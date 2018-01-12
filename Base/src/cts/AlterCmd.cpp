@@ -461,7 +461,7 @@ bool AlterCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 
 const char* AlterCmd::arg()  { return CtsApi::alterArg();}
 const char* AlterCmd::desc() {
-   /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+            /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
    return  "Alter the node according to the options.\n"
          "To add/delete/change server variables use '/' for the path.\n"
          "arg1 = [ delete | change | add | set_flag | clear_flag | sort ]\n"
@@ -490,8 +490,31 @@ const char* AlterCmd::desc() {
          "       specifies the new value only used for 'change'/'add'\n"
          "       values with spaces must be quoted\n"
          "arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
-         ;
+            "\nUsage:\n\n"
+            "   ecflow_client --alter=add variable GLOBAL \"value\" /           # add server variable\n"
+            "   ecflow_client --alter=add variable FRED \"value\" /path/to/node # add node variable\n"
+            "   ecflow_client --alter=add time \"+00:20\" /path/to/node\n"
+            "   ecflow_client --alter=add date \"01.*.*\" /path/to/node\n"
+            "   ecflow_client --alter=add day \"sunday\"  /path/to/node\n"
+            "   ecflow_client --alter=add label name \"label_value\" /path/to/node\n"
+            "   ecflow_client --alter=add late \"-s 00:01 -a 14:30 -c +00:01\" /path/to/node\n"
+            "   ecflow_client --alter=add limit mars \"100\" /path/to/node\n"
+            "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /s1\n"
+            "   # zombie attributes have the following structure:\n"
+            "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`\n"
+            "      zombie_type        = \"user\" | \"ecf\" | \"path\"\n"
+            "      client_side_action = \"fob\" | \"fail\" | \"block\"\n"
+            "      server_side_action = \"adopt\" | \"delete\" | \"kill\"\n"
+            "      child              = \"init\" | \"event\" | \"meter\" | \"label\" | \"wait\" | \"abort\" | \"complete\"\n"
+            "      zombie_life_time   = unsigned integer default: user(300), ecf(3600), path(900)  minimum is 60\n"
+            "   ecflow_client --alter=add zombie \"ecf:fail::\" /path/to/node     # ask system zombies to fail\n"
+            "   ecflow_client --alter=add zombie \"user:fail::\" /path/to/node    # ask user generated zombies to fail\n"
+            "   ecflow_client --alter=add zombie \"path:fail::\" /path/to/node    # ask path zombies to fail\n\n"
+            "   ecflow_client --alter=delete variable FRED /path/to/node    # delete variable FRED\n"
+            "   ecflow_client --alter=delete variable      /path/to/node    # delete *ALL* variables on the specified node\n"
+            ;
 }
+
 
 void AlterCmd::addOption(boost::program_options::options_description& desc) const {
 	desc.add_options()( AlterCmd::arg(),po::value< vector<string> >()->multitoken(), AlterCmd::desc() );
@@ -565,7 +588,7 @@ void AlterCmd::create(  Cmd_ptr& cmd,
 void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths ) const
 {
 	// options[0]  - add
-	// options[1]  - [ time | date | day | zombie | variable | limit | inlimit | label ]
+	// options[1]  - [ time | today | date | day | zombie | variable | late | limit | inlimit | label ]
 	// options[2]  - [ time_string | date_string | day_string | zombie_string | variable_name | limit_name | path_to_limit ]
 	// options[3]  - variable_value
 	std::stringstream ss;
@@ -632,9 +655,9 @@ void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::
          Label check(name,value);
          break;
       }
-      case AlterCmd::ADD_LIMIT: {  // inlimit /obs/limits:hpcd
+      case AlterCmd::ADD_LIMIT: {
          if (options.size() < 4 ) {
-            ss << "AlterCmd: add: Expected 'add inlimit <name> <paths>. Not enough arguments\n" << dump_args(options,paths) << "\n";
+            ss << "AlterCmd: add: Expected 'add limit <name> int. Not enough arguments\n" << dump_args(options,paths) << "\n";
             throw std::runtime_error( ss.str() );
          }
          value = options[3];

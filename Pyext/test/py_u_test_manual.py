@@ -19,6 +19,44 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
 import os 
 import unittest 
 
+class TestAddSuiteFamilyTask0(unittest.TestCase):
+    def setUp(self):
+        defs = Defs()
+        s = Suite('s1')
+        f = Family('f1')
+        t = Task('t1')
+        defs.add_suite(s)
+        s.add_family(f)
+        f.add_task(t)
+        self.defs = defs
+
+    def test_0(self):
+        defs = Defs()
+        defs.add_suite('s1').add_family('f1').add_task('t1')
+        self.assertEqual(self.defs, defs, "defs not equal")
+        
+    def test_1(self):
+        defs = Defs().add(
+            Suite('s1').add(
+                Family('f1').add(
+                    Task('t1'))))
+        self.assertEqual(self.defs, defs, "defs not equal")
+
+    def test_2(self):
+        defs = Defs(
+            Suite('s1',
+                  Family('f1',
+                         Task('t1'))))
+        self.assertEqual(self.defs, defs, "defs not equal")
+
+    def test_3(self):
+        defs = Defs() + (Suite('s1') + (Family('f1') + Task('t1')))
+        self.assertEqual(self.defs, defs, "defs not equal")
+
+    def test_3(self):
+        defs = Defs() + (Suite('s1') + (Family('f1') + Task('t1')))
+        self.assertEqual(self.defs, defs, "defs not equal")
+          
 class TestAddSuiteFamilyTask(unittest.TestCase):
     def setUp(self):
         defs = Defs()            # create an empty definition
@@ -288,11 +326,9 @@ class TestAddVariable(unittest.TestCase):
  
     def test_alternative1(self):
          
-        defs = Defs() + Suite("s1")
-        defs.s1 += [ Edit(HELLO="world"),
-                     Edit({ "NAME":"value", "NAME2":"value2", "NAME3":"value3", "NAME4":4 }, BILL=1),
-                     Edit(FRED="bloggs")
-                   ]
+        defs = Defs() + Suite("s1",Edit(HELLO="world"))
+        defs.s1 += [ Edit({ "NAME":"value", "NAME2":"value2", "NAME3":"value3", "NAME4":4 }, BILL=1),
+                     Edit(FRED="bloggs") ]
  
         defs.s1.sort_attributes("variable");
         Ecf.set_debug_equality(True)
@@ -379,7 +415,8 @@ class TestAddTaskChain(unittest.TestCase):
         
     def test_alternative(self):
         defs = Defs() + Suite("s1")
-        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
+        defs.s1 += [ Task("t1"),Task("t2"),
+                     Task("t3"),Task("t4") ]
         defs.s1.t2 += Trigger( ["t1"] )
         defs.s1.t3 += Trigger( ["t2"] )
         defs.s1.t4 += Trigger( ["t3"] )

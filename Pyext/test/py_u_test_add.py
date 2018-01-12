@@ -355,6 +355,14 @@ class TestDefsAdd(unittest.TestCase):
     def test_add_suite3(self):
         defs = Defs().add(Suite("a"),Suite("b"),Suite("c").add(Edit(a="b")))
         self.assertEqual(len(defs),3,"Expected 3 suite to be added")
+
+    def test_add_variables(self):
+        defs = Defs().add(Edit(a="b",b='c',d='e'))
+        self.assertEqual(len(list(defs.user_variables)),3,"Expected 3 variables to be added")
+
+    def test_add_variables2(self):
+        defs = Defs(Edit(a="b",b='c',d='e'))
+        self.assertEqual(len(list(defs.user_variables)),3,"Expected 3 variables to be added")
         
 class TestSuiteAdd(unittest.TestCase):
     def test_add_suite1(self):

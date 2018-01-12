@@ -20,7 +20,7 @@ const char* NodeAttrDoc::variable_doc()
    return
             "Defines a `variable`_ on a `node`_ for use in `ecf script`_.\n\n"
             "A Node can have a number of variables.\n"
-            "These variables can be added at any node level: `suite`_, `family`_ or `task`_.\n"
+            "These variables can be added at any node level: Defs, `suite`_, `family`_ or `task`_.\n"
             "The variables are names inside a pair of '%' characters in an `ecf script`_.\n"
             "The content of a variable replaces the variable name in the `ecf script`_ at\n"
             "job submission time. When a variable is needed at submission time, it is first\n"
@@ -35,17 +35,19 @@ const char* NodeAttrDoc::variable_doc()
             "   Edit(dict,kwarg) # alternative that allows multiple variables\n"
             "\nUsage::\n\n"
             "   ...\n"
-            "   var = Variable(\"ECF_JOB_CMD\",\"/bin/sh %ECF_JOB% &\")\n"
+            "   var = Variable('ECF_JOB_CMD','/bin/sh %ECF_JOB% &')\n"
             "   task.add_variable(var)\n"
             "   task.add_variable('JOE','90')\n\n"
             "The following use example of using Edit, which allow multiple variables to added at the same time ::\n\n"
-            "   t = Task('t1').add(\n"
+            "   t = Task('t1',\n"
             "             Edit({ 'a':'y', 'b':'bb'}, c='v',d='b'),\n"
             "             Edit({ 'e':1100, 'f':'bb'}),\n"
             "             Edit(g='d'),\n"
             "             Edit(h='1'))\n\n"
             "::\n\n"
-            "  defs = Defs().add(Suite('s1')\n"
+            "  defs = Defs(\n"
+            "            Suite('s1'),\n"
+            "            Edit(SLEEP='1')) # Add user variable to definition\n"
             "  defs.s1 += [ Task('a') ]\n"
             "  defs.s1.a += [ Edit({ 'x1':'y', 'aa1':'bb'}, a='v',b='b'),\n"
             "                 Edit({ 'var':10, 'aa':'bb'}),\n"
@@ -62,7 +64,7 @@ const char* NodeAttrDoc::zombie_doc()
             "It can be added to any `node`_. But is best defined at the `suite`_ or `family`_ level.\n"
             "If there is no zombie attribute the default behaviour is to block the init,complete,abort `child command`_.\n"
             "and *fob* the event,label,and meter `child command`_\n"
-            "This attribute allows the server to make a automated response\n"
+            "This attribute allows the server to make a automated response.\n"
             "Please see: :py:class:`ecflow.ZombieType`, :py:class:`ecflow.ChildCmdType`, :py:class:`ecflow.ZombieUserActionType`\n"
             "\nConstructor::\n\n"
             "   ZombieAttr(ZombieType,ChildCmdTypes, ZombieUserActionType, lifetime)\n"
@@ -73,12 +75,14 @@ const char* NodeAttrDoc::zombie_doc()
             "      int lifetime<optional>: Defines the life time in seconds of the zombie in the server.\n"
             "                              On expiration, zombie is removed automatically\n"
             "\nUsage::\n\n"
-            "   # Add a zombie attribute so that child label commands(i.e ecflow_client --label)\n"
-            "   # never block the job\n"
-            "   s1 = ecflow.Suite('s1')\n"
-            "   child_list = [ ChildCmdType.label ]\n"
-            "   zombie_attr = ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob)\n"
-            "   s1.add_zombie(zombie_attr)\n"
+            "   # Add a zombie attribute so that child commands(i.e ecflow_client --init)\n"
+            "   # will fail the job if it is a zombie process.\n"
+            "   s1 = Suite('s1')\n"
+            "   child_list = [ ChildCmdType.init, ChildCmdType.complete, ChildCmdType.abort ]\n"
+            "   s1.add_zombie( ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fob))\n\n"
+            "   # create the zombie as part of the node constructor\n"
+            "   s1 = Suite('s1',\n"
+            "              ZombieAttr(ZombieType.ecf, child_list, ZombieUserActionType.fail))\n"
             ;
 }
 
@@ -96,16 +100,18 @@ const char* NodeAttrDoc::zombie_user_action_type_doc()
             "ZombieUserActionType is used define an automated response. See class :py:class:`ZombieAttr`\n\n"
             "This can be either on the client side or on the server side\n"
             "\nclient side:\n\n"
-            "- fob:    The `child command`_ always succeeds, i.e allowed to complete without blocking\n"
+            "- fob:    The `child command`_ always succeeds, i.e allows job to complete without blocking\n"
             "- fail:   The `child command`_ is asked to fail.\n"
-            "- block:  The `child command`_ is asked to block. This is the default action for all child commands\n"
+            "- block:  The `child command`_ is asked to block.\n"
+            "          This is the default action for init,complete and abort child commands\n"
             "\nserver side:\n\n"
             "- adopt:  Allows the password supplied with the `child command`_ s, to be adopted by the server\n"
             "- kill:   Kills the zombie process associated with the `child command`_ using ECF_KILL_CMD.\n"
             "          path zombies will need to be killed manually. If kill is specified for path zombies\n"
             "          they will be fobed, i.e allowed to complete without blocking the job.\n"
             "- remove: `ecflow_server`_ removes the `zombie`_ from the zombie list.\n"
-            "          The child continues blocking. The `zombie`_ may well re-appear\n\n"
+            "          The child continues blocking. If the process is still running, the\n"
+            "          `zombie`_ may well re-appear\n\n"
             "Note: Only adopt will allow the `child command`_ to continue and change the `node`_ tree\n"
             ;
 }
@@ -130,25 +136,26 @@ const char* NodeAttrDoc::label_doc()
 {
    return
             "A `label`_ has a name and value and provides a way of displaying information in a GUI.\n\n"
-            "The value can be anything(ASCII) as it can not be used in triggers\n"
+            "The value can be anything(ASCII) as it can not be used in triggers.\n"
             "The value of the label is set to be the default value given in the definition\n"
             "when the `suite`_ is begun. This is useful in repeated suites: A task sets the label\n"
-            "to be something, e.g, the number of observations, and once the `suite`_ is `complete`_\n"
-            "and the next day starts) the number of observations is cleared.\n\n"
+            "to be something.\n\n"
             "Labels can be set at any level: Suite,Family,Task.\n"
             "There are two ways of updating the label\n\n"
             "- A `child command`_ can be used to automatically update the label on a `task`_\n"
-            "- By using the alter command, the labels on `suite`_ `family`_ and `task`_ can be changed manually\n"
+            "- Using the alter command, the labels on `suite`_ `family`_ and `task`_ can be changed manually\n"
             "\nConstructor::\n\n"
             "   Label(name,value)\n"
             "      string name:  The name of the label\n"
             "      string value: The value of the label\n"
             "\nUsage::\n\n"
-            "   t1 = Task('t1')\n"
+            "   t1 = Task('t1',\n"
+            "             Label('name','value'),  # create Labels in-place\n"
+            "             Label('a','b'))\n"
             "   t1.add_label('l1','value')\n"
             "   t1.add_label(Label('l2','value2'))\n"
             "   for label in t1.labels:\n"
-            "      print label\n"
+            "      print(label)\n"
             ;
 }
 
@@ -166,9 +173,11 @@ const char* NodeAttrDoc::limit_doc()
             "      string name: the name of the limit\n"
             "      int   value: The value of the limit\n"
             "\nUsage::\n\n"
-            "   limit = Limit(\"fast\", 10)\n"
+            "   limit = Limit('fast', 10)\n"
             "    ...\n"
-            "   suite.add_limit(limit)\n"
+            "   suite = Suite('s1',\n"
+            "                 Limit('slow',10))  # create Limit in Node constructor\n"
+            "   suite.add_limit(limit)           # add existing limit using function\n"
             ;
 }
 
@@ -182,7 +191,7 @@ const char* NodeAttrDoc::inlimit_doc()
             "         inlimit /x:fast\n"
             "         task t1\n"
             "         task t2\n\n"
-            "Here 'fast' is the name of limit and the number defines the maximum number of tasks\n"
+            "Here 'fast' is the name of :py:class:`ecflow.Limit` and the number defines the maximum number of tasks\n"
             "that can run simultaneously using this limit. Thats why you do not need a `trigger`_\n"
             "between tasks 't1' and 't2'. There is no need to change the tasks. The jobs are\n"
             "created in the order they are defined\n"
@@ -196,9 +205,11 @@ const char* NodeAttrDoc::inlimit_doc()
             "      bool limit_this_node_only<optional> : Only limits this node and *NOT* its children\n"
             "                                            Can be used load balance families\n"
             "\nUsage::\n\n"
-            "   inlimit = InLimit(\"fast\",\"/x/f\", 2)\n"
+            "   inlimit = InLimit('fast','/x/f', 2)\n"
             "    ...\n"
-            "   family.add_inlimit(inlimit)\n"
+            "   family = Family('f1',\n"
+            "                   InLimit('mars','/x/f', 2)) # create InLimit in Node constructor\n"
+            "   family.add_inlimit(inlimit)                # add existing inlimit using function\n"
             ;
 }
 
@@ -210,11 +221,11 @@ const char* NodeAttrDoc::event_doc()
             "and to be able to `trigger`_ another job, which is waiting for this partial completion.\n"
             "Only tasks can have events that are automatically set via a `child command`_ s, see below.\n"
             "Events are cleared automatically when a `node`_ is re-queued or begun.\n"
-            "Suites and Families can have tasks, but these events must be set via the Alter command\n"
+            "Suites and Families can have events, but these events must be set via the Alter command\n"
             "Multiple events can be added to a task.\n"
             "An Event has a number and a optional name. Events are typically used\n"
             "in `trigger`_ and `complete expression`_ , to control job creation.\n"
-            "Event are fired within a `job file`_, i.e.::\n\n"
+            "Event are fired within a script/`job file`_, i.e.::\n\n"
             "   ecflow_client --init=$$\n"
             "   ecflow_client --event=foo\n"
             "   ecflow_client --complete\n\n"
@@ -225,10 +236,13 @@ const char* NodeAttrDoc::event_doc()
             "      int number            : The number must be >= 0\n"
             "      string name<optional> : If name is given, can only refer to Event by its name\n"
             "\nUsage::\n\n"
-            "   event = Event(2,\"event_name\")\n"
+            "   event = Event(2,'event_name')\n"
             "   task.add_event(event)\n"
-            "   task1.add_event(\"2\")      # create a event '1' and add to the task\n"
-            "   task2.add_event(\"name\")   # create a event 'name' and add to task\n"
+            "   task1.add_event('2')          # create a event '1' and add to the task\n"
+            "   task2.add_event('name')       # create a event 'name' and add to task\n\n"
+            "   # Events can be created in the Task constructor, like any other attribute\n"
+            "   t = Task('t3',\n"
+            "            Event(2,'event_name'))\n"
             ;
 }
 
@@ -250,11 +264,11 @@ const char* NodeAttrDoc::meter_doc()
             "\nUsage:\n\n"
             "Using a meter requires:\n\n"
             "- Defining a meter on a `task`_::\n\n"
-            "     meter = Meter(\"progress\",0,100,100)\n"
+            "     meter = Meter('progress',0,100,100)\n"
             "     task.add_meter(meter)\n\n"
             "- Updating the corresponding `ecf script`_ file with the meter `child command`_::\n\n"
             "     ecflow_client --init=$$\n"
-            "     for  i in 10 20 30 40 50 60 80 100; do\n"
+            "     for i in 10 20 30 40 50 60 80 100; do\n"
             "         ecflow_client --meter=progress $i\n"
             "         sleep 2 # or do some work\n"
             "     done\n"
@@ -286,15 +300,19 @@ const char* NodeAttrDoc::date_doc()
             "will be set to `complete`_ at the beginning of the `suite`_, without the\n"
             "task ever being dispatched otherwise, the suite would never complete.\n"
             "\nConstructor::\n\n"
-            "   Date(day,month,year)\n"
-            "      int day   : represents the day, zero means wild card. day >= 0 & day < 31\n"
-            "      int month : represents the month, zero means wild card. month >= 0 & month < 12\n"
-            "      int year  : represents the year, zero means wild card. year >= 0\n"
+            "  Date(string)\n"
+            "     string : * means wild card\n"
+            "  Date(day,month,year)\n"
+            "     int day   : represents the day, zero means wild card. day >= 0 & day < 31\n"
+            "     int month : represents the month, zero means wild card. month >= 0 & month < 12\n"
+            "     int year  : represents the year, zero means wild card. year >= 0\n"
             "\nExceptions:\n\n"
             "- raises IndexError when an invalid date is specified\n"
             "\nUsage::\n\n"
-            "   date = Date(11,12,2010)  # represent 11th of December 2010\n"
-            "   date = Date(1,0,0);      # means the first day of every month of every year\n"
+            "  date = Date(11,12,2010)  # represent 11th of December 2010\n"
+            "  date = Date(1,0,0);      # means the first day of every month of every year\n"
+            "  t = Task('t1',\n"
+            "            Date('1.*.*'));  # Create Date in place.\n"
             ;
 }
 
@@ -307,11 +325,14 @@ const char* NodeAttrDoc::day_doc()
             "beginning of the `suite`_, without the task ever being dispatched otherwise\n"
             "the suite would never complete.\n"
             "\nConstructor::\n\n"
+            "   Day(string)\n"
+            "      string: 'sunday','monday',etc\n"
             "   Day(Days)\n"
             "      Days day: Is an enumerator with represent the days of the week\n"
             "\nUsage::\n\n"
             "   day1 = Day(Days.sunday)\n"
-            "   day2 = Day(Days.monday)\n"
+            "   t = Task('t1',\n"
+            "           Day('tuesday'))\n"
             ;
 }
 
@@ -323,7 +344,10 @@ const char* NodeAttrDoc::days_enum_doc()
             "\nUsage::\n\n"
             "   day1 = Day(Days.sunday)\n"
             "   day2 = Day(Days.monday)\n"
-            "   day3 = Day(Days.tuesday)\n"
+            "   t = Task('t1',\n"
+            "           day1,\n"
+            "           day2,\n"
+            "           Day(Days.tuesday))\n"
             ;
 }
 
@@ -336,6 +360,8 @@ const char* NodeAttrDoc::time_doc()
             "cause unexpected results. The time dependency can be made relative to the beginning\n"
             "of the suite or in repeated families relative to the beginning of the repeated family.\n"
             "\nConstructor::\n\n"
+            "   Time(string)\n"
+            "     string: i.e '00:30' || '00:30 20:00 00:30'"
             "   Time(hour,minute,relative<optional> = false)\n"
             "      int hour:               hour in 24 clock\n"
             "      int minute:             minute <= 59\n"
@@ -353,9 +379,12 @@ const char* NodeAttrDoc::time_doc()
             "\nExceptions:\n\n"
             "- raises IndexError when an invalid Time is specified\n"
             "\nUsage::\n\n"
-            "   time = Time( 10,10 )                                                   #  time 10:10 \n"
-            "   time = Time( TimeSlot(10,10), true)                                    #  time +10:10 \n"
-            "   time = Time( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 \n"
+            "   time1 = Time( 10,10 )                                                   #  time 10:10 \n"
+            "   time2 = Time( TimeSlot(10,10), true)                                    #  time +10:10 \n"
+            "   time2 = Time( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 \n\n"
+            "   t = Task('t1',\n"
+            "            time1,time2,time3,\n"
+            "            Time('10:30 20:10 00:10')) # Create time in place\n"
             ;
 }
 
@@ -383,10 +412,13 @@ const char* NodeAttrDoc::today_doc()
             "\nExceptions:\n\n"
             "- raises IndexError when an invalid Today is specified\n"
             "\nUsage::\n\n"
-            "   today = Today( 10,10 )                                                   #  today 10:10 \n"
-            "   today = Today( TimeSlot(10,10) )                                         #  today 10:10 \n"
-            "   today = Today( TimeSlot(10,10), true)                                    #  today +10:10 \n"
-            "   today = Today( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 \n"
+            "   today1 = Today( 10,10 )                                                   #  today 10:10 \n"
+            "   today2 = Today( TimeSlot(10,10) )                                         #  today 10:10 \n"
+            "   today3 = Today( TimeSlot(10,10), true)                                    #  today +10:10 \n"
+            "   today4 = Today( TimeSlot(10,10), TimeSlot(20,10),TimeSlot(0,10), false )  #  time 10:10 20:10 00:10 \n"
+            "   t = Task('t1',\n"
+            "            today1,today2,today3,today4,\n"
+            "            Today('10:30 20:10 00:10')) # Create today in place\n"
             ;
 }
 
@@ -399,13 +431,17 @@ const char* NodeAttrDoc::late_doc()
             "Only one Late attribute can be specified on a Node.\n"
             "\nConstructor::\n\n"
             "   Late()\n"
+            "   Late(kwargs)\n"
             "\nUsage::\n\n"
+            "   # This is interpreted as: The node can stay `submitted`_ for a maximum of 15 minutes\n"
+            "   # and it must become `active`_ by 20:00 and the run time must not exceed 2 hours\n"
             "   late = Late()\n"
             "   late.submitted( 0,15 )\n"
             "   late.active(   20,0 )\n"
             "   late.complete(  2,0, true )\n\n"
-            "This is interpreted as: The node can stay `submitted`_ for a maximum of 15 minutes\n"
-            "and it must become `active`_ by 20:00 and the run time must not exceed 2 hours"
+            "   late = Late(submitted='00:15',active='20:00',complete='+02:00')\n"
+            "   t = Task('t1',\n"
+            "            Late(submitted='00:15',active='20:00'))\n"
             ;
 }
 
@@ -428,7 +464,9 @@ const char* NodeAttrDoc::autocancel_doc()
             "   attr = Autocancel( 1,30, true )              # delete node 1 hour and 30 minutes after completion\n"
             "   attr = Autocancel( TimeSlot(0,10), true )    # delete node 10 minutes after completion\n"
             "   attr = Autocancel( TimeSlot(10,10), false )  # delete node at 10:10 after completion\n"
-            "   attr = Autocancel( 3  )                      # delete node 3 days after completion\n"
+            "   attr = Autocancel( 3  )                      # delete node 3 days after completion\n\n"
+            "   t1 = Task('t1',\n"
+            "              Autocancel(2,0,true))             # delete task 2 hours after completion\n"
             ;
 }
 
@@ -472,7 +510,7 @@ const char* NodeAttrDoc::repeat_date_doc()
    return
             "Allows a `node`_ to be repeated using a yyyymmdd format\n\n"
             "A node can only have one `repeat`_.\n"
-            "The repeat can be referenced in `trigger`_ expressions.\n"
+            "The repeat name can be referenced in `trigger`_ expressions.\n"
             "\nConstructor::\n\n"
             "   RepeatDate(variable,start,end,delta)\n"
             "      string variable:     The name of the repeat. The current date can referenced in\n"
@@ -483,8 +521,10 @@ const char* NodeAttrDoc::repeat_date_doc()
             "\nException:\n\n"
             "- Throws a RuntimeError if start/end are not valid dates\n"
             "\nUsage::\n\n"
-            "   rep = RepeatDate(\"YMD\", 20050130, 20050203 )\n"
-            "   rep = RepeatDate(\"YMD\", 20050130, 20050203, 2 )\n"
+            "   rep = RepeatDate('YMD', 20050130, 20050203 )\n"
+            "   rep = RepeatDate('YMD', 20050130, 20050203, 2 )\n"
+            "   t = Task('t1',\n"
+            "            RepeatDate('YMD', 20050130, 20050203 ) )\n"
             ;
 }
 
@@ -502,7 +542,8 @@ const char* NodeAttrDoc::repeat_integer_doc()
             "      int end:             End end integer value\n"
             "      int step<optional>:  Default = 1, The step amount\n"
             "\nUsage::\n\n"
-            "   rep = RepeatInteger(\"HOUR\", 6, 24, 6 )\n"
+            "   t = Task('t1',\n"
+            "            RepeatInteger('HOUR', 6, 24, 6 ))\n"
             ;
 }
 
@@ -518,7 +559,8 @@ const char* NodeAttrDoc::repeat_enumerated_doc()
             "                           referenced in trigger expressions using the variable name\n"
             "      vector list:         The list of enumerations\n"
             "\nUsage::\n\n"
-            "   rep = RepeatEnumerated(\"COLOR\", [ 'red', 'green', 'blue' ] )\n"
+            "   t = Task('t1',\n"
+            "            RepeatEnumerated('COLOR', [ 'red', 'green', 'blue' ] ))\n"
             ;
 }
 
@@ -534,7 +576,8 @@ const char* NodeAttrDoc::repeat_string_doc()
             "                           referenced in trigger expressions using the variable name\n"
             "      vector list:         The list of enumerations\n"
             "\nUsage::\n\n"
-            "   rep = RepeatString(\"COLOR\", [ 'red', 'green', 'blue' ] )\n"
+            "   t = Task('t1',\n"
+            "            RepeatString('COLOR', [ 'red', 'green', 'blue' ] ))\n"
             ;
 }
 
@@ -547,14 +590,15 @@ const char* NodeAttrDoc::repeat_day_doc()
             "   RepeatDay(step)\n"
             "      int step:     The step.\n"
             "\nUsage::\n\n"
-            "   rep = RepeatDay( 1 )\n"
+            "   t = Task('t1',\n"
+            "             RepeatDay( 1 ))\n"
             ;
 }
 
 const char* NodeAttrDoc::cron_doc()
 {
    return
-            "`cron`_ defines a time dependency for a node.\n\n"
+            "`cron`_ defines a repeating time dependency for a node.\n\n"
             "Crons are repeated indefinitely.\n\n"
             "Avoid having a cron and `repeat`_ at the same level,as both provide looping functionality\n"
             "\nConstructor::\n\n"
@@ -570,27 +614,28 @@ const char* NodeAttrDoc::cron_doc()
             "\nExceptions:\n\n"
             "- raises IndexError || RuntimeError when an invalid cron is specified\n"
             "\nUsage::\n\n"
+            "    cron = Cron('+00:00 23:00 00:30', days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6])\n\n"
             "    # Here '+' means relative to begin or re-queue time\n"
-            "    cron = ecflow.Cron('+01:30',days_of_week=[0,1,2,3,4,5,6])\n\n"
-            "    cron = ecflow.Cron('+00:00 23:00 00:30', days_of_week=[0,1,2],days_of_month=[4,5,6], months=[1,2,3])\n\n"
-            "    start = ecflow.TimeSlot(0 , 0)\n"
-            "    finish = ecflow.TimeSlot(23, 0)\n"
-            "    incr = ecflow.TimeSlot(0, 30)\n"
-            "    ts = ecflow.TimeSeries(start, finish, incr, True)  # True means relative to suite start\n"
-            "    cron = ecflow.Cron(ts, days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2])\n\n"
-            "    cron = ecflow.Cron()\n"
+            "    cron = Cron('+01:30',days_of_week=[0,1,2,3,4,5,6])\n\n"
+            "    cron = Cron('+00:00 23:00 00:30', days_of_week=[0,1,2],days_of_month=[4,5,6], months=[1,2,3])\n\n"
+            "    start = TimeSlot(0 , 0)\n"
+            "    finish = TimeSlot(23, 0)\n"
+            "    incr = TimeSlot(0, 30)\n"
+            "    ts = TimeSeries(start, finish, incr, True)  # True means relative to suite start\n"
+            "    cron = Cron(ts, days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2])\n\n"
+            "    cron = Cron()\n"
             "    cron.set_week_days([0, 1, 2, 3, 4, 5, 6])\n"
             "    cron.set_days_of_month([1, 2, 3, 4, 5, 6 ])\n"
             "    cron.set_months([1, 2, 3, 4, 5, 6])\n"
             "    cron.set_time_series(ts)\n\n"
-            "    cron1 = ecflow.Cron()\n"
+            "    cron1 = Cron()\n"
             "    cron1.set_time_series(1, 30, True)  # same as cron +01:30\n\n"
-            "    cron2 = ecflow.Cron()\n"
+            "    cron2 = Cron()\n"
             "    cron2.set_week_days([0, 1, 2, 3, 4, 5, 6])\n"
-            "    cron2.set_time_series(\"00:30 01:30 00:01\")\n\n"
-            "    cron3 = ecflow.Cron()\n"
+            "    cron2.set_time_series('00:30 01:30 00:01')\n\n"
+            "    cron3 = Cron()\n"
             "    cron3.set_week_days([0, 1, 2, 3, 4, 5, 6])\n"
-            "    cron3.set_time_series(\"+00:30\")\n"
+            "    cron3.set_time_series('+00:30')\n"
             ;
 }
 

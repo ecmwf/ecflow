@@ -99,6 +99,7 @@ protected:
     ChangeNotify* indexToNtf(int idx);
     int ntfToIndex(ChangeNotify* ntf);
 	void closeEvent(QCloseEvent*);
+    void clearCurrentData();
 	void writeSettings();
 	void readSettings();
     void readNtfWidgetSettings(int tabIndex);

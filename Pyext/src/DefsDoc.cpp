@@ -99,9 +99,9 @@ const char* DefsDoc::part_expression_doc()
             "To add large triggers and complete expression::\n\n"
             "  exp1 = PartExpression('t1 == complete')\n  # a simple expression can be added as a string\n"
             "  ....\n"
-            "  task2.add_part_trigger( PartExpression(\"t1 == complete or t4 == complete\") ) \n"
-            "  task2.add_part_trigger( PartExpression(\"t5 == active\",True) )    # anded with first expression\n"
-            "  task2.add_part_trigger( PartExpression(\"t7 == active\",False) )   # or'ed with last expression added\n\n"
+            "  task2.add_part_trigger( PartExpression('t1 == complete or t4 == complete') ) \n"
+            "  task2.add_part_trigger( PartExpression('t5 == active',True) )    # anded with first expression\n"
+            "  task2.add_part_trigger( PartExpression('t7 == active',False) )   # or'ed with last expression added\n\n"
             "The trigger for task2 is equivalent to\n"
             "'t1 == complete or t4 == complete and t5 == active or t7 == active'"
             ;
@@ -110,7 +110,7 @@ const char* DefsDoc::part_expression_doc()
 const char* DefsDoc::expression_doc()
 {
    return
-            "Expression holds `trigger`_ or `complete expression`_.\n\n"
+            "Expression holds `trigger`_ or `complete expression`_. Also see :py:class:`ecflow.Trigger`\n\n"
             "Expressions can contain references to events, meters, user variables,repeat variables and generated variables.\n"
             "Expressions hold a list of part expressions. This allows us to split a large trigger or complete\n"
             "expression into smaller ones.\n"
@@ -130,16 +130,16 @@ const char* DefsDoc::expression_doc()
             "  task.add_trigger( 't1 == active' )\n"
             "  task.add_part_trigger( 't3 == active', True)\n\n"
             "To store and add large expressions use a Expression with PartExpression::\n\n"
-            "  big_expr = Expression( PartExpression(\"t1 == complete or t4 == complete\") )\n"
-            "  big_expr.add( PartExpression(\"t5 == active\",True) )\n"
-            "  big_expr.add( PartExpression(\"t7 == active\",False) )\n"
+            "  big_expr = Expression( PartExpression('t1 == complete or t4 == complete') )\n"
+            "  big_expr.add( PartExpression('t5 == active',True) )\n"
+            "  big_expr.add( PartExpression('t7 == active',False) )\n"
             "  task.add_trigger( big_expr)\n\n"
             "In the example above the trigger for task is equivalent to\n"
             "'t1 == complete or t4 == complete and t5 == active or t7 == active'\n\n"
             "::\n\n"
             "  big_expr2 = Expression('t0 == complete'))\n"
-            "  big_expr2.add( PartExpression(\"t1 == complete or t4 == complete\",True) )\n"
-            "  big_expr2.add( PartExpression(\"t5 == active\",False) )\n"
+            "  big_expr2.add( PartExpression('t1 == complete or t4 == complete',True) )\n"
+            "  big_expr2.add( PartExpression('t5 == active',False) )\n"
             "  task2.add_trigger( big_expr2)\n\n"
             "Here the trigger for task2 is equivalent to\n"
             "'t0 == complete and t1 == complete or t4 == complete or t5 == active'"
@@ -149,7 +149,7 @@ const char* DefsDoc::expression_doc()
 const char* DefsDoc::add_trigger_doc()
 {
    return
-            "Add a `trigger`_ or `complete expression`_.\n\n"
+            "Add a `trigger`_ or `complete expression`_.Also see :py:class:`ecflow.Trigger`\n\n"
             "This defines a dependency for a `node`_.\n"
             "There can only be one `trigger`_ or `complete expression`_ dependency per node.\n"
             "A `node`_ with a trigger can only be activated when the trigger has expired.\n"
@@ -161,14 +161,14 @@ const char* DefsDoc::add_trigger_doc()
             "\nUsage:\n\n"
             "Note we can not make multiple add_trigger(..) calls on the same `task`_!\n"
             "to add a simple trigger::\n\n"
-            "  task1.add_trigger( \"t2 == active\" )\n"
-            "  task2.add_trigger( \"t1 == complete or t4 == complete\" )\n"
-            "  task3.add_trigger( \"t5 == active\" )\n"
+            "  task1.add_trigger( 't2 == active' )\n"
+            "  task2.add_trigger( 't1 == complete or t4 == complete' )\n"
+            "  task3.add_trigger( 't5 == active' )\n"
             "\n"
             "Long expression can be broken up using add_part_trigger::\n\n"
-            "  task2.add_part_trigger( \"t1 == complete or t4 == complete\")\n"
-            "  task2.add_part_trigger( \"t5 == active\",True)  # True means  AND\n"
-            "  task2.add_part_trigger( \"t7 == active\",False) # False means OR\n\n"
+            "  task2.add_part_trigger( 't1 == complete or t4 == complete')\n"
+            "  task2.add_part_trigger( 't5 == active',True)  # True means  AND\n"
+            "  task2.add_part_trigger( 't7 == active',False) # False means OR\n\n"
             "The trigger for task2 is equivalent to:\n"
             "'t1 == complete or t4 == complete and t5 == active or t7 == active'"
             ;
@@ -189,21 +189,21 @@ const char* DefsDoc::trigger()
             "\nUsage:\n\n"
             "Multiple trigger will automatically be *anded* together, If *or* is required please\n"
             "use bool 'False' as the last argument i.e ::\n\n"
-            "  task1.add( Trigger(\"t2 == active\" ),\n"
-            "             Trigger(\"t1 == complete or t4 == complete\" ),\n"
-            "             Trigger( \"t5 == active\",False))\n"
+            "  task1.add( Trigger('t2 == active' ),\n"
+            "             Trigger('t1 == complete or t4 == complete' ),\n"
+            "             Trigger('t5 == active',False))\n"
             "\n"
             "The trigger for task1 is equivalent to ::\n\n"
             "  t2 == active and t1 == complete or t4 == complete or t5 == active\n\n"
             "Since a large number of triggers are of the form `<node> == complete` there are\n"
             "are short cuts, these involves a use of a list ::\n\n"
-            "  task1.add( Trigger( [\"t2\",\"t3\"] )) #  This is same as t2 == complete and t3 == complete\n\n"
+            "  task1.add( Trigger( ['t2','t3'] )) #  This is same as t2 == complete and t3 == complete\n\n"
             "You can also use a node ::\n\n"
-            "  task1.add( Trigger( [\"t2\",taskx] ))\n\n"
+            "  task1.add( Trigger( ['t2',taskx] ))\n\n"
             "If the node 'taskx' has a parent, we use the full hierarchy, hence we will get a trigger\n"
             "of the form ::\n\n"
             "  t2 ==complete and /suite/family/taskx == complete\n\n"
-            "If however node taskx has not yet been added to its parent, we use a relative name ::\n\n"
+            "If however node taskx has not yet been added to its parent, we use a relative name in the trigger ::\n\n"
             "  t2 ==complete and taskx == complete\n"
             ;
 }
@@ -211,7 +211,7 @@ const char* DefsDoc::trigger()
 const char* DefsDoc::add_variable_doc()
 {
    return
-            "Adds a name value `variable`_.\n\n"
+            "Adds a name value `variable`_. Also see :py:class:`ecflow.Edit`\n\n"
             "This defines a variable for use in `variable substitution`_ in a `ecf script`_ file.\n"
             "There can be any number of variables. The variables are names inside a pair of\n"
             "'%' characters in an `ecf script`_. The name are case sensitive.\n"
@@ -223,10 +223,10 @@ const char* DefsDoc::add_variable_doc()
             "\nException:\n\n"
             "- Writes warning to standard output, if a duplicate variable name is added\n"
             "\nUsage::\n\n"
-            "  task.add_variable( Variable(\"ECF_HOME\",\"/tmp/\"))\n"
-            "  task.add_variable( \"TMPDIR\",\"/tmp/\")\n"
-            "  task.add_variable( \"COUNT\",2)\n"
-            "  a_dict = { \"name\":\"value\", \"name2\":\"value2\", \"name3\":\"value3\" }\n"
+            "  task.add_variable( Variable('ECF_HOME','/tmp/'))\n"
+            "  task.add_variable( 'TMPDIR','/tmp/')\n"
+            "  task.add_variable( 'COUNT',2)\n"
+            "  a_dict = { 'name':'value', 'name2':'value2', 'name3':'value3' }\n"
             "  task.add_variable(a_dict)\n"
             ;
 }
@@ -234,13 +234,13 @@ const char* DefsDoc::add_variable_doc()
 const char* DefsDoc::add_label_doc()
 {
    return
-            "Adds a `label`_ to a `node`_.\n\n"
+            "Adds a `label`_ to a `node`_. See :py:class:`ecflow.Label`\n\n"
             "Labels can be updated from the jobs files, via `child command`_\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate label name is added\n"
             "\nUsage::\n\n"
-            "  task.add_label( Label(\"TEA\",\"/me/\"))\n"
-            "  task.add_label( \"Joe\",\"/me/\")\n\n"
+            "  task.add_label( Label('TEA','/me/'))\n"
+            "  task.add_label( 'Joe','/me/')\n\n"
             "The corresponding child command in the .ecf script file might be::\n\n"
             "  ecflow_client --label=TEA time\n"
             "  ecflow_client --label=Joe ninety\n"
@@ -250,27 +250,27 @@ const char* DefsDoc::add_label_doc()
 const char* DefsDoc::add_limit_doc()
 {
    return
-            "Adds a `limit`_ to a `node`_ for simple load management.\n\n"
+            "Adds a `limit`_ to a `node`_ for simple load management. See :py:class:`ecflow.Limit`\n\n"
             "Multiple limits can be added, however the limit name must be unique.\n"
             "For a node to be in a limit, a `inlimit`_ must be used.\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate limit name is added\n"
             "\nUsage::\n\n"
-            "  family.add_limit( Limit(\"load\",12) )\n"
-            "  family.add_limit( \"load\",12 )\n"
+            "  family.add_limit( Limit('load',12) )\n"
+            "  family.add_limit( 'load',12 )\n"
             ;
 }
 
 const char* DefsDoc::add_inlimit_doc()
 {
    return
-            "Adds a `inlimit`_ to a `node`_.\n\n"
+            "Adds a `inlimit`_ to a `node`_. See :py:class:`ecflow.InLimit`\n\n"
             "InLimit reference a `limit`_/:py:class:`ecflow.Limit`. Duplicate InLimits are not allowed\n"
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
-            "  task2.add_inlimit( InLimit(\"limitName\",\"/s1/f1\",2) )\n"
-            "  task2.add_inlimit( \"limitName\",\"/s1/f1\",2 )\n"
+            "  task2.add_inlimit( InLimit('limitName','/s1/f1',2) )\n"
+            "  task2.add_inlimit( 'limitName','/s1/f1',2 )\n"
             ;
 }
 
@@ -279,25 +279,25 @@ const char* DefsDoc::suite_doc()
    return
             "A `suite`_ is a collection of Families,Tasks,Variables, `repeat`_ and `clock`_ definitions\n\n"
             "Suite is the only node that can be started using the begin API.\n"
-            "There are two ways of adding a suite, see example below and :py:class:`ecflow.Defs.add_suite`\n"
+            "There are several ways of adding a suite, see example below and :py:class:`ecflow.Defs.add_suite`\n"
             "\nConstructor::\n\n"
             "  Suite(name, Nodes | attributes)\n"
             "      string name : The Suite name. name must consist of alpha numeric characters or\n"
             "                    underscore or dot. The first character can not be a dot, as this\n"
             "                    will interfere with trigger expressions. Case is significant\n"
-            "      Nodes | Attributes: (optional)\n"
+            "      Nodes | Attributes:(optional)\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if the name is not valid\n"
             "- Throws a RuntimeError if duplicate suite names added\n"
             "\nUsage::\n\n"
-            "  defs = Defs(\"new.def\")         # create a defs\n"
-            "  suite = Suite(\"suite_1\")       # create a suite\n"
-            "  defs.add_suite(suite)            # add suite to definition\n"
-            "  suite2 = defs.add_suite(\"s2\")  # create a suite and add it to the defs\n\n"
+            "  defs = Defs()                  # create a empty definition. Root of all Suites\n"
+            "  suite = Suite('suite_1')       # create a stand alone suite\n"
+            "  defs.add_suite(suite)          # add suite to definition\n"
+            "  suite2 = defs.add_suite('s2')  # create a suite and add it to the defs\n\n"
             "  defs = Defs(\n"
             "           Suite('s1',\n"
             "              Family('f1',\n"
-            "                 Task('t1'))))     # create in in-place\n"
+            "                 Task('t1'))))   # create in in-place\n"
             ;
 }
 
@@ -322,36 +322,44 @@ const char* DefsDoc::family_doc()
             "  suite = Suite('suite_1')       # create a suite\n"
             "  family = Family('family_1')    # create a family\n"
             "  suite.add_family(family)       # add created family to a suite\n"
-            "  f2 = suite.add_family('f2')    # create a family f2 and add to suite\n"
+            "  f2 = suite.add_family('f2')    # create a family f2 and add to suite\n\n"
             "  # create in place\n"
-            "  suite = Suite('s1',\n"
-            "             Family('f1',\n"
-            "                Task('t1')))\n"
+            "  defs = Defs(\n"
+            "           Suite('s1',\n"
+            "              Family('f1',\n"
+            "                 Task('t1',\n"
+            "                     Edit(SLEEP='10')))))\n"
             ;
 }
 
 const char* DefsDoc::task_doc()
 {
    return
-            "Creates a `task`_ `node`_.Task is a child of a `suite`_ or `family`_ node.\n\n"
+            "Creates a `task`_ `node`_. Task is a child of a :py:class:`ecflow.Suite` or :py:class:`ecflow.Family` node.\n\n"
             "Multiple Tasks can be added, however the task names must be unique for a given parent.\n"
             "Note case is significant. Only Tasks can be submitted. A job inside a Task `ecf script`_ (i.e .ecf file)\n"
             "should generally be re-entrant since a Task may be automatically submitted more than once if it aborts.\n"
-            "There are two ways of adding a task, see example below\n"
+            "There are serveral ways of adding a task, see examples below\n"
             "\nConstructor::\n\n"
-            "   Task(name, Attributes)\n"
-            "      string name : The Task name.Name must consist of alpha numeric characters or\n"
-            "                    underscore or dot. First character can not be a dot.\n"
-            "                    Case is significant\n"
-            "      attributes: optional, i.e like Meter, Event, Trigger etc\n"
+            "  Task(name, Attributes)\n"
+            "     string name : The Task name.Name must consist of alpha numeric characters or\n"
+            "                   underscore or dot. First character can not be a dot.\n"
+            "                   Case is significant\n"
+            "     attributes: optional, i.e like Meter, Event, Trigger etc\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if the name is not valid\n"
             "- Throws a RuntimeError if a duplicate Task is added\n"
             "\nUsage::\n\n"
-            "  task = Task(\"t1\")            # create a task\n"
-            "  family.add_task(task)          # add to the family\n"
-            "  t2 = family.add_task(\"t2\")   # create a task t2 and add to the family\n\n"
-            "  task = Task('t1',Trigger('1==1'),Edit(SLEEP='10')) # add Trigger and Variables in place"
+            "  task = Task('t1')            # create a stand alone task\n"
+            "  family.add_task(task)        # add to the family\n"
+            "  t2 = family.add_task('t2')   # create a task t2 and add to the family\n\n"
+            "  # Create Task in place\n"
+            "  defs = Defs(\n"
+            "           Suite('s1',\n"
+            "              Family('f1',\n"
+            "                 Task('t1',\n"
+            "                    Trigger('1==1'),\n"
+            "                    Edit(SLEEP='10'))))) # add Trigger and Variables in place\n"
             ;
 }
 
@@ -368,16 +376,23 @@ const char* DefsDoc::add_suite_doc()
 {
    return
             "Add a `suite`_ `node`_. See :py:class:`ecflow.Suite`\n\n"
-            "Only one suite should be added for ease of maintenance. If a new suite is added\n"
-            "which matches the name of an existing suite, then an exception is thrown.\n"
+            "If a new suite is added which matches the name of an existing suite, then an exception is thrown.\n"
             "\nException:\n\n"
             "- Throws RuntimeError is the suite name is not valid\n"
             "- Throws RuntimeError if duplicate suite is added\n"
             "\nUsage::\n\n"
-            "  Defs defs(\"file.def\"         # create a defs)\n"
-            "  suite = Suite(\"suite\")       # create a Suite \n"
+            "  defs = Defs()                # create a empty defs\n"
+            "  suite = Suite('suite')       # create a stand alone Suite \n"
             "  defs.add_suite(suite)        # add suite to defs\n"
-            "  s2 = defs.add_suite(\"s2\")    # create a suite and add to defs\n"
+            "  s2 = defs.add_suite('s2')    # create a suite and add to defs\n\n"
+            "  # Alternatively we can create Suite in place\n"
+            "  defs = Defs(\n"
+            "           Suite('s1',\n"
+            "              Family('f1',\n"
+            "                 Task('t1'))),\n"
+            "           Suite('s2',\n"
+            "              Family('f1',\n"
+            "                 Task('t1'))))\n"
             ;
 }
 
@@ -391,7 +406,7 @@ const char* DefsDoc::add_extern_doc()
             "Manual Method::\n\n"
             "  void add_extern(string nodePath )\n"
             "\nUsage::\n\n"
-            "  defs = Defs(\"file.def\")\n"
+            "  defs = Defs('file.def')\n"
             "  ....\n"
             "  defs.add_extern('/temp/bill:event_name')\n"
             "  defs.add_extern('/temp/bill:meter_name')\n"
@@ -407,7 +422,7 @@ const char* DefsDoc::add_extern_doc()
             "::\n\n"
             "  void auto_add_externs(bool remove_existing_externs_first )\n"
             "\nUsage::\n\n"
-            "  defs = Defs(\"file.def\")\n"
+            "  defs = Defs('file.def')\n"
             "  ...\n"
             "  defs.auto_add_externs(True)   # remove existing extern first.\n"
             ;
@@ -447,10 +462,10 @@ const char* DefsDoc::add_family_doc()
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
-            "  suite = Suite(\"suite\")          # create a suite\n"
-            "  f1 = Family(\"f1\")               # create a family\n"
+            "  suite = Suite('suite')          # create a suite\n"
+            "  f1 = Family('f1')               # create a family\n"
             "  suite.add_family(f1)            # add family to suite\n"
-            "  f2 = suite.add_family(\"f2\")     # create a family and add to suite\n"
+            "  f2 = suite.add_family('f2')     # create a family and add to suite\n"
             ;
 }
 
@@ -463,10 +478,10 @@ const char* DefsDoc::add_task_doc()
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
-            "  f1 = Family(\"f1\")        # create a family\n"
-            "  t1 = Task(\"t1\")          # create a task\n"
+            "  f1 = Family('f1')      # create a family\n"
+            "  t1 = Task('t1')          # create a task\n"
             "  f1.add_task(t1)          # add task to family\n"
-            "  t2 = f1.add_task(\"t2\")   # create task 't2' and add to family"
+            "  t2 = f1.add_task('t2') # create task 't2' and add to family"
             ;
 }
 
@@ -475,22 +490,54 @@ const char* DefsDoc::add_definition_doc()
 {
    return
             "The Defs class holds the `suite definition`_ structure.\n\n"
-            "It contains all the suites and hence acts like the root for suite node tree hierarchy.\n"
+            "It contains all the :py:class:`ecflow.Suite` and hence acts like the root for suite node tree hierarchy.\n"
             "The definition can be kept as python code, alternatively it can be saved as a flat\n"
             "ASCII definition file.\n"
             "If a definition is read in from disk, it will by default, check the `trigger`_ expressions.\n"
-            "If however the definition is created in python, then checking should be done explicitly.\n"
-            "The Defs class take one argument which represents the file name\n\n"
-            "Example::\n\n"
+            "If however the definition is created in python, then checking should be done explicitly:\n\n"
+            "   Defs(string)\n"
+            "      string - The Defs class take one argument which represents the file name\n"
+            "   Defs(Suite | Edit )\n"
+            "      :py:class:`ecflow.Suite`- One or more suites\n\n"
+            "      :py:class:`ecflow.Edit` - specifies user defined server variables\n"
+            "\nExample::\n\n"
+            "  # Build definition using Constructor approach, This allows indentation, to show the structure\n"
+            "  # This is a made up example to demonstrate suite construction:\n"
+            " defs = Defs(\n"
+            "     Edit(SLEEP=10,FRED='bill'),  # user defined server variables\n"
+            "     Suite('s1'\n"
+            "         Clock(1, 1, 2010, False),\n"
+            "         Autocancel(1, 10, True),\n"
+            "         Task('t1'\n"
+            "             Edit({'a':'12', 'b':'bb'}, c='v',d='b'),\n"
+            "             Edit(g='d'),\n"
+            "             Edit(h=1),\n"
+            "             Event(1),\n"
+            "             Event(11,'event'),\n"
+            "             Meter('meter',0,10,10),\n"
+            "             Label('label','c'),\n"
+            "             Trigger('1==1'),\n"
+            "             Complete('1==1'),\n"
+            "             Limit('limit',10),Limit('limit2',10),\n"
+            "             InLimit('limitName','/limit',2),\n"
+            "             Defstatus(DState.complete),\n"
+            "             Today(0,30),Today('00:59'),Today('00:00 11:30 00:01'),\n"
+            "             Time(0,30),Time('00:59'),Time('00:00 11:30 00:01'),\n"
+            "             Day('sunday'),Day(Days.monday),\n"
+            "             Date(1,1,0),Date(28,2,1960),\n"
+            "             Autocancel(3)\n"
+            "             ),\n"
+            "         [ Family('f{}'.format(i)) for i in range(1,6)]))\n\n"
+            "  defs.save_as_defs('filename.def')  # save defs into file\n\n"
             "  defs = Defs()                      # create an empty defs\n"
-            "  suite = defs.add_suite(\"s1\")\n"
-            "  family = suite.add_family(\"f1\")\n"
-            "  for i in [ \"_1\", \"_2\", \"_3\" ]: family.add_task( \"t\" + i )\n"
+            "  suite = defs.add_suite('s1')\n"
+            "  family = suite.add_family('f1')\n"
+            "  for i in [ '_1', '_2', '_3' ]: family.add_task( 't' + i )\n"
             "  defs.save_as_defs('filename.def')  # save defs into file\n"
             "\n"
             "Create a Defs from an existing file on disk. ::\n\n"
             "  defs = Defs('filename.def')   #  Will open and parse the file and create the Definition\n"
-            "  print defs\n"
+            "  print(defs)\n"
             ;
 }
 
@@ -502,15 +549,17 @@ const char* DefsDoc::add_event_doc()
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_event( Event(10) )\n"
-            "  t1.add_event( Event(11,\"Eventname\") )\n"
+            "  t1 = Task('t1',\n"
+            "            Event(12),\n"
+            "            Event(11,'eventx'))             # Create events on Task creation\n\n"
+            "  t1.add_event( Event(10) )                 # Create with function on Task\n"
+            "  t1.add_event( Event(11,'Eventname') )\n"
             "  t1.add_event( 12 )\n"
-            "  t1.add_event( 13, \"name\")\n"
-            "  t1.add_event(\"flag\")\n\n"
-            "To reference in a trigger::\n\n"
-            "  t2 = Task(\"t2\")\n"
-            "  t2.add_trigger('t1:flag == set')\n"
+            "  t1.add_event( 13, 'name')\n\n"
+            "To reference event 'flag' in a trigger::\n\n"
+            "  t1.add_event('flag')\n"
+            "  t2 = Task('t2',\n"
+            "            Trigger('t1:flag == set'))"
             ;
 }
 
@@ -522,11 +571,12 @@ const char* DefsDoc::add_meter_doc()
             "\nException:\n\n"
             "- Throws RuntimeError if a duplicate is added\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_meter( Meter(\"metername\",0,100,50) )\n"
-            "  t1.add_meter( \"meter\",0,200)\n\n"
+            "  t1 = Task('t1',\n"
+            "            Meter('met',0,50))                   # create Meter on Task creation\n"
+            "  t1.add_meter( Meter('metername',0,100,50) )  # create Meter using function\n"
+            "  t1.add_meter( 'meter',0,200)\n\n"
             "To reference in a trigger::\n\n"
-            "  t2 = Task(\"t2\")\n"
+            "  t2 = Task('t2')\n"
             "  t2.add_trigger('t1:meter >= 10')\n"
             ;
 }
@@ -534,12 +584,14 @@ const char* DefsDoc::add_meter_doc()
 const char* DefsDoc::add_date_doc()
 {
    return
-            "Add a `date`_ time dependency\n\n"
+            "Add a `date`_ time dependency. See :py:class:`ecflow.Date`\n\n"
             "A value of zero for day,month,year means every day, every month, every year\n"
             "\nException:\n\n"
             "- Throws RuntimeError if an invalid date is added\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
+            "  t1 = Task('t1',\n"
+            "            Date('1.*.*'),\n"
+            "            Date(1,1,2010)))    # Create Date in place\n\n"
             "  t1.add_date( Date(1,1,2010) ) # day,month,year\n"
             "  t1.add_date( 2,1,2010)        # day,month,year\n"
             "  t1.add_date( 1,0,0)           # day,month,year, the first of each month for every year\n"
@@ -549,24 +601,26 @@ const char* DefsDoc::add_date_doc()
 const char* DefsDoc::add_day_doc()
 {
    return
-            "Add a `day`_ time dependency\n\n"
+            "Add a `day`_ time dependency. See :py:class:`ecflow.Day`\n\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_day( Day(Days.sunday) ) \n"
+            "  t1 = Task('t1',\n"
+            "            Day('sunday'))  # Create Day on Task creation\n\n"
+            "  t1.add_day( Day(Days.sunday) )\n"
             "  t1.add_day( Days.monday)\n"
-            "  t1.add_day( \"tuesday\")\n"
+            "  t1.add_day( 'tuesday' )\n"
             ;
 }
 
 const char* DefsDoc::add_today_doc()
 {
    return
-            "Add a `today`_ time dependency\n\n"
+            "Add a `today`_ time dependency. See :py:class:`ecflow.Today`\n\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_today( \"00:30\" )\n"
-            "  t1.add_today( \"+00:30\" )\n"
-            "  t1.add_today( \"+00:30 20:00 01:00\" )\n"
+            "  t1 = Task('t1',\n"
+            "            Today('+00:30 20:00 01:00')) # Create Today in Task constructor\n\n"
+            "  t1.add_today( '00:30' )\n"
+            "  t1.add_today( '+00:30' )\n"
+            "  t1.add_today( '+00:30 20:00 01:00' )\n"
             "  t1.add_today( Today( 0,10 ))      # hour,min,relative =false\n"
             "  t1.add_today( Today( 0,12,True )) # hour,min,relative\n"
             "  t1.add_today( Today(TimeSlot(20,20),False))\n"
@@ -583,12 +637,12 @@ const char* DefsDoc::add_today_doc()
 const char* DefsDoc::add_time_doc()
 {
    return
-            "Add a `time`_ dependency\n\n"
+            "Add a `time`_ dependency. See :py:class:`ecflow.Time`\n\n"
             "\nUsage::\n\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_time( \"00:30\" )\n"
-            "  t1.add_time( \"+00:30\" )\n"
-            "  t1.add_time( \"+00:30 20:00 01:00\" )\n"
+            "  t1 = Task('t1', Time('+00:30 20:00 01:00')) # Create Time in Task constructor\n"
+            "  t1.add_time( '00:30' )\n"
+            "  t1.add_time( '+00:30' )\n"
+            "  t1.add_time( '+00:30 20:00 01:00' )\n"
             "  t1.add_time( Time( 0,10 ))      # hour,min,relative =false\n"
             "  t1.add_time( Time( 0,12,True )) # hour,min,relative\n"
             "  t1.add_time( Time(TimeSlot(20,20),False))\n"
@@ -605,7 +659,7 @@ const char* DefsDoc::add_time_doc()
 const char* DefsDoc::add_cron_doc()
 {
    return
-            "Add a `cron`_ time dependency\n\n"
+            "Add a `cron`_ time dependency. See :py:class:`ecflow.Cron`\n\n"
             "\nUsage::\n\n"
             "  start = TimeSlot(0,0)\n"
             "  finish = TimeSlot(23,0)\n"
@@ -616,31 +670,37 @@ const char* DefsDoc::add_cron_doc()
             "  cron.set_days_of_month( [1,2,3,4,5,6] )\n"
             "  cron.set_months( [1,2,3,4,5,6] )\n"
             "  cron.set_time_series( time_series )\n"
-            "  t1 = Task(\"t1\")\n"
-            "  t1.add_cron( cron )\n"
+            "  t1 = Task('t1')\n"
+            "  t1.add_cron( cron )\n\n"
+            "  # we can also create a Cron in the Task constructor like any other attribute\n"
+            "  t2 = Task('t2',\n"
+            "            Cron('+00:00 23:00 00:30',days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6],months=[1,2,3,4,5,6]))\n"
             ;
 }
 
 const char* DefsDoc::add_late_doc()
 {
    return
-            "Add a `late`_ attribute\n\n"
+            "Add a `late`_ attribute. See :py:class:`ecflow.Late`\n\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one late is added\n"
             "\nUsage::\n\n"
-            "   late = Late()\n"
-            "   late.submitted( 20,10 )     # hour,minute\n"
-            "   late.active(    20,10 )     # hour,minute\n"
-            "   late.complete(  20,10,True) # hour,minute,relative\n"
-            "   t1 = Task(\"t1\")\n"
-            "   t1.add_late( late )\n"
-            ;
+            "  late = Late()\n"
+            "  late.submitted( 20,10 )     # hour,minute\n"
+            "  late.active(    20,10 )     # hour,minute\n"
+            "  late.complete(  20,10,True) # hour,minute,relative\n"
+            "  t1 = Task('t1')\n"
+            "  t1.add_late( late )\n\n"
+            "  # we can also create a Late in the Task constructor like any other attribute\n"
+            "  t2 = Task('t2',\n"
+            "            Late(submitted='20:10',active='20:10',complete='+20:10'))\n"
+           ;
 }
 
 const char* DefsDoc::add_autocancel_doc()
 {
    return
-            "Add a `autocancel` attribute.\n\n"
+            "Add a `autocancel` attribute. See :py:class:`ecflow.Autocancel`\n\n"
             "This will delete the node on completion. The deletion may be delayed by\n"
             "an amount of time in hours and minutes or expressed as days\n"
             "Node deletion is not immediate. The nodes are checked once a minute\n"
@@ -654,9 +714,12 @@ const char* DefsDoc::add_autocancel_doc()
             "  t2 = Task('t2')\n"
             "  t2.add_autocancel( 3 )                        # 3 days \n"
             "  t3 = Task('t3')\n"
-            "  t3.add_autocancel( 20,10,True )               # hour,minutes,relative \n"
+            "  t3.add_autocancel( 20,10,True )               # hour,minutes,relative\n"
             "  t4 = Task('t4')\n"
-            "  t4.add_autocancel( TimeSlot(20,10),True )     # hour,minutes,relative \n"
+            "  t4.add_autocancel( TimeSlot(20,10),True )     # hour,minutes,relative\n\n"
+            "  # we can also create a Autocancel in the Task constructor like any other attribute\n"
+            "  t2 = Task('t2',\n"
+            "            Autocancel(20,10,False))\n"
             ;
 }
 
@@ -664,81 +727,101 @@ const char* DefsDoc::add_verify_doc()
 {
    return
             "Add a Verify attribute.\n\n"
-            "For DEBUG/test used to assert that a particular state was reached."
+            "Used in python simulation used to assert that a particular state was reached."
+            "  t2 = Task('t2',\n"
+            "             Verify(State.complete, 6)) # verify task completes 6 times during simulation\n"
             ;
 }
 
 const char* DefsDoc::add_repeat_date_doc()
 {
    return
-            "Add a RepeatDate attribute.\n\n"
+            "Add a RepeatDate attribute. See :py:class:`ecflow.RepeatDate`\n\n"
             "A node can only have one repeat\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
-            "  t1.add_repeat( RepeatDate(\"testDate\",20100111,20100115) )\n"
+            "  t1.add_repeat( RepeatDate('testDate',20100111,20100115) )\n\n"
+            "  # we can also create a repeat in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',\n"
+            "            RepeatDate('testDate',20100111,20100115))\n"
             ;
 }
 
 const char* DefsDoc::add_repeat_integer_doc()
 {
    return
-            "Add a RepeatInteger attribute.\n\n"
+            "Add a RepeatInteger attribute. See :py:class:`ecflow.RepeatInteger`\n\n"
             "A node can only have one `repeat`_\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
-            "  t1.add_repeat( RepeatInteger(\"testInteger\",0,100,2) )\n"
+            "  t1.add_repeat( RepeatInteger('testInteger',0,100,2) )\n\n"
+            "  # we can also create a repeat in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',\n"
+            "            RepeatInteger('testInteger',0,100,2))\n"
             ;
 }
 
 const char* DefsDoc::add_repeat_string_doc()
 {
    return
-            "Add a RepeatString attribute.\n\n"
+            "Add a RepeatString attribute. See :py:class:`ecflow.RepeatString`\n\n"
             "A node can only have one `repeat`_\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
-            "  t1.add_repeat( RepeatString(\"test_string\",['a', 'b', 'c' ] ) )\n"
+            "  t1.add_repeat( RepeatString('test_string',['a', 'b', 'c' ] ) )\n\n"
+            "  # we can also create a repeat in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',\n"
+            "            RepeatString('test_string',['a', 'b', 'c' ] ) )\n"
             ;
 }
 
 const char* DefsDoc::add_repeat_enumerated_doc()
 {
    return
-            "Add a RepeatEnumerated attribute.\n\n"
+            "Add a RepeatEnumerated attribute. See :py:class:`ecflow.RepeatEnumerated`\n\n"
             "A node can only have one `repeat`_\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
-            "  t1.add_repeat( RepeatEnumerated(\"test_string\", ['red', 'green', 'blue' ] ) )\n"
+            "  t1.add_repeat( RepeatEnumerated('test_string', ['red', 'green', 'blue' ] ) )\n\n"
+            "  # we can also create a repeat in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',\n"
+            "            RepeatEnumerated('test_string', ['red', 'green', 'blue' ] ) )\n"
             ;
 }
 
 const char* DefsDoc::add_repeat_day_doc()
 {
    return
-            "Add a RepeatDay attribute.\n\n"
+            "Add a RepeatDay attribute. See :py:class:`ecflow.RepeatDay`\n\n"
             "A node can only have one `repeat`_\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
+            "\nUsage::\n\n"
+            "  t2 = Task('t2',\n"
+            "            RepeatDay(1))\n"
             ;
 }
 
 const char* DefsDoc::add_defstatus_doc()
 {
    return
-            "Set the default status( `defstatus`_ ) of node at begin or re queue\n\n"
+            "Set the default status( `defstatus`_ ) of node at begin or re queue. See :py:class:`ecflow.Defstatus`\n\n"
             "A `defstatus`_ is useful in preventing suites from running automatically\n"
             "once begun, or in setting Task's complete so they can be run selectively\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1') + Defstatus('complete')\n"
-            "  t2 = Task('t2').add_defstatus( DState.suspended )\n"
+            "  t2 = Task('t2').add_defstatus( DState.suspended )\n\n"
+            "  # we can also create a Defstatus in the Task constructor like any other attribute\n"
+            "  t2 = Task('t3',\n"
+            "            Defstatus('complete'))\n"
             ;
 }
 
@@ -753,17 +836,17 @@ const char* DefsDoc::jobgenctrl_doc()
             "   job_ctrl = JobCreationCtrl()\n"
             "   job_ctrl.set_node_path('/suite/to_check') # will hierarchically check job creation under this node\n"
             "   defs.check_job_creation(job_ctrl)         # job files generated to ECF_JOB\n"
-            "   print job_ctrl.get_error_msg()            # report any errors in job generation\n"
+            "   print(job_ctrl.get_error_msg())            # report any errors in job generation\n"
             "\n"
             "   job_ctrl = JobCreationCtrl()              # no set_node_path() hence check job creation for all tasks\n"
             "   job_ctrl.set_dir_for_job_creation(tmp)    # generate jobs file under this directory\n"
             "   defs.check_job_creation(job_ctrl)\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             "\n"
             "   job_ctrl = JobCreationCtrl()              # no set_node_path() hence check job creation for all tasks\n"
             "   job_ctrl.generate_temp_dir()              # automatically generate directory for job file\n"
             "   defs.check_job_creation(job_ctrl)\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             ;
 }
 
@@ -784,26 +867,26 @@ const char* DefsDoc::check_job_creation_doc()
             "\nUsage::\n\n"
             "   defs = Defs('my.def')                     # specify the defs we want to check, load into memory\n"
             "   ...\n"
-            "   print defs.check_job_creation()           # Check job generation for all tasks\n"
+            "   print(defs.check_job_creation())          # Check job generation for all tasks\n"
             "   ...\n"
             "   job_ctrl = JobCreationCtrl()\n"
             "   defs.check_job_creation(job_ctrl)         # Check job generation for all tasks, same as above\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             "   ...\n"
             "   job_ctrl = JobCreationCtrl()\n"
             "   job_ctrl.set_node_path('/suite/to_check') # will hierarchically check job creation under this node\n"
             "   defs.check_job_creation(job_ctrl)         # job files generated to ECF_JOB\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             "   ...\n"
             "   job_ctrl = JobCreationCtrl()              # no set_node_path() hence check job creation for all tasks\n"
             "   job_ctrl.set_dir_for_job_creation(tmp)    # generate jobs file under this directory\n"
             "   defs.check_job_creation(job_ctrl)\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             "   ...\n"
             "   job_ctrl = JobCreationCtrl()              # no set_node_path() hence check job creation for all tasks\n"
             "   job_ctrl.generate_temp_dir()              # automatically generate directory for job file\n"
             "   defs.check_job_creation(job_ctrl)\n"
-            "   print job_ctrl.get_error_msg()\n"
+            "   print(job_ctrl.get_error_msg())\n"
             ;
 }
 
@@ -833,11 +916,11 @@ const char* DefsDoc::generate_scripts_doc()
             "\nUsage::\n\n"
             "   defs = ecflow.Defs()\n"
             "   suite = defs.add_suite('s1')\n"
-            "   suite.add_variable(\"ECF_HOME\",\"/user/var/home\")\n"
-            "   suite.add_variable(\"ECF_INCLUDE\",\"/user/var/home/includes\")\n"
+            "   suite.add_variable('ECF_HOME','/user/var/home')\n"
+            "   suite.add_variable('ECF_INCLUDE','/user/var/home/includes')\n"
             "   for i in range(1,7) :\n"
-            "      fam = suite.add_family(\"f\" + str(i))\n"
-            "      for t in ( \"a\", \"b\", \"c\", \"d\", \"e\" ) :\n"
+            "      fam = suite.add_family('f' + str(i))\n"
+            "      for t in ( 'a', 'b', 'c', 'd', 'e' ) :\n"
             "        fam.add_task(t);\n"
             "   defs.generate_scripts()   # generate '.ecf' and head.h/tail.h if required\n"
             ;
@@ -857,14 +940,14 @@ const char* DefsDoc::check()
             "   # Client side\n"
             "   defs = Defs('my.def')        # Load my.def from disk\n"
             "   ....\n"
-            "   print defs.check() # do the check\n"
+            "   print(defs.check()) # do the check\n"
             "\n"
             "   # Server Side\n"
             "   try:\n"
             "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       print ci.check('/suite')\n"
+            "       print(ci.check('/suite'))\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
             ;
 }
 
@@ -900,7 +983,7 @@ const char* DefsDoc::simulate() {
          "   defs = Defs('my.def')        # specify the defs we want to simulate\n"
          "   ....\n"
          "   theResults = defs.simulate()\n"
-         "   print theResults\n"
+         "   print(theResults)\n"
          ;
 }
 
@@ -913,8 +996,8 @@ const char* DefsDoc::get_server_state()
             "       ci = Client()           # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       ci.shutdown_server()\n"
             "       ci.sync_local()\n"
-            "       assert ci.get_defs().get_server_state() == SState.SHUTDOWN, \"Expected server to be shutdown\"\n"
+            "       assert ci.get_defs().get_server_state() == SState.SHUTDOWN, 'Expected server to be shutdown'\n"
             "   except RuntimeError, e:\n"
-            "       print str(e)\n"
+            "       print(str(e))\n"
              ;
 }

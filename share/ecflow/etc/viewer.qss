@@ -243,6 +243,10 @@ QLabel[editorInfo="1"] {
   Triggers
 -----------------------------*/
 
+QToolButton[triggerDepend="1"]:checked {
+    background: rgb(233,242,247);
+}
+
 QWidget[triggertitle="1"] {
      background: rgb(95, 97, 99);
 }
@@ -265,7 +269,6 @@ QToolButton[triggertitle="1"]:hover {
     icon-size:  18px;
     background: rgb(140,140,140);
 }
-
 
 /*----------------------------
   Property editor

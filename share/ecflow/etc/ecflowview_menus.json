@@ -128,6 +128,7 @@
             "visible_for"    : "task or suite or family",
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --requeue=force <full_name>",
+            "warning"        : "This command can potentially lead to creating zombies when active nodes are present in the current subtree.",
             "question"       : "Confirm requeuing of <full_name>",
             "question_control" : "menu.confirm.confirmRequeue",
             "default_answer" : "Yes",

@@ -53,6 +53,7 @@ public:
 	void calendarChanged( const ecf::Calendar& c ); // can set attribute free
 	void resetRelativeDuration();
 
+    void reset_only();
 	void reset(const ecf::Calendar& c);
 	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true);
 

@@ -376,43 +376,37 @@ void ChangeNotifyDialog::setEnabled(ChangeNotify* ntf,bool b)
 	}
 }
 
-void ChangeNotifyDialog::on_closePb__clicked(bool b)
-{
-	hide();
-
-	if(clearOnCloseCb_->isChecked())
-	{
-        UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
-                 "stacked_->count()=" << stacked_->count() <<
-                 " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
-
-        int idx=buttonGroup_->checkedId();
-		if(idx != -1)
-		{
-            UI_ASSERT(idx < stacked_->count(),"idx=" << idx << " stacked_->count()=" << stacked_->count());
-            UI_ASSERT(idx >=0,"idx=" << idx);
-            if(ChangeNotify *ntf=indexToNtf(idx))
-				ntf->clearData();
-		}
-	}
-
-	writeSettings();
-}
-
-void ChangeNotifyDialog::on_clearPb__clicked(bool b)
+void ChangeNotifyDialog::clearCurrentData()
 {
     UI_ASSERT(stacked_->count() == buttonGroup_->buttons().count(),
              "stacked_->count()=" << stacked_->count() <<
              " buttonGroup_->buttons().count()=" << buttonGroup_->buttons().count());
 
     int idx=buttonGroup_->checkedId();
-	if(idx != -1)
-	{
+    if(idx != -1)
+    {
         UI_ASSERT(idx < stacked_->count(),"idx=" << idx << " stacked_->count()=" << stacked_->count());
         UI_ASSERT(idx >=0,"idx=" << idx);
         if(ChangeNotify *ntf=indexToNtf(idx))
-			ntf->clearData();
-	}
+            ntf->clearData();
+    }
+}
+
+void ChangeNotifyDialog::on_closePb__clicked(bool)
+{
+	hide();
+
+	if(clearOnCloseCb_->isChecked())
+	{
+        clearCurrentData();
+    }
+
+	writeSettings();
+}
+
+void ChangeNotifyDialog::on_clearPb__clicked(bool)
+{
+    clearCurrentData();
 }
 
 ChangeNotify* ChangeNotifyDialog::indexToNtf(int idx)
@@ -467,7 +461,11 @@ void ChangeNotifyDialog::updateSettings(ChangeNotify* notifier)
 
 void ChangeNotifyDialog::closeEvent(QCloseEvent* e)
 {
-	writeSettings();
+    if(clearOnCloseCb_->isChecked())
+    {
+        clearCurrentData();
+    }
+    writeSettings();
 	e->accept();
 }
 

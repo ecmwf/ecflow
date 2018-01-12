@@ -187,7 +187,7 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
         if(modes.find(TriggerCollector::Normal) != modes.end())
             return QVariant();
         else
-            return QColor(239,240,240);
+            return QColor(233,242,247);
     }
 
 	return QVariant();

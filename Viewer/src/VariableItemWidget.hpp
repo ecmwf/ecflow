@@ -143,6 +143,8 @@ protected:
     void updateState(const ChangeFlags&);
     void toClipboard(QString txt) const;
     void regainSelection();
+    void saveExpandState();
+    void restoreExpandState();
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
@@ -157,6 +159,7 @@ protected:
     VProperty* shadowProp_;
     VInfo_ptr lastSelection_;
     bool canSaveLastSelection_;
+    QList<bool> expanded_;
 };
 
 #endif

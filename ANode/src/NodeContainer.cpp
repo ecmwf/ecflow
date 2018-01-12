@@ -118,6 +118,13 @@ void NodeContainer::begin()
  	handle_defstatus_propagation();
 }
 
+void NodeContainer::reset()
+{
+   Node::reset();
+   size_t node_vec_size = nodeVec_.size();
+   for(size_t t = 0; t < node_vec_size; t++)   { nodeVec_[t]->reset(); }
+}
+
 void NodeContainer::requeue(
       bool resetRepeats,
       int clear_suspended_in_child_nodes,

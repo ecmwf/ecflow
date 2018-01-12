@@ -322,6 +322,26 @@ void Node::requeue(
    decrementInLimit(limitSet);    // will recurse up, expensive but needed
 }
 
+void Node::reset()
+{
+   // Set the state without causing any side effects
+   initState(1);
+
+   clearTrigger();
+   clearComplete();
+
+   repeat_.reset(); // if repeat is empty reset() does nothing
+
+   if ( time_dep_attrs_ ) time_dep_attrs_->reset();
+
+   flag_.reset();
+
+   if (lateAttr_) lateAttr_->reset();
+   if (child_attrs_) child_attrs_->requeue();
+
+   for(size_t i = 0; i < limitVec_.size(); i++) { limitVec_[i]->reset(); }
+}
+
 
 void Node::requeue_time_attrs()
 {
