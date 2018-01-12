@@ -65,7 +65,8 @@ public:
 	// relative duration stored locally since it can be reset, when used with repeats
 	// returns true if relative duration is reset/ i.e state change has been made
 	bool resetRelativeDuration();
-	void reset(const ecf::Calendar& c);
+   void reset_only();
+   void reset(const ecf::Calendar& c);
 
 	// Increment time series. Will find the next time slot after current calendar
 	// record the current suite time, to check of jobs finish after midnight

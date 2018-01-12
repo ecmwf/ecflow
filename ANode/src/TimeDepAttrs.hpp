@@ -37,6 +37,7 @@ public:
    // needed by node serialisation
    void set_node(Node* n) { node_ = n; }
 
+   void reset();
    void begin();
 
    /// If a job takes longer than it slots, then that slot is missed, and next slot is used

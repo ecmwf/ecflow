@@ -161,12 +161,16 @@ bool TimeSeries::resetRelativeDuration()
 	return false;
 }
 
+void TimeSeries::reset_only()
+{
+   isValid_ = true;
+   nextTimeSlot_ = start_;
+   (void) resetRelativeDuration();
+}
+
 void TimeSeries::reset(const ecf::Calendar& c)
 {
- 	isValid_ = true;
- 	nextTimeSlot_ = start_;
-
-	(void)resetRelativeDuration();
+   reset_only();
 
 	// Note: **difference between reset and re-queue,
 	//  Hence if at begin(), time slot same as current time, allow job to run.
@@ -560,7 +564,7 @@ bool TimeSeries::operator==(const TimeSeries& rhs) const
 	if (isValid_ != rhs.isValid_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeSeries::operator==  ( isValid_ != rhs.isValid_) \n";
+         std::cout << "TimeSeries::operator==  ( isValid_ != rhs.isValid_) " << toString() << "\n";
       }
 #endif
 	   return false;
@@ -568,7 +572,7 @@ bool TimeSeries::operator==(const TimeSeries& rhs) const
 	if (nextTimeSlot_ != rhs.nextTimeSlot_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeSeries::operator==  ( nextTimeSlot_ != rhs.nextTimeSlot_) \n";
+         std::cout << "TimeSeries::operator==  ( nextTimeSlot_(" << nextTimeSlot_.toString() << ") != rhs.nextTimeSlot_(" << rhs.nextTimeSlot_.toString() << ")) " << toString() << "\n";
       }
 #endif
 	   return false;
@@ -576,7 +580,7 @@ bool TimeSeries::operator==(const TimeSeries& rhs) const
 	if (relativeDuration_ != rhs.relativeDuration_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeSeries::operator==  ( relativeDuration_ != rhs.relativeDuration_) \n";
+         std::cout << "TimeSeries::operator==  ( relativeDuration_ != rhs.relativeDuration_) " << toString() << "\n";
       }
 #endif
 	   return false;

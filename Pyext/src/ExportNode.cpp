@@ -385,7 +385,7 @@ void export_Node()
    .add_property("crons",     bp::range( &Node::cron_begin,     &Node::cron_end),    "Returns a list of `cron`_ s" )
    .add_property("zombies",   bp::range( &Node::zombie_begin,   &Node::zombie_end),  "Returns a list of `zombie`_ s" )
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python<node_ptr>(); // needed for mac and boost 1.6
 #endif
 }
