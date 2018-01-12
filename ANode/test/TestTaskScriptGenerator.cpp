@@ -36,6 +36,7 @@ BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_reset_after_job_generation_checking )
 {
+   cout << "ANode:: ...test_reset_after_job_generation_checking\n";
    {
       Defs defs = Defs();
       suite_ptr s = defs.add_suite("s");
