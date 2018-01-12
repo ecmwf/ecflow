@@ -326,11 +326,9 @@ class TestAddVariable(unittest.TestCase):
  
     def test_alternative1(self):
          
-        defs = Defs() + Suite("s1")
-        defs.s1 += [ Edit(HELLO="world"),
-                     Edit({ "NAME":"value", "NAME2":"value2", "NAME3":"value3", "NAME4":4 }, BILL=1),
-                     Edit(FRED="bloggs")
-                   ]
+        defs = Defs() + Suite("s1",Edit(HELLO="world"))
+        defs.s1 += [ Edit({ "NAME":"value", "NAME2":"value2", "NAME3":"value3", "NAME4":4 }, BILL=1),
+                     Edit(FRED="bloggs") ]
  
         defs.s1.sort_attributes("variable");
         Ecf.set_debug_equality(True)
@@ -417,7 +415,8 @@ class TestAddTaskChain(unittest.TestCase):
         
     def test_alternative(self):
         defs = Defs() + Suite("s1")
-        defs.s1 += [ Task("t1"),Task("t2"),Task("t3"),Task("t4") ]
+        defs.s1 += [ Task("t1"),Task("t2"),
+                     Task("t3"),Task("t4") ]
         defs.s1.t2 += Trigger( ["t1"] )
         defs.s1.t3 += Trigger( ["t2"] )
         defs.s1.t4 += Trigger( ["t3"] )
