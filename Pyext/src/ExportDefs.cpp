@@ -124,10 +124,12 @@ std::vector<node_ptr> get_all_nodes(defs_ptr self){ std::vector<node_ptr> nodes;
 defs_ptr defs_enter(defs_ptr self) { return self;}
 bool defs_exit(defs_ptr self,const bp::object& type,const bp::object& value,const bp::object& traceback){return false;}
 
-std::string check_job_creation(defs_ptr defs)
-{
+std::string check_job_creation(defs_ptr defs, bool throw_on_error){
    job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
    defs->check_job_creation(jobCtrl);
+   if (!jobCtrl->get_error_msg().empty() && throw_on_error) {
+      throw std::runtime_error(jobCtrl->get_error_msg());
+   }
    return jobCtrl->get_error_msg();
 }
 
@@ -281,7 +283,7 @@ void export_Defs()
 	.def("save_as_defs",          &save_as_defs_1, "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
 	.def("check",                 &check_defs,               DefsDoc::check())
 	.def("simulate",              &simulate,                 DefsDoc::simulate())
-	.def("check_job_creation",    &check_job_creation,       DefsDoc::check_job_creation_doc() )
+	.def("check_job_creation",    &check_job_creation,(bp::arg("throw_on_error")=false),DefsDoc::check_job_creation_doc() )
 	.def("check_job_creation",    &Defs::check_job_creation)
 	.def("generate_scripts",      &Defs::generate_scripts,   DefsDoc::generate_scripts_doc() )
 	.def("get_state",             &Defs::state )
