@@ -418,7 +418,7 @@ void export_NodeAttr()
    .def("decrement",&Limit::decrement, "used for test only")
    .def("node_paths",&wrap_set_of_strings,"List of nodes(paths) that have consumed a limit")
  	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<Limit> >(); // needed for mac and boost 1.6
 #endif
 
@@ -544,7 +544,7 @@ void export_NodeAttr()
     .def("complete_is_relative",  &LateAttr::complete_is_relative, "Returns a boolean where true means that complete is relative")
     .def("is_late",   &LateAttr::isLate, "Return True if late")
     ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<LateAttr> >(); // needed for mac and boost 1.6
 #endif
 
@@ -561,7 +561,7 @@ void export_NodeAttr()
 	.def("relative",&AutoCancelAttr::relative, "Returns a boolean where true means the time is relative")
 	.def("days",    &AutoCancelAttr::days,     "Returns a boolean true if time was specified in days")
   	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<AutoCancelAttr> >(); // needed for mac and boost 1.6
 #endif
 
@@ -597,7 +597,7 @@ void export_NodeAttr()
 	.def("end",            &RepeatEnumerated::end)
 	.def("step",           &RepeatEnumerated::step)
 	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<RepeatEnumerated> >(); // needed for mac and boost 1.6
 #endif
 
@@ -611,7 +611,7 @@ void export_NodeAttr()
 	.def("end",            &RepeatString::end)
 	.def("step",           &RepeatString::step)
 	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<RepeatString> >(); // needed for mac and boost 1.6
 #endif
 
@@ -683,7 +683,7 @@ void export_NodeAttr()
 	.def( "positive_gain",&ClockAttr::positive_gain,"Returns a boolean, where true means that the gain is positive")
 	.def( "virtual"      ,&ClockAttr::is_virtual,   "Returns a boolean, where true means that clock is virtual")
 	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<ClockAttr> >(); // needed for mac and boost 1.6
 #endif
 }

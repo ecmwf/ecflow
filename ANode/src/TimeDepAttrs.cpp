@@ -77,6 +77,17 @@ void TimeDepAttrs::requeue(bool reset_next_time_slot,bool reset_relative_duartio
    for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
 }
 
+void TimeDepAttrs::reset()
+{
+   // Note:: resetRelativeDuration updates state_change_no
+   for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].resetRelativeDuration(); todayVec_[i].reset_only();}
+   for(size_t i = 0; i < timeVec_.size(); i++)   {  timeVec_[i].resetRelativeDuration(); timeVec_[i].reset_only();}
+   for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].resetRelativeDuration(); crons_[i].reset_only();}
+
+   for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
+   for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
+}
+
 void TimeDepAttrs::calendarChanged(const ecf::Calendar& c )
 {
    // For time/today/cron attributes if the time is free, it *remains* free until re-queued

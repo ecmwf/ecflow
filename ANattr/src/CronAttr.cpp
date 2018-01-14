@@ -310,6 +310,12 @@ bool CronAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 	return true;
 }
 
+void CronAttr::reset_only()
+{
+   clearFree();
+   timeSeries_.reset_only();
+}
+
 void CronAttr::reset(const ecf::Calendar& c)
 {
 	clearFree();

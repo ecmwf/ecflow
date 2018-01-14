@@ -299,6 +299,16 @@ node_ptr Task::findImmediateChild(const std::string& name, size_t& child_pos) co
     return node_ptr();
 }
 
+void Task::reset()
+{
+   if (aliases_.empty()) {
+      if (alias_no_ != 0) {
+         reset_alias_number();
+      }
+   }
+   Submittable::reset();
+}
+
 void Task::begin()
 {
    if (aliases_.empty()) {

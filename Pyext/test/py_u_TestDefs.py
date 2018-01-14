@@ -13,13 +13,14 @@
 #  code for testing creation of defs file in python
 import os
 import ecflow
+
 print(ecflow.__doc__)
 print(ecflow.Defs.__doc__)
     
 from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Variable, Limit, InLimit, \
                    Date, Day, Event, Meter, Label, Autocancel, Days, TimeSlot, TimeSeries, Style, State, \
                    RepeatString, RepeatDate, RepeatInteger, RepeatDay, RepeatEnumerated, \
-                   Verify, PrintStyle, Time, Today, Late, Cron, Client, debug_build
+                   Verify, PrintStyle, Time, Today, Late, Cron, Client, debug_build,Ecf
 
 if __name__ == "__main__":
     print("####################################################################")
@@ -218,4 +219,16 @@ if __name__ == "__main__":
     # Comment this out if you want to see what the file looked like
     os.remove(checkpt_file)
     os.remove(defs_file)
+    
+    # Test job creation failure
+    msg = defs.check_job_creation()
+    assert len(msg) != 0 ,"Expected job creation to fail"
+    
+    expected_exeption = False;
+    try:
+        defs.check_job_creation(throw_on_error=True) 
+    except RuntimeError as e:
+        expected_exeption = True
+    assert expected_exeption,"expected exception"  
+ 
     print("All tests pass")

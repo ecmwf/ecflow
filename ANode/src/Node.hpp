@@ -124,6 +124,10 @@ public:
    /// Order the node using the second parameter
    virtual void order(Node*/*immediateChild*/, NOrder::Order) {}
 
+   /// reset all. Used after job generation.
+   /// Unlike re-queue/begin, will reset time attributes. see ECFLOW-1204
+   virtual void reset();
+
    /// For suites it allows dependencies to be resolved, and changes state to defStatus
    virtual void begin();
 

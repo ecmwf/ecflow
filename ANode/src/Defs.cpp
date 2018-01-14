@@ -211,14 +211,13 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
  		for(size_t s = 0; s < theSize; s++) {
  		   /// begin will cause creation of generated variables. The generated variables
  		   /// are use in client scripts and used to locate the ecf files
- 			suiteVec_[s]->begin();
- 			suiteVec_[s]->check_job_creation( jobCtrl ) ;
+ 		   suiteVec_[s]->begin();
+ 		   suiteVec_[s]->check_job_creation( jobCtrl ) ;
 
- 			/// reset the state
-         suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes,true,true);
-         suiteVec_[s]->reset_begin();
-         suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
-         set_most_significant_state();
+ 		   /// reset the state
+ 		   suiteVec_[s]->reset();  // will reset begin
+ 		   suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
+ 		   set_most_significant_state();
  		}
 	}
 	else {
@@ -231,7 +230,7 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
 	      node->check_job_creation( jobCtrl );
 
 	      /// reset the state
-	      node->requeue(true,clear_suspended_in_child_nodes,true,true);
+	      node->reset();
 	      node->suite()->reset_begin();
 	      node->setStateOnlyHierarchically( NState::UNKNOWN );
 	   }
