@@ -272,6 +272,11 @@ if [[ $ecbuild_arg = ecbuild ]] ; then
    ecbuild=$workspace/ecbuild/bin/ecbuild
 fi
 
+# An alternative is to run cmake directly. (i.e to use its options/flags)
+# cmake -C $workspace/ecflow/bamboo/macosx1010-flags.cmake $source_dir \
+#        -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
+#  .....
+
 $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
