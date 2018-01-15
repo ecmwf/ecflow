@@ -280,6 +280,11 @@ endif()
 # =========================================================================================
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth=1024")
+    
+    # HACK cant get bamboo build to work, setting ENABLE_PYTHON_PTR_REGISTER does not work ?
+    #if (ENABLE_PYTHON)
+    #    add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
+    #endif()
 endif()
 
 
@@ -308,11 +313,11 @@ if (ENABLE_PYTHON)
         ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
     endif()
 
-	if ( ENABLE_PYTHON_PTR_REGISTER )
-    	add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
-	endif()
+    if ( ENABLE_PYTHON_PTR_REGISTER )
+        add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
+    endif()
 	
-	add_subdirectory( Pyext )
+    add_subdirectory( Pyext )
 endif()	
 	
 if(ENABLE_UI)
