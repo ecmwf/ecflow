@@ -567,12 +567,6 @@ def remote_file(node, fname, res):
     import base64
     ssh = paramiko.SSHClient()
     HOST = None
-    if "ccb" in res:
-        HOST = "ccb-il2"
-    if "cca" in res:
-        HOST = "cca-il2"
-    if "vsms" in res:
-        HOST = res
     if not HOST:
         return res
     #key = paramiko.RSAKey(data=base64. decodestring(' '))
