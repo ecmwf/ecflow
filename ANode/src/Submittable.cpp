@@ -605,8 +605,8 @@ public:
    JobCreationTimer(Submittable* sub) : enabled_(false),failed_(false), sub_(sub) {}
    ~JobCreationTimer() {
       if (enabled_) {
-         std::cout << " check_job_creation(verbose): " << sub_->absNodePath();
-         if (failed_)  std::cout << "(FAILED)\n";
+         std::cout << " " << sub_->absNodePath();
+         if (failed_)  std::cout << " (FAILED)\n";
          else {
             boost::posix_time::time_duration duration = Calendar::second_clock_time() - start_;
             std::cout << " (" << duration.total_microseconds() << " ms)\n";
