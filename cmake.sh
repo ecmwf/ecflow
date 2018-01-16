@@ -276,6 +276,8 @@ fi
 # cmake -C $workspace/ecflow/bamboo/macosx1010-flags.cmake $source_dir \
 #        -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
 #  .....
+# For gcc 6.3.0 default is c++11. to by pass use:
+#  -DCMAKE_CXX_STANDARD=98 
 
 $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
