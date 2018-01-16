@@ -963,7 +963,7 @@ def test_client_alter_delete(ci):
     task_t2 = defs.find_abs_node(t2)
     task_t2.add_repeat( RepeatDate("date",20100111,20100115,2) )  # can't add cron and repeat at the same level
     
-    print(defs)
+    #print(defs)
     ci.load(defs)   
 
     ci.alter(t1,"delete","variable","var")

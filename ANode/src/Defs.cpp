@@ -193,10 +193,9 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
    /// However Job generation checking will end up changing the states of the DEFS
    /// If this defs is loaded into the server the state of each node may be surprising. (i.e submitted)
    /// Hence we need to reset the state.
+   if (!jobCtrl.get()) throw std::runtime_error("Defs::check_job_creation: NULL JobCreationCtrl passed");
 
-   if (!jobCtrl.get()) {
-      throw std::runtime_error("Defs::check_job_creation: NULL JobCreationCtrl passed");
-   }
+   if (jobCtrl->verbose()) cout << "Defs::check_job_creation(verbose):\n";
 
    // This function should NOT really change the data model
    // The changed state is reset, hence we need to preserve change and modify numbers
