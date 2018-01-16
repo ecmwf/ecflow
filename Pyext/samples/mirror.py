@@ -24,13 +24,19 @@ import time
 import unittest
 from time import gmtime, strftime
 
+from ecf import *  # mirror
+import ecf
+import ecflow
+
+import signal
 ECFLOWP = "/usr/local/apps/ecflow/current"
 ECFLOWC = ECFLOWP + "/bin/ecflow_client"
 sys.path.append(ECFLOWP + "/lib/python2.7/site-packages/ecflow")
 child = None
 
 
-def getreq(): return Family("getreq").add(Task("collectreq"))
+def getreq():
+    return Family("getreq").add(Task("collectreq"))
 
 
 def ymd():
@@ -59,10 +65,6 @@ def fullname(item):
 sys.excepthook = excepthook
 CDP = None
 
-from ecf import *  # mirror
-import ecf
-import ecflow
-
 
 class Edit(ecf.Variables):
     pass
@@ -74,21 +76,21 @@ DEBUG = 0
 USER = "emos"
 XPING = "/usr/local/apps/sms/bin/smsping"
 x_status = {-1: "unknown",
-              0: "unknown",
-              1: "suspended",
-              2: "complete",
-              3: "queued",
-              4: "submitted",
-              5: "active",
-              6: "aborted",
-              7: "shutdown",
-              8: "halted",
-              9: "unknown", }
+            0: "unknown",
+            1: "suspended",
+            2: "complete",
+            3: "queued",
+            4: "submitted",
+            5: "active",
+            6: "aborted",
+            7: "shutdown",
+            8: "halted",
+            9: "unknown", }
 x_type = {13: "definition",
-            12: "suite",
-            11: "family",
-            10: "task",
-            32: "alias", }
+          12: "suite",
+          11: "family",
+          10: "task",
+          32: "alias", }
 
 
 ############################
@@ -111,7 +113,7 @@ can also be used as a module: gen_task, gen_suite
 
 ############################
 def get_uid():
-	return pwd.getpwnam(get_username()).pw_uid
+    return pwd.getpwnam(get_username()).pw_uid
 
 
 ############################
@@ -157,7 +159,6 @@ def timer(a, b):
     child.report("complete")
 
 
-import signal
 signal.signal(signal.SIGALRM, timer)
 signal.alarm(180)
 
@@ -302,24 +303,25 @@ def gen_suite(host=None, port=None, path=None):
             gen_task(load_only=True),
             Variables(ALL_ECF="localhost:31415",
                       ALL_SMS="",
-            [Family(name).add(
-                Variables(DESTINATIONS=destinations[name]),
-                Label("info", ""),
-                gen_task(0, kind=name), )
-             for name in definitions.keys()])))
+                      [Family(name).add(
+                          Variables(DESTINATIONS=destinations[name]),
+                          Label("info", ""),
+                          gen_task(0, kind=name), )
+                          for name in definitions.keys()])))
     if DEBUG:
         print(defs)
     return defs
 
 
-def o5hres(name="gsup"): return Family(name).add(
-    Family("an").add(
-        Family("main").add(
-            Family("ed00").add(
-                Label("info", "YMD"),
-                Edit("YMD", "21000101"),  # USE_YMD
-                Task("an"),
-                Task("fc")))))
+def o5hres(name="gsup"):
+    return Family(name).add(
+        Family("an").add(
+            Family("main").add(
+                Family("ed00").add(
+                    Label("info", "YMD"),
+                    Edit("YMD", "21000101"),  # USE_YMD
+                    Task("an"),
+                    Task("fc")))))
 
 
 definitions = {  # strings as path for all nodes below sync
@@ -371,13 +373,13 @@ class Mirror(object):
         elif " " in server:
             self.servers = server.split(" ")
         elif "@" in server:
-            host, port=server.split("@")
-            self.servers=("%s@%s" % (host, port), )
+            host, port = server.split("@")
+            self.servers = ("%s@%s" % (host, port), )
         elif ":" in server:
-            host, port=server.split(":")
-            self.servers=("%s:%s" % (host, port), )
+            host, port = server.split(":")
+            self.servers = ("%s:%s" % (host, port), )
 
-        host=os.getenv("ECF_HOST", "$ECF_HOST:none$")
+        host = os.getenv("ECF_HOST", "$ECF_HOST:none$")
         if MICRO[0] in host or host == "none":
             host = os.getenv("ECF_NODE", "$ECF_NODE$")
         # if MICRO[0] in host: host = "localhost"
@@ -530,7 +532,7 @@ class Mirror(object):
                 server = server.replace('@', ':')
                 if DEBUG:
                     print("#DBG: target is", server)
-                host, port=server.split(':')
+                host, port = server.split(':')
 
                 if int(port) < 65536 and 0 == comm(
                         ECFLOWC + " --ping --port %s --host %s" % (port, host)):
@@ -786,9 +788,9 @@ class Mirror(object):
 
         print("#MSG:", msg)
         if type(client) == cdp.sms_node:
-            host, port=server.split(':')
-            CDP="/usr/local/apps/sms/bin/cdp -q -c "
-            cmd=CDP + "'set SMS_PROG %s; login %s %s 1;" % (port, host, USER)
+            host, port = server.split(':')
+            CDP = "/usr/local/apps/sms/bin/cdp -q -c "
+            cmd = CDP + "'set SMS_PROG %s; login %s %s 1;" % (port, host, USER)
         if kind in ("active", "submitted", ):
             return
         elif FORCE:
@@ -920,14 +922,15 @@ def sms_replay(path, defs=None):
 class TestMirror(unittest.TestCase):
     """ a test case """
 
-    def test_1(self, test_ok=1): replay('/' + sname, gen_suite())
+    def test_1(self, test_ok=1):
+        replay('/' + sname, gen_suite())
 
 
 memo = dict()
 ############################
 if __name__ == '__main__':
     try:
-        OPTS, ARGS=getopt.getopt(
+        OPTS, ARGS = getopt.getopt(
             sys.argv[1:], "fhi:m:n:p:rstw",
             ["force", "help", "interval", "mirror", "number", "path", "replay",
              "sms", "test", "wait", ])
@@ -980,7 +983,7 @@ if __name__ == '__main__':
                 replay(PATH)
             else:
                 s = PATH.split('/')[1]
-                if not "mirror" in PATH:
+                if "mirror" not in PATH:
                     defs = Defs()
                     defs.add_suite(definitions[s])
                 else:

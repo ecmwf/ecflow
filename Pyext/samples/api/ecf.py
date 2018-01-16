@@ -216,9 +216,18 @@ UNKNOWN = State("unknown")
 class Attribute(object):
     """ generic attribute to be attached to a node"""
 
+    def __init__(self): 
+        self.load = None
+
     def add_to(self, node):
         """ use polymorphism to attach attribute to a node"""
-        raise Exception("ERR: virtual class")  # return node
+        raise Exception("ERR: virtual class")
+
+    def __get_attr__(self, attr):
+        return getattr(self.load, attr)
+
+    def real(self): 
+        return self.load
 
 
 class Label(Attribute):
@@ -263,7 +272,7 @@ class Inlimit(Attribute):
         (in debug mode) """
 
     def __init__(self, fullpath):
-        self.data = None
+        self.load = None
         if USE_LIMIT:
             try:
                 path, name = fullpath.split(":")
@@ -276,7 +285,7 @@ class Inlimit(Attribute):
             if '-' in name: name = name.replace('-', '_')
             if "None" in path or "None" in name:
                 raise Exception(path, name, fullpath)
-            self.data = ecflow.InLimit(name, path)
+            self.load = ecflow.InLimit(name, path)
             self.path_ = path
             self.name_ = name
 
@@ -284,9 +293,9 @@ class Inlimit(Attribute):
         """ add_inlimit"""
         if not USE_LIMIT:
             return
-        if self.data is None:
+        if self.load is None:
             raise Exception
-        node.load.add_inlimit(self.data)
+        node.load.add_inlimit(self.load)
         return node
 
     def value(self):
@@ -431,10 +440,13 @@ class Trigger(Attribute):
         if "YMD+1" in self.expr: raise Exception(self.expr)
         # NO_EXTERN_ALONE = 0 # set to 1 for test/activate
 
+    def expression(self):
+        return self.expr
+
     def add_to(self, node):
         if self.expr is None or self.expr == "" or not USE_TRIGGER:
             return None
-        if 0 and "/make/setup" in "%s" % self.expr:  # help DEBUG
+        if 0 and "/main/00/prod/fc/240/prodgen" in "%s" % self.expr:  # help DEBUG
             raise Exception(self.expr, node.fullname())
         if node.load.get_trigger() is None:
             node.load.add_trigger(self.expr)
@@ -488,18 +500,18 @@ class Clock(Attribute):
             hhh, mmm, sss = [0, 0, 0]
             try:
                 hhh, mmm, sss = arg.split(':')
-                self.data = ecflow.Clock(hhh, mmm, sss, hybrid)
+                self.load = ecflow.Clock(hhh, mmm, sss, hybrid)
             except:
-                self.data = ecflow.Clock(hybrid)
+                self.load = ecflow.Clock(hybrid)
         else:
-            self.data = ecflow.Clock(arg)
+            self.load = ecflow.Clock(arg)
 
     def add_to(self, node):
         if type(node) != Suite:
             print("#WAR: clock can only be attached to suite node,\n",
                   "#WAR: clock is ignored")
             return
-        node.load.add_clock(self.data)
+        node.load.add_clock(self.load)
         return node
 
 
@@ -511,14 +523,14 @@ class Autocancel(Attribute):
             if ':' in arg:  # hh:mm +hh:mm
                 hhh, mmm = arg.split(':')
                 rel = '+' in arg
-                self.data = ecflow.Autocancel(int(hhh), int(mmm), rel)
+                self.load = ecflow.Autocancel(int(hhh), int(mmm), rel)
             else:
-                self.data = ecflow.Autocancel(int(arg))
+                self.load = ecflow.Autocancel(int(arg))
         else:
-            self.data = ecflow.Autocancel(arg)  # days
+            self.load = ecflow.Autocancel(arg)  # days
 
     def add_to(self, node):
-        node.load.add_autocancel(self.data)
+        node.load.add_autocancel(self.load)
         return node
 
 
@@ -538,19 +550,19 @@ class Time(Attribute):
     """ wrapper to add time """
 
     def __init__(self, arg):
-        self.data = arg
+        self.load = arg
 
     def add_to(self, node):
-        if USE_TIME and self.data is not None:
-            node.load.add_time(self.data)
+        if USE_TIME and self.load is not None:
+            node.load.add_time(self.load)
         return node
 
 class Today(Time):
     """ wrapper to add time """
 
     def add_to(self, node):
-        if USE_TIME and self.data is not None:
-            node.load.add_today(self.data)
+        if USE_TIME and self.load is not None:
+            node.load.add_today(self.load)
         return node
 
 
@@ -559,10 +571,10 @@ class Cron(Time):
 
     def __init__(self, bes, wdays=None, days=None, months=None):
         import argparse
-        self.data = ecflow.Cron()
+        self.load = ecflow.Cron()
 
         if not ("-w" in bes or "-m" in bes or "-d" in bes):
-            self.data.set_time_series(bes)
+            self.load.set_time_series(bes)
             return
 
         parser = argparse.ArgumentParser()
@@ -573,17 +585,17 @@ class Cron(Time):
         parsed = parser.parse_args(bes.split())
 
         if parsed.w:
-            self.data.set_week_days([int(x) for x in parsed.w.split(',')])
+            self.load.set_week_days([int(x) for x in parsed.w.split(',')])
         if parsed.d:
-            self.data.set_week_days([int(x) for x in parsed.d.split(',')])
+            self.load.set_week_days([int(x) for x in parsed.d.split(',')])
         if parsed.m:
-            self.data.set_months([int(x) for x in parsed.m.split(',')])
-        self.data.set_time_series(parsed.arg)
+            self.load.set_months([int(x) for x in parsed.m.split(',')])
+        self.load.set_time_series(parsed.arg)
 
     def add_to(self, node):
-        if USE_TIME and self.data is not None:
-            node.load.add_cron(self.data)
-        else: print("#WAR: ignoring: %s" % self.data)
+        if USE_TIME and self.load is not None:
+            node.load.add_cron(self.load)
+        else: print("#WAR: ignoring: %s" % self.load)
         return node
 
 
@@ -595,12 +607,12 @@ class Date(Time):
         self.mask = mask
 
     def add_to(self, node):
-        if USE_TIME and self.data is not None:
+        if USE_TIME and self.load is not None:
             # ??? emos avoids dates, datasvc would not
             if self.mask:
-                node.load.add_variable("DATEMASK", self.data)
+                node.load.add_variable("DATEMASK", self.load)
             else:
-                ddd, mmm, yyy = self.data.split('.')
+                ddd, mmm, yyy = self.load.split('.')
                 if ddd == '*':
                     ddd = 0
                 if mmm == '*':
@@ -609,7 +621,7 @@ class Date(Time):
                     yyy = 0
 
                 node.load.add_date(int(ddd), int(mmm), int(yyy))
-                # node.add_date(self.data)
+                # node.add_date(self.load)
         return node
 
 
@@ -617,9 +629,9 @@ class Day(Date):
     """ wrapper to add day """
 
     def add_to(self, node):
-        if not USE_TIME or self.data is None:
+        if not USE_TIME or self.load is None:
             return
-        if isinstance(self.data, str):
+        if isinstance(self.load, str):
             days = {"monday": ecflow.Days.monday,
                     "sunday": ecflow.Days.sunday,
                     "tuesday": ecflow.Days.tuesday,
@@ -635,9 +647,9 @@ class Day(Date):
                     "thu": ecflow.Days.thursday,
                     "sat": ecflow.Days.saturday,
                     "fri": ecflow.Days.friday, }
-            node.load.add_day(ecflow.Days(days[self.data]))
+            node.load.add_day(ecflow.Days(days[self.load]))
         else:
-            node.load.add_day(ecflow.Days(self.data))
+            node.load.add_day(ecflow.Days(self.load))
         return node
 
 
@@ -653,11 +665,11 @@ class Defstatus(Attribute):
                      "submitted": ecflow.DState.submitted,
                      "unknown": ecflow.DState.unknown,
                      "queued": ecflow.DState.queued, }
-            self.data = kinds[kind]
-        else: self.data = kind
+            self.load = kinds[kind]
+        else: self.load = kind
 
     def add_to(self, node):
-        node.load.add_defstatus(self.data)
+        node.load.add_defstatus(self.load)
         return node
 
 
@@ -677,10 +689,10 @@ class DefcompleteIf(Defcomplete):
     just change name to make it explicit """
 
     def __init__(self, arg=True):
-        self.data = arg
+        self.load = arg
 
     def add_to(self, node):
-        if self.data:
+        if self.load:
             node.add(Defstatus("complete"))
         # else: node.defstatus("queued") # in comment to prevent
         # overwrite when using multiple defcomplete
@@ -719,7 +731,7 @@ class Late(Attribute):
     """ wrapper around late, to be add'ed to families and tasks """
 
     def __init__(self, arg):
-        self.data = None
+        self.load = None
         if not USE_LATE:
             # print("#MSG: late is disabled")
             return
@@ -727,7 +739,7 @@ class Late(Attribute):
         act = False
         com = False
         rel = False
-        self.data = ecflow.Late()
+        self.load = ecflow.Late()
         for item in arg.split(" "):
             if item == "-s":
                 sub = True
@@ -752,19 +764,19 @@ class Late(Attribute):
 
     def _add_sub(self, hour, mins):
         """ submitted"""
-        self.data.submitted(ecflow.TimeSlot(int(hour), int(mins)))
+        self.load.submitted(ecflow.TimeSlot(int(hour), int(mins)))
 
     def _add_com(self, hour, mins, rel):
         """ complete"""
-        self.data.complete(ecflow.TimeSlot(int(hour), int(mins)), rel)
+        self.load.complete(ecflow.TimeSlot(int(hour), int(mins)), rel)
 
     def _add_act(self, hour, mins):
         """ active"""
-        self.data.active(ecflow.TimeSlot(int(hour), int(mins)))
+        self.load.active(ecflow.TimeSlot(int(hour), int(mins)))
 
     def add_to(self, node):
-        if USE_LATE and self.data is not None:
-            try: node.load.add_late(self.data)
+        if USE_LATE and self.load is not None:
+            try: node.load.add_late(self.load)
             except:
                 if DEBUG: print("#WAR: late is already attached")
         return node
@@ -780,19 +792,22 @@ class Edit(Attribute):
     """ dedicated class to enable variable addition with different
     syntax """
 
+    def __init__(self, name, value=""):
+        self.load = ecflow.Edit(name, value)
+
     def _set_tvar(self, key, val):
         """ facilitate to load a ecflow suite to SMS, translating
         variable names"""
         keyt, edit = translate(str(key), str(val))
         # if keyt == "SCHOST" and val == "ccb": raise Exception
-        if self.data is None:
-            self.data = ecflow.Variable(keyt, edit)
+        if self.load is None:
+            self.load = ecflow.Variable(keyt, edit)
         else:
             next = self.next
             self.next = Edit(keyt, edit, next)
 
     def __init__(self, __a=None, __b=None, __next=None, *args, **kwargs):
-        self.data = None
+        self.load = None
         self.next = __next
 
         if len(args) > 0:
@@ -827,7 +842,7 @@ class Edit(Attribute):
         elif type(__a) == list:
             raise Exception
         elif type(__a) == Variable:
-            self.data = __a
+            self.load = __a
         elif __a is not None and __b is not None:
             python_true(__a, __b)
             self._set_tvar(__a, __b)
@@ -837,10 +852,10 @@ class Edit(Attribute):
             raise Exception(__a, __b, __next, args, kwargs)
 
     def add_to(self, node):
-        if self.data is not None:
-            edit = "%s" % self.data
+        if self.load is not None:
+            edit = "%s" % self.load
             if "CPUTIME" in edit and not CPUTIME: pass
-            else: node.load.add_variable(self.data)
+            else: node.load.add_variable(self.load)
             if node.fullname() == "/o" and "QUEUE 'emos" in edit:
                 raise Exception(node.fullname(), edit)
             if 1:  # try:  # Operators' request
@@ -862,7 +877,7 @@ class Edit(Attribute):
         return node
 
     def add(self, what):
-        print("add???", "%s" % self.data)
+        print("add???", "%s" % self.load)
         if type(what) in (Suite, Family, Task):
             raise Exception(what.fullname())
         else:
@@ -881,22 +896,22 @@ class Repeat(Attribute):
     def __init__(self, name="YMD", start=20120101, end=21010101,
                  step=1, kind="date"):
         if kind in "date":
-            self.data = ecflow.RepeatDate(name, int(start), int(end), int(step))
+            self.load = ecflow.RepeatDate(name, int(start), int(end), int(step))
         elif "int" in kind:
-            self.data = ecflow.RepeatInteger(
+            self.load = ecflow.RepeatInteger(
                 name, int(start), int(end), int(step))
         elif kind == "string":
-            self.data = ecflow.RepeatString(name, start)
+            self.load = ecflow.RepeatString(name, start)
         elif "enum" in kind:
-            self.data = ecflow.RepeatEnumerated(name, start)
+            self.load = ecflow.RepeatEnumerated(name, start)
         elif kind == "day":
-            self.data = ecflow.RepeatDay(step)
+            self.load = ecflow.RepeatDay(step)
         else:
-            self.data = None
+            self.load = None
 
     def add_to(self, node):
-        if self.data is not None:
-            node.load.add_repeat(self.data)
+        if self.load is not None:
+            node.load.add_repeat(self.load)
         return node
 
 
@@ -933,7 +948,6 @@ class Root(object):  # from where Suite and Node derive
     def __init__(self): self.load = None  # to be filled with ecFlow item
 
     def real(self): 
-        # print(type(self.load))
         return self.load
 
     def __get_attr__(self, attr): return getattr(self.load, attr)
@@ -965,6 +979,8 @@ class Root(object):  # from where Suite and Node derive
         if isinstance(self.load, ecflow.Node):
             return "%s or " % self + str(node)
         return False
+
+    def get_abs_node_path(self): return self.fullname()
 
     def fullname(self):
         """ simple syntax """
@@ -1106,27 +1122,11 @@ class Node(Root): # from where Task and Family derive
     def __enter__(self): return self
     def __exit__(self, exc_type, exc_val, exc_tb): pass  # return self
 
-    def real(self): return self.load
-
     def events(self):
-        # for i in self.load.events: yield i                
-        # print(i)
-
-        # out = [x for x in self.load.events]; return out
-
-        out = []
-        for x in self.load.events: 
-            out.append(x)
-        print(out)
-        return out
+        return [event for event in self.load.events]
 
     def meters(self):
-        # for i in self.load.meters: yield i        
-        return [x for x in self.load.meters]
-
-    #def nodes(self):
-    # for i in self.load.nodes: yield i        
-    #    return [x for x in self.load.nodes]
+        return [meter for meter in self.load.meters]
 
     def name(self):
         return self.load.name()
@@ -1205,11 +1205,7 @@ class Defs(object):
     def auto_add_externs(self, true): self.load.auto_add_externs(true)
     def check(self): self.load.check()
     def add_extern(self, path): self.load.add_extern(path)  # TODO list
-    def suites(self): 
-        out = []
-        for suite in self.load.suites:  # TODO list
-            out.append(suite.name())
-        return out
+    def suites(self): return [suite for suite in self.load.suites]
 
     def add_suite(self, node): 
         if type(node) == Suite:
@@ -1291,6 +1287,8 @@ class Suite(Root):
     def __init__(self, name):
         self.load = ecflow.Suite(name)
 
+    def name(self): return self.load.name()
+
     def family(self, name):
         """ add a family """
         if "%" in name: raise Exception(name)
@@ -1342,6 +1340,7 @@ class Family(Node, Attribute):
                                    node.name(), self.name())
         node.load.add_family(self.load)
 
+    def nodes(self): return [node for node in self.load.nodes]
     # def __enter__(self): return self
 
     # def __exit__(self, *args): pass
