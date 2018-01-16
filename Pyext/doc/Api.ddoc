@@ -1,6 +1,40 @@
-
+How to pass an arbitarty number of argument and key word arguments from python to c++
+=========================================================================================
+   1/ ecf.py. This used multiple inheritance over ecflow objects
+      With MRO() it meant ecflow.Node.add() , will have a greater precdence than Derived class in ecf.py
+      and hence break ecf.py.
+      Axel has since modified ecf.py
+      
+   2/ Support of the following was abandoned.
+       with Defs() as defs4:
+         with Suite("s1"):
+            with Task("t1"):
+                Edit(var = "v")
+                Trigger("a==1")
+                Complete("a==1")
+                Event(1,"event")
+                Meter("meter",0,100)
+                Label("label","value")
+       The implementation mean that any call to the constructor in a with, will add to parent scope.
+       However using WITH and node.add(Meter(...) || node += Meter(..) || node += [ Meter(),Event() ],
+       would mean Meter gets added twice.
+       There is a work around, where for add() and += we add a null node_ptr to the stack.
+       Then in the Attribute constructors if the top of the stack is null, we dont add to the With node.
+       
+       To support the addition of attributes and node, automatically. Each of the Node and attribute constructors
+       needed overriding with make_constructor(). make_constructor only works with boost::shared_ptr
+        	class_<Variable, boost::shared_ptr<Variable> >("Variable",NodeAttrDoc::variable_doc())
+              .def("__init__",make_constructor(&create_Variable) )
+       
+       		static boost::shared_ptr<Variable> create_Variable(const std::string& name, const std::string& value) {
+   				if ( node_ptr node = With::context()) node->add_variable(name,value);
+   				return boost::make_shared<Variable>(name,value);}
+   				
+   		This is a lot of effort.
+ 
+ 
 API
-===
+============================================================================
 
 The default api is provided by the ecflow module.
 

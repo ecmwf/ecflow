@@ -126,6 +126,13 @@ void Submittable::set_process_or_remote_id(const std::string& id)
 #endif
 }
 
+void Submittable::reset()
+{
+   tryNo_ = 0;    // reset try number
+   clear();       // jobs password, process_id, aborted_reason
+   Node::reset();
+}
+
 void Submittable::begin()
 {
    /// It is *very* important that we reset the passwords. This allows us to detect zombies.
@@ -139,13 +146,13 @@ void Submittable::begin()
 #endif
 }
 
-void Submittable::requeue(bool resetRepeats, int clear_suspended_in_child_nodes, bool reset_next_time_slot)
+void Submittable::requeue(bool resetRepeats, int clear_suspended_in_child_nodes, bool reset_next_time_slot,bool reset_relative_duration)
 {
    /// It is *very* important that we reset the passwords. This allows us to detect zombies.
    tryNo_ = 0;    // reset try number
    clear();       // jobs password, process_id, aborted_reason
 
-   Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot);
+   Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot,reset_relative_duration);
    update_generated_variables();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -593,9 +600,33 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam)
    return false;
 }
 
+class JobCreationTimer : private boost::noncopyable {
+public:
+   JobCreationTimer(Submittable* sub) : enabled_(false),failed_(false), sub_(sub) {}
+   ~JobCreationTimer() {
+      if (enabled_) {
+         std::cout << " " << sub_->absNodePath();
+         if (failed_)  std::cout << " (FAILED)\n";
+         else {
+            boost::posix_time::time_duration duration = Calendar::second_clock_time() - start_;
+            std::cout << " (" << duration.total_microseconds() << " ms)\n";
+         }
+      }
+   }
+   void set_enabled() { enabled_ = true; start_ = Calendar::second_clock_time(); }
+   void set_failed() { failed_ = true; }
+private:
+   bool enabled_;
+   bool failed_;
+   Submittable* sub_;
+   boost::posix_time::ptime start_;
+};
 
 void Submittable::check_job_creation( job_creation_ctrl_ptr jobCtrl)
 {
+   JobCreationTimer output_tasks_being_checked(this);
+   if ( jobCtrl->verbose() ) output_tasks_being_checked.set_enabled();
+
    // Typically a valid try number is >=1.
    // Since check_job_creation is only used for testing/python, we will initialise tryNum to -1
    // so than when it is incremented it will by a try_no of zero. *zero is an invalid try_no *
@@ -619,6 +650,7 @@ void Submittable::check_job_creation( job_creation_ctrl_ptr jobCtrl)
    if ( submit_job_only(jobsParam) ) {
       return;
    }
+   output_tasks_being_checked.set_failed();
 
    std::string errorMsg = jobsParam.getErrorMsg();
    LOG_ASSERT( !errorMsg.empty(), "failing to submit must raise an error message" );

@@ -1460,7 +1460,7 @@ public:
    enum Change_attr_type  { VARIABLE, CLOCK_TYPE, CLOCK_DATE, CLOCK_GAIN,  EVENT, METER, LABEL,
       TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC, LATE };
 
-   enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND, ADD_LATE, ADD_LIMIT, ADD_INLIMIT };
+   enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND, ADD_LATE, ADD_LIMIT, ADD_INLIMIT, ADD_LABEL };
    // add
    AlterCmd(const std::string& path, Add_attr_type  attr,  const std::string& name, const std::string& value = "" )
    : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(attr),

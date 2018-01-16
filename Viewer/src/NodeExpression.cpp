@@ -8,6 +8,7 @@
 //
 //============================================================================
 
+#include <QDateTime>
 #include <QRegExp>
 
 #include <boost/algorithm/string.hpp>
@@ -20,9 +21,11 @@
 #include "MenuHandler.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
+#include "UIDebug.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
+#include "VNodeMover.hpp"
 
 //#define _UI_NODEXPRESSIONPARSEER_DEBUG
 
@@ -115,7 +118,8 @@ bool NodeExpressionParser::isNodeHasAttribute(const std::string &str) const
 bool NodeExpressionParser::isNodeFlag(const std::string &str) const
 {
     if (str == "is_late" || str == "has_message" ||
-        str == "is_rerun" || str == "is_waiting" || str == "is_zombie" || str == "is_migrated")
+        str == "is_rerun" || str == "is_waiting" || str == "is_zombie" || str == "is_migrated" ||
+        str ==  "is_ecfcmd_failed" || str == "is_killed")
         return true;
 
     return false;
@@ -155,6 +159,16 @@ bool NodeExpressionParser::isAttributeState(const std::string &str) const
     return (str == "event_set" || str == "event_clear" ||
             str == "repeat_date" || str == "repeat_int" || str == "repeat_string" || str == "repeat_enum" ||
             str == "repeat_day");
+}
+
+bool NodeExpressionParser::isIsoDate(const std::string &str) const
+{
+    if(str.size() == 19)
+    {
+        QDateTime d=QDateTime::fromString(QString::fromStdString(str),Qt::ISODate);
+        return d.isValid();
+    }
+    return false;
 }
 
 // NodeExpressionParser::popLastNOperands
@@ -312,7 +326,14 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     result = flagCond;
                     updatedOperands = true;
                 }
-
+                // node status change date
+                else if (*i_ == "status_change_time")
+                {
+                    NodeStatusChangeDateCondition *chDateCond = new NodeStatusChangeDateCondition();
+                    operandStack.push_back(chDateCond);
+                    result = chDateCond;
+                    updatedOperands = true;
+                }
                 // node attribute type
                 //else if ((attrType = toAttrType(*i_)) != NodeExpressionParser::BADATTRIBUTE)
                 else if ((attrType = toAttrType(*i_)) != NULL)
@@ -338,6 +359,31 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     operandStack.push_back(searchCond);
                     result = searchCond;
                     updatedOperands = true;
+                }
+
+                // isoDate
+                else if (isIsoDate(*i_))
+                {
+                    IsoDateCondition *dateCond = new IsoDateCondition(QString::fromStdString(*i_));
+                    operandStack.push_back(dateCond);
+                    result = dateCond;
+                    updatedOperands = true;
+                }
+
+                //iso date operator
+                else if (*i_ == "date::<=")
+                {
+                    IsoDateLessThanEqualCondition *dateCond = new IsoDateLessThanEqualCondition();
+                    funcStack.push_back(dateCond);
+                    result = dateCond;
+                }
+
+                //iso date operator
+                else if (*i_ == "date::>=")
+                {
+                    IsoDateGreaterThanEqualCondition *dateCond = new IsoDateGreaterThanEqualCondition();
+                    funcStack.push_back(dateCond);
+                    result = dateCond;
                 }
 
                 else if (*i_ == "marked")
@@ -433,6 +479,8 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
     }
 
 
+    int iterCnt=0; //to avoid infinite loop we use this counter
+
     // final unwinding of the stack
     while (!funcStack.empty())
     {
@@ -444,9 +492,22 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
             result->setOperands(operands);
             funcStack.pop_back(); // remove the last function from the stack
             operandStack.push_back(result);  // store the current result
+            iterCnt=0;
+        }
+        else
+        {
+            iterCnt++;
+            if(iterCnt > 10)
+            {
+                if(result)
+                {
+                    delete result;
+                    result=NULL;
+                }
+                break;
+            }
         }
     }
-
 
     if(result)
         UiLog().dbg() << "    " <<  result->print();
@@ -615,12 +676,13 @@ bool StateNodeCondition::execute(VItem* item)
 //
 //=========================================================================
 
-bool NodeMenuModeCondition::execute(VItem*)
+bool NodeMenuModeCondition::execute(VItem* item)
 {
-    // since we don't currently have the concept of user levels, we just 
-    // return true for now
-
-    return MenuHandler::nodeMenuMode() == menuModeName_;
+    if(item)
+    {
+        return (item->nodeMenuMode() == menuModeName_);
+    }
+    return false;
 }
 
 
@@ -634,7 +696,7 @@ bool UIStateCondition::execute(VItem*)
 {
     if (uiStateName_ == "marked")
     {
-        return !(VNode::nodeMarkedForMoveServerAlias().empty());
+        return VNodeMover::hasMarkedForMove();
     }
 
     return false;
@@ -809,6 +871,13 @@ bool NodeFlagCondition::execute(VItem* item)
         else if(nodeFlagName_ == "is_migrated")
             return vnode->isFlagSet(ecf::Flag::MIGRATED);
 
+        else if(nodeFlagName_ == "is_ecfcmd_failed")
+            return vnode->isFlagSet(ecf::Flag::JOBCMD_FAILED);
+
+        else if(nodeFlagName_ == "is_killed")
+            return vnode->isFlagSet(ecf::Flag::KILLED);
+
+
 	}
 
 	return false;
@@ -890,4 +959,106 @@ bool AttributeStateCondition::execute(VItem* item)
          }
     }
     return false;
+}
+
+//==========================================
+//
+// ISO date condition
+//
+//==========================================
+
+IsoDateCondition::IsoDateCondition(QString dateStr) : secsSinceEpoch_(-1)
+{
+    QDateTime d=QDateTime::fromString(dateStr,Qt::ISODate);
+    if(d.isValid())
+        secsSinceEpoch_=d.toMSecsSinceEpoch()/1000;
+}
+
+std::string IsoDateCondition::print()
+{
+    if(secsSinceEpoch_ > 0)
+        return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_*1000).toString(Qt::ISODate).toStdString();
+    return std::string();
+}
+
+//==========================================
+//
+// Node status change date condition
+//
+//==========================================
+
+qint64 NodeStatusChangeDateCondition::secsSinceEpoch(VItem* item) const
+{
+    Q_ASSERT(item);
+    if(item->isNode())
+    {
+         VNode* vnode=static_cast<VNode*>(item);
+         Q_ASSERT(vnode);
+         return vnode->statusChangeTime();
+    }
+
+    return -1;
+}
+
+std::string NodeStatusChangeDateCondition::print()
+{
+    return "status_change_time";
+}
+
+//==========================================
+//
+// ISO date greater than equal condition
+//
+//==========================================
+
+bool IsoDateGreaterThanEqualCondition::execute(VItem *node)
+{
+    UI_ASSERT(operands_.size() == 2,"operands size=" <<operands_.size() );
+    Q_ASSERT(operands_[0]);
+    Q_ASSERT(operands_[1]);
+    //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
+    IsoDateCondition* leftOperand=static_cast<IsoDateCondition*> (operands_[1]);
+    IsoDateCondition* rightOperand=static_cast<IsoDateCondition*> (operands_[0]);
+    Q_ASSERT(leftOperand);
+    Q_ASSERT(rightOperand);
+
+    return leftOperand->secsSinceEpoch(node) >= rightOperand->secsSinceEpoch(node);
+}
+
+std::string IsoDateGreaterThanEqualCondition::print()
+{
+    UI_ASSERT(operands_.size() == 2,"operands size=" <<operands_.size() );
+    Q_ASSERT(operands_[0]);
+    Q_ASSERT(operands_[1]);
+    //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
+    return operands_[1]->print() + " >= " + operands_[0]->print();
+}
+
+//==========================================
+//
+// ISO date less than equal condition
+//
+//==========================================
+
+bool IsoDateLessThanEqualCondition::execute(VItem *node)
+{
+    UI_ASSERT(operands_.size() == 2,"operands size=" <<operands_.size() );
+    Q_ASSERT(operands_[0]);
+    Q_ASSERT(operands_[1]);
+    //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
+    IsoDateCondition* leftOperand=static_cast<IsoDateCondition*> (operands_[1]);
+    IsoDateCondition* rightOperand=static_cast<IsoDateCondition*> (operands_[0]);
+    Q_ASSERT(leftOperand);
+    Q_ASSERT(rightOperand);
+
+    return leftOperand->secsSinceEpoch(node) <= rightOperand->secsSinceEpoch(node);
+}
+
+std::string IsoDateLessThanEqualCondition::print()
+{
+    UI_ASSERT(operands_.size() == 2,"operands size=" <<operands_.size() );
+    Q_ASSERT(operands_[0]);
+    Q_ASSERT(operands_[1]);
+    //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
+    return operands_[1]->print() + " <= " + operands_[0]->print();
 }

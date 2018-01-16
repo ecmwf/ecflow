@@ -44,9 +44,6 @@
 
 #define _UI_VNODE_DEBUG
 
-// static member of VNode
-std::string VNode::nodeMarkedForMoveRelPath_;
-std::string VNode::nodeMarkedForMoveServerAlias_;
 
 //For a given node this class stores all the nodes that this node itself triggers.
 //For memory efficiency we only store the AttributeFilterindex of the nodes not the pointers themselves.
@@ -601,20 +598,6 @@ std::string VNode::absNodePath() const
 	return (node_)?node_->absNodePath():"";
 }
 
-
-void VNode::setNodeMarkedForMove(std::string serverAlias, std::string relPath)
-{
-	nodeMarkedForMoveServerAlias_ = serverAlias;
-	nodeMarkedForMoveRelPath_ = relPath;
-}
-
-void VNode::clearNodeMarkedForMove()
-{
-	nodeMarkedForMoveRelPath_.clear();
-	nodeMarkedForMoveServerAlias_.clear();
-}
-
-
 bool VNode::sameContents(VItem* item) const
 {
     return item == this;
@@ -878,7 +861,7 @@ void VNode::statusChangeTime(QString& sct) const
     }
 }
 
-uint VNode::statusChangeTime() const
+unsigned int VNode::statusChangeTime() const
 {
     if(node_)
     {
@@ -1145,6 +1128,12 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
    //return &dummy_node::get(path + ":" + name);
 }
 
+QString VNode::nodeMenuMode() const
+{
+    ServerHandler* s=server();
+    Q_ASSERT(s);
+    return s->nodeMenuMode();
+}
 
 const std::string& VSuiteNode::typeName() const
 {
@@ -1162,6 +1151,13 @@ const std::string& VAliasNode::typeName() const
 {
    static std::string t("alias");
    return t;
+}
+
+void VNode::print()
+{
+    UiLog().dbg() << name() << " " << children_.size();
+    for(std::size_t i=0; i < children_.size(); i++)
+        children_[i]->print();
 }
 
 //=================================================
@@ -1515,7 +1511,7 @@ void VServer::scan(VNode *node,bool hasNotifications)
 		VNode* vn=NULL;
 		if((*it)->isTask())
 		{
-			vn=new VTaskNode(node,*it);
+            vn=new VTaskNode(node,*it);
 
 			//If there are notifications we need to check them using the previous state
 			if(hasNotifications)
@@ -1586,6 +1582,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 		if(s && s->begun())
 		{
 			node->node()->update_generated_variables();
+            s->update_generated_variables();
 		}
 
 		if(node->nodeType() == "task")
@@ -1802,3 +1799,8 @@ void VServer::clearNodeTriggerData()
         nodes_[i]->clearTriggerData();
 }
 
+void VServer::print()
+{
+    for(std::size_t i=0; i < children_.size(); i++)
+        children_[i]->print();
+}

@@ -193,10 +193,9 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
    /// However Job generation checking will end up changing the states of the DEFS
    /// If this defs is loaded into the server the state of each node may be surprising. (i.e submitted)
    /// Hence we need to reset the state.
+   if (!jobCtrl.get()) throw std::runtime_error("Defs::check_job_creation: NULL JobCreationCtrl passed");
 
-   if (!jobCtrl.get()) {
-      throw std::runtime_error("Defs::check_job_creation: NULL JobCreationCtrl passed");
-   }
+   if (jobCtrl->verbose()) cout << "Defs::check_job_creation(verbose):\n";
 
    // This function should NOT really change the data model
    // The changed state is reset, hence we need to preserve change and modify numbers
@@ -211,34 +210,34 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
  		for(size_t s = 0; s < theSize; s++) {
  		   /// begin will cause creation of generated variables. The generated variables
  		   /// are use in client scripts and used to locate the ecf files
- 			suiteVec_[s]->begin();
- 			suiteVec_[s]->check_job_creation( jobCtrl ) ;
+ 		   suiteVec_[s]->begin();
+ 		   suiteVec_[s]->check_job_creation( jobCtrl ) ;
 
- 			/// reset the state
-         suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes,true);
-         suiteVec_[s]->reset_begin();
-         suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
+ 		   /// reset the state
+ 		   suiteVec_[s]->reset();  // will reset begin
+ 		   suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
+ 		   set_most_significant_state();
  		}
 	}
 	else {
 
-		node_ptr node =  findAbsNode( jobCtrl->node_path() );
-		if (node.get()) {
-		   /// begin will cause creation of generated variables. The generated variables
-		   /// are use in client scripts and used to locate the ecf files
-		   node->suite()->begin();
-			node->check_job_creation( jobCtrl );
+	   node_ptr node =  findAbsNode( jobCtrl->node_path() );
+	   if (node.get()) {
+	      /// begin will cause creation of generated variables. The generated variables
+	      /// are use in client scripts and used to locate the ecf files
+	      node->suite()->begin();
+	      node->check_job_creation( jobCtrl );
 
-			/// reset the state
-         node->requeue(true,clear_suspended_in_child_nodes,true);
-         node->suite()->reset_begin();
-         node->setStateOnlyHierarchically( NState::UNKNOWN );
-		}
-		else {
- 		    std::stringstream ss;
-		    ss << "Defs::check_job_creation: failed as node path '"  << jobCtrl->node_path() << "' does not exist.\n";
- 		    jobCtrl->error_msg() =  ss.str();
- 		}
+	      /// reset the state
+	      node->reset();
+	      node->suite()->reset_begin();
+	      node->setStateOnlyHierarchically( NState::UNKNOWN );
+	   }
+	   else {
+	      std::stringstream ss;
+	      ss << "Defs::check_job_creation: failed as node path '"  << jobCtrl->node_path() << "' does not exist.\n";
+	      jobCtrl->error_msg() =  ss.str();
+	   }
 	}
 }
 
@@ -255,6 +254,25 @@ void Defs::generate_scripts() const
    do_generate_scripts(override);
 }
 
+static void remove_autocancelled(const std::vector<node_ptr>& auto_cancelled_nodes)
+{
+   // Permanently remove any auto-cancelled nodes.
+   if ( !auto_cancelled_nodes.empty() ) {
+      std::vector<node_ptr>::const_iterator theNodeEnd = auto_cancelled_nodes.end();
+      string msg;
+      for(std::vector<node_ptr>::const_iterator n = auto_cancelled_nodes.begin(); n != theNodeEnd; ++n) {
+         // If we have two autocancel in the hierarchy, with same attributes. Then
+         // (*n)->remove() on the second will fail( with a crash, SuiteChanged0 destructor,  no suite pointer)
+         // since it would already be detached. See ECFLOW-556
+         // By checking we can still reach the Defs we know we are not detached
+         if ((*n)->defs()) {
+            msg.clear(); msg = "autocancel "; msg += (*n)->debugNodePath();
+            ecf::log(Log::MSG,msg);
+            (*n)->remove();
+         }
+      }
+   }
+}
 
 void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
 {
@@ -270,23 +288,19 @@ void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
 	}
 
 	// Permanently remove any auto-cancelled nodes.
- 	if ( !auto_cancelled_nodes.empty() ) {
- 		std::vector<node_ptr>::iterator theNodeEnd = auto_cancelled_nodes.end();
- 		string msg;
- 		for(std::vector<node_ptr>::iterator n = auto_cancelled_nodes.begin(); n != theNodeEnd; ++n) {
- 		   // If we have two autocancel in the hierarchy, with same attributes. Then
- 		   // (*n)->remove() on the second will fail( with a crash, SuiteChanged0 destructor,  no suite pointer)
- 		   // since it would already be detached. See ECFLOW-556
- 		   // By checking we can still reach the Defs we know we are not detached
- 		   if ((*n)->defs()) {
- 		      msg.clear(); msg = "autocancel "; msg += (*n)->debugNodePath();
- 		      ecf::log(Log::MSG,msg);
- 		      (*n)->remove();
- 		   }
-  		}
- 	}
+	remove_autocancelled(auto_cancelled_nodes);
 }
 
+void Defs::update_calendar(suite_ptr suite, const ecf::CalendarUpdateParams& cal_update_params )
+{
+   /// Collate any auto cancelled nodes as a result of calendar update
+   std::vector<node_ptr> auto_cancelled_nodes;
+
+   suite->updateCalendar( cal_update_params , auto_cancelled_nodes);
+
+   // Permanently remove any auto-cancelled nodes.
+   remove_autocancelled(auto_cancelled_nodes);
+}
 
 void Defs::absorb(Defs* input_defs, bool force)
 {
@@ -527,7 +541,8 @@ void Defs::requeue()
    for(size_t s = 0; s < theSuiteVecSize; s++) {
       suiteVec_[s]->requeue( true /* reset repeats */,
                              clear_suspended_in_child_nodes,
-                             true /* reset_next_time_slot */);
+                             true /* reset_next_time_slot */,
+                             true /* reset relative duration */);
    }
 
    set_most_significant_state();

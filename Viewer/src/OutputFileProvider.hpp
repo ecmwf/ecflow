@@ -12,7 +12,6 @@
 
 #include <QObject>
 
-#include "OutputCache.hpp"
 #include "VDir.hpp"
 #include "VInfo.hpp"
 #include "InfoProvider.hpp"
@@ -20,6 +19,7 @@
 #include "VTaskObserver.hpp"
 
 class OutputFileClient;
+class OutputCache;
 
 class OutputFileProvider : public QObject, public InfoProvider
 {
@@ -32,26 +32,27 @@ public:
 	 void clear();
 
 	 //Get a particular jobout file
-	 void file(const std::string& fileName);
-     void setDir(VDir_ptr);
+     void file(const std::string& fileName,bool useCache=true);
+     void setDirectories(const std::vector<VDir_ptr>&);
 
      std::string joboutFileName() const;
      bool isTryNoZero(const std::string& fileName) const;
 
 private Q_SLOTS:
-	void slotOutputClientError(QString);
-    void slotOutputClientProgress(QString,int);
-	void slotOutputClientFinished();
+     void slotOutputClientError(QString);
+     void slotOutputClientProgress(QString,int);
+     void slotOutputClientFinished();
 
 private:
+     VDir_ptr dirToFile(const std::string& fileName) const;
      void fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool detachCache);
 	 void fetchJoboutViaServer(ServerHandler *server,VNode *n,const std::string&);
-	 bool fetchFileViaOutputClient(VNode *n,const std::string& fileName);
+     bool fetchFileViaOutputClient(VNode *n,const std::string& fileName,bool useCache);
 	 bool fetchLocalFile(const std::string& fileName);
 
 	 OutputFileClient *outClient_;
-     OutputCacheItem* latestCached_;
-     VDir_ptr dir_;
+     std::vector<VDir_ptr> dirs_;
+     OutputCache* outCache_;
 };
 
 #endif

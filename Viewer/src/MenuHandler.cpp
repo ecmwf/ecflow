@@ -139,10 +139,12 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string questFor = ItemDef.get("question_for","");
                 std::string question = ItemDef.get("question", "");
                 std::string questionControl = ItemDef.get("question_control", "");
+                std::string warning  = ItemDef.get("warning", "");
                 std::string handler  = ItemDef.get("handler", "");
                 std::string views    = ItemDef.get("view", "");
                 std::string icon     = ItemDef.get("icon", "");
                 std::string hidden   = ItemDef.get("hidden", "false");
+                std::string multiSelect   = ItemDef.get("multi", "true");
                 std::string statustip  = ItemDef.get("status_tip", "");
 
                 //std::cout << "  " << name << " :" << menuName << std::endl;
@@ -177,9 +179,9 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 }
                 item->setQuestionCondition(questionCond);
 
-
                 item->setQuestion(question);
                 item->setQuestionControl(questionControl);
+                item->setWarning(warning);
                 item->setHandler(handler);
                 item->setIcon(icon);
                 item->setStatustip(statustip);
@@ -196,8 +198,9 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 	item->setViews(viewsVec);
                 }
 
-                if(hidden == "true")
-                	item->setHidden(true);
+
+                item->setHidden((hidden == "true")?1:0);
+                item->setMultiSelect((multiSelect == "true")?1:0);
 
                 if (type == "Submenu")
                     item->setAsSubMenu();
@@ -270,7 +273,7 @@ void MenuHandler::refreshCustomMenuCommands()
     CustomCommandHistoryHandler *customRecentCmds = CustomCommandHistoryHandler::instance();
     CustomSavedCommandHandler   *customSavedCmds  = CustomSavedCommandHandler::instance();
 
-    Menu *menu = findMenu("Custom");
+    Menu *menu = findMenu("User defined");
     if(menu)
     {
         menu->clearFixedList();
@@ -278,7 +281,7 @@ void MenuHandler::refreshCustomMenuCommands()
         // create the 'compulsary' menu items
         MenuItem *item1 = new MenuItem("Manage commands...");
         item1->setCommand("custom");
-        addItemToMenu(item1, "Custom");
+        menu->addItemToFixedList(item1);
         item1->setEnabledCondition(&trueCond_);
         item1->setVisibleCondition(&trueCond_);
         item1->setQuestionCondition(&falseCond_);
@@ -286,7 +289,7 @@ void MenuHandler::refreshCustomMenuCommands()
 
         // Saved commands
         MenuItem *item2 = new MenuItem("-");
-        addItemToMenu(item2, "Custom");
+        menu->addItemToFixedList(item2);
         item2->setEnabledCondition(&trueCond_);
         item2->setVisibleCondition(&trueCond_);
         item2->setQuestionCondition(&falseCond_);
@@ -305,20 +308,20 @@ void MenuHandler::refreshCustomMenuCommands()
                 item->setQuestionCondition(&trueCond_);
                 item->setCustom(true);
                 item->setStatustip("__cmd__");
-                addItemToMenu(item, "Custom");
+                menu->addItemToFixedList(item);
             }
         }
 
 
         // Recently executed commands
         MenuItem *item3 = new MenuItem("-");
-        addItemToMenu(item3, "Custom");
+        menu->addItemToFixedList(item3);
         item3->setEnabledCondition(&trueCond_);
         item3->setVisibleCondition(&trueCond_);
         item3->setQuestionCondition(&falseCond_);
 
         MenuItem *item4 = new MenuItem("Recent");
-        addItemToMenu(item4, "Custom");
+        menu->addItemToFixedList(item4);
         item4->setEnabledCondition(&falseCond_);
         item4->setVisibleCondition(&trueCond_);
         item4->setQuestionCondition(&falseCond_);
@@ -336,7 +339,7 @@ void MenuHandler::refreshCustomMenuCommands()
             item->setQuestionCondition(&trueCond_);
             item->setCustom(true);
             item->setStatustip("__cmd__");
-            addItemToMenu(item, "Custom");
+            menu->addItemToFixedList(item);
         }
     }
 }
@@ -492,20 +495,6 @@ void MenuHandler::interceptCommandsThatNeedConfirmation(MenuItem *item)
 	}
 }
 
-QString MenuHandler::nodeMenuMode()
-{
-    static VProperty* p=0;
-    if(!p)
-    {
-        p=VConfig::instance()->find("menu.access.nodeMenuMode");
-        UI_ASSERT(p!=0,"");
-        if(!p)
-            return QString();
-    }
-    return p->value().toString();
-}
-
-
 // -----------------------------------------------------------------
 
 
@@ -566,15 +555,10 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     //    UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse condition: " + condString));
     //}
 
-
-
-
     // add an inactive action(!) to the top of the menu in order to show which
     // node has been selected
 
     buildMenuTitle(nodes, qmenu);
-
-
 
     // if multiple attributes are selected, then tell the user we can't help them
     // NOTE that ActionHandler.cpp ensures that we cannot have a mix of attr and non-attr nodes
@@ -585,8 +569,6 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
         qmenu->addAction(noAction);
         return qmenu;
     }
-
-
 
     // merge the fixed menu items (from the config file) with the dynamic ones
     itemsCombined_ = itemsFixed_;
@@ -620,6 +602,9 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
                 enabled = enabled && (*itItems)->enabledCondition()->execute(*itNodes);
             }
 
+            //Check multiple selection
+            if(nodes.size() > 1 && !(*itItems)->multiSelect())
+                enabled = false;
 
             if ((*itItems)->isSubMenu())
             {
@@ -770,6 +755,7 @@ MenuItem::MenuItem(const std::string &name) :
    name_(name),
    id_(idCnt_++),
    hidden_(false),
+   multiSelect_(true),
    visibleCondition_(NULL),
    enabledCondition_(NULL),
    questionCondition_(NULL),

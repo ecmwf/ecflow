@@ -64,6 +64,7 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     on_dependInfoTb__toggled(false);
 
     //Dependency is off by default
+    dependTb_->setProperty("triggerDepend","1");
     dependTb_->setChecked(false);
     on_dependTb__toggled(false);
 

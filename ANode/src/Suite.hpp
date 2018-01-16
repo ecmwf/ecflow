@@ -63,11 +63,13 @@ public:
 
    virtual void accept(ecf::NodeTreeVisitor&);
    virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
+   virtual void reset();
    virtual void begin();
    virtual void requeue(
             bool resetRepeats,
             int clear_suspended_in_child_nodes,
-            bool reset_next_time_slot);
+            bool reset_next_time_slot,
+            bool reset_relative_duration);
    bool begun() const { return begun_; }
    void reset_begin();
    virtual void update_generated_variables() const;
@@ -114,6 +116,7 @@ public:
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 
 private:
+   void reset_begin_only();
    void begin_calendar();
    void requeue_calendar();
    void handle_clock_attribute_change();

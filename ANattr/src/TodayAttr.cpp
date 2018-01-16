@@ -20,10 +20,23 @@
 #include "Log.hpp"
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
+#include "Str.hpp"
 
 using namespace std;
 
 namespace ecf {
+
+TodayAttr::TodayAttr (const std::string& str)
+: makeFree_(false), state_change_no_(0)
+{
+   if (str.empty()) throw std::runtime_error("Today::Today: empty string passed");
+   std::vector<std::string> tokens;
+   Str::split(str,tokens);
+   if (tokens.empty()) throw std::runtime_error("Today::Today: incorrect time string ?");
+
+   size_t index = 0;
+   timeSeries_  = TimeSeries::create(index,tokens,false/*parse_state*/);
+}
 
 std::ostream& TodayAttr::print(std::ostream& os) const
 {
@@ -176,14 +189,19 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
       }
    }
    else {
-      boost::gregorian::date_duration one_day(1);
-      boost::gregorian::date the_next_date = c.date();  // todays date
-      the_next_date += one_day;                         // add one day, so its in the future
+      if (timeSeries_.relative()) {
+         theReasonWhy += " please *re-queue*, to reset the relative duration";
+      }
+      else {
+         boost::gregorian::date_duration one_day(1);
+         boost::gregorian::date the_next_date = c.date();  // todays date
+         the_next_date += one_day;                         // add one day, so its in the future
 
-      theReasonWhy += " next run tomorrow at ";
-      theReasonWhy += timeSeries_.start().toString();
-      theReasonWhy += " ";
-      theReasonWhy += to_simple_string( the_next_date );
+         theReasonWhy += " next run tomorrow at ";
+         theReasonWhy += timeSeries_.start().toString();
+         theReasonWhy += " ";
+         theReasonWhy += to_simple_string( the_next_date );
+      }
    }
    theReasonWhy += " )";
 

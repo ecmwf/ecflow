@@ -20,9 +20,14 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
+#include "CalendarUpdateParams.hpp"
+
 
 using namespace std;
 using namespace ecf;
+using namespace boost::gregorian;
+using namespace boost::posix_time;
+
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
@@ -243,4 +248,53 @@ BOOST_AUTO_TEST_CASE( test_ecflow_428 )
    TestHelper::test_state(t1,NState::QUEUED);
    TestHelper::test_state(t2,NState::QUEUED);
 }
+
+
+BOOST_AUTO_TEST_CASE( test_repeat_based_requeue_resets_relative_duration )
+{
+   cout << "Base:: ...test_repeat_based_requeue_resets_relative_duration\n";
+
+   //   suite ecflow_1182
+   //    family f
+   //      repeat integer HYEAR 1993 2017 1
+   //      time +00:01
+   //      task uk2fdb
+
+   defs_ptr the_defs = Defs::create();
+   suite_ptr suite = the_defs->add_suite( "ecflow_1182" ) ;
+   family_ptr f = suite->add_family("f");
+   f->addRepeat( RepeatInteger("rep",1993,2017) );
+   f->addTime( TimeAttr("+00:01"));
+
+   task_ptr t1 = f->add_task("uk2fsb");
+
+   TimeSeries& theTime = const_cast<TimeSeries&>(f->timeVec().back().time_series());
+
+   the_defs->beginAll();
+   BOOST_CHECK_MESSAGE(theTime.is_valid(), "Expected time to be holding");
+   
+   // forward time, so that time expires
+   // The calendar is *only* updated if the suite have been begun. Hence make sure this test scaffold
+   // starts the test, with all the suites in a begun state
+   boost::posix_time::ptime time_now = Calendar::second_clock_time();
+   {
+      CalendarUpdateParams cal( time_now , minutes(1), true /* server running */, false/* for Test*/ );
+      the_defs->updateCalendar(cal); //cout << suite->calendar().toString() << "\n";
+      time_now += minutes(1);
+   }
+   {
+      CalendarUpdateParams cal( time_now , minutes(1), true /* server running */, false/* for Test*/ );
+      the_defs->updateCalendar(cal); // cout << suite->calendar().toString() << "\n";
+   }
+   theTime.requeue(suite->calendar(),true); //will expire time
+   BOOST_CHECK_MESSAGE(!theTime.is_valid(), "Expected time to be expired");
+
+   // Now re-queue the suite/family
+   TestHelper::invokeRequest(the_defs.get(),Cmd_ptr( new RequeueNodeCmd(suite->absNodePath())));
+   BOOST_CHECK_MESSAGE(theTime.is_valid(), "Expected time to be valid");
+
+   //PrintStyle style(PrintStyle::MIGRATE);
+   //cout << the_defs;
+}
+
 BOOST_AUTO_TEST_SUITE_END()

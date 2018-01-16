@@ -26,7 +26,7 @@
 // defines statics utility functions used by more than one test
 class TestHelper {
 public:
-	static void invokeRequest( Defs* defs, Cmd_ptr theCmd, bool check_change_numbers = true ) {
+	static std::string invokeRequest( Defs* defs, Cmd_ptr theCmd, bool check_change_numbers = true ) {
 
 	   // Check that state change happens
 	   unsigned int state_change_no = Ecf::state_change_no();
@@ -49,6 +49,8 @@ public:
 		   std::string error_msg;
 	      BOOST_CHECK_MESSAGE(defs->checkInvariants(error_msg),"invokeRequest checkInvariants failed " << error_msg << " for cmd " << cmd_request );
 		}
+		if (result) return result->get_string();
+		return std::string();
 	}
 
 	static void invokeFailureRequest( Defs* defs, Cmd_ptr theCmd ) {
@@ -60,7 +62,7 @@ public:
 
   		// We expect this to fail
   		BOOST_CHECK_THROW(cmd_request.handleRequest(&server), std::runtime_error );
-   	}
+   }
 
 	static void invokeFailureRequest(MockServer& server,  Cmd_ptr theCmd ) {
 

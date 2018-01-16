@@ -53,19 +53,22 @@ protected Q_SLOTS:
 	void on_reloadTb__clicked();
 	void on_fontSizeUpTb__clicked();
 	void on_fontSizeDownTb__clicked();
-	void on_saveFileAsTb__clicked();
+    void on_saveFileAsTb__clicked();
+    void on_copyPathTb__clicked();
+    void on_dirReloadTb__clicked();
 
 protected:
     void setCurrentInDir(const std::string&);
     void updateDir(bool);
-	void updateDir(VDir_ptr,bool);
+    void updateDir(const std::vector<VDir_ptr>&,bool);
 	void enableDir(bool);
     void updateState(const FlagSet<ChangeFlag>&);
 	void searchOnReload();
-	void getCurrentFile();
+    void getCurrentFile(bool doReload);
 	void getLatestFile();
 	std::string currentFullName() const;
     void updateHistoryLabel(const std::vector<std::string>&);
+    void displayDirErrors(const std::vector<std::string>& errorVec);
 
 	OutputDirProvider* dirProvider_;
 	OutputModel* dirModel_;

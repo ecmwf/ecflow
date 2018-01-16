@@ -270,8 +270,11 @@ bool Str::valid_name(const std::string& name, std::string &msg)
       result = name.find_first_not_of(VALID_NODE_CHARS, 1) == string::npos;
       if ( !result ) {
          msg = "Valid names can only consist of alphanumeric characters "
-               ",underscores and dots. The first character can not be a dot: ";
+               ",underscores and dots. The first character can not be a dot. ";
+         if (name.find('\r') != string::npos)  msg += "Window's line ending ? ";
+         msg += "'";
          msg += name;
+         msg += "'"; // use '<name>' to show if PC format. i.e carriage return
       }
    }
 

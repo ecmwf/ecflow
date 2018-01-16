@@ -14,8 +14,10 @@
 //============================================================================
 #include <assert.h>
 #include <iostream>
+#include <stdexcept>
 #include "DState.hpp"
 #include "Ecf.hpp"
+#include <stdexcept>
 
 void DState::setState( State s ) {
 	state_= s;
@@ -115,7 +117,7 @@ DState::State DState::toState( const std::string& str ) {
 		return DState::SUSPENDED;
 	if ( str == "active" )
 		return DState::ACTIVE;
-	assert(false);
+	throw std::runtime_error("DState::toState: Can change string to a DState :"+ str);
 	return DState::UNKNOWN;
 }
 

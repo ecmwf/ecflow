@@ -47,9 +47,11 @@ public:
     void setViews(const std::vector<std::string> &views) {views_=views;}
     void setQuestion(const std::string &question) {question_=question;}
     void setQuestionControl(const std::string &questionControl) {questionControl_=questionControl;}
+    void setWarning(const std::string &warning) {warning_=warning;}
     void setIcon(const std::string &icon);
     void setStatustip(const std::string &statustip) {statustip_=statustip;}
     void setHidden(bool b) {hidden_=b;}
+    void setMultiSelect(bool b) {multiSelect_=b;}
     void setAsSubMenu() {isSubMenu_ = true;}
     void setVisibleCondition(BaseNodeCondition *cond)  {visibleCondition_  = cond;}
     void setEnabledCondition(BaseNodeCondition *cond)  {enabledCondition_  = cond;}
@@ -68,7 +70,9 @@ public:
     const std::string& command() const {return command_;}
     const std::string& question() const {return question_;}
     const std::string& questionControl() const {return questionControl_;}
+    const std::string& warning() const {return warning_;}
     bool hidden() const {return hidden_;}
+    bool multiSelect() const {return multiSelect_;}
     int id() const {return id_;}
     QAction* createAction(QWidget* parent);
 
@@ -87,9 +91,11 @@ private:
     std::string question_;
     std::string questionControl_;
     std::string defaultAnswer_;
+    std::string warning_;
     std::string handler_;
     std::vector<std::string> views_;
     bool hidden_;
+    bool multiSelect_; //multiple selecttion
 
     //std::vector<NodeType>      validNodeTypes_;
     //std::vector<DState::State> validNodeStates_;
@@ -162,7 +168,6 @@ public:
     static void addMenu(Menu *menu) {menus_.push_back(menu);}
     static void interceptCommandsThatNeedConfirmation(MenuItem *item);
     static void refreshCustomMenuCommands();
-    static QString nodeMenuMode();
 
 private:
     typedef std::map<std::string, std::string> ConfirmationMap;

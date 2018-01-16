@@ -53,16 +53,17 @@ ecbuild_info( "ECFLOW_VERSION           : ${ECFLOW_VERSION_STR}" )
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
-option( ENABLE_SERVER            "Build the server, can be switched off if just building UI" ON  )
-option( ENABLE_PYTHON            "enable python interface"         ON  )
-option( ENABLE_UI                "Build ecFlowUI"                  ON  ) 
-option( ENABLE_GUI               "Build ecflowview"                ON  )
-option( ENABLE_STATIC_BOOST_LIBS "Link with boost libs statically" ON  )
-option( ENABLE_ALL_TESTS         "This includes performance/migration/regression tests" OFF )
-option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace"         OFF ) 
-option( ENABLE_UI_USAGE_LOG      "Enable UI usage logging"            OFF )
-option( ENABLE_SSL               "Enable SSL encrypted communication" OFF )
-option( ENABLE_SECURE_USER       "Enable passwords for user"          OFF )
+option( ENABLE_SERVER              "Build the server, can be switched off if just building UI" ON  )
+option( ENABLE_PYTHON              "enable python interface"         ON  )
+option( ENABLE_UI                  "Build ecFlowUI"                  ON  ) 
+option( ENABLE_GUI                 "Build ecflowview"                ON  )
+option( ENABLE_STATIC_BOOST_LIBS   "Link with boost libs statically" ON  )
+option( ENABLE_ALL_TESTS           "This includes performance/migration/regression tests" OFF )
+option( ENABLE_UI_BACKTRACE        "Print a UI debug backtrace"         OFF ) 
+option( ENABLE_UI_USAGE_LOG        "Enable UI usage logging"            OFF )
+option( ENABLE_SSL                 "Enable SSL encrypted communication" OFF )
+option( ENABLE_SECURE_USER         "Enable passwords for user"          OFF )
+option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
@@ -81,20 +82,23 @@ if(ENABLE_UI)
         find_package(Qt5Gui 5.0.0)
         if (Qt5Gui_FOUND)
             find_package(Qt5Network 5.0.0)
+            if (Qt5Network_FOUND)
+                find_package(Qt5Svg 5.0.0)
+            endif()
         endif()
     endif()
 
-    if (Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5Network_FOUND)
+    if (Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5Network_FOUND AND Qt5Svg_FOUND)
           ecbuild_info("Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
-          set(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIR} ${Qt5Network_INCLUDE_DIR})
-          set(ECFLOW_QT_LIBRARIES   ${Qt5Widgets_LIBRARIES}    ${Qt5Gui_LIBRARIES}   ${Qt5Network_LIBRARIES})
+          set(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIR} ${Qt5Network_INCLUDE_DIR} ${Qt5Svg_INCLUDE_DIR})
+          set(ECFLOW_QT_LIBRARIES   ${Qt5Widgets_LIBRARIES}    ${Qt5Gui_LIBRARIES}   ${Qt5Network_LIBRARIES} ${Qt5Svg_LIBRARIES})
           set(ECFLOW_QT5 1)
           add_definitions(-DECFLOW_QT5)
     else()
         ecbuild_info("Could not find all required Qt5 packages (Qt5Widgets, Qt5Gui and Qt5Network) - searching for Qt4")
         ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
 
-        find_package(Qt4 4.8.0 REQUIRED QtCore QtGui QtNetwork)
+        find_package(Qt4 4.8.0 REQUIRED QtCore QtGui QtNetwork QtSvg)
         if(QT_FOUND)
             ecbuild_info("Found Qt 4, please ignore any warnings about Qt5 components that were not found.")
         else()
@@ -140,14 +144,15 @@ if(ENABLE_UI_USAGE_LOG AND (NOT UI_LOG_SITE_TAG))
 endif()
 
 
-ecbuild_info( "ENABLE_SERVER            : ${ENABLE_SERVER}" )
-ecbuild_info( "ENABLE_PYTHON            : ${ENABLE_PYTHON}" )
-ecbuild_info( "ENABLE_GUI               : ${ENABLE_GUI}" )
-ecbuild_info( "ENABLE_UI                : ${ENABLE_UI}" )
-ecbuild_info( "ENABLE_ALL_TESTS         : ${ENABLE_ALL_TESTS}" )
-ecbuild_info( "ENABLE_STATIC_BOOST_LIBS : ${ENABLE_STATIC_BOOST_LIBS}" )
-ecbuild_info( "ENABLE_SSL               : ${ENABLE_SSL}" )
-ecbuild_info( "ENABLE_SECURE_USER       : ${ENABLE_SECURE_USER}" )
+ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
+ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
+ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
+ecbuild_info( "ENABLE_GUI                 : ${ENABLE_GUI}" )
+ecbuild_info( "ENABLE_UI                  : ${ENABLE_UI}" )
+ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
+ecbuild_info( "ENABLE_STATIC_BOOST_LIBS   : ${ENABLE_STATIC_BOOST_LIBS}" )
+ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL}" )
+ecbuild_info( "ENABLE_SECURE_USER         : ${ENABLE_SECURE_USER}" )
 
 
 if (ENABLE_UI)
@@ -287,6 +292,8 @@ add_subdirectory( ANode )
 add_subdirectory( Base )
 add_subdirectory( CSim )
 add_subdirectory( Client )
+add_subdirectory( tools )
+
 if (ENABLE_SERVER)
     add_subdirectory( Server )
     add_subdirectory( Test )
@@ -301,7 +308,11 @@ if (ENABLE_PYTHON)
         ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
     endif()
 
-	add_subdirectory( Pyext )
+    if ( ENABLE_PYTHON_PTR_REGISTER )
+        add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
+    endif()
+	
+    add_subdirectory( Pyext )
 endif()	
 	
 if(ENABLE_UI)
@@ -340,22 +351,6 @@ ecbuild_dont_pack( FILES
 )
 
 
-# =========================================================================================
-# install scripts
-# =========================================================================================
-
-install( FILES
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_stop.sh
-            ${CMAKE_SOURCE_DIR}/tools/noconnect.sh
-            ${CMAKE_SOURCE_DIR}/Pyext/migrate/ecflow_migrate.py
-         DESTINATION bin
-         PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-         COMPONENT binary
-       )
-        
 # =========================================================================================
 # final
 # =========================================================================================

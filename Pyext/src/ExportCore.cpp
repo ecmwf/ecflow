@@ -15,6 +15,8 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/noncopyable.hpp>
+#include <boost/python/raw_function.hpp>
+
 #include "PrintStyle.hpp"
 #include "DState.hpp"
 #include "SState.hpp"
@@ -23,7 +25,11 @@
 #include "TimeSeries.hpp"
 #include "CheckPt.hpp"
 #include "Ecf.hpp"
+
+#include "Edit.hpp"
+#include "NodeAttrDoc.hpp"
 #include "BoostPythonUtil.hpp"
+
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 template<class K, class T>
@@ -57,6 +63,18 @@ void export_Core()
 {
    // For use in test only
    def("debug_build",debug_build);
+
+
+   // see: https://github.com/boostorg/python/blob/master/test/raw_ctor.cpp
+   // Uses a raw constructor approach to support pass arbitrary number arguments on the python side.
+   // using no_init postpones defining __init__ function until after raw_function for proper overload resolution order,
+   // since later defs get higher priority.
+   class_<Edit>("Edit", NodeAttrDoc::variable_doc(), no_init)
+             .def("__init__", raw_function(&Edit::init,0)) // raw_constructor -> will call -> def(init<dict>() )
+             .def(init<dict>())                 //
+             .def(init<dict,dict>())            //
+             .def("__str__",  &Edit::to_string) // __str__
+             ;
 
 	class_<File, boost::noncopyable >("File", "Utility class, Used in test only.")
             .def("find_server",&File::find_ecf_server_path, "Provides pathname to the server") .staticmethod("find_server")
@@ -92,11 +110,27 @@ void export_Core()
    .value("MIGRATE",  PrintStyle::MIGRATE)
 	;
 
+   class_<PrintStyle, boost::noncopyable >("PrintStyle",
+                                           "Singleton used to control the print Style. See :py:class:`ecflow.Style`\n\n"
+                                           "\nUsage::\n\n"
+                                           "   old_style = PrintStyle.get_style()\n"
+                                           "   PrintStyle.set_style(PrintStyle.STATE)\n"
+                                           "   ...\n"
+                                           "   print(defs)                     # show the node state\n"
+                                           "   PrintStyle.set_style(old_style) # reset previous style\n"
+                                           ,
+                                           no_init)
+   .def("get_style", &PrintStyle::getStyle,"Returns the style, static method")
+   .staticmethod("get_style")
+   .def("set_style", &PrintStyle::setStyle,"Set the style, static method")
+   .staticmethod("set_style")
+   ;
+
    enum_<CheckPt::Mode>("CheckPt",
-            "CheckPt is enum that is used to control check pointing in the :term:`ecflow_server`\n\n"
+            "CheckPt is enum that is used to control check pointing in the `ecflow_server`_\n\n"
             "- NEVER  : Switches of check pointing\n"
-            "- ON_TIME: :term:`check point` file is saved periodically, specified by checkPtInterval. This is the default.\n"
-            "- ALWAYS : :term:`check point` file is saved after any state change, *not* recommended for large definitions\n"
+            "- ON_TIME: `check point`_ file is saved periodically, specified by checkPtInterval. This is the default.\n"
+            "- ALWAYS : `check point`_ file is saved after any state change, *not* recommended for large definitions\n"
             "- UNDEFINED : None of the the above, used to provide default argument\n"
    )
    .value("NEVER",  CheckPt::NEVER)
@@ -104,19 +138,6 @@ void export_Core()
    .value("ALWAYS", CheckPt::ALWAYS)
    .value("UNDEFINED", CheckPt::UNDEFINED)
    ;
-
-
-	class_<PrintStyle, boost::noncopyable >("PrintStyle",
-	         "Singleton used to control the print Style.\n\n"
- 	         "\nUsage::\n\n"
-	         "   style = PrintStyle.get_style()\n"
-	      ,
-			no_init)
-	.def("get_style", &PrintStyle::getStyle,"Returns the style, static method")
-	.staticmethod("get_style")
-	.def("set_style", &PrintStyle::setStyle,"Set the style, static method")
-	.staticmethod("set_style")
- 	;
 
 	class_<Ecf, boost::noncopyable >("Ecf",
 			"Singleton used to control ecf debugging\n\n",
@@ -132,18 +153,18 @@ void export_Core()
  	;
 
 	enum_<NState::State>("State",
-			"Each :term:`node` can have a status, which reflects the life cycle of a node.\n\n"
+			"Each `node`_ can have a status, which reflects the life cycle of a node.\n\n"
 			"It varies as follows:\n\n"
-			"- When the definition file is loaded into the :term:`ecflow_server` the :term:`task` status is :term:`unknown`\n"
-			"- After begin command the :term:`task` s are either :term:`queued`, :term:`complete`, :term:`aborted` or :term:`suspended` ,\n"
-			"  a suspended task means that the task is really :term:`queued` but it must be resumed by\n"
-			"  the user first before it can be :term:`submitted`. See :py:class:`ecflow.DState`\n"
-			"- Once the :term:`dependencies` are resolved a task is submitted and placed into the :term:`submitted` state,\n"
-			"  however if the submission fails, the task is placed in a :term:`aborted` state.\n"
-			"- On a successful submission the task is placed into the :term:`active` state\n"
+			"- When the definition file is loaded into the `ecflow_server`_ the `task`_ status is `unknown`_\n"
+			"- After begin command the `task`_ s are either `queued`_, `complete`_, `aborted`_ or `suspended`_ ,\n"
+			"  a suspended task means that the task is really `queued`_ but it must be resumed by\n"
+			"  the user first before it can be `submitted`_. See :py:class:`ecflow.DState`\n"
+			"- Once the `dependencies`_ are resolved a task is submitted and placed into the `submitted`_ state,\n"
+			"  however if the submission fails, the task is placed in a `aborted`_ state.\n"
+			"- On a successful submission the task is placed into the `active`_ state\n"
 			"- Before a job ends, it may send other message to the server such as:\n"
-			"  Set an :term:`event`, Change a :term:`meter`, Change a :term:`label`, send a message to log file\n\n"
-			"Jobs end by becoming either :term:`complete` or :term:`aborted`"
+			"  Set an `event`_, Change a `meter`_, Change a `label`_, send a message to log file\n\n"
+			"Jobs end by becoming either `complete`_ or `aborted`_"
 			)
 	.value("unknown",  NState::UNKNOWN)
 	.value("complete", NState::COMPLETE)
@@ -157,11 +178,16 @@ void export_Core()
 	                     "A DState is like a ecflow.State, except for the addition of SUSPENDED\n\n"
 	                     "Suspended stops job generation, and hence is an attribute of a Node.\n"
 	                     "DState can be used for setting the default state of node when it is\n"
-	                     "begun or re queued. DState is used for defining :term:`defstatus`. See :py:class:`ecflow.Node.add_defstatus`\n"
-	                     "The default state of a :term:`node` is :term:`queued`.\n"
+	                     "begun or re queued. DState is used for defining `defstatus`_.\n"
+	                     "See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.Defstatus`\n"
+	                     "The default state of a `node`_ is `queued`_.\n"
 	                     "\nUsage::\n\n"
 	                     "   task = ecflow.Task('t1')\n"
-	                     "   task.add_defstatus(ecflow.DState.complete)"
+                        "   task.add_defstatus(ecflow.DState.complete)"
+                        "   task = ecflow.Task('t2')\n"
+                        "   task += Defstatus('complete')\n"
+                        "   task = Task('t3',\n"
+	                     "               Defstatus('complete')) # create in place\n"
 			)
 	.value("unknown",  DState::UNKNOWN)
 	.value("complete", DState::COMPLETE)
@@ -172,9 +198,21 @@ void export_Core()
 	.value("active",   DState::ACTIVE)
 	;
 
+   class_<Defstatus>("Defstatus",
+                     "A `node`_ can be set with a default status other the `queued`_\n\n"
+                     "The default state of a `node`_ is `queued`_.\n"
+                     "This defines the state to take at 'begin' or 're-queue' time\n"
+                     "See :py:class:`ecflow.Node.add_defstatus` and :py:class:`ecflow.DState`\n"
+                     ,
+                     init<DState::State>())
+            .def(init<std::string>())                              // constructor
+            .def("state",  &Defstatus::state)
+            .def("__str__",  &Defstatus::to_string) // __str__
+            ;
+
 	enum_<SState::State>("SState",
-	         "A SState holds the :term:`ecflow_server` state\n\n"
-	         "See :term:`server states`"
+	         "A SState holds the `ecflow_server`_ state\n\n"
+	         "See `server states`_"
 	)
 	.value("HALTED",   SState::HALTED)
 	.value("SHUTDOWN", SState::SHUTDOWN)
@@ -184,7 +222,7 @@ void export_Core()
 
 	class_<TimeSlot>("TimeSlot",
 			"Represents a time slot.\n\n"
-	      "It is typically used as an argument to a TimeSeries or\n"
+	        "It is typically used as an argument to a :py:class:`TimeSeries` or\n"
 			"other time dependent attributes of a node.\n"
 			"\n"
 			"\nConstructor::\n\n"
@@ -207,8 +245,8 @@ void export_Core()
 	// single slot, | start, finish, incr,  bool relative to suite start
 	class_<TimeSeries>("TimeSeries",
 			"A TimeSeries can hold a single time slot or a series.\n\n"
-	      "Time series can be created relative to the :term:`suite` start or start of a repeating node.\n"
-	      "A Time series can be used as argument to the :py:class:`ecflow.Time`, py:class:`ecflow.Today` and py:class:`ecflow.Cron` attributes of a node.\n"
+	      "Time series can be created relative to the `suite`_ start or start of a repeating node.\n"
+	      "A Time series can be used as argument to the :py:class:`ecflow.Time`, :py:class:`ecflow.Today` and :py:class:`ecflow.Cron` attributes of a node.\n"
 			"If a time the job takes to complete is longer than the interval, a 'slot' is missed\n"
 			"e.g time 10:00 20:00 01:00, if the 10.00 run takes more than an hour the 11.00 is missed\n\n"
 			"\nConstructor::\n\n"

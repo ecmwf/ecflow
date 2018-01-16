@@ -17,9 +17,14 @@ set(viewer_srcs
     ChangeNotifyEditor.cpp
     ChangeNotifyModel.cpp
     ChangeNotifyWidget.cpp
+    ClockWidget.cpp
     CodeItemWidget.cpp
     ComboMulti.cpp
     CommandDesignerWidget.cpp
+    CommandHandler.cpp
+    CommandOutput.cpp
+    CommandOutputDialog.cpp
+    CommandOutputWidget.cpp
     CompactView.cpp
     ConfigListDelegate.cpp
     ConnectState.cpp
@@ -101,7 +106,7 @@ set(viewer_srcs
     OutputDirProvider.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
-    Palette.cpp
+    Palette.cpp  
     PlainTextEdit.cpp
     PlainTextSearchLine.cpp
     PlainTextSearchInterface.cpp
@@ -127,6 +132,7 @@ set(viewer_srcs
     SessionDialog.cpp
     SessionRenameDialog.cpp
     SessionHandler.cpp
+    ShellCommand.cpp
     Sound.cpp
     StandardView.cpp
     StringMatchCombo.cpp
@@ -146,8 +152,8 @@ set(viewer_srcs
     RichTextSearchInterface.cpp
     RichTextSearchLine.cpp
     TextEditSearchLine.cpp
+    TextFormat.cpp
     TimeItemWidget.cpp
-    ToolTipFormat.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
@@ -169,6 +175,7 @@ set(viewer_srcs
     VAttribute.cpp
     VAttributeType.cpp
     VConfig.cpp   
+    VConfigLoader.cpp
     VDateAttr.cpp
     VDir.cpp
     VEventAttr.cpp
@@ -187,6 +194,7 @@ set(viewer_srcs
     VModelData.cpp
     VNode.cpp
     VNodeList.cpp
+    VNodeMover.cpp
     VNState.cpp
     VParam.cpp
     VProperty.cpp   
@@ -208,9 +216,10 @@ set(viewer_srcs
     VariableItemWidget.cpp
     VariableSearchLine.cpp
     VariableView.cpp
-    VConfigLoader.cpp
+    ViewerUtil.cpp
     WhyItemWidget.cpp
     WidgetNameProvider.cpp
+    WmWorkspaceHandler.cpp
     ZombieItemWidget.cpp
     ZombieModel.cpp
     TextPager/TextPagerCursor.cpp
@@ -242,9 +251,13 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ChangeNotifyEditor.hpp
     ChangeNotifyModel.hpp
     ChangeNotifyWidget.hpp
+    ClockWidget.hpp
     CodeItemWidget.hpp
     ComboMulti.hpp
     CommandDesignerWidget.hpp    
+    CommandOutput.hpp
+    CommandOutputDialog.hpp
+    CommandOutputWidget.hpp
     CustomCommandDialog.hpp
     CustomListWidget.hpp
     Dashboard.hpp
@@ -307,6 +320,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerSettingsItemWidget.hpp
     SessionDialog.hpp
     SessionRenameDialog.hpp
+    ShellCommand.hpp
     StringMatchCombo.hpp
     SuiteItemWidget.hpp
     TabWidget.hpp
@@ -352,7 +366,9 @@ set(viewer_wrap_ui_files
     ChangeNotifyDialogWidget.ui
     ChangeNotifyEditor.ui
     CommandDesignerWidget.ui 
-    CustomCommandDialog.ui 
+    CommandOutputDialog.ui
+    CommandOutputWidget.ui
+    CustomCommandDialog.ui
     CodeItemWidget.ui
     DashboardDialog.ui
     DashboardDockTitleWidget.ui

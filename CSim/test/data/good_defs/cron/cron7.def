@@ -1,10 +1,20 @@
-suite cron7             # use real clock otherwise the date wont change
-   clock real 1.1.2017  # need to define a date otherwise log file content varies according to the time 
-   endclock   1.1.2018  # When to finish. 
-   family cronFamily
-      task t
-          cron -d 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31  -m 1,2,3,4,5,6,7,8,9,10,11,12   10:00    # run every day for a year
-          verify complete:365
-   endfamily
+suite cron7           # use real clock otherwise the date wont change
+ clock real 1.1.2017  # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2018  # When to finish. 
+ family cronFamily
+  task t
+   cron -d 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 -m 1,2,3,4,5,6,7,8,9,10,11,12 10:00 # run every day for a year
+   verify complete:365
+ endfamily
+endsuite
+
+suite leap_year       # use real clock otherwise the date wont change
+ clock real 1.1.2016  # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2017  # When to finish. 
+ family cronFamily
+  task t
+   cron -d 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31 -m 1,2,3,4,5,6,7,8,9,10,11,12 10:00  # run every day for a year
+   verify complete:366 # leap year has 366 days
+ endfamily
 endsuite
 

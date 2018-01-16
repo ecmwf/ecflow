@@ -190,13 +190,19 @@
                     }
                 },
                 "tab" : {
-                    "label" : "Toolbar",
+                    "label" : "Other",
 
                     "group" : {
-                        "title" : "Server refresh button",
+                        "title" : "Server refresh button in toolbar",
                         "prefix" : "server.update",
                         "line" : "blinkUpdateButtonLimit",
                         "line" : "showLastRefreshTimeInAutoMode"
+                    },
+                    "group" : {
+                        "title" : "Clock in statusbar",
+                        "prefix" : "view.clock",
+                        "line" : "showClock",
+                        "line" : "clockFormat"
                     }
                 }
             }
@@ -243,12 +249,14 @@
 
             "group" : {
                 "title" : "Node context menu",
-                "prefix" : "menu.access",
 
-                "line" : "nodeMenuMode",
+                "line" : "server.menu.nodeMenuMode",
                 "note" : {
-                            "default" : "Operator and Administrator modes allow suites to be begun, nodes to be removed and servers to be unlocked. Administrator mode additionally enables the <I>Force</I> and <I>Order</I> menus."
-                         }
+                        "default" : "Operator and Administrator modes allow suites to be begun, nodes to be removed and servers to be unlocked. Administrator mode additionally enables the <I>Force</I> and <I>Order</I> menus."
+                },
+                "note" : {
+                        "default" : "These settings can be customised for each server separately"
+                }
             },
             "group" : {
                 "title" : "Request confirmation when:",
@@ -273,6 +281,10 @@
             "icon" : "notification.svg",
 
             "line"  : "notification.settings.max_item_num",
+            "line"  : "notification.settings.switch_desktop",
+            "note" : {
+                "default" : "When enabled switches to the vitual desktop of the main window when a taks is selected in the notification popup dialogue. This feature only works if the underlying window system supports it."
+            },
 
             "custom-notification" : {
                 "title" : "Notification types",
@@ -289,8 +301,15 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-
                     },                  
+                    "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.aborted.use_status_colour",
+                        "line" : "notification.aborted.fill_colour",
+                        "line" : "notification.aborted.text_colour",
+                        "line" : "notification.aborted.count_fill_colour",
+                        "line" : "notification.aborted.count_text_colour"
+                    },
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.aborted.sound_file_type",
@@ -314,7 +333,14 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },                    
+                    },
+                    "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.restarted.fill_colour",
+                        "line" : "notification.restarted.text_colour",
+                        "line" : "notification.restarted.count_fill_colour",
+                        "line" : "notification.restarted.count_text_colour"
+                    },
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.restarted.sound_file_type",
@@ -340,6 +366,13 @@
                         }
                     },                    
                     "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.late.fill_colour",
+                        "line" : "notification.late.text_colour",
+                        "line" : "notification.late.count_fill_colour",
+                        "line" : "notification.late.count_text_colour"
+                    },
+                    "group" : {
                         "title" : "Sound",
                         "line" : "notification.late.sound_file_type",
                         "line" : {
@@ -364,6 +397,13 @@
                         }
                     },                   
                     "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.zombie.fill_colour",
+                        "line" : "notification.zombie.text_colour",
+                        "line" : "notification.zombie.count_fill_colour",
+                        "line" : "notification.zombie.count_text_colour"
+                    },
+                    "group" : {
                         "title" : "Sound",
                         "line" : "notification.zombie.sound_file_type",
                         "line" : {
@@ -386,7 +426,14 @@
                         "note" : {
                             "default" : "These settings can be customised for each server separately"
                         }
-                    },                    
+                    },
+                    "group" : {
+                        "title" : "Colour",
+                        "line" : "notification.alias.fill_colour",
+                        "line" : "notification.alias.text_colour",
+                        "line" : "notification.alias.count_fill_colour",
+                        "line" : "notification.alias.count_text_colour"
+                    },
                     "group" : {
                         "title" : "Sound",
                         "line" : "notification.alias.sound_file_type",

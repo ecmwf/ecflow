@@ -467,8 +467,31 @@ QVariant ColourPropertyLine::currentValue()
 void ColourPropertyLine::setEnabledEditable(bool b)
 {
 	cb_->setEnabled(b);
-}
 
+    QColor col;
+    if(b)
+    {
+        col=currentCol_;
+    }
+    else
+    {
+        if(label_)
+        {
+            QPalette pal=label_->palette();
+            col=pal.color(QPalette::Disabled,QPalette::Window);
+        }
+        else
+        {
+            col=QColor(200,200,200);
+        }
+    }
+
+    QString st=styleSheet_;
+    st.replace("BG","rgb(" + QString::number(col.red()) + "," +
+                QString::number(col.green()) + "," + QString::number(col.blue()) + ")");
+
+    cb_->setStyleSheet(st);
+}
 
 //=========================================================================
 //

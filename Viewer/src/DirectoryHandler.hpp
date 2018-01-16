@@ -20,6 +20,7 @@ public:
     DirectoryHandler();
 
     static void init(const std::string& exePath);
+    static const std::string& exeDir()  {return exeDir_;}
     static const std::string& shareDir()  {return shareDir_;}
     static const std::string& etcDir()    {return etcDir_;}
     static const std::string& configDir()  {return configDir_;}
@@ -48,6 +49,7 @@ public:
     static bool isFirstStartUp();
 
 private:
+    static std::string exeDir_;
     static std::string shareDir_;
     static std::string etcDir_;
     static std::string configDir_;

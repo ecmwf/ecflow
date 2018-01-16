@@ -83,6 +83,20 @@ QToolButton[colorTb="1"] {
 }           
 
 /*-----------------------------
+ Options
+------------------------------*/
+/*
+QComboBox[options="1"] {
+    color : rgb(94,94,213);
+    color : rgb(20,20,21);
+}
+
+QComboBox[options="1"]:selected {
+    background: white;
+}
+*/
+
+/*-----------------------------
   Notifications
 ------------------------------*/
 
@@ -202,9 +216,12 @@ QAbstractScrollArea[pager="1"] {
 ------------------------------*/
   
 QLabel[fileInfo="1"] {
-     border: 1px solid rgb(216,210,200);
+     border: 1px solid rgb(200,200,200);
+     background: rgb(232, 233, 234);
+     color: rgb(30,30,30);
+
      /*background: rgb(252, 241, 219);  */
-     background: rgb(244, 239, 216);
+     /*background: rgb(244, 239, 216);*/
 }
 
 QLabel[fileInfo="2"] {
@@ -225,6 +242,10 @@ QLabel[editorInfo="1"] {
 /*----------------------------
   Triggers
 -----------------------------*/
+
+QToolButton[triggerDepend="1"]:checked {
+    background: rgb(233,242,247);
+}
 
 QWidget[triggertitle="1"] {
      background: rgb(95, 97, 99);
@@ -248,7 +269,6 @@ QToolButton[triggertitle="1"]:hover {
     icon-size:  18px;
     background: rgb(140,140,140);
 }
-
 
 /*----------------------------
   Property editor

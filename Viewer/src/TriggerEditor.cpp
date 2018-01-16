@@ -13,10 +13,10 @@
 #include <QSettings>
 
 #include "AttributeEditorFactory.hpp"
+#include "CommandHandler.hpp"
 #include "Highlighter.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
-#include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 
 TriggerEditorWidget::TriggerEditorWidget(QWidget* parent) : QWidget(parent)
@@ -93,7 +93,7 @@ void TriggerEditor::apply()
     std::string txt=w_->te_->toPlainText().toStdString();
     std::vector<std::string> cmd;
     VAttribute::buildAlterCommand(cmd,"change",typeInCmd_.toStdString(),txt);
-    ServerHandler::command(info_,cmd);
+    CommandHandler::run(info_,cmd);
 }
 
 void TriggerEditor::resetValue()

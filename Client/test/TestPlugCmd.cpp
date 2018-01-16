@@ -284,6 +284,8 @@ BOOST_AUTO_TEST_CASE( test_server_plug_cmd )
  		// This will remove check pt and backup file before server start, to avoid the server from loading previous test data
  		InvokeServer invokeServer1("",SCPort::next());
  		InvokeServer invokeServer2("",SCPort::next());
+ 	   BOOST_REQUIRE_MESSAGE( invokeServer1.server_started(), "Server failed to start on " <<  invokeServer1.host() << ":" << invokeServer1.port() );
+ 	   BOOST_REQUIRE_MESSAGE( invokeServer2.server_started(), "Server failed to start on " <<  invokeServer2.host() << ":" << invokeServer2.port() );
 
 		test_plug_on_multiple_server(invokeServer1.host(), invokeServer1.port(),
 		                             invokeServer2.host(), invokeServer2.port());
@@ -308,6 +310,7 @@ BOOST_AUTO_TEST_CASE( test_server_plug_cmd )
  	   // Start additional local server, special constructor. need false flag, to avoid ambiguity, with the other constructor.
  	   std::string port2 = SCPort::next_only();
  	   InvokeServer invokeServer2(port2,false);
+ 	   BOOST_REQUIRE_MESSAGE( invokeServer2.server_started(), "Server failed to start on " <<  invokeServer2.host() << ":" << invokeServer2.port() );
 
  	   test_plug_on_multiple_server(ClientEnvironment::hostSpecified(), ClientEnvironment::portSpecified(),
  	                                Str::LOCALHOST(), port2);

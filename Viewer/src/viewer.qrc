@@ -37,6 +37,7 @@
     <file alias="cogwheel.svg">../images/cogwheel.svg</file>
     <file alias="cogwheel_blue.svg">../images/cogwheel_blue.svg</file>
     <file alias="colour.svg">../images/colour.svg</file>
+    <file alias="copy_path.svg">../images/copy_path.svg</file>
     <file alias="dependency.svg">../images/dependency.svg</file>
     <file alias="dependency_detail.svg">../images/dependency_detail.svg</file>
     <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>

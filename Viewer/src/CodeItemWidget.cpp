@@ -10,6 +10,15 @@
 
 #include "CodeItemWidget.hpp"
 
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#else
+#include <QApplication>
+#endif
+
+#include <QClipboard>
+
 #include <QDebug>
 #include <QFontDatabase>
 
@@ -23,8 +32,9 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) :
 	fileLabel_->setProperty("fileInfo","1");
 
 	searchLine_->setEditor(textEdit_);
-
 	searchLine_->setVisible(false);
+
+    copyPathTb_->setEnabled(false);
 }
 
 CodeItemWidget::~CodeItemWidget()
@@ -72,4 +82,38 @@ void CodeItemWidget::on_fontSizeDownTb__clicked()
 void CodeItemWidget::on_reloadTb__clicked()
 {
     reloadRequested();
+}
+
+//-----------------------------------------
+// Copy file path
+//-----------------------------------------
+
+void CodeItemWidget::on_copyPathTb__clicked()
+{
+    if(!currentFileName_.empty())
+    {
+        QString txt=QString::fromStdString(currentFileName_);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QClipboard* cb=QGuiApplication::clipboard();
+        cb->setText(txt, QClipboard::Clipboard);
+        cb->setText(txt, QClipboard::Selection);
+#else
+        QClipboard* cb=QApplication::clipboard();
+        cb->setText(txt, QClipboard::Clipboard);
+        cb->setText(txt, QClipboard::Selection);
+#endif
+    }
+}
+
+void CodeItemWidget::setCurrentFileName(const std::string& fname)
+{
+    currentFileName_=fname;
+    copyPathTb_->setEnabled(!currentFileName_.empty());
+}
+
+void CodeItemWidget::clearCurrentFileName()
+{
+    currentFileName_.clear();
+    copyPathTb_->setEnabled(false);
 }

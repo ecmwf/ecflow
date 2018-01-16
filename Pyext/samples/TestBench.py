@@ -131,11 +131,15 @@ if __name__ == "__main__":
     if "ECF_PORT" in os.environ:
          default_port = os.environ["ECF_PORT"]
  
+    default_host = "localhost"
+    if "ECF_HOST" in os.environ:
+        default_host  = os.environ["ECF_HOST"]
+
     PARSER = argparse.ArgumentParser(description=DESC,  
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     PARSER.add_argument('defs_file', 
                         help="The definition file")
-    PARSER.add_argument('--host', default="localhost",   
+    PARSER.add_argument('--host', default=default_host,   
                         help="The name of the host machine, defaults to 'localhost'")
     PARSER.add_argument('--port', default=default_port,   
                         help="The port on the host, defaults to 3141")
@@ -158,6 +162,7 @@ if __name__ == "__main__":
         using_workspace = True
         if ARGS.verbose:
             print "Workspace is defined ecflow_source_dir: ",ecflow_source_dir
+                
     except:
         pass
     
@@ -209,9 +214,8 @@ if __name__ == "__main__":
 
     if ARGS.verbose: 
         print "\nchecking script file generation, pre-processing & variable substitution\n"
-    JOB_CTRL = ecflow.JobCreationCtrl()
-    DEFS.check_job_creation(JOB_CTRL)       
-    assert len(JOB_CTRL.get_error_msg()) == 0, JOB_CTRL.get_error_msg()
+    msg = DEFS.check_job_creation()       
+    assert len(msg) == 0, msg
     
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)

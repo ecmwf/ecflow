@@ -20,7 +20,7 @@
 
 VLimiterAttrType::VLimiterAttrType() : VAttributeType("limiter")
 {
-    dataCount_=3;
+    dataCount_=4;
     searchKeyToData_["limiter_name"]=NameIndex;
     searchKeyToData_["limiter_path"]=PathIndex;
     searchKeyToData_["name"]=NameIndex;
@@ -33,8 +33,8 @@ QString VLimiterAttrType::toolTip(QStringList d) const
     if(d.count() == dataCount_)
     {
         t+="<b>Limit:</b> " + d[NameIndex] + "<br>";
-        t+="<b>Node:</b> " + d[PathIndex];
-
+        t+="<b>Node:</b> " + d[PathIndex] + "<br>";
+        t+="<b>Tokens:</b> " + d[TokenIndex];
     }
     return t;
 }
@@ -44,7 +44,7 @@ QString VLimiterAttrType::definition(QStringList d) const
     QString t="inlimit";
     if(d.count() == dataCount_)
     {
-        t+=" " + d[NameIndex];
+        t+=" " + d[PathIndex] + ":" + d[NameIndex] + " " + d[TokenIndex];
     }
     return t;
 }
@@ -53,7 +53,8 @@ void VLimiterAttrType::encode(const InLimit& lim,QStringList& data) const
 {
     data << qName_ <<
            QString::fromStdString(lim.name()) <<
-           QString::fromStdString(lim.pathToNode());
+           QString::fromStdString(lim.pathToNode()) <<
+           QString::number(lim.tokens());
 }
 
 //=====================================================

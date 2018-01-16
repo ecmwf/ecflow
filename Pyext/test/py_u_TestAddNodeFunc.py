@@ -58,7 +58,7 @@ if __name__ == "__main__":
     defs.add_suite("s1").add_task("t1").add_variable("var","v")
     defs.add_suite("s2").add_family("f1").add_task("t1").add_variable("var","v")
     defs.add_suite("s3").add_family("f1").add_family("f2").add_task("t1").add_variable("var","v")
-    assert len(list(defs.suites)) == 3,"Expected 3 suites"    
+    assert len(defs) == 3,"Expected 3 suites"    
   
     # These test show that although add_variable() returns a node_ptr, its really a suite
     # hence calling add_family/add_task still works.

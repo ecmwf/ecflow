@@ -59,7 +59,8 @@ namespace ecf {
 // Use compiler ,  destructor, assignment, copy constructor,
 class TimeAttr  {
 public:
-	TimeAttr() : makeFree_(false), state_change_no_(0) {}
+   TimeAttr(const std::string&);
+   TimeAttr() : makeFree_(false), state_change_no_(0) {}
 	TimeAttr(int hour, int minute, bool relative = false )
 		: timeSeries_(hour, minute,relative), makeFree_(false),state_change_no_(0) {}
 	TimeAttr(const TimeSlot& t,    bool relative = false )
@@ -78,6 +79,7 @@ public:
 	void calendarChanged( const ecf::Calendar& c ); // can set attribute free
 	void resetRelativeDuration();
 
+	void reset_only() { clearFree(); timeSeries_.reset_only();}
 	void reset(const ecf::Calendar& c)
 	      { clearFree(); timeSeries_.reset(c); }       // updates state_change_no_
  	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true)

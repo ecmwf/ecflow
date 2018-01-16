@@ -45,18 +45,24 @@ BOOST_AUTO_TEST_CASE( test_cron_parsing )
    }
    {
       CronAttr cron; cron.add_time_series(10,10,false);
+      CronAttr cron1(10,10,false);
       CronAttr parsedCron = CronAttr::create("cron 10:10");
       BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron),"Expected " << cron.toString() << " but found " << parsedCron.toString());
+      BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron1),"Expected " << cron1.toString() << " but found " << parsedCron.toString());
    }
    {
       CronAttr cron; cron.add_time_series(10,10,true);
+      CronAttr cron1(10,10,true);
       CronAttr parsedCron = CronAttr::create("cron +10:10");
       BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron),"Expected " << cron.toString() << " but found " << parsedCron.toString());
+      BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron1),"Expected " << cron1.toString() << " but found " << parsedCron.toString());
    }
    {
       CronAttr cron; cron.addTimeSeries(start,finish,incr);
+      CronAttr cron1(start,finish,incr);
       CronAttr parsedCron = CronAttr::create("cron 10:10 23:10 00:01");
       BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron),"Expected " << cron.toString() << " but found " << parsedCron.toString());
+      BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron1),"Expected " << cron1.toString() << " but found " << parsedCron.toString());
    }
 
    std::vector<int> week_days;
@@ -71,8 +77,13 @@ BOOST_AUTO_TEST_CASE( test_cron_parsing )
       CronAttr cron;
       cron.addWeekDays(week_days);
       cron.add_time_series(10,10,true);
+
+      CronAttr cron1(10,10,true);
+      cron1.addWeekDays(week_days);
+
       CronAttr parsedCron = CronAttr::create("cron -w 0,1,2,3,4,5,6 +10:10");
       BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron),"Expected " << cron.toString() << " but found " << parsedCron.toString());
+      BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron1),"Expected " << cron1.toString() << " but found " << parsedCron.toString());
    }
 
    std::vector<int> days_of_month;
@@ -87,8 +98,13 @@ BOOST_AUTO_TEST_CASE( test_cron_parsing )
       CronAttr cron;
       cron.addDaysOfMonth(days_of_month);
       cron.add_time_series(10,10,true);
+
+      CronAttr cron1(10,10,true);
+      cron1.addDaysOfMonth(days_of_month);
+
       CronAttr parsedCron = CronAttr::create("cron -d 1,3,4,5,6,24,25 +10:10");
       BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron),"Expected " << cron.toString() << " but found " << parsedCron.toString());
+      BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron1),"Expected " << cron1.toString() << " but found " << parsedCron.toString());
    }
 
    std::vector<int> months;
@@ -108,8 +124,13 @@ BOOST_AUTO_TEST_CASE( test_cron_parsing )
       CronAttr cron;
       cron.addMonths(months);
       cron.add_time_series(10,10,true);
+
+      CronAttr cron1(10,10,true);
+      cron1.addMonths(months);
+
       CronAttr parsedCron = CronAttr::create("cron -m 1,2,3,4,5,6,7,8,9,10,11,12 +10:10");
       BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron),"Expected " << cron.toString() << " but found " << parsedCron.toString());
+      BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron1),"Expected " << cron1.toString() << " but found " << parsedCron.toString());
    }
 
    {
@@ -118,8 +139,15 @@ BOOST_AUTO_TEST_CASE( test_cron_parsing )
       cron.addDaysOfMonth(days_of_month);
       cron.addMonths(months);
       cron.addTimeSeries(start,finish,incr);
+
+      CronAttr cron1(start,finish,incr);
+      cron1.addWeekDays(week_days);
+      cron1.addDaysOfMonth(days_of_month);
+      cron1.addMonths(months);
+
       CronAttr parsedCron = CronAttr::create("cron -w 0,1,2,3,4,5,6 -d 1,3,4,5,6,24,25 -m 1,2,3,4,5,6,7,8,9,10,11,12 10:10 23:10 00:01");
       BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron),"Expected " << cron.toString() << " but found " << parsedCron.toString());
+      BOOST_CHECK_MESSAGE(parsedCron.structureEquals(cron1),"Expected " << cron1.toString() << " but found " << parsedCron.toString());
    }
 }
 

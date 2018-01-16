@@ -138,7 +138,8 @@ void Suite::begin()
 void Suite::requeue(
          bool resetRepeats,
          int clear_suspended_in_child_nodes,
-         bool reset_next_time_slot)
+         bool reset_next_time_slot,
+         bool reset_relative_duration)
 {
    if (false == begun_) {
       std::stringstream ss; ss << "Suite::requeue: The suite " << name() << " must be 'begun' first\n";
@@ -158,13 +159,35 @@ void Suite::requeue(
 
    NodeContainer::requeue(resetRepeats,
                           clear_suspended_in_child_nodes,
-                          reset_next_time_slot);
+                          reset_next_time_slot,
+                          reset_relative_duration);
 
    update_generated_variables();
 }
 
+void Suite::reset()
+{
+   // reset will change all the states of all child nodes, reset all attributes
+   SuiteChanged1 changed(this);
+
+   // reset can cause thousands of mementos to be created, to avoid this we
+   // update the modify change number.
+   Ecf::incr_modify_change_no();
+
+   reset_begin_only();
+
+   requeue_calendar();
+
+   NodeContainer::reset();
+}
+
 void Suite::reset_begin() {
    SuiteChanged1 changed(this);
+   reset_begin_only();
+}
+
+void Suite::reset_begin_only()  // private
+{
    begun_ = false;
    begun_change_no_ = Ecf::incr_state_change_no();
 }

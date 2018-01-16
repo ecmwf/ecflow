@@ -443,6 +443,7 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             // -the number of lines changed in a multiline label (so the height changed)
             bool wChanged=paintedSize.width() != item->width;
             bool hChanged=paintedSize.height() != item->height;
+            bool wIncreased=paintedSize.width() > item->width;
 
             if(wChanged || hChanged)
             {
@@ -462,7 +463,6 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
             }
 
             //The width changed
-
             if(wChanged)
             {
                 bool sameAsWidest=(item->width == item->widestInSiblings);
@@ -495,6 +495,11 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
                     if(item->right() > maxRowWidth_)
                     {
                         maxRowWidth_=item->right();
+                        doDelayedWidthAdjustment();
+                    }
+                    else if(wIncreased && !hChanged)
+                    {
+                        //we need to repaint the attribute
                         doDelayedWidthAdjustment();
                     }
                 }

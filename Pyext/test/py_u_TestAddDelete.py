@@ -59,6 +59,11 @@ if __name__ == "__main__":
     defs.add_variable(a_dict)
     assert len(list(defs.user_variables)) == 0, "Expected zero variables"    
     
+    a_dict = { "name":0, "name2":1, "name3":2, "name4":3 }
+    defs.add_variable(a_dict)
+    assert len(list(defs.user_variables)) == 4, "Expected 4 variable"    
+    defs.delete_variable("");         assert len(list(defs.user_variables)) == 0, "Expected 0 variable since we should have deleted all"
+
     #===========================================================================
     # Suite: add,delete and sort variables
     #===========================================================================
@@ -85,15 +90,20 @@ if __name__ == "__main__":
     assert len(list(suite.variables)) == 4, "Expected 4 variable"    
     suite.delete_variable("");         assert len(list(suite.variables)) == 0, "Expected 0 variable since we should have deleted all"
 
+    a_dict = { "name":1, "name2":2, "name3":3, "name4":4 }
+    suite.add_variable(a_dict)
+    assert len(list(suite.variables)) == 4, "Expected 4 variable"    
+    suite.delete_variable("");         assert len(list(suite.variables)) == 0, "Expected 0 variable since we should have deleted all"
+
     # add a empty dictionary
     a_dict = { }
     suite.add_variable(a_dict)
     assert len(list(suite.variables)) == 0, "Expected zero variables"    
 
-    # adding dictionary items that are not strings should result in a type error
+    # adding dictionary items that are not strings,or ints in value ,should result in a type error
     expected_type_error = False
     try:
-        a_bad_dict = { "name":"fred", "name2":14, "name3":"12", "name4":12 }
+        a_bad_dict = { "name":"fred", "name2":14, "name3": list( 1,2,3), "name4":12 }
         suite.add_variable(a_bad_dict)
     except TypeError:
         expected_type_error = True
@@ -193,6 +203,8 @@ if __name__ == "__main__":
     task.add_complete("t2 == complete")
     assert task.get_complete(), "Expected complete"
     assert task.get_trigger(), "Expected trigger"
+    assert task.get_trigger().get_expression() == "t2 == active","add trigger failed"
+    assert task.get_complete().get_expression() == "t2 == complete","add complete failed"
     task.delete_trigger();  assert not task.get_trigger(), "Expected no trigger"
     task.delete_complete(); assert not task.get_complete(), "Expected no complete"
     
@@ -209,21 +221,22 @@ if __name__ == "__main__":
     task.add_part_complete("t4 == active", False)  #  for long and/or expressions, subsequent expr must be and/or
     task.delete_trigger();  assert not task.get_trigger(), "Expected no trigger"
     task.delete_complete(); assert not task.get_complete(), "Expected no complete"
-   
+    
     #===========================================================================
     # Add triggers using expressions
     #===========================================================================
     expr = ecflow.Expression("t1 == complete")
     task = ecflow.Task("task")
     task.add_trigger(expr)
+    assert task.get_trigger().get_expression() == "t1 == complete","add trigger failed : " + task.get_trigger().get_expression()
 
     expr = ecflow.Expression("t1 == complete")
-    expr.add(ecflow.PartExpression("t1 == complete", True))
     expr.add(ecflow.PartExpression("t2 == complete", True))
+    expr.add(ecflow.PartExpression("t3 == complete", True))
     task = ecflow.Task("task")
     task.add_trigger(expr)
+    assert task.get_trigger().get_expression() == "t1 == complete AND t2 == complete AND t3 == complete","add trigger failed : " + task.get_trigger().get_expression()
 
-     
     #===========================================================================
     # add,delete,find events
     #===========================================================================
@@ -334,15 +347,22 @@ if __name__ == "__main__":
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
     task.add_repeat(ecflow.RepeatEnumerated("enum", ["red", "green", "blue" ]))
-    print(task)
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
 
     task.add_repeat(ecflow.RepeatDate("date", 20100111, 20100115, 2))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
     task.add_repeat(ecflow.RepeatString("string", ["a", "b", "c" ]))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
+    task.delete_repeat()      
+    repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
+
+    task.add_repeat(ecflow.RepeatDay(1))
+    repeat = task.get_repeat(); assert not repeat.empty(), "Expected repeat"
     task.delete_repeat()      
     repeat = task.get_repeat(); assert repeat.empty(), "Expected no repeat"
     
@@ -374,11 +394,13 @@ if __name__ == "__main__":
     task.add_today("+00:30")
     task.add_today("+00:30 20:00 01:00")
     task.add_today(ecflow.Today(time_series))
+    task.add_today(ecflow.Today("+00:30"))
+    task.add_today(ecflow.Today("+00:30 20:00 01:00"))
     task.add_today(ecflow.Today(0, 10))
     task.add_today(0, 59, True)
     task.add_today(ecflow.Today(ecflow.TimeSlot(20, 10)))
     task.add_today(ecflow.Today(ecflow.TimeSlot(20, 20), False)) 
-    assert len(list(task.todays)) == 8, "Expected 8 todays"
+    assert len(list(task.todays)) == 10, "Expected 8 todays"
     vec_copy = []
     for today in task.todays: vec_copy.append(today)
     for today in vec_copy: task.delete_today(today)
@@ -392,10 +414,12 @@ if __name__ == "__main__":
     task.add_time("+00:30 20:00 01:00")
     task.add_time(ecflow.Time(time_series))
     task.add_time(ecflow.Time(0, 10))
+    task.add_time(ecflow.Time("+00:30"))
+    task.add_time(ecflow.Time("+00:30 20:00 01:00"))
     task.add_time(0, 59, True)
     task.add_time(ecflow.Time(ecflow.TimeSlot(20, 10)))
     task.add_time(ecflow.Time(ecflow.TimeSlot(20, 20), False)) 
-    assert len(list(task.times)) == 8, "Expected 8 times"
+    assert len(list(task.times)) == 10, "Expected 8 times"
     vec_copy = []
     for time in task.times: vec_copy.append(time)
     for time in vec_copy: task.delete_time(time)
@@ -423,8 +447,9 @@ if __name__ == "__main__":
     task.add_day(ecflow.Day(ecflow.Days.sunday))
     task.add_day(ecflow.Days.monday)
     task.add_day(ecflow.Days.tuesday)  # duplicate ?
+    task.add_day(ecflow.Day("tuesday"))   
     task.add_day("sunday")     
-    assert len(list(task.days)) == 4, "Expected 4 days"
+    assert len(list(task.days)) == 5, "Expected 5 days"
     vec_copy = []
     for attr in task.days: vec_copy.append(attr)
     for attr in vec_copy: task.delete_day(attr)
@@ -523,9 +548,9 @@ if __name__ == "__main__":
     assert task.get_defstatus() == ecflow.DState.aborted
     task.add_defstatus(ecflow.DState.submitted)
     assert task.get_defstatus() == ecflow.DState.submitted
-    task.add_defstatus(ecflow.DState.suspended)
+    task.add_defstatus(ecflow.Defstatus(ecflow.DState.suspended ));
     assert task.get_defstatus() == ecflow.DState.suspended
-    task.add_defstatus(ecflow.DState.active)
+    task.add_defstatus(ecflow.Defstatus("active"))  
     assert task.get_defstatus() == ecflow.DState.active
 
     # the state should be unknown until the suite is begun

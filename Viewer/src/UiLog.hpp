@@ -12,6 +12,7 @@
 
 #include <string>
 #include <sstream>
+#include <boost/current_function.hpp>
 
 class QString;
 class QModelIndex;

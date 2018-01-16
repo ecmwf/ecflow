@@ -19,6 +19,7 @@ public:
     PropertyMapper(const std::vector<std::string>&,VPropertyObserver* obs);
     ~PropertyMapper();
     VProperty* find(const std::string& path,bool failOnError=false) const;
+    void initObserver(VPropertyObserver *obs) const;
 
 private:
     VPropertyObserver* obs_;

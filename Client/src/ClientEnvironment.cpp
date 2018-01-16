@@ -282,7 +282,7 @@ void ClientEnvironment::read_environment_variables()
  		host_vec_.push_back(std::make_pair(host,port));
 	}
    if (getenv(Str::ECF_NODE().c_str()))
-      cout << "Warning: ECF_NODE has been replaced with ECF_HOST. In future ecflow releases, ECF_NODE will be deprecated\n";
+      cerr << "Warning: ECF_NODE has been replaced with ECF_HOST. In future ecflow releases, ECF_NODE will be deprecated\n";
 
 	if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
 	   env_ecf_new_client_old_server_ = getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER");

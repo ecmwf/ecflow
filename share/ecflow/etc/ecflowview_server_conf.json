@@ -75,6 +75,19 @@
                     }
             },
             
+            "menu":  {
+
+                "label" : "Menu options",
+
+                "nodeMenuMode": {
+                     "label": "Menu mode",
+                     "tooltip" : "Controls what commands are available in the node context menu.",
+                     "values"  : "user/oper/admin",
+                     "values_label" : "User/Operator/Administrator",
+                     "default": "user"
+                }
+            },
+
             "notification": {
 				"label" : "Popup notifications",
 				"tooltip" : "Popup notifications", 

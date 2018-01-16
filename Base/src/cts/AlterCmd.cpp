@@ -126,6 +126,7 @@ static AlterCmd::Add_attr_type addAttrType(const std::string& s)
    if (s == "late") return AlterCmd::ADD_LATE;
    if (s == "limit") return AlterCmd::ADD_LIMIT;
    if (s == "inlimit") return AlterCmd::ADD_INLIMIT;
+   if (s == "label") return AlterCmd::ADD_LABEL;
 	return AlterCmd::ADD_ATTR_ND;
 }
 static std::string to_string(AlterCmd::Add_attr_type a) {
@@ -139,13 +140,14 @@ static std::string to_string(AlterCmd::Add_attr_type a) {
    case AlterCmd::ADD_LATE:    return "late"; break;
    case AlterCmd::ADD_LIMIT:   return "limit"; break;
    case AlterCmd::ADD_INLIMIT: return "inlimit"; break;
+   case AlterCmd::ADD_LABEL:   return "label"; break;
 	case AlterCmd::ADD_ATTR_ND: break;
 	}
 	return string();
 }
 static void validAddAttr(std::vector<std::string>& vec)
 {
-	vec.reserve(8);
+	vec.reserve(10);
 	vec.push_back("time");
 	vec.push_back("today");
 	vec.push_back("date");
@@ -154,6 +156,8 @@ static void validAddAttr(std::vector<std::string>& vec)
    vec.push_back("variable");
    vec.push_back("late");
    vec.push_back("limit");
+   vec.push_back("inlimit");
+   vec.push_back("label");
 }
 
 
@@ -385,6 +389,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 			case AlterCmd::ADD_ZOMBIE:  node->addZombie( ZombieAttr::create(name_) ); break;
          case AlterCmd::ADD_VARIABLE:node->add_variable( name_, value_); break;
          case AlterCmd::ADD_LATE:    node->addLate( LateAttr::create(name_)); break;
+         case AlterCmd::ADD_LABEL:   node->addLabel( Label(name_,value_) ); break;
          case AlterCmd::ADD_LIMIT: {
              int int_value = 0;
              try { int_value = boost::lexical_cast< int >( value_ ); }
@@ -453,36 +458,59 @@ bool AlterCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 
 const char* AlterCmd::arg()  { return CtsApi::alterArg();}
 const char* AlterCmd::desc() {
-   /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+            /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
    return  "Alter the node according to the options.\n"
-         "To add/delete/change server variables use '/' for the path.\n"
-         "arg1 = [ delete | change | add | set_flag | clear_flag | sort ]\n"
-         "         one option must be specified\n"
-         "arg2 = For delete:\n"
-         "         [ variable | time | today | date  | day | cron | event | meter | late |\n"
-         "           label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
-         "       For change:\n"
-         "         [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
-         "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late ]\n"
-         "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
-         "         the change to take effect fully.\n"
-         "       For add:\n"
-         "         [ variable | time | today | date | day | zombie | late | limit | inlimit ]\n"
-         "       For set_flag and clear_flag:\n"
-         "         [ force_aborted | user_edit | task_aborted | edit_failed |\n"
-         "           ecfcmd_failed | no_script | killed | migrated | late |\n"
-         "           message | complete | queue_limit | task_waiting | locked | zombie ]\n"
-         "       For sort:\n"
-         "         [ event | meter | label | variable| limit ]\n"
-         "arg3 = name/value\n"
-         "       when changing, attributes like variable,meter,event,label,limits,late\n"
-         "       we expect arguments to be quoted. For sort this argument can be called 'recursive'\n"
-         "arg4 = new_value\n"
-         "       specifies the new value only used for 'change'\n"
-         "       values with spaces must be quoted\n"
-         "arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
-         ;
+            "To add/delete/change server variables use '/' for the path.\n"
+            "arg1 = [ delete | change | add | set_flag | clear_flag | sort ]\n"
+            "         one option must be specified\n"
+            "arg2 = For delete:\n"
+            "         [ variable | time | today | date  | day | cron | event | meter | late |\n"
+            "           label | trigger | complete | repeat | limit | inlimit | limit_path | zombie ]\n"
+            "       For change:\n"
+            "         [ variable | clock_type | clock_gain | clock_date | clock_sync  | event | meter | label |\n"
+            "           trigger  | complete   | repeat     | limit_max  | limit_value | defstatus | late ]\n"
+            "         *NOTE* If the clock is changed, then the suite will need to be re-queued in order for\n"
+            "         the change to take effect fully.\n"
+            "       For add:\n"
+            "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label ]\n"
+            "       For set_flag and clear_flag:\n"
+            "         [ force_aborted | user_edit | task_aborted | edit_failed |\n"
+            "           ecfcmd_failed | no_script | killed | migrated | late |\n"
+            "           message | complete | queue_limit | task_waiting | locked | zombie ]\n"
+            "       For sort:\n"
+            "         [ event | meter | label | variable| limit ]\n"
+            "arg3 = name/value\n"
+            "       when changing, attributes like variable,meter,event,label,limits,late\n"
+            "       we expect arguments to be quoted. For sort this argument can be called 'recursive'\n"
+            "arg4 = new_value\n"
+            "       specifies the new value only used for 'change'/'add'\n"
+            "       values with spaces must be quoted\n"
+            "arg5 = paths : At lease one node path required.The paths must start with a leading '/' character\n\n"
+            "\nUsage:\n\n"
+            "   ecflow_client --alter=add variable GLOBAL \"value\" /           # add server variable\n"
+            "   ecflow_client --alter=add variable FRED \"value\" /path/to/node # add node variable\n"
+            "   ecflow_client --alter=add time \"+00:20\" /path/to/node\n"
+            "   ecflow_client --alter=add date \"01.*.*\" /path/to/node\n"
+            "   ecflow_client --alter=add day \"sunday\"  /path/to/node\n"
+            "   ecflow_client --alter=add label name \"label_value\" /path/to/node\n"
+            "   ecflow_client --alter=add late \"-s 00:01 -a 14:30 -c +00:01\" /path/to/node\n"
+            "   ecflow_client --alter=add limit mars \"100\" /path/to/node\n"
+            "   ecflow_client --alter=add inlimit /path/to/node/withlimit:limit_name \"10\" /s1\n"
+            "   # zombie attributes have the following structure:\n"
+            "     `zombie_type`:(`client_side_action` | `server_side_action`):`child`:`zombie_life_time`\n"
+            "      zombie_type        = \"user\" | \"ecf\" | \"path\"\n"
+            "      client_side_action = \"fob\" | \"fail\" | \"block\"\n"
+            "      server_side_action = \"adopt\" | \"delete\" | \"kill\"\n"
+            "      child              = \"init\" | \"event\" | \"meter\" | \"label\" | \"wait\" | \"abort\" | \"complete\"\n"
+            "      zombie_life_time   = unsigned integer default: user(300), ecf(3600), path(900)  minimum is 60\n"
+            "   ecflow_client --alter=add zombie \"ecf:fail::\" /path/to/node     # ask system zombies to fail\n"
+            "   ecflow_client --alter=add zombie \"user:fail::\" /path/to/node    # ask user generated zombies to fail\n"
+            "   ecflow_client --alter=add zombie \"path:fail::\" /path/to/node    # ask path zombies to fail\n\n"
+            "   ecflow_client --alter=delete variable FRED /path/to/node    # delete variable FRED\n"
+            "   ecflow_client --alter=delete variable      /path/to/node    # delete *ALL* variables on the specified node\n"
+            ;
 }
+
 
 void AlterCmd::addOption(boost::program_options::options_description& desc) const {
 	desc.add_options()( AlterCmd::arg(),po::value< vector<string> >()->multitoken(), AlterCmd::desc() );
@@ -556,7 +584,7 @@ void AlterCmd::create( 	Cmd_ptr& cmd,
 void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::vector<std::string>& paths ) const
 {
 	// options[0]  - add
-	// options[1]  - [ time | date | day | zombie | variable | limit | inlimit ]
+	// options[1]  - [ time | today | date | day | zombie | variable | late | limit | inlimit | label ]
 	// options[2]  - [ time_string | date_string | day_string | zombie_string | variable_name | limit_name | path_to_limit ]
 	// options[3]  - variable_value
 	std::stringstream ss;
@@ -607,9 +635,25 @@ void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::
 			Variable check(name,value);
 			break;
 		}
-      case AlterCmd::ADD_LIMIT: {  // inlimit /obs/limits:hpcd
+      case AlterCmd::ADD_LABEL: {
+         if (options.size() == 3 && paths.size() > 1) {
+            // label value may be a path, hence it will be in the paths parameter
+            options.push_back(paths[0] );
+            paths.erase( paths.begin() );
+         }
          if (options.size() < 4 ) {
-            ss << "AlterCmd: add: Expected 'add inlimit <name> <paths>. Not enough arguments\n" << dump_args(options,paths) << "\n";
+            ss << "AlterCmd: add: Expected 'add label <name> <value> <paths>. Not enough arguments\n" << dump_args(options,paths) << "\n";
+            throw std::runtime_error( ss.str() );
+         }
+         value = options[3];
+
+         // Create a Label to check valid names
+         Label check(name,value);
+         break;
+      }
+      case AlterCmd::ADD_LIMIT: {
+         if (options.size() < 4 ) {
+            ss << "AlterCmd: add: Expected 'add limit <name> int. Not enough arguments\n" << dump_args(options,paths) << "\n";
             throw std::runtime_error( ss.str() );
          }
          value = options[3];

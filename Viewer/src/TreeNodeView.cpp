@@ -50,6 +50,8 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilte
     canRegainCurrentFromExpand_(true),
     inStartUp_(true)
 {
+    Q_ASSERT(view_);
+
     setObjectName("view");
     setProperty("style","nodeView");
     setProperty("view","tree");

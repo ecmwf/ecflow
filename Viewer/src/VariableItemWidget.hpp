@@ -64,6 +64,7 @@ protected:
     QString defineNodeName_;
     QString defineNodeType_;
     bool cleared_;
+    bool suspended_;
 
 };
 
@@ -97,6 +98,7 @@ protected:
     QString nodeType_;
     QString nodeTypeCapital_;
     bool cleared_;
+    bool suspended_;
 };
 
 
@@ -141,6 +143,8 @@ protected:
     void updateState(const ChangeFlags&);
     void toClipboard(QString txt) const;
     void regainSelection();
+    void saveExpandState();
+    void restoreExpandState();
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
 	void defsChanged(const std::vector<ecf::Aspect::Type>&);
@@ -155,6 +159,7 @@ protected:
     VProperty* shadowProp_;
     VInfo_ptr lastSelection_;
     bool canSaveLastSelection_;
+    QList<bool> expanded_;
 };
 
 #endif

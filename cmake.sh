@@ -115,6 +115,7 @@ echo "python3_arg=$python3_arg"
 echo "no_gui_arg=$no_gui_arg"
 echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
+set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 # ==================== compiler flags ========================================
 # 
@@ -156,14 +157,16 @@ if [[ "$ARCH" = cray ]] ; then
     else
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
-    module unload atp
+    module unload atp                     # must use for NON MPI code (ATP abnormal termination processing only works with cray MPI for ESM modes)
+    module load craype-target-local_host  # must use for NON MPI code
     module load boost/1.53.0
     export CRAY_ADD_RPATH=yes
     export ECFLOW_CRAY_BATCH=1
 fi
 
 if [[ "$python3_arg" = python3 ]] ; then
-    # Need to wait for ecbuild to fix print error, meanwhile use local ecbuild to test python3
+    module unload python
+    module load python3/3.5.1-01
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
     cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0.python3"
 fi
@@ -269,11 +272,17 @@ if [[ $ecbuild_arg = ecbuild ]] ; then
    ecbuild=$workspace/ecbuild/bin/ecbuild
 fi
 
+# An alternative is to run cmake directly. (i.e to use its options/flags)
+# cmake -C $workspace/ecflow/bamboo/macosx1010-flags.cmake $source_dir \
+#        -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
+#  .....
+
 $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
             -DENABLE_WARNINGS=ON \
             -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
+            -DSITE_SPECIFIC_SERVER_SCRIPT="/home/ma/emos/bin/ecflow_site.sh" \
             ${cmake_extra_options} \
             ${gui_options} \
             ${ssl_options} \
@@ -284,7 +293,8 @@ $ecbuild $source_dir \
             #-DENABLE_STATIC_BOOST_LIBS=ON \
             #-DCMAKE_PYTHON_INSTALL_TYPE=local \
             #-DENABLE_PYTHON=OFF   \
-            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/python/ecflow/$release.$major.$minor  \
+            #-DENABLE_PYTHON_PTR_REGISTER=ON  \
+            #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor   \
             #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             #-DENABLE_GUI=ON       \
             #-DENABLE_UI=ON        \           

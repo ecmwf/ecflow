@@ -28,6 +28,10 @@ public:
 	void showWarning(QString);
     void showError(QString);
     void showTip(QString);
+    void appendInfo(QString);
+    void appendWarning(QString);
+    void appendError(QString);
+    void appendTip(QString);
 	void startLoadLabel();
 	void stopLoadLabel();
     void startProgress(int max=0);
@@ -38,7 +42,8 @@ public:
     void setNarrowMode(bool);
 
 private:
-	void showMessage(const Type&,QString);
+    void showMessage(const Type&,QString);
+    void appendMessage(const Type&,QString);
 
 	bool showTypeTitle_;
     bool narrowMode_;
@@ -50,6 +55,7 @@ private:
     QWidget* progWidget_;
     QLabel*  progLabel_;
     QProgressBar* progBar_;
+    QString message_;
 
 };
 

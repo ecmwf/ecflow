@@ -1,3 +1,4 @@
+
 //=============================================================================================
 // Name        : 
 // Author      : 
@@ -48,9 +49,6 @@ void jobstatus::show(node& n)
   const std::string& scmd = ecf ? cmd_str_ecf : cmd_str_sms;
   const std::string var = n.variable(scmd, true);
   const std::string& job = ecf ? n.variable("ECF_JOB") : n.variable("SMSJOB");
-
-  // const char *p = var.c_str();
-  // const std::string cmd = (ecf && p) ? ecf->substitute(var) : var;
   std::string stat   = job + ".stat";
 
   if (!var.empty())
@@ -71,7 +69,8 @@ void jobstatus::show(node& n)
     XmTextSetString(name_,(char*)"not submitted not active");
     return;
   }
-  if (reload_) {  reload_ = false; ; 
+  if (reload_) {  
+    reload_ = false;
     tmp_file (n.serv().jobstatus(n, "")); 
   }
   tmp_file f (stat.c_str(), false);

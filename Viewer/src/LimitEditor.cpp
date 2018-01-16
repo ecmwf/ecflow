@@ -17,10 +17,11 @@
 #include "Aspect.hpp"
 
 #include "AttributeEditorFactory.hpp"
+#include "CommandHandler.hpp"
+#include "MainWindow.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VLimitAttr.hpp"
-#include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 
 LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
@@ -28,7 +29,8 @@ LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
     setupUi(this);
     removeTb_->setDefaultAction(actionRemove_);
     removeAllTb_->setDefaultAction(actionRemoveAll_);
-    pathView_->addAction(actionRemove_);
+    //pathView_->addAction(actionRemove_);
+    pathView_->addAction(actionLookUp_);
     pathView_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     pathView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
@@ -79,6 +81,12 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) :
     connect(w_->actionRemoveAll_,SIGNAL(triggered()),
             this,SLOT(slotRemoveAll()));
 
+    connect(w_->actionLookUp_,SIGNAL(triggered()),
+            this,SLOT(slotLookUp()));
+
+    connect(w_->pathView_,SIGNAL(doubleClicked(const QModelIndex&)),
+            this,SLOT(slotDoubleClicked(const QModelIndex&)));
+
     header_->setInfo(QString::fromStdString(info_->path()),"Limit");
 
     checkButtonStatus();
@@ -124,23 +132,23 @@ void LimitEditor::apply()
     {
         if(intVal < oriMax_)
         {
-            ServerHandler::command(info_,valCmd);
-            ServerHandler::command(info_,maxCmd);
+            CommandHandler::run(info_,valCmd);
+            CommandHandler::run(info_,maxCmd);
         }
         else
         {
-            ServerHandler::command(info_,maxCmd);
-            ServerHandler::command(info_,valCmd);
+            CommandHandler::run(info_,maxCmd);
+            CommandHandler::run(info_,valCmd);
         }
     }
     else if(oriVal_ != intVal)
     {
-        ServerHandler::command(info_,valCmd);
+        CommandHandler::run(info_,valCmd);
     }
 
     else if(oriMax_ != intMax)
     {
-        ServerHandler::command(info_,maxCmd);
+        CommandHandler::run(info_,maxCmd);
     }
 }
 
@@ -173,7 +181,7 @@ void LimitEditor::remove(bool all)
     if(!info_)
         return;
 
-    //We cannot cancle the setting after remove is callled
+    //We cannot cancel the setting after remove is callled
     disableCancel();
 
     Q_ASSERT(model_);
@@ -187,7 +195,7 @@ void LimitEditor::remove(bool all)
     {
         std::vector<std::string> valCmd;
         VAttribute::buildAlterCommand(valCmd,"change","limit_value",a->strName(),"0");
-        ServerHandler::command(info_,valCmd);
+        CommandHandler::run(info_,valCmd);
     }
     else
     {
@@ -197,7 +205,7 @@ void LimitEditor::remove(bool all)
             std::vector<std::string> valCmd;
             VAttribute::buildAlterCommand(valCmd,"delete","limit_path",a->strName(),
                                           model_->data(idx,Qt::DisplayRole).toString().toStdString());
-            ServerHandler::command(info_,valCmd);
+            CommandHandler::run(info_,valCmd);
         }
     }
 
@@ -252,6 +260,35 @@ void LimitEditor::setModelData(QStringList lst)
     {
         w_->actionRemove_->setEnabled(false);
         w_->actionRemoveAll_->setEnabled(false);
+    }
+}
+//Lookup in tree
+
+void LimitEditor::slotLookUp()
+{
+     QModelIndex idx=w_->pathView_->currentIndex();
+     lookup(idx);
+}
+
+void LimitEditor::slotDoubleClicked(const QModelIndex &index)
+{
+    lookup(index);
+}
+
+void LimitEditor::lookup(const QModelIndex &idx)
+{
+    if(!info_)
+        return;
+
+    Q_ASSERT(model_);
+
+    std::string nodePath=
+            model_->data(idx,Qt::DisplayRole).toString().toStdString();
+
+    VInfo_ptr ni=VInfo::createFromPath(info_->server(),nodePath);
+    if(ni)
+    {
+        MainWindow::lookUpInTree(ni);
     }
 }
 

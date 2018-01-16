@@ -3,6 +3,7 @@
 # Error handlings
 set -e # stop the shell on first error
 set -u # fail when using an undefined variable
+set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 # ====================================================================
 show_error_and_exit() {

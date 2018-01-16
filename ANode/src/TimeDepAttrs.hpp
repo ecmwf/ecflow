@@ -37,6 +37,7 @@ public:
    // needed by node serialisation
    void set_node(Node* n) { node_ = n; }
 
+   void reset();
    void begin();
 
    /// If a job takes longer than it slots, then that slot is missed, and next slot is used
@@ -45,7 +46,7 @@ public:
    /// on this function to clear the time dependencies so they *HOLD* the task.
    ///
    /// If we have done an interactive run or complete, *dont* increment next_time_slot_
-   void requeue(bool reset_next_time_slot);
+   void requeue(bool reset_next_time_slot, bool reset_relative_duartion);
 
    void miss_next_time_slot();
    void freeHoldingDateDependencies();
@@ -102,8 +103,6 @@ public:
 
    bool why(std::vector<std::string>& theReasonWhy,const std::string& prefix) const; // return true if why found
    bool testTimeDependenciesForRequeue() const;
-   void resetRelativeDuration();
-
 
 /// For use by python interface,
    std::vector<ecf::TimeAttr>::const_iterator time_begin() const { return timeVec_.begin();}

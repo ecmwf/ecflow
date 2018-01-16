@@ -340,7 +340,8 @@ NodeFilterEngine::NodeFilterEngine(NodeFilter* owner) :
     query_(new NodeQuery("tmp")),
     parser_(NULL),
     server_(NULL),
-    owner_(owner)
+    owner_(owner),
+    rootNode_(0)
 {
 }
 
@@ -368,19 +369,42 @@ void NodeFilterEngine::setQuery(NodeQuery* query)
 }
 
 
-void NodeFilterEngine::runQuery(ServerHandler* server)
+bool NodeFilterEngine::runQuery(ServerHandler* server)
 {
+    rootNode_=0;
+
     if(!query_)
-        return;
+        return false;
 
     server_=server;
     if(!server_)
-        return;
+        return false;
 
     if(!parser_)
-        return;
+        return false;
 
-    runRecursively(server_->vRoot());
+    if(!query_->rootNode().empty() &&
+      (query_->servers().count() == 1 && !query_->servers()[0].simplified().isEmpty()))
+    {
+        rootNode_=server_->vRoot()->find(query_->rootNode());
+        if(!rootNode_)
+        {
+            UiLog().err() << " the specified root node does not exist: " << query_->rootNode();
+#if 0
+            UserMessage::message(UserMessage::ERROR,true,
+                         "Node filter failed! The specified root node <u>does not</u> exist: <b>" + query_->rootNode() +
+                         "</b><br> Please redefine your filter!");
+#endif
+            return false;
+        }
+    }
+
+    if(rootNode_)
+        runRecursively(rootNode_);
+    else
+        runRecursively(server_->vRoot());
+
+    return true;
 }
 
 void NodeFilterEngine::runRecursively(VNode *node)
@@ -388,8 +412,6 @@ void NodeFilterEngine::runRecursively(VNode *node)
     if(!node->isServer() &&
        (node == owner_->forceShowNode() ||  parser_->execute(node)))
     {
-        //UserMessage::message(UserMessage::DBG,false,"FOUND: " + node->absNodePath());
-        //owner_->res_[node->index()]=node;
         owner_->match_.push_back(node);
     }
 

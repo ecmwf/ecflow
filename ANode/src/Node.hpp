@@ -124,6 +124,10 @@ public:
    /// Order the node using the second parameter
    virtual void order(Node*/*immediateChild*/, NOrder::Order) {}
 
+   /// reset all. Used after job generation.
+   /// Unlike re-queue/begin, will reset time attributes. see ECFLOW-1204
+   virtual void reset();
+
    /// For suites it allows dependencies to be resolved, and changes state to defStatus
    virtual void begin();
 
@@ -148,8 +152,9 @@ public:
    /// However if the JOB *abort* we clear NO_REQUE_IF_SINGLE_TIME_DEP
    /// Otherwise if we run again, we miss additional time slots necessarily
    virtual void requeue(bool resetRepeats,
-                          int clear_suspended_in_child_nodes,
-                          bool reset_next_time_slot);
+                        int clear_suspended_in_child_nodes,
+                        bool reset_next_time_slot,
+                        bool reset_relative_duration);
 
    /// Re queue the time based attributes only.
    /// Used as a part of Alter (clock) functionality.
@@ -382,6 +387,9 @@ public:
    void add_complete_expr(const Expression&);       // Can throw std::runtime_error
    void add_part_trigger(const PartExpression& );   // for adding multiple and/or expression,Can throw std::runtime_error
    void add_part_complete(const PartExpression& );  // for adding multiple and/or expression,Can throw std::runtime_error
+   void py_add_trigger_expr(const std::vector<PartExpression>&);     // used by python api to add expression cumulative
+   void py_add_complete_expr(const std::vector<PartExpression>&);    // used by python api to add expression cumulative
+
 
    void addTime( const ecf::TimeAttr& );
    void addToday( const ecf::TodayAttr& );
@@ -622,7 +630,6 @@ protected:
    ///
    ///  Otherwise we need to traverse up the node tree and set the most significant state
    void requeueOrSetMostSignificantStateUpNodeTree();
-   virtual void resetRelativeDuration();
 
    node_ptr non_const_this() const;
 

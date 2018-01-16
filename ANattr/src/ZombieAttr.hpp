@@ -59,6 +59,11 @@ public:
 	// Provide the default behaviour
 	static ZombieAttr get_default_attr(ecf::Child::ZombieType);
 
+	static int default_ecf_zombie_life_time()  { return 3600; }
+	static int default_user_zombie_life_time() { return 300; }
+   static int default_path_zombie_life_time() { return 900; }
+   static int minimum_zombie_life_time()      { return 60; }
+
 private:
 	ecf::Child::ZombieType           zombie_type_;      // User,path or ecf
 	ecf::User::Action                action_;           // fob, fail,remove, adopt, block, kill

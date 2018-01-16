@@ -23,11 +23,13 @@
 // ===========================================================================
 class DefsDoc : private boost::noncopyable {
 public:
+   static const char* add();
    static const char* abs_node_path_doc();
  	static const char* part_expression_doc();
  	static const char* expression_doc();
-	static const char* add_trigger_doc();
-	static const char* add_variable_doc();
+   static const char* add_trigger_doc();
+   static const char* trigger();
+   static const char* add_variable_doc();
 	static const char* add_label_doc();
 	static const char* add_limit_doc();
 	static const char* add_inlimit_doc();

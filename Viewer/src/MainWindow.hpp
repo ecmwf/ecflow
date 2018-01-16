@@ -16,32 +16,35 @@
 #include "ui_MainWindow.h"
 
 #include "VInfo.hpp"
-#include "VProperty.hpp"
 
 #include <boost/property_tree/ptree.hpp>
 
 class QActionGroup;
 class QLabel;
 class QToolButton;
+class ClockWidget;
 class InfoPanel;
 class NodePanel;
 class ServerRefreshInfoWidget;
 class ServerFilterMenu;
 class SessionItem;
 class VComboSettings;
-class PropertyMapper;
 
-class MainWindowTitleHandler : public VPropertyObserver
+class MainWindow;
+
+class MainWindowTitleHandler
 {
+   friend class MainWindow;
 public:
-   MainWindowTitleHandler(QMainWindow*);
+   MainWindowTitleHandler(MainWindow*);
    ~MainWindowTitleHandler();
+
    void update();
-   void notifyChange(VProperty*);
 
 protected:
-   QMainWindow* win_;
-   PropertyMapper* prop_;
+   void update(ServerHandler*);
+
+   MainWindow* win_;
 };
 
 class MainWindow : public QMainWindow, private Ui::MainWindow
@@ -52,14 +55,18 @@ public:
     MainWindow(QStringList,QWidget *parent=0);
     ~MainWindow();
     
+    ServerHandler* selectedServer() const;
+
     static void init();
     static void showWindows();
     static void openWindow(QString id,QWidget *fromW=0);
     static void openWindow(QStringList id,QWidget *fromW=0);
     static void reload();
     static void saveSession(SessionItem*);
-    static void changeNotifySelectionChanged(VInfo_ptr);
+    static void lookUpInTree(VInfo_ptr);
     static void startPreferences(QString);
+    static void updateMenuMode(ServerHandler*);
+    static MainWindow* firstWindow();
 
 protected Q_SLOTS:
 	void on_actionNewTab_triggered();
@@ -78,6 +85,7 @@ protected Q_SLOTS:
 	void on_actionPreferences_triggered();
 	void on_actionSearch_triggered();
     void on_actionNotification_triggered();
+    void on_actionCommandOutput_triggered();
 	void on_actionAbout_triggered();
 	void on_actionSaveSessionAs_triggered();
 	void on_actionManageSessions_triggered();
@@ -112,7 +120,7 @@ private:
     static bool aboutToQuit(MainWindow*);
     static void save(MainWindow *);
     static void saveContents(MainWindow *);
-    static MainWindow* findWindow(QWidget *childW);
+    static MainWindow* findWindow(QWidget *childW);    
     static void configChanged(MainWindow *);
     static void hideServerSyncNotify(MainWindow*);
     static void cleanUpOnQuit(MainWindow *);
@@ -125,6 +133,7 @@ private:
     QToolButton* serverSyncNotifyTb_;
     ServerRefreshInfoWidget *serverComWidget_;
     MainWindowTitleHandler* winTitle_;
+    ClockWidget* clockWidget_;
 
     static bool quitStarted_;
     static QList<MainWindow*> windows_;

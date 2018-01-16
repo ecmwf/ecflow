@@ -22,16 +22,21 @@
 #include <QGuiApplication>
 #else
 #include <QApplication>
+#include <QTextDocument>
 #endif
 
+#include "CommandHandler.hpp"
 #include "VNode.hpp"
 #include "Str.hpp"
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
 #include "CustomCommandDialog.hpp"
+#include "TextFormat.hpp"
 #include "UiLog.hpp"
+#include "UIDebug.hpp"
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
+#include "VNodeMover.hpp"
 
 #define _UI_ACTIONHANDLER_DEBUG
 
@@ -138,28 +143,13 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
         else if(item->command() == "mark_for_move")
         {
-            if (filteredNodes.size() > 1)
+            if(filteredNodes.size() > 1)
             {
                 UserMessage::message(UserMessage::ERROR, true, "Only one node can be marked for move at a time");
                 return;
             }
 
-            VNode::setNodeMarkedForMove(filteredNodes[0]->serverAlias(), filteredNodes[0]->relativePath());
-
-
-            // suspend if not already suspended
-            ServerHandler* shSource = ServerHandler::findServer(VNode::nodeMarkedForMoveServerAlias());
-            assert(shSource);
-            VServer* vs = shSource->vRoot();
-            VNode* vnodeSource = vs->find(VNode::nodeMarkedForMoveRelPath());
-            if (!vnodeSource->isSuspended())
-            {
-                std::string suspendCommand = "ecflow_client --suspend <full_name> ";
-                shSource->command(VNode::nodeMarkedForMoveRelPath(), suspendCommand);
-            }
-
-            UserMessage::message(UserMessage::INFO, true, "Node " + VNode::nodeMarkedForMoveServerAlias() + ":/" +
-                                                                    VNode::nodeMarkedForMoveRelPath() + " suspended and marked for move.");
+            VNodeMover::markNodeForMove(filteredNodes[0]);
         }
 
         else if(item->command() == "move_marked")
@@ -170,60 +160,8 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 return;
             }
 
-            // if same server, then error
-            // NO - ecflowview had this restriction, but it does not seem to be necessary
-            //if (filteredNodes[0]->serverAlias() == aliasOfMarkedServer)
-            //{
-            //    UserMessage::message(UserMessage::ERROR, true, "Cannot move node to the same server");
-            //    return;
-            //}
-
-            // get a ServerHandler for the server
-            std::string aliasOfMarkedServer(VNode::nodeMarkedForMoveServerAlias());
-            ServerHandler* shSource = ServerHandler::findServer(aliasOfMarkedServer);
-            if (shSource == NULL)
-            {
-                UserMessage::message(UserMessage::ERROR, true, "The source server " + aliasOfMarkedServer + " must be loaded into the UI");
-                return;
-            }
-
-            // can only do this if the source (marked) node is suspended
-            std::string pathOfMarkedNode(VNode::nodeMarkedForMoveRelPath());
-            VServer* vs = shSource->vRoot();
-            assert(vs);
-            VNode* vnodeSource = vs->find(pathOfMarkedNode);
-            if (!vnodeSource)
-            {
-                UserMessage::message(UserMessage::ERROR, true, "The source node " + pathOfMarkedNode + " no longer exists on server " + aliasOfMarkedServer);
-                return;
-            }
-
-            if (!vnodeSource->isSuspended())
-            {
-                UserMessage::message(UserMessage::ERROR, true, "Node " + VNode::nodeMarkedForMoveServerAlias() + ":/" +
-                                                                         VNode::nodeMarkedForMoveRelPath() +
-                                                                         " must be suspended first.");
-                return;
-            }
-
-            // tell the user what we're about to do
-            ServerHandler *shDest = filteredNodes[0]->server();
-            bool ok = UserMessage::confirm("About to move node " +
-                                           pathOfMarkedNode + " from server " +
-                                           aliasOfMarkedServer + " (" + shSource->host() + ":" + shSource->port() + ") to " +
-                                           filteredNodes[0]->serverAlias() + " (" + shDest->host() + ":" + shDest->port() + ") "
-                                           "/" + filteredNodes[0]->relativePath() +  ". Ok?");
-            // do it (?)
-            if (ok)
-            {
-                std::string plugCommand;
-                plugCommand = "ecflow_client --plug <full_name> " + shDest->host() + ":" + shDest->port() + filteredNodes[0]->relativePath();
-                shSource->command(pathOfMarkedNode, plugCommand);
-                shDest->reset();  // the dest server will have a big update, and we don't want to wait for the next sync to see it
-                VNode::clearNodeMarkedForMove();
-            }
+            VNodeMover::moveMarkedNode(filteredNodes[0]);
         }
-
 
         else
         {
@@ -303,8 +241,36 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 placeholder = "<node_name>";
                 ecf::Str::replace_all(question, placeholder, nodeNames);
 
-                QMessageBox msgBox;
-                msgBox.setText(QString::fromStdString(question));
+                QString msg=QString::fromStdString(question);
+
+                QString warning=QString::fromStdString(item->warning());
+                if(!warning.isEmpty())
+                {
+                    if(!msg.contains("<ul>"))
+                        msg+="<br><br>";
+
+                    msg+="<i>warning: " + Viewer::formatText(warning,QColor(196,103,36)) + "</i><br>";
+                }
+
+                if(!item->command().empty())
+                {
+                    QString cmdStr=QString::fromStdString(item->command());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+                    cmdStr=cmdStr.toHtmlEscaped();
+#else
+                    cmdStr=Qt::escape(cmdStr);
+#endif
+                    if(!warning.isEmpty())
+                        msg+="<br>";
+                    else if(!msg.contains("<ul>"))
+                        msg+="<br><br>";
+
+                    msg+="<i>command: "  + Viewer::formatText(cmdStr,QColor(41,78,126)) + "</i>";
+                    msg+="<br>";
+                }
+
+                QMessageBox msgBox;               
+                msgBox.setText(msg);
                 msgBox.setTextFormat(Qt::RichText);
                 msgBox.setIcon(QMessageBox::Question);
                 msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
@@ -315,8 +281,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             }
 
             if(ok)
-                ServerHandler::command(filteredNodes,item->command());
-                //ServerHandler::command(filteredNodes,action->iconText().toStdString(), true);
+                CommandHandler::run(filteredNodes,item->command());
 
             if (customCommandDialog)
                    delete customCommandDialog;

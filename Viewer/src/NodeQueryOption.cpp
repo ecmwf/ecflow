@@ -95,9 +95,9 @@ NodeQueryOption::NodeQueryOption(VProperty* p) : ignoreIfAny_(false)
 }
 
 void NodeQueryOption::build(NodeQuery* query)
-{
+{  
 #ifdef _UI_NODEQUERY_DEBUG
-    UiLog().dbg() << "NodeQueryOption::build -->";
+    UI_FUNCTION_LOG
 #endif
 
     //Node query part
@@ -176,11 +176,6 @@ void NodeQueryOption::build(NodeQuery* query)
                 query->attrGroup_[p->name()] = new NodeQueryAttrGroup(p->name(),typeLst,opLst);
        }
    }
-
-
-#ifdef _UI_NODEQUERY_DEBUG
-    UiLog().dbg() << "<-- build";
-#endif
 }
 
 //===============================================
@@ -357,6 +352,192 @@ void NodeQueryComboOption::load(VSettings* vs)
 
 }
 
+//===============================================
+//
+// NodeQueryPeriodOption
+//
+//===============================================
+
+NodeQueryPeriodOption::NodeQueryPeriodOption(VProperty* p) :
+  NodeQueryOption(p),
+  mode_(NoMode),
+  lastPeriod_(-1)
+{
+}
+
+void NodeQueryPeriodOption::clear()
+{
+   mode_=NoMode;
+   lastPeriod_=-1;
+   lastPeriodUnits_.clear();
+   fromDate_=QDateTime();
+   toDate_=QDateTime();
+}
+
+void NodeQueryPeriodOption::setLastPeriod(int interval,QString intervalUnits)
+{
+    mode_=LastPeriodMode;
+    lastPeriod_=interval;
+    lastPeriodUnits_=intervalUnits;
+    fromDate_=QDateTime();
+    toDate_=QDateTime();
+}
+
+void NodeQueryPeriodOption::setPeriod(QDateTime fromDate,QDateTime toDate)
+{
+    mode_=FixedPeriodMode;
+    fromDate_=fromDate;
+    toDate_=toDate;
+    lastPeriod_=-1;
+    lastPeriodUnits_.clear();
+}
+
+QString NodeQueryPeriodOption::query() const
+{
+    QString s;
+    if(mode_ == LastPeriodMode)
+    {
+        if(lastPeriod_ >=0 && lastPeriodUnits_ >=0)
+        {
+            QDateTime prev=QDateTime::currentDateTime();
+            if(lastPeriodUnits_ == "minute")
+                prev=prev.addSecs(-60*lastPeriod_);
+            else if(lastPeriodUnits_ == "hour")
+                prev=prev.addSecs(-3600*lastPeriod_);
+            else if(lastPeriodUnits_ == "day")
+                prev=prev.addDays(-lastPeriod_);
+            else if(lastPeriodUnits_ == "week")
+                prev=prev.addDays(-7*lastPeriod_);
+            else if(lastPeriodUnits_ == "month")
+                prev=prev.addMonths(-lastPeriod_);
+            else if(lastPeriodUnits_ == "year")
+                prev=prev.addYears(-lastPeriod_);
+            else
+                return QString();
+
+            s=name_ + " date::>= " +  prev.toString(Qt::ISODate);
+        }
+
+    }
+    else if(mode_ == FixedPeriodMode)
+    {
+        if(fromDate_.isValid() && toDate_.isValid())
+        {
+            s=name_ + " date::>= " + fromDate_.toString(Qt::ISODate) + " and " +
+                name_ + " date::<= " + toDate_.toString(Qt::ISODate);
+        }
+    }
+    return s;
+}
+
+QString NodeQueryPeriodOption::sqlQuery() const
+{
+    QString s;
+    if(mode_ == LastPeriodMode)
+    {
+        if(lastPeriod_ >=0 && lastPeriodUnits_ >=0)
+        {
+            s=name_ +" >= now() -interval " + QString::number(lastPeriod_) + " " + lastPeriodUnits_;
+        }
+
+    }
+    else if(mode_ == FixedPeriodMode)
+    {
+        if(fromDate_.isValid() && toDate_.isValid())
+        {
+            s=name_ + " between " + fromDate_.toString(Qt::ISODate) +
+                " and " + toDate_.toString(Qt::ISODate);
+        }
+    }
+    return s;
+}
+
+void NodeQueryPeriodOption::swap(const NodeQueryOption* option)
+{
+    const NodeQueryPeriodOption* op=static_cast<const NodeQueryPeriodOption*>(option);
+    Q_ASSERT(op);
+
+    if(op->mode_ == LastPeriodMode)
+    {
+        setLastPeriod(op->lastPeriod_,op->lastPeriodUnits_);
+    }
+    else if(op->mode_ == FixedPeriodMode)
+    {
+        setPeriod(op->fromDate(),op->toDate());
+    }
+    else
+        mode_=NoMode;
+}
+
+
+void NodeQueryPeriodOption::save(VSettings* vs)
+{
+    if(mode_ == NoMode)
+        return;
+
+    vs->beginGroup(name_.toStdString());
+    if(mode_ == LastPeriodMode)
+    {
+        vs->put("mode","last");
+        vs->put("value",lastPeriod_);
+        vs->put("units",lastPeriodUnits_.toStdString());
+    }
+    else if(mode_ == FixedPeriodMode)
+    {
+        vs->put("mode","fixed");
+        vs->put("from",fromDate_.toString(Qt::ISODate).toStdString());
+        vs->put("to",toDate_.toString(Qt::ISODate).toStdString());
+    }
+    vs->endGroup();
+}
+
+void NodeQueryPeriodOption::load(VSettings* vs)
+{
+    if(!vs->contains(name().toStdString()))
+        return;
+
+    vs->beginGroup(name_.toStdString());
+    QString mode=QString::fromStdString(vs->get("mode",std::string()));
+
+    if(mode == "last")
+    {
+        mode_=LastPeriodMode;
+        lastPeriod_=vs->get<int>("value",lastPeriod_);
+        lastPeriodUnits_=QString::fromStdString(vs->get("units",lastPeriodUnits_.toStdString()));
+
+        //Check period length
+        if(lastPeriod_ <= 0)
+            clear();
+
+        //Check period units
+        if(lastPeriodUnits_ != "minute" && lastPeriodUnits_ != "hour" &&
+           lastPeriodUnits_ != "day" && lastPeriodUnits_ != "week" &&
+           lastPeriodUnits_ != "month" && lastPeriodUnits_ != "year")
+             clear();
+
+    }
+    else if(mode == "fixed")
+    {
+        mode_=FixedPeriodMode;
+        QString from=QString::fromStdString(vs->get("from",fromDate_.toString(Qt::ISODate).toStdString()));
+        QString to=QString::fromStdString(vs->get("to",fromDate_.toString(Qt::ISODate).toStdString()));
+
+        fromDate_=QDateTime::fromString(from,Qt::ISODate);
+        toDate_=QDateTime::fromString(from,Qt::ISODate);
+
+        //Check if dates are valis
+        if(!fromDate_.isValid() || !fromDate_.isValid())
+            clear();
+    }
+    else
+    {
+        clear();
+    }
+
+    vs->endGroup();
+}
+
 static NodeQueryOptionMaker<NodeQueryStringOption> maker1("string");
 static NodeQueryOptionMaker<NodeQueryListOption> maker2("list");
 static NodeQueryOptionMaker<NodeQueryComboOption> maker3("combo");
+static NodeQueryOptionMaker<NodeQueryPeriodOption> maker4("period");

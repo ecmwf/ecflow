@@ -48,7 +48,8 @@ public:
 	static NState::State convert(DState::State);
    static const char* toString(DState::State s);
    static const char* to_html(DState::State s);
-	static const char* toString(const DState& ns) { return toString(ns.state());}
+   static const char* toString(const DState& ns) { return toString(ns.state());}
+   static std::string to_string( DState::State s){ return std::string( toString(s) );}
 	static DState::State toState(const std::string& state);
 	static bool isValid(const std::string& state);
 	static std::vector<std::string> allStates();
@@ -64,6 +65,18 @@ private:
     {
         ar & state_;
     }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////
+// Thin wrapper over DState, to aid python. i.e Task("t").add(Defstatus(DState.complete))
+class Defstatus {
+public:
+   Defstatus(DState::State state) : state_(state) {}
+   Defstatus(const std::string& ds) : state_(DState::toState(ds)) {}
+   DState::State state() const { return state_;}
+   std::string to_string() const { return DState::to_string(state_);}
+private:
+   DState::State state_;
 };
 
 // This should ONLY be added to objects that are *NOT* serialised through a pointer

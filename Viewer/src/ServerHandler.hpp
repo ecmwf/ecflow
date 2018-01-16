@@ -49,6 +49,7 @@ class ServerHandler : public QObject
 
 	friend class ServerDefsAccess;
 	friend class ServerComQueue;
+    friend class CommandHandler;
   
 public:
 	enum Activity {NoActivity,LoadActivity,RescanActivity};
@@ -63,6 +64,7 @@ public:
 	bool communicating() {return communicating_;}
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
+    QString nodeMenuMode() const;
 
     void setSuiteFilterWithOne(VNode*);
 	void updateSuiteFilter(SuiteFilter*);
@@ -79,7 +81,6 @@ public:
 	SState::State serverState();
 	NState::State state(bool& isSuspended);
 
-	void runCommand(const std::vector<std::string>& cmd);
 	void run(VTask_ptr);
 
 	void addNodeObserver(NodeObserver* obs);
@@ -103,11 +104,6 @@ public:
 	static void removeServer(ServerHandler*);
 	static ServerHandler* findServer(const std::string &alias);
 
-	void command(const std::vector<std::string>& fullPaths, const std::vector<std::string>& cmd);
-	void command(const std::string& fullPath, const std::string&cmd);
-	static void command(VInfo_ptr,const std::vector<std::string>&);
-	static void command(std::vector<VInfo_ptr>,std::string);
-
 	void searchBegan();
 	void searchFinished();    
     bool updateInfo(int& basePeriod,int& currentPeriod,int &drift,int& toNext);
@@ -123,12 +119,15 @@ protected:
 	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
 	~ServerHandler();
 
+    //Only friend classes can access it. Practically it means we
+    //we can only run it through CommandHandler!!!
+    void runCommand(const std::vector<std::string>& cmd);
+
 	void connectToServer();
 	void setCommunicatingStatus(bool c) {communicating_ = c;}
 	void clientTaskFinished(VTask_ptr task,const ServerReply& serverReply);
 	void clientTaskFailed(VTask_ptr task,const std::string& errMsg);
 
-	static std::string commandToString(const std::vector<std::string>& cmd);
 	static void checkNotificationState(VServerSettings::Param par);
 
     bool checkRefreshTimerDrift() const;

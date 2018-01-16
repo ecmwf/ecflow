@@ -25,6 +25,7 @@ public:
     enum Param {AutoUpdate, UpdateRate,
                AdaptiveUpdate,AdaptiveUpdateIncrement,MaxAdaptiveUpdateRate,
                MaxOutputFileLines,ReadFromDisk,
+               NodeMenuMode,
 	           NotifyAbortedEnabled, NotifyAbortedPopup, NotifyAbortedSound,
 			   NotifyRestartedEnabled, NotifyRestartedPopup, NotifyRestartedSound,
 			   NotifyLateEnabled, NotifyLatePopup, NotifyLateSound,
@@ -33,7 +34,8 @@ public:
 
 	int intValue(Param par) const;
 	bool boolValue(Param par) const;
-	VProperty* guiProp() const {return guiProp_;}
+    QString stringValue(Param par) const;
+    VProperty* guiProp() const {return guiProp_;}
 	bool notificationsEnabled() const;
     static std::string notificationId(Param);
     static Param notificationParam(const std::string& id);

@@ -229,6 +229,7 @@ BOOST_AUTO_TEST_CASE( test_perf_for_large_defs )
    if (fs::exists("/var/tmp/ma0/BIG_DEFS")) {
       /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
       InvokeServer invokeServer("Client:: ...test_perf_for_large_defs:",SCPort::next());
+      BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
       ClientInvoker theClient(invokeServer.host(), invokeServer.port());
       time_load_and_downloads(theClient,invokeServer.host(), invokeServer.port(),"/var/tmp/ma0/BIG_DEFS");

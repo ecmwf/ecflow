@@ -12,6 +12,7 @@
 #define NODEQUERYOPTIONEDIT_HPP
 
 #include <QObject>
+#include <QDateTime>
 
 class CustomListWidget;
 class NodeQuery;
@@ -22,11 +23,14 @@ class NodeQueryStringOption;
 class NodeQueryListOption;
 class NodeQueryComboOption;
 class StringMatchCombo;
+class NodeQueryPeriodOption;
 
 class QComboBox;
+class QDateTimeEdit;
 class QLabel;
 class QGridLayout;
 class QLineEdit;
+class QSpinBox;
 class QToolButton;
 class QWidget;
 
@@ -110,6 +114,36 @@ protected:
     QComboBox* cb_;
     NodeQueryComboOption* option_;
 };
+
+class NodeQueryPeriodOptionEdit : public NodeQueryOptionEdit
+{
+Q_OBJECT
+public:
+    NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget *parent);
+    void setVisible(bool);
+
+protected:
+    void init(NodeQueryOption*);
+
+protected Q_SLOTS:
+    void updateOptions();
+    void modeChanged(int);
+    void lastValueChanged(int);
+    void lastUnitsChanged(int);
+    void slotFromChanged(QDateTime);
+    void slotToChanged(QDateTime);
+
+private:
+    NodeQueryPeriodOption* option_;
+    QLabel* label_;
+    QComboBox* modeCb_;
+    QSpinBox* lastValueSpin_;
+    QComboBox* lastUnitsCb_;
+    QDateTimeEdit* periodFromDe_;
+    QDateTimeEdit* periodToDe_;
+    QWidget* holder_;
+};
+
 
 
 #endif // NODEQUERYOPTIONEDIT_HPP

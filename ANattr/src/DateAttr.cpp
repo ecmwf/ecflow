@@ -37,6 +37,13 @@ DateAttr::DateAttr( int day, int month, int year )
 	checkDate(day_,month_,year_,true /* allow wild cards */);
 }
 
+DateAttr::DateAttr(const std::string& str)
+: day_(0), month_(0), year_(0), makeFree_(false), state_change_no_(0)
+{
+   DateAttr::getDate(str,day_,month_,year_);
+   checkDate(day_,month_,year_,true /* allow wild cards */);
+}
+
 bool DateAttr::operator<(const DateAttr& rhs) const {
    if (year_ < rhs.year_) return true;
    if (year_ == rhs.year_) {

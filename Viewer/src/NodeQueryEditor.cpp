@@ -156,9 +156,12 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
     //nodePathGrid_
 
-    //Name
+    //Name + path
     nameEdit_=new NodeQueryStringOptionEdit(query_->option("node_name"),nodeGrid_,this,false);
     pathEdit_=new NodeQueryStringOptionEdit(query_->option("node_path"),nodeGrid_,this,false);
+
+    //Status change time
+    periodEdit_=new NodeQueryPeriodOptionEdit(query_->option("status_change_time"),nodeGrid_,this);
 
     //-------------------------
     // Filter
@@ -187,7 +190,6 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
 
     //Attributes
-
     attrPanel_->setProperty("attrArea","1");
     Q_FOREACH(NodeQueryAttrGroup* aGrp,query_->attrGroup().values())
     {
@@ -212,6 +214,9 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     attrPanelLayout_->addStretch(1);
     //attrPanel_->hide();
 
+    //--------------------------------
+    // Select tab
+    //--------------------------------
     tab_->setCurrentIndex(0);
 
     //--------------------------------
@@ -254,6 +259,7 @@ void NodeQueryEditor::setFilterMode(bool b)
     if(filterMode_ != b)
     {
         filterMode_=b;
+        Q_ASSERT(tab_->count() == 2);
         tab_->setTabEnabled(1,!filterMode_);
     }
 }
@@ -271,9 +277,11 @@ void NodeQueryEditor::init()
 	//Servers
 	QStringList servers=query_->servers();
 	if(servers == serverCb_->all())
-		serverCb_->clearSelection();
+        serverCb_->clearSelection();
 	else
 		serverCb_->setSelection(servers);
+
+    rootLe_->setText(QString::fromStdString(query_->rootNode()));
 
 	//Node name
     nameEdit_->init(query_);
@@ -285,30 +293,19 @@ void NodeQueryEditor::init()
     flagEdit_->init(query_);
     attrEdit_->init(query_);
 
+    //period
+    periodEdit_->init(query_);
+
     //attrPanel_->init();
 
 	initIsOn_=false;
 
 	updateQueryTe();
 	checkGuiState();
-}
 
-#if 0
-void NodeQueryEditor::setQueryTeCanExpand(bool b)
-{
-    return;
-
-    queryTeCanExpand_=b;
-	if(queryTeCanExpand_)
-	{
-		queryTe_->setFixedHeight(QWIDGETSIZE_MAX);
-	}
-	else
-	{
-		adjustQueryTe();
-	}
+    //switch to the first
+    tab_->setCurrentIndex(0);
 }
-#endif
 
 void NodeQueryEditor::showDefPanel(bool b)
 {
@@ -447,11 +444,11 @@ void NodeQueryEditor::checkGuiState()
 	bool oneServer=(serverCb_->count() == 1 || serverCb_->selection().count() == 1);
 
 	rootLabel_->setEnabled(oneServer);
-	rootLe_->setEnabled(oneServer);
+    rootLe_->setEnabled(oneServer);
 
     QString t=nodeTabText_;
-    if(!query_->nodeQueryPart().isEmpty())
-      t+="*";
+    if(query_->hasBasicNodeQueryPart())
+        t+="*";
     tab_->setTabText(0,t);
 
     if(!filterMode_)
@@ -478,6 +475,7 @@ void NodeQueryEditor::slotClear()
     typeEdit_->clear();
     stateEdit_->clear();
     flagEdit_->clear();
+    periodEdit_->clear();
     attrEdit_->clear();
 }
 

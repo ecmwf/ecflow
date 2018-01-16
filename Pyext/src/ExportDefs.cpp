@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <boost/python/raw_function.hpp>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
@@ -26,9 +27,11 @@
 #include "File.hpp"
 #include "JobCreationCtrl.hpp"
 #include "Simulator.hpp"
-#include "BoostPythonUtil.hpp"
 
+#include "BoostPythonUtil.hpp"
+#include "Edit.hpp"
 #include "DefsDoc.hpp"
+#include "GlossaryDoc.hpp"
 
 using namespace ecf;
 using namespace boost::python;
@@ -79,11 +82,6 @@ std::string check_defs(defs_ptr defs)
  	return warning_msg;
 }
 
-void save_as_checkpt(defs_ptr defs, const std::string& file_name)
-{
-   defs->boost_save_as_checkpt(file_name); // use default ARCHIVE
-}
-
 void restore_from_checkpt(defs_ptr defs, const std::string& file_name)
 {
    // Temp, until default ecflow version is 4.7.0, ECFLOW-939
@@ -124,12 +122,15 @@ std::vector<node_ptr> get_all_nodes(defs_ptr self){ std::vector<node_ptr> nodes;
 
 // Context management, Only used to provide indentation
 defs_ptr defs_enter(defs_ptr self) { return self;}
-bool defs_exit(defs_ptr self,const boost::python::object& type,const boost::python::object& value,const boost::python::object& traceback){return false;}
+bool defs_exit(defs_ptr self,const bp::object& type,const bp::object& value,const bp::object& traceback){return false;}
 
-std::string check_job_creation(defs_ptr defs)
-{
+std::string check_job_creation(defs_ptr defs, bool throw_on_error, bool verbose){
    job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+   if (verbose) jobCtrl->set_verbose(verbose);
    defs->check_job_creation(jobCtrl);
+   if (!jobCtrl->get_error_msg().empty() && throw_on_error) {
+      throw std::runtime_error(jobCtrl->get_error_msg());
+   }
    return jobCtrl->get_error_msg();
 }
 
@@ -140,7 +141,7 @@ defs_ptr add_variable_int(defs_ptr self,const std::string& name, int value) {
    self->set_server().add_or_update_user_variables(name, boost::lexical_cast<std::string>(value)); return self;}
 defs_ptr add_variable_var(defs_ptr self,const Variable& var) {
    self->set_server().add_or_update_user_variables(var.name(),var.theValue()); return self;}
-defs_ptr add_variable_dict(defs_ptr self,const boost::python::dict& dict) {
+defs_ptr add_variable_dict(defs_ptr self,const bp::dict& dict) {
    std::vector<std::pair<std::string,std::string> > vec;
    BoostPythonUtil::dict_to_str_vec(dict,vec);
    std::vector<std::pair<std::string,std::string> >::iterator i;
@@ -152,7 +153,6 @@ defs_ptr add_variable_dict(defs_ptr self,const boost::python::dict& dict) {
 }
 void delete_variable(defs_ptr self,const std::string& name) { self->set_server().delete_user_variable(name);}
 
-
 void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recursive){
    std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
    ecf::Attr::Type attr = Attr::to_attr(attribute_name);
@@ -163,46 +163,139 @@ void sort_attributes(defs_ptr self,const std::string& attribute_name, bool recur
    self->sort_attributes(attr,recursive);
 }
 
+// Support sized and Container protocol
+size_t defs_len(defs_ptr self) { return self->suiteVec().size();}
+bool defs_container(defs_ptr self, const std::string& name){return (self->findSuite(name)) ?  true : false;}
+
+static object do_add(defs_ptr self, const bp::object& arg) {
+   //std::cout << "defs::do_add \n";
+   if (arg.ptr() == object().ptr())  return object(self); // *IGNORE* None
+   else if (extract<suite_ptr>(arg).check()) self->addSuite(extract<suite_ptr>(arg)) ;
+   else if (extract<dict>(arg).check())     add_variable_dict(self,extract<dict>(arg));
+   else if (extract<Edit>(arg).check()) {
+      Edit edit = extract<Edit>(arg);
+      const std::vector<Variable>& vec = edit.variables();
+      for(size_t i=0; i < vec.size(); i++) self->set_server().add_or_update_user_variables(vec[i].name(),vec[i].theValue());
+   }
+   else if (extract<bp::list>(arg).check()){
+      bp::list the_list = extract<bp::list>(arg);
+      int the_list_size = len(the_list);
+      for(int i = 0; i < the_list_size; ++i) (void) do_add(self,the_list[i]); // recursive
+   }
+   else if (extract<Variable>(arg).check()) {
+      Variable var = extract<Variable>(arg);
+      self->set_server().add_or_update_user_variables(var.name(),var.theValue());
+   }
+   else throw std::runtime_error("ExportDefs::add : Unknown type");
+   return object(self);
+}
+
+static object add(tuple args, dict kwargs) {
+   int the_list_size = len(args);
+   defs_ptr self = extract<defs_ptr>(args[0]); // self
+   if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
+
+   for (int i = 1; i < the_list_size; ++i) (void)do_add(self,args[i]);
+   (void)add_variable_dict(self,kwargs);
+
+   return object(self); // return defs as python object, relies class_<Defs>... for type registration
+}
+
+static object defs_iadd(defs_ptr self, const bp::list& list) {
+   //std::cout << "defs_iadd  list " << self->name() << "\n";
+   int the_list_size = len(list);
+   for(int i = 0; i < the_list_size; ++i) (void)do_add(self,list[i]);
+   return object(self); // return node_ptr as python object, relies class_<Node>... for type registration
+}
+
+static object defs_getattr(defs_ptr self, const std::string& attr) {
+   // cout << "  defs_getattr  self.name() : " << self->name() << "  attr " << attr << "\n";
+   suite_ptr child = self->findSuite(attr);
+   if (child) return object(child);
+
+   Variable var = self->server().findVariable(attr);
+   if (!var.empty()) return object(var);
+
+   std::stringstream ss; ss << "ExportDefs::defs_getattr : function of name '" << attr << "' does not exist *OR* suite or defs variable";
+   throw std::runtime_error(ss.str());
+   return object();
+}
+
+object defs_raw_constructor(tuple args, dict kw) {
+   // cout << "defs_raw_constructor  len(args):" << len(args) << endl;
+   // args[0] is Defs(i.e self)
+   bp::list the_list;
+   std::string name;
+   for (int i = 1; i < len(args) ; ++i) {
+      if (extract<string>(args[i]).check()) name = extract<string>(args[i]);
+      else the_list.append(args[i]);
+   }
+   if (!name.empty() && len(the_list) > 0)
+      throw std::runtime_error("defs_raw_constructor: Can't mix string with other arguments. String argument specifies a path(loads a definition from disk)");
+   return args[0].attr("__init__")(the_list,kw); // calls -> init(list attr, dict kw)
+}
+
+defs_ptr defs_init( bp::list the_list, bp::dict kw) {
+   // cout << " defs_init: the_list: " << len(the_list) << " dict: " << len(kw) << endl;
+   defs_ptr defs = Defs::create();
+   (void) add_variable_dict(defs,kw);
+   (void) defs_iadd(defs,the_list);
+   return defs;
+}
 
 void export_Defs()
 {
-	class_<Defs,defs_ptr >( "Defs", DefsDoc::add_definition_doc() ,init<>("Create a empty Defs"))
+	class_<Defs,defs_ptr>( "Defs", DefsDoc::add_definition_doc(),init<>("Create a empty Defs"))
+   .def("__init__",raw_function(&defs_raw_constructor,0))  // will call -> task_init
+   .def("__init__",make_constructor(&defs_init))
    .def("__init__",make_constructor(&create_defs),         DefsDoc::add_definition_doc())
 	.def(self == self )                                           // __eq__
-   .def("__copy__",              copyObject<Defs>)               // __copy__ uses copy constructor
+	.def("__copy__",              copyObject<Defs>)               // __copy__ uses copy constructor
 	.def("__str__",               &Defs::toString)                // __str__
-   .def("__enter__",             &defs_enter)                    // allow with statement, hence indentation support
-   .def("__exit__",              &defs_exit)                     // allow with statement, hence indentation support
-   .def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
-   .def("add_suite",             &Defs::add_suite )
- 	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())
+	.def("__enter__",             &defs_enter)                    // allow with statement, hence indentation support
+	.def("__exit__",              &defs_exit)                     // allow with statement, hence indentation support
+	.def("__len__",               &defs_len)                      // Sized protocol
+	.def("__contains__",          &defs_container)                // Container protocol
+	.def("__iter__",              bp::range(&Defs::suite_begin, &Defs::suite_end)) // iterable protocol
+	.def("__getattr__",           &defs_getattr) /* Any attempt to resolve a property, method, or field name that doesn't actually exist on the object itself will be passed to __getattr__*/
+   .def("__iadd__",              &defs_iadd)  // defs += [ Suite('s1'), Edit(var='value'), Variable('a','b') [ Suite('t2') ] ]
+   .def("__iadd__",              &do_add)     // defs += Suite("s1")
+   .def("__add__",               &do_add)
+	.def("add",                   raw_function(add,1),DefsDoc::add())
+	.def("add_suite",             &add_suite,               DefsDoc::add_suite_doc())
+	.def("add_suite",             &Defs::add_suite, GlossaryDoc::list() )
+	.def("add_extern",            &Defs::add_extern,        DefsDoc::add_extern_doc())
 	.def("auto_add_externs",      &Defs::auto_add_externs,  DefsDoc::add_extern_doc())
-   .def("add_variable",          &add_variable,            DefsDoc::add_variable_doc())
-   .def("add_variable",          &add_variable_int)
-   .def("add_variable",          &add_variable_var)
-   .def("add_variable",          &add_variable_dict)
-   .def("sort_attributes",       &sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
-   .def("sort_attributes",       &Defs::sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
-   .def("delete_variable",       &delete_variable,"An empty string will delete all user variables")
-	.def("find_suite",            &Defs::findSuite,"Given a name, find the corresponding :term:`suite`")
-   .def("find_abs_node",         &Defs::findAbsNode,"Given a path, find the the :term:`node`")
-   .def("get_all_nodes",         &get_all_nodes,"Returns all the :term:`node` s in the definition")
-   .def("get_all_tasks",         &get_all_tasks,"Returns all the :term:`task` nodes")
-	.def("has_time_dependencies", &Defs::hasTimeDependencies,"returns True if the :term:`suite definition` has any time :term:`dependencies`")
-	.def("save_as_checkpt",       &save_as_checkpt, "Save the in memory :term:`suite definition` as a :term:`check point` file. This includes all node state.")
-	.def("restore_from_checkpt",  &restore_from_checkpt, "Restore the :term:`suite definition` from a :term:`check point` file stored on disk")
-   .def("save_as_defs",          &save_as_defs,   "Save the in memory :term:`suite definition` into a file. The file name must be passed as an argument\n\n")
-   .def("save_as_defs",          &save_as_defs_1, "Save the in memory :term:`suite definition` into a file. The file name must be passed as an argument\n\n")
+	.def("add_variable",          &add_variable,            DefsDoc::add_variable_doc())
+	.def("add_variable",          &add_variable_int)
+	.def("add_variable",          &add_variable_var)
+	.def("add_variable",          &add_variable_dict)
+	.def("sort_attributes",       &sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
+	.def("sort_attributes",       &Defs::sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
+	.def("delete_variable",       &delete_variable,"An empty string will delete all user variables")
+	.def("find_suite",            &Defs::findSuite,"Given a name, find the corresponding `suite`_")
+	.def("find_abs_node",         &Defs::findAbsNode,"Given a path, find the the `node`_")
+	.def("get_all_nodes",         &get_all_nodes,"Returns all the `node`_ s in the definition")
+	.def("get_all_tasks",         &get_all_tasks,"Returns all the `task`_ nodes")
+	.def("has_time_dependencies", &Defs::hasTimeDependencies,"returns True if the `suite definition`_ has any time `dependencies`_")
+	.def("save_as_checkpt",       &Defs::save_as_checkpt, "Save the in memory `suite definition`_ as a `check point`_ file. This includes all node state.")
+	.def("restore_from_checkpt",  &restore_from_checkpt, "Restore the `suite definition`_ from a `check point`_ file stored on disk")
+	.def("save_as_defs",          &save_as_defs,   "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
+	.def("save_as_defs",          &save_as_defs_1, "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
 	.def("check",                 &check_defs,               DefsDoc::check())
 	.def("simulate",              &simulate,                 DefsDoc::simulate())
-   .def("check_job_creation",    &check_job_creation,       DefsDoc::check_job_creation_doc() )
-   .def("check_job_creation",    &Defs::check_job_creation)
-   .def("generate_scripts",      &Defs::generate_scripts,   DefsDoc::generate_scripts_doc() )
-   .def("get_state",             &Defs::state )
-   .def("get_server_state",      &get_server_state,         DefsDoc::get_server_state() )
-	.add_property("suites",       boost::python::range( &Defs::suite_begin, &Defs::suite_end),"Returns a list of :term:`suite` s")
-	.add_property("externs",      boost::python::range( &Defs::extern_begin, &Defs::extern_end),"Returns a list of :term:`extern` s" )
-   .add_property("user_variables", boost::python::range( &Defs::user_variables_begin, &Defs::user_variables_end),"Returns a list of user defined :term:`variable` s" )
-   .add_property("server_variables", boost::python::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server :term:`variable` s" )
+	.def("check_job_creation",    &check_job_creation,(bp::arg("throw_on_error")=false,bp::arg("verbose")=false),DefsDoc::check_job_creation_doc() )
+	.def("check_job_creation",    &Defs::check_job_creation)
+	.def("generate_scripts",      &Defs::generate_scripts,   DefsDoc::generate_scripts_doc() )
+	.def("get_state",             &Defs::state )
+	.def("get_server_state",      &get_server_state,         DefsDoc::get_server_state() )
+	.add_property("suites",       bp::range( &Defs::suite_begin, &Defs::suite_end),"Returns a list of `suite`_ s")
+	.add_property("externs",      bp::range( &Defs::extern_begin, &Defs::extern_end),"Returns a list of `extern`_ s" )
+	.add_property("user_variables", bp::range( &Defs::user_variables_begin, &Defs::user_variables_end),"Returns a list of user defined `variable`_ s" )
+	.add_property("server_variables", bp::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server `variable`_ s" )
 	;
+
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
+   bp::register_ptr_to_python<defs_ptr>(); // needed for mac and boost 1.6
+#endif
 }

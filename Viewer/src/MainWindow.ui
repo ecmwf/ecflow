@@ -93,6 +93,7 @@
     </property>
     <addaction name="actionSearch"/>
     <addaction name="actionNotification"/>
+    <addaction name="actionCommandOutput"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
@@ -289,6 +290,9 @@
    <property name="text">
     <string>&amp;Search ...</string>
    </property>
+   <property name="toolTip">
+    <string>Start search dialogue</string>
+   </property>
   </action>
   <action name="actionRefreshSelected">
    <property name="icon">
@@ -327,7 +331,15 @@
     <string>&amp;Notifications ...</string>
    </property>
    <property name="toolTip">
-    <string>Notifications</string>
+    <string>Start notifications dialogue</string>
+   </property>
+  </action>
+  <action name="actionCommandOutput">
+   <property name="text">
+    <string>Shell command &amp;output ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Start shell command output dialogue</string>
    </property>
   </action>
  </widget>

@@ -30,37 +30,38 @@ OutputModel::OutputModel(QObject *parent) :
 {
 }
 
-void OutputModel::setData(VDir_ptr dir,const std::string& jobout)
+void OutputModel::setData(const std::vector<VDir_ptr>& dirs,const std::string& jobout)
 {
-	beginResetModel();
-	dir_=dir;
+    beginResetModel();
+    dirs_=dirs;
     joboutRow_=-1;
 
-    if(dir_)
+    for(std::size_t i=0; i < dirs_.size(); i++)
     {
-        for(int i=0; i < dir_->count(); i++)
+        if(dirs_[i])
         {
-            if(dir_->fullName(i) == jobout)
+            int idx=dirs_[i]->findByFullName(jobout);
+            if(idx != -1)
             {
-                joboutRow_=i;
+                joboutRow_=idx;
                 break;
             }
         }
-    }
+     }
 
-	endResetModel();
+    endResetModel();
 }
 
 void OutputModel::clearData()
 {
 	beginResetModel();
-	dir_.reset();
+    dirs_.clear();
 	endResetModel();
 }
 
 int OutputModel::columnCount( const QModelIndex& parent  ) const
 {
-	return 4;
+    return 6;
 }
 
 int OutputModel::rowCount( const QModelIndex& parent) const
@@ -69,7 +70,15 @@ int OutputModel::rowCount( const QModelIndex& parent) const
 		return 0;
 
 	if(!parent.isValid())
-		return dir_->count();
+    {
+        int cnt=0;
+        for(std::size_t i=0; i < dirs_.size(); i++)
+        {
+            if(dirs_[i])
+                cnt+=dirs_[i]->count();
+        }
+        return cnt;
+    }
 
 	return 0;
 }
@@ -81,38 +90,32 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 
 	int row=index.row();
-	VDirItem *item=dir_->items().at(row);
+    VDir_ptr dir;
+    VDirItem *item=itemAt(row,dir);
+
+    if(!item || !dir)
+        return QVariant();
 
 	if(role == Qt::DisplayRole)
 	{
 		switch(index.column())
 		{
 		case 0:
-			return QString::fromStdString(item->name_);
-		case 1:
+            return QString::fromStdString(item->name_);
+        case 1:
+            return QString::fromStdString(dir->path());
+        case 2:
 			return formatSize(item->size_);
-		case 2:
+        case 3:
 			return formatAgo(item->mtime_);
-		case 3:
-			return formatDate(item->mtime_);
+        case 4:
+            return formatDate(item->mtime_);
+        case 5:
+            return QString::fromStdString(dir->fetchModeStr());
 		default:
 			break;
 		}
-	}
-	else if(role == Qt::UserRole)
-	{
-		switch(index.column())
-		{
-		case 0:
-			return QString::fromStdString(fullName(index));
-		case 1:
-			return static_cast<float>(item->size_)/1024.;
-		case 2:
-			return item->mtime_.toTime_t();
-		default:
-			break;
-		}
-	}
+    }
     else if(role == Qt::ForegroundRole)
     {
         if(row == joboutRow_)
@@ -136,6 +139,28 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
             return QString::fromStdString(item->name_) + " is the current job output file.";
         }
     }
+    //Used for sorting
+    else if(role == Qt::UserRole)
+    {
+        switch(index.column())
+        {
+        case 0:
+            return QString::fromStdString(item->name_);
+        case 1:
+            return QString::fromStdString(dir->path());
+        case 2:
+            return item->size_;
+        case 3:
+            return secsToNow(item->mtime_);
+        case 4:
+            return item->mtime_.toTime_t();
+        case 5:
+            return QString::fromStdString(dir->fetchModeStr());
+        default:
+            break;
+        }
+    }
+
 
 	return QVariant();
 }
@@ -147,10 +172,12 @@ QVariant OutputModel::headerData( const int section, const Qt::Orientation orien
 
    	switch ( section )
 	{
-   	case 0: return tr("Name");
-   	case 1: return tr("Size");
-    case 2: return tr("Modified (ago)");
-   	case 3: return tr("Modified");
+    case 0: return tr("Name");
+    case 1: return tr("Path");
+    case 2: return tr("Size");
+    case 3: return tr("Modified (ago)");
+    case 4: return tr("Modified");
+    case 5: return tr("Source");
    	default: return QVariant();
    	}
 
@@ -180,9 +207,34 @@ QModelIndex OutputModel::parent(const QModelIndex &child) const
 
 }
 
+VDirItem* OutputModel::itemAt(int row,VDir_ptr& dir) const
+{
+    for(std::size_t i=0; i < dirs_.size(); i++)
+    {
+        if(dirs_[i])
+        {
+            int cnt=dirs_[i]->count();
+            if(row < cnt)
+            {
+                Q_ASSERT(row>=0);
+                dir=dirs_[i];
+                return dirs_[i]->items()[row];
+            }
+
+            row-=cnt;
+       }
+    }
+
+    return 0;
+}
+
 bool OutputModel::hasData() const
 {
-	return dir_ && dir_.get();
+    for(std::size_t i=0; i < dirs_.size(); i++)
+        if(dirs_[i])
+            return true;
+
+    return false;
 }
 
 std::string OutputModel::fullName(const QModelIndex& index) const
@@ -190,7 +242,22 @@ std::string OutputModel::fullName(const QModelIndex& index) const
 	if(!hasData())
 		return std::string();
 
-	return dir_->fullName(index.row());
+    int row=index.row();
+    for(std::size_t i=0; i < dirs_.size(); i++)
+    {
+        if(dirs_[i])
+        {
+            int cnt=dirs_[i]->count();
+            if(row < cnt)
+            {
+                Q_ASSERT(row >=0);
+                return dirs_[i]->fullName(row);
+            }
+            row-=cnt;
+       }
+    }
+
+    return std::string();
 }
 
 QString OutputModel::formatSize(unsigned int size) const
@@ -251,6 +318,14 @@ QString OutputModel::formatAgo(QDateTime dt) const
 	return str;
 }
 
+qint64 OutputModel::secsToNow(QDateTime dt) const
+{
+    QDateTime now=QDateTime::currentDateTime();
+
+    qint64 delta  = dt.secsTo(now);
+    return (delta<0)?0:delta;
+}
+
 //=======================================================================
 //
 // OutputSortModel
@@ -261,34 +336,6 @@ OutputSortModel::OutputSortModel(QObject* parent) :
 	QSortFilterProxyModel(parent)
 {
 
-}
-
-bool OutputSortModel::lessThan(const QModelIndex &sourceLeft, const QModelIndex &sourceRight) const
-{
-	int col=sourceLeft.column();
-
-	//Name or modification date
-	if(col==0 || col == 3)
-	{
-		return sourceModel()->data(sourceLeft,Qt::DisplayRole).toString() < sourceModel()->data(sourceRight,Qt::DisplayRole).toString();
-	}
-	//Size
-	else if(col == 1)
-	{
-		return sourceModel()->data(sourceLeft,Qt::UserRole).toFloat() < sourceModel()->data(sourceRight,Qt::UserRole).toFloat();
-	}
-	//Ago
-	else if(col == 2)
-	{
-		return sourceModel()->data(sourceLeft,Qt::UserRole).toInt() > sourceModel()->data(sourceRight,Qt::UserRole).toInt();
-	}
-
-	return true;
-}
-
-bool OutputSortModel::filterAcceptsRow(int sourceRow,const QModelIndex& sourceParent) const
-{
-	return true;
 }
 
 QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName)
@@ -306,5 +353,29 @@ QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName)
 	return QModelIndex();
 }
 
+//========================================================
+//
+// OutputDirLitsDelegate
+//
+//========================================================
 
+OutputDirLitsDelegate::OutputDirLitsDelegate(QWidget *parent) : QStyledItemDelegate(parent)
+{
+}
+
+void OutputDirLitsDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const
+{
+    if(index.column()==1)
+    {
+        QStyleOptionViewItem vopt(option);
+        initStyleOption(&vopt, index);
+        vopt.textElideMode=Qt::ElideRight;
+        QStyledItemDelegate::paint(painter,vopt,index);
+    }
+    else
+    {
+        QStyledItemDelegate::paint(painter,option,index);
+    }
+}
 

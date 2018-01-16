@@ -50,7 +50,7 @@ class DefsTraverser:
     def write_to_file(self):
         for extern in self.__defs.externs:
             self.__writeln("extern " + extern)
-        for suite in self.__defs.suites:
+        for suite in self.__defs:
             self.__write("suite ")
             self.__print_node(suite)
             clock = suite.get_clock()
@@ -64,7 +64,7 @@ class DefsTraverser:
 
     def __print_nc(self,node_container):
         indent = Indentor()
-        for node in node_container.nodes:
+        for node in node_container:
             if isinstance(node, ecflow.Task):
                 self.__write("task ")
                 self.__print_node(node)
@@ -78,7 +78,7 @@ class DefsTraverser:
 
     def __print_alias(self,task):
        indent = Indentor()
-       for alias in task.nodes:
+       for alias in task:
            self.__write("alias ")
            self.__print_node(alias)
            self.__writeln("endalias")

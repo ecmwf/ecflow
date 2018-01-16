@@ -14,6 +14,7 @@
 #include <QDialog>
 #include <QLinearGradient>
 #include <QSettings>
+#include <QToolButton>
 #include <QWidget>
 
 #include "ui_ChangeNotifyDialog.h"
@@ -24,7 +25,28 @@
 class ChangeNotify;
 class VProperty;
 
+class QButtonGroup;
+class QHBoxLayout;
 class QLabel;
+
+class ChangeNotifyDialogButton : public QToolButton
+{
+Q_OBJECT
+
+public:
+    explicit ChangeNotifyDialogButton(QWidget* parent=0);
+
+    void setNotifier(ChangeNotify*);
+    void updateSettings();
+
+public Q_SLOTS:
+    void slotAppend();
+    void slotRemoveRow(int);
+    void slotReset();
+
+protected:
+    ChangeNotify* notifier_;
+};
 
 class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialogWidget
 {
@@ -35,28 +57,21 @@ public:
     ~ChangeNotifyDialogWidget() {}
 
 	void init(ChangeNotify*);
-	void update(ChangeNotify*);
+    void updateSettings();
 	ChangeNotify* notifier() const {return notifier_;}
     void writeSettings(QSettings& settings);
     void readSettings(const QSettings& settings);
-
-public Q_SLOTS:
-	void slotAppend();
-	void slotRemoveRow(int);
-	void slotReset();
 
 protected Q_SLOTS:
     void slotSelectItem(const QModelIndex&);
     void slotDoubleClickItem(const QModelIndex&);
 
 Q_SIGNALS:
-    void contentsChanged();
     void selectionChanged(VInfo_ptr);
 
 protected:
 	ChangeNotify* notifier_;
 };
-
 
 class ChangeNotifyDialog : public QDialog, protected Ui::ChangeNotifyDialog
 {
@@ -66,35 +81,36 @@ public:
 	explicit ChangeNotifyDialog(QWidget *parent=0);
 	~ChangeNotifyDialog();
 
-	void addTab(ChangeNotify*);
-	void setCurrentTab(ChangeNotify*);
-	void setEnabledTab(ChangeNotify*,bool b);
+    void add(ChangeNotify*);
+    void setCurrent(ChangeNotify*);
+    void setEnabled(ChangeNotify*,bool b);
 	void updateSettings(ChangeNotify*);
 
 public Q_SLOTS:
-	void on_tab__currentChanged(int);
 	void on_closePb__clicked(bool b);
 	void on_clearPb__clicked(bool b);
-    void slotContentsChanged();
 
 protected Q_SLOTS:
     void slotSelectionChanged(VInfo_ptr);
     void slotOptions();
+    void slotButtonToggled(int,bool);
 
 protected:
-	ChangeNotify* tabToNtf(int tabIdx);
-	int ntfToTab(ChangeNotify*);
-	void decorateTabs();
-	void decorateTab(int,ChangeNotify*);
-	void updateStyleSheet(VProperty *currentProp);
+    ChangeNotify* indexToNtf(int idx);
+    int ntfToIndex(ChangeNotify* ntf);
 	void closeEvent(QCloseEvent*);
+    void clearCurrentData();
 	void writeSettings();
 	void readSettings();
-    void readTabSettings(int tabIndex);
+    void readNtfWidgetSettings(int tabIndex);
 
-	QList<ChangeNotifyDialogWidget*> tabWidgets_;
+    QList<ChangeNotifyDialogWidget*> ntfWidgets_;
+    QList<ChangeNotifyDialogButton*> ntfButtons_;
+    QButtonGroup* buttonGroup_;
 	bool ignoreCurrentChange_;
 	QLinearGradient grad_;
+    QHBoxLayout* buttonHb_;
+    VProperty* switchWsProp_;
 };
 
 #endif

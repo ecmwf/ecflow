@@ -120,6 +120,18 @@ VFile_ptr VFile::create(bool deleteFile)
 	return VFile_ptr(new VFile(deleteFile));
 }
 
+VFile_ptr VFile::createTmpFile(bool deleteFile)
+{
+    std::string tmpFile=DirectoryHandler::tmpFileName();
+    std::ofstream f(tmpFile.c_str());
+    if(f.is_open())
+    {
+        f.close();
+    }
+
+    return VFile_ptr(new VFile(tmpFile,deleteFile));
+}
+
 void VFile::setStorageMode(StorageMode mode)
 {
 	if(storageMode_ == mode)

@@ -732,7 +732,7 @@ bool TableNodeFilter::update()
 #endif
 
     NodeQuery* q=def_->query_;
-
+    Q_ASSERT(q);
     if(!q->hasServer(server_->name()) || server_->vRoot()->totalNum() ==0)
     {
         matchMode_=NoneMatch;
@@ -760,32 +760,37 @@ bool TableNodeFilter::update()
     }
 
 #ifdef _UI_VFILTER_DEBUG
-     QTime timer;
-     timer.start();
+    QTime timer;
+    timer.start();
 #endif
 
-     matchMode_=VectorMatch;
-     match_.clear();
-     int num=server_->vRoot()->totalNum();
-     if(num != static_cast<int>(index_.size()))
-     {
+    matchMode_=VectorMatch;
+    match_.clear();
+    int num=server_->vRoot()->totalNum();
+    if(num != static_cast<int>(index_.size()))
+    {
         //Reallocates
         index_=std::vector<int>();
         index_.resize(num,-1);
-     }
-     else
-     {
+    }
+    else
+    {
         std::fill(index_.begin(), index_.end(), -1);
-     }
+    }
 
-     queryEngine_->setQuery(def_->query_);
-     queryEngine_->runQuery(server_);
-
-     matchCount_=match_.size();
-     for(size_t i=0; i < match_.size(); i++)
-     {
-        index_[match_[i]->index()]=i;
-     }
+    queryEngine_->setQuery(def_->query_);
+    if(queryEngine_->runQuery(server_))
+    {
+        matchCount_=match_.size();
+        for(size_t i=0; i < match_.size(); i++)
+        {
+            index_[match_[i]->index()]=i;
+        }
+    }
+    else
+    {
+        std::fill(index_.begin(),index_.end(),-1);
+    }
 
 #ifdef _UI_VFILTER_DEBUG
     UiLog(server_).dbg() << " elapsed time: " << timer.elapsed() << " ms";
@@ -794,6 +799,5 @@ bool TableNodeFilter::update()
 #endif
 
     return true;
-
 }
 

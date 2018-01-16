@@ -37,10 +37,10 @@ typedef boost::unordered_map< std::string, AstTop* > my_map;
 
 ExprDuplicate::~ExprDuplicate()
 {
-//   cout << "ExprDuplicate::~ExprDuplicate()\n";
+   // cout << "ExprDuplicate::~ExprDuplicate()\n";
    BOOST_FOREACH(my_map::value_type i, duplicate_expr) {
-      AstTop* top = i.second;
-      delete top;
+      delete i.second;
+      i.second = NULL;
    }
    duplicate_expr.clear();
 }
