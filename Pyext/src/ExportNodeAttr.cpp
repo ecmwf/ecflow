@@ -49,7 +49,7 @@ namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-object late_raw_constructor(tuple args, dict kw) {
+object late_raw_constructor(bp::tuple args, bp::dict kw) {
    //cout << "late_raw_constructor len(args):" << len(args) << endl;
    // args[0] is Late(i.e self)
    if (len(args) > 1) throw std::runtime_error("late_raw_constructor: Late only expects keyword arguments, ie. Late(submitted='00:20',active='15:00',complete='+30:00')");
@@ -87,7 +87,7 @@ static boost::shared_ptr<LateAttr> late_create() { return boost::make_shared<Lat
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-object cron_raw_constructor(tuple args, dict kw) {
+object cron_raw_constructor(bp::tuple args, bp::dict kw) {
    //cout << "cron_raw_constructor len(args):" << len(args) << endl;
    // args[0] is Cron(i.e self) args[1] is string name
    for (int i = 1; i < len(args) ; ++i) {

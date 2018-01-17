@@ -190,7 +190,7 @@ static object do_add(defs_ptr self, const bp::object& arg) {
    return object(self);
 }
 
-static object add(tuple args, dict kwargs) {
+static object add(bp::tuple args, dict kwargs) {
    int the_list_size = len(args);
    defs_ptr self = extract<defs_ptr>(args[0]); // self
    if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
@@ -221,7 +221,7 @@ static object defs_getattr(defs_ptr self, const std::string& attr) {
    return object();
 }
 
-object defs_raw_constructor(tuple args, dict kw) {
+object defs_raw_constructor(bp::tuple args, dict kw) {
    // cout << "defs_raw_constructor  len(args):" << len(args) << endl;
    // args[0] is Defs(i.e self)
    bp::list the_list;

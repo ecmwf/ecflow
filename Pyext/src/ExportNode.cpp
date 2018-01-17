@@ -175,7 +175,7 @@ static object do_lshift(node_ptr self, const bp::object& arg){
    return object(self);
 }
 
-static object add(tuple args, dict kwargs)
+static object add(bp::tuple args, bp::dict kwargs)
 {
    int the_list_size = len(args);
    node_ptr self = extract<node_ptr>(args[0]); // self

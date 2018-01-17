@@ -124,8 +124,8 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable"
-
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations"
+ 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
@@ -276,8 +276,8 @@ fi
 # cmake -C $workspace/ecflow/bamboo/macosx1010-flags.cmake $source_dir \
 #        -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
 #  .....
-# For gcc 6.3.0 default is c++11. to by pass use:
-#  -DCMAKE_CXX_STANDARD=98 
+# For gcc 6.3.0 default  
+#  -DCMAKE_CXX_STANDARD=98     # add -std=gnu++98
 
 $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
