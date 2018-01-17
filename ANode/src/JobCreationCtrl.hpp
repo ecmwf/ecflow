@@ -28,7 +28,7 @@
 // Note: For testing purposes we do not always want to create jobs
 class JobCreationCtrl : public boost::enable_shared_from_this<JobCreationCtrl>, private boost::noncopyable {
 public:
-	JobCreationCtrl() {}
+	JobCreationCtrl() : verbose_(false) {}
 
 	void set_node_path( const std::string& absNodePath ) { absNodePath_ = absNodePath;}
 	const std::string& node_path() const { return absNodePath_;}
@@ -43,7 +43,11 @@ public:
 	void push_back_failing_submittable(submittable_ptr t) { fail_submittables_.push_back(t); }
 	const std::vector<weak_submittable_ptr>& fail_submittables() const { return fail_submittables_;}
 
+	void set_verbose(bool verbose) { verbose_ = verbose;}
+	bool verbose() const { return verbose_;}
+
 private:
+	bool verbose_;
 	std::string absNodePath_;
    std::string tempDirForJobGeneration_;
  	std::string errorMsg_;

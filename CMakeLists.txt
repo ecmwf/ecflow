@@ -280,11 +280,6 @@ endif()
 # =========================================================================================
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ftemplate-depth=1024")
-    
-    # HACK cant get bamboo build to work, setting ENABLE_PYTHON_PTR_REGISTER does not work ?
-    #if (ENABLE_PYTHON)
-    #    add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
-    #endif()
 endif()
 
 

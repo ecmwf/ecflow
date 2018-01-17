@@ -47,7 +47,7 @@ using namespace ecf;
 namespace bp = boost::python;
 
 
-object NodeUtil::node_raw_constructor(tuple args, dict kw) {
+object NodeUtil::node_raw_constructor(bp::tuple args, bp::dict kw) {
    // cout << "node_raw_constructor len(args):" << len(args) << endl;
    // args[0] is Task(i.e self) args[1] is string name
    bp::list the_list;

@@ -24,7 +24,7 @@ namespace bp = boost::python;
 Edit::Edit(const boost::python::dict& dict){BoostPythonUtil::dict_to_str_vec(dict,vec_);}
 Edit::Edit(const boost::python::dict& dict,const boost::python::dict& dict2){BoostPythonUtil::dict_to_str_vec(dict,vec_);BoostPythonUtil::dict_to_str_vec(dict2,vec_);}
 
-object Edit::init(tuple args, dict kw) {
+object Edit::init(boost::python::tuple args, dict kw) {
    //cout << "Edit::init args: " << len(args) << " kwargs " << len(kw) << "\n";
    // args[0] is Edit(i.e self)
    for (int i = 1; i < len(args) ; ++i) {
@@ -34,6 +34,6 @@ object Edit::init(tuple args, dict kw) {
       }
       else throw std::runtime_error("Edit::Edit: only accepts dictionary and key word arguments");
    }
-   tuple rest(args.slice(1,_));
+   bp::tuple rest(args.slice(1,_));
    return args[0].attr("__init__")(kw); // calls -> .def(init<dict>() -> Edit(const boost::python::dict& dict)
 }
