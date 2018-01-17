@@ -301,9 +301,18 @@ bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &des
     BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
     {
         std::string fileName = p.filename().string();
+        std::string srcFile=p.string();
 
         if (is_regular_file(p))  // file? then copy it into its new home
-        {
+        {      
+            //The original boost based copy implementation did not work with newer compilers,
+            //so we opted for a Qt based implementation. See ECFLOW-1207
+            boost::filesystem::path destPath=dest / p.filename();
+            std::string destFile=destPath.string();
+            if(!copyFile(srcFile,destFile,errorMessage))
+                return false;
+
+#if 0
             try
             {
                 boost::filesystem::copy_file(p, dest / p.filename());
@@ -313,6 +322,8 @@ bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &des
                 errorMessage = "Could not copy file " + fileName + " to " + destDir + "; reason: " + err.what();
                 return false;
             }
+#endif
+
         }
         else if (is_directory(p))  // directory? then copy it recursively
         {
@@ -378,7 +389,7 @@ bool DirectoryHandler::renameDir(const std::string &dir, const std::string &newN
 bool DirectoryHandler::copyFile(const std::string &srcFile, std::string &destFile, std::string &errorMessage)
 {
     //The original boost based copy implementation did not work with newer compilers,
-    //so we opt for a Qt based implementation. See ECFLOW-1207
+    //so we opted for a Qt based implementation. See ECFLOW-1207
 
     if(srcFile == destFile)
         return true;
