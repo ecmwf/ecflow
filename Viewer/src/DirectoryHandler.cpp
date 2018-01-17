@@ -16,10 +16,13 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <QFile>
+
 #include "DirectoryHandler.hpp"
 #include "File.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+
 
 std::string DirectoryHandler::exeDir_;
 std::string DirectoryHandler::shareDir_;
@@ -374,6 +377,33 @@ bool DirectoryHandler::renameDir(const std::string &dir, const std::string &newN
 
 bool DirectoryHandler::copyFile(const std::string &srcFile, std::string &destFile, std::string &errorMessage)
 {
+    //The original boost based copy implementation did not work with newer compilers,
+    //so we opt for a Qt based implementation. See ECFLOW-1207
+
+    if(srcFile == destFile)
+        return true;
+
+    QString src=QString::fromStdString(srcFile);
+    QString dest=QString::fromStdString(destFile);
+
+    if(!QFile::exists(src))
+    {
+        errorMessage = "Could not copy file " + srcFile + " to " + destFile + "; reason: source file does not exist";
+        return false;
+    }
+
+    if(QFile::exists(dest))
+    {
+        QFile::remove(dest);
+    }
+    if(!QFile::copy(src,dest))
+    {
+        errorMessage = "Could not copy file " + srcFile + " to " + destFile;
+        return false;
+    }
+    return true;
+
+#if 0
     boost::filesystem::path src(srcFile);
     boost::filesystem::path dest(destFile);
 
@@ -388,6 +418,7 @@ bool DirectoryHandler::copyFile(const std::string &srcFile, std::string &destFil
     }
 
     return true;
+#endif
 }
 
 
