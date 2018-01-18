@@ -847,6 +847,13 @@ void VTreeServer::clearForceShow(const VItem* itemNext)
     updateFilter(sv);
 }
 
+void VTreeServer::deleteExpandState()
+{
+    if(expandState_)
+        delete expandState_;
+    expandState_=0;
+}
+
 void VTreeServer::setExpandState(ExpandState* es)
 {
     if(expandState_)
@@ -1460,6 +1467,14 @@ void VTreeModelData::slotAttrFilterChanged()
     for(int i=0; i < serverNum_; i++)
     {
         servers_[i]->treeServer()->attrFilterChanged();
+    }
+}
+
+void VTreeModelData::deleteExpandState()
+{
+    for(int i=0; i < serverNum_; i++)
+    {
+        servers_[i]->treeServer()->deleteExpandState();
     }
 }
 
