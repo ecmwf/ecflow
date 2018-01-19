@@ -90,10 +90,13 @@ if test_uname Linux ; then
             # for boost 1.53 and > gcc 4.3 -Wno-unused-local-typedefs  : not valid
             # for boost 1.53 and > gcc 4.8 -Wno-unused-local-typedefs  : get a lot warning messages , suppress
             # for boost 1.53 and > gcc 6.1 -Wno-deprecated-declarations: std::auto_ptr deprecated messages, suppress
+            # for boost 1.53 and > gcc 6.3 c++11 is default ?, use -std=gnu++98
             compiler=$(gcc -dumpversion | sed 's/\.//g' )  # assume major.minor.patch
             if [ "$compiler" -gt 430  ] ; then
-                CXXFLAGS=cxxflags=-Wno-unused-local-typedefs
-                #CXXFLAGS="cxxflags=-Wno-unused-local-typedefs,-Wno-deprecated-declarations"
+                CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs"
+       		fi
+       		if [ "$compiler" -gt 610  ] ; then
+       		   CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs -Wno-deprecated-declarations"
        		fi
   	  elif [ $tool = intel ] ; then
   

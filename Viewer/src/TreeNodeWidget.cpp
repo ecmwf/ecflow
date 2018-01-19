@@ -11,6 +11,7 @@
 #include "TreeNodeWidget.hpp"
 
 #include <QHBoxLayout>
+#include <QMetaMethod>
 
 #include "AbstractNodeModel.hpp"
 #include "DashboardDock.hpp"
@@ -20,6 +21,7 @@
 #include "NodeViewBase.hpp"
 #include "TreeNodeModel.hpp"
 #include "TreeNodeView.hpp"
+#include "UiLog.hpp"
 #include "VFilter.hpp"
 #include "VConfig.hpp"
 #include "VModelData.hpp"
@@ -109,6 +111,7 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
         delete view_;
         view_=0;
         delete realW;
+        model_->data()->deleteExpandState();
     }
 
     if(viewLayoutMode_ == CompactLayoutMode)

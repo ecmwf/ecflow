@@ -111,9 +111,10 @@ public:
      void setForceShowAttribute(const VAttribute* node);
      void setForceShow(const VItem* item);
      void clearForceShow(const VItem*);
-     bool isFirstScan() const {return firstScan_;}
+     bool isFirstScan() const {return firstScan_;}     
      ExpandState* expandState() const {return expandState_;}
      void setExpandState(ExpandState*);
+     void deleteExpandState();
 
      //From ServerObserver
 	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
@@ -230,6 +231,8 @@ public:
 	int numOfNodes(int) const;
     bool isFilterComplete() const;
     bool isFilterNull() const;
+    virtual void deleteExpandState() {}
+
 
 	//From ServerFilterObserver
 	void notifyServerFilterAdded(ServerItem*);
@@ -269,6 +272,7 @@ class VTreeModelData : public VModelData
 
 public:
     VTreeModelData(NodeFilterDef* filterDef,AttributeFilter* attrFilter,AbstractNodeModel* model);
+    void deleteExpandState();
 
 protected Q_SLOTS:
     void slotAttrFilterChanged();
