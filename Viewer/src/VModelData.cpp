@@ -1141,7 +1141,9 @@ void VModelData::init()
 	{
         if(ServerHandler *server=serverFilter_->items().at(i)->serverHandler())
 		{
-			add(server);
+            UI_ASSERT(indexOfServer(server) == -1,"server=" << server->name());
+
+            add(server);
 		}
 	}
 }
@@ -1254,7 +1256,13 @@ void VModelData::notifyServerFilterAdded(ServerItem* item)
 
 	if(ServerHandler *server=item->serverHandler())
 	{
-		//Notifies the model that a change will happen
+        //A server can already be added!! It can happen when we add a server to a tab where no view exists.
+        //In this case a tree view is created automatically and can lead to muliple calls
+        //to this routine with the same server!!!
+        if(indexOfServer(server) != -1)
+            return;
+
+        //Notifies the model that a change will happen
 		Q_EMIT serverAddBegin(count());
 
 		add(server);
@@ -1449,7 +1457,10 @@ void VTreeModelData::connectToModel(VModelServer* s)
 
 void VTreeModelData::add(ServerHandler *server)
 {
-	VModelServer* d=NULL;
+    //We need to check it. See the comment in VModelData::notifyServerFilterAdded
+    UI_ASSERT(indexOfServer(server) == -1,"server=" << server->name());
+
+    VModelServer* d=NULL;
 
     d=new VTreeServer(server,filterDef_,attrFilter_);
 
@@ -1501,7 +1512,10 @@ void VTableModelData::connectToModel(VModelServer* s)
 }
 void VTableModelData::add(ServerHandler *server)
 {
-	VModelServer* d=NULL;
+    //We need to check it. See the comment in VModelData::notifyServerFilterAdded
+    UI_ASSERT(indexOfServer(server) == -1,"server=" << server->name());
+
+    VModelServer* d=NULL;
 
 	d=new VTableServer(server,filterDef_);
 
