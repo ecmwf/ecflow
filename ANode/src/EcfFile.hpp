@@ -54,6 +54,8 @@ public:
              };
 
    EcfFile();
+
+   /// This preserves the cache, used to avoid opening include file more than once.
 	EcfFile& operator=(const EcfFile& rhs);
 
 	/// use default copy constructor, assignment, destructor

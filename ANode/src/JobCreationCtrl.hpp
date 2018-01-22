@@ -22,6 +22,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "NodeFwd.hpp"
+#include "JobsParam.hpp"
 
 // Used as a utility class for testing Job creation
 // Collates data during the node tree traversal
@@ -46,11 +47,17 @@ public:
 	void set_verbose(bool verbose) { verbose_ = verbose;}
 	bool verbose() const { return verbose_;}
 
+	// Used in job creation checking. Holds EcfFile, which has a CACHE of included files.
+	// Use to minimise file opening of included files
+	// Since we hold a only a single JobsParam over ALL job creation testing. See ECFLOW-1210
+	JobsParam& jobsParam() { return jobsParam_;}
+
 private:
 	bool verbose_;
 	std::string absNodePath_;
-   std::string tempDirForJobGeneration_;
- 	std::string errorMsg_;
- 	std::vector<weak_submittable_ptr> fail_submittables_;
+	std::string tempDirForJobGeneration_;
+	std::string errorMsg_;
+	std::vector<weak_submittable_ptr> fail_submittables_;
+	JobsParam jobsParam_; // create jobs = false, spawn jobs = false used as a cache
 };
 #endif
