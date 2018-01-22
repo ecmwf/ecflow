@@ -56,7 +56,7 @@ const char* ClientDoc::class_client(){
 
 const char* ClientDoc::set_host_port(){
    return
-            "Override the default(localhost and port 3141) and environment setting(ECF_HOST and ECF_PORT)\n"
+            "Override the default(localhost and port 3141) and environment setting(ECF_HOST and ECF_PORT)\n\n"
             "and set it explicitly::\n\n"
             "   set_host_port(\n"
             "      string host, # The server name. Can not be empty.\n"
@@ -175,7 +175,7 @@ const char* ClientDoc::new_log()
 const char* ClientDoc::clear_log()
 {
    return
-            "Request the `ecflow_server`_ to clear log file.\n"
+            "Request the `ecflow_server`_ to clear log file.\n\n"
             "Log file will be empty after this call.\n\n"
             "\nUsage::\n\n"
             "   try:\n"
@@ -818,7 +818,7 @@ const char* ClientDoc::ch_drop_user(){
 
 const char* ClientDoc::ch_add() {
    return
-            "Add a set of suites, to an existing registered handle\n"
+            "Add a set of suites, to an existing registered handle\n\n"
             "When dealing with large definitions, where a user is only interested in a small subset\n"
             "of suites, registering them, improves download performance from the server.\n"
             "Registered suites have an associated handle.\n"
@@ -842,7 +842,7 @@ const char* ClientDoc::ch_add() {
 
 const char* ClientDoc::ch_remove() {
    return
-            "Remove a set of suites, from an existing handle\n"
+            "Remove a set of suites, from an existing handle\n\n"
             "When dealing with large definitions, where a user is only interested in a small subset\n"
             "of suites, registering them, improves download performance from the server.\n"
             "Registered suites have an associated handle.\n"
@@ -866,7 +866,7 @@ const char* ClientDoc::ch_remove() {
 
 const char* ClientDoc::ch_auto_add() {
    return
-            "Change an existing handle so that new suites can be added automatically\n"
+            "Change an existing handle so that new suites can be added automatically\n\n"
             "When dealing with large definitions, where a user is only interested in a small subset\n"
             "of suites, registering them, improves download performance from the server.\n"
             "Registered suites have an associated handle.\n"
@@ -1343,7 +1343,7 @@ const char* ClientDoc::resume(){
 
 const char* ClientDoc::job_gen(){
    return
-            "Job submission for chosen Node *based* on `dependencies`_\n"
+            "Job submission for chosen Node *based* on `dependencies`_\n\n"
             "The `ecflow_server`_ traverses the `node`_ tree every 60 seconds, and if the dependencies are free\n"
             "does `job creation` and submission. Sometimes the user may free time/date dependencies\n"
             "to avoid waiting for the server poll, this commands allows early job generation\n::\n\n"
@@ -1432,14 +1432,14 @@ const char* ClientDoc::check()
 
 const char* ClientDoc::set_child_path()
 {
-   return   "Set the path to the task, obtained from server using %ECF_NAME%\n"
+   return   "Set the path to the task, obtained from server using %ECF_NAME%\n\n"
             "By default the environment variable ECF_NAME is read for the task path\n"
             "This can be overridden for the python child api"
             ;
 }
 const char* ClientDoc::set_child_password()
 {
-   return   "Set the password, needed for authentication, provided by the server using %ECF_PASS%\n"
+   return   "Set the password, needed for authentication, provided by the server using %ECF_PASS%\n\n"
             "By default the environment variable ECF_PASS is read for the jobs password\n"
             "This can be overridden for the python child api"
             ;
@@ -1447,7 +1447,7 @@ const char* ClientDoc::set_child_password()
 
 const char* ClientDoc::set_child_pid()
 {
-   return   "Set the process id of this job\n"
+   return   "Set the process id of this job\n\n"
             "By default the environment variable ECF_RID is read for the jobs process or remote id\n"
             "This can be overridden for the python child api"
             ;
@@ -1455,7 +1455,7 @@ const char* ClientDoc::set_child_pid()
 
 const char* ClientDoc::set_child_try_no()
 {
-   return   "Set the try no, i.e the number of times this job has run, obtained from the server, using %ECF_TRYNO%\n"
+   return   "Set the try no, i.e the number of times this job has run, obtained from the server, using %ECF_TRYNO%\n\n"
             "By default the environment variable ECF_TRYNO is read to record number of times job has been run\n"
             "This can be overridden for the python child api"
             ;
@@ -1464,7 +1464,7 @@ const char* ClientDoc::set_child_try_no()
 
 const char* ClientDoc::set_child_timeout()
 {
-   return   "Set timeout if child can not connect to server, default is 24 hours. The input is required to be in seconds\n"
+   return   "Set timeout if child can not connect to server, default is 24 hours. The input is required to be in seconds\n\n"
             "By default the environment variable  ECF_TIMEOUT is read to control how long child command should attempt to connect to the server\n"
             "This can be overridden for the python child api"
             ;
