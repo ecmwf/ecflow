@@ -2,7 +2,7 @@
 
 #=========================================================================================
 # Syntax
-# start_logserver [-d <sms_home_directory>] [-m <sms_server_map>] [-l <server_log_file> [-h]
+# start_logserver [-d <home_directory>] [-m <server_map>] [-l <server_log_file> [-h]
 #
 #=========================================================================================
 
@@ -11,7 +11,7 @@ echo "Usage: $0 [-d <dir>] [-m <map>] [-l <logfile>] [-h]"
 echo "       -d <dir>     specify the directory name where files will be served"
 echo "                    from - default is \$HOME"
 echo "       -m <map>     gives mapping between local directory and directory"
-echo "                    where SMS server runs - default is <dir>:<dir>"
+echo "                    where ecflow server runs - default is <dir>:<dir>"
 echo "       -l <logfile> logserver log file - default is \$SCRATCH/log/logfile"
 echo "       -h           print this help page"
 }
@@ -73,20 +73,20 @@ else
   . ~/.profile > /dev/null 2>&1
 fi
 
-# SMSLOGPATH gives the name of the directory that will serve the files.
+# LOGPATH gives the name of the directory that will serve the files.
 # Only one path can be given.
 
-export SMSLOGPATH=${server_dir:-$HOME}
+export LOGPATH=${server_dir:-$HOME}
 
 LOGFILE=${server_logfile:-$SCRATCH/log/logserver.log}
 
-# SMSLOGMAP will contain series of two directories, separated with ":"
+# LOGMAP will contain series of two directories, separated with ":"
 # The first directory name will be the local directory serving the files and
 # the second directory name will give the corresponding directory on the
-# remote system where the SMS server runs. This variable is only needed if
-# some files are moved from the local system back to the SMS server.
+# remote system where the ecflow server runs. This variable is only needed if
+# some files are moved from the local system back to the ecflow server.
 
-export SMSLOGMAP=${server_map:-$SMSLOGPATH:$SMSLOGPATH}
+export LOGMAP=${server_map:-$LOGPATH:$LOGPATH}
 
 # prognum is set based on the unique users numeric uid.
 
@@ -99,7 +99,7 @@ PROG_PATH=`readlink -f $PROG`
 PATH_NAME=$ecflow_DIR/bin
 # `dirname $PROG_PATH`
 
-export SMSLOGPORT=$prognum
+export LOGPORT=$prognum
 LOGDIR=`dirname $LOGFILE`
 
 [[ ! -d $LOGDIR ]] && mkdir -p $LOGDIR
@@ -123,9 +123,9 @@ fi
 
 
 if [[ -f ${LOGSERVERLIST} ]] ; then
-  logserverfound=`grep $SMSLOGPORT ${LOGSERVERLIST} | grep $USER`
+  logserverfound=`grep $LOGPORT ${LOGSERVERLIST} | grep $USER`
   if [[ -z $logserverfound ]]; then
-    echo $USER    $SMSLOGPORT   $SMSLOGPATH $SMSLOGMAP>> ${LOGSERVERLIST}
+    echo $USER    $LOGPORT   $LOGPATH $LOGMAP>> ${LOGSERVERLIST}
   fi  
 fi
 
