@@ -148,8 +148,11 @@ BOOST_AUTO_TEST_CASE( test_task_script_generator )
       }
    }
 
-   // Remove the directories that were generated
-   fs::remove_all(ecf_home);
+   // Remove the directories that were generated. This occasionally fails on ecgb and lxg ?
+   try { fs::remove_all( ecf_home); }
+   catch (const fs::filesystem_error& e) {
+      cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
+   }
 }
 
 
@@ -235,8 +238,11 @@ BOOST_AUTO_TEST_CASE( test_task_script_generator_with_dummy_tasks )
       BOOST_REQUIRE_THROW(t->locatedEcfFile(),std::runtime_error);
    }
 
-   // Remove the directories that were generated
-   fs::remove_all(ecf_home);
+   // Remove the directories that were generated. This occasionally fails on ecgb and lxg ?
+   try { fs::remove_all( ecf_home); }
+   catch (const fs::filesystem_error& e) {
+      cout << "Could not remove directory " << ecf_home << " : " << e.what() << "\n";
+   }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
