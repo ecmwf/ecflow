@@ -121,8 +121,8 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable"
-
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations"
+ 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
@@ -264,6 +264,13 @@ if [[ $ecbuild_arg = ecbuild ]] ; then
    ecbuild=$workspace/ecbuild/bin/ecbuild
 fi
 
+# An alternative is to run cmake directly. (i.e to use its options/flags)
+# cmake -C $workspace/ecflow/bamboo/macosx1010-flags.cmake $source_dir \
+#        -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
+#  .....
+# For gcc 6.3.0 default  
+#  -DCMAKE_CXX_STANDARD=98     # add -std=gnu++98
+
 $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
@@ -279,6 +286,7 @@ $ecbuild $source_dir \
             #-DENABLE_STATIC_BOOST_LIBS=ON \
             #-DCMAKE_PYTHON_INSTALL_TYPE=local \
             #-DENABLE_PYTHON=OFF   \
+            #-DENABLE_PYTHON_PTR_REGISTER=ON  \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor   \
             #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
             #-DENABLE_GUI=ON       \

@@ -312,7 +312,7 @@ def test_client_run(ci):
     suite.add_defstatus(DState.suspended)
 
     defs.generate_scripts();
-    msg = defs.check_job_creation()
+    msg = defs.check_job_creation(verbose=True)
     assert len(msg) == 0, msg
     
     ci.restart_server()
@@ -345,7 +345,7 @@ def test_client_run_with_multiple_paths(ci):
     suite.add_defstatus(DState.suspended)
 
     defs.generate_scripts();
-    msg = defs.check_job_creation()
+    msg = defs.check_job_creation(verbose=True)
     assert len(msg) == 0, msg
     
     ci.restart_server()
@@ -380,7 +380,7 @@ def test_client_requeue(ci):
     suite.add_defstatus(DState.suspended)
      
     defs.generate_scripts()
-    msg = defs.check_job_creation()
+    msg = defs.check_job_creation(verbose=True)
     assert len(msg) == 0, msg
  
     ci.restart_server()
@@ -408,7 +408,7 @@ def test_client_requeue_with_multiple_paths(ci):
     suite.add_defstatus(DState.suspended)
      
     defs.generate_scripts()
-    msg = defs.check_job_creation()
+    msg = defs.check_job_creation(verbose=True)
     assert len(msg) == 0, msg
  
     ci.restart_server()
@@ -465,7 +465,7 @@ def test_client_free_dep(ci):
     t4.add_trigger("1 == 0")
 
     defs.generate_scripts();
-    msg = defs.check_job_creation()
+    msg = defs.check_job_creation(verbose=True)
     assert len(msg) == 0, msg
  
     ci.restart_server()
@@ -753,7 +753,7 @@ def test_client_get_file(ci):
     t2.add_variable("ECF_JOBOUT",t2_jobout)
     
     defs.generate_scripts();
-    msg = defs.check_job_creation()
+    msg = defs.check_job_creation(verbose=True)
     assert len(msg) == 0, msg
  
     ci.restart_server()
@@ -963,7 +963,7 @@ def test_client_alter_delete(ci):
     task_t2 = defs.find_abs_node(t2)
     task_t2.add_repeat( RepeatDate("date",20100111,20100115,2) )  # can't add cron and repeat at the same level
     
-    print(defs)
+    #print(defs)
     ci.load(defs)   
 
     ci.alter(t1,"delete","variable","var")
@@ -1649,7 +1649,7 @@ def test_client_check_defstatus(ci):
     task_t1.add_defstatus(DState.suspended)
     
     defs.generate_scripts();
-    msg = defs.check_job_creation()
+    msg = defs.check_job_creation(verbose=True)
     assert len(msg) == 0, msg
     
     ci.restart_server()
@@ -1679,7 +1679,7 @@ def test_ECFLOW_189(ci):
     ci.delete_all()     
     defs = create_defs("test_ECFLOW_189")  
     defs.generate_scripts();
-    msg = defs.check_job_creation()
+    msg = defs.check_job_creation(verbose=True)
     assert len(msg) == 0, msg
     
     ci.restart_server()
@@ -1727,7 +1727,7 @@ def test_ECFLOW_199(ci):
     ci.delete_all()     
     defs = create_defs("test_ECFLOW_199")  
     defs.generate_scripts();
-    msg = defs.check_job_creation()
+    msg = defs.check_job_creation(verbose=True)
     assert len(msg) == 0, msg
     
     ci.restart_server()

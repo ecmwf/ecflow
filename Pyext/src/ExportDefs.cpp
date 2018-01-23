@@ -124,8 +124,9 @@ std::vector<node_ptr> get_all_nodes(defs_ptr self){ std::vector<node_ptr> nodes;
 defs_ptr defs_enter(defs_ptr self) { return self;}
 bool defs_exit(defs_ptr self,const bp::object& type,const bp::object& value,const bp::object& traceback){return false;}
 
-std::string check_job_creation(defs_ptr defs, bool throw_on_error){
+std::string check_job_creation(defs_ptr defs, bool throw_on_error, bool verbose){
    job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+   if (verbose) jobCtrl->set_verbose(verbose);
    defs->check_job_creation(jobCtrl);
    if (!jobCtrl->get_error_msg().empty() && throw_on_error) {
       throw std::runtime_error(jobCtrl->get_error_msg());
@@ -189,7 +190,7 @@ static object do_add(defs_ptr self, const bp::object& arg) {
    return object(self);
 }
 
-static object add(tuple args, dict kwargs) {
+static object add(bp::tuple args, dict kwargs) {
    int the_list_size = len(args);
    defs_ptr self = extract<defs_ptr>(args[0]); // self
    if (!self) throw std::runtime_error("ExportDefs::add() : first argument is not a Defs");
@@ -220,7 +221,7 @@ static object defs_getattr(defs_ptr self, const std::string& attr) {
    return object();
 }
 
-object defs_raw_constructor(tuple args, dict kw) {
+object defs_raw_constructor(bp::tuple args, dict kw) {
    // cout << "defs_raw_constructor  len(args):" << len(args) << endl;
    // args[0] is Defs(i.e self)
    bp::list the_list;
@@ -283,7 +284,7 @@ void export_Defs()
 	.def("save_as_defs",          &save_as_defs_1, "Save the in memory `suite definition`_ into a file. The file name must be passed as an argument\n\n")
 	.def("check",                 &check_defs,               DefsDoc::check())
 	.def("simulate",              &simulate,                 DefsDoc::simulate())
-	.def("check_job_creation",    &check_job_creation,(bp::arg("throw_on_error")=false),DefsDoc::check_job_creation_doc() )
+	.def("check_job_creation",    &check_job_creation,(bp::arg("throw_on_error")=false,bp::arg("verbose")=false),DefsDoc::check_job_creation_doc() )
 	.def("check_job_creation",    &Defs::check_job_creation)
 	.def("generate_scripts",      &Defs::generate_scripts,   DefsDoc::generate_scripts_doc() )
 	.def("get_state",             &Defs::state )
@@ -294,7 +295,7 @@ void export_Defs()
 	.add_property("server_variables", bp::range( &Defs::server_variables_begin, &Defs::server_variables_end),"Returns a list of server `variable`_ s" )
 	;
 
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python<defs_ptr>(); // needed for mac and boost 1.6
 #endif
 }

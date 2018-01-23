@@ -699,9 +699,9 @@ bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
     UI_FUNCTION_LOG
 #endif
     int dataIndex=-1;
-	for(unsigned int i=0; i < data_.size(); i++)
+    for(std::size_t i=0; i < data_.size(); i++)
 	{
-		if(data_.at(i)->node() == node)
+        if(data_[i]->node() == node)
 		{
 			dataIndex=i;
 			break;
@@ -713,7 +713,25 @@ bool VariableModelDataHandler::nodeChanged(const VNode* node, const std::vector<
 #endif
     Q_ASSERT(dataIndex != -1);
 
+    //Update the given block
     bool retVal=updateVariables(dataIndex);
+
+    Q_ASSERT(data_[dataIndex]->node());
+
+    //Always update the suite as well!!
+    if(!data_[dataIndex]->node()->isSuite())
+    {
+        for(std::size_t i=dataIndex+1; i < data_.size(); i++)
+        {
+            if(data_[i]->node()->isSuite())
+            {
+                if(updateVariables(i))
+                    retVal=true;
+
+                break;
+            }
+        }
+    }
 
     if(retVal)
         broadcastUpdate();

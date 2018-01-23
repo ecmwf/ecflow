@@ -119,7 +119,7 @@ class TestFamilies(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"),  "course") 
         defs = Defs().add(
             Suite("test").add(
-                Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
                 Family("f1").add(
                     Task("t1"),
                     Task("t2"))))
@@ -141,7 +141,7 @@ def create_family_f1():
 home = os.path.join(os.getenv("HOME"),  "course") 
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f1()))
 #xx print(defs) 
 
@@ -161,7 +161,7 @@ defs.save_as_defs('test.def')
          
         #print("Creating suite definition")
         home = os.path.join(os.getenv("HOME"),  "course") 
-        defs = Defs() + (Suite("test") + Edit(ECF_INCLUDE=home,ECF_HOME=home))
+        defs = Defs() + (Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home))
         defs.test += Family("f1") + [ Task("t{0}".format(i)) for i in range(1,3) ]
         defs.save_as_defs(test_def_file())
 
@@ -182,7 +182,7 @@ class TestVariables(unittest.TestCase):
   
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add( Suite("test").add(
-                            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
                             create_family_f1()))
   
         defs.save_as_defs(test_def_file())
@@ -203,7 +203,7 @@ def create_family_f1():
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs(
         Suite("test", 
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f1()))         
 #xx print(defs) 
 
@@ -224,7 +224,7 @@ defs.save_as_defs('test.def')
   
         with Defs() as defs: 
             defs += Suite("test").add(
-                      Edit(ECF_INCLUDE=home,ECF_HOME=home)) 
+                      Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home)) 
             defs.test += Family("f1").add(
                                 Task("t1").add(Edit(SLEEP= 20)),
                                 Task("t2").add(Edit(SLEEP= 20)))                          
@@ -237,7 +237,7 @@ defs.save_as_defs('test.def')
         import os
         home = os.path.join(os.getenv("HOME"), "course")
   
-        defs = Defs() + (Suite("test") + Edit(ECF_INCLUDE=home,ECF_HOME=home)) 
+        defs = Defs() + (Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home)) 
         defs.test += Family("f1") + (Task("t1") + Edit(SLEEP=20)) + (Task("t2") + Edit(SLEEP=20))                     
         defs.save_as_defs(test_def_file())
          
@@ -258,7 +258,7 @@ class TestVariableInheritance(unittest.TestCase):
              
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add(Suite("test").add(
-                            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
                             create_family_f1() ))
         defs.save_as_defs(test_def_file())
    
@@ -279,7 +279,7 @@ def create_family_f1():
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs(
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f1()))
 #xx print(defs) 
 
@@ -302,7 +302,7 @@ defs.save_as_defs('test.def')
              
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs() + (Suite("test") + create_family_f1()) 
-        defs.test += Edit(ECF_INCLUDE=home,ECF_HOME=home) 
+        defs.test += [ Edit(ECF_HOME=home) , Edit(ECF_INCLUDE=home) ]
         defs.save_as_defs(test_def_file())
         
         self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
@@ -323,7 +323,7 @@ class TestTriggers(unittest.TestCase):
              
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add(Suite("test").add(
-                            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
                             create_family_f1()))
         defs.save_as_defs(test_def_file())
   
@@ -344,7 +344,7 @@ def create_family_f1():
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f1()))
 #xx print(defs) 
 
@@ -368,7 +368,7 @@ defs.save_as_defs('test.def')
          
         home = os.path.join(os.getenv("HOME"), "course")
         with Suite("test") as suite:
-            suite += Edit(ECF_INCLUDE=home,ECF_HOME=home) 
+            suite += [ Edit(ECF_HOME=home) , Edit(ECF_INCLUDE=home) ]
             suite += Family("f1") + Edit(SLEEP=20) + Task("t1") + Task("t2")
             suite.f1.t2 += Trigger(["t1"]) 
              
@@ -399,7 +399,7 @@ class TestEvents(unittest.TestCase):
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add(
             Suite("test").add(
-                Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
                 create_family_f1() ))
         defs.save_as_defs(test_def_file()) 
   
@@ -427,7 +427,7 @@ def create_family_f1():
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f1()))
 #xx print(defs) 
 
@@ -459,7 +459,7 @@ defs.save_as_defs('test.def')
          
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs() + Suite("test")
-        defs.test += [ Edit(ECF_INCLUDE=home,ECF_HOME=home), create_family_f1()]
+        defs.test += [ Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home), create_family_f1()]
         defs.save_as_defs(test_def_file())   
          
         self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
@@ -484,7 +484,7 @@ class TestComplete(unittest.TestCase):
         
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add(Suite("test").add(
-                Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
                 create_family_f1() ))
         defs.save_as_defs(test_def_file())   
  
@@ -513,7 +513,7 @@ def create_family_f1():
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f1()))
 #xx print(defs) 
 
@@ -544,7 +544,7 @@ defs.save_as_defs('test.def')
             return f1
         
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs() + (Suite("test") + Edit(ECF_INCLUDE=home,ECF_HOME=home))
+        defs = Defs() + (Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home))
         defs.test += create_family_f1()      
         defs.save_as_defs(test_def_file())   
          
@@ -574,7 +574,7 @@ class TestMeter(unittest.TestCase):
         
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add(Suite("test").add(
-                Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
                 create_family_f1() ))
         defs.save_as_defs(test_def_file())   
  
@@ -600,7 +600,7 @@ def create_family_f1():
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f1()))
 #xx print(defs) 
 
@@ -635,7 +635,7 @@ defs.save_as_defs('test.def')
             return f1
         
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs() + (Suite("test") + Edit(ECF_INCLUDE=home,ECF_HOME=home))
+        defs = Defs() + (Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home))
         defs.test += create_family_f1()   
         defs.save_as_defs(test_def_file())   
          
@@ -698,7 +698,7 @@ def create_family_f2():
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             #create_family_f1(),
             create_family_f2()
             ))
@@ -734,7 +734,7 @@ defs.save_as_defs('test.def')
             return f1
   
         home = os.path.join(os.getenv("HOME"), "course")
-        defs = Defs() + ( Suite("test") + Edit(ECF_INCLUDE=home,ECF_HOME=home))
+        defs = Defs() + ( Suite("test") + Edit(ECF_HOME=home) + Edit(ECF_INCLUDE=home))
         defs.test += create_family_f2()    
         defs.save_as_defs(test_def_file())   
           
@@ -756,7 +756,7 @@ defs.save_as_defs('test.def')
   
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs().add(Suite("test").add(
-                Edit(ECF_INCLUDE=home,ECF_HOME=home),
+                Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
                 create_family_f2()))
         defs.save_as_defs(test_def_file())   
  
@@ -766,6 +766,67 @@ defs.save_as_defs('test.def')
         do_tear_down()
      
          
+class TestCron(unittest.TestCase):
+    def setUp(self):
+        Ecf.set_debug_equality(True)      
+
+        def create_family_house_keeping():
+            cron = Cron()
+            cron.set_week_days( [0] )
+            cron.set_time_series( "22:30" )
+            f2 = Family("house_keeping")
+            f2.add_task("clear_log").add_cron(cron)  
+            return f2
+            
+        defs = Defs()
+        suite = defs.add_suite("test")
+        suite.add_variable("ECF_HOME",    os.path.join(os.getenv("HOME"),  "course"))
+        suite.add_variable("ECF_INCLUDE", os.path.join(os.getenv("HOME"),  "course"))
+
+        #suite.add_family( create_family_f1() )
+        suite.add_family( create_family_house_keeping() )
+        errors = defs.check()
+        assert len(errors) == 0,errors
+
+        defs.save_as_defs(test_def_file())  
+ 
+        self.defs = defs;
+         
+    def test_me0(self):
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Cron
+  
+def create_family_house_keeping():
+    return Family("house_keeping",
+                Task("clear_log",
+                    Cron("22:30",days_of_week=[0])))
+          
+print("Creating suite definition") 
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs(
+        Suite("test",
+            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            create_family_house_keeping()))
+#xx print(defs) 
+
+#xx print("Checking job creation: .ecf -> .job0")  
+#print(defs.check_job_creation())
+
+#xx print("Checking trigger expressions")
+errors = defs.check()
+assert len(errors) == 0,errors
+
+#xx print("Saving definition to file 'test.def'")
+defs.save_as_defs('test.def')
+"""
+        test_compile(text)
+        test_defs = Defs(test_def_file())
+        self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        
+    def tearDown(self):
+        do_tear_down()
+     
 class TestIndentation(unittest.TestCase):
     def setUp(self):
         Ecf.set_debug_equality(True)      
@@ -915,7 +976,7 @@ def create_family_f3():
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f3()))
 #xx print(defs) 
 
@@ -980,7 +1041,7 @@ class TestRepeat(unittest.TestCase):
               
         defs = Defs( 
                 Suite("test",
-                    Edit(ECF_INCLUDE=self.ecf_includes, ECF_HOME=self.ecf_home),
+                    Edit(ECF_HOME=self.ecf_home, ECF_INCLUDE=self.ecf_includes ),
                     create_family_f4()))
         #print(defs)
  
@@ -1007,7 +1068,7 @@ def create_family_f4():
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home, ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f4()))
 #xx print(defs) 
 
@@ -1027,7 +1088,7 @@ defs.save_as_defs('test.def')
         #print("Creating suite definition") 
         defs = Defs(
                 Suite("test",
-                    Edit(ECF_INCLUDE=self.ecf_includes,ECF_HOME=self.ecf_home),
+                    Edit(ECF_HOME=self.ecf_home,ECF_INCLUDE=self.ecf_includes),
                     Family("f4",
                         Edit(SLEEP=2), 
                         RepeatString("NAME", ["a", "b", "c", "d", "e", "f" ]),
@@ -1104,7 +1165,7 @@ def create_family_f5() :
 home = os.path.join(os.getenv("HOME"),"course")
 defs = Defs(
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             Limit("l1",2),
             create_family_f5()))
 #xx print(defs)
@@ -1169,7 +1230,7 @@ def create_family_f6():
 home = os.path.join(os.getenv("HOME"),"course")
 defs = Defs( 
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_f6()))
 #xx print(defs) 
 

@@ -77,7 +77,7 @@ void export_Task()
    .add_property("aliases",bp::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
    .add_property("nodes",  bp::range( &Task::alias_begin,  &Task::alias_end), "Returns a list of aliases")
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python<task_ptr>(); // needed for mac and boost 1.6
 #endif
 
@@ -86,7 +86,7 @@ void export_Task()
    .def("__str__", &Alias::to_string)   // __str__
    .def("__copy__", copyObject<Alias>)  // __copy__ uses copy constructor
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python<alias_ptr>(); // needed for mac and boost 1.6
 #endif
 }

@@ -604,9 +604,33 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam)
    return false;
 }
 
+class JobCreationTimer : private boost::noncopyable {
+public:
+   JobCreationTimer(Submittable* sub) : enabled_(false),failed_(false), sub_(sub) {}
+   ~JobCreationTimer() {
+      if (enabled_) {
+         std::cout << " " << sub_->absNodePath();
+         if (failed_)  std::cout << " (FAILED)\n";
+         else {
+            boost::posix_time::time_duration duration = Calendar::second_clock_time() - start_;
+            std::cout << " (" << duration.total_microseconds() << " ms)\n";
+         }
+      }
+   }
+   void set_enabled() { enabled_ = true; start_ = Calendar::second_clock_time(); }
+   void set_failed() { failed_ = true; }
+private:
+   bool enabled_;
+   bool failed_;
+   Submittable* sub_;
+   boost::posix_time::ptime start_;
+};
 
 void Submittable::check_job_creation( job_creation_ctrl_ptr jobCtrl)
 {
+   JobCreationTimer output_tasks_being_checked(this);
+   if ( jobCtrl->verbose() ) output_tasks_being_checked.set_enabled();
+
    // Typically a valid try number is >=1.
    // Since check_job_creation is only used for testing/python, we will initialise tryNum to -1
    // so than when it is incremented it will by a try_no of zero. *zero is an invalid try_no *
@@ -626,12 +650,20 @@ void Submittable::check_job_creation( job_creation_ctrl_ptr jobCtrl)
       set_genvar_ecfjob(tmpLocationForJob);
    }
 
-   JobsParam jobsParam; // create jobs = false, spawn jobs = false
-   if ( submit_job_only(jobsParam) ) {
+   // Before we had a Local JobsParam  here
+   // By using the JobsParam on job_creation_ctrl_ptr, we get the effect of USING a cache.
+   // EcfFile stored on JobsParam has cache. This cache avoids opening include files more than once.
+   // Since we have a Single job_creation_ctrl_ptr, hence single JobsParam, hence single EcfFile
+   // the cache is applied for ALL tasks. See ECFLOW-1210
+   jobCtrl->jobsParam().clear(); // allow jobsParam to be re-used by clearing
+   LOG_ASSERT(!jobCtrl->jobsParam().spawnJobs() , "spawn jobs should be disabled for check job creation" );
+   LOG_ASSERT(!jobCtrl->jobsParam().createJobs(), "create jobs should be disabled for check job creation" );
+   if ( submit_job_only( jobCtrl->jobsParam() ) ) {
       return;
    }
+   output_tasks_being_checked.set_failed();
 
-   std::string errorMsg = jobsParam.getErrorMsg();
+   std::string errorMsg = jobCtrl->jobsParam().getErrorMsg();
    LOG_ASSERT( !errorMsg.empty(), "failing to submit must raise an error message" );
 
    jobCtrl->error_msg() += errorMsg;

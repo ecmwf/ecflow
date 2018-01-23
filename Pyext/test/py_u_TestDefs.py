@@ -231,7 +231,7 @@ if __name__ == "__main__":
     expected_exeption = False;
     try:
         defs.check_job_creation(throw_on_error=True) 
-    except RuntimeError, e:
+    except RuntimeError as e:
         expected_exeption = True
     assert expected_exeption,"expected exception"  
  

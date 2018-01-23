@@ -201,7 +201,7 @@ static object do_lshift(node_ptr self, const bp::object& arg){
    return object(self);
 }
 
-static object add(tuple args, dict kwargs)
+static object add(bp::tuple args, bp::dict kwargs)
 {
    int the_list_size = len(args);
    node_ptr self = extract<node_ptr>(args[0]); // self
@@ -429,7 +429,7 @@ void export_Node()
    .add_property("queues",    bp::range( &Node::queue_begin,    &Node::queue_end),   "Returns a list of `queue`_ s" )
    .add_property("generics",  bp::range( &Node::generic_begin,  &Node::generic_end), "Returns a list of `generic`_ s" )
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python<node_ptr>(); // needed for mac and boost 1.6
 #endif
 }

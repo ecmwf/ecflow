@@ -29,3 +29,12 @@ bool JobsParam::check_for_job_generation_timeout()
    }
    return false;
 }
+
+void JobsParam::clear() {
+   errorMsg_.clear();
+   debugMsg_.clear();
+   submitted_.clear();
+   user_edit_file_.clear();
+   user_edit_variables_.clear();
+}
+

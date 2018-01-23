@@ -96,9 +96,14 @@ int WmWorkspaceHandler::workspaceId(int winId)
 
     if(!proc.waitForStarted(3000))
     {
-        UI_FUNCTION_LOG
+        UI_FUNCTION_LOG     
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         UiLog().err() << " Failed to get workspace id for window=" << winId << " using command \'" <<
                          proc.program() << " " << proc.arguments().join(" ") << "\'";
+#else
+        UiLog().err() << " Failed to get workspace id for window=" << winId << " using command \
+                         \'xdotool get_desktop_for_window " << QString::number(winId) << "\'";
+#endif
         UiLog().err() << "   error: failed to start";
         return -1;
     }
@@ -113,15 +118,25 @@ int WmWorkspaceHandler::workspaceId(int winId)
         else
         {
             UI_FUNCTION_LOG
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
             UiLog().err() << " Failed to get workspace id for window=" << winId << " using command \'" << proc.program()
                           << " " << proc.arguments().join(" ") << "\'";
+#else
+            UiLog().err() << " Failed to get workspace id for window=" << winId << " using command \'xdotools \
+                           xdotool get_desktop_for_window " << QString::number(winId) << "\'";
+#endif
+
             UiLog().err() << "   error: invalid id=" << result << " returned";
         }
     }
     else
     {
         UI_FUNCTION_LOG
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         UiLog().err() << " Failed to get workspace id for window=" << winId << " using command " << proc.program();
+#else
+        UiLog().err() << " Failed to get workspace id for window=" << winId << " using command xdotools";
+#endif
         UiLog().err() << "   error:" << QString(proc.readAllStandardError());
     }
 

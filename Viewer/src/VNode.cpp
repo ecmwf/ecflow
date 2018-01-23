@@ -1582,6 +1582,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
 		if(s && s->begun())
 		{
 			node->node()->update_generated_variables();
+            s->update_generated_variables();
 		}
 
 		if(node->nodeType() == "task")

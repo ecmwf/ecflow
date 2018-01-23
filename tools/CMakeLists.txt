@@ -1,7 +1,7 @@
 #
 # Configure  ecflow_site.sh. This is used in ecflow_start.sh and ecflow_stop.sh
-# Used to coping with start of ecflow server on linux cluser
-# Avoid hard copy mention of paths specific to ECMWF
+# Used in coping with start of ecflow server on a linux cluser
+# Avoid's hard copy mention of paths specific to ECMWF
 
 if( DEFINED SITE_SPECIFIC_SERVER_SCRIPT )
 
@@ -15,11 +15,13 @@ if( DEFINED SITE_SPECIFIC_SERVER_SCRIPT )
 endif()
 
 install( FILES
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_fuse.py
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
             ${CMAKE_SOURCE_DIR}/tools/noconnect.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_stop.sh
+            ${CMAKE_SOURCE_DIR}/tools/start_logserver.sh
          DESTINATION bin
          PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
          COMPONENT binary
