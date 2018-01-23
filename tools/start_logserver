@@ -96,24 +96,25 @@ prognum=$((base+username))
 
 PROG=`which $0`
 PROG_PATH=`readlink -f $PROG`
-PATH_NAME=`dirname $PROG_PATH`
+PATH_NAME=$ecflow_DIR/bin
+# `dirname $PROG_PATH`
 
 export SMSLOGPORT=$prognum
 LOGDIR=`dirname $LOGFILE`
 
 [[ ! -d $LOGDIR ]] && mkdir -p $LOGDIR
 
-check=`ps -fu ${USER} | grep logsvr.pl | grep -v grep 1>/dev/null 2>&1 \
+check=`ps -fu ${USER} | grep ecflow_logsvr.pl | grep -v grep 1>/dev/null 2>&1 \
  && echo 1 || echo 0`
 if [ $check = 0 ] ; then
-  nohup $PATH_NAME/logsvr.pl 1>$LOGFILE 2>&1 &
+  nohup $PATH_NAME/ecflow_logsvr.pl 1>$LOGFILE 2>&1 &
 else
   exit 0
 fi
 
 sleep 1
 
-check=`ps -fu ${USER} | grep logsvr.pl | grep -v grep 1>/dev/null 2>&1 \
+check=`ps -fu ${USER} | grep ecflow_logsvr.pl | grep -v grep 1>/dev/null 2>&1 \
  && echo 1 || echo 0`
 if [ $check = 0 ] ; then
   /usr/bin/tail -n 30 $LOGFILE | /bin/mail -s "$(hostname -s): logserver for ${USER} did not start. Please investigate..." -c "root" ${USER}
