@@ -72,27 +72,30 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
    if (args.size()) query_type = args[0];
    if ( query_type == "event" || query_type == "meter" || query_type == "variable") {
       // second argument must be <path>:event_or_meter_or_variable
+      std::string path_and_name ;
       if (args.size() == 2) {
-         std::string path_and_name = args[1];
+         path_and_name = args[1];
          if ( !Extract::pathAndName( path_and_name , path_to_attribute, attribute  ) ) {
             throw std::runtime_error( "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " + query_type );
          }
       }
       else throw std::runtime_error( "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " + query_type);
-      if (attribute.empty()) throw std::runtime_error( "QueryCmd: no attribute specified\n" + string(QueryCmd::desc()) );
+      if (attribute.empty()) throw std::runtime_error( "QueryCmd: no attribute specified: query type: " + query_type + " path+attribute: " + path_and_name + "\n" + string(QueryCmd::desc()) );
    }
    else if (query_type == "trigger") {
-      if (args.size() == 1)  path_to_attribute = args[1];
-      if (args.size() == 2) {
-         attribute = args[2];
-         (void)Expression::parse(attribute,"QueryCmd:"); // will throw if expression does not parse
+      for(size_t i=1; i < args.size(); i++){
+         if (i == 1) path_to_attribute = args[i];
+         if (i == 2) {
+            attribute = args[i];
+            (void)Expression::parse(attribute,"QueryCmd:"); // will throw if expression does not parse
+         }
       }
-      if (attribute.empty()) throw std::runtime_error( "QueryCmd: no attribute specified\n" + string(QueryCmd::desc()) );
+      if (attribute.empty()) throw std::runtime_error( "QueryCmd: no attribute specified: query type: trigger\n" + string(QueryCmd::desc()) );
    }
    else if (query_type == "state" || query_type == "dstate") {
       // for state and dstate attribute is empty
       if (args.size() >= 1) path_to_attribute = args[1];
-      if (args.size() >= 2) throw std::runtime_error( "QueryCmd: invalid query : " +  args[2]);
+      if (args.size() > 2) throw std::runtime_error( "QueryCmd: invalid (state | dstate) query : " + args[2]);
    }
    else throw std::runtime_error( "QueryCmd: first argument must be one of [ state | dstate | event | meter | variable | trigger ] but found:" + query_type);
 
