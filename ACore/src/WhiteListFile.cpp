@@ -197,7 +197,20 @@ bool WhiteListFile::load(const std::string& file, bool debug, std::string& error
  			}
  		}
 
-      if (debug)  std::cout << dump_valid_users() << "\n";
+ 		// remove duplicates
+ 		mymap::iterator i;
+ 		for(i=users_with_read_access_.begin(); i!= users_with_read_access_.end(); ++i) {
+ 		   std::vector<std::string>& paths = (*i).second;
+ 		   std::sort(paths.begin(), paths.end());
+ 		   paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
+ 		}
+ 		for(i=users_with_write_access_.begin(); i!= users_with_write_access_.end(); ++i) {
+ 		   std::vector<std::string>& paths = (*i).second;
+ 		   std::sort(paths.begin(), paths.end());
+ 		   paths.erase(std::unique(paths.begin(), paths.end()), paths.end());
+ 		}
+
+ 		if (debug)  std::cout << dump_valid_users() << "\n";
 
  		return true;
  	}

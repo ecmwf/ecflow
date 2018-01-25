@@ -6,8 +6,10 @@ user1 /a/b/c/d,/b,/c  # user1 has read write access to suite /a /b /c
 /a/b/c/d/e userz
 /b userz
 /c userz
+/c userz # duplicates should be ignored
 
 -user4 /a,/b,/c/e/f/g/h  # user4 has read access to suite /a /b /c
+-user4 /a,/b,/c/e/f/g/h
 
 ##################################
 * /x/y/a /y   # all user have read/write access  suites /x /y
