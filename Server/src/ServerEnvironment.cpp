@@ -290,6 +290,11 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
   		errorMsg = ss.str();
  		return false;
 	}
+   if (checkCmd_.empty()) {
+      ss << "No ECF_CHECK_CMD specified. Please set in Server/server_environment.cfg\n";
+      errorMsg = ss.str();
+      return false;
+   }
 	if (urlCmd_.empty()) {
 		ss << "No ECF_URL_CMD specified. Please set in Server/server_environment.cfg\n";
   		errorMsg = ss.str();
@@ -379,7 +384,8 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	// variables that can be overridden, in the suite definition
 	theRetVec.push_back( std::make_pair(std::string("ECF_JOB_CMD"), ecf_cmd_) );
 	theRetVec.push_back( std::make_pair(std::string("ECF_KILL_CMD"), killCmd_) );
-	theRetVec.push_back( std::make_pair(std::string("ECF_STATUS_CMD"), statusCmd_) );
+   theRetVec.push_back( std::make_pair(std::string("ECF_STATUS_CMD"), statusCmd_) );
+   theRetVec.push_back( std::make_pair(std::string("ECF_CHECK_CMD"), checkCmd_) );
 	theRetVec.push_back( std::make_pair(std::string("ECF_URL_CMD"), urlCmd_) );
 	theRetVec.push_back( std::make_pair(std::string("ECF_URL_BASE"), urlBase_) );
 	theRetVec.push_back( std::make_pair(std::string("ECF_URL"), url_) );
@@ -495,7 +501,8 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
          ("ECF_CHECKMODE", po::value<std::string>(&theCheckMode), "The check mode, must be one of CHECK_NEVER, CHECK_ON_TIME, CHECK_ALWAYS")
          ("ECF_JOB_CMD",   po::value<std::string>(&ecf_cmd_)->default_value(Ecf::JOB_CMD()), "Command to be executed to submit a job.")
          ("ECF_KILL_CMD",  po::value<std::string>(&killCmd_)->default_value(Ecf::KILL_CMD()), "Command to be executed to kill a job.")
-         ("ECF_STATUS_CMD",po::value<std::string>(&statusCmd_)->default_value(Ecf::STATUS_CMD()), "Command to be obtain the status.")
+         ("ECF_STATUS_CMD",po::value<std::string>(&statusCmd_)->default_value(Ecf::STATUS_CMD()), "Command to be obtain the job status from server.")
+         ("ECF_CHECK_CMD", po::value<std::string>(&checkCmd_)->default_value(Ecf::CHECK_CMD()), "Command to be obtain the job status from client.")
          ("ECF_URL_CMD",   po::value<std::string>(&urlCmd_)->default_value(Ecf::URL_CMD()), "Command to be obtain url.")
          ("ECF_URL_BASE",  po::value<std::string>(&urlBase_)->default_value(Ecf::URL_BASE()), "Defines url base.")
          ("ECF_URL",       po::value<std::string>(&url_)->default_value(Ecf::URL()), "The default url.")
@@ -635,6 +642,7 @@ std::string ServerEnvironment::dump() const
    ss << "ECF_JOB_CMD = '" << ecf_cmd_ << "'\n";
    ss << "ECF_KILL_CMD = '" << killCmd_ << "'\n";
    ss << "ECF_STATUS_CMD = '" << statusCmd_ << "'\n";
+   ss << "ECF_CHECK_CMD = '" << checkCmd_ << "'\n";
    ss << "ECF_URL_CMD = '" << urlCmd_ << "'\n";
    ss << "ECF_URL_BASE = '" << urlBase_ << "'\n";
    ss << "ECF_URL = '" << url_ << "'\n";
@@ -654,3 +662,33 @@ std::string ServerEnvironment::dump() const
    ss << white_list_file_.dump_valid_users();
    return ss.str();
 }
+
+
+std::vector<std::string> ServerEnvironment::expected_variables()
+{
+   std::vector<std::string> expected_variables;
+   expected_variables.push_back(  Str::ECF_HOME() );
+   expected_variables.push_back( "ECF_LOG"  );
+   expected_variables.push_back( "ECF_CHECK" );
+   expected_variables.push_back( "ECF_CHECKOLD" );
+   expected_variables.push_back( "ECF_JOB_CMD" );
+   expected_variables.push_back( "ECF_KILL_CMD" );
+   expected_variables.push_back( "ECF_STATUS_CMD" );
+   expected_variables.push_back( "ECF_CHECK_CMD" );
+   expected_variables.push_back( "ECF_URL_CMD" );
+   expected_variables.push_back( "ECF_URL_BASE" );
+   expected_variables.push_back( "ECF_URL" );
+   expected_variables.push_back( "ECF_MICRO" );
+   expected_variables.push_back( "ECF_PID" );
+   expected_variables.push_back( "ECF_VERSION" );
+   expected_variables.push_back( "ECF_LISTS" );
+   expected_variables.push_back(  Str::ECF_PORT() );
+   expected_variables.push_back(  Str::ECF_NODE() );
+   expected_variables.push_back(  Str::ECF_HOST() );
+   expected_variables.push_back( "ECF_INTERVAL");
+#ifdef ECF_SECURE_USER
+   expected_variables.push_back( "ECF_PASSWD");
+#endif
+   return expected_variables;
+}
+

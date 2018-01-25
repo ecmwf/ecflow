@@ -65,7 +65,8 @@ public:
    static const std::string& MICRO();
    static const std::string& JOB_CMD();
    static const std::string& KILL_CMD();
-   static const std::string& STATUS_CMD();
+   static const std::string& STATUS_CMD(); // Typical run on the server
+   static const std::string& CHECK_CMD();  // Typical run on the client
    static const std::string& URL_CMD();
    static const std::string& URL_BASE();
    static const std::string& URL();
