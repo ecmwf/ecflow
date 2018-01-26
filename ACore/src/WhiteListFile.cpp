@@ -35,7 +35,18 @@ WhiteListFile::~WhiteListFile() {}
 
 bool WhiteListFile::verify_read_access(const std::string& user) const
 {
-   return verify_read_access(user, Str::EMPTY());
+   // Please note that the presence of * , even with paths means all users, have access
+   // Command like --news has no paths, hence allow access to all if * specified
+   if (all_users_have_read_access_) return true;
+   if (users_with_read_access_.empty() && users_with_write_access_.empty() ) return true;
+
+   if (users_with_read_access_.find(user) != users_with_read_access_.end()) return true;
+   if (users_with_read_access_.find("*") !=  users_with_read_access_.end()) return true;
+
+   // user with write access also have read access
+   if (users_with_write_access_.find(user) != users_with_write_access_.end()) return true;
+   if (users_with_write_access_.find("*") !=  users_with_write_access_.end()) return true;
+   return false;
 }
 
 bool WhiteListFile::verify_write_access(const std::string& user) const
@@ -61,8 +72,9 @@ bool WhiteListFile::verify_write_access(const std::string& user,const std::strin
 {
    if (all_users_have_write_access_) return true;
    if (users_with_read_access_.empty() && users_with_write_access_.empty() ) return true;
-   if (verify_path_access(user,path,users_with_write_access_)) return true;
-   if (verify_path_access("*",path,users_with_write_access_)) return true;
+
+   if (verify_write_access(user,path,users_with_write_access_)) return true;
+   if (verify_write_access("*",path,users_with_write_access_)) return true;
    return false;
 }
 
@@ -92,8 +104,8 @@ bool WhiteListFile::verify_write_access(const std::string& user, const std::vect
 {
    if (all_users_have_write_access_) return true;
    if (users_with_read_access_.empty() && users_with_write_access_.empty() ) return true;
-   if (verify_path_access(user,paths,users_with_write_access_)) return true;
-   if (verify_path_access("*",paths,users_with_write_access_)) return true;
+   if (verify_write_access(user,paths,users_with_write_access_)) return true;
+   if (verify_write_access("*",paths,users_with_write_access_)) return true;
    return false;
 }
 
@@ -141,6 +153,60 @@ bool WhiteListFile::verify_path_access(const std::string& user,const std::string
    }
    return false;
 }
+
+bool WhiteListFile::verify_write_access(const std::string& user,const std::vector<std::string>& paths,const mymap& user_path_map) const
+{
+   mymap::const_iterator it = user_path_map.find(user);
+   if (it != user_path_map.end()) {
+
+      const std::vector<std::string>& allowed_paths = it->second;
+      if (allowed_paths.empty()) return true; // user  # write user with no paths specified
+
+      // if we get here we have:
+      // user /a/b/ c                      # user who has paths specified
+      if ( paths.empty())  return false;// # input path is empty deny access
+
+      size_t allowed_paths_size = allowed_paths.size();
+      for(size_t i = 0; i < paths.size(); i++) {
+         bool found_path_in_allowed_paths = false;
+         for(size_t ap = 0; ap < allowed_paths_size; ap++) {
+            string::size_type fnd = allowed_paths[ap].find(paths[i]);
+            if (fnd != std::string::npos && fnd == 0) {
+               found_path_in_allowed_paths = true;
+               continue;
+            }
+         }
+         if (!found_path_in_allowed_paths) return false;
+      }
+      return true;
+   }
+   return false;
+}
+
+bool WhiteListFile::verify_write_access(const std::string& user,const std::string& path,const mymap& user_path_map) const
+{
+   mymap::const_iterator it = user_path_map.find(user);
+   if (it != user_path_map.end()) {
+
+      const std::vector<std::string>& allowed_paths = it->second;
+      if (allowed_paths.empty()) return true;   // user  # write user with no paths specified
+
+      // if we get here we have:
+      // user /a/b/ c                      # user who has paths specified
+      if ( path.empty())  return false; // # input path is empty deny access
+
+      size_t allowed_paths_size = allowed_paths.size();
+      for(size_t ap = 0; ap < allowed_paths_size; ap++) {
+         string::size_type fnd = allowed_paths[ap].find(path);
+         if (fnd != std::string::npos && fnd == 0) {
+            // found path in allowed paths
+            return true;
+         }
+      }
+   }
+   return false;
+}
+
 
 bool WhiteListFile::load(const std::string& file, bool debug, std::string& errorMsg )
 {
