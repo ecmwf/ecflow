@@ -346,6 +346,7 @@ class Trigger(Attribute):
 
     def __init__(self, expr, unk=False, anded=True):
         self.expr = ""
+        self.load = None
         if expr is None or expr == "":
             return
         if type(expr) == str:
@@ -437,6 +438,7 @@ class Trigger(Attribute):
         else:
             raise Exception("what? trigger?", type(expr))
 
+        if self.expr: self.load = ecflow.Expression(self.expr)
         if "YMD+1" in self.expr: raise Exception(self.expr)
         # NO_EXTERN_ALONE = 0 # set to 1 for test/activate
 
@@ -665,38 +667,40 @@ class Defstatus(Attribute):
                      "submitted": ecflow.DState.submitted,
                      "unknown": ecflow.DState.unknown,
                      "queued": ecflow.DState.queued, }
-            self.load = kinds[kind]
+            self.load = ecflow.Defstatus(kinds[kind])
         else: self.load = kind
 
     def add_to(self, node):
-        node.load.add_defstatus(self.load)
+        if type(node) in (Suite, Family, Task):
+            node.load.add_defstatus(self.load)
+        else: node.add_defstatus(self.load)
         return node
 
 
-class Defcomplete(Defstatus):
-    """ wrapper to add defstatus complete """
+# class Defcomplete(Defstatus):
+#     """ wrapper to add defstatus complete """
 
-    def __init__(self):
-        pass
+#     def __init__(self):
+#         pass
 
-    def add_to(self, node):
-        node.add(Defstatus("complete"))
-        return node
+#     def add_to(self, node):
+#         node.add(Defstatus("complete"))
+#         return node
 
 
-class DefcompleteIf(Defcomplete):
-    """ wrapper to add conditional defstatus complete
-    just change name to make it explicit """
+# class DefcompleteIf(Defcomplete):
+#     """ wrapper to add conditional defstatus complete
+#     just change name to make it explicit """
 
-    def __init__(self, arg=True):
-        self.load = arg
+#     def __init__(self, arg=True):
+#         self.load = arg
 
-    def add_to(self, node):
-        if self.load:
-            node.add(Defstatus("complete"))
-        # else: node.defstatus("queued") # in comment to prevent
-        # overwrite when using multiple defcomplete
-        return node
+#     def add_to(self, node):
+#         if self.load:
+#             node.add(Defstatus("complete"))
+#         # else: node.defstatus("queued") # in comment to prevent
+#         # overwrite when using multiple defcomplete
+#         return node
 
 
 class Limit(Attribute):
@@ -784,8 +788,9 @@ class Late(Attribute):
 
 def python_true(key, val):
     if "%s" % val == "True":
-        if key == "HYPERTHREADING": return  # OK
-        print("WAR: really???", key, val)
+        if key in("HYPERTHREADING"
+                  "USE_HUGEPAGE"): return  # OK
+        print("#WAR: really???", key, val)
 
 
 class Edit(Attribute):
@@ -855,9 +860,13 @@ class Edit(Attribute):
         if self.load is not None:
             edit = "%s" % self.load
             if "CPUTIME" in edit and not CPUTIME: pass
-            else: node.load.add_variable(self.load)
-            if node.fullname() == "/o" and "QUEUE 'emos" in edit:
-                raise Exception(node.fullname(), edit)
+            elif node in (Suite, Family, Task):
+                node.load.add_variable(self.load)
+            else: 
+                node.add_variable(self.load)
+            if node.name() == "o" and "QUEUE 'emos" in edit:
+                raise Exception(node.name(), edit)
+
             if 1:  # try:  # Operators' request
                 labels = {"WSHOST": "infopws",
                           "SCHOST":"infopsc",
@@ -1131,28 +1140,28 @@ class Node(Root): # from where Task and Family derive
     def name(self):
         return self.load.name()
 
-    def event(self, name=1):
-        """ add event attribute"""
-        if USE_EVENT:
-            self.load.add_event(name)
-        return self
+    # def event(self, name=1):
+    #     """ add event attribute"""
+    #     if USE_EVENT:
+    #         self.load.add_event(name)
+    #     return self
 
-    def meter(self, name, start, end, threshold=None):
-        """ add meter attribute"""
-        if threshold is None:
-            threshold = end
-        self.load.add_meter(name, start, end, threshold)
-        return self
+    # def meter(self, name, start, end, threshold=None):
+    #     """ add meter attribute"""
+    #     if threshold is None:
+    #         threshold = end
+    #     self.load.add_meter(name, start, end, threshold)
+    #     return self
 
-    def label(self, name, default=""):
-        """ add label attribute"""
-        self.load.add_label(name, default)
-        return self
+    # def label(self, name, default=""):
+    #     """ add label attribute"""
+    #     self.load.add_label(name, default)
+    #     return self
 
-    def edit(self, name, value=""):
-        """ add variable attribute"""
-        self.load.add_variable(name, value)
-        return self
+    # def edit(self, name, value=""):
+    #     """ add variable attribute"""
+    #     self.load.add_variable(name, value)
+    #     return self
 
     def variable(self, name, value=""): return self.edit(name, value)
 
@@ -1338,7 +1347,9 @@ class Family(Node, Attribute):
         if parent: raise Exception("already attached...",
                                    parent.name(),
                                    node.name(), self.name())
-        node.load.add_family(self.load)
+        if type(node) in (Suite, Family, Task):
+            node.load.add_family(self.load)
+        else: node.add_family(self.load)
 
     def nodes(self): return [node for node in self.load.nodes]
     # def __enter__(self): return self
@@ -1360,7 +1371,10 @@ class Task(Node, Attribute):
     #         self.load.add(ecflow.Variable(key, val))
 
     def add_to(self, node):
-        node.load.add_task(self.load)
+        if type(node) in (Family, Suite):
+            node.load.add_task(self.load)
+            return
+        node.add_task(self.load)
 
     def add_family(self, node):
         raise Exception(self.name(), node.name(), self.fullname())
