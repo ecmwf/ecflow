@@ -33,7 +33,7 @@ const std::string& Ecf::MICRO() { static const std::string MICRO= "%";return MIC
 const std::string& Ecf::JOB_CMD() { static const std::string JOB_CMD= "%ECF_JOB% 1> %ECF_JOBOUT% 2>&1";return JOB_CMD;}
 const std::string& Ecf::KILL_CMD() { static const std::string KILL_CMD= "kill -15 %ECF_RID%";return KILL_CMD;}     // "${ECF_KILL:=/home/ma/emos/bin/ecfkill}   %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.kill 2>&1";
 const std::string& Ecf::STATUS_CMD() { static const std::string STATUS_CMD= "ps --pid %ECF_RID% -f > %ECF_JOB%.stat 2>&1";return STATUS_CMD;}// "${ECF_STAT:=/home/ma/emos/bin/ecfstatus} %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1";
-const std::string& Ecf::CHECK_CMD() { static const std::string CHECK_CMD= "ps --pid %ECF_RID% -f > %ECF_JOB%.stat && cat %ECF_JOB%.stat";return CHECK_CMD ;}
+const std::string& Ecf::CHECK_CMD() { static const std::string CHECK_CMD= "ps --pid %ECF_RID% -f";return CHECK_CMD ;}
 const std::string& Ecf::URL_CMD() { static const std::string URL_CMD= "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'";return URL_CMD;}
 const std::string& Ecf::URL_BASE() { static const std::string URL_BASE= "https://software.ecmwf.int";return URL_BASE;}
 const std::string& Ecf::URL() { static const std::string URL = "wiki/display/ECFLOW/Home";return URL;}
