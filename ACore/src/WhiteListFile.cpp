@@ -22,7 +22,6 @@
 #include "File.hpp"
 #include "Str.hpp"
 #include "Log.hpp"
-#include "NodePath.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -132,28 +131,24 @@ static bool path_access(const std::vector<std::string>& paths,const std::vector<
    //    /ecflow/fred               /ecflow/freddy      FALSE
    //    /ecflow/fred               /ecflow/fred/me     TRUE
 
-   std::vector<std::string> path_split;
-   std::vector<std::string> allowed_path_split;
    size_t allowed_paths_size = allowed_paths.size();
    size_t paths_size = paths.size();
    for(size_t i = 0; i < paths_size; i++) {
-      path_split.clear();
-      NodePath::split(paths[i], path_split);
-
+      const std::string& path = paths[i];
       bool found_path_in_allowed_paths = false;
+
       for(size_t ap = 0; ap < allowed_paths_size; ap++) {
-         if (paths[i].find(allowed_paths[ap]) == 0) {
-
-            allowed_path_split.clear();
-            NodePath::split(allowed_paths[ap],allowed_path_split );
-            size_t allowed_path_split_size = allowed_path_split.size();
-            if (allowed_path_split_size > path_split.size()) continue;
-
-            bool match = true;
-            for(size_t p=0; p < allowed_path_split_size;p++) {
-               if (allowed_path_split[p] != path_split[p]) { match = false; break;}
+         const std::string& allowed_path = allowed_paths[ap];
+//         cout << "path " << path << "\n";
+//         cout << "allowed_path " <<  allowed_path << "\n";
+//         if (path.size() > allowed_paths[ap].size()) {
+//            cout << "path[allowed_path.size()] " << path[ allowed_path.size()] << "\n";
+//         }
+         if (path.find(allowed_path) == 0) {
+            if (path.size() > allowed_path.size() && path[allowed_path.size()] != '/') {
+               // FALSE case above
+               continue;
             }
-            if (!match) continue; // no match
 
             found_path_in_allowed_paths = true;
             continue; // all paths must match, or fail
@@ -169,26 +164,16 @@ static bool path_access(const std::string& path,const std::vector<std::string>& 
    if (allowed_paths.empty()) return true;
    if (path.empty())  return false;
 
-   std::vector<std::string> path_split;
-   std::vector<std::string> allowed_path_split;
-
    size_t allowed_paths_size = allowed_paths.size();
    for(size_t ap = 0; ap < allowed_paths_size; ap++) {
-      string::size_type fnd = path.find(allowed_paths[ap]);
-      if (fnd == 0) {
-         // found path in allowed paths
+      const std::string& allowed_path = allowed_paths[ap];
 
-         if ( path_split.empty()) NodePath::split(path,path_split); // only create one, if required
-         NodePath::split(allowed_paths[ap], allowed_path_split);
-         if (allowed_path_split.size() > path_split.size()) continue;
-
-         bool match = true;
-         size_t allowed_path_split_size = allowed_path_split.size();
-         for(size_t p=0; p < allowed_path_split_size;p++) {
-            if (allowed_path_split[p] != path_split[p]) { match = false; break;}
+      if (path.find(allowed_path)  == 0) {
+         // found path in allowed paths, check correct SUB_PATH
+         if (path.size() > allowed_path.size() && path[allowed_path.size()] != '/') {
+            // FALSE case above
+            continue;
          }
-         if (!match) continue;
-
          return true;
       }
    }
