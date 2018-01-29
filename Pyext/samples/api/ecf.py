@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding=utf-8
-# This software is provided under the ECMWF standard software license agreement.
+# This software is provided under the ECMWF standard software license
+# agreement.
 """ a layer over raw ecflow api
 
 use 'export ECF_DEBUG_LEVEL=10' to remove warning message related to
@@ -10,6 +11,11 @@ specialisation module for ecFlow nodes/attributes:
 initially it was simple derivation
 then it is composition
 
+
+https://pypi.python.org/pypi/anytree
+pip install anytree --user
+
+20180126 https://www.python.org/dev/peps/pep-0343/
 """
 from __future__ import print_function    # (at top of module)
 import sys
@@ -31,8 +37,11 @@ except:
     loc = "/usr/local/lib/python2.7/site-packages"
     sys.path.append(loc)
     import ecflow
-# import ecflow; 
+# import ecflow;
 ecflow.Ecf.set_debug_level(3)
+
+global DEFS
+DEFS = None  # general case when not in parameters.py
 
 DEBUG = 0
 DECORATE = "ALL"
@@ -55,7 +64,83 @@ elif DECORATE == "ALL":
     USE_TRIGGER = True
     USE_LIMIT = True
     USE_EVENT = True
-else: raise Exception
+else:
+    raise Exception
+
+
+class CWN(object):
+    __CDP = False
+    __CWN = []
+
+    @classmethod
+    def cdp(cls, active=False):
+        CWN.__CDP = active
+        if active and CWN.is_empty():
+            return
+        print("#DBG: CWN reset")
+        CWN.__CWN = []
+
+    @classmethod
+    def is_empty(cls): return len(CWN.__CWN) == 0
+
+    @classmethod
+    def pop(cls):
+        if CWN.is_empty():
+            return
+        # if 1: raise
+        print("#BDG: pop")
+        CWN.__CWN.pop()
+
+    @classmethod
+    def last(cls):
+        if CWN.is_empty():
+            return None
+        return CWN.__CWN[-1]
+
+    def __init__(self, item=None):
+        def name(item):
+            if type(item) in (Event, Meter, Label):
+                print("#BDG:", type(item), "%s" % item.real())
+            else:
+                print("#BDG:", type(item), item.real().name())
+
+        if item is None or not CWN.__CDP:
+            # print("#BDG: no item")
+            return
+
+        if type(item) == Suite and CWN.is_empty():
+            global DEFS
+            if DEFS is None:
+                DEFS = Defs()
+                DEFS.add_suite(item)
+            CWN.__CWN.append(item)
+            print("#BDG: append suite", item.name())
+            return
+
+        if id(item) == id(CWN.last()):  # __eq__ is used for trigger str
+            return
+
+        if type(item) == Suite:
+            if not CWN.is_empty():
+                print("#WAR: changing CWN from", CWN.__CWN.name(), "to",
+                      item.name())
+            CWN.__CWN.append(item)
+        elif item is None: pass
+        # print("#WAR: no attachment item is None", type(item))
+        elif item.real() == None: pass
+        # print("#WAR: no attachment", item.name(), type(item))
+        elif CWN.is_empty():
+            raise Exception("#ERR: no node!")
+        else:
+            if type(CWN.last()) == Task and type(item) in (Task, Family):
+                CWN.pop()
+            # print("#DBG:", CWN.last().name(), type(item))
+            name(item)
+            item.add_to(CWN.last())
+            if type(item) in (Task, Family):
+                # print("#DBG: append", item.name(), type(item))
+                CWN.__CWN.append(item)
+            # else: print("#DBG: add", type(item), "to", CWN.last().name())
 
 
 def get_username():
@@ -65,16 +150,24 @@ def get_username():
 def get_uid():
     return pwd.getpwnam(get_username()).pw_uid
 
+
 def obsolete():
-    if 1: return
-    if 1: raise Exception
+    if 1:
+        return
+    if 1:
+        raise Exception
+
 
 def raise_int(arg):
-    if 0: return
-    if "/none" in arg: raise Exception("None!!!", arg)
-    if arg in ("1==0", "0==1", "1==1", "0==0"): return
+    if 0:
+        return
+    if "/none" in arg:
+        raise Exception("None!!!", arg)
+    if arg in ("1==0", "0==1", "1==1", "0==0"):
+        return
     if arg[0] in ("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"):
         raise Exception("please add ./", arg)
+
 
 def set_raw_mode(kind=True):
     import sms2ecf
@@ -83,7 +176,9 @@ def set_raw_mode(kind=True):
 
 LINKTASK = False  # FD
 # LINKTASK = True  # RD mode v we turn task into families,
-                   # with a leaf a task matching script name
+# with a leaf a task matching script name
+
+
 def linktask(name, real="get", add=None, fam=None, task=True):
     """ give a change to avoid UNIX links time consuming for maintenance, update
     perforce git
@@ -91,21 +186,27 @@ def linktask(name, real="get", add=None, fam=None, task=True):
     real: script/task wrapper name
     add: attributes that shall be added to the leaf task, eg Label, Event, Meter
     """
-    if fam is None: fam = name
+    if fam is None:
+        fam = name
     try:
         import parameters as ip
         # if ip.USER == "rdx": global LINKTASK; LINKTASK = True  # acceptance
         # if ip.USER == "emos": global LINKTASK; LINKTASK = False  # acceptance
-    except: pass
-    if LINKTASK: return Task(name)  # RD???
+    except:
+        pass
+    if LINKTASK:
+        return Task(name)  # RD???
     return Family(fam).add(
         Task(real).add(add, If(task, Edit("TASK", name))))
 
 
 def translate(name, value=None):
     """ Translate from sms to ecflow """
-    try: import sms2ecf
-    except: return name, value
+    try:
+        import sms2ecf
+    except:
+        return name, value
+
     def is_sms():
         if sys.argv[-1] in ("sms", "od3", "ode", "map", "od", "od2", "ligarius"):
             sms2ecf.ECF_MODE = "sms"
@@ -116,37 +217,46 @@ def translate(name, value=None):
         return sms2ecf.translate(name, value)
     return name, value
 
-
-DEFS = None  # general case when not in parameters.py
 # USE_EXTERN = 1
 # NO_EXTERN_ALONE = 0 # set to 1 for test/activate
+
+
 class Extern(object):
     """ extern may be collected and added as soon as Defs is created """
 
     def __init__(self, path):
-        if type(path) in (tuple, list, str): pass
-        else: raise Exception
+        if type(path) in (tuple, list, str):
+            pass
+        else:
+            raise Exception
 
         try:
             import parameters as ip
             if type(path) in (tuple, list):
-                for item in path: Extern(item)
+                for item in path:
+                    Extern(item)
             elif type(path) in (str, ):
                 ip.DEFS.load.add_extern(path)
             return
         except:
             global DEFS
-            if DEFS is None: DEFS = Defs()
+            if DEFS is None:
+                DEFS = Defs()
 
         if type(path) == tuple or type(path) == list:
-            for ppp in path: Extern(ppp)
+            for ppp in path:
+                Extern(ppp)
 
         elif type(path) == str:
-            if DEBUG: print("#MSG: extern", path)
-            if ":" in path: Extern(path.split(":")[0])
-            elif DEFS: DEFS.load.add_extern(path)
+            if DEBUG:
+                print("#MSG: extern", path)
+            if ":" in path:
+                Extern(path.split(":")[0])
+            elif DEFS:
+                DEFS.load.add_extern(path)
 
-        elif path is None: pass
+        elif path is None:
+            pass
 
         else:
             raise Exception(type(path), path)
@@ -177,7 +287,8 @@ class State(object):
         if type(arg) == str:
             if type(arg[0]) == int:
                 add = "./"
-            else: add = ""
+            else:
+                add = ""
             return add + arg + " == " + self.state
         elif isinstance(arg, Node):
             return arg.fullname() + " == " + self.state
@@ -190,7 +301,8 @@ class State(object):
         if type(arg) == str:
             if type(arg[0]) == int:
                 add = "./"
-            else: add = ""
+            else:
+                add = ""
             return add + arg + " != " + self.state
         elif isinstance(arg.load, ecflow.Node):
             return arg.load.get_abs_node_path() + " != " + self.state
@@ -216,8 +328,14 @@ UNKNOWN = State("unknown")
 class Attribute(object):
     """ generic attribute to be attached to a node"""
 
-    def __init__(self): 
+    def __init__(self):
         self.load = None
+        # CWN(self)
+
+    def __enter__(self): CWN(self)
+
+    def __exit__(self, type, value, traceback): pass
+    # def __exit__(self): pass
 
     def add_to(self, node):
         """ use polymorphism to attach attribute to a node"""
@@ -226,7 +344,7 @@ class Attribute(object):
     def __get_attr__(self, attr):
         return getattr(self.load, attr)
 
-    def real(self): 
+    def real(self):
         return self.load
 
 
@@ -235,18 +353,22 @@ class Label(Attribute):
 
     def __init__(self, name, msg=""):
         self.load = ecflow.Label(name, msg)
+        CWN(self)
 
     def add_to(self, node):
         """add_label"""
         node.load.add_label(self.load)
         return node
 
+
 class Meter(Attribute):
     """wrap around meter"""
 
     def __init__(self, name, beg, end, thr=None):
-        if thr is None: thr = end
+        if thr is None:
+            thr = end
         self.load = ecflow.Meter(name, beg, end, thr)
+        CWN(self)
 
     def add_to(self, node):
         """ add_meter"""
@@ -259,6 +381,7 @@ class Event(Attribute):
 
     def __init__(self, name):
         self.load = ecflow.Event(name)
+        CWN(self)
 
     def add_to(self, node):
         """ add_event"""
@@ -281,13 +404,16 @@ class Inlimit(Attribute):
                 path = ""
             if name is None:
                 raise Exception
-            if '-prod' in name: name = name.split('-')[0]  # vdiss-prod
-            if '-' in name: name = name.replace('-', '_')
+            if '-prod' in name:
+                name = name.split('-')[0]  # vdiss-prod
+            if '-' in name:
+                name = name.replace('-', '_')
             if "None" in path or "None" in name:
                 raise Exception(path, name, fullpath)
             self.load = ecflow.InLimit(name, path)
             self.path_ = path
             self.name_ = name
+            CWN(self)
 
     def add_to(self, node):
         """ add_inlimit"""
@@ -307,15 +433,20 @@ class Inlimit(Attribute):
         return self.name_
 
 
-class InLimit(Inlimit): pass
+class InLimit(Inlimit):
+    pass
 
 
 def item_to_string(prev, index, name):
     """ index not used... """
-    if name is None: return ""
-    if name is "": return prev
-    if "<main>" in name: raise Exception
-    if "==" in name: return name
+    if name is None:
+        return ""
+    if name is "":
+        return prev
+    if "<main>" in name:
+        raise Exception
+    if "==" in name:
+        return name
     if len(name) > 0:
         if name[0].isdigit():
             pre = "./"  # "0123456789":
@@ -323,7 +454,8 @@ def item_to_string(prev, index, name):
     if prev is None or prev == "":
         if ':' in name or name == "":
             return name
-        else: return "%s == complete" % name
+        else:
+            return "%s == complete" % name
     if ' or ' in name:
         if "complete" in name:
             return prev + "%s" % name
@@ -350,21 +482,24 @@ class Trigger(Attribute):
         if expr is None or expr == "":
             return
         if type(expr) == str:
-            if "%s" in expr: raise Exception("ERR:", expr)
-            if "%d" in expr: raise Exception("ERR:", expr)
+            if "%s" in expr:
+                raise Exception("ERR:", expr)
+            if "%d" in expr:
+                raise Exception("ERR:", expr)
             self.expr = expr
             try:
-              import parameters as ip
-              dim = len(ip.SELECTION)
-              for ploc in expr.split():
-                if ploc[0] == '/' and ip.SELECTION != ploc[1:dim + 1]:
-                    if ploc in ("eq", "ne", "==", "!=", "and", "or",
-                                "active", "complete", "queued", ):
-                        continue
-                    if ploc.isdigit():
-                        continue
-                    Extern(ploc.replace("==complete", "").replace(")", ""))
-            except: pass
+                import parameters as ip
+                dim = len(ip.SELECTION)
+                for ploc in expr.split():
+                    if ploc[0] == '/' and ip.SELECTION != ploc[1:dim + 1]:
+                        if ploc in ("eq", "ne", "==", "!=", "and", "or",
+                                    "active", "complete", "queued", ):
+                            continue
+                        if ploc.isdigit():
+                            continue
+                        Extern(ploc.replace("==complete", "").replace(")", ""))
+            except:
+                pass
             # NO_EXTERN_ALONE = 0 # set to 1 for test/activate
             return
         if type(expr) == tuple:
@@ -373,10 +508,13 @@ class Trigger(Attribute):
 
         if type(expr) == Task:
             pnode = expr.fullname()
-            if pnode[0] != '/': pnode = expr.name()
+            if pnode[0] != '/':
+                pnode = expr.name()
             try:
-                if ic.psel() not in pnode: pnode = expr.name()
-            except: pass
+                if ic.psel() not in pnode:
+                    pnode = expr.name()
+            except:
+                pass
             # if 1: raise Exception("really?", pnode)
             self.expr += item_to_string(None, 0, pnode)
 
@@ -386,23 +524,29 @@ class Trigger(Attribute):
                     continue
                 pre = ""
 
-                if name is None: continue
+                if name is None:
+                    continue
                 if type(name) in (set, list, tuple):
                     print("#WAR: please avoid list in list", expr, name)
-                    if 1: print("#WAR: list in list")
-                    elif 1: raise Exception("please avoid list in list", expr, name)
+                    if 1:
+                        print("#WAR: list in list")
+                    elif 1:
+                        raise Exception(
+                            "please avoid list in list", expr, name)
                     name = ""
                     for index, another in enumerate(name):
                         name += item_to_string(name, index, another)
                 elif type(name) in (Node, Task, Family, Suite):
-                    if DEBUG: print(name.name())
+                    if DEBUG:
+                        print(name.name())
                     fullname = name.fullname()
                     if fullname[0] == '/':
                         try:
                             import inc_common as ic
                             if ic.psel() not in fullname:
                                 fullname = name.name()
-                        except: print("#WAR: trigger expcept")
+                        except:
+                            print("#WAR: trigger expcept")
                     name = fullname
                 elif type(name) in (ecflow.Task, ecflow.Family):
                     name = name.name()
@@ -411,13 +555,16 @@ class Trigger(Attribute):
                 else:
                     raise Exception(type(name), name)
 
-                if "==" in name: pass
+                if "==" in name:
+                    pass
                 elif len(name) > 0:
                     # if "==" in name: pass
                     # if "1==0" in name or "0==1" in name or "1==1" in name: pass
-                    if name[0].isdigit(): pre = "./"  # "0123456789":
+                    if name[0].isdigit():
+                        pre = "./"  # "0123456789":
 
-                self.expr = item_to_string(self.expr, index, name); continue ##
+                self.expr = item_to_string(self.expr, index, name)
+                continue
 
         elif type(expr) in (ecflow.Expression,
                             ecflow.PartExpression):
@@ -430,16 +577,19 @@ class Trigger(Attribute):
                     import inc_common as ic
                     if ic.psel() not in fullname:
                         fullname = name.name()
-                except: print("#WAR: trigger expcept")
+                except:
+                    print("#WAR: trigger expcept")
             self.expr = fullname
             # check full name is really full name, not /name
             # print("#REM:", self.expr)
-            if self.expr == "/%s" % expr.name(): self.expr = expr.name()
+            if self.expr == "/%s" % expr.name():
+                self.expr = expr.name()
         else:
             raise Exception("what? trigger?", type(expr))
 
-        if self.expr: self.load = ecflow.Expression(self.expr)
         if "YMD+1" in self.expr: raise Exception(self.expr)
+        self.load = "trigger"  # ecflow.Trigger(self.expr)
+        CWN(self)
         # NO_EXTERN_ALONE = 0 # set to 1 for test/activate
 
     def expression(self):
@@ -455,6 +605,7 @@ class Trigger(Attribute):
         else:
             node.load.add_part_trigger(ecflow.PartExpression(self.expr, True))
         return node
+
 
 class TriggerImpossible(Trigger):
     """attribute to be added to node when it is not expected to run any task"""
@@ -480,7 +631,8 @@ class Complete(Trigger):
 
     def add_to(self, node):
         if USE_TRIGGER and self.expr is not None:
-            if "%s" in self.expr: raise Exception
+            if "%s" in self.expr:
+                raise Exception
             node.load.add_complete(self.expr)
         return node
 
@@ -507,6 +659,7 @@ class Clock(Attribute):
                 self.load = ecflow.Clock(hybrid)
         else:
             self.load = ecflow.Clock(arg)
+        CWN(self)
 
     def add_to(self, node):
         if type(node) != Suite:
@@ -536,12 +689,14 @@ class Autocancel(Attribute):
         return node
 
 
-class Autocancel(Autocancel): pass
+class Autocancel(Autocancel):
+    pass
 
 
 class Script(Attribute):
+
     def __init__(self, script):
-      self._script = script
+        self._script = script
 
     def add_to(self, node):
         print("#WAR: Script attribute, not yet ... ignored")
@@ -558,6 +713,7 @@ class Time(Attribute):
         if USE_TIME and self.load is not None:
             node.load.add_time(self.load)
         return node
+
 
 class Today(Time):
     """ wrapper to add time """
@@ -597,7 +753,8 @@ class Cron(Time):
     def add_to(self, node):
         if USE_TIME and self.load is not None:
             node.load.add_cron(self.load)
-        else: print("#WAR: ignoring: %s" % self.load)
+        else:
+            print("#WAR: ignoring: %s" % self.load)
         return node
 
 
@@ -714,10 +871,12 @@ class Limit(Attribute):
     def add_to(self, node):
         if USE_LIMIT and self.name is not None:
             if type(self.name) is dict:
-                if LINKTASK: items = self.name.items()   # 45r1 COMPARE
-                else: items = sorted(self.name.items())  # EMOS prefers
+                if LINKTASK:
+                    items = self.name.items()   # 45r1 COMPARE
+                else:
+                    items = sorted(self.name.items())  # EMOS prefers
                 for name, size in items:
-                # for name in sorted(self.name.keys()):
+                    # for name in sorted(self.name.keys()):
                     size = self.name[name]
                     node.load.add_limit(name, size)
                     if self.addi:
@@ -726,10 +885,12 @@ class Limit(Attribute):
                         pass
             else:
                 node.load.add_limit(self.name, self.size)
-                if self.addi: node.load.add_inlimit(name)
+                if self.addi:
+                    node.load.add_inlimit(name)
         return node
 
 # class Limits(Limit): pass
+
 
 class Late(Attribute):
     """ wrapper around late, to be add'ed to families and tasks """
@@ -780,9 +941,11 @@ class Late(Attribute):
 
     def add_to(self, node):
         if USE_LATE and self.load is not None:
-            try: node.load.add_late(self.load)
+            try:
+                node.load.add_late(self.load)
             except:
-                if DEBUG: print("#WAR: late is already attached")
+                if DEBUG:
+                    print("#WAR: late is already attached")
         return node
 
 
@@ -869,20 +1032,24 @@ class Edit(Attribute):
 
             if 1:  # try:  # Operators' request
                 labels = {"WSHOST": "infopws",
-                          "SCHOST":"infopsc",
+                          "SCHOST": "infopsc",
                           "HOST": "infophs", }
                 # if "seas" in ip.SELECTION: pass
                 for key in labels.keys():
-                  try:
-                    if "ECF_JOB_CMD" in edit:
-                        find = "%" + key + "%"
-                        if find in edit: node.add_label("infopcmd", key)
-                    else:
-                        find = "edit %s " % key
-                        if find in edit: node.add_label(
-                                labels[key], edit.replace(find, ""))
-                  except: pass
-        if self.next is not None: self.next.add_to(node)
+                    try:
+                        if "ECF_JOB_CMD" in edit:
+                            find = "%" + key + "%"
+                            if find in edit:
+                                node.add_label("infopcmd", key)
+                        else:
+                            find = "edit %s " % key
+                            if find in edit:
+                                node.add_label(
+                                    labels[key], edit.replace(find, ""))
+                    except:
+                        pass
+        if self.next is not None:
+            self.next.add_to(node)
         return node
 
     def add(self, what):
@@ -893,10 +1060,12 @@ class Edit(Attribute):
             raise Exception(type(what))
 
 
-class Variable(Edit): pass
+class Variable(Edit):
+    pass
 
 
-class Variables(Edit): pass
+class Variables(Edit):
+    pass
 
 
 class Repeat(Attribute):
@@ -905,7 +1074,8 @@ class Repeat(Attribute):
     def __init__(self, name="YMD", start=20120101, end=21010101,
                  step=1, kind="date"):
         if kind in "date":
-            self.load = ecflow.RepeatDate(name, int(start), int(end), int(step))
+            self.load = ecflow.RepeatDate(
+                name, int(start), int(end), int(step))
         elif "int" in kind:
             self.load = ecflow.RepeatInteger(
                 name, int(start), int(end), int(step))
@@ -940,7 +1110,8 @@ def If(test=True, then=None, otow=None, *args):
         try:
             print(then.name())
             print(otow.name())
-        except: pass
+        except:
+            pass
         # print(args[0].name())
         raise Exception("test",
                         test, "\nthen\n",
@@ -954,10 +1125,19 @@ def If(test=True, then=None, otow=None, *args):
 class Root(object):  # from where Suite and Node derive
     """ generic tree node """
 
-    def __init__(self): self.load = None  # to be filled with ecFlow item
+    def __init__(self):
+        self.load = None  # to be filled with ecFlow item
+        # CWN(self)
 
-    def real(self): 
+    def real(self):
         return self.load
+
+    def __enter__(self):
+        # CWN(self)
+        raise Exception("#ERR: this shall be overwritten by kid")
+
+    def __exit__(self, type, value, traceback):
+        CWN.pop()
 
     def __get_attr__(self, attr): return getattr(self.load, attr)
 
@@ -969,10 +1149,15 @@ class Root(object):  # from where Suite and Node derive
     def __repr__(self):
         return "%s" % self.load
 
+    def is_eq(self, node):
+        return super(self, __eq__), (self, node)
+
     def __eq__(self, node):
+        if 1:
+            raise Exception
         if isinstance(self.load, ecflow.Node):
             return "%s == " % self + str(node)
-        return False
+        return self  # False
 
     def __ne__(self, node):
         if isinstance(self.load, ecflow.Node):
@@ -1006,7 +1191,8 @@ class Root(object):  # from where Suite and Node derive
             self.add(Repeat(name, start, kind=kind))
         elif kind == "day":
             self.add(Repeat(step, kind="day"))
-        else: raise Exception
+        else:
+            raise Exception
         return self
 
     def defstatus(self, kind):
@@ -1021,8 +1207,10 @@ class Root(object):  # from where Suite and Node derive
                      "unknown": ecflow.DState.unknown,
                      "queued": ecflow.DState.queued, }
             status = kinds[kind]
-        elif type(kind) == ecflow.DState: pass
-        else: raise Exception("defstatus?")
+        elif type(kind) == ecflow.DState:
+            pass
+        else:
+            raise Exception("defstatus?")
         self.load.add_defstatus(status)
         return self
 
@@ -1034,7 +1222,8 @@ class Root(object):  # from where Suite and Node derive
 
     def add(self, item=None, *args):
         """ add a task, a family or an attribute """
-        if DEBUG: print(self.fullname(), item, args)
+        if DEBUG:
+            print(self.fullname(), item, args)
 
         if item is not None:
             if type(item) == tuple:
@@ -1055,7 +1244,8 @@ class Root(object):  # from where Suite and Node derive
             elif type(args) == list:
                 for val in args:
                     self.add(val)
-            else: raise Exception
+            else:
+                raise Exception
             return self
 
         if not isinstance(self.load, ecflow.Node):
@@ -1085,51 +1275,63 @@ class Root(object):  # from where Suite and Node derive
 
     # follow pyflow
     shape = None
-    def draw_tree(self): dot = Dot(fullnames=False); self._tree(dot); return dot
+
+    def draw_tree(self): dot = Dot(fullnames=False)
+    self._tree(dot)
+    return dot
 
     def _tree(self, dot):
-      try: dot.edge(self.load.get_parent(), self)
-      except: pass
-      for n in self.load.nodes:
-        if n.name() != '_': _tree(dot, n)
-        # if n.names[0] != '_': n._tree(dot)
+        try:
+            dot.edge(self.load.get_parent(), self)
+        except:
+            pass
+        for n in self.load.nodes:
+            if n.name() != '_':
+                _tree(dot, n)
+            # if n.names[0] != '_': n._tree(dot)
 
     def draw_graph(self):
-        dot = Dot(); self._graph(dot); dot.save("test.gv"); return dot
+        dot = Dot()
+        self._graph(dot)
+        dot.save("test.gv")
+        return dot
 
     def _graph(self, dot):
-      for n in self.load.nodes:
-        if n.name() != '_': _tree(dot, n)
-      # for n in self._nodes.values():
-      #  if n.names[0] != '_': n._tree(dot)
+        for n in self.load.nodes:
+            if n.name() != '_':
+                _tree(dot, n)
+        # for n in self._nodes.values():
+        #  if n.names[0] != '_': n._tree(dot)
 
     # @property
     def to_html(self):
-        # from .html import HTMLWrapper
+            # from .html import HTMLWrapper
         return "%s" % HTMLWrapper("%s" % self)  # .generate_node()))
 
     def _repr_html_(self): return str(self.to_html())
 
 
 def _tree(dot, node):
-      if type(node) in (ecflow.Node, ecflow.Family, ecflow.Task,
-                        ecflow.ecflow.Family, ecflow.ecflow.Task):
-          dot.edge(node.get_parent(), node)
-          for n in node.nodes:
-              if n.name() != '_': _tree(dot, n)
-      elif type(node) in (Node, Family, Task):
-          dot.edge(node.load.parent, node)
-          _tree(dot, node.load)
-      else: raise Exception(type(node))
-      #try: dot.edge(node.load.parent, self)
-      #except: pass
+    if type(node) in (ecflow.Node, ecflow.Family, ecflow.Task, ):
+        dot.edge(node.get_parent(), node)
+        for n in node.nodes:
+            if n.name() != '_':
+                _tree(dot, n)
+    elif type(node) in (Node, Family, Task):
+        dot.edge(node.load.parent, node)
+        _tree(dot, node.load)
+    else:
+        raise Exception(type(node))
+    # try: dot.edge(node.load.parent, self)
+    # except: pass
 
 
-class Node(Root): # from where Task and Family derive
+class Node(Root):  # from where Task and Family derive
     """ Node class is shared by family and task """
 
-    def __enter__(self): return self
-    def __exit__(self, exc_type, exc_val, exc_tb): pass  # return self
+    def __enter__(self): CWN(self)
+    return self
+    # def __exit__(self, exc_type, exc_val, exc_tb): pass  # return self
 
     def events(self):
         return [event for event in self.load.events]
@@ -1208,20 +1410,24 @@ class Defs(object):
     def __init__(self):
         self.load = ecflow.Defs()
 
-    def __get_attr__(self, attr): 
+    def __get_attr__(self, attr):
         return getattr(self.load, attr)
 
     def auto_add_externs(self, true): self.load.auto_add_externs(true)
+
     def check(self): self.load.check()
+
     def add_extern(self, path): self.load.add_extern(path)  # TODO list
+
     def suites(self): return [suite for suite in self.load.suites]
 
-    def add_suite(self, node): 
+    def add_suite(self, node):
         if type(node) == Suite:
             self.load.add_suite(node.load)  # TODO list
         elif type(node) == ecflow.Suite:
             self.load.add_suite(node)  # TODO list
-        else: raise Exception("what?")
+        else:
+            raise Exception("what?")
 
     def __str__(self): return "%s" % self.load
     __repr__ = __str__
@@ -1230,7 +1436,7 @@ class Defs(object):
         """ add suite """
         if type(item) == Suite:
             self.load.add_suite(item.load)
-        #elif type(item) == Extern:  # obsolete, Extern uses global DEFS var
+        # elif type(item) == Extern:  # obsolete, Extern uses global DEFS var
         #    for path in item.folk: self.load.add_extern(path)
         elif type(item) == tuple:
             for one in item:
@@ -1255,7 +1461,8 @@ class Client(object):
     """ wrapper around client """
 
     def __init__(self, host="localhost", port="31415"):
-        if host is None: host = "localhost"
+        if host is None:
+            host = "localhost"
         self.clnt = ecflow.Client(host, port)
         if "@" in host:
             host, port = host.split("@")
@@ -1271,15 +1478,19 @@ class Client(object):
             self.clnt.load(defs.load)
         elif type(defs) == ecflow.Defs:
             self.clnt.load(defs)
-        else: raise Exception("defs: really?")
+        else:
+            raise Exception("defs: really?")
 
     def replace(self, path, defs=None, parent=True, force=False):
-        if defs is None: self.clnt.replace(path, DEFS, parent, force)
+        if defs is None:
+            self.clnt.replace(path, DEFS, parent, force)
         elif type(defs) is Defs:
             self.clnt.replace(path, defs.load, parent, force)
-        else: self.clnt.replace(path, defs, parent, force)
+        else:
+            self.clnt.replace(path, defs, parent, force)
 
     def suites(self): return self.clnt.suites()
+
     def ping(self): self.clnt.ping()
 
     def __str__(self):
@@ -1291,16 +1502,19 @@ class Suite(Root):
     """ wrapper for a suite """
 
     def __enter__(self): return self
+
     def __exit__(self, exc_type, exc_val, exc_tb): pass  # return self
 
     def __init__(self, name):
         self.load = ecflow.Suite(name)
+        CWN(self)
 
     def name(self): return self.load.name()
 
     def family(self, name):
         """ add a family """
-        if "%" in name: raise Exception(name)
+        if "%" in name:
+            raise Exception(name)
         obsolete()
         fam = Family(str(name))
         self.add(fam)
@@ -1308,7 +1522,8 @@ class Suite(Root):
 
     def task(self, name):
         """ add a task """
-        if "%" in name: raise Exception(name)
+        if "%" in name:
+            raise Exception(name)
         obsolete()
         tsk = Task(name)
         self.add(tsk)
@@ -1324,10 +1539,12 @@ class Family(Node, Attribute):
 
     def __init__(self, name):
         self.load = ecflow.Family(name)
+        CWN(self)
 
     def family(self, name):
         """ add a family """
-        if "%" in name: raise Exception(name)
+        if "%" in name:
+            raise Exception(name)
         obsolete()
         fam = Family(str(name))
         self.add(fam)
@@ -1335,14 +1552,16 @@ class Family(Node, Attribute):
 
     def task(self, name):
         """ add a task """
-        if "%" in name: raise Exception(name)
+        if "%" in name:
+            raise Exception(name)
         obsolete()
         tsk = Task(name)
         self.add(tsk)
         return tsk
 
     def add_to(self, node):
-        if DEBUG: print("add: %s %s" % (node.name(), self.name()))
+        if DEBUG:
+            print("add: %s %s" % (node.name(), self.name()))
         parent = self.load.get_parent()
         if parent: raise Exception("already attached...",
                                    parent.name(),
@@ -1361,7 +1580,9 @@ class Task(Node, Attribute):
     """ wrapper around task """
 
     def __init__(self, name):
+        # super(Task, self).__init__(name)
         self.load = ecflow.Task(name)
+        CWN(self)
 
     # def __setattr__(self, key, val):
     #     # assert key.isupper()
@@ -1393,11 +1614,11 @@ def display(defs, fname=None):
 class TestEcf(unittest.TestCase):
     """ a test case aka use-case """
 
-    def test_xxx(self):
+    def xtest_xxx(self):
         """ a test """
-
+        CWN.cdp(False)
         suite = Suite("Suite").add(Clock("real"),
-                                     Autocancel(3))
+                                   Autocancel(3))
         suite.defstatus("suspended")
 
         fam = Family("Family")
@@ -1420,7 +1641,7 @@ class TestEcf(unittest.TestCase):
                 Task("t22").add(Today("14:00")),
                 Task("t23").add(Date("1.*.*")),
                 Task("t24").add(Day("monday")),
-            )
+                )
 
         fam.add(Task("t3").add(
                 If(test=(1 == 1),
@@ -1431,7 +1652,7 @@ class TestEcf(unittest.TestCase):
                    then=Edit(ADD_ONE=0),
                    otow=Edit(ADD_TWO=0)),
                 Trigger(tsk != ABORTED),
-                Complete(tsk == COMPLETE))) # longer
+                Complete(tsk == COMPLETE)))  # longer
 
         fam.add(
             Task("2t"),
@@ -1480,18 +1701,49 @@ class TestEcf(unittest.TestCase):
         print(repr(suite))  # print content
         print(defs)  # print content
         cmd = "xdg-open test.gv.pdf;"
-        cmd += "dot -Tps test.gv > test.ps && xdg-open test.ps"; os.system(cmd)
+        cmd += "dot -Tps test.gv > test.ps && xdg-open test.ps"
+        os.system(cmd)
 
+    def test_cdp_aka_pyflow(self):
+        CWN.cdp(True)
+        with Suite("test") as s1:
+            with Family("f1"):
+                with Task("t1"):
+                    Event("1")
+                    Event(2)
+                    Meter("step", -1, 120)
+                    Label("info", "msg")
+                with Task("t2"):
+                    pass
+                with Family("f2"):
+                    with Task("t3"):
+                        pass
+            print("#DBG: up*3")
+            with Family("f22"):
+                Task("t01")
+                print("#DBG: up")
+                with Task("t11"):
+                    pass
+        print("#DBG: up*2")
+        print(s1)
+        # defs = Defs().add_suite(s1)
+        print(DEFS)
+        CWN.cdp(False)
 
 # from pyflow, COMPAT
+
+
 def definition_to_html(d):
     result = []
-    for n in d.split("\n"): result.append(n)
+    for n in d.split("\n"):
+        result.append(n)
     return "<pre>%s</pre>" % ("\n".join(result),)
 
 
 class HTMLWrapper(object):
+
     def __init__(self, d): self._def = d
+
     def _repr_html_(self): return definition_to_html(self._def)
     __str__ = _repr_html_
 
@@ -1507,40 +1759,44 @@ def shapes(node):
 
 
 class Dot(object):
-  """ follow tracks from pyflow """
+    """ follow tracks from pyflow """
 
-  def __init__(self, fullnames=True):
-      from graphviz import Digraph
-      self._dot = Digraph()
-      self._nodes = {}
-      self._fullnames = fullnames
+    def __init__(self, fullnames=True):
+        try:
+            from graphviz import Digraph
+        except:
+            raise Exception("pip install --user graphviz # ???")
+        self._dot = Digraph()
+        self._nodes = {}
+        self._fullnames = fullnames
 
-  def edge(self, node1, node2):
-      self._dot.edge(self.node(node1), self.node(node2))
+    def edge(self, node1, node2):
+        self._dot.edge(self.node(node1), self.node(node2))
 
-  def node(self, node):
-      full = node.get_abs_node_path()
-      if full not in self._nodes:
-          self._nodes[full] = '%s' % node.name()
-      self._dot.node(self._nodes[full], 
-                     # fillcolor="shape",
-                     # fontcolor="blue",
-                     # fontsize=32,
-                     # width=0.5,
-                     # style="filled",
-                     # fixedsize="shape",
-                     # fixedsize="true",
-                     # label="xxx",
-                     shape=shapes(node))
-      return self._nodes[full]
+    def node(self, node):
+        full = node.get_abs_node_path()
+        if full not in self._nodes:
+            self._nodes[full] = '%s' % node.name()
+        self._dot.node(self._nodes[full],
+                       # fillcolor="shape",
+                       # fontcolor="blue",
+                       # fontsize=32,
+                       # width=0.5,
+                       # style="filled",
+                       # fixedsize="shape",
+                       # fixedsize="true",
+                       # label="xxx",
+                       shape=shapes(node))
+        return self._nodes[full]
 
-  def save(self, path, view=True):
-      if os.path.exists(path): os.unlink(path)
-      self._dot.render(path, view=view)
+    def save(self, path, view=True):
+        if os.path.exists(path):
+            os.unlink(path)
+        self._dot.render(path, view=view)
 
-  # For jupyter notbeook
-  def _repr_svg_(self):
-      return self._dot._repr_svg_()
+    # For jupyter notbeook
+    def _repr_svg_(self):
+        return self._dot._repr_svg_()
 
 
 if __name__ == '__main__':
