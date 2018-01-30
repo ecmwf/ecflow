@@ -50,8 +50,8 @@ BOOST_AUTO_TEST_CASE( test_stress )
 {
    // at 4000 : limit reached os can not create more than 3946 process
    //   Job creation failed for task /test_stress/family/t3996 could not create child process
-   int no_of_tasks_to_run = 200;
-   int run_test_for_n_seconds = 180;
+   int no_of_tasks_to_run = 300;
+   int run_test_for_n_seconds = 240;
    int max_time_for_suspended_suite_to_complete = 60;
 
    DurationTimer timer;
@@ -98,8 +98,7 @@ BOOST_AUTO_TEST_CASE( test_stress )
             if (vec[i]->get_state().first == NState::ACTIVE) no_of_active_tasks++;
             else if (vec[i]->get_state().first == NState::SUBMITTED) no_of_submitted_tasks ++;
          }
-         cout << "   " << no_of_active_tasks << " still active" << endl;
-         cout << "   " << no_of_submitted_tasks  << " still submitted" << endl;
+         cout << "   still active:" << no_of_active_tasks << "  still submitted:" << no_of_submitted_tasks << endl;
          if (no_of_active_tasks == 0 && no_of_submitted_tasks == 0 ) break;
       }
 
