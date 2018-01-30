@@ -92,12 +92,15 @@ BOOST_AUTO_TEST_CASE( test_stress )
       defs_ptr defs = TestFixture::client().defs();
       if (defs) {
          int no_of_active_tasks = 0;
+         int no_of_submitted_tasks = 0;
          std::vector<Task*> vec; defs->getAllTasks(vec);
          for(size_t i = 0; i < vec.size(); i++) {
             if (vec[i]->get_state().first == NState::ACTIVE) no_of_active_tasks++;
+            else if (vec[i]->get_state().first == NState::SUBMITTED) no_of_submitted_tasks ++;
          }
          cout << "   " << no_of_active_tasks << " still active" << endl;
-         if (no_of_active_tasks == 0) break;
+         cout << "   " << no_of_submitted_tasks  << " still submitted" << endl;
+         if (no_of_active_tasks == 0 && no_of_submitted_tasks == 0 ) break;
       }
 
       // make sure test does not take too long.
