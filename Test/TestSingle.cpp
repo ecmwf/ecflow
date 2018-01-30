@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( test_stress )
 {
    // at 4000 : limit reached os can not create more than 3946 process
    //   Job creation failed for task /test_stress/family/t3996 could not create child process
-   int no_of_tasks_to_run = 300;
+   int no_of_tasks_to_run = 250;
    int run_test_for_n_seconds = 240;
    int max_time_for_suspended_suite_to_complete = 60;
 
@@ -62,7 +62,11 @@ BOOST_AUTO_TEST_CASE( test_stress )
       suite_ptr suite = theDefs.add_suite( test_name );
       family_ptr fam = suite->add_family("family");
       for(int i=0; i < no_of_tasks_to_run ; i++) {
-         fam->add_task ( "t" + boost::lexical_cast<std::string>(i) ) ->addRepeat(RepeatDay(1));
+         task_ptr t = fam->add_task ( "t" + boost::lexical_cast<std::string>(i) );
+         t->addRepeat(RepeatDay(1));
+         t->addEvent(Event("event"));
+         t->addLabel(Label("name","value"));
+         t->addMeter(Meter("meter",0,10));
       }
    }
 
