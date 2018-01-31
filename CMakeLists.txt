@@ -53,16 +53,17 @@ ecbuild_info( "ECFLOW_VERSION           : ${ECFLOW_VERSION_STR}" )
 # Options , be aware of caching, when modifying on the command line. 
 # Ideally start fresh or remove cache CmakeCache.txt in build dir
 # =========================================================================================
-option( ENABLE_SERVER            "Build the server, can be switched off if just building UI" ON  )
-option( ENABLE_PYTHON            "enable python interface"         ON  )
-option( ENABLE_UI                "Build ecFlowUI"                  ON  ) 
-option( ENABLE_GUI               "Build ecflowview"                ON  )
-option( ENABLE_STATIC_BOOST_LIBS "Link with boost libs statically" ON  )
-option( ENABLE_ALL_TESTS         "This includes performance/migration/regression tests" OFF )
-option( ENABLE_UI_BACKTRACE      "Print a UI debug backtrace"         OFF ) 
-option( ENABLE_UI_USAGE_LOG      "Enable UI usage logging"            OFF )
-option( ENABLE_SSL               "Enable SSL encrypted communication" OFF )
-option( ENABLE_SECURE_USER       "Enable passwords for user"          OFF )
+option( ENABLE_SERVER              "Build the server, can be switched off if just building UI" ON  )
+option( ENABLE_PYTHON              "enable python interface"         ON  )
+option( ENABLE_UI                  "Build ecFlowUI"                  ON  ) 
+option( ENABLE_GUI                 "Build ecflowview"                ON  )
+option( ENABLE_STATIC_BOOST_LIBS   "Link with boost libs statically" ON  )
+option( ENABLE_ALL_TESTS           "This includes performance/migration/regression tests" OFF )
+option( ENABLE_UI_BACKTRACE        "Print a UI debug backtrace"         OFF ) 
+option( ENABLE_UI_USAGE_LOG        "Enable UI usage logging"            OFF )
+option( ENABLE_SSL                 "Enable SSL encrypted communication" OFF )
+option( ENABLE_SECURE_USER         "Enable passwords for user"          OFF )
+option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
 
 # =========================================================================================
 # Qt for ecFlowUI. 
@@ -143,14 +144,15 @@ if(ENABLE_UI_USAGE_LOG AND (NOT UI_LOG_SITE_TAG))
 endif()
 
 
-ecbuild_info( "ENABLE_SERVER            : ${ENABLE_SERVER}" )
-ecbuild_info( "ENABLE_PYTHON            : ${ENABLE_PYTHON}" )
-ecbuild_info( "ENABLE_GUI               : ${ENABLE_GUI}" )
-ecbuild_info( "ENABLE_UI                : ${ENABLE_UI}" )
-ecbuild_info( "ENABLE_ALL_TESTS         : ${ENABLE_ALL_TESTS}" )
-ecbuild_info( "ENABLE_STATIC_BOOST_LIBS : ${ENABLE_STATIC_BOOST_LIBS}" )
-ecbuild_info( "ENABLE_SSL               : ${ENABLE_SSL}" )
-ecbuild_info( "ENABLE_SECURE_USER       : ${ENABLE_SECURE_USER}" )
+ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
+ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
+ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
+ecbuild_info( "ENABLE_GUI                 : ${ENABLE_GUI}" )
+ecbuild_info( "ENABLE_UI                  : ${ENABLE_UI}" )
+ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
+ecbuild_info( "ENABLE_STATIC_BOOST_LIBS   : ${ENABLE_STATIC_BOOST_LIBS}" )
+ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL}" )
+ecbuild_info( "ENABLE_SECURE_USER         : ${ENABLE_SECURE_USER}" )
 
 
 if (ENABLE_UI)
@@ -306,7 +308,11 @@ if (ENABLE_PYTHON)
         ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
     endif()
 
-	add_subdirectory( Pyext )
+    if ( ENABLE_PYTHON_PTR_REGISTER )
+        add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
+    endif()
+	
+    add_subdirectory( Pyext )
 endif()	
 	
 if(ENABLE_UI)

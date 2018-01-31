@@ -110,7 +110,7 @@ void export_SuiteAndFamily()
    .def("__len__",   &family_len)         // Implement sized protocol for immediate children
    .def("__contains__",&family_container) // Implement container protocol for immediate children
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python<family_ptr>(); // needed for mac and boost 1.6
 #endif
 
@@ -131,7 +131,7 @@ void export_SuiteAndFamily()
    .def("get_end_clock", &Suite::clock_end_attr,"Return the suite's end clock. Can be NULL")
    .def("begun",     &Suite::begun, "Returns true if the `suite`_ has begun, false otherwise")
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python<suite_ptr>(); // needed for mac and boost 1.6
 #endif
 }

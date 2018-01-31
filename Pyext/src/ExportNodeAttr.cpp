@@ -49,7 +49,7 @@ namespace bp = boost::python;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-object late_raw_constructor(tuple args, dict kw) {
+object late_raw_constructor(bp::tuple args, bp::dict kw) {
    //cout << "late_raw_constructor len(args):" << len(args) << endl;
    // args[0] is Late(i.e self)
    if (len(args) > 1) throw std::runtime_error("late_raw_constructor: Late only expects keyword arguments, ie. Late(submitted='00:20',active='15:00',complete='+30:00')");
@@ -87,7 +87,7 @@ static boost::shared_ptr<LateAttr> late_create() { return boost::make_shared<Lat
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-object cron_raw_constructor(tuple args, dict kw) {
+object cron_raw_constructor(bp::tuple args, bp::dict kw) {
    //cout << "cron_raw_constructor len(args):" << len(args) << endl;
    // args[0] is Cron(i.e self) args[1] is string name
    for (int i = 1; i < len(args) ; ++i) {
@@ -323,6 +323,7 @@ void export_NodeAttr()
    .def("__init__",make_constructor(makeJobCreationCtrl), DefsDoc::jobgenctrl_doc())
    .def("set_node_path", &JobCreationCtrl::set_node_path, "The node we want to check job creation for. If no node specified check all tasks")
    .def("set_dir_for_job_creation", &JobCreationCtrl::set_dir_for_job_creation, "Specify directory, for job creation")
+   .def("set_verbose", &JobCreationCtrl::set_verbose, "Output each task as its being checked.")
    .def("get_dir_for_job_creation", &JobCreationCtrl::dir_for_job_creation, return_value_policy<copy_const_reference>(), "Returns the directory set for job creation")
    .def("generate_temp_dir", &JobCreationCtrl::generate_temp_dir, "Automatically generated temporary directory for job creation. Directory written to stdout for information")
    .def("get_error_msg", &JobCreationCtrl::get_error_msg, return_value_policy<copy_const_reference>(),"Returns an error message generated during checking of job creation")
@@ -418,7 +419,7 @@ void export_NodeAttr()
    .def("decrement",&Limit::decrement, "used for test only")
    .def("node_paths",&wrap_set_of_strings,"List of nodes(paths) that have consumed a limit")
  	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<Limit> >(); // needed for mac and boost 1.6
 #endif
 
@@ -544,7 +545,7 @@ void export_NodeAttr()
     .def("complete_is_relative",  &LateAttr::complete_is_relative, "Returns a boolean where true means that complete is relative")
     .def("is_late",   &LateAttr::isLate, "Return True if late")
     ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<LateAttr> >(); // needed for mac and boost 1.6
 #endif
 
@@ -561,7 +562,7 @@ void export_NodeAttr()
 	.def("relative",&AutoCancelAttr::relative, "Returns a boolean where true means the time is relative")
 	.def("days",    &AutoCancelAttr::days,     "Returns a boolean true if time was specified in days")
   	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<AutoCancelAttr> >(); // needed for mac and boost 1.6
 #endif
 
@@ -597,7 +598,7 @@ void export_NodeAttr()
 	.def("end",            &RepeatEnumerated::end)
 	.def("step",           &RepeatEnumerated::step)
 	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<RepeatEnumerated> >(); // needed for mac and boost 1.6
 #endif
 
@@ -611,7 +612,7 @@ void export_NodeAttr()
 	.def("end",            &RepeatString::end)
 	.def("step",           &RepeatString::step)
 	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<RepeatString> >(); // needed for mac and boost 1.6
 #endif
 
@@ -683,7 +684,7 @@ void export_NodeAttr()
 	.def( "positive_gain",&ClockAttr::positive_gain,"Returns a boolean, where true means that the gain is positive")
 	.def( "virtual"      ,&ClockAttr::is_virtual,   "Returns a boolean, where true means that clock is virtual")
 	;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< boost::shared_ptr<ClockAttr> >(); // needed for mac and boost 1.6
 #endif
 }

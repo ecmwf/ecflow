@@ -193,10 +193,9 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
    /// However Job generation checking will end up changing the states of the DEFS
    /// If this defs is loaded into the server the state of each node may be surprising. (i.e submitted)
    /// Hence we need to reset the state.
+   if (!jobCtrl.get()) throw std::runtime_error("Defs::check_job_creation: NULL JobCreationCtrl passed");
 
-   if (!jobCtrl.get()) {
-      throw std::runtime_error("Defs::check_job_creation: NULL JobCreationCtrl passed");
-   }
+   if (jobCtrl->verbose()) cout << "Defs::check_job_creation(verbose):\n";
 
    // This function should NOT really change the data model
    // The changed state is reset, hence we need to preserve change and modify numbers
@@ -211,14 +210,13 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
  		for(size_t s = 0; s < theSize; s++) {
  		   /// begin will cause creation of generated variables. The generated variables
  		   /// are use in client scripts and used to locate the ecf files
- 			suiteVec_[s]->begin();
- 			suiteVec_[s]->check_job_creation( jobCtrl ) ;
+ 		   suiteVec_[s]->begin();
+ 		   suiteVec_[s]->check_job_creation( jobCtrl ) ;
 
- 			/// reset the state
-         suiteVec_[s]->requeue(true,clear_suspended_in_child_nodes,true,true);
-         suiteVec_[s]->reset_begin();
-         suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
-         set_most_significant_state();
+ 		   /// reset the state
+ 		   suiteVec_[s]->reset();  // will reset begin
+ 		   suiteVec_[s]->setStateOnlyHierarchically( NState::UNKNOWN );
+ 		   set_most_significant_state();
  		}
 	}
 	else {
@@ -231,7 +229,7 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
 	      node->check_job_creation( jobCtrl );
 
 	      /// reset the state
-	      node->requeue(true,clear_suspended_in_child_nodes,true,true);
+	      node->reset();
 	      node->suite()->reset_begin();
 	      node->setStateOnlyHierarchically( NState::UNKNOWN );
 	   }

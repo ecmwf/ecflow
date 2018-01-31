@@ -648,7 +648,13 @@ std::string Dashboard::widgetSettingsId(int i)
 void Dashboard::notifyServerFilterAdded(ServerItem* item)
 {
 	if(!settingsAreRead_)
-		Q_EMIT contentsChanged();
+    {
+        //If there are no views we automatically add a tree view
+        if(widgets_.count() == 0)
+            addWidget("tree");
+
+        Q_EMIT contentsChanged();
+    }
 }
 
 void Dashboard::notifyServerFilterRemoved(ServerItem* item)
