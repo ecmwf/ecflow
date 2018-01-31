@@ -83,6 +83,7 @@ Client Server API
   * :py:class:`ecflow.Client.ch_handle`
   * :py:class:`ecflow.Client.ch_register`
   * :py:class:`ecflow.Client.ch_remove`
+  * :py:class:`ecflow.Client.changed_node_paths`
   * :py:class:`ecflow.Client.checkpt`
   * :py:class:`ecflow.Client.clear_log`
   * :py:class:`ecflow.Client.delete`

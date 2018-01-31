@@ -214,7 +214,7 @@ void Server::start_accept()
    if (serverEnv_.debug()) cout << "   Server::start_accept()" << endl;
 
 #ifdef ECF_OPENSSL
-   connection_ptr new_conn = boost::make_shared<connection>( io_service_, context_) ;
+   connection_ptr new_conn = boost::make_shared<connection>( boost::ref(io_service_), boost::ref(context_)) ;
 #else
    connection_ptr new_conn = boost::make_shared<connection>( boost::ref(io_service_) );
 #endif
