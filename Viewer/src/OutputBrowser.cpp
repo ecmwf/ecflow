@@ -35,6 +35,9 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     vb->setContentsMargins(0,0,0,0);
     vb->setSpacing(2);
 
+    filterLine_=new QLineEdit(this);
+    vb->addWidget(filterLine_);
+
     stacked_=new QStackedWidget(this);
     vb->addWidget(stacked_,1);
 
@@ -76,6 +79,8 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
 
     connect(searchLine_,SIGNAL(visibilityChanged()),
           this,SLOT(showConfirmSearchLabel()));
+
+    filterLine_->hide();
 }
 
 OutputBrowser::~OutputBrowser()
@@ -297,6 +302,13 @@ void OutputBrowser::showSearchLine()
 void OutputBrowser::searchOnReload(bool userClickedReload)
 {
 	searchLine_->searchOnReload(userClickedReload);
+}
+
+void OutputBrowser::showFilterLine()
+{
+    filterLine_->setVisible(true);
+    filterLine_->setFocus();
+    //searchLine_->selectAll();
 }
 
 void OutputBrowser::setFontProperty(VProperty* p)

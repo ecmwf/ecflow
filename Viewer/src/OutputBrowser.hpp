@@ -10,6 +10,7 @@
 #ifndef VIEWER_SRC_OUTPUTBROWSER_HPP_
 #define VIEWER_SRC_OUTPUTBROWSER_HPP_
 
+#include <QLineEdit>
 #include <QStackedWidget>
 #include <QMap>
 
@@ -56,7 +57,8 @@ public:
 	void updateFont();
 	void gotoLine();
 	void showSearchLine();
-	void searchOnReload(bool userClickedReload);
+    void searchOnReload(bool userClickedReload);
+    void showFilterLine();
 	void zoomIn();
 	void zoomOut();
     void clearCursorCache() {cursorCache_.clear();}
@@ -76,7 +78,8 @@ private:
 	PlainTextEdit* textEdit_;
 	TextPagerWidget* textPager_;
 	TextEditSearchLine* searchLine_;
-	Highlighter* jobHighlighter_;
+    QLineEdit* filterLine_;
+    Highlighter* jobHighlighter_;
 	PlainTextSearchInterface *textEditSearchInterface_;
 	TextPagerSearchInterface *textPagerSearchInterface_;
 	MessageLabel *confirmSearchLabel_;
