@@ -671,12 +671,9 @@ std::vector<std::string> ServerEnvironment::expected_variables()
    expected_variables.push_back( "ECF_VERSION" );
    expected_variables.push_back( "ECF_LISTS" );
    expected_variables.push_back(  Str::ECF_PORT() );
-   expected_variables.push_back(  Str::ECF_NODE() );
    expected_variables.push_back(  Str::ECF_HOST() );
    expected_variables.push_back( "ECF_INTERVAL");
-#ifdef ECF_SECURE_USER
    expected_variables.push_back( "ECF_PASSWD");
-#endif
    return expected_variables;
 }
 
