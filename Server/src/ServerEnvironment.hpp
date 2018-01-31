@@ -172,6 +172,8 @@ public:
 
 	std::string dump() const;
 
+   static std::vector<std::string> expected_variables();
+
 private:
    void init(int argc, char* argv[], const std::string& path_to_config_file);
 
@@ -204,7 +206,8 @@ private:
 	std::string ecf_backup_checkpt_file_;
 	std::string ecf_pid_;
 	std::string killCmd_;
-	std::string statusCmd_;
+   std::string statusCmd_;
+   std::string checkCmd_;
 	std::string urlCmd_;
 	std::string urlBase_;
 	std::string url_;

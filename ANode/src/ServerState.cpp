@@ -486,7 +486,7 @@ void ServerState::setup_default_server_variables(std::vector<Variable>&  server_
    server_variables.push_back( Variable(Str::ECF_HOME(), string(".")) );
    server_variables.push_back( Variable(string("ECF_JOB_CMD"), Ecf::JOB_CMD() )); //Command to be executed to submit a job
    server_variables.push_back( Variable(string("ECF_KILL_CMD"), Ecf::KILL_CMD() )); // Command to be executed to kill a job
-   server_variables.push_back( Variable(string("ECF_STATUS_CMD"), Ecf::STATUS_CMD() )); // Command to be executed to kill a job
+   server_variables.push_back( Variable(string("ECF_STATUS_CMD"), Ecf::STATUS_CMD() )); // Command to be executed to get status of job
    server_variables.push_back( Variable(string("ECF_URL_CMD"), Ecf::URL_CMD() ));
    server_variables.push_back( Variable(string("ECF_URL_BASE"), Ecf::URL_BASE() ));
    server_variables.push_back( Variable(string("ECF_URL"), Ecf::URL() ));

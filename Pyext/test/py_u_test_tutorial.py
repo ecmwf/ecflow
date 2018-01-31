@@ -806,7 +806,7 @@ print("Creating suite definition")
 home = os.path.join(os.getenv("HOME"), "course")
 defs = Defs(
         Suite("test",
-            Edit(ECF_INCLUDE=home,ECF_HOME=home),
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
             create_family_house_keeping()))
 #xx print(defs) 
 

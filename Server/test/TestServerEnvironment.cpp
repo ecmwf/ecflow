@@ -154,26 +154,7 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
 
    ServerEnvironment serverEnv(argc,argv,File::test_data("Server/server_environment.cfg","Server"));
 
-   // expected variables
-   std::vector<std::string> expected_variables;
-   expected_variables.push_back(  Str::ECF_HOME() );
-   expected_variables.push_back( "ECF_LOG"  );
-   expected_variables.push_back( "ECF_CHECK" );
-   expected_variables.push_back( "ECF_CHECKOLD" );
-   expected_variables.push_back( "ECF_JOB_CMD" );
-   expected_variables.push_back( "ECF_KILL_CMD" );
-   expected_variables.push_back( "ECF_STATUS_CMD" );
-   expected_variables.push_back( "ECF_URL_CMD" );
-   expected_variables.push_back( "ECF_URL_BASE" );
-   expected_variables.push_back( "ECF_URL" );
-   expected_variables.push_back( "ECF_MICRO" );
-   expected_variables.push_back( "ECF_PID" );
-   expected_variables.push_back( "ECF_VERSION" );
-   expected_variables.push_back( "ECF_LISTS" );
-   expected_variables.push_back(  Str::ECF_PORT() );
-   expected_variables.push_back(  Str::ECF_HOST() );
-   expected_variables.push_back( "ECF_INTERVAL");
-   expected_variables.push_back( "ECF_PASSWD");
+   std::vector<std::string> expected_variables = ServerEnvironment::expected_variables();
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);
@@ -243,6 +224,11 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
           BOOST_CHECK_MESSAGE(p.second == expected,"for ECF_STATUS_CMD expected " <<  expected << " but found " << p.second);
           continue;
       }
+      if (string("ECF_CHECK_CMD") == p.first) {
+          std::string expected = Ecf::CHECK_CMD();
+          BOOST_CHECK_MESSAGE(p.second == expected,"for ECF_CHECK_CMD expected " <<  expected << " but found " << p.second);
+          continue;
+      }
       if (string("ECF_URL_CMD") == p.first) {
           std::string expected = Ecf::URL_CMD();
           BOOST_CHECK_MESSAGE(p.second == expected,"for ECF_URL_CMD expected " <<  expected << " but found " << p.second);
@@ -291,26 +277,7 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
    char* argv[] = { const_cast<char*>("ServerEnvironment"),  const_cast<char*>("--port=3144") };
    ServerEnvironment serverEnv(argc,argv);
 
-   // expected variables
-   std::vector<std::string> expected_variables;
-   expected_variables.push_back(  Str::ECF_HOME() );
-   expected_variables.push_back( "ECF_LOG"  );
-   expected_variables.push_back( "ECF_CHECK" );
-   expected_variables.push_back( "ECF_CHECKOLD" );
-   expected_variables.push_back( "ECF_JOB_CMD" );
-   expected_variables.push_back( "ECF_KILL_CMD" );
-   expected_variables.push_back( "ECF_STATUS_CMD" );
-   expected_variables.push_back( "ECF_URL_CMD" );
-   expected_variables.push_back( "ECF_URL_BASE" );
-   expected_variables.push_back( "ECF_URL" );
-   expected_variables.push_back( "ECF_MICRO" );
-   expected_variables.push_back( "ECF_PID" );
-   expected_variables.push_back( "ECF_VERSION" );
-   expected_variables.push_back( "ECF_LISTS" );
-   expected_variables.push_back(  Str::ECF_PORT() );
-   expected_variables.push_back(  Str::ECF_HOST() );
-   expected_variables.push_back( "ECF_INTERVAL");
-   expected_variables.push_back( "ECF_PASSWD");
+   std::vector<std::string> expected_variables = ServerEnvironment::expected_variables();
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);

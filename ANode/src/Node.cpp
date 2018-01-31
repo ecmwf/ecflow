@@ -456,6 +456,15 @@ void Node::checkForLateness(const ecf::Calendar& c)
 
 void Node::initState(int clear_suspended_in_child_nodes)
 {
+   // The state duration is ONLY updated *IF* state has changed.
+   // However on re-queue *ALWAYS* reset state time.
+   // Otherwise we can end up, showing time in the future. SEE ECFLOW-1215
+   Suite* theSuite = suite();
+   if ( theSuite ) {
+      const Calendar& calendar = theSuite->calendar();
+      state_.second = calendar.duration();
+   }
+
    if (defStatus_ == DState::SUSPENDED) {
       /// Note: DState::SUSPENDED is not a real state, its really a user interaction
       /// Replace with suspend, and set underlying state as queued
@@ -816,7 +825,7 @@ void Node::handleStateChange()
 void Node::setStateOnly(NState::State newState, bool force, const std::string& additional_info_to_log)
 {
    if (state_.first.state() == newState) {
-      return; // if old and new state the same dont do anything
+      return; // if old and new state the same don't do anything
    }
 
    Suite* theSuite =  suite();
