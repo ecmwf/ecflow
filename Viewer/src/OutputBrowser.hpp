@@ -24,6 +24,7 @@ class PlainTextSearchInterface;
 class TextPagerWidget;
 class TextPagerSearchInterface;
 class VProperty;
+class TextFilterWidget;
 
 class OutputBrowser;
 
@@ -65,6 +66,7 @@ public:
 
 protected Q_SLOTS:
 	void showConfirmSearchLabel();
+    void slotRunFilter(QString);
 
 private:
 	enum IndexType {BasicIndex=0,PagerIndex=1};
@@ -78,7 +80,7 @@ private:
 	PlainTextEdit* textEdit_;
 	TextPagerWidget* textPager_;
 	TextEditSearchLine* searchLine_;
-    QLineEdit* filterLine_;
+    TextFilterWidget* textFilter_;
     Highlighter* jobHighlighter_;
 	PlainTextSearchInterface *textEditSearchInterface_;
 	TextPagerSearchInterface *textPagerSearchInterface_;

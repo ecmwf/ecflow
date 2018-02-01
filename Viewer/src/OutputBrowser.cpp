@@ -20,6 +20,7 @@
 #include "TextPager/TextPagerSearchInterface.hpp"
 #include "TextPagerWidget.hpp"
 #include "DirectoryHandler.hpp"
+#include "TextFilterWidget.hpp"
 #include "UserMessage.hpp"
 
 
@@ -35,8 +36,11 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     vb->setContentsMargins(0,0,0,0);
     vb->setSpacing(2);
 
-    filterLine_=new QLineEdit(this);
-    vb->addWidget(filterLine_);
+    //Text filter editor
+    textFilter_=new TextFilterWidget(this);
+    vb->addWidget(textFilter_);
+    connect(textFilter_,SIGNAL(runRequested(QString)),
+            this,SLOT(slotRunFilter(QString)));
 
     stacked_=new QStackedWidget(this);
     vb->addWidget(stacked_,1);
@@ -80,7 +84,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     connect(searchLine_,SIGNAL(visibilityChanged()),
           this,SLOT(showConfirmSearchLabel()));
 
-    filterLine_->hide();
+    textFilter_->hide();
 }
 
 OutputBrowser::~OutputBrowser()
@@ -306,8 +310,8 @@ void OutputBrowser::searchOnReload(bool userClickedReload)
 
 void OutputBrowser::showFilterLine()
 {
-    filterLine_->setVisible(true);
-    filterLine_->setFocus();
+    textFilter_->setVisible(true);
+    textFilter_->setFocus();
     //searchLine_->selectAll();
 }
 
@@ -359,4 +363,9 @@ void OutputBrowser::setCursorPos(qint64 pos)
     {
         textPager_->textEditor()->setCursorPosition(pos);
     }
+}
+
+void OutputBrowser::slotRunFilter(QString)
+{
+
 }

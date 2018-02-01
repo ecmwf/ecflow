@@ -142,12 +142,14 @@ set(viewer_srcs
     SuiteFilterObserver.hpp
     SuiteModel.cpp
     TabWidget.cpp 
+    TextFilterHandler.cpp
     TableFilterWidget.cpp
     TableNodeModel.cpp
     TableNodeSortModel.cpp
     TableNodeView.cpp
     TableNodeViewDelegate.cpp
     TableNodeWidget.cpp
+    TextFilterWidget.cpp
     RichTextEdit.cpp
     RichTextSearchInterface.cpp
     RichTextSearchLine.cpp
@@ -330,6 +332,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TableNodeViewDelegate.hpp
     TableNodeWidget.hpp             
     TextEditSearchLine.hpp
+    TextFilterWidget.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp
     TreeNodeViewDelegate.hpp
@@ -404,6 +407,7 @@ set(viewer_wrap_ui_files
     SuiteItemWidget.ui
     TableFilterWidget.ui
     TableNodeWidget.ui
+    TextFilterWidget.ui
     TimeItemWidget.ui
     TreeNodeWidget.ui
     TriggerEditorWidget.ui
