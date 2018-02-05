@@ -34,6 +34,7 @@ public:
     void setSourcePath(const std::string& p) {sourcePath_=p;}
     void  setContents(const std::string);
 	bool  exists() const;
+    bool isEmpty() const;
 
 	StorageMode storageMode() const {return storageMode_;}
 	static const size_t maxDataSize() {return maxDataSize_;}

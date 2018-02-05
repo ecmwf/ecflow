@@ -228,7 +228,6 @@ void OutputItemWidget::clearContents()
     messageLabel_->hide();
     messageLabel_->stopProgress();
     fileLabel_->clear();      
-    browser_->clearCursorCache();
     browser_->clear();
     reloadTb_->setEnabled(true);
     userClickedReload_ = false;

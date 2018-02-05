@@ -24,7 +24,6 @@
     <file>../images/arrow_up.svg</file>
     <file>../images/arrow_down.svg</file>
     <file>../images/add.svg</file>
-    <file alias="close.svg">../images/close.svg</file>
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>
     <file alias="add_tab.svg">../images/add_tab.svg</file> 
@@ -33,6 +32,9 @@
     <file alias="chain_open.svg">../images/chain_open.svg</file>
     <file alias="chain_closed.svg">../images/chain_closed.svg</file>
     <file alias="clear_left.svg">../images/clear_left.svg</file>
+    <file alias="close.svg">../images/close.svg</file>
+    <file alias="close_grey.svg">../images/close_grey.svg</file>
+    <file alias="close_red.svg">../images/close_red.svg</file>
     <file alias="case_sensitive.svg">../images/case_sensitive.svg</file>
     <file alias="cogwheel.svg">../images/cogwheel.svg</file>
     <file alias="cogwheel_blue.svg">../images/cogwheel_blue.svg</file>
@@ -102,6 +104,7 @@
     <file alias="status.svg">../images/status.svg</file>
     <file alias="system.svg">../images/system.svg</file>
     <file alias="submit.svg">../images/submit.svg</file>
+    <file alias="submit_arrow.svg">../images/submit_arrow.svg</file>
     <file alias="submit_round.svg">../images/submit_round.svg</file>
     <file alias="sync.svg">../images/sync.svg</file>
     <file alias="sync_black.svg">../images/sync_black.svg</file>

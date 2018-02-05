@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1,0,0,0">
    <property name="spacing">
     <number>1</number>
    </property>
@@ -30,6 +30,29 @@
     <number>0</number>
    </property>
    <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="viewer.qrc">:/viewer/filter_decor.svg</pixmap>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>2</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <widget class="QLineEdit" name="le_"/>
    </item>
    <item>
@@ -38,7 +61,14 @@
       <string>Run filter</string>
      </property>
      <property name="text">
-      <string>Run</string>
+      <string>Apply filter</string>
+     </property>
+     <property name="icon">
+      <iconset resource="viewer.qrc">
+       <normaloff>:/viewer/submit_round.svg</normaloff>:/viewer/submit_round.svg</iconset>
+     </property>
+     <property name="toolButtonStyle">
+      <enum>Qt::ToolButtonTextBesideIcon</enum>
      </property>
     </widget>
    </item>
@@ -63,10 +93,6 @@
      </property>
      <property name="text">
       <string>...</string>
-     </property>
-     <property name="icon">
-      <iconset resource="viewer.qrc">
-       <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
      </property>
      <property name="autoRaise">
       <bool>true</bool>

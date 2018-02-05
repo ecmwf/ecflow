@@ -28,8 +28,14 @@ public:
     explicit TextFilterWidget(QWidget *parent=0);
     ~TextFilterWidget() {}
 
+    enum FilterStatus {EditStatus,FoundStatus,NotFoundStatus};
+    void setStatus(FilterStatus);
+
+    void setEditFocus();
+
 public Q_SLOTS:
     void slotFilterEditor();
+    void on_le__textChanged();
     void on_runTb__clicked();
     void on_confTb__clicked();
     void on_closeTb__clicked();
@@ -37,8 +43,11 @@ public Q_SLOTS:
 Q_SIGNALS:
     void runRequested(QString);
 
-
 private:
+    FilterStatus status_;
+    QColor oriColour_;
+    QColor redColour_;
+    QColor greenColour_;
     QCompleter* completer_;
     TextFilterCompleterModel* completerModel_;
 };

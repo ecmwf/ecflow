@@ -10,6 +10,7 @@
 
 #include "OutputBrowser.hpp"
 
+#include <QProcess>
 #include <QVBoxLayout>
 
 #include "Highlighter.hpp"
@@ -22,15 +23,14 @@
 #include "DirectoryHandler.hpp"
 #include "TextFilterWidget.hpp"
 #include "UserMessage.hpp"
-
+#include "UiLog.hpp"
 
 int OutputBrowser::minPagerTextSize_=1*1024*1024;
 int OutputBrowser::minPagerSparseSize_=30*1024*1024;
 int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) :
-    QWidget(parent),
-    lastPos_(0)
+    QWidget(parent)
 {
     QVBoxLayout *vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
@@ -100,13 +100,6 @@ OutputBrowser::~OutputBrowser()
 
 void OutputBrowser::clear()
 {
-    if(stacked_->currentIndex() == BasicIndex)
-        cursorCache_[currentSourceFile_].pos_=textEdit_->textCursor().position();
-    else
-        cursorCache_[currentSourceFile_].pos_=textPager_->textEditor()->textCursor().position();
-
-    currentSourceFile_.clear();
-
     textEdit_->clear();
 	textPager_->clear();
     file_.reset();
@@ -149,9 +142,6 @@ void OutputBrowser::loadFile(VFile_ptr file)
     if(file_->storageMode() == VFile::DiskStorage)
     {
         loadFile(QString::fromStdString(file_->path()));
-
-        //Set the cursor position from the cache
-        updateCursorFromCache(file_->sourcePath());
     }
     else
     {
@@ -209,7 +199,7 @@ void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
     }
 
     //Set the cursor position from the cache
-    updateCursorFromCache(fileName.toStdString());
+    //updateCursorFromCache(fileName.toStdString());
 }
 
 void OutputBrowser::saveCurrentFile(QString &fileNameToSaveTo)
@@ -247,20 +237,6 @@ void OutputBrowser::saveCurrentFile(QString &fileNameToSaveTo)
 bool OutputBrowser::isFileLoaded()
 {
     return (file_ != 0);
-}
-
-
-void OutputBrowser::updateCursorFromCache(const std::string& sourcePath)
-{
-#if 0
-    //Set the cursor position from the cache
-    QMap<std::string,CursorCacheItem>::const_iterator it=cursorCache_.find(sourcePath);
-    if(it != cursorCache_.end())
-    {
-        setCursorPos(it.value().pos_);
-    }
-    currentSourceFile_=file_->sourcePath();
-#endif
 }
 
 bool OutputBrowser::isJobFile(QString fileName)
@@ -311,8 +287,7 @@ void OutputBrowser::searchOnReload(bool userClickedReload)
 void OutputBrowser::showFilterLine()
 {
     textFilter_->setVisible(true);
-    textFilter_->setFocus();
-    //searchLine_->selectAll();
+    textFilter_->setEditFocus();
 }
 
 void OutputBrowser::setFontProperty(VProperty* p)
@@ -365,7 +340,71 @@ void OutputBrowser::setCursorPos(qint64 pos)
     }
 }
 
-void OutputBrowser::slotRunFilter(QString)
+void OutputBrowser::slotRunFilter(QString filter)
 {
+    assert(file_);
 
+    VFile_ptr fTarget=VFile::createTmpFile(true);
+    VFile_ptr fSrc=VFile_ptr();
+
+    if(file_->storageMode() == VFile::DiskStorage)
+    {
+        fSrc=file_;
+    }
+    // file in memory - just dump it to the tmp file
+    else
+    {
+        fSrc=VFile::createTmpFile(true);
+        QFile file(QString::fromStdString(fSrc->path()));
+        if(file.open(QFile::WriteOnly | QFile::Text))
+        {
+            QTextStream out(&file);
+            QString s(file_->data());
+            out << s;
+        }
+        else
+        {
+        }
+    }
+
+    //At this point point fSrc must contain the text to filter
+    QProcess proc;
+    proc.setStandardOutputFile(QString::fromStdString(fTarget->path()));
+    proc.start("/bin/sh",
+         QStringList() <<  "-c" << "grep -e \'" + filter  + "\' " +
+         QString::fromStdString(fSrc->path()));
+
+    UiLog().dbg() << "args=" << proc.arguments().join(" ");
+
+    if(!proc.waitForStarted(1000))
+    {
+        UI_FUNCTION_LOG
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        UiLog().err() << " Failed to filter output file using command \'" <<
+                             proc.program() << " " << proc.arguments().join(" ") << "\'";
+#endif
+        UiLog().err() << "   error: failed to start";
+
+        fTarget.reset();
+        return;
+    }
+
+    proc.waitForFinished(10000);
+    if(proc.exitStatus() == QProcess::NormalExit)
+    {
+        UiLog().err() << "   error:" << QString(proc.readAllStandardError());
+        oriFile_=file_;
+        textFilter_->setStatus(fTarget->isEmpty()?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));
+        loadFile(fTarget);
+    }
+    else
+    {
+        UI_FUNCTION_LOG
+        UiLog().err() << " Failed";
+        UiLog().err() << "   error:" << QString(proc.readAllStandardError());
+        textFilter_->setStatus(TextFilterWidget::NotFoundStatus);
+        fTarget.reset(); //delete
+    }
+
+    return;
 }

@@ -62,7 +62,6 @@ public:
     void showFilterLine();
 	void zoomIn();
 	void zoomOut();
-    void clearCursorCache() {cursorCache_.clear();}
 
 protected Q_SLOTS:
 	void showConfirmSearchLabel();
@@ -73,7 +72,7 @@ private:
 	void changeIndex(IndexType indexType,qint64 fileSize);
     bool isJobFile(QString fileName);
     void loadFile(QString fileName);
-    void updateCursorFromCache(const std::string&);
+    //void updateCursorFromCache(const std::string&);
     void setCursorPos(qint64 pos);
 
     QStackedWidget *stacked_;
@@ -89,10 +88,7 @@ private:
     //we keep a reference to it to make sure that it does not get deleted while
     //it is being displayed
     VFile_ptr file_;
-    int lastPos_;
-    std::string currentSourceFile_;
-
-    QMap<std::string,CursorCacheItem> cursorCache_;
+    VFile_ptr oriFile_;
 
     static int minPagerTextSize_;
 	static int minPagerSparseSize_;

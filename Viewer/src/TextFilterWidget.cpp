@@ -12,21 +12,28 @@
 #include <QtGlobal>
 #include <QCompleter>
 #include <QMenu>
+#include <QPalette>
 #include <QTreeView>
 
-TextFilterWidget::TextFilterWidget(QWidget *parent) : QWidget(parent)
+TextFilterWidget::TextFilterWidget(QWidget *parent) :
+    QWidget(parent),
+    status_(EditStatus)
 {
     setupUi(this);
 
     //Editor
 
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
-    le_->setPlaceholderText(tr("Regexp filter"));
+    le_->setPlaceholderText(tr(" Enter regexp to filter"));
 #endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     le_->setClearButtonEnabled(true);
 #endif
+
+    oriColour_=QColor(le_->palette().color(QPalette::Base));
+    redColour_=QColor(210,24,24);
+    greenColour_=QColor(25,143,0);
 
     completer_=new QCompleter(this);
     completer_->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
@@ -39,13 +46,17 @@ TextFilterWidget::TextFilterWidget(QWidget *parent) : QWidget(parent)
     completer_->setModel(completerModel_);
     completer_->setPopup(view);
     le_->setCompleter(completer_);
+
+    QIcon icon;
+    icon.addPixmap(QPixmap(":/viewer/close_grey.svg"),QIcon::Normal);
+    icon.addPixmap(QPixmap(":/viewer/close_red.svg"),QIcon::Active);
+    closeTb_->setIcon(icon);
 }
 
 void TextFilterWidget::slotFilterEditor()
 {
 
 }
-
 
 void TextFilterWidget::on_confTb__clicked()
 {
@@ -98,6 +109,42 @@ void TextFilterWidget::on_runTb__clicked()
 void TextFilterWidget::on_closeTb__clicked()
 {
     hide();
+}
+
+void TextFilterWidget::on_le__textChanged()
+{
+    if(status_ != EditStatus)
+        setStatus(EditStatus);
+}
+
+void TextFilterWidget::setEditFocus()
+{
+    le_->setFocus();
+}
+
+void TextFilterWidget::setStatus(FilterStatus status)
+{
+    status_=status;
+    QColor col=oriColour_;
+    QPalette p=le_->palette();
+    switch(status_)
+    {
+    case EditStatus:
+        col=oriColour_;
+        break;
+    case FoundStatus:
+        col=greenColour_;
+        break;
+    case NotFoundStatus:
+        col=redColour_;
+        break;
+    default:
+        col=oriColour_;
+        break;
+    }
+
+    p.setColor(QPalette::Text,col);
+    le_->setPalette(p);
 }
 
 TextFilterCompleterModel::TextFilterCompleterModel(QObject *parent) :
