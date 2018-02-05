@@ -373,7 +373,7 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 			throw std::runtime_error(ss.str());
 	 	}
 
-	 	if (edit_type == EditScriptCmd::SUBMIT || EditScriptCmd::SUBMIT_USER_FILE) {
+	 	if (edit_type == EditScriptCmd::SUBMIT || edit_type == EditScriptCmd::SUBMIT_USER_FILE) {
 	 		// extract the Used variables from the script file
 	 		NameValueMap used_variables_as_map;
 	 		EcfFile::extract_used_variables(used_variables_as_map,script_lines);
