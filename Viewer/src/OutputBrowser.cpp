@@ -42,6 +42,9 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     connect(textFilter_,SIGNAL(runRequested(QString)),
             this,SLOT(slotRunFilter(QString)));
 
+    connect(textFilter_,SIGNAL(closeRequested()),
+            this,SLOT(slotRemoveFilter()));
+
     stacked_=new QStackedWidget(this);
     vb->addWidget(stacked_,1);
 
@@ -94,7 +97,7 @@ OutputBrowser::~OutputBrowser()
 
     if(jobHighlighter_ && !jobHighlighter_->parent())
     {
-            delete jobHighlighter_;
+        delete jobHighlighter_;
     }
 }
 
@@ -103,6 +106,7 @@ void OutputBrowser::clear()
     textEdit_->clear();
 	textPager_->clear();
     file_.reset();
+    oriFile_.reset();
 }
 
 void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
@@ -344,6 +348,9 @@ void OutputBrowser::slotRunFilter(QString filter)
 {
     assert(file_);
 
+    if(oriFile_)
+        file_=oriFile_;
+
     VFile_ptr fTarget=VFile::createTmpFile(true);
     VFile_ptr fSrc=VFile_ptr();
 
@@ -394,7 +401,7 @@ void OutputBrowser::slotRunFilter(QString filter)
     {
         UiLog().err() << "   error:" << QString(proc.readAllStandardError());
         oriFile_=file_;
-        textFilter_->setStatus(fTarget->isEmpty()?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));
+        textFilter_->setStatus(fTarget->isEmpty()?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));        
         loadFile(fTarget);
     }
     else
@@ -407,4 +414,13 @@ void OutputBrowser::slotRunFilter(QString filter)
     }
 
     return;
+}
+
+void OutputBrowser::slotRemoveFilter()
+{
+    if(oriFile_)
+    {
+        loadFile(oriFile_);
+        oriFile_.reset();
+    }
 }

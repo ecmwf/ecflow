@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1,0,0,0">
+  <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,1,0,0">
    <property name="spacing">
     <number>1</number>
    </property>
@@ -54,23 +54,6 @@
    </item>
    <item>
     <widget class="QLineEdit" name="le_"/>
-   </item>
-   <item>
-    <widget class="QToolButton" name="runTb_">
-     <property name="toolTip">
-      <string>Run filter</string>
-     </property>
-     <property name="text">
-      <string>Apply filter</string>
-     </property>
-     <property name="icon">
-      <iconset resource="viewer.qrc">
-       <normaloff>:/viewer/submit_round.svg</normaloff>:/viewer/submit_round.svg</iconset>
-     </property>
-     <property name="toolButtonStyle">
-      <enum>Qt::ToolButtonTextBesideIcon</enum>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="QToolButton" name="confTb_">

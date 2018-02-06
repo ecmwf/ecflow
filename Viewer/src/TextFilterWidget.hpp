@@ -36,14 +36,18 @@ public:
 public Q_SLOTS:
     void slotFilterEditor();
     void on_le__textChanged();
-    void on_runTb__clicked();
+    void on_le__returnPressed();
     void on_confTb__clicked();
     void on_closeTb__clicked();
 
 Q_SIGNALS:
     void runRequested(QString);
+    void closeRequested();
 
 private:
+    void addToLatest(QString f);
+    void addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,QString title);
+
     FilterStatus status_;
     QColor oriColour_;
     QColor redColour_;

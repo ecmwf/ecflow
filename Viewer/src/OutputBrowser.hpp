@@ -66,13 +66,13 @@ public:
 protected Q_SLOTS:
 	void showConfirmSearchLabel();
     void slotRunFilter(QString);
+    void slotRemoveFilter();
 
 private:
 	enum IndexType {BasicIndex=0,PagerIndex=1};
 	void changeIndex(IndexType indexType,qint64 fileSize);
     bool isJobFile(QString fileName);
     void loadFile(QString fileName);
-    //void updateCursorFromCache(const std::string&);
     void setCursorPos(qint64 pos);
 
     QStackedWidget *stacked_;

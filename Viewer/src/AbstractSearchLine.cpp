@@ -54,6 +54,11 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
 	redColour_=QColor(247,230,230);
 	greenColour_=QColor(186,249,206);
 
+    QIcon icon;
+    icon.addPixmap(QPixmap(":/viewer/close_grey.svg"),QIcon::Normal);
+    icon.addPixmap(QPixmap(":/viewer/close_red.svg"),QIcon::Active);
+    closeTb_->setIcon(icon);
+
 	// for the 'find next' functionality, although Qt (at the time of writing) uses
 	// both F3 and CTRL-G for most platforms, this is not true for Linux. Therefore,
 	// we have to add CTRL-G ourselves.

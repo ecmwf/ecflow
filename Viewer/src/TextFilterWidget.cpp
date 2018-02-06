@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "TextFilterWidget.hpp"
+#include "TextFilterHandlerDialog.hpp"
 
 #include <QtGlobal>
 #include <QCompleter>
@@ -24,16 +25,16 @@ TextFilterWidget::TextFilterWidget(QWidget *parent) :
     //Editor
 
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
-    le_->setPlaceholderText(tr(" Enter regexp to filter"));
+    le_->setPlaceholderText(tr(" Regexp filter"));
 #endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     le_->setClearButtonEnabled(true);
 #endif
 
-    oriColour_=QColor(le_->palette().color(QPalette::Base));
+    oriColour_=QColor(le_->palette().color(QPalette::Text));
     redColour_=QColor(210,24,24);
-    greenColour_=QColor(25,143,0);
+    greenColour_=QColor(39,124,21);
 
     completer_=new QCompleter(this);
     completer_->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
@@ -63,31 +64,30 @@ void TextFilterWidget::on_confTb__clicked()
     QMenu* menu=new QMenu(confTb_);
 
     QAction *manageAc=new QAction(menu);
-    manageAc->setText("Manage text filters ...");
-    //connect(ac,SIGNAL(triggered()),this,SLOT(slotFilterEditor()));
+    manageAc->setText(tr("Manage text filters ..."));
     menu->addAction(manageAc);
 
-    QAction *sep=new QAction(menu);
-    sep->setSeparator(true);
-    menu->addAction(sep);
+    QAction *addAc=new QAction(menu);
+    addAc->setText(tr("Save current filter ..."));
+    menu->addAction(addAc);
 
-    QAction* acSavedTitle = new QAction(menu);
-    acSavedTitle->setText(tr("Saved"));
-    QFont f=acSavedTitle->font();
-    f.setBold(true);
-    acSavedTitle->setFont(f);
-    menu->addAction(acSavedTitle);
-
-    const std::vector<TextFilterItem>& items=TextFilterHandler::Instance()->items();
-    for(std::size_t i=0 ; i < items.size(); i++)
-    {
-        QAction* ac=new QAction(this);
-        ac->setText(QString::fromStdString(items[i].filter()));
-        menu->addAction(ac);
-    }
+    addMenuSection(menu,TextFilterHandler::Instance()->items(),tr("Saved"));
+    addMenuSection(menu,TextFilterHandler::Instance()->latestItems(),tr("Recent"));
 
     if(QAction *ac=menu->exec(QCursor::pos()))
     {
+        if(ac == manageAc)
+        {
+            TextFilterHandlerDialog diag;
+            diag.exec();
+        }
+        else if(ac == addAc)
+        {
+            TextFilterHandlerDialog diag;
+            diag.setItemToAdd("filter",le_->text());
+            diag.exec();
+        }
+
         //int index=ac->data().toInt();
         //if(index >=0 && index < count())
         //{
@@ -99,16 +99,41 @@ void TextFilterWidget::on_confTb__clicked()
     menu->deleteLater();
 }
 
-void TextFilterWidget::on_runTb__clicked()
+void TextFilterWidget::addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,QString title)
 {
-    QString t=le_->text();
-    if(!t.isEmpty())
-        Q_EMIT runRequested(t);
+    if(items.empty())
+        return;
+
+    QAction *sep1=new QAction(menu);
+    sep1->setSeparator(true);
+    menu->addAction(sep1);
+
+    QAction* acTitle = new QAction(menu);
+    acTitle->setText(title);
+    QFont f=acTitle->font();
+    f.setBold(true);
+    acTitle->setFont(f);
+    menu->addAction(acTitle);
+
+    for(std::size_t i=0 ; i < items.size(); i++)
+    {
+        QAction* ac=new QAction(this);
+        ac->setText(QString::fromStdString(items[i].filter()));
+        menu->addAction(ac);
+    }
 }
 
 void TextFilterWidget::on_closeTb__clicked()
 {
     hide();
+    Q_EMIT closeRequested();
+}
+
+void TextFilterWidget::on_le__returnPressed()
+{
+    QString t=le_->text();
+    if(!t.isEmpty())
+        Q_EMIT runRequested(t);
 }
 
 void TextFilterWidget::on_le__textChanged()
@@ -134,6 +159,7 @@ void TextFilterWidget::setStatus(FilterStatus status)
         break;
     case FoundStatus:
         col=greenColour_;
+        addToLatest(le_->text());
         break;
     case NotFoundStatus:
         col=redColour_;
@@ -145,6 +171,11 @@ void TextFilterWidget::setStatus(FilterStatus status)
 
     p.setColor(QPalette::Text,col);
     le_->setPalette(p);
+}
+
+void TextFilterWidget::addToLatest(QString f)
+{
+    TextFilterHandler::Instance()->addLatest("",f.simplified().toStdString());
 }
 
 TextFilterCompleterModel::TextFilterCompleterModel(QObject *parent) :

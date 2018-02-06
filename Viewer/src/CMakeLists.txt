@@ -116,6 +116,9 @@ set(viewer_srcs
     PropertyMapper.cpp
     RectMetrics.cpp
     RepeatEditor.cpp
+    RichTextEdit.cpp
+    RichTextSearchInterface.cpp
+    RichTextSearchLine.cpp
     SaveSessionAsDialog.cpp
     ScriptItemWidget.cpp
     ServerComInfoWidget.cpp
@@ -142,18 +145,16 @@ set(viewer_srcs
     SuiteFilterObserver.hpp
     SuiteModel.cpp
     TabWidget.cpp 
-    TextFilterHandler.cpp
     TableFilterWidget.cpp
     TableNodeModel.cpp
     TableNodeSortModel.cpp
     TableNodeView.cpp
     TableNodeViewDelegate.cpp
     TableNodeWidget.cpp
-    TextFilterWidget.cpp
-    RichTextEdit.cpp
-    RichTextSearchInterface.cpp
-    RichTextSearchLine.cpp
     TextEditSearchLine.cpp
+    TextFilterHandler.cpp
+    TextFilterHandlerDialog.cpp
+    TextFilterWidget.cpp
     TextFormat.cpp
     TimeItemWidget.cpp
     TreeNodeModel.cpp
@@ -332,6 +333,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TableNodeViewDelegate.hpp
     TableNodeWidget.hpp             
     TextEditSearchLine.hpp
+    TextFilterHandlerDialog.hpp
     TextFilterWidget.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp
@@ -407,6 +409,7 @@ set(viewer_wrap_ui_files
     SuiteItemWidget.ui
     TableFilterWidget.ui
     TableNodeWidget.ui
+    TextFilterHandlerDialog.ui
     TextFilterWidget.ui
     TimeItemWidget.ui
     TreeNodeWidget.ui
