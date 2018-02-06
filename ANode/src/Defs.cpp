@@ -620,6 +620,8 @@ std::ostream& Defs::print(std::ostream& os) const
    for(size_t s = 0; s < the_size; s++) {
       os << *suiteVec_[s];
    }
+
+   os << "# enddef\n"; // ECFLOW-1227 so user knows there was no truncation
    return os;
 }
 
