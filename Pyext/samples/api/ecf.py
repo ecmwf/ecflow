@@ -22,16 +22,9 @@ import sys
 import pwd
 import os
 import unittest
-# try:
-#     from ecflow import TimeSlot
-#     from ecflow import JobCreationCtrl as JobCreationCtrl
-#     from ecflow import ChildCmdType
-#     from ecflow import ZombieType, ZombieAttr, ZombieUserActionType
-# except:
-#     print "# ecf.py cannot import few types"
 try:
     import ecflow
-except:
+except ImportError:
     loc = "/usr/local/apps/ecflow/current/lib/python2.7/site-packages/ecflow"
     sys.path.append(loc)
     loc = "/usr/local/lib/python2.7/site-packages"
@@ -68,6 +61,23 @@ else:
     raise Exception
 
 
+deployed = []
+
+
+def deploy(script, pathname, extn=".ecf"):
+    if pathname in deployed:
+        return  # create once
+    else:
+        deployed.append(pathname)
+    if extn in pathname:  # surround .ecf with head, tail:
+        script = "%include <head.h>\n" + script + "\n%include <tail.h>"
+    with open(pathname, "w") as destination:  # overwrite!
+        print(script, file=destination)
+        print("#MSG: created", pathname)
+# deploy("echo acq %TASK%", files + acq + extn)  # create wrapper
+# deploy("ecflow_client --label info %TASK%", files + post + extn)
+
+
 class CWN(object):
     __CDP = False
     __CWN = []
@@ -81,7 +91,8 @@ class CWN(object):
         CWN.__CWN = []
 
     @classmethod
-    def is_empty(cls): return len(CWN.__CWN) == 0
+    def is_empty(cls):
+        return len(CWN.__CWN) == 0
 
     @classmethod
     def pop(cls):
@@ -125,9 +136,11 @@ class CWN(object):
                 print("#WAR: changing CWN from", CWN.__CWN.name(), "to",
                       item.name())
             CWN.__CWN.append(item)
-        elif item is None: pass
+        elif item is None:
+            pass
         # print("#WAR: no attachment item is None", type(item))
-        elif item.real() == None: pass
+        elif item.real() is None:
+            pass
         # print("#WAR: no attachment", item.name(), type(item))
         elif CWN.is_empty():
             raise Exception("#ERR: no node!")
@@ -184,7 +197,8 @@ def linktask(name, real="get", add=None, fam=None, task=True):
     perforce git
     name: original name
     real: script/task wrapper name
-    add: attributes that shall be added to the leaf task, eg Label, Event, Meter
+    add: attributes that shall be added to the leaf task,
+         eg Label, Event, Meter
     """
     if fam is None:
         fam = name
@@ -192,7 +206,7 @@ def linktask(name, real="get", add=None, fam=None, task=True):
         import parameters as ip
         # if ip.USER == "rdx": global LINKTASK; LINKTASK = True  # acceptance
         # if ip.USER == "emos": global LINKTASK; LINKTASK = False  # acceptance
-    except:
+    except ImportError:
         pass
     if LINKTASK:
         return Task(name)  # RD???
@@ -204,7 +218,7 @@ def translate(name, value=None):
     """ Translate from sms to ecflow """
     try:
         import sms2ecf
-    except:
+    except ImportError:
         return name, value
 
     def is_sms():
@@ -216,6 +230,7 @@ def translate(name, value=None):
         sms2ecf.ECF_MODE = "sms"
         return sms2ecf.translate(name, value)
     return name, value
+
 
 # USE_EXTERN = 1
 # NO_EXTERN_ALONE = 0 # set to 1 for test/activate
@@ -261,7 +276,8 @@ class Extern(object):
         else:
             raise Exception(type(path), path)
 
-    def add_to(self, node): return None
+    def add_to(self, node):
+        return None
 
 
 class State(object):
@@ -316,6 +332,7 @@ class State(object):
         """ return state """
         return self.state == node.get_state()
 
+
 SUBMITTED = State("submitted")
 ACTIVE = State("active")
 SUSPENDED = State("suspended")
@@ -332,9 +349,11 @@ class Attribute(object):
         self.load = None
         # CWN(self)
 
-    def __enter__(self): CWN(self)
+    def __enter__(self):
+        CWN(self)
 
-    def __exit__(self, type, value, traceback): pass
+    def __exit__(self, type, value, traceback):
+        pass
     # def __exit__(self): pass
 
     def add_to(self, node):
@@ -398,8 +417,8 @@ class Inlimit(Attribute):
         self.load = None
         if USE_LIMIT:
             try:
-                path, name = fullpath.split(":")
-            except:
+                (path, name) = fullpath.split(":")
+            except ValueError:
                 name = fullpath
                 path = ""
             if name is None:
@@ -498,7 +517,7 @@ class Trigger(Attribute):
                         if ploc.isdigit():
                             continue
                         Extern(ploc.replace("==complete", "").replace(")", ""))
-            except:
+            except ImportError:
                 pass
             # NO_EXTERN_ALONE = 0 # set to 1 for test/activate
             return
@@ -587,7 +606,8 @@ class Trigger(Attribute):
         else:
             raise Exception("what? trigger?", type(expr))
 
-        if "YMD+1" in self.expr: raise Exception(self.expr)
+        if "YMD+1" in self.expr:
+            raise Exception(self.expr)
         self.load = "trigger"  # ecflow.Trigger(self.expr)
         CWN(self)
         # NO_EXTERN_ALONE = 0 # set to 1 for test/activate
@@ -825,12 +845,14 @@ class Defstatus(Attribute):
                      "unknown": ecflow.DState.unknown,
                      "queued": ecflow.DState.queued, }
             self.load = ecflow.Defstatus(kinds[kind])
-        else: self.load = kind
+        else:
+            self.load = kind
 
     def add_to(self, node):
         if type(node) in (Suite, Family, Task):
             node.load.add_defstatus(self.load)
-        else: node.add_defstatus(self.load)
+        else:
+            node.add_defstatus(self.load)
         return node
 
 
@@ -952,7 +974,8 @@ class Late(Attribute):
 def python_true(key, val):
     if "%s" % val == "True":
         if key in("HYPERTHREADING"
-                  "USE_HUGEPAGE"): return  # OK
+                  "USE_HUGEPAGE"):
+            return  # OK
         print("#WAR: really???", key, val)
 
 
@@ -1022,10 +1045,11 @@ class Edit(Attribute):
     def add_to(self, node):
         if self.load is not None:
             edit = "%s" % self.load
-            if "CPUTIME" in edit and not CPUTIME: pass
+            if "CPUTIME" in edit and not CPUTIME:
+                pass
             elif node in (Suite, Family, Task):
                 node.load.add_variable(self.load)
-            else: 
+            else:
                 node.add_variable(self.load)
             if node.name() == "o" and "QUEUE 'emos" in edit:
                 raise Exception(node.name(), edit)
@@ -1214,7 +1238,8 @@ class Root(object):  # from where Suite and Node derive
         self.load.add_defstatus(status)
         return self
 
-    def __add__(self, item): self.add(item)
+    def __add__(self, item):
+        self.add(item)
 
     def append(self, item=None, *args):
         """ we get compatible with list then """
@@ -1276,9 +1301,10 @@ class Root(object):  # from where Suite and Node derive
     # follow pyflow
     shape = None
 
-    def draw_tree(self): dot = Dot(fullnames=False)
-    self._tree(dot)
-    return dot
+    def draw_tree(self):
+        dot = Dot(fullnames=False)
+        self._tree(dot)
+        return dot
 
     def _tree(self, dot):
         try:
@@ -1308,7 +1334,8 @@ class Root(object):  # from where Suite and Node derive
             # from .html import HTMLWrapper
         return "%s" % HTMLWrapper("%s" % self)  # .generate_node()))
 
-    def _repr_html_(self): return str(self.to_html())
+    def _repr_html_(self):
+        return str(self.to_html())
 
 
 def _tree(dot, node):
@@ -1326,11 +1353,208 @@ def _tree(dot, node):
     # except: pass
 
 
+def to_d3js(node):
+    kids = [to_d3js(item) for item in node.nodes]
+    return [{"children": [kids],
+             "kind": node.get_kind(),
+             "name": "%s" % node.name(),
+             "size": len(kids)}]
+
+
+def to_pyflow(node, container=None):
+    if container is None:
+        container = dict()
+    if type(node) in (tuple, list):
+        for item in node:
+            container.update(to_pyflow(item, container))
+        return container
+
+    if node.name() not in container.keys():
+        container[node.name()] = dict()
+    # steps follow
+    upd = {
+        'variables': dict(),
+        'events': [item.name() for item in node.events],
+        'meters': dict(),
+        'labels': dict(),
+        'limits': dict(),
+        'inlimits': [item.name() for item in node.inlimits],
+    }
+    for item in node.variables:
+        upd['variables'][item.name()] = item.value()
+    for item in node.meters:
+        upd['meters'][item.name()] = [item.min(), item.max()]
+    for item in node.labels:
+        upd['labels'][item.name()] = item.value()
+    for item in node.limits:
+        upd['limits'][item.name()] = item.value()
+    # ("variables", "events", "meters", "labels", "limits", "inlimits"):
+    for key in upd.keys():
+        if len(upd[key]) == 0:
+            del upd[key]
+    # repeat time date days today
+    if node.get_autocancel():
+        upd['autocancel'] = True
+    if "%s" % node.get_defstatus() != "queued":
+        upd['defstatus'] = "%s" % node.get_defstatus()
+    for item in node.nodes:
+        upd.update(to_pyflow(item, container[node.name()]))
+
+    container["%s" % node.name()].update(upd)
+    return container
+
+
+def to_dict(node, container=None):
+    kids = dict()
+    for item in node.nodes:
+        kids[item.name()] = to_dict(item)
+
+    def nat(name, key):
+        res = "%s" % name
+        return res.replace("%s " % key, "")
+
+    temp = {"edits": dict(),
+            # "events": ["%s" % item.name_or_number() for item in node.events],
+            "events": ["%s" % item.name() for item in node.events],
+            "meters": [{"%s" % item.name(): {"min": item.min(),
+                                             "max": item.max(),
+                                             "thr": item.color_change(),
+                                             # aka threshold(),
+                                             }} for item in node.meters],
+            "labels": dict(),
+            "limits": dict(),
+            "inlimits": ["%s" % item.name() for item in node.inlimits],
+
+            "zombies": [nat(item, "zomie") for item in node.zombies],
+
+            "dates": [nat(item, "date") for item in node.dates],
+            "days": [nat(item, "day") for item in node.days],
+            "times": [nat(item, "time") for item in node.times],
+            "crons": [nat(item, "cron") for item in node.crons],
+            "todays": [nat(item, "today") for item in node.todays],
+            "trigger": "%s" % node.get_trigger(),
+            "complete": "%s" % node.get_complete(),
+            "children": kids,
+            }
+    for item in node.variables:
+        temp["edits"][item.name()] = "%s" % item.value()
+    for item in node.labels:
+        temp["labels"][item.name()] = "%s" % item.value()
+    for item in node.limits:
+        temp["limits"][item.name()] = item.value()
+    out = {":name": "%s" % node.name(),
+           ':kind': "%s" % node.get_kind(),
+           ':status': "%s" % node.get_state(), }
+    defstatus = "%s" % node.get_defstatus()
+    if defstatus != "queued":
+        out[":defstatus"] = defstatus
+
+    for key in temp.keys():
+        if temp[key] is None:
+            continue
+        if temp[key] == "None":
+            continue  # WARNING ???
+        if len(temp[key]) == 0:
+            continue
+        out[":" + key] = temp[key]
+
+    return out
+
+
+def to_json(item, pyflow=False):
+    import json
+    if type(item) in (list, tuple):
+        pass
+    elif type(item) != dict:
+        print(type(item))
+        item = to_dict(item, pyflow)
+    return json.dumps(item,
+                      # default= lambda o:
+                      ensure_ascii=True,
+                      skipkeys=True,
+                      sort_keys=True,
+                      indent=2)
+
+
+def from_json(tree):
+    out = []
+    res = None
+    ITEMS = {"suite": Suite,
+             "family": Family,
+             "task": Task,
+
+             ":events": Event,
+             ":meters": Meter,
+             ":labels": Label,
+             ":edits": Edit,
+
+             ":inlimits": Inlimit,
+             ":limits": Limit,
+
+             ":trigger": Trigger,
+             ":complete": Complete,
+             ":defstatus": Defstatus,
+             ":kids": Limit,
+
+             ":times": Time,
+             ":crons": Cron,
+             ":dates": Date,
+             ":today": Today,
+             }
+    for k, v in tree.items():
+        print(k, v)
+        if k in (":name", ):
+            res = ITEMS[tree[":kind"]](tree[":name"])
+        elif k in (":status", ":kind"):
+            pass
+        elif k in (":children", ):
+            out.append(from_json(v))
+        elif k in (":defstatus", ":trigger", ":complete"):
+            out.append(ITEMS[k](v))
+        elif k in (":meters", ):
+            for item in v:
+                name = item.keys()[0]
+                out.append(ITEMS[k](name,
+                                    int(item[name]['min']),
+                                    int(item[name]['max']),
+                                    int(item[name]['thr'])
+                                    ))
+        elif ":" in k:
+            if type(v) == dict:
+                for key in v.keys():
+                    out.append(ITEMS[k](key, v[key]))
+            else:
+                for item in v:
+                    if item == '':
+                        continue
+                    print(k, item)
+                    out.append(ITEMS[k](item))
+        elif 1:
+            # print("##########U", k, v)
+            out.append(from_json(v))
+        elif k in (":edits",  ":labels", ":limits"):
+            for item in v:
+                print(k, item)
+                out.append(ITEMS[k](item[0], item[1]))
+        elif k in (":events",  ":inlimits", ":limits"):
+            for item in v:
+                out.append(ITEMS[k](item))
+        elif k[0] == ':' and k[-1] == "s":
+            print("::::::::", k, v)
+        else:
+            out.append(from_json(v))
+            # print("#UUUUUUU", k, v)
+    if res is None:
+        return {}
+    return res.add(out)
+
+
 class Node(Root):  # from where Task and Family derive
     """ Node class is shared by family and task """
 
-    def __enter__(self): CWN(self)
-    return self
+    def __enter__(self): 
+        CWN(self)
+        return self
     # def __exit__(self, exc_type, exc_val, exc_tb): pass  # return self
 
     def events(self):
@@ -1365,7 +1589,8 @@ class Node(Root):  # from where Task and Family derive
     #     self.load.add_variable(name, value)
     #     return self
 
-    def variable(self, name, value=""): return self.edit(name, value)
+    def variable(self, name, value=""):
+        return self.edit(name, value)
 
     def cron(self, time, dom=False, wdays=False, month=False):
         """ wrapper for add_cron """
@@ -1413,13 +1638,17 @@ class Defs(object):
     def __get_attr__(self, attr):
         return getattr(self.load, attr)
 
-    def auto_add_externs(self, true): self.load.auto_add_externs(true)
+    def auto_add_externs(self, true):
+        self.load.auto_add_externs(true)
 
-    def check(self): self.load.check()
+    def check(self):
+        self.load.check()
 
-    def add_extern(self, path): self.load.add_extern(path)  # TODO list
+    def add_extern(self, path):
+        self.load.add_extern(path)  # TODO list
 
-    def suites(self): return [suite for suite in self.load.suites]
+    def suites(self):
+        return [suite for suite in self.load.suites]
 
     def add_suite(self, node):
         if type(node) == Suite:
@@ -1429,7 +1658,9 @@ class Defs(object):
         else:
             raise Exception("what?")
 
-    def __str__(self): return "%s" % self.load
+    def __str__(self):
+        return "%s" % self.load
+
     __repr__ = __str__
 
     def add(self, item):
@@ -1489,9 +1720,11 @@ class Client(object):
         else:
             self.clnt.replace(path, defs, parent, force)
 
-    def suites(self): return self.clnt.suites()
+    def suites(self):
+        return self.clnt.suites()
 
-    def ping(self): self.clnt.ping()
+    def ping(self):
+        self.clnt.ping()
 
     def __str__(self):
         return "ecflow client %s@%s v%s" % (
@@ -1501,15 +1734,18 @@ class Client(object):
 class Suite(Root):
     """ wrapper for a suite """
 
-    def __enter__(self): return self
+    def __enter__(self):
+        return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb): pass  # return self
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass  # return self
 
     def __init__(self, name):
         self.load = ecflow.Suite(name)
         CWN(self)
 
-    def name(self): return self.load.name()
+    def name(self):
+        return self.load.name()
 
     def family(self, name):
         """ add a family """
@@ -1563,14 +1799,17 @@ class Family(Node, Attribute):
         if DEBUG:
             print("add: %s %s" % (node.name(), self.name()))
         parent = self.load.get_parent()
-        if parent: raise Exception("already attached...",
-                                   parent.name(),
-                                   node.name(), self.name())
+        if parent:
+            raise Exception("already attached...",
+                            parent.name(),
+                            node.name(), self.name())
         if type(node) in (Suite, Family, Task):
             node.load.add_family(self.load)
-        else: node.add_family(self.load)
+        else:
+            node.add_family(self.load)
 
-    def nodes(self): return [node for node in self.load.nodes]
+    def nodes(self):
+        return [node for node in self.load.nodes]
     # def __enter__(self): return self
 
     # def __exit__(self, *args): pass
@@ -1681,7 +1920,7 @@ class TestEcf(unittest.TestCase):
                       Repeat("YMD", 20200202, 20320202, 7, "date"),
                       Task("doer").add(Time("04:55"))))
 
-        fam.family("fam").add(DefcompleteIf(True))
+        fam.family("fam").add(Defstatus("complete"))
 
         defs = Defs()
         defs.add(suite)
@@ -1695,6 +1934,8 @@ class TestEcf(unittest.TestCase):
         suite.draw_tree()
         suite.draw_graph()
         suite.to_html()
+
+        to_json(suite)
 
         print("%s" % suite)  # print name
         print(suite)  # print name
@@ -1742,9 +1983,12 @@ def definition_to_html(d):
 
 class HTMLWrapper(object):
 
-    def __init__(self, d): self._def = d
+    def __init__(self, d):
+        self._def = d
 
-    def _repr_html_(self): return definition_to_html(self._def)
+    def _repr_html_(self):
+        return definition_to_html(self._def)
+
     __str__ = _repr_html_
 
 
@@ -1764,7 +2008,7 @@ class Dot(object):
     def __init__(self, fullnames=True):
         try:
             from graphviz import Digraph
-        except:
+        except ImportError:
             raise Exception("pip install --user graphviz # ???")
         self._dot = Digraph()
         self._nodes = {}
