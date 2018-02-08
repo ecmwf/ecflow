@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:xlink='http://www.w3.org/1999/xlink'>
+<meta>
+<meta charset="utf-8">
+<link rel="stylesheet" href="/static/ecflow.css" />
+</meta>
+<!--body oncontextmenu="return false;"-->
+<body>
+<style>
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin: auto;
+  position: relative;
+  width: 960px;
+}
+
+form {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.node {
+  border: solid 1px white;
+  font: 10px sans-serif;
+  line-height: 12px;
+  overflow: hidden;
+  position: absolute;
+  text-indent: 2px;
+}
+
+#tooltip {
+  position: absolute;
+  width: auto;
+  height: auto;
+  padding: 5px;
+  z-index: 100;
+  background-color: white;
+  border-radius: 10px;
+  /* -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+   -webkit-border-radius: 10px;
+   -moz-border-radius: 10px;
+   -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4); */
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+#tooltip.hidden {
+  display: none;
+}
+
+#tooltip p {
+  margin: 0;
+  font-family: sans-serif;
+  font-size: 16px;
+  line-height: 20px;
+}
+</style>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://d3js.org/d3.v3.js"></script>
+<h4>{{ title }}</h4>
+<!--form name="show">
+  <label><input type="radio" name="mode" value="size" checked> Size</label>
+  <label><input type="radio" name="mode" value="count"> Count</label>
+
+  <input type="text" name="mouseXField" value="0" size="4">x</input>
+  <input type="text" name="mouseYField" value="0" size="4">y</input>
+</form-->
+<!--div id="test1"-->
+{{ time }} 
+  <a href="{{ top }}">top</a>
+  <a href="{{ json_url }}">json</a>
+ {% for item in items %}
+  <a href="{{ item.href }}">{{ item.key }}</a>
+ {% endfor %}<br/>
+
+  Built with <a href="http://d3js.org">D3.js</a>. Based on
+  an <a href="http://bl.ocks.org/tgk/6044254">example</a>
+  by <a href="http://bost.ocks.org/mike">Mike Bostock</a>.
+  <a href="http://www.ecmwf.int" class="test">ecmwf</a>
+  <input name="updateButton" 
+         type="button" 
+         value="Update" 
+         onclick="updateData()" /><br/>
+<script>
+var jsondata = {{ jsondata | safe }} , 
+  WIDTH=640, 
+  HEIGHT= 740;
+
+function updateData() {
+  var url = document.URL;
+  window.location.replace(url);
+}
+</script>
+<script src="/static/ecflow.js"></script><br/>
+<script src="/static/treemap.js"></script><br/>
+
+<!-- initially hidden right-click menu -->
+<div id="tooltip" class="hidden">
+  <p><strong id="fullname"></strong></p>
+</div>
+<div class="hide" id="rmenu">
+  <ul>
+    <li><a href="http://www.google.com">Script</a></li>   
+    <li><a href="http://localhost:8080/login">Man</a></li>
+    <li><a href="C:\">Job</a>
+    <li><a href="C:\">Output</a>
+    <li><a href="C:\">Info</a>
+    <li><a href="C:\">Why</a>
+    <li><a href="C:\">Msg</a>
+    <li><a href="C:\">Var</a>
+    </li>
+  </ul>
+</div>
+</body></html>

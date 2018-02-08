@@ -1353,12 +1353,35 @@ def _tree(dot, node):
     # except: pass
 
 
+def get_kind(item):
+    if type(item) in (Defs, ecflow.Defs):
+        return "definition"
+    if type(item) in (Suite, ecflow.Suite):
+        return "suite"
+    if type(item) in (Family, ecflow.Family):
+        return "family"
+    if type(item) in (Task, ecflow.Task):
+        return "task"
+    if type(item) in (ecflow.Alias, ):
+        return "alias"
+    return "ignore"
+
+
 def to_d3js(node):
-    kids = [to_d3js(item) for item in node.nodes]
-    return [{"children": [kids],
-             "kind": node.get_kind(),
-             "name": "%s" % node.name(),
-             "size": len(kids)}]
+    if type(node) == ecflow.Defs:
+        name = 'definition'
+        kids = [to_d3js(item) for item in node.suites]
+        status = "%s" % node.get_state()
+    else:
+        kids = [to_d3js(item) for item in node.nodes]
+        name = node.name()
+        status = "%s" % node.get_state()
+
+    return {'children': [kids],
+            'kind': get_kind(node),
+            'name': '%s' % name,
+            '_status': '%s' % status,
+            'size': len(kids), }
 
 
 def to_pyflow(node, container=None):
@@ -1388,19 +1411,19 @@ def to_pyflow(node, container=None):
         upd['labels'][item.name()] = item.value()
     for item in node.limits:
         upd['limits'][item.name()] = item.value()
-    # ("variables", "events", "meters", "labels", "limits", "inlimits"):
+    # ('variables', 'events', 'meters', 'labels', 'limits', 'inlimits'):
     for key in upd.keys():
         if len(upd[key]) == 0:
             del upd[key]
     # repeat time date days today
     if node.get_autocancel():
         upd['autocancel'] = True
-    if "%s" % node.get_defstatus() != "queued":
-        upd['defstatus'] = "%s" % node.get_defstatus()
+    if '%s' % node.get_defstatus() != 'queued':
+        upd['defstatus'] = '%s' % node.get_defstatus()
     for item in node.nodes:
         upd.update(to_pyflow(item, container[node.name()]))
 
-    container["%s" % node.name()].update(upd)
+    container['%s' % node.name()].update(upd)
     return container
 
 
@@ -1410,53 +1433,53 @@ def to_dict(node, container=None):
         kids[item.name()] = to_dict(item)
 
     def nat(name, key):
-        res = "%s" % name
-        return res.replace("%s " % key, "")
+        res = '%s' % name
+        return res.replace('%s ' % key, '')
 
-    temp = {"edits": dict(),
-            # "events": ["%s" % item.name_or_number() for item in node.events],
-            "events": ["%s" % item.name() for item in node.events],
-            "meters": [{"%s" % item.name(): {"min": item.min(),
-                                             "max": item.max(),
-                                             "thr": item.color_change(),
+    temp = {'edits': dict(),
+            # 'events': ['%s' % item.name_or_number() for item in node.events],
+            'events': ['%s' % item.name() for item in node.events],
+            'meters': [{'%s' % item.name(): {'min': item.min(),
+                                             'max': item.max(),
+                                             'thr': item.color_change(),
                                              # aka threshold(),
                                              }} for item in node.meters],
-            "labels": dict(),
-            "limits": dict(),
-            "inlimits": ["%s" % item.name() for item in node.inlimits],
+            'labels': dict(),
+            'limits': dict(),
+            'inlimits': ['%s' % item.name() for item in node.inlimits],
 
-            "zombies": [nat(item, "zomie") for item in node.zombies],
+            'zombies': [nat(item, 'zombie') for item in node.zombies],
 
-            "dates": [nat(item, "date") for item in node.dates],
-            "days": [nat(item, "day") for item in node.days],
-            "times": [nat(item, "time") for item in node.times],
-            "crons": [nat(item, "cron") for item in node.crons],
-            "todays": [nat(item, "today") for item in node.todays],
-            "trigger": "%s" % node.get_trigger(),
-            "complete": "%s" % node.get_complete(),
-            "children": kids,
+            'dates': [nat(item, 'date') for item in node.dates],
+            'days': [nat(item, 'day') for item in node.days],
+            'times': [nat(item, 'time') for item in node.times],
+            'crons': [nat(item, 'cron') for item in node.crons],
+            'todays': [nat(item, 'today') for item in node.todays],
+            'trigger': '%s' % node.get_trigger(),
+            'complete': '%s' % node.get_complete(),
+            'children': kids,
             }
     for item in node.variables:
-        temp["edits"][item.name()] = "%s" % item.value()
+        temp['edits'][item.name()] = '%s' % item.value()
     for item in node.labels:
-        temp["labels"][item.name()] = "%s" % item.value()
+        temp['labels'][item.name()] = '%s' % item.value()
     for item in node.limits:
-        temp["limits"][item.name()] = item.value()
-    out = {":name": "%s" % node.name(),
-           ':kind': "%s" % node.get_kind(),
-           ':status': "%s" % node.get_state(), }
-    defstatus = "%s" % node.get_defstatus()
-    if defstatus != "queued":
-        out[":defstatus"] = defstatus
+        temp['limits'][item.name()] = item.value()
+    out = {':name': '%s' % node.name(),
+           ':kind': '%s' % get_kind(node),
+           ':status': '%s' % node.get_state(), }
+    defstatus = '%s' % node.get_defstatus()
+    if defstatus != 'queued':
+        out[':defstatus'] = defstatus
 
     for key in temp.keys():
         if temp[key] is None:
             continue
-        if temp[key] == "None":
+        if temp[key] == 'None':
             continue  # WARNING ???
         if len(temp[key]) == 0:
             continue
-        out[":" + key] = temp[key]
+        out[':' + key] = temp[key]
 
     return out
 
@@ -1466,7 +1489,7 @@ def to_json(item, pyflow=False):
     if type(item) in (list, tuple):
         pass
     elif type(item) != dict:
-        print(type(item))
+        # print(type(item))
         item = to_dict(item, pyflow)
     return json.dumps(item,
                       # default= lambda o:
@@ -1479,39 +1502,39 @@ def to_json(item, pyflow=False):
 def from_json(tree):
     out = []
     res = None
-    ITEMS = {"suite": Suite,
-             "family": Family,
-             "task": Task,
+    ITEMS = {'suite': Suite,
+             'family': Family,
+             'task': Task,
 
-             ":events": Event,
-             ":meters": Meter,
-             ":labels": Label,
-             ":edits": Edit,
+             ':events': Event,
+             ':meters': Meter,
+             ':labels': Label,
+             ':edits': Edit,
 
-             ":inlimits": Inlimit,
-             ":limits": Limit,
+             ':inlimits': Inlimit,
+             ':limits': Limit,
 
-             ":trigger": Trigger,
-             ":complete": Complete,
-             ":defstatus": Defstatus,
-             ":kids": Limit,
+             ':trigger': Trigger,
+             ':complete': Complete,
+             ':defstatus': Defstatus,
+             ':kids': Limit,
 
-             ":times": Time,
-             ":crons": Cron,
-             ":dates": Date,
-             ":today": Today,
+             ':times': Time,
+             ':crons': Cron,
+             ':dates': Date,
+             ':today': Today,
              }
     for k, v in tree.items():
         print(k, v)
-        if k in (":name", ):
-            res = ITEMS[tree[":kind"]](tree[":name"])
-        elif k in (":status", ":kind"):
+        if k in (':name', ):
+            res = ITEMS[tree[':kind']](tree[':name'])
+        elif k in (':status', ':kind'):
             pass
-        elif k in (":children", ):
+        elif k in (':children', ):
             out.append(from_json(v))
-        elif k in (":defstatus", ":trigger", ":complete"):
+        elif k in (':defstatus', ':trigger', ':complete'):
             out.append(ITEMS[k](v))
-        elif k in (":meters", ):
+        elif k in (':meters', ):
             for item in v:
                 name = item.keys()[0]
                 out.append(ITEMS[k](name,
@@ -1519,7 +1542,7 @@ def from_json(tree):
                                     int(item[name]['max']),
                                     int(item[name]['thr'])
                                     ))
-        elif ":" in k:
+        elif ':' in k:
             if type(v) == dict:
                 for key in v.keys():
                     out.append(ITEMS[k](key, v[key]))
@@ -1530,20 +1553,20 @@ def from_json(tree):
                     print(k, item)
                     out.append(ITEMS[k](item))
         elif 1:
-            # print("##########U", k, v)
+            # print('##########U', k, v)
             out.append(from_json(v))
-        elif k in (":edits",  ":labels", ":limits"):
+        elif k in (':edits',  ':labels', ':limits'):
             for item in v:
                 print(k, item)
                 out.append(ITEMS[k](item[0], item[1]))
-        elif k in (":events",  ":inlimits", ":limits"):
+        elif k in (':events',  ':inlimits', ':limits'):
             for item in v:
                 out.append(ITEMS[k](item))
-        elif k[0] == ':' and k[-1] == "s":
-            print("::::::::", k, v)
+        elif k[0] == ':' and k[-1] == 's':
+            print('::::::::', k, v)
         else:
             out.append(from_json(v))
-            # print("#UUUUUUU", k, v)
+            # print('#UUUUUUU', k, v)
     if res is None:
         return {}
     return res.add(out)
