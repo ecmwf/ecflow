@@ -23,7 +23,7 @@ public:
    Edit(const boost::python::dict& dict);
    Edit(const boost::python::dict& dict,const boost::python::dict& dict2);
    const std::vector<Variable>& variables() const { return vec_;}
-   std::string to_string() const { return "edit";}
+   static std::string to_string() { return "edit";}
    static boost::python::object init(boost::python::tuple args, boost::python::dict kw);
 private:
    std::vector<Variable> vec_;
