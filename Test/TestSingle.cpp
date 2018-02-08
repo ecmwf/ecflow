@@ -50,8 +50,8 @@ BOOST_AUTO_TEST_CASE( test_stress )
 {
    // at 4000 : limit reached os can not create more than 3946 process
    //   Job creation failed for task /test_stress/family/t3996 could not create child process
-   int no_of_tasks_to_run = 3000;
-   int run_test_for_n_seconds = 3600;
+   int no_of_tasks_to_run = 250;
+   int run_test_for_n_seconds = 240;
    int max_time_for_suspended_suite_to_complete = 60;
 
    DurationTimer timer;
@@ -62,7 +62,11 @@ BOOST_AUTO_TEST_CASE( test_stress )
       suite_ptr suite = theDefs.add_suite( test_name );
       family_ptr fam = suite->add_family("family");
       for(int i=0; i < no_of_tasks_to_run ; i++) {
-         fam->add_task ( "t" + boost::lexical_cast<std::string>(i) ) ->addRepeat(RepeatDay(1));
+         task_ptr t = fam->add_task ( "t" + boost::lexical_cast<std::string>(i) );
+         t->addRepeat(RepeatDay(1));
+         t->addEvent(Event("event"));
+         t->addLabel(Label("name","value"));
+         t->addMeter(Meter("meter",0,10));
       }
    }
 
@@ -92,12 +96,14 @@ BOOST_AUTO_TEST_CASE( test_stress )
       defs_ptr defs = TestFixture::client().defs();
       if (defs) {
          int no_of_active_tasks = 0;
+         int no_of_submitted_tasks = 0;
          std::vector<Task*> vec; defs->getAllTasks(vec);
          for(size_t i = 0; i < vec.size(); i++) {
             if (vec[i]->get_state().first == NState::ACTIVE) no_of_active_tasks++;
+            else if (vec[i]->get_state().first == NState::SUBMITTED) no_of_submitted_tasks ++;
          }
-         cout << "   " << no_of_active_tasks << " still active" << endl;
-         if (no_of_active_tasks == 0) break;
+         cout << "   still active:" << no_of_active_tasks << "  still submitted:" << no_of_submitted_tasks << endl;
+         if (no_of_active_tasks == 0 && no_of_submitted_tasks == 0 ) break;
       }
 
       // make sure test does not take too long.

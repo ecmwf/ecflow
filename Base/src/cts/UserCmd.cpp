@@ -115,7 +115,7 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vecto
          }
          std::string msg = "[ authentication failed ] User ";
          msg += user_;
-         msg += " has no *write* access. paths(";
+         msg += " has no *write* access to paths(";
          for(size_t i=0; i < paths.size(); ++i) { msg += paths[i];msg += ",";}
          msg += ") Please see your administrator.";
          throw std::runtime_error( msg );

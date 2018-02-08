@@ -51,7 +51,12 @@ bool WhiteListFile::verify_read_access(const std::string& user) const
 
 bool WhiteListFile::verify_write_access(const std::string& user) const
 {
-   return verify_write_access(user, Str::EMPTY());
+   if (all_users_have_write_access_) return true;
+   if (users_with_read_access_.empty() && users_with_write_access_.empty() ) return true;
+
+   if (verify_path_access(user,Str::EMPTY(),users_with_write_access_)) return true;
+   if (verify_path_access("*", Str::EMPTY(),users_with_write_access_)) return true;
+   return false;
 }
 
 bool WhiteListFile::verify_read_access(const std::string& user, const std::string& path) const
@@ -73,8 +78,9 @@ bool WhiteListFile::verify_write_access(const std::string& user,const std::strin
    if (all_users_have_write_access_) return true;
    if (users_with_read_access_.empty() && users_with_write_access_.empty() ) return true;
 
-   if (verify_write_access(user,path,users_with_write_access_)) return true;
-   if (verify_write_access("*",path,users_with_write_access_)) return true;
+   if (verify_path_access(user,path,users_with_write_access_)) return true;
+   if (verify_path_access("*",path,users_with_write_access_)) return true;
+
    return false;
 }
 
@@ -104,8 +110,73 @@ bool WhiteListFile::verify_write_access(const std::string& user, const std::vect
 {
    if (all_users_have_write_access_) return true;
    if (users_with_read_access_.empty() && users_with_write_access_.empty() ) return true;
-   if (verify_write_access(user,paths,users_with_write_access_)) return true;
-   if (verify_write_access("*",paths,users_with_write_access_)) return true;
+   if (verify_path_access(user,paths,users_with_write_access_)) return true;
+   if (verify_path_access("*",paths,users_with_write_access_)) return true;
+   return false;
+}
+
+static bool path_access(const std::vector<std::string>& paths,const std::vector<std::string>& allowed_paths)
+{
+   if (allowed_paths.empty()) return true; // no paths is specified in PASSWORD file allow access
+
+   // Paths specified in PASSWORD file.
+   if ( paths.empty())  return false; // INPUT user path empty deny access
+
+   // when we have a set of paths, supplied the the GUI. These can be random path selections
+   // Hence to allow access *ALL* paths need to pass access
+   //
+   // need to correctly check for subsets
+   //    allowed_paths              paths               valid
+   //    /ecflow                    /ecflow_1182        FALSE
+   //    /ecflow/fred               /ecflow/freddy      FALSE
+   //    /ecflow/fred               /ecflow/fred/me     TRUE
+
+   size_t allowed_paths_size = allowed_paths.size();
+   size_t paths_size = paths.size();
+   for(size_t i = 0; i < paths_size; i++) {
+      const std::string& path = paths[i];
+      bool found_path_in_allowed_paths = false;
+
+      for(size_t ap = 0; ap < allowed_paths_size; ap++) {
+         const std::string& allowed_path = allowed_paths[ap];
+//         cout << "path " << path << "\n";
+//         cout << "allowed_path " <<  allowed_path << "\n";
+//         if (path.size() > allowed_paths[ap].size()) {
+//            cout << "path[allowed_path.size()] " << path[ allowed_path.size()] << "\n";
+//         }
+         if (path.find(allowed_path) == 0) {
+            if (path.size() > allowed_path.size() && path[allowed_path.size()] != '/') {
+               // FALSE case above
+               continue;
+            }
+
+            found_path_in_allowed_paths = true;
+            continue; // all paths must match, or fail
+         }
+      }
+      if (!found_path_in_allowed_paths) return false;
+   }
+   return true;
+}
+
+static bool path_access(const std::string& path,const std::vector<std::string>& allowed_paths)
+{
+   if (allowed_paths.empty()) return true;
+   if (path.empty())  return false;
+
+   size_t allowed_paths_size = allowed_paths.size();
+   for(size_t ap = 0; ap < allowed_paths_size; ap++) {
+      const std::string& allowed_path = allowed_paths[ap];
+
+      if (path.find(allowed_path)  == 0) {
+         // found path in allowed paths, check correct SUB_PATH
+         if (path.size() > allowed_path.size() && path[allowed_path.size()] != '/') {
+            // FALSE case above
+            continue;
+         }
+         return true;
+      }
+   }
    return false;
 }
 
@@ -113,23 +184,7 @@ bool WhiteListFile::verify_path_access(const std::string& user,const std::vector
 {
    mymap::const_iterator it = user_path_map.find(user);
    if (it != user_path_map.end()) {
-      const std::vector<std::string>& allowed_paths = it->second;
-      if (allowed_paths.empty()) return true;
-      if ( paths.empty())  return false;
-
-      size_t allowed_paths_size = allowed_paths.size();
-      for(size_t i = 0; i < paths.size(); i++) {
-         bool found_path_in_allowed_paths = false;
-         for(size_t ap = 0; ap < allowed_paths_size; ap++) {
-            string::size_type fnd = allowed_paths[ap].find(paths[i]);
-            if (fnd != std::string::npos && fnd == 0) {
-               found_path_in_allowed_paths = true;
-               continue;
-            }
-         }
-         if (!found_path_in_allowed_paths) return false;
-      }
-      return true;
+      return path_access(paths,it->second);
    }
    return false;
 }
@@ -138,75 +193,10 @@ bool WhiteListFile::verify_path_access(const std::string& user,const std::string
 {
    mymap::const_iterator it = user_path_map.find(user);
    if (it != user_path_map.end()) {
-      const std::vector<std::string>& allowed_paths = it->second;
-      if (allowed_paths.empty()) return true;
-      if ( path.empty())  return false;
-
-      size_t allowed_paths_size = allowed_paths.size();
-      for(size_t ap = 0; ap < allowed_paths_size; ap++) {
-         string::size_type fnd = allowed_paths[ap].find(path);
-         if (fnd != std::string::npos && fnd == 0) {
-            // found path in allowed paths
-            return true;
-         }
-      }
+      return path_access(path,it->second);
    }
    return false;
 }
-
-bool WhiteListFile::verify_write_access(const std::string& user,const std::vector<std::string>& paths,const mymap& user_path_map) const
-{
-   mymap::const_iterator it = user_path_map.find(user);
-   if (it != user_path_map.end()) {
-
-      const std::vector<std::string>& allowed_paths = it->second;
-      if (allowed_paths.empty()) return true; // user  # write user with no paths specified
-
-      // if we get here we have:
-      // user /a/b/ c                      # user who has paths specified
-      if ( paths.empty())  return false;// # input path is empty deny access
-
-      size_t allowed_paths_size = allowed_paths.size();
-      for(size_t i = 0; i < paths.size(); i++) {
-         bool found_path_in_allowed_paths = false;
-         for(size_t ap = 0; ap < allowed_paths_size; ap++) {
-            string::size_type fnd = allowed_paths[ap].find(paths[i]);
-            if (fnd != std::string::npos && fnd == 0) {
-               found_path_in_allowed_paths = true;
-               continue;
-            }
-         }
-         if (!found_path_in_allowed_paths) return false;
-      }
-      return true;
-   }
-   return false;
-}
-
-bool WhiteListFile::verify_write_access(const std::string& user,const std::string& path,const mymap& user_path_map) const
-{
-   mymap::const_iterator it = user_path_map.find(user);
-   if (it != user_path_map.end()) {
-
-      const std::vector<std::string>& allowed_paths = it->second;
-      if (allowed_paths.empty()) return true;   // user  # write user with no paths specified
-
-      // if we get here we have:
-      // user /a/b/ c                      # user who has paths specified
-      if ( path.empty())  return false; // # input path is empty deny access
-
-      size_t allowed_paths_size = allowed_paths.size();
-      for(size_t ap = 0; ap < allowed_paths_size; ap++) {
-         string::size_type fnd = allowed_paths[ap].find(path);
-         if (fnd != std::string::npos && fnd == 0) {
-            // found path in allowed paths
-            return true;
-         }
-      }
-   }
-   return false;
-}
-
 
 bool WhiteListFile::load(const std::string& file, bool debug, std::string& errorMsg )
 {

@@ -622,8 +622,10 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_begin )
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
    create_and_start_test("test_user_zombies_for_begin","begin");
 
-   /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
+   /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete or abort
+   /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
+   /// Previously we had tried again, but fix for ECFLOW-1216, means we now don't try again,hence allow abort
+   BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
 
    check_at_least_one_zombie();
 
@@ -660,8 +662,10 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_begin )
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
    create_and_start_test(suite_name,"begin"); // create zombies via begin force
 
-   /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
+   /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete or abort
+   /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
+   /// Previously we had tried again, but fix for ECFLOW-1216, means we now don't try again,hence allow abort
+   BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
 
    check_at_least_one_zombie();
 
@@ -695,7 +699,9 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_adopt )
    create_and_start_test(suite_name,"begin");
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
+   /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
+   /// Previously we had tried again, but fix for ECFLOW-1216, means we now don't try again,hence allow abort
+   BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
 
    check_at_least_one_zombie();
 
@@ -734,7 +740,9 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_adopt )
    create_and_start_test(suite_name,"begin");
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Wait for all non-zombie tasks to complete failed");
+   /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
+   /// Previously we had tried again, but fix for ECFLOW-1216, means we now don't try again,hence allow abort
+   BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
 
    // expected 5 zombies, ie because we have NUM_OF_TASKS tasks. These should all be blocking
    check_at_least_one_zombie();
