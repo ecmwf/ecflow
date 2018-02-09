@@ -12,7 +12,21 @@
 
 #include <QDialog>
 
+#include "ui_TextFilterAddDialog.h"
 #include "ui_TextFilterHandlerDialog.h"
+
+
+class TextFilterAddDialog : public QDialog, private Ui::TextFilterAddDialog
+{
+Q_OBJECT
+
+public:
+    explicit TextFilterAddDialog(QWidget* parent=0);
+    void init(QString name,QString filter);
+
+public Q_SLOTS:
+    void accept();
+};
 
 class TextFilterHandlerDialog : public QDialog, private Ui::TextFilterHandlerDialog
 {
@@ -22,16 +36,18 @@ public:
     explicit TextFilterHandlerDialog(QWidget *parent = 0);
     ~TextFilterHandlerDialog();
 
-    void setItemToAdd(QString name,QString filter);
+    void setItemToSaveAs(QString name,QString filter,bool matched,bool caseSensitive);
 
 protected Q_SLOTS:
-    void on_addPb__clicked();
+    void on_actionAdd__triggered();
     void on_actionEdit__triggered();
     void on_actionDuplicate__triggered();
     void on_actionRemove__triggered();
 
 private:
     void reloadTable();
+    bool addItem();
+    void updateStatus();
     QString settingsFile();
     void writeSettings();
     void readSettings();

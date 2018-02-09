@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>868</width>
-    <height>780</height>
+    <width>697</width>
+    <height>525</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,8 +23,20 @@
          <property name="contextMenuPolicy">
           <enum>Qt::ActionsContextMenu</enum>
          </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::NoEditTriggers</set>
+         </property>
+         <property name="alternatingRowColors">
+          <bool>true</bool>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <property name="selectionBehavior">
+          <enum>QAbstractItemView::SelectRows</enum>
+         </property>
          <property name="columnCount">
-          <number>2</number>
+          <number>4</number>
          </property>
          <attribute name="horizontalHeaderStretchLastSection">
           <bool>true</bool>
@@ -37,57 +49,146 @@
          </attribute>
          <column>
           <property name="text">
-           <string>Name</string>
+           <string>Match mode</string>
           </property>
          </column>
          <column>
           <property name="text">
-           <string>Filter regexp</string>
+           <string>Case sensitive</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Context menu</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Regexp</string>
           </property>
          </column>
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <layout class="QHBoxLayout" name="horizontalLayout">
-           <item>
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Name:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="addNameLe_"/>
-           </item>
-           <item>
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Filter regexp:</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLineEdit" name="addFilterLe_"/>
-           </item>
-           <item>
-            <widget class="QPushButton" name="addPb_">
-             <property name="text">
-              <string>Add</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
+        <widget class="QGroupBox" name="saveAsGb_">
+         <property name="title">
+          <string>Save filter as</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QWidget" name="widget" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_2">
+             <item>
+              <layout class="QGridLayout" name="gridLayout">
+               <item row="0" column="0">
+                <widget class="QLabel" name="label_3">
+                 <property name="text">
+                  <string>Name:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="QLabel" name="label_4">
+                 <property name="text">
+                  <string>Regexp</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QLineEdit" name="addFilterLe_"/>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLineEdit" name="addNameLe_"/>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout">
+               <item>
+                <widget class="QLabel" name="label">
+                 <property name="text">
+                  <string>Match mode: </string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="addMatchedCb_">
+                 <item>
+                  <property name="text">
+                   <string>matched</string>
+                  </property>
+                 </item>
+                 <item>
+                  <property name="text">
+                   <string>unmatched</string>
+                  </property>
+                 </item>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeType">
+                  <enum>QSizePolicy::Fixed</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>6</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="addCaseCb_">
+                 <property name="text">
+                  <string>Case sensitive</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="horizontalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="saveAsPb_">
+            <property name="text">
+             <string>Save</string>
+            </property>
+            <property name="icon">
+             <iconset resource="viewer.qrc">
+              <normaloff>:/viewer/filesaveas.svg</normaloff>:/viewer/filesaveas.svg</iconset>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3"/>
        </item>
       </layout>
      </item>
      <item>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
-        <widget class="QToolButton" name="editPb_">
+        <widget class="QToolButton" name="editTb_">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -97,10 +198,29 @@
          <property name="text">
           <string>&amp;Edit</string>
          </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextBesideIcon</enum>
+         </property>
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="duplicatePb_">
+        <widget class="QToolButton" name="addTb_">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Add</string>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextBesideIcon</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="duplicateTb_">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -113,7 +233,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QToolButton" name="removePb_">
+        <widget class="QToolButton" name="removeTb_">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -122,6 +242,9 @@
          </property>
          <property name="text">
           <string>&amp;Remove</string>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextBesideIcon</enum>
          </property>
         </widget>
        </item>
@@ -165,6 +288,10 @@
    </property>
   </action>
   <action name="actionEdit_">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/configure.svg</normaloff>:/viewer/configure.svg</iconset>
+   </property>
    <property name="text">
     <string>&amp;Edit</string>
    </property>
@@ -176,6 +303,10 @@
    </property>
   </action>
   <action name="actionRemove_">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
+   </property>
    <property name="text">
     <string>&amp;Remove</string>
    </property>
@@ -186,13 +317,30 @@
     <string>Del</string>
    </property>
   </action>
+  <action name="actionAdd_">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/images/add.svg</normaloff>:/viewer/images/add.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Add</string>
+   </property>
+   <property name="toolTip">
+    <string>Add item</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
+  </action>
   <zorder>buttonBox</zorder>
   <zorder>layoutWidget</zorder>
   <zorder>layoutWidget_2</zorder>
   <zorder>editPb_</zorder>
   <zorder>table_</zorder>
  </widget>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

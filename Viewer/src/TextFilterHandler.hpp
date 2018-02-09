@@ -19,14 +19,22 @@ class VSettings;
 class TextFilterItem
 {
 public:
-    TextFilterItem(const std::string& name,const std::string& filter) : name_(name), filter_(filter) {}
-    const std::string& name() const {return name_;}
+    TextFilterItem(const std::string& filter,bool matched=true,bool caseSensitive=false,bool contextMenu=true) :
+        filter_(filter), matched_(matched), caseSensitive_(caseSensitive), contextMenu_(true) {}
+
     const std::string& filter() const {return filter_;}
+    bool caseSensitive() const {return caseSensitive_;}
+    bool matched() const {return matched_;}
+    bool contextMenu() const {return contextMenu_;}
     void save(VSettings *vs) const;
+    static TextFilterItem make(VSettings* vs);
+    bool operator ==(const TextFilterItem& o) const;
 
 public:
-    std::string name_;
     std::string filter_;
+    bool matched_;
+    bool caseSensitive_;
+    bool contextMenu_;
 };
 
 class TextFilterHandler
@@ -34,11 +42,12 @@ class TextFilterHandler
 public:
     static TextFilterHandler* Instance();
 
-    bool contains(const std::string& name,const std::string& filter) const;
-    void add(const std::string& name,const std::string& filter);
-    void update(const std::string& name,const std::string& filter);
-    const std::vector<TextFilterItem>& items() const {return items_;}
-    void addLatest(const std::string& name,const std::string& filter);
+    bool contains(const std::string& filter,bool matched,bool caseSensitive) const;
+    bool add(const TextFilterItem&);
+    bool add(const std::string& filter,bool matched,bool caseSensitive,bool contextMenu);
+    void addLatest(const TextFilterItem&);
+    void addLatest(const std::string& filter,bool matched,bool caseSensitive,bool contextMenu);
+    const std::vector<TextFilterItem>& items() const {return items_;}    
     const std::vector<TextFilterItem>& latestItems() const {return latest_;}
     void remove(int);
 

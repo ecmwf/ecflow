@@ -15,6 +15,7 @@
 #include <QWidget>
 #include <QAbstractItemModel>
 #include <QCompleter>
+#include <QToolButton>
 
 #include "TextFilterHandler.hpp"
 
@@ -32,30 +33,48 @@ public:
     void setStatus(FilterStatus);
 
     void setEditFocus();
+    void buildMenu(QToolButton *tb);
+    void setExternalButtons(QToolButton* statusTb,QToolButton* optionTb);
+    QString filterText() const;
+    bool isActive() const;
+    bool isCaseSensitive() const;
+    bool isMatched() const;
 
 public Q_SLOTS:
     void slotFilterEditor();
     void on_le__textChanged();
     void on_le__returnPressed();
-    void on_confTb__clicked();
     void on_closeTb__clicked();
+    void slotOptionTb();
 
 Q_SIGNALS:
-    void runRequested(QString);
+    void runRequested(QString,bool,bool);
+    void clearRequested();
     void closeRequested();
+    void hideRequested();
+    void statusChanged(FilterStatus);
+
+protected:
+    void paintEvent(QPaintEvent *);
 
 private:
-    void addToLatest(QString f);
-    void addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,QString title);
+    void init(const TextFilterItem& item);
+    void refreshCompleter();
+    void addCurrentToLatest();
+    void addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,
+                        QString title,QString data);
 
     FilterStatus status_;
-    QColor oriColour_;
-    QColor redColour_;
-    QColor greenColour_;
+    QBrush oriBrush_;
+    QBrush redBrush_;
+    QBrush greenBrush_;
     QCompleter* completer_;
     TextFilterCompleterModel* completerModel_;
+    QToolButton* statusTb_;
+    QToolButton* optionTb_;
 };
 
+#if 0
 class TextFilterCompleterModel : public QAbstractItemModel
 {
 public:
@@ -81,5 +100,7 @@ public:
 protected:
     std::vector<TextFilterItem> data_;
 };
+
+#endif
 
 #endif // TEXTFILTERWIDGET_HPP

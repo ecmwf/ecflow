@@ -409,6 +409,7 @@ set(viewer_wrap_ui_files
     SuiteItemWidget.ui
     TableFilterWidget.ui
     TableNodeWidget.ui
+    TextFilterAddDialog.ui
     TextFilterHandlerDialog.ui
     TextFilterWidget.ui
     TimeItemWidget.ui

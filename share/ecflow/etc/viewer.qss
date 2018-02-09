@@ -434,3 +434,6 @@ QTabBar[nodePanel="1"]::tab:selected{
     padding : 2px;
 }*/
 
+QWidget[textFilter="1"] {
+     background: rgb(233,233,233);
+}

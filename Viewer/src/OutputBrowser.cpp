@@ -30,7 +30,8 @@ int OutputBrowser::minPagerSparseSize_=30*1024*1024;
 int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) :
-    QWidget(parent)
+    QWidget(parent),
+    filterTb_(0)
 {
     QVBoxLayout *vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
@@ -39,8 +40,12 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     //Text filter editor
     textFilter_=new TextFilterWidget(this);
     vb->addWidget(textFilter_);
-    connect(textFilter_,SIGNAL(runRequested(QString)),
-            this,SLOT(slotRunFilter(QString)));
+
+    connect(textFilter_,SIGNAL(runRequested(QString,bool,bool)),
+            this,SLOT(slotRunFilter(QString,bool,bool)));
+
+    connect(textFilter_,SIGNAL(clearRequested()),
+            this,SLOT(slotRemoveFilter()));
 
     connect(textFilter_,SIGNAL(closeRequested()),
             this,SLOT(slotRemoveFilter()));
@@ -99,6 +104,11 @@ OutputBrowser::~OutputBrowser()
     {
         delete jobHighlighter_;
     }
+}
+
+void OutputBrowser::setFilterButtons(QToolButton* statusTb,QToolButton* optionTb)
+{
+    textFilter_->setExternalButtons(statusTb,optionTb);
 }
 
 void OutputBrowser::clear()
@@ -344,7 +354,7 @@ void OutputBrowser::setCursorPos(qint64 pos)
     }
 }
 
-void OutputBrowser::slotRunFilter(QString filter)
+void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive)
 {
     assert(file_);
 
@@ -377,8 +387,15 @@ void OutputBrowser::slotRunFilter(QString filter)
     //At this point point fSrc must contain the text to filter
     QProcess proc;
     proc.setStandardOutputFile(QString::fromStdString(fTarget->path()));
+
+    QString extraOptions;
+    if(!matched)
+        extraOptions+=" -v ";
+    if(!caseSensitive)
+        extraOptions+=" -i ";
+
     proc.start("/bin/sh",
-         QStringList() <<  "-c" << "grep -e \'" + filter  + "\' " +
+         QStringList() <<  "-c" << "grep " + extraOptions + " -e \'" + filter  + "\' " +
          QString::fromStdString(fSrc->path()));
 
     UiLog().dbg() << "args=" << proc.arguments().join(" ");

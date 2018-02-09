@@ -12,40 +12,57 @@
 
 #include <QtGlobal>
 #include <QCompleter>
+#include <QLabel>
+#include <QLinearGradient>
 #include <QMenu>
 #include <QPalette>
+#include <QPainter>
+#include <QStyleOption>
 #include <QTreeView>
+#include <QWidgetAction>
+
+#include "TextFormat.hpp"
+#include "ViewerUtil.hpp"
 
 TextFilterWidget::TextFilterWidget(QWidget *parent) :
     QWidget(parent),
-    status_(EditStatus)
+    status_(EditStatus),
+    statusTb_(0),
+    optionTb_(0)
 {
     setupUi(this);
 
-    //Editor
+    setProperty("textFilter","1");
 
+    //match
+    matchCb_->addItem(tr("matching"),0);
+    matchCb_->addItem(tr("unmatching"),1);
+
+    //Editor
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
-    le_->setPlaceholderText(tr(" Regexp filter"));
+    le_->setPlaceholderText(tr(" Regexp (grep)"));
 #endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     le_->setClearButtonEnabled(true);
 #endif
 
-    oriColour_=QColor(le_->palette().color(QPalette::Text));
-    redColour_=QColor(210,24,24);
-    greenColour_=QColor(39,124,21);
+    oriBrush_=QBrush(le_->palette().brush(QPalette::Base));
+    redBrush_=ViewerUtil::lineEditRedBg();
+    greenBrush_=ViewerUtil::lineEditGreenBg();
 
     completer_=new QCompleter(this);
-    completer_->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+    //completer_->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
 
-    QTreeView *view=new QTreeView(this);
-    view->setFixedHeight(100);
-    completerModel_=new TextFilterCompleterModel(this);
-    completerModel_->setData(TextFilterHandler::Instance()->items());
+    //QTreeView *view=new QTreeView(this);
+    //view->setFixedHeight(100);
+    //view->setRootIsDecorated(false);
 
-    completer_->setModel(completerModel_);
-    completer_->setPopup(view);
+    //completerModel_=new TextFilterCompleterModel(this);
+    //completerModel_->setData(TextFilterHandler::Instance()->items());
+
+    //completer_->setModel(completerModel_);
+    //completer_->setPopup(view);
     le_->setCompleter(completer_);
 
     QIcon icon;
@@ -54,52 +71,150 @@ TextFilterWidget::TextFilterWidget(QWidget *parent) :
     closeTb_->setIcon(icon);
 }
 
+bool TextFilterWidget::isActive() const
+{
+    return !le_->text().isEmpty();
+}
+
+bool TextFilterWidget::isCaseSensitive() const
+{
+    return caseCb_->isChecked();
+}
+
+bool TextFilterWidget::isMatched() const
+{
+    return matchCb_->currentIndex() == 0;
+}
+
+QString TextFilterWidget::filterText() const
+{
+    return le_->text();
+}
+
+void TextFilterWidget::init(const TextFilterItem& item)
+{
+    matchCb_->setCurrentIndex(item.matched()?0:1);
+    caseCb_->setChecked(item.caseSensitive());
+    le_->setText(QString::fromStdString(item.filter()));
+}
+
+void TextFilterWidget::setExternalButtons(QToolButton* statusTb,QToolButton* optionTb)
+{
+    Q_ASSERT(statusTb);
+    Q_ASSERT(optionTb);
+
+    statusTb_=statusTb;
+    optionTb_=optionTb;
+
+    connect(optionTb_,SIGNAL(clicked()),
+            this,SLOT(slotOptionTb()));
+}
+
+void TextFilterWidget::refreshCompleter()
+{
+    //completerModel_->setData(TextFilterHandler::Instance()->items());
+}
+
 void TextFilterWidget::slotFilterEditor()
 {
 
 }
 
-void TextFilterWidget::on_confTb__clicked()
+void TextFilterWidget::buildMenu(QToolButton *tb)
 {
-    QMenu* menu=new QMenu(confTb_);
+    QMenu* menu=new QMenu(tb);
 
     QAction *manageAc=new QAction(menu);
-    manageAc->setText(tr("Manage text filters ..."));
+    manageAc->setText(tr("Manage filters ..."));
+    manageAc->setIcon(QPixmap(":/viewer/configure.svg"));
     menu->addAction(manageAc);
 
-    QAction *addAc=new QAction(menu);
-    addAc->setText(tr("Save current filter ..."));
-    menu->addAction(addAc);
+    QAction *saveAc=0;
+    if(isActive() && isVisible())
+    {
+        saveAc=new QAction(menu);
+        saveAc->setText(tr("Save filter"));
+        saveAc->setIcon(QPixmap(":/viewer/filesaveas.svg"));
+        menu->addAction(saveAc);
+    }
 
-    addMenuSection(menu,TextFilterHandler::Instance()->items(),tr("Saved"));
-    addMenuSection(menu,TextFilterHandler::Instance()->latestItems(),tr("Recent"));
+    QAction *clearAc=new QAction(menu);
+    clearAc->setText(tr("Clear filter"));
+    if(!isActive()) clearAc->setEnabled(false);
+    menu->addAction(clearAc);
+
+    QAction *sep=new QAction(menu);
+    sep->setSeparator(true);
+    menu->addAction(sep);
+
+    addMenuSection(menu,TextFilterHandler::Instance()->items(),tr("Saved"),"s");
+    addMenuSection(menu,TextFilterHandler::Instance()->latestItems(),tr("Recent"),"r");
 
     if(QAction *ac=menu->exec(QCursor::pos()))
-    {
+    {      
         if(ac == manageAc)
         {
             TextFilterHandlerDialog diag;
             diag.exec();
+            refreshCompleter();
         }
-        else if(ac == addAc)
+        else if(ac == saveAc)
         {
-            TextFilterHandlerDialog diag;
-            diag.setItemToAdd("filter",le_->text());
-            diag.exec();
+            std::string filter=filterText().toStdString();
+            bool matchMode=isMatched();
+            bool caseSensitive=isCaseSensitive();
+
+            if(TextFilterHandler::Instance()->contains(filter,matchMode,caseSensitive))
+            {
+                return;
+            }
+
+            TextFilterHandler::Instance()->add(filter,matchMode,caseSensitive,true);
+            refreshCompleter();
+        }
+        else if(ac == clearAc)
+        {
+
+            refreshCompleter();
+        }
+        else
+        {
+            QStringList id=ac->data().toString().split("_");
+            if(id.count() == 2)
+            {
+                std::size_t pos=id[1].toInt();
+                TextFilterItem item("","");
+                if(id[0] == "s")
+                {
+                    if(pos >=0 && TextFilterHandler::Instance()->items().size())
+                    {
+                        item=TextFilterHandler::Instance()->items()[pos];
+                    }
+                }
+
+                else if(id[0] == "r")
+                {
+                    if(pos >=0 && TextFilterHandler::Instance()->latestItems().size())
+                    {
+                        item=TextFilterHandler::Instance()->latestItems()[pos];
+                    }
+                }
+
+                if(!item.filter().empty())
+                {
+                    init(item);
+                    Q_EMIT runRequested(QString::fromStdString(item.filter()),item.matched(),item.caseSensitive());
+                }
+            }
         }
 
-        //int index=ac->data().toInt();
-        //if(index >=0 && index < count())
-        //{
-            //setCurrentIndex(index);
-        //}
     }
 
     menu->clear();
     menu->deleteLater();
 }
 
-void TextFilterWidget::addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,QString title)
+void TextFilterWidget::addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,QString title,QString data)
 {
     if(items.empty())
         return;
@@ -108,18 +223,40 @@ void TextFilterWidget::addMenuSection(QMenu* menu,const std::vector<TextFilterIt
     sep1->setSeparator(true);
     menu->addAction(sep1);
 
-    QAction* acTitle = new QAction(menu);
-    acTitle->setText(title);
-    QFont f=acTitle->font();
-    f.setBold(true);
-    acTitle->setFont(f);
-    menu->addAction(acTitle);
+    if(!title.isEmpty())
+    {
+        QAction* acTitle = new QAction(menu);
+        acTitle->setText(title);
+        QFont f=acTitle->font();
+        f.setBold(true);
+        acTitle->setFont(f);
+        menu->addAction(acTitle);
+    }
 
     for(std::size_t i=0 ; i < items.size(); i++)
     {
+        //QLabel *label = new QLabel("<i>first</i>second", this);
+
+        // init widget action
+        //QWidgetAction *wAc= new QWidgetAction(this);
+        //wAc->setDefaultWidget(label);
+        //menu->addAction(wAc);
+
+        //QWidgetAction *wAc= new QWidgetAction(this);
         QAction* ac=new QAction(this);
-        ac->setText(QString::fromStdString(items[i].filter()));
+        //QLabel *label = new QLabel(this);
+
+        QString txt=QString::fromStdString(items[i].filter()) +
+                    "   <" + QString(items[i].matched()?"m":"u") + "," +
+                     QString(items[i].caseSensitive()?"cs":"ci") + ">";
+
+        //label->setText(txt);
+        //wAc->setDefaultWidget(label);
+        ac->setText(txt);
+        ac->setData(data + "_" + QString::number(i)); //set an id for the action
         menu->addAction(ac);
+
+        //menu->addAction(wAc);
     }
 }
 
@@ -133,13 +270,22 @@ void TextFilterWidget::on_le__returnPressed()
 {
     QString t=le_->text();
     if(!t.isEmpty())
-        Q_EMIT runRequested(t);
+        Q_EMIT runRequested(t,isMatched(),isCaseSensitive());
 }
 
 void TextFilterWidget::on_le__textChanged()
 {
     if(status_ != EditStatus)
         setStatus(EditStatus);
+
+    if(!isActive())
+        clearRequested();
+}
+
+void TextFilterWidget::slotOptionTb()
+{
+    Q_ASSERT(optionTb_);
+    buildMenu(optionTb_);
 }
 
 void TextFilterWidget::setEditFocus()
@@ -149,34 +295,53 @@ void TextFilterWidget::setEditFocus()
 
 void TextFilterWidget::setStatus(FilterStatus status)
 {
-    status_=status;
-    QColor col=oriColour_;
-    QPalette p=le_->palette();
-    switch(status_)
+    if(status_ != status)
     {
-    case EditStatus:
-        col=oriColour_;
-        break;
-    case FoundStatus:
-        col=greenColour_;
-        addToLatest(le_->text());
-        break;
-    case NotFoundStatus:
-        col=redColour_;
-        break;
-    default:
-        col=oriColour_;
-        break;
+        status_=status;
+
+        QBrush br=oriBrush_;
+        QPalette p=le_->palette();
+        switch(status_)
+        {
+        case EditStatus:
+            br=oriBrush_;
+            if(statusTb_) statusTb_->setIcon(QPixmap(":/viewer/filter_decor.svg"));
+            break;
+        case FoundStatus:
+            br=greenBrush_;
+            if(statusTb_) statusTb_->setIcon(QPixmap(":/viewer/filter_decor_green.svg"));
+            addCurrentToLatest();
+            break;
+        case NotFoundStatus:
+            br=redBrush_;
+            if(statusTb_) statusTb_->setIcon(QPixmap(":/viewer/filter_decor_red.svg"));
+            break;
+        default:
+            break;
+        }
+
+        p.setBrush(QPalette::Base,br);
+        le_->setPalette(p);
     }
-
-    p.setColor(QPalette::Text,col);
-    le_->setPalette(p);
+    //Q_EMIT statusChanged(status_);
 }
 
-void TextFilterWidget::addToLatest(QString f)
+void TextFilterWidget::addCurrentToLatest()
 {
-    TextFilterHandler::Instance()->addLatest("",f.simplified().toStdString());
+    TextFilterHandler::Instance()->addLatest(filterText().simplified().toStdString(),
+                                             isMatched(),isCaseSensitive(),true);
 }
+
+void TextFilterWidget::paintEvent(QPaintEvent *)
+{
+     QStyleOption opt;
+     opt.init(this);
+     QPainter p(this);
+     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+#if 0
+
 
 TextFilterCompleterModel::TextFilterCompleterModel(QObject *parent) :
           QAbstractItemModel(parent)
@@ -350,6 +515,9 @@ QModelIndex TextFilterCompleterModel::parent(const QModelIndex &child) const
 {
     return QModelIndex();
 }
+
+#endif
+
 
 #if 0
 Zombie TextFilterCompleterModel::indexToZombie(const QModelIndex& idx) const

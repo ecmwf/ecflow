@@ -13,21 +13,75 @@
 #include "SessionHandler.hpp"
 
 #include <QDebug>
+#include <QMessageBox>
 #include <QSettings>
 #include <QTableWidgetItem>
+
+//======================================
+//
+// TextFilterAddDialog
+//
+//======================================
+
+TextFilterAddDialog::TextFilterAddDialog(QWidget *parent) :
+   QDialog(parent)
+{
+    setupUi(this);
+}
+
+void TextFilterAddDialog::init(QString name,QString filter)
+{
+    nameEdit_->setText(name);
+    filterEdit_->setText(filter);
+}
+
+void TextFilterAddDialog::accept()
+{
+    QString name=nameEdit_->text();
+    QString filter=filterEdit_->text();
+#if 0
+    if(TextFilterHandler::Instance()->contains(name.toStdString(),filter.toStdString()))
+    {
+        QMessageBox::critical(0,tr("Text filter"), "Cannot add text filter! Text filter with the same name: <b>"  +
+                              name + "</b> and regexp: <b>" + filter + "</b> already exists!");
+        return;
+    }
+
+    TextFilterHandler::Instance()->add(name.toStdString(),filter.toStdString());
+#endif
+
+    QDialog::accept();
+}
+
+
+//======================================
+//
+// TextFilterHandlerDialog
+//
+//======================================
 
 TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);
 
-    table_->addAction(actionEdit_);
+    QAction *sep1=new QAction(this);
+    sep1->setSeparator(true);
+
+    QAction *sep2=new QAction(this);
+    sep2->setSeparator(true);
+
+    table_->addAction(actionAdd_);
+    table_->addAction(sep1);
     table_->addAction(actionDuplicate_);
+    table_->addAction(actionEdit_);
+    table_->addAction(sep2);
     table_->addAction(actionRemove_);
 
     //Add actions for the toolbuttons
-    editPb_->setDefaultAction(actionEdit_);
-    removePb_->setDefaultAction(actionRemove_);
-    duplicatePb_->setDefaultAction(actionDuplicate_);
+    addTb_->setDefaultAction(actionAdd_);
+    editTb_->setDefaultAction(actionEdit_);
+    removeTb_->setDefaultAction(actionRemove_);
+    duplicateTb_->setDefaultAction(actionDuplicate_);
 
     //Init the table
     reloadTable();
@@ -49,18 +103,28 @@ void TextFilterHandlerDialog::reloadTable()
     table_->clear(); //it removes the headers as well
 
     QStringList headers;
-    headers << "Name" << "Filter expression (regexp)";
+    headers << "Match mode" << "Case sensitive" << "Context menu" << "Regexp (grep)";
     table_->setHorizontalHeaderLabels(headers);
 
     const std::vector<TextFilterItem>& items=TextFilterHandler::Instance()->items();
     table_->setRowCount(items.size());
     for(size_t i=0; i < items.size(); i++)
     {
-        QTableWidgetItem *nameItem = new QTableWidgetItem(QString::fromStdString(items[i].name()));
         QTableWidgetItem *filterItem = new QTableWidgetItem(QString::fromStdString(items[i].filter()));
-        table_->setItem(i, 0, nameItem);
-        table_->setItem(i, 1, filterItem);
+        QTableWidgetItem *matchedItem = new QTableWidgetItem((items[i].matched())?"matched":"unmatched");
+        QTableWidgetItem *caseItem = new QTableWidgetItem((items[i].caseSensitive())?"yes":"no");
+        QTableWidgetItem *contextItem = new QTableWidgetItem((items[i].contextMenu())?"yes":"no");
+
+        table_->setItem(i, 0, matchedItem);
+        table_->setItem(i, 1, caseItem);
+        table_->setItem(i, 2, contextItem);
+        table_->setItem(i, 3, filterItem);
     }
+
+    if(table_->rowCount() > 0)
+        table_->setCurrentCell(0,0);
+
+    updateStatus();
 }
 
 
@@ -86,24 +150,55 @@ void TextFilterHandlerDialog::on_actionRemove__triggered()
     }
 }
 
-void TextFilterHandlerDialog::setItemToAdd(QString name,QString filter)
+void TextFilterHandlerDialog::on_actionAdd__triggered()
 {
-    addNameLe_->setText(name);
-    addFilterLe_->setText(filter);
+
 }
 
-void TextFilterHandlerDialog::on_addPb__clicked()
+#if 0
+bool TextFilterHandlerDialog::addItem(QString name,QString filter)
+{
+    if(TextFilterHandler::Instance()->contains(name,filter))
+    {
+        return false;
+    }
+
+    if(TextFilterHandler::Instance()->add(name,filter))
+    {
+        reloadTable();
+        return true;
+    }
+    return false;
+}
+#endif
+
+
+#if 0
+void TextFilterHandlerDialog::on_saveAsPb__clicked()
 {
     std::string name=addNameLe_->text().toStdString();
     std::string filter=addFilterLe_->text().toStdString();
+    bool matchMode=(addMatchedCb_->currentIndex()==0);
+    bool caseSensitive=addCaseCb_->isChecked();
 
-    if(TextFilterHandler::Instance()->contains(name,filter))
+    if(TextFilterHandler::Instance()->contains(name,filter,matchMode,caseSensitive))
     {
         return;
     }
 
-    TextFilterHandler::Instance()->add(name,filter);
-    reloadTable();
+    TextFilterHandler::Instance()->add(name,filter,matchMode,caseSensitive);
+    accept();
+    //reloadTable();
+}
+#endif
+
+void TextFilterHandlerDialog::updateStatus()
+{
+    bool hasSelected=table_->currentRow() >=0;
+
+    actionEdit_->setEnabled(hasSelected);
+    actionDuplicate_->setEnabled(hasSelected);
+    actionRemove_->setEnabled(hasSelected);
 }
 
 QString TextFilterHandlerDialog::settingsFile()
@@ -138,7 +233,7 @@ void TextFilterHandlerDialog::readSettings()
     }
     else
     {
-        resize(QSize(350,500));
+        resize(QSize(520,330));
     }
 
     settings.endGroup();

@@ -25,6 +25,7 @@ class TextPagerWidget;
 class TextPagerSearchInterface;
 class VProperty;
 class TextFilterWidget;
+class QToolButton;
 
 class OutputBrowser;
 
@@ -38,7 +39,6 @@ protected:
     int verticalScrollValue_;
     int viewportHeight_;
 };
-
 
 class OutputBrowser : public QWidget
 {
@@ -62,10 +62,11 @@ public:
     void showFilterLine();
 	void zoomIn();
 	void zoomOut();
+    void setFilterButtons(QToolButton* statusTb,QToolButton* optionTb);
 
 protected Q_SLOTS:
 	void showConfirmSearchLabel();
-    void slotRunFilter(QString);
+    void slotRunFilter(QString,bool,bool);
     void slotRemoveFilter();
 
 private:
@@ -84,6 +85,7 @@ private:
 	PlainTextSearchInterface *textEditSearchInterface_;
 	TextPagerSearchInterface *textPagerSearchInterface_;
 	MessageLabel *confirmSearchLabel_;
+    QToolButton* filterTb_;
 
     //we keep a reference to it to make sure that it does not get deleted while
     //it is being displayed

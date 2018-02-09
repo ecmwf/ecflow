@@ -17,6 +17,7 @@
 #include <QComboBox>
 #include <QDebug>
 #include <QLabel>
+#include <QLinearGradient>
 #include <QStackedWidget>
 #include <QTabBar>
 #include <QTabWidget>
@@ -106,4 +107,31 @@ void ViewerUtil::initCheckableAction(QSettings& settings,QString key,QAction *ac
     {
         ac->setChecked(settings.value(key).toBool());
     }
+}
+
+QBrush ViewerUtil::lineEditGreenBg()
+{
+    //return lineEditBg(QColor(189,239,205));
+    return lineEditBg(QColor(210,255,224));
+}
+
+QBrush ViewerUtil::lineEditRedBg()
+{
+    return lineEditBg(QColor(234,215,214));
+}
+
+QBrush ViewerUtil::lineEditBg(QColor col)
+{
+    QLinearGradient grad;
+    grad.setCoordinateMode(QGradient::ObjectBoundingMode);
+    grad.setStart(0,0);
+    grad.setFinalStop(0,1);
+
+    grad.setColorAt(0,col);
+    grad.setColorAt(0.1,col.lighter(105));
+    grad.setColorAt(0.2,col.lighter(108));
+    grad.setColorAt(0.8,col.lighter(108));
+    grad.setColorAt(0.9,col.lighter(105));
+    grad.setColorAt(1,col);
+    return QBrush(grad);
 }

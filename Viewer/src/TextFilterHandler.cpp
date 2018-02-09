@@ -11,6 +11,7 @@
 #include "TextFilterHandler.hpp"
 
 #include <algorithm>
+#include <sstream>
 
 #include "SessionHandler.hpp"
 #include "VSettings.hpp"
@@ -25,8 +26,26 @@ TextFilterHandler* TextFilterHandler::instance_=0;
 
 void TextFilterItem::save(VSettings *vs) const
 {
-    vs->put("name",    name_);
     vs->put("filter",  filter_);
+    vs->putAsBool("matched",  matched_);
+    vs->putAsBool("caseSensitive",caseSensitive_);
+    vs->putAsBool("contextMenu",contextMenu_);
+}
+
+TextFilterItem TextFilterItem::make(VSettings* vs)
+{
+    std::string emptyDefault="";
+    std::string filter = vs->get("filter", emptyDefault);
+    bool matched = vs->getAsBool("matched",true);
+    bool caseSensitive = vs->getAsBool("filter",false);
+    bool contextMenu = vs->getAsBool("contextMenu",false);
+    return TextFilterItem(filter,matched,caseSensitive);
+}
+
+bool TextFilterItem::operator ==(const TextFilterItem& o) const
+{
+    return filter_ == o.filter_ &&
+           matched_ == o.matched_ && caseSensitive_ == o.caseSensitive_;
 }
 
 //==============================================
@@ -44,68 +63,46 @@ TextFilterHandler* TextFilterHandler::Instance()
 }
 
 TextFilterHandler::TextFilterHandler() :
-    maxLatestNum_(10)
+    maxLatestNum_(5)
 {
     readSettings();
-
-    //items_.push_back(TextFilterItem("first","abc+++"));
-    //items_.push_back(TextFilterItem("second","//S+..."));
 }
 
-bool TextFilterHandler::contains(const std::string& name,const std::string& filter) const
+bool TextFilterHandler::contains(const std::string& filter,bool matched,bool caseSensitive) const
 {
     if(filter.empty())
         return false;
 
-    for(std::vector<TextFilterItem>::const_iterator it=items_.begin(); it !=items_.end(); ++it)
-    {
-        if((*it).name() == name && (*it).filter() == filter)
-        {
-            return true;
-        }
-    }
+    TextFilterItem item(filter,matched,caseSensitive);
+    return std::find(items_.begin(), items_.end(), item) != items_.end();
+}
 
-    return false;
+bool TextFilterHandler::add(const TextFilterItem& item)
+{
+    if(item.filter().empty())
+        return false;
+
+    items_.push_back(item);
+    writeSettings();
+    return true;
 }
 
 
-void TextFilterHandler::add(const std::string& name,const std::string& filter)
+bool TextFilterHandler::add(const std::string& filter,bool matched,bool caseSensitive,bool contextMenu)
 {
-    if(filter.empty())
+    TextFilterItem item(filter,matched,caseSensitive,contextMenu);
+    return add(item);
+}
+
+void TextFilterHandler::addLatest(const TextFilterItem& item)
+{
+    if(item.filter().empty())
         return;
 
-    //remove if exists
-    for(std::vector<TextFilterItem>::iterator it=items_.begin(); it !=items_.end(); ++it)
-    {
-        if((*it).name() == name)
-        {
-            return;
-        }
-    }
-
-    //add item
-    items_.push_back(TextFilterItem(name,filter));
-}
-
-
-void TextFilterHandler::update(const std::string& name,const std::string& filter)
-{
-}
-
-void TextFilterHandler::addLatest(const std::string& name,const std::string& filter)
-{
-    if(filter.empty())
-        return;
-
-    //remove if exists
-    for(std::vector<TextFilterItem>::iterator it=latest_.begin(); it !=latest_.end(); ++it)
-    {
-        if((*it).filter() == filter)
-        {
-            latest_.erase(it);
-            break;
-        }
-    }
+    //Remove if exists
+    std::vector<TextFilterItem>::iterator it=std::find(latest_.begin(),latest_.end(),item) ;
+    if(it != latest_.end())
+       latest_.erase(it);
 
     //trim size
     while(latest_.size() >= maxLatestNum_)
@@ -113,8 +110,16 @@ void TextFilterHandler::addLatest(const std::string& name,const std::string& fil
         latest_.pop_back();
     }
 
-    //add item
-    latest_.insert(latest_.begin(),TextFilterItem(name,filter));
+    //add item to front
+    latest_.insert(latest_.begin(),item);
+
+    writeSettings();
+}
+
+void TextFilterHandler::addLatest(const std::string& filter,bool matched,bool caseSensitive,bool contextMenu)
+{
+    TextFilterItem item(filter,matched,caseSensitive,contextMenu);
+    addLatest(item);
 }
 
 void TextFilterHandler::remove(int index)
@@ -123,6 +128,7 @@ void TextFilterHandler::remove(int index)
         return;
 
     items_.erase(items_.begin()+index);
+    writeSettings();
 }
 
 std::string TextFilterHandler::settingsFile()
@@ -171,21 +177,14 @@ void TextFilterHandler::readSettings()
         vs.get("saved",vsItems);
         for (std::size_t i = 0; i < vsItems.size(); i++)
         {
-            std::string emptyDefault="";
-            std::string name    = vsItems[i].get("name",  emptyDefault);
-            std::string filter = vsItems[i].get("filter", emptyDefault);
-            add(name,filter);  // add it to our in-memory list
+            add(TextFilterItem::make(&vsItems[i]));
         }
 
         vsItems.clear();
         vs.get("latest",vsItems);
         for (std::size_t i = 0; i < vsItems.size(); i++)
         {
-            std::string emptyDefault="";
-            std::string name    = vsItems[i].get("name",  emptyDefault);
-            std::string filter = vsItems[i].get("filter", emptyDefault);
-            addLatest(name,filter);  // add it to our in-memory list
+            addLatest(TextFilterItem::make(&vsItems[i]));
         }
     }
 }
-

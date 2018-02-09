@@ -126,6 +126,8 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     QWidgetAction* fetchInfoAction=new QWidgetAction(this);
     fetchInfoAction->setDefaultWidget(fetchInfo_);
     fetchInfoTb_->addAction(fetchInfoAction);
+
+    browser_->setFilterButtons(filterTb_,filterOptionTb_);
 }
 
 OutputItemWidget::~OutputItemWidget()
