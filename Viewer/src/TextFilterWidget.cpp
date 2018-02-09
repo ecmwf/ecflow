@@ -174,7 +174,7 @@ void TextFilterWidget::buildMenu(QToolButton *tb)
         }
         else if(ac == clearAc)
         {
-
+            le_->clear();
             refreshCompleter();
         }
         else
@@ -301,20 +301,35 @@ void TextFilterWidget::setStatus(FilterStatus status)
 
         QBrush br=oriBrush_;
         QPalette p=le_->palette();
+        QString tooltip;
         switch(status_)
         {
         case EditStatus:
             br=oriBrush_;
-            if(statusTb_) statusTb_->setIcon(QPixmap(":/viewer/filter_decor.svg"));
+            if(statusTb_)
+            {
+                statusTb_->setIcon(QPixmap(":/viewer/filter_decor.svg"));
+                tooltip=tr("Show filter bar");
+            }
             break;
         case FoundStatus:
             br=greenBrush_;
-            if(statusTb_) statusTb_->setIcon(QPixmap(":/viewer/filter_decor_green.svg"));
+            if(statusTb_)
+            {
+                statusTb_->setIcon(QPixmap(":/viewer/filter_decor_green.svg"));
+                statusTb_->setToolTip(tr("Show filter bar<br><b>Status:</b> filter is active and ") +
+                                      Viewer::formatText("there are matching lines ",QColor(0,255,0)) +
+                                      tr("in the current output."));
+            }
             addCurrentToLatest();
             break;
         case NotFoundStatus:
             br=redBrush_;
-            if(statusTb_) statusTb_->setIcon(QPixmap(":/viewer/filter_decor_red.svg"));
+            if(statusTb_)
+            {
+                statusTb_->setIcon(QPixmap(":/viewer/filter_decor_red.svg"));
+                statusTb_->setToolTip(tr("Show filter bar<br>Filter is active and there are matching lines in current output"));
+            }
             break;
         default:
             break;

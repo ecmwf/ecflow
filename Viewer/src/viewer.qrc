@@ -51,6 +51,7 @@
     <file alias="dock_max_disabled.svg">../images/dock_max_disabled.svg</file>
     <file alias="dock_menu_indicator.png">../images/dock_menu_indicator.png</file>
     <file alias="dock_restore.svg">../images/dock_restore.svg</file>
+    <file alias="down_arrow.svg">../images/down_arrow.svg</file>
     <file alias="drawer_open.svg">../images/drawer_open.svg</file>
     <file alias="drawer_close.svg">../images/drawer_close.svg</file>
     <file alias="edit.svg">../images/edit.svg</file>
