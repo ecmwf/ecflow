@@ -353,7 +353,7 @@ def callback():
 CLIENT = "ecflow_client"
 CLIENT = "/usr/local/apps/ecflow/current/bin/ecflow_client"
 
-DJANGO = 0
+DJANGO = False
 app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'secret!'
@@ -528,24 +528,15 @@ class Servers(Command):
         body += TOP + "servers/treemap" + br
 
         TOP = "url syntax: " + APPH
-        body += TOP + "%s/%s/<b>show</b>" % (red("vsms2"), red("43333")) + br
+        body += TOP + "%s/%s/<b>show</b>" % (red("localhost"), red("2500")) + br
 
         body += TOP + "%s/%s/suite/%s/<b>display/statuses/attributes/depth</b><br/>" % (
-            red("vsms2"), red("43333"), red("emc_41r1"))
+            red("localhost"), red("2500"), red("test"))
         body += br + "<b>show</b>:" + \
             " ".join(SERVER_CMD) + ", suite name may be _all_"
         body += br + "<b>display</b>:" + " ".join(DISPLAYS)
         body += br + "<b>statuses</b>: SARQCU all"
         body += br + "<b>attributes</b>: all none atTd<br/>"
-
-        man = APPH + "vsms2/43333/man/emc_41r1/main/12/legA/fc/cf/modeleps_nemo"
-        body += br + "man example: <a href='%s'>%s</a>" % (man, man)
-
-        var = APPH + "vsms2/43333/suite/find/SCHOST/emc_41r1"
-        body += br + "find example: <a href='%s'>%s</a>" % (var, var)
-
-        var = APPS + "ablamor/314159/timeline"
-        body += br + "timeline: <a href='%s'>%s</a>" % (var, var)
 
         cont = {'title': "Please, select a server",
                 'body': body,
@@ -1007,28 +998,6 @@ form_templateX = """<!DOCTYPE html>
 <body>
 <div class="top">"""
 
-if 0:
-    form_template += """<form 
-  name="ecflow.form" 
-  action='action='%s'
-  onsubmit='return gotoPage();'
-  method='get'>
-<b>{{ title }}</b>
-{{ select_servers_list | safe}}
-{{ select_actions_list | safe }}
-<!--input type="submit" value="Submit" onclick="form_feed();"-->
-<input type="submit" value="Submit" onclick="gotoPage();">
-<button onclick="gotoPage();">Send</button>
-<br />
-<script type="text/javascript">
-createBoxStatuses(1);
-// document.write('<br />');
-createBoxAttributes(1);
-// document.write('<br />');
-createBoxDisplays(1, checked='{{ display | safe }}');
-</script>
-</form>"""  # % APPH
-
 form_templateY = """</div>
 <p>{{ body | safe}}
 <div id="test1">
@@ -1036,28 +1005,6 @@ form_templateY = """</div>
    class="test">ecFlow servers</a>
 <a href=%sservers/treemap" 
    class="test">SMS servers</a><br/>
-
-<a href="%svsms2/31415/suite/sunburst/all/none/5/einterim"
-   class="test">sunburst</a>
-<a href="%svsms2/31415/suite/radial/all/none/5/einterim"
-   class="test">radial</a><br/>
-<a href="%svsms2/43333/suite/sunburs2/SAR/none/5/e_41r1"
-   class="test">e-suite</a>
-<a href="%svsms2/43333/suite/radial/SAR/none/5/eeda_41r1"
-   class="test">eeda</a>
-<a href="%svsms2/43333/suite/sunburst/SAR/none/5/elaw_41r1"
-   class="test">elaw</a>
-<a href="%svsms2/43333/suite/sunburst/SAR/none/5/emc_41r1"
-   class="test">emc</a>
-<a href="%svsms2/43333/suite/treemap/SAR/none/5/eeda_41r1"
-   class="test">eeda-t</a><br/>
-<a href="%svsms2/43333/suite/treemap/SARQCU/non/5/macc"
-   class="test">macc</a>
-<a href="%svsms2/43333/suite/sunburst/SARQCU/none/5/macc"
-   class="test">macc-s</a>
-<a href="%svsms2/32222/suite/sunburst/adm/none/7/fsobs" 
-   class="test">fsobs</a>
-<!--a href="%svsms1/433334/suite/raw/SAR/none/7/emc_crayr" class="test">emc_crayr</a-->
         </div>
 <!-- initially hidden right-click menu -->
 <!--div class="hide" id="rmenu">
@@ -1065,8 +1012,7 @@ form_templateY = """</div>
 </li><li> <a href="http://%s/login">Localhost</a>
 </li><li> <a href="C:\">C</a></li></ul> </div-->
 </body>
-</html>"""  # % (APPH, APPH, APPH, APPH, APPH, APPH, APPH, APPH, APPH,
-#              APPH, APPH, APPH, APPH, APPS, )
+</html>"""
 
 
 def form_template(request):
