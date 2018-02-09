@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<meta content="utf-8" http-equiv="encoding">
+<title>Suite Sunburst</title>
+<meta name="description" content="A visualisation of coffee flavours.">
+<style>
+@import url(http://d3js.org/../media/style.css);
+path {
+  stroke: #000;
+  stroke-width: 1.5;
+  cursor: pointer;
+}
+
+text {
+  font: 11px sans-serif;
+  cursor: pointer;
+}
+
+body {
+  width: 880px;
+  margin: 0 auto;
+}
+
+h1 {
+  text-align: center;
+  margin: .5em 0;
+}
+
+p#intro {
+  text-align: center;
+  margin: 1em 0;
+}
+</style>
+<!--script src="/static/assets/d3/d3.v3.js' %}"></script-->
+</head><body>
+<script>
+var jsondata ="{{ jsondata }}";
+var WIDTH=1024, HEIGHT= 1024;
+</script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="/static/ecflow.js"></script><br/>
+<script src="/static/breadcrumb.js"></script><br/>
+<h3>{{ title }}</h3>
+<a href="{{ jsondata }}">json</a><br/>
+<p>Built with <a href="http://d3js.org">D3.js</a>.
+  Breadcrumb based on
+  an <a href="http://bl.ocks.org/kerryrodden/7090426">example</a>
+  by <a href="http://bost.ocks.org/mike">Mike Bostock</a>.
+</body></html>

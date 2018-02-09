@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html><head><meta http-equiv=”refresh” content="300" ><meta charset='utf-8'>
+{% load staticfiles %}
+</head>
+<body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+{# Load the tag library #}
+{% load bootstrap3 %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+ <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="http://www.ecmwf.int">
+	  <img src="static/atl.site.logo.png"/></a>
+      </div>
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+<li class="active"><a href="">Home</a></li>
+<li><a href="https://software.ecmwf.int/wiki/display/ECFLOW/ecflow+Home">
+	      About</a>
+</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+<h3>{{ action }}</h3>
+ 
