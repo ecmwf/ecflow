@@ -135,7 +135,7 @@ module load ecbuild/2.7.3
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
-	module load clang
+	module load clang/5.0.1
 	CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined"
 	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
 fi
