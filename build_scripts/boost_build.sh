@@ -90,7 +90,7 @@ if test_uname Linux ; then
             # for boost 1.53 and > gcc 4.3 -Wno-unused-local-typedefs  : not valid
             # for boost 1.53 and > gcc 4.8 -Wno-unused-local-typedefs  : get a lot warning messages , suppress
             # for boost 1.53 and > gcc 6.1 -Wno-deprecated-declarations: std::auto_ptr deprecated messages, suppress
-            # for boost 1.53 and > gcc 6.3 c++11 is default ?, use -std=gnu++98
+            # for boost 1.53 and > gcc 6.3 c++14  
             compiler=$(gcc -dumpversion | sed 's/\.//g' )  # assume major.minor.patch
             if [ "$compiler" -gt 430  ] ; then
                 CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs"
@@ -99,14 +99,17 @@ if test_uname Linux ; then
        		   CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs -Wno-deprecated-declarations"
        		fi
   	  elif [ $tool = intel ] ; then
-  
-      		cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
       		#module unload gnu
       		#module load intel/15.0.2
+  
+      		cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
 
   	  elif [ $tool = clang ] ; then
+      		# module unload gnu
+      		# module load clang/5.0.1
   
       		cp $WK/build_scripts/site_config/site-config-Linux64-clang.jam $SITE_CONFIG_LOCATION 
+       		CXXFLAGS=cxxflags="-fPIC -ftemplate-depth=1024 -Wno-unused-local-typedefs -Wno-deprecated-declarations -Wno-unused-variable"
   	  fi
    fi
      
