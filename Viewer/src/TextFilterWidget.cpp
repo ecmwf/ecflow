@@ -313,7 +313,7 @@ void TextFilterWidget::setStatus(FilterStatus status)
 
         QString filterDesc;
         if(status_ == FoundStatus || status_ == NotFoundStatus)
-            filterDesc=tr("Show text filter bar<br>----------------------------------------") +
+            filterDesc=tr("Click to show text filter bar<br>----------------------------------------") +
                      tr("<br>Current filter:") +
                 "<br><b>&nbsp;regexp:</b> " + filterText() +
                 "<br><b>&nbsp;mode: </b>" + (isMatched()?"match":"no match") + ", " +

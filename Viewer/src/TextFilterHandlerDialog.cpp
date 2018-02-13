@@ -60,6 +60,7 @@ void TextFilterAddDialog::accept()
         return;
     }
 
+    TextFilterHandler::Instance()->add(it);
     QDialog::accept();
 }
 
@@ -87,6 +88,10 @@ void TextFilterEditDialog::accept()
     if(itemIndex_ >= 0)
     {
         TextFilterItem it=item();
+
+        if(TextFilterHandler::Instance()->items()[itemIndex_] == it)
+            return;
+
         if(TextFilterHandler::Instance()->contains(it.filter(),it.matched(),it.caseSensitive()))
         {
             QMessageBox::critical(0,tr("Save text filter"), "Cannot save text filter! A text filter with the same regexp: <b>" +
