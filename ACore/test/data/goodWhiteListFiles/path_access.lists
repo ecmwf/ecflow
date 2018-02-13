@@ -1,6 +1,7 @@
 4.4.14 
 
 user1 /a,/b,/c  # user1 has read write access to suite /a /b /c
+user1 /a,/b,/c  # duplicate should be ignored
 user2 /a
 user2 /b
 user2 /c       # user2 has read write access to suite /a /b /c
@@ -10,13 +11,15 @@ user3 /a /b /c # user3 has read write access to suite /a /b /c
 /a,/b,/c usery # userx has read write access to suite /a /b /c
 
 /a userz
+/a userz  # duplicate should be ignored
 /b userz
 /c userz
 
 -user4 /a,/b,/c  # user4 has read access to suite /a /b /c
+-user4 /a,/b,/c  # duplicate should be ignored
 -user5 /a
 -user5 /b
--user5 /c    # user5 has read access to suite /a /b /c
+-user5 /c         # user5 has read access to suite /a /b /c
 -user6 /a /b /c   # user6 has read access to suite /a /b /c
 
 /a /b /c -userxx # userxx has read  access to suite /a /b /c
@@ -25,6 +28,7 @@ user3 /a /b /c # user3 has read write access to suite /a /b /c
 /a -userzz
 /b -userzz
 /c -userzz
+/c -userzz       # duplicate should be ignored
 
 ##################################
 * /x /y   # all user have read/write access  suites /x /y

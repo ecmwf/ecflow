@@ -263,20 +263,24 @@ void host::logout( const std::string& name )
 
 host* host::find( const std::string& machine, int number )
 {
-   host *h = extent < host > ::first();
+  // host *h = extent< host >::first();
+   host *h = first();
    while ( h ) {
       if (h->host_ == machine && h->number_ == number) return h;
-      h = h->extent < host > ::next();
+      // h = h->extent< host >::next();
+      h = h->next();
    }
    return 0x0;
 }
 
 host* host::find( const std::string& name )
 {
-   host *h = extent < host > ::first();
+   // host *h = extent < host > ::first();
+   host *h = first();
    while ( h ) {
       if (h->name() && h->name() == name) return h;
-      h = h->extent < host > ::next();
+      // h = h->extent< host >::next();
+      h = h->next();
    }
    return 0;
 }
@@ -292,20 +296,24 @@ node* host::find( const std::string& hostname, const std::string& n )
 
 void host::status( Boolean force )
 {
-   host *h = extent < host > ::first();
+   // host *h = extent < host > ::first();
+   host *h = first();
    while ( h ) {
       if (force) h->reset(force);
       h->status();
-      h = h->extent < host > ::next();
+      // h = h->extent < host > ::next();
+      h = h->next();
    }
 }
 
 void host::redraw_all()
 {
-   host *h = extent < host > ::first();
+  // host *h = extent < host > ::first();
+   host *h = first();
    while ( h ) {
       h->redraw();
-      h = h->extent < host > ::next();
+      // h = h->extent < host > ::next();
+      h = h->next();
    }
 }
 
@@ -738,10 +746,12 @@ void host::chat()
 
 void host::check_all_mail()
 {
-   host *h = extent < host > ::first();
+  // host *h = extent < host > ::first();
+   host *h = first();
    while ( h ) {
       h->check_mail();
-      h = h->extent < host > ::next();
+      // h = h->extent < host > ::next();
+      h = h->next();
    }
 }
 
@@ -1200,10 +1210,12 @@ const str& host::timefile()
 
 void host::hosts( host_lister& l )
 {
-   host *h = extent < host > ::first();
+   // host *h = extent < host > ::first();
+   host *h = first();
    while ( h ) {
       l.next(*h);
-      h = h->extent < host > ::next();
+      // h = h->extent < host > ::next();
+      h = h->next();
    }
 }
 

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html>
+<!-- thanks 
+http://www.billdwhite.com/wordpress/2015/01/12/d3-in-3d-combining-d3-js-and-three-js/
+-->
+<head>
+<script src="http://modernizr.com/downloads/modernizr-latest.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
+<!--script src="/static/3d/three.js"></script-->
+<script src="//cdnjs.cloudflare.com/ajax/libs/three.js/r67/three.min.js"></script>
+<!--script src="http://www.billdwhite.com/wordpress/wp-content/js/threejs/examples/js/controls/OrbitControls.js"></script>
+<script src="http://www.billdwhite.com/wordpress/wp-content/js/threejs/examples/js/renderers/CanvasRenderer.js"></script-->
+<script src="/static/3d/TrackballControls.js"></script>
+<script src="/static/3d/tween.js"></script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+  <meta charset="utf-8">
+  <title>JS Bin</title>
+</head>
+<body>
+<h4>{{ title }}</h4>
+{{ time }} 
+  <a href="{{ top }}">top</a>
+  <a href="{{ json_url }}">json</a>
+ {% for item in items %}
+  <a href="{{ item.href }}">{{ item.key }}</a>
+ {% endfor %}<br/>
+  Built with <a href="http://d3js.org">D3.js</a>. Based on
+  an <a href="http://bl.ocks.org/tgk/6044254">example</a>
+  by <a href="http://bost.ocks.org/mike">Mike Bostock</a>.
+  <a href="http://www.ecmwf.int" class="test">ecmwf</a>
+  <input name="updateButton" 
+         type="button" 
+         value="Update" 
+         onclick="updateData()" /><br/>
+<div id="timer"></div>
+
+<style>
+body {
+  font-family: "Arial";
+  margin: auto;
+  position: relative;
+  padding: 20px;
+  height: 100%;
+  background-color: #FFFFFF;
+}
+
+form {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.node {
+  border: solid 1px white;
+  line-height: 0.95;
+  overflow: hidden;
+  position: absolute;
+  border-radius: 6px;
+  background-image: -webkit-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  background-image: -ms-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  background-image: -o-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  background-image: linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  text-shadow: -1px -1px 2px hsla(0,0%,100%,0.25),
+        -1px -1px 2px hsla(0,0%,100%,0.25),
+        -1px 1px 2px hsla(0,0%,100%,0.25),
+        1px -1px 2px hsla(0,0%,100%,0.25),
+        -1px 0px 2px hsla(0,0%,100%,0.25),
+        1px 0px 2px hsla(0,0%,100%,0.25);
+}
+
+.node div {
+  padding: 6px 4%;
+}
+
+.controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 20;
+}
+
+.controls button {
+  width: 100px;
+  height: 20px;
+  margin: 1px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: "Arial";
+  color: #333333;
+  border-radius: 2px;
+  background-color: #FFFFFF;
+  border: 1px solid #999999;
+}
+
+.instructions {
+  position: relative;
+  color: #000000;
+  left: 30px;
+  top: 460px;
+  z-index: 10;
+  font-size: 11px;
+  font-family: "Arial";
+  color: #777777;
+  width: 400px;
+}
+
+body {
+  font-family: "Arial";
+  margin: auto;
+  position: relative;
+  padding: 20px;
+  height: 100%;
+  background-color: #FFFFFF;
+}
+
+form {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
+
+.node {
+  border: solid 1px white;
+  line-height: 0.95;
+  overflow: hidden;
+  position: absolute;
+  border-radius: 6px;
+  background-image: -webkit-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  background-image: -moz-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  background-image: -ms-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  background-image: -o-linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  background-image: linear-gradient(top, hsla(0,0%,100%,.3), hsla(0,0%,100%,0));
+  text-shadow: -1px -1px 2px hsla(0,0%,100%,0.25),
+        -1px -1px 2px hsla(0,0%,100%,0.25),
+        -1px 1px 2px hsla(0,0%,100%,0.25),
+        1px -1px 2px hsla(0,0%,100%,0.25),
+        -1px 0px 2px hsla(0,0%,100%,0.25),
+        1px 0px 2px hsla(0,0%,100%,0.25);
+}
+
+.node div {
+  padding: 6px 4%;
+}
+
+.controls {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 20;
+}
+
+.controls button {
+  width: 100px;
+  height: 20px;
+  margin: 1px;
+  cursor: pointer;
+  font-size: 11px;
+  font-family: "Arial";
+  color: #333333;
+  border-radius: 2px;
+  background-color: #FFFFFF;
+  border: 1px solid #999999;
+}
+
+.instructions {
+  position: relative;
+  color: #000000;
+  left: 30px;
+  top: 460px;
+  z-index: 10;
+  font-size: 11px;
+  font-family: "Arial";
+  color: #777777;
+  width: 400px;
+}
+</style>
+<script>
+
+var jsondata = {{ jsondata | safe }} , 
+  WIDTH=640, 
+  HEIGHT= 740;
+
+function updateData() {
+  var url = document.URL;
+  window.location.replace(url);
+}
+
+demo = {};
+
+demo.Treemap3d = function() {
+
+    "use strict";
+
+    var _width          = 500,
+        _height         = 500,
+        _renderer       = null,
+        _controls       = null,
+        _scene          = new THREE.Scene(),
+        _camera         = new THREE.PerspectiveCamera(45, _width/_height , 1, 10000),
+        _zmetric        = "size",
+        _colorScale     = d3.scale.category20c(),
+        _zscaleSize     = d3.scale.linear().range([0,500]),
+        _zscaleCost     = d3.scale.linear().range([0,500]),
+        _buttonBarDiv   = null,
+        _elements       = null,
+        _boxMap         = {};
+
+    function Treemap3d(selection) {
+        _camera.setLens(100);
+        _camera.position.set(-1000, -5000, 2000);
+        
+        _renderer = Modernizr.webgl ? new THREE.WebGLRenderer({antialias: true}) : new THREE.CanvasRenderer();
+        _renderer.setSize(_width, _height);
+        _renderer.setClearColor(0xFFFFFF);
+        _renderer.domElement.style.position = 'absolute';
+        _renderer.shadowMapEnabled = true;
+        _renderer.shadowMapSoft = true;
+        _renderer.shadowMapType = THREE.PCFShadowMap;
+        _renderer.shadowMapAutoUpdate = true;
+        
+        selection.node().appendChild(_renderer.domElement);
+
+        _buttonBarDiv = selection.append("div")
+            .attr("class", "controls");
+        _buttonBarDiv.append("button")
+            .text("ZScale: 0")
+            .on("click", function() {
+                _zmetric = "base";
+                transform();
+            });
+        _buttonBarDiv.append("button")
+            .text("ZScale: Size")
+            .on("click", function() {
+                _zmetric = "size";
+                transform();
+            });
+        _buttonBarDiv.append("button")
+            .text("ZScale: Cost")
+            .on("click", function() {
+                _zmetric = "cost";
+                transform();
+            });
+        
+        function enterHandler(d) {
+            var boxGeometry = new THREE.BoxGeometry(1,1,1);
+            var boxMaterial = new THREE.MeshLambertMaterial({color: _colorScale(d.name)});
+            var box = new THREE.Mesh(boxGeometry, boxMaterial);
+            box.castShadow = true;
+            _boxMap[d.id] = box;
+            _scene.add(box);
+        }
+        
+        function updateHandler(d) {
+            var duration = 1000;
+            var zvalue = (_zmetric === "size" ? _zscaleSize(d.size) : (_zmetric === "cost" ? _zscaleCost(d.cost) : 50));
+            var box = _boxMap[d.id];
+            box.material.color.set(_colorScale(d.name));
+            var newMetrics = {
+                x: d.x + (d.dx / 2) - _width / 2,
+                y: d.y + (d.dy / 2) - _height / 2,
+                z: zvalue / 2,
+                w: Math.max(0, d.dx-1),
+                h: Math.max(0, d.dy-1),
+                d: zvalue
+            };
+            var coords = new TWEEN.Tween(box.position)
+                .to({x: newMetrics.x, y: newMetrics.y, z: newMetrics.z}, duration)
+                .easing(TWEEN.Easing.Sinusoidal.InOut)
+                .start();
+                
+            var dims = new TWEEN.Tween(box.scale)
+                .to({x: newMetrics.w, y: newMetrics.h, z: newMetrics.d}, duration)
+                .easing(TWEEN.Easing.Sinusoidal.InOut)
+                .start();
+                
+            var newRot = box.rotation;
+            var rotate = new TWEEN.Tween(box.rotation)
+                .to({x: newRot.x, y: newRot.y, z: newRot.z}, duration)
+                .easing(TWEEN.Easing.Sinusoidal.InOut)
+                .start();
+                
+            var update = new TWEEN.Tween(this)
+                .to({}, duration)
+                .onUpdate(_.bind(render, this))
+                .start();
+        }
+        
+        function exitHandler(d) {
+            var box = _boxMap[d.id];
+            _scene.remove(box);
+            delete _boxMap[d.id];
+        }
+        
+        function transform() {
+            TWEEN.removeAll();
+            _elements.each(updateHandler);
+        }
+        
+        function render() {
+            _renderer.render(_scene, _camera);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            TWEEN.update();
+            _controls.update();
+        }
+            
+        Treemap3d.load = function(data) {
+            var treemap = d3.layout.treemap()
+                .size([_width, _height])
+                .sticky(true)
+                .value(function(d) { 
+                    return d.size;
+                });
+            _zscaleSize.domain(d3.extent(data.children, function(d) { return d.size;}));
+            _zscaleCost.domain(d3.extent(data.children, function(d) { return d.cost;}));
+                        
+            _elements = selection.datum(data).selectAll(".node")
+                .data(treemap.nodes);
+          
+            _elements.enter().append("div")
+                .attr("class", "node")
+                .each(enterHandler);
+           
+            _elements.exit().each(exitHandler).remove();
+                
+            render();
+            animate();
+            transform();
+        };
+        
+        var directionalLight = new THREE.DirectionalLight(0xFFFFFF, 1.0);
+        directionalLight.position.set(-1000, -2000, 4000);
+        _scene.add(directionalLight);
+        
+        // add subtle ambient lighting
+        var ambientLight = new THREE.AmbientLight(0x313131);
+        _scene.add(ambientLight);
+        
+        //_controls = new THREE.OrbitControls(_camera, _renderer.domElement);
+        _controls = new THREE.TrackballControls(_camera, _renderer.domElement);
+        _controls.staticMoving  = true;
+        _controls.minDistance = 100;
+        _controls.maxDistance = 6000;
+        _controls.rotateSpeed = 1.5;
+        _controls.zoomSpeed = 1.5;
+        _controls.panSpeed = 0.5;
+        _controls.addEventListener('change', render);
+    }
+
+    return Treemap3d;
+};
+
+d3.json("/static/3d/treemap3d.json", function(error, data) {
+// d3.json("/static/3dhttp://www.billdwhite.com/wordpress/wp-content/data/treemap3d.json", function(error, data) {
+	var treemap3d = demo.Treemap3d();
+	d3.select("#container_pehomu").append("div")
+    	.style("position", "relative")
+    	.call(treemap3d);
+   treemap3d.load(data);
+});
+
+window.addEventListener("resize", function() {
+    var newWidth  = window.innerWidth,
+        newHeight = window.innerHeight;
+    _renderer.setSize(newWidth, newHeight);
+    _camera.aspect = newWidth / newHeight;
+    _camera.updateProjectionMatrix();
+});
+
+</script>
+
+    <div id="container"></div>
+  <div id="intro">
+      <h3>3D</h3>
+    </div>
+    <div id="menu"><button>sphere</button><button>helix</button><button>grid</button></div>
+    <div id="icons">
+      <img src="/static/3d/single.png">
+      <img src="/static/3d/pinch.png">
+      <img src="/static/3d/triple.png">
+    </div>
+    <!--script src="/static/3d/three.js"></script>
+    <script src="/static/3d/tween.js"></script-->
+    <script src="/static/3d/CSS3DRenderer.js"></script>
+    <!--script src="/static/3d/TrackballControls.js"></script-->
+    <script src="/static/3d/d3.js"></script>
+    <script src="/static/3d/viz.js"></script>
+    <script>
+      d3.json("/static/3d/investments.json", function (error, data) {
+        VIZ.drawElements(data);
+        VIZ.transform('helix');
+        d3.select("#loading").remove();
+        VIZ.render();
+        VIZ.animate();
+        window.addEventListener('resize', VIZ.onWindowResize, false);
+      });
+    </script>
+
+  <div id="container_pehomu"></div>
+  <div class="instructions">
+[Drag with mouse to move/rotate; mouse wheel to zoom; right-drag to pan]</div>
+</body>  
+</html>

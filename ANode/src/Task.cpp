@@ -480,6 +480,18 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
          return false;
       }
 
+      // Job cmd failed. Do not resubmit jobs, until *begin* or *re-queue*. ECFLOW-1216
+      if (get_flag().is_set(ecf::Flag::EDIT_FAILED)) {
+         return false; // pre-processing, variable subs, create directory, change job file permission failed
+      }
+      if (get_flag().is_set(ecf::Flag::NO_SCRIPT)) {
+         return false; // .ecf file location failed
+      }
+      if (get_flag().is_set(ecf::Flag::JOBCMD_FAILED)) {
+         return false; // variable substituion on JOB cmd failed
+      }
+
+
       // If the task was aborted, and we have not exceeded ECF_TRIES, then resubmit
       // otherwise ONLY in state QUEUED can we submit jobs
       std::string varValue;

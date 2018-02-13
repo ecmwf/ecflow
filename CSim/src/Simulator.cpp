@@ -157,8 +157,9 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  		// Resolve dependencies and submit jobs
  		if (!doJobSubmission(theDefs,errorMsg)) return false;
 
- 		// Increment calendar per suite. *MUST* use theDefs.suiteVec() as update_calendar() can remove suites (auto-cancel)
- 		BOOST_FOREACH(suite_ptr suite, theDefs.suiteVec()) {
+ 		// Increment calendar per suite. *MUST* use *COPY* as update_calendar() can remove suites (auto-cancel)
+ 		std::vector<suite_ptr> suiteVec = theDefs.suiteVec();
+ 		BOOST_FOREACH(suite_ptr suite, suiteVec ) {
  		   boost::posix_time::time_duration max_duration_for_suite = simiVisitor.max_simulation_period(suite.get());
  		   if (duration < max_duration_for_suite) {
  		      theDefs.update_calendar(suite, calUpdateParams );

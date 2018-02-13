@@ -207,7 +207,7 @@ void ClockAttr::init_calendar(ecf::Calendar& calendar)
    calendar.init(clockType, startStopWithServer_);
 }
 
-void ClockAttr::begin_calendar(ecf::Calendar& calendar)
+void ClockAttr::begin_calendar(ecf::Calendar& calendar) const
 {
    calendar.begin(ptime());
 }

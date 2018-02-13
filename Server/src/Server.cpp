@@ -22,6 +22,8 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
+
 #include <iostream>
 
 #include "Server.hpp"  // Must come before boost/serialization headers.
@@ -212,9 +214,9 @@ void Server::start_accept()
    if (serverEnv_.debug()) cout << "   Server::start_accept()" << endl;
 
 #ifdef ECF_OPENSSL
-   connection_ptr new_conn( new connection( io_service_, context_ ) );
+   connection_ptr new_conn = boost::make_shared<connection>( boost::ref(io_service_), boost::ref(context_)) ;
 #else
-   connection_ptr new_conn( new connection( io_service_ ) );
+   connection_ptr new_conn = boost::make_shared<connection>( boost::ref(io_service_) );
 #endif
 
    if (serverEnv_.allow_old_client_new_server() !=0 ) {

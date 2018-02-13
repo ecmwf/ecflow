@@ -1,0 +1,7 @@
+suite suiteName
+   family familyName0    # missing endfamily and endsuite, should parse ok if its last family and suite
+
+suite suiteName
+   family familyName0    
+   endfamily
+endsuite 

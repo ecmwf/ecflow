@@ -201,9 +201,6 @@ void Defs::check_job_creation(  job_creation_ctrl_ptr jobCtrl )
    // The changed state is reset, hence we need to preserve change and modify numbers
    EcfPreserveChangeNo preserveChangeNo;
 
-   // Do *not* modify suspended state of child nodes
-   int clear_suspended_in_child_nodes = -1;
-
  	if (jobCtrl->node_path().empty()) {
 
  		size_t theSize = suiteVec_.size();
@@ -620,6 +617,8 @@ std::ostream& Defs::print(std::ostream& os) const
    for(size_t s = 0; s < the_size; s++) {
       os << *suiteVec_[s];
    }
+
+   os << "# enddef\n"; // ECFLOW-1227 so user knows there was no truncation
    return os;
 }
 

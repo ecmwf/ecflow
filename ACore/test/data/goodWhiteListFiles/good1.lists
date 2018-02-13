@@ -12,4 +12,6 @@ cog   # a comment
 -bill # a comment
 -jake # a comment
 
+avi   /suite/write
+-avi  /suite/read
 # a comment

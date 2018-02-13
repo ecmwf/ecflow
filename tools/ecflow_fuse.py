@@ -7,7 +7,10 @@ import getopt
 from errno import ENOENT
 from stat import S_IFDIR, S_IFREG, S_IFBLK
 from sys import argv, exit
-from fuse import FUSE, Operations, LoggingMixIn, FuseOSError, fuse_get_context
+try:
+  from fuse import FUSE, Operations, LoggingMixIn, FuseOSError, fuse_get_context
+except:
+  raise Exception("#ERR: fuse is needed\n pip install --user fuse ")
 
 try:
     import ecflow
