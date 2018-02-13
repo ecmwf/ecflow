@@ -136,8 +136,8 @@ cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
 	module load clang/5.0.1
-	CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined -Wno-unused-local-typedefs -Wno-deprecated-declarations -Wno-unused-variable"
-	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
+	CXX_FLAGS=""  # latest clang with latest boost, should not need any warning suppression
+	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
 	
 	#CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined -Wno-unused-local-typedefs"
     #cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
