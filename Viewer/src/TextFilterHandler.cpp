@@ -212,6 +212,6 @@ void TextFilterHandler::readSettings()
     //If there is no settings file at all we automatically add this filter
     else if(!vs.fileExists())
     {
-        add(TextFilterItem("^\\+\\s"));
+        add(TextFilterItem("^\\+\\s",false,false));
     }
 }
