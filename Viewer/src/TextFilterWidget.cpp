@@ -339,7 +339,7 @@ void TextFilterWidget::setStatus(FilterStatus status)
                 statusTb_->setIcon(QPixmap(":/viewer/filter_decor_green.svg"));
                 statusTb_->setToolTip(filterDesc + tr("There ") +
                                       Viewer::formatText("are lines",QColor(100,220,120)) +
-                                      tr(" matching the filter in output file"));
+                                      tr(" matching the filter in the output file"));
             }
             addCurrentToLatest();
             break;
@@ -350,7 +350,7 @@ void TextFilterWidget::setStatus(FilterStatus status)
                 statusTb_->setIcon(QPixmap(":/viewer/filter_decor_red.svg"));
                 statusTb_->setToolTip(filterDesc + tr("There ") +
                                       Viewer::formatText("are no lines",QColor(255,95,95)) +
-                                      tr(" matching the filter in output file"));
+                                      tr(" matching the filter in the output file"));
             }
             break;
         default:
