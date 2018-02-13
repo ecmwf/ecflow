@@ -13,7 +13,6 @@
 #include "ui_TextFilterWidget.h"
 
 #include <QWidget>
-#include <QAbstractItemModel>
 #include <QCompleter>
 #include <QToolButton>
 
@@ -45,6 +44,8 @@ public Q_SLOTS:
     void on_le__textChanged();
     void on_le__returnPressed();
     void on_closeTb__clicked();
+    void on_matchCb__currentIndexChanged(int);
+    void on_caseCb__statusChanged(int);
     void slotOptionTb();
 
 Q_SIGNALS:
@@ -59,6 +60,7 @@ protected:
 
 private:
     void init(const TextFilterItem& item);
+    void runIt();
     void refreshCompleter();
     void addCurrentToLatest();
     void addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,
@@ -73,34 +75,5 @@ private:
     QToolButton* statusTb_;
     QToolButton* optionTb_;
 };
-
-#if 0
-class TextFilterCompleterModel : public QAbstractItemModel
-{
-public:
-    explicit TextFilterCompleterModel(QObject *parent=0);
-    ~TextFilterCompleterModel();
-
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
-
-    Qt::ItemFlags flags ( const QModelIndex & index) const;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
-
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-    QModelIndex parent (const QModelIndex & ) const;
-
-    void setData(const std::vector<TextFilterItem>&);
-    //bool updateData(const std::vector<Zombie>&);
-    //void clearData();
-    bool hasData() const;
-    //Zombie indexToZombie(const QModelIndex&) const;
-
-protected:
-    std::vector<TextFilterItem> data_;
-};
-
-#endif
 
 #endif // TEXTFILTERWIDGET_HPP

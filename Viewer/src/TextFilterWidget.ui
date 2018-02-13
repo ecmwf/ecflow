@@ -45,7 +45,7 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Filter</string>
+      <string>Filter: </string>
      </property>
     </widget>
    </item>
@@ -78,7 +78,7 @@
    <item>
     <widget class="QToolButton" name="closeTb_">
      <property name="toolTip">
-      <string>Close filter bar &lt;br&gt; (filter remains active)</string>
+      <string>Close filter bar &lt;br&gt; (filter remains active if not empty)</string>
      </property>
      <property name="text">
       <string>...</string>

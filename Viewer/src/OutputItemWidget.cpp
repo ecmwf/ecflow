@@ -135,12 +135,17 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     menu->addAction(actionSaveFileAs_);
     menu->addAction(actionGotoLine_);
 
-    //Sets the menu on the toolbutton
-    moreActionTb_->setMenu(menu);
-
-    saveFileAsTb_->hide();
+    //TODO: needs proper implementation
     gotoLineTb_->hide();
 
+    //Sets the menu on the toolbutton
+    moreActionTb_->setMenu(menu);
+    moreActionTb_->hide();
+    moreActionTb_->setEnabled(false);
+    actionSaveFileAs_->setEnabled(false);
+    actionGotoLine_->setEnabled(false);
+
+    //Init filter in output browser
     browser_->setFilterButtons(filterTb_,filterOptionTb_);
 }
 

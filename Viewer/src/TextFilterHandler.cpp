@@ -131,6 +131,28 @@ void TextFilterHandler::remove(int index)
     writeSettings();
 }
 
+void TextFilterHandler::update(int index,const TextFilterItem& item)
+{
+    if(index < 0 || index >= static_cast<int>(items_.size()))
+        return;
+
+    items_[index]=item;
+    writeSettings();
+}
+
+void TextFilterHandler::allFilters(std::set<std::string>& v)
+{
+    v.clear();
+    for(std::size_t i = 0; i < items_.size() ; i++)
+    {
+        v.insert(items_[i].filter());
+    }
+    for(std::size_t i = 0; i < latest_.size() ; i++)
+    {
+        v.insert(latest_[i].filter());
+    }
+}
+
 std::string TextFilterHandler::settingsFile()
 {
     SessionItem* cs=SessionHandler::instance()->current();
@@ -186,5 +208,10 @@ void TextFilterHandler::readSettings()
         {
             addLatest(TextFilterItem::make(&vsItems[i]));
         }
+    }
+    //If there is no settings file at all we automatically add this filter
+    else if(!vs.fileExists())
+    {
+        add(TextFilterItem("^\\+\\s"));
     }
 }

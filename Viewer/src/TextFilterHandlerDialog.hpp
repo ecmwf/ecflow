@@ -15,6 +15,7 @@
 #include "ui_TextFilterAddDialog.h"
 #include "ui_TextFilterHandlerDialog.h"
 
+class TextFilterItem;
 
 class TextFilterAddDialog : public QDialog, private Ui::TextFilterAddDialog
 {
@@ -22,10 +23,28 @@ Q_OBJECT
 
 public:
     explicit TextFilterAddDialog(QWidget* parent=0);
-    void init(QString name,QString filter);
+    void init(const TextFilterItem& item);
 
 public Q_SLOTS:
     void accept();
+
+protected:
+    TextFilterItem item();
+};
+
+class TextFilterEditDialog : public TextFilterAddDialog
+{
+Q_OBJECT
+
+public:
+    explicit TextFilterEditDialog(QWidget* parent=0);
+    void init(int itemIndex,const TextFilterItem& item);
+
+public Q_SLOTS:
+    void accept();
+
+protected:
+    int itemIndex_;
 };
 
 class TextFilterHandlerDialog : public QDialog, private Ui::TextFilterHandlerDialog

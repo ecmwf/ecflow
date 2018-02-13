@@ -11,6 +11,7 @@
 #ifndef TEXTFILTERHANDLER_HPP
 #define TEXTFILTERHANDLER_HPP
 
+#include <set>
 #include <string>
 #include <vector>
 
@@ -49,7 +50,9 @@ public:
     void addLatest(const std::string& filter,bool matched,bool caseSensitive,bool contextMenu);
     const std::vector<TextFilterItem>& items() const {return items_;}    
     const std::vector<TextFilterItem>& latestItems() const {return latest_;}
+    void update(int,const TextFilterItem&);
     void remove(int);
+    void allFilters(std::set<std::string>&);
 
 protected:
     TextFilterHandler();

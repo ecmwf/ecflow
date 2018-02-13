@@ -129,8 +129,8 @@ QBrush ViewerUtil::lineEditBg(QColor col)
 
     grad.setColorAt(0,col);
     grad.setColorAt(0.1,col.lighter(105));
-    grad.setColorAt(0.2,col.lighter(108));
-    grad.setColorAt(0.8,col.lighter(108));
+    grad.setColorAt(0.1,col.lighter(108));
+    grad.setColorAt(0.9,col.lighter(108));
     grad.setColorAt(0.9,col.lighter(105));
     grad.setColorAt(1,col);
     return QBrush(grad);

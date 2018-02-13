@@ -35,8 +35,8 @@ TextFilterWidget::TextFilterWidget(QWidget *parent) :
     setProperty("textFilter","1");
 
     //match
-    matchCb_->addItem(tr("matching"),0);
-    matchCb_->addItem(tr("unmatching"),1);
+    matchCb_->addItem(QIcon(QPixmap(":/viewer/filter_match.svg")),tr("match"),0);
+    matchCb_->addItem(QIcon(QPixmap(":/viewer/filter_no_match.svg")),tr("no match"),1);
 
     //Editor
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
@@ -51,24 +51,15 @@ TextFilterWidget::TextFilterWidget(QWidget *parent) :
     redBrush_=ViewerUtil::lineEditRedBg();
     greenBrush_=ViewerUtil::lineEditGreenBg();
 
-    completer_=new QCompleter(this);
-    //completer_->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
-
-    //QTreeView *view=new QTreeView(this);
-    //view->setFixedHeight(100);
-    //view->setRootIsDecorated(false);
-
-    //completerModel_=new TextFilterCompleterModel(this);
-    //completerModel_->setData(TextFilterHandler::Instance()->items());
-
-    //completer_->setModel(completerModel_);
-    //completer_->setPopup(view);
+    completer_=new QCompleter(this);    
     le_->setCompleter(completer_);
 
     QIcon icon;
     icon.addPixmap(QPixmap(":/viewer/close_grey.svg"),QIcon::Normal);
     icon.addPixmap(QPixmap(":/viewer/close_red.svg"),QIcon::Active);
     closeTb_->setIcon(icon);
+
+    refreshCompleter();
 }
 
 bool TextFilterWidget::isActive() const
@@ -112,7 +103,15 @@ void TextFilterWidget::setExternalButtons(QToolButton* statusTb,QToolButton* opt
 
 void TextFilterWidget::refreshCompleter()
 {
-    //completerModel_->setData(TextFilterHandler::Instance()->items());
+    QStringList lst;
+    std::set<std::string> vals;
+    TextFilterHandler::Instance()->allFilters(vals);
+
+    for(std::set<std::string>::const_iterator it=vals.begin(); it != vals.end(); ++it)
+    {
+        lst << QString::fromStdString(*it);
+    }
+    le_->setCompleter(new QCompleter(lst,le_));
 }
 
 void TextFilterWidget::slotFilterEditor()
@@ -130,22 +129,27 @@ void TextFilterWidget::buildMenu(QToolButton *tb)
     menu->addAction(manageAc);
 
     QAction *saveAc=0;
-    if(isActive() && isVisible())
+    if(isVisible())
     {
         saveAc=new QAction(menu);
         saveAc->setText(tr("Save filter"));
         saveAc->setIcon(QPixmap(":/viewer/filesaveas.svg"));
+        if(!isActive()) saveAc->setEnabled(false);
         menu->addAction(saveAc);
     }
+
+    QAction *sep=new QAction(menu);
+    sep->setSeparator(true);
+    menu->addAction(sep);
 
     QAction *clearAc=new QAction(menu);
     clearAc->setText(tr("Clear filter"));
     if(!isActive()) clearAc->setEnabled(false);
     menu->addAction(clearAc);
 
-    QAction *sep=new QAction(menu);
-    sep->setSeparator(true);
-    menu->addAction(sep);
+    QAction *sep1=new QAction(menu);
+    sep1->setSeparator(true);
+    menu->addAction(sep1);
 
     addMenuSection(menu,TextFilterHandler::Instance()->items(),tr("Saved"),"s");
     addMenuSection(menu,TextFilterHandler::Instance()->latestItems(),tr("Recent"),"r");
@@ -175,6 +179,7 @@ void TextFilterWidget::buildMenu(QToolButton *tb)
         else if(ac == clearAc)
         {
             le_->clear();
+            setStatus(EditStatus);
             refreshCompleter();
         }
         else
@@ -235,29 +240,28 @@ void TextFilterWidget::addMenuSection(QMenu* menu,const std::vector<TextFilterIt
 
     for(std::size_t i=0 ; i < items.size(); i++)
     {
-        //QLabel *label = new QLabel("<i>first</i>second", this);
-
-        // init widget action
-        //QWidgetAction *wAc= new QWidgetAction(this);
-        //wAc->setDefaultWidget(label);
-        //menu->addAction(wAc);
-
-        //QWidgetAction *wAc= new QWidgetAction(this);
         QAction* ac=new QAction(this);
-        //QLabel *label = new QLabel(this);
 
         QString txt=QString::fromStdString(items[i].filter()) +
-                    "   <" + QString(items[i].matched()?"m":"u") + "," +
-                     QString(items[i].caseSensitive()?"cs":"ci") + ">";
+                    "   ("  + QString(items[i].caseSensitive()?"cs":"ci") + ")";
 
-        //label->setText(txt);
-        //wAc->setDefaultWidget(label);
         ac->setText(txt);
         ac->setData(data + "_" + QString::number(i)); //set an id for the action
-        menu->addAction(ac);
 
-        //menu->addAction(wAc);
+        if(items[i].matched())
+            ac->setIcon(QPixmap(":/viewer/filter_match.svg"));
+        else
+            ac->setIcon(QPixmap(":/viewer/filter_no_match.svg"));
+
+        menu->addAction(ac);
     }
+}
+
+void TextFilterWidget::runIt()
+{
+    QString t=le_->text();
+    if(!t.isEmpty())
+        Q_EMIT runRequested(t,isMatched(),isCaseSensitive());
 }
 
 void TextFilterWidget::on_closeTb__clicked()
@@ -268,9 +272,7 @@ void TextFilterWidget::on_closeTb__clicked()
 
 void TextFilterWidget::on_le__returnPressed()
 {
-    QString t=le_->text();
-    if(!t.isEmpty())
-        Q_EMIT runRequested(t,isMatched(),isCaseSensitive());
+    runIt();
 }
 
 void TextFilterWidget::on_le__textChanged()
@@ -280,6 +282,16 @@ void TextFilterWidget::on_le__textChanged()
 
     if(!isActive())
         clearRequested();
+}
+
+void TextFilterWidget::on_matchCb__currentIndexChanged(int)
+{
+    runIt();
+}
+
+void TextFilterWidget::on_caseCb__statusChanged(int)
+{
+    runIt();
 }
 
 void TextFilterWidget::slotOptionTb()
@@ -299,9 +311,17 @@ void TextFilterWidget::setStatus(FilterStatus status)
     {
         status_=status;
 
+        QString filterDesc;
+        if(status_ == FoundStatus || status_ == NotFoundStatus)
+            filterDesc=tr("Show text filter bar<br>----------------------------------------") +
+                     tr("<br>Current filter:") +
+                "<br><b>&nbsp;regexp:</b> " + filterText() +
+                "<br><b>&nbsp;mode: </b>" + (isMatched()?"match":"no match") + ", " +
+                + (isCaseSensitive()?"case sensitive":"case insensitive") +
+                "<br><br>Filter status: ";
+
         QBrush br=oriBrush_;
         QPalette p=le_->palette();
-        QString tooltip;
         switch(status_)
         {
         case EditStatus:
@@ -309,7 +329,7 @@ void TextFilterWidget::setStatus(FilterStatus status)
             if(statusTb_)
             {
                 statusTb_->setIcon(QPixmap(":/viewer/filter_decor.svg"));
-                tooltip=tr("Show filter bar");
+                statusTb_->setToolTip(tr("Show filter bar"));
             }
             break;
         case FoundStatus:
@@ -317,9 +337,9 @@ void TextFilterWidget::setStatus(FilterStatus status)
             if(statusTb_)
             {
                 statusTb_->setIcon(QPixmap(":/viewer/filter_decor_green.svg"));
-                statusTb_->setToolTip(tr("Show filter bar<br><b>Status:</b> filter is active and ") +
-                                      Viewer::formatText("there are matching lines ",QColor(0,255,0)) +
-                                      tr("in the current output."));
+                statusTb_->setToolTip(filterDesc +
+                                      Viewer::formatText("lines filtered",QColor(100,220,120)) +
+                                      tr(" from current output"));
             }
             addCurrentToLatest();
             break;
@@ -328,7 +348,9 @@ void TextFilterWidget::setStatus(FilterStatus status)
             if(statusTb_)
             {
                 statusTb_->setIcon(QPixmap(":/viewer/filter_decor_red.svg"));
-                statusTb_->setToolTip(tr("Show filter bar<br>Filter is active and there are matching lines in current output"));
+                statusTb_->setToolTip(filterDesc +
+                                      Viewer::formatText("no lines filtered",QColor(255,95,95)) +
+                                      tr(" in current output"));
             }
             break;
         default:
@@ -355,194 +377,3 @@ void TextFilterWidget::paintEvent(QPaintEvent *)
      style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 
-#if 0
-
-
-TextFilterCompleterModel::TextFilterCompleterModel(QObject *parent) :
-          QAbstractItemModel(parent)
-{}
-
-TextFilterCompleterModel::~TextFilterCompleterModel()
-{
-}
-
-void TextFilterCompleterModel::setData(const std::vector<TextFilterItem>& data)
-{
-    beginResetModel();
-    data_=data;
-    endResetModel();
-}
-
-#if 0
-bool TextFilterCompleterModel::updateData(const std::vector<Zombie>& data)
-{
-    bool sameAs=false;
-    if(hasData() && data.size() == data_.size())
-    {
-        sameAs=true;
-        for(std::vector<Zombie>::const_iterator it=data.begin(); it != data.end(); it++)
-        {
-            bool hasIt=false;
-            std::string p=(*it).path_to_task();
-            for(std::vector<Zombie>::const_iterator itM=data_.begin(); itM != data_.end(); itM++)
-            {
-                if(p == (*itM).path_to_task())
-                {
-                    hasIt=true;
-                    break;
-                }
-            }
-
-            if(!hasIt)
-            {
-                sameAs=false;
-                break;
-            }
-        }
-    }
-
-    if(sameAs)
-    {
-        data_=data;
-        Q_EMIT dataChanged(index(0,0),index(data_.size()-1,columns_->count()));
-        return false;
-    }
-    else
-    {
-        beginResetModel();
-        data_=data;
-        endResetModel();
-        return true;
-    }
-}
-
-
-void TextFilterCompleterModel::clearData()
-{
-    beginResetModel();
-    data_.clear();
-    endResetModel();
-}
-#endif
-
-
-bool TextFilterCompleterModel::hasData() const
-{
-    return !data_.empty();
-}
-
-int TextFilterCompleterModel::columnCount( const QModelIndex& /*parent */) const
-{
-     return 2;
-}
-
-int TextFilterCompleterModel::rowCount( const QModelIndex& parent) const
-{
-    if(!hasData())
-        return 0;
-
-    //Parent is the root:
-    if(!parent.isValid())
-    {
-        return static_cast<int>(data_.size());
-    }
-
-    return 0;
-}
-
-Qt::ItemFlags TextFilterCompleterModel::flags ( const QModelIndex & index) const
-{
-    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-}
-
-QVariant TextFilterCompleterModel::data( const QModelIndex& index, int role ) const
-{
-    if(!index.isValid() || !hasData())
-    {
-        return QVariant();
-    }
-
-    int row=index.row();
-    int col=index.column();
-    if(row < 0 || row >= static_cast<int>(data_.size()))
-        return QVariant();
-
-    if(role == Qt::DisplayRole)
-    {
-        if(col== 0)
-            return QString::fromStdString(data_[row].name());
-        else if(col == 1)
-            return QString::fromStdString(data_[row].filter());
-        else
-            return QVariant();
-    }
-    else if(role == Qt::EditRole)
-    {
-        if(col == 0)
-            return QString::fromStdString(data_[row].filter());
-        else if(col == 1)
-            return QString::fromStdString(data_[row].filter());
-        else
-            return QVariant();
-    }
-    else if(role == Qt::ForegroundRole)
-    {
-        if(col == 0)
-            return QColor(150,150,150);
-        else
-            return QVariant();
-    }
-
-    return QVariant();
-}
-
-QVariant TextFilterCompleterModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
-{
-    if ( orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole ))
-              return QAbstractItemModel::headerData( section, orient, role );
-
-    if(role == Qt::DisplayRole)
-        return "Name";
-    else if(role == Qt::UserRole)
-        return "Filter regexp";
-
-    return QVariant();
-}
-
-QModelIndex TextFilterCompleterModel::index( int row, int column, const QModelIndex & parent ) const
-{
-    if(!hasData() || row < 0 || column < 0)
-    {
-        return QModelIndex();
-    }
-
-    //When parent is the root this index refers to a node or server
-    if(!parent.isValid())
-    {
-        return createIndex(row,column);
-    }
-
-    return QModelIndex();
-
-}
-
-QModelIndex TextFilterCompleterModel::parent(const QModelIndex &child) const
-{
-    return QModelIndex();
-}
-
-#endif
-
-
-#if 0
-Zombie TextFilterCompleterModel::indexToZombie(const QModelIndex& idx) const
-{
-    if(idx.isValid() && hasData())
-    {
-        int row=idx.row();
-        if(row >= 0 || row < static_cast<int>(data_.size()))
-            return data_[row];
-    }
-    return Zombie();
-}
-#endif

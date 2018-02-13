@@ -10,8 +10,13 @@
 
 #include "OutputBrowser.hpp"
 
+#include <QtGlobal>
 #include <QProcess>
 #include <QVBoxLayout>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#endif
 
 #include "Highlighter.hpp"
 #include "MessageLabel.hpp"
@@ -144,6 +149,7 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
     showConfirmSearchLabel();
 }
 
+//This should only be called externally when a new output is loaded
 void OutputBrowser::loadFile(VFile_ptr file)
 {
     if(!file)
@@ -162,6 +168,26 @@ void OutputBrowser::loadFile(VFile_ptr file)
         QString s(file_->data());
         loadText(s,QString::fromStdString(file_->sourcePath()),true);
     }
+
+    //Run the filter if defined
+    if(textFilter_->isActive())
+    {
+        slotRunFilter(textFilter_->filterText(),textFilter_->isMatched(),
+                      textFilter_->isCaseSensitive());
+    }
+}
+
+void OutputBrowser::loadFilteredFile(VFile_ptr file)
+{
+    if(!file)
+    {
+        clear();
+        return;
+    }
+
+    file_=file;
+    Q_ASSERT(file_->storageMode() == VFile::DiskStorage);
+    loadFile(QString::fromStdString(file_->path()));
 }
 
 void OutputBrowser::loadFile(QString fileName)
@@ -364,6 +390,7 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
     VFile_ptr fTarget=VFile::createTmpFile(true);
     VFile_ptr fSrc=VFile_ptr();
 
+    // file is on disk - we use it as it is
     if(file_->storageMode() == VFile::DiskStorage)
     {
         fSrc=file_;
@@ -388,11 +415,16 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
     QProcess proc;
     proc.setStandardOutputFile(QString::fromStdString(fTarget->path()));
 
+    //Run grep to filter fSrc into fTarget
     QString extraOptions;
     if(!matched)
         extraOptions+=" -v ";
     if(!caseSensitive)
         extraOptions+=" -i ";
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
 
     proc.start("/bin/sh",
          QStringList() <<  "-c" << "grep " + extraOptions + " -e \'" + filter  + "\' " +
@@ -402,14 +434,19 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
 
     if(!proc.waitForStarted(1000))
     {
+        QString errStr;
         UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        UiLog().err() << " Failed to filter output file using command \'" <<
-                             proc.program() << " " << proc.arguments().join(" ") << "\'";
+        errStr="Failed to filter output file using command \'" +
+                             proc.program() + " " + proc.arguments().join(" ") + "\'";
+#else
+        errStr="Failed to start grep command!";
 #endif
-        UiLog().err() << "   error: failed to start";
-
+        UserMessage::message(UserMessage::ERROR,true,errStr.toStdString());
         fTarget.reset();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
         return;
     }
 
@@ -419,17 +456,26 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
         UiLog().err() << "   error:" << QString(proc.readAllStandardError());
         oriFile_=file_;
         textFilter_->setStatus(fTarget->isEmpty()?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));        
-        loadFile(fTarget);
+        loadFilteredFile(fTarget);
     }
     else
     {
+        QString errStr;
         UI_FUNCTION_LOG
-        UiLog().err() << " Failed";
-        UiLog().err() << "   error:" << QString(proc.readAllStandardError());
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        errStr="Failed to filter output file using command \'" +
+                             proc.program() + " " + proc.arguments().join(" ") + "\'";
+#else
+        errStr="Failed to run grep command!";
+#endif
+        UserMessage::message(UserMessage::ERROR,true,errStr.toStdString());
         textFilter_->setStatus(TextFilterWidget::NotFoundStatus);
         fTarget.reset(); //delete
     }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::restoreOverrideCursor();
+#endif
     return;
 }
 

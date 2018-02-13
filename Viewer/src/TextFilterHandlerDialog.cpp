@@ -27,32 +27,79 @@ TextFilterAddDialog::TextFilterAddDialog(QWidget *parent) :
    QDialog(parent)
 {
     setupUi(this);
+
+    setWindowTitle(tr("Add item"));
+
+    //match
+    matchCb_->addItem(QIcon(QPixmap(":/viewer/filter_match.svg")),tr("match"),0);
+    matchCb_->addItem(QIcon(QPixmap(":/viewer/filter_no_match.svg")),tr("no match"),1);
 }
 
-void TextFilterAddDialog::init(QString name,QString filter)
+TextFilterItem TextFilterAddDialog::item()
 {
-    nameEdit_->setText(name);
-    filterEdit_->setText(filter);
+    return TextFilterItem(filterLe_->text().toStdString(),(matchCb_->currentIndex() == 0),
+                          caseCb_->isChecked(),menuCb_->isChecked());
+}
+
+void TextFilterAddDialog::init(const TextFilterItem& item)
+{
+    filterLe_->setText(QString::fromStdString(item.filter()));
+    matchCb_->setCurrentIndex(item.matched()?0:1);
+    caseCb_->setChecked(item.caseSensitive());
+    menuCb_->setChecked(item.contextMenu());
 }
 
 void TextFilterAddDialog::accept()
 {
-    QString name=nameEdit_->text();
-    QString filter=filterEdit_->text();
-#if 0
-    if(TextFilterHandler::Instance()->contains(name.toStdString(),filter.toStdString()))
+    TextFilterItem it=item();
+    if(TextFilterHandler::Instance()->contains(it.filter(),it.matched(),it.caseSensitive()))
     {
-        QMessageBox::critical(0,tr("Text filter"), "Cannot add text filter! Text filter with the same name: <b>"  +
-                              name + "</b> and regexp: <b>" + filter + "</b> already exists!");
+        QMessageBox::critical(0,tr("Save text filter"), "Cannot save text filter! A text filter with the same regexp: <b>" +
+                              QString::fromStdString(it.filter()) +
+                              "</b> and settings already exists!");
         return;
     }
-
-    TextFilterHandler::Instance()->add(name.toStdString(),filter.toStdString());
-#endif
 
     QDialog::accept();
 }
 
+
+//======================================
+//
+// TextFilterEditDialog
+//
+//======================================
+
+TextFilterEditDialog::TextFilterEditDialog(QWidget *parent) :
+   TextFilterAddDialog(parent), itemIndex_(-1)
+{
+    setWindowTitle(tr("Edit item"));
+}
+
+void TextFilterEditDialog::init(int itemIndex,const TextFilterItem& item)
+{
+    itemIndex_=itemIndex;
+    TextFilterAddDialog::init(item);
+}
+
+void TextFilterEditDialog::accept()
+{
+    if(itemIndex_ >= 0)
+    {
+        TextFilterItem it=item();
+        if(TextFilterHandler::Instance()->contains(it.filter(),it.matched(),it.caseSensitive()))
+        {
+            QMessageBox::critical(0,tr("Save text filter"), "Cannot save text filter! A text filter with the same regexp: <b>" +
+                                  QString::fromStdString(it.filter())+
+                              "</b> and settings already exists!");
+            return;
+        }
+
+        TextFilterHandler::Instance()->update(itemIndex_,it);
+    }
+
+    QDialog::accept();
+}
 
 //======================================
 //
@@ -111,7 +158,7 @@ void TextFilterHandlerDialog::reloadTable()
     for(size_t i=0; i < items.size(); i++)
     {
         QTableWidgetItem *filterItem = new QTableWidgetItem(QString::fromStdString(items[i].filter()));
-        QTableWidgetItem *matchedItem = new QTableWidgetItem((items[i].matched())?"matched":"unmatched");
+        QTableWidgetItem *matchedItem = new QTableWidgetItem((items[i].matched())?"match":"no match");
         QTableWidgetItem *caseItem = new QTableWidgetItem((items[i].caseSensitive())?"yes":"no");
         QTableWidgetItem *contextItem = new QTableWidgetItem((items[i].contextMenu())?"yes":"no");
 
@@ -130,14 +177,26 @@ void TextFilterHandlerDialog::reloadTable()
 
 void TextFilterHandlerDialog::on_actionEdit__triggered()
 {
-    //QModelIndex index=serverView->currentIndex();
-    //editItem(index);
+    int r=table_->currentRow();
+    if(r >=0 )
+    {
+        TextFilterEditDialog diag(this);
+        diag.init(r,TextFilterHandler::Instance()->items()[r]);
+        if(diag.exec() == QDialog::Accepted)
+            reloadTable();
+    }
 }
 
 void TextFilterHandlerDialog::on_actionDuplicate__triggered()
 {
-    //QModelIndex index=serverView->currentIndex();
-    //editItem(index);
+    int r=table_->currentRow();
+    if(r >=0 )
+    {
+        TextFilterAddDialog diag(this);
+        diag.init(TextFilterHandler::Instance()->items()[r]);
+        if(diag.exec() == QDialog::Accepted)
+            reloadTable();
+    }
 }
 
 void TextFilterHandlerDialog::on_actionRemove__triggered()
@@ -152,45 +211,10 @@ void TextFilterHandlerDialog::on_actionRemove__triggered()
 
 void TextFilterHandlerDialog::on_actionAdd__triggered()
 {
-
-}
-
-#if 0
-bool TextFilterHandlerDialog::addItem(QString name,QString filter)
-{
-    if(TextFilterHandler::Instance()->contains(name,filter))
-    {
-        return false;
-    }
-
-    if(TextFilterHandler::Instance()->add(name,filter))
-    {
+    TextFilterAddDialog diag(this);
+    if(diag.exec() == QDialog::Accepted)
         reloadTable();
-        return true;
-    }
-    return false;
 }
-#endif
-
-
-#if 0
-void TextFilterHandlerDialog::on_saveAsPb__clicked()
-{
-    std::string name=addNameLe_->text().toStdString();
-    std::string filter=addFilterLe_->text().toStdString();
-    bool matchMode=(addMatchedCb_->currentIndex()==0);
-    bool caseSensitive=addCaseCb_->isChecked();
-
-    if(TextFilterHandler::Instance()->contains(name,filter,matchMode,caseSensitive))
-    {
-        return;
-    }
-
-    TextFilterHandler::Instance()->add(name,filter,matchMode,caseSensitive);
-    accept();
-    //reloadTable();
-}
-#endif
 
 void TextFilterHandlerDialog::updateStatus()
 {

@@ -50,7 +50,6 @@ public:
 
     void clear();
     void loadFile(VFile_ptr file);
-    void loadText(QString text,QString fileName,bool resetFile=true);
     bool isFileLoaded();
     void saveCurrentFile(QString &fileNameToSaveTo);
 	void adjustHighlighter(QString fileName);
@@ -74,6 +73,8 @@ private:
 	void changeIndex(IndexType indexType,qint64 fileSize);
     bool isJobFile(QString fileName);
     void loadFile(QString fileName);
+    void loadText(QString text,QString fileName,bool resetFile=true);
+    void loadFilteredFile(VFile_ptr file);
     void setCursorPos(qint64 pos);
 
     QStackedWidget *stacked_;
