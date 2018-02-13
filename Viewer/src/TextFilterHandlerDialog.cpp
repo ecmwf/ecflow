@@ -90,7 +90,10 @@ void TextFilterEditDialog::accept()
         TextFilterItem it=item();
 
         if(TextFilterHandler::Instance()->items()[itemIndex_] == it)
+        {
+            QDialog::reject();
             return;
+        }
 
         if(TextFilterHandler::Instance()->contains(it.filter(),it.matched(),it.caseSensitive()))
         {

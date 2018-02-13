@@ -59,17 +59,17 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="52.3125"
-     inkscape:cx="4.8149452"
-     inkscape:cy="7.9235364"
+     inkscape:cx="7.6533073"
+     inkscape:cy="7.8853046"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:snap-grids="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1144"
-     inkscape:window-x="0"
-     inkscape:window-y="0"
-     inkscape:window-maximized="1"
+     inkscape:window-width="867"
+     inkscape:window-height="440"
+     inkscape:window-x="737"
+     inkscape:window-y="287"
+     inkscape:window-maximized="0"
      showguides="true"
      inkscape:guide-bbox="true">
     <inkscape:grid
@@ -127,18 +127,18 @@
      inkscape:label="lens"
      transform="translate(0,-16)">
     <path
-       style="fill:#2ca02c;stroke:none"
-       d="M 6.9818856,31.252877 6.9611571,25.824724 1.5717524,19.227432 c 0,0 4.1569319,0.947049 6.653842,0.876854 2.4264556,-0.06822 6.3636436,-0.814223 6.3636436,-0.814223 l -5.4101336,6.55554 10e-8,5.407274 c 0,0 -0.5476606,0.373954 -1.1193379,0.375798 -0.7289536,0.0023 -1.077881,-0.375798 -1.077881,-0.375798 z"
+       style="fill:#008000;stroke:none"
+       d="m 7.1348127,31.136561 -0.020729,-5.00197 -5.3894047,-6.079317 c 0,0 4.1569319,0.872693 6.653842,0.80801 2.4264555,-0.06286 6.3636435,-0.750296 6.3636435,-0.750296 l -5.4101335,6.040842 1e-7,4.982731 c 0,0 -0.5476606,0.344593 -1.1193379,0.346293 -0.7289536,0.0021 -1.077881,-0.346293 -1.077881,-0.346293 z"
        id="path3025"
        inkscape:connector-curvature="0"
        sodipodi:nodetypes="cccscccsc" />
     <ellipse
-       style="fill:#d7f4d7;stroke:#008000;stroke-width:0.53590792;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:#ffffff;stroke:#008000;stroke-width:0.53590792;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
        id="path3795"
-       cx="8.0286741"
-       cy="18.921806"
+       cx="8.1816015"
+       cy="19.773645"
        rx="6.4154644"
-       ry="2.1829748" />
+       ry="2.0115821" />
   </g>
   <g
      inkscape:groupmode="layer"

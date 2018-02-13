@@ -434,48 +434,53 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
 
     if(!proc.waitForStarted(1000))
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
         QString errStr;
         UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        errStr="Failed to filter output file using command \'" +
+        errStr="Failed to start text filter using command:<br> \'" +
                              proc.program() + " " + proc.arguments().join(" ") + "\'";
 #else
         errStr="Failed to start grep command!";
 #endif
         UserMessage::message(UserMessage::ERROR,true,errStr.toStdString());
         fTarget.reset();
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        QGuiApplication::restoreOverrideCursor();
-#endif
         return;
     }
 
     proc.waitForFinished(10000);
-    if(proc.exitStatus() == QProcess::NormalExit)
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::restoreOverrideCursor();
+#endif
+
+    QString errStr=proc.readAllStandardError();
+    if(proc.exitStatus() == QProcess::NormalExit && errStr.isEmpty())
     {
-        UiLog().err() << "   error:" << QString(proc.readAllStandardError());
         oriFile_=file_;
         textFilter_->setStatus(fTarget->isEmpty()?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));        
         loadFilteredFile(fTarget);
     }
     else
-    {
-        QString errStr;
+    {        
+        QString msg;
         UI_FUNCTION_LOG
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-        errStr="Failed to filter output file using command \'" +
+        msg="Failed to filter output file using command:<br> \'" +
                              proc.program() + " " + proc.arguments().join(" ") + "\'";
 #else
-        errStr="Failed to run grep command!";
+        msg="Failed to run grep command!";
 #endif
-        UserMessage::message(UserMessage::ERROR,true,errStr.toStdString());
+        if(!errStr.isEmpty())
+            msg+="<br>Error message: " + errStr;
+
+        UserMessage::message(UserMessage::ERROR,true,msg.toStdString());
         textFilter_->setStatus(TextFilterWidget::NotFoundStatus);
         fTarget.reset(); //delete
     }
 
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    QGuiApplication::restoreOverrideCursor();
-#endif
     return;
 }
 

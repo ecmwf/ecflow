@@ -63,6 +63,7 @@ private:
     void runIt();
     void refreshCompleter();
     void addCurrentToLatest();
+    bool isCurrentSaved() const;
     void addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,
                         QString title,QString data);
 

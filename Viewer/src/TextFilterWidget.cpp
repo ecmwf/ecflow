@@ -134,7 +134,7 @@ void TextFilterWidget::buildMenu(QToolButton *tb)
         saveAc=new QAction(menu);
         saveAc->setText(tr("Save filter"));
         saveAc->setIcon(QPixmap(":/viewer/filesaveas.svg"));
-        if(!isActive()) saveAc->setEnabled(false);
+        if(!isActive() || isCurrentSaved()) saveAc->setEnabled(false);
         menu->addAction(saveAc);
     }
 
@@ -318,7 +318,7 @@ void TextFilterWidget::setStatus(FilterStatus status)
                 "<br><b>&nbsp;regexp:</b> " + filterText() +
                 "<br><b>&nbsp;mode: </b>" + (isMatched()?"match":"no match") + ", " +
                 + (isCaseSensitive()?"case sensitive":"case insensitive") +
-                "<br><br>Filter status: ";
+                "<br><br>";
 
         QBrush br=oriBrush_;
         QPalette p=le_->palette();
@@ -337,9 +337,9 @@ void TextFilterWidget::setStatus(FilterStatus status)
             if(statusTb_)
             {
                 statusTb_->setIcon(QPixmap(":/viewer/filter_decor_green.svg"));
-                statusTb_->setToolTip(filterDesc +
-                                      Viewer::formatText("lines filtered",QColor(100,220,120)) +
-                                      tr(" from current output"));
+                statusTb_->setToolTip(filterDesc + tr("There ") +
+                                      Viewer::formatText("are lines",QColor(100,220,120)) +
+                                      tr(" matching the filter in output file"));
             }
             addCurrentToLatest();
             break;
@@ -348,9 +348,9 @@ void TextFilterWidget::setStatus(FilterStatus status)
             if(statusTb_)
             {
                 statusTb_->setIcon(QPixmap(":/viewer/filter_decor_red.svg"));
-                statusTb_->setToolTip(filterDesc +
-                                      Viewer::formatText("no lines filtered",QColor(255,95,95)) +
-                                      tr(" in current output"));
+                statusTb_->setToolTip(filterDesc + tr("There ") +
+                                      Viewer::formatText("are no lines",QColor(255,95,95)) +
+                                      tr(" matching the filter in output file"));
             }
             break;
         default:
@@ -367,6 +367,12 @@ void TextFilterWidget::addCurrentToLatest()
 {
     TextFilterHandler::Instance()->addLatest(filterText().simplified().toStdString(),
                                              isMatched(),isCaseSensitive(),true);
+}
+
+bool TextFilterWidget::isCurrentSaved() const
+{
+    return TextFilterHandler::Instance()->contains(filterText().simplified().toStdString(),
+                                             isMatched(),isCaseSensitive());
 }
 
 void TextFilterWidget::paintEvent(QPaintEvent *)
