@@ -10,6 +10,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include <iostream>
 #include <fstream>
 #include <string.h>
@@ -264,6 +268,19 @@ std::string VFile::tmpName()
 
 }
 */
+
+bool VFile::isEmpty() const
+{
+    if(storageMode_ == VFile::MemoryStorage)
+        return dataSize_ == 0;
+
+    if(exists())
+    {
+        struct stat info;
+        return (::stat( path_.c_str(), &info ) != 0 || info.st_size == 0);
+    }
+    return false;
+}
 
 void VFile::print()
 {

@@ -75,7 +75,7 @@ void NodeWidget::setCurrentSelection(VInfo_ptr info)
         //3. Panel B selects the node
         //4  Panel B then brodcasts the selection back to panel A
         // ...
-        //So here we do to check if the given item is already selected!!
+        //So here we need to check if the given item is already selected!!
         VInfo_ptr csInfo=currentSelection();
         if(csInfo && info &&  *(csInfo.get()) == *(info.get()))
             return;
