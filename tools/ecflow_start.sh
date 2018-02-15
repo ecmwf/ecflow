@@ -194,9 +194,9 @@ if [[ -f $ECF_LOG ]]; then
     STAMP=$(date +%Y%m%d.%H%M)
     SIZE=$(du -Hm $ECF_LOG | awk '{print $1}') || SIZE=0
     if [[ $SIZE -gt 100 ]]; then
-	echo "Moving, compressing logfile ${SIZE}mb ${ECF_LOG}.${STAMP}.log"
-	mv $ECF_LOG log/${ECF_LOG}.${STAMP}.log 2>/dev/null
-	gzip -f log/${ECF_LOG}.${STAMP}.log 2>/dev/null
+	     echo "Moving, compressing logfile ${SIZE}mb ${ECF_LOG}.${STAMP}.log"
+	     mv $ECF_LOG log/${ECF_LOG}.${STAMP}.log 2>/dev/null
+	     gzip -f log/${ECF_LOG}.${STAMP}.log 2>/dev/null
     fi
 fi
 cp $ECF_LOG log/ 2>/dev/null  # allow logfile append in case of multiple restart
