@@ -443,7 +443,7 @@ void Node::checkForLateness(const ecf::Calendar& c)
    }
 }
 
-void Node::initState(int clear_suspended_in_child_nodes)
+void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes )
 {
    // The state duration is ONLY updated *IF* state has changed.
    // However on re-queue *ALWAYS* reset state time.
@@ -468,7 +468,10 @@ void Node::initState(int clear_suspended_in_child_nodes)
 
       // convert DState --> NState.
       // NOTE::  NState does *NOT* have SUSPENDED
-      setStateOnly( DState::convert( defStatus_.state())  );
+      setStateOnly( DState::convert( defStatus_.state()),
+                    false        /*force*/,
+                    Str::EMPTY() /* additional info to log */,
+                    log_state_changes );
    }
 }
 
