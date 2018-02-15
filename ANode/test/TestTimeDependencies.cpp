@@ -66,7 +66,11 @@ BOOST_AUTO_TEST_CASE( test_day_time_combination )
 
          BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time,"\nExpected to submit at " << expected_time << " only, but also found " << suite->calendar().suiteTime());
 
-         t1->requeue(true/*resetRepeats*/,0/*clear_suspended_in_child_nodes*/,true/*reset_next_time_slot*/, true /* reset relative duration */);
+         Node::Requeue_args args(true /* reset repeats*/,
+                                  0    /* clear_suspended_in_child_nodes */,
+                                  true /* reset_next_time_slot_ */,
+                                  true /* reset relative duration */);
+         t1->requeue(args);
       }
 
       defs.updateCalendar(calUpdateParams);
@@ -108,7 +112,12 @@ BOOST_AUTO_TEST_CASE( test_date_time_combination )
          //cout << "submitted at " << suite->calendar().suiteTime() << "\n";
 
          BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time,"\nExpected to submit at " << expected_time << " only, but also found " << suite->calendar().suiteTime());
-         t1->requeue(true/*resetRepeats*/,0/*clear_suspended_in_child_nodes*/,true/*reset_next_time_slot*/,true /* reset relative duration */);
+
+         Node::Requeue_args args(true /* reset repeats*/,
+                                 0    /* clear_suspended_in_child_nodes */,
+                                 true /* reset_next_time_slot_ */,
+                                 true /* reset relative duration */);
+         t1->requeue(args);
       }
 
       defs.updateCalendar(calUpdateParams);
@@ -159,7 +168,11 @@ BOOST_AUTO_TEST_CASE( test_day_time_combination_in_hierarchy )
          if ( submitted == 2)
             BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time2,"\nExpected to submit at " << expected_time2 << " only, but also found " << suite->calendar().suiteTime());
 
-         t1->requeue(true/*resetRepeats*/,0/*clear_suspended_in_child_nodes*/,true/*reset_next_time_slot*/,true /* reset relative duration */);
+         Node::Requeue_args args(true /* reset repeats*/,
+                                 0    /* clear_suspended_in_child_nodes */,
+                                 true /* reset_next_time_slot_ */,
+                                 true /* reset relative duration */);
+         t1->requeue(args);
       }
 
       defs.updateCalendar(calUpdateParams);
@@ -209,7 +222,11 @@ BOOST_AUTO_TEST_CASE( test_date_time_combination_in_hierarchy )
          if ( submitted == 2)
             BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time2,"\nExpected to submit at " << expected_time2 << " only, but also found " << suite->calendar().suiteTime());
 
-         t1->requeue(true/*resetRepeats*/,0/*clear_suspended_in_child_nodes*/,true/*reset_next_time_slot*/,true /* reset relative duration */);
+         Node::Requeue_args args(true /* reset repeats*/,
+                                 0    /* clear_suspended_in_child_nodes */,
+                                 true /* reset_next_time_slot_ */,
+                                 true /* reset relative duration */);
+         t1->requeue(args);
       }
 
       defs.updateCalendar(calUpdateParams);

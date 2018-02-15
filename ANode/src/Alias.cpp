@@ -102,9 +102,9 @@ void Alias::begin()
    Submittable::begin();
 }
 
-void Alias::requeue(bool resetRepeats, int clear_suspended_in_child_nodes,bool reset_next_time_slot,bool reset_relative_duration)
+void Alias::requeue(const Requeue_args& args)
 {
-   Submittable::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot,reset_relative_duration);
+   Submittable::requeue(args);
 }
 
 const std::string& Alias::debugType() const { return ecf::Str::ALIAS();}

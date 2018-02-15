@@ -34,10 +34,7 @@ public:
 	virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
     virtual void reset();
 	virtual void begin();
-	virtual void requeue( bool resetRepeats,
-	                      int clear_suspended_in_child_nodes,
-	                      bool reset_next_time_slot,
-	                      bool reset_relative_duration);
+	virtual void requeue(const Requeue_args&);
    virtual void requeue_time_attrs();
 	virtual bool run(JobsParam& jobsParam, bool force);
 	virtual void kill(const std::string& zombie_pid = "");

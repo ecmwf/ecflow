@@ -533,13 +533,13 @@ void Defs::requeue()
    flag_.reset();
    if (edit_history_set) flag().set(ecf::Flag::MESSAGE);
 
-   int clear_suspended_in_child_nodes = 0;
+   Node::Requeue_args args(true /* reset repeats */,
+                           0    /* clear_suspended_in_child_nodes*/,
+                           true /* reset_next_time_slot */,
+                           true /* reset relative duration */);
    size_t theSuiteVecSize = suiteVec_.size();
    for(size_t s = 0; s < theSuiteVecSize; s++) {
-      suiteVec_[s]->requeue( true /* reset repeats */,
-                             clear_suspended_in_child_nodes,
-                             true /* reset_next_time_slot */,
-                             true /* reset relative duration */);
+      suiteVec_[s]->requeue(args);
    }
 
    set_most_significant_state();
