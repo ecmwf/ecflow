@@ -296,7 +296,7 @@ bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
 
    if (message.find("\n") == std::string::npos) {
       file_ << log_type_and_time_stamp_ << message;
-      if (newline) file_ << endl;
+      if (newline) file_ << '\n';
    }
    else {
       // If message has \n then split into multiple lines
@@ -304,9 +304,12 @@ bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
       Str::split(message,lines,"\n");
       size_t theSize = lines.size();
       for(size_t i = 0; i < theSize; ++i) {
-         file_ << log_type_and_time_stamp_ << lines[i] << endl; // flush EACH line
+         file_ << log_type_and_time_stamp_ << lines[i] << '\n';
       }
    }
+
+   // Don't flush for state changes. Done for performance. see ECFLOW-1239
+   if (lt != Log::LOG) file_.flush();
 
    // Check to see, if writing to file was ok.
    return check_file_write(message);
@@ -332,7 +335,7 @@ bool LogImpl::append(const std::string& message)
 bool LogImpl::check_file_write(const std::string& message) const
 {
    bool file_is_good = file_.good();
-   if (!file_is_good) cout << "LogImpl::append: Could not write to log file! File system full? Try --log=flush !" << endl;
+   if (!file_is_good) cout << "LogImpl::append: Could not write to log file! File system full/deleted ? Try ecflow_client --log=flush !" << endl;
    if (LogToCout::ok() || !file_is_good) {
       Indentor::indent(cout) << message << endl;
    }
