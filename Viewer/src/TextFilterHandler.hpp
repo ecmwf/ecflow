@@ -27,7 +27,7 @@ public:
     bool caseSensitive() const {return caseSensitive_;}
     bool matched() const {return matched_;}
     bool contextMenu() const {return contextMenu_;}
-    bool setContextMenu(bool cm) {contextMenu_=cm;}
+    void setContextMenu(bool cm) {contextMenu_=cm;}
     void save(VSettings *vs) const;
 
 

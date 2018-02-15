@@ -39,7 +39,7 @@ TextFilterItem TextFilterItem::make(VSettings* vs)
     bool matched = vs->getAsBool("matched",true);
     bool caseSensitive = vs->getAsBool("filter",false);
     bool contextMenu = vs->getAsBool("contextMenu",false);
-    return TextFilterItem(filter,matched,caseSensitive);
+    return TextFilterItem(filter,matched,caseSensitive,contextMenu);
 }
 
 bool TextFilterItem::operator ==(const TextFilterItem& o) const
@@ -94,14 +94,13 @@ bool TextFilterHandler::containsExceptOne(int index,const std::string& filter,bo
         return false;
 
     TextFilterItem item(filter,matched,caseSensitive);
-    for(size_t i=0; i < items_.size(); i++)
+    for(int i=0; i < static_cast<int>(items_.size()); i++)
     {
         if(i!= index && items_[i] == item)
             return true;
     }
     return false;
 }
-
 
 bool TextFilterHandler::add(const TextFilterItem& item)
 {
@@ -131,7 +130,7 @@ void TextFilterHandler::addLatest(const TextFilterItem& item)
        latest_.erase(it);
 
     //trim size
-    while(latest_.size() >= maxLatestNum_)
+    while(static_cast<int>(latest_.size()) >= maxLatestNum_)
     {
         latest_.pop_back();
     }
