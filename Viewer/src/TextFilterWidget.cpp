@@ -289,7 +289,7 @@ void TextFilterWidget::on_matchCb__currentIndexChanged(int)
     runIt();
 }
 
-void TextFilterWidget::on_caseCb__statusChanged(int)
+void TextFilterWidget::on_caseCb__stateChanged(int)
 {
     runIt();
 }

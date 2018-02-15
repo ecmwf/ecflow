@@ -45,7 +45,7 @@ public Q_SLOTS:
     void on_le__returnPressed();
     void on_closeTb__clicked();
     void on_matchCb__currentIndexChanged(int);
-    void on_caseCb__statusChanged(int);
+    void on_caseCb__stateChanged(int);
     void slotOptionTb();
 
 Q_SIGNALS:

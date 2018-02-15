@@ -450,7 +450,7 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
         return;
     }
 
-    proc.waitForFinished(10000);
+    proc.waitForFinished(60000);
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     QGuiApplication::restoreOverrideCursor();
