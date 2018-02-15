@@ -102,7 +102,7 @@ void Alias::begin()
    Submittable::begin();
 }
 
-void Alias::requeue(const Requeue_args& args)
+void Alias::requeue(Requeue_args& args)
 {
    Submittable::requeue(args);
 }

@@ -37,7 +37,7 @@ public:
 
    virtual void begin();
    virtual bool resolveDependencies(JobsParam& ); // overriden to speicy family for job profiler
-    virtual void requeue(const Requeue_args&);
+    virtual void requeue(Requeue_args&);
 	virtual void accept(ecf::NodeTreeVisitor&);
 	virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
 	virtual void update_generated_variables() const;

@@ -169,7 +169,7 @@ public:
       bool reset_relative_duration_;
       bool log_state_changes_;
    };
-   virtual void requeue(const Requeue_args&);
+   virtual void requeue(Requeue_args&);
 
    /// Re queue the time based attributes only.
    /// Used as a part of Alter (clock) functionality.

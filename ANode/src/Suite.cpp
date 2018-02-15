@@ -135,7 +135,7 @@ void Suite::begin()
    }
 }
 
-void Suite::requeue(const Requeue_args& args)
+void Suite::requeue(Requeue_args& args)
 {
    if (false == begun_) {
       std::stringstream ss; ss << "Suite::requeue: The suite " << name() << " must be 'begun' first\n";

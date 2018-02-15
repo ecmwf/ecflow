@@ -35,7 +35,7 @@ public:
    /// the output. The try number is used in SMSJOB/SMSJOBOUT to preserve the output when
    /// there are multiple runs.  re-queue/begin() resets the try Number
    virtual void begin();
-   virtual void requeue(const Requeue_args&);
+   virtual void requeue(Requeue_args&);
 
    virtual Suite* suite() const { return parent()->suite(); }
    virtual Defs* defs() const { return (parent()) ? parent()->defs() : NULL;} // exposed to python hence check for NULL first

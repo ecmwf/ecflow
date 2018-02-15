@@ -65,7 +65,7 @@ public:
    virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
    virtual void reset();
    virtual void begin();
-   virtual void requeue(const Requeue_args& args);
+   virtual void requeue(Requeue_args& args);
    bool begun() const { return begun_; }
    void reset_begin();
    virtual void update_generated_variables() const;

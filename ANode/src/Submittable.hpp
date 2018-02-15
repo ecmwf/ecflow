@@ -65,7 +65,7 @@ public:
    /// there are multiple runs.  re-queue/begin() resets the try Number
    virtual void reset();
    virtual void begin();
-   virtual void requeue(const Requeue_args&);
+   virtual void requeue(Requeue_args&);
    virtual bool run(JobsParam& jobsParam, bool force);
    virtual void kill(const std::string& zombie_pid = "");
    virtual void status();

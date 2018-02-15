@@ -256,16 +256,16 @@ void Node::begin()
    // Hence to avoid excessive memory consumption, they are created on demand
 }
 
-void Node::requeue( const Requeue_args& args)
+void Node::requeue(Requeue_args& args)
 {
 #ifdef DEBUG_REQUEUE
-   LOG(Log::DBG,"      Node::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
+   LOG(Log::DBG,"      Node::requeue() " << absNodePath() << " resetRepeats = " << args.resetRepeats_);
 #endif
    /// Note: we don't reset verify attributes as they record state stat's
 
 
    // Set the state without causing any side effects
-   initState(args.clear_suspended_in_child_nodes_);
+   initState(args.clear_suspended_in_child_nodes_,args.log_state_changes_);
 
    clearTrigger();
    clearComplete();
@@ -458,7 +458,11 @@ void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes 
       /// Note: DState::SUSPENDED is not a real state, its really a user interaction
       /// Replace with suspend, and set underlying state as queued
       suspend();
-      setStateOnly( NState::QUEUED );
+      setStateOnly( NState::QUEUED,
+                    false        /*force*/,
+                    Str::EMPTY() /* additional info to log */,
+                    log_state_changes
+                  );
    }
    else {
 
@@ -471,7 +475,8 @@ void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes 
       setStateOnly( DState::convert( defStatus_.state()),
                     false        /*force*/,
                     Str::EMPTY() /* additional info to log */,
-                    log_state_changes );
+                    log_state_changes
+                  );
    }
 }
 

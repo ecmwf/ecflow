@@ -146,7 +146,7 @@ void Submittable::begin()
 #endif
 }
 
-void Submittable::requeue(const Requeue_args& args)
+void Submittable::requeue(Requeue_args& args)
 {
    /// It is *very* important that we reset the passwords. This allows us to detect zombies.
    tryNo_ = 0;    // reset try number

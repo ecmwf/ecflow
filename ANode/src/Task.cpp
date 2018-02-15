@@ -324,7 +324,7 @@ void Task::begin()
 #endif
 }
 
-void Task::requeue(const Requeue_args& args)
+void Task::requeue(Requeue_args& args)
 {
    if (aliases_.empty()) {
       if (alias_no_ != 0) {
