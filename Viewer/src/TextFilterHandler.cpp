@@ -68,14 +68,40 @@ TextFilterHandler::TextFilterHandler() :
     readSettings();
 }
 
+int TextFilterHandler::indexOf(const std::string& filter,bool matched,bool caseSensitive) const
+{
+    if(filter.empty())
+        return -1;
+
+    TextFilterItem item(filter,matched,caseSensitive);
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i] == item)
+            return i;
+    }
+
+    return -1;
+}
+
 bool TextFilterHandler::contains(const std::string& filter,bool matched,bool caseSensitive) const
+{
+    return indexOf(filter,matched,caseSensitive) != -1;
+}
+
+bool TextFilterHandler::containsExceptOne(int index,const std::string& filter,bool matched,bool caseSensitive) const
 {
     if(filter.empty())
         return false;
 
     TextFilterItem item(filter,matched,caseSensitive);
-    return std::find(items_.begin(), items_.end(), item) != items_.end();
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(i!= index && items_[i] == item)
+            return true;
+    }
+    return false;
 }
+
 
 bool TextFilterHandler::add(const TextFilterItem& item)
 {

@@ -89,13 +89,15 @@ void TextFilterEditDialog::accept()
     {
         TextFilterItem it=item();
 
-        if(TextFilterHandler::Instance()->items()[itemIndex_] == it)
+        if(TextFilterHandler::Instance()->items()[itemIndex_] == it &&
+           TextFilterHandler::Instance()->items()[itemIndex_].contextMenu() ==
+           it.contextMenu())
         {
             QDialog::reject();
             return;
         }
 
-        if(TextFilterHandler::Instance()->contains(it.filter(),it.matched(),it.caseSensitive()))
+        if(TextFilterHandler::Instance()->containsExceptOne(itemIndex_,it.filter(),it.matched(),it.caseSensitive()))
         {
             QMessageBox::critical(0,tr("Save text filter"), "Cannot save text filter! A text filter with the same regexp: <b>" +
                                   QString::fromStdString(it.filter())+
@@ -115,7 +117,7 @@ void TextFilterEditDialog::accept()
 //
 //======================================
 
-TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget *parent) : QDialog(parent)
+TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget *parent) : QDialog(parent), applyIndex_(-1)
 {
     setupUi(this);
 
@@ -125,11 +127,16 @@ TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget *parent) : QDialog(pare
     QAction *sep2=new QAction(this);
     sep2->setSeparator(true);
 
+    QAction *sep3=new QAction(this);
+    sep3->setSeparator(true);
+
     table_->addAction(actionAdd_);
     table_->addAction(sep1);
     table_->addAction(actionDuplicate_);
     table_->addAction(actionEdit_);
     table_->addAction(sep2);
+    table_->addAction(actionApply_);
+    table_->addAction(sep3);
     table_->addAction(actionRemove_);
 
     //Add actions for the toolbuttons
@@ -137,6 +144,7 @@ TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget *parent) : QDialog(pare
     editTb_->setDefaultAction(actionEdit_);
     removeTb_->setDefaultAction(actionRemove_);
     duplicateTb_->setDefaultAction(actionDuplicate_);
+    applyTb_->setDefaultAction(actionApply_);
 
     //Init the table
     reloadTable();
@@ -165,7 +173,11 @@ void TextFilterHandlerDialog::reloadTable()
     table_->setRowCount(items.size());
     for(size_t i=0; i < items.size(); i++)
     {
-        QTableWidgetItem *filterItem = new QTableWidgetItem(QString::fromStdString(items[i].filter()));
+        QString filterTxt=QString::fromStdString(items[i].filter());
+        //Replace whitespace with Open Box U+2423 just for better interpretation
+        filterTxt.replace(QChar(' '),QChar(9251));
+
+        QTableWidgetItem *filterItem = new QTableWidgetItem(filterTxt);
         QTableWidgetItem *matchedItem = new QTableWidgetItem((items[i].matched())?"match":"no match");
         QTableWidgetItem *caseItem = new QTableWidgetItem((items[i].caseSensitive())?"yes":"no");
         QTableWidgetItem *contextItem = new QTableWidgetItem((items[i].contextMenu())?"yes":"no");
@@ -182,8 +194,7 @@ void TextFilterHandlerDialog::reloadTable()
     updateStatus();
 }
 
-
-void TextFilterHandlerDialog::on_actionEdit__triggered()
+void TextFilterHandlerDialog::editItem()
 {
     int r=table_->currentRow();
     if(r >=0 )
@@ -193,6 +204,12 @@ void TextFilterHandlerDialog::on_actionEdit__triggered()
         if(diag.exec() == QDialog::Accepted)
             reloadTable();
     }
+}
+
+
+void TextFilterHandlerDialog::on_actionEdit__triggered()
+{
+    editItem();
 }
 
 void TextFilterHandlerDialog::on_actionDuplicate__triggered()
@@ -224,6 +241,20 @@ void TextFilterHandlerDialog::on_actionAdd__triggered()
         reloadTable();
 }
 
+void TextFilterHandlerDialog::on_table__doubleClicked(const QModelIndex& index)
+{
+    editItem();
+}
+
+void TextFilterHandlerDialog::on_actionApply__triggered()
+{
+    int r=table_->currentRow();
+    {
+        applyIndex_=table_->currentRow();
+        close();
+    }
+}
+
 void TextFilterHandlerDialog::updateStatus()
 {
     bool hasSelected=table_->currentRow() >=0;
@@ -231,6 +262,7 @@ void TextFilterHandlerDialog::updateStatus()
     actionEdit_->setEnabled(hasSelected);
     actionDuplicate_->setEnabled(hasSelected);
     actionRemove_->setEnabled(hasSelected);
+    actionApply_->setEnabled(hasSelected);
 }
 
 QString TextFilterHandlerDialog::settingsFile()

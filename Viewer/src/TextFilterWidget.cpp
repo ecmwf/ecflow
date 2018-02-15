@@ -37,6 +37,8 @@ TextFilterWidget::TextFilterWidget(QWidget *parent) :
     //match
     matchCb_->addItem(QIcon(QPixmap(":/viewer/filter_match.svg")),tr("match"),0);
     matchCb_->addItem(QIcon(QPixmap(":/viewer/filter_no_match.svg")),tr("no match"),1);
+    matchCb_->setItemData(0,tr("Show only the <b>lines matching</b> the filter experssion"),Qt::ToolTipRole);
+    matchCb_->setItemData(1,tr("Show only the <b>lines not matching</b> the filter experssion"),Qt::ToolTipRole);
 
     //Editor
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
@@ -156,32 +158,58 @@ void TextFilterWidget::buildMenu(QToolButton *tb)
 
     if(QAction *ac=menu->exec(QCursor::pos()))
     {      
+        //Start manage filters dialogue
         if(ac == manageAc)
         {
             TextFilterHandlerDialog diag;
             diag.exec();
-            refreshCompleter();
+            int pos=diag.applyIndex();
+            if(pos >=0 && TextFilterHandler::Instance()->latestItems().size())
+            {
+                TextFilterItem item=TextFilterHandler::Instance()->items()[pos];
+                if(!item.filter().empty())
+                {
+                    init(item);
+                    Q_EMIT runRequested(QString::fromStdString(item.filter()),item.matched(),item.caseSensitive());
+                }
+            }
+            else
+            {
+                refreshCompleter();
+            }
         }
+        //Save current filter
         else if(ac == saveAc)
         {
             std::string filter=filterText().toStdString();
             bool matchMode=isMatched();
             bool caseSensitive=isCaseSensitive();
 
-            if(TextFilterHandler::Instance()->contains(filter,matchMode,caseSensitive))
+            int pos=TextFilterHandler::Instance()->indexOf(filter,matchMode,caseSensitive);
+            if(pos != -1)
             {
+                TextFilterItem it=TextFilterHandler::Instance()->items()[pos];
+
+                //Enable context menu for already saved items
+                if(!it.contextMenu())
+                {
+                   it.setContextMenu(true);
+                   TextFilterHandler::Instance()->update(pos,it);
+                }
                 return;
             }
 
             TextFilterHandler::Instance()->add(filter,matchMode,caseSensitive,true);
             refreshCompleter();
         }
+         //Clear current filter
         else if(ac == clearAc)
         {
             le_->clear();
             setStatus(EditStatus);
             refreshCompleter();
         }
+        //Load a filter
         else
         {
             QStringList id=ac->data().toString().split("_");
@@ -240,20 +268,25 @@ void TextFilterWidget::addMenuSection(QMenu* menu,const std::vector<TextFilterIt
 
     for(std::size_t i=0 ; i < items.size(); i++)
     {
-        QAction* ac=new QAction(this);
+        if(data != "s" || items[i].contextMenu())
+        {
+            QAction* ac=new QAction(this);
 
-        QString txt=QString::fromStdString(items[i].filter()) +
-                    "   ("  + QString(items[i].caseSensitive()?"cs":"ci") + ")";
+            QString txt=QString::fromStdString(items[i].filter());
+            //Replace whitespace with Open Box U+2423 just for better interpretation
+            txt.replace(QChar(' '),QChar(9251));
+            txt+="   ("  + QString(items[i].caseSensitive()?"cs":"ci") + ")";
 
-        ac->setText(txt);
-        ac->setData(data + "_" + QString::number(i)); //set an id for the action
+            ac->setText(txt);
+            ac->setData(data + "_" + QString::number(i)); //set an id for the action
 
-        if(items[i].matched())
-            ac->setIcon(QPixmap(":/viewer/filter_match.svg"));
-        else
-            ac->setIcon(QPixmap(":/viewer/filter_no_match.svg"));
+            if(items[i].matched())
+                ac->setIcon(QPixmap(":/viewer/filter_match.svg"));
+            else
+                ac->setIcon(QPixmap(":/viewer/filter_no_match.svg"));
 
-        menu->addAction(ac);
+            menu->addAction(ac);
+        }
     }
 }
 
@@ -267,6 +300,7 @@ void TextFilterWidget::runIt()
 void TextFilterWidget::on_closeTb__clicked()
 {
     hide();
+    adjustToolTip();
     Q_EMIT closeRequested();
 }
 
@@ -305,20 +339,49 @@ void TextFilterWidget::setEditFocus()
     le_->setFocus();
 }
 
-void TextFilterWidget::setStatus(FilterStatus status)
+void TextFilterWidget::adjustToolTip()
 {
-    if(status_ != status)
-    {
-        status_=status;
+    if(!statusTb_)
+        return;
 
-        QString filterDesc;
-        if(status_ == FoundStatus || status_ == NotFoundStatus)
-            filterDesc=tr("Click to show text filter bar<br>----------------------------------------") +
-                     tr("<br>Current filter:") +
+    QString filterDesc;
+    if(status_ == FoundStatus || status_ == NotFoundStatus)
+    {
+        if(!isVisible())
+          filterDesc+=tr("Click to show text filter bar<br>----------------------------------------<br>");
+
+          filterDesc+=tr("Current filter:") +
                 "<br><b>&nbsp;regexp:</b> " + filterText() +
                 "<br><b>&nbsp;mode: </b>" + (isMatched()?"match":"no match") + ", " +
                 + (isCaseSensitive()?"case sensitive":"case insensitive") +
                 "<br><br>";
+     }
+
+     switch(status_)
+     {
+     case EditStatus:
+        statusTb_->setToolTip(tr("Show filter bar"));
+        break;
+     case FoundStatus:
+            statusTb_->setToolTip(filterDesc + tr("There ") +
+                Viewer::formatText("are lines",QColor(100,220,120)) +
+                tr(" matching the filter in the output file"));
+        break;
+     case NotFoundStatus:
+        statusTb_->setToolTip(filterDesc + tr("There ") +
+            Viewer::formatText("are no lines",QColor(255,95,95)) +
+            tr(" matching the filter in the output file"));
+        break;
+     default:
+        break;
+     }
+}
+
+void TextFilterWidget::setStatus(FilterStatus status,bool force)
+{
+    if(force || status_ != status)
+    {
+        status_=status;
 
         QBrush br=oriBrush_;
         QPalette p=le_->palette();
@@ -328,18 +391,14 @@ void TextFilterWidget::setStatus(FilterStatus status)
             br=oriBrush_;
             if(statusTb_)
             {
-                statusTb_->setIcon(QPixmap(":/viewer/filter_decor.svg"));
-                statusTb_->setToolTip(tr("Show filter bar"));
+                statusTb_->setIcon(QPixmap(":/viewer/filter_decor.svg"));               
             }
             break;
         case FoundStatus:
             br=greenBrush_;
             if(statusTb_)
             {
-                statusTb_->setIcon(QPixmap(":/viewer/filter_decor_green.svg"));
-                statusTb_->setToolTip(filterDesc + tr("There ") +
-                                      Viewer::formatText("are lines",QColor(100,220,120)) +
-                                      tr(" matching the filter in the output file"));
+                statusTb_->setIcon(QPixmap(":/viewer/filter_decor_green.svg"));                
             }
             addCurrentToLatest();
             break;
@@ -347,10 +406,7 @@ void TextFilterWidget::setStatus(FilterStatus status)
             br=redBrush_;
             if(statusTb_)
             {
-                statusTb_->setIcon(QPixmap(":/viewer/filter_decor_red.svg"));
-                statusTb_->setToolTip(filterDesc + tr("There ") +
-                                      Viewer::formatText("are no lines",QColor(255,95,95)) +
-                                      tr(" matching the filter in the output file"));
+                statusTb_->setIcon(QPixmap(":/viewer/filter_decor_red.svg"));              
             }
             break;
         default:
@@ -359,19 +415,20 @@ void TextFilterWidget::setStatus(FilterStatus status)
 
         p.setBrush(QPalette::Base,br);
         le_->setPalette(p);
+
+        adjustToolTip();
     }
-    //Q_EMIT statusChanged(status_);
 }
 
 void TextFilterWidget::addCurrentToLatest()
 {
-    TextFilterHandler::Instance()->addLatest(filterText().simplified().toStdString(),
+    TextFilterHandler::Instance()->addLatest(filterText().toStdString(),
                                              isMatched(),isCaseSensitive(),true);
 }
 
 bool TextFilterWidget::isCurrentSaved() const
 {
-    return TextFilterHandler::Instance()->contains(filterText().simplified().toStdString(),
+    return TextFilterHandler::Instance()->contains(filterText().toStdString(),
                                              isMatched(),isCaseSensitive());
 }
 
@@ -381,5 +438,10 @@ void TextFilterWidget::paintEvent(QPaintEvent *)
      opt.init(this);
      QPainter p(this);
      style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+void TextFilterWidget::showEvent(QShowEvent *)
+{
+    adjustToolTip();
 }
 

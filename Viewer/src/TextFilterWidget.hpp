@@ -29,7 +29,7 @@ public:
     ~TextFilterWidget() {}
 
     enum FilterStatus {EditStatus,FoundStatus,NotFoundStatus};
-    void setStatus(FilterStatus);
+    void setStatus(FilterStatus,bool force=false);
 
     void setEditFocus();
     void buildMenu(QToolButton *tb);
@@ -57,6 +57,7 @@ Q_SIGNALS:
 
 protected:
     void paintEvent(QPaintEvent *);
+    void showEvent(QShowEvent *);
 
 private:
     void init(const TextFilterItem& item);
@@ -64,6 +65,7 @@ private:
     void refreshCompleter();
     void addCurrentToLatest();
     bool isCurrentSaved() const;
+    void adjustToolTip();
     void addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,
                         QString title,QString data);
 

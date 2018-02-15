@@ -122,6 +122,19 @@
         </widget>
        </item>
        <item>
+        <widget class="QToolButton" name="applyTb_">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Apply</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="Line" name="line">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -228,11 +241,11 @@
     <string>Ctrl+N</string>
    </property>
   </action>
-  <zorder>buttonBox</zorder>
-  <zorder>layoutWidget</zorder>
-  <zorder>layoutWidget_2</zorder>
-  <zorder>editPb_</zorder>
-  <zorder>table_</zorder>
+  <action name="actionApply_">
+   <property name="text">
+    <string>A&amp;pply</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="viewer.qrc"/>

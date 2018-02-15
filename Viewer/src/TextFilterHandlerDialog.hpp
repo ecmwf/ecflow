@@ -56,20 +56,26 @@ public:
     ~TextFilterHandlerDialog();
 
     void setItemToSaveAs(QString name,QString filter,bool matched,bool caseSensitive);
+    int applyIndex() const {return applyIndex_;}
 
 protected Q_SLOTS:
     void on_actionAdd__triggered();
     void on_actionEdit__triggered();
     void on_actionDuplicate__triggered();
     void on_actionRemove__triggered();
+    void on_actionApply__triggered();
+    void on_table__doubleClicked(const QModelIndex& index);
 
 private:
     void reloadTable();
     bool addItem();
+    void editItem();
     void updateStatus();
     QString settingsFile();
     void writeSettings();
     void readSettings();
+
+    int applyIndex_;
 };
 
 #endif // TEXTFILTERHANDLERDIALOG_HPP
