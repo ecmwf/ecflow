@@ -343,7 +343,8 @@ void LogImpl::disable_auto_flush() { enable_auto_flush_ = false;}
 
 bool LogImpl::append(const std::string& message)
 {
-   file_ << message << endl;
+   file_ << message << '\n';
+   if (enable_auto_flush_) file_.flush();
    return check_file_write(message);
 }
 
