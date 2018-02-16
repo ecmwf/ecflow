@@ -54,7 +54,7 @@ void Log::destroy()
 }
 
 Log::Log(const std::string& fileName)
-: fileName_(fileName), logImpl_( new LogImpl(fileName) )
+: enable_auto_flush_(false),fileName_(fileName), logImpl_( new LogImpl(fileName,false) )
 {
 }
 
@@ -64,11 +64,10 @@ Log::~Log()
 	logImpl_ = NULL;
 }
 
-
 bool Log::log(Log::LogType lt,const std::string& message)
 {
 	if (!logImpl_) {
-		logImpl_ = new LogImpl(fileName_) ;
+		logImpl_ = new LogImpl(fileName_,enable_auto_flush_);
 	}
 	return logImpl_->log(lt,message);
 }
@@ -76,7 +75,7 @@ bool Log::log(Log::LogType lt,const std::string& message)
 bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 {
    if (!logImpl_) {
-      logImpl_ = new LogImpl(fileName_) ;
+      logImpl_ = new LogImpl(fileName_,enable_auto_flush_);
    }
    return logImpl_->log_no_newline(lt,message);
 }
@@ -84,7 +83,7 @@ bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 bool Log::append(const std::string& message)
 {
    if (!logImpl_) {
-      logImpl_ = new LogImpl(fileName_) ;
+      logImpl_ = new LogImpl(fileName_,enable_auto_flush_) ;
    }
    return logImpl_->append(message);
 }
@@ -92,7 +91,7 @@ bool Log::append(const std::string& message)
 void Log::cache_time_stamp()
 {
 	if (!logImpl_) {
-		logImpl_ = new LogImpl(fileName_) ;
+		logImpl_ = new LogImpl(fileName_,enable_auto_flush_) ;
 	}
 	logImpl_->create_time_stamp();
 }
@@ -111,6 +110,20 @@ void Log::flush()
 	// Forcing writing to physical medium can't be guaranteed though!
 	delete logImpl_;
 	logImpl_ = NULL;
+}
+
+void Log::enable_auto_flush()
+{
+   enable_auto_flush_ = true;
+   if (!logImpl_) logImpl_ = new LogImpl(fileName_,enable_auto_flush_) ;
+   logImpl_->enable_auto_flush();
+}
+
+void Log::disable_auto_flush()
+{
+   enable_auto_flush_  = false;
+   if (!logImpl_) logImpl_ = new LogImpl(fileName_,enable_auto_flush_) ;
+   logImpl_->disable_auto_flush();
 }
 
 void Log::clear()
@@ -254,8 +267,8 @@ void Log::get_log_types(std::vector<std::string>& vec)
 }
 
 //======================================================================================================
-LogImpl::LogImpl(const std::string& filename)
-: file_(filename.c_str(), ios::out | ios::app)
+LogImpl::LogImpl(const std::string& filename,bool enable_auto_flush)
+: enable_auto_flush_(enable_auto_flush), file_(filename.c_str(), ios::out | ios::app)
 {
  	if (!file_.is_open()) {
 		std::cerr << "LogImpl::LogImpl: Could not open log file '" << filename << "'\n";
@@ -308,8 +321,7 @@ bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
       }
    }
 
-   // Don't flush for state changes. Done for performance. see ECFLOW-1239
-   if (lt != Log::LOG) file_.flush();
+   if (enable_auto_flush_) file_.flush();
 
    // Check to see, if writing to file was ok.
    return check_file_write(message);
@@ -325,6 +337,9 @@ bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
 //   }
 //#endif
 }
+
+void LogImpl::enable_auto_flush() { enable_auto_flush_ = true; file_.flush();}
+void LogImpl::disable_auto_flush() { enable_auto_flush_ = false;}
 
 bool LogImpl::append(const std::string& message)
 {

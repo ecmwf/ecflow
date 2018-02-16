@@ -23,12 +23,14 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
+#ifdef ECFLOW_MT
+#include <boost/thread/thread.hpp> // needed for ECFLOW_MT and debug() to print thread ID
+#endif
 
 #include <iostream>
 
 #include "Server.hpp"  // Must come before boost/serialization headers.
                        // defines ECFLOW_MT
-#include <boost/thread/thread.hpp> // needed for ECFLOW_MT and debug() to print thread ID
 #include "Defs.hpp"
 #include "Log.hpp"
 #include "System.hpp"
@@ -450,7 +452,8 @@ void Server::terminate()
 
 void Server::handle_terminate()
 {
-   if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
+   // if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
+   if (serverEnv_.debug()) cout << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
 
    // Cancel signal
    signals_.clear();

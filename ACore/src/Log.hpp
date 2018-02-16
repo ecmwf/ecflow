@@ -78,6 +78,12 @@ public:
    /// Will call flush and close the file. See notes above
    void flush();
 
+   /// By default 4.9.0 automatic flush after each child/user command and state change is *DISABLED*
+   /// These functions control this feature.
+   void enable_auto_flush();
+   void disable_auto_flush();
+   bool is_auto_flush_enabled() const { return enable_auto_flush_;}
+
    /// clear the log file. Required for testing
    void clear();
 
@@ -101,6 +107,7 @@ private:
    Log(const std::string& filename);
    static Log* instance_;
 
+   bool enable_auto_flush_;
    std::string fileName_;
    LogImpl* logImpl_;
 };
@@ -111,7 +118,7 @@ private:
 /// the log file
 class LogImpl : private boost::noncopyable {
 public:
-   LogImpl(const std::string& filename);
+   LogImpl(const std::string& filename,bool enable_auto_flush);
    ~LogImpl();
 
    bool log(Log::LogType lt,const std::string& message) { return do_log(lt,message,true); }
@@ -121,11 +128,15 @@ public:
    void create_time_stamp();
    const std::string& get_cached_time_stamp() const { return time_stamp_;}
 
+   void enable_auto_flush();
+   void disable_auto_flush();
+
 private:
    bool do_log(Log::LogType,const std::string& message, bool newline);
    bool check_file_write(const std::string& message) const;
 
 private:
+   bool enable_auto_flush_;
    std::string time_stamp_;
    mutable std::ofstream file_;
 

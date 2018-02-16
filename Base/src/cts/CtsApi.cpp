@@ -701,7 +701,9 @@ std::vector<std::string> CtsApi::new_log(const std::string& new_path) {
 std::string CtsApi::clearLog()     { return "--log=clear"; }
 std::string CtsApi::flushLog()     { return "--log=flush"; }
 std::string CtsApi::get_log_path() { return "--log=path"; }
-
+std::string CtsApi::enable_auto_flush()  { return "--log=enable_auto_flush";}
+std::string CtsApi::disable_auto_flush() { return "--log=disable_auto_flush";}
+std::string CtsApi::query_auto_flush()   { return "--log=query_auto_flush";}
 
 std::string CtsApi::forceDependencyEval() { return "--force-dep-eval";}
 const char* CtsApi::forceDependencyEvalArg() { return "force-dep-eval";}

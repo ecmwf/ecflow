@@ -62,6 +62,9 @@ std::ostream& LogCmd::print(std::ostream& os) const
       case LogCmd::FLUSH: return user_cmd(os,CtsApi::flushLog()); break;
       case LogCmd::NEW:   return user_cmd(os,CtsApi::to_string(CtsApi::new_log(new_path_)));  break;
       case LogCmd::PATH:  return user_cmd(os,CtsApi::get_log_path()); break;
+      case LogCmd::ENABLE_AUTO_FLUSH:  return user_cmd(os,CtsApi::enable_auto_flush()); break;
+      case LogCmd::DISABLE_AUTO_FLUSH: return user_cmd(os,CtsApi::disable_auto_flush()); break;
+      case LogCmd::QUERY_AUTO_FLUSH: return user_cmd(os,CtsApi::query_auto_flush()); break;
       default : throw std::runtime_error( "LogCmd::print: Unrecognised log api command,") ;
    }
    return os;
@@ -81,11 +84,14 @@ bool LogCmd::equals(ClientToServerCmd* rhs) const
 bool LogCmd::isWrite() const
 {
    switch (api_) {
-      case LogCmd::GET:   return false;  break;
+      case LogCmd::GET:   return false; break;
       case LogCmd::CLEAR: return false; break;
       case LogCmd::FLUSH: return false; break;
       case LogCmd::NEW:   return true;  break;
       case LogCmd::PATH:  return false; break;
+      case LogCmd::ENABLE_AUTO_FLUSH: return true;  break;
+      case LogCmd::DISABLE_AUTO_FLUSH: return true; break;
+      case LogCmd::QUERY_AUTO_FLUSH: return false; break;
       default : throw std::runtime_error( "LogCmd::isWrite: Unrecognised log api command,") ;
    }
    return false;
@@ -125,6 +131,13 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
             break;
          }
          case LogCmd::PATH:  return PreAllocatedReply::string_cmd(  Log::instance()->path() ); break;
+         case LogCmd::ENABLE_AUTO_FLUSH:  Log::instance()->enable_auto_flush();  break;
+         case LogCmd::DISABLE_AUTO_FLUSH: Log::instance()->disable_auto_flush(); break;
+         case LogCmd::QUERY_AUTO_FLUSH: {
+            if (Log::instance()->is_auto_flush_enabled()) return PreAllocatedReply::string_cmd("enabled");
+            else                                          return PreAllocatedReply::string_cmd("disabled");
+            break;
+         }
 			default : throw std::runtime_error( "Unrecognised log api command,") ;
 		}
 	}
@@ -138,21 +151,27 @@ const char* LogCmd::desc() {
             "Specifying '--log=get' with a large number of lines from the server,\n"
             "can consume a lot of **memory**. The log file can be a very large file,\n"
             "hence we use a default of 100 lines, optionally the number of lines can be specified.\n"
-            "  arg1 = [ get | clear | flush | new | path ]\n"
-            "         get   -  Outputs the log file to standard out.\n"
-            "                  defaults to return the last 100 lines\n"
-            "                  The second argument can specify how many lines to return\n"
-            "         clear -  Clear the log file of its contents.\n"
-            "         flush -  Flush and close the log file. (only temporary) next time\n"
-            "                  server writes to log, it will be opened again. Hence it best\n"
-            "                  to halt the server first\n"
-            "         new   -  Flush and close the existing log file, and start using the\n"
-            "                  the path defined for ECF_LOG. By changing this variable\n"
-            "                  a new log file path can be used\n"
-            "                  Alternatively an explicit path can also be provided\n"
-            "                  in which case ECF_LOG is also updated\n"
-            "         path  -  Returns the path name to the existing log file\n"
-            "  arg2 = [ new_path | optional last n lines ]\n"
+            " arg1 = [ get | clear | flush | new | path ]\n"
+            "  get -   Outputs the log file to standard out.\n"
+            "          defaults to return the last 100 lines\n"
+            "          The second argument can specify how many lines to return\n"
+            "  clear - Clear the log file of its contents.\n"
+            "  flush - Flush and close the log file. (only temporary) next time\n"
+            "          server writes to log, it will be opened again. Hence it best\n"
+            "          to halt the server first\n"
+            "  new -   Flush and close the existing log file, and start using the\n"
+            "          the path defined for ECF_LOG. By changing this variable\n"
+            "          a new log file path can be used\n"
+            "          Alternatively an explicit path can also be provided\n"
+            "          in which case ECF_LOG is also updated\n"
+            "  path -  Returns the path name to the existing log file\n"
+            "  query_auto_flush   - returns 'enabled' or 'disabled'\n"
+            "  enable_auto_flush  - After each user/child command automatically flush to "
+            "                       log file, used for debug\n"
+            "  disable_auto_flush - switch OFF Automatically of flush of log after each user/child command\n"
+            "                       log changes will be buffered, and then written in one go by\n"
+            "                       operating system defined interval. This is the default\n"
+            " arg2 = [ new_path | optional last n lines ]\n"
             "         if get specified can specify lines to get. Value must be convertible to an integer\n"
             "         Otherwise if arg1 is 'new' then the second argument must be a path\n"
             "Usage:\n"
@@ -161,7 +180,10 @@ const char* LogCmd::desc() {
             "  --log=clear                      # Clear the log file. The log is now empty\n"
             "  --log=flush                      # Flush and close log file, next request will re-open log file\n"
             "  --log=new /path/to/new/log/file  # Close and flush log file, and create a new log file, updates ECF_LOG\n"
-            "  --log=new                        # Close and flush log file, and create a new log file using ECF_LOG variable"
+            "  --log=new                        # Close and flush log file, and create a new log file using ECF_LOG variable\n"
+            "  --log=enable_auto_flush          # flush child and user commands, to aid debug\n"
+            "  --log=disable_auto_flush         # switch of automatic flushing after each child/user command\n"
+            "  --log=query_auto_flush\n"
             ;
 }
 
@@ -234,7 +256,6 @@ void LogCmd::create( 	Cmd_ptr& cmd,
       cmd = Cmd_ptr( new LogCmd( LogCmd::PATH ) );
       return;
    }
-
    if (!args.empty() && args[0] == "new")   {
 
       if (args.size() > 2 ) {
@@ -247,6 +268,36 @@ void LogCmd::create( 	Cmd_ptr& cmd,
          path = args[1];
       }
       cmd = Cmd_ptr( new LogCmd( path ) );
+      return;
+   }
+   if (!args.empty() && args[0] == "enable_auto_flush")   {
+
+      if (args.size() != 1 ) {
+         std::stringstream ss;
+         ss << "LogCmd: Too many arguments. Please use " << CtsApi::enable_auto_flush() << "\n";
+         throw std::runtime_error( ss.str() );
+      }
+      cmd = Cmd_ptr( new LogCmd( LogCmd::ENABLE_AUTO_FLUSH ) );
+      return;
+   }
+   if (!args.empty() && args[0] == "disable_auto_flush")   {
+
+      if (args.size() != 1 ) {
+         std::stringstream ss;
+         ss << "LogCmd: Too many arguments. Please use " << CtsApi::disable_auto_flush() << "\n";
+         throw std::runtime_error( ss.str() );
+      }
+      cmd = Cmd_ptr( new LogCmd( LogCmd::DISABLE_AUTO_FLUSH ) );
+      return;
+   }
+   if (!args.empty() && args[0] == "query_auto_flush")   {
+
+      if (args.size() != 1 ) {
+         std::stringstream ss;
+         ss << "LogCmd: Too many arguments. Please use " << CtsApi::query_auto_flush() << "\n";
+         throw std::runtime_error( ss.str() );
+      }
+      cmd = Cmd_ptr( new LogCmd( LogCmd::QUERY_AUTO_FLUSH ) );
       return;
    }
 
