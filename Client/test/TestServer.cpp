@@ -234,9 +234,18 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
    DurationTimer duration_timer;
    ClientInvoker theClient(invokeServer.host(), invokeServer.port());
    theClient.set_throw_on_error(false);
+
+   // enable_auto_flush/disable_auto_flush was added in 4.9.0, hence disable for old server, which 
+   // automatically flush for log output anyway
+   // Remove getenv when default version is 4.9.0.
+   bool disable_test = false;
+   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) disable_test = true;
+
    for(int i = 0; i < load; i++) {
 
-      BOOST_REQUIRE_MESSAGE( theClient.disable_auto_flush() == 0,"disable_auto_flush should return 0\n" << theClient.errorMsg());
+      if (!disable_test) {
+         BOOST_REQUIRE_MESSAGE( theClient.disable_auto_flush() == 0,"disable_auto_flush should return 0\n" << theClient.errorMsg());
+      }
       BOOST_REQUIRE_MESSAGE( theClient.pingServer() == 0, " ping should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.loadDefs(path) == 0,"load defs failed \n" << theClient.errorMsg());
@@ -326,9 +335,15 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
       BOOST_REQUIRE_MESSAGE( theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg()); //60
       BOOST_REQUIRE_MESSAGE( theClient.defs().get(),"Server returned a NULL defs");
       BOOST_REQUIRE_MESSAGE( theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
-      BOOST_REQUIRE_MESSAGE( theClient.enable_auto_flush() == 0,"enable_auto_flush should return 0\n" << theClient.errorMsg());
+      if (!disable_test) {
+         BOOST_REQUIRE_MESSAGE( theClient.enable_auto_flush() == 0,"enable_auto_flush should return 0\n" << theClient.errorMsg());
+      }
    }
-   cout << " Server handled " << load * 77
+
+   int no_of_client_calls = 75;
+   if (!disable_test) no_of_client_calls = 77;
+  
+   cout << " Server handled " << load * no_of_client_calls
         << " requests in boost_timer(" << boost_timer.elapsed()
         << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
         << ")" << endl;
