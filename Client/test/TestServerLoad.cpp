@@ -45,7 +45,13 @@ BOOST_AUTO_TEST_CASE( test_server_load )
    BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
-   theClient.enable_auto_flush(); // required for testing of server load
+
+   // enable_auto_flush was added in 4.9.0, hence disable for old server, which 
+   // automatically flush for log output anyway
+   // Remove getenv when default version is 4.9.0.
+   if (!getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
+      theClient.enable_auto_flush(); // required for testing of server load
+   }
 
    // add some text in log file, need at least 4 different time-stamps for plotting
    int load = 2;
