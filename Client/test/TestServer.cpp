@@ -264,7 +264,9 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
       BOOST_REQUIRE_MESSAGE( theClient.get_log_path() == 0,"get_log_path should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.getLog(1) == 0,"get_log last line should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.flushLog() == 0,"flushLog should return 0\n" << theClient.errorMsg());
-      BOOST_REQUIRE_MESSAGE( theClient.query_auto_flush() == 0,"query_auto_flush should return 0\n" << theClient.errorMsg());
+      if (!disable_test) {
+         BOOST_REQUIRE_MESSAGE( theClient.query_auto_flush() == 0,"query_auto_flush should return 0\n" << theClient.errorMsg());
+      }
 
       BOOST_REQUIRE_MESSAGE( theClient.force("/suite1","unknown",true) == 0,"check should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.force("/suite1","complete",true) == 0,"check should return 0\n" << theClient.errorMsg());
@@ -340,7 +342,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
       }
    }
 
-   int no_of_client_calls = 75;
+   int no_of_client_calls = 74;
    if (!disable_test) no_of_client_calls = 77;
   
    cout << " Server handled " << load * no_of_client_calls
