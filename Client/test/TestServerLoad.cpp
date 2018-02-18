@@ -45,6 +45,7 @@ BOOST_AUTO_TEST_CASE( test_server_load )
    BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
+   theClient.enable_auto_flush(); // required for testing of server load
 
    // add some text in log file, need at least 4 different time-stamps for plotting
    int load = 2;

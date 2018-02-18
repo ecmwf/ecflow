@@ -210,7 +210,7 @@ bool log(Log::LogType lt,const std::string& message)
 	}
 	else {
 		if (LogToCout::ok()) {
-			Indentor::indent(cout) << message << endl;
+			Indentor::indent(cout) << message << '\n';
 		}
 	}
 	return true;
@@ -223,7 +223,7 @@ bool log_no_newline(Log::LogType lt,const std::string& message)
    }
    else {
       if (LogToCout::ok()) {
-         Indentor::indent(cout) << message << endl;
+         Indentor::indent(cout) << message << '\n';
       }
    }
 	return true;
@@ -236,7 +236,7 @@ bool log_append(const std::string& message)
    }
    else {
       if (LogToCout::ok()) {
-         Indentor::indent(cout) << message << endl;
+         Indentor::indent(cout) << message << '\n';
       }
    }
    return true;
@@ -351,9 +351,9 @@ bool LogImpl::append(const std::string& message)
 bool LogImpl::check_file_write(const std::string& message) const
 {
    bool file_is_good = file_.good();
-   if (!file_is_good) cout << "LogImpl::append: Could not write to log file! File system full/deleted ? Try ecflow_client --log=flush !" << endl;
+   if (!file_is_good) cout << "LogImpl::append: Could not write to log file! File system full/deleted ? Try ecflow_client --log=flush !" << '\n';
    if (LogToCout::ok() || !file_is_good) {
-      Indentor::indent(cout) << message << endl;
+      Indentor::indent(cout) << message << '\n';
    }
    return file_is_good;
 }
