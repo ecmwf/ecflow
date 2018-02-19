@@ -245,7 +245,8 @@ const char* ClientDoc::query_auto_flush()
             "\nUsage::\n\n"
             "   try:\n"
             "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       log_flush_status = ci.query_auto_flush()\n"
+            "       if ci.query_auto_flush():\n"
+            "           print('enabled');\n"
             "   except RuntimeError, e:\n"
             "       print(str(e))\n"
             ;

@@ -134,8 +134,8 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
          case LogCmd::ENABLE_AUTO_FLUSH:  Log::instance()->enable_auto_flush();  break;
          case LogCmd::DISABLE_AUTO_FLUSH: Log::instance()->disable_auto_flush(); break;
          case LogCmd::QUERY_AUTO_FLUSH: {
-            if (Log::instance()->is_auto_flush_enabled()) return PreAllocatedReply::string_cmd("enabled");
-            else                                          return PreAllocatedReply::string_cmd("disabled");
+            if (Log::instance()->is_auto_flush_enabled()) return PreAllocatedReply::string_cmd(Log::flush_enabled());
+            else                                          return PreAllocatedReply::string_cmd(Log::flush_disabled());
             break;
          }
 			default : throw std::runtime_error( "Unrecognised log api command,") ;

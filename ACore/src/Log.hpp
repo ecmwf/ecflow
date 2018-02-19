@@ -83,6 +83,8 @@ public:
    void enable_auto_flush();
    void disable_auto_flush();
    bool is_auto_flush_enabled() const { return enable_auto_flush_;}
+   static std::string flush_enabled()  { return std::string("enabled");}
+   static std::string flush_disabled() { return std::string("disabled");}
 
    /// clear the log file. Required for testing
    void clear();

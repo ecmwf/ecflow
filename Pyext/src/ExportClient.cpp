@@ -23,6 +23,7 @@
 #include "NState.hpp"
 #include "Version.hpp"
 #include "BoostPythonUtil.hpp"
+#include "Log.hpp"
 
 using namespace boost::python;
 using namespace std;
@@ -124,6 +125,8 @@ void replace_2(ClientInvoker* self,const std::string& absNodePath, const std::st
 
 void order(ClientInvoker* self,const std::string& absNodePath,const std::string& the_order){ self->order(absNodePath,the_order);}
 
+bool query_auto_flush(ClientInvoker* self){ self->query_auto_flush(); return (self->get_string() == ecf::Log::flush_enabled()) ? true: false; }
+
 void alters(ClientInvoker* self,
           const bp::list& list,
           const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
@@ -174,7 +177,7 @@ void export_Client()
  	.def("clear_log",        &ClientInvoker::clearLog,                     ClientDoc::clear_log())
  	.def("flush_log",        &ClientInvoker::flushLog,                     ClientDoc::flush_log())
    .def("log_msg",          &ClientInvoker::logMsg,                       ClientDoc::log_msg())
-   .def("query_auto_flush", &ClientInvoker::query_auto_flush,             ClientDoc::query_auto_flush())
+   .def("query_auto_flush", &query_auto_flush,                            ClientDoc::query_auto_flush())
    .def("enable_auto_flush",&ClientInvoker::enable_auto_flush,            ClientDoc::enable_auto_flush())
    .def("disable_auto_flush",&ClientInvoker::disable_auto_flush,          ClientDoc::disable_auto_flush())
  	.def("restart_server",   &ClientInvoker::restartServer,   ClientDoc::restart_server())
