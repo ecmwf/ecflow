@@ -13,6 +13,8 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
+#include "boost/filesystem.hpp"
+#include "boost/filesystem/operations.hpp"
 
 #include "ClientToServerCmd.hpp"
 #include "TestHelper.hpp"
@@ -20,13 +22,15 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
+#include "File.hpp"
 #include "CalendarUpdateParams.hpp"
-
+#include "Pid.hpp"
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
+namespace fs = boost::filesystem;
 
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
@@ -295,6 +299,64 @@ BOOST_AUTO_TEST_CASE( test_repeat_based_requeue_resets_relative_duration )
 
    //PrintStyle style(PrintStyle::MIGRATE);
    //cout << the_defs;
+}
+
+BOOST_AUTO_TEST_CASE( test_reque_with_repeat_and_defstatus_complete )
+{
+   cout << "Base:: ...test_reque_with_repeat_and_defstatus_complete\n";
+   // This will test that when we have a family with a repeat AND defstatus complete
+   // We ONLY log the state change complete in the log file when re-queuing
+
+   //   suite test_reque_with_repeat_and_defstatus_complete
+   //     family f1
+   //       repeat date YMD 20000101 20100101 1
+   //       task t1
+   //       task t2
+   ///      defstatus complete
+
+   defs_ptr the_defs = Defs::create();
+   suite_ptr suite = the_defs->add_suite( "test_reque_with_repeat_and_defstatus_complete" ) ;
+   family_ptr f1 = suite->add_family("f1");
+   f1->addRepeat(RepeatDate("YMD",20090531,20101231,1));
+   f1->addDefStatus(DState::COMPLETE);
+   task_ptr t1 = f1->add_task("t1");
+   task_ptr t2 = f1->add_task("t2");
+
+   //PrintStyle style(PrintStyle::STATE); cout << the_defs;
+
+   the_defs->beginAll();
+
+   // Create a log file with a unique name, to avoid problems when running in paralle
+   // This test relies on log file contents to be flushed.
+   std::string log_file = "Base/test/test_reque_with_repeat_and_defstatus_complete_";
+   log_file += Pid::getpid(); // can throw
+   log_file += ".log";
+   log_file = File::test_data(log_file,"Base");
+
+   Log::create(log_file);
+   Log::instance()->enable_auto_flush();
+
+   // Re-queue the family. In past we queued all nodes, then set to complete
+   // We still do this, but we now longer LOG the setting the the queued state
+   // Hence in the log file we only expected to see nodes in the complete state
+   // See: ECFLOW-1239. When dealing with thousands of nodes, this was causing performance problems
+   TestHelper::invokeRequest(the_defs.get(), Cmd_ptr( new RequeueNodeCmd(f1->absNodePath())));
+   TestHelper::test_state(t1,NState::COMPLETE);
+   TestHelper::test_state(t2,NState::COMPLETE );
+   TestHelper::test_state(f1,NState::COMPLETE);
+   TestHelper::test_state(suite,NState::COMPLETE);
+
+   // This should also flush the log file.
+   Log::destroy();
+
+   // Open the log file and look for 'queued:' if we find it then this is a regression.
+   std::string error_msg;
+   std::string log_contents = File::get_first_n_lines(log_file,1000, error_msg);
+   BOOST_REQUIRE_MESSAGE(error_msg.empty(), "could not open log file " << log_file);
+   BOOST_CHECK_MESSAGE(log_contents.find("complete:") != std::string::npos,"defstatus complete failed.\n'" << log_contents << "'");
+   BOOST_CHECK_MESSAGE(log_contents.find("queued:") == std::string::npos,"RequeNode with repeat and defstatus complete should only log the complete state change");
+
+   fs::remove(log_file);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
