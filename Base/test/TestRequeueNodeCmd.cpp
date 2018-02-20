@@ -334,7 +334,6 @@ BOOST_AUTO_TEST_CASE( test_reque_with_repeat_and_defstatus_complete )
    log_file = File::test_data(log_file,"Base");
 
    Log::create(log_file);
-   Log::instance()->enable_auto_flush();
 
    // Re-queue the family. In past we queued all nodes, then set to complete
    // We still do this, but we now longer LOG the setting the the queued state
