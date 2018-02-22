@@ -55,7 +55,7 @@ public:
 
    EcfFile();
 
-   /// This preserves the cache, used to avoid opening include file more than once.
+   /// This preserves the caches, used to avoid opening/stat of include file more than once.
 	EcfFile& operator=(const EcfFile& rhs);
 
 	/// use default copy constructor, assignment, destructor
@@ -132,6 +132,7 @@ private:
  	void get_used_variables(std::string& used_variables) const;
  	bool get_used_variables(NameValueMap& used_variables, std::string& errorMsg) const;
  	void doCreateUsrFile() const;
+ 	bool file_exists(const std::string& file_path) const;
 
 	Node* node_;                         // Task or Alias or Container when pre-processing the man files
 	std::string  ecfMicroCache_;         // cache value of ECF_MICRO
@@ -139,7 +140,8 @@ private:
 	mutable std::string  job_size_;      // to be placed in log file during job submission
 	EcfFile::ScriptType    script_type_; // get script from a file, or from running a command
 	std::vector<std::string> jobLines_;  // Lines that will form the job file.
-	mutable std::vector< boost::shared_ptr<IncludeFileCache> > include_file_cache_; // only open include file once
+   mutable std::vector<boost::shared_ptr<IncludeFileCache> > include_file_cache_; // only open include file once
+   mutable std::vector<std::pair<std::string,bool> > file_stat_cache_; // Minimise calls to stat/kernel calls
 };
 
 

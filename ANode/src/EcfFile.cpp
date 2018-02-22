@@ -75,6 +75,7 @@ EcfFile::EcfFile()
 
 EcfFile& EcfFile::operator=(const EcfFile& rhs)
 {
+   /// This preserves the caches, used to avoid opening/stat of include file more than once.
    // assign in order or declaration
    node_ = rhs.node_;
    ecfMicroCache_ = rhs.ecfMicroCache_;
@@ -247,32 +248,34 @@ const std::string& EcfFile::create_job( JobsParam& jobsParam)
    // NOTE: When editing pure python jobs, we may have *NO* variable specified, but only user_edit_file
    //       hence whenever we have user_edit_file, we should follow the else part below
    std::string error_msg;
-   std::vector<std::string> lines;
-   if (jobsParam.user_edit_variables().empty() && jobsParam.user_edit_file().empty()) {
-      /// The typical *NORMAL* path
-      if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines,  error_msg)) {
-         throw std::runtime_error("EcfFile::create_job: failed " + error_msg );
-      }
-   }
-   else {
-      // *USER* edit, two kinds
-      if (jobsParam.user_edit_file().empty()) {
-         // *USE* user variables, but ECF file accessible from the server
-         if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines,  jobsParam.errorMsg())) {
-            throw std::runtime_error("EcfFile::create_job: User variables, Could not open script: " + error_msg );
+   { // add scope to limit lifetime of lines variable
+      std::vector<std::string> lines;
+      if (jobsParam.user_edit_variables().empty() && jobsParam.user_edit_file().empty()) {
+         /// The typical *NORMAL* path
+         if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines,  error_msg)) {
+            throw std::runtime_error("EcfFile::create_job: failed " + error_msg );
          }
       }
       else {
-         // *USE* the user supplied ECF file *AND* user variables
-         lines = jobsParam.user_edit_file();
+         // *USER* edit, two kinds
+         if (jobsParam.user_edit_file().empty()) {
+            // *USE* user variables, but ECF file accessible from the server
+            if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines,  jobsParam.errorMsg())) {
+               throw std::runtime_error("EcfFile::create_job: User variables, Could not open script: " + error_msg );
+            }
+         }
+         else {
+            // *USE* the user supplied ECF file *AND* user variables
+            lines = jobsParam.user_edit_file();
+         }
       }
-   }
 
-   // expand all %includes this will expand %includenopp by enclosing in %nopp %end
+      // expand all %includes this will expand %includenopp by enclosing in %nopp %end
 
-   PreProcessor data(this);
-   if (!data.preProcess(lines)) {
-      throw std::runtime_error("EcfFile::create_job: pre process failed " + data.error_msg());
+      PreProcessor data(this);
+      if (!data.preProcess(lines)) {
+         throw std::runtime_error("EcfFile::create_job: pre process failed " + data.error_msg());
+      }
    }
 
 #ifdef DEBUG_PRE_PROCESS_OUTPUT
@@ -1221,7 +1224,7 @@ bool PreProcessor::preProcess(std::vector<std::string>& script_lines )
    size_t script_lines_size = script_lines.size();
    for(size_t i=0; i < script_lines_size; ++i) {
       const std::string& script_line = script_lines[i];
-      jobLines_.push_back(script_line);    // copy line
+      jobLines_.push_back(script_line);    // copy line, C++11 use std::move()
       preProcess_line(script_line);
       if (!error_msg_.empty()) return false;
    }
@@ -1412,7 +1415,7 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    size_t include_lines_size = include_lines.size();
    for(size_t i=0; i < include_lines_size; ++i) {
       const std::string& script_line = include_lines[i];
-      jobLines_.push_back(script_line);    // copy line
+      jobLines_.push_back(script_line);    // copy line,  C++11 use std::move()
       preProcess_line(script_line);
       if (!error_msg_.empty()) return;
    }
@@ -1493,14 +1496,14 @@ std::string PreProcessor::getIncludedFilePath(
                // since in test scenario ECF_INCLUDE is defined relative to $ECF_HOME
                node->variable_dollar_subsitution(ecf_include);
 
-               if (fs::exists(ecf_include)) return ecf_include;
+               if (ecfile_->file_exists(ecf_include)) return ecf_include;
             }
          }
          else {
             ecf_include += '/';
             ecf_include += the_include_file;
             node->variable_dollar_subsitution(ecf_include);
-            if (fs::exists(ecf_include)) return ecf_include;
+            if (ecfile_->file_exists(ecf_include)) return ecf_include;
          }
 
          // ECF_INCLUDE is specified *BUT* the file does *NOT* exist, Look in ECF_HOME
@@ -1579,6 +1582,26 @@ std::string PreProcessor::getIncludedFilePath(
    // File either has an absolute pathname or is in the current working dir.
    // include file name as is, from current working directory
    return includedFile;
+}
+
+bool EcfFile::file_exists(const std::string& ecf_include) const
+{
+//   return fs::exists(ecf_include);
+   size_t file_stat_cache_size = file_stat_cache_.size();
+   for(size_t i = 0 ; i < file_stat_cache_size; i++) {
+      if ( file_stat_cache_[i].first == ecf_include) {
+         //cout << "EcfFile::file_exists " << ecf_include << " found in cache " << file_stat_cache_[i].second << "\n";
+         return file_stat_cache_[i].second;
+      }
+   }
+   if (fs::exists(ecf_include)) {
+      //cout << "EcfFile::file_exists " << ecf_include << " exists add to cache\n";
+      file_stat_cache_.push_back(std::make_pair(ecf_include,true));
+      return true;
+   }
+   //cout << "EcfFile::file_exists " << ecf_include << " does NOT exist add to cache\n";
+   file_stat_cache_.push_back(std::make_pair(ecf_include,false));
+   return false;
 }
 
 // **********************************************************************************

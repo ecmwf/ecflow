@@ -155,8 +155,6 @@ bool Node::user_variable_exists(const std::string& name) const
 
 const Variable& Node::findVariable(const std::string& name) const
 {
-   if (varVec_.empty())  return Variable::EMPTY();
-
    size_t theSize = varVec_.size();
    for(size_t i = 0; i < theSize; i++) {
       if (varVec_[i].name() == name) {
