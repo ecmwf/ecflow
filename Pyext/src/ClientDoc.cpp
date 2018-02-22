@@ -214,6 +214,44 @@ const char* ClientDoc::log_msg()
             ;
 }
 
+const char* ClientDoc::enable_auto_flush()
+{
+   return
+            "Enable automatic flush of log file for each user and child commands and state change.\n\n"
+            "\nUsage::\n\n"
+            "   try:\n"
+            "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "       ci.enable_auto_flush()\n"
+            "   except RuntimeError, e:\n"
+            "       print(str(e))\n"
+            ;
+}
+const char* ClientDoc::disable_auto_flush()
+{
+   return
+            "Disable automatic flush of log file for each user and child commands and state change.\n\n"
+            "\nUsage::\n\n"
+            "   try:\n"
+            "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "       ci.disable_auto_flush()\n"
+            "   except RuntimeError, e:\n"
+            "       print(str(e))\n"
+            ;
+}
+const char* ClientDoc::query_auto_flush()
+{
+   return
+            "Query if the log file flush is enabled or disabled.\n\n"
+            "\nUsage::\n\n"
+            "   try:\n"
+            "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
+            "       if ci.query_auto_flush():\n"
+            "           print('enabled');\n"
+            "   except RuntimeError, e:\n"
+            "       print(str(e))\n"
+            ;
+}
+
 const char* ClientDoc::restart_server()   {
    return
             "Restart the `ecflow_server`_\n\n"
