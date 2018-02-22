@@ -15,6 +15,7 @@
                 "prefix" : "server.update",
                 
                 "line" : "autoUpdate",
+                "line" : "adaptiveUpdateMode",
                 "line" : "updateRateInSec",
                 "line" : "adaptiveUpdate",
                 "note" : {
