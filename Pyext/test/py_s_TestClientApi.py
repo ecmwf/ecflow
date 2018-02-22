@@ -166,8 +166,15 @@ def test_client_log_msg(ci, port):
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert log_text.find("Humpty dumpty sat on a wall!") != -1, "Expected to find Humpty dumpty in the log file"                
-        
-         
+
+def test_client_log_auto_flush(ci, port):
+    print("test_client_log_auto_flush")
+    assert not ci.query_auto_flush() , "By default auto flush should be disabled"
+    ci.enable_auto_flush()
+    assert ci.query_auto_flush(), "Enable auto flush not working"
+    ci.disable_auto_flush()
+    assert not ci.query_auto_flush(), "disabling auto flush not working"
+
 def test_client_restart_server(ci):
     print("test_client_restart_server")
     ci.restart_server()
@@ -1782,6 +1789,7 @@ if __name__ == "__main__":
         test_client_new_log(ci, the_port)             
         test_client_clear_log(ci, the_port)             
         test_client_log_msg(ci, the_port)             
+        test_client_log_auto_flush(ci, the_port)             
            
         test_client_restart_server(ci)             
         test_client_halt_server(ci)             

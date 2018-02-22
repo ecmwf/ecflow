@@ -29,7 +29,8 @@ public:
 	std::string windowFile() const;
 	std::string settingsFile() const ;
 	std::string recentCustomCommandsFile() const ;
-	std::string savedCustomCommandsFile() const ;
+    std::string savedCustomCommandsFile() const ;
+    std::string textFilterFile() const ;
 	std::string serverFile(const std::string& serverName) const;
     std::string infoPanelDialogFile() const;
 	std::string qtDir() const;

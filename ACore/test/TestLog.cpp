@@ -64,7 +64,17 @@ BOOST_AUTO_TEST_CASE( test_log )
 
  	Log::instance()->log(Log::OTH,"OTHER2");
 
+ 	// test default is with flushing disabled
+   BOOST_CHECK_MESSAGE(!Log::instance()->is_auto_flush_enabled()," By default automatic flushing should be disabled");
+   Log::instance()->enable_auto_flush();
+   BOOST_CHECK_MESSAGE(Log::instance()->is_auto_flush_enabled(),"expected flushing(of user and child commands) to be enabled");
+   Log::instance()->disable_auto_flush();
+   BOOST_CHECK_MESSAGE(!Log::instance()->is_auto_flush_enabled(),"expected flushing(of user and child commands) to be disabled");
+
 	BOOST_CHECK_MESSAGE(fs::exists( path ), "log file " << path << " not created \n");
+
+   // These following tests rely log being flushed
+   Log::instance()->enable_auto_flush();
 }
 
 BOOST_AUTO_TEST_CASE( test_log_append )

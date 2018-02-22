@@ -195,6 +195,11 @@ VNode* VTree::vnodeAt(int index) const
 
 VTreeNode* VTree::find(const VNode* vn) const
 {
+    //This can happen when the tree is empty
+    if(totalNum_ == 0)
+        return 0;
+
+    //Otherwise we must find the node!!!
     UI_ASSERT(vn->index()  < static_cast<int>(nodeVec_.size()),"vn index=" << vn->index() << " size=" << nodeVec_.size());
     return nodeVec_[vn->index()];
 }

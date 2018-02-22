@@ -11,6 +11,7 @@
 #ifndef VIEWERUTIL_HPP
 #define VIEWERUTIL_HPP
 
+#include <QBrush>
 #include <QPixmap>
 #include <QSettings>
 #include <QString>
@@ -32,6 +33,9 @@ public:
    static void initStacked(QSettings& settings,QString key,QStackedWidget *stacked);
    static void initButtonGroup(QSettings& settings,QString key,QButtonGroup *bg);
    static void initCheckableAction(QSettings& settings,QString key,QAction *ac);
+   static QBrush lineEditGreenBg();
+   static QBrush lineEditRedBg();
+   static QBrush lineEditBg(QColor col);
 };
 
 #endif // VIEWERUTIL_HPP

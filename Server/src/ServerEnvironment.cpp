@@ -188,6 +188,7 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
       log_file_name =  host_name_.prefix_host_and_port(port,log_file_name);
 
    // Create the Log file. The log file is obtained from the environment. Hence **must** be done last.
+   // From ecflow version 4.9.0 we no longer flush for each command. This can enabled/disabled
    Log::create(log_file_name);
 
 

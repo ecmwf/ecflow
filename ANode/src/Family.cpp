@@ -89,9 +89,9 @@ bool Family::resolveDependencies(JobsParam& jobsParam)
    return NodeContainer::resolveDependencies(jobsParam);
 }
 
-void Family::requeue(bool resetRepeats, int clear_suspended_in_child_nodes, bool reset_next_time_slot,bool reset_relative_duration)
+void Family::requeue(Requeue_args& args)
 {
-   NodeContainer::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot,reset_relative_duration);
+   NodeContainer::requeue(args);
    update_generated_variables();
 }
 

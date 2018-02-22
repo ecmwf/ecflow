@@ -146,13 +146,13 @@ void Submittable::begin()
 #endif
 }
 
-void Submittable::requeue(bool resetRepeats, int clear_suspended_in_child_nodes, bool reset_next_time_slot,bool reset_relative_duration)
+void Submittable::requeue(Requeue_args& args)
 {
    /// It is *very* important that we reset the passwords. This allows us to detect zombies.
    tryNo_ = 0;    // reset try number
    clear();       // jobs password, process_id, aborted_reason
 
-   Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot,reset_relative_duration);
+   Node::requeue(args);
    update_generated_variables();
 
 #ifdef DEBUG_STATE_CHANGE_NO

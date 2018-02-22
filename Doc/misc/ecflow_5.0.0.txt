@@ -44,7 +44,7 @@ o Replace boost serialsiation used client/server communication with json.
 Challenges
 =====================================================================
 o In ecflow 4.70 the checkpoint is now saved, in the defs format.
-  hence migrating to the new server should be trevial.
+  hence migrating to the new server should be trivial.
   
 o However the client/server protocol has changed, 
   and hence we can *NOT* use 4.x.x ecflow_ui, to 
@@ -52,4 +52,5 @@ o However the client/server protocol has changed,
   By replacing boost with json, it should allow greater 
   compatibility in the future.
   
+  https://snowplowanalytics.com/blog/2014/05/15/introducing-self-describing-jsons/
   

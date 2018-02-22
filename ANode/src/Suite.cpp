@@ -140,11 +140,7 @@ void Suite::begin()
    }
 }
 
-void Suite::requeue(
-         bool resetRepeats,
-         int clear_suspended_in_child_nodes,
-         bool reset_next_time_slot,
-         bool reset_relative_duration)
+void Suite::requeue(Requeue_args& args)
 {
    if (false == begun_) {
       std::stringstream ss; ss << "Suite::requeue: The suite " << name() << " must be 'begun' first\n";
@@ -162,10 +158,7 @@ void Suite::requeue(
 
    requeue_calendar();
 
-   NodeContainer::requeue(resetRepeats,
-                          clear_suspended_in_child_nodes,
-                          reset_next_time_slot,
-                          reset_relative_duration);
+   NodeContainer::requeue(args);
 
    update_generated_variables();
 }

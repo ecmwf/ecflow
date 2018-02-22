@@ -125,28 +125,35 @@ void NodeContainer::reset()
    for(size_t t = 0; t < node_vec_size; t++)   { nodeVec_[t]->reset(); }
 }
 
-void NodeContainer::requeue(
-      bool resetRepeats,
-      int clear_suspended_in_child_nodes,
-      bool reset_next_time_slot,
-      bool reset_relative_duration
-)
+void NodeContainer::requeue(Requeue_args& args)
 {
 //	LOG(Log::DBG,"   " << debugType() << "::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
 
    restore_on_begin_or_requeue();
-   Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot,reset_relative_duration);
+   Node::requeue(args);
 
 	// For negative numbers, do nothing, i.e do not clear
-	if (clear_suspended_in_child_nodes >=0) clear_suspended_in_child_nodes++;
+	if (args.clear_suspended_in_child_nodes_ >= 0) args.clear_suspended_in_child_nodes_++;
+
+	// If the defstatus is complete, don't bother logging the state change in the re-queue
+	// When we have several thousands children (as in operations), we will end up
+	// changing state to queue, then again changing it back to complete.
+	// To avoid this problem we don't bother logging state change for re-queue
+	// See: ECFLOW-1239
+	if (defStatus_ == DState::COMPLETE )
+	   args.log_state_changes_ = false;
+
+   Node::Requeue_args largs(true /* reset repeats, Moot for tasks */,
+                           args.clear_suspended_in_child_nodes_,
+                           args.reset_next_time_slot_,
+                           true /* reset relative duration */,
+                           args.log_state_changes_);
 
  	size_t node_vec_size = nodeVec_.size();
  	for(size_t t = 0; t < node_vec_size; t++) {
- 	   nodeVec_[t]->requeue(true /*reset child repeats. Moot for tasks*/,
- 	                        clear_suspended_in_child_nodes,
- 	                        reset_next_time_slot,
- 	                        true /* reset relative duration */);
+ 	   nodeVec_[t]->requeue(largs);
  	}
+
    handle_defstatus_propagation();
 }
 

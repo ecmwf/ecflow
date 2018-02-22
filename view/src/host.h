@@ -99,11 +99,13 @@ public:
 
 
 class host : public extent<host>
-, public timeout
+  , public timeout
   , public searchable
   , public configurable
   , public observable 
 {
+  using extent<host>::next;
+  using extent<host>::first;
  public:
 	static void status(Boolean);
 	static void login(const std::string&,int);

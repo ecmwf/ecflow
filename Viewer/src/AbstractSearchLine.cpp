@@ -13,6 +13,7 @@
 #include <QShowEvent>
 #include "AbstractSearchLine.hpp"
 #include "IconProvider.hpp"
+#include "ViewerUtil.hpp"
 
 AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
   QWidget(parent),
@@ -50,9 +51,20 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
 	nextTb_->setDefaultAction(actionNext_);
 	prevTb_->setDefaultAction(actionPrev_);
 
-	oriColour_=QColor(searchLine_->palette().color(QPalette::Base));
+    oriBrush_=QBrush(searchLine_->palette().brush(QPalette::Base));
+    redBrush_=ViewerUtil::lineEditRedBg();
+    greenBrush_=ViewerUtil::lineEditGreenBg();
+
+#if 0
+    oriColour_=QColor(searchLine_->palette().color(QPalette::Base));
 	redColour_=QColor(247,230,230);
 	greenColour_=QColor(186,249,206);
+#endif
+
+    QIcon icon;
+    icon.addPixmap(QPixmap(":/viewer/close_grey.svg"),QIcon::Normal);
+    icon.addPixmap(QPixmap(":/viewer/close_red.svg"),QIcon::Active);
+    closeTb_->setIcon(icon);
 
 	// for the 'find next' functionality, although Qt (at the time of writing) uses
 	// both F3 and CTRL-G for most platforms, this is not true for Linux. Therefore,
@@ -105,7 +117,7 @@ void AbstractSearchLine::selectAll()
 void AbstractSearchLine::toDefaultState()
 {
 	QPalette p=searchLine_->palette();
-	p.setColor(QPalette::Base,oriColour_);
+    p.setBrush(QPalette::Base,oriBrush_);
 	searchLine_->setPalette(p);
 }
 
@@ -116,7 +128,7 @@ void AbstractSearchLine::updateButtons(bool found)
 	if(searchLine_->text().isEmpty())
 	{
 	  	QPalette p=searchLine_->palette();
-		p.setColor(QPalette::Base,oriColour_);
+        p.setBrush(QPalette::Base,oriBrush_);
 		searchLine_->setPalette(p);
 	}
 	else
@@ -124,13 +136,13 @@ void AbstractSearchLine::updateButtons(bool found)
 		if(!found)
 		{
 			QPalette p=searchLine_->palette();
-			p.setColor(QPalette::Base,redColour_);
+            p.setBrush(QPalette::Base,redBrush_);
 			searchLine_->setPalette(p);
 		}
 		else
 		{
 			QPalette p=searchLine_->palette();
-			p.setColor(QPalette::Base,greenColour_);
+            p.setBrush(QPalette::Base,greenBrush_);
 			searchLine_->setPalette(p);
 		}
 	}

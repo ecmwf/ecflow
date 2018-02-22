@@ -58,7 +58,7 @@ public:
  	void sync();
 
    void init_calendar(ecf::Calendar&);
-   void begin_calendar(ecf::Calendar&);
+   void begin_calendar(ecf::Calendar&) const;
 
 	// The state_change_no is never reset. Must be incremented if it can affect equality
  	unsigned int state_change_no() const { return state_change_no_; }

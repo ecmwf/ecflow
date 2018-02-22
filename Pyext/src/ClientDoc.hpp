@@ -33,7 +33,10 @@ public:
 	static const char* new_log();
 	static const char* clear_log();
 	static const char* flush_log();
-	static const char* log_msg();
+   static const char* log_msg();
+   static const char* enable_auto_flush();
+   static const char* disable_auto_flush();
+   static const char* query_auto_flush();
 	static const char* restart_server();
 	static const char* halt_server();
 	static const char* shutdown_server();

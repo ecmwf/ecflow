@@ -17,22 +17,6 @@ o test job processing
   Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
   
 
-Log file<TODO>
-================================================================
-The log file, is automatically flushed for every write.
-We could consider only flushing:
-    o At the end of each command
-    o NodeTreeObserver, CheckPt saver
-This should cover all the cases.
-Could also just flush on Log::ERR ?
-
-To see the affect of buffering before/after run:
-
-    strace -c Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
-    
-This will show the cost of the writes, and how much time is spent.
-
-
 Trigger Parsing <TODO>
 =================================================================
 Currently use spirit classic for parsing trigger expressions:
@@ -57,11 +41,6 @@ DISK IO
 =====================================================================
    o/ print code: and minimise use of <<.
       In most cases this is used only due formatting of integers.
-   o/ Each request, involve disk IO, ie writing to log file.
-      ? Could buffer MSG, but warnings & errors, no buffering ?
-      Could add another log category, hidden, so that commands
-      are not buffered, only the affect, i.e. the state change
-      messages are buffered.
 
 Need a test case before starting.
    Test case will average of 10 check pts.

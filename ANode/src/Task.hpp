@@ -79,10 +79,7 @@ public:
 	/// there are multiple runs.  re-queue/begin() resets the try Number
    virtual void reset();
    virtual void begin();
-	virtual void requeue( bool resetRepeats,
-	                      int clear_suspended_in_child_nodes,
-	                      bool reset_next_time_slot,
-	                      bool reset_relative_duration);
+	virtual void requeue(Requeue_args&);
 
    virtual Suite* suite() const { return parent()->suite(); }
    virtual Defs* defs() const { return (parent()) ? parent()->defs() : NULL;} // exposed to python hence check for NULL first

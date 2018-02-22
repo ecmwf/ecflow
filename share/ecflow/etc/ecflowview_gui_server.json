@@ -14,12 +14,13 @@
                 "title" : "Refresh",
                 "prefix" : "server.update",
                 
-                "line" : "autoUpdate",
+                "line" : "autoUpdate",              
                 "line" : "updateRateInSec",
                 "line" : "adaptiveUpdate",
                 "note" : {
                     "default": "When enabled the server refresh period is <u>increased at every automatic refresh</u> until the maximum period is reached. If the user in the meantime refreshes the server manually the refresh period is set back to its original value and whole process starts again."
                 },
+                "line" : "adaptiveUpdateMode",
                 "line" : "adaptiveUpdateIncrementInSec",
                 "line" : "maxAdaptiveUpdateRateInMin"
             },

@@ -10,7 +10,13 @@
 
 #include "OutputBrowser.hpp"
 
+#include <QtGlobal>
+#include <QProcess>
 #include <QVBoxLayout>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#endif
 
 #include "Highlighter.hpp"
 #include "MessageLabel.hpp"
@@ -20,8 +26,9 @@
 #include "TextPager/TextPagerSearchInterface.hpp"
 #include "TextPagerWidget.hpp"
 #include "DirectoryHandler.hpp"
+#include "TextFilterWidget.hpp"
 #include "UserMessage.hpp"
-
+#include "UiLog.hpp"
 
 int OutputBrowser::minPagerTextSize_=1*1024*1024;
 int OutputBrowser::minPagerSparseSize_=30*1024*1024;
@@ -29,11 +36,24 @@ int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) :
     QWidget(parent),
-    lastPos_(0)
+    filterTb_(0)
 {
     QVBoxLayout *vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
     vb->setSpacing(2);
+
+    //Text filter editor
+    textFilter_=new TextFilterWidget(this);
+    vb->addWidget(textFilter_);
+
+    connect(textFilter_,SIGNAL(runRequested(QString,bool,bool)),
+            this,SLOT(slotRunFilter(QString,bool,bool)));
+
+    connect(textFilter_,SIGNAL(clearRequested()),
+            this,SLOT(slotRemoveFilter()));
+
+    connect(textFilter_,SIGNAL(closeRequested()),
+            this,SLOT(slotRemoveFilter()));
 
     stacked_=new QStackedWidget(this);
     vb->addWidget(stacked_,1);
@@ -76,6 +96,8 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
 
     connect(searchLine_,SIGNAL(visibilityChanged()),
           this,SLOT(showConfirmSearchLabel()));
+
+    textFilter_->hide();
 }
 
 OutputBrowser::~OutputBrowser()
@@ -85,22 +107,21 @@ OutputBrowser::~OutputBrowser()
 
     if(jobHighlighter_ && !jobHighlighter_->parent())
     {
-            delete jobHighlighter_;
+        delete jobHighlighter_;
     }
+}
+
+void OutputBrowser::setFilterButtons(QToolButton* statusTb,QToolButton* optionTb)
+{
+    textFilter_->setExternalButtons(statusTb,optionTb);
 }
 
 void OutputBrowser::clear()
 {
-    if(stacked_->currentIndex() == BasicIndex)
-        cursorCache_[currentSourceFile_].pos_=textEdit_->textCursor().position();
-    else
-        cursorCache_[currentSourceFile_].pos_=textPager_->textEditor()->textCursor().position();
-
-    currentSourceFile_.clear();
-
     textEdit_->clear();
 	textPager_->clear();
     file_.reset();
+    oriFile_.reset();
 }
 
 void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
@@ -128,6 +149,7 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
     showConfirmSearchLabel();
 }
 
+//This should only be called externally when a new output is loaded
 void OutputBrowser::loadFile(VFile_ptr file)
 {
     if(!file)
@@ -140,15 +162,32 @@ void OutputBrowser::loadFile(VFile_ptr file)
     if(file_->storageMode() == VFile::DiskStorage)
     {
         loadFile(QString::fromStdString(file_->path()));
-
-        //Set the cursor position from the cache
-        updateCursorFromCache(file_->sourcePath());
     }
     else
     {
         QString s(file_->data());
         loadText(s,QString::fromStdString(file_->sourcePath()),true);
     }
+
+    //Run the filter if defined
+    if(textFilter_->isActive())
+    {
+        slotRunFilter(textFilter_->filterText(),textFilter_->isMatched(),
+                      textFilter_->isCaseSensitive());
+    }
+}
+
+void OutputBrowser::loadFilteredFile(VFile_ptr file)
+{
+    if(!file)
+    {
+        clear();
+        return;
+    }
+
+    file_=file;
+    Q_ASSERT(file_->storageMode() == VFile::DiskStorage);
+    loadFile(QString::fromStdString(file_->path()));
 }
 
 void OutputBrowser::loadFile(QString fileName)
@@ -200,7 +239,7 @@ void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
     }
 
     //Set the cursor position from the cache
-    updateCursorFromCache(fileName.toStdString());
+    //updateCursorFromCache(fileName.toStdString());
 }
 
 void OutputBrowser::saveCurrentFile(QString &fileNameToSaveTo)
@@ -238,20 +277,6 @@ void OutputBrowser::saveCurrentFile(QString &fileNameToSaveTo)
 bool OutputBrowser::isFileLoaded()
 {
     return (file_ != 0);
-}
-
-
-void OutputBrowser::updateCursorFromCache(const std::string& sourcePath)
-{
-#if 0
-    //Set the cursor position from the cache
-    QMap<std::string,CursorCacheItem>::const_iterator it=cursorCache_.find(sourcePath);
-    if(it != cursorCache_.end())
-    {
-        setCursorPos(it.value().pos_);
-    }
-    currentSourceFile_=file_->sourcePath();
-#endif
 }
 
 bool OutputBrowser::isJobFile(QString fileName)
@@ -297,6 +322,12 @@ void OutputBrowser::showSearchLine()
 void OutputBrowser::searchOnReload(bool userClickedReload)
 {
 	searchLine_->searchOnReload(userClickedReload);
+}
+
+void OutputBrowser::showFilterLine()
+{
+    textFilter_->setVisible(true);
+    textFilter_->setEditFocus();
 }
 
 void OutputBrowser::setFontProperty(VProperty* p)
@@ -346,5 +377,118 @@ void OutputBrowser::setCursorPos(qint64 pos)
     else
     {
         textPager_->textEditor()->setCursorPosition(pos);
+    }
+}
+
+void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive)
+{
+    assert(file_);
+
+    if(oriFile_)
+        file_=oriFile_;
+
+    VFile_ptr fTarget=VFile::createTmpFile(true);
+    VFile_ptr fSrc=VFile_ptr();
+
+    // file is on disk - we use it as it is
+    if(file_->storageMode() == VFile::DiskStorage)
+    {
+        fSrc=file_;
+    }
+    // file in memory - just dump it to the tmp file
+    else
+    {
+        fSrc=VFile::createTmpFile(true);
+        QFile file(QString::fromStdString(fSrc->path()));
+        if(file.open(QFile::WriteOnly | QFile::Text))
+        {
+            QTextStream out(&file);
+            QString s(file_->data());
+            out << s;
+        }
+        else
+        {
+        }
+    }
+
+    //At this point point fSrc must contain the text to filter
+    QProcess proc;
+    proc.setStandardOutputFile(QString::fromStdString(fTarget->path()));
+
+    //Run grep to filter fSrc into fTarget
+    QString extraOptions;
+    if(!matched)
+        extraOptions+=" -v ";
+    if(!caseSensitive)
+        extraOptions+=" -i ";
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+
+    proc.start("/bin/sh",
+         QStringList() <<  "-c" << "grep " + extraOptions + " -e \'" + filter  + "\' " +
+         QString::fromStdString(fSrc->path()));
+
+    UiLog().dbg() << "args=" << proc.arguments().join(" ");
+
+    if(!proc.waitForStarted(1000))
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
+        QString errStr;
+        UI_FUNCTION_LOG
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        errStr="Failed to start text filter using command:<br> \'" +
+                             proc.program() + " " + proc.arguments().join(" ") + "\'";
+#else
+        errStr="Failed to start grep command!";
+#endif
+        UserMessage::message(UserMessage::ERROR,true,errStr.toStdString());
+        fTarget.reset();
+        return;
+    }
+
+    proc.waitForFinished(60000);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::restoreOverrideCursor();
+#endif
+
+    QString errStr=proc.readAllStandardError();
+    if(proc.exitStatus() == QProcess::NormalExit && errStr.isEmpty())
+    {
+        oriFile_=file_;
+        textFilter_->setStatus(fTarget->isEmpty()?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));        
+        loadFilteredFile(fTarget);
+    }
+    else
+    {        
+        QString msg;
+        UI_FUNCTION_LOG
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        msg="Failed to filter output file using command:<br> \'" +
+                             proc.program() + " " + proc.arguments().join(" ") + "\'";
+#else
+        msg="Failed to run grep command!";
+#endif
+        if(!errStr.isEmpty())
+            msg+="<br>Error message: " + errStr;
+
+        UserMessage::message(UserMessage::ERROR,true,msg.toStdString());
+        textFilter_->setStatus(TextFilterWidget::NotFoundStatus);
+        fTarget.reset(); //delete
+    }
+
+    return;
+}
+
+void OutputBrowser::slotRemoveFilter()
+{
+    if(oriFile_)
+    {
+        loadFile(oriFile_);
+        oriFile_.reset();
     }
 }
