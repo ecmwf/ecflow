@@ -94,15 +94,16 @@ int main(int argc, char* argv[])
    std::vector<Task*> tasks;
    defs.getAllTasks(tasks);
 
-#ifdef DEBUG
-   cout << "Total number of tasks" << tasks.size() << "\n";
-   cout << "begin-all\n";
-#endif
+//#ifdef DEBUG
+//   cout << "Total number of tasks: " << tasks.size() << "\n";
+//   cout << "begin-all\n";
+//#endif
+
    defs.beginAll();
 
-#ifdef DEBUG
-   cout << "Free all dependencies, free suspended time and trigger dependencies\n";
-#endif
+//#ifdef DEBUG
+//   cout << "Free all dependencies, free suspended time and trigger dependencies\n";
+//#endif
 
    std::vector<node_ptr> all_nodes;
    defs.get_all_nodes(all_nodes);
