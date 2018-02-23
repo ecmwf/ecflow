@@ -1620,7 +1620,7 @@ bool IncludeFileCache::lines(std::vector<std::string>& lns) {
 
    // Note if we use: while( getline( theEcfFile, line)), then we will miss the *last* *empty* line
    string line;
-   while ( std::getline(fp_,line) ) { lns.push_back(line); }
+   while ( std::getline(fp_,line) ) { lns.push_back(line); }  // c++11
    fp_.clear();               // eol fp_ will be in bad state reset. So we can re-use
    no_of_lines_ = lns.size(); // cache for next time
 

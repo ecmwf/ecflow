@@ -1078,6 +1078,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
    bool double_micro_found = false;
    std::string::size_type pos = 0;
    int count = 0;
+   Alias* is_a_alias = isAlias();
    while ( 1 ) {
       // A while loop here is used to:
       //		a/ Allow for multiple substitution on a single line. i.e %ECF_FILES% -I %ECF_INCLUDE%"
@@ -1131,56 +1132,60 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
       else if (generated_variable && find_parent_gen_variable_value(percentVar,varValue)) {
-
-         cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
-      }
-      else if (findParentVariableValue( percentVar ,varValue)) {
-         // For alias we could have added variables with %A:0%, %A:1%. Aliases allow variables with ':' in the name
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
       else {
-
          size_t firstColon = percentVar.find( ':' );
          if (firstColon != string::npos) {
 
-            string var(percentVar.begin(), percentVar.begin() + firstColon);
-#ifdef DEBUG_S
-            cout << "   var " << var << "\n";
-#endif
-
-            if (!user_edit_variables.empty() && search_user_edit_variables(var,varValue,user_edit_variables)) {
-#ifdef DEBUG_S
-               cout << "   user var value = " << varValue << "\n";
-#endif
-               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
-            }
-            else if (generated_variable && find_parent_gen_variable_value(var,varValue)) {
-#ifdef DEBUG_S
-               cout << "   generated var value = " << varValue << "\n";
-#endif
-                cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
-            }
-            else if (findParentVariableValue( var, varValue ))  {
-               // Note: variable can exist, but have an empty value
-#ifdef DEBUG_S
-               cout << "   var value = " << varValue << "\n";
-#endif
-               // replace the "%VAR:fred --f%" with var
-               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
+            if (is_a_alias && findParentVariableValue( percentVar ,varValue)) {
+               // For alias we could have added variables with %A:0%, %A:1%. Aliases allow variables with ':' in the name
+               cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
             }
             else {
-               string substitute (percentVar.begin()+ firstColon+1, percentVar.end());
+               // ':' is not a valid in variables, hence split, and search, if search fails use replacement
+               string var(percentVar.begin(), percentVar.begin() + firstColon);
 #ifdef DEBUG_S
-               cout << "  substitute value = " << substitute << "\n";
+               cout << "   var " << var << "\n";
 #endif
-               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,substitute);
+               if (!user_edit_variables.empty() && search_user_edit_variables(var,varValue,user_edit_variables)) {
+#ifdef DEBUG_S
+                  cout << "   user var value = " << varValue << "\n";
+#endif
+                  cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
+               }
+               else if (generated_variable && find_parent_gen_variable_value(var,varValue)) {
+#ifdef DEBUG_S
+                  cout << "   generated var value = " << varValue << "\n";
+#endif
+                  cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
+               }
+               else if (findParentVariableValue( var, varValue ))  {
+                  // Note: variable can exist, but have an empty value
+#ifdef DEBUG_S
+                  cout << "   var value = " << varValue << "\n";
+#endif
+                  // replace the "%VAR:fred --f%" with var
+                  cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
+               }
+               else {
+                  string substitute (percentVar.begin()+ firstColon+1, percentVar.end());
+#ifdef DEBUG_S
+                  cout << "  substitute value = " << substitute << "\n";
+#endif
+                  cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,substitute);
+               }
+#ifdef DEBUG_S
+               cout << "   cmd = " << cmd << "\n";
+#endif
             }
-#ifdef DEBUG_S
-            cout << "   cmd = " << cmd << "\n";
-#endif
+         }
+         else if (findParentVariableValue( percentVar ,varValue)) {
+            // No ':' search user variables, repeat, and then generated variables.
+            cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
          }
          else {
-            // No Colon, Can't find in user variables, or node variable, hence can't go any further
+            // Can't find in user variables, or node variable, hence can't go any further
             return false;
          }
       }
