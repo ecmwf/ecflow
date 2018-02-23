@@ -872,7 +872,7 @@ const char* DefsDoc::check_job_creation_doc()
             "   # throw on error and Output the tasks as they are being checked\n"
             "   defs.check_job_creation(throw_on_error=TrueTrue,verbose=True)\n\n"
             "   job_ctrl = JobCreationCtrl()\n"
-            "   defs.set_verbose(True)                    # Output the tasks as they are being checked\n"
+            "   job_ctrl.set_verbose(True)                # Output the tasks as they are being checked\n"
             "   defs.check_job_creation(job_ctrl)         # Check job generation for all tasks, same as above\n"
             "   print(job_ctrl.get_error_msg())\n"
             "   ...\n"
