@@ -161,7 +161,7 @@ private:
    //       only include directives in %nopp/%end are ignored
    void preProcess_line(const std::string& script_line );
    void preProcess_includes(const std::string& script_line);
-   std::string getIncludedFilePath( const std::string& include, const std::string& line, std::string& errormsg);
+   std::string getIncludedFilePath( const std::string& include, const std::string& line);
 
 private:
    EcfFile* ecfile_;

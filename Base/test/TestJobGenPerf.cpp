@@ -52,31 +52,34 @@ namespace fs = boost::filesystem;
 //
 // After ECFLOW-1244:
 //  - cacheing of stat of include files
-//  - re-arranging EcfFile data member for hotness:
+//  - re-arranging EcfFile data member for hotness
+//  - re-arrange search for generation variables, most common first
+//  - replace ecffile_->countEcfMicro _. EcfFile::countEcfMicro(..) remove reference since function is static
 //
 //time Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def : submitted 5808 out of 7941( fastest of 10 attempts)
-// - ECFLOW-1244: real: 2.86s user: 2.42s sys: 0.42s
+// - ECFLOW-1244: real: 2.84s user: 2.41s sys: 0.40s
 //
 //perf stat -r 10 -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
-//Performance counter stats for 'Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
+// Performance counter stats for 'Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
 //
-//      2894.687079      task-clock (msec)         #    0.926 CPUs utilized            ( +-  0.84% )
-//               93      context-switches          #    0.032 K/sec                    ( +- 18.48% )
-//                2      cpu-migrations            #    0.001 K/sec                    ( +- 30.23% )
-//           11,493      page-faults               #    0.004 M/sec                    ( +-  0.02% )
-//   10,888,902,061      cycles                    #    3.762 GHz                      ( +-  0.37% )  (37.49%)
-//    4,739,862,119      stalled-cycles-frontend   #   43.53% frontend cycles idle     ( +-  0.89% )  (50.03%)
-//  <not supported>      stalled-cycles-backend
-//   13,925,593,267      instructions              #    1.28  insns per cycle
-//                                                 #    0.34  stalled cycles per insn  ( +-  0.05% )  (62.57%)
-//    3,802,491,790      branches                  # 1313.611 M/sec                    ( +-  0.04% )  (62.59%)
-//      108,612,244      branch-misses             #    2.86% of all branches          ( +-  0.21% )  (62.62%)
-//    3,430,787,436      L1-dcache-loads           # 1185.201 M/sec                    ( +-  0.07% )  (49.52%)
-//      260,132,335      L1-dcache-load-misses     #    7.58% of all L1-dcache hits    ( +-  0.11% )  (24.98%)
-//      101,447,778      LLC-loads                 #   35.046 M/sec                    ( +-  0.26% )  (24.98%)
-//  <not supported>      LLC-load-misses
+//       2908.895909      task-clock (msec)         #    0.933 CPUs utilized            ( +-  1.02% )
+//                89      context-switches          #    0.031 K/sec                    ( +-  7.13% )
+//                 2      cpu-migrations            #    0.001 K/sec                    ( +- 25.00% )
+//            11,500      page-faults               #    0.004 M/sec                    ( +-  0.03% )
+//    10,900,694,824      cycles                    #    3.747 GHz                      ( +-  0.93% )  (37.44%)
+//     4,810,738,973      stalled-cycles-frontend   #   44.13% frontend cycles idle     ( +-  2.34% )  (49.98%)
+//   <not supported>      stalled-cycles-backend
+//    13,845,775,843      instructions              #    1.27  insns per cycle
+//                                                  #    0.35  stalled cycles per insn  ( +-  0.03% )  (62.51%)
+//     3,777,695,721      branches                  # 1298.670 M/sec                    ( +-  0.05% )  (62.56%)
+//       107,367,375      branch-misses             #    2.84% of all branches          ( +-  0.15% )  (62.70%)
+//     3,410,593,440      L1-dcache-loads           # 1172.470 M/sec                    ( +-  0.09% )  (49.60%)
+//       260,536,494      L1-dcache-load-misses     #    7.64% of all L1-dcache hits    ( +-  0.13% )  (24.94%)
+//       101,191,979      LLC-loads                 #   34.787 M/sec                    ( +-  0.20% )  (24.90%)
+//   <not supported>      LLC-load-misses
 //
-//      3.126218696 seconds time elapsed                                          ( +-  2.82% )
+//       3.118979324 seconds time elapsed                                          ( +-  2.80% )
+
 
 
 int main(int argc, char* argv[])

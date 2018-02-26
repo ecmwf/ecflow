@@ -1100,27 +1100,29 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       }
 
       string percentVar( cmd.begin() + firstPercentPos+1, cmd.begin() + secondPercentPos );
+      //cout << percentVar << "\n";
 #ifdef DEBUG_S
       cout << "   Found percentVar " << percentVar << "\n";
 #endif
 
-
       // ****************************************************************************************
-      // Look for generated variables first:
+      // Look for generated variables that should NOT be overridden first:
       //    Variable like ECF_PASS can be overridden, i.e. with FREE_JOBS_PASSWORD
       //    However for job file generation we should use use the generated variables first.
       //    if the user removes ECF_PASS then we are stuck with the wrong value in the script file
       //    FREE_JOBS_PASSWORD is left for the server to deal with
       // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitamly override these. ECFLOW-999
       bool generated_variable = false;
-      if ( percentVar.find("ECF_") != std::string::npos) {
-         if ( percentVar.find(Str::ECF_PASS())         != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_PORT())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_NODE())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_HOST())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
+      if ( percentVar.find("ECF_") == 0) {
+         if ( percentVar.find(Str::ECF_HOST())       != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_PORT())  != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_TRYNO()) != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_NAME())  != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_PASS())  != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_NODE())  != std::string::npos) generated_variable = true;
       }
+
+      size_t firstColon = percentVar.find( ':' );
 
       // First search user variable (*ONLY* set user edit's the script)
       // Handle case: cmd = "%fred:bill% and where we have user variable "fred:bill"
@@ -1131,11 +1133,10 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       if (!user_edit_variables.empty() && search_user_edit_variables(percentVar,varValue,user_edit_variables)) {
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
-      else if (generated_variable && find_parent_gen_variable_value(percentVar,varValue)) {
+      else if (generated_variable && firstColon == string::npos && find_parent_gen_variable_value(percentVar,varValue)) {
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
       else {
-         size_t firstColon = percentVar.find( ':' );
          if (firstColon != string::npos) {
 
             if (is_a_alias && findParentVariableValue( percentVar ,varValue)) {
@@ -1169,7 +1170,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
                   cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
                }
                else {
-                  string substitute (percentVar.begin()+ firstColon+1, percentVar.end());
+                  string substitute(percentVar.begin()+ firstColon+1, percentVar.end());
 #ifdef DEBUG_S
                   cout << "  substitute value = " << substitute << "\n";
 #endif

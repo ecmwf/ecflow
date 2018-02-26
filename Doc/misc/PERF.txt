@@ -54,14 +54,24 @@ kcachegrind cachegrind.out.18473
 
 test job creation
 ==========================================================================
- - Note wrting to scratch can be slow, this can be overriden by user specfiying
+ - Note writing to scratch can be slow, this can be overriden by user specfiying
  - thier own directory:
  
 export PYTHONPATH=/var/tmp/ma0/workspace/ecflow/Pyext/ecflow
 cat > tmp.py << EOF
+import shutil
 from ecflow import *
+
 defs = Defs("metabuilder.def")
-defs.check_job_creation() # verbose=True)
+
+job_ctrl = JobCreationCtrl()
+job_ctrl.set_dir_for_job_creation("/var/tmp/ma0/tmp/ecflow")  # generate jobs file under this directory
+#job_ctrl.set_verbose(True)
+defs.check_job_creation(job_ctrl)
+print(job_ctrl.get_error_msg())
+
+#print("removing job generation directory tree " + job_ctrl.get_dir_for_job_creation())
+#shutil.rmtree(job_ctrl.get_dir_for_job_creation())     
 EOF
 
 strace -c python tmp.py
