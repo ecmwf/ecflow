@@ -49,13 +49,15 @@ namespace fs = boost::filesystem;
 //   Before ECFLOW-864:        22.77    0.001159           0    132329     50737 stat
 //   After  ECFLOW-864:        21.35    0.001097           0    125644     50737 stat
 //
-// After:
+//
+// After ECFLOW-1244:
 //  - cacheing of stat of include files
 //  - re-arranging EcfFile data member for hotness:
 //
 //time Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def : submitted 5808 out of 7941( fastest of 10 attempts)
 // - ECFLOW-1244: real: 2.86s user: 2.42s sys: 0.42s
 //
+//perf stat -r 10 -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
 //Performance counter stats for 'Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
 //
 //      2894.687079      task-clock (msec)         #    0.926 CPUs utilized            ( +-  0.84% )
