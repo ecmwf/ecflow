@@ -80,9 +80,9 @@ EcfFile& EcfFile::operator=(const EcfFile& rhs)
    node_ = rhs.node_;
    ecfMicroCache_ = rhs.ecfMicroCache_;
    script_path_or_cmd_ = rhs.script_path_or_cmd_;
+   jobLines_.resize(0);  // the most expensive
    job_size_.clear();
    script_type_ = rhs.script_type_;
-   jobLines_.resize(0);  // the most expensive
    return *this;
 }
 
@@ -461,6 +461,11 @@ bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>
    }
 
    //cout << "NOT found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
+
+   if (include_file_cache_size > 1000) {
+      // avoid hitting limit for open file descriptors ~1024, valgrind(takes 10 fd). clear cache
+      include_file_cache_.clear();
+   }
 
    // ADD to cache
    boost::shared_ptr<IncludeFileCache> ptr = boost::make_shared<IncludeFileCache>(file);
@@ -1412,19 +1417,7 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    if (!ecfile_->open_script_file(includedFile, EcfFile::INCLUDE, include_lines, error_msg_))  return;
    if (fnd_includenopp) include_lines.push_back(ecf_micro_ + T_END);
 
-   size_t include_lines_size = include_lines.size();
-   for(size_t i=0; i < include_lines_size; ++i) {
-      const std::string& script_line = include_lines[i];
-      jobLines_.push_back(script_line);    // copy line,  C++11 use std::move()
-      preProcess_line(script_line);
-      if (!error_msg_.empty()) return;
-   }
-
-   if (nopp_) {
-      std::stringstream ss; ss << "Unterminated nopp, matching 'end' is missing for " << ecfile_->script_path_or_cmd_;
-      error_msg_ += ss.str();
-      ecfile_->dump_expanded_script_file(jobLines_);
-   }
+   (void)preProcess(include_lines);
 }
 
 std::string PreProcessor::getIncludedFilePath(

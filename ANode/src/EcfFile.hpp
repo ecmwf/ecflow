@@ -137,11 +137,11 @@ private:
 	Node* node_;                         // Task or Alias or Container when pre-processing the man files
 	std::string  ecfMicroCache_;         // cache value of ECF_MICRO
 	std::string  script_path_or_cmd_;    // path to .ecf, .usr file or command
-	mutable std::string  job_size_;      // to be placed in log file during job submission
-	EcfFile::ScriptType    script_type_; // get script from a file, or from running a command
 	std::vector<std::string> jobLines_;  // Lines that will form the job file.
-   mutable std::vector<boost::shared_ptr<IncludeFileCache> > include_file_cache_; // only open include file once
-   mutable std::vector<std::pair<std::string,bool> > file_stat_cache_; // Minimise calls to stat/kernel calls
+    mutable std::vector<boost::shared_ptr<IncludeFileCache> > include_file_cache_; // only open include file once
+    mutable std::vector<std::pair<std::string,bool> > file_stat_cache_; // Minimise calls to stat/kernel calls
+	mutable std::string  job_size_;      // to be placed in log file during job submission
+	EcfFile::ScriptType  script_type_;   // get script from a file, or from running a command
 };
 
 
@@ -176,12 +176,12 @@ private:
    std::string pp_end_;
    std::string ecf_micro_;                 // constant until ecfmicro changes, then reset
 
-   std::string error_msg_;
    std::vector<std::string>& jobLines_;
    std::vector<std::string> tokens_;       // re-use to save memory
 
    std::vector<std::pair<std::string,int> > globalIncludedFileSet_;// test for recursive includes, <no _of times it was included>
    std::vector<std::string> include_once_set_;
+   std::string error_msg_;
 };
 
 #endif
