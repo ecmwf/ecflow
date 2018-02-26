@@ -49,28 +49,32 @@ namespace fs = boost::filesystem;
 //   Before ECFLOW-864:        22.77    0.001159           0    132329     50737 stat
 //   After  ECFLOW-864:        21.35    0.001097           0    125644     50737 stat
 //
-// After: re-arranging EcfFile data member for hotness
+// After:
+//  - cacheing of stat of include files
+//  - re-arranging EcfFile data member for hotness:
+//
+//time Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def : submitted 5808 out of 7941( fastest of 10 attempts)
+// - ECFLOW-1244: real: 2.86s user: 2.42s sys: 0.42s
 //
 //Performance counter stats for 'Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
 //
-//       2929.239898      task-clock (msec)         #    0.923 CPUs utilized            ( +-  1.29% )
-//                85      context-switches          #    0.029 K/sec                    ( +- 10.92% )
-//                 2      cpu-migrations            #    0.001 K/sec                    ( +- 14.57% )
-//            11,494      page-faults               #    0.004 M/sec                    ( +-  0.02% )
-//    11,017,892,799      cycles                    #    3.761 GHz                      ( +-  1.38% )  (37.50%)
-//     4,871,685,155      stalled-cycles-frontend   #   44.22% frontend cycles idle     ( +-  3.56% )  (50.03%)
-//   <not supported>      stalled-cycles-backend
-//    13,934,851,808      instructions              #    1.26  insns per cycle
-//                                                  #    0.35  stalled cycles per insn  ( +-  0.06% )  (62.54%)
-//     3,802,649,637      branches                  # 1298.169 M/sec                    ( +-  0.05% )  (62.56%)
-//       108,707,343      branch-misses             #    2.86% of all branches          ( +-  0.17% )  (62.60%)
-//     3,432,544,996      L1-dcache-loads           # 1171.821 M/sec                    ( +-  0.05% )  (49.49%)
-//       260,568,218      L1-dcache-load-misses     #    7.59% of all L1-dcache hits    ( +-  0.18% )  (25.00%)
-//       101,270,204      LLC-loads                 #   34.572 M/sec                    ( +-  0.27% )  (24.98%)
-//   <not supported>      LLC-load-misses
+//      2894.687079      task-clock (msec)         #    0.926 CPUs utilized            ( +-  0.84% )
+//               93      context-switches          #    0.032 K/sec                    ( +- 18.48% )
+//                2      cpu-migrations            #    0.001 K/sec                    ( +- 30.23% )
+//           11,493      page-faults               #    0.004 M/sec                    ( +-  0.02% )
+//   10,888,902,061      cycles                    #    3.762 GHz                      ( +-  0.37% )  (37.49%)
+//    4,739,862,119      stalled-cycles-frontend   #   43.53% frontend cycles idle     ( +-  0.89% )  (50.03%)
+//  <not supported>      stalled-cycles-backend
+//   13,925,593,267      instructions              #    1.28  insns per cycle
+//                                                 #    0.34  stalled cycles per insn  ( +-  0.05% )  (62.57%)
+//    3,802,491,790      branches                  # 1313.611 M/sec                    ( +-  0.04% )  (62.59%)
+//      108,612,244      branch-misses             #    2.86% of all branches          ( +-  0.21% )  (62.62%)
+//    3,430,787,436      L1-dcache-loads           # 1185.201 M/sec                    ( +-  0.07% )  (49.52%)
+//      260,132,335      L1-dcache-load-misses     #    7.58% of all L1-dcache hits    ( +-  0.11% )  (24.98%)
+//      101,447,778      LLC-loads                 #   35.046 M/sec                    ( +-  0.26% )  (24.98%)
+//  <not supported>      LLC-load-misses
 //
-//       3.174452598 seconds time elapsed                                          ( +-  3.00% )
-
+//      3.126218696 seconds time elapsed                                          ( +-  2.82% )
 
 
 int main(int argc, char* argv[])
