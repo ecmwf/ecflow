@@ -80,9 +80,9 @@ EcfFile& EcfFile::operator=(const EcfFile& rhs)
    node_ = rhs.node_;
    ecfMicroCache_ = rhs.ecfMicroCache_;
    script_path_or_cmd_ = rhs.script_path_or_cmd_;
+   jobLines_.resize(0);  // the most expensive
    job_size_.clear();
    script_type_ = rhs.script_type_;
-   jobLines_.resize(0);  // the most expensive
    return *this;
 }
 
@@ -461,6 +461,11 @@ bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>
    }
 
    //cout << "NOT found " << file << " in cache, cache size = " << include_file_cache_.size() << "\n";
+
+   if (include_file_cache_size > 1000) {
+      // avoid hitting limit for open file descriptors ~1024, valgrind(takes 10 fd). clear cache
+      include_file_cache_.clear();
+   }
 
    // ADD to cache
    boost::shared_ptr<IncludeFileCache> ptr = boost::make_shared<IncludeFileCache>(file);
@@ -1249,7 +1254,7 @@ void PreProcessor::preProcess_line(const std::string& script_line)
       // For variable substitution '%' can occur anywhere on the line.
       // Check for Mismatched micro i.e %FRED or %FRED%%
       if (ecfmicro_pos != 0) {
-         int ecfMicroCount = ecfile_->countEcfMicro( script_line, ecf_micro_ );
+         int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
          if (ecfMicroCount % 2 != 0 ) {
             std::stringstream ss;
             ss << "Mismatched ecfmicro(" << ecf_micro_ << ") count(" << ecfMicroCount << ")  '" << script_line << "' in " << ecfile_->script_path_or_cmd_;
@@ -1367,7 +1372,7 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    jobLines_.push_back("========== include of " + tokens_[1] + " ===========================");
 #endif
 
-   std::string includedFile = getIncludedFilePath(tokens_[1], script_line, error_msg_);
+   std::string includedFile = getIncludedFilePath(tokens_[1], script_line);
    if (!error_msg_.empty()) return;
 
    // handle %includeonce
@@ -1388,7 +1393,8 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    // To get round this will use a simple count.
    // replace map with vector
    bool fnd = false;
-   for(size_t i = 0; i < globalIncludedFileSet_.size(); ++i) {
+   size_t globalIncludedFileSet_size = globalIncludedFileSet_.size();
+   for(size_t i = 0; i < globalIncludedFileSet_size; ++i) {
       if (globalIncludedFileSet_[i].first == includedFile) {
          fnd = true;
          if ( globalIncludedFileSet_[i].second > 100) {
@@ -1411,25 +1417,10 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    if (!ecfile_->open_script_file(includedFile, EcfFile::INCLUDE, include_lines, error_msg_))  return;
    if (fnd_includenopp) include_lines.push_back(ecf_micro_ + T_END);
 
-   size_t include_lines_size = include_lines.size();
-   for(size_t i=0; i < include_lines_size; ++i) {
-      const std::string& script_line = include_lines[i];
-      jobLines_.push_back(script_line);    // copy line,  C++11 use std::move()
-      preProcess_line(script_line);
-      if (!error_msg_.empty()) return;
-   }
-
-   if (nopp_) {
-      std::stringstream ss; ss << "Unterminated nopp, matching 'end' is missing for " << ecfile_->script_path_or_cmd_;
-      error_msg_ += ss.str();
-      ecfile_->dump_expanded_script_file(jobLines_);
-   }
+   (void)preProcess(include_lines);
 }
 
-std::string PreProcessor::getIncludedFilePath(
-      const std::string& includedFile1,
-      const std::string& line,
-      std::string& errormsg)
+std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,const std::string& line)
 {
    // Include can have following format: [ %include | %includeonce | %includenopp ]
    //   %include /tmp/file.name   -> /tmp/filename
@@ -1451,11 +1442,11 @@ std::string PreProcessor::getIncludedFilePath(
    // the included file could have variables,(ECFLOW-765), check for miss-matched ecf_micro
    std::string includedFile = includedFile1;
    if ( includedFile.find(ecf_micro_) != std::string::npos) {
-      int ecfMicroCount = ecfile_->countEcfMicro( includedFile, ecf_micro_ );
+      int ecfMicroCount = EcfFile::countEcfMicro( includedFile, ecf_micro_ );
       if (ecfMicroCount % 2 != 0 ) {
          std::stringstream ss;
          ss << "Mismatched ecfmicro(" << ecf_micro_ << ") count(" << ecfMicroCount << ")  '" << line << "' in " << ecfile_->script_path_or_cmd_;
-         errormsg += ss.str();
+         error_msg_ += ss.str();
          return string();
       }
       NameValueMap user_edit_variables;
@@ -1513,7 +1504,7 @@ std::string PreProcessor::getIncludedFilePath(
       node->findParentVariableValue( Str::ECF_HOME() , ecf_include );
       if (ecf_include.empty()) {
          ss << "ECF_INCLUDE/ECF_HOME not specified, for task " << node->absNodePath() << " at " << line;
-         errormsg += ss.str();
+         error_msg_ += ss.str();
          return string();
       }
 
@@ -1552,7 +1543,7 @@ std::string PreProcessor::getIncludedFilePath(
       node->findParentUserVariableValue( Str::ECF_HOME() , path);
       if ( path.empty() ) {
          ss << "ECF_HOME not specified, for task " << node->absNodePath() << " at " << line;
-         errormsg += ss.str();
+         error_msg_ += ss.str();
          return string();
       }
       path += '/';
@@ -1560,7 +1551,7 @@ std::string PreProcessor::getIncludedFilePath(
       node->findParentVariableValue( "SUITE" , suite);   // SUITE is a generated variable
       if ( suite.empty() ) {
          ss << "SUITE not specified, for task " << node->absNodePath() << " at " << line;
-         errormsg += ss.str();
+         error_msg_ += ss.str();
          return string();
       }
       path += suite;
@@ -1569,7 +1560,7 @@ std::string PreProcessor::getIncludedFilePath(
       node->findParentVariableValue( "FAMILY" , family); // FAMILY is a generated variable
       if ( family.empty() ) {
          ss << "FAMILY not specified, for task " << node->absNodePath() << " at " << line;
-         errormsg += ss.str();
+         error_msg_ += ss.str();
          return string();
       }
       path += family;
