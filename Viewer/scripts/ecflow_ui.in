@@ -152,6 +152,18 @@ do
             shift
 			;;
 
+        #Specify the location of the config dir. It is used for ui testing only.
+        #We do not expose it in the usage() print out!!
+        -confd)
+            export ECFUI_CONFIG_DIR=$2
+            if [[ $ECFUI_CONFIG_DIR  != /* ]] ; then
+                echo "Please specify an absolute path for flag -confd!"
+                exit 1
+            fi
+            echo "Starting ecFlowUI with user specified config dir: ${ECFUI_CONFIG_DIR}"
+            shift
+            ;;
+
 		-h)
 			ECFUI_HELP=yes
 			;;
