@@ -97,6 +97,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     connect(searchLine_,SIGNAL(visibilityChanged()),
           this,SLOT(showConfirmSearchLabel()));
 
+    //the textfilter is is hidden by default
     textFilter_->hide();
 }
 
@@ -322,12 +323,6 @@ void OutputBrowser::showSearchLine()
 void OutputBrowser::searchOnReload(bool userClickedReload)
 {
 	searchLine_->searchOnReload(userClickedReload);
-}
-
-void OutputBrowser::showFilterLine()
-{
-    textFilter_->setVisible(true);
-    textFilter_->setEditFocus();
 }
 
 void OutputBrowser::setFontProperty(VProperty* p)

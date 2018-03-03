@@ -62,6 +62,9 @@ TextFilterWidget::TextFilterWidget(QWidget *parent) :
     closeTb_->setIcon(icon);
 
     refreshCompleter();
+
+    //Initially it is hidden
+    hide();
 }
 
 bool TextFilterWidget::isActive() const
@@ -98,6 +101,11 @@ void TextFilterWidget::setExternalButtons(QToolButton* statusTb,QToolButton* opt
 
     statusTb_=statusTb;
     optionTb_=optionTb;
+
+    statusTb_->setChecked(false);
+
+    connect(statusTb_,SIGNAL(toggled(bool)),
+            this,SLOT(slotStatusTb(bool)));
 
     connect(optionTb_,SIGNAL(clicked()),
             this,SLOT(slotOptionTb()));
@@ -297,11 +305,31 @@ void TextFilterWidget::runIt()
         Q_EMIT runRequested(t,isMatched(),isCaseSensitive());
 }
 
+void TextFilterWidget::slotStatusTb(bool b)
+{
+    if(b)
+    {
+        show();
+        setEditFocus();
+    }
+    else
+    {
+        hide();
+        adjustToolTip();
+    }
+}
+
 void TextFilterWidget::on_closeTb__clicked()
 {
-    hide();
-    adjustToolTip();
-    Q_EMIT closeRequested();
+    //clear
+    le_->clear();
+    setStatus(EditStatus);
+    refreshCompleter();
+
+    //hide
+    statusTb_->setChecked(false);
+    Q_EMIT closeRequested(); //this will clear the filter
+
 }
 
 void TextFilterWidget::on_le__returnPressed()
@@ -315,7 +343,7 @@ void TextFilterWidget::on_le__textChanged()
         setStatus(EditStatus);
 
     if(!isActive())
-        clearRequested();
+        Q_EMIT clearRequested();
 }
 
 void TextFilterWidget::on_matchCb__currentIndexChanged(int)
@@ -348,7 +376,9 @@ void TextFilterWidget::adjustToolTip()
     if(status_ == FoundStatus || status_ == NotFoundStatus)
     {
         if(!isVisible())
-          filterDesc+=tr("Click to show text filter bar<br>----------------------------------------<br>");
+          filterDesc+=tr("Click to <b>show</b> text filter bar<br>----------------------------------------<br>");
+        else
+          filterDesc+=tr("Click to <b>hide</b> text filter bar. The filter remains active (if defined). <br>----------------------------------------<br>");
 
           filterDesc+=tr("Current filter:") +
                 "<br><b>&nbsp;regexp:</b> " + filterText() +
@@ -360,7 +390,7 @@ void TextFilterWidget::adjustToolTip()
      switch(status_)
      {
      case EditStatus:
-        statusTb_->setToolTip(tr("Show filter bar"));
+        statusTb_->setToolTip(tr(isVisible()?"<b>Hide</b> text filter bar. The filter remains active (if defined).":"<b>Show</b> text filter bar"));
         break;
      case FoundStatus:
             statusTb_->setToolTip(filterDesc + tr("There ") +

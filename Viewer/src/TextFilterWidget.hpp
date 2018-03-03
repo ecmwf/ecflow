@@ -47,6 +47,7 @@ public Q_SLOTS:
     void on_matchCb__currentIndexChanged(int);
     void on_caseCb__stateChanged(int);
     void slotOptionTb();
+    void slotStatusTb(bool);
 
 Q_SIGNALS:
     void runRequested(QString,bool,bool);

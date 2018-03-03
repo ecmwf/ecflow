@@ -14,7 +14,7 @@
                 "title" : "Refresh",
                 "prefix" : "server.update",
                 
-                "line" : "autoUpdate",              
+                "line" : "autoUpdate",
                 "line" : "updateRateInSec",
                 "line" : "adaptiveUpdate",
                 "note" : {

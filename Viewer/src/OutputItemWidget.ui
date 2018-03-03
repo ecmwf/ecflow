@@ -207,7 +207,7 @@
          <item>
           <widget class="QToolButton" name="filterTb_">
            <property name="toolTip">
-            <string>Show text filter bar</string>
+            <string>&lt;b&gt;Show&lt;/b&gt; text filter bar</string>
            </property>
            <property name="text">
             <string>...</string>
@@ -215,6 +215,9 @@
            <property name="icon">
             <iconset resource="viewer.qrc">
              <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
            <property name="popupMode">
             <enum>QToolButton::InstantPopup</enum>
@@ -227,7 +230,7 @@
          <item>
           <widget class="QToolButton" name="filterOptionTb_">
            <property name="toolTip">
-            <string>Filter menu</string>
+            <string>Text filter menu</string>
            </property>
            <property name="text">
             <string/>

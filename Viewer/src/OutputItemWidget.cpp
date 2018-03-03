@@ -673,15 +673,6 @@ void OutputItemWidget::slotOutputSelected(QModelIndex idx1,QModelIndex idx2)
         getCurrentFile(false);
 }
 
-//---------------------------------------------
-// Filter
-//---------------------------------------------
-
-void OutputItemWidget::on_filterTb__clicked()
-{
-    browser_->showFilterLine();
-}
-
 //-----------------------------------------
 // Fontsize management
 //-----------------------------------------
