@@ -106,7 +106,7 @@ bool File::splitFileIntoLines(const std::string& filename, std::vector<std::stri
 //		i++;
 //		cout << i << ": " << line << "\n";
 		if (ignoreEmptyLine && line.empty()) continue;
- 		lines.push_back(line);
+ 		lines.push_back(line);  // c++11 , lines.push_back(std::move(line))
 	}
 
 //	 METHOD1

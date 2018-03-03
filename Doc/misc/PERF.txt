@@ -22,7 +22,8 @@ o/ cd metabuilder workspace edit <package.py> remove code
 Use of perf:  http://www.brendangregg.com/perf.html
 ===============================================================
   cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
-  Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  time Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  time Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
   
   # Show system call overhead,as a summary.
   strace -c Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
@@ -31,7 +32,7 @@ Use of perf:  http://www.brendangregg.com/perf.html
   perf stat -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
   
   # perf stat to run the same test workload multiple times and get for each count, the standard deviation from the mean.
-  perf stat -r 5 -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  perf stat -r 10 -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
   
   # For more detail and higher level overview, compile debug, -g means record stack traces
   perf record -g Base/bin/gcc-5.3.0/debug/perf_job_gen ./metabuilder.def
@@ -46,6 +47,35 @@ Use of perf:  http://www.brendangregg.com/perf.html
   cat out.perf-folded | $HOME/FlameGraph/flamegraph.pl > my_perf.svg
   display my_perf.svg
   
+Using valgrind
+==========================================================================
+valgrind --tool=cachegrind Base/bin/gcc-5.3.0/debug/perf_job_gen ./metabuilder.def
+kcachegrind cachegrind.out.18473
+
+test job creation
+==========================================================================
+ - Note writing to scratch can be slow, this can be overriden by user specfiying
+ - thier own directory:
+ 
+export PYTHONPATH=/var/tmp/ma0/workspace/ecflow/Pyext/ecflow
+cat > tmp.py << EOF
+import shutil
+from ecflow import *
+
+defs = Defs("metabuilder.def")
+
+job_ctrl = JobCreationCtrl()
+job_ctrl.set_dir_for_job_creation("/var/tmp/ma0/tmp/ecflow")  # generate jobs file under this directory
+#job_ctrl.set_verbose(True)
+defs.check_job_creation(job_ctrl)
+print(job_ctrl.get_error_msg())
+
+#print("removing job generation directory tree " + job_ctrl.get_dir_for_job_creation())
+#shutil.rmtree(job_ctrl.get_dir_for_job_creation())     
+EOF
+
+strace -c python tmp.py
+
 
 strace
 ===========================================================================

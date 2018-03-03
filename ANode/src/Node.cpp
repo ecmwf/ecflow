@@ -1078,6 +1078,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
    bool double_micro_found = false;
    std::string::size_type pos = 0;
    int count = 0;
+   Alias* is_a_alias = isAlias();
    while ( 1 ) {
       // A while loop here is used to:
       //		a/ Allow for multiple substitution on a single line. i.e %ECF_FILES% -I %ECF_INCLUDE%"
@@ -1099,27 +1100,29 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       }
 
       string percentVar( cmd.begin() + firstPercentPos+1, cmd.begin() + secondPercentPos );
+      //cout << percentVar << "\n";
 #ifdef DEBUG_S
       cout << "   Found percentVar " << percentVar << "\n";
 #endif
 
-
       // ****************************************************************************************
-      // Look for generated variables first:
+      // Look for generated variables that should NOT be overridden first:
       //    Variable like ECF_PASS can be overridden, i.e. with FREE_JOBS_PASSWORD
       //    However for job file generation we should use use the generated variables first.
       //    if the user removes ECF_PASS then we are stuck with the wrong value in the script file
       //    FREE_JOBS_PASSWORD is left for the server to deal with
       // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitamly override these. ECFLOW-999
       bool generated_variable = false;
-      if ( percentVar.find("ECF_") != std::string::npos) {
-         if ( percentVar.find(Str::ECF_PASS())         != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_PORT())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_NODE())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_HOST())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
+      if ( percentVar.find("ECF_") == 0) {
+         if ( percentVar.find(Str::ECF_HOST())       != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_PORT())  != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_TRYNO()) != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_NAME())  != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_PASS())  != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_NODE())  != std::string::npos) generated_variable = true;
       }
+
+      size_t firstColon = percentVar.find( ':' );
 
       // First search user variable (*ONLY* set user edit's the script)
       // Handle case: cmd = "%fred:bill% and where we have user variable "fred:bill"
@@ -1130,57 +1133,60 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       if (!user_edit_variables.empty() && search_user_edit_variables(percentVar,varValue,user_edit_variables)) {
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
-      else if (generated_variable && find_parent_gen_variable_value(percentVar,varValue)) {
-
-         cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
-      }
-      else if (findParentVariableValue( percentVar ,varValue)) {
-         // For alias we could have added variables with %A:0%, %A:1%. Aliases allow variables with ':' in the name
+      else if (generated_variable && firstColon == string::npos && find_parent_gen_variable_value(percentVar,varValue)) {
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
       else {
-
-         size_t firstColon = percentVar.find( ':' );
          if (firstColon != string::npos) {
 
-            string var(percentVar.begin(), percentVar.begin() + firstColon);
-#ifdef DEBUG_S
-            cout << "   var " << var << "\n";
-#endif
-
-            if (!user_edit_variables.empty() && search_user_edit_variables(var,varValue,user_edit_variables)) {
-#ifdef DEBUG_S
-               cout << "   user var value = " << varValue << "\n";
-#endif
-               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
-            }
-            else if (generated_variable && find_parent_gen_variable_value(var,varValue)) {
-#ifdef DEBUG_S
-               cout << "   generated var value = " << varValue << "\n";
-#endif
-                cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
-            }
-            else if (findParentVariableValue( var, varValue ))  {
-               // Note: variable can exist, but have an empty value
-#ifdef DEBUG_S
-               cout << "   var value = " << varValue << "\n";
-#endif
-               // replace the "%VAR:fred --f%" with var
-               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
+            if (is_a_alias && findParentVariableValue( percentVar ,varValue)) {
+               // For alias we could have added variables with %A:0%, %A:1%. Aliases allow variables with ':' in the name
+               cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
             }
             else {
-               string substitute (percentVar.begin()+ firstColon+1, percentVar.end());
+               // ':' is not a valid in variables, hence split, and search, if search fails use replacement
+               string var(percentVar.begin(), percentVar.begin() + firstColon);
 #ifdef DEBUG_S
-               cout << "  substitute value = " << substitute << "\n";
+               cout << "   var " << var << "\n";
 #endif
-               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,substitute);
+               if (!user_edit_variables.empty() && search_user_edit_variables(var,varValue,user_edit_variables)) {
+#ifdef DEBUG_S
+                  cout << "   user var value = " << varValue << "\n";
+#endif
+                  cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
+               }
+               else if (generated_variable && find_parent_gen_variable_value(var,varValue)) {
+#ifdef DEBUG_S
+                  cout << "   generated var value = " << varValue << "\n";
+#endif
+                  cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
+               }
+               else if (findParentVariableValue( var, varValue ))  {
+                  // Note: variable can exist, but have an empty value
+#ifdef DEBUG_S
+                  cout << "   var value = " << varValue << "\n";
+#endif
+                  // replace the "%VAR:fred --f%" with var
+                  cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
+               }
+               else {
+                  string substitute(percentVar.begin()+ firstColon+1, percentVar.end());
+#ifdef DEBUG_S
+                  cout << "  substitute value = " << substitute << "\n";
+#endif
+                  cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,substitute);
+               }
+#ifdef DEBUG_S
+               cout << "   cmd = " << cmd << "\n";
+#endif
             }
-#ifdef DEBUG_S
-            cout << "   cmd = " << cmd << "\n";
-#endif
+         }
+         else if (findParentVariableValue( percentVar ,varValue)) {
+            // No ':' search user variables, repeat, and then generated variables.
+            cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
          }
          else {
-            // No Colon, Can't find in user variables, or node variable, hence can't go any further
+            // Can't find in user variables, or node variable, hence can't go any further
             return false;
          }
       }

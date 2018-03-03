@@ -49,6 +49,38 @@ namespace fs = boost::filesystem;
 //   Before ECFLOW-864:        22.77    0.001159           0    132329     50737 stat
 //   After  ECFLOW-864:        21.35    0.001097           0    125644     50737 stat
 //
+//
+// After ECFLOW-1244:
+//  - cacheing of stat of include files
+//  - re-arranging EcfFile data member for hotness
+//  - re-arrange search for generation variables, most common first
+//  - replace ecffile_->countEcfMicro _. EcfFile::countEcfMicro(..) remove reference since function is static
+//
+//time Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def : submitted 5808 out of 7941( fastest of 10 attempts)
+// - ECFLOW-1244: real: 2.84s user: 2.41s sys: 0.40s
+//
+//perf stat -r 10 -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+// Performance counter stats for 'Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
+//
+//       2908.895909      task-clock (msec)         #    0.933 CPUs utilized            ( +-  1.02% )
+//                89      context-switches          #    0.031 K/sec                    ( +-  7.13% )
+//                 2      cpu-migrations            #    0.001 K/sec                    ( +- 25.00% )
+//            11,500      page-faults               #    0.004 M/sec                    ( +-  0.03% )
+//    10,900,694,824      cycles                    #    3.747 GHz                      ( +-  0.93% )  (37.44%)
+//     4,810,738,973      stalled-cycles-frontend   #   44.13% frontend cycles idle     ( +-  2.34% )  (49.98%)
+//   <not supported>      stalled-cycles-backend
+//    13,845,775,843      instructions              #    1.27  insns per cycle
+//                                                  #    0.35  stalled cycles per insn  ( +-  0.03% )  (62.51%)
+//     3,777,695,721      branches                  # 1298.670 M/sec                    ( +-  0.05% )  (62.56%)
+//       107,367,375      branch-misses             #    2.84% of all branches          ( +-  0.15% )  (62.70%)
+//     3,410,593,440      L1-dcache-loads           # 1172.470 M/sec                    ( +-  0.09% )  (49.60%)
+//       260,536,494      L1-dcache-load-misses     #    7.64% of all L1-dcache hits    ( +-  0.13% )  (24.94%)
+//       101,191,979      LLC-loads                 #   34.787 M/sec                    ( +-  0.20% )  (24.90%)
+//   <not supported>      LLC-load-misses
+//
+//       3.118979324 seconds time elapsed                                          ( +-  2.80% )
+
+
 
 int main(int argc, char* argv[])
 {
@@ -94,15 +126,16 @@ int main(int argc, char* argv[])
    std::vector<Task*> tasks;
    defs.getAllTasks(tasks);
 
-#ifdef DEBUG
-   cout << "Total number of tasks" << tasks.size() << "\n";
-   cout << "begin-all\n";
-#endif
+//#ifdef DEBUG
+//   cout << "Total number of tasks: " << tasks.size() << "\n";
+//   cout << "begin-all\n";
+//#endif
+
    defs.beginAll();
 
-#ifdef DEBUG
-   cout << "Free all dependencies, free suspended time and trigger dependencies\n";
-#endif
+//#ifdef DEBUG
+//   cout << "Free all dependencies, free suspended time and trigger dependencies\n";
+//#endif
 
    std::vector<node_ptr> all_nodes;
    defs.get_all_nodes(all_nodes);
