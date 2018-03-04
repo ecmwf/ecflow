@@ -257,6 +257,20 @@ export ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
 # Where to write the user interaction log file to
 export ECFLOWUI_UI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
 
+
+#---------------------------------------------------------------
+# Remove lock files created more than 3 s ago (see ECFLOW-980)
+#---------------------------------------------------------------
+
+confDir=${ECFUI_CONFIG_DIR:=${HOME}/.ecflow_ui}
+#We are extra careful an delete the files in a loop instead of using exec for find
+for fn in $(find $confDir -type f -cmin +0.05 -name *.lock) ; do
+    if [[ $fn == *.lock ]] ; then
+        echo "Remove lock file: ${fn}"
+        rm -f $fn
+    fi
+done
+
 #-----------------------------------------------------------
 # Close tty and redirect stdout to a file?
 #-----------------------------------------------------------
