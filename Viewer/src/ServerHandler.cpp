@@ -1368,6 +1368,9 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 		{
 			reset();
 		}
+
+        //Save the settings
+        conf_->saveSettings();
 	}
 }
 
