@@ -376,9 +376,9 @@ void TextFilterWidget::adjustToolTip()
     if(status_ == FoundStatus || status_ == NotFoundStatus)
     {
         if(!isVisible())
-          filterDesc+=tr("Click to <b>show</b> text filter bar<br>----------------------------------------<br>");
+          filterDesc+=tr("Toggle to <b>show</b> text filter bar<br>----------------------------------------<br>");
         else
-          filterDesc+=tr("Click to <b>hide</b> text filter bar. The filter remains active (if defined). <br>----------------------------------------<br>");
+          filterDesc+=tr("Toggle to <b>hide</b> text filter bar. The filter remains active (if defined). <br>----------------------------------------<br>");
 
           filterDesc+=tr("Current filter:") +
                 "<br><b>&nbsp;regexp:</b> " + filterText() +
@@ -390,7 +390,7 @@ void TextFilterWidget::adjustToolTip()
      switch(status_)
      {
      case EditStatus:
-        statusTb_->setToolTip(tr(isVisible()?"<b>Hide</b> text filter bar. The filter remains active (if defined).":"<b>Show</b> text filter bar"));
+        statusTb_->setToolTip(tr(isVisible()?"Toggle to <b>hide</b> text filter bar. The filter remains active (if defined).":"Toggle to <b>show</b> text filter bar"));
         break;
      case FoundStatus:
             statusTb_->setToolTip(filterDesc + tr("There ") +

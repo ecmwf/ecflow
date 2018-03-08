@@ -207,7 +207,7 @@
          <item>
           <widget class="QToolButton" name="filterTb_">
            <property name="toolTip">
-            <string>&lt;b&gt;Show&lt;/b&gt; text filter bar</string>
+            <string>Toggle  to &lt;b&gt;show&lt;/b&gt; text filter bar</string>
            </property>
            <property name="text">
             <string>...</string>
