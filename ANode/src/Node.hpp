@@ -698,6 +698,8 @@ private:
 
    // Clear the node suspended and update state change number, no other side effects
    void clearSuspended();
+   void delete_time_dep_attrs_if_empty();
+   void delete_child_attrs_if_empty();
 
 private: // alow simulator access
    friend class ecf::DefsAnalyserVisitor;
@@ -766,7 +768,7 @@ private:
    ecf::LateAttr*              lateAttr_;     // Can only have one late attribute per node
    ecf::AutoCancelAttr*        autoCancel_;   // Can only have 1 auto cancel per node
    TimeDepAttrs*               time_dep_attrs_;
-   ChildAttrs*                 child_attrs_;  // event meter & lables
+   ChildAttrs*                 child_attrs_;  // event meter & labels
    MiscAttrs*                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
    Repeat                      repeat_;       // each node can only have one repeat. By value, since has pimpl
 

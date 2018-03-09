@@ -128,6 +128,8 @@ public:
    void get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const;
    void get_max_simulation_duration(boost::posix_time::time_duration& duration) const;
 
+   bool empty() const { return (timeVec_.empty() && todayVec_.empty() && dates_.empty() && days_.empty() && crons_.empty()) ? true : false ;}
+
 private:
    Node*        node_; // *NOT* persisted must be set by the parent class
 

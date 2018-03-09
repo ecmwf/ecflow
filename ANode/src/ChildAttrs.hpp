@@ -49,6 +49,7 @@ public:
 // state related functions: ========================================
 
    // Access functions: ======================================================
+   bool empty() const { return (meters_.empty() && events_.empty() && labels_.empty()) ? true : false; }
    const std::vector<Meter>&           meters()    const { return meters_;}
    const std::vector<Event>&           events()    const { return events_;}
    const std::vector<Label>&           labels()   const { return labels_;}

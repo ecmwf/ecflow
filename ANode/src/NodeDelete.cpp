@@ -20,10 +20,19 @@
 using namespace ecf;
 using namespace std;
 
+void Node::delete_time_dep_attrs_if_empty()
+{
+   if (time_dep_attrs_ && time_dep_attrs_->empty()) {
+      delete time_dep_attrs_;
+      time_dep_attrs_ = NULL;
+   }
+}
+
 void Node::deleteTime(const std::string& name )
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->deleteTime(name);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_time: Can not find time attribute: ");
@@ -33,6 +42,7 @@ void Node::delete_time( const ecf::TimeAttr& attr )
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->delete_time(attr);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_time: Can not find time attribute: ");
@@ -42,6 +52,7 @@ void Node::deleteToday(const std::string& name)
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->deleteToday(name);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_today: Can not find today attribute: ");
@@ -51,6 +62,7 @@ void Node::delete_today(const ecf::TodayAttr& attr)
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->delete_today(attr);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_today: Can not find today attribute: " + attr.toString());
@@ -60,6 +72,7 @@ void Node::deleteDate(const std::string& name)
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->deleteDate(name);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_date: Can not find date attribute: ");
@@ -69,6 +82,7 @@ void Node::delete_date(const DateAttr& attr)
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->delete_date(attr);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_date: Can not find date attribute: " + attr.toString());
@@ -78,6 +92,7 @@ void Node::deleteDay(const std::string& name)
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->deleteDay(name);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_day: Can not find day attribute: ");
@@ -87,6 +102,7 @@ void Node::delete_day(const DayAttr& attr)
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->delete_day(attr);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_day: Can not find day attribute: " + attr.toString());
@@ -96,6 +112,7 @@ void Node::deleteCron(const std::string& name)
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->deleteCron(name);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_cron: Can not find cron attribute: ");
@@ -105,6 +122,7 @@ void Node::delete_cron(const ecf::CronAttr& attr)
 {
    if (time_dep_attrs_)  {
       time_dep_attrs_->delete_cron(attr);
+      delete_time_dep_attrs_if_empty();
       return;
    }
    throw std::runtime_error("Node::delete_cron: Can not find cron attribute: " + attr.toString());
@@ -137,10 +155,19 @@ void Node::deleteVariable( const std::string& name)
 	throw std::runtime_error("Node::deleteVariable: Can not find 'user' variable of name " + name);
 }
 
+void Node::delete_child_attrs_if_empty()
+{
+   if (child_attrs_ && child_attrs_->empty()) {
+      delete child_attrs_;
+      child_attrs_ = NULL;
+   }
+}
+
 void Node::deleteEvent(const std::string& name)
 {
    if (child_attrs_)  {
       child_attrs_->deleteEvent(name);
+      delete_child_attrs_if_empty();
       return;
    }
 	throw std::runtime_error("Node::deleteEvent: Can not find event: " + name);
@@ -150,6 +177,7 @@ void Node::deleteMeter(const std::string& name)
 {
    if (child_attrs_)  {
       child_attrs_->deleteMeter(name);
+      delete_child_attrs_if_empty();
       return;
    }
 	throw std::runtime_error("Node::deleteMeter: Can not find meter: " + name);
@@ -159,6 +187,7 @@ void Node::deleteLabel(const std::string& name)
 {
    if (child_attrs_)  {
       child_attrs_->deleteLabel(name);
+      delete_child_attrs_if_empty();
       return;
    }
 	throw std::runtime_error("Node::deleteLabel: Can not find label: " + name);

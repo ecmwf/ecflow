@@ -501,8 +501,6 @@ const Event& ChildAttrs::findEventByNameOrNumber( const std::string& theName) co
    return Event::EMPTY();
 }
 
-
-
 const Meter& ChildAttrs::findMeter(const std::string& name) const
 {
    size_t theSize = meters_.size();
