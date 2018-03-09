@@ -425,7 +425,7 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
          QStringList() <<  "-c" << "grep " + extraOptions + " -e \'" + filter  + "\' " +
          QString::fromStdString(fSrc->path()));
 
-    UiLog().dbg() << "args=" << proc.arguments().join(" ");
+//    UiLog().dbg() << "args=" << proc.arguments().join(" "); breaks on macos, avi
 
     if(!proc.waitForStarted(1000))
     {
