@@ -14,6 +14,8 @@ echo "       -m <map>     gives mapping between local directory and directory"
 echo "                    where ecflow server runs - default is <dir>:<dir>"
 echo "       -l <logfile> logserver log file - default is \$SCRATCH/log/logfile"
 echo "       -h           print this help page"
+echo "Example:"
+echo "       start_logserver.sh -d %ECF_OUT% -m %ECF_HOME%:%ECF_OUT% -l $HOME/log/logserver.log"
 }
 
 LOGSERVERLIST=/home/us/usx/logserver/user.lst
