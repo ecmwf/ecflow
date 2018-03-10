@@ -347,57 +347,58 @@ void TimeDepAttrs::freeHoldingTimeDependencies()
 
 bool TimeDepAttrs::timeDependenciesFree() const
 {
-   if (!timeVec_.empty() || !todayVec_.empty() || !dates_.empty() || !days_.empty() || !crons_.empty()) {
+   // The code that call this function assumes we must have at least one time dependencies
+   // If there are no time dependencies then TimeDepAttrs should have been deleted by Node.
+   assert(!empty());
 
-      int noOfTimeDependencies = 0;
-      if (!timeVec_.empty())  noOfTimeDependencies++;
-      if (!todayVec_.empty()) noOfTimeDependencies++;
-      if (!dates_.empty())    noOfTimeDependencies++;
-      if (!days_.empty())     noOfTimeDependencies++;
-      if (!crons_.empty())    noOfTimeDependencies++;
+   int noOfTimeDependencies = 0;
+   if (!timeVec_.empty())  noOfTimeDependencies++;
+   if (!todayVec_.empty()) noOfTimeDependencies++;
+   if (!dates_.empty())    noOfTimeDependencies++;
+   if (!days_.empty())     noOfTimeDependencies++;
+   if (!crons_.empty())    noOfTimeDependencies++;
 
-      bool oneDateIsFree = false;
-      bool oneDayIsFree = false;
-      bool oneTodayIsFree = false;
-      bool oneTimeIsFree = false;
-      bool oneCronIsFree = false;
+   bool oneDateIsFree = false;
+   bool oneDayIsFree = false;
+   bool oneTodayIsFree = false;
+   bool oneTimeIsFree = false;
+   bool oneCronIsFree = false;
 
-      const Calendar& calendar = node_->suite()->calendar();
-      for(size_t i=0;i<timeVec_.size();i++)  { if (timeVec_[i].isFree(calendar))  {if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
-      for(size_t i=0;i<crons_.size();i++)    { if (crons_[i].isFree(calendar))    {if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
-      for(size_t i=0;i<dates_.size();i++)    { if (dates_[i].isFree(calendar))    {if ( noOfTimeDependencies == 1) return true;oneDateIsFree = true;break;}}
-      for(size_t i=0;i<days_.size();i++)     { if (days_[i].isFree(calendar))     {if ( noOfTimeDependencies == 1) return true;oneDayIsFree = true;break;}}
+   const Calendar& calendar = node_->suite()->calendar();
+   for(size_t i=0;i<timeVec_.size();i++){ if (timeVec_[i].isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
+   for(size_t i=0;i<crons_.size();i++)  { if (crons_[i].isFree(calendar))  {if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
+   for(size_t i=0;i<dates_.size();i++)  { if (dates_[i].isFree(calendar))  {if ( noOfTimeDependencies == 1) return true;oneDateIsFree = true;break;}}
+   for(size_t i=0;i<days_.size();i++)   { if (days_[i].isFree(calendar))   {if ( noOfTimeDependencies == 1) return true;oneDayIsFree = true;break;}}
 
-      if (!todayVec_.empty()) {
-         // : single Today: (single-time)   is free, if calendar time >= today_time
-         // : single Today: (range)         is free, if calendar time == (one of the time ranges)
-         // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
-         if (todayVec_.size() == 1 ) {
-            // Single Today Attribute: could be single slot or range
-            if (todayVec_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
-         }
-         else {
-            // Multiple Today Attributes, each could single, or range
-            for(size_t i=0;i<todayVec_.size();i++) {
-               if (todayVec_[i].isFreeMultipleContext(calendar)) {if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
-            }
+   if (!todayVec_.empty()) {
+      // : single Today: (single-time)   is free, if calendar time >= today_time
+      // : single Today: (range)         is free, if calendar time == (one of the time ranges)
+      // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
+      if (todayVec_.size() == 1 ) {
+         // Single Today Attribute: could be single slot or range
+         if (todayVec_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
+      }
+      else {
+         // Multiple Today Attributes, each could single, or range
+         for(size_t i=0;i<todayVec_.size();i++) {
+            if (todayVec_[i].isFreeMultipleContext(calendar)) {if (noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
          }
       }
+   }
 
 
-      if ( oneDateIsFree || oneDayIsFree || oneTodayIsFree ||  oneTimeIsFree || oneCronIsFree) {
-         if ( noOfTimeDependencies > 1 ) {
-            // *When* we have multiple time dependencies of *different types* then the results
-            // *MUST* be anded for the node to be free.
-            if (!dates_.empty() && !oneDateIsFree) return false;
-            if (!days_.empty() && !oneDayIsFree) return false;
-            if (!todayVec_.empty() && !oneTodayIsFree) return false;
-            if (!timeVec_.empty() && !oneTimeIsFree) return false;
-            if (!crons_.empty() && !oneCronIsFree) return false;
+   if ( oneDateIsFree || oneDayIsFree || oneTodayIsFree ||  oneTimeIsFree || oneCronIsFree) {
+      if ( noOfTimeDependencies > 1 ) {
+         // *When* we have multiple time dependencies of *different types* then the results
+         // *MUST* be anded for the node to be free.
+         if (!dates_.empty() && !oneDateIsFree) return false;
+         if (!days_.empty() && !oneDayIsFree) return false;
+         if (!todayVec_.empty() && !oneTodayIsFree) return false;
+         if (!timeVec_.empty() && !oneTimeIsFree) return false;
+         if (!crons_.empty() && !oneCronIsFree) return false;
 
-            // We will only get here, if we have a multiple time dependencies and they are free
-            return true;
-         }
+         // We will only get here, if we have a multiple time dependencies and they are free
+         return true;
       }
    }
 
@@ -590,20 +591,14 @@ bool TimeDepAttrs::checkInvariants(std::string& errorMsg) const
       errorMsg +="TimeDepAttrs::checkInvariants node_ not set";
       return false;
    }
+   if (empty()) {
+      errorMsg +="TimeDepAttrs::checkInvariants when TimeDepAttrs is empty, it should have been deleted";
+      return false;
+   }
    BOOST_FOREACH(const ecf::TimeAttr& t, timeVec_)  { if (!t.checkInvariants(errorMsg)) return false; }
    BOOST_FOREACH(const ecf::TodayAttr& t,todayVec_) { if (!t.checkInvariants(errorMsg)) return false; }
    BOOST_FOREACH(const CronAttr& cron, crons_ )     { if (!cron.checkInvariants(errorMsg)) return false; }
    return true;
-}
-
-
-void TimeDepAttrs::clear()
-{
-   timeVec_.clear();
-   todayVec_.clear();
-   dates_.clear();
-   days_.clear();
-   crons_.clear();
 }
 
 

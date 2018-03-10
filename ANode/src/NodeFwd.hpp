@@ -105,6 +105,7 @@ class ChildrenMemento;
 class AliasChildrenMemento;
 class AliasNumberMemento;
 class NodeQueueMemento;
+class NodeGenericMemento;
 class NodeQueueIndexMemento;
 
 #endif

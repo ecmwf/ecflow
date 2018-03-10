@@ -452,8 +452,13 @@ QToolButton[strip="first"] {
 }
 
 QToolButton[strip="first"]:hover {
-   background-color: rgb(221,221,221);
+   background-color: rgb(226,227,228);
 }
+
+QToolButton[strip="first"]:checked {
+    background-color: rgb(211,212,213);
+}
+
 
 QToolButton[strip="last"] {
   border-top-right-radius: 4px;
@@ -463,6 +468,6 @@ QToolButton[strip="last"] {
 }
 
 QToolButton[strip="last"]:hover {
-   background-color: rgb(221,221,221);
+   background-color: rgb(226,227,228);
 }
 

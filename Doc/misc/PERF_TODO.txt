@@ -1,3 +1,6 @@
+Backbround:
+=========================================================
+https://stackoverflow.com/questions/3124852/linux-timerfd-accuracy
 
 Testing Performance
 ==========================================================

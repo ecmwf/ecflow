@@ -48,4 +48,56 @@ BOOST_AUTO_TEST_CASE( test_add )
    BOOST_CHECK_THROW( defs2->addSuite(s1),std::runtime_error);
 }
 
+BOOST_AUTO_TEST_CASE( test_add_delete_time )
+{
+   cout << "ANode:: ...test_add_delete_time\n"; // ECFLOW-1260
+
+   // Make sure that if we delete any time based attributes, we delete Node::time_dep_attrs_
+   Defs defs;
+   suite_ptr s1 = defs.add_suite("s1");
+   task_ptr t1 = s1->add_task("t1");
+
+   BOOST_REQUIRE_MESSAGE(!t1->get_time_dep_attrs(), "Expected no time attributes");
+
+   ecf::CronAttr cronAttr;
+   ecf::TimeSlot start( 0, 0 );
+   ecf::TimeSlot finish( 10, 0 );
+   ecf::TimeSlot incr( 0, 5 );
+   std::vector<int> weekdays;   for(int i=0;i<7;++i) weekdays.push_back(i);
+   std::vector<int> daysOfMonth;for(int i=1;i<32;++i) daysOfMonth.push_back(i);
+   std::vector<int> months;     for(int i=1;i<13;++i) months.push_back(i);
+   cronAttr.addTimeSeries(start,finish,incr);
+   cronAttr.addWeekDays( weekdays  );
+   cronAttr.addDaysOfMonth(daysOfMonth);
+   cronAttr.addMonths(  months );
+   t1->addCron( cronAttr  );
+   BOOST_CHECK_MESSAGE(t1->get_time_dep_attrs(), "Expected time attributes");
+   t1->deleteCron("");
+   BOOST_CHECK_MESSAGE(!t1->get_time_dep_attrs(), "Expected no time attributes");
+
+   t1->addDate( DateAttr(1,2,2009) );
+   BOOST_CHECK_MESSAGE(t1->get_time_dep_attrs(), "Expected time attributes");
+   BOOST_CHECK_MESSAGE(!t1->get_time_dep_attrs()->empty(), "Expected time attributes");
+   t1->deleteDate("");
+   BOOST_CHECK_MESSAGE(!t1->get_time_dep_attrs(), "Expected no time attributes");
+
+   t1->addDay( DayAttr(DayAttr::MONDAY) );
+   BOOST_CHECK_MESSAGE(t1->get_time_dep_attrs(), "Expected time attributes");
+   BOOST_CHECK_MESSAGE(!t1->get_time_dep_attrs()->empty(), "Expected time attributes");
+   t1->deleteDay("");
+   BOOST_CHECK_MESSAGE(!t1->get_time_dep_attrs(), "Expected no time attributes");
+
+   t1->addTime( ecf::TimeAttr(ecf::TimeSlot(0,0),ecf::TimeSlot(10,1),ecf::TimeSlot(0,1),true) );
+   BOOST_CHECK_MESSAGE(t1->get_time_dep_attrs(), "Expected time attributes");
+   BOOST_CHECK_MESSAGE(!t1->get_time_dep_attrs()->empty(), "Expected time attributes");
+   t1->deleteTime("");
+   BOOST_CHECK_MESSAGE(!t1->get_time_dep_attrs(), "Expected no time attributes");
+
+   t1->addToday( ecf::TodayAttr(ecf::TimeSlot(10,12)) );
+   BOOST_CHECK_MESSAGE(t1->get_time_dep_attrs(), "Expected time attributes");
+   BOOST_CHECK_MESSAGE(!t1->get_time_dep_attrs()->empty(), "Expected time attributes");
+   t1->deleteToday("");
+   BOOST_CHECK_MESSAGE(!t1->get_time_dep_attrs(), "Expected no time attributes");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

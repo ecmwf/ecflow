@@ -58,7 +58,6 @@ public:
 	void gotoLine();
 	void showSearchLine();
     void searchOnReload(bool userClickedReload);
-    void showFilterLine();
 	void zoomIn();
 	void zoomOut();
     void setFilterButtons(QToolButton* statusTb,QToolButton* optionTb);

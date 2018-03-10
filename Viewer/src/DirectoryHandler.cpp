@@ -48,22 +48,35 @@ DirectoryHandler::DirectoryHandler()
 
 void DirectoryHandler::init(const std::string& exeStr)
 {
-	//Sets paths in the home directory
-    if(char *h=getenv("HOME"))
+    boost::filesystem::path configDir;
+
+    //The location of the config dir is specified by the user
+    //This could be the case for a ui test! In this case we
+    //must not use the rcDir!
+    if(char *confCh=getenv("ECFUI_CONFIG_DIR"))
+    {
+        std::string confStr(confCh);
+        configDir=boost::filesystem::path(confStr);
+    }
+    //By default the config dir is .ecflow_ui in $HOME,
+    //in this case we might import older settings from $HOME/.ecflowrc
+    else if(char *h=getenv("HOME"))
 	{
         std::string home(h);
         boost::filesystem::path homeDir(home);
 
-		boost::filesystem::path configDir = homeDir;
-		configDir /= ".ecflow_ui";
+        configDir = boost::filesystem::path(homeDir);
+        configDir /= ".ecflow_ui";
 
-		boost::filesystem::path rcDir = homeDir;
-		rcDir /= ".ecflowrc";
+        boost::filesystem::path rcDir = homeDir;
+        rcDir /= ".ecflowrc";
+        rcDir_=rcDir.string();
+    }
 
-		configDir_=configDir.string();
-		rcDir_=rcDir.string();
-
-		//Create configDir if if does not exist
+    //Sets configDir_ and creates it if it does not exist
+    if(!configDir.string().empty())
+    {
+        configDir_=configDir.string();
 		if(!boost::filesystem::exists(configDir))
 		{
 			firstStartUp=true;
@@ -80,6 +93,12 @@ void DirectoryHandler::init(const std::string& exeStr)
 			}
 		}
 	}
+    else
+    {
+        UserMessage::message(UserMessage::ERROR, true,
+                std::string("Could not create configDir with an empty path!"));
+        exit(1);
+    }
 
 	//Sets paths in the system directory
     boost::filesystem::path exePath(exeStr);

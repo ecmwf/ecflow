@@ -361,6 +361,25 @@ private:
    }
 };
 
+class NodeGenericMemento : public Memento {
+public:
+   NodeGenericMemento(const GenericAttr& e) : generic_(e) {}
+   NodeGenericMemento() {}
+private:
+   virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
+
+   GenericAttr generic_;
+   friend class Node;
+   friend class MiscAttrs;
+
+   friend class boost::serialization::access;
+   template<class Archive>
+   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+      ar & boost::serialization::base_object<Memento>(*this);
+      ar & generic_;
+   }
+};
+
 class NodeQueueIndexMemento : public Memento {
 public:
    NodeQueueIndexMemento(const std::string& name, int index) : index_(index), name_(name) {}
@@ -779,6 +798,7 @@ BOOST_CLASS_EXPORT_KEY(NodeEventMemento);
 BOOST_CLASS_EXPORT_KEY(NodeMeterMemento);
 BOOST_CLASS_EXPORT_KEY(NodeLabelMemento);
 BOOST_CLASS_EXPORT_KEY(NodeQueueMemento);
+BOOST_CLASS_EXPORT_KEY(NodeGenericMemento);
 BOOST_CLASS_EXPORT_KEY(NodeQueueIndexMemento);
 BOOST_CLASS_EXPORT_KEY(NodeTriggerMemento);
 BOOST_CLASS_EXPORT_KEY(NodeCompleteMemento);

@@ -38,9 +38,12 @@ void Node::clear()
    //       Hence no need for memento
   	// ************************************************************
 
-   if (time_dep_attrs_) time_dep_attrs_->clear();
-   if (child_attrs_) child_attrs_->clear();
-   if (misc_attrs_) misc_attrs_->clear_attributes_with_state();    // zombies can be added/removed via AlterCmd
+   delete time_dep_attrs_; time_dep_attrs_ = NULL;
+   delete child_attrs_; child_attrs_ = NULL;
+   delete misc_attrs_; misc_attrs_ = NULL; // zombies can be added/removed via AlterCm
+
+   // we dont delete auto_attrs_ since that does not have changable state ?
+
   	repeat_.clear();
 	varVec_.clear();
 	limitVec_.clear();
@@ -125,6 +128,9 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 
          const std::vector<QueueAttr>& queue_attrs = misc_attrs_->queues();
          BOOST_FOREACH(const QueueAttr& attr, queue_attrs){ comp->add( boost::make_shared<NodeQueueMemento>( attr) ); }
+
+         const std::vector<GenericAttr>& generic_attrs = misc_attrs_->generics();
+         BOOST_FOREACH(const GenericAttr& attr,generic_attrs){ comp->add( boost::make_shared<NodeGenericMemento>( attr) ); }
 		}
 
 		BOOST_FOREACH(limit_ptr l, limitVec_ )         { comp->add( boost::make_shared<NodeLimitMemento>(  *l) ); }
@@ -393,6 +399,20 @@ void Node::set_memento(const NodeQueueMemento* m,std::vector<ecf::Aspect::Type>&
       return;
    }
    add_queue(m->queue_);
+}
+
+void Node::set_memento(const NodeGenericMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only)
+{
+   if (aspect_only) {
+      // For attribute add/delete Should have already added ecf::Aspect::ADD_REMOVE_ATTR to aspects
+      aspects.push_back(ecf::Aspect::GENERIC);
+      return;
+   }
+   if (misc_attrs_) {
+      misc_attrs_->set_memento(m);
+      return;
+   }
+   add_generic(m->generic_);
 }
 
 void Node::set_memento(const NodeQueueIndexMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only )

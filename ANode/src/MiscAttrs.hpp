@@ -29,9 +29,9 @@
 
 class MiscAttrs : private boost::noncopyable {
 public:
-   MiscAttrs(Node* node) : node_(node),auto_cancel_(NULL),auto_archive_(NULL),auto_restore_(NULL) {}
+   MiscAttrs(Node* node) : node_(node){}
    MiscAttrs(const MiscAttrs& rhs);
-   MiscAttrs() : node_(NULL),auto_cancel_(NULL),auto_archive_(NULL),auto_restore_(NULL) {}
+   MiscAttrs() : node_(NULL){}
    ~MiscAttrs();
 
    // needed by node serialisation
@@ -57,22 +57,6 @@ public:
    void add_queue( const QueueAttr& );                   // will throw std::runtime_error if duplicate
    void add_generic( const GenericAttr& );               // will throw std::runtime_error if duplicate, must be unique on the key
 
-   // Auto =====================================================================================
-   ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_;}
-   ecf::AutoCancelAttr*  get_autocancel() const { return auto_cancel_;}
-   ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_;}
-
-   void add_autorestore( const ecf::AutoRestoreAttr& ); // will throw std::runtime_error for errors
-   void add_autocancel( const ecf::AutoCancelAttr& );   // will throw std::runtime_error for errors
-   void add_autoarchive( const ecf::AutoArchiveAttr& ); // will throw std::runtime_error for errors
-
-   void do_autorestore();
-
-   bool checkForAutoCancel(const ecf::Calendar& calendar) const;
-   bool check_for_auto_archive(const ecf::Calendar& calendar) const;
-   bool has_auto_cancel() const {return (auto_cancel_) ? true : false;} // simulator function
-
-
    /// Check to see if auto_restore can reference the nodes
    void check(std::string& errorMsg) const;
 
@@ -93,12 +77,12 @@ public:
 
    void verification(std::string& errorMsg) const;
 
+   void set_memento(const NodeGenericMemento* );
    void set_memento(const NodeQueueMemento* );
    void set_memento(const NodeQueueIndexMemento*);
 
+   bool empty() const { return (zombies_.empty() && verifys_.empty() && queues_.empty() && generics_.empty()) ? true : false;}
 private:
-   void clear_attributes_with_state(); // used during incremental sync, where attribute with state added/deleted
-
    std::vector<ZombieAttr>::const_iterator zombie_begin() const { return zombies_.begin();}
    std::vector<ZombieAttr>::const_iterator zombie_end() const { return zombies_.end();}
    std::vector<VerifyAttr>::const_iterator verify_begin() const { return verifys_.begin();}
@@ -113,10 +97,7 @@ private:
    friend class Node;
 
 private:
-   ecf::AutoCancelAttr*    auto_cancel_;  // Can only have 1 auto cancel per node
-   ecf::AutoArchiveAttr*   auto_archive_; // Can only have 1 auto archive per node
-   ecf::AutoRestoreAttr*   auto_restore_; // Can only have 1 autorestore per node
-   std::vector<ZombieAttr> zombies_;
+   std::vector<ZombieAttr> zombies_;      // can be added/removed via AlterCmd
    std::vector<VerifyAttr> verifys_;      // used for statistics and test verification
    std::vector<QueueAttr>  queues_;       // experimental
    std::vector<GenericAttr> generics_;    // experimental
@@ -125,9 +106,6 @@ private:
    friend class boost::serialization::access;
    template<class Archive>
    void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & auto_cancel_;
-      ar & auto_archive_;
-      ar & auto_restore_;
       ar & zombies_;
       ar & verifys_;
       ar & queues_;

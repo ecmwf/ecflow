@@ -128,6 +128,55 @@ void delete_some_attributes(defs_ptr defs)
 	}
 }
 
+void delete_time_attributes(defs_ptr defs)
+{
+   std::vector<Node*> nodes;
+   defs->getAllNodes(nodes);
+   BOOST_FOREACH(Node* node, nodes) {
+
+      SuiteChanged1 changed(node->suite());
+
+      /// Take a copy, of the objects we want to delete. since there are returned by reference
+      std::vector<TimeAttr> times = node->timeVec();
+      std::vector<TodayAttr> todays = node->todayVec();
+      std::vector<DayAttr>   days = node->days();
+      std::vector<DateAttr> dates = node->dates();
+      std::vector<CronAttr> crons = node->crons();
+
+      BOOST_FOREACH(const TimeAttr& t, times) { node->delete_time( t );}
+      BOOST_FOREACH(const TodayAttr& t, todays) { node->delete_today( t );}
+      BOOST_FOREACH(const DayAttr& t, days) { node->delete_day( t );}
+      BOOST_FOREACH(const DateAttr& t, dates) { node->delete_date( t );}
+      BOOST_FOREACH(const CronAttr& t, crons) { node->delete_cron( t );}
+
+      BOOST_REQUIRE_MESSAGE( node->timeVec().empty(),"Expected all times to be deleted");
+      BOOST_REQUIRE_MESSAGE( node->todayVec().empty(),"Expected all todays to be deleted");
+      BOOST_REQUIRE_MESSAGE( node->days().empty(),"Expected all days to be deleted");
+      BOOST_REQUIRE_MESSAGE( node->dates().empty(),"Expected all dates to be deleted");
+      BOOST_REQUIRE_MESSAGE( node->crons().empty(),"Expected all crons to be deleted");
+   }
+}
+
+void delete_misc_attributes(defs_ptr defs)
+{
+   std::vector<Node*> nodes;
+   defs->getAllNodes(nodes);
+   BOOST_FOREACH(Node* node, nodes) {
+
+      SuiteChanged1 changed(node->suite());
+
+      /// Take a copy, of the objects we want to delete. since there are returned by reference
+      std::vector<ZombieAttr> zombies = node->zombies();
+      //std::vector<VerifyAttr> verifys = node->verifys()();
+
+      BOOST_FOREACH(const ZombieAttr & t, zombies ) { node->delete_zombie( t.zombie_type() );}
+      //BOOST_FOREACH(const VerifyAttr & t, verifys ) { node->delete_verify( t );}
+
+      BOOST_REQUIRE_MESSAGE( node->zombies().empty(),"Expected all zombies to be deleted");
+      //BOOST_REQUIRE_MESSAGE( node->verifys().empty(),"Expected all verifys to be deleted");
+   }
+}
+
 void add_some_attributes(defs_ptr defs) {
 	std::vector<task_ptr> tasks;
 	defs->get_all_tasks(tasks);
@@ -348,6 +397,8 @@ BOOST_AUTO_TEST_CASE( test_ssync_cmd  )
 	cout << "Base:: ...test_ssync_cmd\n";
    test_sync_scaffold(update_repeat,"update_repeat");
    test_sync_scaffold(delete_some_attributes,"delete_some_attributes");
+   test_sync_scaffold(delete_time_attributes,"delete_time_attributes");
+   test_sync_scaffold(delete_misc_attributes,"delete_misc_attributes");
 	test_sync_scaffold(add_some_attributes,"add_some_attributes");
    test_sync_scaffold(begin,"begin",true /* expect full_sync */);
    test_sync_scaffold(add_alias,"add_alias");

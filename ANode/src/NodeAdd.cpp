@@ -296,32 +296,32 @@ void Node::addRepeat( const Repeat& r ){
 
 void Node::addAutoCancel( const AutoCancelAttr& ac)
 {
-   if (misc_attrs_) {
-      misc_attrs_->add_autocancel(ac); // can throw, will update Node::state_change_no_
+   if (auto_attrs_) {
+      auto_attrs_->add_autocancel(ac); // can throw, will update Node::state_change_no_
       return;
    }
-   misc_attrs_ = new MiscAttrs(this);
-   misc_attrs_->add_autocancel(ac); // will update Node::state_change_no_
+   auto_attrs_ = new AutoAttrs(this);
+   auto_attrs_->add_autocancel(ac); // will update Node::state_change_no_
 }
 
 void Node::add_autoarchive( const AutoArchiveAttr& aa)
 {
-   if (misc_attrs_) {
-      misc_attrs_->add_autoarchive(aa); // can throw, will update Node::state_change_no_
+   if (auto_attrs_) {
+      auto_attrs_->add_autoarchive(aa); // can throw, will update Node::state_change_no_
       return;
    }
-   misc_attrs_ = new MiscAttrs(this);
-   misc_attrs_->add_autoarchive(aa);   // will update Node::state_change_no_
+   auto_attrs_ = new AutoAttrs(this);
+   auto_attrs_->add_autoarchive(aa);   // will update Node::state_change_no_
 }
 
 void Node::add_autorestore( const ecf::AutoRestoreAttr& ar)
 {
-   if (misc_attrs_) {
-      misc_attrs_->add_autorestore(ar); // can throw, will update Node::state_change_no_
+   if (auto_attrs_) {
+      auto_attrs_->add_autorestore(ar); // can throw, will update Node::state_change_no_
       return;
    }
-   misc_attrs_ = new MiscAttrs(this);
-   misc_attrs_->add_autorestore(ar);   // will update Node::state_change_no_
+   auto_attrs_ = new AutoAttrs(this);
+   auto_attrs_->add_autorestore(ar);   // will update Node::state_change_no_
 }
 
 void Node::addLate( const ecf::LateAttr& l )

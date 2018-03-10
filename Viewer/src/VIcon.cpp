@@ -442,15 +442,16 @@ bool  VTimeIcon::show(VNode *n)
 
 	node_ptr node=n->node();
 
-	//Check if time is held
-	if(TimeDepAttrs *attr = node->get_time_dep_attrs())
-	{
-		return !attr->time_today_cron_is_free();
-	}
+    if(node->timeVec().size() > 0 ||
+       node->todayVec().size() > 0 ||
+       node->crons().size() > 0)
+    {
+        //if(TimeDepAttrs *attr = node->get_time_dep_attrs())
+        //    return !attr->time_today_cron_is_free();
+        return true;
 
-	return (node->timeVec().size() > 0 ||
-	        node->todayVec().size() > 0 ||
-	        node->crons().size() > 0);
+    }
+    return false;
 }
 
 //==========================================================

@@ -59,6 +59,7 @@ Node::Node(const std::string& n)
   time_dep_attrs_(NULL),
   child_attrs_(NULL),
   misc_attrs_(NULL),
+  auto_attrs_(NULL),
   inLimitMgr_(this),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
   graphic_ptr_(0)
@@ -79,6 +80,7 @@ Node::Node()
   time_dep_attrs_(NULL),
   child_attrs_(NULL),
   misc_attrs_(NULL),
+  auto_attrs_(NULL),
   inLimitMgr_(this),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
   graphic_ptr_(0)
@@ -96,6 +98,7 @@ Node::Node(const Node& rhs)
   time_dep_attrs_((rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL),
   child_attrs_((rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL),
   misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL),
+  auto_attrs_((rhs.auto_attrs_) ? new AutoAttrs(*rhs.auto_attrs_) : NULL),
   repeat_( rhs.repeat_),
   varVec_(rhs.varVec_),
   inLimitMgr_(rhs.inLimitMgr_),
@@ -107,6 +110,7 @@ Node::Node(const Node& rhs)
    if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
    if ( child_attrs_ )    child_attrs_->set_node(this);
    if ( misc_attrs_ )     misc_attrs_->set_node(this);
+   if ( auto_attrs_ )     auto_attrs_->set_node(this);
 
    for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
       limit_ptr the_limit = boost::make_shared<Limit>( *rhs.limitVec_[l]);
@@ -122,6 +126,7 @@ void Node::delete_attributes() {
    delete time_dep_attrs_;
    delete child_attrs_;
    delete misc_attrs_;
+   delete auto_attrs_;
 }
 
 node_ptr Node::create(const std::string& node_string)
@@ -158,6 +163,7 @@ Node& Node::operator=(const Node& rhs)
       time_dep_attrs_ = (rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL ;
       child_attrs_ = (rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL ;
       misc_attrs_ = (rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL;
+      auto_attrs_ = (rhs.auto_attrs_) ? new AutoAttrs(*rhs.auto_attrs_) : NULL;
       repeat_ =  rhs.repeat_ ;
       varVec_ = rhs.varVec_ ;
       inLimitMgr_ = rhs.inLimitMgr_ ;
@@ -172,6 +178,7 @@ Node& Node::operator=(const Node& rhs)
       if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
       if ( child_attrs_ )    child_attrs_->set_node(this);
       if ( misc_attrs_ )     misc_attrs_->set_node(this);
+      if ( auto_attrs_ )     auto_attrs_->set_node(this);
 
       limitVec_.clear();
       for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
@@ -403,14 +410,14 @@ void Node::calendarChanged(
       time_dep_attrs_->calendarChanged(c);
    }
 
-   if (misc_attrs_) {
+   if (auto_attrs_) {
 
-      if (misc_attrs_->checkForAutoCancel(c)) {
+      if (auto_attrs_->checkForAutoCancel(c)) {
          auto_cancelled_nodes.push_back(shared_from_this());
       }
 
       // Avoid automatically archiving a restored node. Wait till begin/re-queue
-      if (!flag().is_set(ecf::Flag::RESTORED) && misc_attrs_->check_for_auto_archive(c)) {
+      if (!flag().is_set(ecf::Flag::RESTORED) && auto_attrs_->check_for_auto_archive(c)) {
          auto_archive_nodes.push_back(shared_from_this());
       }
    }
@@ -824,7 +831,7 @@ void Node::set_state(NState::State newState, bool force, const std::string& addi
 void Node::handleStateChange()
 {
    if (state() == NState::COMPLETE) {
-      if (misc_attrs_) misc_attrs_->do_autorestore();
+      if (auto_attrs_) auto_attrs_->do_autorestore();
    }
 }
 
@@ -1426,7 +1433,7 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    inLimitMgr_.check(errorMsg,warningMsg,reportErrors, reportWarnings);
 
    /// Check that the references to nodes in autorestore resolve
-   if (misc_attrs_) misc_attrs_->check(errorMsg);
+   if (auto_attrs_) auto_attrs_->check(errorMsg);
 
    return errorMsg.empty();
 }
@@ -1534,6 +1541,7 @@ std::ostream& Node::print(std::ostream& os) const
    if (child_attrs_) child_attrs_->print(os);
    if (time_dep_attrs_) time_dep_attrs_->print(os);
    if (misc_attrs_) misc_attrs_->print(os);
+   if (auto_attrs_) auto_attrs_->print(os);
 
    return os;
 }
@@ -1731,6 +1739,22 @@ bool Node::operator==(const Node& rhs) const
       return false;
    }
 
+   if (( auto_attrs_ && !rhs.auto_attrs_) || ( !auto_attrs_ && rhs.auto_attrs_)){
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator== (( auto_attrs_ && !rhs.auto_attrs_) || ( !auto_attrs_ && rhs.auto_attrs_)) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   if ( auto_attrs_ &&  rhs.auto_attrs_ && !(*auto_attrs_ == *rhs.auto_attrs_)) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator== ( auto_attrs_ && rhs.auto_attrs_ && !(*auto_attrs_ == *(rhs.auto_attrs_))) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
 
    if (!(repeat_ == rhs.repeat_)) {
 #ifdef DEBUG
@@ -2223,10 +2247,10 @@ const std::vector<QueueAttr>& Node::queues()   const { if (misc_attrs_) return m
 std::vector<QueueAttr>& Node::ref_queues()           { if (misc_attrs_) return misc_attrs_->ref_queues(); return queues_; }
 const std::vector<GenericAttr>& Node::generics() const { if (misc_attrs_) return misc_attrs_->generics(); return generics_; }
 
-ecf::AutoRestoreAttr* Node::get_autorestore() const  { if (misc_attrs_) return misc_attrs_->get_autorestore(); return NULL;}
-ecf::AutoCancelAttr*  Node::get_autocancel() const   { if (misc_attrs_) return misc_attrs_->get_autocancel(); return NULL;}
-ecf::AutoArchiveAttr* Node::get_autoarchive() const  { if (misc_attrs_) return misc_attrs_->get_autoarchive(); return NULL;}
-bool Node::hasAutoCancel() const { if (misc_attrs_) return misc_attrs_->has_auto_cancel(); return false;}
+ecf::AutoRestoreAttr* Node::get_autorestore() const  { if (auto_attrs_) return auto_attrs_->get_autorestore(); return NULL;}
+ecf::AutoCancelAttr*  Node::get_autocancel() const   { if (auto_attrs_) return auto_attrs_->get_autocancel(); return NULL;}
+ecf::AutoArchiveAttr* Node::get_autoarchive() const  { if (auto_attrs_) return auto_attrs_->get_autoarchive(); return NULL;}
+bool Node::hasAutoCancel() const { if (auto_attrs_) return auto_attrs_->has_auto_cancel(); return false;}
 
 std::vector<ZombieAttr>::const_iterator Node::zombie_begin() const { if (misc_attrs_) return misc_attrs_->zombie_begin(); return zombies_.begin();}
 std::vector<ZombieAttr>::const_iterator Node::zombie_end()   const { if (misc_attrs_) return misc_attrs_->zombie_end(); return zombies_.end();}
