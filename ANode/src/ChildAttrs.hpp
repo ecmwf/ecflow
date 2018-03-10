@@ -107,9 +107,6 @@ private: // allow simulator access
    std::vector<Meter>&  ref_meters() { return meters_;} // allow simulator set meter value
    std::vector<Event>&  ref_events() { return events_;} // allow simulator set event value
 
-private: // All mementos access
-   void clear(); /// Clear *ALL* internal attributes
-
 private: /// For use by python interface,
    friend class Node;
    std::vector<Meter>::const_iterator meter_begin() const { return meters_.begin();}

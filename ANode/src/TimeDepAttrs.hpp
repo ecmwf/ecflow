@@ -116,8 +116,6 @@ public:
    std::vector<ecf::CronAttr>::const_iterator cron_begin() const { return crons_.begin();}
    std::vector<ecf::CronAttr>::const_iterator cron_end() const { return crons_.end();}
 
-   void clear(); /// Clear *ALL* internal attributes
-
    /// Under the hybrid calendar some time dependent attributes may not be applicable
    /// i.e if day,date,cron attributes does correspond to 24 hours of today, then we
    /// need make them as complete.

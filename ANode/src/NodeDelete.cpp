@@ -281,14 +281,28 @@ void Node::deleteInlimit(const std::string& name)
 	}
 }
 
+void Node::delete_misc_attrs_if_empty()
+{
+   if (misc_attrs_ && misc_attrs_->empty()) {
+      delete misc_attrs_;
+      misc_attrs_ = NULL;
+   }
+}
+
 void Node::deleteZombie(const std::string& zombie_type)
 {
-   if (misc_attrs_) misc_attrs_->deleteZombie(zombie_type);
+   if (misc_attrs_) {
+      misc_attrs_->deleteZombie(zombie_type);
+      delete_misc_attrs_if_empty();
+   }
 }
 
 void Node::delete_zombie(Child::ZombieType zt)
 {
-   if (misc_attrs_) misc_attrs_->delete_zombie(zt);
+   if (misc_attrs_) {
+      misc_attrs_->delete_zombie(zt);
+      delete_misc_attrs_if_empty();
+   }
 }
 
 void Node::deleteLate()

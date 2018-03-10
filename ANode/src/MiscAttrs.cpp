@@ -171,8 +171,3 @@ bool MiscAttrs::findVerify(const VerifyAttr& v) const
    return false;
 }
 
-void MiscAttrs::clear()
-{
-   zombies_.clear();   // can be added/removed via AlterCmd
-   verifys_.clear();
-}

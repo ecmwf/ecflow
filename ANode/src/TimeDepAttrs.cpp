@@ -602,16 +602,6 @@ bool TimeDepAttrs::checkInvariants(std::string& errorMsg) const
 }
 
 
-void TimeDepAttrs::clear()
-{
-   timeVec_.clear();
-   todayVec_.clear();
-   dates_.clear();
-   days_.clear();
-   crons_.clear();
-}
-
-
 void TimeDepAttrs::addTime(const ecf::TimeAttr& t)
 {
    timeVec_.push_back(t);

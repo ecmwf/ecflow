@@ -700,6 +700,7 @@ private:
    void clearSuspended();
    void delete_time_dep_attrs_if_empty();
    void delete_child_attrs_if_empty();
+   void delete_misc_attrs_if_empty();
 
 private: // alow simulator access
    friend class ecf::DefsAnalyserVisitor;
