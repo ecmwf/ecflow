@@ -425,7 +425,9 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
          QStringList() <<  "-c" << "grep " + extraOptions + " -e \'" + filter  + "\' " +
          QString::fromStdString(fSrc->path()));
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     UiLog().dbg() << "args=" << proc.arguments().join(" ");
+#endif
 
     if(!proc.waitForStarted(1000))
     {
