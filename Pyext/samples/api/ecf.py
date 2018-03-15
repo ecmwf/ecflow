@@ -77,7 +77,7 @@ user = os.getenv("USER")
 
 ECF_PORT = os.getenv("ECF_PORT", 1500 + int(pwd.getpwnam(get_username()).pw_uid))
 ECF_HOME = os.getenv("ECF_HOME", "localhost")
-CLIENT = ecf.Client(ECF_HOME + "@%s" % ECF_PORT)  # PYTHON CLIENT
+CLIENT = ecflow.Client(ECF_HOME + ":%s" % ECF_PORT)  # PYTHON CLIENT
 deployed = []
 
 
@@ -2043,6 +2043,21 @@ class TestEcf(unittest.TestCase):
         cmd = "xdg-open test.gv.pdf;"
         cmd += "dot -Tps test.gv > test.ps && xdg-open test.ps"
         os.system(cmd)
+
+    def test_defs(self):
+        git = os.getenv("GIT_ECFLOW", "./")
+        locs = [git + "ANode/parser/test/data/good_defs",
+                git + "CSim/test/data/good_defs" ]
+
+        def process_dir(log):
+            for root, dirs, files in os.walk(loc):
+                for file in files:
+                    if file.enswith(".def"):
+                        print(file)                                
+                for dir in dirs: process_dir(dir)
+
+        for loc in locs:
+            process_dir(loc)
 
     def test_cdp_aka_pyflow(self):
         CWN.cdp(True)
