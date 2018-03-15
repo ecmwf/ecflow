@@ -1481,6 +1481,9 @@ def to_pyflow(node, container=None):
 
 def to_dict(node, container=None):
     kids = dict()
+    if type(node) is ecflow.Defs:
+        return dict()
+
     for item in node.nodes:
         kids[item.name()] = to_dict(item)
 
@@ -2049,12 +2052,18 @@ class TestEcf(unittest.TestCase):
         locs = [git + "ANode/parser/test/data/good_defs",
                 git + "CSim/test/data/good_defs" ]
 
-        def process_dir(log):
+        def process_dir(loc):
             for root, dirs, files in os.walk(loc):
+                # print(root, dirs, files)
                 for file in files:
-                    if file.enswith(".def"):
-                        print(file)                                
-                for dir in dirs: process_dir(dir)
+                    if file.endswith(".def"):
+                        defs = ecflow.Defs(os.path.join(root, file))
+                        json = to_json(defs)
+                        print(defs, json)
+
+                for dir in dirs: 
+                    # print(dir);
+                    process_dir(os.path.join(root, dir))
 
         for loc in locs:
             process_dir(loc)
