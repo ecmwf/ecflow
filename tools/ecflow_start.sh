@@ -134,7 +134,7 @@ $localh )
 
   servers_ui=$HOME/.ecflow_ui/servers.txt
   if [ -f $server_ui ] ; then 
-    grep "^$localh" $servers_ui || echo "$localh,$localh,$ECF_PORT,0,1" >> $servers_ui
+    grep "^$localh" $servers_ui || echo "$localh,$localh,$ECF_PORT,0,0" >> $servers_ui
   fi
 ;;
 esac
