@@ -67,7 +67,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
       // handle case like: alter add variable FRED "fre d ddy" /suite
       // If we have quote marks, then treat as one string,
       // by replacing spaces with /b, then replacing back after the split
-      // This can only handle one level of quotes  hence cant cope with "fred \"joe fred\"
+      // This can only handle one level of quotes  hence can't cope with "fred \"joe fred\"
       bool start_quote = false;
       bool replaced_spaces =  false;
       for(size_t i =0; i < subCmd.size(); ++i) {
