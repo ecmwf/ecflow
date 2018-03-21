@@ -53,19 +53,48 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
    cmdRegistry.addCmdOptions(desc);
 
 
+   std::string subCmd;
    for(size_t i=0; i < individualCmdVec.size(); i++){
       // massage the commands so that, we add -- at the start of each command.
       // This is required by the boost program options.
       std::string aCmd = individualCmdVec[i];
       boost::algorithm::trim(aCmd);
 
-      std::string subCmd;
+      subCmd.clear();
       if (aCmd.find("--") == std::string::npos)  subCmd = "--";
       subCmd += aCmd;
+
+      // handle case like: alter add variable FRED "fre d ddy" /suite
+      // If we have quote marks, then treat as one string,
+      // by replacing spaces with /b, then replacing back after the split
+      // This can only handle one level of quotes  hence can't cope with "fred \"joe fred\"
+      bool start_quote = false;
+      bool replaced_spaces =  false;
+      for(size_t i =0; i < subCmd.size(); ++i) {
+         if (start_quote) {
+            if (subCmd[i] == '"' || subCmd[i] == '\'') start_quote = false;
+            else if (subCmd[i] == ' ') {
+               subCmd[i] = '\b';  // "fre d ddy"  => "fre\bd\bddy"
+               replaced_spaces = true;
+            }
+         }
+         else {
+            if (subCmd[i] == '"' || subCmd[i] == '\'') start_quote = true;
+         }
+      }
 
       // Each sub command can have, many args
       std::vector<std::string> subCmdArgs;
       Str::split(subCmd,subCmdArgs);
+
+      if (replaced_spaces) {
+         for(size_t i = 0; i < subCmdArgs.size(); ++i) {
+            std::string& str = subCmdArgs[i];
+            for(size_t j=0; j < str.size(); ++j) {
+               if (str[j] == '\b') str[j] = ' ';     // "fre\bd\bddy"  => "fre d ddy"
+            }
+         }
+      }
 
       // The first will be the command, then the args. However from boost 1.59
       // we must use --cmd=value, instead of --cmd value

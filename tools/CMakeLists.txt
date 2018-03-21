@@ -17,7 +17,6 @@ endif()
 install( FILES
             ${CMAKE_SOURCE_DIR}/tools/ecflow_fuse.py
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
             ${CMAKE_SOURCE_DIR}/tools/noconnect.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_stop.sh
