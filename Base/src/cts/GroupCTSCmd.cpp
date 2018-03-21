@@ -72,16 +72,14 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
       bool replaced_spaces =  false;
       for(size_t i =0; i < subCmd.size(); ++i) {
          if (start_quote) {
-            if (subCmd[i] == '"') start_quote = false;
-            else if ( subCmd[i] == '\'') start_quote = false;
+            if (subCmd[i] == '"' || subCmd[i] == '\'') start_quote = false;
             else if (subCmd[i] == ' ') {
                subCmd[i] = '\b';  // "fre d ddy"  => "fre\bd\bddy"
                replaced_spaces = true;
             }
          }
          else {
-            if (subCmd[i] == '"') start_quote = true;
-            else if (subCmd[i] == '\'') start_quote = true;
+            if (subCmd[i] == '"' || subCmd[i] == '\'') start_quote = true;
          }
       }
 
