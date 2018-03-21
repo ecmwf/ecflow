@@ -34,10 +34,12 @@ public:
     void setEditFocus();
     void buildMenu(QToolButton *tb);
     void setExternalButtons(QToolButton* statusTb,QToolButton* optionTb);
+    void setEnabledExternalButtons(bool);
     QString filterText() const;
     bool isActive() const;
     bool isCaseSensitive() const;
     bool isMatched() const;
+    void closeIt();
 
 public Q_SLOTS:
     void slotFilterEditor();

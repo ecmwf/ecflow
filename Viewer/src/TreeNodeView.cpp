@@ -344,12 +344,10 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
             UiLog().dbg() << "expandAll time=" << t.elapsed()/1000. << "s";
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-            QGuiApplication::restoreOverrideCursor();
-
+            QGuiApplication::restoreOverrideCursor();        
+#endif
             //save/update the expand state object
             saveExpandAll(idx);
-
-#endif
         }
     }
     else if(cmd == "collapse")
