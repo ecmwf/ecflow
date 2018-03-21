@@ -55,7 +55,7 @@ public:
     void saveCurrentFile(QString &fileNameToSaveTo);
 	void adjustHighlighter(QString fileName);
 	void setFontProperty(VProperty* p);
-	void updateFont();
+    void updateFont();
 	void gotoLine();
 	void showSearchLine();
     void searchOnReload(bool userClickedReload);
