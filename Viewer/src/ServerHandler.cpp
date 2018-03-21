@@ -301,6 +301,17 @@ void ServerHandler::driftRefreshTimer()
             if(delta==0)
                 delta=baseDelta;
         }
+        //x modes
+        else
+        {
+            float f=conf_->stringValue(VServerSettings::AdaptiveUpdateMode).toFloat();
+            if(f >= 1. && f <=5.)
+            {
+                delta=((10*(refreshTimer_->interval()/1000-rate))*(f-1))/10;
+                if(delta==0)
+                    delta=baseDelta;
+            }
+        }
 
         refreshTimer_->drift(delta,conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
 
