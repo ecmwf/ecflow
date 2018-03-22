@@ -16,7 +16,7 @@ class TestConfluence(unittest.TestCase):
 
     def test_add_attachment_id(self):
         title = "Releases"
-        space_key_list = [  "EMOS", "ECFLOW", "MAGP", "METV", "ECCUI"]
+        space_key_list = [ "EMOS", "ECFLOW", "MAGP", "METV", "ECCUI", "ECC" ]
         for space_key in space_key_list:
             page_id = self.c.get_page_id(space_key,title) 
             if page_id == None:
