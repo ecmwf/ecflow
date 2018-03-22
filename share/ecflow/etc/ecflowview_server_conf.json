@@ -29,7 +29,7 @@
                 "adaptiveUpdateMode": {
                     "label": "Server refresh drift increase method",
                     "tooltip" : "Defines how the drift is increased. In <b>linear</b> mode the increment is added to the current drift, while in <b>drift x N</b> mode the current drift value is always multiplied by the given N factor.",
-                    "default": "doubling",
+                    "default": "1.4",
                     "values" : "linear/1.2/1.4/1.6/1.8/doubling",
                     "values_label" : "linear/drift x 1.2/drift x 1.4/drift x 1.6/drift x 1.8/drift x 2"
                 },
