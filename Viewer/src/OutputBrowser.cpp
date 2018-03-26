@@ -19,7 +19,9 @@
 #endif
 
 #include "Highlighter.hpp"
+
 #include "MessageLabel.hpp"
+#include "HtmlEdit.hpp"
 #include "PlainTextEdit.hpp"
 #include "PlainTextSearchInterface.hpp"
 #include "TextEditSearchLine.hpp"
@@ -36,7 +38,7 @@ int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) :
     QWidget(parent),
-    filterTb_(0)
+    searchTb_(0)
 {
     QVBoxLayout *vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
@@ -88,8 +90,12 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     textPagerSearchInterface_=new TextPagerSearchInterface();
     textPagerSearchInterface_->setEditor(textPager_->textEditor());
 
+    //Html browser for html files
+    htmlEdit_=new HtmlEdit(this);
+
     stacked_->addWidget(textEdit_);
     stacked_->addWidget(textPager_);
+    stacked_->addWidget(htmlEdit_);
 
     stacked_->setCurrentIndex(BasicIndex);
     searchLine_->hide();
@@ -112,6 +118,11 @@ OutputBrowser::~OutputBrowser()
     }
 }
 
+void OutputBrowser::setSearchButtons(QToolButton* searchTb)
+{
+    searchTb_=searchTb;
+}
+
 void OutputBrowser::setFilterButtons(QToolButton* statusTb,QToolButton* optionTb)
 {
     textFilter_->setExternalButtons(statusTb,optionTb);
@@ -120,7 +131,8 @@ void OutputBrowser::setFilterButtons(QToolButton* statusTb,QToolButton* optionTb
 void OutputBrowser::clear()
 {
     textEdit_->clear();
-	textPager_->clear();
+    textPager_->clear();
+    htmlEdit_->clear();
     file_.reset();
     oriFile_.reset();
 }
@@ -129,22 +141,48 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
 {
     if(indexType == BasicIndex)
     {
-        stacked_->setCurrentIndex(indexType);
+        stacked_->setCurrentIndex(indexType);               
+        textPager_->clear();
+        htmlEdit_->clear();
+
+        //enable and init search
+        if(searchTb_) searchTb_->setEnabled(true);
         searchLine_->setConfirmSearch(false);
         searchLine_->setSearchInterface(textEditSearchInterface_);
-        //confirmSearchLabel_->clear();
-        //confirmSearchLabel_->hide();
 
-        textPager_->clear();
+        //enable filter
+        textFilter_->setEnabledExternalButtons(true);
     }
-    else
+    else if(indexType == PagerIndex)
     {
-        stacked_->setCurrentIndex(indexType);
+        stacked_->setCurrentIndex(indexType);          
+        textEdit_->clear();
+        htmlEdit_->clear();
+
+        //enable and init search
+        if(searchTb_) searchTb_->setEnabled(true);
         searchLine_->setConfirmSearch(fileSize >=minConfirmSearchSize_);
         searchLine_->setSearchInterface(textPagerSearchInterface_);
-        //confirmSearchLabel_->show();
-        //confirmSearchLabel_->showWarning(searchLine_->confirmSearchText());
+
+        //enable filter
+        textFilter_->setEnabledExternalButtons(true);
+    }
+    else if(indexType == HtmlIndex)
+    {
+        stacked_->setCurrentIndex(indexType);
+        textPager_->clear();
         textEdit_->clear();
+        if(oriFile_)
+            oriFile_.reset();
+
+        //Disable search
+        if(searchTb_) searchTb_->setEnabled(false);
+        searchLine_->setSearchInterface(0);
+        searchLine_->hide();
+
+        //Disable filter
+        textFilter_->closeIt();
+        textFilter_->setEnabledExternalButtons(false);
     }
 
     showConfirmSearchLabel();
@@ -198,7 +236,20 @@ void OutputBrowser::loadFile(QString fileName)
     QFileInfo fInfo(file);
     qint64 fSize=fInfo.size();
     
-    if(!isJobFile(fileName) && fSize >= minPagerTextSize_)
+    if(isHtmlFile(fileName))
+    {
+        changeIndex(HtmlIndex,fSize);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+        QString str=file.readAll();
+        htmlEdit_->document()->setHtml(str);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
+
+    }
+    else if(!isJobFile(fileName) && fSize >= minPagerTextSize_)
     {
         changeIndex(PagerIndex,fSize);
 
@@ -227,7 +278,18 @@ void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
     //We estimate the size in bytes
 	qint64 txtSize=txt.size()*2;
     
-    if(!isJobFile(fileName) && txtSize > minPagerTextSize_)
+    if(isHtmlFile(fileName))
+    {
+        changeIndex(HtmlIndex,txtSize);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+        htmlEdit_->document()->setHtml(txt);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
+    }
+    else if(!isJobFile(fileName) && txtSize > minPagerTextSize_)
     {
         changeIndex(PagerIndex,txtSize);
         textPager_->setText(txt);
@@ -285,50 +347,62 @@ bool OutputBrowser::isJobFile(QString fileName)
     return fileName.contains(".job");
 }
 
+bool OutputBrowser::isHtmlFile(QString fileName)
+{
+    return fileName.endsWith(".html");
+}
+
 void OutputBrowser::adjustHighlighter(QString fileName)
 {
     //For job files we set the proper highlighter
     if(isJobFile(fileName))
     {
-	if(!jobHighlighter_)
-	{
+        if(!jobHighlighter_)
+        {
             jobHighlighter_=new Highlighter(textEdit_->document(),"job");
-	}
-	else if(jobHighlighter_->document() != textEdit_->document())
-	{
+        }
+        else if(jobHighlighter_->document() != textEdit_->document())
+        {
             jobHighlighter_->setDocument(textEdit_->document());
-	}
+        }
     }
     else if(jobHighlighter_)
     {
-	jobHighlighter_->setDocument(NULL);
+        jobHighlighter_->setDocument(NULL);
     }
 }
 
 void OutputBrowser::gotoLine()
 {
     if(stacked_->currentIndex() == BasicIndex)
-	textEdit_->gotoLine();
-    else
+       textEdit_->gotoLine();
+    else if(stacked_->currentIndex() == PagerIndex)
        textPager_->gotoLine(); 
 }
 
 void OutputBrowser::showSearchLine()
 {
-	searchLine_->setVisible(true);
-	searchLine_->setFocus();
-	searchLine_->selectAll();
+    if(searchLine_->hasInterface())
+    {
+        searchLine_->setVisible(true);
+        searchLine_->setFocus();
+        searchLine_->selectAll();
+    }
 }
 
 void OutputBrowser::searchOnReload(bool userClickedReload)
 {
-	searchLine_->searchOnReload(userClickedReload);
+    if(searchLine_->hasInterface())
+    {
+        searchLine_->searchOnReload(userClickedReload);
+    }
 }
 
 void OutputBrowser::setFontProperty(VProperty* p)
 {
 	textEdit_->setFontProperty(p);
 	textPager_->setFontProperty(p);
+    htmlEdit_->setFontProperty(p);
 }
 
 void OutputBrowser::updateFont()
@@ -340,12 +414,14 @@ void OutputBrowser::zoomIn()
 {
 	textEdit_->slotZoomIn();
 	textPager_->zoomIn();
+    htmlEdit_->zoomIn();
 }
 
 void OutputBrowser::zoomOut()
 {
 	textEdit_->slotZoomOut();
 	textPager_->zoomOut();
+    htmlEdit_->zoomOut();
 }
 
 void OutputBrowser::showConfirmSearchLabel()
@@ -369,7 +445,7 @@ void OutputBrowser::setCursorPos(qint64 pos)
         c.setPosition(pos);
         textEdit_->setTextCursor(c);
     }
-    else
+    else if(stacked_->currentIndex() == PagerIndex)
     {
         textPager_->textEditor()->setCursorPosition(pos);
     }
@@ -377,6 +453,9 @@ void OutputBrowser::setCursorPos(qint64 pos)
 
 void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive)
 {
+    if(stacked_->currentIndex() == HtmlIndex)
+        return;
+
     assert(file_);
 
     if(oriFile_)
@@ -425,7 +504,9 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
          QStringList() <<  "-c" << "grep " + extraOptions + " -e \'" + filter  + "\' " +
          QString::fromStdString(fSrc->path()));
 
-//    UiLog().dbg() << "args=" << proc.arguments().join(" "); breaks on macos, avi
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    UiLog().dbg() << "args=" << proc.arguments().join(" ");
+#endif
 
     if(!proc.waitForStarted(1000))
     {
@@ -481,6 +562,9 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
 
 void OutputBrowser::slotRemoveFilter()
 {
+    if(stacked_->currentIndex() == HtmlIndex)
+        return;
+
     if(oriFile_)
     {
         loadFile(oriFile_);

@@ -26,6 +26,7 @@ class TextPagerSearchInterface;
 class VProperty;
 class TextFilterWidget;
 class QToolButton;
+class HtmlEdit;
 
 class OutputBrowser;
 
@@ -54,12 +55,13 @@ public:
     void saveCurrentFile(QString &fileNameToSaveTo);
 	void adjustHighlighter(QString fileName);
 	void setFontProperty(VProperty* p);
-	void updateFont();
+    void updateFont();
 	void gotoLine();
 	void showSearchLine();
     void searchOnReload(bool userClickedReload);
 	void zoomIn();
 	void zoomOut();
+    void setSearchButtons(QToolButton* searchTb);
     void setFilterButtons(QToolButton* statusTb,QToolButton* optionTb);
 
 protected Q_SLOTS:
@@ -68,9 +70,10 @@ protected Q_SLOTS:
     void slotRemoveFilter();
 
 private:
-	enum IndexType {BasicIndex=0,PagerIndex=1};
+    enum IndexType {BasicIndex=0,PagerIndex=1,HtmlIndex=2};
 	void changeIndex(IndexType indexType,qint64 fileSize);
     bool isJobFile(QString fileName);
+    bool isHtmlFile(QString fileName);
     void loadFile(QString fileName);
     void loadText(QString text,QString fileName,bool resetFile=true);
     void loadFilteredFile(VFile_ptr file);
@@ -79,13 +82,14 @@ private:
     QStackedWidget *stacked_;
 	PlainTextEdit* textEdit_;
 	TextPagerWidget* textPager_;
+    HtmlEdit* htmlEdit_;
 	TextEditSearchLine* searchLine_;
     TextFilterWidget* textFilter_;
     Highlighter* jobHighlighter_;
 	PlainTextSearchInterface *textEditSearchInterface_;
 	TextPagerSearchInterface *textPagerSearchInterface_;
 	MessageLabel *confirmSearchLabel_;
-    QToolButton* filterTb_;
+    QToolButton* searchTb_;
 
     //we keep a reference to it to make sure that it does not get deleted while
     //it is being displayed

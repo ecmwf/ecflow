@@ -179,13 +179,19 @@ void EcfFile::script(std::string& theScript) const
    vector_to_string(lines,theScript);
 }
 
-void EcfFile::pre_process(std::vector<std::string>& user_edit_file, std::string& pre_processed_file)
+void EcfFile::pre_process_user_file(std::vector<std::string>& user_edit_file, std::string& pre_processed_file)
 {
    // expand all %includes this will expand %includenopp by enclosing in %nopp %end, will populate jobLines_
    PreProcessor data(this);
    if (!data.preProcess(user_edit_file)) {
       throw std::runtime_error("EcfFile::pre_process: Failed to pre_process user edit file " + data.error_msg());
    }
+
+   JobsParam dummy;
+   variableSubstitution(dummy);
+   removeCommentAndManual();
+   remove_nopp_end_tokens();
+
    vector_to_string(jobLines_,pre_processed_file);
 }
 

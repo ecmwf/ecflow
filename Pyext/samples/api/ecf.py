@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding=utf-8
-# This software is provided under the ECMWF standard software license
-# agreement.
+# This software is provided under the ECMWF standard software license agreement.
 """ a layer over raw ecflow api
 
 use 'export ECF_DEBUG_LEVEL=10' to remove warning message related to
@@ -65,6 +64,20 @@ else:
     raise DefError
 
 
+def get_username():
+    return pwd.getpwuid(os.getuid())[0]
+
+
+def get_uid():
+    return pwd.getpwnam(get_username()).pw_uid
+
+
+home = os.getenv("HOME") + "/ecflow_server"
+user = os.getenv("USER")
+
+ECF_PORT = os.getenv("ECF_PORT", 1500 + int(pwd.getpwnam(get_username()).pw_uid))
+ECF_HOME = os.getenv("ECF_HOME", "localhost")
+CLIENT = ecflow.Client(ECF_HOME + ":%s" % ECF_PORT)  # PYTHON CLIENT
 deployed = []
 
 
@@ -80,6 +93,65 @@ def deploy(script, pathname, extn=".ecf"):
         print("#MSG: created", pathname)
 # deploy("echo acq %TASK%", files + acq + extn)  # create wrapper
 # deploy("ecflow_client --label info %TASK%", files + post + extn)
+
+###################################################################################################
+head_h = """#!%SHELL:/bin/bash%
+#set -e # stop the shell on first error
+#set -u # fail when using an undefined variable
+#set -x # echo script lines as they are executed
+
+# Defines the variables that are needed for any communication with ECF
+export ECF_PORT=%ECF_PORT%    # The server port number
+export ECF_HOST=%ECF_HOST%    # where the server is running
+export ECF_NAME=%ECF_NAME%    # The name of this current task
+export ECF_PASS=%ECF_PASS%    # A unique password
+export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
+export ECF_RID=$$             # record the process id. Also used for
+                              # zombie detection
+
+# Define the path where to find ecflow_client
+# make sure client and server use the *same* version.
+# Important when there are multiple versions of ecFlow
+export PATH=/usr/local/apps/ecflow/%ECF_VERSION%/bin:$PATH
+export PATH=$PATH:/usr/local/apps/ecflow/bin:/usr/local/bin
+
+# Define a error handler
+ERROR() {
+   set +e                      # Clear -e flag, so we don't fail
+   wait                        # wait for background process to stop
+   ecflow_client --abort=trap  # Notify ecFlow that something went
+                               # wrong, using 'trap' as the reason
+   trap 0                      # Remove the trap
+   exit 0                      # End the script
+}
+
+# Tell ecFlow we have started
+ecflow_client --init=$$
+set -eux
+"""
+
+tail_h = """
+set +x
+wait           # wait for background process to stop
+ecflow_client --complete  # Notify ecFlow of a normal end
+trap 0                    # Remove all traps
+exit 0                    # End the shell
+"""
+
+
+def create_head_and_tail(ecf_home=None, head="head.h", tail="tail.h"):
+    if ecf_home is None:
+        HOME = os.getenv("HOME")
+        ecf_home = HOME + "/ecflow_server/include/"
+
+    if not os.path.exist(head):
+        with open(ecf_home + head) as fip:
+            write(head_h, file=fip)
+
+    if not os.path.exist(tail):
+        with open(ecf_home + tail) as fip:
+            write(tail_h, file=fip)
+
 
 
 class CWN(object):
@@ -159,14 +231,6 @@ class CWN(object):
                 # print("#DBG: append", item.name(), type(item))
                 CWN.__CWN.append(item)
             # else: print("#DBG: add", type(item), "to", CWN.last().name())
-
-
-def get_username():
-    return pwd.getpwuid(os.getuid())[0]
-
-
-def get_uid():
-    return pwd.getpwnam(get_username()).pw_uid
 
 
 def obsolete():
@@ -599,7 +663,8 @@ class Trigger(Attribute):
         else:
             raise DefError("what? trigger?", type(expr))
 
-        if "YMD+1" in self.expr: raise DefError(self.expr)
+        if "YMD+1" in self.expr:
+            raise DefError(self.expr)
         # self.load = "trigger"  # ecflow.Trigger(self.expr)
         CWN(self)
         # NO_EXTERN_ALONE = 0 # set to 1 for test/activate
@@ -610,7 +675,7 @@ class Trigger(Attribute):
     def add_to(self, node):
         if self.expr is None or self.expr == "" or not USE_TRIGGER:
             return None
-        if 0 and "/main/00/prod/fc/240/prodgen" in "%s" % self.expr:
+        if 0 and "/prod/wave" in "%s" % self.expr:
             raise DefError(self.expr, node.fullname())  # help DEBUG
 
         if "trigger" in self.expr:
@@ -847,7 +912,7 @@ class Defstatus(Attribute):
                      "unknown": ecflow.DState.unknown,
                      "queued": ecflow.DState.queued, }
             self.load = kinds[kind]
-        elif kind in ecflow.DState:
+        elif type(kind) in (ecflow.DState, ):
             self.load = kind
         else:
             raise DefError(type(kind))
@@ -1031,30 +1096,30 @@ class Edit(Attribute):
             else:
                 node.add_variable(self.load)
             if node.name() == "o" and "QUEUE 'emos" in edit:
-                raise DefError(node.name(), edit)
+                raise DefError(node.name(), edit)  # intercept, DEBUG
 
             if 1:  # try:  # Operators' request
                 labels = {"WSHOST": "infopws",
                           "SCHOST": "infopsc",
                           "HOST": "infophs", }
-                # if "seas" in ip.SELECTION: pass
+                # if 'seas' in ip.SELECTION: pass
                 for key in labels.keys():
-                  try:
-                    info = labels[key]
-                    msg = ""
-                    find = ""
-                    if "ECF_JOB_CMD" in edit:
-                        find = "%" + key + "%"
-                        info = "infopcmd"
-                        msg = key
-                        # print("edit", edit)
-                    elif "ECF_KILL_CMD" in edit:
-                        find = "edit %s " % key
-                    if find != "" and find in edit:
-                        node.real.add_label(info, msg)
-                  except: 
-                      # raise DefError("duplicated", "edit", edit)
-                      print("#WAR: duplicated label", "edit", edit)
+                    try:
+                        info = labels[key]
+                        msg = ""
+                        find = ""
+                        if "ECF_JOB_CMD" in edit:
+                            find = "%" + key + "%"
+                            info = "infopcmd"
+                            msg = key
+                            # print("edit", edit)
+                        elif "ECF_KILL_CMD" in edit:
+                            find = "edit %s " % key
+                        if find != "" and find in edit:
+                            node.real.add_label(info, msg)
+                    except:
+                        # raise DefError("duplicated", "edit", edit)
+                        print("#WAR: duplicated label", "edit", edit)
         if self.next is not None:
             self.next.add_to(node)
         return node
@@ -1244,6 +1309,8 @@ class Root(object):  # from where Suite and Node derive
                     self.add(val)
             elif type(item) == str:
                 raise DefError(item)
+            elif type(item) == int:
+                pass  # raise DefError(item)
             else:
                 item.add_to(self)
 
@@ -1414,6 +1481,9 @@ def to_pyflow(node, container=None):
 
 def to_dict(node, container=None):
     kids = dict()
+    if type(node) is ecflow.Defs:
+        return dict()
+
     for item in node.nodes:
         kids[item.name()] = to_dict(item)
 
@@ -1583,6 +1653,10 @@ class Node(Root):  # from where Task and Family derive
     def name(self):
         return self.load.name()
 
+    def find_variable(self, name):
+        if self.load:
+            return self.load.find_variable(name)
+        return None
     # def event(self, name=1):
     #     """ add event attribute"""
     #     if USE_EVENT:
@@ -1833,6 +1907,7 @@ class Family(Node, Attribute):
 
     def nodes(self):
         return [node for node in self.load.nodes]
+
     # def __enter__(self): return self
 
     # def __exit__(self, *args): pass
@@ -1855,7 +1930,11 @@ class Task(Node, Attribute):
 
     def add_to(self, node):
         if type(node) in (Family, Suite):
-            node.load.add_task(self.load)
+            load = self.load  # deep copy
+            if load.get_parent() != None:
+                new = load
+                load = new
+            node.load.add_task(load)
             return
         node.add_task(self.load)
 
@@ -1967,6 +2046,27 @@ class TestEcf(unittest.TestCase):
         cmd = "xdg-open test.gv.pdf;"
         cmd += "dot -Tps test.gv > test.ps && xdg-open test.ps"
         os.system(cmd)
+
+    def test_defs(self):
+        git = os.getenv("GIT_ECFLOW", "./")
+        locs = [git + "ANode/parser/test/data/good_defs",
+                git + "CSim/test/data/good_defs" ]
+
+        def process_dir(loc):
+            for root, dirs, files in os.walk(loc):
+                # print(root, dirs, files)
+                for file in files:
+                    if file.endswith(".def"):
+                        defs = ecflow.Defs(os.path.join(root, file))
+                        json = to_json(defs)
+                        print(defs, json)
+
+                for dir in dirs: 
+                    # print(dir);
+                    process_dir(os.path.join(root, dir))
+
+        for loc in locs:
+            process_dir(loc)
 
     def test_cdp_aka_pyflow(self):
         CWN.cdp(True)

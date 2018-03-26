@@ -128,6 +128,9 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 		case EditScriptCmd::PREPROCESS: {
 
 			/// PRE_PROCESS the ecf file accessible by the server
+		   /// We only *ONLY* want %include pre-processed and *NOT* variable substitution
+		   /// The used variable will be listed at the top, the user can then edit these.
+		   /// Hence it is NOT until -> EditScriptCmd::SUBMIT_USER_FILE do we need to variable substitute
  			EcfFile ecf_file = submittable->locatedEcfFile(); // will throw std::runtime_error for errors
 
 			/// This function can throw std::runtime error if pre_processing fails
@@ -144,8 +147,13 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
  			EcfFile ecf_file = submittable->locatedEcfFile(); // will throw std::runtime_error for errors
 
 			/// This function can throw std::runtime error if pre_processing fails
+ 			/// Does full pre-processing:
+ 			///   - include pre-processing
+ 			///   - variable substitution
+ 			///   - remove comment and manual sections
+ 			///   - ignore %noop
   			std::string ret_file_contents ;
- 			ecf_file.pre_process(user_file_contents_,ret_file_contents);
+ 			ecf_file.pre_process_user_file(user_file_contents_,ret_file_contents);
  		   vector<string>().swap(user_file_contents_); // clear user_file_contents_ and minimise its capacity
 			return PreAllocatedReply::string_cmd(ret_file_contents);
   		}
@@ -250,44 +258,48 @@ bool EditScriptCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 const char* EditScriptCmd::arg()  { return CtsApi::edit_script_arg();}
 const char* EditScriptCmd::desc() {
 	/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-   return "Allows user to edit, pre-process and submit the script.\n"
-            "  arg1 = path to task  # The path to the task/alias\n"
-            "  arg2 = [ edit | pre_process | submit | pre_process_file | submit_file ]\n"
-            "       edit : will return the script file to standard out. The script will\n"
-            "              include used variables enclosed between %comment/%end at the\n"
-            "              start of the file\n"
-            "       pre_process: Will return the script file to standard out.The script will\n"
-            "              include used variables enclosed between %comment/%end at the\n"
-            "              start of the file and with all %include expanded\n"
-            "       submit: Will extract the used variables from the supplied file, i.e \n"
-            "               between the %comment/%end and use these them to generate the\n"
-            "               job using the ecf file accessible from the server\n"
-            "       pre_process_file: Will pre process the user supplied file\n"
-            "       submit_file: Like submit, but the supplied file, is submitted by the server\n"
-            "               The last 2 options allow complete freedom to debug the script file\n"
-            "  arg3 = [ path_to_script_file ]\n"
-            "       needed for option [  pre_process_file | submit_file ]\n"
-            "  arg4 = create_alias (optional) default value is false, for use with 'submit_file' option\n"
-            "  arg5 = no_run (optional) default value is false, i.e immediately run the alias\n"
-            "         is no_run is specified the alias in only created\n"
+   return   "Allows user to edit, pre-process and submit the script.\n"
+            "Will allow pre-processing of arbitrary file with 'pre_process_file' option\n"
+            " arg1 = path to task  # The path to the task/alias\n"
+            " arg2 = [ edit | pre_process | submit | pre_process_file | submit_file ]\n"
+            "    edit : will return the script file to standard out. The script will\n"
+            "           include used variables enclosed between %comment/%end at the\n"
+            "           start of the file\n"
+            "    pre_process: Will return the script file to standard out.The script will\n"
+            "                 include used variables enclosed between %comment/%end at the\n"
+            "                 start of the file and with all %include expanded\n"
+            "    submit: Will extract the used variables from the supplied file, i.e\n"
+            "            between the %comment/%end and use these them to generate the\n"
+            "            job using the ecf file accessible from the server\n"
+            "    pre_process_file: Will pre process the user supplied file.\n"
+            "                      Will expand includes,variable substitution,\n"
+            "                      remove manual & comment sections.\n"
+            "    submit_file: Like submit, but the supplied file, is submitted by the server\n"
+            "                 The last 2 options allow complete freedom to debug the script file\n"
+            " arg3 = [ path_to_script_file ]\n"
+            "          needed for option [  pre_process_file | submit_file ]\n"
+            " arg4 = create_alias (optional) default value is false, for use with 'submit_file' option\n"
+            " arg5 = no_run (optional) default value is false, i.e immediately run the alias\n"
+            "        is no_run is specified the alias in only created\n"
             "Usage:\n"
             "--edit_script=/path/to/task edit > script_file\n"
             "   server returns script with the used variables to standard out\n"
-            "   The user can choose to edit this file\n"
+            "   The user can choose to edit this file\n\n"
             "--edit_script=/path/to/task pre_process > pre_processed_script_file\n"
             "  server will pre process the ecf file accessible from the server\n"
-            "  (i.e expand all %includes) and return the file to standard out\n"
+            "  (i.e expand all %includes) and return the file to standard out\n\n"
             "--edit_script=/path/to/task submit script_file\n"
             "  Will extract the used variables in the 'script_file' and will uses these\n"
             "  variables during variable substitution of the ecf file accessible by the\n"
-            "  server. This is then submitted as a job\n"
+            "  server. This is then submitted as a job\n\n"
             "--edit_script=/path/to/task pre_process_file file_to_pre_process\n"
             "  The server will pre-process the user supplied file and return the contents\n"
-            "  to standard out\n"
+            "  to standard out. This pre-processing is the same as job file processing,\n"
+            "  but on a arbitrary file\n\n"
             "--edit_script=/path/to/task submit_file file_to_submit\n"
             "  Will extract the used variables in the 'file_to_submit' and will uses these\n"
             "  variables during variable substitution, the file is then submitted for job\n"
-            "  generation by the server\n"
+            "  generation by the server\n\n"
             "--edit_script=/path/to/task submit_file file_to_submit create_alias\n"
             "  Like the the previous example but will create and run as an alias"
             ;

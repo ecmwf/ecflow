@@ -95,3 +95,33 @@ std::string VItemPathParser::encodeAttribute(const std::string& parentPath,const
 
     return "[" + attrType + "]" + parent.server() + ":/" + parent.node() + ":" + attrName;
 }
+
+std::string VItemPathParser::parent() const
+{
+    switch(itemType_)
+    {
+    case ServerType:
+        return std::string();
+        break;
+    case NodeType:
+        {
+            std::size_t pos=node_.find_last_of("/");
+            if(pos !=  std::string::npos)
+            {
+                std::string n=node_.substr(0,pos);
+                if(!n.empty())
+                    return encodeWithServer(server_,n,type_);
+                else
+                    return encodeWithServer(server_,"/","server");
+            }
+        }
+        break;
+    case AttributeType:
+        return encodeWithServer(server_,node_,"node");
+        break;
+    default:
+        break;
+    }
+
+    return std::string();
+}

@@ -51,6 +51,7 @@ set(viewer_srcs
     GotoLineDialog.cpp
     Highlighter.cpp
     HistoryItemWidget.cpp
+    HtmlEdit.cpp
     HtmlItemWidget.cpp
     IconProvider.cpp
     InfoPanel.cpp 

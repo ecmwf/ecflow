@@ -111,6 +111,12 @@ void TextFilterWidget::setExternalButtons(QToolButton* statusTb,QToolButton* opt
             this,SLOT(slotOptionTb()));
 }
 
+void TextFilterWidget::setEnabledExternalButtons(bool b)
+{
+    if(statusTb_) statusTb_->setEnabled(b);
+    if(optionTb_) optionTb_->setEnabled(b);
+}
+
 void TextFilterWidget::refreshCompleter()
 {
     QStringList lst;
@@ -319,7 +325,7 @@ void TextFilterWidget::slotStatusTb(bool b)
     }
 }
 
-void TextFilterWidget::on_closeTb__clicked()
+void TextFilterWidget::closeIt()
 {
     //clear
     le_->clear();
@@ -329,7 +335,12 @@ void TextFilterWidget::on_closeTb__clicked()
     //hide
     statusTb_->setChecked(false);
     Q_EMIT closeRequested(); //this will clear the filter
+}
 
+
+void TextFilterWidget::on_closeTb__clicked()
+{
+   closeIt();
 }
 
 void TextFilterWidget::on_le__returnPressed()

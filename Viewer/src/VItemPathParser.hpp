@@ -25,6 +25,7 @@ public:
     const std::string server() const {return server_;}
     const std::string node() const {return node_;}
     const std::string attribute() const {return attribute_;}
+    std::string parent() const;
 
     static std::string encode(const std::string& path,const std::string& type);    
     static std::string encodeWithServer(const std::string& server,const std::string& path,
