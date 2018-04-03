@@ -216,3 +216,17 @@ else()
          install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
       endif()
 endif()
+
+# ====================================================================================
+ecbuild_dont_pack( DIRS 
+                   test/data/CUSTOMER
+)
+
+# ignore files with passwords
+ecbuild_dont_pack( FILES 
+                   .pydevproject
+                   samples/test.py
+                   samples/confluence_add_attachment.py
+)
+
+
