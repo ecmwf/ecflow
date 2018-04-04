@@ -220,6 +220,7 @@ endif()
 # ====================================================================================
 ecbuild_dont_pack( DIRS 
                    test/data/CUSTOMER
+                   __pycache__
 )
 
 # ignore files with passwords
