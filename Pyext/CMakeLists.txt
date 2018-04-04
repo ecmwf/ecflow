@@ -220,7 +220,6 @@ endif()
 # ====================================================================================
 ecbuild_dont_pack( DIRS 
                    test/data/CUSTOMER
-                   __pycache__
 )
 
 # ignore files with passwords
@@ -228,7 +227,6 @@ ecbuild_dont_pack( FILES
                    .pydevproject
                    samples/test.py
                    samples/confluence_add_attachment.py
-                   __pycache__
 )
 
 
