@@ -228,6 +228,7 @@ ecbuild_dont_pack( FILES
                    .pydevproject
                    samples/test.py
                    samples/confluence_add_attachment.py
+                   __pycache__
 )
 
 
