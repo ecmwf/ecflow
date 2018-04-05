@@ -86,13 +86,14 @@ int main(argc,argv) int argc; char **argv;
         exit(0);
     }
 
-  if( !infile ) { infile=(char *)tmpnam(NULL);
+  if( !infile ) {
+     infile=(char *)tmpnam(NULL);
 
-  if( !(fp=fopen(infile,"w")) )
-  {
-    perror("STANDALONE-INPUT-FILE");
-    exit(1);
-  }}
+     if( !(fp=fopen(infile,"w")) ) {
+        perror("STANDALONE-INPUT-FILE");
+        exit(1);
+     }
+  }
 
   while( fgets( buff,MAXLEN-1,stdin) )
     fputs(buff,fp);
