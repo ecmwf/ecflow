@@ -1037,6 +1037,21 @@ int ClientInvoker::flushLog() const
    if (testInterface_) return invoke(CtsApi::flushLog());
    return invoke(Cmd_ptr(new LogCmd( LogCmd::FLUSH )));
 }
+int ClientInvoker::enable_auto_flush() const
+{
+   if (testInterface_) return invoke(CtsApi::enable_auto_flush());
+   return invoke(Cmd_ptr(new LogCmd( LogCmd::ENABLE_AUTO_FLUSH )));
+}
+int ClientInvoker::disable_auto_flush() const
+{
+   if (testInterface_) return invoke(CtsApi::disable_auto_flush());
+   return invoke(Cmd_ptr(new LogCmd( LogCmd::DISABLE_AUTO_FLUSH )));
+}
+int ClientInvoker::query_auto_flush() const
+{
+   if (testInterface_) return invoke(CtsApi::query_auto_flush());
+   return invoke(Cmd_ptr(new LogCmd( LogCmd::QUERY_AUTO_FLUSH)));
+}
 int ClientInvoker::get_log_path() const
 {
    if (testInterface_) return invoke(CtsApi::get_log_path());

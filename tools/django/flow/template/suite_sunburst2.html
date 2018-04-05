@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+body {
+font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+margin: auto;
+position: relative;
+width: 960px;
+}
+form {
+position: absolute;
+right: 10px;
+top: 10px;
+}
+path {
+stroke: #fff;
+fill-rule: evenodd;
+}
+</style>
+<body>
+<form>
+<label><input type="radio" name="mode" value="size"> Size</label>
+<label><input type="radio" name="mode" value="count" checked> Count</label>
+</form>
+<script>
+var jsondata ="{{ jsondata }}";
+var WIDTH=640, HEIGHT= 740;
+</script>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="/static/ecflow.js"></script>
+<script src="/static/sunburst2.js"></script>
+<p><a href="{{ jsondata }}">json</a>
+<script>var jsondata ="{{ jsondata }}", WIDTH=640, HEIGHT= 740;</script>
+<h3>{{ title }}</h3>

@@ -316,18 +316,16 @@ void ServerComThread::reset()
     //Detach the defs and the nodes from the observer
     detach(defsAccess.defs());
 
-    //If we have already set a handle we
-    //need to drop it.
-    if(ci_->client_handle() > 0)
+    //We drop all the handles belonging to the current user to have a proper clean-up!
+    //Other running instances of ecflow_ui under the same user will properly react
+    //to these changes and reset their handles! So it is a safe operation!!!
+    try
     {
-        try
-        {
-            ci_->ch1_drop();
-        }
-        catch (std::exception &e)
-        {
-            UiLog(serverName_).warn() << " cannot drop handle: " << e.what();
-        }
+        ci_->ch_drop_user();
+    }
+    catch (std::exception &e)
+    {
+        UiLog(serverName_).warn() << " cannot drop handle for current user: " << e.what();
     }
 
     if(hasSuiteFilter_)

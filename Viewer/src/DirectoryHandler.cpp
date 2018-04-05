@@ -16,10 +16,13 @@
 
 #include <boost/algorithm/string/predicate.hpp>
 
+#include <QFile>
+
 #include "DirectoryHandler.hpp"
 #include "File.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+
 
 std::string DirectoryHandler::exeDir_;
 std::string DirectoryHandler::shareDir_;
@@ -45,22 +48,35 @@ DirectoryHandler::DirectoryHandler()
 
 void DirectoryHandler::init(const std::string& exeStr)
 {
-	//Sets paths in the home directory
-    if(char *h=getenv("HOME"))
+    boost::filesystem::path configDir;
+
+    //The location of the config dir is specified by the user
+    //This could be the case for a ui test! In this case we
+    //must not use the rcDir!
+    if(char *confCh=getenv("ECFUI_CONFIG_DIR"))
+    {
+        std::string confStr(confCh);
+        configDir=boost::filesystem::path(confStr);
+    }
+    //By default the config dir is .ecflow_ui in $HOME,
+    //in this case we might import older settings from $HOME/.ecflowrc
+    else if(char *h=getenv("HOME"))
 	{
         std::string home(h);
         boost::filesystem::path homeDir(home);
 
-		boost::filesystem::path configDir = homeDir;
-		configDir /= ".ecflow_ui";
+        configDir = boost::filesystem::path(homeDir);
+        configDir /= ".ecflow_ui";
 
-		boost::filesystem::path rcDir = homeDir;
-		rcDir /= ".ecflowrc";
+        boost::filesystem::path rcDir = homeDir;
+        rcDir /= ".ecflowrc";
+        rcDir_=rcDir.string();
+    }
 
-		configDir_=configDir.string();
-		rcDir_=rcDir.string();
-
-		//Create configDir if if does not exist
+    //Sets configDir_ and creates it if it does not exist
+    if(!configDir.string().empty())
+    {
+        configDir_=configDir.string();
 		if(!boost::filesystem::exists(configDir))
 		{
 			firstStartUp=true;
@@ -77,6 +93,12 @@ void DirectoryHandler::init(const std::string& exeStr)
 			}
 		}
 	}
+    else
+    {
+        UserMessage::message(UserMessage::ERROR, true,
+                std::string("Could not create configDir with an empty path!"));
+        exit(1);
+    }
 
 	//Sets paths in the system directory
     boost::filesystem::path exePath(exeStr);
@@ -298,9 +320,18 @@ bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &des
     BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod))
     {
         std::string fileName = p.filename().string();
+        std::string srcFile=p.string();
 
         if (is_regular_file(p))  // file? then copy it into its new home
-        {
+        {      
+            //The original boost based copy implementation did not work with newer compilers,
+            //so we opted for a Qt based implementation. See ECFLOW-1207
+            boost::filesystem::path destPath=dest / p.filename();
+            std::string destFile=destPath.string();
+            if(!copyFile(srcFile,destFile,errorMessage))
+                return false;
+
+#if 0
             try
             {
                 boost::filesystem::copy_file(p, dest / p.filename());
@@ -310,6 +341,8 @@ bool DirectoryHandler::copyDir(const std::string &srcDir, const std::string &des
                 errorMessage = "Could not copy file " + fileName + " to " + destDir + "; reason: " + err.what();
                 return false;
             }
+#endif
+
         }
         else if (is_directory(p))  // directory? then copy it recursively
         {
@@ -374,6 +407,33 @@ bool DirectoryHandler::renameDir(const std::string &dir, const std::string &newN
 
 bool DirectoryHandler::copyFile(const std::string &srcFile, std::string &destFile, std::string &errorMessage)
 {
+    //The original boost based copy implementation did not work with newer compilers,
+    //so we opted for a Qt based implementation. See ECFLOW-1207
+
+    if(srcFile == destFile)
+        return true;
+
+    QString src=QString::fromStdString(srcFile);
+    QString dest=QString::fromStdString(destFile);
+
+    if(!QFile::exists(src))
+    {
+        errorMessage = "Could not copy file " + srcFile + " to " + destFile + "; reason: source file does not exist";
+        return false;
+    }
+
+    if(QFile::exists(dest))
+    {
+        QFile::remove(dest);
+    }
+    if(!QFile::copy(src,dest))
+    {
+        errorMessage = "Could not copy file " + srcFile + " to " + destFile;
+        return false;
+    }
+    return true;
+
+#if 0
     boost::filesystem::path src(srcFile);
     boost::filesystem::path dest(destFile);
 
@@ -388,6 +448,7 @@ bool DirectoryHandler::copyFile(const std::string &srcFile, std::string &destFil
     }
 
     return true;
+#endif
 }
 
 

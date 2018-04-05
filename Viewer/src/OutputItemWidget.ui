@@ -43,9 +43,9 @@
         <widget class="MessageLabel" name="messageLabel_" native="true"/>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0,0">
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0,0,0,0,0,0,0">
          <property name="spacing">
-          <number>1</number>
+          <number>0</number>
          </property>
          <item>
           <widget class="FileInfoLabel" name="fileLabel_">
@@ -192,6 +192,75 @@
           </widget>
          </item>
          <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>1</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QToolButton" name="filterTb_">
+           <property name="toolTip">
+            <string>Toggle  to &lt;b&gt;show&lt;/b&gt; text filter bar</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="popupMode">
+            <enum>QToolButton::InstantPopup</enum>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="filterOptionTb_">
+           <property name="toolTip">
+            <string>Text filter menu</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/down_arrow.svg</normaloff>:/viewer/down_arrow.svg</iconset>
+           </property>
+           <property name="popupMode">
+            <enum>QToolButton::InstantPopup</enum>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>1</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
           <widget class="QToolButton" name="reloadTb_">
            <property name="toolTip">
             <string>Reload the selected output file</string>
@@ -205,6 +274,23 @@
            </property>
            <property name="shortcut">
             <string>Ctrl+R</string>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="moreActionTb_">
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/cogwheel.svg</normaloff>:/viewer/cogwheel.svg</iconset>
+           </property>
+           <property name="popupMode">
+            <enum>QToolButton::InstantPopup</enum>
            </property>
            <property name="autoRaise">
             <bool>true</bool>
@@ -267,7 +353,17 @@
         </layout>
        </item>
        <item>
-        <widget class="QTreeView" name="dirView_"/>
+        <widget class="QTreeView" name="dirView_">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -277,6 +373,33 @@
     <widget class="MessageLabel" name="dirMessageLabel_" native="true"/>
    </item>
   </layout>
+  <action name="actionSaveFileAs_">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/filesaveas.svg</normaloff>:/viewer/filesaveas.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Save file as ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Save a local copy of the current task to disk</string>
+   </property>
+  </action>
+  <action name="actionGotoLine_">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/images/goto_line.svg</normaloff>:/viewer/images/goto_line.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Go to line ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Go to line number</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+L</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

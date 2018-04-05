@@ -43,7 +43,9 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
    BOOST_CHECK_MESSAGE(!fs::exists( log_path ), "log file " << log_path << " not deleted ");
 
    // Create a new log, file, we will look in here to see if job profiling is working
+   // Hence this test relies on output to be flushed
    Log::create(log_path);
+   Log::instance()->enable_auto_flush();
 
 
    // SET ECF_HOME, re-use exist test of directory and scripts

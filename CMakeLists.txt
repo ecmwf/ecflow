@@ -328,13 +328,11 @@ endif()
 # tar ball, by default ecbuild will tar everything apart from hard wired directory called 'build' 
 # hence we can tell it, what directories not to pack
 # =========================================================================================
-
 ecbuild_dont_pack( DIRS 
                     .settings
                     bamboo
                    	ACore/doc ANattr/doc ANode/doc Client/doc CSim/doc Pyext/doc Server/doc
                    	ecbuild
-                   	Pyext/test/data/CUSTOMER
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
@@ -346,7 +344,6 @@ ecbuild_dont_pack( FILES
                    .project
                    .cproject
                    .pydevproject
-                   Pyext/.pydevproject
                    build_scripts/.pydevproject
 )
 

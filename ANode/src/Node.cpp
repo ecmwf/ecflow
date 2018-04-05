@@ -256,25 +256,21 @@ void Node::begin()
    // Hence to avoid excessive memory consumption, they are created on demand
 }
 
-void Node::requeue(
-         bool resetRepeats,
-         int clear_suspended_in_child_nodes,
-         bool do_reset_next_time_slot,
-         bool reset_relative_duration)
+void Node::requeue(Requeue_args& args)
 {
 #ifdef DEBUG_REQUEUE
-   LOG(Log::DBG,"      Node::requeue() " << absNodePath() << " resetRepeats = " << resetRepeats);
+   LOG(Log::DBG,"      Node::requeue() " << absNodePath() << " resetRepeats = " << args.resetRepeats_);
 #endif
    /// Note: we don't reset verify attributes as they record state stat's
 
 
    // Set the state without causing any side effects
-   initState(clear_suspended_in_child_nodes);
+   initState(args.clear_suspended_in_child_nodes_,args.log_state_changes_);
 
    clearTrigger();
    clearComplete();
 
-   if (resetRepeats) repeat_.reset(); // if repeat is empty reset() does nothing
+   if (args.resetRepeats_) repeat_.reset(); // if repeat is empty reset() does nothing
 
 
    /// If a job takes longer than it slots, then that slot is missed, and next slot is used
@@ -290,7 +286,7 @@ void Node::requeue(
       /// For manual and automated reueue due to repeat's we always clear Flag::NO_REQUE_IF_SINGLE_TIME_DEP
       /// since in those context we do NOT want miss any time slots
       bool reset_next_time_slot = true;
-      if (do_reset_next_time_slot) {
+      if (args.reset_next_time_slot_) {
          reset_next_time_slot = true;
       }
       else {
@@ -302,7 +298,7 @@ void Node::requeue(
          }
       }
 
-      time_dep_attrs_->requeue(reset_next_time_slot,reset_relative_duration);
+      time_dep_attrs_->requeue(reset_next_time_slot,args.reset_relative_duration_);
       time_dep_attrs_->markHybridTimeDependentsAsComplete();
    }
 
@@ -447,13 +443,26 @@ void Node::checkForLateness(const ecf::Calendar& c)
    }
 }
 
-void Node::initState(int clear_suspended_in_child_nodes)
+void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes )
 {
+   // The state duration is ONLY updated *IF* state has changed.
+   // However on re-queue *ALWAYS* reset state time.
+   // Otherwise we can end up, showing time in the future. SEE ECFLOW-1215
+   Suite* theSuite = suite();
+   if ( theSuite ) {
+      const Calendar& calendar = theSuite->calendar();
+      state_.second = calendar.duration();
+   }
+
    if (defStatus_ == DState::SUSPENDED) {
       /// Note: DState::SUSPENDED is not a real state, its really a user interaction
       /// Replace with suspend, and set underlying state as queued
       suspend();
-      setStateOnly( NState::QUEUED );
+      setStateOnly( NState::QUEUED,
+                    false        /*force*/,
+                    Str::EMPTY() /* additional info to log */,
+                    log_state_changes
+                  );
    }
    else {
 
@@ -463,7 +472,11 @@ void Node::initState(int clear_suspended_in_child_nodes)
 
       // convert DState --> NState.
       // NOTE::  NState does *NOT* have SUSPENDED
-      setStateOnly( DState::convert( defStatus_.state())  );
+      setStateOnly( DState::convert( defStatus_.state()),
+                    false        /*force*/,
+                    Str::EMPTY() /* additional info to log */,
+                    log_state_changes
+                  );
    }
 }
 
@@ -510,10 +523,11 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             // This handles the case where a user, has manually intervened (i.e via run or complete) and we had a time attribute
             // That time attribute will have expired, typically we show next day. In the case where we have a parent repeat
             // we need to clear the flag, otherwise the task/family with time based attribute would wait for next day.
-            requeue( false /* don't reset repeats */,
-                     clear_suspended_in_child_nodes,
-                     true /* reset_next_time_slot */,
-                     true /* reset relative duration */);
+            Node::Requeue_args args(false /* don't reset repeats */,
+                                    clear_suspended_in_child_nodes,
+                                    true /* reset_next_time_slot */,
+                                    true /* reset relative duration */);
+            requeue(args);
             set_most_significant_state_up_node_tree();
             return;
          }
@@ -535,10 +549,11 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             }
          }
 
-         requeue( false /* don't reset repeats */,
-                  clear_suspended_in_child_nodes,
-                  reset_next_time_slot,
-                  false /* don't reset relative duration */); // time +00:01 00:07 00:03 # here task re-queued many times, relative time must be preserved.
+         Node::Requeue_args args(false /* don't reset repeats */,
+                                 clear_suspended_in_child_nodes,
+                                 reset_next_time_slot ,
+                                 false /*  don't reset relative duration */);
+         requeue(args); // time +00:01 00:07 00:03 # here task re-queued many times, relative time must be preserved.
          set_most_significant_state_up_node_tree();
          return;
       }
@@ -817,10 +832,10 @@ void Node::set_state(NState::State s, bool force, const std::string& additional_
    handleStateChange();
 }
 
-void Node::setStateOnly(NState::State newState, bool force, const std::string& additional_info_to_log)
+void Node::setStateOnly(NState::State newState,bool force,const std::string& additional_info_to_log,bool do_log_state_changes)
 {
    if (state_.first.state() == newState) {
-      return; // if old and new state the same dont do anything
+      return; // if old and new state the same don't do anything
    }
 
    Suite* theSuite =  suite();
@@ -872,14 +887,17 @@ void Node::setStateOnly(NState::State newState, bool force, const std::string& a
    // Please change/update LogVerification::extractNodePathAndState() all verification relies on this one function
    //           " " +  submitted(max) + ": " + path(estimate)  + " try-no: " + try_no(estimate)  + " reason: " + reason(estimate)
    // reserve : 1   +  9              + 2    + 100             + 9           + 3                 + 9           + 12   = 145
-   std::string log_state_change; log_state_change.reserve(145 + additional_info_to_log.size());
-   log_state_change += " ";
-   log_state_change += NState::toString(newState);
-   log_state_change += ": ";
-   log_state_change += absNodePath();
-   if (!additional_info_to_log.empty()) {
+   std::string log_state_change;
+   if (do_log_state_changes) {
+      log_state_change.reserve(145 + additional_info_to_log.size());
       log_state_change += " ";
-      log_state_change += additional_info_to_log;
+      log_state_change += NState::toString(newState);
+      log_state_change += ": ";
+      log_state_change += absNodePath();
+      if (!additional_info_to_log.empty()) {
+         log_state_change += " ";
+         log_state_change += additional_info_to_log;
+      }
    }
 
    if ( newState == NState::ABORTED) {
@@ -887,10 +905,12 @@ void Node::setStateOnly(NState::State newState, bool force, const std::string& a
       Submittable* submittable = isSubmittable();
       if ( submittable ) {
          flag().set(ecf::Flag::TASK_ABORTED);
-         log_state_change += " try-no: ";
-         log_state_change += submittable->tryNo();
-         log_state_change += " reason: ";
-         log_state_change += abortedReason();
+         if (do_log_state_changes) {
+            log_state_change += " try-no: ";
+            log_state_change += submittable->tryNo();
+            log_state_change += " reason: ";
+            log_state_change += abortedReason();
+         }
       }
    }
    else {
@@ -898,18 +918,19 @@ void Node::setStateOnly(NState::State newState, bool force, const std::string& a
       flag().clear(ecf::Flag::FORCE_ABORT);
    }
 
-   // SUP-408 what does submitted mean in log?
-   // We want to mimimize calls to create a new time stamp in the log file.
-   // A time stamp is automatically created, whenever a *new* client request is received, & then cached
-   // However we can get a change in state, during tree traversal, when a node is free of its dependencies
-   // If we were to just log the message it would use the last cached time stamp. Giving misleading info:
-   // Since state changes are bubbled up, we need only update the time stamp for tasks, when not in a command
-   if (!CmdContext::in_command() && isTask() && Log::instance()) {
-       //std::cout << "!!!!! NOT in cmd context updating time stamp before logging\n";
-       Log::instance()->cache_time_stamp();
+   if (do_log_state_changes) {
+      // SUP-408 what does submitted mean in log?
+      // We want to mimimize calls to create a new time stamp in the log file.
+      // A time stamp is automatically created, whenever a *new* client request is received, & then cached
+      // However we can get a change in state, during tree traversal, when a node is free of its dependencies
+      // If we were to just log the message it would use the last cached time stamp. Giving misleading info:
+      // Since state changes are bubbled up, we need only update the time stamp for tasks, when not in a command
+      if (!CmdContext::in_command() && isTask() && Log::instance()) {
+         //std::cout << "!!!!! NOT in cmd context updating time stamp before logging\n";
+         Log::instance()->cache_time_stamp();
+      }
+      ecf::log(Log::LOG,log_state_change);  // Note: log type, must be same for debug & release for test, i.e for log file verification
    }
-
-   ecf::log(Log::LOG,log_state_change);  // Note: log type, must be same for debug & release for test, i.e for log file verification
 
    state_.first.setState(newState);      // this will update state_change_no
    state_.second = calendar.duration();  // record state change duration for late, autocancel,etc
@@ -1057,6 +1078,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
    bool double_micro_found = false;
    std::string::size_type pos = 0;
    int count = 0;
+   Alias* is_a_alias = isAlias();
    while ( 1 ) {
       // A while loop here is used to:
       //		a/ Allow for multiple substitution on a single line. i.e %ECF_FILES% -I %ECF_INCLUDE%"
@@ -1078,27 +1100,29 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       }
 
       string percentVar( cmd.begin() + firstPercentPos+1, cmd.begin() + secondPercentPos );
+      //cout << percentVar << "\n";
 #ifdef DEBUG_S
       cout << "   Found percentVar " << percentVar << "\n";
 #endif
 
-
       // ****************************************************************************************
-      // Look for generated variables first:
+      // Look for generated variables that should NOT be overridden first:
       //    Variable like ECF_PASS can be overridden, i.e. with FREE_JOBS_PASSWORD
       //    However for job file generation we should use use the generated variables first.
       //    if the user removes ECF_PASS then we are stuck with the wrong value in the script file
       //    FREE_JOBS_PASSWORD is left for the server to deal with
       // Leave ECF_JOB and ECF_JOBOUT out of this list: As user may legitamly override these. ECFLOW-999
       bool generated_variable = false;
-      if ( percentVar.find("ECF_") != std::string::npos) {
-         if ( percentVar.find(Str::ECF_PASS())         != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_PORT())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_NODE())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_HOST())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_NAME())    != std::string::npos) generated_variable = true;
-         else if ( percentVar.find(Str::ECF_TRYNO())   != std::string::npos) generated_variable = true;
+      if ( percentVar.find("ECF_") == 0) {
+         if ( percentVar.find(Str::ECF_HOST())       != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_PORT())  != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_TRYNO()) != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_NAME())  != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_PASS())  != std::string::npos) generated_variable = true;
+         else if ( percentVar.find(Str::ECF_NODE())  != std::string::npos) generated_variable = true;
       }
+
+      size_t firstColon = percentVar.find( ':' );
 
       // First search user variable (*ONLY* set user edit's the script)
       // Handle case: cmd = "%fred:bill% and where we have user variable "fred:bill"
@@ -1109,57 +1133,60 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       if (!user_edit_variables.empty() && search_user_edit_variables(percentVar,varValue,user_edit_variables)) {
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
-      else if (generated_variable && find_parent_gen_variable_value(percentVar,varValue)) {
-
-         cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
-      }
-      else if (findParentVariableValue( percentVar ,varValue)) {
-         // For alias we could have added variables with %A:0%, %A:1%. Aliases allow variables with ':' in the name
+      else if (generated_variable && firstColon == string::npos && find_parent_gen_variable_value(percentVar,varValue)) {
          cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
       }
       else {
-
-         size_t firstColon = percentVar.find( ':' );
          if (firstColon != string::npos) {
 
-            string var(percentVar.begin(), percentVar.begin() + firstColon);
-#ifdef DEBUG_S
-            cout << "   var " << var << "\n";
-#endif
-
-            if (!user_edit_variables.empty() && search_user_edit_variables(var,varValue,user_edit_variables)) {
-#ifdef DEBUG_S
-               cout << "   user var value = " << varValue << "\n";
-#endif
-               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
-            }
-            else if (generated_variable && find_parent_gen_variable_value(var,varValue)) {
-#ifdef DEBUG_S
-               cout << "   generated var value = " << varValue << "\n";
-#endif
-                cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
-            }
-            else if (findParentVariableValue( var, varValue ))  {
-               // Note: variable can exist, but have an empty value
-#ifdef DEBUG_S
-               cout << "   var value = " << varValue << "\n";
-#endif
-               // replace the "%VAR:fred --f%" with var
-               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
+            if (is_a_alias && findParentVariableValue( percentVar ,varValue)) {
+               // For alias we could have added variables with %A:0%, %A:1%. Aliases allow variables with ':' in the name
+               cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
             }
             else {
-               string substitute (percentVar.begin()+ firstColon+1, percentVar.end());
+               // ':' is not a valid in variables, hence split, and search, if search fails use replacement
+               string var(percentVar.begin(), percentVar.begin() + firstColon);
 #ifdef DEBUG_S
-               cout << "  substitute value = " << substitute << "\n";
+               cout << "   var " << var << "\n";
 #endif
-               cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,substitute);
+               if (!user_edit_variables.empty() && search_user_edit_variables(var,varValue,user_edit_variables)) {
+#ifdef DEBUG_S
+                  cout << "   user var value = " << varValue << "\n";
+#endif
+                  cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
+               }
+               else if (generated_variable && find_parent_gen_variable_value(var,varValue)) {
+#ifdef DEBUG_S
+                  cout << "   generated var value = " << varValue << "\n";
+#endif
+                  cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
+               }
+               else if (findParentVariableValue( var, varValue ))  {
+                  // Note: variable can exist, but have an empty value
+#ifdef DEBUG_S
+                  cout << "   var value = " << varValue << "\n";
+#endif
+                  // replace the "%VAR:fred --f%" with var
+                  cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,varValue);
+               }
+               else {
+                  string substitute(percentVar.begin()+ firstColon+1, percentVar.end());
+#ifdef DEBUG_S
+                  cout << "  substitute value = " << substitute << "\n";
+#endif
+                  cmd.replace(firstPercentPos,secondPercentPos-firstPercentPos+1,substitute);
+               }
+#ifdef DEBUG_S
+               cout << "   cmd = " << cmd << "\n";
+#endif
             }
-#ifdef DEBUG_S
-            cout << "   cmd = " << cmd << "\n";
-#endif
+         }
+         else if (findParentVariableValue( percentVar ,varValue)) {
+            // No ':' search user variables, repeat, and then generated variables.
+            cmd.replace( firstPercentPos, secondPercentPos - firstPercentPos + 1, varValue );
          }
          else {
-            // No Colon, Can't find in user variables, or node variable, hence can't go any further
+            // Can't find in user variables, or node variable, hence can't go any further
             return false;
          }
       }

@@ -124,6 +124,9 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
             std::cout << defs;
             return true;
          }
+
+         // with defs_state MIGRATE on --load we will recover the state.
+         if (cts_cmd->show_style() == PrintStyle::MIGRATE ) std::cout << "defs_state MIGRATE\n"; // see ECFLOW-1233
          std::cout << *suite << "\n";
          return true;
       }

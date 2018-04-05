@@ -1,26 +1,56 @@
 Reason to move to ecflow 5.0.0
 ====================================
-
-o Allow family to be limited as well as tasks
-
-o Functionality for archive and restore.( and auto migrate). To cope with extra large suites
-
-o much better identification of zombies
-  - i.e password missmatch, pid miss match, if user created zombies we record user command that gave rise to the zombie
+o Built with c++11
+  - issue for rpm, force update to gcc 4.7 minimum version
   
-o security: password protection
-o security: User commands will now log hostname as well as the user that issued the command
-
-o Improved why command( when using time attributes)
-
-o New query command, allows us to query event,meter and trigger status.
-
-o New  Queue attribute
+o Built with python3 
+  - big implication for existing 2.7 code base
 
 o Uses the latest boost version
 
-o Built with c++11
+o Allow family to be limited as well as tasks
 
-o Old GUI(ecfowview) will be retired.
+o Functionality for archive and restore.( and auto migrate). 
+  To cope with extra large suites
 
+o much better identification of zombies
+  - i.e password missmatch, pid miss match, 
+    if user created zombies we record user command that 
+    gave rise to the zombie
+  
+o security: password protection
+o security: User commands will now log hostname as 
+            well as the user that issued the command
 
+o Improved why command, when using time attributes.
+
+o New query command, allows us to query event,meter and trigger status.
+
+o Old GUI(ecfowview) will be retired
+
+o New Queue attribute
+  This is still under developement
+  
+o new date attribute
+  This is still under developement
+
+o Replace boost serialsiation used client/server communication with json.
+  (TODO)
+
+* We will be producing a development version of ecflow 5.0.0
+  It should *NOT* be used for any operational task, as it subject to change
+  and can not gurantee compatibliy with future release, until released.
+  
+Challenges
+=====================================================================
+o In ecflow 4.70 the checkpoint is now saved, in the defs format.
+  hence migrating to the new server should be trivial.
+  
+o However the client/server protocol has changed, 
+  and hence we can *NOT* use 4.x.x ecflow_ui, to 
+  view 5.x.x server, and vice versa.
+  By replacing boost with json, it should allow greater 
+  compatibility in the future.
+  
+  https://snowplowanalytics.com/blog/2014/05/15/introducing-self-describing-jsons/
+  

@@ -1,5 +1,20 @@
 ========================== SUCCESS ===============================================================
 
+Job generation performance: (minimise stat calls) ECFLOW-1244
+   We now cache the file-stat calleds in ECfFile(this is for include files only)
+   By saving on stat, there was a small but noticeble improvement
+
+ 
+Log file> ECFLOW-1239
+================================================================
+ecflow < 4.9.0, The log file, is automatically flushed for every write.
+After release 4.9.0 the default is to no longer flush.
+This can be updated on the command line :
+	ecflow_client --log=enable_auto_flash
+	ecflow_client --log=disable_auto_flash
+	ecflow_client --log=query_auto_flash
+    
+
 Server<DONE> ECFLOW-846
    When job processing the same head/tail or any include can be opened/closed many times.
    We now cache the file, this so we only open/close once.

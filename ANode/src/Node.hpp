@@ -151,10 +151,25 @@ public:
    /// resetting the time slots, effectively missing the next time slot. we then clear the flag.
    /// However if the JOB *abort* we clear NO_REQUE_IF_SINGLE_TIME_DEP
    /// Otherwise if we run again, we miss additional time slots necessarily
-   virtual void requeue(bool resetRepeats,
-                        int clear_suspended_in_child_nodes,
-                        bool reset_next_time_slot,
-                        bool reset_relative_duration);
+   struct Requeue_args {
+      Requeue_args(bool resetRepeats,
+                   int clear_suspended_in_child_nodes,
+                   bool reset_next_time_slot,
+                   bool reset_relative_duration,
+                   bool log_state_changes = true) :
+                      resetRepeats_(resetRepeats),
+                      clear_suspended_in_child_nodes_(clear_suspended_in_child_nodes),
+                      reset_next_time_slot_(reset_next_time_slot),
+                      reset_relative_duration_(reset_relative_duration),
+                      log_state_changes_(log_state_changes){}
+
+      bool resetRepeats_;
+      int clear_suspended_in_child_nodes_;
+      bool reset_next_time_slot_;
+      bool reset_relative_duration_;
+      bool log_state_changes_;
+   };
+   virtual void requeue(Requeue_args&);
 
    /// Re queue the time based attributes only.
    /// Used as a part of Alter (clock) functionality.
@@ -270,7 +285,7 @@ public:
    virtual void set_state_hierarchically(NState::State s, bool force) { set_state(s,force); }
 
    /// Set state only, has no side effects
-   void setStateOnly(NState::State s, bool force = false, const std::string& additional_info_to_log = "");
+   void setStateOnly(NState::State s, bool force = false, const std::string& additional_info_to_log = "", bool log_state_changes = true);
    virtual void setStateOnlyHierarchically(NState::State s, bool force = false) { setStateOnly(s,force); }
 
    /// This returns the time of state change: (relative to real time when the suite calendar was begun)
@@ -679,10 +694,13 @@ private:
    /// on the node. If node has a default state this is applied to the node, and
    /// hierarchically to all the children
    /// Can also clear suspended see re-queue()
-   void initState(int clear_suspended_in_child_nodes);
+   void initState(int clear_suspended_in_child_nodes, bool log_state_changes = true);
 
    // Clear the node suspended and update state change number, no other side effects
    void clearSuspended();
+   void delete_time_dep_attrs_if_empty();
+   void delete_child_attrs_if_empty();
+   void delete_misc_attrs_if_empty();
 
 private: // alow simulator access
    friend class ecf::DefsAnalyserVisitor;
@@ -751,7 +769,7 @@ private:
    ecf::LateAttr*              lateAttr_;     // Can only have one late attribute per node
    ecf::AutoCancelAttr*        autoCancel_;   // Can only have 1 auto cancel per node
    TimeDepAttrs*               time_dep_attrs_;
-   ChildAttrs*                 child_attrs_;  // event meter & lables
+   ChildAttrs*                 child_attrs_;  // event meter & labels
    MiscAttrs*                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
    Repeat                      repeat_;       // each node can only have one repeat. By value, since has pimpl
 

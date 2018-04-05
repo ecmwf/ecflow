@@ -36,10 +36,9 @@ void Node::clear()
  	// Note: auto cancel does not have any changeable state
  	//       Hence it is not cleared. Hence no need for memento
   	// ************************************************************
-
-   if (time_dep_attrs_) time_dep_attrs_->clear();
-   if (child_attrs_) child_attrs_->clear();
-   if (misc_attrs_) misc_attrs_->clear();    // zombies can be added/removed via AlterCmd
+   delete time_dep_attrs_; time_dep_attrs_ = NULL;
+   delete child_attrs_; child_attrs_ = NULL;
+   delete misc_attrs_; misc_attrs_ = NULL; // zombies can be added/removed via AlterCm
   	repeat_.clear();
 	varVec_.clear();
 	limitVec_.clear();

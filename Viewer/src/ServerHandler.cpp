@@ -289,8 +289,31 @@ void ServerHandler::driftRefreshTimer()
 #ifdef __UI_SERVERUPDATE_DEBUG
         UiLog(this).dbg() << "driftRefreshTimer -->";
 #endif
-        refreshTimer_->drift(conf_->intValue(VServerSettings::AdaptiveUpdateIncrement),
-                              conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
+
+        int rate=conf_->intValue(VServerSettings::UpdateRate);
+        int baseDelta=conf_->intValue(VServerSettings::AdaptiveUpdateIncrement);
+        int delta=baseDelta;  //linear mode
+
+        //doubling mode
+        if(conf_->stringValue(VServerSettings::AdaptiveUpdateMode) == "doubling")
+        {
+            delta=refreshTimer_->interval()/1000-rate;
+            if(delta==0)
+                delta=baseDelta;
+        }
+        //x modes
+        else
+        {
+            float f=conf_->stringValue(VServerSettings::AdaptiveUpdateMode).toFloat();
+            if(f >= 1. && f <=5.)
+            {
+                delta=(refreshTimer_->interval()/1000-rate)*(f-1);
+                if(delta==0)
+                    delta=1;
+            }
+        }
+
+        refreshTimer_->drift(delta,conf_->intValue(VServerSettings::MaxAdaptiveUpdateRate));
 
         broadcast(&ServerComObserver::notifyRefreshTimerChanged);
     }
@@ -1356,6 +1379,9 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 		{
 			reset();
 		}
+
+        //Save the settings
+        conf_->saveSettings();
 	}
 }
 
@@ -1417,6 +1443,7 @@ void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
     case VServerSettings::AutoUpdate:
     case VServerSettings::UpdateRate:
     case VServerSettings::AdaptiveUpdate:
+    case VServerSettings::AdaptiveUpdateMode:
     case VServerSettings::AdaptiveUpdateIncrement:
         updateRefreshTimer();
         break;

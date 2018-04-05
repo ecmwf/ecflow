@@ -35,6 +35,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QItemSelectionModel>
+#include <QMenu>
 #include <QMovie>
 #include <QTime>
 #include <QTimer>
@@ -126,6 +127,29 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
     QWidgetAction* fetchInfoAction=new QWidgetAction(this);
     fetchInfoAction->setDefaultWidget(fetchInfo_);
     fetchInfoTb_->addAction(fetchInfoAction);
+
+    filterTb_->setProperty("strip","first");
+    filterOptionTb_->setProperty("strip","last");
+
+    QMenu *menu=new QMenu(this);
+    menu->addAction(actionSaveFileAs_);
+    menu->addAction(actionGotoLine_);
+
+    //TODO: needs proper implementation
+    gotoLineTb_->hide();
+
+    //Sets the menu on the toolbutton
+    moreActionTb_->setMenu(menu);
+    moreActionTb_->hide();
+    moreActionTb_->setEnabled(false);
+    actionSaveFileAs_->setEnabled(false);
+    actionGotoLine_->setEnabled(false);
+
+    //Init filter in output browser
+    browser_->setFilterButtons(filterTb_,filterOptionTb_);
+
+    //
+    browser_->setSearchButtons(searchTb_);
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -228,7 +252,6 @@ void OutputItemWidget::clearContents()
     messageLabel_->hide();
     messageLabel_->stopProgress();
     fileLabel_->clear();      
-    browser_->clearCursorCache();
     browser_->clear();
     reloadTb_->setEnabled(true);
     userClickedReload_ = false;

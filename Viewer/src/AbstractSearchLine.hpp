@@ -56,9 +56,9 @@ protected:
 	bool highlightAll_;
     StringMatchMode matchMode_;
 
-	QColor   oriColour_;
-	QColor   redColour_;
-	QColor   greenColour_;
+    QBrush oriBrush_;
+    QBrush redBrush_;
+    QBrush greenBrush_;
 
 	bool confirmSearch_;
 };

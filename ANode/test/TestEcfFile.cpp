@@ -232,6 +232,7 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
    suite_ptr suite = Suite::create( Pid::unique_name("test_ECF_SCRIPT_CMD_ECFLOW_427")  );
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
+      suite->addVariable( Variable( "body", "body" ) );
       suite->addTask( task_t1 );
       theDefs.addSuite( suite );
    }
@@ -247,8 +248,9 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
 
    // generate the ecf file;
    string header = "%include <simple_head.h>\n";
-   string body = "#body\n";
+   string body = "#%body%\n";
    body += "%manual\nThis is a manual\n%end\n";
+   body += "%comment\nThis is a comment\n%end\n";
    string tail = "%include <simple_tail.h>\n";
    string ecf_file = header;
    ecf_file += body;
@@ -287,6 +289,23 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
       BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
       std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
       BOOST_CHECK_MESSAGE(job_file_contents == expected_job_file_contents ,"Expected\n'" <<expected_job_file_contents << "' but found:\n'" <<  job_file_contents << "'");
+   }
+
+   /// Check pre-processing arbitrary file, should return same result as task pre-processing for job generation
+   {
+      task_t1->update_generated_variables();
+
+      string ecf_file_location = ecf_home  + task_t1->absNodePath() + ".ecf";
+      std::vector<std::string> user_edit_file;
+      BOOST_CHECK_MESSAGE(File::splitFileIntoLines( ecf_file_location ,user_edit_file),"Could not open file " << ecf_file_location);
+
+      string processed_file;
+      try { ecfFile.pre_process_user_file(user_edit_file,processed_file); }
+      catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected pre-processing succeed " << e.what());}
+
+      // because we have read file, as a vector of lines, expect extra \n at the end
+      std::string expected_job_file_contents = "#head.h\n#body\n#tail.h\n";
+      BOOST_CHECK_MESSAGE(processed_file == expected_job_file_contents ,"Expected\n'" << expected_job_file_contents << "' but found:\n'" <<  processed_file << "'");
    }
 
    /// Check manual extraction
@@ -550,9 +569,11 @@ BOOST_AUTO_TEST_CASE( test_ecf_include_ECFLOW_274 )
    std::string job_file_contents;
    BOOST_CHECK_MESSAGE(File::open(job_file_location,job_file_contents),"Could not open job file " << job_file_location<< " (" << strerror(errno) << ")");
 
-   /// Remove all the generated files. This occasionally fails on ecgb/lxg ???
-   try { boost::filesystem::remove_all( ecf_home + suite->absNodePath() ); }
-   catch (...) {  cout << "Could not remove directory " << ecf_home + suite->absNodePath() << "\n";}
+   /// Remove the directories that were generated. This occasionally fails on ecgb and lxg ???
+   try { fs::remove_all( ecf_home + suite->absNodePath()); }
+   catch (const fs::filesystem_error& e) {
+      cout << "Could not remove directory " << ecf_home + suite->absNodePath() << " : " << e.what() << "\n";
+   }
 }
 
 

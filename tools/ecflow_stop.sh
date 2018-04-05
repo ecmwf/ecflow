@@ -21,7 +21,7 @@
 
 #set -eux
 
-PATH=/usr/local/bin:/usr/bin:$PATH
+PATH=$PATH:/usr/local/bin:/usr/bin
 export TZ=GMT LANG=en_GB.UTG-8
 host=$(hostname)
 backup_server=false

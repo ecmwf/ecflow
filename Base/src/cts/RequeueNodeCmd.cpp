@@ -62,8 +62,12 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	as->update_stats().requeue_node_++;
 	assert(isWrite()); // isWrite used in handleRequest() to control check pointing
 
-	// This is *only* incremented for child nodes. Hence we only clear suspended for child nodes.
-	int clear_suspended_in_child_nodes = 0;
+	// The clear_suspended_in_child_nodes *only* incremented for child nodes.
+	// Hence we only clear suspended for child nodes.
+   Node::Requeue_args args(true /* reset repeats */,
+                           0    /* clear_suspended_in_child_nodes */,
+                           true /* reset_next_time_slot */,
+                           true /* reset relative duration */);
 
    std::stringstream ss;
 	size_t vec_size = paths_.size();
@@ -90,10 +94,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      theNodeToRequeue->getAllTasks(taskVec);
 	      for(size_t i=0; i < taskVec.size(); i++) {
 	         if (taskVec[i]->state() == NState::ABORTED) {
-	            taskVec[i]->requeue( true  /* reset repeats */,
-	                                 clear_suspended_in_child_nodes,
-	                                 true  /* reset_next_time_slot */,
-	                                 true  /* reset relative duration */);
+	            taskVec[i]->requeue(args);
 	            taskVec[i]->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
 	         }
 	      }
@@ -121,12 +122,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // calling force complete now leaves node in a complete state and with NO_REQUE_IF_SINGLE_TIME_DEP set.
 	      // Therefore *any* *MANUAL* re-queue afterward will NOT reset the next valid time slot.
 	      // To overcome this manual re-queue will always clear NO_REQUE_IF_SINGLE_TIME_DEP and hence reset next valid time slot
-	      theNodeToRequeue->requeue( true /* reset repeats */,
-	                                 clear_suspended_in_child_nodes,
-	                                 true /* reset_next_time_slot */,
-	                                 true /* reset relative duration */);
-
-
+	      theNodeToRequeue->requeue(args);
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
 
          // Call handleStateChange on parent, to avoid requeue same node again.
@@ -142,11 +138,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // The GUI: that calls this command should call a separate request
 	      // the returns the active/submitted tasks first. This can then be
 	      // presented to the user, who can elect to kill them if required.
-	      theNodeToRequeue->requeue(  true /* reset repeats */,
-	                                  clear_suspended_in_child_nodes,
-	                                  true /* reset_next_time_slot */,
-	                                  true /* reset relative duration */);
-
+	      theNodeToRequeue->requeue(args);
 	      theNodeToRequeue->set_most_significant_state_up_node_tree();
 
 	      // Call handleStateChange on parent, to avoid requeue same node again.

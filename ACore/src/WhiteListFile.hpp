@@ -29,11 +29,31 @@ public:
 	WhiteListFile();
 	~WhiteListFile();
 
+	// If any user in read/write lists, then it has read access.
+	// However when paths are specified teh returns may not me the same. i.e
+	//    verify_read_access("userX") != verify_read_access("userX","/f")
+	// This is is because different commands, call different functions:
+	// Hence if we have:
+	//              verify_read_access(userX) verify_read_access(userX,'/f') verify_read_access(userX,'/s1')
+	//  userX  /s1               TRUE                  FALSE                        TRUE
+	//  -userX /s2               TRUE                  FALSE                        FALSE
+	//
+	// If we also add * in the mix: All users have read/write acess to suite /a, and read access to /b
+	//  *  /a
+	//  -* /b
+	//  userX  /s1
+	//  -userX /s2
+	// HENCE:
+	//    verify_read_access(userX)   -> TRUE
+	//    verify_read_access(yy)      -> TRUE  // yy qualifies as all users
+	//   verify_read_access(userX,/a) -> TRUE
+	//   verify_read_access(yy,/a)    -> TRUE
    bool verify_read_access(const std::string& user) const;
-   bool verify_write_access(const std::string& user) const;
    bool verify_read_access(const std::string& user, const std::string& path) const;
-   bool verify_write_access(const std::string& user,const std::string& path) const;
    bool verify_read_access(const std::string& user, const std::vector<std::string>& paths) const;
+
+   bool verify_write_access(const std::string& user) const;
+   bool verify_write_access(const std::string& user,const std::string& path) const;
    bool verify_write_access(const std::string& user,const std::vector<std::string>& paths) const;
 
    std::string dump_valid_users() const;

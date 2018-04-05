@@ -214,7 +214,7 @@ static const char* const_ecf_string(const char *str)
 }
 
 #undef MAXLEN
-#define MAXLEN          255        /* For temp names, should be big enough */
+#define MAXLEN          254        /* For temp names, should be big enough */
 #include <sys/stat.h>
 #include <dirent.h>
 

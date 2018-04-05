@@ -124,26 +124,32 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable"
-
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations"
+ 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
-module load cmake/3.3.2
-module load ecbuild/2.7.3
+module load cmake/3.10.2
+module load ecbuild/2.8.1
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
 	module unload gnu
-	module load clang
-	CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined"
-	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
+	module load clang/5.0.1
+	CXX_FLAGS=""  # latest clang with latest boost, should not need any warning suppression
+	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
+	
+	#CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined -Wno-unused-local-typedefs"
+    #cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
 fi
 if [[ "$clang_sanitiser_arg" = san ]] ; then
 	module unload gnu
 	module load clang
-	CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined -fsanitize=thread"
-    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
+	CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined -fsanitize=thread"
+	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
+    
+	#CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined -fsanitize=thread"
+    #cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
 fi
 if [[ "$ARCH" = cray ]] ; then
 
@@ -276,6 +282,8 @@ fi
 # cmake -C $workspace/ecflow/bamboo/macosx1010-flags.cmake $source_dir \
 #        -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
 #  .....
+# For gcc 6.3.0 default  
+#  -DCMAKE_CXX_STANDARD=98     # add -std=gnu++98
 
 $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
@@ -296,8 +304,8 @@ $ecbuild $source_dir \
             #-DENABLE_PYTHON_PTR_REGISTER=ON  \
             #-DCMAKE_PYTHON_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor   \
             #-DCMAKE_PREFIX_PATH="/usr/local/apps/qt/5.5.0/5.5/gcc_64/" \
-            #-DENABLE_GUI=ON       \
-            #-DENABLE_UI=ON        \           
+            #-DENABLE_GUI=ON       \  # ecflowview
+            #-DENABLE_UI=ON        \  # ecflow_ui      
             #-DENABLE_ALL_TESTS=ON \
             #-DENABLE_SERVER=OFF   \
             #-DENABLE_PROFILING=ON \

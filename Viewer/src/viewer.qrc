@@ -24,7 +24,6 @@
     <file>../images/arrow_up.svg</file>
     <file>../images/arrow_down.svg</file>
     <file>../images/add.svg</file>
-    <file alias="close.svg">../images/close.svg</file>
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>
     <file alias="add_tab.svg">../images/add_tab.svg</file> 
@@ -33,6 +32,9 @@
     <file alias="chain_open.svg">../images/chain_open.svg</file>
     <file alias="chain_closed.svg">../images/chain_closed.svg</file>
     <file alias="clear_left.svg">../images/clear_left.svg</file>
+    <file alias="close.svg">../images/close.svg</file>
+    <file alias="close_grey.svg">../images/close_grey.svg</file>
+    <file alias="close_red.svg">../images/close_red.svg</file>
     <file alias="case_sensitive.svg">../images/case_sensitive.svg</file>
     <file alias="cogwheel.svg">../images/cogwheel.svg</file>
     <file alias="cogwheel_blue.svg">../images/cogwheel_blue.svg</file>
@@ -49,6 +51,7 @@
     <file alias="dock_max_disabled.svg">../images/dock_max_disabled.svg</file>
     <file alias="dock_menu_indicator.png">../images/dock_menu_indicator.png</file>
     <file alias="dock_restore.svg">../images/dock_restore.svg</file>
+    <file alias="down_arrow.svg">../images/down_arrow.svg</file>
     <file alias="drawer_open.svg">../images/drawer_open.svg</file>
     <file alias="drawer_close.svg">../images/drawer_close.svg</file>
     <file alias="edit.svg">../images/edit.svg</file>
@@ -61,8 +64,12 @@
     <file alias="filesave.svg">../images/filesave.svg</file>
     <file alias="filesaveas.svg">../images/filesaveas.svg</file>
     <file alias="filter_decor.svg">../images/filter_decor.svg</file> 
+    <file alias="filter_decor_green.svg">../images/filter_decor_green.svg</file>
+    <file alias="filter_decor_red.svg">../images/filter_decor_red.svg</file>
     <file alias="filter_edit.svg">../images/filter_edit.svg</file>
     <file alias="filter.svg">../images/filter.svg</file>
+    <file alias="filter_match.svg">../images/filter_match.svg</file>
+    <file alias="filter_no_match.svg">../images/filter_no_match.svg</file>
     <file alias="font.svg">../images/font.svg</file>
     <file alias="fontsize_down.svg">../images/fontsize_down.svg</file>
     <file alias="fontsize_up.svg">../images/fontsize_up.svg</file>   

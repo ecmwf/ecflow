@@ -1,0 +1,206 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>ecFlow-Flask-SocketIO</title>
+    <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.16/socket.io.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function(){
+        namespace = '/test'; // change to an empty string to use the global namespace
+        namsp = '/ecflow'; // change to an empty string to use the global namespace
+	states_color = [];
+	states_color['submitted'] = "#04e1d1";
+	states_color['aborted'] = 'red';
+	states_color['active'] = 'green';
+	states_color['complete'] = 'yellow';
+	states_color['suspended'] = 'orange';
+	states_color['unknown'] = 'grey';
+	states_color['queued'] = 'lightblue';
+	states_color['shutdown']=  "#ffc1cc"; 
+	states_color['halted']=    "#ef83ef";
+	states_color['none']=    "#ffffff";
+
+            // the socket.io documentation recommends sending an explicit package upon connection
+            // this is specially important when using the global namespace
+            var socket = io.connect('http://' + document.domain + ':' + location.port + namespace);
+            var sock = io.connect('http://' + document.domain + ':' + location.port + namsp);
+            socket.on('connect', function() {
+                socket.emit('my event', {data: 'online!'});
+            });
+
+            sock.on('connect', function() {
+                socket.emit('my event', {data: 'Connexion!'});
+            });
+
+            sock.on('clear', function(msg) {
+        $("#suites").empty();
+        $("#tasks").empty();
+        $("#tasks-sub").empty();
+        $("#tasks-run").empty();
+        $("#tasks-abt").empty();
+        $("#logs").empty();
+        });
+
+        sock.on('suites list', function(msg) {
+	// console.log(msg);
+
+if (msg.node.status == "complete") { }
+elif (msg.node.status == "queued") { }
+else {
+	var list = $('<div/>', { id: msg.node._id,
+	text: msg.node.name,
+	style: 'cursor:pointer;background-color:' 
+	  + states_color[msg.node.status] + ';',
+	click: function() { $('#tasks').empty();
+$('#tasks-sub').empty();
+$('#tasks-run').empty();
+$('#tasks-abt').empty();
+	$('#logs').empty();
+	sock.emit('list tasks', {data: "xx"});
+	sock.emit('log tasks',  {data: "yy"});
+	}}).appendTo("#suites")});
+
+        sock.on('tasks list', function(msg) {
+	// console.log(msg);
+
+if (msg.node.status == "submitted") {
+	var color = states_color[msg.node.status]
+	if (msg.node.alert) { color = "magenta"; }
+
+	var list = $('<div/>', { id: msg.node._id,
+	text: msg.node.name,
+	style: 'cursor:pointer;background-color:' + color + ';',
+	click: function() { $('#logs').empty();
+	// sock.emit('log tasks', {data: "yy"});
+	}}).appendTo("#tasks-sub"); 
+}
+
+if (msg.node.status == "aborted") {
+	var color = states_color[msg.node.status]
+	if (msg.node.alert) { color = "magenta"; }
+
+	var list = $('<div/>', { id: msg.node._id,
+	text: msg.node.name,
+	style: 'cursor:pointer;background-color:' + color + ';',
+	click: function() { $('#logs').empty();
+	// sock.emit('log tasks', {data: "yy"});
+	}}).appendTo("#tasks-abt");
+}
+
+if (msg.node.status == "active") {
+	var color = states_color[msg.node.status]
+	if (msg.node.alert) { color = "magenta"; }
+
+	var list = $('<div/>', { id: msg.node._id,
+	text: msg.node.name,
+	style: 'cursor:pointer;background-color:' + color + ';',
+	click: function() { $('#logs').empty();
+	// sock.emit('log tasks', {data: "yy"});
+	}}).appendTo("#tasks-run");
+}
+	});
+
+        sock.on('logs list', function(msg) {
+	// console.log(msg);
+	var list = $('<div/>', { id: msg.node._id,
+	text: msg.node.name,
+	style: 'cursor:pointer;background-color:' + states_color[msg.node.status] + ';',
+	click: function() { // $('#logs').empty();
+	// sock.emit('log tasks', {data: "yy"});
+	}}).appendTo("#logs")});
+
+            // event handler for server sent data
+            // the data is displayed in the "Received" section of the page
+            socket.on('my response', function(msg) {
+                $('#logs list').append('<br>Received #' + msg.count + ': ' + msg.data);
+            });
+
+            // handlers for the different forms in the page
+            // these send data to the server in a variety of ways
+/*
+            $('form#emit').submit(function(event) {
+                socket.emit('my event', {data: $('#emit_data').val()});
+                return false;
+            });
+            $('form#broadcast').submit(function(event) {
+                socket.emit('my broadcast event', {
+	data: $('#broadcast_data').val()});
+                return false;
+            });
+            $('form#join').submit(function(event) {
+                socket.emit('join', {room: $('#join_room').val()});
+                return false;
+            });
+            $('form#leave').submit(function(event) {
+                socket.emit('leave', {room: $('#leave_room').val()});
+                return false;
+            });
+            $('form#send_room').submit(function(event) {
+                socket.emit('my room event', {room: $('#room_name').val(), 
+	data: $('#room_data').val()});
+                return false;
+            });
+            $('form#close').submit(function(event) {
+                socket.emit('close room', {room: $('#close_room').val()});
+                return false;
+            });
+            $('form#disconnect').submit(function(event) {
+                socket.emit('disconnect request');
+                return false;
+            });
+*/
+        }); 
+    </script>
+</head>
+<body>
+    <h1>ecFlow-Flask-SocketIO</h1>
+    <!--h2>Send:</h2>
+    <form id="emit" method="POST" action='#'>
+        <input type="text" name="emit_data" id="emit_data" placeholder="Message">
+        <input type="submit" value="Echo">
+    </form>
+    <form id="broadcast" method="POST" action='#'>
+        <input type="text" name="broadcast_data" id="broadcast_data" placeholder="Message">
+        <input type="submit" value="Broadcast">
+    </form>
+    <form id="join" method="POST" action='#'>
+        <input type="text" name="join_room" id="join_room" placeholder="Room Name">
+        <input type="submit" value="Join Room">
+    </form>
+    <form id="leave" method="POST" action='#'>
+        <input type="text" name="leave_room" id="leave_room" placeholder="Room Name">
+        <input type="submit" value="Leave Room">
+    </form>
+    <form id="send_room" method="POST" action='#'>
+        <input type="text" name="room_name" id="room_name" placeholder="Room Name">
+        <input type="text" name="room_data" id="room_data" placeholder="Message">
+        <input type="submit" value="Send to Room">
+    </form>
+    <form id="close" method="POST" action="#">
+        <input type="text" name="close_room" id="close_room" placeholder="Room Name">
+        <input type="submit" value="Close Room">
+    </form>
+    <form id="disconnect" method="POST" action="#">
+        <input type="submit" value="Disconnect">
+    </form>
+    <h2>Receive:</h2-->
+    <table><tr>
+	<td><p>Suites</td>
+	<td><p>Tasks</td>
+	<td><p>Logs</td>
+      </tr>
+<tr>
+	<td valign="top"><div id="suites"></div></td>
+	<td valign="top"><div id="tasks"></div></td>
+
+	<td valign="top"><div id="tasks-sub"></div></td>
+	<td valign="top"><div id="tasks-abt"></div></td>
+	<td valign="top"><div id="tasks-run"></div></td>
+	<td valign="top" ><div id="logs"></div></td>
+      </tr>
+</table>
+    <div id="log"></div>
+
+
+</body>
+</html>

@@ -10,18 +10,27 @@
 
 #include "OutputBrowser.hpp"
 
+#include <QtGlobal>
+#include <QProcess>
 #include <QVBoxLayout>
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#endif
+
 #include "Highlighter.hpp"
+
 #include "MessageLabel.hpp"
+#include "HtmlEdit.hpp"
 #include "PlainTextEdit.hpp"
 #include "PlainTextSearchInterface.hpp"
 #include "TextEditSearchLine.hpp"
 #include "TextPager/TextPagerSearchInterface.hpp"
 #include "TextPagerWidget.hpp"
 #include "DirectoryHandler.hpp"
+#include "TextFilterWidget.hpp"
 #include "UserMessage.hpp"
-
+#include "UiLog.hpp"
 
 int OutputBrowser::minPagerTextSize_=1*1024*1024;
 int OutputBrowser::minPagerSparseSize_=30*1024*1024;
@@ -29,11 +38,24 @@ int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) :
     QWidget(parent),
-    lastPos_(0)
+    searchTb_(0)
 {
     QVBoxLayout *vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
     vb->setSpacing(2);
+
+    //Text filter editor
+    textFilter_=new TextFilterWidget(this);
+    vb->addWidget(textFilter_);
+
+    connect(textFilter_,SIGNAL(runRequested(QString,bool,bool)),
+            this,SLOT(slotRunFilter(QString,bool,bool)));
+
+    connect(textFilter_,SIGNAL(clearRequested()),
+            this,SLOT(slotRemoveFilter()));
+
+    connect(textFilter_,SIGNAL(closeRequested()),
+            this,SLOT(slotRemoveFilter()));
 
     stacked_=new QStackedWidget(this);
     vb->addWidget(stacked_,1);
@@ -68,14 +90,21 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     textPagerSearchInterface_=new TextPagerSearchInterface();
     textPagerSearchInterface_->setEditor(textPager_->textEditor());
 
+    //Html browser for html files
+    htmlEdit_=new HtmlEdit(this);
+
     stacked_->addWidget(textEdit_);
     stacked_->addWidget(textPager_);
+    stacked_->addWidget(htmlEdit_);
 
     stacked_->setCurrentIndex(BasicIndex);
     searchLine_->hide();
 
     connect(searchLine_,SIGNAL(visibilityChanged()),
           this,SLOT(showConfirmSearchLabel()));
+
+    //the textfilter is is hidden by default
+    textFilter_->hide();
 }
 
 OutputBrowser::~OutputBrowser()
@@ -85,49 +114,81 @@ OutputBrowser::~OutputBrowser()
 
     if(jobHighlighter_ && !jobHighlighter_->parent())
     {
-            delete jobHighlighter_;
+        delete jobHighlighter_;
     }
+}
+
+void OutputBrowser::setSearchButtons(QToolButton* searchTb)
+{
+    searchTb_=searchTb;
+}
+
+void OutputBrowser::setFilterButtons(QToolButton* statusTb,QToolButton* optionTb)
+{
+    textFilter_->setExternalButtons(statusTb,optionTb);
 }
 
 void OutputBrowser::clear()
 {
-    if(stacked_->currentIndex() == BasicIndex)
-        cursorCache_[currentSourceFile_].pos_=textEdit_->textCursor().position();
-    else
-        cursorCache_[currentSourceFile_].pos_=textPager_->textEditor()->textCursor().position();
-
-    currentSourceFile_.clear();
-
     textEdit_->clear();
-	textPager_->clear();
+    textPager_->clear();
+    htmlEdit_->clear();
     file_.reset();
+    oriFile_.reset();
 }
 
 void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
 {
     if(indexType == BasicIndex)
     {
-        stacked_->setCurrentIndex(indexType);
+        stacked_->setCurrentIndex(indexType);               
+        textPager_->clear();
+        htmlEdit_->clear();
+
+        //enable and init search
+        if(searchTb_) searchTb_->setEnabled(true);
         searchLine_->setConfirmSearch(false);
         searchLine_->setSearchInterface(textEditSearchInterface_);
-        //confirmSearchLabel_->clear();
-        //confirmSearchLabel_->hide();
 
-        textPager_->clear();
+        //enable filter
+        textFilter_->setEnabledExternalButtons(true);
     }
-    else
+    else if(indexType == PagerIndex)
     {
-        stacked_->setCurrentIndex(indexType);
+        stacked_->setCurrentIndex(indexType);          
+        textEdit_->clear();
+        htmlEdit_->clear();
+
+        //enable and init search
+        if(searchTb_) searchTb_->setEnabled(true);
         searchLine_->setConfirmSearch(fileSize >=minConfirmSearchSize_);
         searchLine_->setSearchInterface(textPagerSearchInterface_);
-        //confirmSearchLabel_->show();
-        //confirmSearchLabel_->showWarning(searchLine_->confirmSearchText());
+
+        //enable filter
+        textFilter_->setEnabledExternalButtons(true);
+    }
+    else if(indexType == HtmlIndex)
+    {
+        stacked_->setCurrentIndex(indexType);
+        textPager_->clear();
         textEdit_->clear();
+        if(oriFile_)
+            oriFile_.reset();
+
+        //Disable search
+        if(searchTb_) searchTb_->setEnabled(false);
+        searchLine_->setSearchInterface(0);
+        searchLine_->hide();
+
+        //Disable filter
+        textFilter_->closeIt();
+        textFilter_->setEnabledExternalButtons(false);
     }
 
     showConfirmSearchLabel();
 }
 
+//This should only be called externally when a new output is loaded
 void OutputBrowser::loadFile(VFile_ptr file)
 {
     if(!file)
@@ -140,15 +201,32 @@ void OutputBrowser::loadFile(VFile_ptr file)
     if(file_->storageMode() == VFile::DiskStorage)
     {
         loadFile(QString::fromStdString(file_->path()));
-
-        //Set the cursor position from the cache
-        updateCursorFromCache(file_->sourcePath());
     }
     else
     {
         QString s(file_->data());
         loadText(s,QString::fromStdString(file_->sourcePath()),true);
     }
+
+    //Run the filter if defined
+    if(textFilter_->isActive())
+    {
+        slotRunFilter(textFilter_->filterText(),textFilter_->isMatched(),
+                      textFilter_->isCaseSensitive());
+    }
+}
+
+void OutputBrowser::loadFilteredFile(VFile_ptr file)
+{
+    if(!file)
+    {
+        clear();
+        return;
+    }
+
+    file_=file;
+    Q_ASSERT(file_->storageMode() == VFile::DiskStorage);
+    loadFile(QString::fromStdString(file_->path()));
 }
 
 void OutputBrowser::loadFile(QString fileName)
@@ -158,7 +236,20 @@ void OutputBrowser::loadFile(QString fileName)
     QFileInfo fInfo(file);
     qint64 fSize=fInfo.size();
     
-    if(!isJobFile(fileName) && fSize >= minPagerTextSize_)
+    if(isHtmlFile(fileName))
+    {
+        changeIndex(HtmlIndex,fSize);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+        QString str=file.readAll();
+        htmlEdit_->document()->setHtml(str);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
+
+    }
+    else if(!isJobFile(fileName) && fSize >= minPagerTextSize_)
     {
         changeIndex(PagerIndex,fSize);
 
@@ -187,7 +278,18 @@ void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
     //We estimate the size in bytes
 	qint64 txtSize=txt.size()*2;
     
-    if(!isJobFile(fileName) && txtSize > minPagerTextSize_)
+    if(isHtmlFile(fileName))
+    {
+        changeIndex(HtmlIndex,txtSize);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+        htmlEdit_->document()->setHtml(txt);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
+    }
+    else if(!isJobFile(fileName) && txtSize > minPagerTextSize_)
     {
         changeIndex(PagerIndex,txtSize);
         textPager_->setText(txt);
@@ -200,7 +302,7 @@ void OutputBrowser::loadText(QString txt,QString fileName,bool resetFile)
     }
 
     //Set the cursor position from the cache
-    updateCursorFromCache(fileName.toStdString());
+    //updateCursorFromCache(fileName.toStdString());
 }
 
 void OutputBrowser::saveCurrentFile(QString &fileNameToSaveTo)
@@ -240,23 +342,14 @@ bool OutputBrowser::isFileLoaded()
     return (file_ != 0);
 }
 
-
-void OutputBrowser::updateCursorFromCache(const std::string& sourcePath)
-{
-#if 0
-    //Set the cursor position from the cache
-    QMap<std::string,CursorCacheItem>::const_iterator it=cursorCache_.find(sourcePath);
-    if(it != cursorCache_.end())
-    {
-        setCursorPos(it.value().pos_);
-    }
-    currentSourceFile_=file_->sourcePath();
-#endif
-}
-
 bool OutputBrowser::isJobFile(QString fileName)
 {
     return fileName.contains(".job");
+}
+
+bool OutputBrowser::isHtmlFile(QString fileName)
+{
+    return fileName.endsWith(".html");
 }
 
 void OutputBrowser::adjustHighlighter(QString fileName)
@@ -264,45 +357,52 @@ void OutputBrowser::adjustHighlighter(QString fileName)
     //For job files we set the proper highlighter
     if(isJobFile(fileName))
     {
-	if(!jobHighlighter_)
-	{
+        if(!jobHighlighter_)
+        {
             jobHighlighter_=new Highlighter(textEdit_->document(),"job");
-	}
-	else if(jobHighlighter_->document() != textEdit_->document())
-	{
+        }
+        else if(jobHighlighter_->document() != textEdit_->document())
+        {
             jobHighlighter_->setDocument(textEdit_->document());
-	}
+        }
     }
     else if(jobHighlighter_)
     {
-	jobHighlighter_->setDocument(NULL);
+        jobHighlighter_->setDocument(NULL);
     }
 }
 
 void OutputBrowser::gotoLine()
 {
     if(stacked_->currentIndex() == BasicIndex)
-	textEdit_->gotoLine();
-    else
+       textEdit_->gotoLine();
+    else if(stacked_->currentIndex() == PagerIndex)
        textPager_->gotoLine(); 
 }
 
 void OutputBrowser::showSearchLine()
 {
-	searchLine_->setVisible(true);
-	searchLine_->setFocus();
-	searchLine_->selectAll();
+    if(searchLine_->hasInterface())
+    {
+        searchLine_->setVisible(true);
+        searchLine_->setFocus();
+        searchLine_->selectAll();
+    }
 }
 
 void OutputBrowser::searchOnReload(bool userClickedReload)
 {
-	searchLine_->searchOnReload(userClickedReload);
+    if(searchLine_->hasInterface())
+    {
+        searchLine_->searchOnReload(userClickedReload);
+    }
 }
 
 void OutputBrowser::setFontProperty(VProperty* p)
 {
 	textEdit_->setFontProperty(p);
 	textPager_->setFontProperty(p);
+    htmlEdit_->setFontProperty(p);
 }
 
 void OutputBrowser::updateFont()
@@ -314,12 +414,14 @@ void OutputBrowser::zoomIn()
 {
 	textEdit_->slotZoomIn();
 	textPager_->zoomIn();
+    htmlEdit_->zoomIn();
 }
 
 void OutputBrowser::zoomOut()
 {
 	textEdit_->slotZoomOut();
 	textPager_->zoomOut();
+    htmlEdit_->zoomOut();
 }
 
 void OutputBrowser::showConfirmSearchLabel()
@@ -343,8 +445,129 @@ void OutputBrowser::setCursorPos(qint64 pos)
         c.setPosition(pos);
         textEdit_->setTextCursor(c);
     }
-    else
+    else if(stacked_->currentIndex() == PagerIndex)
     {
         textPager_->textEditor()->setCursorPosition(pos);
+    }
+}
+
+void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive)
+{
+    if(stacked_->currentIndex() == HtmlIndex)
+        return;
+
+    assert(file_);
+
+    if(oriFile_)
+        file_=oriFile_;
+
+    VFile_ptr fTarget=VFile::createTmpFile(true);
+    VFile_ptr fSrc=VFile_ptr();
+
+    // file is on disk - we use it as it is
+    if(file_->storageMode() == VFile::DiskStorage)
+    {
+        fSrc=file_;
+    }
+    // file in memory - just dump it to the tmp file
+    else
+    {
+        fSrc=VFile::createTmpFile(true);
+        QFile file(QString::fromStdString(fSrc->path()));
+        if(file.open(QFile::WriteOnly | QFile::Text))
+        {
+            QTextStream out(&file);
+            QString s(file_->data());
+            out << s;
+        }
+        else
+        {
+        }
+    }
+
+    //At this point point fSrc must contain the text to filter
+    QProcess proc;
+    proc.setStandardOutputFile(QString::fromStdString(fTarget->path()));
+
+    //Run grep to filter fSrc into fTarget
+    QString extraOptions;
+    if(!matched)
+        extraOptions+=" -v ";
+    if(!caseSensitive)
+        extraOptions+=" -i ";
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+
+    proc.start("/bin/sh",
+         QStringList() <<  "-c" << "grep " + extraOptions + " -e \'" + filter  + "\' " +
+         QString::fromStdString(fSrc->path()));
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    UiLog().dbg() << "args=" << proc.arguments().join(" ");
+#endif
+
+    if(!proc.waitForStarted(1000))
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
+        QString errStr;
+        UI_FUNCTION_LOG
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        errStr="Failed to start text filter using command:<br> \'" +
+                             proc.program() + " " + proc.arguments().join(" ") + "\'";
+#else
+        errStr="Failed to start grep command!";
+#endif
+        UserMessage::message(UserMessage::ERROR,true,errStr.toStdString());
+        fTarget.reset();
+        return;
+    }
+
+    proc.waitForFinished(60000);
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::restoreOverrideCursor();
+#endif
+
+    QString errStr=proc.readAllStandardError();
+    if(proc.exitStatus() == QProcess::NormalExit && errStr.isEmpty())
+    {
+        oriFile_=file_;
+        textFilter_->setStatus(fTarget->isEmpty()?(TextFilterWidget::NotFoundStatus):(TextFilterWidget::FoundStatus));        
+        loadFilteredFile(fTarget);
+    }
+    else
+    {        
+        QString msg;
+        UI_FUNCTION_LOG
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        msg="Failed to filter output file using command:<br> \'" +
+                             proc.program() + " " + proc.arguments().join(" ") + "\'";
+#else
+        msg="Failed to run grep command!";
+#endif
+        if(!errStr.isEmpty())
+            msg+="<br>Error message: " + errStr;
+
+        UserMessage::message(UserMessage::ERROR,true,msg.toStdString());
+        textFilter_->setStatus(TextFilterWidget::NotFoundStatus);
+        fTarget.reset(); //delete
+    }
+
+    return;
+}
+
+void OutputBrowser::slotRemoveFilter()
+{
+    if(stacked_->currentIndex() == HtmlIndex)
+        return;
+
+    if(oriFile_)
+    {
+        loadFile(oriFile_);
+        oriFile_.reset();
     }
 }

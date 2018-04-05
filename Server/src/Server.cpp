@@ -22,11 +22,15 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
+#ifdef ECFLOW_MT
+#include <boost/thread/thread.hpp> // needed for ECFLOW_MT and debug() to print thread ID
+#endif
+
 #include <iostream>
 
 #include "Server.hpp"  // Must come before boost/serialization headers.
                        // defines ECFLOW_MT
-#include <boost/thread/thread.hpp> // needed for ECFLOW_MT and debug() to print thread ID
 #include "Defs.hpp"
 #include "Log.hpp"
 #include "System.hpp"
@@ -212,9 +216,9 @@ void Server::start_accept()
    if (serverEnv_.debug()) cout << "   Server::start_accept()" << endl;
 
 #ifdef ECF_OPENSSL
-   connection_ptr new_conn( new connection( io_service_, context_ ) );
+   connection_ptr new_conn = boost::make_shared<connection>( boost::ref(io_service_), boost::ref(context_)) ;
 #else
-   connection_ptr new_conn( new connection( io_service_ ) );
+   connection_ptr new_conn = boost::make_shared<connection>( boost::ref(io_service_) );
 #endif
 
    if (serverEnv_.allow_old_client_new_server() !=0 ) {
@@ -448,7 +452,8 @@ void Server::terminate()
 
 void Server::handle_terminate()
 {
-   if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
+   // if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
+   if (serverEnv_.debug()) cout << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
 
    // Cancel signal
    signals_.clear();

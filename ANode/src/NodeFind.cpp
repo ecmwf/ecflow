@@ -155,8 +155,6 @@ bool Node::user_variable_exists(const std::string& name) const
 
 const Variable& Node::findVariable(const std::string& name) const
 {
-   if (varVec_.empty())  return Variable::EMPTY();
-
    size_t theSize = varVec_.size();
    for(size_t i = 0; i < theSize; i++) {
       if (varVec_[i].name() == name) {
@@ -189,10 +187,12 @@ const Variable& Node::find_parent_variable(const std::string& name) const
 
 bool Node::findVariableValue( const std::string& name, std::string& returnedValue) const
 {
-   const Variable& var = findVariable(name);
-   if (!var.empty()) {
-      returnedValue = var.theValue();
-      return true;
+   size_t theSize = varVec_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (varVec_[i].name() == name) {
+         returnedValue = varVec_[i].theValue();
+         return true;
+      }
    }
    return false;
 }

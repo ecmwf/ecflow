@@ -70,11 +70,21 @@ VSettings::VSettings(boost::property_tree::ptree pt) : pt_(pt)
 {
 }
 
-
 void VSettings::clear()
 {
 	pt_.clear();
 
+}
+
+bool VSettings::fileExists() const
+{
+    if(!file_.empty())
+    {
+        namespace fs=boost::filesystem;
+        fs::path boostpath(file_);
+        return fs::exists(boostpath);
+    }
+    return false;
 }
 
 bool VSettings::contains(const std::string& key)

@@ -152,6 +152,18 @@ do
             shift
 			;;
 
+        #Specify the location of the config dir. It is used for ui testing only.
+        #We do not expose it in the usage() print out!!
+        -confd)
+            export ECFUI_CONFIG_DIR=$2
+            if [[ $ECFUI_CONFIG_DIR  != /* ]] ; then
+                echo "Please specify an absolute path for flag -confd!"
+                exit 1
+            fi
+            echo "Starting ecFlowUI with user specified config dir: ${ECFUI_CONFIG_DIR}"
+            shift
+            ;;
+
 		-h)
 			ECFUI_HELP=yes
 			;;
@@ -244,6 +256,20 @@ export ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
 
 # Where to write the user interaction log file to
 export ECFLOWUI_UI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
+
+
+#---------------------------------------------------------------
+# Remove lock files created more than 3 s ago (see ECFLOW-980)
+#---------------------------------------------------------------
+
+confDir=${ECFUI_CONFIG_DIR:=${HOME}/.ecflow_ui}
+#We are extra careful an delete the files in a loop instead of using exec for find
+for fn in $(find $confDir -type f -cmin +0.05 -name *.lock) ; do
+    if [[ $fn == *.lock ]] ; then
+        echo "Remove lock file: ${fn}"
+        rm -f $fn
+    fi
+done
 
 #-----------------------------------------------------------
 # Close tty and redirect stdout to a file?

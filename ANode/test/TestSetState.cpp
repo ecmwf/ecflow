@@ -122,7 +122,11 @@ BOOST_AUTO_TEST_CASE( test_set_aborted )
       BOOST_CHECK_MESSAGE( jobsParam.submitted().size() == 0,"No jobs should be submitted when task is forcibly aborted but found " << jobsParam.submitted().size() << " submitted");
    }
 
-   t1->requeue(true/* reset repeats*/,0/*clear suspended */,false/*reset next time slot*/,true/*reset relative duration*/);
+   Node::Requeue_args args(true /* reset repeats*/,
+                           0    /* clear_suspended_in_child_nodes */,
+                           true /* reset_next_time_slot_ */,
+                           true /* reset relative duration */);
+   t1->requeue(args);
 
    t1->set_state(NState::ABORTED); // mimic non forced, i.e like job aborted
    {

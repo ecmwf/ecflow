@@ -42,6 +42,7 @@ public:
 	//bool read(const std::string &fs);
 	//virtual void write(const std::string &fs);
 
+    bool fileExists() const;
 	bool read(bool failIfFileDoesNotExist = true);
 	virtual void write();
 

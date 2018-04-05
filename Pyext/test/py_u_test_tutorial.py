@@ -766,6 +766,67 @@ defs.save_as_defs('test.def')
         do_tear_down()
      
          
+class TestCron(unittest.TestCase):
+    def setUp(self):
+        Ecf.set_debug_equality(True)      
+
+        def create_family_house_keeping():
+            cron = Cron()
+            cron.set_week_days( [0] )
+            cron.set_time_series( "22:30" )
+            f2 = Family("house_keeping")
+            f2.add_task("clear_log").add_cron(cron)  
+            return f2
+            
+        defs = Defs()
+        suite = defs.add_suite("test")
+        suite.add_variable("ECF_HOME",    os.path.join(os.getenv("HOME"),  "course"))
+        suite.add_variable("ECF_INCLUDE", os.path.join(os.getenv("HOME"),  "course"))
+
+        #suite.add_family( create_family_f1() )
+        suite.add_family( create_family_house_keeping() )
+        errors = defs.check()
+        assert len(errors) == 0,errors
+
+        defs.save_as_defs(test_def_file())  
+ 
+        self.defs = defs;
+         
+    def test_me0(self):
+        text = """#!/usr/bin/env python2.7
+import os
+from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Cron
+  
+def create_family_house_keeping():
+    return Family("house_keeping",
+                Task("clear_log",
+                    Cron("22:30",days_of_week=[0])))
+          
+print("Creating suite definition") 
+home = os.path.join(os.getenv("HOME"), "course")
+defs = Defs(
+        Suite("test",
+            Edit(ECF_HOME=home),Edit(ECF_INCLUDE=home),
+            create_family_house_keeping()))
+#xx print(defs) 
+
+#xx print("Checking job creation: .ecf -> .job0")  
+#print(defs.check_job_creation())
+
+#xx print("Checking trigger expressions")
+errors = defs.check()
+assert len(errors) == 0,errors
+
+#xx print("Saving definition to file 'test.def'")
+defs.save_as_defs('test.def')
+"""
+        test_compile(text)
+        test_defs = Defs(test_def_file())
+        self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
+        
+    def tearDown(self):
+        do_tear_down()
+     
 class TestIndentation(unittest.TestCase):
     def setUp(self):
         Ecf.set_debug_equality(True)      

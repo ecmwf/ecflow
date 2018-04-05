@@ -35,6 +35,9 @@ public:
 	     createJobs_(createJobs),spawnJobs_(spawn_jobs), submitJobsInterval_(submitJobsInterval)
 	   { if (!createJobs_) spawnJobs_ = false;}
 
+	// Allow JobsParam to be re-used. Preserve cache in EcfFile. ECFLOW-1210
+	void clear();
+
 	std::string& errorMsg() { return errorMsg_;}
 	const std::string& getErrorMsg() const { return errorMsg_;}
 

@@ -83,13 +83,6 @@ void ChildAttrs::sort_attributes( ecf::Attr::Type attr)
    }
 }
 
-void ChildAttrs::clear()
-{
-   meters_.clear();
-   events_.clear();
-   labels_.clear();
-}
-
 bool ChildAttrs::set_event_used_in_trigger(const std::string& event_name_or_number)
 {
    if (events_.empty()) {
@@ -500,8 +493,6 @@ const Event& ChildAttrs::findEventByNameOrNumber( const std::string& theName) co
    }
    return Event::EMPTY();
 }
-
-
 
 const Meter& ChildAttrs::findMeter(const std::string& name) const
 {

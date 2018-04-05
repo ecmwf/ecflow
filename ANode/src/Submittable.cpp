@@ -146,13 +146,13 @@ void Submittable::begin()
 #endif
 }
 
-void Submittable::requeue(bool resetRepeats, int clear_suspended_in_child_nodes, bool reset_next_time_slot,bool reset_relative_duration)
+void Submittable::requeue(Requeue_args& args)
 {
    /// It is *very* important that we reset the passwords. This allows us to detect zombies.
    tryNo_ = 0;    // reset try number
    clear();       // jobs password, process_id, aborted_reason
 
-   Node::requeue(resetRepeats,clear_suspended_in_child_nodes,reset_next_time_slot,reset_relative_duration);
+   Node::requeue(args);
    update_generated_variables();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -646,13 +646,20 @@ void Submittable::check_job_creation( job_creation_ctrl_ptr jobCtrl)
       set_genvar_ecfjob(tmpLocationForJob);
    }
 
-   JobsParam jobsParam; // create jobs = false, spawn jobs = false
-   if ( submit_job_only(jobsParam) ) {
+   // Before we had a Local JobsParam  here
+   // By using the JobsParam on job_creation_ctrl_ptr, we get the effect of USING a cache.
+   // EcfFile stored on JobsParam has cache. This cache avoids opening include files more than once.
+   // Since we have a Single job_creation_ctrl_ptr, hence single JobsParam, hence single EcfFile
+   // the cache is applied for ALL tasks. See ECFLOW-1210
+   jobCtrl->jobsParam().clear(); // allow jobsParam to be re-used by clearing
+   LOG_ASSERT(!jobCtrl->jobsParam().spawnJobs() , "spawn jobs should be disabled for check job creation" );
+   LOG_ASSERT(!jobCtrl->jobsParam().createJobs(), "create jobs should be disabled for check job creation" );
+   if ( submit_job_only( jobCtrl->jobsParam() ) ) {
       return;
    }
    output_tasks_being_checked.set_failed();
 
-   std::string errorMsg = jobsParam.getErrorMsg();
+   std::string errorMsg = jobCtrl->jobsParam().getErrorMsg();
    LOG_ASSERT( !errorMsg.empty(), "failing to submit must raise an error message" );
 
    jobCtrl->error_msg() += errorMsg;

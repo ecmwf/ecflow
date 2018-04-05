@@ -17,10 +17,10 @@ endif()
 install( FILES
             ${CMAKE_SOURCE_DIR}/tools/ecflow_fuse.py
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
             ${CMAKE_SOURCE_DIR}/tools/noconnect.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_stop.sh
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_logserver.sh
          DESTINATION bin
          PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
          COMPONENT binary

@@ -63,9 +63,9 @@ public:
 
    void verification(std::string& errorMsg) const;
 
-private:
-   void clear(); /// Clear *ALL* internal attributes
+   bool empty() const { return (zombies_.empty() && verifys_.empty()) ? true : false; }
 
+private:
    std::vector<ZombieAttr>::const_iterator zombie_begin() const { return zombies_.begin();}
    std::vector<ZombieAttr>::const_iterator zombie_end() const { return zombies_.end();}
    std::vector<VerifyAttr>::const_iterator verify_begin() const { return verifys_.begin();}

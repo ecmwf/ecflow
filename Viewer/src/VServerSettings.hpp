@@ -23,7 +23,7 @@ class VServerSettings : public VPropertyObserver
 
 public:
     enum Param {AutoUpdate, UpdateRate,
-               AdaptiveUpdate,AdaptiveUpdateIncrement,MaxAdaptiveUpdateRate,
+               AdaptiveUpdate,AdaptiveUpdateIncrement,MaxAdaptiveUpdateRate,AdaptiveUpdateMode,
                MaxOutputFileLines,ReadFromDisk,
                NodeMenuMode,
 	           NotifyAbortedEnabled, NotifyAbortedPopup, NotifyAbortedSound,
