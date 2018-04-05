@@ -49,13 +49,12 @@ int main(argc,argv) int argc; char **argv;
   char *infile;                    /* Temporary input file        */
   char *outfile;                   /* Output file (def /dev/null) */
   char *shell;
-  int   keep_file=FALSE;           /* Flag to keep the input file */
+  /* int   keep_file=FALSE;*/      /* Flag to keep the input file */
 
   FILE *fp;                        /* Temp to write the input file */
   char  buff[MAXLEN];              /* Temp buffer to read in lines */
 
   int   option;
-  int   n;
 
   extern char *optarg;             /* Needed for the getopt */
   extern int   optind;
@@ -71,7 +70,7 @@ int main(argc,argv) int argc; char **argv;
     {
       case 'i':
         infile = optarg;
-        keep_file = TRUE;
+        /* keep_file = TRUE; */
         break;
 
       case 'o':
