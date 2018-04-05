@@ -597,6 +597,9 @@ RepeatEnumerated::RepeatEnumerated( const std::string& variable, const std::vect
    if ( !Str::valid_name( variable ) ) {
       throw std::runtime_error("RepeatEnumerated: Invalid name: " + variable);
    }
+   if (theEnums.empty()) {
+      throw std::runtime_error("RepeatEnumerated: " + variable + " is empty");
+   }
 }
 
 int RepeatEnumerated::end() const   {
@@ -788,6 +791,9 @@ RepeatString::RepeatString( const std::string& variable, const std::vector<std::
 {
    if ( !Str::valid_name( variable ) ) {
       throw std::runtime_error("RepeatString:: Invalid name: " + variable);
+   }
+   if (theEnums.empty()) {
+      throw std::runtime_error("RepeatString : " + variable + " is empty");
    }
 }
 

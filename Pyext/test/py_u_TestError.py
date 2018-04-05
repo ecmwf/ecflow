@@ -235,10 +235,12 @@ if __name__ == "__main__":
     assert check_repeat_string("",["a"] )==False,                 "Expected Exception since no name specified"
     assert check_repeat_string(" ",["a"] )==False,                "Expected Exception can not have spaces for a name"
     assert check_repeat_string("name",[ 1,2 ])==False,            "Expected Exception since a list of strings was expected"
+    assert check_repeat_string("name",[])==False,                 "Expected Exception since list of strings is empty"
     assert check_repeat_enumerated("name",[ "a" ]),               "Expected valid repeat"
     assert check_repeat_enumerated("",["a"] )==False,             "Expected Exception since no name specified"
-    assert check_repeat_enumerated(" ",["a"] )==False,            "Expected Exception since a list of strings was expected"
+    assert check_repeat_enumerated(" ",["a"] )==False,            "Expected Exception since no name specified"
     assert check_repeat_enumerated("name",[ 1,2 ])==False,        "Expected Exception since a list of strings was expected"
+    assert check_repeat_enumerated("name",[])==False,             "Expected Exception since list is empty"
 
 
     assert check_variable("name","value"),        "Expected valid Variable"
