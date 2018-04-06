@@ -94,7 +94,13 @@ public:
 	/// Pre-processing involves include expansion and variable substitution
 	/// Will throw std::runtime_error if pre processing fails
 	void pre_process(std::string& pre_processed_file);
-	void pre_process(std::vector<std::string> & user_edit_file, std::string& pre_processed_file);
+
+   /// Does full pre-processing:
+   ///   - include pre-processing
+   ///   - variable substitution
+   ///   - remove comment and manual sections
+   ///   - ignore %noop
+	void pre_process_user_file(std::vector<std::string> & user_edit_file, std::string& pre_processed_file);
 
 	/// Searches for the first %comment, then extracts all variables of the form
 	///   <name>  =  <value>

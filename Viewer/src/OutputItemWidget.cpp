@@ -147,6 +147,9 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     //Init filter in output browser
     browser_->setFilterButtons(filterTb_,filterOptionTb_);
+
+    //
+    browser_->setSearchButtons(searchTb_);
 }
 
 OutputItemWidget::~OutputItemWidget()

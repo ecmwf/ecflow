@@ -1,10 +1,10 @@
  ======================================================================================
 Subject: New release of ecFlow now available  
 
-A new version of the ecFlow(4.8.0) has been released:
+A new version of the ecFlow(4.10.0) has been released:
 
 
-This release is accessible from: /usr/local/apps/ecflow/4.8.0
+This release is accessible from: /usr/local/apps/ecflow/4.10.0
 on the following platforms:
 
    o linux 11.3                (lxop-dev)
@@ -23,7 +23,7 @@ Note: The GUI(ecflowview) is only available on linux
 
    module avail ecflow
    module unload ecflow 
-   module load ecflow/4.8.0
+   module load ecflow/4.10.0
       
 The new GUI(ecflow_ui) is available from vsms1,ecgb,lxop-dev,lxc,opensuse131,leap42
             
@@ -33,7 +33,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   module load ecflow/4.8.0
+   module load ecflow/4.10.0
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
 the server variable %ECF_VERSION% to locate the executable, this ensures

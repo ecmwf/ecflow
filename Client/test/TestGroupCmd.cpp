@@ -63,6 +63,7 @@ BOOST_AUTO_TEST_CASE( test_client_group_lifecyle )
 
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
 
+   size_t expected_var = 0;
    {
       // restart server, load lifecycle, and get the defs tree from the server
       std::string groupRequest ="--restart; load=";
@@ -73,6 +74,24 @@ BOOST_AUTO_TEST_CASE( test_client_group_lifecyle )
       defs_ptr serverDefs =  theClient.defs();
       BOOST_REQUIRE_MESSAGE( serverDefs.get(),"Server returned a NULL defs");
       BOOST_REQUIRE_MESSAGE( serverDefs->suiteVec().size() >= 1,"  no suite ?");
+      const std::vector<suite_ptr>& suites = serverDefs->suiteVec();
+      const std::vector<Variable>& variables = suites[0]->variables();
+      expected_var = variables.size();
+   }
+
+   {
+      // add some var's with spaces ECFLOW-1265
+      expected_var += 1;
+      std::string groupRequest ="alter add variable VAR 'space s' /suite1; get";
+
+      BOOST_REQUIRE_MESSAGE( theClient.group(groupRequest) == 0,"Group request " << CtsApi::group(groupRequest) << " failed should return 0\n" << theClient.errorMsg());
+      defs_ptr serverDefs =  theClient.defs();
+      BOOST_REQUIRE_MESSAGE( serverDefs.get(),"Server returned a NULL defs");
+      const std::vector<suite_ptr>& suites = serverDefs->suiteVec();
+      BOOST_REQUIRE_MESSAGE( suites.size() >= 1,"  no suite ?");
+      const std::vector<Variable>& variables = suites[0]->variables();
+      BOOST_REQUIRE_MESSAGE( variables.size() == expected_var, "Expected " <<  expected_var << " variables but found " << variables.size());
+      BOOST_REQUIRE_MESSAGE( variables[expected_var-1].theValue() == "'space s'", "Expected 'space s' but found " << variables[expected_var-1].theValue());
    }
 
    // Now go through and simulate client request to change Node tree state.

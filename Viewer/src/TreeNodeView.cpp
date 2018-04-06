@@ -33,6 +33,7 @@
 #include "TreeNodeViewDelegate.hpp"
 #include "UIDebug.hpp"
 #include "UiLog.hpp"
+#include "VItemPathParser.hpp"
 #include "VNode.hpp"
 #include "VModelData.hpp"
 #include "VTree.hpp"
@@ -343,12 +344,10 @@ void TreeNodeView::slotViewCommand(VInfo_ptr info,QString cmd)
             UiLog().dbg() << "expandAll time=" << t.elapsed()/1000. << "s";
 #endif
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-            QGuiApplication::restoreOverrideCursor();
-
+            QGuiApplication::restoreOverrideCursor();        
+#endif
             //save/update the expand state object
             saveExpandAll(idx);
-
-#endif
         }
     }
     else if(cmd == "collapse")
@@ -637,14 +636,25 @@ void TreeNodeView::regainSelectionFromExpand()
     {
         if(lastSelection_)
         {
+            std::string lastPath=lastSelection_->storedPath();
             lastSelection_->regainData();
             if(!lastSelection_->hasData())
             {
-                lastSelection_.reset();
+                lastSelection_.reset();                
+
+                //We might have lost the selection because the
+                //selected node was removed. We try to find the parent
+                //and select it when exists.
+                VItemPathParser p(lastPath);
+                VInfo_ptr ptr=VInfo::createFromPath(p.parent());
+                if(ptr)
+                {
+                    setCurrentSelectionFromExpand(ptr);
+                }
             }
             else
             {
-                setCurrentSelectionFromExpand(lastSelection_);
+                    setCurrentSelectionFromExpand(lastSelection_);
             }
         }
     }

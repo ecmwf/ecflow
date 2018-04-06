@@ -1,3 +1,9 @@
+
+# This can be used by submission system. i.e trimurti
+ecbuild_add_executable( TARGET    ecflow_standalone
+                        SOURCES   ecflow_standalone.c
+                      )
+
 #
 # Configure  ecflow_site.sh. This is used in ecflow_start.sh and ecflow_stop.sh
 # Used in coping with start of ecflow server on a linux cluser
@@ -17,11 +23,10 @@ endif()
 install( FILES
             ${CMAKE_SOURCE_DIR}/tools/ecflow_fuse.py
             ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.pl
-            ${CMAKE_SOURCE_DIR}/tools/ecflow_logsvr.sh
             ${CMAKE_SOURCE_DIR}/tools/noconnect.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_start.sh
             ${CMAKE_SOURCE_DIR}/tools/ecflow_stop.sh
-            ${CMAKE_SOURCE_DIR}/tools/start_logserver.sh
+            ${CMAKE_SOURCE_DIR}/tools/ecflow_logserver.sh
          DESTINATION bin
          PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
          COMPONENT binary
