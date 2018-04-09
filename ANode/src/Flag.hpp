@@ -63,7 +63,7 @@ public:
       QUEUELIMIT    = 11,  // Node                                   ( NOT USED currently)
       WAIT          = 12,  // task*  Set/cleared but never queried ? ( NOT USED currently )
       LOCKED        = 13,  // Server                                 ( NOT USED currently)
-      ZOMBIE        = 14,  // task*  Set/cleared but never queried ? ( NOT USED currently )
+      ZOMBIE        = 14,  // task*  indicates zombie process
       NO_REQUE_IF_SINGLE_TIME_DEP = 15,  //
       NOT_SET       = 16
    };
