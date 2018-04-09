@@ -126,8 +126,8 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
-module load cmake/3.3.2
-module load ecbuild/2.7.3
+module load cmake/3.10.2
+module load ecbuild/2.8.1
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
