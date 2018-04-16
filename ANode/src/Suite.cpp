@@ -300,8 +300,7 @@ std::ostream& Suite::print(std::ostream& os) const
 {
 	Indentor::indent(os) << "suite " << name();
    if (!PrintStyle::defsStyle()) {
-      std::string st = write_state();
-      if (!st.empty()) os << " #" << st;
+      os << " #" << write_state();
    }
    os << "\n";
 

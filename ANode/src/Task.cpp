@@ -100,8 +100,7 @@ std::ostream& Task::print(std::ostream& os) const
    Indentor in;
    Indentor::indent(os) << "task " << name();
    if (!PrintStyle::defsStyle()) {
-      std::string st = write_state();
-      if (!st.empty()) os << " #" << st;
+      os << " #" << write_state();
    }
    os << "\n";
 
