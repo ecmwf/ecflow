@@ -103,7 +103,8 @@ std::ostream& Family::print(std::ostream& os) const
 	Indentor in;
 	Indentor::indent(os) << "family " << name();
    if (!PrintStyle::defsStyle()) {
-      os << " #" << write_state();
+      std::string st = write_state();
+      if (!st.empty()) os << " #" << st;
    }
    os << "\n";
 
