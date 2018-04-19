@@ -6,6 +6,7 @@
 #include <QSortFilterProxyModel>
 #include <QStyledItemDelegate>
 
+#include <set>
 #include <vector>
 
 #include "NodeObserver.hpp"
@@ -31,6 +32,8 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
    	std::string fullName(const QModelIndex& index) const;
+    void itemDesc(const QModelIndex& index,std::string& itemFullName,VDir::FetchMode& mode) const;
+    QModelIndex itemToIndex(const std::string& itemFullName,VDir::FetchMode fetchMode) const;
 
 protected:
     VDirItem* itemAt(int row,VDir_ptr& dir) const;
@@ -41,7 +44,7 @@ protected:
     qint64 secsToNow(QDateTime dt) const;
 
     std::vector<VDir_ptr> dirs_;
-    int joboutRow_;
+    std::set<int> joboutRows_;
     static QColor joboutCol_;
 };
 
