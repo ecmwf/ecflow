@@ -148,7 +148,14 @@
             "icon"	  : "cogwheel_blue.svg",
             "visible_for" : "server"
              
-        }  
+        } ,
+
+        {
+            "name"    : "server_load",
+            "label"   : "Server load",
+            "visible_for" : "server"
+
+    }
         
     ]
 }
