@@ -20,6 +20,32 @@
 #include <QtCharts>
 using namespace QtCharts;
 
+#if 0
+
+class LogItem
+{
+public:
+    enum Type {MsgType,ErrorType};
+    virtual Type type()=0;
+
+    size_t time_;
+    std::string txt_;
+};
+
+class MsgLogItem : public LogItem
+{
+public:
+    Type type() {return MsgType;}
+};
+
+class ErrorLogItem : public LogItem
+{
+public:
+    Type type() {return ErrorType;}
+};
+
+#endif
+
 class ServerLoadData
 {
 public:
@@ -61,20 +87,44 @@ private:
                             size_t& column_index);
 };
 
+class ChartView : public QChartView
+{
+    Q_OBJECT
+public:
+    ChartView(QChart *chart, QWidget *parent);
+
+    void doZoom(QRectF);
+
+Q_SIGNALS:
+    void chartZoomed(QRectF);
+
+protected:
+    void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void keyPressEvent(QKeyEvent *event);
+    void adjustTimeAxis(qint64 periodInMs);
+};
+
 class ServerLoadView : public QWidget
 {
+    Q_OBJECT
 public:
     explicit ServerLoadView(QWidget* parent=0);
 
     void load(const std::string& logFile);
 
+protected Q_SLOTS:
+    void slotZoom(QRectF);
+
 protected:
     void build(QChart* chart,QLineSeries *series);
 
     QChart* chart_;
-    QChartView* chartView_;
+    ChartView* chartView_;
     QChart* chartUserReq_;
     QChart* chartChildReq_;
+    QList<ChartView*> views_;
 
     ServerLoadData data_;
 };

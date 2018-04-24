@@ -10,18 +10,17 @@
 
 #include "ServerLoadView.hpp"
 
-#include "VNode.hpp"
-#include "VReply.hpp"
-#include "ServerHandler.hpp"
 #include "File_r.hpp"
 #include "File.hpp"
 #include "NodePath.hpp"
 #include "Str.hpp"
+#include "UiLog.hpp"
 
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 //#include <QChartView>
 #include <QLineSeries>
+
 
 //using namespace QtCharts;
 
@@ -362,27 +361,174 @@ bool ServerLoadData::extract_suite_path(
    return false;
 }
 
+
+ChartView::ChartView(QChart *chart, QWidget *parent) :
+    QChartView(chart, parent)
+{
+    setRubberBand(QChartView::HorizontalRubberBand);
+}
+
+void ChartView::mousePressEvent(QMouseEvent *event)
+{
+    QChartView::mousePressEvent(event);
+}
+
+void ChartView::mouseMoveEvent(QMouseEvent *event)
+{
+    QChartView::mouseMoveEvent(event);
+}
+
+void ChartView::mouseReleaseEvent(QMouseEvent *event)
+{
+    // Because we disabled animations when touch event was detected
+    // we must put them back on.
+    //chart()->setAnimationOptions(QChart::SeriesAnimations);
+
+    UiLog().dbg() << "zoom: " << chart()->plotArea();
+
+    QPointF oriLeft=chart()->mapToValue(chart()->plotArea().bottomLeft());
+    QPointF oriRight=chart()->mapToValue(chart()->plotArea().topRight());
+
+    UiLog().dbg() << "  " << chart()->mapToValue(chart()->plotArea().bottomLeft());
+
+    QChartView::mouseReleaseEvent(event);
+
+    UiLog().dbg() << "   " << chart()->plotArea();
+    UiLog().dbg() << "  " << chart()->mapToValue(chart()->plotArea().bottomLeft());
+
+    QPointF newLeft=chart()->mapToValue(chart()->plotArea().bottomLeft());
+    QPointF newRight=chart()->mapToValue(chart()->plotArea().topRight());
+
+    if(newLeft != oriLeft || newRight != oriRight )
+    {
+        Q_EMIT chartZoomed(QRectF(newLeft,newRight));
+    }
+
+    qint64 period=newRight.x()-newLeft.x(); //in ms
+    adjustTimeAxis(period);
+}
+
+void ChartView::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key()) {
+    case Qt::Key_Plus:
+        chart()->zoomIn();
+        break;
+    case Qt::Key_Minus:
+        chart()->zoomOut();
+        break;
+    case Qt::Key_Left:
+        chart()->scroll(-10, 0);
+        break;
+    case Qt::Key_Right:
+        chart()->scroll(10, 0);
+        break;
+    case Qt::Key_Up:
+        chart()->scroll(0, 10);
+        break;
+    case Qt::Key_Down:
+        chart()->scroll(0, -10);
+        break;
+    default:
+        QGraphicsView::keyPressEvent(event);
+        break;
+    }
+}
+
+void ChartView::doZoom(QRectF valRect)
+{
+    QRectF r(chart()->mapToPosition(valRect.bottomLeft()),
+             chart()->mapToPosition(valRect.topRight()));
+
+    chart()->zoomIn(r);
+
+    qint64 period=valRect.width(); //in ms
+    adjustTimeAxis(period);
+}
+
+void ChartView::adjustTimeAxis(qint64 periodInMs)
+{
+    qint64 period=periodInMs/1000; //in seconds
+    QString format;
+
+    if(period < 60)
+    {
+        format="hh:mm:ss";
+    }
+    else if(period < 3600)
+    {
+        format="hh:mm";
+    }
+    else if(period < 6*3600)
+    {
+        format="hh:mm DD/MM";
+    }
+    else if(period < 12*3600)
+    {
+        format="hh:mm DD/MM";
+    }
+    else if(period < 24*3600)
+    {
+        format="hh:mm DD/MM";
+    }
+    else if(period < 24*5*3600)
+    {
+        format="hh DD/MM";
+    }
+    else
+    {
+        format="DD/MM";
+    }
+
+    if(QDateTimeAxis *ax=static_cast<QDateTimeAxis*>(chart()->axisX()))
+    {
+        ax->setFormat(format);
+    }
+}
+
 ServerLoadView::ServerLoadView(QWidget* parent) : QWidget(parent)
 {
     QVBoxLayout* hb=new QVBoxLayout(this);
 
 
     chart_ = new QChart();
-    chartView_=new QChartView(chart_);
+    chartView_=new ChartView(chart_,this);
     chartView_->setRenderHint(QPainter::Antialiasing);
     hb->addWidget(chartView_);
 
 
     chartUserReq_ = new QChart();
-    QChartView* chartViewUser=new QChartView(chartUserReq_);
+    ChartView* chartViewUser=new ChartView(chartUserReq_,this);
     chartViewUser->setRenderHint(QPainter::Antialiasing);
     hb->addWidget(chartViewUser);
 
     chartChildReq_ = new QChart();
-    QChartView* chartViewChild=new QChartView(chartChildReq_);
+    ChartView* chartViewChild=new ChartView(chartChildReq_,this);
     chartViewChild->setRenderHint(QPainter::Antialiasing);
     hb->addWidget(chartViewChild);
+
+
+    views_ << chartView_ << chartViewUser << chartViewChild;
+
+    Q_FOREACH(ChartView* v,views_)
+    {
+        connect(v,SIGNAL(chartZoomed(QRectF)),
+                this,SLOT(slotZoom(QRectF)));
+    }
 }
+
+void ServerLoadView::slotZoom(QRectF r)
+{
+    if(ChartView* senderView=static_cast<ChartView*>(sender()))
+    {
+        Q_FOREACH(ChartView* v,views_)
+        {
+           if(v != senderView)
+               v->doZoom(r);
+        }
+    }
+}
+
 
 void ServerLoadView::load(const std::string& logFile)
 {
@@ -497,4 +643,23 @@ void  ServerLoadView::build(QChart* chart,QLineSeries *series)
     //chSeries->attachAxis(axisY);
     //usSeries->attachAxis(axisY);
     //tSeries->attachAxis(axisY);
+
+    //connect(series, &QLineSeries::hovered, this, &View::tooltip);
 }
+#if 0
+void View::tooltip(QPointF point, bool state)
+{
+    if (m_tooltip == 0)
+        m_tooltip = new Callout(m_chart);
+
+    if (state) {
+        m_tooltip->setText(QString("X: %1 \nY: %2 ").arg(point.x()).arg(point.y()));
+        m_tooltip->setAnchor(point);
+        m_tooltip->setZValue(11);
+        m_tooltip->updateGeometry();
+        m_tooltip->show();
+    } else {
+        m_tooltip->hide();
+    }
+}
+#endif

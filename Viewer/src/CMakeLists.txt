@@ -324,6 +324,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerListDialog.hpp
     ServerListSyncWidget.hpp
     ServerLoadItemWidget.hpp
+    ServerLoadView.hpp
     ServerSettingsItemWidget.hpp
     SessionDialog.hpp
     SessionRenameDialog.hpp
