@@ -24,7 +24,7 @@ namespace ecf {
 
 class File_r : private boost::noncopyable {
 public:
-   File_r(const std::string& file_name);
+   explicit File_r(const std::string& file_name);
    ~File_r();
 
    bool ok() const { return (fp_) ? true : false; }

@@ -29,7 +29,7 @@
 class NState {
 public:
 	enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5 };
-	NState(State s): state_(s), state_change_no_(0) {}
+	explicit NState(State s): state_(s), state_change_no_(0) {}
 	NState(): state_(UNKNOWN),state_change_no_(0) {}
 
 	State state() const { return state_;}

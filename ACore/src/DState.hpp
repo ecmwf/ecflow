@@ -30,7 +30,7 @@
 class DState {
 public:
    enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5, SUSPENDED=6};
-	DState(State s): state_(s), state_change_no_(0) {}
+	explicit DState(State s): state_(s), state_change_no_(0) {}
 	DState(): state_(QUEUED),state_change_no_(0) {}
 
 	State state() const { return state_;}
@@ -46,12 +46,12 @@ public:
 
 	static DState::State default_state() { return DState::QUEUED; }
 	static NState::State convert(DState::State);
-   static const char* toString(DState::State s);
-   static const char* to_html(DState::State s);
+   static const char* toString(DState::State);
+   static const char* to_html(DState::State);
    static const char* toString(const DState& ns) { return toString(ns.state());}
    static std::string to_string( DState::State s){ return std::string( toString(s) );}
-	static DState::State toState(const std::string& state);
-	static bool isValid(const std::string& state);
+	static DState::State toState(const std::string&);
+	static bool isValid(const std::string&);
 	static std::vector<std::string> allStates();
 	static std::vector<DState::State> states();
 
@@ -71,8 +71,8 @@ private:
 // Thin wrapper over DState, to aid python. i.e Task("t").add(Defstatus(DState.complete))
 class Defstatus {
 public:
-   Defstatus(DState::State state) : state_(state) {}
-   Defstatus(const std::string& ds) : state_(DState::toState(ds)) {}
+   explicit Defstatus(DState::State state) : state_(state) {}
+   explicit Defstatus(const std::string& ds) : state_(DState::toState(ds)) {}
    DState::State state() const { return state_;}
    std::string to_string() const { return DState::to_string(state_);}
 private:
