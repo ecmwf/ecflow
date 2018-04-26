@@ -39,10 +39,10 @@ bool LogVerification::extractNodePathAndState(	const std::string& logfile,
 		return false;
 	}
 
-  	int line_number = 0;
+  	//int line_number = 0;
 	for(std::vector<std::string>::iterator i=lines.begin(); i!=lines.end(); ++i) {
 
-		line_number++;
+		//line_number++;
 		if ((*i).find("LOG:") == std::string::npos) {
 			continue; // State changes have type Log::LOG
 		}
