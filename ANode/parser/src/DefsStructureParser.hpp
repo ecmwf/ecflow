@@ -34,7 +34,7 @@ class Parser;
 // This class is used get a line of defs format from a defs string
 class DefsString : private boost::noncopyable {
 public:
-   DefsString(const std::string& defs_as_string);
+   explicit DefsString(const std::string& defs_as_string);
    bool good() const;
    void getline(std::string& line);
    bool empty() const { return empty_; }
@@ -54,7 +54,7 @@ class DefsStructureParser : private boost::noncopyable {
 public:
    DefsStructureParser(Defs* defsfile, const std::string& file_name);
    DefsStructureParser(Defs* defsfile, const std::string& def_str, bool);
-   DefsStructureParser(const std::string& defs_node_string);
+   explicit DefsStructureParser(const std::string& defs_node_string);
    ~DefsStructureParser();
 
    /// Parse the definition file, *AND* check expressions and limits

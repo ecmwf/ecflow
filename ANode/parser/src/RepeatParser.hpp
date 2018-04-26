@@ -20,7 +20,7 @@
 
 class RepeatParser : public Parser {
 public:
-	RepeatParser(DefsStructureParser* p) : Parser(p) {}
+   explicit RepeatParser(DefsStructureParser* p) : Parser(p) {}
 
 	virtual const char* keyword() const { return "repeat"; }
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);

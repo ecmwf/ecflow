@@ -382,8 +382,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
 
 		try {
 			switch (add_attr_type_) {
-			case AlterCmd::ADD_TIME:    node->addTime( TimeSeries::create(name_ ) ); break;
-			case AlterCmd::ADD_TODAY:   node->addToday( TimeSeries::create(name_) ); break;
+			case AlterCmd::ADD_TIME:    node->addTime( TimeAttr(TimeSeries::create(name_ )) ); break;
+			case AlterCmd::ADD_TODAY:   node->addToday( TodayAttr(TimeSeries::create(name_)) ); break;
 			case AlterCmd::ADD_DATE:    node->addDate( DateAttr::create(name_) ); break;
 			case AlterCmd::ADD_DAY:     node->addDay( DayAttr::create(name_) ); break;
 			case AlterCmd::ADD_ZOMBIE:  node->addZombie( ZombieAttr::create(name_) ); break;

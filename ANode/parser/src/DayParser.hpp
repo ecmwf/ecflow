@@ -20,7 +20,7 @@
 
 class DayParser : public Parser {
 public:
-	DayParser(DefsStructureParser* p) : Parser(p) {}
+   explicit DayParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "day"; }
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
 };
