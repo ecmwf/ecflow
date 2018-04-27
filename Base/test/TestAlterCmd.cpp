@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
 class TestStateChanged {
 public:
-   TestStateChanged(suite_ptr s)
+   explicit TestStateChanged(suite_ptr s)
    : suite_(s),
      initial_suite_state_change_no_(s->state_change_no()),
      initial_suite_modify_change_no_(s->modify_change_no()) { Ecf::set_server(true);}
@@ -57,7 +57,7 @@ private:
 
 class TestDefsStateChanged {
 public:
-   TestDefsStateChanged(Defs* s)
+   explicit TestDefsStateChanged(Defs* s)
    : defs_(s),
      initial_state_change_no_(s->defs_only_max_state_change_no()) {}
 

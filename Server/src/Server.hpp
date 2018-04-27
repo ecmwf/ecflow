@@ -46,7 +46,7 @@ class Server : public AbstractServer {
 public:
    /// Constructor opens the acceptor and starts waiting for the first incoming
    /// connection.
-   Server(ServerEnvironment&);
+   explicit Server(ServerEnvironment&);
    virtual ~Server();
 
    /// Start the server

@@ -24,7 +24,7 @@ namespace ecf { class CalendarUpdateParams;  } // forward declare
 
 class Suite : public NodeContainer {
 public:
-   Suite( const std::string& name )
+   explicit Suite( const std::string& name )
    : NodeContainer(name),
      defs_(NULL),
      begun_(false),
@@ -156,7 +156,7 @@ std::ostream& operator<<(std::ostream& os, const Suite&);
 // This improves client->server down load times by avoiding thousands of string constructions
 class SuiteGenVariables : private boost::noncopyable {
 public:
-   SuiteGenVariables(const Suite*);
+   explicit SuiteGenVariables(const Suite*);
 
    void force_update() { force_update_ = true;}
    void update_generated_variables() const;

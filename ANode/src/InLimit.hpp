@@ -35,7 +35,7 @@
 // Inlimit of the same name specified on a task take priority over the family
 class InLimit {
 public:
-   InLimit(const std::string& name,
+   explicit InLimit(const std::string& name,
            const std::string& pathToNode = std::string(),
            int tokens = 1);
    InLimit() : tokens_(1)    {}

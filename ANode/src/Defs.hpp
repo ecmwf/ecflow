@@ -57,7 +57,7 @@ public:
    static defs_ptr create();
    static defs_ptr create(const std::string& port);
    Defs();
-   Defs(const std::string& port); // used in test, to initialise server variables
+   explicit Defs(const std::string& port); // used in test, to initialise server variables
    Defs(const Defs&);
    Defs& operator=(const Defs&);
 
@@ -442,7 +442,7 @@ private:
 // Start notification. End notification automatically signalled, Even if exception raised.
 class ChangeStartNotification : private boost::noncopyable {
 public:
-   ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start();}
+   explicit ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start();}
    ~ChangeStartNotification() {  defs_ptr_->notify_end();}
 private:
    defs_ptr defs_ptr_;

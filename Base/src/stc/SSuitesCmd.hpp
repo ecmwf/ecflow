@@ -24,7 +24,7 @@ class AbstractServer;
 //================================================================================
 class SSuitesCmd : public ServerToClientCmd {
 public:
-   SSuitesCmd(AbstractServer* as );
+   explicit SSuitesCmd(AbstractServer* as );
    SSuitesCmd() : ServerToClientCmd() {}
 
    void init(AbstractServer* as);

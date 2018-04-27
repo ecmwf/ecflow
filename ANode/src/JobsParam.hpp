@@ -26,7 +26,7 @@
 class JobsParam : private boost::noncopyable {
 public:
    // This constructor is used in test
-	JobsParam(bool createJobs = false)
+   explicit JobsParam(bool createJobs = false)
       : timed_out_of_job_generation_(false),
         createJobs_(createJobs), spawnJobs_(false), submitJobsInterval_(60){}
 

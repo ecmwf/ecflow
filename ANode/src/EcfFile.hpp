@@ -25,7 +25,7 @@
 // This cache serves to open the include file only once. It halves the job processing time.
 class IncludeFileCache : private boost::noncopyable {
 public:
-   IncludeFileCache(const std::string& path);
+   explicit IncludeFileCache(const std::string& path);
    ~IncludeFileCache();
    const std::string& path() const { return path_;}
    bool lines(std::vector<std::string>&);
@@ -155,7 +155,7 @@ private:
 // The pre-processing is done in a depth first fashion (ECFLOW-673)
 class PreProcessor : private boost::noncopyable {
 public:
-   PreProcessor(EcfFile*);
+   explicit PreProcessor(EcfFile*);
    ~PreProcessor();
 
    bool preProcess(std::vector<std::string>& script_lines );

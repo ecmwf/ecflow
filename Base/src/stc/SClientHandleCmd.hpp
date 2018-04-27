@@ -18,7 +18,7 @@
 
 class SClientHandleCmd : public ServerToClientCmd {
 public:
-	SClientHandleCmd(int handle) : handle_(handle) {}
+   explicit SClientHandleCmd(int handle) : handle_(handle) {}
 	SClientHandleCmd() : ServerToClientCmd() , handle_(0) {}
 
 	void init(int handle) { handle_ = handle; }

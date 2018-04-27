@@ -35,7 +35,7 @@
 class ServerState {
 public:
    ServerState();
-   ServerState(const std::string& port); // used in test to init server variables
+   explicit ServerState(const std::string& port); // used in test to init server variables
    ServerState(const ServerState&);
 
    /// Check pointing, SAVES server variables, since they are visualised by client like ecflow_ui
