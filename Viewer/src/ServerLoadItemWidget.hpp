@@ -41,49 +41,7 @@ private:
     void load();
 
     LogLoadWidget* w_;
-
-    //ServerLoadView* view_;
-    //Ui::ServerLoadItemWidget* ui_;
-    //LogLoadData* data_;
-    //LogLoadSuiteModel* suiteModel_;
-    //QSortFilterProxyModel* suiteSortModel_;
 };
-
-
-#if 0
-#include <QAbstractItemModel>
-class LogLoadSuiteModel : public QAbstractItemModel
-{
-    Q_OBJECT
-public:
-    explicit LogLoadSuiteModel(QObject *parent=0);
-    ~LogLoadSuiteModel();
-
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
-
-    Qt::ItemFlags flags ( const QModelIndex & index) const;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-    bool setData(const QModelIndex& idx, const QVariant & value, int role );
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
-
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-    QModelIndex parent (const QModelIndex & ) const;
-
-    void setData(LogLoadData* data);
-    bool hasData() const;
-    void clearData();
-
-Q_SIGNALS:
-    void checkStateChanged(int,bool);
-
-protected:
-    QString formatPrecentage(float perc) const;
-
-    LogLoadData* data_;
-};
-
-#endif
 
 #endif // SERVERLOADITEMWIDGET_HPP
 
