@@ -59,6 +59,13 @@ LogModel::~LogModel()
 {
 }
 
+void LogModel::loadFromFile(const std::string& fileName)
+{
+    beginResetModel();
+    data_.loadFromFile(fileName);
+    endResetModel();
+}
+
 void LogModel::setData(const std::string& data)
 {
 	beginResetModel();

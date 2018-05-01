@@ -12,6 +12,7 @@
 
 #include "File_r.hpp"
 #include "File.hpp"
+#include "LogModel.hpp"
 #include "NodePath.hpp"
 #include "Str.hpp"
 #include "UiLog.hpp"
@@ -19,6 +20,7 @@
 
 #include <QDateTime>
 #include <QHBoxLayout>
+#include <QHeaderView>
 #include <QSortFilterProxyModel>
 #include <QVBoxLayout>
 
@@ -58,6 +60,26 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
 
     connect(suiteModel_,SIGNAL(checkStateChanged(int,bool)),
             ui_->loadView,SLOT(addRemoveSuite(int,bool)));
+
+    //Log contents
+
+    logModel_=new LogModel(this);
+
+    ui_->logView->setProperty("log","1");
+    ui_->logView->setRootIsDecorated(false);
+    ui_->logView->setModel(logModel_);
+    ui_->logView->setUniformRowHeights(true);
+    ui_->logView->setItemDelegate(new LogDelegate(this));
+    ui_->logView->setContextMenuPolicy(Qt::ActionsContextMenu);
+
+    //make the horizontal scrollbar work
+    ui_->logView->header()->setStretchLastSection(false);
+    ui_->logView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    //Define context menu
+    //ui_->logView->addAction(actionCopyEntry_);
+    //ui_->logView->addAction(actionCopyRow_);
+
 }
 
 LogLoadWidget::~LogLoadWidget()
@@ -67,9 +89,12 @@ LogLoadWidget::~LogLoadWidget()
 void LogLoadWidget::load(const std::string& logFile)
 {
     //view_->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
-    ui_->loadView->load("/home/graphics/cgr/ecflow_dev/vsms1.ecf.log");
+    std::string fileName="/home/graphics/cgr/ecflow_dev/vsms1.ecf.log";
+    ui_->loadView->load(fileName);
 
     suiteModel_->setData(ui_->loadView->data(),ui_->loadView->suitePlotState());
+
+    logModel_->loadFromFile(fileName);
 }
 
 void LogLoadWidget::resolutionChanged(int)
@@ -305,8 +330,16 @@ void LogLoadDataItem::init(size_t num)
     sumTotal_=0;
     maxTotal_=0;
     rank_=-1;
-    childReq_=std::vector<int>(num,0);
-    userReq_=std::vector<int>(num,0);
+    if(num==0)
+    {
+        childReq_=std::vector<int>();
+        userReq_=std::vector<int>();
+    }
+    else
+    {
+        childReq_=std::vector<int>(num,0);
+        userReq_=std::vector<int>(num,0);
+    }
 }
 
 void LogLoadData::clear()
@@ -351,10 +384,10 @@ void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals)
     }
 }
 
-void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals1,const std::vector<int>& vals2)
+void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals1,const std::vector<int>& vals2,int & maxVal)
 {
-    UI_ASSERT(time_.size() == vals1.size(), "time_.size()=" << time_.size() << "vals1.size()=" << vals1.size());
-    UI_ASSERT(time_.size() == vals2.size(), "time_.size()=" << time_.size() << "vals2.size()=" << vals2.size());
+    UI_ASSERT(time_.size() == vals1.size(), "time_.size()=" << time_.size() << " vals1.size()=" << vals1.size());
+    UI_ASSERT(time_.size() == vals2.size(), "time_.size()=" << time_.size() << " vals2.size()=" << vals2.size());
 
     if(timeRes_ == SecondResolution)
     {
@@ -363,6 +396,7 @@ void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals1,co
     }
     else if(timeRes_ == MinuteResolution)
     {
+        maxVal=0;
         qint64 currentMinute=0;
         int sum=0;
         for(size_t i=0; i < time_.size(); i++)
@@ -372,8 +406,11 @@ void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals1,co
             if(currentMinute != minute)
             {
                 if(currentMinute >0 )
+                {
                     series.append(time_[i],sum);
-
+                    if(maxVal < sum)
+                        maxVal=sum;
+                }
                 currentMinute=minute;
                 sum=0;
             }
@@ -393,20 +430,36 @@ void LogLoadData::getUserReq(QLineSeries& series)
 
 void LogLoadData::getTotalReq(QLineSeries& series,int& maxVal)
 {
-    getSeries(series,data_.childReq(),data_.userReq());
-    maxVal=data_.maxTotal();
+    getSeries(series,data_.childReq(),data_.userReq(),maxVal);
+    if(timeRes_ == SecondResolution)
+        maxVal=data_.maxTotal();
 }
 
-void LogLoadData::getSuiteReq(QString suiteName,QLineSeries& series)
+void LogLoadData::getSuiteChildReq(size_t idx,QLineSeries& series)
 {
-#if 0
-    int idx=suiteNames_.indexOf(suiteName);
-    if(idx >=0)
+    if(idx >=0 && idx < suites().size())
     {
-        for(int i=0; i < time_.count(); i++)
-            series.append(time_[i].toMSecsSinceEpoch(), suite_[idx][i]);
+        int maxVal;
+        getSeries(series,suiteData_[idx].childReq());
     }
-#endif
+}
+
+void LogLoadData::getSuiteUserReq(size_t idx,QLineSeries& series)
+{
+    if(idx >=0 && idx < suites().size())
+    {
+        int maxVal;
+        getSeries(series,suiteData_[idx].userReq());
+    }
+}
+
+void LogLoadData::getSuiteTotalReq(size_t idx,QLineSeries& series)
+{
+    if(idx >=0 && idx < suites().size())
+    {
+        int maxVal;
+        getSeries(series,suiteData_[idx].childReq(),suiteData_[idx].userReq(),maxVal);
+    }
 }
 
 void LogLoadData::add(std::vector<std::string> time_stamp,size_t child_requests_per_second,
@@ -426,7 +479,7 @@ void LogLoadData::add(std::vector<std::string> time_stamp,size_t child_requests_
     for(size_t i = suiteData_.size(); i < suite_vec.size(); i++)
     {
         suiteData_.push_back(LogLoadDataItem(suite_vec[i].name_));
-        suiteData_.back().init(time_.size());
+        suiteData_.back().init(time_.size()-1);
     }
 
     assert(suiteData_.size() == suite_vec.size());
@@ -751,9 +804,6 @@ bool LogLoadData::extract_suite_path(
 //
 //=============================================
 
-
-
-
 ChartView::ChartView(QChart *chart, QWidget *parent) :
     QChartView(chart, parent)
 {
@@ -930,84 +980,75 @@ void ServerLoadView::setResolution(LogLoadData::TimeRes res)
 {
     data_->setTimeRes(res);
     load();
+    loadSuites();
 }
 
 void ServerLoadView::addRemoveSuite(int idx, bool st)
 {
+    if(idx >= 0 && idx < static_cast<int>(data_->suites().size()))
+    {
+        //Add suite
+        if(st)
+        {
+            suitePlotState_[idx]=true;
 
+            QLineSeries* series=new QLineSeries();
+            series->setName("s_main_" + QString::number(idx));
+            data_->getSuiteTotalReq(idx,*series);
+            chart_->addSeries(series);
+
+            QLineSeries* chSeries=new QLineSeries();
+            chSeries->setName("s_ch_" + QString::number(idx));
+            data_->getSuiteChildReq(idx,*chSeries);
+            chartChildReq_->addSeries(chSeries);
+
+            QLineSeries* usSeries=new QLineSeries();
+            usSeries->setName("s_us_" + QString::number(idx));
+            data_->getSuiteUserReq(idx,*usSeries);
+            chartUserReq_->addSeries(usSeries);
+        }
+        //remove
+        else
+        {
+
+            Q_FOREACH(QAbstractSeries *s,chart_->series())
+            {
+                if(s->name() == "s_main_" + QString::number(idx))
+                {
+                    chart_->removeSeries(s);
+                    break;
+                }
+            }
+            Q_FOREACH(QAbstractSeries *s,chartChildReq_->series())
+            {
+                if(s->name() == "s_ch_" + QString::number(idx))
+                {
+                    chartChildReq_->removeSeries(s);
+                    break;
+                }
+            }
+            Q_FOREACH(QAbstractSeries *s,chartUserReq_->series())
+            {
+                if(s->name() == "s_us_" + QString::number(idx))
+                {
+                    chartUserReq_->removeSeries(s);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void ServerLoadView::load(const std::string& logFile)
 {
     data_->loadLogFile(logFile);
+
     load();
+    loadSuites();
 
     suitePlotState_.clear();
     for(size_t i=0; i < data_->suites().size(); i++)
         suitePlotState_ << false;
-
-
-#if 0
-    //QChart *chart = new QChart();
-    chart_->addSeries(tSeries);
-    //chart_->addSeries(chSeries);
-    //chart_->addSeries(usSeries);
-
-    //chart_->legend()->hide();
-    chart_->setTitle("Server load");
-
-    QDateTimeAxis *axisX = new QDateTimeAxis;
-    axisX->setTickCount(10);
-    axisX->setFormat("HH dd/MM");
-    axisX->setTitleText("Date");
-    chart_->setAxisX(axisX, tSeries);
-
-    //chart_->addAxis(axisX, Qt::AlignBottom);
-    //chSeries->attachAxis(axisX);
-    //usSeries->attachAxis(axisX);
-    //tSeries->attachAxis(axisX);
-
-
-    QValueAxis *axisY = new QValueAxis;
-    axisY->setLabelFormat("%i");
-    axisY->setTitleText("Requests per second");
-    axisY->setMin(0.);
-    //chart_->addAxis(axisY, Qt::AlignLeft);
-    chart_->setAxisY(axisY, tSeries);
-    axisY->setMin(0.);
-    //chSeries->attachAxis(axisY);
-    //usSeries->attachAxis(axisY);
-    //tSeries->attachAxis(axisY);
-
-    chartU_->addSeries(chSeries);
-
-    //chart_->legend()->hide();
-    chart_->setTitle("Server load - child command");
-
-    QDateTimeAxis *axisXU = new QDateTimeAxis;
-    axisXU->setTickCount(10);
-    axisXU->setFormat("HH dd/MM");
-    axisXU->setTitleText("Date");
-    chartU_->setAxisX(axisXU, chSeries);
-
-    //chart_->addAxis(axisX, Qt::AlignBottom);
-    //chSeries->attachAxis(axisX);
-    //usSeries->attachAxis(axisX);
-    //tSeries->attachAxis(axisX);
-
-
-    QValueAxis *axisYU = new QValueAxis;
-    axisYU->setLabelFormat("%i");
-    axisYU->setTitleText("Requests per second");
-    axisYU->setMin(0.);
-    //chart_->addAxis(axisY, Qt::AlignLeft);
-    chartU_->setAxisY(axisYU, chSeries);
-    axisYU->setMin(0.);
-    axisYU->setMax(171.);
-    //chSeries->attachAxis(axisY);
-    //usSeries->attachAxis(axisY);
-    //tSeries->attachAxis(axisY);
-#endif
 
 }
 
@@ -1041,6 +1082,16 @@ void ServerLoadView::load()
     build(chartUserReq_,usSeries,maxVal);
 }
 
+void ServerLoadView::loadSuites()
+{
+    for(int i=0; i < suitePlotState_.count(); i++)
+    {
+        if(suitePlotState_[i])
+        {
+            addRemoveSuite(i,true);
+        }
+    }
+}
 
 void  ServerLoadView::build(QChart* chart,QLineSeries *series, int maxVal)
 {
@@ -1052,7 +1103,7 @@ void  ServerLoadView::build(QChart* chart,QLineSeries *series, int maxVal)
     QDateTimeAxis *axisX = new QDateTimeAxis;
     axisX->setTickCount(10);
     axisX->setFormat("HH dd/MM");
-    axisX->setTitleText("Date");
+    //axisX->setTitleText("Date");
     chart->setAxisX(axisX, series);
 
     //chart_->addAxis(axisX, Qt::AlignBottom);

@@ -9,7 +9,12 @@
 
 #include "LogData.hpp"
 
+#include "File_r.hpp"
+#include "File.hpp"
+#include "NodePath.hpp"
+#include "Str.hpp"
 #include "UiLog.hpp"
+#include "UIDebug.hpp"
 
 LogDataItem::LogDataItem(const std::string& line,qint64 refTimeInMs) : type_(NoType)
 {
@@ -75,6 +80,24 @@ qint64 LogDataItem::getTimeInMs(const std::string& line)
     return QDateTime::fromString(d,"hh:mm:ss dd.M.yyyy").toMSecsSinceEpoch();
 }
 
+void LogData::loadFromFile(const std::string& logFile)
+{
+    data_.clear();
+
+    /// The log file can be massive > 50Mb
+    ecf::File_r log_file(logFile);
+    if( !log_file.ok() )
+        throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
+
+    std::string line;
+
+    while(log_file.good())
+    {
+        log_file.getline(line); // default delimiter is /n
+        appendFromText(line);
+    }
+}
+
 void LogData::loadFromText(const std::string& txt)
 {
     data_.clear();
@@ -96,6 +119,21 @@ void LogData::loadFromText(const std::vector<std::string>& txtVec)
 {
     data_.clear();
     appendFromText(txtVec);
+}
+
+void LogData::appendFromText(const std::string& txt)
+{
+    if(txt.size() < 4 || txt.substr(0,4) != "MSG:")
+        return;
+
+    QString s=QString::fromStdString(txt);
+    if(!s.simplified().isEmpty())
+    {
+        if(refTimeInMs_==0)
+            refTimeInMs_=LogDataItem::getTimeInMs(s.toStdString());
+
+        data_.push_back(LogDataItem(s.toStdString(),refTimeInMs_));
+    }
 }
 
 void LogData::appendFromText(const std::vector<std::string>& txtVec)

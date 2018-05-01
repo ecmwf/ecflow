@@ -49,8 +49,10 @@ public:
     QString  entry(int idx) const {return QString::fromStdString(data_[idx].entry_);}
     LogDataItem::Type type(int idx) const {return data_[idx].type_;}
 
+    void loadFromFile(const std::string& logFile);
     void loadFromText(const std::string& txt);
     void loadFromText(const std::vector<std::string>& txtVec);
+    void appendFromText(const std::string& txt);
     void appendFromText(const std::vector<std::string>& txtVec);
 
 protected:

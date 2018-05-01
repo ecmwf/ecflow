@@ -23,6 +23,7 @@ using namespace QtCharts;
 
 class LogLoadData;
 class LogLoadSuiteModel;
+class LogModel;
 class ServerLoadView;
 class QSortFilterProxyModel;
 
@@ -51,6 +52,7 @@ private:
     Ui::LogLoadWidget* ui_;
     LogLoadSuiteModel* suiteModel_;
     QSortFilterProxyModel* suiteSortModel_;
+    LogModel* logModel_;
 };
 
 struct LogLoadSuiteModelDataItem
@@ -154,7 +156,9 @@ public:
     void getChildReq(QLineSeries& series);
     void getUserReq(QLineSeries& series);
     void getTotalReq(QLineSeries& series,int& maxVal);
-    void getSuiteReq(QString suiteName,QLineSeries& series);
+    void getSuiteChildReq(size_t,QLineSeries& series);
+    void getSuiteUserReq(size_t,QLineSeries& series);
+    void getSuiteTotalReq(size_t,QLineSeries& series);
 
 private:
     //Helper structure for data collection
@@ -169,7 +173,7 @@ private:
 
     void clear();
     void getSeries(QLineSeries& series,const std::vector<int>& vals);
-    void getSeries(QLineSeries& series,const std::vector<int>& vals1,const std::vector<int>& vals2);
+    void getSeries(QLineSeries& series,const std::vector<int>& vals1,const std::vector<int>& vals2,int& maxVal);
     void add(std::vector<std::string> time_stamp,size_t childReq,
              size_t userReq,std::vector<SuiteLoad>& suite_vec);
 
@@ -226,6 +230,7 @@ protected Q_SLOTS:
 
 protected:
     void load();
+    void loadSuites();
     void build(QChart* chart,QLineSeries *series,int maxVal);
 
     QChart* chart_;
