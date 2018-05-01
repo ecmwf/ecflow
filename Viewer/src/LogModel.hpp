@@ -11,23 +11,14 @@
 #define LOGMODEL_H
 
 #include <QAbstractItemModel>
+#include <QDateTime>
 #include <QSortFilterProxyModel>
 #include <QStyledItemDelegate>
 
+#include <string>
 #include <vector>
 
-class LogModelLine
-{
-public:
-	explicit LogModelLine(QString);
-
-	enum Type {NoType,MessageType,ErrorType,LogType,WarningType,DebugType};
-
-	QString date_;
-	QString entry_;
-	Type type_;
-};
-
+#include "LogData.hpp"
 
 class LogModel : public QAbstractItemModel
 {
@@ -56,7 +47,8 @@ public:
     QString fullText(const QModelIndex&) const;
 
 protected:
-	QList<LogModelLine> data_;
+    //QList<LogModelLine> data_;
+    LogData data_;
 };
 
 class LogDelegate : public QStyledItemDelegate

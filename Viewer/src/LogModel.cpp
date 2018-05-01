@@ -13,7 +13,9 @@
 #include <QStringList>
 
 #include "IconProvider.hpp"
+#include "UiLog.hpp"
 
+#if 0
 LogModelLine::LogModelLine(QString s) : type_(NoType)
 {
 	QString s1=s.section("]",0,0);
@@ -43,7 +45,7 @@ LogModelLine::LogModelLine(QString s) : type_(NoType)
 		type_=DebugType;
 	}
 }
-
+#endif
 
 LogModel::LogModel(QObject *parent) :
           QAbstractItemModel(parent)
@@ -61,15 +63,17 @@ void LogModel::setData(const std::string& data)
 {
 	beginResetModel();
 
+    data_.loadFromText(data);
+#if 0
 	data_.clear();
 
 	QString in=QString::fromStdString(data);
 	Q_FOREACH(QString s,in.split("\n"))
 	{
 		if(!s.simplified().isEmpty())
-			data_ << LogModelLine(s);
+            data_.data_.push_back(LogDataItem(s.toStdString()));
 	}
-
+#endif
 	endResetModel();
 }
 
@@ -77,7 +81,9 @@ void LogModel::setData(const std::vector<std::string>& data)
 {
 	beginResetModel();
 
-	data_.clear();
+    data_.loadFromText(data);
+#if 0
+    data_.clear();
 
     for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); ++it)
 	{
@@ -87,6 +93,7 @@ void LogModel::setData(const std::vector<std::string>& data)
 			data_ << LogModelLine(s);
 		}
 	}
+#endif
 	endResetModel();
 }
 
@@ -106,7 +113,8 @@ void LogModel::appendData(const std::vector<std::string>& data)
 	if(num >0)
 	{
 		beginInsertRows(QModelIndex(),rowCount(),rowCount()+num-1);
-
+        data_.appendFromText(data);
+#if 0
         for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); ++it)
 		{
 			QString s=QString::fromStdString(*it);
@@ -115,6 +123,7 @@ void LogModel::appendData(const std::vector<std::string>& data)
 				data_ << LogModelLine(s);
 			}
 		}
+#endif
 
 		endInsertRows();
 	}
@@ -131,7 +140,7 @@ void LogModel::clearData()
 
 bool LogModel::hasData() const
 {
-	return !data_.empty();
+    return !data_.isEmpty();
 }
 
 int LogModel::columnCount( const QModelIndex& /*parent */ ) const
@@ -165,7 +174,7 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 		return QVariant();
 	}
 	int row=index.row();
-	if(row < 0 || row >= data_.size())
+    if(row < 0 || row >= static_cast<int>(data_.size()))
 		return QVariant();
 
 	if(role == Qt::DisplayRole)
@@ -174,17 +183,17 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 		{
 		case 0:
 			{
-				switch(data_.at(row).type_)
+                switch(data_.type(row))
 				{
-				case LogModelLine::MessageType:
+                case LogDataItem::MessageType:
 					return "MSG ";
-				case LogModelLine::LogType:
+                case LogDataItem::LogType:
 					return "LOG ";
-				case LogModelLine::ErrorType:
+                case LogDataItem::ErrorType:
 					return "ERR ";
-				case LogModelLine::WarningType:
+                case LogDataItem::WarningType:
 					return "WAR ";
-				case LogModelLine::DebugType:
+                case LogDataItem::DebugType:
 					return "DBG ";
 				default:
 					return QVariant();
@@ -192,10 +201,10 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 			}
 			break;
 		case 1:
-			return data_.at(row).date_;
+            return data_.date(row).toString("hh:mm:ss dd.M.yyyy");;
 			break;
 		case 2:
-			return data_.at(row).entry_;
+            return data_.entry(row);
 			break;
 		default:
 			break;
@@ -206,15 +215,15 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 	{
 		if(index.column() ==0)
 		{
-			switch(data_.at(row).type_)
+            switch(data_.type(row))
 			{
-				case LogModelLine::MessageType:
+                case LogDataItem::MessageType:
 					return IconProvider::pixmap("log_info",12);
-				case LogModelLine::LogType:
+                case LogDataItem::LogType:
 					return IconProvider::pixmap("log_info",12);
-				case LogModelLine::ErrorType:
+                case LogDataItem::ErrorType:
 					return IconProvider::pixmap("log_error",12);
-				case LogModelLine::WarningType:
+                case LogDataItem::WarningType:
 					return IconProvider::pixmap("log_warning",12);
 				default:
 					return QVariant();
@@ -224,7 +233,7 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 /*
 	else if(role == Qt::BackgroundRole)
 	{
-		if(data_.at(row).type_ == LogModelLine::ErrorType)
+        if(data_.at(row).type_ == LogDataItem::ErrorType)
 		{
 		 return QColor(223,152,152);
 		}
@@ -235,7 +244,7 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 	{
 		QFont f;
 
-		/*if(data_.at(row).type_ == LogModelLine::ErrorType)
+        /*if(data_.at(row).type_ == LogDataItem::ErrorType)
 		{
 			f.setBold(true);
 		}*/
@@ -246,28 +255,28 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
     else if(role == Qt::ToolTipRole)
     {
         QString txt="<b>Type: </b>";
-        switch(data_.at(row).type_)
+        switch(data_.type(row))
         {
-            case LogModelLine::MessageType:
+            case LogDataItem::MessageType:
                     txt +="MSG ";
                     break;
-            case LogModelLine::LogType:
+            case LogDataItem::LogType:
                     txt +="LOG ";
                     break;
-            case LogModelLine::ErrorType:
+            case LogDataItem::ErrorType:
                     txt +="ERR ";
                     break;
-            case LogModelLine::WarningType:
+            case LogDataItem::WarningType:
                     txt +="WAR ";
                     break;
-            case LogModelLine::DebugType:
+            case LogDataItem::DebugType:
                     txt +="DBG ";
             default:
                     break;
         }
 
-        txt+="<br><b>Date: </b>" + data_.at(row).date_;
-        txt+="<br><b>Entry: </b>" + data_.at(row).entry_;
+        txt+="<br><b>Date: </b>" + data_.date(row).toString("hh:mm:ss dd.M.yyyy");
+        txt+="<br><b>Entry: </b>" + data_.entry(row);
         return txt;
     }
 

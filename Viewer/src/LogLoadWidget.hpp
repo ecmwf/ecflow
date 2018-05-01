@@ -8,20 +8,94 @@
 //
 //============================================================================
 
-#ifndef SERVERLOADVIEW_HPP
-#define SERVERLOADVIEW_HPP
+#ifndef LOGLOADWIDGET_HPP
+#define LOGLOADWIDGET_HPP
 
-#include <QDateTime>
-#include <QMap>
+#include <string>
+#include <vector>
+
+#include <QAbstractItemModel>
 #include <QStringList>
-#include <QVector>
 #include <QWidget>
 
 #include <QtCharts>
 using namespace QtCharts;
 
-#include <vector>
+class LogLoadData;
+class LogLoadSuiteModel;
+class ServerLoadView;
+class QSortFilterProxyModel;
 
+namespace Ui {
+    class LogLoadWidget;
+}
+
+//the main widget containing all components
+class LogLoadWidget : public QWidget
+{
+Q_OBJECT
+
+public:
+    explicit LogLoadWidget(QWidget *parent=0);
+    ~LogLoadWidget();
+
+    void load(const std::string& logFile);
+
+protected Q_SLOTS:
+    void resolutionChanged(int);
+
+private:
+    void load();
+
+    ServerLoadView* view_;
+    Ui::LogLoadWidget* ui_;
+    LogLoadSuiteModel* suiteModel_;
+    QSortFilterProxyModel* suiteSortModel_;
+};
+
+struct LogLoadSuiteModelDataItem
+{
+    LogLoadSuiteModelDataItem(QString suiteName, float percentage, bool checked) :
+        suiteName_(suiteName), percentage_(percentage), checked_(checked) {}
+
+    QString suiteName_;
+    float percentage_;
+    bool checked_;
+};
+
+//Model to dislay/select the suites
+class LogLoadSuiteModel : public QAbstractItemModel
+{
+    Q_OBJECT
+public:
+    explicit LogLoadSuiteModel(QObject *parent=0);
+    ~LogLoadSuiteModel();
+
+    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
+    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+
+    Qt::ItemFlags flags ( const QModelIndex & index) const;
+    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
+    bool setData(const QModelIndex& idx, const QVariant & value, int role );
+    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+
+    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
+    QModelIndex parent (const QModelIndex & ) const;
+
+    void setData(LogLoadData* data,QList<bool>);
+    bool hasData() const;
+    void clearData();
+
+Q_SIGNALS:
+    void checkStateChanged(int,bool);
+
+protected:
+    QString formatPrecentage(float perc) const;
+
+    QList<LogLoadSuiteModelDataItem> data_;
+};
+
+//Data structure containing load/request statistics
 class LogLoadDataItem
 {
 public:
@@ -54,34 +128,36 @@ public:
     }
 
 protected:
-    std::vector<int> childReq_;
-    std::vector<int> userReq_;
-    size_t sumTotal_;
-    size_t maxTotal_;
-    int rank_;
-    float percentage_;
-    std::string name_;
+    std::vector<int> childReq_; //per seconds
+    std::vector<int> userReq_;  //per seconds
+    size_t sumTotal_; //sum of all the child and user requests
+    size_t maxTotal_; //the maximum value of child+user requests
+    int rank_; //the rank of this item within other items with regards to sumTotal_
+    float percentage_; //0-100, the percentage of sumTotal_ with respect to the
+                       //sum of sumTotal_ of all the items
+
+    std::string name_; //the name of the item (only makes sense for suites)
 };
 
+//The top level class for load/request statistics
 class LogLoadData
 {
 public:
+    enum TimeRes {SecondResolution, MinuteResolution};
+
     LogLoadData() : timeRes_(SecondResolution)  {}
 
     QStringList suiteNames() const {return suites_;}
     const std::vector<LogLoadDataItem>& suites() const {return suiteData_;}
-
-    enum TimeRes {SecondResolution, MinuteResolution};
     void setTimeRes(TimeRes);
-
     void loadLogFile(const std::string& logFile);
-
     void getChildReq(QLineSeries& series);
     void getUserReq(QLineSeries& series);
     void getTotalReq(QLineSeries& series,int& maxVal);
     void getSuiteReq(QString suiteName,QLineSeries& series);
 
 private:
+    //Helper structure for data collection
     struct SuiteLoad {
        SuiteLoad(const std::string& name) : name_(name),
            childReq_(0),userReq_(0)  {}
@@ -94,8 +170,8 @@ private:
     void clear();
     void getSeries(QLineSeries& series,const std::vector<int>& vals);
     void getSeries(QLineSeries& series,const std::vector<int>& vals1,const std::vector<int>& vals2);
-    void add(std::vector<std::string> time_stamp,size_t child_requests_per_second,
-             size_t user_request_per_second,std::vector<SuiteLoad>& suite_vec);
+    void add(std::vector<std::string> time_stamp,size_t childReq,
+             size_t userReq,std::vector<SuiteLoad>& suite_vec);
 
     void processSuites();
 
@@ -103,9 +179,9 @@ private:
                             size_t& column_index);
 
     TimeRes timeRes_;
-    std::vector<qint64> time_;
-    LogLoadDataItem data_;
-    std::vector<LogLoadDataItem> suiteData_;
+    std::vector<qint64> time_; //times stored as msecs since the epoch
+    LogLoadDataItem data_; //generic data item for
+    std::vector<LogLoadDataItem> suiteData_; //suite-related data items
 
     QStringList suites_;
 };
@@ -117,6 +193,7 @@ public:
     ChartView(QChart *chart, QWidget *parent);
 
     void doZoom(QRectF);
+
 
 Q_SIGNALS:
     void chartZoomed(QRectF);
@@ -134,14 +211,18 @@ class ServerLoadView : public QWidget
     Q_OBJECT
 public:
     explicit ServerLoadView(QWidget* parent=0);
+    ~ServerLoadView();
 
     void setData(LogLoadData*);
+    LogLoadData* data() const {return data_;}
+    QList<bool> suitePlotState() const {return suitePlotState_;}
 
     void load(const std::string& logFile);
     void setResolution(LogLoadData::TimeRes);
 
 protected Q_SLOTS:
     void slotZoom(QRectF);
+    void addRemoveSuite(int idx, bool st);
 
 protected:
     void load();
@@ -154,6 +235,7 @@ protected:
     QList<ChartView*> views_;
 
     LogLoadData* data_;
+    QList<bool> suitePlotState_;
 };
 
-#endif // SERVERLOADVIEW_HPP
+#endif // LOGLOADWIDGET_HPP

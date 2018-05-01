@@ -63,6 +63,8 @@ set(viewer_srcs
     LabelEditor.cpp
     LimitEditor.cpp
     LineEdit.cpp
+    LogData.cpp
+    LogLoadWidget.cpp
     LogModel.cpp
     LogProvider.cpp  
     LogTruncator.cpp
@@ -131,8 +133,7 @@ set(viewer_srcs
     ServerItem.cpp
     ServerList.cpp
     ServerListDialog.cpp
-    ServerListSyncWidget.cpp
-    ServerLoadView.cpp
+    ServerListSyncWidget.cpp   
     ServerLoadItemWidget.cpp
     ServerSettingsItemWidget.cpp
     SessionDialog.cpp
@@ -282,6 +283,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LabelEditor.hpp
     LimitEditor.hpp
     LineEdit.hpp
+    LogLoadWidget.hpp
     LogProvider.hpp
     LogTruncator.hpp
     MainWindow.hpp
@@ -324,7 +326,6 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ServerListDialog.hpp
     ServerListSyncWidget.hpp
     ServerLoadItemWidget.hpp
-    ServerLoadView.hpp
     ServerSettingsItemWidget.hpp
     SessionDialog.hpp
     SessionRenameDialog.hpp
@@ -389,6 +390,7 @@ set(viewer_wrap_ui_files
     InfoPanel.ui
     LabelEditorWidget.ui
     LimitEditorWidget.ui
+    LogLoadWidget.ui
     MainWindow.ui
     MessageItemWidget.ui
     MenuConfigDialog.ui
@@ -408,6 +410,7 @@ set(viewer_wrap_ui_files
     ServerEditDialog.ui 
     ServerListDialog.ui
     ServerListSyncWidget.ui
+    ServerLoadItemWidget.ui
     ServerSettingsItemWidget.ui
     SessionDialog.ui
     SessionRenameDialog.ui
