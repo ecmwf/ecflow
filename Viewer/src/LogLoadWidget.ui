@@ -106,6 +106,13 @@
          <item>
           <widget class="QTreeView" name="suiteTree"/>
          </item>
+         <item>
+          <widget class="QLabel" name="scanLabel">
+           <property name="text">
+            <string>TextLabel</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>

@@ -63,6 +63,7 @@ struct LogLoadSuiteModelDataItem
     QString suiteName_;
     float percentage_;
     bool checked_;
+    QColor col_;
 };
 
 //Model to dislay/select the suites
@@ -117,6 +118,7 @@ public:
     const std::vector<int>& childReq() const {return childReq_;}
     const std::vector<int>& userReq() const {return userReq_;}
     const std::string& name() const {return name_;}
+    void valuesAt(size_t idx,size_t& total,size_t& child,size_t& user) const;
 
     void add(size_t childVal,size_t userVal)
     {
@@ -149,6 +151,7 @@ public:
 
     LogLoadData() : timeRes_(SecondResolution)  {}
 
+    const LogLoadDataItem& dataItem() const {return data_;}
     QStringList suiteNames() const {return suites_;}
     const std::vector<LogLoadDataItem>& suites() const {return suiteData_;}
     TimeRes timeRes() const {return timeRes_;}
@@ -160,7 +163,9 @@ public:
     void getSuiteChildReq(size_t,QLineSeries& series);
     void getSuiteUserReq(size_t,QLineSeries& series);
     void getSuiteTotalReq(size_t,QLineSeries& series);
+    const std::vector<qint64>& time() const {return time_;}
     qint64 period() const;
+    bool indexOfTime(qint64 t,size_t&) const;
 
 private:
     //Helper structure for data collection
@@ -203,6 +208,7 @@ public:
 
 Q_SIGNALS:
     void chartZoomed(QRectF);
+    void positionChanged(float);
 
 protected:
     void mousePressEvent(QMouseEvent *event);
@@ -225,9 +231,13 @@ public:
     void load(const std::string& logFile);
     void setResolution(LogLoadData::TimeRes);
 
+Q_SIGNALS:
+    void scanDataChanged(QString);
+
 protected Q_SLOTS:
     void slotZoom(QRectF);
     void addRemoveSuite(int idx, bool st);
+    void scanPositionChanged(float);
 
 protected:
     enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
@@ -239,6 +249,9 @@ protected:
     void removeSuiteSeries(QChart* chart,QString id);
     QChart* getChart(ChartType);
     ChartView* getView(ChartType);
+    QColor suiteSeriesColour(QChart* chart,size_t idx);
+    QColor seriesColour(QChart* chart,QString id);
+    void buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor col) const;
 
     //QChart* chart_;
     //ChartView* chartView_;

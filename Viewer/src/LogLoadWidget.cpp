@@ -15,6 +15,7 @@
 #include "LogModel.hpp"
 #include "NodePath.hpp"
 #include "Str.hpp"
+#include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
 
@@ -80,6 +81,18 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     //ui_->logView->addAction(actionCopyEntry_);
     //ui_->logView->addAction(actionCopyRow_);
 
+    //Charts
+    QColor bg(50,52,58);
+    ui_->scanLabel->setStyleSheet("QLabel{background: " + bg.name() + ";}");
+
+#if 0
+    ui_->scanLabel->setAutoFillBackground(true);
+    QPalette pal=ui_->scanLabel->palette();
+    pal.setColor(ui_->scanLabel->backgroundRole(),QColor(50,52,58));
+    ui_->scanLabel->setPalette(pal);
+#endif
+    connect(ui_->loadView,SIGNAL(scanDataChanged(QString)),
+            ui_->scanLabel,SLOT(setText(QString)));
 }
 
 LogLoadWidget::~LogLoadWidget()
@@ -342,6 +355,22 @@ void LogLoadDataItem::init(size_t num)
     }
 }
 
+void LogLoadDataItem::valuesAt(size_t idx,size_t& total,size_t& child,size_t& user) const
+{
+    if(idx >=0 && idx < size())
+    {
+        child=childReq_[idx];
+        user=userReq_[idx];
+        total=child+user;
+    }
+}
+
+//=======================================================
+//
+// LogLoadData
+//
+//=======================================================
+
 void LogLoadData::clear()
 {
     time_.clear();
@@ -358,6 +387,56 @@ void LogLoadData::setTimeRes(TimeRes res)
 qint64 LogLoadData::period() const
 {
     return (!time_.empty())?(time_[time_.size()-1]-time_[0]):0;
+}
+
+//t is in ms
+bool LogLoadData::indexOfTime(qint64 t,size_t& idx) const
+{
+    idx=0;
+    if(t < 0)
+        return false;
+
+    size_t num=time_.size();
+    qint64 tolerance=10*1000;
+    qint64 prevDelta=0;
+    for(size_t i=0; i < num; i++)
+    {
+        if(time_[i] < t)
+        {
+            prevDelta=t-time_[i];
+        }
+        else if(t == time_[i])
+        {
+            idx=i;
+            return true;
+        }
+        else if(time_[i] > t)
+        {
+            qint64 nextDelta=time_[i]-t;
+            if(i > 0)
+            {
+                if(prevDelta > nextDelta && nextDelta <=tolerance)
+                {
+                    idx=i;
+                    return true;
+                }
+                else if(prevDelta < nextDelta && prevDelta <=tolerance)
+                {
+                    idx=i-1;
+                    return true;
+                }
+            }
+            if(nextDelta <= tolerance)
+            {
+                idx=i;
+                return true;
+            }
+
+            return false;
+        }
+    }
+    return false;
+
 }
 
 void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals)
@@ -817,12 +896,18 @@ ChartView::ChartView(QChart *chart, QWidget *parent) :
 
 void ChartView::mousePressEvent(QMouseEvent *event)
 {
-    QChartView::mousePressEvent(event);
+    Q_EMIT positionChanged(chart()->mapToValue(event->pos()).x());
 }
 
 void ChartView::mouseMoveEvent(QMouseEvent *event)
 {
     QChartView::mouseMoveEvent(event);
+
+    if(event->pos().x() <= chart()->plotArea().right() &&
+       event->pos().x() >= chart()->plotArea().left())
+        Q_EMIT positionChanged(chart()->mapToValue(event->pos()).x());
+    else
+        Q_EMIT positionChanged(-1);
 }
 
 void ChartView::mouseReleaseEvent(QMouseEvent *event)
@@ -939,7 +1024,12 @@ ServerLoadView::ServerLoadView(QWidget* parent) : QWidget(parent), data_(NULL)
 
         connect(chartView,SIGNAL(chartZoomed(QRectF)),
                 this,SLOT(slotZoom(QRectF)));
+
+        connect(chartView,SIGNAL(positionChanged(float)),
+                this,SLOT(scanPositionChanged(float)));
     }
+
+    UI_ASSERT(views_.count() == 3,"views_.count()=" << views_.count());
 }
 
 ServerLoadView::~ServerLoadView()
@@ -1019,6 +1109,8 @@ void ServerLoadView::addRemoveSuite(int idx, bool st)
         //remove
         else
         {
+            suitePlotState_[idx]=false;
+
             removeSuiteSeries(getChart(TotalChartType),
                               "s_main_" + QString::number(idx));
 
@@ -1038,9 +1130,29 @@ void ServerLoadView::removeSuiteSeries(QChart* chart,QString id)
         if(s->name() == id)
         {
             chart->removeSeries(s);
+            return;
+        }
+    }
+}
+
+QColor ServerLoadView::suiteSeriesColour(QChart* chart,size_t idx)
+{
+    QString id="_" + QString::number(idx);
+    return seriesColour(chart,id);
+}
+
+QColor ServerLoadView::seriesColour(QChart* chart,QString id)
+{
+    Q_FOREACH(QAbstractSeries *s,chart->series())
+    {
+        if(s->name().endsWith(id))
+        {
+            if(QLineSeries *ls=static_cast<QLineSeries*>(s))
+                return ls->color();
             break;
         }
     }
+    return QColor();
 }
 
 void ServerLoadView::clear()
@@ -1073,12 +1185,15 @@ void ServerLoadView::load()
 
     int maxVal=0;
     QLineSeries* tSeries=new QLineSeries();
+    tSeries->setName("all");
     data_->getTotalReq(*tSeries,maxVal);
 
     QLineSeries* chSeries=new QLineSeries();
+    chSeries->setName("all");
     data_->getChildReq(*chSeries);
 
     QLineSeries* usSeries=new QLineSeries();
+    usSeries->setName("all");
     data_->getUserReq(*usSeries);
 
     build(getView(TotalChartType),tSeries,"Child+User requests",maxVal);
@@ -1140,6 +1255,58 @@ void  ServerLoadView::build(ChartView* view,QLineSeries *series, QString title,i
 
     //connect(series, &QLineSeries::hovered, this, &View::tooltip);
 }
+
+void ServerLoadView::scanPositionChanged(float pos)
+{
+    qint64 t(pos);
+    size_t idx=0;
+    if(data_->indexOfTime(t,idx))
+    {
+        QString txt="date: " + QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy");
+        txt+="<table width=\'100%\' cellpadding=\'2px\'>";
+        //header
+        txt+="<tr><th>Item</th><th>Total</th><th>Child</th><th>User</th></tr>";
+
+        size_t tot=0,ch=0,us=0;
+        QColor col=seriesColour(getChart(TotalChartType),"all");
+        QString name="all";
+        data_->dataItem().valuesAt(idx,tot,ch,us);
+        buildScanRow(txt,name,tot,ch,us,col);
+
+        for(int i=0; i < suitePlotState_.size(); i++)
+        {
+            if(suitePlotState_[i])
+            {
+                tot=0;ch=0;us=0;
+                QColor col=suiteSeriesColour(getChart(TotalChartType),i);
+                QString name=QString::fromStdString(data_->suites()[i].name());
+                data_->suites()[i].valuesAt(idx,tot,ch,us);
+                buildScanRow(txt,name,tot,ch,us,col);
+            }
+        }
+
+        txt+="</table>";
+
+        Q_EMIT scanDataChanged(txt);
+    }
+}
+
+void ServerLoadView::buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor lineCol) const
+{
+    //txt+="<tr bgcolor=\'" + col.lighter(120).name() + "\'><td>" +
+    QColor numBg(230,230,230);
+    txt+="<tr>" + Viewer::formatTableTd(name,lineCol.lighter(150)) +
+          Viewer::formatTableTd(QString::number(tot),numBg) +
+          Viewer::formatTableTd(QString::number(ch),numBg) +
+          Viewer::formatTableTd(QString::number(us),numBg) + "</tr>";
+#if 0
+    txt+="<tr><td bgcolor=\'" + col.lighter(150).name() + "\'>&nbsp;" +
+         name + "</td><td>&nbsp;" + QString::number(tot) +
+         "</td><td>&nbsp;" + QString::number(ch) +
+         "</td><td>&nbsp;" + QString::number(us) + "</td></tr>";
+#endif
+}
+
 #if 0
 void View::tooltip(QPointF point, bool state)
 {

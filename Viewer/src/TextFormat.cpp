@@ -56,4 +56,15 @@ QString formatText(QString txt,QColor col)
 {
     return "<font color=\'" + col.name() + "\'>" +txt + "</font>";
 }
+
+QString formatTableTr(QString txt,QColor col)
+{
+    return "<tr bgcolor=\'" + col.name() + "\'>" +txt + "</td>";
+}
+
+QString formatTableTd(QString txt,QColor col)
+{
+    return "<td bgcolor=\'" + col.name() + "\'>" +txt + "</td>";
+}
+
 } //namespace Viewer
