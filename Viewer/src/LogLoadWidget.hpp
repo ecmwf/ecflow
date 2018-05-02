@@ -151,6 +151,7 @@ public:
 
     QStringList suiteNames() const {return suites_;}
     const std::vector<LogLoadDataItem>& suites() const {return suiteData_;}
+    TimeRes timeRes() const {return timeRes_;}
     void setTimeRes(TimeRes);
     void loadLogFile(const std::string& logFile);
     void getChildReq(QLineSeries& series);
@@ -159,6 +160,7 @@ public:
     void getSuiteChildReq(size_t,QLineSeries& series);
     void getSuiteUserReq(size_t,QLineSeries& series);
     void getSuiteTotalReq(size_t,QLineSeries& series);
+    qint64 period() const;
 
 private:
     //Helper structure for data collection
@@ -197,7 +199,7 @@ public:
     ChartView(QChart *chart, QWidget *parent);
 
     void doZoom(QRectF);
-
+    void adjustTimeAxis(qint64 periodInMs);
 
 Q_SIGNALS:
     void chartZoomed(QRectF);
@@ -207,7 +209,6 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
-    void adjustTimeAxis(qint64 periodInMs);
 };
 
 class ServerLoadView : public QWidget
@@ -229,14 +230,20 @@ protected Q_SLOTS:
     void addRemoveSuite(int idx, bool st);
 
 protected:
+    enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
+
+    void clear();
     void load();
     void loadSuites();
-    void build(QChart* chart,QLineSeries *series,int maxVal);
+    void build(ChartView* view,QLineSeries *series,QString title,int maxVal);
+    void removeSuiteSeries(QChart* chart,QString id);
+    QChart* getChart(ChartType);
+    ChartView* getView(ChartType);
 
-    QChart* chart_;
-    ChartView* chartView_;
-    QChart* chartUserReq_;
-    QChart* chartChildReq_;
+    //QChart* chart_;
+    //ChartView* chartView_;
+    //QChart* chartUserReq_;
+    //QChart* chartChildReq_;
     QList<ChartView*> views_;
 
     LogLoadData* data_;

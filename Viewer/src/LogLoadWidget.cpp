@@ -355,6 +355,11 @@ void LogLoadData::setTimeRes(TimeRes res)
     timeRes_=res;
 }
 
+qint64 LogLoadData::period() const
+{
+    return (!time_.empty())?(time_[time_.size()-1]-time_[0]):0;
+}
+
 void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals)
 {
     UI_ASSERT(time_.size() == vals.size(), "time_.size()=" << time_.size() << "vals.size()=" << vals.size());
@@ -893,21 +898,9 @@ void ChartView::adjustTimeAxis(qint64 periodInMs)
     {
         format="hh:mm:ss";
     }
-    else if(period < 3600)
-    {
-        format="hh:mm";
-    }
-    else if(period < 6*3600)
-    {
-        format="hh:mm dd/MM";
-    }
-    else if(period < 12*3600)
-    {
-        format="hh:mm dd/MM";
-    }
     else if(period < 24*3600)
     {
-        format="hh:mm dd/MM";
+        format="hh:mm";
     }
     else if(period < 24*5*3600)
     {
@@ -924,44 +917,60 @@ void ChartView::adjustTimeAxis(qint64 periodInMs)
     }
 }
 
+//=============================================
+//
+// ServerLoadView
+//
+//=============================================
+
 ServerLoadView::ServerLoadView(QWidget* parent) : QWidget(parent), data_(NULL)
 {
     //The data object - to read and store processed log data
     data_=new LogLoadData();
 
-
-    QVBoxLayout* hb=new QVBoxLayout(this);
-
-
-    chart_ = new QChart();
-    chartView_=new ChartView(chart_,this);
-    chartView_->setRenderHint(QPainter::Antialiasing);
-    hb->addWidget(chartView_);
-
-
-    chartUserReq_ = new QChart();
-    ChartView* chartViewUser=new ChartView(chartUserReq_,this);
-    chartViewUser->setRenderHint(QPainter::Antialiasing);
-    hb->addWidget(chartViewUser);
-
-    chartChildReq_ = new QChart();
-    ChartView* chartViewChild=new ChartView(chartChildReq_,this);
-    chartViewChild->setRenderHint(QPainter::Antialiasing);
-    hb->addWidget(chartViewChild);
-
-
-    views_ << chartView_ << chartViewUser << chartViewChild;
-
-    Q_FOREACH(ChartView* v,views_)
+    QVBoxLayout* vb=new QVBoxLayout(this);
+    for(int i=0; i < 3; i++)
     {
-        connect(v,SIGNAL(chartZoomed(QRectF)),
+        QChart* chart = new QChart();
+        ChartView* chartView=new ChartView(chart,this);
+        chartView->setRenderHint(QPainter::Antialiasing);
+        vb->addWidget(chartView);
+        views_ << chartView;
+
+        connect(chartView,SIGNAL(chartZoomed(QRectF)),
                 this,SLOT(slotZoom(QRectF)));
     }
 }
 
 ServerLoadView::~ServerLoadView()
 {
+    Q_ASSERT(data_);
     delete data_;
+}
+
+QChart* ServerLoadView::getChart(ChartType type)
+{
+    if(ChartView *v=getView(type))
+        return v->chart();
+    return 0;
+}
+
+ChartView* ServerLoadView::getView(ChartType type)
+{
+    UI_ASSERT(views_.count() == 3,"views_.count()=" << views_.count());
+    switch(type)
+    {
+    case TotalChartType:
+        return views_[0];
+    case ChildChartType:
+        return views_[1];
+    case UserChartType:
+        return views_[2];
+    default:
+        break;
+    }
+
+    return 0;
 }
 
 void ServerLoadView::slotZoom(QRectF r)
@@ -995,47 +1004,53 @@ void ServerLoadView::addRemoveSuite(int idx, bool st)
             QLineSeries* series=new QLineSeries();
             series->setName("s_main_" + QString::number(idx));
             data_->getSuiteTotalReq(idx,*series);
-            chart_->addSeries(series);
+            getChart(TotalChartType)->addSeries(series);
 
             QLineSeries* chSeries=new QLineSeries();
             chSeries->setName("s_ch_" + QString::number(idx));
             data_->getSuiteChildReq(idx,*chSeries);
-            chartChildReq_->addSeries(chSeries);
+            getChart(ChildChartType)->addSeries(chSeries);
 
             QLineSeries* usSeries=new QLineSeries();
             usSeries->setName("s_us_" + QString::number(idx));
             data_->getSuiteUserReq(idx,*usSeries);
-            chartUserReq_->addSeries(usSeries);
+            getChart(UserChartType)->addSeries(usSeries);
         }
         //remove
         else
         {
+            removeSuiteSeries(getChart(TotalChartType),
+                              "s_main_" + QString::number(idx));
 
-            Q_FOREACH(QAbstractSeries *s,chart_->series())
-            {
-                if(s->name() == "s_main_" + QString::number(idx))
-                {
-                    chart_->removeSeries(s);
-                    break;
-                }
-            }
-            Q_FOREACH(QAbstractSeries *s,chartChildReq_->series())
-            {
-                if(s->name() == "s_ch_" + QString::number(idx))
-                {
-                    chartChildReq_->removeSeries(s);
-                    break;
-                }
-            }
-            Q_FOREACH(QAbstractSeries *s,chartUserReq_->series())
-            {
-                if(s->name() == "s_us_" + QString::number(idx))
-                {
-                    chartUserReq_->removeSeries(s);
-                    break;
-                }
-            }
+            removeSuiteSeries(getChart(ChildChartType),
+                              "s_ch_" + QString::number(idx));
+
+            removeSuiteSeries(getChart(UserChartType),
+                              "s_us_" + QString::number(idx));
         }
+    }
+}
+
+void ServerLoadView::removeSuiteSeries(QChart* chart,QString id)
+{
+    Q_FOREACH(QAbstractSeries *s,chart->series())
+    {
+        if(s->name() == id)
+        {
+            chart->removeSeries(s);
+            break;
+        }
+    }
+}
+
+void ServerLoadView::clear()
+{
+    Q_FOREACH(ChartView* v,views_)
+    {
+        Q_ASSERT(v->chart());
+        v->chart()->removeAllSeries();
+        v->chart()->removeAxis(v->chart()->axisX());
+        v->chart()->removeAxis(v->chart()->axisY());
     }
 }
 
@@ -1054,18 +1069,11 @@ void ServerLoadView::load(const std::string& logFile)
 
 void ServerLoadView::load()
 {
-    chart_->removeAllSeries();
-    chartChildReq_->removeAllSeries();
-    chartUserReq_->removeAllSeries();
+    clear();
 
-    chart_->removeAxis(chart_->axisX());
-    chart_->removeAxis(chart_->axisY());
-
-    chartChildReq_->removeAxis(chartChildReq_->axisX());
-    chartChildReq_->removeAxis(chartChildReq_->axisY());
-
-    chartUserReq_->removeAxis(chartUserReq_->axisX());
-    chartUserReq_->removeAxis(chartUserReq_->axisY());
+    int maxVal=0;
+    QLineSeries* tSeries=new QLineSeries();
+    data_->getTotalReq(*tSeries,maxVal);
 
     QLineSeries* chSeries=new QLineSeries();
     data_->getChildReq(*chSeries);
@@ -1073,13 +1081,9 @@ void ServerLoadView::load()
     QLineSeries* usSeries=new QLineSeries();
     data_->getUserReq(*usSeries);
 
-    int maxVal=0;
-    QLineSeries* tSeries=new QLineSeries();
-    data_->getTotalReq(*tSeries,maxVal);
-
-    build(chart_,tSeries,maxVal);
-    build(chartChildReq_,chSeries,maxVal);
-    build(chartUserReq_,usSeries,maxVal);
+    build(getView(TotalChartType),tSeries,"Child+User requests",maxVal);
+    build(getView(ChildChartType),chSeries,"Child requests",maxVal);
+    build(getView(UserChartType),usSeries,"User requests",maxVal);
 }
 
 void ServerLoadView::loadSuites()
@@ -1093,11 +1097,14 @@ void ServerLoadView::loadSuites()
     }
 }
 
-void  ServerLoadView::build(QChart* chart,QLineSeries *series, int maxVal)
+void  ServerLoadView::build(ChartView* view,QLineSeries *series, QString title,int maxVal)
 {
-    chart->addSeries(series);
+    Q_ASSERT(view);
+    QChart *chart=view->chart();
+    Q_ASSERT(chart);
 
-    chart->setTitle("Server load - child command");
+    chart->addSeries(series);
+    chart->setTitle(title);
 
     chart->legend()->hide();
     QDateTimeAxis *axisX = new QDateTimeAxis;
@@ -1105,6 +1112,7 @@ void  ServerLoadView::build(QChart* chart,QLineSeries *series, int maxVal)
     axisX->setFormat("HH dd/MM");
     //axisX->setTitleText("Date");
     chart->setAxisX(axisX, series);
+    view->adjustTimeAxis(data_->period());
 
     //chart_->addAxis(axisX, Qt::AlignBottom);
     //chSeries->attachAxis(axisX);
@@ -1113,7 +1121,14 @@ void  ServerLoadView::build(QChart* chart,QLineSeries *series, int maxVal)
 
     QValueAxis *axisY = new QValueAxis;
     axisY->setLabelFormat("%i");
-    axisY->setTitleText("Requests per second");
+
+    QString yTitle;
+    if(data_->timeRes() == LogLoadData::SecondResolution)
+        yTitle="Req. per second";
+    else if(data_->timeRes() == LogLoadData::MinuteResolution)
+        yTitle="Req. per minute";
+
+    axisY->setTitleText(yTitle);
     axisY->setMin(0.);
     //chart_->addAxis(axisY, Qt::AlignLeft);
     chart->setAxisY(axisY, series);
