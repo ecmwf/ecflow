@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <QAbstractItemModel>
+#include <QGraphicsItem>
 #include <QStringList>
 #include <QWidget>
 
@@ -92,6 +93,9 @@ public:
 Q_SIGNALS:
     void checkStateChanged(int,bool);
 
+public Q_SLOTS:
+    void updateSuite(int,bool,QColor);
+
 protected:
     QString formatPrecentage(float perc) const;
 
@@ -165,7 +169,7 @@ public:
     void getSuiteTotalReq(size_t,QLineSeries& series);
     const std::vector<qint64>& time() const {return time_;}
     qint64 period() const;
-    bool indexOfTime(qint64 t,size_t&) const;
+    bool indexOfTime(qint64 t,size_t&,size_t) const;
 
 private:
     //Helper structure for data collection
@@ -192,9 +196,32 @@ private:
     TimeRes timeRes_;
     std::vector<qint64> time_; //times stored as msecs since the epoch
     LogLoadDataItem data_; //generic data item for
-    std::vector<LogLoadDataItem> suiteData_; //suite-related data items
+    std::vector<LogLoadDataItem> suiteData_; //suite,true-related data items
 
     QStringList suites_;
+};
+
+class ChartCallout : public QGraphicsItem
+{
+public:
+    ChartCallout(QChart *parent);
+
+    void setText(const QString &text);
+    void setAnchor(QPointF point);
+    QPointF anchor() const {return anchor_;}
+    void updateGeometry();
+
+    QRectF boundingRect() const;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,QWidget *widget);
+
+private:
+    QString text_;
+    QRectF textRect_;
+    QRectF rect_;
+    QPointF anchor_;
+    QPointF bottomPos_;
+    QFont font_;
+    QChart *chart_;
 };
 
 class ChartView : public QChartView
@@ -205,16 +232,22 @@ public:
 
     void doZoom(QRectF);
     void adjustTimeAxis(qint64 periodInMs);
+    void currentTimeRange(qint64& start,qint64& end);
+    void setCallout(qreal);
+    void adjustCallout();
 
 Q_SIGNALS:
     void chartZoomed(QRectF);
-    void positionChanged(float);
+    void positionChanged(qreal);
+    void positionClicked(qreal);
 
 protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
     void keyPressEvent(QKeyEvent *event);
+
+    ChartCallout* callout_;
 };
 
 class ServerLoadView : public QWidget
@@ -233,11 +266,15 @@ public:
 
 Q_SIGNALS:
     void scanDataChanged(QString);
+    void suitePlotStateChanged(int,bool,QColor);
+    void timeRangeChanged(qint64,qint64);
+    void timeRangeHighlighted(qint64,qint64);
 
 protected Q_SLOTS:
     void slotZoom(QRectF);
     void addRemoveSuite(int idx, bool st);
-    void scanPositionChanged(float);
+    void scanPositionChanged(qreal);
+    void scanPositionClicked(qreal);
 
 protected:
     enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
@@ -245,6 +282,7 @@ protected:
     void clear();
     void load();
     void loadSuites();
+    void addSuite(int);
     void build(ChartView* view,QLineSeries *series,QString title,int maxVal);
     void removeSuiteSeries(QChart* chart,QString id);
     QChart* getChart(ChartType);
@@ -253,14 +291,12 @@ protected:
     QColor seriesColour(QChart* chart,QString id);
     void buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor col) const;
 
-    //QChart* chart_;
-    //ChartView* chartView_;
-    //QChart* chartUserReq_;
-    //QChart* chartChildReq_;
     QList<ChartView*> views_;
-
     LogLoadData* data_;
     QList<bool> suitePlotState_;
+    size_t lastScanIndex_;
 };
+
+
 
 #endif // LOGLOADWIDGET_HPP

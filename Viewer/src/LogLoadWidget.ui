@@ -46,7 +46,7 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="TreeView" name="logView">
+     <widget class="LogView" name="logView">
       <property name="contextMenuPolicy">
        <enum>Qt::ActionsContextMenu</enum>
       </property>
@@ -75,7 +75,7 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
        <item>
         <widget class="ServerLoadView" name="loadView" native="true"/>
@@ -168,15 +168,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TreeView</class>
-   <extends>QTreeView</extends>
-   <header location="global">TreeView.hpp</header>
-  </customwidget>
-  <customwidget>
    <class>ServerLoadView</class>
    <extends>QWidget</extends>
    <header>LogLoadWidget.hpp</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LogView</class>
+   <extends>QTreeView</extends>
+   <header>LogView.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

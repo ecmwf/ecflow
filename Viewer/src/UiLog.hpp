@@ -21,6 +21,7 @@ class QVariant;
 class QPoint;
 class QRegion;
 class QRect;
+class QDateTime;
 
 class ServerHandler;
 
@@ -88,6 +89,7 @@ std::ostream&  operator <<(std::ostream&,const QStringList&);
 std::ostream&  operator <<(std::ostream&,const QRegion&);
 std::ostream&  operator <<(std::ostream&,const QRect&);
 std::ostream&  operator <<(std::ostream&,const QPoint&);
+std::ostream&  operator <<(std::ostream&,const QDateTime&);
 
 #endif // UILOG_HPP
 

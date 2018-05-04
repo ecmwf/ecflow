@@ -57,12 +57,17 @@ QString formatText(QString txt,QColor col)
     return "<font color=\'" + col.name() + "\'>" +txt + "</font>";
 }
 
-QString formatTableTr(QString txt,QColor col)
+QString formatTableThText(QString txt,QColor col)
 {
-    return "<tr bgcolor=\'" + col.name() + "\'>" +txt + "</td>";
+    return "<th><font color=\'" + col.name() + "\'>" +txt + "</font></th>";
 }
 
-QString formatTableTd(QString txt,QColor col)
+QString formatTableTrBg(QString txt,QColor col)
+{
+    return "<tr bgcolor=\'" + col.name() + "\'>" +txt + "</tr>";
+}
+
+QString formatTableTdBg(QString txt,QColor col)
 {
     return "<td bgcolor=\'" + col.name() + "\'>" +txt + "</td>";
 }

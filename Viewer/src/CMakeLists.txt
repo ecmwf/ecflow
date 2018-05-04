@@ -68,6 +68,7 @@ set(viewer_srcs
     LogModel.cpp
     LogProvider.cpp  
     LogTruncator.cpp
+    LogView.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
     MenuConfigDialog.cpp
@@ -284,8 +285,10 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LimitEditor.hpp
     LineEdit.hpp
     LogLoadWidget.hpp
+    LogModel.hpp
     LogProvider.hpp
     LogTruncator.hpp
+    LogView.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
     MessageItemWidget.hpp

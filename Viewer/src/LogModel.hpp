@@ -22,6 +22,7 @@
 
 class LogModel : public QAbstractItemModel
 {
+    Q_OBJECT
 public:
    	explicit LogModel(QObject *parent=0);
    	~LogModel();
@@ -43,13 +44,27 @@ public:
 	bool hasData() const;
     void clearData();
     QModelIndex lastIndex() const;
+    QModelIndex highlightPeriodIndex() const;
 
     QString entryText(const QModelIndex&) const;
     QString fullText(const QModelIndex&) const;
 
+
+public Q_SLOTS:
+    void setPeriod(qint64,qint64);
+    void setHighlightPeriod(qint64,qint64);
+
 protected:
+    int realRow(size_t idx) const;
+
     //QList<LogModelLine> data_;
     LogData data_;
+    bool filterPeriod_;
+    size_t periodStart_;
+    size_t periodEnd_;
+    bool highlightPeriod_;
+    size_t highlightStart_;
+    size_t highlightEnd_;
 };
 
 class LogDelegate : public QStyledItemDelegate

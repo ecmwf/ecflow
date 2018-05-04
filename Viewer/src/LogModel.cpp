@@ -15,40 +15,10 @@
 #include "IconProvider.hpp"
 #include "UiLog.hpp"
 
-#if 0
-LogModelLine::LogModelLine(QString s) : type_(NoType)
-{
-	QString s1=s.section("]",0,0);
-	date_=s1.section("[",1);
-	entry_=s.section("]",1);
-
-	QString t=s1.section("[",0);
-
-	if(t.contains("MSG:"))
-	{
-		type_=MessageType;
-	}
-	else if(t.contains("LOG:"))
-	{
-		type_=LogType;
-	}
-	else if(t.contains("ERR:"))
-	{
-		type_=ErrorType;
-	}
-	else if(t.contains("WAR:"))
-	{
-		type_=WarningType;
-	}
-	else if(t.contains("DBG:"))
-	{
-		type_=DebugType;
-	}
-}
-#endif
-
 LogModel::LogModel(QObject *parent) :
-          QAbstractItemModel(parent)
+          QAbstractItemModel(parent),
+          filterPeriod_(false), periodStart_(0), periodEnd_(0),
+          highlightPeriod_(false), highlightStart_(0), highlightEnd_(0)
 {
 	IconProvider::add(":/viewer/log_error.svg","log_error");
 	IconProvider::add(":/viewer/log_info.svg","log_info");
@@ -62,6 +32,14 @@ LogModel::~LogModel()
 void LogModel::loadFromFile(const std::string& fileName)
 {
     beginResetModel();
+
+    filterPeriod_=false;
+    periodStart_=0;
+    periodEnd_=0;
+    highlightPeriod_=false;
+    highlightStart_=0;
+    highlightEnd_=0;
+
     data_.loadFromFile(fileName);
     endResetModel();
 }
@@ -69,6 +47,13 @@ void LogModel::loadFromFile(const std::string& fileName)
 void LogModel::setData(const std::string& data)
 {
 	beginResetModel();
+
+    filterPeriod_=false;
+    periodStart_=0;
+    periodEnd_=0;
+    highlightPeriod_=false;
+    highlightStart_=0;
+    highlightEnd_=0;
 
     data_.loadFromText(data);
 #if 0
@@ -88,6 +73,12 @@ void LogModel::setData(const std::vector<std::string>& data)
 {
 	beginResetModel();
 
+    filterPeriod_=false;
+    periodStart_=0;
+    periodEnd_=0;
+    highlightPeriod_=false;
+    highlightStart_=0;
+    highlightEnd_=0;
     data_.loadFromText(data);
 #if 0
     data_.clear();
@@ -141,6 +132,12 @@ void LogModel::appendData(const std::vector<std::string>& data)
 void LogModel::clearData()
 {
 	beginResetModel();
+    filterPeriod_=false;
+    periodStart_=0;
+    periodEnd_=0;
+    highlightPeriod_=false;
+    highlightStart_=0;
+    highlightEnd_=0;
 	data_.clear();
 	endResetModel();
 }
@@ -163,7 +160,10 @@ int LogModel::rowCount( const QModelIndex& parent) const
 	//Parent is the root:
 	if(!parent.isValid())
 	{
-		return data_.size();
+        if(!filterPeriod_)
+            return data_.size();
+        else
+            return periodEnd_-periodStart_+1;
 	}
 
 	return 0;
@@ -181,6 +181,10 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 		return QVariant();
 	}
 	int row=index.row();
+
+    if(filterPeriod_)
+        row+=periodStart_;
+
     if(row < 0 || row >= static_cast<int>(data_.size()))
 		return QVariant();
 
@@ -237,6 +241,17 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 			}
 		}
 	}
+
+    else if(role == Qt::BackgroundRole)
+    {
+        if(highlightPeriod_)
+        {
+            if(row >= highlightStart_ && row <= highlightEnd_)
+                return QColor(168,226,145);
+            else
+                return QVariant();
+        }
+    }
 /*
 	else if(role == Qt::BackgroundRole)
 	{
@@ -364,6 +379,42 @@ QString LogModel::fullText(const QModelIndex &idx) const
     return data(index(idx.row(),0)).toString() + " " +
            data(index(idx.row(),1)).toString() + " " +
            data(index(idx.row(),2)).toString();
+}
+
+void LogModel::setPeriod(qint64 start,qint64 end)
+{
+    beginResetModel();
+    filterPeriod_=data_.indexOfPeriod(start,end,periodStart_,periodEnd_);
+    endResetModel();
+}
+
+void LogModel::setHighlightPeriod(qint64 start,qint64 end)
+{
+    beginResetModel();
+    if(data_.indexOfPeriod(start,end,highlightStart_,highlightEnd_))
+    {
+        highlightPeriod_=true;
+        //need a repaint
+    }
+    endResetModel();
+}
+
+int LogModel::realRow(size_t idx) const
+{
+    if(filterPeriod_)
+    {
+        return idx-periodStart_;
+    }
+    return idx;
+}
+
+QModelIndex LogModel::highlightPeriodIndex() const
+{
+    if(highlightPeriod_)
+    {
+        return index(realRow(highlightStart_),0);
+    }
+    return QModelIndex();
 }
 
 //========================================================

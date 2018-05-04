@@ -23,8 +23,9 @@ namespace Viewer
     void addShortCutToToolTip(QList<QAction*>);
     QString formatBoldText(QString,QColor);
     QString formatText(QString,QColor);
-    QString formatTableTr(QString txt,QColor col);
-    QString formatTableTd(QString txt,QColor col);
+    QString formatTableThText(QString txt,QColor col);
+    QString formatTableTrBg(QString txt,QColor col);
+    QString formatTableTdBg(QString txt,QColor col);
 } //namespace Viewer
 
 #endif // TEXTFORMAT_HPP

@@ -62,14 +62,19 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     connect(suiteModel_,SIGNAL(checkStateChanged(int,bool)),
             ui_->loadView,SLOT(addRemoveSuite(int,bool)));
 
+    connect(ui_->loadView,SIGNAL(suitePlotStateChanged(int,bool,QColor)),
+            suiteModel_,SLOT(updateSuite(int,bool,QColor)));
+
     //Log contents
 
     logModel_=new LogModel(this);
 
     ui_->logView->setProperty("log","1");
+    ui_->logView->setProperty("log","1");
     ui_->logView->setRootIsDecorated(false);
-    ui_->logView->setModel(logModel_);
+    ui_->logView->setLogModel(logModel_);
     ui_->logView->setUniformRowHeights(true);
+    ui_->logView->setAlternatingRowColors(false);
     ui_->logView->setItemDelegate(new LogDelegate(this));
     ui_->logView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -80,6 +85,12 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     //Define context menu
     //ui_->logView->addAction(actionCopyEntry_);
     //ui_->logView->addAction(actionCopyRow_);
+
+    connect(ui_->loadView,SIGNAL(timeRangeChanged(qint64,qint64)),
+            logModel_,SLOT(setPeriod(qint64,qint64)));
+
+    connect(ui_->loadView, SIGNAL(timeRangeHighlighted(qint64,qint64)),
+            ui_->logView,SLOT(setHighlightPeriod(qint64,qint64)));
 
     //Charts
     QColor bg(50,52,58);
@@ -225,7 +236,6 @@ QVariant LogLoadSuiteModel::data( const QModelIndex& index, int role ) const
 
         return QVariant();
     }
-
     else if(role == Qt::UserRole)
     {
         switch(index.column())
@@ -239,6 +249,10 @@ QVariant LogLoadSuiteModel::data( const QModelIndex& index, int role ) const
         default:
             break;
         }
+    }
+    else if(role == Qt::BackgroundRole)
+    {
+        return (data_[row].checked_)?data_[row].col_:QVariant();
     }
 
     return QVariant();
@@ -317,6 +331,17 @@ QString LogLoadSuiteModel::formatPrecentage(float perc) const
     return QString::number(perc,'f',1);
 }
 
+void LogLoadSuiteModel::updateSuite(int idx,bool st,QColor col)
+{
+    if(idx>=0 && idx < data_.size())
+    {
+        data_[idx].col_=col.lighter(150);
+        QModelIndex startIdx=index(idx,0);
+        QModelIndex endIdx=index(idx,columnCount()-1);
+        Q_EMIT dataChanged(startIdx,endIdx);
+    }
+}
+
 //=======================================================
 //
 // LogLoadDataItem
@@ -390,31 +415,25 @@ qint64 LogLoadData::period() const
 }
 
 //t is in ms
-bool LogLoadData::indexOfTime(qint64 t,size_t& idx) const
+bool LogLoadData::indexOfTime(qint64 t,size_t& idx,size_t startIdx) const
 {
     idx=0;
     if(t < 0)
         return false;
 
     size_t num=time_.size();
-    qint64 tolerance=10*1000;
-    qint64 prevDelta=0;
-    for(size_t i=0; i < num; i++)
+    if(startIdx > num-1)
+        startIdx=0;
+
+    if(t >= time_[startIdx])
     {
-        if(time_[i] < t)
+        qint64 tolerance=10*1000;
+        for(size_t i=startIdx; i < num; i++)
         {
-            prevDelta=t-time_[i];
-        }
-        else if(t == time_[i])
-        {
-            idx=i;
-            return true;
-        }
-        else if(time_[i] > t)
-        {
-            qint64 nextDelta=time_[i]-t;
-            if(i > 0)
+            if(time_[i] >= t)
             {
+                qint64 nextDelta=time_[i]-t;
+                qint64 prevDelta=(i > 0)?(t-time_[i-1]):(nextDelta+1);
                 if(prevDelta > nextDelta && nextDelta <=tolerance)
                 {
                     idx=i;
@@ -425,18 +444,35 @@ bool LogLoadData::indexOfTime(qint64 t,size_t& idx) const
                     idx=i-1;
                     return true;
                 }
+                return false;
             }
-            if(nextDelta <= tolerance)
+       }
+   }
+   else
+   {
+        qint64 tolerance=10*1000;
+        for(size_t i=startIdx; i >=0; i--)
+        {
+            if(time_[i] <= t)
             {
-                idx=i;
-                return true;
+                qint64 nextDelta=t-time_[i];
+                qint64 prevDelta=(i < startIdx)?(time_[i+1]-t):(nextDelta+1);
+                if(prevDelta > nextDelta && nextDelta <=tolerance)
+                {
+                    idx=i;
+                    return true;
+                }
+                else if(prevDelta < nextDelta && prevDelta <=tolerance)
+                {
+                    idx=i+1;
+                    return true;
+                }
+                return false;
             }
-
-            return false;
         }
     }
-    return false;
 
+    return false;
 }
 
 void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals)
@@ -884,19 +920,131 @@ bool LogLoadData::extract_suite_path(
 
 //=============================================
 //
+// ChartCallout
+//
+//=============================================
+
+ChartCallout::ChartCallout(QChart *chart):
+    QGraphicsItem(chart),
+    chart_(chart)
+{
+    font_.setPointSize(font_.pointSize()-1);
+}
+
+QRectF ChartCallout::boundingRect() const
+{
+    QPointF anchor = mapFromParent(chart_->mapToPosition(anchor_));
+    QPointF bottom = mapFromParent(chart_->mapToPosition(bottomPos_));
+    QRectF rect;
+    rect.setLeft(qMin(rect_.left(), anchor.x()));
+    rect.setRight(qMax(rect_.right(), anchor.x()));
+    rect.setTop(qMin(rect_.top(), anchor.y()));
+    rect.setBottom(bottom.y());
+    return rect;
+}
+
+void ChartCallout::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+{
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+    QPainterPath path;
+    path.addRoundedRect(rect_, 5, 5);
+
+    //The callout shape
+    QPointF anchor = mapFromParent(chart_->mapToPosition(anchor_));
+    if(!rect_.contains(anchor))
+    {
+        QPointF point1, point2;
+
+        bool above = anchor.y() <= rect_.top();
+        bool aboveCenter = anchor.y() > rect_.top() && anchor.y() <= rect_.center().y();
+        bool belowCenter = anchor.y() > rect_.center().y() && anchor.y() <= rect_.bottom();
+        bool below = anchor.y() > rect_.bottom();
+
+        bool onLeft = anchor.x() <= rect_.left();
+        bool leftOfCenter = anchor.x() > rect_.left() && anchor.x() <= rect_.center().x();
+        bool rightOfCenter = anchor.x() > rect_.center().x() && anchor.x() <= rect_.right();
+        bool onRight = anchor.x() > rect_.right();
+
+        // get the nearest rect corner.
+        qreal x = (onRight + rightOfCenter) * rect_.width();
+        qreal y = (below + belowCenter) * rect_.height();
+        bool cornerCase = (above && onLeft) || (above && onRight) || (below && onLeft) || (below && onRight);
+        bool vertical = qAbs(anchor.x() - x) > qAbs(anchor.y() - y);
+
+        qreal x1 = x + leftOfCenter * 10 - rightOfCenter * 20 + cornerCase * !vertical * (onLeft * 10 - onRight * 20);
+        qreal y1 = y + aboveCenter * 5 - belowCenter * 10 + cornerCase * vertical * (above * 5 - below * 10);
+        point1.setX(x1);
+        point1.setY(y1);
+
+        qreal x2 = x + leftOfCenter * 20 - rightOfCenter * 10 + cornerCase * !vertical * (onLeft * 20 - onRight * 10);
+        qreal y2 = y + aboveCenter * 10 - belowCenter * 5 + cornerCase * vertical * (above * 10 - below * 5);
+        point2.setX(x2);
+        point2.setY(y2);
+
+        path.moveTo(point1);
+        path.lineTo(anchor);
+        path.lineTo(point2);
+        path = path.simplified();
+    }
+
+    painter->setBrush(QColor(80, 82, 98));
+    painter->drawPath(path);
+
+    painter->setFont(font_);
+    painter->setPen(QColor(255, 255, 255));
+    painter->drawText(textRect_, text_);
+
+    //Vertical line down from the anchor pos
+    painter->setPen(QPen(QColor(60,60,60),2,Qt::DotLine));
+    painter->drawLine(anchor,mapFromParent(chart_->mapToPosition(bottomPos_)));
+}
+
+void ChartCallout::setText(const QString &text)
+{
+    text_ = text;
+    QFontMetrics metrics(font_);
+    textRect_ = metrics.boundingRect(QRect(0, 0, 150, 150), Qt::AlignLeft, text_);
+    textRect_.translate(5, 5);
+    prepareGeometryChange();
+    rect_ = textRect_.adjusted(-5, -5, 5, 5);
+}
+
+void ChartCallout::setAnchor(QPointF point)
+{
+    anchor_ = point; //in value coords
+    bottomPos_ = QPointF(point.x(),0); //in value coords
+    updateGeometry();
+}
+
+void ChartCallout::updateGeometry()
+{
+    prepareGeometryChange();
+    setPos(chart_->mapToPosition(anchor_) + QPoint(10, -30));
+}
+
+//=============================================
+//
 // ChartView
 //
 //=============================================
 
 ChartView::ChartView(QChart *chart, QWidget *parent) :
-    QChartView(chart, parent)
+    QChartView(chart, parent), callout_(0)
 {
     setRubberBand(QChartView::HorizontalRubberBand);
 }
 
 void ChartView::mousePressEvent(QMouseEvent *event)
 {
-    Q_EMIT positionChanged(chart()->mapToValue(event->pos()).x());
+    QChartView::mousePressEvent(event);
+    if(event->button() == Qt::MidButton &&
+       event->pos().x() <= chart()->plotArea().right() &&
+       event->pos().x() >= chart()->plotArea().left())
+    {
+        qreal t=chart()->mapToValue(event->pos()).x();
+        Q_EMIT positionClicked(t);
+    }
 }
 
 void ChartView::mouseMoveEvent(QMouseEvent *event)
@@ -905,7 +1053,10 @@ void ChartView::mouseMoveEvent(QMouseEvent *event)
 
     if(event->pos().x() <= chart()->plotArea().right() &&
        event->pos().x() >= chart()->plotArea().left())
-        Q_EMIT positionChanged(chart()->mapToValue(event->pos()).x());
+    {
+        qreal v=chart()->mapToValue(event->pos()).x();
+        Q_EMIT positionChanged(v);
+    }
     else
         Q_EMIT positionChanged(-1);
 }
@@ -974,6 +1125,12 @@ void ChartView::doZoom(QRectF valRect)
     }
 }
 
+void ChartView::currentTimeRange(qint64& start,qint64& end)
+{
+    start=chart()->mapToValue(chart()->plotArea().bottomLeft()).x();
+    end=chart()->mapToValue(chart()->plotArea().topRight()).x();
+}
+
 void ChartView::adjustTimeAxis(qint64 periodInMs)
 {
     qint64 period=periodInMs/1000; //in seconds
@@ -1002,13 +1159,49 @@ void ChartView::adjustTimeAxis(qint64 periodInMs)
     }
 }
 
+void ChartView::setCallout(qreal val)
+{
+    if(!callout_)
+    {
+        callout_=new ChartCallout(chart());
+        scene()->addItem(callout_);
+    }
+
+    if(QValueAxis *axisY=static_cast<QValueAxis*>(chart()->axisY()))
+    {
+        qreal m=axisY->max();
+        callout_->setAnchor(QPointF(val,m));
+        QString txt=QDateTime::fromMSecsSinceEpoch(val).toString("hh:mm:ss dd/MM/yyyy");
+        callout_->setText(txt);
+    }
+}
+
+void ChartView::adjustCallout()
+{
+    if(callout_)
+    {
+        QPointF anchor=callout_->anchor();
+        qint64 start,end;
+        currentTimeRange(start,end);
+        if(anchor.x() >= start && anchor.x() <=end)
+            callout_->setAnchor(callout_->anchor());
+        else
+        {
+            scene()->removeItem(callout_);
+            delete callout_;
+            callout_=0;
+        }
+    }
+}
+
 //=============================================
 //
 // ServerLoadView
 //
 //=============================================
 
-ServerLoadView::ServerLoadView(QWidget* parent) : QWidget(parent), data_(NULL)
+ServerLoadView::ServerLoadView(QWidget* parent) : QWidget(parent),
+    data_(NULL), lastScanIndex_(0)
 {
     //The data object - to read and store processed log data
     data_=new LogLoadData();
@@ -1025,8 +1218,11 @@ ServerLoadView::ServerLoadView(QWidget* parent) : QWidget(parent), data_(NULL)
         connect(chartView,SIGNAL(chartZoomed(QRectF)),
                 this,SLOT(slotZoom(QRectF)));
 
-        connect(chartView,SIGNAL(positionChanged(float)),
-                this,SLOT(scanPositionChanged(float)));
+        connect(chartView,SIGNAL(positionChanged(qreal)),
+                this,SLOT(scanPositionChanged(qreal)));
+
+        connect(chartView,SIGNAL(positionClicked(qreal)),
+                this,SLOT(scanPositionClicked(qreal)));
     }
 
     UI_ASSERT(views_.count() == 3,"views_.count()=" << views_.count());
@@ -1071,7 +1267,14 @@ void ServerLoadView::slotZoom(QRectF r)
         {
            if(v != senderView)
                v->doZoom(r);
+
+           v->adjustCallout();
         }
+
+        qint64 start, end;
+        Q_ASSERT(!views_.isEmpty());
+        views_[0]->currentTimeRange(start,end);
+        Q_EMIT timeRangeChanged(start,end);
     }
 }
 
@@ -1088,23 +1291,10 @@ void ServerLoadView::addRemoveSuite(int idx, bool st)
     {
         //Add suite
         if(st)
-        {
-            suitePlotState_[idx]=true;
-
-            QLineSeries* series=new QLineSeries();
-            series->setName("s_main_" + QString::number(idx));
-            data_->getSuiteTotalReq(idx,*series);
-            getChart(TotalChartType)->addSeries(series);
-
-            QLineSeries* chSeries=new QLineSeries();
-            chSeries->setName("s_ch_" + QString::number(idx));
-            data_->getSuiteChildReq(idx,*chSeries);
-            getChart(ChildChartType)->addSeries(chSeries);
-
-            QLineSeries* usSeries=new QLineSeries();
-            usSeries->setName("s_us_" + QString::number(idx));
-            data_->getSuiteUserReq(idx,*usSeries);
-            getChart(UserChartType)->addSeries(usSeries);
+        {         
+            addSuite(idx);
+            Q_EMIT suitePlotStateChanged(idx,true,
+                   suiteSeriesColour(getChart(TotalChartType),idx));
         }
         //remove
         else
@@ -1121,6 +1311,37 @@ void ServerLoadView::addRemoveSuite(int idx, bool st)
                               "s_us_" + QString::number(idx));
         }
     }
+}
+
+void ServerLoadView::addSuite(int idx)
+{
+    suitePlotState_[idx]=true;
+
+    QChart* chart=0;
+
+    QLineSeries* series=new QLineSeries();
+    series->setName("s_main_" + QString::number(idx));
+    data_->getSuiteTotalReq(idx,*series);
+    chart=getChart(TotalChartType);
+    chart->addSeries(series);
+    series->attachAxis(chart->axisX());
+    series->attachAxis(chart->axisY());
+
+    QLineSeries* chSeries=new QLineSeries();
+    chSeries->setName("s_ch_" + QString::number(idx));
+    data_->getSuiteChildReq(idx,*chSeries);
+    chart=getChart(ChildChartType);
+    chart->addSeries(chSeries);
+    chSeries->attachAxis(chart->axisX());
+    chSeries->attachAxis(chart->axisY());
+
+    QLineSeries* usSeries=new QLineSeries();
+    usSeries->setName("s_us_" + QString::number(idx));
+    data_->getSuiteUserReq(idx,*usSeries);
+    chart=getChart(UserChartType);
+    chart->addSeries(usSeries);
+    usSeries->attachAxis(chart->axisX());
+    usSeries->attachAxis(chart->axisY());
 }
 
 void ServerLoadView::removeSuiteSeries(QChart* chart,QString id)
@@ -1207,7 +1428,7 @@ void ServerLoadView::loadSuites()
     {
         if(suitePlotState_[i])
         {
-            addRemoveSuite(i,true);
+            addSuite(i);
         }
     }
 }
@@ -1224,15 +1445,9 @@ void  ServerLoadView::build(ChartView* view,QLineSeries *series, QString title,i
     chart->legend()->hide();
     QDateTimeAxis *axisX = new QDateTimeAxis;
     axisX->setTickCount(10);
-    axisX->setFormat("HH dd/MM");
-    //axisX->setTitleText("Date");
+    axisX->setFormat("HH dd/MM");   
     chart->setAxisX(axisX, series);
     view->adjustTimeAxis(data_->period());
-
-    //chart_->addAxis(axisX, Qt::AlignBottom);
-    //chSeries->attachAxis(axisX);
-    //usSeries->attachAxis(axisX);
-    //tSeries->attachAxis(axisX);
 
     QValueAxis *axisY = new QValueAxis;
     axisY->setLabelFormat("%i");
@@ -1245,27 +1460,50 @@ void  ServerLoadView::build(ChartView* view,QLineSeries *series, QString title,i
 
     axisY->setTitleText(yTitle);
     axisY->setMin(0.);
-    //chart_->addAxis(axisY, Qt::AlignLeft);
     chart->setAxisY(axisY, series);
     axisY->setMin(0.);
     axisY->setMax(maxVal);
-    //chSeries->attachAxis(axisY);
-    //usSeries->attachAxis(axisY);
-    //tSeries->attachAxis(axisY);
-
-    //connect(series, &QLineSeries::hovered, this, &View::tooltip);
 }
 
-void ServerLoadView::scanPositionChanged(float pos)
+void ServerLoadView::scanPositionClicked(qreal pos)
+{
+    qint64 t1(pos);
+    qint64 t2=t1;
+    if(data_->timeRes() == LogLoadData::MinuteResolution)
+        t2=t1+60*1000;
+
+    Q_FOREACH(ChartView* view,views_)
+        view->setCallout(pos);
+
+    Q_EMIT(timeRangeHighlighted(t1,t2));
+}
+
+
+void ServerLoadView::scanPositionChanged(qreal pos)
 {
     qint64 t(pos);
     size_t idx=0;
-    if(data_->indexOfTime(t,idx))
+    if(data_->indexOfTime(t,idx,lastScanIndex_))
     {
-        QString txt="date: " + QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy");
-        txt+="<table width=\'100%\' cellpadding=\'2px\'>";
+        lastScanIndex_=idx;
+        //UiLog().dbg() << "idx=" << idx;
+
+        QColor dateCol(210,212,218);
+        QString txt=Viewer::formatText("date: " +
+                      QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy"),
+                      dateCol);
+        txt+="<br>" +
+             Viewer::formatText("date: " +
+                    QDateTime::fromMSecsSinceEpoch(t).toString("hh:mm:ss dd/MM/yyyy"),
+                    dateCol);
+
+        txt+="<table width=\'100%\' cellpadding=\'4px\'>";
         //header
-        txt+="<tr><th>Item</th><th>Total</th><th>Child</th><th>User</th></tr>";
+        QColor hdrCol(205,206,210);
+        txt+="<tr>" + Viewer::formatTableThText("Item",hdrCol) +
+              Viewer::formatTableThText("Total",hdrCol) +
+              Viewer::formatTableThText("Child",hdrCol) +
+              Viewer::formatTableThText("User",hdrCol) + "</tr>";
 
         size_t tot=0,ch=0,us=0;
         QColor col=seriesColour(getChart(TotalChartType),"all");
@@ -1293,34 +1531,9 @@ void ServerLoadView::scanPositionChanged(float pos)
 
 void ServerLoadView::buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor lineCol) const
 {
-    //txt+="<tr bgcolor=\'" + col.lighter(120).name() + "\'><td>" +
-    QColor numBg(230,230,230);
-    txt+="<tr>" + Viewer::formatTableTd(name,lineCol.lighter(150)) +
-          Viewer::formatTableTd(QString::number(tot),numBg) +
-          Viewer::formatTableTd(QString::number(ch),numBg) +
-          Viewer::formatTableTd(QString::number(us),numBg) + "</tr>";
-#if 0
-    txt+="<tr><td bgcolor=\'" + col.lighter(150).name() + "\'>&nbsp;" +
-         name + "</td><td>&nbsp;" + QString::number(tot) +
-         "</td><td>&nbsp;" + QString::number(ch) +
-         "</td><td>&nbsp;" + QString::number(us) + "</td></tr>";
-#endif
+    QColor numBg(210,211,214);
+    txt+="<tr>" + Viewer::formatTableTdBg(name,lineCol.lighter(150)) +
+          Viewer::formatTableTdBg(QString::number(tot),numBg) +
+          Viewer::formatTableTdBg(QString::number(ch),numBg) +
+          Viewer::formatTableTdBg(QString::number(us),numBg) + "</tr>";
 }
-
-#if 0
-void View::tooltip(QPointF point, bool state)
-{
-    if (m_tooltip == 0)
-        m_tooltip = new Callout(m_chart);
-
-    if (state) {
-        m_tooltip->setText(QString("X: %1 \nY: %2 ").arg(point.x()).arg(point.y()));
-        m_tooltip->setAnchor(point);
-        m_tooltip->setZValue(11);
-        m_tooltip->updateGeometry();
-        m_tooltip->show();
-    } else {
-        m_tooltip->hide();
-    }
-}
-#endif
