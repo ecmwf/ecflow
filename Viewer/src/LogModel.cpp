@@ -246,21 +246,12 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
     {
         if(highlightPeriod_)
         {
-            if(row >= highlightStart_ && row <= highlightEnd_)
+            if(static_cast<size_t>(row) >= highlightStart_ && static_cast<size_t>(row)  <= highlightEnd_)
                 return QColor(168,226,145);
             else
                 return QVariant();
         }
     }
-/*
-	else if(role == Qt::BackgroundRole)
-	{
-        if(data_.at(row).type_ == LogDataItem::ErrorType)
-		{
-		 return QColor(223,152,152);
-		}
-	}
-*/
 
 	else if(role == Qt::FontRole)
 	{

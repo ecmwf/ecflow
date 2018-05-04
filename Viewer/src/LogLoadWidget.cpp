@@ -988,15 +988,16 @@ void ChartCallout::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
         path = path.simplified();
     }
 
-    painter->setBrush(QColor(80, 82, 98));
+    painter->setBrush(QColor(168,226,145).lighter(120));
+    //painter->setBrush(QColor(255,245,204));
     painter->drawPath(path);
 
     painter->setFont(font_);
-    painter->setPen(QColor(255, 255, 255));
+    //painter->setPen(QColor(255, 255, 255));
     painter->drawText(textRect_, text_);
 
     //Vertical line down from the anchor pos
-    painter->setPen(QPen(QColor(60,60,60),2,Qt::DotLine));
+    painter->setPen(QPen(QColor(80,80,80),1,Qt::DotLine));
     painter->drawLine(anchor,mapFromParent(chart_->mapToPosition(bottomPos_)));
 }
 
@@ -1136,10 +1137,10 @@ void ChartView::adjustTimeAxis(qint64 periodInMs)
     qint64 period=periodInMs/1000; //in seconds
     QString format;
 
-    if(period < 60)
+    if(period < 60*60)
     {
         format="hh:mm:ss";
-    }
+    }   
     else if(period < 24*3600)
     {
         format="hh:mm";
