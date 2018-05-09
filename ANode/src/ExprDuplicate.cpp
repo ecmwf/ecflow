@@ -37,8 +37,9 @@ typedef boost::unordered_map< std::string, AstTop* > my_map;
 
 ExprDuplicate::~ExprDuplicate()
 {
-   // cout << "ExprDuplicate::~ExprDuplicate()\n";
+//   cout << "ExprDuplicate::~ExprDuplicate(): " << duplicate_expr.size() << " *****************************************************************\n";
    BOOST_FOREACH(my_map::value_type i, duplicate_expr) {
+//      cout << " deleting: " << i.first << " :" << i.second << "\n";
       delete i.second;
       i.second = NULL;
    }
@@ -57,5 +58,8 @@ std::auto_ptr<AstTop> ExprDuplicate::find(const std::string& expr)
 void ExprDuplicate::add(const std::string& expr,AstTop* ast)
 {
    assert(!expr.empty() && ast);
-   duplicate_expr.insert( std::make_pair(expr,ast->clone()));
+   AstTop* clone = ast->clone();
+   duplicate_expr.insert( std::make_pair(expr,clone));
+
+//   cout << "ExprDuplicate::add: " << expr << " :" << clone << "   " << duplicate_expr.size() << "\n";
 }

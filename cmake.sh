@@ -21,7 +21,8 @@ show_error_and_exit() {
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
    echo "   clang_tidy     - create compilation database for clang_tdiy and then call run-clang-tidy.py"
-   echo "   san            - is short for clang thread sanitiser"
+   echo "   tsan           - is short for clang thread sanitiser"
+   echo "   asan           - is short for address sanitiser"
    echo "   no_gui         - Don't build the gui"
    echo "   ssl            - build using openssl"
    echo "   secure_user    - enable password for client server"
@@ -45,7 +46,7 @@ test_safe_arg=
 clang_arg=
 clang_tidy_arg=
 intel_arg=
-clang_sanitiser_arg=
+tsan_arg=
 mode_arg=release
 verbose_arg=
 ctest_arg=
@@ -55,6 +56,7 @@ python3_arg=
 ssl_arg=
 secure_user_arg=
 log_arg=
+asan_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -83,7 +85,8 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = clang_tidy ]] ; then clang_tidy_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
    elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
-   elif [[ "$1" = san ]]   ; then clang_sanitiser_arg=$1 ;
+   elif [[ "$1" = tsan ]]   ; then tsan_arg=$1 ;
+   elif [[ "$1" = asan ]]  ; then asan_arg=$1 ;
    elif [[ "$1" = package_source ]] ; then package_source_arg=$1 ;
    elif [[ "$1" = copy_tarball ]] ; then copy_tarball_arg=$1 ;
    elif [[ "$1" = test ]] ;  then test_arg=$1 ;
@@ -112,7 +115,7 @@ echo "test_arg=$test_arg"
 echo "test_safe_arg=$test_safe_arg"
 echo "clang_arg=$clang_arg"
 echo "clang_tidy_arg=$clang_tidy_arg"
-echo "clang_sanitiser_arg=$clang_sanitiser_arg"
+echo "tsan_arg=$tsan_arg"
 echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
 echo "python3_arg=$python3_arg"
@@ -128,7 +131,7 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations"
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-address"
  
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
@@ -140,22 +143,32 @@ cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	module unload gnu
 	module load clang/5.0.1
-	CXX_FLAGS=""  # latest clang with latest boost, should not need any warning suppression
-	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
+    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
+
+    CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined"
+
+	#CXX_FLAGS=""  # latest clang with latest boost, should not need any warning suppression
+	#cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
 	
 	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
 	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 	fi
 fi
-if [[ "$clang_sanitiser_arg" = san ]] ; then
-	module unload gnu
-	module load clang
-	CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined -fsanitize=thread"
-	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
-    
-	#CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined -fsanitize=thread"
-    #cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
+
+# ==============================================================================================
+# sanitisers
+if [[ "$tsan_arg" = tsan && "$tsan_arg" = tsan ]] ; then
+    echo "Cant use address and thread sanitiser at the same time"
 fi
+if [[ "$tsan_arg" = tsan ]] ; then
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=thread -fno-omit-frame-pointer"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=thread'"  # LINK FLAGS
+fi
+if [[ "$asan_arg" = asan ]] ; then
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=address -fno-omit-frame-pointer"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address'"  # LINK FLAGS
+fi
+
 if [[ "$ARCH" = cray ]] ; then
 
     # disable new UI, no QT on cray
@@ -296,7 +309,6 @@ $ecbuild $source_dir \
             -DENABLE_WARNINGS=ON \
             -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
             -DSITE_SPECIFIC_SERVER_SCRIPT="/home/ma/emos/bin/ecflow_site.sh" \
-            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             ${cmake_extra_options} \
             ${gui_options} \
             ${ssl_options} \
