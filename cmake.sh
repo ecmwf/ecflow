@@ -23,6 +23,7 @@ show_error_and_exit() {
    echo "   clang_tidy     - create compilation database for clang_tdiy and then call run-clang-tidy.py"
    echo "   tsan           - is short for clang thread sanitiser"
    echo "   asan           - is short for address sanitiser"
+   echo "   msan           - is short for memory sanitiser"
    echo "   no_gui         - Don't build the gui"
    echo "   ssl            - build using openssl"
    echo "   secure_user    - enable password for client server"
@@ -57,6 +58,7 @@ ssl_arg=
 secure_user_arg=
 log_arg=
 asan_arg=
+msan_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -87,6 +89,7 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
    elif [[ "$1" = tsan ]]   ; then tsan_arg=$1 ;
    elif [[ "$1" = asan ]]  ; then asan_arg=$1 ;
+   elif [[ "$1" = msan ]]  ; then msan_arg=$1 ;
    elif [[ "$1" = package_source ]] ; then package_source_arg=$1 ;
    elif [[ "$1" = copy_tarball ]] ; then copy_tarball_arg=$1 ;
    elif [[ "$1" = test ]] ;  then test_arg=$1 ;
@@ -167,6 +170,11 @@ fi
 if [[ "$asan_arg" = asan ]] ; then
    CXX_FLAGS="$CXX_FLAGS -fsanitize=address -fno-omit-frame-pointer"
    cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address'"  # LINK FLAGS
+fi
+if [[ "$msan_arg" = msan ]] ; then
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fPIE -fno-omit-frame-pointer -fsanitize-memory-track-origins"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=memory"  # LINK FLAGS
+   #LINK_FLAGS='-DCMAKE_EXE_LINKER_FLAGS="-fsanitize=memory -fPIE -pie"'
 fi
 
 if [[ "$ARCH" = cray ]] ; then
@@ -316,6 +324,7 @@ $ecbuild $source_dir \
             ${log_options} \
             ${test_options}
             
+            #-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=memory -fPIE -pie' 
             #-DENABLE_STATIC_BOOST_LIBS=ON \
             #-DCMAKE_PYTHON_INSTALL_TYPE=local \
             #-DENABLE_PYTHON=OFF   \
