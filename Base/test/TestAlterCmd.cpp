@@ -458,9 +458,16 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
       // test change variable
       s->add_variable("FRED1","BILL");
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::VARIABLE,"FRED1","BILL1")));
-      const Variable& v = s->findVariable("FRED1");
-      BOOST_CHECK_MESSAGE( !v.empty() && v.theValue() == "BILL1", "expected to find variable FRED1, with value BILL1");
+      {
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::VARIABLE,"FRED1","BILL1")));
+         const Variable& v = s->findVariable("FRED1");
+         BOOST_CHECK_MESSAGE( !v.empty() && v.theValue() == "BILL1", "expected to find variable FRED1, with value BILL1");
+      }
+      {
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::VARIABLE,"FRED1")));
+         const Variable& v = s->findVariable("FRED1");
+         BOOST_CHECK_MESSAGE( !v.empty() && v.theValue() == "", "expected to find variable FRED1, with empty value");
+      }
    }
 
    {   // test add event

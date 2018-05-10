@@ -71,7 +71,8 @@ BOOST_AUTO_TEST_CASE( test_log_cmd )
    Defs defs;
    TestHelper::invokeRequest(&defs,Cmd_ptr( new LogCmd(new_log_file)), false /* check_change_numbers */);
    BOOST_CHECK_MESSAGE( defs.server().find_variable("ECF_LOG") == expected_new_log_file , "expected to find ECF_LOG with value '" << expected_new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG") << "'");
-   BOOST_CHECK_MESSAGE( defs.server().find_user_variable("ECF_LOG") == expected_new_log_file , "expected to find ECF_LOG in the *USER* variables '" << expected_new_log_file << "' but found '" << defs.server().find_user_variable("ECF_LOG") << "'");
+   std::string value;
+   BOOST_CHECK_MESSAGE( defs.server().find_user_variable("ECF_LOG",value)  && (value == expected_new_log_file) , "expected to find ECF_LOG in the *USER* variables '" << expected_new_log_file << "' but found '" << value << "'");
    BOOST_CHECK_MESSAGE( Log::instance()->path() == expected_new_log_file , "expected to find ECF_LOG with value '" << expected_new_log_file << "' but found '" << defs.server().find_variable("ECF_LOG") << "'");
 
 

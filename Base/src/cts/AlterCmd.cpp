@@ -890,14 +890,14 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 			options.push_back(paths[0]);
 			paths.erase(paths.begin()); // remove first path, since it has been added to options
 		}
-		if (options.size() != 4 ) {
-			ss << "AlterCmd: change: expected 5 args : change variable <variable_name> <new_value> <path_to_node>";
-			ss << " but found only " << (options.size() + paths.size()) << " arguments. The value should be quoted if there are spaces\n";
-			ss << dump_args(options,paths) << "\n";
-			throw std::runtime_error( ss.str() );
-		}
+      if (options.size() < 3 || options.size() > 4) {
+         ss << "AlterCmd: change: expected 5 args : change variable <variable_name> <new_value> <path_to_node>";
+         ss << " but found only " << (options.size() + paths.size()) << " arguments.\nThe value should be quoted if there are spaces\n";
+         ss << dump_args(options,paths) << "\n";
+         throw std::runtime_error( ss.str() );
+      }
 		name = options[2];
-		value = options[3];
+		if (options.size() == 4 ) value = options[3];
 		break;}
 
 	case AlterCmd::CLOCK_TYPE: {
