@@ -1,0 +1,12 @@
+# Needed for python ONLY
+# https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer#suppressions
+leak:__interceptor_fopen64 
+leak:list_resize 
+leak:_PyString_Resize
+leak:PyString_FromString 
+leak:PyString_FromStringAndSize
+leak:type_new 
+leak:__interceptor_calloc
+leak:__interceptor_malloc
+leak:boost::python::objects::function_object
+leak:boost::python::objects::py_function

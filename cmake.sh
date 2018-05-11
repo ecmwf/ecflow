@@ -251,14 +251,16 @@ if [[ $test_safe_arg = test_safe ]] ; then
 	fi
 fi
 if [[ "$ctest_arg" != "" ]] ; then
-    # for pthon module we need tp preload asan as it needs to be the very first library
+    # for python module we need to preload asan as it needs to be the very first library
     # ==2971==ASan runtime does not come first in initial library list; 
     #  you should either link runtime to your application or manually preload it with LD_PRELOAD.
     #
     if [[ "$asan_arg" = asan ]] ; then
 	   export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libasan.so.3 
+	   ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp $ctest_arg
+    else
+       $ctest_arg 
 	fi
-	$ctest_arg
 	exit 0
 fi
 
