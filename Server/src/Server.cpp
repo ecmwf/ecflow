@@ -40,6 +40,7 @@
 #include "Version.hpp"
 #include "Str.hpp"
 #include "File.hpp"
+#include "ExprDuplicate.hpp"
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
 #endif
@@ -168,6 +169,11 @@ std::string Server::get_password() const
 Server::~Server()
 {
    if (serverEnv_.debug()) cout << "<--Server::~server exiting server on port " << serverEnv_.port() << endl;
+
+   // Defs destructor may get called after we have returned from main. See ECFLOW-1291
+   // In this case the static memory used in ExprDuplicate will not be reclaimed. hence do it here:
+   // Duplicate AST are held in a static map. Delete them, to avoid valgrind and ASAN from complaining
+   ExprDuplicate reclaim_cloned_ast_memory;
 
    defs_.reset();
 

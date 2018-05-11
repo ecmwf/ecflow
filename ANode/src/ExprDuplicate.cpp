@@ -21,6 +21,7 @@
 
 #include "ExprDuplicate.hpp"
 #include "ExprAst.hpp"
+#include "Ecf.hpp"
 
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;
@@ -37,13 +38,21 @@ typedef boost::unordered_map< std::string, AstTop* > my_map;
 
 ExprDuplicate::~ExprDuplicate()
 {
-//   cout << "ExprDuplicate::~ExprDuplicate(): " << duplicate_expr.size() << " *****************************************************************\n";
+   //cout << "ExprDuplicate::~ExprDuplicate: server(" << Ecf::server() << ") " << duplicate_expr.size() << " *****************************************************************\n";
    BOOST_FOREACH(my_map::value_type i, duplicate_expr) {
-//      cout << " deleting: " << i.first << " :" << i.second << "\n";
+      //cout << " deleting: " << i.first << " :" << i.second << "\n";
       delete i.second;
       i.second = NULL;
    }
    duplicate_expr.clear();
+}
+
+void ExprDuplicate::dump(const std::string& msg )
+{
+   cout << "ExprDuplicate::dump server(" << Ecf::server() << ") " << msg << "\n";
+   BOOST_FOREACH(const my_map::value_type& i, duplicate_expr) {
+      cout << "   " << i.first << " :" << i.second << "\n";
+   }
 }
 
 std::auto_ptr<AstTop> ExprDuplicate::find(const std::string& expr)
@@ -61,5 +70,5 @@ void ExprDuplicate::add(const std::string& expr,AstTop* ast)
    AstTop* clone = ast->clone();
    duplicate_expr.insert( std::make_pair(expr,clone));
 
-//   cout << "ExprDuplicate::add: " << expr << " :" << clone << "   " << duplicate_expr.size() << "\n";
+   //cout << "ExprDuplicate::add: server(" << Ecf::server() << ") " << expr << " :" << clone << "   " << duplicate_expr.size() << "\n";
 }

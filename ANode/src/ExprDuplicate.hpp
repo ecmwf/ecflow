@@ -34,6 +34,9 @@ public:
    ExprDuplicate() {}
    ~ExprDuplicate();
 
+   // for debug only
+   static void dump(const std::string& msg );
+
    // Find the expr in the map, if found returns a CLONED ast, else NULL
    static std::auto_ptr<AstTop> find(const std::string& expr);
 
