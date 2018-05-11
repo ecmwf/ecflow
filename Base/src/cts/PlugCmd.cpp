@@ -295,16 +295,26 @@ bool MoveCmd::check_source() const
    return false;
 }
 
+void MoveCmd::delete_source() const
+{
+   // See: ECFLOW-1292
+   delete sourceSuite_;
+   delete sourceFamily_;
+   delete sourceTask_ ;
+}
+
 STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
 {
    Lock lock(user(),as);
    if (!lock.ok()) {
+      delete_source();
       std::string errorMsg = "Plug(Move) command failed. User "; errorMsg += as->lockedUser();
       errorMsg += " already has an exclusive lock";
       throw std::runtime_error( errorMsg);
    }
 
    if (!check_source()) {
+      delete_source();
       throw std::runtime_error("Plug(Move) command failed. No source specified");
    }
 
@@ -314,6 +324,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
 
       destNode =  as->defs()->findAbsNode(dest_);
       if (!destNode.get()) {
+         delete_source();
          std::string errorMsg = "Plug(Move) command failed. The destination path "; errorMsg += dest_;
          errorMsg += " does not exist on server";
          throw std::runtime_error( errorMsg);
@@ -321,6 +332,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
    }
    else {
       if (!source()->isSuite()) {
+         delete_source();
          throw std::runtime_error("::Destination path can only be empty when moving a whole suite to a new server");
       }
    }
@@ -337,6 +349,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
       // check its ok to add
       std::string errorMsg;
       if (!thedestNode->isAddChildOk(source(),errorMsg) ) {
+         delete_source();
          std::string msg = "Plug(Move) command failed. "; msg += errorMsg;
          throw std::runtime_error( msg) ;
       }
@@ -344,6 +357,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
       // pass ownership
       if (!thedestNode->addChild( node_ptr( source() ) )) {
          // This should never fail !!!! else we have lost/ and leaked source node !!!!
+         delete_source();
          throw std::runtime_error("Fatal error plug(move) command failed.") ;
       }
 
@@ -367,7 +381,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
    // Updated defs state
    as->defs()->set_most_significant_state();
 
-   // Ownership for sourceSuite_ has been passed on.
+   // Ownership for sourceSuite_ has been passed on or we have deleted it in delete_source() ECFLOW-1292
    sourceSuite_ = NULL;
    sourceFamily_ = NULL;
    sourceTask_ =  NULL;

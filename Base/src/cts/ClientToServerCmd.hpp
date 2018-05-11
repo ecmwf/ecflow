@@ -1758,6 +1758,7 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
    bool check_source() const;
+   void delete_source() const; // should *ONLY* be called in doHandleRequest() as that is in server
 
 private:
    mutable Suite*  sourceSuite_; // only one is set, gets round un-registered class exception
@@ -1772,9 +1773,9 @@ private:
    template<class Archive>
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
       ar & boost::serialization::base_object< UserCmd >( *this );
-      ar & sourceSuite_;  // only one is serialised
-      ar & sourceFamily_; // only one is serialised
-      ar & sourceTask_;   // only one is serialised
+      ar & sourceSuite_;  // only one is serialised, these are new allocated an need to deleted if errors
+      ar & sourceFamily_; // only one is serialised, these are new allocated an need to deleted if errors
+      ar & sourceTask_;   // only one is serialised, these are new allocated an need to deleted if errors
       ar & src_host_;
       ar & src_port_;
       ar & src_path_;
