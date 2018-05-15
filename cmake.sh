@@ -160,7 +160,7 @@ fi
 
 # ==============================================================================================
 # sanitisers
-if [[ "$tsan_arg" = tsan && "$tsan_arg" = tsan ]] ; then
+if [[ "$tsan_arg" = tsan && "$asan_arg" = asan ]] ; then
     echo "Cant use address and thread sanitiser at the same time"
 fi
 if [[ "$tsan_arg" = tsan ]] ; then
