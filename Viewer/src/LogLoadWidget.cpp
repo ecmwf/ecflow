@@ -65,6 +65,13 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     connect(ui_->loadView,SIGNAL(suitePlotStateChanged(int,bool,QColor)),
             suiteModel_,SLOT(updateSuite(int,bool,QColor)));
 
+    connect(ui_->unselectSuitesTb,SIGNAL(clicked()),
+            suiteModel_,SLOT(unselectAllSuites()));
+
+    connect(ui_->selectFourSuitesTb,SIGNAL(clicked()),
+            suiteModel_,SLOT(selectFirstFourSuites()));
+
+
     //Log contents
 
     logModel_=new LogModel(this);
@@ -96,6 +103,20 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     QColor bg(50,52,58);
     ui_->scanLabel->setStyleSheet("QLabel{background: " + bg.name() + ";}");
 
+
+    QFont font;
+    QFontMetrics fm(font);
+    int w=fm.width("AAAAAverylongsuitename");
+    QList<int> sizeLst=ui_->splitter->sizes();
+    if(sizeLst.count()==3)
+    {
+        sizeLst[2]=w;
+        sizeLst[0]=(width()-w)/2;
+        sizeLst[1]=(width()-w)/2;
+        ui_->splitter->setSizes(sizeLst);
+    }
+
+
 #if 0
     ui_->scanLabel->setAutoFillBackground(true);
     QPalette pal=ui_->scanLabel->palette();
@@ -117,6 +138,9 @@ void LogLoadWidget::load(const std::string& logFile)
     ui_->loadView->load(fileName);
 
     suiteModel_->setData(ui_->loadView->data(),ui_->loadView->suitePlotState());
+
+    for(int i=0; i < suiteModel_->columnCount()-1; i++)
+        ui_->suiteTree->resizeColumnToContents(i);
 
     logModel_->loadFromFile(fileName);
 }
@@ -157,7 +181,8 @@ void LogLoadSuiteModel::setData(LogLoadData* data,QList<bool> checkedLst)
     for(size_t i=0; i < data->suites().size(); i++)
     {
         data_ << LogLoadSuiteModelDataItem(QString::fromStdString(data->suites()[i].name()),
-                                           data->suites()[i].percentage(),checkedLst[i]);
+                                           data->suites()[i].percentage(),checkedLst[i],
+                                           data->suites()[i].rank());
     }
 
     endResetModel();
@@ -340,6 +365,39 @@ void LogLoadSuiteModel::updateSuite(int idx,bool st,QColor col)
         QModelIndex endIdx=index(idx,columnCount()-1);
         Q_EMIT dataChanged(startIdx,endIdx);
     }
+}
+
+void LogLoadSuiteModel::unselectAllSuites()
+{
+    for(int i=0; i < data_.size(); i++)
+    {
+        if(data_[i].checked_)
+        {
+            data_[i].checked_=false;
+            Q_EMIT checkStateChanged(i,false);
+        }
+    }
+
+    QModelIndex startIdx=index(0,0);
+    QModelIndex endIdx=index(rowCount(),columnCount()-1);
+    Q_EMIT dataChanged(startIdx,endIdx);
+}
+
+void LogLoadSuiteModel::selectFirstFourSuites()
+{
+    unselectAllSuites();
+    for(int i=0; i < data_.size(); i++)
+    {
+        if(data_[i].rank_ < 4 && data_[i].rank_ >=0)
+        {
+            data_[i].checked_=true;
+            Q_EMIT checkStateChanged(i,true);
+        }
+    }
+
+    QModelIndex startIdx=index(0,0);
+    QModelIndex endIdx=index(rowCount(),columnCount()-1);
+    Q_EMIT dataChanged(startIdx,endIdx);
 }
 
 //=======================================================
@@ -988,7 +1046,7 @@ void ChartCallout::paint(QPainter *painter, const QStyleOptionGraphicsItem *opti
         path = path.simplified();
     }
 
-    painter->setBrush(QColor(168,226,145).lighter(120));
+    painter->setBrush(QColor(198,223,188));
     //painter->setBrush(QColor(255,245,204));
     painter->drawPath(path);
 
@@ -1208,6 +1266,8 @@ ServerLoadView::ServerLoadView(QWidget* parent) : QWidget(parent),
     data_=new LogLoadData();
 
     QVBoxLayout* vb=new QVBoxLayout(this);
+    vb->setContentsMargins(0,0,0,0);
+
     for(int i=0; i < 3; i++)
     {
         QChart* chart = new QChart();
@@ -1484,28 +1544,31 @@ void ServerLoadView::scanPositionChanged(qreal pos)
 {
     qint64 t(pos);
     size_t idx=0;
-    if(data_->indexOfTime(t,idx,lastScanIndex_))
-    {
-        lastScanIndex_=idx;
-        //UiLog().dbg() << "idx=" << idx;
+    bool hasData=data_->indexOfTime(t,idx,lastScanIndex_);
 
-        QColor dateCol(210,212,218);
-        QString txt=Viewer::formatText("date: " +
-                      QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy"),
-                      dateCol);
-        txt+="<br>" +
-             Viewer::formatText("date: " +
+    lastScanIndex_=idx;
+    //UiLog().dbg() << "idx=" << idx;
+
+    QColor dateCol(210,212,218);
+    QString dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
+    QString txt=Viewer::formatText("date (log): " + dateTxt, dateCol);
+#if 0
+    txt+="<br>" +
+             Viewer::formatText("date (cursor): " +
                     QDateTime::fromMSecsSinceEpoch(t).toString("hh:mm:ss dd/MM/yyyy"),
                     dateCol);
+#endif
 
-        txt+="<table width=\'100%\' cellpadding=\'4px\'>";
+    txt+="<table width=\'100%\' cellpadding=\'4px\'>";
         //header
-        QColor hdrCol(205,206,210);
-        txt+="<tr>" + Viewer::formatTableThText("Item",hdrCol) +
+    QColor hdrCol(205,206,210);
+    txt+="<tr>" + Viewer::formatTableThText("Item",hdrCol) +
               Viewer::formatTableThText("Total",hdrCol) +
               Viewer::formatTableThText("Child",hdrCol) +
               Viewer::formatTableThText("User",hdrCol) + "</tr>";
 
+    if(hasData)
+    {
         size_t tot=0,ch=0,us=0;
         QColor col=seriesColour(getChart(TotalChartType),"all");
         QString name="all";
@@ -1517,17 +1580,32 @@ void ServerLoadView::scanPositionChanged(qreal pos)
             if(suitePlotState_[i])
             {
                 tot=0;ch=0;us=0;
-                QColor col=suiteSeriesColour(getChart(TotalChartType),i);
-                QString name=QString::fromStdString(data_->suites()[i].name());
+                col=suiteSeriesColour(getChart(TotalChartType),i);
+                name=QString::fromStdString(data_->suites()[i].name());
                 data_->suites()[i].valuesAt(idx,tot,ch,us);
                 buildScanRow(txt,name,tot,ch,us,col);
             }
         }
-
-        txt+="</table>";
-
-        Q_EMIT scanDataChanged(txt);
     }
+    else
+    {
+        QColor col=seriesColour(getChart(TotalChartType),"all");
+        QString name="all";
+        buildEmptyScanRow(txt,name,col);
+        for(int i=0; i < suitePlotState_.size(); i++)
+        {
+            if(suitePlotState_[i])
+            {
+                col=suiteSeriesColour(getChart(TotalChartType),i);
+                name=QString::fromStdString(data_->suites()[i].name());
+                buildEmptyScanRow(txt,name,col);
+            }
+        }
+    }
+
+    txt+="</table>";
+
+    Q_EMIT scanDataChanged(txt);
 }
 
 void ServerLoadView::buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor lineCol) const
@@ -1538,3 +1616,13 @@ void ServerLoadView::buildScanRow(QString &txt,QString name,size_t tot,size_t ch
           Viewer::formatTableTdBg(QString::number(ch),numBg) +
           Viewer::formatTableTdBg(QString::number(us),numBg) + "</tr>";
 }
+
+void ServerLoadView::buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const
+{
+    QColor numBg(210,211,214);
+    txt+="<tr>" + Viewer::formatTableTdBg(name,lineCol.lighter(150)) +
+          Viewer::formatTableTdBg(" N/A",numBg) +
+          Viewer::formatTableTdBg(" N/A",numBg) +
+          Viewer::formatTableTdBg(" N/A",numBg) + "</tr>";
+}
+

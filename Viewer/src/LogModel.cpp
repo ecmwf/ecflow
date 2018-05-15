@@ -247,7 +247,8 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
         if(highlightPeriod_)
         {
             if(static_cast<size_t>(row) >= highlightStart_ && static_cast<size_t>(row)  <= highlightEnd_)
-                return QColor(168,226,145);
+                //return QColor(168,226,145);
+                return QColor(198,223,188);
             else
                 return QVariant();
         }

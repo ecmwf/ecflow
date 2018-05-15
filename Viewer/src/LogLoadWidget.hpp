@@ -58,13 +58,14 @@ private:
 
 struct LogLoadSuiteModelDataItem
 {
-    LogLoadSuiteModelDataItem(QString suiteName, float percentage, bool checked) :
-        suiteName_(suiteName), percentage_(percentage), checked_(checked) {}
+    LogLoadSuiteModelDataItem(QString suiteName, float percentage, bool checked,int rank) :
+        suiteName_(suiteName), percentage_(percentage), checked_(checked), rank_(-1) {}
 
     QString suiteName_;
     float percentage_;
     bool checked_;
     QColor col_;
+    int rank_;
 };
 
 //Model to dislay/select the suites
@@ -95,6 +96,8 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     void updateSuite(int,bool,QColor);
+    void unselectAllSuites();
+    void selectFirstFourSuites();
 
 protected:
     QString formatPrecentage(float perc) const;
@@ -290,6 +293,7 @@ protected:
     QColor suiteSeriesColour(QChart* chart,size_t idx);
     QColor seriesColour(QChart* chart,QString id);
     void buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor col) const;
+    void buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const;
 
     QList<ChartView*> views_;
     LogLoadData* data_;

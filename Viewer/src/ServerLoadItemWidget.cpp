@@ -23,6 +23,7 @@
 ServerLoadItemWidget::ServerLoadItemWidget(QWidget *parent)
 {
     QHBoxLayout* hb=new QHBoxLayout(this);
+    hb->setContentsMargins(0,0,0,0);
     w_=new LogLoadWidget(this);
     hb->addWidget(w_);
 
