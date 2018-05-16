@@ -45,9 +45,9 @@ public:
 
 	/// Find 'stringToFind' in 'jobLine' and replace with string 'stringToRplace'
 	/// return true if replace ok else returns false;
-   static bool replace(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace);
-   static bool replace_all(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace);
-   static void replaceall(std::string& jobLine, const std::string& stringToFind, const std::string& stringToRplace);
+   static bool replace(std::string& subject, const std::string& stringToFind, const std::string& stringToRplace);
+   static bool replace_all(std::string& subject, const std::string& stringToFind, const std::string& stringToRplace);
+   static void replaceall(std::string& subject, const std::string& stringToFind, const std::string& stringToRplace);
 
    // extract data member value, ie given a string of the form:
    //   str=cmd a b fred:value
@@ -59,8 +59,8 @@ public:
 	/// The split is based on *ANY* of the characters in the delimiters.
 	/// **** Hence a delimiter of "==" will still split "a = complete"
 	/// **** sequential delimiter character are ignored ****
-	static void split(const std::string& str,
-	                  std::vector< std::string >& lineTokens,
+	static void split(const std::string& line,
+	                  std::vector< std::string >& tokens,
 	                  const std::string& delimiters = " \t");
 
 	// Uses boost::make_split_iterator will remove
@@ -82,13 +82,13 @@ public:
 	static boost::split_iterator<std::string::const_iterator> make_split_iterator(const std::string& str,const std::string& delimiters = " \t");
 
 	/// case in sensitive string comparison
-	static bool caseInsCompare( const std::string& str1, const std::string& str2);
+	static bool caseInsCompare( const std::string&, const std::string&);
 
 	/// case insenstive less
-   static bool caseInsLess( const std::string& str1, const std::string& str2);
+   static bool caseInsLess( const std::string&, const std::string&);
 
    /// case insenstive Greater
-   static bool caseInsGreater( const std::string& str1, const std::string& str2);
+   static bool caseInsGreater( const std::string&, const std::string&);
 
 	/// Used for checking node names
    static bool valid_name(const std::string& name, std::string &msg);
@@ -102,8 +102,8 @@ public:
 
 	/// Truncate the input string at the start/end if exceeds max_lines_ newlines
 	/// returns true if truncated false otherwise
-   static bool truncate_at_start(  std::string& fileContents, size_t max_lines_);
-   static bool truncate_at_end(  std::string& fileContents, size_t max_lines_);
+   static bool truncate_at_start(  std::string& fileContents, size_t max_lines);
+   static bool truncate_at_end(  std::string& fileContents, size_t max_lines);
 
 	/// Only use strcmp if the first characters are the same
 	static int local_strcmp(const char* s, const char* t)

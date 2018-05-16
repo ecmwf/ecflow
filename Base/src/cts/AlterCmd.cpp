@@ -388,13 +388,13 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
          ss << "Alter (change) failed for " << paths_[i] << " : " << e.what() << "\n";
       }
 
-      try {
-         switch (add_attr_type_) {
-         case AlterCmd::ADD_TIME:    node->addTime( TimeSeries::create(name_ ) ); break;
-         case AlterCmd::ADD_TODAY:   node->addToday( TimeSeries::create(name_) ); break;
-         case AlterCmd::ADD_DATE:    node->addDate( DateAttr::create(name_) ); break;
-         case AlterCmd::ADD_DAY:     node->addDay( DayAttr::create(name_) ); break;
-         case AlterCmd::ADD_ZOMBIE:  node->addZombie( ZombieAttr::create(name_) ); break;
+		try {
+			switch (add_attr_type_) {
+			case AlterCmd::ADD_TIME:    node->addTime( TimeAttr(TimeSeries::create(name_ )) ); break;
+			case AlterCmd::ADD_TODAY:   node->addToday( TodayAttr(TimeSeries::create(name_)) ); break;
+			case AlterCmd::ADD_DATE:    node->addDate( DateAttr::create(name_) ); break;
+			case AlterCmd::ADD_DAY:     node->addDay( DayAttr::create(name_) ); break;
+			case AlterCmd::ADD_ZOMBIE:  node->addZombie( ZombieAttr::create(name_) ); break;
          case AlterCmd::ADD_VARIABLE:node->add_variable( name_, value_); break;
          case AlterCmd::ADD_LATE:    node->addLate( LateAttr::create(name_)); break;
          case AlterCmd::ADD_LABEL:   node->addLabel( Label(name_,value_) ); break;
@@ -895,23 +895,23 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
       throw std::runtime_error( ss.str() );
    }
 
-   std::string name, value;
-   switch (theAttrType) {
-   case AlterCmd::VARIABLE: {
-      if (options.size() == 3 && paths.size() > 1) {
-         // The variable value may be a path, and hence it will be paths and not options parameter
-         options.push_back(paths[0]);
-         paths.erase(paths.begin()); // remove first path, since it has been added to options
-      }
-      if (options.size() != 4 ) {
+	std::string name, value;
+	switch (theAttrType) {
+	case AlterCmd::VARIABLE: {
+		if (options.size() == 3 && paths.size() > 1) {
+			// The variable value may be a path, and hence it will be paths and not options parameter
+			options.push_back(paths[0]);
+			paths.erase(paths.begin()); // remove first path, since it has been added to options
+		}
+      if (options.size() < 3 || options.size() > 4) {
          ss << "AlterCmd: change: expected 5 args : change variable <variable_name> <new_value> <path_to_node>";
-         ss << " but found only " << (options.size() + paths.size()) << " arguments. The value should be quoted if there are spaces\n";
+         ss << " but found only " << (options.size() + paths.size()) << " arguments.\nThe value should be quoted if there are spaces\n";
          ss << dump_args(options,paths) << "\n";
          throw std::runtime_error( ss.str() );
       }
-      name = options[2];
-      value = options[3];
-      break;}
+		name = options[2];
+		if (options.size() == 4 ) value = options[3];
+		break;}
 
    case AlterCmd::CLOCK_TYPE: {
       if (options.size() != 3) {

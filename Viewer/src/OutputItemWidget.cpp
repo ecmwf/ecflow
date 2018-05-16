@@ -103,7 +103,6 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	connect(dirView_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotOutputSelected(QModelIndex,QModelIndex)));
 
-
 	//Set splitter's initial size.
 	int wHeight=size().height();
 	if(wHeight > 100)
@@ -189,22 +188,21 @@ void OutputItemWidget::reload(VInfo_ptr info)
 	}
 }
 
-std::string OutputItemWidget::currentFullName() const
+//Get information (description) about the current selection in the dir list
+void OutputItemWidget::currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const
 {
-	QModelIndex current=dirSortModel_->mapToSource(dirView_->currentIndex());
+    QModelIndex current=dirSortModel_->mapToSource(dirView_->currentIndex());
 
-	std::string fullName;
-	if(current.isValid())
-	{
-		fullName=dirModel_->fullName(current);
-	}
-	else
-	{
+    if(current.isValid())
+    {
+        dirModel_->itemDesc(current,fullName,fetchMode);
+    }
+    else
+    {
         OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
         fullName=op->joboutFileName();
-	}
-
-	return fullName;
+        fetchMode=VDir::NoFetchMode;
+    }
 }
 
 void OutputItemWidget::getLatestFile()
@@ -222,6 +220,7 @@ void OutputItemWidget::getLatestFile()
     updateDir(false);  // get the directory listing
 }
 
+//Load the currently selected file in the dir view
 void OutputItemWidget::getCurrentFile(bool doReload)
 {
 	messageLabel_->hide();
@@ -233,14 +232,27 @@ void OutputItemWidget::getCurrentFile(bool doReload)
 
     if(info_)
 	{
-		std::string fullName=currentFullName();
+        std::string fullName;
+        VDir::FetchMode fetchMode;
+        currentDesc(fullName,fetchMode);
+        if(!fullName.empty())
+        {            
 #ifdef _UI_OUTPUTITEMWIDGET_DEBUG
-        UiLog().dbg()  << "output selected: " << fullName;
+            UI_FUNCTION_LOG
+            UiLog().dbg()  << "output selected: " << fullName;
 #endif
-        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-        op->file(fullName,!doReload);
+            //Fetch the file with given fetchmode
+            OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
 
-        updateDir(false);  // get the directory listing
+            //If the fetchmode is not defined we use the normal fetch policy
+            if(fetchMode == VDir::NoFetchMode)
+               op->file(fullName,!doReload);
+            //Otherwise we need to use the given fetch mode
+            else
+               op->fetchFile(fullName,fetchMode,!doReload);
+
+            updateDir(false);  // get the directory listing
+        }
 	}
 }
 
@@ -405,7 +417,7 @@ void OutputItemWidget::infoReady(VReply* reply)
         //Update the selection in the dir list according to the file
         if(f)
         {          
-            setCurrentInDir(f->sourcePath());
+            setCurrentInDir(f->sourcePath(),f->fetchMode());
         }
 #if 0
         if(reply->tmpFile() && reply->fileReadMode() == VReply::LocalReadMode &&
@@ -521,13 +533,33 @@ void OutputItemWidget::on_dirReloadTb__clicked()
     updateDir(false);  // get the directory listing
 }
 
-void OutputItemWidget::setCurrentInDir(const std::string& fullName)
+void OutputItemWidget::setCurrentInDir(const std::string& fullName,VFile::FetchMode fetchMode)
 {
     if(!dirModel_->isEmpty())
     {
         //Try to preserve the selection
         ignoreOutputSelection_=true;
-        dirView_->setCurrentIndex(dirSortModel_->fullNameToIndex(fullName));
+
+        VDir::FetchMode fm=VDir::NoFetchMode;
+        switch(fetchMode)
+        {
+        case VFile::LocalFetchMode:
+            fm=VDir::LocalFetchMode;
+            break;
+        case VFile::ServerFetchMode:
+            fm=VDir::ServerFetchMode;
+            break;
+        case VFile::LogServerFetchMode:
+            fm=VDir::LogServerFetchMode;
+            break;
+        default:
+            break;
+        }
+
+        QModelIndex idx=dirModel_->itemToIndex(fullName,fm);
+        if(idx.isValid())
+            dirView_->setCurrentIndex(dirSortModel_->mapFromSource(idx));
+
         ignoreOutputSelection_=false;
     }
 }
@@ -554,7 +586,9 @@ UI_FUNCTION_LOG
         OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
         op->setDirectories(dirs);
 
-        std::string fullName=currentFullName();
+        std::string fullName;
+        VDir::FetchMode fetchMode;
+        currentDesc(fullName,fetchMode);
 
 		dirView_->selectionModel()->clearSelection();
         dirModel_->setData(dirs,op->joboutFileName());
@@ -576,8 +610,11 @@ UI_FUNCTION_LOG
 #endif
 		//Try to preserve the selection
 		ignoreOutputSelection_=true;
-		dirView_->setCurrentIndex(dirSortModel_->fullNameToIndex(fullName));
-		ignoreOutputSelection_=false;
+        QModelIndex idx=dirModel_->itemToIndex(fullName,fetchMode);
+        if(idx.isValid())
+            dirView_->setCurrentIndex(dirSortModel_->mapFromSource(idx));
+
+        ignoreOutputSelection_=false;
 	}
 	else
 	{
@@ -669,7 +706,7 @@ void OutputItemWidget::searchOnReload()
 	browser_->searchOnReload(userClickedReload_);
 }
 
-//This slot is called when a file item is selected in the output view.
+//This slot is called when a file item is selected in the dir view
 void OutputItemWidget::slotOutputSelected(QModelIndex idx1,QModelIndex idx2)
 {
 	if(!ignoreOutputSelection_)
@@ -718,7 +755,9 @@ void OutputItemWidget::on_saveFileAsTb__clicked()
 
 void OutputItemWidget::on_copyPathTb__clicked()
 {
-    std::string fullName=currentFullName();
+    std::string fullName;
+    VDir::FetchMode fetchMode;
+    currentDesc(fullName,fetchMode);
 
     if(!fullName.empty())
     {
@@ -754,7 +793,10 @@ void OutputItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect
             {
                 OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
                 Q_ASSERT(op);
-                if(currentFullName() == op->joboutFileName())
+                std::string fullName;
+                VDir::FetchMode fetchMode;
+                currentDesc(fullName,fetchMode);
+                if(fullName == op->joboutFileName())
                     getLatestFile();
             }
             return;

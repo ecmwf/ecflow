@@ -23,7 +23,7 @@
 ///================================================================================
 class SServerLoadCmd : public ServerToClientCmd {
 public:
-   SServerLoadCmd(const std::string& log_file_path) : log_file_path_(log_file_path) {}
+   explicit SServerLoadCmd(const std::string& log_file_path) : log_file_path_(log_file_path) {}
    SServerLoadCmd() : ServerToClientCmd() {}
 
    void init(const std::string& s) { log_file_path_ = s;}

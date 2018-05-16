@@ -23,6 +23,7 @@
 
 #include "LimitFwd.hpp"
 
+
 // Inlimit. Multiple inlimits on same Node are logically ANDED
 //    inlimit    limitName     // This will consume one token in the limit <limitName>
 //    inlimit    limitName 10  // This will consume 10 tokens in the limit <limitName>
@@ -33,7 +34,7 @@
 // Inlimit of the same name specified on a task take priority over the family
 class InLimit {
 public:
-   InLimit(const std::string& limit_name,                                         // referenced limit
+   explicit InLimit(const std::string& limit_name,                                         // referenced limit
            const std::string& path_to_node_with_referenced_limit = std::string(), // if empty, search for limit up parent hierarchy
            int tokens = 1,                                                        // tokens to consume in the Limit
            bool limit_this_node_only = false);                                    // if true limit this node only

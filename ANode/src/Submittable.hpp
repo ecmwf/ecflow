@@ -184,7 +184,7 @@ private:
 // This improves client->server down load times by avoiding thousands of string constructions
 class SubGenVariables : private boost::noncopyable {
 public:
-   SubGenVariables(const Submittable*);
+   explicit SubGenVariables(const Submittable*);
 
    void update_generated_variables() const;
 

@@ -20,7 +20,7 @@
 
 class DefsStatusParser : public Parser {
 public:
-	DefsStatusParser(DefsStructureParser* p) : Parser(p) {}
+   explicit DefsStatusParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "defstatus"; }
 	virtual bool doParse(const std::string& line,std::vector<std::string>& lineTokens);
 };

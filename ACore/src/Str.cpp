@@ -112,13 +112,13 @@ bool Str::replace(std::string& jobLine, const std::string& stringToFind, const s
 	return false;
 }
 
-bool Str::replace_all(std::string& subject, const std::string& search, const std::string& replace)
+bool Str::replace_all(std::string& subject, const std::string& stringToFind, const std::string& stringToReplace)
 {
    bool replaced = false ;
    size_t pos = 0;
-   while ((pos = subject.find(search, pos)) != std::string::npos) {
-      subject.replace(pos, search.length(), replace);
-      pos += replace.length();
+   while ((pos = subject.find(stringToFind, pos)) != std::string::npos) {
+      subject.replace(pos, stringToFind.length(), stringToReplace);
+      pos += stringToReplace.length();
       replaced = true;
    }
    return replaced;

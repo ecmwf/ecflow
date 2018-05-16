@@ -21,7 +21,7 @@ class AbstractServer;
 //================================================================================
 class SClientHandleSuitesCmd : public ServerToClientCmd {
 public:
-   SClientHandleSuitesCmd(AbstractServer* as );
+   explicit SClientHandleSuitesCmd(AbstractServer* as );
    SClientHandleSuitesCmd() : ServerToClientCmd() {}
 
    void init(AbstractServer* as);

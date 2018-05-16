@@ -38,7 +38,7 @@
 //
 class InLimitMgr {
 public:
-   InLimitMgr(Node* n) : node_(n) {}
+   explicit InLimitMgr(Node* n) : node_(n) {}
    InLimitMgr(const InLimitMgr& rhs) : node_(NULL),inLimitVec_(rhs.inLimitVec_){}
 	InLimitMgr() : node_(NULL) {}
 

@@ -29,7 +29,7 @@
 ///================================================================================
 class SStringCmd : public ServerToClientCmd {
 public:
-   SStringCmd(const std::string& s) : str_(s) {}
+   explicit SStringCmd(const std::string& s) : str_(s) {}
    SStringCmd() : ServerToClientCmd() {}
 
    void init(const std::string& s) { str_ = s;}

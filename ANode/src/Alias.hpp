@@ -18,7 +18,7 @@
 
 class Alias : public Submittable {
 public:
-   Alias(const std::string& name);
+   explicit Alias(const std::string& name);
    Alias();
    Alias(const Alias&);
    Alias& operator=(const Alias&);

@@ -52,9 +52,9 @@ namespace ecf {
 class TimeSeries  {
 public:
 	TimeSeries();
-	TimeSeries(int hour, int minute, bool relativeToSuiteStart = false );
-	TimeSeries(const TimeSlot&, bool relativeToSuiteStart = false );
-	TimeSeries(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relativeToSuiteStart = false);
+	TimeSeries(int hour, int minute, bool relative = false );
+	TimeSeries(const TimeSlot&, bool relative = false );
+	TimeSeries(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative = false);
 
    bool operator<(const TimeSeries& rhs) const;
 

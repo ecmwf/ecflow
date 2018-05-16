@@ -36,7 +36,7 @@ public:
 	TimeSlot(int hour, int min)
 		: hour_(hour), minute_(min),isNull_(false)
 		{ assert(hour >= 0  && min >=0 ); }
-	TimeSlot(const boost::posix_time::time_duration& td)
+	explicit TimeSlot(const boost::posix_time::time_duration& td)
 		: hour_(td.hours()), minute_(td.minutes()),isNull_(false)
 		{ assert( hour_ < 60 && minute_ < 60);}
 

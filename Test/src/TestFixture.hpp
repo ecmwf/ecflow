@@ -39,7 +39,7 @@ struct TestFixture {
 	// Since this class is static, the constructor/destructor can not call
 	// any of BOOST MACRO, since the unit test will not be there.
 	// When running across platforms will will assume server is already running
-   TestFixture(const std::string& project_test_dir /* Test or view */);
+   explicit TestFixture(const std::string& project_test_dir /* Test or view */);
    TestFixture();
 	~TestFixture();
 

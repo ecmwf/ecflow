@@ -18,7 +18,7 @@
 
 class Task : public Submittable {
 public:
-   Task( const std::string& name )
+   explicit Task( const std::string& name )
    : Submittable(name),
      order_state_change_no_(0),
      add_remove_state_change_no_(0),

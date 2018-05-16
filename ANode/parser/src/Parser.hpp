@@ -29,7 +29,7 @@ class Defs;
 
 class Parser {
 public:
-	Parser(DefsStructureParser* p);
+   explicit Parser(DefsStructureParser* p);
 	virtual ~Parser();
 
 	// if child does not recognise token try the parent

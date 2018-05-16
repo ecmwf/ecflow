@@ -229,10 +229,10 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,const Nam
       }
    }
 
-   // copy over events, meters, labels
-   BOOST_FOREACH(const Meter& meter, meters()) { alias->addMeter(meter); }
-   BOOST_FOREACH(const Event& event, events()) { alias->addEvent(event); }
-   BOOST_FOREACH(const Label& label, labels()) { alias->addLabel(label); }
+   // copy over events, meters, labels, but clear state (ECFLOW-1278)
+   BOOST_FOREACH(Meter meter, meters()) { meter.reset(); alias->addMeter(meter); }
+   BOOST_FOREACH(Event event, events()) { event.reset(); alias->addEvent(event); }
+   BOOST_FOREACH(Label label, labels()) { label.reset(); alias->addLabel(label); }
 
    // Add user_variables as variables. Note: to reduce memory we could choose
    // to only add those variable that have been changed/added. However this

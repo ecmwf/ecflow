@@ -270,16 +270,16 @@ void ServerState::delete_user_variable( const std::string& var)
    }
 }
 
-const std::string& ServerState::find_user_variable(const std::string& theVarName) const
+bool ServerState::find_user_variable(const std::string& name,std::string& value) const
 {
    std::vector<Variable>::const_iterator user_var_end = user_variables_.end();
    for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=user_var_end; ++i) {
-      if ((*i).name() == theVarName) {
-         LOG_ASSERT(!(*i).theValue().empty(),"");
-         return (*i).theValue();
+      if ((*i).name() == name) {
+         value = (*i).theValue();
+         return true;
       }
    }
-   return Str::EMPTY();
+   return false;
 }
 
 const std::string& ServerState::find_variable(const std::string& theVarName) const
@@ -289,7 +289,6 @@ const std::string& ServerState::find_variable(const std::string& theVarName) con
    for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=user_var_end; ++i) {
       if ((*i).name() == theVarName) {
 //			cerr << "FOUND '" << (*i).first << "'   '" << (*i).second << "'\n";
-			LOG_ASSERT(!(*i).theValue().empty(),"");
  			return (*i).theValue();
 		}
 	}
@@ -314,7 +313,6 @@ const Variable& ServerState::findVariable(const std::string& name) const
    std::vector<Variable>::const_iterator var_end = user_variables_.end();
    for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=var_end; ++i) {
       if ((*i).name() == name) {
-         LOG_ASSERT(!(*i).theValue().empty(),"");
          // if ((*i).theValue().empty() )  std::cout << (*i).name() << " has a empty value\n";
          return (*i);
       }

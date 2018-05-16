@@ -1766,6 +1766,26 @@ def test_ECFLOW_199(ci):
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_ECFLOW_199"
     shutil.rmtree(dir_to_remove)      
 
+def test_client_ch_with_drops_handles(the_port,top_ci):
+    print("test_client_ch_with_drops_handles")
+    try:
+        print("  test using with but without register, handle should be zero, ie do nothing")
+        with Client("localhost",the_port) as local_ci:
+            #print("Handle:",local_ci.ch_handle())
+            assert local_ci.ch_handle() == 0,"Expected handle to be zero"
+            local_ci.ch_suites()
+        print("  Test Client with register, should drop handle")
+        with Client("localhost",the_port) as local_ci:
+            local_ci.ch_register(True, [ 's1','s2'])
+            #print("Handle:",local_ci .ch_handle())
+            local_ci.ch_suites()
+            #raise RuntimeError("xxx") #check exeption is still caught
+    except RuntimeError, e:
+        print("Exception",e)
+    print("after with:")
+    # really need a way to get hold of the suites, via python api.
+    top_ci.ch_suites() # should be empty
+ 
 
 if __name__ == "__main__":
     client_version = Client().version();
@@ -1785,30 +1805,32 @@ if __name__ == "__main__":
         the_port = ci.get_port();
         test_version(ci)
         PrintStyle.set_style( Style.STATE ) # show node state 
+                
         test_client_get_server_defs(ci)             
         test_client_new_log(ci, the_port)             
         test_client_clear_log(ci, the_port)             
         test_client_log_msg(ci, the_port)             
         test_client_log_auto_flush(ci, the_port)             
-           
+             
         test_client_restart_server(ci)             
         test_client_halt_server(ci)             
         test_client_shutdown_server(ci)   
-       
+         
         test_client_load_in_memory_defs(ci)             
         test_client_load_from_disk(ci)             
         test_client_checkpt(ci, the_port)             
         test_client_restore_from_checkpt(ci, the_port)             
-            
+              
         test_client_reload_wl_file(ci, the_port)             
-    
+      
         test_client_run(ci)  
         test_client_run_with_multiple_paths(ci)     
         test_client_requeue(ci)             
         test_client_requeue_with_multiple_paths(ci)             
         test_client_free_dep(ci)              
-   
+     
         test_client_suites(ci)
+        test_client_ch_with_drops_handles(the_port,ci)
         test_client_ch_suites(ci)  
         test_client_ch_register(ci)             
         test_client_ch_drop(ci)             
@@ -1816,7 +1838,7 @@ if __name__ == "__main__":
         test_client_ch_add(ci)             
         test_client_ch_auto_add(ci)             
         test_client_ch_remove(ci)             
-              
+                
         test_client_get_file(ci)             
         #test_client_plug(ci)             
         test_client_alter_sort(ci) 
@@ -1830,7 +1852,7 @@ if __name__ == "__main__":
         test_client_replace(ci,False)             
         test_client_replace(ci,True)             
         test_node_replace(ci)             
-   
+     
         #test_client_kill(ci)             
         #test_client_status(ci)             
         #test_client_order(ci)             
@@ -1845,11 +1867,11 @@ if __name__ == "__main__":
    
         test_client_check(ci)  
         test_client_check_defstatus(ci)  
-    
+      
         test_client_stats(ci)             
         test_client_stats_reset(ci)             
         test_client_debug_server_on_off(ci)    
-          
+            
         test_ECFLOW_189(ci)         
         test_ECFLOW_199(ci)         
 

@@ -650,7 +650,7 @@ public:
       STATS_SERVER
      };
 
-   CtsCmd(Api a) : api_(a) {}
+   explicit CtsCmd(Api a) : api_(a) {}
    CtsCmd() : api_(NO_CMD) {}
 
    Api api() const { return api_;}
@@ -733,7 +733,7 @@ public:
      client_handle_(client_handle),
      client_state_change_no_(client_state_change_no),
      client_modify_change_no_(client_modify_change_no) {}
-   CSyncCmd(unsigned int client_handle)
+   explicit CSyncCmd(unsigned int client_handle)
    : api_(SYNC_FULL),
      client_handle_(client_handle),
      client_state_change_no_(0),
@@ -786,7 +786,7 @@ class ClientHandleCmd : public UserCmd {
 public:
    enum Api { REGISTER, DROP, DROP_USER, ADD, REMOVE, AUTO_ADD , SUITES };
 
-   ClientHandleCmd(Api api = AUTO_ADD)
+   explicit ClientHandleCmd(Api api = AUTO_ADD)
    : api_(api),
      client_handle_(0),
      auto_add_new_suites_(false) {}
@@ -797,12 +797,12 @@ public:
      auto_add_new_suites_(add_add_new_suites),
      suites_(suites)  {}
 
-   ClientHandleCmd(int client_handle)
+   explicit ClientHandleCmd(int client_handle)
    : api_(DROP),
      client_handle_(client_handle),
      auto_add_new_suites_(false) {}
 
-   ClientHandleCmd(const std::string& drop_user)
+   explicit ClientHandleCmd(const std::string& drop_user)
     : api_(DROP_USER),
       client_handle_(0),
       auto_add_new_suites_(false),
@@ -868,7 +868,7 @@ class CtsNodeCmd : public UserCmd {
 public:
    enum Api { NO_CMD, JOB_GEN, CHECK_JOB_GEN_ONLY, GET, WHY, GET_STATE, MIGRATE };
    CtsNodeCmd(Api a, const std::string& absNodePath) : api_(a),absNodePath_(absNodePath) {}
-   CtsNodeCmd(Api a) : api_(a) { assert(a != NO_CMD); }
+   explicit CtsNodeCmd(Api a) : api_(a) { assert(a != NO_CMD); }
    CtsNodeCmd() : api_(NO_CMD) {}
 
    Api api() const { return api_;}
@@ -915,7 +915,7 @@ public:
    PathsCmd(Api api,const std::vector<std::string>& paths, bool force = false)
    : api_(api),force_(force),paths_(paths){}
    PathsCmd(Api api,const std::string& absNodePath, bool force = false);
-   PathsCmd(Api api)
+   explicit PathsCmd(Api api)
    : api_(api), force_(false) { assert(api != NO_CMD); }
    PathsCmd()
    : api_(NO_CMD),force_(false) {}
@@ -967,7 +967,7 @@ class LogCmd : public UserCmd {
 public:
    enum LogApi { GET, CLEAR, FLUSH, NEW , PATH, ENABLE_AUTO_FLUSH, DISABLE_AUTO_FLUSH, QUERY_AUTO_FLUSH};
    LogCmd(LogApi a, int get_last_n_lines = 0); // for zero we take default from log. Avoid adding dependency on log.hpp
-   LogCmd(const std::string& path); // NEW
+   explicit LogCmd(const std::string& path); // NEW
    LogCmd();
 
    LogApi api() const { return api_;}
@@ -1006,7 +1006,7 @@ private:
 /// Simply writes the message to the log file
 class LogMessageCmd : public UserCmd {
 public:
-   LogMessageCmd(const std::string& msg) : msg_(msg) {}
+   explicit LogMessageCmd(const std::string& msg) : msg_(msg) {}
    LogMessageCmd() {}
 
    const std::string& msg() const { return msg_;}
@@ -1078,7 +1078,7 @@ class ZombieCmd : public UserCmd {
 public:
    ZombieCmd(ecf::User::Action uc, const std::vector<std::string>& paths, const std::string& process_id, const std::string& password)
    : user_action_(uc), process_id_(process_id), password_(password),paths_(paths) {}
-   ZombieCmd(ecf::User::Action uc = ecf::User::BLOCK) : user_action_(uc) {}
+   explicit ZombieCmd(ecf::User::Action uc = ecf::User::BLOCK) : user_action_(uc) {}
 
    const std::vector<std::string>& paths() const { return paths_;}
    const std::string& process_or_remote_id() const { return process_id_;}
@@ -1249,7 +1249,7 @@ private:
 // This class has no need for persistence, i.e client side only
 class ShowCmd : public UserCmd {
 public:
-   ShowCmd(PrintStyle::Type_t s = PrintStyle::DEFS) : style_(s) {}
+   explicit ShowCmd(PrintStyle::Type_t s = PrintStyle::DEFS) : style_(s) {}
 
    // returns the showStyle
    virtual bool show_cmd() const { return true ;}
@@ -1814,9 +1814,12 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
    bool check_source() const;
+   void delete_source() const; // should *ONLY* be called in doHandleRequest() as that is in server
 
 private:
-   std::string src_node_;
+   mutable Suite*  sourceSuite_; // only one is set, gets round un-registered class exception
+   mutable Family* sourceFamily_;// only one is set, gets round un-registered class exception
+   mutable Task*   sourceTask_;  // only one is set, gets round un-registered class exception
    std::string src_host_;
    std::string src_port_;
    std::string src_path_;
@@ -1826,7 +1829,9 @@ private:
    template<class Archive>
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
       ar & boost::serialization::base_object< UserCmd >( *this );
-      ar & src_node_ ;
+      ar & sourceSuite_;  // only one is serialised, these are new allocated an need to deleted if errors
+      ar & sourceFamily_; // only one is serialised, these are new allocated an need to deleted if errors
+      ar & sourceTask_;   // only one is serialised, these are new allocated an need to deleted if errors
       ar & src_host_;
       ar & src_port_;
       ar & src_path_;

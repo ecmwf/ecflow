@@ -405,7 +405,7 @@ private:
 
 class AstInteger : public AstLeaf {
 public:
-	AstInteger(int value) : value_(value) {}
+	explicit AstInteger(int value) : value_(value) {}
 
    virtual bool is_evaluateable() const { return true; }
 	virtual bool evaluate() const {  return value_; } // -1 -2 1 2 3 evaluates to true, 0 returns false
@@ -426,7 +426,7 @@ private:
 
 class AstNodeState : public AstLeaf {
 public:
-	AstNodeState(DState::State s) : state_(s) {}
+   explicit AstNodeState(DState::State s) : state_(s) {}
 
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstNodeState* clone() const;
@@ -443,7 +443,7 @@ private:
 
 class AstEventState : public AstLeaf {
 public:
-	AstEventState(bool b) : state_(b) {}
+   explicit AstEventState(bool b) : state_(b) {}
 
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstEventState* clone() const;
@@ -470,7 +470,7 @@ private:
 
 class AstNode : public AstLeaf {
 public:
-	AstNode(const std::string& n) : parentNode_(NULL), nodePath_(n) {}
+   explicit AstNode(const std::string& n) : parentNode_(NULL), nodePath_(n) {}
 
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstNode* clone() const;
@@ -595,7 +595,7 @@ private:
 //  ** i.e  "2 == (((:YMD / 100 ) % 100) % 3"
 class AstParentVariable : public AstLeaf {
 public:
-   AstParentVariable(const std::string& variablename)
+   explicit AstParentVariable(const std::string& variablename)
    : parentNode_(NULL), name_(variablename)  {}
 
    virtual std::string name() const { return name_;}
@@ -635,7 +635,7 @@ private:
 // Helper class
 class VariableHelper : private boost::noncopyable {
 public:
-	VariableHelper(const AstVariable* astVariable);
+   explicit VariableHelper(const AstVariable* astVariable);
 	VariableHelper(const AstVariable* astVariable, std::string& errorMsg);
 
 	int value() const;

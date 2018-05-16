@@ -41,7 +41,7 @@
 // Also distinguish between server and environment errors
 class ServerEnvironmentException : public std::runtime_error {
 public:
-   ServerEnvironmentException(const std::string& msg) : std::runtime_error(msg) {}
+   explicit ServerEnvironmentException(const std::string& msg) : std::runtime_error(msg) {}
 };
 
 

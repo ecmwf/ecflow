@@ -69,7 +69,7 @@ ostream& operator<<(ostream& os, const vector<T>& v) {
 
 class TextParser : public Parser {
 public:
-   TextParser(DefsStructureParser* p) : Parser(p) {}
+   explicit TextParser(DefsStructureParser* p) : Parser(p) {}
 
    virtual const char* keyword() const { return "text"; }
 
@@ -83,7 +83,7 @@ public:
 
 class AliasParser : public Parser {
 public:
-   AliasParser(DefsStructureParser* p) : Parser(p) {
+   explicit AliasParser(DefsStructureParser* p) : Parser(p) {
       reserve_vec(19);
       addParser( new VariableParser(p) );
       addParser( new LabelParser(p) );
@@ -167,7 +167,7 @@ private:
 
 class TaskParser : public Parser {
 public:
-   TaskParser(DefsStructureParser* p) : Parser(p) {
+   explicit TaskParser(DefsStructureParser* p) : Parser(p) {
       reserve_vec(21);
       addParser( new VariableParser(p) );
       addParser( new TriggerParser(p) );
@@ -256,7 +256,7 @@ private:
 
 class FamilyParser : public Parser {
 public:
-   FamilyParser(DefsStructureParser* p) : Parser(p)
+   explicit FamilyParser(DefsStructureParser* p) : Parser(p)
    {
       reserve_vec(21);
       addParser( new VariableParser(p) );
@@ -374,7 +374,7 @@ private:
 // See ECFLOW-106, and SUP-1198, why we don't allow time,today,date,day ate the suite level.
 class SuiteParser : public Parser {
 public:
-	SuiteParser(DefsStructureParser* p) : Parser(p), started_(false)
+   explicit SuiteParser(DefsStructureParser* p) : Parser(p), started_(false)
 	{
       reserve_vec(18);
 	   addParser( new VariableParser(p) );

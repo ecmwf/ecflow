@@ -34,7 +34,7 @@ namespace ecf {
 
 class SuiteChanged  : private boost::noncopyable {
 public:
-	SuiteChanged(suite_ptr s);
+   explicit SuiteChanged(suite_ptr s);
 	~SuiteChanged();
 private:
 	weak_suite_ptr suite_;
@@ -44,7 +44,7 @@ private:
 
 class SuiteChanged0  : private boost::noncopyable {
 public:
-	SuiteChanged0(node_ptr s);
+   explicit SuiteChanged0(node_ptr s);
 	~SuiteChanged0();
 private:
 	weak_node_ptr node_;
@@ -56,7 +56,7 @@ private:
 
 class SuiteChanged1  : private boost::noncopyable {
 public:
-	SuiteChanged1(Suite* s);
+   explicit SuiteChanged1(Suite* s);
 	~SuiteChanged1();
 private:
 	Suite* suite_;

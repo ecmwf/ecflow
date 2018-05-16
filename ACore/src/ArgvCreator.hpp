@@ -24,7 +24,7 @@
 class ArgvCreator : private boost::noncopyable {
 public:
 	// Create argc/argv from a vector of strings
-	ArgvCreator(const std::vector<std::string> & );
+	explicit ArgvCreator(const std::vector<std::string> & );
 
 	// Destroys argv array
 	~ArgvCreator();

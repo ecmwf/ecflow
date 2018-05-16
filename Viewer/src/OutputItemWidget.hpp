@@ -58,7 +58,7 @@ protected Q_SLOTS:
     void on_dirReloadTb__clicked();
 
 protected:
-    void setCurrentInDir(const std::string&);
+    void setCurrentInDir(const std::string&,VFile::FetchMode fetchMode);
     void updateDir(bool);
     void updateDir(const std::vector<VDir_ptr>&,bool);
 	void enableDir(bool);
@@ -66,7 +66,7 @@ protected:
 	void searchOnReload();
     void getCurrentFile(bool doReload);
 	void getLatestFile();
-	std::string currentFullName() const;
+    void currentDesc(std::string& fullName,VDir::FetchMode& fetchMode) const;
     void updateHistoryLabel(const std::vector<std::string>&);
     void displayDirErrors(const std::vector<std::string>& errorVec);
 

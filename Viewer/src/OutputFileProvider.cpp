@@ -24,13 +24,16 @@
 
 OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::OutputTask),
-    outClient_(NULL)
+    outClient_(NULL),
+    useOutputClientOnly_(false)
 {
     outCache_=new OutputCache(this);
 }
 
 void OutputFileProvider::clear()
 {
+    useOutputClientOnly_=false;
+
     //Detach all the outputs registered for this instance in cache
     outCache_->detach();
 
@@ -49,6 +52,8 @@ void OutputFileProvider::clear()
 void OutputFileProvider::visit(VInfoNode* infoNode)
 {
     assert(info_->node() == infoNode->node());
+
+    useOutputClientOnly_=false;
 
     //Reset the reply
 	reply_->reset();
@@ -79,6 +84,8 @@ void OutputFileProvider::visit(VInfoNode* infoNode)
 //Get a file
 void OutputFileProvider::file(const std::string& fileName,bool useCache)
 {
+    useOutputClientOnly_=false;
+
     //If we do not want to use the cache we detach all the output
     //attached to this instance
     if(!useCache)
@@ -108,6 +115,7 @@ void OutputFileProvider::file(const std::string& fileName,bool useCache)
 
     fetchFile(server,n,fileName,(fileName==jobout),useCache);
 }
+
 
 void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::string& fileName,bool isJobout,bool useCache)
 {
@@ -206,7 +214,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     	return;
     }
 
-    //If we are here there is no outpt client defined
+    //If we are here there is no output client defined
     reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
 
     //If there is no output client we try
@@ -231,6 +239,91 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     {
         reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
     }
+    owner_->infoFailed(reply_);
+}
+
+//Get a file with the given fetch mode
+void OutputFileProvider::fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,bool useCache)
+{
+    //If we do not want to use the cache we detach all the output
+    //attached to this instance
+    if(!useCache)
+        outCache_->detach();
+
+    //Check if the task is already running
+    if(task_)
+    {
+        task_->status(VTask::CANCELLED);
+        task_.reset();
+    }
+
+    //Reset the reply
+    reply_->reset();
+
+    if(!info_->isNode() || !info_->node() || !info_->node()->node())
+    {
+        owner_->infoFailed(reply_);
+        return;
+    }
+
+    ServerHandler* server=info_->server();
+    VNode *n=info_->node();
+
+    //Get the filename
+    std::string jobout=joboutFileName(); //n->findVariable("ECF_JOBOUT",true);
+    bool isJobout=(fileName==jobout);
+
+    //Set the filename in reply
+    reply_->fileName(fileName);
+
+    //No filename is available
+    if(fileName.empty())
+    {
+        reply_->setErrorText("Output file is not defined!");
+        reply_->addLog("MSG>Output file is not defined.");
+        owner_->infoFailed(reply_);
+        return;
+    }
+
+    //Check if tryno is 0. ie. the file is the current jobout file and ECF_TRYNO = 0
+    if(isTryNoZero(fileName))
+    {
+        reply_->setInfoText("Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!)");
+        reply_->addLog("MSG>Current job output does not exist yet (<b>TRYNO</b> is <b>0</b>)!");
+        owner_->infoReady(reply_);
+        return;
+    }
+
+    //We try the output client (aka logserver), its asynchronous!
+    if(fetchMode == VDir::LogServerFetchMode)
+    {
+        useOutputClientOnly_=true;
+        if(fetchFileViaOutputClient(n,fileName,useCache))
+        {
+            //If we are here we created an output client and asked it to the fetch the
+            //file asynchronously. The ouput client will call slotOutputClientFinished() or
+            //slotOutputClientError eventually!!
+            return;
+        }
+
+        //If we are here there is no output client defined
+        reply_->addLog("TRY>fetch file from logserver: NOT DEFINED");
+    }
+    else if(fetchMode == VDir::LocalFetchMode)
+    {
+        if(fetchLocalFile(fileName))
+           return;
+    }
+
+    //If we are here no output client is defined and we could not read the file from
+    //the local disk, so we try the server if it is the jobout file.
+    else if(isJobout && fetchMode == VDir::ServerFetchMode)
+    {
+        fetchJoboutViaServer(server,n,fileName);
+        return;
+    }
+
+    //If we are here we coud not get the file
     owner_->infoFailed(reply_);
 }
 
@@ -307,6 +400,7 @@ void OutputFileProvider::slotOutputClientFinished()
 	VFile_ptr tmp = outClient_->result();
     assert(tmp);
 
+    useOutputClientOnly_=false;
     outClient_->clearResult();
 
     //Files retrieved from the log server are automatically added to the cache!
@@ -341,9 +435,10 @@ void OutputFileProvider::slotOutputClientError(QString msg)
     UiLog().dbg() << "OutputFileProvider::slotOutputClientError error:" << msg;
     reply_->addLog("TRY> fetch file from logserver: " + outClient_->host() + "@" + outClient_->portStr() + " FAILED");
 
-    if(info_)
+    if(info_ && !useOutputClientOnly_)
 	{
-		ServerHandler* server=info_->server();
+        useOutputClientOnly_=false;
+        ServerHandler* server=info_->server();
 		VNode *n=info_->node();
 
 		if(server && n)

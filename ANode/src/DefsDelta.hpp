@@ -34,7 +34,7 @@ class DefsDelta : private boost::noncopyable {
 public:
    ///=========================================================================
 	/// *Server side*
-	DefsDelta(unsigned int client_state_change_no)
+	explicit DefsDelta(unsigned int client_state_change_no)
 	: sync_suite_clock_(false),
 	  client_state_change_no_(client_state_change_no),
 	  server_state_change_no_(0),

@@ -27,7 +27,7 @@ public:
 	AutoCancelAttr() : relative_(true),days_(false) {}
 	AutoCancelAttr(int hour, int minute, bool relative ) : timeStruct_(hour, minute), relative_(relative), days_(false) {}
  	AutoCancelAttr(const TimeSlot& ts,   bool relative ) : timeStruct_(ts),           relative_(relative), days_(false) {}
- 	AutoCancelAttr(int days) : timeStruct_( TimeSlot(days*24,0) ), relative_(true), days_(true) {}
+ 	explicit AutoCancelAttr(int days) : timeStruct_( TimeSlot(days*24,0) ), relative_(true), days_(true) {}
 
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const AutoCancelAttr& rhs) const;

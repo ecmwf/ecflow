@@ -138,7 +138,8 @@ int main(argc,argv) int argc; char **argv;
     exit(1);
   }
 
-  execl(shell,nameof(shell),"-x",infile,NULL);
+  char* null_char = NULL;
+  execl(shell,nameof(shell),"-x",infile,null_char);
   /* if( !keep_file ) unlink(infile); */
 
   fclose(fout); /* must be closed last */

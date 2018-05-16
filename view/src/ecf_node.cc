@@ -1357,7 +1357,7 @@ const Label& ecf_concrete_node<Node>::get_label( const std::string& name )
 template<>
 const Event& ecf_concrete_node<Node>::get_event( const std::string& name )
 {
-   return owner_ ? owner_->findEvent(name) : Event::EMPTY();
+   return owner_ ? owner_->findEvent(Event(name)) : Event::EMPTY();
 }
 template<>
 const Meter& ecf_concrete_node<Node>::get_meter( const std::string& name )
@@ -1378,7 +1378,7 @@ const Label& ecf_concrete_node<Suite>::get_label( const std::string& name )
 template<>
 const Event& ecf_concrete_node<Suite>::get_event( const std::string& name )
 {
-   return owner_ ? owner_->findEvent(name) : Event::EMPTY();
+   return owner_ ? owner_->findEvent(Event(name)) : Event::EMPTY();
 }
 template<>
 const Meter& ecf_concrete_node<Suite>::get_meter( const std::string& name )

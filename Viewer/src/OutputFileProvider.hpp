@@ -33,6 +33,7 @@ public:
 
 	 //Get a particular jobout file
      void file(const std::string& fileName,bool useCache=true);
+     void fetchFile(const std::string& fileName,VDir::FetchMode fetchMode,bool useCache=true);
      void setDirectories(const std::vector<VDir_ptr>&);
 
      std::string joboutFileName() const;
@@ -50,7 +51,8 @@ private:
      bool fetchFileViaOutputClient(VNode *n,const std::string& fileName,bool useCache);
 	 bool fetchLocalFile(const std::string& fileName);
 
-	 OutputFileClient *outClient_;
+     OutputFileClient *outClient_;
+     bool useOutputClientOnly_;
      std::vector<VDir_ptr> dirs_;
      OutputCache* outCache_;
 };

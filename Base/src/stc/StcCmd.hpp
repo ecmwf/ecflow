@@ -27,7 +27,7 @@ public:
       BLOCK_CLIENT_SERVER_HALTED,
       BLOCK_CLIENT_ON_HOME_SERVER
    };
-   StcCmd(Api a) :  api_(a) {}
+   explicit StcCmd(Api a) :  api_(a) {}
    StcCmd() :  api_(OK) {}
 
    void init(Api a) { api_ = a;}

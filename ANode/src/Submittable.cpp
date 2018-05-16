@@ -606,7 +606,7 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam)
 
 class JobCreationTimer : private boost::noncopyable {
 public:
-   JobCreationTimer(Submittable* sub) : enabled_(false),failed_(false), sub_(sub) {}
+   explicit JobCreationTimer(Submittable* sub) : enabled_(false),failed_(false), sub_(sub) {}
    ~JobCreationTimer() {
       if (enabled_) {
          std::cout << " " << sub_->absNodePath();

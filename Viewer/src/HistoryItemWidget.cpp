@@ -12,6 +12,7 @@
 #include <QtGlobal>
 #include <QAction>
 #include <QClipboard>
+#include <QHeaderView>
 
 #include "LogProvider.hpp"
 #include "LogModel.hpp"
@@ -36,6 +37,10 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 	treeView_->setModel(model_);
 	treeView_->setItemDelegate(new LogDelegate(this));
     treeView_->setContextMenuPolicy(Qt::ActionsContextMenu);
+
+    //make the horizontal scrollbar work
+    treeView_->header()->setStretchLastSection(false);
+    treeView_->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     checkActionState();
 

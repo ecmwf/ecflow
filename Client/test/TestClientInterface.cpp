@@ -381,6 +381,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
 
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","variable","name","newValue") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","variable","name","/new/value/with/path") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","variable","name") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","clock_type","hybrid") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","clock_type","real") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","clock_date","12.6.2013") == 0,"--alter should return 0\n" << theClient.errorMsg());

@@ -20,7 +20,7 @@
 
 class AutoCancelParser : public Parser {
 public:
-	AutoCancelParser(DefsStructureParser* p) : Parser(p) {}
+   explicit AutoCancelParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "autocancel"; }
 	virtual bool doParse(const std::string& line,std::vector<std::string>& lineTokens);
 };

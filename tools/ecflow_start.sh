@@ -26,15 +26,19 @@ force=true
 backup_server=false
 verbose=false
 rerun=false
+check=false
 
 #==========================================================================
 # Syntax
 # ecflow_start [-b] [-d ecf_home_directory] [-f] [-h] [-p port_number ]
 #==========================================================================
 # get command line options if any.
-while getopts hfbd:vp:r option
+while getopts chfbd:vp:r option
 do
 case $option in
+c)
+check=true
+;;
 f)
 force=true
 ;;
@@ -229,6 +233,10 @@ set -e
 echo "";
 echo "OK starting ecFlow server..."
 echo "";
+
+if [[ $check == true ]]; then
+  ecflow_client --load $ECF_CHECK check_only
+fi
 
 nohup ecflow_server > $ECF_OUT 2>&1 < /dev/null &
 
