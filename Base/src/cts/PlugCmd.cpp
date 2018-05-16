@@ -276,26 +276,17 @@ bool MoveCmd::check_source() const
    return !src_node_.empty();
 }
 
-void MoveCmd::delete_source() const
-{
-   // See: ECFLOW-1292
-   delete sourceSuite_;
-   delete sourceFamily_;
-   delete sourceTask_ ;
-}
 
 STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
 {
    Lock lock(user(),as);
    if (!lock.ok()) {
-      delete_source();
       std::string errorMsg = "Plug(Move) command failed. User "; errorMsg += as->lockedUser();
       errorMsg += " already has an exclusive lock";
       throw std::runtime_error( errorMsg);
    }
 
    if (!check_source()) {
-      delete_source();
       throw std::runtime_error("Plug(Move) command failed. No source specified");
    }
 
@@ -311,7 +302,6 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
 
       destNode = as->defs()->findAbsNode(dest_);
       if (!destNode.get()) {
-         delete_source();
          std::string errorMsg = "Plug(Move) command failed. The destination path "; errorMsg += dest_;
          errorMsg += " does not exist on server";
          throw std::runtime_error( errorMsg);
