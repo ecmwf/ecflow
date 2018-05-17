@@ -252,14 +252,18 @@ if [[ $test_safe_arg = test_safe ]] ; then
 fi
 if [[ "$ctest_arg" != "" ]] ; then
     if [[ "$asan_arg" = asan ]] ; then
-        # for python module we need to preload asan as it needs to be the very first library
-        # ==2971==ASan runtime does not come first in initial library list; 
-        #              you should either link runtime to your application or manually preload it with LD_PRELOAD.
-	    export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libasan.so.3 
+        if [[ $clang_arg != "clang" ]] ; then
+            # for python module we need to preload asan as it needs to be the very first library
+            # ==2971==ASan runtime does not come first in initial library list; 
+            #              you should either link runtime to your application or manually preload it with LD_PRELOAD.
+	        export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libasan.so.3 
+	    fi
 	    ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp $ctest_arg
     elif [[ "$tsan_arg" = tsan ]] ; then
-        # LD_PRELOAD needed otherwise we get: .... cannot allocate memory in static TLS block
-        export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libtsan.so
+        if [[ $clang_arg != "clang" ]] ; then
+            # LD_PRELOAD needed otherwise we get: .... cannot allocate memory in static TLS block
+            export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libtsan.so
+        fi
         $ctest_arg 
     else
         $ctest_arg 
