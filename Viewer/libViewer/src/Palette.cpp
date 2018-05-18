@@ -11,12 +11,12 @@
 #include "Palette.hpp"
 
 #include "UserMessage.hpp"
-#include "VProperty.hpp"
 
 #include <QApplication>
 #include <QDebug>
 #include <QMap>
 #include <QPalette>
+#include <QRegExp>
 
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -98,7 +98,7 @@ void Palette::load(const std::string& parFile)
 			QMap<std::string,QPalette::ColorRole>::const_iterator itP=paletteId.find(role);
 			if(itP != paletteId.end())
 			{
-				QColor col=VProperty::toColour(val);
+                QColor col=toColour(val);
 				if(col.isValid())
 				{					
 					palette.setColor(group,itP.value(),col);
@@ -124,3 +124,18 @@ void Palette::statusColours(QColor bg,QColor &bgLight,QColor &border)
     border=bg.darker(120); //125 150
 }
 
+QColor Palette::toColour(const std::string& name)
+{
+    QString qn=QString::fromStdString(name);
+    QColor col;
+    QRegExp rx("rgb\\((\\d+),(\\d+),(\\d+)");
+
+    if(rx.indexIn(qn) > -1 && rx.captureCount() == 3)
+    {
+        col=QColor(rx.cap(1).toInt(),
+                  rx.cap(2).toInt(),
+                  rx.cap(3).toInt());
+
+    }
+    return col;
+}

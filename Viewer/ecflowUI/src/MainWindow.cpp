@@ -17,6 +17,7 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QPixmap>
+#include <QProcess>
 #include <QSplitter>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -30,6 +31,7 @@
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "InfoPanelHandler.hpp"
+#include "LogViewerProc.hpp"
 #include "MenuConfigDialog.hpp"
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
@@ -56,6 +58,7 @@
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
 int MainWindow::maxWindowNum_=25;
+LogViewerProc* MainWindow::logProc_=NULL;
 
 MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     QMainWindow(parent),
@@ -126,6 +129,9 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     actionRefreshSelected->setEnabled(false);
     actionResetSelected->setEnabled(false);
 
+    connect(actionServerLoad,SIGNAL(triggered()),
+            this,SLOT(slotServerLoad()));
+
     //--------------
     //Status bar
     //--------------
@@ -165,7 +171,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    UiLog().dbg() << "MainWindow --> desctutor";
+    UiLog().dbg() << "MainWindow --> destructor";
     delete winTitle_;
     serverFilterMenu_->aboutToDestroy();
 }
@@ -457,6 +463,23 @@ void MainWindow::slotEditServerSettings(ServerHandler* s)
 {
     VInfo_ptr info=VInfoServer::create(s);
     nodePanel_->openDialog(info,"server_settings");
+}
+
+void MainWindow::slotServerLoad()
+{
+    ServerHandler* s=0;
+    QString serverName;
+    if(selection_)
+    {
+        s=selection_->server();
+    }
+
+    if(!logProc_)
+    {
+        logProc_ = new LogViewerProc();
+    }
+
+    logProc_->addToWin(s);
 }
 
 //==============================================================

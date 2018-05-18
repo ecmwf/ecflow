@@ -32,6 +32,7 @@ std::string DirectoryHandler::rcDir_;
 std::string DirectoryHandler::tmpDir_;
 std::string DirectoryHandler::uiLogFile_;
 std::string DirectoryHandler::uiEventLogFile_;
+std::string DirectoryHandler::socketDir_;
 
 static bool firstStartUp=false;
 
@@ -193,7 +194,19 @@ void DirectoryHandler::init(const std::string& exeStr)
         boost::filesystem::path tmp(tmpDir_);
         tmp /= "ecflowui_uilog.txt";
         uiEventLogFile_=tmp.string();
-     }
+    }
+
+    //Ui event log file. Ui event logging always goes into a file
+    if(char *h=getenv("ECFLOWUI_SOCKETDIR"))
+    {
+        socketDir_=std::string(h);
+    }
+    else
+    {
+        boost::filesystem::path tmp(tmpDir_);
+        //tmp /= "sockets";
+        socketDir_=tmp.string();
+    }
 }
 
 

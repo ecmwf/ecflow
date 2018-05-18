@@ -17,7 +17,6 @@
 #include "VInfo.hpp"
 
 class VNode;
-class LogLoadData;
 class LogLoadWidget;
 
 class ServerLoadItemWidget : public QWidget, public InfoPanelItem
@@ -39,8 +38,11 @@ protected:
 
 private:
     void load();
-
+#ifdef ECFLOW_LOGVIEW
     LogLoadWidget* w_;
+#else
+    QWidget* w_;
+#endif
 };
 
 #endif // SERVERLOADITEMWIDGET_HPP

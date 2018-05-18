@@ -37,7 +37,7 @@ set(viewer_srcs
     DashboardDock.cpp
     DashboardTitle.cpp
     DashboardWidget.cpp
-    DirectoryHandler.cpp
+    #DirectoryHandler.cpp
     EditItemWidget.cpp
     EditProvider.cpp
     EditorInfoLabel.cpp
@@ -53,7 +53,7 @@ set(viewer_srcs
     HistoryItemWidget.cpp
     HtmlEdit.cpp
     HtmlItemWidget.cpp
-    IconProvider.cpp
+    #IconProvider.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp   
     InfoPanelHandler.cpp
@@ -63,12 +63,13 @@ set(viewer_srcs
     LabelEditor.cpp
     LimitEditor.cpp
     LineEdit.cpp
-    LogData.cpp
-    LogLoadWidget.cpp
-    LogModel.cpp
+    #LogData.cpp
+    #LogLoadWidget.cpp
+    #LogModel.cpp
     LogProvider.cpp  
-    LogTruncator.cpp
-    LogView.cpp
+    #LogTruncator.cpp
+    #LogView.cpp
+    LogViewerProc.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
     MenuConfigDialog.cpp
@@ -110,7 +111,7 @@ set(viewer_srcs
     OutputDirProvider.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
-    Palette.cpp  
+    #Palette.cpp
     PlainTextEdit.cpp
     PlainTextSearchLine.cpp
     PlainTextSearchInterface.cpp
@@ -160,7 +161,7 @@ set(viewer_srcs
     TextFilterHandler.cpp
     TextFilterHandlerDialog.cpp
     TextFilterWidget.cpp
-    TextFormat.cpp
+    #TextFormat.cpp
     TimeItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
@@ -176,13 +177,13 @@ set(viewer_srcs
     TriggerTableWidget.cpp
     TriggerViewDelegate.cpp
     TriggeredScanner.cpp
-    UIDebug.cpp
-    UiLog.cpp
+    #UIDebug.cpp
+    #UiLog.cpp
     UpdateTimer.cpp
-    UserMessage.cpp
+    #UserMessage.cpp
     VAttribute.cpp
     VAttributeType.cpp
-    VConfig.cpp   
+    VConfig.cpp
     VConfigLoader.cpp
     VDateAttr.cpp
     VDir.cpp
@@ -205,7 +206,7 @@ set(viewer_srcs
     VNodeMover.cpp
     VNState.cpp
     VParam.cpp
-    VProperty.cpp   
+    VProperty.cpp
     VRepeatAttr.cpp
     VReply.cpp
     VServerSettings.cpp
@@ -284,11 +285,12 @@ set(viewer_moc_files AbstractNodeModel.hpp
     LabelEditor.hpp
     LimitEditor.hpp
     LineEdit.hpp
-    LogLoadWidget.hpp
-    LogModel.hpp
+    #LogLoadWidget.hpp
+    #LogModel.hpp
     LogProvider.hpp
-    LogTruncator.hpp
-    LogView.hpp
+    #LogTruncator.hpp
+    #LogView.hpp
+    LogViewerProc.hpp
     MainWindow.hpp
     MenuConfigDialog.hpp
     MessageItemWidget.hpp
@@ -393,7 +395,7 @@ set(viewer_wrap_ui_files
     InfoPanel.ui
     LabelEditorWidget.ui
     LimitEditorWidget.ui
-    LogLoadWidget.ui
+    #LogLoadWidget.ui
     MainWindow.ui
     MessageItemWidget.ui
     MenuConfigDialog.ui
@@ -460,18 +462,19 @@ add_definitions( -DECFLOW_SHARED_DIR="${CMAKE_INSTALL_PREFIX}/share/ecflow" )
 ecbuild_add_executable( TARGET   ecflow_ui.x
     SOURCES  ${viewer_srcs} ${VIEWER_MOC} ${VIEWER_RES} ${VIEWER_FORMS_HEADERS}
     INCLUDES .
-     ../../ACore/src 
-     ../../ANattr/src
-     ../../ANode/src
-     ../../ANode/test
-     ../../Base/src
-     ../../Base/src/cts
-     ../../Base/src/stc
-     ../../Client/src
+     ../../libViewer/src
+     ../../../ACore/src
+     ../../../ANattr/src
+     ../../../ANode/src
+     ../../../ANode/test
+     ../../../Base/src
+     ../../../Base/src/cts
+     ../../../Base/src/stc
+     ../../../Client/src
      TextPager    
      ${Boost_INCLUDE_DIRS} 
      ${CMAKE_CURRENT_BINARY_DIR}
-    LIBS core nodeattr node base libclient 
+    LIBS viewer core nodeattr node base libclient
          pthread  
          m dl
          ${ECFLOW_QT_LIBRARIES}
@@ -481,6 +484,32 @@ ecbuild_add_executable( TARGET   ecflow_ui.x
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
 target_link_libraries(ecflow_ui.x debug ${Boost_REGEX_LIBRARY_DEBUG}   ${Boost_REGEX_LIBRARY_RELEASE} )
 
+
+if(0)
+set(logviewer_srcs
+    AboutDialog.cpp
+    ClockWidget.cpp
+    DirectoryHandler.cpp
+    FlagSet.hpp
+    IconProvider.cpp
+    InfoPanel.cpp
+    InfoPanelItem.cpp
+    InfoPanelHandler.cpp
+    InfoProvider.cpp
+    LogData.cpp
+    LogLoadWidget.cpp
+    LogModel.cpp
+    LogTruncator.cpp
+    LogView.cpp
+    LogViewerMain.cpp
+    ServerLoadItemWidget.cpp
+    UIDebug.cpp
+    UiLog.cpp
+    UserMessage.cpp
+    VConfig.cpp
+    VConfigLoader.cpp
+    )
+endif()
 
 set(build_ecflow_ui_log 0)
 

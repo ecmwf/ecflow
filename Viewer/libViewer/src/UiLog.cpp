@@ -23,7 +23,9 @@
 
 #include "DirectoryHandler.hpp"
 #include "LogTruncator.hpp"
+#if 0
 #include "ServerHandler.hpp"
+#endif
 #include "TimeStamp.hpp"
 
 static LogTruncator *truncator=0;
@@ -35,9 +37,10 @@ static LogTruncator *truncator=0;
 UiFunctionLog::UiFunctionLog(ServerHandler* server,const std::string& funcName) :
     funcName_(funcName)
 {
+#if 0
     if(server)
         serverName_=server->longName();
-
+#endif
     init();
     UiLog(serverName_).dbg() << logEnter();
 }
@@ -80,7 +83,10 @@ std::string UiFunctionLog::logLeave() const
 //---------------------------------
 
 UiLog::UiLog(ServerHandler* sh) :
+#if 0
     type_(INFO), server_(sh->longName())
+#endif
+    type_(INFO), server_("??")
 {}
 
 UiLog::UiLog(const std::string& server) :

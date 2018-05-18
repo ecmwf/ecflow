@@ -25,6 +25,7 @@ namespace Viewer
     QString formatText(QString,QColor);
     QString formatTableThText(QString txt,QColor col);
     QString formatTableTrBg(QString txt,QColor col);
+    QString formatTableTdText(QString txt,QColor col);
     QString formatTableTdBg(QString txt,QColor col);
 } //namespace Viewer
 

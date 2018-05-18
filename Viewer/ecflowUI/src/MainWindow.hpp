@@ -22,8 +22,11 @@
 class QActionGroup;
 class QLabel;
 class QToolButton;
+class QProcess;
+
 class ClockWidget;
 class InfoPanel;
+class LogViewerProc;
 class NodePanel;
 class ServerRefreshInfoWidget;
 class ServerFilterMenu;
@@ -97,6 +100,7 @@ protected Q_SLOTS:
 	void slotContentsChanged();
     void slotServerSyncNotify(bool);
     void slotEditServerSettings(ServerHandler* s);
+    void slotServerLoad();
 
 private:
     void init(MainWindow*);
@@ -138,6 +142,8 @@ private:
     static bool quitStarted_;
     static QList<MainWindow*> windows_;
     static int maxWindowNum_;
+
+    static LogViewerProc* logProc_;
 };
 
 #endif 

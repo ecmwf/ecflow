@@ -116,6 +116,15 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
         ui_->splitter->setSizes(sizeLst);
     }
 
+    //logInfo label
+    ui_->logInfoLabel->setProperty("fileInfo","1");
+    ui_->logInfoLabel->setWordWrap(true);
+    ui_->logInfoLabel->setMargin(2);
+    ui_->logInfoLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+    ui_->logInfoLabel->setAutoFillBackground(true);
+    ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
+    ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+
 
 #if 0
     ui_->scanLabel->setAutoFillBackground(true);
@@ -131,18 +140,45 @@ LogLoadWidget::~LogLoadWidget()
 {
 }
 
-void LogLoadWidget::load(const std::string& logFile)
+void LogLoadWidget::clear()
 {
+    ui_->logInfoLabel->setText(QString());
+    ui_->loadView->clear();
+    suiteModel_->clearData();
+    logModel_->clearData();
+}
+
+void LogLoadWidget::updateInfoLabel()
+{
+    QColor col(39,49,101);
+    QString txt=Viewer::formatBoldText("Log file: ",col) + logFile_;
+    txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
+         Viewer::formatBoldText(" Host: ",col) + host_ +
+         Viewer::formatBoldText(" Port: ",col) + port_;
+
+    ui_->logInfoLabel->setText(txt);
+}
+
+void LogLoadWidget::load(QString serverName, QString host, QString port, QString logFile)
+{
+    serverName_=serverName;
+    host_=host;
+    port_=port;
+    logFile_=logFile;
+
     //view_->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
-    std::string fileName="/home/graphics/cgr/ecflow_dev/vsms1.ecf.log";
-    ui_->loadView->load(fileName);
+    //std::string fileName="/home/graphics/cgr/ecflow_dev/vsms1.ecf.log";
+
+    updateInfoLabel();
+
+    ui_->loadView->load(logFile_.toStdString());
 
     suiteModel_->setData(ui_->loadView->data(),ui_->loadView->suitePlotState());
 
     for(int i=0; i < suiteModel_->columnCount()-1; i++)
         ui_->suiteTree->resizeColumnToContents(i);
 
-    logModel_->loadFromFile(fileName);
+    logModel_->loadFromFile(logFile_.toStdString());
 }
 
 void LogLoadWidget::resolutionChanged(int)
@@ -473,19 +509,27 @@ qint64 LogLoadData::period() const
 }
 
 //t is in ms
-bool LogLoadData::indexOfTime(qint64 t,size_t& idx,size_t startIdx) const
+bool LogLoadData::indexOfTime(qint64 t,size_t& idx,size_t startIdx,qint64 tolerance) const
 {
     idx=0;
     if(t < 0)
         return false;
 
     size_t num=time_.size();
+    if(num == 0)
+        return false;
+
     if(startIdx > num-1)
         startIdx=0;
 
+    if(startIdx >= num)
+        return false;
+
     if(t >= time_[startIdx])
     {
-        qint64 tolerance=10*1000;
+        if(tolerance <=0)
+            tolerance=10*1000; //ms
+
         for(size_t i=startIdx; i < num; i++)
         {
             if(time_[i] >= t)
@@ -508,7 +552,9 @@ bool LogLoadData::indexOfTime(qint64 t,size_t& idx,size_t startIdx) const
    }
    else
    {
-        qint64 tolerance=10*1000;
+        if(tolerance <=0)
+            tolerance=10*1000; //ms
+
         for(size_t i=startIdx; i >=0; i--)
         {
             if(time_[i] <= t)
@@ -701,7 +747,7 @@ void LogLoadData::processSuites()
     for(size_t i = 0; i < sortVec.size(); i++)
     {
         int idx=sortVec[i].first;
-        suiteData_[idx].setRank(i);
+        suiteData_[idx].setRank(sortVec.size()-i-1);
         suiteData_[idx].setPercentage(static_cast<float>(suiteData_[idx].sumTotal()*100)/static_cast<float>(sum));
     }
 }
@@ -1097,9 +1143,10 @@ ChartView::ChartView(QChart *chart, QWidget *parent) :
 void ChartView::mousePressEvent(QMouseEvent *event)
 {
     QChartView::mousePressEvent(event);
-    if(event->button() == Qt::MidButton &&
-       event->pos().x() <= chart()->plotArea().right() &&
-       event->pos().x() >= chart()->plotArea().left())
+    if(event->button() == Qt::MidButton)
+       // &&
+       //event->pos().x() <= chart()->plotArea().right() &&
+       //event->pos().x() >= chart()->plotArea().left())
     {
         qreal t=chart()->mapToValue(event->pos()).x();
         Q_EMIT positionClicked(t);
@@ -1184,10 +1231,43 @@ void ChartView::doZoom(QRectF valRect)
     }
 }
 
+void ChartView::doZoom(qint64 start,qint64 end)
+{
+    QRectF valRect(QPointF(start,left.y()),QPointF(end,right.y()));
+    QRectF r(chart()->mapToPosition(valRect.bottomLeft()),
+             chart()->mapToPosition(valRect.topRight()));
+
+    //QRectF r(chart()->mapToPosition(QPointF(start,left.y())),
+    //         chart()->mapToPosition(QPointF(end,left.y()+1)));
+
+    if(r.isValid())
+    {
+        chart()->zoomIn(r);
+        qint64 period=end-start; //in ms
+        adjustTimeAxis(period);
+    }
+}
+
 void ChartView::currentTimeRange(qint64& start,qint64& end)
 {
     start=chart()->mapToValue(chart()->plotArea().bottomLeft()).x();
     end=chart()->mapToValue(chart()->plotArea().topRight()).x();
+}
+
+qint64 ChartView::widthToTimeRange(float wPix)
+{
+    if(wPix > 0)
+    {
+        float pw=chart()->plotArea().width();
+        if(pw >0)
+        {
+            qint64 start=chart()->mapToValue(chart()->plotArea().bottomLeft()).x();
+            qint64 end=chart()->mapToValue(chart()->plotArea().topRight()).x();
+            qint64 tw=(end-start)*(wPix/chart()->plotArea().width());
+            return tw;
+        }
+    }
+    return -1;
 }
 
 void ChartView::adjustTimeAxis(qint64 periodInMs)
@@ -1199,17 +1279,13 @@ void ChartView::adjustTimeAxis(qint64 periodInMs)
     {
         format="hh:mm:ss";
     }   
-    else if(period < 24*3600)
+    else if(period < 2*24*3600)
     {
         format="hh:mm";
-    }
-    else if(period < 24*5*3600)
-    {
-        format="hh dd/MM";
-    }
+    }   
     else
     {
-        format="DD/MM";
+        format="dd MMM";
     }
 
     if(QDateTimeAxis *ax=static_cast<QDateTimeAxis*>(chart()->axisX()))
@@ -1342,8 +1418,24 @@ void ServerLoadView::slotZoom(QRectF r)
 void ServerLoadView::setResolution(LogLoadData::TimeRes res)
 {
     data_->setTimeRes(res);
+
+    qint64 start=-1, end=-1;
+    if(!views_.isEmpty())
+    {
+        views_[0]->currentTimeRange(start,end);
+    }
+
     load();
     loadSuites();
+
+    if(start != -1 && end  !=-1)
+    {
+        Q_FOREACH(ChartView* v,views_)
+        {
+            v->doZoom(start,end);
+            v->adjustCallout();
+        }
+    }
 }
 
 void ServerLoadView::addRemoveSuite(int idx, bool st)
@@ -1439,6 +1531,14 @@ QColor ServerLoadView::seriesColour(QChart* chart,QString id)
 
 void ServerLoadView::clear()
 {
+    clearCharts();
+    data_->clear();
+    suitePlotState_.clear();
+    size_t lastScanIndex_=0;;
+}
+
+void ServerLoadView::clearCharts()
+{
     Q_FOREACH(ChartView* v,views_)
     {
         Q_ASSERT(v->chart());
@@ -1463,7 +1563,7 @@ void ServerLoadView::load(const std::string& logFile)
 
 void ServerLoadView::load()
 {
-    clear();
+    clearCharts();
 
     int maxVal=0;
     QLineSeries* tSeries=new QLineSeries();
@@ -1544,28 +1644,52 @@ void ServerLoadView::scanPositionChanged(qreal pos)
 {
     qint64 t(pos);
     size_t idx=0;
-    bool hasData=data_->indexOfTime(t,idx,lastScanIndex_);
+
+    if(views_.isEmpty())
+        return;
+
+    qint64 tw=views_[0]->widthToTimeRange(50.);
+
+    bool hasData=data_->indexOfTime(t,idx,lastScanIndex_,tw);
 
     lastScanIndex_=idx;
     //UiLog().dbg() << "idx=" << idx;
 
-    QColor dateCol(210,212,218);
-    QString dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
-    QString txt=Viewer::formatText("date (log): " + dateTxt, dateCol);
-#if 0
-    txt+="<br>" +
-             Viewer::formatText("date (cursor): " +
-                    QDateTime::fromMSecsSinceEpoch(t).toString("hh:mm:ss dd/MM/yyyy"),
-                    dateCol);
-#endif
+    //QColor dateCol(210,212,218);
+    QColor dateCol(210,211,214);
+    //QString dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
+    //QString txt=Viewer::formatText("date (): " + dateTxt, dateCol);
 
-    txt+="<table width=\'100%\' cellpadding=\'4px\'>";
-        //header
+    QString txt="<table width=\'100%\' cellpadding=\'4px\'>";
+    QString dateTxt=QDateTime::fromMSecsSinceEpoch(t).toString("hh:mm:ss dd/MM/yyyy");
+
+    txt="<tr>" +
+        Viewer::formatTableTdText("Date (cursor): ",dateCol) +
+        Viewer::formatTableTdBg(dateTxt,dateCol) +
+        "</tr>";
+
+    //Viewer::formatText("date (at cursor): </td>" +
+    //                QDateTime::fromMSecsSinceEpoch(t).toString("hh:mm:ss dd/MM/yyyy"),
+    //                dateCol);
+
+    dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
+    txt+="<tr>" +
+        Viewer::formatTableTdText("Date (nearest):",dateCol) +
+        Viewer::formatTableTdBg(dateTxt,dateCol) +
+        "</tr>";
+    txt+="</table>";
+
+
+   // txt+="<br>" + Viewer::formatText("date (data): " + dateTxt, dateCol);
+
+    txt+="<br><table width=\'100%\' cellpadding=\'4px\'>";
+    //header
     QColor hdrCol(205,206,210);
     txt+="<tr>" + Viewer::formatTableThText("Item",hdrCol) +
               Viewer::formatTableThText("Total",hdrCol) +
               Viewer::formatTableThText("Child",hdrCol) +
               Viewer::formatTableThText("User",hdrCol) + "</tr>";
+
 
     if(hasData)
     {

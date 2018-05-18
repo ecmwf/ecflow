@@ -67,6 +67,11 @@ QString formatTableTrBg(QString txt,QColor col)
     return "<tr bgcolor=\'" + col.name() + "\'>" +txt + "</tr>";
 }
 
+QString formatTableTdText(QString txt,QColor col)
+{
+    return "<td><font color=\'" + col.name() + "\'>" +txt + "</font></td>";
+}
+
 QString formatTableTdBg(QString txt,QColor col)
 {
     return "<td bgcolor=\'" + col.name() + "\'>" +txt + "</td>";

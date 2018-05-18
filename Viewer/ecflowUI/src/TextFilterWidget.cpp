@@ -391,7 +391,7 @@ void TextFilterWidget::adjustToolTip()
         else
           filterDesc+=tr("Toggle to <b>hide</b> text filter bar. The filter remains active (if defined). <br>----------------------------------------<br>");
 
-          filterDesc+=tr("Current filter:") +
+        filterDesc+=tr("Current filter:") +
                 "<br><b>&nbsp;regexp:</b> " + filterText() +
                 "<br><b>&nbsp;mode: </b>" + (isMatched()?"match":"no match") + ", " +
                 + (isCaseSensitive()?"case sensitive":"case insensitive") +

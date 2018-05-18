@@ -257,6 +257,12 @@ export ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
 # Where to write the user interaction log file to
 export ECFLOWUI_UI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
 
+#---------------------------------------------------------------
+# Create socket dir for local domain socket base communication
+#---------------------------------------------------------------
+
+export ECFLOWUI_SOCKETDIR=$ECFLOWUI_TMPDIR/sockets
+mkdir -p $ECFLOWUI_SOCKETDIR
 
 #---------------------------------------------------------------
 # Remove lock files created more than 3 s ago (see ECFLOW-980)
@@ -311,11 +317,16 @@ ECFLOWUI_STARTTIME=$(date)
 
 
 #-----------------------------------------------------------
+# The log viewer exe
+#-----------------------------------------------------------
+
+ECFLOWUI_LOG_VIEWER=${EXE_DIR}/ecflow_ui_log.x
+
+#-----------------------------------------------------------
 # Run the executable
 #-----------------------------------------------------------
 
 exe=${EXE_DIR}/ecflow_ui.x
-
 
 #-----------------------------------------------------------
 # Backtrace report?

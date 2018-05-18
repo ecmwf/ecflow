@@ -141,21 +141,19 @@
             "visible_for" : "server"
              
         },
-        
+        {
+            "name"    : "server_load",
+            "label"   : "Server load",
+            "icon"    : "monitor.svg",
+            "visible_for" : "server"
+
+        },
         {
         	"name"    : "server_settings",
             "label"   : "Settings",
             "icon"	  : "cogwheel_blue.svg",
             "visible_for" : "server"
              
-        } ,
-
-        {
-            "name"    : "server_load",
-            "label"   : "Server load",
-            "visible_for" : "server"
-
-    }
-        
+        }
     ]
 }

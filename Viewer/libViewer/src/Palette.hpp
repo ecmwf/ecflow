@@ -20,6 +20,7 @@ public:
 	Palette();
 	static void load(const std::string& parFile);
     static void statusColours(QColor bg,QColor &bgLight,QColor &border);
+    static QColor toColour(const std::string& name);
 
 };
 

@@ -22,7 +22,7 @@
   <property name="statusTip">
    <string/>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
    <property name="spacing">
     <number>0</number>
    </property>
@@ -38,6 +38,59 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,0,0,0">
+     <property name="spacing">
+      <number>8</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="logInfoLabel">
+       <property name="text">
+        <string>logInfoLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Plot resolution: </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="resCombo"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton_3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Show full period</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item>
     <widget class="QSplitter" name="splitter">
      <property name="orientation">
@@ -72,54 +125,23 @@
        <bool>false</bool>
       </property>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1">
+       <property name="spacing">
+        <number>2</number>
+       </property>
+       <property name="topMargin">
+        <number>2</number>
+       </property>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>Resolution:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QComboBox" name="resCombo"/>
-         </item>
-         <item>
-          <widget class="QToolButton" name="toolButton_3">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Show full period</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
+        <layout class="QHBoxLayout" name="horizontalLayout"/>
        </item>
        <item>
         <widget class="ServerLoadView" name="loadView" native="true"/>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <spacer name="verticalSpacer">
@@ -185,24 +207,6 @@
     </widget>
    </item>
   </layout>
-  <action name="actionTerminate">
-   <property name="icon">
-    <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/terminate.svg</normaloff>:/viewer/terminate.svg</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Terminate</string>
-   </property>
-  </action>
-  <action name="actionRescue">
-   <property name="icon">
-    <iconset resource="viewer.qrc">
-     <normaloff>:/viewer/rescue.svg</normaloff>:/viewer/rescue.svg</iconset>
-   </property>
-   <property name="text">
-    <string>&amp;Rescue</string>
-   </property>
-  </action>
   <action name="actionFoboff">
    <property name="text">
     <string>&amp;Fob off</string>
@@ -210,7 +214,7 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset resource="viewer.qrc">
+    <iconset resource="../../ecflowUI/src/viewer.qrc">
      <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
    </property>
    <property name="text">
@@ -245,7 +249,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="viewer.qrc"/>
+  <include location="../../ecflowUI/src/viewer.qrc"/>
  </resources>
  <connections/>
 </ui>

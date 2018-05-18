@@ -41,25 +41,32 @@ public:
     explicit LogLoadWidget(QWidget *parent=0);
     ~LogLoadWidget();
 
-    void load(const std::string& logFile);
+    void clear();
+    void load(QString serverName, QString host, QString port, QString logFile);
 
 protected Q_SLOTS:
     void resolutionChanged(int);
 
 private:
     void load();
+    void updateInfoLabel();
 
     ServerLoadView* view_;
     Ui::LogLoadWidget* ui_;
     LogLoadSuiteModel* suiteModel_;
     QSortFilterProxyModel* suiteSortModel_;
     LogModel* logModel_;
+
+    QString serverName_;
+    QString host_;
+    QString port_;
+    QString logFile_;
 };
 
 struct LogLoadSuiteModelDataItem
 {
     LogLoadSuiteModelDataItem(QString suiteName, float percentage, bool checked,int rank) :
-        suiteName_(suiteName), percentage_(percentage), checked_(checked), rank_(-1) {}
+        suiteName_(suiteName), percentage_(percentage), checked_(checked), rank_(rank) {}
 
     QString suiteName_;
     float percentage_;
@@ -158,6 +165,7 @@ public:
 
     LogLoadData() : timeRes_(SecondResolution)  {}
 
+    void clear();
     const LogLoadDataItem& dataItem() const {return data_;}
     QStringList suiteNames() const {return suites_;}
     const std::vector<LogLoadDataItem>& suites() const {return suiteData_;}
@@ -172,7 +180,7 @@ public:
     void getSuiteTotalReq(size_t,QLineSeries& series);
     const std::vector<qint64>& time() const {return time_;}
     qint64 period() const;
-    bool indexOfTime(qint64 t,size_t&,size_t) const;
+    bool indexOfTime(qint64 t,size_t&,size_t,qint64) const;
 
 private:
     //Helper structure for data collection
@@ -185,7 +193,6 @@ private:
        size_t   userReq_;
     };
 
-    void clear();
     void getSeries(QLineSeries& series,const std::vector<int>& vals);
     void getSeries(QLineSeries& series,const std::vector<int>& vals1,const std::vector<int>& vals2,int& maxVal);
     void add(std::vector<std::string> time_stamp,size_t childReq,
@@ -234,7 +241,9 @@ public:
     ChartView(QChart *chart, QWidget *parent);
 
     void doZoom(QRectF);
+    void doZoom(qint64,qint64);
     void adjustTimeAxis(qint64 periodInMs);
+    qint64 widthToTimeRange(float wPix);
     void currentTimeRange(qint64& start,qint64& end);
     void setCallout(qreal);
     void adjustCallout();
@@ -264,6 +273,7 @@ public:
     LogLoadData* data() const {return data_;}
     QList<bool> suitePlotState() const {return suitePlotState_;}
 
+    void clear();
     void load(const std::string& logFile);
     void setResolution(LogLoadData::TimeRes);
 
@@ -282,7 +292,7 @@ protected Q_SLOTS:
 protected:
     enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
 
-    void clear();
+    void clearCharts();
     void load();
     void loadSuites();
     void addSuite(int);

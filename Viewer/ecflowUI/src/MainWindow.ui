@@ -81,7 +81,7 @@
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
-     <string>&amp;Panels</string>
+     <string>Pa&amp;nels</string>
     </property>
     <addaction name="actionAddTreeWidget"/>
     <addaction name="actionAddTableWidget"/>
@@ -133,6 +133,7 @@
    </attribute>
    <addaction name="actionSearch"/>
    <addaction name="actionManageServers"/>
+   <addaction name="actionServerLoad"/>
   </widget>
   <action name="actionClose">
    <property name="icon">
@@ -340,6 +341,18 @@
    </property>
    <property name="toolTip">
     <string>Start shell command output dialogue</string>
+   </property>
+  </action>
+  <action name="actionServerLoad">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/monitor.svg</normaloff>:/viewer/monitor.svg</iconset>
+   </property>
+   <property name="text">
+    <string>serverLoad</string>
+   </property>
+   <property name="toolTip">
+    <string>Analyse server load from log</string>
    </property>
   </action>
  </widget>

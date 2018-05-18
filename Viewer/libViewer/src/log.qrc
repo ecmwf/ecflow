@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="log">
+    <file alias="log_info.svg">../images/log_info.svg</file>
+    <file alias="log_error.svg">../images/log_error.svg</file>
+  </qresource>
+</RCC>
+

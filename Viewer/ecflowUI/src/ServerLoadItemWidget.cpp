@@ -14,7 +14,11 @@
 #include "Node.hpp"
 
 #include "InfoProvider.hpp"
+
+#ifdef ECFLOW_LOGVIEW
 #include "LogLoadWidget.hpp"
+#endif
+
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
@@ -24,7 +28,11 @@ ServerLoadItemWidget::ServerLoadItemWidget(QWidget *parent)
 {
     QHBoxLayout* hb=new QHBoxLayout(this);
     hb->setContentsMargins(0,0,0,0);
+#ifdef ECFLOW_LOGVIEW
     w_=new LogLoadWidget(this);
+#else
+    w_=new QWidget(this);
+#endif
     hb->addWidget(w_);
 
     //We will not keep the contents when the item becomes unselected
@@ -58,19 +66,35 @@ void ServerLoadItemWidget::reload(VInfo_ptr info)
 
 void ServerLoadItemWidget::load()
 {
-    //textEdit_->clear();
-    if(info_)
+#ifdef ECFLOW_LOGVIEW
+    if(info_ && info_->server())
     {
+        ServerHandler *sh=info_->server();
+        Q_ASSERT(sh);
+        QString logFile;
+        if(VServer* vs=sh->vRoot())
+        {
+            logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
+
+            w_->load(QString::fromStdString(sh->name()),
+                         QString::fromStdString(sh->host()),
+                         QString::fromStdString(sh->port()),
+                         logFile);
+        }
+
         //"/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log"
-        w_->load("/home/graphics/cgr/ecflow_dev/vsms1.ecf.log");
+        //w_->load("/home/graphics/cgr/ecflow_dev/vsms1.ecf.log");
     }
+#endif
 }
 
 void ServerLoadItemWidget::clearContents()
 {
+#ifdef ECFLOW_LOGVIEW
+    w_->clear();
+#endif
     InfoPanelItem::clear();
 }
-
 
 void ServerLoadItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
@@ -92,9 +116,7 @@ void ServerLoadItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
     }
 
     Q_ASSERT(!flags.isSet(SelectedChanged));
-
 }
-
 
 //After each sync we need to reaload the contents
 void ServerLoadItemWidget::serverSyncFinished()
@@ -112,19 +134,5 @@ void ServerLoadItemWidget::serverSyncFinished()
     //For any change we nee to reload
     load();
 }
-
-#if 0
-
-void ServerLoadItemWidget::resolutionChanged(int)
-{
-    int idx=ui_->resCombo->currentIndex();
-    if(idx == 0)
-        ui_->loadView->setResolution(LogLoadData::SecondResolution);
-    else if(idx == 1)
-        ui_->loadView->setResolution(LogLoadData::MinuteResolution);
-}
-
-#endif
-
 
 static InfoPanelItemMaker<ServerLoadItemWidget> maker1("server_load");
