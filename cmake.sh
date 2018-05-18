@@ -258,12 +258,16 @@ if [[ "$ctest_arg" != "" ]] ; then
             #              you should either link runtime to your application or manually preload it with LD_PRELOAD.
 	        export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libasan.so.3 
 	    fi
-	    ASAN_OPTIONS=detect_leaks=1 LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp $ctest_arg
+	    export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp  
+	    export LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_lsan.supp
+	    $ctest_arg  
     elif [[ "$tsan_arg" = tsan ]] ; then
         if [[ $clang_arg != "clang" ]] ; then
             # LD_PRELOAD needed otherwise we get: .... cannot allocate memory in static TLS block
             export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libtsan.so
         fi
+        export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp  
+        export LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_lsan.supp
         $ctest_arg 
     else
         $ctest_arg 
