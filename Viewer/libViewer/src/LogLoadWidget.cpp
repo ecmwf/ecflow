@@ -1233,6 +1233,9 @@ void ChartView::doZoom(QRectF valRect)
 
 void ChartView::doZoom(qint64 start,qint64 end)
 {
+    QPointF left=chart()->mapToValue(chart()->plotArea().bottomLeft());
+    QPointF right=chart()->mapToValue(chart()->plotArea().topRight());
+
     QRectF valRect(QPointF(start,left.y()),QPointF(end,right.y()));
     QRectF r(chart()->mapToPosition(valRect.bottomLeft()),
              chart()->mapToPosition(valRect.topRight()));
