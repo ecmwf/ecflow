@@ -151,20 +151,62 @@ void LogData::appendFromText(const std::vector<std::string>& txtVec)
     }
 }
 
-bool LogData::indexOfPeriod(qint64 start,qint64 end,size_t& idxStart,size_t& idxEnd)
+bool LogData::indexOfPeriod(qint64 start,qint64 end,size_t& idxStart,size_t& idxEnd,qint64 toleranceInMs)
 {
     unsigned int startTime=(start-refTimeInMs_)/1000;
     unsigned int endTime=(end-refTimeInMs_)/1000;
 
     bool hasStart=false;
+    qint64 tolerance=toleranceInMs/1000;
+
+    if(tolerance == 0)
+    {
+        for(size_t i=0; i < data_.size(); i++)
+        {
+            if(data_[i].time_ >= startTime)
+            {
+                idxStart=i;
+                hasStart=true;
+                break;
+            }
+        }
+
+        if(!hasStart)
+            return false;
+
+        for(size_t i=idxStart; i < data_.size(); i++)
+        {
+            if(data_[i].time_ > endTime)
+            {
+                idxEnd=(i==0)?0:(i-1);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     for(size_t i=0; i < data_.size(); i++)
     {
-        if(data_[i].time_ >= startTime)
+        if(startTime - tolerance <= data_[i].time_ && data_[i].time_ <= startTime)
         {
             idxStart=i;
+            idxEnd=i;
+            hasStart=true;            
+        }
+        else if(!hasStart &&
+                startTime + tolerance < data_[i].time_)
+        {
+            idxStart=i;
+            idxEnd=i;
             hasStart=true;
             break;
         }
+        else if(data_[i].time_ >= startTime)
+        {
+            break;
+        }
+
     }
 
     if(!hasStart)
@@ -175,6 +217,8 @@ bool LogData::indexOfPeriod(qint64 start,qint64 end,size_t& idxStart,size_t& idx
         if(data_[i].time_ > endTime)
         {
             idxEnd=(i==0)?0:(i-1);
+            if(idxEnd < idxStart)
+                idxEnd=idxStart;
             return true;
         }
     }

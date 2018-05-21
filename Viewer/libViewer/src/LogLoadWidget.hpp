@@ -247,6 +247,7 @@ public:
     void currentTimeRange(qint64& start,qint64& end);
     void setCallout(qreal);
     void adjustCallout();
+    void removeCallout();
 
 Q_SIGNALS:
     void chartZoomed(QRectF);
@@ -281,7 +282,11 @@ Q_SIGNALS:
     void scanDataChanged(QString);
     void suitePlotStateChanged(int,bool,QColor);
     void timeRangeChanged(qint64,qint64);
-    void timeRangeHighlighted(qint64,qint64);
+    void timeRangeHighlighted(qint64,qint64,qint64);
+    void timeRangeReset();
+
+public Q_SLOTS:
+    void showFullRange();
 
 protected Q_SLOTS:
     void slotZoom(QRectF);

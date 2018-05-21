@@ -52,7 +52,12 @@ public:
 
 public Q_SLOTS:
     void setPeriod(qint64,qint64);
-    void setHighlightPeriod(qint64,qint64);
+    void setHighlightPeriod(qint64,qint64,qint64 tolerance=0);
+    void resetPeriod();
+
+Q_SIGNALS:
+    void rerender();
+    void scrollToHighlightedPeriod();
 
 protected:
     int realRow(size_t idx) const;

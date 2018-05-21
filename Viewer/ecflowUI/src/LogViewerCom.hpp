@@ -17,34 +17,20 @@
 #include <QDateTime>
 #include <QObject>
 
-#include <QProcess>
-
 class ServerHandler;
 class QLocalSocket;
 
-class LogViewerProc : public QObject
+class LogViewerCom : public QObject
 {
-    Q_OBJECT
 public:
-    LogViewerProc();
+    LogViewerCom();
 
-    //static ShellCommand* run(const std::string&,const std::string&);
-
-    void addToWin(ServerHandler*);
-    //QString command() const;
-    //QString commandDef() const {return commandDef_;}
-    //QDateTime startTime() const {return startTime_;}
-
-protected Q_SLOTS:
-    //void procFinished(int exitCode, QProcess::ExitStatus exitStatus);
-    //void slotStdOutput();
-    //void slotStdError();
+    void addToApp(ServerHandler*);
+    void closeApp();
 
 protected:
-    //LogViewerProc(const std::string&,const std::string&);
     void start(QStringList);
 
-    QProcess *proc_;
     QString program_;
     QString logViewerId_;
     QLocalSocket* socket_;

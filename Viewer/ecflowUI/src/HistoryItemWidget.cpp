@@ -59,7 +59,9 @@ void HistoryItemWidget::reload(VInfo_ptr info)
     assert(active_);
 
     if(suspended_)
+    {
         return;
+    }
 
 	clearContents();    
     info_=info;

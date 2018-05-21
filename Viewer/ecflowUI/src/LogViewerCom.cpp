@@ -7,33 +7,48 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include "LogViewerProc.hpp"
+#include "LogViewerCom.hpp"
 
 #include <QLocalSocket>
+#include <QProcess>
 
 #include "LocalSocketServer.hpp"
 #include "ServerHandler.hpp"
 #include "VNode.hpp"
 
-LogViewerProc::LogViewerProc() :
+LogViewerCom::LogViewerCom() :
     QObject(0),
     socket_(NULL)
 {
     if(char* logexe=getenv("ECFLOWUI_LOG_VIEWER"))
     {
-        program_=QString(logexe);
-        //QStringList arguments;
-        //arguments << "-style" << "fusion";
-
-        if(!program_.isEmpty())
-            proc_ = new QProcess(this);
-        //logProc_->start(program, arguments);
+        program_=QString(logexe);       
     }
 }
 
-void LogViewerProc::addToWin(ServerHandler* sh)
+void LogViewerCom::closeApp()
 {
-    if(!proc_)
+    if(!logViewerId_.isEmpty())
+    {
+        if(!socket_)
+        {
+            socket_ = new QLocalSocket(this);
+            socket_->setServerName(logViewerId_);
+        }
+
+        socket_->connectToServer(QIODevice::WriteOnly);
+        if(socket_->waitForConnected(1000))
+        {
+            socket_->write("exit");
+            socket_->disconnectFromServer();
+            socket_->waitForDisconnected(1000);
+        }
+    }
+}
+
+void LogViewerCom::addToApp(ServerHandler* sh)
+{
+    if(program_.isEmpty())
         return;
 
     if(sh)
@@ -54,8 +69,11 @@ void LogViewerProc::addToWin(ServerHandler* sh)
     }
 }
 
-void LogViewerProc::start(QStringList args)
+void LogViewerCom::start(QStringList args)
 {
+    if(program_.isEmpty())
+        return;
+
     if(logViewerId_.isEmpty())
     {
         qint64 pid;
@@ -70,39 +88,28 @@ void LogViewerProc::start(QStringList args)
         {
             socket_ = new QLocalSocket(this);
             socket_->setServerName(logViewerId_);
-            socket_->connectToServer(QIODevice::WriteOnly);
-            if(socket_->waitForConnected(1000))
-            {
-                socket_->write("hello");
-            }
 
             //connect(socket_,SIGNAL(connected()),
             //        this,SLOT(slotConnected()));
         }
+
+        socket_->connectToServer(QIODevice::WriteOnly);
+        if(socket_->waitForConnected(1000))
+        {
+            socket_->write(args.join("::").toUtf8());
+        }
+        //no connection: proc probably stopped
+        else
+        {
+            //start new process
+            qint64 pid;
+            if(QProcess::startDetached(program_,args,QString(),&pid))
+            {
+                logViewerId_ = LocalSocketServer::generateServerName("log",pid);
+            }
+
+        }
     }
-
-#if 0
-    Q_ASSERT(proc_);
-
-
-
-    qint64 pid=0;
-#if QT_VERSION >= QT_VERSION_CHECK(5, 3, 0)
-    pid=proc_->processId();
-#endif
-
-
-
-    //already running
-    if(pid > 0)
-    {
-        proc_->write("hello");
-        proc_->closeWriteChannel();
-    }
-    else
-    {
-        proc_->start(program_, args);
-    }
-#endif
-
 }
+
+

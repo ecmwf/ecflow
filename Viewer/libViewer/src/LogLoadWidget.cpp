@@ -73,7 +73,6 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
 
 
     //Log contents
-
     logModel_=new LogModel(this);
 
     ui_->logView->setProperty("log","1");
@@ -96,13 +95,15 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     connect(ui_->loadView,SIGNAL(timeRangeChanged(qint64,qint64)),
             logModel_,SLOT(setPeriod(qint64,qint64)));
 
-    connect(ui_->loadView, SIGNAL(timeRangeHighlighted(qint64,qint64)),
-            ui_->logView,SLOT(setHighlightPeriod(qint64,qint64)));
+    connect(ui_->loadView, SIGNAL(timeRangeHighlighted(qint64,qint64,qint64)),
+            logModel_,SLOT(setHighlightPeriod(qint64,qint64,qint64)));
 
-    //Charts
+    connect(ui_->loadView,SIGNAL(timeRangeReset()),
+            logModel_,SLOT(resetPeriod()));
+
+    //Scan label
     QColor bg(50,52,58);
     ui_->scanLabel->setStyleSheet("QLabel{background: " + bg.name() + ";}");
-
 
     QFont font;
     QFontMetrics fm(font);
@@ -125,6 +126,10 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
     ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
+
+    //Charts
+    connect(ui_->showFullTb,SIGNAL(clicked()),
+            ui_->loadView,SLOT(showFullRange()));
 
 #if 0
     ui_->scanLabel->setAutoFillBackground(true);
@@ -1144,12 +1149,17 @@ void ChartView::mousePressEvent(QMouseEvent *event)
 {
     QChartView::mousePressEvent(event);
     if(event->button() == Qt::MidButton)
-       // &&
-       //event->pos().x() <= chart()->plotArea().right() &&
-       //event->pos().x() >= chart()->plotArea().left())
     {
-        qreal t=chart()->mapToValue(event->pos()).x();
-        Q_EMIT positionClicked(t);
+       if(event->pos().x() <= chart()->plotArea().right() &&
+          event->pos().x() >= chart()->plotArea().left())
+       {
+            qreal t=chart()->mapToValue(event->pos()).x();
+            Q_EMIT positionClicked(t);
+       }
+       else
+       {
+            Q_EMIT positionClicked(0);
+       }
     }
 }
 
@@ -1329,6 +1339,16 @@ void ChartView::adjustCallout()
             delete callout_;
             callout_=0;
         }
+    }
+}
+
+void ChartView::removeCallout()
+{
+    if(callout_)
+    {
+        scene()->removeItem(callout_);
+        delete callout_;
+        callout_=0;
     }
 }
 
@@ -1629,17 +1649,39 @@ void  ServerLoadView::build(ChartView* view,QLineSeries *series, QString title,i
     axisY->setMax(maxVal);
 }
 
+void ServerLoadView::showFullRange()
+{
+    Q_FOREACH(ChartView* view,views_)
+        view->chart()->zoomReset();
+
+    Q_EMIT(timeRangeReset());
+}
+
 void ServerLoadView::scanPositionClicked(qreal pos)
 {
-    qint64 t1(pos);
-    qint64 t2=t1;
-    if(data_->timeRes() == LogLoadData::MinuteResolution)
-        t2=t1+60*1000;
+    if(pos < 1)
+    {
+        Q_FOREACH(ChartView* view,views_)
+            view->removeCallout();
 
-    Q_FOREACH(ChartView* view,views_)
-        view->setCallout(pos);
+        Q_EMIT(timeRangeHighlighted(0,0,0));
+    }
+    else
+    {
+        qint64 t1(pos);
+        qint64 t2=t1;
+        if(data_->timeRes() == LogLoadData::MinuteResolution)
+            t2=t1+60*1000;
 
-    Q_EMIT(timeRangeHighlighted(t1,t2));
+        Q_FOREACH(ChartView* view,views_)
+            view->setCallout(pos);
+
+        qint64 tw=0;
+        if(!views_.isEmpty())
+            tw=views_[0]->widthToTimeRange(50.);
+
+        Q_EMIT(timeRangeHighlighted(t1,t2,tw));
+    }
 }
 
 

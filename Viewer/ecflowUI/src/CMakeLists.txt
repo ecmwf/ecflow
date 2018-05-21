@@ -37,7 +37,6 @@ set(viewer_srcs
     DashboardDock.cpp
     DashboardTitle.cpp
     DashboardWidget.cpp
-    #DirectoryHandler.cpp
     EditItemWidget.cpp
     EditProvider.cpp
     EditorInfoLabel.cpp
@@ -53,7 +52,6 @@ set(viewer_srcs
     HistoryItemWidget.cpp
     HtmlEdit.cpp
     HtmlItemWidget.cpp
-    #IconProvider.cpp
     InfoPanel.cpp 
     InfoPanelItem.cpp   
     InfoPanelHandler.cpp
@@ -62,14 +60,9 @@ set(viewer_srcs
     JobItemWidget.cpp
     LabelEditor.cpp
     LimitEditor.cpp
-    LineEdit.cpp
-    #LogData.cpp
-    #LogLoadWidget.cpp
-    #LogModel.cpp
-    LogProvider.cpp  
-    #LogTruncator.cpp
-    #LogView.cpp
-    LogViewerProc.cpp
+    LineEdit.cpp  
+    LogProvider.cpp     
+    LogViewerCom.cpp
     MainWindow.cpp
     ManualItemWidget.cpp 
     MenuConfigDialog.cpp
@@ -111,7 +104,6 @@ set(viewer_srcs
     OutputDirProvider.cpp
     OverviewItemWidget.cpp
     OverviewProvider.cpp
-    #Palette.cpp
     PlainTextEdit.cpp
     PlainTextSearchLine.cpp
     PlainTextSearchInterface.cpp
@@ -160,8 +152,7 @@ set(viewer_srcs
     TextEditSearchLine.cpp
     TextFilterHandler.cpp
     TextFilterHandlerDialog.cpp
-    TextFilterWidget.cpp
-    #TextFormat.cpp
+    TextFilterWidget.cpp   
     TimeItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
@@ -176,11 +167,8 @@ set(viewer_srcs
     TriggerTableView.cpp
     TriggerTableWidget.cpp
     TriggerViewDelegate.cpp
-    TriggeredScanner.cpp
-    #UIDebug.cpp
-    #UiLog.cpp
-    UpdateTimer.cpp
-    #UserMessage.cpp
+    TriggeredScanner.cpp    
+    UpdateTimer.cpp  
     VAttribute.cpp
     VAttributeType.cpp
     VConfig.cpp
@@ -284,13 +272,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     InputEventLog.hpp
     LabelEditor.hpp
     LimitEditor.hpp
-    LineEdit.hpp
-    #LogLoadWidget.hpp
-    #LogModel.hpp
-    LogProvider.hpp
-    #LogTruncator.hpp
-    #LogView.hpp
-    LogViewerProc.hpp
+    LineEdit.hpp   
+    LogProvider.hpp    
     MainWindow.hpp
     MenuConfigDialog.hpp
     MessageItemWidget.hpp

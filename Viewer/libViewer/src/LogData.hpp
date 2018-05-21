@@ -48,7 +48,7 @@ public:
 
     QString  entry(int idx) const {return QString::fromStdString(data_[idx].entry_);}
     LogDataItem::Type type(int idx) const {return data_[idx].type_;}
-    bool indexOfPeriod(qint64 start,qint64 end,size_t& idxStart,size_t& idxEnd);
+    bool indexOfPeriod(qint64 start,qint64 end,size_t& idxStart,size_t& idxEnd,qint64 tolerance);
 
 
     void loadFromFile(const std::string& logFile);

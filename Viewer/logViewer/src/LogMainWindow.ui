@@ -55,8 +55,8 @@
     <addaction name="actionNew_tab"/>
     <addaction name="actionOpen_log_file"/>
     <addaction name="separator"/>
-    <addaction name="action_Exit"/>
-    <addaction name="action_Close"/>
+    <addaction name="actionExit"/>
+    <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menu_Help">
     <property name="title">
@@ -68,7 +68,7 @@
    <addaction name="menu_Help"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
-  <action name="action_Exit">
+  <action name="actionExit">
    <property name="text">
     <string>&amp;Quit</string>
    </property>
@@ -76,7 +76,7 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="action_Close">
+  <action name="actionClose">
    <property name="text">
     <string>&amp;Close</string>
    </property>
@@ -99,7 +99,7 @@
   </action>
   <action name="actionAbout">
    <property name="text">
-    <string>About</string>
+    <string>&amp;About</string>
    </property>
   </action>
  </widget>

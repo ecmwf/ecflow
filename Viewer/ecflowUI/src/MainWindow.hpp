@@ -26,7 +26,7 @@ class QProcess;
 
 class ClockWidget;
 class InfoPanel;
-class LogViewerProc;
+class LogViewerCom;
 class NodePanel;
 class ServerRefreshInfoWidget;
 class ServerFilterMenu;
@@ -143,7 +143,7 @@ private:
     static QList<MainWindow*> windows_;
     static int maxWindowNum_;
 
-    static LogViewerProc* logProc_;
+    static LogViewerCom* logCom_;
 };
 
 #endif 

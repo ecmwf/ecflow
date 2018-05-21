@@ -23,7 +23,9 @@ public:
     void setModel(QAbstractItemModel*);
 
 public Q_SLOTS:
-    void setHighlightPeriod(qint64,qint64);
+    //void setHighlightPeriod(qint64,qint64,qint64);
+    void scrolltToHighlightPeriod();
+    void rerender();
 
 protected:
     LogModel* logModel_;

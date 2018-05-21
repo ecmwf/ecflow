@@ -376,19 +376,35 @@ QString LogModel::fullText(const QModelIndex &idx) const
 void LogModel::setPeriod(qint64 start,qint64 end)
 {
     beginResetModel();
-    filterPeriod_=data_.indexOfPeriod(start,end,periodStart_,periodEnd_);
+    filterPeriod_=data_.indexOfPeriod(start,end,periodStart_,periodEnd_,0);
     endResetModel();
+
+    Q_EMIT scrollToHighlightedPeriod();
 }
 
-void LogModel::setHighlightPeriod(qint64 start,qint64 end)
+void LogModel::setHighlightPeriod(qint64 start,qint64 end,qint64 tolerance)
 {
-    beginResetModel();
-    if(data_.indexOfPeriod(start,end,highlightStart_,highlightEnd_))
+    //beginResetModel();
+    if(data_.indexOfPeriod(start,end,highlightStart_,highlightEnd_,tolerance))
     {
         highlightPeriod_=true;
+        Q_EMIT rerender();
         //need a repaint
     }
+   // endResetModel();
+
+    Q_EMIT scrollToHighlightedPeriod();
+}
+
+void LogModel::resetPeriod()
+{
+    beginResetModel();
+    filterPeriod_=false;
+    periodStart_=0;
+    periodEnd_=0;
     endResetModel();
+
+    Q_EMIT scrollToHighlightedPeriod();
 }
 
 int LogModel::realRow(size_t idx) const

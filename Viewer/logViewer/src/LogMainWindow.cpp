@@ -91,6 +91,7 @@ LogMainWindow::LogMainWindow(QStringList idLst,QWidget *parent) :
 
     //Create a node panel
     tab_=new QTabWidget(this);
+    tab_->setTabsClosable(true);
     tab_->setTabBarAutoHide(true);
     layout->addWidget(tab_);
 
@@ -102,6 +103,11 @@ LogMainWindow::LogMainWindow(QStringList idLst,QWidget *parent) :
     //lw->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
     //lw->load("/home/graphics/cgr/ecflow_dev/vsms1.ecf.log");
 
+    connect(ui_->actionExit,SIGNAL(triggered()),
+            this,SLOT(slotQuit()));
+
+    connect(ui_->actionClose,SIGNAL(triggered()),
+                    this,SLOT(slotClose()));
 
     //--------------
     // Toolbar
@@ -109,7 +115,7 @@ LogMainWindow::LogMainWindow(QStringList idLst,QWidget *parent) :
 
 
     //--------------
-    //Status bar
+    // Status bar
     //--------------
 
     //Add clock widget
@@ -152,8 +158,11 @@ void LogMainWindow::addNewTab(QString serverName,QString host, QString port,QStr
 {
     LogLoadWidget *lw=new LogLoadWidget(this);
 
-    QFileInfo fi(logFile);
-    tab_->addTab(lw,fi.fileName());
+    QFileInfo fInfo(logFile);
+    if(!fInfo.exists())
+        return;
+
+    tab_->addTab(lw,fInfo.fileName());
 
     lw->load(serverName,host,port,logFile);
     //lw->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
@@ -168,6 +177,15 @@ void LogMainWindow::slotNewTab()
 void LogMainWindow::slotMessageReceived(QString msg)
 {
     textView_->appendPlainText(msg);
+
+    QStringList lst=msg.split("::");
+    if(lst.count() == 4)
+    {
+        addNewTab(lst[0],lst[1],lst[2],lst[3]);
+    }
+    else if(msg == "exit" || msg == "close")
+         close();
+
 }
 
 void LogMainWindow::slotClose()

@@ -31,7 +31,7 @@
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "InfoPanelHandler.hpp"
-#include "LogViewerProc.hpp"
+#include "LogViewerCom.hpp"
 #include "MenuConfigDialog.hpp"
 #include "NodePathWidget.hpp"
 #include "NodePanel.hpp"
@@ -58,7 +58,7 @@
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
 int MainWindow::maxWindowNum_=25;
-LogViewerProc* MainWindow::logProc_=NULL;
+LogViewerCom* MainWindow::logCom_=NULL;
 
 MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     QMainWindow(parent),
@@ -129,8 +129,12 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     actionRefreshSelected->setEnabled(false);
     actionResetSelected->setEnabled(false);
 
-    connect(actionServerLoad,SIGNAL(triggered()),
+#ifdef ECFLOW_LOGVIEW
+    connect(actionServerLoadViewer,SIGNAL(triggered()),
             this,SLOT(slotServerLoad()));
+#else
+    actionServerLoadViewer->setEnabled(false);
+#endif
 
     //--------------
     //Status bar
@@ -467,19 +471,19 @@ void MainWindow::slotEditServerSettings(ServerHandler* s)
 
 void MainWindow::slotServerLoad()
 {
+#ifdef ECFLOW_LOGVIEW
     ServerHandler* s=0;
     QString serverName;
     if(selection_)
     {
         s=selection_->server();
+        if(!logCom_)
+        {
+            logCom_ = new LogViewerCom();
+        }
+        logCom_->addToApp(s);
     }
-
-    if(!logProc_)
-    {
-        logProc_ = new LogViewerProc();
-    }
-
-    logProc_->addToWin(s);
+#endif
 }
 
 //==============================================================
@@ -685,6 +689,9 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 	{
 #endif
         quitStarted_=true;
+
+        if(logCom_)
+            logCom_->closeApp();
 
 		//Save browser settings
 		MainWindow::save(topWin);
