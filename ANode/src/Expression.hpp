@@ -34,7 +34,7 @@ class PartExpression  {
 public:
    enum ExprType { FIRST, AND, OR };
 
-   PartExpression(const std::string& expression)
+   explicit PartExpression(const std::string& expression)
    : exp_(expression), exp_type_(FIRST) {}
 
    PartExpression(const std::string& expression, bool and_type)
@@ -84,8 +84,8 @@ private:
 // Use compiler , generated destructor, assignment,  copy constructor
 class Expression  {
 public:
-   Expression(const std::string& expression);
-   Expression(const PartExpression& );
+   explicit Expression(const std::string& expression);
+   explicit Expression(const PartExpression& );
    Expression();
    Expression(const Expression& rhs);
 

@@ -38,7 +38,7 @@ public:
 
 
 	// For use in the simulator/ unit tests
- 	CalendarUpdateParams(const boost::posix_time::time_duration& serverPollPeriod)
+ 	explicit CalendarUpdateParams(const boost::posix_time::time_duration& serverPollPeriod)
 	: timeNow_( boost::date_time::not_a_date_time),
  	  serverPollPeriod_(serverPollPeriod),
  	  serverRunning_( true ),

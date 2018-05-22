@@ -20,7 +20,7 @@
 
 class TriggerCompleteParser : public Parser {
 protected:
-	TriggerCompleteParser(DefsStructureParser* p) : Parser(p) {}
+   explicit TriggerCompleteParser(DefsStructureParser* p) : Parser(p) {}
 	void getExpression(const std::string& line,
 	                   std::vector<std::string>& lineTokens,
 	                   std::string& expression,
@@ -31,14 +31,14 @@ protected:
 
 class TriggerParser : public TriggerCompleteParser {
 public:
-	TriggerParser(DefsStructureParser* p) : TriggerCompleteParser(p) {}
+   explicit TriggerParser(DefsStructureParser* p) : TriggerCompleteParser(p) {}
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
 	virtual const char* keyword() const { return "trigger"; }
 };
 
 class CompleteParser : public TriggerCompleteParser {
 public:
-	CompleteParser(DefsStructureParser* p) : TriggerCompleteParser(p) {}
+   explicit CompleteParser(DefsStructureParser* p) : TriggerCompleteParser(p) {}
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) ;
 	virtual const char* keyword() const { return "complete"; }
 };

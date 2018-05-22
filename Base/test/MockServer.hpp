@@ -33,8 +33,8 @@ public:
 	};
 
 	// Only in server side do we increment state/modify numbers, controlled by: Ecf::set_server(true)
-	MockServer(Defs* defs) : defs_(defs_ptr(defs,MockServer::null_deleter())) { Ecf::set_server(true); }
-	MockServer(defs_ptr defs) : defs_(defs)                                   { Ecf::set_server(true); }
+	explicit MockServer(Defs* defs) : defs_(defs_ptr(defs,MockServer::null_deleter())) { Ecf::set_server(true); }
+	explicit MockServer(defs_ptr defs) : defs_(defs)                                   { Ecf::set_server(true); }
 	~MockServer() { Ecf::set_server(false); }
 
 	virtual SState::State state() const { return  SState::RUNNING;}
@@ -95,7 +95,7 @@ private:
 ///   o Update Suite state/modify change number
 class MockSuiteChangedServer  : private boost::noncopyable {
 public:
-	MockSuiteChangedServer(suite_ptr suite) : suiteChanged_(suite) { Ecf::set_server(true);}
+   explicit MockSuiteChangedServer(suite_ptr suite) : suiteChanged_(suite) { Ecf::set_server(true);}
 	~MockSuiteChangedServer() { Ecf::set_server(false); }
 private:
 	ecf::SuiteChanged suiteChanged_;

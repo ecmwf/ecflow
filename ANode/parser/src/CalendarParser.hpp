@@ -20,7 +20,7 @@
 
 class CalendarParser : public Parser {
 public:
-   CalendarParser(DefsStructureParser* p) : Parser(p) {}
+   explicit CalendarParser(DefsStructureParser* p) : Parser(p) {}
    virtual const char* keyword() const { return "calendar"; }
    virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
 };

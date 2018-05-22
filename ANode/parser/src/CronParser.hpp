@@ -20,7 +20,7 @@
 
 class CronParser : public Parser {
 public:
-	CronParser(DefsStructureParser* p) : Parser(p) {}
+   explicit CronParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "cron"; }
 	virtual bool doParse(const std::string& line,std::vector<std::string>& lineTokens);
 };

@@ -29,7 +29,7 @@
 class NState {
 public:
 	enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5 };
-	NState(State s): state_(s), state_change_no_(0) {}
+	explicit NState(State s): state_(s), state_change_no_(0) {}
 	NState(): state_(UNKNOWN),state_change_no_(0) {}
 
 	State state() const { return state_;}
@@ -46,7 +46,7 @@ public:
    static const char* toString(NState::State s);
    static const char* to_html(NState::State s);
 	static const char* toString(const NState& ns) { return toString(ns.state());}
-	static NState::State toState(const std::string& state);
+	static NState::State toState(const std::string&);
 	static bool isValid(const std::string& state);
 	static std::vector<std::string> allStates();
 	static std::vector<NState::State> states();

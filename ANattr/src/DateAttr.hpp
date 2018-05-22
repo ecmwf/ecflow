@@ -29,11 +29,11 @@ namespace ecf { class Calendar;} // forward declare class that is in a name spac
 class DateAttr {
 public:
    DateAttr(int day, int month, int year); // will throw std::out_of_range for if invalid date
-   DateAttr(const std::string&);           // will throw std::runtime_error for if invalid date
+   explicit DateAttr(const std::string&);           // will throw std::runtime_error for if invalid date
    DateAttr()
    : day_(0), month_(0), year_(0), makeFree_(false),
      state_change_no_(0) {} // for serialisation
-   DateAttr(const boost::gregorian::date& date)
+   explicit DateAttr(const boost::gregorian::date& date)
    : day_(date.day()), month_(date.month()), year_(date.year()), makeFree_(false),
      state_change_no_(0) {} // for test
 

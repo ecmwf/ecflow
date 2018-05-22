@@ -20,7 +20,7 @@
 ///================================================================================
 class SStringVecCmd : public ServerToClientCmd {
 public:
-   SStringVecCmd(const std::vector<std::string>& s) : vec_(s) {}
+   explicit SStringVecCmd(const std::vector<std::string>& s) : vec_(s) {}
    SStringVecCmd() : ServerToClientCmd() {}
 
    void init(const std::vector<std::string>& s) { vec_ = s;}

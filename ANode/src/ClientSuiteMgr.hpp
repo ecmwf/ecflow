@@ -41,7 +41,7 @@ class DefsDelta;
 
 class ClientSuiteMgr : private boost::noncopyable {
 public:
- 	ClientSuiteMgr(Defs*);
+   explicit ClientSuiteMgr(Defs*);
 
  	/// Create a client suite, and return the handle associated with the created object
  	unsigned int create_client_suite(bool auto_add_new_suites, const std::vector<std::string>& suites, const std::string& user);

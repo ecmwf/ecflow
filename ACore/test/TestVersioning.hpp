@@ -20,7 +20,7 @@
 namespace version0 {
 class X {
 public:
-   X(int h = 0) : hour_(h) {}
+   explicit X(int h = 0) : hour_(h) {}
    bool operator==(const X& rhs) const { return hour_ == rhs.hour_; }
 private:
    int hour_;
@@ -56,7 +56,7 @@ BOOST_CLASS_VERSION(version_new_data_member::X, 1)
 namespace version_change_dm_name {
 class X {
 public:
-   X(int h = 0) : hours_(h) {}
+   explicit X(int h = 0) : hours_(h) {}
    bool operator==(const X& rhs) const { return hours_ == rhs.hours_; }
 private:
    int hours_;
@@ -72,7 +72,7 @@ BOOST_CLASS_VERSION(version_change_dm_name::X, 1)
 namespace version_change_dm_type {
 class X {
 public:
-   X(const std::string& h = "") : hour_(h) {}
+   explicit X(const std::string& h = "") : hour_(h) {}
    bool operator==(const X& rhs) const { return hour_ == rhs.hour_; }
    std::string str() const { return hour_; }
 private:

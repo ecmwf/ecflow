@@ -113,7 +113,7 @@ public:
    void init(const boost::posix_time::ptime& time, Clock_t clock = Calendar::REAL, bool startStopWithServer = false);
 
    /// Start the Calendar.  Parameter time can include gain.
-   void begin(const boost::posix_time::ptime& time);
+   void begin(const boost::posix_time::ptime&);
 
 	/// Update the calendar using the input. Will Store internally the time duration
 	/// between the init() function call and the last update.

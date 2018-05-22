@@ -214,7 +214,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         //        ‘>>’  Sequence/concatenation
         //        ‘|’   alternate
         //        ‘-‘   not
-        definition(ExpressionGrammer const& /*self*/)
+        explicit definition(ExpressionGrammer const& /*self*/)
         {
           nodename
                 = leaf_node_d[
