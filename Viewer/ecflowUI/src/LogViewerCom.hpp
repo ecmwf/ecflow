@@ -33,7 +33,6 @@ protected:
 
     QString program_;
     QString logViewerId_;
-    QLocalSocket* socket_;
 };
 
 #endif // LOGVIEWERPROC_HPP

@@ -17,8 +17,7 @@
 #include "VNode.hpp"
 
 LogViewerCom::LogViewerCom() :
-    QObject(0),
-    socket_(NULL)
+    QObject(0)
 {
     if(char* logexe=getenv("ECFLOWUI_LOG_VIEWER"))
     {
