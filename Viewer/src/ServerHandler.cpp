@@ -1086,9 +1086,10 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 		}
 		case VTask::CommandTask:
 		{
-			task->reply()->setErrorText(errMsg);
+            comQueue_->addSyncTask();
+            task->reply()->setErrorText(errMsg);
 			task->status(VTask::ABORTED);
-			UserMessage::message(UserMessage::WARN, true, errMsg);
+			UserMessage::message(UserMessage::WARN, true, errMsg);           
 			break;
 		}
 		default:
