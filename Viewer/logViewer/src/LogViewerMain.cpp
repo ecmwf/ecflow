@@ -39,7 +39,12 @@
 int main(int argc, char **argv)
 {
     QString host, port, name, logFile;
-    if (argc == 5)
+
+    if(argc == 2)
+    {
+        logFile=QString(argv[1]);
+    }
+    else if (argc == 5)
     {
         name=QString(argv[1]);
         host=QString(argv[2]);
@@ -47,10 +52,14 @@ int main(int argc, char **argv)
         logFile=QString(argv[4]);
     }
 
-    //  std::cout << "Usage:" << std::endl;
-     //   std::cout << argv[0] << " <host> <port>" << std::endl;
-    //    return 1;
-    //
+#if 0
+    else
+    {
+        std::cout << "Usage:" << std::endl;
+        std::cout << argv[0] << " logfile" << std::endl;
+        return 1;
+    }
+#endif
 
     //Init qt
     QApplication app(argc, argv);
@@ -110,12 +119,9 @@ int main(int argc, char **argv)
         //Build the GUI
         LogMainWindow* win=LogMainWindow::makeWindow();
         Q_ASSERT(win);
-        win->addNewTab(name,host,port,logFile);
-
-        //LogMainWindow::init();
-
-        //Show all the windows
-        LogMainWindow::showWindows();
+        win->init();
+        win->addNewTab(name,host,port,logFile,true);
+        win->show();
 
         //Start input event logging
         //InputEventLog::instance()->start();

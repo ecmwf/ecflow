@@ -52,8 +52,8 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="actionNew_tab"/>
-    <addaction name="actionOpen_log_file"/>
+    <addaction name="actionNewTab"/>
+    <addaction name="actionReplaceLogFile"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
     <addaction name="actionClose"/>
@@ -84,14 +84,20 @@
     <string>Ctrl+W</string>
    </property>
   </action>
-  <action name="actionOpen_log_file">
+  <action name="actionReplaceLogFile">
    <property name="text">
-    <string>&amp;Open log file ...</string>
+    <string>&amp;Replace log file ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Replace current log file</string>
    </property>
   </action>
-  <action name="actionNew_tab">
+  <action name="actionNewTab">
    <property name="text">
-    <string>New &amp;tab</string>
+    <string>&amp;Add log file ...</string>
+   </property>
+   <property name="toolTip">
+    <string>Load log file into a new tab</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+T</string>

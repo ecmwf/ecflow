@@ -502,9 +502,13 @@ void Dashboard::writeSettings(VComboSettings* vs)
 
 	//Qt settings
     if(savedDockState_.isEmpty() == false)
+    {
         vs->putQs("state",savedDockState_);
+    }
     else
+    {
         vs->putQs("state",saveState());
+    }
 
 	//Other setting
 	vs->put("widgetCount",findChildren<QDockWidget*>().count());

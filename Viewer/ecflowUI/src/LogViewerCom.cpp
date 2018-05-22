@@ -30,18 +30,15 @@ void LogViewerCom::closeApp()
 {
     if(!logViewerId_.isEmpty())
     {
-        if(!socket_)
-        {
-            socket_ = new QLocalSocket(this);
-            socket_->setServerName(logViewerId_);
-        }
+        QLocalSocket* socket = new QLocalSocket(this);
+        socket->setServerName(logViewerId_);
 
-        socket_->connectToServer(QIODevice::WriteOnly);
-        if(socket_->waitForConnected(1000))
+        socket->connectToServer(QIODevice::WriteOnly);
+        if(socket->waitForConnected(1000))
         {
-            socket_->write("exit");
-            socket_->disconnectFromServer();
-            socket_->waitForDisconnected(1000);
+            socket->write("exit");
+            socket->disconnectFromServer();
+            socket->waitForDisconnected(1000);
         }
     }
 }
@@ -84,19 +81,16 @@ void LogViewerCom::start(QStringList args)
     }
     else
     {
-        if(!socket_)
-        {
-            socket_ = new QLocalSocket(this);
-            socket_->setServerName(logViewerId_);
+        //Send message over local socket
+        QLocalSocket* socket = new QLocalSocket(this);
+        socket->setServerName(logViewerId_);
+        socket->connectToServer(QIODevice::WriteOnly);
 
-            //connect(socket_,SIGNAL(connected()),
-            //        this,SLOT(slotConnected()));
-        }
-
-        socket_->connectToServer(QIODevice::WriteOnly);
-        if(socket_->waitForConnected(1000))
+        if(socket->waitForConnected(1000))
         {
-            socket_->write(args.join("::").toUtf8());
+            socket->write(args.join("::").toUtf8());
+            socket->disconnectFromServer();
+            socket->waitForDisconnected(1000);
         }
         //no connection: proc probably stopped
         else
@@ -107,8 +101,13 @@ void LogViewerCom::start(QStringList args)
             {
                 logViewerId_ = LocalSocketServer::generateServerName("log",pid);
             }
-
+            else
+            {
+                logViewerId_.clear();
+            }
         }
+
+        delete socket;
     }
 }
 

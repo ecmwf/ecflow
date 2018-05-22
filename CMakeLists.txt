@@ -149,6 +149,11 @@ if(ENABLE_UI_USAGE_LOG AND (NOT UI_LOG_FILE))
 	ecbuild_error("If ENABLE_UI_USAGE_LOG is set, UI_LOG_FILE must also be set")
 endif()
 
+# sanity check - if ENABLE_UI_USAGE_LOG is ON, we must also have UI_LOG_FILE
+if(ENABLE_UI_USAGE_LOG AND (NOT LOGUI_LOG_FILE))
+    ecbuild_error("If ENABLE_UI_USAGE_LOG is set, LOGUI_LOG_FILE must also be set")
+endif()
+
 # sanity check - if ENABLE_UI_USAGE_LOG is ON, we must also have UI_LOG_SITE_TAG
 if(ENABLE_UI_USAGE_LOG AND (NOT UI_LOG_SITE_TAG))
 	ecbuild_error("If ENABLE_UI_USAGE_LOG is set, UI_LOG_SITE_TAG must also be set")
@@ -172,10 +177,15 @@ if (ENABLE_UI)
 		ecbuild_info( "UI_BACKTRACE_EMAIL_ADDRESS_FILE : ${UI_BACKTRACE_EMAIL_ADDRESS_FILE}" )
 	endif()
 
+    if(LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE)
+        ecbuild_info( "LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE : ${LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE}" )
+    endif()
+
 	ecbuild_info( "ENABLE_UI_USAGE_LOG      : ${ENABLE_UI_USAGE_LOG}" )
 	if(ENABLE_UI_USAGE_LOG)
 		ecbuild_info( "UI_LOG_FILE              : ${UI_LOG_FILE}" )
-		ecbuild_info( "UI_LOG_SITE_TAG          : ${UI_LOG_SITE_TAG}" )
+        ecbuild_info( "LOGUI_LOG_FILE           : ${LOGUI_LOG_FILE}" )
+        ecbuild_info( "UI_LOG_SITE_TAG          : ${UI_LOG_SITE_TAG}" )
 	endif()
 endif()
 ecbuild_info("")

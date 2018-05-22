@@ -20,6 +20,7 @@
 #include "UIDebug.hpp"
 
 #include <QDateTime>
+#include <QFileInfo>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QSortFilterProxyModel>
@@ -36,6 +37,8 @@
 LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
 {
     ui_->setupUi(this);
+
+    ui_->messageLabel->hide();
 
     //Temporal resolution combo box
     ui_->resCombo->addItem("seconds",0);
@@ -147,10 +150,15 @@ LogLoadWidget::~LogLoadWidget()
 
 void LogLoadWidget::clear()
 {
+    ui_->messageLabel->clear();
+    ui_->messageLabel->hide();
+
     ui_->logInfoLabel->setText(QString());
     ui_->loadView->clear();
     suiteModel_->clearData();
     logModel_->clearData();
+
+    setAllVisible(false);
 }
 
 void LogLoadWidget::updateInfoLabel()
@@ -164,17 +172,55 @@ void LogLoadWidget::updateInfoLabel()
     ui_->logInfoLabel->setText(txt);
 }
 
+void LogLoadWidget::setAllVisible(bool b)
+{
+    ui_->loadView->setVisible(b);
+    ui_->suiteTree->setVisible(b);
+    ui_->scanLabel->setVisible(b);
+    ui_->logView->setVisible(b);
+    ui_->unselectSuitesTb->setVisible(b);
+    ui_->selectFourSuitesTb->setVisible(b);
+}
+
+void LogLoadWidget::load(QString logFile)
+{
+    load("","","",logFile);
+}
+
 void LogLoadWidget::load(QString serverName, QString host, QString port, QString logFile)
 {
+    clear();
+
     serverName_=serverName;
     host_=host;
     port_=port;
     logFile_=logFile;
 
+    updateInfoLabel();
+
+    QFileInfo fInfo(logFile);
+    if(!fInfo.exists())
+    {
+        ui_->messageLabel->showError("The specified log file does not exist!");
+        return;
+    }
+
+    if(!fInfo.isReadable())
+    {
+        ui_->messageLabel->showError("The specified log file is not readable!");
+        return;
+    }
+
+    if(!fInfo.isFile())
+    {
+        ui_->messageLabel->showError("The specified log file is not a file!");
+        return;
+    }
+
+    setAllVisible(true);
+
     //view_->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
     //std::string fileName="/home/graphics/cgr/ecflow_dev/vsms1.ecf.log";
-
-    updateInfoLabel();
 
     ui_->loadView->load(logFile_.toStdString());
 

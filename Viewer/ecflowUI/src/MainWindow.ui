@@ -94,6 +94,7 @@
     <addaction name="actionSearch"/>
     <addaction name="actionNotification"/>
     <addaction name="actionCommandOutput"/>
+    <addaction name="separator"/>
     <addaction name="actionServerLoadViewer"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
@@ -349,7 +350,7 @@
      <normaloff>:/viewer/monitor.svg</normaloff>:/viewer/monitor.svg</iconset>
    </property>
    <property name="text">
-    <string>Server load viewer ...</string>
+    <string>Server load (standalone app) ...</string>
    </property>
   </action>
  </widget>

@@ -34,25 +34,6 @@ class SessionItem;
 class VComboSettings;
 class LocalSocketServer;
 
-class MainWindow;
-
-#if 0
-class MainWindowTitleHandler
-{
-   friend class MainWindow;
-public:
-   MainWindowTitleHandler(MainWindow*);
-   ~MainWindowTitleHandler();
-
-   void update();
-
-protected:
-   void update(ServerHandler*);
-
-   MainWindow* win_;
-};
-#endif
-
 namespace Ui {
     class LogMainWindow;
 }
@@ -65,12 +46,14 @@ public:
     LogMainWindow(QStringList,QWidget *parent=0);
     ~LogMainWindow();
 
-    void addNewTab(QString name,QString host, QString port,QString logFile);
+    void init();
+    void addNewTab(QString name,QString host, QString port,QString logFile,bool forced=false);
+    void addNewTab(QString name);
 
-    static void init();
+
     static void showWindows();
-    static void openWindow(QString id,QWidget *fromW=0);
-    static void openWindow(QStringList id,QWidget *fromW=0);
+    //static void openWindow(QString id,QWidget *fromW=0);
+    //static void openWindow(QStringList id,QWidget *fromW=0);
     static LogMainWindow *makeWindow();
     static void reload();
     //static void saveSession(SessionItem*);
@@ -80,31 +63,35 @@ public:
     static LogMainWindow* firstWindow();
 
 protected Q_SLOTS:
+    void slotAddFile();
+    void slotReplaceFile();
     void slotNewTab();
+    void slotCloseTab(int idx);
     void slotMessageReceived(QString msg);
     void slotClose();
     void slotQuit();
 
 private:
-    void init(LogMainWindow*);
     void closeEvent(QCloseEvent*);
 
-    void reloadContents();
-    void rerenderContents();
+    //void reloadContents();
+    //void rerenderContents();
+    QString userSelectFile();
+    QStringList loadedFiles() const;
 
     void cleanUpOnQuit();
-
-    //void writeSettings(VComboSettings*);
-    //void readSettings(VComboSettings*);
+    void setInitialSize(int w, int h);
+    void writeSettings(QSettings&);
+    void readSettings(QSettings&);
 
     //static MainWindow* makeWindow(VComboSettings* vs);
     //static LogMainWindow *makeWindow();
+    static QString qsFile(QString);
     static LogMainWindow *makeWindow(QString id);
     static LogMainWindow *makeWindow(QStringList idLst);
     static bool aboutToClose(LogMainWindow*);
     static bool aboutToQuit(LogMainWindow*);
     static void save(LogMainWindow *);
-    static void saveContents(LogMainWindow *);
     static LogMainWindow* findWindow(QWidget *childW);
     //static void configChanged(MainWindow *);
     //static void hideServerSyncNotify(MainWindow*);
@@ -112,9 +99,7 @@ private:
     //static void startPreferences(MainWindow *,QString);
 
     Ui::LogMainWindow* ui_;
-    //MainWindowTitleHandler* winTitle_;
     QTabWidget* tab_;
-    //ClockWidget* clockWidget_;
     QPlainTextEdit* textView_;
 
     static bool quitStarted_;

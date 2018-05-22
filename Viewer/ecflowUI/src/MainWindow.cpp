@@ -919,7 +919,7 @@ void MainWindowTitleHandler::update()
 {
     Q_ASSERT(win_);
 
-    char *userTitle = getenv("ECFUI_TITLE");
+    char *userTitle = getenv("ECFLOWUI_TITLE");
     std::string mainTitle = (userTitle != NULL) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
                                                 : VConfig::instance()->appLongName();
     QString title=QString::fromStdString(mainTitle);

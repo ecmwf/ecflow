@@ -6,7 +6,8 @@ set(srcs
     LogModel.cpp
     LogTruncator.cpp
     LogView.cpp
-    Palette.cpp   
+    MessageLabel.cpp
+    Palette.cpp
     TextFormat.cpp
     UIDebug.cpp
     UiLog.cpp

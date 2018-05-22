@@ -28,6 +28,7 @@ std::string DirectoryHandler::exeDir_;
 std::string DirectoryHandler::shareDir_;
 std::string DirectoryHandler::etcDir_;
 std::string DirectoryHandler::configDir_;
+std::string DirectoryHandler::logviewerConfigDir_;
 std::string DirectoryHandler::rcDir_;
 std::string DirectoryHandler::tmpDir_;
 std::string DirectoryHandler::uiLogFile_;
@@ -54,7 +55,7 @@ void DirectoryHandler::init(const std::string& exeStr)
     //The location of the config dir is specified by the user
     //This could be the case for a ui test! In this case we
     //must not use the rcDir!
-    if(char *confCh=getenv("ECFUI_CONFIG_DIR"))
+    if(char *confCh=getenv("ECFLOWUI_CONFIG_DIR"))
     {
         std::string confStr(confCh);
         configDir=boost::filesystem::path(confStr);
@@ -99,6 +100,23 @@ void DirectoryHandler::init(const std::string& exeStr)
         UserMessage::message(UserMessage::ERROR, true,
                 std::string("Could not create configDir with an empty path!"));
         exit(1);
+    }
+
+    boost::filesystem::path lgvConfigDir   = configDir;
+    lgvConfigDir /= "logviewer";
+    logviewerConfigDir_= lgvConfigDir.string();
+    if(!boost::filesystem::exists(lgvConfigDir))
+    {
+        try
+        {
+            boost::filesystem::create_directory(lgvConfigDir);
+        }
+        catch(const boost::filesystem::filesystem_error& err)
+        {
+            UserMessage::message(UserMessage::ERROR, true,
+                    std::string("Could not create logviewer configDir: " + logviewerConfigDir_ + " reason: " + err.what()));
+            exit(1);
+        }
     }
 
 	//Sets paths in the system directory

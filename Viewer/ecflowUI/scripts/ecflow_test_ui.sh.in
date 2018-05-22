@@ -145,7 +145,7 @@ $EXE_DIR/ecflow_client --begin=operation_suite
 # =======================================================================
 
 echo "Starting ecFlowUI"
-export ECFUI_TEMP_SESSION_PRESERVE_CONFIRM="no"
+export ECFLOWUI_TEMP_SESSION_PRESERVE_CONFIRM="no"
 $EXE_DIR/ecflow_ui -ts localhost $ECF_PORT
 
 

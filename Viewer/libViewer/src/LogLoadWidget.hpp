@@ -42,12 +42,15 @@ public:
     ~LogLoadWidget();
 
     void clear();
+    void load(QString logFile);
     void load(QString serverName, QString host, QString port, QString logFile);
+    QString logFile() const {return logFile_;}
 
 protected Q_SLOTS:
     void resolutionChanged(int);
 
 private:
+    void setAllVisible(bool);
     void load();
     void updateInfoLabel();
 

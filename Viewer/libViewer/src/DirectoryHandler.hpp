@@ -28,6 +28,7 @@ public:
     static const std::string& uiLogFileName() {return uiLogFile_;}
     static const std::string& uiEventLogFileName() {return uiEventLogFile_;}
     static const std::string& socketDir() {return socketDir_;}
+    static const std::string& logviewerConfigDir()  {return logviewerConfigDir_;}
     static std::string concatenate(const std::string &path1, const std::string &path2);
     static std::string tmpFileName();
     static bool createDir(const std::string& path);
@@ -54,6 +55,7 @@ private:
     static std::string shareDir_;
     static std::string etcDir_;
     static std::string configDir_;
+    static std::string logviewerConfigDir_;
     static std::string rcDir_;
     static std::string tmpDir_;
     static std::string uiLogFile_;

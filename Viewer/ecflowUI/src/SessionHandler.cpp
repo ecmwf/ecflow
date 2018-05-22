@@ -296,7 +296,7 @@ void SessionHandler::load()
 
 bool SessionHandler::requestStartupViaSessionManager()
 {
-	char *sm = getenv("ECFUI_SESSION_MANAGER");
+    char *sm = getenv("ECFLOWUI_SESSION_MANAGER");
 	if (sm)
 		return true;
 	else
@@ -306,10 +306,10 @@ bool SessionHandler::requestStartupViaSessionManager()
 
 void SessionHandler::setTemporarySessionIfReqested()
 {
-	char *sh = getenv("ECFUI_TEMP_SESSION_HOST");
+    char *sh = getenv("ECFLOWUI_TEMP_SESSION_HOST");
 	if (sh)
 	{
-		char *sp = getenv("ECFUI_TEMP_SESSION_PORT");
+        char *sp = getenv("ECFLOWUI_TEMP_SESSION_PORT");
 		if (sp)
 		{
 			// create a session name, likely to be unique - if it already exists in the list, then use that
@@ -323,7 +323,7 @@ void SessionHandler::setTemporarySessionIfReqested()
 			instance()->current(si);
 			si->temporary(true);
 
-			char *sask = getenv("ECFUI_TEMP_SESSION_PRESERVE_CONFIRM");
+            char *sask = getenv("ECFLOWUI_TEMP_SESSION_PRESERVE_CONFIRM");
 			if (sask && !strcmp(sask, "no"))
 				si->askToPreserveTemporarySession(false);
 

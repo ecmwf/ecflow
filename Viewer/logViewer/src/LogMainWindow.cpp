@@ -14,6 +14,7 @@
 #include <QComboBox>
 #include <QDialog>
 #include <QFileInfo>
+#include <QFileDialog>
 #include <QLabel>
 #include <QMessageBox>
 #include <QPixmap>
@@ -26,33 +27,10 @@
 #include "LogMainWindow.hpp"
 
 #include "DirectoryHandler.hpp"
-//#include "AboutDialog.hpp"
-//#include "ChangeNotify.hpp"
-//#include "ChangeNotifyWidget.hpp"
-//#include "ClockWidget.hpp"
-//#include "FilterWidget.hpp"
-//#include "InfoPanel.hpp"
-//#include "InfoPanelHandler.hpp"
-//#include "MenuConfigDialog.hpp"
-//#include "NodePathWidget.hpp"
-//#include "NodePanel.hpp"
-//#include "PropertyDialog.hpp"
-//#include "ServerComInfoWidget.hpp"
-//#include "ServerHandler.hpp"
-//#include "ServerList.hpp"
-//#include "ServerListDialog.hpp"
-//#include "ServerListSyncWidget.hpp"
-//#include "SessionHandler.hpp"
-//#include "SaveSessionAsDialog.hpp"
-//#include "CommandOutputDialog.hpp"
 #include "LocalSocketServer.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
-//#include "VConfig.hpp"
-//#include "VIcon.hpp"
-//#include "VSettings.hpp"
 #include "Version.hpp"
-//#include "WidgetNameProvider.hpp"
 
 #include "LogLoadWidget.hpp"
 
@@ -66,7 +44,6 @@ QList<LogMainWindow*> LogMainWindow::windows_;
 int LogMainWindow::maxWindowNum_=25;
 LocalSocketServer* LogMainWindow::socketServer_=NULL;
 
-
 LogMainWindow::LogMainWindow(QStringList idLst,QWidget *parent) :
     QMainWindow(parent), ui_(new Ui::LogMainWindow)
 {
@@ -76,6 +53,9 @@ LogMainWindow::LogMainWindow(QStringList idLst,QWidget *parent) :
     //setObjectName("win_" + QString::number(windows_.count()));
 
     setAttribute(Qt::WA_DeleteOnClose);
+
+    //Initial size
+    setInitialSize(1100,800);
 
     //the window title    
     std::string title = "ecflowUI - LogViewer (" + ecf::Version::raw() + ")";
@@ -102,6 +82,15 @@ LogMainWindow::LogMainWindow(QStringList idLst,QWidget *parent) :
    // tab_->addTab(lw,"first");
     //lw->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
     //lw->load("/home/graphics/cgr/ecflow_dev/vsms1.ecf.log");
+
+    connect(tab_,SIGNAL(tabCloseRequested(int)),
+            this,SLOT(slotCloseTab(int)));
+
+    connect(ui_->actionNewTab,SIGNAL(triggered()),
+            this,SLOT(slotAddFile()));
+
+    connect(ui_->actionReplaceLogFile,SIGNAL(triggered()),
+            this,SLOT(slotReplaceFile()));
 
     connect(ui_->actionExit,SIGNAL(triggered()),
             this,SLOT(slotQuit()));
@@ -140,13 +129,6 @@ LogMainWindow::~LogMainWindow()
     //delete winTitle_;
 }
 
-void LogMainWindow::init(LogMainWindow *win)
-{
-    //nodePanel_->init();
-
-    if(!win)
-        return;
-}
 
 //==============================================================
 //
@@ -154,7 +136,22 @@ void LogMainWindow::init(LogMainWindow *win)
 //
 //==============================================================
 
-void LogMainWindow::addNewTab(QString serverName,QString host, QString port,QString logFile)
+
+void LogMainWindow::addNewTab(QString serverName,QString host, QString port,QString logFile,bool forced)
+{
+    LogLoadWidget *lw=new LogLoadWidget(this);
+
+    QFileInfo fInfo(logFile);
+    if(!fInfo.exists() && forced)
+        return;
+
+    tab_->addTab(lw,fInfo.fileName());
+    lw->load(serverName,host,port,logFile);
+    //lw->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
+    //lw->load("/home/graphics/cgr/ecflow_dev/vsms1.ecf.log");
+}
+
+void LogMainWindow::addNewTab(QString logFile)
 {
     LogLoadWidget *lw=new LogLoadWidget(this);
 
@@ -163,8 +160,7 @@ void LogMainWindow::addNewTab(QString serverName,QString host, QString port,QStr
         return;
 
     tab_->addTab(lw,fInfo.fileName());
-
-    lw->load(serverName,host,port,logFile);
+    lw->load(logFile);
     //lw->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
     //lw->load("/home/graphics/cgr/ecflow_dev/vsms1.ecf.log");
 }
@@ -172,6 +168,69 @@ void LogMainWindow::addNewTab(QString serverName,QString host, QString port,QStr
 void LogMainWindow::slotNewTab()
 {
     //nodePanel_->slotNewTab();
+}
+
+void LogMainWindow::slotCloseTab(int idx)
+{
+    if(QWidget *w=tab_->widget(idx))
+    {
+        tab_->removeTab(idx);
+        delete w;
+    }
+}
+
+QString LogMainWindow::userSelectFile()
+{
+    QStringList fileLst=loadedFiles();
+    QString startDir;
+    if(fileLst.count() > 0)
+    {
+        startDir=fileLst.last();
+        QFileInfo fi(startDir);
+        startDir=fi.dir().path();
+    }
+
+    QFileDialog dialog(this,QObject::tr("Add log file to LogViewer"),startDir);
+    dialog.setAcceptMode(QFileDialog::AcceptOpen);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setLabelText(QFileDialog::Accept,"Ok");
+
+    if(dialog.exec() == QDialog::Accepted)
+    {
+        QStringList lst=dialog.selectedFiles();
+        if(lst.count() > 0)
+        {
+            QString f=lst[0];
+            QString err;
+            if(fileLst.contains(f))
+            {
+                QMessageBox::warning(this,"","File " +  f + " is already loaded",QMessageBox::Ok);
+                return QString();
+            }
+            else
+                return f;
+        }
+    }
+    return QString();
+}
+
+void LogMainWindow::slotAddFile()
+{
+    QString f=userSelectFile();
+    if(!f.isEmpty())
+        addNewTab(f);
+}
+
+void LogMainWindow::slotReplaceFile()
+{
+    QString f=userSelectFile();
+    if(!f.isEmpty())
+    {
+        if(LogLoadWidget *lw=static_cast<LogLoadWidget*>(tab_->widget(tab_->currentIndex())))
+        {
+            lw->load(f);
+        }
+    }
 }
 
 void LogMainWindow::slotMessageReceived(QString msg)
@@ -196,6 +255,17 @@ void LogMainWindow::slotClose()
 void LogMainWindow::slotQuit()
 {
     LogMainWindow::aboutToQuit(this);
+}
+
+QStringList LogMainWindow::loadedFiles() const
+{
+    QStringList files;
+    for(int i=0; i < tab_->count(); i++)
+    {
+         if(LogLoadWidget *lw=static_cast<LogLoadWidget*>(tab_->widget(i)))
+            files << lw->logFile();
+    }
+    return files;
 }
 
 //==============================================================
@@ -236,52 +306,21 @@ void LogMainWindow::cleanUpOnQuit()
 //
 //====================================================
 
-#if 0
-void LogMainWindow::writeSettings(VComboSettings *vs)
+void LogMainWindow::writeSettings(QSettings& vs)
 {
     //Qt settings
-    vs->putQs("geometry",saveGeometry());
-    vs->putQs("state",saveState());
-
-//See ECFLOW-1090
-#if 0
-    vs->putQs("minimized",(windowState() & Qt::WindowMinimized)?1:0);
-#endif
-
-    //Other setting
-    vs->put("infoPanelCount",findChildren<QDockWidget*>().count());
-
-    //Saves nodePanel
-    nodePanel_->writeSettings(vs);
+    vs.setValue("geometry",saveGeometry());
+    vs.setValue("state",saveState());
 }
-#endif
 
-#if 0
-void LogMainWindow::readSettings(VComboSettings *vs)
+void LogMainWindow::readSettings(QSettings& vs)
 {
-    int cnt=vs->get<int>("infoPanelCount",0);
-    for(int i=0; i < cnt ; i++)
-    {
-        //addInfoPanel();
-    }
+    if(vs.contains("geometry"))
+        restoreGeometry(vs.value("geometry").toByteArray());
 
-    nodePanel_->readSettings(vs);
-
-    //See ECFLOW-1090
-#if 0
-    if(vs->getQs("minimized").toInt()== 1)
-    {
-        setWindowState(windowState() | Qt::WindowMinimized);
-    }
-#endif
-
-    if(vs->containsQs("geometry"))
-        restoreGeometry(vs->getQs("geometry").toByteArray());
-
-    if(vs->containsQs("state"))
-        restoreState(vs->getQs("state").toByteArray());
+    if(vs.contains("state"))
+        restoreState(vs.value("state").toByteArray());
 }
-#endif
 
 //====================================================
 //
@@ -317,6 +356,7 @@ LogMainWindow* LogMainWindow::makeWindow(QStringList idLst)
     return win;
 }
 
+#if 0
 void LogMainWindow::openWindow(QString id,QWidget *fromW)
 {
     LogMainWindow* win=LogMainWindow::makeWindow(id);
@@ -330,7 +370,7 @@ void LogMainWindow::openWindow(QStringList idLst,QWidget *fromW)
     win->init(findWindow(fromW));
     win->show();
 }
-
+#endif
 void LogMainWindow::showWindows()
 {
     Q_FOREACH(LogMainWindow *win,windows_)
@@ -391,154 +431,50 @@ bool LogMainWindow::aboutToQuit(LogMainWindow* topWin)
 #endif
         quitStarted_=true;
 
-#if 0
         //Save browser settings
         LogMainWindow::save(topWin);
-
-        // handle session cleanup
-        // temporary sessions can be saved or deleted
-        SessionItem *si = SessionHandler::instance()->current();
-        if (si->temporary())
-        {
-            if (si->askToPreserveTemporarySession())
-            {
-                if(QMessageBox::question(0,tr("Delete temporary session?"),
-                            tr("This was a temporary session - would you like to preserve it for future use?"),
-                            QMessageBox::Yes | QMessageBox::No,QMessageBox::No) == QMessageBox::No)
-                    SessionHandler::destroyInstance();
-            }
-            else  // if askToPreserveTemporarySession() is false, then we assume we want to delete
-            {
-                SessionHandler::destroyInstance();
-            }
-        }
-#endif
 
         //Ensure the ServerHandler destructors are called
         LogMainWindow::cleanUpOnQuit(topWin);
 
         //Exit ecFlowView
         QApplication::quit();
+
 #if 0
     }
 #endif
-
     return false;
 }
 
 void LogMainWindow::init()
 {
-#if 0
-    SessionItem* cs=SessionHandler::instance()->current();
-    assert(cs);
+    QSettings vs(LogMainWindow::qsFile("main"),QSettings::NativeFormat);
 
-    VComboSettings vs(cs->sessionFile(),cs->windowFile());
-
-    //Read configuration. If it fails we create an empty window!!
-    if(!vs.read())
-    {
-         MainWindow::makeWindow(&vs);
-         return;
-    }
-
-    //Get number of windows and topWindow index.
-    int cnt=vs.get<int>("windowCount",0);
-    int topWinId=vs.get<int>("topWindowId",-1);
-
-    if(cnt > maxWindowNum_)
-    {
-        cnt=maxWindowNum_;
-    }
-
-    //Create all windows (except the topWindow) in a loop. The
-    //topWindow should be created last so that it should always appear on top.
-    std::string winPattern("window_");
-    for(int i=0; i < cnt; i++)
-    {
-        if(i != topWinId)
-        {
-            std::string id=winPattern + boost::lexical_cast<std::string>(i);
-            if(vs.contains(id))
-            {
-                vs.beginGroup(id);
-                MainWindow::makeWindow(&vs);
-                vs.endGroup();
-            }
-        }
-    }
-
-    //Create the topwindow
-    if(topWinId != -1)
-    {
-        std::string id=winPattern + boost::lexical_cast<std::string>(topWinId);
-        if(vs.contains(id))
-        {
-            vs.beginGroup(id);
-            MainWindow::makeWindow(&vs);
-            vs.endGroup();
-        }
-    }
-
-    //If now windows were created we need to create an empty one
-    if(windows_.count() == 0)
-    {
-        MainWindow::makeWindow(&vs);
-    }
-
-#endif
-
-    if(windows_.count() == 0)
-    {
-        LogMainWindow::makeWindow();
-    }
-
+    vs.beginGroup("window_0");
+    readSettings(vs);
+    vs.endGroup();
 }
 
 void LogMainWindow::save(LogMainWindow *topWin)
-{
-#if 0
-    MainWindow::saveContents(topWin);
-
-    //Save global config
-    VConfig::instance()->saveSettings();
-
-    //Save server list
-    ServerHandler::saveSettings();
-
-    //Save icon name list
-    VIcon::saveLastNames();
-#endif
-}
-
-void LogMainWindow::saveContents(LogMainWindow *topWin)
-{
-#if 0
-    SessionItem* cs=SessionHandler::instance()->current();
-    assert(cs);
-
-    VComboSettings vs(cs->sessionFile(),cs->windowFile());
+{  
+    QSettings vs(LogMainWindow::qsFile("main"),QSettings::NativeFormat);
 
     //We have to clear it so that not to remember all the previous windows
     vs.clear();
 
     //Add total window number and id of active window
-    vs.put("windowCount",windows_.count());
-    vs.put("topWindowId",windows_.indexOf(topWin));
+    vs.setValue("windowCount",windows_.count());
+    vs.setValue("topWindowId",windows_.indexOf(topWin));
 
     //Save info for all the windows
     for(int i=0; i < windows_.count(); i++)
     {
-        std::string id="window_"+boost::lexical_cast<std::string>(i);
+        QString id="window_"+ QString::number(i);
         vs.beginGroup(id);
-        windows_.at(i)->writeSettings(&vs);
+        windows_.at(i)->writeSettings(vs);
         vs.endGroup();
     }
-
-    //Write to json
-    vs.write();
-#endif
 }
-
 
 void LogMainWindow::reload()
 {
@@ -547,13 +483,6 @@ void LogMainWindow::reload()
         w->reloadContents();
     }*/
 }
-
-#if 0
-void MainWindow::saveSession(SessionItem* s)
-{
-
-}
-#endif
 
 LogMainWindow* LogMainWindow::findWindow(QWidget *childW)
 {
@@ -569,4 +498,22 @@ LogMainWindow* LogMainWindow::findWindow(QWidget *childW)
 LogMainWindow* LogMainWindow::firstWindow()
 {
     return (!windows_.isEmpty())?(windows_[0]):NULL;
+}
+
+QString LogMainWindow::qsFile(QString name)
+{
+    std::string confDir=DirectoryHandler::logviewerConfigDir();
+    std::string qsFile=DirectoryHandler::concatenate(confDir, name.toStdString() + ".conf");
+    return QString::fromStdString(qsFile);
+}
+
+void LogMainWindow::setInitialSize(int w, int h)
+{
+    QDesktopWidget *dw=QApplication::desktop();
+    QRect scg=dw->screenGeometry(dw->screenNumber());
+
+    int wr=(scg.width()  > w) ? w : scg.width()-50;
+    int hr=(scg.height() > h) ? h : scg.height()-50;
+
+    resize(QSize(wr,hr));
 }

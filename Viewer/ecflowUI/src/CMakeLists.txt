@@ -67,7 +67,6 @@ set(viewer_srcs
     ManualItemWidget.cpp 
     MenuConfigDialog.cpp
     MenuHandler.cpp
-    MessageLabel.cpp
     MessageItemWidget.cpp
     MeterEditor.cpp
     ModelColumn.cpp

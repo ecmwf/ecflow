@@ -22,9 +22,9 @@
   <property name="statusTip">
    <string/>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,1">
    <property name="spacing">
-    <number>0</number>
+    <number>1</number>
    </property>
    <property name="leftMargin">
     <number>0</number>
@@ -41,7 +41,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="1,0,0,0,0">
      <property name="spacing">
-      <number>8</number>
+      <number>4</number>
      </property>
      <item>
       <widget class="QLabel" name="logInfoLabel">
@@ -67,16 +67,6 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Plot resolution: </string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="resCombo"/>
-     </item>
-     <item>
       <widget class="QToolButton" name="showFullTb">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -89,7 +79,20 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Plot resolution: </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="resCombo"/>
+     </item>
     </layout>
+   </item>
+   <item>
+    <widget class="MessageLabel" name="messageLabel" native="true"/>
    </item>
    <item>
     <widget class="QSplitter" name="splitter">
@@ -246,6 +249,12 @@
    <class>LogView</class>
    <extends>QTreeView</extends>
    <header>LogView.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>MessageLabel</class>
+   <extends>QWidget</extends>
+   <header>MessageLabel.hpp</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
