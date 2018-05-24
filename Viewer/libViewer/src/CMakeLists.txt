@@ -15,7 +15,7 @@ set(srcs
     )
 
 if(ECFLOW_LOGVIEW)
-    list(APPEND srcs LogLoadWidget.cpp)
+    list(APPEND srcs LogLoadData.cpp LogLoadWidget.cpp)
 endif()
 
 if(ECFLOW_QT5)

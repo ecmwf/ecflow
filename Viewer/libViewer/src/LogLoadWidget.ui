@@ -129,7 +129,7 @@
       </property>
      </widget>
      <widget class="QWidget" name="layoutWidget">
-      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1">
+      <layout class="QVBoxLayout" name="verticalLayout_4" stretch="0,1,0">
        <property name="spacing">
         <number>2</number>
        </property>
@@ -140,7 +140,14 @@
         <layout class="QHBoxLayout" name="horizontalLayout"/>
        </item>
        <item>
-        <widget class="ServerLoadView" name="loadView" native="true"/>
+        <widget class="QTabWidget" name="viewTab">
+         <property name="currentIndex">
+          <number>-1</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="ServerLoadView" name="loadView_old" native="true"/>
        </item>
       </layout>
      </widget>
@@ -204,6 +211,26 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Child commands</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTreeView" name="childTree"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>User commands</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTreeView" name="userTree"/>
        </item>
       </layout>
      </widget>
