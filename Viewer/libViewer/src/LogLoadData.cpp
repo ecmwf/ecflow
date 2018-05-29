@@ -119,7 +119,7 @@ void LogLoadDataItem::clear()
     userReq_.clear();
     name_.clear();
     childSubReq_.clear();
-    childSubReq_.clear();
+    userSubReq_.clear();
 
     buildSubReq();
 }

@@ -18,6 +18,7 @@
 #include <QAbstractItemModel>
 #include <QGraphicsItem>
 #include <QMap>
+#include <QScrollArea>
 #include <QStringList>
 #include <QWidget>
 
@@ -57,6 +58,7 @@ public:
 
 protected Q_SLOTS:
     void resolutionChanged(int);
+    void currentTabChanged(int);
 
 private:
     void setAllVisible(bool);
@@ -73,6 +75,8 @@ private:
     QSortFilterProxyModel* suiteSortModel_;
     LogLoadRequestModel* childReqModel_;
     QSortFilterProxyModel* childReqSortModel_;
+    LogLoadRequestModel* userReqModel_;
+    QSortFilterProxyModel* userReqSortModel_;
     LogModel* logModel_;
 
     QString serverName_;
@@ -132,6 +136,8 @@ public:
     bool hasData() const;
     void clearData();
 
+    void setShowColour(bool);
+
 Q_SIGNALS:
     void checkStateChanged(int,bool);
 
@@ -145,6 +151,7 @@ protected:
 
     QString dataName_;
     QList<LogLoadRequestModelDataItem> data_;
+    bool showColour_;
 };
 
 
@@ -301,6 +308,7 @@ class LogRequestViewHandler : public QObject
     friend class LogRequestView;
     friend class LogTotalRequestView;
     friend class LogSuiteRequestView;
+    friend class LogSubRequestView;
 
 public:
     LogRequestViewHandler(QWidget* parent);
@@ -320,10 +328,13 @@ public Q_SLOTS:
     void showFullRange();
     void addRemoveSuite(int idx, bool st);
     void addRemoveChildReq(int idx, bool st);
+    void addRemoveUserReq(int idx, bool st);
 
 Q_SIGNALS:
     void scanDataChanged(QString);
     void suitePlotStateChanged(int,bool,QColor);
+    void childPlotStateChanged(int,bool,QColor);
+    void userPlotStateChanged(int,bool,QColor);
     void timeRangeChanged(qint64,qint64);
     void timeRangeHighlighted(qint64,qint64,qint64);
     void timeRangeReset();
@@ -337,7 +348,7 @@ protected:
     size_t lastScanIndex_;
 };
 
-class LogRequestView : public QWidget
+class LogRequestView : public QScrollArea
 {
     Q_OBJECT
 public:
@@ -355,6 +366,8 @@ public:
 Q_SIGNALS:
     void scanDataChanged(QString);
     void suitePlotStateChanged(int,bool,QColor);
+    void childPlotStateChanged(int,bool,QColor);
+    void userPlotStateChanged(int,bool,QColor);
     void timeRangeChanged(qint64,qint64);
     void timeRangeHighlighted(qint64,qint64,qint64);
     void timeRangeReset();
@@ -363,6 +376,7 @@ public Q_SLOTS:
     void showFullRange();
     virtual void addRemoveSuite(int idx, bool st) {}
     virtual void addRemoveChildReq(int idx, bool st) {}
+    virtual void addRemoveUserReq(int idx, bool st) {}
 
 protected Q_SLOTS:
     void slotZoom(QRectF);
@@ -370,34 +384,35 @@ protected Q_SLOTS:
     void scanPositionClicked(qreal);
 
 protected:
-    //enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
-
-    QChart* addChartById(int id);
-    void removeChartById(int id);
+    QChart* addChartById(QString id);
+    void removeChartById(QString id);
+    QString chartId(ChartView* cv);
     void clearCharts();
     virtual void loadCore()=0;
     void loadSuites();
+
     virtual void addSuite(int)=0;
-    void build(ChartView* view,QLineSeries *series,QString title,int maxVal);
-    void removeSuiteSeries(QChart* chart,QString id);
-    //QChart* getChart(ChartType);
-    //ChartView* getView(ChartType);
-    QColor suiteSeriesColour(QChart* chart,size_t idx);
+    virtual void removeSuite(int)=0;
+    virtual void addChildReq(int) {}
+    virtual void removeChildReq(int) {}
+    virtual void addUserReq(int) {}
+    virtual void removeUserReq(int) {}
+
     QColor seriesColour(QChart* chart,QString id);
+
+    void build(ChartView* view,QLineSeries *series,QString title,int maxVal);
+
+    void removeSeries(QChart* chart,QString id);
+
+
     void buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor col) const;
     void buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const;
 
     LogRequestViewHandler* handler_;
     QList<ChartView*> views_;
-    QMap<int,ChartView*> viewIds_;
+    QMap<QString,ChartView*> viewIds_;
     QVBoxLayout* mainLayout_;
-    //LogLoadData* data_;
-    //QList<bool> suitePlotState_;
-    //size_t lastScanIndex_;
 };
-
-
-
 
 class LogTotalRequestView : public LogRequestView
 {
@@ -433,23 +448,14 @@ public Q_SLOTS:
 protected:
     enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
 
-    //void clearCharts();
     void loadCore();
-    //void loadSuites();
+
     void addSuite(int);
-    //void build(ChartView* view,QLineSeries *series,QString title,int maxVal);
-    //void removeSuiteSeries(QChart* chart,QString id);
+    void removeSuite(int) {}
+
+    QString suiteSeriesId(int idx) const;
     QChart* getChart(ChartType);
     ChartView* getView(ChartType);
-    //QColor suiteSeriesColour(QChart* chart,size_t idx);
-    //QColor seriesColour(QChart* chart,QString id);
-    //void buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor col) const;
-    //void buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const;
-
-    //QList<ChartView*> views_;
-    //LogLoadData* data_;
-    //QList<bool> suitePlotState_;
-    //size_t lastScanIndex_;
 };
 
 class LogSuiteRequestView : public  LogRequestView
@@ -465,7 +471,7 @@ public:
 
 //Q_SIGNALS:
     //void scanDataChanged(QString);
-    //void suitePlotStateChanged(int,bool,QColor);
+    //void childPlotStateChanged(int,bool,QColor);
     //void timeRangeChanged(qint64,qint64);
     //void timeRangeHighlighted(qint64,qint64,qint64);
     //void timeRangeReset();
@@ -477,37 +483,68 @@ public Q_SLOTS:
     //void slotZoom(QRectF);
     void addRemoveSuite(int idx, bool st);
     void addRemoveChildReq(int idx, bool st);
+    void addRemoveUserReq(int idx, bool st);
     //void scanPositionChanged(qreal);
     //void scanPositionClicked(qreal);
 
 protected:
-    //enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
-
-    //void clearCharts();
     void loadCore();
-    //void loadSuites();
 
     void addSuite(int);
-    int  chartId(ChartView* cv);
+    void removeSuite(int) {}
     void addChildReq(int childReqIdx);
+    void removeChildReq(int childReqIdx);
+    void addUserReq(int userReqIdx);
+    void removeUserReq(int userReqIdx);
 
-    //void build(ChartView* view,QLineSeries *series,QString title,int maxVal);
-    //void removeSuiteSeries(QChart* chart,QString id);
-    //QChart* getChart(ChartType);
-    //ChartView* getView(ChartType);
-    //QColor suiteSeriesColour(QChart* chart,size_t idx);
-    //QColor seriesColour(QChart* chart,QString id);
-    //void buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor col) const;
-    //void buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const;
-
-    //LogRequestViewHandler* handler_;
-    //QList<ChartView*> views_;
-
-    //QVBoxLayout* mainLayout_;
-    //LogLoadData* data_;
-    //QList<bool> suitePlotState_;
-    //size_t lastScanIndex_;
+    QString childSeriesId(int childIdx) const;
+    QString userSeriesId(int userIdx) const;
+    QColor childSeriesColour(QChart* chart,size_t idx);
+    QColor userSeriesColour(QChart* chart,size_t idx);
 };
 
+class LogSubRequestView : public  LogRequestView
+{
+    Q_OBJECT
+public:
+    explicit LogSubRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogSubRequestView() {}
+
+//Q_SIGNALS:
+    //void scanDataChanged(QString);
+    //void childPlotStateChanged(int,bool,QColor);
+    //void timeRangeChanged(qint64,qint64);
+    //void timeRangeHighlighted(qint64,qint64,qint64);
+    //void timeRangeReset();
+
+public Q_SLOTS:
+    //void showFullRange();
+
+public Q_SLOTS:
+    //void slotZoom(QRectF);
+    void addRemoveSuite(int idx, bool st);
+    void addRemoveChildReq(int idx, bool st);
+    void addRemoveUserReq(int idx, bool st);
+    //void scanPositionChanged(qreal);
+    //void scanPositionClicked(qreal);
+
+protected:
+    void loadCore();
+
+    void addSuite(int);
+    void removeSuite(int);
+    void addChildReq(int childReqIdx);
+    void removeChildReq(int childReqIdx) {}
+    void addUserReq(int userReqIdx);
+    void removeUserReq(int userReqIdx) {}
+
+    QString childChartId(int idx) const;
+    QString userChartId(int idx) const;
+    void parseChartId(QString id,QString& type,int& idx);
+
+    QString suiteSeriesId(int suiteIdx) const;
+    QColor suiteSeriesColour(QChart*,int suiteIdx);
+
+};
 
 #endif // LOGLOADWIDGET_HPP
