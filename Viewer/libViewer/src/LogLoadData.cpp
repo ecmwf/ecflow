@@ -73,6 +73,16 @@ void LogReqCounter::add(bool childCmd,const std::string& line)
     }
 }
 
+
+void LogRequestItem::add(size_t v)
+{
+    sumTotal_+=v;
+    req_.push_back(v);
+
+    if(maxTotal_ < v)
+        maxTotal_ = v;
+}
+
 //=======================================================
 //
 // LogLoadDataItem
@@ -85,13 +95,13 @@ bool sortVecFunction(const std::pair<size_t,size_t>& a, const std::pair<size_t,s
 }
 
 LogLoadDataItem::LogLoadDataItem(const std::string& name) :
-    sumTotal_(0), maxTotal_(0), rank_(-1), percentage_(0.), name_(name)
+    subReqMax_(0), sumTotal_(0), maxTotal_(0), rank_(-1), percentage_(0.), name_(name)
 {
     buildSubReq();
 }
 
 LogLoadDataItem::LogLoadDataItem() :
-    sumTotal_(0), maxTotal_(0), rank_(-1), percentage_(0.)
+    subReqMax_(0), sumTotal_(0), maxTotal_(0), rank_(-1), percentage_(0.)
 {
     buildSubReq();
 }
@@ -104,10 +114,22 @@ void LogLoadDataItem::buildSubReq()
 void LogLoadDataItem::buildSubReq(std::vector<LogRequestItem>& childSubReq,
                                   std::vector<LogRequestItem>& userSubReq)
 {
-    childSubReq.push_back(LogRequestItem(LogRequestItem::ChildLabelType,"label","chd:label"));
+    childSubReq.push_back(LogRequestItem(LogRequestItem::ChildAbortType,"abort","chd:abort"));
+    childSubReq.push_back(LogRequestItem(LogRequestItem::ChildCompleteType,"complete","chd:complete"));
+    childSubReq.push_back(LogRequestItem(LogRequestItem::ChildEventType,"event","chd:event"));
     childSubReq.push_back(LogRequestItem(LogRequestItem::ChildInitType,"init","chd:init"));
-    userSubReq.push_back(LogRequestItem(LogRequestItem::UserNewsType,"news","--news="));
-    userSubReq.push_back(LogRequestItem(LogRequestItem::UserSyncType,"sync","--sync="));
+    childSubReq.push_back(LogRequestItem(LogRequestItem::ChildLabelType,"label","chd:label"));
+    childSubReq.push_back(LogRequestItem(LogRequestItem::ChildMeterType,"meter","chd:meter"));
+    childSubReq.push_back(LogRequestItem(LogRequestItem::ChildWaitType,"wait","chd:wait"));
+
+    userSubReq.push_back(LogRequestItem(LogRequestItem::UserAlterType,"alter","--alter="));
+    userSubReq.push_back(LogRequestItem(LogRequestItem::UserDeleteType,"delete","--delete="));
+    userSubReq.push_back(LogRequestItem(LogRequestItem::UserForceType,"force","--force="));
+    userSubReq.push_back(LogRequestItem(LogRequestItem::UserNewsType,"news","--news=",true));
+    userSubReq.push_back(LogRequestItem(LogRequestItem::UserRequeueType,"requeue","--requeue="));
+    userSubReq.push_back(LogRequestItem(LogRequestItem::UserResumeType,"resume","--resume="));
+    userSubReq.push_back(LogRequestItem(LogRequestItem::UserSuspendType,"suspend","--suspend="));
+    userSubReq.push_back(LogRequestItem(LogRequestItem::UserSyncType,"sync","--sync=",true));
 }
 
 void LogLoadDataItem::clear()
@@ -120,6 +142,7 @@ void LogLoadDataItem::clear()
     name_.clear();
     childSubReq_.clear();
     userSubReq_.clear();
+    subReqMax_=0;
 
     buildSubReq();
 }
@@ -181,12 +204,68 @@ void LogLoadDataItem::add(const LogReqCounter& req)
 
     for(size_t i=0; i < childSubReq_.size(); i++)
     {
-        childSubReq_[i].req_.push_back(req.childSubReq_[i].counter_);
+        childSubReq_[i].add(req.childSubReq_[i].counter_);
     }
 
     for(size_t i=0; i < userSubReq_.size(); i++)
     {
-        userSubReq_[i].req_.push_back(req.userSubReq_[i].counter_);
+        userSubReq_[i].add(req.userSubReq_[i].counter_);
+    }
+}
+
+void LogLoadDataItem::procSubReq(std::vector<LogRequestItem>& subReq)
+{
+    if(subReq.size() == 0)
+        return;
+
+    if(subReq.size() == 1)
+    {
+        subReq[0].rank_=0;
+        subReq[0].percentage_=100.;
+        return;
+    }
+
+    std::vector<size_t> sumVec;
+    std::vector<std::pair<size_t,size_t> > sortVec;
+    size_t sum=0;
+    for(size_t i = 0; i < subReq.size(); i++)
+    {
+        sum+=subReq[i].sumTotal_;
+        sumVec.push_back(subReq[i].sumTotal_);
+        sortVec.push_back(std::make_pair(i,subReq[i].sumTotal_));
+    }
+
+    if(sum <=0 )
+        return;
+
+    assert(sumVec.size() == subReq.size());
+    std::sort(sortVec.begin(), sortVec.end(),sortVecFunction);
+
+    for(size_t i = 0; i < sortVec.size(); i++)
+    {
+        int idx=sortVec[i].first;
+        subReq[idx].rank_=sortVec.size()-i-1;
+        subReq[idx].percentage_=static_cast<float>(subReq[idx].sumTotal_*100)/static_cast<float>(sum);
+    }
+}
+
+void LogLoadDataItem::postProc()
+{
+    procSubReq(childSubReq_);
+    procSubReq(userSubReq_);
+
+    subReqMax_=0;
+
+    for(size_t i=0; i < childSubReq_.size(); i++)
+    {
+        if(subReqMax_ < childSubReq_[i].maxTotal_)
+            subReqMax_ = childSubReq_[i].maxTotal_;
+    }
+
+    for(size_t i=0; i < userSubReq_.size(); i++)
+    {
+        if(subReqMax_ < userSubReq_[i].maxTotal_)
+            subReqMax_ = userSubReq_[i].maxTotal_;
     }
 }
 
@@ -202,6 +281,21 @@ void LogLoadData::clear()
     total_.clear();
     suiteData_.clear();
     suites_.clear();
+}
+
+QString LogLoadData::childSubReqName(int idx) const
+{
+    return QString::fromStdString(total_.childSubReq()[idx].name_);
+}
+
+QString LogLoadData::userSubReqName(int idx) const
+{
+    return QString::fromStdString(total_.userSubReq()[idx].name_);
+}
+
+size_t LogLoadData::subReqMax() const
+{
+    return total_.subReqMax();
 }
 
 void LogLoadData::setTimeRes(TimeRes res)
@@ -285,14 +379,18 @@ bool LogLoadData::indexOfTime(qint64 t,size_t& idx,size_t startIdx,qint64 tolera
     return false;
 }
 
-void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals)
+void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals,int& maxVal)
 {
     UI_ASSERT(time_.size() == vals.size(), "time_.size()=" << time_.size() << " vals.size()=" << vals.size());
 
+    maxVal=0;
     if(timeRes_ == SecondResolution)
     {
         for(size_t i=0; i < time_.size(); i++)
+        {
+            if(vals[i] > maxVal) maxVal=vals[i];
             series.append(time_[i], vals[i]);
+        }
     }
     else if(timeRes_ == MinuteResolution)
     {
@@ -305,13 +403,38 @@ void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals)
             if(currentMinute != minute)
             {
                 if(currentMinute >0 )
+                {
+                    if(sum > maxVal) maxVal=sum;
                     series.append(time_[i],sum);
+                }
 
                 currentMinute=minute;
                 sum=0;
             }
         }
     }
+    else if(timeRes_ == HourResolution)
+    {
+        qint64 currentHour=0;
+        int sum=0;
+        for(size_t i=0; i < time_.size(); i++)
+        {
+            qint64 hour=time_[i]/3600000;
+            sum+=vals[i];
+            if(currentHour != hour)
+            {
+                if(currentHour >0 )
+                {
+                    if(sum > maxVal) maxVal=sum;
+                    series.append(time_[i],sum);
+                }
+
+                currentHour=hour;
+                sum=0;
+            }
+        }
+    }
+
 }
 
 void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals1,const std::vector<int>& vals2,int & maxVal)
@@ -346,16 +469,40 @@ void LogLoadData::getSeries(QLineSeries& series,const std::vector<int>& vals1,co
             }
         }
     }
+    else if(timeRes_ == HourResolution)
+    {
+        maxVal=0;
+        qint64 currentHour=0;
+        int sum=0;
+        for(size_t i=0; i < time_.size(); i++)
+        {
+            qint64 hour=time_[i]/3600000;
+            sum+=vals1[i] + vals2[i];
+            if(currentHour != hour)
+            {
+                if(currentHour >0 )
+                {
+                    series.append(time_[i],sum);
+                    if(maxVal < sum)
+                        maxVal=sum;
+                }
+                currentHour=hour;
+                sum=0;
+            }
+        }
+    }
 }
 
 void LogLoadData::getChildReq(QLineSeries& series)
 {
-    getSeries(series,total_.childReq());
+    int maxVal=0;
+    getSeries(series,total_.childReq(),maxVal);
 }
 
 void LogLoadData::getUserReq(QLineSeries& series)
 {
-    getSeries(series,total_.userReq());
+    int maxVal=0;
+    getSeries(series,total_.userReq(),maxVal);
 }
 
 void LogLoadData::getTotalReq(QLineSeries& series,int& maxVal)
@@ -369,8 +516,8 @@ void LogLoadData::getSuiteChildReq(size_t idx,QLineSeries& series)
 {
     if(idx >=0 && idx < suites().size())
     {
-        int maxVal;
-        getSeries(series,suiteData_[idx].childReq());
+        int maxVal=0;
+        getSeries(series,suiteData_[idx].childReq(),maxVal);
     }
 }
 
@@ -378,8 +525,8 @@ void LogLoadData::getSuiteUserReq(size_t idx,QLineSeries& series)
 {
     if(idx >=0 && idx < suites().size())
     {
-        int maxVal;
-        getSeries(series,suiteData_[idx].userReq());
+        int maxVal=0;
+        getSeries(series,suiteData_[idx].userReq(),maxVal);
     }
 }
 
@@ -387,7 +534,7 @@ void LogLoadData::getSuiteTotalReq(size_t idx,QLineSeries& series)
 {
     if(idx >=0 && idx < suites().size())
     {
-        int maxVal;
+        int maxVal=0;
         getSeries(series,suiteData_[idx].childReq(),suiteData_[idx].userReq(),maxVal);
     }
 }
@@ -396,17 +543,27 @@ void LogLoadData::getSuiteChildSubReq(size_t suiteIdx,size_t subIdx,QLineSeries&
 {
     if(suiteIdx >=0 && suiteIdx < suites().size())
     {
-        int maxVal;
-        getSeries(series,suiteData_[suiteIdx].childSubReq()[subIdx].req_);
+        int maxVal=0;
+        getSeries(series,suiteData_[suiteIdx].childSubReq()[subIdx].req_,maxVal);
     }
+}
+
+void LogLoadData::getChildSubReq(size_t subIdx,QLineSeries& series,int& maxVal)
+{
+     getSeries(series,total_.childSubReq()[subIdx].req_,maxVal);
+}
+
+void LogLoadData::getUserSubReq(size_t subIdx,QLineSeries& series,int& maxVal)
+{
+    getSeries(series,total_.userSubReq()[subIdx].req_,maxVal);
 }
 
 void LogLoadData::getSuiteUserSubReq(size_t suiteIdx,size_t subIdx,QLineSeries& series)
 {
     if(suiteIdx >=0 && suiteIdx < suites().size())
     {
-        int maxVal;
-        getSeries(series,suiteData_[suiteIdx].userSubReq()[subIdx].req_);
+        int maxVal=0;
+        getSeries(series,suiteData_[suiteIdx].userSubReq()[subIdx].req_,maxVal);
     }
 }
 
@@ -444,6 +601,8 @@ void LogLoadData::add(std::vector<std::string> time_stamp,const LogReqCounter& t
 
 void LogLoadData::processSuites()
 {
+    total_.postProc();
+
     if(suiteData_.size() == 0)
         return;
 
@@ -475,6 +634,11 @@ void LogLoadData::processSuites()
         int idx=sortVec[i].first;
         suiteData_[idx].setRank(sortVec.size()-i-1);
         suiteData_[idx].setPercentage(static_cast<float>(suiteData_[idx].sumTotal()*100)/static_cast<float>(sum));
+    }
+
+    for(size_t i = 0; i < suiteData_.size(); i++)
+    {
+        suiteData_[i].postProc();
     }
 }
 
@@ -716,12 +880,6 @@ bool LogLoadData::extract_suite_path(
                     if (suite_vec[n].name_ == theNodeNames[0] )
                     {
                         suite_vec[n].add(child_cmd,line);
-                        /*if(child_cmd)
-                            suite_vec[n].childReq_++;
-                        else
-                            suite_vec[n].userReq_++;*/
-
-                        //suite_vec[n].total_request_per_second_++;
                         column_index = n;
                         return true;
                     }
@@ -730,12 +888,6 @@ bool LogLoadData::extract_suite_path(
                 suite_vec.push_back( LogReqCounter(theNodeNames[0]) );
                 column_index = suite_vec.size() - 1;
                 suite_vec[column_index].add(child_cmd,line);
-#if 0
-                if(child_cmd)
-                    suite_vec[column_index].childReq_++;
-                else
-                    suite_vec[column_index].userReq_++;
-#endif
                 return true;
          }
       }

@@ -19,9 +19,10 @@
 #include <QGraphicsItem>
 #include <QMap>
 #include <QScrollArea>
+
 #include <QStringList>
 #include <QWidget>
-
+#include <QSortFilterProxyModel>
 #include <QtCharts>
 using namespace QtCharts;
 
@@ -37,6 +38,7 @@ class LogRequestViewHandler;
 class ServerLoadView;
 class QSortFilterProxyModel;
 class QVBoxLayout;
+class QComboBox;
 
 namespace Ui {
     class LogLoadWidget;
@@ -62,6 +64,9 @@ protected Q_SLOTS:
 
 private:
     void setAllVisible(bool);
+    void setSuiteControlVisible(bool b);
+    void setChildControlVisible(bool b);
+    void setUserControlVisible(bool b);
     void load();
     void updateInfoLabel();
 
@@ -78,6 +83,7 @@ private:
     LogLoadRequestModel* userReqModel_;
     QSortFilterProxyModel* userReqSortModel_;
     LogModel* logModel_;
+    QComboBox* resCombo_;
 
     QString serverName_;
     QString host_;
@@ -110,6 +116,15 @@ struct LogLoadSuiteModelDataItem
     int rank_;
 };
 
+class LogLoadRequestSortModel : public QSortFilterProxyModel
+{
+public:
+    LogLoadRequestSortModel(QObject* parent=0);
+
+protected:
+    bool lessThan(const QModelIndex &left,const QModelIndex &right) const;
+};
+
 //Model to dislay/select the suites
 class LogLoadRequestModel : public QAbstractItemModel
 {
@@ -129,7 +144,6 @@ public:
     QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
     QModelIndex parent (const QModelIndex & ) const;
 
-    //void setData(LogLoadData* data,QList<bool>); //for subrequests
     void setData(const std::vector<LogLoadDataItem>& data,QList<bool> checkedLst); //for suites
     void setData(const std::vector<LogRequestItem>& data,QList<bool> checkedLst); //for subrequests
 
@@ -152,45 +166,6 @@ protected:
     QString dataName_;
     QList<LogLoadRequestModelDataItem> data_;
     bool showColour_;
-};
-
-
-
-//Model to dislay/select the suites
-class LogLoadSuiteModel : public QAbstractItemModel
-{
-    Q_OBJECT
-public:
-    explicit LogLoadSuiteModel(QObject *parent=0);
-    ~LogLoadSuiteModel();
-
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
-
-    Qt::ItemFlags flags ( const QModelIndex & index) const;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-    bool setData(const QModelIndex& idx, const QVariant & value, int role );
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
-
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-    QModelIndex parent (const QModelIndex & ) const;
-
-    void setData(LogLoadData* data,QList<bool>);
-    bool hasData() const;
-    void clearData();
-
-Q_SIGNALS:
-    void checkStateChanged(int,bool);
-
-public Q_SLOTS:
-    void updateSuite(int,bool,QColor);
-    void unselectAllSuites();
-    void selectFirstFourSuites();
-
-protected:
-    QString formatPrecentage(float perc) const;
-
-    QList<LogLoadSuiteModelDataItem> data_;
 };
 
 class ChartCallout : public QGraphicsItem
@@ -245,6 +220,7 @@ protected:
     ChartCallout* callout_;
 };
 
+#if 0
 class ServerLoadView : public QWidget
 {
     Q_OBJECT
@@ -298,6 +274,8 @@ protected:
     size_t lastScanIndex_;
 };
 
+#endif
+
 class LogRequestView;
 
 
@@ -345,7 +323,7 @@ protected:
     QList<bool> suitePlotState_;
     QList<bool> childPlotState_;
     QList<bool> userPlotState_;
-    size_t lastScanIndex_;
+    int lastScanIndex_;
 };
 
 class LogRequestView : public QScrollArea
@@ -388,6 +366,7 @@ protected:
     void removeChartById(QString id);
     QString chartId(ChartView* cv);
     void clearCharts();
+    void clearViews();
     virtual void loadCore()=0;
     void loadSuites();
 
@@ -398,13 +377,18 @@ protected:
     virtual void addUserReq(int) {}
     virtual void removeUserReq(int) {}
 
+    int seriesValue(QChart* chart,QString id,int idx);
     QColor seriesColour(QChart* chart,QString id);
+    bool seriesIndex(qint64 t,int startId,qint64 tolerance,int& idx);
+    qint64 seriesTime(int idx);
 
+    void adjustMaxVal();
     void build(ChartView* view,QLineSeries *series,QString title,int maxVal);
 
     void removeSeries(QChart* chart,QString id);
 
-
+    virtual void buildScanTable(QString& txt,int idx)=0;
+    void buildScanRow(QString &txt,QString name,size_t val,QColor col) const;
     void buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor col) const;
     void buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const;
 
@@ -412,6 +396,7 @@ protected:
     QList<ChartView*> views_;
     QMap<QString,ChartView*> viewIds_;
     QVBoxLayout* mainLayout_;
+    int maxVal_;
 };
 
 class LogTotalRequestView : public LogRequestView
@@ -456,6 +441,7 @@ protected:
     QString suiteSeriesId(int idx) const;
     QChart* getChart(ChartType);
     ChartView* getView(ChartType);
+    void buildScanTable(QString& txt,int idx);
 };
 
 class LogSuiteRequestView : public  LogRequestView
@@ -490,6 +476,7 @@ public Q_SLOTS:
 protected:
     void loadCore();
 
+    void addTotal();
     void addSuite(int);
     void removeSuite(int) {}
     void addChildReq(int childReqIdx);
@@ -501,6 +488,7 @@ protected:
     QString userSeriesId(int userIdx) const;
     QColor childSeriesColour(QChart* chart,size_t idx);
     QColor userSeriesColour(QChart* chart,size_t idx);
+    void buildScanTable(QString& txt,int idx);
 };
 
 class LogSubRequestView : public  LogRequestView
@@ -544,7 +532,7 @@ protected:
 
     QString suiteSeriesId(int suiteIdx) const;
     QColor suiteSeriesColour(QChart*,int suiteIdx);
-
+    void buildScanTable(QString& txt,int idx);
 };
 
 #endif // LOGLOADWIDGET_HPP
