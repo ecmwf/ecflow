@@ -39,6 +39,7 @@ class ServerLoadView;
 class QSortFilterProxyModel;
 class QVBoxLayout;
 class QComboBox;
+class QTextBrowser;
 
 namespace Ui {
     class LogLoadWidget;
@@ -220,64 +221,7 @@ protected:
     ChartCallout* callout_;
 };
 
-#if 0
-class ServerLoadView : public QWidget
-{
-    Q_OBJECT
-public:
-    explicit ServerLoadView(QWidget* parent=0);
-    ~ServerLoadView();
-
-    void setData(LogLoadData*);
-    LogLoadData* data() const {return data_;}
-    QList<bool> suitePlotState() const {return suitePlotState_;}
-
-    void clear();
-    void load(const std::string& logFile);
-    void setResolution(LogLoadData::TimeRes);
-
-Q_SIGNALS:
-    void scanDataChanged(QString);
-    void suitePlotStateChanged(int,bool,QColor);
-    void timeRangeChanged(qint64,qint64);
-    void timeRangeHighlighted(qint64,qint64,qint64);
-    void timeRangeReset();
-
-public Q_SLOTS:
-    void showFullRange();
-
-protected Q_SLOTS:
-    void slotZoom(QRectF);
-    void addRemoveSuite(int idx, bool st);
-    void scanPositionChanged(qreal);
-    void scanPositionClicked(qreal);
-
-protected:
-    enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
-
-    void clearCharts();
-    void load();
-    void loadSuites();
-    void addSuite(int);
-    void build(ChartView* view,QLineSeries *series,QString title,int maxVal);
-    void removeSuiteSeries(QChart* chart,QString id);
-    QChart* getChart(ChartType);
-    ChartView* getView(ChartType);
-    QColor suiteSeriesColour(QChart* chart,size_t idx);
-    QColor seriesColour(QChart* chart,QString id);
-    void buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor col) const;
-    void buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const;
-
-    QList<ChartView*> views_;
-    LogLoadData* data_;
-    QList<bool> suitePlotState_;
-    size_t lastScanIndex_;
-};
-
-#endif
-
 class LogRequestView;
-
 
 class LogRequestViewHandler : public QObject
 {
@@ -287,6 +231,7 @@ class LogRequestViewHandler : public QObject
     friend class LogTotalRequestView;
     friend class LogSuiteRequestView;
     friend class LogSubRequestView;
+    friend class LogStatRequestView;
 
 public:
     LogRequestViewHandler(QWidget* parent);
@@ -307,6 +252,9 @@ public Q_SLOTS:
     void addRemoveSuite(int idx, bool st);
     void addRemoveChildReq(int idx, bool st);
     void addRemoveUserReq(int idx, bool st);
+
+protected Q_SLOTS:
+    void slotZoomHappened(QRectF);
 
 Q_SIGNALS:
     void scanDataChanged(QString);
@@ -333,13 +281,10 @@ public:
     explicit LogRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
     ~LogRequestView();
 
-    //void setData(LogLoadData*);
-    //LogLoadData* data() const {return data_;}
-    //QList<bool> suitePlotState() const {return suitePlotState_;}
-
     void clear();
     void load();
     void changeResolution();
+    virtual void adjustZoom(QRectF r);
 
 Q_SIGNALS:
     void scanDataChanged(QString);
@@ -349,6 +294,7 @@ Q_SIGNALS:
     void timeRangeChanged(qint64,qint64);
     void timeRangeHighlighted(qint64,qint64,qint64);
     void timeRangeReset();
+    void zoomHappened(QRectF);
 
 public Q_SLOTS:
     void showFullRange();
@@ -358,6 +304,7 @@ public Q_SLOTS:
 
 protected Q_SLOTS:
     void slotZoom(QRectF);
+    void adjustZoom();
     void scanPositionChanged(qreal);
     void scanPositionClicked(qreal);
 
@@ -406,29 +353,8 @@ public:
     explicit LogTotalRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
     ~LogTotalRequestView() {}
 
-    //void setData(LogLoadData*);
-    //LogLoadData* data() const {return data_;}
-    //QList<bool> suitePlotState() const {return suitePlotState_;}
-
-    //void clear();
-    //void load(const std::string& logFile);
-    //void setResolution(LogLoadData::TimeRes);
-
-//Q_SIGNALS:
-    //void scanDataChanged(QString);
-    //void suitePlotStateChanged(int,bool,QColor);
-    //void timeRangeChanged(qint64,qint64);
-    //void timeRangeHighlighted(qint64,qint64,qint64);
-    //void timeRangeReset();
-
-//public Q_SLOTS:
-//    void showFullRange();
-
 public Q_SLOTS:
-    //void slotZoom(QRectF);
     void addRemoveSuite(int idx, bool st);
-    //void scanPositionChanged(qreal);
-    //void scanPositionClicked(qreal);
 
 protected:
     enum ChartType {TotalChartType=0,ChildChartType=1,UserChartType=2};
@@ -451,27 +377,10 @@ public:
     explicit LogSuiteRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
     ~LogSuiteRequestView() {}
 
-    //void clear();
-    //void load(const std::string& logFile);
-    //void setResolution();
-
-//Q_SIGNALS:
-    //void scanDataChanged(QString);
-    //void childPlotStateChanged(int,bool,QColor);
-    //void timeRangeChanged(qint64,qint64);
-    //void timeRangeHighlighted(qint64,qint64,qint64);
-    //void timeRangeReset();
-
 public Q_SLOTS:
-    //void showFullRange();
-
-public Q_SLOTS:
-    //void slotZoom(QRectF);
     void addRemoveSuite(int idx, bool st);
     void addRemoveChildReq(int idx, bool st);
     void addRemoveUserReq(int idx, bool st);
-    //void scanPositionChanged(qreal);
-    //void scanPositionClicked(qreal);
 
 protected:
     void loadCore();
@@ -498,23 +407,10 @@ public:
     explicit LogSubRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
     ~LogSubRequestView() {}
 
-//Q_SIGNALS:
-    //void scanDataChanged(QString);
-    //void childPlotStateChanged(int,bool,QColor);
-    //void timeRangeChanged(qint64,qint64);
-    //void timeRangeHighlighted(qint64,qint64,qint64);
-    //void timeRangeReset();
-
 public Q_SLOTS:
-    //void showFullRange();
-
-public Q_SLOTS:
-    //void slotZoom(QRectF);
     void addRemoveSuite(int idx, bool st);
     void addRemoveChildReq(int idx, bool st);
     void addRemoveUserReq(int idx, bool st);
-    //void scanPositionChanged(qreal);
-    //void scanPositionClicked(qreal);
 
 protected:
     void loadCore();
@@ -533,6 +429,29 @@ protected:
     QString suiteSeriesId(int suiteIdx) const;
     QColor suiteSeriesColour(QChart*,int suiteIdx);
     void buildScanTable(QString& txt,int idx);
+};
+
+class LogStatRequestView : public  LogRequestView
+{
+    Q_OBJECT
+public:
+    explicit LogStatRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogStatRequestView() {}
+
+    void adjustZoom(QRectF r) {}
+
+public Q_SLOTS:
+    void addRemoveSuite(int idx, bool st);
+
+protected:
+    void loadCore();
+
+    void buildTable();
+    void addSuite(int) {}
+    void removeSuite(int) {}
+    void buildScanTable(QString& txt,int idx) {}
+
+    QTextBrowser* textView_;
 };
 
 #endif // LOGLOADWIDGET_HPP

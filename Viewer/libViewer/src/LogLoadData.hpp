@@ -37,16 +37,17 @@ public:
                UserSuspendType,UserSyncType,
                NoType};
 
-    LogRequestItem() : global_(false), sumTotal_(0), maxTotal_(0), counter_(0) {}
-    LogRequestItem(Type type,const std::string& name,const std::string& pattern,bool global=false) :
-        type_(type), global_(global), name_(name), pattern_(pattern), sumTotal_(0), maxTotal_(0), counter_(0) {}
+    LogRequestItem() : global_(false), sumTotal_(0), maxTotal_(0), rank_(0), percentage_(0.), counter_(0) {}
+    LogRequestItem(const std::string& name,const std::string& pattern,bool global=false) :
+        global_(global), name_(name), pattern_(pattern), sumTotal_(0), maxTotal_(0), rank_(0), percentage_(0.), counter_(0) {}
 
-    void add(size_t);
+    void add(size_t index,size_t val);
 
-    Type type_;
+    //Type type_;
     bool global_;
     std::string name_;
     std::string pattern_; //used to identify the request in the log file
+    std::vector<size_t> index_;
     std::vector<int> req_;
     size_t sumTotal_; //sum of all the child and user requests
     size_t maxTotal_; //the maximum value of child+user requests
@@ -99,7 +100,7 @@ public:
     const std::vector<LogRequestItem>& childSubReq() const {return childSubReq_;}
     const std::vector<LogRequestItem>& userSubReq() const {return userSubReq_;}
 
-    void add(const LogReqCounter&);
+    void add(size_t index,const LogReqCounter&);
     static void buildSubReq(std::vector<LogRequestItem>& childSubReq,
                        std::vector<LogRequestItem>& useSubReq);
 
@@ -178,6 +179,7 @@ public:
     size_t subReqMax() const;
 
 private:
+    void getSeries(QLineSeries& series,const LogRequestItem& item,int& maxVal);
     void getSeries(QLineSeries& series,const std::vector<int>& vals,int& maxVal);
     void getSeries(QLineSeries& series,const std::vector<int>& vals1,
                    const std::vector<int>& vals2,int& maxVal);

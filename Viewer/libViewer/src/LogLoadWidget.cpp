@@ -25,6 +25,8 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QSortFilterProxyModel>
+#include <QTextBrowser>
+#include <QTimer>
 #include <QToolButton>
 #include <QVBoxLayout>
 
@@ -53,8 +55,9 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     connect(ui_->viewTab,SIGNAL(currentChanged(int)),
             this,SLOT(currentTabChanged(int)));
 
-    ui_->viewTab->setTabText(0,tr("Total view"));
-    ui_->viewTab->setTabText(0,tr("Suite view"));
+    ui_->viewTab->setTabText(0,tr("Totals"));
+    ui_->viewTab->setTabText(1,tr("Commands"));
+    ui_->viewTab->setTabText(2,tr("Stats"));
 
     ui_->viewTab->setCurrentIndex(0);
 
@@ -363,17 +366,28 @@ void LogLoadWidget::resolutionChanged(int)
 
 void LogLoadWidget::currentTabChanged(int idx)
 {
-    if(idx == 0 || idx == 2)
+    if(idx == 0)
     {
+        ui_->scanLabel->show();
         suiteModel_->setShowColour(true);
         childReqModel_->setShowColour(false);
         userReqModel_->setShowColour(false);
     }
     else if(idx == 1)
     {
+        ui_->scanLabel->show();
         suiteModel_->setShowColour(false);
         childReqModel_->setShowColour(true);
         userReqModel_->setShowColour(true);
+    }
+    else if(idx == 2)
+    {
+        ui_->scanLabel->clear();
+        ui_->scanLabel->hide();
+        suiteModel_->setShowColour(false);
+        childReqModel_->setShowColour(false);
+        userReqModel_->setShowColour(false);
+        ui_->controlToolBox->setCurrentIndex(0);
     }
 }
 
@@ -633,7 +647,9 @@ QModelIndex LogLoadRequestModel::parent(const QModelIndex &child) const
 
 QString LogLoadRequestModel::formatPrecentage(float perc) const
 {
-    if(perc < 0.5)
+    if(perc < 0.000000001)
+        return "0";
+    else if(perc < 0.5)
         return "<0.5";
 
     return QString::number(perc,'f',1);
@@ -917,6 +933,9 @@ void ChartView::doZoom(qint64 start,qint64 end)
     //QRectF r(chart()->mapToPosition(QPointF(start,left.y())),
     //         chart()->mapToPosition(QPointF(end,left.y()+1)));
 
+    UiLog().dbg() << "start " << QDateTime::fromMSecsSinceEpoch(start);
+    UiLog().dbg() << "end " << QDateTime::fromMSecsSinceEpoch(end);
+
     if(r.isValid())
     {
         chart()->zoomIn(r);
@@ -1030,7 +1049,8 @@ LogRequestViewHandler::LogRequestViewHandler(QWidget* parent) :
 
     views_ << new LogTotalRequestView(this,parent);
     views_ << new LogSuiteRequestView(this,parent);
-    views_ << new LogSubRequestView(this,parent);
+    //views_ << new LogSubRequestView(this,parent);
+    views_ << new LogStatRequestView(this,parent);
 
     for(int i=0; i < views_.count(); i++)
     {
@@ -1139,452 +1159,17 @@ void LogRequestViewHandler::addRemoveUserReq(int idx, bool st)
     }
 }
 
-#if 0
-
-//=============================================
-//
-// ServerLoadView
-//
-//=============================================
-
-ServerLoadView::ServerLoadView(QWidget* parent) : QWidget(parent),
-    data_(NULL), lastScanIndex_(0)
+void LogRequestViewHandler::slotZoomHappened(QRectF r)
 {
-    //The data object - to read and store processed log data
-    data_=new LogLoadData();
-
-    QVBoxLayout* vb=new QVBoxLayout(this);
-    vb->setContentsMargins(0,0,0,0);
-
-    for(int i=0; i < 3; i++)
+    if(LogRequestView* senderView=static_cast<LogRequestView*>(sender()))
     {
-        QChart* chart = new QChart();
-        ChartView* chartView=new ChartView(chart,this);
-        chartView->setRenderHint(QPainter::Antialiasing);
-        vb->addWidget(chartView);
-        views_ << chartView;
-
-        connect(chartView,SIGNAL(chartZoomed(QRectF)),
-                this,SLOT(slotZoom(QRectF)));
-
-        connect(chartView,SIGNAL(positionChanged(qreal)),
-                this,SLOT(scanPositionChanged(qreal)));
-
-        connect(chartView,SIGNAL(positionClicked(qreal)),
-                this,SLOT(scanPositionClicked(qreal)));
-    }
-
-    UI_ASSERT(views_.count() == 3,"views_.count()=" << views_.count());
-}
-
-ServerLoadView::~ServerLoadView()
-{
-    Q_ASSERT(data_);
-    delete data_;
-}
-
-QChart* ServerLoadView::getChart(ChartType type)
-{
-    if(ChartView *v=getView(type))
-        return v->chart();
-    return 0;
-}
-
-ChartView* ServerLoadView::getView(ChartType type)
-{
-    UI_ASSERT(views_.count() == 3,"views_.count()=" << views_.count());
-    switch(type)
-    {
-    case TotalChartType:
-        return views_[0];
-    case ChildChartType:
-        return views_[1];
-    case UserChartType:
-        return views_[2];
-    default:
-        break;
-    }
-
-    return 0;
-}
-
-void ServerLoadView::slotZoom(QRectF r)
-{
-    if(ChartView* senderView=static_cast<ChartView*>(sender()))
-    {
-        Q_FOREACH(ChartView* v,views_)
+        Q_FOREACH(LogRequestView* v,views_)
         {
-           if(v != senderView)
-               v->doZoom(r);
-
-           v->adjustCallout();
-        }
-
-        qint64 start, end;
-        Q_ASSERT(!views_.isEmpty());
-        views_[0]->currentTimeRange(start,end);
-        Q_EMIT timeRangeChanged(start,end);
-    }
-}
-
-void ServerLoadView::setResolution(LogLoadData::TimeRes res)
-{
-    data_->setTimeRes(res);
-
-    qint64 start=-1, end=-1;
-    if(!views_.isEmpty())
-    {
-        views_[0]->currentTimeRange(start,end);
-    }
-
-    load();
-    loadSuites();
-
-    if(start != -1 && end  !=-1)
-    {
-        Q_FOREACH(ChartView* v,views_)
-        {
-            v->doZoom(start,end);
-            v->adjustCallout();
+            if(v != senderView)
+                v->adjustZoom(r);
         }
     }
 }
-
-void ServerLoadView::addRemoveSuite(int idx, bool st)
-{
-    if(idx >= 0 && idx < static_cast<int>(data_->suites().size()))
-    {
-        //Add suite
-        if(st)
-        {         
-            addSuite(idx);
-            Q_EMIT suitePlotStateChanged(idx,true,
-                   suiteSeriesColour(getChart(TotalChartType),idx));
-        }
-        //remove
-        else
-        {
-            suitePlotState_[idx]=false;
-
-            removeSuiteSeries(getChart(TotalChartType),
-                              "s_main_" + QString::number(idx));
-
-            removeSuiteSeries(getChart(ChildChartType),
-                              "s_ch_" + QString::number(idx));
-
-            removeSuiteSeries(getChart(UserChartType),
-                              "s_us_" + QString::number(idx));
-        }
-    }
-}
-
-void ServerLoadView::addSuite(int idx)
-{
-    suitePlotState_[idx]=true;
-
-    QChart* chart=0;
-
-    QLineSeries* series=new QLineSeries();
-    series->setName("s_main_" + QString::number(idx));
-    data_->getSuiteTotalReq(idx,*series);
-    chart=getChart(TotalChartType);
-    chart->addSeries(series);
-    series->attachAxis(chart->axisX());
-    series->attachAxis(chart->axisY());
-
-    QLineSeries* chSeries=new QLineSeries();
-    chSeries->setName("s_ch_" + QString::number(idx));
-    data_->getSuiteChildReq(idx,*chSeries);
-    chart=getChart(ChildChartType);
-    chart->addSeries(chSeries);
-    chSeries->attachAxis(chart->axisX());
-    chSeries->attachAxis(chart->axisY());
-
-    QLineSeries* usSeries=new QLineSeries();
-    usSeries->setName("s_us_" + QString::number(idx));
-    data_->getSuiteUserReq(idx,*usSeries);
-    chart=getChart(UserChartType);
-    chart->addSeries(usSeries);
-    usSeries->attachAxis(chart->axisX());
-    usSeries->attachAxis(chart->axisY());
-}
-
-void ServerLoadView::removeSuiteSeries(QChart* chart,QString id)
-{
-    Q_FOREACH(QAbstractSeries *s,chart->series())
-    {
-        if(s->name() == id)
-        {
-            chart->removeSeries(s);
-            return;
-        }
-    }
-}
-
-QColor ServerLoadView::suiteSeriesColour(QChart* chart,size_t idx)
-{
-    QString id="_" + QString::number(idx);
-    return seriesColour(chart,id);
-}
-
-QColor ServerLoadView::seriesColour(QChart* chart,QString id)
-{
-    Q_FOREACH(QAbstractSeries *s,chart->series())
-    {
-        if(s->name().endsWith(id))
-        {
-            if(QLineSeries *ls=static_cast<QLineSeries*>(s))
-                return ls->color();
-            break;
-        }
-    }
-    return QColor();
-}
-
-void ServerLoadView::clear()
-{
-    clearCharts();
-    data_->clear();
-    suitePlotState_.clear();
-    size_t lastScanIndex_=0;;
-}
-
-void ServerLoadView::clearCharts()
-{
-    Q_FOREACH(ChartView* v,views_)
-    {
-        Q_ASSERT(v->chart());
-        v->chart()->removeAllSeries();
-        v->chart()->removeAxis(v->chart()->axisX());
-        v->chart()->removeAxis(v->chart()->axisY());
-    }
-}
-
-void ServerLoadView::load(const std::string& logFile)
-{
-    data_->loadLogFile(logFile);
-
-    load();
-    loadSuites();
-
-    suitePlotState_.clear();
-    for(size_t i=0; i < data_->suites().size(); i++)
-        suitePlotState_ << false;
-
-}
-
-void ServerLoadView::load()
-{
-    clearCharts();
-
-    int maxVal=0;
-    QLineSeries* tSeries=new QLineSeries();
-    tSeries->setName("all");
-    data_->getTotalReq(*tSeries,maxVal);
-
-    QLineSeries* chSeries=new QLineSeries();
-    chSeries->setName("all");
-    data_->getChildReq(*chSeries);
-
-    QLineSeries* usSeries=new QLineSeries();
-    usSeries->setName("all");
-    data_->getUserReq(*usSeries);
-
-    build(getView(TotalChartType),tSeries,"Child+User requests",maxVal);
-    build(getView(ChildChartType),chSeries,"Child requests",maxVal);
-    build(getView(UserChartType),usSeries,"User requests",maxVal);
-}
-
-void ServerLoadView::loadSuites()
-{
-    for(int i=0; i < suitePlotState_.count(); i++)
-    {
-        if(suitePlotState_[i])
-        {
-            addSuite(i);
-        }
-    }
-}
-
-void  ServerLoadView::build(ChartView* view,QLineSeries *series, QString title,int maxVal)
-{
-    Q_ASSERT(view);
-    QChart *chart=view->chart();
-    Q_ASSERT(chart);
-
-    chart->addSeries(series);
-    chart->setTitle(title);
-
-    chart->legend()->hide();
-    QDateTimeAxis *axisX = new QDateTimeAxis;
-    axisX->setTickCount(10);
-    axisX->setFormat("HH dd/MM");   
-    chart->setAxisX(axisX, series);
-    view->adjustTimeAxis(data_->period());
-
-    QValueAxis *axisY = new QValueAxis;
-    axisY->setLabelFormat("%i");
-
-    QString yTitle;
-    if(data_->timeRes() == LogLoadData::SecondResolution)
-        yTitle="Req. per second";
-    else if(data_->timeRes() == LogLoadData::MinuteResolution)
-        yTitle="Req. per minute";
-
-    axisY->setTitleText(yTitle);
-    axisY->setMin(0.);
-    chart->setAxisY(axisY, series);
-    axisY->setMin(0.);
-    axisY->setMax(maxVal);
-}
-
-void ServerLoadView::showFullRange()
-{
-    Q_FOREACH(ChartView* view,views_)
-        view->chart()->zoomReset();
-
-    Q_EMIT(timeRangeReset());
-}
-
-void ServerLoadView::scanPositionClicked(qreal pos)
-{
-    if(pos < 1)
-    {
-        Q_FOREACH(ChartView* view,views_)
-            view->removeCallout();
-
-        Q_EMIT(timeRangeHighlighted(0,0,0));
-    }
-    else
-    {
-        qint64 t1(pos);
-        qint64 t2=t1;
-        if(data_->timeRes() == LogLoadData::MinuteResolution)
-            t2=t1+60*1000;
-
-        Q_FOREACH(ChartView* view,views_)
-            view->setCallout(pos);
-
-        qint64 tw=0;
-        if(!views_.isEmpty())
-            tw=views_[0]->widthToTimeRange(50.);
-
-        Q_EMIT(timeRangeHighlighted(t1,t2,tw));
-    }
-}
-
-
-void ServerLoadView::scanPositionChanged(qreal pos)
-{
-    qint64 t(pos);
-    size_t idx=0;
-
-    if(views_.isEmpty())
-        return;
-
-    qint64 tw=views_[0]->widthToTimeRange(50.);
-
-    bool hasData=data_->indexOfTime(t,idx,lastScanIndex_,tw);
-
-    lastScanIndex_=idx;
-    //UiLog().dbg() << "idx=" << idx;
-
-    //QColor dateCol(210,212,218);
-    QColor dateCol(210,211,214);
-    //QString dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
-    //QString txt=Viewer::formatText("date (): " + dateTxt, dateCol);
-
-    QString txt="<table width=\'100%\' cellpadding=\'4px\'>";
-    QString dateTxt=QDateTime::fromMSecsSinceEpoch(t).toString("hh:mm:ss dd/MM/yyyy");
-
-    txt="<tr>" +
-        Viewer::formatTableTdText("Date (cursor): ",dateCol) +
-        Viewer::formatTableTdBg(dateTxt,dateCol) +
-        "</tr>";
-
-    //Viewer::formatText("date (at cursor): </td>" +
-    //                QDateTime::fromMSecsSinceEpoch(t).toString("hh:mm:ss dd/MM/yyyy"),
-    //                dateCol);
-
-    dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
-    txt+="<tr>" +
-        Viewer::formatTableTdText("Date (nearest):",dateCol) +
-        Viewer::formatTableTdBg(dateTxt,dateCol) +
-        "</tr>";
-    txt+="</table>";
-
-
-   // txt+="<br>" + Viewer::formatText("date (data): " + dateTxt, dateCol);
-
-    txt+="<br><table width=\'100%\' cellpadding=\'4px\'>";
-    //header
-    QColor hdrCol(205,206,210);
-    txt+="<tr>" + Viewer::formatTableThText("Item",hdrCol) +
-              Viewer::formatTableThText("Total",hdrCol) +
-              Viewer::formatTableThText("Child",hdrCol) +
-              Viewer::formatTableThText("User",hdrCol) + "</tr>";
-
-
-    if(hasData)
-    {
-        size_t tot=0,ch=0,us=0;
-        QColor col=seriesColour(getChart(TotalChartType),"all");
-        QString name="all";
-        data_->dataItem().valuesAt(idx,tot,ch,us);
-        buildScanRow(txt,name,tot,ch,us,col);
-
-        for(int i=0; i < suitePlotState_.size(); i++)
-        {
-            if(suitePlotState_[i])
-            {
-                tot=0;ch=0;us=0;
-                col=suiteSeriesColour(getChart(TotalChartType),i);
-                name=QString::fromStdString(data_->suites()[i].name());
-                data_->suites()[i].valuesAt(idx,tot,ch,us);
-                buildScanRow(txt,name,tot,ch,us,col);
-            }
-        }
-    }
-    else
-    {
-        QColor col=seriesColour(getChart(TotalChartType),"all");
-        QString name="all";
-        buildEmptyScanRow(txt,name,col);
-        for(int i=0; i < suitePlotState_.size(); i++)
-        {
-            if(suitePlotState_[i])
-            {
-                col=suiteSeriesColour(getChart(TotalChartType),i);
-                name=QString::fromStdString(data_->suites()[i].name());
-                buildEmptyScanRow(txt,name,col);
-            }
-        }
-    }
-
-    txt+="</table>";
-
-    Q_EMIT scanDataChanged(txt);
-}
-
-void ServerLoadView::buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor lineCol) const
-{
-    QColor numBg(210,211,214);
-    txt+="<tr>" + Viewer::formatTableTdBg(name,lineCol.lighter(150)) +
-          Viewer::formatTableTdBg(QString::number(tot),numBg) +
-          Viewer::formatTableTdBg(QString::number(ch),numBg) +
-          Viewer::formatTableTdBg(QString::number(us),numBg) + "</tr>";
-}
-
-void ServerLoadView::buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const
-{
-    QColor numBg(210,211,214);
-    txt+="<tr>" + Viewer::formatTableTdBg(name,lineCol.lighter(150)) +
-          Viewer::formatTableTdBg(" N/A",numBg) +
-          Viewer::formatTableTdBg(" N/A",numBg) +
-          Viewer::formatTableTdBg(" N/A",numBg) + "</tr>";
-}
-
-#endif
 
 //=============================================
 //
@@ -1619,6 +1204,9 @@ QChart* LogRequestView::addChartById(QString id)
 
     connect(chartView,SIGNAL(chartZoomed(QRectF)),
             this,SLOT(slotZoom(QRectF)));
+
+    connect(chartView,SIGNAL(chartZoomed(QRectF)),
+            this,SIGNAL(zoomHappened(QRectF)));
 
     connect(chartView,SIGNAL(positionChanged(qreal)),
             this,SLOT(scanPositionChanged(qreal)));
@@ -1664,6 +1252,39 @@ void LogRequestView::slotZoom(QRectF r)
         Q_EMIT timeRangeChanged(start,end);
     }
 }
+
+void LogRequestView::adjustZoom(QRectF r)
+{
+    if(ChartView* senderView=static_cast<ChartView*>(sender()))
+    {
+        Q_FOREACH(ChartView* v,views_)
+        {
+           if(v != senderView)
+               v->doZoom(r);
+
+           v->adjustCallout();
+        }
+    }
+}
+
+//Adjust the time range (zoom) of the last view using the time range
+//in the first view
+void LogRequestView::adjustZoom()
+{
+    qint64 start=-1, end=-1;
+    if(views_.count() > 1)
+    {
+        views_[0]->currentTimeRange(start,end);
+
+        if(start != -1 && end  !=-1)
+        {
+            ChartView* view=views_.back();
+            view->doZoom(start,end);
+            view->adjustCallout();
+        }
+   }
+}
+
 
 void LogRequestView::changeResolution()
 {
@@ -2340,6 +1961,12 @@ void LogSuiteRequestView::addRemoveSuite(int suiteIdx, bool st)
         if(st)
         {
             addSuite(suiteIdx);
+            QString id=QString::number(suiteIdx);
+            ChartView* view=viewIds_.value(id,NULL);
+            Q_ASSERT(view);
+            //It only woks if the chart is already displayed, so we need a delayed
+            //adjustment
+            QTimer::singleShot(0,this, SLOT(adjustZoom()));
         }
         //remove
         else
@@ -2406,7 +2033,7 @@ void LogSuiteRequestView::addTotal()
     ChartView* view=viewIds_.value(id,NULL);
     Q_ASSERT(view);
 
-    QString title="total";
+    QString title="ALL SUITES";
 
     for(int i=0; i < handler_->childPlotState_.count(); i++)
     {
@@ -2461,7 +2088,7 @@ void LogSuiteRequestView::addRemoveChildReq(int childReqIdx, bool st)
         if(st)
         {
             addChildReq(childReqIdx);
-            if(views_.size() >0)
+            if(views_.count() >0)
             {
                 Q_EMIT childPlotStateChanged(childReqIdx,true,
                    childSeriesColour(views_[0]->chart(),childReqIdx));
@@ -2485,7 +2112,7 @@ void LogSuiteRequestView::addChildReq(int childReqIdx)
 
         if(chartId(views_[i]) == "total")
         {
-            QString title="total";
+            QString title="ALL SUITES";
 
             QLineSeries* series=new QLineSeries();
             series->setName(childSeriesId(childReqIdx));
@@ -2536,7 +2163,7 @@ void LogSuiteRequestView::addRemoveUserReq(int userReqIdx, bool st)
         if(st)
         {
             addUserReq(userReqIdx);
-            if(views_.size() >0)
+            if(views_.count() >0)
             {
                 Q_EMIT userPlotStateChanged(userReqIdx,true,
                    userSeriesColour(views_[0]->chart(),userReqIdx));
@@ -2618,27 +2245,13 @@ QString LogSuiteRequestView::userSeriesId(int userIdx) const
 //The child colour is the same for all the suites
 QColor LogSuiteRequestView::childSeriesColour(QChart* chart,size_t childReqIdx)
 {
-    for(int i=0; i < handler_->suitePlotState().count(); i++)
-    {
-        if(handler_->suitePlotState()[i])
-        {
-            return seriesColour(chart,childSeriesId(childReqIdx));
-        }
-    }
-    return QColor();
+    return seriesColour(chart,childSeriesId(childReqIdx));
 }
 
 //The user colour is the same for all the suites
 QColor LogSuiteRequestView::userSeriesColour(QChart* chart,size_t userReqIdx)
 {
-    for(int i=0; i < handler_->suitePlotState().count(); i++)
-    {
-        if(handler_->suitePlotState()[i])
-        {
-            return seriesColour(chart,userSeriesId(userReqIdx));
-        }
-    }
-    return QColor();
+    return seriesColour(chart,userSeriesId(userReqIdx));
 }
 
 void LogSuiteRequestView::loadCore()
@@ -2961,4 +2574,136 @@ void LogSubRequestView::buildScanTable(QString& txt,int idx)
     }
 
     txt+="</table>";
+}
+
+//=============================================================================
+//
+// LogStatRequestView
+//
+//=============================================================================
+
+LogStatRequestView::LogStatRequestView(LogRequestViewHandler* handler,QWidget* parent) :
+    LogRequestView(handler,parent)
+{
+    Q_ASSERT(mainLayout_);
+
+    textView_=new QTextBrowser(this);
+    textView_->setReadOnly(true);
+    mainLayout_->addWidget(textView_);
+
+    //Read css for the text formatting
+    QString cssDoc;
+    QFile f(":/viewer/trigger.css");
+    //QTextStream in(&f);
+    if(f.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        cssDoc=QString(f.readAll());
+    }
+    f.close();
+
+#if 0
+    //Add css for state names
+    std::vector<VParam*> states=VNState::filterItems();
+    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
+    {
+       cssDoc+="font." + (*it)->name() +
+               " {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " +
+               (*it)->colour().lighter(120).name() + ", stop: 1 " +  (*it)->colour().name() +
+               "); color: " +  (*it)->typeColour().name() + ";}";
+
+    }
+#endif
+
+    //Add css for false statements
+    //QColor falseCol(218,219,219);
+    //cssDoc+="font.false {background-color: " + falseCol.name() + ";}";
+
+    textView_->document()->setDefaultStyleSheet(cssDoc);
+
+    textView_->setStyleSheet("QTextEdit{ background-color: rgb(255,255,255);}");
+}
+
+//One chart = one suite with all the subrequests (child + user)
+void LogStatRequestView::addRemoveSuite(int suiteIdx, bool st)
+{
+    if(suiteIdx >= 0 && suiteIdx < static_cast<int>(handler_->data_->suites().size()))
+    {
+        buildTable();
+    }
+}
+
+void LogStatRequestView::buildTable()
+{
+    QString txt;
+    QColor col;
+
+    txt+="<table width=\'100%\'>";
+    //txt+="<br><table width=\'100%\' cellpadding=\'4px\'>";
+
+    txt+="<tr><th>Child command</th><th>Total</th>";
+    for(int i=0; i < handler_->suitePlotState().count(); i++)
+    {
+        if(handler_->suitePlotState()[i])
+            txt+="<th>" + handler_->data_->suiteNames()[i] + "</th>";
+    }
+    txt+="</tr>";
+
+    const std::vector<LogRequestItem>& subCh=handler_->data_->total().childSubReq();
+    for(size_t i=0; i < subCh.size(); i++)
+    {
+        txt+="<tr>";
+        txt+=Viewer::formatTableTdText(QString::fromStdString(subCh[i].name_),col);
+
+        int val=subCh[i].sumTotal_;
+        txt+=Viewer::formatTableTdText(QString::number(val),col);
+
+        for(int j=0; j < handler_->suitePlotState().count(); j++)
+        {
+            if(handler_->suitePlotState()[j])
+            {
+                val=handler_->data_->suites()[j].childSubReq()[i].sumTotal_;
+                txt+=Viewer::formatTableTdText(QString::number(val),col);
+            }
+        }
+
+        txt+="</tr>";
+    }
+
+    txt+="<tr><th>User command</th><th>Total</th>";
+    for(int i=0; i < handler_->suitePlotState().count(); i++)
+    {
+        if(handler_->suitePlotState()[i])
+            txt+="<th>" + handler_->data_->suiteNames()[i] + "</th>";
+    }
+    txt+="</tr>";
+
+    const std::vector<LogRequestItem>& subUs=handler_->data_->total().userSubReq();
+    for(size_t i=0; i < subUs.size(); i++)
+    {
+        txt+="<tr>";
+        txt+=Viewer::formatTableTdText(QString::fromStdString(subUs[i].name_),col);
+
+        int val=subUs[i].sumTotal_;
+        txt+=Viewer::formatTableTdText(QString::number(val),col);
+
+        for(int j=0; j < handler_->suitePlotState().count(); j++)
+        {
+            if(handler_->suitePlotState()[j])
+            {
+                int val=handler_->data_->suites()[j].userSubReq()[i].sumTotal_;
+                txt+=Viewer::formatTableTdText(QString::number(val),col);
+            }
+        }
+
+        txt+="</tr>";
+    }
+
+    txt+="</table>";
+
+    textView_->setHtml(txt);
+}
+
+void LogStatRequestView::loadCore()
+{
+    buildTable();
 }
