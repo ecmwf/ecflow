@@ -31,6 +31,7 @@ public:
 	void reload(VInfo_ptr);
 	QWidget* realWidget();
     void clearContents();
+    bool hasSameContents(VInfo_ptr info);
 
 	//From VInfoPresenter
 	void infoReady(VReply*);

@@ -130,7 +130,7 @@
             "dock_icon"	  : "zombie_dock.svg",
             "show" 	  : "toolbar",
             "button_tooltip" : "Open <b>zombies</b> tab in a new Info Panel dialog",
-            "visible_for" : "server"
+            "visible_for" : "server or node"
              
         },     
         
@@ -145,7 +145,8 @@
             "name"    : "server_load",
             "label"   : "Server load",
             "icon"    : "monitor.svg",
-            "visible_for" : "server"
+            "show" 	  : "toolbar",
+            "visible_for" : "server or node"
 
         },
         {

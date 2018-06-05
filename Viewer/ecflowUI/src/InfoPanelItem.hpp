@@ -35,8 +35,9 @@ friend class InfoPanel;
 
 public:
     InfoPanelItem() : owner_(0), active_(false), selected_(false), suspended_(false),
-                      frozen_(false), detached_(false), unselectedFlags_(KeepContents),
-                      useAncestors_(false),handleAnyChange_(false) {}
+                      frozen_(false), detached_(false), unselectedFlags_(KeepContents),                     
+                      useAncestors_(false),handleAnyChange_(false),
+                      keepServerDataOnLoad_(false) {}
 	virtual ~InfoPanelItem();
 
     enum ChangeFlag {ActiveChanged=1,SelectedChanged=2,SuspendedChanged=4,FrozenChanged=8,DetachedChanged=16};
@@ -49,7 +50,7 @@ public:
 	virtual void reload(VInfo_ptr info)=0;
 	virtual QWidget* realWidget()=0;
 	virtual void clearContents()=0;
-
+    virtual bool hasSameContents(VInfo_ptr info);
     void setOwner(InfoPanel*);
 
     virtual void setActive(bool);
@@ -59,6 +60,7 @@ public:
 	void setDetached(bool);
 
     bool isSuspended() const {return suspended_;}
+    bool keepServerDataOnLoad() const {return keepServerDataOnLoad_;}
 
 	//From VTaskObserver
     void taskChanged(VTask_ptr) {}
@@ -105,6 +107,11 @@ protected:
     UnselectedFlags unselectedFlags_;
     bool useAncestors_;
     bool handleAnyChange_;
+
+    //do not reload the server data when a new info object is loaded. This
+    //only makes sense if the this sever-related item(tab) is alawys visible
+    //whatever node is selected!!!
+    bool keepServerDataOnLoad_;
 };
 
 class InfoPanelItemFactory

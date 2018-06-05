@@ -21,6 +21,7 @@
 #include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 #include "UiLog.hpp"
+#include "UIDebug.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
@@ -351,9 +352,26 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	for(int i=0; i < tab_->count(); i++)
 	{
 		if(InfoPanelItemHandler* d=findHandler(tab_->widget(i)))
-		{
-			//Disable and force to clear the contents           
-			d->item()->setActive(false);
+        {
+            //We only keep the tab as it is when all these match:
+            //1. it is a server tab that must always be visible whatever
+            //node is selected
+            //2. the server data in the tab has to be kept (i.e. static)
+            //3. the server in the new info  object is the same as in the tab
+
+            //Sanity check
+            if(d->item()->keepServerDataOnLoad())
+            {
+                UI_ASSERT(d->match(ids),"d=" << d->def()->name()) ;
+            }
+
+            //Disable and force to clear the contents when it is not the case
+            //described above
+            if(!(d->item()->keepServerDataOnLoad() &&
+                 d->item()->hasSameContents(info)))
+            {
+                d->item()->setActive(false);
+            }
 
 			if(d->match(ids))
 				match++;

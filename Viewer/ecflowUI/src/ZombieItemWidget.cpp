@@ -90,7 +90,7 @@ void ZombieItemWidget::reload(VInfo_ptr info)
     clearContents();
 	info_=info;
 
-    if(info_ && info_->isServer() && info_->server())
+    if(info_ && info_->server())
 	{
 		commandSent_=false;
 		infoProvider_->info(info_);
@@ -108,7 +108,7 @@ void ZombieItemWidget::clearContents()
 void ZombieItemWidget::updateContents()
 {
 	//model_->clearData();
-    if(info_ && info_->isServer() && info_->server())
+    if(info_ && info_->server())
 	{
 		infoProvider_->info(info_);
 	}
@@ -200,7 +200,7 @@ void ZombieItemWidget::command(const std::string& cmdName)
             QList<Zombie> zLst;
             Q_FOREACH(QModelIndex idx,lst)
             {
-                zLst <<model_->indexToZombie(sortModel_->mapToSource(idx));
+                zLst << model_->indexToZombie(sortModel_->mapToSource(idx));
             }
 
             Q_FOREACH(Zombie z,zLst)
@@ -280,6 +280,16 @@ void ZombieItemWidget::checkActionState()
 	actionTerminate->setEnabled(acState);
 	actionDelete->setEnabled(acState);
 }
+
+bool ZombieItemWidget::hasSameContents(VInfo_ptr info)
+{
+    if(info && info_ && info->server())
+    {
+        return info->server() == info_->server();
+    }
+    return false;
+}
+
 
 void ZombieItemWidget::serverSyncFinished()
 {

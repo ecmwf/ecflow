@@ -245,6 +245,11 @@ void InfoPanelItem::setDetached(bool b)
     updateState(DetachedChanged);
 }
 
+bool InfoPanelItem::hasSameContents(VInfo_ptr)
+{
+    return false;
+}
+
 void InfoPanelItem::linkSelected(const std::string& path)
 {
     if(!suspended_)

@@ -28,6 +28,7 @@ public:
     void reload(VInfo_ptr);
     QWidget* realWidget();
     void clearContents();
+    bool hasSameContents(VInfo_ptr info);
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}

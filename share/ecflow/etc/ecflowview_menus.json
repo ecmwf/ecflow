@@ -702,7 +702,7 @@
         {
             "menu"           : "Node",
             "name"           : "Zombies ...",
-            "visible_for"    : "server",        
+            "visible_for"    : "server or node",
             "command"        : "zombie",
             "multi"          : "false",
             "handler"        : "info_panel",

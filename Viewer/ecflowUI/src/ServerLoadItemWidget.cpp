@@ -35,8 +35,12 @@ ServerLoadItemWidget::ServerLoadItemWidget(QWidget *parent)
 #endif
     hb->addWidget(w_);
 
-    //We will not keep the contents when the item becomes unselected
-    unselectedFlags_.clear();
+    //This tab is always visible whatever node is selected!!!
+    //We keep the data unchanged unless a new server is selected
+    keepServerDataOnLoad_=true;
+
+    //We will KEEP the contents when the item (aka tab) becomes unselected
+    //unselectedFlags_.clear();
 }
 
 ServerLoadItemWidget::~ServerLoadItemWidget()
@@ -58,10 +62,13 @@ void ServerLoadItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
-    //set the info. we do not need to observe the node!!!
+    bool same=hasSameContents(info);
+
+    //set the info. We do not need to observe the node!!!
     info_=info;
 
-    load();
+    if(!same)
+        load();
 }
 
 void ServerLoadItemWidget::load()
@@ -81,9 +88,6 @@ void ServerLoadItemWidget::load()
                          QString::fromStdString(sh->port()),
                          logFile,-50000); //last 50000 rows are read
         }
-
-        //"/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log"
-        //w_->load("/home/graphics/cgr/ecflow_dev/vsms1.ecf.log");
     }
 #endif
 }
@@ -96,43 +100,23 @@ void ServerLoadItemWidget::clearContents()
     InfoPanelItem::clear();
 }
 
+//We are independent of the server's state
 void ServerLoadItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
-    if(flags.isSet(SuspendedChanged))
-    {
-        //If we are here this item is active but not selected!
-
-        //When it becomes suspended we need to clear everything since the
-        //tree is probably cleared at this point
-        if(suspended_)
-        {
-            //textEdit_->clear();
-        }
-        //When we leave the suspended state we need to reload everything
-        else
-        {
-            load();
-        }
-    }
-
-    Q_ASSERT(!flags.isSet(SelectedChanged));
 }
 
-//The content is independent of the server change
+bool ServerLoadItemWidget::hasSameContents(VInfo_ptr info)
+{
+    if(info && info_ && info->server())
+    {
+        return info->server() == info_->server();
+    }
+    return false;
+}
+
+//We are independent of the server's state
 void ServerLoadItemWidget::serverSyncFinished()
 {
-    if(frozen_)
-        return;
-
-    //We do not track changes when the item is not selected
-    if(!selected_ || !active_)
-        return;
-
-    if(!info_)
-        return;
-
-    //For any change we nee to reload
-    load();
 }
 
 static InfoPanelItemMaker<ServerLoadItemWidget> maker1("server_load");
