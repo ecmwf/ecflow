@@ -29,7 +29,7 @@ LogModel::~LogModel()
 {
 }
 
-void LogModel::loadFromFile(const std::string& fileName)
+void LogModel::loadFromFile(const std::string& fileName,size_t startPos)
 {
     beginResetModel();
 
@@ -40,8 +40,10 @@ void LogModel::loadFromFile(const std::string& fileName)
     highlightStart_=0;
     highlightEnd_=0;
 
-    data_.loadFromFile(fileName);
+    data_.loadFromFile(fileName,startPos);
     endResetModel();
+
+    UiLog().dbg() << "first date: " << data_.date(0).toString("hh:mm:ss dd.M.yyyy");;
 }
 
 void LogModel::setData(const std::string& data)

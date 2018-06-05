@@ -146,7 +146,7 @@ class LogLoadData
 public:
     enum TimeRes {SecondResolution, MinuteResolution, HourResolution};
 
-    LogLoadData() : timeRes_(SecondResolution)  {}
+    LogLoadData() : timeRes_(SecondResolution), maxNumOfRows_(0), numOfRows_(0), startPos_(0)  {}
 
     void clear();
     const LogLoadDataItem& dataItem() const {return total_;}
@@ -155,7 +155,7 @@ public:
     const LogLoadDataItem& total() const {return total_;}
     TimeRes timeRes() const {return timeRes_;}
     void setTimeRes(TimeRes);
-    void loadLogFile(const std::string& logFile);
+    void loadLogFile(const std::string& logFile,int numOfRows=0);
 
     void getChildReq(QLineSeries& series);
     void getUserReq(QLineSeries& series);
@@ -170,6 +170,9 @@ public:
     void getSuiteChildSubReq(size_t,size_t,QLineSeries& series);
     void getSuiteUserSubReq(size_t,size_t,QLineSeries& series);
 
+    size_t size() const {return time_.size();}
+    QDateTime startTime() const;
+    QDateTime endTime() const;
     const std::vector<qint64>& time() const {return time_;}
     qint64 period() const;
     bool indexOfTime(qint64 t,size_t&,size_t,qint64) const;
@@ -177,6 +180,9 @@ public:
     QString childSubReqName(int idx) const;
     QString userSubReqName(int idx) const;
     size_t subReqMax() const;
+    int maxNumOfRows() const {return maxNumOfRows_;}
+    int numOfRows() const {return numOfRows_;}
+    std::streamoff startPos() const { return startPos_;}
 
 private:
     void getSeries(QLineSeries& series,const LogRequestItem& item,int& maxVal);
@@ -196,6 +202,9 @@ private:
     LogLoadDataItem total_; //generic data item for all the suites
     std::vector<LogLoadDataItem> suiteData_; //suite-related data items
     QStringList suites_;
+    int maxNumOfRows_;
+    int numOfRows_;
+    std::streamoff startPos_;
 };
 
 #endif // LOGLOADDATA_HPP

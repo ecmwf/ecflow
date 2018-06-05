@@ -62,30 +62,30 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     ui_->viewTab->setCurrentIndex(0);
 
     //Cornerbutton for tab
-    QWidget *cornerW=new QWidget(this);
-    QHBoxLayout *cornerHb=new QHBoxLayout(cornerW);
-    cornerHb->setContentsMargins(0,0,0,0);
+    //QWidget *cornerW=new QWidget(this);
+    //QHBoxLayout *cornerHb=new QHBoxLayout(cornerW);
+    //cornerHb->setContentsMargins(0,0,0,0);
 
-    QToolButton* showFullTb=new QToolButton(this);
-    showFullTb->setText(tr("Full period"));
-    cornerHb->addWidget(showFullTb);
+    //QToolButton* showFullTb=new QToolButton(this);
+    //showFullTb->setText(tr("Full period"));
+    //cornerHb->addWidget(showFullTb);
 
-    connect(showFullTb,SIGNAL(clicked()),
+    connect(ui_->showFullTb,SIGNAL(clicked()),
             viewHandler_,SLOT(showFullRange()));
 
     //Temporal resolution combo box
-    resCombo_=new QComboBox(this);
-    resCombo_->addItem("seconds",0);
-    resCombo_->addItem("minutes",1);
-    resCombo_->addItem("hours",2);
+    //resCombo_=new QComboBox(this);
+    ui_->resCombo->addItem("seconds",0);
+    ui_->resCombo->addItem("minutes",1);
+    ui_->resCombo->addItem("hours",2);
 
-    connect(resCombo_,SIGNAL(currentIndexChanged(int)),
+    connect(ui_->resCombo,SIGNAL(currentIndexChanged(int)),
             this,SLOT(resolutionChanged(int)));
 
-    cornerHb->addWidget(new QLabel("Resolution:",this));
-    cornerHb->addWidget(resCombo_);
+    //cornerHb->addWidget(new QLabel("Resolution:",this));
+    //cornerHb->addWidget(ui_->resCombo_);
 
-    ui_->viewTab->setCornerWidget(cornerW);
+    //ui_->viewTab->setCornerWidget(cornerW);
 
     //-----------------------------------------------
     // View + model to display/select suites
@@ -122,7 +122,7 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     //-----------------------------------------------
 
     childReqModel_=new LogLoadRequestModel("Command",this);
-    childReqSortModel_=new QSortFilterProxyModel(this);
+    childReqSortModel_=new LogLoadRequestSortModel(this);
     childReqSortModel_->setSourceModel(childReqModel_);
     //childReqSortModel_->setSortRole(Qt::UserRole);
     childReqSortModel_->setDynamicSortFilter(true);
@@ -154,9 +154,9 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     //-----------------------------------------------
 
     userReqModel_=new LogLoadRequestModel("Command",this);
-    userReqSortModel_=new QSortFilterProxyModel(this);
+    userReqSortModel_=new LogLoadRequestSortModel(this);
     userReqSortModel_->setSourceModel(userReqModel_);
-    userReqSortModel_->setSortRole(Qt::UserRole);
+    //userReqSortModel_->setSortRole(Qt::UserRole);
     userReqSortModel_->setDynamicSortFilter(true);
 
     ui_->userTree->setRootIsDecorated(false);
@@ -205,11 +205,17 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     connect(viewHandler_,SIGNAL(timeRangeChanged(qint64,qint64)),
             logModel_,SLOT(setPeriod(qint64,qint64)));
 
+    connect(viewHandler_,SIGNAL(timeRangeChanged(qint64,qint64)),
+            this,SLOT(periodChanged(qint64,qint64)));
+
     connect(viewHandler_, SIGNAL(timeRangeHighlighted(qint64,qint64,qint64)),
             logModel_,SLOT(setHighlightPeriod(qint64,qint64,qint64)));
 
     connect(viewHandler_,SIGNAL(timeRangeReset()),
             logModel_,SLOT(resetPeriod()));
+
+    connect(viewHandler_,SIGNAL(timeRangeReset()),
+            this,SLOT(periodWasReset()));
 
     //Scan label
     QColor bg(50,52,58);
@@ -241,6 +247,8 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     connect(viewHandler_,SIGNAL(scanDataChanged(QString)),
             ui_->scanLabel,SLOT(setText(QString)));
 
+    ui_->timeWidget->setStyleSheet("#timeWidget{background-color: rgb(212,212,212);}");
+
 }
 
 LogLoadWidget::~LogLoadWidget()
@@ -269,6 +277,21 @@ void LogLoadWidget::updateInfoLabel()
     txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
          Viewer::formatBoldText(" Host: ",col) + host_ +
          Viewer::formatBoldText(" Port: ",col) + port_;
+
+
+    QDateTime startDt=viewHandler_->data()->startTime();
+    QDateTime endDt=viewHandler_->data()->endTime();
+    txt+=Viewer::formatBoldText(" Full period: ",col) +
+            startDt.toString("yyyy-MM-dd hh:mm:ss") + Viewer::formatBoldText(" to ",col) +
+            endDt.toString("yyyy-MM-dd hh:mm:ss");
+
+    int maxNum=viewHandler_->data()->maxNumOfRows();
+    int num=viewHandler_->data()->numOfRows();
+    if(maxNum != 0 && num == abs(maxNum))
+    {
+        txt+=Viewer::formatBoldText(" Log entries: ",col) +
+           "last " + QString::number(abs(maxNum)) + " rows read (maximum reached)";
+    }
 
     ui_->logInfoLabel->setText(txt);
 }
@@ -302,12 +325,12 @@ void LogLoadWidget::setUserControlVisible(bool b)
     ui_->userTree->setVisible(b);
 }
 
-void LogLoadWidget::load(QString logFile)
+void LogLoadWidget::load(QString logFile,int numOfRows)
 {
-    load("","","",logFile);
+    load("","","",logFile,numOfRows);
 }
 
-void LogLoadWidget::load(QString serverName, QString host, QString port, QString logFile)
+void LogLoadWidget::load(QString serverName, QString host, QString port, QString logFile,int numOfRows)
 {
     clear();
 
@@ -342,7 +365,16 @@ void LogLoadWidget::load(QString serverName, QString host, QString port, QString
     //view_->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
     //std::string fileName="/home/graphics/cgr/ecflow_dev/vsms1.ecf.log";
 
-    viewHandler_->load(logFile_.toStdString());
+    try
+    {
+        viewHandler_->load(logFile_.toStdString(),numOfRows);
+    }
+    catch(std::runtime_error e)
+    {
+        ui_->messageLabel->showError(e.what());
+        setAllVisible(false);
+    }
+
     suiteModel_->setData(viewHandler_->data()->suites(),viewHandler_->suitePlotState());
     childReqModel_->setData(viewHandler_->data()->total().childSubReq(),viewHandler_->childPlotState());
     userReqModel_->setData(viewHandler_->data()->total().userSubReq(),viewHandler_->userPlotState());
@@ -350,12 +382,39 @@ void LogLoadWidget::load(QString serverName, QString host, QString port, QString
     for(int i=0; i < suiteModel_->columnCount()-1; i++)
         ui_->suiteTree->resizeColumnToContents(i);
 
-    logModel_->loadFromFile(logFile_.toStdString());
+    logModel_->loadFromFile(logFile_.toStdString(),viewHandler_->data()->startPos());
+
+    QDateTime startTime=viewHandler_->data()->startTime();
+    QDateTime endTime=viewHandler_->data()->endTime();
+    ui_->startTe->setMinimumDateTime(startTime);
+    ui_->startTe->setMaximumDateTime(endTime);
+    ui_->startTe->setDateTime(startTime);
+    ui_->endTe->setMinimumDateTime(startTime);
+    ui_->endTe->setMaximumDateTime(endTime);
+    ui_->endTe->setDateTime(endTime);
+
+    updateInfoLabel();
+}
+
+void LogLoadWidget::periodChanged(qint64 start,qint64 end)
+{
+    QDateTime startDt=QDateTime::fromMSecsSinceEpoch(start);
+    QDateTime endDt=QDateTime::fromMSecsSinceEpoch(end);
+    ui_->startTe->setDateTime(startDt);
+    ui_->endTe->setDateTime(endDt);
+}
+
+void LogLoadWidget::periodWasReset()
+{
+    QDateTime startDt=viewHandler_->data()->startTime();
+    QDateTime endDt=viewHandler_->data()->endTime();
+    ui_->startTe->setDateTime(startDt);
+    ui_->endTe->setDateTime(endDt);
 }
 
 void LogLoadWidget::resolutionChanged(int)
 {
-    int idx=resCombo_->currentIndex();
+    int idx=ui_->resCombo->currentIndex();
     if(idx == 0)
         viewHandler_->setResolution(LogLoadData::SecondResolution);
     else if(idx == 1)
@@ -408,8 +467,8 @@ bool LogLoadRequestSortModel::lessThan(const QModelIndex &left,
     }
     else
     {
-        qreal leftData = sourceModel()->data(left).toFloat();
-        qreal rightData = sourceModel()->data(right).toFloat();
+        qreal leftData = sourceModel()->data(left,Qt::UserRole).toFloat();
+        qreal rightData = sourceModel()->data(right,Qt::UserRole).toFloat();
 
         if(leftData == rightData)
         {
@@ -1090,9 +1149,9 @@ void LogRequestViewHandler::clear()
     }
 }
 
-void LogRequestViewHandler::load(const std::string& logFile)
+void LogRequestViewHandler::load(const std::string& logFile,int numOfRows)
 {
-    data_->loadLogFile(logFile);
+    data_->loadLogFile(logFile,numOfRows);
 
     suitePlotState_.clear();
     for(size_t i=0; i < data_->suites().size(); i++)
@@ -2033,7 +2092,7 @@ void LogSuiteRequestView::addTotal()
     ChartView* view=viewIds_.value(id,NULL);
     Q_ASSERT(view);
 
-    QString title="ALL SUITES";
+    QString title="All suites";
 
     for(int i=0; i < handler_->childPlotState_.count(); i++)
     {
@@ -2112,7 +2171,7 @@ void LogSuiteRequestView::addChildReq(int childReqIdx)
 
         if(chartId(views_[i]) == "total")
         {
-            QString title="ALL SUITES";
+            QString title="All suites";
 
             QLineSeries* series=new QLineSeries();
             series->setName(childSeriesId(childReqIdx));
@@ -2189,7 +2248,7 @@ void LogSuiteRequestView::addUserReq(int userReqIdx)
 
         if(chartId(views_[i]) == "total")
         {
-            QString title="total";
+            QString title="All suites";
 
             QLineSeries* series=new QLineSeries();
             series->setName(userSeriesId(userReqIdx));

@@ -20,7 +20,7 @@ class LogDataItem
     friend class LogData;
 
 public:
-    explicit LogDataItem(const std::string&,qint64 refTimeInMs);
+    explicit LogDataItem(const std::string&,qint64& refTimeInMs);
     enum Type {NoType,MessageType,ErrorType,LogType,WarningType,DebugType};
     static qint64 getTimeInMs(const std::string& line);
 
@@ -51,7 +51,7 @@ public:
     bool indexOfPeriod(qint64 start,qint64 end,size_t& idxStart,size_t& idxEnd,qint64 tolerance);
 
 
-    void loadFromFile(const std::string& logFile);
+    void loadFromFile(const std::string& logFile,size_t startPos=0);
     void loadFromText(const std::string& txt);
     void loadFromText(const std::vector<std::string>& txtVec);
     void appendFromText(const std::string& txt);

@@ -55,13 +55,15 @@ public:
     ~LogLoadWidget();
 
     void clear();
-    void load(QString logFile);
-    void load(QString serverName, QString host, QString port, QString logFile);
+    void load(QString logFile,int numOfRows=0);
+    void load(QString serverName, QString host, QString port, QString logFile,int numOfRows=0);
     QString logFile() const {return logFile_;}
 
 protected Q_SLOTS:
     void resolutionChanged(int);
     void currentTabChanged(int);
+    void periodChanged(qint64 start,qint64 end);
+    void periodWasReset();
 
 private:
     void setAllVisible(bool);
@@ -84,7 +86,6 @@ private:
     LogLoadRequestModel* userReqModel_;
     QSortFilterProxyModel* userReqSortModel_;
     LogModel* logModel_;
-    QComboBox* resCombo_;
 
     QString serverName_;
     QString host_;
@@ -241,7 +242,7 @@ public:
 
     LogLoadData* data() const {return data_;}
     void clear();
-    void load(const std::string& logFile);
+    void load(const std::string& logFile,int numOfRows=0);
     void setResolution(LogLoadData::TimeRes);
     QList<bool> suitePlotState() const {return suitePlotState_;}
     QList<bool> childPlotState() const {return childPlotState_;}

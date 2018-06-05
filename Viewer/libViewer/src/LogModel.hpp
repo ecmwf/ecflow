@@ -37,7 +37,7 @@ public:
    	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
    	QModelIndex parent (const QModelIndex & ) const;
 
-    void loadFromFile(const std::string&);
+    void loadFromFile(const std::string&,size_t startPos=0);
     void setData(const std::string&);
 	void setData(const std::vector<std::string>&);
 	void appendData(const std::vector<std::string>&);

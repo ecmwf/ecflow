@@ -79,7 +79,7 @@ void ServerLoadItemWidget::load()
             w_->load(QString::fromStdString(sh->name()),
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
-                         logFile);
+                         logFile,-50000); //last 50000 rows are read
         }
 
         //"/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log"
@@ -118,7 +118,7 @@ void ServerLoadItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
     Q_ASSERT(!flags.isSet(SelectedChanged));
 }
 
-//After each sync we need to reaload the contents
+//The content is independent of the server change
 void ServerLoadItemWidget::serverSyncFinished()
 {
     if(frozen_)

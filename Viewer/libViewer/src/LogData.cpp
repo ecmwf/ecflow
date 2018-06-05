@@ -16,7 +16,10 @@
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
 
-LogDataItem::LogDataItem(const std::string& line,qint64 refTimeInMs) : type_(NoType)
+#include <QFile>
+#include <QFileInfo>
+
+LogDataItem::LogDataItem(const std::string& line,qint64& refTimeInMs) : type_(NoType)
 {
     //Format is as follows:
     //MSG:[06:46:44 23.4.2018] chd:complete .....
@@ -38,8 +41,15 @@ LogDataItem::LogDataItem(const std::string& line,qint64 refTimeInMs) : type_(NoT
     if(pos1+1 < line.size())
         entry_=line.substr(pos1+1);
 
-    time_=(QDateTime::fromString(QString::fromStdString(d),
-                                "hh:mm:ss dd.M.yyyy").toMSecsSinceEpoch()-refTimeInMs)/1000;
+    if(refTimeInMs == 0)
+    {
+       time_=0;
+       refTimeInMs=QDateTime::fromString(QString::fromStdString(d),
+                                         "hh:mm:ss d.M.yyyy").toMSecsSinceEpoch();
+    }
+    else
+        time_=(QDateTime::fromString(QString::fromStdString(d),
+                                "hh:mm:ss d.M.yyyy").toMSecsSinceEpoch()-refTimeInMs)/1000;
     if(t == "MSG:")
     {
         type_=MessageType;
@@ -77,10 +87,10 @@ qint64 LogDataItem::getTimeInMs(const std::string& line)
 
     QString d=QString::fromStdString(line.substr(pos+1,pos1-pos-1));
 
-    return QDateTime::fromString(d,"hh:mm:ss dd.M.yyyy").toMSecsSinceEpoch();
+    return QDateTime::fromString(d,"hh:mm:ss d.M.yyyy").toMSecsSinceEpoch();
 }
 
-void LogData::loadFromFile(const std::string& logFile)
+void LogData::loadFromFile(const std::string& logFile,size_t startPos)
 {
     data_.clear();
 
@@ -88,6 +98,8 @@ void LogData::loadFromFile(const std::string& logFile)
     ecf::File_r log_file(logFile);
     if( !log_file.ok() )
         throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
+
+    log_file.setPos(startPos);
 
     std::string line;
 
@@ -106,10 +118,7 @@ void LogData::loadFromText(const std::string& txt)
     Q_FOREACH(QString s,in.split("\n"))
     {
         if(!s.simplified().isEmpty())
-        {
-            if(refTimeInMs_==0)
-                refTimeInMs_=LogDataItem::getTimeInMs(s.toStdString());
-
+        {            
             data_.push_back(LogDataItem(s.toStdString(),refTimeInMs_));
         }
     }
@@ -128,10 +137,7 @@ void LogData::appendFromText(const std::string& txt)
 
     QString s=QString::fromStdString(txt);
     if(!s.simplified().isEmpty())
-    {
-        if(refTimeInMs_==0)
-            refTimeInMs_=LogDataItem::getTimeInMs(s.toStdString());
-
+    {       
         data_.push_back(LogDataItem(s.toStdString(),refTimeInMs_));
     }
 }
@@ -142,10 +148,7 @@ void LogData::appendFromText(const std::vector<std::string>& txtVec)
     {
         QString s=QString::fromStdString(txtVec[i]);
         if(!s.simplified().isEmpty())
-        {
-            if(refTimeInMs_==0)
-                refTimeInMs_=LogDataItem::getTimeInMs(s.toStdString());
-
+        {            
             data_.push_back(LogDataItem(s.toStdString(),refTimeInMs_));
         }
     }

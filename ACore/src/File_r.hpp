@@ -28,6 +28,8 @@ public:
    ~File_r();
 
    bool ok() const { return (fp_) ? true : false; }
+   std::streamoff pos() { return fp_.tellg();}
+   void setPos(std::streamoff pos) { fp_.seekg(pos,fp_.beg);}
    bool good() const { return fp_.good(); }
    void getline(std::string& line) { std::getline(fp_,line); }
    const std::string& file_name() const { return file_name_; }

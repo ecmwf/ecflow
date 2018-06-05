@@ -122,78 +122,82 @@ void LogLoadDataItem::buildSubReq(std::vector<LogRequestItem>& childSubReq,
     chCmd << "abort" << "complete" << "event" << "init" << "label" << "meter" << "wait";
 
     QStringList usCmd;
-    usCmd << "alter" << "begin" << "ch_add" << "ch_auto_add" <<
-               "ch_drop_user"   <<
-               "ch_register"  <<
-               "ch_rem"   <<
-               "ch_suites" <<
-               "check" <<
-               "checkJobGenOnly" <<
-               "check_pt" <<
-               "debug" <<
-               "debug_server_off" <<
-               "debug_server_on" <<
-               "delete"  <<
-               "edit_history" <<
-               "edit_script"  <<
-               "file" <<
-               "force"  <<
-               "force-dep-eval" <<
-               "free-dep" <<
-               "get" <<
-               "get_state"  <<
-               "group"  <<
-               "halt"  <<
-               "help" <<
-               "host" <<
-               "job_gen" <<
-               "kill"  <<
-               "load"  <<
-               "log" <<
-               "migrate" <<
-               "msg"  <<
-               "news"  <<
-               "order" <<
-               "ping"  <<
-               "plug"  <<
-               "port"  <<
-               "reloadwsfile" <<
-               "replace"   <<
-               "requeue"  <<
-               "restart"  <<
-               "restore_from_checkpt" <<
-               "resume"   <<
-               "rid"   <<
-               "run"   <<
-               "server_load"  <<
-               "server_version"  <<
-               "show"   <<
-               "shutdown"  <<
-               "stats"   <<
-               "stats_reset"  <<
-               "status"  <<
-               "suites"  <<
-               "suspend"  <<
-               "sync"  <<
-               "sync_full" <<
-               "terminate"  <<
-               "version" <<
-               "why"  <<
-               "zombie_adopt"   <<
-               "zombie_block"  <<
-               "zombie_fail"  <<
-               "zombie_fob"  <<
-               "zombie_get"  <<
-               "zombie_kill"   <<
-               "zombie_remove";
+    usCmd <<   "alter"          << "--alter " <<
+               "begin"          << "--begin=" <<
+               "ch_add"         << "--ch_add=" <<
+               "ch_auto_add"    << "--ch_auto_add=" <<
+               "ch_drop_user"   << "--ch_drop_user=" <<
+               "ch_register"    << "--ch_register=" <<
+               "ch_rem"         << "--ch_red=" <<
+               "ch_suites"      << "--ch_suites=" <<
+               "check"          << "--check=" <<
+               "checkJobGenOnly" << "--checkJobGenOnly" <<
+               "check_pt"       << "svr:check_pt " <<
+               "debug"          << "--debug" <<
+               "debug_server_off" << "--debug_server_off" <<
+               "debug_server_on"  << "--debug_server_on" <<
+               "delete"         << "--delete " <<
+               "edit_history"   << "--edit_history=" <<
+               "edit_script"    << "--edit_script=" <<
+               "file"           << "--file=" <<
+               "force"          << "--force=" <<
+               "force-dep-eval" << "--force-dep-eval" <<
+               "free-dep"       << "--free-dep" <<
+               "get"            << "--get" <<
+               "get_state"      << "--get_state" <<
+               "group"          << "--group=" <<
+               "halt"           << "--halt" <<
+               "help"           << "--help" <<
+               "host"           << "--host " <<
+               "job_gen"        << "--job_gen" <<
+               "kill"           << "--kill " <<
+               "load"           << "--load=" <<
+               "log"            << "--log=" <<
+               "migrate"        << "--migrate" <<
+               "msg"            << "--msg=" <<
+               "news"           << "--news=" <<
+               "order"          << "--order=" <<
+               "ping"           << "--ping " <<
+               "plug"           << "--plug=" <<
+               "port"           << "--port " <<
+               "reloadwsfile"   << "--reloadwsfile " <<
+               "replace"        << "--replace=" <<
+               "requeue"        << "--requeue " <<
+               "restart"        << "--restart " <<
+               "restore_from_checkpt" << "--restore_from_checkpt " <<
+               "resume"         << "--resume " <<
+               "rid"            << "--rid" <<
+               "run"            << "--run " <<
+               "server_load"    << "--server_load" <<
+               "server_version" << "--server_version " <<
+               "shutdown"       << "--shutdown" <<
+               "stats"          << "--stats " <<
+               "stats_reset"    << "--stats_reset" <<
+               "status"         << "--status=" <<
+               "suites"         << "--suites " <<
+               "suspend"        << "--suspend=" <<
+               "sync"           << "--sync=" <<
+               "sync_full"      << "--sync_full=" <<
+               "terminate"      << "--terminate" <<
+               "version"        << "--version" <<
+               "zombie_adopt"   << "--zombie_adopt=" <<
+               "zombie_block"   << "--zombie_block=" <<
+               "zombie_fail"    << "--zombie_fail=" <<
+               "zombie_fob"     << "--zombie_fob=" <<
+               "zombie_get"     << "--zombie_get=" <<
+               "zombie_kill"    << "--zombie_kill=" <<
+               "zombie_remove"  << "--zombie_remove=" ;
+
 
     Q_FOREACH(QString s,chCmd)
     {
          childSubReq.push_back(LogRequestItem(s.toStdString(),"chd:" + s.toStdString()));
     }
-    Q_FOREACH(QString s,usCmd)
+
+    Q_ASSERT(usCmd.count() % 2 == 0);
+    for(int i=0; i < usCmd.count() ; i+=2)
     {
-         userSubReq.push_back(LogRequestItem(s.toStdString(),"--" + s.toStdString() + "="));
+         userSubReq.push_back(LogRequestItem(usCmd[i].toStdString(),usCmd[i+1].toStdString()));
     }
 
 #if 0
@@ -396,6 +400,9 @@ void LogLoadData::clear()
     total_.clear();
     suiteData_.clear();
     suites_.clear();
+    maxNumOfRows_=0;
+    numOfRows_=0;
+    startPos_=0;
 }
 
 QString LogLoadData::childSubReqName(int idx) const
@@ -421,6 +428,17 @@ void LogLoadData::setTimeRes(TimeRes res)
 qint64 LogLoadData::period() const
 {
     return (!time_.empty())?(time_[time_.size()-1]-time_[0]):0;
+}
+
+
+QDateTime LogLoadData::startTime() const
+{
+    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[0]);
+}
+
+QDateTime LogLoadData::endTime() const
+{
+    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[time_.size()-1]);
 }
 
 //t is in ms
@@ -843,7 +861,7 @@ void LogLoadData::processSuites()
     }
 }
 
-void LogLoadData::loadLogFile(const std::string& logFile )
+void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
 {
    /// Will read the log file.
    /// We will collate each request/cmd to the server made over a second.
@@ -862,10 +880,59 @@ void LogLoadData::loadLogFile(const std::string& logFile )
     //Clear all collected data
     clear();
 
+    maxNumOfRows_=numOfRows;
+    numOfRows_=0;
+
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);
     if( !log_file.ok() )
         throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
+
+    std::string line;
+    if(numOfRows < 0)
+    {
+        int maxNum=-numOfRows;
+        int cnt=0;
+        std::vector<std::streamoff> posVec(maxNum,0);
+        startPos_=0;
+        while(log_file.good())
+        {
+            std::streamoff currentPos=log_file.pos();
+
+            log_file.getline(line); // default delimiter is /n
+
+            /// We are only interested in Commands (i.e MSG:), and not state changes
+            if (line.empty())
+                continue;
+
+            if (line[0] != 'M')
+                continue;
+
+            std::string::size_type msg_pos = line.find("SG:");
+            if (msg_pos != 1)
+                continue;
+
+            bool child_cmd = false;
+            bool user_cmd = false;
+            if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos)
+            {
+                child_cmd = true;
+            }
+            else if (line.find(ecf::Str::USER_CMD()) != std::string::npos)
+            {
+                user_cmd = true;
+            }
+
+            if(!child_cmd && !user_cmd)
+                continue;
+
+            posVec[cnt % maxNum]=currentPos;
+            cnt++;
+        }
+
+        startPos_=posVec[cnt % maxNum];
+        log_file.setPos(startPos_);
+    }
 
     //A collector total counts
     LogReqCounter total("total");
@@ -875,7 +942,6 @@ void LogLoadData::loadLogFile(const std::string& logFile )
 
     std::vector<std::string> new_time_stamp;
     std::vector<std::string> old_time_stamp;
-    std::string line;
 
     while ( log_file.good() )
     {
@@ -944,6 +1010,8 @@ void LogLoadData::loadLogFile(const std::string& logFile )
 //#ifdef DEBUG
 //      std::cout << line << "\n";
 //#endif
+
+      numOfRows_++;
 
       if (old_time_stamp.empty())
       {
