@@ -27,7 +27,7 @@ class Defs;
 /// to ensure they are the same
 class PersistHelper : private boost::noncopyable {
 public:
-	PersistHelper(bool compare_edit_history = false) : file_size_(0),compare_edit_history_(compare_edit_history) {}
+	explicit PersistHelper(bool compare_edit_history = false) : file_size_(0),compare_edit_history_(compare_edit_history) {}
 
    bool test_persist_and_reload( const Defs& theInMemoryDefs, PrintStyle::Type_t file_type_on_disk,bool do_compare = true );
    bool test_defs_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare = true );

@@ -20,7 +20,10 @@ show_error_and_exit() {
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
-   echo "   san            - is short for clang thread sanitiser"
+   echo "   clang_tidy     - create compilation database for clang_tdiy and then call run-clang-tidy.py"
+   echo "   tsan           - is short for clang thread sanitiser"
+   echo "   asan           - is short for address sanitiser"
+   echo "   msan           - is short for memory sanitiser"
    echo "   no_gui         - Don't build the gui"
    echo "   ssl            - build using openssl"
    echo "   secure_user    - enable password for client server"
@@ -42,8 +45,9 @@ make_only_arg=
 test_arg=
 test_safe_arg=
 clang_arg=
+clang_tidy_arg=
 intel_arg=
-clang_sanitiser_arg=
+tsan_arg=
 mode_arg=release
 verbose_arg=
 ctest_arg=
@@ -53,6 +57,8 @@ python3_arg=
 ssl_arg=
 secure_user_arg=
 log_arg=
+asan_arg=
+msan_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -78,9 +84,12 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
+   elif [[ "$1" = clang_tidy ]] ; then clang_tidy_arg=$1 ;
    elif [[ "$1" = intel ]] ; then intel_arg=$1 ;
    elif [[ "$1" = clean ]] ; then clean_arg=$1 ;
-   elif [[ "$1" = san ]]   ; then clang_sanitiser_arg=$1 ;
+   elif [[ "$1" = tsan ]]   ; then tsan_arg=$1 ;
+   elif [[ "$1" = asan ]]  ; then asan_arg=$1 ;
+   elif [[ "$1" = msan ]]  ; then msan_arg=$1 ;
    elif [[ "$1" = package_source ]] ; then package_source_arg=$1 ;
    elif [[ "$1" = copy_tarball ]] ; then copy_tarball_arg=$1 ;
    elif [[ "$1" = test ]] ;  then test_arg=$1 ;
@@ -108,7 +117,8 @@ echo "make_arg=$make_arg"
 echo "test_arg=$test_arg"
 echo "test_safe_arg=$test_safe_arg"
 echo "clang_arg=$clang_arg"
-echo "clang_sanitiser_arg=$clang_sanitiser_arg"
+echo "clang_tidy_arg=$clang_tidy_arg"
+echo "tsan_arg=$tsan_arg"
 echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
 echo "python3_arg=$python3_arg"
@@ -124,7 +134,7 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations"
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-address"
  
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
@@ -133,24 +143,40 @@ module load cmake/3.10.2
 module load ecbuild/2.8.1
 
 cmake_extra_options=""
-if [[ "$clang_arg" = clang ]] ; then
+if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	module unload gnu
 	module load clang/5.0.1
-	CXX_FLAGS=""  # latest clang with latest boost, should not need any warning suppression
-	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
+    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
+
+    CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined"
+
+	#CXX_FLAGS=""  # latest clang with latest boost, should not need any warning suppression
+	#cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
 	
-	#CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined -Wno-unused-local-typedefs"
-    #cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
+	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
+	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+	fi
 fi
-if [[ "$clang_sanitiser_arg" = san ]] ; then
-	module unload gnu
-	module load clang
-	CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined -fsanitize=thread"
-	cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
-    
-	#CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512 -Wno-expansion-to-defined -fsanitize=thread"
-    #cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang/boost_1_53_0"
+
+# ==============================================================================================
+# sanitisers
+if [[ "$tsan_arg" = tsan && "$asan_arg" = asan ]] ; then
+    echo "Cant use address and thread sanitiser at the same time"
 fi
+if [[ "$tsan_arg" = tsan ]] ; then
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=thread -fno-omit-frame-pointer"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=thread'"  # LINK FLAGS
+fi
+if [[ "$asan_arg" = asan ]] ; then
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=address -fno-omit-frame-pointer"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address'"  # LINK FLAGS
+fi
+if [[ "$msan_arg" = msan ]] ; then
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fPIE -fno-omit-frame-pointer -fsanitize-memory-track-origins"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=memory"  # LINK FLAGS
+   #LINK_FLAGS='-DCMAKE_EXE_LINKER_FLAGS="-fsanitize=memory -fPIE -pie"'
+fi
+
 if [[ "$ARCH" = cray ]] ; then
 
     # disable new UI, no QT on cray
@@ -225,7 +251,27 @@ if [[ $test_safe_arg = test_safe ]] ; then
 	fi
 fi
 if [[ "$ctest_arg" != "" ]] ; then
-	$ctest_arg
+    if [[ "$asan_arg" = asan ]] ; then
+        if [[ $clang_arg != "clang" ]] ; then
+            # for python module we need to preload asan as it needs to be the very first library
+            # ==2971==ASan runtime does not come first in initial library list; 
+            #              you should either link runtime to your application or manually preload it with LD_PRELOAD.
+	        export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libasan.so.3 
+	    fi
+	    export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp  
+	    export LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_lsan.supp
+	    $ctest_arg  
+    elif [[ "$tsan_arg" = tsan ]] ; then
+        if [[ $clang_arg != "clang" ]] ; then
+            # LD_PRELOAD needed otherwise we get: .... cannot allocate memory in static TLS block
+            export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libtsan.so
+        fi
+        export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp  
+        export LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_lsan.supp
+        $ctest_arg 
+    else
+        $ctest_arg 
+	fi
 	exit 0
 fi
 
@@ -298,6 +344,7 @@ $ecbuild $source_dir \
             ${log_options} \
             ${test_options}
             
+            #-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=memory -fPIE -pie' 
             #-DENABLE_STATIC_BOOST_LIBS=ON \
             #-DCMAKE_PYTHON_INSTALL_TYPE=local \
             #-DENABLE_PYTHON=OFF   \
@@ -311,6 +358,9 @@ $ecbuild $source_dir \
             #-DENABLE_PROFILING=ON \
             #-DECBUILD_GPROF_FLAGS \
         
+if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
+    python $WK/build_scripts/run-clang-tidy.py
+fi
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then
 	$make_arg 

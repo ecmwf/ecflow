@@ -19,7 +19,7 @@
 
 class ZombieAttrParser : public Parser {
 public:
-	ZombieAttrParser(DefsStructureParser* p) : Parser(p) {}
+   explicit ZombieAttrParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "zombie"; }
 	virtual bool doParse( const std::string& line, std::vector<std::string >& lineTokens );
 };

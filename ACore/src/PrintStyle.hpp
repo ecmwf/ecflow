@@ -28,7 +28,7 @@ public:
       MIGRATE = 3      // Output the definition that is fully parse-able & includes state
 	};
 
-	PrintStyle(Type_t t) : old_style_(getStyle()) { setStyle(t);}
+	explicit PrintStyle(Type_t t) : old_style_(getStyle()) { setStyle(t);}
 	~PrintStyle() { setStyle(old_style_); } // reset to old style on destruction
 
 

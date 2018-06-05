@@ -20,14 +20,14 @@
 
 class DefsStateParser : public Parser {
 public:
-   DefsStateParser(DefsStructureParser* p) : Parser(p){}
+   explicit DefsStateParser(DefsStructureParser* p) : Parser(p){}
    virtual bool doParse(const std::string& line,std::vector<std::string>& lineTokens);
    virtual const char* keyword() const { return "defs_state"; }
 };
 
 class HistoryParser : public Parser {
 public:
-   HistoryParser(DefsStructureParser* p) : Parser(p){}
+   explicit HistoryParser(DefsStructureParser* p) : Parser(p){}
    virtual bool doParse(const std::string& line,std::vector<std::string>& lineTokens);
    virtual const char* keyword() const { return "history"; }
 };

@@ -302,8 +302,8 @@ fi
 # tmp directory cleaned automatically at end or at error.
 # on new platforms check that these signals are valid:
 
-ECFLOWUI_SIGLIST="HUP INT QUIT TERM XCPU  XFSZ"
-#           1   2   3    15   30/24 31/25
+ECFLOWUI_SIGLIST="QUIT TERM XCPU  XFSZ"
+#              3    15   30/24 31/25
 
 trap 'cleanup "EXIT" $LINENO' EXIT
 trap 'cleanup "SIGNAL trap" $LINENO' $ECFLOWUI_SIGLIST

@@ -20,7 +20,7 @@
 
 class MeterParser : public Parser {
 public:
-	MeterParser(DefsStructureParser* p) : Parser(p) {}
+   explicit MeterParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "meter"; }
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
 };

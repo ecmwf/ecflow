@@ -27,7 +27,7 @@
 
 class MiscAttrs : private boost::noncopyable {
 public:
-   MiscAttrs(Node* node) : node_(node) {}
+   explicit MiscAttrs(Node* node) : node_(node) {}
    MiscAttrs(const MiscAttrs& rhs) : node_(NULL),zombies_(rhs.zombies_),verifys_(rhs.verifys_) {}
    MiscAttrs() : node_(NULL) {}
 

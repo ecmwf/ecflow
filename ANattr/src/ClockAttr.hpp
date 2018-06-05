@@ -40,7 +40,7 @@ public:
 	/// create a clock attribute initialised with given date and time
 	ClockAttr(const boost::posix_time::ptime&, bool hybrid = false, bool positiveGain = true);
 	ClockAttr(int day, int month, int year, bool hybrid = false );
-	ClockAttr(bool hybrid = false);
+	explicit ClockAttr(bool hybrid = false);
 
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const ClockAttr& rhs) const;

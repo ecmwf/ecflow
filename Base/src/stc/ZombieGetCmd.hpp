@@ -25,7 +25,7 @@ class AbstractServer;
 //================================================================================
 class ZombieGetCmd : public ServerToClientCmd {
 public:
-	ZombieGetCmd(AbstractServer*);
+   explicit ZombieGetCmd(AbstractServer*);
 	ZombieGetCmd() : ServerToClientCmd() {}
 
 	void init(AbstractServer*);

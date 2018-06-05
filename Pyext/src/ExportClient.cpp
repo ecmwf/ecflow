@@ -53,7 +53,7 @@ const std::string& get_file_1(ClientInvoker* self,
 /// Set the CLI to enable output to standard out
 class CliSetter {
 public:
-   CliSetter(ClientInvoker* self) : _self(self) {  self->set_cli(true); }
+   explicit CliSetter(ClientInvoker* self) : _self(self) {  self->set_cli(true); }
    ~CliSetter()                                 { _self->set_cli(false);}
 private:
    ClientInvoker* _self;

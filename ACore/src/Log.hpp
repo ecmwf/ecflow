@@ -90,7 +90,7 @@ public:
    void clear();
 
    /// Close the existing log file, and new start writing to the new location
-   void new_path(const std::string& the_path);
+   void new_path(const std::string& the_new_path);
 
    /// Returns the current log file path name
    std::string path() const;
@@ -102,11 +102,11 @@ private:
 
    /// make sure path is not a directory & path has a parent directory.
    /// Will throw std::runtime_error for errors
-   static void check_new_path(const std::string& the_new_path);
+   static void check_new_path(const std::string& new_path);
 
 private:
    ~Log();
-   Log(const std::string& filename);
+   explicit Log(const std::string& fileName);
    static Log* instance_;
 
    bool enable_auto_flush_;

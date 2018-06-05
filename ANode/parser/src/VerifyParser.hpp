@@ -21,7 +21,7 @@
 
 class VerifyParser : public Parser {
 public:
-	VerifyParser(DefsStructureParser* p) : Parser(p) {}
+   explicit VerifyParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "verify"; }
 	virtual bool doParse( const std::string& line, std::vector<std::string >& lineTokens );
 };

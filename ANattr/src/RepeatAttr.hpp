@@ -39,7 +39,7 @@
 //
 class RepeatBase {
 public:
-   RepeatBase(const std::string& name) : state_change_no_(0), name_(name) {}
+   explicit RepeatBase(const std::string& name) : state_change_no_(0), name_(name) {}
    RepeatBase() : state_change_no_(0) {}
    virtual ~RepeatBase();
 

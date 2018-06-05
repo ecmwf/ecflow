@@ -20,7 +20,7 @@
 
 class LabelParser : public Parser {
 public:
-	LabelParser(DefsStructureParser* p) : Parser(p) {}
+   explicit LabelParser(DefsStructureParser* p) : Parser(p) {}
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
 	virtual const char* keyword() const { return "label"; }
 };

@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
 class TestStateChanged {
 public:
-   TestStateChanged(suite_ptr s)
+   explicit TestStateChanged(suite_ptr s)
    : suite_(s),
      initial_suite_state_change_no_(s->state_change_no()),
      initial_suite_modify_change_no_(s->modify_change_no()) { Ecf::set_server(true);}
@@ -57,7 +57,7 @@ private:
 
 class TestDefsStateChanged {
 public:
-   TestDefsStateChanged(Defs* s)
+   explicit TestDefsStateChanged(Defs* s)
    : defs_(s),
      initial_state_change_no_(s->defs_only_max_state_change_no()) {}
 
@@ -458,9 +458,16 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
       // test change variable
       s->add_variable("FRED1","BILL");
-      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::VARIABLE,"FRED1","BILL1")));
-      const Variable& v = s->findVariable("FRED1");
-      BOOST_CHECK_MESSAGE( !v.empty() && v.theValue() == "BILL1", "expected to find variable FRED1, with value BILL1");
+      {
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::VARIABLE,"FRED1","BILL1")));
+         const Variable& v = s->findVariable("FRED1");
+         BOOST_CHECK_MESSAGE( !v.empty() && v.theValue() == "BILL1", "expected to find variable FRED1, with value BILL1");
+      }
+      {
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::VARIABLE,"FRED1")));
+         const Variable& v = s->findVariable("FRED1");
+         BOOST_CHECK_MESSAGE( !v.empty() && v.theValue() == "", "expected to find variable FRED1, with empty value");
+      }
    }
 
    {   // test add event

@@ -39,7 +39,7 @@ public:
 
 private:
    ~Rtt();
-   Rtt(const std::string& filename);
+   explicit Rtt(const std::string& filename);
    static Rtt* instance_;
    mutable std::ofstream file_;
 };

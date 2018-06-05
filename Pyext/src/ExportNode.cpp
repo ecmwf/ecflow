@@ -141,7 +141,7 @@ static object do_rshift(node_ptr self, const bp::object& arg){
          if (previous_child && children[i] == child) {
             // if existing trigger, add new trigger as AND
             if (child->get_trigger()) child->add_part_trigger( PartExpression( previous_child->name() + " == complete", PartExpression::AND) );
-            else child->add_trigger_expr( previous_child->name() + " == complete");
+            else child->add_trigger_expr( Expression(previous_child->name() + " == complete"));
          }
          if (children[i]->defStatus() != DState::COMPLETE)  previous_child = children[i];
       }
@@ -168,7 +168,7 @@ static object do_lshift(node_ptr self, const bp::object& arg){
          if (previous_child &&  previous_child != child && children[i] == child) {
             // if existing trigger, add new trigger as AND
             if (previous_child->get_trigger()) previous_child->add_part_trigger( PartExpression( child->name() + " == complete", PartExpression::AND) );
-            else previous_child->add_trigger_expr( child->name() + " == complete");
+            else previous_child->add_trigger_expr( Expression(child->name() + " == complete"));
          }
       }
    }
