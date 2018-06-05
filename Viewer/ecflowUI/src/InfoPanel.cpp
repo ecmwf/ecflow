@@ -504,7 +504,7 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 	return 0;
 }
 
-
+//We clicked on another tab
 void InfoPanel::slotCurrentWidgetChanged(int idx)
 {
 	if(tabBeingCleared_ || tabBeingAdjusted_)

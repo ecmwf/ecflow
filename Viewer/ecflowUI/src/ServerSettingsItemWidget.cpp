@@ -36,6 +36,10 @@ ServerSettingsItemWidget::ServerSettingsItemWidget(QWidget *parent) : QWidget(pa
 
 	connect(editor_,SIGNAL(changed()),
 		this,SLOT(slotEditorChanged()));
+
+    //This tab is always visible whatever node is selected!!!
+    //We keep the data unchanged unless a new server is selected
+    keepServerDataOnLoad_=true;
 }
 
 QWidget* ServerSettingsItemWidget::realWidget()
@@ -51,7 +55,7 @@ void ServerSettingsItemWidget::reload(VInfo_ptr info)
 
 	info_=info;
 
-    if(info_ && info_->isServer() && info_->server())
+    if(info_ && info_->server())
 	{
 		editor_->edit(info_->server()->conf()->guiProp(),
 				QString::fromStdString(info_->server()->name()));

@@ -138,7 +138,8 @@
         	"name"    : "suite",
             "label"   : "Suite filter",
             "icon"    : "filter.svg",
-            "visible_for" : "server"
+            "show" 	  : "toolbar",
+            "visible_for" : "server or node"
              
         },
         {
@@ -153,7 +154,8 @@
         	"name"    : "server_settings",
             "label"   : "Settings",
             "icon"	  : "cogwheel_blue.svg",
-            "visible_for" : "server"
+            "show" 	  : "toolbar",
+            "visible_for" : "server or node"
              
         }
     ]

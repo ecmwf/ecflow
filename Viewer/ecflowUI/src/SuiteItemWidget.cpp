@@ -90,7 +90,7 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 
 	info_=info;
 
-    if(info_ && info_->isServer() && info_->server())
+    if(info_ && info_->server())
 	{
 		//Get the current suitefilter
 		SuiteFilter *sf=info_->server()->suiteFilter();
@@ -262,7 +262,7 @@ void SuiteItemWidget::on_unselectAllTb_clicked(bool)
 //get a fresh suite list from the server
 void SuiteItemWidget::on_syncTb_clicked(bool)
 {
-	if(info_.get() && info_->isServer() && info_->server())
+    if(info_.get() && info_->server())
 	{
 		infoProvider_->info(info_);
 	}
@@ -284,7 +284,7 @@ void SuiteItemWidget::on_removeTb_clicked(bool val)
 
 void SuiteItemWidget::on_okTb_clicked(bool)
 {
-	if(info_.get() && info_->isServer() && info_->server())
+    if(info_.get() && info_->server())
 	{
 		//This replace the edited filter in model the one
 		//stored by the server
