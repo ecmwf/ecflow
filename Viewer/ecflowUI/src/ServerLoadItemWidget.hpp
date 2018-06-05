@@ -18,6 +18,7 @@
 
 class VNode;
 class LogLoadWidget;
+class MessageLabel;
 
 class ServerLoadItemWidget : public QWidget, public InfoPanelItem
 {
@@ -42,7 +43,7 @@ private:
 #ifdef ECFLOW_LOGVIEW
     LogLoadWidget* w_;
 #else
-    QWidget* w_;
+    MessageLabel* w_;
 #endif
 };
 

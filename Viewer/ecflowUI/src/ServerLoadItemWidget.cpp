@@ -9,7 +9,7 @@
 
 #include "ServerLoadItemWidget.hpp"
 
-#include <QHBoxLayout>
+#include <QVBoxLayout>
 
 #include "Node.hpp"
 
@@ -19,6 +19,7 @@
 #include "LogLoadWidget.hpp"
 #endif
 
+#include "MessageLabel.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
@@ -26,14 +27,17 @@
 
 ServerLoadItemWidget::ServerLoadItemWidget(QWidget *parent)
 {
-    QHBoxLayout* hb=new QHBoxLayout(this);
-    hb->setContentsMargins(0,0,0,0);
+    QVBoxLayout* vb=new QVBoxLayout(this);
+    vb->setContentsMargins(0,0,0,0);
 #ifdef ECFLOW_LOGVIEW
     w_=new LogLoadWidget(this);
+    vb->addWidget(w_);
 #else
-    w_=new QWidget(this);
+    w_=new MessageLabel(this);
+    w_->showWarning("The <b>server load view</b> is only avialable when ecFlowUI is built with <b>QtCharts</b>.");
+    vb->addWidget(w_);
+    vb->addStretch(1);
 #endif
-    hb->addWidget(w_);
 
     //This tab is always visible whatever node is selected!!!
     //We keep the data unchanged unless a new server is selected
