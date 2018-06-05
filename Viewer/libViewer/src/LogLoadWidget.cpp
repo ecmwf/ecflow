@@ -305,11 +305,10 @@ void LogLoadWidget::updateInfoLabel()
 void LogLoadWidget::setAllVisible(bool b)
 {
     ui_->viewTab->setVisible(b);
-    setSuiteControlVisible(b);
-    setChildControlVisible(b);
-    setUserControlVisible(b);
+    ui_->controlToolBox->setVisible(b);
     ui_->scanLabel->setVisible(b);
-    ui_->logView->setVisible(b);   
+    ui_->logView->setVisible(b);
+    ui_->timeWidget->setVisible(b);
 }
 
 void LogLoadWidget::setSuiteControlVisible(bool b)
