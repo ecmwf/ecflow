@@ -266,6 +266,12 @@ void LogLoadWidget::clear()
     childReqModel_->clearData();
     userReqModel_->clearData();
     logModel_->clearData();
+    logFile_.clear();
+    serverName_.clear();
+    host_.clear();
+    port_.clear();
+    ui_->startTe->clear();
+    ui_->endTe->clear();
 
     setAllVisible(false);
 }
