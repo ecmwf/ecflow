@@ -53,11 +53,9 @@ std::ostream& QueueAttr::print(std::ostream& os) const
    Indentor in;
    Indentor::indent(os) << toString();
    if ( !PrintStyle::defsStyle() ) {
-      if (currentIndex_ != 0)  {
-         os << " # " <<  currentIndex_;
-         for(size_t i=0; i <  state_vec_.size(); i++) {
-            os << " " << state_vec_[i];
-         }
+      os << " # " <<  currentIndex_;
+      for(size_t i=0; i <  state_vec_.size(); i++) {
+         os << " " << NState::toString(state_vec_[i]);
       }
    }
    os << "\n";
@@ -225,15 +223,15 @@ void QueueAttr::parse(QueueAttr& queAttr, const std::string& line, std::vector<s
    std::vector<NState::State> state_vec;
 
    if (parse_state) {
-      // queue VARIABLE a b c # index state state state
+      // queue VARIABLE a b c d # index active complete aborted queued
       for(size_t i = 0; i < lineTokens.size(); i++) {
          if (lineTokens[i] == "#" && i+1 < lineTokens.size()) {
             i++;
             index = Extract::theInt(lineTokens[i] ,"QueueAttr::parse, could not extract index");
             i++;
             for(;i < lineTokens.size(); i++) {
-               int state = Extract::theInt(lineTokens[i] ,"QueueAttr::parse, could not extract state");
-               state_vec.push_back(static_cast<NState::State>(state));
+               NState::State state = NState::toState(lineTokens[i]);
+               state_vec.push_back( state );
             }
             break;
          }
