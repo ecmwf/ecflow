@@ -31,12 +31,6 @@ class LogLoadDataItem;
 class LogRequestItem
 {
 public:
-    enum Type {ChildAbortType,ChildInitType,ChildCompleteType,
-               ChildEventType,ChildLabelType,ChildMeterType,ChildWaitType,
-               UserAlterType,UserDeleteType,UserForceType,UserNewsType,UserRequeueType,UserResumeType,
-               UserSuspendType,UserSyncType,
-               NoType};
-
     LogRequestItem() : global_(false), sumTotal_(0), maxTotal_(0), rank_(0), percentage_(0.), counter_(0) {}
     LogRequestItem(const std::string& name,const std::string& pattern,bool global=false) :
         global_(global), name_(name), pattern_(pattern), sumTotal_(0), maxTotal_(0), rank_(0), percentage_(0.), counter_(0) {}
@@ -101,8 +95,9 @@ public:
     const std::vector<LogRequestItem>& userSubReq() const {return userSubReq_;}
 
     void add(size_t index,const LogReqCounter&);
-    static void buildSubReq(std::vector<LogRequestItem>& childSubReq,
-                       std::vector<LogRequestItem>& useSubReq);
+
+    static void buildChildSubReq(std::vector<LogRequestItem>& childSubReq);
+    static void buildUserSubReq(std::vector<LogRequestItem>& useSubReq);
 
     void postProc();
     void procSubReq(std::vector<LogRequestItem>& childSubReq);
@@ -152,6 +147,7 @@ public:
     const LogLoadDataItem& dataItem() const {return total_;}
     QStringList suiteNames() const {return suites_;}
     const std::vector<LogLoadDataItem>& suites() const {return suiteData_;}
+    const std::vector<LogLoadDataItem>& uidData() const {return uidData_;}
     const LogLoadDataItem& total() const {return total_;}
     TimeRes timeRes() const {return timeRes_;}
     void setTimeRes(TimeRes);
@@ -169,6 +165,8 @@ public:
     void getUserSubReq(size_t subIdx,QLineSeries& series,int& maxVal);
     void getSuiteChildSubReq(size_t,size_t,QLineSeries& series);
     void getSuiteUserSubReq(size_t,size_t,QLineSeries& series);
+    void getUidUserSubReq(size_t,size_t,QLineSeries& series);
+    void getUidUserReq(size_t uidIdx,QLineSeries& series,int& maxVal);
 
     size_t size() const {return time_.size();}
     QDateTime startTime() const;
@@ -179,6 +177,7 @@ public:
 
     QString childSubReqName(int idx) const;
     QString userSubReqName(int idx) const;
+    QString uidName(int idx) const;
     size_t subReqMax() const;
     int maxNumOfRows() const {return maxNumOfRows_;}
     int numOfRows() const {return numOfRows_;}
@@ -190,10 +189,13 @@ private:
     void getSeries(QLineSeries& series,const std::vector<int>& vals1,
                    const std::vector<int>& vals2,int& maxVal);
     void add(std::vector<std::string> time_stamp,const LogReqCounter& total,
-             const std::vector<LogReqCounter>& suite_vec);
+             const std::vector<LogReqCounter>& suite_vec,
+             const std::vector<LogReqCounter>& uid_vec);
 
     void processSuites();
+    void processUids();
 
+    bool extract_uid_data(const std::string& line,std::vector<LogReqCounter>& uid_vec);
     bool extract_suite_path(const std::string& line,bool child_cmd,std::vector<LogReqCounter>& suite_vec,
                             size_t& column_index);
 
@@ -201,6 +203,7 @@ private:
     std::vector<qint64> time_; //times stored as msecs since the epoch
     LogLoadDataItem total_; //generic data item for all the suites
     std::vector<LogLoadDataItem> suiteData_; //suite-related data items
+    std::vector<LogLoadDataItem> uidData_;
     QStringList suites_;
     int maxNumOfRows_;
     int numOfRows_;

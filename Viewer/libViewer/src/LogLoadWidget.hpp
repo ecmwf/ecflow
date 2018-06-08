@@ -37,9 +37,16 @@ class LogRequestView;
 class LogRequestViewHandler;
 class ServerLoadView;
 class QSortFilterProxyModel;
+class QHBoxLayout;
 class QVBoxLayout;
 class QComboBox;
+class QToolBox;
 class QTextBrowser;
+class QTableView;
+class QTabWidget;
+class QTreeView;
+class QSplitter;
+class QLabel;
 
 namespace Ui {
     class LogLoadWidget;
@@ -85,6 +92,8 @@ private:
     QSortFilterProxyModel* childReqSortModel_;
     LogLoadRequestModel* userReqModel_;
     QSortFilterProxyModel* userReqSortModel_;
+    LogLoadRequestModel* uidModel_;
+    QSortFilterProxyModel* uidSortModel_;
     LogModel* logModel_;
 
     QString serverName_;
@@ -160,6 +169,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void updateItem(int,bool,QColor);
     void unselectAll();
+    void selectAll();
     void selectFirstFourItems();
 
 protected:
@@ -230,15 +240,19 @@ class LogRequestViewHandler : public QObject
 
     friend class LogRequestView;
     friend class LogTotalRequestView;
-    friend class LogSuiteRequestView;
-    friend class LogSubRequestView;
+    friend class LogCmdSuiteRequestViewiew;
+    friend class LogSuiteCmdRequestViewiew;
+    friend class LogUidCmdRequestView;
+    friend class LogCmdUidRequestView;
     friend class LogStatRequestView;
+    friend class LogStatUidCmdView;
 
 public:
     LogRequestViewHandler(QWidget* parent);
     ~LogRequestViewHandler();
 
     QList<LogRequestView*> views() const {return views_;}
+    QList<QWidget*> tabItems() const {return tabItems_;}
 
     LogLoadData* data() const {return data_;}
     void clear();
@@ -247,12 +261,14 @@ public:
     QList<bool> suitePlotState() const {return suitePlotState_;}
     QList<bool> childPlotState() const {return childPlotState_;}
     QList<bool> userPlotState() const {return userPlotState_;}
+    QList<bool> uidPlotState() const {return uidPlotState_;}
 
 public Q_SLOTS:
     void showFullRange();
     void addRemoveSuite(int idx, bool st);
     void addRemoveChildReq(int idx, bool st);
     void addRemoveUserReq(int idx, bool st);
+    void addRemoveUid(int idx, bool st);
 
 protected Q_SLOTS:
     void slotZoomHappened(QRectF);
@@ -262,17 +278,37 @@ Q_SIGNALS:
     void suitePlotStateChanged(int,bool,QColor);
     void childPlotStateChanged(int,bool,QColor);
     void userPlotStateChanged(int,bool,QColor);
+    void uidPlotStateChanged(int,bool,QColor);
     void timeRangeChanged(qint64,qint64);
     void timeRangeHighlighted(qint64,qint64,qint64);
     void timeRangeReset();
 
 protected:
+    void buildCommandTab(QWidget*);
+    void buildUidTab(QWidget*);
+    void buildTableTab(QWidget*);
+
     LogLoadData* data_;
     QList<LogRequestView*> views_;
+    QList<QWidget*> tabItems_;
     QList<bool> suitePlotState_;
     QList<bool> childPlotState_;
     QList<bool> userPlotState_;
+    QList<bool> uidPlotState_;
     int lastScanIndex_;
+};
+
+class LogRequestViewControlItem
+{
+public:
+    LogRequestViewControlItem() : model_(0), sortModel_(0), tree_(0) {}
+
+    void adjustColumnWidth();
+
+    LogLoadRequestModel* model_;
+    QSortFilterProxyModel* sortModel_;
+    QTreeView* tree_;
+    QList<bool> plotState_;
 };
 
 class LogRequestView : public QScrollArea
@@ -292,6 +328,7 @@ Q_SIGNALS:
     void suitePlotStateChanged(int,bool,QColor);
     void childPlotStateChanged(int,bool,QColor);
     void userPlotStateChanged(int,bool,QColor);
+    void uidPlotStateChanged(int,bool,QColor);
     void timeRangeChanged(qint64,qint64);
     void timeRangeHighlighted(qint64,qint64,qint64);
     void timeRangeReset();
@@ -302,14 +339,24 @@ public Q_SLOTS:
     virtual void addRemoveSuite(int idx, bool st) {}
     virtual void addRemoveChildReq(int idx, bool st) {}
     virtual void addRemoveUserReq(int idx, bool st) {}
+    virtual void addRemoveUid(int idx, bool st) {}
 
 protected Q_SLOTS:
+    void adjustSplitterSize();
     void slotZoom(QRectF);
     void adjustZoom();
     void scanPositionChanged(qreal);
     void scanPositionClicked(qreal);
 
 protected:
+    enum ControlType {SuiteType,ChildType,UserType,UidType};
+
+    void buildControlCore(LogRequestViewControlItem* item,QString title,QString modelHeader);
+    void buildSuiteControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
+    void buildChildReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
+    void buildUserReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
+    void buildUidControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
+
     QChart* addChartById(QString id);
     void removeChartById(QString id);
     QString chartId(ChartView* cv);
@@ -335,16 +382,54 @@ protected:
 
     void removeSeries(QChart* chart,QString id);
 
+    void setScanText(QString);
     virtual void buildScanTable(QString& txt,int idx)=0;
     void buildScanRow(QString &txt,QString name,size_t val,QColor col) const;
     void buildScanRow(QString &txt,QString name,size_t tot,size_t ch,size_t us,QColor col) const;
     void buildEmptyScanRow(QString &txt,QString name,QColor lineCol) const;
+    void buildEmptyScanRowSingleVal(QString &txt,QString name,QColor lineCol) const;
 
     LogRequestViewHandler* handler_;
+    LogLoadData* data_;
     QList<ChartView*> views_;
     QMap<QString,ChartView*> viewIds_;
-    QVBoxLayout* mainLayout_;
+    QSplitter* splitter_;
+    QHBoxLayout* mainLayout_;
+    QVBoxLayout* viewLayout_;
+    QVBoxLayout* sideLayout_;
+    QTabWidget *controlTab_;
+    QLabel* scanLabel_;
+
+    LogRequestViewControlItem suiteCtl_;
+    LogRequestViewControlItem userCtl_;
+    LogRequestViewControlItem childCtl_;
+    LogRequestViewControlItem uidCtl_;
+
+    QMap<ControlType,LogRequestViewControlItem> control_;
+
+
+    /*LogLoadRequestModel* suiteModel_;
+    QSortFilterProxyModel* suiteSortModel_;
+    QTreeView* suiteTree_;
+
+    LogLoadRequestModel* childReqModel_;
+    QSortFilterProxyModel* childReqSortModel_;
+    QTreeView* childReqTree_;
+
+    LogLoadRequestModel* userReqModel_;
+    QSortFilterProxyModel* userReqSortModel_;
+    QTreeView* userReqTree_;
+
+    LogLoadRequestModel* uidModel_;
+    QSortFilterProxyModel* uidSortModel_;
+    QTreeView* uidReqTree_;
+
+    QList<bool> suitePlotState_;
+    QList<bool> childPlotState_;
+    QList<bool> userPlotState_;
+    QList<bool> uidPlotState_;*/
     int maxVal_;
+    int lastScanIndex_;
 };
 
 class LogTotalRequestView : public LogRequestView
@@ -369,14 +454,19 @@ protected:
     QChart* getChart(ChartType);
     ChartView* getView(ChartType);
     void buildScanTable(QString& txt,int idx);
+    //void buildSuiteControl();
+
+    LogLoadRequestModel* suiteModel_;
+    LogLoadRequestSortModel* suiteSortModel_;
+    QTreeView* suiteTree_;
 };
 
-class LogSuiteRequestView : public  LogRequestView
+class LogCmdSuiteRequestView : public  LogRequestView
 {
     Q_OBJECT
 public:
-    explicit LogSuiteRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
-    ~LogSuiteRequestView() {}
+    explicit LogCmdSuiteRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogCmdSuiteRequestView() {}
 
 public Q_SLOTS:
     void addRemoveSuite(int idx, bool st);
@@ -401,12 +491,12 @@ protected:
     void buildScanTable(QString& txt,int idx);
 };
 
-class LogSubRequestView : public  LogRequestView
+class LogSuiteCmdRequestView : public  LogRequestView
 {
     Q_OBJECT
 public:
-    explicit LogSubRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
-    ~LogSubRequestView() {}
+    explicit LogSuiteCmdRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogSuiteCmdRequestView() {}
 
 public Q_SLOTS:
     void addRemoveSuite(int idx, bool st);
@@ -416,21 +506,90 @@ public Q_SLOTS:
 protected:
     void loadCore();
 
+    void addTotal();
     void addSuite(int);
     void removeSuite(int);
     void addChildReq(int childReqIdx);
-    void removeChildReq(int childReqIdx) {}
     void addUserReq(int userReqIdx);
-    void removeUserReq(int userReqIdx) {}
 
     QString childChartId(int idx) const;
     QString userChartId(int idx) const;
-    void parseChartId(QString id,QString& type,int& idx);
+    void parseChartId(QString id,int& idx,QString& type) const;
+    QString suiteSeriesId(int childIdx) const;
+    QColor suiteSeriesColour(QChart* chart,size_t idx);
 
-    QString suiteSeriesId(int suiteIdx) const;
-    QColor suiteSeriesColour(QChart*,int suiteIdx);
     void buildScanTable(QString& txt,int idx);
 };
+
+class LogUidCmdRequestView : public  LogRequestView
+{
+    Q_OBJECT
+public:
+    explicit LogUidCmdRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogUidCmdRequestView() {}
+
+public Q_SLOTS:
+    void addRemoveUid(int idx, bool st);
+    //void addRemoveChildReq(int idx, bool st);
+    void addRemoveUserReq(int idx, bool st);
+
+protected:
+    void loadCore();
+
+    void addTotal();
+    void addSuite(int) {}
+    void removeSuite(int) {}
+    void addUid(int);
+    void removeUid(int);
+    //void addChildReq(int childReqIdx);
+    //void removeChildReq(int childReqIdx) {}
+    void addUserReq(int userReqIdx);
+    void removeUserReq(int userReqIdx) {}
+
+    //QString childChartId(int idx) const;
+    QString userChartId(int idx) const;
+
+    QString uidSeriesId(int uidIdx) const;
+    QColor uidSeriesColour(QChart*,int uidIdx);
+    void buildScanTable(QString& txt,int idx);
+};
+
+class LogCmdUidRequestView : public  LogRequestView
+{
+    Q_OBJECT
+public:
+    explicit LogCmdUidRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogCmdUidRequestView() {}
+
+public Q_SLOTS:
+    void addRemoveUid(int idx, bool st);
+    //void addRemoveChildReq(int idx, bool st);
+    void addRemoveUserReq(int idx, bool st);
+
+protected:
+    void loadCore();
+
+    void addTotal();
+    void addSuite(int) {}
+    void removeSuite(int) {}
+    void addUid(int);
+    void removeUid(int);
+    //void addChildReq(int childReqIdx);
+    //void removeChildReq(int childReqIdx) {}
+    void addUserReq(int userReqIdx);
+    void removeUserReq(int userReqIdx);
+
+    //QString childChartId(int idx) const;
+    QString uidChartId(int idx) const;
+
+    QString userSeriesId(int useReqIdx) const;
+    QColor userSeriesColour(QChart*,int userReqIdx);
+    void buildScanTable(QString& txt,int idx);
+};
+
+
+class LogStatRequestModelData;
+class LogStatRequestModel;
 
 class LogStatRequestView : public  LogRequestView
 {
@@ -441,18 +600,83 @@ public:
 
     void adjustZoom(QRectF r) {}
 
-public Q_SLOTS:
-    void addRemoveSuite(int idx, bool st);
-
 protected:
-    void loadCore();
-
-    void buildTable();
     void addSuite(int) {}
     void removeSuite(int) {}
     void buildScanTable(QString& txt,int idx) {}
 
-    QTextBrowser* textView_;
+    LogStatRequestModel* statModel_;
+    QSortFilterProxyModel *statSortModel_;
+    QTableView* statTable_;
 };
+
+class LogStatCmdUidView : public  LogStatRequestView
+{
+    Q_OBJECT
+public:
+    explicit LogStatCmdUidView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogStatCmdUidView() {}
+
+public Q_SLOTS:
+    void addRemoveUid(int idx, bool st);
+
+protected:
+    void loadCore();
+};
+
+class LogStatUidCmdView : public  LogStatRequestView
+{
+    Q_OBJECT
+public:
+    explicit LogStatUidCmdView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogStatUidCmdView() {}
+
+public Q_SLOTS:
+    void addRemoveUserReq(int idx, bool st);
+
+protected:
+    void loadCore();
+};
+
+class LogStatRequestModelData
+{
+public:
+    int rowNum() const {return rowLabels_.count();}
+    int colNum() const {return colLabels_.count();}
+    void clear() {rowLabels_.clear(); colLabels_.clear(); vals_.clear();}
+
+    QStringList rowLabels_;
+    QStringList colLabels_;
+    QVector<QVector<float> > vals_;
+};
+
+class LogStatRequestModel : public QAbstractItemModel
+{
+public:
+    explicit LogStatRequestModel(QObject *parent=0);
+    ~LogStatRequestModel();
+
+    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
+    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+
+    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
+    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+
+    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
+    QModelIndex parent (const QModelIndex & ) const;
+
+    void setDataUidCmd(const LogLoadDataItem& total,const std::vector<LogLoadDataItem>& data);
+    void setDataCmdUid(const LogLoadDataItem& total,const std::vector<LogLoadDataItem>& data);
+    void setData(const std::vector<LogRequestItem>& data);
+
+    bool hasData() const;
+    void clearData();
+
+protected:
+    LogStatRequestModelData data_;
+};
+
+
+
 
 #endif // LOGLOADWIDGET_HPP

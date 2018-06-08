@@ -21,6 +21,8 @@
 #include <QFileInfo>
 #include <QStringList>
 
+static int REQCNT=0;
+
 //=======================================================
 //
 // LogReqCounter
@@ -31,7 +33,8 @@
 LogReqCounter::LogReqCounter(const std::string& name) :
     name_(name), childReq_(0),userReq_(0)
 {
-    LogLoadDataItem::buildSubReq(childSubReq_,userSubReq_);
+    LogLoadDataItem::buildChildSubReq(childSubReq_);
+    LogLoadDataItem::buildUserSubReq(userSubReq_);
 }
 
 void LogReqCounter::clear()
@@ -63,17 +66,16 @@ void LogReqCounter::add(bool childCmd,const std::string& line)
     else
     {
         userReq_++;
-        for(std::vector<LogRequestItem>::iterator it=userSubReq_.begin(); it != userSubReq_.end(); ++it)
+        for(size_t i=0; i < userSubReq_.size(); i++)
         {
-            if(line.find((*it).pattern_) != std::string::npos)
+            if(line.find(userSubReq_[i].pattern_) != std::string::npos)
             {
-                (*it).counter_++;
+                userSubReq_[i].counter_++;
                 return;
             }
         }
     }
 }
-
 
 void LogRequestItem::add(size_t index,size_t v)
 {
@@ -110,17 +112,25 @@ LogLoadDataItem::LogLoadDataItem() :
 
 void LogLoadDataItem::buildSubReq()
 {
-    buildSubReq(childSubReq_,userSubReq_);
+    buildChildSubReq(childSubReq_);
+    buildUserSubReq(userSubReq_);
 }
 
-void LogLoadDataItem::buildSubReq(std::vector<LogRequestItem>& childSubReq,
-                                  std::vector<LogRequestItem>& userSubReq)
+void LogLoadDataItem::buildChildSubReq(std::vector<LogRequestItem>& childSubReq)
 {
     //clientOptionsDescriptions_ = new po::options_description("help", po::options_description::m_default_line_length + 80);
 
     QStringList chCmd;
     chCmd << "abort" << "complete" << "event" << "init" << "label" << "meter" << "wait";
 
+    Q_FOREACH(QString s,chCmd)
+    {
+         childSubReq.push_back(LogRequestItem(s.toStdString(),"chd:" + s.toStdString()));
+    }
+}
+
+void LogLoadDataItem::buildUserSubReq(std::vector<LogRequestItem>& userSubReq)
+{
     QStringList usCmd;
     usCmd <<   "alter"          << "--alter " <<
                "begin"          << "--begin=" <<
@@ -137,7 +147,7 @@ void LogLoadDataItem::buildSubReq(std::vector<LogRequestItem>& childSubReq,
                "debug_server_off" << "--debug_server_off" <<
                "debug_server_on"  << "--debug_server_on" <<
                "delete"         << "--delete " <<
-               "edit_history"   << "--edit_history=" <<
+               "edit_history"   << "--edit_history" <<
                "edit_script"    << "--edit_script=" <<
                "file"           << "--file=" <<
                "force"          << "--force=" <<
@@ -188,45 +198,11 @@ void LogLoadDataItem::buildSubReq(std::vector<LogRequestItem>& childSubReq,
                "zombie_kill"    << "--zombie_kill=" <<
                "zombie_remove"  << "--zombie_remove=" ;
 
-
-    Q_FOREACH(QString s,chCmd)
-    {
-         childSubReq.push_back(LogRequestItem(s.toStdString(),"chd:" + s.toStdString()));
-    }
-
     Q_ASSERT(usCmd.count() % 2 == 0);
     for(int i=0; i < usCmd.count() ; i+=2)
     {
          userSubReq.push_back(LogRequestItem(usCmd[i].toStdString(),usCmd[i+1].toStdString()));
     }
-
-#if 0
-    childSubReq.push_back(LogRequestItem("abort","chd:abort"));
-    childSubReq.push_back(LogRequestItem("complete","chd:complete"));
-    childSubReq.push_back(LogRequestItem("event","chd:event"));
-    childSubReq.push_back(LogRequestItem("init","chd:init"));
-    childSubReq.push_back(LogRequestItem("label","chd:label"));
-    childSubReq.push_back(LogRequestItem("meter","chd:meter"));
-    childSubReq.push_back(LogRequestItem("wait","chd:wait"));
-
-    userSubReq.push_back(LogRequestItem("alter","--alter="));
-    userSubReq.push_back(LogRequestItem("begin","--begin="));
-    userSubReq.push_back(LogRequestItem("check","--check="));
-    userSubReq.push_back(LogRequestItem("debug","--debug="));
-
-    userSubReq.push_back(LogRequestItem("delete","--delete="));
-    userSubReq.push_back(LogRequestItem("edit_history","--edit_history="));
-    userSubReq.push_back(LogRequestItem("edit_script","--edit_script="));
-    userSubReq.push_back(LogRequestItem("file","--file="));
-    userSubReq.push_back(LogRequestItem("free-dep","--free-dep="));
-    userSubReq.push_back(LogRequestItem("force","--force="));
-    userSubReq.push_back(LogRequestItem("get","--force="));
-    userSubReq.push_back(LogRequestItem("news","--news=",true));
-    userSubReq.push_back(LogRequestItem("requeue","--requeue="));
-    userSubReq.push_back(LogRequestItem("resume","--resume="));
-    userSubReq.push_back(LogRequestItem("suspend","--suspend="));
-    userSubReq.push_back(LogRequestItem("sync","--sync=",true));
-#endif
 }
 
 void LogLoadDataItem::clear()
@@ -413,6 +389,11 @@ QString LogLoadData::childSubReqName(int idx) const
 QString LogLoadData::userSubReqName(int idx) const
 {
     return QString::fromStdString(total_.userSubReq()[idx].name_);
+}
+
+QString LogLoadData::uidName(int idx) const
+{
+    return QString::fromStdString(uidData_[idx].name());
 }
 
 size_t LogLoadData::subReqMax() const
@@ -784,8 +765,26 @@ void LogLoadData::getSuiteUserSubReq(size_t suiteIdx,size_t subIdx,QLineSeries& 
     }
 }
 
+void LogLoadData::getUidUserSubReq(size_t uidIdx,size_t subIdx,QLineSeries& series)
+{
+    if(uidIdx >=0 && uidIdx < uidData().size())
+    {
+        int maxVal=0;
+        getSeries(series,uidData_[uidIdx].userSubReq()[subIdx],maxVal);
+    }
+}
+
+void LogLoadData::getUidUserReq(size_t uidIdx,QLineSeries& series,int& maxVal)
+{
+    if(uidIdx >=0 && uidIdx < uidData_.size())
+    {
+        getSeries(series,uidData_[uidIdx].userReq(),maxVal);
+    }
+}
+
 void LogLoadData::add(std::vector<std::string> time_stamp,const LogReqCounter& total,
-                  const std::vector<LogReqCounter>& suite_vec)
+                  const std::vector<LogReqCounter>& suite_vec,
+                  const std::vector<LogReqCounter>& uid_vec)
 {
     if(time_stamp.size() < 2)
         return;
@@ -800,7 +799,24 @@ void LogLoadData::add(std::vector<std::string> time_stamp,const LogReqCounter& t
     //data_.add(total.childReq_,total.userReq_);
     total_.add(index,total);
 
+    //---------------------------
+    // uid specific data
+    //---------------------------
+    for(size_t i = uidData_.size(); i < uid_vec.size(); i++)
+    {
+        uidData_.push_back(LogLoadDataItem(uid_vec[i].name_));
+        uidData_.back().init(time_.size()-1);
+    }
+
+    assert(uidData_.size() == uid_vec.size());
+    for(size_t i = 0; i < uidData_.size(); i++)
+    {
+        uidData_[i].add(index,uid_vec[i]);
+    }
+
+    //---------------------------
     //suite specific data
+    //---------------------------
     for(size_t i = suiteData_.size(); i < suite_vec.size(); i++)
     {
         suiteData_.push_back(LogLoadDataItem(suite_vec[i].name_));
@@ -808,8 +824,6 @@ void LogLoadData::add(std::vector<std::string> time_stamp,const LogReqCounter& t
     }
 
     assert(suiteData_.size() == suite_vec.size());
-
-    //suite specific data
     for(size_t i = 0; i < suiteData_.size(); i++)
     {
         //suiteData_[i].add(suite_vec[i].childReq_,
@@ -858,6 +872,49 @@ void LogLoadData::processSuites()
     for(size_t i = 0; i < suiteData_.size(); i++)
     {
         suiteData_[i].postProc();
+    }
+
+    processUids();
+}
+
+void LogLoadData::processUids()
+{
+    if(uidData_.size() == 0)
+        return;
+
+    if(uidData_.size() == 1)
+    {
+        uidData_[0].setRank(0);
+        uidData_[0].setPercentage(100.);
+        return;
+    }
+
+    std::vector<size_t> sumVec;
+    std::vector<std::pair<size_t,size_t> > sortVec;
+    size_t sum=0;
+    for(size_t i = 0; i < uidData_.size(); i++)
+    {
+        sum+=uidData_[i].sumTotal();
+        sumVec.push_back(uidData_[i].sumTotal());
+        sortVec.push_back(std::make_pair(i,uidData_[i].sumTotal()));
+    }
+
+    if(sum <=0 )
+        return;
+
+    assert(sumVec.size() == uidData_.size());
+    std::sort(sortVec.begin(), sortVec.end(),sortVecFunction);
+
+    for(size_t i = 0; i < sortVec.size(); i++)
+    {
+        int idx=sortVec[i].first;
+        uidData_[idx].setRank(sortVec.size()-i-1);
+        uidData_[idx].setPercentage(static_cast<float>(uidData_[idx].sumTotal()*100)/static_cast<float>(sum));
+    }
+
+    for(size_t i = 0; i < uidData_.size(); i++)
+    {
+        uidData_[i].postProc();
     }
 }
 
@@ -940,8 +997,13 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
     //A collector for suite related data
     std::vector<LogReqCounter> suite_vec;
 
+    //A collector for uid related data
+    std::vector<LogReqCounter> uid_vec;
+
     std::vector<std::string> new_time_stamp;
     std::vector<std::string> old_time_stamp;
+
+    std::map<std::string,size_t> uidCnt;
 
     while ( log_file.good() )
     {
@@ -976,6 +1038,26 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
 
         if(!child_cmd && !user_cmd)
             continue;
+
+#if 0
+        std::string uid;
+        if(user_cmd)
+        {
+            std::string::size_type uidStart = line.find(" :");
+            if ( uidStart != std::string::npos)
+            {
+                std::string::size_type uidEnd = line.find(" ",uidStart+2);
+                if(uidEnd != std::string::npos)
+                {
+                    uid=line.substr(uidStart+2,uidEnd-uidStart+1);
+                }
+                else
+                {
+                    uid = line.substr(uidStart+2);
+                }
+            }
+        }
+#endif
 
         new_time_stamp.clear();
         {
@@ -1020,6 +1102,10 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
          // Extract path if any, to determine the suite most contributing to server load
          size_t column_index = 0;
          bool suite_path_found = extract_suite_path(line,child_cmd,suite_vec,column_index);
+         if(user_cmd)
+         {
+            extract_uid_data(line,uid_vec);
+         }
          //if ( suite_path_found )
          //    assert(suite_vec[column_index].request_per_second_ <= (child_requests_per_second + user_request_per_second) );
       }
@@ -1030,6 +1116,10 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
 
          size_t column_index = 0;
          bool suite_path_found = extract_suite_path(line,child_cmd,suite_vec,column_index);
+         if(user_cmd)
+         {
+            extract_uid_data(line,uid_vec);
+         }
          //if ( suite_path_found )
          //    assert(suite_vec[column_index].request_per_second_ <= (child_requests_per_second + user_request_per_second) );
       }
@@ -1054,7 +1144,7 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
 #endif
 
          //Add collected data to the storage objects
-         add(old_time_stamp,total,suite_vec);
+         add(old_time_stamp,total,suite_vec,uid_vec);
 
          // clear request per second
          total.clear();
@@ -1063,14 +1153,23 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
          {
             suite_vec[i].clear();
          }
+         for(size_t i= 0; i < uid_vec.size();i++)
+         {
+            uid_vec[i].clear();
+         }
 
          // start of *new* time
-         total.add(child_cmd,line);
+         total.add(child_cmd,line); //?
 
          size_t column_index = 0;
          bool suite_path_found = extract_suite_path(line,child_cmd,suite_vec,column_index);
          //if ( suite_path_found )
          //    assert(suite_vec[column_index].request_per_second_ <= (child_requests_per_second + user_request_per_second) );
+         if(user_cmd)
+         {
+            extract_uid_data(line,uid_vec);
+         }
+
       }
 
       old_time_stamp = new_time_stamp;
@@ -1086,6 +1185,95 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
    }
 
    processSuites();
+
+   UiLog().dbg() << "REQCNT " << REQCNT;
+}
+
+
+bool LogLoadData::extract_uid_data(const std::string& line,std::vector<LogReqCounter>& uid_vec)
+{
+   std::string uid;
+   std::string::size_type uidStart = line.find(" :");
+
+   bool hasIt=false;
+   if(line.find(":newops") != std::string::npos)
+   {
+       hasIt=true;
+       REQCNT++;
+   }
+
+   if ( uidStart != std::string::npos)
+   {
+       uidStart+=2;
+       for(size_t i=uidStart; i < line.size() ; i++)
+       {
+            if(line[i] == ' ')
+            {
+                if(i > uidStart+1)
+                {
+                    uid=line.substr(uidStart,i-uidStart);
+                }
+                break;
+            }
+            else if(line[i] == ';')
+            {
+               if(i > uidStart+1)
+               {
+                   uid=line.substr(uidStart,i-uidStart);
+               }
+               break;
+            }
+            else if(line[i] == ':')
+            {
+                if(i >= uidStart+5 && line.substr(i-3,4) == "ERR:")
+                {
+                    uid=line.substr(uidStart,i-uidStart-3);
+                }
+                break;
+            }
+       }
+
+       if(uid.empty() && line.size()-uidStart >= 2)
+       {
+           uid=line.substr(uidStart);
+       }
+
+       /*std::string::size_type uidEnd = line.find(" ",uidStart+2);
+        if(uidEnd != std::string::npos)
+        {
+            uid=line.substr(uidStart+2,uidEnd-uidStart-2);
+        }
+        else
+        {
+            uid = line.substr(uidStart+2);
+        }*/
+    }
+   //if(uid == "newops")
+   //    REQCNT++;
+
+    if(hasIt && uid.empty())
+    {
+        hasIt=false;
+    }
+
+    //collect uid based stats for user requests!
+    if(!uid.empty())
+    {
+        for(size_t i=0; i < uid_vec.size(); i++)
+        {
+            if(uid_vec[i].name_ ==  uid)
+            {
+                uid_vec[i].add(false,line);
+                return true;
+            }
+        }
+
+        uid_vec.push_back(LogReqCounter(uid));
+        uid_vec.back().add(false,line);
+        return true;
+    }
+
+    return false;
 }
 
 bool LogLoadData::extract_suite_path(

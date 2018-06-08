@@ -77,6 +77,7 @@ LogMainWindow::LogMainWindow(QStringList idLst,QWidget *parent) :
 
     textView_=new QPlainTextEdit(this);
     layout->addWidget(textView_);
+    textView_->hide(); //TODO: remove textview
 
     //LogLoadWidget *lw=new LogLoadWidget(this);
    // tab_->addTab(lw,"first");
