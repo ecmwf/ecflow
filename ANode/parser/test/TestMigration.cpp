@@ -185,8 +185,8 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
       family_ptr fam = suite->add_family("f1");
       task_ptr t = fam->add_task("t");
       std::vector<std::string> queue_items; queue_items.push_back("001"); queue_items.push_back("002"); queue_items.push_back("003");
-      QueueAttr queue("queue",queue_items); queue.increment(); queue.increment();
-      QueueAttr queue1("queue1",queue_items); queue1.increment();
+      QueueAttr queue("queue",queue_items); queue.active(); queue.active();
+      QueueAttr queue1("queue1",queue_items); queue1.active();
       suite->add_queue(queue); suite->add_queue(queue1);
       fam->add_queue(queue); fam->add_queue(queue1);
       t->add_queue(queue); t->add_queue(queue1);

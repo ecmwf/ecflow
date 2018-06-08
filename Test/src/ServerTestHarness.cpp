@@ -464,16 +464,17 @@ static void add_queue(std::string& content,const std::vector<QueueAttr>& queues)
    BOOST_FOREACH(const QueueAttr& queue, queues) {
       content += "\n";
       content += "for i in";
-      const std::vector<std::string>& queue_list = queue.list();
+      const std::vector< std::string >& queue_list = queue.list();
       for(size_t i = 0; i < queue_list.size(); i++) {
          content += " ";
          content += queue_list[i];
       }
       content += "\n";
       content += "do\n";
-      content += "   step=$(%ECF_CLIENT_EXE_PATH% --queue=" + queue.name() + ")\n";
+      content += "   step=$(%ECF_CLIENT_EXE_PATH% --queue=" + queue.name() + " active )\n";
       content += "   echo $step\n";
       content += "   sleep %SLEEPTIME%\n";
+      content += "   %ECF_CLIENT_EXE_PATH% --queue=" + queue.name() + " complete\n";
       content += "done\n";
    }
 }

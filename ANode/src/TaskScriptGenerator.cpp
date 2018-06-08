@@ -136,9 +136,10 @@ static void add_queue(std::string& content,const std::string& client_exe, const 
       }
       content += "\n";
       content += "do\n";
-      content += "   step=$(" + client_exe + "--queue=" + queue.name() + ")\n";
+      content += "   step=$(" + client_exe + "--queue=" + queue.name() + " active" + " )\n";
       content += "   echo $step\n";
       content += "   " + sleep;
+      content += "   " + client_exe + "--queue=" + queue.name() + " complete\n";
       content += "done\n";
    }
 }

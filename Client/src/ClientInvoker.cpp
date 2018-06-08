@@ -1339,12 +1339,12 @@ void ClientInvoker::child_wait(const std::string& expression)
    invoke( Cmd_ptr( new CtsWaitCmd(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(), expression ) ) );
 }
 
-std::string ClientInvoker::child_queue(const std::string& queue_name, const std::string& path_to_node_with_queue)
+std::string ClientInvoker::child_queue(const std::string& queue_name, const std::string& action,const std::string& step,const std::string& path_to_node_with_queue)
 {
    if (queue_name.empty()) throw std::runtime_error("ClientInvoker::child_queue:  Queue name not set");
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( Cmd_ptr( new QueueCmd(clientEnv_.task_path(),clientEnv_.jobs_password(),clientEnv_.process_or_remote_id(),clientEnv_.task_try_no(),queue_name,path_to_node_with_queue)));
+   invoke( Cmd_ptr( new QueueCmd(clientEnv_.task_path(),clientEnv_.jobs_password(),clientEnv_.process_or_remote_id(),clientEnv_.task_try_no(),queue_name,action,step,path_to_node_with_queue)));
    return server_reply_.get_string();
 }
 

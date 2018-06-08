@@ -233,7 +233,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       BOOST_FOREACH(const QueueAttr& attr, queue_attrs ) {
          if (attr.state_change_no() > client_state_change_no) {
             if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-            comp->add( boost::make_shared<NodeQueueIndexMemento>( attr.name(), attr.index() ) );
+            comp->add( boost::make_shared<NodeQueueIndexMemento>( attr.name(), attr.index(), attr.state_vec() ) );
          }
       }
 

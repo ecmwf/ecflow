@@ -121,7 +121,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new AbortCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1)));
 	cmd_vec.push_back( Cmd_ptr( new CtsWaitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"1 eq 1")));
    cmd_vec.push_back( Cmd_ptr( new LabelCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"labelName","label value")));
-   cmd_vec.push_back( Cmd_ptr( new QueueCmd("/suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"queue1","/suiteName")));
+   cmd_vec.push_back( Cmd_ptr( new QueueCmd("/suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"queue1","active","","/suiteName")));
 
    cmd_vec.push_back( Cmd_ptr( new ForceCmd("/suiteName","complete",true,true)));
 	cmd_vec.push_back( Cmd_ptr( new FreeDepCmd("/suiteName")));

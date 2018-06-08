@@ -382,13 +382,15 @@ private:
 
 class NodeQueueIndexMemento : public Memento {
 public:
-   NodeQueueIndexMemento(const std::string& name, int index) : index_(index), name_(name) {}
+   NodeQueueIndexMemento(const std::string& name, int index,const std::vector<NState::State>& state_vec)
+    : index_(index), name_(name),state_vec_(state_vec) {}
    NodeQueueIndexMemento() : index_(0) {}
 private:
    virtual void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
    int index_;
    std::string name_;
+   std::vector<NState::State> state_vec_;
    friend class Node;
    friend class MiscAttrs;
 
@@ -398,6 +400,7 @@ private:
       ar & boost::serialization::base_object<Memento>(*this);
       ar & index_;
       ar & name_;
+      ar & state_vec_;
    }
 };
 

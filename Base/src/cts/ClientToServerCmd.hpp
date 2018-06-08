@@ -505,6 +505,7 @@ private:
    }
 };
 
+class QueueAttr;
 class QueueCmd : public TaskCmd {
 public:
    QueueCmd(const std::string& pathToTask,
@@ -512,12 +513,16 @@ public:
             const std::string& process_or_remote_id,
             int try_no,
             const std::string& queueName,
+            const std::string& action,
+            const std::string& step = "",
             const std::string& path_to_node_with_queue = "") // if empty search for queue up node tree
    : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no),
-     name_(queueName),path_to_node_with_queue_(path_to_node_with_queue) {}
+     name_(queueName),action_(action),step_(step),path_to_node_with_queue_(path_to_node_with_queue) {}
    QueueCmd() : TaskCmd() {}
 
    const std::string& name() const { return name_; }
+   const std::string& action() const { return action_; }
+   const std::string& step() const { return step_; }
    const std::string& path_to_node_with_queue() const { return path_to_node_with_queue_; }
 
    virtual std::ostream& print(std::ostream& os) const;
@@ -535,8 +540,12 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual ecf::Child::CmdType child_type() const { return ecf::Child::QUEUE; }
 
+   std::string handle_queue(QueueAttr& queue_attr) const;
+
 private:
    std::string name_;                     // the queue name
+   std::string action_;                   // [ active | aborted | complete | no_of_aborted ]
+   std::string step_;                     // will be empty when action is [ active | no_of_aborted]
    std::string path_to_node_with_queue_;
 
    friend class boost::serialization::access;
@@ -544,6 +553,8 @@ private:
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
       ar & boost::serialization::base_object< TaskCmd >( *this );
       ar & name_;
+      ar & action_;
+      ar & step_;
       ar & path_to_node_with_queue_;
    }
 };

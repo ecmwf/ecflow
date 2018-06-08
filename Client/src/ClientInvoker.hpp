@@ -169,8 +169,8 @@ public:
 	void child_event(const std::string& event_name_or_number);
 	void child_meter(const std::string& meter_name, int meter_value);
 	void child_label(const std::string& label_name, const std::string& label_value);
-    void child_wait(const std::string& on_expression);
-   std::string child_queue(const std::string& queue_name, const std::string& path_to_node_with_queue = "");
+   void child_wait(const std::string& on_expression);
+   std::string child_queue(const std::string& queue_name,const std::string& ation,const std::string& step,const std::string& path_to_node_with_queue = "");
 	void child_complete();
 
 	// ********************************************************************************

@@ -340,13 +340,16 @@ bool Simulator::update_for_queues(Submittable* t,std::string& msg, std::vector<Q
    BOOST_FOREACH(QueueAttr& queue, queues) {
       const std::vector<std::string>& queue_list = queue.list();
       for(size_t i = 0; i < queue_list.size(); i++) {
-         queue.increment();
+         std::string step = queue.active();
+         if (step != "<NULL>") queue.complete(step);
          if (queue.used_in_trigger()) {
             msg.clear();
             msg += Str::CHILD_CMD();
             msg += "queue ";
             msg += queue.name();
+            msg += " complete";
             msg += " ";
+            msg += step;
             msg += t->absNodePath();
             log(Log::MSG,msg);
 

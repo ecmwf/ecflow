@@ -44,12 +44,12 @@ void MiscAttrs::begin()
 {
    // reset verification
    for(size_t i = 0; i < verifys_.size(); i++) { verifys_[i].reset(); }
-   for(size_t i = 0; i < queues_.size(); i++)  { queues_[i].reset(); }
+   for(size_t i = 0; i < queues_.size(); i++)  { queues_[i].requeue(); }
 }
 
 void MiscAttrs::requeue()
 {
-   for(size_t i = 0; i < queues_.size(); i++) { queues_[i].reset(); }
+   for(size_t i = 0; i < queues_.size(); i++) { queues_[i].requeue(); }
 }
 
 std::ostream& MiscAttrs::print(std::ostream& os) const
@@ -327,6 +327,7 @@ void MiscAttrs::set_memento(const NodeQueueIndexMemento* m )
    for(size_t i = 0; i < queues_.size(); i++) {
       if (queues_[i].name() == m->name_) {
          queues_[i].set_index( m->index_);
+         queues_[i].set_state_vec(m->state_vec_);
       }
    }
 }

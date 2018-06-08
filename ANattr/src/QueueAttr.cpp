@@ -43,6 +43,7 @@ QueueAttr::QueueAttr(const std::string& name,const std::vector<std::string>& the
    if (theQueue.empty()) {
       throw std::runtime_error( "QueueAttr::QueueAttr: No queue items specified");
    }
+   for(size_t i=0; i < theQueue.size(); i++) state_vec_.push_back(NState::QUEUED);
 }
 
 QueueAttr::~QueueAttr() {}
@@ -52,7 +53,12 @@ std::ostream& QueueAttr::print(std::ostream& os) const
    Indentor in;
    Indentor::indent(os) << toString();
    if ( !PrintStyle::defsStyle() ) {
-      if (currentIndex_ != 0)  os << " # " <<  currentIndex_;
+      if (currentIndex_ != 0)  {
+         os << " # " <<  currentIndex_;
+         for(size_t i=0; i <  state_vec_.size(); i++) {
+            os << " " << state_vec_[i];
+         }
+      }
    }
    os << "\n";
    return os;
@@ -62,6 +68,7 @@ bool QueueAttr::operator==(const QueueAttr& rhs) const
 {
    if (name_ != rhs.name_) return false;
    if (theQueue_ != rhs.theQueue_) return false;
+   if (state_vec_  != rhs.state_vec_) return false;
    if (currentIndex_ != rhs.currentIndex_) return false;
    return true;
 }
@@ -87,16 +94,82 @@ int QueueAttr::index_or_value() const
    return currentIndex_;
 }
 
-void QueueAttr::reset()
+NState::State QueueAttr::state(const std::string& step) const
+{
+   for(size_t i=0; i < theQueue_.size(); i++) {
+       if (step == theQueue_[i]) {
+          if (i >= state_vec_.size()) throw std::runtime_error("QueueAttr::state: index out of range");
+          return state_vec_[i];
+       }
+    }
+    throw std::runtime_error("QueueAttr::state: could not find step " + step);
+    return NState::UNKNOWN;
+}
+
+void QueueAttr::requeue()
 {
    currentIndex_ = 0;
+   for(size_t i=0; i < state_vec_.size(); i++) state_vec_[i] = NState::QUEUED;
    incr_state_change_no();
 }
 
-void QueueAttr::increment()
+std::string QueueAttr::active()
 {
-   currentIndex_++;
-   incr_state_change_no();
+   if ( currentIndex_ >=0 && currentIndex_ < static_cast<int>(theQueue_.size())) {
+      state_vec_[currentIndex_] = NState::ACTIVE;
+      std::string ret = theQueue_[currentIndex_];
+      currentIndex_++;
+      incr_state_change_no();
+      return ret;
+   }
+   return "<NULL>";
+}
+
+void QueueAttr::complete(const std::string& step)
+{
+   for(size_t i=0; i < theQueue_.size(); i++) {
+      if (step == theQueue_[i]) {
+         state_vec_[i] = NState::COMPLETE;
+         incr_state_change_no();
+         return;
+      }
+   }
+   std::stringstream ss; ss << "QueueAttr::complete: Could not find " << step << " in queue " << name_;
+   throw std::runtime_error(ss.str());
+}
+
+void QueueAttr::aborted(const std::string& step)
+{
+   for(size_t i=0; i < theQueue_.size(); i++) {
+      if (step == theQueue_[i]) {
+         state_vec_[i] = NState::ABORTED;
+         incr_state_change_no();
+         return;
+      }
+   }
+   std::stringstream ss; ss << "QueueAttr::aborted: Could not find " << step << " in queue " << name_;
+   throw std::runtime_error(ss.str());
+}
+
+std::string QueueAttr::no_of_aborted() const
+{
+   int count = 0;
+   for(size_t i=0; i < state_vec_.size(); i++) {
+      if (state_vec_[i] == NState::ABORTED) count++;
+   }
+   if (count !=0) return boost::lexical_cast<std::string>(count);
+   return std::string();
+}
+
+void  QueueAttr::reset_index_to_first_queued_or_aborted()
+{
+   for(size_t i=0; i < state_vec_.size(); i++) {
+      if (  state_vec_[i] == NState::QUEUED || state_vec_[i] == NState::ABORTED) {
+         currentIndex_ = i;
+         incr_state_change_no();
+         break;
+      }
+   }
 }
 
 std::string QueueAttr::toString() const
@@ -106,7 +179,7 @@ std::string QueueAttr::toString() const
    ret += name_;
    for(size_t i = 0; i < theQueue_.size(); i++) {
       ret += " ";
-      ret += theQueue_[i] ;
+      ret += theQueue_[i];
    }
    return ret;
 }
@@ -115,6 +188,7 @@ std::string QueueAttr::dump() const
 {
    std::stringstream ss;
    ss << toString() << " # " << currentIndex_;
+   for(size_t i=0; i < state_vec_.size(); i++) ss << " " << state_vec_[i];
    return ss.str();
 }
 
@@ -132,7 +206,7 @@ void QueueAttr::parse(QueueAttr& queAttr, const std::string& line, std::vector<s
       throw std::runtime_error(ss.str());
    }
 
-   // queue name "first" "second" "last" #   3
+   // queue name "first" "second" "last" #   current_index state state state
    //   0     1        2       3        4    5   6
    queAttr.set_name(lineTokens[1]);
 
@@ -145,24 +219,56 @@ void QueueAttr::parse(QueueAttr& queAttr, const std::string& line, std::vector<s
       theEnums.push_back(theEnum);
    }
    if ( theEnums.empty() ) throw std::runtime_error( "queue: has no values " + line );
-   queAttr.set_queue(theEnums);
 
-   int index = 0; // This is *assumed to be the index* and not the value
+
+   int index = 0;
+   std::vector<NState::State> state_vec;
 
    if (parse_state) {
-      // search back for comment
-      // queue VARIABLE a b c # value
-      std::string token_after_comment;
-      for(size_t i = line_tokens_size-1; i > 3; i--) {
-         if (lineTokens[i] == "#") {
-            // token after comment is the index
-            index = Extract::theInt(token_after_comment,"QueueAttr::parse, could not extract index");
+      // queue VARIABLE a b c # index state state state
+      for(size_t i = 0; i < lineTokens.size(); i++) {
+         if (lineTokens[i] == "#" && i+1 < lineTokens.size()) {
+            i++;
+            index = Extract::theInt(lineTokens[i] ,"QueueAttr::parse, could not extract index");
+            i++;
+            for(;i < lineTokens.size(); i++) {
+               int state = Extract::theInt(lineTokens[i] ,"QueueAttr::parse, could not extract state");
+               state_vec.push_back(static_cast<NState::State>(state));
+            }
             break;
          }
-         else token_after_comment = lineTokens[i];
       }
    }
-   queAttr.set_index(index);
+
+   queAttr.set_queue(theEnums,index,state_vec);
+}
+
+void QueueAttr::set_queue( const std::vector<std::string>& theQueue,int index,const std::vector<NState::State>& state_vec)
+{
+   if (theQueue.empty()) throw std::runtime_error( "QueueAttr::set_queue: No queue items specified");
+
+   if (!state_vec.empty()) {
+      if (state_vec.size() != theQueue.size()) {
+         std::stringstream ss;
+         ss << "QueueAttr::set_state: for queue " << name_ << " size " << theQueue.size() << " does not match state size " << state_vec.size();
+         throw std::runtime_error(ss.str());
+      }
+      state_vec_ = state_vec;
+   }
+   else {
+      for(size_t i=0; i < theQueue.size(); i++) state_vec_.push_back( NState::QUEUED );
+   }
+
+   currentIndex_ = index;
+   theQueue_ = theQueue;
+}
+
+void QueueAttr::set_state_vec(const std::vector<NState::State>& state_vec)
+{
+   state_vec_ = state_vec;
+   if (theQueue_.size() != state_vec_.size()) {
+      std::cout << "QueueAttr::set_state_vec: for queue " << name_ << " queue size " << theQueue_.size() << " not equal to state_vec size " << state_vec_.size() << "\n";
+   }
 }
 
 void QueueAttr::set_name( const std::string& name)
@@ -173,12 +279,3 @@ void QueueAttr::set_name( const std::string& name)
    }
    name_ =  name;
 }
-
-void QueueAttr::set_queue( const std::vector<std::string>& theQueue)
-{
-   if (theQueue.empty()) {
-      throw std::runtime_error( "QueueAttr::set_queue: No queue items specified");
-   }
-   theQueue_ = theQueue;
-}
-
