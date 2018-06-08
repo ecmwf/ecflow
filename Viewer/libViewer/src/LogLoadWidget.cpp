@@ -2346,7 +2346,7 @@ LogCmdSuiteRequestView::LogCmdSuiteRequestView(LogRequestViewHandler* handler,QW
     buildChildReqControl(&childCtl_,tr("Child cmds"),tr("Command"));
     buildUserReqControl(&userCtl_,tr("User cmds"),tr("Command"));
 
-    controlTab_->setCurrentindex(2);
+    controlTab_->setCurrentIndex(2);
 }
 
 //One chart = one suite with all the subrequests (child + user)
@@ -2756,7 +2756,7 @@ LogSuiteCmdRequestView::LogSuiteCmdRequestView(LogRequestViewHandler* handler,QW
     buildChildReqControl(&childCtl_,tr("Child cmds"),tr("Command"));
     buildUserReqControl(&userCtl_,tr("User cmds"),tr("Command"));
 
-    controlTab_->setCurrentindex(0);
+    controlTab_->setCurrentIndex(0);
 }
 
 //One chart = one suite with all the subrequests (child + user)
@@ -3100,7 +3100,7 @@ LogUidCmdRequestView::LogUidCmdRequestView(LogRequestViewHandler* handler,QWidge
     buildUidControl(&uidCtl_,tr("Users"),tr("User"));
     buildUserReqControl(&userCtl_,tr("Commands"),tr("Command"));
 
-    controlTab_->setCurrentindex(0);
+    controlTab_->setCurrentIndex(0);
 }
 
 //One chart = all the users for the given subrequest/command
@@ -3359,7 +3359,7 @@ LogCmdUidRequestView::LogCmdUidRequestView(LogRequestViewHandler* handler,QWidge
     buildUidControl(&uidCtl_,tr("Users"),tr("User"));
     buildUserReqControl(&userCtl_,tr("Commands"),tr("Command"));
 
-    controlTab_->setCurrentindex(1);
+    controlTab_->setCurrentIndex(1);
 }
 
 //One chart = all the commands for the given uid
