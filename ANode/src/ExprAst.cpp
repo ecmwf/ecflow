@@ -229,7 +229,7 @@ std::string AstRoot::do_bracket_why_expression(const std::string& root,bool html
 std::string AstRoot::do_false_bracket_why_expression(const std::string& root,bool html) const
 {
    std::string ret;
-   if (html) ret += "<false>";  // still need guard with html for ecflowview
+   if (html) ret += "<false>";  // still need guard with html for ecflowview ?
    ret += do_bracket_why_expression(root,html);
    if (html) ret += "</false>";
    return ret;

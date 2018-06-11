@@ -56,7 +56,6 @@ ecbuild_info( "ECFLOW_VERSION           : ${ECFLOW_VERSION_STR}" )
 option( ENABLE_SERVER              "Build the server, can be switched off if just building UI" ON  )
 option( ENABLE_PYTHON              "enable python interface"         ON  )
 option( ENABLE_UI                  "Build ecFlowUI"                  ON  ) 
-option( ENABLE_GUI                 "Build ecflowview"                ON  )
 option( ENABLE_STATIC_BOOST_LIBS   "Link with boost libs statically" ON  )
 option( ENABLE_ALL_TESTS           "This includes performance/migration/regression tests" OFF )
 option( ENABLE_UI_BACKTRACE        "Print a UI debug backtrace"         OFF ) 
@@ -147,7 +146,6 @@ endif()
 ecbuild_info( "ENABLE_SERVER              : ${ENABLE_SERVER}" )
 ecbuild_info( "ENABLE_PYTHON              : ${ENABLE_PYTHON}" )
 ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
-ecbuild_info( "ENABLE_GUI                 : ${ENABLE_GUI}" )
 ecbuild_info( "ENABLE_UI                  : ${ENABLE_UI}" )
 ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS   : ${ENABLE_STATIC_BOOST_LIBS}" )
@@ -169,27 +167,6 @@ if (ENABLE_UI)
 endif()
 ecbuild_info("")
 
-# ======================================================================================
-# GUI requires X11 and Motif
-# ======================================================================================
-
-if(ENABLE_GUI)
-  find_package( X11 )
-#  if ( X11_FOUND )
-#	   ecbuild_debug_var( X11_INCLUDE_DIR )
-#	   ecbuild_debug_var( X11_LIBRARIES )  
-#	   ecbuild_debug_var( X11_Xt_INCLUDE_PATH )
-#	   ecbuild_debug_var( X11_Xt_LIB )
-#	   ecbuild_debug_var( X11_Xpm_INCLUDE_PATH )
-#	   ecbuild_debug_var( X11_Xpm_LIB )
-#  endif()
-
-  find_package( Motif )
-#  if ( MOTIF_FOUND )
-#	   ecbuild_debug_var( MOTIF_INCLUDE_DIR )
-#	   ecbuild_debug_var( MOTIF_LIBRARIES )  
-#  endif()
-endif()
  
 # =========================================================================================
 # Boost
@@ -310,10 +287,6 @@ endif()
 if(ENABLE_UI)
     add_subdirectory( Viewer )
     add_subdirectory( share )
-endif()
-
-if( ENABLE_GUI AND X11_FOUND AND MOTIF_FOUND )
-   add_subdirectory( view )
 endif()
 
 # =========================================================================================

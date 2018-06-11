@@ -47,11 +47,6 @@ build-project Test ;
 import os ;
 ARCH = [ os.environ ARCH ] ;
 ARCH default = UNDEF ;  # if arch not defined set as UNDEF, otherwise if $(ARCH) will be true
-build_gui = linux cray other_gui_arch ;
-# echo "ARCH =  $(ARCH)" ;
-if $(ARCH) in $(build_gui) {
-   build-project view ;
-}
 
 # Some user do no want python: They must define ECF_NO_PYTHON
 NO_PYTHON = [ os.environ ECF_NO_PYTHON ] ;
@@ -76,14 +71,10 @@ local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
 python_install_dir default = $(install_dir)/lib/python2.7/site-packages/ecflow ;
 constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 
-# Used for ecflowview files
-constant ECFLOW_SHARED_DIR : $(ECFLOW_DESTDIR)$(ECFLOW_INSTALL_DIR)/share/ecflow ;
-
 #echo "ECFLOW_VERSION            = '$(ECFLOW_VERSION)'" ;
 #echo "ECFLOW_DESTDIR            = '$(ECFLOW_DESTDIR)'" ;
 #echo "ECFLOW_INSTALL_DIR        = '$(ECFLOW_INSTALL_DIR)'" ;
 #echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
-#echo  "ECFLOW_SHARED_DIR        = '$(ECFLOW_SHARED_DIR)'" ;
 
 #
 # Allow the installation directory be be defined externally, by the environment variable ECFLOW_INSTALL_DIR
@@ -109,30 +100,9 @@ constant ECFLOW_SHARED_DIR : $(ECFLOW_DESTDIR)$(ECFLOW_INSTALL_DIR)/share/ecflow
 # that ties up with $WK/VERSION.cmake
 #
 
-# Do no call this on the command line, prefer bjam install-all || install-viewer
-# If this is called in isolation ldd will show the referenced shared lib as missing
-install install-view
-	: view//ecflowview
-	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
-	  <dll-path>$(ECFLOW_INSTALL_DIR)/lib
-	;
-
-
 # Some linux RPM have requirements that 64 bit libs must be under lib64
 # See http://software.ecmwf.int/issues/browse/ECFLOW-30, 64-bit Linux platforms expect libraries to go to the $PREFIX/lib64 directory, not $PREFIX/lib
 #
-install install-view64
-	: view//ecflowview
-	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
-	  <dll-path>$(ECFLOW_INSTALL_DIR)/lib64
-	;
-
-install install-view-files
-    : [ glob view/servers ]
-      [ glob view/src/ecflowview.menu ]
-    : <location>$(ECFLOW_SHARED_DIR)
-    ;
-
 install install-server
 	: Server//ecflow_server
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
@@ -150,7 +120,7 @@ install install-tools
 	;
 
 install install-doc
-        : [ glob Doc/user-manual/client_*.docx ]
+    : [ glob Doc/user-manual/client_*.docx ]
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/doc/ecflow
 	;
 
@@ -175,32 +145,14 @@ alias install :
 	Pyext//install-py
  	Pyext//install-py1
 	;
-alias install-viewer :
-	install-view
-	install-view-files
-	;
-alias install-viewer64 :
-	install-view64
-   install-view-files
- 	;
 alias install-all :
 	install
-   install-viewer
-   ;
-alias install-all64 :
-	install
-   install-viewer64
    ;
 
 # make install explicit, otherwise we end installing for all calls to bjam
 explicit install-server ;
 explicit install-client ;
 explicit install-tools ;
-explicit install-view ;
-explicit install-viewer ;
-explicit install-view64 ;
-explicit install-viewer64 ;
-explicit install-view-files ;
 explicit install-doc ;
 explicit install-migrate ;
 explicit install ;

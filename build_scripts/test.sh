@@ -135,12 +135,6 @@ if test_uname Linux ; then
       Test/bin/$exe_path/s_test_zombies  --log_level=message $TEST_OPTS
    fi
    
-   if [ x$DISPLAY = x  ]; then
-       echo "DISPLAY variable is not defined, ecflowview is not tested..."
-   else
-       view/bin/$exe_path/test-view  --log_level=message $TEST_OPTS
-   fi
-   
 elif test_uname HP-UX ; then
 
    echo "Testing: variant=$mode"

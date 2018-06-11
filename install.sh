@@ -45,7 +45,6 @@ cd build
 
 cmake .. -DCMAKE_INSTALL_PREFIX=$prefix_arg  \
          # -DCMAKE_BUILD_TYPE=Release 
-         # -DENABLE_GUI=OFF       \
          # -DENABLE_UI=OFF        \
          # -DENABLE_PYTHON=OFF    \
          # -DENABLE_ALL_TESTS=ON  \

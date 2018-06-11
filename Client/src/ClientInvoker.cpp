@@ -495,7 +495,6 @@ int ClientInvoker::sync_local(bool sync_suite_clock) const
    if (defs.get()) {
 
       // Prevent infinite loops in change observers.
-      // This can be removed  when we do the new ecflowview. TODO
       if ( defs->in_notification()) {
          std::cout << "ecflow:ClientInvoker::sync_local() called in the middle of notification. Ignoring..... \n";
          return 0;

@@ -343,7 +343,6 @@ public:
 
    // Access functions: ======================================================
    const std::string& name() const { return name_; }
-   std::string toString() const    { return name_; }  // keep ecflowview/ecf_node.h happy
    const Repeat& repeat() const    { return repeat_;} // can be empty()
    const std::vector<Variable>&        variables()const { return varVec_;}
    const std::vector<limit_ptr>&       limits()   const { return limitVec_;}

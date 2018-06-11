@@ -86,7 +86,6 @@ Install structure
 -----------------
 $ECFLOW_DESTDIR/$ECFLOW_INSTALL_DIR/bin/ecflow_client
                                         ecflow_server
-                                        ecflowview (<dll_path>=$ECFLOW_INSTALL_DIR/lib/libxpmcc.so)
                                         ecflow_start.sh
                                         ecflow_stop.sh
                                         noconnect.sh
