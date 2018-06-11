@@ -151,8 +151,8 @@ public:
 	   { return invoke(TaskApi::label(labelName,labels)); }
    int waitTask(const std::string& on_expression) const
       { return invoke(TaskApi::wait(on_expression)); }
-   int queueTask(const std::string& queue_name, const std::string& path_to_node_with_queue = "") const
-      { return invoke(TaskApi::queue(queue_name,path_to_node_with_queue)); }
+   int queueTask(const std::string& queue_name,const std::string& action,const std::string& step = "",const std::string& path_to_node_with_queue = "") const
+      { return invoke(TaskApi::queue(queue_name,action,step,path_to_node_with_queue)); }
 	int completeTask() const
 	   { return invoke(TaskApi::complete()); }
 

@@ -1059,14 +1059,15 @@ const char* QueueCmd::desc()
 {
    return "QueueCmd. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
-            "  arg1(string) = queue-name\n"
-            "  arg2(string) = [active | aborted | complete | no_of_aborted | reset ]\n"
-            "     active: returns the first queued/aborted step, and the updated the index\n"
-            "             the return string if of the form index:value, i.e 0:003  1:006\n"
-            "     no_of_aborted: returns a integer as a string, for number of aborted steps, i.e 10\n"
+            "  arg1(string) = queue-name:\n"
+            "  arg2(string) = action: [active | aborted | complete | no_of_aborted | reset ]\n"
+            "     active: returns the first queued/aborted step, the return string is the queue  value from the definition\n"
+            "     no_of_aborted: returns number of aborted steps as a string, i.e 10\n"
             "     reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors\n"
-            "  arg2(step) =  value returned from. step=$(ecflow_client --queue=queue_name active)\n"
-            "  arg4(string) = (optional)The path where the queue is defined\n\n"
+            "  arg2(string) = step:  value returned from. step=$(ecflow_client --queue=queue_name active)\n"
+            "                This is only only for complete and aborted steps\n"
+            "  arg4(string) = path: (optional). The path where the queue is defined.\n"
+            "                 By default we search for the queue up the node tree.\n\n"
             "If this child command is a zombie, then the default action will be to *block*,\n"
             "The default can be overridden by using zombie attributes."
             "If the path to the queue is not defined, then this command will\n"
@@ -1079,8 +1080,6 @@ const char* QueueCmd::desc()
             "   if [[ $step == \"<NULL>\" ]] then\n"
             "        break;\n"
             "   fi\n"
-            "   index=${step%:*}  # retain the part before the colon \n"
-            "   value=${step##*:} # retain the part after the colon\n"
             "   ...\n"
             "   ecflow_client --queue=STEP $step complete   # tell ecflow this step completed\n"
             "done\n"
@@ -1107,6 +1106,8 @@ void QueueCmd::create(  Cmd_ptr& cmd,
       << ")\n";
    }
 
+   // expect:
+   //   <queue-name> [active | aborted | complete | no_of_aborted | reset ] step <path to node with queue>
    std::string queue_name,step;
    std::string path_to_node_with_queue,action;
    for(size_t i = 0; i < args.size(); i++) {
@@ -1119,6 +1120,16 @@ void QueueCmd::create(  Cmd_ptr& cmd,
          else step = args[i];
       }
    }
+   if (clientEnv->debug()) {
+      cout << "  QueueCmd::create " << "queue-name:(" << queue_name << ") action:(" << action << ") step:(" << step << ") path_to_node_with_queue:(" << path_to_node_with_queue << ")\n";
+   }
+
+   if (args.size() == 4 && path_to_node_with_queue.empty()) {
+      std::stringstream ss;
+      ss << "QueueCmd: The fourth argument if specified must provide a path to a node where the queue resides.\n"
+         << "No path specified. " << args[3];
+      throw std::runtime_error( ss.str() );
+    }
 
    if (args.empty() || queue_name.empty() || action.empty()) {
       std::stringstream ss;
@@ -1126,20 +1137,23 @@ void QueueCmd::create(  Cmd_ptr& cmd,
          << " Please specify <queue-name> [active | aborted | complete | no_of_aborted | reset ] step <path to node with queue>(optional) i.e\n"
          << "--queue=name active  # active does not need a step\n"
          << "--queue=name active /path/to/node/with/queue\n"
-         << "--queue=name $step aborted\n"
-         << "--queue=name $step complete\n"
+         << "--queue=name aborted $step\n"
+         << "--queue=name complete $step\n"
          << "--queue=name no_of_aborted\n"
          << "--queue=name reset\n";
       throw std::runtime_error( ss.str() );
    }
-   if ( (action == "completed" || action == "aborted") && step.empty()) {
+   if ( (action == "complete" || action == "aborted") && step.empty()) {
       std::stringstream ss;
       ss << "QueueCmd: when --queue=name complete || --queue=name aborted is used a step must be provided.i.e\n"
-         << "--queue=name $step aborted\n"
-         << "--queue=name $step complete\n"
+         << "--queue=name aborted $step\n"
+         << "--queue=name complete $step\n"
          << "where step is value returned from active i.e\n"
          << "step=$(ecflow_client --queue=STEP active)\n";
       throw std::runtime_error( ss.str() );
+   }
+   if ((action == "active" || action == "reset" || action == "no_of_aborted") && !step.empty()) {
+      throw std::runtime_error("QueueCmd: when step should not be used with active,reset or no_of_aborted.");
    }
 
    string msg;

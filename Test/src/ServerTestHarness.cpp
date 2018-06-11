@@ -474,7 +474,7 @@ static void add_queue(std::string& content,const std::vector<QueueAttr>& queues)
       content += "   step=$(%ECF_CLIENT_EXE_PATH% --queue=" + queue.name() + " active )\n";
       content += "   echo $step\n";
       content += "   sleep %SLEEPTIME%\n";
-      content += "   %ECF_CLIENT_EXE_PATH% --queue=" + queue.name() + " complete\n";
+      content += "   %ECF_CLIENT_EXE_PATH% --queue=" + queue.name() + " complete $step\n";
       content += "done\n";
    }
 }

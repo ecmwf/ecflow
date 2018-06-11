@@ -616,8 +616,19 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface )
    BOOST_REQUIRE_MESSAGE( theClient.eventTask("event_name") == 0,"--event should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.meterTask("meter_name","20") == 0,"--meter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.waitTask("a == complete") == 0,"--wait should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","/path/to/node/with/queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
+
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","active") == 0,"--queue should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","complete","4") == 0,"--queue should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","aborted","4") == 0,"--queue should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","no_of_aborted") == 0,"--queue should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","reset") == 0,"--queue should return 0\n" << theClient.errorMsg());
+
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","active","","/path/to/node/with/queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","complete","4","/path/to/node/with/queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","aborted","4","/path/to/node/with/queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","no_of_aborted","","/path/to/node/with/queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","reset","","/path/to/node/with/queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
+
    BOOST_REQUIRE_MESSAGE( theClient.completeTask() == 0,"--complete should return 0\n" << theClient.errorMsg());
    std::vector<std::string> labels; labels.push_back("test_client_task_interface");
    BOOST_REQUIRE_MESSAGE( theClient.labelTask("label_name",labels) == 0,"--label should return 0\n" << theClient.errorMsg());
@@ -664,7 +675,20 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface_for_fail )
       std::vector<std::string> labels; labels.push_back("test_client_task_interface");
       BOOST_REQUIRE_THROW( theClient.labelTask("label_name",labels),std::runtime_error);
    }
+   { // test bad queue
+      ClientInvoker theClient ;
+      theClient.testInterface(); // stops submission to server
+      theClient.taskPath("/a/made/up/path");
+      theClient.set_jobs_password( Submittable::DUMMY_JOBS_PASSWORD() );
+
+      BOOST_REQUIRE_THROW( theClient.queueTask("queue","fred"),std::runtime_error );    // unknown action
+      BOOST_REQUIRE_THROW( theClient.queueTask("queue","active","","should be path"),std::runtime_error ); // bad path no '/'
+      BOOST_REQUIRE_THROW( theClient.queueTask("queue","complete"),std::runtime_error); // no step specified
+      BOOST_REQUIRE_THROW( theClient.queueTask("queue","complete","3","path"),std::runtime_error); // bad path
+      BOOST_REQUIRE_THROW( theClient.queueTask("queue","aborted"),std::runtime_error);  // no step specified
+      BOOST_REQUIRE_THROW( theClient.queueTask("queue","aborted","3","path"),std::runtime_error); // bad path
+      BOOST_REQUIRE_THROW( theClient.queueTask("queue","reset","","no path"),std::runtime_error);  //  bad path no '/'
+   }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
