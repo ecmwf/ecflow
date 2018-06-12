@@ -27,7 +27,7 @@ using namespace std;
 using namespace ecf;
 using namespace boost;
 
-//#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
+#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
@@ -51,9 +51,8 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          result.clear();
          boost::algorithm::split(result, line, boost::is_any_of(" \t"),boost::algorithm::token_compress_on);
 
-         std::stringstream ss;
-         BOOST_FOREACH(const std::string& s, result) { ss << s << " "; }
-         string reconstructed = ss.str();
+         string reconstructed;
+         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
          //cout << "boost::split: reconstructed " << reconstructed << "\n";
       }
       cout << "Time for boost::split " << times << " times = " << timer.elapsed() << "\n";
@@ -64,9 +63,8 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
       for (size_t i = 0; i < times; i++) {
          result.clear(); Str::split(line,result);
 
-         std::stringstream ss;
-         BOOST_FOREACH(const std::string& s, result) { ss << s << " "; }
-         string reconstructed = ss.str();
+         string reconstructed;
+         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
          //cout << "Str::split reconstructed " << reconstructed << "\n";
       }
       cout << "Time for Str::split " << times << " times = " << timer.elapsed() << "\n";
@@ -95,9 +93,11 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
       for (size_t i = 0; i < times; i++) {
          StringSplitter string_splitter(line);
 
-         std::stringstream ss;
-         while(!string_splitter.finished())  ss << string_splitter.next() << " " ;
-         string reconstructed = ss.str();
+         string reconstructed;
+         while(!string_splitter.finished())  {
+            reconstructed += std::string(string_splitter.next());
+            reconstructed += " ";
+         }
          //cout << "StringSplitter:: reconstructed " << reconstructed << "\n";
       }
       cout << "Time for boost::split_ref " << times << " times = " << timer.elapsed() << "\n";
@@ -126,9 +126,8 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
             result.clear();
             boost::algorithm::split(result,file_contents[i], boost::is_any_of(" \t"),boost::algorithm::token_compress_on);
 
-            std::stringstream ss;
-            BOOST_FOREACH(const std::string& s, result) { ss << s << " "; }
-            string reconstructed = ss.str();
+            string reconstructed;
+            BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
          }
          cout << "Time for boost::split " << file_contents.size() << " times = " << timer.elapsed() << "\n";
       }
@@ -138,9 +137,8 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
             result.clear();
             Str::split(file_contents[i],result);
 
-            std::stringstream ss;
-            BOOST_FOREACH(const std::string& s, result) { ss << s << " "; }
-            string reconstructed = ss.str();
+            string reconstructed;
+            BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
          }
          cout << "Time for Str::split " << file_contents.size() << " times = " << timer.elapsed() << "\n";
       }
@@ -148,7 +146,6 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
          typedef boost::split_iterator<string::const_iterator> split_iter_t;
          boost::timer timer;
          for(size_t i = 0; i < file_contents.size(); i++) {
-            result.clear();
 
             std::stringstream ss;
             split_iter_t tokens = Str::make_split_iterator(file_contents[i]);
@@ -165,13 +162,14 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
       {
          boost::timer timer;
          for(size_t i = 0; i < file_contents.size(); i++) {
-            result.clear();
 
             StringSplitter string_splitter(file_contents[i]);
 
-            std::stringstream ss;
-            while(!string_splitter.finished())  ss << string_splitter.next() << " " ;
-            string reconstructed = ss.str();
+            string reconstructed;
+            while(!string_splitter.finished())  {
+               reconstructed += std::string(string_splitter.next());
+               reconstructed += " ";
+            }
          }
          cout << "Time for boost::split_ref " << file_contents.size() << " times = " << timer.elapsed() << "\n";
       }
