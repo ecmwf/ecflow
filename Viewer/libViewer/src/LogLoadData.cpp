@@ -77,14 +77,38 @@ void LogReqCounter::add(bool childCmd,const std::string& line)
     }
 }
 
+//=======================================================
+//
+// LogRequestItem
+//
+//=======================================================
+
 void LogRequestItem::add(size_t index,size_t v)
 {
-    sumTotal_+=v;
+    //stat_.sumTotal_+=v;
     index_.push_back(index);
     req_.push_back(v);
 
-    if(maxTotal_ < v)
-        maxTotal_ = v;
+    //if(stat_.maxTotal_ < v)
+    //    stat_.maxTotal_ = v;
+}
+
+void LogRequestItem::computeStat(size_t startIndex,size_t endIndex)
+{
+    int max=0;
+    size_t sum=0;
+    for(size_t i=0; i < index_.size(); i++)
+    {
+        if(index_[i] >= startIndex && index_[i] <= endIndex)
+        {
+            sum+=req_[i];
+            if(req_[i] > max)
+                max=req_[i];
+        }
+    }
+
+    periodStat_.maxTotal_=max;
+    periodStat_.sumTotal_=sum;
 }
 
 //=======================================================
@@ -99,13 +123,12 @@ bool sortVecFunction(const std::pair<size_t,size_t>& a, const std::pair<size_t,s
 }
 
 LogLoadDataItem::LogLoadDataItem(const std::string& name) :
-    subReqMax_(0), sumTotal_(0), maxTotal_(0), rank_(-1), percentage_(0.), name_(name)
+   name_(name)
 {
     buildSubReq();
 }
 
-LogLoadDataItem::LogLoadDataItem() :
-    subReqMax_(0), sumTotal_(0), maxTotal_(0), rank_(-1), percentage_(0.)
+LogLoadDataItem::LogLoadDataItem()
 {
     buildSubReq();
 }
@@ -207,14 +230,13 @@ void LogLoadDataItem::buildUserSubReq(std::vector<LogRequestItem>& userSubReq)
 
 void LogLoadDataItem::clear()
 {
-    sumTotal_=0;
-    maxTotal_=0;
-    rank_=-1;
     childReq_.clear();
     userReq_.clear();
     name_.clear();
     childSubReq_.clear();
     userSubReq_.clear();
+    periodStat_.clear();
+    fullStat_.clear();
     subReqMax_=0;
 
     buildSubReq();
@@ -222,9 +244,6 @@ void LogLoadDataItem::clear()
 
 void LogLoadDataItem::init(size_t num)
 {
-    sumTotal_=0;
-    maxTotal_=0;
-    rank_=-1;
     if(num==0)
     {
         childReq_=std::vector<int>();
@@ -273,10 +292,10 @@ void LogLoadDataItem::add(size_t index,const LogReqCounter& req)
     childReq_.push_back(static_cast<int>(req.childReq_));
     userReq_.push_back(static_cast<int>(req.userReq_));
 
-    size_t tot=req.childReq_ + req.userReq_;
-    sumTotal_+=tot;
-    if(maxTotal_ < tot)
-        maxTotal_ = tot;
+    //size_t tot=req.childReq_ + req.userReq_;
+    //stat_.sumTotal_+=tot;
+    //if(stat_.maxTotal_ < tot)
+    //    stat_.maxTotal_ = tot;
 
     for(size_t i=0; i < childSubReq_.size(); i++)
     {
@@ -291,15 +310,21 @@ void LogLoadDataItem::add(size_t index,const LogReqCounter& req)
     }
 }
 
-void LogLoadDataItem::procSubReq(std::vector<LogRequestItem>& subReq)
+void LogLoadDataItem::computeSubReqStat(std::vector<LogRequestItem>& subReq,
+                                 size_t startIndex,size_t endIndex)
 {
+    for(size_t i = 0; i < subReq.size(); i++)
+    {
+        subReq[i].computeStat(startIndex,endIndex);
+    }
+
     if(subReq.size() == 0)
         return;
 
     if(subReq.size() == 1)
     {
         //subReq[0].rank_=0;
-        subReq[0].percentage_=100.;
+        subReq[0].periodStat_.percentage_=100.;
         return;
     }
 
@@ -307,7 +332,7 @@ void LogLoadDataItem::procSubReq(std::vector<LogRequestItem>& subReq)
     size_t sum=0;
     for(size_t i = 0; i < subReq.size(); i++)
     {
-        sum+=subReq[i].sumTotal_;
+        sum+=subReq[i].periodStat_.sumTotal_;
     }
 
     if(sum <=0 )
@@ -315,7 +340,7 @@ void LogLoadDataItem::procSubReq(std::vector<LogRequestItem>& subReq)
 
     for(size_t i = 0; i < subReq.size(); i++)
     {
-        subReq[i].percentage_=static_cast<float>(subReq[i].sumTotal_*100)/static_cast<float>(sum);
+        subReq[i].periodStat_.percentage_=static_cast<float>(subReq[i].periodStat_.sumTotal_*100)/static_cast<float>(sum);
     }
 
 #if 0
@@ -344,23 +369,69 @@ void LogLoadDataItem::procSubReq(std::vector<LogRequestItem>& subReq)
 
 }
 
-void LogLoadDataItem::postProc()
+void LogLoadDataItem::saveFullStat()
 {
-    procSubReq(childSubReq_);
-    procSubReq(userSubReq_);
+    fullStat_=periodStat_;
+    for(size_t i=0; i < childSubReq_.size(); i++)
+    {
+        childSubReq_[i].fullStat_=childSubReq_[i].periodStat_;
+    }
+    for(size_t i=0; i < userSubReq_.size(); i++)
+    {
+        userSubReq_[i].fullStat_=userSubReq_[i].periodStat_;
+    }
+}
 
+void LogLoadDataItem::useFullStat()
+{
+    periodStat_=fullStat_;
+    for(size_t i=0; i < childSubReq_.size(); i++)
+    {
+        childSubReq_[i].periodStat_=childSubReq_[i].fullStat_;
+    }
+    for(size_t i=0; i < userSubReq_.size(); i++)
+    {
+        userSubReq_[i].periodStat_=userSubReq_[i].fullStat_;
+    }
+
+    computeSubReqMax();
+}
+
+void LogLoadDataItem::computeStat(size_t startIndex,size_t endIndex)
+{
+    size_t max=0;
+    size_t sum=0;
+    for(size_t i=startIndex; i <= endIndex; i++)
+    {
+        size_t tot=childReq_[i] + userReq_[i];
+        sum+=tot;
+        if(max < tot)
+            max = tot;
+    }
+
+    periodStat_.sumTotal_=sum;
+    periodStat_.maxTotal_=max;
+
+    computeSubReqStat(childSubReq_,startIndex,endIndex);
+    computeSubReqStat(userSubReq_,startIndex,endIndex);
+
+    computeSubReqMax();
+}
+
+void LogLoadDataItem::computeSubReqMax()
+{
     subReqMax_=0;
 
     for(size_t i=0; i < childSubReq_.size(); i++)
     {
-        if(subReqMax_ < childSubReq_[i].maxTotal_)
-            subReqMax_ = childSubReq_[i].maxTotal_;
+        if(subReqMax_ < childSubReq_[i].periodStat_.maxTotal_)
+            subReqMax_ = childSubReq_[i].periodStat_.maxTotal_;
     }
 
     for(size_t i=0; i < userSubReq_.size(); i++)
     {
-        if(subReqMax_ < userSubReq_[i].maxTotal_)
-            subReqMax_ = userSubReq_[i].maxTotal_;
+        if(subReqMax_ < userSubReq_[i].periodStat_.maxTotal_)
+            subReqMax_ = userSubReq_[i].periodStat_.maxTotal_;
     }
 }
 
@@ -376,6 +447,8 @@ void LogLoadData::clear()
     total_.clear();
     suiteData_.clear();
     suites_.clear();
+    uidData_.clear();
+    fullStatComputed_=false;
     maxNumOfRows_=0;
     numOfRows_=0;
     startPos_=0;
@@ -410,7 +483,6 @@ qint64 LogLoadData::period() const
 {
     return (!time_.empty())?(time_[time_.size()-1]-time_[0]):0;
 }
-
 
 QDateTime LogLoadData::startTime() const
 {
@@ -832,89 +904,100 @@ void LogLoadData::add(std::vector<std::string> time_stamp,const LogReqCounter& t
     }
 }
 
-void LogLoadData::processSuites()
+//Compute the initial stat
+void LogLoadData::computeInitialStat()
 {
-    total_.postProc();
-
-    if(suiteData_.size() == 0)
-        return;
-
-    if(suiteData_.size() == 1)
-    {
-        suiteData_[0].setRank(0);
-        suiteData_[0].setPercentage(100.);
-        return;
-    }
-
-    std::vector<size_t> sumVec;
-    std::vector<std::pair<size_t,size_t> > sortVec;
-    size_t sum=0;
-    for(size_t i = 0; i < suiteData_.size(); i++)
-    {
-        sum+=suiteData_[i].sumTotal();
-        sumVec.push_back(suiteData_[i].sumTotal());
-        sortVec.push_back(std::make_pair(i,suiteData_[i].sumTotal()));
-    }
-
-    if(sum <=0 )
-        return;
-
-    assert(sumVec.size() == suiteData_.size());
-    std::sort(sortVec.begin(), sortVec.end(),sortVecFunction);
-
-    for(size_t i = 0; i < sortVec.size(); i++)
-    {
-        int idx=sortVec[i].first;
-        suiteData_[idx].setRank(sortVec.size()-i-1);
-        suiteData_[idx].setPercentage(static_cast<float>(suiteData_[idx].sumTotal()*100)/static_cast<float>(sum));
-    }
-
-    for(size_t i = 0; i < suiteData_.size(); i++)
-    {
-        suiteData_[i].postProc();
-    }
-
-    processUids();
+    size_t endIndex=(time_.empty())?0:(time_.size()-1);
+    computeStat(0,endIndex);
+    fullStatComputed_=true;
 }
 
-void LogLoadData::processUids()
+void LogLoadData::computeStat()
 {
-    if(uidData_.size() == 0)
+    size_t endIndex=(time_.empty())?0:(time_.size()-1);
+    computeStat(0,endIndex);
+}
+
+void LogLoadData::computeStat(size_t startIndex,size_t endIndex)
+{
+    bool fullPeriod=(startIndex == 0 && (time_.size() ==0 || endIndex == time_.size()-1));
+
+    //Compute stats for total
+    if(fullPeriod && fullStatComputed_)
+    {
+        total_.useFullStat();
+    }
+    else
+    {
+        total_.computeStat(startIndex,endIndex);
+        if(!fullStatComputed_)
+            total_.saveFullStat();
+    }
+
+    //Suites
+    computeStat(suiteData_,startIndex,endIndex,fullPeriod);
+
+    //Uids
+    computeStat(uidData_,startIndex,endIndex,fullPeriod);
+}
+
+void LogLoadData::computeStat(std::vector<LogLoadDataItem>& items,size_t startIndex,size_t endIndex,
+                              bool fullPeriod)
+{
+    if(fullPeriod && fullStatComputed_)
+    {
+        for(size_t i = 0; i < items.size(); i++)
+        {
+            items[i].useFullStat();
+        }
+        return;
+    }
+
+    for(size_t i = 0; i < items.size(); i++)
+    {
+        items[i].computeStat(startIndex,endIndex);
+    }
+
+    if(items.size() == 0)
         return;
 
-    if(uidData_.size() == 1)
+    if(items.size() == 1)
     {
-        uidData_[0].setRank(0);
-        uidData_[0].setPercentage(100.);
+        items[0].setRank(0);
+        items[0].setPercentage(100.);
         return;
     }
 
     std::vector<size_t> sumVec;
     std::vector<std::pair<size_t,size_t> > sortVec;
     size_t sum=0;
-    for(size_t i = 0; i < uidData_.size(); i++)
+    for(size_t i = 0; i < items.size(); i++)
     {
-        sum+=uidData_[i].sumTotal();
-        sumVec.push_back(uidData_[i].sumTotal());
-        sortVec.push_back(std::make_pair(i,uidData_[i].sumTotal()));
+        sum+=items[i].sumTotal();
+        sumVec.push_back(items[i].sumTotal());
+        sortVec.push_back(std::make_pair(i,items[i].sumTotal()));
     }
 
     if(sum <=0 )
         return;
 
-    assert(sumVec.size() == uidData_.size());
+    assert(sumVec.size() == items.size());
     std::sort(sortVec.begin(), sortVec.end(),sortVecFunction);
 
     for(size_t i = 0; i < sortVec.size(); i++)
     {
         int idx=sortVec[i].first;
-        uidData_[idx].setRank(sortVec.size()-i-1);
-        uidData_[idx].setPercentage(static_cast<float>(uidData_[idx].sumTotal()*100)/static_cast<float>(sum));
+        items[idx].setRank(sortVec.size()-i-1);
+        items[idx].setPercentage(static_cast<float>(items[idx].sumTotal()*100.)/static_cast<float>(sum));
     }
 
-    for(size_t i = 0; i < uidData_.size(); i++)
+    if(fullPeriod && !fullStatComputed_)
     {
-        uidData_[i].postProc();
+        for(size_t i = 0; i < items.size(); i++)
+        {
+            items[i].saveFullStat();
+        }
+        return;
     }
 }
 
@@ -1184,7 +1267,7 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
        suites_ << QString::fromStdString(suite_vec[i].name_);
    }
 
-   processSuites();
+   computeInitialStat();
 
    UiLog().dbg() << "REQCNT " << REQCNT;
 }

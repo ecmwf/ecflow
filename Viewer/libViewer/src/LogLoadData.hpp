@@ -27,14 +27,33 @@ using namespace QtCharts;
 class LogLoadData;
 class LogLoadDataItem;
 
+struct  LogLoadStatItem
+{
+    LogLoadStatItem() : sumTotal_(0), maxTotal_(0), rank_(0), percentage_(0.) {}
+
+    void clear() {sumTotal_=0, maxTotal_=0, rank_=0, percentage_=0.;}
+    float percentage() const {return percentage_;}
+    size_t sumTotal() const {return sumTotal_;}
+    size_t maxTotal() const {return maxTotal_;}
+    int rank() const {return rank_;}
+
+    size_t sumTotal_; //sum of all
+    size_t maxTotal_; //the maximum value
+    int rank_; //the rank of this item within other items with regards to sumTotal_
+    float percentage_; //0-100, the percentage of sumTotal_ with respect to the
+                       //sum of sumTotal_ of all the items
+};
+
 //Data for one type of request
 class LogRequestItem
 {
 public:
-    LogRequestItem() : global_(false), sumTotal_(0), maxTotal_(0), rank_(0), percentage_(0.), counter_(0) {}
+    LogRequestItem() : global_(false), counter_(0) {}
     LogRequestItem(const std::string& name,const std::string& pattern,bool global=false) :
-        global_(global), name_(name), pattern_(pattern), sumTotal_(0), maxTotal_(0), rank_(0), percentage_(0.), counter_(0) {}
+        global_(global), name_(name), pattern_(pattern), counter_(0) {}
 
+    const LogLoadStatItem& periodStat() const {return periodStat_;}
+    void computeStat(size_t startIndex,size_t endIndex);
     void add(size_t index,size_t val);
 
     //Type type_;
@@ -43,10 +62,8 @@ public:
     std::string pattern_; //used to identify the request in the log file
     std::vector<size_t> index_;
     std::vector<int> req_;
-    size_t sumTotal_; //sum of all the child and user requests
-    size_t maxTotal_; //the maximum value of child+user requests
-    int rank_;
-    float percentage_;
+    LogLoadStatItem periodStat_;
+    LogLoadStatItem fullStat_;
     size_t counter_;
 };
 
@@ -78,14 +95,16 @@ public:
     void init(size_t num);
 
     size_t size() const {return childReq_.size();}
-    float percentage() const {return percentage_;}
-    void setPercentage(float v) {percentage_=v;}
-    size_t sumTotal() const {return sumTotal_;}
-    size_t maxTotal() const {return maxTotal_;}
-    size_t subReqMax() const {return subReqMax_;}
 
-    int rank() const {return rank_;}
-    void setRank(int v) {rank_=v;}
+    const LogLoadStatItem& periodStat() const {return periodStat_;}
+    float percentage() const {return periodStat_.percentage_;}
+    void setPercentage(float v) {periodStat_.percentage_=v;}
+    size_t sumTotal() const {return periodStat_.sumTotal_;}
+    size_t maxTotal() const {return periodStat_.maxTotal_;}
+    size_t subReqMax() const {return subReqMax_;}
+    int rank() const {return periodStat_.rank_;}
+    void setRank(int v) {periodStat_.rank_=v;}
+
     const std::vector<int>& childReq() const {return childReq_;}
     const std::vector<int>& userReq() const {return userReq_;}
     const std::string& name() const {return name_;}
@@ -99,24 +118,15 @@ public:
     static void buildChildSubReq(std::vector<LogRequestItem>& childSubReq);
     static void buildUserSubReq(std::vector<LogRequestItem>& useSubReq);
 
-    void postProc();
-    void procSubReq(std::vector<LogRequestItem>& childSubReq);
-
-#if 0
-    void add(size_t childVal,size_t userVal)
-    {
-        childReq_.push_back(static_cast<int>(childVal));
-        userReq_.push_back(static_cast<int>(userVal));
-
-        size_t tot=childVal + userVal;
-        sumTotal_+=tot;
-        if(maxTotal_ < tot)
-            maxTotal_ = tot;
-    }
-#endif
+    void saveFullStat();
+    void useFullStat();
+    void computeStat(size_t startIndex,size_t endIndex);
 
 protected:
     void buildSubReq();
+    void computeSubReqStat(std::vector<LogRequestItem>& childSubReq,
+                    size_t startIndex,size_t endIndex);
+    void computeSubReqMax();
 
     std::vector<int> childReq_; //per seconds
     std::vector<int> userReq_;  //per seconds
@@ -124,16 +134,17 @@ protected:
     std::vector<LogRequestItem> childSubReq_;
     std::vector<LogRequestItem> userSubReq_;
 
+    LogLoadStatItem fullStat_;
+    LogLoadStatItem periodStat_;
     size_t subReqMax_;
-    size_t sumTotal_; //sum of all the child and user requests
-    size_t maxTotal_; //the maximum value of child+user requests
-    int rank_; //the rank of this item within other items with regards to sumTotal_
-    float percentage_; //0-100, the percentage of sumTotal_ with respect to the
-                       //sum of sumTotal_ of all the items
 
     std::string name_; //the name of the item (only makes sense for suites)
 };
 
+class LogLoadDataStats
+{
+
+};
 
 //The top level class for load/request statistics
 class LogLoadData
@@ -141,7 +152,7 @@ class LogLoadData
 public:
     enum TimeRes {SecondResolution, MinuteResolution, HourResolution};
 
-    LogLoadData() : timeRes_(SecondResolution), maxNumOfRows_(0), numOfRows_(0), startPos_(0)  {}
+    LogLoadData() : timeRes_(SecondResolution), fullStatComputed_(false), maxNumOfRows_(0), numOfRows_(0), startPos_(0)  {}
 
     void clear();
     const LogLoadDataItem& dataItem() const {return total_;}
@@ -175,6 +186,9 @@ public:
     qint64 period() const;
     bool indexOfTime(qint64 t,size_t&,size_t,qint64) const;
 
+    void computeStat();
+    void computeStat(size_t startIndex,size_t endIndex);
+
     QString childSubReqName(int idx) const;
     QString userSubReqName(int idx) const;
     QString uidName(int idx) const;
@@ -192,8 +206,8 @@ private:
              const std::vector<LogReqCounter>& suite_vec,
              const std::vector<LogReqCounter>& uid_vec);
 
-    void processSuites();
-    void processUids();
+    void computeInitialStat();
+    void computeStat(std::vector<LogLoadDataItem>& items,size_t startIndex,size_t endIndex,bool fullPeriod);
 
     bool extract_uid_data(const std::string& line,std::vector<LogReqCounter>& uid_vec);
     bool extract_suite_path(const std::string& line,bool child_cmd,std::vector<LogReqCounter>& suite_vec,
@@ -201,13 +215,17 @@ private:
 
     TimeRes timeRes_;
     std::vector<qint64> time_; //times stored as msecs since the epoch
+
     LogLoadDataItem total_; //generic data item for all the suites
     std::vector<LogLoadDataItem> suiteData_; //suite-related data items
     std::vector<LogLoadDataItem> uidData_;
+    bool fullStatComputed_;
+
     QStringList suites_;
     int maxNumOfRows_;
     int numOfRows_;
     std::streamoff startPos_;
+
 };
 
 #endif // LOGLOADDATA_HPP

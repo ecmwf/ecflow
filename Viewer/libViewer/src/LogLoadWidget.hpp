@@ -155,8 +155,10 @@ public:
     QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
     QModelIndex parent (const QModelIndex & ) const;
 
-    void setData(const std::vector<LogLoadDataItem>& data,QList<bool> checkedLst); //for suites
-    void setData(const std::vector<LogRequestItem>& data,QList<bool> checkedLst); //for subrequests
+    void setData(const std::vector<LogLoadDataItem>& data,QList<bool> checkedLst);
+    void setData(const std::vector<LogRequestItem>& data,QList<bool> checkedLst);
+    void adjustStats(const std::vector<LogLoadDataItem>& data);
+    void adjustStats(const std::vector<LogRequestItem>& data);
 
     bool hasData() const;
     void clearData();
@@ -371,9 +373,11 @@ protected:
     virtual void removeChildReq(int) {}
     virtual void addUserReq(int) {}
     virtual void removeUserReq(int) {}
+    virtual void adjustStats()=0;
 
     int seriesValue(QChart* chart,QString id,int idx);
     QColor seriesColour(QChart* chart,QString id);
+    bool seriesPeriodIndex(qint64 startTime, qint64 endTime,size_t& startIdx,size_t& endIdx);
     bool seriesIndex(qint64 t,int startId,qint64 tolerance,int& idx);
     qint64 seriesTime(int idx);
 
@@ -449,6 +453,7 @@ protected:
 
     void addSuite(int);
     void removeSuite(int) {}
+    void adjustStats();
 
     QString suiteSeriesId(int idx) const;
     QChart* getChart(ChartType);
@@ -482,7 +487,8 @@ protected:
     void addChildReq(int childReqIdx);
     void removeChildReq(int childReqIdx);
     void addUserReq(int userReqIdx);
-    void removeUserReq(int userReqIdx);
+    void removeUserReq(int userReqIdx);   
+    void adjustStats() {}
 
     QString childSeriesId(int childIdx) const;
     QString userSeriesId(int userIdx) const;
@@ -511,6 +517,7 @@ protected:
     void removeSuite(int);
     void addChildReq(int childReqIdx);
     void addUserReq(int userReqIdx);
+    void adjustStats() {}
 
     QString childChartId(int idx) const;
     QString userChartId(int idx) const;
@@ -546,6 +553,8 @@ protected:
     void addUserReq(int userReqIdx);
     void removeUserReq(int userReqIdx) {}
 
+    void adjustStats() {}
+
     //QString childChartId(int idx) const;
     QString userChartId(int idx) const;
 
@@ -579,6 +588,8 @@ protected:
     void addUserReq(int userReqIdx);
     void removeUserReq(int userReqIdx);
 
+    void adjustStats() {}
+
     //QString childChartId(int idx) const;
     QString uidChartId(int idx) const;
 
@@ -598,7 +609,7 @@ public:
     explicit LogStatRequestView(LogRequestViewHandler* handler,QWidget* parent=0);
     ~LogStatRequestView() {}
 
-    void adjustZoom(QRectF r) {}
+    void adjustZoom(QRectF r);
 
 protected:
     void addSuite(int) {}
@@ -617,10 +628,13 @@ public:
     explicit LogStatCmdUidView(LogRequestViewHandler* handler,QWidget* parent=0);
     ~LogStatCmdUidView() {}
 
+
+
 public Q_SLOTS:
     void addRemoveUid(int idx, bool st);
 
 protected:
+    void adjustStats();
     void loadCore();
 };
 
@@ -635,6 +649,7 @@ public Q_SLOTS:
     void addRemoveUserReq(int idx, bool st);
 
 protected:
+    void adjustStats();
     void loadCore();
 };
 

@@ -159,6 +159,8 @@ bool LogData::indexOfPeriod(qint64 start,qint64 end,size_t& idxStart,size_t& idx
     unsigned int startTime=(start-refTimeInMs_)/1000;
     unsigned int endTime=(end-refTimeInMs_)/1000;
 
+    UiLog().dbg() << "start " << QDateTime::fromMSecsSinceEpoch(start);
+
     bool hasStart=false;
     qint64 tolerance=toleranceInMs/1000;
 
@@ -191,11 +193,18 @@ bool LogData::indexOfPeriod(qint64 start,qint64 end,size_t& idxStart,size_t& idx
 
     for(size_t i=0; i < data_.size(); i++)
     {
-        if(startTime - tolerance <= data_[i].time_ && data_[i].time_ <= startTime)
+        if(startTime - tolerance <= data_[i].time_ && data_[i].time_ < startTime)
         {
             idxStart=i;
             idxEnd=i;
             hasStart=true;            
+        }
+        else if(startTime == data_[i].time_)
+        {
+            idxStart=i;
+            idxEnd=i;
+            hasStart=true;
+            break;
         }
         else if(!hasStart &&
                 startTime + tolerance < data_[i].time_)

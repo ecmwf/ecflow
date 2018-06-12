@@ -563,8 +563,8 @@ void LogLoadRequestModel::setData(const std::vector<LogRequestItem>& data,QList<
     for(size_t i=0; i < data.size(); i++)
     {
         data_ << LogLoadRequestModelDataItem(QString::fromStdString(data[i].name_),
-                                           data[i].percentage_,checkedLst[i],
-                                           data[i].rank_);
+                                           data[i].periodStat().percentage_,checkedLst[i],
+                                           data[i].periodStat().rank_);
     }
     endResetModel();
 }
@@ -580,10 +580,40 @@ void LogLoadRequestModel::setData(const std::vector<LogLoadDataItem>& data,QList
     for(size_t i=0; i < data.size(); i++)
     {
         data_ << LogLoadRequestModelDataItem(QString::fromStdString(data[i].name()),
-                                           data[i].percentage(),checkedLst[i],
-                                           data[i].rank());
+                                           data[i].periodStat().percentage(),checkedLst[i],
+                                           data[i].periodStat().rank());
     }
     endResetModel();
+}
+
+void LogLoadRequestModel::adjustStats(const std::vector<LogRequestItem>& data)
+{
+    //Q_ASSERT(data);
+    Q_ASSERT(data_.size() == static_cast<int>(data.size()));
+    for(int i=0; i < data_.size(); i++)
+    {
+        data_[i].percentage_=data[i].periodStat().percentage();
+        data_[i].rank_=data[i].periodStat().rank();
+    }
+
+    QModelIndex startIdx=index(0,0);
+    QModelIndex endIdx=index(rowCount(),columnCount()-1);
+    Q_EMIT dataChanged(startIdx,endIdx);
+}
+
+void LogLoadRequestModel::adjustStats(const std::vector<LogLoadDataItem>& data)
+{
+    //Q_ASSERT(data);
+    Q_ASSERT(data_.size() == static_cast<int>(data.size()));
+    for(int i=0; i < data_.size(); i++)
+    {
+        data_[i].percentage_=data[i].periodStat().percentage();
+        data_[i].rank_=data[i].periodStat().rank();
+    }
+
+    QModelIndex startIdx=index(0,0);
+    QModelIndex endIdx=index(rowCount(),columnCount()-1);
+    Q_EMIT dataChanged(startIdx,endIdx);
 }
 
 void LogLoadRequestModel::clearData()
@@ -1183,21 +1213,9 @@ LogRequestViewHandler::LogRequestViewHandler(QWidget* parent) :
     buildTableTab(parent);
 
     for(int i=0; i < views_.count(); i++)
-    {
-        /*connect(views_[i],SIGNAL(scanDataChanged(QString)),
-                this,SIGNAL(scanDataChanged(QString)));
-
-        connect(views_[i],SIGNAL(suitePlotStateChanged(int,bool,QColor)),
-                this,SIGNAL(suitePlotStateChanged(int,bool,QColor)));
-
-        connect(views_[i],SIGNAL(childPlotStateChanged(int,bool,QColor)),
-                this,SIGNAL(childPlotStateChanged(int,bool,QColor)));
-
-        connect(views_[i],SIGNAL(userPlotStateChanged(int,bool,QColor)),
-                this,SIGNAL(userPlotStateChanged(int,bool,QColor)));
-
-        connect(views_[i],SIGNAL(uidPlotStateChanged(int,bool,QColor)),
-                this,SIGNAL(uidPlotStateChanged(int,bool,QColor)));*/
+    {      
+        connect(views_[i],SIGNAL(zoomHappened(QRectF)),
+                this,SLOT(slotZoomHappened(QRectF)));
 
         connect(views_[i],SIGNAL(timeRangeChanged(qint64,qint64)),
                 this,SIGNAL(timeRangeChanged(qint64,qint64)));
@@ -1389,6 +1407,8 @@ void LogRequestViewHandler::setResolution(LogLoadData::TimeRes res)
 
 void LogRequestViewHandler::showFullRange()
 {
+    data_->computeStat();
+
     for(int i=0; i < views_.count(); i++)
     {
         views_[i]->showFullRange();
@@ -1439,7 +1459,7 @@ void LogRequestViewHandler::addRemoveUid(int idx, bool st)
 void LogRequestViewHandler::slotZoomHappened(QRectF r)
 {
     if(LogRequestView* senderView=static_cast<LogRequestView*>(sender()))
-    {
+    {       
         Q_FOREACH(LogRequestView* v,views_)
         {
             if(v != senderView)
@@ -1564,17 +1584,22 @@ void LogRequestView::buildControlCore(LogRequestViewControlItem* item,QString ti
 
     controlTab_->addTab(w,title);
 
-    QHBoxLayout* hb=new QHBoxLayout();
+    //QHBoxLayout* hb=new QHBoxLayout();
 
     QToolButton* unselectSuitesTb=new QToolButton(this);
     unselectSuitesTb->setText(tr("Unselect all"));
 
+    QSizePolicy pol=unselectSuitesTb->sizePolicy();
+    pol.setHorizontalPolicy(QSizePolicy::Expanding);
+    unselectSuitesTb->setSizePolicy(pol);
+
     QToolButton* selectFourSuitesTb=new QToolButton(this);
     selectFourSuitesTb->setText(tr("Select 1-4"));
+    selectFourSuitesTb->setSizePolicy(pol);
 
-    hb->addWidget(unselectSuitesTb);
-    hb->addWidget(selectFourSuitesTb);
-    vb->addLayout(hb);
+    vb->addWidget(unselectSuitesTb);
+    vb->addWidget(selectFourSuitesTb);
+    //vb->addLayout(hb);
 
     connect(unselectSuitesTb,SIGNAL(clicked()),
             item->model_,SLOT(unselectAll()));
@@ -1638,8 +1663,8 @@ QChart* LogRequestView::addChartById(QString id)
     connect(chartView,SIGNAL(chartZoomed(QRectF)),
             this,SLOT(slotZoom(QRectF)));
 
-    connect(chartView,SIGNAL(chartZoomed(QRectF)),
-            this,SIGNAL(zoomHappened(QRectF)));
+    //connect(chartView,SIGNAL(chartZoomed(QRectF)),
+    //        this,SIGNAL(zoomHappened(QRectF)));
 
     connect(chartView,SIGNAL(positionChanged(qreal)),
             this,SLOT(scanPositionChanged(qreal)));
@@ -1679,25 +1704,32 @@ void LogRequestView::slotZoom(QRectF r)
            v->adjustCallout();
         }
 
-        qint64 start, end;
+        qint64 startTime, endTime;
         Q_ASSERT(!views_.isEmpty());
-        views_[0]->currentTimeRange(start,end);
-        Q_EMIT timeRangeChanged(start,end);
+        views_[0]->currentTimeRange(startTime,endTime);
+
+        size_t startIdx,endIdx;
+        if(seriesPeriodIndex(startTime,endTime,startIdx,endIdx))
+        {
+            data_->computeStat(startIdx,endIdx);
+            adjustStats();
+        }
+
+        //Notify the other request views handled by the handler
+        Q_EMIT zoomHappened(r);
+        Q_EMIT timeRangeChanged(startTime,endTime);
     }
 }
 
 void LogRequestView::adjustZoom(QRectF r)
 {
-    if(ChartView* senderView=static_cast<ChartView*>(sender()))
+    Q_FOREACH(ChartView* v,views_)
     {
-        Q_FOREACH(ChartView* v,views_)
-        {
-           if(v != senderView)
-               v->doZoom(r);
-
-           v->adjustCallout();
-        }
+        v->doZoom(r);
+        v->adjustCallout();
     }
+
+    adjustStats();
 }
 
 //Adjust the time range (zoom) of the last view using the time range
@@ -1717,7 +1749,6 @@ void LogRequestView::adjustZoom()
         }
    }
 }
-
 
 void LogRequestView::changeResolution()
 {
@@ -1909,6 +1940,8 @@ void LogRequestView::showFullRange()
     Q_FOREACH(ChartView* view,views_)
         view->chart()->zoomReset();
 
+    adjustStats();
+
     Q_EMIT(timeRangeReset());
 }
 
@@ -1925,18 +1958,52 @@ void LogRequestView::scanPositionClicked(qreal pos)
     {
         qint64 t1(pos);
         qint64 t2=t1;
-        if(data_->timeRes() == LogLoadData::MinuteResolution)
-            t2=t1+60*1000;
-
-        Q_FOREACH(ChartView* view,views_)
-            view->setCallout(pos);
 
         qint64 tw=0;
         if(!views_.isEmpty())
             tw=views_[0]->widthToTimeRange(50.);
 
+        //Try to find the nearest data point around the click position
+        int idx=0;
+        if(seriesIndex(t1,0,tw,idx))
+        {
+            QChart *chart=views_[0]->chart();
+
+            QList<QAbstractSeries*> lst=chart->series();
+            if(!lst.empty())
+            {
+                QLineSeries *ser=static_cast<QLineSeries*>(lst[0]);
+                Q_ASSERT(ser);
+                t1=ser->at(idx).x();
+                t2=t1;
+            }
+        }
+
+        if(data_->timeRes() == LogLoadData::MinuteResolution)
+            t2=t1+60*1000;
+
+        Q_FOREACH(ChartView* view,views_)
+            view->setCallout(t1);
+
         Q_EMIT(timeRangeHighlighted(t1,t2,tw));
     }
+}
+
+bool LogRequestView::seriesPeriodIndex(qint64 startTime, qint64 endTime,size_t& startIdx,size_t& endIdx)
+{
+    startIdx=0;
+    endIdx=0;
+    int start=0,end=0;
+    if(seriesIndex(startTime,0,0,start))
+    {
+        if(seriesIndex(endTime,startIdx,0,end))
+        {
+            startIdx=start;
+            endIdx=end;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool LogRequestView::seriesIndex(qint64 t,int startIdx,qint64 tolerance,int& idx)
@@ -2261,6 +2328,11 @@ void LogTotalRequestView::loadCore()
     build(getView(TotalChartType),tSeries,"Child+User requests",maxVal);
     build(getView(ChildChartType),chSeries,"Child requests",maxVal);
     build(getView(UserChartType),usSeries,"User requests",maxVal);
+}
+
+void LogTotalRequestView::adjustStats()
+{
+    suiteCtl_.model_->adjustStats(data_->suites());
 }
 
 QString LogTotalRequestView::suiteSeriesId(int idx) const
@@ -3638,6 +3710,11 @@ LogStatRequestView::LogStatRequestView(LogRequestViewHandler* handler,QWidget* p
     scanLabel_->hide();
 }
 
+void LogStatRequestView::adjustZoom(QRectF r)
+{
+    adjustStats();
+}
+
 //=============================================================================
 //
 // LogStatUidCmdView
@@ -3653,6 +3730,12 @@ LogStatCmdUidView::LogStatCmdUidView(LogRequestViewHandler* handler,QWidget* par
 void LogStatCmdUidView::addRemoveUid(int uidIdx,bool st)
 {
     statTable_->setColumnHidden(uidIdx+1,!st);
+}
+
+void LogStatCmdUidView::adjustStats()
+{
+    uidCtl_.model_->adjustStats(data_->uidData());
+    statModel_->setDataCmdUid(data_->total(),data_->uidData());
 }
 
 void LogStatCmdUidView::loadCore()
@@ -3683,6 +3766,12 @@ LogStatUidCmdView::LogStatUidCmdView(LogRequestViewHandler* handler,QWidget* par
 void LogStatUidCmdView::addRemoveUserReq(int userReqIdx,bool st)
 {
     statTable_->setColumnHidden(userReqIdx+1,!st);
+}
+
+void LogStatUidCmdView::adjustStats()
+{
+    userCtl_.model_->adjustStats(data_->total().userSubReq());
+    statModel_->setDataUidCmd(data_->total(),data_->uidData());
 }
 
 void LogStatUidCmdView::loadCore()
@@ -3720,6 +3809,7 @@ void LogStatRequestModel::setData(const std::vector<LogRequestItem>& data)
     endResetModel();
 }
 
+
 void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std::vector<LogLoadDataItem>& data)
 {
     beginResetModel();
@@ -3730,7 +3820,7 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
     QVector<float> val;
     for(size_t i=0; i < total.userSubReq().size(); i++)
     {
-        val << total.userSubReq()[i].sumTotal_;
+        val << total.userSubReq()[i].periodStat().sumTotal_;
         data_.rowLabels_ << QString::fromStdString(total.userSubReq()[i].name_);
     }
     data_.vals_ << val;
@@ -3742,7 +3832,7 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
         val.clear();
         for(size_t j=0; j < data[i].userSubReq().size(); j++)
         {
-            val << data[i].userSubReq()[j].sumTotal_;
+            val << data[i].userSubReq()[j].periodStat().sumTotal_;
         }
 
         data_.vals_ << val;
@@ -3773,7 +3863,7 @@ void LogStatRequestModel::setDataUidCmd(const LogLoadDataItem& total, const std:
         val.clear();
         for(size_t j=0; j < data.size(); j++)
         {
-            val << data[j].userSubReq()[i].sumTotal_;
+            val << data[j].userSubReq()[i].periodStat().sumTotal_;
         }
 
         data_.vals_ << val;
@@ -3830,6 +3920,16 @@ QVariant LogStatRequestModel::data( const QModelIndex& index, int role ) const
     if(role == Qt::DisplayRole)
     {
         return data_.vals_[index.column()][index.row()];
+    }
+    else if(role == Qt::ForegroundRole)
+    {
+        if(fabs(data_.vals_[index.column()][index.row()]) < 0.0000001)
+            return QColor(190,190,190);
+    }
+    else if(role == Qt::BackgroundRole)
+    {
+        if(fabs(data_.vals_[index.column()][index.row()]) > 0.0000001)
+            return QColor(192,219,247);
     }
 
     return QVariant();
