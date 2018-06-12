@@ -1820,8 +1820,14 @@ void LogRequestView::clearCharts()
     {
         Q_ASSERT(v->chart());
         v->chart()->removeAllSeries();
-        v->chart()->removeAxis(v->chart()->axisX());
-        v->chart()->removeAxis(v->chart()->axisY());
+
+        //We do it in this way to get rid of error message:
+        //"Can not remove axis. Axis not found on the chart."
+        if(v->chart()->axes(Qt::Horizontal).contains(v->chart()->axisX()))
+            v->chart()->removeAxis(v->chart()->axisX());
+
+        if(v->chart()->axes(Qt::Vertical).contains(v->chart()->axisY()))
+            v->chart()->removeAxis(v->chart()->axisY());
     }
     maxVal_=0;
 }
@@ -3734,7 +3740,11 @@ LogStatCmdUidView::LogStatCmdUidView(LogRequestViewHandler* handler,QWidget* par
 
 void LogStatCmdUidView::addRemoveUid(int uidIdx,bool st)
 {
-    statTable_->setColumnHidden(uidIdx+1,!st);
+    for(int i=0; i < statModel_->columnCount(); i++)
+    {
+        if(statModel_->dataIndex(i) == uidIdx)
+            statTable_->setColumnHidden(i,!st);
+    }
 }
 
 void LogStatCmdUidView::adjustStats()
@@ -3770,7 +3780,11 @@ LogStatUidCmdView::LogStatUidCmdView(LogRequestViewHandler* handler,QWidget* par
 
 void LogStatUidCmdView::addRemoveUserReq(int userReqIdx,bool st)
 {
-    statTable_->setColumnHidden(userReqIdx+1,!st);
+    for(int i=0; i < statModel_->columnCount(); i++)
+    {
+        if(statModel_->dataIndex(i) == userReqIdx)
+            statTable_->setColumnHidden(i,!st);
+    }
 }
 
 void LogStatUidCmdView::adjustStats()
@@ -3799,7 +3813,7 @@ void LogStatUidCmdView::loadCore()
 //=====================================================
 
 LogStatRequestModel::LogStatRequestModel(QObject *parent) :
-          QAbstractItemModel(parent)
+          QAbstractItemModel(parent), columnOrder_(ValueOrder)
 {
 }
 
@@ -3822,17 +3836,31 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
     data_.clear();
 
     data_.colLabels_ << "ALL";
+    for(size_t i=0; i < data.size(); i++)
+        data_.colLabels_ << "";
+
+    data_.vals_=QVector<QVector<float> >(1+data.size());
+    data_.dataIndex_=QVector<int>(1+data.size(),-1);
+
     QVector<float> val;
     for(size_t i=0; i < total.userSubReq().size(); i++)
     {
         val << total.userSubReq()[i].periodStat().sumTotal_;
         data_.rowLabels_ << QString::fromStdString(total.userSubReq()[i].name_);
-    }
-    data_.vals_ << val;
+    }  
+    data_.vals_[0] =val;
+    data_.dataIndex_[0]=-1;
 
     for(size_t i=0; i < data.size(); i++)
     {
-        data_.colLabels_ << QString::fromStdString(data[i].name());
+        size_t pos=0;
+        if(columnOrder_ == NameOrder)
+            pos=i+1;
+        else
+            pos=data[i].rank()+1;
+
+        data_.dataIndex_[pos]=i;
+        data_.colLabels_[pos] = QString::fromStdString(data[i].name());
 
         val.clear();
         for(size_t j=0; j < data[i].userSubReq().size(); j++)
@@ -3840,7 +3868,7 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
             val << data[i].userSubReq()[j].periodStat().sumTotal_;
         }
 
-        data_.vals_ << val;
+        data_.vals_[pos] = val;
     }
 
     endResetModel();
@@ -3853,17 +3881,31 @@ void LogStatRequestModel::setDataUidCmd(const LogLoadDataItem& total, const std:
     data_.clear();
 
     data_.colLabels_ << "ALL";
+    for(size_t i=0; i < total.userSubReq().size(); i++)
+        data_.colLabels_ << "";
+
+    data_.vals_=QVector<QVector<float> >(1+total.userSubReq().size());
+    data_.dataIndex_=QVector<int>(1+total.userSubReq().size(),-1);
+
     QVector<float> val;
     for(size_t i=0; i < data.size(); i++)
     {
         val << data[i].sumTotal();
         data_.rowLabels_ << QString::fromStdString(data[i].name());
     }
-    data_.vals_ << val;
+    data_.vals_[0]=val;
+    data_.dataIndex_[0]=-1;
 
     for(size_t i=0; i < total.userSubReq().size(); i++)
     {
-        data_.colLabels_ << QString::fromStdString(total.userSubReq()[i].name_);
+        size_t pos=0;
+        if(columnOrder_ == NameOrder)
+            pos=i+1;
+        else
+            pos=total.userSubReq()[i].periodStat().rank_+1;
+
+        data_.dataIndex_[pos]=i;
+        data_.colLabels_[pos]=QString::fromStdString(total.userSubReq()[i].name_);
 
         val.clear();
         for(size_t j=0; j < data.size(); j++)
@@ -3871,7 +3913,7 @@ void LogStatRequestModel::setDataUidCmd(const LogLoadDataItem& total, const std:
             val << data[j].userSubReq()[i].periodStat().sumTotal_;
         }
 
-        data_.vals_ << val;
+        data_.vals_[pos]=val;
     }
 
     endResetModel();

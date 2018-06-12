@@ -105,7 +105,7 @@ private:
 struct LogLoadRequestModelDataItem
 {
     LogLoadRequestModelDataItem(QString name, float percentage, bool checked,int rank) :
-        name_(name), percentage_(percentage), checked_(checked) {}
+        name_(name), percentage_(percentage), checked_(checked), rank_(rank) {}
 
     QString name_;
     float percentage_;
@@ -658,8 +658,9 @@ class LogStatRequestModelData
 public:
     int rowNum() const {return rowLabels_.count();}
     int colNum() const {return colLabels_.count();}
-    void clear() {rowLabels_.clear(); colLabels_.clear(); vals_.clear();}
+    void clear() {dataIndex_.clear(); rowLabels_.clear(); colLabels_.clear(); vals_.clear();}
 
+    QVector<int> dataIndex_;
     QStringList rowLabels_;
     QStringList colLabels_;
     QVector<QVector<float> > vals_;
@@ -686,9 +687,13 @@ public:
 
     bool hasData() const;
     void clearData();
+    int dataIndex(int i) const {return(i >=0 && i < data_.dataIndex_.count())?(data_.dataIndex_[i]):0;}
+
 
 protected:
     LogStatRequestModelData data_;
+    enum ColumnOrder {NameOrder, ValueOrder};
+    ColumnOrder columnOrder_;
 };
 
 
