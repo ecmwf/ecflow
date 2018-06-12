@@ -66,7 +66,8 @@ public:
       NO_REQUE_IF_SINGLE_TIME_DEP = 14,  //
       ARCHIVED      = 15,  // Container*
       RESTORED      = 16,  // Container*, Avoid re-archiving node that is restored, until it is re-queued again
-      NOT_SET       = 17
+      THRESHOLD     = 17,  // Job threshold exceeded.(slow disk,large includes/huge scripts,overloaded machice,server)
+      NOT_SET       = 18
    };
 
    bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }

@@ -64,6 +64,7 @@ std::vector<Flag::Type> Flag::list()
    ret.push_back(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
    ret.push_back(Flag::ARCHIVED);
    ret.push_back(Flag::RESTORED);
+   ret.push_back(Flag::THRESHOLD);
    return ret;
 }
 
@@ -87,6 +88,7 @@ std::string Flag::enum_to_string(Flag::Type flag) {
       case Flag::NO_REQUE_IF_SINGLE_TIME_DEP: return "no_reque"; break;
       case Flag::ARCHIVED:     return "archived"; break;
       case Flag::RESTORED:     return "restored"; break;
+      case Flag::THRESHOLD:    return "threshold"; break;
       case Flag::NOT_SET:      return "not_set"; break;
       default: break;
    };
@@ -113,6 +115,7 @@ Flag::Type Flag::string_to_flag_type(const std::string& s)
    if (s == "no_reque") return Flag::NO_REQUE_IF_SINGLE_TIME_DEP;
    if (s == "archived") return Flag::ARCHIVED;
    if (s == "restored") return Flag::RESTORED;
+   if (s == "threshold") return Flag::THRESHOLD;
    return Flag::NOT_SET;
 }
 
@@ -136,6 +139,7 @@ void Flag::valid_flag_type(std::vector<std::string>& vec)
    vec.push_back("no_reque");
    vec.push_back("archived");
    vec.push_back("restored");
+   vec.push_back("threshold");
 }
 
 std::string Flag::to_string() const

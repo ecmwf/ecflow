@@ -306,6 +306,7 @@ void export_NodeAttr()
          "- NO_REQUE      - task\n"
          "- ARCHIVED      - Suite/Family\n"
          "- RESTORED      - Family/Family\n"
+         "- THRESHOLD     - task\n"
          "- NOT_SET\n"
    )
          .value("force_abort",  Flag::FORCE_ABORT)
@@ -325,6 +326,7 @@ void export_NodeAttr()
          .value("no_reque",     Flag::NO_REQUE_IF_SINGLE_TIME_DEP)
          .value("archived",     Flag::ARCHIVED)
          .value("restored",     Flag::RESTORED)
+         .value("threshold",    Flag::THRESHOLD)
          .value("not_set",      Flag::NOT_SET)
          ;
 
