@@ -72,10 +72,10 @@ cleanup(){
                     tail -$TAILNUM $ECFLOWUI_LOGFILE                 >> $EFLOWUI_LOGTAIL
 
                     #Add the last lines from the user interaction log file
-                    if [ -e $ECFLOWUI_UI_LOGFILE ] ; then
+                    if [ -e $ECFLOWUI_LOGFILE ] ; then
                         echo ""                                      >> $EFLOWUI_LOGTAIL
                         echo "Last $UI_TAILNUM lines of user interaction log file:" >> $EFLOWUI_LOGTAIL
-                        tail -${UI_TAILNUM} $ECFLOWUI_UI_LOGFILE     >> $EFLOWUI_LOGTAIL
+                        tail -${UI_TAILNUM} $ECFLOWUI_LOGFILE     >> $EFLOWUI_LOGTAIL
                     fi
 
                     addr=$(head -1 $ECFLOWUI_BT_EMAIL_ADDRESS_FILE)
@@ -90,10 +90,10 @@ cleanup(){
                 tail -$TAILNUM $ECFLOWUI_LOGFILE
 
                 #Add the last lines from the user interaction log file
-                if [ -e $ECFLOWUI_UI_LOGFILE ] ; then
+                if [ -e $ECFLOWUI_LOGFILE ] ; then
                     echo ""
                     echo "Last $UI_TAILNUM lines of user interaction log file:"
-                    tail -${UI_TAILNUM} $ECFLOWUI_UI_LOGFILE
+                    tail -${UI_TAILNUM} $ECFLOWUI_LOGFILE
                 fi
             fi
         fi
@@ -255,7 +255,7 @@ fi
 export git=$ECFLOWUI_TMPDIR/ecflowui_log_$$.$LOGNAME.txt
 
 # Where to write the user interaction log file to
-export ECFLOWUI_UI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
+export ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
 
 #---------------------------------------------------------------
 # Create socket dir for local domain socket base communication
