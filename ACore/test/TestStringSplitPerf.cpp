@@ -27,7 +27,7 @@ using namespace std;
 using namespace ecf;
 using namespace boost;
 
-#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
+//#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
