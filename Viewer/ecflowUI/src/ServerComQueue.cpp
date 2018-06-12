@@ -65,14 +65,15 @@ ServerComQueue::~ServerComQueue()
 
 	//If the comthread is running we need to wait
 	//until it finishes its task.
-	comThread_->wait();
+    if(comThread_->wait(5000))
+    {
+        //Send a logout task
+        VTask_ptr task=VTask::create(VTask::LogOutTask);
+        comThread_->task(task);
 
-	//Send a logout task
-	VTask_ptr task=VTask::create(VTask::LogOutTask);
-	comThread_->task(task);
-
-    //Wait until the logout finishes
-	comThread_->wait();
+        //Wait until the logout finishes
+        comThread_->wait(3000);
+    }
 
 	delete comThread_;
 }

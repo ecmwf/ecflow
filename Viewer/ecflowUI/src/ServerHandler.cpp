@@ -91,7 +91,8 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
         client_=0;
     }
 
-	client_->set_retry_connection_period(1);
+    client_->set_retry_connection_period(1);
+    client_->set_connection_attempts(1);
 	client_->set_throw_on_error(true);
 
 	//Create the vnode root. This will represent the node tree in the viewer, but
