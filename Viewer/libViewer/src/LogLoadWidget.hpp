@@ -353,11 +353,11 @@ protected Q_SLOTS:
 protected:
     enum ControlType {SuiteType,ChildType,UserType,UidType};
 
-    void buildControlCore(LogRequestViewControlItem* item,QString title,QString modelHeader);
+    void buildControlCore(LogRequestViewControlItem* item,QString title,QString modelHeader,bool selectAll);
     void buildSuiteControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
     void buildChildReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
-    void buildUserReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
-    void buildUidControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
+    void buildUserReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool selectAll);
+    void buildUidControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool selectAll);
 
     QChart* addChartById(QString id);
     void removeChartById(QString id);

@@ -806,7 +806,7 @@ void LogLoadRequestModel::selectAll()
         if(!data_[i].checked_)
         {
             data_[i].checked_=true;
-            Q_EMIT checkStateChanged(i,false);
+            Q_EMIT checkStateChanged(i,true);
         }
     }
 
@@ -1562,7 +1562,7 @@ void LogRequestView::adjustSplitterSize()
     }
 }
 
-void LogRequestView::buildControlCore(LogRequestViewControlItem* item,QString title,QString modelHeader)
+void LogRequestView::buildControlCore(LogRequestViewControlItem* item,QString title,QString modelHeader,bool addSelectAll)
 {
     item->model_=new LogLoadRequestModel(modelHeader,this);
     item->sortModel_=new LogLoadRequestSortModel(this);
@@ -1572,6 +1572,7 @@ void LogRequestView::buildControlCore(LogRequestViewControlItem* item,QString ti
     QWidget* w=new QWidget(this);
     QVBoxLayout* vb=new QVBoxLayout(w);
     vb->setContentsMargins(0,0,0,0);
+    vb->setSpacing(1);
 
     item->tree_=new QTreeView(this);
     item->tree_->setRootIsDecorated(false);
@@ -1584,33 +1585,40 @@ void LogRequestView::buildControlCore(LogRequestViewControlItem* item,QString ti
 
     controlTab_->addTab(w,title);
 
-    //QHBoxLayout* hb=new QHBoxLayout();
-
-    QToolButton* unselectSuitesTb=new QToolButton(this);
-    unselectSuitesTb->setText(tr("Unselect all"));
-
-    QSizePolicy pol=unselectSuitesTb->sizePolicy();
+    QToolButton* unselectAllTb=new QToolButton(this);
+    unselectAllTb->setText(tr("Unselect all"));
+    QSizePolicy pol=unselectAllTb->sizePolicy();
     pol.setHorizontalPolicy(QSizePolicy::Expanding);
-    unselectSuitesTb->setSizePolicy(pol);
+    unselectAllTb->setSizePolicy(pol);
 
-    QToolButton* selectFourSuitesTb=new QToolButton(this);
-    selectFourSuitesTb->setText(tr("Select 1-4"));
-    selectFourSuitesTb->setSizePolicy(pol);
+    QToolButton* selectFourTb=new QToolButton(this);
+    selectFourTb->setText(tr("Select 1-4"));
+    selectFourTb->setSizePolicy(pol);
 
-    vb->addWidget(unselectSuitesTb);
-    vb->addWidget(selectFourSuitesTb);
-    //vb->addLayout(hb);
+    if(addSelectAll)
+    {
+        QToolButton* selectAllTb=new QToolButton(this);
+        selectAllTb->setText(tr("Select all"));
+        selectAllTb->setSizePolicy(pol);
+        vb->addWidget(selectAllTb);
 
-    connect(unselectSuitesTb,SIGNAL(clicked()),
+        connect(selectAllTb,SIGNAL(clicked()),
+            item->model_,SLOT(selectAll()));
+    }
+
+    vb->addWidget(selectFourTb);
+    vb->addWidget(unselectAllTb);
+
+    connect(unselectAllTb,SIGNAL(clicked()),
             item->model_,SLOT(unselectAll()));
 
-    connect(selectFourSuitesTb,SIGNAL(clicked()),
+    connect(selectFourTb,SIGNAL(clicked()),
             item->model_,SLOT(selectFirstFourItems()));
 }
 
 void LogRequestView::buildSuiteControl(LogRequestViewControlItem* item,QString title,QString modelHeader)
 {
-    buildControlCore(item,title,modelHeader);
+    buildControlCore(item,title,modelHeader,false);
 
     connect(item->model_,SIGNAL(checkStateChanged(int,bool)),
             this,SLOT(addRemoveSuite(int,bool)));
@@ -1621,7 +1629,7 @@ void LogRequestView::buildSuiteControl(LogRequestViewControlItem* item,QString t
 
 void LogRequestView::buildChildReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader)
 {
-    buildControlCore(item,title,modelHeader);
+    buildControlCore(item,title,modelHeader,false);
 
     connect(item->model_,SIGNAL(checkStateChanged(int,bool)),
             this,SLOT(addRemoveChildReq(int,bool)));
@@ -1630,9 +1638,9 @@ void LogRequestView::buildChildReqControl(LogRequestViewControlItem* item,QStrin
             item->model_,SLOT(updateItem(int,bool,QColor)));
 }
 
-void LogRequestView::buildUserReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader)
+void LogRequestView::buildUserReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool addSelectAll)
 {
-    buildControlCore(item,title,modelHeader);
+    buildControlCore(item,title,modelHeader,addSelectAll);
 
     connect(item->model_,SIGNAL(checkStateChanged(int,bool)),
             this,SLOT(addRemoveUserReq(int,bool)));
@@ -1641,9 +1649,9 @@ void LogRequestView::buildUserReqControl(LogRequestViewControlItem* item,QString
             item->model_,SLOT(updateItem(int,bool,QColor)));
 }
 
-void LogRequestView::buildUidControl(LogRequestViewControlItem* item,QString title,QString modelHeader)
+void LogRequestView::buildUidControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool addSelectAll)
 {
-    buildControlCore(item,title,modelHeader);
+    buildControlCore(item,title,modelHeader,addSelectAll);
 
     connect(item->model_,SIGNAL(checkStateChanged(int,bool)),
             this,SLOT(addRemoveUid(int,bool)));
@@ -2427,7 +2435,7 @@ LogCmdSuiteRequestView::LogCmdSuiteRequestView(LogRequestViewHandler* handler,QW
 
     buildSuiteControl(&suiteCtl_,tr("Suites"),tr("Suite"));
     buildChildReqControl(&childCtl_,tr("Child cmds"),tr("Command"));
-    buildUserReqControl(&userCtl_,tr("User cmds"),tr("Command"));
+    buildUserReqControl(&userCtl_,tr("User cmds"),tr("Command"),false);
 
     controlTab_->setCurrentIndex(2);
 }
@@ -2837,7 +2845,7 @@ LogSuiteCmdRequestView::LogSuiteCmdRequestView(LogRequestViewHandler* handler,QW
 
     buildSuiteControl(&suiteCtl_,tr("Suites"),tr("Suite"));
     buildChildReqControl(&childCtl_,tr("Child cmds"),tr("Command"));
-    buildUserReqControl(&userCtl_,tr("User cmds"),tr("Command"));
+    buildUserReqControl(&userCtl_,tr("User cmds"),tr("Command"),false);
 
     controlTab_->setCurrentIndex(0);
 }
@@ -3180,8 +3188,8 @@ LogUidCmdRequestView::LogUidCmdRequestView(LogRequestViewHandler* handler,QWidge
 {
     Q_ASSERT(mainLayout_);
 
-    buildUidControl(&uidCtl_,tr("Users"),tr("User"));
-    buildUserReqControl(&userCtl_,tr("Commands"),tr("Command"));
+    buildUidControl(&uidCtl_,tr("Users"),tr("User"),false);
+    buildUserReqControl(&userCtl_,tr("Commands"),tr("Command"),false);
 
     controlTab_->setCurrentIndex(0);
 }
@@ -3439,8 +3447,8 @@ LogCmdUidRequestView::LogCmdUidRequestView(LogRequestViewHandler* handler,QWidge
 {
     Q_ASSERT(mainLayout_);
 
-    buildUidControl(&uidCtl_,tr("Users"),tr("User"));
-    buildUserReqControl(&userCtl_,tr("Commands"),tr("Command"));
+    buildUidControl(&uidCtl_,tr("Users"),tr("User"),false);
+    buildUserReqControl(&userCtl_,tr("Commands"),tr("Command"),false);
 
     controlTab_->setCurrentIndex(1);
 }
@@ -3735,7 +3743,7 @@ void LogStatRequestView::adjustZoom(QRectF r)
 LogStatCmdUidView::LogStatCmdUidView(LogRequestViewHandler* handler,QWidget* parent) :
     LogStatRequestView(handler,parent)
 {
-    buildUidControl(&uidCtl_,tr("Users"),tr("User"));
+    buildUidControl(&uidCtl_,tr("Users"),tr("User"),true);
 }
 
 void LogStatCmdUidView::addRemoveUid(int uidIdx,bool st)
@@ -3775,7 +3783,7 @@ void LogStatCmdUidView::loadCore()
 LogStatUidCmdView::LogStatUidCmdView(LogRequestViewHandler* handler,QWidget* parent) :
     LogStatRequestView(handler,parent)
 {
-    buildUserReqControl(&userCtl_,tr("User command"),tr("Command"));
+    buildUserReqControl(&userCtl_,tr("User command"),tr("Command"),true);
 }
 
 void LogStatUidCmdView::addRemoveUserReq(int userReqIdx,bool st)

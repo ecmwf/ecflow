@@ -329,28 +329,14 @@ void LogLoadDataItem::computeSubReqStat(std::vector<LogRequestItem>& subReq,
     }
 
     //std::vector<size_t> sumVec;
+    std::vector<std::pair<size_t,size_t> > sortVec;
+    std::vector<size_t> sumVec;
     size_t sum=0;
     for(size_t i = 0; i < subReq.size(); i++)
     {
         sum+=subReq[i].periodStat_.sumTotal_;
-    }
-
-    if(sum <=0 )
-        return;
-
-    for(size_t i = 0; i < subReq.size(); i++)
-    {
-        subReq[i].periodStat_.percentage_=static_cast<float>(subReq[i].periodStat_.sumTotal_*100)/static_cast<float>(sum);
-    }
-
-#if 0
-    std::vector<std::pair<size_t,size_t> > sortVec;
-    size_t sum=0;
-    for(size_t i = 0; i < subReq.size(); i++)
-    {
-        sum+=subReq[i].sumTotal_;
-        sumVec.push_back(subReq[i].sumTotal_);
-        sortVec.push_back(std::make_pair(i,subReq[i].sumTotal_));
+        sumVec.push_back(subReq[i].periodStat_.sumTotal_);
+        sortVec.push_back(std::make_pair(i,subReq[i].periodStat_.sumTotal_));
     }
 
     if(sum <=0 )
@@ -359,14 +345,12 @@ void LogLoadDataItem::computeSubReqStat(std::vector<LogRequestItem>& subReq,
     assert(sumVec.size() == subReq.size());
     std::sort(sortVec.begin(), sortVec.end(),sortVecFunction);
 
-    for(size_t i = 0; i < sortVec.size(); i++)
-    {
+    for(size_t i = 0; i < subReq.size(); i++)
+    {     
         int idx=sortVec[i].first;
-        subReq[idx].rank_=sortVec.size()-i-1;
-        subReq[idx].percentage_=static_cast<float>(subReq[idx].sumTotal_*100)/static_cast<float>(sum);
+        subReq[idx].periodStat_.rank_=sortVec.size()-i-1;
+        subReq[idx].periodStat_.percentage_=static_cast<float>(subReq[idx].periodStat_.sumTotal_*100)/static_cast<float>(sum);
     }
-#endif
-
 }
 
 void LogLoadDataItem::saveFullStat()
