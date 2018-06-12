@@ -1867,6 +1867,8 @@ void LogRequestView::load()
     childCtl_.adjustColumnWidth();
     userCtl_.adjustColumnWidth();
     uidCtl_.adjustColumnWidth();
+
+    scanPositionChanged(0);
 }
 
 void LogRequestView::loadSuites()
@@ -1938,7 +1940,10 @@ void LogRequestView::adjustMaxVal()
 void LogRequestView::showFullRange()
 {
     Q_FOREACH(ChartView* view,views_)
+    {
         view->chart()->zoomReset();
+        view->adjustCallout();
+    }
 
     adjustStats();
 
