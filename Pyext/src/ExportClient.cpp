@@ -53,7 +53,7 @@ const std::string& get_file_1(ClientInvoker* self,
 /// Set the CLI to enable output to standard out
 class CliSetter {
 public:
-   CliSetter(ClientInvoker* self) : _self(self) {  self->set_cli(true); }
+   explicit CliSetter(ClientInvoker* self) : _self(self) {  self->set_cli(true); }
    ~CliSetter()                                 { _self->set_cli(false);}
 private:
    ClientInvoker* _self;
@@ -151,13 +151,38 @@ void alter_sort(ClientInvoker* self,
 
 void set_child_pid(ClientInvoker* self,int pid) { self->set_child_pid( boost::lexical_cast<std::string>(pid)); }
 
+// Context mgr. The expression is evaluated and should result in an object called a ``context manager''
+// with expression [as variable]:
+//    with-block
+//
+// . The context manager must have __enter__() and __exit__() methods.
+// . The context manager's __enter__() method is called.
+//   The value returned is assigned to VAR.
+//   If no 'as VAR' clause is present, the value is simply discarded.
+// . The code in BLOCK is executed.
+// . If BLOCK raises an exception, the __exit__(type, value, traceback)
+//   is called with the exception details, the same values returned by sys.exc_info().
+//   The method's return value controls whether the exception is re-raised:
+//    any false value re-raises the exception, and True will result in suppressing it.
+//    You'll only rarely want to suppress the exception, because if you do the author
+//    of the code containing the 'with' statement will never realize anything went wrong.
+// .  If BLOCK didn't raise an exception, the __exit__() method is still called, but type, value, and traceback are all None.
+//
+boost::shared_ptr<ClientInvoker> client_enter(boost::shared_ptr<ClientInvoker> self) { return self;}
+bool client_exit(boost::shared_ptr<ClientInvoker> self,const bp::object& type,const bp::object& value,const bp::object& traceback){
+   self->ch1_drop(); 
+   return false;   
+}
 
 void export_Client()
 {
- 	class_<ClientInvoker, boost::noncopyable >("Client",ClientDoc::class_client())
+   // Need boost::shared_ptr<ClientInvoker>, to add support for with( __enter__,__exit__)
+ 	class_<ClientInvoker,boost::shared_ptr<ClientInvoker>,boost::noncopyable>("Client",ClientDoc::class_client())
    .def( init<std::string>() /* host:port      */)
    .def( init<std::string,std::string>() /* host, port      */)
    .def( init<std::string,int>()         /* host, port(int) */)
+   .def("__enter__",        &client_enter)       // allow with statement
+   .def("__exit__",         &client_exit)        // allow with statement, remove last handle
    .def("version",          &version,        "Returns the current client version")
    .def("server_version",   &server_version, "Returns the server version, can throw for old servers, that did not implement this request.")
    .def("set_host_port",    &ClientInvoker::set_host_port,  ClientDoc::set_host_port())

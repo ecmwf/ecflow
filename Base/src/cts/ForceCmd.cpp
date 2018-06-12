@@ -63,7 +63,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	if (!is_node_state && !is_event_state) {
 		std::stringstream ss;
 		ss << "ForceCmd: failed. Invalid node state or event " << stateOrEvent_ << " expected one of "
-		   << "[ unknown | complete | queued | submitted | active | aborted | clear | set]";
+		   << "[ unknown | complete | queued | submitted | active | aborted | clear | set ]";
  		throw std::runtime_error( ss.str() ) ;
  	}
 
@@ -76,22 +76,14 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	   if ( is_event_state ) {
  	      Extract::pathAndName(paths_[i],the_path, the_event);
  	      if ( the_path.empty() || the_event.empty() ) {
- 	         std::stringstream ss;
- 	         ss << "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event i.e --force=/path/to_task:event_name set";
- 	         std::string error_msg = ss.str();
- 	         ecf::log(Log::ERR, error_msg);
- 	         error_ss << error_msg << "\n";
+ 	         error_ss << "ForceCmd: When 'set' or 'clear' is specified the path needs to include name of the event i.e --force=/path/to_task:event_name set\n";
  	         continue;
  	      }
  	   }
 
  	   node_ptr node = find_node_for_edit_no_throw(as,the_path);
  	   if (!node.get()) {
- 	      std::stringstream ss;
-         ss << "ForceCmd: Could not find node at path " << the_path;
-         std::string error_msg = ss.str();
-         ecf::log(Log::ERR, error_msg);
-         error_ss << error_msg << "\n";
+ 	      error_ss << "ForceCmd: Could not find node at path " << the_path << "\n";
  	      continue;
  	   }
  	   SuiteChanged0 changed(node); // Cater for suites in handles
@@ -116,25 +108,17 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      // The recursive option is *NOT* applicable to events, hence ignore. According to Axel !!!!
  	      if ( stateOrEvent_ == Event::SET() )  {
  	         if (!node->set_event(the_event)) {
- 	            std::stringstream ss;
- 	            ss << "ForceCmd: force set: failed for node(" << node->absNodePath() << ") can not find event(" << the_event << ")";
- 	            std::string error_msg = ss.str();
- 	            ecf::log(Log::ERR, error_msg);
- 	            error_ss << error_msg << "\n";
+ 	            error_ss << "ForceCmd: force set: failed for node(" << node->absNodePath() << ") can not find event(" << the_event << ")\n";
 	            continue;
  	         }
  	      }
  	      else if ( stateOrEvent_ == Event::CLEAR() ) {
  	         if (!node->clear_event(the_event)) {
- 	            std::stringstream ss;
- 	            ss << "ForceCmd: force clear: failed for node(" << node->absNodePath() << ") can not find event(" << the_event << ")";
-               std::string error_msg = ss.str();
-               ecf::log(Log::ERR, error_msg);
-               error_ss << error_msg << "\n";
+ 	            error_ss << "ForceCmd: force clear: failed for node(" << node->absNodePath() << ") can not find event(" << the_event << ")\n";
  	            continue;
  	         }
  	      }
- 	      else  throw std::runtime_error("ForceCmd: Invalid parameter") ;
+ 	      else throw std::runtime_error("ForceCmd: Invalid parameter") ;
  	   }
 
  	   if ( recursive_ && setRepeatToLastValue_) {

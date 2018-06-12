@@ -59,13 +59,13 @@ namespace ecf {
 // Use compiler ,  destructor, assignment, copy constructor,
 class TimeAttr  {
 public:
-   TimeAttr(const std::string&);
+   explicit TimeAttr(const std::string&);
    TimeAttr() : makeFree_(false), state_change_no_(0) {}
 	TimeAttr(int hour, int minute, bool relative = false )
 		: timeSeries_(hour, minute,relative), makeFree_(false),state_change_no_(0) {}
 	TimeAttr(const TimeSlot& t,    bool relative = false )
 		: timeSeries_(t,relative), makeFree_(false),state_change_no_(0) {}
-	TimeAttr(const TimeSeries& ts)
+	explicit TimeAttr(const TimeSeries& ts)
 		: timeSeries_(ts), makeFree_(false),state_change_no_(0) {}
 	TimeAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
 		: timeSeries_(start,finish,incr,relative), makeFree_(false),state_change_no_(0) {}

@@ -24,9 +24,7 @@ QColor OutputModel::joboutCol_=QColor(0,115,48);
 //=======================================================================
 
 OutputModel::OutputModel(QObject *parent) :
-          QAbstractItemModel(parent),
-          joboutRow_(-1)
-
+          QAbstractItemModel(parent)
 {
 }
 
@@ -34,7 +32,7 @@ void OutputModel::setData(const std::vector<VDir_ptr>& dirs,const std::string& j
 {
     beginResetModel();
     dirs_=dirs;
-    joboutRow_=-1;
+    joboutRows_.clear();
 
     for(std::size_t i=0; i < dirs_.size(); i++)
     {
@@ -43,7 +41,7 @@ void OutputModel::setData(const std::vector<VDir_ptr>& dirs,const std::string& j
             int idx=dirs_[i]->findByFullName(jobout);
             if(idx != -1)
             {
-                joboutRow_=idx;
+                joboutRows_.insert(idx);
                 break;
             }
         }
@@ -118,14 +116,14 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
     }
     else if(role == Qt::ForegroundRole)
     {
-        if(row == joboutRow_)
+        if(joboutRows_.find(row) != joboutRows_.end())
         {
             return joboutCol_;
         }
     }
     else if(role == Qt::FontRole)
     {
-        if(row == joboutRow_)
+        if(joboutRows_.find(row) != joboutRows_.end())
         {
             QFont f;
             f.setBold(true);
@@ -134,7 +132,7 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
     }
     else if(role == Qt::ToolTipRole)
     {
-        if(row == joboutRow_)
+        if(joboutRows_.find(row) != joboutRows_.end())
         {
             return QString::fromStdString(item->name_) + " is the current job output file.";
         }
@@ -259,6 +257,52 @@ std::string OutputModel::fullName(const QModelIndex& index) const
 
     return std::string();
 }
+
+void OutputModel::itemDesc(const QModelIndex& index,std::string& itemFullName,VDir::FetchMode& mode) const
+{
+    itemFullName.clear();
+
+    if(!hasData())
+        return;
+
+    int row=index.row();
+    for(std::size_t i=0; i < dirs_.size(); i++)
+    {
+        if(dirs_[i])
+        {
+            int cnt=dirs_[i]->count();
+            if(row < cnt)
+            {
+                Q_ASSERT(row >=0);
+                itemFullName=dirs_[i]->fullName(row);
+                mode=dirs_[i]->fetchMode();
+                return;
+            }
+            row-=cnt;
+       }
+    }
+}
+
+QModelIndex OutputModel::itemToIndex(const std::string& itemFullName,VDir::FetchMode fetchMode) const
+{
+    int row=0;;
+    for(std::size_t i=0; i < dirs_.size(); i++)
+    {
+        if(dirs_[i])
+        {
+            if(dirs_[i]->fetchMode() == fetchMode)
+            {
+                for(int j=0; j < dirs_[i]->count(); j++, row++)
+                    if(dirs_[i]->fullName(j) == itemFullName)
+                        return index(row,0);
+            }
+            else
+                row+=dirs_[i]->count();
+        }
+    }
+    return QModelIndex();
+}
+
 
 QString OutputModel::formatSize(unsigned int size) const
 {

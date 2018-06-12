@@ -29,7 +29,7 @@ class AbstractClientEnv;
 
 class CtsCmdRegistry : private boost::noncopyable  {
 public:
-	CtsCmdRegistry(bool addGroupCmd = true );
+   explicit CtsCmdRegistry(bool addGroupCmd = true );
 
 	/// These option describe the arguments for each of the commands
 	/// They also can be presented to the user via --help option.

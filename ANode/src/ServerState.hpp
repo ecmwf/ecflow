@@ -35,7 +35,7 @@
 class ServerState {
 public:
    ServerState();
-   ServerState(const std::string& port); // used in test to init server variables
+   explicit ServerState(const std::string& port); // used in test to init server variables
    ServerState(const ServerState&);
 
    /// Check pointing, SAVES server variables, since they are visualised by client like ecflow_ui
@@ -72,7 +72,7 @@ public:
 
    void set_user_variables(const std::vector<Variable>& e);
    const std::vector<Variable>& user_variables() const { return user_variables_; }
-   const std::string& find_user_variable(const std::string& name) const;
+   bool find_user_variable(const std::string& name, std::string& value ) const;
 
    // Search user variables, and then server variables
    const std::string& find_variable(const std::string& name) const;

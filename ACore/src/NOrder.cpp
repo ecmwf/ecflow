@@ -42,14 +42,14 @@ NOrder::Order NOrder::toOrder(const std::string& str)
 	return NOrder::TOP;
 }
 
-bool NOrder::isValid(const std::string& state)
+bool NOrder::isValid(const std::string& order)
 {
-	if (state == "top")  return true;
-	if (state == "bottom")   return true;
-	if (state == "alpha")    return true;
-	if (state == "order")   return true;
-	if (state == "up") return true;
-	if (state == "down") return true;
+	if (order == "top")  return true;
+	if (order == "bottom")   return true;
+	if (order == "alpha")    return true;
+	if (order == "order")   return true;
+	if (order == "up") return true;
+	if (order == "down") return true;
  	return false;
 }
 

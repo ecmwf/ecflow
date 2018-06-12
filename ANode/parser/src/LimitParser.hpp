@@ -20,7 +20,7 @@
 
 class LimitParser : public Parser {
 public:
-	LimitParser(DefsStructureParser* p) : Parser(p) {}
+   explicit LimitParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "limit"; }
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
 };

@@ -39,7 +39,7 @@ public:
 	/// Will create the *ClientEnvironment* once on construction
 	/// By default will throw exception std::runtime_error for errors
    ClientInvoker();
-   ClientInvoker(const std::string& host_port);
+   explicit ClientInvoker(const std::string& host_port);
    ClientInvoker(const std::string& host, const std::string& port);
    ClientInvoker(const std::string& host, int port);
 
@@ -359,7 +359,7 @@ private:
 // Allow logging and debug output of request round trip times
 class RequestLogger : private boost::noncopyable  {
 public:
-   RequestLogger(const ClientInvoker* ci);
+   explicit RequestLogger(const ClientInvoker* ci);
    ~RequestLogger();
    void set_cts_cmd(Cmd_ptr cmd) { cmd_ = cmd;}
 private:
@@ -369,7 +369,7 @@ private:
 
 class RoundTripRecorder : private boost::noncopyable  {
 public:
-   RoundTripRecorder(const ClientInvoker* ci);
+   explicit RoundTripRecorder(const ClientInvoker* ci);
    ~RoundTripRecorder();
 private:
    const ClientInvoker* ci_;

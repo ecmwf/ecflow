@@ -25,7 +25,7 @@ namespace ecf {
 
 class TaskScriptGenerator : private boost::noncopyable {
 public:
-   TaskScriptGenerator(const Task*);
+   explicit TaskScriptGenerator(const Task*);
 
    void generate(const std::map<std::string,std::string>& override);
 

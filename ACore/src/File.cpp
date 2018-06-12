@@ -75,11 +75,11 @@ std::string File::which(const std::string& file)
 	return std::string();
 }
 
-std::string File::getExt(const std::string& s)
+std::string File::getExt(const std::string& file)
 {
-	size_t i = s.rfind('.',s.length());
+	size_t i = file.rfind('.',file.length());
 	if (i != std::string::npos) {
-		return s.substr(i+1);
+		return file.substr(i+1);
 	}
 	return string();
 }

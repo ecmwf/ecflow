@@ -82,7 +82,7 @@ public:
 
 class AstResolveVisitor : public ExprAstVisitor {
 public:
-	AstResolveVisitor(const Node* );
+   explicit AstResolveVisitor(const Node* );
 	virtual ~AstResolveVisitor();
 
 	const std::string& errorMsg() const { return errorMsg_;}
@@ -120,7 +120,7 @@ private:
 
 class AstCollateNodesVisitor : public ExprAstVisitor {
 public:
-	AstCollateNodesVisitor( std::set<Node*>& );
+   explicit AstCollateNodesVisitor( std::set<Node*>& );
 	virtual ~AstCollateNodesVisitor();
 
   	virtual void visitTop(AstTop*){}

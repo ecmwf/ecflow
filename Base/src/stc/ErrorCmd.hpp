@@ -18,7 +18,7 @@
 
 class ErrorCmd : public ServerToClientCmd {
 public:
-	ErrorCmd(const std::string& errorMsg);
+   explicit ErrorCmd(const std::string& errorMsg);
 	ErrorCmd() : ServerToClientCmd() {}
 
 	void init( const std::string& errorMsg);

@@ -25,7 +25,7 @@ class Host : private boost::noncopyable {
 public:
 	/// can throw std::runtime_error if the gethostname fails
    Host();
-   Host(const std::string& host);
+   explicit Host(const std::string& host);
 
 	/// return the host name
 	std::string name() const;
@@ -46,7 +46,7 @@ public:
    std::string ecf_passwd_file(const std::string& port) const;
 
    /// Given a port and file name, will return <host>.<port>.file_name
-   std::string prefix_host_and_port( const std::string& port,const std::string& list_file ) const;
+   std::string prefix_host_and_port( const std::string& port,const std::string& file_name ) const;
 
 private:
 	std::string host_port_prefix(const std::string& port) const;

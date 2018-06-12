@@ -37,6 +37,10 @@ MessageItemWidget::MessageItemWidget(QWidget *parent) : QWidget(parent)
     treeView_->setItemDelegate(new LogDelegate(this));
     treeView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 
+    //make the horizontal scrollbar work
+    treeView_->header()->setStretchLastSection(false);
+    treeView_->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+
     syncTb_->hide();
 
     //Define context menu

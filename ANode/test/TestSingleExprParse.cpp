@@ -39,10 +39,13 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
 {
     std::cout <<  "ANode:: ...test_single_expression\n";
 
-	// The map key = trigger expression,
+    // Duplicate AST are held in a static map. Delete them, to avoid ASAN complaining
+    ExprDuplicate reclaim_cloned_ast_memory;
+
+    // The map key = trigger expression,
     // value.first  = type of expected root abstract syntax tree
     // value.second = result of expected evaluation
-	map<string,std::pair<string,bool> > exprMap;
+    map<string,std::pair<string,bool> > exprMap;
 
    exprMap[":var == 0"] = std::make_pair(AstEqual::stype(),true);
    exprMap[":var != 1"] = std::make_pair(AstNotEqual::stype(),true);

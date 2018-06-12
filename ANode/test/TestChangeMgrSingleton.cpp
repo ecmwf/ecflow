@@ -25,8 +25,8 @@ using namespace ecf;
 
 class MyObserver : public AbstractObserver {
 public:
-   MyObserver(Defs* defs) : update_count_(0),defs_(defs),node_(NULL) { defs->attach(this); }
-   MyObserver(Node* node) : update_count_(0),defs_(NULL),node_(node) { node->attach(this); }
+   explicit MyObserver(Defs* defs) : update_count_(0),defs_(defs),node_(NULL) { defs->attach(this); }
+   explicit MyObserver(Node* node) : update_count_(0),defs_(NULL),node_(node) { node->attach(this); }
 
    virtual ~MyObserver() {
       /* std::cout << "~MyObserver()\n"; */

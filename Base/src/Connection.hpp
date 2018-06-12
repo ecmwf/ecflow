@@ -75,7 +75,7 @@ public:
 	ssl_socket::lowest_layer_type& socket_ll() { return socket_.lowest_layer();}
 	boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& socket() { return socket_;}
 #else
-   connection(boost::asio::io_service& io_service);
+	explicit connection(boost::asio::io_service& io_service);
    boost::asio::ip::tcp::socket& socket_ll() { return socket_; }
    boost::asio::ip::tcp::socket& socket() { return socket_; }
 #endif

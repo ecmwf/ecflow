@@ -97,7 +97,7 @@ private:
 class Event {
 public:
    Event(int number, const std::string& eventName = "");
-   Event(const std::string& eventName);
+   explicit Event(const std::string& eventName);
    Event()
    : value_(false),
      number_(std::numeric_limits<int>::max()),

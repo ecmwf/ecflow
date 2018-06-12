@@ -20,7 +20,7 @@
 
 class TimeParser : public Parser {
 public:
-	TimeParser(DefsStructureParser* p) : Parser(p) {}
+   explicit TimeParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "time"; }
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
 };

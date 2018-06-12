@@ -20,7 +20,7 @@
 
 class Edit {
 public:
-   Edit(const boost::python::dict& dict);
+   explicit Edit(const boost::python::dict& dict);
    Edit(const boost::python::dict& dict,const boost::python::dict& dict2);
    const std::vector<Variable>& variables() const { return vec_;}
    static std::string to_string() { return "edit";}

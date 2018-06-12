@@ -28,7 +28,7 @@ namespace ecf {
 
 class SimulatorVisitor : public NodeTreeVisitor {
 public:
-	SimulatorVisitor(const std::string& defs_filename);
+   explicit SimulatorVisitor(const std::string& defs_filename);
 
 	/// If we have crons and no endclock then show error message
 	const std::string& errors_found() const { return error_msg_;}
