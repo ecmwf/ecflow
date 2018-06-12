@@ -167,15 +167,17 @@ bool ServerComQueue::prepareReset()
 
 	//If the comthread is running we need to wait
 	//until it finishes its task.
-	comThread_->wait();
+    if(comThread_->wait(5000))
+    {
+        //The thread cannot be running
+        assert(comThread_->isRunning() == false);
+        //assert(taskIsBeingFinished_==false);
+        //assert(taskIsBeingFailed_==false);
+        //assert(!current_);
+        return true;
+    }
 
-	//The thread cannot be running
-	assert(comThread_->isRunning() == false);
-    //assert(taskIsBeingFinished_==false);
-    //assert(taskIsBeingFailed_==false);
-    //assert(!current_);
-
-	return true;
+    return false;
 }
 
 //This is a special mode to reload the whole ClientInvoker. Must be called after prepareReset returned true;
