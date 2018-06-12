@@ -1016,7 +1016,7 @@ AstTop* createTopAst(
    std::cout << "\nPRINT_AST_TRAVERSAL  " << expr << "\n";
 #endif
 
-   std::auto_ptr<AstTop> ast(new AstTop);
+   std::unique_ptr<AstTop> ast = std::make_unique<AstTop>();
    (void)doCreateAst(info.trees.begin(),rule_names,ast.get() );
 
    if (!ast->is_valid_ast(error_msg)) {

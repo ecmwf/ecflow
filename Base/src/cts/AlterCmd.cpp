@@ -1069,7 +1069,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 	   name = options[2];
 
 	   std::string error_msg = "AlterCmd: change trigger:";
-	   std::auto_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
+	   std::unique_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
 	   if (!ast.get()) {
 	      ss << error_msg << "\n" << dump_args(options,paths) << "\n";
 	      throw std::runtime_error( ss.str() );
@@ -1086,7 +1086,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
       name = options[2];
 
 	   std::string error_msg = "AlterCmd: change complete:";
-	   std::auto_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
+	   std::unique_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
 	   if (!ast.get()) {
 	      ss << error_msg << "\n" << dump_args(options,paths) << "\n";
 	      throw std::runtime_error( ss.str() );

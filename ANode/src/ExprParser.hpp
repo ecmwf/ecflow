@@ -17,7 +17,7 @@
 //============================================================================
 
 #include <string>
-#include <memory> // for auto_ptr
+#include <memory> // for unique_ptr
 #include <boost/noncopyable.hpp>
 #include "ExprAst.hpp"
 
@@ -33,13 +33,13 @@ public:
 	bool doParse(std::string& errorMsg);
 
 	/// return the Abstract syntax tree, and release memory
-	std::auto_ptr<AstTop> ast() { return ast_;}
+	std::unique_ptr<AstTop> ast() { return std::move(ast_);}
 
 	/// return the Abstract syntax tree, without release memory
 	AstTop* getAst() const { return ast_.get();}
 
 private:
-	std::auto_ptr<AstTop> ast_;
+	std::unique_ptr<AstTop> ast_;
 	std::string           expr_;
 };
 
@@ -54,11 +54,11 @@ public:
    bool doParse();
 
    /// return the Abstract syntax tree, and release memory
-   std::auto_ptr<AstTop> ast() { return ast_;}
+   std::unique_ptr<AstTop> ast() { return std::move(ast_);}
 
 private:
    const std::string& expr_;
-   std::auto_ptr<AstTop> ast_;
+   std::unique_ptr<AstTop> ast_;
 };
 
 #endif

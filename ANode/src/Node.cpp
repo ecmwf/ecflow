@@ -1384,9 +1384,9 @@ bool Node::check_expressions(Ast* ast,const std::string& expr,bool trigger, std:
    return true;
 }
 
-std::auto_ptr<AstTop> Node::parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context)
+std::unique_ptr<AstTop> Node::parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context)
 {
-   std::auto_ptr<AstTop> ast = Expression::parse(expr,context ); // will throw for errors
+   std::unique_ptr<AstTop> ast = Expression::parse(expr,context ); // will throw for errors
 
    std::string errorMsg;
    if (!check_expressions(ast.get(),expr,trigger,errorMsg)) {

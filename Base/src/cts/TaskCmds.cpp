@@ -498,7 +498,7 @@ STC_Cmd_ptr CtsWaitCmd::doHandleRequest(AbstractServer* as) const
 	// If the expression references paths that don't exist throw an error
 	// This can be captured in the ecf script, which should then abort the task
 	// Otherwise we will end up blocking indefinitely
-	std::auto_ptr<AstTop> ast = submittable_->parse_and_check_expressions(expression_,true,"CtsWaitCmd:" ); // will throw for errors
+	std::unique_ptr<AstTop> ast = submittable_->parse_and_check_expressions(expression_,true,"CtsWaitCmd:" ); // will throw for errors
 
 	// Evaluate the expression
 	if ( ast->evaluate() ) {

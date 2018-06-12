@@ -65,7 +65,7 @@ std::ostream& PartExpression::print(std::ostream& os,const std::string& exprType
    return os;
 }
 
-std::auto_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) const
+std::unique_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) const
 {
    //#ifdef DEBUG
    //	cout << "PartExpression::parseExpressions '" << exp_ << "'\n";
@@ -75,7 +75,7 @@ std::auto_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) co
       if (expressionParser.doParse( errorMsg)) {
 
          // returns new allocated memory, if no errors
-         std::auto_ptr<AstTop> ast =  expressionParser.ast();
+         std::unique_ptr<AstTop> ast =  expressionParser.ast();
 
          if (errorMsg.empty()) LOG_ASSERT(ast.get(),"");
          else                  LOG_ASSERT(!ast.get(), "");
@@ -83,35 +83,35 @@ std::auto_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) co
          return ast;
       }
    }
-   return std::auto_ptr<AstTop>();
+   return std::unique_ptr<AstTop>();
 }
 
 //===========================================================================
 
 Expression::Expression(const std::string& expression)
-:  makeFree_(false), state_change_no_(0), theCombinedAst_(0)
+:  makeFree_(false), state_change_no_(0)
 {
    add(PartExpression(expression));
 }
 
 Expression::Expression(const PartExpression& exp)
-: makeFree_(false), state_change_no_(0),theCombinedAst_(0)
+: makeFree_(false), state_change_no_(0)
 {
    add(exp);
 }
 
 Expression::Expression()
-: makeFree_(false), state_change_no_(0), theCombinedAst_(0) {}
+: makeFree_(false), state_change_no_(0)  {}
 
 Expression::Expression(const Expression& rhs)
-: vec_(rhs.vec_), makeFree_(rhs.makeFree_), state_change_no_(0),theCombinedAst_(0) {}
+: vec_(rhs.vec_), makeFree_(rhs.makeFree_), state_change_no_(0)  {}
 
 
-std::auto_ptr<AstTop> Expression::parse(const std::string& expression_to_parse,const std::string& error_msg_context)
+std::unique_ptr<AstTop> Expression::parse(const std::string& expression_to_parse,const std::string& error_msg_context)
 {
    PartExpression exp(expression_to_parse);
    string parseErrorMsg;
-   std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
+   std::unique_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
    if (!ast.get()) {
       std::stringstream ss; ss << error_msg_context  << " Failed to parse expression '" << expression_to_parse  << "'.  " << parseErrorMsg;
       throw std::runtime_error( ss.str() ) ;
@@ -119,11 +119,11 @@ std::auto_ptr<AstTop> Expression::parse(const std::string& expression_to_parse,c
    return ast;
 }
 
-std::auto_ptr<AstTop> Expression::parse_no_throw(const std::string& expression_to_parse,std::string& error_msg_context)
+std::unique_ptr<AstTop> Expression::parse_no_throw(const std::string& expression_to_parse,std::string& error_msg_context)
 {
    PartExpression exp(expression_to_parse);
    string parseErrorMsg;
-   std::auto_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
+   std::unique_ptr<AstTop> ast = exp.parseExpressions( parseErrorMsg );
    if (!ast.get()) {
       std::stringstream ss; ss << error_msg_context  << " Failed to parse expression '" << expression_to_parse  << "'.  " << parseErrorMsg;
       error_msg_context = ss.str();
@@ -189,7 +189,7 @@ void Expression::createAST( Node* node, const std::string& exprType, std::string
    size_t theSize = vec_.size();
    for(size_t i = 0; i < theSize; i++) {
       std::string localErrorMsg;
-      std::auto_ptr<AstTop> ast = vec_[i].parseExpressions( localErrorMsg );
+      std::unique_ptr<AstTop> ast = vec_[i].parseExpressions( localErrorMsg );
       if ( ast.get() ) {
 
          // We can have multiple trigger/complete expression, combine to a single AST tree
@@ -216,13 +216,13 @@ void Expression::createAST( Node* node, const std::string& exprType, std::string
 
                // Since we have transferred over root2 it must be set to NULL for top2,
                // to avoid its child destruction
-               ast->addChild(NULL); // since its an auto_ptr, no need for explicit delete
+               ast->addChild(NULL); // since its an unique_ptr, no need for explicit delete
             }
          }
          else {
             // The very first expression should _NOT_ be AND/OR trigger. (i.e no -o | -a)
             LOG_ASSERT((!vec_[i].andExpr()) && (!vec_[i].orExpr()), "");
-            theCombinedAst_ = ast; // transfer ownership
+            theCombinedAst_ = std::move(ast); // transfer ownership
             theCombinedAst_->exprType(exprType);
          }
          //			cout << "****************************************************************\n";

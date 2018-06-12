@@ -55,13 +55,13 @@ void ExprDuplicate::dump(const std::string& msg )
    }
 }
 
-std::auto_ptr<AstTop> ExprDuplicate::find(const std::string& expr)
+std::unique_ptr<AstTop> ExprDuplicate::find(const std::string& expr)
 {
    my_map::const_iterator it = duplicate_expr.find(expr);
    if (it != duplicate_expr.end()) {
-      return std::auto_ptr<AstTop>((*it).second->clone());
+      return std::unique_ptr<AstTop>((*it).second->clone());
    }
-   return std::auto_ptr<AstTop>();
+   return std::unique_ptr<AstTop>();
 }
 
 void ExprDuplicate::add(const std::string& expr,AstTop* ast)

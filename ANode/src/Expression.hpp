@@ -17,7 +17,7 @@
 //============================================================================
 
 #include <ostream>
-#include <memory> // for auto_ptr
+#include <memory> // for unique_ptr
 
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>         // no need to include <vector>
@@ -56,7 +56,7 @@ public:
    bool operator!=(const PartExpression& rhs) const { return !operator==(rhs); }
 
    /// Parse the expression and create the abstract syntax tree
-   std::auto_ptr<AstTop> parseExpressions(std::string& errorMsg) const;
+   std::unique_ptr<AstTop> parseExpressions(std::string& errorMsg) const;
 
    void set_expr_type(ExprType t) { exp_type_ = t;}
    ExprType expr_type() const { return exp_type_;}
@@ -99,10 +99,10 @@ public:
 
    /// Helper function, will parse the expression and return the abstract syntax tree
 
-   static std::auto_ptr<AstTop> parse(
+   static std::unique_ptr<AstTop> parse(
             const std::string& expression_to_parse,
             const std::string& error_msg_context); // Will throw for parse errors
-   static std::auto_ptr<AstTop> parse_no_throw(
+   static std::unique_ptr<AstTop> parse_no_throw(
             const std::string& expression_to_parse,
             std::string& error_msg_context);
 
@@ -154,10 +154,10 @@ private:
    // They are created on demand. reasons:
    // 1/ Help with AIX serialisation
    // 2/ Help to reduce network traffic
-   mutable std::auto_ptr< AstTop >  theCombinedAst_; // *not* persisted, demand created
+   mutable std::unique_ptr< AstTop >  theCombinedAst_; // *not* persisted, demand created
 
 private:
-   // prevent assignment since we have an auto_ptr
+   // prevent assignment since we have an unique_ptr
    Expression& operator=(Expression const& f);
 
 private:

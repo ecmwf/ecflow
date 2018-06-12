@@ -622,7 +622,7 @@ public:
    bool check_expressions(Ast*,const std::string& expr, bool trigger, std::string& errorMsg) const;
 
    /// check trigger expression have nodes and events,meter,repeat that resolve, will throw for error
-   std::auto_ptr<AstTop> parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context);
+   std::unique_ptr<AstTop> parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context);
 
 protected:
    /// Used in conjunction with Node::position()

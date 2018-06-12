@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic )
 
       PartExpression part(vec[i]);
       string parseErrorMsg;
-      std::auto_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
+      std::unique_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
       BOOST_REQUIRE_MESSAGE(ast.get(),"Failed to parse\n" << vec[i] << "  " << parseErrorMsg);
 
       std::stringstream s2;
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic_with_brackets )
 
       PartExpression part(vec[i]);
       string parseErrorMsg;
-      std::auto_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
+      std::unique_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
       BOOST_REQUIRE_MESSAGE(ast.get(),"Failed to parse " << vec[i] << "  " << parseErrorMsg);
 
       std::stringstream s2;

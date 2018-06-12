@@ -24,7 +24,7 @@
 // =========================================================================
 
 #include <string>
-#include <memory> // for auto_ptr
+#include <memory> // for unique_ptr
 #include <boost/noncopyable.hpp>
 class AstTop;
 
@@ -38,7 +38,7 @@ public:
    static void dump(const std::string& msg );
 
    // Find the expr in the map, if found returns a CLONED ast, else NULL
-   static std::auto_ptr<AstTop> find(const std::string& expr);
+   static std::unique_ptr<AstTop> find(const std::string& expr);
 
    // Add the expr to the map, the ast is cloned.
    static void add(const std::string& expr,AstTop*);

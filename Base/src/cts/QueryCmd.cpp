@@ -188,7 +188,7 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
    }
 
    if (query_type_ == "trigger") {
-      std::auto_ptr<AstTop> ast = node->parse_and_check_expressions(attribute_,true,"QueryCmd:" ); // will throw for errors
+      std::unique_ptr<AstTop> ast = node->parse_and_check_expressions(attribute_,true,"QueryCmd:" ); // will throw for errors
       if ( ast->evaluate() ) return PreAllocatedReply::string_cmd("true");
       return PreAllocatedReply::string_cmd("false");
    }
