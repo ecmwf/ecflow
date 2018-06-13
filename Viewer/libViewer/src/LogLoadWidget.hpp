@@ -67,39 +67,27 @@ public:
     QString logFile() const {return logFile_;}
 
 protected Q_SLOTS:
-    void resolutionChanged(int);
-    void currentTabChanged(int);
-    void periodChanged(qint64 start,qint64 end);
-    void periodWasReset();
+   void periodWasReset();
+   void periodChanged(qint64 start,qint64 end);
+   void resolutionChanged(int);
+   void slotReload();
 
 private:
     void setAllVisible(bool);
-    void setSuiteControlVisible(bool b);
-    void setChildControlVisible(bool b);
-    void setUserControlVisible(bool b);
     void load();
     void updateInfoLabel();
 
     enum TabIndex {TotalTab=0,SuiteTab=1,SubReqTab=2};
 
     LogRequestViewHandler *viewHandler_;
-    //ServerLoadView* view_;
     QMap<TabIndex,ServerLoadView*> views_;
     Ui::LogLoadWidget* ui_;
-    LogLoadRequestModel* suiteModel_;
-    QSortFilterProxyModel* suiteSortModel_;
-    LogLoadRequestModel* childReqModel_;
-    QSortFilterProxyModel* childReqSortModel_;
-    LogLoadRequestModel* userReqModel_;
-    QSortFilterProxyModel* userReqSortModel_;
-    LogLoadRequestModel* uidModel_;
-    QSortFilterProxyModel* uidSortModel_;
     LogModel* logModel_;
-
     QString serverName_;
     QString host_;
     QString port_;
     QString logFile_;
+    int numOfRows_;
 };
 
 struct LogLoadRequestModelDataItem
@@ -113,7 +101,6 @@ struct LogLoadRequestModelDataItem
     QColor col_;
     int rank_;
 };
-
 
 struct LogLoadSuiteModelDataItem
 {
@@ -261,15 +248,13 @@ public:
     void load(const std::string& logFile,int numOfRows=0);
     void setResolution(LogLoadData::TimeRes);
     QList<bool> suitePlotState() const {return suitePlotState_;}
-    QList<bool> childPlotState() const {return childPlotState_;}
-    QList<bool> userPlotState() const {return userPlotState_;}
+    QList<bool> cmdPlotState() const {return cmdPlotState_;}
     QList<bool> uidPlotState() const {return uidPlotState_;}
 
 public Q_SLOTS:
     void showFullRange();
     void addRemoveSuite(int idx, bool st);
-    void addRemoveChildReq(int idx, bool st);
-    void addRemoveUserReq(int idx, bool st);
+    void addRemoveCmd(int idx, bool st);
     void addRemoveUid(int idx, bool st);
 
 protected Q_SLOTS:
@@ -278,24 +263,21 @@ protected Q_SLOTS:
 Q_SIGNALS:
     void scanDataChanged(QString);
     void suitePlotStateChanged(int,bool,QColor);
-    void childPlotStateChanged(int,bool,QColor);
-    void userPlotStateChanged(int,bool,QColor);
+    void cmdPlotStateChanged(int,bool,QColor);
     void uidPlotStateChanged(int,bool,QColor);
     void timeRangeChanged(qint64,qint64);
     void timeRangeHighlighted(qint64,qint64,qint64);
     void timeRangeReset();
 
 protected:
-    void buildCommandTab(QWidget*);
-    void buildUidTab(QWidget*);
+    void buildOtherTab(QWidget*);
     void buildTableTab(QWidget*);
 
     LogLoadData* data_;
     QList<LogRequestView*> views_;
     QList<QWidget*> tabItems_;
     QList<bool> suitePlotState_;
-    QList<bool> childPlotState_;
-    QList<bool> userPlotState_;
+    QList<bool> cmdPlotState_;
     QList<bool> uidPlotState_;
     int lastScanIndex_;
 };
@@ -328,8 +310,7 @@ public:
 Q_SIGNALS:
     void scanDataChanged(QString);
     void suitePlotStateChanged(int,bool,QColor);
-    void childPlotStateChanged(int,bool,QColor);
-    void userPlotStateChanged(int,bool,QColor);
+    void cmdPlotStateChanged(int,bool,QColor);
     void uidPlotStateChanged(int,bool,QColor);
     void timeRangeChanged(qint64,qint64);
     void timeRangeHighlighted(qint64,qint64,qint64);
@@ -339,8 +320,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void showFullRange();
     virtual void addRemoveSuite(int idx, bool st) {}
-    virtual void addRemoveChildReq(int idx, bool st) {}
-    virtual void addRemoveUserReq(int idx, bool st) {}
+    virtual void addRemoveCmd(int idx, bool st) {}
     virtual void addRemoveUid(int idx, bool st) {}
 
 protected Q_SLOTS:
@@ -351,12 +331,11 @@ protected Q_SLOTS:
     void scanPositionClicked(qreal);
 
 protected:
-    enum ControlType {SuiteType,ChildType,UserType,UidType};
+    enum ControlType {SuiteType,CmdType,UidType};
 
     void buildControlCore(LogRequestViewControlItem* item,QString title,QString modelHeader,bool selectAll);
-    void buildSuiteControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
-    void buildChildReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader);
-    void buildUserReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool selectAll);
+    void buildSuiteControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool selectAll);
+    void buildCmdControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool selectAll);
     void buildUidControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool selectAll);
 
     QChart* addChartById(QString id);
@@ -369,10 +348,8 @@ protected:
 
     virtual void addSuite(int)=0;
     virtual void removeSuite(int)=0;
-    virtual void addChildReq(int) {}
-    virtual void removeChildReq(int) {}
-    virtual void addUserReq(int) {}
-    virtual void removeUserReq(int) {}
+    virtual void addCmd(int) {}
+    virtual void removeCmd(int) {}
     virtual void adjustStats()=0;
 
     int seriesValue(QChart* chart,QString id,int idx);
@@ -405,33 +382,11 @@ protected:
     QLabel* scanLabel_;
 
     LogRequestViewControlItem suiteCtl_;
-    LogRequestViewControlItem userCtl_;
-    LogRequestViewControlItem childCtl_;
+    LogRequestViewControlItem cmdCtl_;
     LogRequestViewControlItem uidCtl_;
 
     QMap<ControlType,LogRequestViewControlItem> control_;
 
-
-    /*LogLoadRequestModel* suiteModel_;
-    QSortFilterProxyModel* suiteSortModel_;
-    QTreeView* suiteTree_;
-
-    LogLoadRequestModel* childReqModel_;
-    QSortFilterProxyModel* childReqSortModel_;
-    QTreeView* childReqTree_;
-
-    LogLoadRequestModel* userReqModel_;
-    QSortFilterProxyModel* userReqSortModel_;
-    QTreeView* userReqTree_;
-
-    LogLoadRequestModel* uidModel_;
-    QSortFilterProxyModel* uidSortModel_;
-    QTreeView* uidReqTree_;
-
-    QList<bool> suitePlotState_;
-    QList<bool> childPlotState_;
-    QList<bool> userPlotState_;
-    QList<bool> uidPlotState_;*/
     int maxVal_;
     int lastScanIndex_;
 };
@@ -459,7 +414,6 @@ protected:
     QChart* getChart(ChartType);
     ChartView* getView(ChartType);
     void buildScanTable(QString& txt,int idx);
-    //void buildSuiteControl();
 
     LogLoadRequestModel* suiteModel_;
     LogLoadRequestSortModel* suiteSortModel_;
@@ -475,8 +429,7 @@ public:
 
 public Q_SLOTS:
     void addRemoveSuite(int idx, bool st);
-    void addRemoveChildReq(int idx, bool st);
-    void addRemoveUserReq(int idx, bool st);
+    void addRemoveCmd(int idx, bool st);
 
 protected:
     void loadCore();
@@ -484,16 +437,12 @@ protected:
     void addTotal();
     void addSuite(int);
     void removeSuite(int) {}
-    void addChildReq(int childReqIdx);
-    void removeChildReq(int childReqIdx);
-    void addUserReq(int userReqIdx);
-    void removeUserReq(int userReqIdx);   
+    void addCmd(int);
+    void removeCmd(int);
     void adjustStats() {}
 
-    QString childSeriesId(int childIdx) const;
-    QString userSeriesId(int userIdx) const;
-    QColor childSeriesColour(QChart* chart,size_t idx);
-    QColor userSeriesColour(QChart* chart,size_t idx);
+    QString cmdSeriesId(int) const;
+    QColor cmdSeriesColour(QChart* chart,size_t idx);
     void buildScanTable(QString& txt,int idx);
 };
 
@@ -506,8 +455,7 @@ public:
 
 public Q_SLOTS:
     void addRemoveSuite(int idx, bool st);
-    void addRemoveChildReq(int idx, bool st);
-    void addRemoveUserReq(int idx, bool st);
+    void addRemoveCmd(int idx, bool st);
 
 protected:
     void loadCore();
@@ -515,13 +463,10 @@ protected:
     void addTotal();
     void addSuite(int);
     void removeSuite(int);
-    void addChildReq(int childReqIdx);
-    void addUserReq(int userReqIdx);
+    void addCmd(int);
     void adjustStats() {}
 
-    QString childChartId(int idx) const;
-    QString userChartId(int idx) const;
-    void parseChartId(QString id,int& idx,QString& type) const;
+    QString cmdChartId(int idx) const;
     QString suiteSeriesId(int childIdx) const;
     QColor suiteSeriesColour(QChart* chart,size_t idx);
 
@@ -537,8 +482,7 @@ public:
 
 public Q_SLOTS:
     void addRemoveUid(int idx, bool st);
-    //void addRemoveChildReq(int idx, bool st);
-    void addRemoveUserReq(int idx, bool st);
+    void addRemoveCmd(int idx, bool st);
 
 protected:
     void loadCore();
@@ -547,17 +491,13 @@ protected:
     void addSuite(int) {}
     void removeSuite(int) {}
     void addUid(int);
-    void removeUid(int);
-    //void addChildReq(int childReqIdx);
-    //void removeChildReq(int childReqIdx) {}
-    void addUserReq(int userReqIdx);
-    void removeUserReq(int userReqIdx) {}
+    void removeUid(int);  
+    void addCmd(int);
+    void removeCmd(int) {}
 
     void adjustStats() {}
 
-    //QString childChartId(int idx) const;
-    QString userChartId(int idx) const;
-
+    QString cmdChartId(int idx) const;
     QString uidSeriesId(int uidIdx) const;
     QColor uidSeriesColour(QChart*,int uidIdx);
     void buildScanTable(QString& txt,int idx);
@@ -572,8 +512,7 @@ public:
 
 public Q_SLOTS:
     void addRemoveUid(int idx, bool st);
-    //void addRemoveChildReq(int idx, bool st);
-    void addRemoveUserReq(int idx, bool st);
+    void addRemoveCmd(int idx, bool st);
 
 protected:
     void loadCore();
@@ -583,18 +522,13 @@ protected:
     void removeSuite(int) {}
     void addUid(int);
     void removeUid(int);
-    //void addChildReq(int childReqIdx);
-    //void removeChildReq(int childReqIdx) {}
-    void addUserReq(int userReqIdx);
-    void removeUserReq(int userReqIdx);
-
+    void addCmd(int);
+    void removeCmd(int);
     void adjustStats() {}
 
-    //QString childChartId(int idx) const;
     QString uidChartId(int idx) const;
-
-    QString userSeriesId(int useReqIdx) const;
-    QColor userSeriesColour(QChart*,int userReqIdx);
+    QString cmdSeriesId(int) const;
+    QColor cmdSeriesColour(QChart*,int);
     void buildScanTable(QString& txt,int idx);
 };
 
@@ -628,8 +562,6 @@ public:
     explicit LogStatCmdUidView(LogRequestViewHandler* handler,QWidget* parent=0);
     ~LogStatCmdUidView() {}
 
-
-
 public Q_SLOTS:
     void addRemoveUid(int idx, bool st);
 
@@ -646,7 +578,38 @@ public:
     ~LogStatUidCmdView() {}
 
 public Q_SLOTS:
-    void addRemoveUserReq(int idx, bool st);
+    void addRemoveCmd(int idx, bool st);
+
+protected:
+    void adjustStats();
+    void loadCore();
+};
+
+class LogStatCmdSuiteView : public  LogStatRequestView
+{
+    Q_OBJECT
+public:
+    explicit LogStatCmdSuiteView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogStatCmdSuiteView() {}
+
+public Q_SLOTS:
+    void addRemoveSuite(int idx, bool st);
+
+protected:
+    void adjustStats();
+    void loadCore();
+};
+
+
+class LogStatSuiteCmdView : public  LogStatRequestView
+{
+    Q_OBJECT
+public:
+    explicit LogStatSuiteCmdView(LogRequestViewHandler* handler,QWidget* parent=0);
+    ~LogStatSuiteCmdView() {}
+
+public Q_SLOTS:
+    void addRemoveCmd(int idx, bool st);
 
 protected:
     void adjustStats();
@@ -683,6 +646,8 @@ public:
 
     void setDataUidCmd(const LogLoadDataItem& total,const std::vector<LogLoadDataItem>& data);
     void setDataCmdUid(const LogLoadDataItem& total,const std::vector<LogLoadDataItem>& data);
+    void setDataCmdSuite(const LogLoadDataItem& total,const std::vector<LogLoadDataItem>& data);
+    void setDataSuiteCmd(const LogLoadDataItem& total,const std::vector<LogLoadDataItem>& data);
     void setData(const std::vector<LogRequestItem>& data);
 
     bool hasData() const;
@@ -695,8 +660,5 @@ protected:
     enum ColumnOrder {NameOrder, ValueOrder};
     ColumnOrder columnOrder_;
 };
-
-
-
 
 #endif // LOGLOADWIDGET_HPP

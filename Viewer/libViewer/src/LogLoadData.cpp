@@ -33,8 +33,7 @@ static int REQCNT=0;
 LogReqCounter::LogReqCounter(const std::string& name) :
     name_(name), childReq_(0),userReq_(0)
 {
-    LogLoadDataItem::buildChildSubReq(childSubReq_);
-    LogLoadDataItem::buildUserSubReq(userSubReq_);
+    LogLoadDataItem::buildSubReq(subReq_);
 }
 
 void LogReqCounter::clear()
@@ -42,10 +41,7 @@ void LogReqCounter::clear()
     childReq_=0;
     userReq_=0;
 
-    for(std::vector<LogRequestItem>::iterator it=childSubReq_.begin(); it != childSubReq_.end(); ++it)
-        (*it).counter_=0;
-
-    for(std::vector<LogRequestItem>::iterator it=userSubReq_.begin(); it != userSubReq_.end(); ++it)
+    for(std::vector<LogRequestItem>::iterator it=subReq_.begin(); it != subReq_.end(); ++it)
         (*it).counter_=0;
 }
 
@@ -54,25 +50,34 @@ void LogReqCounter::add(bool childCmd,const std::string& line)
     if(childCmd)
     {
         childReq_++;
-        for(std::vector<LogRequestItem>::iterator it=childSubReq_.begin(); it != childSubReq_.end(); ++it)
+        /*for(std::vector<LogRequestItem>::iterator it=childSubReq_.begin(); it != childSubReq_.end(); ++it)
         {
             if(line.find((*it).pattern_) != std::string::npos)
             {
                 (*it).counter_++;
                 return;
             }
-        }
+        }*/
     }
     else
     {
         userReq_++;
-        for(size_t i=0; i < userSubReq_.size(); i++)
+        /*for(size_t i=0; i < userSubReq_.size(); i++)
         {
             if(line.find(userSubReq_[i].pattern_) != std::string::npos)
             {
                 userSubReq_[i].counter_++;
                 return;
             }
+        }*/
+    }
+
+    for(std::vector<LogRequestItem>::iterator it=subReq_.begin(); it != subReq_.end(); ++it)
+    {
+        if(line.find((*it).pattern_) != std::string::npos)
+        {
+            (*it).counter_++;
+            return;
         }
     }
 }
@@ -125,21 +130,15 @@ bool sortVecFunction(const std::pair<size_t,size_t>& a, const std::pair<size_t,s
 LogLoadDataItem::LogLoadDataItem(const std::string& name) :
    name_(name)
 {
-    buildSubReq();
+    buildSubReq(subReq_);
 }
 
 LogLoadDataItem::LogLoadDataItem()
 {
-    buildSubReq();
+    buildSubReq(subReq_);
 }
 
-void LogLoadDataItem::buildSubReq()
-{
-    buildChildSubReq(childSubReq_);
-    buildUserSubReq(userSubReq_);
-}
-
-void LogLoadDataItem::buildChildSubReq(std::vector<LogRequestItem>& childSubReq)
+void LogLoadDataItem::buildSubReq(std::vector<LogRequestItem>& subReq)
 {
     //clientOptionsDescriptions_ = new po::options_description("help", po::options_description::m_default_line_length + 80);
 
@@ -148,12 +147,10 @@ void LogLoadDataItem::buildChildSubReq(std::vector<LogRequestItem>& childSubReq)
 
     Q_FOREACH(QString s,chCmd)
     {
-         childSubReq.push_back(LogRequestItem(s.toStdString(),"chd:" + s.toStdString()));
+         subReq.push_back(LogRequestItem(s.toStdString(),LogRequestItem::ChildCmd,
+                                         "chd:" + s.toStdString()));
     }
-}
 
-void LogLoadDataItem::buildUserSubReq(std::vector<LogRequestItem>& userSubReq)
-{
     QStringList usCmd;
     usCmd <<   "alter"          << "--alter " <<
                "begin"          << "--begin=" <<
@@ -224,7 +221,9 @@ void LogLoadDataItem::buildUserSubReq(std::vector<LogRequestItem>& userSubReq)
     Q_ASSERT(usCmd.count() % 2 == 0);
     for(int i=0; i < usCmd.count() ; i+=2)
     {
-         userSubReq.push_back(LogRequestItem(usCmd[i].toStdString(),usCmd[i+1].toStdString()));
+         subReq.push_back(LogRequestItem(usCmd[i].toStdString(),
+                                             LogRequestItem::UserCmd,
+                                             usCmd[i+1].toStdString()));
     }
 }
 
@@ -233,21 +232,20 @@ void LogLoadDataItem::clear()
     childReq_.clear();
     userReq_.clear();
     name_.clear();
-    childSubReq_.clear();
-    userSubReq_.clear();
+    subReq_.clear();
     periodStat_.clear();
     fullStat_.clear();
     subReqMax_=0;
 
-    buildSubReq();
+    buildSubReq(subReq_);
 }
 
 void LogLoadDataItem::init(size_t num)
 {
     if(num==0)
     {
-        childReq_=std::vector<int>();
-        userReq_=std::vector<int>();
+       childReq_=std::vector<int>();
+       userReq_=std::vector<int>();
 
 #if 0
         for(size_t i=0; i < childSubReq_.size(); i++)
@@ -297,16 +295,10 @@ void LogLoadDataItem::add(size_t index,const LogReqCounter& req)
     //if(stat_.maxTotal_ < tot)
     //    stat_.maxTotal_ = tot;
 
-    for(size_t i=0; i < childSubReq_.size(); i++)
+    for(size_t i=0; i < subReq_.size(); i++)
     {
-        if(req.childSubReq_[i].counter_ > 0)
-            childSubReq_[i].add(index,req.childSubReq_[i].counter_);
-    }
-
-    for(size_t i=0; i < userSubReq_.size(); i++)
-    {
-         if(req.userSubReq_[i].counter_ > 0)
-             userSubReq_[i].add(index,req.userSubReq_[i].counter_);
+        if(req.subReq_[i].counter_ > 0)
+            subReq_[i].add(index,req.subReq_[i].counter_);
     }
 }
 
@@ -356,26 +348,18 @@ void LogLoadDataItem::computeSubReqStat(std::vector<LogRequestItem>& subReq,
 void LogLoadDataItem::saveFullStat()
 {
     fullStat_=periodStat_;
-    for(size_t i=0; i < childSubReq_.size(); i++)
+    for(size_t i=0; i < subReq_.size(); i++)
     {
-        childSubReq_[i].fullStat_=childSubReq_[i].periodStat_;
-    }
-    for(size_t i=0; i < userSubReq_.size(); i++)
-    {
-        userSubReq_[i].fullStat_=userSubReq_[i].periodStat_;
+        subReq_[i].fullStat_=subReq_[i].periodStat_;
     }
 }
 
 void LogLoadDataItem::useFullStat()
 {
     periodStat_=fullStat_;
-    for(size_t i=0; i < childSubReq_.size(); i++)
+    for(size_t i=0; i < subReq_.size(); i++)
     {
-        childSubReq_[i].periodStat_=childSubReq_[i].fullStat_;
-    }
-    for(size_t i=0; i < userSubReq_.size(); i++)
-    {
-        userSubReq_[i].periodStat_=userSubReq_[i].fullStat_;
+        subReq_[i].periodStat_=subReq_[i].fullStat_;
     }
 
     computeSubReqMax();
@@ -396,8 +380,7 @@ void LogLoadDataItem::computeStat(size_t startIndex,size_t endIndex)
     periodStat_.sumTotal_=sum;
     periodStat_.maxTotal_=max;
 
-    computeSubReqStat(childSubReq_,startIndex,endIndex);
-    computeSubReqStat(userSubReq_,startIndex,endIndex);
+    computeSubReqStat(subReq_,startIndex,endIndex);
 
     computeSubReqMax();
 }
@@ -406,16 +389,10 @@ void LogLoadDataItem::computeSubReqMax()
 {
     subReqMax_=0;
 
-    for(size_t i=0; i < childSubReq_.size(); i++)
+    for(size_t i=0; i < subReq_.size(); i++)
     {
-        if(subReqMax_ < childSubReq_[i].periodStat_.maxTotal_)
-            subReqMax_ = childSubReq_[i].periodStat_.maxTotal_;
-    }
-
-    for(size_t i=0; i < userSubReq_.size(); i++)
-    {
-        if(subReqMax_ < userSubReq_[i].periodStat_.maxTotal_)
-            subReqMax_ = userSubReq_[i].periodStat_.maxTotal_;
+        if(subReqMax_ < subReq_[i].periodStat_.maxTotal_)
+            subReqMax_ = subReq_[i].periodStat_.maxTotal_;
     }
 }
 
@@ -438,14 +415,9 @@ void LogLoadData::clear()
     startPos_=0;
 }
 
-QString LogLoadData::childSubReqName(int idx) const
+QString LogLoadData::subReqName(int idx) const
 {
-    return QString::fromStdString(total_.childSubReq()[idx].name_);
-}
-
-QString LogLoadData::userSubReqName(int idx) const
-{
-    return QString::fromStdString(total_.userSubReq()[idx].name_);
+    return QString::fromStdString(total_.subReq()[idx].name_);
 }
 
 QString LogLoadData::uidName(int idx) const
@@ -793,48 +765,36 @@ void LogLoadData::getSuiteTotalReq(size_t idx,QLineSeries& series)
 }
 
 
-void LogLoadData::getSuiteChildSubReq(size_t suiteIdx,size_t subIdx,QLineSeries& series)
+void LogLoadData::getSuiteSubReq(size_t suiteIdx,size_t subIdx,QLineSeries& series)
 {
     if(suiteIdx >=0 && suiteIdx < suites().size())
     {
         int maxVal=0;
-        getSeries(series,suiteData_[suiteIdx].childSubReq()[subIdx],maxVal);
+        getSeries(series,suiteData_[suiteIdx].subReq()[subIdx],maxVal);
     }
 }
 
-void LogLoadData::getChildSubReq(size_t subIdx,QLineSeries& series,int& maxVal)
+void LogLoadData::getSubReq(size_t subIdx,QLineSeries& series,int& maxVal)
 {
-     getSeries(series,total_.childSubReq()[subIdx],maxVal);
+     getSeries(series,total_.subReq()[subIdx],maxVal);
 }
 
-void LogLoadData::getUserSubReq(size_t subIdx,QLineSeries& series,int& maxVal)
+void LogLoadData::getUidTotalReq(size_t uidIdx,QLineSeries& series,int& maxVal)
 {
-    getSeries(series,total_.userSubReq()[subIdx],maxVal);
-}
-
-void LogLoadData::getSuiteUserSubReq(size_t suiteIdx,size_t subIdx,QLineSeries& series)
-{
-    if(suiteIdx >=0 && suiteIdx < suites().size())
+    if(uidIdx >=0 && uidIdx < uidData().size())
     {
-        int maxVal=0;
-        getSeries(series,suiteData_[suiteIdx].userSubReq()[subIdx],maxVal);
+        //the childreq  = 0 for the uidData!
+        maxVal=0;
+        getSeries(series,uidData_[uidIdx].userReq(),maxVal);
     }
 }
 
-void LogLoadData::getUidUserSubReq(size_t uidIdx,size_t subIdx,QLineSeries& series)
+void LogLoadData::getUidSubReq(size_t uidIdx,size_t subIdx,QLineSeries& series)
 {
     if(uidIdx >=0 && uidIdx < uidData().size())
     {
         int maxVal=0;
-        getSeries(series,uidData_[uidIdx].userSubReq()[subIdx],maxVal);
-    }
-}
-
-void LogLoadData::getUidUserReq(size_t uidIdx,QLineSeries& series,int& maxVal)
-{
-    if(uidIdx >=0 && uidIdx < uidData_.size())
-    {
-        getSeries(series,uidData_[uidIdx].userReq(),maxVal);
+        getSeries(series,uidData_[uidIdx].subReq()[subIdx],maxVal);
     }
 }
 

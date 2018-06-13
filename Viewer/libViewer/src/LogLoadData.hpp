@@ -48,9 +48,11 @@ struct  LogLoadStatItem
 class LogRequestItem
 {
 public:
-    LogRequestItem() : global_(false), counter_(0) {}
-    LogRequestItem(const std::string& name,const std::string& pattern,bool global=false) :
-        global_(global), name_(name), pattern_(pattern), counter_(0) {}
+    enum Type {ChildCmd,UserCmd,OtherCmd};
+
+    LogRequestItem() : global_(false), type_(OtherCmd), counter_(0) {}
+    LogRequestItem(const std::string& name,Type type, const std::string& pattern,bool global=false) :
+        global_(global), name_(name), type_(type), pattern_(pattern), counter_(0) {}
 
     const LogLoadStatItem& periodStat() const {return periodStat_;}
     void computeStat(size_t startIndex,size_t endIndex);
@@ -59,6 +61,7 @@ public:
     //Type type_;
     bool global_;
     std::string name_;
+    Type type_;
     std::string pattern_; //used to identify the request in the log file
     std::vector<size_t> index_;
     std::vector<int> req_;
@@ -79,8 +82,7 @@ struct LogReqCounter
    std::string name_; //used for suites
    size_t   childReq_;
    size_t   userReq_;
-   std::vector<LogRequestItem> childSubReq_;
-   std::vector<LogRequestItem> userSubReq_;
+   std::vector<LogRequestItem> subReq_;
 };
 
 //Data structure containing load/request statistics for
@@ -110,13 +112,11 @@ public:
     const std::string& name() const {return name_;}
     void valuesAt(size_t idx,size_t& total,size_t& child,size_t& user) const;
 
-    const std::vector<LogRequestItem>& childSubReq() const {return childSubReq_;}
-    const std::vector<LogRequestItem>& userSubReq() const {return userSubReq_;}
+    const std::vector<LogRequestItem>& subReq() const {return subReq_;}
 
     void add(size_t index,const LogReqCounter&);
 
-    static void buildChildSubReq(std::vector<LogRequestItem>& childSubReq);
-    static void buildUserSubReq(std::vector<LogRequestItem>& useSubReq);
+    static void buildSubReq(std::vector<LogRequestItem>& subReq);
 
     void saveFullStat();
     void useFullStat();
@@ -130,10 +130,7 @@ protected:
 
     std::vector<int> childReq_; //per seconds
     std::vector<int> userReq_;  //per seconds
-
-    std::vector<LogRequestItem> childSubReq_;
-    std::vector<LogRequestItem> userSubReq_;
-
+    std::vector<LogRequestItem> subReq_;
     LogLoadStatItem fullStat_;
     LogLoadStatItem periodStat_;
     size_t subReqMax_;
@@ -158,6 +155,7 @@ public:
     const LogLoadDataItem& dataItem() const {return total_;}
     QStringList suiteNames() const {return suites_;}
     const std::vector<LogLoadDataItem>& suites() const {return suiteData_;}
+    const std::vector<LogLoadDataItem>& suiteData() const {return suiteData_;}
     const std::vector<LogLoadDataItem>& uidData() const {return uidData_;}
     const LogLoadDataItem& total() const {return total_;}
     TimeRes timeRes() const {return timeRes_;}
@@ -171,13 +169,10 @@ public:
     void getSuiteChildReq(size_t,QLineSeries& series);
     void getSuiteUserReq(size_t,QLineSeries& series);
     void getSuiteTotalReq(size_t,QLineSeries& series);
-
-    void getChildSubReq(size_t subIdx,QLineSeries& series,int& maxVal);
-    void getUserSubReq(size_t subIdx,QLineSeries& series,int& maxVal);
-    void getSuiteChildSubReq(size_t,size_t,QLineSeries& series);
-    void getSuiteUserSubReq(size_t,size_t,QLineSeries& series);
-    void getUidUserSubReq(size_t,size_t,QLineSeries& series);
-    void getUidUserReq(size_t uidIdx,QLineSeries& series,int& maxVal);
+    void getSubReq(size_t subIdx,QLineSeries& series,int& maxVal);
+    void getSuiteSubReq(size_t,size_t,QLineSeries& series);
+    void getUidTotalReq(size_t,QLineSeries& series,int& maxVal);
+    void getUidSubReq(size_t,size_t,QLineSeries& series);
 
     size_t size() const {return time_.size();}
     QDateTime startTime() const;
@@ -189,8 +184,7 @@ public:
     void computeStat();
     void computeStat(size_t startIndex,size_t endIndex);
 
-    QString childSubReqName(int idx) const;
-    QString userSubReqName(int idx) const;
+    QString subReqName(int idx) const;
     QString uidName(int idx) const;
     size_t subReqMax() const;
     int maxNumOfRows() const {return maxNumOfRows_;}

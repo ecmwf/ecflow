@@ -43,7 +43,9 @@
 //
 //=======================================================
 
-LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
+LogLoadWidget::LogLoadWidget(QWidget *parent) :
+    ui_(new Ui::LogLoadWidget),
+    numOfRows_(0)
 {
     ui_->setupUi(this);
 
@@ -57,13 +59,9 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
         ui_->viewTab->addTab(viewHandler_->tabItems()[i]," h");
     }
 
-    connect(ui_->viewTab,SIGNAL(currentChanged(int)),
-            this,SLOT(currentTabChanged(int)));
-
     ui_->viewTab->setTabText(0,tr("Total charts"));
-    ui_->viewTab->setTabText(1,tr("Suite vs command charts"));
-    ui_->viewTab->setTabText(2,tr("User vs command charts"));
-    ui_->viewTab->setTabText(3,tr("User vs command tables"));
+    ui_->viewTab->setTabText(1,tr("Other charts"));
+    ui_->viewTab->setTabText(2,tr("Tables"));
 
     ui_->viewTab->setCurrentIndex(0);
 
@@ -93,124 +91,6 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
 
     //ui_->viewTab->setCornerWidget(cornerW);
 
-    //-----------------------------------------------
-    // View + model to display/select suites
-    //-----------------------------------------------
-
-#if 0
-    suiteModel_=new LogLoadRequestModel(tr("Suite"),this);
-    //suiteSortModel_=new QSortFilterProxyModel(this);
-    suiteSortModel_=new LogLoadRequestSortModel(this);
-    suiteSortModel_->setSourceModel(suiteModel_);
-    //suiteSortModel_->setSortRole(Qt::UserRole);
-    suiteSortModel_->setDynamicSortFilter(true);
-
-    ui_->suiteTree->setRootIsDecorated(false);
-    ui_->suiteTree->setAllColumnsShowFocus(true);
-    ui_->suiteTree->setUniformRowHeights(true);
-    ui_->suiteTree->setSortingEnabled(true);
-    ui_->suiteTree->sortByColumn(1, Qt::DescendingOrder);
-    ui_->suiteTree->setModel(suiteSortModel_);
-
-    connect(suiteModel_,SIGNAL(checkStateChanged(int,bool)),
-            viewHandler_,SLOT(addRemoveSuite(int,bool)));
-
-    connect(viewHandler_,SIGNAL(suitePlotStateChanged(int,bool,QColor)),
-            suiteModel_,SLOT(updateItem(int,bool,QColor)));
-
-    connect(ui_->unselectSuitesTb,SIGNAL(clicked()),
-            suiteModel_,SLOT(unselectAll()));
-
-    connect(ui_->selectFourSuitesTb,SIGNAL(clicked()),
-            suiteModel_,SLOT(selectFirstFourItems()));
-
-    //-----------------------------------------------
-    // View + model to display/select child commands
-    //-----------------------------------------------
-
-    childReqModel_=new LogLoadRequestModel("Command",this);
-    childReqSortModel_=new LogLoadRequestSortModel(this);
-    childReqSortModel_->setSourceModel(childReqModel_);
-    //childReqSortModel_->setSortRole(Qt::UserRole);
-    childReqSortModel_->setDynamicSortFilter(true);
-
-    ui_->childTree->setRootIsDecorated(false);
-    ui_->childTree->setAllColumnsShowFocus(true);
-    ui_->childTree->setUniformRowHeights(true);
-    //ui_->childTree->setSortingEnabled(true);
-    ui_->childTree->sortByColumn(1, Qt::DescendingOrder);
-    ui_->childTree->setModel(childReqSortModel_);
-
-
-    connect(childReqModel_,SIGNAL(checkStateChanged(int,bool)),
-            viewHandler_,SLOT(addRemoveChildReq(int,bool)));
-
-    connect(viewHandler_,SIGNAL(childPlotStateChanged(int,bool,QColor)),
-            childReqModel_,SLOT(updateItem(int,bool,QColor)));
-
-#if 0
-    connect(ui_->unselectSuitesTb,SIGNAL(clicked()),
-            suiteModel_,SLOT(unselectAllSuites()));
-
-    connect(ui_->selectFourSuitesTb,SIGNAL(clicked()),
-            suiteModel_,SLOT(selectFirstFourSuites()));
-#endif
-
-    //-----------------------------------------------
-    // View + model to display/select user commands
-    //-----------------------------------------------
-
-    userReqModel_=new LogLoadRequestModel("Command",this);
-    userReqSortModel_=new LogLoadRequestSortModel(this);
-    userReqSortModel_->setSourceModel(userReqModel_);
-    //userReqSortModel_->setSortRole(Qt::UserRole);
-    userReqSortModel_->setDynamicSortFilter(true);
-
-    ui_->userTree->setRootIsDecorated(false);
-    ui_->userTree->setAllColumnsShowFocus(true);
-    ui_->userTree->setUniformRowHeights(true);
-    ui_->userTree->setSortingEnabled(true);
-    ui_->userTree->sortByColumn(1, Qt::DescendingOrder);
-    ui_->userTree->setModel(userReqSortModel_);
-
-
-    connect(userReqModel_,SIGNAL(checkStateChanged(int,bool)),
-            viewHandler_,SLOT(addRemoveUserReq(int,bool)));
-
-    connect(viewHandler_,SIGNAL(userPlotStateChanged(int,bool,QColor)),
-            userReqModel_,SLOT(updateItem(int,bool,QColor)));
-
-#if 0
-    connect(ui_->unselectSuitesTb,SIGNAL(clicked()),
-            suiteModel_,SLOT(unselectAllSuites()));
-
-    connect(ui_->selectFourSuitesTb,SIGNAL(clicked()),
-            suiteModel_,SLOT(selectFirstFourSuites()));
-#endif
-
-    //-----------------------------------------------
-    // View + model to display/select user commands
-    //-----------------------------------------------
-
-    uidModel_=new LogLoadRequestModel("User id",this);
-    uidSortModel_=new LogLoadRequestSortModel(this);
-    uidSortModel_->setSourceModel(uidModel_);
-    //userReqSortModel_->setSortRole(Qt::UserRole);
-    uidSortModel_->setDynamicSortFilter(true);
-
-    ui_->uidTree->setRootIsDecorated(false);
-    ui_->uidTree->setAllColumnsShowFocus(true);
-    ui_->uidTree->setUniformRowHeights(true);
-    ui_->uidTree->setSortingEnabled(true);
-    ui_->uidTree->sortByColumn(1, Qt::DescendingOrder);
-    ui_->uidTree->setModel(uidSortModel_);
-
-    connect(uidModel_,SIGNAL(checkStateChanged(int,bool)),
-            viewHandler_,SLOT(addRemoveUid(int,bool)));
-
-    connect(viewHandler_,SIGNAL(uidPlotStateChanged(int,bool,QColor)),
-            uidModel_,SLOT(updateItem(int,bool,QColor)));
-#endif
 
     //Log contents
     logModel_=new LogModel(this);
@@ -248,24 +128,6 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     connect(viewHandler_,SIGNAL(timeRangeReset()),
             this,SLOT(periodWasReset()));
 
-    //Scan label
-#if 0
-    QColor bg(50,52,58);
-    ui_->scanLabel->setStyleSheet("QLabel{background: " + bg.name() + ";}");
-
-    QFont font;
-    QFontMetrics fm(font);
-    int w=fm.width("AAAAAverylongsuitename");
-    QList<int> sizeLst=ui_->splitter->sizes();
-    if(sizeLst.count()==3)
-    {
-        sizeLst[2]=w;
-        sizeLst[0]=(width()-w)/2;
-        sizeLst[1]=(width()-w)/2;
-        ui_->splitter->setSizes(sizeLst);
-    }
-#endif
-
     //logInfo label
     ui_->logInfoLabel->setProperty("fileInfo","1");
     ui_->logInfoLabel->setWordWrap(true);
@@ -276,12 +138,10 @@ LogLoadWidget::LogLoadWidget(QWidget *parent) : ui_(new Ui::LogLoadWidget)
     ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
 
-    //Charts
-    //connect(viewHandler_,SIGNAL(scanDataChanged(QString)),
-    //        ui_->scanLabel,SLOT(setText(QString)));
+    connect(ui_->reloadTb,SIGNAL(clicked()),
+            this,SLOT(slotReload()));
 
-    ui_->timeWidget->setStyleSheet("#timeWidget{background-color: rgb(212,212,212);}");
-
+    //ui_->timeWidget->setStyleSheet("#timeWidget{background-color: rgb(212,212,212);}");
 }
 
 LogLoadWidget::~LogLoadWidget()
@@ -295,12 +155,7 @@ void LogLoadWidget::clear()
 
     ui_->logInfoLabel->setText(QString());
     viewHandler_->clear();
-#if 0
-    suiteModel_->clearData();
-    childReqModel_->clearData();
-    userReqModel_->clearData();
-    uidModel_->clearData();
-#endif
+
     logModel_->clearData();
     logFile_.clear();
     serverName_.clear();
@@ -336,34 +191,24 @@ void LogLoadWidget::updateInfoLabel()
     }
 
     ui_->logInfoLabel->setText(txt);
+
+    //TODO: we need a better implementation
+    ui_->timeWidget->hide();
 }
 
 void LogLoadWidget::setAllVisible(bool b)
 {
     ui_->viewTab->setVisible(b);
-    //ui_->controlToolBox->setVisible(b);
-    //ui_->scanLabel->setVisible(b);
     ui_->logView->setVisible(b);
     ui_->timeWidget->setVisible(b);
 }
 
-void LogLoadWidget::setSuiteControlVisible(bool b)
+void LogLoadWidget::slotReload()
 {
-    //ui_->suiteTree->setVisible(b);
-    //ui_->unselectSuitesTb->setVisible(b);
-    //ui_->selectFourSuitesTb->setVisible(b);
-}
-
-void LogLoadWidget::setChildControlVisible(bool b)
-{
-    //ui_->childLabel->setVisible(b);
-    //ui_->childTree->setVisible(b);
-}
-
-void LogLoadWidget::setUserControlVisible(bool b)
-{
-    //ui_->userLabel->setVisible(b);
-    //ui_->userTree->setVisible(b);
+    if(!serverName_.isEmpty() && numOfRows_ != 0)
+    {
+        load(serverName_, host_, port_, logFile_,numOfRows_);
+    }
 }
 
 void LogLoadWidget::load(QString logFile,int numOfRows)
@@ -379,6 +224,7 @@ void LogLoadWidget::load(QString serverName, QString host, QString port, QString
     host_=host;
     port_=port;
     logFile_=logFile;
+    numOfRows_=numOfRows;
 
     updateInfoLabel();
 
@@ -403,9 +249,6 @@ void LogLoadWidget::load(QString serverName, QString host, QString port, QString
 
     setAllVisible(true);
 
-    //view_->load("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log");
-    //std::string fileName="/home/graphics/cgr/ecflow_dev/vsms1.ecf.log";
-
     try
     {
         viewHandler_->load(logFile_.toStdString(),numOfRows);
@@ -415,16 +258,6 @@ void LogLoadWidget::load(QString serverName, QString host, QString port, QString
         ui_->messageLabel->showError(e.what());
         setAllVisible(false);
     }
-
-#if 0
-    suiteModel_->setData(viewHandler_->data()->suites(),viewHandler_->suitePlotState());
-    childReqModel_->setData(viewHandler_->data()->total().childSubReq(),viewHandler_->childPlotState());
-    userReqModel_->setData(viewHandler_->data()->total().userSubReq(),viewHandler_->userPlotState());
-    uidModel_->setData(viewHandler_->data()->uidData(),viewHandler_->uidPlotState());
-
-    for(int i=0; i < suiteModel_->columnCount()-1; i++)
-        ui_->suiteTree->resizeColumnToContents(i);
-#endif
 
     logModel_->loadFromFile(logFile_.toStdString(),viewHandler_->data()->startPos());
 
@@ -465,33 +298,6 @@ void LogLoadWidget::resolutionChanged(int)
         viewHandler_->setResolution(LogLoadData::MinuteResolution);
     else if(idx == 2)
         viewHandler_->setResolution(LogLoadData::HourResolution);
-}
-
-void LogLoadWidget::currentTabChanged(int idx)
-{
-   /* if(idx == 0)
-    {
-        ui_->scanLabel->show();
-        suiteModel_->setShowColour(true);
-        childReqModel_->setShowColour(false);
-        userReqModel_->setShowColour(false);
-    }
-    else if(idx == 1)
-    {
-        ui_->scanLabel->show();
-        suiteModel_->setShowColour(false);
-        childReqModel_->setShowColour(true);
-        userReqModel_->setShowColour(true);
-    }
-    else if(idx == 2)
-    {
-        ui_->scanLabel->clear();
-        ui_->scanLabel->hide();
-        suiteModel_->setShowColour(false);
-        childReqModel_->setShowColour(false);
-        userReqModel_->setShowColour(false);
-        ui_->controlToolBox->setCurrentIndex(0);
-    }*/
 }
 
 LogLoadRequestSortModel::LogLoadRequestSortModel(QObject* parent) : QSortFilterProxyModel(parent)
@@ -1203,11 +1009,8 @@ LogRequestViewHandler::LogRequestViewHandler(QWidget* parent) :
     views_ << view;
     tabItems_ << view;
 
-    //tab: suite vs command
-    buildCommandTab(parent);
-
-    //tab: uid vs command
-    buildUidTab(parent);
+    //tab
+    buildOtherTab(parent);
 
     //tab: tables
     buildTableTab(parent);
@@ -1233,59 +1036,19 @@ LogRequestViewHandler::~LogRequestViewHandler()
     delete data_;
 }
 
-void LogRequestViewHandler::buildCommandTab(QWidget *parent)
+void LogRequestViewHandler::buildOtherTab(QWidget *parent)
 {
-    LogRequestView* view;
-    LogRequestView* view1;
-
-    view=new LogCmdSuiteRequestView(this,parent);
+    LogRequestView* view=new LogCmdSuiteRequestView(this,parent);
     views_ << view;
 
-    view1=new LogSuiteCmdRequestView(this,parent);
-    views_ << view1;
-
-    QWidget* w=new QWidget(parent);
-    QVBoxLayout* vb=new QVBoxLayout(w);
-    vb->setContentsMargins(0,3,0,0);
-    vb->setSpacing(1);
-
-    QHBoxLayout* hb=new QHBoxLayout();
-
-    QLabel *label=new QLabel("Mode: ",w);
-    hb->addWidget(label);
-
-    QComboBox* cb=new QComboBox(w);
-    cb->addItem("Chart per suite",0);
-    cb->addItem("Chart per command",1);
-    hb->addWidget(cb);
-    hb->addStretch(1);
-
-    vb->addLayout(hb);
-
-    QStackedWidget* stacked=new QStackedWidget(w);
-    stacked->addWidget(view);
-    stacked->addWidget(view1);
-    vb->addWidget(stacked);
-
-    connect(cb,SIGNAL(currentIndexChanged(int)),
-            stacked,SLOT(setCurrentIndex(int)));
-
-    cb->setCurrentIndex(0);
-    stacked->setCurrentIndex(0);
-
-    tabItems_ << w;
-}
-
-void LogRequestViewHandler::buildUidTab(QWidget *parent)
-{
-    LogRequestView* view;
-    LogRequestView* view1;
+    view=new LogSuiteCmdRequestView(this,parent);
+    views_ << view;
 
     view=new LogUidCmdRequestView(this,parent);
     views_ << view;
 
-    view1=new LogCmdUidRequestView(this,parent);
-    views_ << view1;
+    view=new LogCmdUidRequestView(this,parent);
+    views_ << view;
 
     QWidget* w=new QWidget(parent);
     QVBoxLayout* vb=new QVBoxLayout(w);
@@ -1298,16 +1061,20 @@ void LogRequestViewHandler::buildUidTab(QWidget *parent)
     hb->addWidget(label);
 
     QComboBox* cb=new QComboBox(w);
-    cb->addItem("Chart per command",0);
-    cb->addItem("Chart per user",1);
+    cb->addItem("Command graph per suite",0);
+    cb->addItem("Suite graph per command",1);
+    cb->addItem("User graph per command",2);
+    cb->addItem("Command graph per user",3);
     hb->addWidget(cb);
     hb->addStretch(1);
 
     vb->addLayout(hb);
 
     QStackedWidget* stacked=new QStackedWidget(w);
-    stacked->addWidget(view);
-    stacked->addWidget(view1);
+    int cnt=views_.count();
+    for(int i=cnt-4; i < cnt ; i++)
+        stacked->addWidget(views_[i]);
+
     vb->addWidget(stacked);
 
     connect(cb,SIGNAL(currentIndexChanged(int)),
@@ -1321,14 +1088,17 @@ void LogRequestViewHandler::buildUidTab(QWidget *parent)
 
 void LogRequestViewHandler::buildTableTab(QWidget *parent)
 {
-    LogRequestView* view;
-    LogRequestView* view1;
-
-    view=new LogStatCmdUidView(this,parent);
+    LogRequestView* view=new LogStatCmdUidView(this,parent);
     views_ << view;
 
-    view1=new LogStatUidCmdView(this,parent);
-    views_ << view1;
+    view=new LogStatUidCmdView(this,parent);
+    views_ << view;
+
+    view=new LogStatCmdSuiteView(this,parent);
+    views_ << view;
+
+    view=new LogStatSuiteCmdView(this,parent);
+    views_ << view;
 
     QWidget* w=new QWidget(parent);
     QVBoxLayout* vb=new QVBoxLayout(w);
@@ -1341,16 +1111,20 @@ void LogRequestViewHandler::buildTableTab(QWidget *parent)
     hb->addWidget(label);
 
     QComboBox* cb=new QComboBox(w);
-    cb->addItem("Command vs Uid",0);
-    cb->addItem("uid vs command",1);
+    cb->addItem("command vs user",0);
+    cb->addItem("user vs command",1);
+    cb->addItem("command vs suite",2);
+    cb->addItem("suite vs command",3);
     hb->addWidget(cb);
     hb->addStretch(1);
 
     vb->addLayout(hb);
 
     QStackedWidget* stacked=new QStackedWidget(w);
-    stacked->addWidget(view);
-    stacked->addWidget(view1);
+    int cnt=views_.count();
+    for(int i=cnt-4; i < cnt ; i++)
+        stacked->addWidget(views_[i]);
+
     vb->addWidget(stacked);
 
     connect(cb,SIGNAL(currentIndexChanged(int)),
@@ -1378,13 +1152,9 @@ void LogRequestViewHandler::load(const std::string& logFile,int numOfRows)
     for(size_t i=0; i < data_->suites().size(); i++)
         suitePlotState_ << false;
 
-    childPlotState_.clear();
-    for(size_t i=0; i < data_->total().childSubReq().size(); i++)
-        childPlotState_ << false;
-
-    userPlotState_.clear();
-    for(size_t i=0; i < data_->total().userSubReq().size(); i++)
-        userPlotState_ << false;
+    cmdPlotState_.clear();
+    for(size_t i=0; i < data_->total().subReq().size(); i++)
+        cmdPlotState_ << false;
 
     uidPlotState_.clear();
     for(size_t i=0; i < data_->uidData().size(); i++)
@@ -1425,23 +1195,13 @@ void LogRequestViewHandler::addRemoveSuite(int idx, bool st)
     }
 }
 
-void LogRequestViewHandler::addRemoveChildReq(int idx, bool st)
+void LogRequestViewHandler::addRemoveCmd(int idx, bool st)
 {
-    childPlotState_[idx]=st;
+    cmdPlotState_[idx]=st;
 
     for(int i=0; i < views_.count(); i++)
     {
-        views_[i]->addRemoveChildReq(idx,st);
-    }
-}
-
-void LogRequestViewHandler::addRemoveUserReq(int idx, bool st)
-{
-    userPlotState_[idx]=st;
-
-    for(int i=0; i < views_.count(); i++)
-    {
-        views_[i]->addRemoveUserReq(idx,st);
+        views_[i]->addRemoveCmd(idx,st);
     }
 }
 
@@ -1616,9 +1376,9 @@ void LogRequestView::buildControlCore(LogRequestViewControlItem* item,QString ti
             item->model_,SLOT(selectFirstFourItems()));
 }
 
-void LogRequestView::buildSuiteControl(LogRequestViewControlItem* item,QString title,QString modelHeader)
+void LogRequestView::buildSuiteControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool addSelectAll)
 {
-    buildControlCore(item,title,modelHeader,false);
+    buildControlCore(item,title,modelHeader,addSelectAll);
 
     connect(item->model_,SIGNAL(checkStateChanged(int,bool)),
             this,SLOT(addRemoveSuite(int,bool)));
@@ -1627,25 +1387,14 @@ void LogRequestView::buildSuiteControl(LogRequestViewControlItem* item,QString t
             item->model_,SLOT(updateItem(int,bool,QColor)));
 }
 
-void LogRequestView::buildChildReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader)
-{
-    buildControlCore(item,title,modelHeader,false);
-
-    connect(item->model_,SIGNAL(checkStateChanged(int,bool)),
-            this,SLOT(addRemoveChildReq(int,bool)));
-
-    connect(this,SIGNAL(childPlotStateChanged(int,bool,QColor)),
-            item->model_,SLOT(updateItem(int,bool,QColor)));
-}
-
-void LogRequestView::buildUserReqControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool addSelectAll)
+void LogRequestView::buildCmdControl(LogRequestViewControlItem* item,QString title,QString modelHeader,bool addSelectAll)
 {
     buildControlCore(item,title,modelHeader,addSelectAll);
 
     connect(item->model_,SIGNAL(checkStateChanged(int,bool)),
-            this,SLOT(addRemoveUserReq(int,bool)));
+            this,SLOT(addRemoveCmd(int,bool)));
 
-    connect(this,SIGNAL(userPlotStateChanged(int,bool,QColor)),
+    connect(this,SIGNAL(cmdPlotStateChanged(int,bool,QColor)),
             item->model_,SLOT(updateItem(int,bool,QColor)));
 }
 
@@ -1812,11 +1561,8 @@ void LogRequestView::clear()
     if(suiteCtl_.model_)
         suiteCtl_.model_->clearData();
 
-    if(childCtl_.model_)
-        childCtl_.model_->clearData();
-
-    if(userCtl_.model_)
-        userCtl_.model_->clearData();
+    if(cmdCtl_.model_)
+        cmdCtl_.model_->clearData();
 
     if(uidCtl_.model_)
         uidCtl_.model_->clearData();
@@ -1862,13 +1608,9 @@ void LogRequestView::load()
     for(size_t i=0; i < data_->suites().size(); i++)
         suiteCtl_.plotState_ << false;
 
-    childCtl_.plotState_.clear();
-    for(size_t i=0; i < data_->total().childSubReq().size(); i++)
-        childCtl_.plotState_ << false;
-
-    userCtl_.plotState_.clear();
-    for(size_t i=0; i < data_->total().userSubReq().size(); i++)
-        userCtl_.plotState_ << false;
+    cmdCtl_.plotState_.clear();
+    for(size_t i=0; i < data_->total().subReq().size(); i++)
+        cmdCtl_.plotState_ << false;
 
     uidCtl_.plotState_.clear();
     for(size_t i=0; i < data_->uidData().size(); i++)
@@ -1878,8 +1620,7 @@ void LogRequestView::load()
     loadSuites();
 
     suiteCtl_.adjustColumnWidth();
-    childCtl_.adjustColumnWidth();
-    userCtl_.adjustColumnWidth();
+    cmdCtl_.adjustColumnWidth();
     uidCtl_.adjustColumnWidth();
 
     scanPositionChanged(0);
@@ -2239,7 +1980,7 @@ LogTotalRequestView::LogTotalRequestView(LogRequestViewHandler* handler,QWidget*
 
     UI_ASSERT(views_.count() == 3,"views_.count()=" << views_.count());
 
-    buildSuiteControl(&suiteCtl_,tr("Suites"),tr("Suite"));
+    buildSuiteControl(&suiteCtl_,tr("Suites"),tr("Suite"),false);
 }
 
 QChart* LogTotalRequestView::getChart(ChartType type)
@@ -2433,9 +2174,8 @@ LogCmdSuiteRequestView::LogCmdSuiteRequestView(LogRequestViewHandler* handler,QW
 {
     Q_ASSERT(mainLayout_);
 
-    buildSuiteControl(&suiteCtl_,tr("Suites"),tr("Suite"));
-    buildChildReqControl(&childCtl_,tr("Child cmds"),tr("Command"));
-    buildUserReqControl(&userCtl_,tr("User cmds"),tr("Command"),false);
+    buildSuiteControl(&suiteCtl_,tr("Suites"),tr("Suite"),false);
+    buildCmdControl(&cmdCtl_,tr("Commands"),tr("Command"),false);
 
     controlTab_->setCurrentIndex(2);
 }
@@ -2478,25 +2218,14 @@ void LogCmdSuiteRequestView::addSuite(int suiteIdx)
     QString title="suite: " +
             QString::fromStdString(data_->suites()[suiteIdx].name());
 
-    for(int i=0; i < childCtl_.plotState_.count(); i++)
+    for(int i=0; i < cmdCtl_.plotState_.count(); i++)
     {
-        if(childCtl_.plotState_[i])
+        if(cmdCtl_.plotState_[i])
         {
             QLineSeries* series=new QLineSeries();
-            series->setName(childSeriesId(i));
+            series->setName(cmdSeriesId(i));
 
-            data_->getSuiteChildSubReq(suiteIdx,i,*series);
-            build(view,series,title,maxVal_);
-        }
-    }
-
-    for(int i=0; i < userCtl_.plotState_.count(); i++)
-    {
-        if(userCtl_.plotState_[i])
-        {
-            QLineSeries* series=new QLineSeries();
-            series->setName(userSeriesId(i));
-            data_->getSuiteUserSubReq(suiteIdx,i,*series);
+            data_->getSuiteSubReq(suiteIdx,i,*series);
             build(view,series,title,maxVal_);
         }
     }
@@ -2513,40 +2242,22 @@ void LogCmdSuiteRequestView::addTotal()
 
     QString title="All suites";
 
-    for(int i=0; i < childCtl_.plotState_.count(); i++)
+    for(int i=0; i < cmdCtl_.plotState_.count(); i++)
     {
-        if(childCtl_.plotState_[i])
+        if(cmdCtl_.plotState_[i])
         {
             QLineSeries* series=new QLineSeries();
-            series->setName(childSeriesId(i));
+            series->setName(cmdSeriesId(i));
 
             int maxVal=0;
-            data_->getChildSubReq(i,*series,maxVal);
+            data_->getSubReq(i,*series,maxVal);
             if(maxVal_< maxVal)
                 maxVal_=maxVal;
 
             build(view,series,title,maxVal_);
 
-            Q_EMIT childPlotStateChanged(i,true,
-                    childSeriesColour(view->chart(),i));
-        }
-    }
-
-    for(int i=0; i < userCtl_.plotState_.count(); i++)
-    {
-        if(userCtl_.plotState_[i])
-        {
-            QLineSeries* series=new QLineSeries();
-            series->setName(userSeriesId(i));
-            int maxVal=0;
-            data_->getUserSubReq(i,*series,maxVal);
-            if(maxVal_< maxVal)
-                maxVal_=maxVal;
-
-            build(view,series,title,maxVal);
-
-            Q_EMIT userPlotStateChanged(i,true,
-               userSeriesColour(view->chart(),i));
+            Q_EMIT cmdPlotStateChanged(i,true,
+                    cmdSeriesColour(view->chart(),i));
         }
     }
 
@@ -2558,31 +2269,31 @@ void LogCmdSuiteRequestView::addTotal()
 
 
 //One chart = one suite
-void LogCmdSuiteRequestView::addRemoveChildReq(int childReqIdx, bool st)
+void LogCmdSuiteRequestView::addRemoveCmd(int reqIdx, bool st)
 {
     //if(childReqIdx >= 0 && childReqIdx < static_cast<int>(handler_->data_->suites().size()))
     {
-        childCtl_.plotState_[childReqIdx]=st;
+        cmdCtl_.plotState_[reqIdx]=st;
 
         //Add suite
         if(st)
         {
-            addChildReq(childReqIdx);
+            addCmd(reqIdx);
             if(views_.count() >0)
             {
-                Q_EMIT childPlotStateChanged(childReqIdx,true,
-                   childSeriesColour(views_[0]->chart(),childReqIdx));
+                Q_EMIT cmdPlotStateChanged(reqIdx,true,
+                   cmdSeriesColour(views_[0]->chart(),reqIdx));
             }
         }
         //remove
         else
         {
-            removeChildReq(childReqIdx);
+            removeCmd(reqIdx);
         }
     }
 }
 
-void LogCmdSuiteRequestView::addChildReq(int childReqIdx)
+void LogCmdSuiteRequestView::addCmd(int reqIdx)
 {
     int prevMaxVal=maxVal_;
 
@@ -2595,10 +2306,10 @@ void LogCmdSuiteRequestView::addChildReq(int childReqIdx)
             QString title="All suites";
 
             QLineSeries* series=new QLineSeries();
-            series->setName(childSeriesId(childReqIdx));
+            series->setName(cmdSeriesId(reqIdx));
 
             int maxVal=0;
-            data_->getChildSubReq(childReqIdx,*series,maxVal);
+            data_->getSubReq(reqIdx,*series,maxVal);
             if(maxVal > maxVal_)
                 maxVal_=maxVal;
 
@@ -2613,8 +2324,8 @@ void LogCmdSuiteRequestView::addChildReq(int childReqIdx)
                 QString::fromStdString(data_->suites()[suiteIdx].name());
 
             QLineSeries* series=new QLineSeries();
-            series->setName(childSeriesId(childReqIdx));
-            data_->getSuiteChildSubReq(suiteIdx,childReqIdx,*series);
+            series->setName(cmdSeriesId(reqIdx));
+            data_->getSuiteSubReq(suiteIdx,reqIdx,*series);
 
             build(views_[i],series,title,maxVal_);
         }
@@ -2626,114 +2337,23 @@ void LogCmdSuiteRequestView::addChildReq(int childReqIdx)
     }
 }
 
-void LogCmdSuiteRequestView::removeChildReq(int childReqIdx)
+void LogCmdSuiteRequestView::removeCmd(int reqIdx)
 {
     for(int i=0; i < views_.count(); i++)
     {
-        removeSeries(views_[i]->chart(),childSeriesId(childReqIdx));
+        removeSeries(views_[i]->chart(),cmdSeriesId(reqIdx));
     }
 }
 
-//One chart = one suite
-void LogCmdSuiteRequestView::addRemoveUserReq(int userReqIdx, bool st)
+QString LogCmdSuiteRequestView::cmdSeriesId(int idx) const
 {
-    //if(userReqIdx >= 0 && userReqIdx < static_cast<int>(handler_->data_->suites().size()))
-    {
-        userCtl_.plotState_[userReqIdx]=st;
-
-        //Add suite
-        if(st)
-        {
-            addUserReq(userReqIdx);
-            if(views_.count() >0)
-            {
-                Q_EMIT userPlotStateChanged(userReqIdx,true,
-                   userSeriesColour(views_[0]->chart(),userReqIdx));
-            }
-        }
-        //remove
-        else
-        {
-            removeUserReq(userReqIdx);
-        }
-    }
+    return "c_" + QString::number(idx);
 }
 
-void LogCmdSuiteRequestView::addUserReq(int userReqIdx)
+//The command colour is the same for all the suites
+QColor LogCmdSuiteRequestView::cmdSeriesColour(QChart* chart,size_t reqIdx)
 {
-    int prevMaxVal=maxVal_;
-
-    for(int i=0; i < views_.count(); i++)
-    {
-        Q_ASSERT(views_[i]);
-
-        //bool global=handler_->data_->suerSubReqIsGlobal(userReqIdx);
-
-        if(chartId(views_[i]) == "total")
-        {
-            QString title="All suites";
-
-            QLineSeries* series=new QLineSeries();
-            series->setName(userSeriesId(userReqIdx));
-
-            int maxVal=0;
-            data_->getUserSubReq(userReqIdx,*series,maxVal);
-            if(maxVal > maxVal_)
-                maxVal_=maxVal;
-
-            build(views_[i],series,title,maxVal_);
-        }
-        else
-        {
-            int suiteIdx=chartId(views_[i]).toInt();
-            Q_ASSERT(suiteIdx >= 0);
-
-            QString title="suite: " +
-                QString::fromStdString(data_->suites()[suiteIdx].name());
-
-            QLineSeries* series=new QLineSeries();
-            series->setName(userSeriesId(userReqIdx));
-            data_->getSuiteUserSubReq(suiteIdx,userReqIdx,*series);
-
-            build(views_[i],series,title,maxVal_);
-
-        }
-    }
-
-    if(maxVal_ > prevMaxVal)
-    {
-        adjustMaxVal();
-    }
-}
-
-void LogCmdSuiteRequestView::removeUserReq(int userReqIdx)
-{
-    for(int i=0; i < views_.count(); i++)
-    {
-        removeSeries(views_[i]->chart(),userSeriesId(userReqIdx));
-    }
-}
-
-QString LogCmdSuiteRequestView::childSeriesId(int childIdx) const
-{
-    return "c_" + QString::number(childIdx);
-}
-
-QString LogCmdSuiteRequestView::userSeriesId(int userIdx) const
-{
-    return "u_" + QString::number(userIdx);
-}
-
-//The child colour is the same for all the suites
-QColor LogCmdSuiteRequestView::childSeriesColour(QChart* chart,size_t childReqIdx)
-{
-    return seriesColour(chart,childSeriesId(childReqIdx));
-}
-
-//The user colour is the same for all the suites
-QColor LogCmdSuiteRequestView::userSeriesColour(QChart* chart,size_t userReqIdx)
-{
-    return seriesColour(chart,userSeriesId(userReqIdx));
+    return seriesColour(chart,cmdSeriesId(reqIdx));
 }
 
 void LogCmdSuiteRequestView::loadCore()
@@ -2741,11 +2361,8 @@ void LogCmdSuiteRequestView::loadCore()
     Q_ASSERT(suiteCtl_.model_);
     suiteCtl_.model_->setData(data_->suites(),suiteCtl_.plotState_);
 
-    Q_ASSERT(childCtl_.model_);
-    childCtl_.model_->setData(data_->total().childSubReq(),childCtl_.plotState_);
-
-    Q_ASSERT(userCtl_.model_);
-    userCtl_.model_->setData(data_->total().userSubReq(),userCtl_.plotState_);
+    Q_ASSERT(cmdCtl_.model_);
+    cmdCtl_.model_->setData(data_->total().subReq(),cmdCtl_.plotState_);
 
     //Removes everything
     clearViews();
@@ -2789,44 +2406,24 @@ void LogCmdSuiteRequestView::buildScanTable(QString& txt,int idx)
                 Viewer::formatText(name,QColor(230,230,230)) + "</td></tr>";
 
 
-        for(int j=0; j < childCtl_.plotState_.count(); j++)
+        for(int j=0; j < cmdCtl_.plotState_.count(); j++)
         {
-            if(childCtl_.plotState_[j])
+            if(cmdCtl_.plotState_[j])
             {
-                QString id=childSeriesId(j);
+                QString id=cmdSeriesId(j);
                 QColor col=seriesColour(chart,id);
 
                 if(idx != -1)
                 {
                     int val=seriesValue(chart,id,idx);
-                    buildScanRow(txt,data_->childSubReqName(j),val,col);
+                    buildScanRow(txt,data_->subReqName(j),val,col);
                 }
                 else
                 {
-                    buildEmptyScanRowSingleVal(txt,data_->childSubReqName(j),col);
+                    buildEmptyScanRowSingleVal(txt,data_->subReqName(j),col);
                 }
             }
         }
-
-        for(int j=0; j < userCtl_.plotState_.count(); j++)
-        {
-            if(userCtl_.plotState_[j])
-            {
-                QString id=userSeriesId(j);
-                QColor col=seriesColour(chart,id);
-
-                if(idx != -1)
-                {
-                    int val=seriesValue(chart,id,idx);
-                    buildScanRow(txt,data_->userSubReqName(j),val,col);
-                }
-                else
-                {
-                    buildEmptyScanRowSingleVal(txt,data_->userSubReqName(j),col);
-                }
-            }
-        }
-
     }
 
     txt+="</table>";
@@ -2843,70 +2440,22 @@ LogSuiteCmdRequestView::LogSuiteCmdRequestView(LogRequestViewHandler* handler,QW
 {
     Q_ASSERT(mainLayout_);
 
-    buildSuiteControl(&suiteCtl_,tr("Suites"),tr("Suite"));
-    buildChildReqControl(&childCtl_,tr("Child cmds"),tr("Command"));
-    buildUserReqControl(&userCtl_,tr("User cmds"),tr("Command"),false);
+    buildSuiteControl(&suiteCtl_,tr("Suites"),tr("Suite"),false);
+    buildCmdControl(&cmdCtl_,tr("Commands"),tr("Command"),false);
 
     controlTab_->setCurrentIndex(0);
 }
 
-//One chart = one suite with all the subrequests (child + user)
-void LogSuiteCmdRequestView::addRemoveUserReq(int userReqIdx, bool st)
-{
-    userCtl_.plotState_[userReqIdx]=st;
-
-    //Add
-    if(st)
-    {
-        addUserReq(userReqIdx);
-        ChartView* view=viewIds_.value(userChartId(userReqIdx),NULL);
-        Q_ASSERT(view);
-        //It only woks if the chart is already displayed, so we need a delayed
-        //adjustment
-        QTimer::singleShot(0,this, SLOT(adjustZoom()));
-    }
-    //remove
-    else
-    {
-        removeChartById(userChartId(userReqIdx));
-    }
-}
-
-void LogSuiteCmdRequestView::addUserReq(int userReqIdx)
-{
-    //at this point total must be already added, so we do not need to adjust the
-    //maxval
-    QString id=userChartId(userReqIdx);
-    addChartById(id);
-    ChartView* view=viewIds_.value(id,NULL);
-    Q_ASSERT(view);
-
-    QString title="cmd: " + data_->userSubReqName(userReqIdx);
-
-    for(int i=0; i < suiteCtl_.plotState_.count(); i++)
-    {
-        if(suiteCtl_.plotState_[i])
-        {
-            QLineSeries* series=new QLineSeries();
-            series->setName(suiteSeriesId(i));
-
-            data_->getSuiteUserSubReq(i,userReqIdx,*series);
-            build(view,series,title,maxVal_);
-        }
-    }
-}
-
-
 //One chart = one suite
-void LogSuiteCmdRequestView::addRemoveChildReq(int childReqIdx, bool st)
+void LogSuiteCmdRequestView::addRemoveCmd(int reqIdx, bool st)
 {
-    childCtl_.plotState_[childReqIdx]=st;
+    cmdCtl_.plotState_[reqIdx]=st;
 
     //Add
     if(st)
     {
-        addChildReq(childReqIdx);
-        ChartView* view=viewIds_.value(childChartId(childReqIdx),NULL);
+        addCmd(reqIdx);
+        ChartView* view=viewIds_.value(cmdChartId(reqIdx),NULL);
         Q_ASSERT(view);
         //It only woks if the chart is already displayed, so we need a delayed
         //adjustment
@@ -2915,20 +2464,20 @@ void LogSuiteCmdRequestView::addRemoveChildReq(int childReqIdx, bool st)
     //remove
     else
     {
-        removeChartById(childChartId(childReqIdx));
+        removeChartById(cmdChartId(reqIdx));
     }
 }
 
-void LogSuiteCmdRequestView::addChildReq(int childReqIdx)
+void LogSuiteCmdRequestView::addCmd(int reqIdx)
 {
     //at this point total must be already added, so we do not need to adjust the
     //maxval
-    QString id=childChartId(childReqIdx);
+    QString id=cmdChartId(reqIdx);
     addChartById(id);
     ChartView* view=viewIds_.value(id,NULL);
     Q_ASSERT(view);
 
-    QString title="cmd: " + data_->childSubReqName(childReqIdx);
+    QString title="cmd: " + data_->subReqName(reqIdx);
 
     for(int i=0; i < suiteCtl_.plotState_.count(); i++)
     {
@@ -2937,7 +2486,7 @@ void LogSuiteCmdRequestView::addChildReq(int childReqIdx)
             QLineSeries* series=new QLineSeries();
             series->setName(suiteSeriesId(i));
 
-            data_->getSuiteChildSubReq(i,childReqIdx,*series);
+            data_->getSuiteSubReq(i,reqIdx,*series);
             build(view,series,title,maxVal_);
         }
     }
@@ -3026,25 +2575,14 @@ void LogSuiteCmdRequestView::addSuite(int suiteIdx)
         }
         else
         {
-            int cmdIdx=-1;
-            QString cmdType;
-            parseChartId(chartId(views_[i]),cmdIdx,cmdType);
+            int cmdIdx=chartId(views_[i]).toInt();
             Q_ASSERT(cmdIdx >= 0);
 
-            QString title;
-            if(cmdType == "c")
-                title="cmd: " + data_->childSubReqName(cmdIdx);
-            else if(cmdType == "u")
-                title="cmd: " + data_->userSubReqName(cmdIdx);
+            QString title="cmd: " + data_->subReqName(cmdIdx);
 
             QLineSeries* series=new QLineSeries();
-            series->setName(suiteSeriesId(suiteIdx));
-
-            if(cmdType == "c")
-                data_->getSuiteChildSubReq(suiteIdx,cmdIdx,*series);
-            else if(cmdType == "u")
-                data_->getSuiteUserSubReq(suiteIdx,cmdIdx,*series);
-
+            series->setName(suiteSeriesId(suiteIdx));           
+            data_->getSuiteSubReq(suiteIdx,cmdIdx,*series);
             build(views_[i],series,title,maxVal_);
         }
     }
@@ -3063,24 +2601,9 @@ void LogSuiteCmdRequestView::removeSuite(int suiteIdx)
     }
 }
 
-QString LogSuiteCmdRequestView::childChartId(int idx) const
+QString LogSuiteCmdRequestView::cmdChartId(int idx) const
 {
-    return "c_" + QString::number(idx);
-}
-
-QString LogSuiteCmdRequestView::userChartId(int idx) const
-{
-    return "u_" + QString::number(idx);
-}
-
-void LogSuiteCmdRequestView::parseChartId(QString id,int& idx,QString& type) const
-{
-    QStringList lst=id.split("_");
-    if(lst.count() == 2)
-    {
-        type=lst[0];
-        idx=lst[1].toInt();
-    }
+    return QString::number(idx);
 }
 
 QString LogSuiteCmdRequestView::suiteSeriesId(int suiteIdx) const
@@ -3088,7 +2611,6 @@ QString LogSuiteCmdRequestView::suiteSeriesId(int suiteIdx) const
     return QString::number(suiteIdx);
 }
 
-//The child colour is the same for all the suites
 QColor LogSuiteCmdRequestView::suiteSeriesColour(QChart* chart,size_t suiteIdx)
 {
     return seriesColour(chart,suiteSeriesId(suiteIdx));
@@ -3099,11 +2621,8 @@ void LogSuiteCmdRequestView::loadCore()
     Q_ASSERT(suiteCtl_.model_);
     suiteCtl_.model_->setData(data_->suites(),suiteCtl_.plotState_);
 
-    Q_ASSERT(childCtl_.model_);
-    childCtl_.model_->setData(data_->total().childSubReq(),childCtl_.plotState_);
-
-    Q_ASSERT(userCtl_.model_);
-    userCtl_.model_->setData(data_->total().userSubReq(),userCtl_.plotState_);
+    Q_ASSERT(cmdCtl_.model_);
+    cmdCtl_.model_->setData(data_->total().subReq(),cmdCtl_.plotState_);
 
     //Removes everything
     clearViews();
@@ -3132,21 +2651,17 @@ void LogSuiteCmdRequestView::buildScanTable(QString& txt,int idx)
         Q_ASSERT(chart);
         QString id=chartId(views_[i]);
         QString name;
-        int cmdIdx=-1;
-        QString cmdType;
+        int cmdIdx=id.toInt();
+
 
         if(id == "total")
         {
             name="all commands";
         }
         else
-        {
-            parseChartId(id,cmdIdx,cmdType);
-            Q_ASSERT(cmdIdx >= 0);
-            if(cmdType == "c")
-                name="cmd: " + data_->childSubReqName(cmdIdx);
-            else if(cmdType == "u")
-                name="cmd: " + data_->userSubReqName(cmdIdx);
+        {           
+            Q_ASSERT(cmdIdx >= 0);          
+            name="cmd: " + data_->subReqName(cmdIdx);
         }
 
         txt+="<tr><td colspan=\'2\' bgcolor=\'" + QColor(140,140,140).name()  + "\'>" +
@@ -3189,7 +2704,7 @@ LogUidCmdRequestView::LogUidCmdRequestView(LogRequestViewHandler* handler,QWidge
     Q_ASSERT(mainLayout_);
 
     buildUidControl(&uidCtl_,tr("Users"),tr("User"),false);
-    buildUserReqControl(&userCtl_,tr("Commands"),tr("Command"),false);
+    buildCmdControl(&cmdCtl_,tr("Commands"),tr("Command"),false);
 
     controlTab_->setCurrentIndex(0);
 }
@@ -3234,7 +2749,7 @@ void LogUidCmdRequestView::addUid(int uidIdx)
             series->setName(uidSeriesId(uidIdx));
 
             int maxVal=0;
-            data_->getUidUserReq(uidIdx,*series,maxVal);
+            data_->getUidTotalReq(uidIdx,*series,maxVal);
             if(maxVal > maxVal_)
                 maxVal_=maxVal;
 
@@ -3245,13 +2760,13 @@ void LogUidCmdRequestView::addUid(int uidIdx)
             QString id=chartId(views_[i]);
             int idx=id.toInt();
             Q_ASSERT(idx >= 0);
-            QString title="command: " + data_->userSubReqName(idx);
+            QString title="command: " + data_->subReqName(idx);
 
             QLineSeries* series=new QLineSeries();
 
             int userReqIdx=idx;
             series->setName(uidSeriesId(uidIdx));
-            data_->getUidUserSubReq(uidIdx,userReqIdx,*series);
+            data_->getUidSubReq(uidIdx,userReqIdx,*series);
 
             build(views_[i],series,title,data_->subReqMax());
         }
@@ -3272,14 +2787,14 @@ void LogUidCmdRequestView::removeUid(int uidIdx)
 }
 
 //One chart = one scommand
-void LogUidCmdRequestView::addRemoveUserReq(int userReqIdx, bool st)
+void LogUidCmdRequestView::addRemoveCmd(int reqIdx, bool st)
 {
-    userCtl_.plotState_[userReqIdx]=st;
+    cmdCtl_.plotState_[reqIdx]=st;
 
     if(st)
     {
-        addUserReq(userReqIdx);
-        QString id=QString::number(userReqIdx);
+        addCmd(reqIdx);
+        QString id=QString::number(reqIdx);
         ChartView* view=viewIds_.value(id,NULL);
         Q_ASSERT(view);
         //It only woks if the chart is already displayed, so we need a delayed
@@ -3288,19 +2803,19 @@ void LogUidCmdRequestView::addRemoveUserReq(int userReqIdx, bool st)
     }
     else
     {
-        removeChartById(userChartId(userReqIdx));
+        removeChartById(cmdChartId(reqIdx));
     }
 }
 
 
-void LogUidCmdRequestView::addUserReq(int userReqIdx)
+void LogUidCmdRequestView::addCmd(int reqIdx)
 {
-    QString id=userChartId(userReqIdx);
+    QString id=cmdChartId(reqIdx);
     addChartById(id);
     ChartView* view=viewIds_.value(id,NULL);
     Q_ASSERT(view);
 
-    QString title="command: " + data_->userSubReqName(userReqIdx);
+    QString title="command: " + data_->subReqName(reqIdx);
 
     for(int i=0; i < uidCtl_.plotState_.count(); i++)
     {
@@ -3308,7 +2823,7 @@ void LogUidCmdRequestView::addUserReq(int userReqIdx)
         {
             QLineSeries* series=new QLineSeries();
             series->setName(uidSeriesId(i));
-            data_->getUidUserSubReq(i,userReqIdx,*series);
+            data_->getUidSubReq(i,reqIdx,*series);
             build(view,series,title,maxVal_);
         }
     }
@@ -3332,7 +2847,7 @@ void LogUidCmdRequestView::addTotal()
             QLineSeries* series=new QLineSeries();
             series->setName(uidSeriesId(i));
             int maxVal=0;
-            data_->getUidUserReq(i,*series,maxVal);
+            data_->getUidTotalReq(i,*series,maxVal);
             if(maxVal_< maxVal)
                 maxVal_=maxVal;
 
@@ -3359,7 +2874,7 @@ QColor LogUidCmdRequestView::uidSeriesColour(QChart* chart,int uidIdx)
     return seriesColour(chart,uidSeriesId(uidIdx));
 }
 
-QString LogUidCmdRequestView::userChartId(int idx) const
+QString LogUidCmdRequestView::cmdChartId(int idx) const
 {
     return QString::number(idx);
 }
@@ -3369,8 +2884,8 @@ void LogUidCmdRequestView::loadCore()
     Q_ASSERT(uidCtl_.model_);
     uidCtl_.model_->setData(data_->uidData(),uidCtl_.plotState_);
 
-    Q_ASSERT(userCtl_.model_);
-    userCtl_.model_->setData(data_->total().userSubReq(),userCtl_.plotState_);
+    Q_ASSERT(cmdCtl_.model_);
+    cmdCtl_.model_->setData(data_->total().subReq(),cmdCtl_.plotState_);
 
     //Removes everything
     clearViews();
@@ -3406,7 +2921,7 @@ void LogUidCmdRequestView::buildScanTable(QString& txt,int idx)
         {
             int cmdIdx=id.toInt();
             Q_ASSERT(cmdIdx >= 0);
-            cmd=data_->userSubReqName(cmdIdx);
+            cmd=data_->subReqName(cmdIdx);
         }
 
         txt+="<tr><td colspan=\'2\' bgcolor=\'" + QColor(140,140,140).name()  + "\'>" +
@@ -3448,36 +2963,36 @@ LogCmdUidRequestView::LogCmdUidRequestView(LogRequestViewHandler* handler,QWidge
     Q_ASSERT(mainLayout_);
 
     buildUidControl(&uidCtl_,tr("Users"),tr("User"),false);
-    buildUserReqControl(&userCtl_,tr("Commands"),tr("Command"),false);
+    buildCmdControl(&cmdCtl_,tr("Commands"),tr("Command"),false);
 
     controlTab_->setCurrentIndex(1);
 }
 
 //One chart = all the commands for the given uid
-void LogCmdUidRequestView::addRemoveUserReq(int userReqIdx, bool st)
+void LogCmdUidRequestView::addRemoveCmd(int reqIdx, bool st)
 {
-    if(userReqIdx >= 0 && userReqIdx < static_cast<int>(data_->total().userSubReq().size()))
+    if(reqIdx >= 0 && reqIdx < static_cast<int>(data_->total().subReq().size()))
     {
-        userCtl_.plotState_[userReqIdx]=st;
+        cmdCtl_.plotState_[reqIdx]=st;
 
         //Add uid
         if(st)
         {
-            addUserReq(userReqIdx);
+            addCmd(reqIdx);
             if(views_.size() >0)
             {
-                Q_EMIT userPlotStateChanged(userReqIdx,true,
-                   seriesColour(views_[0]->chart(),userSeriesId(userReqIdx)));
+                Q_EMIT cmdPlotStateChanged(reqIdx,true,
+                   seriesColour(views_[0]->chart(),cmdSeriesId(reqIdx)));
             }
         }
         //remove
         else
         {
-            removeUserReq(userReqIdx);
+            removeCmd(reqIdx);
         }
     }
 }
-void LogCmdUidRequestView::addUserReq(int userReqIdx)
+void LogCmdUidRequestView::addCmd(int reqIdx)
 {
     int prevMaxVal=maxVal_;
 
@@ -3490,10 +3005,10 @@ void LogCmdUidRequestView::addUserReq(int userReqIdx)
             QString title="All uids";
 
             QLineSeries* series=new QLineSeries();
-            series->setName(userSeriesId(userReqIdx));
+            series->setName(cmdSeriesId(reqIdx));
 
             int maxVal=0;
-            data_->getUidUserReq(i,*series,maxVal);
+            data_->getUidTotalReq(i,*series,maxVal);
             if(maxVal > maxVal_)
                 maxVal_=maxVal;
 
@@ -3509,8 +3024,8 @@ void LogCmdUidRequestView::addUserReq(int userReqIdx)
             QLineSeries* series=new QLineSeries();
 
             int uidIdx=idx;
-            series->setName(userSeriesId(userReqIdx));
-            data_->getUidUserSubReq(uidIdx,userReqIdx,*series);
+            series->setName(cmdSeriesId(reqIdx));
+            data_->getUidSubReq(uidIdx,reqIdx,*series);
             build(views_[i],series,title,data_->subReqMax());
         }
     }
@@ -3521,11 +3036,11 @@ void LogCmdUidRequestView::addUserReq(int userReqIdx)
     }
 }
 
-void LogCmdUidRequestView::removeUserReq(int userReqIdx)
+void LogCmdUidRequestView::removeCmd(int reqIdx)
 {
     for(int i=0; i < views_.count(); i++)
     {
-        removeSeries(views_[i]->chart(),userSeriesId(userReqIdx));
+        removeSeries(views_[i]->chart(),cmdSeriesId(reqIdx));
     }
 }
 
@@ -3560,13 +3075,13 @@ void LogCmdUidRequestView::addUid(int uidIdx)
 
     QString title="user: " + data_->uidName(uidIdx);
 
-    for(int i=0; i < userCtl_.plotState_.count(); i++)
+    for(int i=0; i < cmdCtl_.plotState_.count(); i++)
     {
-        if(userCtl_.plotState_[i])
+        if(cmdCtl_.plotState_[i])
         {
             QLineSeries* series=new QLineSeries();
-            series->setName(userSeriesId(i));
-            data_->getUidUserSubReq(uidIdx,i,*series);
+            series->setName(cmdSeriesId(i));
+            data_->getUidSubReq(uidIdx,i,*series);
             build(view,series,title,data_->subReqMax());
         }
     }
@@ -3583,21 +3098,21 @@ void LogCmdUidRequestView::addTotal()
 
     QString title="All users";
 
-    for(int i=0; i < userCtl_.plotState_.count(); i++)
+    for(int i=0; i < cmdCtl_.plotState_.count(); i++)
     {
-        if(userCtl_.plotState_[i])
+        if(cmdCtl_.plotState_[i])
         {
             QLineSeries* series=new QLineSeries();
-            series->setName(userSeriesId(i));
+            series->setName(cmdSeriesId(i));
             int maxVal=0;
-            data_->getUserSubReq(i,*series,maxVal);
+            data_->getSubReq(i,*series,maxVal);
             if(maxVal_< maxVal)
                 maxVal_=maxVal;
 
             build(view,series,title,maxVal);
 
-            Q_EMIT userPlotStateChanged(i,true,
-               userSeriesColour(view->chart(),i));
+            Q_EMIT cmdPlotStateChanged(i,true,
+               cmdSeriesColour(view->chart(),i));
         }
     }
 
@@ -3607,14 +3122,14 @@ void LogCmdUidRequestView::addTotal()
     }
 }
 
-QString LogCmdUidRequestView::userSeriesId(int userReqIdx) const
+QString LogCmdUidRequestView::cmdSeriesId(int reqIdx) const
 {
-    return "u_" + QString::number(userReqIdx);
+    return "c_" + QString::number(reqIdx);
 }
 
-QColor LogCmdUidRequestView::userSeriesColour(QChart* chart,int userReqIdx)
+QColor LogCmdUidRequestView::cmdSeriesColour(QChart* chart,int reqIdx)
 {
-    return seriesColour(chart,userSeriesId(userReqIdx));
+    return seriesColour(chart,cmdSeriesId(reqIdx));
 }
 
 QString LogCmdUidRequestView::uidChartId(int idx) const
@@ -3628,8 +3143,8 @@ void LogCmdUidRequestView::loadCore()
     Q_ASSERT(uidCtl_.model_);
     uidCtl_.model_->setData(data_->uidData(),uidCtl_.plotState_);
 
-    Q_ASSERT(userCtl_.model_);
-    userCtl_.model_->setData(data_->total().userSubReq(),userCtl_.plotState_);
+    Q_ASSERT(cmdCtl_.model_);
+    cmdCtl_.model_->setData(data_->total().subReq(),cmdCtl_.plotState_);
 
     //Removes everything
     clearViews();
@@ -3783,36 +3298,115 @@ void LogStatCmdUidView::loadCore()
 LogStatUidCmdView::LogStatUidCmdView(LogRequestViewHandler* handler,QWidget* parent) :
     LogStatRequestView(handler,parent)
 {
-    buildUserReqControl(&userCtl_,tr("User command"),tr("Command"),true);
+    buildCmdControl(&cmdCtl_,tr("Commands"),tr("Command"),true);
 }
 
-void LogStatUidCmdView::addRemoveUserReq(int userReqIdx,bool st)
+void LogStatUidCmdView::addRemoveCmd(int reqIdx,bool st)
 {
     for(int i=0; i < statModel_->columnCount(); i++)
     {
-        if(statModel_->dataIndex(i) == userReqIdx)
+        if(statModel_->dataIndex(i) == reqIdx)
             statTable_->setColumnHidden(i,!st);
     }
 }
 
 void LogStatUidCmdView::adjustStats()
 {
-    userCtl_.model_->adjustStats(data_->total().userSubReq());
+    cmdCtl_.model_->adjustStats(data_->total().subReq());
     statModel_->setDataUidCmd(data_->total(),data_->uidData());
 }
 
 void LogStatUidCmdView::loadCore()
 {
-    Q_ASSERT(userCtl_.model_);
-    userCtl_.model_->setData(data_->total().userSubReq(),userCtl_.plotState_);
-
-    userCtl_.model_->selectAll();
+    Q_ASSERT(cmdCtl_.model_);
+    cmdCtl_.model_->setData(data_->total().subReq(),cmdCtl_.plotState_);
+    cmdCtl_.model_->selectAll();
 
     statModel_->setDataUidCmd(data_->total(),data_->uidData());
 
     for(int i=0; i < statModel_->columnCount()-1; i++)
         statTable_->resizeColumnToContents(i);
 }
+
+//=============================================================================
+//
+// LogStatCmdSuiteView
+//
+//=============================================================================
+
+LogStatCmdSuiteView::LogStatCmdSuiteView(LogRequestViewHandler* handler,QWidget* parent) :
+    LogStatRequestView(handler,parent)
+{
+    buildSuiteControl(&suiteCtl_,tr("Suites"),tr("Suites"),true);
+}
+
+void LogStatCmdSuiteView::addRemoveSuite(int suiteIdx,bool st)
+{
+    for(int i=0; i < statModel_->columnCount(); i++)
+    {
+        if(statModel_->dataIndex(i) == suiteIdx)
+            statTable_->setColumnHidden(i,!st);
+    }
+}
+
+void LogStatCmdSuiteView::adjustStats()
+{
+    suiteCtl_.model_->adjustStats(data_->suiteData());
+    statModel_->setDataCmdSuite(data_->total(),data_->suiteData());
+}
+
+void LogStatCmdSuiteView::loadCore()
+{
+    Q_ASSERT(suiteCtl_.model_);
+    suiteCtl_.model_->setData(data_->suiteData(),suiteCtl_.plotState_);
+
+    suiteCtl_.model_->selectAll();
+
+    statModel_->setDataCmdSuite(data_->total(),data_->suiteData());
+
+    for(int i=0; i < statModel_->columnCount()-1; i++)
+        statTable_->resizeColumnToContents(i);
+}
+
+//=============================================================================
+//
+// LogStatSuiteCmdView
+//
+//=============================================================================
+
+LogStatSuiteCmdView::LogStatSuiteCmdView(LogRequestViewHandler* handler,QWidget* parent) :
+    LogStatRequestView(handler,parent)
+{
+    buildCmdControl(&cmdCtl_,tr("Commands"),tr("Command"),true);
+}
+
+void LogStatSuiteCmdView::addRemoveCmd(int idx, bool st)
+{
+    for(int i=0; i < statModel_->columnCount(); i++)
+    {
+        if(statModel_->dataIndex(i) == idx)
+            statTable_->setColumnHidden(i,!st);
+    }
+}
+
+void LogStatSuiteCmdView::adjustStats()
+{
+    cmdCtl_.model_->adjustStats(data_->total().subReq());
+    statModel_->setDataSuiteCmd(data_->total(),data_->suiteData());
+}
+
+void LogStatSuiteCmdView::loadCore()
+{
+    Q_ASSERT(cmdCtl_.model_);
+    cmdCtl_.model_->setData(data_->total().subReq(),cmdCtl_.plotState_);
+    cmdCtl_.model_->selectAll();
+
+    statModel_->setDataSuiteCmd(data_->total(),data_->suiteData());
+
+    for(int i=0; i < statModel_->columnCount()-1; i++)
+        statTable_->resizeColumnToContents(i);
+}
+
 
 //=====================================================
 //
@@ -3851,10 +3445,10 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
     data_.dataIndex_=QVector<int>(1+data.size(),-1);
 
     QVector<float> val;
-    for(size_t i=0; i < total.userSubReq().size(); i++)
+    for(size_t i=0; i < total.subReq().size(); i++)
     {
-        val << total.userSubReq()[i].periodStat().sumTotal_;
-        data_.rowLabels_ << QString::fromStdString(total.userSubReq()[i].name_);
+        val << total.subReq()[i].periodStat().sumTotal_;
+        data_.rowLabels_ << QString::fromStdString(total.subReq()[i].name_);
     }  
     data_.vals_[0] =val;
     data_.dataIndex_[0]=-1;
@@ -3871,9 +3465,9 @@ void LogStatRequestModel::setDataCmdUid(const LogLoadDataItem& total, const std:
         data_.colLabels_[pos] = QString::fromStdString(data[i].name());
 
         val.clear();
-        for(size_t j=0; j < data[i].userSubReq().size(); j++)
+        for(size_t j=0; j < data[i].subReq().size(); j++)
         {
-            val << data[i].userSubReq()[j].periodStat().sumTotal_;
+            val << data[i].subReq()[j].periodStat().sumTotal_;
         }
 
         data_.vals_[pos] = val;
@@ -3889,11 +3483,11 @@ void LogStatRequestModel::setDataUidCmd(const LogLoadDataItem& total, const std:
     data_.clear();
 
     data_.colLabels_ << "ALL";
-    for(size_t i=0; i < total.userSubReq().size(); i++)
+    for(size_t i=0; i < total.subReq().size(); i++)
         data_.colLabels_ << "";
 
-    data_.vals_=QVector<QVector<float> >(1+total.userSubReq().size());
-    data_.dataIndex_=QVector<int>(1+total.userSubReq().size(),-1);
+    data_.vals_=QVector<QVector<float> >(1+total.subReq().size());
+    data_.dataIndex_=QVector<int>(1+total.subReq().size(),-1);
 
     QVector<float> val;
     for(size_t i=0; i < data.size(); i++)
@@ -3904,24 +3498,118 @@ void LogStatRequestModel::setDataUidCmd(const LogLoadDataItem& total, const std:
     data_.vals_[0]=val;
     data_.dataIndex_[0]=-1;
 
-    for(size_t i=0; i < total.userSubReq().size(); i++)
+    for(size_t i=0; i < total.subReq().size(); i++)
     {
         size_t pos=0;
         if(columnOrder_ == NameOrder)
             pos=i+1;
         else
-            pos=total.userSubReq()[i].periodStat().rank_+1;
+            pos=total.subReq()[i].periodStat().rank_+1;
 
         data_.dataIndex_[pos]=i;
-        data_.colLabels_[pos]=QString::fromStdString(total.userSubReq()[i].name_);
+        data_.colLabels_[pos]=QString::fromStdString(total.subReq()[i].name_);
 
         val.clear();
         for(size_t j=0; j < data.size(); j++)
         {
-            val << data[j].userSubReq()[i].periodStat().sumTotal_;
+            val << data[j].subReq()[i].periodStat().sumTotal_;
         }
 
         data_.vals_[pos]=val;
+    }
+
+    endResetModel();
+}
+
+void LogStatRequestModel::setDataCmdSuite(const LogLoadDataItem& total, const std::vector<LogLoadDataItem>& data)
+{
+    beginResetModel();
+
+    data_.clear();
+
+    data_.colLabels_ << "ALL";
+    for(size_t i=0; i < data.size(); i++)
+        data_.colLabels_ << "";
+
+    data_.vals_=QVector<QVector<float> >(1+data.size());
+    data_.dataIndex_=QVector<int>(1+data.size(),-1);
+
+    QVector<float> val;
+    for(size_t i=0; i < total.subReq().size(); i++)
+    {
+        val << total.subReq()[i].periodStat().sumTotal_;
+        data_.rowLabels_ << QString::fromStdString(total.subReq()[i].name_);
+    }
+
+    data_.vals_[0] =val;
+    data_.dataIndex_[0]=-1;
+
+    for(size_t i=0; i < data.size(); i++)
+    {
+        size_t pos=0;
+        if(columnOrder_ == NameOrder)
+            pos=i+1;
+        else
+            pos=data[i].rank()+1;
+
+        data_.dataIndex_[pos]=i;
+        data_.colLabels_[pos] = QString::fromStdString(data[i].name());
+
+        val.clear();
+        for(size_t j=0; j < data[i].subReq().size(); j++)
+        {
+            val << data[i].subReq()[j].periodStat().sumTotal_;
+        }
+
+        data_.vals_[pos] = val;
+    }
+
+    endResetModel();
+}
+
+void LogStatRequestModel::setDataSuiteCmd(const LogLoadDataItem& total, const std::vector<LogLoadDataItem>& data)
+{
+    beginResetModel();
+
+    data_.clear();
+
+    size_t colNum=1+total.subReq().size();
+
+    data_.colLabels_ << "ALL";
+    for(size_t i=0; i < colNum-1; i++)
+        data_.colLabels_ << "";
+
+    data_.vals_=QVector<QVector<float> >(colNum);
+    data_.dataIndex_=QVector<int>(colNum,-1);
+
+    QVector<float> val;
+    for(size_t i=0; i < data.size(); i++)
+    {
+        val << data[i].periodStat().sumTotal_;
+        data_.rowLabels_ << QString::fromStdString(data[i].name());
+    }
+
+    data_.vals_[0] =val;
+    data_.dataIndex_[0]=-1;
+
+    for(size_t i=0; i < total.subReq().size(); i++)
+    {
+        size_t pos=0;
+        if(columnOrder_ == NameOrder)
+            pos=i+1;
+        else
+            pos=total.subReq()[i].periodStat().rank_+1;
+
+        data_.dataIndex_[pos]=i;
+        data_.colLabels_[pos] = QString::fromStdString(total.subReq()[i].name_);
+
+        val.clear();
+        for(size_t j=0; j < data.size(); j++)
+        {
+            val << data[j].subReq()[i].periodStat().sumTotal_;
+        }
+
+        data_.vals_[pos] = val;
     }
 
     endResetModel();
