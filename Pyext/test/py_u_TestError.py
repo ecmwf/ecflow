@@ -438,6 +438,20 @@ if __name__ == "__main__":
     assert test_passed,"duplicate Task test failed"   
 
     # =================================================================================
+    print("Task and family of same name should not be allowed")
+    test_passed = False
+    try:
+        suite = Suite("1")
+        ta = Task("a")
+        tb = Family("a")
+        suite.add_task(ta)
+        suite.add_family(tb)
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Task and family of same name should not be allowed"   
+
+    # =================================================================================
     print("check duplicate meter not allowed")
     test_passed = False
     try:
