@@ -1,0 +1,5 @@
+suite  s1
+   task t1
+   family t1
+   endfamily
+endsuite
