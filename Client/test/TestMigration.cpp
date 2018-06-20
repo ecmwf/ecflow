@@ -115,6 +115,7 @@ BOOST_FIXTURE_TEST_CASE( test_migration,ArgsFixture )
    else {
       std::cout << "Ignoring test, since directory '/var/tmp/ma0/ECFLOW_TEST/migration' not found\n";
    }
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

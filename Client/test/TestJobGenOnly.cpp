@@ -89,6 +89,7 @@ BOOST_AUTO_TEST_CASE( test_jobgenonly )
 
 	// Check if jobs file were generated.
 	BOOST_FOREACH(const std::string& s, generatedFiles ) { BOOST_REQUIRE_MESSAGE(fs::exists(s),"File " << s << " should have been created");  }
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()
