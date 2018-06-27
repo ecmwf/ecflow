@@ -31,12 +31,14 @@ public:
 	QModelIndex infoToIndex(VInfo_ptr);
     QModelIndex nodeToIndex(const VNode *node);
     void selectionChanged(QModelIndexList lst);
+    void setSkipSort(bool b) {skipSort_=b;}
 
 protected:
     bool lessThan(const QModelIndex &left,
                                       const QModelIndex &right) const;
 
     TableNodeModel* nodeModel_;
+    bool skipSort_;
 };
 
 #endif

@@ -47,8 +47,11 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 
 	setRootIsDecorated(false);
 
-    setSortingEnabled(true);
-    //sortByColumn(0,Qt::AscendingOrder);
+    //We enable sorting but do not want to perform it immediately
+    setSortingEnabledNoExec(true);
+
+    //setSortingEnabled(false);
+    //sortByColumn(-1,Qt::AscendingOrder);
 
 	setAllColumnsShowFocus(true);
 	setUniformRowHeights(true);
@@ -114,6 +117,8 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 
 	//Initialise bg
 	adjustBackground(prop_->find("view.table.background")->value().value<QColor>());
+
+    header_->setSortIndicatorShown(true);
 }
 
 TableNodeView::~TableNodeView()
@@ -137,6 +142,21 @@ QWidget* TableNodeView::realWidget()
 QObject* TableNodeView::realObject()
 {
     return this;
+}
+
+//Enable sorting without actually performing it!!!
+void TableNodeView::setSortingEnabledNoExec(bool b)
+{
+    if(b)
+    {
+        model_->setSkipSort(true);
+        setSortingEnabled(true);
+        model_->setSkipSort(false);
+    }
+    else
+    {
+        setSortingEnabled(false);
+    }
 }
 
 //Collects the selected list of indexes
@@ -297,8 +317,10 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 
     int visCnt=0;
     for(int i=0; i <header_->count(); i++)
+    {
         if(!header_->isSectionHidden(i))
             visCnt++;
+    }
 
 	QList<QAction*> lst;
 	QMenu *menu=new QMenu(this);

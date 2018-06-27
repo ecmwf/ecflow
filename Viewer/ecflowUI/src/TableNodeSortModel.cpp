@@ -14,7 +14,8 @@
 
 TableNodeSortModel::TableNodeSortModel(TableNodeModel* nodeModel,QObject *parent) :
 		QSortFilterProxyModel(parent),
-		nodeModel_(nodeModel)
+        nodeModel_(nodeModel),
+        skipSort_(false)
 {
     //connect(nodeModel_,SIGNAL(filterChanged()),
     //		this,SLOT(slotFilterChanged()));
@@ -56,9 +57,15 @@ void TableNodeSortModel::selectionChanged(QModelIndexList lst)
 bool TableNodeSortModel::lessThan(const QModelIndex &left,
                                   const QModelIndex &right) const
 {
+    if(skipSort_)
+        return true;
+
     TableNodeModel::ColumnType id=static_cast<TableNodeModel::ColumnType>(left.column());
 
-    if(id == TableNodeModel::StatusChangeColumn)
+    if(id == TableNodeModel::PathColumn)
+        return left.row() < right.row();
+
+    else if(id == TableNodeModel::StatusChangeColumn)
     {
         return left.data(AbstractNodeModel::SortRole).toUInt() <
                right.data(AbstractNodeModel::SortRole).toUInt();

@@ -70,6 +70,7 @@ protected:
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 	void adjustBackground(QColor col);
 	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void setSortingEnabledNoExec(bool b);
 
     TableNodeSortModel* model_;
 	ActionHandler* actionHandler_;
