@@ -77,8 +77,8 @@ protected:
    void contextMenuEvent(QContextMenuEvent* e);
 
 private:
-	DashboardWidget* addWidgetCore(const std::string& type);
-	DashboardWidget* addWidget(const std::string& type,const std::string& dockId);
+    DashboardWidget* addWidgetCore(const std::string& type,bool userAddedView);
+    DashboardWidget* addWidget(const std::string& type,const std::string& dockId,bool userAddedView);
 	QString uniqueDockId();
 	static std::string widgetSettingsId(int i);
     void initialSelectionInView();

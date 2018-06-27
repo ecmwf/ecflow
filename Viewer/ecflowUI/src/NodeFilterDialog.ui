@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Table filter</string>
+   <string>Define filter for table view</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0">
    <item>

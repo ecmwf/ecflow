@@ -27,7 +27,7 @@
 
 #include <QHBoxLayout>
 
-TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
+TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,bool interactive,QWidget * parent) :
     NodeWidget("table",serverFilter,parent),
     sortModel_(0)
 {
@@ -36,8 +36,18 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
 
     bcWidget_=new NodePathWidget(this);
 
-	//This defines how to filter the nodes in the tree. We only want to filter according to node status.
+    //This defines how to filter the nodes in the tree.
 	filterDef_=new NodeFilterDef(serverFilter_,NodeFilterDef::GeneralScope);
+
+    //Build the filter widget
+    filterW_->build(filterDef_,serverFilter_);
+
+    //pop up the editor to define a filter. Only when the users
+    //creates a new table view
+    if(interactive)
+    {
+        filterW_->slotEdit();
+    }
 
 	//Create the table model. It uses the datahandler to access the data.
     TableNodeModel* tModel=new TableNodeModel(serverFilter_,filterDef_,this);
@@ -45,9 +55,6 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,QWidget * parent) :
 
 	//Create a filter model for the tree.
     sortModel_=new TableNodeSortModel(tModel,this);
-
-	//Build the filter widget
-	filterW_->build(filterDef_,serverFilter_);
 
 	//Create the view
 	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);

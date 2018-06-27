@@ -75,7 +75,7 @@ Dashboard::~Dashboard()
 }
 
 
-DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
+DashboardWidget* Dashboard::addWidgetCore(const std::string& type,bool userAddedView)
 {
 	DashboardWidget *w=0;
 
@@ -94,7 +94,7 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type)
 	}
 	else if(type == "table")
 	{
-		NodeWidget* ctl=new TableNodeWidget(serverFilter_,this);
+        NodeWidget* ctl=new TableNodeWidget(serverFilter_,userAddedView,this);
 
 		connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
 				this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
@@ -159,7 +159,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
         resetMaximised();
     }
 
-    DashboardWidget* w=addWidget(type,dockId.toStdString());
+    DashboardWidget* w=addWidget(type,dockId.toStdString(),true);
 
 	//At this point the widgets can be inactive. Reload will make them active!!!
 	w->reload();
@@ -179,9 +179,9 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
 	return w;
 }
 
-DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string& dockId)
+DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string& dockId,bool userAddedView)
 {
-	DashboardWidget *w=Dashboard::addWidgetCore(type);
+    DashboardWidget *w=Dashboard::addWidgetCore(type,userAddedView);
 
 	//If the db-widget creation fails we should do something!!!
 	if(!w)
@@ -213,7 +213,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 
 DashboardWidget* Dashboard::addDialog(const std::string& type)
 {
-	DashboardWidget *w=Dashboard::addWidgetCore(type);
+    DashboardWidget *w=Dashboard::addWidgetCore(type,false);
 
 	//If the db-widget creation fails we should do something!!!
 	if(!w)
@@ -548,7 +548,7 @@ void Dashboard::readSettings(VComboSettings* vs)
 			std::string dockId=vs->get<std::string>("dockId","");
 
 			//Create a dashboard widget
-			if(DashboardWidget *dw=addWidget(type,dockId))
+            if(DashboardWidget *dw=addWidget(type,dockId,false))
 			{
                 //This will make the widgets active!!! The ServerHandler reset() can
                 //be still running at this point!
