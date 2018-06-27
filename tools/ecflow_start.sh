@@ -125,8 +125,8 @@ localh=$(uname -n)
 # =========================================================================
 # Update host, ecflow_site.sh is configured from CMAKE at install time
 # =========================================================================
-if [ -f ecflow_site.sh ] ; then
-$(source ./ecflow_site.sh)
+if [ -f ${ECFLOW_DIR:=/usr/local}/bin/ecflow_site.sh ] ; then
+  source ${ECFLOW_DIR}/bin/ecflow_site.sh
 fi
 
 # ==================================================================================

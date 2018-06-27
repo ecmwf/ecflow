@@ -46,11 +46,17 @@ if __name__ == "__main__":
     
     f1 = s1.find_family("f1")
     assert f1 != None, "expected find find family f1"
+    f1 = s1.find_node("f1")
+    assert f1 != None, "expected find find family f1"
 
     fx = s1.find_family("fx")
     assert fx == None, "expected not to find family fx"
+    fx = s1.find_node("fx")
+    assert fx == None, "expected not to find family fx"
 
     f2 = s1.find_family("f2")
+    assert f2 != None, "expected find find family f2"
+    f2 = s1.find_node("f2")
     assert f2 != None, "expected find find family f2"
     
     f2_t1 = f2.find_task("f2_t1")
@@ -58,8 +64,12 @@ if __name__ == "__main__":
 
     f2_t2 = f2.find_task("f2_t2")
     assert f2_t2 != None, "Expected to find task"
+    f2_t2 = f2.find_node("f2_t2")
+    assert f2_t2 != None, "Expected to find task"
 
     f2_tx = f2.find_task("f2_tx")
+    assert f2_tx == None, "Expected not to find task"
+    f2_tx = f2.find_node("f2_tx")
     assert f2_tx == None, "Expected not to find task"
 
     tasks = defs.get_all_tasks()

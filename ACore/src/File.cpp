@@ -67,8 +67,13 @@ std::string File::which(const std::string& file)
 			path = paths[i];
 			path += '/';
 			path += file;
-			if (fs::exists(path)) {
-				return paths[i];
+			try {
+			   if (fs::exists(path)) {
+			      return paths[i];
+			   }
+			}
+			catch(...) {
+			   // could be permission denied.
 			}
 		}
 	}

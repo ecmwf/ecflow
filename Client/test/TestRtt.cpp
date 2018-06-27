@@ -48,6 +48,7 @@ BOOST_AUTO_TEST_CASE( test_client_invoker_round_trip_times )
    BOOST_CHECK_MESSAGE(diffs.empty(),diffs << "\n" <<  errorMsg);
 
    if (diffs.empty())  boost::filesystem::remove(generated_file);
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

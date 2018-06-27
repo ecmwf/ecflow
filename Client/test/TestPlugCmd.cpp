@@ -272,6 +272,7 @@ static void test_plug_on_multiple_server(
    BOOST_REQUIRE_MESSAGE(server2Client.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << server2Client.errorMsg());
    BOOST_REQUIRE_MESSAGE( server2Client.defs().get(),"Server returned a NULL defs");
    BOOST_REQUIRE_MESSAGE( server2Client.defs()->suiteVec().size() == 1," Expected server2 to have one suite");
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_server_plug_cmd )
@@ -315,6 +316,7 @@ BOOST_AUTO_TEST_CASE( test_server_plug_cmd )
  	   test_plug_on_multiple_server(ClientEnvironment::hostSpecified(), ClientEnvironment::portSpecified(),
  	                                Str::LOCALHOST(), port2);
  	}
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

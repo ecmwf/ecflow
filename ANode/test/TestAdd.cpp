@@ -48,6 +48,20 @@ BOOST_AUTO_TEST_CASE( test_add )
    BOOST_CHECK_THROW( defs2->addSuite(s1),std::runtime_error);
 }
 
+BOOST_AUTO_TEST_CASE( test_add_error )
+{
+   cout << "ANode:: ...test_add_error\n";
+
+   defs_ptr defs = Defs::create();
+   suite_ptr s1  = defs->add_suite("s1");
+   s1->add_task("t1");
+   s1->add_family("f1");
+   BOOST_CHECK_THROW( defs->add_suite("s1"),std::runtime_error); // duplicate suite
+   BOOST_CHECK_THROW( s1->add_task("t1"),std::runtime_error);    // duplicate task
+   BOOST_CHECK_THROW( s1->add_family("t1"),std::runtime_error);  // duplicate name
+   BOOST_CHECK_THROW( s1->add_task("f1"),std::runtime_error);    // duplicate name
+}
+
 BOOST_AUTO_TEST_CASE( test_add_delete_time )
 {
    cout << "ANode:: ...test_add_delete_time\n"; // ECFLOW-1260
