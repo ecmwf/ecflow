@@ -21,6 +21,7 @@
 #include "TreeNodeWidget.hpp"
 #include "UiLog.hpp"
 #include "VFilter.hpp"
+#include "VConfig.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
@@ -159,7 +160,13 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
         resetMaximised();
     }
 
-    DashboardWidget* w=addWidget(type,dockId.toStdString(),true);
+    bool popupTableFilter=false;
+    if(VProperty* prop=VConfig::instance()->find("view.table.popupFilter"))
+    {
+        popupTableFilter=prop->value().toBool();
+    }
+
+    DashboardWidget* w=addWidget(type,dockId.toStdString(),popupTableFilter);
 
 	//At this point the widgets can be inactive. Reload will make them active!!!
 	w->reload();
