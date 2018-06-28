@@ -198,10 +198,10 @@ set +e
 
 cp $ECF_CHECK    log/ 2>/dev/null
 cp $ECF_CHECKOLD log/ 2>/dev/null
-if [[ -f $ECF_LOG ]]; then 
+if [ -f $ECF_LOG ]; then 
     STAMP=$(date +%Y%m%d.%H%M)
     SIZE=$(du -Hm $ECF_LOG | awk '{print $1}') || SIZE=0
-    if [[ $SIZE -gt 100 ]]; then
+    if [ $SIZE -gt 100 ]; then
 	     echo "Moving, compressing logfile ${SIZE}mb ${ECF_LOG}.${STAMP}.log"
 	     mv $ECF_LOG log/${ECF_LOG}.${STAMP}.log 2>/dev/null
 	     gzip -f log/${ECF_LOG}.${STAMP}.log 2>/dev/null
@@ -234,7 +234,7 @@ echo "";
 echo "OK starting ecFlow server..."
 echo "";
 
-if [[ $check == true ]]; then
+if [ $check == true ]; then
   ecflow_client --load $ECF_CHECK check_only
 fi
 
