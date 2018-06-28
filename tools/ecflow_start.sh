@@ -117,7 +117,25 @@ fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT
 if [ -f $fname ]; then host=$(cat $fname); fi
 
 mkdir -p $rcdir
-ecflow_client --port=$ECF_PORT --host=$host --ping  && echo "server is already started" && exit 0 || :
+THERE=KO
+ecflow_client --port=$ECF_PORT --host=$host --ping && THERE=OK
+if [[ $THERE == OK ]]; then
+  echo "server is already started"
+  res="$(ps -lf -u $USER | grep ecflow_server | grep -v grep)"
+  echo "$res $(ecflow_client --stats)"
+  if [ "$res" == "" ] ; then
+    mail $USER -s "server is already started - server hijack?" <<EOF
+Hello.
+
+there was an attempt to start the ecFlow server while port is already in use
+by another user, see the ecflow stats output below.
+
+$(ecflow_client --stats)
+EOF
+    exit 1
+  fi
+  exit 0 || :
+fi
 
 servers=$HOME/.ecflowrc/servers
 localh=$(uname -n)
