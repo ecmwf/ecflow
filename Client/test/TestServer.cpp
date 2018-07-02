@@ -61,7 +61,6 @@ BOOST_AUTO_TEST_CASE( test_server_version )
       // remote server, version may be different
       BOOST_WARN_MESSAGE(theClient.get_string() == Version::raw(),"Client version(" << Version::raw() << ") does not match server version(" << theClient.get_string() << ")");
    }
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_server_state_changes )
@@ -116,7 +115,6 @@ BOOST_AUTO_TEST_CASE( test_server_state_changes )
       BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() ==  0,"Expected edit history of size 0, but found " <<  theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
    }
-   cout << "Client:: ...-END\n";
 }
 
 
@@ -154,7 +152,6 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test )
 	     << " requests in boost_timer(" << boost_timer.elapsed()
 	     << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
 	     << ")" << endl;
-   cout << "Client:: ...-END\n";
 }
 
 
@@ -202,7 +199,6 @@ BOOST_AUTO_TEST_CASE( test_server_group_stress_test )
 	     << " commands using " << load << " group requests in boost_timer(" << boost_timer.elapsed()
 	     << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
 	     << ")" << endl;
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
@@ -354,7 +350,6 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
         << " requests in boost_timer(" << boost_timer.elapsed()
         << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
         << ")" << endl;
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

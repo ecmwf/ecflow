@@ -115,8 +115,6 @@ BOOST_AUTO_TEST_CASE( test_check_pt_defs_cmd )
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_mode_ == ecf::CheckPt::ON_TIME, " Expected default check pt mode to be ON_TIME");
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_interval_ == CheckPt::default_interval(), " Expected default check pt interval of " << CheckPt::default_interval() << " but found " << theClient.server_reply().stats().checkpt_interval_);
    BOOST_REQUIRE_MESSAGE(theClient.server_reply().stats().checkpt_save_time_alarm_ == CheckPt::default_save_time_alarm(), " Expected default check pt alarm time of " << CheckPt::default_save_time_alarm() << " but found " << theClient.server_reply().stats().checkpt_save_time_alarm_);
-
-   cout << "Client:: ...-END\n";
 }
 
 
@@ -149,7 +147,6 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt )
       BOOST_REQUIRE_MESSAGE( theClient.delete_node(suite) == 0,"Expected delete single suite to succeed\n" << theClient.errorMsg());
       expected_no_of_suites--;
    }
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
@@ -210,7 +207,6 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
    BOOST_CHECK_MESSAGE( *theClient.defs() == *defs_to_be_check_pointed,
          "expected defs to be the same.\nServer defs:\n" << *theClient.defs() << "\nExpected defs:\n" << *defs_to_be_check_pointed);
 
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
@@ -257,7 +253,6 @@ BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
    Defs defs;
    defs.restore(invokeServer.ecf_checkpt_file()); // make a data model change
    BOOST_REQUIRE_MESSAGE(defs.get_edit_history(Str::ROOT_PATH()).size() == 5,"Expected edit history of size 5, but found " <<  defs.get_edit_history(Str::ROOT_PATH()).size());
-   cout << "Client:: ...-END\n";
 }
 
 
@@ -307,7 +302,6 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
    //PrintStyle style(PrintStyle::STATE);
    //cout << theDefsFixture.defsfile_ << "\n";
    BOOST_CHECK_MESSAGE( *theClient.defs() == theDefsFixture.defsfile_,"expected defs to be the same");
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()
