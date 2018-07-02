@@ -234,7 +234,6 @@ BOOST_AUTO_TEST_CASE( test_client_group_lifecyle )
       // Clear the log
       BOOST_REQUIRE_MESSAGE( theClient.clearLog() == 0,CtsApi::clearLog() << " failed should return 0\n" << theClient.errorMsg());
    }
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

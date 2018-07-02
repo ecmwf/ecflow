@@ -140,7 +140,6 @@ BOOST_AUTO_TEST_CASE( test_flag_migrate )
       theClient.defs()->get_all_nodes(all_nodes);
       BOOST_REQUIRE_MESSAGE(all_nodes.size() == expected_nodes  ,"Expected "  << expected_nodes << " nodes but found " << all_nodes.size());
    }
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

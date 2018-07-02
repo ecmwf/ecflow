@@ -99,7 +99,6 @@ BOOST_AUTO_TEST_CASE( test_load_defs_cmd_handleRequest )
 	// hence we expect the PARSE to fail.
 	std::string errormsg,warningMsg;
 	BOOST_CHECK_MESSAGE(!secondDefs.check(errormsg,warningMsg),errormsg);
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_load_defs_check_only )
@@ -121,7 +120,6 @@ BOOST_AUTO_TEST_CASE( test_load_defs_check_only )
    // provide path to definition that should fail to parse
    std::string path_bad_def = File::test_data("Client/test/data/bad.def","Client");
    BOOST_REQUIRE_THROW( theClient.loadDefs(path_bad_def,false,true/* check only*/),std::runtime_error);
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_load_defs )
@@ -151,7 +149,6 @@ BOOST_AUTO_TEST_CASE( test_load_defs )
 
    /// Destroy singleton's to avoid valgrind from complaining
    System::destroy();
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()
