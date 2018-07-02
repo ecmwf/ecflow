@@ -88,6 +88,7 @@ BOOST_AUTO_TEST_CASE( test_loading_of_white_list_file )
       // Remove the white list file. Comment out for debug
       fs::remove(the_host.ecf_lists_file(port));
    }
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

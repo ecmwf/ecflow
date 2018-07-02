@@ -256,6 +256,7 @@ BOOST_AUTO_TEST_CASE( test_perf_for_large_defs )
    else {
       std::cout << "Ingoring test, since directory /var/tmp/ma0/BIG_DEFS does not exist";
    }
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

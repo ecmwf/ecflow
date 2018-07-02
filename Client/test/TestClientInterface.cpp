@@ -435,6 +435,8 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
       BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attributes[i],true) == 0,"--alter should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attributes[i],false) == 0,"--alter should return 0\n" << theClient.errorMsg());
    }
+
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
@@ -632,6 +634,7 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface )
    BOOST_REQUIRE_MESSAGE( theClient.completeTask() == 0,"--complete should return 0\n" << theClient.errorMsg());
    std::vector<std::string> labels; labels.push_back("test_client_task_interface");
    BOOST_REQUIRE_MESSAGE( theClient.labelTask("label_name",labels) == 0,"--label should return 0\n" << theClient.errorMsg());
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_client_task_interface_for_fail )

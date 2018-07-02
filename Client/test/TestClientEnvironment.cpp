@@ -79,6 +79,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_parsing )
 	   BOOST_CHECK_MESSAGE( host == expectedHost[count], "Expected host " << expectedHost[count] << " but found " << host);
 	}
 	BOOST_CHECK_MESSAGE( home_host_fnd, "Cycling through host file, should lead to home host");
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_client_environment_host_file_defaults )
@@ -134,6 +135,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_defaults )
       BOOST_CHECK_MESSAGE( port == expectedHost[count].second, "Expected port " << expectedHost[count].second << " but found " << port);
    }
    BOOST_CHECK_MESSAGE( home_host_fnd, "Cycling through host file, should lead to home host");
+   cout << "Client:: ...-END\n";
 }
 
 
@@ -152,6 +154,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment_empty_host_file )
    BOOST_CHECK_MESSAGE( client_env.get_next_host(errorMsg),errorMsg);
 
    fs::remove(empty_host_file);
+   cout << "Client:: ...-END\n";
 }
 
 
@@ -200,6 +203,8 @@ BOOST_AUTO_TEST_CASE( test_client_environment_errors )
       BOOST_CHECK_THROW(ClientEnvironment client_env, std::runtime_error );
       putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
    }
+
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_client_environment )
@@ -253,6 +258,7 @@ BOOST_AUTO_TEST_CASE( test_client_environment )
       BOOST_CHECK_MESSAGE(client_env.allow_new_client_old_server()==10,"expcted 10 but found " << client_env.allow_new_client_old_server());
       putenv(const_cast<char*>("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")); // remove from env, otherwise valgrind complains
    }
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

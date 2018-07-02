@@ -117,7 +117,25 @@ fname=$rcdir/$(echo $host | cut -c1-4).$USER.$ECF_PORT
 if [ -f $fname ]; then host=$(cat $fname); fi
 
 mkdir -p $rcdir
-ecflow_client --port=$ECF_PORT --host=$host --ping  && echo "server is already started" && exit 0 || :
+THERE=KO
+ecflow_client --port=$ECF_PORT --host=$host --ping && THERE=OK
+if [[ $THERE == OK ]]; then
+  echo "server is already started"
+  res="$(ps -lf -u $USER | grep ecflow_server | grep -v grep)"
+  echo "$res $(ecflow_client --stats)"
+  if [ "$res" == "" ] ; then
+    mail $USER -s "server is already started - server hijack?" <<EOF
+Hello.
+
+there was an attempt to start the ecFlow server while port is already in use
+by another user, see the ecflow stats output below.
+
+$(ecflow_client --stats)
+EOF
+    exit 1
+  fi
+  exit 0 || :
+fi
 
 servers=$HOME/.ecflowrc/servers
 localh=$(uname -n)
@@ -198,10 +216,10 @@ set +e
 
 cp $ECF_CHECK    log/ 2>/dev/null
 cp $ECF_CHECKOLD log/ 2>/dev/null
-if [[ -f $ECF_LOG ]]; then 
+if [ -f $ECF_LOG ]; then 
     STAMP=$(date +%Y%m%d.%H%M)
     SIZE=$(du -Hm $ECF_LOG | awk '{print $1}') || SIZE=0
-    if [[ $SIZE -gt 100 ]]; then
+    if [ $SIZE -gt 100 ]; then
 	     echo "Moving, compressing logfile ${SIZE}mb ${ECF_LOG}.${STAMP}.log"
 	     mv $ECF_LOG log/${ECF_LOG}.${STAMP}.log 2>/dev/null
 	     gzip -f log/${ECF_LOG}.${STAMP}.log 2>/dev/null
@@ -234,7 +252,7 @@ echo "";
 echo "OK starting ecFlow server..."
 echo "";
 
-if [[ $check == true ]]; then
+if [ $check == true ]; then
   ecflow_client --load $ECF_CHECK check_only
 fi
 

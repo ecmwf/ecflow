@@ -208,6 +208,7 @@ BOOST_AUTO_TEST_CASE( test_node_tree_lifecycle )
 		BOOST_CHECK_MESSAGE( suite->state() == NState::COMPLETE, "Suite should be in NState::COMPLETE state");
 	 	std::string errorMsg; BOOST_CHECK_MESSAGE( defs.checkInvariants(errorMsg),errorMsg);
  	}
+   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()
