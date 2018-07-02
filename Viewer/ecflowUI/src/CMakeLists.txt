@@ -167,7 +167,8 @@ set(viewer_srcs
     TriggerTableWidget.cpp
     TriggerViewDelegate.cpp
     TriggeredScanner.cpp    
-    UpdateTimer.cpp  
+    UiLogS.cpp
+    UpdateTimer.cpp
     VAttribute.cpp
     VAttributeType.cpp
     VConfig.cpp

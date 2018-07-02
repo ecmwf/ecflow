@@ -34,13 +34,10 @@ static LogTruncator *truncator=0;
 // UiFunctionLog
 //---------------------------------
 
-UiFunctionLog::UiFunctionLog(ServerHandler* server,const std::string& funcName) :
+UiFunctionLog::UiFunctionLog(const std::string& server,const std::string& funcName) :
+    serverName_(server),
     funcName_(funcName)
 {
-#if 0
-    if(server)
-        serverName_=server->longName();
-#endif
     init();
     UiLog(serverName_).dbg() << logEnter();
 }
@@ -81,13 +78,6 @@ std::string UiFunctionLog::logLeave() const
 //---------------------------------
 // UiLog
 //---------------------------------
-
-UiLog::UiLog(ServerHandler* sh) :
-#if 0
-    type_(INFO), server_(sh->longName())
-#endif
-    type_(INFO), server_("??")
-{}
 
 UiLog::UiLog(const std::string& server) :
     type_(INFO), server_(server)

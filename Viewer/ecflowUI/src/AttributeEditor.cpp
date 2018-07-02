@@ -15,7 +15,7 @@
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "ServerHandler.hpp"
-#include "UiLog.hpp"
+#include "UiLogS.hpp"
 #include "VConfig.hpp"
 #include "VRepeatAttr.hpp"
 

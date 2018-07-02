@@ -13,7 +13,7 @@
 #include "ServerComThread.hpp"
 #include "ServerHandler.hpp"
 #include "UIDebug.hpp"
-#include "UiLog.hpp"
+#include "UiLogS.hpp"
 
 #include "Log.hpp"
 
@@ -125,7 +125,7 @@ void ServerComQueue::disable()
 	if(state_ == DisabledState)
 		return;
 
-    UiLog(server_).dbg() << "ComQueue::disable -->";
+    UiLogS(server_).dbg() << "ComQueue::disable -->";
 
 	state_=DisabledState;
 
@@ -139,7 +139,7 @@ void ServerComQueue::disable()
 	//until it finishes its task.
 	comThread_->wait();
 
-    UiLog(server_).dbg() << " queue is disabled";
+    UiLogS(server_).dbg() << " queue is disabled";
 
 	//Clear the current task
 	if(current_)
@@ -215,7 +215,7 @@ void ServerComQueue::start()
 {
 	if(state_ != DisabledState && state_ != ResetState)
 	{
-        UiLog(server_).dbg() << "ComQueue::start -->";
+        UiLogS(server_).dbg() << "ComQueue::start -->";
 
         //assert(taskIsBeingFinished_==false);
         //assert(taskIsBeingFailed_==false);
@@ -230,13 +230,13 @@ void ServerComQueue::start()
 
 		state_=RunningState;
 
-        UiLog(server_).dbg() << "  thread finished";
+        UiLogS(server_).dbg() << "  thread finished";
 
 		//Starts the timer
 		timer_->start(timeout_);
 
-        UiLog(server_).dbg() << "  timer started";
-        UiLog(server_).dbg() << "<-- ComQueue::start";
+        UiLogS(server_).dbg() << "  timer started";
+        UiLogS(server_).dbg() << "<-- ComQueue::start";
 	}
 }
 
@@ -371,7 +371,7 @@ void ServerComQueue::slotRun()
     {
 #ifdef _UI_SERVERCOMQUEUE_DEBUG       
         UI_FUNCTION_LOG_S(server_);
-        UiLog(server_).dbg() << " queue is either disabled or suspended";
+        UiLogS(server_).dbg() << " queue is either disabled or suspended";
 #endif
         return;
     }
@@ -380,7 +380,7 @@ void ServerComQueue::slotRun()
     {
 #ifdef _UI_SERVERCOMQUEUE_DEBUG        
         UI_FUNCTION_LOG_S(server_);
-        UiLog(server_).dbg() << " task is either being finished or failed";
+        UiLogS(server_).dbg() << " task is either being finished or failed";
 #endif
         return;
     }
@@ -389,7 +389,7 @@ void ServerComQueue::slotRun()
 	{
 #ifdef _UI_SERVERCOMQUEUE_DEBUG        
         UI_FUNCTION_LOG_S(server_);
-        UiLog(server_).dbg() << " there are no tasks! Stop timer!";
+        UiLogS(server_).dbg() << " there are no tasks! Stop timer!";
 #endif
         timer_->stop();
 		return;
@@ -420,7 +420,7 @@ void ServerComQueue::slotRun()
         UI_FUNCTION_LOG_S(server_);
         if(startTimeoutTryCnt_ < ctMaxStartTimeoutTryCnt_)
         {
-            UiLog(server_).warn() << " ServerCom thread does not seem to have started within the allocated timeout. \
+            UiLogS(server_).warn() << " ServerCom thread does not seem to have started within the allocated timeout. \
                           startTimeoutTryCnt_=" << startTimeoutTryCnt_;
 
             startTimeoutTryCnt_++;
@@ -440,24 +440,24 @@ void ServerComQueue::slotRun()
             //-the thread is running
             if(running)
             {
-                UiLog(server_).warn() << " It seems that the ServerCom thread started but it is in a bad state. Try to run task again.";
+                UiLogS(server_).warn() << " It seems that the ServerCom thread started but it is in a bad state. Try to run task again.";
             }
 
             //Problem 2:
             //-the thread is not running
             else
             {
-                UiLog(server_).warn() << " It seems that the ServerCom thread could not start. Try to run task again.";
+                UiLogS(server_).warn() << " It seems that the ServerCom thread could not start. Try to run task again.";
             }
 
             if(comThread_->wait(ctStartWaitTimeout_) == false)
             {              
-                UiLog(server_).warn() << "  Calling wait() on the ServerCom thread failed.";
+                UiLogS(server_).warn() << "  Calling wait() on the ServerCom thread failed.";
 
                 //The thread started to run in the meantime. We check its status again at the next slotRun call.
                 if(!running && comThread_->isRunning())
                 {
-                    UiLog(server_).warn() << "  It seems that in the meantime the thread started to run.\
+                    UiLogS(server_).warn() << "  It seems that in the meantime the thread started to run.\
                                    We will check its state again";
                     return;
                 }
@@ -483,7 +483,7 @@ void ServerComQueue::slotRun()
 #endif
             }
 
-            UiLog(server_).warn() << "  Calling wait() on the ServerCom thread succeeded.";
+            UiLogS(server_).warn() << "  Calling wait() on the ServerCom thread succeeded.";
 
             Q_ASSERT(comThread_->isRunning() == false);
 
@@ -496,7 +496,7 @@ void ServerComQueue::slotRun()
             else
             {
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
-                UiLog(server_).dbg() << "  current_ aborted or cancelled. Reset current_ !";
+                UiLogS(server_).dbg() << "  current_ aborted or cancelled. Reset current_ !";
 #endif
                 current_.reset();
             }
@@ -539,7 +539,7 @@ void ServerComQueue::slotRun()
 	}
 
 #ifdef _UI_SERVERCOMQUEUE_DEBUG  
-    UiLog(server_).dbg() << " run task: " <<  current_->typeString();
+    UiLogS(server_).dbg() << " run task: " <<  current_->typeString();
 #endif
 
     //Send it to the thread
@@ -561,7 +561,7 @@ void ServerComQueue::slotTaskFinished()
     taskIsBeingFinished_=true;
     startTimeoutTryCnt_=0;
 
-    UiLog(server_).dbg() << "ComQueue::slotTaskFinished -->";
+    UiLogS(server_).dbg() << "ComQueue::slotTaskFinished -->";
 
 	//We need to leave the load mode
 	endReset();
@@ -571,7 +571,7 @@ void ServerComQueue::slotTaskFinished()
 	if(current_)
 	{
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
-        UiLog(server_).dbg() << " reset current_";
+        UiLogS(server_).dbg() << " reset current_";
 #endif
 
         VTask_ptr task=current_;
@@ -593,12 +593,12 @@ void ServerComQueue::slotTaskFailed(std::string msg)
     taskIsBeingFailed_=true;
     startTimeoutTryCnt_=0;
 
-    UiLog(server_).dbg() << "ComQueue::slotTaskFailed -->";
+    UiLogS(server_).dbg() << "ComQueue::slotTaskFailed -->";
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
     if(current_)
-        UiLog(server_).dbg() << " current_ exists";
+        UiLogS(server_).dbg() << " current_ exists";
     else
-        UiLog(server_).dbg() << " current_ is null";
+        UiLogS(server_).dbg() << " current_ is null";
 #endif
 
     //We need to leave the load mode
@@ -606,13 +606,13 @@ void ServerComQueue::slotTaskFailed(std::string msg)
 
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
     if(current_)
-        UiLog(server_).dbg() << " current_ exists";
+        UiLogS(server_).dbg() << " current_ exists";
     else
-        UiLog(server_).dbg() << " current_ is null";
+        UiLogS(server_).dbg() << " current_ is null";
 #endif
 
 #ifdef _UI_SERVERCOMQUEUE_DEBUG
-    UiLog(server_).dbg() << " reset current_";
+    UiLogS(server_).dbg() << " reset current_";
 #endif
     assert(current_);
     VTask_ptr task=current_;

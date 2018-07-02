@@ -18,7 +18,7 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 #include "VTree.hpp"
-#include "UiLog.hpp"
+#include "UiLogS.hpp"
 #include "UIDebug.hpp"
 
 #include <QDebug>
@@ -220,7 +220,7 @@ void VTreeServer::notifyEndServerSync(ServerHandler* server)
 {
 #ifdef _UI_VMODELDATA_DEBUG
     UI_FUNCTION_LOG_S(server_)
-    UiLog(server_).dbg() << " number of state changes=" <<
+    UiLogS(server_).dbg() << " number of state changes=" <<
                            changeInfo_->stateChangeSuites().size();
 #endif
 
@@ -246,7 +246,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 	bool nodeNumCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end());
 
 #ifdef _UI_VMODELDATA_DEBUG
-    UiLog(server_).dbg() << " node=" << vnode->strName();
+    UiLogS(server_).dbg() << " node=" << vnode->strName();
 #endif
 
 	//-----------------------------------------------------------------------
@@ -331,7 +331,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
                     changeInfo_->addStateChange(vnode);
 
 #ifdef _UI_VMODELDATA_DEBUG
-                UiLog(server_).dbg() << " node status changed";
+                UiLogS(server_).dbg() << " node status changed";
 #endif               
 			}
 
@@ -437,9 +437,9 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
     {
 #ifdef _UI_VMODELDATA_DEBUG      
         if(suitesChanged.size() < 0)
-            UiLog(server_).dbg() << " suites changed:";
+            UiLogS(server_).dbg() << " suites changed:";
         for(size_t i= 0; i < suitesChanged.size(); i++)
-            UiLog(server_).dbg() << "  " << suitesChanged[i]->strName();
+            UiLogS(server_).dbg() << "  " << suitesChanged[i]->strName();
 #endif
         //Update the filter for the suites with a status change. topFilterChange
         //will contain the branches where the filter changed. A branch is
@@ -450,9 +450,9 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
 
 #ifdef _UI_VMODELDATA_DEBUG
         if(topFilterChange.size() > 0)
-            UiLog(server_).dbg() << " top level nodes that changed in filter:";
+            UiLogS(server_).dbg() << " top level nodes that changed in filter:";
         for(size_t i= 0; i < topFilterChange.size(); i++)
-            UiLog(server_).dbg() << "  " << topFilterChange.at(i)->strName();
+            UiLogS(server_).dbg() << "  " << topFilterChange.at(i)->strName();
 #endif
 
         //A topFilterChange branch cannot be the root (server)
@@ -461,13 +461,13 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
             Q_ASSERT(!topFilterChange[i]->isServer());
         }
 #ifdef _UI_VMODELDATA_DEBUG
-        UiLog(server_).dbg() << " apply changes to branches";
+        UiLogS(server_).dbg() << " apply changes to branches";
 #endif
         //If something changed in the list of filtered nodes
         for(size_t i=0; i < topFilterChange.size(); i++)
         {
 #ifdef _UI_VMODELDATA_DEBUG
-            UiLog(server_).dbg() << "  branch: " << topFilterChange[i]->absNodePath();
+            UiLogS(server_).dbg() << "  branch: " << topFilterChange[i]->absNodePath();
 #endif
             //If the filter status of a SUITE has changed
             if(topFilterChange[i]->isSuite())
@@ -484,7 +484,7 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
                     Q_ASSERT(!tn->isRoot());
 
 #ifdef _UI_VMODELDATA_DEBUG
-                    UiLog(server_).dbg() << "  remove suite: " <<  suite->absNodePath();
+                    UiLogS(server_).dbg() << "  remove suite: " <<  suite->absNodePath();
 #endif
                     int index=tree_->indexOfTopLevel(tn);
                     Q_ASSERT(index >=0);
@@ -497,7 +497,7 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
                 else
                 {
 #ifdef _UI_VMODELDATA_DEBUG
-                    UiLog(server_).dbg() << "  add suite: " << suite->absNodePath();
+                    UiLogS(server_).dbg() << "  add suite: " << suite->absNodePath();
 #endif
                     VTreeNode *branch=tree_->makeTopLevelBranch(filter_->match_,suite);
                     int index=tree_->indexOfTopLevelToInsert(suite);
@@ -520,7 +520,7 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
                 Q_ASSERT(!tn->isRoot());
 
 #ifdef _UI_VMODELDATA_DEBUG
-                 UiLog(server_).dbg() << "  tree node to update: "  << tn->vnode()->absNodePath();
+                 UiLogS(server_).dbg() << "  tree node to update: "  << tn->vnode()->absNodePath();
 #endif
                 //First, we remove the branch contents
                 if(tn->numOfChildren() >0)
@@ -605,14 +605,14 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     VTreeNode* node=tree_->find(vnode);
 
 #ifdef _UI_VMODELDATA_DEBUG
-    UiLog(server_).dbg() << "  node=" << node << " Attr=" << a->name() << " type=" << a->typeName();
+    UiLogS(server_).dbg() << "  node=" << node << " Attr=" << a->name() << " type=" << a->typeName();
 #endif
 
     //Clear
     clearForceShow(a);
 
 #ifdef _UI_VMODELDATA_DEBUG
-    UiLog(server_).dbg() << "  node after clear=" << node;
+    UiLogS(server_).dbg() << "  node after clear=" << node;
 #endif
 
     //clearForce might have removed the node, so we need to find it again!
@@ -630,7 +630,7 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     if(!node)
     {
 #ifdef _UI_VMODELDATA_DEBUG
-    UiLog(server_).dbg() << "  node does not exist -->" << node;
+    UiLogS(server_).dbg() << "  node does not exist -->" << node;
 #endif
 
         //find the suite
@@ -650,7 +650,7 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
     else if(!attrFilter_->isSet(a->type()))
     {
 #ifdef _UI_VMODELDATA_DEBUG
-        UiLog(server_).dbg() << "  attribute type is not filtered -->";
+        UiLogS(server_).dbg() << "  attribute type is not filtered -->";
 #endif
 
         //We only need to handle this case. When the attributes are not yet initialised
@@ -674,7 +674,7 @@ void VTreeServer::setForceShowAttribute(const VAttribute* a)
             Q_ASSERT(cachedNum >= 0);           
 
 #ifdef _UI_VMODELDATA_DEBUG
-            UiLog(server_).dbg() << "  currentNum=" << currentNum << " cachedNum=" << cachedNum;
+            UiLogS(server_).dbg() << "  currentNum=" << currentNum << " cachedNum=" << cachedNum;
 #endif
             if(currentNum != cachedNum)
             {
@@ -978,7 +978,7 @@ void VTableServer::reload()
 
     int oriNodeNum=nodeNum();
 #ifdef _UI_VMODELDATA_DEBUG
-    UiLog(server_).dbg() << " oriNodeNum=" << oriNodeNum;
+    UiLogS(server_).dbg() << " oriNodeNum=" << oriNodeNum;
 #endif
 
     Q_EMIT beginServerClear(this,oriNodeNum);
@@ -995,7 +995,7 @@ void VTableServer::reload()
     Q_EMIT endServerScan(this, nodeNum());
 
 #ifdef _UI_VMODELDATA_DEBUG
-    UiLog(server_).dbg() << " nodeNum: " << oriNodeNum;
+    UiLogS(server_).dbg() << " nodeNum: " << oriNodeNum;
 #endif
 }
 

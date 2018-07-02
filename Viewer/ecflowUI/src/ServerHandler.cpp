@@ -28,7 +28,7 @@
 #include "ServerComObserver.hpp"
 #include "ShellCommand.hpp"
 #include "SuiteFilter.hpp"
-#include "UiLog.hpp"
+#include "UiLogS.hpp"
 #include "UIDebug.hpp"
 #include "UpdateTimer.hpp"
 #include "UserMessage.hpp"
@@ -210,14 +210,14 @@ void ServerHandler::stopRefreshTimer()
 {
     refreshTimer_->stop();
 #ifdef __UI_SERVERUPDATE_DEBUG
-    UiLog(this).dbg() << "ServerHandler::stopRefreshTimer -->";
+    UiLogS(this).dbg() << "ServerHandler::stopRefreshTimer -->";
 #endif
     broadcast(&ServerComObserver::notifyRefreshTimerStopped);
 }
 
 void ServerHandler::startRefreshTimer()
 {
-    UiLog(this).dbg() << "ServerHandler::startRefreshTimer -->";
+    UiLogS(this).dbg() << "ServerHandler::startRefreshTimer -->";
 
     if(!conf_->boolValue(VServerSettings::AutoUpdate))
     {
@@ -239,13 +239,13 @@ void ServerHandler::startRefreshTimer()
 	}
 
 #ifdef __UI_SERVERUPDATE_DEBUG
-    UiLog(this).dbg() << " refreshTimer interval: " <<  refreshTimer_->interval();
+    UiLogS(this).dbg() << " refreshTimer interval: " <<  refreshTimer_->interval();
 #endif
 }
 
 void ServerHandler::updateRefreshTimer()
 {
-    UiLog(this).dbg() << "ServerHandler::updateRefreshTimer -->";
+    UiLogS(this).dbg() << "ServerHandler::updateRefreshTimer -->";
 
     if(!conf_->boolValue(VServerSettings::AutoUpdate))
     {
@@ -271,7 +271,7 @@ void ServerHandler::updateRefreshTimer()
     broadcast(&ServerComObserver::notifyRefreshTimerChanged);
 
 #ifdef __UI_SERVERUPDATE_DEBUG
-    UiLog(this).dbg() << " refreshTimer interval: " << refreshTimer_->interval();
+    UiLogS(this).dbg() << " refreshTimer interval: " << refreshTimer_->interval();
 #endif
 
 }
@@ -288,7 +288,7 @@ void ServerHandler::driftRefreshTimer()
        conf_->boolValue(VServerSettings::AdaptiveUpdate))
     {
 #ifdef __UI_SERVERUPDATE_DEBUG
-        UiLog(this).dbg() << "driftRefreshTimer -->";
+        UiLogS(this).dbg() << "driftRefreshTimer -->";
 #endif
 
         int rate=conf_->intValue(VServerSettings::UpdateRate);
@@ -320,7 +320,7 @@ void ServerHandler::driftRefreshTimer()
     }
 
 #ifdef __UI_SERVERUPDATE_DEBUG
-    UiLog(this).dbg() << "driftRefreshTimer interval: " << refreshTimer_->interval();
+    UiLogS(this).dbg() << "driftRefreshTimer interval: " << refreshTimer_->interval();
 #endif
 
 }
@@ -605,7 +605,7 @@ void ServerHandler::refresh()
 //This slot is called by the timer regularly to get news from the server.
 void ServerHandler::refreshServerInfo()
 {
-    UiLog(this).dbg() << "Auto refreshing server";
+    UiLogS(this).dbg() << "Auto refreshing server";
     refreshInternal();
 
     //We reduce the update frequency
@@ -619,7 +619,7 @@ void ServerHandler::refreshServerInfo()
 //This slot is called when a node changes.
 void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type> aspect)
 {
-    UiLog(this).dbg() << "ServerHandler::slotNodeChanged - node: " + nc->name();
+    UiLogS(this).dbg() << "ServerHandler::slotNodeChanged - node: " + nc->name();
 
     //for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
     //UserMessage::message(UserMessage::DBG, false, std::string(" aspect: ") + boost::lexical_cast<std::string>(*it));
@@ -627,7 +627,7 @@ void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type
 	//This can happen if we initiated a reset while we sync in the thread
 	if(vRoot_->isEmpty())
 	{
-        UiLog(this).dbg() << " tree is empty - no change applied!";
+        UiLogS(this).dbg() << " tree is empty - no change applied!";
 		return;
 	}
 
@@ -643,7 +643,7 @@ void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type
 	//TODO: what about the infopanel or breadcrumbs??????
 	if(change.ignore_)
 	{
-        UiLog(this).dbg() << " update ignored";
+        UiLogS(this).dbg() << " update ignored";
 		return;
 	}
 	else
@@ -657,7 +657,7 @@ void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type
 		//Notify the observers
 		broadcast(&NodeObserver::notifyEndNodeChange,vn,aspect,change);
 
-        UiLog(this).dbg() << " update applied";
+        UiLogS(this).dbg() << " update applied";
 	}
 }
 
@@ -852,7 +852,7 @@ void ServerHandler::slotRescanNeed()
 
 void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverReply)
 {
-    UiLog(this).dbg() << "ServerHandler::clientTaskFinished -->";
+    UiLogS(this).dbg() << "ServerHandler::clientTaskFinished -->";
 
     //The status of the tasks sent from the info panel must be properly set to
     //FINISHED!! Only that will notify the observers about the change!!
@@ -866,7 +866,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			// any updates on the server (there should have been, because we
 			// just did something!)
 
-            UiLog(this).dbg() << " command finished - send SYNC command";
+            UiLogS(this).dbg() << " command finished - send SYNC command";
 			//comQueue_->addNewsTask();
 			comQueue_->addSyncTask();
             updateRefreshTimer();
@@ -883,7 +883,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				case ServerReply::NO_NEWS:
 				{
 					// no news, nothing to do
-                    UiLog(this).dbg() << " NO_NEWS";
+                    UiLogS(this).dbg() << " NO_NEWS";
 
 					//If we just regained the connection we need to reset
 					if(connectionGained())
@@ -898,7 +898,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 					// yes, something's changed - synchronise with the server
 
 					//If we just regained the connection we need to reset
-                    UiLog(this).dbg() << " NEWS - send SYNC command";
+                    UiLogS(this).dbg() << " NEWS - send SYNC command";
 					if(connectionGained())
 					{
 						reset();
@@ -913,7 +913,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 				case ServerReply::DO_FULL_SYNC:
 				{
 					// yes, a lot of things have changed - we need to reset!!!!!!                       
-                    UiLog(this).dbg() << " DO_FULL_SYNC - will reset";
+                    UiLogS(this).dbg() << " DO_FULL_SYNC - will reset";
 					connectionGained();
 					reset();
 					break;
@@ -928,12 +928,12 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 		case VTask::SyncTask:
 		{
-            UiLog(this).dbg() << " sync finished";
+            UiLogS(this).dbg() << " sync finished";
 
 			//This typically happens when a suite is added/removed
 			if(serverReply.full_sync() || vRoot_->isEmpty())
 			{
-                UiLog(this).dbg() << " full sync requested - rescanTree";
+                UiLogS(this).dbg() << " full sync requested - rescanTree";
 
                 //This will update the suites + restart the timer
 				rescanTree();
@@ -1018,7 +1018,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 		}
 		case VTask::ScriptSubmitTask:
 		{
-            UiLog(this).dbg() << " script submit finished - send NEWS command";
+            UiLogS(this).dbg() << " script submit finished - send NEWS command";
 
 			task->reply()->text(serverReply.get_string());
 			task->status(VTask::FINISHED);
@@ -1057,7 +1057,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
 void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 {
-    UiLog(this).dbg() << "ServerHandler::clientTaskFailed -->";
+    UiLogS(this).dbg() << "ServerHandler::clientTaskFailed -->";
 
 	//TODO: suite filter  + ci_ observers
 
@@ -1153,7 +1153,7 @@ void ServerHandler::connectServer()
 
 void ServerHandler::reset()
 {
-    UiLog(this).dbg() << "ServerHandler::reset -->";
+    UiLogS(this).dbg() << "ServerHandler::reset -->";
 
 	//---------------------------------
 	// First part of reset: clearing
@@ -1181,7 +1181,7 @@ void ServerHandler::reset()
 	}
 	else
 	{
-        UiLog(this).dbg() << " skip reset";
+        UiLogS(this).dbg() << " skip reset";
 	}
 }
 
@@ -1263,7 +1263,7 @@ void ServerHandler::resetFailed(const std::string& errMsg)
 
 void ServerHandler::clearTree()
 {
-    UiLog(this).dbg() << "ServerHandler::clearTree -->";
+    UiLogS(this).dbg() << "ServerHandler::clearTree -->";
 
 	if(!vRoot_->isEmpty())
 	{
@@ -1277,13 +1277,13 @@ void ServerHandler::clearTree()
         broadcast(&ServerObserver::notifyEndServerClear);
 	}
 
-    UiLog(this).dbg() << " <-- clearTree";
+    UiLogS(this).dbg() << " <-- clearTree";
 }
 
 
 void ServerHandler::rescanTree()
 {
-    UiLog(this).dbg() << "ServerHandler::rescanTree -->";
+    UiLogS(this).dbg() << "ServerHandler::rescanTree -->";
 
 	setActivity(RescanActivity);
 
@@ -1334,7 +1334,7 @@ void ServerHandler::rescanTree()
 
 	setActivity(NoActivity);
 
-    UiLog(this).dbg() << "<-- rescanTree";
+    UiLogS(this).dbg() << "<-- rescanTree";
 }
 
 //====================================================
@@ -1535,13 +1535,13 @@ void ServerHandler::loadConf()
 
 void ServerHandler::searchBegan()
 {
-    UiLog(this).dbg() << "ServerHandler::searchBegan --> suspend queue";
+    UiLogS(this).dbg() << "ServerHandler::searchBegan --> suspend queue";
 	comQueue_->suspend(true);
 }
 
 void ServerHandler::searchFinished()
 {
-    UiLog(this).dbg() << "ServerHandler::searchFinished --> start queue";
+    UiLogS(this).dbg() << "ServerHandler::searchFinished --> start queue";
 	comQueue_->start();
 
 }
