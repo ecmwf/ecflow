@@ -21,7 +21,6 @@
 #include "boost/filesystem/path.hpp"
 
 #include <cereal/archives/json.hpp>
-#include <cereal/access.hpp>
 
 using namespace boost;
 using namespace std;
@@ -83,7 +82,7 @@ BOOST_AUTO_TEST_CASE( test_cereal_json )
       MyTop   m1, m2, m3;
       iarchive(m1, m2, m3); // Read the data from the archive
 
-//      fs::remove(path); // Remove the file. Comment out for debugging
+      fs::remove(path); // Remove the file. Comment out for debugging
    }
 }
 
