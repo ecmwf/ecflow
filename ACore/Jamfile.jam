@@ -29,6 +29,7 @@ lib core : [ glob src/*.cpp ]
            <use>/site-config//boost_program_options
           :
           : <include>../ACore/src
+            <include>../cereal/include
           ;
 
 #
