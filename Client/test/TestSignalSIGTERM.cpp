@@ -77,7 +77,6 @@ BOOST_AUTO_TEST_CASE( test_signal_SIGTERM )
    BOOST_REQUIRE_MESSAGE(fs::file_size(invokeServer.ecf_checkpt_file()) !=0,"Expected check point file(" << invokeServer.ecf_checkpt_file() << ") to have file size > 0  ");
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_backup_checkpt_file()), "Expected backup check point file(" << invokeServer.ecf_backup_checkpt_file() << ") to be created");
    BOOST_REQUIRE_MESSAGE(fs::file_size(invokeServer.ecf_backup_checkpt_file()) !=0,"Expected backup check point file(" << invokeServer.ecf_backup_checkpt_file() << "), to have file size > 0");
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

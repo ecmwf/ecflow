@@ -241,7 +241,6 @@ BOOST_AUTO_TEST_CASE( test_client_lifecyle )
 
    /// Destroy singleton's to avoid valgrind from complaining
    System::destroy();
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

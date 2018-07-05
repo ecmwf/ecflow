@@ -105,7 +105,6 @@ BOOST_AUTO_TEST_CASE( test_server_load )
    fs::remove( gnuplot_dat_file );
    fs::remove( gnuplot_script_file );
    fs::remove( gnuplot_png_file );
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()

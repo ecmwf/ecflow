@@ -116,7 +116,6 @@ BOOST_AUTO_TEST_CASE( test_loading_of_passwd )
 
    // Remove the white list file. Comment out for debug
    fs::remove(passwd_file);
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_CASE( test_loading_of_passwd_fail )
@@ -170,7 +169,6 @@ BOOST_AUTO_TEST_CASE( test_loading_of_passwd_fail )
 
    // Remove the white list file. Comment out for debug
    fs::remove(passwd_file);
-   cout << "Client:: ...-END\n";
 }
 
 BOOST_AUTO_TEST_SUITE_END()
