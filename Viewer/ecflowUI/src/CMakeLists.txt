@@ -320,6 +320,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     ShellCommand.hpp
     StringMatchCombo.hpp
     SuiteItemWidget.hpp
+    SuiteModel.hpp
     TabWidget.hpp
     TableFilterWidget.hpp
     TableNodeModel.hpp 

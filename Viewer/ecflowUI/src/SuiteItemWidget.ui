@@ -92,8 +92,28 @@
           <string>&amp;Apply</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="viewer.qrc">
            <normaloff>:/viewer/submit_round.svg</normaloff>:/viewer/submit_round.svg</iconset>
+         </property>
+         <property name="toolButtonStyle">
+          <enum>Qt::ToolButtonTextBesideIcon</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QToolButton" name="resetTb">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="text">
+          <string>Ignore changes</string>
+         </property>
+         <property name="icon">
+          <iconset resource="viewer.qrc">
+           <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
          </property>
          <property name="toolButtonStyle">
           <enum>Qt::ToolButtonTextBesideIcon</enum>
@@ -138,7 +158,7 @@
           <string>Enable filter</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="viewer.qrc">
            <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
          </property>
          <property name="checkable">
@@ -200,7 +220,7 @@
           <string>Select &amp;all</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="viewer.qrc">
            <normaloff>:/viewer/select_all.svg</normaloff>:/viewer/select_all.svg</iconset>
          </property>
          <property name="toolButtonStyle">
@@ -226,7 +246,7 @@
           <string>&amp;Unselect all</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="viewer.qrc">
            <normaloff>:/viewer/unselect_all.svg</normaloff>:/viewer/unselect_all.svg</iconset>
          </property>
          <property name="toolButtonStyle">
@@ -275,7 +295,7 @@
           <string>&amp;Fetch load status</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="viewer.qrc">
            <normaloff>:/viewer/sync_black.svg</normaloff>:/viewer/sync_black.svg</iconset>
          </property>
          <property name="toolButtonStyle">
@@ -301,7 +321,7 @@
           <string>&amp;Remove unloaded</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="viewer.qrc">
            <normaloff>:/viewer/remove.svg</normaloff>:/viewer/remove.svg</iconset>
          </property>
          <property name="toolButtonStyle">
@@ -332,10 +352,12 @@
   <customwidget>
    <class>MessageLabel</class>
    <extends>QWidget</extends>
-   <header location="global">MessageLabel.hpp</header>
+   <header>MessageLabel.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -149,6 +149,22 @@ void UiLog::enableTruncation()
                                      86400*1000,10*1024*1024,1000);
 }
 
+//--------------------------------------------
+// Overload ostringstream for various objects
+//--------------------------------------------
+
+std::ostream& operator <<(std::ostream &stream,const std::vector<std::string>& vec)
+{
+    stream << "[";
+    for(size_t i=0; i < vec.size(); i++)
+    {
+        if(i > 0) stream << ",";
+        stream << vec[i];
+    }
+    stream << "]";
+
+    return stream;
+}
 
 //------------------------------------------
 // Overload ostringstream for qt objects

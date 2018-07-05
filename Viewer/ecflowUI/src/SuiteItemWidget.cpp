@@ -17,6 +17,9 @@
 #include "SuiteModel.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
+#include "UiLog.hpp"
+
+#define SuiteItemWidget__DEBUG__
 
 //========================================================
 //
@@ -26,7 +29,8 @@
 
 SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
     QWidget(parent),
-    columnsAdjusted_(false)
+    columnsAdjusted_(false),
+    edited_(false)
 {
 	setupUi(this);
 
@@ -42,6 +46,9 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
 
 	connect(model_,SIGNAL(dataChanged(QModelIndex,QModelIndex)),
 			this,SLOT(slotModelEdited(QModelIndex,QModelIndex)));
+
+    connect(model_,SIGNAL(dataUpdated()),
+            this,SLOT(slotModelDataUpdated()));
 
     messageLabel->setShowTypeTitle(false);
     messageLabel->setNarrowMode(true);
@@ -67,6 +74,7 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
     //okTb->setPalette(pal);
 
     okTb->setEnabled(false);
+    resetTb->setEnabled(false);
 	enableTb->setChecked(false);
 
     checkActionState();
@@ -95,10 +103,16 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 		//Get the current suitefilter
 		SuiteFilter *sf=info_->server()->suiteFilter();
 
+        UiLog().dbg() << "SuiteItemWidget::reload 1";
+        sf->filter();
+
 		assert(sf);
 
 		//The model will be an observer of the suitefilter
         model_->setData(sf,info_->server());
+
+        UiLog().dbg() << "SuiteItemWidget::reload 2";
+        sf->filter();
 
         if(!columnsAdjusted_)
         {
@@ -136,6 +150,9 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 			//inforReady or infoFailed will always be called.
 			infoProvider_->info(info_);
 		}
+
+        UiLog().dbg() << "SuiteItemWidget::reload 3";
+        sf->filter();
 	}
 }
 
@@ -165,6 +182,7 @@ void SuiteItemWidget::clearContents()
     model_->setData(0,0);
 	InfoPanelItem::clear();
 	okTb->setEnabled(false);
+    resetTb->setEnabled(false);
     messageLabel->hide();
 }
 
@@ -185,12 +203,37 @@ void SuiteItemWidget::checkActionState()
         removeTb->setEnabled(false);
         suiteView->setEnabled(false);
         okTb->setEnabled(false);
+        resetTb->setEnabled(false);
+        messageLabel->clear();
+        messageLabel->hide();
         return;
     }
     else
     {
          enableTb->setEnabled(true);
          suiteView->setEnabled(true);
+         bool st=model_->isEdited();
+         if(st)
+         {
+             SuiteFilter *sf=model_->filter();
+             SuiteFilter *oriSf=model_->realFilter();
+             if(sf && oriSf)
+             {
+                 st=(sf->sameAsLoadedIgnored(oriSf) == false);
+             }
+         }
+
+         okTb->setEnabled(st);
+         resetTb->setEnabled(st);
+         if(!st)
+         {
+            messageLabel->clear();
+            messageLabel->hide();
+         }
+         else
+         {
+            messageLabel->showTip("You have edited the suite filter! Please click <b>Apply</b> to submit the changes to the server!");
+         }
     }
 
     if(enableTb->isChecked())
@@ -222,8 +265,9 @@ void SuiteItemWidget::on_autoCb_clicked(bool val)
 {
 	if(SuiteFilter* sf=model_->filter())
 	{
-		sf->setAutoAddNewSuites(val);
-        settingsChanged();
+        model_->setEdited(true);
+        sf->setAutoAddNewSuites(val);
+        checkActionState();
 	}
 }
 
@@ -231,9 +275,10 @@ void SuiteItemWidget::on_enableTb_clicked(bool val)
 {
 	if(SuiteFilter* sf=model_->filter())
 	{
-		sf->setEnabled(val);
-		model_->reloadData();
-		settingsChanged();
+        sf->setEnabled(val);
+        model_->setEdited(true);
+        model_->reloadData();
+        checkActionState();
 	}
 
     checkActionState();
@@ -242,10 +287,11 @@ void SuiteItemWidget::on_enableTb_clicked(bool val)
 void SuiteItemWidget::on_selectAllTb_clicked(bool)
 {
 	if(SuiteFilter* sf=model_->filter())
-	{
-		sf->selectAll();
-		model_->reloadData();
-		settingsChanged();
+	{		
+        sf->selectAll();
+        model_->setEdited(true);
+        model_->reloadData();
+        checkActionState();
 	}
 }
 
@@ -254,8 +300,9 @@ void SuiteItemWidget::on_unselectAllTb_clicked(bool)
 	if(SuiteFilter* sf=model_->filter())
 	{
 		sf->unselectAll();
-		model_->reloadData();
-		settingsChanged();
+        model_->setEdited(true);
+        model_->reloadData();
+        checkActionState();
 	}
 }
 
@@ -274,8 +321,9 @@ void SuiteItemWidget::on_removeTb_clicked(bool val)
     {
         if(sf->removeUnloaded())
         {
+            model_->setEdited(true);
             model_->reloadData();
-            settingsChanged();
+            checkActionState();
         }
     }
 
@@ -286,43 +334,44 @@ void SuiteItemWidget::on_okTb_clicked(bool)
 {
     if(info_.get() && info_->server())
 	{
-		//This replace the edited filter in model the one
+        //This replace the edited filter in the model with the one
 		//stored by the server
-		info_->server()->updateSuiteFilter(model_->filter());
+        model_->setEdited(false);
+        info_->server()->updateSuiteFilter(model_->filter());
         okTb->setEnabled(false);
+        resetTb->setEnabled(false);
         messageLabel->clear();
         messageLabel->hide();
 	}
 }
 
-void SuiteItemWidget::slotModelEdited(const QModelIndex&,const QModelIndex&)
+void SuiteItemWidget::on_resetTb_clicked(bool)
 {
-	settingsChanged();
-}
-
-void SuiteItemWidget::settingsChanged()
-{
-    SuiteFilter *sf=model_->filter();
-    SuiteFilter *oriSf=model_->realFilter();
-    if(sf && oriSf)
+    if(info_.get() && info_->server())
     {
-        bool st=oriSf->sameAs(sf);
-        okTb->setEnabled(!st);
-        if(st)
-        {
-            messageLabel->clear();
-            messageLabel->hide();
-        }
-        else
-        {
-            messageLabel->showTip("The suite filter has changed! Please click <b>Apply</b> to submit the changes to the server!");
-        }
+        model_->setEdited(false);
+        model_->resetData();
+        okTb->setEnabled(false);
+        resetTb->setEnabled(false);
+        messageLabel->clear();
+        messageLabel->hide();
     }
 }
 
+
+void SuiteItemWidget::slotModelEdited(const QModelIndex&,const QModelIndex&)
+{
+    checkActionState();
+}
+
+void SuiteItemWidget::slotModelDataUpdated()
+{
+    checkActionState();
+}
+
+
 void SuiteItemWidget::notifyChange(SuiteFilter *filter)
 {
-    settingsChanged();
     checkActionState();
 }
 

@@ -12,6 +12,9 @@
 #include "ServerHandler.hpp"
 #include "SuiteFilter.hpp"
 #include "VNode.hpp"
+#include "UiLog.hpp"
+
+//#define SUITEMODEL_UI_DEBUG_
 
 SuiteModel::SuiteModel(QObject *parent) :
      QAbstractItemModel(parent),
@@ -19,9 +22,9 @@ SuiteModel::SuiteModel(QObject *parent) :
      data_(0),
      realData_(0),
      presentCol_(QColor(1,128,73)),
-     notPresentCol_(QColor(255,0,0))
+     notPresentCol_(QColor(255,0,0)),
+     edited_(false)
 {
-
 }
 
 SuiteModel::~SuiteModel()
@@ -44,6 +47,12 @@ void SuiteModel::clearData()
 		realData_->removeObserver(this);
 
 	realData_=0;
+    edited_=false;
+}
+
+void SuiteModel::setEdited(bool e)
+{
+    edited_=e;
 }
 
 void SuiteModel::setData(SuiteFilter* filter,ServerHandler* server)
@@ -69,7 +78,7 @@ void SuiteModel::setData(SuiteFilter* filter,ServerHandler* server)
 
 void SuiteModel::notifyChange(SuiteFilter *filter)
 {
-	if(filter && filter == realData_)
+    if(filter && filter == realData_)
 	{
 		updateData();
 	}
@@ -87,13 +96,48 @@ void SuiteModel::notifyDelete(SuiteFilter *filter)
 
 void SuiteModel::updateData()
 {
+#if 0
     if(realData_ && data_ &&
-         !data_->loadedSameAs(realData_->loaded()))
+         !data_->sameAs(realData_->loaded()))
         {
             beginResetModel();
             data_->setLoaded(realData_->loaded());
             endResetModel();
         }
+#endif
+
+    if(realData_ && data_ &&
+         !data_->sameAs(realData_))
+        {
+            bool filteredChanged=false;
+            beginResetModel();
+
+            if(edited_)
+                filteredChanged=data_->merge(realData_);
+            else
+            {
+                delete data_;
+                data_=realData_->clone();
+            }
+
+            endResetModel();
+
+            if(filteredChanged)
+                Q_EMIT dataUpdated();
+        }
+}
+
+void SuiteModel::resetData()
+{
+    beginResetModel();
+
+    if(data_)
+        delete data_;
+
+    if(realData_)
+        data_=realData_->clone();
+
+    endResetModel();
 }
 
 void SuiteModel::reloadData()
@@ -214,9 +258,9 @@ bool SuiteModel::setData(const QModelIndex& index, const QVariant & value, int r
 		if(row >=0 && row < data_->count())
 		{
 			bool checked=(value.toInt() == Qt::Checked)?true:false;
-			data_->setFiltered(row,checked);
-			Q_EMIT dataChanged(index,index);
-
+			data_->setFiltered(row,checked);			
+            edited_=true;
+            Q_EMIT dataChanged(index,index);
 			return true;
 		}
 	}

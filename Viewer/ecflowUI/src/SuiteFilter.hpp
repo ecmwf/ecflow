@@ -70,6 +70,8 @@ public:
 
 	enum ChangeFlag {AutoAddChanged=1,EnabledChanged=2,ItemChanged=4};
 
+    friend std::ostream& operator<< ( std::ostream& aStream, const SuiteFilter& obj);
+
 	SuiteFilter* clone();
 
     std::vector<std::string> filter() const;
@@ -94,8 +96,10 @@ public:
     bool hasUnloaded() const;
 
     bool sameAs(const SuiteFilter*) const;
+    bool sameAsLoadedIgnored(const SuiteFilter*) const;
+    bool merge(const SuiteFilter*);
 	bool update(SuiteFilter*);
-	bool setLoaded(const std::vector<std::string>& loaded,bool checkDiff=true);
+    bool setLoaded(const std::vector<std::string>& loaded,bool checkDiff=true);
 	bool loadedSameAs(const std::vector<std::string>& loaded) const;
 	const FlagSet<ChangeFlag>& changeFlags() {return changeFlags_;}
 
@@ -112,7 +116,7 @@ private:
 	void clear();
 	void adjust();
     void broadcastChange();
-    void adjustLoaded(const std::vector<std::string>& loaded);
+    bool adjustLoaded(const std::vector<std::string>& loaded);
     void adjustFiltered(const std::vector<std::string>& filtered);
 
     std::vector<SuiteFilterItem> items_;

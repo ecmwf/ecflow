@@ -11,6 +11,7 @@ class SuiteFilter;
 
 class SuiteModel : public QAbstractItemModel, public SuiteFilterObserver
 {
+    Q_OBJECT
 public:
    	explicit SuiteModel(QObject *parent=0);
    	~SuiteModel();
@@ -27,13 +28,19 @@ public:
    	QModelIndex parent (const QModelIndex & ) const;
 
     void setData(SuiteFilter* filter,ServerHandler* server);
-	void reloadData();
+    void reloadData();
+    void resetData();
 
    	SuiteFilter* filter() const {return data_;}   
     SuiteFilter* realFilter() const {return realData_;}
+    void setEdited(bool);
+    bool isEdited() const {return edited_;}
 
     void notifyChange(SuiteFilter*);
    	void notifyDelete(SuiteFilter*);
+
+Q_SIGNALS:
+    void dataUpdated();
 
 protected:
 	bool hasData() const;
@@ -45,6 +52,7 @@ protected:
 	SuiteFilter* realData_;
 	QColor presentCol_;
 	QColor notPresentCol_;
+    bool edited_;
 };
 
 #endif

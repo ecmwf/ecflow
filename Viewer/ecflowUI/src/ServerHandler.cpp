@@ -1369,7 +1369,8 @@ void ServerHandler::setSuiteFilterWithOne(VNode* n)
 
 void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 {
-	if(suiteFilter_->update(sf))
+UI_FUNCTION_LOG_S(this)
+    if(suiteFilter_->update(sf))
 	{
 		//If only this flag has changed we exec a custom task for it
 		if(suiteFilter_->changeFlags().sameAs(SuiteFilter::AutoAddChanged))
@@ -1388,19 +1389,28 @@ void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 }
 
 //Update the suite filter with the list of suites actually loaded onto the server.
-//If the suitefilter is enabled this might have only a subset of it in our tree.
+//If the suitefilter is enabled we might have only a subset of it in our tree.
 void ServerHandler::updateSuiteFilterWithLoaded(const std::vector<std::string>& loadedSuites)
 {	
-    suiteFilter_->setLoaded(loadedSuites);
+UI_FUNCTION_LOG_S(this)
+    if(suiteFilter_->setLoaded(loadedSuites))
+    {
+        //If the filtered state changed and the filter is active we need to reset
+        if(suiteFilter_->isEnabled())
+           reset();
+    }
 }
 
 //Update the suite filter with the list of suites stored in the defs (in the tree). It only
 //makes sense if the filter is disabled since in this case the defs stores all the loaded servers.
 void ServerHandler::updateSuiteFilterWithDefs()
 {
-	if(suiteFilter_->isEnabled())
+UI_FUNCTION_LOG_S(this)
+
+    if(suiteFilter_->isEnabled())
 		return;
 
+    //The filte ris disabled
 	std::vector<std::string> defSuites;
 	vRoot_->suites(defSuites);
 	suiteFilter_->setLoaded(defSuites);
@@ -1409,7 +1419,25 @@ void ServerHandler::updateSuiteFilterWithDefs()
 //Only called internally after reset or serverscan!!
 void ServerHandler::updateSuiteFilter()
 {
-	//We only fetch the full list of loaded suites from the server
+UI_FUNCTION_LOG_S(this)
+    //We only fetch the full list of loaded suites from the server
+    //via the thread when
+    //  -the suiteFilter is enabled!
+    if(suiteFilter_->isEnabled())
+    {
+        //This will call updateSuiteFilterWithLoaded()
+        comQueue_->addSuiteListTask();
+    }
+    //Otherwise the defs contains the full list of suites
+    else
+    {
+        std::vector<std::string> defSuites;
+        vRoot_->suites(defSuites);
+        suiteFilter_->setLoaded(defSuites);
+    }
+
+#if 0
+    //We only fetch the full list of loaded suites from the server
     //via the thread when
     //  -the suiteFilter is not yet initialised
     //   OR
@@ -1426,6 +1454,7 @@ void ServerHandler::updateSuiteFilter()
 		vRoot_->suites(defSuites);
 		suiteFilter_->setLoaded(defSuites);
 	}
+#endif
 }
 
 bool ServerHandler::readFromDisk() const

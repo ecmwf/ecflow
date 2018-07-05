@@ -12,6 +12,7 @@
 
 #include <string>
 #include <sstream>
+#include <vector>
 #include <boost/current_function.hpp>
 
 class QString;
@@ -77,6 +78,9 @@ private:
    UiLog(const UiLog&);
    UiLog& operator =(const UiLog&);
 };
+
+//Overload ostringstream for various objects
+std::ostream&  operator <<(std::ostream&,const std::vector<std::string>&);
 
 //Overload ostringstream for qt objects
 std::ostream&  operator <<(std::ostream&,const QString &);

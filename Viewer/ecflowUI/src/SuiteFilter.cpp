@@ -13,11 +13,12 @@
 #include "UserMessage.hpp"
 #include "VSettings.hpp"
 #include "VProperty.hpp"
+#include "UiLog.hpp"
 
 #include <algorithm>
 #include <assert.h>
 
-#define _UI_SUITEFILTER_DEBUG
+#define SUITEFILTER_UI_DEBUG_
 
 std::string SuiteFilter::dummySuite_="__DUMMY_FOR_UI__";
 
@@ -55,9 +56,18 @@ void SuiteFilter::clear()
 	broadcastChange();
 }
 
-void SuiteFilter::adjustLoaded(const std::vector<std::string>& loaded)
+bool SuiteFilter::adjustLoaded(const std::vector<std::string>& loaded)
 {
+#ifdef SUITEFILTER_UI_DEBUG_
+    UI_FUNCTION_LOG
+#endif
     bool changed=false;
+    bool filteredChanged=false;
+
+#ifdef SUITEFILTER_UI_DEBUG_
+    UiLog().dbg() << "loaded=" << loaded;
+    UiLog().dbg() << "items_=" << *this;
+#endif
 
     std::vector<std::string> currentLoaded;
     for(std::vector<SuiteFilterItem>::iterator it=items_.begin(); it != items_.end(); ++it)
@@ -69,6 +79,11 @@ void SuiteFilter::adjustLoaded(const std::vector<std::string>& loaded)
             if(ld &&
               loadedInitialised_ && enabled_ && autoAddNew_)
             {
+                if(!(*it).filtered_)
+                {
+                    filteredChanged=true;
+                }
+
                 (*it).filtered_=true;
             }
             changed=true;
@@ -86,16 +101,26 @@ void SuiteFilter::adjustLoaded(const std::vector<std::string>& loaded)
             bool filtered=loadedInitialised_ && enabled_ && autoAddNew_;
             items_.push_back(SuiteFilterItem(*it,true,filtered));
             changed=true;
+            if(filtered)
+            {
+                filteredChanged=true;
+            }
         }
     }
-
 
     if(!loadedInitialised_ && loaded.size() > 0)
         loadedInitialised_=true;
 
     if(changed)
         broadcastChange();
+
+#ifdef SUITEFILTER_UI_DEBUG_
+    UiLog().dbg() << "(2) items_=" << *this;
+#endif
+
+    return filteredChanged;
 }
+
 
 std::vector<std::string> SuiteFilter::loaded() const
 {
@@ -108,7 +133,7 @@ std::vector<std::string> SuiteFilter::loaded() const
     return fv;
 }
 
-
+//Called only once on init
 void SuiteFilter::adjustFiltered(const std::vector<std::string>& filtered)
 {
     bool changed=false;
@@ -120,7 +145,7 @@ void SuiteFilter::adjustFiltered(const std::vector<std::string>& filtered)
         if((*it).filtered_ != ld)
         {
             (*it).filtered_=ld;
-            changed=true;
+            changed=true;                      
         }
         if(ld)
             currentFiltered.push_back((*it).name_);
@@ -147,6 +172,12 @@ std::vector<std::string> SuiteFilter::filter() const
         if((*it).filtered_)
            fv.push_back((*it).name());
     }
+
+#ifdef SUITEFILTER_UI_DEBUG_
+    UI_FUNCTION_LOG
+    UiLog().dbg() << "filter=" << fv;
+#endif
+
     return fv;
 }
 
@@ -213,11 +244,11 @@ bool SuiteFilter::setLoaded(const std::vector<std::string>& loaded,bool checkDif
 
     if(!checkDiff || !same)
     {
-        adjustLoaded(loaded);
-        return true;
+        return adjustLoaded(loaded);
     }
 
-    return !same;
+    return false;
+    //return !same;
 }
 
 bool SuiteFilter::sameAs(const SuiteFilter* sf) const
@@ -240,6 +271,70 @@ bool SuiteFilter::sameAs(const SuiteFilter* sf) const
     }
 
     return true;
+}
+
+bool SuiteFilter::sameAsLoadedIgnored(const SuiteFilter* sf) const
+{
+    if(autoAddNew_ != sf->autoAddNewSuites())
+        return false;
+
+    if(enabled_ != sf->isEnabled())
+        return false;
+
+    if(sf->count() != count())
+        return false;
+
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i].filtered_ != sf->items()[i].filtered_ ||
+           items_[i].name_ != sf->items()[i].name_ )
+        {
+           return false;
+        }
+    }
+
+    return true;
+}
+
+bool SuiteFilter::merge(const SuiteFilter* sf)
+{
+    bool filteredChanged=false;
+
+    if(enabled_ != sf->enabled_)
+    {
+        filteredChanged=true;
+    }
+    //enabled_=sf->enabled_;
+
+    if(autoAddNew_ !=sf->autoAddNew_ )
+    {
+       filteredChanged=true;
+    }
+    //autoAddNew_=sf->autoAddNew_;
+
+    std::vector<SuiteFilterItem> oriItems=items_;
+
+    items_=sf->items_;
+    for(size_t i=0; i < oriItems.size(); i++)
+    {
+        for(size_t j=0; j < items_.size(); j++)
+        {
+            if(items_[j].name_ == oriItems[i].name_)
+            {
+                if(items_[j].filtered_ != oriItems[i].filtered_ )
+                {
+                    filteredChanged=true;
+                }
+
+                //we keep the filtered state from the original items
+                items_[j].filtered_ = oriItems[i].filtered_;
+
+                break;
+            }
+        }
+    }
+
+    return filteredChanged;
 }
 
 bool SuiteFilter::update(SuiteFilter* sf)
@@ -278,7 +373,12 @@ bool SuiteFilter::update(SuiteFilter* sf)
         }
     }
 
-	return (changeFlags_.isEmpty() == false);
+    bool changed=(changeFlags_.isEmpty() == false);
+    if(changed)
+    {
+        broadcastChange();
+    }
+    return changed;
 }
 
 void SuiteFilter::selectAll()
@@ -352,6 +452,16 @@ void SuiteFilter::broadcastChange()
 	{
 		(*it)->notifyChange(this);
 	}
+}
+
+std::ostream& operator<< ( std::ostream& aStream, const SuiteFilter& obj)
+{
+    aStream << " " << obj.loadedInitialised_ << " " << obj.enabled_  << " " << obj.autoAddNew_ << std::endl;
+    for(std::vector<SuiteFilterItem>::const_iterator it=obj.items_.begin(); it != obj.items_.end(); ++it)
+    {
+        aStream << " " << (*it).name() << " " << (*it).filtered() << " " << (*it).loaded() << std::endl;
+    }
+    return aStream;
 }
 
 void SuiteFilter::readSettings(VSettings *vs)

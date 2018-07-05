@@ -335,7 +335,7 @@ void ServerComThread::reset()
 
         if(!filteredSuites_.empty())
         {
-            UiLog(serverName_).dbg() << " register suites";
+            UiLog(serverName_).dbg() << " register suites=" << filteredSuites_;
 
             //This will add a new handle to the client
             ci_->ch_register(autoAddNewSuites_, filteredSuites_);

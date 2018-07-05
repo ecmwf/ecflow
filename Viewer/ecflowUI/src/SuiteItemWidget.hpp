@@ -49,17 +49,19 @@ protected Q_SLOTS:
 	void on_unselectAllTb_clicked(bool);
 	void on_syncTb_clicked(bool);
     void on_okTb_clicked(bool);
+    void on_resetTb_clicked(bool);
     void on_removeTb_clicked(bool);
 	void slotModelEdited(const QModelIndex&,const QModelIndex&);
+    void slotModelDataUpdated();
 
 protected:
 	void updateData();    
     void updateState(const ChangeFlags&);
-	void settingsChanged();
     void checkActionState();
 
     SuiteModel *model_;
     bool columnsAdjusted_;
+    bool edited_;
 };
 
 #endif
