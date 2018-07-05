@@ -1,0 +1,24 @@
+{
+    "def": {
+        "cereal_class_version": 0,
+        "initTime_": {
+            "ptime": "2011-Feb-10 23:59:00"
+        },
+        "suiteTime_": {
+            "ptime": "2011-Feb-10 23:59:00"
+        },
+        "duration_": {
+            "duration": "00:00:00"
+        },
+        "dayChanged_": false,
+        "initLocalTime_": {
+            "ptime": "2018-Jul-05 15:21:41"
+        },
+        "lastTime_": {
+            "ptime": "2018-Jul-05 15:21:41"
+        },
+        "calendarIncrement_": {
+            "duration": "00:01:00"
+        }
+    }
+}

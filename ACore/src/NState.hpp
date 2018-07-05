@@ -18,9 +18,7 @@
 
 #include <string>
 #include <vector>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
+#include "Serialization.hpp"
 
 // NState: stores the state of a node.
 // *The class NState just used to define the enum, however we also
@@ -55,16 +53,12 @@ private:
 	State state_;
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
-	friend class boost::serialization::access;
+   friend class cereal::access;
 	template<class Archive>
 	void serialize(Archive & ar, const unsigned int /*version*/)
 	{
 	   ar & state_;
 	}
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(NState, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(NState,boost::serialization::track_never);
 
 #endif

@@ -27,7 +27,7 @@ lib core : [ glob src/*.cpp ]
            <use>/site-config//boost_serialization
            <use>/site-config//boost_datetime
            <use>/site-config//boost_program_options
-          :
+          : <include>../cereal/include
           : <include>../ACore/src
             <include>../cereal/include
           ;

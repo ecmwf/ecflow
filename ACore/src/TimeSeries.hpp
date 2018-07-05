@@ -17,10 +17,10 @@
 
 #include "TimeSlot.hpp"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/date_time/posix_time/time_serialize.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
+#include "Serialization.hpp"
+#include "cereal.hpp"
 
 namespace ecf { class Calendar;} // forward declare class
 
@@ -185,17 +185,18 @@ private:
 	// Note: isValid_      is persisted for use by why() command on the client side.
 	// Note: nextTimeSlot_ is persisted for use by why() command on the client side.
 	// Note: relativeDuration_ is persisted for use by why() command on the client side.
-	friend class boost::serialization::access;
+	friend class cereal::access;
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/)
+	void serialize(Archive & ar, std::uint32_t const  /*version*/)
 	{
-	   ar & relativeToSuiteStart_;
-	   ar & isValid_;
-	   ar & start_;
-	   ar & finish_;
-	   ar & incr_;
-	   ar & nextTimeSlot_;
-	   ar & relativeDuration_;
+      ar( CEREAL_NVP(relativeToSuiteStart_),
+          CEREAL_NVP(isValid_ ),
+          CEREAL_NVP(start_ ),
+          CEREAL_NVP(finish_ ),
+          CEREAL_NVP(incr_),
+          CEREAL_NVP(nextTimeSlot_),
+          CEREAL_NVP(relativeDuration_)
+        );
 
 	   if (Archive::is_loading::value) {
 	      if (!finish_.isNULL()) {
@@ -208,9 +209,5 @@ private:
 std::ostream& operator<<(std::ostream& os, const TimeSeries*);
 std::ostream& operator<<(std::ostream& os, const TimeSeries&);
 }
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(ecf::TimeSeries, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(ecf::TimeSeries,boost::serialization::track_never);
 
 #endif

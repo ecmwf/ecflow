@@ -82,9 +82,8 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/posix_time/conversion.hpp>
 #include <boost/date_time/posix_time/time_serialize.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
+#include "Serialization.hpp"
+#include "cereal.hpp"
 
 namespace ecf {
 
@@ -217,9 +216,9 @@ private:
 	// Note: The *only* reason to serialise the calendar is so that we can support
 	// why() command on the client side. By default calendar is initialised in the *server*
 	// at begin time, from the clock attribute
-	friend class boost::serialization::access;
+   friend class cereal::access;
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/)
+	void serialize(Archive & ar, std::uint32_t const /*version*/)
 	{
 	   if (Archive::is_saving::value) {
 	      if ( initTime_.is_special() ) {
@@ -231,25 +230,16 @@ private:
 	         begin(second_clock_time());
 	      }
 	   }
-
-	   ar & initTime_;
-	   ar & suiteTime_;
-	   ar & duration_;
-	   ar & dayChanged_;
-	   ar & initLocalTime_;
-	   ar & lastTime_;
-	   ar & calendarIncrement_;
+      ar( CEREAL_NVP(initTime_),
+          CEREAL_NVP(suiteTime_),
+          CEREAL_NVP(duration_),
+          CEREAL_NVP(dayChanged_),
+          CEREAL_NVP(initLocalTime_),
+          CEREAL_NVP(lastTime_),
+          CEREAL_NVP(calendarIncrement_)
+        );
 	}
 };
 }
-
-
-// eliminate serialization overhead at the cost of
-// never being able to increase the version.
-BOOST_CLASS_IMPLEMENTATION(ecf::Calendar, boost::serialization::object_serializable)
-
-// eliminate object tracking (even if serialized through a pointer)
-// at the risk of a programming error creating duplicate objects.
-BOOST_CLASS_TRACKING(ecf::Calendar,boost::serialization::track_never);
 
 #endif

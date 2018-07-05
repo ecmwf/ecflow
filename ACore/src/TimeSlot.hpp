@@ -15,11 +15,9 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include "boost/date_time/posix_time/posix_time_types.hpp"
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
 #include <ostream>
+#include "boost/date_time/posix_time/posix_time_types.hpp"
+#include "Serialization.hpp"
 
 namespace ecf {
 
@@ -66,21 +64,18 @@ private:
  	unsigned short minute_;
  	bool           isNull_;
 
- 	friend class boost::serialization::access;
+ 	friend class cereal::access;
  	template<class Archive>
- 	void serialize(Archive & ar, const unsigned int /*version*/) {
- 	   ar & hour_;
- 	   ar & minute_;
- 	   ar & isNull_;
+ 	void serialize(Archive & ar, std::uint32_t const version ) {
+ 	   ar( CEREAL_NVP(hour_),
+ 	       CEREAL_NVP(minute_ ),
+ 	       CEREAL_NVP(isNull_)
+ 	     );
  	}
 };
 
 std::ostream& operator<<(std::ostream& os, const TimeSlot*);
 std::ostream& operator<<(std::ostream& os, const TimeSlot&);
 }
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(ecf::TimeSlot, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(ecf::TimeSlot,boost::serialization::track_never);
 
 #endif

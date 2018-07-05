@@ -14,8 +14,6 @@
 //============================================================================
 #include <fstream>
 #include <boost/test/unit_test.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/version.hpp>
 #include "boost/filesystem/operations.hpp"
 
 #include "TestVersioning.hpp"

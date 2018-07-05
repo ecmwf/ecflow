@@ -1,4 +1,3 @@
-#if defined(TEXT_ARCHIVE) || !defined(BINARY_ARCHIVE) && !defined(PORTABLE_BINARY_ARCHIVE) && !defined(EOS_PORTABLE_BINARY_ARCHIVE)
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
@@ -19,10 +18,10 @@
 #include "boost/filesystem/path.hpp"
 
 #include "TimeSeries.hpp"
-#include "SerializationTest.hpp"
 #include "Calendar.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
+#include "SerializationTest.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -33,11 +32,11 @@ namespace fs = boost::filesystem;
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
 // If you are updating the tests, *MAKE SURE* to check out test/data/migration/* files
-//#define UPDATE_TESTS 1
+#define UPDATE_TESTS 1
 
-BOOST_AUTO_TEST_CASE( test_migration_restore_1_9 )
+BOOST_AUTO_TEST_CASE( test_migration_restore_cereal )
 {
-   cout << "ACore:: ...test_migration_restore_1_9\n";
+   cout << "ACore:: ...test_migration_restore_cereal\n";
 
    std::string file_name = File::test_data("ACore/test/data/migration/","ACore");
 
@@ -49,23 +48,23 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_1_9 )
 
    DebugEquality debug_equality; // only as affect in DEBUG build
 
+   string cereal_version = "_1_2_2_";
+
 #ifdef UPDATE_TESTS
-   doSave<TimeSlot>(file_name + "timeslot_default_constructor_v1.9");
-   doSave<TimeSeries>(file_name + "timeseries_default_constructor_v1.9");
-   doSave<Calendar>(file_name + "calendar_v1.9",calendar);
-   doSave(file_name + "timeslot_1_1_v1_9",TimeSlot(1,1));
-   doSave(file_name + "timeslot_99_59_v1_9",TimeSlot(99,59));
-   doSave(file_name + "timeseries_10_10_v1_9",TimeSeries(TimeSlot(10,10)));
+   doSave<TimeSlot>(file_name + "timeslot_default_constructor" + cereal_version);
+   doSave<TimeSeries>(file_name + "timeseries_default_constructor" + cereal_version);
+   doSave<Calendar>(file_name + "calendar" + cereal_version,calendar);
+   doSave(file_name + "timeslot"  + cereal_version + "11",TimeSlot(1,1));
+   doSave(file_name + "timeslot"  + cereal_version + "9959",TimeSlot(99,59));
+   doSave(file_name + "timeseries" + cereal_version + "1010",TimeSeries(TimeSlot(10,10)));
 #else
-   do_restore<TimeSlot>(file_name + "timeslot_default_constructor_v1.9",TimeSlot());
-   do_restore<TimeSeries>(file_name + "timeseries_default_constructor_v1.9",TimeSeries());
-   do_restore<Calendar>(file_name + "calendar_v1.9",calendar);
-   do_restore<TimeSlot>(file_name + "timeslot_1_1_v1_9",TimeSlot(1,1));
-   do_restore<TimeSlot>(file_name + "timeslot_99_59_v1_9",TimeSlot(99,59));
-   do_restore<TimeSeries>(file_name + "timeseries_10_10_v1_9",TimeSeries(TimeSlot(10,10)));
+   do_restore<TimeSlot>(file_name   + "timeslot_default_constructor" + cereal_version,TimeSlot());
+   do_restore<TimeSeries>(file_name + "timeseries_default_constructor" + cereal_version ,TimeSeries());
+   do_restore<Calendar>(file_name   + "calendar"  + cereal_version,          calendar);
+   do_restore<TimeSlot>(file_name   + "timeslot"  + cereal_version + "11",   TimeSlot(1,1));
+   do_restore<TimeSlot>(file_name   + "timeslot"  + cereal_version + "9959", TimeSlot(99,59));
+   do_restore<TimeSeries>(file_name + "timeseries" + cereal_version + "1010",TimeSeries(TimeSlot(10,10)));
 #endif
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif

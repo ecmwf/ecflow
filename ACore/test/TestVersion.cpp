@@ -16,7 +16,6 @@
 #include <iostream>
 #include <boost/test/unit_test.hpp>
 #include "Version.hpp"
-#include "boost_archive.hpp"
 #include "File.hpp"
 #include "Str.hpp"
 
@@ -31,12 +30,6 @@ BOOST_AUTO_TEST_CASE( test_version )
    std::string desc = Version::description();
    BOOST_CHECK_MESSAGE(!desc.empty(),"Expected version");
    cout << "ACore:: ...test_version:" << desc  << endl;
-}
-
-BOOST_AUTO_TEST_CASE( boost_serialisation_archive_version )
-{
-   cout << "ACore:: ...boost_serialisation_archive_version:  " << ecf::boost_archive::version()  << endl;
-   BOOST_REQUIRE_MESSAGE(ecf::boost_archive::version() != 0,"keep boost from complaining");
 }
 
 

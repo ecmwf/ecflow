@@ -1,16 +1,15 @@
 // Revision    : $Revision: #5 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2018 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
 // granted to it by virtue of its status as an intergovernmental organisation 
 // nor does it submit to any jurisdiction. 
 //
-#include <boost/serialization/string.hpp>
-#include <boost/serialization/version.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iostream>
+#include "SerializationTest.hpp"
 
 
 /// To simulate changing of data model over time, we will
@@ -25,9 +24,9 @@ public:
 private:
    int hour_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int version) {
+   void serialize(Archive & ar, std::uint32_t const version) {
       ar & hour_;
    }
 };
@@ -41,9 +40,9 @@ public:
 private:
    int hour_;
    int min_;
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int version) {
+   void serialize(Archive & ar, std::uint32_t const  version) {
       // When *loading* the version pertains to loaded version in the data
       // When *saving* the version always pertains to the latest version
       ar & hour_;
@@ -51,7 +50,7 @@ private:
    }
 };
 }
-BOOST_CLASS_VERSION(version_new_data_member::X, 1)
+CEREAL_CLASS_VERSION(version_new_data_member::X, 1)
 
 namespace version_change_dm_name {
 class X {
@@ -60,14 +59,14 @@ public:
    bool operator==(const X& rhs) const { return hours_ == rhs.hours_; }
 private:
    int hours_;
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int version) {
+   void serialize(Archive & ar, std::uint32_t const  version ) {
       ar & hours_;
    }
 };
 }
-BOOST_CLASS_VERSION(version_change_dm_name::X, 1)
+CEREAL_CLASS_VERSION(version_change_dm_name::X, 1)
 
 namespace version_change_dm_type {
 class X {
@@ -77,9 +76,9 @@ public:
    std::string str() const { return hour_; }
 private:
    std::string hour_;
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int version) {
+   void serialize(Archive & ar, std::uint32_t const  version  ) {
       // When *loading* the version pertains to loaded version in the data
       // When *saving* the version always pertains to the latest version
       if (version == 0) {
@@ -94,4 +93,4 @@ private:
    }
 };
 }
-BOOST_CLASS_VERSION(version_change_dm_type::X, 1)
+CEREAL_CLASS_VERSION(version_change_dm_type::X, 1)

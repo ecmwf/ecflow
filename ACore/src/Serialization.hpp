@@ -20,116 +20,44 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-
-#include "boost_archive.hpp"
-#include "Archive.hpp"
+#include <cereal/archives/json.hpp>
 
 namespace ecf {
 
-/// These function do *NOT* trap  boost::archive::archive_exception since we want it
-/// to propagate up.
+template< typename T >
+void save(const std::string& fileName, const T& t)
+{
+   std::ofstream os(fileName);
+   cereal::JSONOutputArchive oarchive(os); // Create an output archive
+   oarchive(cereal::make_nvp("def",t) ); // Write the data to the archive
+}
 
 template< typename T >
-void save(const std::string& fileName, const T& ts, ecf::Archive::Type at = ecf::Archive::default_archive())
+void restore(const std::string& fileName, T& restored)
 {
-   // Argument added if in future we want to allow multiple archives, so we can choose
-#if defined(BINARY_ARCHIVE)
-	std::ofstream ofs( fileName.c_str(), std::ios::binary );
-	boost::archive::binary_oarchive oa( ofs );
-	oa << ts;
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-	std::ofstream ofs( fileName.c_str(), std::ios::binary );
-	portable_binary_oarchive oa(ofs);
-	oa << ts;
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-   std::ofstream ofs( fileName.c_str(), std::ios::binary );
-   eos::portable_oarchive oa(ofs);
-   oa << ts;
-#else
-   std::ofstream ofs( fileName.c_str() );
-   boost::archive::text_oarchive oa( ofs );
-	oa << ts;
-#endif
+   std::ifstream is(fileName);
+   cereal::JSONInputArchive iarchive(is); // Create an input archive
+   iarchive(restored);                    // Read the data from the archive
 }
+
 
 template< typename T >
 void save_as_string(std::string& outbound_data, const T& t)
 {
    std::ostringstream archive_stream;
-
-#if defined(BINARY_ARCHIVE)
-   boost::archive::binary_oarchive archive( archive_stream );
-   archive << t;
+   cereal::JSONOutputArchive oarchive(archive_stream); // Create an output archive
+   oarchive(cereal::make_nvp("def",t) );               // Write the data to the archive
    outbound_data = archive_stream.str();
-   //             std::cout << "save_as_string BINARY " << outbound_data_ << "\n";
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-   portable_binary_oarchive archive( archive_stream );
-   archive << t;
-   outbound_data = archive_stream.str();
-   //             std::cout << "save_as_string PORTABLE_BINARY " << outbound_data_ << "\n";
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-   eos::portable_oarchive archive( archive_stream );
-   archive << t;
-   outbound_data = archive_stream.str();
-   //             std::cout << "save_as_string EOS_PORTABLE_BINARY " << outbound_data_ << "\n";
-#else
-   boost::archive::text_oarchive archive( archive_stream );
-   archive << t;
-   outbound_data = archive_stream.str();
-#endif
 }
 
 template< typename T >
-void restore_from_string(const std::string& archive_data, T& t)
+void restore_from_string(const std::string& archive_data, T& restored)
 {
    std::istringstream archive_stream(archive_data);
-
-#if defined(BINARY_ARCHIVE)
-   // std::cout << "restore_from_string Archive BINARY\n";
-   boost::archive::binary_iarchive archive( archive_stream );
-
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-   // std::cout << "restore_from_string Archive PORTABLE_BINARY\n";
-   portable_binary_iarchive archive( archive_stream );
-
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-   // std::cout << "restore_from_string Archive EOS_PORTABLE_BINARY\n";
-   eos::portable_iarchive archive( archive_stream );
-
-#else
-   // std::cout << "restore_from_string Archive TEXT\n";
-   boost::archive::text_iarchive archive( archive_stream );
-
-#endif
-
-   archive >> t;
-}
-
-
-
-template< typename T >
-void restore(const std::string& fileName, T& restored, ecf::Archive::Type at = ecf::Archive::default_archive())
-{
-   // Argument added if in future we want to allow multiple archives, so we can choose
-
-#if defined(BINARY_ARCHIVE)
-	std::ifstream ifs( fileName.c_str(), std::ios::binary );
-	boost::archive::binary_iarchive ia( ifs );
-	ia >> restored;
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-	std::ifstream ifs( fileName.c_str(), std::ios::binary );
-	portable_binary_iarchive ia( ifs );
-	ia >> restored;
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-   std::ifstream ifs( fileName.c_str(), std::ios::binary );
-   eos::portable_iarchive ia( ifs );
-   ia >> restored;
-#else
-	std::ifstream ifs( fileName.c_str() );
-	boost::archive::text_iarchive ia( ifs );
-	ia >> restored;
-#endif
+   cereal::JSONInputArchive iarchive(archive_stream); // Create an input archive
+   iarchive(restored);                                // Read the data from the archive
 }
 
 }
+
 #endif
