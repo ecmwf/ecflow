@@ -29,6 +29,7 @@ namespace ecf {
 // is possible for a TimeSlot hour to have any integer value
 class TimeSlot {
 public:
+   static std::string type() { return "TimeSlot";}
 	TimeSlot()
 		: hour_(0), minute_(0),isNull_(true) {}
 	TimeSlot(int hour, int min)

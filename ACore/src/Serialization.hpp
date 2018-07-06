@@ -29,7 +29,7 @@ void save(const std::string& fileName, const T& t)
 {
    std::ofstream os(fileName);
    cereal::JSONOutputArchive oarchive(os); // Create an output archive
-   oarchive(cereal::make_nvp("def",t) ); // Write the data to the archive
+   oarchive(cereal::make_nvp(typeid(t).name(),t) ); // Write the data to the archive
 }
 
 template< typename T >
