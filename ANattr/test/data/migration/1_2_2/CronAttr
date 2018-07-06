@@ -1,0 +1,47 @@
+{
+    "N3ecf8CronAttrE": {
+        "cereal_class_version": 0,
+        "timeSeries_": {
+            "cereal_class_version": 0,
+            "relativeToSuiteStart_": false,
+            "isValid_": true,
+            "start_": {
+                "cereal_class_version": 0,
+                "hour_": 0,
+                "minute_": 0,
+                "isNull_": false
+            },
+            "finish_": {
+                "hour_": 20,
+                "minute_": 0,
+                "isNull_": false
+            },
+            "incr_": {
+                "hour_": 0,
+                "minute_": 1,
+                "isNull_": false
+            },
+            "nextTimeSlot_": {
+                "hour_": 0,
+                "minute_": 0,
+                "isNull_": false
+            },
+            "relativeDuration_": {
+                "duration": "00:00:00"
+            }
+        },
+        "weekDays_": [
+            1,
+            2
+        ],
+        "daysOfMonth_": [
+            1,
+            2
+        ],
+        "months_": [
+            1,
+            2
+        ],
+        "makeFree_": false
+    }
+}

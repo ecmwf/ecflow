@@ -1,0 +1,12 @@
+{
+    "10RepeatDate": {
+        "cereal_class_version": 0,
+        "value0": {
+            "name_": "date"
+        },
+        "start_": 20110112,
+        "end_": 20110115,
+        "delta_": 1,
+        "value_": 20110112
+    }
+}

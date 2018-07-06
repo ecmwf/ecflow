@@ -1,0 +1,13 @@
+{
+    "N3ecf15AutoArchiveAttrE": {
+        "cereal_class_version": 0,
+        "timeStruct_": {
+            "cereal_class_version": 0,
+            "hour_": 0,
+            "minute_": 0,
+            "isNull_": true
+        },
+        "relative_": true,
+        "days_": false
+    }
+}

@@ -14,15 +14,7 @@
 //============================================================================
 
 #include <ostream>
-#include "boost_archive.hpp" // collates boost archive includes
-
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-#include <boost/serialization/string.hpp>         // no need to include <string>
-#include <boost/serialization/assume_abstract.hpp>
-#include <boost/serialization/export.hpp>   // explicit code for exports (place last) , needed for BOOST_CLASS_EXPORT
-
+#include "Serialization.hpp"
 #include <boost/utility.hpp>
 
 #include "NState.hpp"
@@ -83,18 +75,16 @@ private:
    std::vector<NState::State> state_vec_;
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & currentIndex_;
-      ar & name_;
-      ar & theQueue_;
-      ar & state_vec_;
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar( CEREAL_NVP(currentIndex_),
+          CEREAL_NVP(name_),
+          CEREAL_NVP(theQueue_),
+          CEREAL_NVP(state_vec_)
+      );
    }
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(QueueAttr, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(QueueAttr,boost::serialization::track_never);
 
 #endif

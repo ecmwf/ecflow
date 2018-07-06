@@ -48,8 +48,6 @@
 /// If the job starts at 10:00 but takes more than 1 hour, then it will miss the 11:00 slot
 /// and will have to start at 12:00
 //============================================================================
-#include <boost/serialization/tracking.hpp>
-#include <boost/serialization/level.hpp>
 #include "TimeSeries.hpp"
 
 namespace ecf { class Calendar;} // forward declare class
@@ -118,19 +116,15 @@ private:
 	bool         makeFree_;
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int /*version*/)
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
     {
-     	ar & timeSeries_;
-     	ar & makeFree_;      // Only persisted for testing, see usage of isSetFree()
+      ar( CEREAL_NVP(timeSeries_),
+          CEREAL_NVP(makeFree_) // Only persisted for testing, see usage of isSetFree()
+      );
     }
 };
 
 }
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(ecf::TimeAttr, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(ecf::TimeAttr,boost::serialization::track_never);
-
 #endif

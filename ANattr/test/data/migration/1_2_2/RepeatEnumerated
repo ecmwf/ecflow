@@ -1,0 +1,13 @@
+{
+    "16RepeatEnumerated": {
+        "cereal_class_version": 0,
+        "value0": {
+            "name_": "enum"
+        },
+        "theEnums_": [
+            "a",
+            "b"
+        ],
+        "currentIndex_": 0
+    }
+}

@@ -21,17 +21,8 @@
 //============================================================================
 
 #include <ostream>
-#include "boost_archive.hpp" // collates boost archive includes
-
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-#include <boost/serialization/string.hpp>         // no need to include <string>
-#include <boost/serialization/assume_abstract.hpp>
-#include <boost/serialization/export.hpp>   // explicit code for exports (place last) , needed for BOOST_CLASS_EXPORT
-
+#include <memory>
 #include <boost/utility.hpp>
-
 #include "Variable.hpp"
 
 /////////////////////////////////////////////////////////////////////////
@@ -107,11 +98,11 @@ protected:
    mutable Variable var_;          // *not* persisted
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive& ar, const unsigned int /*version*/)
+   void serialize(Archive & ar)
    {
-      ar & name_;
+      ar( CEREAL_NVP(name_) );
    }
 };
 
@@ -172,14 +163,16 @@ private:
    mutable Variable dow_;          // *not* persisted
    mutable Variable julian_;       // *not* persisted
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::base_object<RepeatBase>(*this);
-      ar & start_;
-      ar & end_;
-      ar & delta_;
-      ar & value_;
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar(cereal::base_class<RepeatBase>(this),
+         CEREAL_NVP(start_),
+         CEREAL_NVP(end_),
+         CEREAL_NVP(delta_),
+         CEREAL_NVP(value_)
+      );
    }
 };
 
@@ -224,14 +217,16 @@ private:
    int  delta_;
    long  value_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::base_object<RepeatBase>(*this);
-      ar & start_;
-      ar & end_;
-      ar & delta_;
-      ar & value_;
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar(cereal::base_class<RepeatBase>(this),
+         CEREAL_NVP(start_),
+         CEREAL_NVP(end_),
+         CEREAL_NVP(delta_),
+         CEREAL_NVP(value_)
+      );
    }
 };
 
@@ -277,12 +272,14 @@ private:
    std::vector<std::string> theEnums_;
    int currentIndex_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::base_object<RepeatBase>(*this);
-      ar & theEnums_;
-      ar & currentIndex_;
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar(cereal::base_class<RepeatBase>(this),
+         CEREAL_NVP(theEnums_),
+         CEREAL_NVP(currentIndex_)
+      );
    }
 };
 
@@ -325,12 +322,14 @@ private:
    std::vector<std::string> theStrings_;
    int currentIndex_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::base_object<RepeatBase>(*this);
-      ar & theStrings_;
-      ar & currentIndex_;
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar(cereal::base_class<RepeatBase>(this),
+         CEREAL_NVP(theStrings_),
+         CEREAL_NVP(currentIndex_)
+      );
    }
 };
 
@@ -393,11 +392,12 @@ private:
    int step_;
    bool valid_;  // not persisted since only used in simulator
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::base_object<RepeatBase>(*this);
-      ar & step_;
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar(cereal::base_class<RepeatBase>(this),
+         CEREAL_NVP(step_));
    }
 };
 
@@ -415,7 +415,7 @@ public:
    bool operator==(const Repeat& rhs) const;
 
    bool empty() const { return (repeatType_) ? false : true; }
-   void clear() { delete repeatType_; repeatType_ = 0;}
+   void clear() { repeatType_.release();  }
 
    const std::string& name() const;
 
@@ -455,26 +455,17 @@ public:
    bool is_repeat_day() const { return (repeatType_) ? repeatType_->is_repeat_day() : false; }
 
    /// Expose base for the GUI only, use with caution
-   RepeatBase* repeatBase() const { return repeatType_;}
+   RepeatBase* repeatBase() const { return repeatType_.get();}
 
 private:
-   RepeatBase* repeatType_;
+   std::unique_ptr<RepeatBase> repeatType_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & repeatType_;
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar(CEREAL_NVP(repeatType_));
    }
 };
-
-BOOST_CLASS_EXPORT_KEY(RepeatDate)
-BOOST_CLASS_EXPORT_KEY(RepeatInteger)
-BOOST_CLASS_EXPORT_KEY(RepeatEnumerated)
-BOOST_CLASS_EXPORT_KEY(RepeatString)
-BOOST_CLASS_EXPORT_KEY(RepeatDay)
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(Repeat, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(Repeat,boost::serialization::track_never);
 
 #endif

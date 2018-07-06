@@ -19,9 +19,7 @@
 #include <ostream>
 #include <vector>
 #include <string>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
+#include "Serialization.hpp"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 namespace ecf { class Calendar;} // forward declare class that is in a name space
@@ -74,18 +72,13 @@ private:
    bool           makeFree_;         // persisted for use by why() on client side
    unsigned int  state_change_no_;  // *not* persisted, only used on server side
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & day_;
-      ar & makeFree_;
+      ar( CEREAL_NVP(day_),
+          CEREAL_NVP(makeFree_)
+      );
    }
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(DayAttr, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(DayAttr,boost::serialization::track_never)
-
-
 #endif

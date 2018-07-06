@@ -1,0 +1,13 @@
+{
+    "12RepeatString": {
+        "cereal_class_version": 0,
+        "value0": {
+            "name_": "string"
+        },
+        "theStrings_": [
+            "a",
+            "b"
+        ],
+        "currentIndex_": 0
+    }
+}

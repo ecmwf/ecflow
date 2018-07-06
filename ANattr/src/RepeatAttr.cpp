@@ -38,39 +38,28 @@ const Repeat& Repeat::EMPTY() { static const Repeat REPEAT = Repeat(); return RE
 
 //=========================================================================
 
-Repeat::Repeat() : repeatType_(NULL) {}
+Repeat::Repeat() {}
 Repeat::Repeat( const RepeatDate& r) : repeatType_(new RepeatDate(r)) {}
 Repeat::Repeat( const RepeatInteger& r) : repeatType_(new RepeatInteger(r)) {}
 Repeat::Repeat( const RepeatEnumerated& r) : repeatType_(new RepeatEnumerated(r)) {}
 Repeat::Repeat( const RepeatString& r) : repeatType_(new RepeatString(r)) {}
 Repeat::Repeat( const RepeatDay& r) : repeatType_(new RepeatDay(r)) {}
 
-Repeat::~Repeat() { delete repeatType_;}
+Repeat::~Repeat() {}
 
-Repeat::Repeat( const Repeat& rhs) : repeatType_(NULL)
+Repeat::Repeat( const Repeat& rhs)
 {
-	// Do stuff that could throw exception first
-	RepeatBase* clone = NULL;
 	if ( rhs.repeatType_) {
-		clone = rhs.repeatType_->clone();
+	   repeatType_.reset( rhs.repeatType_->clone());
 	}
-
-	// Change state
- 	repeatType_ = clone;
 }
 
 Repeat& Repeat::operator=(const Repeat& rhs)
 {
-	// Do stuff that could throw exception first
-	RepeatBase* clone = NULL;
+   repeatType_.release();
 	if ( rhs.repeatType_) {
-		clone = rhs.repeatType_->clone();
+      repeatType_.reset( rhs.repeatType_->clone());
 	}
-
-	// Change state
-	delete repeatType_; repeatType_ = NULL;
-	repeatType_ = clone;
-
 	return *this;
 }
 
@@ -79,11 +68,11 @@ bool Repeat::operator==(const Repeat& rhs) const
 	if (!repeatType_ && rhs.repeatType_) return false;
 	if (repeatType_ && !rhs.repeatType_) return false;
 	if (!repeatType_ && !rhs.repeatType_) return true	;
-	return repeatType_->compare(rhs.repeatType_);
+	return repeatType_->compare(rhs.repeatType_.get());
 }
 
 const std::string& Repeat::name() const {
-   return (repeatType_) ? repeatType_->name() : Str::EMPTY();
+   return (repeatType_.get()) ? repeatType_->name() : Str::EMPTY();
 }
 
 std::ostream& Repeat::print( std::ostream& os ) const {
@@ -955,8 +944,8 @@ bool RepeatDay::operator==(const RepeatDay& rhs) const
 	return true;
 }
 
-BOOST_CLASS_EXPORT_IMPLEMENT(RepeatDate);
-BOOST_CLASS_EXPORT_IMPLEMENT(RepeatInteger);
-BOOST_CLASS_EXPORT_IMPLEMENT(RepeatEnumerated);
-BOOST_CLASS_EXPORT_IMPLEMENT(RepeatString);
-BOOST_CLASS_EXPORT_IMPLEMENT(RepeatDay);
+CEREAL_REGISTER_TYPE(RepeatDate);
+CEREAL_REGISTER_TYPE(RepeatInteger);
+CEREAL_REGISTER_TYPE(RepeatEnumerated);
+CEREAL_REGISTER_TYPE(RepeatString);
+CEREAL_REGISTER_TYPE(RepeatDay);

@@ -102,14 +102,16 @@ private:
 
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/) {
-	   ar & submitted_;
-	   ar & active_;
-	   ar & complete_;
-	   ar & completeIsRelative_;
-	   ar & isLate_;
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar( CEREAL_NVP(submitted_),
+          CEREAL_NVP(active_),
+          CEREAL_NVP(complete_),
+          CEREAL_NVP(completeIsRelative_),
+          CEREAL_NVP(isLate_)
+      );
 	}
 };
 

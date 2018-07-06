@@ -15,9 +15,7 @@
 // Description :
 //============================================================================
 #include <ostream>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
+#include "Serialization.hpp"
 #include "Child.hpp"
 
 // Class ZombieAttr:
@@ -70,18 +68,16 @@ private:
 	int                              zombie_lifetime_;  // How long zombie lives in server
 	std::vector<ecf::Child::CmdType> child_cmds_;       // init, event, meter,label, complete
 
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/) {
-	   ar & zombie_type_;
-	   ar & action_;
-	   ar & zombie_lifetime_;
-	   ar & child_cmds_;
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar( CEREAL_NVP(zombie_type_),
+          CEREAL_NVP(action_),
+          CEREAL_NVP(zombie_lifetime_),
+          CEREAL_NVP(child_cmds_)
+      );
 	}
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(ZombieAttr, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(ZombieAttr,boost::serialization::track_never);
 
 #endif

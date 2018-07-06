@@ -21,6 +21,8 @@
 #include <iostream>
 #include <fstream>
 #include <cereal/archives/json.hpp>
+#include <cereal/types/memory.hpp>
+#include <cereal/types/vector.hpp>
 
 namespace ecf {
 

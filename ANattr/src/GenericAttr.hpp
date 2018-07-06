@@ -15,10 +15,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <ostream>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
+#include "Serialization.hpp"
 
 // Class GenericAttr:
 // Use compiler , generated destructor, assignment, copy constructor
@@ -48,16 +45,14 @@ private:
    std::string name_;
    std::vector<std::string> values_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & name_;
-      ar & values_;
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar( CEREAL_NVP(name_),
+          CEREAL_NVP(values_)
+      );
    }
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(GenericAttr, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(GenericAttr,boost::serialization::track_never);
 
 #endif

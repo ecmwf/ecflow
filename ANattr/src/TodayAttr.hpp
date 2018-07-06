@@ -82,9 +82,6 @@
 /// and will have to start at 12:00
 //============================================================================
 
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
-
 #include "TimeSeries.hpp"
 
 
@@ -169,19 +166,15 @@ private:
 	bool          makeFree_;         // persisted for use by why() on client side && for state changes
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/)
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
 	{
-	   ar & timeSeries_;
-	   ar & makeFree_;
+      ar( CEREAL_NVP(timeSeries_),
+          CEREAL_NVP(makeFree_)
+      );
 	}
 };
 
 }
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(ecf::TodayAttr, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(ecf::TodayAttr,boost::serialization::track_never);
-
 #endif

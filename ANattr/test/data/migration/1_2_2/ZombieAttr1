@@ -1,0 +1,18 @@
+{
+    "10ZombieAttr": {
+        "cereal_class_version": 0,
+        "zombie_type_": 0,
+        "action_": 0,
+        "zombie_lifetime_": 500,
+        "child_cmds_": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+        ]
+    }
+}

@@ -55,7 +55,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_def_con )
 {
    cout << "ANattr:: ...test_migration_restore_def_con\n";
 
-   std::string file_name = File::test_data("ANattr/test/data/migration/default_constructor_v1_9/","ANattr");
+   std::string file_name = File::test_data("ANattr/test/data/migration/default_constructor_1_2_2/","ANattr");
+   //BOOST_CHECK_MESSAGE(File::createDirectories(file_name ),"Could not create directory " << file_name);
 
    // Create migration data
 #ifdef UPDATE_TESTS
@@ -108,7 +109,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
 {
    cout << "ANattr:: ...test_migration_restore\n";
 
-   std::string file_name = File::test_data("ANattr/test/data/migration/v1_9/","ANattr");
+   std::string file_name = File::test_data("ANattr/test/data/migration/1_2_2/","ANattr");
+   //BOOST_CHECK_MESSAGE(File::createDirectories(file_name ),"Could not create directory " << file_name);
 
    std::vector<std::string> theVec; theVec.push_back("a");  theVec.push_back("b");
    LateAttr lateattr;

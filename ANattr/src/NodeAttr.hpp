@@ -21,12 +21,7 @@
 
 #include <boost/operators.hpp>
 #include <boost/utility.hpp>
-
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/set.hpp>            // no need to include <set>
-#include <boost/serialization/string.hpp>         // no need to include <string>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
+#include "Serialization.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Class Label:
@@ -76,13 +71,14 @@ private:
    std::string new_value_;
    unsigned int state_change_no_;        // *not* persisted, only used on server side
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & name_;
-      ar & value_;
-      ar & new_value_;
+      ar( CEREAL_NVP(name_),
+          CEREAL_NVP(value_),
+          CEREAL_NVP(new_value_)
+      );
    }
 };
 
@@ -134,13 +130,14 @@ private:
    bool         used_;             // used by the simulator not persisted
    unsigned int state_change_no_;  // *not* persisted, only used on server side
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & value_;
-      ar & number_;
-      ar & name_;
+      ar( CEREAL_NVP(value_),
+          CEREAL_NVP(number_),
+          CEREAL_NVP(name_)
+      );
    }
 };
 
@@ -189,23 +186,16 @@ private:
    bool         used_;        // used by the simulator not persisted
    unsigned int state_change_no_;  // *not* persisted, only used on server side
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & min_;
-      ar & max_;
-      ar & value_;
-      ar & colorChange_;
-      ar & name_;
+      ar( CEREAL_NVP(min_),
+          CEREAL_NVP(max_),
+          CEREAL_NVP(value_),
+          CEREAL_NVP(colorChange_),
+          CEREAL_NVP(name_)
+      );
    }
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(Meter, boost::serialization::object_serializable);
-BOOST_CLASS_IMPLEMENTATION(Event, boost::serialization::object_serializable);
-BOOST_CLASS_IMPLEMENTATION(Label, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(Meter,boost::serialization::track_never);
-BOOST_CLASS_TRACKING(Event,boost::serialization::track_never);
-BOOST_CLASS_TRACKING(Label,boost::serialization::track_never);
 #endif

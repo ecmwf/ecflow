@@ -42,11 +42,9 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <string>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
 #include "Child.hpp"
 #include "ZombieAttr.hpp"
+#include "Serialization.hpp"
 
 /// Use default copy constructor ,assignment operator and destructor
 class Zombie {
@@ -146,28 +144,25 @@ private:
 	ZombieAttr attr_;                        // Default or attribute obtained from node tree.
  	boost::posix_time::ptime  creation_time_;// When zombie was created. Needed to control lifetime
 
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize( Archive & ar, const unsigned int /*version*/ ) {
-
-		ar & user_action_;
- 		ar & try_no_;
-		ar & duration_;
-		ar & calls_;
-		ar & zombie_type_;
-		ar & last_child_cmd_;
- 		ar & path_to_task_;
-		ar & jobs_password_;
-		ar & process_or_remote_id_;
-		ar & user_cmd_;
-		ar & user_action_set_;
-		ar & attr_;
-   	}
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar( CEREAL_NVP(user_action_),
+          CEREAL_NVP(try_no_),
+          CEREAL_NVP(duration_),
+          CEREAL_NVP(calls_),
+          CEREAL_NVP(zombie_type_),
+          CEREAL_NVP(last_child_cmd_),
+          CEREAL_NVP(path_to_task_),
+          CEREAL_NVP(jobs_password_),
+          CEREAL_NVP(process_or_remote_id_),
+          CEREAL_NVP(user_cmd_),
+          CEREAL_NVP(user_action_set_),
+          CEREAL_NVP(attr_)
+      );
+   }
 };
 
 std::ostream& operator<<(std::ostream& os, const Zombie&);
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(Zombie, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(Zombie,boost::serialization::track_never);
 #endif

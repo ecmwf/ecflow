@@ -44,14 +44,15 @@ private:
    bool relative_;
    bool days_;
 
-   friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive & ar, const unsigned int /*version*/)
-    {
-        ar & timeStruct_;
-        ar & relative_;
-        ar & days_;
-    }
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar( CEREAL_NVP(timeStruct_),
+          CEREAL_NVP(relative_),
+          CEREAL_NVP(days_)
+      );
+   }
 };
 
 }

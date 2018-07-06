@@ -16,11 +16,7 @@
 //============================================================================
 
 #include <ostream>
-
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/string.hpp>         // no need to include <string>
-#include <boost/serialization/tracking.hpp>
-#include <boost/serialization/level.hpp>
+#include "Serialization.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Class Variable:
@@ -60,17 +56,14 @@ private:
    std::string  name_;
    std::string  value_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & name_;
-      ar & value_;
+      ar( CEREAL_NVP(name_),
+          CEREAL_NVP(value_)
+      );
    }
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(Variable, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(Variable,boost::serialization::track_never);
 
 #endif

@@ -18,7 +18,7 @@
 
 #include <ostream>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/serialization/serialization.hpp>
+#include "Serialization.hpp"
 
 namespace ecf { class Calendar;} // forward declare class that is in a namesapce
 
@@ -86,17 +86,19 @@ private:
 
 	unsigned int   state_change_no_;  // *not* persisted, only used on server side
 
-	friend class boost::serialization::access;
+   friend class cereal::access;
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
 	{
-	   ar & hybrid_;
-	   ar & positiveGain_;
-	   ar & startStopWithServer_;
-	   ar & gain_;
-	   ar & day_;
-	   ar & month_;
-	   ar & year_;
+      ar( CEREAL_NVP(hybrid_),
+          CEREAL_NVP(positiveGain_),
+          CEREAL_NVP(startStopWithServer_),
+          CEREAL_NVP(gain_),
+          CEREAL_NVP(day_),
+          CEREAL_NVP(month_),
+          CEREAL_NVP(year_)
+        );
 	}
 };
+
 #endif

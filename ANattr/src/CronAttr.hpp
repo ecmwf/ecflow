@@ -16,9 +16,6 @@
 //============================================================================
 
 #include "TimeSeries.hpp"
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
 
 namespace ecf { class Calendar;} // forward declare class
 
@@ -119,20 +116,18 @@ private:
  	bool             makeFree_;         // persisted for use by why() on client side
 	unsigned int    state_change_no_;  // *not* persisted, only used on server side
 
-	friend class boost::serialization::access;
+   friend class cereal::access;
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/) {
-	   ar & timeSeries_;
-	   ar & weekDays_;
-	   ar & daysOfMonth_;
-	   ar & months_;
-	   ar & makeFree_;
+   void serialize(Archive & ar, std::uint32_t const version )
+	{
+	   ar( CEREAL_NVP(timeSeries_),
+	       CEREAL_NVP(weekDays_),
+	       CEREAL_NVP(daysOfMonth_),
+	       CEREAL_NVP(months_),
+	       CEREAL_NVP(makeFree_)
+	   );
 	}
 };
 }
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(ecf::CronAttr, boost::serialization::object_serializable);
-BOOST_CLASS_TRACKING(ecf::CronAttr,boost::serialization::track_never);
 
 #endif /* CRONATTR_HPP_ */
