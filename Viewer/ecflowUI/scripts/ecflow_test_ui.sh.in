@@ -1,0 +1,151 @@
+#!/bin/bash
+
+#============================================================================
+# Copyright 2009-2017 ECMWF.
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#============================================================================
+
+
+
+# ----------------------------------------------------------
+# Clean up the tmp directory at the end or on error
+#-----------------------------------------------------------
+cleanup(){
+    status=$?
+    trap "" EXIT ERR
+
+    echo "Shutting down server"
+    #$EXE_DIR/ecflow_client --delete=yes /operation_suite
+    #$EXE_DIR/ecflow_client --shutdown=yes
+    #$EXE_DIR/ecflow_client --halt=yes
+    $EXE_DIR/ecflow_client --terminate=yes
+
+    echo "Cleaning up temporary directory"
+
+    # remove temporary directory
+    if [ $(echo $ECFTEST_TMPDIR | grep -c "/ecflow_ui_test.") -ge 1 ] ; then
+        rm -Rf $ECFTEST_TMPDIR
+    fi
+
+    echo "Done"
+    exit $status
+}
+
+
+
+
+# =============================================================
+# tmp directory cleaned automatically at end or at error.
+# on new platforms check that these signals are valid:
+
+ECFLOWUI_SIGLIST="HUP INT QUIT TERM XCPU  XFSZ"
+#           1   2   3    15   30/24 31/25
+
+trap 'cleanup "EXIT" $LINENO' EXIT
+trap 'cleanup "SIGNAL trap" $LINENO' $ECFLOWUI_SIGLIST
+
+
+
+
+
+# Figure out the directory of the exe
+EXE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ETC_DIR="$EXE_DIR/../share/ecflow/etc"
+DEF_FILE="$ETC_DIR/ecflow_ui_test.def"
+
+
+
+# =======================================================================
+# Create a temporary directory
+# =======================================================================
+
+# Define tmp root dir
+TMPDIR_TEST_ROOT=${TMPDIR:=/tmp}
+
+# check that TMPDIR_ROOT actually exists - we can't run without it
+if [ ! -d $TMPDIR_TEST_ROOT ]
+then
+    echo ""
+    echo "  Temporary directory '$TMPDIR_TEST_ROOT' does not exist"
+    echo "  ecFlowUI needs this in order to run. Check that environment"
+    echo "  variable \$TMPDIR is set to a valid directory and try again."
+    exit 1
+fi
+
+# Define and create tmp dir
+# We add a subdirectory 'x' to the end because otherwise the temp dir inherits
+# the time stamp from the .tar.gz that we uncompress there
+export ECFTEST_TMPDIR=${TMPDIR_TEST_ROOT}/ecflow_ui_test.$$.$LOGNAME
+mkdir -p $ECFTEST_TMPDIR
+
+# Check if we could create it
+if [ $? -ne 0 ]
+then
+    echo ""
+    echo "  Temporary directory '$ECFTEST_TMPDIR' could not be created."
+    echo "  ecFlowUI needs this in order to run. Check that environment"
+    echo "  variable \$TMPDIR is set to a valid directory and try again."
+    exit 1
+fi
+
+
+
+
+
+# =======================================================================
+# Start server
+# =======================================================================
+
+export ECF_PORT=4949
+$EXE_DIR/ecflow_client --version
+
+rm -rf `hostname`.${ECF_PORT}.*
+
+
+export PATH=${EXE_DIR}:${PATH}
+
+#export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
+SLEEPTIME=4
+echo "Start server, port $ECF_PORT  (and wait $SLEEPTIME seconds for it to start)"
+$EXE_DIR/ecflow_server&
+sleep $SLEEPTIME
+
+
+# =======================================================================
+# Create suite definition
+# =======================================================================
+
+echo "Create suite definition in $ECFTEST_TMPDIR"
+sed -e "s,ECF_HOME_PLACEHOLDER,${ECFTEST_TMPDIR}\/operation_suite,g"  $DEF_FILE             > $ECFTEST_TMPDIR/1.txt
+sed -e "s,ECF_INCLUDE_PLACEHOLDER,${ECFTEST_TMPDIR}\/includes,g"      $ECFTEST_TMPDIR/1.txt > $ECFTEST_TMPDIR/2.txt
+sed -e "s,ECF_FILES_PLACEHOLDER,${ECFTEST_TMPDIR}\/operation_suite,g" $ECFTEST_TMPDIR/2.txt > $ECFTEST_TMPDIR/test_suite.def
+
+ECFTEST_SCRIPTS_HOME=$ECFTEST_TMPDIR
+cd $ECFTEST_SCRIPTS_HOME
+tar xzvf $ETC_DIR/ecflow_ui_test_server_scripts.tar.gz
+cd -
+
+# =======================================================================
+# Load suite definition and start
+# =======================================================================
+
+echo "Load suite definition"
+$EXE_DIR/ecflow_client --server_version
+$EXE_DIR/ecflow_client --load=$ECFTEST_TMPDIR/test_suite.def
+$EXE_DIR/ecflow_client --restart
+$EXE_DIR/ecflow_client --begin=operation_suite
+
+
+# =======================================================================
+# Launch ecFlowUI
+# =======================================================================
+
+echo "Starting ecFlowUI"
+export ECFLOWUI_TEMP_SESSION_PRESERVE_CONFIRM="no"
+$EXE_DIR/ecflow_ui -ts localhost $ECF_PORT
+
+

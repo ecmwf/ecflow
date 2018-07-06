@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ServerLoadItemWidget</class>
+ <widget class="QWidget" name="ServerLoadItemWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>810</width>
+    <height>488</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="statusTip">
+   <string/>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,1">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QToolButton" name="toolButton">
+       <property name="text">
+        <string>Show log</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton_2">
+       <property name="text">
+        <string>Modes</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <widget class="TreeView" name="logView">
+      <property name="contextMenuPolicy">
+       <enum>Qt::ActionsContextMenu</enum>
+      </property>
+      <property name="alternatingRowColors">
+       <bool>true</bool>
+      </property>
+      <property name="selectionMode">
+       <enum>QAbstractItemView::ExtendedSelection</enum>
+      </property>
+      <property name="rootIsDecorated">
+       <bool>false</bool>
+      </property>
+      <property name="uniformRowHeights">
+       <bool>true</bool>
+      </property>
+      <property name="itemsExpandable">
+       <bool>false</bool>
+      </property>
+      <property name="sortingEnabled">
+       <bool>true</bool>
+      </property>
+      <property name="allColumnsShowFocus">
+       <bool>true</bool>
+      </property>
+      <property name="expandsOnDoubleClick">
+       <bool>false</bool>
+      </property>
+     </widget>
+     <widget class="QWidget" name="">
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,0">
+       <item>
+        <widget class="ServerLoadView" name="loadView" native="true"/>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,1">
+           <item>
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Resolution:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="resCombo"/>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="newsCb">
+           <property name="text">
+            <string>news</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QTreeView" name="suiteTree"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+  <action name="actionTerminate">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/terminate.svg</normaloff>:/viewer/terminate.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Terminate</string>
+   </property>
+  </action>
+  <action name="actionRescue">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/rescue.svg</normaloff>:/viewer/rescue.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Rescue</string>
+   </property>
+  </action>
+  <action name="actionFoboff">
+   <property name="text">
+    <string>&amp;Fob off</string>
+   </property>
+  </action>
+  <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Delete</string>
+   </property>
+  </action>
+  <action name="actionKill">
+   <property name="text">
+    <string>&amp;Kill</string>
+   </property>
+  </action>
+  <action name="actionLookup">
+   <property name="text">
+    <string>&amp;Look up node in tree</string>
+   </property>
+   <property name="toolTip">
+    <string>Look up node in tree</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header location="global">TreeView.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>ServerLoadView</class>
+   <extends>QWidget</extends>
+   <header>ServerLoadView.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
+ <connections/>
+</ui>
