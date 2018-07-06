@@ -32,7 +32,7 @@ namespace fs = boost::filesystem;
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
 // If you are updating the tests, *MAKE SURE* to check out test/data/migration/* files
-#define UPDATE_TESTS 1
+//#define UPDATE_TESTS 1
 
 BOOST_AUTO_TEST_CASE( test_migration_restore_cereal )
 {
