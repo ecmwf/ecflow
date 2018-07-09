@@ -19,10 +19,7 @@
 #include <ostream>
 #include <memory> // for unique_ptr
 
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-#include <boost/serialization/string.hpp>         // no need to include <string>
-
+#include "Serialization.hpp"
 #include "ExprAst.hpp"
 class Node;
 
@@ -65,9 +62,9 @@ private:
    std::string exp_;
    ExprType    exp_type_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
       ar & exp_;
       ar & exp_type_;
@@ -161,9 +158,9 @@ private:
    Expression& operator=(Expression const& f);
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
       ar & vec_;
       ar & makeFree_;

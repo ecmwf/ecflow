@@ -130,43 +130,14 @@ int main(int argc, char* argv[])
             << timer.elapsed()  << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
 
-#if defined(BINARY_ARCHIVE)
    {
       bool do_compare = false;
       timer.restart();
       PersistHelper helper;
-      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare,ecf::Archive::BINARY);
-      cout << " Checkpt(BINARY_ARCHIVE) and reload , time taken   = ";
-      cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
-   }
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-   {
-      bool do_compare = false;
-      timer.restart();
-      PersistHelper helper;
-      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare, ecf::Archive::PORTABLE_BINARY);
-      cout << " Checkpt(PORTABLE_BINARY_ARCHIVE) and reload , time taken   = ";
-      cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
-   }
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-   {
-      bool do_compare = false;
-      timer.restart();
-      PersistHelper helper;
-      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare, ecf::Archive::EOS_PORTABLE_BINARY);
-      cout << " Checkpt(EOS_PORTABLE_BINARY_ARCHIVE) and reload , time taken   = ";
-      cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
-   }
-#else
-   {
-      bool do_compare = false;
-      timer.restart();
-      PersistHelper helper;
-      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare, ecf::Archive::TEXT);
+      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare);
       cout << " Checkpt(TEXT_ARCHIVE) and reload , time taken   = ";
       cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
-#endif
 
    {
       timer.restart();

@@ -18,6 +18,7 @@
 #include "NodeContainer.hpp"
 #include "Calendar.hpp"
 #include "ClockAttr.hpp"
+
 class SuiteGenVariables;
 namespace ecf { class CalendarUpdateParams;  } // forward declare
 
@@ -119,12 +120,12 @@ private:
    void handle_clock_attribute_change();
    virtual std::string write_state() const;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
       // serialise base class information
-      ar & boost::serialization::base_object<NodeContainer>(*this);
+      ar & cereal::base_class<NodeContainer>(this);
       ar & begun_;
       ar & clockAttr_;
       ar & calendar_;

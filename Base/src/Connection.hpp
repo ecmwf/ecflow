@@ -23,10 +23,10 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <memory>
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
 
 #include "Log.hpp"
@@ -302,6 +302,6 @@ private:
 	std::vector<char> inbound_data_; 	 /// Holds the in-bound data.
 };
 
-typedef boost::shared_ptr<connection> connection_ptr;
+typedef std::shared_ptr<connection> connection_ptr;
 
 #endif /* CONNECTION_HPP_ */

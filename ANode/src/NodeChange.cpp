@@ -173,7 +173,6 @@ void Node::changeDefstatus(const std::string& theState)
 
 void Node::changeLate(const ecf::LateAttr& late)
 {
-   if (lateAttr_) delete lateAttr_;
-   lateAttr_ = new ecf::LateAttr(late);
+   lateAttr_ = std::make_unique<ecf::LateAttr>(late);
    state_change_no_ = Ecf::incr_state_change_no();
 }

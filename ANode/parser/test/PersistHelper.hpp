@@ -18,7 +18,6 @@
 
 #include <boost/noncopyable.hpp>
 #include <string>
-#include "Archive.hpp"
 #include "PrintStyle.hpp"
 class Defs;
 
@@ -31,7 +30,7 @@ public:
 
    bool test_persist_and_reload( const Defs& theInMemoryDefs, PrintStyle::Type_t file_type_on_disk,bool do_compare = true );
    bool test_defs_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare = true );
-   bool test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare = true,ecf::Archive::Type at = ecf::Archive::default_archive());
+   bool test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare = true);
 	bool test_state_persist_and_reload_with_checkpt( const Defs& theInMemoryDefs );
 	const std::string& errorMsg() const { return errorMsg_;}
 
@@ -44,8 +43,7 @@ private:
    bool reload_from_defs_file( const Defs& theInMemoryDefs, Defs& reloaded_defs, const std::string& filename,bool do_compare = true );
    bool reload_from_boost_checkpt_file(const Defs& theInMemoryDefs,
                                  Defs& reloaded_defs,
-                                 bool do_compare = true,
-                                 ecf::Archive::Type at = ecf::Archive::default_archive() );
+                                 bool do_compare = true);
 
 private:
 

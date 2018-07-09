@@ -22,10 +22,7 @@
 //============================================================================
 
 #include <ostream>
-
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/set.hpp>            // no need to include <set>
-#include <boost/serialization/string.hpp>         // no need to include <string>
+#include "Serialization.hpp"
 class Node;
 
 // Class Limit: The limit is zero based, hence if limit is 10, increment must use < 10
@@ -80,9 +77,10 @@ private:
    std::set<std::string>    paths_;           // Updated via increment()/decrement()/reset(). Typically task paths
    Node*                    node_ ;           // The parent NOT persisted
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & name_;
       ar & theLimit_;
       ar & value_;

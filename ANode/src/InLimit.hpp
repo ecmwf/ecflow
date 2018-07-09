@@ -16,11 +16,9 @@
 //============================================================================
 
 #include <ostream>
+#include <boost/weak_ptr.hpp>
 
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/string.hpp>         // no need to include <string>
-#include <boost/serialization/weak_ptr.hpp>
-
+#include "Serialization.hpp"
 #include "LimitFwd.hpp"
 
 
@@ -54,7 +52,7 @@ public:
    std::string toString() const;
 
 private:
-   void limit( limit_ptr l) { limit_ = boost::weak_ptr<Limit>(l);}
+   void limit( limit_ptr l) { limit_ = std::weak_ptr<Limit>(l);}
    Limit* limit() const { return limit_.lock().get();}  // can return NULL
    friend class InLimitMgr;
 
@@ -64,22 +62,18 @@ private:
    int                    tokens_;
    bool                   limit_this_node_only_;  // default is false,if True, will consume one token(s) only, regardless of number of children
    bool                   incremented_;           // state
-   boost::weak_ptr<Limit> limit_;                 // NOT persisted since computed on the fly
+   std::weak_ptr<Limit>   limit_;                 // NOT persisted since computed on the fly
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int version) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & name_;
       ar & pathToNode_; // can be empty
       ar & tokens_;
-      if (version > 0) {
-         ar & limit_this_node_only_; // 5.0.0
-         ar & incremented_;          // 5.0.0
-      }
+      ar & limit_this_node_only_; // new to 5.0.0
+      ar & incremented_;          // new to 5.0.0
    }
 };
-
-// 5.0.0
-BOOST_CLASS_VERSION(InLimit, 1)
 
 #endif

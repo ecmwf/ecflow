@@ -70,14 +70,14 @@ bool PersistHelper::test_defs_checkpt_and_reload( const Defs& theInMemoryDefs, b
 }
 
 
-bool PersistHelper::test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare, ecf::Archive::Type at)
+bool PersistHelper::test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare)
 {
  	errorMsg_.clear();
  	file_size_ = 0;
 
    // Save in memory defs as a check pt file, then restore and compare
  	Defs reloaded_defs;
- 	return reload_from_boost_checkpt_file(theInMemoryDefs,reloaded_defs,do_compare,at);
+ 	return reload_from_boost_checkpt_file(theInMemoryDefs,reloaded_defs,do_compare);
 }
 
 bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theInMemoryDefs )
@@ -120,7 +120,7 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
 
    // Save in memory defs as a check pt file, then restore and compare
    Defs reloaded_boost_checkPt_defs;
-   if (!reload_from_boost_checkpt_file(theInMemoryDefs,reloaded_boost_checkPt_defs ,true,ecf::Archive::default_archive())) {
+   if (!reload_from_boost_checkpt_file(theInMemoryDefs,reloaded_boost_checkPt_defs ,true)) {
       return false;
    }
 
@@ -251,8 +251,7 @@ bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs, Defs& rel
 
 bool PersistHelper::reload_from_boost_checkpt_file(const Defs& theInMemoryDefs,
                                              Defs& reloaded_defs,
-                                             bool do_compare ,
-                                             ecf::Archive::Type at)
+                                             bool do_compare)
 {
    // make sure edit history is saved
 #ifdef DEBUG
@@ -260,13 +259,13 @@ bool PersistHelper::reload_from_boost_checkpt_file(const Defs& theInMemoryDefs,
 #else
    std::string tmpCheckPt_file = "tmp.check";
 #endif
-   theInMemoryDefs.boost_save_as_checkpt(tmpCheckPt_file,at);
+   theInMemoryDefs.boost_save_as_checkpt(tmpCheckPt_file);
 
    DebugEquality debug_equality; // only as affect in DEBUG build
 
    try  {
       // Parse the file we just persisted and load the defs file into memory.
-      reloaded_defs.boost_restore_from_checkpt(tmpCheckPt_file,at);
+      reloaded_defs.boost_restore_from_checkpt(tmpCheckPt_file);
 
       if (do_compare ) {
          // Make sure the checkpoint file file we just parsed match's the one we persisted

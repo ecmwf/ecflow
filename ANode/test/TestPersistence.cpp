@@ -28,13 +28,13 @@ namespace fs = boost::filesystem;
 BOOST_FIXTURE_TEST_SUITE( NodeTestSuite, MyDefsFixture )
 
 // Allow for multiple archives
-static void testPersistence(const Defs& fixtureDefs,ecf::Archive::Type at)
+static void testPersistence(const Defs& fixtureDefs)
 {
 	std::string check_pt_file = "fixture_defs.check";
-	fixtureDefs.boost_save_as_checkpt(check_pt_file,at);
+	fixtureDefs.boost_save_as_checkpt(check_pt_file);
 
 	Defs restoredDefs;
-	restoredDefs.boost_restore_from_checkpt(check_pt_file,at);
+	restoredDefs.boost_restore_from_checkpt(check_pt_file);
 
 	bool theyCompare = (restoredDefs == fixtureDefs);
 	if (!theyCompare) {
@@ -51,35 +51,12 @@ static void testPersistence(const Defs& fixtureDefs,ecf::Archive::Type at)
 	fs::remove(check_pt_file);
 }
 
-#if defined(BINARY_ARCHIVE)
-BOOST_AUTO_TEST_CASE( test_node_tree_persistence_binary )
-{
-	cout << left << setw(54) << "ANode:: ...test_node_tree_persistence_binary";
-	BOOST_CHECK_MESSAGE(true,""); // stop boost complaining about no assertions
-	testPersistence(fixtureDefsFile(),ecf::Archive::BINARY);
-}
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-BOOST_AUTO_TEST_CASE( test_node_tree_persistence_portable_binary )
-{
-	cout << left << setw(54) << "ANode:: ...test_node_tree_persistence_portable_binary";
-	BOOST_CHECK_MESSAGE(true,""); // stop boost complaining about no assertions
-	testPersistence(fixtureDefsFile(),ecf::Archive::PORTABLE_BINARY);
-}
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-BOOST_AUTO_TEST_CASE( test_node_tree_persistence_eos_portable_binary )
-{
-   cout << left << setw(54) << "ANode:: ...test_node_tree_persistence_eos_portable_binary";
-   BOOST_CHECK_MESSAGE(true,""); // stop boost complaining about no assertions
-   testPersistence(fixtureDefsFile(),ecf::Archive::EOS_PORTABLE_BINARY);
-}
-#else
 BOOST_AUTO_TEST_CASE( test_node_tree_persistence_text )
 {
    cout << left << setw(54) << "ANode:: ...test_node_tree_persistence_text" ;
    BOOST_CHECK_MESSAGE(true,""); // stop boost complaining about no assertions
-   testPersistence(fixtureDefsFile(),ecf::Archive::TEXT);
+   testPersistence(fixtureDefsFile());
 }
-#endif
 
 
 BOOST_AUTO_TEST_CASE( test_node_defs_persistence  )

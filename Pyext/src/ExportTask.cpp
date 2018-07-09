@@ -16,9 +16,6 @@
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/raw_function.hpp>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
 
 #include "Task.hpp"

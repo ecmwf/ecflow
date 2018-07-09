@@ -23,7 +23,6 @@
 
 #include <memory>
 #include <boost/asio.hpp>
-#include <boost/shared_ptr.hpp>
 
 // ECFLOW_MT See doc/multi-threaded-server.tar/ddoc
 //#define ECFLOW_MT 1

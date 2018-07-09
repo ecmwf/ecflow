@@ -12,8 +12,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/make_shared.hpp>
-
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -138,7 +136,7 @@ STC_Cmd_ptr CtsNodeCmd::doHandleRequest(AbstractServer* as) const
 
       case CtsNodeCmd::CHECK_JOB_GEN_ONLY:  {
          as->update_stats().node_check_job_gen_only_++;
-         job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+         job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
          jobCtrl->set_node_path(absNodePath_);
          as->defs()->check_job_creation(jobCtrl);
          if (! jobCtrl->get_error_msg().empty() ) {

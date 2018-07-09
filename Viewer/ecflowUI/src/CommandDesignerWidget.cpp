@@ -216,7 +216,7 @@ std::vector<VInfo_ptr>& CommandDesignerWidget::selectedNodes()
 void CommandDesignerWidget::addClientCommandsToComponentList()
 {
 	// sort the commands into alphabetical order
-	std::vector< boost::shared_ptr<po::option_description> > options = clientOptionsDescriptions_->options();
+	std::vector< std::shared_ptr<po::option_description> > options = clientOptionsDescriptions_->options();
 
 	std::sort(options.begin(),options.end(),
 		boost::bind(std::less<std::string>(),

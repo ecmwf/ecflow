@@ -141,16 +141,16 @@ protected:
 private:
    void copy(const NodeContainer& rhs);
    void swap(NodeContainer& rhs);
-	friend class boost::serialization::access;
 
-	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/)
-	{
-	   ar.register_type(static_cast<Task *>(NULL));
-	   ar.register_type(static_cast<Family *>(NULL));
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+//	   ar.register_type(static_cast<Task *>(NULL));
+//	   ar.register_type(static_cast<Family *>(NULL));
 
 	   // serialise base class information
-	   ar & boost::serialization::base_object<Node>(*this);
+	   ar & cereal::base_class<Node>(this);
 	   ar & nodeVec_;
 
       // Setup the parent pointers. Since they are not serialised

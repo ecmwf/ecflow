@@ -19,8 +19,7 @@
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 
 #include "ClientToServerRequest.hpp"
 #include "ServerToClientResponse.hpp"
@@ -28,7 +27,7 @@
 class server;
 
 /// Represents a single connection from a client.
-class CConnection : public boost::enable_shared_from_this<CConnection>, private boost::noncopyable {
+class CConnection : public std::enable_shared_from_this<CConnection>, private boost::noncopyable {
 public:
    /// Construct a connection with the given io_service.
    explicit CConnection( boost::asio::io_service& io_service, server* );
@@ -69,6 +68,6 @@ private:
    std::vector<char> inbound_data_;     /// Holds the in-bound data.
 };
 
-typedef boost::shared_ptr<CConnection> CConnection_ptr;
+typedef std::shared_ptr<CConnection> CConnection_ptr;
 
 #endif

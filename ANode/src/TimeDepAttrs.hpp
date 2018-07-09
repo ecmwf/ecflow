@@ -16,10 +16,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <ostream>
 
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-
 #include "TimeAttr.hpp"
 #include "TodayAttr.hpp"
 #include "DateAttr.hpp"
@@ -138,9 +134,10 @@ private:
    std::vector<ecf::CronAttr>  crons_;
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & timeVec_;
       ar & todayVec_;
       ar & dates_;

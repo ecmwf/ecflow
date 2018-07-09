@@ -12,12 +12,12 @@
 
 #include <QString>
 #include <QStringList>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class VNode;
 
 class NodeQueryResultTmp;
-typedef boost::shared_ptr<NodeQueryResultTmp> NodeQueryResultTmp_ptr;
+typedef std::shared_ptr<NodeQueryResultTmp> NodeQueryResultTmp_ptr;
 
 struct  NodeQueryResultTmp
 {

@@ -20,7 +20,6 @@
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/exception.hpp"
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 
 #include "Alias.hpp"
 #include "Defs.hpp"
@@ -56,7 +55,7 @@ Alias::Alias()
 
 node_ptr Alias::clone() const
 {
-   return boost::make_shared<Alias>( *this );
+   return std::make_shared<Alias>( *this );
 }
 
 Alias::~Alias()
@@ -76,7 +75,7 @@ Alias& Alias::operator=(const Alias& rhs)
 
 alias_ptr Alias::create(const std::string& name)
 {
-   return boost::make_shared<Alias>( name );
+   return std::make_shared<Alias>( name );
 }
 
 bool Alias::operator==(const Alias& rhs) const
@@ -182,4 +181,6 @@ node_ptr Alias::find_node_up_the_tree(const std::string& name) const
    if (the_parent) return the_parent->find_node_up_the_tree(name);
    return node_ptr();
 }
+
+CEREAL_REGISTER_TYPE(Alias);
 

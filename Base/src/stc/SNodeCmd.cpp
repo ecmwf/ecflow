@@ -93,7 +93,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
             ///
             /// We need a fabricate a defs to show the externs, used by the suite
             Defs defs;
-            defs.addSuite(boost::dynamic_pointer_cast<Suite>( node ));
+            defs.addSuite(std::dynamic_pointer_cast<Suite>( node ));
             defs.auto_add_externs();
             std::cout << defs;
             return true;

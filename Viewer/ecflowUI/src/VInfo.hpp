@@ -12,8 +12,7 @@
 #define VINFO_HPP_
 
 #include <cstddef>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 
 #include <string>
 #include <vector>
@@ -30,7 +29,7 @@ class VInfoObserver;
 class VInfoVisitor;
 
 class VInfo;
-typedef boost::shared_ptr<VInfo> VInfo_ptr;
+typedef std::shared_ptr<VInfo> VInfo_ptr;
 
 //==============================================================================
 // For each selected item in any of the views a new VInfo object is created.
@@ -165,9 +164,9 @@ protected:
     VInfoAttribute(ServerHandler*,VNode*,VAttribute*);
 };
 
-typedef boost::shared_ptr<VInfoServer>   VInfoServer_ptr;
-typedef boost::shared_ptr<VInfoNode>   VInfoNode_ptr;
-typedef boost::shared_ptr<VInfoAttribute>   VInfoAttribute_ptr;
+typedef std::shared_ptr<VInfoServer>   VInfoServer_ptr;
+typedef std::shared_ptr<VInfoNode>   VInfoNode_ptr;
+typedef std::shared_ptr<VInfoAttribute>   VInfoAttribute_ptr;
 
 class VInfoVisitor
 {

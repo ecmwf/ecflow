@@ -19,13 +19,12 @@
 #include <vector>
 
 #include <boost/noncopyable.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/utility.hpp>
 
 #include "NodeAttr.hpp"
 #include "NodeFwd.hpp"
 #include "Aspect.hpp"
 #include "Attr.hpp"
+#include "Serialization.hpp"
 
 class ChildAttrs :  private boost::noncopyable {
 public:
@@ -125,9 +124,10 @@ private:
    Node*        node_; // *NOT* persisted must be set by the parent class
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & meters_;
       ar & events_;
       ar & labels_;

@@ -12,8 +12,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/make_shared.hpp>
-
 #include "Suite.hpp"
 #include "Ecf.hpp"
 #include "DefsDelta.hpp"
@@ -28,21 +26,20 @@ using namespace std;
 /// CompoundMemento relies all clearing all attributes with state
 void Node::clear()
 {
-   delete lateAttr_; lateAttr_ = NULL;
-   delete completeExpr_; completeExpr_ = NULL;
-   delete triggerExpr_; triggerExpr_ = NULL;
+   lateAttr_.reset(nullptr);
+   completeExpr_.reset(nullptr);
+   triggerExpr_.reset(nullptr);
+
+   time_dep_attrs_.reset(nullptr);
+   child_attrs_.reset(nullptr);
+   misc_attrs_.reset(nullptr);
 
  	// ************************************************************
  	// Note: auto cancel, auto restore, auto archive does not have any
    //       changeable state, Hence it is not cleared.
    //       Hence no need for memento
   	// ************************************************************
-
-   delete time_dep_attrs_; time_dep_attrs_ = NULL;
-   delete child_attrs_; child_attrs_ = NULL;
-   delete misc_attrs_; misc_attrs_ = NULL; // zombies can be added/removed via AlterCm
-
-   // we dont delete auto_attrs_ since that does not have changable state ?
+   // we don't delete auto_attrs_ since that does not have changeable state ?
 
   	repeat_.clear();
 	varVec_.clear();
@@ -60,20 +57,20 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 
 	// determine if state changed
 	if (state_.first.state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-		comp->add( boost::make_shared<StateMemento>( state_.first.state()) );
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		comp->add( std::make_shared<StateMemento>( state_.first.state()) );
 	}
 
 	// determine if def status changed
 	if (defStatus_.state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-		comp->add( boost::make_shared<NodeDefStatusDeltaMemento>( defStatus_.state()) );
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		comp->add( std::make_shared<NodeDefStatusDeltaMemento>( defStatus_.state()) );
 	}
 
 	// determine if node suspend changed
 	if (suspended_change_no_  > client_state_change_no) {
-		if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-		comp->add( boost::make_shared<SuspendedMemento>( suspended_) );
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		comp->add( std::make_shared<SuspendedMemento>( suspended_) );
 	}
 
 	// Determine if node attributes DELETED or ADDED, We copy **all** internal state
@@ -90,58 +87,58 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 #endif
 	    // Note: auto-cancel does not have any alterable state hence, *NO* memento
 
-	   if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
+	   if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
  		comp->clear_attributes();
 
 		if (child_attrs_) {
          const std::vector<Meter>& meter_attrs = child_attrs_->meters();
-         BOOST_FOREACH(const Meter& m, meter_attrs )  { comp->add( boost::make_shared<NodeMeterMemento>( m) ); }
+         BOOST_FOREACH(const Meter& m, meter_attrs )  { comp->add( std::make_shared<NodeMeterMemento>( m) ); }
 
          const std::vector<Event>& event_attrs = child_attrs_->events();
-         BOOST_FOREACH(const Event& e, event_attrs ) { comp->add( boost::make_shared<NodeEventMemento>( e) ); }
+         BOOST_FOREACH(const Event& e, event_attrs ) { comp->add( std::make_shared<NodeEventMemento>( e) ); }
 
          const std::vector<Label>& label_attrs = child_attrs_->labels();
-         BOOST_FOREACH(const Label& l, label_attrs )  { comp->add( boost::make_shared<NodeLabelMemento>(  l) ); }
+         BOOST_FOREACH(const Label& l, label_attrs )  { comp->add( std::make_shared<NodeLabelMemento>(  l) ); }
 		}
 		if (time_dep_attrs_) {
 		   const std::vector<ecf::TodayAttr>& today_attrs = time_dep_attrs_->todayVec();
-	      BOOST_FOREACH(const ecf::TodayAttr& attr, today_attrs){ comp->add( boost::make_shared<NodeTodayMemento>(  attr) ); }
+	      BOOST_FOREACH(const ecf::TodayAttr& attr, today_attrs){ comp->add( std::make_shared<NodeTodayMemento>(  attr) ); }
 
 	      const std::vector<ecf::TimeAttr>& time_attrs = time_dep_attrs_->timeVec();
-         BOOST_FOREACH(const ecf::TimeAttr& attr, time_attrs ) { comp->add( boost::make_shared<NodeTimeMemento>(  attr) ); }
+         BOOST_FOREACH(const ecf::TimeAttr& attr, time_attrs ) { comp->add( std::make_shared<NodeTimeMemento>(  attr) ); }
 
          const std::vector<DayAttr>& day_attrs = time_dep_attrs_->days();
-         BOOST_FOREACH(const DayAttr& attr, day_attrs )     { comp->add( boost::make_shared<NodeDayMemento>(  attr) ); }
+         BOOST_FOREACH(const DayAttr& attr, day_attrs )     { comp->add( std::make_shared<NodeDayMemento>(  attr) ); }
 
          const std::vector<DateAttr>& dates_attrs = time_dep_attrs_->dates();
-         BOOST_FOREACH(const DateAttr& attr, dates_attrs )   { comp->add( boost::make_shared<NodeDateMemento>(  attr) ); }
+         BOOST_FOREACH(const DateAttr& attr, dates_attrs )   { comp->add( std::make_shared<NodeDateMemento>(  attr) ); }
 
          const std::vector<ecf::CronAttr>& cron_attrs = time_dep_attrs_->crons();
-         BOOST_FOREACH(const CronAttr& attr, cron_attrs )   { comp->add( boost::make_shared<NodeCronMemento>(  attr) ); }
+         BOOST_FOREACH(const CronAttr& attr, cron_attrs )   { comp->add( std::make_shared<NodeCronMemento>(  attr) ); }
 		}
 		if (misc_attrs_) {
          const std::vector<VerifyAttr>& verify_attrs = misc_attrs_->verifys();
-         if (!verify_attrs.empty()) comp->add( boost::make_shared<NodeVerifyMemento>( verify_attrs) );
+         if (!verify_attrs.empty()) comp->add( std::make_shared<NodeVerifyMemento>( verify_attrs) );
 
          const std::vector<ZombieAttr>& zombie_attrs = misc_attrs_->zombies();
-         BOOST_FOREACH(const ZombieAttr& attr, zombie_attrs){ comp->add( boost::make_shared<NodeZombieMemento>( attr) ); }
+         BOOST_FOREACH(const ZombieAttr& attr, zombie_attrs){ comp->add( std::make_shared<NodeZombieMemento>( attr) ); }
 
          const std::vector<QueueAttr>& queue_attrs = misc_attrs_->queues();
-         BOOST_FOREACH(const QueueAttr& attr, queue_attrs){ comp->add( boost::make_shared<NodeQueueMemento>( attr) ); }
+         BOOST_FOREACH(const QueueAttr& attr, queue_attrs){ comp->add( std::make_shared<NodeQueueMemento>( attr) ); }
 
          const std::vector<GenericAttr>& generic_attrs = misc_attrs_->generics();
-         BOOST_FOREACH(const GenericAttr& attr,generic_attrs){ comp->add( boost::make_shared<NodeGenericMemento>( attr) ); }
+         BOOST_FOREACH(const GenericAttr& attr,generic_attrs){ comp->add( std::make_shared<NodeGenericMemento>( attr) ); }
 		}
 
-		BOOST_FOREACH(limit_ptr l, limitVec_ )         { comp->add( boost::make_shared<NodeLimitMemento>(  *l) ); }
-  		BOOST_FOREACH(const Variable& v, varVec_ )     { comp->add( boost::make_shared<NodeVariableMemento>( v) ); }
+		BOOST_FOREACH(limit_ptr l, limitVec_ )         { comp->add( std::make_shared<NodeLimitMemento>(  *l) ); }
+  		BOOST_FOREACH(const Variable& v, varVec_ )     { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
 
  		inLimitMgr_.get_memento(comp);
 
- 		if (triggerExpr_)     comp->add( boost::make_shared<NodeTriggerMemento>(  *triggerExpr_) );
-	 	if (completeExpr_)    comp->add( boost::make_shared<NodeCompleteMemento>(  *completeExpr_ ) );
- 		if (!repeat_.empty()) comp->add( boost::make_shared<NodeRepeatMemento>(  repeat_) );
- 		if (lateAttr_)        comp->add( boost::make_shared<NodeLateMemento>(  *lateAttr_) );
+ 		if (triggerExpr_)     comp->add( std::make_shared<NodeTriggerMemento>(  *triggerExpr_) );
+	 	if (completeExpr_)    comp->add( std::make_shared<NodeCompleteMemento>(  *completeExpr_ ) );
+ 		if (!repeat_.empty()) comp->add( std::make_shared<NodeRepeatMemento>(  repeat_) );
+ 		if (lateAttr_)        comp->add( std::make_shared<NodeLateMemento>(  *lateAttr_) );
 
   		changes.add( comp );
 		return;
@@ -159,8 +156,8 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       const std::vector<Event>& event_attrs = child_attrs_->events();
       BOOST_FOREACH(const Event& e, event_attrs ) {
          if (e.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-            comp->add( boost::make_shared<NodeEventMemento>(e) );
+            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+            comp->add( std::make_shared<NodeEventMemento>(e) );
          }
       }
 
@@ -168,8 +165,8 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       const std::vector<Meter>& meter_attrs = child_attrs_->meters();
       BOOST_FOREACH(const Meter& m, meter_attrs ) {
          if (m.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-            comp->add( boost::make_shared<NodeMeterMemento>( m) );
+            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+            comp->add( std::make_shared<NodeMeterMemento>( m) );
          }
       }
 
@@ -177,8 +174,8 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       const std::vector<Label>& label_attrs = child_attrs_->labels();
       BOOST_FOREACH(const Label& l, label_attrs ) {
          if (l.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-            comp->add( boost::make_shared<NodeLabelMemento>(  l) );
+            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+            comp->add( std::make_shared<NodeLabelMemento>(  l) );
          }
       }
    }
@@ -189,40 +186,40 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       const std::vector<ecf::TodayAttr>& today_attrs = time_dep_attrs_->todayVec();
 	   BOOST_FOREACH(const TodayAttr& attr, today_attrs ) {
 	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( boost::make_shared<NodeTodayMemento>( attr) );
+	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+	         comp->add( std::make_shared<NodeTodayMemento>( attr) );
 	      }
 	   }
 
       const std::vector<ecf::TimeAttr>& time_attrs = time_dep_attrs_->timeVec();
       BOOST_FOREACH(const TimeAttr& attr, time_attrs ) {
 	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( boost::make_shared<NodeTimeMemento>( attr) );
+	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+	         comp->add( std::make_shared<NodeTimeMemento>( attr) );
 	      }
 	   }
 
       const std::vector<DayAttr>& day_attrs = time_dep_attrs_->days();
 	   BOOST_FOREACH(const DayAttr& attr, day_attrs ) {
 	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( boost::make_shared<NodeDayMemento>( attr) );
+	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+	         comp->add( std::make_shared<NodeDayMemento>( attr) );
 	      }
 	   }
 
       const std::vector<DateAttr>& dates_attrs = time_dep_attrs_->dates();
 	   BOOST_FOREACH(const DateAttr& attr, dates_attrs ) {
 	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( boost::make_shared<NodeDateMemento>( attr) );
+	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+	         comp->add( std::make_shared<NodeDateMemento>( attr) );
 	      }
 	   }
 
       const std::vector<ecf::CronAttr>& cron_attrs = time_dep_attrs_->crons();
       BOOST_FOREACH(const CronAttr& attr, cron_attrs ) {
 	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( boost::make_shared<NodeCronMemento>( attr) );
+	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+	         comp->add( std::make_shared<NodeCronMemento>( attr) );
 	      }
 	   }
 	}
@@ -232,8 +229,8 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       const std::vector<QueueAttr>& queue_attrs = misc_attrs_->queues();
       BOOST_FOREACH(const QueueAttr& attr, queue_attrs ) {
          if (attr.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-            comp->add( boost::make_shared<NodeQueueIndexMemento>( attr.name(), attr.index(), attr.state_vec() ) );
+            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+            comp->add( std::make_shared<NodeQueueIndexMemento>( attr.name(), attr.index(), attr.state_vec() ) );
          }
       }
 
@@ -242,8 +239,8 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       const std::vector<VerifyAttr>& verify_attrs = misc_attrs_->verifys();
       BOOST_FOREACH(const VerifyAttr& v, verify_attrs ) {
          if (v.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-            comp->add( boost::make_shared<NodeVerifyMemento>( verify_attrs) );
+            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+            comp->add( std::make_shared<NodeVerifyMemento>( verify_attrs) );
             break;
          }
       }
@@ -251,44 +248,44 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 
 	// determine if the trigger or complete changed
 	if (triggerExpr_ && triggerExpr_->state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-		comp->add( boost::make_shared<NodeTriggerMemento>(  *triggerExpr_) );
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		comp->add( std::make_shared<NodeTriggerMemento>(  *triggerExpr_) );
 	}
  	if (completeExpr_ && completeExpr_->state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-		comp->add( boost::make_shared<NodeCompleteMemento>(  *completeExpr_) );
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		comp->add( std::make_shared<NodeCompleteMemento>(  *completeExpr_) );
 	}
 
 	// determine if the repeat changed
 	if (!repeat_.empty() && repeat_.state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-		comp->add( boost::make_shared<NodeRepeatIndexMemento>( repeat_) );
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		comp->add( std::make_shared<NodeRepeatIndexMemento>( repeat_) );
 	}
 
 	// determine if limits changed.
 	BOOST_FOREACH(limit_ptr l, limitVec_ ) {
 		if (l->state_change_no() > client_state_change_no) {
-			if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-			comp->add( boost::make_shared<NodeLimitMemento>(  *l) );
+			if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+			comp->add( std::make_shared<NodeLimitMemento>(  *l) );
 		}
 	}
 
 	// determine if variable values changed. Copy all variables. Save on having variable_change_no_ per variable
 	if (variable_change_no_ > client_state_change_no) {
-      if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-	   BOOST_FOREACH(const Variable& v, varVec_ )  { comp->add( boost::make_shared<NodeVariableMemento>( v) ); }
+      if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+	   BOOST_FOREACH(const Variable& v, varVec_ )  { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
 	}
 
 	// Determine if the late attribute has changed
 	if (lateAttr_ && lateAttr_->state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-		comp->add( boost::make_shared<NodeLateMemento>( *lateAttr_) );
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		comp->add( std::make_shared<NodeLateMemento>( *lateAttr_) );
 	}
 
 	// Determine if the flag changed
 	if (flag_.state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(absNodePath());
-		comp->add( boost::make_shared<FlagMemento>( flag_ ) );
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		comp->add( std::make_shared<FlagMemento>( flag_ ) );
 	}
 
 
@@ -736,6 +733,6 @@ void Node::set_memento( const NodeVerifyMemento* memento,std::vector<ecf::Aspect
 	   return;
   	}
 
-	misc_attrs_ = new MiscAttrs(this);
+	misc_attrs_ = std::make_unique<MiscAttrs>(this);
    misc_attrs_->verifys_ = memento->verifys_;
 }

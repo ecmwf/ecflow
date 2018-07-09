@@ -17,9 +17,7 @@
 
 #include <vector>
 #include <string>
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
+#include "Serialization.hpp"
 
 namespace  ecf {
 
@@ -106,16 +104,13 @@ private:
    int          flag_;
    unsigned int state_change_no_;  // *not* persisted, only used on server side
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & flag_;
    }
 };
 }
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(ecf::Flag, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(ecf::Flag,boost::serialization::track_never);
 
 #endif

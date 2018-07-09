@@ -11,7 +11,7 @@
 // nor does it submit to any jurisdiction. 
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/make_shared.hpp>
+#include <memory>
 #include "CtsCmdRegistry.hpp"
 #include "ClientToServerCmd.hpp"
 #include "AbstractClientEnv.hpp"
@@ -27,86 +27,86 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
    /// Place the command which require the fastest response first.
    vec_.reserve(90);
 
-	vec_.push_back( boost::make_shared<CSyncCmd>(CSyncCmd::NEWS,0,0,0));
-   vec_.push_back( boost::make_shared<CSyncCmd>(CSyncCmd::SYNC,0,0,0));
-   vec_.push_back( boost::make_shared<CSyncCmd>(0)); // SYNC_FULL
-   vec_.push_back( boost::make_shared<CSyncCmd>(CSyncCmd::SYNC_CLOCK,0,0,0));
-   vec_.push_back( boost::make_shared<CtsNodeCmd>(CtsNodeCmd::GET));
-   vec_.push_back( boost::make_shared<CtsNodeCmd>(CtsNodeCmd::GET_STATE));
-   vec_.push_back( boost::make_shared<CtsNodeCmd>(CtsNodeCmd::MIGRATE));
-   vec_.push_back( boost::make_shared<CheckPtCmd>());
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::PING));
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::RESTORE_DEFS_FROM_CHECKPT));
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::RESTART_SERVER));
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::HALT_SERVER));
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::SHUTDOWN_SERVER));
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::TERMINATE_SERVER));
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::RELOAD_WHITE_LIST_FILE));
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::RELOAD_PASSWD_FILE));
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::FORCE_DEP_EVAL));
-   vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::STATS));
-   vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::STATS_SERVER));
-   vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::STATS_RESET));
-   vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_ON));
-   vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_OFF));
-   vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::SERVER_LOAD));
-   vec_.push_back( boost::make_shared<CtsNodeCmd>(CtsNodeCmd::JOB_GEN));
-   vec_.push_back( boost::make_shared<CtsNodeCmd>(CtsNodeCmd::CHECK_JOB_GEN_ONLY));
-   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::DELETE));
-   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::SUSPEND));
-   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::RESUME));
-   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::KILL));
-   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::STATUS));
-   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::CHECK));
-   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::EDIT_HISTORY));
-   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::ARCHIVE));
-   vec_.push_back( boost::make_shared<PathsCmd>(PathsCmd::RESTORE));
-	vec_.push_back( boost::make_shared<ZombieCmd>(ecf::User::FOB));
-	vec_.push_back( boost::make_shared<ZombieCmd>(ecf::User::FAIL));
-	vec_.push_back( boost::make_shared<ZombieCmd>(ecf::User::ADOPT));
-	vec_.push_back( boost::make_shared<ZombieCmd>(ecf::User::BLOCK));
-   vec_.push_back( boost::make_shared<ZombieCmd>(ecf::User::REMOVE));
-   vec_.push_back( boost::make_shared<ZombieCmd>(ecf::User::KILL));
-	vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::GET_ZOMBIES));
-   vec_.push_back( boost::make_shared<CtsCmd>(CtsCmd::SUITES));
-	vec_.push_back( boost::make_shared<ClientHandleCmd>(ClientHandleCmd::REGISTER));
-   vec_.push_back( boost::make_shared<ClientHandleCmd>(ClientHandleCmd::DROP));
-   vec_.push_back( boost::make_shared<ClientHandleCmd>(ClientHandleCmd::DROP_USER));
-	vec_.push_back( boost::make_shared<ClientHandleCmd>(ClientHandleCmd::ADD));
-	vec_.push_back( boost::make_shared<ClientHandleCmd>(ClientHandleCmd::REMOVE));
-   vec_.push_back( boost::make_shared<ClientHandleCmd>(ClientHandleCmd::AUTO_ADD));
-   vec_.push_back( boost::make_shared<ClientHandleCmd>(ClientHandleCmd::SUITES));
-   vec_.push_back( boost::make_shared<LogCmd>());
-   vec_.push_back( boost::make_shared<ServerVersionCmd>());
-	vec_.push_back( boost::make_shared<LogMessageCmd>());
-	vec_.push_back( boost::make_shared<BeginCmd>());
-	vec_.push_back( boost::make_shared<InitCmd>());
-	vec_.push_back( boost::make_shared<CompleteCmd>());
-	vec_.push_back( boost::make_shared<AbortCmd>());
-	vec_.push_back( boost::make_shared<CtsWaitCmd>());
-	vec_.push_back( boost::make_shared<EventCmd>());
-	vec_.push_back( boost::make_shared<MeterCmd>());
-   vec_.push_back( boost::make_shared<LabelCmd>());
-   vec_.push_back( boost::make_shared<QueueCmd>());
-	vec_.push_back( boost::make_shared<RequeueNodeCmd>());
-	vec_.push_back( boost::make_shared<OrderNodeCmd>());
-	vec_.push_back( boost::make_shared<RunNodeCmd>());
-	vec_.push_back( boost::make_shared<ForceCmd>());
-	vec_.push_back( boost::make_shared<FreeDepCmd>());
-	vec_.push_back( boost::make_shared<LoadDefsCmd>());
-	vec_.push_back( boost::make_shared<ReplaceNodeCmd>());
-	vec_.push_back( boost::make_shared<CFileCmd>());
-	vec_.push_back( boost::make_shared<EditScriptCmd>());
-   vec_.push_back( boost::make_shared<AlterCmd>());
-   vec_.push_back( boost::make_shared<QueryCmd>());
-	vec_.push_back( boost::make_shared<PlugCmd>());
+	vec_.push_back( std::make_shared<CSyncCmd>(CSyncCmd::NEWS,0,0,0));
+   vec_.push_back( std::make_shared<CSyncCmd>(CSyncCmd::SYNC,0,0,0));
+   vec_.push_back( std::make_shared<CSyncCmd>(0)); // SYNC_FULL
+   vec_.push_back( std::make_shared<CSyncCmd>(CSyncCmd::SYNC_CLOCK,0,0,0));
+   vec_.push_back( std::make_shared<CtsNodeCmd>(CtsNodeCmd::GET));
+   vec_.push_back( std::make_shared<CtsNodeCmd>(CtsNodeCmd::GET_STATE));
+   vec_.push_back( std::make_shared<CtsNodeCmd>(CtsNodeCmd::MIGRATE));
+   vec_.push_back( std::make_shared<CheckPtCmd>());
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::PING));
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::RESTORE_DEFS_FROM_CHECKPT));
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::RESTART_SERVER));
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::HALT_SERVER));
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::SHUTDOWN_SERVER));
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::TERMINATE_SERVER));
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::RELOAD_WHITE_LIST_FILE));
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::RELOAD_PASSWD_FILE));
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::FORCE_DEP_EVAL));
+   vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::STATS));
+   vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::STATS_SERVER));
+   vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::STATS_RESET));
+   vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_ON));
+   vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::DEBUG_SERVER_OFF));
+   vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::SERVER_LOAD));
+   vec_.push_back( std::make_shared<CtsNodeCmd>(CtsNodeCmd::JOB_GEN));
+   vec_.push_back( std::make_shared<CtsNodeCmd>(CtsNodeCmd::CHECK_JOB_GEN_ONLY));
+   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::DELETE));
+   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::SUSPEND));
+   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::RESUME));
+   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::KILL));
+   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::STATUS));
+   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::CHECK));
+   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::EDIT_HISTORY));
+   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::ARCHIVE));
+   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::RESTORE));
+	vec_.push_back( std::make_shared<ZombieCmd>(ecf::User::FOB));
+	vec_.push_back( std::make_shared<ZombieCmd>(ecf::User::FAIL));
+	vec_.push_back( std::make_shared<ZombieCmd>(ecf::User::ADOPT));
+	vec_.push_back( std::make_shared<ZombieCmd>(ecf::User::BLOCK));
+   vec_.push_back( std::make_shared<ZombieCmd>(ecf::User::REMOVE));
+   vec_.push_back( std::make_shared<ZombieCmd>(ecf::User::KILL));
+	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::GET_ZOMBIES));
+   vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::SUITES));
+	vec_.push_back( std::make_shared<ClientHandleCmd>(ClientHandleCmd::REGISTER));
+   vec_.push_back( std::make_shared<ClientHandleCmd>(ClientHandleCmd::DROP));
+   vec_.push_back( std::make_shared<ClientHandleCmd>(ClientHandleCmd::DROP_USER));
+	vec_.push_back( std::make_shared<ClientHandleCmd>(ClientHandleCmd::ADD));
+	vec_.push_back( std::make_shared<ClientHandleCmd>(ClientHandleCmd::REMOVE));
+   vec_.push_back( std::make_shared<ClientHandleCmd>(ClientHandleCmd::AUTO_ADD));
+   vec_.push_back( std::make_shared<ClientHandleCmd>(ClientHandleCmd::SUITES));
+   vec_.push_back( std::make_shared<LogCmd>());
+   vec_.push_back( std::make_shared<ServerVersionCmd>());
+	vec_.push_back( std::make_shared<LogMessageCmd>());
+	vec_.push_back( std::make_shared<BeginCmd>());
+	vec_.push_back( std::make_shared<InitCmd>());
+	vec_.push_back( std::make_shared<CompleteCmd>());
+	vec_.push_back( std::make_shared<AbortCmd>());
+	vec_.push_back( std::make_shared<CtsWaitCmd>());
+	vec_.push_back( std::make_shared<EventCmd>());
+	vec_.push_back( std::make_shared<MeterCmd>());
+   vec_.push_back( std::make_shared<LabelCmd>());
+   vec_.push_back( std::make_shared<QueueCmd>());
+	vec_.push_back( std::make_shared<RequeueNodeCmd>());
+	vec_.push_back( std::make_shared<OrderNodeCmd>());
+	vec_.push_back( std::make_shared<RunNodeCmd>());
+	vec_.push_back( std::make_shared<ForceCmd>());
+	vec_.push_back( std::make_shared<FreeDepCmd>());
+	vec_.push_back( std::make_shared<LoadDefsCmd>());
+	vec_.push_back( std::make_shared<ReplaceNodeCmd>());
+	vec_.push_back( std::make_shared<CFileCmd>());
+	vec_.push_back( std::make_shared<EditScriptCmd>());
+   vec_.push_back( std::make_shared<AlterCmd>());
+   vec_.push_back( std::make_shared<QueryCmd>());
+	vec_.push_back( std::make_shared<PlugCmd>());
 	// Note: we deliberately do not add MoveCmd, as it should not appear in the public api
 	//       It is created on the fly by the PlugCmd
 
 	/// Command that can *ONLY* be used in a group command
-	vec_.push_back( boost::make_shared<CtsNodeCmd>(CtsNodeCmd::WHY));
-	vec_.push_back( boost::make_shared<ShowCmd>());
-	if (addGroupCmd) vec_.push_back( boost::make_shared<GroupCTSCmd>());
+	vec_.push_back( std::make_shared<CtsNodeCmd>(CtsNodeCmd::WHY));
+	vec_.push_back( std::make_shared<ShowCmd>());
+	if (addGroupCmd) vec_.push_back( std::make_shared<GroupCTSCmd>());
 }
 
 bool CtsCmdRegistry::parse(Cmd_ptr& cmd,

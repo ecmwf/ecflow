@@ -15,11 +15,7 @@
 // Description :
 //============================================================================
 
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-
+#include "Serialization.hpp"
 class Node;
 
 namespace ecf {
@@ -46,9 +42,9 @@ private:
    Node* node_;                                // Not persisted, constructor will always set this up.
    std::vector<std::string> nodes_to_restore_; // must be suite or family
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
       ar & nodes_to_restore_;
    }

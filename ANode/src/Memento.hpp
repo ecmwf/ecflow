@@ -45,10 +45,6 @@
 #include "Task.hpp"
 #include "Alias.hpp"
 
-#include "boost_archive.hpp" // collates boost archive includes
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/deque.hpp>          // no need to include <deque>
-
 //#define DEBUG_MEMENTO 1
 
 class Memento : private boost::noncopyable {
@@ -65,11 +61,11 @@ private:
    friend class CompoundMemento;
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {}
+   void serialize(Archive & ar, std::uint32_t const version )
+   {}
 };
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(Memento)
 
 
 // Used for storing all the memento's associated with a single node
@@ -95,9 +91,10 @@ private:
    std::vector<memento_ptr> vec_;
    mutable std::vector<ecf::Aspect::Type> aspects_; // not persisted only used on client side
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & clear_attributes_;
       ar & absNodePath_;
       ar & vec_;
@@ -117,10 +114,11 @@ private:
    friend class Node;
    friend class Defs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & state_;
    }
 };
@@ -140,10 +138,11 @@ private:
    friend class Task;
    friend class Defs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & order_;
    }
 };
@@ -159,14 +158,14 @@ private:
    std::vector<node_ptr> children_;
    friend class NodeContainer;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+//      ar.register_type(static_cast<Task *>(NULL));
+//      ar.register_type(static_cast<Family *>(NULL));
 
-      ar.register_type(static_cast<Task *>(NULL));
-      ar.register_type(static_cast<Family *>(NULL));
-
-      ar & boost::serialization::base_object<Memento>(*this);
+      ar & cereal::base_class<Memento>(this);
       ar & children_;
    }
 };
@@ -181,13 +180,13 @@ private:
    std::vector<alias_ptr> children_;
    friend class Task;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+//      ar.register_type(static_cast<Alias *>(NULL));
 
-      ar.register_type(static_cast<Alias *>(NULL));
-
-      ar & boost::serialization::base_object<Memento>(*this);
+      ar & cereal::base_class<Memento>(this);
       ar & children_;
    }
 };
@@ -202,10 +201,11 @@ private:
    unsigned int alias_no_;
    friend class Task;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & alias_no_;
    }
 };
@@ -222,10 +222,11 @@ private:
    friend class Node;
    friend class Defs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & suspended_;
    }
 };
@@ -240,10 +241,11 @@ private:
    SState::State state_;
    friend class Defs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & state_;
    }
 };
@@ -258,10 +260,11 @@ private:
    std::vector<Variable>  serverEnv_;
    friend class Defs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & serverEnv_;
    }
 };
@@ -276,10 +279,11 @@ private:
    DState::State state_;
    friend class Node;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & state_;
    }
 };
@@ -295,10 +299,11 @@ private:
    friend class Node;
    friend class ChildAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & event_;
    }
 };
@@ -314,10 +319,11 @@ private:
    friend class Node;
    friend class ChildAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & meter_;
    }
 };
@@ -334,10 +340,11 @@ private:
    friend class Node;
    friend class ChildAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & label_;
    }
 };
@@ -353,10 +360,11 @@ private:
    friend class Node;
    friend class MiscAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & queue_;
    }
 };
@@ -372,10 +380,11 @@ private:
    friend class Node;
    friend class MiscAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & generic_;
    }
 };
@@ -394,10 +403,11 @@ private:
    friend class Node;
    friend class MiscAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & index_;
       ar & name_;
       ar & state_vec_;
@@ -415,10 +425,11 @@ private:
    Expression exp_;
    friend class Node;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & exp_;
    }
 };
@@ -433,10 +444,11 @@ private:
    Expression exp_;
    friend class Node;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & exp_;
    }
 };
@@ -451,10 +463,11 @@ private:
    Repeat repeat_;
    friend class Node;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & repeat_;
    }
 };
@@ -469,10 +482,11 @@ private:
    long index_or_value_;
    friend class Node;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & index_or_value_;
    }
 };
@@ -488,10 +502,11 @@ private:
    Limit limit_;
    friend class Node;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & limit_;
    }
 };
@@ -510,7 +525,7 @@ private:
    friend class boost::serialization::access;
    template<class Archive>
    void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+      ar & cereal::base_class<Memento>(this);
       ar & inlimit_;
    }
 };
@@ -525,10 +540,11 @@ private:
    Variable var_;
    friend class Node;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & var_;
    }
 };
@@ -543,10 +559,11 @@ private:
    ecf::LateAttr late_;
    friend class Node;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & late_;
    }
 };
@@ -563,10 +580,11 @@ private:
    friend class Node;
    friend class Defs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & flag_;
    }
 };
@@ -582,10 +600,11 @@ private:
    friend class Node;
    friend class TimeDepAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & attr_;
    }
 };
@@ -601,10 +620,11 @@ private:
    friend class Node;
    friend class TimeDepAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & attr_;
    }
 };
@@ -620,10 +640,11 @@ private:
    friend class Node;
    friend class TimeDepAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & attr_;
    }
 };
@@ -639,10 +660,11 @@ private:
    friend class Node;
    friend class TimeDepAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & attr_;
    }
 };
@@ -658,10 +680,11 @@ private:
    friend class Node;
    friend class TimeDepAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & attr_;
    }
 };
@@ -676,10 +699,11 @@ private:
    ZombieAttr attr_;
    friend class Node;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & attr_;
    }
 };
@@ -696,10 +720,11 @@ private:
    friend class Node;
    friend class MiscAttrs;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & verifys_;
    }
 };
@@ -726,10 +751,11 @@ private:
    int          tryNo_;
    friend class Submittable;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & jobsPassword_;
       ar & process_or_remote_id_;
       ar & abortedReason_;
@@ -747,10 +773,11 @@ private:
    ClockAttr  clockAttr_;
    friend class Suite;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & clockAttr_;
    }
 };
@@ -765,10 +792,11 @@ private:
    bool begun_;
    friend class Suite;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & begun_;
    }
 };
@@ -783,49 +811,13 @@ private:
    ecf::Calendar  calendar_;          // *Only* persisted since used by the why() on client side
    friend class Suite;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object<Memento>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Memento>(this);
       ar & calendar_;
    }
 };
-
-
-BOOST_CLASS_EXPORT_KEY(StateMemento);
-BOOST_CLASS_EXPORT_KEY(NodeDefStatusDeltaMemento);
-BOOST_CLASS_EXPORT_KEY(SuspendedMemento);
-BOOST_CLASS_EXPORT_KEY(ServerStateMemento);
-BOOST_CLASS_EXPORT_KEY(ServerVariableMemento);
-BOOST_CLASS_EXPORT_KEY(NodeEventMemento);
-BOOST_CLASS_EXPORT_KEY(NodeMeterMemento);
-BOOST_CLASS_EXPORT_KEY(NodeLabelMemento);
-BOOST_CLASS_EXPORT_KEY(NodeQueueMemento);
-BOOST_CLASS_EXPORT_KEY(NodeGenericMemento);
-BOOST_CLASS_EXPORT_KEY(NodeQueueIndexMemento);
-BOOST_CLASS_EXPORT_KEY(NodeTriggerMemento);
-BOOST_CLASS_EXPORT_KEY(NodeCompleteMemento);
-BOOST_CLASS_EXPORT_KEY(NodeRepeatMemento);
-BOOST_CLASS_EXPORT_KEY(NodeRepeatIndexMemento);
-BOOST_CLASS_EXPORT_KEY(NodeLimitMemento);
-BOOST_CLASS_EXPORT_KEY(NodeInLimitMemento);
-BOOST_CLASS_EXPORT_KEY(NodeVariableMemento);
-BOOST_CLASS_EXPORT_KEY(NodeLateMemento);
-BOOST_CLASS_EXPORT_KEY(NodeTodayMemento);
-BOOST_CLASS_EXPORT_KEY(NodeTimeMemento);
-BOOST_CLASS_EXPORT_KEY(NodeDayMemento);
-BOOST_CLASS_EXPORT_KEY(NodeCronMemento);
-BOOST_CLASS_EXPORT_KEY(NodeDateMemento);
-BOOST_CLASS_EXPORT_KEY(NodeZombieMemento);
-BOOST_CLASS_EXPORT_KEY(FlagMemento);
-BOOST_CLASS_EXPORT_KEY(NodeVerifyMemento);
-BOOST_CLASS_EXPORT_KEY(SubmittableMemento);
-BOOST_CLASS_EXPORT_KEY(SuiteClockMemento);
-BOOST_CLASS_EXPORT_KEY(SuiteBeginDeltaMemento);
-BOOST_CLASS_EXPORT_KEY(SuiteCalendarMemento);
-BOOST_CLASS_EXPORT_KEY(OrderMemento);
-BOOST_CLASS_EXPORT_KEY(ChildrenMemento);
-BOOST_CLASS_EXPORT_KEY(AliasChildrenMemento);
-BOOST_CLASS_EXPORT_KEY(AliasNumberMemento);
 
 #endif

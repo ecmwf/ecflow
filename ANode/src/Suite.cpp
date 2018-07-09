@@ -15,8 +15,8 @@
 
 #include <assert.h>
 #include <sstream>
+#include <memory>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 
 #include "Suite.hpp"
 #include "Defs.hpp"
@@ -57,17 +57,17 @@ Suite::Suite(const Suite& rhs)
   suite_gen_variables_(NULL)
 {
    if (rhs.clockAttr_.get())
-      clockAttr_ = boost::make_shared<ClockAttr>( *rhs.clockAttr_ );
+      clockAttr_ = std::make_shared<ClockAttr>( *rhs.clockAttr_ );
 
    if (rhs.clock_end_attr_.get())
-      clock_end_attr_ = boost::make_shared<ClockAttr>( *rhs.clock_end_attr_ );
+      clock_end_attr_ = std::make_shared<ClockAttr>( *rhs.clock_end_attr_ );
 
    calendar_ = rhs.calendar_;
 }
 
 node_ptr Suite::clone() const
 {
-   return boost::make_shared<Suite>(*this );
+   return std::make_shared<Suite>(*this );
 }
 
 Suite& Suite::operator=(const Suite& rhs)
@@ -76,8 +76,8 @@ Suite& Suite::operator=(const Suite& rhs)
    if (this != &rhs) {
       NodeContainer::operator=(rhs);
       begun_ = rhs.begun_;
-      if (rhs.clockAttr_.get()) clockAttr_ = boost::make_shared<ClockAttr>( *rhs.clockAttr_ );
-      if (rhs.clock_end_attr_.get()) clock_end_attr_ = boost::make_shared<ClockAttr>( *rhs.clock_end_attr_ );
+      if (rhs.clockAttr_.get()) clockAttr_ = std::make_shared<ClockAttr>( *rhs.clockAttr_ );
+      if (rhs.clock_end_attr_.get()) clock_end_attr_ = std::make_shared<ClockAttr>( *rhs.clock_end_attr_ );
       calendar_ = rhs.calendar_;
 
       state_change_no_ = 0;
@@ -102,7 +102,7 @@ Suite::~Suite()
 
 suite_ptr Suite::create(const std::string& name)
 {
-	return boost::make_shared<Suite>( name );
+	return std::make_shared<Suite>( name );
 }
 
 void Suite::accept(ecf::NodeTreeVisitor& v)
@@ -148,7 +148,7 @@ void Suite::requeue(Requeue_args& args)
    }
 
    // This is more efficient than: since no locking is required
-   //    SuiteChanged changed(boost::dynamic_pointer_cast<Suite>(shared_from_this()));
+   //    SuiteChanged changed(std::dynamic_pointer_cast<Suite>(shared_from_this()));
    // since no locking is required in SuiteChanged
    SuiteChanged1 changed(this); //
 
@@ -365,7 +365,7 @@ void Suite::addClock( const ClockAttr& c,bool initialize_calendar)
        }
     }
 
-	clockAttr_ = boost::make_shared<ClockAttr>(c);
+	clockAttr_ = std::make_shared<ClockAttr>(c);
 	if (initialize_calendar) clockAttr_->init_calendar(calendar_);
 
    // clock_end_attr_ is always same type as clock
@@ -391,7 +391,7 @@ void Suite::add_end_clock( const ClockAttr& c)
       }
    }
 
-   clock_end_attr_ = boost::make_shared<ClockAttr>(c);
+   clock_end_attr_ = std::make_shared<ClockAttr>(c);
    clock_end_attr_->set_end_clock();
 
    // clock_end_attr_ is always same type as clock
@@ -628,12 +628,12 @@ void Suite::collateChanges(DefsDelta& changes) const
 
 	   compound_memento_ptr suite_compound_mememto;
 	   if (clockAttr_.get() && clockAttr_->state_change_no() > changes.client_state_change_no()) {
-	      if (!suite_compound_mememto.get()) suite_compound_mememto = boost::make_shared<CompoundMemento>(absNodePath());
-	      suite_compound_mememto->add( boost::make_shared<SuiteClockMemento>(  *clockAttr_ ) );
+	      if (!suite_compound_mememto.get()) suite_compound_mememto = std::make_shared<CompoundMemento>(absNodePath());
+	      suite_compound_mememto->add( std::make_shared<SuiteClockMemento>(  *clockAttr_ ) );
 	   }
 	   if (begun_change_no_ > changes.client_state_change_no()) {
-	      if (!suite_compound_mememto.get()) suite_compound_mememto = boost::make_shared<CompoundMemento>(absNodePath());
-	      suite_compound_mememto->add( boost::make_shared<SuiteBeginDeltaMemento>( begun_) );
+	      if (!suite_compound_mememto.get()) suite_compound_mememto = std::make_shared<CompoundMemento>(absNodePath());
+	      suite_compound_mememto->add( std::make_shared<SuiteBeginDeltaMemento>( begun_) );
 	   }
 
 	   /// Collate NodeContainer and Node changes into *SAME* compound_memento_ptr
@@ -652,8 +652,8 @@ void Suite::collateChanges(DefsDelta& changes) const
 	   /// after some kind of state change. Fixed with ECFLOW-631 (Client must do sync_clock, before calling why)
 	   size_t after = changes.size();
 	   if ((before != after || changes.sync_suite_clock() ) && calendar_change_no_ > changes.client_state_change_no() ) {
-	      compound_memento_ptr compound_ptr =  boost::make_shared<CompoundMemento>(absNodePath());
-	      compound_ptr->add( boost::make_shared<SuiteCalendarMemento>( calendar_ ) );
+	      compound_memento_ptr compound_ptr =  std::make_shared<CompoundMemento>(absNodePath());
+	      compound_ptr->add( std::make_shared<SuiteCalendarMemento>( calendar_ ) );
 	      changes.add( compound_ptr );
 	   }
 	}
@@ -893,3 +893,6 @@ void SuiteGenVariables::gen_variables(std::vector<Variable>& vec) const
    vec.push_back(genvar_ecf_julian_);
    vec.push_back(genvar_time_);
 }
+
+CEREAL_REGISTER_TYPE(Suite);
+

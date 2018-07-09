@@ -202,43 +202,14 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
       BOOST_CHECK_MESSAGE(helper.file_size() <= 6679000 ,"File size regression expected <= 6679000 but found " << helper.file_size());
    }
 
-#if defined(BINARY_ARCHIVE)
    {
       timer.restart();
       PersistHelper helper;
-      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true,ecf::Archive::BINARY), helper.errorMsg());
-      BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForCheckPtPersistAndReload,"Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload << " seconds to persist and reload, but found " << timer.elapsed());
-      cout << " Checkpt(BINARY_ARCHIVE) and reload and compare, time taken  = ";
-      cout << timer.elapsed() << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")" << " file_size(" << helper.file_size() << ")" << endl;
-   }
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-   {
-      timer.restart();
-      PersistHelper helper;
-      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true,ecf::Archive::PORTABLE_BINARY), helper.errorMsg());
-      BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForCheckPtPersistAndReload,"Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload << " seconds to persist and reload, but found " << timer.elapsed());
-      cout << " Checkpt(PORTABLE_BINARY) and reload and compare, time taken = ";
-      cout << timer.elapsed() << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")" << " file_size(" << helper.file_size() << ")" << endl;
-   }
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-   {
-      timer.restart();
-      PersistHelper helper;
-      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true,ecf::Archive::EOS_PORTABLE_BINARY), helper.errorMsg());
-      BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForCheckPtPersistAndReload,"Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload << " seconds to persist and reload, but found " << timer.elapsed());
-      cout << " Checkpt(EOS_PORTABLE_BINARY) and reload and compare, time taken = ";
-      cout << timer.elapsed() << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")" << " file_size(" << helper.file_size() << ")" << endl;
-   }
-#else
-   {
-      timer.restart();
-      PersistHelper helper;
-      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true,ecf::Archive::TEXT), helper.errorMsg());
+      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true), helper.errorMsg());
       BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForCheckPtPersistAndReload,"Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload << " seconds to persist and reload, but found " << timer.elapsed());
       cout << " Checkpt(TEXT_ARCHIVE) and reload and compare, time taken   = ";
       cout << timer.elapsed() << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")" << " file_size(" << helper.file_size() << ")" << endl;
    }
-#endif
 
    {
       // Time how long it takes for job submission. Must call begin on all suites first.

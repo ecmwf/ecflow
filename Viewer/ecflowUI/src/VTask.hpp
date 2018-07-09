@@ -17,8 +17,7 @@
 #include "NodeFwd.hpp"
 #include "Zombie.hpp"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 
 //#include "VReply.hpp"
 class VReply;
@@ -32,7 +31,7 @@ class VTaskObserver;
 //a shared pointer of VTask. So VTask can only exist as a shared pointer.
 
 class VTask;
-typedef boost::shared_ptr<VTask> VTask_ptr;
+typedef std::shared_ptr<VTask> VTask_ptr;
 
 class VTask  : public boost::enable_shared_from_this<VTask>
 {

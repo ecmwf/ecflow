@@ -16,7 +16,6 @@
 #include <deque>
 
 #include <boost/bind.hpp>
-#include <boost/make_shared.hpp>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -53,13 +52,6 @@ Node::Node(const std::string& n)
 : parent_(NULL),name_(n),
   suspended_(false),
   state_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
-  completeExpr_(NULL),
-  triggerExpr_(NULL),
-  lateAttr_(NULL),
-  time_dep_attrs_(NULL),
-  child_attrs_(NULL),
-  misc_attrs_(NULL),
-  auto_attrs_(NULL),
   inLimitMgr_(this),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
   graphic_ptr_(0)
@@ -74,13 +66,6 @@ Node::Node()
 : parent_(NULL),
   suspended_(false),
   state_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
-  completeExpr_(NULL),
-  triggerExpr_(NULL),
-  lateAttr_(NULL),
-  time_dep_attrs_(NULL),
-  child_attrs_(NULL),
-  misc_attrs_(NULL),
-  auto_attrs_(NULL),
   inLimitMgr_(this),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
   graphic_ptr_(0)
@@ -113,20 +98,20 @@ Node::Node(const Node& rhs)
    if ( auto_attrs_ )     auto_attrs_->set_node(this);
 
    for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
-      limit_ptr the_limit = boost::make_shared<Limit>( *rhs.limitVec_[l]);
+      limit_ptr the_limit = std::make_shared<Limit>( *rhs.limitVec_[l]);
       the_limit->set_node(this);
       limitVec_.push_back( the_limit );
    }
 }
 
 void Node::delete_attributes() {
-   delete completeExpr_;
-   delete triggerExpr_;
-   delete lateAttr_;
-   delete time_dep_attrs_;
-   delete child_attrs_;
-   delete misc_attrs_;
-   delete auto_attrs_;
+   completeExpr_.reset(nullptr);
+   triggerExpr_.reset(nullptr);
+   lateAttr_.reset(nullptr);
+   time_dep_attrs_.reset(nullptr);
+   child_attrs_.reset(nullptr);
+   misc_attrs_.reset(nullptr);
+   auto_attrs_.reset(nullptr);
 }
 
 node_ptr Node::create(const std::string& node_string)
@@ -157,13 +142,13 @@ Node& Node::operator=(const Node& rhs)
 
       delete_attributes();
 
-      completeExpr_ =  (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL  ;
-      triggerExpr_ =   (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL  ;
-      lateAttr_ = (rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL ;
-      time_dep_attrs_ = (rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL ;
-      child_attrs_ = (rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL ;
-      misc_attrs_ = (rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL;
-      auto_attrs_ = (rhs.auto_attrs_) ? new AutoAttrs(*rhs.auto_attrs_) : NULL;
+      if (rhs.completeExpr_)   completeExpr_   = std::make_unique<Expression>(*rhs.completeExpr_);
+      if (rhs.triggerExpr_)    triggerExpr_    = std::make_unique<Expression>(*rhs.triggerExpr_ );
+      if (rhs.lateAttr_)       lateAttr_       = std::make_unique<ecf::LateAttr>(*rhs.lateAttr_);
+      if (rhs.time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(*rhs.time_dep_attrs_);
+      if (rhs.child_attrs_)    child_attrs_    = std::make_unique<ChildAttrs>(*rhs.child_attrs_);
+      if (rhs.misc_attrs_)     misc_attrs_     = std::make_unique<MiscAttrs>(*rhs.misc_attrs_);
+      if (rhs.auto_attrs_)     auto_attrs_     = std::make_unique<AutoAttrs>(*rhs.auto_attrs_);
       repeat_ =  rhs.repeat_ ;
       varVec_ = rhs.varVec_ ;
       inLimitMgr_ = rhs.inLimitMgr_ ;
@@ -182,7 +167,7 @@ Node& Node::operator=(const Node& rhs)
 
       limitVec_.clear();
       for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
-         limit_ptr the_limit = boost::make_shared<Limit>( *rhs.limitVec_[l]);
+         limit_ptr the_limit = std::make_shared<Limit>( *rhs.limitVec_[l]);
          the_limit->set_node(this);
          limitVec_.push_back( the_limit );
       }
@@ -190,9 +175,7 @@ Node& Node::operator=(const Node& rhs)
    return *this;
 }
 
-Node::~Node() {
-   delete_attributes();
-}
+Node::~Node() {}
 
 bool Node::isParentSuspended() const
 {
@@ -432,7 +415,7 @@ void Node::check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr* inheri
          if (!inherited_late || inherited_late->isNull())  checkForLateness(c);
          else {
             LateAttr overidden_late = *inherited_late;
-            overidden_late.override_with(lateAttr_);
+            overidden_late.override_with(lateAttr_.get());
             if (overidden_late.check_for_lateness( state_, c)) {
                lateAttr_->setLate(true);
                flag().set(ecf::Flag::LATE);

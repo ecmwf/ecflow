@@ -18,10 +18,7 @@
 #include <set>
 
 #include <boost/noncopyable.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
+#include "Serialization.hpp"
 
 #include "InLimit.hpp"
 #include "LimitFwd.hpp"
@@ -122,15 +119,12 @@ private:
 
  	mutable std::vector<InLimit>        inLimitVec_;
 
- 	friend class boost::serialization::access;
- 	template<class Archive>
- 	void serialize(Archive & ar, const unsigned int /*version*/) {
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
  	   ar & inLimitVec_;
  	}
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(InLimitMgr, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(InLimitMgr,boost::serialization::track_never);
 
 #endif

@@ -15,8 +15,8 @@
 // Description :
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <memory>
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
 #include "boost/date_time/posix_time/posix_time_types.hpp"
 
 #include "ClientEnvironment.hpp"

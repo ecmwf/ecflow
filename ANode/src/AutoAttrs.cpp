@@ -30,35 +30,29 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-AutoAttrs::AutoAttrs(const AutoAttrs& rhs)
-: node_(NULL),auto_cancel_(NULL),auto_archive_(NULL),auto_restore_(NULL)
+AutoAttrs::AutoAttrs(const AutoAttrs& rhs) : node_(NULL)
 {
-   if (rhs.auto_cancel_) auto_cancel_= new AutoCancelAttr(*rhs.auto_cancel_);
-   if (rhs.auto_archive_) auto_archive_= new AutoArchiveAttr(*rhs.auto_archive_);
-   if (rhs.auto_restore_) auto_restore_= new AutoRestoreAttr(*rhs.auto_restore_);
+   if (rhs.auto_cancel_) auto_cancel_ = std::make_unique<AutoCancelAttr>(*rhs.auto_cancel_);
+   if (rhs.auto_archive_) auto_archive_ = std::make_unique<AutoArchiveAttr>(*rhs.auto_archive_);
+   if (rhs.auto_restore_) auto_restore_ = std::make_unique<AutoRestoreAttr>(*rhs.auto_restore_);
 }
 
-AutoAttrs::~AutoAttrs()
-{
-   delete auto_cancel_;
-   delete auto_archive_;
-   delete auto_restore_;
-}
+AutoAttrs::~AutoAttrs(){}
 
-void AutoAttrs::delete_autorestore()
-{
-   delete auto_restore_;auto_restore_ = NULL;
-}
-
-void AutoAttrs::delete_autocancel()
-{
-   delete auto_cancel_; auto_cancel_ = NULL;
-}
-
-void AutoAttrs::delete_autoarchive()
-{
-   delete auto_archive_; auto_archive_ = NULL;
-}
+//void AutoAttrs::delete_autorestore()
+//{
+//   auto_restore_.reset(nullptr);
+//}
+//
+//void AutoAttrs::delete_autocancel()
+//{
+//   auto_cancel_.reset(nullptr);
+//}
+//
+//void AutoAttrs::delete_autoarchive()
+//{
+//   auto_archive_.reset(nullptr);
+//}
 
 // needed by node serialisation
 void AutoAttrs::set_node(Node* n)
@@ -175,7 +169,7 @@ void AutoAttrs::add_autorestore( const ecf::AutoRestoreAttr& auto_restore)
       ss << "AutoAttrs::add_auto_restore: Can only have one autorestore per node " << node_->debugNodePath();
       throw std::runtime_error( ss.str() );
    }
-   auto_restore_ =  new ecf::AutoRestoreAttr(auto_restore);
+   auto_restore_ = std::make_unique<ecf::AutoRestoreAttr>(auto_restore);
    auto_restore_->set_node(node_);
    node_->state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
 }
@@ -192,7 +186,7 @@ void AutoAttrs::add_autocancel( const AutoCancelAttr& ac)
       ss << "Node::addAutoCancel: A node can only have one autocancel, see node " << node_->debugNodePath();
       throw std::runtime_error( ss.str() );
    }
-   auto_cancel_ = new ecf::AutoCancelAttr(ac);
+   auto_cancel_ = std::make_unique<ecf::AutoCancelAttr>(ac);
    node_->state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -208,7 +202,7 @@ void AutoAttrs::add_autoarchive( const AutoArchiveAttr& ac)
       ss << "Node::add_autoarchive: A node can only have one autoarchive, see node " << node_->debugNodePath();
       throw std::runtime_error( ss.str() );
    }
-   auto_archive_ = new ecf::AutoArchiveAttr(ac);
+   auto_archive_ = std::make_unique<ecf::AutoArchiveAttr>(ac);
    node_->state_change_no_ = Ecf::incr_state_change_no();
 }
 

@@ -15,10 +15,6 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/raw_function.hpp>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
 
 #include "Defs.hpp"
@@ -125,7 +121,7 @@ defs_ptr defs_enter(defs_ptr self) { return self;}
 bool defs_exit(defs_ptr self,const bp::object& type,const bp::object& value,const bp::object& traceback){return false;}
 
 std::string check_job_creation(defs_ptr defs, bool throw_on_error, bool verbose){
-   job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+   job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
    if (verbose) jobCtrl->set_verbose(verbose);
    defs->check_job_creation(jobCtrl);
    if (!jobCtrl->get_error_msg().empty() && throw_on_error) {

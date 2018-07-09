@@ -15,7 +15,6 @@
 
 #include <assert.h>
 #include <sstream>
-#include <boost/make_shared.hpp>
 
 #include "Family.hpp"
 #include "Log.hpp"
@@ -48,7 +47,7 @@ Family& Family::operator=(const Family& rhs)
 
 node_ptr Family::clone() const
 {
-   return boost::make_shared<Family>( *this );
+   return std::make_shared<Family>( *this );
 }
 
 Family::~Family()
@@ -62,7 +61,7 @@ Family::~Family()
 
 family_ptr Family::create(const std::string& name)
 {
-	return boost::make_shared<Family>( name );
+	return std::make_shared<Family>( name );
 }
 
 void Family::accept(ecf::NodeTreeVisitor& v)
@@ -210,3 +209,6 @@ void FamGenVariables::gen_variables(std::vector<Variable>& vec) const
    vec.push_back(genvar_family_);
    vec.push_back(genvar_family1_);
 }
+
+CEREAL_REGISTER_TYPE(Family);
+

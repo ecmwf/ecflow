@@ -138,7 +138,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    cmd_vec.push_back( Cmd_ptr( new PlugCmd()));
    cmd_vec.push_back( Cmd_ptr( new QueryCmd("event","/suiteName/t1","event","")));
 
-	boost::shared_ptr<GroupCTSCmd>  theGroupCmd = boost::make_shared<GroupCTSCmd>();
+	std::shared_ptr<GroupCTSCmd>  theGroupCmd = std::make_shared<GroupCTSCmd>();
    theGroupCmd->addChild(  Cmd_ptr( new ServerVersionCmd())  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::PING))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER))  );
@@ -204,7 +204,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    stc_cmd_vec.push_back( STC_Cmd_ptr( new DefsCmd(mock_server)));
    stc_cmd_vec.push_back( STC_Cmd_ptr( new SNodeCmd(mock_server,node_ptr()) ));
 
-	boost::shared_ptr<GroupSTCCmd>  theSTCGroupCmd = boost::make_shared<GroupSTCCmd>() ;
+	std::shared_ptr<GroupSTCCmd>  theSTCGroupCmd = std::make_shared<GroupSTCCmd>() ;
 	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new ErrorCmd())  );
 	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new StcCmd(StcCmd::OK))  );
 	theSTCGroupCmd->addChild(  STC_Cmd_ptr( new StcCmd(StcCmd::BLOCK_CLIENT_SERVER_HALTED))  );

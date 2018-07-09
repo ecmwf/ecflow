@@ -61,10 +61,11 @@ private:
    mutable FamGenVariables* fam_gen_variables_;
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::base_object<NodeContainer>(*this);
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<NodeContainer>(this);
    }
 };
 

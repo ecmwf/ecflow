@@ -16,7 +16,6 @@
 #include <sstream>
 #include <fstream>
 #include <boost/bind.hpp>
-#include <boost/make_shared.hpp>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -83,7 +82,7 @@ Defs::Defs(const Defs& rhs) :
 {
    size_t theSize = rhs.suiteVec_.size();
    for(size_t s = 0; s < theSize; s++) {
-      suite_ptr suite_copy = boost::make_shared<Suite>( *rhs.suiteVec_[s] );
+      suite_ptr suite_copy = std::make_shared<Suite>( *rhs.suiteVec_[s] );
       suite_copy->set_defs(this);
       suiteVec_.push_back( suite_copy );
    }
@@ -138,8 +137,8 @@ Defs& Defs::operator=(const Defs& rhs)
    return *this;
 }
 
-defs_ptr Defs::create() { return boost::make_shared<Defs>();}
-defs_ptr Defs::create(const std::string& port) { return boost::make_shared<Defs>(port);} // Defs::create(port)
+defs_ptr Defs::create() { return std::make_shared<Defs>();}
+defs_ptr Defs::create(const std::string& port) { return std::make_shared<Defs>(port);} // Defs::create(port)
 
 Defs::~Defs()
 {
@@ -461,7 +460,7 @@ node_ptr Defs::removeChild(Node* child)
  		 	Ecf::incr_modify_change_no();
  		   suiteVec_[t]->set_defs(NULL); // Must be set to NULL, allows suite to be added to different defs
  		 	client_suite_mgr_.suite_deleted_in_defs(suiteVec_[t]); // must be after Ecf::incr_modify_change_no();
- 			node_ptr node = boost::dynamic_pointer_cast<Node>(suiteVec_[t]);
+ 			node_ptr node = std::dynamic_pointer_cast<Node>(suiteVec_[t]);
  			suiteVec_.erase( suiteVec_.begin() + t);
  			return node ;
  		}
@@ -482,7 +481,7 @@ bool Defs::addChild( node_ptr child, size_t position)
 	// *** CANT construct shared_ptr from a raw pointer, must use dynamic_pointer_cast,
 	// *** otherwise the reference counts will get messed up.
 	// If the suite of the same exists, it is deleted first
-	addSuite( boost::dynamic_pointer_cast<Suite>( child ), position );
+	addSuite( std::dynamic_pointer_cast<Suite>( child ), position );
 	return true;
 }
 
@@ -1162,25 +1161,25 @@ node_ptr Defs::replaceChild(const std::string& path,
 	return client_node_to_add;
 }
 
-void Defs::boost_save_as_checkpt(const std::string& the_fileName,ecf::Archive::Type at) const
+void Defs::boost_save_as_checkpt(const std::string& the_fileName) const
 {
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
 
 	/// Can throw archive exception
- 	ecf::save(the_fileName,*this,at);
+ 	ecf::save(the_fileName,*this);
 }
 
 
  
-void Defs::boost_save_as_filename(const std::string& the_fileName,ecf::Archive::Type at) const
+void Defs::boost_save_as_filename(const std::string& the_fileName) const
 {
    /// Can throw archive exception
-   ecf::save(the_fileName,*this,at);
+   ecf::save(the_fileName,*this);
 }
 
 
-void Defs::boost_restore_from_checkpt(const std::string& the_fileName,ecf::Archive::Type at)
+void Defs::boost_restore_from_checkpt(const std::string& the_fileName)
 {
 //	cout << "Defs::boost_restore_from_checkpt " << the_fileName << "\n";
 
@@ -1189,7 +1188,7 @@ void Defs::boost_restore_from_checkpt(const std::string& the_fileName,ecf::Archi
 	// deleting existing content first. *** Note: Server environment left as is ****
 	clear();
 
-	ecf::restore(the_fileName, (*this), at);
+	ecf::restore(the_fileName, (*this));
 
 //	cout << "Restored: " << suiteVec_.size() << " suites\n";
 }
@@ -1528,30 +1527,30 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const
    // ************************************************************************************************
    compound_memento_ptr comp;
    if (state_.state_change_no() > incremental_changes.client_state_change_no()) {
-      if (!comp.get()) comp = boost::make_shared<CompoundMemento>(Str::ROOT_PATH());
-      comp->add( boost::make_shared<StateMemento>( state_.state()) );
+      if (!comp.get()) comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+      comp->add( std::make_shared<StateMemento>( state_.state()) );
    }
    if (order_state_change_no_ > incremental_changes.client_state_change_no()) {
-       if (!comp.get()) comp = boost::make_shared<CompoundMemento>(Str::ROOT_PATH());
+       if (!comp.get()) comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
        std::vector<std::string> order; order.reserve(suiteVec_.size());
        for(size_t i =0; i < suiteVec_.size(); i++)  order.push_back( suiteVec_[i]->name());
-       comp->add( boost::make_shared<OrderMemento>( order ) );
+       comp->add( std::make_shared<OrderMemento>( order ) );
    }
 
    // Determine if the flag changed
    if (flag_.state_change_no() > incremental_changes.client_state_change_no()) {
-      if (!comp.get()) comp =  boost::make_shared<CompoundMemento>(Str::ROOT_PATH());
-      comp->add( boost::make_shared<FlagMemento>( flag_ ) );
+      if (!comp.get()) comp =  std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+      comp->add( std::make_shared<FlagMemento>( flag_ ) );
    }
 
    // determine if defs server state, currently only watch server state. i.e HALTED, SHUTDOWN, RUNNING
    if (server_.state_change_no()  > incremental_changes.client_state_change_no()) {
-      if (!comp.get()) comp = boost::make_shared<CompoundMemento>(Str::ROOT_PATH());
-      comp->add( boost::make_shared<ServerStateMemento>( server_.get_state() ) );
+      if (!comp.get()) comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+      comp->add( std::make_shared<ServerStateMemento>( server_.get_state() ) );
    }
    if (server_.variable_state_change_no()  > incremental_changes.client_state_change_no()) {
-      if (!comp.get()) comp = boost::make_shared<CompoundMemento>(Str::ROOT_PATH());
-      comp->add( boost::make_shared<ServerVariableMemento>( server_.user_variables() ) );
+      if (!comp.get()) comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
+      comp->add( std::make_shared<ServerVariableMemento>( server_.user_variables() ) );
    }
 
    if (comp.get() ) {

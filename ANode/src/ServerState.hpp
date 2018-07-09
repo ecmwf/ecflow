@@ -15,9 +15,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/string.hpp>         // no need to include <string>
-
 #include "SState.hpp"
 #include "NodeFwd.hpp"
 #include "Variable.hpp"
@@ -125,18 +122,14 @@ private:
  	std::pair<std::string,std::string> hostPort_; // NOT persisted, set by server hence no need to persist
 
 private:
- 	friend class boost::serialization::access;
- 	template<class Archive>
- 	void serialize(Archive & ar, const unsigned int /*version*/)
- 	{
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
  	   ar & server_state_;
       ar & user_variables_;
       ar & server_variables_;
  	}
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(ServerState, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(ServerState,boost::serialization::track_never);
 
 #endif

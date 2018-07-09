@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( test_reset_after_job_generation_checking )
       BOOST_REQUIRE_MESSAGE( defs_copy == defs, "Expected defs to be equal");
 
       // After check_job_creation, the defs SHOULD be reset. see ECFLOW-1203
-      job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+      job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
       defs.check_job_creation( jobCtrl );
       BOOST_REQUIRE_MESSAGE(!jobCtrl->get_error_msg().empty(), jobCtrl->get_error_msg());
 
@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE( test_reset_after_job_generation_checking )
       Defs copy = Defs(theDefsFixture.defsfile_);
 
       // After check_job_creation, the defs SHOULD be reset. see ECFLOW-1203
-      job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+      job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
       theDefsFixture.defsfile_.check_job_creation( jobCtrl );
 
       DebugEquality debug_equality; // only as affect in DEBUG build
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE( test_task_script_generator )
    /// Test the ecf file were created, by doing job creation
    /// JobCreationCtrl is used control what node we generate the jobs for:
    /// Since we have not set the node on it, we force job generation for all tasks
-   job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+   job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
    theDefs.check_job_creation(jobCtrl);
    BOOST_REQUIRE_MESSAGE(jobCtrl->get_error_msg().empty(), jobCtrl->get_error_msg());
    BOOST_REQUIRE_MESSAGE(jobCtrl->fail_submittables().empty(),"Expected no failing tasks");
@@ -207,7 +207,7 @@ BOOST_AUTO_TEST_CASE( test_task_script_generator_with_dummy_tasks )
    /// Test the ecf file were created, by doing job creation
    /// JobCreationCtrl is used control what node we generate the jobs for:
    /// Since we have *NOT* set the node on it, we force job generation for all tasks
-   job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+   job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
    theDefs.check_job_creation(jobCtrl);
    BOOST_REQUIRE_MESSAGE(jobCtrl->get_error_msg().empty(), jobCtrl->get_error_msg());
    BOOST_REQUIRE_MESSAGE(jobCtrl->fail_submittables().empty(),"Expected no failing tasks");

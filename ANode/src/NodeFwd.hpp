@@ -14,8 +14,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+#include <memory>
 #include <vector>
 #include <string>
 #include <map>
@@ -41,25 +40,25 @@ class Variable;
 
 namespace ecf { class LateAttr; class AutoCancelAttr; class AutoArchiveAttr; class AutoRestoreAttr; } // forward declare class
 
-typedef boost::shared_ptr<Memento> memento_ptr;
-typedef boost::shared_ptr<CompoundMemento> compound_memento_ptr;
-typedef boost::shared_ptr<ClockAttr> clock_ptr;
+typedef std::shared_ptr<Memento> memento_ptr;
+typedef std::shared_ptr<CompoundMemento> compound_memento_ptr;
+typedef std::shared_ptr<ClockAttr> clock_ptr;
 
-typedef boost::shared_ptr<JobCreationCtrl> job_creation_ctrl_ptr;
-typedef boost::shared_ptr<Node>   node_ptr;
-typedef boost::shared_ptr<Task>   task_ptr;
-typedef boost::shared_ptr<Alias>  alias_ptr;
-typedef boost::shared_ptr<Submittable>  submittable_ptr;
-typedef boost::shared_ptr<Family> family_ptr;
-typedef boost::shared_ptr<Suite>  suite_ptr;
-typedef boost::shared_ptr<Defs>   defs_ptr;
+typedef std::shared_ptr<JobCreationCtrl> job_creation_ctrl_ptr;
+typedef std::shared_ptr<Node>   node_ptr;
+typedef std::shared_ptr<Task>   task_ptr;
+typedef std::shared_ptr<Alias>  alias_ptr;
+typedef std::shared_ptr<Submittable>  submittable_ptr;
+typedef std::shared_ptr<Family> family_ptr;
+typedef std::shared_ptr<Suite>  suite_ptr;
+typedef std::shared_ptr<Defs>   defs_ptr;
 
-typedef boost::weak_ptr<Defs>  weak_defs_ptr;
-typedef boost::weak_ptr<Suite> weak_suite_ptr;
-typedef boost::weak_ptr<Task>  weak_task_ptr;
-typedef boost::weak_ptr<Alias> weak_alias_ptr;
-typedef boost::weak_ptr<Submittable> weak_submittable_ptr;
-typedef boost::weak_ptr<Node>  weak_node_ptr;
+typedef std::weak_ptr<Defs>  weak_defs_ptr;
+typedef std::weak_ptr<Suite> weak_suite_ptr;
+typedef std::weak_ptr<Task>  weak_task_ptr;
+typedef std::weak_ptr<Alias> weak_alias_ptr;
+typedef std::weak_ptr<Submittable> weak_submittable_ptr;
+typedef std::weak_ptr<Node>  weak_node_ptr;
 
 typedef std::map<std::string,std::string> NameValueMap;
 

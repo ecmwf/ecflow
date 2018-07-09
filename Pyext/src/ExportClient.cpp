@@ -180,8 +180,8 @@ void set_child_pid(ClientInvoker* self,int pid) { self->set_child_pid( boost::le
 //    of the code containing the 'with' statement will never realize anything went wrong.
 // .  If BLOCK didn't raise an exception, the __exit__() method is still called, but type, value, and traceback are all None.
 //
-boost::shared_ptr<ClientInvoker> client_enter(boost::shared_ptr<ClientInvoker> self) { return self;}
-bool client_exit(boost::shared_ptr<ClientInvoker> self,const bp::object& type,const bp::object& value,const bp::object& traceback){
+std::shared_ptr<ClientInvoker> client_enter(std::shared_ptr<ClientInvoker> self) { return self;}
+bool client_exit(std::shared_ptr<ClientInvoker> self,const bp::object& type,const bp::object& value,const bp::object& traceback){
    self->ch1_drop(); 
    return false;   
 }
@@ -200,8 +200,8 @@ void zombieKillCli(ClientInvoker* self,const bp::list& list){std::vector<std::st
 
 void export_Client()
 {
-   // Need boost::shared_ptr<ClientInvoker>, to add support for with( __enter__,__exit__)
- 	class_<ClientInvoker,boost::shared_ptr<ClientInvoker>,boost::noncopyable>("Client",ClientDoc::class_client())
+   // Need std::shared_ptr<ClientInvoker>, to add support for with( __enter__,__exit__)
+ 	class_<ClientInvoker,std::shared_ptr<ClientInvoker>,boost::noncopyable>("Client",ClientDoc::class_client())
    .def( init<std::string>() /* host:port      */)
    .def( init<std::string,std::string>() /* host, port      */)
    .def( init<std::string,int>()         /* host, port(int) */)

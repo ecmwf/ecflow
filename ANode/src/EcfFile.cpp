@@ -16,11 +16,11 @@
 #include <sys/stat.h>
 #include <iostream>
 #include <cerrno>
+#include <memory>
 
 #include "boost/foreach.hpp"
 #include "boost/filesystem/operations.hpp"
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/make_shared.hpp>
 
 #include "EcfFile.hpp"
 #include "Log.hpp"
@@ -474,7 +474,7 @@ bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>
    }
 
    // ADD to cache
-   boost::shared_ptr<IncludeFileCache> ptr = boost::make_shared<IncludeFileCache>(file);
+   std::shared_ptr<IncludeFileCache> ptr = std::make_shared<IncludeFileCache>(file);
    include_file_cache_.push_back( ptr );
 
    if (!ptr->lines(lines)) {
@@ -483,7 +483,7 @@ bool EcfFile::open_include_file(const std::string& file,std::vector<std::string>
          log(Log::WAR,"EcfFile::open_include_file: Too many files open(errno=EMFILE), Clearing cache, and trying again. Check limits with ulimit -Sn");
          include_file_cache_.clear();
 
-         boost::shared_ptr<IncludeFileCache> a_ptr = boost::make_shared<IncludeFileCache>(file);
+         std::shared_ptr<IncludeFileCache> a_ptr = std::make_shared<IncludeFileCache>(file);
          include_file_cache_.push_back( a_ptr );
          if (!a_ptr->lines(lines)) {
             std::stringstream ss;

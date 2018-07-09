@@ -14,7 +14,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <assert.h>
 #include <boost/foreach.hpp>
-#include <boost/make_shared.hpp>
 
 #include "InLimitMgr.hpp"
 #include "Limit.hpp"
@@ -139,7 +138,7 @@ void InLimitMgr::get_memento( compound_memento_ptr& comp) const
 	std::cout << "InLimitMgr::get_memento " << node_->debugNodePath() << "\n";
 #endif
 
- 	BOOST_FOREACH(const InLimit& l, inLimitVec_ )  { comp->add( boost::make_shared<NodeInLimitMemento>(  l) ); }
+ 	BOOST_FOREACH(const InLimit& l, inLimitVec_ )  { comp->add( std::make_shared<NodeInLimitMemento>(  l) ); }
 }
 
 

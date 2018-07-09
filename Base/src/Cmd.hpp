@@ -15,13 +15,13 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ClientToServerCmd;
 class ServerToClientCmd;
 class ServerReply;
 
-typedef boost::shared_ptr<ClientToServerCmd> Cmd_ptr;
-typedef boost::shared_ptr<ServerToClientCmd> STC_Cmd_ptr;
+typedef std::shared_ptr<ClientToServerCmd> Cmd_ptr;
+typedef std::shared_ptr<ServerToClientCmd> STC_Cmd_ptr;
 
 #endif

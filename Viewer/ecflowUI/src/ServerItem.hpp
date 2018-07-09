@@ -15,7 +15,7 @@
 #include <vector>
 
 #include <cstddef>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ServerHandler;
 class ServerItem;
@@ -79,6 +79,6 @@ protected:
 	std::vector<ServerItemObserver*> observers_;
 };
 
-typedef boost::shared_ptr<ServerItem>   ServerItem_ptr;
+typedef std::shared_ptr<ServerItem>   ServerItem_ptr;
 
 #endif

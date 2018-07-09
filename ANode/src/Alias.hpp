@@ -86,10 +86,11 @@ private:
    virtual void getAllSubmittables(std::vector<Submittable*>&) const {}
    virtual void get_all_active_submittables(std::vector<Submittable*>&) const {}
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::base_object<Submittable>(*this); // Serialise base class information
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Submittable>(this); // Serialise base class information
    }
 };
 

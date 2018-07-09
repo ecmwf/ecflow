@@ -13,7 +13,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/make_shared.hpp>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
@@ -170,7 +169,7 @@ Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename, bool force, bool c
    // The server will also update the env on the defs, server will override client env, where they clash
 
    // The constructor can throw if parsing of defs_filename fail's
-   boost::shared_ptr<LoadDefsCmd> load_cmd = boost::make_shared<LoadDefsCmd>(defs_filename,force,check_only,print,clientEnv->env());
+   std::shared_ptr<LoadDefsCmd> load_cmd = std::make_shared<LoadDefsCmd>(defs_filename,force,check_only,print,clientEnv->env());
 
    // Don't send to server if checking, i.e cmd not set
    if (check_only) return Cmd_ptr();

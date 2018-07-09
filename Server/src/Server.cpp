@@ -22,7 +22,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/bind.hpp>
-#include <boost/make_shared.hpp>
 #ifdef ECFLOW_MT
 #include <boost/thread/thread.hpp> // needed for ECFLOW_MT and debug() to print thread ID
 #endif
@@ -194,10 +193,10 @@ void Server::run()
 
 #ifdef ECFLOW_MT
   // Create a pool of threads to run all of the io_services.
-  std::vector<boost::shared_ptr<boost::thread> > threads;
+  std::vector<std::shared_ptr<boost::thread> > threads;
   for (std::size_t i = 0; i < thread_pool_size_; ++i)
   {
-      boost::shared_ptr<boost::thread> thread(new boost::thread(
+      std::shared_ptr<boost::thread> thread(new boost::thread(
           boost::bind(&boost::asio::io_service::run, &io_service_)));
       threads.push_back(thread);
   }
@@ -222,9 +221,9 @@ void Server::start_accept()
    if (serverEnv_.debug()) cout << "   Server::start_accept()" << endl;
 
 #ifdef ECF_OPENSSL
-   connection_ptr new_conn = boost::make_shared<connection>( boost::ref(io_service_), boost::ref(context_)) ;
+   connection_ptr new_conn = std::make_shared<connection>( boost::ref(io_service_), boost::ref(context_)) ;
 #else
-   connection_ptr new_conn = boost::make_shared<connection>( boost::ref(io_service_) );
+   connection_ptr new_conn = std::make_shared<connection>( boost::ref(io_service_) );
 #endif
 
    if (serverEnv_.allow_old_client_new_server() !=0 ) {

@@ -14,9 +14,9 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class Limit;
-typedef boost::shared_ptr<Limit> limit_ptr;
+typedef std::shared_ptr<Limit> limit_ptr;
 
 #endif

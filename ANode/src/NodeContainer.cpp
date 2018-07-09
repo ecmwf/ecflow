@@ -17,7 +17,6 @@
 #include <assert.h>
 #include <sstream>
 #include <boost/bind.hpp>
-#include <boost/make_shared.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
@@ -61,14 +60,14 @@ void NodeContainer::copy(const NodeContainer& rhs)
    for(size_t s = 0; s < theSize; s++) {
       Task* task = rhs.nodeVec_[s]->isTask();
       if ( task ) {
-         task_ptr task_copy = boost::make_shared<Task>( *task );
+         task_ptr task_copy = std::make_shared<Task>( *task );
          task_copy->set_parent(this);
          nodeVec_.push_back(task_copy);
       }
       else {
          Family* family = rhs.nodeVec_[s]->isFamily();
          assert(family);
-         family_ptr family_copy = boost::make_shared<Family>( *family );
+         family_ptr family_copy = std::make_shared<Family>( *family );
          family_copy->set_parent(this);
          nodeVec_.push_back(family_copy);
       }
@@ -220,15 +219,15 @@ void NodeContainer::incremental_changes( DefsDelta& changes, compound_memento_pt
 {
    /// There no point doing a OrderMemento if children have been added/delete
    if (add_remove_state_change_no_ > changes.client_state_change_no()) {
-      if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
-      comp->add( boost::make_shared<ChildrenMemento>( nodeVec_ ) );
+      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+      comp->add( std::make_shared<ChildrenMemento>( nodeVec_ ) );
    }
    else if (order_state_change_no_ > changes.client_state_change_no()) {
-      if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
+      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
       std::vector<std::string> order_vec; order_vec.reserve(nodeVec_.size());
       size_t node_vec_size = nodeVec_.size();
       for(size_t i =0; i < node_vec_size; i++)  order_vec.push_back( nodeVec_[i]->name());
-      comp->add( boost::make_shared<OrderMemento>( order_vec ) );
+      comp->add( std::make_shared<OrderMemento>( order_vec ) );
    }
 
    Node::incremental_changes(changes, comp);
@@ -395,8 +394,8 @@ void NodeContainer::calendarChanged(
    if (inherited_late && !inherited_late->isNull()) {
       overridden_late = *inherited_late;
    }
-	if (lateAttr_ != inherited_late) {
-	   overridden_late.override_with(lateAttr_);
+	if (lateAttr_.get() != inherited_late) {
+	   overridden_late.override_with(lateAttr_.get());
 	}
 
  	size_t node_vec_size = nodeVec_.size();
@@ -476,7 +475,7 @@ node_ptr NodeContainer::removeChild(Node* child)
  	size_t node_vec_size = nodeVec_.size();
  	for(size_t t = 0; t < node_vec_size; t++)     {
  		if (nodeVec_[t].get() == child) {
- 			node_ptr node = boost::dynamic_pointer_cast<Node>(nodeVec_[t]);
+ 			node_ptr node = std::dynamic_pointer_cast<Node>(nodeVec_[t]);
  			child->set_parent(NULL); // must set to NULL, allows it to be re-added to different parent
  			nodeVec_.erase( nodeVec_.begin() + t);
  			add_remove_state_change_no_ = Ecf::incr_state_change_no();
@@ -495,13 +494,13 @@ bool NodeContainer::addChild( node_ptr child, size_t position)
 	try {
 		if ( child->isTask() ) {
 			// can throw if duplicate names
-			addTask( boost::dynamic_pointer_cast<Task>(child), position );
+			addTask( std::dynamic_pointer_cast<Task>(child), position );
 			return true;
 		}
 
 		if ( child->isFamily() ) {
 			// can throw if duplicate names
-			addFamily( boost::dynamic_pointer_cast<Family>(child), position );
+			addFamily( std::dynamic_pointer_cast<Family>(child), position );
 			return true;
 		}
 	}
@@ -650,11 +649,11 @@ void NodeContainer::addFamily(family_ptr f,size_t position)
 void NodeContainer::add_child(node_ptr child,size_t position)
 {
    if (child->isTask()) {
-      task_ptr task_child = boost::dynamic_pointer_cast<Task>( child );
+      task_ptr task_child = std::dynamic_pointer_cast<Task>( child );
       addTask(task_child,position);
    }
    else if (child->isFamily()) {
-       family_ptr family_child = boost::dynamic_pointer_cast<Family>( child );
+       family_ptr family_child = std::dynamic_pointer_cast<Family>( child );
        addFamily(family_child,position);
    }
 }
@@ -800,7 +799,7 @@ family_ptr NodeContainer::findFamily(const std::string& familyName) const
  	size_t node_vec_size = nodeVec_.size();
 	for(size_t f = 0; f < node_vec_size; f++) {
  		if (nodeVec_[f]->name() == familyName && nodeVec_[f]->isFamily()) {
-	 		return boost::dynamic_pointer_cast<Family>(nodeVec_[f]);
+	 		return std::dynamic_pointer_cast<Family>(nodeVec_[f]);
  		}
 	}
 	return family_ptr();
@@ -811,7 +810,7 @@ task_ptr NodeContainer::findTask(const std::string& taskName) const
  	size_t node_vec_size = nodeVec_.size();
 	for(size_t t = 0; t < node_vec_size; t++) {
  		if (nodeVec_[t]->name() == taskName && nodeVec_[t]->isTask()) {
-	 		return boost::dynamic_pointer_cast<Task>(nodeVec_[t]);
+	 		return std::dynamic_pointer_cast<Task>(nodeVec_[t]);
  		}
 	}
 	return task_ptr();
@@ -939,7 +938,7 @@ std::vector<task_ptr> NodeContainer::taskVec() const
 	std::vector<task_ptr> vec; vec.reserve(node_vec_size);
 	for(size_t t = 0; t < node_vec_size; t++)   {
  		if (nodeVec_[t]->isTask()) {
- 			vec.push_back( boost::dynamic_pointer_cast<Task>(nodeVec_[t]) );
+ 			vec.push_back( std::dynamic_pointer_cast<Task>(nodeVec_[t]) );
 		}
 	}
 	return vec;
@@ -951,7 +950,7 @@ std::vector<family_ptr> NodeContainer::familyVec() const
  	size_t node_vec_size = nodeVec_.size();
 	for(size_t t = 0; t < node_vec_size; t++)   {
  		if (nodeVec_[t]->isFamily()) {
- 			vec.push_back( boost::dynamic_pointer_cast<Family>(nodeVec_[t]) );
+ 			vec.push_back( std::dynamic_pointer_cast<Family>(nodeVec_[t]) );
 		}
 	}
 	return vec;
@@ -1118,7 +1117,7 @@ void NodeContainer::archive()
    // re-create node tree up to the def. Do *NOT* clone we just need a SHALLOW hierarchy
    defs_ptr archive_defs = Defs::create();
    if (isSuite()) {
-      suite_ptr suite_clone = boost::dynamic_pointer_cast<Suite>(this_clone);
+      suite_ptr suite_clone = std::dynamic_pointer_cast<Suite>(this_clone);
       archive_defs->addSuite(suite_clone);
    }
    else {

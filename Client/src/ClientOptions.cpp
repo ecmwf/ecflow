@@ -13,10 +13,10 @@
 // Description : Delegates argument parsing to the registered commands
 //============================================================================
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 #include <iostream>
 #include <iomanip>
+#include <memory>
 
 #include "ClientOptions.hpp"
 #include "ClientEnvironment.hpp"
@@ -213,7 +213,7 @@ void ClientOptions::show_all_commands(const char* title) const
 {
    cout << title << "\n";
    // take a copy, since we need to sort
-   std::vector< boost::shared_ptr<po::option_description> > options = desc_->options();
+   std::vector< std::shared_ptr<po::option_description> > options = desc_->options();
 
    // sort using long_name
    std::sort(options.begin(),options.end(),
@@ -238,7 +238,7 @@ void ClientOptions::show_cmd_summary(const char *title,const std::string& user_o
    cout << title << "\n";
 
    // take a copy, since we need to sort
-   std::vector< boost::shared_ptr<po::option_description> > options = desc_->options();
+   std::vector< std::shared_ptr<po::option_description> > options = desc_->options();
 
    // sort using long_name
    std::sort(options.begin(),options.end(),

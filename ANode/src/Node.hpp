@@ -33,11 +33,6 @@
 
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-#include <boost/serialization/string.hpp>         // no need to include <string>
-#include <boost/serialization/shared_ptr.hpp>     // no need to include shared_ptr
 #include <boost/foreach.hpp>                      // used so often just placed here for convenience
 
 #include "DState.hpp"
@@ -67,7 +62,7 @@ class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
 namespace ecf { class Calendar; class NodeTreeVisitor; } // forward declare class
 
-class Node : public boost::enable_shared_from_this<Node>  {
+class Node : public std::enable_shared_from_this<Node>  {
 protected:
    Node(const std::string& name);
    Node();
@@ -359,8 +354,8 @@ public:
    const std::vector<ZombieAttr>&      zombies()  const;
    const std::vector<QueueAttr>&       queues()  const;
    const std::vector<GenericAttr>&     generics() const;
-   TimeDepAttrs*  get_time_dep_attrs() const { return time_dep_attrs_;} // can be NULL
-   ecf::LateAttr* get_late() const { return lateAttr_;}
+   TimeDepAttrs*  get_time_dep_attrs() const { return time_dep_attrs_.get();} // can be NULL
+   ecf::LateAttr* get_late() const { return lateAttr_.get();}
    ecf::AutoCancelAttr*  get_autocancel() const;
    ecf::AutoArchiveAttr* get_autoarchive() const;
    ecf::AutoRestoreAttr* get_autorestore() const;
@@ -375,8 +370,8 @@ public:
    // and complete expressions. This is many times faster than calling
    // triggerAst()/completeAst() as this will force a parse and construction
    // of Abstract syntax tree, first time it is called.
-   Expression* get_trigger()    const { return triggerExpr_;}
-   Expression* get_complete()   const { return completeExpr_;}
+   Expression* get_trigger()    const { return triggerExpr_.get();}
+   Expression* get_complete()   const { return completeExpr_.get();}
    AstTop* completeAst() const;   // Will create AST on demand
    AstTop* triggerAst() const;    // Will create AST on demand
    std::string completeExpression() const;
@@ -787,14 +782,14 @@ private:
    std::pair<NState,boost::posix_time::time_duration> state_; // state and duration since suite start when state changed
    DState                      defStatus_;    // default value is QUEUED
 
-   mutable Expression*         completeExpr_; // can only have one complete expression
-   mutable Expression*         triggerExpr_;  // can only have one trigger expression
+   mutable std::unique_ptr<Expression>        completeExpr_; // can only have one complete expression
+   mutable std::unique_ptr<Expression>        triggerExpr_;  // can only have one trigger expression
 
-   ecf::LateAttr*              lateAttr_;     // Can only have one late attribute per node
-   TimeDepAttrs*               time_dep_attrs_;
-   ChildAttrs*                 child_attrs_;  // event meter & labels
-   MiscAttrs*                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
-   AutoAttrs*                  auto_attrs_;   // has no changeable state ?
+   std::unique_ptr<ecf::LateAttr>              lateAttr_;     // Can only have one late attribute per node
+   std::unique_ptr<TimeDepAttrs>               time_dep_attrs_;
+   std::unique_ptr<ChildAttrs>                 child_attrs_;  // event meter & labels
+   std::unique_ptr<MiscAttrs>                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
+   std::unique_ptr<AutoAttrs>                  auto_attrs_;   // has no changeable state ?
    Repeat                      repeat_;       // each node can only have one repeat. By value, since has pimpl
 
    std::vector<Variable>       varVec_;
@@ -819,9 +814,10 @@ private:
    friend class AutoAttrs;
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & name_;
       ar & state_;
       ar & suspended_;

@@ -21,7 +21,6 @@
 #include "boost/filesystem/exception.hpp"
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 
 #include "Task.hpp"
 #include "Defs.hpp"
@@ -52,7 +51,7 @@ void Task::copy(const Task& rhs)
 {
    size_t theSize = rhs.aliases_.size();
    for(size_t s = 0; s < theSize; s++) {
-      alias_ptr alias_copy = boost::make_shared<Alias>( *rhs.aliases_[s] );
+      alias_ptr alias_copy = std::make_shared<Alias>( *rhs.aliases_[s] );
       alias_copy->set_parent(this);
       aliases_.push_back( alias_copy );
    }
@@ -70,7 +69,7 @@ Task::Task(const Task& rhs)
 
 node_ptr Task::clone() const
 {
-   return boost::make_shared<Task>( *this );
+   return std::make_shared<Task>( *this );
 }
 
 Task& Task::operator=(const Task& rhs)
@@ -97,7 +96,7 @@ Task::~Task()
 
 task_ptr Task::create(const std::string& name)
 {
-	return boost::make_shared<Task>( name );
+	return std::make_shared<Task>( name );
 }
 
 std::ostream& Task::print(std::ostream& os) const
@@ -370,7 +369,7 @@ void Task::immediateChildren(std::vector<node_ptr>& vec) const
    size_t vec_size = aliases_.size();
    vec.reserve(vec.size() + vec_size);
    for(size_t i = 0; i < vec_size; i++) {
-      vec.push_back( boost::dynamic_pointer_cast<Node>(aliases_[i]) );
+      vec.push_back( std::dynamic_pointer_cast<Node>(aliases_[i]) );
    }
 }
 
@@ -422,7 +421,7 @@ void Task::get_all_active_submittables(std::vector<Submittable*>& vec) const
 
 void Task::get_all_tasks(std::vector<task_ptr>& vec) const
 {
-   vec.push_back(boost::dynamic_pointer_cast<Task>(non_const_this()));
+   vec.push_back(std::dynamic_pointer_cast<Task>(non_const_this()));
 }
 
 void Task::get_all_nodes(std::vector<node_ptr>& nodes) const
@@ -595,7 +594,7 @@ node_ptr Task::removeChild(Node* child)
    for(size_t t = 0; t < node_vec_size; t++)     {
       if (aliases_[t].get() == child) {
          child->set_parent(NULL);
-         node_ptr node = boost::dynamic_pointer_cast<Alias>(aliases_[t]);
+         node_ptr node = std::dynamic_pointer_cast<Alias>(aliases_[t]);
          aliases_.erase( aliases_.begin() + t);
          add_remove_state_change_no_ = Ecf::incr_state_change_no();
          return node ;
@@ -786,20 +785,20 @@ void Task::collateChanges(DefsDelta& changes) const
 
    /// There no point doing a OrderMemento if children have been added/delete
    if (add_remove_state_change_no_ > changes.client_state_change_no()) {
-      if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
-      comp->add( boost::make_shared<AliasChildrenMemento>( aliases_ ) );
+      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+      comp->add( std::make_shared<AliasChildrenMemento>( aliases_ ) );
    }
    else if (order_state_change_no_ > changes.client_state_change_no()) {
-      if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
+      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
       std::vector<std::string> order_vec; order_vec.reserve(aliases_.size());
       size_t node_vec_size = aliases_.size();
       for(size_t i =0; i < node_vec_size; i++)  order_vec.push_back( aliases_[i]->name());
-      comp->add( boost::make_shared<OrderMemento>( order_vec ) );
+      comp->add( std::make_shared<OrderMemento>( order_vec ) );
    }
 
    if (alias_change_no_ > changes.client_state_change_no()) {
-      if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
-      comp->add( boost::make_shared<AliasNumberMemento>( alias_no_ ) );
+      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+      comp->add( std::make_shared<AliasNumberMemento>( alias_no_ ) );
    }
 
    // ** base class will add compound memento into changes.
@@ -874,3 +873,6 @@ void Task::set_memento( const AliasNumberMemento* memento,std::vector<ecf::Aspec
 
    alias_no_ = memento->alias_no_;
 }
+
+CEREAL_REGISTER_TYPE(Task);
+

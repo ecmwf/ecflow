@@ -137,10 +137,11 @@ private:
    // Overridden to locate alias's
    virtual node_ptr findImmediateChild(const std::string& name, size_t& child_pos) const;
 
- 	friend class boost::serialization::access;
- 	template<class Archive>
- 	void serialize(Archive & ar, const unsigned int /*version*/) {
- 	   ar & boost::serialization::base_object<Submittable>(*this); // Serialise base class information
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+ 	   ar & cereal::base_class<Submittable>(this); // Serialise base class information
       ar & alias_no_;
       ar & aliases_;
 

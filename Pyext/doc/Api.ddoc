@@ -22,13 +22,13 @@ How to pass an arbitarty number of argument and key word arguments from python t
        Then in the Attribute constructors if the top of the stack is null, we dont add to the With node.
        
        To support the addition of attributes and node, automatically. Each of the Node and attribute constructors
-       needed overriding with make_constructor(). make_constructor only works with boost::shared_ptr
-        	class_<Variable, boost::shared_ptr<Variable> >("Variable",NodeAttrDoc::variable_doc())
+       needed overriding with make_constructor(). make_constructor only works with std::shared_ptr
+        	class_<Variable, std::shared_ptr<Variable> >("Variable",NodeAttrDoc::variable_doc())
               .def("__init__",make_constructor(&create_Variable) )
        
-       		static boost::shared_ptr<Variable> create_Variable(const std::string& name, const std::string& value) {
+       		static std::shared_ptr<Variable> create_Variable(const std::string& name, const std::string& value) {
    				if ( node_ptr node = With::context()) node->add_variable(name,value);
-   				return boost::make_shared<Variable>(name,value);}
+   				return std::make_shared<Variable>(name,value);}
    				
    		This is a lot of effort.
  

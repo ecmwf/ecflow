@@ -13,13 +13,12 @@
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 
 #include <QDateTime>
 
 class VFile;
-typedef boost::shared_ptr<VFile> VFile_ptr;
+typedef std::shared_ptr<VFile> VFile_ptr;
 
 class VFile : public boost::enable_shared_from_this<VFile>
 {

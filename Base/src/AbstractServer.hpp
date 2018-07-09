@@ -16,7 +16,7 @@
 //============================================================================
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "Stats.hpp"
 #include "ZombieCtrl.hpp"

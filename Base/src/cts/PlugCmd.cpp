@@ -12,7 +12,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/make_shared.hpp>
 
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
@@ -342,7 +341,7 @@ STC_Cmd_ptr MoveCmd::doHandleRequest(AbstractServer* as) const
       if (!src_node->isSuite())  throw std::runtime_error("plug(move): Source node was expected to be a suite");
 
       // convert node_ptr to suite_ptr
-      suite_ptr the_source_suite = boost::dynamic_pointer_cast<Suite>(src_node);
+      suite_ptr the_source_suite = std::dynamic_pointer_cast<Suite>(src_node);
 
       // The sourceSuite may be in a handle or pre-registered suite
       SuiteChanged suiteChanged(the_source_suite);

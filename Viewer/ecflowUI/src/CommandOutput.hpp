@@ -17,11 +17,10 @@
 #include <QObject>
 #include <QVector>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 
 class CommandOutput;
-typedef boost::shared_ptr<CommandOutput> CommandOutput_ptr;
+typedef std::shared_ptr<CommandOutput> CommandOutput_ptr;
 
 class CommandOutputHandler;
 

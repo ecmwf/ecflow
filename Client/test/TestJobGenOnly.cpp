@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( test_jobgenonly )
 
 	// JobCreationCtrl is used control what node we generate the jobs for:
 	// Since we have not set the node on it, we force job generation for all tasks
-   job_creation_ctrl_ptr jobCtrl = boost::make_shared<JobCreationCtrl>();
+   job_creation_ctrl_ptr jobCtrl = std::make_shared<JobCreationCtrl>();
 	theDefs.check_job_creation(jobCtrl);
 	BOOST_REQUIRE_MESSAGE(jobCtrl->get_error_msg().empty(), jobCtrl->get_error_msg());
 	BOOST_REQUIRE_MESSAGE(jobCtrl->fail_submittables().empty(),"Expected no failing tasks");

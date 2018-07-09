@@ -15,12 +15,12 @@
 
 #include <assert.h>
 #include <sstream>
+#include <memory>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/exception.hpp"
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 
 #include "Submittable.hpp"
 #include "Defs.hpp"
@@ -881,8 +881,8 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
 #endif
 
    if (state_change_no_ > changes.client_state_change_no()) {
-      if (!comp.get()) comp = boost::make_shared<CompoundMemento>(absNodePath());
-      comp->add( boost::make_shared<SubmittableMemento>( jobsPassword_,process_or_remote_id_,abortedReason_,tryNo_) );
+      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+      comp->add( std::make_shared<SubmittableMemento>( jobsPassword_,process_or_remote_id_,abortedReason_,tryNo_) );
    }
 
    // ** if compound memento has children base class, will add it to DefsDelta

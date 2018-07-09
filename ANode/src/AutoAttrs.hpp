@@ -15,19 +15,17 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <ostream>
+#include <memory>
 
 #include <boost/noncopyable.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/utility.hpp>
-
 #include "NodeFwd.hpp"
 #include "Calendar.hpp"
 
 class AutoAttrs : private boost::noncopyable {
 public:
-   AutoAttrs(Node* node) : node_(node),auto_cancel_(NULL),auto_archive_(NULL),auto_restore_(NULL) {}
+   AutoAttrs(Node* node) : node_(node) {}
    AutoAttrs(const AutoAttrs& rhs);
-   AutoAttrs() : node_(NULL),auto_cancel_(NULL),auto_archive_(NULL),auto_restore_(NULL) {}
+   AutoAttrs() : node_(NULL) {}
    ~AutoAttrs();
 
    // needed by node serialisation
@@ -38,17 +36,17 @@ public:
    bool operator==(const AutoAttrs& ) const;
 
    // Auto =====================================================================================
-   ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_;}
-   ecf::AutoCancelAttr*  get_autocancel() const { return auto_cancel_;}
-   ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_;}
+   ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_.get();}
+   ecf::AutoCancelAttr*  get_autocancel() const { return auto_cancel_.get();}
+   ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_.get();}
 
    void add_autorestore( const ecf::AutoRestoreAttr& ); // will throw std::runtime_error for errors
    void add_autocancel( const ecf::AutoCancelAttr& );   // will throw std::runtime_error for errors
    void add_autoarchive( const ecf::AutoArchiveAttr& ); // will throw std::runtime_error for errors
 
-   void delete_autorestore();
-   void delete_autocancel();
-   void delete_autoarchive();
+//   void delete_autorestore();
+//   void delete_autocancel();
+//   void delete_autoarchive();
 
    void do_autorestore();
 
@@ -64,14 +62,15 @@ private:
    friend class Node;
 
 private:
-   ecf::AutoCancelAttr*    auto_cancel_;  // Can only have 1 auto cancel per node
-   ecf::AutoArchiveAttr*   auto_archive_; // Can only have 1 auto archive per node
-   ecf::AutoRestoreAttr*   auto_restore_; // Can only have 1 autorestore per node
+   std::unique_ptr<ecf::AutoCancelAttr>    auto_cancel_;  // Can only have 1 auto cancel per node
+   std::unique_ptr<ecf::AutoArchiveAttr>   auto_archive_; // Can only have 1 auto archive per node
+   std::unique_ptr<ecf::AutoRestoreAttr>   auto_restore_; // Can only have 1 autorestore per node
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & auto_cancel_;
       ar & auto_archive_;
       ar & auto_restore_;

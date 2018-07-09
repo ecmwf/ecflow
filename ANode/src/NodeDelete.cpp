@@ -23,8 +23,7 @@ using namespace std;
 void Node::delete_time_dep_attrs_if_empty()
 {
    if (time_dep_attrs_ && time_dep_attrs_->empty()) {
-      delete time_dep_attrs_;
-      time_dep_attrs_ = NULL;
+      time_dep_attrs_.reset(nullptr);
    }
 }
 
@@ -158,8 +157,7 @@ void Node::deleteVariable( const std::string& name)
 void Node::delete_child_attrs_if_empty()
 {
    if (child_attrs_ && child_attrs_->empty()) {
-      delete child_attrs_;
-      child_attrs_ = NULL;
+      child_attrs_.reset(nullptr);
    }
 }
 
@@ -214,7 +212,7 @@ void Node::delete_generic(const std::string& name)
 void Node::deleteTrigger()
 {
 	if (triggerExpr_)  {
-		delete triggerExpr_; triggerExpr_ = NULL;
+	   triggerExpr_.reset(nullptr);
 		state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
 		std::cout << "Node::deleteTrigger()\n";
@@ -225,7 +223,7 @@ void Node::deleteTrigger()
 void Node::deleteComplete()
 {
 	if (completeExpr_) {
-		delete completeExpr_; completeExpr_ = NULL;
+		completeExpr_.reset(nullptr);
 		state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
 		std::cout << "Node::deleteComplete()\n";
@@ -302,8 +300,7 @@ void Node::deleteInlimit(const std::string& name)
 void Node::delete_misc_attrs_if_empty()
 {
    if (misc_attrs_ && misc_attrs_->empty()) {
-      delete misc_attrs_;
-      misc_attrs_ = NULL;
+      misc_attrs_.reset(nullptr);
    }
 }
 
@@ -325,8 +322,7 @@ void Node::delete_zombie(Child::ZombieType zt)
 
 void Node::deleteLate()
 {
-   delete lateAttr_;
-   lateAttr_ = NULL;
+   lateAttr_.reset(nullptr);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 

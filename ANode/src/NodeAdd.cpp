@@ -12,7 +12,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/make_shared.hpp>
 #include <boost/lexical_cast.hpp>
 #include "Node.hpp"
 #include "Ecf.hpp"
@@ -77,7 +76,7 @@ void Node::add_trigger_expression(const Expression& t)
 	}
 	if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
 
-  	triggerExpr_ = new Expression(t);
+  	triggerExpr_ = std::make_unique<Expression>(t);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -91,7 +90,7 @@ void Node::add_complete_expression(const Expression& t)
 	}
    if (isSuite())  throw std::runtime_error( "Can not add complete trigger on a suite" );
 
-  	completeExpr_ = new Expression(t);
+  	completeExpr_ = std::make_unique<Expression>(t);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -127,7 +126,7 @@ void Node::add_part_trigger(const PartExpression& part)
 {
    if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
 
-	if (!triggerExpr_) triggerExpr_ = new Expression();
+	if (!triggerExpr_) triggerExpr_ = std::make_unique<Expression>();
 	triggerExpr_->add( part );
    state_change_no_ = Ecf::incr_state_change_no();
 }
@@ -135,7 +134,7 @@ void Node::add_part_complete(const PartExpression& part)
 {
    if (isSuite())  throw std::runtime_error( "Can not add complete trigger on a suite" );
 
-	if (!completeExpr_) completeExpr_ = new Expression();
+	if (!completeExpr_) completeExpr_ = std::make_unique<Expression>();
 	completeExpr_->add( part );
    state_change_no_ = Ecf::incr_state_change_no();
 }
@@ -151,7 +150,7 @@ void Node::addTime(const ecf::TimeAttr& t)
       throw std::runtime_error("Can not add time based dependency on a suite");
    }
 
-   if (!time_dep_attrs_) time_dep_attrs_ = new TimeDepAttrs(this);
+   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
    time_dep_attrs_->addTime(t);  // will call  Ecf::incr_state_change_no();
 }
 
@@ -165,7 +164,7 @@ void Node::addToday(const ecf::TodayAttr& t)
       throw std::runtime_error("Can not add time based dependency on a suite");
    }
 
-   if (!time_dep_attrs_) time_dep_attrs_ = new TimeDepAttrs(this);
+   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
    time_dep_attrs_->addToday(t); // will call  Ecf::incr_state_change_no();
 }
 
@@ -180,7 +179,7 @@ void Node::addDate( const DateAttr& d)
       throw std::runtime_error("Can not add time based dependency on a suite"); // Added at 4.0.2
    }
 
-   if (!time_dep_attrs_) time_dep_attrs_ = new TimeDepAttrs(this);
+   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
    time_dep_attrs_->addDate(d); // will call  Ecf::incr_state_change_no();
 }
 
@@ -195,7 +194,7 @@ void Node::addDay( const DayAttr& d)
       throw std::runtime_error("Can not add time based dependency on a suite"); // Added at 4.0.2
    }
 
-   if (!time_dep_attrs_) time_dep_attrs_ = new TimeDepAttrs(this);
+   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
    time_dep_attrs_->addDay(d); // will call  Ecf::incr_state_change_no();
 }
 
@@ -214,7 +213,7 @@ void Node::addCron( const CronAttr& d)
 		throw std::runtime_error(ss.str());
 	}
 
-   if (!time_dep_attrs_) time_dep_attrs_ = new TimeDepAttrs(this);
+   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
    time_dep_attrs_->addCron(d); // will call  Ecf::incr_state_change_no();
 }
 
@@ -225,7 +224,7 @@ void Node::addLabel( const Label& l)
       child_attrs_->addLabel(l); // can throw
       return;
    }
-   child_attrs_ = new ChildAttrs(this);
+   child_attrs_ = std::make_unique<ChildAttrs>(this);
    child_attrs_->addLabel(l);
 }
 
@@ -240,7 +239,7 @@ void Node::addMeter( const Meter& m)
       child_attrs_->addMeter(m); // can throw
       return;
    }
-   child_attrs_ = new ChildAttrs(this);
+   child_attrs_ =std::make_unique<ChildAttrs>(this);
    child_attrs_->addMeter(m);
 }
 
@@ -250,7 +249,7 @@ void Node::addEvent( const Event& e)
       child_attrs_->addEvent(e); // can throw
       return;
    }
-   child_attrs_ = new ChildAttrs(this);
+   child_attrs_ = std::make_unique<ChildAttrs>(this);
    child_attrs_->addEvent(e);
 }
 
@@ -261,7 +260,7 @@ void Node::addLimit(const Limit& l )
 		ss << "Add Limit failed: Duplicate Limit of name '" << l.name() << "' already exist for node " << debugNodePath();
 		throw std::runtime_error( ss.str() );
 	}
-	limit_ptr the_limit = boost::make_shared<Limit>(l);
+	limit_ptr the_limit = std::make_shared<Limit>(l);
 	the_limit->set_node(this);
 	limitVec_.push_back( the_limit );
    state_change_no_ = Ecf::incr_state_change_no();
@@ -300,7 +299,7 @@ void Node::addAutoCancel( const AutoCancelAttr& ac)
       auto_attrs_->add_autocancel(ac); // can throw, will update Node::state_change_no_
       return;
    }
-   auto_attrs_ = new AutoAttrs(this);
+   auto_attrs_ = std::make_unique<AutoAttrs>(this);
    auto_attrs_->add_autocancel(ac); // will update Node::state_change_no_
 }
 
@@ -310,7 +309,7 @@ void Node::add_autoarchive( const AutoArchiveAttr& aa)
       auto_attrs_->add_autoarchive(aa); // can throw, will update Node::state_change_no_
       return;
    }
-   auto_attrs_ = new AutoAttrs(this);
+   auto_attrs_ = std::make_unique<AutoAttrs>(this);
    auto_attrs_->add_autoarchive(aa);   // will update Node::state_change_no_
 }
 
@@ -320,14 +319,14 @@ void Node::add_autorestore( const ecf::AutoRestoreAttr& ar)
       auto_attrs_->add_autorestore(ar); // can throw, will update Node::state_change_no_
       return;
    }
-   auto_attrs_ = new AutoAttrs(this);
+   auto_attrs_ = std::make_unique<AutoAttrs>(this);
    auto_attrs_->add_autorestore(ar);   // will update Node::state_change_no_
 }
 
 void Node::addLate( const ecf::LateAttr& l )
 {
 	if (! lateAttr_) {
-		lateAttr_ = new ecf::LateAttr(l);
+		lateAttr_ = std::make_unique<ecf::LateAttr>(l);
 	   state_change_no_ = Ecf::incr_state_change_no();
 		return;
 	}
@@ -340,7 +339,7 @@ void Node::addVerify( const VerifyAttr& v )
       misc_attrs_->addVerify(v); // can throw
       return;
    }
-   misc_attrs_ =  new MiscAttrs(this);
+   misc_attrs_ = std::make_unique<MiscAttrs>(this);
    misc_attrs_->addVerify(v);
 }
 
@@ -354,18 +353,18 @@ void Node::addZombie( const ZombieAttr& z)
       misc_attrs_->addZombie(z); // can throw
       return;
    }
-   misc_attrs_ = new MiscAttrs(this);
+   misc_attrs_ = std::make_unique<MiscAttrs>(this);
    misc_attrs_->addZombie(z);
 }
 
 void Node::add_queue( const QueueAttr& q)
 {
-   if (!misc_attrs_)  misc_attrs_ = new MiscAttrs(this);
+   if (!misc_attrs_)  misc_attrs_ = std::make_unique<MiscAttrs>(this);
    misc_attrs_->add_queue(q);
 }
 
 void Node::add_generic( const GenericAttr& q)
 {
-   if (!misc_attrs_)  misc_attrs_ = new MiscAttrs(this);
+   if (!misc_attrs_)  misc_attrs_ = std::make_unique<MiscAttrs>(this);
    misc_attrs_->add_generic(q);
 }

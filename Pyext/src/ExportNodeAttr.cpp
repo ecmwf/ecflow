@@ -14,7 +14,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/python/raw_function.hpp>
 
 #include "NodeAttr.hpp"
@@ -61,7 +60,7 @@ object late_raw_constructor(bp::tuple args, bp::dict kw) {
    return args[0].attr("__init__")(kw); // calls -> late_init(dict kw)
 }
 
-static void extract_late_keyword_arguments(boost::shared_ptr<LateAttr> late, bp::dict& dict) {
+static void extract_late_keyword_arguments(std::shared_ptr<LateAttr> late, bp::dict& dict) {
    boost::python::list keys = dict.keys();
    const int no_of_keys = len(keys);
    for(int i = 0; i < no_of_keys; ++i) {
@@ -82,13 +81,13 @@ static void extract_late_keyword_arguments(boost::shared_ptr<LateAttr> late, bp:
    }
 }
 
-static boost::shared_ptr<LateAttr> late_init(bp::dict& dict){
-   boost::shared_ptr<LateAttr> late = boost::make_shared<LateAttr>();
+static std::shared_ptr<LateAttr> late_init(bp::dict& dict){
+   std::shared_ptr<LateAttr> late = std::make_shared<LateAttr>();
    extract_late_keyword_arguments(late,dict);
    return late;
 }
 
-static boost::shared_ptr<LateAttr> late_create() { return boost::make_shared<LateAttr>();}
+static std::shared_ptr<LateAttr> late_create() { return std::make_shared<LateAttr>();}
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -111,7 +110,7 @@ object cron_raw_constructor(bp::tuple args, bp::dict kw) {
    return object();
 }
 
-static void extract_cron_keyword_arguments(boost::shared_ptr<CronAttr> cron, bp::dict& dict) {
+static void extract_cron_keyword_arguments(std::shared_ptr<CronAttr> cron, bp::dict& dict) {
    boost::python::list keys = dict.keys();
    const int no_of_keys = len(keys);
    for(int i = 0; i < no_of_keys; ++i) {
@@ -135,20 +134,20 @@ static void extract_cron_keyword_arguments(boost::shared_ptr<CronAttr> cron, bp:
    }
 }
 
-static boost::shared_ptr<CronAttr> cron_init(const std::string& ts, bp::dict& dict){
-   boost::shared_ptr<CronAttr> cron = boost::make_shared<CronAttr>(ts);
+static std::shared_ptr<CronAttr> cron_init(const std::string& ts, bp::dict& dict){
+   std::shared_ptr<CronAttr> cron = std::make_shared<CronAttr>(ts);
    extract_cron_keyword_arguments(cron,dict);
    return cron;
 }
 
-static boost::shared_ptr<CronAttr> cron_init1(const TimeSeries& ts, bp::dict& dict) {
-   boost::shared_ptr<CronAttr> cron = boost::make_shared<CronAttr>(ts);
+static std::shared_ptr<CronAttr> cron_init1(const TimeSeries& ts, bp::dict& dict) {
+   std::shared_ptr<CronAttr> cron = std::make_shared<CronAttr>(ts);
    extract_cron_keyword_arguments(cron,dict);
    return cron;
 }
 
-static boost::shared_ptr<CronAttr> cron_create() { return boost::make_shared<CronAttr>();}
-static boost::shared_ptr<CronAttr> cron_create2(const TimeSeries& ts) { return boost::make_shared<CronAttr>(ts);}
+static std::shared_ptr<CronAttr> cron_create() { return std::make_shared<CronAttr>();}
+static std::shared_ptr<CronAttr> cron_create2(const TimeSeries& ts) { return std::make_shared<CronAttr>(ts);}
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -179,40 +178,40 @@ void set_months(CronAttr* cron,const bp::list& list)
 // *AND* the only way make_constructor works is with a pointer.
 // The Node::add function seem to cope with this, some boost python magic,must do a conversion
 // from shared_ptr to pass by reference
-static boost::shared_ptr<RepeatEnumerated> create_RepeatEnumerated(const std::string& name, const bp::list& list)
+static std::shared_ptr<RepeatEnumerated> create_RepeatEnumerated(const std::string& name, const bp::list& list)
 {
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
-   return boost::make_shared<RepeatEnumerated>( name,vec );
+   return std::make_shared<RepeatEnumerated>( name,vec );
 }
-static boost::shared_ptr<RepeatString> create_RepeatString(const std::string& name, const bp::list& list)
+static std::shared_ptr<RepeatString> create_RepeatString(const std::string& name, const bp::list& list)
 {
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
-   return boost::make_shared<RepeatString>( name,vec );
+   return std::make_shared<RepeatString>( name,vec );
 }
-static boost::shared_ptr<AutoRestoreAttr> create_AutoRestoreAttr(const boost::python::list& list)
+static std::shared_ptr<AutoRestoreAttr> create_AutoRestoreAttr(const boost::python::list& list)
 {
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
-   return boost::make_shared<AutoRestoreAttr>( vec );
-}
-
-static boost::shared_ptr<QueueAttr> create_queue(const std::string& name, const boost::python::list& list)
-{
-   std::vector<std::string> vec;
-   BoostPythonUtil::list_to_str_vec(list,vec);
-   return boost::make_shared<QueueAttr>( name, vec );
+   return std::make_shared<AutoRestoreAttr>( vec );
 }
 
-static boost::shared_ptr<GenericAttr> create_generic(const std::string& name, const boost::python::list& list)
+static std::shared_ptr<QueueAttr> create_queue(const std::string& name, const boost::python::list& list)
 {
    std::vector<std::string> vec;
    BoostPythonUtil::list_to_str_vec(list,vec);
-   return boost::make_shared<GenericAttr>( name, vec );
+   return std::make_shared<QueueAttr>( name, vec );
 }
 
-static boost::shared_ptr<ZombieAttr> create_ZombieAttr(
+static std::shared_ptr<GenericAttr> create_generic(const std::string& name, const boost::python::list& list)
+{
+   std::vector<std::string> vec;
+   BoostPythonUtil::list_to_str_vec(list,vec);
+   return std::make_shared<GenericAttr>( name, vec );
+}
+
+static std::shared_ptr<ZombieAttr> create_ZombieAttr(
       Child::ZombieType zt,const bp::list& list,User::Action uc,int life_time_in_server)
 {
    std::vector<Child::CmdType> vec;
@@ -221,10 +220,10 @@ static boost::shared_ptr<ZombieAttr> create_ZombieAttr(
    for (int i = 0; i < the_list_size; ++i) {
       vec.push_back(extract<Child::CmdType>(list[i]));
    }
-   return boost::make_shared<ZombieAttr>(zt,vec,uc,life_time_in_server );
+   return std::make_shared<ZombieAttr>(zt,vec,uc,life_time_in_server );
 }
 
-static boost::shared_ptr<ZombieAttr> create_ZombieAttr1(
+static std::shared_ptr<ZombieAttr> create_ZombieAttr1(
       Child::ZombieType zt,const bp::list& list,User::Action uc)
 {
    std::vector<Child::CmdType> vec;
@@ -233,7 +232,7 @@ static boost::shared_ptr<ZombieAttr> create_ZombieAttr1(
    for (int i = 0; i < the_list_size; ++i) {
       vec.push_back(extract<Child::CmdType>(list[i]));
    }
-   return boost::make_shared<ZombieAttr>(zt,vec,uc);
+   return std::make_shared<ZombieAttr>(zt,vec,uc);
 }
 
 static bp::list wrap_set_of_strings(Limit* limit)
@@ -244,12 +243,12 @@ static bp::list wrap_set_of_strings(Limit* limit)
    return list;
 }
 
-static job_creation_ctrl_ptr makeJobCreationCtrl() { return boost::make_shared<JobCreationCtrl>();}
+static job_creation_ctrl_ptr makeJobCreationCtrl() { return std::make_shared<JobCreationCtrl>();}
 
 void export_NodeAttr()
 {
    // Trigger & Complete thin wrapper over Expression, allows us to call: Task("a").add(Trigger("a=1"),Complete("b=1"))
-   class_<Trigger,boost::shared_ptr<Trigger> >("Trigger",DefsDoc::trigger(), init<std::string>() )
+   class_<Trigger,std::shared_ptr<Trigger> >("Trigger",DefsDoc::trigger(), init<std::string>() )
    .def(init<PartExpression>())
    .def(init<bp::list>())
    .def(init<std::string,bool>())
@@ -258,7 +257,7 @@ void export_NodeAttr()
    .def("get_expression", &Trigger::expression, "returns the trigger expression as a string")
    ;
 
-   class_<Complete,boost::shared_ptr<Complete> >("Complete",DefsDoc::trigger(), init<std::string>() )
+   class_<Complete,std::shared_ptr<Complete> >("Complete",DefsDoc::trigger(), init<std::string>() )
    .def(init<PartExpression>())
    .def(init<bp::list>())
    .def(init<std::string,bool>())
@@ -278,7 +277,7 @@ void export_NodeAttr()
    .def("or_expr",        &PartExpression::orExpr)
    ;
 
-   class_<Expression,  boost::shared_ptr<Expression> >("Expression",DefsDoc::expression_doc(), init<std::string>() )
+   class_<Expression,  std::shared_ptr<Expression> >("Expression",DefsDoc::expression_doc(), init<std::string>() )
    .def(init<PartExpression>())
    .def(self == self )                               // __eq__
    .def("__str__",        &Expression::expression)   // __str__
@@ -472,7 +471,7 @@ void export_NodeAttr()
 	// This will not work, because paths_begin
    //.add_property("node_paths", bp::range(&Limit::paths_begin,&Limit::paths_begin),"List of nodes(paths) that have consumed a limit")
 
-	class_<Limit, boost::shared_ptr<Limit> >("Limit",NodeAttrDoc::limit_doc(),init<std::string, int>())
+	class_<Limit, std::shared_ptr<Limit> >("Limit",NodeAttrDoc::limit_doc(),init<std::string, int>())
 	.def(self == self )                               // __eq__
 	.def("__str__",  &Limit::toString)                // __str__
    .def("__copy__",   copyObject<Limit>)             // __copy__ uses copy constructor
@@ -484,7 +483,7 @@ void export_NodeAttr()
    .def("node_paths",&wrap_set_of_strings,"List of nodes(paths) that have consumed a limit")
  	;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-   bp::register_ptr_to_python< boost::shared_ptr<Limit> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< std::shared_ptr<Limit> >(); // needed for mac and boost 1.6
 #endif
 
 	class_<InLimit>("InLimit",NodeAttrDoc::inlimit_doc())
@@ -595,7 +594,7 @@ void export_NodeAttr()
 	;
 
 
-	class_<LateAttr, boost::shared_ptr<LateAttr>  >("Late",NodeAttrDoc::late_doc())
+	class_<LateAttr, std::shared_ptr<LateAttr>  >("Late",NodeAttrDoc::late_doc())
     .def("__init__",raw_function(&late_raw_constructor,1))  // will call -> late_init
     .def("__init__",make_constructor(&late_init))
     .def("__init__",make_constructor(&late_create))
@@ -633,10 +632,10 @@ void export_NodeAttr()
     .def("is_late",   &LateAttr::isLate, "Return True if late")
     ;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-   bp::register_ptr_to_python< boost::shared_ptr<LateAttr> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< std::shared_ptr<LateAttr> >(); // needed for mac and boost 1.6
 #endif
 
-	class_<AutoCancelAttr, boost::shared_ptr<AutoCancelAttr> >(
+	class_<AutoCancelAttr, std::shared_ptr<AutoCancelAttr> >(
 			"Autocancel",NodeAttrDoc::autocancel_doc() ,
 			init<int,int,bool >()                             // hour, minute, relative
 	)
@@ -650,11 +649,11 @@ void export_NodeAttr()
 	.def("days",    &AutoCancelAttr::days,     "Returns a boolean true if time was specified in days")
   	;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-   bp::register_ptr_to_python< boost::shared_ptr<AutoCancelAttr> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< std::shared_ptr<AutoCancelAttr> >(); // needed for mac and boost 1.6
 #endif
 
 
-   class_<AutoArchiveAttr, boost::shared_ptr<AutoArchiveAttr> >(
+   class_<AutoArchiveAttr, std::shared_ptr<AutoArchiveAttr> >(
          "Autoarchive",NodeAttrDoc::autocancel_doc() ,
          init<int,int,bool >()                             // hour, minute, relative
    )
@@ -668,11 +667,11 @@ void export_NodeAttr()
    .def("days",    &AutoArchiveAttr::days,     "Returns a boolean true if time was specified in days")
    ;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python< boost::shared_ptr<AutoArchiveAttr> >(); // needed for mac and boost 1.6
+   boost::python::register_ptr_to_python< std::shared_ptr<AutoArchiveAttr> >(); // needed for mac and boost 1.6
 #endif
 
 
-   class_<AutoRestoreAttr, boost::shared_ptr<AutoRestoreAttr> >( "Autorestore",NodeAttrDoc::autocancel_doc())
+   class_<AutoRestoreAttr, std::shared_ptr<AutoRestoreAttr> >( "Autorestore",NodeAttrDoc::autocancel_doc())
    .def("__init__",make_constructor(&create_AutoRestoreAttr) )
    .def(self == self )                                       // __eq__
    .def("__str__", &AutoRestoreAttr::toString)               // __str__
@@ -680,7 +679,7 @@ void export_NodeAttr()
    .def("nodes_to_restore",&AutoRestoreAttr::nodes_to_restore, return_value_policy<copy_const_reference>(), "returns archive time as a TimeSlot")
    ;
 #if defined(__clang__)
-   boost::python::register_ptr_to_python< boost::shared_ptr<AutoRestoreAttr> >(); // needed for mac and boost 1.6
+   boost::python::register_ptr_to_python< std::shared_ptr<AutoRestoreAttr> >(); // needed for mac and boost 1.6
 #endif
 
 
@@ -706,7 +705,7 @@ void export_NodeAttr()
 
 	// Create as shared because: we want to pass a Python list as part of the constructor,
 	// and the only way make_constructor works is with a pointer.
-	class_<RepeatEnumerated, boost::shared_ptr<RepeatEnumerated> >("RepeatEnumerated",NodeAttrDoc::repeat_enumerated_doc())
+	class_<RepeatEnumerated, std::shared_ptr<RepeatEnumerated> >("RepeatEnumerated",NodeAttrDoc::repeat_enumerated_doc())
    .def("__init__",make_constructor(&create_RepeatEnumerated) )
 	.def(self == self )                                     // __eq__
 	.def("__str__",        &RepeatEnumerated::toString)     // __str__
@@ -717,10 +716,10 @@ void export_NodeAttr()
 	.def("step",           &RepeatEnumerated::step)
 	;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-   bp::register_ptr_to_python< boost::shared_ptr<RepeatEnumerated> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< std::shared_ptr<RepeatEnumerated> >(); // needed for mac and boost 1.6
 #endif
 
-	class_<RepeatString,boost::shared_ptr<RepeatString> >("RepeatString", NodeAttrDoc::repeat_string_doc())
+	class_<RepeatString,std::shared_ptr<RepeatString> >("RepeatString", NodeAttrDoc::repeat_string_doc())
    .def("__init__",make_constructor(&create_RepeatString) )
 	.def(self == self )                                 // __eq__
 	.def("__str__",        &RepeatString::toString)     // __str__
@@ -731,7 +730,7 @@ void export_NodeAttr()
 	.def("step",           &RepeatString::step)
 	;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-   bp::register_ptr_to_python< boost::shared_ptr<RepeatString> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< std::shared_ptr<RepeatString> >(); // needed for mac and boost 1.6
 #endif
 
 	class_<RepeatDay>("RepeatDay",NodeAttrDoc::repeat_day_doc(),init< optional<int> >())
@@ -755,7 +754,7 @@ void export_NodeAttr()
 
 	void (CronAttr::*add_time_series)(const TimeSeries&) = &CronAttr::addTimeSeries;
 	void (CronAttr::*add_time_series_2)( const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) = &CronAttr::addTimeSeries;
-	class_<CronAttr, boost::shared_ptr<CronAttr> >("Cron",NodeAttrDoc::cron_doc() )
+	class_<CronAttr, std::shared_ptr<CronAttr> >("Cron",NodeAttrDoc::cron_doc() )
    .def("__init__",raw_function(&cron_raw_constructor,1))  // will call -> cron_init or cron_init1
    .def("__init__",make_constructor(&cron_init))
    .def("__init__",make_constructor(&cron_init1))
@@ -786,7 +785,7 @@ void export_NodeAttr()
 
 
 	void (ClockAttr::*start_stop_with_server)(bool) = &ClockAttr::startStopWithServer;
-	class_<ClockAttr, boost::shared_ptr<ClockAttr> >("Clock",NodeAttrDoc::clock_doc() ,init<int,int,int,optional<bool> > ())  // day, month, year, hybrid
+	class_<ClockAttr, std::shared_ptr<ClockAttr> >("Clock",NodeAttrDoc::clock_doc() ,init<int,int,int,optional<bool> > ())  // day, month, year, hybrid
     .def( init<int,int,int,bool>())
     .def( init<bool>())
 	.def(self == self )                                   // __eq__
@@ -803,6 +802,6 @@ void export_NodeAttr()
 	.def( "virtual"      ,&ClockAttr::is_virtual,   "Returns a boolean, where true means that clock is virtual")
 	;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
-   bp::register_ptr_to_python< boost::shared_ptr<ClockAttr> >(); // needed for mac and boost 1.6
+   bp::register_ptr_to_python< std::shared_ptr<ClockAttr> >(); // needed for mac and boost 1.6
 #endif
 }

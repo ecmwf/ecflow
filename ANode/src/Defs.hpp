@@ -27,13 +27,6 @@
 
 #include <boost/noncopyable.hpp>
 #include "boost/date_time/posix_time/posix_time_types.hpp"
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
-#include <boost/serialization/deque.hpp>          // no need to include <deque>
-#include <boost/serialization/map.hpp>            // no need to include <map>
-#include <boost/serialization/string.hpp>         // no need to include <string>
-#include <boost/serialization/shared_ptr.hpp>     // no need to include shared_ptr
 #include <boost/foreach.hpp> // used so often just placed here for convenience
 
 #include "ServerState.hpp"
@@ -44,7 +37,6 @@
 #include "JobCreationCtrl.hpp"
 #include "Suite.hpp"
 #include "CheckPt.hpp"
-#include "Archive.hpp"
 #include "Attr.hpp"
 #include "PrintStyle.hpp"
 
@@ -257,9 +249,9 @@ public:
 
    /// Function to save/restore the defs as a checkpoint file. Can throw exception
    /// If the Defs file has content, this is deleted first, i.e. suites, externs, Can throw an exception
-   void boost_save_as_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const;
-   void boost_save_as_filename(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive()) const; // used in test only
-   void boost_restore_from_checkpt(const std::string& fileName,ecf::Archive::Type = ecf::Archive::default_archive());
+   void boost_save_as_checkpt(const std::string& fileName) const;
+   void boost_save_as_filename(const std::string& fileName) const; // used in test only
+   void boost_restore_from_checkpt(const std::string& fileName);
 
    // defs format
    void save_as_checkpt(const std::string& fileName) const;
@@ -380,9 +372,9 @@ public:
    bool in_notification() const { return in_notification_;}
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/)
+   void serialize(Archive & ar, std::uint32_t const version )
    {
       ar & state_change_no_;
       ar & modify_change_no_;
@@ -447,6 +439,5 @@ public:
 private:
    defs_ptr defs_ptr_;
 };
-
 
 #endif /* DEFS_HPP_ */

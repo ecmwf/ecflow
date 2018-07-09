@@ -26,8 +26,6 @@
 //
 // Note:: updating state_change_no() on the *client side*  a no-op() it has no effect
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/serialization/level.hpp>
-#include <boost/serialization/tracking.hpp>
 #include "Memento.hpp"
 
 class DefsDelta : private boost::noncopyable {
@@ -77,17 +75,14 @@ private:
    unsigned int server_modify_change_no_;
 	std::vector<compound_memento_ptr> compound_mementos_;
 
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize( Archive & ar, const unsigned int /*version*/ ) {
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & server_state_change_no_;
       ar & server_modify_change_no_;
    	ar & compound_mementos_;
   	}
 };
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-BOOST_CLASS_IMPLEMENTATION(DefsDelta, boost::serialization::object_serializable)
-BOOST_CLASS_TRACKING(DefsDelta,boost::serialization::track_never);
 
 #endif

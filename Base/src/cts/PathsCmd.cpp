@@ -13,7 +13,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <algorithm>
-#include <boost/make_shared.hpp>
 
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"

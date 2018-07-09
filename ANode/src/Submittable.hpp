@@ -16,6 +16,7 @@
 //============================================================================
 #include <boost/noncopyable.hpp>
 #include "Node.hpp"
+
 class EcfFile;
 class SubGenVariables;
 
@@ -168,10 +169,11 @@ private:
    mutable SubGenVariables* sub_gen_variables_; // *not* persisted since they can be generated
    friend class SubGenVariables;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
-      ar & boost::serialization::base_object<Node>(*this); // Serialise base class information
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class<Node>(this); // Serialise base class information
       ar & jobsPassword_;
       ar & process_or_remote_id_;
       ar & abortedReason_;

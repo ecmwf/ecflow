@@ -17,10 +17,8 @@
 #include <ostream>
 
 #include <boost/noncopyable.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/utility.hpp>
-#include <boost/serialization/vector.hpp>         // no need to include <vector>
 
+#include "Serialization.hpp"
 #include "ZombieAttr.hpp"
 #include "VerifyAttr.hpp"
 #include "QueueAttr.hpp"
@@ -103,9 +101,10 @@ private:
    std::vector<GenericAttr> generics_;    // experimental
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & zombies_;
       ar & verifys_;
       ar & queues_;
