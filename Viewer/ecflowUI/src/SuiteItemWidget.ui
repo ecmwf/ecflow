@@ -109,7 +109,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Ignore changes</string>
+          <string>&amp;Revert changes</string>
          </property>
          <property name="icon">
           <iconset resource="viewer.qrc">
