@@ -36,10 +36,11 @@ public:
 private:
    std::string log_file_path_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< ServerToClientCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< ServerToClientCmd >( this );
       ar & log_file_path_;
    }
 };

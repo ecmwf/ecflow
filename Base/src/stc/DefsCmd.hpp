@@ -40,10 +40,11 @@ private:
 
  	std::string full_server_defs_as_string_;
 
- 	friend class boost::serialization::access;
- 	template<class Archive>
- 	void serialize( Archive & ar, const unsigned int /*version*/ ) {
- 	   ar & boost::serialization::base_object< ServerToClientCmd >( *this );
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+ 	   ar & cereal::base_class< ServerToClientCmd >( this );
 
  	   if (Archive::is_saving::value) {
  	      // Avoid copying the string. As this could be very large

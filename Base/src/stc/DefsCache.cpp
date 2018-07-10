@@ -21,7 +21,6 @@
 #include "Alias.hpp"
 #include "Ecf.hpp"
 #include "Log.hpp"
-#include "boost_archive.hpp" // collates boost archive includes
 #include "Serialization.hpp"
 
 using namespace std;

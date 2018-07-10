@@ -18,10 +18,7 @@
 #include <string>
 #include <vector>
 
-#include <boost/serialization/base_object.hpp>      // base class serialization
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/assume_abstract.hpp>
-#include <boost/serialization/shared_ptr.hpp>
+#include "Serialization.hpp"
 
 #include "Cmd.hpp"
 #include "NodeFwd.hpp"
@@ -55,10 +52,11 @@ public:
 protected:
 	ServerToClientCmd(){}
 private:
-    friend class boost::serialization::access;
-    template<class Archive>
-    void serialize(Archive &ar, const unsigned int /*version*/) {}
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+   }
 };
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(ServerToClientCmd)
 
 #endif

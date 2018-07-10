@@ -82,11 +82,11 @@ private:
    std::string server_defs_;               // for returning a subset of the suites
    std::string full_server_defs_as_string_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int version ) {
-
-      ar & boost::serialization::base_object< ServerToClientCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< ServerToClientCmd >( this );
       ar & full_defs_;               // returning full defs as a string
       ar & incremental_changes_;     // state changes, small scale changes
 

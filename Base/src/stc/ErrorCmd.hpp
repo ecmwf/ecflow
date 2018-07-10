@@ -33,10 +33,11 @@ public:
 private:
  	std::string error_msg_;
 
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize( Archive & ar, const unsigned int /*version*/ ) {
- 		ar & boost::serialization::base_object< ServerToClientCmd >( *this );
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+ 		ar & cereal::base_class< ServerToClientCmd >( this );
  		ar & error_msg_;
   	}
 };

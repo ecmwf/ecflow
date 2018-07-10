@@ -15,11 +15,12 @@
 // Description :
 //============================================================================
 
-#include <boost/serialization/serialization.hpp>
 #include <deque>
 #include <iostream>
 #include <sstream>
 #include "CheckPt.hpp"
+#include "Serialization.hpp"
+
 
 /// This class is used to store all statistical data about all the
 /// commands processed by the server. Uses default copy constructor
@@ -130,10 +131,11 @@ struct Stats {
 private:
 
 	std::deque< std::pair<int,int> > request_vec_; // pair.first =  number of requests, pair.second = poll interval
-	friend class boost::serialization::access;
-	template<class Archive>
-	void serialize( Archive & ar, const unsigned int /*version*/ ) {
 
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
 		ar & status_;
 		ar & locked_by_user_;
 		ar & host_;

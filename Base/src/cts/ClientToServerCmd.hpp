@@ -19,10 +19,6 @@
 #include <vector>
 
 #include <boost/program_options.hpp>
-#include <boost/serialization/base_object.hpp>      // base class serialization
-#include <boost/serialization/serialization.hpp>
-#include <boost/serialization/assume_abstract.hpp>
-#include <boost/serialization/shared_ptr.hpp>
 
 #include "PrintStyle.hpp"
 #include "Cmd.hpp"
@@ -33,14 +29,7 @@
 #include "Child.hpp"
 #include "CheckPt.hpp"
 #include "PreAllocatedReply.hpp"
-
-#if defined(_AIX) && !defined(DEBUG)
-// Required for MoveCmd for release mode of v11.1 compiler
-#include "Defs.hpp"
-#include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
-#endif
+#include "Serialization.hpp"
 
 class AbstractServer;
 class AbstractClientEnv;
@@ -172,11 +161,12 @@ private:
    mutable std::vector<std::string>   edit_history_node_paths_;  // NOT persisted, used when deleting
 
 private:
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive &ar, const unsigned int /*version*/) {}
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+   }
 };
-BOOST_SERIALIZATION_ASSUME_ABSTRACT(ClientToServerCmd)
 
 //=================================================================================
 // Task Commands
@@ -234,10 +224,11 @@ private:
    std::string process_or_remote_id_;
    int try_no_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< ClientToServerCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< ClientToServerCmd >( this );
       ar & path_to_submittable_;
       ar & jobs_password_;
       ar & process_or_remote_id_;
@@ -270,10 +261,11 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual ecf::Child::CmdType child_type() const { return ecf::Child::INIT; }
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< TaskCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< TaskCmd >( this );
    }
 };
 
@@ -301,10 +293,11 @@ private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
    virtual ecf::Child::CmdType child_type() const { return ecf::Child::COMPLETE; }
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< TaskCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< TaskCmd >( this );
    }
 };
 
@@ -338,10 +331,12 @@ private:
    virtual ecf::Child::CmdType child_type() const { return ecf::Child::WAIT; }
 
    std::string expression_;
-   friend class boost::serialization::access;
+
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< TaskCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< TaskCmd >( this );
       ar & expression_;
    }
 };
@@ -374,10 +369,11 @@ private:
 
    std::string reason_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< TaskCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< TaskCmd >( this );
       ar & reason_;
    }
 };
@@ -412,10 +408,11 @@ private:
 private:
    std::string name_; // the events name
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< TaskCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< TaskCmd >( this );
       ar & name_;
    }
 };
@@ -453,10 +450,11 @@ private:
    std::string name_;  // the meters name
    int value_;         // the meters value
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< TaskCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< TaskCmd >( this );
       ar & name_;
       ar & value_;
    }
@@ -496,10 +494,11 @@ private:
    std::string name_;   // the label name
    std::string label_;  // a single label, or multi-line label
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< TaskCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< TaskCmd >( this );
       ar & name_;
       ar & label_;
    }
@@ -548,10 +547,11 @@ private:
    std::string step_;                     // will be empty when action is [ active | no_of_aborted]
    std::string path_to_node_with_queue_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< TaskCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< TaskCmd >( this );
       ar & name_;
       ar & action_;
       ar & step_;
@@ -601,10 +601,11 @@ private:
    std::string passwd_;
    std::string hostname_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int version ) {
-      ar & boost::serialization::base_object< ClientToServerCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< ClientToServerCmd >( this );
       ar & user_;
       ar & passwd_;
       ar & hostname_;
@@ -629,10 +630,11 @@ public:
 private:
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
    }
 };
 
@@ -686,10 +688,11 @@ private:
 
    Api api_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & api_;
    }
 };
@@ -720,10 +723,11 @@ private:
    int check_pt_interval_;
    int check_pt_save_time_alarm_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & mode_;
       ar & check_pt_interval_;
       ar & check_pt_save_time_alarm_;
@@ -782,10 +786,11 @@ private:
    int client_state_change_no_;
    int client_modify_change_no_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & api_;
       ar & client_handle_;
       ar & client_state_change_no_;
@@ -850,10 +855,11 @@ private:
    std::string drop_user_;
    std::vector<std::string> suites_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & api_;
       ar & client_handle_;
       ar & auto_add_new_suites_;
@@ -909,10 +915,11 @@ private:
    Api api_;
    std::string absNodePath_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & api_;
       ar & absNodePath_;
    }
@@ -959,10 +966,11 @@ private:
    bool force_;
    std::vector<std::string> paths_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & api_;
       ar & force_;
       ar & paths_;
@@ -1004,10 +1012,11 @@ private:
    int get_last_n_lines_; // default to 100 -> ECFLOW-174
    std::string new_path_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & api_;
       ar & get_last_n_lines_;
       ar & new_path_;
@@ -1037,10 +1046,11 @@ private:
 
    std::string msg_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & msg_;
    }
 };
@@ -1076,10 +1086,11 @@ private:
    std::string suiteName_;
    bool        force_;      // reset begin status on suites & bypass checks, can create zombies, used in test only
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & suiteName_;
       ar & force_;
    }
@@ -1112,10 +1123,11 @@ private:
    std::string password_;           // should be empty for multiple paths and when using CLI
    std::vector<std::string> paths_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & user_action_;
       ar & process_id_;
       ar & password_;
@@ -1160,10 +1172,11 @@ private:
    mutable std::vector<std::string>  paths_;  // mutable to allow swap to clear & reclaim memory, as soon as possible
    Option                    option_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & paths_;
       ar & option_;
    }
@@ -1198,10 +1211,11 @@ private:
    std::string   absNodepath_;
    NOrder::Order      option_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & absNodepath_;
       ar & option_;
    }
@@ -1245,10 +1259,11 @@ private:
    bool        force_;
    bool        test_;   // only for test, hence we don't serialise this
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & paths_;
       ar & force_;
    }
@@ -1286,10 +1301,11 @@ private:
 
    // Persistence is still required since show command can be *USED* in a *GROUP* command
    // However its ONLY used on the client side, hence no need to serialise data members
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
    }
 };
 
@@ -1328,10 +1344,11 @@ private:
    std::string defs_;
    std::string defs_filename_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & force_;
       ar & defs_;
       ar & defs_filename_;
@@ -1377,10 +1394,11 @@ private:
    std::string path_to_defs_; // Can be empty if defs loaded in memory via python api
    std::string clientDefs_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & createNodesAsNeeded_;
       ar & force_;
       ar & pathToNode_;
@@ -1440,10 +1458,11 @@ private:
    bool                     recursive_;
    bool                     setRepeatToLastValue_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & paths_;
       ar & stateOrEvent_;
       ar & recursive_;
@@ -1504,10 +1523,11 @@ private:
    bool          date_;
    bool          time_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & paths_;
       ar & trigger_;
       ar & all_;
@@ -1614,10 +1634,11 @@ private:
    ecf::Flag::Type          flag_type_;
    bool                     flag_; // true means set false means clear
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & paths_;
       ar & name_;
       ar & value_;
@@ -1670,10 +1691,11 @@ private:
    std::string   pathToNode_;
    size_t        max_lines_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & file_;
       ar & pathToNode_;
       ar & max_lines_;
@@ -1746,10 +1768,11 @@ private:
    bool alias_;
    bool run_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & edit_type_;
       ar & path_to_node_;
       ar & user_file_contents_;
@@ -1789,10 +1812,11 @@ private:
    std::string source_;
    std::string dest_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & source_;
       ar & dest_;
    }
@@ -1833,10 +1857,11 @@ private:
    std::string src_path_;
    std::string dest_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & src_node_ ;
       ar & src_host_;
       ar & src_port_;
@@ -1881,10 +1906,11 @@ private:
    std::string attribute_;         // [ event_name | meter_name | variable_name | trigger expression] empty for state and dstate
    std::string path_to_task_;      // The task the invoked this command, needed for logging
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & query_type_;
       ar & path_to_attribute_;
       ar & attribute_;
@@ -1940,10 +1966,11 @@ private:
 
    std::vector<Cmd_ptr> cmdVec_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< UserCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< UserCmd >( this );
       ar & cmdVec_;
    }
 };
@@ -1978,40 +2005,4 @@ std::ostream& operator<<(std::ostream& os, const MoveCmd&);
 std::ostream& operator<<(std::ostream& os, const GroupCTSCmd&);
 std::ostream& operator<<(std::ostream& os, const QueryCmd&);
 
-
-#include <boost/serialization/export.hpp>   // explicit code for exports (place last) , needed for BOOST_CLASS_EXPORT
-BOOST_CLASS_EXPORT_KEY(ServerVersionCmd)
-BOOST_CLASS_EXPORT_KEY(CtsCmd)
-BOOST_CLASS_EXPORT_KEY(CSyncCmd)
-BOOST_CLASS_EXPORT_KEY(ClientHandleCmd)
-BOOST_CLASS_EXPORT_KEY(CtsNodeCmd)
-BOOST_CLASS_EXPORT_KEY(PathsCmd)
-BOOST_CLASS_EXPORT_KEY(CheckPtCmd)
-BOOST_CLASS_EXPORT_KEY(LoadDefsCmd)
-BOOST_CLASS_EXPORT_KEY(LogCmd)
-BOOST_CLASS_EXPORT_KEY(LogMessageCmd)
-BOOST_CLASS_EXPORT_KEY(BeginCmd)
-BOOST_CLASS_EXPORT_KEY(ZombieCmd)
-BOOST_CLASS_EXPORT_KEY(InitCmd)
-BOOST_CLASS_EXPORT_KEY(EventCmd)
-BOOST_CLASS_EXPORT_KEY(MeterCmd)
-BOOST_CLASS_EXPORT_KEY(LabelCmd)
-BOOST_CLASS_EXPORT_KEY(QueueCmd)
-BOOST_CLASS_EXPORT_KEY(AbortCmd)
-BOOST_CLASS_EXPORT_KEY(CtsWaitCmd)
-BOOST_CLASS_EXPORT_KEY(CompleteCmd)
-BOOST_CLASS_EXPORT_KEY(RequeueNodeCmd)
-BOOST_CLASS_EXPORT_KEY(OrderNodeCmd)
-BOOST_CLASS_EXPORT_KEY(RunNodeCmd)
-BOOST_CLASS_EXPORT_KEY(ReplaceNodeCmd)
-BOOST_CLASS_EXPORT_KEY(ForceCmd)
-BOOST_CLASS_EXPORT_KEY(FreeDepCmd)
-BOOST_CLASS_EXPORT_KEY(CFileCmd)
-BOOST_CLASS_EXPORT_KEY(EditScriptCmd)
-BOOST_CLASS_EXPORT_KEY(PlugCmd)
-BOOST_CLASS_EXPORT_KEY(AlterCmd)
-BOOST_CLASS_EXPORT_KEY(MoveCmd)
-BOOST_CLASS_EXPORT_KEY(GroupCTSCmd)
-BOOST_CLASS_EXPORT_KEY(ShowCmd)
-BOOST_CLASS_EXPORT_KEY(QueryCmd)
 #endif

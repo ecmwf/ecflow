@@ -27,7 +27,6 @@
 #include "File.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
-#include "boost_archive.hpp"
 #include "TimeStamp.hpp"
 #include "Version.hpp"
 #include "PasswdFile.hpp"

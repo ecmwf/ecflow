@@ -39,10 +39,11 @@ private:
    node_ptr get_node_ptr(std::string& error_msg) const;
    std::string the_node_str_;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< ServerToClientCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< ServerToClientCmd >( this );
       ar & the_node_str_;
    }
 };

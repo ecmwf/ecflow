@@ -191,26 +191,20 @@ STC_Cmd_ptr PreAllocatedReply::sync_full_cmd(unsigned int client_handle,Abstract
 
 // ==============================================================================
 // Serialisation export
-#include "Defs.hpp"
-#include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
-#include "boost_archive.hpp"
 
-#include <boost/serialization/export.hpp>   // explicit code for exports (place last) , needed for BOOST_CLASS_EXPORT
-BOOST_CLASS_EXPORT(DefsCmd)
-BOOST_CLASS_EXPORT(SNodeCmd)
-BOOST_CLASS_EXPORT(SStringCmd)
-BOOST_CLASS_EXPORT(SStringVecCmd)
-BOOST_CLASS_EXPORT(SServerLoadCmd)
-BOOST_CLASS_EXPORT(GroupSTCCmd)
-BOOST_CLASS_EXPORT(ErrorCmd)
-BOOST_CLASS_EXPORT(StcCmd)
-BOOST_CLASS_EXPORT(SSyncCmd)
-BOOST_CLASS_EXPORT(SNewsCmd)
-BOOST_CLASS_EXPORT(SStatsCmd)
-BOOST_CLASS_EXPORT(SSuitesCmd)
-BOOST_CLASS_EXPORT(SClientHandleCmd)
-BOOST_CLASS_EXPORT(SClientHandleSuitesCmd)
-BOOST_CLASS_EXPORT(ZombieGetCmd)
-BOOST_CLASS_EXPORT(BlockClientZombieCmd)
+CEREAL_REGISTER_TYPE(DefsCmd);
+CEREAL_REGISTER_TYPE(SNodeCmd);
+CEREAL_REGISTER_TYPE(SStringCmd);
+CEREAL_REGISTER_TYPE(SStringVecCmd);
+CEREAL_REGISTER_TYPE(SServerLoadCmd);
+CEREAL_REGISTER_TYPE(GroupSTCCmd);
+CEREAL_REGISTER_TYPE(ErrorCmd);
+CEREAL_REGISTER_TYPE(StcCmd);
+CEREAL_REGISTER_TYPE(SSyncCmd);
+CEREAL_REGISTER_TYPE(SNewsCmd);
+CEREAL_REGISTER_TYPE(SStatsCmd);
+CEREAL_REGISTER_TYPE(SSuitesCmd);
+CEREAL_REGISTER_TYPE(SClientHandleCmd);
+CEREAL_REGISTER_TYPE(SClientHandleSuitesCmd);
+CEREAL_REGISTER_TYPE(ZombieGetCmd);
+CEREAL_REGISTER_TYPE(BlockClientZombieCmd);

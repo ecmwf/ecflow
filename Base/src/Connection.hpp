@@ -52,7 +52,6 @@ typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 /// run times? I would have expected client->server communication via binary
 /// to be faster. However the definition file we are using are relatively small!
 ///
-/// See: ACore/src/boost_archive.hpp for details about serialisation migration issues
 ///
 /**
  * Each message sent using this class consists of:
@@ -98,22 +97,9 @@ public:
 		// Serialise the data first so we know how large it is.
 		try {
 		   ecf::save_as_string(outbound_data_,t);
-
-         if (allow_new_client_old_server_ != 0 && !Ecf::server()) {
-            // Client context, forward compatibility, new client -> old server
-            ecf::boost_archive::replace_version(outbound_data_,allow_new_client_old_server_);
-         }
-
-         // Server context: To allow build of ecflow, i.e old clients 3.0.x, installed on machines hpux,aix,etc
-         // need to communicate to *new* server 4.0.0,  new server (boost 1.53:10) ) --> (old_client:boost_1.47:9)
-         // Note: the read below, will have determined the actual archive version used.
-         if (Ecf::server() && allow_old_client_new_server_ != 0 ) {
-            ecf::boost_archive::replace_version(outbound_data_,allow_old_client_new_server_);
-         }
-
-		} catch (const boost::archive::archive_exception& ae ) {
+		} catch (const std::exception& ae ) {
 		   // Unable to decode data. Something went wrong, inform the caller.
-		   log_archive_error("Connection::async_write, boost::archive::archive_exception ",ae);
+		   log_archive_error("Connection::async_write, exception ",ae);
 		   boost::system::error_code error(boost::asio::error::invalid_argument);
 		   socket_.get_io_service().post(boost::bind(handler, error));
 		   return;
@@ -224,51 +210,6 @@ private:
 #endif
 
 				ecf::restore_from_string(archive_data,t);
-
-	         // Server context: To allow build of ecflow, i.e old clients 3.0.x, installed on machines hpux,aix,etc
-	         // need to communicate to *new* server 4.0.0,   new server (boost 1.53:10) ) --> (old_client:boost_1.47:9)
-	         if (Ecf::server() && allow_old_client_new_server_ != 0 ) {
-	            // get the actual version used, and *re-use* when replying back to *old* client
-	            int archive_version_in_data = ecf::boost_archive::extract_version(archive_data);
-	            int current_archive_version = ecf::boost_archive::version();
-	            if ( current_archive_version != archive_version_in_data ) {
-	               allow_old_client_new_server_ = archive_version_in_data;
-	            }
-	            else {
-	               // compatible, don't bother changing the write format
-	               allow_old_client_new_server_ = 0;
-	            }
- 	         }
-			}
-			catch (const boost::archive::archive_exception& ae ) {
-
-			   // Log anyway so we know client <--> server incompatible
-			   log_archive_error("Connection::handle_read_data, boost::archive::archive_exception ",ae);
-
-			   // two context, client code or server, before giving up, try
-			   // - Client context, new server  -> old client (* assumes old client updated, with this code *)
-			   // - Server context, new client  -> old server (* assumes old server updated, with this code *)
-            // Match up the boost archive version in the string archive_data with current version
-            std::string archive_data(&inbound_data_[0], inbound_data_.size());
-			   int current_archive_version = ecf::boost_archive::version();
-			   int archive_version_in_data = ecf::boost_archive::extract_version(archive_data);
-            log_error(archive_data.c_str()); // ECFLOW-1025
-			   if (current_archive_version != archive_version_in_data ) {
-			      log_error("Connection::handle_read_data archive version miss-match!"); // ECFLOW-1025
-			      if (ecf::boost_archive::replace_version(archive_data,current_archive_version)) {
-			         try {
-			            ecf::restore_from_string(archive_data,t);
-			            // It worked
-			            boost::get<0>(handler)(e);
-			            return;
-			         }
-			         catch (...) {}  // fall through and return error code
-			      }
-			   }
-				// Unable to decode data.
-				boost::system::error_code error( boost::asio::error::invalid_argument);
-				boost::get<0>(handler)(error);
-				return;
 			}
 			catch (std::exception& ) {
 			   log_error("Connection::handle_read_data, Unable to decode data");
@@ -285,7 +226,7 @@ private:
 private:
 
 	static void log_error(const char* msg);
-   static void log_archive_error(const char* msg,const boost::archive::archive_exception& ae);
+   static void log_archive_error(const char* msg,const std::exception& ae);
 
 private:
    int allow_new_client_old_server_;

@@ -33,10 +33,11 @@ private:
    std::vector<std::pair<std::string,  std::vector<unsigned int> > > users_;          // users , list of handles
    std::vector<std::pair<unsigned int, std::vector<std::string> > >  client_handles_; // handle, list of suites
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
-      ar & boost::serialization::base_object< ServerToClientCmd >( *this );
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar & cereal::base_class< ServerToClientCmd >( this );
       ar & users_;
       ar & client_handles_;
    }

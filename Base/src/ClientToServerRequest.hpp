@@ -16,7 +16,6 @@
 //============================================================================
 
 #include <boost/noncopyable.hpp>
-#include <boost/serialization/tracking.hpp>
 #include "ClientToServerCmd.hpp"
 
 // Base class for client to server requesting.
@@ -46,23 +45,15 @@ public:
 
 private:
    Cmd_ptr cmd_;
-   friend class boost::serialization::access;
+
+   friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, const unsigned int /*version*/) {
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
       ar & cmd_;
    }
 };
 
 std::ostream& operator<<(std::ostream& os, const ClientToServerRequest& d);
-
-// Do NOT use
-//    BOOST_CLASS_IMPLEMENTATION(ClientToServerRequest, boost::serialization::object_serializable)
-//    i.e eliminate serialisation overhead at the cost of never being able to increase the version.
-// Since we may need use version ing in the future
-
-// This should ONLY be added to objects that are *NOT* serialised through a pointer
-//   Eliminate object tracking (even if serialised through a pointer)
-//   at the risk of a programming error creating duplicate objects.
-BOOST_CLASS_TRACKING(ClientToServerRequest,boost::serialization::track_never);
 
 #endif
