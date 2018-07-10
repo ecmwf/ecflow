@@ -42,7 +42,6 @@ lib libserver : [ glob src/*.cpp : src/*Main.cpp ]
                 <use>/theBase//base
                 <use>/site-config//boost_system
                 <use>/site-config//boost_thread
-                <use>/site-config//boost_serialization
                 <use>/site-config//boost_filesystem
                 <use>/site-config//boost_program_options
                 <use>/site-config//boost_datetime
@@ -59,7 +58,6 @@ exe ecflow_server : [ glob src/*Main.cpp ]
              libserver
              /site-config//boost_system
              /site-config//boost_thread
-             /site-config//boost_serialization
              /site-config//boost_filesystem
              /site-config//boost_datetime
              /site-config//boost_program_options
@@ -80,7 +78,6 @@ exe u_server : [ glob test/*.cpp ]
              libserver
              /site-config//boost_system
              /site-config//boost_thread
-             /site-config//boost_serialization
              /site-config//boost_filesystem
              /site-config//boost_datetime
              /site-config//boost_program_options

@@ -25,7 +25,6 @@ lib node : [ glob src/*.cpp parser/src/*.cpp ]
            <use>/theCore//core
            <use>/theNodeAttr//nodeattr
            <use>/site-config//boost_system
-           <use>/site-config//boost_serialization
            <use>/site-config//boost_filesystem
            <use>/site-config//boost_datetime
            <use>/site-config//boost_test
@@ -44,7 +43,6 @@ exe u_anode : [ glob test/*.cpp : test/TestSingleExprParse.cpp ]
            /theNodeAttr//nodeattr
            node
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_test
@@ -58,7 +56,6 @@ exe u_anode_stest : test/TestSingleExprParse.cpp
            /theNodeAttr//nodeattr
            node
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_test

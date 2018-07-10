@@ -91,10 +91,6 @@ public:
 	/// try the next server, and so on until a timeout period is reached.
 	int invoke( int argc, char* argv[]) const;
 
-   // support for forward compatibility, by changing boost archive version
-   // Chosen to change client side only
-   void allow_new_client_old_server(int archive_version_of_old_server);
-   int allow_new_client_old_server() const;
 
 	/// If testing, overwrite the task path set in the environment, required for
 	/// testing the task based commands.

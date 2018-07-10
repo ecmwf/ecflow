@@ -30,7 +30,6 @@ lib base : [ glob src/*.cpp ] [ glob src/cts/*.cpp ] [ glob src/stc/*.cpp ]
            <use>/theNodeAttr//nodeattr
            <use>/theNode//node
            <use>/site-config//boost_system
-           <use>/site-config//boost_serialization
            <use>/site-config//boost_filesystem
            <use>/site-config//boost_datetime
            <use>/site-config//boost_program_options
@@ -54,7 +53,6 @@ exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
            /theNode//node
            base
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_program_options
@@ -75,7 +73,6 @@ exe perf_job_gen : test/TestJobGenPerf.cpp
            /theNode//node
            base
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
          : <include>../ANode/test 

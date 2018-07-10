@@ -24,10 +24,9 @@ lib core : [ glob src/*.cpp ]
            <use>/site-config//boost_system
            <use>/site-config//boost_filesystem
            <use>/site-config//boost_test
-           <use>/site-config//boost_serialization
            <use>/site-config//boost_datetime
            <use>/site-config//boost_program_options
-          : <include>../cereal/include
+          : <include>cereal/include
           : <include>../ACore/src
             <include>../cereal/include
           ;
@@ -40,7 +39,6 @@ exe u_acore : [ glob test/*.cpp ]
            core
            /site-config//boost_system
            /site-config//boost_filesystem
-           /site-config//boost_serialization
            /site-config//boost_datetime
            /site-config//boost_test
          :  <variant>debug:<define>DEBUG

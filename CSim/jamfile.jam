@@ -40,7 +40,6 @@ lib libsimu : [ glob src/*.cpp ]
                 <use>/theNode//node
                 <use>/theBase//base
             	<use>/site-config//boost_system
-             	<use>/site-config//boost_serialization
              	<use>/site-config//boost_filesystem
              	<use>/site-config//boost_program_options
              	<use>/site-config//boost_datetime
@@ -60,7 +59,6 @@ exe c_csim : [ glob test/*.cpp : test/TestSingleSimulator.cpp ]
              /theBase//base
              libsimu
              /site-config//boost_system
-             /site-config//boost_serialization
              /site-config//boost_filesystem
              /site-config//boost_datetime
              /site-config//boost_program_options
@@ -80,7 +78,6 @@ exe c_csim_single : [ glob test/TestSingleSimulator.cpp test/TestUtil.cpp ]
              /theBase//base
              libsimu
              /site-config//boost_system
-             /site-config//boost_serialization
              /site-config//boost_filesystem
              /site-config//boost_datetime
              /site-config//boost_program_options

@@ -79,14 +79,6 @@ public:
    boost::asio::ip::tcp::socket& socket() { return socket_; }
 #endif
 
-	// support for forward compatibility, by changing boost archive version, used in client context
-	// See: ACore/src/boost_archive.hpp for details about serialisation migration issues
-   void allow_new_client_old_server(int f)  { allow_new_client_old_server_ = f;}
-
-   // support for forward compatibility, by changing boost archive version, used in server context
-   void allow_old_client_new_server(int f)  { allow_old_client_new_server_ = f;}
-
-
 	/// Asynchronously write a data structure to the socket.
 	template<typename T, typename Handler>
 	void async_write(const T& t, Handler handler) {
@@ -229,8 +221,6 @@ private:
    static void log_archive_error(const char* msg,const std::exception& ae);
 
 private:
-   int allow_new_client_old_server_;
-   int allow_old_client_new_server_;
 #ifdef ECF_OPENSSL
 	boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
 #else

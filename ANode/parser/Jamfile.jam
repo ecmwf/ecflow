@@ -32,7 +32,6 @@ exe u_aparser : [ glob test/*.cpp :
            /theNodeAttr//nodeattr
            /theNode//node
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_test
@@ -49,7 +48,6 @@ exe perf_aparser : test/TestSingleDefsFile.cpp test/PersistHelper.cpp
            /theNodeAttr//nodeattr
            /theNode//node
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_test
@@ -66,7 +64,6 @@ exe perf_aparser_timer : test/ParseTimer.cpp  test/PersistHelper.cpp
            /theNodeAttr//nodeattr
            /theNode//node
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
          : <include>../test                 # ANode/test
@@ -82,7 +79,6 @@ exe perf_aparser_only : test/ParseOnly.cpp
            /theNodeAttr//nodeattr
            /theNode//node
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_datetime
          : <include>../test             # ANode/test

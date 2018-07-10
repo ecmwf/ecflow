@@ -88,7 +88,6 @@ library_dirs = ['/tmp/ma0/workspace/bdir/release/ecflow/ACore',
 # define the libraries to link with this includes the boost lib
 libraries = [ 'core' , 'nodeattr', 'node', 'base', 'libsimu', 'libclient',
               'boost_system-mt',
-              'boost_serialization-mt',
               'boost_filesystem-mt',
               'boost_program_options-mt',
               'boost_date_time-mt', 

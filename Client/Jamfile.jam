@@ -45,7 +45,6 @@ lib libclient : [ glob src/*.cpp : src/*Main.cpp ]
                 <use>/theNode//node
                 <use>/theBase//base
             	<use>/site-config//boost_system
-             	<use>/site-config//boost_serialization
              	<use>/site-config//boost_filesystem
              	<use>/site-config//boost_program_options
              	<use>/site-config//boost_datetime
@@ -63,7 +62,6 @@ exe ecflow_client : [ glob src/*Main.cpp ]
              /theBase//base
              libclient
              /site-config//boost_system
-             /site-config//boost_serialization
              /site-config//boost_filesystem
              /site-config//boost_program_options
              /site-config//boost_datetime
@@ -84,7 +82,6 @@ exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cp
            /theBase//base
            libclient
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
            /site-config//boost_datetime
@@ -103,7 +100,6 @@ exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPor
            libclient
            pthread
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
            /site-config//boost_datetime
@@ -122,7 +118,6 @@ exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp
            libclient
            pthread
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
            /site-config//boost_datetime

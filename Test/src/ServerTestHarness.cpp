@@ -101,25 +101,12 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
    // If set this can be used to choose which suite to begin.
    std::string suiteName;
 
-   // Create the client early, since we need to determine if environment variable
-   // ECF_ALLOW_NEW_CLIENT_OLD_SERVER was set, if it was, we need to update the generated .ecf scripts
-   // to embed this variable, this will allow  *new child commands* to talk to old servers
-   int allow_new_client_old_server = 0;
-   if (TestFixture::client().allow_new_client_old_server() != 0) {
-      // need export ECF_ALLOW_NEW_CLIENT_OLD_SERVER
-      allow_new_client_old_server = TestFixture::client().allow_new_client_old_server();
-   }
-
 
    // ECF_CLIENT_EXE_PATH allows dependence on client exe without installation
    // Allow user to add SLEEPTIME, otherwise add a default
    int customSmsCnt = 0;
    int taskSmsMapSize = static_cast<int>(customTaskSmsMap.size());
    BOOST_FOREACH(suite_ptr s, theClientDefs.suiteVec()) {
-      if (allow_new_client_old_server != 0) {
-         std::string value = "export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=" + boost::lexical_cast<std::string>(allow_new_client_old_server);
-         s->addVariable( Variable( "ECF_ALLOW_NEW_CLIENT_OLD_SERVER",  value ) );
-      }
 
       // Always override these to correctly locate files.
       s->addVariable( Variable( Str::ECF_HOME(),  ecf_home ) );

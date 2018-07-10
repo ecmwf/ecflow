@@ -64,8 +64,7 @@ ClientEnvironment::ClientEnvironment()
   task_try_num_(1),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),connect_timeout_(0),
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
-  host_vec_index_(0),
-  allow_new_client_old_server_(0)
+  host_vec_index_(0)
 {
 	init();
 }
@@ -76,8 +75,7 @@ ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::str
   task_try_num_(1),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),connect_timeout_(0),
   denied_(false),no_ecf_(false), debug_(false),under_test_(false),
   host_file_read_(false),
-  host_vec_index_(0),
-  allow_new_client_old_server_(0)
+  host_vec_index_(0)
 {
 	init();
 
@@ -162,9 +160,6 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
    // Make sure we don't look in hosts file.
    // When there is only one host:port in host_vec_, calling get_next_host() will always return host_vec_[0]
    host_file_read_ = true;
-
-   // Update 'int allow_new_client_old_server_' *IF* ECF_ALLOW_NEW_CLIENT_OLD_SERVER set, and matches input host/port
-   update_allow_new_client_old_server(the_host,the_port);
 }
 
 bool ClientEnvironment::checkTaskPathAndPassword(std::string& errorMsg) const
@@ -206,8 +201,6 @@ std::string ClientEnvironment::toString() const
 	for(size_t i = 0; i < env_.size(); i++) {
 		ss << "   " << env_[i].first << " = " << env_[i].second << "\n";
 	}
-   ss << "   ECF_ALLOW_NEW_CLIENT_OLD_SERVER = " << env_ecf_new_client_old_server_ << "\n";
-   ss << "   allow_new_client_old_server_ = " << allow_new_client_old_server_ << "\n";
 
    ss << "   ECF_DEBUG_CLIENT = " << debug_ << "\n";
 	return ss.str();
@@ -283,69 +276,7 @@ void ClientEnvironment::read_environment_variables()
 		host_vec_.clear(); // remove previous setting if any
  		host_vec_.push_back(std::make_pair(host,port));
 	}
-
-	if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
-	   env_ecf_new_client_old_server_ = getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER");
-	   update_allow_new_client_old_server(host,port);
-	}
 }
-
-
-static std::string ecf_allow_new_client_old_server_error_msg(const std::string& env)
-{
-   int current_archive_version = ecf::boost_archive::version();
-   int previous_archive_version = current_archive_version -1;
-   std::stringstream ss;
-   ss << "\nFound environment variable ECF_ALLOW_NEW_CLIENT_OLD_SERVER=" << env << "\n";
-   ss << "ECF_ALLOW_NEW_CLIENT_OLD_SERVER must have one of the formats:\n";
-   ss << "   ECF_ALLOW_NEW_CLIENT_OLD_SERVER=<int>\n";
-   ss << "   ECF_ALLOW_NEW_CLIENT_OLD_SERVER=<host>:<port>:<int>,<host>:<port>:<int>,<host>:<port>:<int>\n";
-   ss << "Where <int> represents the archive version of the server. i.e the old server\n";
-   ss << "i.e. export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=" << previous_archive_version << "\n";
-   ss << "or   export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=host1:3142:" << previous_archive_version << ",localhost:3142:" << previous_archive_version << "\n";
-   ss << "Please ensure host/port of the server you want connect too, is on the list";
-   return ss.str();
-}
-
-void ClientEnvironment::update_allow_new_client_old_server(const std::string& host, const std::string& port)
-{
-   // If we update host/port via command line, we need to update this again.
-   // cout << "ClientEnvironment::update_allow_new_client_old_server:  host:" << host << " port:" << port << " env=" << env_ecf_new_client_old_server_ << "\n";
-
-   // In the viewer context, we can have multiple clients, some where client <-> server is compatible , others which are not:
-   // To allow for this, we expect following syntax:
-   //    option 1/ export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=<int>
-   //    option 2/ export ECF_ALLOW_NEW_CLIENT_OLD_SERVER=<host>:<port>:<int>,<host>:<port>:<int>,<host>:<port>:<int>
-   // Where <int> represents the archive version of the server. i.e the old server.
-   // Only if the host/port matches in in our list do we update allow_new_client_old_server_
-   //
-   if (!env_ecf_new_client_old_server_.empty()) {
-      try {
-         // option 1:
-         allow_new_client_old_server_ = boost::lexical_cast<int>(env_ecf_new_client_old_server_);
-      }
-      catch (...) {
-         // cout << "option 2: Match the archive referring to *this* host/port specified.\n";
-         std::vector<std::string> list;
-         Str::split(env_ecf_new_client_old_server_,list,",");
-         if (list.empty())  throw std::runtime_error(ecf_allow_new_client_old_server_error_msg(env_ecf_new_client_old_server_));
-         // Find our host/port in the list:
-         for(size_t i = 0; i < list.size(); ++i) {
-            std::vector<std::string> host_port_archive;
-            Str::split( list[i], host_port_archive, ":");
-            if (host_port_archive.size() == 3) {
-               // cout << host_port_archive[0] << ":" << host_port_archive[1] << ":" << host_port_archive[2] << "\n";
-               if (host_port_archive[0] == host && host_port_archive[1] == port) {
-                  try { allow_new_client_old_server_ = boost::lexical_cast<int>(host_port_archive[2]); break;}
-                  catch (...) { throw std::runtime_error(ecf_allow_new_client_old_server_error_msg(env_ecf_new_client_old_server_));}
-               }
-            }
-            else { throw std::runtime_error(ecf_allow_new_client_old_server_error_msg(env_ecf_new_client_old_server_));}
-         }
-      }
-   }
-}
-
 
 bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 {

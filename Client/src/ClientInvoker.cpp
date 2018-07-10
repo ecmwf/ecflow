@@ -116,16 +116,6 @@ const std::string& ClientInvoker::port() const
    return clientEnv_.port();
 }
 
-void ClientInvoker::allow_new_client_old_server(int archive_version_of_old_server)
-{
-   clientEnv_.allow_new_client_old_server(archive_version_of_old_server);
-}
-
-int ClientInvoker::allow_new_client_old_server() const
-{
-   return clientEnv_.allow_new_client_old_server();
-}
-
 void ClientInvoker::taskPath(const std::string& s) {
 	test_ = true;
 	clientEnv_.taskPath(s);
@@ -316,7 +306,6 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 #else
 	            Client theClient(io_service,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
 #endif
-					if (clientEnv_.allow_new_client_old_server() != 0) theClient.allow_new_client_old_server(clientEnv_.allow_new_client_old_server());
 					io_service.run();
 					if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;;
 

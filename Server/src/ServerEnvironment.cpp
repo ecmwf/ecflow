@@ -37,7 +37,6 @@
 #include "Version.hpp"
 #include "Calendar.hpp"
 #include "File.hpp"
-#include "boost_archive.hpp"
 #include "JobProfiler.hpp"
 #include "Pid.hpp"
 
@@ -576,12 +575,6 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 
 	if (getenv("ECF_DEBUG_SERVER")) {
 		debug_ = true; // can also be enabled via --debug option
-	}
-
-	if (getenv("ECF_ALLOW_OLD_CLIENT_NEW_SERVER")) {
-	   // we don't need exact version of boost archive version of old client, since we can determine
-	   // this from the message sent to the server from the *old* client
-	   allow_old_client_new_server_ = ecf::boost_archive::version_1_47();
 	}
 
    char* threshold = getenv("ECF_TASK_THRESHOLD");

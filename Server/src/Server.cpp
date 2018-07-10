@@ -226,10 +226,6 @@ void Server::start_accept()
    connection_ptr new_conn = std::make_shared<connection>( boost::ref(io_service_) );
 #endif
 
-   if (serverEnv_.allow_old_client_new_server() !=0 ) {
-      new_conn->allow_old_client_new_server(serverEnv_.allow_old_client_new_server());
-   }
-
    acceptor_.async_accept( new_conn->socket_ll(),
                            boost::bind( &Server::handle_accept, this,
                                  boost::asio::placeholders::error,

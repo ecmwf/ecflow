@@ -41,7 +41,6 @@ lib libharness : [ glob src/*.cpp ]
                 <use>/theBase//base
            	    <use>/theClient//libclient
             	<use>/site-config//boost_system
-             	<use>/site-config//boost_serialization
              	<use>/site-config//boost_filesystem
              	<use>/site-config//boost_program_options
              	<use>/site-config//boost_datetime
@@ -59,7 +58,6 @@ exe s_test : [ glob Test*.cpp : TestSingle.cpp TestZombies.cpp ]
            /theClient//libclient
            libharness
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
            /site-config//boost_datetime
@@ -79,7 +77,6 @@ exe s_test_zombies : [ glob TestZombies.cpp  ]
            /theClient//libclient
            libharness
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
            /site-config//boost_datetime
@@ -99,7 +96,6 @@ exe singletest : [ glob TestSingle.cpp  ]
            /theClient//libclient
            libharness
            /site-config//boost_system
-           /site-config//boost_serialization
            /site-config//boost_filesystem
            /site-config//boost_program_options
            /site-config//boost_datetime

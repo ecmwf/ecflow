@@ -26,13 +26,6 @@ public:
 	/// This constructor is only used in Test environment, as it allow the host file to be set
 	ClientEnvironment(const std::string& hostFile, const std::string& host = "", const std::string& port = "");
 
-	/// Forward compatibility allow new client to talk to old server
-	/// Only applies when return value is non zero, in which case, it will return
-	/// the boost archive version of the old server
-	/// For the command line this is read from ECF_ALLOW_NEW_CLIENT_OLD_SERVER
-	int allow_new_client_old_server() const { return allow_new_client_old_server_;}
-	void allow_new_client_old_server(int boost_archive_version) { allow_new_client_old_server_ = boost_archive_version;}
-
    /// This controls for how long child commands continue trying to connect to Server before failing.
 	/// Maximum time in seconds for client to deliver message to server/servers. This is
 	/// typically 24 hours in a real environment. It is this long to allow operators to
@@ -135,8 +128,6 @@ private:
 	bool host_file_read_;               // to ensure we read host file only once
 	std::vector<std::pair<std::string, std::string> > host_vec_; // The list of host:port pairs
 	int  host_vec_index_;               // index into host_vec;
-	int allow_new_client_old_server_;   // the boost archive version of old server, allow new client--> old server communication
-	std::string env_ecf_new_client_old_server_;
 
    mutable std::string passwd_;
 
@@ -151,8 +142,6 @@ private:
    void init();
 
    void read_environment_variables();  /// Get the standard environment variables
-
-   void update_allow_new_client_old_server(const std::string& host, const std::string& port);
 
    void taskPath(const std::string& s) { task_path_ = s;}
    void set_jobs_password(const std::string& s) { jobs_password_ = s;}

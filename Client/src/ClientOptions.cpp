@@ -213,7 +213,7 @@ void ClientOptions::show_all_commands(const char* title) const
 {
    cout << title << "\n";
    // take a copy, since we need to sort
-   std::vector< std::shared_ptr<po::option_description> > options = desc_->options();
+   std::vector< boost::shared_ptr<po::option_description> > options = desc_->options();
 
    // sort using long_name
    std::sort(options.begin(),options.end(),
@@ -238,7 +238,7 @@ void ClientOptions::show_cmd_summary(const char *title,const std::string& user_o
    cout << title << "\n";
 
    // take a copy, since we need to sort
-   std::vector< std::shared_ptr<po::option_description> > options = desc_->options();
+   std::vector< boost::shared_ptr<po::option_description> > options = desc_->options();
 
    // sort using long_name
    std::sort(options.begin(),options.end(),
