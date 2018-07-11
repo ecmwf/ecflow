@@ -79,7 +79,6 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   debug_(false),
   help_option_(false),
   version_option_(false),
-  allow_old_client_new_server_(0),
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
@@ -101,7 +100,6 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& 
   debug_(false),
   help_option_(false),
   version_option_(false),
-  allow_old_client_new_server_(0),
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
@@ -200,9 +198,6 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
       LOG(Log::MSG, "Host(" <<  hostPort().first << ")  Port(" << hostPort().second << ") using TCP/IP v6");
    LOG(Log::MSG, "ECF_HOME " <<  ecf_home());
    LOG(Log::MSG, "Job scheduling interval: " <<  submitJobsInterval_);
-   if (allow_old_client_new_server_ != 0) {
-      LOG(Log::MSG, "ECF_ALLOW_OLD_CLIENT_NEW_SERVER enabled: " <<  allow_old_client_new_server_);
-   }
 }
 
 ServerEnvironment::~ServerEnvironment()

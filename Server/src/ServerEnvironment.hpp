@@ -73,13 +73,6 @@ public:
 	/// for test/debug we can elect to disable, it.
 	bool jobGeneration() const { return jobGeneration_;}
 
-   /// Forward compatibility allow old clients to talk to new server
-	/// Temp: This allows ecflow  to be built. i.e we have old clients(3.0.x), installed on different machines
-	///       they need to talk to new server. (i.e since we can't change the old clients)
-   /// This is controlled with ECF_ALLOW_OLD_CLIENT_NEW_SERVER
-   int allow_old_client_new_server() const { return allow_old_client_new_server_;}
-
-
 	/// Whenever we save the checkpt, we time how long this takes.
 	/// For very large definition the time can be significant and start to interfere with
 	/// the scheduling. (i.e since write to disk is blocking).
@@ -199,7 +192,6 @@ private:
 	bool debug_;
    bool help_option_;
    bool version_option_;
-	int allow_old_client_new_server_;
  	ecf::CheckPt::Mode checkMode_;
 	std::string ecfHome_;
 	std::string ecf_checkpt_file_;
