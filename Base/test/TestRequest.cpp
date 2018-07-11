@@ -232,7 +232,7 @@ static void test_persistence(const Defs& theFixtureDefs )
 	int groupRequest = 0;
 	BOOST_FOREACH(const Cmd_ptr& theCmd, cmd_vec) {
 
-		//std::cout << "TheCmd "; theCmd->print(std::cout); std::cout << "\n";
+		std::cout << "TheCmd "; theCmd->print(std::cout); std::cout << "\n";
 		if (theCmd->connect_to_different_servers()) {
 			BOOST_CHECK_MESSAGE(theCmd->task_cmd(),"Currently only tasks commands, are allowed to connect to different servers");
 		}
@@ -258,17 +258,30 @@ static void test_persistence(const Defs& theFixtureDefs )
 			}
 		}
 
-      //cout << " Saving = " << cmd_request << "\n";
-		BOOST_REQUIRE_NO_THROW(ecf::save("request.txt",cmd_request));
+      cout << " Saving = " << cmd_request << "\n";
+      std::string saved_request;
+      {
+         BOOST_REQUIRE_NO_THROW(ecf::save("request.txt",cmd_request)); // save as filename
+		   ecf::save_as_string(saved_request ,cmd_request);              // save as string
+		   cout << saved_request << "\n";
+      }
 
-      //cout << " Restoring = " << cmd_request << "\n";
-		ClientToServerRequest restoredRequest;
-		BOOST_REQUIRE_NO_THROW(ecf::restore("request.txt", restoredRequest));
-		BOOST_REQUIRE_MESSAGE(restoredRequest == cmd_request, "restoredRequest " << restoredRequest << " cmd_request " << cmd_request);
+      cout << " Restoring = " << cmd_request << "\n";
+      {
+         ClientToServerRequest restoredRequest;
+         BOOST_REQUIRE_NO_THROW(ecf::restore("request.txt", restoredRequest));
+         BOOST_REQUIRE_MESSAGE(restoredRequest == cmd_request, "restoredRequest " << restoredRequest << " cmd_request " << cmd_request);
 
-		if (restoredRequest.getRequest()) getRequest++;
-		if (restoredRequest.terminateRequest()) terminateRequest++;
-		if (restoredRequest.groupRequest())   groupRequest++;
+         if (restoredRequest.getRequest()) getRequest++;
+         if (restoredRequest.terminateRequest()) terminateRequest++;
+         if (restoredRequest.groupRequest())   groupRequest++;
+      }
+      {
+         ClientToServerRequest restoredRequest;
+		   ecf::restore_from_string(saved_request, restoredRequest);
+         BOOST_REQUIRE_MESSAGE(restoredRequest == cmd_request, "restoredRequest " << restoredRequest << " cmd_request " << cmd_request);
+      }
+
 		fs::remove("request.txt");
 	}
 
@@ -290,31 +303,11 @@ static void test_persistence(const Defs& theFixtureDefs )
 	}
 }
 
-#if defined(BINARY_ARCHIVE)
-BOOST_AUTO_TEST_CASE( test_all_request_persistence_binary )
-{
-   cout << "Base:: ...test_all_request_persistence_binary\n";
-   test_persistence( fixtureDefsFile());
-}
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-BOOST_AUTO_TEST_CASE( test_all_request_persistence_portable_binary )
-{
-   cout << "Base:: ...test_all_request_persistence_portable_binary\n";
-   test_persistence( fixtureDefsFile() );
-}
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-BOOST_AUTO_TEST_CASE( test_all_request_persistence_eos_portable_binary )
-{
-   cout << "Base:: ...test_all_request_persistence_eos_portable_binary\n";
-   test_persistence( fixtureDefsFile() );
-}
-#else
 BOOST_AUTO_TEST_CASE( test_all_request_persistence_text )
 {
    cout << "Base:: ...test_all_request_persistence_text\n";
    test_persistence( fixtureDefsFile());
 }
-#endif
 
 BOOST_AUTO_TEST_CASE( test_request_authenticate )
 {

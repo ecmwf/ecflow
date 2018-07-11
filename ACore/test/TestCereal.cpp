@@ -15,6 +15,7 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
@@ -78,6 +79,8 @@ std::ostream& operator<<(std::ostream &os, MyTop const &m) {
    return os;
 }
 
+// =================================================================================
+
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_cereal_json )
@@ -121,5 +124,6 @@ BOOST_AUTO_TEST_CASE( test_cereal_json2 )
       ecf::doSaveAndRestore<MyTop>(path);
    }
 }
+
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -52,8 +52,9 @@ void save_as_string(std::string& outbound_data, const T& t)
 {
    std::ostringstream archive_stream;
    cereal::JSONOutputArchive oarchive(archive_stream); // Create an output archive
-   oarchive(cereal::make_nvp("def",t) );               // Write the data to the archive
+   oarchive(cereal::make_nvp(typeid(t).name(),t) );    // Write the data to the archive
    outbound_data = archive_stream.str();
+   outbound_data += "}"; //HACK for cereal BUG, YUK,YUK, TODO
 }
 
 template< typename T >

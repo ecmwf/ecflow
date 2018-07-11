@@ -98,7 +98,8 @@ public:
 		}
 
 #ifdef DEBUG_CONNECTION
-		std::cout << "Connection::async_write Format the header \n";
+		std::cout << "Connection::async_write Format the header\n";
+		std::cout << " " << outbound_data_ << "\n";
 #endif
 		// Format the header.
 		std::ostringstream header_stream;
@@ -198,13 +199,13 @@ private:
 #ifdef DEBUG_CONNECTION_MEMORY
 				if (Ecf::server()) std::cout << "server::";
 				else               std::cout << "client::";
-				std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ")\n";
+            std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ") typeid(" << typeid(t).name() << ")\n";
+            std::cout << archive_data << "\n";
 #endif
-
 				ecf::restore_from_string(archive_data,t);
 			}
-			catch (std::exception& ) {
-			   log_error("Connection::handle_read_data, Unable to decode data");
+			catch (std::exception& e) {
+			   log_archive_error("Connection::handle_read_data, Unable to decode data :",e);
  				boost::system::error_code error( boost::asio::error::invalid_argument);
 				boost::get<0>(handler)(error);
 				return;

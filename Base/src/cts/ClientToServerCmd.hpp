@@ -163,9 +163,7 @@ private:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-   }
+   void serialize(Archive & ar, std::uint32_t const version ){}
 };
 
 //=================================================================================
@@ -605,10 +603,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< ClientToServerCmd >( this );
-      ar & user_;
-      ar & passwd_;
-      ar & hostname_;
+      ar(cereal::base_class< ClientToServerCmd >( this ),
+         CEREAL_NVP(user_),
+         CEREAL_NVP(passwd_),
+         CEREAL_NVP(hostname_));
    }
 };
 
@@ -692,8 +690,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & api_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(api_));
    }
 };
 

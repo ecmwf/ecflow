@@ -44,7 +44,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar)
    {
       ar & stc_cmd_;
    }
