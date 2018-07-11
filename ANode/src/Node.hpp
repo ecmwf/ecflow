@@ -818,22 +818,22 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & name_;
-      ar & state_;
-      ar & suspended_;
-      ar & defStatus_;
-      ar & completeExpr_;
-      ar & triggerExpr_;
-      ar & lateAttr_;
-      ar & time_dep_attrs_;
-      ar & child_attrs_;
-      ar & misc_attrs_;    // VerifyAttr & Zombies * auto attrs
-      ar & auto_attrs_;
-      ar & repeat_;
-      ar & varVec_;
-      ar & limitVec_;
-      ar & inLimitMgr_;
-      ar & flag_;
+      ar( name_,
+          state_,
+          suspended_,
+          defStatus_,
+          completeExpr_,
+          triggerExpr_,
+          lateAttr_,
+          time_dep_attrs_,
+          child_attrs_,
+          misc_attrs_,    // VerifyAttr & Zombies * auto attrs
+          auto_attrs_,
+          repeat_,
+          varVec_,
+          limitVec_,
+          inLimitMgr_,
+          flag_);
 
       if (Archive::is_loading::value) {
          if (time_dep_attrs_)  time_dep_attrs_->set_node(this);
