@@ -80,7 +80,6 @@ list( APPEND test_srcs
 if (ENABLE_SERVER)
     list(APPEND test_srcs
         test/SCPort.cpp
-        test/TestClientInvoker.cpp
         test/TestClientTimeout.cpp
         test/TestCheckPtDefsCmd.cpp
         test/TestGroupCmd.cpp
