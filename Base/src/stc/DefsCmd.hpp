@@ -44,7 +44,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
- 	   ar & cereal::base_class< ServerToClientCmd >( this );
+ 	   ar(cereal::base_class< ServerToClientCmd >( this ));
 
  	   if (Archive::is_saving::value) {
  	      // Avoid copying the string. As this could be very large

@@ -86,15 +86,15 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< ServerToClientCmd >( this );
-      ar & full_defs_;               // returning full defs as a string
-      ar & incremental_changes_;     // state changes, small scale changes
+      ar(cereal::base_class< ServerToClientCmd >( this ),
+         CEREAL_NVP(full_defs_),               // returning full defs as a string
+         CEREAL_NVP(incremental_changes_),     // state changes, small scale changes
 
       /// When the server_defs_ was created the def's pointer on the suites was reset back to real server defs
       /// This is not correct for server_defs_, since we use the *same* suites
       /// **** This is OK since by default the Defs serialisation will fix up the suite's def's pointers ***
       /// The alternative is to clone all the suites, which is very expensive
-      ar & server_defs_;  // large scale changes, if non zero handle, a small subset of the suites
+          CEREAL_NVP(server_defs_));  // large scale changes, if non zero handle, a small subset of the suites
 
       // when full_defs_ is set 'server_defs_' will be empty.
       if (Archive::is_saving::value) {

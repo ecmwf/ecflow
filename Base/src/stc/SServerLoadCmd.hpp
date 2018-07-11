@@ -40,8 +40,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< ServerToClientCmd >( this );
-      ar & log_file_path_;
+      ar(cereal::base_class< ServerToClientCmd >( this ),
+         CEREAL_NVP(log_file_path_));
    }
 };
 

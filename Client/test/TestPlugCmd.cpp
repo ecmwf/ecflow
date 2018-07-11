@@ -292,11 +292,11 @@ BOOST_AUTO_TEST_CASE( test_server_plug_cmd )
 	}
  	else {
 
- 	   // Plug is broken for new->old servers, where boost serialsation version number changes.
- 	   if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
- 	      cout << "Client:: ...test_server_plug_cmd:  ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified" << endl;
- 	      return;
- 	   }
+// 	   // Plug is broken for new->old servers, where boost serialsation version number changes.
+// 	   if (getenv("ECF_ALLOW_NEW_CLIENT_OLD_SERVER")) {
+// 	      cout << "Client:: ...test_server_plug_cmd:  ignoring test when ECF_ALLOW_NEW_CLIENT_OLD_SERVER specified" << endl;
+// 	      return;
+// 	   }
 
       cout << "Client:: ...test_server_plug_cmd";
 

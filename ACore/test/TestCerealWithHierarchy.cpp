@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE( test_cereal_save_as_string_and_save_as_filename )
       BOOST_REQUIRE_MESSAGE(restoredCmd  ==  originalCmd, "restoredCmd " << restoredCmd  << "  originalCmd " << originalCmd );
    }
    {
-       cout <<  saved_cmd_as_string << "\n";
+       //cout <<  saved_cmd_as_string << "\n";
        CmdContainer  restoredCmd ;
        ecf::restore_from_string(saved_cmd_as_string , restoredCmd );  // restore form string fails, due to missing '}'
        BOOST_REQUIRE_MESSAGE(restoredCmd == originalCmd, "restoredCmd " << restoredCmd  << "  originalCmd " << originalCmd );

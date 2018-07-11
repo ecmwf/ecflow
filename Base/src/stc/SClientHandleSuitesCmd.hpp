@@ -37,9 +37,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< ServerToClientCmd >( this );
-      ar & users_;
-      ar & client_handles_;
+      ar(cereal::base_class< ServerToClientCmd >( this ),
+         CEREAL_NVP(users_),
+         CEREAL_NVP(client_handles_));
    }
 };
 

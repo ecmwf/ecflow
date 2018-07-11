@@ -42,8 +42,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< ServerToClientCmd >( this );
-      ar & zombie_type_;
+      ar(cereal::base_class< ServerToClientCmd >( this ),
+         CEREAL_NVP(zombie_type_));
    }
 };
 std::ostream& operator<<(std::ostream& os, const BlockClientZombieCmd&);

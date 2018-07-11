@@ -46,7 +46,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar)
    {
-      ar & stc_cmd_;
+      ar(CEREAL_NVP(stc_cmd_));
    }
 };
 

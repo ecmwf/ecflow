@@ -522,9 +522,9 @@ private:
    friend class Node;
    friend class InLimitMgr;
 
-   friend class boost::serialization::access;
+   friend class cereal::access;
    template<class Archive>
-   void serialize( Archive & ar, const unsigned int /*version*/ ) {
+   void serialize( Archive & ar, std::uint32_t const version  ) {
       ar & cereal::base_class<Memento>(this);
       ar & inlimit_;
    }

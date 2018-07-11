@@ -59,9 +59,9 @@ private:
 
    friend class cereal::access;
 	template<class Archive>
-	void serialize(Archive & ar, const unsigned int /*version*/)
+	void serialize(Archive & ar, std::uint32_t const version)
 	{
-	   ar & state_;
+	   ar(CEREAL_NVP(state_));
 	}
 };
 
