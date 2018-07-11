@@ -34,7 +34,7 @@ template< typename T >
 void save(const std::string& fileName, const T& t)
 {
    std::ofstream os(fileName);
-   cereal::JSONOutputArchive oarchive(os); // Create an output archive
+   cereal::JSONOutputArchive oarchive(os, cereal::JSONOutputArchive::Options::NoIndent()); // Create an output archive
    oarchive(cereal::make_nvp(typeid(t).name(),t) ); // Write the data to the archive
 }
 
@@ -51,7 +51,7 @@ template< typename T >
 void save_as_string(std::string& outbound_data, const T& t)
 {
    std::ostringstream archive_stream;
-   cereal::JSONOutputArchive oarchive(archive_stream); // Create an output archive
+   cereal::JSONOutputArchive oarchive(archive_stream,cereal::JSONOutputArchive::Options::NoIndent()); // Create an output archive
    oarchive(cereal::make_nvp(typeid(t).name(),t) );    // Write the data to the archive
    outbound_data = archive_stream.str();
    outbound_data += "}"; //HACK for cereal BUG, YUK,YUK, TODO
