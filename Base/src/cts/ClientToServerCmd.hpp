@@ -226,11 +226,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< ClientToServerCmd >( this );
-      ar & path_to_submittable_;
-      ar & jobs_password_;
-      ar & process_or_remote_id_;
-      ar & try_no_;
+      ar(cereal::base_class< ClientToServerCmd >( this ),
+          CEREAL_NVP(path_to_submittable_),
+          CEREAL_NVP(jobs_password_),
+          CEREAL_NVP(process_or_remote_id_),
+          CEREAL_NVP(try_no_));
    }
 };
 
@@ -263,7 +263,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< TaskCmd >( this );
+      ar(cereal::base_class< TaskCmd >( this ));
    }
 };
 
@@ -295,7 +295,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< TaskCmd >( this );
+      ar(cereal::base_class< TaskCmd >( this ));
    }
 };
 
@@ -334,8 +334,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< TaskCmd >( this );
-      ar & expression_;
+      ar(cereal::base_class< TaskCmd >( this ),
+         CEREAL_NVP(expression_));
    }
 };
 
@@ -371,8 +371,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< TaskCmd >( this );
-      ar & reason_;
+      ar(cereal::base_class< TaskCmd >( this ),
+      CEREAL_NVP(reason_));
    }
 };
 
@@ -410,8 +410,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< TaskCmd >( this );
-      ar & name_;
+      ar(cereal::base_class< TaskCmd >( this ),
+      CEREAL_NVP(name_));
    }
 };
 
@@ -452,9 +452,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< TaskCmd >( this );
-      ar & name_;
-      ar & value_;
+      ar(cereal::base_class< TaskCmd >( this ),
+      CEREAL_NVP(name_),
+      CEREAL_NVP(value_));
    }
 };
 
@@ -496,9 +496,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< TaskCmd >( this );
-      ar & name_;
-      ar & label_;
+      ar(cereal::base_class< TaskCmd >( this ),
+      CEREAL_NVP(name_),
+      CEREAL_NVP(label_));
    }
 };
 
@@ -549,11 +549,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< TaskCmd >( this );
-      ar & name_;
-      ar & action_;
-      ar & step_;
-      ar & path_to_node_with_queue_;
+      ar(cereal::base_class< TaskCmd >( this ),
+         CEREAL_NVP(name_),
+         CEREAL_NVP(action_),
+         CEREAL_NVP(step_),
+         CEREAL_NVP(path_to_node_with_queue_));
    }
 };
 
@@ -632,7 +632,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
+      ar(cereal::base_class< UserCmd >( this ));
    }
 };
 
@@ -725,10 +725,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & mode_;
-      ar & check_pt_interval_;
-      ar & check_pt_save_time_alarm_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(mode_),
+         CEREAL_NVP(check_pt_interval_),
+         CEREAL_NVP(check_pt_save_time_alarm_));
    }
 };
 
@@ -788,11 +788,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & api_;
-      ar & client_handle_;
-      ar & client_state_change_no_;
-      ar & client_modify_change_no_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(api_),
+         CEREAL_NVP(client_handle_),
+         CEREAL_NVP(client_state_change_no_),
+         CEREAL_NVP(client_modify_change_no_));
    }
 };
 
@@ -857,12 +857,12 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & api_;
-      ar & client_handle_;
-      ar & auto_add_new_suites_;
-      ar & drop_user_;
-      ar & suites_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(api_),
+         CEREAL_NVP(client_handle_),
+         CEREAL_NVP(auto_add_new_suites_),
+         CEREAL_NVP(drop_user_),
+         CEREAL_NVP(suites_));
    }
 };
 
@@ -917,9 +917,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & api_;
-      ar & absNodePath_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(api_),
+         CEREAL_NVP(absNodePath_));
    }
 };
 
@@ -968,10 +968,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & api_;
-      ar & force_;
-      ar & paths_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(api_),
+         CEREAL_NVP(force_),
+         CEREAL_NVP(paths_));
    }
 };
 
@@ -1014,10 +1014,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & api_;
-      ar & get_last_n_lines_;
-      ar & new_path_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(api_),
+         CEREAL_NVP(get_last_n_lines_),
+         CEREAL_NVP(new_path_));
    }
 };
 
@@ -1048,8 +1048,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & msg_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(msg_));
    }
 };
 
@@ -1088,9 +1088,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & suiteName_;
-      ar & force_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(suiteName_),
+         CEREAL_NVP(force_));
    }
 };
 
@@ -1125,11 +1125,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & user_action_;
-      ar & process_id_;
-      ar & password_;
-      ar & paths_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(user_action_),
+         CEREAL_NVP(process_id_),
+         CEREAL_NVP(password_),
+         CEREAL_NVP(paths_));
    }
 };
 
@@ -1174,9 +1174,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & paths_;
-      ar & option_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(paths_),
+         CEREAL_NVP(option_));
    }
 };
 
@@ -1213,9 +1213,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & absNodepath_;
-      ar & option_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(absNodepath_),
+         CEREAL_NVP(option_));
    }
 };
 
@@ -1261,9 +1261,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & paths_;
-      ar & force_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(paths_),
+         CEREAL_NVP(force_));
    }
 };
 
@@ -1303,7 +1303,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
+      ar(cereal::base_class< UserCmd >( this ));
    }
 };
 
@@ -1346,10 +1346,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & force_;
-      ar & defs_;
-      ar & defs_filename_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(force_),
+         CEREAL_NVP(defs_),
+         CEREAL_NVP(defs_filename_));
    }
 };
 
@@ -1396,12 +1396,12 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & createNodesAsNeeded_;
-      ar & force_;
-      ar & pathToNode_;
-      ar & path_to_defs_;
-      ar & clientDefs_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(createNodesAsNeeded_),
+         CEREAL_NVP(force_),
+         CEREAL_NVP(pathToNode_),
+         CEREAL_NVP(path_to_defs_),
+         CEREAL_NVP(clientDefs_));
    }
 };
 
@@ -1460,11 +1460,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & paths_;
-      ar & stateOrEvent_;
-      ar & recursive_;
-      ar & setRepeatToLastValue_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(paths_),
+         CEREAL_NVP(stateOrEvent_),
+         CEREAL_NVP(recursive_),
+         CEREAL_NVP(setRepeatToLastValue_));
    }
 };
 
@@ -1525,12 +1525,12 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & paths_;
-      ar & trigger_;
-      ar & all_;
-      ar & date_;
-      ar & time_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(paths_),
+         CEREAL_NVP(trigger_),
+         CEREAL_NVP(all_),
+         CEREAL_NVP(date_),
+         CEREAL_NVP(time_));
    }
 };
 
@@ -1636,15 +1636,15 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & paths_;
-      ar & name_;
-      ar & value_;
-      ar & add_attr_type_;
-      ar & del_attr_type_;
-      ar & change_attr_type_;
-      ar & flag_type_;
-      ar & flag_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(paths_),
+         CEREAL_NVP(name_),
+         CEREAL_NVP(value_),
+         CEREAL_NVP(add_attr_type_),
+         CEREAL_NVP(del_attr_type_),
+         CEREAL_NVP(change_attr_type_),
+         CEREAL_NVP(flag_type_),
+         CEREAL_NVP(flag_));
    }
 };
 
@@ -1693,10 +1693,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & file_;
-      ar & pathToNode_;
-      ar & max_lines_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(file_),
+         CEREAL_NVP(pathToNode_),
+         CEREAL_NVP(max_lines_));
    }
 };
 
@@ -1770,13 +1770,13 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & edit_type_;
-      ar & path_to_node_;
-      ar & user_file_contents_;
-      ar & user_variables_;
-      ar & alias_;
-      ar & run_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(edit_type_),
+         CEREAL_NVP(path_to_node_),
+         CEREAL_NVP(user_file_contents_),
+         CEREAL_NVP(user_variables_),
+         CEREAL_NVP(alias_),
+         CEREAL_NVP(run_));
    }
 };
 
@@ -1814,9 +1814,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & source_;
-      ar & dest_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(source_),
+         CEREAL_NVP(dest_));
    }
 };
 
@@ -1859,12 +1859,12 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & src_node_ ;
-      ar & src_host_;
-      ar & src_port_;
-      ar & src_path_;
-      ar & dest_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(src_node_),
+         CEREAL_NVP(src_host_),
+         CEREAL_NVP(src_port_),
+         CEREAL_NVP(src_path_),
+         CEREAL_NVP(dest_));
    }
 };
 
@@ -1908,11 +1908,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & query_type_;
-      ar & path_to_attribute_;
-      ar & attribute_;
-      ar & path_to_task_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(query_type_),
+         CEREAL_NVP(path_to_attribute_),
+         CEREAL_NVP(attribute_),
+         CEREAL_NVP(path_to_task_));
    }
 };
 
@@ -1968,8 +1968,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class< UserCmd >( this );
-      ar & cmdVec_;
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(cmdVec_));
    }
 };
 

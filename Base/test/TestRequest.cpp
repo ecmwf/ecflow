@@ -232,7 +232,7 @@ static void test_persistence(const Defs& theFixtureDefs )
 	int groupRequest = 0;
 	BOOST_FOREACH(const Cmd_ptr& theCmd, cmd_vec) {
 
-		std::cout << "TheCmd "; theCmd->print(std::cout); std::cout << "\n";
+		//std::cout << "TheCmd "; theCmd->print(std::cout); std::cout << "\n";
 		if (theCmd->connect_to_different_servers()) {
 			BOOST_CHECK_MESSAGE(theCmd->task_cmd(),"Currently only tasks commands, are allowed to connect to different servers");
 		}
@@ -258,15 +258,15 @@ static void test_persistence(const Defs& theFixtureDefs )
 			}
 		}
 
-      cout << " Saving = " << cmd_request << "\n";
+      //cout << " Saving = " << cmd_request << "\n";
       std::string saved_request;
       {
          BOOST_REQUIRE_NO_THROW(ecf::save("request.txt",cmd_request)); // save as filename
 		   ecf::save_as_string(saved_request ,cmd_request);              // save as string
-		   cout << saved_request << "\n";
+		   // cout << saved_request << "\n";                                // Take a peek at json output
       }
 
-      cout << " Restoring = " << cmd_request << "\n";
+      //cout << " Restoring = " << cmd_request << "\n";
       {
          ClientToServerRequest restoredRequest;
          BOOST_REQUIRE_NO_THROW(ecf::restore("request.txt", restoredRequest));
