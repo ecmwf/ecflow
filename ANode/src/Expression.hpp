@@ -66,8 +66,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & exp_;
-      ar & exp_type_;
+      ar(CEREAL_NVP(exp_),
+         CEREAL_NVP(exp_type_));
    }
 };
 
@@ -162,8 +162,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & vec_;
-      ar & makeFree_;
+      ar(CEREAL_NVP(vec_),
+         CEREAL_NVP(makeFree_));
    }
 };
 #endif

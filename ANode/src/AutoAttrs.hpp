@@ -71,9 +71,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & auto_cancel_;
-      ar & auto_archive_;
-      ar & auto_restore_;
+      ar(CEREAL_NVP(auto_cancel_),
+         CEREAL_NVP(auto_archive_ ),
+         CEREAL_NVP(auto_restore_)
+       );
    }
 };
 #endif

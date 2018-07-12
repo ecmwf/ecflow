@@ -138,11 +138,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & timeVec_;
-      ar & todayVec_;
-      ar & dates_;
-      ar & days_;
-      ar & crons_;
+      ar(CEREAL_NVP(timeVec_),
+         CEREAL_NVP(todayVec_),
+         CEREAL_NVP(dates_),
+         CEREAL_NVP(days_),
+         CEREAL_NVP(crons_));
    }
 };
 

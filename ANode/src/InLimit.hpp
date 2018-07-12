@@ -68,11 +68,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & name_;
-      ar & pathToNode_; // can be empty
-      ar & tokens_;
-      ar & limit_this_node_only_; // new to 5.0.0
-      ar & incremented_;          // new to 5.0.0
+      ar(CEREAL_NVP(name_),
+         CEREAL_NVP(pathToNode_),           // can be empty
+         CEREAL_NVP(tokens_),
+         CEREAL_NVP(limit_this_node_only_), // new to 5.0.0
+         CEREAL_NVP(incremented_));         // new to 5.0.0
    }
 };
 

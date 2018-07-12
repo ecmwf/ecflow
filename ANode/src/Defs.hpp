@@ -376,27 +376,27 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & state_change_no_;
-      ar & modify_change_no_;
-      ar & updateCalendarCount_;
-      ar & state_;
-      ar & server_;
-      ar & suiteVec_;
-      ar & flag_;
+      ar(CEREAL_NVP(state_change_no_),
+         CEREAL_NVP(modify_change_no_),
+         CEREAL_NVP(updateCalendarCount_),
+         CEREAL_NVP(state_),
+         CEREAL_NVP(server_),
+         CEREAL_NVP(suiteVec_),
+         CEREAL_NVP(flag_));
 
       // only save the edit history when check pointing.
       if (Archive::is_saving::value) {
          if (save_edit_history_) {
-            ar & edit_history_;
+            ar(CEREAL_NVP(edit_history_));
             save_edit_history_ = false; // reset
          }
          else {
-            std::map<std::string, std::deque<std::string> > empty_edit_history;
-            ar & empty_edit_history;
+            std::map<std::string, std::deque<std::string> > edit_history;
+            ar(CEREAL_NVP(edit_history)); // empty
          }
       }
       else {
-         ar & edit_history_;
+         ar(CEREAL_NVP(edit_history_));
       }
 
       if (Archive::is_loading::value) {

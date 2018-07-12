@@ -782,17 +782,17 @@ private:
    std::pair<NState,boost::posix_time::time_duration> state_; // state and duration since suite start when state changed
    DState                      defStatus_;    // default value is QUEUED
 
+   std::vector<Variable>       varVec_;
    mutable std::unique_ptr<Expression>        completeExpr_; // can only have one complete expression
    mutable std::unique_ptr<Expression>        triggerExpr_;  // can only have one trigger expression
 
-   std::unique_ptr<ecf::LateAttr>              lateAttr_;     // Can only have one late attribute per node
-   std::unique_ptr<TimeDepAttrs>               time_dep_attrs_;
    std::unique_ptr<ChildAttrs>                 child_attrs_;  // event meter & labels
+   std::unique_ptr<TimeDepAttrs>               time_dep_attrs_;
+   std::unique_ptr<ecf::LateAttr>              lateAttr_;     // Can only have one late attribute per node
    std::unique_ptr<MiscAttrs>                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
    std::unique_ptr<AutoAttrs>                  auto_attrs_;   // has no changeable state ?
    Repeat                      repeat_;       // each node can only have one repeat. By value, since has pimpl
 
-   std::vector<Variable>       varVec_;
    std::vector<limit_ptr>      limitVec_;    // Ptrs since many in-limits can point to a single limit
    InLimitMgr                  inLimitMgr_;  // manages the inlimit
 
@@ -818,22 +818,22 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar( name_,
-          state_,
-          suspended_,
-          defStatus_,
-          completeExpr_,
-          triggerExpr_,
-          lateAttr_,
-          time_dep_attrs_,
-          child_attrs_,
-          misc_attrs_,    // VerifyAttr & Zombies * auto attrs
-          auto_attrs_,
-          repeat_,
-          varVec_,
-          limitVec_,
-          inLimitMgr_,
-          flag_);
+      ar( CEREAL_NVP(name_),
+          CEREAL_NVP(state_),
+          CEREAL_NVP(suspended_),
+          CEREAL_NVP(defStatus_),
+          CEREAL_NVP(varVec_),
+          CEREAL_NVP(completeExpr_),
+          CEREAL_NVP(triggerExpr_),
+          CEREAL_NVP(child_attrs_),
+          CEREAL_NVP(time_dep_attrs_),
+          CEREAL_NVP(lateAttr_),
+          CEREAL_NVP(misc_attrs_),   // VerifyAttr & Zombies * auto attrs
+          CEREAL_NVP(auto_attrs_),
+          CEREAL_NVP(repeat_),
+          CEREAL_NVP(limitVec_),
+          CEREAL_NVP(inLimitMgr_),
+          CEREAL_NVP(flag_));
 
       if (Archive::is_loading::value) {
          if (time_dep_attrs_)  time_dep_attrs_->set_node(this);

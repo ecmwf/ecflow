@@ -128,9 +128,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & meters_;
-      ar & events_;
-      ar & labels_;
+      ar(CEREAL_NVP(meters_),
+         CEREAL_NVP(events_),
+         CEREAL_NVP(labels_));
    }
 };
 #endif

@@ -141,9 +141,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
- 	   ar & cereal::base_class<Submittable>(this); // Serialise base class information
-      ar & alias_no_;
-      ar & aliases_;
+      ar(cereal::base_class<Submittable>(this), // Serialise base class information
+         CEREAL_NVP(alias_no_),
+         CEREAL_NVP(aliases_));
 
       // Setup the alias parent pointers. Since they are not serialised
       // ********************************************************************

@@ -65,7 +65,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<NodeContainer>(this);
+      ar(cereal::base_class<NodeContainer>(this));
    }
 };
 

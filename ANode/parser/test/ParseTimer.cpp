@@ -118,6 +118,7 @@ int main(int argc, char* argv[])
       cout << " Save as BOOST checkpoint, time taken                                  = " << timer.elapsed()  << endl;
 
       std::remove(tmpFilename.c_str());
+      //exit(0);
    }
 
    {

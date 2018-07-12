@@ -105,10 +105,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & zombies_;
-      ar & verifys_;
-      ar & queues_;
-      ar & generics_;
+      ar(CEREAL_NVP(zombies_),
+         CEREAL_NVP(verifys_),
+         CEREAL_NVP(queues_),
+         CEREAL_NVP(generics_));
    }
 };
 #endif

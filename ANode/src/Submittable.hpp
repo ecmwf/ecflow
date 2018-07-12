@@ -173,11 +173,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Node>(this); // Serialise base class information
-      ar & jobsPassword_;
-      ar & process_or_remote_id_;
-      ar & abortedReason_;
-      ar & tryNo_;
+      ar(cereal::base_class<Node>(this),
+         CEREAL_NVP(jobsPassword_),
+         CEREAL_NVP(process_or_remote_id_),
+         CEREAL_NVP(abortedReason_),
+         CEREAL_NVP(tryNo_));
    }
 };
 

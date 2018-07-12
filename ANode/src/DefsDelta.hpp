@@ -79,10 +79,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & server_state_change_no_;
-      ar & server_modify_change_no_;
-   	ar & compound_mementos_;
-  	}
+      ar(CEREAL_NVP(server_state_change_no_),
+         CEREAL_NVP(server_modify_change_no_),
+         CEREAL_NVP(compound_mementos_));
+   }
 };
 
 #endif

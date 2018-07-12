@@ -95,9 +95,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & clear_attributes_;
-      ar & absNodePath_;
-      ar & vec_;
+      ar(CEREAL_NVP(clear_attributes_),
+         CEREAL_NVP(absNodePath_),
+         CEREAL_NVP(vec_));
    }
 };
 
@@ -118,8 +118,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & state_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(state_));
    }
 };
 
@@ -142,8 +142,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & order_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(order_));
    }
 };
 
@@ -165,8 +165,8 @@ private:
 //      ar.register_type(static_cast<Task *>(NULL));
 //      ar.register_type(static_cast<Family *>(NULL));
 
-      ar & cereal::base_class<Memento>(this);
-      ar & children_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(children_));
    }
 };
 
@@ -186,8 +186,8 @@ private:
    {
 //      ar.register_type(static_cast<Alias *>(NULL));
 
-      ar & cereal::base_class<Memento>(this);
-      ar & children_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(children_));
    }
 };
 
@@ -205,8 +205,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & alias_no_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(alias_no_));
    }
 };
 
@@ -226,8 +226,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & suspended_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(suspended_));
    }
 };
 
@@ -245,8 +245,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & state_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(state_));
    }
 };
 
@@ -264,8 +264,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & serverEnv_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(serverEnv_));
    }
 };
 
@@ -283,8 +283,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & state_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(state_));
    }
 };
 
@@ -303,8 +303,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & event_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(event_));
    }
 };
 
@@ -323,8 +323,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & meter_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(meter_));
    }
 };
 
@@ -344,8 +344,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & label_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(label_));
    }
 };
 
@@ -364,8 +364,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & queue_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(queue_));
    }
 };
 
@@ -384,8 +384,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & generic_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(generic_));
    }
 };
 
@@ -407,10 +407,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & index_;
-      ar & name_;
-      ar & state_vec_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(index_),
+         CEREAL_NVP(name_),
+         CEREAL_NVP(state_vec_));
    }
 };
 
@@ -429,8 +429,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & exp_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(exp_));
    }
 };
 
@@ -448,8 +448,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & exp_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(exp_));
    }
 };
 
@@ -467,8 +467,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & repeat_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(repeat_));
    }
 };
 
@@ -486,8 +486,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & index_or_value_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(index_or_value_));
    }
 };
 
@@ -506,8 +506,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & limit_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(limit_));
    }
 };
 
@@ -525,8 +525,8 @@ private:
    friend class cereal::access;
    template<class Archive>
    void serialize( Archive & ar, std::uint32_t const version  ) {
-      ar & cereal::base_class<Memento>(this);
-      ar & inlimit_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(inlimit_));
    }
 };
 
@@ -544,8 +544,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & var_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(var_));
    }
 };
 
@@ -563,8 +563,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & late_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(late_));
    }
 };
 
@@ -584,8 +584,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & flag_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(flag_));
    }
 };
 
@@ -604,8 +604,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & attr_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(attr_));
    }
 };
 
@@ -624,8 +624,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & attr_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(attr_));
    }
 };
 
@@ -644,8 +644,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & attr_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(attr_));
    }
 };
 
@@ -664,8 +664,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & attr_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(attr_));
    }
 };
 
@@ -684,8 +684,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & attr_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(attr_));
    }
 };
 
@@ -703,8 +703,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & attr_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(attr_));
    }
 };
 
@@ -724,8 +724,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & verifys_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(verifys_));
    }
 };
 
@@ -755,11 +755,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & jobsPassword_;
-      ar & process_or_remote_id_;
-      ar & abortedReason_;
-      ar & tryNo_;
+      ar(cereal::base_class<Memento>(this),
+         CEREAL_NVP(jobsPassword_),
+         CEREAL_NVP(process_or_remote_id_),
+         CEREAL_NVP(abortedReason_),
+         CEREAL_NVP(tryNo_));
    }
 };
 
@@ -777,8 +777,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & clockAttr_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(clockAttr_));
    }
 };
 
@@ -796,8 +796,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & begun_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(begun_));
    }
 };
 
@@ -815,8 +815,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & cereal::base_class<Memento>(this);
-      ar & calendar_;
+      ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(calendar_));
    }
 };
 

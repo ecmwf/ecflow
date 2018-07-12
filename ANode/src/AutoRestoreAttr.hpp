@@ -46,7 +46,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & nodes_to_restore_;
+      ar(CEREAL_NVP(nodes_to_restore_));
    }
 };
 

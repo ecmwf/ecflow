@@ -125,10 +125,10 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       // serialise base class information
-      ar & cereal::base_class<NodeContainer>(this);
-      ar & begun_;
-      ar & clockAttr_;
-      ar & calendar_;
+      ar(cereal::base_class<NodeContainer>(this),
+         CEREAL_NVP(begun_),
+         CEREAL_NVP(clockAttr_),
+         CEREAL_NVP(calendar_));
 
       // The calendar does not persist the clock type or start stop with server since
       // that is persisted with the clock attribute

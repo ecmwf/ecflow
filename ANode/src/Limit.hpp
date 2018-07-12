@@ -81,10 +81,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & name_;
-      ar & theLimit_;
-      ar & value_;
-      ar & paths_;
+      ar(CEREAL_NVP(name_),
+         CEREAL_NVP(theLimit_),
+         CEREAL_NVP(value_),
+         CEREAL_NVP(paths_));
    }
 };
 

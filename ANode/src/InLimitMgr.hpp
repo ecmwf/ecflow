@@ -123,7 +123,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
- 	   ar & inLimitVec_;
+ 	   ar(CEREAL_NVP(inLimitVec_));
  	}
 };
 

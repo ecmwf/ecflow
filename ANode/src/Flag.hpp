@@ -108,7 +108,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar & flag_;
+      ar(CEREAL_NVP(flag_));
    }
 };
 }

@@ -77,15 +77,15 @@ Node::Node(const Node& rhs)
   suspended_(rhs.suspended_),
   state_( rhs.state_),
   defStatus_(rhs.defStatus_),
+  varVec_(rhs.varVec_),
   completeExpr_( (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL ),
   triggerExpr_(  (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL ),
-  lateAttr_((rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL),
-  time_dep_attrs_((rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL),
   child_attrs_((rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL),
+  time_dep_attrs_((rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL),
+  lateAttr_((rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL),
   misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL),
   auto_attrs_((rhs.auto_attrs_) ? new AutoAttrs(*rhs.auto_attrs_) : NULL),
   repeat_( rhs.repeat_),
-  varVec_(rhs.varVec_),
   inLimitMgr_(rhs.inLimitMgr_),
   flag_(rhs.flag_),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
@@ -107,9 +107,9 @@ Node::Node(const Node& rhs)
 void Node::delete_attributes() {
    completeExpr_.reset(nullptr);
    triggerExpr_.reset(nullptr);
-   lateAttr_.reset(nullptr);
-   time_dep_attrs_.reset(nullptr);
    child_attrs_.reset(nullptr);
+   time_dep_attrs_.reset(nullptr);
+   lateAttr_.reset(nullptr);
    misc_attrs_.reset(nullptr);
    auto_attrs_.reset(nullptr);
 }
@@ -140,17 +140,18 @@ Node& Node::operator=(const Node& rhs)
       state_ =  rhs.state_;
       defStatus_ = rhs.defStatus_;
 
-      delete_attributes();
+      varVec_ = rhs.varVec_ ;
 
+      delete_attributes();
       if (rhs.completeExpr_)   completeExpr_   = std::make_unique<Expression>(*rhs.completeExpr_);
       if (rhs.triggerExpr_)    triggerExpr_    = std::make_unique<Expression>(*rhs.triggerExpr_ );
-      if (rhs.lateAttr_)       lateAttr_       = std::make_unique<ecf::LateAttr>(*rhs.lateAttr_);
-      if (rhs.time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(*rhs.time_dep_attrs_);
       if (rhs.child_attrs_)    child_attrs_    = std::make_unique<ChildAttrs>(*rhs.child_attrs_);
+      if (rhs.time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(*rhs.time_dep_attrs_);
+      if (rhs.lateAttr_)       lateAttr_       = std::make_unique<ecf::LateAttr>(*rhs.lateAttr_);
       if (rhs.misc_attrs_)     misc_attrs_     = std::make_unique<MiscAttrs>(*rhs.misc_attrs_);
       if (rhs.auto_attrs_)     auto_attrs_     = std::make_unique<AutoAttrs>(*rhs.auto_attrs_);
+
       repeat_ =  rhs.repeat_ ;
-      varVec_ = rhs.varVec_ ;
       inLimitMgr_ = rhs.inLimitMgr_ ;
       inLimitMgr_.set_node(this);
       flag_ = rhs.flag_ ;
@@ -160,8 +161,8 @@ Node& Node::operator=(const Node& rhs)
       suspended_change_no_ = 0;
       graphic_ptr_ = 0;
 
-      if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
       if ( child_attrs_ )    child_attrs_->set_node(this);
+      if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
       if ( misc_attrs_ )     misc_attrs_->set_node(this);
       if ( auto_attrs_ )     auto_attrs_->set_node(this);
 
