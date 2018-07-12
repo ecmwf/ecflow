@@ -66,18 +66,25 @@ bool PersistHelper::test_defs_checkpt_and_reload( const Defs& theInMemoryDefs, b
 
    // Reload the file we just persisted and compare with in memory defs
    Defs savedDef;
-   return reload_from_defs_file(theInMemoryDefs,savedDef,tmpFilename,do_compare);
+   bool reload_result = reload_from_defs_file(theInMemoryDefs,savedDef,tmpFilename,do_compare);
+   if (reload_result)  return savedDef.checkInvariants(errorMsg_);
+   return reload_result;
 }
 
 
-bool PersistHelper::test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare)
+bool PersistHelper::test_cereal_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare)
 {
  	errorMsg_.clear();
  	file_size_ = 0;
+ 	if (!theInMemoryDefs.checkInvariants(errorMsg_)) {
+ 	   return false;
+ 	}
 
    // Save in memory defs as a check pt file, then restore and compare
  	Defs reloaded_defs;
- 	return reload_from_boost_checkpt_file(theInMemoryDefs,reloaded_defs,do_compare);
+ 	bool reload_result = reload_from_cereal_checkpt_file(theInMemoryDefs,reloaded_defs,do_compare);
+   if (reload_result)  return reloaded_defs.checkInvariants(errorMsg_);
+   return reload_result;
 }
 
 bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theInMemoryDefs )
@@ -85,6 +92,10 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
    // Write Defs to disk, and reload, then compare defs reloaded checkpt file, they should be the same
    errorMsg_.clear();
    file_size_ = 0;
+   if (!theInMemoryDefs.checkInvariants(errorMsg_)) {
+      return false;
+   }
+
    DebugEquality debug_equality; // only as affect in DEBUG build
 
 #ifdef DEBUG
@@ -110,22 +121,34 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
          errorMsg_ += error_msg ;
          return false;
       }
+      if (!reload_strings_def.checkInvariants(errorMsg_)) {
+         return false;
+      }
    }
+
 
    // Reload the file we just persisted and compare with in memory defs
    Defs reloaded_defs;
    if (!reload_from_defs_file(theInMemoryDefs,reloaded_defs,tmpFilename)) {
       return false;
    }
-
-   // Save in memory defs as a check pt file, then restore and compare
-   Defs reloaded_boost_checkPt_defs;
-   if (!reload_from_boost_checkpt_file(theInMemoryDefs,reloaded_boost_checkPt_defs ,true)) {
+   if (!reloaded_defs.checkInvariants(errorMsg_)) {
       return false;
    }
 
+
+   // Save in memory defs as a check pt file, then restore and compare
+   Defs reloaded_cereal_checkPt_defs;
+   if (!reload_from_cereal_checkpt_file(theInMemoryDefs,reloaded_cereal_checkPt_defs ,true)) {
+      return false;
+   }
+   if (!reloaded_cereal_checkPt_defs.checkInvariants(errorMsg_)) {
+      return false;
+   }
+
+
    // Make sure reloading def's file with state is same as the checkpt file
-   bool match = reloaded_defs == reloaded_boost_checkPt_defs;
+   bool match = reloaded_defs == reloaded_cereal_checkPt_defs;
 
    if (!match) {
       std::stringstream ss;
@@ -137,11 +160,11 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
       ss << "+++++++++++++ reloaded_defs  ++++++++++++++++++++++++++++\n";
       ss << reloaded_defs;
       ss << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n";
-      ss << reloaded_boost_checkPt_defs ;
+      ss << reloaded_cereal_checkPt_defs ;
       errorMsg_ += ss.str();
    }
    else {
-      if (compare_edit_history_ && !reloaded_defs.compare_edit_history(reloaded_boost_checkPt_defs )) {
+      if (compare_edit_history_ && !reloaded_defs.compare_edit_history(reloaded_cereal_checkPt_defs )) {
          std::stringstream ss;
          ss << "\nPersistHelper::test_state_persist_and_reload_with_checkpt  compare_edit_history_\n";
          ss << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n";
@@ -151,17 +174,17 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
          ss << "+++++++++++++ reloaded_defs  ++++++++++++++++++++++++++++\n";
          ss << reloaded_defs;
          ss << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n";
-         ss << reloaded_boost_checkPt_defs;
+         ss << reloaded_cereal_checkPt_defs;
          errorMsg_ += ss.str();
       }
    }
-   if ( !reloaded_defs.compare_change_no(reloaded_boost_checkPt_defs )) {
-      errorMsg_ += "\nPersistHelper::test_state_persist_and_reload_with_checkpt: Change numbers don't compare between reloaded_defs and reloaded_boost_checkPt_defs \n";
+   if ( !reloaded_defs.compare_change_no(reloaded_cereal_checkPt_defs )) {
+      errorMsg_ += "\nPersistHelper::test_state_persist_and_reload_with_checkpt: Change numbers don't compare between reloaded_defs and reloaded_cereal_checkPt_defs \n";
    }
 
 
    // Make sure reloading def's file with state is same as the checkpt file
-   match = reload_strings_def == reloaded_boost_checkPt_defs;
+   match = reload_strings_def == reloaded_cereal_checkPt_defs;
    if (!match) {
       std::stringstream ss;
       ss << "\nPersistHelper::test_state_persist_and_reload_with_checkpt\n";
@@ -172,11 +195,11 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
       ss << "+++++++++++++  reload_strings_def  ++++++++++++++++++++++++++++\n";
       ss << reload_strings_def;
       ss << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n";
-      ss << reloaded_boost_checkPt_defs ;
+      ss << reloaded_cereal_checkPt_defs ;
       errorMsg_ += ss.str();
    }
    else {
-      if (compare_edit_history_ && !reload_strings_def.compare_edit_history(reloaded_boost_checkPt_defs )) {
+      if (compare_edit_history_ && !reload_strings_def.compare_edit_history(reloaded_cereal_checkPt_defs )) {
          std::stringstream ss;
          ss << "\nPersistHelper::test_state_persist_and_reload_with_checkpt  compare_edit_history_\n";
          ss << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n";
@@ -186,12 +209,12 @@ bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theIn
          ss << "+++++++++++++ reload_strings_def ++++++++++++++++++++++++++++\n";
          ss <<  reload_strings_def;
          ss << "++++++++++++++ reloaded_checkPt_defs  ++++++++++++++++++++++++++++\n";
-         ss << reloaded_boost_checkPt_defs;
+         ss << reloaded_cereal_checkPt_defs;
          errorMsg_ += ss.str();
       }
    }
-   if ( !reload_strings_def.compare_change_no(reloaded_boost_checkPt_defs )) {
-      errorMsg_ += "\nPersistHelper::test_state_persist_and_reload_with_checkpt: Change numbers don't compare between reload_strings_def and reloaded_boost_checkPt_defs\n";
+   if ( !reload_strings_def.compare_change_no(reloaded_cereal_checkPt_defs )) {
+      errorMsg_ += "\nPersistHelper::test_state_persist_and_reload_with_checkpt: Change numbers don't compare between reload_strings_def and reloaded_cereal_checkPt_defs\n";
    }
 
    return errorMsg_.empty();
@@ -249,7 +272,7 @@ bool PersistHelper::reload_from_defs_file(const Defs& theInMemoryDefs, Defs& rel
 }
 
 
-bool PersistHelper::reload_from_boost_checkpt_file(const Defs& theInMemoryDefs,
+bool PersistHelper::reload_from_cereal_checkpt_file(const Defs& theInMemoryDefs,
                                              Defs& reloaded_defs,
                                              bool do_compare)
 {
@@ -259,20 +282,20 @@ bool PersistHelper::reload_from_boost_checkpt_file(const Defs& theInMemoryDefs,
 #else
    std::string tmpCheckPt_file = "tmp.check";
 #endif
-   theInMemoryDefs.boost_save_as_checkpt(tmpCheckPt_file);
+   theInMemoryDefs.cereal_save_as_checkpt(tmpCheckPt_file);
 
    DebugEquality debug_equality; // only as affect in DEBUG build
 
    try  {
       // Parse the file we just persisted and load the defs file into memory.
-      reloaded_defs.boost_restore_from_checkpt(tmpCheckPt_file);
+      reloaded_defs.cereal_restore_from_checkpt(tmpCheckPt_file);
 
       if (do_compare ) {
          // Make sure the checkpoint file file we just parsed match's the one we persisted
          bool match = reloaded_defs == theInMemoryDefs;
          if (!match) {
             std::stringstream ss;
-            ss << "\nPersistHelper::reload_from_boost_checkpt_file\n";
+            ss << "\nPersistHelper::reload_from_cereal_checkpt_file\n";
             ss << "In memory and reloaded def's don't match\n";
             ss << "+++++++++++++ Saved/reloaded check pt file ++++++++++++++++++++++++++++\n";
             PrintStyle style(PrintStyle::STATE);
@@ -284,7 +307,7 @@ bool PersistHelper::reload_from_boost_checkpt_file(const Defs& theInMemoryDefs,
          else {
             if (compare_edit_history_ && !reloaded_defs.compare_edit_history(theInMemoryDefs)) {
                std::stringstream ss;
-               ss << "\nPersistHelper::reload_from_boost_checkpt_file  compare_edit_history_\n";
+               ss << "\nPersistHelper::reload_from_cereal_checkpt_file  compare_edit_history_\n";
                ss << "In reloaded_defs_file and reloaded_checkPt_defs edit history don't match\n";
                ss << "+++++++++++++ Saved/reloaded check pt file ++++++++++++++++++++++++++++\n";
                PrintStyle style(PrintStyle::MIGRATE);
@@ -295,12 +318,12 @@ bool PersistHelper::reload_from_boost_checkpt_file(const Defs& theInMemoryDefs,
             }
          }
          if ( !reloaded_defs.compare_change_no( theInMemoryDefs )) {
-            errorMsg_ += "\nPersistHelper::reload_from_boost_checkpt_file: Change numbers don't compare between reloaded_defs and theInMemoryDefs  \n";
+            errorMsg_ += "\nPersistHelper::reload_from_cereal_checkpt_file: Change numbers don't compare between reloaded_defs and theInMemoryDefs  \n";
          }
       }
    }
    catch (std::exception& e) {
-      errorMsg_ =  "PersistHelper::reload_from_boost_checkpt_file: " + string(e.what());
+      errorMsg_ =  "PersistHelper::reload_from_cereal_checkpt_file: " + string(e.what());
    }
 
    file_size_ = fs::file_size(tmpCheckPt_file);

@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_CASE( test_defs_structure_persistence_and_reload )
 
 	MyDefsFixture theDefsFixture;
 	PersistHelper helper;
- 	BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
+ 	BOOST_CHECK_MESSAGE( helper.test_cereal_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
 
    // Note: Aliases are *NOT* written in PrintStyle::DEFS file
  	// Hence in order for this test to pass, we must delete the alias first & reset task alias_no
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( test_defs_checkpt_persistence_and_reload )
 
    MyDefsFixture theDefsFixture;
    PersistHelper helper;
-   BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
+   BOOST_CHECK_MESSAGE( helper.test_cereal_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
    BOOST_CHECK_MESSAGE( helper.test_defs_checkpt_and_reload(theDefsFixture.defsfile_), helper.errorMsg());
 }
 

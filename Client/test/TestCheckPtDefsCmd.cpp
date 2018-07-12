@@ -281,7 +281,7 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_old_boost_format )
    // Save the MyDefsFixture as a boost checkpoint file.
    Host host;
    MyDefsFixture theDefsFixture(port); // make sure server variable use this port
-   theDefsFixture.defsfile_.boost_save_as_checkpt(host.ecf_checkpt_file(port));
+   theDefsFixture.defsfile_.cereal_save_as_checkpt(host.ecf_checkpt_file(port));
 
    // Now attempt to restore this boost checkpoint, from the server
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());

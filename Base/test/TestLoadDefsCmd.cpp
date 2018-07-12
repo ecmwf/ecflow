@@ -44,7 +44,7 @@ BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 //   std::string boost_format = Pid::unique_name(test_dir + "/test_load_defs_cmd.check");
 //
 //   defs->save_as_checkpt(  defs_format );
-//   defs->boost_save_as_checkpt(boost_format);
+//   defs->cereal_save_as_checkpt(boost_format);
 //
 //   BOOST_CHECK_MESSAGE(fs::exists( defs_format  ),   defs_format << " file not created" );
 //   BOOST_CHECK_MESSAGE(fs::exists(  boost_format  ), boost_format << " file not created" );

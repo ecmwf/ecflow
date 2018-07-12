@@ -249,9 +249,8 @@ public:
 
    /// Function to save/restore the defs as a checkpoint file. Can throw exception
    /// If the Defs file has content, this is deleted first, i.e. suites, externs, Can throw an exception
-   void boost_save_as_checkpt(const std::string& fileName) const;
-   void boost_save_as_filename(const std::string& fileName) const; // used in test only
-   void boost_restore_from_checkpt(const std::string& fileName);
+   void cereal_save_as_checkpt(const std::string& fileName) const;
+   void cereal_restore_from_checkpt(const std::string& fileName);
 
    // defs format
    void save_as_checkpt(const std::string& fileName) const;

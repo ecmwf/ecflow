@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    {
       timer.restart();
       PersistHelper helper;
-      BOOST_CHECK_MESSAGE( helper.test_boost_checkpt_and_reload(defs,true), helper.errorMsg());
+      BOOST_CHECK_MESSAGE( helper.test_cereal_checkpt_and_reload(defs,true), helper.errorMsg());
       BOOST_CHECK_MESSAGE(timer.elapsed() < expectedTimeForCheckPtPersistAndReload,"Performance regression, expected < " << expectedTimeForCheckPtPersistAndReload << " seconds to persist and reload, but found " << timer.elapsed());
       cout << " Checkpt(TEXT_ARCHIVE) and reload and compare, time taken   = ";
       cout << timer.elapsed() << " < limit(" << expectedTimeForCheckPtPersistAndReload << ")" << " file_size(" << helper.file_size() << ")" << endl;

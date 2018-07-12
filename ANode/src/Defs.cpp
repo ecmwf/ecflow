@@ -1161,7 +1161,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 	return client_node_to_add;
 }
 
-void Defs::boost_save_as_checkpt(const std::string& the_fileName) const
+void Defs::cereal_save_as_checkpt(const std::string& the_fileName) const
 {
    // only_save_edit_history_when_check_pointing or if explicitly requested
    save_edit_history_ = true;   // this is reset after edit_history is saved
@@ -1170,18 +1170,9 @@ void Defs::boost_save_as_checkpt(const std::string& the_fileName) const
  	ecf::save(the_fileName,*this);
 }
 
-
- 
-void Defs::boost_save_as_filename(const std::string& the_fileName) const
+void Defs::cereal_restore_from_checkpt(const std::string& the_fileName)
 {
-   /// Can throw archive exception
-   ecf::save(the_fileName,*this);
-}
-
-
-void Defs::boost_restore_from_checkpt(const std::string& the_fileName)
-{
-//	cout << "Defs::boost_restore_from_checkpt " << the_fileName << "\n";
+//	cout << "Defs::cereal_restore_from_checkpt " << the_fileName << "\n";
 
 	if (the_fileName.empty())  return;
 

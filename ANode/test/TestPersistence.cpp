@@ -31,12 +31,12 @@ BOOST_FIXTURE_TEST_SUITE( NodeTestSuite, MyDefsFixture )
 static void testPersistence(const Defs& fixtureDefs)
 {
 	std::string check_pt_file = "fixture_defs.check";
-	fixtureDefs.boost_save_as_checkpt(check_pt_file);
+	fixtureDefs.cereal_save_as_checkpt(check_pt_file);
 	std::string error_msg;
 	BOOST_CHECK_MESSAGE(fixtureDefs.checkInvariants(error_msg),error_msg);
 
 	Defs restoredDefs;
-	restoredDefs.boost_restore_from_checkpt(check_pt_file);
+	restoredDefs.cereal_restore_from_checkpt(check_pt_file);
 	error_msg.clear();
    BOOST_CHECK_MESSAGE(restoredDefs.checkInvariants(error_msg),error_msg);
 

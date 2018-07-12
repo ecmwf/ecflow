@@ -30,18 +30,18 @@ public:
 
    bool test_persist_and_reload( const Defs& theInMemoryDefs, PrintStyle::Type_t file_type_on_disk,bool do_compare = true );
    bool test_defs_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare = true );
-   bool test_boost_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare = true);
+   bool test_cereal_checkpt_and_reload( const Defs& theInMemoryDefs, bool do_compare = true);
 	bool test_state_persist_and_reload_with_checkpt( const Defs& theInMemoryDefs );
 	const std::string& errorMsg() const { return errorMsg_;}
 
 	/// returns the file size of the temporary file created by:
-	///   test_persist_and_reload(..) or test_boost_checkpt_and_reload(..)
+	///   test_persist_and_reload(..) or test_cereal_checkpt_and_reload(..)
 	size_t file_size() const { return file_size_;}
 
 private:
 
    bool reload_from_defs_file( const Defs& theInMemoryDefs, Defs& reloaded_defs, const std::string& filename,bool do_compare = true );
-   bool reload_from_boost_checkpt_file(const Defs& theInMemoryDefs,
+   bool reload_from_cereal_checkpt_file(const Defs& theInMemoryDefs,
                                  Defs& reloaded_defs,
                                  bool do_compare = true);
 

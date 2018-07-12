@@ -114,8 +114,8 @@ int main(int argc, char* argv[])
       std::string tmpFilename = "tmp.def";
 
       timer.restart();
-      defs.boost_save_as_checkpt(tmpFilename);
-      cout << " Save as BOOST checkpoint, time taken                                  = " << timer.elapsed()  << endl;
+      defs.cereal_save_as_checkpt(tmpFilename);
+      cout << " Save as CEREAL checkpoint, time taken                                  = " << timer.elapsed()  << endl;
 
       std::remove(tmpFilename.c_str());
       //exit(0);
@@ -135,8 +135,8 @@ int main(int argc, char* argv[])
       bool do_compare = false;
       timer.restart();
       PersistHelper helper;
-      bool result = helper.test_boost_checkpt_and_reload(defs, do_compare);
-      cout << " Checkpt(TEXT_ARCHIVE) and reload , time taken   = ";
+      bool result = helper.test_cereal_checkpt_and_reload(defs, do_compare);
+      cout << " Checkpt(CEREAL) and reload , time taken   = ";
       cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
 

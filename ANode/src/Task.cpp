@@ -738,12 +738,12 @@ bool Task::checkInvariants(std::string& errorMsg) const
          return false;
       }
    }
-   if ( vec_size > alias_no_ ) {
-      std::stringstream ss;
-      ss << "Task::checkInvariants: alias vector size " << vec_size << " should be less or equal to alias_no_ " << alias_no_ << " for task " << absNodePath() << "\n";
-      errorMsg += ss.str();
-      return false;
-   }
+//   if ( vec_size > alias_no_ ) {
+//      std::stringstream ss;
+//      ss << "Task::checkInvariants: alias vector size " << vec_size << " should be less or equal to alias_no_ " << alias_no_ << " for task " << absNodePath() << "\n";
+//      errorMsg += ss.str();
+//      return false;
+//   }
    return true;
 }
 

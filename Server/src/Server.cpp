@@ -516,7 +516,6 @@ void Server::loadCheckPtFile()
 bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
 {
    // cout << "Server::restore_from_checkpt " <<  filename;
-   failed = false;
    if (fs::exists(filename)) {
       // cout << " file exists\n";
       LOG(Log::MSG, "Loading check point file " << filename << " port = " << serverEnv_.port());
@@ -529,18 +528,6 @@ bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
       }
       catch (exception& e) {
          LOG(Log::ERR, "Failed to load *DEFS* check point file " << filename << ", because: " << e.what());
-         failed = true;
-      }
-
-      try {
-         defs_->boost_restore_from_checkpt(filename);   // this can throw
-         update_defs_server_state();                    // works on def_
-         LOG(Log::MSG, "Loading of *BOOST* check point file SUCCEDED. Loaded "<< defs_->suiteVec().size() << " suites");
-         return true;
-      }
-      catch (exception& e) {
-         LOG(Log::ERR, "Failed to *BOOST* check point file " << filename << ", because: " << e.what());
-         failed = true;
       }
    }
 //   else {
