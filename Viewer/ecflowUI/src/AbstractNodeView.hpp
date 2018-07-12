@@ -197,7 +197,8 @@ private:
     QPoint pressedPosition_;
     QPersistentModelIndex pressedIndex_;
     QPersistentModelIndex pressedRefIndex_;
-    bool noSelectionOnMousePress_;   
+    bool noSelectionOnMousePress_;
+    bool autoScroll_;
     QBasicTimer delayedWidth_;
 
     inline bool storeExpanded(const QPersistentModelIndex &idx)
