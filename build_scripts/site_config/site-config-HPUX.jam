@@ -17,7 +17,6 @@ local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 #
 # Boost libraries referenced in client/server programs
 #
-lib boost_serialization : :   <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt-d.a ;
 lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-d.a ;
 lib boost_thread : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-d.a ;
 lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-d.a ;
@@ -28,7 +27,6 @@ lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_python          : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt-d.so ;
 lib boost_python_static   : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python-mt-d.a ;
 
-lib boost_serialization : :   <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_serialization-mt.a ;
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
 lib boost_thread : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
 lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
