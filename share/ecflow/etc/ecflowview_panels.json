@@ -143,6 +143,13 @@
              
         },
         {
+            "name"    : "timeline",
+            "label"   : "Timeline",
+            "show" 	  : "toolbar",
+            "visible_for" : "server or node"
+
+        },
+        {
             "name"    : "server_load",
             "label"   : "Server load",
             "icon"    : "monitor.svg",

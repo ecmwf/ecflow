@@ -153,6 +153,7 @@ set(viewer_srcs
     TextFilterHandlerDialog.cpp
     TextFilterWidget.cpp   
     TimeItemWidget.cpp
+    TimelineItemWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
