@@ -55,14 +55,17 @@ template< typename T >
 void save_as_string(std::string& outbound_data, const T& t)
 {
    std::ostringstream archive_stream;
+   {
 #ifdef DEBUG
-   cereal::JSONOutputArchive oarchive(archive_stream);  // Use default Indent can be very slow
+      cereal::JSONOutputArchive oarchive(archive_stream);  // Use default Indent can be very slow
 #else
-   cereal::JSONOutputArchive oarchive(archive_stream,cereal::JSONOutputArchive::Options::NoIndent()); // Create an output archive
+      cereal::JSONOutputArchive oarchive(archive_stream,cereal::JSONOutputArchive::Options::NoIndent()); // Create an output archive
 #endif
-   oarchive(cereal::make_nvp(typeid(t).name(),t) );    // Write the data to the archive
+      // when archive goes out of scope it is guaranteed to have flushed its
+      // contents to its stream.
+      oarchive(cereal::make_nvp(typeid(t).name(),t) );    // Write the data to the archive
+   }
    outbound_data = archive_stream.str();
-   outbound_data += "}"; //HACK for cereal BUG, YUK,YUK, TODO
 }
 
 template< typename T >
