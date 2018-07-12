@@ -40,6 +40,15 @@ void MiscAttrs::set_node(Node* n)
    node_ = n;
 }
 
+bool MiscAttrs::checkInvariants(std::string& errorMsg) const
+{
+   if (!node_) {
+      errorMsg += "MiscAttrs::checkInvariants: failed node_ is NULL";
+      return false;
+   }
+   return true;
+}
+
 void MiscAttrs::begin()
 {
    // reset verification

@@ -391,8 +391,8 @@ private:
             save_edit_history_ = false; // reset
          }
          else {
-            std::map<std::string, std::deque<std::string> > edit_history;
-            ar(CEREAL_NVP(edit_history)); // empty
+            std::map<std::string, std::deque<std::string> > edit_history_;
+            ar(CEREAL_NVP(edit_history_)); // empty
          }
       }
       else {

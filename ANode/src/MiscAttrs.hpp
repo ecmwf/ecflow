@@ -34,6 +34,7 @@ public:
 
    // needed by node serialisation
    void set_node(Node* n);
+   bool checkInvariants(std::string& errorMsg) const;
 
    void begin();
    void requeue();

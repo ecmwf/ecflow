@@ -30,6 +30,7 @@ public:
 
    // needed by node serialisation
    void set_node(Node* n);
+   bool checkInvariants(std::string& errorMsg) const;
 
    // standard functions: ==============================================
    std::ostream& print(std::ostream&) const;

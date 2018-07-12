@@ -1892,6 +1892,22 @@ bool Node::checkInvariants(std::string& errorMsg) const
          return false;
       }
    }
+   if (auto_attrs_) {
+      if (!auto_attrs_->checkInvariants(errorMsg)) {
+         return false;
+      }
+   }
+   if (misc_attrs_) {
+      if (!misc_attrs_->checkInvariants(errorMsg)) {
+         return false;
+      }
+   }
+   if (child_attrs_) {
+      if (!child_attrs_->checkInvariants(errorMsg)) {
+         return false;
+      }
+   }
+
    if (!repeat_.empty()) {
       if (repeat_.name().empty()) {
          errorMsg += "Repeat name empty ???";

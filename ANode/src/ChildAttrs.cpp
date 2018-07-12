@@ -34,6 +34,15 @@ ChildAttrs::ChildAttrs(const ChildAttrs& rhs)
   // users must call set_node() afterwards
 }
 
+bool ChildAttrs::checkInvariants(std::string& errorMsg) const
+{
+   if (!node_) {
+      errorMsg += "ChildAttrs::checkInvariants: failed node_ is NULL";
+      return false;
+   }
+   return true;
+}
+
 void ChildAttrs::begin()
 {
    for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }

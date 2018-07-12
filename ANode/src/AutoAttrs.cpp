@@ -61,6 +61,15 @@ void AutoAttrs::set_node(Node* n)
    if (auto_restore_) auto_restore_->set_node(n);
 }
 
+bool AutoAttrs::checkInvariants(std::string& errorMsg) const
+{
+   if (!node_) {
+      errorMsg += "AutoAttrs::checkInvariants: failed node_ is NULL";
+      return false;
+   }
+   return true;
+}
+
 void AutoAttrs::do_autorestore()
 {
    if ( auto_restore_ ) auto_restore_->do_autorestore();
