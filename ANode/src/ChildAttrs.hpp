@@ -129,9 +129,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(CEREAL_NVP(meters_),
-         CEREAL_NVP(events_),
-         CEREAL_NVP(labels_));
+      CEREAL_OPTIONAL_NVP(ar, meters_, [this](){return !meters_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, events_, [this](){return !events_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, labels_, [this](){return !labels_.empty(); }); // conditionally save
    }
 };
 #endif

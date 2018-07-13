@@ -380,8 +380,9 @@ private:
          CEREAL_NVP(updateCalendarCount_),
          CEREAL_NVP(state_),
          CEREAL_NVP(server_),
-         CEREAL_NVP(suiteVec_),
-         CEREAL_NVP(flag_));
+         CEREAL_NVP(suiteVec_));
+
+      CEREAL_OPTIONAL_NVP(ar, flag_ , [this](){return flag_.flag() !=0 ; }); // conditionally save
 
       // only save the edit history when check pointing.
       if (Archive::is_saving::value) {

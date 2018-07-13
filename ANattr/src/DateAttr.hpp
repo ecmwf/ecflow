@@ -89,9 +89,9 @@ private:
    {
       ar( CEREAL_NVP(day_),
           CEREAL_NVP(month_),
-          CEREAL_NVP(year_),
-          CEREAL_NVP(free_)
+          CEREAL_NVP(year_)
       );
+      CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
    }
 };
 

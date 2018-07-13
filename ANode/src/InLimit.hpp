@@ -69,10 +69,12 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(CEREAL_NVP(name_),
-         CEREAL_NVP(pathToNode_),           // can be empty
-         CEREAL_NVP(tokens_),
-         CEREAL_NVP(limit_this_node_only_), // new to 5.0.0
-         CEREAL_NVP(incremented_));         // new to 5.0.0
+         CEREAL_NVP(pathToNode_)         // can be empty
+         );
+
+      CEREAL_OPTIONAL_NVP(ar,tokens_,               [this](){return tokens_ !=0 ; });          // conditionally save
+      CEREAL_OPTIONAL_NVP(ar,limit_this_node_only_, [this](){return limit_this_node_only_; }); // conditionally save new to 5.0.0
+      CEREAL_OPTIONAL_NVP(ar,incremented_,          [this](){return incremented_; });          // conditionally save new to 5.0.0
    }
 };
 

@@ -28,6 +28,8 @@
 #include <cereal/types/map.hpp>
 #include <cereal/types/utility.hpp>
 
+#include "cereal_optional_nvp.hpp"
+
 namespace ecf {
 
 template< typename T >

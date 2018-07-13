@@ -106,12 +106,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar( CEREAL_NVP(submitted_),
-          CEREAL_NVP(active_),
-          CEREAL_NVP(complete_),
-          CEREAL_NVP(completeIsRelative_),
-          CEREAL_NVP(isLate_)
-      );
+      CEREAL_OPTIONAL_NVP(ar, submitted_ , [this](){return !submitted_.isNULL();});
+      CEREAL_OPTIONAL_NVP(ar, active_,     [this](){return !active_.isNULL();});
+      CEREAL_OPTIONAL_NVP(ar, complete_,   [this](){return !complete_.isNULL();});
+      CEREAL_OPTIONAL_NVP(ar, completeIsRelative_, [this](){return completeIsRelative_;});
+      CEREAL_OPTIONAL_NVP(ar, isLate_,             [this](){return isLate_;});
 	}
 };
 

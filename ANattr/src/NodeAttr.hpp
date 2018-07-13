@@ -28,7 +28,7 @@
 // Use compiler , generated destructor, assignment,  copy constructor
 class Label : public boost::equality_comparable<Label> {
 public:
-   Label(const std::string& name, const std::string& l);
+   Label(const std::string& name, const std::string& value);
    Label() : state_change_no_(0) {}
 
    std::ostream& print(std::ostream&) const;
@@ -76,9 +76,9 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar( CEREAL_NVP(n_),
-          CEREAL_NVP(v_),
-          CEREAL_NVP(new_v_)
+          CEREAL_NVP(v_)
       );
+      CEREAL_OPTIONAL_NVP(ar,new_v_, [this](){return !new_v_.empty();});  // conditionally save
    }
 };
 
@@ -134,10 +134,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar( CEREAL_NVP(value_),
-          CEREAL_NVP(number_),
+      ar( CEREAL_NVP(number_),
           CEREAL_NVP(name_)
       );
+      CEREAL_OPTIONAL_NVP(ar,value_ , [this](){return value_;});  // conditionally save
    }
 };
 
@@ -193,9 +193,9 @@ private:
       ar( CEREAL_NVP(min_),
           CEREAL_NVP(max_),
           CEREAL_NVP(value_),
-          CEREAL_NVP(cc_),
           CEREAL_NVP(name_)
       );
+      CEREAL_OPTIONAL_NVP(ar,cc_ , [this](){return cc_ != 0;});  // conditionally save
    }
 };
 #endif

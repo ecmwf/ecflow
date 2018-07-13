@@ -818,22 +818,26 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar( CEREAL_NVP(name_),
-          CEREAL_NVP(state_),
-          CEREAL_NVP(suspended_),
-          CEREAL_NVP(defStatus_),
-          CEREAL_NVP(vars_),
-          CEREAL_NVP(c_expr_),
-          CEREAL_NVP(t_expr_),
-          ::cereal::make_nvp("child",child_attrs_),
-          ::cereal::make_nvp("time",time_dep_attrs_),
-          ::cereal::make_nvp("late",lateAttr_),
-          ::cereal::make_nvp("misc",misc_attrs_),   // VerifyAttr & Zombies & Queueattrs * GenericAttr
-          ::cereal::make_nvp("auto",auto_attrs_),
-          CEREAL_NVP(repeat_),
-          CEREAL_NVP(limits_),
-          CEREAL_NVP(inLimitMgr_),
-          CEREAL_NVP(flag_));
+      ar( CEREAL_NVP(name_) );
+
+      CEREAL_OPTIONAL_NVP(ar, state_,         [this](){return state_.first != NState::UNKNOWN; }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, suspended_,     [this](){return suspended_; }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, defStatus_,     [this](){return defStatus_.state() != DState::QUEUED ; }); // conditionally save
+
+      CEREAL_OPTIONAL_NVP(ar, vars_ ,         [this](){return !vars_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, c_expr_ ,       [this](){return c_expr_.get(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, t_expr_ ,       [this](){return t_expr_.get(); }); // conditionally save
+
+      CEREAL_OPTIONAL_NVP(ar, child_attrs_,   [this](){return child_attrs_.get() ;});   // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, time_dep_attrs_,[this](){return time_dep_attrs_.get();}); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, lateAttr_,      [this](){return lateAttr_.get() ; });     // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, misc_attrs_,    [this](){return misc_attrs_.get() ; });   // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, auto_attrs_,    [this](){return auto_attrs_.get()  ; });  // conditionally save
+
+      CEREAL_OPTIONAL_NVP(ar, repeat_ ,       [this](){return !repeat_.empty() ; });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, limits_ ,       [this](){return !limits_.empty() ; });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, inLimitMgr_ ,   [this](){return !inLimitMgr_.inlimits().empty() ; }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, flag_ ,         [this](){return flag_.flag() !=0 ; }); // conditionally save
 
       if (Archive::is_loading::value) {
          if (time_dep_attrs_)  time_dep_attrs_->set_node(this);

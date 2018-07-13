@@ -138,11 +138,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(CEREAL_NVP(timeVec_),
-         CEREAL_NVP(todayVec_),
-         CEREAL_NVP(dates_),
-         CEREAL_NVP(days_),
-         CEREAL_NVP(crons_));
+      CEREAL_OPTIONAL_NVP(ar, timeVec_,  [this](){return !timeVec_.empty(); });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, todayVec_, [this](){return !todayVec_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, dates_,    [this](){return !dates_.empty(); });    // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, days_,     [this](){return !days_.empty(); });     // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, crons_,    [this](){return !crons_.empty(); });    // conditionally save
    }
 };
 

@@ -95,8 +95,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(CEREAL_NVP(clear_attributes_),
-         CEREAL_NVP(absNodePath_),
+      CEREAL_OPTIONAL_NVP(ar, clear_attributes_, [this](){return clear_attributes_; });  // conditionally save
+      ar(CEREAL_NVP(absNodePath_),
          CEREAL_NVP(vec_));
    }
 };

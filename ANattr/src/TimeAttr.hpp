@@ -120,9 +120,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
     {
-      ar( CEREAL_NVP(timeSeries_),
-          CEREAL_NVP(free_) // Only persisted for testing, see usage of isSetFree()
-      );
+      ar( CEREAL_NVP(timeSeries_));
+
+      // Only persisted for testing, see usage of isSetFree()
+      CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
     }
 };
 

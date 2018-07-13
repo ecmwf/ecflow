@@ -120,12 +120,11 @@ private:
 	template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
 	{
-	   ar( CEREAL_NVP(timeSeries_),
-	       CEREAL_NVP(weekDays_),
-	       CEREAL_NVP(daysOfMonth_),
-	       CEREAL_NVP(months_),
-	       CEREAL_NVP(free_)
-	   );
+	   ar( CEREAL_NVP(timeSeries_));
+      CEREAL_OPTIONAL_NVP(ar, weekDays_ ,   [this](){return !weekDays_.empty() ;});   // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, daysOfMonth_, [this](){return !daysOfMonth_.empty() ;});// conditionally save
+      CEREAL_OPTIONAL_NVP(ar, months_,      [this](){return !months_.empty() ;});     // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, free_,        [this](){return free_ ; });               // conditionally save
 	}
 };
 }

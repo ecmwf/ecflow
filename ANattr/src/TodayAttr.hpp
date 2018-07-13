@@ -170,9 +170,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
 	{
-      ar( CEREAL_NVP(timeSeries_),
-          CEREAL_NVP(free_)
-      );
+      ar( CEREAL_NVP(timeSeries_));
+      CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
 	}
 };
 

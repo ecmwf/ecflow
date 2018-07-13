@@ -82,9 +82,9 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(CEREAL_NVP(name_),
-         CEREAL_NVP(theLimit_),
-         CEREAL_NVP(value_),
-         CEREAL_NVP(paths_));
+         CEREAL_NVP(theLimit_));
+      CEREAL_OPTIONAL_NVP(ar, value_,  [this](){return value_ !=0; });      // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, paths_,  [this](){return !paths_.empty(); }); // conditionally save
    }
 };
 

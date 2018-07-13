@@ -106,10 +106,10 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(CEREAL_NVP(zombies_),
-         CEREAL_NVP(verifys_),
-         CEREAL_NVP(queues_),
-         CEREAL_NVP(generics_));
+      CEREAL_OPTIONAL_NVP(ar, zombies_,  [this](){return !zombies_.empty(); });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, verifys_,  [this](){return !verifys_.empty(); });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, queues_,   [this](){return !queues_.empty(); });   // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, generics_, [this](){return !generics_.empty(); }); // conditionally save
    }
 };
 #endif

@@ -173,11 +173,12 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(cereal::base_class<Node>(this),
-         CEREAL_NVP(paswd_),
-         CEREAL_NVP(rid_),
-         CEREAL_NVP(abr_),
-         CEREAL_NVP(tryNo_));
+      ar(cereal::base_class<Node>(this));
+
+      CEREAL_OPTIONAL_NVP(ar, paswd_, [this](){return !paswd_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, rid_,   [this](){return !rid_.empty(); });   // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, abr_,   [this](){return !abr_.empty(); });   // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, tryNo_, [this](){return tryNo_ != 0 ; });    // conditionally save
    }
 };
 
