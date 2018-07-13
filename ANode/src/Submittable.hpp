@@ -37,7 +37,7 @@ protected:
    : Node(rhs),
      paswd_(rhs.paswd_),
      rid_(rhs.rid_),
-     abortedReason_(rhs.abortedReason_),
+     abr_(rhs.abr_),
      tryNo_(rhs.tryNo_),
      state_change_no_(0),
      sub_gen_variables_(NULL) {}
@@ -120,7 +120,7 @@ public:
    /// resubmit the job. However we *should* not do this immediately here, instead we
    /// wait of *next* call to resolveDependencies, as that will check if we are *inlimit*
    void aborted(const std::string& reason);
-   virtual const std::string& abortedReason() const { return abortedReason_;}
+   virtual const std::string& abortedReason() const { return abr_;}
 
 // Memento functions:
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
@@ -163,7 +163,7 @@ private:
 private:
    std::string         paswd_;
    std::string         rid_;
-   std::string         abortedReason_;
+   std::string         abr_;
    int                 tryNo_;
    unsigned int state_change_no_;               // *not* persisted, only used on server side
    mutable SubGenVariables* sub_gen_variables_; // *not* persisted since they can be generated
@@ -176,7 +176,7 @@ private:
       ar(cereal::base_class<Node>(this),
          CEREAL_NVP(paswd_),
          CEREAL_NVP(rid_),
-         CEREAL_NVP(abortedReason_),
+         CEREAL_NVP(abr_),
          CEREAL_NVP(tryNo_));
    }
 };

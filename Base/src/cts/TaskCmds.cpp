@@ -565,7 +565,7 @@ AbortCmd::AbortCmd(const std::string& pathToTask,
 :TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), reason_(reason)
 {
    if (!reason_.empty()) {
-      // Do not use "\n" | ';' in abortedReason_, as this can mess up, --migrate output
+      // Do not use "\n" | ';' in Submittable::abr_, as this can mess up, --migrate output
       // Which would then affect --load.
       Str::replace(reason_,"\n","");
       Str::replace(reason_,";"," ");

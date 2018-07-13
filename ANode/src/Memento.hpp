@@ -738,7 +738,7 @@ public:
    ) :
       paswd_( jobsPassword ),
       rid_( process_or_remote_id ),
-      abortedReason_( abortedReason ),
+      abr_( abortedReason ),
       tryNo_( tryNo ) {}
    SubmittableMemento() : tryNo_(0) {}
 private:
@@ -747,7 +747,7 @@ private:
 
    std::string  paswd_;
    std::string  rid_;
-   std::string  abortedReason_;
+   std::string  abr_;
    int          tryNo_;
    friend class Submittable;
 
@@ -758,7 +758,7 @@ private:
       ar(cereal::base_class<Memento>(this),
          CEREAL_NVP(paswd_),
          CEREAL_NVP(rid_),
-         CEREAL_NVP(abortedReason_),
+         CEREAL_NVP(abr_),
          CEREAL_NVP(tryNo_));
    }
 };

@@ -57,7 +57,7 @@ Submittable& Submittable::operator=(const Submittable& rhs)
       Node::operator=(rhs);
       paswd_ = rhs.paswd_;
       rid_ = rhs.rid_;
-      abortedReason_ = rhs.abortedReason_;
+      abr_ = rhs.abr_;
       tryNo_ = rhs.tryNo_;
 
       delete sub_gen_variables_;
@@ -182,10 +182,10 @@ std::string Submittable::write_state() const
    if ( !paswd_.empty() && paswd_!= Submittable::DUMMY_JOBS_PASSWORD()) { ret += " passwd:"; ret += paswd_;}
    if ( !rid_.empty() )  { ret += " rid:"; ret += rid_; }
 
-   // The abortedReason_, can contain user generated messages, including \n and ;, hence remove these
+   // The abr_, can contain user generated messages, including \n and ;, hence remove these
    // as they can mess up the parsing on reload.
-   if ( !abortedReason_.empty() ) {
-      std::string the_abort_reason = abortedReason_;
+   if ( !abr_.empty() ) {
+      std::string the_abort_reason = abr_;
       Str::replaceall(the_abort_reason,"\n","\\n");
       Str::replaceall(the_abort_reason,";"," ");
       ret += " abort<:"; ret += the_abort_reason; ret += ">abort";
@@ -223,7 +223,7 @@ void Submittable::read_state(const std::string& line,const std::vector<std::stri
    size_t last_pos = line.find(">abort");
    if (first_pos != std::string::npos) {
       if ( last_pos != std::string::npos) {
-         abortedReason_ = line.substr(first_pos+7, (last_pos-first_pos-7) );
+         abr_ = line.substr(first_pos+7, (last_pos-first_pos-7) );
       }
       else {
          throw std::runtime_error("Submittable::read_state failed for abort reason. Expected abort reason to on single line;");
@@ -265,10 +265,10 @@ bool Submittable::operator==(const Submittable& rhs) const
       return false;
    }
 
-   if ( abortedReason_ != rhs.abortedReason_ ) {
+   if ( abr_ != rhs.abr_ ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Submittable::operator==  abortedReason_(" << abortedReason_ << ") != rhs.abortedReason_(" << rhs.abortedReason_ << ") " << debugNodePath() << "\n";
+         std::cout << "Submittable::operator==  abr_(" << abr_ << ") != rhs.abr_(" << rhs.abr_ << ") " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -471,7 +471,7 @@ void Submittable::increment_try_no()
    // *** This MUST be done before pre-processing as it uses these variables ***
    tryNo_++;
    rid_.clear();
-   abortedReason_.clear();
+   abr_.clear();
    paswd_ = Passwd::generate();
    state_change_no_ = Ecf::incr_state_change_no();
    update_generated_variables();
@@ -479,7 +479,7 @@ void Submittable::increment_try_no()
 
 void Submittable::clear()
 {
-   abortedReason_.clear();       // reset reason aborted
+   abr_.clear();       // reset reason aborted
    paswd_.clear();        // reset password, it will be regenerated before submission
    rid_.clear();// reset process id
    state_change_no_ = Ecf::incr_state_change_no();
@@ -834,13 +834,13 @@ void Submittable::set_aborted_only(const std::string& reason)
    std::cout << "Submittable::set_aborted_only\n";
 #endif
 
-   abortedReason_ = reason;
+   abr_ = reason;
    state_change_no_ = Ecf::incr_state_change_no();
 
-   // Do not use "\n" | ';' in abortedReason_, as this can mess up, --migrate output
+   // Do not use "\n" | ';' in abr_, as this can mess up, --migrate output
    // Which would then affect --load.
-   Str::replace(abortedReason_,"\n","");
-   Str::replace(abortedReason_,";"," ");
+   Str::replace(abr_,"\n","");
+   Str::replace(abr_,";"," ");
 
    // This will set the state and bubble up the most significant state
    set_state(NState::ABORTED);
@@ -882,7 +882,7 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
 
    if (state_change_no_ > changes.client_state_change_no()) {
       if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
-      comp->add( std::make_shared<SubmittableMemento>( paswd_,rid_,abortedReason_,tryNo_) );
+      comp->add( std::make_shared<SubmittableMemento>( paswd_,rid_,abr_,tryNo_) );
    }
 
    // ** if compound memento has children base class, will add it to DefsDelta
@@ -902,7 +902,7 @@ void Submittable::set_memento(const SubmittableMemento* memento,std::vector<ecf:
 
    paswd_ = memento->paswd_;
    rid_ = memento->rid_;
-   abortedReason_ = memento->abortedReason_;
+   abr_ = memento->abr_;
    tryNo_ = memento->tryNo_;
 }
 

@@ -828,7 +828,7 @@ private:
           ::cereal::make_nvp("child",child_attrs_),
           ::cereal::make_nvp("time",time_dep_attrs_),
           ::cereal::make_nvp("late",lateAttr_),
-          ::cereal::make_nvp("misc",misc_attrs_),   // VerifyAttr & Zombies * auto attrs
+          ::cereal::make_nvp("misc",misc_attrs_),   // VerifyAttr & Zombies & Queueattrs * GenericAttr
           ::cereal::make_nvp("auto",auto_attrs_),
           CEREAL_NVP(repeat_),
           CEREAL_NVP(limits_),
