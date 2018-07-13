@@ -1608,7 +1608,7 @@ void Defs::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Typ
    
    // Order the suites
 
-   // Order nodeVec_ according to memento ordering
+   // Order nodes according to memento ordering
    const std::vector<std::string>& order = memento->order_;
 
    // NOTE: When we have handles only a small subset of the suites, are returned

@@ -92,9 +92,9 @@ bool Calendar::operator==( const Calendar& rhs) const
 #endif
 	   return false;
 	}
-	if (calendarIncrement_ !=rhs.calendarIncrement_) {
+	if (increment_ !=rhs.increment_) {
 #ifdef DEBUG
-      if (Ecf::debug_equality())  std::cout << "Calendar::operator== calendarIncrement_  don't match\n";
+      if (Ecf::debug_equality())  std::cout << "Calendar::operator== increment_  don't match\n";
 #endif
 	   return false;
 	}
@@ -112,7 +112,7 @@ void Calendar::assign( const Calendar& rhs)
  	startStopWithServer_ =  rhs.startStopWithServer_;
   	initLocalTime_ =  rhs.initLocalTime_;
  	lastTime_ =  rhs.lastTime_;
-	calendarIncrement_ = rhs.calendarIncrement_;
+	increment_ = rhs.increment_;
 
 	day_of_week_ = rhs.day_of_week_;   // Cache
 	day_of_year_ = rhs.day_of_year_;   // Cache
@@ -137,7 +137,7 @@ void Calendar::init(const boost::posix_time::ptime& time, Clock_t clock, bool st
 void Calendar::begin(const boost::posix_time::ptime& the_time)
 {
    duration_ = time_duration(0,0,0,0);
-   calendarIncrement_ = time_duration(0,1,0,0); // This will get overwritten on update
+   increment_ = time_duration(0,1,0,0); // This will get overwritten on update
                                                 // But allows some tests to run
    suiteTime_ = the_time; // includes gain _IF_ it was specified
    initTime_ = the_time;  // includes gain
@@ -167,7 +167,7 @@ void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
  	      time_duration one_minute(0,1,0,0);
  	      duration_ += one_minute;
  	      suiteTime_ += one_minute;
- 	      calendarIncrement_ = one_minute;
+ 	      increment_ = one_minute;
 
 #ifdef DEBUG_CALENDAR
          std::cout << "Calendar::update:  if (calUpdateParams.serverPollPeriod().total_seconds() < 60) { \n";
@@ -181,8 +181,8 @@ void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
  	      const ptime& time_now =  calUpdateParams.timeNow();
  	      assert(!time_now.is_special()); // This should have been set
  	      duration_ = time_period( initLocalTime_, time_now ).length();
- 	      calendarIncrement_ = time_now - lastTime_;
- 	      suiteTime_ += calendarIncrement_;
+ 	      increment_ = time_now - lastTime_;
+ 	      suiteTime_ += increment_;
  	      lastTime_ = time_now;
 #ifdef DEBUG_CALENDAR
  	      std::cout << "Calendar::update:  if ( !startStopWithServer_ && !calUpdateParams.forTest() ) { \n";
@@ -195,7 +195,7 @@ void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
 	   // Note: for simulation serverPollPeriod could be 1 hour
 		duration_ += calUpdateParams.serverPollPeriod();
 		suiteTime_ += calUpdateParams.serverPollPeriod();
-		calendarIncrement_ = calUpdateParams.serverPollPeriod();
+		increment_ = calUpdateParams.serverPollPeriod();
 #ifdef DEBUG_CALENDAR
       std::cout << "Calendar::update:  calUpdateParams.serverPollPeriod() = " << calUpdateParams.serverPollPeriod() << "\n";
 #endif
@@ -290,7 +290,7 @@ std::string Calendar::toString() const
      << ") initTime_("  << to_simple_string(initTime_)
      << ") suiteTime_(" << to_simple_string(suiteTime_)
      << ") dayChanged_(" << dayChanged_ << ")";
-     ss << " calendarIncrement_(" << to_simple_string(calendarIncrement_) << ")";
+     ss << " increment_(" << to_simple_string(increment_) << ")";
 
    if (day_of_week_ == 0) ss << " SUNDAY";
    else if (day_of_week_ == 1) ss << " MONDAY";
@@ -308,7 +308,7 @@ std::string Calendar::write_state() const
 {
    if ( initTime_.is_special() ) return string();
 
-   bool calendarIncrement__changed = (!calendarIncrement_.is_special() && calendarIncrement_.total_seconds() != 0);
+   bool increment__changed = (!increment_.is_special() && increment_.total_seconds() != 0);
 
    // cType is obtained from the suite clock attribute, and not persisted
    std::string ret;
@@ -317,7 +317,7 @@ std::string Calendar::write_state() const
    ret += " duration:";      ret += to_simple_string(duration_);
    ret += " initLocalTime:"; ret += to_simple_string(initLocalTime_);
    ret += " lastTime:";      ret += to_simple_string(lastTime_);
-   if (calendarIncrement__changed) { ret += " calendarIncrement:"; ret += to_simple_string(calendarIncrement_); }
+   if (increment__changed) { ret += " calendarIncrement:"; ret += to_simple_string(increment_); }
 
    if (dayChanged_) ret += " dayChanged:1" ;
    return ret;
@@ -360,7 +360,7 @@ void Calendar::read_state(const std::string& line,const std::vector<std::string>
       }
       else if (lineTokens[i].find("calendarIncrement:") != std::string::npos ) {
          if (!Extract::split_get_second(lineTokens[i],time)) throw std::runtime_error( "Calendar::read_state failed: (calendarIncrement)");
-         calendarIncrement_ = duration_from_string(time);
+         increment_ = duration_from_string(time);
       }
       else if (lineTokens[i] == "dayChanged:1") dayChanged_ = true;
    }

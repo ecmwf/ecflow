@@ -89,22 +89,22 @@ std::unique_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) 
 //===========================================================================
 
 Expression::Expression(const std::string& expression)
-:  makeFree_(false), state_change_no_(0)
+:  free_(false), state_change_no_(0)
 {
    add(PartExpression(expression));
 }
 
 Expression::Expression(const PartExpression& exp)
-: makeFree_(false), state_change_no_(0)
+: free_(false), state_change_no_(0)
 {
    add(exp);
 }
 
 Expression::Expression()
-: makeFree_(false), state_change_no_(0)  {}
+: free_(false), state_change_no_(0)  {}
 
 Expression::Expression(const Expression& rhs)
-: vec_(rhs.vec_), makeFree_(rhs.makeFree_), state_change_no_(0)  {}
+: vec_(rhs.vec_), free_(rhs.free_), state_change_no_(0)  {}
 
 
 std::unique_ptr<AstTop> Expression::parse(const std::string& expression_to_parse,const std::string& error_msg_context)
@@ -134,7 +134,7 @@ std::unique_ptr<AstTop> Expression::parse_no_throw(const std::string& expression
 std::ostream& Expression::print(std::ostream& os, const std::string& exprType) const
 {
    BOOST_FOREACH(const PartExpression& expr, vec_ ) {
-      expr.print(os,exprType,makeFree_);
+      expr.print(os,exprType,free_);
    }
    return os;
 }
@@ -246,26 +246,26 @@ void Expression::createAST( Node* node, const std::string& exprType, std::string
 void Expression::setFree()
 {
    // Only update for a real change
-   if (!makeFree_) {
+   if (!free_) {
       state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
       std::cout << "Expression::setFree()\n";
 #endif
    }
-   makeFree_ = true;
+   free_ = true;
 }
 
 void Expression::clearFree()
 {
    // Only update for a real change
-   if (makeFree_) {
+   if (free_) {
       state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
       std::cout << "Expression::clearFree()\n";
 #endif
    }
-   makeFree_ = false;
+   free_ = false;
 }
 

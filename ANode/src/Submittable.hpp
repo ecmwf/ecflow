@@ -35,8 +35,8 @@ protected:
 
    Submittable(const Submittable& rhs)
    : Node(rhs),
-     jobsPassword_(rhs.jobsPassword_),
-     process_or_remote_id_(rhs.process_or_remote_id_),
+     paswd_(rhs.paswd_),
+     rid_(rhs.rid_),
      abortedReason_(rhs.abortedReason_),
      tryNo_(rhs.tryNo_),
      state_change_no_(0),
@@ -106,11 +106,11 @@ public:
    std::string tryNo() const;
    int try_no() const { return tryNo_;}
 
-   const std::string& jobsPassword() const { return jobsPassword_;}
+   const std::string& jobsPassword() const { return paswd_;}
 
    /// The remote id (ECF_RID) allows a jobs to be killed when added via a queueing system
    /// in which case the remote id is really the queueing id.
-   const std::string& process_or_remote_id() const { return process_or_remote_id_;}
+   const std::string& process_or_remote_id() const { return rid_;}
 
    /// Set the task to aborted, providing a reason. Will set the state to NState::ABORTED
    /// This should only be called in two context's:
@@ -161,8 +161,8 @@ private:
    void set_genvar_ecfrid(const std::string& value);
 
 private:
-   std::string         jobsPassword_;
-   std::string         process_or_remote_id_;
+   std::string         paswd_;
+   std::string         rid_;
    std::string         abortedReason_;
    int                 tryNo_;
    unsigned int state_change_no_;               // *not* persisted, only used on server side
@@ -174,8 +174,8 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class<Node>(this),
-         CEREAL_NVP(jobsPassword_),
-         CEREAL_NVP(process_or_remote_id_),
+         CEREAL_NVP(paswd_),
+         CEREAL_NVP(rid_),
          CEREAL_NVP(abortedReason_),
          CEREAL_NVP(tryNo_));
    }

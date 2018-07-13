@@ -25,7 +25,7 @@
 namespace ecf {
 
 TimeAttr::TimeAttr(const std::string& str)
-: makeFree_(false), state_change_no_(0)
+: free_(false), state_change_no_(0)
 {
    if (str.empty()) throw std::runtime_error("Time::Time: empty string passed");
    std::vector<std::string> tokens;
@@ -38,7 +38,7 @@ TimeAttr::TimeAttr(const std::string& str)
 
 void TimeAttr::calendarChanged( const ecf::Calendar& c )
 {
-   if ( makeFree_ ) {
+   if ( free_ ) {
       return;
    }
 
@@ -64,7 +64,7 @@ std::ostream& TimeAttr::print(std::ostream& os) const
    Indentor in;
    Indentor::indent(os) << toString();
    if (!PrintStyle::defsStyle()) {
-      os << timeSeries_.state_to_string(makeFree_);
+      os << timeSeries_.state_to_string(free_);
    }
    os << "\n";
    return os;
@@ -82,7 +82,7 @@ std::string TimeAttr::dump() const
 	std::stringstream ss;
 	ss << "time ";
 
-    if (makeFree_) ss << "(free) ";
+    if (free_) ss << "(free) ";
     else           ss << "(holding) ";
 
  	ss << timeSeries_.dump();
@@ -92,7 +92,7 @@ std::string TimeAttr::dump() const
 
 bool TimeAttr::operator==(const TimeAttr& rhs) const
 {
-	if (makeFree_ != rhs.makeFree_) {
+	if (free_ != rhs.free_) {
 		return false;
 	}
  	return timeSeries_.operator==(rhs.timeSeries_);
@@ -106,7 +106,7 @@ bool TimeAttr::structureEquals(const TimeAttr& rhs) const
 bool TimeAttr::isFree(const ecf::Calendar& calendar) const
 {
 	// The FreeDepCmd can be used to free the time,
- 	if (makeFree_) {
+ 	if (free_) {
 		return true;
 	}
  	return is_free(calendar);
@@ -118,7 +118,7 @@ bool TimeAttr::is_free(const ecf::Calendar& calendar) const
 }
 
 void TimeAttr::setFree() {
-	makeFree_ = true;
+	free_ = true;
 	state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -127,7 +127,7 @@ void TimeAttr::setFree() {
 }
 
 void TimeAttr::clearFree() {
-	makeFree_ = false;
+	free_ = false;
 	state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO

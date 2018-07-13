@@ -1,15 +1,1 @@
-{
-    "9QueueAttr": {
-        "cereal_class_version": 0,
-        "currentIndex_": 0,
-        "name_": "queue",
-        "theQueue_": [
-            "a",
-            "b"
-        ],
-        "state_vec_": [
-            2,
-            2
-        ]
-    }
-}
+{"9QueueAttr":{"cereal_class_version":0,"currentIndex_":0,"name_":"queue","theQueue_":["a","b"],"state_vec_":[2,2]}}

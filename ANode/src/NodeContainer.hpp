@@ -78,7 +78,7 @@ public:
    virtual void get_all_nodes(std::vector<node_ptr>&) const;
    virtual void get_all_aliases(std::vector<alias_ptr>&) const;
 	virtual void getAllAstNodes(std::set<Node*>&) const;
- 	const std::vector<node_ptr>& nodeVec() const { return nodeVec_;}
+ 	const std::vector<node_ptr>& nodeVec() const { return nodes_;}
  	std::vector<task_ptr> taskVec() const;
  	std::vector<family_ptr> familyVec() const;
 
@@ -126,8 +126,8 @@ private:
   	virtual bool doDeleteChild(Node* child);
 
 	/// For use by python interface,
-	std::vector<node_ptr>::const_iterator node_begin() const { return nodeVec_.begin();}
-	std::vector<node_ptr>::const_iterator node_end() const { return nodeVec_.end();}
+	std::vector<node_ptr>::const_iterator node_begin() const { return nodes_.begin();}
+	std::vector<node_ptr>::const_iterator node_end() const { return nodes_.end();}
 	friend void export_SuiteAndFamily();
 
 protected:
@@ -146,24 +146,20 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-//	   ar.register_type(static_cast<Task *>(NULL));
-//	   ar.register_type(static_cast<Family *>(NULL));
-
-	   // serialise base class information
-	   ar & cereal::base_class<Node>(this);
-	   ar & nodeVec_;
+	   ar(cereal::base_class<Node>(this),
+	      CEREAL_NVP(nodes_));
 
       // Setup the parent pointers. Since they are not serialised
       if (Archive::is_loading::value) {
-         size_t vec_size = nodeVec_.size();
+         size_t vec_size = nodes_.size();
          for(size_t i = 0; i < vec_size; i++) {
-            nodeVec_[i]->set_parent(this);
+            nodes_[i]->set_parent(this);
          }
       }
 	}
 
 private:
-  	std::vector<node_ptr> nodeVec_;
+  	std::vector<node_ptr> nodes_;
 };
 
 #endif

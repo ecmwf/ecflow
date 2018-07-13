@@ -26,10 +26,10 @@ using namespace std;
 
 void Node::changeVariable(const std::string& name,const std::string& value)
 {
-	size_t theSize = varVec_.size();
+	size_t theSize = vars_.size();
 	for(size_t i = 0; i < theSize; i++) {
-		if (varVec_[i].name() == name) {
-			varVec_[i].set_value( value );
+		if (vars_[i].name() == name) {
+			vars_[i].set_value( value );
 			variable_change_no_ = Ecf::incr_state_change_no();
 			return;
 		}

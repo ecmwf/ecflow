@@ -736,8 +736,8 @@ public:
             const std::string& abortedReason,
             int tryNo
    ) :
-      jobsPassword_( jobsPassword ),
-      process_or_remote_id_( process_or_remote_id ),
+      paswd_( jobsPassword ),
+      rid_( process_or_remote_id ),
       abortedReason_( abortedReason ),
       tryNo_( tryNo ) {}
    SubmittableMemento() : tryNo_(0) {}
@@ -745,8 +745,8 @@ private:
    virtual void do_incremental_task_sync(Task* n,std::vector<ecf::Aspect::Type>& aspects,bool f)   const { n->set_memento(this,aspects,f);}
    virtual void do_incremental_alias_sync(Alias* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
-   std::string  jobsPassword_;
-   std::string  process_or_remote_id_;
+   std::string  paswd_;
+   std::string  rid_;
    std::string  abortedReason_;
    int          tryNo_;
    friend class Submittable;
@@ -756,8 +756,8 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class<Memento>(this),
-         CEREAL_NVP(jobsPassword_),
-         CEREAL_NVP(process_or_remote_id_),
+         CEREAL_NVP(paswd_),
+         CEREAL_NVP(rid_),
          CEREAL_NVP(abortedReason_),
          CEREAL_NVP(tryNo_));
    }

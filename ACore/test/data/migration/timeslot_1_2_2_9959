@@ -1,8 +1,1 @@
-{
-    "N3ecf8TimeSlotE": {
-        "cereal_class_version": 0,
-        "hour_": 99,
-        "minute_": 59,
-        "isNull_": false
-    }
-}
+{"N3ecf8TimeSlotE":{"cereal_class_version":0,"hour_":99,"minute_":59,"isNull_":false}}

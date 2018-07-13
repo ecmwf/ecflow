@@ -32,13 +32,13 @@ using namespace boost::posix_time;
 //==========================================================================================
 
 DateAttr::DateAttr( int day, int month, int year )
-: day_( day ), month_( month ), year_( year ), makeFree_( false ), state_change_no_(0)
+: day_( day ), month_( month ), year_( year ), free_( false ), state_change_no_(0)
 {
 	checkDate(day_,month_,year_,true /* allow wild cards */);
 }
 
 DateAttr::DateAttr(const std::string& str)
-: day_(0), month_(0), year_(0), makeFree_(false), state_change_no_(0)
+: day_(0), month_(0), year_(0), free_(false), state_change_no_(0)
 {
    DateAttr::getDate(str,day_,month_,year_);
    checkDate(day_,month_,year_,true /* allow wild cards */);
@@ -94,7 +94,7 @@ void DateAttr::calendarChanged( const ecf::Calendar& c )
       clearFree();
    }
 
-   if (makeFree_) {
+   if (free_) {
       return;
    }
    else if (isFree(c)) {
@@ -103,7 +103,7 @@ void DateAttr::calendarChanged( const ecf::Calendar& c )
 }
 
 void DateAttr::setFree() {
-	makeFree_ = true;
+	free_ = true;
 	state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -112,7 +112,7 @@ void DateAttr::setFree() {
 }
 
 void DateAttr::clearFree() {
-	makeFree_ = false;
+	free_ = false;
 	state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -123,7 +123,7 @@ void DateAttr::clearFree() {
 bool DateAttr::isFree(const ecf::Calendar& calendar) const
 {
 	// The FreeDepCmd can be used to free the dates,
- 	if (makeFree_) {
+ 	if (free_) {
 		return true;
 	}
  	return is_free(calendar);
@@ -209,7 +209,7 @@ std::ostream& DateAttr::print(std::ostream& os) const
 	Indentor in;
 	Indentor::indent(os) << toString();
    if (!PrintStyle::defsStyle()) {
-      if (makeFree_) os << " # free";
+      if (free_) os << " # free";
    }
 	os << "\n";
 	return os;
@@ -233,7 +233,7 @@ std::string DateAttr::toString() const
 std::string DateAttr::dump() const
 {
 	std::stringstream ss; ss << toString();
- 	if (makeFree_) ss << " (free)";
+ 	if (free_) ss << " (free)";
 	else           ss << " (holding)";
 	return ss.str();
 }
@@ -241,7 +241,7 @@ std::string DateAttr::dump() const
 
 bool DateAttr::operator==(const DateAttr& rhs) const
 {
-	if (makeFree_ != rhs.makeFree_) {
+	if (free_ != rhs.free_) {
 		return false;
 	}
 	return structureEquals(rhs);

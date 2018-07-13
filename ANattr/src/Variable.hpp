@@ -28,22 +28,22 @@ public:
    // These are called during serialisation, hence to avoid checking generated names, we know are valid
    // use this constructor. The bool is used as a dummy argument, so that we call the right constructor
    Variable(const std::string& name, const std::string& value, bool /*check_names_dummy*/)
-   : name_(name), value_(value) {}
+   : n_(name), v_(value) {}
    Variable(const std::string& name, const std::string& value);
    Variable() {}
 
-   const std::string& name() const   { return  name_;}
+   const std::string& name() const   { return  n_;}
    std::ostream& print(std::ostream&) const;
    std::ostream& print_server_variable(std::ostream&) const;
    std::ostream& print_generated(std::ostream&) const;
-   bool empty() const { return name_.empty(); }
+   bool empty() const { return n_.empty(); }
 
-   void set_value(const std::string& v) { value_ = v; }
-   const std::string& theValue() const  { return  value_;}
+   void set_value(const std::string& v) { v_ = v; }
+   const std::string& theValue() const  { return  v_;}
    int value() const;
 
    void set_name(const std::string& v);
-   std::string& value_by_ref() { return value_;}
+   std::string& value_by_ref() { return v_;}
 
    bool operator==(const Variable& rhs) const;
    std::string toString() const;
@@ -53,15 +53,15 @@ public:
    static const Variable& EMPTY();
 
 private:
-   std::string  name_;
-   std::string  value_;
+   std::string  n_;
+   std::string  v_;
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar)
    {
-      ar( CEREAL_NVP(name_),
-          CEREAL_NVP(value_)
+      ar( CEREAL_NVP(n_),
+          CEREAL_NVP(v_)
       );
    }
 };

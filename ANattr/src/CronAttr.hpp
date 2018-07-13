@@ -29,9 +29,9 @@ class CronAttr  {
 public:
 	CronAttr();
 	explicit CronAttr(const std::string& time_series);
-   CronAttr(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) : timeSeries_(s,f,i),makeFree_(false),state_change_no_(0) {}
-   explicit CronAttr(const TimeSeries& ts ) : timeSeries_(ts),makeFree_(false),state_change_no_(0) {}
-   CronAttr(int h, int m, bool relative = false) : timeSeries_(h,m,relative),makeFree_(false),state_change_no_(0) {}
+   CronAttr(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) : timeSeries_(s,f,i),free_(false),state_change_no_(0) {}
+   explicit CronAttr(const TimeSeries& ts ) : timeSeries_(ts),free_(false),state_change_no_(0) {}
+   CronAttr(int h, int m, bool relative = false) : timeSeries_(h,m,relative),free_(false),state_change_no_(0) {}
 
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const CronAttr& rhs) const;
@@ -56,7 +56,7 @@ public:
 
    void miss_next_time_slot();
 	void setFree();   // ensures that isFree() always returns true
-	bool isSetFree() const { return makeFree_; }
+	bool isSetFree() const { return free_; }
   	bool isFree( const ecf::Calendar&) const;
 	bool checkForRequeue( const ecf::Calendar&) const;
 	bool validForHybrid(const ecf::Calendar&) const;
@@ -113,7 +113,7 @@ private:
 	std::vector<int> weekDays_;
 	std::vector<int> daysOfMonth_;
 	std::vector<int> months_;
- 	bool             makeFree_;         // persisted for use by why() on client side
+ 	bool             free_;         // persisted for use by why() on client side
 	unsigned int    state_change_no_;  // *not* persisted, only used on server side
 
    friend class cereal::access;
@@ -124,7 +124,7 @@ private:
 	       CEREAL_NVP(weekDays_),
 	       CEREAL_NVP(daysOfMonth_),
 	       CEREAL_NVP(months_),
-	       CEREAL_NVP(makeFree_)
+	       CEREAL_NVP(free_)
 	   );
 	}
 };

@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
 
       timer.restart();
       defs.save_as_checkpt(tmpFilename);
-      cout << " Save as DEFS checkpoint, time taken                                   = " << timer.elapsed()  << endl;
+      cout << " Save as DEFS checkpoint, time taken             = " << timer.elapsed()  << endl;
 
       std::remove(tmpFilename.c_str());
    }
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
 
       timer.restart();
       defs.cereal_save_as_checkpt(tmpFilename);
-      cout << " Save as CEREAL checkpoint, time taken                                  = " << timer.elapsed()  << endl;
+      cout << " Save as CEREAL checkpoint, time taken           = " << timer.elapsed()  << endl;
 
       std::remove(tmpFilename.c_str());
       //exit(0);
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
       timer.restart();
       PersistHelper helper;
       bool result = helper.test_cereal_checkpt_and_reload(defs, do_compare);
-      cout << " Checkpt(CEREAL) and reload , time taken   = ";
+      cout << " Checkpt(CEREAL) and reload , time taken         = ";
       cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
 

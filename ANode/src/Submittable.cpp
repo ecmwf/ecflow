@@ -55,8 +55,8 @@ Submittable& Submittable::operator=(const Submittable& rhs)
 {
    if (this != &rhs) {
       Node::operator=(rhs);
-      jobsPassword_ = rhs.jobsPassword_;
-      process_or_remote_id_ = rhs.process_or_remote_id_;
+      paswd_ = rhs.paswd_;
+      rid_ = rhs.rid_;
       abortedReason_ = rhs.abortedReason_;
       tryNo_ = rhs.tryNo_;
 
@@ -89,7 +89,7 @@ void Submittable::complete()
    set_state( NState::COMPLETE );
    flag().clear(ecf::Flag::ZOMBIE);
 
-   /// Should we clear jobsPassword_ & process_id? It can be argued that
+   /// Should we clear paswd_ & process_id? It can be argued that
    /// we should keep this. In case it is needed. i.e The job may not really be
    /// complete. However keeping, this means the memory usage will continue to rise
    /// Dependent on number of tasks. This can affect network bandwidth as well.
@@ -110,12 +110,12 @@ void Submittable::aborted(const std::string& reason)
 
 void Submittable::set_process_or_remote_id(const std::string& id)
 {
-   process_or_remote_id_ = id;
-   set_genvar_ecfrid(process_or_remote_id_);
+   rid_ = id;
+   set_genvar_ecfrid(rid_);
    state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG
-   if (tryNo_ == 0 && process_or_remote_id_ != Submittable::DUMMY_PROCESS_OR_REMOTE_ID()) {
+   if (tryNo_ == 0 && rid_ != Submittable::DUMMY_PROCESS_OR_REMOTE_ID()) {
       LogToCout logToCout;
       LOG(Log::ERR,"Submittable::set_process_or_remote_id: " << absNodePath() << " process_id(" << id << ") tryNo == 0, how can this be ???");
    }
@@ -179,8 +179,8 @@ std::string Submittable::write_state() const
    //             multiple statement on a single line i.e.
    //                 task a; task b;
    std::string ret;
-   if ( !jobsPassword_.empty() && jobsPassword_!= Submittable::DUMMY_JOBS_PASSWORD()) { ret += " passwd:"; ret += jobsPassword_;}
-   if ( !process_or_remote_id_.empty() )  { ret += " rid:"; ret += process_or_remote_id_; }
+   if ( !paswd_.empty() && paswd_!= Submittable::DUMMY_JOBS_PASSWORD()) { ret += " passwd:"; ret += paswd_;}
+   if ( !rid_.empty() )  { ret += " rid:"; ret += rid_; }
 
    // The abortedReason_, can contain user generated messages, including \n and ;, hence remove these
    // as they can mess up the parsing on reload.
@@ -201,11 +201,11 @@ void Submittable::read_state(const std::string& line,const std::vector<std::stri
    // task name #
    for(size_t i = 3; i < lineTokens.size(); i++) {
       if (lineTokens[i].find("passwd:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],jobsPassword_))
+         if (!Extract::split_get_second(lineTokens[i],paswd_))
             throw std::runtime_error( "Submittable::read_state failed for jobs password : " + name());
       }
       else if (lineTokens[i].find("rid:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],process_or_remote_id_))
+         if (!Extract::split_get_second(lineTokens[i],rid_))
             throw std::runtime_error( "Submittable::read_state failed for rid : " + name());
       }
       else if (lineTokens[i].find("try:") != std::string::npos ) {
@@ -236,10 +236,10 @@ void Submittable::read_state(const std::string& line,const std::vector<std::stri
 
 bool Submittable::operator==(const Submittable& rhs) const
 {
-   if ( jobsPassword_ != rhs.jobsPassword_ ) {
+   if ( paswd_ != rhs.paswd_ ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Submittable::operator==  jobsPassword_(" << jobsPassword_ << ") != rhs.jobsPassword_(" << rhs.jobsPassword_ << ") " << debugNodePath() << "\n";
+         std::cout << "Submittable::operator==  paswd_(" << paswd_ << ") != rhs.paswd_(" << rhs.paswd_ << ") " << debugNodePath() << "\n";
          std::cout << "Submittable::operator==  state(" << NState::toString(state()) << ")  rhs.state(" << NState::toString(rhs.state()) << ") \n";
          // No point dumping out change numbers, since we don't persist them, hence values will always be zero on client side.
       }
@@ -247,10 +247,10 @@ bool Submittable::operator==(const Submittable& rhs) const
       return false;
    }
 
-   if ( process_or_remote_id_ != rhs.process_or_remote_id_ ) {
+   if ( rid_ != rhs.rid_ ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Submittable::operator==  process_or_remote_id_(" << process_or_remote_id_ << ") != rhs.process_or_remote_id_(" << rhs.process_or_remote_id_ << ") " << debugNodePath() << "\n";
+         std::cout << "Submittable::operator==  rid_(" << rid_ << ") != rhs.rid_(" << rhs.rid_ << ") " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -451,7 +451,7 @@ EcfFile Submittable::locatedEcfFile() const
 
 void Submittable::set_jobs_password(const std::string& p)
 {
-   jobsPassword_ = p;
+   paswd_ = p;
    state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -470,9 +470,9 @@ void Submittable::increment_try_no()
    // o Clear the process/remote id. These will be reset by the child commands
    // *** This MUST be done before pre-processing as it uses these variables ***
    tryNo_++;
-   process_or_remote_id_.clear();
+   rid_.clear();
    abortedReason_.clear();
-   jobsPassword_ = Passwd::generate();
+   paswd_ = Passwd::generate();
    state_change_no_ = Ecf::incr_state_change_no();
    update_generated_variables();
 }
@@ -480,8 +480,8 @@ void Submittable::increment_try_no()
 void Submittable::clear()
 {
    abortedReason_.clear();       // reset reason aborted
-   jobsPassword_.clear();        // reset password, it will be regenerated before submission
-   process_or_remote_id_.clear();// reset process id
+   paswd_.clear();        // reset password, it will be regenerated before submission
+   rid_.clear();// reset process id
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -882,7 +882,7 @@ void Submittable::incremental_changes(DefsDelta& changes, compound_memento_ptr& 
 
    if (state_change_no_ > changes.client_state_change_no()) {
       if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
-      comp->add( std::make_shared<SubmittableMemento>( jobsPassword_,process_or_remote_id_,abortedReason_,tryNo_) );
+      comp->add( std::make_shared<SubmittableMemento>( paswd_,rid_,abortedReason_,tryNo_) );
    }
 
    // ** if compound memento has children base class, will add it to DefsDelta
@@ -900,8 +900,8 @@ void Submittable::set_memento(const SubmittableMemento* memento,std::vector<ecf:
       return;
    }
 
-   jobsPassword_ = memento->jobsPassword_;
-   process_or_remote_id_ = memento->process_or_remote_id_;
+   paswd_ = memento->paswd_;
+   rid_ = memento->rid_;
    abortedReason_ = memento->abortedReason_;
    tryNo_ = memento->tryNo_;
 }
@@ -1012,9 +1012,9 @@ void SubGenVariables::update_dynamic_generated_variables(const std::string& ecf_
    // cache strings that are used in many variables
    std::string the_try_no = submittable_->tryNo();
 
-   genvar_ecfrid_.set_value(submittable_->process_or_remote_id_); // does *not* modify Variable::state_change_no
+   genvar_ecfrid_.set_value(submittable_->rid_); // does *not* modify Variable::state_change_no
    genvar_ecftryno_.set_value(the_try_no);                        // does *not* modify Variable::state_change_no
-   genvar_ecfpass_.set_value(submittable_->jobsPassword_);        // does *not* modify Variable::state_change_no
+   genvar_ecfpass_.set_value(submittable_->paswd_);        // does *not* modify Variable::state_change_no
 
 
    /// The directory associated with ECF_JOB is automatically created if it does not exist.

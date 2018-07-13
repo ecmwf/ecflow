@@ -339,8 +339,8 @@ public:
    // Access functions: ======================================================
    const std::string& name() const { return name_; }
    const Repeat& repeat() const    { return repeat_;} // can be empty()
-   const std::vector<Variable>&        variables()const { return varVec_;}
-   const std::vector<limit_ptr>&       limits()   const { return limitVec_;}
+   const std::vector<Variable>&        variables()const { return vars_;}
+   const std::vector<limit_ptr>&       limits()   const { return limits_;}
    const std::vector<InLimit>&         inlimits() const { return inLimitMgr_.inlimits(); }
    const std::vector<Meter>&           meters()    const;
    const std::vector<Event>&           events()    const;
@@ -370,8 +370,8 @@ public:
    // and complete expressions. This is many times faster than calling
    // triggerAst()/completeAst() as this will force a parse and construction
    // of Abstract syntax tree, first time it is called.
-   Expression* get_trigger()    const { return triggerExpr_.get();}
-   Expression* get_complete()   const { return completeExpr_.get();}
+   Expression* get_trigger()    const { return t_expr_.get();}
+   Expression* get_complete()   const { return c_expr_.get();}
    AstTop* completeAst() const;   // Will create AST on demand
    AstTop* triggerAst() const;    // Will create AST on demand
    std::string completeExpression() const;
@@ -767,10 +767,10 @@ private: /// For use by python interface,
    std::vector<QueueAttr>::const_iterator queue_end() const;
    std::vector<GenericAttr>::const_iterator generic_begin() const;
    std::vector<GenericAttr>::const_iterator generic_end() const;
-   std::vector<Variable>::const_iterator variable_begin() const { return varVec_.begin();}
-   std::vector<Variable>::const_iterator variable_end() const { return varVec_.end();}
-   std::vector<limit_ptr>::const_iterator limit_begin() const { return limitVec_.begin();}
-   std::vector<limit_ptr>::const_iterator limit_end() const { return limitVec_.end();}
+   std::vector<Variable>::const_iterator variable_begin() const { return vars_.begin();}
+   std::vector<Variable>::const_iterator variable_end() const { return vars_.end();}
+   std::vector<limit_ptr>::const_iterator limit_begin() const { return limits_.begin();}
+   std::vector<limit_ptr>::const_iterator limit_end() const { return limits_.end();}
    std::vector<InLimit>::const_iterator inlimit_begin() const { return inLimitMgr_.inlimit_begin();}
    std::vector<InLimit>::const_iterator inlimit_end() const { return inLimitMgr_.inlimit_end();}
    std::string to_string() const;                                  // For python interface
@@ -782,9 +782,9 @@ private:
    std::pair<NState,boost::posix_time::time_duration> state_; // state and duration since suite start when state changed
    DState                      defStatus_;    // default value is QUEUED
 
-   std::vector<Variable>       varVec_;
-   mutable std::unique_ptr<Expression>        completeExpr_; // can only have one complete expression
-   mutable std::unique_ptr<Expression>        triggerExpr_;  // can only have one trigger expression
+   std::vector<Variable>       vars_;
+   mutable std::unique_ptr<Expression>        c_expr_; // can only have one complete expression
+   mutable std::unique_ptr<Expression>        t_expr_;  // can only have one trigger expression
 
    std::unique_ptr<ChildAttrs>                 child_attrs_;  // event meter & labels
    std::unique_ptr<TimeDepAttrs>               time_dep_attrs_;
@@ -793,7 +793,7 @@ private:
    std::unique_ptr<AutoAttrs>                  auto_attrs_;   // has no changeable state ?
    Repeat                      repeat_;       // each node can only have one repeat. By value, since has pimpl
 
-   std::vector<limit_ptr>      limitVec_;    // Ptrs since many in-limits can point to a single limit
+   std::vector<limit_ptr>      limits_;    // Ptrs since many in-limits can point to a single limit
    InLimitMgr                  inLimitMgr_;  // manages the inlimit
 
    ecf::Flag                   flag_;
@@ -822,16 +822,16 @@ private:
           CEREAL_NVP(state_),
           CEREAL_NVP(suspended_),
           CEREAL_NVP(defStatus_),
-          CEREAL_NVP(varVec_),
-          CEREAL_NVP(completeExpr_),
-          CEREAL_NVP(triggerExpr_),
-          CEREAL_NVP(child_attrs_),
-          CEREAL_NVP(time_dep_attrs_),
-          CEREAL_NVP(lateAttr_),
-          CEREAL_NVP(misc_attrs_),   // VerifyAttr & Zombies * auto attrs
-          CEREAL_NVP(auto_attrs_),
+          CEREAL_NVP(vars_),
+          CEREAL_NVP(c_expr_),
+          CEREAL_NVP(t_expr_),
+          ::cereal::make_nvp("child",child_attrs_),
+          ::cereal::make_nvp("time",time_dep_attrs_),
+          ::cereal::make_nvp("late",lateAttr_),
+          ::cereal::make_nvp("misc",misc_attrs_),   // VerifyAttr & Zombies * auto attrs
+          ::cereal::make_nvp("auto",auto_attrs_),
           CEREAL_NVP(repeat_),
-          CEREAL_NVP(limitVec_),
+          CEREAL_NVP(limits_),
           CEREAL_NVP(inLimitMgr_),
           CEREAL_NVP(flag_));
 
@@ -840,7 +840,7 @@ private:
          if (child_attrs_) child_attrs_->set_node(this);
          if (misc_attrs_) misc_attrs_->set_node(this);
          if (auto_attrs_) auto_attrs_->set_node(this);
-         for(std::vector<limit_ptr>::iterator i = limitVec_.begin(); i!= limitVec_.end(); ++i)  (*i)->set_node(this);
+         for(std::vector<limit_ptr>::iterator i = limits_.begin(); i!= limits_.end(); ++i)  (*i)->set_node(this);
       }
    }
 };

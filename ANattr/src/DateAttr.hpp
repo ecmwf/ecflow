@@ -29,10 +29,10 @@ public:
    DateAttr(int day, int month, int year); // will throw std::out_of_range for if invalid date
    explicit DateAttr(const std::string&);           // will throw std::runtime_error for if invalid date
    DateAttr()
-   : day_(0), month_(0), year_(0), makeFree_(false),
+   : day_(0), month_(0), year_(0), free_(false),
      state_change_no_(0) {} // for serialisation
    explicit DateAttr(const boost::gregorian::date& date)
-   : day_(date.day()), month_(date.month()), year_(date.year()), makeFree_(false),
+   : day_(date.day()), month_(date.month()), year_(date.year()), free_(false),
      state_change_no_(0) {} // for test
 
    std::ostream& print(std::ostream&) const;
@@ -42,7 +42,7 @@ public:
 
    void setFree();   // ensures that isFree() always returns true
    void clearFree(); // resets the free flag
-   bool isSetFree() const { return makeFree_; }
+   bool isSetFree() const { return free_; }
    void calendarChanged( const ecf::Calendar& c ); // can set attribute free
    bool isFree(const ecf::Calendar&) const;
    bool checkForRequeue( const ecf::Calendar&) const;
@@ -74,13 +74,13 @@ public:
    int year() const { return year_; }
 
 private:
-   bool is_free(const ecf::Calendar&) const; // ignores makeFree_
+   bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
    int          day_;
    int          month_;
    int          year_;
-   bool         makeFree_; // persisted for use by why() on client side
+   bool         free_; // persisted for use by why() on client side
    unsigned int state_change_no_;  // *not* persisted, only used on server side
 
    friend class cereal::access;
@@ -90,7 +90,7 @@ private:
       ar( CEREAL_NVP(day_),
           CEREAL_NVP(month_),
           CEREAL_NVP(year_),
-          CEREAL_NVP(makeFree_)
+          CEREAL_NVP(free_)
       );
    }
 };

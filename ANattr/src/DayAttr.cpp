@@ -49,7 +49,7 @@ void DayAttr::calendarChanged( const ecf::Calendar& c )
    if (c.dayChanged()) {
       clearFree();
    }
-   if (makeFree_) {
+   if (free_) {
       return;
    }
    else if (isFree(c)) {
@@ -60,7 +60,7 @@ void DayAttr::calendarChanged( const ecf::Calendar& c )
 bool DayAttr::isFree(const ecf::Calendar& calendar) const
 {
 	// The FreeDepCmd can be used to free the dates,
- 	if (makeFree_) {
+ 	if (free_) {
 		return true;
 	}
  	return is_free(calendar);
@@ -72,7 +72,7 @@ bool DayAttr::is_free(const ecf::Calendar& calendar) const
 }
 
 void DayAttr::setFree() {
-	makeFree_ = true;
+	free_ = true;
 	state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -81,7 +81,7 @@ void DayAttr::setFree() {
 }
 
 void DayAttr::clearFree() {
-	makeFree_ = false;
+	free_ = false;
 	state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -123,7 +123,7 @@ std::ostream& DayAttr::print(std::ostream& os) const
 	Indentor in;
 	Indentor::indent(os) << toString();
    if (!PrintStyle::defsStyle()) {
-      if (makeFree_) os << " # free";
+      if (free_) os << " # free";
    }
 	os << "\n";
 	return os;
@@ -140,14 +140,14 @@ std::string DayAttr::dump() const
 {
 	std::stringstream ss;
 	ss << toString();
- 	if (makeFree_) ss << " (free)";
+ 	if (free_) ss << " (free)";
 	else           ss << " (holding)";
   	return ss.str();
 }
 
 bool DayAttr::operator==(const DayAttr& rhs) const
 {
-	if (makeFree_ != rhs.makeFree_) {
+	if (free_ != rhs.free_) {
 		return false;
 	}
 	return structureEquals(rhs);

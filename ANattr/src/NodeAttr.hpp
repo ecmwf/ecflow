@@ -32,28 +32,28 @@ public:
    Label() : state_change_no_(0) {}
 
    std::ostream& print(std::ostream&) const;
-   const std::string& name() const      { return name_;}
-   const std::string& value() const     { return value_;}
-   const std::string& new_value() const { return new_value_;}
+   const std::string& name() const      { return n_;}
+   const std::string& value() const     { return v_;}
+   const std::string& new_value() const { return new_v_;}
    void set_new_value(const std::string& new_label);
    void reset();
-   bool empty() const { return name_.empty(); }
+   bool empty() const { return n_.empty(); }
 
    // The state_change_no is never reset. Must be incremented if it can affect equality
    unsigned int state_change_no() const { return state_change_no_; }
 
    // 2 kinds of equality, structure and state
    friend bool operator==(const Label& lhs,const Label& rhs) {
-      if (lhs.name_ != rhs.name_ )  {
-         //std::cout << "lhs.name_ '" << lhs.name_ << "' != rhs.name_ '" << rhs.name_ << "'\n";
+      if (lhs.n_ != rhs.n_ )  {
+         //std::cout << "lhs.n_ '" << lhs.n_ << "' != rhs.n_ '" << rhs.n_ << "'\n";
          return false;
       }
-      if (lhs.new_value_ != rhs.new_value_) {
-         //std::cout << "lhs.new_value_ '" << lhs.new_value_ << "' != rhs.new_value_ '" << rhs.new_value_ << "'\n";
+      if (lhs.new_v_ != rhs.new_v_) {
+         //std::cout << "lhs.new_v_ '" << lhs.new_v_ << "' != rhs.new_v_ '" << rhs.new_v_ << "'\n";
          return false;
       }
-      if ( lhs.value_ != rhs.value_ ) {
-         //std::cout << "lhs.value_ '" << lhs.value_ << "' != rhs.value_ '" << rhs.value_ << "'\n";
+      if ( lhs.v_ != rhs.v_ ) {
+         //std::cout << "lhs.v_ '" << lhs.v_ << "' != rhs.v_ '" << rhs.v_ << "'\n";
          return false;
       }
       return true;
@@ -66,18 +66,18 @@ public:
    static const Label& EMPTY(); // Added to support return by reference
 
 private:
-   std::string name_;
-   std::string value_;
-   std::string new_value_;
+   std::string n_;
+   std::string v_;
+   std::string new_v_;
    unsigned int state_change_no_;        // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar( CEREAL_NVP(name_),
-          CEREAL_NVP(value_),
-          CEREAL_NVP(new_value_)
+      ar( CEREAL_NVP(n_),
+          CEREAL_NVP(v_),
+          CEREAL_NVP(new_v_)
       );
    }
 };
@@ -149,7 +149,7 @@ private:
 class Meter {
 public:
    Meter(const std::string& name,int min, int max, int colorChange = std::numeric_limits<int>::max());
-   Meter() : min_(0),max_(0), value_(0),colorChange_(0),used_(false), state_change_no_(0){}
+   Meter() : min_(0),max_(0), value_(0),cc_(0),used_(false), state_change_no_(0){}
 
    std::ostream& print(std::ostream&) const;
    void reset() { set_value(min_);}
@@ -160,7 +160,7 @@ public:
    int value() const { return value_;}
    int min() const { return min_;}
    int max() const { return max_;}
-   int colorChange() const { return colorChange_;}
+   int colorChange() const { return cc_;}
 
    // The state_change_no is never reset. Must be incremented if it can affect equality
    unsigned int state_change_no() const { return state_change_no_; }
@@ -181,7 +181,7 @@ private:
    int          min_;
    int          max_;
    int          value_;
-   int          colorChange_;
+   int          cc_;
    std::string  name_;
    bool         used_;        // used by the simulator not persisted
    unsigned int state_change_no_;  // *not* persisted, only used on server side
@@ -193,7 +193,7 @@ private:
       ar( CEREAL_NVP(min_),
           CEREAL_NVP(max_),
           CEREAL_NVP(value_),
-          CEREAL_NVP(colorChange_),
+          CEREAL_NVP(cc_),
           CEREAL_NVP(name_)
       );
    }

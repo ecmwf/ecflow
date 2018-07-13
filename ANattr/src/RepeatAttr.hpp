@@ -414,57 +414,57 @@ public:
    Repeat& operator=(const Repeat& rhs);
    bool operator==(const Repeat& rhs) const;
 
-   bool empty() const { return (repeatType_) ? false : true; }
-   void clear() { repeatType_.release();  }
+   bool empty() const { return (type_) ? false : true; }
+   void clear() { type_.release();  }
 
    const std::string& name() const;
 
-   void gen_variables(std::vector<Variable>& vec) const { if (repeatType_) repeatType_->gen_variables(vec);}
-   const Variable& find_gen_variable(const std::string& name) const { return (repeatType_) ? repeatType_->find_gen_variable(name) : Variable::EMPTY();}
-   void update_repeat_genvar() const { if (repeatType_) repeatType_->update_repeat_genvar();}
+   void gen_variables(std::vector<Variable>& vec) const { if (type_) type_->gen_variables(vec);}
+   const Variable& find_gen_variable(const std::string& name) const { return (type_) ? type_->find_gen_variable(name) : Variable::EMPTY();}
+   void update_repeat_genvar() const { if (type_) type_->update_repeat_genvar();}
 
-   int start() const  { return (repeatType_) ? repeatType_->start() : 0;}
-   int end() const    { return (repeatType_) ? repeatType_->end()   : 0;}
-   int step() const   { return (repeatType_) ? repeatType_->step()  : 0;}
-   long value() const { return (repeatType_) ? repeatType_->value() : 0;}
-   long index_or_value() const { return (repeatType_) ? repeatType_->index_or_value() : 0;}
-   long last_valid_value() const { return (repeatType_) ? repeatType_->last_valid_value() : 0;}
-   long last_valid_value_minus(int val) const { return (repeatType_) ? repeatType_->last_valid_value_minus(val) : -val;}
-   long last_valid_value_plus(int val)  const { return (repeatType_) ? repeatType_->last_valid_value_plus(val)  : val;}
+   int start() const  { return (type_) ? type_->start() : 0;}
+   int end() const    { return (type_) ? type_->end()   : 0;}
+   int step() const   { return (type_) ? type_->step()  : 0;}
+   long value() const { return (type_) ? type_->value() : 0;}
+   long index_or_value() const { return (type_) ? type_->index_or_value() : 0;}
+   long last_valid_value() const { return (type_) ? type_->last_valid_value() : 0;}
+   long last_valid_value_minus(int val) const { return (type_) ? type_->last_valid_value_minus(val) : -val;}
+   long last_valid_value_plus(int val)  const { return (type_) ? type_->last_valid_value_plus(val)  : val;}
 
    std::ostream& print(std::ostream& os) const;
-   bool valid() const                           { return (repeatType_) ? repeatType_->valid() : false;}
-   void setToLastValue()                        { if (repeatType_) repeatType_->setToLastValue() ; }
-   std::string valueAsString() const            { return (repeatType_) ? repeatType_->valueAsString() : std::string(); }
-   std::string value_as_string(int index) const { return (repeatType_) ? repeatType_->value_as_string(index) : std::string(); }
-   void reset()                                 { if (repeatType_) repeatType_->reset();}
-   void increment()                             { if (repeatType_) repeatType_->increment();}
-   void change( const std::string& newValue )   { if (repeatType_) repeatType_->change(newValue); }
-   void changeValue( long newValue )            { if (repeatType_) repeatType_->changeValue(newValue); }
-   void set_value( long newValue )              { if (repeatType_) repeatType_->set_value(newValue); }
-   std::string toString() const                 { return (repeatType_) ? repeatType_->toString() : std::string();}
-   std::string dump() const                     { return (repeatType_) ? repeatType_->dump() : std::string();} // additional state
-   unsigned int state_change_no() const         { return (repeatType_) ? repeatType_->state_change_no() : 0; }
+   bool valid() const                           { return (type_) ? type_->valid() : false;}
+   void setToLastValue()                        { if (type_) type_->setToLastValue() ; }
+   std::string valueAsString() const            { return (type_) ? type_->valueAsString() : std::string(); }
+   std::string value_as_string(int index) const { return (type_) ? type_->value_as_string(index) : std::string(); }
+   void reset()                                 { if (type_) type_->reset();}
+   void increment()                             { if (type_) type_->increment();}
+   void change( const std::string& newValue )   { if (type_) type_->change(newValue); }
+   void changeValue( long newValue )            { if (type_) type_->changeValue(newValue); }
+   void set_value( long newValue )              { if (type_) type_->set_value(newValue); }
+   std::string toString() const                 { return (type_) ? type_->toString() : std::string();}
+   std::string dump() const                     { return (type_) ? type_->dump() : std::string();} // additional state
+   unsigned int state_change_no() const         { return (type_) ? type_->state_change_no() : 0; }
 
    /// simulator functions:
-   bool isInfinite() const                      { return (repeatType_) ? repeatType_->isInfinite() : false;}
+   bool isInfinite() const                      { return (type_) ? type_->isInfinite() : false;}
 
    // Allows Repeat's to be returned by reference
    static const Repeat& EMPTY();
 
-   bool is_repeat_day() const { return (repeatType_) ? repeatType_->is_repeat_day() : false; }
+   bool is_repeat_day() const { return (type_) ? type_->is_repeat_day() : false; }
 
    /// Expose base for the GUI only, use with caution
-   RepeatBase* repeatBase() const { return repeatType_.get();}
+   RepeatBase* repeatBase() const { return type_.get();}
 
 private:
-   std::unique_ptr<RepeatBase> repeatType_;
+   std::unique_ptr<RepeatBase> type_;
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(CEREAL_NVP(repeatType_));
+      ar(CEREAL_NVP(type_));
    }
 };
 

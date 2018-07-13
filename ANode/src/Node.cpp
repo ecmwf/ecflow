@@ -77,9 +77,9 @@ Node::Node(const Node& rhs)
   suspended_(rhs.suspended_),
   state_( rhs.state_),
   defStatus_(rhs.defStatus_),
-  varVec_(rhs.varVec_),
-  completeExpr_( (rhs.completeExpr_) ? new Expression(*rhs.completeExpr_) : NULL ),
-  triggerExpr_(  (rhs.triggerExpr_) ? new Expression(*rhs.triggerExpr_) : NULL ),
+  vars_(rhs.vars_),
+  c_expr_( (rhs.c_expr_) ? new Expression(*rhs.c_expr_) : NULL ),
+  t_expr_(  (rhs.t_expr_) ? new Expression(*rhs.t_expr_) : NULL ),
   child_attrs_((rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL),
   time_dep_attrs_((rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL),
   lateAttr_((rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL),
@@ -97,16 +97,16 @@ Node::Node(const Node& rhs)
    if ( misc_attrs_ )     misc_attrs_->set_node(this);
    if ( auto_attrs_ )     auto_attrs_->set_node(this);
 
-   for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
-      limit_ptr the_limit = std::make_shared<Limit>( *rhs.limitVec_[l]);
+   for (size_t l = 0;  l< rhs.limits_.size(); l++ ) {
+      limit_ptr the_limit = std::make_shared<Limit>( *rhs.limits_[l]);
       the_limit->set_node(this);
-      limitVec_.push_back( the_limit );
+      limits_.push_back( the_limit );
    }
 }
 
 void Node::delete_attributes() {
-   completeExpr_.reset(nullptr);
-   triggerExpr_.reset(nullptr);
+   c_expr_.reset(nullptr);
+   t_expr_.reset(nullptr);
    child_attrs_.reset(nullptr);
    time_dep_attrs_.reset(nullptr);
    lateAttr_.reset(nullptr);
@@ -140,11 +140,11 @@ Node& Node::operator=(const Node& rhs)
       state_ =  rhs.state_;
       defStatus_ = rhs.defStatus_;
 
-      varVec_ = rhs.varVec_ ;
+      vars_ = rhs.vars_ ;
 
       delete_attributes();
-      if (rhs.completeExpr_)   completeExpr_   = std::make_unique<Expression>(*rhs.completeExpr_);
-      if (rhs.triggerExpr_)    triggerExpr_    = std::make_unique<Expression>(*rhs.triggerExpr_ );
+      if (rhs.c_expr_)   c_expr_   = std::make_unique<Expression>(*rhs.c_expr_);
+      if (rhs.t_expr_)    t_expr_    = std::make_unique<Expression>(*rhs.t_expr_ );
       if (rhs.child_attrs_)    child_attrs_    = std::make_unique<ChildAttrs>(*rhs.child_attrs_);
       if (rhs.time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(*rhs.time_dep_attrs_);
       if (rhs.lateAttr_)       lateAttr_       = std::make_unique<ecf::LateAttr>(*rhs.lateAttr_);
@@ -166,11 +166,11 @@ Node& Node::operator=(const Node& rhs)
       if ( misc_attrs_ )     misc_attrs_->set_node(this);
       if ( auto_attrs_ )     auto_attrs_->set_node(this);
 
-      limitVec_.clear();
-      for (size_t l = 0;  l< rhs.limitVec_.size(); l++ ) {
-         limit_ptr the_limit = std::make_shared<Limit>( *rhs.limitVec_[l]);
+      limits_.clear();
+      for (size_t l = 0;  l< rhs.limits_.size(); l++ ) {
+         limit_ptr the_limit = std::make_shared<Limit>( *rhs.limits_[l]);
          the_limit->set_node(this);
-         limitVec_.push_back( the_limit );
+         limits_.push_back( the_limit );
       }
    }
    return *this;
@@ -227,7 +227,7 @@ void Node::begin()
 
    if (lateAttr_) lateAttr_->reset();
    if (child_attrs_) child_attrs_->begin();
-   for(size_t i = 0; i < limitVec_.size(); i++)   { limitVec_[i]->reset(); }
+   for(size_t i = 0; i < limits_.size(); i++)   { limits_[i]->reset(); }
 
    // Let time base attributes use, relative duration if applicable
    if (time_dep_attrs_) {
@@ -237,7 +237,7 @@ void Node::begin()
 
    // DO *NOT* call update_generated_variables(). Called on a type specific bases, for begin
    // Typically we need only call update_generated_variables() for a task, at job creation time.
-   // so that ECF_OUT, ECF_TRYNO, ECF_JOBOUT, ECF_PASS(jobsPassword_) can be updated.
+   // so that ECF_OUT, ECF_TRYNO, ECF_JOBOUT, ECF_PASS(paswd_) can be updated.
    // However the generated variables are used when within job generation and can be referenced by AST
    // Hence to avoid excessive memory consumption, they are created on demand
 }
@@ -301,7 +301,7 @@ void Node::requeue(Requeue_args& args)
    if (child_attrs_) child_attrs_->requeue();
    if (misc_attrs_) misc_attrs_->requeue();
 
-   for(size_t i = 0; i < limitVec_.size(); i++) { limitVec_[i]->reset(); }
+   for(size_t i = 0; i < limits_.size(); i++) { limits_[i]->reset(); }
 
    // ECFLOW-196, ensure the re-queue release tokens held by Limits higher up the tree.
    // Note: Its safe to call decrementInLimit, even when no limit consumed
@@ -326,7 +326,7 @@ void Node::reset()
    if (lateAttr_) lateAttr_->reset();
    if (child_attrs_) child_attrs_->requeue();
 
-   for(size_t i = 0; i < limitVec_.size(); i++) { limitVec_[i]->reset(); }
+   for(size_t i = 0; i < limits_.size(); i++) { limits_[i]->reset(); }
 }
 
 
@@ -686,22 +686,22 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
 
 void Node::freeTrigger() const
 {
-   if (triggerExpr_) triggerExpr_->setFree();
+   if (t_expr_) t_expr_->setFree();
 }
 
 void Node::clearTrigger() const
 {
-   if (triggerExpr_) triggerExpr_->clearFree();
+   if (t_expr_) t_expr_->clearFree();
 }
 
 void Node::freeComplete() const
 {
-   if (completeExpr_) completeExpr_->setFree();
+   if (c_expr_) c_expr_->setFree();
 }
 
 void Node::clearComplete() const
 {
-   if (completeExpr_) completeExpr_->clearFree();
+   if (c_expr_) c_expr_->clearFree();
 }
 
 void Node::freeHoldingDateDependencies()
@@ -722,13 +722,13 @@ bool Node::evaluateComplete() const
       // *NOTE* if we have a non NULL complete ast, we must have complete expression
       // The freed state is stored on the expression ( i.e not on the ast)
       // ISSUE: Complete expression can not be by-passed in the GUI
-      if (completeExpr_->isFree() || theCompeteAst->evaluate()) {
+      if (c_expr_->isFree() || theCompeteAst->evaluate()) {
 
          // Note: if a task has been set complete, the use may decide to place into queued state( via GUI)
          //       In which case, we *want* this complete expression to be re-evaluated.
          //       Hence the old code below has been commented out.
          // >>old: Set the complete as free, until begin()/requeue, // Only update state change no, if state has changed.
-         // >>old:if (!completeExpr_->isFree()) freeComplete();
+         // >>old:if (!c_expr_->isFree()) freeComplete();
 
          // ECFLOW-247 Family goes complete despite active child
          //            Typically we have a complete expression on the family i/e f1/t1 == complete
@@ -772,13 +772,13 @@ bool Node::evaluateTrigger() const
       // Note 1: A trigger can be freed by the ForceCmd
       // Note 2: if we have a non NULL trigger ast, we must have trigger expression
       // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
-      if (triggerExpr_->isFree() || theTriggerAst->evaluate()) {
+      if (t_expr_->isFree() || theTriggerAst->evaluate()) {
 
          // *ALWAYS* evaluate trigger expression unless user has forcibly removed trigger dependencies
          // ******** This allows force queued functionality, to work as expected, since trigger's will be honoured
          // The old code below has been commented out.
          // >> old: Set the trigger as free, until begin()/requeue.  Only update state change no, when required
-         // >> old: if (!triggerExpr_->isFree()) freeTrigger();
+         // >> old: if (!t_expr_->isFree()) freeTrigger();
 
 #ifdef DEBUG_DEPENDENCIES
          LOG(Log::DBG,"   Node::evaluateTrigger() " << debugNodePath() << " FREE, TRIGGER AST evaluation succeeded" );
@@ -1316,9 +1316,9 @@ bool Node::variable_dollar_subsitution(std::string& cmd)
 
 std::string Node::completeExpression() const
 {
-   if (completeExpr_) {
+   if (c_expr_) {
       string ret = "complete ";
-      ret += completeExpr_->expression();
+      ret += c_expr_->expression();
       return ret;
    }
    return string();
@@ -1326,9 +1326,9 @@ std::string Node::completeExpression() const
 
 std::string Node::triggerExpression() const
 {
-   if (triggerExpr_) {
+   if (t_expr_) {
       string ret = "trigger ";
-      ret += triggerExpr_->expression();
+      ret += t_expr_->expression();
       return ret;
    }
    return string();
@@ -1398,14 +1398,14 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    if (ctop) {
       // capture node path resolve errors, and expression divide/module by zero
       std::string expr;
-      if (completeExpr_) expr = completeExpr_->expression();
+      if (c_expr_) expr = c_expr_->expression();
       (void)check_expressions(ctop,expr,false,errorMsg);
    }
 
    AstTop* ttop = triggerAst(errorMsg);
    if (ttop) {
       std::string expr;
-      if (triggerExpr_) expr = triggerExpr_->expression();
+      if (t_expr_) expr = t_expr_->expression();
       (void)check_expressions(ttop,expr,true,errorMsg);
    }
 
@@ -1480,11 +1480,11 @@ std::ostream& Node::print(std::ostream& os) const
 
    if (lateAttr_) lateAttr_->print(os);
 
-   if (completeExpr_) {
-      completeExpr_-> print(os,"complete");
+   if (c_expr_) {
+      c_expr_-> print(os,"complete");
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
-         if (completeExpr_->isFree()) Indentor::indent(os) << "# (free)\n";
+         if (c_expr_->isFree()) Indentor::indent(os) << "# (free)\n";
          if ( completeAst() ) {
             if (!defs()) {
                // Full defs is required for extern checking, and finding absolute node paths
@@ -1496,11 +1496,11 @@ std::ostream& Node::print(std::ostream& os) const
          }
       }
    }
-   if (triggerExpr_)  {
-      triggerExpr_->print(os,"trigger");
+   if (t_expr_)  {
+      t_expr_->print(os,"trigger");
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
-         if (triggerExpr_->isFree()) Indentor::indent(os) << "# (free)\n";
+         if (t_expr_->isFree()) Indentor::indent(os) << "# (free)\n";
          if ( triggerAst() ) {
             if (!defs()) {
                Indentor in;
@@ -1512,7 +1512,7 @@ std::ostream& Node::print(std::ostream& os) const
    }
    repeat_.print(os);  // if repeat is empty print(..) does nothing
 
-   BOOST_FOREACH(const Variable& v, varVec_ )       { v.print(os); }
+   BOOST_FOREACH(const Variable& v, vars_ )       { v.print(os); }
 
    if ( PrintStyle::getStyle() == PrintStyle::STATE ) {
       // Distinguish normal variable from generated, by adding a #
@@ -1522,7 +1522,7 @@ std::ostream& Node::print(std::ostream& os) const
       BOOST_FOREACH(const Variable& v, gvec ) { v.print_generated(os); }
    }
 
-   BOOST_FOREACH(limit_ptr l, limitVec_)            { l->print(os); }
+   BOOST_FOREACH(limit_ptr l, limits_)            { l->print(os); }
    inLimitMgr_.print(os);
    if (child_attrs_) child_attrs_->print(os);
    if (time_dep_attrs_) time_dep_attrs_->print(os);
@@ -1589,56 +1589,56 @@ bool Node::operator==(const Node& rhs) const
       return false;
    }
 
-   if ( (triggerExpr_ && !rhs.triggerExpr_) || (!triggerExpr_ && rhs.triggerExpr_) ) {
+   if ( (t_expr_ && !rhs.t_expr_) || (!t_expr_ && rhs.t_expr_) ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (triggerExpr_ && !rhs.triggerExpr_) || (!triggerExpr_&& rhs.triggerExpr_)  " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (t_expr_ && !rhs.t_expr_) || (!t_expr_&& rhs.t_expr_)  " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   if ( triggerExpr_ && rhs.triggerExpr_ && (*triggerExpr_ != *rhs.triggerExpr_) ) {
+   if ( t_expr_ && rhs.t_expr_ && (*t_expr_ != *rhs.t_expr_) ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  triggerExpr_ && rhs.triggerExpr_ && (*triggerExpr_ != *rhs.triggerExpr_) " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
-
-   if ( (completeExpr_ && !rhs.completeExpr_) || (!completeExpr_ && rhs.completeExpr_) ) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (completeExpr_ && !rhs.completeExpr_) || (!completeExpr_&& rhs.completeExpr_)  " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
-   if ( completeExpr_ && rhs.completeExpr_ && (*completeExpr_ != *rhs.completeExpr_) ) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  completeExpr_ && rhs.completeExpr_ && (*completeExpr_ != *rhs.completeExpr_) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  t_expr_ && rhs.t_expr_ && (*t_expr_ != *rhs.t_expr_) " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
 
-
-   if (varVec_.size() != rhs.varVec_.size()) {
+   if ( (c_expr_ && !rhs.c_expr_) || (!c_expr_ && rhs.c_expr_) ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (varVec_.size() != rhs.varVec_.size()) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (c_expr_ && !rhs.c_expr_) || (!c_expr_&& rhs.c_expr_)  " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   for(unsigned i = 0; i < varVec_.size(); ++i) {
-      if (!(varVec_[i] == rhs.varVec_[i] )) {
+   if ( c_expr_ && rhs.c_expr_ && (*c_expr_ != *rhs.c_expr_) ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  c_expr_ && rhs.c_expr_ && (*c_expr_ != *rhs.c_expr_) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+
+
+   if (vars_.size() != rhs.vars_.size()) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  (vars_.size() != rhs.vars_.size()) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   for(unsigned i = 0; i < vars_.size(); ++i) {
+      if (!(vars_[i] == rhs.vars_[i] )) {
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
-            std::cout << "Node::operator==  (!(varVec_[i] == rhs.varVec_[i] )) " << debugNodePath() << "\n";
-            std::cout << "     varVec_[i] name = '" << varVec_[i].name() << "' value = '" << varVec_[i].theValue() << "'\n";
-            std::cout << " rhs.varVec_[i] name = '" << rhs.varVec_[i].name() << "' value = '" << rhs.varVec_[i].theValue() << "'\n";
+            std::cout << "Node::operator==  (!(vars_[i] == rhs.vars_[i] )) " << debugNodePath() << "\n";
+            std::cout << "     vars_[i] name = '" << vars_[i].name() << "' value = '" << vars_[i].theValue() << "'\n";
+            std::cout << " rhs.vars_[i] name = '" << rhs.vars_[i].name() << "' value = '" << rhs.vars_[i].theValue() << "'\n";
          }
 #endif
          return false;
@@ -1655,19 +1655,19 @@ bool Node::operator==(const Node& rhs) const
       return false;
    }
 
-   if (limitVec_.size() != rhs.limitVec_.size()) {
+   if (limits_.size() != rhs.limits_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  (limitVec_.size(" << limitVec_.size() << ") != rhs.limitVec_.size(" << rhs.limitVec_.size() << ")) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (limits_.size(" << limits_.size() << ") != rhs.limits_.size(" << rhs.limits_.size() << ")) " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   for(unsigned i = 0; i < limitVec_.size(); ++i) {
-      if (!(*limitVec_[i] == *rhs.limitVec_[i] )) {
+   for(unsigned i = 0; i < limits_.size(); ++i) {
+      if (!(*limits_[i] == *rhs.limits_[i] )) {
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
-            std::cout << "Node::operator==  (!(*limitVec_[i] == *rhs.limitVec_[i] )) " << debugNodePath() << "\n";
+            std::cout << "Node::operator==  (!(*limits_[i] == *rhs.limits_[i] )) " << debugNodePath() << "\n";
          }
 #endif
          return false;
@@ -1866,7 +1866,7 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
       // Note 1: A trigger can be freed by the ForceCmd
       // Note 2: if we have a non NULL trigger ast, we must have trigger expression
       // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
-      if (!triggerExpr_->isFree() ) {
+      if (!t_expr_->isFree() ) {
 
 #ifdef DEBUG_WHY
          std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
@@ -2002,7 +2002,7 @@ void Node::getAllAstNodes(std::set<Node*>& theSet) const
 
 AstTop* Node::completeAst() const
 {
-   if (completeExpr_) {
+   if (c_expr_) {
       std::string ignoredErrorMsg;
       return completeAst(ignoredErrorMsg);
    }
@@ -2011,7 +2011,7 @@ AstTop* Node::completeAst() const
 
 AstTop* Node::triggerAst() const
 {
-   if (triggerExpr_) {
+   if (t_expr_) {
       std::string ignoredErrorMsg;
       return triggerAst(ignoredErrorMsg);
    }
@@ -2020,30 +2020,30 @@ AstTop* Node::triggerAst() const
 
 AstTop* Node::completeAst(std::string& errorMsg) const
 {
-   if (completeExpr_) {
-      if (completeExpr_->get_ast() == NULL) {
+   if (c_expr_) {
+      if (c_expr_->get_ast() == NULL) {
 
-         completeExpr_->createAST(const_cast<Node*>(this),"complete",errorMsg);
+         c_expr_->createAST(const_cast<Node*>(this),"complete",errorMsg);
 #ifdef DEBUG
-         if (errorMsg.empty()) LOG_ASSERT(completeExpr_->get_ast(),"");
+         if (errorMsg.empty()) LOG_ASSERT(c_expr_->get_ast(),"");
 #endif
       }
-      return completeExpr_->get_ast();
+      return c_expr_->get_ast();
    }
    return NULL;
 }
 
 AstTop* Node::triggerAst(std::string& errorMsg) const
 {
-   if (triggerExpr_) {
-      if (triggerExpr_->get_ast() == NULL) {
+   if (t_expr_) {
+      if (t_expr_->get_ast() == NULL) {
 
-         triggerExpr_->createAST(const_cast<Node*>(this),"trigger",errorMsg);
+         t_expr_->createAST(const_cast<Node*>(this),"trigger",errorMsg);
 #ifdef DEBUG
-         if (errorMsg.empty()) LOG_ASSERT(triggerExpr_->get_ast(),"");
+         if (errorMsg.empty()) LOG_ASSERT(t_expr_->get_ast(),"");
 #endif
       }
-      return triggerExpr_->get_ast();
+      return t_expr_->get_ast();
    }
    return NULL;
 }
@@ -2188,12 +2188,12 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
       case Attr::METER: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
       case Attr::LABEL: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
       case Attr::LIMIT:
-         sort(limitVec_.begin(),limitVec_.end(),boost::bind(Str::caseInsLess,
+         sort(limits_.begin(),limits_.end(),boost::bind(Str::caseInsLess,
                                    boost::bind(&Limit::name,_1),
                                    boost::bind(&Limit::name,_2)));
          break;
       case Attr::VARIABLE:
-         sort(varVec_.begin(),varVec_.end(),boost::bind(Str::caseInsLess,
+         sort(vars_.begin(),vars_.end(),boost::bind(Str::caseInsLess,
                                    boost::bind(&Variable::name,_1),
                                    boost::bind(&Variable::name,_2)));
          break;

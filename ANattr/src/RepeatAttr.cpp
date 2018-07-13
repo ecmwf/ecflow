@@ -39,44 +39,44 @@ const Repeat& Repeat::EMPTY() { static const Repeat REPEAT = Repeat(); return RE
 //=========================================================================
 
 Repeat::Repeat() {}
-Repeat::Repeat( const RepeatDate& r) : repeatType_(new RepeatDate(r)) {}
-Repeat::Repeat( const RepeatInteger& r) : repeatType_(new RepeatInteger(r)) {}
-Repeat::Repeat( const RepeatEnumerated& r) : repeatType_(new RepeatEnumerated(r)) {}
-Repeat::Repeat( const RepeatString& r) : repeatType_(new RepeatString(r)) {}
-Repeat::Repeat( const RepeatDay& r) : repeatType_(new RepeatDay(r)) {}
+Repeat::Repeat( const RepeatDate& r) : type_(new RepeatDate(r)) {}
+Repeat::Repeat( const RepeatInteger& r) : type_(new RepeatInteger(r)) {}
+Repeat::Repeat( const RepeatEnumerated& r) : type_(new RepeatEnumerated(r)) {}
+Repeat::Repeat( const RepeatString& r) : type_(new RepeatString(r)) {}
+Repeat::Repeat( const RepeatDay& r) : type_(new RepeatDay(r)) {}
 
 Repeat::~Repeat() {}
 
 Repeat::Repeat( const Repeat& rhs)
 {
-	if ( rhs.repeatType_) {
-	   repeatType_.reset( rhs.repeatType_->clone());
+	if ( rhs.type_) {
+	   type_.reset( rhs.type_->clone());
 	}
 }
 
 Repeat& Repeat::operator=(const Repeat& rhs)
 {
-   repeatType_.release();
-	if ( rhs.repeatType_) {
-      repeatType_.reset( rhs.repeatType_->clone());
+   type_.release();
+	if ( rhs.type_) {
+      type_.reset( rhs.type_->clone());
 	}
 	return *this;
 }
 
 bool Repeat::operator==(const Repeat& rhs) const
 {
-	if (!repeatType_ && rhs.repeatType_) return false;
-	if (repeatType_ && !rhs.repeatType_) return false;
-	if (!repeatType_ && !rhs.repeatType_) return true	;
-	return repeatType_->compare(rhs.repeatType_.get());
+	if (!type_ && rhs.type_) return false;
+	if (type_ && !rhs.type_) return false;
+	if (!type_ && !rhs.type_) return true	;
+	return type_->compare(rhs.type_.get());
 }
 
 const std::string& Repeat::name() const {
-   return (repeatType_.get()) ? repeatType_->name() : Str::EMPTY();
+   return (type_.get()) ? type_->name() : Str::EMPTY();
 }
 
 std::ostream& Repeat::print( std::ostream& os ) const {
-	if (repeatType_) {
+	if (type_) {
 		Indentor in;
 		Indentor::indent(os) << toString() << "\n";
 	}

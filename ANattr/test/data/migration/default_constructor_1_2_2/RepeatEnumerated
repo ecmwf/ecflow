@@ -1,10 +1,1 @@
-{
-    "16RepeatEnumerated": {
-        "cereal_class_version": 0,
-        "value0": {
-            "name_": ""
-        },
-        "theEnums_": [],
-        "currentIndex_": 0
-    }
-}
+{"16RepeatEnumerated":{"cereal_class_version":0,"value0":{"name_":""},"theEnums_":[],"currentIndex_":0}}

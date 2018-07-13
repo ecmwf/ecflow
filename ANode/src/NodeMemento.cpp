@@ -27,8 +27,8 @@ using namespace std;
 void Node::clear()
 {
    lateAttr_.reset(nullptr);
-   completeExpr_.reset(nullptr);
-   triggerExpr_.reset(nullptr);
+   c_expr_.reset(nullptr);
+   t_expr_.reset(nullptr);
 
    time_dep_attrs_.reset(nullptr);
    child_attrs_.reset(nullptr);
@@ -42,8 +42,8 @@ void Node::clear()
    // we don't delete auto_attrs_ since that does not have changeable state ?
 
   	repeat_.clear();
-	varVec_.clear();
-	limitVec_.clear();
+	vars_.clear();
+	limits_.clear();
 	inLimitMgr_.clear();
 }
 
@@ -130,13 +130,13 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
          BOOST_FOREACH(const GenericAttr& attr,generic_attrs){ comp->add( std::make_shared<NodeGenericMemento>( attr) ); }
 		}
 
-		BOOST_FOREACH(limit_ptr l, limitVec_ )         { comp->add( std::make_shared<NodeLimitMemento>(  *l) ); }
-  		BOOST_FOREACH(const Variable& v, varVec_ )     { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
+		BOOST_FOREACH(limit_ptr l, limits_ )         { comp->add( std::make_shared<NodeLimitMemento>(  *l) ); }
+  		BOOST_FOREACH(const Variable& v, vars_ )     { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
 
  		inLimitMgr_.get_memento(comp);
 
- 		if (triggerExpr_)     comp->add( std::make_shared<NodeTriggerMemento>(  *triggerExpr_) );
-	 	if (completeExpr_)    comp->add( std::make_shared<NodeCompleteMemento>(  *completeExpr_ ) );
+ 		if (t_expr_)     comp->add( std::make_shared<NodeTriggerMemento>(  *t_expr_) );
+	 	if (c_expr_)    comp->add( std::make_shared<NodeCompleteMemento>(  *c_expr_ ) );
  		if (!repeat_.empty()) comp->add( std::make_shared<NodeRepeatMemento>(  repeat_) );
  		if (lateAttr_)        comp->add( std::make_shared<NodeLateMemento>(  *lateAttr_) );
 
@@ -247,13 +247,13 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
    }
 
 	// determine if the trigger or complete changed
-	if (triggerExpr_ && triggerExpr_->state_change_no() > client_state_change_no) {
+	if (t_expr_ && t_expr_->state_change_no() > client_state_change_no) {
 		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-		comp->add( std::make_shared<NodeTriggerMemento>(  *triggerExpr_) );
+		comp->add( std::make_shared<NodeTriggerMemento>(  *t_expr_) );
 	}
- 	if (completeExpr_ && completeExpr_->state_change_no() > client_state_change_no) {
+ 	if (c_expr_ && c_expr_->state_change_no() > client_state_change_no) {
 		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-		comp->add( std::make_shared<NodeCompleteMemento>(  *completeExpr_) );
+		comp->add( std::make_shared<NodeCompleteMemento>(  *c_expr_) );
 	}
 
 	// determine if the repeat changed
@@ -263,7 +263,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	}
 
 	// determine if limits changed.
-	BOOST_FOREACH(limit_ptr l, limitVec_ ) {
+	BOOST_FOREACH(limit_ptr l, limits_ ) {
 		if (l->state_change_no() > client_state_change_no) {
 			if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
 			comp->add( std::make_shared<NodeLimitMemento>(  *l) );
@@ -273,7 +273,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	// determine if variable values changed. Copy all variables. Save on having variable_change_no_ per variable
 	if (variable_change_no_ > client_state_change_no) {
       if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-	   BOOST_FOREACH(const Variable& v, varVec_ )  { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
+	   BOOST_FOREACH(const Variable& v, vars_ )  { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
 	}
 
 	// Determine if the late attribute has changed
@@ -439,7 +439,7 @@ void Node::set_memento( const NodeTriggerMemento* memento,std::vector<ecf::Aspec
 	   return;
 	}
 
-	if (triggerExpr_) {
+	if (t_expr_) {
 		if (memento->exp_.isFree()) freeTrigger();
 		else                        clearTrigger();
 		return;
@@ -459,7 +459,7 @@ void Node::set_memento( const NodeCompleteMemento* memento,std::vector<ecf::Aspe
 	   return;
 	}
 
-	if (completeExpr_) {
+	if (c_expr_) {
 		if (memento->exp_.isFree()) freeComplete();
 		else                        clearComplete();
 		return;
@@ -566,10 +566,10 @@ void Node::set_memento( const NodeVariableMemento* memento,std::vector<ecf::Aspe
       return;
    }
 
-	size_t theSize = varVec_.size();
+	size_t theSize = vars_.size();
 	for(size_t i = 0; i < theSize; i++) {
-		if (varVec_[i].name() == memento->var_.name()) {
-			varVec_[i].set_value( memento->var_.theValue() );
+		if (vars_[i].name() == memento->var_.name()) {
+			vars_[i].set_value( memento->var_.theValue() );
 			return;
 		}
  	}

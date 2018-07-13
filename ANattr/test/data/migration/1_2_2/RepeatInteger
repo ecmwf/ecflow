@@ -1,12 +1,1 @@
-{
-    "13RepeatInteger": {
-        "cereal_class_version": 0,
-        "value0": {
-            "name_": "integer"
-        },
-        "start_": 0,
-        "end_": 100,
-        "delta_": 2,
-        "value_": 0
-    }
-}
+{"13RepeatInteger":{"cereal_class_version":0,"value0":{"name_":"integer"},"start_":0,"end_":100,"delta_":2,"value_":0}}

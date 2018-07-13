@@ -93,15 +93,15 @@ namespace ecf {
 class TodayAttr  {
 public:
    explicit TodayAttr(const std::string&);
-	TodayAttr() : makeFree_(false), state_change_no_(0) {}
+	TodayAttr() : free_(false), state_change_no_(0) {}
 	TodayAttr(int hour, int minute, bool relative = false )
-		: timeSeries_(hour, minute,relative), makeFree_(false),state_change_no_(0) {}
+		: timeSeries_(hour, minute,relative), free_(false),state_change_no_(0) {}
  	TodayAttr(const TimeSlot& t,    bool relative = false )
-		: timeSeries_(t,relative), makeFree_(false),state_change_no_(0) {}
+		: timeSeries_(t,relative), free_(false),state_change_no_(0) {}
  	explicit TodayAttr(const TimeSeries& ts)
-		: timeSeries_(ts), makeFree_(false),state_change_no_(0) {}
+		: timeSeries_(ts), free_(false),state_change_no_(0) {}
 	TodayAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative =  false)
-		: timeSeries_(start,finish,incr,relative), makeFree_(false),state_change_no_(0) {}
+		: timeSeries_(start,finish,incr,relative), free_(false),state_change_no_(0) {}
 
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const TodayAttr& rhs) const;
@@ -119,7 +119,7 @@ public:
 
 	void miss_next_time_slot(); // updates state_change_no_
 	void setFree();               // ensures that isFree() always returns true, updates state_change_no_
-	bool isSetFree() const { return makeFree_; }
+	bool isSetFree() const { return free_; }
 
 	// This is used when we have a *single* today attribute
    //  single-slot   is free, if calendar time >= today_time
@@ -159,11 +159,11 @@ public:
 
 private:
 	void clearFree();             // resets the free flag, updates state_change_no_
-	bool is_free(const ecf::Calendar&) const; // ignores makeFree_
+	bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
 	TimeSeries    timeSeries_;
-	bool          makeFree_;         // persisted for use by why() on client side && for state changes
+	bool          free_;         // persisted for use by why() on client side && for state changes
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
    friend class cereal::access;
@@ -171,7 +171,7 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
 	{
       ar( CEREAL_NVP(timeSeries_),
-          CEREAL_NVP(makeFree_)
+          CEREAL_NVP(free_)
       );
 	}
 };

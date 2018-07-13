@@ -1,13 +1,1 @@
-{
-    "N3ecf14AutoCancelAttrE": {
-        "cereal_class_version": 0,
-        "timeStruct_": {
-            "cereal_class_version": 0,
-            "hour_": 0,
-            "minute_": 0,
-            "isNull_": true
-        },
-        "relative_": true,
-        "days_": false
-    }
-}
+{"N3ecf14AutoCancelAttrE":{"cereal_class_version":0,"timeStruct_":{"cereal_class_version":0,"hour_":0,"minute_":0,"isNull_":true},"relative_":true,"days_":false}}

@@ -24,19 +24,19 @@ void Node::addVariable(const Variable& v )
    state_change_no_ = Ecf::incr_state_change_no();
 
    const std::string& variable_name = v.name();
-   size_t theSize = varVec_.size();
+   size_t theSize = vars_.size();
    for(size_t i = 0; i < theSize; i++) {
-      if (varVec_[i].name() == variable_name) {
+      if (vars_[i].name() == variable_name) {
          // Variable already exist, *UPDATE* its value
-         varVec_[i].set_value(v.theValue());
+         vars_[i].set_value(v.theValue());
          if (0 == Ecf::debug_level())
             std::cout << "Node::addVariable: Variable of name '" << v.name() << "' already exist for node " << debugNodePath() << " updating with value '" << v.theValue() << "'\n";
          return;
       }
    }
 
-   if (varVec_.capacity() == 0) varVec_.reserve(5);
-	varVec_.push_back( v );
+   if (vars_.capacity() == 0) vars_.reserve(5);
+	vars_.push_back( v );
 }
 
 void Node::add_variable(const std::string& name, const std::string& value )
@@ -68,7 +68,7 @@ void Node::add_complete_expr(const Expression& expr)
 }
 void Node::add_trigger_expression(const Expression& t)
 {
-	if ( triggerExpr_ ) {
+	if ( t_expr_ ) {
 		std::stringstream ss;
 		ss << "Node::add_trigger_expression. A Node(" << absNodePath() << " can only have one trigger ";
 		ss << "to add large triggers use multiple calls to Node::add_part_trigger( PartExpression('t1 == complete') )";
@@ -76,13 +76,13 @@ void Node::add_trigger_expression(const Expression& t)
 	}
 	if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
 
-  	triggerExpr_ = std::make_unique<Expression>(t);
+  	t_expr_ = std::make_unique<Expression>(t);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::add_complete_expression(const Expression& t)
 {
-	if ( completeExpr_ ) {
+	if ( c_expr_ ) {
 		std::stringstream ss;
 		ss << "Node::add_complete_expression. A Node(" << absNodePath() << " can only have one complete expression ";
 		ss << "to add large complete expressions use multiple calls to Node::add_part_complete( PartExpression('t1 == complete') )";
@@ -90,15 +90,15 @@ void Node::add_complete_expression(const Expression& t)
 	}
    if (isSuite())  throw std::runtime_error( "Can not add complete trigger on a suite" );
 
-  	completeExpr_ = std::make_unique<Expression>(t);
+  	c_expr_ = std::make_unique<Expression>(t);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::py_add_trigger_expr(const std::vector<PartExpression>& vec)
 {
-   if (triggerExpr_) {
+   if (t_expr_) {
       if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
-      triggerExpr_->add_expr(vec);
+      t_expr_->add_expr(vec);
       state_change_no_ = Ecf::incr_state_change_no();
    }
    else {
@@ -110,9 +110,9 @@ void Node::py_add_trigger_expr(const std::vector<PartExpression>& vec)
 
 void Node::py_add_complete_expr( const std::vector<PartExpression>& vec )
 {
-   if (completeExpr_) {
+   if (c_expr_) {
       if (isSuite())  throw std::runtime_error( "Can not add complete on a suite" );
-      completeExpr_->add_expr(vec);
+      c_expr_->add_expr(vec);
       state_change_no_ = Ecf::incr_state_change_no();
    }
    else {
@@ -126,16 +126,16 @@ void Node::add_part_trigger(const PartExpression& part)
 {
    if (isSuite())  throw std::runtime_error( "Can not add trigger on a suite" );
 
-	if (!triggerExpr_) triggerExpr_ = std::make_unique<Expression>();
-	triggerExpr_->add( part );
+	if (!t_expr_) t_expr_ = std::make_unique<Expression>();
+	t_expr_->add( part );
    state_change_no_ = Ecf::incr_state_change_no();
 }
 void Node::add_part_complete(const PartExpression& part)
 {
    if (isSuite())  throw std::runtime_error( "Can not add complete trigger on a suite" );
 
-	if (!completeExpr_) completeExpr_ = std::make_unique<Expression>();
-	completeExpr_->add( part );
+	if (!c_expr_) c_expr_ = std::make_unique<Expression>();
+	c_expr_->add( part );
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -262,7 +262,7 @@ void Node::addLimit(const Limit& l )
 	}
 	limit_ptr the_limit = std::make_shared<Limit>(l);
 	the_limit->set_node(this);
-	limitVec_.push_back( the_limit );
+	limits_.push_back( the_limit );
    state_change_no_ = Ecf::incr_state_change_no();
 }
 

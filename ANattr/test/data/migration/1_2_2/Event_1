@@ -1,8 +1,1 @@
-{
-    "5Event": {
-        "cereal_class_version": 0,
-        "value_": false,
-        "number_": 1,
-        "name_": ""
-    }
-}
+{"5Event":{"cereal_class_version":0,"value_":false,"number_":1,"name_":""}}

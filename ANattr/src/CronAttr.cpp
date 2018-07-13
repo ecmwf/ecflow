@@ -40,10 +40,10 @@ using namespace boost::posix_time;
 
 namespace ecf {
 
-CronAttr::CronAttr() :  makeFree_(false),state_change_no_(0) {}
+CronAttr::CronAttr() :  free_(false),state_change_no_(0) {}
 
 CronAttr::CronAttr(const std::string& str)
-:  makeFree_(false),state_change_no_(0)
+:  free_(false),state_change_no_(0)
 {
    if (str.empty()) throw std::runtime_error("CronAttr::CronAttr : empty string passed");
    std::vector<std::string> tokens;
@@ -91,7 +91,7 @@ std::ostream& CronAttr::print(std::ostream& os) const
 	Indentor in;
 	Indentor::indent(os) << toString();
 	if (!PrintStyle::defsStyle()) {
-      os << timeSeries_.state_to_string(makeFree_);
+      os << timeSeries_.state_to_string(free_);
 	}
 	os << "\n";
 	return os;
@@ -132,14 +132,14 @@ std::string CronAttr::toString() const
 std::string CronAttr::dump() const
 {
 	std::stringstream ss; ss << toString();
- 	if (makeFree_) ss << " (free)";
+ 	if (free_) ss << " (free)";
 	else           ss << " (holding)";
  	return ss.str();
 }
 
 bool CronAttr::operator==(const CronAttr& rhs) const
 {
-	if (makeFree_ != rhs.makeFree_) {
+	if (free_ != rhs.free_) {
 		return false;
 	}
 
@@ -158,7 +158,7 @@ bool CronAttr::structureEquals(const CronAttr& rhs) const
 
 void CronAttr::calendarChanged( const ecf::Calendar& c )
 {
-   if ( makeFree_ ) {
+   if ( free_ ) {
       return;
    }
 
@@ -182,7 +182,7 @@ void CronAttr::resetRelativeDuration()
 }
 
 void CronAttr::setFree() {
-	makeFree_ = true;
+	free_ = true;
 	state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -191,7 +191,7 @@ void CronAttr::setFree() {
 }
 
 void CronAttr::clearFree() {
-	makeFree_ = false;
+	free_ = false;
 	state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -331,7 +331,7 @@ void CronAttr::requeue(const ecf::Calendar& c, bool reset_next_time_slot)
 bool CronAttr::isFree(const ecf::Calendar& c) const
 {
 	// The FreeDepCmd can be used to free the crons,
-	if (makeFree_) {
+	if (free_) {
 		return true;
 	}
 

@@ -1,12 +1,1 @@
-{
-    "10RepeatDate": {
-        "cereal_class_version": 0,
-        "value0": {
-            "name_": ""
-        },
-        "start_": 0,
-        "end_": 0,
-        "delta_": 0,
-        "value_": 0
-    }
-}
+{"10RepeatDate":{"cereal_class_version":0,"value0":{"name_":""},"start_":0,"end_":0,"delta_":0,"value_":0}}

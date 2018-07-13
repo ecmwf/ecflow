@@ -58,15 +58,15 @@ namespace ecf {
 class TimeAttr  {
 public:
    explicit TimeAttr(const std::string&);
-   TimeAttr() : makeFree_(false), state_change_no_(0) {}
+   TimeAttr() : free_(false), state_change_no_(0) {}
 	TimeAttr(int hour, int minute, bool relative = false )
-		: timeSeries_(hour, minute,relative), makeFree_(false),state_change_no_(0) {}
+		: timeSeries_(hour, minute,relative), free_(false),state_change_no_(0) {}
 	TimeAttr(const TimeSlot& t,    bool relative = false )
-		: timeSeries_(t,relative), makeFree_(false),state_change_no_(0) {}
+		: timeSeries_(t,relative), free_(false),state_change_no_(0) {}
 	explicit TimeAttr(const TimeSeries& ts)
-		: timeSeries_(ts), makeFree_(false),state_change_no_(0) {}
+		: timeSeries_(ts), free_(false),state_change_no_(0) {}
 	TimeAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
-		: timeSeries_(start,finish,incr,relative), makeFree_(false),state_change_no_(0) {}
+		: timeSeries_(start,finish,incr,relative), free_(false),state_change_no_(0) {}
 
 	std::ostream& print(std::ostream&) const;
    bool operator==(const TimeAttr& rhs) const;
@@ -85,7 +85,7 @@ public:
 
 	void miss_next_time_slot(); // updates state_change_no_
 	void setFree();   // ensures that isFree() always returns true, updates state_change_no_
-	bool isSetFree() const { return makeFree_; }
+	bool isSetFree() const { return free_; }
  	bool isFree(const ecf::Calendar&) const;
    bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max) const
    { return timeSeries_.checkForRequeue(c,the_min,the_max);}
@@ -109,11 +109,11 @@ public:
 
 private:
 	void clearFree(); // resets the free flag, updates state_change_no_
-   bool is_free(const ecf::Calendar&) const; // ignores makeFree_
+   bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
  	TimeSeries   timeSeries_;
-	bool         makeFree_;
+	bool         free_;
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
    friend class cereal::access;
@@ -121,7 +121,7 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
     {
       ar( CEREAL_NVP(timeSeries_),
-          CEREAL_NVP(makeFree_) // Only persisted for testing, see usage of isSetFree()
+          CEREAL_NVP(free_) // Only persisted for testing, see usage of isSetFree()
       );
     }
 };

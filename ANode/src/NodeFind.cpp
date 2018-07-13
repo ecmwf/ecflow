@@ -33,7 +33,7 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 
 bool Node::findParentVariableValue(const std::string& name, std::string& theValue) const
 {
-   if (!varVec_.empty() && findVariableValue(name,theValue)) return true;
+   if (!vars_.empty() && findVariableValue(name,theValue)) return true;
    if (!repeat_.empty() && repeat_.name() == name) {
       theValue = repeat_.valueAsString(); return true;
    }
@@ -155,10 +155,10 @@ bool Node::user_variable_exists(const std::string& name) const
 
 const Variable& Node::findVariable(const std::string& name) const
 {
-   size_t theSize = varVec_.size();
+   size_t theSize = vars_.size();
    for(size_t i = 0; i < theSize; i++) {
-      if (varVec_[i].name() == name) {
-         return varVec_[i];
+      if (vars_[i].name() == name) {
+         return vars_[i];
       }
    }
    return Variable::EMPTY();
@@ -187,10 +187,10 @@ const Variable& Node::find_parent_variable(const std::string& name) const
 
 bool Node::findVariableValue( const std::string& name, std::string& returnedValue) const
 {
-   size_t theSize = varVec_.size();
+   size_t theSize = vars_.size();
    for(size_t i = 0; i < theSize; i++) {
-      if (varVec_[i].name() == name) {
-         returnedValue = varVec_[i].theValue();
+      if (vars_[i].name() == name) {
+         returnedValue = vars_[i].theValue();
          return true;
       }
    }
@@ -210,9 +210,9 @@ bool Node::findGenVariableValue( const std::string& name, std::string& returnedV
 
 bool Node::findLimit(const Limit& theLimit) const
 {
-   size_t theSize = limitVec_.size();
+   size_t theSize = limits_.size();
    for(size_t i = 0; i < theSize; i++) {
-      if (limitVec_[i]->name() == theLimit.name()) {
+      if (limits_[i]->name() == theLimit.name()) {
          return true;
       }
    }
@@ -221,10 +221,10 @@ bool Node::findLimit(const Limit& theLimit) const
 
 limit_ptr Node::find_limit(const std::string& theName) const
 {
-   size_t theSize = limitVec_.size();
+   size_t theSize = limits_.size();
    for(size_t i = 0; i < theSize; i++) {
-      if (limitVec_[i]->name() == theName) {
-         return limitVec_[i];
+      if (limits_[i]->name() == theName) {
+         return limits_[i];
       }
    }
    return limit_ptr();

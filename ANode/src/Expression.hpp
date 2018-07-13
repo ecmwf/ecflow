@@ -87,7 +87,7 @@ public:
    Expression(const Expression& rhs);
 
    bool operator==( const Expression& rhs) const{
-      if (makeFree_ != rhs.makeFree_) return false;
+      if (free_ != rhs.free_) return false;
       return vec_ == rhs.vec_;
    }
    bool operator!=( const Expression& rhs) const {
@@ -128,7 +128,7 @@ public:
    /// tree is created on demand, and is not persisted
    void setFree();  // hence must be used before evaluate
    void clearFree(); // resets the free flag
-   bool isFree() const { return makeFree_;}
+   bool isFree() const { return free_;}
    bool empty() const { return vec_.empty();}
    const std::vector<PartExpression>& expr() const { return vec_;}
 
@@ -144,7 +144,7 @@ private:  /// For use by python interface,
 
 private:
    std::vector<PartExpression> vec_;
-   bool                        makeFree_;
+   bool                        free_;
 
    unsigned int state_change_no_;                    // *not* persisted, only used on server side
 
@@ -163,7 +163,7 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(CEREAL_NVP(vec_),
-         CEREAL_NVP(makeFree_));
+         CEREAL_NVP(free_));
    }
 };
 #endif

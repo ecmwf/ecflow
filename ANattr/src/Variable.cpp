@@ -29,7 +29,7 @@ const Variable& Variable::EMPTY() { static const Variable VARIABLE = Variable();
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 Variable::Variable(const std::string& name, const std::string& value)
-: name_(name), value_(value)
+: n_(name), v_(value)
 {
    std::string msg;
    if ( !Str::valid_name( name,msg ) ) {
@@ -43,19 +43,19 @@ void Variable::set_name(const std::string& v)
    if ( !Str::valid_name( v,msg ) ) {
       throw std::runtime_error("Variable::set_name: Invalid Variable name: " + msg);
    }
-   name_ = v;
+   n_ = v;
 }
 
 int Variable::value() const
 {
    // see if the value is convertible to a integer
-   return Str::to_int( value_, 0/* value to return if conversion fails*/);
+   return Str::to_int( v_, 0/* value to return if conversion fails*/);
 }
 
 bool Variable::operator==( const Variable& rhs ) const {
-   if ( value_ != rhs.value_ )
+   if ( v_ != rhs.v_ )
       return false;
-   if ( name_ != rhs.name_ )
+   if ( n_ != rhs.n_ )
       return false;
    return true;
 }
@@ -85,14 +85,14 @@ std::ostream& Variable::print_generated( std::ostream& os ) const {
 
 std::string Variable::toString() const
 {
-   std::string ret; ret.reserve(name_.size() + value_.size() + 8);
+   std::string ret; ret.reserve(n_.size() + v_.size() + 8);
    ret += "edit ";
-   ret += name_;
+   ret += n_;
    ret += " '";
-   if (value_.find("\n") == std::string::npos) ret += value_;
+   if (v_.find("\n") == std::string::npos) ret += v_;
    else {
       // replace \n, otherwise re-parse will fail
-      std::string value = value_;
+      std::string value = v_;
       Str::replaceall(value,"\n","\\n");
       ret += value;
    }

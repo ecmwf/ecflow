@@ -130,7 +130,7 @@ void Node::delete_cron(const ecf::CronAttr& attr)
 void Node::deleteVariable( const std::string& name)
 {
 	if (name.empty()) {
-		varVec_.clear(); // delete all
+		vars_.clear(); // delete all
 		state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -139,10 +139,10 @@ void Node::deleteVariable( const std::string& name)
 		return;
 	}
 
-	size_t theSize = varVec_.size();
+	size_t theSize = vars_.size();
 	for(size_t i = 0; i < theSize; i++) {
-		if (varVec_[i].name() == name) {
- 			varVec_.erase( varVec_.begin() + i );
+		if (vars_[i].name() == name) {
+ 			vars_.erase( vars_.begin() + i );
  			state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -211,8 +211,8 @@ void Node::delete_generic(const std::string& name)
 
 void Node::deleteTrigger()
 {
-	if (triggerExpr_)  {
-	   triggerExpr_.reset(nullptr);
+	if (t_expr_)  {
+	   t_expr_.reset(nullptr);
 		state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
 		std::cout << "Node::deleteTrigger()\n";
@@ -222,8 +222,8 @@ void Node::deleteTrigger()
 
 void Node::deleteComplete()
 {
-	if (completeExpr_) {
-		completeExpr_.reset(nullptr);
+	if (c_expr_) {
+		c_expr_.reset(nullptr);
 		state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
 		std::cout << "Node::deleteComplete()\n";
@@ -245,7 +245,7 @@ void Node::deleteRepeat()
 void Node::deleteLimit(const std::string& name)
 {
 	if (name.empty()) {
-		limitVec_.clear();
+		limits_.clear();
 		state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
 		std::cout << "Node::deleteLimit\n";
@@ -253,10 +253,10 @@ void Node::deleteLimit(const std::string& name)
   		return;
 	}
 
-	size_t theSize = limitVec_.size();
+	size_t theSize = limits_.size();
 	for(size_t i = 0; i < theSize; i++) {
-		if (limitVec_[i]->name() == name) {
-			limitVec_.erase( limitVec_.begin() + i );
+		if (limits_[i]->name() == name) {
+			limits_.erase( limits_.begin() + i );
 			state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
 			std::cout << "Node::deleteLimit\n";
@@ -276,10 +276,10 @@ void Node::delete_limit_path(const std::string& name,const std::string& path)
       throw std::runtime_error("Node::delete_limit_path: the limit path must be provided");
    }
 
-   size_t theSize = limitVec_.size();
+   size_t theSize = limits_.size();
    for(size_t i = 0; i < theSize; i++) {
-      if (limitVec_[i]->name() == name) {
-         limitVec_[i]->delete_path(path); // will update state change no
+      if (limits_[i]->name() == name) {
+         limits_[i]->delete_path(path); // will update state change no
          return;
       }
    }

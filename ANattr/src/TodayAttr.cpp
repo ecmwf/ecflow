@@ -27,7 +27,7 @@ using namespace std;
 namespace ecf {
 
 TodayAttr::TodayAttr (const std::string& str)
-: makeFree_(false), state_change_no_(0)
+: free_(false), state_change_no_(0)
 {
    if (str.empty()) throw std::runtime_error("Today::Today: empty string passed");
    std::vector<std::string> tokens;
@@ -43,7 +43,7 @@ std::ostream& TodayAttr::print(std::ostream& os) const
    Indentor in;
    Indentor::indent(os) << toString();
    if (!PrintStyle::defsStyle()) {
-      os << timeSeries_.state_to_string(makeFree_);
+      os << timeSeries_.state_to_string(free_);
    }
    os << "\n";
    return os;
@@ -62,7 +62,7 @@ std::string TodayAttr::dump() const
 	ss << "today ";
 
     if (PrintStyle::getStyle() == PrintStyle::STATE) {
-    	if (makeFree_) ss << "(free) ";
+    	if (free_) ss << "(free) ";
     	else           ss << "(holding) ";
     }
 
@@ -73,7 +73,7 @@ std::string TodayAttr::dump() const
 
 bool TodayAttr::operator==(const TodayAttr& rhs) const
 {
-	if (makeFree_ != rhs.makeFree_) {
+	if (free_ != rhs.free_) {
 		return false;
 	}
 	return timeSeries_.operator==(rhs.timeSeries_);
@@ -92,18 +92,18 @@ void TodayAttr::miss_next_time_slot()
 
 void TodayAttr::setFree()
 {
-	makeFree_ = true;
+	free_ = true;
 	state_change_no_ =  Ecf::incr_state_change_no();
 }
 
 void TodayAttr::clearFree() {
-	makeFree_ = false;
+	free_ = false;
 	state_change_no_ =  Ecf::incr_state_change_no();
 }
 
 void TodayAttr::calendarChanged( const ecf::Calendar& c )
 {
-   if ( makeFree_ ) {
+   if ( free_ ) {
       return;
    }
 
@@ -126,8 +126,8 @@ void TodayAttr::resetRelativeDuration() {
 bool TodayAttr::isFree(const ecf::Calendar& calendar) const
 {
 	// The FreeDepCmd can be used to free the today,
- 	if (makeFree_) {
-//		LOG(Log::DBG,"   TodayAttr::isFree makeFree_");
+ 	if (free_) {
+//		LOG(Log::DBG,"   TodayAttr::isFree free_");
 		return true;
 	}
  	return is_free(calendar);

@@ -19,21 +19,21 @@ class Variable {
 
 const Variable& Node::findVariable(const std::string& name) const
 {
-   if (varVec_.empty()) {
+   if (vars_.empty()) {
       return Variable::EMPTY();
    }
 
 //   bool fnd = false;
-//   size_t theSize = varVec_.size();
+//   size_t theSize = vars_.size();
 //   for(size_t i = 0; i < theSize; i++) {
-//      if (varVec_[i].name() == name) {
+//      if (vars_[i].name() == name) {
 //         fnd = true;
 //      }
 //   }
 
    //Variable var(name,"",false);
-   std::vector<Variable>::const_iterator l = std::lower_bound(varVec_.begin(),varVec_.end(),name); // should use < and not ==
-   if (l == varVec_.end() || name < (*l).name() ) {
+   std::vector<Variable>::const_iterator l = std::lower_bound(vars_.begin(),vars_.end(),name); // should use < and not ==
+   if (l == vars_.end() || name < (*l).name() ) {
       //cout << "not found\n";
 //      assert(!fnd);
       return Variable::EMPTY();
@@ -49,23 +49,23 @@ void Node::addVariable(const Variable& v )
    state_change_no_ = Ecf::incr_state_change_no();
 
 //   bool fnd = false;
-//   size_t theSize = varVec_.size();
+//   size_t theSize = vars_.size();
 //   for(size_t i = 0; i < theSize; i++) {
-//      if (varVec_[i].name() == v.name()) {
+//      if (vars_[i].name() == v.name()) {
 //         fnd = true;
 //      }
 //   }
 
-   std::vector<Variable>::iterator l = std::lower_bound(varVec_.begin(),varVec_.end(),v); // should use < and not ==
-   if (l == varVec_.end() || v.name() < (*l).name() ) {
+   std::vector<Variable>::iterator l = std::lower_bound(vars_.begin(),vars_.end(),v); // should use < and not ==
+   if (l == vars_.end() || v.name() < (*l).name() ) {
 
 //      assert(!fnd);
       //cout << "Node::addVariable: (" << v.name() << " : " << v.theValue() << ") NOT found\n";
-      if (varVec_.capacity() == 0) varVec_.reserve(5);
+      if (vars_.capacity() == 0) vars_.reserve(5);
 
-      if (varVec_.empty()) varVec_.push_back(v);
+      if (vars_.empty()) vars_.push_back(v);
       else {
-         varVec_.insert(l, v );
+         vars_.insert(l, v );
       }
       return;
    }

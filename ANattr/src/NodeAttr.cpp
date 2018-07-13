@@ -151,7 +151,7 @@ bool Event::isValidState( const std::string& state ) {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 Meter::Meter( const std::string& name, int min, int max, int colorChange ) :
-	         min_( min ), max_( max ), value_( min ), colorChange_( colorChange ),
+	         min_( min ), max_( max ), value_( min ), cc_( colorChange ),
 	         name_( name ), used_( false ), state_change_no_( 0 )
 {
    if ( !Str::valid_name( name ) ) {
@@ -162,12 +162,12 @@ Meter::Meter( const std::string& name, int min, int max, int colorChange ) :
       throw std::out_of_range( "Meter::Meter: Invalid Meter(name,min,max,color_change) : min must be less than max" );
 
    if (colorChange == std::numeric_limits<int>::max()) {
-      colorChange_ =  max_;
+      cc_ =  max_;
    }
 
-   if ( colorChange_ < min || colorChange_ > max ) {
+   if ( cc_ < min || cc_ > max ) {
       std::stringstream ss;
-      ss << "Meter::Meter: Invalid Meter(name,min,max,color_change) color_change(" << colorChange_ << ") must be between min(" << min_ << ") and max(" << max_ << ")";
+      ss << "Meter::Meter: Invalid Meter(name,min,max,color_change) color_change(" << cc_ << ") must be between min(" << min_ << ") and max(" << max_ << ")";
       throw std::out_of_range( ss.str() );
    }
 }
@@ -198,7 +198,7 @@ bool Meter::operator==( const Meter& rhs ) const {
    if ( max_ != rhs.max_ ) {
       return false;
    }
-   if ( colorChange_ != rhs.colorChange_ ) {
+   if ( cc_ != rhs.cc_ ) {
       return false;
    }
    if ( name_ != rhs.name_ ) {
@@ -222,14 +222,14 @@ std::string Meter::toString() const {
    ret += name_; ret += " ";
    ret += boost::lexical_cast<std::string>(min_); ret += " ";
    ret += boost::lexical_cast<std::string>(max_); ret += " ";
-   ret += boost::lexical_cast<std::string>(colorChange_);
+   ret += boost::lexical_cast<std::string>(cc_);
    return ret;
 }
 
 std::string Meter::dump() const {
    std::stringstream ss;
    ss << "meter " << name_ << " min(" << min_ << ") max (" << max_
-            << ") colorChange(" << colorChange_ << ") value(" << value_
+            << ") colorChange(" << cc_ << ") value(" << value_
             << ") used(" << used_ << ")";
    return ss.str();
 }
@@ -237,7 +237,7 @@ std::string Meter::dump() const {
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 Label::Label(const std::string& name, const std::string& l)
-: name_(name),value_(l),state_change_no_(0)
+: n_(name),v_(l),state_change_no_(0)
 {
    if ( !Str::valid_name( name ) ) {
       throw std::runtime_error("Label::Label: Invalid Label name :" + name);
@@ -250,12 +250,12 @@ std::ostream& Label::print( std::ostream& os ) const {
    Indentor in;
    Indentor::indent( os ) << toString();
    if (!PrintStyle::defsStyle()) {
-      if (!new_value_.empty()) {
-         if (new_value_.find("\n") == std::string::npos) {
-            os << " # \"" << new_value_ << "\"";
+      if (!new_v_.empty()) {
+         if (new_v_.find("\n") == std::string::npos) {
+            os << " # \"" << new_v_ << "\"";
          }
          else {
-            std::string value = new_value_;
+            std::string value = new_v_;
             Str::replaceall(value,"\n","\\n");
             os << " # \"" << value << "\"";
          }
@@ -267,14 +267,14 @@ std::ostream& Label::print( std::ostream& os ) const {
 
 std::string Label::toString() const {
    // parsing always STRIPS the quotes, hence add them back
-   std::string ret; ret.reserve(name_.size() + value_.size() + 10);
+   std::string ret; ret.reserve(n_.size() + v_.size() + 10);
    ret += "label ";
-   ret += name_;
+   ret += n_;
    ret += " \"";
-   if (value_.find("\n") == std::string::npos) ret += value_;
+   if (v_.find("\n") == std::string::npos) ret += v_;
    else  {
       // replace \n, otherwise re-parse will fail
-      std::string value = value_;
+      std::string value = v_;
       Str::replaceall(value,"\n","\\n");
       ret += value;
    }
@@ -284,12 +284,12 @@ std::string Label::toString() const {
 
 std::string Label::dump() const {
    std::stringstream ss;
-   ss << toString() << " : \"" << new_value_  << "\"";
+   ss << toString() << " : \"" << new_v_  << "\"";
    return ss.str();
 }
 
 void Label::set_new_value( const std::string& l ) {
-   new_value_ = l;
+   new_v_ = l;
    state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -298,7 +298,7 @@ void Label::set_new_value( const std::string& l ) {
 }
 
 void Label::reset() {
-   new_value_.clear();
+   new_v_.clear();
    state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -312,16 +312,16 @@ void Label::parse(const std::string& line, std::vector<std::string >& lineTokens
    if ( lineTokens.size() < 3 )
       throw std::runtime_error( "Label::parse: Invalid label :" + line );
 
-   name_ = lineTokens[1];
+   n_ = lineTokens[1];
 
    // parsing will always STRIP single or double quotes, print will add double quotes
    // label simple_label 'ecgems'
    if ( lineTokens.size() == 3 ) {
       Str::removeQuotes(lineTokens[2]);
       Str::removeSingleQuotes(lineTokens[2]);
-      value_ = lineTokens[2];
-      if (value_.find("\\n") != std::string::npos) {
-         Str::replaceall(value_,"\\n","\n");
+      v_ = lineTokens[2];
+      if (v_.find("\\n") != std::string::npos) {
+         Str::replaceall(v_,"\\n","\n");
       }
    }
    else {
@@ -338,9 +338,9 @@ void Label::parse(const std::string& line, std::vector<std::string >& lineTokens
 
       Str::removeQuotes(value);
       Str::removeSingleQuotes(value);
-      value_ = value;
-      if (value_.find("\\n") != std::string::npos) {
-         Str::replaceall(value_,"\\n","\n");
+      v_ = value;
+      if (v_.find("\\n") != std::string::npos) {
+         Str::replaceall(v_,"\\n","\n");
       }
 
 
@@ -360,10 +360,10 @@ void Label::parse(const std::string& line, std::vector<std::string >& lineTokens
          if (comment_fnd && first_quote_after_comment != last_quote_after_comment) {
             std::string new_value = line.substr(first_quote_after_comment+1,last_quote_after_comment-first_quote_after_comment-1);
             //std::cout << "new label = '" << new_value << "'\n";
-            new_value_ = new_value;
+            new_v_ = new_value;
 
-            if (new_value_.find("\\n") != std::string::npos) {
-               Str::replaceall(new_value_,"\\n","\n");
+            if (new_v_.find("\\n") != std::string::npos) {
+               Str::replaceall(new_v_,"\\n","\n");
             }
          }
       }

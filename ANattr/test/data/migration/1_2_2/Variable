@@ -1,7 +1,1 @@
-{
-    "8Variable": {
-        "cereal_class_version": 0,
-        "name_": "var_name",
-        "value_": "var_value"
-    }
-}
+{"8Variable":{"n_":"var_name","v_":"var_value"}}

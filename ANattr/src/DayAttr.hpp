@@ -28,11 +28,11 @@ namespace ecf { class Calendar;} // forward declare class that is in a name spac
 class DayAttr {
 public:
 	enum Day_t { SUNDAY=0, MONDAY=1, TUESDAY=2, WEDNESDAY=3, THURSDAY=4, FRIDAY=5, SATURDAY=6 };
-   DayAttr() : day_(DayAttr::SUNDAY), makeFree_(false),state_change_no_(0) {}
-   explicit DayAttr(Day_t day) : day_(day), makeFree_(false),state_change_no_(0) {}
-   explicit DayAttr(const std::string& str) : day_(DayAttr::getDay(str)), makeFree_(false),state_change_no_(0) {}
+   DayAttr() : day_(DayAttr::SUNDAY), free_(false),state_change_no_(0) {}
+   explicit DayAttr(Day_t day) : day_(day), free_(false),state_change_no_(0) {}
+   explicit DayAttr(const std::string& str) : day_(DayAttr::getDay(str)), free_(false),state_change_no_(0) {}
    explicit DayAttr(const boost::gregorian::date& date)
-	: day_(static_cast<DayAttr::Day_t>(date.day_of_week().as_number())), makeFree_(false),state_change_no_(0) {}
+	: day_(static_cast<DayAttr::Day_t>(date.day_of_week().as_number())), free_(false),state_change_no_(0) {}
 
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const DayAttr& rhs) const;
@@ -41,7 +41,7 @@ public:
 
 	void setFree();   // ensures that isFree() always returns true
 	void clearFree(); // resets the free flag
-	bool isSetFree() const { return makeFree_; }
+	bool isSetFree() const { return free_; }
 	void calendarChanged( const ecf::Calendar& c ) ; // can set attribute free
 	bool isFree(const ecf::Calendar&) const;
 	bool checkForRequeue( const ecf::Calendar&) const;
@@ -65,11 +65,11 @@ public:
 	DayAttr::Day_t day() const { return day_;}
 
 private:
-   bool is_free(const ecf::Calendar&) const; // ignores makeFree_
+   bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
    DayAttr::Day_t day_;
-   bool           makeFree_;         // persisted for use by why() on client side
+   bool           free_;         // persisted for use by why() on client side
    unsigned int  state_change_no_;  // *not* persisted, only used on server side
 
    friend class cereal::access;
@@ -77,7 +77,7 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar( CEREAL_NVP(day_),
-          CEREAL_NVP(makeFree_)
+          CEREAL_NVP(free_)
       );
    }
 };

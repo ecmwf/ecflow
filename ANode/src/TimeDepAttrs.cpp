@@ -659,7 +659,7 @@ void TimeDepAttrs::delete_time( const ecf::TimeAttr& attr )
 {
    size_t theSize = timeVec_.size();
    for(size_t i = 0; i < theSize; i++) {
-      // Dont use '==' since that compares additional state like makeFree_
+      // Dont use '==' since that compares additional state like free_
       if (timeVec_[i].structureEquals(attr)) {
          timeVec_.erase( timeVec_.begin() + i );
          node_->state_change_no_ = Ecf::incr_state_change_no();
@@ -692,7 +692,7 @@ void TimeDepAttrs::delete_today(const ecf::TodayAttr& attr)
 {
    size_t theSize = todayVec_.size();
    for(size_t i = 0; i < theSize; i++) {
-      // Dont use '==' since that compares additional state like makeFree_
+      // Dont use '==' since that compares additional state like free_
       if (todayVec_[i].structureEquals(attr)) {
          todayVec_.erase( todayVec_.begin() + i );
          node_->state_change_no_ = Ecf::incr_state_change_no();
@@ -722,7 +722,7 @@ void TimeDepAttrs::deleteDate(const std::string& name)
 void TimeDepAttrs::delete_date(const DateAttr& attr)
 {
    for(size_t i = 0; i < dates_.size(); i++) {
-      // Dont use '==' since that compares additional state like makeFree_
+      // Dont use '==' since that compares additional state like free_
       if (attr.structureEquals(dates_[i]) ) {
          dates_.erase( dates_.begin() + i );
          node_->state_change_no_ = Ecf::incr_state_change_no();
@@ -753,7 +753,7 @@ void TimeDepAttrs::deleteDay(const std::string& name)
 void TimeDepAttrs::delete_day(const DayAttr& attr)
 {
    for(size_t i = 0; i < days_.size(); i++) {
-      // Dont use '==' since that compares additional state like makeFree_
+      // Dont use '==' since that compares additional state like free_
       if (attr.structureEquals(days_[i]) ) {
          days_.erase( days_.begin() + i );
          node_->state_change_no_ = Ecf::incr_state_change_no();
@@ -784,7 +784,7 @@ void TimeDepAttrs::deleteCron(const std::string& name)
 void TimeDepAttrs::delete_cron(const ecf::CronAttr& attr)
 {
    for(size_t i = 0; i < crons_.size(); i++) {
-      // Dont use '==' since that compares additional state like makeFree_
+      // Dont use '==' since that compares additional state like free_
       if (attr.structureEquals(crons_[i]) ) {
          crons_.erase( crons_.begin() + i );
          node_->state_change_no_ = Ecf::incr_state_change_no();

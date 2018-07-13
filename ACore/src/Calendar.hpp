@@ -135,7 +135,7 @@ public:
   	bool dayChanged() const { return dayChanged_;}
 
   	/// returns the last calendar increment
-	const boost::posix_time::time_duration& calendarIncrement() const { return calendarIncrement_;}
+	const boost::posix_time::time_duration& calendarIncrement() const { return increment_;}
 
  	/// return the init() time + the accumulated duration from calls to update(...)
   	/// This should only be used when this calendar is real.
@@ -202,7 +202,7 @@ private:
   	boost::posix_time::ptime         initLocalTime_;   // Real Time: When calendar was started, used to work out duration_
  	boost::posix_time::ptime         lastTime_;        // Real Time: Used to calculate calendarIncrement
 
-	boost::posix_time::time_duration calendarIncrement_;
+	boost::posix_time::time_duration increment_;
 
 private:
    void update_cache() const;
@@ -236,7 +236,7 @@ private:
           CEREAL_NVP(dayChanged_),
           CEREAL_NVP(initLocalTime_),
           CEREAL_NVP(lastTime_),
-          CEREAL_NVP(calendarIncrement_)
+          CEREAL_NVP(increment_)
         );
 	}
 };
