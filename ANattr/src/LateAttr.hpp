@@ -50,17 +50,17 @@ public:
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const LateAttr& rhs) const;
 
-	void addSubmitted( const TimeSlot& s)    { submitted_  = s; }
-	void add_submitted(int hour, int minute) { submitted_  = TimeSlot(hour,minute); }
-	void addActive( const TimeSlot& s )      { active_  = s; }
-	void add_active(int hour, int minute)    { active_  = TimeSlot(hour,minute); }
-	void addComplete( const TimeSlot& s,  bool relative)   { complete_  = s;                     completeIsRelative_ = relative;}
-	void add_complete(int hour, int minute,bool relative)  { complete_  = TimeSlot(hour,minute); completeIsRelative_ = relative; }
+	void addSubmitted( const TimeSlot& s)    { s_  = s; }
+	void add_submitted(int hour, int minute) { s_  = TimeSlot(hour,minute); }
+	void addActive( const TimeSlot& s )      { a_  = s; }
+	void add_active(int hour, int minute)    { a_  = TimeSlot(hour,minute); }
+	void addComplete( const TimeSlot& s,  bool relative)   { c_  = s;                     c_is_rel_ = relative;}
+	void add_complete(int hour, int minute,bool relative)  { c_  = TimeSlot(hour,minute); c_is_rel_ = relative; }
 
-	const TimeSlot& submitted() const { return submitted_; }
-	const TimeSlot& active() const { return active_; }
-	const TimeSlot& complete() const { return complete_; }
-	bool complete_is_relative() const { return completeIsRelative_; }
+	const TimeSlot& submitted() const { return s_; }
+	const TimeSlot& active() const { return a_; }
+	const TimeSlot& complete() const { return c_; }
+	bool complete_is_relative() const { return c_is_rel_; }
 
 	/// i.e no time structs specified
 	bool isNull() const;
@@ -93,11 +93,10 @@ public:
 
 private:
 
-	TimeSlot submitted_;  // relative by default
-	TimeSlot active_;
-	TimeSlot complete_;
-
-	bool completeIsRelative_;
+	TimeSlot s_;                    // relative by default
+	TimeSlot a_;
+	TimeSlot c_;
+	bool c_is_rel_;
 	bool isLate_;
 
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
@@ -106,11 +105,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      CEREAL_OPTIONAL_NVP(ar, submitted_ , [this](){return !submitted_.isNULL();});
-      CEREAL_OPTIONAL_NVP(ar, active_,     [this](){return !active_.isNULL();});
-      CEREAL_OPTIONAL_NVP(ar, complete_,   [this](){return !complete_.isNULL();});
-      CEREAL_OPTIONAL_NVP(ar, completeIsRelative_, [this](){return completeIsRelative_;});
-      CEREAL_OPTIONAL_NVP(ar, isLate_,             [this](){return isLate_;});
+      CEREAL_OPTIONAL_NVP(ar, s_ ,       [this](){return !s_.isNULL();});
+      CEREAL_OPTIONAL_NVP(ar, a_,        [this](){return !a_.isNULL();});
+      CEREAL_OPTIONAL_NVP(ar, c_,        [this](){return !c_.isNULL();});
+      CEREAL_OPTIONAL_NVP(ar, c_is_rel_, [this](){return c_is_rel_;});
+      CEREAL_OPTIONAL_NVP(ar, isLate_,   [this](){return isLate_;});
 	}
 };
 

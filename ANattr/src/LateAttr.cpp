@@ -29,7 +29,7 @@ using namespace boost::posix_time;
 
 namespace ecf {
 
-LateAttr::LateAttr() :  completeIsRelative_(false),isLate_(false),state_change_no_(0) {}
+LateAttr::LateAttr() :  c_is_rel_(false),isLate_(false),state_change_no_(0) {}
 
 std::ostream& LateAttr::print(std::ostream& os) const
 {
@@ -45,35 +45,35 @@ std::ostream& LateAttr::print(std::ostream& os) const
 std::string LateAttr::toString() const
 {
    std::string ret = "late";
-   if (!submitted_.isNULL()) {
+   if (!s_.isNULL()) {
       ret += " -s +";
-      ret += submitted_.toString();
+      ret += s_.toString();
    }
-   if (!active_.isNULL()) {
+   if (!a_.isNULL()) {
       ret += " -a ";
-      ret += active_.toString();
+      ret += a_.toString();
    }
-   if (!complete_.isNULL()) {
+   if (!c_.isNULL()) {
       ret += " -c ";
-      if (completeIsRelative_) ret += "+";
-      ret += complete_.toString();
+      if (c_is_rel_) ret += "+";
+      ret += c_.toString();
    }
    return ret;
 }
 
 bool LateAttr::operator==(const LateAttr& rhs) const
 {
- 	if ( completeIsRelative_ != rhs.completeIsRelative_) return false;
-	if ( submitted_ != rhs.submitted_) return false;
-	if ( active_ != rhs.active_) return false;
-   if ( complete_ != rhs.complete_) return false;
+ 	if ( c_is_rel_ != rhs.c_is_rel_) return false;
+	if ( s_ != rhs.s_) return false;
+	if ( a_ != rhs.a_) return false;
+   if ( c_ != rhs.c_) return false;
    if ( isLate_ != rhs.isLate_) return false;
 	return true;
 }
 
 bool LateAttr::isNull() const
 {
-	return ( submitted_.isNULL() && active_.isNULL() && complete_.isNULL());
+	return ( s_.isNULL() && a_.isNULL() && c_.isNULL());
 }
 
 void LateAttr::checkForLateness( const std::pair<NState,boost::posix_time::time_duration>&  state,
@@ -94,13 +94,13 @@ bool LateAttr::check_for_lateness( const std::pair<NState,boost::posix_time::tim
    if (state.first == NState::SUBMITTED || state.first == NState::QUEUED) {
 
       // Submitted is always relative, ASSUME this means relative to suite start
-      if (state.first == NState::SUBMITTED && !submitted_.isNULL()) {
+      if (state.first == NState::SUBMITTED && !s_.isNULL()) {
 
          // ECFLOW-322
          // The late attr check for being late in submitted state, is always *RELATIVE*
          // Previously we had:
          //
-         //       if ( calendar.duration() >= submitted_.duration()  ) {
+         //       if ( calendar.duration() >= s_.duration()  ) {
          //          setLate(true);
          //          return;
          //       }
@@ -111,28 +111,28 @@ bool LateAttr::check_for_lateness( const std::pair<NState,boost::posix_time::tim
          // to check for submitted, we need the duration *after* state went into submitted state
          // state.second is when state went SUBMITTED, relative to suite start
          boost::posix_time::time_duration time_in_submitted_state = calendar.duration() - state.second ;
-         if ( time_in_submitted_state >= submitted_.duration()) {
+         if ( time_in_submitted_state >= s_.duration()) {
             return true;
          }
       }
 
       // In Submitted or queued state, check for active, in REAL time
-      if (!active_.isNULL() && calendar.suiteTime().time_of_day() >= active_.duration()) {
+      if (!a_.isNULL() && calendar.suiteTime().time_of_day() >= a_.duration()) {
          return true;
       }
    }
-   else if ( state.first == NState::ACTIVE && !complete_.isNULL()) {
-      if ( completeIsRelative_) {
+   else if ( state.first == NState::ACTIVE && !c_.isNULL()) {
+      if ( c_is_rel_) {
          // to check for complete, we need the duration when state went into active state
          // state.second is when state went ACTIVE, relative to suite start
          boost::posix_time::time_duration runtime = calendar.duration() - state.second ;
-         if ( runtime >= complete_.duration()) {
+         if ( runtime >= c_.duration()) {
             return true;
          }
       }
       else {
          // Real time
-         if (calendar.suiteTime().time_of_day() >= complete_.duration()) {
+         if (calendar.suiteTime().time_of_day() >= c_.duration()) {
             return true;
          }
       }
@@ -156,10 +156,10 @@ void LateAttr::setLate(bool f)
 void LateAttr::override_with(LateAttr* in_late)
 {
    if (in_late) {
-      if (!in_late->submitted().isNULL()) submitted_ = in_late->submitted();
-      if (!in_late->active().isNULL()) active_ = in_late->active();
-      if (!in_late->complete().isNULL()) complete_ = in_late->complete();
-      completeIsRelative_ = in_late->complete_is_relative();
+      if (!in_late->submitted().isNULL()) s_ = in_late->submitted();
+      if (!in_late->active().isNULL()) a_ = in_late->active();
+      if (!in_late->complete().isNULL()) c_ = in_late->complete();
+      c_is_rel_ = in_late->complete_is_relative();
 
       // DO NOT override isLate_, because if the parent is late, we do not want *ALL* children to be set late
       // isLate_ = in_late->isLate();
