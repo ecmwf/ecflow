@@ -29,8 +29,10 @@ namespace ecf {
 
 Calendar::Calendar()
 : ctype_(Calendar::REAL),
+  duration_(time_duration(0,0,0,0)),
   dayChanged_(false),
   startStopWithServer_(false),
+  increment_(time_duration(0,1,0,0)),
   day_of_week_(-1),
   day_of_year_(-1),
   day_of_month_(-1),

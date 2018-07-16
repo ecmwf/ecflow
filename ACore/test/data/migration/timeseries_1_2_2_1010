@@ -1,1 +1,1 @@
-{"N3ecf10TimeSeriesE":{"cereal_class_version":0,"start_":{"cereal_class_version":0,"hour_":10,"minute_":10},"nextTimeSlot_":{"hour_":10,"minute_":10}}}
+{"N3ecf10TimeSeriesE":{"cereal_class_version":0,"start_":{"cereal_class_version":0,"h_":10,"m_":10},"nextTimeSlot_":{"h_":10,"m_":10}}}
