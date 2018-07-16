@@ -75,9 +75,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar( CEREAL_NVP(n_),
-          CEREAL_NVP(v_)
-      );
+      ar( CEREAL_NVP(n_));
+      CEREAL_OPTIONAL_NVP(ar,v_,     [this](){return !v_.empty();});
       CEREAL_OPTIONAL_NVP(ar,new_v_, [this](){return !new_v_.empty();});  // conditionally save
    }
 };
@@ -134,10 +133,9 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar( CEREAL_NVP(number_),
-          CEREAL_NVP(name_)
-      );
-      CEREAL_OPTIONAL_NVP(ar,value_ , [this](){return value_;});  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar,number_, [this](){return number_ != std::numeric_limits<int>::max();});
+      CEREAL_OPTIONAL_NVP(ar,name_,   [this](){return !name_.empty();});
+      CEREAL_OPTIONAL_NVP(ar,value_,  [this](){return value_;});
    }
 };
 
@@ -193,9 +191,9 @@ private:
       ar( CEREAL_NVP(min_),
           CEREAL_NVP(max_),
           CEREAL_NVP(value_),
-          CEREAL_NVP(name_)
+          CEREAL_NVP(name_),
+          CEREAL_NVP(cc_)
       );
-      CEREAL_OPTIONAL_NVP(ar,cc_ , [this](){return cc_ != 0;});  // conditionally save
    }
 };
 #endif
