@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( test_cereal_optional )
       iarchive(restored,restored1); // Read the data from the archive
       BOOST_CHECK_MESSAGE(restored == original,"restored(" << restored  << ") != original(" << original << ")");
       BOOST_CHECK_MESSAGE(restored1 == original1,"restored1(" << restored1  << ") != original1(" << original1 << ")");
-      //fs::remove(path); // Remove the file. Comment out for debugging
+      fs::remove(path); // Remove the file. Comment out for debugging
    }
 }
 
