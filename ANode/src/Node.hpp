@@ -814,15 +814,16 @@ private:
    friend class AutoAttrs;
 
 private:
+   // conditionally save to cut down on client/server bandwidth.
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar( CEREAL_NVP(name_) );
 
-      CEREAL_OPTIONAL_NVP(ar, state_,         [this](){return state_.first != NState::UNKNOWN; }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, suspended_,     [this](){return suspended_; }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, defStatus_,     [this](){return defStatus_.state() != DState::QUEUED ; }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, state_,         [this](){return state_.first != NState::default_state();}); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, suspended_,     [this](){return suspended_; });
+      CEREAL_OPTIONAL_NVP(ar, defStatus_,     [this](){return defStatus_.state() != DState::default_state();}); // conditionally save
 
       CEREAL_OPTIONAL_NVP(ar, vars_ ,         [this](){return !vars_.empty(); }); // conditionally save
       CEREAL_OPTIONAL_NVP(ar, c_expr_ ,       [this](){return c_expr_.get(); }); // conditionally save

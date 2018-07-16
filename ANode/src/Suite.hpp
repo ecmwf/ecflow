@@ -125,8 +125,8 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class<NodeContainer>(this));
-      CEREAL_OPTIONAL_NVP(ar, begun_,     [this](){return begun_; }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, clockAttr_, [this](){return clockAttr_.get() ; }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, begun_,     [this](){return begun_; });           // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, clockAttr_, [this](){return clockAttr_.get(); }); // conditionally save
       ar(CEREAL_NVP(calendar_));
 
       // The calendar does not persist the clock type or start stop with server since

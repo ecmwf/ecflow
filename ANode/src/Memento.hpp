@@ -803,12 +803,12 @@ private:
 
 class SuiteCalendarMemento : public Memento {
 public:
-   explicit SuiteCalendarMemento(const ecf::Calendar& cal) : calendar_(cal) {}
+   explicit SuiteCalendarMemento(const ecf::Calendar& cal) : cal_(cal) {}
    SuiteCalendarMemento() {}
 private:
    virtual void do_incremental_suite_sync(Suite* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const { n->set_memento(this,aspects,f);}
 
-   ecf::Calendar  calendar_;          // *Only* persisted since used by the why() on client side
+   ecf::Calendar  cal_;          // *Only* persisted since used by the why() on client side
    friend class Suite;
 
    friend class cereal::access;
@@ -816,7 +816,7 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class<Memento>(this),
-      CEREAL_NVP(calendar_));
+      CEREAL_NVP(cal_));
    }
 };
 

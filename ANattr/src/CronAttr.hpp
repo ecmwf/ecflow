@@ -124,7 +124,7 @@ private:
       CEREAL_OPTIONAL_NVP(ar, weekDays_ ,   [this](){return !weekDays_.empty() ;});   // conditionally save
       CEREAL_OPTIONAL_NVP(ar, daysOfMonth_, [this](){return !daysOfMonth_.empty() ;});// conditionally save
       CEREAL_OPTIONAL_NVP(ar, months_,      [this](){return !months_.empty() ;});     // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, free_,        [this](){return free_ ; });               // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, free_,        [this](){return free_; });                // conditionally save
 	}
 };
 }

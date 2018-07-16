@@ -24,11 +24,15 @@
 // *The class NState just used to define the enum, however we also
 // needed to know when the state changed. Hence the use of state_change_no
 // Uses default copy constructor and destructor, and equality
+//
+// The default_state() should *NEVER* change as it will affect client/server comms
+//
 class NState {
 public:
 	enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5 };
 	explicit NState(State s): state_(s), state_change_no_(0) {}
-	NState(): state_(UNKNOWN),state_change_no_(0) {}
+	NState(): state_(default_state()),state_change_no_(0) {}
+   static NState::State default_state() { return NState::UNKNOWN; }
 
 	State state() const { return state_;}
 	void setState(State);

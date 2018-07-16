@@ -689,7 +689,7 @@ void Suite::set_memento( const SuiteCalendarMemento* memento,std::vector<ecf::As
 
 	// The calendar does *NOT* persist the calendar type (hybrid/real) since we can derive this for clock attribute
 	// Hence make sure calendar/clock are in sync. part of the suite invariants
-	calendar_ = memento->calendar_;
+	calendar_ = memento->cal_;
    if  (clockAttr_.get()) {
       if (clockAttr_->hybrid()) calendar_.set_clock_type(ecf::Calendar::HYBRID);
       else                      calendar_.set_clock_type(ecf::Calendar::REAL);

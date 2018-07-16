@@ -169,6 +169,8 @@ private:
    mutable SubGenVariables* sub_gen_variables_; // *not* persisted since they can be generated
    friend class SubGenVariables;
 
+private:
+   // never change defaults !! or will mess up client/server protocol
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
@@ -178,7 +180,7 @@ private:
       CEREAL_OPTIONAL_NVP(ar, paswd_, [this](){return !paswd_.empty(); }); // conditionally save
       CEREAL_OPTIONAL_NVP(ar, rid_,   [this](){return !rid_.empty(); });   // conditionally save
       CEREAL_OPTIONAL_NVP(ar, abr_,   [this](){return !abr_.empty(); });   // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, tryNo_, [this](){return tryNo_ != 0 ; });    // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, tryNo_, [this](){return tryNo_ != 0; });     // conditionally save
    }
 };
 

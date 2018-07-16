@@ -226,7 +226,7 @@ private:
 	         // The serialisation of ptime makes use of exceptions, especially
 	         // when dealing with a date that has *not* been initialised.
 	         // To avoid this we take a small hit to initialise the calendar with
-	         // time now. This will get overriden with suite clock at begin
+	         // time now. This will get overridden with suite clock at begin
 	         begin(second_clock_time());
 	      }
 	   }

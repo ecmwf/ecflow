@@ -181,9 +181,9 @@ private:
    int          min_;
    int          max_;
    int          value_;
-   int          cc_;
+   int          cc_;               // Colour change, used by gui ?
    std::string  name_;
-   bool         used_;        // used by the simulator not persisted
+   bool         used_;             // used by the simulator not persisted
    unsigned int state_change_no_;  // *not* persisted, only used on server side
 
    friend class cereal::access;

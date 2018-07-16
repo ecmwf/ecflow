@@ -32,7 +32,7 @@
 // Inlimit of the same name specified on a task take priority over the family
 class InLimit {
 public:
-   explicit InLimit(const std::string& limit_name,                                         // referenced limit
+   explicit InLimit(const std::string& limit_name,                                // referenced limit
            const std::string& path_to_node_with_referenced_limit = std::string(), // if empty, search for limit up parent hierarchy
            int tokens = 1,                                                        // tokens to consume in the Limit
            bool limit_this_node_only = false);                                    // if true limit this node only
@@ -68,13 +68,11 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(CEREAL_NVP(name_),
-         CEREAL_NVP(pathToNode_)         // can be empty
-         );
-
-      CEREAL_OPTIONAL_NVP(ar,tokens_,               [this](){return tokens_ !=0 ; });          // conditionally save
-      CEREAL_OPTIONAL_NVP(ar,limit_this_node_only_, [this](){return limit_this_node_only_; }); // conditionally save new to 5.0.0
-      CEREAL_OPTIONAL_NVP(ar,incremented_,          [this](){return incremented_; });          // conditionally save new to 5.0.0
+      ar(CEREAL_NVP(name_));
+      CEREAL_OPTIONAL_NVP(ar,pathToNode_,           [this](){return !pathToNode_.empty();});  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar,tokens_,               [this](){return tokens_ !=1;});           // conditionally save
+      CEREAL_OPTIONAL_NVP(ar,limit_this_node_only_, [this](){return limit_this_node_only_;}); // conditionally save new to 5.0.0
+      CEREAL_OPTIONAL_NVP(ar,incremented_,          [this](){return incremented_;});          // conditionally save new to 5.0.0
    }
 };
 

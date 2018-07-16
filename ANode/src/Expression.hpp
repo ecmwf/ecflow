@@ -32,13 +32,14 @@ public:
    enum ExprType { FIRST, AND, OR };
 
    explicit PartExpression(const std::string& expression)
-   : exp_(expression), exp_type_(FIRST) {}
+   : exp_(expression), exp_type_(default_expr_type()) {}
 
    PartExpression(const std::string& expression, bool and_type)
    : exp_(expression), exp_type_( (and_type) ? AND : OR) {}
 
-   PartExpression()
-   : exp_type_(FIRST) {}
+   PartExpression() : exp_type_(default_expr_type() ) {}
+
+   static ExprType default_expr_type() { return FIRST;} // NEVER change
 
    const std::string& expression() const  { return exp_;}
    bool andExpr() const { return (exp_type_ == AND) ? true : false ;}
@@ -67,7 +68,7 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(CEREAL_NVP(exp_));
-      CEREAL_OPTIONAL_NVP(ar,exp_type_,  [this](){return exp_type_ != PartExpression::FIRST; });          // conditionally save
+      CEREAL_OPTIONAL_NVP(ar,exp_type_,  [this](){return exp_type_ != default_expr_type();}); // conditionally save
    }
 };
 

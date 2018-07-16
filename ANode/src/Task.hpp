@@ -142,7 +142,7 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class<Submittable>(this));
-      CEREAL_OPTIONAL_NVP(ar, alias_no_, [this](){return alias_no_ != 0; }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, alias_no_, [this](){return alias_no_ != 0; });    // conditionally save
       CEREAL_OPTIONAL_NVP(ar, aliases_ , [this](){return !aliases_.empty(); }); // conditionally save
 
       // Setup the alias parent pointers. Since they are not serialised

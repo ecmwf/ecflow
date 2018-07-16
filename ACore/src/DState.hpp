@@ -29,7 +29,8 @@ class DState {
 public:
    enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5, SUSPENDED=6};
 	explicit DState(State s): state_(s), state_change_no_(0) {}
-	DState(): state_(QUEUED),state_change_no_(0) {}
+	DState(): state_(default_state()),state_change_no_(0) {}
+	static DState::State default_state() { return DState::QUEUED; }  // NEVER change, or will break client/server
 
 	State state() const { return state_;}
 	void setState(State);
@@ -42,7 +43,6 @@ public:
 	bool operator==(State s) const { return s == state_;}
 	bool operator!=(State s) const { return s != state_;}
 
-	static DState::State default_state() { return DState::QUEUED; }
 	static NState::State convert(DState::State);
    static const char* toString(DState::State);
    static const char* to_html(DState::State);
