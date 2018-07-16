@@ -232,12 +232,12 @@ private:
 	   }
       ar( CEREAL_NVP(initTime_),
           CEREAL_NVP(suiteTime_),
-          CEREAL_NVP(duration_),
-          CEREAL_NVP(dayChanged_),
           CEREAL_NVP(initLocalTime_),
-          CEREAL_NVP(lastTime_),
-          CEREAL_NVP(increment_)
+          CEREAL_NVP(lastTime_)
         );
+      CEREAL_OPTIONAL_NVP(ar,dayChanged_,[this](){return  dayChanged_;});
+      CEREAL_OPTIONAL_NVP(ar,duration_ , [this](){return  duration_  != boost::posix_time::time_duration(0,0,0,0);});
+      CEREAL_OPTIONAL_NVP(ar,increment_, [this](){return increment_  != boost::posix_time::time_duration(0,1,0,0);});
 	}
 };
 }

@@ -90,14 +90,13 @@ private:
 	template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
 	{
-      ar( CEREAL_NVP(hybrid_),
-          CEREAL_NVP(positiveGain_),
-          CEREAL_NVP(startStopWithServer_),
-          CEREAL_NVP(gain_),
-          CEREAL_NVP(day_),
-          CEREAL_NVP(month_),
-          CEREAL_NVP(year_)
-        );
+      ar( CEREAL_NVP(hybrid_) );
+      CEREAL_OPTIONAL_NVP(ar, positiveGain_,        [this](){return  positiveGain_;});
+      CEREAL_OPTIONAL_NVP(ar, startStopWithServer_, [this](){return startStopWithServer_ ;}); // ??
+      CEREAL_OPTIONAL_NVP(ar, gain_,                [this](){return gain_ != 0;});
+      CEREAL_OPTIONAL_NVP(ar, day_,                 [this](){return day_ != 0;});
+      CEREAL_OPTIONAL_NVP(ar, month_,               [this](){return month_ != 0;});
+      CEREAL_OPTIONAL_NVP(ar, year_,                [this](){return year_ != 0;});
 	}
 };
 

@@ -26,18 +26,18 @@ namespace ecf {
 
 bool TimeSlot::operator<(const TimeSlot& rhs) const
 {
-   if (hour_ <  rhs.hour()) return true;
-   if (hour_ == rhs.hour()) {
-      return minute_ < rhs.minute();
+   if (h_ <  rhs.hour()) return true;
+   if (h_ == rhs.hour()) {
+      return m_ < rhs.minute();
    }
    return false;
 }
 
 bool TimeSlot::operator>(const TimeSlot& rhs) const
 {
-   if (hour_ >  rhs.hour()) return true;
-   if (hour_ == rhs.hour()) {
-      return minute_ > rhs.minute();
+   if (h_ >  rhs.hour()) return true;
+   if (h_ == rhs.hour()) {
+      return m_ > rhs.minute();
    }
    return false;
 }
@@ -65,19 +65,19 @@ std::string TimeSlot::toString() const
    if (isNULL())  return "00:00";
 
    std::string ret;
-	if (hour_ < 10)  ret += "0";
-	ret += boost::lexical_cast<std::string>(hour_);
+	if (h_ < 10)  ret += "0";
+	ret += boost::lexical_cast<std::string>(h_);
 
 	ret += Str::COLON();
-	if (minute_ < 10) ret += "0";
-	ret += boost::lexical_cast<std::string>(minute_);
+	if (m_ < 10) ret += "0";
+	ret += boost::lexical_cast<std::string>(m_);
 	return ret;
 }
 
 boost::posix_time::time_duration TimeSlot::duration() const
 {
 	assert(!isNULL());
-	return boost::posix_time::time_duration( hours(hour_) + minutes(minute_) ) ;
+	return boost::posix_time::time_duration( hours(h_) + minutes(m_) ) ;
 }
 
 std::ostream& operator<<(std::ostream& os, const TimeSlot* d) {
