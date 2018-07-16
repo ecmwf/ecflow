@@ -13,8 +13,9 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <boost/lexical_cast.hpp>
+
 #include "TimeSlot.hpp"
-#include "Calendar.hpp"
 #include "Str.hpp"
 
 using namespace boost::posix_time;
@@ -47,13 +48,11 @@ bool TimeSlot::operator<=( const TimeSlot& rhs ) const
    return operator==(rhs);
 }
 
-
 bool TimeSlot::operator>=( const TimeSlot& rhs ) const
 {
    if (operator>(rhs)) return true;
    return operator==(rhs);
 }
-
 
 std::ostream& TimeSlot::print(std::ostream& os) const
 {
@@ -63,6 +62,8 @@ std::ostream& TimeSlot::print(std::ostream& os) const
 
 std::string TimeSlot::toString() const
 {
+   if (isNULL())  return "00:00";
+
    std::string ret;
 	if (hour_ < 10)  ret += "0";
 	ret += boost::lexical_cast<std::string>(hour_);
@@ -78,7 +79,6 @@ boost::posix_time::time_duration TimeSlot::duration() const
 	assert(!isNULL());
 	return boost::posix_time::time_duration( hours(hour_) + minutes(minute_) ) ;
 }
-
 
 std::ostream& operator<<(std::ostream& os, const TimeSlot* d) {
 	if (d) return d->print(os);

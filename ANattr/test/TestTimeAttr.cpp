@@ -38,20 +38,16 @@ BOOST_AUTO_TEST_CASE( test_time_string_constrcutor)
       TimeAttr time("+00:30");
       BOOST_CHECK_MESSAGE(time.time_series().start().hour() == 0 &&
                           time.time_series().start().minute() == 30 &&
-                          time.time_series().finish().hour() == 0 &&
-                          time.time_series().finish().minute() == 0 &&
-                          time.time_series().incr().hour() == 0 &&
-                          time.time_series().incr().minute() == 0 &&
+                          time.time_series().finish().isNULL() &&
+                          time.time_series().incr().isNULL() &&
                           time.time_series().relative(),"Error in time constructor");
    }
    {
       TimeAttr time("12:30");
       BOOST_CHECK_MESSAGE(time.time_series().start().hour() == 12 &&
                           time.time_series().start().minute() == 30 &&
-                          time.time_series().finish().hour() == 0 &&
-                          time.time_series().finish().minute() == 0 &&
-                          time.time_series().incr().hour() == 0 &&
-                          time.time_series().incr().minute() == 0 &&
+                          time.time_series().finish().isNULL() &&
+                          time.time_series().incr().isNULL() &&
                           !time.time_series().relative(),"Error in time constructor");
    }
    {

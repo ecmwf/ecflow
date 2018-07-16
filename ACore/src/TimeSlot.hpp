@@ -30,19 +30,14 @@ namespace ecf {
 class TimeSlot {
 public:
    static std::string type() { return "TimeSlot";}
-	TimeSlot()
-		: hour_(0), minute_(0),isNull_(true) {}
-	TimeSlot(int hour, int min)
-		: hour_(hour), minute_(min),isNull_(false)
-		{ assert(hour >= 0  && min >=0 ); }
+	TimeSlot() : hour_(-1), minute_(-1) {}
+	TimeSlot(int hour, int min) : hour_(hour), minute_(min) { assert(hour >= 0  && min >=0 ); }
 	explicit TimeSlot(const boost::posix_time::time_duration& td)
-		: hour_(td.hours()), minute_(td.minutes()),isNull_(false)
+		: hour_(td.hours()), minute_(td.minutes())
 		{ assert( hour_ < 60 && minute_ < 60);}
 
-	bool operator==(const TimeSlot& rhs) const
-		{ return ((hour_ == rhs.hour_) && (minute_ == rhs.minute_) && (isNull_ == rhs.isNull_));}
-	bool operator!=(const TimeSlot& rhs) const
-		{ return !operator==(rhs);}
+	bool operator==(const TimeSlot& rhs) const { return ((hour_ == rhs.hour_) && (minute_ == rhs.minute_));}
+	bool operator!=(const TimeSlot& rhs) const { return !operator==(rhs);}
 
    bool operator<(const TimeSlot& rhs) const;
    bool operator>(const TimeSlot& rhs) const;
@@ -51,7 +46,7 @@ public:
 
 	int hour() const { return hour_;}
 	int minute() const { return minute_;}
-	bool isNULL() const { return isNull_; }
+	bool isNULL() const { return (hour_ == -1 && minute_ == -1); }
 	std::ostream& print(std::ostream&) const;
 
 	/// returns the corresponding duration.
@@ -61,16 +56,14 @@ public:
  	std::string toString() const;
 
 private:
- 	unsigned short hour_;
- 	unsigned short minute_;
- 	bool           isNull_;
+ 	int hour_;
+ 	int minute_;
 
  	friend class cereal::access;
  	template<class Archive>
  	void serialize(Archive & ar, std::uint32_t const version ) {
  	   ar( CEREAL_NVP(hour_),
- 	       CEREAL_NVP(minute_ ),
- 	       CEREAL_NVP(isNull_)
+ 	       CEREAL_NVP(minute_ )
  	     );
  	}
 };
