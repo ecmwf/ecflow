@@ -56,7 +56,7 @@ Repeat::Repeat( const Repeat& rhs)
 
 Repeat& Repeat::operator=(const Repeat& rhs)
 {
-   type_.release();
+   type_.reset(nullptr);
 	if ( rhs.type_) {
       type_.reset( rhs.type_->clone());
 	}

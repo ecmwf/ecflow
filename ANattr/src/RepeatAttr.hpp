@@ -415,7 +415,7 @@ public:
    bool operator==(const Repeat& rhs) const;
 
    bool empty() const { return (type_) ? false : true; }
-   void clear() { type_.release();  }
+   void clear() { type_.reset(nullptr); }
 
    const std::string& name() const;
 
