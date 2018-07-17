@@ -297,7 +297,6 @@ private:
 
    Event event_;
    friend class Node;
-   friend class ChildAttrs;
 
    friend class cereal::access;
    template<class Archive>
@@ -317,7 +316,6 @@ private:
 
    Meter meter_;
    friend class Node;
-   friend class ChildAttrs;
 
    friend class cereal::access;
    template<class Archive>
@@ -338,7 +336,6 @@ private:
 
    Label label_;
    friend class Node;
-   friend class ChildAttrs;
 
    friend class cereal::access;
    template<class Archive>

@@ -49,7 +49,6 @@
 #include "Expression.hpp"
 #include "InLimitMgr.hpp"
 #include "TimeDepAttrs.hpp"
-#include "ChildAttrs.hpp"
 #include "MiscAttrs.hpp"
 #include "AutoAttrs.hpp"
 #include "NodeFwd.hpp"
@@ -342,9 +341,9 @@ public:
    const std::vector<Variable>&        variables()const { return vars_;}
    const std::vector<limit_ptr>&       limits()   const { return limits_;}
    const std::vector<InLimit>&         inlimits() const { return inLimitMgr_.inlimits(); }
-   const std::vector<Meter>&           meters()    const;
-   const std::vector<Event>&           events()    const;
-   const std::vector<Label>&           labels()   const;
+   const std::vector<Meter>&           meters()   const { return meters_;}
+   const std::vector<Event>&           events()   const { return events_;}
+   const std::vector<Label>&           labels()   const { return labels_;}
    const std::vector<ecf::TimeAttr>&   timeVec()  const;
    const std::vector<ecf::TodayAttr>&  todayVec() const;
    const std::vector<DateAttr>&        dates()    const;
@@ -713,7 +712,6 @@ private:
    // Clear the node suspended and update state change number, no other side effects
    void clearSuspended();
    void delete_time_dep_attrs_if_empty();
-   void delete_child_attrs_if_empty();
    void delete_misc_attrs_if_empty();
 
 private: // alow simulator access
@@ -721,8 +719,8 @@ private: // alow simulator access
    friend class ecf::FlatAnalyserVisitor;
    friend class ecf::SimulatorVisitor;
    friend class ecf::Simulator;
-   std::vector<Meter>& ref_meters();    // allow simulator set meter value
-   std::vector<Event>& ref_events();    // allow simulator set event value
+   std::vector<Meter>&  ref_meters() { return meters_;} // allow simulator set meter value
+   std::vector<Event>&  ref_events() { return events_;} // allow simulator set event value
    std::vector<QueueAttr>& ref_queues();// allow simulator set event value
 
    /// Note: If the complete expression evaluation fails. we should continue resolving dependencies
@@ -743,12 +741,12 @@ private: /// For use by python interface,
    friend void export_Node();
    friend void export_Task();
    friend void export_SuiteAndFamily();
-   std::vector<Meter>::const_iterator meter_begin() const;
-   std::vector<Meter>::const_iterator meter_end() const;
-   std::vector<Event>::const_iterator event_begin() const;
-   std::vector<Event>::const_iterator event_end() const;
-   std::vector<Label>::const_iterator label_begin() const;
-   std::vector<Label>::const_iterator label_end() const;
+   std::vector<Meter>::const_iterator meter_begin() const { return meters_.begin();}
+   std::vector<Meter>::const_iterator meter_end() const { return meters_.end();}
+   std::vector<Event>::const_iterator event_begin() const { return events_.begin();}
+   std::vector<Event>::const_iterator event_end() const { return events_.end();}
+   std::vector<Label>::const_iterator label_begin() const { return labels_.begin();}
+   std::vector<Label>::const_iterator label_end() const { return labels_.end();}
    std::vector<ecf::TimeAttr>::const_iterator time_begin() const;
    std::vector<ecf::TimeAttr>::const_iterator time_end() const;
    std::vector<ecf::TodayAttr>::const_iterator today_begin() const;
@@ -786,7 +784,10 @@ private:
    mutable std::unique_ptr<Expression>        c_expr_; // can only have one complete expression
    mutable std::unique_ptr<Expression>        t_expr_;  // can only have one trigger expression
 
-   std::unique_ptr<ChildAttrs>                 child_attrs_;  // event meter & labels
+   std::vector<Meter>          meters_;
+   std::vector<Event>          events_;
+   std::vector<Label>          labels_;
+
    std::unique_ptr<TimeDepAttrs>               time_dep_attrs_;
    std::unique_ptr<ecf::LateAttr>              lateAttr_;     // Can only have one late attribute per node
    std::unique_ptr<MiscAttrs>                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
@@ -809,7 +810,6 @@ private:
    void* graphic_ptr_;  // for use with the gui only
 
    friend class TimeDepAttrs;
-   friend class ChildAttrs;
    friend class MiscAttrs;
    friend class AutoAttrs;
 
@@ -829,7 +829,10 @@ private:
       CEREAL_OPTIONAL_NVP(ar, c_expr_ ,       [this](){return c_expr_.get(); }); // conditionally save
       CEREAL_OPTIONAL_NVP(ar, t_expr_ ,       [this](){return t_expr_.get(); }); // conditionally save
 
-      CEREAL_OPTIONAL_NVP(ar, child_attrs_,   [this](){return child_attrs_.get() ;});   // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, meters_,        [this](){return !meters_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, events_,        [this](){return !events_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, labels_,        [this](){return !labels_.empty(); }); // conditionally save
+
       CEREAL_OPTIONAL_NVP(ar, time_dep_attrs_,[this](){return time_dep_attrs_.get();}); // conditionally save
       CEREAL_OPTIONAL_NVP(ar, lateAttr_,      [this](){return lateAttr_.get() ; });     // conditionally save
       CEREAL_OPTIONAL_NVP(ar, misc_attrs_,    [this](){return misc_attrs_.get() ; });   // conditionally save
@@ -842,7 +845,6 @@ private:
 
       if (Archive::is_loading::value) {
          if (time_dep_attrs_)  time_dep_attrs_->set_node(this);
-         if (child_attrs_) child_attrs_->set_node(this);
          if (misc_attrs_) misc_attrs_->set_node(this);
          if (auto_attrs_) auto_attrs_->set_node(this);
          for(std::vector<limit_ptr>::iterator i = limits_.begin(); i!= limits_.end(); ++i)  (*i)->set_node(this);

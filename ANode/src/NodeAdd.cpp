@@ -220,12 +220,13 @@ void Node::addCron( const CronAttr& d)
 
 void Node::addLabel( const Label& l)
 {
-   if (child_attrs_) {
-      child_attrs_->addLabel(l); // can throw
-      return;
-   }
-   child_attrs_ = std::make_unique<ChildAttrs>(this);
-   child_attrs_->addLabel(l);
+   if (findLabel(l.name())) {
+       std::stringstream ss;
+       ss << "Add Label failed: Duplicate label of name '" << l.name() << "' already exist for node " << debugNodePath();
+       throw std::runtime_error( ss.str() );
+    }
+    labels_.push_back( l );
+    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 
@@ -235,22 +236,26 @@ void Node::addMeter( const Meter& m)
 //      throw std::runtime_error("Node::addMeter: Can not add meter to a Suite");
 //   }
 
-   if (child_attrs_) {
-      child_attrs_->addMeter(m); // can throw
-      return;
+   const Meter& meter = findMeter(m.name());
+   if (!meter.empty()) {
+      std::stringstream ss;
+      ss << "Add Meter failed: Duplicate Meter of name '" << m.name() << "' already exist for node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
    }
-   child_attrs_ =std::make_unique<ChildAttrs>(this);
-   child_attrs_->addMeter(m);
+   meters_.push_back( m );
+   state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::addEvent( const Event& e)
 {
-   if (child_attrs_) {
-      child_attrs_->addEvent(e); // can throw
-      return;
+   const Event& event = findEvent(e);
+   if (!event.empty()) {
+      std::stringstream ss;
+      ss << "Add Event failed: Duplicate Event of name '" << e.name_or_number() << "' already exist for node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
    }
-   child_attrs_ = std::make_unique<ChildAttrs>(this);
-   child_attrs_->addEvent(e);
+   events_.push_back( e );
+   state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::addLimit(const Limit& l )

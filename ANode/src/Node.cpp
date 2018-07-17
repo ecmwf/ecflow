@@ -80,7 +80,9 @@ Node::Node(const Node& rhs)
   vars_(rhs.vars_),
   c_expr_( (rhs.c_expr_) ? new Expression(*rhs.c_expr_) : NULL ),
   t_expr_(  (rhs.t_expr_) ? new Expression(*rhs.t_expr_) : NULL ),
-  child_attrs_((rhs.child_attrs_) ? new ChildAttrs(*rhs.child_attrs_) : NULL),
+  meters_(rhs.meters_),
+  events_(rhs.events_),
+  labels_(rhs.labels_),
   time_dep_attrs_((rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL),
   lateAttr_((rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL),
   misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL),
@@ -93,7 +95,6 @@ Node::Node(const Node& rhs)
 {
    inLimitMgr_.set_node(this);
    if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
-   if ( child_attrs_ )    child_attrs_->set_node(this);
    if ( misc_attrs_ )     misc_attrs_->set_node(this);
    if ( auto_attrs_ )     auto_attrs_->set_node(this);
 
@@ -107,7 +108,6 @@ Node::Node(const Node& rhs)
 void Node::delete_attributes() {
    c_expr_.reset(nullptr);
    t_expr_.reset(nullptr);
-   child_attrs_.reset(nullptr);
    time_dep_attrs_.reset(nullptr);
    lateAttr_.reset(nullptr);
    misc_attrs_.reset(nullptr);
@@ -143,9 +143,13 @@ Node& Node::operator=(const Node& rhs)
       vars_ = rhs.vars_ ;
 
       delete_attributes();
+
+      meters_ = rhs.meters_;
+      events_ = rhs.events_;
+      labels_ = rhs.labels_;
+
       if (rhs.c_expr_)   c_expr_   = std::make_unique<Expression>(*rhs.c_expr_);
       if (rhs.t_expr_)    t_expr_    = std::make_unique<Expression>(*rhs.t_expr_ );
-      if (rhs.child_attrs_)    child_attrs_    = std::make_unique<ChildAttrs>(*rhs.child_attrs_);
       if (rhs.time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(*rhs.time_dep_attrs_);
       if (rhs.lateAttr_)       lateAttr_       = std::make_unique<ecf::LateAttr>(*rhs.lateAttr_);
       if (rhs.misc_attrs_)     misc_attrs_     = std::make_unique<MiscAttrs>(*rhs.misc_attrs_);
@@ -161,7 +165,6 @@ Node& Node::operator=(const Node& rhs)
       suspended_change_no_ = 0;
       graphic_ptr_ = 0;
 
-      if ( child_attrs_ )    child_attrs_->set_node(this);
       if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
       if ( misc_attrs_ )     misc_attrs_->set_node(this);
       if ( auto_attrs_ )     auto_attrs_->set_node(this);
@@ -225,8 +228,11 @@ void Node::begin()
    flag_.reset();
    repeat_.reset();         // if repeat is empty reset() does nothing
 
+   for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
+   for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
+   for(size_t i = 0; i < labels_.size(); i++)     {   labels_[i].reset(); }
+
    if (lateAttr_) lateAttr_->reset();
-   if (child_attrs_) child_attrs_->begin();
    for(size_t i = 0; i < limits_.size(); i++)   { limits_[i]->reset(); }
 
    // Let time base attributes use, relative duration if applicable
@@ -298,7 +304,14 @@ void Node::requeue(Requeue_args& args)
 
 
    if (lateAttr_) lateAttr_->reset();
-   if (child_attrs_) child_attrs_->requeue();
+
+   for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
+   for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
+   // ECFLOW-195, only clear labels, if they are on Suites/Family not tasks(typically only specified on tasks)
+   if (isNodeContainer()) {
+      for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
+   }
+
    if (misc_attrs_) misc_attrs_->requeue();
 
    for(size_t i = 0; i < limits_.size(); i++) { limits_[i]->reset(); }
@@ -324,7 +337,12 @@ void Node::reset()
    flag_.reset();
 
    if (lateAttr_) lateAttr_->reset();
-   if (child_attrs_) child_attrs_->requeue();
+
+   for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
+   for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
+   if (isNodeContainer()) {
+      for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
+   }
 
    for(size_t i = 0; i < limits_.size(); i++) { limits_[i]->reset(); }
 }
@@ -340,7 +358,8 @@ void Node::requeue_time_attrs()
 
 void Node::requeue_labels()
 {
-   if (child_attrs_) child_attrs_->requeue_labels();
+   // ECFLOW-195, clear labels before a task is run.
+   for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
 }
 
 void Node::miss_next_time_slot()
@@ -852,7 +871,7 @@ void Node::setStateOnly(NState::State newState,bool force,const std::string& add
          // cout << debugNodePath() << " submit->active->complete time = " << td.total_seconds()  << " seconds.\n";
 
          // Avoid this check if we have meters. as we wait a second between each meter update
-         if ( td.total_seconds() >= jobSubmissionInterval && ((!child_attrs_)  || child_attrs_->meters().empty())) {
+         if ( td.total_seconds() >= jobSubmissionInterval && meters_.empty())) {
 
             const Variable& do_check = theSuite->findVariable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL");
             if (!do_check.empty()) {
@@ -957,11 +976,21 @@ DState::State Node::dstate() const {
 }
 
 bool Node::set_event( const std::string& event_name_or_number)  {
-   if (child_attrs_) return child_attrs_->set_event(event_name_or_number);
+   BOOST_FOREACH(Event& e, events_) {
+      if (e.name_or_number() == event_name_or_number) {
+         e.set_value( true );
+         return true;
+      }
+   }
    return false;
 }
 bool Node::clear_event(const std::string& event_name_or_number ){
-   if (child_attrs_) return child_attrs_->clear_event(event_name_or_number);
+   BOOST_FOREACH(Event& e, events_) {
+      if (e.name_or_number() == event_name_or_number) {
+         e.set_value( false );
+         return true;
+      }
+   }
    return false;
 }
 
@@ -1524,7 +1553,9 @@ std::ostream& Node::print(std::ostream& os) const
 
    BOOST_FOREACH(limit_ptr l, limits_)            { l->print(os); }
    inLimitMgr_.print(os);
-   if (child_attrs_) child_attrs_->print(os);
+   BOOST_FOREACH(const Label& la, labels_ )  { la.print(os); }
+   BOOST_FOREACH(const Meter& m, meters_ )   { m.print(os); }
+   BOOST_FOREACH(const Event& e, events_ )   { e.print(os); }
    if (time_dep_attrs_) time_dep_attrs_->print(os);
    if (misc_attrs_) misc_attrs_->print(os);
    if (auto_attrs_) auto_attrs_->print(os);
@@ -1691,22 +1722,64 @@ bool Node::operator==(const Node& rhs) const
       return false;
    }
 
-   if (( child_attrs_ && !rhs.child_attrs_) || ( !child_attrs_ && rhs.child_attrs_)){
+   if (labels_.size() != rhs.labels_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator== (( child_attrs_ && !rhs.child_attrs_) || ( !child_attrs_ && rhs.child_attrs_)) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (labels_.size() != rhs.labels_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   if ( child_attrs_ &&  rhs.child_attrs_ && !(*child_attrs_ == *rhs.child_attrs_)) {
+   for(unsigned i = 0; i < labels_.size(); ++i) {
+      if (labels_[i] != rhs.labels_[i]) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "Node::operator==  (labels_[i] != rhs.labels_[i]) " << debugNodePath() << "\n";
+            std::cout << "   lhs = " << labels_[i].dump() << "\n";
+            std::cout << "   rhs = " << rhs.labels_[i].dump() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
+
+   if (meters_.size() != rhs.meters_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator== ( child_attrs_ && rhs.child_attrs_ && !(*child_attrs_ == *(rhs.child_attrs_))) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (meters_.size() != rhs.meters_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
+   for(size_t i = 0; i < meters_.size(); ++i) {
+      if (!(meters_[i] == rhs.meters_[i] )) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "Node::operator==   (!(meters_[i] == rhs.meters_[i] )) " << debugNodePath() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
+   if (events_.size() != rhs.events_.size()) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==   (events_.size() != rhs.events_.size()) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   for(size_t i = 0; i < events_.size(); ++i) {
+      if (!(events_[i] == rhs.events_[i] )) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "Node::operator==   (!(events_[i] == rhs.events_[i] )) " << debugNodePath() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
+
 
    if (( misc_attrs_ && !rhs.misc_attrs_) || ( !misc_attrs_ && rhs.misc_attrs_)){
 #ifdef DEBUG
@@ -1902,11 +1975,6 @@ bool Node::checkInvariants(std::string& errorMsg) const
          return false;
       }
    }
-   if (child_attrs_) {
-      if (!child_attrs_->checkInvariants(errorMsg)) {
-         return false;
-      }
-   }
 
    if (!repeat_.empty()) {
       if (repeat_.name().empty()) {
@@ -2059,13 +2127,26 @@ node_ptr Node::remove()
 
 bool Node::getLabelValue(const std::string& labelName, std::string& value) const
 {
-   if (child_attrs_) return child_attrs_->getLabelValue(labelName,value);
+   size_t theSize = labels_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (labels_[i].name() == labelName) {
+         if (!(labels_[i].new_value().empty())) value = labels_[i].new_value();
+         else                                   value = labels_[i].value();
+         return true;
+      }
+   }
    return false;
 }
 
 bool Node::getLabelNewValue(const std::string& labelName, std::string& value) const
 {
-   if (child_attrs_) return child_attrs_->getLabelNewValue(labelName,value);
+   size_t theSize = labels_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (labels_[i].name() == labelName) {
+         value = labels_[i].new_value();
+         return true;
+      }
+   }
    return false;
 }
 
@@ -2184,9 +2265,21 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
 {
    state_change_no_ = Ecf::incr_state_change_no();
    switch ( attr ) {
-      case Attr::EVENT: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
-      case Attr::METER: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
-      case Attr::LABEL: if (child_attrs_) child_attrs_->sort_attributes(attr); break;
+      case Attr::EVENT:
+         sort(events_.begin(),events_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Event::name_or_number,_1),
+                                   boost::bind(&Event::name_or_number,_2)));
+         break;
+      case Attr::METER:
+         sort(meters_.begin(),meters_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Meter::name,_1),
+                                   boost::bind(&Meter::name,_2)));
+         break;
+      case Attr::LABEL:
+         sort(labels_.begin(),labels_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Label::name,_1),
+                                   boost::bind(&Label::name,_2)));
+         break;
       case Attr::LIMIT:
          sort(limits_.begin(),limits_.end(),boost::bind(Str::caseInsLess,
                                    boost::bind(&Limit::name,_1),
@@ -2223,21 +2316,6 @@ std::vector<DayAttr>::const_iterator Node::day_begin() const {          if (time
 std::vector<DayAttr>::const_iterator Node::day_end() const {            if (time_dep_attrs_) return time_dep_attrs_->day_end(); return days_.end();}
 std::vector<ecf::CronAttr>::const_iterator Node::cron_begin() const {   if (time_dep_attrs_) return time_dep_attrs_->cron_begin(); return crons_.begin();}
 std::vector<ecf::CronAttr>::const_iterator Node::cron_end() const {     if (time_dep_attrs_) return time_dep_attrs_->cron_end(); return crons_.end();}
-
-static std::vector<Meter> meters_;
-static std::vector<Event> events_;
-static std::vector<Label> labels_;
-const std::vector<Meter>& Node::meters() const { if (child_attrs_) return child_attrs_->meters(); return meters_;}
-const std::vector<Event>& Node::events() const { if (child_attrs_) return child_attrs_->events(); return events_;}
-const std::vector<Label>& Node::labels() const { if (child_attrs_) return child_attrs_->labels(); return labels_;}
-std::vector<Meter>&  Node::ref_meters()        { if (child_attrs_) return child_attrs_->ref_meters(); return meters_;} // allow simulator set meter value
-std::vector<Event>&  Node::ref_events()        { if (child_attrs_) return child_attrs_->ref_events(); return events_;} // allow simulator set event value
-std::vector<Meter>::const_iterator Node::meter_begin() const { if (child_attrs_) return child_attrs_->meter_begin(); return meters_.begin();}
-std::vector<Meter>::const_iterator Node::meter_end() const {   if (child_attrs_) return child_attrs_->meter_end(); return meters_.end();}
-std::vector<Event>::const_iterator Node::event_begin() const { if (child_attrs_) return child_attrs_->event_begin(); return events_.begin();}
-std::vector<Event>::const_iterator Node::event_end() const {   if (child_attrs_) return child_attrs_->event_end(); return events_.end();}
-std::vector<Label>::const_iterator Node::label_begin() const { if (child_attrs_) return child_attrs_->label_begin(); return labels_.begin();}
-std::vector<Label>::const_iterator Node::label_end() const {   if (child_attrs_) return child_attrs_->label_end(); return labels_.end();}
 
 static std::vector<VerifyAttr> verifys_;
 static std::vector<ZombieAttr> zombies_;

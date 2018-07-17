@@ -154,39 +154,77 @@ void Node::deleteVariable( const std::string& name)
 	throw std::runtime_error("Node::deleteVariable: Can not find 'user' variable of name " + name);
 }
 
-void Node::delete_child_attrs_if_empty()
-{
-   if (child_attrs_ && child_attrs_->empty()) {
-      child_attrs_.reset(nullptr);
-   }
-}
-
 void Node::deleteEvent(const std::string& name)
 {
-   if (child_attrs_)  {
-      child_attrs_->deleteEvent(name);
-      delete_child_attrs_if_empty();
+   if (name.empty()) {
+      events_.clear();
+      state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+      std::cout << "Node::deleteEvent\n";
+#endif
       return;
+   }
+
+   size_t theSize = events_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (events_[i].name_or_number() == name) {
+         events_.erase( events_.begin() + i );
+         state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+         std::cout << "Node::deleteEvent\n";
+#endif
+         return;
+      }
    }
 	throw std::runtime_error("Node::deleteEvent: Can not find event: " + name);
 }
 
 void Node::deleteMeter(const std::string& name)
 {
-   if (child_attrs_)  {
-      child_attrs_->deleteMeter(name);
-      delete_child_attrs_if_empty();
+   if (name.empty()) {
+      meters_.clear();
+      state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+      std::cout << "Expression::clearFree()\n";
+#endif
       return;
+   }
+
+   size_t theSize = meters_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (meters_[i].name() == name) {
+         meters_.erase( meters_.begin() + i );
+         state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+         std::cout << "Expression::clearFree()\n";
+#endif
+         return;
+      }
    }
 	throw std::runtime_error("Node::deleteMeter: Can not find meter: " + name);
 }
 
 void Node::deleteLabel(const std::string& name)
 {
-   if (child_attrs_)  {
-      child_attrs_->deleteLabel(name);
-      delete_child_attrs_if_empty();
+   if (name.empty()) {
+      labels_.clear();
+      state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+      std::cout << "Node::deleteLabel\n";
+#endif
       return;
+   }
+
+   size_t theSize = labels_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (labels_[i].name() == name) {
+         labels_.erase( labels_.begin() + i );
+         state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_STATE_CHANGE_NO
+         std::cout << "Node::deleteLabel\n";
+#endif
+         return;
+      }
    }
 	throw std::runtime_error("Node::deleteLabel: Can not find label: " + name);
 }

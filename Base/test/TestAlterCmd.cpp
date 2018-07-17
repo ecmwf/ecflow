@@ -500,7 +500,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
    }
 
    {   // test add meter
-      TestStateChanged changed(s);
+      //TestStateChanged changed(s);
       s->addMeter( Meter("meter",0,100,100) );
       s->addMeter( Meter("meter1",0,100,100) );
       s->addMeter( Meter("meter2",0,100,100) );
@@ -510,10 +510,11 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_METER,"meter")));
       BOOST_CHECK_MESSAGE( s->meters().size() == 2, "expected 2  but found " <<  s->meters().size());
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_METER)));
-      BOOST_CHECK_MESSAGE( s->meters().size() == 0, "expected 0  but found " <<  s->meters().size());
+      BOOST_CHECK_MESSAGE( s->meters().size() == 0, "expected 0 meters but found " <<  s->meters().size());
 
       // test change meter value
       s->addMeter( Meter("meter",0,100,100) );
+      BOOST_CHECK_MESSAGE( s->meters().size() == 1, "expected 1 meter but found " << s->meters().size());
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::METER,"meter","10")));
       const Meter& v = s->findMeter("meter");
       BOOST_CHECK_MESSAGE( v.value() == 10, "expected to find meter with value 10");

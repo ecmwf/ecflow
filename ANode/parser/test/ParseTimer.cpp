@@ -110,15 +110,15 @@ int main(int argc, char* argv[])
       std::remove(tmpFilename.c_str());
    }
    {
-      // Test time for persisting to BOOST checkpoint file only
+      // Test time for persisting to CEREAL  checkpoint file only
       std::string tmpFilename = "tmp.def";
 
       timer.restart();
       defs.cereal_save_as_checkpt(tmpFilename);
       cout << " Save as CEREAL checkpoint, time taken           = " << timer.elapsed()  << endl;
 
-      std::remove(tmpFilename.c_str());
-      //exit(0);
+      //std::remove(tmpFilename.c_str());
+      exit(0);
    }
 
    {

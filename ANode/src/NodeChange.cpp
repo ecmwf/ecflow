@@ -39,62 +39,134 @@ void Node::changeVariable(const std::string& name,const std::string& value)
 
 bool Node::set_event(const std::string& event_name_or_number ,bool value)
 {
-   if (child_attrs_) return child_attrs_->set_event(event_name_or_number,value);
-	return false;
+   if (events_.empty()) {
+      return false;
+   }
+
+   // find by name first
+   size_t theSize = events_.size();
+   for(size_t i = 0; i < theSize; i++)   {
+      if (events_[i].name() == event_name_or_number) {
+         events_[i].set_value( value );
+         return true;
+      }
+   }
+
+   // Test for numeric, and then casting, is ****faster***** than relying on exception alone
+   if ( event_name_or_number.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
+      try {
+         int eventNumber = boost::lexical_cast< int >( event_name_or_number );
+         for(size_t i = 0; i < theSize; i++)   {
+            if (events_[i].number() == eventNumber) {
+               events_[i].set_value( value );
+               return true;;
+            }
+         }
+      }
+      catch ( boost::bad_lexical_cast&) {}
+   }
+   return false;
 }
 
 bool Node::set_event_used_in_trigger(const std::string& event_name_or_number)
 {
-   if (child_attrs_) return child_attrs_->set_event_used_in_trigger(event_name_or_number);
-	return false;
+   if (events_.empty()) {
+      return false;
+   }
+
+   // find by name first
+   size_t theSize = events_.size();
+   for(size_t i = 0; i < theSize; i++)   {
+      if (events_[i].name() == event_name_or_number) {
+         events_[i].usedInTrigger( true );
+         return true;
+      }
+   }
+
+   // Test for numeric, and then casting, is ****faster***** than relying on exception alone
+   if ( event_name_or_number.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
+      try {
+         int eventNumber = boost::lexical_cast< int >( event_name_or_number );
+         for(size_t i = 0; i < theSize; i++)   {
+            if (events_[i].number() == eventNumber) {
+               events_[i].usedInTrigger( true );
+               return true;;
+            }
+         }
+      }
+      catch ( boost::bad_lexical_cast&) {}
+   }
+   return false;
 }
 void Node::changeEvent(const std::string& event_name_or_number,const std::string& setOrClear)
 {
-   if (child_attrs_) return child_attrs_->changeEvent(event_name_or_number,setOrClear);
+   bool value;
+   if (!setOrClear.empty()) {
+      if (setOrClear != Event::SET() && setOrClear != Event::CLEAR() ) {
+         throw std::runtime_error("Node::changeEvent: Expected empty string, 'set' or 'clear' but found " + setOrClear + " for event " + event_name_or_number);
+      }
+      value = (setOrClear == Event::SET());
+   }
+   else  value = true;
+
+   changeEvent(event_name_or_number,value);
 }
+
 void Node::changeEvent(const std::string& event_name_or_number,bool value)
 {
-   if (child_attrs_) {
-      child_attrs_->changeEvent(event_name_or_number,value);
-      return;
-   }
+   if (set_event(event_name_or_number,value))  return;
  	throw std::runtime_error("Node::changeEvent: Could not find event " + event_name_or_number);
 }
 
 bool Node::set_meter(const std::string& meter_name,int value)
 {
-   if (child_attrs_) return child_attrs_->set_meter(meter_name,value);
-	return false;
+   size_t the_meter_size = meters_.size();
+   for(size_t i = 0; i < the_meter_size ; ++i) {
+      if (meters_[i].name() == meter_name) {
+         meters_[i].set_value( value);
+         return true;
+      }
+   }
+   return false;
 }
 bool Node::set_meter_used_in_trigger(const std::string& meter_name)
 {
-   if (child_attrs_) return child_attrs_->set_meter_used_in_trigger(meter_name);
-	return false;
+   size_t the_meter_size = meters_.size();
+    for(size_t i = 0; i < the_meter_size ; ++i) {
+       if (meters_[i].name() == meter_name ) {
+          meters_[i].usedInTrigger( true );
+          return true;
+       }
+    }
+    return false;
 }
 void Node::changeMeter(const std::string& meter_name,const std::string& value)
 {
-   if (child_attrs_) {
-      child_attrs_->changeMeter(meter_name,value);
-      return;
+   int theValue = 0;
+   try {
+      theValue = boost::lexical_cast< int >( value );
    }
-   throw std::runtime_error("Node::changeMeter: Could not find meter " + meter_name);
+   catch ( boost::bad_lexical_cast& ) {
+      throw std::runtime_error( "Node::changeMeter expected integer value but found " + value);
+   }
+   changeMeter(meter_name,theValue);
 }
 void Node::changeMeter(const std::string& meter_name,int value)
 {
-   if (child_attrs_) {
-      child_attrs_->changeMeter(meter_name,value);
-      return;
-   }
+   if (set_meter(meter_name,value)) return;
  	throw std::runtime_error("Node::changeMeter: Could not find meter " + meter_name);
 }
 
 void Node::changeLabel(const std::string& name,const std::string& value)
 {
-   if (child_attrs_) {
-      child_attrs_->changeLabel(name,value);
-      return;
+   size_t theSize = labels_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (labels_[i].name() == name) {
+         labels_[i].set_new_value( value );
+         return;
+      }
    }
-	throw std::runtime_error("Node::changeLabel: Could not find label " + name);
+   throw std::runtime_error("Node::changeLabel: Could not find label " + name);
 }
 
 void Node::changeTrigger(const std::string& expression)

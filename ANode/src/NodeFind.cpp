@@ -249,48 +249,95 @@ limit_ptr  Node::findLimitUpNodeTree(const std::string& name) const
 
 const Event& Node::findEvent(const Event& theEvent) const
 {
-   if (child_attrs_) return child_attrs_->findEvent(theEvent);
+   size_t theSize = events_.size();
+   for(size_t i = 0; i < theSize; i++)   {
+      if (events_[i] == theEvent) {
+         return events_[i];
+      }
+   }
    return Event::EMPTY();
 }
 
 const Event& Node::findEventByNumber(int number) const
 {
-   if (child_attrs_) return child_attrs_->findEventByNumber(number);
+   size_t theSize = events_.size();
+   for(size_t i = 0; i < theSize; i++)   {
+      if (events_[i].number() == number) {
+         return events_[i];
+      }
+   }
    return Event::EMPTY();
 }
 
 const Event& Node::findEventByName( const std::string& event_name) const
 {
-   if (child_attrs_) return child_attrs_->findEventByName(event_name);
+   size_t theSize = events_.size();
+   for(size_t i = 0; i < theSize; i++)   {
+      if (events_[i].name() == event_name) {
+         return events_[i];
+      }
+   }
    return Event::EMPTY();
 }
 
 const Event& Node::findEventByNameOrNumber( const std::string& theName) const
 {
-   if (child_attrs_) return child_attrs_->findEventByNameOrNumber(theName);
+   const Event& event = findEventByName(theName);
+   if (!event.empty()) {
+      return event;
+   }
+
+   // Test for numeric, and then casting, is ****faster***** than relying on exception alone
+   if ( theName.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
+      try {
+         int eventNumber = boost::lexical_cast< int >( theName );
+         return findEventByNumber(eventNumber);
+      }
+      catch ( boost::bad_lexical_cast&) {}
+   }
    return Event::EMPTY();
 }
 const Meter& Node::findMeter(const std::string& name) const
 {
-   if (child_attrs_) return child_attrs_->findMeter(name);
+   size_t theSize = meters_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (meters_[i].name() == name) {
+         return meters_[i];
+      }
+   }
    return Meter::EMPTY();
 }
 
 Meter& Node::find_meter(const std::string& name)
 {
-   if (child_attrs_) return child_attrs_->find_meter(name);
+   size_t theSize = meters_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (meters_[i].name() == name) {
+         return meters_[i];
+      }
+   }
    return const_cast<Meter&>(Meter::EMPTY());
 }
 
 bool Node::findLabel(const std::string& name) const
 {
-   if (child_attrs_) return child_attrs_->findLabel(name);
+   size_t theSize = labels_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (labels_[i].name() == name) {
+         return true;
+      }
+   }
    return false;
 }
 
 const Label& Node::find_label(const std::string& name) const
 {
-   if (child_attrs_) return child_attrs_->find_label(name);
+   size_t theSize = labels_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (labels_[i].name() == name) {
+          return labels_[i];
+      }
+   }
    return Label::EMPTY();
 }
 

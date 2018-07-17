@@ -31,7 +31,6 @@ void Node::clear()
    t_expr_.reset(nullptr);
 
    time_dep_attrs_.reset(nullptr);
-   child_attrs_.reset(nullptr);
    misc_attrs_.reset(nullptr);
 
  	// ************************************************************
@@ -41,6 +40,9 @@ void Node::clear()
   	// ************************************************************
    // we don't delete auto_attrs_ since that does not have changeable state ?
 
+   meters_.clear();
+   events_.clear();
+   labels_.clear();
   	repeat_.clear();
 	vars_.clear();
 	limits_.clear();
@@ -90,16 +92,11 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	   if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
  		comp->clear_attributes();
 
-		if (child_attrs_) {
-         const std::vector<Meter>& meter_attrs = child_attrs_->meters();
-         BOOST_FOREACH(const Meter& m, meter_attrs )  { comp->add( std::make_shared<NodeMeterMemento>( m) ); }
 
-         const std::vector<Event>& event_attrs = child_attrs_->events();
-         BOOST_FOREACH(const Event& e, event_attrs ) { comp->add( std::make_shared<NodeEventMemento>( e) ); }
+      BOOST_FOREACH(const Meter& m, meters_) { comp->add( std::make_shared<NodeMeterMemento>( m) ); }
+      BOOST_FOREACH(const Event& e, events_) { comp->add( std::make_shared<NodeEventMemento>( e) ); }
+      BOOST_FOREACH(const Label& l, labels_) { comp->add( std::make_shared<NodeLabelMemento>(  l) ); }
 
-         const std::vector<Label>& label_attrs = child_attrs_->labels();
-         BOOST_FOREACH(const Label& l, label_attrs )  { comp->add( std::make_shared<NodeLabelMemento>(  l) ); }
-		}
 		if (time_dep_attrs_) {
 		   const std::vector<ecf::TodayAttr>& today_attrs = time_dep_attrs_->todayVec();
 	      BOOST_FOREACH(const ecf::TodayAttr& attr, today_attrs){ comp->add( std::make_shared<NodeTodayMemento>(  attr) ); }
@@ -150,35 +147,25 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 
 	// ** if start to Change ZombieAttr then it needs to be added here, currently we only add/delete.
 
-   if (child_attrs_) {
-
-      // determine if event value changed.
-      const std::vector<Event>& event_attrs = child_attrs_->events();
-      BOOST_FOREACH(const Event& e, event_attrs ) {
-         if (e.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-            comp->add( std::make_shared<NodeEventMemento>(e) );
-         }
-      }
-
-      // determine if Meter changed.
-      const std::vector<Meter>& meter_attrs = child_attrs_->meters();
-      BOOST_FOREACH(const Meter& m, meter_attrs ) {
-         if (m.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-            comp->add( std::make_shared<NodeMeterMemento>( m) );
-         }
-      }
-
-      // determine if labels changed.
-      const std::vector<Label>& label_attrs = child_attrs_->labels();
-      BOOST_FOREACH(const Label& l, label_attrs ) {
-         if (l.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-            comp->add( std::make_shared<NodeLabelMemento>(  l) );
-         }
-      }
-   }
+	// determine if event, meter, label   changed.
+	BOOST_FOREACH(const Event& e, events_ ) {
+	   if (e.state_change_no() > client_state_change_no) {
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      comp->add( std::make_shared<NodeEventMemento>(e) );
+	   }
+	}
+	BOOST_FOREACH(const Meter& m, meters_) {
+	   if (m.state_change_no() > client_state_change_no) {
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      comp->add( std::make_shared<NodeMeterMemento>( m) );
+	   }
+	}
+	BOOST_FOREACH(const Label& l, labels_ ) {
+	   if (l.state_change_no() > client_state_change_no) {
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      comp->add( std::make_shared<NodeLabelMemento>(  l) );
+	   }
+	}
 
 	// Determine if the time related dependency changed
 	if (time_dep_attrs_) {
@@ -339,11 +326,10 @@ void Node::set_memento( const NodeEventMemento* memento,std::vector<ecf::Aspect:
       return;
    }
 
-	if (child_attrs_) {
-	   child_attrs_->set_memento(memento);
-	   return;
-	}
-	addEvent( memento->event_);
+   if (set_event(memento->event_.name_or_number(),  memento->event_.value())) {
+      return;
+   }
+   addEvent( memento->event_);
 }
 
 void Node::set_memento( const NodeMeterMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {
@@ -358,11 +344,10 @@ void Node::set_memento( const NodeMeterMemento* memento,std::vector<ecf::Aspect:
       return;
    }
 
-   if (child_attrs_) {
-      child_attrs_->set_memento(memento);
+   if (set_meter(memento->meter_.name(), memento->meter_.value())) {
       return;
    }
-	addMeter(memento->meter_);
+   addMeter(memento->meter_);
 }
 
 void Node::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {
@@ -377,11 +362,14 @@ void Node::set_memento( const NodeLabelMemento* memento,std::vector<ecf::Aspect:
       return;
    }
 
-	if (child_attrs_) {
-	   child_attrs_->set_memento(memento);
-	   return;
-	}
-	addLabel(memento->label_);
+   size_t theSize = labels_.size();
+    for(size_t i = 0; i < theSize; i++) {
+       if (labels_[i].name() == memento->label_.name()) {
+          labels_[i] = memento->label_;
+          return;
+       }
+    }
+    addLabel(memento->label_);
 }
 
 void Node::set_memento(const NodeQueueMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only)
