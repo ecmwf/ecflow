@@ -230,14 +230,19 @@ private:
 	         begin(second_clock_time());
 	      }
 	   }
-      ar( CEREAL_NVP(initTime_),
-           CEREAL_NVP(suiteTime_),
-           CEREAL_NVP(initLocalTime_),
-           CEREAL_NVP(lastTime_)
-         );
-      CEREAL_OPTIONAL_NVP(ar,dayChanged_,[this](){return dayChanged_;});
-      CEREAL_OPTIONAL_NVP(ar,duration_ , [this](){return duration_  != boost::posix_time::time_duration(0,0,0,0);});
-      CEREAL_OPTIONAL_NVP(ar,increment_, [this](){return increment_ != boost::posix_time::time_duration(0,1,0,0);});
+      ar( CEREAL_NVP(initTime_) );
+      CEREAL_OPTIONAL_NVP(ar,suiteTime_ ,   [this](){return suiteTime_     != initTime_;});
+      CEREAL_OPTIONAL_NVP(ar,initLocalTime_,[this](){return initLocalTime_ != initTime_;});
+      CEREAL_OPTIONAL_NVP(ar,lastTime_,     [this](){return lastTime_      != initTime_;});
+      CEREAL_OPTIONAL_NVP(ar,dayChanged_,   [this](){return dayChanged_;});
+      CEREAL_OPTIONAL_NVP(ar,duration_ ,    [this](){return duration_  != boost::posix_time::time_duration(0,0,0,0);});
+      CEREAL_OPTIONAL_NVP(ar,increment_,    [this](){return increment_ != boost::posix_time::time_duration(0,1,0,0);});
+
+      if (Archive::is_loading::value) {
+         if ( lastTime_.is_special())      lastTime_ = initTime_;
+         if ( initLocalTime_.is_special()) initLocalTime_ = initTime_;
+         if ( suiteTime_.is_special())     suiteTime_ = initTime_;
+      }
 	}
 };
 }
