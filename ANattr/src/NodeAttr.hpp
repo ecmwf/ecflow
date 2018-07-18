@@ -94,17 +94,17 @@ public:
    Event(int number, const std::string& eventName = "");
    explicit Event(const std::string& eventName);
    Event()
-   : value_(false),
+   : v_(false),
      number_(std::numeric_limits<int>::max()),
      used_(false),
      state_change_no_(0){}
 
    std::string name_or_number() const; // if name present return, else return number
-   const std::string& name() const { return  name_;}
+   const std::string& name() const { return  n_;}
    std::ostream& print(std::ostream&) const;
-   bool value() const { return value_;}
+   bool value() const { return v_;}
    void reset() { set_value(false);}
-   bool empty() const { return (name_.empty() && number_ == std::numeric_limits<int>::max()); }
+   bool empty() const { return (n_.empty() && number_ == std::numeric_limits<int>::max()); }
 
    int number() const { return number_;}
    bool operator==(const Event& rhs) const;
@@ -123,9 +123,9 @@ public:
    static const Event& EMPTY(); // Added to support return by reference
 
 private:
-   bool         value_;
+   bool         v_;
    int          number_;
-   std::string  name_;
+   std::string  n_;
    bool         used_;             // used by the simulator not persisted
    unsigned int state_change_no_;  // *not* persisted, only used on server side
 
@@ -134,8 +134,8 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       CEREAL_OPTIONAL_NVP(ar,number_, [this](){return number_ != std::numeric_limits<int>::max();});
-      CEREAL_OPTIONAL_NVP(ar,name_,   [this](){return !name_.empty();});
-      CEREAL_OPTIONAL_NVP(ar,value_,  [this](){return value_;});
+      CEREAL_OPTIONAL_NVP(ar,n_,   [this](){return !n_.empty();});
+      CEREAL_OPTIONAL_NVP(ar,v_,  [this](){return v_;});
    }
 };
 
@@ -147,15 +147,15 @@ private:
 class Meter {
 public:
    Meter(const std::string& name,int min, int max, int colorChange = std::numeric_limits<int>::max());
-   Meter() : min_(0),max_(0), value_(0),cc_(0),used_(false), state_change_no_(0){}
+   Meter() : min_(0),max_(0), v_(0),cc_(0),used_(false), state_change_no_(0){}
 
    std::ostream& print(std::ostream&) const;
    void reset() { set_value(min_);}
    void set_value(int v); // can throw throw std::runtime_error if out of range
-   bool empty() const { return name_.empty(); }
+   bool empty() const { return n_.empty(); }
 
-   const std::string& name() const { return  name_;}
-   int value() const { return value_;}
+   const std::string& name() const { return  n_;}
+   int value() const { return v_;}
    int min() const { return min_;}
    int max() const { return max_;}
    int colorChange() const { return cc_;}
@@ -178,9 +178,9 @@ private:
 
    int          min_;
    int          max_;
-   int          value_;
+   int          v_;                // value
    int          cc_;               // Colour change, used by gui ?
-   std::string  name_;
+   std::string  n_;                // name
    bool         used_;             // used by the simulator not persisted
    unsigned int state_change_no_;  // *not* persisted, only used on server side
 
@@ -190,8 +190,8 @@ private:
    {
       ar( CEREAL_NVP(min_),
           CEREAL_NVP(max_),
-          CEREAL_NVP(value_),
-          CEREAL_NVP(name_),
+          CEREAL_NVP(v_),
+          CEREAL_NVP(n_),
           CEREAL_NVP(cc_)
       );
    }

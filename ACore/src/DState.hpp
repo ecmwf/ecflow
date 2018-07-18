@@ -28,20 +28,20 @@
 class DState {
 public:
    enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5, SUSPENDED=6};
-	explicit DState(State s): state_(s), state_change_no_(0) {}
-	DState(): state_(default_state()),state_change_no_(0) {}
+	explicit DState(State s): st_(s), state_change_no_(0) {}
+	DState(): st_(default_state()),state_change_no_(0) {}
 	static DState::State default_state() { return DState::QUEUED; }  // NEVER change, or will break client/server
 
-	State state() const { return state_;}
+	State state() const { return st_;}
 	void setState(State);
 
 	// The state_change_no is never reset. Must be incremented if it can affect equality
  	unsigned int state_change_no() const { return state_change_no_; }
 
-	bool operator==(const DState& rhs) const { return state_ == rhs.state_;}
-	bool operator!=(const DState& rhs) const { return state_ != rhs.state_;}
-	bool operator==(State s) const { return s == state_;}
-	bool operator!=(State s) const { return s != state_;}
+	bool operator==(const DState& rhs) const { return st_ == rhs.st_;}
+	bool operator!=(const DState& rhs) const { return st_ != rhs.st_;}
+	bool operator==(State s) const { return s == st_;}
+	bool operator!=(State s) const { return s != st_;}
 
 	static NState::State convert(DState::State);
    static const char* toString(DState::State);
@@ -54,14 +54,14 @@ public:
 	static std::vector<DState::State> states();
 
 private:
-	State state_;
+	State st_;
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
    friend class cereal::access;
 	template<class Archive>
 	void serialize(Archive & ar, std::uint32_t const version)
 	{
-	   ar(CEREAL_NVP(state_));
+	   ar(CEREAL_NVP(st_));
 	}
 };
 
@@ -69,12 +69,12 @@ private:
 // Thin wrapper over DState, to aid python. i.e Task("t").add(Defstatus(DState.complete))
 class Defstatus {
 public:
-   explicit Defstatus(DState::State state) : state_(state) {}
-   explicit Defstatus(const std::string& ds) : state_(DState::toState(ds)) {}
-   DState::State state() const { return state_;}
-   std::string to_string() const { return DState::to_string(state_);}
+   explicit Defstatus(DState::State state) : st_(state) {}
+   explicit Defstatus(const std::string& ds) : st_(DState::toState(ds)) {}
+   DState::State state() const { return st_;}
+   std::string to_string() const { return DState::to_string(st_);}
 private:
-   DState::State state_;
+   DState::State st_;
 };
 
 #endif

@@ -31,7 +31,7 @@ using namespace std;
 InLimitMgr& InLimitMgr::operator=(const InLimitMgr& rhs)
 {
    if (this != &rhs) {
-      inLimitVec_ = rhs.inLimitVec_;
+      vec_ = rhs.vec_;
       node_ = NULL;
    }
    return *this;
@@ -39,25 +39,25 @@ InLimitMgr& InLimitMgr::operator=(const InLimitMgr& rhs)
 
 std::ostream& InLimitMgr::print(std::ostream& os) const
 {
-	BOOST_FOREACH(const InLimit& i, inLimitVec_)     { i.print(os); }
+	BOOST_FOREACH(const InLimit& i, vec_)     { i.print(os); }
  	return os;
 }
 
 bool InLimitMgr::operator==(const InLimitMgr& rhs) const
 {
-	if (inLimitVec_.size() != rhs.inLimitVec_.size()) {
+	if (vec_.size() != rhs.vec_.size()) {
 #ifdef DEBUG
 		if (Ecf::debug_equality()) {
-			std::cout << "InLimitMgr::operator==  inLimitVec_.size() != rhs.inLimitVec_.size() " << node_->debugNodePath() << "\n";
+			std::cout << "InLimitMgr::operator==  vec_.size() != rhs.vec_.size() " << node_->debugNodePath() << "\n";
 		}
 #endif
 		return false;
 	}
-	for(size_t i = 0; i < inLimitVec_.size(); ++i) {
- 		if (!(inLimitVec_[i] == rhs.inLimitVec_[i] )) {
+	for(size_t i = 0; i < vec_.size(); ++i) {
+ 		if (!(vec_[i] == rhs.vec_[i] )) {
 #ifdef DEBUG
 			if (Ecf::debug_equality()) {
-				std::cout << "InLimitMgr::operator==  (!(inLimitVec_[i] == rhs.inLimitVec_[i] )) " << node_->debugNodePath() << "\n";
+				std::cout << "InLimitMgr::operator==  (!(vec_[i] == rhs.vec_[i] )) " << node_->debugNodePath() << "\n";
 			}
 #endif
 			return false;
@@ -69,7 +69,7 @@ bool InLimitMgr::operator==(const InLimitMgr& rhs) const
 void InLimitMgr::addInLimit(const InLimit& l )
 {
 	if (!findInLimitByNameAndPath(l)) {
-		inLimitVec_.push_back( l );
+		vec_.push_back( l );
 		return;
 	}
  	throw std::runtime_error( "Add InLimit failed: Duplicate InLimit see node " + node_->debugNodePath() );
@@ -79,7 +79,7 @@ bool InLimitMgr::deleteInlimit(const std::string& name)
 {
    //cout << "InLimitMgr::deleteInlimit: " << name << "\n";
    if (name.empty()) {
-      inLimitVec_.clear();
+      vec_.clear();
       return true;
    }
 
@@ -90,17 +90,17 @@ bool InLimitMgr::deleteInlimit(const std::string& name)
    //cout << "   limit_name:" <<  limit_name << "\n";
 
 
-   for(size_t i = 0; i < inLimitVec_.size(); i++) {
-      //cout << "   " << i << ": " << inLimitVec_[i].pathToNode() << "  :  " << inLimitVec_[i].name() << "\n";
+   for(size_t i = 0; i < vec_.size(); i++) {
+      //cout << "   " << i << ": " << vec_[i].pathToNode() << "  :  " << vec_[i].name() << "\n";
       if (path_to_limit.empty()) {
-         if (inLimitVec_[i].name() == limit_name ) {
-            inLimitVec_.erase( inLimitVec_.begin() + i );
+         if (vec_[i].name() == limit_name ) {
+            vec_.erase( vec_.begin() + i );
             return true;
          }
       }
       else {
-         if (inLimitVec_[i].name() == limit_name && inLimitVec_[i].pathToNode() == path_to_limit) {
-            inLimitVec_.erase( inLimitVec_.begin() + i );
+         if (vec_[i].name() == limit_name && vec_[i].pathToNode() == path_to_limit) {
+            vec_.erase( vec_.begin() + i );
             return true;
          }
       }
@@ -111,11 +111,11 @@ bool InLimitMgr::deleteInlimit(const std::string& name)
 Limit* InLimitMgr::findLimitViaInLimit(const InLimit& theInLimit) const
 {
    // Use in *test* only
-	size_t theSize = inLimitVec_.size();
+	size_t theSize = vec_.size();
 	for(size_t i = 0; i < theSize; i++) {
- 		if (inLimitVec_[i].name() == theInLimit.name() && inLimitVec_[i].pathToNode() == theInLimit.pathToNode()) {
- 			resolveInLimit(inLimitVec_[i]);
- 			return inLimitVec_[i].limit() ;
+ 		if (vec_[i].name() == theInLimit.name() && vec_[i].pathToNode() == theInLimit.pathToNode()) {
+ 			resolveInLimit(vec_[i]);
+ 			return vec_[i].limit() ;
 		}
  	}
 	return NULL;
@@ -123,9 +123,9 @@ Limit* InLimitMgr::findLimitViaInLimit(const InLimit& theInLimit) const
 
 bool InLimitMgr::findInLimitByNameAndPath(const InLimit& theInLimit) const
 {
-	size_t theSize = inLimitVec_.size();
+	size_t theSize = vec_.size();
 	for(size_t i = 0; i < theSize; i++) {
- 		if (inLimitVec_[i].name() == theInLimit.name() && inLimitVec_[i].pathToNode() == theInLimit.pathToNode()) {
+ 		if (vec_[i].name() == theInLimit.name() && vec_[i].pathToNode() == theInLimit.pathToNode()) {
  			return true;
 		}
  	}
@@ -138,7 +138,7 @@ void InLimitMgr::get_memento( compound_memento_ptr& comp) const
 	std::cout << "InLimitMgr::get_memento " << node_->debugNodePath() << "\n";
 #endif
 
- 	BOOST_FOREACH(const InLimit& l, inLimitVec_ )  { comp->add( std::make_shared<NodeInLimitMemento>(  l) ); }
+ 	BOOST_FOREACH(const InLimit& l, vec_ )  { comp->add( std::make_shared<NodeInLimitMemento>(  l) ); }
 }
 
 
@@ -149,23 +149,23 @@ bool InLimitMgr::inLimit() const
 	// In the case we have multiple inlimits then we are only in limit if _ALL_ are in limit.
    // This is like a logical AND.
 
-   if (inLimitVec_.empty()) return true;
+   if (vec_.empty()) return true;
 
    resolveInLimitReferences();
 
    int inlimitsWithLimits = 0;
    int inlimitCount = 0;
-   size_t theSize = inLimitVec_.size();
+   size_t theSize = vec_.size();
    for(size_t i = 0; i < theSize; i++ ) {
-      if (inLimitVec_[i].limit_this_node_only() ) {
-         if (inLimitVec_[i].incremented()) {
+      if (vec_[i].limit_this_node_only() ) {
+         if (vec_[i].incremented()) {
             continue; // Effectively, this inlimit no longer constrains any tasks, allowing them to run.
          }
       }
-      Limit* limit = inLimitVec_[i].limit();
+      Limit* limit = vec_[i].limit();
       if (limit) {
          inlimitsWithLimits++;
-         if (limit->inLimit( inLimitVec_[i].tokens() )) {
+         if (limit->inLimit( vec_[i].tokens() )) {
             inlimitCount++;
          }
       }
@@ -199,11 +199,11 @@ void InLimitMgr::incrementInLimit( std::set<Limit*>& limitSet,const std::string&
  	//          inlimit limitname 4
  	//          inlimit limitname 2    // illegal and trapped by parser
 
-   if (inLimitVec_.empty()) return;
+   if (vec_.empty()) return;
 
 	resolveInLimitReferences();
 
-	BOOST_FOREACH(InLimit& inlimit, inLimitVec_) {
+	BOOST_FOREACH(InLimit& inlimit, vec_) {
 		Limit* limit = inlimit.limit();
 		if (limit && limitSet.find(limit) == limitSet.end()) {
 			limitSet.insert(limit);
@@ -243,12 +243,12 @@ void InLimitMgr::decrementInLimit( std::set<Limit*>& limitSet,const std::string&
  	//          inlimit limitname 4
  	//          inlimit limitname 2    // illegal and trapped by parser
 
-   if (inLimitVec_.empty()) return;
+   if (vec_.empty()) return;
 
    resolveInLimitReferences();
 
 	std::vector<task_ptr> task_vec;
-	BOOST_FOREACH(InLimit& inlimit, inLimitVec_) {
+	BOOST_FOREACH(InLimit& inlimit, vec_) {
 		Limit* limit = inlimit.limit();
 		if (limit && limitSet.find(limit) == limitSet.end()) {
 			limitSet.insert(limit);
@@ -347,20 +347,20 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool top_down, bool html) co
 #ifdef DEBUG_WHY
  		std::cout << "   InLimitMgr::why " << node_->debugNodePath() << " NOT in limit\n";
 #endif
-  		for(size_t i = 0; i < inLimitVec_.size(); i++ ) {
-	 		Limit* limit = inLimitVec_[i].limit();
-			if (limit &&  !limit->inLimit(inLimitVec_[i].tokens())) {
+  		for(size_t i = 0; i < vec_.size(); i++ ) {
+	 		Limit* limit = vec_[i].limit();
+			if (limit &&  !limit->inLimit(vec_[i].tokens())) {
 				std::stringstream ss;
-				if (  inLimitVec_[i].pathToNode().empty()) {
+				if (  vec_[i].pathToNode().empty()) {
 					ss << "limit " << limit->name() << " is full";
 				}
 				else {
 				   if (html) {
 				      std::stringstream s;
-				      s << "[limit]" << inLimitVec_[i].pathToNode() << Str::COLON() << limit->name();
+				      s << "[limit]" << vec_[i].pathToNode() << Str::COLON() << limit->name();
 				      ss << Node::path_href_attribute(s.str()) << " is full";
 				   }
-				   else ss << "limit " <<  inLimitVec_[i].pathToNode() << Str::COLON() << limit->name() << " is full";
+				   else ss << "limit " <<  vec_[i].pathToNode() << Str::COLON() << limit->name() << " is full";
 				}
 
             // show node paths that have consumed a limit, Only show first 5, Otherwise string may be too long
@@ -376,9 +376,9 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool top_down, bool html) co
 
 void InLimitMgr::check(std::string& errorMsg, std::string& warningMsg,bool reportErrors, bool reportWarnings) const
 {
-   size_t theSize = inLimitVec_.size();
+   size_t theSize = vec_.size();
    for(size_t i = 0; i < theSize; i++) {
-      (void)find_limit(inLimitVec_[i], errorMsg, warningMsg,  reportErrors,   reportWarnings) ;
+      (void)find_limit(vec_[i], errorMsg, warningMsg,  reportErrors,   reportWarnings) ;
    }
 }
 
@@ -402,12 +402,12 @@ void InLimitMgr::auto_add_inlimit_externs(Defs* defs) const
 {
    std::string errorMsg;
    std::string warningMsg;
-   size_t theSize = inLimitVec_.size();
+   size_t theSize = vec_.size();
    for(size_t i = 0; i < theSize; i++) {
-      limit_ptr referencedLimit = find_limit(inLimitVec_[i],errorMsg,warningMsg,false,false);
+      limit_ptr referencedLimit = find_limit(vec_[i],errorMsg,warningMsg,false,false);
       if (!referencedLimit.get()) {
-         if (inLimitVec_[i].pathToNode().empty()) defs->add_extern( inLimitVec_[i].name() );
-         else                                     defs->add_extern( inLimitVec_[i].pathToNode() + ":" + inLimitVec_[i].name());
+         if (vec_[i].pathToNode().empty()) defs->add_extern( vec_[i].name() );
+         else                                     defs->add_extern( vec_[i].pathToNode() + ":" + vec_[i].name());
       }
    }
 }
@@ -504,12 +504,12 @@ void InLimitMgr::resolveInLimit(InLimit& inLimit) const
 
 void InLimitMgr::resolveInLimitReferences() const
 {
-   size_t theSize = inLimitVec_.size();
+   size_t theSize = vec_.size();
    if (theSize > 0) {
       std::string warningMsg;
       std::string errorMsg;
       for(size_t i = 0; i < theSize; i++) {
-         resolveInLimit(inLimitVec_[i], errorMsg, warningMsg,  false,   false) ;
+         resolveInLimit(vec_[i], errorMsg, warningMsg,  false,   false) ;
       }
    }
 }

@@ -150,7 +150,7 @@ void Node::addTime(const ecf::TimeAttr& t)
       throw std::runtime_error("Can not add time based dependency on a suite");
    }
 
-   timeVec_.push_back(t);
+   times_.push_back(t);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -164,7 +164,7 @@ void Node::addToday(const ecf::TodayAttr& t)
       throw std::runtime_error("Can not add time based dependency on a suite");
    }
 
-   todayVec_.push_back(t);
+   todays_.push_back(t);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -330,8 +330,8 @@ void Node::add_autorestore( const ecf::AutoRestoreAttr& ar)
 
 void Node::addLate( const ecf::LateAttr& l )
 {
-	if (! lateAttr_) {
-		lateAttr_ = std::make_unique<ecf::LateAttr>(l);
+	if (! late_) {
+		late_ = std::make_unique<ecf::LateAttr>(l);
 	   state_change_no_ = Ecf::incr_state_change_no();
 		return;
 	}

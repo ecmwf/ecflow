@@ -23,7 +23,7 @@ using namespace std;
 void Node::deleteTime(const std::string& name )
 {
    if (name.empty()) {
-       timeVec_.clear();  // delete all
+       times_.clear();  // delete all
        state_change_no_ = Ecf::incr_state_change_no();
  #ifdef DEBUG_STATE_CHANGE_NO
        std::cout << "TimeDepAttrs::deleteTime\n";
@@ -36,11 +36,11 @@ void Node::deleteTime(const std::string& name )
 
 void Node::delete_time( const ecf::TimeAttr& attr )
 {
-   size_t theSize = timeVec_.size();
+   size_t theSize = times_.size();
    for(size_t i = 0; i < theSize; i++) {
       // Dont use '==' since that compares additional state like free_
-      if (timeVec_[i].structureEquals(attr)) {
-         timeVec_.erase( timeVec_.begin() + i );
+      if (times_[i].structureEquals(attr)) {
+         times_.erase( times_.begin() + i );
          state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -55,7 +55,7 @@ void Node::delete_time( const ecf::TimeAttr& attr )
 void Node::deleteToday(const std::string& name)
 {
    if (name.empty()) {
-      todayVec_.clear();
+      todays_.clear();
       state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
       std::cout << "TimeDepAttrs::deleteToday\n";
@@ -69,11 +69,11 @@ void Node::deleteToday(const std::string& name)
 
 void Node::delete_today(const ecf::TodayAttr& attr)
 {
-   size_t theSize = todayVec_.size();
+   size_t theSize = todays_.size();
    for(size_t i = 0; i < theSize; i++) {
       // Dont use '==' since that compares additional state like free_
-      if (todayVec_[i].structureEquals(attr)) {
-         todayVec_.erase( todayVec_.begin() + i );
+      if (todays_[i].structureEquals(attr)) {
+         todays_.erase( todays_.begin() + i );
          state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
          std::cout << "TimeDepAttrs::delete_today\n";
@@ -411,7 +411,7 @@ void Node::delete_zombie(Child::ZombieType zt)
 
 void Node::deleteLate()
 {
-   lateAttr_.reset(nullptr);
+   late_.reset(nullptr);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 

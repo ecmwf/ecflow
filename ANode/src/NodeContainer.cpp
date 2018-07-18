@@ -139,7 +139,7 @@ void NodeContainer::requeue(Requeue_args& args)
 	// changing state to queue, then again changing it back to complete.
 	// To avoid this problem we don't bother logging state change for re-queue
 	// See: ECFLOW-1239
-	if (defStatus_ == DState::COMPLETE )
+	if (d_st_ == DState::COMPLETE )
 	   args.log_state_changes_ = false;
 
    Node::Requeue_args largs(true /* reset repeats, Moot for tasks */,
@@ -167,12 +167,12 @@ void NodeContainer::requeue_time_attrs()
 
 void NodeContainer::handle_defstatus_propagation()
 {
-   if ( defStatus_ == DState::COMPLETE ) {
+   if ( d_st_ == DState::COMPLETE ) {
        /// A defstatus of complete and *ONLY* complete should always be applied
        /// hierarchically downwards
        setStateOnlyHierarchically(NState::COMPLETE);
     }
-    else if ( defStatus_ == DState::default_state() ) {
+    else if ( d_st_ == DState::default_state() ) {
        /// Reflect that the status of the children.
        /// *However* do NOT override the defstatus setting
        NState::State theSignificantStateOfImmediateChildren = computedState( Node::IMMEDIATE_CHILDREN );
@@ -394,8 +394,8 @@ void NodeContainer::calendarChanged(
    if (inherited_late && !inherited_late->isNull()) {
       overridden_late = *inherited_late;
    }
-	if (lateAttr_.get() != inherited_late) {
-	   overridden_late.override_with(lateAttr_.get());
+	if (late_.get() != inherited_late) {
+	   overridden_late.override_with(late_.get());
 	}
 
  	size_t node_vec_size = nodes_.size();

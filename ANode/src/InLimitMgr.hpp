@@ -36,7 +36,7 @@
 class InLimitMgr {
 public:
    explicit InLimitMgr(Node* n) : node_(n) {}
-   InLimitMgr(const InLimitMgr& rhs) : node_(NULL),inLimitVec_(rhs.inLimitVec_){}
+   InLimitMgr(const InLimitMgr& rhs) : node_(NULL),vec_(rhs.vec_){}
 	InLimitMgr() : node_(NULL) {}
 
    // needed by node copy constructor
@@ -46,10 +46,10 @@ public:
    InLimitMgr& operator=(const InLimitMgr&);
  	std::ostream& print(std::ostream&) const;
  	bool operator==(const InLimitMgr& rhs) const;
- 	void clear() { inLimitVec_.clear(); }
+ 	void clear() { vec_.clear(); }
 
 // Access functions: ======================================================
-	const std::vector<InLimit>&  inlimits()  const { return inLimitVec_; }
+	const std::vector<InLimit>&  inlimits()  const { return vec_; }
 
 // Add functions: ===============================================================
 	void addInLimit(const InLimit& );    // will throw std::runtime_error if duplicate
@@ -103,8 +103,8 @@ public:
    void auto_add_inlimit_externs(Defs*) const;
 
  	/// Needed by python interface
-	std::vector<InLimit>::const_iterator inlimit_begin() const { return inLimitVec_.begin();}
-	std::vector<InLimit>::const_iterator inlimit_end() const { return inLimitVec_.end();}
+	std::vector<InLimit>::const_iterator inlimit_begin() const { return vec_.begin();}
+	std::vector<InLimit>::const_iterator inlimit_end() const { return vec_.end();}
 
 private:
 	/// Setup in-limits, to point to their limits,
@@ -117,13 +117,13 @@ private:
 private:
  	Node* node_; // Not persisted, constructor will always set this up.
 
- 	mutable std::vector<InLimit>        inLimitVec_;
+ 	mutable std::vector<InLimit> vec_;
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
- 	   ar(CEREAL_NVP(inLimitVec_));
+ 	   ar(CEREAL_NVP(vec_));
  	}
 };
 

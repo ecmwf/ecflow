@@ -35,7 +35,7 @@ TodayAttr::TodayAttr (const std::string& str)
    if (tokens.empty()) throw std::runtime_error("Today::Today: incorrect time string ?");
 
    size_t index = 0;
-   timeSeries_  = TimeSeries::create(index,tokens,false/*parse_state*/);
+   ts_  = TimeSeries::create(index,tokens,false/*parse_state*/);
 }
 
 std::ostream& TodayAttr::print(std::ostream& os) const
@@ -43,7 +43,7 @@ std::ostream& TodayAttr::print(std::ostream& os) const
    Indentor in;
    Indentor::indent(os) << toString();
    if (!PrintStyle::defsStyle()) {
-      os << timeSeries_.state_to_string(free_);
+      os << ts_.state_to_string(free_);
    }
    os << "\n";
    return os;
@@ -52,7 +52,7 @@ std::ostream& TodayAttr::print(std::ostream& os) const
 std::string TodayAttr::toString() const
 {
    std::string ret = "today ";
-   ret += timeSeries_.toString();
+   ret += ts_.toString();
    return ret;
 }
 
@@ -66,7 +66,7 @@ std::string TodayAttr::dump() const
     	else           ss << "(holding) ";
     }
 
- 	ss << timeSeries_.toString();
+ 	ss << ts_.toString();
 
  	return ss.str();
 }
@@ -76,17 +76,17 @@ bool TodayAttr::operator==(const TodayAttr& rhs) const
 	if (free_ != rhs.free_) {
 		return false;
 	}
-	return timeSeries_.operator==(rhs.timeSeries_);
+	return ts_.operator==(rhs.ts_);
 }
 
 bool TodayAttr::structureEquals(const TodayAttr& rhs) const
 {
-   return timeSeries_.structureEquals(rhs.timeSeries_);
+   return ts_.structureEquals(rhs.ts_);
 }
 
 void TodayAttr::miss_next_time_slot()
 {
-   timeSeries_.miss_next_time_slot();
+   ts_.miss_next_time_slot();
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -107,7 +107,7 @@ void TodayAttr::calendarChanged( const ecf::Calendar& c )
       return;
    }
 
-   if (timeSeries_.calendarChanged(c)) {
+   if (ts_.calendarChanged(c)) {
       state_change_no_ = Ecf::incr_state_change_no();
    }
 
@@ -118,7 +118,7 @@ void TodayAttr::calendarChanged( const ecf::Calendar& c )
 }
 
 void TodayAttr::resetRelativeDuration() {
-   if (timeSeries_.resetRelativeDuration()) {
+   if (ts_.resetRelativeDuration()) {
       state_change_no_ = Ecf::incr_state_change_no();
    }
 }
@@ -135,15 +135,15 @@ bool TodayAttr::isFree(const ecf::Calendar& calendar) const
 
 bool TodayAttr::is_free(const ecf::Calendar& calendar) const
 {
-   if (!timeSeries_.hasIncrement()) {
-      if (timeSeries_.duration(calendar) > timeSeries_.start().duration() ) {
+   if (!ts_.hasIncrement()) {
+      if (ts_.duration(calendar) > ts_.start().duration() ) {
          return true;
       }
    }
 
-   // For time series(/range), this  is already handle by timeSeries_
+   // For time series(/range), this  is already handle by ts_
    // If timer expired return false. otherwise must match one time slot in the range/series
-   return timeSeries_.isFree(calendar);
+   return ts_.isFree(calendar);
 }
 
 bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
@@ -152,22 +152,22 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
    theReasonWhy += "is today dependent";
 
    // Check to see if time has expired, if has not, then report why
-   if (timeSeries_.is_valid()) {
+   if (ts_.is_valid()) {
       // This can apply to single and series
-      boost::posix_time::time_duration calendar_time = timeSeries_.duration(c);
-      if (calendar_time < timeSeries_.start().duration()) {
-         timeSeries_.why(c, theReasonWhy);
+      boost::posix_time::time_duration calendar_time = ts_.duration(c);
+      if (calendar_time < ts_.start().duration()) {
+         ts_.why(c, theReasonWhy);
          return true;
       }
 
-      // calendar_time >= timeSeries_.start().duration()
-      if (timeSeries_.hasIncrement()) {
-         if (calendar_time < timeSeries_.finish().duration()) {
-            timeSeries_.why(c, theReasonWhy);
+      // calendar_time >= ts_.start().duration()
+      if (ts_.hasIncrement()) {
+         if (calendar_time < ts_.finish().duration()) {
+            ts_.why(c, theReasonWhy);
             return true;
          }
       }
-      // calendar_time >= timeSeries_.start().duration() && calendar_time >= timeSeries_.finish().duration()
+      // calendar_time >= ts_.start().duration() && calendar_time >= ts_.finish().duration()
       // past the end of time slot, hence this should not hold job generation,
    }
 
@@ -177,10 +177,10 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
    theReasonWhy += "' has expired,";
 
    // take into account, user can use run/force complete to miss time slots
-   bool do_a_requeue = timeSeries_.requeueable(c);
+   bool do_a_requeue = ts_.requeueable(c);
    if (do_a_requeue) {
-      TimeSlot the_next_time_slot = timeSeries_.compute_next_time_slot(c);
-      if (the_next_time_slot.isNULL() || !timeSeries_.hasIncrement() ) {
+      TimeSlot the_next_time_slot = ts_.compute_next_time_slot(c);
+      if (the_next_time_slot.isNULL() || !ts_.hasIncrement() ) {
          theReasonWhy += " *re-queue* to run at this time";
       }
       else {
@@ -189,7 +189,7 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
       }
    }
    else {
-      if (timeSeries_.relative()) {
+      if (ts_.relative()) {
          theReasonWhy += " please *re-queue*, to reset the relative duration";
       }
       else {
@@ -198,7 +198,7 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
          the_next_date += one_day;                         // add one day, so its in the future
 
          theReasonWhy += " next run tomorrow at ";
-         theReasonWhy += timeSeries_.start().toString();
+         theReasonWhy += ts_.start().toString();
          theReasonWhy += " ";
          theReasonWhy += to_simple_string( the_next_date );
       }

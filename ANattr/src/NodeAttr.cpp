@@ -38,7 +38,7 @@ const Label& Label::EMPTY() { static const Label LABEL = Label(); return LABEL ;
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 Event::Event( int number, const std::string& eventName )
-: value_( false ), number_( number ), name_( eventName ), used_( false ), state_change_no_( 0 )
+: v_( false ), number_( number ), n_( eventName ), used_( false ), state_change_no_( 0 )
 {
    if ( !eventName.empty() ) {
       string msg;
@@ -49,13 +49,13 @@ Event::Event( int number, const std::string& eventName )
 }
 
 Event::Event(  const std::string& eventName )
-: value_( false ), number_( std::numeric_limits<int>::max() ), name_( eventName ), used_( false ), state_change_no_( 0 )
+: v_( false ), number_( std::numeric_limits<int>::max() ), n_( eventName ), used_( false ), state_change_no_( 0 )
 {
    if ( eventName.empty() ) {
       throw std::runtime_error( "Event::Event: Invalid event name : name must be specified if no number supplied");
    }
 
-   // If the eventName is a integer, then treat it as such, by setting number_ and clearing name_
+   // If the eventName is a integer, then treat it as such, by setting number_ and clearing n_
    // This was added after migration failed, since *python* api allowed:
    //       ta.add_event(1);
    //       ta.add_event("1");
@@ -68,7 +68,7 @@ Event::Event(  const std::string& eventName )
    if ( eventName.find_first_of( Str::NUMERIC() ) != std::string::npos ) {
       try {
          number_ = boost::lexical_cast< int >( eventName );
-         name_.clear();
+         n_.clear();
          return;
       }
       catch ( boost::bad_lexical_cast&  ) {
@@ -83,7 +83,7 @@ Event::Event(  const std::string& eventName )
 }
 
 void Event::set_value( bool b ) {
-   value_ = b;
+   v_ = b;
    state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -92,22 +92,22 @@ void Event::set_value( bool b ) {
 }
 
 std::string Event::name_or_number() const {
-   if ( name_.empty() ) {
+   if ( n_.empty() ) {
       std::stringstream ss;
       ss << number_;
       return ss.str();
    }
-   return name_;
+   return n_;
 }
 
 bool Event::operator==( const Event& rhs ) const {
-   if ( value_ != rhs.value_ ) {
+   if ( v_ != rhs.v_ ) {
       return false;
    }
    if ( number_ != rhs.number_ ) {
       return false;
    }
-   if ( name_ != rhs.name_ ) {
+   if ( n_ != rhs.n_ ) {
       return false;
    }
    return true;
@@ -117,7 +117,7 @@ std::ostream& Event::print( std::ostream& os ) const {
    Indentor in;
    Indentor::indent( os ) << toString();
    if ( !PrintStyle::defsStyle() ) {
-      if (value_)  os << " # " << Event::SET();
+      if (v_)  os << " # " << Event::SET();
    }
    os << "\n";
    return os;
@@ -125,18 +125,18 @@ std::ostream& Event::print( std::ostream& os ) const {
 
 std::string Event::toString() const {
    std::string ret = "event ";
-   if ( number_ == std::numeric_limits< int >::max() )  ret += name_;
+   if ( number_ == std::numeric_limits< int >::max() )  ret += n_;
    else {
       ret += boost::lexical_cast<std::string>(number_);
       ret += " ";
-      ret += name_;
+      ret += n_;
    }
    return ret;
 }
 
 std::string Event::dump() const {
    std::stringstream ss;
-   ss << toString() << " value(" << value_ << ")  used(" << used_ << ")";
+   ss << toString() << " value(" << v_ << ")  used(" << used_ << ")";
    return ss.str();
 }
 
@@ -151,8 +151,8 @@ bool Event::isValidState( const std::string& state ) {
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 Meter::Meter( const std::string& name, int min, int max, int colorChange ) :
-	         min_( min ), max_( max ), value_( min ), cc_( colorChange ),
-	         name_( name ), used_( false ), state_change_no_( 0 )
+	         min_( min ), max_( max ), v_( min ), cc_( colorChange ),
+	         n_( name ), used_( false ), state_change_no_( 0 )
 {
    if ( !Str::valid_name( name ) ) {
       throw std::runtime_error("Meter::Meter: Invalid Meter name: " + name);
@@ -176,11 +176,11 @@ void Meter::set_value( int v ) {
 
    if (!isValidValue( v )) {
       std::stringstream ss;
-      ss << "Meter::set_value(int): The meter(" << name_ << ") value must be in the range[" << min() << "->" << max() << "] but found '" << v << "'";
+      ss << "Meter::set_value(int): The meter(" << n_ << ") value must be in the range[" << min() << "->" << max() << "] but found '" << v << "'";
       throw std::runtime_error( ss.str() );
    }
 
-   value_ = v;
+   v_ = v;
    state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
@@ -189,7 +189,7 @@ void Meter::set_value( int v ) {
 }
 
 bool Meter::operator==( const Meter& rhs ) const {
-   if ( value_ != rhs.value_ ) {
+   if ( v_ != rhs.v_ ) {
       return false;
    }
    if ( min_ != rhs.min_ ) {
@@ -201,7 +201,7 @@ bool Meter::operator==( const Meter& rhs ) const {
    if ( cc_ != rhs.cc_ ) {
       return false;
    }
-   if ( name_ != rhs.name_ ) {
+   if ( n_ != rhs.n_ ) {
       return false;
    }
    return true;
@@ -211,7 +211,7 @@ std::ostream& Meter::print( std::ostream& os ) const {
    Indentor in;
    Indentor::indent( os ) <<  toString();
    if ( !PrintStyle::defsStyle() ) {
-      if (value_ != min_) os << " # " << value_;
+      if (v_ != min_) os << " # " << v_;
    }
    os << "\n";
    return os;
@@ -219,7 +219,7 @@ std::ostream& Meter::print( std::ostream& os ) const {
 
 std::string Meter::toString() const {
    std::string ret = "meter ";
-   ret += name_; ret += " ";
+   ret += n_; ret += " ";
    ret += boost::lexical_cast<std::string>(min_); ret += " ";
    ret += boost::lexical_cast<std::string>(max_); ret += " ";
    ret += boost::lexical_cast<std::string>(cc_);
@@ -228,8 +228,8 @@ std::string Meter::toString() const {
 
 std::string Meter::dump() const {
    std::stringstream ss;
-   ss << "meter " << name_ << " min(" << min_ << ") max (" << max_
-            << ") colorChange(" << cc_ << ") value(" << value_
+   ss << "meter " << n_ << " min(" << min_ << ") max (" << max_
+            << ") colorChange(" << cc_ << ") value(" << v_
             << ") used(" << used_ << ")";
    return ss.str();
 }

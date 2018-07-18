@@ -240,11 +240,11 @@ void Node::changeDefstatus(const std::string& theState)
 	}
 
 	// Updates state_change_no on the defStatus
-	defStatus_.setState( DState::toState(theState) );
+	d_st_.setState( DState::toState(theState) );
 }
 
 void Node::changeLate(const ecf::LateAttr& late)
 {
-   lateAttr_ = std::make_unique<ecf::LateAttr>(late);
+   late_ = std::make_unique<ecf::LateAttr>(late);
    state_change_no_ = Ecf::incr_state_change_no();
 }

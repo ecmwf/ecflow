@@ -19,7 +19,7 @@
 #include "Ecf.hpp"
 
 void NState::setState( State s ) {
-	state_= s;
+	st_= s;
 	state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO

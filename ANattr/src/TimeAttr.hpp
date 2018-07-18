@@ -60,42 +60,42 @@ public:
    explicit TimeAttr(const std::string&);
    TimeAttr() : free_(false), state_change_no_(0) {}
 	TimeAttr(int hour, int minute, bool relative = false )
-		: timeSeries_(hour, minute,relative), free_(false),state_change_no_(0) {}
+		: ts_(hour, minute,relative), free_(false),state_change_no_(0) {}
 	TimeAttr(const TimeSlot& t,    bool relative = false )
-		: timeSeries_(t,relative), free_(false),state_change_no_(0) {}
+		: ts_(t,relative), free_(false),state_change_no_(0) {}
 	explicit TimeAttr(const TimeSeries& ts)
-		: timeSeries_(ts), free_(false),state_change_no_(0) {}
+		: ts_(ts), free_(false),state_change_no_(0) {}
 	TimeAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
-		: timeSeries_(start,finish,incr,relative), free_(false),state_change_no_(0) {}
+		: ts_(start,finish,incr,relative), free_(false),state_change_no_(0) {}
 
 	std::ostream& print(std::ostream&) const;
    bool operator==(const TimeAttr& rhs) const;
-   bool operator<(const TimeAttr& rhs) const { return timeSeries_ < rhs.timeSeries_; }
+   bool operator<(const TimeAttr& rhs) const { return ts_ < rhs.ts_; }
 	bool structureEquals(const TimeAttr& rhs) const;
 
 	/// This can set attribute as free, once free its stays free, until re-queue/reset
 	void calendarChanged( const ecf::Calendar& c ); // can set attribute free
 	void resetRelativeDuration();
 
-	void reset_only() { clearFree(); timeSeries_.reset_only();}
+	void reset_only() { clearFree(); ts_.reset_only();}
 	void reset(const ecf::Calendar& c)
-	      { clearFree(); timeSeries_.reset(c); }       // updates state_change_no_
+	      { clearFree(); ts_.reset(c); }       // updates state_change_no_
  	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true)
- 	      { clearFree(); timeSeries_.requeue(c,reset_next_time_slot);} // updates state_change_no_
+ 	      { clearFree(); ts_.requeue(c,reset_next_time_slot);} // updates state_change_no_
 
 	void miss_next_time_slot(); // updates state_change_no_
 	void setFree();   // ensures that isFree() always returns true, updates state_change_no_
 	bool isSetFree() const { return free_; }
  	bool isFree(const ecf::Calendar&) const;
    bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max) const
-   { return timeSeries_.checkForRequeue(c,the_min,the_max);}
-	void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const {timeSeries_.min_max_time_slots(the_min,the_max);}
+   { return ts_.checkForRequeue(c,the_min,the_max);}
+	void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const {ts_.min_max_time_slots(the_min,the_max);}
  	bool why(const ecf::Calendar&, std::string& theReasonWhy) const;
 
- 	bool checkInvariants(std::string& errormsg) const { return timeSeries_.checkInvariants(errormsg);}
+ 	bool checkInvariants(std::string& errormsg) const { return ts_.checkInvariants(errormsg);}
 
 	// The state_change_no is never reset. Must be incremented if it can affect equality
-   // Note: changes in state of timeSeries_, i.e affect the equality operator (used in test)
+   // Note: changes in state of ts_, i.e affect the equality operator (used in test)
    //       must be captured. i.e things like relative duration & next_time_slot are
    //       reported by the Why command, & hence need to be synced.
  	unsigned int state_change_no() const { return state_change_no_; }
@@ -105,14 +105,14 @@ public:
 	std::string dump() const;
 
 	// access
-	const TimeSeries& time_series() const { return timeSeries_; }
+	const TimeSeries& time_series() const { return ts_; }
 
 private:
 	void clearFree(); // resets the free flag, updates state_change_no_
    bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
- 	TimeSeries   timeSeries_;
+ 	TimeSeries   ts_;
 	bool         free_;
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
@@ -120,7 +120,7 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
     {
-      ar( CEREAL_NVP(timeSeries_));
+      ar( CEREAL_NVP(ts_));
 
       // Only persisted for testing, see usage of isSetFree()
       CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save

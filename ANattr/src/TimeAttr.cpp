@@ -33,7 +33,7 @@ TimeAttr::TimeAttr(const std::string& str)
    if (tokens.empty())  throw std::runtime_error("Time::Time: incorrect time string ?");
 
    size_t index = 0;
-   timeSeries_  = TimeSeries::create(index,tokens,false/*parse_state*/);
+   ts_  = TimeSeries::create(index,tokens,false/*parse_state*/);
 }
 
 void TimeAttr::calendarChanged( const ecf::Calendar& c )
@@ -42,7 +42,7 @@ void TimeAttr::calendarChanged( const ecf::Calendar& c )
       return;
    }
 
-   if (timeSeries_.calendarChanged(c)) {
+   if (ts_.calendarChanged(c)) {
       state_change_no_ = Ecf::incr_state_change_no();
    }
 
@@ -54,7 +54,7 @@ void TimeAttr::calendarChanged( const ecf::Calendar& c )
 
 void TimeAttr::resetRelativeDuration()
 {
-   if (timeSeries_.resetRelativeDuration()) {
+   if (ts_.resetRelativeDuration()) {
       state_change_no_ = Ecf::incr_state_change_no();
    }
 }
@@ -64,7 +64,7 @@ std::ostream& TimeAttr::print(std::ostream& os) const
    Indentor in;
    Indentor::indent(os) << toString();
    if (!PrintStyle::defsStyle()) {
-      os << timeSeries_.state_to_string(free_);
+      os << ts_.state_to_string(free_);
    }
    os << "\n";
    return os;
@@ -73,7 +73,7 @@ std::ostream& TimeAttr::print(std::ostream& os) const
 std::string TimeAttr::toString() const
 {
    std::string ret = "time ";
-   ret += timeSeries_.toString();
+   ret += ts_.toString();
    return ret;
 }
 
@@ -85,7 +85,7 @@ std::string TimeAttr::dump() const
     if (free_) ss << "(free) ";
     else           ss << "(holding) ";
 
- 	ss << timeSeries_.dump();
+ 	ss << ts_.dump();
 
  	return ss.str();
 }
@@ -95,12 +95,12 @@ bool TimeAttr::operator==(const TimeAttr& rhs) const
 	if (free_ != rhs.free_) {
 		return false;
 	}
- 	return timeSeries_.operator==(rhs.timeSeries_);
+ 	return ts_.operator==(rhs.ts_);
 }
 
 bool TimeAttr::structureEquals(const TimeAttr& rhs) const
 {
-   return timeSeries_.structureEquals(rhs.timeSeries_);
+   return ts_.structureEquals(rhs.ts_);
 }
 
 bool TimeAttr::isFree(const ecf::Calendar& calendar) const
@@ -114,7 +114,7 @@ bool TimeAttr::isFree(const ecf::Calendar& calendar) const
 
 bool TimeAttr::is_free(const ecf::Calendar& calendar) const
 {
-	return timeSeries_.isFree(calendar);
+	return ts_.isFree(calendar);
 }
 
 void TimeAttr::setFree() {
@@ -137,7 +137,7 @@ void TimeAttr::clearFree() {
 
 void TimeAttr::miss_next_time_slot()
 {
-   timeSeries_.miss_next_time_slot();
+   ts_.miss_next_time_slot();
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -148,22 +148,22 @@ bool TimeAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 	theReasonWhy += "is time dependent";
 
 	// Check to see if time has expired, if has not, then report why
-	if (timeSeries_.is_valid()) {
+	if (ts_.is_valid()) {
 	   // This can apply to single and series
-	   boost::posix_time::time_duration calendar_time = timeSeries_.duration(c);
-	   if (calendar_time < timeSeries_.start().duration()) {
-	      timeSeries_.why(c, theReasonWhy);
+	   boost::posix_time::time_duration calendar_time = ts_.duration(c);
+	   if (calendar_time < ts_.start().duration()) {
+	      ts_.why(c, theReasonWhy);
 	      return true;
 	   }
 
-	   // calendar_time >= timeSeries_.start().duration()
-	   if (timeSeries_.hasIncrement()) {
-	      if (calendar_time < timeSeries_.finish().duration()) {
-	         timeSeries_.why(c, theReasonWhy);
+	   // calendar_time >= ts_.start().duration()
+	   if (ts_.hasIncrement()) {
+	      if (calendar_time < ts_.finish().duration()) {
+	         ts_.why(c, theReasonWhy);
 	         return true;
 	      }
 	   }
-      // calendar_time >= timeSeries_.start().duration() && calendar_time >= timeSeries_.finish().duration()
+      // calendar_time >= ts_.start().duration() && calendar_time >= ts_.finish().duration()
       // past the end of time slot, hence this should not hold job generation,
 	}
 
@@ -173,10 +173,10 @@ bool TimeAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
    theReasonWhy += "' has expired,";
 
    // take into account, user can use run/force complete to miss time slots
-   bool do_a_requeue = timeSeries_.requeueable(c);
+   bool do_a_requeue = ts_.requeueable(c);
    if (do_a_requeue) {
-      TimeSlot the_next_time_slot = timeSeries_.compute_next_time_slot(c);
-      if (the_next_time_slot.isNULL() || !timeSeries_.hasIncrement() ) {
+      TimeSlot the_next_time_slot = ts_.compute_next_time_slot(c);
+      if (the_next_time_slot.isNULL() || !ts_.hasIncrement() ) {
          theReasonWhy += " *re-queue* to run at this time";
       }
       else {
@@ -185,7 +185,7 @@ bool TimeAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
       }
    }
    else {
-      if (timeSeries_.relative()) {
+      if (ts_.relative()) {
          theReasonWhy += " please *re-queue*, to reset the relative duration";
       }
       else {
@@ -194,7 +194,7 @@ bool TimeAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
          the_next_date += one_day;                         // add one day, so its in the future
 
          theReasonWhy += " next run tomorrow at ";
-         theReasonWhy += timeSeries_.start().toString();
+         theReasonWhy += ts_.start().toString();
          theReasonWhy += " ";
          theReasonWhy += to_simple_string( the_next_date );
       }

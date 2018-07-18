@@ -270,10 +270,10 @@ public:
 
    /// This represents the persisted/saved state // First = NState, Second = time_duration
    /// The State represent the life cycle changes of a node.
-   NState::State state() const { return state_.first.state(); }
+   NState::State state() const { return st_.first.state(); }
 
    /// return the state and duration time(relative to when suite was begun) when the state change happened
-   std::pair<NState,boost::posix_time::time_duration> get_state() const { return state_;}
+   std::pair<NState,boost::posix_time::time_duration> get_state() const { return st_;}
 
    /// Set the state, this can have side affects. To handle state changes
    ///	  Should family triggers use saved state, or computed state.
@@ -298,9 +298,9 @@ public:
 
    /// Sets the default status the node should have when the begin/re-queue is called
    /// *Distinguish* between adding a def status and changing it.
-   /// Changing via defStatus_.setState(s);  should alter state_change_no
-   void addDefStatus(DState::State s ) { defStatus_ = DState(s); }
-   DState::State defStatus() const { return defStatus_.state(); }
+   /// Changing via d_st_.setState(s);  should alter state_change_no
+   void addDefStatus(DState::State s ) { d_st_ = DState(s); }
+   DState::State defStatus() const { return d_st_.state(); }
 
    // Query functions: =========================================================
    /// returns my parent, for suite will return NULL;
@@ -342,7 +342,7 @@ public:
 
 
    // Access functions: ======================================================
-   const std::string& name() const { return name_; }
+   const std::string& name() const { return n_; }
    const Repeat& repeat() const    { return repeat_;} // can be empty()
    const std::vector<Variable>&        variables()const { return vars_;}
    const std::vector<limit_ptr>&       limits()   const { return limits_;}
@@ -352,8 +352,8 @@ public:
    const std::vector<Event>&           events()   const { return events_;}
    const std::vector<Label>&           labels()   const { return labels_;}
 
-   const std::vector<ecf::TimeAttr>&   timeVec()  const { return timeVec_; }
-   const std::vector<ecf::TodayAttr>&  todayVec() const { return todayVec_; }
+   const std::vector<ecf::TimeAttr>&   timeVec()  const { return times_; }
+   const std::vector<ecf::TodayAttr>&  todayVec() const { return todays_; }
    const std::vector<DateAttr>&        dates()    const { return dates_; }
    const std::vector<DayAttr>&         days()     const { return days_; }
    const std::vector<ecf::CronAttr>&   crons()    const { return crons_; }
@@ -362,7 +362,7 @@ public:
    const std::vector<ZombieAttr>&      zombies()  const;
    const std::vector<QueueAttr>&       queues()  const;
    const std::vector<GenericAttr>&     generics() const;
-   ecf::LateAttr* get_late() const { return lateAttr_.get();}
+   ecf::LateAttr* get_late() const { return late_.get();}
    ecf::AutoCancelAttr*  get_autocancel() const;
    ecf::AutoArchiveAttr* get_autoarchive() const;
    ecf::AutoRestoreAttr* get_autorestore() const;
@@ -633,7 +633,7 @@ protected:
 
    /// The set_state_only() requires a correctly formed tree, ie since it needs suite()/calendar
    /// to initialise the duration. We need a way set the state directly. For initialization
-   void set_state_only(NState::State s) { state_.first.setState(s);}
+   void set_state_only(NState::State s) { st_.first.setState(s);}
 
    /// based on the *current* state increment or decrements the limits
    /// Should *only* be called within a task
@@ -764,10 +764,10 @@ private: /// For use by python interface,
    std::vector<Event>::const_iterator event_end() const { return events_.end();}
    std::vector<Label>::const_iterator label_begin() const { return labels_.begin();}
    std::vector<Label>::const_iterator label_end() const { return labels_.end();}
-   std::vector<ecf::TimeAttr>::const_iterator time_begin() const { return timeVec_.begin();}
-   std::vector<ecf::TimeAttr>::const_iterator time_end() const { return timeVec_.end();}
-   std::vector<ecf::TodayAttr>::const_iterator today_begin() const { return todayVec_.begin();}
-   std::vector<ecf::TodayAttr>::const_iterator today_end() const   { return todayVec_.end();}
+   std::vector<ecf::TimeAttr>::const_iterator time_begin() const { return times_.begin();}
+   std::vector<ecf::TimeAttr>::const_iterator time_end() const { return times_.end();}
+   std::vector<ecf::TodayAttr>::const_iterator today_begin() const { return todays_.begin();}
+   std::vector<ecf::TodayAttr>::const_iterator today_end() const   { return todays_.end();}
    std::vector<DateAttr>::const_iterator date_begin() const { return dates_.begin();}
    std::vector<DateAttr>::const_iterator date_end() const   { return dates_.end();}
    std::vector<DayAttr>::const_iterator day_begin() const { return days_.begin();}
@@ -792,10 +792,10 @@ private: /// For use by python interface,
 
 private:
    Node*        parent_; // *NOT* persisted must be set by the parent class
-   std::string  name_;
+   std::string  n_;
    bool                        suspended_;
-   std::pair<NState,boost::posix_time::time_duration> state_; // state and duration since suite start when state changed
-   DState                      defStatus_;    // default value is QUEUED
+   std::pair<NState,boost::posix_time::time_duration> st_; // state and duration since suite start when state changed
+   DState                      d_st_;    // default value is QUEUED
 
    std::vector<Variable>       vars_;
    mutable std::unique_ptr<Expression> c_expr_; // can only have one complete expression
@@ -805,16 +805,16 @@ private:
    std::vector<Event>          events_;
    std::vector<Label>          labels_;
 
-   std::vector<ecf::TimeAttr>  timeVec_;
-   std::vector<ecf::TodayAttr> todayVec_;
+   std::vector<ecf::TimeAttr>  times_;
+   std::vector<ecf::TodayAttr> todays_;
    std::vector<ecf::CronAttr>  crons_;
    std::vector<DateAttr>       dates_;
    std::vector<DayAttr>        days_;
 
-   std::unique_ptr<ecf::LateAttr>              lateAttr_;     // Can only have one late attribute per node
-   std::unique_ptr<MiscAttrs>                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
-   std::unique_ptr<AutoAttrs>                  auto_attrs_;   // has no changeable state ?
-   Repeat                      repeat_;       // each node can only have one repeat. By value, since has pimpl
+   std::unique_ptr<ecf::LateAttr> late_;     // Can only have one late attribute per node
+   std::unique_ptr<MiscAttrs>     misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
+   std::unique_ptr<AutoAttrs>     auto_attrs_;   // has no changeable state ?
+   Repeat                         repeat_;       // each node can only have one repeat. By value, since has pimpl
 
    std::vector<limit_ptr>      limits_;    // Ptrs since many in-limits can point to a single limit
    InLimitMgr                  inLimitMgr_;  // manages the inlimit
@@ -841,34 +841,34 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar( CEREAL_NVP(name_) );
+      ar( CEREAL_NVP(n_) );
 
-      CEREAL_OPTIONAL_NVP(ar, state_,         [this](){return state_.first != NState::default_state();}); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, suspended_,     [this](){return suspended_; });
-      CEREAL_OPTIONAL_NVP(ar, defStatus_,     [this](){return defStatus_.state() != DState::default_state();}); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, st_,         [this](){return st_.first != NState::default_state();}); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, suspended_,  [this](){return suspended_; });
+      CEREAL_OPTIONAL_NVP(ar, d_st_,       [this](){return d_st_.state() != DState::default_state();}); // conditionally save
 
-      CEREAL_OPTIONAL_NVP(ar, vars_ ,         [this](){return !vars_.empty(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, c_expr_ ,       [this](){return c_expr_.get(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, t_expr_ ,       [this](){return t_expr_.get(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, vars_ ,      [this](){return !vars_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, c_expr_ ,    [this](){return c_expr_.get(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, t_expr_ ,    [this](){return t_expr_.get(); }); // conditionally save
 
-      CEREAL_OPTIONAL_NVP(ar, meters_,        [this](){return !meters_.empty(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, events_,        [this](){return !events_.empty(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, labels_,        [this](){return !labels_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, meters_,     [this](){return !meters_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, events_,     [this](){return !events_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, labels_,     [this](){return !labels_.empty(); }); // conditionally save
 
-      CEREAL_OPTIONAL_NVP(ar, timeVec_,       [this](){return !timeVec_.empty(); });  // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, todayVec_,      [this](){return !todayVec_.empty(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, crons_,         [this](){return !crons_.empty(); });    // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, dates_,         [this](){return !dates_.empty(); });    // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, days_,          [this](){return !days_.empty(); });     // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, times_,      [this](){return !times_.empty(); });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, todays_,     [this](){return !todays_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, crons_,      [this](){return !crons_.empty(); });    // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, dates_,      [this](){return !dates_.empty(); });    // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, days_,       [this](){return !days_.empty(); });     // conditionally save
 
-      CEREAL_OPTIONAL_NVP(ar, lateAttr_,      [this](){return lateAttr_.get(); });       // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, misc_attrs_,    [this](){return misc_attrs_.get(); });     // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, auto_attrs_,    [this](){return auto_attrs_.get(); });     // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, late_,       [this](){return late_.get(); });       // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, misc_attrs_, [this](){return misc_attrs_.get(); });     // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, auto_attrs_, [this](){return auto_attrs_.get(); });     // conditionally save
 
-      CEREAL_OPTIONAL_NVP(ar, repeat_ ,       [this](){return !repeat_.empty(); });  // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, limits_ ,       [this](){return !limits_.empty(); });  // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, inLimitMgr_ ,   [this](){return !inLimitMgr_.inlimits().empty() ; }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, flag_ ,         [this](){return flag_.flag() !=0 ; }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, repeat_ ,    [this](){return !repeat_.empty(); });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, limits_ ,    [this](){return !limits_.empty(); });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, inLimitMgr_, [this](){return !inLimitMgr_.inlimits().empty() ; }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, flag_ ,      [this](){return flag_.flag() !=0 ; }); // conditionally save
 
       if (Archive::is_loading::value) {
          if (misc_attrs_) misc_attrs_->set_node(this);

@@ -31,8 +31,8 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
    // must be done before the re-queue
    if (reset_relative_duartion) {
       for(size_t i = 0; i < crons_.size();    i++)  {   crons_[i].resetRelativeDuration(); }
-      for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].resetRelativeDuration();}
-      for(size_t i = 0; i < timeVec_.size();  i++)  {  timeVec_[i].resetRelativeDuration(); }
+      for(size_t i = 0; i < todays_.size(); i++)  { todays_[i].resetRelativeDuration();}
+      for(size_t i = 0; i < times_.size();  i++)  {  times_[i].resetRelativeDuration(); }
    }
 
    /// If a job takes longer than it slots, then that slot is missed, and next slot is used
@@ -40,8 +40,8 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
    /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
    /// on this function to clear the time dependencies so they *HOLD* the task.
    const Calendar& calendar = suite()->calendar();
-   for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].requeue(calendar,reset_next_time_slot);}
-   for(size_t i = 0; i < timeVec_.size(); i++)   {  timeVec_[i].requeue(calendar,reset_next_time_slot);}
+   for(size_t i = 0; i < todays_.size(); i++)  { todays_[i].requeue(calendar,reset_next_time_slot);}
+   for(size_t i = 0; i < times_.size(); i++)   {  times_[i].requeue(calendar,reset_next_time_slot);}
    for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].requeue(calendar,reset_next_time_slot);}
 
    for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
@@ -66,8 +66,8 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c )
    if (days_.empty() && dates_.empty() ) {
 
       // No Day or Date, If time matches  calendarChanged(c) will free time dependencies
-      for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
-      for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
+      for(size_t i = 0; i < times_.size(); i++)  {  times_[i].calendarChanged(c); }
+      for(size_t i = 0; i < todays_.size(); i++) { todays_[i].calendarChanged(c); }
       for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
    }
    else {
@@ -85,8 +85,8 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c )
       }
 
       if ( at_least_one_day_free || at_least_one_date_free)  {
-         for(size_t i = 0; i < timeVec_.size(); i++)  {  timeVec_[i].calendarChanged(c); }
-         for(size_t i = 0; i < todayVec_.size(); i++) { todayVec_[i].calendarChanged(c); }
+         for(size_t i = 0; i < times_.size(); i++)  {  times_[i].calendarChanged(c); }
+         for(size_t i = 0; i < todays_.size(); i++) { todays_[i].calendarChanged(c); }
          for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
       }
    }
@@ -157,10 +157,10 @@ bool Node::testTimeDependenciesForRequeue() const
    }
 
 
-   if (!timeVec_.empty()) {
+   if (!times_.empty()) {
       TimeSlot the_min,the_max; // Needs to handle multiple single slot time attributes
-      BOOST_FOREACH(const ecf::TimeAttr& time, timeVec_) { time.min_max_time_slots(the_min,the_max);}
-      BOOST_FOREACH(const ecf::TimeAttr& time, timeVec_) {
+      BOOST_FOREACH(const ecf::TimeAttr& time, times_) { time.min_max_time_slots(the_min,the_max);}
+      BOOST_FOREACH(const ecf::TimeAttr& time, times_) {
          if (time.checkForRequeue(calendar,the_min,the_max)) {
 #ifdef DEBUG_REQUEUE
             LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << debugNodePath() << " for time " << time.toString());
@@ -171,10 +171,10 @@ bool Node::testTimeDependenciesForRequeue() const
    }
 
 
-   if (!todayVec_.empty()) {
+   if (!todays_.empty()) {
       TimeSlot the_min,the_max; // Needs to handle multiple single slot today attributes
-      BOOST_FOREACH(const ecf::TodayAttr& today,todayVec_)  { today.min_max_time_slots(the_min,the_max);}
-      BOOST_FOREACH(const ecf::TodayAttr& today,todayVec_) {
+      BOOST_FOREACH(const ecf::TodayAttr& today,todays_)  { today.min_max_time_slots(the_min,the_max);}
+      BOOST_FOREACH(const ecf::TodayAttr& today,todays_) {
          if (today.checkForRequeue(calendar,the_min,the_max)) {
 #ifdef DEBUG_REQUEUE
             LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << debugNodePath() << " for today " << today.toString());
@@ -264,15 +264,15 @@ void Node::miss_next_time_slot()
 
           // for the moment assume, they have been added sequentially,
           // hence only first non expired time is updated to miss next time slot
-          for(size_t i=0;i<timeVec_.size();i++) {
-             if (timeVec_[i].time_series().is_valid()) {
-                timeVec_[i].miss_next_time_slot();
+          for(size_t i=0;i<times_.size();i++) {
+             if (times_[i].time_series().is_valid()) {
+                times_[i].miss_next_time_slot();
                 break;
              }
           }
-          for(size_t i=0;i<todayVec_.size();i++){
-             if (todayVec_[i].time_series().is_valid()) {
-                todayVec_[i].miss_next_time_slot();
+          for(size_t i=0;i<todays_.size();i++){
+             if (todays_[i].time_series().is_valid()) {
+                todays_[i].miss_next_time_slot();
                 break;
              }
           }
@@ -310,17 +310,17 @@ void Node::freeHoldingTimeDependencies()
    // If we have multiple time dependencies of different types
    // we need only free one in each category
    const Calendar& calendar = suite()->calendar();
-   for(size_t i=0;i<timeVec_.size();i++)  {
-      if (!timeVec_[i].isFree(calendar))  {
-         timeVec_[i].setFree();
-         timeVec_[i].miss_next_time_slot();
+   for(size_t i=0;i<times_.size();i++)  {
+      if (!times_[i].isFree(calendar))  {
+         times_[i].setFree();
+         times_[i].miss_next_time_slot();
          break;
       }
    }
-   for(size_t i=0;i<todayVec_.size();i++)  {
-      if (!todayVec_[i].isFree(calendar)) {
-         todayVec_[i].setFree();
-         todayVec_[i].miss_next_time_slot();
+   for(size_t i=0;i<todays_.size();i++)  {
+      if (!todays_[i].isFree(calendar)) {
+         todays_[i].setFree();
+         todays_[i].miss_next_time_slot();
          break;
       }
    }
@@ -341,8 +341,8 @@ void Node::freeHoldingTimeDependencies()
 
 bool Node::has_time_dependencies() const
 {
-   if (!timeVec_.empty())   return true;
-   if (!todayVec_.empty())  return true;
+   if (!times_.empty())   return true;
+   if (!todays_.empty())  return true;
    if (!crons_.empty())     return true;
    if (!dates_.empty())     return true;
    if (!days_.empty())      return true;
@@ -353,8 +353,8 @@ bool Node::has_time_dependencies() const
 bool Node::timeDependenciesFree() const
 {
    int noOfTimeDependencies = 0;
-   if (!timeVec_.empty())  noOfTimeDependencies++;
-   if (!todayVec_.empty()) noOfTimeDependencies++;
+   if (!times_.empty())  noOfTimeDependencies++;
+   if (!todays_.empty()) noOfTimeDependencies++;
    if (!dates_.empty())    noOfTimeDependencies++;
    if (!days_.empty())     noOfTimeDependencies++;
    if (!crons_.empty())    noOfTimeDependencies++;
@@ -369,23 +369,23 @@ bool Node::timeDependenciesFree() const
    bool oneCronIsFree = false;
 
    const Calendar& calendar = suite()->calendar();
-   for(size_t i=0;i<timeVec_.size();i++){ if (timeVec_[i].isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
+   for(size_t i=0;i<times_.size();i++){ if (times_[i].isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
    for(size_t i=0;i<crons_.size();i++)  { if (crons_[i].isFree(calendar))  {if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
    for(size_t i=0;i<dates_.size();i++)  { if (dates_[i].isFree(calendar))  {if ( noOfTimeDependencies == 1) return true;oneDateIsFree = true;break;}}
    for(size_t i=0;i<days_.size();i++)   { if (days_[i].isFree(calendar))   {if ( noOfTimeDependencies == 1) return true;oneDayIsFree = true;break;}}
 
-   if (!todayVec_.empty()) {
+   if (!todays_.empty()) {
       // : single Today: (single-time)   is free, if calendar time >= today_time
       // : single Today: (range)         is free, if calendar time == (one of the time ranges)
       // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
-      if (todayVec_.size() == 1 ) {
+      if (todays_.size() == 1 ) {
          // Single Today Attribute: could be single slot or range
-         if (todayVec_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
+         if (todays_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
       }
       else {
          // Multiple Today Attributes, each could single, or range
-         for(size_t i=0;i<todayVec_.size();i++) {
-            if (todayVec_[i].isFreeMultipleContext(calendar)) {if (noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
+         for(size_t i=0;i<todays_.size();i++) {
+            if (todays_[i].isFreeMultipleContext(calendar)) {if (noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
          }
       }
    }
@@ -397,8 +397,8 @@ bool Node::timeDependenciesFree() const
          // *MUST* be anded for the node to be free.
          if (!dates_.empty() && !oneDateIsFree) return false;
          if (!days_.empty() && !oneDayIsFree) return false;
-         if (!todayVec_.empty() && !oneTodayIsFree) return false;
-         if (!timeVec_.empty() && !oneTimeIsFree) return false;
+         if (!todays_.empty() && !oneTodayIsFree) return false;
+         if (!times_.empty() && !oneTimeIsFree) return false;
          if (!crons_.empty() && !oneCronIsFree) return false;
 
          // We will only get here, if we have a multiple time dependencies and they are free
@@ -411,11 +411,11 @@ bool Node::timeDependenciesFree() const
 
 bool Node::time_today_cron_is_free() const
 {
-   if (!timeVec_.empty() || !todayVec_.empty() || !crons_.empty()) {
+   if (!times_.empty() || !todays_.empty() || !crons_.empty()) {
 
       int noOfTimeDependencies = 0;
-      if (!timeVec_.empty())  noOfTimeDependencies++;
-      if (!todayVec_.empty()) noOfTimeDependencies++;
+      if (!times_.empty())  noOfTimeDependencies++;
+      if (!todays_.empty()) noOfTimeDependencies++;
       if (!crons_.empty())    noOfTimeDependencies++;
 
       bool oneTodayIsFree = false;
@@ -423,21 +423,21 @@ bool Node::time_today_cron_is_free() const
       bool oneCronIsFree = false;
 
       const Calendar& calendar = suite()->calendar();
-      for(size_t i=0;i<timeVec_.size();i++)  { if (timeVec_[i].isFree(calendar))  {if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
+      for(size_t i=0;i<times_.size();i++)  { if (times_[i].isFree(calendar))  {if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
       for(size_t i=0;i<crons_.size();i++)    { if (crons_[i].isFree(calendar))    {if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
 
-      if (!todayVec_.empty()) {
+      if (!todays_.empty()) {
          // : single Today: (single-time)   is free, if calendar time >= today_time
          // : single Today: (range)         is free, if calendar time == (one of the time ranges)
          // : multi Today : (single | range)is free, if calendar time == (one of the time ranges | tody_time)
-         if (todayVec_.size() == 1 ) {
+         if (todays_.size() == 1 ) {
             // Single Today Attribute: could be single slot or range
-            if (todayVec_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
+            if (todays_[0].isFree(calendar)) { if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;}
          }
          else {
             // Multiple Today Attributes, each could single, or range
-            for(size_t i=0;i<todayVec_.size();i++) {
-               if (todayVec_[i].isFreeMultipleContext(calendar)) {if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
+            for(size_t i=0;i<todays_.size();i++) {
+               if (todays_[i].isFreeMultipleContext(calendar)) {if ( noOfTimeDependencies == 1) return true;oneTodayIsFree = true;break;}
             }
          }
       }
@@ -447,8 +447,8 @@ bool Node::time_today_cron_is_free() const
          if ( noOfTimeDependencies > 1 ) {
             // *When* we have multiple time dependencies of *different types* then the results
             // *MUST* be anded for the node to be free.
-            if (!todayVec_.empty() && !oneTodayIsFree) return false;
-            if (!timeVec_.empty() && !oneTimeIsFree) return false;
+            if (!todays_.empty() && !oneTodayIsFree) return false;
+            if (!times_.empty() && !oneTimeIsFree) return false;
             if (!crons_.empty() && !oneCronIsFree) return false;
 
             // We will only get here, if we have a multiple time dependencies and they are free
@@ -462,8 +462,8 @@ bool Node::time_today_cron_is_free() const
 
 void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const
 {
-   for(size_t i = 0; i < timeVec_.size(); i++){
-      const TimeSeries& time_series = timeVec_[i].time_series();
+   for(size_t i = 0; i < times_.size(); i++){
+      const TimeSeries& time_series = times_[i].time_series();
       if (time_series.start().minute() != 0 )  { resol = minutes(1); return; }
       if (time_series.hasIncrement()) {
          if (time_series.finish().minute() != 0 ) { resol = minutes(1); return; }
@@ -471,8 +471,8 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
       }
    }
 
-   for(size_t i = 0; i < todayVec_.size(); i++){
-      const TimeSeries& time_series = todayVec_[i].time_series();
+   for(size_t i = 0; i < todays_.size(); i++){
+      const TimeSeries& time_series = todays_[i].time_series();
       if (time_series.start().minute() != 0 )     { resol = minutes(1); return; }
       if (time_series.hasIncrement()) {
          if (time_series.finish().minute() != 0 ) { resol = minutes(1); return; }
@@ -493,7 +493,7 @@ void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& 
 void Node::get_max_simulation_duration(boost::posix_time::time_duration& duration) const
 {
    // don't override a higher value of duration
-   if ((!timeVec_.empty() || !todayVec_.empty()) && duration < hours(24)) duration = hours(24); // day
+   if ((!times_.empty() || !todays_.empty()) && duration < hours(24)) duration = hours(24); // day
    if (!days_.empty()  && duration < hours(168))     duration = hours(168);                     // week
    if (!dates_.empty() && duration < hours(24*7*31)) duration = hours(24*7*31);                 // month
    if (!crons_.empty())  duration = hours(8760);                                                // year

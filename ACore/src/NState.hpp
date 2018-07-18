@@ -30,20 +30,20 @@
 class NState {
 public:
 	enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5 };
-	explicit NState(State s): state_(s), state_change_no_(0) {}
-	NState(): state_(default_state()),state_change_no_(0) {}
+	explicit NState(State s): st_(s), state_change_no_(0) {}
+	NState(): st_(default_state()),state_change_no_(0) {}
    static NState::State default_state() { return NState::UNKNOWN; }
 
-	State state() const { return state_;}
+	State state() const { return st_;}
 	void setState(State);
 
 	// The state_change_no is never reset. Must be incremented if it can affect equality
  	unsigned int state_change_no() const { return state_change_no_; }
 
-	bool operator==(const NState& rhs) const { return state_ == rhs.state_;}
-	bool operator!=(const NState& rhs) const { return state_ != rhs.state_;}
-	bool operator==(State s) const { return s == state_;}
-	bool operator!=(State s) const { return s != state_;}
+	bool operator==(const NState& rhs) const { return st_ == rhs.st_;}
+	bool operator!=(const NState& rhs) const { return st_ != rhs.st_;}
+	bool operator==(State s) const { return s == st_;}
+	bool operator!=(State s) const { return s != st_;}
 
    static const char* toString(NState::State s);
    static const char* to_html(NState::State s);
@@ -54,14 +54,14 @@ public:
 	static std::vector<NState::State> states();
 
 private:
-	State state_;
+	State st_;
 	unsigned int state_change_no_;  // *not* persisted, only used on server side
 
    friend class cereal::access;
 	template<class Archive>
 	void serialize(Archive & ar, std::uint32_t const version )
 	{
-	   ar(CEREAL_NVP(state_));
+	   ar(CEREAL_NVP(st_));
 	}
 };
 

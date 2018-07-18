@@ -49,9 +49,9 @@ using namespace boost::posix_time;
 //#define DEBUG_FIND_REFERENCED_NODE 1
 
 Node::Node(const std::string& n)
-: parent_(NULL),name_(n),
+: parent_(NULL),n_(n),
   suspended_(false),
-  state_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
+  st_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
   inLimitMgr_(this),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
   graphic_ptr_(0)
@@ -65,7 +65,7 @@ Node::Node(const std::string& n)
 Node::Node()
 : parent_(NULL),
   suspended_(false),
-  state_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
+  st_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
   inLimitMgr_(this),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
   graphic_ptr_(0)
@@ -73,22 +73,22 @@ Node::Node()
 
 Node::Node(const Node& rhs)
 : parent_(NULL),
-  name_(rhs.name_),
+  n_(rhs.n_),
   suspended_(rhs.suspended_),
-  state_( rhs.state_),
-  defStatus_(rhs.defStatus_),
+  st_( rhs.st_),
+  d_st_(rhs.d_st_),
   vars_(rhs.vars_),
   c_expr_( (rhs.c_expr_) ? new Expression(*rhs.c_expr_) : NULL ),
   t_expr_(  (rhs.t_expr_) ? new Expression(*rhs.t_expr_) : NULL ),
   meters_(rhs.meters_),
   events_(rhs.events_),
   labels_(rhs.labels_),
-  timeVec_(rhs.timeVec_),
-  todayVec_(rhs.todayVec_),
+  times_(rhs.times_),
+  todays_(rhs.todays_),
   crons_(rhs.crons_),
   dates_(rhs.dates_),
   days_(rhs.days_),
-  lateAttr_((rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL),
+  late_((rhs.late_) ? new ecf::LateAttr(*rhs.late_) : NULL),
   misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL),
   auto_attrs_((rhs.auto_attrs_) ? new AutoAttrs(*rhs.auto_attrs_) : NULL),
   repeat_( rhs.repeat_),
@@ -111,7 +111,7 @@ Node::Node(const Node& rhs)
 void Node::delete_attributes() {
    c_expr_.reset(nullptr);
    t_expr_.reset(nullptr);
-   lateAttr_.reset(nullptr);
+   late_.reset(nullptr);
    misc_attrs_.reset(nullptr);
    auto_attrs_.reset(nullptr);
 }
@@ -137,10 +137,10 @@ Node& Node::operator=(const Node& rhs)
    // Note:: Defs assignment operator use copy/swap, hence this assignemnt note used
    // parent must set parent_
    if (this != &rhs) {
-      name_ = rhs.name_;
+      n_ = rhs.n_;
       suspended_ = rhs.suspended_;
-      state_ =  rhs.state_;
-      defStatus_ = rhs.defStatus_;
+      st_ =  rhs.st_;
+      d_st_ = rhs.d_st_;
 
       vars_ = rhs.vars_ ;
 
@@ -150,15 +150,15 @@ Node& Node::operator=(const Node& rhs)
       events_ = rhs.events_;
       labels_ = rhs.labels_;
 
-      timeVec_ = rhs.timeVec_;
-      todayVec_ = rhs.todayVec_;
+      times_ = rhs.times_;
+      todays_ = rhs.todays_;
       crons_ = rhs.crons_;
       dates_ = rhs.dates_;
       days_ = rhs.days_;
 
       if (rhs.c_expr_)    c_expr_      = std::make_unique<Expression>(*rhs.c_expr_);
       if (rhs.t_expr_)     t_expr_     = std::make_unique<Expression>(*rhs.t_expr_ );
-      if (rhs.lateAttr_)   lateAttr_   = std::make_unique<ecf::LateAttr>(*rhs.lateAttr_);
+      if (rhs.late_)   late_   = std::make_unique<ecf::LateAttr>(*rhs.late_);
       if (rhs.misc_attrs_) misc_attrs_ = std::make_unique<MiscAttrs>(*rhs.misc_attrs_);
       if (rhs.auto_attrs_) auto_attrs_ = std::make_unique<AutoAttrs>(*rhs.auto_attrs_);
 
@@ -238,14 +238,14 @@ void Node::begin()
    for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
    for(size_t i = 0; i < labels_.size(); i++)     {   labels_[i].reset(); }
 
-   if (lateAttr_) lateAttr_->reset();
+   if (late_) late_->reset();
    for(size_t i = 0; i < limits_.size(); i++)   { limits_[i]->reset(); }
 
    // Let time base attributes use, relative duration if applicable
    {
       const Calendar& calendar = suite()->calendar();
-      for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].reset(calendar);}
-      for(size_t i = 0; i < timeVec_.size(); i++)   {  timeVec_[i].reset(calendar);}
+      for(size_t i = 0; i < todays_.size(); i++)  { todays_[i].reset(calendar);}
+      for(size_t i = 0; i < times_.size(); i++)   {  times_[i].reset(calendar);}
       for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].reset(calendar);}
 
       for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
@@ -316,7 +316,7 @@ void Node::requeue(Requeue_args& args)
    if (archived_set)     flag().set(ecf::Flag::ARCHIVED);
 
 
-   if (lateAttr_) lateAttr_->reset();
+   if (late_) late_->reset();
 
    for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
    for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
@@ -345,15 +345,15 @@ void Node::reset()
 
    repeat_.reset(); // if repeat is empty reset() does nothing
 
-   for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].resetRelativeDuration(); todayVec_[i].reset_only();}
-   for(size_t i = 0; i < timeVec_.size(); i++)   {  timeVec_[i].resetRelativeDuration(); timeVec_[i].reset_only();}
+   for(size_t i = 0; i < todays_.size(); i++)  { todays_[i].resetRelativeDuration(); todays_[i].reset_only();}
+   for(size_t i = 0; i < times_.size(); i++)   {  times_[i].resetRelativeDuration(); times_[i].reset_only();}
    for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].resetRelativeDuration(); crons_[i].reset_only();}
    for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
    for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
 
    flag_.reset();
 
-   if (lateAttr_) lateAttr_->reset();
+   if (late_) late_->reset();
 
    for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
    for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
@@ -403,15 +403,15 @@ void Node::calendarChanged(
 void Node::check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr* inherited_late)
 {
    // Late flag should ONLY be set on Submittable
-   if (lateAttr_) {
+   if (late_) {
       // Only check for lateness if we are not late.
-      if (!lateAttr_->isLate()) {
+      if (!late_->isLate()) {
          if (!inherited_late || inherited_late->isNull())  checkForLateness(c);
          else {
             LateAttr overidden_late = *inherited_late;
-            overidden_late.override_with(lateAttr_.get());
-            if (overidden_late.check_for_lateness( state_, c)) {
-               lateAttr_->setLate(true);
+            overidden_late.override_with(late_.get());
+            if (overidden_late.check_for_lateness( st_, c)) {
+               late_->setLate(true);
                flag().set(ecf::Flag::LATE);
             }
          }
@@ -419,7 +419,7 @@ void Node::check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr* inheri
    }
    else {
       // inherited late, we can only set late flag.
-      if (inherited_late && !flag().is_set(ecf::Flag::LATE) && inherited_late->check_for_lateness(state_, c)) {
+      if (inherited_late && !flag().is_set(ecf::Flag::LATE) && inherited_late->check_for_lateness(st_, c)) {
          flag().set(ecf::Flag::LATE);
       }
    }
@@ -427,8 +427,8 @@ void Node::check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr* inheri
 
 void Node::checkForLateness(const ecf::Calendar& c)
 {
-   if (lateAttr_ && lateAttr_->check_for_lateness(state_,c)) {
-      lateAttr_->setLate(true);
+   if (late_ && late_->check_for_lateness(st_,c)) {
+      late_->setLate(true);
       flag().set(ecf::Flag::LATE);
       // cout << "Node::checkForLateness late flag set on " << absNodePath() << "\n";
    }
@@ -442,10 +442,10 @@ void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes 
    Suite* theSuite = suite();
    if ( theSuite ) {
       const Calendar& calendar = theSuite->calendar();
-      state_.second = calendar.duration();
+      st_.second = calendar.duration();
    }
 
-   if (defStatus_ == DState::SUSPENDED) {
+   if (d_st_ == DState::SUSPENDED) {
       /// Note: DState::SUSPENDED is not a real state, its really a user interaction
       /// Replace with suspend, and set underlying state as queued
       suspend();
@@ -463,7 +463,7 @@ void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes 
 
       // convert DState --> NState.
       // NOTE::  NState does *NOT* have SUSPENDED
-      setStateOnly( DState::convert( defStatus_.state()),
+      setStateOnly( DState::convert( d_st_.state()),
                     false        /*force*/,
                     Str::EMPTY() /* additional info to log */,
                     log_state_changes
@@ -612,7 +612,7 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
 
 
    // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
-   if (lateAttr_ && isSubmittable()) {
+   if (late_ && isSubmittable()) {
       // since the suite() traverse up the tree, only call when have a late attribute
       checkForLateness(suite()->calendar());
    }
@@ -785,7 +785,7 @@ const std::string& Node::abortedReason() const { return Str::EMPTY(); }
 
 void Node::set_state(NState::State newState, bool force, const std::string& additional_info_to_log)
 {
-   if (state_.first.state() != newState) {
+   if (st_.first.state() != newState) {
 
       setStateOnly(newState,false,additional_info_to_log);
 
@@ -804,7 +804,7 @@ void Node::handleStateChange()
 
 void Node::setStateOnly(NState::State newState,bool force,const std::string& additional_info_to_log,bool do_log_state_changes)
 {
-   if (state_.first.state() == newState) {
+   if (st_.first.state() == newState) {
       return; // if old and new state the same don't do anything
    }
 
@@ -902,8 +902,8 @@ void Node::setStateOnly(NState::State newState,bool force,const std::string& add
       ecf::log(Log::LOG,log_state_change);  // Note: log type, must be same for debug & release for test, i.e for log file verification
    }
 
-   state_.first.setState(newState);      // this will update state_change_no
-   state_.second = calendar.duration();  // record state change duration for late, autocancel,autoarchive,etc
+   st_.first.setState(newState);      // this will update state_change_no
+   st_.second = calendar.duration();  // record state change duration for late, autocancel,autoarchive,etc
 
    // Record state changes for verification
    if (misc_attrs_) {
@@ -918,7 +918,7 @@ boost::posix_time::ptime Node::state_change_time() const
 {
    const Calendar& calendar = suite()->calendar();
    boost::posix_time::ptime the_state_change_time = calendar.begin_time();
-   the_state_change_time += state_.second; // state_.second is calendar duration relative to calendar begin_time
+   the_state_change_time += st_.second; // st_.second is calendar duration relative to calendar begin_time
    return the_state_change_time;
 }
 
@@ -1426,9 +1426,9 @@ std::string Node::write_state() const
       ret += " state:";
       ret += NState::toString(state());
    }
-   if (state_.second.total_seconds() != 0) {
+   if (st_.second.total_seconds() != 0) {
       ret += " dur:";
-      ret += to_simple_string(state_.second);
+      ret += to_simple_string(st_.second);
    }
    if (flag_.flag() != 0) {
       ret += " flag:";
@@ -1458,7 +1458,7 @@ void Node::read_state(const std::string& line,const std::vector<std::string>& li
       }
       else if (lineTokens[i].find("dur:") != std::string::npos ) {
          if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Node::read_state invalid duration for node: " + name());
-         state_.second = duration_from_string(token);
+         st_.second = duration_from_string(token);
       }
       else if (lineTokens[i] == "suspended:1") suspend();
    }
@@ -1466,12 +1466,12 @@ void Node::read_state(const std::string& line,const std::vector<std::string>& li
 
 std::ostream& Node::print(std::ostream& os) const
 {
-   if ( defStatus_ != DState::default_state() ) {
+   if ( d_st_ != DState::default_state() ) {
       Indentor in;
-      Indentor::indent(os) << "defstatus " << DState::toString(defStatus_) << "\n";
+      Indentor::indent(os) << "defstatus " << DState::toString(d_st_) << "\n";
    }
 
-   if (lateAttr_) lateAttr_->print(os);
+   if (late_) late_->print(os);
 
    if (c_expr_) {
       c_expr_-> print(os,"complete");
@@ -1522,8 +1522,8 @@ std::ostream& Node::print(std::ostream& os) const
    BOOST_FOREACH(const Meter& m, meters_ )   { m.print(os); }
    BOOST_FOREACH(const Event& e, events_ )   { e.print(os); }
 
-   BOOST_FOREACH(const ecf::TimeAttr& t, timeVec_)  { t.print(os);    }
-   BOOST_FOREACH(const ecf::TodayAttr& t,todayVec_) { t.print(os);    }
+   BOOST_FOREACH(const ecf::TimeAttr& t, times_)  { t.print(os);    }
+   BOOST_FOREACH(const ecf::TodayAttr& t,todays_) { t.print(os);    }
    BOOST_FOREACH(const DateAttr& date, dates_)      { date.print(os); }
    BOOST_FOREACH(const DayAttr& day, days_)         { day.print(os);  }
    BOOST_FOREACH(const CronAttr& cron, crons_)      { cron.print(os); }
@@ -1549,10 +1549,10 @@ std::string Node::to_string() const
 
 bool Node::operator==(const Node& rhs) const
 {
-   if ( name_ != rhs.name_) {
+   if ( n_ != rhs.n_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==( name_(" << name_ << ") != rhs.name_(" << rhs.name_ << ")) for: " << debugNodePath() << "\n";
+         std::cout << "Node::operator==( n_(" << n_ << ") != rhs.n_(" << rhs.n_ << ")) for: " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1565,10 +1565,10 @@ bool Node::operator==(const Node& rhs) const
 #endif
       return false;
    }
-   if ( defStatus_ != rhs.defStatus_) {
+   if ( d_st_ != rhs.d_st_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator==  ( defStatus_ != rhs.defStatus_) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  ( d_st_ != rhs.d_st_) " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1677,38 +1677,38 @@ bool Node::operator==(const Node& rhs) const
    }
 
 
-   if (timeVec_.size() != rhs.timeVec_.size()) {
+   if (times_.size() != rhs.times_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeDepAttrs::operator==  (timeVec_.size() != rhs.timeVec_.size()) " << debugNodePath() << "\n";
+         std::cout << "TimeDepAttrs::operator==  (times_.size() != rhs.times_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   for(unsigned i = 0; i < timeVec_.size(); ++i) {
-      if (!(timeVec_[i] == rhs.timeVec_[i] )) {
+   for(unsigned i = 0; i < times_.size(); ++i) {
+      if (!(times_[i] == rhs.times_[i] )) {
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
-            std::cout << "TimeDepAttrs::operator==  (!(timeVec_[i] == rhs.timeVec_[i] ))  " << debugNodePath() << "\n";
+            std::cout << "TimeDepAttrs::operator==  (!(times_[i] == rhs.times_[i] ))  " << debugNodePath() << "\n";
          }
 #endif
          return false;
       }
    }
 
-   if (todayVec_.size() != rhs.todayVec_.size()) {
+   if (todays_.size() != rhs.todays_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeDepAttrs::operator==  (todayVec_.size() != rhs.todayVec_.size()) " << debugNodePath() << "\n";
+         std::cout << "TimeDepAttrs::operator==  (todays_.size() != rhs.todays_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   for(unsigned i = 0; i < todayVec_.size(); ++i) {
-      if (!(todayVec_[i] == rhs.todayVec_[i] )) {
+   for(unsigned i = 0; i < todays_.size(); ++i) {
+      if (!(todays_[i] == rhs.todays_[i] )) {
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
-            std::cout << "TimeDepAttrs::operator==  (!(todayVec_[i] == rhs.todayVec_[i] ))  " << debugNodePath() << "\n";
+            std::cout << "TimeDepAttrs::operator==  (!(todays_[i] == rhs.todays_[i] ))  " << debugNodePath() << "\n";
          }
 #endif
          return false;
@@ -1876,18 +1876,18 @@ bool Node::operator==(const Node& rhs) const
    }
 
 
-   if (( lateAttr_ && !rhs.lateAttr_) || ( !lateAttr_ && rhs.lateAttr_)){
+   if (( late_ && !rhs.late_) || ( !late_ && rhs.late_)){
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator== (( lateAttr_ && !rhs.lateAttr_) || ( !lateAttr_ && rhs.lateAttr_)) " << debugNodePath() << "\n";
+         std::cout << "Node::operator== (( late_ && !rhs.late_) || ( !late_ && rhs.late_)) " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   if ( lateAttr_ &&  rhs.lateAttr_ && !(*lateAttr_ == *rhs.lateAttr_)) {
+   if ( late_ &&  rhs.late_ && !(*late_ == *rhs.late_)) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator== ( lateAttr_ &&   rhs.lateAttr_ && !(*lateAttr_ == *(rhs.lateAttr_))) " << debugNodePath() << "\n";
+         std::cout << "Node::operator== ( late_ &&   rhs.late_ && !(*late_ == *(rhs.late_))) " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1979,8 +1979,8 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
       const Calendar& c = suite()->calendar();
       for(size_t i = 0; i < days_.size(); i++)    { postFix.clear(); if (days_[i].why(c,postFix))    { vec.push_back(prefix + postFix); why_found=true;}}
       for(size_t i = 0; i < dates_.size(); i++)   { postFix.clear(); if (dates_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
-      for(size_t i = 0; i < todayVec_.size(); i++){ postFix.clear(); if (todayVec_[i].why(c,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
-      for(size_t i = 0; i < timeVec_.size(); i++) { postFix.clear(); if (timeVec_[i].why(c,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
+      for(size_t i = 0; i < todays_.size(); i++){ postFix.clear(); if (todays_[i].why(c,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
+      for(size_t i = 0; i < times_.size(); i++) { postFix.clear(); if (times_[i].why(c,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
       for(size_t i = 0; i < crons_.size(); i++)   { postFix.clear(); if (crons_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
    }
 
@@ -2015,8 +2015,8 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
 
 bool Node::checkInvariants(std::string& errorMsg) const
 {
-   BOOST_FOREACH(const ecf::TimeAttr& t, timeVec_)  { if (!t.checkInvariants(errorMsg)) return false; }
-   BOOST_FOREACH(const ecf::TodayAttr& t,todayVec_) { if (!t.checkInvariants(errorMsg)) return false; }
+   BOOST_FOREACH(const ecf::TimeAttr& t, times_)  { if (!t.checkInvariants(errorMsg)) return false; }
+   BOOST_FOREACH(const ecf::TodayAttr& t,todays_) { if (!t.checkInvariants(errorMsg)) return false; }
    BOOST_FOREACH(const CronAttr& cron, crons_ )     { if (!cron.checkInvariants(errorMsg)) return false; }
 
    if (auto_attrs_) {

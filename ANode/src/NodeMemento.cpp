@@ -26,14 +26,14 @@ using namespace std;
 /// CompoundMemento relies all clearing all attributes with state
 void Node::clear()
 {
-   lateAttr_.reset(nullptr);
+   late_.reset(nullptr);
    c_expr_.reset(nullptr);
    t_expr_.reset(nullptr);
 
    misc_attrs_.reset(nullptr);
 
-   todayVec_.clear();
-   timeVec_.clear();
+   todays_.clear();
+   times_.clear();
    crons_.clear();
    days_.clear();
    dates_.clear();
@@ -64,15 +64,15 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	unsigned int client_state_change_no = changes.client_state_change_no();
 
 	// determine if state changed
-	if (state_.first.state_change_no() > client_state_change_no) {
+	if (st_.first.state_change_no() > client_state_change_no) {
 		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-		comp->add( std::make_shared<StateMemento>( state_.first.state()) );
+		comp->add( std::make_shared<StateMemento>( st_.first.state()) );
 	}
 
 	// determine if def status changed
-	if (defStatus_.state_change_no() > client_state_change_no) {
+	if (d_st_.state_change_no() > client_state_change_no) {
 		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-		comp->add( std::make_shared<NodeDefStatusDeltaMemento>( defStatus_.state()) );
+		comp->add( std::make_shared<NodeDefStatusDeltaMemento>( d_st_.state()) );
 	}
 
 	// determine if node suspend changed
@@ -103,8 +103,8 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       BOOST_FOREACH(const Event& e, events_) { comp->add( std::make_shared<NodeEventMemento>( e) ); }
       BOOST_FOREACH(const Label& l, labels_) { comp->add( std::make_shared<NodeLabelMemento>( l) ); }
 
-      BOOST_FOREACH(const ecf::TodayAttr& attr, todayVec_){ comp->add( std::make_shared<NodeTodayMemento>( attr) ); }
-      BOOST_FOREACH(const ecf::TimeAttr& attr, timeVec_ ) { comp->add( std::make_shared<NodeTimeMemento>( attr) ); }
+      BOOST_FOREACH(const ecf::TodayAttr& attr, todays_){ comp->add( std::make_shared<NodeTodayMemento>( attr) ); }
+      BOOST_FOREACH(const ecf::TimeAttr& attr, times_ ) { comp->add( std::make_shared<NodeTimeMemento>( attr) ); }
       BOOST_FOREACH(const DayAttr& attr, days_ )          { comp->add( std::make_shared<NodeDayMemento>( attr) ); }
       BOOST_FOREACH(const DateAttr& attr, dates_ )        { comp->add( std::make_shared<NodeDateMemento>( attr) ); }
       BOOST_FOREACH(const CronAttr& attr, crons_ )        { comp->add( std::make_shared<NodeCronMemento>( attr) ); }
@@ -131,7 +131,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
  		if (t_expr_)     comp->add( std::make_shared<NodeTriggerMemento>(  *t_expr_) );
 	 	if (c_expr_)    comp->add( std::make_shared<NodeCompleteMemento>(  *c_expr_ ) );
  		if (!repeat_.empty()) comp->add( std::make_shared<NodeRepeatMemento>(  repeat_) );
- 		if (lateAttr_)        comp->add( std::make_shared<NodeLateMemento>(  *lateAttr_) );
+ 		if (late_)        comp->add( std::make_shared<NodeLateMemento>(  *late_) );
 
   		changes.add( comp );
 		return;
@@ -164,13 +164,13 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	}
 
 	// Determine if the time related dependency changed
-	BOOST_FOREACH(const TodayAttr& attr, todayVec_  ) {
+	BOOST_FOREACH(const TodayAttr& attr, todays_  ) {
 	   if (attr.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeTodayMemento>( attr) );
 	   }
 	}
-	BOOST_FOREACH(const TimeAttr& attr, timeVec_  ) {
+	BOOST_FOREACH(const TimeAttr& attr, times_  ) {
 	   if (attr.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeTimeMemento>( attr) );
@@ -249,9 +249,9 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	}
 
 	// Determine if the late attribute has changed
-	if (lateAttr_ && lateAttr_->state_change_no() > client_state_change_no) {
+	if (late_ && late_->state_change_no() > client_state_change_no) {
 		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-		comp->add( std::make_shared<NodeLateMemento>( *lateAttr_) );
+		comp->add( std::make_shared<NodeLateMemento>( *late_) );
 	}
 
 	// Determine if the flag changed
@@ -283,7 +283,7 @@ void Node::set_memento( const NodeDefStatusDeltaMemento* memento,std::vector<ecf
 #endif
 
 	if (aspect_only) aspects.push_back(ecf::Aspect::DEFSTATUS);
-	else             defStatus_.setState( memento->state_ );
+	else             d_st_.setState( memento->state_ );
 }
 
 void Node::set_memento( const SuspendedMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {
@@ -561,8 +561,8 @@ void Node::set_memento( const NodeLateMemento* memento,std::vector<ecf::Aspect::
 	   return;
 	}
 
-	if (lateAttr_) {
-		lateAttr_->setLate(memento->late_.isLate());
+	if (late_) {
+		late_->setLate(memento->late_.isLate());
 		return;
 	}
 	addLate(memento->late_);
@@ -580,11 +580,11 @@ void Node::set_memento( const NodeTodayMemento* memento,std::vector<ecf::Aspect:
       return;
    }
 
-   for(size_t i = 0; i < todayVec_.size(); ++i) {
+   for(size_t i = 0; i < todays_.size(); ++i) {
       // We need to ignore state changes in TodayAttr, (ie we don't use equality operator)
       // otherwise today will never compare
-      if ( todayVec_[i].structureEquals(memento->attr_) ) {
-         todayVec_[i] = memento->attr_;  // need to copy over time series state
+      if ( todays_[i].structureEquals(memento->attr_) ) {
+         todays_[i] = memento->attr_;  // need to copy over time series state
          return;
       }
    }
@@ -603,11 +603,11 @@ void Node::set_memento( const NodeTimeMemento* memento,std::vector<ecf::Aspect::
       return;
    }
 
-   for(size_t i = 0; i < timeVec_.size(); ++i) {
+   for(size_t i = 0; i < times_.size(); ++i) {
       // We need to ignore state changes in TimeAttr, (ie we don't use equality operator)
       // otherwise time will never compare
-      if ( timeVec_[i].structureEquals(memento->attr_) ) {
-         timeVec_[i] = memento->attr_;    // need to copy over time series state
+      if ( times_[i].structureEquals(memento->attr_) ) {
+         times_[i] = memento->attr_;    // need to copy over time series state
          return;
       }
    }
