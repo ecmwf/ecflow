@@ -30,8 +30,13 @@ void Node::clear()
    c_expr_.reset(nullptr);
    t_expr_.reset(nullptr);
 
-   time_dep_attrs_.reset(nullptr);
    misc_attrs_.reset(nullptr);
+
+   todayVec_.clear();
+   timeVec_.clear();
+   crons_.clear();
+   days_.clear();
+   dates_.clear();
 
  	// ************************************************************
  	// Note: auto cancel, auto restore, auto archive does not have any
@@ -43,6 +48,7 @@ void Node::clear()
    meters_.clear();
    events_.clear();
    labels_.clear();
+
   	repeat_.clear();
 	vars_.clear();
 	limits_.clear();
@@ -95,24 +101,14 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 
       BOOST_FOREACH(const Meter& m, meters_) { comp->add( std::make_shared<NodeMeterMemento>( m) ); }
       BOOST_FOREACH(const Event& e, events_) { comp->add( std::make_shared<NodeEventMemento>( e) ); }
-      BOOST_FOREACH(const Label& l, labels_) { comp->add( std::make_shared<NodeLabelMemento>(  l) ); }
+      BOOST_FOREACH(const Label& l, labels_) { comp->add( std::make_shared<NodeLabelMemento>( l) ); }
 
-		if (time_dep_attrs_) {
-		   const std::vector<ecf::TodayAttr>& today_attrs = time_dep_attrs_->todayVec();
-	      BOOST_FOREACH(const ecf::TodayAttr& attr, today_attrs){ comp->add( std::make_shared<NodeTodayMemento>(  attr) ); }
+      BOOST_FOREACH(const ecf::TodayAttr& attr, todayVec_){ comp->add( std::make_shared<NodeTodayMemento>( attr) ); }
+      BOOST_FOREACH(const ecf::TimeAttr& attr, timeVec_ ) { comp->add( std::make_shared<NodeTimeMemento>( attr) ); }
+      BOOST_FOREACH(const DayAttr& attr, days_ )          { comp->add( std::make_shared<NodeDayMemento>( attr) ); }
+      BOOST_FOREACH(const DateAttr& attr, dates_ )        { comp->add( std::make_shared<NodeDateMemento>( attr) ); }
+      BOOST_FOREACH(const CronAttr& attr, crons_ )        { comp->add( std::make_shared<NodeCronMemento>( attr) ); }
 
-	      const std::vector<ecf::TimeAttr>& time_attrs = time_dep_attrs_->timeVec();
-         BOOST_FOREACH(const ecf::TimeAttr& attr, time_attrs ) { comp->add( std::make_shared<NodeTimeMemento>(  attr) ); }
-
-         const std::vector<DayAttr>& day_attrs = time_dep_attrs_->days();
-         BOOST_FOREACH(const DayAttr& attr, day_attrs )     { comp->add( std::make_shared<NodeDayMemento>(  attr) ); }
-
-         const std::vector<DateAttr>& dates_attrs = time_dep_attrs_->dates();
-         BOOST_FOREACH(const DateAttr& attr, dates_attrs )   { comp->add( std::make_shared<NodeDateMemento>(  attr) ); }
-
-         const std::vector<ecf::CronAttr>& cron_attrs = time_dep_attrs_->crons();
-         BOOST_FOREACH(const CronAttr& attr, cron_attrs )   { comp->add( std::make_shared<NodeCronMemento>(  attr) ); }
-		}
 		if (misc_attrs_) {
          const std::vector<VerifyAttr>& verify_attrs = misc_attrs_->verifys();
          if (!verify_attrs.empty()) comp->add( std::make_shared<NodeVerifyMemento>( verify_attrs) );
@@ -168,48 +164,37 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	}
 
 	// Determine if the time related dependency changed
-	if (time_dep_attrs_) {
-
-      const std::vector<ecf::TodayAttr>& today_attrs = time_dep_attrs_->todayVec();
-	   BOOST_FOREACH(const TodayAttr& attr, today_attrs ) {
-	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( std::make_shared<NodeTodayMemento>( attr) );
-	      }
-	   }
-
-      const std::vector<ecf::TimeAttr>& time_attrs = time_dep_attrs_->timeVec();
-      BOOST_FOREACH(const TimeAttr& attr, time_attrs ) {
-	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( std::make_shared<NodeTimeMemento>( attr) );
-	      }
-	   }
-
-      const std::vector<DayAttr>& day_attrs = time_dep_attrs_->days();
-	   BOOST_FOREACH(const DayAttr& attr, day_attrs ) {
-	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( std::make_shared<NodeDayMemento>( attr) );
-	      }
-	   }
-
-      const std::vector<DateAttr>& dates_attrs = time_dep_attrs_->dates();
-	   BOOST_FOREACH(const DateAttr& attr, dates_attrs ) {
-	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( std::make_shared<NodeDateMemento>( attr) );
-	      }
-	   }
-
-      const std::vector<ecf::CronAttr>& cron_attrs = time_dep_attrs_->crons();
-      BOOST_FOREACH(const CronAttr& attr, cron_attrs ) {
-	      if (attr.state_change_no() > client_state_change_no) {
-	         if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-	         comp->add( std::make_shared<NodeCronMemento>( attr) );
-	      }
+	BOOST_FOREACH(const TodayAttr& attr, todayVec_  ) {
+	   if (attr.state_change_no() > client_state_change_no) {
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      comp->add( std::make_shared<NodeTodayMemento>( attr) );
 	   }
 	}
+	BOOST_FOREACH(const TimeAttr& attr, timeVec_  ) {
+	   if (attr.state_change_no() > client_state_change_no) {
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      comp->add( std::make_shared<NodeTimeMemento>( attr) );
+	   }
+	}
+	BOOST_FOREACH(const DayAttr& attr, days_ ) {
+	   if (attr.state_change_no() > client_state_change_no) {
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      comp->add( std::make_shared<NodeDayMemento>( attr) );
+	   }
+	}
+	BOOST_FOREACH(const DateAttr& attr, dates_ ) {
+	   if (attr.state_change_no() > client_state_change_no) {
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      comp->add( std::make_shared<NodeDateMemento>( attr) );
+	   }
+	}
+	BOOST_FOREACH(const CronAttr& attr, crons_ ) {
+	   if (attr.state_change_no() > client_state_change_no) {
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      comp->add( std::make_shared<NodeCronMemento>( attr) );
+	   }
+	}
+
 
    if (misc_attrs_) {
 
@@ -595,8 +580,13 @@ void Node::set_memento( const NodeTodayMemento* memento,std::vector<ecf::Aspect:
       return;
    }
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      return;
+   for(size_t i = 0; i < todayVec_.size(); ++i) {
+      // We need to ignore state changes in TodayAttr, (ie we don't use equality operator)
+      // otherwise today will never compare
+      if ( todayVec_[i].structureEquals(memento->attr_) ) {
+         todayVec_[i] = memento->attr_;  // need to copy over time series state
+         return;
+      }
    }
 	addToday(memento->attr_);
 }
@@ -613,8 +603,13 @@ void Node::set_memento( const NodeTimeMemento* memento,std::vector<ecf::Aspect::
       return;
    }
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      return;
+   for(size_t i = 0; i < timeVec_.size(); ++i) {
+      // We need to ignore state changes in TimeAttr, (ie we don't use equality operator)
+      // otherwise time will never compare
+      if ( timeVec_[i].structureEquals(memento->attr_) ) {
+         timeVec_[i] = memento->attr_;    // need to copy over time series state
+         return;
+      }
    }
 	addTime(memento->attr_);
 }
@@ -631,8 +626,14 @@ void Node::set_memento( const NodeDayMemento* memento,std::vector<ecf::Aspect::T
       return;
    }
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      return;
+   for(size_t i = 0; i < days_.size(); ++i) {
+      // We need to ignore state changes (ie we don't use equality operator)
+      // otherwise attributes will never compare
+      if ( days_[i].structureEquals(memento->attr_) ) {
+         if (memento->attr_.isSetFree()) days_[i].setFree();
+         else                            days_[i].clearFree();
+         return;
+      }
    }
 	addDay(memento->attr_);
 }
@@ -649,8 +650,14 @@ void Node::set_memento( const NodeDateMemento* memento,std::vector<ecf::Aspect::
       return;
    }
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      return;
+   for(size_t i = 0; i < dates_.size(); ++i) {
+      // We need to ignore state changes (ie we don't use equality operator)
+      // otherwise attributes will never compare
+      if ( dates_[i].structureEquals(memento->attr_) ) {
+         if (memento->attr_.isSetFree()) dates_[i].setFree();
+         else                            dates_[i].clearFree();
+         return;
+      }
    }
    addDate(memento->attr_);
 }
@@ -667,8 +674,13 @@ void Node::set_memento( const NodeCronMemento* memento,std::vector<ecf::Aspect::
       return;
    }
 
-   if (time_dep_attrs_ && time_dep_attrs_->set_memento(memento) ) {
-      return;
+   for(size_t i = 0; i < crons_.size(); ++i) {
+      // We need to ignore state changes (ie we don't use equality operator)
+      // otherwise attributes will never compare
+      if ( crons_[i].structureEquals(memento->attr_) ) {
+         crons_[i] = memento->attr_;   // need to copy over time series state
+         return ;
+      }
    }
 	addCron(memento->attr_);
 }

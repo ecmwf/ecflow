@@ -117,8 +117,8 @@ int main(int argc, char* argv[])
       defs.cereal_save_as_checkpt(tmpFilename);
       cout << " Save as CEREAL checkpoint, time taken           = " << timer.elapsed()  << endl;
 
-      //std::remove(tmpFilename.c_str());
-      exit(0);
+      std::remove(tmpFilename.c_str());
+      //exit(0);
    }
 
    {

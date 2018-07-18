@@ -194,13 +194,12 @@ private:
       ar(CEREAL_NVP(start_ ));
       CEREAL_OPTIONAL_NVP(ar,finish_,          [this](){return !finish_.isNULL();});
       CEREAL_OPTIONAL_NVP(ar,incr_ ,           [this](){return !incr_.isNULL();});
-      CEREAL_OPTIONAL_NVP(ar,nextTimeSlot_,    [this](){return !nextTimeSlot_.isNULL();});
+      CEREAL_OPTIONAL_NVP(ar,nextTimeSlot_,    [this](){return !nextTimeSlot_.isNULL() && nextTimeSlot_ != start_;});
       CEREAL_OPTIONAL_NVP(ar,relativeDuration_,[this](){return relativeDuration_ != boost::posix_time::time_duration(0,0,0,0);});
 
 	   if (Archive::is_loading::value) {
-	      if (!finish_.isNULL()) {
-	         compute_last_time_slot();
-	      }
+         if (nextTimeSlot_.isNULL()) nextTimeSlot_ = start_;
+	      if (!finish_.isNULL())  compute_last_time_slot();
 	   }
 	}
 };

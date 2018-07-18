@@ -382,22 +382,10 @@ private:
          CEREAL_NVP(server_),
          CEREAL_NVP(suiteVec_));
 
-      CEREAL_OPTIONAL_NVP(ar, flag_ , [this](){return flag_.flag() !=0 ; }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, flag_ ,        [this](){return flag_.flag() !=0 ; }); // conditionally save
 
       // only save the edit history when check pointing.
-      if (Archive::is_saving::value) {
-         if (save_edit_history_) {
-            ar(CEREAL_NVP(edit_history_));
-            save_edit_history_ = false; // reset
-         }
-         else {
-            std::map<std::string, std::deque<std::string> > edit_history_;
-            ar(CEREAL_NVP(edit_history_)); // empty
-         }
-      }
-      else {
-         ar(CEREAL_NVP(edit_history_));
-      }
+      CEREAL_OPTIONAL_NVP(ar, edit_history_, [this](){return save_edit_history_ && !edit_history_.empty(); }); // conditionally save
 
       if (Archive::is_loading::value) {
          size_t vec_size = suiteVec_.size();

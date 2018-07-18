@@ -150,8 +150,8 @@ void Node::addTime(const ecf::TimeAttr& t)
       throw std::runtime_error("Can not add time based dependency on a suite");
    }
 
-   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
-   time_dep_attrs_->addTime(t);  // will call  Ecf::incr_state_change_no();
+   timeVec_.push_back(t);
+   state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::addToday(const ecf::TodayAttr& t)
@@ -164,8 +164,8 @@ void Node::addToday(const ecf::TodayAttr& t)
       throw std::runtime_error("Can not add time based dependency on a suite");
    }
 
-   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
-   time_dep_attrs_->addToday(t); // will call  Ecf::incr_state_change_no();
+   todayVec_.push_back(t);
+   state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::addDate( const DateAttr& d)
@@ -179,8 +179,8 @@ void Node::addDate( const DateAttr& d)
       throw std::runtime_error("Can not add time based dependency on a suite"); // Added at 4.0.2
    }
 
-   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
-   time_dep_attrs_->addDate(d); // will call  Ecf::incr_state_change_no();
+   dates_.push_back( d );
+   state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::addDay( const DayAttr& d)
@@ -194,8 +194,8 @@ void Node::addDay( const DayAttr& d)
       throw std::runtime_error("Can not add time based dependency on a suite"); // Added at 4.0.2
    }
 
-   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
-   time_dep_attrs_->addDay(d); // will call  Ecf::incr_state_change_no();
+   days_.push_back( d );
+   state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::addCron( const CronAttr& d)
@@ -213,8 +213,8 @@ void Node::addCron( const CronAttr& d)
 		throw std::runtime_error(ss.str());
 	}
 
-   if (!time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(this);
-   time_dep_attrs_->addCron(d); // will call  Ecf::incr_state_change_no();
+	crons_.push_back( d );
+	state_change_no_ = Ecf::incr_state_change_no();
 }
 
 

@@ -83,7 +83,11 @@ Node::Node(const Node& rhs)
   meters_(rhs.meters_),
   events_(rhs.events_),
   labels_(rhs.labels_),
-  time_dep_attrs_((rhs.time_dep_attrs_) ? new TimeDepAttrs(*rhs.time_dep_attrs_) : NULL),
+  timeVec_(rhs.timeVec_),
+  todayVec_(rhs.todayVec_),
+  crons_(rhs.crons_),
+  dates_(rhs.dates_),
+  days_(rhs.days_),
   lateAttr_((rhs.lateAttr_) ? new ecf::LateAttr(*rhs.lateAttr_) : NULL),
   misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL),
   auto_attrs_((rhs.auto_attrs_) ? new AutoAttrs(*rhs.auto_attrs_) : NULL),
@@ -94,7 +98,6 @@ Node::Node(const Node& rhs)
   graphic_ptr_(0)
 {
    inLimitMgr_.set_node(this);
-   if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
    if ( misc_attrs_ )     misc_attrs_->set_node(this);
    if ( auto_attrs_ )     auto_attrs_->set_node(this);
 
@@ -108,7 +111,6 @@ Node::Node(const Node& rhs)
 void Node::delete_attributes() {
    c_expr_.reset(nullptr);
    t_expr_.reset(nullptr);
-   time_dep_attrs_.reset(nullptr);
    lateAttr_.reset(nullptr);
    misc_attrs_.reset(nullptr);
    auto_attrs_.reset(nullptr);
@@ -148,12 +150,17 @@ Node& Node::operator=(const Node& rhs)
       events_ = rhs.events_;
       labels_ = rhs.labels_;
 
-      if (rhs.c_expr_)   c_expr_   = std::make_unique<Expression>(*rhs.c_expr_);
-      if (rhs.t_expr_)    t_expr_    = std::make_unique<Expression>(*rhs.t_expr_ );
-      if (rhs.time_dep_attrs_) time_dep_attrs_ = std::make_unique<TimeDepAttrs>(*rhs.time_dep_attrs_);
-      if (rhs.lateAttr_)       lateAttr_       = std::make_unique<ecf::LateAttr>(*rhs.lateAttr_);
-      if (rhs.misc_attrs_)     misc_attrs_     = std::make_unique<MiscAttrs>(*rhs.misc_attrs_);
-      if (rhs.auto_attrs_)     auto_attrs_     = std::make_unique<AutoAttrs>(*rhs.auto_attrs_);
+      timeVec_ = rhs.timeVec_;
+      todayVec_ = rhs.todayVec_;
+      crons_ = rhs.crons_;
+      dates_ = rhs.dates_;
+      days_ = rhs.days_;
+
+      if (rhs.c_expr_)    c_expr_      = std::make_unique<Expression>(*rhs.c_expr_);
+      if (rhs.t_expr_)     t_expr_     = std::make_unique<Expression>(*rhs.t_expr_ );
+      if (rhs.lateAttr_)   lateAttr_   = std::make_unique<ecf::LateAttr>(*rhs.lateAttr_);
+      if (rhs.misc_attrs_) misc_attrs_ = std::make_unique<MiscAttrs>(*rhs.misc_attrs_);
+      if (rhs.auto_attrs_) auto_attrs_ = std::make_unique<AutoAttrs>(*rhs.auto_attrs_);
 
       repeat_ =  rhs.repeat_ ;
       inLimitMgr_ = rhs.inLimitMgr_ ;
@@ -165,7 +172,6 @@ Node& Node::operator=(const Node& rhs)
       suspended_change_no_ = 0;
       graphic_ptr_ = 0;
 
-      if ( time_dep_attrs_ ) time_dep_attrs_->set_node(this);
       if ( misc_attrs_ )     misc_attrs_->set_node(this);
       if ( auto_attrs_ )     auto_attrs_->set_node(this);
 
@@ -236,9 +242,15 @@ void Node::begin()
    for(size_t i = 0; i < limits_.size(); i++)   { limits_[i]->reset(); }
 
    // Let time base attributes use, relative duration if applicable
-   if (time_dep_attrs_) {
-      time_dep_attrs_->begin();
-      time_dep_attrs_->markHybridTimeDependentsAsComplete();
+   {
+      const Calendar& calendar = suite()->calendar();
+      for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].reset(calendar);}
+      for(size_t i = 0; i < timeVec_.size(); i++)   {  timeVec_[i].reset(calendar);}
+      for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].reset(calendar);}
+
+      for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
+      for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
+      markHybridTimeDependentsAsComplete();
    }
 
    // DO *NOT* call update_generated_variables(). Called on a type specific bases, for begin
@@ -269,7 +281,7 @@ void Node::requeue(Requeue_args& args)
    /// Note we do *NOT* reset for requeue as we want to advance the valid time slots.
    /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
    /// on this function to clear the time dependencies so they *HOLD* the task.
-   if ( time_dep_attrs_ ) {
+   if ( has_time_dependencies() ) {
 
       /// Requeue has several contexts:
       ///   1/ manual requeue
@@ -290,8 +302,9 @@ void Node::requeue(Requeue_args& args)
          }
       }
 
-      time_dep_attrs_->requeue(reset_next_time_slot,args.reset_relative_duration_);
-      time_dep_attrs_->markHybridTimeDependentsAsComplete();
+      // must be done before the re-queue
+      do_requeue_time_attrs(reset_next_time_slot,args.reset_relative_duration_);
+      markHybridTimeDependentsAsComplete();
    }
 
    // Should *NOT* clear, archived flag, as this is done via autorestore or --restore
@@ -332,7 +345,11 @@ void Node::reset()
 
    repeat_.reset(); // if repeat is empty reset() does nothing
 
-   if ( time_dep_attrs_ ) time_dep_attrs_->reset();
+   for(size_t i = 0; i < todayVec_.size(); i++)  { todayVec_[i].resetRelativeDuration(); todayVec_[i].reset_only();}
+   for(size_t i = 0; i < timeVec_.size(); i++)   {  timeVec_[i].resetRelativeDuration(); timeVec_[i].reset_only();}
+   for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].resetRelativeDuration(); crons_[i].reset_only();}
+   for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
+   for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
 
    flag_.reset();
 
@@ -353,7 +370,7 @@ void Node::requeue_time_attrs()
    // Note: we *dont* mark hybrid time dependencies as complete.
    //       i.e. since this is called during alter command, it could be that
    //        the task is in a submitted or active state.
-   if (time_dep_attrs_) time_dep_attrs_->requeue(true,true/*reset relative duration*/);
+   do_requeue_time_attrs(true/*reset_next_time_slot*/, true /*reset_relative_duration*/);
 }
 
 void Node::requeue_labels()
@@ -362,56 +379,13 @@ void Node::requeue_labels()
    for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
 }
 
-void Node::miss_next_time_slot()
-{
-   // Why do we need to set NO_REQUE_IF_SINGLE_TIME_DEP flag ?
-   // This is required when we have time based attributes, which we want to miss.
-   //    time 10:00
-   //    time 12:00
-   // Essentially this avoids an automated job run, *IF* the job was run manually for a given time slot.
-   // If we call this function before 10:00, we want to miss the next time slot (i.e. 10:00)
-   // and want to *requeue*, for 12:00 time slot. However at re-queue, we need to ensure
-   // we do *not* reset the 10:00 time slot. hence by setting NO_REQUE_IF_SINGLE_TIME_DEP
-   // we allow requeue to query this flag, and hence avoid resetting the time based attribute
-   // Note: requeue will *always* clear NO_REQUE_IF_SINGLE_TIME_DEP afterwards.
-   //
-   // In the case above when we reach the last time slot, there is *NO* automatic requeue, and
-   // hence, *no* clearing of NO_REQUE_IF_SINGLE_TIME_DEP flag.
-   // This will then be up to any top level parent that has a Repeat/cron to force a requeue
-   // when all the children are complete. *or* user does a manual re-queue
-   //
-   // Additionally if the job *aborts*, we clear NO_REQUE_IF_SINGLE_TIME_DEP if it was set.
-   // Otherwise if manually run again, we will miss further time slots.
-   if ( time_dep_attrs_) {
-
-      /// Handle abort
-      /// The flag: NO_REQUE_IF_SINGLE_TIME_DEP is *only* set when doing an interactive force complete or run command.
-      /// What happens if the job aborts during the run command ?
-      ///     time 10:00
-      ///     time 11:00
-      /// If at 9.00am we used the run command, we want to miss the 10:00 time slot.
-      /// However if the run at 9.00 fails, and we run again, we also miss 11:00 time slot.
-      /// During the run the flag is still set.
-      /// Hence *ONLY* miss the next time slot *IF* Flag::NO_REQUE_IF_SINGLE_TIME_DEP is NOT set
-      if (!flag().is_set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
-
-         SuiteChanged0 changed(shared_from_this());
-         flag().set(Flag::NO_REQUE_IF_SINGLE_TIME_DEP);
-
-         time_dep_attrs_->miss_next_time_slot();
-      }
-   }
-}
-
 void Node::calendarChanged(
          const ecf::Calendar& c,
          std::vector<node_ptr>& auto_cancelled_nodes,
          std::vector<node_ptr>& auto_archive_nodes,
          const ecf::LateAttr*)
 {
-   if (time_dep_attrs_) {
-      time_dep_attrs_->calendarChanged(c);
-   }
+   calendar_changed_timeattrs(c);
 
    if (auto_attrs_) {
 
@@ -554,13 +528,13 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
       /// This would cause Node to miss the next time slot. i.e expire the time slot
       /// In which case testTimeDependenciesForRequeue should return false for a single time/today dependency
       /// and not requeue the node.
-      if (time_dep_attrs_ && time_dep_attrs_->testTimeDependenciesForRequeue()) {
+      if (has_time_dependencies() && testTimeDependenciesForRequeue()) {
 
          // This is the only place we do not explicitly reset_next_time_slot
          bool reset_next_time_slot = false;
 
          // Remove effects of RUN and Force complete interactive commands, *BUT* only if *not* applied to this cron
-         if (!time_dep_attrs_->crons().empty()) {
+         if (!crons().empty()) {
             if (!flag().is_set(ecf::Flag::NO_REQUE_IF_SINGLE_TIME_DEP)) {
                 reset_next_time_slot = true ;
             }
@@ -657,7 +631,7 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
       return false;
    }
 
-   if (time_dep_attrs_ && !time_dep_attrs_->timeDependenciesFree()) {
+   if (!timeDependenciesFree()) {
 #ifdef DEBUG_DEPENDENCIES
       const Calendar& calendar = suite()->calendar();
       LOG(Log::DBG,"   Node::resolveDependencies() " << absNodePath() << " HOLDING due to time dependencies at " << calendar.toString());
@@ -721,16 +695,6 @@ void Node::freeComplete() const
 void Node::clearComplete() const
 {
    if (c_expr_) c_expr_->clearFree();
-}
-
-void Node::freeHoldingDateDependencies()
-{
-   if (time_dep_attrs_) time_dep_attrs_->freeHoldingDateDependencies();
-}
-
-void Node::freeHoldingTimeDependencies()
-{
-   if (time_dep_attrs_) time_dep_attrs_->freeHoldingTimeDependencies();
 }
 
 bool Node::evaluateComplete() const
@@ -1553,10 +1517,17 @@ std::ostream& Node::print(std::ostream& os) const
 
    BOOST_FOREACH(limit_ptr l, limits_)            { l->print(os); }
    inLimitMgr_.print(os);
+
    BOOST_FOREACH(const Label& la, labels_ )  { la.print(os); }
    BOOST_FOREACH(const Meter& m, meters_ )   { m.print(os); }
    BOOST_FOREACH(const Event& e, events_ )   { e.print(os); }
-   if (time_dep_attrs_) time_dep_attrs_->print(os);
+
+   BOOST_FOREACH(const ecf::TimeAttr& t, timeVec_)  { t.print(os);    }
+   BOOST_FOREACH(const ecf::TodayAttr& t,todayVec_) { t.print(os);    }
+   BOOST_FOREACH(const DateAttr& date, dates_)      { date.print(os); }
+   BOOST_FOREACH(const DayAttr& day, days_)         { day.print(os);  }
+   BOOST_FOREACH(const CronAttr& cron, crons_)      { cron.print(os); }
+
    if (misc_attrs_) misc_attrs_->print(os);
    if (auto_attrs_) auto_attrs_->print(os);
 
@@ -1705,22 +1676,102 @@ bool Node::operator==(const Node& rhs) const
       }
    }
 
-   if (( time_dep_attrs_ && !rhs.time_dep_attrs_) || ( !time_dep_attrs_ && rhs.time_dep_attrs_)){
+
+   if (timeVec_.size() != rhs.timeVec_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator== (( time_dep_attrs_ && !rhs.time_dep_attrs_) || ( !time_dep_attrs_ && rhs.time_dep_attrs_)) " << debugNodePath() << "\n";
+         std::cout << "TimeDepAttrs::operator==  (timeVec_.size() != rhs.timeVec_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
-   if ( time_dep_attrs_ &&  rhs.time_dep_attrs_ && !(*time_dep_attrs_ == *rhs.time_dep_attrs_)) {
+   for(unsigned i = 0; i < timeVec_.size(); ++i) {
+      if (!(timeVec_[i] == rhs.timeVec_[i] )) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "TimeDepAttrs::operator==  (!(timeVec_[i] == rhs.timeVec_[i] ))  " << debugNodePath() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
+
+   if (todayVec_.size() != rhs.todayVec_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Node::operator== ( time_dep_attrs_ &&   rhs.time_dep_attrs_ && !(*time_dep_attrs_ == *(rhs.time_dep_attrs_))) " << debugNodePath() << "\n";
+         std::cout << "TimeDepAttrs::operator==  (todayVec_.size() != rhs.todayVec_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
    }
+   for(unsigned i = 0; i < todayVec_.size(); ++i) {
+      if (!(todayVec_[i] == rhs.todayVec_[i] )) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "TimeDepAttrs::operator==  (!(todayVec_[i] == rhs.todayVec_[i] ))  " << debugNodePath() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
+
+   if (dates_.size() != rhs.dates_.size()) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "TimeDepAttrs::operator==   (dates_.size() != rhs.dates_.size()) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   for(unsigned i = 0; i < dates_.size(); ++i) {
+      if (!(dates_[i] == rhs.dates_[i]) ) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "TimeDepAttrs::operator==   (!(dates_[i] == rhs.dates_[i]) " << debugNodePath() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
+
+   if (days_.size() != rhs.days_.size()) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "TimeDepAttrs::operator==   (days_.size() != rhs.days_.size()) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   for(unsigned i = 0; i < days_.size(); ++i) {
+      if (!(days_[i] == rhs.days_[i]) ) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "TimeDepAttrs::operator==   (!(days_[i] == rhs.days_[i]) " << debugNodePath() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
+
+   if (crons_.size() != rhs.crons_.size()) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "TimeDepAttrs::operator==   (crons_.size() != rhs.crons_.size()) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   for(unsigned i = 0; i < crons_.size(); ++i) {
+      if (!(crons_[i] == rhs.crons_[i]) ) {
+#ifdef DEBUG
+         if (Ecf::debug_equality()) {
+            std::cout << "TimeDepAttrs::operator==   (!(crons_[i] == rhs.crons_[i]) " << debugNodePath() << "\n";
+         }
+#endif
+         return false;
+      }
+   }
+
 
    if (labels_.size() != rhs.labels_.size()) {
 #ifdef DEBUG
@@ -1921,12 +1972,16 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
    else      prefix += NState::toString(state());
    prefix += ") ";
 
-   if (time_dep_attrs_) {
-#ifdef DEBUG_WHY
-      std::cout << "   Node::why " << debugNodePath() << " checking time dependencies\n";
-#endif
+
+   {
       // postfix  = <attr-type dependent> <next run time > < optional current state>
-      if (time_dep_attrs_->why(vec,prefix)) why_found = true ; // return true if why found
+      std::string postFix;
+      const Calendar& c = suite()->calendar();
+      for(size_t i = 0; i < days_.size(); i++)    { postFix.clear(); if (days_[i].why(c,postFix))    { vec.push_back(prefix + postFix); why_found=true;}}
+      for(size_t i = 0; i < dates_.size(); i++)   { postFix.clear(); if (dates_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
+      for(size_t i = 0; i < todayVec_.size(); i++){ postFix.clear(); if (todayVec_[i].why(c,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
+      for(size_t i = 0; i < timeVec_.size(); i++) { postFix.clear(); if (timeVec_[i].why(c,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
+      for(size_t i = 0; i < crons_.size(); i++)   { postFix.clear(); if (crons_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
    }
 
    // **************************************************************************************
@@ -1960,11 +2015,10 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
 
 bool Node::checkInvariants(std::string& errorMsg) const
 {
-   if (time_dep_attrs_) {
-      if (!time_dep_attrs_->checkInvariants(errorMsg)) {
-         return false;
-      }
-   }
+   BOOST_FOREACH(const ecf::TimeAttr& t, timeVec_)  { if (!t.checkInvariants(errorMsg)) return false; }
+   BOOST_FOREACH(const ecf::TodayAttr& t,todayVec_) { if (!t.checkInvariants(errorMsg)) return false; }
+   BOOST_FOREACH(const CronAttr& cron, crons_ )     { if (!cron.checkInvariants(errorMsg)) return false; }
+
    if (auto_attrs_) {
       if (!auto_attrs_->checkInvariants(errorMsg)) {
          return false;
@@ -2180,23 +2234,6 @@ void Node::update_repeat_genvar() const
    repeat_.update_repeat_genvar();  // if repeat_ is empty update_repeat_genvar() does nothing
 }
 
-void Node::get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const
-{
-   if ( time_dep_attrs_ ) {
-      time_dep_attrs_->get_time_resolution_for_simulation(resol);
-   }
-}
-
-void Node::get_max_simulation_duration(boost::posix_time::time_duration& duration) const
-{
-   if ( time_dep_attrs_ ) {
-      time_dep_attrs_->get_max_simulation_duration(duration);
-   }
-   if (!repeat_.empty()) {
-      duration = hours(8760);  // year
-   }
-}
-
 void Node::notify_delete()
 {
    // make a copy, to avoid iterating over observer list that is being changed
@@ -2294,28 +2331,6 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
       default:            break;
    }
 }
-
-
-static std::vector<ecf::TimeAttr>  timeVec_;
-static std::vector<ecf::TodayAttr> todayVec_;
-static std::vector<DateAttr>       dates_;
-static std::vector<DayAttr>        days_;
-static std::vector<ecf::CronAttr>  crons_;
-const std::vector<ecf::TimeAttr>&   Node::timeVec()  const { if (time_dep_attrs_) return time_dep_attrs_->timeVec(); return timeVec_; }
-const std::vector<ecf::TodayAttr>&  Node::todayVec() const { if (time_dep_attrs_) return time_dep_attrs_->todayVec();return todayVec_; }
-const std::vector<DateAttr>&        Node::dates()    const { if (time_dep_attrs_) return time_dep_attrs_->dates(); return dates_; }
-const std::vector<DayAttr>&         Node::days()     const { if (time_dep_attrs_) return time_dep_attrs_->days(); return days_; }
-const std::vector<ecf::CronAttr>&   Node::crons()    const { if (time_dep_attrs_) return time_dep_attrs_->crons(); return crons_; }
-std::vector<ecf::TimeAttr>::const_iterator Node::time_begin() const   { if (time_dep_attrs_) return time_dep_attrs_->time_begin(); return timeVec_.begin();}
-std::vector<ecf::TimeAttr>::const_iterator Node::time_end() const     { if (time_dep_attrs_) return time_dep_attrs_->time_end(); return timeVec_.end();}
-std::vector<ecf::TodayAttr>::const_iterator Node::today_begin() const { if (time_dep_attrs_) return time_dep_attrs_->today_begin(); return todayVec_.begin();}
-std::vector<ecf::TodayAttr>::const_iterator Node::today_end() const   { if (time_dep_attrs_) return time_dep_attrs_->today_end(); return todayVec_.end();}
-std::vector<DateAttr>::const_iterator Node::date_begin() const {        if (time_dep_attrs_) return time_dep_attrs_->date_begin(); return dates_.begin();}
-std::vector<DateAttr>::const_iterator Node::date_end() const {          if (time_dep_attrs_) return time_dep_attrs_->date_end(); return dates_.end();}
-std::vector<DayAttr>::const_iterator Node::day_begin() const {          if (time_dep_attrs_) return time_dep_attrs_->day_begin(); return days_.begin();}
-std::vector<DayAttr>::const_iterator Node::day_end() const {            if (time_dep_attrs_) return time_dep_attrs_->day_end(); return days_.end();}
-std::vector<ecf::CronAttr>::const_iterator Node::cron_begin() const {   if (time_dep_attrs_) return time_dep_attrs_->cron_begin(); return crons_.begin();}
-std::vector<ecf::CronAttr>::const_iterator Node::cron_end() const {     if (time_dep_attrs_) return time_dep_attrs_->cron_end(); return crons_.end();}
 
 static std::vector<VerifyAttr> verifys_;
 static std::vector<ZombieAttr> zombies_;

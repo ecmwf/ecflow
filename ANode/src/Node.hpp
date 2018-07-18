@@ -48,7 +48,13 @@
 #include "AutoRestoreAttr.hpp"
 #include "Expression.hpp"
 #include "InLimitMgr.hpp"
-#include "TimeDepAttrs.hpp"
+
+#include "TimeAttr.hpp"
+#include "TodayAttr.hpp"
+#include "DateAttr.hpp"
+#include "DayAttr.hpp"
+#include "CronAttr.hpp"
+
 #include "MiscAttrs.hpp"
 #include "AutoAttrs.hpp"
 #include "NodeFwd.hpp"
@@ -322,8 +328,8 @@ public:
 
    /// returns true if this node OR any of its children
    /// has cron,time,day,date or today time dependencies
-   virtual bool hasTimeDependencies() const { return (time_dep_attrs_) ? true : false; }
-   bool isTimeFree() const { return (time_dep_attrs_) ? time_dep_attrs_->timeDependenciesFree() : false;}
+   virtual bool hasTimeDependencies() const { return has_time_dependencies();}
+   bool isTimeFree() const { return (hasTimeDependencies()) ? timeDependenciesFree() : false;}
 
    /// If no time dependencies then we have a resolution of 1 hour.
    /// If we have just day/date then we have a resolution of 1 hour
@@ -341,19 +347,21 @@ public:
    const std::vector<Variable>&        variables()const { return vars_;}
    const std::vector<limit_ptr>&       limits()   const { return limits_;}
    const std::vector<InLimit>&         inlimits() const { return inLimitMgr_.inlimits(); }
+
    const std::vector<Meter>&           meters()   const { return meters_;}
    const std::vector<Event>&           events()   const { return events_;}
    const std::vector<Label>&           labels()   const { return labels_;}
-   const std::vector<ecf::TimeAttr>&   timeVec()  const;
-   const std::vector<ecf::TodayAttr>&  todayVec() const;
-   const std::vector<DateAttr>&        dates()    const;
-   const std::vector<DayAttr>&         days()     const;
-   const std::vector<ecf::CronAttr>&   crons()    const;
+
+   const std::vector<ecf::TimeAttr>&   timeVec()  const { return timeVec_; }
+   const std::vector<ecf::TodayAttr>&  todayVec() const { return todayVec_; }
+   const std::vector<DateAttr>&        dates()    const { return dates_; }
+   const std::vector<DayAttr>&         days()     const { return days_; }
+   const std::vector<ecf::CronAttr>&   crons()    const { return crons_; }
+
    const std::vector<VerifyAttr>&      verifys()  const;
    const std::vector<ZombieAttr>&      zombies()  const;
    const std::vector<QueueAttr>&       queues()  const;
    const std::vector<GenericAttr>&     generics() const;
-   TimeDepAttrs*  get_time_dep_attrs() const { return time_dep_attrs_.get();} // can be NULL
    ecf::LateAttr* get_late() const { return lateAttr_.get();}
    ecf::AutoCancelAttr*  get_autocancel() const;
    ecf::AutoArchiveAttr* get_autoarchive() const;
@@ -711,8 +719,17 @@ private:
 
    // Clear the node suspended and update state change number, no other side effects
    void clearSuspended();
-   void delete_time_dep_attrs_if_empty();
    void delete_misc_attrs_if_empty();
+
+   /// Under the hybrid calendar some time dependent attributes may not be applicable
+   /// i.e if day,date,cron attributes does correspond to 24 hours of today, then we
+   /// need make them as complete.
+   void markHybridTimeDependentsAsComplete();
+   bool time_today_cron_is_free() const; /* used by viewer */
+   bool testTimeDependenciesForRequeue() const;
+   void calendar_changed_timeattrs(const ecf::Calendar& c );
+   void do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion);
+   bool has_time_dependencies() const;
 
 private: // alow simulator access
    friend class ecf::DefsAnalyserVisitor;
@@ -747,16 +764,16 @@ private: /// For use by python interface,
    std::vector<Event>::const_iterator event_end() const { return events_.end();}
    std::vector<Label>::const_iterator label_begin() const { return labels_.begin();}
    std::vector<Label>::const_iterator label_end() const { return labels_.end();}
-   std::vector<ecf::TimeAttr>::const_iterator time_begin() const;
-   std::vector<ecf::TimeAttr>::const_iterator time_end() const;
-   std::vector<ecf::TodayAttr>::const_iterator today_begin() const;
-   std::vector<ecf::TodayAttr>::const_iterator today_end() const ;
-   std::vector<DateAttr>::const_iterator date_begin() const ;
-   std::vector<DateAttr>::const_iterator date_end() const;
-   std::vector<DayAttr>::const_iterator day_begin() const ;
-   std::vector<DayAttr>::const_iterator day_end() const;
-   std::vector<ecf::CronAttr>::const_iterator cron_begin() const ;
-   std::vector<ecf::CronAttr>::const_iterator cron_end() const;
+   std::vector<ecf::TimeAttr>::const_iterator time_begin() const { return timeVec_.begin();}
+   std::vector<ecf::TimeAttr>::const_iterator time_end() const { return timeVec_.end();}
+   std::vector<ecf::TodayAttr>::const_iterator today_begin() const { return todayVec_.begin();}
+   std::vector<ecf::TodayAttr>::const_iterator today_end() const   { return todayVec_.end();}
+   std::vector<DateAttr>::const_iterator date_begin() const { return dates_.begin();}
+   std::vector<DateAttr>::const_iterator date_end() const   { return dates_.end();}
+   std::vector<DayAttr>::const_iterator day_begin() const { return days_.begin();}
+   std::vector<DayAttr>::const_iterator day_end() const   { return days_.end();}
+   std::vector<ecf::CronAttr>::const_iterator cron_begin() const { return  crons_.begin();}
+   std::vector<ecf::CronAttr>::const_iterator cron_end() const   { return  crons_.end();}
    std::vector<ZombieAttr>::const_iterator zombie_begin() const;
    std::vector<ZombieAttr>::const_iterator zombie_end() const;
    std::vector<VerifyAttr>::const_iterator verify_begin() const;
@@ -781,14 +798,19 @@ private:
    DState                      defStatus_;    // default value is QUEUED
 
    std::vector<Variable>       vars_;
-   mutable std::unique_ptr<Expression>        c_expr_; // can only have one complete expression
-   mutable std::unique_ptr<Expression>        t_expr_;  // can only have one trigger expression
+   mutable std::unique_ptr<Expression> c_expr_; // can only have one complete expression
+   mutable std::unique_ptr<Expression> t_expr_;  // can only have one trigger expression
 
    std::vector<Meter>          meters_;
    std::vector<Event>          events_;
    std::vector<Label>          labels_;
 
-   std::unique_ptr<TimeDepAttrs>               time_dep_attrs_;
+   std::vector<ecf::TimeAttr>  timeVec_;
+   std::vector<ecf::TodayAttr> todayVec_;
+   std::vector<ecf::CronAttr>  crons_;
+   std::vector<DateAttr>       dates_;
+   std::vector<DayAttr>        days_;
+
    std::unique_ptr<ecf::LateAttr>              lateAttr_;     // Can only have one late attribute per node
    std::unique_ptr<MiscAttrs>                  misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
    std::unique_ptr<AutoAttrs>                  auto_attrs_;   // has no changeable state ?
@@ -833,18 +855,22 @@ private:
       CEREAL_OPTIONAL_NVP(ar, events_,        [this](){return !events_.empty(); }); // conditionally save
       CEREAL_OPTIONAL_NVP(ar, labels_,        [this](){return !labels_.empty(); }); // conditionally save
 
-      CEREAL_OPTIONAL_NVP(ar, time_dep_attrs_,[this](){return time_dep_attrs_.get();}); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, lateAttr_,      [this](){return lateAttr_.get() ; });     // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, misc_attrs_,    [this](){return misc_attrs_.get() ; });   // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, auto_attrs_,    [this](){return auto_attrs_.get()  ; });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, timeVec_,       [this](){return !timeVec_.empty(); });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, todayVec_,      [this](){return !todayVec_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, crons_,         [this](){return !crons_.empty(); });    // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, dates_,         [this](){return !dates_.empty(); });    // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, days_,          [this](){return !days_.empty(); });     // conditionally save
 
-      CEREAL_OPTIONAL_NVP(ar, repeat_ ,       [this](){return !repeat_.empty() ; });  // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, limits_ ,       [this](){return !limits_.empty() ; });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, lateAttr_,      [this](){return lateAttr_.get(); });       // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, misc_attrs_,    [this](){return misc_attrs_.get(); });     // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, auto_attrs_,    [this](){return auto_attrs_.get(); });     // conditionally save
+
+      CEREAL_OPTIONAL_NVP(ar, repeat_ ,       [this](){return !repeat_.empty(); });  // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, limits_ ,       [this](){return !limits_.empty(); });  // conditionally save
       CEREAL_OPTIONAL_NVP(ar, inLimitMgr_ ,   [this](){return !inLimitMgr_.inlimits().empty() ; }); // conditionally save
       CEREAL_OPTIONAL_NVP(ar, flag_ ,         [this](){return flag_.flag() !=0 ; }); // conditionally save
 
       if (Archive::is_loading::value) {
-         if (time_dep_attrs_)  time_dep_attrs_->set_node(this);
          if (misc_attrs_) misc_attrs_->set_node(this);
          if (auto_attrs_) auto_attrs_->set_node(this);
          for(std::vector<limit_ptr>::iterator i = limits_.begin(); i!= limits_.end(); ++i)  (*i)->set_node(this);
