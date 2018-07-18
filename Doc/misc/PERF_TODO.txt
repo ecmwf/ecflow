@@ -190,16 +190,6 @@ BEST* so far Client/test/TestPerfForLargeDefs::=================================
                                                                Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
                                                                Download(FULL):1, 1, 1, 1, 1 Avg:1
     
-   opensuse113 (EOS_PORTABLE_BINARY_ARCHIVE)
-      Running 1 test case...
-      Client:: ...test_perf_for_large_defs:   port(3142)
-      /var/tmp/ma0/BIG_DEFS/3199.def Delete:0 Load:8 Begin:2  Download(Sync):5, 0, 0, 0, 0  
-                                                              Download(Sync-FULL):2, 2, 2, 2, 2 Avg:2  
-                                                              Download(FULL):5, 5, 5, 6, 5 Avg:5.2
-      /var/tmp/ma0/BIG_DEFS/mega.def Delete:0 Load:2 Begin:0  Download(Sync):1, 0, 0, 0, 0  
-                                                              Download(Sync-FULL):0, 0, 0, 0, 0 Avg:0  
-                                                              Download(FULL):1, 0, 0, 0, 0 Avg:0.2
-    
 ======================== TOO MUCH EFFORT ========================================================
 
 Cacheing

@@ -1,4 +1,3 @@
-#if defined(TEXT_ARCHIVE) || !defined(BINARY_ARCHIVE) && !defined(PORTABLE_BINARY_ARCHIVE) && !defined(EOS_PORTABLE_BINARY_ARCHIVE)
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
@@ -88,5 +87,3 @@ BOOST_AUTO_TEST_CASE( test_compare_boost_and_defs_checkpt_file )
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-
-#endif

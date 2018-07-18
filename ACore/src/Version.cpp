@@ -67,16 +67,7 @@ std::string Version::description()
    std::string the_comp = compiler();
    if (!the_comp.empty()) ss << " compiler(" << the_comp << ")";
 
-   ss << " protocol(";
-#if defined(BINARY_ARCHIVE)
-   ss << "BINARY_ARCHIVE)";
-#elif defined(PORTABLE_BINARY_ARCHIVE)
-   ss << "PORTABLE_BINARY_ARCHIVE)";
-#elif defined(EOS_PORTABLE_BINARY_ARCHIVE)
-   ss << "EOS_PORTABLE_BINARY_ARCHIVE)";
-#else
-   ss << "TEXT_ARCHIVE)";
-#endif
+   ss << " protocol(JSON)";
 
 #ifdef ECF_OPENSSL
    ss << " openssl";
