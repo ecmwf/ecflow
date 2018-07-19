@@ -300,32 +300,46 @@ void Node::addRepeat( const Repeat& r ){
 
 void Node::addAutoCancel( const AutoCancelAttr& ac)
 {
-   if (auto_attrs_) {
-      auto_attrs_->add_autocancel(ac); // can throw, will update Node::state_change_no_
-      return;
-   }
-   auto_attrs_ = std::make_unique<AutoAttrs>(this);
-   auto_attrs_->add_autocancel(ac); // will update Node::state_change_no_
+   if (auto_archive_) {
+       std::stringstream ss;
+       ss << "Node::addAutoCancel: Can not add autocancel and autoarchive on the same node " << debugNodePath();
+       throw std::runtime_error( ss.str() );
+    }
+    if (auto_cancel_) {
+       std::stringstream ss;
+       ss << "Node::addAutoCancel: A node can only have one autocancel, see node " << debugNodePath();
+       throw std::runtime_error( ss.str() );
+    }
+    auto_cancel_ = std::make_unique<ecf::AutoCancelAttr>(ac);
+    state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::add_autoarchive( const AutoArchiveAttr& aa)
 {
-   if (auto_attrs_) {
-      auto_attrs_->add_autoarchive(aa); // can throw, will update Node::state_change_no_
-      return;
+   if (auto_cancel_) {
+      std::stringstream ss;
+      ss << "Node::add_autoarchive: Can not add autocancel and autoarchive on the same node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
    }
-   auto_attrs_ = std::make_unique<AutoAttrs>(this);
-   auto_attrs_->add_autoarchive(aa);   // will update Node::state_change_no_
+   if (auto_archive_) {
+      std::stringstream ss;
+      ss << "Node::add_autoarchive: A node can only have one autoarchive, see node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+   auto_archive_ = std::make_unique<ecf::AutoArchiveAttr>(aa);
+   state_change_no_ = Ecf::incr_state_change_no();
 }
 
 void Node::add_autorestore( const ecf::AutoRestoreAttr& ar)
 {
-   if (auto_attrs_) {
-      auto_attrs_->add_autorestore(ar); // can throw, will update Node::state_change_no_
-      return;
-   }
-   auto_attrs_ = std::make_unique<AutoAttrs>(this);
-   auto_attrs_->add_autorestore(ar);   // will update Node::state_change_no_
+   if (auto_restore_) {
+       std::stringstream ss;
+       ss << "Node::add_auto_restore: Can only have one autorestore per node " << debugNodePath();
+       throw std::runtime_error( ss.str() );
+    }
+    auto_restore_ = std::make_unique<ecf::AutoRestoreAttr>(ar);
+    auto_restore_->set_node(this);
+    state_change_no_ = Ecf::incr_state_change_no(); // Only add where used in AlterCmd
 }
 
 void Node::addLate( const ecf::LateAttr& l )

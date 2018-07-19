@@ -90,16 +90,19 @@ Node::Node(const Node& rhs)
   days_(rhs.days_),
   late_((rhs.late_) ? new ecf::LateAttr(*rhs.late_) : NULL),
   misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL),
-  auto_attrs_((rhs.auto_attrs_) ? new AutoAttrs(*rhs.auto_attrs_) : NULL),
   repeat_( rhs.repeat_),
   inLimitMgr_(rhs.inLimitMgr_),
   flag_(rhs.flag_),
+  auto_cancel_((rhs.auto_cancel_)    ? new AutoCancelAttr(*rhs.auto_cancel_) : NULL),
+  auto_archive_((rhs.auto_archive_ ) ? new AutoArchiveAttr(*rhs.auto_archive_) : NULL),
+  auto_restore_((rhs.auto_restore_ ) ? new AutoRestoreAttr(*rhs.auto_restore_) : NULL),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
   graphic_ptr_(0)
 {
    inLimitMgr_.set_node(this);
-   if ( misc_attrs_ )     misc_attrs_->set_node(this);
-   if ( auto_attrs_ )     auto_attrs_->set_node(this);
+   if ( misc_attrs_ ) misc_attrs_->set_node(this);
+
+   if (auto_restore_) auto_restore_->set_node(this);
 
    for (size_t l = 0;  l< rhs.limits_.size(); l++ ) {
       limit_ptr the_limit = std::make_shared<Limit>( *rhs.limits_[l]);
@@ -113,7 +116,6 @@ void Node::delete_attributes() {
    t_expr_.reset(nullptr);
    late_.reset(nullptr);
    misc_attrs_.reset(nullptr);
-   auto_attrs_.reset(nullptr);
 }
 
 node_ptr Node::create(const std::string& node_string)
@@ -160,7 +162,10 @@ Node& Node::operator=(const Node& rhs)
       if (rhs.t_expr_)     t_expr_     = std::make_unique<Expression>(*rhs.t_expr_ );
       if (rhs.late_)   late_   = std::make_unique<ecf::LateAttr>(*rhs.late_);
       if (rhs.misc_attrs_) misc_attrs_ = std::make_unique<MiscAttrs>(*rhs.misc_attrs_);
-      if (rhs.auto_attrs_) auto_attrs_ = std::make_unique<AutoAttrs>(*rhs.auto_attrs_);
+
+      if (rhs.auto_cancel_) auto_cancel_ = std::make_unique<AutoCancelAttr>(*rhs.auto_cancel_);
+      if (rhs.auto_archive_) auto_archive_ = std::make_unique<AutoArchiveAttr>(*rhs.auto_archive_);
+      if (rhs.auto_restore_) auto_restore_ = std::make_unique<AutoRestoreAttr>(*rhs.auto_restore_);
 
       repeat_ =  rhs.repeat_ ;
       inLimitMgr_ = rhs.inLimitMgr_ ;
@@ -172,8 +177,9 @@ Node& Node::operator=(const Node& rhs)
       suspended_change_no_ = 0;
       graphic_ptr_ = 0;
 
-      if ( misc_attrs_ )     misc_attrs_->set_node(this);
-      if ( auto_attrs_ )     auto_attrs_->set_node(this);
+      if ( misc_attrs_ ) misc_attrs_->set_node(this);
+
+      if (auto_restore_) auto_restore_->set_node(this);
 
       limits_.clear();
       for (size_t l = 0;  l< rhs.limits_.size(); l++ ) {
@@ -387,16 +393,13 @@ void Node::calendarChanged(
 {
    calendar_changed_timeattrs(c);
 
-   if (auto_attrs_) {
+   if (checkForAutoCancel(c)) {
+      auto_cancelled_nodes.push_back(shared_from_this());
+   }
 
-      if (auto_attrs_->checkForAutoCancel(c)) {
-         auto_cancelled_nodes.push_back(shared_from_this());
-      }
-
-      // Avoid automatically archiving a restored node. Wait till begin/re-queue
-      if (!flag().is_set(ecf::Flag::RESTORED) && auto_attrs_->check_for_auto_archive(c)) {
-         auto_archive_nodes.push_back(shared_from_this());
-      }
+   // Avoid automatically archiving a restored node. Wait till begin/re-queue
+   if (!flag().is_set(ecf::Flag::RESTORED) && check_for_auto_archive(c)) {
+      auto_archive_nodes.push_back(shared_from_this());
    }
 }
 
@@ -798,7 +801,7 @@ void Node::set_state(NState::State newState, bool force, const std::string& addi
 void Node::handleStateChange()
 {
    if (state() == NState::COMPLETE) {
-      if (auto_attrs_) auto_attrs_->do_autorestore();
+      if ( auto_restore_ ) auto_restore_->do_autorestore();
    }
 }
 
@@ -1410,7 +1413,7 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    inLimitMgr_.check(errorMsg,warningMsg,reportErrors, reportWarnings);
 
    /// Check that the references to nodes in autorestore resolve
-   if (auto_attrs_) auto_attrs_->check(errorMsg);
+   if ( auto_restore_ ) auto_restore_->check(errorMsg);
 
    return errorMsg.empty();
 }
@@ -1528,8 +1531,11 @@ std::ostream& Node::print(std::ostream& os) const
    BOOST_FOREACH(const DayAttr& day, days_)         { day.print(os);  }
    BOOST_FOREACH(const CronAttr& cron, crons_)      { cron.print(os); }
 
+   if (auto_cancel_) auto_cancel_->print(os);
+   if (auto_archive_) auto_archive_->print(os);
+   if (auto_restore_) auto_restore_->print(os);
+
    if (misc_attrs_) misc_attrs_->print(os);
-   if (auto_attrs_) auto_attrs_->print(os);
 
    return os;
 }
@@ -1849,22 +1855,6 @@ bool Node::operator==(const Node& rhs) const
       return false;
    }
 
-   if (( auto_attrs_ && !rhs.auto_attrs_) || ( !auto_attrs_ && rhs.auto_attrs_)){
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator== (( auto_attrs_ && !rhs.auto_attrs_) || ( !auto_attrs_ && rhs.auto_attrs_)) " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
-   if ( auto_attrs_ &&  rhs.auto_attrs_ && !(*auto_attrs_ == *rhs.auto_attrs_)) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "Node::operator== ( auto_attrs_ && rhs.auto_attrs_ && !(*auto_attrs_ == *(rhs.auto_attrs_))) " << debugNodePath() << "\n";
-      }
-#endif
-      return false;
-   }
 
    if (!(repeat_ == rhs.repeat_)) {
 #ifdef DEBUG
@@ -1888,6 +1878,84 @@ bool Node::operator==(const Node& rhs) const
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
          std::cout << "Node::operator== ( late_ &&   rhs.late_ && !(*late_ == *(rhs.late_))) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+
+   if (auto_restore_ && rhs.auto_restore_) {
+      if (*auto_restore_ == *rhs.auto_restore_) {
+         return true;
+      }
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "AutoAttrs::operator== auto_restore_ && rhs.auto_restore_   " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   else if ( !auto_restore_ && rhs.auto_restore_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "AutoAttrs::operator==  !auto_restore_ && rhs.auto_restore_ " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   else if ( auto_restore_ && !rhs.auto_restore_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "AutoAttrs::operator==  auto_restore_ && !rhs.auto_restore_  " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+
+   if (auto_cancel_ && !rhs.auto_cancel_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  if (auto_cancel_ && !rhs.auto_cancel_)  " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   if (!auto_cancel_ && rhs.auto_cancel_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  if (!auto_cancel_ && rhs.auto_cancel_)  " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   if (auto_cancel_ && rhs.auto_cancel_ && !(*auto_cancel_ == *rhs.auto_cancel_)) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  (auto_cancel_ && rhs.auto_cancel_ && !(*auto_cancel_ == *rhs.auto_cancel_)) " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+
+   if (auto_archive_ && !rhs.auto_archive_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  if (auto_archive_ && !rhs.auto_archive_)  " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   if (!auto_archive_ && rhs.auto_archive_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  if (!auto_archive_ && rhs.auto_archive_)  " << debugNodePath() << "\n";
+      }
+#endif
+      return false;
+   }
+   if (auto_archive_ && rhs.auto_archive_ && !(*auto_archive_ == *rhs.auto_archive_)) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "Node::operator==  (auto_archive_ && rhs.auto_archive_ && !(*auto_archive_ == *rhs.auto_archive_)) " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -2019,17 +2087,11 @@ bool Node::checkInvariants(std::string& errorMsg) const
    BOOST_FOREACH(const ecf::TodayAttr& t,todays_) { if (!t.checkInvariants(errorMsg)) return false; }
    BOOST_FOREACH(const CronAttr& cron, crons_ )     { if (!cron.checkInvariants(errorMsg)) return false; }
 
-   if (auto_attrs_) {
-      if (!auto_attrs_->checkInvariants(errorMsg)) {
-         return false;
-      }
-   }
    if (misc_attrs_) {
       if (!misc_attrs_->checkInvariants(errorMsg)) {
          return false;
       }
    }
-
    if (!repeat_.empty()) {
       if (repeat_.name().empty()) {
          errorMsg += "Repeat name empty ???";
@@ -2332,6 +2394,47 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
    }
 }
 
+bool Node::checkForAutoCancel(const ecf::Calendar& calendar) const
+{
+   if ( auto_cancel_ && state() == NState::COMPLETE) {
+      if (auto_cancel_->isFree(calendar,get_state().second)) {
+
+         /// *Only* delete this node if we don't create zombies
+         /// anywhere for our children
+         vector<Task*> taskVec;
+         getAllTasks(taskVec);
+         BOOST_FOREACH(Task* t, taskVec) {
+            if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+               return false;
+            }
+         }
+         return true;
+      }
+   }
+   return false;
+}
+
+bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const
+{
+   if ( auto_archive_ && state() == NState::COMPLETE) {
+      if (!isSuspended() && auto_archive_->isFree(calendar,get_state().second)) {
+         if (!isParentSuspended()) {
+
+            /// *Only* archive this node if we don't create zombies anywhere for our children
+            vector<Task*> taskVec;
+            getAllTasks(taskVec);
+            BOOST_FOREACH(Task* t, taskVec) {
+               if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
+                  return false;
+               }
+            }
+            return true;
+         }
+      }
+   }
+   return false;
+}
+
 static std::vector<VerifyAttr> verifys_;
 static std::vector<ZombieAttr> zombies_;
 static std::vector<QueueAttr>  queues_;
@@ -2341,11 +2444,6 @@ const std::vector<ZombieAttr>& Node::zombies() const { if (misc_attrs_) return m
 const std::vector<QueueAttr>& Node::queues()   const { if (misc_attrs_) return misc_attrs_->queues(); return queues_; }
 std::vector<QueueAttr>& Node::ref_queues()           { if (misc_attrs_) return misc_attrs_->ref_queues(); return queues_; }
 const std::vector<GenericAttr>& Node::generics() const { if (misc_attrs_) return misc_attrs_->generics(); return generics_; }
-
-ecf::AutoRestoreAttr* Node::get_autorestore() const  { if (auto_attrs_) return auto_attrs_->get_autorestore(); return NULL;}
-ecf::AutoCancelAttr*  Node::get_autocancel() const   { if (auto_attrs_) return auto_attrs_->get_autocancel(); return NULL;}
-ecf::AutoArchiveAttr* Node::get_autoarchive() const  { if (auto_attrs_) return auto_attrs_->get_autoarchive(); return NULL;}
-bool Node::hasAutoCancel() const { if (auto_attrs_) return auto_attrs_->has_auto_cancel(); return false;}
 
 std::vector<ZombieAttr>::const_iterator Node::zombie_begin() const { if (misc_attrs_) return misc_attrs_->zombie_begin(); return zombies_.begin();}
 std::vector<ZombieAttr>::const_iterator Node::zombie_end()   const { if (misc_attrs_) return misc_attrs_->zombie_end(); return zombies_.end();}

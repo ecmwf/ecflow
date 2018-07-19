@@ -35,12 +35,12 @@ std::ostream& AutoArchiveAttr::print(std::ostream& os) const
    Indentor in;
    Indentor::indent(os) << "autoarchive ";
    if (days_) {
-      os << timeStruct_.hour()/24 << "\n";
+      os << time_.hour()/24 << "\n";
       return os;
    }
 
    if (relative_)  os << "+";
-   timeStruct_.print(os);
+   time_.print(os);
    os << "\n";
    return os;
 }
@@ -50,12 +50,12 @@ std::string AutoArchiveAttr::toString() const
    std::stringstream ss;
    ss << "autoarchive ";
    if (days_) {
-      ss << timeStruct_.hour()/24;
+      ss << time_.hour()/24;
       return ss.str();
    }
 
    if (relative_)  ss << "+";
-   ss << timeStruct_.toString();
+   ss << time_.toString();
    return ss.str();
 }
 
@@ -64,7 +64,7 @@ bool AutoArchiveAttr::operator==(const AutoArchiveAttr& rhs) const
 {
    if (relative_ != rhs.relative_) return false;
    if (days_ != rhs.days_) return false;
-   return timeStruct_.operator==(rhs.timeStruct_);
+   return time_.operator==(rhs.time_);
 }
 
 bool AutoArchiveAttr::isFree(const ecf::Calendar& calendar,const boost::posix_time::time_duration& suiteDurationAtComplete) const
@@ -82,17 +82,17 @@ bool AutoArchiveAttr::isFree(const ecf::Calendar& calendar,const boost::posix_ti
    if ( relative_ ) {
       time_duration timeElapsedAfterComplete = calendar.duration() - suiteDurationAtComplete;
       LOG_ASSERT(!timeElapsedAfterComplete.is_negative(),"should always be positive or some things gone wrong");
-      if (timeElapsedAfterComplete >= timeStruct_.duration()) {
+      if (timeElapsedAfterComplete >= time_.duration()) {
          return true;
       }
    }
    else {
       // real time
 //#ifdef DEBUG
-//    cout << "real time timeStruct_(" << to_simple_string(timeStruct_.duration())
+//    cout << "real time time_(" << to_simple_string(time_.duration())
 //         << ") calendar.suiteTime().time_of_day(" << to_simple_string(calendar.suiteTime().time_of_day()) << ")\n";
 //#endif
-      if (calendar.suiteTime().time_of_day() >= timeStruct_.duration()) {
+      if (calendar.suiteTime().time_of_day() >= time_.duration()) {
          return true;
       }
    }

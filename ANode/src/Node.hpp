@@ -56,12 +56,15 @@
 #include "CronAttr.hpp"
 
 #include "MiscAttrs.hpp"
-#include "AutoAttrs.hpp"
 #include "NodeFwd.hpp"
 #include "Flag.hpp"
 #include "Aspect.hpp"
 #include "Attr.hpp"
 #include "PrintStyle.hpp"
+
+#include "AutoRestoreAttr.hpp"
+#include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
 
 class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
@@ -338,7 +341,7 @@ public:
    void get_max_simulation_duration(boost::posix_time::time_duration& resol) const;
 
    /// A hierarchical function
-   virtual bool hasAutoCancel() const;
+   virtual bool hasAutoCancel() const {return (auto_cancel_) ? true : false;} // simulator function
 
 
    // Access functions: ======================================================
@@ -363,9 +366,9 @@ public:
    const std::vector<QueueAttr>&       queues()  const;
    const std::vector<GenericAttr>&     generics() const;
    ecf::LateAttr* get_late() const { return late_.get();}
-   ecf::AutoCancelAttr*  get_autocancel() const;
-   ecf::AutoArchiveAttr* get_autoarchive() const;
-   ecf::AutoRestoreAttr* get_autorestore() const;
+   ecf::AutoRestoreAttr* get_autorestore() const { return auto_restore_.get();}
+   ecf::AutoCancelAttr*  get_autocancel() const { return auto_cancel_.get();}
+   ecf::AutoArchiveAttr* get_autoarchive() const { return auto_archive_.get();}
    ecf::Flag&       flag()           { return flag_;}
    const ecf::Flag& get_flag() const { return flag_;}
 
@@ -749,6 +752,10 @@ private: // alow simulator access
    AstTop* completeAst(std::string& errorMsg) const;   // Will create AST on demand
    AstTop* triggerAst(std::string& errorMsg) const;    // Will create AST on demand
 
+private:
+   bool check_for_auto_archive(const ecf::Calendar& calendar) const;
+   bool checkForAutoCancel(const ecf::Calendar& calendar) const;
+
 private: // All mementos access
    friend class CompoundMemento;
    void clear(); /// Clear *ALL* internal attributes
@@ -813,13 +820,16 @@ private:
 
    std::unique_ptr<ecf::LateAttr> late_;     // Can only have one late attribute per node
    std::unique_ptr<MiscAttrs>     misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
-   std::unique_ptr<AutoAttrs>     auto_attrs_;   // has no changeable state ?
    Repeat                         repeat_;       // each node can only have one repeat. By value, since has pimpl
 
    std::vector<limit_ptr>      limits_;    // Ptrs since many in-limits can point to a single limit
    InLimitMgr                  inLimitMgr_;  // manages the inlimit
 
    ecf::Flag                   flag_;
+
+   std::unique_ptr<ecf::AutoCancelAttr>    auto_cancel_;  // Can only have 1 auto cancel per node
+   std::unique_ptr<ecf::AutoArchiveAttr>   auto_archive_; // Can only have 1 auto archive per node
+   std::unique_ptr<ecf::AutoRestoreAttr>   auto_restore_; // Can only have 1 autorestore per node
 
    unsigned int state_change_no_;     // *not* persisted, only used on server side,Used to indicate addition or deletion of attribute
    unsigned int variable_change_no_;  // *not* persisted, placed here rather than Variable, to save memory
@@ -863,16 +873,19 @@ private:
 
       CEREAL_OPTIONAL_NVP(ar, late_,       [this](){return late_.get(); });       // conditionally save
       CEREAL_OPTIONAL_NVP(ar, misc_attrs_, [this](){return misc_attrs_.get(); });     // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, auto_attrs_, [this](){return auto_attrs_.get(); });     // conditionally save
 
       CEREAL_OPTIONAL_NVP(ar, repeat_ ,    [this](){return !repeat_.empty(); });  // conditionally save
       CEREAL_OPTIONAL_NVP(ar, limits_ ,    [this](){return !limits_.empty(); });  // conditionally save
       CEREAL_OPTIONAL_NVP(ar, inLimitMgr_, [this](){return !inLimitMgr_.inlimits().empty() ; }); // conditionally save
       CEREAL_OPTIONAL_NVP(ar, flag_ ,      [this](){return flag_.flag() !=0 ; }); // conditionally save
 
+      CEREAL_OPTIONAL_NVP(ar, auto_cancel_,  [this](){return auto_cancel_.get(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, auto_archive_, [this](){return auto_archive_.get(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, auto_restore_, [this](){return auto_restore_.get(); }); // conditionally save
+
       if (Archive::is_loading::value) {
+         if (auto_restore_) auto_restore_->set_node(this);
          if (misc_attrs_) misc_attrs_->set_node(this);
-         if (auto_attrs_) auto_attrs_->set_node(this);
          for(std::vector<limit_ptr>::iterator i = limits_.begin(); i!= limits_.end(); ++i)  (*i)->set_node(this);
       }
    }

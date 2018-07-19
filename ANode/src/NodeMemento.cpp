@@ -43,7 +43,6 @@ void Node::clear()
    //       changeable state, Hence it is not cleared.
    //       Hence no need for memento
   	// ************************************************************
-   // we don't delete auto_attrs_ since that does not have changeable state ?
 
    meters_.clear();
    events_.clear();

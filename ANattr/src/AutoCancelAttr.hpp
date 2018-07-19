@@ -25,9 +25,9 @@ namespace ecf {
 class AutoCancelAttr  {
 public:
 	AutoCancelAttr() : relative_(true),days_(false) {}
-	AutoCancelAttr(int hour, int minute, bool relative ) : timeStruct_(hour, minute), relative_(relative), days_(false) {}
- 	AutoCancelAttr(const TimeSlot& ts,   bool relative ) : timeStruct_(ts),           relative_(relative), days_(false) {}
- 	explicit AutoCancelAttr(int days) : timeStruct_( TimeSlot(days*24,0) ), relative_(true), days_(true) {}
+	AutoCancelAttr(int hour, int minute, bool relative ) : time_(hour, minute), relative_(relative), days_(false) {}
+ 	AutoCancelAttr(const TimeSlot& ts,   bool relative ) : time_(ts),           relative_(relative), days_(false) {}
+ 	explicit AutoCancelAttr(int days) : time_( TimeSlot(days*24,0) ), relative_(true), days_(true) {}
 
 	std::ostream& print(std::ostream&) const;
 	bool operator==(const AutoCancelAttr& rhs) const;
@@ -35,12 +35,12 @@ public:
 
 	std::string toString() const;
 
-	const TimeSlot& time() const { return timeStruct_;}
+	const TimeSlot& time() const { return time_;}
 	bool relative() const { return relative_; }
 	bool days() const { return days_; }
 
 private:
- 	TimeSlot timeStruct_;
+ 	TimeSlot time_;
  	bool relative_;
  	bool days_;
 
@@ -48,10 +48,9 @@ private:
  	template<class Archive>
  	void serialize(Archive & ar, std::uint32_t const /*version*/)
  	{
- 	   ar( CEREAL_NVP(timeStruct_ ),
- 	       CEREAL_NVP(relative_ ),
- 	       CEREAL_NVP(days_ )
- 	   );
+ 	   ar( CEREAL_NVP(time_ ) );
+      CEREAL_OPTIONAL_NVP(ar, relative_, [this](){return !relative_;}); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, days_,     [this](){return days_; });     // conditionally save
  	}
 };
 
