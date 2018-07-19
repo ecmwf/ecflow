@@ -34,7 +34,7 @@ std::string PartExpression::toString(const std::string& exprType) const
 {
    std::stringstream ss;
    ss << exprType; // trigger or complete
-   switch (exp_type_) {
+   switch (type_) {
       case PartExpression::FIRST: ss << " ";break;
       case PartExpression::AND: ss << " -a ";break;
       case PartExpression::OR: ss << " -o ";break;
@@ -48,7 +48,7 @@ std::ostream& PartExpression::print(std::ostream& os,const std::string& exprType
 {
    Indentor in;
    Indentor::indent(os) << exprType;
-   switch (exp_type_) {
+   switch (type_) {
       case PartExpression::FIRST: os << " ";break;
       case PartExpression::AND: os << " -a ";break;
       case PartExpression::OR: os << " -o ";break;
@@ -57,7 +57,7 @@ std::ostream& PartExpression::print(std::ostream& os,const std::string& exprType
    os << exp_;
 
    if ( !PrintStyle::defsStyle()) {
-      if (exp_type_ == PartExpression::FIRST) {
+      if (type_ == PartExpression::FIRST) {
          if (isFree) os << " # free";
       }
    }

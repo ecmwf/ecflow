@@ -30,12 +30,12 @@ class Limit {
 public:
    Limit(const std::string& name,int limit);
    Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths);
-   Limit() : state_change_no_(0), theLimit_(0), value_(0),node_(0)  {}
+   Limit() : state_change_no_(0), lim_(0), value_(0),node_(0)  {}
    Limit(const Limit& rhs);
 
    std::ostream& print(std::ostream&) const;
    bool operator==(const Limit& rhs) const;
-   const std::string& name() const { return  name_;}
+   const std::string& name() const { return  n_;}
 
    void set_node(Node* n) { node_ = n; }
 
@@ -48,8 +48,8 @@ public:
    const std::set<std::string>& paths() const { return paths_;}
 
    int value() const { return value_;}
-   bool inLimit(int inlimit_tokens) const { return ((value_ + inlimit_tokens) <= theLimit_);}
-   int theLimit() const { return theLimit_;}
+   bool inLimit(int inlimit_tokens) const { return ((value_ + inlimit_tokens) <= lim_);}
+   int theLimit() const { return lim_;}
    void increment(int tokens, const std::string& abs_node_path);
    void decrement(int tokens, const std::string& abs_node_path);
    void reset();
@@ -71,8 +71,8 @@ private:
 
 private:
    unsigned int             state_change_no_;  // *not* persisted, only used on server side
-   std::string              name_;
-   int                      theLimit_;
+   std::string              n_;
+   int                      lim_;
    int                      value_;
    std::set<std::string>    paths_;           // Updated via increment()/decrement()/reset(). Typically task paths
    Node*                    node_ ;           // The parent NOT persisted
@@ -81,8 +81,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(CEREAL_NVP(name_),
-         CEREAL_NVP(theLimit_));
+      ar(CEREAL_NVP(n_),
+         CEREAL_NVP(lim_));
       CEREAL_OPTIONAL_NVP(ar, value_,  [this](){return value_ !=0; });      // conditionally save
       CEREAL_OPTIONAL_NVP(ar, paths_,  [this](){return !paths_.empty(); }); // conditionally save
    }

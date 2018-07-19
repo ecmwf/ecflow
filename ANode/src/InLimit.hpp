@@ -41,8 +41,8 @@ public:
    std::ostream& print(std::ostream&) const;
    bool operator==(const InLimit& rhs) const;
 
-   const std::string& name() const { return  name_;}             // must be defined
-   const std::string& pathToNode() const { return  pathToNode_;} // can be empty,the node referenced by the In-Limit, this should hold the Limit.
+   const std::string& name() const { return  n_;}         // must be defined
+   const std::string& pathToNode() const { return path_;} // can be empty,the node referenced by the In-Limit, this should hold the Limit.
    int tokens() const { return tokens_;}
 
    bool limit_this_node_only() const { return limit_this_node_only_;}
@@ -57,8 +57,8 @@ private:
    friend class InLimitMgr;
 
 private:
-   std::string            name_;
-   std::string            pathToNode_;
+   std::string            n_;
+   std::string            path_;
    int                    tokens_;
    bool                   limit_this_node_only_;  // default is false,if True, will consume one token(s) only, regardless of number of children
    bool                   incremented_;           // state
@@ -68,8 +68,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(CEREAL_NVP(name_));
-      CEREAL_OPTIONAL_NVP(ar,pathToNode_,           [this](){return !pathToNode_.empty();});  // conditionally save
+      ar(CEREAL_NVP(n_));
+      CEREAL_OPTIONAL_NVP(ar,path_,                 [this](){return !path_.empty();});        // conditionally save
       CEREAL_OPTIONAL_NVP(ar,tokens_,               [this](){return tokens_ !=1;});           // conditionally save
       CEREAL_OPTIONAL_NVP(ar,limit_this_node_only_, [this](){return limit_this_node_only_;}); // conditionally save new to 5.0.0
       CEREAL_OPTIONAL_NVP(ar,incremented_,          [this](){return incremented_;});          // conditionally save new to 5.0.0

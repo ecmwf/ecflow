@@ -32,43 +32,43 @@ public:
    enum ExprType { FIRST, AND, OR };
 
    explicit PartExpression(const std::string& expression)
-   : exp_(expression), exp_type_(default_expr_type()) {}
+   : exp_(expression), type_(default_expr_type()) {}
 
    PartExpression(const std::string& expression, bool and_type)
-   : exp_(expression), exp_type_( (and_type) ? AND : OR) {}
+   : exp_(expression), type_( (and_type) ? AND : OR) {}
 
-   PartExpression() : exp_type_(default_expr_type() ) {}
+   PartExpression() : type_(default_expr_type() ) {}
 
    static ExprType default_expr_type() { return FIRST;} // NEVER change
 
    const std::string& expression() const  { return exp_;}
-   bool andExpr() const { return (exp_type_ == AND) ? true : false ;}
-   bool orExpr() const  { return (exp_type_ == OR)  ? true : false ;}
+   bool andExpr() const { return (type_ == AND) ? true : false ;}
+   bool orExpr() const  { return (type_ == OR)  ? true : false ;}
 
    std::string toString(const std::string& exprType) const;
    std::ostream& print(std::ostream&,const std::string& exprType,bool isFree) const;
 
    bool operator==(const PartExpression& rhs) const {
-      return exp_type_ == rhs.exp_type_ && exp_ == rhs.exp_;
+      return type_ == rhs.type_ && exp_ == rhs.exp_;
    }
    bool operator!=(const PartExpression& rhs) const { return !operator==(rhs); }
 
    /// Parse the expression and create the abstract syntax tree
    std::unique_ptr<AstTop> parseExpressions(std::string& errorMsg) const;
 
-   void set_expr_type(ExprType t) { exp_type_ = t;}
-   ExprType expr_type() const { return exp_type_;}
+   void set_expr_type(ExprType t) { type_ = t;}
+   ExprType expr_type() const { return type_;}
 
 private:
    std::string exp_;
-   ExprType    exp_type_;
+   ExprType    type_;
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(CEREAL_NVP(exp_));
-      CEREAL_OPTIONAL_NVP(ar,exp_type_,  [this](){return exp_type_ != default_expr_type();}); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar,type_,  [this](){return type_ != default_expr_type();}); // conditionally save
    }
 };
 

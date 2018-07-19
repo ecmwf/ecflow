@@ -29,7 +29,7 @@ using namespace ecf;
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 Limit::Limit(const std::string& name,int limit)
-: state_change_no_(0),name_(name),theLimit_(limit),value_(0),node_(0)
+: state_change_no_(0),n_(name),lim_(limit),value_(0),node_(0)
 {
    if ( !Str::valid_name( name ) ) {
       throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
@@ -37,7 +37,7 @@ Limit::Limit(const std::string& name,int limit)
 }
 
 Limit::Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths)
-: state_change_no_(0),name_(name),theLimit_(limit),value_(value),paths_(paths),node_(0)
+: state_change_no_(0),n_(name),lim_(limit),value_(value),paths_(paths),node_(0)
 {
    if ( !Str::valid_name( name ) ) {
       throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
@@ -45,7 +45,7 @@ Limit::Limit(const std::string& name,int limit, int value, const std::set<std::s
 }
 
 Limit::Limit(const Limit& rhs)
-: state_change_no_(0), name_(rhs.name_),theLimit_(rhs.theLimit_),value_(rhs.value_),paths_(rhs.paths_),node_(0)
+: state_change_no_(0), n_(rhs.n_),lim_(rhs.lim_),value_(rhs.value_),paths_(rhs.paths_),node_(0)
 {
 }
 
@@ -58,18 +58,18 @@ bool Limit::operator==( const Limit& rhs ) const {
 #endif
       return false;
    }
-   if ( theLimit_ != rhs.theLimit_ ) {
+   if ( lim_ != rhs.lim_ ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Limit::operator==( theLimit_ != rhs.theLimit_) " << toString() << "   rhs(" << rhs.toString() << ")\n";
+         std::cout << "Limit::operator==( lim_ != rhs.lim_) " << toString() << "   rhs(" << rhs.toString() << ")\n";
       }
 #endif
       return false;
    }
-   if ( name_ != rhs.name_ ) {
+   if ( n_ != rhs.n_ ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "Limit::operator==( name_ != rhs.name_ ) " << toString() << "   rhs(" << rhs.toString() << ")\n";
+         std::cout << "Limit::operator==( n_ != rhs.n_ ) " << toString() << "   rhs(" << rhs.toString() << ")\n";
       }
 #endif
       return false;
@@ -102,15 +102,15 @@ std::ostream& Limit::print( std::ostream& os ) const {
 
 std::string Limit::toString() const {
    std::string ret = "limit ";
-   ret += name_;
+   ret += n_;
    ret += " ";
-   ret += boost::lexical_cast<std::string>(theLimit_);
+   ret += boost::lexical_cast<std::string>(lim_);
    return ret;
 }
 
 void Limit::decrement( int tokens ,  const std::string& abs_node_path) {
 
-   // cout << "Limit::decrement name = " << name_ << " current value_ = " << value_ << " limit = " <<  theLimit_ << " consume tokens = " << tokens << " path = " << abs_node_path << "\n";
+   // cout << "Limit::decrement name = " << n_ << " current value_ = " << value_ << " limit = " <<  lim_ << " consume tokens = " << tokens << " path = " << abs_node_path << "\n";
    // Note: we previously had 'if (value_ > 0) {
    //       However if the user had manually changed the value_, then we could be left with paths_,  that would never have been cleared
    if (delete_path(abs_node_path)) {
@@ -125,15 +125,15 @@ void Limit::decrement( int tokens ,  const std::string& abs_node_path) {
 #ifdef DEBUG_STATE_CHANGE_NO
    std::cout << "Limit::decrement\n";
 #endif
-   // cout << "Limit::decrement name = " << name_ << " current value_ = " << value_ << "\n";
+   // cout << "Limit::decrement name = " << n_ << " current value_ = " << value_ << "\n";
 }
 
 void Limit::increment( int tokens , const std::string& abs_node_path) {
-   // cout << "Limit::increment name = " << name_ << " current value_ = " << value_ << " limit = " <<  theLimit_ << " consume tokens = " << tokens << " path = " << abs_node_path << "\n";
+   // cout << "Limit::increment name = " << n_ << " current value_ = " << value_ << " limit = " <<  lim_ << " consume tokens = " << tokens << " path = " << abs_node_path << "\n";
 
    // increment should keep increasing limit value, *EVEN* if over the limit. See ECFLOW-324
    // Note: previously we had:
-   //     if ( value_ < theLimit_ ) {
+   //     if ( value_ < lim_ ) {
 
    if (paths_.find(abs_node_path) == paths_.end()) {
 
@@ -145,7 +145,7 @@ void Limit::increment( int tokens , const std::string& abs_node_path) {
 #ifdef DEBUG_STATE_CHANGE_NO
       std::cout << "Limit::increment\n";
 #endif
-   // cout << "Limit::increment name = " << name_ << " current value_ = " << value_ << "\n";
+   // cout << "Limit::increment name = " << n_ << " current value_ = " << value_ << "\n";
 }
 
 void Limit::setValue( int v )
@@ -160,11 +160,11 @@ void Limit::setValue( int v )
 
 void Limit::setLimit(int v)
 {
-   theLimit_ = v;
+   lim_ = v;
    update_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
-   std::cout << "   Limit::setLimit() theLimit_ = " << value_ << "\n";
+   std::cout << "   Limit::setLimit() lim_ = " << value_ << "\n";
 #endif
 }
 
@@ -177,7 +177,7 @@ void Limit::set_paths(const std::set<std::string>& paths)
 void Limit::set_state(int limit, int value, const std::set<std::string>& paths)
 {
    value_ = value;
-   theLimit_ = limit;
+   lim_ = limit;
    paths_ = paths;
    update_change_no();
 }

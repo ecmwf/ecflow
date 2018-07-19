@@ -33,7 +33,7 @@ using namespace ecf;
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 InLimit::InLimit(const std::string& name, const std::string& pathToNode, int tokens,bool limit_this_node_only)
-: name_(name),pathToNode_(pathToNode),tokens_(tokens),limit_this_node_only_(limit_this_node_only),incremented_(false)
+: n_(name),path_(pathToNode),tokens_(tokens),limit_this_node_only_(limit_this_node_only),incremented_(false)
 {
    if ( !Str::valid_name( name ) ) {
       throw std::runtime_error("InLimit::InLimit: Invalid InLimit name: " + name);
@@ -42,15 +42,15 @@ InLimit::InLimit(const std::string& name, const std::string& pathToNode, int tok
 
 bool InLimit::operator==( const InLimit& rhs ) const
 {
-   if ( pathToNode_ != rhs.pathToNode_ ) {
+   if ( path_ != rhs.path_ ) {
 #ifdef DEBUG
-      if (Ecf::debug_equality())   std::cout << "InLimit::operator==   pathToNode_ != rhs.pathToNode_\n";
+      if (Ecf::debug_equality())   std::cout << "InLimit::operator==   path_ != rhs.path_\n";
 #endif
       return false;
    }
-   if ( name_ != rhs.name_ ) {
+   if ( n_ != rhs.n_ ) {
 #ifdef DEBUG
-      if (Ecf::debug_equality())  std::cout << "InLimit::operator==     name_ != rhs.name_\n";
+      if (Ecf::debug_equality())  std::cout << "InLimit::operator==     n_ != rhs.n_\n";
 #endif
       return false;
    }
@@ -102,8 +102,8 @@ std::ostream& InLimit::print( std::ostream& os ) const {
 std::string InLimit::toString() const {
    std::string ret = "inlimit ";
    if (limit_this_node_only_) ret += "-n ";
-   if ( pathToNode_.empty() )  ret += name_;
-   else                      { ret += pathToNode_; ret += Str::COLON(); ret += name_; }
+   if ( path_.empty() )  ret += n_;
+   else                      { ret += path_; ret += Str::COLON(); ret += n_; }
    if ( tokens_ != 1 )       { ret += " "; ret += boost::lexical_cast<std::string>(tokens_); }
    return ret;
 }
