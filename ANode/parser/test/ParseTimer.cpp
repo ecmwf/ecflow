@@ -35,9 +35,12 @@
 #include "DurationTimer.hpp"
 #include "Log.hpp"
 #include "System.hpp"
+#include "Str.hpp"
 
 using namespace std;
 using namespace ecf;
+namespace fs = boost::filesystem;
+
 
 // This test is used to find a task given a path of the form:
 //      suite/family/task
@@ -78,6 +81,11 @@ int main(int argc, char* argv[])
 
    std::string path = argv[1];
 
+
+
+
+
+
    DurationTimer duration_timer;
    boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 
@@ -109,16 +117,34 @@ int main(int argc, char* argv[])
 
       std::remove(tmpFilename.c_str());
    }
+
    {
-      // Test time for persisting to CEREAL  checkpoint file only
-      std::string tmpFilename = "tmp.def";
+      // Test time for persisting to CEREAL checkpoint file only
+      fs::path fs_path(path);
+      //   std::cout << "parent path " << fs_path.parent_path() << "\n";
+      //   std::cout << "root path " << fs_path.root_path()  << "\n";
+      //   std::cout << "root name " << fs_path.root_name()  << "\n";
+      //   std::cout << "root directory " << fs_path.root_directory()  << "\n";
+      //   std::cout << "relative_path " << fs_path.relative_path()  << "\n";
+      //   std::cout << "filename " << fs_path.filename()  << "\n";
+      //   std::cout << "stem " << fs_path.stem()  << "\n";
+      //   std::cout << "extension " << fs_path.extension()  << "\n";
 
+      std::stringstream ss;
+#ifdef DEBUG
+      ss << "/var/tmp/ma0/JSON/debug_" << fs_path.stem() << ".json";
+#else
+      ss << "/var/tmp/ma0/JSON/" << fs_path.stem() << ".json";
+#endif
+
+      std::string json_filepath = ss.str();
+      Str::replaceall(json_filepath,"\"","");  // fs_path.stem() seems to add ", so remove them
+      //cout << "  json_filepath: " << json_filepath << endl;
+
+      std::remove(json_filepath.c_str());
       timer.restart();
-      defs.cereal_save_as_checkpt(tmpFilename);
+      defs.cereal_save_as_checkpt(json_filepath);
       cout << " Save as CEREAL checkpoint, time taken           = " << timer.elapsed()  << endl;
-
-      std::remove(tmpFilename.c_str());
-      //exit(0);
    }
 
    {
