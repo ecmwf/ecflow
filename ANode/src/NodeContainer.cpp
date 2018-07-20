@@ -415,8 +415,8 @@ bool NodeContainer::hasAutoCancel() const
 void NodeContainer::invalidate_trigger_references() const
 {
    Node::invalidate_trigger_references();
-   size_t node_vec_size = nodeVec_.size();
-   for(size_t t = 0; t < node_vec_size; t++) {  nodeVec_[t]->invalidate_trigger_references(); }
+   size_t node_vec_size = nodes_.size();
+   for(size_t t = 0; t < node_vec_size; t++) {  nodes_[t]->invalidate_trigger_references(); }
 }
 
 bool NodeContainer::resolveDependencies(JobsParam& jobsParam)

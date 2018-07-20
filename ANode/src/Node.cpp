@@ -2234,14 +2234,14 @@ AstTop* Node::triggerAst(std::string& errorMsg) const
 
 void Node::invalidate_trigger_references() const
 {
-   if (triggerExpr_) {
-      if (triggerExpr_->get_ast()) {
-         triggerExpr_->get_ast()->invalidate_trigger_references();
+   if (t_expr_) {
+      if (t_expr_->get_ast()) {
+         t_expr_->get_ast()->invalidate_trigger_references();
       }
    }
-   if (completeExpr_ ) {
-      if (completeExpr_->get_ast()) {
-         completeExpr_->get_ast()->invalidate_trigger_references();
+   if (c_expr_ ) {
+      if (c_expr_->get_ast()) {
+         c_expr_->get_ast()->invalidate_trigger_references();
       }
    }
 }

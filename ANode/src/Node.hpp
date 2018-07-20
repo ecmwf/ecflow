@@ -341,7 +341,7 @@ public:
    void get_max_simulation_duration(boost::posix_time::time_duration& resol) const;
 
    /// hierarchical function
-   virtual bool hasAutoCancel() const { return (autoCancel_) ? true : false;}
+   virtual bool hasAutoCancel() const { return (auto_cancel_) ? true : false;}
    virtual void invalidate_trigger_references() const;
 
    // Access functions: ======================================================
