@@ -49,6 +49,7 @@ public:
  	virtual void calendarChanged(const ecf::Calendar&,std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late);
  	virtual bool resolveDependencies(JobsParam& );
  	virtual bool check(std::string& errorMsg, std::string& warningMsg) const;
+   virtual void invalidate_trigger_references() const;
 
    task_ptr add_task(const std::string& task_name);
    family_ptr add_family(const std::string& family_name);
