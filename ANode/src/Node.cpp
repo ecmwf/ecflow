@@ -2232,6 +2232,20 @@ AstTop* Node::triggerAst(std::string& errorMsg) const
    return NULL;
 }
 
+void Node::invalidate_trigger_references() const
+{
+   if (triggerExpr_) {
+      if (triggerExpr_->get_ast()) {
+         triggerExpr_->get_ast()->invalidate_trigger_references();
+      }
+   }
+   if (completeExpr_ ) {
+      if (completeExpr_->get_ast()) {
+         completeExpr_->get_ast()->invalidate_trigger_references();
+      }
+   }
+}
+
 node_ptr Node::remove()
 {
    SuiteChanged0 changed(shared_from_this());

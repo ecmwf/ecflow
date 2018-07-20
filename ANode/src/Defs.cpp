@@ -1030,6 +1030,12 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
 	return false;
 }
 
+void Defs::invalidate_trigger_references() const
+{
+   size_t theSuiteVecSize = suiteVec_.size();
+   for(size_t s = 0; s < theSuiteVecSize; s++) { suiteVec_[s]->invalidate_trigger_references();}
+}
+
 node_ptr Defs::replaceChild(const std::string& path,
 	               const defs_ptr& clientDefs,
 	               bool createNodesAsNeeded,
@@ -1067,6 +1073,9 @@ node_ptr Defs::replaceChild(const std::string& path,
 			errorMsg += " does not exist on the server definition. Please use <parent> option";
 			return node_ptr();
 		}
+
+		invalidate_trigger_references();
+
 		// HAVE a FULL match in the server
 
 		// Copy over begun and suspended states, otherwise preserve state of client node
@@ -1093,6 +1102,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 	 	return client_node_to_add;
  	}
 
+   invalidate_trigger_references();
 
  	// ADD ======================================================================
 	// Create/Add nodes as needed for a *PARTIAL* match

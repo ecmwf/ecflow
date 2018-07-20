@@ -27,6 +27,15 @@
 //
 //========================================================
 
+//Interface to edit the suite filter.
+//This class contains a model which itself contains a SuiteFilter object. This is a
+//copy of the original SuiteFilter stored by ServerHandler. The idea is that the
+//editing is performed on this copy then users need to click apply
+//to update the original SuiteFilter. The complication comes from the fact that
+//the original SuiteFilter can be modified independently from this interface
+//(e.g. suites are added/loaded/removed from the server). Then we need to make sure
+//that the changes are merged into the edited state.
+
 SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
     QWidget(parent),
     columnsAdjusted_(false),

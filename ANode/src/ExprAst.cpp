@@ -150,6 +150,11 @@ void AstTop::setParentNode(Node* p)
 	if (root_) root_->setParentNode(p);
 }
 
+void AstTop::invalidate_trigger_references() const
+{
+   if (root_) root_->invalidate_trigger_references();
+}
+
 //////////////////////////////////////////////////////////////////////////////////////
 
 AstRoot::~AstRoot() {
@@ -256,6 +261,12 @@ void AstRoot::setParentNode(Node* p)
 {
 	if (left_) left_->setParentNode(p);
 	if (right_) right_->setParentNode(p);
+}
+
+void AstRoot::invalidate_trigger_references() const
+{
+   if (left_)  left_->invalidate_trigger_references();
+   if (right_) right_->invalidate_trigger_references();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
