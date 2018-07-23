@@ -235,10 +235,12 @@ if __name__ == "__main__":
     assert check_repeat_string("",["a"] )==False,                 "Expected Exception since no name specified"
     assert check_repeat_string(" ",["a"] )==False,                "Expected Exception can not have spaces for a name"
     assert check_repeat_string("name",[ 1,2 ])==False,            "Expected Exception since a list of strings was expected"
+    assert check_repeat_string("name",[])==False,                 "Expected Exception since list of strings is empty"
     assert check_repeat_enumerated("name",[ "a" ]),               "Expected valid repeat"
     assert check_repeat_enumerated("",["a"] )==False,             "Expected Exception since no name specified"
-    assert check_repeat_enumerated(" ",["a"] )==False,            "Expected Exception since a list of strings was expected"
+    assert check_repeat_enumerated(" ",["a"] )==False,            "Expected Exception since no name specified"
     assert check_repeat_enumerated("name",[ 1,2 ])==False,        "Expected Exception since a list of strings was expected"
+    assert check_repeat_enumerated("name",[])==False,             "Expected Exception since list is empty"
 
 
     assert check_variable("name","value"),        "Expected valid Variable"
@@ -418,6 +420,20 @@ if __name__ == "__main__":
         test_passed = True
         pass
     assert test_passed,"duplicate Task test failed"   
+
+    # =================================================================================
+    print("Task and family of same name should not be allowed")
+    test_passed = False
+    try:
+        suite = Suite("1")
+        ta = Task("a")
+        tb = Family("a")
+        suite.add_task(ta)
+        suite.add_family(tb)
+    except RuntimeError as e : 
+        test_passed = True
+        pass
+    assert test_passed,"Task and family of same name should not be allowed"   
 
     # =================================================================================
     print("check duplicate meter not allowed")

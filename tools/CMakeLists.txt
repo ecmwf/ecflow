@@ -1,3 +1,9 @@
+
+# This can be used by submission system. i.e trimurti
+ecbuild_add_executable( TARGET    ecflow_standalone
+                        SOURCES   ecflow_standalone.c
+                      )
+
 #
 # Configure  ecflow_site.sh. This is used in ecflow_start.sh and ecflow_stop.sh
 # Used in coping with start of ecflow server on a linux cluser

@@ -206,6 +206,7 @@ BOOST_AUTO_TEST_CASE( test_restore_from_check_pt_using_new_server )
 
    BOOST_CHECK_MESSAGE( *theClient.defs() == *defs_to_be_check_pointed,
          "expected defs to be the same.\nServer defs:\n" << *theClient.defs() << "\nExpected defs:\n" << *defs_to_be_check_pointed);
+
 }
 
 BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )

@@ -57,7 +57,7 @@ public:
    static defs_ptr create();
    static defs_ptr create(const std::string& port);
    Defs();
-   Defs(const std::string& port); // used in test, to initialise server variables
+   explicit Defs(const std::string& port); // used in test, to initialise server variables
    Defs(const Defs&);
    Defs& operator=(const Defs&);
 
@@ -233,6 +233,11 @@ public:
    /// generic way of deleting a Node.
    /// This should always succeed else something is seriously wrong
    bool deleteChild(Node*);
+
+   /// This called during replace. If the trigger expression(AST) has been created,  then
+   /// the references to the nodes, will be invalidated.
+   /// These get generated on the fly, when referenced.
+   void invalidate_trigger_references() const;
 
    /// Adopt the child specified by 'path' from the clientDef.
    /// If node at path already exists in this instance, it is replaced.
@@ -442,7 +447,7 @@ private:
 // Start notification. End notification automatically signalled, Even if exception raised.
 class ChangeStartNotification : private boost::noncopyable {
 public:
-   ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start();}
+   explicit ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start();}
    ~ChangeStartNotification() {  defs_ptr_->notify_end();}
 private:
    defs_ptr defs_ptr_;

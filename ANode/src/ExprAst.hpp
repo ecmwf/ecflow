@@ -66,6 +66,7 @@ public:
    virtual int plus(Ast* right) const { return (value() + right->value());}
 
 	virtual void setParentNode(Node*){} // traverse and set for interested nodes
+	virtual void invalidate_trigger_references() const {}
 };
 
 class AstTop : public Ast {
@@ -94,6 +95,7 @@ public:
 	virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
 	virtual void setParentNode(Node*);
+   virtual void invalidate_trigger_references() const;
 
 private:
 	Ast*        root_;
@@ -119,6 +121,8 @@ public:
 	virtual void setParentNode(Node*);
 
 	virtual void set_root_name(const std::string&) {}
+   virtual void invalidate_trigger_references() const;
+
 protected:
    std::string do_why_expression(const std::string& root,bool html) const;
    std::string do_bracket_why_expression(const std::string& root,bool html) const;
@@ -405,7 +409,7 @@ private:
 
 class AstInteger : public AstLeaf {
 public:
-	AstInteger(int value) : value_(value) {}
+	explicit AstInteger(int value) : value_(value) {}
 
    virtual bool is_evaluateable() const { return true; }
 	virtual bool evaluate() const {  return value_; } // -1 -2 1 2 3 evaluates to true, 0 returns false
@@ -426,7 +430,7 @@ private:
 
 class AstNodeState : public AstLeaf {
 public:
-	AstNodeState(DState::State s) : state_(s) {}
+   explicit AstNodeState(DState::State s) : state_(s) {}
 
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstNodeState* clone() const;
@@ -443,7 +447,7 @@ private:
 
 class AstEventState : public AstLeaf {
 public:
-	AstEventState(bool b) : state_(b) {}
+   explicit AstEventState(bool b) : state_(b) {}
 
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstEventState* clone() const;
@@ -470,7 +474,7 @@ private:
 
 class AstNode : public AstLeaf {
 public:
-	AstNode(const std::string& n) : parentNode_(NULL), nodePath_(n) {}
+   explicit AstNode(const std::string& n) : parentNode_(NULL), nodePath_(n) {}
 
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstNode* clone() const;
@@ -481,6 +485,7 @@ public:
    virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
  	virtual void setParentNode(Node* n) { parentNode_ = n; }
+   virtual void invalidate_trigger_references() const { ref_node_.reset();}
 	static std::string stype() { return "node";}
 
 	const std::string& nodePath() const { return nodePath_;}
@@ -518,6 +523,7 @@ public:
    virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
    virtual void setParentNode(Node* n) { parentNode_ = n; }
+   virtual void invalidate_trigger_references() const { ref_node_.reset();}
    static std::string stype() { return "flag";}
 
    const std::string& nodePath() const { return nodePath_;}
@@ -565,6 +571,7 @@ public:
 	virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
  	virtual void setParentNode(Node* n) { parentNode_ = n; }
+   virtual void invalidate_trigger_references() const { ref_node_.reset();}
 
    virtual int minus(Ast* right) const;
    virtual int plus(Ast* right) const;
@@ -595,7 +602,7 @@ private:
 //  ** i.e  "2 == (((:YMD / 100 ) % 100) % 3"
 class AstParentVariable : public AstLeaf {
 public:
-   AstParentVariable(const std::string& variablename)
+   explicit AstParentVariable(const std::string& variablename)
    : parentNode_(NULL), name_(variablename)  {}
 
    virtual std::string name() const { return name_;}
@@ -616,6 +623,7 @@ public:
    virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
    virtual void setParentNode(Node* n) { parentNode_ = n; }
+   virtual void invalidate_trigger_references() const { ref_node_.reset();}
 
    virtual int minus(Ast* right) const;
    virtual int plus(Ast* right) const;
@@ -635,7 +643,7 @@ private:
 // Helper class
 class VariableHelper : private boost::noncopyable {
 public:
-	VariableHelper(const AstVariable* astVariable);
+   explicit VariableHelper(const AstVariable* astVariable);
 	VariableHelper(const AstVariable* astVariable, std::string& errorMsg);
 
 	int value() const;

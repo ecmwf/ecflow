@@ -36,11 +36,11 @@ public:
 
 	/// extract integer or throw an std::runtime_error on failure,
 	/// the error message passed in is used to configure the returned exception
-	static int theInt(const std::string& token,const std::string& errorContext) ;
+	static int theInt(const std::string& token,const std::string& errorMsg) ;
 
 	/// extract YMD, integer of the form yyyymmdd, will throw std::runtime_error on failure
 	/// the error message passed in is used to configure the returned exception
-	static int ymd(const std::string& token, std::string& errorContext);
+	static int ymd(const std::string& ymdToken, std::string& errorMsg);
 
 	/// extract optional int, else return -1
 	/// the error message passed in is used to configure the returned exception
@@ -49,7 +49,7 @@ public:
 	// repeat integer variable 3 4 # a comment
 	// hence we must check the first character, and not the complete token
 	static int optionalInt(const std::vector<std::string>& lineTokens,
-	                       int pos,int defaultvalue,const std::string& errorContext);
+	                       int pos,int defaultValue,const std::string& errorMsg);
 private:
 	Extract();
 };

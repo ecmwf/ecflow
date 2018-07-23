@@ -1460,8 +1460,10 @@ std::string Node::write_state() const
 
 void Node::read_state(const std::string& line,const std::vector<std::string>& lineTokens)
 {
+   //  0    1   2
+   // task name #
    std::string token;
-   for(size_t i = 0; i < lineTokens.size(); i++) {
+   for(size_t i = 3; i < lineTokens.size(); i++) {
       token.clear();
       if (lineTokens[i].find("state:") != std::string::npos ) {
          if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Node::read_state Invalid state specified for suite " + name());
@@ -2049,6 +2051,20 @@ AstTop* Node::triggerAst(std::string& errorMsg) const
       return triggerExpr_->get_ast();
    }
    return NULL;
+}
+
+void Node::invalidate_trigger_references() const
+{
+   if (triggerExpr_) {
+      if (triggerExpr_->get_ast()) {
+         triggerExpr_->get_ast()->invalidate_trigger_references();
+      }
+   }
+   if (completeExpr_ ) {
+      if (completeExpr_->get_ast()) {
+         completeExpr_->get_ast()->invalidate_trigger_references();
+      }
+   }
 }
 
 node_ptr Node::remove()

@@ -31,9 +31,9 @@ class DayAttr {
 public:
 	enum Day_t { SUNDAY=0, MONDAY=1, TUESDAY=2, WEDNESDAY=3, THURSDAY=4, FRIDAY=5, SATURDAY=6 };
    DayAttr() : day_(DayAttr::SUNDAY), makeFree_(false),state_change_no_(0) {}
-	DayAttr(Day_t day) : day_(day), makeFree_(false),state_change_no_(0) {}
-   DayAttr(const std::string& str) : day_(DayAttr::getDay(str)), makeFree_(false),state_change_no_(0) {}
-	DayAttr(const boost::gregorian::date& date)
+   explicit DayAttr(Day_t day) : day_(day), makeFree_(false),state_change_no_(0) {}
+   explicit DayAttr(const std::string& str) : day_(DayAttr::getDay(str)), makeFree_(false),state_change_no_(0) {}
+   explicit DayAttr(const boost::gregorian::date& date)
 	: day_(static_cast<DayAttr::Day_t>(date.day_of_week().as_number())), makeFree_(false),state_change_no_(0) {}
 
 	std::ostream& print(std::ostream&) const;

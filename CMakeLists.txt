@@ -84,16 +84,30 @@ if(ENABLE_UI)
             find_package(Qt5Network 5.0.0)
             if (Qt5Network_FOUND)
                 find_package(Qt5Svg 5.0.0)
+                if (Qt5Svg_FOUND)
+                    find_package(Qt5Charts 5.0.0)
+                endif()
             endif()
         endif()
     endif()
 
     if (Qt5Widgets_FOUND AND Qt5Gui_FOUND AND Qt5Network_FOUND AND Qt5Svg_FOUND)
           ecbuild_info("Qt5 version ${Qt5Widgets_VERSION_STRING} was found")
-          set(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIR} ${Qt5Network_INCLUDE_DIR} ${Qt5Svg_INCLUDE_DIR})
+          set(ECFLOW_QT_INCLUDE_DIR ${Qt5Widgets_INCLUDE_DIRS} ${Qt5Gui_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS} ${Qt5Svg_INCLUDE_DIRS})
           set(ECFLOW_QT_LIBRARIES   ${Qt5Widgets_LIBRARIES}    ${Qt5Gui_LIBRARIES}   ${Qt5Network_LIBRARIES} ${Qt5Svg_LIBRARIES})
           set(ECFLOW_QT5 1)
           add_definitions(-DECFLOW_QT5)
+
+          if(Qt5Charts_FOUND)
+              ecbuild_info("Qt5Charts was found - the server log viewer will be built")
+              list(APPEND ECFLOW_QT_INCLUDE_DIR ${Qt5Charts_INCLUDE_DIRS})
+              list(APPEND ECFLOW_QT_LIBRARIES  ${Qt5Charts_LIBRARIES})
+              set(ECFLOW_LOGVIEW 1)
+              add_definitions(-DECFLOW_LOGVIEW)
+          else()
+              ecbuild_info("Qt5Charts was not found - the server log viewer will not be built")
+          endif()
+
     else()
         ecbuild_info("Could not find all required Qt5 packages (Qt5Widgets, Qt5Gui and Qt5Network) - searching for Qt4")
         ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
@@ -138,6 +152,11 @@ if(ENABLE_UI_USAGE_LOG AND (NOT UI_LOG_FILE))
 	ecbuild_error("If ENABLE_UI_USAGE_LOG is set, UI_LOG_FILE must also be set")
 endif()
 
+# sanity check - if ENABLE_UI_USAGE_LOG is ON, we must also have UI_LOG_FILE
+if(ENABLE_UI_USAGE_LOG AND (NOT LOGUI_LOG_FILE))
+    ecbuild_error("If ENABLE_UI_USAGE_LOG is set, LOGUI_LOG_FILE must also be set")
+endif()
+
 # sanity check - if ENABLE_UI_USAGE_LOG is ON, we must also have UI_LOG_SITE_TAG
 if(ENABLE_UI_USAGE_LOG AND (NOT UI_LOG_SITE_TAG))
 	ecbuild_error("If ENABLE_UI_USAGE_LOG is set, UI_LOG_SITE_TAG must also be set")
@@ -161,10 +180,15 @@ if (ENABLE_UI)
 		ecbuild_info( "UI_BACKTRACE_EMAIL_ADDRESS_FILE : ${UI_BACKTRACE_EMAIL_ADDRESS_FILE}" )
 	endif()
 
+    if(LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE)
+        ecbuild_info( "LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE : ${LOGUI_BACKTRACE_EMAIL_ADDRESS_FILE}" )
+    endif()
+
 	ecbuild_info( "ENABLE_UI_USAGE_LOG      : ${ENABLE_UI_USAGE_LOG}" )
 	if(ENABLE_UI_USAGE_LOG)
 		ecbuild_info( "UI_LOG_FILE              : ${UI_LOG_FILE}" )
-		ecbuild_info( "UI_LOG_SITE_TAG          : ${UI_LOG_SITE_TAG}" )
+        ecbuild_info( "LOGUI_LOG_FILE           : ${LOGUI_LOG_FILE}" )
+        ecbuild_info( "UI_LOG_SITE_TAG          : ${UI_LOG_SITE_TAG}" )
 	endif()
 endif()
 ecbuild_info("")
@@ -336,6 +360,7 @@ ecbuild_dont_pack( DIRS
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
+                    cereal-1.2.2
                     Doc
 )
 

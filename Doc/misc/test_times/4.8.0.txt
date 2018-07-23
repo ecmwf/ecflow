@@ -1,4 +1,4 @@
-Jan 2018 (TEXT_ARCHIVE)   4.8.0, leap42
+Jan 2018 (TEXT_ARCHIVE)   4.8.0, leap42, gcc5.3.0
 ============================================================================================
 
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
@@ -36,6 +36,7 @@ sys	0m0.19s
  Time for Defs::check(inlimit resolution)        = 0.755251 result(0)
  time for deleting all nodes                     = 0.406089
  Total elapsed time = 18 seconds
+ 
 + Client/perf_test_large_defs
 Running 1 test case...
 Client:: ...test_perf_for_large_defs:   port(3143)

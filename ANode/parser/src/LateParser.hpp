@@ -20,7 +20,7 @@
 
 class LateParser : public Parser {
 public:
-	LateParser(DefsStructureParser* p) : Parser(p) {}
+   explicit LateParser(DefsStructureParser* p) : Parser(p) {}
 	virtual const char* keyword() const { return "late"; }
 	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
 };

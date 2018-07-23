@@ -40,12 +40,19 @@ BOOST_AUTO_TEST_CASE( test_alias_create )
       suite_ptr s = theDefs.add_suite("test_alias_create");
       family_ptr f = s->add_family("f");
       t = f->add_task("t");
-      t->addMeter(Meter("meter",0,100,100));
-      t->addMeter(Meter("meter1",0,100,100));
-      t->addEvent(Event(1,"event1"));
-      t->addEvent(Event(2,"event2"));
-      t->addLabel(Label("label_name","value"));
-      t->addLabel(Label("label_name1","value"));
+      // ECFLOW-1278  set values for event,meter,labels, then ensure alias creation clears them
+      Meter meter1("met",0,100,100); meter1.set_value(10);
+      Meter meter2("met2",0,100,100); meter2.set_value(10);
+      Event event1(1,"event1"); event1.set_value(true);
+      Event event2(1,"event2"); event2.set_value(true);
+      Label label1("name","value"); label1.set_new_value("new_value");
+      Label label2("name2","value"); label2.set_new_value("new_value");
+      t->addMeter(meter1);
+      t->addMeter(meter2);
+      t->addEvent(event1);
+      t->addEvent(event2);
+      t->addLabel(label1);
+      t->addLabel(label2);
       s->add_variable(Str::ECF_HOME(),ecf_home);
    }
 
@@ -64,10 +71,23 @@ BOOST_AUTO_TEST_CASE( test_alias_create )
    // Test that default node state is QUEUED
    BOOST_CHECK_MESSAGE(alias->state() == NState::QUEUED,"Expected initial state of QUEUED");
 
-   // Test that CHILD specific attributes event, meter, labels are copied over from the task.
+   // Test that CHILD specific attributes event, meter, labels are copied over from the task  AND that they are reset.
    BOOST_CHECK_MESSAGE(alias->meters().size() == 2,"Expected 2 meter to be copied from task but found " << alias->meters().size());
    BOOST_CHECK_MESSAGE(alias->events().size() == 2,"Expected 2 events to be copied from task but found " << alias->events().size());
    BOOST_CHECK_MESSAGE(alias->labels().size() == 2,"Expected 2 labels to be copied from task but found " << alias->labels().size());
+   BOOST_FOREACH(const Meter& meter, alias->meters()){BOOST_CHECK_MESSAGE(meter.value() == meter.min(),"Expected meter value " << meter.min() << " but found " << meter.value() << " for " << meter.dump());}
+   BOOST_FOREACH(const Event& event, alias->events()){BOOST_CHECK_MESSAGE(!event.value(),"Expected " << event.dump() << " to be clear");}
+   BOOST_FOREACH(const Label& label, alias->labels()){BOOST_CHECK_MESSAGE(label.new_value().empty(),"Expected " << label.dump() << " to be clear");}
+
+
+   // Ensure Task state was not changed
+   BOOST_CHECK_MESSAGE(t->meters().size() == 2,"Did not expect task state to change, expected 2 meter but found: " << t->meters().size());
+   BOOST_CHECK_MESSAGE(t->events().size() == 2,"Did not expect task state to change, expected 2 events but found:" << t->events().size());
+   BOOST_CHECK_MESSAGE(t->labels().size() == 2,"Did not expect task state to change, expected 2 labels but found:" << t->labels().size());
+   BOOST_FOREACH(const Meter& meter, t->meters()){BOOST_CHECK_MESSAGE(meter.value() == 10,"Expected meter value 10 but found " << meter.value() << " for " << meter.dump());}
+   BOOST_FOREACH(const Event& event, t->events()){BOOST_CHECK_MESSAGE(event.value(),"Expected " << event.dump() << " to be set");}
+   BOOST_FOREACH(const Label& label, t->labels()){BOOST_CHECK_MESSAGE(label.new_value() == "new_value","Expected label with 'new_value' but found " << label.new_value());}
+
 
    // test that user variables passed in got added as Variables
    BOOST_CHECK_MESSAGE(alias->variables().size() == 2,"Expected 2 variables to be create from input args but found " << alias->variables().size());

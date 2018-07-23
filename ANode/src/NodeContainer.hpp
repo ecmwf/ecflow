@@ -25,7 +25,7 @@ class NodeContainer : public Node {
 protected:
    NodeContainer& operator=(const NodeContainer&);
 public:
-   NodeContainer( const std::string& name );
+   explicit NodeContainer( const std::string& name );
    NodeContainer(const NodeContainer& );
 	NodeContainer();
 	virtual ~NodeContainer();
@@ -49,6 +49,7 @@ public:
  	virtual void calendarChanged(const ecf::Calendar&,std::vector<node_ptr>& auto_cancelled_nodes,const ecf::LateAttr* inherited_late);
  	virtual bool resolveDependencies(JobsParam& );
  	virtual bool check(std::string& errorMsg, std::string& warningMsg) const;
+   virtual void invalidate_trigger_references() const;
 
    task_ptr add_task(const std::string& task_name);
    family_ptr add_family(const std::string& family_name);
@@ -61,10 +62,10 @@ public:
  	virtual node_ptr findImmediateChild(const std::string& name,size_t& child_pos) const;
    virtual node_ptr find_node_up_the_tree(const std::string& name) const;
 
-	virtual node_ptr
- find_relative_node(const std::vector<std::string>& pathToNode);
+	virtual node_ptr find_relative_node(const std::vector<std::string>& pathToNode);
 	void find_closest_matching_node( const std::vector< std::string >& pathToNode, int indexIntoPathNode, node_ptr& closest_matching_node );
 
+   node_ptr find_by_name(const std::string& name) const;
 	family_ptr findFamily(const std::string& familyName) const;
 	task_ptr findTask(const std::string& taskName) const;
 	void getAllFamilies(std::vector<Family*>&) const;

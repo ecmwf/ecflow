@@ -67,19 +67,24 @@ std::string File::which(const std::string& file)
 			path = paths[i];
 			path += '/';
 			path += file;
-			if (fs::exists(path)) {
-				return paths[i];
+			try {
+			   if (fs::exists(path)) {
+			      return paths[i];
+			   }
+			}
+			catch(...) {
+			   // could be permission denied.
 			}
 		}
 	}
 	return std::string();
 }
 
-std::string File::getExt(const std::string& s)
+std::string File::getExt(const std::string& file)
 {
-	size_t i = s.rfind('.',s.length());
+	size_t i = file.rfind('.',file.length());
 	if (i != std::string::npos) {
-		return s.substr(i+1);
+		return file.substr(i+1);
 	}
 	return string();
 }

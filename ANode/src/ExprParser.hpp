@@ -26,7 +26,7 @@
 /// It will own the AST unless specifically released calling ast();
 class ExprParser : private boost::noncopyable {
 public:
-	ExprParser(const std::string& expression);
+   explicit ExprParser(const std::string& expression);
 
 	/// Parse the expression, return true if parse OK false otherwise
 	/// if false is returned, and error message is returned
@@ -48,7 +48,7 @@ private:
 // But the simple expression do form a very large subset
 class SimpleExprParser : private boost::noncopyable {
 public:
-   SimpleExprParser(const std::string& expression) : expr_(expression) {}
+   explicit SimpleExprParser(const std::string& expression) : expr_(expression) {}
 
    /// Parse the expression, return true if parse OK false otherwise
    bool doParse();

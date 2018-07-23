@@ -33,7 +33,7 @@
 // =======================================================================
 struct MyDefsFixture {
 
-	MyDefsFixture(const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER()) : defsfile_(port)
+   explicit MyDefsFixture(const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER()) : defsfile_(port)
 	{
 		suite_ptr  suite = create_suite();
 

@@ -26,7 +26,7 @@ namespace ecf {
 
 class ResolveExternsVisitor : public NodeTreeVisitor {
 public:
-	ResolveExternsVisitor(Defs*);
+   explicit ResolveExternsVisitor(Defs*);
 
 	virtual bool traverseObjectStructureViaVisitors() const { return true;}
 	virtual void visitDefs(Defs*);

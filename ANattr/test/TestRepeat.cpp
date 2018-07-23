@@ -517,6 +517,18 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_errors )
 {
    cout << "ANattr:: ...test_repeat_date_errors \n";
 
+   std::vector<std::string> empty;
+   std::vector<std::string> stringList;stringList.push_back("a");stringList.push_back("b");
+   BOOST_REQUIRE_THROW( RepeatEnumerated("",stringList),std::runtime_error); // empty name
+   BOOST_REQUIRE_THROW( RepeatEnumerated(" ",stringList),std::runtime_error); // empty name
+   BOOST_REQUIRE_THROW( RepeatEnumerated("*",stringList),std::runtime_error); // illegal name
+   BOOST_REQUIRE_THROW( RepeatString("",stringList),std::runtime_error);      // empty name
+   BOOST_REQUIRE_THROW( RepeatString(" ",stringList),std::runtime_error);     // empty name
+   BOOST_REQUIRE_THROW( RepeatString("!£$%^&*()",stringList),std::runtime_error);     // illegal name
+   BOOST_REQUIRE_THROW( RepeatEnumerated("AEnum",empty),std::runtime_error); // empty enumerations
+   BOOST_REQUIRE_THROW( RepeatString("AEnum",empty),std::runtime_error);     // empty string list
+
+
    BOOST_REQUIRE_THROW( RepeatDate("",20090916,20090920,1),std::runtime_error);
    BOOST_REQUIRE_THROW( RepeatDate("YMD",200909161,20090920,1),std::runtime_error); // start > 8
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090916,200909201,1),std::runtime_error); // end > 8
@@ -528,6 +540,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_errors )
 
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090920,20090916,1),std::runtime_error);  //  start day > end day, and delta > 0
    BOOST_REQUIRE_THROW( RepeatDate("YMD",20090916,20090920,-1),std::runtime_error);  //  start day < end day, and delta < 0
+
 
    RepeatDate date("YMD",20150514,20150730,7);
    BOOST_REQUIRE_THROW( date.changeValue(20150513),std::runtime_error);   // outside of range

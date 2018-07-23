@@ -105,7 +105,11 @@
                 "font" : {
  					"label" : "Font",
  					"default": "font(,)"
- 				} 				
+                },
+                "popupFilter" : {
+                    "label" : "Popup filter dialog when new table view is added",
+                    "default" : "true"
+                }
 			},
 
             "attribute" : {

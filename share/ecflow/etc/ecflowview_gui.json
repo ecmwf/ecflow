@@ -151,7 +151,8 @@
                         "title" : "Options",
                         "prefix" : "view.table",
 
-                        "line" : "background"
+                        "line" : "background",
+                        "line" : "popupFilter"
                     }
                 },
                 "tab" : {

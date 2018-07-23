@@ -37,8 +37,8 @@ public:
 	static std::string to_string(int status);
 	static std::string to_string(SState::State);
 
-   static SState::State toState(const std::string& state);
-   static bool isValid(const std::string& state);
+   static SState::State toState(const std::string&);
+   static bool isValid(const std::string&);
 
 private:
 	SState();

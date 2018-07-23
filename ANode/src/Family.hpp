@@ -21,7 +21,7 @@ class FamGenVariables;
 
 class Family : public NodeContainer {
 public:
-   Family( const std::string& name ) : NodeContainer(name),fam_gen_variables_(NULL) {}
+   explicit Family( const std::string& name ) : NodeContainer(name),fam_gen_variables_(NULL) {}
    Family() : fam_gen_variables_(NULL)  {}
    Family(const Family& rhs) : NodeContainer(rhs), fam_gen_variables_(NULL) {}
    Family& operator=(const Family&);
@@ -75,7 +75,7 @@ std::ostream& operator<<(std::ostream& os, const Family&);
 // This improves client->server down load times by avoiding thousands of string constructions
 class FamGenVariables : private boost::noncopyable {
 public:
-   FamGenVariables(const Family*);
+   explicit FamGenVariables(const Family*);
 
    void update_generated_variables() const;
    const Variable& findGenVariable(const std::string& name) const;

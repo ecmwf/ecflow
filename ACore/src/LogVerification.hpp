@@ -32,7 +32,7 @@ public:
 	/// Will compare the input log file, with gold reference.
  	/// Will compare the node state changes only
     /// Compensate for states that are scheduler dependent
- 	static bool compareNodeStates( const std::string& logfile, const std::string& goldenRefLogFile, std::string& errormsg);
+ 	static bool compareNodeStates( const std::string& logfile, const std::string& goldenRefLogFile, std::string& errorMsg);
 
 private:
 	LogVerification() {}
