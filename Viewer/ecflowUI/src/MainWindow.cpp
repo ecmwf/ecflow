@@ -58,7 +58,10 @@
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
 int MainWindow::maxWindowNum_=25;
+
+#ifdef ECFLOW_LOGVIEW
 LogViewerCom* MainWindow::logCom_=NULL;
+#endif
 
 MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     QMainWindow(parent),
@@ -690,8 +693,10 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 #endif
         quitStarted_=true;
 
+#ifdef ECFLOW_LOGVIEW
         if(logCom_)
             logCom_->closeApp();
+#endif
 
 		//Save browser settings
 		MainWindow::save(topWin);
