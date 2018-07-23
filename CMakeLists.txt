@@ -357,6 +357,8 @@ ecbuild_dont_pack( DIRS
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
+                    build_scripts/ecflow_asan.supp build_scripts/ecflow_lsan.supp build_scripts/run-clang-tidy.py
+                    cereal-1.2.2
                     Doc
 )
 
