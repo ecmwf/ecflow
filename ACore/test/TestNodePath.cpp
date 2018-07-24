@@ -134,7 +134,8 @@ BOOST_AUTO_TEST_CASE( test_extractHostPort )
 //	// Timing using:
 //	//    StringSplitter : 6.35
 //	//    Str::split     : 8.64
-//	// See: NodePath::split
+//	// See: Str::split -> define USE_STRINGSPLITTER
+//
 //	boost::timer timer;  // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 //	int n= 10000000 ;
 //	std::vector<std::string> thePath;thePath.reserve(20);

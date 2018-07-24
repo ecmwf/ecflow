@@ -27,7 +27,12 @@ using namespace std;
 using namespace ecf;
 using namespace boost;
 
+// **************************************************************************************************************
+// IMPORTANT: Str:split uses StringSplitter:
+//            to run these tests, please switch off Str.cpp::USE_STRINGSPLITTER
+// **************************************************************************************************************
 //#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
+
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
@@ -39,7 +44,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
    // boost::split:        4.34
    // Str::split:          2.47
    // make_split_iterator  4.13
-   // boost::string_ref    1.86
+   // boost::string_view    1.86
    std::vector<std::string> result;
    std::string line = "This is a long string that is going to be used to test the performance of splitting with different Implementations   extra   empty tokens   ";
    size_t times = 1000000;
@@ -88,7 +93,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
       cout << "Time for make_split_iterator::split " << times << " times = " << timer.elapsed() << "\n";
    }
 
-   { // boost::string_ref
+   { // boost::string_view
       boost::timer timer;
       for (size_t i = 0; i < times; i++) {
          StringSplitter string_splitter(line);
@@ -100,7 +105,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          }
          //cout << "StringSplitter:: reconstructed " << reconstructed << "\n";
       }
-      cout << "Time for boost::split_ref " << times << " times = " << timer.elapsed() << "\n";
+      cout << "Time for boost::string_view " << times << " times = " << timer.elapsed() << "\n";
    }
 }
 
@@ -110,7 +115,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
 //   Time for boost::split 2001774 times =               3.71848
 //   Time for Str::split 2001774 times =                 2.06476
 //   Time for boost::make_split_iterator 2001774 times = 4.24187
-//   Time for boost::split_ref 2001774 times =           1.66037
+//   Time for boost::string_view 2001774 times =           1.66037
 
    // Now test performance of splitting with a big DEFS file
    std::string path = "/var/tmp/ma0/BIG_DEFS/vsms2.31415.def";
@@ -171,7 +176,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
                reconstructed += " ";
             }
          }
-         cout << "Time for boost::split_ref " << file_contents.size() << " times = " << timer.elapsed() << "\n";
+         cout << "Time for boost::string_view " << file_contents.size() << " times = " << timer.elapsed() << "\n";
       }
    }
 }

@@ -14,9 +14,9 @@
 // Description : This class is used as a helper class
 //============================================================================
 #include <boost/algorithm/string.hpp>
-
 #include <boost/lexical_cast.hpp>
 
+#include "StringSplitter.hpp"
 #include "Str.hpp"
 
 using namespace std;
@@ -149,8 +149,12 @@ void Str::replaceall(std::string& subject, const std::string& search, const std:
    boost::replace_all(subject, search, replace);
 }
 
+#define USE_STRINGSPLITTER 1
 void Str::split(const std::string& line, std::vector< std::string >& tokens,const std::string& delimiters )
 {
+#ifdef USE_STRINGSPLITTER
+   StringSplitter::split(line,tokens,delimiters);
+#else
 	// ***************************************************************************
 	//	Time for split 1000000 times = 5.81
 
@@ -165,6 +169,7 @@ void Str::split(const std::string& line, std::vector< std::string >& tokens,cons
 		lastPos = line.find_first_not_of( delimiters, pos );       // Skip delimiters.  Note the "not_of"
 		pos = line.find_first_of( delimiters, lastPos );           // Find next "non-delimiter"
 	}
+#endif
 
 //	// ***************************************************************************
 //	// Time for split 1000000 times = 11.66

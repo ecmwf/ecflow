@@ -126,12 +126,12 @@ static void check(const std::string& line,
 }
 
 static void check(const std::string& line,
-                  const std::vector<boost::string_ref>& result2,
+                  const std::vector<boost::string_view>& result2,
                   const std::vector<std::string>& expected )
 {
    std::vector<std::string> result;
    for(size_t i =0; i < result2.size(); ++i) {
-      boost::string_ref ref = result2[i]; result.push_back(string(ref.begin(),ref.end()));
+      boost::string_view ref = result2[i]; result.push_back(string(ref.begin(),ref.end()));
    }
    check(line,result,expected);
 }
@@ -152,7 +152,7 @@ BOOST_AUTO_TEST_CASE( test_str_split )
 
 	std::vector<std::string> expected;
    std::vector<std::string> result;
-   std::vector<boost::string_ref> result2;
+   std::vector<boost::string_view> result2;
 
 	std::string line = "This is a string";
 	expected.push_back("This"); expected.push_back("is"); expected.push_back("a"); expected.push_back("string");

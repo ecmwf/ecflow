@@ -33,7 +33,7 @@ static void check(const std::string& line,
 {
    std::vector<std::string> result;
    while (!string_splitter.finished()) {
-      boost::string_ref ref = string_splitter.next();
+      boost::string_view ref = string_splitter.next();
       //std::cout << "ref:'" << ref << "'\n";
       result.push_back(std::string(ref.begin(),ref.end()));
    }
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
 //
 //   //filter tokens
 //   StringSplitter sp3(input);
-//   std::vector<string_ref> tokens;
+//   std::vector<string_view> tokens;
 //   std::copy_if(sp3.begin(), sp3.end(), std::back_inserter(tokens),
 //                [](auto x) { return x.ends_with(".com"); });
 //}
