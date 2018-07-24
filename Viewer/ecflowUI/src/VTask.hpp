@@ -33,7 +33,7 @@ class VTaskObserver;
 class VTask;
 typedef std::shared_ptr<VTask> VTask_ptr;
 
-class VTask  : public boost::enable_shared_from_this<VTask>
+class VTask  : public std::enable_shared_from_this<VTask>
 {
 public:
 	enum Type {NoTask,CommandTask,OverviewTask,WhyTask,ManualTask,ScriptTask,

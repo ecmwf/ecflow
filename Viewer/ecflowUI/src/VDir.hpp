@@ -74,6 +74,6 @@ protected:
 };
 
 class VDir;
-typedef boost::shared_ptr<VDir> VDir_ptr;
+typedef std::shared_ptr<VDir> VDir_ptr;
 
 #endif

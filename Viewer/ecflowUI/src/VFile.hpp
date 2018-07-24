@@ -20,7 +20,7 @@
 class VFile;
 typedef std::shared_ptr<VFile> VFile_ptr;
 
-class VFile : public boost::enable_shared_from_this<VFile>
+class VFile : public std::enable_shared_from_this<VFile>
 {
 public:
 	virtual ~VFile();

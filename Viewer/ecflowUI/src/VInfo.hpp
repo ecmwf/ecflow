@@ -102,7 +102,7 @@ protected:
 };
 
 // Implements the info object for server selections
-class VInfoServer : public VInfo, public boost::enable_shared_from_this<VInfo>
+class VInfoServer : public VInfo, public std::enable_shared_from_this<VInfo>
 {
 public:
 	bool isServer() {return true;}
@@ -122,7 +122,7 @@ protected:
 
 
 // Implements the info object for node selections
-class VInfoNode: public VInfo, public boost::enable_shared_from_this<VInfo>
+class VInfoNode: public VInfo, public std::enable_shared_from_this<VInfo>
 {
 public:
 	bool isNode() {return true;}
@@ -144,7 +144,7 @@ protected:
 
 
 // Implements the info  base class for attribute selections
-class VInfoAttribute: public VInfo, public boost::enable_shared_from_this<VInfo>
+class VInfoAttribute: public VInfo, public std::enable_shared_from_this<VInfo>
 {
 public:
     ~VInfoAttribute();
