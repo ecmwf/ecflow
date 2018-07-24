@@ -132,7 +132,8 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # CLANG    -ftemplate-depth=512
 #
 CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-address"
- 
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations"
+
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
@@ -147,12 +148,9 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 
     CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined"
 
-	#CXX_FLAGS=""  # latest clang with latest boost, should not need any warning suppression
+	#CXX_FLAGS="-std=c++14 -stdlib=libc++"  # latest clang with latest boost, should not need any warning suppression
 	#cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
-	
-	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
-	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
-	fi
+	#cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-stdlib=libc++'"  # LINK FLAGS
 fi
 
 # ==============================================================================================
@@ -320,8 +318,8 @@ fi
 # cmake -C $workspace/ecflow/bamboo/macosx1010-flags.cmake $source_dir \
 #        -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
 #  .....
-# For gcc 6.3.0 default  
-#  -DCMAKE_CXX_STANDARD=98     # add -std=gnu++98
+#
+# DCMAKE_EXPORT_COMPILE_COMMANDS create compiler database. used by clang-tidy and others
 
 $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
@@ -330,6 +328,7 @@ $ecbuild $source_dir \
             -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
             -DSITE_SPECIFIC_SERVER_SCRIPT="/home/ma/emos/bin/ecflow_site.sh" \
             ${cmake_extra_options} \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
             ${gui_options} \
             ${ssl_options} \
             ${log_options} \

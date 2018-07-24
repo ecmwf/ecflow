@@ -14,6 +14,7 @@
 //============================================================================
 #include "TimeStamp.hpp"
 #include <cstdio>
+#include <ctime>
 
 using namespace std;
 
@@ -29,7 +30,7 @@ std::string TimeStamp::now()
 void TimeStamp::now(std::string& time_stamp)
 {
    char t_fmt[255];
-   time_t stamp = time( NULL);
+   time_t stamp = std::time( NULL);
    struct tm *tod = localtime(&stamp);
    sprintf(t_fmt, "[%02d:%02d:%02d %d.%d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
            tod->tm_mday, tod->tm_mon + 1, tod->tm_year + 1900);
