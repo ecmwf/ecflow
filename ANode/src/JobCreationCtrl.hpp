@@ -18,7 +18,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
 
 #include "NodeFwd.hpp"
@@ -27,7 +26,7 @@
 // Used as a utility class for testing Job creation
 // Collates data during the node tree traversal
 // Note: For testing purposes we do not always want to create jobs
-class JobCreationCtrl : public boost::enable_shared_from_this<JobCreationCtrl>, private boost::noncopyable {
+class JobCreationCtrl : public std::enable_shared_from_this<JobCreationCtrl>, private boost::noncopyable {
 public:
 	JobCreationCtrl() : verbose_(false) {}
 

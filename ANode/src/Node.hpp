@@ -31,7 +31,6 @@
 #include <set>
 #include <limits>
 
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
 #include <boost/foreach.hpp>                      // used so often just placed here for convenience
 
