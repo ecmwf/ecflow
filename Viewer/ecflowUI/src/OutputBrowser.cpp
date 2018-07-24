@@ -8,6 +8,7 @@
 //
 //============================================================================
 
+#include <assert.h>
 #include "OutputBrowser.hpp"
 
 #include <QtGlobal>
