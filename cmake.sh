@@ -193,9 +193,9 @@ fi
 
 if [[ "$python3_arg" = python3 ]] ; then
     module unload python
-    module load python3/3.5.1-01
-    cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.5.1-01/bin/python3.5"
-    cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0.python3"
+    module load python3/3.6.5-01
+    cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
+    #cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0.python3"
 fi
  
 # ====================================================================================
