@@ -219,7 +219,7 @@ set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON)
 
 if ( ENABLE_PYTHON )
-	find_package( Boost 1.64.0 REQUIRED COMPONENTS python27 system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+	find_package( Boost 1.64.0 REQUIRED COMPONENTS python system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 else()
 	find_package( Boost 1.64.0 REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 endif()

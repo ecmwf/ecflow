@@ -24,7 +24,7 @@ lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-d.a ;
 lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d.a ;
 lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d.a ;
-lib boost_python27_static  : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt-d.a ;
+lib boost_python_static  : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt-d.a ;
 
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
 lib boost_thread : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
@@ -33,7 +33,7 @@ lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
 lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
-lib boost_python27_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
+lib boost_python_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
 
 # Lib for run time checks, use for debug builds only
 lib rtc : :  <variant>debug <file>/opt/langtools/lib/hpux32/librtc.so ;
