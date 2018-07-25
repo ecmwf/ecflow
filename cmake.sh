@@ -146,9 +146,9 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	module load clang/5.0.1
     cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
 
-    CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined"
+    CXX_FLAGS="$CXX_FLAGS -std=c++14  -stdlib=libc++ -Wno-expansion-to-defined"
 
-	#CXX_FLAGS="-std=c++14 -stdlib=libc++"  # latest clang with latest boost, should not need any warning suppression
+    # latest clang with latest boost, should not need any warning suppression
 	#cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
 	#cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-stdlib=libc++'"  # LINK FLAGS
 fi

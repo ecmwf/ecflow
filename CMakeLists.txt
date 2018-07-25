@@ -219,7 +219,7 @@ set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON)
 
 if ( ENABLE_PYTHON )
-	find_package( Boost 1.53.0 REQUIRED COMPONENTS python system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+	find_package( Boost 1.53.0 REQUIRED COMPONENTS python27 system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 else()
 	find_package( Boost 1.53.0 REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 endif()
@@ -231,6 +231,7 @@ endif()
 #    ${Boost_FILESYSTEM_LIBRARY}
 #    ${Boost_PROGRAM_OPTIONS_LIBRARY}
 #    ${Boost_DATE_TIME_LIBRARY}
+#    ${Boost_PYTHON_LIBRARY_RELEASE} )
 #
 #    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
 #    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 

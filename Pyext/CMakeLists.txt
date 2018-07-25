@@ -52,9 +52,11 @@ ecbuild_add_library( TARGET    ecflow
 
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs 
-if (   PYTHONLIBS_FOUND )             
-   target_link_libraries(ecflow debug      ${Boost_PYTHON_LIBRARY_DEBUG}   )
-   target_link_libraries(ecflow optimized  ${Boost_PYTHON_LIBRARY_RELEASE} )
+# Currently we only build optimised boost libs
+if ( PYTHONLIBS_FOUND )             
+   #target_link_libraries(ecflow debug      ${Boost_PYTHON_LIBRARY_DEBUG}   )
+   #target_link_libraries(ecflow optimized  ${Boost_PYTHON_LIBRARY_RELEASE} )
+   target_link_libraries(ecflow ${Boost_PYTHON_LIBRARY_RELEASE} )
 endif()
 
 #
