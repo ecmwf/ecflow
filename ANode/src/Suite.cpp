@@ -788,10 +788,10 @@ void SuiteGenVariables::update_generated_variables() const
 
 
    char smstime[255];
-   sprintf(smstime,"%02ld%02ld", time_of_day.hours(),time_of_day.minutes());
+   sprintf(smstime,"%02d%02d", time_of_day.hours(),time_of_day.minutes());
    genvar_time_.set_value( smstime );
 
-   sprintf(smstime,"%02ld:%02ld", time_of_day.hours(),time_of_day.minutes());
+   sprintf(smstime,"%02d:%02d", time_of_day.hours(),time_of_day.minutes());
    genvar_ecf_time_.set_value( smstime );
 
    //cout << "genvar_time_ = " << genvar_time_.theValue() << "\n";
