@@ -31,16 +31,16 @@
 # PYTHON3:
 # Build:
 #   1/ module load python3, this update the $PATH
-#   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
+#   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.6.5-01/bin/python3
 #   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
 #
-#      using python 
+#     using python 
 #       : 3.6 
-#       : /usr/local/apps/python3/3.6.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
-#       : /usr/local/apps/python3/3.6.1-01/include/python3.6m # include directory
+#       : /usr/local/apps/python3/3.6.5-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
+#       : /usr/local/apps/python3/3.6.5-01/include/python3.6m # include directory || fatal error: pyconfig.h: No such file or directory
 #       ; 
 #       ...
-#      option.set includedir : /usr/local/apps/python3/3.6.1-01/include/python3.6m ;  # ***MAKE*** sure this is set
+#      option.set includedir : /usr/local/apps/python3/3.6.1-01/include/python3.6m ;  # This might be required if include above does not work
 #
 #     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
 #     python 2.7 and 3.5, YUK, took ages to debug
@@ -92,7 +92,7 @@ if ! [ python.configured ]
     #     :  # condition
     #     ;
     #using python ;
-    #using python : 3.5 : /usr/local/apps/python3/3.5.1-01/bin/python3 : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;
+    #using python : 3.6 : /usr/local/apps/python3/3.6.5-01/bin/python3 : /usr/local/apps/python3/3.6.5-01/include/python3.6m ;
 }
 
 # Specify the path to the Boost project.  If you move this project,
