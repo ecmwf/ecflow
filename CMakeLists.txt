@@ -61,7 +61,6 @@ option( ENABLE_ALL_TESTS           "This includes performance/migration/regressi
 option( ENABLE_UI_BACKTRACE        "Print a UI debug backtrace"         OFF ) 
 option( ENABLE_UI_USAGE_LOG        "Enable UI usage logging"            OFF )
 option( ENABLE_SSL                 "Enable SSL encrypted communication" OFF )
-option( ENABLE_SECURE_USER         "Enable passwords for user"          OFF )
 option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
 
 # =========================================================================================
@@ -166,7 +165,6 @@ ecbuild_info( "ENABLE_UI                  : ${ENABLE_UI}" )
 ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS   : ${ENABLE_STATIC_BOOST_LIBS}" )
 ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL}" )
-ecbuild_info( "ENABLE_SECURE_USER         : ${ENABLE_SECURE_USER}" )
 
 
 if (ENABLE_UI)
