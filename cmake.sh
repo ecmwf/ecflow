@@ -192,10 +192,10 @@ if [[ "$ARCH" = cray ]] ; then
 fi
 
 if [[ "$python3_arg" = python3 ]] ; then
+    # versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
     module unload python
     module load python3/3.6.5-01
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
-    #cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/var/tmp/ma0/boost/boost_1_53_0.python3"
 fi
  
 # ====================================================================================
