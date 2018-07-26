@@ -206,7 +206,6 @@ foreach(BOOST_PATH_TO_SEARCH ${BOOST_PATH} ${BOOST_ROOT} $ENV{BOOST_ROOT})
     list(REMOVE_DUPLICATES CMAKE_PREFIX_PATH)
 endforeach()
 
-
 # Ecflow test require statics libs for boost < 1.59, otherwise get double free error.
 # To use static boost python ensure that Boost_USE_STATIC_LIBS is set on.
 # See: http://www.cmake.org/cmake/help/v3.0/module/FindBoost.html
@@ -216,28 +215,23 @@ endif()
 set(Boost_USE_MULTITHREADED      ON)
 set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
-#set(Boost_DEBUG                 ON)
+#set(Boost_DEBUG                 ON) # Set to ON to enable debug output from FindBoost
 
+find_package( Boost 1.64.0 REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 if ( ENABLE_PYTHON )
-	find_package( Boost 1.64.0 REQUIRED COMPONENTS python27 python36 system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
-else()
-	find_package( Boost 1.64.0 REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+    if ( Boost_MINOR_VERSION GREATER 66 )
+	   find_package( Boost 1.64.0 REQUIRED COMPONENTS python27 python36 )
+	else()
+       find_package( Boost 1.64.0 REQUIRED COMPONENTS python )
+	endif()
 endif()
-
-# Available boost lib should be referenced as:
-#
-#    ${Boost_SYSTEM_LIBRARY}
-#    ${Boost_THREAD_LIBRARY}
-#    ${Boost_FILESYSTEM_LIBRARY}
-#    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-#    ${Boost_DATE_TIME_LIBRARY}
-#    ${Boost_PYTHON27_LIBRARY_RELEASE} || ${Boost_PYTHON36_LIBRARY_RELEASE}
-#    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
-#    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
 
 #ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 
+# =======================================================================================
+# ??
+# =======================================================================================
 if (NOT "${CMAKE_PREFIX_PATH}" EQUAL "${_CMAKE_PREFIX_PATH_BACKUP}")
     set (CMAKE_PREFIX_PATH ${_CMAKE_PREFIX_PATH_BACKUP}) # restore CMAKE_PREFIX_PATH
     ecbuild_debug("Resetting CMAKE_PREFIX_PATH to ${CMAKE_PREFIX_PATH}")

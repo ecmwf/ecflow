@@ -1,6 +1,9 @@
 message( STATUS "------------------------------------------------------" )
 
 if(Boost_FOUND)
+    message( STATUS " Boost_MAJOR_VERSION               : [${Boost_MAJOR_VERSION}]" )
+    message( STATUS " Boost_MINOR_VERSION               : [${Boost_MINOR_VERSION}]" )
+    message( STATUS " Boost_SUBMINOR_VERSION            : [${Boost_SUBMINOR_VERSION}]" )
     message( STATUS " Boost_INCLUDE_DIRS                : [${Boost_INCLUDE_DIRS}]" )
     message( STATUS " Boost_LIBRARY_DIR_RELEASE         : [${Boost_LIBRARY_DIR_RELEASE}]" )
     message( STATUS " Boost_SYSTEM_LIBRARY              : [${Boost_SYSTEM_LIBRARY}]" )

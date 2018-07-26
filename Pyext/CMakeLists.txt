@@ -56,10 +56,14 @@ ecbuild_add_library( TARGET    ecflow
 #target_link_libraries(ecflow optimized  ${Boost_PYTHON_LIBRARY_RELEASE} )
    
 # Currently we only build optimised boost libs
-if (PYTHON_VERSION_MAJOR EQUAL 2)
-    target_link_libraries(ecflow ${Boost_PYTHON27_LIBRARY_RELEASE} )
+if ( Boost_MINOR_VERSION GREATER 66 )
+    if (PYTHON_VERSION_MAJOR EQUAL 2)
+        target_link_libraries(ecflow ${Boost_PYTHON27_LIBRARY_RELEASE} )
+    else()
+        target_link_libraries(ecflow ${Boost_PYTHON36_LIBRARY_RELEASE} )
+    endif()
 else()
-    target_link_libraries(ecflow ${Boost_PYTHON36_LIBRARY_RELEASE} )
+    target_link_libraries(ecflow ${Boost_PYTHON_LIBRARY_RELEASE} )
 endif()
 
 #
