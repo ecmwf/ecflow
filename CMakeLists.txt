@@ -13,7 +13,7 @@
 #       -DBUILD_SHARED_LIBS=OFF
 ##############################################################################
 
-cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
+cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
 
 # ===========================================================================
 # Change the default if NO CMAKE_BUILD_TYPE specified
@@ -219,7 +219,7 @@ set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON)
 
 if ( ENABLE_PYTHON )
-	find_package( Boost 1.64.0 REQUIRED COMPONENTS python system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+	find_package( Boost 1.64.0 REQUIRED COMPONENTS python27 python36 system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 else()
 	find_package( Boost 1.64.0 REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 endif()
@@ -231,8 +231,7 @@ endif()
 #    ${Boost_FILESYSTEM_LIBRARY}
 #    ${Boost_PROGRAM_OPTIONS_LIBRARY}
 #    ${Boost_DATE_TIME_LIBRARY}
-#    ${Boost_PYTHON_LIBRARY_RELEASE} )
-#
+#    ${Boost_PYTHON27_LIBRARY_RELEASE} || ${Boost_PYTHON36_LIBRARY_RELEASE}
 #    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
 #    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
 
@@ -295,18 +294,21 @@ if (ENABLE_SERVER)
 endif()
 
 if (ENABLE_PYTHON)
-    ecbuild_find_python( VERSION 2.6 REQUIRED )
+    ecbuild_find_python( VERSION 2.7 REQUIRED )
     # ecbuild_debug_var(PYTHON_LIBRARIES)
     # ecbuild_debug_var(PYTHON_INCLUDE_DIR)
     
     if( NOT PYTHON_FOUND )
         ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
     endif()
+    if( NOT PYTHONLIBS_FOUND  )
+        ecbuild_error("ecflow python extension is enabled, but python libraries not found")
+    endif()
 
-    if ( ENABLE_PYTHON_PTR_REGISTER )
+	if ( ENABLE_PYTHON_PTR_REGISTER )
         add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
     endif()
-	
+	         
     add_subdirectory( Pyext )
 endif()	
 	

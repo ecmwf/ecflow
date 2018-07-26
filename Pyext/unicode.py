@@ -2,6 +2,6 @@
 
 import sys
 if sys.maxunicode > 65535:
-    print 'UCS4 build'
+    print('UCS4 build')
 else:
-    print 'UCS2 build'
+    print('UCS2 build')

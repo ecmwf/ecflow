@@ -147,19 +147,6 @@ echo "using compiler $tool with build $1 variants "
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=debug -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=debug -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=debug  -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=debug -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=debug  -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-thread variant=debug  -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-regex variant=debug  -j2   # ecflowUi
- 
-
-
-# ========================================================================
-# Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
-# ========================================================================
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=release  -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release   -j2
@@ -229,11 +216,9 @@ else
     #   To check the build make sure we don't have symbol pulled in from python2 libs
     #   cd $BOOST_ROOT/stage/lib
     #   nm -D *python* | grep PyClass_Type                                                # PyClass_Type is a symbol *ONLY* used in python2.x
-    #   nm -D /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
+    #   nm -D  /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
     # ===============================================================================
                
-#   ./bjam toolset=$tool link=shared variant=debug   "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
-#   ./bjam toolset=$tool link=static variant=debug   "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
-   ./bjam toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
-   ./bjam toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+    ./bjam toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+    ./bjam toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
