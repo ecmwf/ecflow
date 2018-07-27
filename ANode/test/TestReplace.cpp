@@ -17,6 +17,13 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Ecf.hpp"
+#include "Str.hpp"
+
+#include "JobsParam.hpp"
+#include "Jobs.hpp"
+#include "System.hpp"
+#include "File.hpp"
+#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -691,10 +698,97 @@ BOOST_AUTO_TEST_CASE( test_replace_task_ECFLOW_1135 )
       BOOST_REQUIRE_MESSAGE( !replaced_node, "Expected replace to fail" );
       BOOST_REQUIRE_MESSAGE( !errorMsg.empty() , "Expected error message" );
    }
+}
 
+BOOST_AUTO_TEST_CASE( test_trigger_references_during_replace )
+{
+   cout << "ANode:: ...test_trigger_references_during_replace\n"; // ECFLOW-1319
+
+   // This is used to check that the trigger references in AST, are invalidated after replace.
+
+   Defs serverDefs;
+   suite_ptr server_suite;
+   {
+      server_suite = serverDefs.add_suite( "suite"  );
+      server_suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/../includes" ) );
+      server_suite->addVariable( Variable( "SLEEPTIME", "1" ) );
+      server_suite->addVariable( Variable( "ECF_CLIENT_EXE_PATH",  "a/made/up/path" ) );
+      family_ptr fam =  server_suite->add_family( "family"  );
+      fam->add_task( "t1" )->add_trigger("/suite1/family/suite1_task1 == complete");
+      fam->add_task( "t2" )->add_trigger("/suite1/family/suite1_task2 == complete");
+      fam->add_task( "t3" )->add_trigger("/suite1/family/suite1_task3 == complete");
+   }
+   task_ptr suite1_task1,suite1_task2,suite1_task3;
+   {
+      suite_ptr suite = serverDefs.add_suite( "suite1"  );
+      family_ptr fam =  suite->add_family( "family"  );
+      suite1_task1 = fam->add_task( "suite1_task1" );
+      suite1_task2 = fam->add_task( "suite1_task2" );
+      suite1_task3 = fam->add_task( "suite1_task3" );
+   }
+
+   // Override ECF_HOME. ECF_HOME is need to locate to the .ecf files
+   std::string ecf_home = File::test_data("ANode/test/data/SMSHOME","ANode");
+   serverDefs.set_server().add_or_update_user_variables(Str::ECF_HOME(),ecf_home);
+
+   /// begin , will cause creation of generated variables. The generated variables
+   /// are use in client scripts and used to locate the ecf files
+   serverDefs.beginAll();
+
+   suite1_task1->set_state(NState::COMPLETE);
+   suite1_task2->set_state(NState::COMPLETE);
+   suite1_task3->set_state(NState::COMPLETE);
+
+   // We need JOB generation to *FORCE* the creation of the trigger AST, and hence references
+   {
+      JobsParam jobsParam(true/*create jobs*/); // spawn_jobs = false
+      Jobs jobs(&serverDefs);
+      jobs.generate(jobsParam);
+      BOOST_REQUIRE_MESSAGE( jobsParam.submitted().size() == 3 , "expected 3 jobs but found " << jobsParam.submitted().size() << "\n" << jobsParam.errorMsg());
+   }
+
+   {
+      // Now replace the suite1/family thereby, invalidating the trigger reference on suite/family/t1,t2,t3
+      defs_ptr clientDef = Defs::create();
+      suite_ptr suite =  clientDef->add_suite( "suite1"  );
+      family_ptr fam =  suite->add_family( "family"  );
+      fam->add_task( "suite1_task1" );
+      fam->add_task( "suite1_task2" );
+      fam->add_task( "suite1_task3" );
+      fam->add_task( "dummy" );
+
+      std::string errorMsg;
+      serverDefs.replaceChild("/suite1/family",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg);
+      BOOST_REQUIRE_MESSAGE( errorMsg.empty() , "Expected no message " << errorMsg );
+   }
+   {
+      std::vector<Node*> all_server_nodes;
+      serverDefs.getAllNodes(all_server_nodes);
+
+      // Now check the Trigger reference. The old reference to nodes in the trigger expressions should have been removed
+      std::vector<Task*> theTasks;
+      server_suite->getAllTasks(theTasks);
+      BOOST_REQUIRE_MESSAGE(theTasks.size() == 3, "Expected 3 tasks but found, " << theTasks.size());
+      for(size_t i = 0; i < theTasks.size(); i++) {
+
+         std::set<Node*>  referenced_nodes;
+         theTasks[i]->getAllAstNodes(referenced_nodes);
+         BOOST_REQUIRE_MESSAGE(referenced_nodes.size() ==1," expected 1 referenced node" );
+
+         // The reference nodes must exist in the server. Otherwise replace has still kept references to old nodes in the triggers
+         bool found_reference = false;
+         for(size_t n = 0; n < all_server_nodes.size(); n++) {
+            if (all_server_nodes[n] == (*referenced_nodes.begin())) {
+               found_reference = true; break;
+            }
+         }
+         BOOST_CHECK_MESSAGE(found_reference,"Could not find trigger reference " << (*referenced_nodes.begin())->absNodePath() << " in the server");
+      }
+   }
 
    // reset, to avoid effecting downstream tests
    Ecf::set_state_change_no(0);
    Ecf::set_modify_change_no(0);
 }
+
 BOOST_AUTO_TEST_SUITE_END()

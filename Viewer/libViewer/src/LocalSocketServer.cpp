@@ -29,8 +29,10 @@ LocalSocketServer::LocalSocketServer(QString serverId,QObject* parent) :
     //Create the server
     server_ = new QLocalServer(parent);
 
+#ifdef EFLOW_QT5
     //Restrict access to the socket
     server_->setSocketOptions(QLocalServer::UserAccessOption);
+#endif
 
     //Start listening
     bool b=server_->listen(name);

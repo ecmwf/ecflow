@@ -99,10 +99,13 @@ if(ENABLE_UI)
           add_definitions(-DECFLOW_QT5)
 
           if(Qt5Charts_FOUND)
+              ecbuild_info("Qt5Charts was found - the server log viewer will be built")
               list(APPEND ECFLOW_QT_INCLUDE_DIR ${Qt5Charts_INCLUDE_DIRS})
               list(APPEND ECFLOW_QT_LIBRARIES  ${Qt5Charts_LIBRARIES})
               set(ECFLOW_LOGVIEW 1)
               add_definitions(-DECFLOW_LOGVIEW)
+          else()
+              ecbuild_info("Qt5Charts was not found - the server log viewer will not be built")
           endif()
 
     else()
@@ -357,6 +360,7 @@ ecbuild_dont_pack( DIRS
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
+                    cereal-1.2.2
                     Doc
 )
 

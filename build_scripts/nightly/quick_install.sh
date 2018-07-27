@@ -10,8 +10,8 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 
 if [[ "$#"  == 0 ]] ; then
-   export PATH=/tmp/ma0/install/cmake/ecflow/4.9.0/bin:$PATH
-   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.9.0/lib/python2.7/site-packages
+export PATH=/tmp/ma0/install/cmake/ecflow/4.10.0/bin:$PATH
+export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.10.0/lib/python2.7/site-packages
 else
    module unload ecflow
    module load ecflow/new

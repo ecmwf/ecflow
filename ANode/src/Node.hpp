@@ -333,9 +333,9 @@ public:
    void get_time_resolution_for_simulation(boost::posix_time::time_duration& resol) const;
    void get_max_simulation_duration(boost::posix_time::time_duration& resol) const;
 
-   /// A hierarchical function
+   /// hierarchical function
    virtual bool hasAutoCancel() const { return (autoCancel_) ? true : false;}
-
+   virtual void invalidate_trigger_references() const;
 
    // Access functions: ======================================================
    const std::string& name() const { return name_; }

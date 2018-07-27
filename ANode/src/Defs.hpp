@@ -234,6 +234,11 @@ public:
    /// This should always succeed else something is seriously wrong
    bool deleteChild(Node*);
 
+   /// This called during replace. If the trigger expression(AST) has been created,  then
+   /// the references to the nodes, will be invalidated.
+   /// These get generated on the fly, when referenced.
+   void invalidate_trigger_references() const;
+
    /// Adopt the child specified by 'path' from the clientDef.
    /// If node at path already exists in this instance, it is replaced.
    /// if  createNodesAsNeeded = false,  then the path must exist on this defs
