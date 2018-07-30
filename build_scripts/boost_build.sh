@@ -197,6 +197,7 @@ else
     # ==========================================================================================
     # PYTHON3:
     # Build:
+    #   0/ ./b2 --with-python --clean # clean any previous python build. VERY IMPORTANT
     #   1/ module load python3, this update the $PATH
     #   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
     #   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
