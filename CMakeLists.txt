@@ -13,6 +13,7 @@
 #       -DBUILD_SHARED_LIBS=OFF
 ##############################################################################
 
+# need 3.12.0 as this has findBoost fix for the latest boost version 1.67
 cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
 
 # ===========================================================================
