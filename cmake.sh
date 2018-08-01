@@ -141,6 +141,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 
 module load cmake/3.12.0
 module load ecbuild/2.9.0
+#module load boost/1.53.0     # uncomment to use local BOOST_ROOT
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
