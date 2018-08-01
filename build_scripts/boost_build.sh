@@ -211,22 +211,30 @@ else
     #
     # ==========================================================================================
     # PYTHON3:
-    # Build:
+    # To build BOTH python2 and Python 3 libraries, the order is important.
+    # - First build python3 and then python2. This is because in boost 1.53 not all python libs have the 3 tag.
+    #
+    # Python 3:
     #   0/ ./b2 --with-python --clean   # Clean previous build
-    #   1/ module load python3, this update the $PATH
+    #   1/ module unload python; module load python3, this update the $PATH
     #   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
-    #   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
+    #   3/ Comment out any other 'using python' then  
+    #      manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
     #
     #      using python 
     #       : 3.5 
-    #       : /usr/local/apps/python3/3.5.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
-    #       : /usr/local/apps/python3/3.5.1-01/include/python3.5m # include directory
+    #       : /usr/local/apps/python3/3.6.5-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
+    #       : /usr/local/apps/python3/3.6.5-01/include/python3.6m # include directory
     #       ; 
-    #       ...
-    #      option.set includedir : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;  # ***MAKE*** sure this is set
     #
     #     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
     #     python 2.7 and 3.5, YUK, took ages to debug
+    #
+    # Python 2:
+    #   0/ ./b2 --with-python --clean   # Clean previous build
+    #   1/ module unload python; module load python2
+    #   2/ ./bootstrap.sh --with-python=/path/to/python2.7
+    #   3/ invoke this script
     #
     # Check:
     #   To check the build make sure we don't have symbol pulled in from python2 libs
@@ -235,8 +243,6 @@ else
     #   nm -D /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
     # ===============================================================================
                
-#   ./bjam toolset=$tool link=shared variant=debug   "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
-#   ./bjam toolset=$tool link=static variant=debug   "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
    ./bjam toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
    ./bjam toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
