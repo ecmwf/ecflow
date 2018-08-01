@@ -66,6 +66,7 @@ public:
    virtual int plus(Ast* right) const { return (value() + right->value());}
 
 	virtual void setParentNode(Node*){} // traverse and set for interested nodes
+	virtual void invalidate_trigger_references() const {}
 };
 
 class AstTop : public Ast {
@@ -94,6 +95,7 @@ public:
 	virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
 	virtual void setParentNode(Node*);
+   virtual void invalidate_trigger_references() const;
 
 private:
 	Ast*        root_;
@@ -119,6 +121,8 @@ public:
 	virtual void setParentNode(Node*);
 
 	virtual void set_root_name(const std::string&) {}
+   virtual void invalidate_trigger_references() const;
+
 protected:
    std::string do_why_expression(const std::string& root,bool html) const;
    std::string do_bracket_why_expression(const std::string& root,bool html) const;
@@ -481,6 +485,7 @@ public:
    virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
  	virtual void setParentNode(Node* n) { parentNode_ = n; }
+   virtual void invalidate_trigger_references() const { ref_node_.reset();}
 	static std::string stype() { return "node";}
 
 	const std::string& nodePath() const { return nodePath_;}
@@ -518,6 +523,7 @@ public:
    virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
    virtual void setParentNode(Node* n) { parentNode_ = n; }
+   virtual void invalidate_trigger_references() const { ref_node_.reset();}
    static std::string stype() { return "flag";}
 
    const std::string& nodePath() const { return nodePath_;}
@@ -565,6 +571,7 @@ public:
 	virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
  	virtual void setParentNode(Node* n) { parentNode_ = n; }
+   virtual void invalidate_trigger_references() const { ref_node_.reset();}
 
    virtual int minus(Ast* right) const;
    virtual int plus(Ast* right) const;
@@ -616,6 +623,7 @@ public:
    virtual std::string expression() const;
    virtual std::string why_expression(bool html = false) const;
    virtual void setParentNode(Node* n) { parentNode_ = n; }
+   virtual void invalidate_trigger_references() const { ref_node_.reset();}
 
    virtual int minus(Ast* right) const;
    virtual int plus(Ast* right) const;

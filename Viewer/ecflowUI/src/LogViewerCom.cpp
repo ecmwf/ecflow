@@ -7,6 +7,8 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
+#ifdef ECFLOW_LOGVIEW
+
 #include "LogViewerCom.hpp"
 
 #include <QLocalSocket>
@@ -110,4 +112,4 @@ void LogViewerCom::start(QStringList args)
     }
 }
 
-
+#endif // ECFLOW_LOGVIEW

@@ -13,7 +13,8 @@
 #       -DBUILD_SHARED_LIBS=OFF
 ##############################################################################
 
-cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
+# Need 3.12.0 for boost python3 libs to be found.
+cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
 
 # ===========================================================================
 # Change the default if NO CMAKE_BUILD_TYPE specified
@@ -99,10 +100,13 @@ if(ENABLE_UI)
           add_definitions(-DECFLOW_QT5)
 
           if(Qt5Charts_FOUND)
+              ecbuild_info("Qt5Charts was found - the server log viewer will be built")
               list(APPEND ECFLOW_QT_INCLUDE_DIR ${Qt5Charts_INCLUDE_DIRS})
               list(APPEND ECFLOW_QT_LIBRARIES  ${Qt5Charts_LIBRARIES})
               set(ECFLOW_LOGVIEW 1)
               add_definitions(-DECFLOW_LOGVIEW)
+          else()
+              ecbuild_info("Qt5Charts was not found - the server log viewer will not be built")
           endif()
 
     else()
@@ -213,6 +217,28 @@ if(ENABLE_GUI)
 endif()
  
 # =========================================================================================
+# Python: Must be done before BOOST
+# =========================================================================================
+
+if (ENABLE_PYTHON)
+    ecbuild_find_python( VERSION 2.6 REQUIRED )
+    if( NOT PYTHON_FOUND )
+        ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
+    endif()
+    if ( NOT PYTHONLIBS_FOUND )             
+        ecbuild_error("ecflow python extension is enabled, but python libraries not found")
+    endif()
+    message( STATUS " PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
+    message( STATUS " PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )
+    message( STATUS " PYTHON_VERSION_MINOR              : ${PYTHON_VERSION_MINOR}" )
+    message( STATUS " PYTHON_VERSION_PATCH              : ${PYTHON_VERSION_PATCH}" )
+    message( STATUS " PYTHON_CONFIG_EXECUTABLE          : ${PYTHON_CONFIG_EXECUTABLE}" )
+    message( STATUS " PYTHON_EXECUTABLE                 : ${PYTHON_EXECUTABLE}" )
+    message( STATUS " PYTHON_INCLUDE_DIRS               : ${PYTHON_INCLUDE_DIRS}" )
+    message( STATUS " PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
+endif()
+
+# =========================================================================================
 # Boost
 # =========================================================================================
 
@@ -236,26 +262,16 @@ set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON)
 
+find_package( Boost 1.53.0 REQUIRED COMPONENTS serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 if ( ENABLE_PYTHON )
-	find_package( Boost 1.53.0 REQUIRED COMPONENTS python serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
-else()
-	find_package( Boost 1.53.0 REQUIRED COMPONENTS serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+    if ( PYTHON_VERSION_MAJOR EQUAL 3) 
+        find_package( Boost 1.53.0 REQUIRED COMPONENTS python3 )
+    else()
+        find_package( Boost 1.53.0 REQUIRED COMPONENTS python )
+    endif()
 endif()
 
-# Available boost lib should be referenced as:
-#
-#    ${Boost_SYSTEM_LIBRARY}
-#    ${Boost_SERIALIZATION_LIBRARY}
-#    ${Boost_THREAD_LIBRARY}
-#    ${Boost_FILESYSTEM_LIBRARY}
-#    ${Boost_PROGRAM_OPTIONS_LIBRARY}
-#    ${Boost_DATE_TIME_LIBRARY}
-#
-#    ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} 
-#    ${Boost_TEST_EXEC_MONITOR_LIBRARY} 
-
 #ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
-
 
 if (NOT "${CMAKE_PREFIX_PATH}" EQUAL "${_CMAKE_PREFIX_PATH_BACKUP}")
     set (CMAKE_PREFIX_PATH ${_CMAKE_PREFIX_PATH_BACKUP}) # restore CMAKE_PREFIX_PATH
@@ -321,18 +337,9 @@ if (ENABLE_SERVER)
 endif()
 
 if (ENABLE_PYTHON)
-    ecbuild_find_python( VERSION 2.6 REQUIRED )
-    # ecbuild_debug_var(PYTHON_LIBRARIES)
-    # ecbuild_debug_var(PYTHON_INCLUDE_DIR)
-    
-    if( NOT PYTHON_FOUND )
-        ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
-    endif()
-
     if ( ENABLE_PYTHON_PTR_REGISTER )
         add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
     endif()
-	
     add_subdirectory( Pyext )
 endif()	
 	
@@ -357,6 +364,7 @@ ecbuild_dont_pack( DIRS
                     SCRATCH
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
+                    cereal-1.2.2
                     Doc
 )
 
@@ -367,7 +375,6 @@ ecbuild_dont_pack( FILES
                    .pydevproject
                    build_scripts/.pydevproject
 )
-
 
 # =========================================================================================
 # final

@@ -10,6 +10,8 @@
 #ifndef LOGVIEWERPROC_HPP
 #define LOGVIEWERPROC_HPP
 
+#ifdef ECFLOW_LOGVIEW
+
 #include <string>
 #include <vector>
 #include <sstream>
@@ -34,5 +36,7 @@ protected:
     QString program_;
     QString logViewerId_;
 };
+
+#endif // ECFLOW_LOGVIEW
 
 #endif // LOGVIEWERPROC_HPP
