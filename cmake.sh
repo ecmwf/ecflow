@@ -145,15 +145,15 @@ module load ecbuild/2.9.0
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
-	module unload gnu
+    # ecflow fails to write boost files with clang 6.0.1, but in debug all tests pass. No point in debugging!
+    module unload gnu
+    module unload clang
 	module load clang/5.0.1
     cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
 
-    CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined"
+    CXX_FLAGS=""
+    CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined"
 
-	#CXX_FLAGS=""  # latest clang with latest boost, should not need any warning suppression
-	#cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
-	
 	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
 	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 	fi
