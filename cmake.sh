@@ -143,14 +143,13 @@ module load ecbuild/2.9.0
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	module unload gnu
-	module load clang/5.0.1
-    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
+	module load clang/6.0.1
+    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-6.0.1/boost_1_67_0"
 
-    CXX_FLAGS="$CXX_FLAGS -std=c++14  -stdlib=libc++ -Wno-expansion-to-defined"
-
-    # latest clang with latest boost, should not need any warning suppression
-	#cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
-	#cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-stdlib=libc++'"  # LINK FLAGS
+    # [-Wdeprecated-register] /usr/local/apps/python/2.7.12-01/include/python2.7/unicodeobject.h:534:5: warning: 'register' storage class specifier is deprecated and incompatible with C++17 [-Wdeprecated-register]
+    # [-Wmacro-redefined]     /usr/local/apps/python/2.7.12-01/include/python2.7/pyconfig.h:1215:9: warning: '_XOPEN_SOURCE' macro redefined
+    CXX_FLAGS=""
+    CXX_FLAGS="$CXX_FLAGS -Wno-exceptions -Wno-deprecated-register -Wno-macro-redefined"
 fi
 
 # ==============================================================================================
