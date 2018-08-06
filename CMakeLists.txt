@@ -13,8 +13,8 @@
 #       -DBUILD_SHARED_LIBS=OFF
 ##############################################################################
 
-# Need 3.12.0 for boost python3 libs to be found.
-cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
+# Need cmake(3.12.0) for boost python3 libs to be found.
+cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
 
 # ===========================================================================
 # Change the default if NO CMAKE_BUILD_TYPE specified
