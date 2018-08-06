@@ -194,6 +194,27 @@ ecbuild_info("")
 include_directories( ${CMAKE_SOURCE_DIR}/cereal/include )
  
 # =========================================================================================
+# Python make sure this is before boost
+# =========================================================================================
+if (ENABLE_PYTHON)
+    ecbuild_find_python( VERSION 2.7 REQUIRED )
+    if( NOT PYTHON_FOUND )
+        ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
+    endif()
+    if( NOT PYTHONLIBS_FOUND  )
+        ecbuild_error("ecflow python extension is enabled, but python libraries not found")
+    endif()
+    message( STATUS " PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
+    message( STATUS " PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )
+    message( STATUS " PYTHON_VERSION_MINOR              : ${PYTHON_VERSION_MINOR}" )
+    message( STATUS " PYTHON_VERSION_PATCH              : ${PYTHON_VERSION_PATCH}" )
+    message( STATUS " PYTHON_CONFIG_EXECUTABLE          : ${PYTHON_CONFIG_EXECUTABLE}" )
+    message( STATUS " PYTHON_EXECUTABLE                 : ${PYTHON_EXECUTABLE}" )
+    message( STATUS " PYTHON_INCLUDE_DIRS               : ${PYTHON_INCLUDE_DIRS}" )
+    message( STATUS " PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
+endif() 
+
+# =========================================================================================
 # Boost
 # =========================================================================================
 
@@ -219,9 +240,13 @@ set(Boost_DETAILED_FAILURE_MSG   ON)
 find_package( Boost 1.64.0 REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 if ( ENABLE_PYTHON )
     if ( Boost_MINOR_VERSION GREATER 66 )
-	   find_package( Boost 1.64.0 REQUIRED COMPONENTS python27 python36 )
+        if ( PYTHON_VERSION_MAJOR EQUAL 3 )
+	       find_package( Boost 1.64.0 REQUIRED COMPONENTS python36 )
+	   else()
+           find_package( Boost 1.64.0 REQUIRED COMPONENTS python27 )
+	   endif()
 	else()
-       find_package( Boost 1.64.0 REQUIRED COMPONENTS python )
+	   find_package( Boost 1.64.0 REQUIRED COMPONENTS python )
 	endif()
 endif()
 
@@ -287,25 +312,13 @@ if (ENABLE_SERVER)
 endif()
 
 if (ENABLE_PYTHON)
-    ecbuild_find_python( VERSION 2.7 REQUIRED )
-    # ecbuild_debug_var(PYTHON_LIBRARIES)
-    # ecbuild_debug_var(PYTHON_INCLUDE_DIR)
-    
-    if( NOT PYTHON_FOUND )
-        ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
-    endif()
-    if( NOT PYTHONLIBS_FOUND  )
-        ecbuild_error("ecflow python extension is enabled, but python libraries not found")
-    endif()
-
 	if ( ENABLE_PYTHON_PTR_REGISTER )
         add_definitions( -DECF_ENABLE_PYTHON_PTR_REGISTER )
     endif()
-	         
     add_subdirectory( Pyext )
 endif()	
 	
-if(ENABLE_UI)
+if (ENABLE_UI)
     add_subdirectory( Viewer )
     add_subdirectory( share )
 endif()
