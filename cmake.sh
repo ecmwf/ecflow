@@ -139,21 +139,21 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
-module load cmake/3.12.0
+module load cmake/3.10.2      # need cmake 3.12.0 to build python3. Allo boost python libs to be found
 module load ecbuild/2.9.0
 #module load boost/1.53.0     # uncomment to use local BOOST_ROOT
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
-	module unload gnu
+    # ecflow fails to write boost files with clang 6.0.1, but in debug all tests pass. No point in debugging!
+    module unload gnu
+    module unload clang
 	module load clang/5.0.1
     cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
 
-    CXX_FLAGS="$CXX_FLAGS -Wno-expansion-to-defined"
+    CXX_FLAGS=""
+    CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined"
 
-	#CXX_FLAGS=""  # latest clang with latest boost, should not need any warning suppression
-	#cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_66_0"
-	
 	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
 	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 	fi
@@ -200,6 +200,10 @@ fi
 if [[ "$python3_arg" = python3 ]] ; then
     module unload python
     module load python3/3.6.5-01
+    
+    module unload cmake  # need cmake 3.12.0 to build python3. Allow boost python libs to be found
+    module load cmake/3.12.0      
+    
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
 fi
  
