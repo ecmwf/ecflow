@@ -10,7 +10,7 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <stdlib.h>
+#include <cstdlib>
 #include <iostream>
 #include <boost/test/unit_test.hpp>
 

@@ -12,7 +12,7 @@
 //
 // Description :
 //============================================================================
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 #include <fstream>
 #include <boost/bind.hpp>

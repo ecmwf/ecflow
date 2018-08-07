@@ -14,7 +14,7 @@
 //============================================================================
 
 #include "NOrder.hpp"
-#include <assert.h>
+#include <cassert>
 
 std::string NOrder::toString(NOrder::Order s) {
 	switch (s) {

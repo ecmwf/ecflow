@@ -14,7 +14,7 @@
 //
 //============================================================================
 
-#include <stdlib.h>    // for getenv()
+#include <cstdlib>    // for getenv()
 
 #include <iostream>
 #include <fstream>

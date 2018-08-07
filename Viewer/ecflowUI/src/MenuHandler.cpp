@@ -13,7 +13,7 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/foreach.hpp>
 
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 #include <QMessageBox>

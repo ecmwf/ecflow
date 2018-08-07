@@ -14,7 +14,7 @@
 //
 // Description : This class is used as a helper class
 //============================================================================
-#include <string.h> //for strcmp
+#include <cstring> //for strcmp
 #include <string>
 #include <vector>
 #include <limits>

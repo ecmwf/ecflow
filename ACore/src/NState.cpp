@@ -13,7 +13,7 @@
 // Description :
 //============================================================================
 
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include "NState.hpp"
 #include "Ecf.hpp"

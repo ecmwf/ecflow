@@ -10,7 +10,7 @@
 #include "PlainTextSearchLine.hpp"
 #include "PlainTextSearchInterface.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 PlainTextSearchLine::PlainTextSearchLine(QWidget *parent) :
 	TextEditSearchLine(parent)

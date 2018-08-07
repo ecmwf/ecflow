@@ -14,7 +14,7 @@
 //============================================================================
 
 #include <limits>
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 #include <boost/bind.hpp>
 #include "boost/filesystem/operations.hpp"

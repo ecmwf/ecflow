@@ -13,7 +13,7 @@
 // Description : Specifies the different kinds of child commands
 //               These are specified in the job file, and communicate with the server
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <assert.h>
+#include <cassert>
 
 #include "Child.hpp"
 #include "Str.hpp"

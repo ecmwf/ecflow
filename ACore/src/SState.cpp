@@ -14,7 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "SState.hpp"
-#include <assert.h>
+#include <cassert>
 
 std::string SState::to_string(int status)
 {

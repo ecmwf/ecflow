@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 
 using namespace std;
 using namespace ecf;

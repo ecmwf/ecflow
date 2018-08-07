@@ -12,7 +12,7 @@
 
 class VProperty;
 
-#include <assert.h>
+#include <cassert>
 
 #include <QList>
 #include <QString>

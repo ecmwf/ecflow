@@ -16,7 +16,7 @@
 #include <iostream>
 #include <fstream>
 #include <iterator>
-#include <stdlib.h> // for getenv()
+#include <cstdlib> // for getenv()
 
 #include "boost/foreach.hpp"
 #include "boost/filesystem/operations.hpp"

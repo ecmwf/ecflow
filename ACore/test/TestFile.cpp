@@ -22,7 +22,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <stdlib.h> // for getenv()
+#include <cstdlib> // for getenv()
 
 #include "DurationTimer.hpp"
 #include "File.hpp"

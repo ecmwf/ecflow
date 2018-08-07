@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include <stdio.h>
+#include <cstdio>
 
 class TriggerListItem;
 class VItem;

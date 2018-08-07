@@ -14,7 +14,7 @@
 //============================================================================
 #include <sstream>
 #include <iostream>
-#include <assert.h>
+#include <cassert>
 #include <boost/tokenizer.hpp>
 #include <boost/token_functions.hpp>
 #include <boost/lexical_cast.hpp>

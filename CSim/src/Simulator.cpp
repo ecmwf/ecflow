@@ -14,7 +14,7 @@
 //============================================================================
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"

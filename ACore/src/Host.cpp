@@ -14,7 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <unistd.h>  // for gethostname
-#include <assert.h>
+#include <cassert>
 #include <stdexcept>
 #include "Host.hpp"
 #include "Str.hpp"

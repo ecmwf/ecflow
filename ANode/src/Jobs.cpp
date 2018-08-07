@@ -12,7 +12,7 @@
 //
 // Description :
 //============================================================================
-#include <assert.h>
+#include <cassert>
 
 #include "Jobs.hpp"
 #include "Defs.hpp"

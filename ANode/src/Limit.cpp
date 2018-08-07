@@ -13,7 +13,7 @@
 // Description :
 //============================================================================
 
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 
 #include "Limit.hpp"

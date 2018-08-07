@@ -18,7 +18,7 @@
 // The AST is now demand created, and hence we no longer need to persist it
 
 #include <vector>
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <boost/noncopyable.hpp>
 

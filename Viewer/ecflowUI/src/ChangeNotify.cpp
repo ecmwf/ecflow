@@ -22,7 +22,7 @@
 #include "VNodeList.hpp"
 #include "VProperty.hpp"
 
-#include <stdlib.h>
+#include <cstdlib>
 
 //#ifdef ECFLOW_QT5
 //#include <QSoundEffect>

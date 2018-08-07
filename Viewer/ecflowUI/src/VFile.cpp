@@ -7,8 +7,8 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -16,7 +16,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <string.h>
+#include <cstring>
 
 #include "DirectoryHandler.hpp"
 #include "VFile.hpp"

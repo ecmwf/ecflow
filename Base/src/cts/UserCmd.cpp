@@ -19,9 +19,9 @@
 #include <pwd.h>       /* getpwuid */
 #include <sys/types.h>
 #include <unistd.h>
-#include <stdio.h>      /* tolower */
-#include <string.h>     // for strerror()
-#include <errno.h>      // for errno()
+#include <cstdio>      /* tolower */
+#include <cstring>     // for strerror()
+#include <cerrno>      // for errno()
 
 #include "ClientToServerCmd.hpp"
 

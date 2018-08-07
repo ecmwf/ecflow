@@ -12,7 +12,7 @@
 
 #include <QDebug>
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>

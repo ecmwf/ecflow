@@ -15,7 +15,7 @@
 
 #include <QPushButton>
 
-#include <assert.h>
+#include <cassert>
 
 //========================================================
 //

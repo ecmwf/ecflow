@@ -16,7 +16,7 @@
 #include "UiLog.hpp"
 
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 
 #define SUITEFILTER_UI_DEBUG_
 

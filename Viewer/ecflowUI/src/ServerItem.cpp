@@ -14,7 +14,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <stdlib.h>
+#include <cstdlib>
 
 
 ServerItem::ServerItem(const std::string& name) :

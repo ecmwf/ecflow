@@ -16,8 +16,8 @@
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 
-#include <assert.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdlib>
 
 //#ifdef ECFLOW_QT5
 //#include <QSoundEffect>

@@ -28,7 +28,7 @@
 #include "ComboMulti.hpp"
 #include "Sound.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 static std::map<VProperty::GuiType,PropertyLineFactory*>* makers = 0;
 

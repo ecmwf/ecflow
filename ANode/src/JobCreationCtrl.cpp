@@ -14,7 +14,7 @@
 //============================================================================
 
 #include <iostream>
-#include <stdlib.h> // for getenv()
+#include <cstdlib> // for getenv()
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"

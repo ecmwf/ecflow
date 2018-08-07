@@ -15,7 +15,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <assert.h>
+#include <cassert>
 
 #include <boost/bind.hpp>
 

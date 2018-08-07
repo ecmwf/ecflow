@@ -14,7 +14,7 @@
 //============================================================================
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"

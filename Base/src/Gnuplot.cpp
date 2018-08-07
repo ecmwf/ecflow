@@ -12,7 +12,7 @@
 //
 // Description : Encompasses functionality for plotting server load
 //============================================================================
-#include <assert.h>
+#include <cassert>
 #include <vector>
 #include <iostream>
 #include <sstream>

@@ -21,7 +21,7 @@
 #include "UiLog.hpp"
 
 #include <map>
-#include <assert.h>
+#include <cassert>
 
 class MessageLabelData {
 public:

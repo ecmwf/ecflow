@@ -9,7 +9,7 @@
 
 #include "UiLog.hpp"
 
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 
 #include <QDateTime>

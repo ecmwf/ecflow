@@ -10,7 +10,7 @@
 #include "RichTextSearchLine.hpp"
 #include "RichTextSearchInterface.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 RichTextSearchLine::RichTextSearchLine(QWidget *parent) :
     TextEditSearchLine(parent)

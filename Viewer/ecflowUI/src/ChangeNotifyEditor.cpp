@@ -17,7 +17,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 
-#include <assert.h>
+#include <cassert>
 
 ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent)
 {

@@ -15,7 +15,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 #include <stdexcept>
 #include <iostream>

@@ -7,7 +7,7 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <assert.h>
+#include <cassert>
 #include <QMessageBox>
 
 

@@ -10,7 +10,7 @@
 
 #include "AstCollateVNodesVisitor.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"

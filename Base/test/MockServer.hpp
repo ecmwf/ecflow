@@ -15,7 +15,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <assert.h>
+#include <cassert>
 #include "Defs.hpp"
 #include "SuiteChanged.hpp"
 #include "AbstractServer.hpp"

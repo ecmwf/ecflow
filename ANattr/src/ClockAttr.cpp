@@ -20,7 +20,7 @@
 #include "Ecf.hpp"
 
 #include <boost/foreach.hpp>
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 
 using namespace std;

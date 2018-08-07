@@ -13,7 +13,7 @@
 // Description :
 //============================================================================
 
-#include <assert.h>
+#include <cassert>
 #include "Attr.hpp"
 
 namespace ecf {

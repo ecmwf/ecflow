@@ -9,7 +9,7 @@
 
 #include "VServerSettings.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 #include "DirectoryHandler.hpp"
 #include "ServerHandler.hpp"

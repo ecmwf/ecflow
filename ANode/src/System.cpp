@@ -12,12 +12,12 @@
 //
 // Description :
 //============================================================================
-#include <assert.h>
+#include <cassert>
 #include <iostream>
-#include <signal.h>
+#include <csignal>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <errno.h>
+#include <cerrno>
 
 #ifndef O_WRONLY
 #include <fcntl.h>

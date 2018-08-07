@@ -12,7 +12,7 @@
 //
 // Description :
 //============================================================================
-#include <assert.h>
+#include <cassert>
 #include <iostream>
 #include <stdexcept>
 #include "DState.hpp"

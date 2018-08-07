@@ -12,7 +12,7 @@
 //
 // Description : Simple singleton implementation of log
 //============================================================================
-#include <assert.h>
+#include <cassert>
 #include <vector>
 #include <iostream>
 #include <boost/lexical_cast.hpp>

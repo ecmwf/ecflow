@@ -21,7 +21,7 @@
 #include "UiLog.hpp"
 #include "VFilter.hpp"
 
-#include <assert.h>
+#include <cassert>
 
 TableFilterWidget::TableFilterWidget(QWidget *parent) :
    QWidget(parent),

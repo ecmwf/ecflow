@@ -17,7 +17,7 @@
 #include "boost/filesystem/path.hpp"
 #include <boost/lexical_cast.hpp>
 #include <iostream>
-#include <stdlib.h> // for getenv()
+#include <cstdlib> // for getenv()
 #include <fstream>  // for ofstream
 
 #include "TestFixture.hpp"
