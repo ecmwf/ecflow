@@ -190,6 +190,7 @@ host::host( const std::string& name, const std::string& host, int number )
 	 , history_len_(100)
 	 , updating_(false)
 	 , jobfile_length_(this, "jobfile_length", 10000)
+  , _input (getenv("ECFLOWVIEW_INPUT"))
 {
    if (number < 1) return; // dummy server OK;
 
@@ -200,7 +201,6 @@ host::host( const std::string& name, const std::string& host, int number )
 
    if (timeout_ < 30) timeout_ = 30;
    if (maximum_ < 30) maximum_ = 30;
-
    frequency(timeout_);
 }
 
@@ -366,6 +366,7 @@ void ehost::logout()
 void host::run()
 {
    if (!poll_) return;
+   if(_input != 0) { scripting::run(_input); }
    update();
    if (drift_) drift(5, maximum_ * 60);
 }
@@ -1749,6 +1750,8 @@ int ehost::update()
       gui::message("host::news-error: %s", e.what());
       XECFDEBUG std::cerr << "# host::news-error: " << e.what() << "\n";
    }
+
+   // if(_input != 0) { scripting::run(_input); }
    return err;
 }
 
