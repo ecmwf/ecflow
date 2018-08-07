@@ -279,7 +279,7 @@ std::string Gnuplot::create_gnuplot_script(
    for(size_t column = 0; column < suite_vec.size(); column++) {
       for(auto & suite : suites) {
          if (suite == suite_vec[column].suite_name_) {
-            ordered_suites.push_back ( std::make_pair(suite, column));
+            ordered_suites.emplace_back(suite, column);
          }
       }
    }
@@ -366,7 +366,7 @@ bool Gnuplot::extract_suite_path(
                }
             }
 
-            suite_vec.push_back( SuiteLoad(theNodeNames[0]) );
+            suite_vec.emplace_back(theNodeNames[0] );
             column_index = suite_vec.size() - 1;
             return true;
          }

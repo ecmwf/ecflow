@@ -126,8 +126,8 @@ public:
 		// Write the serialized data to the socket. We use "gather-write" to send
 		// both the header and the data in a single write operation.
 		std::vector<boost::asio::const_buffer> buffers; buffers.reserve(2);
-		buffers.push_back(boost::asio::buffer(outbound_header_));
-		buffers.push_back(boost::asio::buffer(outbound_data_));
+		buffers.emplace_back(boost::asio::buffer(outbound_header_));
+		buffers.emplace_back(boost::asio::buffer(outbound_data_));
 		boost::asio::async_write(socket_, buffers, handler);
 
 #ifdef DEBUG_CONNECTION

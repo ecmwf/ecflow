@@ -263,7 +263,7 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
       return false;
    }
 
-   vec_.push_back(Pass_wd(tokens[0],tokens[1],tokens[2],tokens[3]));
+   vec_.emplace_back(tokens[0],tokens[1],tokens[2],tokens[3]);
 
    return true;
 }
@@ -286,7 +286,7 @@ bool PasswdFile::createWithAccess(
 {
    std::vector<std::string> lines; lines.reserve( 2 );
 
-   lines.push_back("4.5.0");
+   lines.emplace_back("4.5.0");
 
    string line;
    struct passwd * thePassWord = getpwuid ( getuid() );

@@ -118,12 +118,12 @@ bool NState::isValid( const std::string& state ) {
 std::vector< std::string > NState::allStates() {
 	std::vector< std::string > vec;
 	vec.reserve( 6 );
-	vec.push_back( "complete" );
-	vec.push_back( "unknown" );
-	vec.push_back( "queued" );
-	vec.push_back( "aborted" );
-	vec.push_back( "submitted" );
- 	vec.push_back( "active" );
+	vec.emplace_back("complete" );
+	vec.emplace_back("unknown" );
+	vec.emplace_back("queued" );
+	vec.emplace_back("aborted" );
+	vec.emplace_back("submitted" );
+ 	vec.emplace_back("active" );
 	return vec;
 }
 

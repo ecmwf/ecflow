@@ -394,7 +394,7 @@ void ZombieCtrl::do_add_user_zombies(const std::vector<Submittable*>& tasks,cons
   				ZombieAttr attr = ZombieAttr::get_default_attr(Child::USER); // get the default USER zombie attribute
   				t->findParentZombie(Child::USER, attr );                     // Override default from the node tree
 
- 				zombies_.push_back(Zombie(Child::USER,Child::INIT,attr,t->absNodePath(),t->jobsPassword(),t->process_or_remote_id(),t->try_no(),user_cmd));
+ 				zombies_.emplace_back(Child::USER,Child::INIT,attr,t->absNodePath(),t->jobsPassword(),t->process_or_remote_id(),t->try_no(),user_cmd);
 
  		 	  	/// Mark task as zombie for xcdp
  		 	  	t->flag().set(ecf::Flag::ZOMBIE);

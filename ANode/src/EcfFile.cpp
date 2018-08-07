@@ -520,7 +520,7 @@ bool EcfFile::do_popen(const std::string& the_cmd, EcfFile::Type type, std::vect
    }
    char  line[LINE_MAX];
    while( fgets(line,LINE_MAX,fp) ) {
-      lines.push_back(line);
+      lines.emplace_back(line);
       // remove any trailing new lines
       std::string& the_line = lines.back();
       if (!the_line.empty() && the_line[the_line.size()-1] == '\n') {
@@ -1414,7 +1414,7 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
       }
    }
    if (!fnd) {
-      globalIncludedFileSet_.push_back( std::make_pair(includedFile,0) );
+      globalIncludedFileSet_.emplace_back(includedFile,0 );
    }
 
 
@@ -1592,11 +1592,11 @@ bool EcfFile::file_exists(const std::string& ecf_include) const
    }
    if (fs::exists(ecf_include)) {
       //cout << "EcfFile::file_exists " << ecf_include << " exists add to cache\n";
-      file_stat_cache_.push_back(std::make_pair(ecf_include,true));
+      file_stat_cache_.emplace_back(ecf_include,true);
       return true;
    }
    //cout << "EcfFile::file_exists " << ecf_include << " does NOT exist add to cache\n";
-   file_stat_cache_.push_back(std::make_pair(ecf_include,false));
+   file_stat_cache_.emplace_back(ecf_include,false);
    return false;
 }
 

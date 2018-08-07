@@ -65,7 +65,7 @@ void StringSplitter::split(const std::string& str,std::vector<std::string>& line
    StringSplitter string_splitter(str,delimiters);
    while(!string_splitter.finished()) {
       boost::string_view ref = string_splitter.next();
-      lineTokens.push_back(std::string(ref.begin(),ref.end()));
+      lineTokens.emplace_back(ref.begin(),ref.end());
    }
 }
 

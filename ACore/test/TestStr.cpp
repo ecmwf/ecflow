@@ -131,7 +131,7 @@ static void check(const std::string& line,
 {
    std::vector<std::string> result;
    for(auto ref : result2) {
-      result.push_back(string(ref.begin(),ref.end()));
+      result.emplace_back(ref.begin(),ref.end());
    }
    check(line,result,expected);
 }
@@ -155,7 +155,7 @@ BOOST_AUTO_TEST_CASE( test_str_split )
    std::vector<boost::string_view> result2;
 
 	std::string line = "This is a string";
-	expected.push_back("This"); expected.push_back("is"); expected.push_back("a"); expected.push_back("string");
+	expected.emplace_back("This"); expected.emplace_back("is"); expected.emplace_back("a"); expected.emplace_back("string");
    Str::split(line,result);             check(line,result,expected);
    StringSplitter::split(line,result2); check(line,result2,expected);
 
@@ -166,68 +166,68 @@ BOOST_AUTO_TEST_CASE( test_str_split )
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "a";
-	expected.push_back("a");
+	expected.emplace_back("a");
  	Str::split(line,result);  check(line,result,expected);
  	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	// Some implementation fail this test
 	expected.clear(); result.clear();result2.clear();
 	line = "\n";
-	expected.push_back("\n");
+	expected.emplace_back("\n");
   	Str::split(line,result);  check(line,result,expected);
   	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "a ";
-	expected.push_back("a");
+	expected.emplace_back("a");
  	Str::split(line,result);  check(line,result,expected);
  	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = " a";
-	expected.push_back("a");
+	expected.emplace_back("a");
  	Str::split(line,result);  check(line,result,expected);
  	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "	a"; // check tabs
-	expected.push_back("a");
+	expected.emplace_back("a");
  	Str::split(line,result);  check(line,result,expected);
  	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "		a		"; // check sequential tabs
-	expected.push_back("a");
+	expected.emplace_back("a");
  	Str::split(line,result);  check(line,result,expected);
  	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = " a ";
-	expected.push_back("a"); result2.clear();
+	expected.emplace_back("a"); result2.clear();
  	Str::split(line,result);  check(line,result,expected);
  	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = "        a     b     c       d        ";
-	expected.push_back("a"); expected.push_back("b"); expected.push_back("c"); expected.push_back("d");
+	expected.emplace_back("a"); expected.emplace_back("b"); expected.emplace_back("c"); expected.emplace_back("d");
   	Str::split(line,result); check(line,result,expected);
   	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	expected.clear(); result.clear(); result2.clear();
 	line = " - !   $ % ^ & * ( ) - + ?";
-	expected.push_back("-"); expected.push_back("!");  expected.push_back("$");
-	expected.push_back("%"); expected.push_back("^"); expected.push_back("&"); expected.push_back("*");
-	expected.push_back("("); expected.push_back(")"); expected.push_back("-"); expected.push_back("+");
-	expected.push_back("?");
+	expected.emplace_back("-"); expected.emplace_back("!");  expected.emplace_back("$");
+	expected.emplace_back("%"); expected.emplace_back("^"); expected.emplace_back("&"); expected.emplace_back("*");
+	expected.emplace_back("("); expected.emplace_back(")"); expected.emplace_back("-"); expected.emplace_back("+");
+	expected.emplace_back("?");
   	Str::split(line,result); check(line,result,expected);
   	StringSplitter::split(line,result2); check(line,result2,expected);
 
 	// Check tabs
 	expected.clear(); result.clear(); result2.clear();
 	line = "		 verify complete:8		                # 4 sundays in october hence expect 8 task completions";
-	expected.push_back("verify");expected.push_back("complete:8");expected.push_back("#");expected.push_back("4");
-	expected.push_back("sundays");expected.push_back("in");expected.push_back("october");expected.push_back("hence");
-	expected.push_back("expect");expected.push_back("8");expected.push_back("task");expected.push_back("completions");
+	expected.emplace_back("verify");expected.emplace_back("complete:8");expected.emplace_back("#");expected.emplace_back("4");
+	expected.emplace_back("sundays");expected.emplace_back("in");expected.emplace_back("october");expected.emplace_back("hence");
+	expected.emplace_back("expect");expected.emplace_back("8");expected.emplace_back("task");expected.emplace_back("completions");
    Str::split(line,result);  check(line,result,expected);
    StringSplitter::split(line,result2); check(line,result2,expected);
 }
@@ -238,80 +238,80 @@ BOOST_AUTO_TEST_CASE( test_str_split_make_split_iterator )
 
    std::string line = "This is a string";
    std::vector<std::string> expected;
-   expected.push_back("This"); expected.push_back("is"); expected.push_back("a"); expected.push_back("string");
+   expected.emplace_back("This"); expected.emplace_back("is"); expected.emplace_back("a"); expected.emplace_back("string");
    check(line,Str::make_split_iterator(line),expected);
 
-   expected.clear(); expected.push_back("");
+   expected.clear(); expected.emplace_back("");
    line = "";
    check(line,Str::make_split_iterator(line),expected);
 
-   expected.clear(); expected.push_back(""); expected.push_back("");
+   expected.clear(); expected.emplace_back(""); expected.emplace_back("");
    line = "  ";                                  // If start/end is delimeter, then preserved as empty token
    check(line,Str::make_split_iterator(line),expected);
 
    expected.clear();
    line = "a";
-   expected.push_back("a");
+   expected.emplace_back("a");
    check(line,Str::make_split_iterator(line),expected);
 
    // Some implementation fail this test
    expected.clear();
    line = "\n";
-   expected.push_back("\n");
+   expected.emplace_back("\n");
    check(line,Str::make_split_iterator(line),expected);
 
    expected.clear();
    line = "a ";
-   expected.push_back("a");expected.push_back(""); // delimeter at start/end preserved, as empty token
+   expected.emplace_back("a");expected.emplace_back(""); // delimeter at start/end preserved, as empty token
    check(line,Str::make_split_iterator(line),expected);
 
    expected.clear();
    line = " a";
-   expected.push_back(""); expected.push_back("a"); // delimeter at start/end preserved, as empty token
+   expected.emplace_back(""); expected.emplace_back("a"); // delimeter at start/end preserved, as empty token
    check(line,Str::make_split_iterator(line),expected);
 
    expected.clear();
    line = " a"; // check tabs
-   expected.push_back(""); expected.push_back("a");  // delimeter at start/end preserved, as empty token
+   expected.emplace_back(""); expected.emplace_back("a");  // delimeter at start/end preserved, as empty token
    check(line,Str::make_split_iterator(line),expected);
 
    expected.clear();
    line = "    a     "; // check sequential tabs
-   expected.push_back("");
-   expected.push_back("a");                        // delimeter at start/end preserved, as empty token
-   expected.push_back("");
+   expected.emplace_back("");
+   expected.emplace_back("a");                        // delimeter at start/end preserved, as empty token
+   expected.emplace_back("");
    check(line,Str::make_split_iterator(line),expected);
 
    expected.clear();
    line = " a ";
-   expected.push_back("");
-   expected.push_back("a");                        // delimeter at start/end preserved, as empty token
-   expected.push_back("");
+   expected.emplace_back("");
+   expected.emplace_back("a");                        // delimeter at start/end preserved, as empty token
+   expected.emplace_back("");
    check(line,Str::make_split_iterator(line),expected);
 
    expected.clear();
    line = "        a     b     c       d        ";
-   expected.push_back("");                         // delimeter at start/end preserved, as empty token
-   expected.push_back("a"); expected.push_back("b"); expected.push_back("c"); expected.push_back("d");
-   expected.push_back("");
+   expected.emplace_back("");                         // delimeter at start/end preserved, as empty token
+   expected.emplace_back("a"); expected.emplace_back("b"); expected.emplace_back("c"); expected.emplace_back("d");
+   expected.emplace_back("");
    check(line,Str::make_split_iterator(line),expected);
 
    expected.clear();
    line = " - !   $ % ^  & * ( ) - + ?";
-   expected.push_back("");                         // delimeter at start/end preserved, as empty token
-   expected.push_back("-"); expected.push_back("!");  expected.push_back("$");
-   expected.push_back("%"); expected.push_back("^"); expected.push_back("&"); expected.push_back("*");
-   expected.push_back("("); expected.push_back(")"); expected.push_back("-"); expected.push_back("+");
-   expected.push_back("?");
+   expected.emplace_back("");                         // delimeter at start/end preserved, as empty token
+   expected.emplace_back("-"); expected.emplace_back("!");  expected.emplace_back("$");
+   expected.emplace_back("%"); expected.emplace_back("^"); expected.emplace_back("&"); expected.emplace_back("*");
+   expected.emplace_back("("); expected.emplace_back(")"); expected.emplace_back("-"); expected.emplace_back("+");
+   expected.emplace_back("?");
    check(line,Str::make_split_iterator(line),expected);
 
    // Check tabs
    expected.clear();
    line = "     verify complete:8                      # 4 sundays in october hence expect 8 task completions";
-   expected.push_back("");                         // delimeter at start/end preserved, as empty token
-   expected.push_back("verify");expected.push_back("complete:8");expected.push_back("#");expected.push_back("4");
-   expected.push_back("sundays");expected.push_back("in");expected.push_back("october");expected.push_back("hence");
-   expected.push_back("expect");expected.push_back("8");expected.push_back("task");expected.push_back("completions");
+   expected.emplace_back("");                         // delimeter at start/end preserved, as empty token
+   expected.emplace_back("verify");expected.emplace_back("complete:8");expected.emplace_back("#");expected.emplace_back("4");
+   expected.emplace_back("sundays");expected.emplace_back("in");expected.emplace_back("october");expected.emplace_back("hence");
+   expected.emplace_back("expect");expected.emplace_back("8");expected.emplace_back("task");expected.emplace_back("completions");
    check(line,Str::make_split_iterator(line),expected);
 }
 
@@ -445,25 +445,25 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
    cout << "ACore:: ...test_str_less_greater\n";
 
    std::vector<std::string> expected;
-   expected.push_back("a1");
-   expected.push_back("A2");
-   expected.push_back("b1");
-   expected.push_back("B2");
-   expected.push_back("c");
+   expected.emplace_back("a1");
+   expected.emplace_back("A2");
+   expected.emplace_back("b1");
+   expected.emplace_back("B2");
+   expected.emplace_back("c");
 
    std::vector<std::string> expectedGreater;
-   expectedGreater.push_back("c");
-   expectedGreater.push_back("B2");
-   expectedGreater.push_back("b1");
-   expectedGreater.push_back("A2");
-   expectedGreater.push_back("a1");
+   expectedGreater.emplace_back("c");
+   expectedGreater.emplace_back("B2");
+   expectedGreater.emplace_back("b1");
+   expectedGreater.emplace_back("A2");
+   expectedGreater.emplace_back("a1");
 
    std::vector<std::string> vec;
-   vec.push_back("c");
-   vec.push_back("A2");
-   vec.push_back("a1");
-   vec.push_back("b1");
-   vec.push_back("B2");
+   vec.emplace_back("c");
+   vec.emplace_back("A2");
+   vec.emplace_back("a1");
+   vec.emplace_back("b1");
+   vec.emplace_back("B2");
 
    std::sort(vec.begin(),vec.end(),Str::caseInsLess);
    BOOST_REQUIRE_MESSAGE( vec == expected,"expected " << toString(expected) << " but found " << toString(vec) );
@@ -474,25 +474,25 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
    // --------------------------------------------------------------------
 
    expected.clear();
-   expected.push_back("a");
-   expected.push_back("A");
-   expected.push_back("b");
-   expected.push_back("B");
-   expected.push_back("c");
+   expected.emplace_back("a");
+   expected.emplace_back("A");
+   expected.emplace_back("b");
+   expected.emplace_back("B");
+   expected.emplace_back("c");
 
    expectedGreater.clear();
-   expectedGreater.push_back("c");
-   expectedGreater.push_back("B");
-   expectedGreater.push_back("b");
-   expectedGreater.push_back("A");
-   expectedGreater.push_back("a");
+   expectedGreater.emplace_back("c");
+   expectedGreater.emplace_back("B");
+   expectedGreater.emplace_back("b");
+   expectedGreater.emplace_back("A");
+   expectedGreater.emplace_back("a");
 
    vec.clear();
-   vec.push_back("c");
-   vec.push_back("B");
-   vec.push_back("A");
-   vec.push_back("b");
-   vec.push_back("a");
+   vec.emplace_back("c");
+   vec.emplace_back("B");
+   vec.emplace_back("A");
+   vec.emplace_back("b");
+   vec.emplace_back("a");
 
    std::sort(vec.begin(),vec.end(),Str::caseInsLess);
    BOOST_REQUIRE_MESSAGE( vec == expected,"expected " << toString(expected) << " but found " << toString(vec) );
@@ -503,31 +503,31 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
    // --------------------------------------------------------------------
 
    expected.clear();
-   expected.push_back("1234");
-   expected.push_back("baSE");
-   expected.push_back("Base");
-   expected.push_back("case");
-   expected.push_back("CaSe");
-   expected.push_back("suite");
-   expected.push_back("SUITE");
+   expected.emplace_back("1234");
+   expected.emplace_back("baSE");
+   expected.emplace_back("Base");
+   expected.emplace_back("case");
+   expected.emplace_back("CaSe");
+   expected.emplace_back("suite");
+   expected.emplace_back("SUITE");
 
    expectedGreater.clear();
-   expectedGreater.push_back("SUITE");
-   expectedGreater.push_back("suite");
-   expectedGreater.push_back("CaSe");
-   expectedGreater.push_back("case");
-   expectedGreater.push_back("Base");
-   expectedGreater.push_back("baSE");
-   expectedGreater.push_back("1234");
+   expectedGreater.emplace_back("SUITE");
+   expectedGreater.emplace_back("suite");
+   expectedGreater.emplace_back("CaSe");
+   expectedGreater.emplace_back("case");
+   expectedGreater.emplace_back("Base");
+   expectedGreater.emplace_back("baSE");
+   expectedGreater.emplace_back("1234");
 
    vec.clear();
-   vec.push_back("suite");
-   vec.push_back("SUITE");
-   vec.push_back("baSE");
-   vec.push_back("Base");
-   vec.push_back("case");
-   vec.push_back("CaSe");
-   vec.push_back("1234");
+   vec.emplace_back("suite");
+   vec.emplace_back("SUITE");
+   vec.emplace_back("baSE");
+   vec.emplace_back("Base");
+   vec.emplace_back("case");
+   vec.emplace_back("CaSe");
+   vec.emplace_back("1234");
 
    std::sort(vec.begin(),vec.end(),Str::caseInsLess);
    BOOST_REQUIRE_MESSAGE( vec == expected,"expected " << toString(expected) << " but found " << toString(vec) );

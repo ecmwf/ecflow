@@ -48,11 +48,11 @@ BOOST_AUTO_TEST_CASE( test_order )
 {
 	cout << "ANode:: ...test_order\n" ;
 	std::vector<std::string> vec; vec.reserve(5);
-	vec.push_back("a");
-	vec.push_back("A");
-	vec.push_back("b");
-	vec.push_back("B");
-	vec.push_back("c");
+	vec.emplace_back("a");
+	vec.emplace_back("A");
+	vec.emplace_back("b");
+	vec.emplace_back("B");
+	vec.emplace_back("c");
 	Defs theDefs; {
 		for(size_t s = 0; s < vec.size(); s++) {
  			suite_ptr suite = theDefs.add_suite( vec[s] ) ;
@@ -66,18 +66,18 @@ BOOST_AUTO_TEST_CASE( test_order )
 	}
 
    std::vector<std::string> alpha;
-   alpha.push_back("a");
-   alpha.push_back("A");
-   alpha.push_back("b");
-   alpha.push_back("B");
-   alpha.push_back("c");
+   alpha.emplace_back("a");
+   alpha.emplace_back("A");
+   alpha.emplace_back("b");
+   alpha.emplace_back("B");
+   alpha.emplace_back("c");
 
    std::vector<std::string> order;
-   order.push_back("c");
-   order.push_back("B");
-   order.push_back("b");
-   order.push_back("A");
-   order.push_back("a");
+   order.emplace_back("c");
+   order.emplace_back("B");
+   order.emplace_back("b");
+   order.emplace_back("A");
+   order.emplace_back("a");
 
 	// Test suite ordering ==========================================================================
 	// In init state all suite should be in alpha order
@@ -96,11 +96,11 @@ BOOST_AUTO_TEST_CASE( test_order )
    test_invariants(theDefs,__LINE__);
 
    std::vector<std::string> expected;
-   expected.push_back("c");
-   expected.push_back("a");
-   expected.push_back("A");
-   expected.push_back("b");
-   expected.push_back("B");
+   expected.emplace_back("c");
+   expected.emplace_back("a");
+   expected.emplace_back("A");
+   expected.emplace_back("b");
+   expected.emplace_back("B");
 	theDefs.order(theDefs.findAbsNode("/c").get(), NOrder::TOP);
    test_invariants(theDefs,__LINE__);
 	BOOST_REQUIRE_MESSAGE( toStrVec(theDefs.suiteVec()) == expected,"NOrder::TOP expected " << toString(expected) << " but found " << toString(toStrVec(theDefs.suiteVec())) );
@@ -122,22 +122,22 @@ BOOST_AUTO_TEST_CASE( test_order )
 
 	// Move suite 'a' down by one place
 	expected.clear();
-   expected.push_back("A");
-   expected.push_back("a");
-   expected.push_back("b");
-   expected.push_back("B");
-   expected.push_back("c");
+   expected.emplace_back("A");
+   expected.emplace_back("a");
+   expected.emplace_back("b");
+   expected.emplace_back("B");
+   expected.emplace_back("c");
 	theDefs.order(theDefs.findAbsNode("/a").get(), NOrder::DOWN);
    test_invariants(theDefs,__LINE__);
 	BOOST_REQUIRE_MESSAGE( toStrVec(theDefs.suiteVec()) == expected,"NOrder::DOWN order not as expected" );
 
 	// Move suite 'b' up by one place
  	expected.clear();
-   expected.push_back("A");
-   expected.push_back("b");
-   expected.push_back("a");
-   expected.push_back("B");
-   expected.push_back("c");
+   expected.emplace_back("A");
+   expected.emplace_back("b");
+   expected.emplace_back("a");
+   expected.emplace_back("B");
+   expected.emplace_back("c");
 	theDefs.order(theDefs.findAbsNode("/b").get(), NOrder::UP);
    test_invariants(theDefs,__LINE__);
 	BOOST_REQUIRE_MESSAGE( toStrVec(theDefs.suiteVec()) == expected,"NOrder::UP order not as expected" );
@@ -163,11 +163,11 @@ BOOST_AUTO_TEST_CASE( test_order )
    BOOST_REQUIRE_MESSAGE( toStrVec(suite->nodeVec()) == alpha,"NOrder::ALPHA expected " << toString(alpha) << " but found " << toString(toStrVec(suite->nodeVec())) );
    test_invariants(theDefs,__LINE__);
 	expected.clear();
-	expected.push_back("c");
-	expected.push_back("a");
-	expected.push_back("A");
-	expected.push_back("b");
-	expected.push_back("B");
+	expected.emplace_back("c");
+	expected.emplace_back("a");
+	expected.emplace_back("A");
+	expected.emplace_back("b");
+	expected.emplace_back("B");
 	suite->order(theDefs.findAbsNode("/a/c").get(), NOrder::TOP);
 	BOOST_REQUIRE_MESSAGE( toStrVec(suite->nodeVec()) == expected,"NOrder::TOP order  " << toString(toStrVec(suite->nodeVec())) << " not as expected " << toString(expected));
 
@@ -188,11 +188,11 @@ BOOST_AUTO_TEST_CASE( test_order )
 
 	// Move family 'a' down by one place
 	expected.clear();
-	expected.push_back("A");
-	expected.push_back("a");
-	expected.push_back("b");
-	expected.push_back("B");
-	expected.push_back("c");
+	expected.emplace_back("A");
+	expected.emplace_back("a");
+	expected.emplace_back("b");
+	expected.emplace_back("B");
+	expected.emplace_back("c");
 	suite->order(theDefs.findAbsNode("/a/a").get(), NOrder::DOWN);
    test_invariants(theDefs,__LINE__);
 	BOOST_REQUIRE_MESSAGE( toStrVec(suite->nodeVec()) == expected,"NOrder::DOWN order  " << toString(toStrVec(suite->nodeVec())) << " not as expected " << toString(expected));
@@ -201,11 +201,11 @@ BOOST_AUTO_TEST_CASE( test_order )
 	suite->order(theDefs.findAbsNode("/a/a").get(), NOrder::ALPHA); // reset
    test_invariants(theDefs,__LINE__);
 	expected.clear();
-   expected.push_back("a");
-   expected.push_back("b");
-   expected.push_back("A");
-   expected.push_back("B");
-   expected.push_back("c");
+   expected.emplace_back("a");
+   expected.emplace_back("b");
+   expected.emplace_back("A");
+   expected.emplace_back("B");
+   expected.emplace_back("c");
 	suite->order(theDefs.findAbsNode("/a/b").get(), NOrder::UP);
 	BOOST_REQUIRE_MESSAGE( toStrVec(suite->nodeVec()) == expected,"NOrder::UP order  " << toString(toStrVec(suite->nodeVec())) << " not as expected " << toString(expected));
 
@@ -227,11 +227,11 @@ BOOST_AUTO_TEST_CASE( test_order )
 	// Change back to alpha, then move task 'c' to the top
 	family->order(theDefs.findAbsNode("/a/a/a").get(), NOrder::ALPHA); // reset
 	expected.clear();
-	expected.push_back("c");
-	expected.push_back("a");
-	expected.push_back("A");
-	expected.push_back("b");
-	expected.push_back("B");
+	expected.emplace_back("c");
+	expected.emplace_back("a");
+	expected.emplace_back("A");
+	expected.emplace_back("b");
+	expected.emplace_back("B");
 	family->order(theDefs.findAbsNode("/a/a/c").get(), NOrder::TOP);
    test_invariants(theDefs,__LINE__);
 	BOOST_REQUIRE_MESSAGE( toStrVec(family->nodeVec()) == expected,"NOrder::TOP order  " << toString(toStrVec(family->nodeVec())) << " not as expected " << toString(expected));
@@ -253,11 +253,11 @@ BOOST_AUTO_TEST_CASE( test_order )
 
 	// Move task 'a' down by one place
 	expected.clear();
-	expected.push_back("A");
-	expected.push_back("a");
-	expected.push_back("b");
-	expected.push_back("B");
-	expected.push_back("c");
+	expected.emplace_back("A");
+	expected.emplace_back("a");
+	expected.emplace_back("b");
+	expected.emplace_back("B");
+	expected.emplace_back("c");
 	family->order(theDefs.findAbsNode("/a/a/a").get(), NOrder::DOWN);
    test_invariants(theDefs,__LINE__);
 	BOOST_REQUIRE_MESSAGE( toStrVec(family->nodeVec()) == expected,"NOrder::DOWN order  " << toString(toStrVec(family->nodeVec())) << " not as expected " << toString(expected));
@@ -265,11 +265,11 @@ BOOST_AUTO_TEST_CASE( test_order )
 	// Move task 'b' up by one place
 	family->order(theDefs.findAbsNode("/a/a/b").get(), NOrder::DOWN);
 	expected.clear();
-   expected.push_back("A");
-   expected.push_back("a");
-   expected.push_back("B");
-   expected.push_back("b");
-   expected.push_back("c");
+   expected.emplace_back("A");
+   expected.emplace_back("a");
+   expected.emplace_back("B");
+   expected.emplace_back("b");
+   expected.emplace_back("c");
    test_invariants(theDefs,__LINE__);
 	BOOST_REQUIRE_MESSAGE( toStrVec(family->nodeVec()) == expected,"NOrder::UP order  " << toString(toStrVec(family->nodeVec())) << " not as expected " << toString(expected));
 }
@@ -293,10 +293,10 @@ BOOST_AUTO_TEST_CASE( test_alias_order )
    BOOST_REQUIRE_MESSAGE( alias0,"expected to find alias0");
 
    std::vector<std::string> expected;
-   expected.push_back("alias1");
-   expected.push_back("alias0");
-   expected.push_back("alias2");
-   expected.push_back("alias3");
+   expected.emplace_back("alias1");
+   expected.emplace_back("alias0");
+   expected.emplace_back("alias2");
+   expected.emplace_back("alias3");
    task->order(alias0.get(), NOrder::DOWN);
    test_invariants(theDefs,__LINE__);
    BOOST_REQUIRE_MESSAGE( toStrVec(task->aliases()) == expected,"NOrder::DOWN expected " << toString(expected) << " but found " << toString(toStrVec(task->aliases())) );
@@ -305,20 +305,20 @@ BOOST_AUTO_TEST_CASE( test_alias_order )
    task->order(alias0.get(), NOrder::ALPHA);
    test_invariants(theDefs,__LINE__);
    expected.clear();
-   expected.push_back("alias0");
-   expected.push_back("alias1");
-   expected.push_back("alias2");
-   expected.push_back("alias3");
+   expected.emplace_back("alias0");
+   expected.emplace_back("alias1");
+   expected.emplace_back("alias2");
+   expected.emplace_back("alias3");
    BOOST_REQUIRE_MESSAGE( toStrVec(task->aliases()) == expected,"NOrder::ALPHA expectex " << toString(expected) << " but found " << toString(toStrVec(task->aliases())) );
 
 
    task->order(task->find_alias("alias3").get(), NOrder::UP);
    test_invariants(theDefs,__LINE__);
    expected.clear();
-   expected.push_back("alias0");
-   expected.push_back("alias1");
-   expected.push_back("alias3");
-   expected.push_back("alias2");
+   expected.emplace_back("alias0");
+   expected.emplace_back("alias1");
+   expected.emplace_back("alias3");
+   expected.emplace_back("alias2");
    BOOST_REQUIRE_MESSAGE( toStrVec(task->aliases()) == expected,"NOrder::UP expected " << toString(expected) << " but found " << toString(toStrVec(task->aliases())) );
 
    // sort in reverse order
@@ -326,10 +326,10 @@ BOOST_AUTO_TEST_CASE( test_alias_order )
    task->order(alias0.get(), NOrder::ORDER);
    test_invariants(theDefs,__LINE__);
    expected.clear();
-   expected.push_back("alias3");
-   expected.push_back("alias2");
-   expected.push_back("alias1");
-   expected.push_back("alias0");
+   expected.emplace_back("alias3");
+   expected.emplace_back("alias2");
+   expected.emplace_back("alias1");
+   expected.emplace_back("alias0");
    BOOST_REQUIRE_MESSAGE( toStrVec(task->aliases()) == expected,"NOrder::ORDER expected " << toString(expected) << " but found " << toString(toStrVec(task->aliases())) );
 }
 

@@ -392,9 +392,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated )
       suite_ptr suite = theDefs.add_suite("test_repeat_enumerated");
 
       std::vector<std::string> theEnums;
-      theEnums.push_back("hello");  // index 0
-      theEnums.push_back("there");  // index 1
-      theEnums.push_back("bill");   // index 2
+      theEnums.emplace_back("hello");  // index 0
+      theEnums.emplace_back("there");  // index 1
+      theEnums.emplace_back("bill");   // index 2
 
       family_ptr fam = suite->add_family( "family" );
       fam->addRepeat( RepeatEnumerated("ENUM",theEnums));  // repeat contents 3 times
@@ -445,8 +445,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_string )
       suite_ptr suite = theDefs.add_suite("test_repeat_string");
 
  	   std::vector<std::string> theStrings;
- 	   theStrings.push_back("hello");  // index 0
- 	   theStrings.push_back("there");  // index 1
+ 	   theStrings.emplace_back("hello");  // index 0
+ 	   theStrings.emplace_back("there");  // index 1
 
       family_ptr fam = suite->add_family( "family" );
  	   fam->addRepeat( RepeatString("STRING",theStrings));  // repeat contents 2 times

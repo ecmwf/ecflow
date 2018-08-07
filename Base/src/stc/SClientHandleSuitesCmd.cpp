@@ -45,7 +45,7 @@ void SClientHandleSuitesCmd::init(AbstractServer* as)
       std::vector<std::string> suite_names;
       clientSuites[c].suites( suite_names );
 
-      client_handles_.push_back( std::make_pair(clientSuites[c].handle(), suite_names) );
+      client_handles_.emplace_back(clientSuites[c].handle(), suite_names );
 
       // Create user, and his list of handles
       bool fnd_user = false;
@@ -58,7 +58,7 @@ void SClientHandleSuitesCmd::init(AbstractServer* as)
       }
       if (!fnd_user) {
          std::vector<unsigned int> handles;  handles.push_back(clientSuites[c].handle());
-         users_.push_back( std::make_pair(clientSuites[c].user(),handles) );
+         users_.emplace_back(clientSuites[c].user(),handles );
       }
    }
 }

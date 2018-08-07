@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE( test_program_options_multitoken )
    BOOST_CHECK_MESSAGE(vm.count("help"), "Expected help");
    BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
 
-   std::vector<string> expected; expected.push_back("a"); expected.push_back("b");
+   std::vector<string> expected; expected.emplace_back("a"); expected.emplace_back("b");
    BOOST_CHECK_MESSAGE(vm["arg1"].as< vector<string> >() == expected, "multi-token not as expected");
 }
 
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE( test_program_options_multitoken_with_negative_values )
    BOOST_CHECK_MESSAGE(vm.count("help"), "Expected help");
    BOOST_CHECK_MESSAGE(vm.count("arg1"), "Expected arg1");
 
-   std::vector<string> expected; expected.push_back("-1"); expected.push_back("-w");
+   std::vector<string> expected; expected.emplace_back("-1"); expected.emplace_back("-w");
    BOOST_CHECK_MESSAGE(vm["arg1"].as< vector<string> >() == expected, "multi-token not as expected");
 }
 

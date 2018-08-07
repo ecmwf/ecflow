@@ -33,9 +33,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
    cout << "ANattr:: ...test_repeat_invariants\n";
 
    std::vector<std::string> stringList; stringList.reserve(3);
-   stringList.push_back("a");
-   stringList.push_back("b");
-   stringList.push_back("c");
+   stringList.emplace_back("a");
+   stringList.emplace_back("b");
+   stringList.emplace_back("c");
 
    // Test the invariant that Non empty repeat must have a name
    {
@@ -191,9 +191,9 @@ BOOST_AUTO_TEST_CASE( test_repeat )
 	cout << "ANattr:: ...test_repeat \n";
 
 	std::vector<std::string> stringList; stringList.reserve(3);
-	stringList.push_back("a");
-	stringList.push_back("b");
-	stringList.push_back("c");
+	stringList.emplace_back("a");
+	stringList.emplace_back("b");
+	stringList.emplace_back("c");
 
 	Repeat empty;
 	Repeat empty2;
@@ -343,9 +343,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_last_value )
    }
 
    std::vector<std::string> stringList; stringList.reserve(3);
-   stringList.push_back("a");
-   stringList.push_back("b");
-   stringList.push_back("c");
+   stringList.emplace_back("a");
+   stringList.emplace_back("b");
+   stringList.emplace_back("c");
    {
       Repeat rep(RepeatEnumerated("AEnum",stringList));
       rep.setToLastValue();
@@ -388,9 +388,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated_as_string_integers )
    cout << "ANattr:: ...test_repeat_enumerated_as_string_integers\n";
 
    std::vector<std::string> stringList; stringList.reserve(3);
-   stringList.push_back("20130101");
-   stringList.push_back("20130102");
-   stringList.push_back("20130103");
+   stringList.emplace_back("20130101");
+   stringList.emplace_back("20130102");
+   stringList.emplace_back("20130103");
    {
       Repeat rep(RepeatEnumerated("AEnum",stringList));
       // Note: valueAsString should return string at the last valid index
@@ -462,9 +462,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_increment )
    }
 
    std::vector<std::string> stringList; stringList.reserve(3);
-   stringList.push_back("a");
-   stringList.push_back("b");
-   stringList.push_back("c");
+   stringList.emplace_back("a");
+   stringList.emplace_back("b");
+   stringList.emplace_back("c");
    {
       Repeat rep(RepeatEnumerated("AEnum",stringList));
       while( rep.valid()) { rep.increment(); }
@@ -518,7 +518,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_errors )
    cout << "ANattr:: ...test_repeat_date_errors \n";
 
    std::vector<std::string> empty;
-   std::vector<std::string> stringList;stringList.push_back("a");stringList.push_back("b");
+   std::vector<std::string> stringList;stringList.emplace_back("a");stringList.emplace_back("b");
    BOOST_REQUIRE_THROW( RepeatEnumerated("",stringList),std::runtime_error); // empty name
    BOOST_REQUIRE_THROW( RepeatEnumerated(" ",stringList),std::runtime_error); // empty name
    BOOST_REQUIRE_THROW( RepeatEnumerated("*",stringList),std::runtime_error); // illegal name
@@ -660,49 +660,49 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_generated_variables2 )
    BOOST_CHECK_MESSAGE(rep.last_valid_value() == start,"last_valid_value should be " << start << " but found " << rep.last_valid_value());
 
    std::vector<std::string> expected_YMD;
-   expected_YMD.push_back("20161231");
-   expected_YMD.push_back("20170101");
-   expected_YMD.push_back("20170102");
-   expected_YMD.push_back("20170103");
-   expected_YMD.push_back("20170104");
-   expected_YMD.push_back("20170105");
-   expected_YMD.push_back("20170106");
+   expected_YMD.emplace_back("20161231");
+   expected_YMD.emplace_back("20170101");
+   expected_YMD.emplace_back("20170102");
+   expected_YMD.emplace_back("20170103");
+   expected_YMD.emplace_back("20170104");
+   expected_YMD.emplace_back("20170105");
+   expected_YMD.emplace_back("20170106");
 
    std::vector<std::string> expected_year;
-   expected_year.push_back("2016");
-   expected_year.push_back("2017");
-   expected_year.push_back("2017");
-   expected_year.push_back("2017");
-   expected_year.push_back("2017");
-   expected_year.push_back("2017");
-   expected_year.push_back("2017");
+   expected_year.emplace_back("2016");
+   expected_year.emplace_back("2017");
+   expected_year.emplace_back("2017");
+   expected_year.emplace_back("2017");
+   expected_year.emplace_back("2017");
+   expected_year.emplace_back("2017");
+   expected_year.emplace_back("2017");
 
    std::vector<std::string> expected_MM;
-   expected_MM.push_back("12");
-   expected_MM.push_back("1");
-   expected_MM.push_back("1");
-   expected_MM.push_back("1");
-   expected_MM.push_back("1");
-   expected_MM.push_back("1");
-   expected_MM.push_back("1");
+   expected_MM.emplace_back("12");
+   expected_MM.emplace_back("1");
+   expected_MM.emplace_back("1");
+   expected_MM.emplace_back("1");
+   expected_MM.emplace_back("1");
+   expected_MM.emplace_back("1");
+   expected_MM.emplace_back("1");
 
    std::vector<std::string> expected_day_of_month;
-   expected_day_of_month.push_back("31");
-   expected_day_of_month.push_back("1");
-   expected_day_of_month.push_back("2");
-   expected_day_of_month.push_back("3");
-   expected_day_of_month.push_back("4");
-   expected_day_of_month.push_back("5");
-   expected_day_of_month.push_back("6");
+   expected_day_of_month.emplace_back("31");
+   expected_day_of_month.emplace_back("1");
+   expected_day_of_month.emplace_back("2");
+   expected_day_of_month.emplace_back("3");
+   expected_day_of_month.emplace_back("4");
+   expected_day_of_month.emplace_back("5");
+   expected_day_of_month.emplace_back("6");
 
    std::vector<std::string> expected_day_of_week;
-   expected_day_of_week.push_back("6");
-   expected_day_of_week.push_back("0");
-   expected_day_of_week.push_back("1");
-   expected_day_of_week.push_back("2");
-   expected_day_of_week.push_back("3");
-   expected_day_of_week.push_back("4");
-   expected_day_of_week.push_back("5");
+   expected_day_of_week.emplace_back("6");
+   expected_day_of_week.emplace_back("0");
+   expected_day_of_week.emplace_back("1");
+   expected_day_of_week.emplace_back("2");
+   expected_day_of_week.emplace_back("3");
+   expected_day_of_week.emplace_back("4");
+   expected_day_of_week.emplace_back("5");
 
    std::vector<std::string> expected_julian;
    expected_julian.push_back(boost::lexical_cast<std::string>(Cal::date_to_julian(20161231)));

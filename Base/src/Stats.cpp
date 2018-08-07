@@ -114,7 +114,7 @@ Stats::Stats() :
 void Stats::update_stats(int poll_interval)
 {
    // Called at poll time, ie just before node tree traversal
-   request_vec_.push_back( std::make_pair(request_count_,poll_interval) );
+   request_vec_.emplace_back(request_count_,poll_interval );
    request_count_ = 0;
    request_stats_.clear();
 

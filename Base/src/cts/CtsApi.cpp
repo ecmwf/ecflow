@@ -131,8 +131,8 @@ std::vector<std::string> CtsApi::ch_auto_add( int client_handle, bool auto_add_n
    std::string ret = "--ch_auto_add=";
    ret += boost::lexical_cast<std::string>(client_handle);
    retVec.push_back(ret);
-   if ( auto_add_new_suites ) retVec.push_back("true");
-   else                       retVec.push_back("false");
+   if ( auto_add_new_suites ) retVec.emplace_back("true");
+   else                       retVec.emplace_back("false");
    return retVec;
 }
 const char* CtsApi::ch_auto_add_arg() { return "ch_auto_add"; }
@@ -187,9 +187,9 @@ std::vector<std::string> CtsApi::loadDefs(const std::string& filePath,bool force
 
    std::vector<std::string> retVec; retVec.reserve(3);
    retVec.push_back(ret);
-   if (force) retVec.push_back("force");
-   if (check_only) retVec.push_back("check_only");
-   if (print) retVec.push_back("print");
+   if (force) retVec.emplace_back("force");
+   if (check_only) retVec.emplace_back("check_only");
+   if (print) retVec.emplace_back("print");
    return retVec;
 }
 const char* CtsApi::loadDefsArg() { return "load"; }
@@ -278,8 +278,8 @@ const char* CtsApi::job_genArg() { return "job_gen";}
 std::vector<std::string> CtsApi::check(const std::vector<std::string>& paths)
 {
    std::vector<std::string> retVec; retVec.reserve(2 + paths.size());
-   retVec.push_back("--check");
-   if (paths.empty()) retVec.push_back("_all_");
+   retVec.emplace_back("--check");
+   if (paths.empty()) retVec.emplace_back("_all_");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -295,15 +295,15 @@ const char* CtsApi::check_arg() { return "check";}
 std::vector<std::string> CtsApi::delete_node(const std::vector<std::string>& paths, bool force, bool auto_confirm )
 {
    std::vector<std::string> retVec; retVec.reserve(4 + paths.size());
-   retVec.push_back("--delete");
+   retVec.emplace_back("--delete");
    if (paths.empty()) {
-      retVec.push_back("_all_");
+      retVec.emplace_back("_all_");
    }
    if (force)        {
-      retVec.push_back("force");
+      retVec.emplace_back("force");
    }
    if (auto_confirm) {          // By default delete prompts
-      retVec.push_back("yes");  // yes means we don't prompt, and have automatically confirmed the delete
+      retVec.emplace_back("yes");  // yes means we don't prompt, and have automatically confirmed the delete
    }
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
@@ -319,7 +319,7 @@ const char* CtsApi::delete_node_arg() { return "delete";}
 std::vector<std::string> CtsApi::suspend(const std::vector<std::string>& paths)
 {
    std::vector<std::string> retVec; retVec.reserve(1 + paths.size());
-   retVec.push_back("--suspend");
+   retVec.emplace_back("--suspend");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -333,7 +333,7 @@ const char* CtsApi::suspend_arg() { return "suspend";}
 std::vector<std::string> CtsApi::resume(const std::vector<std::string>& paths)
 {
    std::vector<std::string> retVec; retVec.reserve(1 + paths.size());
-   retVec.push_back("--resume");
+   retVec.emplace_back("--resume");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -347,7 +347,7 @@ const char* CtsApi::resume_arg() { return "resume";}
 std::vector<std::string> CtsApi::kill(const std::vector<std::string>& paths)
 {
    std::vector<std::string> retVec; retVec.reserve(1 + paths.size());
-   retVec.push_back("--kill");
+   retVec.emplace_back("--kill");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -361,7 +361,7 @@ const char* CtsApi::kill_arg() { return "kill";}
 std::vector<std::string> CtsApi::status(const std::vector<std::string>& paths)
 {
    std::vector<std::string> retVec; retVec.reserve(1 + paths.size());
-   retVec.push_back("--status");
+   retVec.emplace_back("--status");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -375,7 +375,7 @@ const char* CtsApi::statusArg() { return "status";}
 std::vector<std::string> CtsApi::edit_history(const std::vector<std::string>& paths)
 {
    std::vector<std::string> retVec; retVec.reserve(1 + paths.size());
-   retVec.push_back("--edit_history");
+   retVec.emplace_back("--edit_history");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -387,8 +387,8 @@ const char* CtsApi::edit_history_arg() { return "edit_history";}
 
 std::vector<std::string> CtsApi::archive(const std::vector<std::string>& paths, bool force){
    std::vector<std::string> retVec; retVec.reserve(2 + paths.size());
-   retVec.push_back("--archive");
-   if (force) retVec.push_back("force");
+   retVec.emplace_back("--archive");
+   if (force) retVec.emplace_back("force");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -399,7 +399,7 @@ const char* CtsApi::archive_arg() { return "archive";}
 
 std::vector<std::string> CtsApi::restore(const std::vector<std::string>& paths){
    std::vector<std::string> retVec; retVec.reserve(1 + paths.size());
-   retVec.push_back("--restore");
+   retVec.emplace_back("--restore");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -550,7 +550,7 @@ const char* CtsApi::zombieKillArg() { return "zombie_kill";}
 std::vector<std::string> CtsApi::requeue(const std::vector<std::string>& paths, const std::string& option)
 {
    std::vector<std::string> retVec; retVec.reserve(2 + paths.size());
-   retVec.push_back("--requeue");
+   retVec.emplace_back("--requeue");
    if (!option.empty()) retVec.push_back(option);
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
@@ -564,8 +564,8 @@ const char* CtsApi::requeueArg() { return "requeue"; }
 std::vector<std::string> CtsApi::run(const std::vector<std::string>& paths, bool force)
 {
    std::vector<std::string> retVec; retVec.reserve(paths.size()+2);
-   retVec.push_back("--run");
-   if (force) retVec.push_back("force");
+   retVec.emplace_back("--run");
+   if (force) retVec.emplace_back("force");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -597,8 +597,8 @@ std::vector<std::string> CtsApi::replace(  const std::string& absNodePath,
    std::string ret = "--replace="; ret += absNodePath;
    retVec.push_back(ret);
    retVec.push_back(path_to_client_defs);
-   if (create_parents_as_required) retVec.push_back("parent");
-   if (force) retVec.push_back("force");
+   if (create_parents_as_required) retVec.emplace_back("parent");
+   if (force) retVec.emplace_back("force");
 
    return retVec;
 }
@@ -653,8 +653,8 @@ std::vector<std::string> CtsApi::force( const std::vector<std::string>& paths,
 
    std::string ret = "--force="; ret += state_or_event;
    retVec.push_back(ret);
-   if (recursive)                 retVec.push_back("recursive");
-   if (set_repeats_to_last_value) retVec.push_back("full");
+   if (recursive)                 retVec.emplace_back("recursive");
+   if (set_repeats_to_last_value) retVec.emplace_back("full");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -673,12 +673,12 @@ std::vector<std::string> CtsApi::freeDep(const std::vector<std::string>& paths,b
 
    std::vector<std::string> retVec; retVec.reserve(paths.size() + 4);
 
-   retVec.push_back("--free-dep");
-   if (all)        retVec.push_back("all");
+   retVec.emplace_back("--free-dep");
+   if (all)        retVec.emplace_back("all");
    else {
-      if (trigger) retVec.push_back("trigger");
-      if (date)    retVec.push_back("date");
-      if (time)    retVec.push_back("time");
+      if (trigger) retVec.emplace_back("trigger");
+      if (date)    retVec.emplace_back("date");
+      if (time)    retVec.emplace_back("time");
    }
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
@@ -723,7 +723,7 @@ std::vector<std::string> CtsApi::alter(
 {
    std::vector<std::string> retVec; retVec.reserve(5 + paths.size());
 
-   retVec.push_back("--alter");
+   retVec.emplace_back("--alter");
    retVec.push_back(alterType);
    retVec.push_back(attrType);
    if ( !name.empty() )  retVec.push_back(name);
@@ -748,10 +748,10 @@ std::vector<std::string> CtsApi::alter_sort(
 {
    std::vector<std::string> retVec; retVec.reserve(2 + paths.size());
 
-   retVec.push_back("--alter");
-   retVec.push_back("sort");
+   retVec.emplace_back("--alter");
+   retVec.emplace_back("sort");
    retVec.push_back(sortable_attribute_name);
-   if ( recursive ) retVec.push_back("recursive");
+   if ( recursive ) retVec.emplace_back("recursive");
    std::copy(paths.begin(),paths.end(),std::back_inserter(retVec));
    return retVec;
 }
@@ -773,7 +773,7 @@ const char* CtsApi::groupArg()  { return "group"; }
 
 std::vector<std::string> CtsApi::getLog(int lastLine) {
    std::vector<std::string> retVec; retVec.reserve(2);
-   retVec.push_back("--log=get");
+   retVec.emplace_back("--log=get");
    if (lastLine != 0) {
       std::stringstream ss; ss << lastLine;
       retVec.push_back(ss.str());
@@ -782,7 +782,7 @@ std::vector<std::string> CtsApi::getLog(int lastLine) {
 }
 std::vector<std::string> CtsApi::new_log(const std::string& new_path) {
    std::vector<std::string> retVec; retVec.reserve(2);
-   retVec.push_back("--log=new");
+   retVec.emplace_back("--log=new");
    if (!new_path.empty()) retVec.push_back(new_path);
    return retVec;
 }
@@ -811,8 +811,8 @@ std::vector<std::string> CtsApi::edit_script(
    retVec.push_back(ret);
    retVec.push_back(edit_type);
    if (!path_to_script.empty()) retVec.push_back(path_to_script);
-   if (create_alias) retVec.push_back("create_alias");
-   if (!run) retVec.push_back("no_run");
+   if (create_alias) retVec.emplace_back("create_alias");
+   if (!run) retVec.emplace_back("no_run");
    return retVec;
 }
 const char* CtsApi::edit_script_arg() { return "edit_script";}

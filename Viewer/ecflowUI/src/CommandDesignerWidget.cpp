@@ -111,32 +111,32 @@ void CommandDesignerWidget::initialiseComponentListDetails()
 	componentBlacklist_.clear();
 
 	// The following rely on standard out:
-	componentBlacklist_.push_back("help");
-	componentBlacklist_.push_back("get");
-	componentBlacklist_.push_back("get_state");
-	componentBlacklist_.push_back("ch_suites");
-	componentBlacklist_.push_back("migrate");
-	componentBlacklist_.push_back("ping");
-	componentBlacklist_.push_back("server_version");
-	componentBlacklist_.push_back("stats");
-	componentBlacklist_.push_back("status");
-	componentBlacklist_.push_back("suites");
-	componentBlacklist_.push_back("version");
-	componentBlacklist_.push_back("zombie_get");
+	componentBlacklist_.emplace_back("help");
+	componentBlacklist_.emplace_back("get");
+	componentBlacklist_.emplace_back("get_state");
+	componentBlacklist_.emplace_back("ch_suites");
+	componentBlacklist_.emplace_back("migrate");
+	componentBlacklist_.emplace_back("ping");
+	componentBlacklist_.emplace_back("server_version");
+	componentBlacklist_.emplace_back("stats");
+	componentBlacklist_.emplace_back("status");
+	componentBlacklist_.emplace_back("suites");
+	componentBlacklist_.emplace_back("version");
+	componentBlacklist_.emplace_back("zombie_get");
 
 	// The following only make sense for a persistent client. (like GUI, python):
-	componentBlacklist_.push_back("news");
-	componentBlacklist_.push_back("sync");
-	componentBlacklist_.push_back("sync_full");
+	componentBlacklist_.emplace_back("news");
+	componentBlacklist_.emplace_back("sync");
+	componentBlacklist_.emplace_back("sync_full");
 
 	// The following require a prompt:
-	componentBlacklist_.push_back("delete");
-	componentBlacklist_.push_back("terminate");
-	componentBlacklist_.push_back("halt");
+	componentBlacklist_.emplace_back("delete");
+	componentBlacklist_.emplace_back("terminate");
+	componentBlacklist_.emplace_back("halt");
 
 	// The following only make sense in a group:
-	componentBlacklist_.push_back("show");
-	componentBlacklist_.push_back("why");
+	componentBlacklist_.emplace_back("show");
+	componentBlacklist_.emplace_back("why");
 }
 
 

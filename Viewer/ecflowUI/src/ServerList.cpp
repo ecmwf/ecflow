@@ -415,7 +415,7 @@ void ServerList::syncSystemFile()
                 std::string errStr,name=vec[0], host=vec[1], port=vec[2];
                 if(checkItemToAdd(name,host,port,false,errStr))
                 {
-                    sysVec.push_back(ServerListTmpItem(vec[0],vec[1],vec[2]));
+                    sysVec.emplace_back(vec[0],vec[1],vec[2]);
                 }
             }
         }

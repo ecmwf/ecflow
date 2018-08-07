@@ -658,9 +658,9 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_REPEAT))); // delete previous repeat
 
       std::vector<std::string> stringList; stringList.reserve(3);
-      stringList.push_back("a");
-      stringList.push_back("b");
-      stringList.push_back("c");
+      stringList.emplace_back("a");
+      stringList.emplace_back("b");
+      stringList.emplace_back("c");
 
       s->addRepeat( RepeatEnumerated("AEnum",stringList));
       BOOST_CHECK_MESSAGE( !s->repeat().empty(), "expected repeat to be added");
@@ -681,9 +681,9 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_REPEAT))); // delete previous repeat
 
       std::vector<std::string> stringList; stringList.reserve(3);
-      stringList.push_back("a");
-      stringList.push_back("b");
-      stringList.push_back("c");
+      stringList.emplace_back("a");
+      stringList.emplace_back("b");
+      stringList.emplace_back("c");
 
       s->addRepeat( RepeatString("RepeatString",stringList));
       BOOST_CHECK_MESSAGE( !s->repeat().empty(), "expected repeat to be added");
@@ -705,9 +705,9 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_REPEAT))); // delete previous repeat
 
       std::vector<std::string> stringList; stringList.reserve(3);
-      stringList.push_back("a");
-      stringList.push_back("b");
-      stringList.push_back("c");
+      stringList.emplace_back("a");
+      stringList.emplace_back("b");
+      stringList.emplace_back("c");
 
       s->addRepeat( RepeatInteger("rep",0,100,1));
       BOOST_CHECK_MESSAGE( !s->repeat().empty(), "expected repeat to be added");

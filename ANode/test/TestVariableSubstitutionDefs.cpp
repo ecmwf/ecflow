@@ -36,15 +36,15 @@ BOOST_AUTO_TEST_CASE( test_defs_variable_substitution )
     Defs defs;
     {
       std::vector<Variable> vec;
-      vec.push_back(Variable("AVI","avi"));
-      vec.push_back(Variable("BAHRA","bahra"));
-      vec.push_back(Variable("LOWER","10"));
-      vec.push_back(Variable("PATH","/fred/bill/joe"));
-      vec.push_back(Variable("fred","%bill%"));
-      vec.push_back(Variable("bill","%fred%"));
-      vec.push_back(Variable("hello","%hello%"));
-      vec.push_back(Variable("mary","%jane%"));
-      vec.push_back(Variable("jane","10"));
+      vec.emplace_back("AVI","avi");
+      vec.emplace_back("BAHRA","bahra");
+      vec.emplace_back("LOWER","10");
+      vec.emplace_back("PATH","/fred/bill/joe");
+      vec.emplace_back("fred","%bill%");
+      vec.emplace_back("bill","%fred%");
+      vec.emplace_back("hello","%hello%");
+      vec.emplace_back("mary","%jane%");
+      vec.emplace_back("jane","10");
       defs.set_server().add_or_update_user_variables(vec);
    }
 

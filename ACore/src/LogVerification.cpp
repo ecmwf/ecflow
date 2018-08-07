@@ -60,7 +60,7 @@ bool LogVerification::extractNodePathAndState(	const std::string& logfile,
 		}
 		// cout << line_number << Str::COLON() << *i << "\n";
 
- 		pathStateVec.push_back( std::make_pair(lineTokens[3], theState ) );
+ 		pathStateVec.emplace_back(lineTokens[3], theState );
 	}
 	return true;
 }

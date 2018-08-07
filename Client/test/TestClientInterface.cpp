@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
 
    ClientInvoker theClient ;
    theClient.testInterface(); // stops submission to server
-   std::vector<std::string> paths; paths.push_back("/s1/t1"); paths.push_back("/s2/t2");
+   std::vector<std::string> paths; paths.emplace_back("/s1/t1"); paths.emplace_back("/s2/t2");
 
    BOOST_REQUIRE_MESSAGE( theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.checkPtDefs(ecf::CheckPt::UNDEFINED,0,35) == 0," should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.restoreDefsFromCheckPt() == 0,CtsApi::restoreDefsFromCheckPt() << " should return 0\n" << theClient.errorMsg());
 
-   std::vector<std::string> event_paths; event_paths.push_back("/s1:e"); event_paths.push_back("/s2/f1/t1:e");
+   std::vector<std::string> event_paths; event_paths.emplace_back("/s1:e"); event_paths.emplace_back("/s2/f1/t1:e");
    BOOST_REQUIRE_MESSAGE( theClient.force(event_paths[0],"set") == 0,   " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.force(event_paths[1],"clear") == 0, " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.force(event_paths,"set") == 0,  " should return 0\n" << theClient.errorMsg());
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    }
 
    {
-      std::vector<std::string> suites; suites.push_back("a"); suites.push_back("b");
+      std::vector<std::string> suites; suites.emplace_back("a"); suites.emplace_back("b");
       BOOST_REQUIRE_MESSAGE( theClient.ch_register(true,suites) == 0,"--ch_register \n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.ch_register(false,suites) == 0,"--ch_register \n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.ch_suites() == 0,"--ch_suites should return 0\n" << theClient.errorMsg());
@@ -445,7 +445,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
    theClient.testInterface(); // stops submission to server
    theClient.set_throw_on_error(false);
 
-   std::vector<std::string> paths; paths.push_back("/s1"); paths.push_back("/s2");
+   std::vector<std::string> paths; paths.emplace_back("/s1"); paths.emplace_back("/s2");
 
    BOOST_REQUIRE_MESSAGE( theClient.check("fred") == 1,CtsApi::to_string(CtsApi::check("fred")) << " should return 1\n" << theClient.errorMsg());
 
@@ -630,7 +630,7 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface )
    BOOST_REQUIRE_MESSAGE( theClient.queueTask("queue","reset","","/path/to/node/with/queue") == 0,"--queue should return 0\n" << theClient.errorMsg());
 
    BOOST_REQUIRE_MESSAGE( theClient.completeTask() == 0,"--complete should return 0\n" << theClient.errorMsg());
-   std::vector<std::string> labels; labels.push_back("test_client_task_interface");
+   std::vector<std::string> labels; labels.emplace_back("test_client_task_interface");
    BOOST_REQUIRE_MESSAGE( theClient.labelTask("label_name",labels) == 0,"--label should return 0\n" << theClient.errorMsg());
 }
 
@@ -657,7 +657,7 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface_for_fail )
       BOOST_REQUIRE_THROW( theClient.meterTask("meter_name","20"),std::runtime_error);
       BOOST_REQUIRE_THROW( theClient.waitTask("a == complete"),std::runtime_error);
       BOOST_REQUIRE_THROW( theClient.completeTask(),std::runtime_error);
-      std::vector<std::string> labels; labels.push_back("test_client_task_interface");
+      std::vector<std::string> labels; labels.emplace_back("test_client_task_interface");
       BOOST_REQUIRE_THROW( theClient.labelTask("label_name",labels),std::runtime_error);
    }
    {  // No task path set expect exception
@@ -672,7 +672,7 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface_for_fail )
       BOOST_REQUIRE_THROW( theClient.meterTask("meter_name","20"),std::runtime_error);
       BOOST_REQUIRE_THROW( theClient.waitTask("a == complete"),std::runtime_error);
       BOOST_REQUIRE_THROW( theClient.completeTask(),std::runtime_error);
-      std::vector<std::string> labels; labels.push_back("test_client_task_interface");
+      std::vector<std::string> labels; labels.emplace_back("test_client_task_interface");
       BOOST_REQUIRE_THROW( theClient.labelTask("label_name",labels),std::runtime_error);
    }
    { // test bad queue

@@ -45,13 +45,13 @@ BOOST_AUTO_TEST_CASE( test_ArgvCreator )
 	doCheck(theArgs);
 
 	// 1 args
-	theArgs.push_back("arg1");
+	theArgs.emplace_back("arg1");
 	doCheck(theArgs);
 
 	// 2 args
 	theArgs.clear();
-	theArgs.push_back("arg1");
-	theArgs.push_back("arg2");
+	theArgs.emplace_back("arg1");
+	theArgs.emplace_back("arg2");
 	doCheck(theArgs);
 
 	// 10 args

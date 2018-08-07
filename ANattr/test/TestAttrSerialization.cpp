@@ -132,12 +132,12 @@ BOOST_AUTO_TEST_CASE( test_RepeatAttr_serialisation )
 		doSaveAndRestore(fileName,saved);
 	}
 	{
-		std::vector<std::string> theVec; theVec.push_back("a");  theVec.push_back("b");
+		std::vector<std::string> theVec; theVec.emplace_back("a");  theVec.emplace_back("b");
 		RepeatEnumerated saved = RepeatEnumerated("varname",theVec);
 		doSaveAndRestore(fileName,saved);
 	}
 	{
-		std::vector<std::string> theVec; theVec.push_back("a");
+		std::vector<std::string> theVec; theVec.emplace_back("a");
 		RepeatString saved = RepeatString("varname",theVec);
 		doSaveAndRestore(fileName,saved);
 	}
@@ -152,12 +152,12 @@ BOOST_AUTO_TEST_CASE( test_RepeatAttr_serialisation )
 		doSaveAndRestore(fileName,saved);
 	}
 	{
-		std::vector<std::string> theVec; theVec.push_back("a");  theVec.push_back("b");
+		std::vector<std::string> theVec; theVec.emplace_back("a");  theVec.emplace_back("b");
 		Repeat saved(RepeatEnumerated("varname",theVec));
 		doSaveAndRestore(fileName,saved);
 	}
 	{
-		std::vector<std::string> theVec; theVec.push_back("a");
+		std::vector<std::string> theVec; theVec.emplace_back("a");
 		Repeat saved(RepeatString("varname",theVec));
 		doSaveAndRestore(fileName,saved);
 	}
@@ -296,7 +296,7 @@ BOOST_AUTO_TEST_CASE( test_Meter_serialisation )
 BOOST_AUTO_TEST_CASE( test_queue_serialisation )
 {
    cout << "ANattr:: ...test_queue_serialisation\n";
-   std::vector<std::string> queue_items; queue_items.push_back("a"); queue_items.push_back("b");
+   std::vector<std::string> queue_items; queue_items.emplace_back("a"); queue_items.emplace_back("b");
    QueueAttr saved("queue",queue_items);
    doSaveAndRestore(fileName,saved);
 }
@@ -304,7 +304,7 @@ BOOST_AUTO_TEST_CASE( test_queue_serialisation )
 BOOST_AUTO_TEST_CASE( test_generic_serialisation )
 {
    cout << "ANattr:: ...test_generic_serialisation\n";
-   std::vector<std::string> queue_items; queue_items.push_back("a"); queue_items.push_back("b");
+   std::vector<std::string> queue_items; queue_items.emplace_back("a"); queue_items.emplace_back("b");
    GenericAttr saved("gen1",queue_items);
    doSaveAndRestore(fileName,saved);
 }

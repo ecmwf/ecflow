@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE( test_generated_variables )
 
       t = fam->add_family("f2")->add_task("t");
       std::vector<std::string> stringList; stringList.reserve(3);
-      stringList.push_back("AA"); stringList.push_back("BB"); stringList.push_back("CC");
+      stringList.emplace_back("AA"); stringList.emplace_back("BB"); stringList.emplace_back("CC");
       t->addRepeat( RepeatEnumerated("AEnum",stringList));
    }
 

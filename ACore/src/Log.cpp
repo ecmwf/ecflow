@@ -258,12 +258,12 @@ void log_assert(char const* expr,char const* file, long line, const std::string&
 void Log::get_log_types(std::vector<std::string>& vec)
 {
    vec.reserve(6);
-   vec.push_back("MSG");
-   vec.push_back("LOG");
-   vec.push_back("ERR");
-   vec.push_back("WAR");
-   vec.push_back("DBG");
-   vec.push_back("OTH");
+   vec.emplace_back("MSG");
+   vec.emplace_back("LOG");
+   vec.emplace_back("ERR");
+   vec.emplace_back("WAR");
+   vec.emplace_back("DBG");
+   vec.emplace_back("OTH");
 }
 
 //======================================================================================================

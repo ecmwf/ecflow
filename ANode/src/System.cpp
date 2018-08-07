@@ -176,7 +176,7 @@ int System::sys(const std::string& cmdToSpawn,const std::string& absPath,std::st
 	}
 
 	// Store the process pid, so that we can wait for it. ho ho.
-	processVec_.push_back(Process(absPath,cmdToSpawn,child_pid));
+	processVec_.emplace_back(absPath,cmdToSpawn,child_pid);
 
 #ifdef DEBUG_FORK
 	//LogToCout logToCoutAsWell;

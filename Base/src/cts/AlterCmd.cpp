@@ -99,25 +99,25 @@ static std::string to_string(AlterCmd::Delete_attr_type d)
 static void validDeleteAttr(std::vector<std::string>& vec)
 {
    vec.reserve(19);
-   vec.push_back("variable");
-   vec.push_back("time");
-   vec.push_back("today");
-   vec.push_back("date");
-   vec.push_back("day");
-   vec.push_back("cron");
-   vec.push_back("event");
-   vec.push_back("meter");
-   vec.push_back("label");
-   vec.push_back("trigger");
-   vec.push_back("complete");
-   vec.push_back("repeat");
-   vec.push_back("limit");
-   vec.push_back("limit_path");
-   vec.push_back("inlimit");
-   vec.push_back("zombie");
-   vec.push_back("late");
-   vec.push_back("queue");
-   vec.push_back("generic");
+   vec.emplace_back("variable");
+   vec.emplace_back("time");
+   vec.emplace_back("today");
+   vec.emplace_back("date");
+   vec.emplace_back("day");
+   vec.emplace_back("cron");
+   vec.emplace_back("event");
+   vec.emplace_back("meter");
+   vec.emplace_back("label");
+   vec.emplace_back("trigger");
+   vec.emplace_back("complete");
+   vec.emplace_back("repeat");
+   vec.emplace_back("limit");
+   vec.emplace_back("limit_path");
+   vec.emplace_back("inlimit");
+   vec.emplace_back("zombie");
+   vec.emplace_back("late");
+   vec.emplace_back("queue");
+   vec.emplace_back("generic");
 }
 
 
@@ -154,16 +154,16 @@ static std::string to_string(AlterCmd::Add_attr_type a) {
 static void validAddAttr(std::vector<std::string>& vec)
 {
    vec.reserve(10);
-   vec.push_back("time");
-   vec.push_back("today");
-   vec.push_back("date");
-   vec.push_back("day");
-   vec.push_back("zombie");
-   vec.push_back("variable");
-   vec.push_back("late");
-   vec.push_back("limit");
-   vec.push_back("inlimit");
-   vec.push_back("label");
+   vec.emplace_back("time");
+   vec.emplace_back("today");
+   vec.emplace_back("date");
+   vec.emplace_back("day");
+   vec.emplace_back("zombie");
+   vec.emplace_back("variable");
+   vec.emplace_back("late");
+   vec.emplace_back("limit");
+   vec.emplace_back("inlimit");
+   vec.emplace_back("label");
 }
 
 
@@ -212,22 +212,22 @@ static std::string to_string(AlterCmd::Change_attr_type c)
 static void validChangeAttr(std::vector<std::string>& vec)
 {
    vec.reserve(16);
-   vec.push_back("variable");
-   vec.push_back("clock_type");
-   vec.push_back("clock_gain");
-   vec.push_back("clock_date");
-   vec.push_back("clock_sync");
-   vec.push_back("event");
-   vec.push_back("meter");
-   vec.push_back("label");
-   vec.push_back("trigger");
-   vec.push_back("complete");
-   vec.push_back("repeat");
-   vec.push_back("limit_max");
-   vec.push_back("limit_value");
-   vec.push_back("defstatus");
-   vec.push_back("free_password");
-   vec.push_back("late");
+   vec.emplace_back("variable");
+   vec.emplace_back("clock_type");
+   vec.emplace_back("clock_gain");
+   vec.emplace_back("clock_date");
+   vec.emplace_back("clock_sync");
+   vec.emplace_back("event");
+   vec.emplace_back("meter");
+   vec.emplace_back("label");
+   vec.emplace_back("trigger");
+   vec.emplace_back("complete");
+   vec.emplace_back("repeat");
+   vec.emplace_back("limit_max");
+   vec.emplace_back("limit_value");
+   vec.emplace_back("defstatus");
+   vec.emplace_back("free_password");
+   vec.emplace_back("late");
 }
 
 //=======================================================================================
@@ -799,7 +799,7 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
       case AlterCmd::DEL_REPEAT:   break; // there can only be one repeat per node, so we delete by path
       case AlterCmd::DEL_LATE:     break; // there can only be one late per node, so we delete by path
       case AlterCmd::DEL_QUEUE:   {
-         std::vector<std::string> vec;vec.push_back("a");
+         std::vector<std::string> vec;vec.emplace_back("a");
          if (!name.empty()) QueueAttr check(name,vec);  // will throw if not valid
          break;
       }

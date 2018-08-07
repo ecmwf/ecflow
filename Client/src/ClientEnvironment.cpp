@@ -85,7 +85,7 @@ ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::str
 	/// Override config, and environment.
 	if (!host.empty()) {
 	   host_vec_.clear();
-	   host_vec_.push_back(std::make_pair(host,port));
+	   host_vec_.emplace_back(host,port);
 	}
 }
 
@@ -98,7 +98,7 @@ void ClientEnvironment::init()
 
 	// If no host specified default to local host and default port number
 	if (host_vec_.empty())
-		host_vec_.push_back(std::make_pair(Str::LOCALHOST(),Str::DEFAULT_PORT_NUMBER()));
+		host_vec_.emplace_back(Str::LOCALHOST(),Str::DEFAULT_PORT_NUMBER());
 
 	// Program option are read in last, and will override any previous setting
 	// However program option are delayed until later. See notes in header
@@ -155,7 +155,7 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
    host_vec_.clear();
 
    // make sure there only one host:port in host_vec_
-   host_vec_.push_back(std::make_pair(the_host,the_port));
+   host_vec_.emplace_back(the_host,the_port);
 
    // Make sure we don't look in hosts file.
    // When there is only one host:port in host_vec_, calling get_next_host() will always return host_vec_[0]
@@ -265,7 +265,7 @@ void ClientEnvironment::read_environment_variables()
   	if (getenv(Str::ECF_PORT().c_str())) {
 		port = getenv(Str::ECF_PORT().c_str());
 		host_vec_.clear(); // remove config settings, net effect is overriding
- 		host_vec_.push_back(std::make_pair(host,port));
+ 		host_vec_.emplace_back(host,port);
 	}
 
 	// Add the ECF_HOST host into list of hosts. Make sure its first in host_vec_
@@ -274,7 +274,7 @@ void ClientEnvironment::read_environment_variables()
 	if (!env_host.empty()) {
 	   host = env_host;
 		host_vec_.clear(); // remove previous setting if any
- 		host_vec_.push_back(std::make_pair(host,port));
+ 		host_vec_.emplace_back(host,port);
 	}
 }
 
@@ -325,7 +325,7 @@ bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 		}
 
 		// std::cout << "Host = " << theBackupHost << "  " << thePort << "\n";
-		host_vec_.push_back(std::make_pair(theBackupHost,thePort));
+		host_vec_.emplace_back(theBackupHost,thePort);
 	}
 
 	return true;

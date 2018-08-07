@@ -53,7 +53,7 @@ void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict, std::vect
          second = boost::lexical_cast<std::string>(the_int);
       }
       else throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
-      str_pair_vec.push_back( std::make_pair(first,second));
+      str_pair_vec.emplace_back(first,second);
       //         std::cout << "BoostPythonUtil::dict_to_str_vec " << first << "   " << second << "\n";
    }
 }
@@ -78,7 +78,7 @@ void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict, std::vect
       }
       else throw std::runtime_error("BoostPythonUtil::dict_to_str_vec: type not convertible to string or integer");
 
-      vec.push_back(Variable(first,second));
+      vec.emplace_back(first,second);
       // std::cout << "BoostPythonUtil::dict_to_str_vec " << first << "   " << second << "\n";
    }
 }

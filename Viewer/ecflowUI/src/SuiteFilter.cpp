@@ -99,7 +99,7 @@ bool SuiteFilter::adjustLoaded(const std::vector<std::string>& loaded)
         if(std::find(currentLoaded.begin(), currentLoaded.end(),it) == currentLoaded.end())
         {
             bool filtered=loadedInitialised_ && enabled_ && autoAddNew_;
-            items_.push_back(SuiteFilterItem(it,true,filtered));
+            items_.emplace_back(it,true,filtered);
             changed=true;
             if(filtered)
             {
@@ -155,7 +155,7 @@ void SuiteFilter::adjustFiltered(const std::vector<std::string>& filtered)
     {
         if(std::find(currentFiltered.begin(), currentFiltered.end(),it) == currentFiltered.end())
         {
-            items_.push_back(SuiteFilterItem(it,false,true));
+            items_.emplace_back(it,false,true);
             changed=true;
         }
     }

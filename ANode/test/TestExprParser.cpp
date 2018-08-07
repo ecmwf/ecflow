@@ -46,49 +46,49 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic )
    // Note: we can use NOT,eq,ne,le,ge, or brackets
    //       we can't use a:event_name  ==> a:event_name == set
    std::vector<std::string> vec;
-   vec.push_back("a == complete");
-   vec.push_back("a != complete");
-   vec.push_back("a:value == 10");
-   vec.push_back("a:value != 10");
-   vec.push_back("a:value >= 10");
-   vec.push_back("a:value <= 10");
-   vec.push_back("a:value > 10");
-   vec.push_back("a:value < 10");
-   vec.push_back("1 == 1");
-   vec.push_back("1 == 0");
-   vec.push_back("a:event_name == set");
-   vec.push_back("a:event_name != set");
-   vec.push_back("a:event_name == clear");
-   vec.push_back("a:event_name != clear");
-   vec.push_back("../a/b:eventname == set");
-   vec.push_back("../a/b:eventname == clear");
-   vec.push_back("../a/b:eventname != clear");
-   vec.push_back("../a:event_name >= 10");
-   vec.push_back("a == unknown and b != complete");
-   vec.push_back("a == unknown or b != complete");
-   vec.push_back("a == complete and b == complete or c == complete");
-   vec.push_back("! a == unknown");
-   vec.push_back("/mc/main:YMD <= /mc/main/ref:MC_STOP");
-   vec.push_back("! ../../../prod2diss/operation_is_late:yes == set or ! a == complete");
-   vec.push_back("./a:YMD - ./b:YMD < 5");
-   vec.push_back("./a:YMD + ./b:YMD < 5");
-   vec.push_back("./a:YMD / ./b:YMD < 5");
-   vec.push_back("./a:YMD * ./b:YMD < 5");
-   vec.push_back("./a:YMD % ./b:YMD < 5");
-   vec.push_back("inigroup:YMD == ! 1");
-   vec.push_back("inigroup:YMD == ! 0");
-   vec.push_back("comp == complete and notready == complete");  // ECFLOW-493
-   vec.push_back("comp == complete and not ready == complete");
-   vec.push_back("comp == complete and ! ready == complete");   // we now store the not from the parse, for test comparison
-   vec.push_back("comp == complete and ~ ready == complete");
+   vec.emplace_back("a == complete");
+   vec.emplace_back("a != complete");
+   vec.emplace_back("a:value == 10");
+   vec.emplace_back("a:value != 10");
+   vec.emplace_back("a:value >= 10");
+   vec.emplace_back("a:value <= 10");
+   vec.emplace_back("a:value > 10");
+   vec.emplace_back("a:value < 10");
+   vec.emplace_back("1 == 1");
+   vec.emplace_back("1 == 0");
+   vec.emplace_back("a:event_name == set");
+   vec.emplace_back("a:event_name != set");
+   vec.emplace_back("a:event_name == clear");
+   vec.emplace_back("a:event_name != clear");
+   vec.emplace_back("../a/b:eventname == set");
+   vec.emplace_back("../a/b:eventname == clear");
+   vec.emplace_back("../a/b:eventname != clear");
+   vec.emplace_back("../a:event_name >= 10");
+   vec.emplace_back("a == unknown and b != complete");
+   vec.emplace_back("a == unknown or b != complete");
+   vec.emplace_back("a == complete and b == complete or c == complete");
+   vec.emplace_back("! a == unknown");
+   vec.emplace_back("/mc/main:YMD <= /mc/main/ref:MC_STOP");
+   vec.emplace_back("! ../../../prod2diss/operation_is_late:yes == set or ! a == complete");
+   vec.emplace_back("./a:YMD - ./b:YMD < 5");
+   vec.emplace_back("./a:YMD + ./b:YMD < 5");
+   vec.emplace_back("./a:YMD / ./b:YMD < 5");
+   vec.emplace_back("./a:YMD * ./b:YMD < 5");
+   vec.emplace_back("./a:YMD % ./b:YMD < 5");
+   vec.emplace_back("inigroup:YMD == ! 1");
+   vec.emplace_back("inigroup:YMD == ! 0");
+   vec.emplace_back("comp == complete and notready == complete");  // ECFLOW-493
+   vec.emplace_back("comp == complete and not ready == complete");
+   vec.emplace_back("comp == complete and ! ready == complete");   // we now store the not from the parse, for test comparison
+   vec.emplace_back("comp == complete and ~ ready == complete");
 
-   vec.push_back(":VAR == 1");
-   vec.push_back(":VAR == /mc/main/ref:MC_STOP");
-   vec.push_back(":YMD - :YMD < 5");
-   vec.push_back(":YMD + :YMD < 5");
-   vec.push_back(":YMD / :YMD < 5");
-   vec.push_back(":YMD * :YMD < 5");
-   vec.push_back(":YMD % :YMD < 5");
+   vec.emplace_back(":VAR == 1");
+   vec.emplace_back(":VAR == /mc/main/ref:MC_STOP");
+   vec.emplace_back(":YMD - :YMD < 5");
+   vec.emplace_back(":YMD + :YMD < 5");
+   vec.emplace_back(":YMD / :YMD < 5");
+   vec.emplace_back(":YMD * :YMD < 5");
+   vec.emplace_back(":YMD % :YMD < 5");
 
    for(const auto & i : vec) {
 
@@ -122,17 +122,17 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic_with_brackets )
    // Note: we can use NOT,eq,ne,le,ge,
    //       we can't use a:event_name  ==> a:event_name == set
    std::vector<std::string> vec;
-   vec.push_back("((a == complete) and (b == complete))");
-   vec.push_back("(((a == complete) or (b == complete)) and (c == complete))");
-   vec.push_back("((a == complete) and ((b == complete) or (nodepath:eventname == set)))");
-   vec.push_back("((a == complete) and ((b == complete) or ((a == complete) and (b == complete))))");
-   vec.push_back("! ((a == unknown))");
-   vec.push_back("((t:step + 20) >= (t:step1 - 20))");
-   vec.push_back("(((/o/main/12/an/slwet == complete) and ((/o/main/12/an/4dvar/ifstraj:finalwave == set) or (/o/main/12/an/4dvar == complete))) or (/o/main/12/an == complete))");
-   vec.push_back("((obs:YMD <= (main:YMD + 1)) and ((../make/setup == complete) and (obs:YMD <= /o/lag:YMD)))");
-   vec.push_back("(((stage == complete) or (./stage:YMD > ./retrieve:YMD)) and ((./retrieve:YMD - ./load:YMD) < 5))");
-   vec.push_back("((./a:YMD - ./b:YMD) < 5)");
-   vec.push_back("((:YMD + :YMD) < 5)");
+   vec.emplace_back("((a == complete) and (b == complete))");
+   vec.emplace_back("(((a == complete) or (b == complete)) and (c == complete))");
+   vec.emplace_back("((a == complete) and ((b == complete) or (nodepath:eventname == set)))");
+   vec.emplace_back("((a == complete) and ((b == complete) or ((a == complete) and (b == complete))))");
+   vec.emplace_back("! ((a == unknown))");
+   vec.emplace_back("((t:step + 20) >= (t:step1 - 20))");
+   vec.emplace_back("(((/o/main/12/an/slwet == complete) and ((/o/main/12/an/4dvar/ifstraj:finalwave == set) or (/o/main/12/an/4dvar == complete))) or (/o/main/12/an == complete))");
+   vec.emplace_back("((obs:YMD <= (main:YMD + 1)) and ((../make/setup == complete) and (obs:YMD <= /o/lag:YMD)))");
+   vec.emplace_back("(((stage == complete) or (./stage:YMD > ./retrieve:YMD)) and ((./retrieve:YMD - ./load:YMD) < 5))");
+   vec.emplace_back("((./a:YMD - ./b:YMD) < 5)");
+   vec.emplace_back("((:YMD + :YMD) < 5)");
 
    for(const auto & i : vec) {
 
@@ -608,55 +608,55 @@ BOOST_AUTO_TEST_CASE( test_parser_bad_expressions )
 {
    std::cout << "ANode:: ...test_parser_bad_expressions\n";
    vector<string> exprvec;
-   exprvec.push_back("a <= complete");
-   exprvec.push_back("a >= complete");
-   exprvec.push_back("a = complete");
-   exprvec.push_back("a e complete");
-   exprvec.push_back("a=complete");
-   exprvec.push_back("a ! complete");
-   exprvec.push_back("a==complet e");
-   exprvec.push_back("a eq complet e");
-   exprvec.push_back("a::eventname");
-   exprvec.push_back("a:eventname =  set");
-   exprvec.push_back("a:eventname == ");
-   exprvec.push_back("a:eventname !  set");
-   exprvec.push_back("a:eventname ! = set");
-   exprvec.push_back("a:eventname %");
-   exprvec.push_back("a:event <= set");
-   exprvec.push_back("a:event >= set");
-   exprvec.push_back("a:event >= clear");
-   exprvec.push_back("a:event >= fred");
-   exprvec.push_back("a:metername  100");
-   exprvec.push_back(". == complete");
-   exprvec.push_back("/ == complete");
-   exprvec.push_back(". == error");
-   exprvec.push_back("./ == error");
-   exprvec.push_back(".a == error");
-   exprvec.push_back(".a == unknown");
-   exprvec.push_back(".a/. == unknown");
-   exprvec.push_back(".. == unknown");
-   exprvec.push_back(".a/b == queued");
-   exprvec.push_back("./a/b/ == active");
-   exprvec.push_back("..a == complete");
-   exprvec.push_back(".../a == complete");
-   exprvec.push_back("../.../a == complete");
-   exprvec.push_back(".. /a == complete");
-   exprvec.push_back("../.. /a == complete");
-   exprvec.push_back("../../.a == complete");
-   exprvec.push_back("..a/b == aborted");
-   exprvec.push_back("..a/b/c == aborted");
-   exprvec.push_back("a == complete and");
-   exprvec.push_back("a %");
-   exprvec.push_back("(a == complete   b == complete)");
-   exprvec.push_back("a == complete and  b == complete)");
-   exprvec.push_back("(a == complete and  b == complete");
-   exprvec.push_back("(a = complete and b = complete or c = complete)");
-   exprvec.push_back("(a erro complete and b == complete) or nodepath:eventname");
-   exprvec.push_back("(a == complete and b == complete or (a == complete and b == complete)");
+   exprvec.emplace_back("a <= complete");
+   exprvec.emplace_back("a >= complete");
+   exprvec.emplace_back("a = complete");
+   exprvec.emplace_back("a e complete");
+   exprvec.emplace_back("a=complete");
+   exprvec.emplace_back("a ! complete");
+   exprvec.emplace_back("a==complet e");
+   exprvec.emplace_back("a eq complet e");
+   exprvec.emplace_back("a::eventname");
+   exprvec.emplace_back("a:eventname =  set");
+   exprvec.emplace_back("a:eventname == ");
+   exprvec.emplace_back("a:eventname !  set");
+   exprvec.emplace_back("a:eventname ! = set");
+   exprvec.emplace_back("a:eventname %");
+   exprvec.emplace_back("a:event <= set");
+   exprvec.emplace_back("a:event >= set");
+   exprvec.emplace_back("a:event >= clear");
+   exprvec.emplace_back("a:event >= fred");
+   exprvec.emplace_back("a:metername  100");
+   exprvec.emplace_back(". == complete");
+   exprvec.emplace_back("/ == complete");
+   exprvec.emplace_back(". == error");
+   exprvec.emplace_back("./ == error");
+   exprvec.emplace_back(".a == error");
+   exprvec.emplace_back(".a == unknown");
+   exprvec.emplace_back(".a/. == unknown");
+   exprvec.emplace_back(".. == unknown");
+   exprvec.emplace_back(".a/b == queued");
+   exprvec.emplace_back("./a/b/ == active");
+   exprvec.emplace_back("..a == complete");
+   exprvec.emplace_back(".../a == complete");
+   exprvec.emplace_back("../.../a == complete");
+   exprvec.emplace_back(".. /a == complete");
+   exprvec.emplace_back("../.. /a == complete");
+   exprvec.emplace_back("../../.a == complete");
+   exprvec.emplace_back("..a/b == aborted");
+   exprvec.emplace_back("..a/b/c == aborted");
+   exprvec.emplace_back("a == complete and");
+   exprvec.emplace_back("a %");
+   exprvec.emplace_back("(a == complete   b == complete)");
+   exprvec.emplace_back("a == complete and  b == complete)");
+   exprvec.emplace_back("(a == complete and  b == complete");
+   exprvec.emplace_back("(a = complete and b = complete or c = complete)");
+   exprvec.emplace_back("(a erro complete and b == complete) or nodepath:eventname");
+   exprvec.emplace_back("(a == complete and b == complete or (a == complete and b == complete)");
    // triggers that dont make sense in the operational suites.
-   exprvec.push_back("../../../legA/fc/pf/01 eq complete eq complete");
+   exprvec.emplace_back("../../../legA/fc/pf/01 eq complete eq complete");
 
-   exprvec.push_back("/mofc/mon/hind/14/back == complete or %s:DOW ne 5"); // ECFLOW-888
+   exprvec.emplace_back("/mofc/mon/hind/14/back == complete or %s:DOW ne 5"); // ECFLOW-888
 
 
    BOOST_FOREACH(const string& expr, exprvec ) {

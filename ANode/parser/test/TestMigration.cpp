@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
       suite_ptr suite = defs.add_suite("s1");
       family_ptr fam = suite->add_family("f1");
       task_ptr t = fam->add_task("t");
-      std::vector<std::string> queue_items; queue_items.push_back("001"); queue_items.push_back("002"); queue_items.push_back("003");
+      std::vector<std::string> queue_items; queue_items.emplace_back("001"); queue_items.emplace_back("002"); queue_items.emplace_back("003");
       QueueAttr queue("queue",queue_items); queue.active(); queue.active();
       QueueAttr queue1("queue1",queue_items); queue1.active();
       suite->add_queue(queue); suite->add_queue(queue1);
@@ -267,9 +267,9 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
         task_ptr t6 = suite->add_task("t6");
 
         std::vector<std::string> stringList; stringList.reserve(3);
-        stringList.push_back("20130101");
-        stringList.push_back("20130201");
-        stringList.push_back("20130301");
+        stringList.emplace_back("20130101");
+        stringList.emplace_back("20130201");
+        stringList.emplace_back("20130301");
 
         RepeatEnumerated rep("AEnum",stringList);
         rep.increment();
@@ -430,9 +430,9 @@ BOOST_AUTO_TEST_CASE( test_server_state )
    {
       Defs defs;
       std::vector<Variable> vec;
-      vec.push_back(Variable("name","value1"));
-      vec.push_back(Variable("name2","val with 'spaces' "));
-      vec.push_back(Variable("name3",""));
+      vec.emplace_back("name","value1");
+      vec.emplace_back("name2","val with 'spaces' ");
+      vec.emplace_back("name3","");
       defs.set_server().set_user_variables(vec);
       //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Set server variables failed " << helper.errorMsg());

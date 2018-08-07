@@ -42,8 +42,8 @@ static void construct_expr(std::vector<PartExpression>& vec, const bp::list& lis
       }
       else throw std::runtime_error("Trigger: Expects string, or list(strings or nodes)");
 
-      if (vec.empty()) vec.push_back(PartExpression(part_expr));
-      else             vec.push_back(PartExpression(part_expr,true/*AND*/));
+      if (vec.empty()) vec.emplace_back(part_expr);
+      else             vec.emplace_back(part_expr,true/*AND*/);
    }
 }
 

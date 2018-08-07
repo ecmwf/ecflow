@@ -142,13 +142,13 @@ bool DState::isValid( const std::string& state ) {
 std::vector< std::string > DState::allStates() {
 	std::vector< std::string > vec;
 	vec.reserve( 7 );
-	vec.push_back( "complete" );
-	vec.push_back( "unknown" );
-	vec.push_back( "queued" );
-	vec.push_back( "aborted" );
-	vec.push_back( "submitted" );
-	vec.push_back( "suspended" );
-	vec.push_back( "active" );
+	vec.emplace_back("complete" );
+	vec.emplace_back("unknown" );
+	vec.emplace_back("queued" );
+	vec.emplace_back("aborted" );
+	vec.emplace_back("submitted" );
+	vec.emplace_back("suspended" );
+	vec.emplace_back("active" );
 	return vec;
 }
 

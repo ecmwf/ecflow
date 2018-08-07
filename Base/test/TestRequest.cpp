@@ -47,7 +47,7 @@ struct null_deleter { void operator()(void const *) const{} };
 
 static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_ptr>& stc_cmd_vec, MockServer* mock_server)
 {
-   std::vector<std::string> suite_names; suite_names.push_back("suiteName");
+   std::vector<std::string> suite_names; suite_names.emplace_back("suiteName");
    MyDefsFixture fixture;
    defs_ptr client_defs = fixture.create_defs();
    client_defs->clear_externs(); // server defs should not have externs

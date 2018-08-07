@@ -138,7 +138,7 @@ public:
     TriggerTableItem(VItem* t) :t_(t){}
 
     void addDependency(VItem* dep,TriggerCollector::Mode mode)
-            {deps_.push_back(TriggerDependencyItem(dep,mode));}
+            {deps_.emplace_back(dep,mode);}
 
     VItem* item() const {return t_;}
     const std::vector<TriggerDependencyItem>& dependencies() const {return deps_;}

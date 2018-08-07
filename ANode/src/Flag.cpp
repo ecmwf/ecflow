@@ -122,24 +122,24 @@ Flag::Type Flag::string_to_flag_type(const std::string& s)
 void Flag::valid_flag_type(std::vector<std::string>& vec)
 {
    vec.reserve(18);
-   vec.push_back("force_aborted");
-   vec.push_back("user_edit");
-   vec.push_back("task_aborted");
-   vec.push_back("edit_failed");
-   vec.push_back("ecfcmd_failed");
-   vec.push_back("no_script");
-   vec.push_back("killed");
-   vec.push_back("late");
-   vec.push_back("message");
-   vec.push_back("by_rule");
-   vec.push_back("queue_limit");
-   vec.push_back("task_waiting");
-   vec.push_back("locked");
-   vec.push_back("zombie");
-   vec.push_back("no_reque");
-   vec.push_back("archived");
-   vec.push_back("restored");
-   vec.push_back("threshold");
+   vec.emplace_back("force_aborted");
+   vec.emplace_back("user_edit");
+   vec.emplace_back("task_aborted");
+   vec.emplace_back("edit_failed");
+   vec.emplace_back("ecfcmd_failed");
+   vec.emplace_back("no_script");
+   vec.emplace_back("killed");
+   vec.emplace_back("late");
+   vec.emplace_back("message");
+   vec.emplace_back("by_rule");
+   vec.emplace_back("queue_limit");
+   vec.emplace_back("task_waiting");
+   vec.emplace_back("locked");
+   vec.emplace_back("zombie");
+   vec.emplace_back("no_reque");
+   vec.emplace_back("archived");
+   vec.emplace_back("restored");
+   vec.emplace_back("threshold");
 }
 
 std::string Flag::to_string() const

@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    std::string file_name = File::test_data("ANattr/test/data/migration/1_2_2/","ANattr");
    //BOOST_CHECK_MESSAGE(File::createDirectories(file_name ),"Could not create directory " << file_name);
 
-   std::vector<std::string> theVec; theVec.push_back("a");  theVec.push_back("b");
+   std::vector<std::string> theVec; theVec.emplace_back("a");  theVec.emplace_back("b");
    LateAttr lateattr;
    lateattr.addSubmitted(TimeSlot(10,12));
    lateattr.addActive(TimeSlot(10,12));

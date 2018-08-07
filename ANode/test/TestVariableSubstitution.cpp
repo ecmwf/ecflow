@@ -346,9 +346,9 @@ static std::vector<std::string> required_server_variables()
    required_server_variables.push_back( Str::ECF_HOST() );
 
    required_server_variables.push_back( Str::ECF_HOME() );
-   required_server_variables.push_back( std::string("ECF_LOG") );
-   required_server_variables.push_back( std::string("ECF_CHECK") );
-   required_server_variables.push_back( std::string("ECF_CHECKOLD") );
+   required_server_variables.emplace_back("ECF_LOG" );
+   required_server_variables.emplace_back("ECF_CHECK" );
+   required_server_variables.emplace_back("ECF_CHECKOLD" );
 
    // These variable are read in from the environment, but are not exposed
    // since they only affect the server
@@ -356,17 +356,17 @@ static std::vector<std::string> required_server_variables()
    // ECF_LISTS
 
    // variables that can be overridden, in the suite definition
-   required_server_variables.push_back( std::string("ECF_JOB_CMD") );
-   required_server_variables.push_back( std::string("ECF_KILL_CMD") );
-   required_server_variables.push_back( std::string("ECF_STATUS_CMD") );
-   required_server_variables.push_back( std::string("ECF_URL_CMD") );
-   required_server_variables.push_back( std::string("ECF_URL_BASE") );
-   required_server_variables.push_back( std::string("ECF_URL") );
-   required_server_variables.push_back( std::string("ECF_MICRO") );
+   required_server_variables.emplace_back("ECF_JOB_CMD" );
+   required_server_variables.emplace_back("ECF_KILL_CMD" );
+   required_server_variables.emplace_back("ECF_STATUS_CMD" );
+   required_server_variables.emplace_back("ECF_URL_CMD" );
+   required_server_variables.emplace_back("ECF_URL_BASE" );
+   required_server_variables.emplace_back("ECF_URL" );
+   required_server_variables.emplace_back("ECF_MICRO" );
 
    // Reference variable, these should be read only
-   required_server_variables.push_back( std::string("ECF_PID") );   // server PID
-   required_server_variables.push_back( std::string("ECF_VERSION") );// server version
+   required_server_variables.emplace_back("ECF_PID" );   // server PID
+   required_server_variables.emplace_back("ECF_VERSION" );// server version
    return required_server_variables;
 }
 

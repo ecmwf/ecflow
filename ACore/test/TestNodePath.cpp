@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( test_path_extractor_constructor )
 	std::vector<std::string> theExpectedPath;
 	checkPath(theExpectedPath,"");
 
-	theExpectedPath.push_back("suite");
+	theExpectedPath.emplace_back("suite");
 	checkPath(theExpectedPath,"/suite");
  	checkPath(theExpectedPath,"suite");
 }
@@ -59,9 +59,9 @@ BOOST_AUTO_TEST_CASE( test_path_extractor )
 	BOOST_CHECK(true); // stop boost test from complaining about no checks
 
 	std::vector<std::string> theExpectedPath;
-	theExpectedPath.push_back("suite");
-	theExpectedPath.push_back("family");
-	theExpectedPath.push_back("task");
+	theExpectedPath.emplace_back("suite");
+	theExpectedPath.emplace_back("family");
+	theExpectedPath.emplace_back("task");
 
 	checkPath(theExpectedPath,"/suite/family/task");
 	checkPath(theExpectedPath,"/suite/family/task/");
@@ -74,9 +74,9 @@ BOOST_AUTO_TEST_CASE( test_unix_path_extractor )
 
 	// On Unix multiple '/' are treated as one.
 	std::vector<std::string> theExpectedPath;
-	theExpectedPath.push_back("suite");
-	theExpectedPath.push_back("family");
-	theExpectedPath.push_back("task");
+	theExpectedPath.emplace_back("suite");
+	theExpectedPath.emplace_back("family");
+	theExpectedPath.emplace_back("task");
 
 	checkPath(theExpectedPath,"/suite///family////task");
 	checkPath(theExpectedPath,"/suite///family////task//");

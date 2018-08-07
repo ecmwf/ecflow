@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE( test_queue_cmd )
    string suite_f_t = "/suite/f/t";
 
    suite_ptr s = defs.add_suite("suite");
-   std::vector<std::string> q1_items; q1_items.push_back("s1"); q1_items.push_back("s2"); q1_items.push_back("s3");
+   std::vector<std::string> q1_items; q1_items.emplace_back("s1"); q1_items.emplace_back("s2"); q1_items.emplace_back("s3");
    QueueAttr q1("q1",q1_items);
    s->add_queue(q1);
    QueueAttr& q1_ref = s->findQueue("q1");
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( test_queue_cmd )
    BOOST_CHECK_MESSAGE( q1_ref.value() == "s1",  "Expected to s1 but found " << q1_ref.value());
 
    family_ptr f = s->add_family("f");
-   std::vector<std::string> q2_items; q2_items.push_back("f1"); q2_items.push_back("f2"); q2_items.push_back("f3");
+   std::vector<std::string> q2_items; q2_items.emplace_back("f1"); q2_items.emplace_back("f2"); q2_items.emplace_back("f3");
    QueueAttr q2("q2",q2_items);
    f->add_queue(q2);
    QueueAttr& q2_ref = f->findQueue("q2");
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( test_queue_cmd )
    BOOST_CHECK_MESSAGE( q2_ref.value() == "f1",  "Expected to f1 but found " << q2_ref.value());
 
    task_ptr t = f->add_task("t");
-   std::vector<std::string> q3_items; q3_items.push_back("t1"); q3_items.push_back("t2"); q3_items.push_back("t3");
+   std::vector<std::string> q3_items; q3_items.emplace_back("t1"); q3_items.emplace_back("t2"); q3_items.emplace_back("t3");
    QueueAttr q3("q3",q3_items);
    t->add_queue(q3);
    QueueAttr& q3_ref = t->findQueue("q3");

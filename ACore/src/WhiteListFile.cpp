@@ -503,7 +503,7 @@ bool WhiteListFile::createWithReadAccess( const std::string& pathToFile,std::str
 {
 	std::vector<std::string> lines; lines.reserve( 2 );
 
-	lines.push_back("4.4.14");
+	lines.emplace_back("4.4.14");
 
 	string user = "-";
 	struct passwd * thePassWord = getpwuid ( getuid() );
@@ -518,7 +518,7 @@ bool WhiteListFile::createWithWriteAccess( const std::string& pathToFile , std::
 {
 	std::vector<std::string> lines; lines.reserve( 2 );
 
-	lines.push_back("4.4.14");
+	lines.emplace_back("4.4.14");
 
  	struct passwd * thePassWord = getpwuid ( getuid() );
 	string user( thePassWord->pw_name ) ;  // equivalent to the login name

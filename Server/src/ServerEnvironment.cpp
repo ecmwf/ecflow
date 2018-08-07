@@ -354,36 +354,36 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	   // Need to setup client environment.
 	   // The server sets these variable for use by the client. i.e when creating the jobs
 	   // The clients then uses them to communicate back with the server.
-  	theRetVec.push_back( std::make_pair(Str::ECF_PORT(), the_port()) );
-   theRetVec.push_back( std::make_pair(Str::ECF_HOST(), serverHost_) );
+  	theRetVec.emplace_back(Str::ECF_PORT(), the_port() );
+   theRetVec.emplace_back(Str::ECF_HOST(), serverHost_ );
 
-	theRetVec.push_back( std::make_pair(Str::ECF_HOME(), ecfHome_) );
-	if (Log::instance()) theRetVec.push_back( std::make_pair(std::string("ECF_LOG"), Log::instance()->path()) );
-	else                 theRetVec.push_back( std::make_pair(std::string("ECF_LOG"), std::string() ));
-	theRetVec.push_back( std::make_pair(std::string("ECF_CHECK"), ecf_checkpt_file_) );
-	theRetVec.push_back( std::make_pair(std::string("ECF_CHECKOLD"), ecf_backup_checkpt_file_) );
-   theRetVec.push_back( std::make_pair(std::string("ECF_INTERVAL"), boost::lexical_cast<std::string>(submitJobsInterval_)) );
+	theRetVec.emplace_back(Str::ECF_HOME(), ecfHome_ );
+	if (Log::instance()) theRetVec.emplace_back(std::string("ECF_LOG"), Log::instance()->path() );
+	else                 theRetVec.emplace_back(std::string("ECF_LOG"), std::string() );
+	theRetVec.emplace_back(std::string("ECF_CHECK"), ecf_checkpt_file_ );
+	theRetVec.emplace_back(std::string("ECF_CHECKOLD"), ecf_backup_checkpt_file_ );
+   theRetVec.emplace_back(std::string("ECF_INTERVAL"), boost::lexical_cast<std::string>(submitJobsInterval_) );
 
 	// These variable are read in from the environment, but are not exposed
 	// since they only affect the server
 	// ECF_CHECKINTERVAL
 
-   theRetVec.push_back( std::make_pair(std::string("ECF_LISTS"), ecf_white_list_file_) ); // read only variable, changing it has no effect
-   theRetVec.push_back( std::make_pair(std::string("ECF_PASSWD"), ecf_passwd_file_) );    // read only variable, changing it has no effect
+   theRetVec.emplace_back(std::string("ECF_LISTS"), ecf_white_list_file_ ); // read only variable, changing it has no effect
+   theRetVec.emplace_back(std::string("ECF_PASSWD"), ecf_passwd_file_ );    // read only variable, changing it has no effect
 
 	// variables that can be overridden, in the suite definition
-	theRetVec.push_back( std::make_pair(std::string("ECF_JOB_CMD"), ecf_cmd_) );
-	theRetVec.push_back( std::make_pair(std::string("ECF_KILL_CMD"), killCmd_) );
-   theRetVec.push_back( std::make_pair(std::string("ECF_STATUS_CMD"), statusCmd_) );
-   theRetVec.push_back( std::make_pair(std::string("ECF_CHECK_CMD"), checkCmd_) );
-	theRetVec.push_back( std::make_pair(std::string("ECF_URL_CMD"), urlCmd_) );
-	theRetVec.push_back( std::make_pair(std::string("ECF_URL_BASE"), urlBase_) );
-	theRetVec.push_back( std::make_pair(std::string("ECF_URL"), url_) );
-   theRetVec.push_back( std::make_pair(std::string("ECF_MICRO"), ecf_micro_) );
+	theRetVec.emplace_back(std::string("ECF_JOB_CMD"), ecf_cmd_ );
+	theRetVec.emplace_back(std::string("ECF_KILL_CMD"), killCmd_ );
+   theRetVec.emplace_back(std::string("ECF_STATUS_CMD"), statusCmd_ );
+   theRetVec.emplace_back(std::string("ECF_CHECK_CMD"), checkCmd_ );
+	theRetVec.emplace_back(std::string("ECF_URL_CMD"), urlCmd_ );
+	theRetVec.emplace_back(std::string("ECF_URL_BASE"), urlBase_ );
+	theRetVec.emplace_back(std::string("ECF_URL"), url_ );
+   theRetVec.emplace_back(std::string("ECF_MICRO"), ecf_micro_ );
 
    // Reference variable, these should be read only
-   theRetVec.push_back( std::make_pair(std::string("ECF_PID"), ecf_pid_) );          // server PID
-   theRetVec.push_back( std::make_pair(std::string("ECF_VERSION"), Version::raw()) );// server version
+   theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_ );          // server PID
+   theRetVec.emplace_back(std::string("ECF_VERSION"), Version::raw() );// server version
 }
 
 bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
@@ -645,24 +645,24 @@ std::vector<std::string> ServerEnvironment::expected_variables()
 {
    std::vector<std::string> expected_variables;
    expected_variables.push_back(  Str::ECF_HOME() );
-   expected_variables.push_back( "ECF_LOG"  );
-   expected_variables.push_back( "ECF_CHECK" );
-   expected_variables.push_back( "ECF_CHECKOLD" );
-   expected_variables.push_back( "ECF_JOB_CMD" );
-   expected_variables.push_back( "ECF_KILL_CMD" );
-   expected_variables.push_back( "ECF_STATUS_CMD" );
-   expected_variables.push_back( "ECF_CHECK_CMD" );
-   expected_variables.push_back( "ECF_URL_CMD" );
-   expected_variables.push_back( "ECF_URL_BASE" );
-   expected_variables.push_back( "ECF_URL" );
-   expected_variables.push_back( "ECF_MICRO" );
-   expected_variables.push_back( "ECF_PID" );
-   expected_variables.push_back( "ECF_VERSION" );
-   expected_variables.push_back( "ECF_LISTS" );
+   expected_variables.emplace_back("ECF_LOG"  );
+   expected_variables.emplace_back("ECF_CHECK" );
+   expected_variables.emplace_back("ECF_CHECKOLD" );
+   expected_variables.emplace_back("ECF_JOB_CMD" );
+   expected_variables.emplace_back("ECF_KILL_CMD" );
+   expected_variables.emplace_back("ECF_STATUS_CMD" );
+   expected_variables.emplace_back("ECF_CHECK_CMD" );
+   expected_variables.emplace_back("ECF_URL_CMD" );
+   expected_variables.emplace_back("ECF_URL_BASE" );
+   expected_variables.emplace_back("ECF_URL" );
+   expected_variables.emplace_back("ECF_MICRO" );
+   expected_variables.emplace_back("ECF_PID" );
+   expected_variables.emplace_back("ECF_VERSION" );
+   expected_variables.emplace_back("ECF_LISTS" );
    expected_variables.push_back(  Str::ECF_PORT() );
    expected_variables.push_back(  Str::ECF_HOST() );
-   expected_variables.push_back( "ECF_INTERVAL");
-   expected_variables.push_back( "ECF_PASSWD");
+   expected_variables.emplace_back("ECF_INTERVAL");
+   expected_variables.emplace_back("ECF_PASSWD");
    return expected_variables;
 }
 

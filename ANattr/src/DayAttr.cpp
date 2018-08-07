@@ -184,13 +184,13 @@ DayAttr::Day_t DayAttr::getDay(const std::string& day)
 std::vector< std::string > DayAttr::allDays() {
 	std::vector< std::string > vec;
 	vec.reserve( 7 );
-	vec.push_back("monday");
-	vec.push_back("tuesday");
-	vec.push_back("wednesday");
-	vec.push_back("thursday");
-	vec.push_back("friday");
-	vec.push_back("saturday");
-	vec.push_back("sunday");
+	vec.emplace_back("monday");
+	vec.emplace_back("tuesday");
+	vec.emplace_back("wednesday");
+	vec.emplace_back("thursday");
+	vec.emplace_back("friday");
+	vec.emplace_back("saturday");
+	vec.emplace_back("sunday");
 	return vec;
 }
 

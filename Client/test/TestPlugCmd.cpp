@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE( test_plug_cmd_with_handles )
 // endsuite
 
    /// create client handle which references suites suite in the server defs
-    std::vector<std::string> suite_names; suite_names.push_back("suite"); suite_names.push_back("suite2");
+    std::vector<std::string> suite_names; suite_names.emplace_back("suite"); suite_names.emplace_back("suite2");
     TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(suite_names,false)),false /* bypass_state_modify_change_check */);
 
 

@@ -53,12 +53,12 @@ static std::string toString(const std::vector<std::string>& c)
 
 static std::vector<std::string> vector_abcd() {
     std::vector<std::string> names; names.reserve(4);
-    names.push_back("a"); names.push_back("b"); names.push_back("c"); names.push_back("d");
+    names.emplace_back("a"); names.emplace_back("b"); names.emplace_back("c"); names.emplace_back("d");
     return names;
 }
 static std::vector<std::string> vector_dcba() {
     std::vector<std::string> names; names.reserve(4);
-    names.push_back("d"); names.push_back("c"); names.push_back("b"); names.push_back("a");
+    names.emplace_back("d"); names.emplace_back("c"); names.emplace_back("b"); names.emplace_back("a");
     return names;
 }
 
@@ -195,7 +195,7 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
    // It should be noted that invokeRequest, uses a MockServer, which set/unsets
    // Hence after this call Ecf::server_ is false. Hence we need to ensure that following
    // commands/ DM function set Ecf::server_ to true.
-   std::vector<std::string> suite_names ; suite_names.push_back("d"); // clinet handle for suite 'd' ONLY
+   std::vector<std::string> suite_names ; suite_names.emplace_back("d"); // clinet handle for suite 'd' ONLY
    TestHelper::invokeRequest(theDefs.get(),Cmd_ptr( new ClientHandleCmd(suite_names,false)),bypass_state_modify_change_check);
    BOOST_CHECK_MESSAGE(theDefs->client_suite_mgr().clientSuites().size() == 1,"Expected 1 Client suites but found " << theDefs->client_suite_mgr().clientSuites().size());
 

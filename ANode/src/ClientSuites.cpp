@@ -51,7 +51,7 @@ void ClientSuites::add_suite(const std::string& s)
          (*i).weak_suite_ptr_ = weak_suite_ptr();
       }
       else {
-         suites_.push_back( HSuite(s) );
+         suites_.emplace_back(s );
       }
    }
 }
@@ -66,7 +66,7 @@ void ClientSuites::add_suite(suite_ptr suite)
          (*i).weak_suite_ptr_ = weak_suite_ptr(suite);
       }
       else {
-         suites_.push_back( HSuite(suite->name(),weak_suite_ptr(suite)) );
+         suites_.emplace_back(suite->name(),weak_suite_ptr(suite) );
       }
       handle_changed_ = true;
 

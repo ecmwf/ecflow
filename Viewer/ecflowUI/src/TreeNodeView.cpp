@@ -77,13 +77,13 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilte
 
     //Properties
     std::vector<std::string> propVec;
-    propVec.push_back("view.tree.indentation");
-    propVec.push_back("view.tree.background");
-    propVec.push_back("view.tree.drawBranchLine");
-    propVec.push_back("view.tree.branchLineColour");
-    propVec.push_back("view.tree.serverToolTip");
-    propVec.push_back("view.tree.nodeToolTip");
-    propVec.push_back("view.tree.attributeToolTip");
+    propVec.emplace_back("view.tree.indentation");
+    propVec.emplace_back("view.tree.background");
+    propVec.emplace_back("view.tree.drawBranchLine");
+    propVec.emplace_back("view.tree.branchLineColour");
+    propVec.emplace_back("view.tree.serverToolTip");
+    propVec.emplace_back("view.tree.nodeToolTip");
+    propVec.emplace_back("view.tree.attributeToolTip");
 
     prop_=new PropertyMapper(propVec,this);
 

@@ -58,11 +58,11 @@ static std::string to_string(EditScriptCmd::EditType et) {
 }
 static std::vector<std::string> valid_edit_types() {
    std::vector<std::string> edit_types; edit_types.reserve(5);
-   edit_types.push_back("edit");
-   edit_types.push_back("pre_process");
-   edit_types.push_back("submit");
-   edit_types.push_back("pre_process_file");
-   edit_types.push_back("submit_file");
+   edit_types.emplace_back("edit");
+   edit_types.emplace_back("pre_process");
+   edit_types.emplace_back("submit");
+   edit_types.emplace_back("pre_process_file");
+   edit_types.emplace_back("submit_file");
    return edit_types;
 }
 

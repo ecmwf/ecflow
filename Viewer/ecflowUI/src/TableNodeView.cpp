@@ -112,7 +112,7 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 
     //Properties
 	std::vector<std::string> propVec;
-	propVec.push_back("view.table.background");
+	propVec.emplace_back("view.table.background");
 	prop_=new PropertyMapper(propVec,this);
 
 	//Initialise bg

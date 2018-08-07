@@ -96,7 +96,7 @@ void SimulatorVisitor::visitSuite( Suite* s)
  	}
 
  	// record the max simulation period for THIS suite. i.e different suites can have different simulation period
- 	suite_duration_vec_.push_back( std::make_pair(s,max_suite_duration_));
+ 	suite_duration_vec_.emplace_back(s,max_suite_duration_);
 
  	// make sure total simulation period cover all the suites.
  	if ( max_suite_duration_ > max_sim_duration_) {

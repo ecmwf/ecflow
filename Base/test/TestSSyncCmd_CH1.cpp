@@ -106,7 +106,7 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
    {
       /// create client handle which references suites s0 and s4, in the server defs
       /// Registering suites should change handle_changed boolean
-      std::vector<std::string> suite_names; suite_names.push_back("s0"); suite_names.push_back("s4");
+      std::vector<std::string> suite_names; suite_names.emplace_back("s0"); suite_names.emplace_back("s4");
       TestHelper::invokeRequest(server_defs.get(),Cmd_ptr( new ClientHandleCmd(suite_names,false)),bypass_state_modify_change_check);
 
       BOOST_CHECK_MESSAGE(server_defs->client_suite_mgr().clientSuites().size() == 1,test_name << ": Expected 1 Client suites but found " <<server_defs->client_suite_mgr().clientSuites().size());
@@ -252,8 +252,8 @@ static bool add_server_user_variables(defs_ptr defs)
 {
    // Change server. This is outside of any suites
    std::vector<Variable> user_variables;
-   user_variables.push_back(Variable("a","b"));
-   user_variables.push_back(Variable("c","d"));
+   user_variables.emplace_back("a","b");
+   user_variables.emplace_back("c","d");
    defs->set_server().set_user_variables(user_variables);
    return true; // expect change
 }
@@ -601,11 +601,11 @@ BOOST_AUTO_TEST_CASE( test_ssync_full_sync_using_handle  )
 
    /// register interest in **ALL** the suites
    std::vector<std::string> suite_names;
-   suite_names.push_back("s0");
-   suite_names.push_back("s1");
-   suite_names.push_back("s2");
-   suite_names.push_back("s3");
-   suite_names.push_back("s4");
+   suite_names.emplace_back("s0");
+   suite_names.emplace_back("s1");
+   suite_names.emplace_back("s2");
+   suite_names.emplace_back("s3");
+   suite_names.emplace_back("s4");
    TestHelper::invokeRequest(server_defs.get(),Cmd_ptr( new ClientHandleCmd(suite_names,false)),bypass_state_modify_change_check);
 
    /// make sure handle created.

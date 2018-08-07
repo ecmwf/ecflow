@@ -71,7 +71,7 @@ TableNodeViewDelegate::TableNodeViewDelegate(QWidget *parent)
     //Property
     if(propVec.empty())
     {
-        propVec.push_back("view.table.font");
+        propVec.emplace_back("view.table.font");
 
         //Base settings
         addBaseSettings(propVec);

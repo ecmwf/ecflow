@@ -106,7 +106,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
       /// Hence if command is just show, add a dummy arg.
       //if (aCmd == "show")  subCmdArgs.push_back("<dummy_arg>");
 
-      std::vector<std::string> theArgs;  theArgs.push_back("ClientInvoker");
+      std::vector<std::string> theArgs;  theArgs.emplace_back("ClientInvoker");
       std::copy( subCmdArgs.begin(), subCmdArgs.end(), std::back_inserter(theArgs));
 
       // Create a Argv array from a vector of strings

@@ -63,11 +63,11 @@ bool Attr::is_valid( const std::string& str ) {
 std::vector< std::string > Attr::all_attrs() {
    std::vector<std::string> vec;
    vec.reserve( 5 );
-   vec.push_back( "event" );
-   vec.push_back( "meter" );
-   vec.push_back( "label" );
-   vec.push_back( "limit" );
-   vec.push_back( "variable" );
+   vec.emplace_back("event" );
+   vec.emplace_back("meter" );
+   vec.emplace_back("label" );
+   vec.emplace_back("limit" );
+   vec.emplace_back("variable" );
    return vec;
 }
 

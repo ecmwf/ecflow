@@ -28,8 +28,8 @@ ClockWidget::ClockWidget(QWidget* parent) : QLabel(parent), showSec_(false)
     setStyleSheet(sh);
 
     std::vector<std::string> propVec;
-    propVec.push_back("view.clock.showClock");
-    propVec.push_back("view.clock.clockFormat");
+    propVec.emplace_back("view.clock.showClock");
+    propVec.emplace_back("view.clock.clockFormat");
     prop_=new PropertyMapper(propVec,this);
     Q_ASSERT(prop_);
     prop_->initObserver(this);

@@ -195,7 +195,7 @@ void ServerState::add_or_update_server_variable( const std::string& name, const 
       }
    }
 //   std::cout << "   Server Variables: Adding " << name << "   " << value << "\n";
-   server_variables_.push_back( Variable(name, value) );
+   server_variables_.emplace_back(name, value );
 }
 
 void ServerState::set_server_variables(const std::vector<Variable>& e)
@@ -247,7 +247,7 @@ void ServerState::add_or_update_user_variables( const std::string& name, const s
    }
 
 //	std::cout << "   ServerState::add_or_update_user_variables: Adding " << name << "   " << value << "\n";
-   user_variables_.push_back( Variable(name, value) );
+   user_variables_.emplace_back(name, value );
 	variable_state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -480,42 +480,42 @@ void ServerState::setup_default_env(const std::string& port)
 void ServerState::setup_default_server_variables(std::vector<Variable>&  server_variables, const std::string& port)
 {
    Host host;
-   server_variables.push_back( Variable(Str::ECF_MICRO(), Ecf::MICRO() )); //Preprocessor character for variable substitution and including files
-   server_variables.push_back( Variable(Str::ECF_HOME(), string(".")) );
-   server_variables.push_back( Variable(string("ECF_JOB_CMD"), Ecf::JOB_CMD() )); //Command to be executed to submit a job
-   server_variables.push_back( Variable(string("ECF_KILL_CMD"), Ecf::KILL_CMD() )); // Command to be executed to kill a job
-   server_variables.push_back( Variable(string("ECF_STATUS_CMD"), Ecf::STATUS_CMD() )); // Command to be executed to get status of job
-   server_variables.push_back( Variable(string("ECF_URL_CMD"), Ecf::URL_CMD() ));
-   server_variables.push_back( Variable(string("ECF_URL_BASE"), Ecf::URL_BASE() ));
-   server_variables.push_back( Variable(string("ECF_URL"), Ecf::URL() ));
-   server_variables.push_back( Variable(string("ECF_LOG"), host.ecf_log_file(port) ));
-   server_variables.push_back( Variable(string("ECF_INTERVAL"), string("60") ));            // Check time dependencies and submit any jobs
-   server_variables.push_back( Variable(string("ECF_LISTS"), host.ecf_lists_file(port) ));
-   server_variables.push_back( Variable(string("ECF_PASSWD"), host.ecf_passwd_file(port) ));
-   server_variables.push_back( Variable(string("ECF_CHECK"), host.ecf_checkpt_file(port) ));
-   server_variables.push_back( Variable(string("ECF_CHECKOLD"), host.ecf_backup_checkpt_file(port)));
-   server_variables.push_back( Variable(string("ECF_CHECKINTERVAL"), string("120") ));      //The interval in seconds to save check point file
-   server_variables.push_back( Variable(string("ECF_CHECKMODE"), string("CHECK_ON_TIME")) );//The check mode, must be one of NEVER, ON_TIME, ALWAYS
+   server_variables.emplace_back(Str::ECF_MICRO(), Ecf::MICRO() ); //Preprocessor character for variable substitution and including files
+   server_variables.emplace_back(Str::ECF_HOME(), string(".") );
+   server_variables.emplace_back(string("ECF_JOB_CMD"), Ecf::JOB_CMD() ); //Command to be executed to submit a job
+   server_variables.emplace_back(string("ECF_KILL_CMD"), Ecf::KILL_CMD() ); // Command to be executed to kill a job
+   server_variables.emplace_back(string("ECF_STATUS_CMD"), Ecf::STATUS_CMD() ); // Command to be executed to get status of job
+   server_variables.emplace_back(string("ECF_URL_CMD"), Ecf::URL_CMD() );
+   server_variables.emplace_back(string("ECF_URL_BASE"), Ecf::URL_BASE() );
+   server_variables.emplace_back(string("ECF_URL"), Ecf::URL() );
+   server_variables.emplace_back(string("ECF_LOG"), host.ecf_log_file(port) );
+   server_variables.emplace_back(string("ECF_INTERVAL"), string("60") );            // Check time dependencies and submit any jobs
+   server_variables.emplace_back(string("ECF_LISTS"), host.ecf_lists_file(port) );
+   server_variables.emplace_back(string("ECF_PASSWD"), host.ecf_passwd_file(port) );
+   server_variables.emplace_back(string("ECF_CHECK"), host.ecf_checkpt_file(port) );
+   server_variables.emplace_back(string("ECF_CHECKOLD"), host.ecf_backup_checkpt_file(port));
+   server_variables.emplace_back(string("ECF_CHECKINTERVAL"), string("120") );      //The interval in seconds to save check point file
+   server_variables.emplace_back(string("ECF_CHECKMODE"), string("CHECK_ON_TIME") );//The check mode, must be one of NEVER, ON_TIME, ALWAYS
 
    // Number of times a job should rerun if it aborts. If more than one and
    // job aborts, the job is automatically re-run. Useful when jobs are run in
    // an unreliable environments. For example using using commands like ftp(1)
    // in a job can fail easily, but re-running the job will often work
-   server_variables.push_back( Variable(Str::ECF_TRIES(), string("2")) );
+   server_variables.emplace_back(Str::ECF_TRIES(), string("2") );
 
-   server_variables.push_back( Variable(string("ECF_VERSION"),Version::raw()) );// server version
+   server_variables.emplace_back(string("ECF_VERSION"),Version::raw() );// server version
 
    // Needed to setup client environment.
    // The server sets these variable for use by the client. i.e when creating the jobs
    // The clients then uses them to communicate with the server.
-   server_variables.push_back( Variable(Str::ECF_PORT(),port) );
-   server_variables.push_back( Variable(Str::ECF_HOST(),Str::LOCALHOST()) );
+   server_variables.emplace_back(Str::ECF_PORT(),port );
+   server_variables.emplace_back(Str::ECF_HOST(),Str::LOCALHOST() );
 }
 
 /// determines why the node is not running.
 bool ServerState::why(std::vector<std::string>& theReasonWhy) const
 {
-   if (server_state_ == SState::HALTED)   { theReasonWhy.push_back("The server is halted"); return true;}
-   if (server_state_ == SState::SHUTDOWN) { theReasonWhy.push_back("The server is shutdown"); return true;}
+   if (server_state_ == SState::HALTED)   { theReasonWhy.emplace_back("The server is halted"); return true;}
+   if (server_state_ == SState::SHUTDOWN) { theReasonWhy.emplace_back("The server is shutdown"); return true;}
    return false;
 }

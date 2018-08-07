@@ -323,10 +323,10 @@ BOOST_AUTO_TEST_CASE( test_server_profile_threshold_environment_variable )
    // ==================================================================================
    // Note test for errors
    vector<string> dodgy_thresholds;
-   dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=x");
-   dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=,");
-   dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=:");
-   dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=,,");
+   dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=x");
+   dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=,");
+   dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=:");
+   dodgy_thresholds.emplace_back("ECF_TASK_THRESHOLD=,,");
 
    for(auto & dodgy_threshold : dodgy_thresholds) {
       //cout << "check -------> " << dodgy_thresholds[i] << endl;

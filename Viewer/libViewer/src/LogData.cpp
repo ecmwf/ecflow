@@ -119,7 +119,7 @@ void LogData::loadFromText(const std::string& txt)
     {
         if(!s.simplified().isEmpty())
         {            
-            data_.push_back(LogDataItem(s.toStdString(),refTimeInMs_));
+            data_.emplace_back(s.toStdString(),refTimeInMs_);
         }
     }
 }
@@ -138,7 +138,7 @@ void LogData::appendFromText(const std::string& txt)
     QString s=QString::fromStdString(txt);
     if(!s.simplified().isEmpty())
     {       
-        data_.push_back(LogDataItem(s.toStdString(),refTimeInMs_));
+        data_.emplace_back(s.toStdString(),refTimeInMs_);
     }
 }
 
@@ -149,7 +149,7 @@ void LogData::appendFromText(const std::vector<std::string>& txtVec)
         QString s=QString::fromStdString(i);
         if(!s.simplified().isEmpty())
         {            
-            data_.push_back(LogDataItem(s.toStdString(),refTimeInMs_));
+            data_.emplace_back(s.toStdString(),refTimeInMs_);
         }
     }
 }

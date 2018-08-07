@@ -233,7 +233,7 @@ int ClientInvoker::invoke( const std::string& arg ) const
 int ClientInvoker::invoke( const std::vector<std::string>& args ) const
 {
 	std::vector<std::string> theArgs;
-	theArgs.push_back("ClientInvoker");
+	theArgs.emplace_back("ClientInvoker");
 	std::copy( args.begin(), args.end(), std::back_inserter(theArgs) );
 	ArgvCreator argvCreator( theArgs );
 	return invoke(argvCreator.argc(),argvCreator.argv());

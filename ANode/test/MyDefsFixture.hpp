@@ -100,7 +100,7 @@ private:
 		suite->addVariable( Variable("VAR1","\"value\"") );
 		suite->addVariable( Variable("ECF_FETCH","\"smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%\"") );
 
-		std::vector<std::string> queue_items; queue_items.push_back("000"); queue_items.push_back("001");  queue_items.push_back("002");
+		std::vector<std::string> queue_items; queue_items.emplace_back("000"); queue_items.emplace_back("001");  queue_items.emplace_back("002");
       suite->add_queue(QueueAttr("queue",queue_items));
       suite->add_queue(QueueAttr("queue1",queue_items));
       suite->add_generic(GenericAttr("gen1",queue_items));
@@ -155,9 +155,9 @@ private:
       suite->addLimit( Limit(suiteLimit2,10) );
 
       std::vector<std::string> stringList; stringList.reserve(3);
-      stringList.push_back("10");
-      stringList.push_back("20");
-      stringList.push_back("30");
+      stringList.emplace_back("10");
+      stringList.emplace_back("20");
+      stringList.emplace_back("30");
 
       // Add tasks with all the repeat variants
       task_ptr t5 = suite->add_task( "t5" );
@@ -228,7 +228,7 @@ private:
          task->add_generic(GenericAttr("gen1",queue_items));
          task->add_generic(GenericAttr("gen2",std::vector<std::string>()));
 
-         std::vector<std::string> nodes_to_restore; nodes_to_restore.push_back("/EmptySuite");
+         std::vector<std::string> nodes_to_restore; nodes_to_restore.emplace_back("/EmptySuite");
          task->add_autorestore(ecf::AutoRestoreAttr(nodes_to_restore));
 			if (i == 2) {
 				 std::string compExpr = "../familyName" + boost::lexical_cast< std::string >( i-1 );

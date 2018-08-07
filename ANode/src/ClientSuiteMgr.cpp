@@ -44,7 +44,7 @@ unsigned int ClientSuiteMgr::create_client_suite(bool auto_add_new_suites, const
 	}
   	if (!found_hole) new_handle = clientSuites_.size() + 1;
 
-	clientSuites_.push_back( ClientSuites(defs_,new_handle,auto_add_new_suites,suites,the_user)  );
+	clientSuites_.emplace_back(defs_,new_handle,auto_add_new_suites,suites,the_user );
 
 	// aesthetics only
 	std::sort(clientSuites_.begin(),clientSuites_.end(),

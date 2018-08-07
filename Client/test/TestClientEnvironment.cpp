@@ -47,12 +47,12 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_parsing )
 
 	std::vector<std::string> expectedHost;
 	expectedHost.push_back(the_host);
-	expectedHost.push_back("host1");
-	expectedHost.push_back("host2");
-	expectedHost.push_back("host3");
-	expectedHost.push_back("host4");
-   expectedHost.push_back("host5");
-   expectedHost.push_back("host6");
+	expectedHost.emplace_back("host1");
+	expectedHost.emplace_back("host2");
+	expectedHost.emplace_back("host3");
+	expectedHost.emplace_back("host4");
+   expectedHost.emplace_back("host5");
+   expectedHost.emplace_back("host6");
 
 
 	ClientEnvironment client_env( good_host_file );
@@ -97,13 +97,13 @@ BOOST_AUTO_TEST_CASE( test_client_environment_host_file_defaults )
 
    // local host should be implicitly added to internal host list
    std::vector<std::pair<std::string,std::string> > expectedHost;
-   expectedHost.push_back( make_pair(Str::LOCALHOST(), string("5111")) ); // here 5111 is job supplied port
-   expectedHost.push_back( make_pair(string("host1"), string("3142")) );
-   expectedHost.push_back( make_pair(string("host2"), string("3141")) );
-   expectedHost.push_back( make_pair(string("host3"), string("5111")) ); // not specified in host file, hence expect 5111
-   expectedHost.push_back( make_pair(string("host4"), string("4001")) );
-   expectedHost.push_back( make_pair(string("host5"), string("5111")) ); // not specified in host file, hence expect 5111
-   expectedHost.push_back( make_pair(string("host6"), string("4081")) );
+   expectedHost.emplace_back(Str::LOCALHOST(), string("5111") ); // here 5111 is job supplied port
+   expectedHost.emplace_back(string("host1"), string("3142") );
+   expectedHost.emplace_back(string("host2"), string("3141") );
+   expectedHost.emplace_back(string("host3"), string("5111") ); // not specified in host file, hence expect 5111
+   expectedHost.emplace_back(string("host4"), string("4001") );
+   expectedHost.emplace_back(string("host5"), string("5111") ); // not specified in host file, hence expect 5111
+   expectedHost.emplace_back(string("host6"), string("4081") );
 
    // Create the ClientEnvironment overriding the config & environment. To specify host and port
    ClientEnvironment client_env( good_host_file , Str::LOCALHOST(),"5111");

@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( test_alias_create )
 
    // Create .usr file content
    std::vector<std::string> usr_file_vec;
-   usr_file_vec.push_back("#This is a .usr file.");
+   usr_file_vec.emplace_back("#This is a .usr file.");
 
    // Create list of variables
    NameValueVec used_variables;

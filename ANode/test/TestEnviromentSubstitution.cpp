@@ -38,11 +38,11 @@ BOOST_AUTO_TEST_CASE( test_environment_substitution )
 		suite->addVariable(Variable("AVI","avi"));
 
   		std::vector<std::pair<std::string,std::string> > env;
-  		env.push_back( std::make_pair(Str::ECF_HOME(), string("/home/smshome")) );
-  		env.push_back( std::make_pair(string("FRED"),    string("/home/fred")) );
-  		env.push_back( std::make_pair(string("BILL"),    string("/home/bill")) );
-      env.push_back( std::make_pair(string("JANE"),    string("/home/jane")) );
-      env.push_back( std::make_pair(string("REP"),    string("$REP/bill")) );
+  		env.emplace_back(Str::ECF_HOME(), string("/home/smshome") );
+  		env.emplace_back(string("FRED"),    string("/home/fred") );
+  		env.emplace_back(string("BILL"),    string("/home/bill") );
+      env.emplace_back(string("JANE"),    string("/home/jane") );
+      env.emplace_back(string("REP"),    string("$REP/bill") );
   		defs.set_server().add_or_update_user_variables( env );
 	}
 

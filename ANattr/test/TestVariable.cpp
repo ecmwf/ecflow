@@ -59,17 +59,17 @@ BOOST_AUTO_TEST_CASE( test_variable_value )
    cout << "ANattr:: ...test_variable_value\n";
 
    std::vector<std::string> values;
-   values.push_back("sdsd");
-   values.push_back("0fred0");
-   values.push_back("fted");
-   values.push_back("%value%");
-   values.push_back("a");
-   values.push_back("");
-   values.push_back("0");
-   values.push_back("00");
-   values.push_back("000");
-   values.push_back("0000");
-   values.push_back("0000000000000");
+   values.emplace_back("sdsd");
+   values.emplace_back("0fred0");
+   values.emplace_back("fted");
+   values.emplace_back("%value%");
+   values.emplace_back("a");
+   values.emplace_back("");
+   values.emplace_back("0");
+   values.emplace_back("00");
+   values.emplace_back("000");
+   values.emplace_back("0000");
+   values.emplace_back("0000000000000");
    for(const auto & value : values) {
       Variable var("name","");
       var.set_value(value);

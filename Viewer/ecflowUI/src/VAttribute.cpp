@@ -130,8 +130,8 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
                                     const std::string& action, const std::string& type,
                                     const std::string& name,const std::string& value)
 {
-    cmd.push_back("ecflow_client");
-    cmd.push_back("--alter");
+    cmd.emplace_back("ecflow_client");
+    cmd.emplace_back("--alter");
     cmd.push_back(action);
     cmd.push_back(type);
 
@@ -141,18 +141,18 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
         cmd.push_back(value);
     }
 
-    cmd.push_back("<full_name>");
+    cmd.emplace_back("<full_name>");
 }
 
 void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
                                     const std::string& action, const std::string& type,
                                     const std::string& value)
 {
-    cmd.push_back("ecflow_client");
-    cmd.push_back("--alter");
+    cmd.emplace_back("ecflow_client");
+    cmd.emplace_back("--alter");
     cmd.push_back(action);
     cmd.push_back(type);
     cmd.push_back(value);
 
-    cmd.push_back("<full_name>");
+    cmd.emplace_back("<full_name>");
 }
