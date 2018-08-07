@@ -21,7 +21,7 @@ MenuConfigDialog::MenuConfigDialog(QWidget *parent) : QDialog(parent)
 
 	// load up the user menu file if it exists  XXXX
 
-	if (0)
+	if (false)
 	{
 	}
 	else

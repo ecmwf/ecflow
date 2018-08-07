@@ -375,7 +375,7 @@ bool ServerState::variableSubsitution(std::string& cmd) const
    bool double_micro_found = false;
    std::string::size_type pos = 0;
    int count = 0;
-   while ( 1 ) {
+   while ( true ) {
       // A while loop here is used to:
       //    a/ Allow for multiple substitution on a single line. i.e %ECF_FILES% -I %ECF_INCLUDE%"
       //    b/ Allow for recursive substitution. %fred% -> %bill%--> 10
@@ -443,7 +443,7 @@ bool ServerState::variableSubsitution(std::string& cmd) const
       doubleEcfMicro += micro;
       doubleEcfMicro += micro;
       size_t last_pos = 0;
-      while ( 1 ) {
+      while ( true ) {
           string::size_type ecf_double_micro_pos = cmd.find( doubleEcfMicro , last_pos);
           if ( ecf_double_micro_pos != std::string::npos ) {
              cmd.erase( cmd.begin() + ecf_double_micro_pos );

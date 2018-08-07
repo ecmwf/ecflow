@@ -1062,7 +1062,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
    std::string::size_type pos = 0;
    int count = 0;
    Alias* is_a_alias = isAlias();
-   while ( 1 ) {
+   while ( true ) {
       // A while loop here is used to:
       //		a/ Allow for multiple substitution on a single line. i.e %ECF_FILES% -I %ECF_INCLUDE%"
       //    b/ Allow for recursive substitution. %fred% -> %bill%--> 10
@@ -1186,7 +1186,7 @@ bool Node::variable_substitution(std::string& cmd, const NameValueMap& user_edit
       doubleEcfMicro += micro;
       doubleEcfMicro += micro;
       size_t last_pos = 0;
-      while ( 1 ) {
+      while ( true ) {
           string::size_type ecf_double_micro_pos = cmd.find( doubleEcfMicro , last_pos);
           if ( ecf_double_micro_pos != std::string::npos ) {
              cmd.erase( cmd.begin() + ecf_double_micro_pos );
@@ -1205,7 +1205,7 @@ bool Node::find_all_used_variables(std::string& cmd, NameValueMap& used_variable
    cout << "cmd  = " << cmd << "\n";
 #endif
    int count = 0;
-   while ( 1 ) {
+   while ( true ) {
       // A while loop here is used to:
       //		a/ Allow for multiple substitution on a single line. i.e %ECF_FILES% -I %ECF_INCLUDE%"
       //    b/ Allow for recursive substitution. %fred% -> %bill%--> 10
@@ -1282,7 +1282,7 @@ bool Node::variable_dollar_subsitution(std::string& cmd)
    // scan command for environment variables, and substitute
    // edit ECF_INCLUDE $ECF_HOME/include
 
-   while ( 1 ) {
+   while ( true ) {
       size_t firstPos = cmd.find( '$' );
       if ( firstPos == string::npos ) break;
 

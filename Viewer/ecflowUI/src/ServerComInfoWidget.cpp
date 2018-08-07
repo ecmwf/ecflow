@@ -237,7 +237,7 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
     }
     else
     {
-        hasInfo_=0;
+        hasInfo_=false;
     }
 
     refreshAction_->setEnabled(true);
@@ -1017,7 +1017,7 @@ void ServerRefreshInfoWidget::adjustToolTip()
 
     }
     */
-    if(1)
+    if(true)
     {
         if(currentComponent_ == ButtonComponent)
         {

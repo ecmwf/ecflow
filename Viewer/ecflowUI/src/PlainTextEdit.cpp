@@ -325,7 +325,7 @@ bool PlainTextEdit::findString(const QString &s,QTextDocument::FindFlags flags, 
     }
     else    // did not find the string
     {
-        if (1)  // 'wraparound' search - on by default, we can add a user option if it might be useful to turn it off
+        if (true)  // 'wraparound' search - on by default, we can add a user option if it might be useful to turn it off
         {
             QTextCursor original_cursor = textCursor();   // get the document's cursor
             QTextCursor cursor(original_cursor);

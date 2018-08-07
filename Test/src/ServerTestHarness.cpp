@@ -244,7 +244,7 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
 
    // How do we terminate this test?
    // The test succeeds if the suite state is complete,
-   while( 1 ) {
+   while( true ) {
 #ifdef DEBUG_TEST_WAITER
   		std::cout << "sleepTime = " << sleepTime << "\n";
 #endif

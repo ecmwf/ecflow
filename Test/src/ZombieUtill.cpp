@@ -66,7 +66,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
    int action_set =  0;
    std::vector<Zombie> action_set_zombies;
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
-   while (1) {
+   while (true) {
       BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
       bool continue_looping = false;

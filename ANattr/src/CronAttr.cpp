@@ -459,7 +459,7 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const
 	boost::gregorian::date future_date = calendar.date();  // todays date
 	future_date += one_day;                                // add one day, so its in the future
 
- 	while ( 1 ) {
+ 	while ( true ) {
 
  		bool week_day_matches = weekDays_.empty();         // week day matches if no week days
  		bool day_of_month_matches = daysOfMonth_.empty();  // day of month if no days of month

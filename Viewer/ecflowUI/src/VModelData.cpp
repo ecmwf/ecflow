@@ -45,7 +45,7 @@ void VTreeChangeInfo::addStateChange(const VNode* n)
 
 VModelServer::VModelServer(ServerHandler *server) :
    server_(server),
-   inScan_(0)
+   inScan_(false)
 {
 	//We has to observe the nodes of the server.
 	server_->addNodeObserver(this);

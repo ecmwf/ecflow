@@ -199,8 +199,8 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 }
 
 
-                item->setHidden((hidden == "true")?1:0);
-                item->setMultiSelect((multiSelect == "true")?1:0);
+                item->setHidden((hidden == "true")?true:false);
+                item->setMultiSelect((multiSelect == "true")?true:false);
 
                 if (type == "Submenu")
                     item->setAsSubMenu();

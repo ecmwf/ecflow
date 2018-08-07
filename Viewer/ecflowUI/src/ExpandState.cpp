@@ -267,7 +267,7 @@ void ExpandState::collectExpanded(ExpandStateNode *expand,const VNode* node,cons
         else
         {
             //create an expand node. Collapsed by default
-            chExpand=expand->setChildAt(i,chNode,0);
+            chExpand=expand->setChildAt(i,chNode,false);
 
             //save all the children recursively
             save(chNode,chExpand,chIdx);

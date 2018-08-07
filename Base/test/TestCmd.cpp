@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( test_simple_cmd )
  		std::string varValue;
 		if (t1->findParentUserVariableValue( Str::ECF_TRIES(), varValue ))  {
 			auto ecf_tries = boost::lexical_cast< int > (varValue);
-			while (1) {
+			while (true) {
             TestHelper::invokeRequest(&defs,Cmd_ptr( new AbortCmd(suite_f_t1,Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1)));
             TestHelper::invokeRequest(&defs,Cmd_ptr( new CtsCmd( CtsCmd::FORCE_DEP_EVAL)));
 				BOOST_CHECK_MESSAGE( t1->state() == NState::ACTIVE,  "expected state NState::ACTIVE, but found to be " << NState::toString(t1->state()));

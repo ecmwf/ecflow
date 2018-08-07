@@ -1163,7 +1163,7 @@ std::string ClientInvoker::find_free_port(int seed_port_number, bool debug)
    ClientInvoker client;
    client.set_retry_connection_period(1); // avoid long wait
    client.set_connection_attempts(1);     // avoid long wait
-   while (1) {
+   while (true) {
       free_port = boost::lexical_cast<std::string>(the_port);
       try {
          if (debug) cout << "   Trying to connect to server on '" << Str::LOCALHOST() << ":" << free_port << "'\n";
@@ -1192,7 +1192,7 @@ std::string ClientInvoker::find_free_port(int seed_port_number, bool debug)
 bool ClientInvoker::wait_for_server_reply(int time_out) const
 {
    DurationTimer timer;
-   while(1) {
+   while(true) {
       sleep(2);
 
       if (on_error_throw_exception_) {
@@ -1217,7 +1217,7 @@ bool ClientInvoker::wait_for_server_reply(int time_out) const
 bool ClientInvoker::wait_for_server_death(int time_out) const
 {
    DurationTimer timer;
-   while(1) {
+   while(true) {
 
       if (on_error_throw_exception_) {
          try {

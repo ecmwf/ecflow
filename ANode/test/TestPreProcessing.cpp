@@ -43,7 +43,7 @@ void findVariable(std::string& line, std::set<std::string>& variables)
 	//
 	// i.e VAR is defined as BILL
 	//  %VAR:fred --f%  will either be "BILL" or if VAR is not defined "fred --f"
- 	while ( 1 ) {
+ 	while ( true ) {
 		size_t firstPercentPos = line.find( Ecf::MICRO() );
 		if ( firstPercentPos == string::npos ) break;
 		size_t secondPercentPos = line.find( Ecf::MICRO(), firstPercentPos + 1 );
