@@ -19,6 +19,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <memory>
 
 OutputDirProvider::OutputDirProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::NoTask),
@@ -350,7 +351,7 @@ VDir_ptr OutputDirProvider::fetchLocalDir(const std::string& path,std::string& e
             {
                 std::string nodeName=info_->node()->strName();
                 std::string pattern=nodeName+".";
-                res=VDir_ptr(new VDir(dirName,pattern));
+                res=std::make_shared<VDir>(dirName,pattern);
                 res->setFetchDate(QDateTime::currentDateTime());
                 res->setFetchMode(VDir::LocalFetchMode);
                 res->setFetchModeStr("from disk");

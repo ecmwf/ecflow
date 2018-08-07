@@ -14,6 +14,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
+#include <memory>
 
 #define _UI_OUTPUTDIRCLIENT_DEBUG
 
@@ -118,7 +119,7 @@ void OutputDirClient::getDir(const std::string& name)
 
 	remoteFile_=name;
 	dir_.reset();
-	dir_=VDir_ptr(new VDir(dirName));
+	dir_=std::make_shared<VDir>(dirName);
 	data_.clear();
 
 	//indicates the source of the files
