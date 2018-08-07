@@ -267,6 +267,8 @@ class host : public extent<host>
 
 	bool updating_; // SUP-423
 	option<int>       jobfile_length_;
+
+	const char* _input;
  public:
 	void updating(bool b) { updating_ = b; }
         virtual void stats(std::ostream& f) { };

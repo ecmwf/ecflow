@@ -90,17 +90,18 @@ int quit_cmd()
 }
 
 int process_command(const char *cmd) {
-  if (!cmd) return 1;
+  if (!cmd) return False;
 
   if (!strncmp("select", cmd, 6)) {
       char host[80] = { 0, };
       char node[1024] = { 0, };
       sscanf(cmd, "select %s %s", host, node);
       if (host[0] != 0 && node[0] != 0) {
+	std::cout << "#CMD (scripting): " << cmd << "\n";
 	select_cmd(host, node);
       } else {
 	std::cerr << "#CMD (scripting): err: " << cmd << "\n";
-	return 1;
+	return False;
       }
 
   } else if (!strncmp("order", cmd, 5)) {
@@ -108,15 +109,15 @@ int process_command(const char *cmd) {
       char node[1024] = { 0, };
       sscanf(cmd, "order %s %s", node, kind);
       if (kind[0] != 0 && node[0] != 0) {
+	std::cout << "#CMD (scripting): " << cmd << "\n";
 	order_cmd(node, kind);
       } else {
 	std::cerr << "#CMD (scripting): err: " << cmd << "\n";
-	return 1;
+	return False;
       }
 
   } else if (!strncmp("menu", cmd, 4)) {
     menu_cmd(cmd);
-
 
   } else if (!strncmp("quit", cmd, 4)) {
     quit_cmd();
@@ -127,7 +128,6 @@ int process_command(const char *cmd) {
       if (host[0] != 0) {
 	login_cmd(host);
       }
-
 
   } else if (!strncmp("output", cmd, 6)) {
       char node[2048] = { 0, };
@@ -165,23 +165,24 @@ int process_command(const char *cmd) {
 	if (!strncmp("-f", name, 2)) frozen   = 1;
 	if (*ptr != ' ') { break; /* skip separator */ }
 	ptr++;
-	std::cerr << "#CMD (scripting): process: " << name << "\n";
+	std::cout << "#CMD (scripting): process: " << name << "\n";
       }
       if (name[0] != 0) {
+	std::cout << "#CMD (scripting): process: " << name << "\n";
 	window_cmd(name, detached, frozen);
       } else {
 	std::cerr << "#CMD (scripting): err: " << cmd << "\n";
-	return 1;
+	return False;
       }
   } else if (!strncmp("\n", cmd, 1)) {
 
   } else {
     std::cerr << "#CMD (scripting): ignored: " << cmd << "\n";
-    return 1;
+    return False;
   }
   
   std::cout << "#CMD (scripting): " << cmd << "\n";
-  return 0;
+  return True;
 }
 
 #undef SCRIPT_PYTHON
@@ -216,8 +217,8 @@ extern XtAppContext app_context;
 
 class ecflowview_input {       
   std::string        name_;
-  XtInputId  id_;
-  int        fd_;
+  XtInputId          id_;
+  int                fd_;
   std::string        line_;
 
 public:
@@ -402,7 +403,7 @@ int scripting::dispatch(int argc,char **argv)
 	scripting* s = find(argv[0]);
 	if(s) return s->execute(argc,argv);
 	fprintf(stderr,"cannot find command %s\n",argv[0]);
-	return 1;
+	return False;
 }
 
 IMP(scripting)
