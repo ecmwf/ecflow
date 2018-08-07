@@ -200,7 +200,7 @@ class TextPagerLineNumberArea : public QWidget
 {
 public:
     explicit TextPagerLineNumberArea(TextPagerEdit *editor);
-    QSize sizeHint() const {return QSize(computeWidth(), 0);}
+    QSize sizeHint() const {return {computeWidth(), 0};}
     int rightMargin() const {return rightMargin_;}
     void updateWidth(int maxLineNum=-1);
     QColor bgColour() const {return bgCol_;}

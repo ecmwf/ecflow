@@ -205,7 +205,7 @@ QModelIndex NodeQueryResultModel::index( int row, int column, const QModelIndex 
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When parent is the root this index refers to a node or server
@@ -220,7 +220,7 @@ QModelIndex NodeQueryResultModel::index( int row, int column, const QModelIndex 
 
 QModelIndex NodeQueryResultModel::parent(const QModelIndex &child) const
 {
-	return QModelIndex();
+	return {};
 }
 
 VInfo_ptr NodeQueryResultModel::nodeInfo(const QModelIndex& index)
@@ -283,7 +283,7 @@ QModelIndex NodeQueryResultModel::infoToIndex(VInfo_ptr info)
 		}
 	}*/
 
-	return QModelIndex();
+	return {};
 }
 
 void  NodeQueryResultModel::slotBeginAppendRow()

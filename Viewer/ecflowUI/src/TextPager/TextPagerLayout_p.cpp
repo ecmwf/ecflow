@@ -325,7 +325,7 @@ QTextLine TextPagerLayout::lineForPosition(int pos, int *offsetInLine, int *line
         *lastLine = false;
 
     if (pos < viewportPosition || pos >= layoutEnd || textLayouts.isEmpty() || lines.isEmpty()) {
-        return QTextLine();
+        return {};
     }
     int layoutIndex = 0;
     QTextLayout *layout = textLayouts.value(layoutIndex);

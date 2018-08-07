@@ -264,7 +264,7 @@ QModelIndex VariableModel::index( int row, int column, const QModelIndex & paren
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When parent is the root this index refers to a node or server
@@ -290,7 +290,7 @@ QModelIndex VariableModel::index( int row, int column, const QModelIndex & paren
 QModelIndex VariableModel::parent(const QModelIndex &child) const
 {
 	if(!child.isValid())
-		return QModelIndex();
+		return {};
 
 	int level=indexToLevel(child);
 	if(level == 1)
@@ -367,7 +367,7 @@ VInfo_ptr VariableModel::indexToInfo(const QModelIndex& index) const
 QModelIndex VariableModel::infoToIndex(VInfo_ptr info) const
 {
     if(!info)
-        return QModelIndex();
+        return {};
 
     int block=-1;
     int row=-1;

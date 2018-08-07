@@ -226,7 +226,7 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 {
     if(!hasData() || row < 0 || column < 0 || parent.isValid())
 	{
-		return QModelIndex();
+		return {};
 	}
 
     if(VNode *node=data_->nodeAt(row))
@@ -240,7 +240,7 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 QModelIndex TableNodeModel::parent(const QModelIndex& /*child*/) const
 {
 	//Parent is always the root!!!
-	return QModelIndex();
+	return {};
 }
 
 //----------------------------------------------
@@ -261,7 +261,7 @@ VNode* TableNodeModel::indexToNode( const QModelIndex & index) const
 QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const
 {
 	if(!node)
-		return QModelIndex();
+		return {};
 
 	int row=0;
     if((row=data_->position(node)) != -1)
@@ -276,7 +276,7 @@ QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const
 QModelIndex TableNodeModel::nodeToIndex(VTableServer* server,const VNode* node, int column) const
 {
 	if(!node)
-		return QModelIndex();
+		return {};
 
 	int row=0;
     if((row=data_->position(server,node)) != -1)
@@ -289,7 +289,7 @@ QModelIndex TableNodeModel::nodeToIndex(VTableServer* server,const VNode* node, 
 QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) const
 {
     if(!a)
-        return QModelIndex();
+        return {};
 
     VNode* node=a->parent();
     if(!node)

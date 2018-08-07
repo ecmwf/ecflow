@@ -340,7 +340,7 @@ QModelIndex LogModel::index( int row, int column, const QModelIndex & parent ) c
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When parent is the root this index refers to a node or server
@@ -355,7 +355,7 @@ QModelIndex LogModel::index( int row, int column, const QModelIndex & parent ) c
 
 QModelIndex LogModel::parent(const QModelIndex &child) const
 {
-	return QModelIndex();
+	return {};
 }
 
 QModelIndex LogModel::lastIndex() const
@@ -424,7 +424,7 @@ QModelIndex LogModel::highlightPeriodIndex() const
     {
         return index(realRow(highlightStart_),0);
     }
-    return QModelIndex();
+    return {};
 }
 
 //========================================================

@@ -302,7 +302,7 @@ QModelIndex SuiteModel::index( int row, int column, const QModelIndex & parent )
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When parent is the root this index refers to a node or server
@@ -317,5 +317,5 @@ QModelIndex SuiteModel::index( int row, int column, const QModelIndex & parent )
 
 QModelIndex SuiteModel::parent(const QModelIndex &child) const
 {
-	return QModelIndex();
+	return {};
 }

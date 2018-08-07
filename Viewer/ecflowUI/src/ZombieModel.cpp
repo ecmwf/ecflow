@@ -178,7 +178,7 @@ QModelIndex ZombieModel::index( int row, int column, const QModelIndex & parent 
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When parent is the root this index refers to a node or server
@@ -193,7 +193,7 @@ QModelIndex ZombieModel::index( int row, int column, const QModelIndex & parent 
 
 QModelIndex ZombieModel::parent(const QModelIndex &child) const
 {
-	return QModelIndex();
+	return {};
 }
 
 Zombie ZombieModel::indexToZombie(const QModelIndex& idx) const

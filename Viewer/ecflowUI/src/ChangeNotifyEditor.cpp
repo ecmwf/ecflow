@@ -281,7 +281,7 @@ QModelIndex ChangeNotifyEditorModel::index( int row, int column, const QModelInd
 {
 	if(row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When parent is the root this index refers to a node or server
@@ -296,7 +296,7 @@ QModelIndex ChangeNotifyEditorModel::index( int row, int column, const QModelInd
 
 QModelIndex ChangeNotifyEditorModel::parent(const QModelIndex &child) const
 {
-	return QModelIndex();
+	return {};
 }
 
 Qt::ItemFlags ChangeNotifyEditorModel::flags( const QModelIndex & index) const

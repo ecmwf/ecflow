@@ -186,7 +186,7 @@ QModelIndex OutputModel::index( int row, int column, const QModelIndex & parent 
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When parent is the root this index refers to a node or server
@@ -201,7 +201,7 @@ QModelIndex OutputModel::index( int row, int column, const QModelIndex & parent 
 
 QModelIndex OutputModel::parent(const QModelIndex &child) const
 {
-	return QModelIndex();
+	return {};
 
 }
 
@@ -300,7 +300,7 @@ QModelIndex OutputModel::itemToIndex(const std::string& itemFullName,VDir::Fetch
                 row+=dir->count();
         }
     }
-    return QModelIndex();
+    return {};
 }
 
 
@@ -394,7 +394,7 @@ QModelIndex OutputSortModel::fullNameToIndex(const std::string& fullName)
 			return idx;
 		}
 	}
-	return QModelIndex();
+	return {};
 }
 
 //========================================================

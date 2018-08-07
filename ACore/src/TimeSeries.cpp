@@ -287,7 +287,7 @@ TimeSlot TimeSeries::compute_next_time_slot(const ecf::Calendar& c) const
    time_duration current_time = duration(c);
    if (!hasIncrement()) {
       if (current_time >= start_.duration() ) {
-         return TimeSlot(); // time has expired
+         return {}; // time has expired
       }
       return start_;
    }
@@ -522,7 +522,7 @@ boost::posix_time::time_duration TimeSeries::duration(const ecf::Calendar& c ) c
 	if ( relativeToSuiteStart_ ) {
 
  		// relative to suite start only
-		return boost::posix_time::time_duration( relativeDuration_.hours(), relativeDuration_.minutes(), 0, 0 );
+		return { relativeDuration_.hours(), relativeDuration_.minutes(), 0, 0 };
 	}
 
 	LOG_ASSERT(!c.suiteTime().is_special(),"init has not been called on calendar. TimeSeries::duration");

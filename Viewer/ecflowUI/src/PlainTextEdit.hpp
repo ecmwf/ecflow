@@ -93,7 +93,7 @@ class LineNumberArea : public QWidget
 {
 public:
     explicit LineNumberArea(PlainTextEdit *editor) : QWidget(editor) {textEditor = editor;}
-    QSize sizeHint() const {return QSize(textEditor->lineNumberAreaWidth(), 0);}
+    QSize sizeHint() const {return {textEditor->lineNumberAreaWidth(), 0};}
 
 protected:
     void paintEvent(QPaintEvent *event) { textEditor->lineNumberAreaPaintEvent(event);}

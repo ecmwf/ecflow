@@ -171,5 +171,5 @@ QModelIndex AbstractNodeModel::infoToIndex(VInfo_ptr info,int column) const
         }
 	}
 
-	return QModelIndex();
+	return {};
 }

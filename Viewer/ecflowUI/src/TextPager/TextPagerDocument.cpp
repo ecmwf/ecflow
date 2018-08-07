@@ -1047,7 +1047,7 @@ QChar TextPagerDocument::readCharacter(int pos) const
 {
     QReadLocker locker(d->readWriteLock);
     if (pos == d->documentSize)
-        return QChar();
+        return {};
     Q_ASSERT(pos >= 0 && pos < d->documentSize);
 #ifndef NO_TEXTDOCUMENT_READ_CACHE
 #ifdef DEBUG_CACHE_HITS

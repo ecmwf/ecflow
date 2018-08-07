@@ -882,7 +882,7 @@ QModelIndex ServerListModel::index(int row, int column, const QModelIndex& /*par
 
 QModelIndex ServerListModel::parent(const QModelIndex &) const
 {
-	return QModelIndex();
+	return {};
 }
 
 Qt::ItemFlags ServerListModel::flags ( const QModelIndex & index) const

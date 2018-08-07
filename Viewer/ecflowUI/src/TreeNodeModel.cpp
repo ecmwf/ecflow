@@ -403,7 +403,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When "parent" is the root this index refers to a server
@@ -439,7 +439,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 {
 	//If "child" is a server the parent is the root
 	if(isServer(child))
-		return QModelIndex();
+		return {};
 
 	int row=-1;
 
@@ -545,7 +545,7 @@ QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const
 	if((i=data_->indexOfServer(server))!= -1)
 			return createIndex(i,0,(void*)NULL);
 
-	return QModelIndex();
+	return {};
 }
 
 QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const
@@ -555,7 +555,7 @@ QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const
 	if((i=data_->indexOfServer(server))!= -1)
 			return createIndex(i,0,(void*)NULL);
 
-	return QModelIndex();
+	return {};
 }
 
 //----------------------------------------------
@@ -706,7 +706,7 @@ VTreeNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
 {
     if(!node)
-		return QModelIndex();
+		return {};
 
 	//This is a server!!!
 	if(node->isServer())
@@ -760,7 +760,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
 QModelIndex TreeNodeModel::nodeToIndex(const VTreeNode* node, int column) const
 {
     if(!node)
-        return QModelIndex();
+        return {};
 
     //It is a server
     if(node->parent() == 0)
@@ -800,7 +800,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VTreeNode* node, int column) const
 QModelIndex TreeNodeModel::nodeToIndex(VTreeServer* server,const VTreeNode* node, int column) const
 {
     if(!node)
-		return QModelIndex();
+		return {};
 
 	//If the node is toplevel node (suite).
 	if(node->isTopLevel())
@@ -831,7 +831,7 @@ QModelIndex TreeNodeModel::nodeToIndex(VTreeServer* server,const VTreeNode* node
 QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) const
 {
     if(!a)
-        return QModelIndex();
+        return {};
 
     VNode* node=a->parent();
     if(!node)

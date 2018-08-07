@@ -205,7 +205,7 @@ QModelIndex TriggerTableModel::index( int row, int column, const QModelIndex & p
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When parent is the root this index refers to a node or server
@@ -220,7 +220,7 @@ QModelIndex TriggerTableModel::index( int row, int column, const QModelIndex & p
 
 QModelIndex TriggerTableModel::parent(const QModelIndex &child) const
 {
-	return QModelIndex();
+	return {};
 }
 
 VInfo_ptr TriggerTableModel::nodeInfo(const QModelIndex& index)
@@ -251,7 +251,7 @@ QModelIndex TriggerTableModel::itemToIndex(TriggerTableItem *item)
                  return index(i,0);
     }
 
-    return QModelIndex();
+    return {};
 }
 
 TriggerTableItem* TriggerTableModel::indexToItem(const QModelIndex& index) const

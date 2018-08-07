@@ -253,7 +253,7 @@ QColor ChangeNotify::fillColour() const
         if(VProperty* p=prop_->findChild("fill_colour"))
            return p->value().value<QColor>();
 
-    return QColor();
+    return {};
 }
 
 QColor ChangeNotify::textColour() const
@@ -262,7 +262,7 @@ QColor ChangeNotify::textColour() const
         if(VProperty* p=prop_->findChild("text_colour"))
            return p->value().value<QColor>();
 
-    return QColor();
+    return {};
 }
 
 QColor ChangeNotify::countFillColour() const
@@ -271,7 +271,7 @@ QColor ChangeNotify::countFillColour() const
         if(VProperty* p=prop_->findChild("count_fill_colour"))
            return p->value().value<QColor>();
 
-    return QColor();
+    return {};
 }
 
 QColor ChangeNotify::countTextColour() const
@@ -280,7 +280,7 @@ QColor ChangeNotify::countTextColour() const
         if(VProperty* p=prop_->findChild("count_text_colour"))
            return p->value().value<QColor>();
 
-    return QColor();
+    return {};
 }
 
 QString ChangeNotify::toolTip() const

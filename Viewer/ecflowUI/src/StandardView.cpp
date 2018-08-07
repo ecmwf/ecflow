@@ -698,7 +698,7 @@ QRect StandardView::visualRect(const QModelIndex &index) const
 
     int vi = viewIndex(index);
     if (vi < 0)
-        return QRect();
+        return {};
 
     int y =coordinateForItem(vi);
     if(y >=0)

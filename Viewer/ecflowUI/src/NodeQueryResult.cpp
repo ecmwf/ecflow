@@ -92,7 +92,7 @@ QColor NodeQueryResultItem::stateColour() const
 {
 	if(node_)
 		return node_->stateColour();
-	return QColor(Qt::transparent);
+	return {Qt::transparent};
 }
 
 QString NodeQueryResultItem::stateChangeTimeAsString() const

@@ -330,7 +330,7 @@ public:
         Q_ASSERT(chunk);
         Q_COMPARE_ASSERT(chunkData.size(), chunk->size());
         if (pos == end())
-            return QChar();
+            return {};
 
 //Calling readCharacter is very expensive during find!!! So we try not to call it!!!
 #if 0
@@ -394,7 +394,7 @@ public:
         if (dir == Left) {
             if (!hasPrevious()) {
                 ok = false;
-                return QChar();
+                return {};
             }
             ok = true;
             return previous();

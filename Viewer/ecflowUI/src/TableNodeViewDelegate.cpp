@@ -109,7 +109,7 @@ void TableNodeViewDelegate::updateSettings()
 QSize TableNodeViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
     QSize size=QStyledItemDelegate::sizeHint(option,index);
-    return QSize(size.width(),nodeBox_->sizeHintCache.height());
+    return {size.width(),nodeBox_->sizeHintCache.height()};
 }
 
 

@@ -567,7 +567,7 @@ QModelIndex AbstractNodeView::indexAt(const QPoint &point) const
 QModelIndex AbstractNodeView::modelIndex(int i) const
 {
     if(i < 0 || i >= static_cast<int>(viewItems_.size()))
-        return QModelIndex();
+        return {};
 
     return viewItems_[i].index;
 }

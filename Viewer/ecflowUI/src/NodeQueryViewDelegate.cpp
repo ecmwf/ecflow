@@ -93,7 +93,7 @@ void NodeQueryViewDelegate::updateSettings()
 QSize NodeQueryViewDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
 	QSize size=QStyledItemDelegate::sizeHint(option,index);
-    return QSize(size.width(),nodeBox_->sizeHintCache.height());
+    return {size.width(),nodeBox_->sizeHintCache.height()};
 }
 
 void NodeQueryViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,

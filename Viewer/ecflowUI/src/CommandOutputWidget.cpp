@@ -128,7 +128,7 @@ QModelIndex CommandOutputModel::index( int row, int column, const QModelIndex & 
 {
     if(!hasData() || row < 0 || column < 0)
     {
-        return QModelIndex();
+        return {};
     }
 
     //When parent is the root this index refers to a node or server
@@ -143,7 +143,7 @@ QModelIndex CommandOutputModel::index( int row, int column, const QModelIndex & 
 
 QModelIndex CommandOutputModel::parent(const QModelIndex &child) const
 {
-    return QModelIndex();
+    return {};
 }
 
 
@@ -173,7 +173,7 @@ QModelIndex CommandOutputModel::itemToStatusIndex(CommandOutput_ptr item) const
         }
     }
 
-    return QModelIndex();
+    return {};
 }
 
 //==============================================

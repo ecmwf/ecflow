@@ -153,7 +153,7 @@ QModelIndex ChangeNotifyModel::index( int row, int column, const QModelIndex & p
 {
 	if(!hasData() || row < 0 || column < 0)
 	{
-		return QModelIndex();
+		return {};
 	}
 
 	//When parent is the root this index refers to a node or server
@@ -168,7 +168,7 @@ QModelIndex ChangeNotifyModel::index( int row, int column, const QModelIndex & p
 
 QModelIndex ChangeNotifyModel::parent(const QModelIndex &child) const
 {
-	return QModelIndex();
+	return {};
 }
 
 VInfo_ptr ChangeNotifyModel::nodeInfo(const QModelIndex& index) const

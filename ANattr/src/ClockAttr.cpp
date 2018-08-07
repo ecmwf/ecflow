@@ -217,7 +217,7 @@ boost::posix_time::ptime ClockAttr::ptime() const
    if (day_ != 0) {
       // Use the date given. ie we start from midnight on the given day + gain.
       boost::gregorian::date theDate(year_,month_,day_);
-      return boost::posix_time::ptime(theDate, seconds(gain_));
+      return {theDate, seconds(gain_)};
    }
 
    // Get the local time, second level resolution, based on the time zone settings of the computer.

@@ -258,7 +258,7 @@ DateAttr DateAttr::create(const std::string& dateString)
 {
 	int day = -1,month = -1,year = -1;
 	getDate(dateString,day,month,year);
-	return DateAttr(day,month,year);
+	return {day,month,year};
 }
 
 void DateAttr::getDate(const std::string& date,int& day,int& month,int& year)

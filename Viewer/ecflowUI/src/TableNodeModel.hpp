@@ -77,7 +77,7 @@ protected:
    	bool isServer(const QModelIndex & index) const {return false;}
 	ServerHandler* indexToRealServer(const QModelIndex & index) const {return NULL;}
 	VModelServer* indexToServer(const QModelIndex & index) const {return NULL;}
-	QModelIndex serverToIndex(ServerHandler*) const {return QModelIndex();}
+	QModelIndex serverToIndex(ServerHandler*) const {return {};}
 
     QModelIndex nodeToIndex(VTableServer* server,const VNode* node, int column) const;
     QModelIndex nodeToIndex(const VNode*,int column=0) const;
