@@ -35,7 +35,7 @@ public:
         bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
 	}
 
-    MessageLabelData()  {}
+    MessageLabelData()  = default;
 
 	QPixmap pix_;
     QPixmap pixSmall_;

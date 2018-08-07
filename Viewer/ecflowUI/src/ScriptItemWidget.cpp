@@ -40,8 +40,7 @@ ScriptItemWidget::ScriptItemWidget(QWidget *parent) : CodeItemWidget(parent)
 }
 
 ScriptItemWidget::~ScriptItemWidget()
-{
-}
+= default;
 
 QWidget* ScriptItemWidget::realWidget()
 {

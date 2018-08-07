@@ -18,6 +18,6 @@
 
 namespace ecf {
 
-NodeTreeVisitor::~NodeTreeVisitor() {}
+NodeTreeVisitor::~NodeTreeVisitor() = default;
 
 } // namespace ecf

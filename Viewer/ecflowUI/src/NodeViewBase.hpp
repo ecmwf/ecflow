@@ -25,7 +25,7 @@ class NodeViewBase
 {
 public:
         explicit NodeViewBase(NodeFilterDef*);
-        virtual ~NodeViewBase(){}
+        virtual ~NodeViewBase()= default;
 
 		virtual void reload()=0;
 		virtual void rerender()=0;

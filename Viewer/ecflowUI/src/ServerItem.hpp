@@ -23,8 +23,8 @@ class ServerItem;
 class ServerItemObserver
 {
 public:
-    ServerItemObserver() {}
-    virtual ~ServerItemObserver() {}
+    ServerItemObserver() = default;
+    virtual ~ServerItemObserver() = default;
 	virtual void notifyServerItemChanged(ServerItem*)=0;
 	virtual void notifyServerItemDeletion(ServerItem*)=0;
 };

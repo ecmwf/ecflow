@@ -115,7 +115,7 @@ public:
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv) const = 0;
 protected:
-   ClientToServerCmd() {}
+   ClientToServerCmd() = default;
 
    /// called by handleRequest, part of the template pattern
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const = 0;
@@ -562,7 +562,7 @@ private:
 // ================================================================================
 class UserCmd : public ClientToServerCmd {
 public:
-   UserCmd(){}
+   UserCmd()= default;
 
    static std::string get_user();
    const std::string& user() const { return user_;}
@@ -616,7 +616,7 @@ private:
 // ========================================================================
 class ServerVersionCmd : public UserCmd {
 public:
-   ServerVersionCmd(){}
+   ServerVersionCmd()= default;
 
    virtual std::ostream& print(std::ostream& os) const;
    virtual bool equals(ClientToServerCmd*) const;
@@ -1025,7 +1025,7 @@ private:
 class LogMessageCmd : public UserCmd {
 public:
    explicit LogMessageCmd(const std::string& msg) : msg_(msg) {}
-   LogMessageCmd() {}
+   LogMessageCmd() = default;
 
    const std::string& msg() const { return msg_;}
 
@@ -1783,7 +1783,7 @@ private:
 class PlugCmd : public UserCmd {
 public:
    PlugCmd(const std::string& source, const std::string& dest) : source_(source), dest_(dest) {}
-   PlugCmd() {}
+   PlugCmd() = default;
 
    // Uses by equals only
    const std::string& source() const { return source_; }
@@ -1930,7 +1930,7 @@ private:
 class GroupCTSCmd : public UserCmd {
 public:
    GroupCTSCmd(const std::string& list_of_commands,AbstractClientEnv* clientEnv);
-   GroupCTSCmd(){}
+   GroupCTSCmd()= default;
 
    virtual bool isWrite() const;
    virtual PrintStyle::Type_t show_style() const;

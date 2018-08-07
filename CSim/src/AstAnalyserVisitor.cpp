@@ -21,8 +21,8 @@ using namespace std;
 
 namespace ecf {
 
-AstAnalyserVisitor::AstAnalyserVisitor()  {}
-AstAnalyserVisitor::~AstAnalyserVisitor() {}
+AstAnalyserVisitor::AstAnalyserVisitor()  = default;
+AstAnalyserVisitor::~AstAnalyserVisitor() = default;
 
 void AstAnalyserVisitor::visitTop(AstTop*) {}
 void AstAnalyserVisitor::visitRoot(AstRoot*) {}

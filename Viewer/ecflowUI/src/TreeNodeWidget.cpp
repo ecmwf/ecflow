@@ -94,8 +94,7 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
 }
 
 TreeNodeWidget::~TreeNodeWidget()
-{
-}
+= default;
 
 void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
 {

@@ -37,7 +37,7 @@ class VSettings
 public:
 	explicit VSettings(const std::string& file);
 	explicit VSettings(boost::property_tree::ptree pt);
-    virtual ~VSettings() {}
+    virtual ~VSettings() = default;
 
 	//bool read(const std::string &fs);
 	//virtual void write(const std::string &fs);

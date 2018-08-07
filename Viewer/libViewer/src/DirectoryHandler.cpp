@@ -38,8 +38,7 @@ std::string DirectoryHandler::socketDir_;
 static bool firstStartUp=false;
 
 DirectoryHandler::DirectoryHandler()
-{
-}
+= default;
 
 // -----------------------------------------------------------------------------
 // DirectoryHandler::init

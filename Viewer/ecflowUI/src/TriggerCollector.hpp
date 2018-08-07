@@ -24,8 +24,8 @@ class VItem;
 class TriggerCollector
 {
 public:
-    TriggerCollector() {}
-    virtual ~TriggerCollector() {}
+    TriggerCollector() = default;
+    virtual ~TriggerCollector() = default;
 
     enum Mode { Normal    = 0,   // Normal trigger_node
                 Parent    = 1,   // Through parent

@@ -43,8 +43,7 @@ OverviewItemWidget::OverviewItemWidget(QWidget *parent) :
 }
 
 OverviewItemWidget::~OverviewItemWidget()
-{
-}
+= default;
 
 QWidget* OverviewItemWidget::realWidget()
 {

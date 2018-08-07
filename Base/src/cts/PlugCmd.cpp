@@ -251,8 +251,8 @@ MoveCmd::MoveCmd(const std::pair<std::string,std::string>& host_port, Node* src,
    dest_(dest)
 {}
 
-MoveCmd::MoveCmd(){}
-MoveCmd::~MoveCmd(){}
+MoveCmd::MoveCmd()= default;
+MoveCmd::~MoveCmd()= default;
 
 bool MoveCmd::equals(ClientToServerCmd* rhs) const
 {

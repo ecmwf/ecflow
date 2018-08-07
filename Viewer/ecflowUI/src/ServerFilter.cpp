@@ -22,8 +22,7 @@
 //==============================================
 
 ServerFilter::ServerFilter()
-{
-}
+= default;
 
 ServerFilter::~ServerFilter()
 {

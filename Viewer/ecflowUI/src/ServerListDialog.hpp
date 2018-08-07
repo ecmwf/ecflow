@@ -159,7 +159,7 @@ class ServerListFilterModel : public QSortFilterProxyModel
 {
 public:
 	explicit ServerListFilterModel(QObject *parent=0);
-    ~ServerListFilterModel() {}
+    ~ServerListFilterModel() = default;
 	void setFilterStr(QString);
 	void setFilterFavourite(bool b);
 

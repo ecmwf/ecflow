@@ -21,9 +21,9 @@
 // server and client
 class ServerToClientResponse : private boost::noncopyable {
 public:
-   ServerToClientResponse() {}
+   ServerToClientResponse() = default;
    explicit ServerToClientResponse(const STC_Cmd_ptr& cmd) : stc_cmd_(cmd) {}
-   ~ServerToClientResponse() {}
+   ~ServerToClientResponse() = default;
 
    STC_Cmd_ptr get_cmd() const { return stc_cmd_; }
    void set_cmd(const STC_Cmd_ptr& cmd) { stc_cmd_ = cmd;}

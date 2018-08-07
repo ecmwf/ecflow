@@ -27,8 +27,8 @@ using namespace ecf;
 using namespace std;
 using namespace boost;
 
-PasswdFile::PasswdFile() {}
-PasswdFile::~PasswdFile() {}
+PasswdFile::PasswdFile() = default;
+PasswdFile::~PasswdFile() = default;
 
 //#define DEBUG_ME 1
 

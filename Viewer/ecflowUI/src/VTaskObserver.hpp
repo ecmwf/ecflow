@@ -15,7 +15,7 @@
 class VTaskObserver
 {
 public:
-    virtual ~VTaskObserver() {}
+    virtual ~VTaskObserver() = default;
 	virtual void taskChanged(VTask_ptr)=0;
 };
 

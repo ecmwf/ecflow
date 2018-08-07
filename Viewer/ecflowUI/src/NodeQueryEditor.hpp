@@ -32,7 +32,7 @@ Q_OBJECT
 
 public:
     explicit NodeQuerySaveDialog(QWidget *parent = 0);
-    ~NodeQuerySaveDialog() {}
+    ~NodeQuerySaveDialog() = default;
     QString name() const;
 
 public Q_SLOTS:

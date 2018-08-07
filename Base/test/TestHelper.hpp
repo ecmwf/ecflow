@@ -86,7 +86,7 @@ public:
    }
 
 private:
-	TestHelper() {}
+	TestHelper() = default;
 };
 #endif /* TESTHELPER_HPP_ */
 

@@ -40,8 +40,7 @@ void CustomCommand::save(VSettings *vs) const
 }
 
 CustomCommandHandler::CustomCommandHandler()
-{
-}
+= default;
 
 void CustomCommandHandler::init()
 {

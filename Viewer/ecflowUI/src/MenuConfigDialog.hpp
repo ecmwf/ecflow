@@ -21,8 +21,7 @@ class ConfigTreeWidget : public QTreeWidget
 {
 public:
   ConfigTreeWidget()
-  {
-  }
+  = default;
 
   explicit ConfigTreeWidget(QSplitter*s) : QTreeWidget(s)
   {
@@ -68,7 +67,7 @@ class MenuConfigDialog : public QDialog, private Ui::MenuConfigDialog
 
 public:
 	explicit MenuConfigDialog(QWidget *parent = 0);
-	~MenuConfigDialog() {};
+	~MenuConfigDialog() = default;;
 
 	void updateMenuTree(Menu *menu);
 

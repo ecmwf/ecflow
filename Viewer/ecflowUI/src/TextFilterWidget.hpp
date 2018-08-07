@@ -26,7 +26,7 @@ Q_OBJECT
 
 public:
     explicit TextFilterWidget(QWidget *parent=0);
-    ~TextFilterWidget() {}
+    ~TextFilterWidget() = default;
 
     enum FilterStatus {EditStatus,FoundStatus,NotFoundStatus};
     void setStatus(FilterStatus,bool force=false);

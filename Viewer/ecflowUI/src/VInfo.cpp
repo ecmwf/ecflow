@@ -428,8 +428,7 @@ VInfoAttribute::VInfoAttribute(ServerHandler* server,VNode* node,VAttribute* att
 }
 
 VInfoAttribute::~VInfoAttribute()
-{
-}
+= default;
 
 bool VInfoAttribute::hasData() const
 {

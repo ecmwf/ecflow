@@ -98,6 +98,6 @@ public:
    static const char* set_child_timeout();
 
 private:
-	ClientDoc(){}
+	ClientDoc()= default;
 };
 #endif

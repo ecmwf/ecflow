@@ -29,7 +29,7 @@ public:
 
 private:
 
-   Pid(){}
+   Pid()= default;
 };
 
 #endif

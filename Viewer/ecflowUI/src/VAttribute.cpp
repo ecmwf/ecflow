@@ -26,8 +26,7 @@ VAttribute::VAttribute(VNode *parent,int index) :
 }
 
 VAttribute::~VAttribute()
-{
-}
+= default;
 
 ServerHandler* VAttribute::server() const
 {

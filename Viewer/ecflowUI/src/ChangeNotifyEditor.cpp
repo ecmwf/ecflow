@@ -146,8 +146,7 @@ ChangeNotifyEditorModel::ChangeNotifyEditorModel(QObject *parent) :
 }
 
 ChangeNotifyEditorModel::~ChangeNotifyEditorModel()
-{
-}
+= default;
 
 void ChangeNotifyEditorModel::add(QString label,QList<VProperty*> propLst)
 {

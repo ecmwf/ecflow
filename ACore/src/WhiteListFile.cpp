@@ -31,7 +31,7 @@ WhiteListFile::WhiteListFile()
 :  all_users_have_read_access_(false),
    all_users_have_write_access_(false) {}
 
-WhiteListFile::~WhiteListFile() {}
+WhiteListFile::~WhiteListFile() = default;
 
 bool WhiteListFile::verify_read_access(const std::string& user) const
 {

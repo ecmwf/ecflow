@@ -68,6 +68,6 @@ public:
    static const char* simulate();
    static const char* get_server_state();
 private:
-	DefsDoc(){}
+	DefsDoc()= default;
 };
 #endif

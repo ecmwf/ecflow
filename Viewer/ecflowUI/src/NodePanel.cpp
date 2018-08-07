@@ -36,8 +36,7 @@ NodePanel::NodePanel(QWidget* parent) :
 }
 
 NodePanel::~NodePanel()
-{    
-}
+= default;
 
 //=============================================
 //

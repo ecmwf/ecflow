@@ -18,7 +18,7 @@
 
 using namespace ecf;
 
-ServerToClientCmd::~ServerToClientCmd() {}
+ServerToClientCmd::~ServerToClientCmd() = default;
 
 const std::string& ServerToClientCmd::get_string() const
 {

@@ -22,7 +22,7 @@ class VSettings;
 class ServerFilterObserver
 {
 public:
-    virtual ~ServerFilterObserver() {}
+    virtual ~ServerFilterObserver() = default;
 	virtual void notifyServerFilterAdded(ServerItem*)=0;
 	virtual void notifyServerFilterRemoved(ServerItem*)=0;
 	virtual void notifyServerFilterChanged(ServerItem*)=0;

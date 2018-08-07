@@ -26,8 +26,7 @@ LogModel::LogModel(QObject *parent) :
 }
 
 LogModel::~LogModel()
-{
-}
+= default;
 
 void LogModel::loadFromFile(const std::string& fileName,size_t startPos)
 {

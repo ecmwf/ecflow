@@ -83,8 +83,7 @@ TableNodeViewDelegate::TableNodeViewDelegate(QWidget *parent)
 }
 
 TableNodeViewDelegate::~TableNodeViewDelegate()
-{
-}
+= default;
 
 void TableNodeViewDelegate::updateSettings()
 {

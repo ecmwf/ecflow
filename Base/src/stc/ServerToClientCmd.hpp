@@ -50,7 +50,7 @@ public:
   	virtual bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const = 0;
 
 protected:
-	ServerToClientCmd(){}
+	ServerToClientCmd()= default;
 private:
    friend class cereal::access;
    template<class Archive>

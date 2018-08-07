@@ -24,8 +24,7 @@
 static QMap<std::string,QPalette::ColorRole> paletteId;
 
 Palette::Palette()
-{
-}
+= default;
 
 void Palette::load(const std::string& parFile)
 {

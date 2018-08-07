@@ -32,8 +32,8 @@ namespace fs = boost::filesystem;
 
 class BaseCmd {
 public:
-   BaseCmd() {}
-   virtual ~BaseCmd() {}
+   BaseCmd() = default;
+   virtual ~BaseCmd() = default;
 
    bool operator==(const BaseCmd & rhs) const { return true;}
    void print(std::ostream &os) const {}
@@ -48,7 +48,7 @@ class Derived1 : public BaseCmd {
 public:
    Derived1() : x_(0) {}
    Derived1(int x) : BaseCmd(), x_(x) {}
-   virtual ~Derived1() {}
+   virtual ~Derived1() = default;
 
    int get_x() const { return x_;}
 
@@ -82,7 +82,7 @@ std::ostream& operator<<(std::ostream &os, Derived1 const &m) {
 
 class CmdContainer {
 public:
-   CmdContainer() {}
+   CmdContainer() = default;
    CmdContainer(std::shared_ptr<BaseCmd> cmd) : cmd_(cmd) {}
 
    bool operator==(const CmdContainer& rhs) const {

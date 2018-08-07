@@ -39,9 +39,7 @@ CompactView::CompactView(TreeNodeModel* model,QWidget* parent) :
 }
 
 CompactView::~CompactView()
-{
-
-}
+= default;
 
 //Creates and initialize the viewItem structure of the children of the element
 // parentId: the items whose children are to be expanded

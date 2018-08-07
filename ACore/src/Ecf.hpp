@@ -73,7 +73,7 @@ public:
 
 private:
 
-	Ecf(){}
+	Ecf()= default;
 	static bool server_;
 	static bool debug_equality_;
    static unsigned int debug_level_;

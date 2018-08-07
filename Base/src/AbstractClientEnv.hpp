@@ -31,7 +31,7 @@ class AbstractClientEnv : private boost::noncopyable {
 protected:
  	AbstractClientEnv() : cli_(false) {}
 public:
- 	virtual ~AbstractClientEnv() {}
+ 	virtual ~AbstractClientEnv() = default;
 
  	void set_cli(bool f) { cli_ = f ;}
  	bool get_cli() const { return cli_;}

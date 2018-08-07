@@ -40,7 +40,7 @@ Q_OBJECT
 
 public:
 	VParamSet();
-    virtual ~VParamSet() {}
+    virtual ~VParamSet() = default;
 
     const std::vector<VParam*>& all() const {return all_;}
     const std::vector<VParam*>& current() const {return current_;}

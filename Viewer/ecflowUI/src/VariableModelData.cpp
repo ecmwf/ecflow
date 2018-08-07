@@ -39,8 +39,7 @@ VariableModelData::VariableModelData(VInfo_ptr info) :
 }
 
 VariableModelData::~VariableModelData()
-{
-}
+= default;
 
 void VariableModelData::clear()
 {

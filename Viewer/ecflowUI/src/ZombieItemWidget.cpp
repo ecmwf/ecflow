@@ -71,9 +71,7 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) :
 }
 
 ZombieItemWidget::~ZombieItemWidget()
-{
-
-}
+= default;
 
 QWidget* ZombieItemWidget::realWidget()
 {

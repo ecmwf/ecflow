@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE( TestServer )
 class TestServer : public Server {
 public:
    explicit TestServer(ServerEnvironment& s) : Server(s) {}
-   virtual ~TestServer() {}
+   virtual ~TestServer() = default;
 
    // abort server if check pt files exist, but can't be loaded
    //   bool load_check_pt_file_on_startup();

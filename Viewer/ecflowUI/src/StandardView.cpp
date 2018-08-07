@@ -45,9 +45,7 @@ StandardView::StandardView(TreeNodeModel* model,QWidget* parent) :
 }
 
 StandardView::~StandardView()
-{
-
-}
+= default;
 
 //Creates and initialize the viewItem structure of the children of the element
 // parentId: the items whose children are to be expanded

@@ -25,6 +25,6 @@ class GlossaryDoc : private boost::noncopyable {
 public:
    static const char* list();
 private:
-   GlossaryDoc(){}
+   GlossaryDoc()= default;
 };
 #endif

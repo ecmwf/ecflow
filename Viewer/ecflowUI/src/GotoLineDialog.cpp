@@ -23,9 +23,7 @@ GotoLineDialog::GotoLineDialog(QWidget *parent) : QDialog(parent)
 
 
 GotoLineDialog::~GotoLineDialog()
-{
-
-}
+= default;
 
 
 // ---------------------------------------------------------------------------

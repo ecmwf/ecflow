@@ -21,8 +21,7 @@ ChangeNotifyModel::ChangeNotifyModel(QObject *parent) :
 }
 
 ChangeNotifyModel::~ChangeNotifyModel()
-{
-}
+= default;
 
 VNodeList* ChangeNotifyModel::data()
 {

@@ -82,7 +82,7 @@ public:
 	enum MatchMode {FilterMode,SearchMode};
 
 	VariableSortModel(VariableModel*,QObject *parent=0);
-    ~VariableSortModel() {}
+    ~VariableSortModel() = default;
 
 	MatchMode matchMode() const {return matchMode_;}
 	void setMatchMode(MatchMode mode);

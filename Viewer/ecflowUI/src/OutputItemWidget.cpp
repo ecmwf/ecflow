@@ -152,8 +152,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 }
 
 OutputItemWidget::~OutputItemWidget()
-{
-}
+= default;
 
 QWidget* OutputItemWidget::realWidget()
 {

@@ -48,7 +48,7 @@ namespace ecf {
 /// Class that allows multiple log files.
 class LogDestroyer {
 public:
-	LogDestroyer() {}
+	LogDestroyer() = default;
 	~LogDestroyer() { Log::destroy(); }
 };
 

@@ -23,8 +23,8 @@
 class ClientToServerRequest : private boost::noncopyable {
 public:
 
-   ClientToServerRequest() {}
-   ~ClientToServerRequest() {}
+   ClientToServerRequest() = default;
+   ~ClientToServerRequest() = default;
 
    void set_cmd(const Cmd_ptr& cmd) { cmd_ = cmd; cmd_->setup_user_authentification(); }
    Cmd_ptr get_cmd() const { return cmd_;}

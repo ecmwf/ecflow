@@ -23,8 +23,8 @@ class VProperty;
 class VPropertyObserver
 {
 public:
-	VPropertyObserver() {}
-	virtual ~VPropertyObserver() {}
+	VPropertyObserver() = default;
+	virtual ~VPropertyObserver() = default;
 
 	virtual void notifyChange(VProperty*)=0;
 };
@@ -32,8 +32,8 @@ public:
 class VPropertyVisitor
 {
 public:
-    VPropertyVisitor() {}
-    virtual ~VPropertyVisitor() {}
+    VPropertyVisitor() = default;
+    virtual ~VPropertyVisitor() = default;
 	virtual void visit(VProperty*)=0;
 };
 

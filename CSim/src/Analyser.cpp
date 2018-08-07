@@ -25,7 +25,7 @@ using namespace std;
 
 namespace ecf {
 
-Analyser::Analyser() {}
+Analyser::Analyser() = default;
 
 void Analyser::run(Defs& theDefs)
 {

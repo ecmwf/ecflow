@@ -28,7 +28,7 @@ class AbstractServer;
 /// All zombies are auto deleted after a period of time. See Zombie::allowed_age()
 class ZombieCtrl : private boost::noncopyable {
 public:
-	ZombieCtrl() {}
+	ZombieCtrl() = default;
 
 	/// Handle the zombie, and return back to the client
 	bool handle_zombie(

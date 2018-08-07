@@ -30,7 +30,7 @@ public:
    Variable(const std::string& name, const std::string& value, bool /*check_names_dummy*/)
    : n_(name), v_(value) {}
    Variable(const std::string& name, const std::string& value);
-   Variable() {}
+   Variable() = default;
 
    const std::string& name() const   { return  n_;}
    std::ostream& print(std::ostream&) const;

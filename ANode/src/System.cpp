@@ -92,8 +92,8 @@ void System::destroy()
 	instance_ = NULL;
 }
 
-System::System() {}
-System::~System(){}
+System::System() = default;
+System::~System()= default;
 
 bool System::spawn(const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg)
 {

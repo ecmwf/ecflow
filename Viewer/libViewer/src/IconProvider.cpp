@@ -90,8 +90,7 @@ QPixmap UnknownIconItem::unknown(int size)
 //===========================================
 
 IconProvider::IconProvider()
-{
-}
+= default;
 
 QString IconProvider::path(int id)
 {

@@ -84,8 +84,7 @@ TriggerViewDelegate::TriggerViewDelegate(QWidget *parent) :
 }
 
 TriggerViewDelegate::~TriggerViewDelegate()
-{
-}
+= default;
 
 void TriggerViewDelegate::updateSettings()
 {

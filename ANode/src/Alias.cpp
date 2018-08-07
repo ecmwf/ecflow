@@ -44,9 +44,7 @@ Alias::Alias( const std::string& name )
 }
 
 Alias::Alias( const Alias& rhs)
-: Submittable(rhs)
-{
-}
+= default;
 
 Alias::Alias()
 {

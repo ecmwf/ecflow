@@ -28,8 +28,7 @@ CommandOutputModel::CommandOutputModel(QObject *parent) :
 }
 
 CommandOutputModel::~CommandOutputModel()
-{
-}
+= default;
 
 bool CommandOutputModel::hasData() const
 {
@@ -242,8 +241,7 @@ CommandOutputWidget::CommandOutputWidget(QWidget *parent) :
 }
 
 CommandOutputWidget::~CommandOutputWidget()
-{
-}
+= default;
 
 bool CommandOutputWidget::isCurrent(CommandOutput_ptr item)
 {

@@ -33,8 +33,7 @@ ManualItemWidget::ManualItemWidget(QWidget *parent) : CodeItemWidget(parent)
 }
 
 ManualItemWidget::~ManualItemWidget()
-{
-}
+= default;
 
 QWidget* ManualItemWidget::realWidget()
 {

@@ -41,9 +41,7 @@ ComboMulti::ComboMulti(QWidget *widget) :
 
 
 ComboMulti::~ComboMulti()
-{
-
-}
+= default;
 
 bool ComboMulti::eventFilter(QObject *object, QEvent *event)
 {

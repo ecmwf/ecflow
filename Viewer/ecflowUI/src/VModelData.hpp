@@ -43,7 +43,7 @@ class VTreeNode;
 class VTreeChangeInfo
 {
 public:
-    VTreeChangeInfo() {}
+    VTreeChangeInfo() = default;
     void addStateChange(const VNode*);
     const std::vector<VNode*> stateChangeSuites() const { return stateSuites_;}
     void clear() {stateSuites_.clear();}

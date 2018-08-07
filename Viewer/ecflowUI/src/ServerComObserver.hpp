@@ -15,8 +15,8 @@ class ServerHandler;
 class ServerComObserver
 {
 public:
-    ServerComObserver() {}
-    virtual ~ServerComObserver() {}
+    ServerComObserver() = default;
+    virtual ~ServerComObserver() = default;
 
     virtual void notifyRefreshTimerStarted(ServerHandler* server) {}
     virtual void notifyRefreshTimerStopped(ServerHandler* server) {}

@@ -21,7 +21,7 @@ class CustomCommandDialog : public QDialog, private Ui::CustomCommandDialog
 
 public:
 	explicit CustomCommandDialog(QWidget *parent = 0);
-	~CustomCommandDialog() {};
+	~CustomCommandDialog() = default;;
 
 	MenuItem &menuItem() {return commandDesigner_->menuItem();};
 	void setNodes(std::vector<VInfo_ptr> &nodes) {commandDesigner_->setNodes(nodes);};

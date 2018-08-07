@@ -20,8 +20,7 @@ SessionRenameDialog::SessionRenameDialog(QWidget *parent) : QDialog(parent)
 }
 
 SessionRenameDialog::~SessionRenameDialog()
-{
-}
+= default;
 
 
 void SessionRenameDialog::on_buttonBox__accepted()

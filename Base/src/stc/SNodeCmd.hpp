@@ -25,7 +25,7 @@ class AbstractServer;
 class SNodeCmd : public ServerToClientCmd {
 public:
    SNodeCmd(AbstractServer* as,node_ptr node);
-   SNodeCmd() {}
+   SNodeCmd() = default;
 
    void init(AbstractServer* as, node_ptr node);
 

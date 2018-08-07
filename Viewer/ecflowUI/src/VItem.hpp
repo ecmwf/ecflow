@@ -28,7 +28,7 @@ class VItem
 {
 public:
     VItem(VNode* parent) : parent_(parent) {}
-    virtual ~VItem() {}
+    virtual ~VItem() = default;
 
     VNode* parent() const {return parent_;}
     virtual VServer* isServer() const {return NULL;}

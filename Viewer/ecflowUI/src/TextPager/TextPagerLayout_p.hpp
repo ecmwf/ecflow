@@ -38,7 +38,7 @@ class TextDocumentBuffer
 {
 public:
     TextDocumentBuffer(TextPagerDocument *doc) : document(doc), bufferPosition(0) {}
-    virtual ~TextDocumentBuffer() {}
+    virtual ~TextDocumentBuffer() = default;
 
     inline QString bufferRead(int from, int size) const
     {

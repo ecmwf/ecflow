@@ -26,7 +26,7 @@ Q_OBJECT
     
 public:
     explicit PropertyDialog(QWidget *parent=0);
-    ~PropertyDialog() {}
+    ~PropertyDialog() = default;
 
     bool isConfigChanged() const {return configChanged_;}
     void showPage(QString);

@@ -105,9 +105,7 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,bool interactive,QWi
 }
 
 TableNodeWidget::~TableNodeWidget()
-{
-
-}
+= default;
 
 void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 {

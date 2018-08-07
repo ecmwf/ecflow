@@ -54,7 +54,7 @@ struct MyDefsFixture {
  			assert(false);
  		}
 	}
-	~MyDefsFixture() {}
+	~MyDefsFixture() = default;
 
 	const Defs& fixtureDefsFile() const { return defsfile_; }
 

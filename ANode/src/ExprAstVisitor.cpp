@@ -22,11 +22,11 @@ namespace ecf {
 
 //======================================================================================
 
-ExprAstVisitor::~ExprAstVisitor(){}
+ExprAstVisitor::~ExprAstVisitor()= default;
 
 //======================================================================================
 AstResolveVisitor::AstResolveVisitor(const Node* node) : triggerNode_(node) {}
-AstResolveVisitor::~AstResolveVisitor() {}
+AstResolveVisitor::~AstResolveVisitor() = default;
 
 void AstResolveVisitor::visitNode(AstNode* astNode)
 {
@@ -86,7 +86,7 @@ void AstResolveVisitor::visitFlag(AstFlag* ast)
 //===========================================================================================================
 
 AstCollateNodesVisitor::AstCollateNodesVisitor( std::set<Node*>& s) : theSet_(s) {}
-AstCollateNodesVisitor::~AstCollateNodesVisitor() {}
+AstCollateNodesVisitor::~AstCollateNodesVisitor() = default;
 
 void AstCollateNodesVisitor::visitNode(AstNode* astNode)
 {

@@ -40,8 +40,7 @@ PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent),
 }
 
 PropertyEditor::~PropertyEditor()
-{
-}
+= default;
 
 void PropertyEditor::edit(VProperty * vGroup,QPixmap pix)
 {

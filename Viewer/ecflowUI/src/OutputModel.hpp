@@ -53,7 +53,7 @@ class OutputSortModel : public QSortFilterProxyModel
 {
 public:
 	explicit OutputSortModel(QObject *parent=0);
-    ~OutputSortModel() {}
+    ~OutputSortModel() = default;
 
 	QModelIndex fullNameToIndex(const std::string& fullName);
 };

@@ -78,8 +78,8 @@ typedef treematch_t::tree_iterator tree_iter_t;
 struct ExpressionGrammer : public grammar<ExpressionGrammer>
 {
    // The parser object is copied a lot, so only use reference/pointer variables as data members
-   ExpressionGrammer(){}
-   ~ExpressionGrammer(){}
+   ExpressionGrammer()= default;
+   ~ExpressionGrammer()= default;
 
    static const int integer_ID  = 1;
    static const int dot_path_ID = 2;

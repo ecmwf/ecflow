@@ -34,7 +34,7 @@ AstCollateVNodesVisitor::AstCollateVNodesVisitor(std::vector<VItem*>& s) : items
    }
 }
 
-AstCollateVNodesVisitor::~AstCollateVNodesVisitor() {}
+AstCollateVNodesVisitor::~AstCollateVNodesVisitor() = default;
 
 void AstCollateVNodesVisitor::visitEventState(AstEventState* astNode)
 {

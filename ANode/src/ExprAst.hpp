@@ -30,7 +30,7 @@ namespace ecf { class ExprAstVisitor;} // forward declare class
 //////////////////////////////////////////////////////////////////////////////////
 class Ast {
 public:
-	Ast() {}
+	Ast() = default;
 	virtual ~Ast();
 
 	virtual void accept(ecf::ExprAstVisitor&) = 0;
@@ -160,7 +160,7 @@ private:
 
 class AstPlus : public AstRoot {
 public:
-	AstPlus() {}
+	AstPlus() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstPlus* clone() const;
 
@@ -177,7 +177,7 @@ public:
 
 class AstMinus : public AstRoot {
 public:
-	AstMinus() {}
+	AstMinus() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstMinus* clone() const;
 
@@ -194,7 +194,7 @@ public:
 
 class AstDivide : public AstRoot {
 public:
-	AstDivide() {}
+	AstDivide() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstDivide* clone() const;
 	virtual bool evaluate() const { return true;}
@@ -211,7 +211,7 @@ public:
 
 class AstMultiply : public AstRoot {
 public:
-	AstMultiply() {}
+	AstMultiply() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstMultiply* clone() const;
 	virtual bool evaluate() const { return true;}
@@ -227,7 +227,7 @@ public:
 
 class AstModulo : public AstRoot {
 public:
-   AstModulo(){}
+   AstModulo()= default;
    virtual void accept(ecf::ExprAstVisitor&);
    virtual AstModulo* clone() const;
    virtual bool check(std::string& error_msg) const;
@@ -245,7 +245,7 @@ public:
 
 class AstAnd : public AstRoot {
 public:
-	AstAnd() {}
+	AstAnd() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstAnd* clone() const;
 	virtual bool evaluate() const { return (left_->evaluate() && right_->evaluate());}
@@ -260,7 +260,7 @@ public:
 
 class AstOr : public AstRoot {
 public:
-	AstOr() {}
+	AstOr() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstOr* clone() const;
 	virtual bool evaluate() const { return (left_->evaluate() || right_->evaluate());}
@@ -275,7 +275,7 @@ public:
 
 class AstEqual : public AstRoot {
 public:
-	AstEqual() {}
+	AstEqual() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstEqual* clone() const;
 	virtual bool evaluate() const { return (left_->value() == right_->value()); }
@@ -290,7 +290,7 @@ public:
 
 class AstNotEqual : public AstRoot {
 public:
-	AstNotEqual() {}
+	AstNotEqual() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstNotEqual* clone() const;
 	virtual bool evaluate() const { return (left_->value() != right_->value()); }
@@ -305,7 +305,7 @@ public:
 
 class AstLessEqual : public AstRoot {
 public:
-	AstLessEqual() {}
+	AstLessEqual() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstLessEqual* clone() const;
 	virtual bool evaluate() const { return (left_->value() <= right_->value()); }
@@ -320,7 +320,7 @@ public:
 
 class AstGreaterEqual : public AstRoot {
 public:
-	AstGreaterEqual() {}
+	AstGreaterEqual() = default;
 	virtual bool evaluate() const { return (left_->value() >= right_->value()); }
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstGreaterEqual* clone() const;
@@ -336,7 +336,7 @@ public:
 
 class AstGreaterThan : public AstRoot {
 public:
-	AstGreaterThan() {}
+	AstGreaterThan() = default;
 
 	virtual bool evaluate() const { return (left_->value() > right_->value()); }
 	virtual void accept(ecf::ExprAstVisitor&);
@@ -353,7 +353,7 @@ public:
 
 class AstLessThan : public AstRoot {
 public:
-	AstLessThan() {}
+	AstLessThan() = default;
 
 	virtual bool evaluate() const { return (left_->value() < right_->value()); }
 	virtual void accept(ecf::ExprAstVisitor&);
@@ -373,7 +373,7 @@ public:
 /// These always represent the right side of the tree
 class AstLeaf : public Ast {
 public:
-  	AstLeaf() {}
+  	AstLeaf() = default;
 	virtual void accept(ecf::ExprAstVisitor&);
 	virtual bool isleaf() const { return true; }
    virtual bool is_valid_ast(std::string&) const { return true;}

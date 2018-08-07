@@ -95,8 +95,7 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
 }
 
 AbstractSearchLine::~AbstractSearchLine()
-{
-}
+= default;
 
 void AbstractSearchLine::clear()
 {

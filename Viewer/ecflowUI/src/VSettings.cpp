@@ -275,8 +275,7 @@ VComboSettings::VComboSettings(const std::string& file,const std::string& qsFile
 }
 
 VComboSettings::~VComboSettings()
-{
-}
+= default;
 
 void VComboSettings::clear()
 {

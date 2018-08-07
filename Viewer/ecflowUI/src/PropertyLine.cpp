@@ -148,8 +148,7 @@ PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 }
 
 PropertyLine::~PropertyLine()
-{
-}
+= default;
 
 void PropertyLine::init()
 {

@@ -72,8 +72,7 @@ NodeQueryResultModel::NodeQueryResultModel(QObject *parent) :
 }
 
 NodeQueryResultModel::~NodeQueryResultModel()
-{
-}
+= default;
 
 
 void NodeQueryResultModel::clearData()

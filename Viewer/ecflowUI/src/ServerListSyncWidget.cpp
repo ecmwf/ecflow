@@ -106,8 +106,7 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
 }
 
 ServerListSyncWidget::~ServerListSyncWidget()
-{
-}
+= default;
 
 void ServerListSyncWidget::slotTypeChanged(QListWidgetItem* item,QListWidgetItem*)
 {

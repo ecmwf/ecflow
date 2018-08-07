@@ -46,7 +46,7 @@ QueueAttr::QueueAttr(const std::string& name,const std::vector<std::string>& the
    for(size_t i=0; i < theQueue.size(); i++) state_vec_.push_back(NState::QUEUED);
 }
 
-QueueAttr::~QueueAttr() {}
+QueueAttr::~QueueAttr() = default;
 
 std::ostream& QueueAttr::print(std::ostream& os) const
 {

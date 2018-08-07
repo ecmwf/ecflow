@@ -682,8 +682,7 @@ ServerListModel::ServerListModel(ServerFilter* filter,QObject *parent) :
 }
 
 ServerListModel::~ServerListModel()
-{
-}
+= default;
 
 void ServerListModel::dataIsAboutToChange()
 {

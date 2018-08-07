@@ -191,7 +191,7 @@ Node& Node::operator=(const Node& rhs)
    return *this;
 }
 
-Node::~Node() {}
+Node::~Node() = default;
 
 bool Node::isParentSuspended() const
 {

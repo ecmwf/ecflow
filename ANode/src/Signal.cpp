@@ -22,7 +22,7 @@ namespace ecf {
 // SIGCHLD : Child status has changed (POSIX)
 // Signal sent to parent process whenever one of its child processes terminates or stops.
 
-Signal::Signal() {}
+Signal::Signal() = default;
 
 Signal::~Signal()
 {

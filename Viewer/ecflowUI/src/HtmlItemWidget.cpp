@@ -31,8 +31,7 @@ HtmlItemWidget::HtmlItemWidget(QWidget *parent) :
 }
 
 HtmlItemWidget::~HtmlItemWidget()
-{
-}
+= default;
 
 void HtmlItemWidget::removeSpacer()
 {

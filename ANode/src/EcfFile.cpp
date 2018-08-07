@@ -1226,7 +1226,7 @@ PreProcessor::PreProcessor(EcfFile* ecfile)
    jobLines_.reserve(512); // estimate for includes
 }
 
-PreProcessor::~PreProcessor(){}
+PreProcessor::~PreProcessor()= default;
 
 bool PreProcessor::preProcess(std::vector<std::string>& script_lines )
 {

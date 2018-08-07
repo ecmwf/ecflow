@@ -904,8 +904,7 @@ MainWindowTitleHandler::MainWindowTitleHandler(MainWindow *win) : win_(win)
 }
 
 MainWindowTitleHandler::~MainWindowTitleHandler()
-{
-}
+= default;
 
 void MainWindowTitleHandler::update(ServerHandler *sh)
 {

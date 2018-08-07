@@ -19,7 +19,7 @@
 #include <string>
 
 class NOrder {
-	NOrder() {}
+	NOrder() = default;
 public:
 	enum Order { TOP, BOTTOM, ALPHA, ORDER, UP, DOWN };
 

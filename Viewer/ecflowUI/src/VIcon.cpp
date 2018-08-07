@@ -155,8 +155,7 @@ VIcon::VIcon(const std::string& name) :
 }
 
 VIcon::~VIcon()
-{
-}
+= default;
 
 void VIcon::initPixmap()
 {

@@ -22,7 +22,7 @@ class Defs;
 
 class AbstractObserver {
 public:
-	virtual ~AbstractObserver() {}
+	virtual ~AbstractObserver() = default;
 
    virtual void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) = 0;
    virtual void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) = 0;

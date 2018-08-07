@@ -38,8 +38,7 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) :
 }
 
 CodeItemWidget::~CodeItemWidget()
-{
-}
+= default;
 
 void CodeItemWidget::removeSpacer()
 {

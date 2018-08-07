@@ -71,7 +71,7 @@ void ResolveExternsVisitor::doSetup(Node* node,Ast* ast)
 AstResolveExternVisitor::AstResolveExternVisitor(Node* node,Defs* defs)
 : triggerNode_(node), defs_(defs) {}
 
-AstResolveExternVisitor::~AstResolveExternVisitor() {}
+AstResolveExternVisitor::~AstResolveExternVisitor() = default;
 
 void AstResolveExternVisitor::visitNode(AstNode* astNode)
 {

@@ -38,7 +38,7 @@ class NodeQueryOptionFactory
 {
 public:
     explicit NodeQueryOptionFactory(const std::string& t);
-    virtual ~NodeQueryOptionFactory() {}
+    virtual ~NodeQueryOptionFactory() = default;
 
     virtual NodeQueryOption* make(VProperty* p) = 0;
     static NodeQueryOption* create(VProperty* p);

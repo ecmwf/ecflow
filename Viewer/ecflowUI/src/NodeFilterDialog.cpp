@@ -41,8 +41,7 @@ NodeFilterDialog::NodeFilterDialog(QWidget *parent) :
 }
 
 NodeFilterDialog::~NodeFilterDialog()
-{
-}
+= default;
 
 void NodeFilterDialog::setQuery(NodeQuery* q)
 {

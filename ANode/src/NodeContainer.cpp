@@ -94,7 +94,7 @@ NodeContainer& NodeContainer::operator=(const NodeContainer& rhs)
    return *this;
 }
 
-NodeContainer::~NodeContainer() {}
+NodeContainer::~NodeContainer() = default;
 
 void NodeContainer::accept(ecf::NodeTreeVisitor& v)
 {

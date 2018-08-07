@@ -32,9 +32,7 @@ TextEditSearchLine::TextEditSearchLine(QWidget *parent) :
 }
 
 TextEditSearchLine::~TextEditSearchLine()
-{
-
-}
+= default;
 
 void TextEditSearchLine::setSearchInterface(AbstractTextEditSearchInterface *e)
 {

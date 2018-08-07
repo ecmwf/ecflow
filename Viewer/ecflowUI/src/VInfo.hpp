@@ -171,8 +171,8 @@ typedef std::shared_ptr<VInfoAttribute>   VInfoAttribute_ptr;
 class VInfoVisitor
 {
 public:
-    VInfoVisitor() {}
-    virtual ~VInfoVisitor() {}
+    VInfoVisitor() = default;
+    virtual ~VInfoVisitor() = default;
 
 	virtual void visit(VInfoServer*)=0;
 	virtual void visit(VInfoNode*)=0;
@@ -183,8 +183,8 @@ public:
 class VInfoObserver
 {
 public:
-    VInfoObserver() {}
-    virtual ~VInfoObserver() {}
+    VInfoObserver() = default;
+    virtual ~VInfoObserver() = default;
 
 	virtual void notifyDataLost(VInfo*)=0;
 	virtual void notifyDelete(VInfo*)=0;

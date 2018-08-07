@@ -33,8 +33,7 @@ JobItemWidget::JobItemWidget(QWidget *parent) : CodeItemWidget(parent)
 }
 
 JobItemWidget::~JobItemWidget()
-{
-}
+= default;
 
 QWidget* JobItemWidget::realWidget()
 {

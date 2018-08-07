@@ -38,7 +38,7 @@ using namespace ecf;
 
 //#define DEBUG_INVARIANTS 1
 
-ClientToServerCmd::~ClientToServerCmd(){}
+ClientToServerCmd::~ClientToServerCmd()= default;
 
 STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
 {

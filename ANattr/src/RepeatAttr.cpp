@@ -38,14 +38,14 @@ const Repeat& Repeat::EMPTY() { static const Repeat REPEAT = Repeat(); return RE
 
 //=========================================================================
 
-Repeat::Repeat() {}
+Repeat::Repeat() = default;
 Repeat::Repeat( const RepeatDate& r) : type_(new RepeatDate(r)) {}
 Repeat::Repeat( const RepeatInteger& r) : type_(new RepeatInteger(r)) {}
 Repeat::Repeat( const RepeatEnumerated& r) : type_(new RepeatEnumerated(r)) {}
 Repeat::Repeat( const RepeatString& r) : type_(new RepeatString(r)) {}
 Repeat::Repeat( const RepeatDay& r) : type_(new RepeatDay(r)) {}
 
-Repeat::~Repeat() {}
+Repeat::~Repeat() = default;
 
 Repeat::Repeat( const Repeat& rhs)
 {
@@ -84,7 +84,7 @@ std::ostream& Repeat::print( std::ostream& os ) const {
 }
 
 // =========================================================================
-RepeatBase::~RepeatBase() {}
+RepeatBase::~RepeatBase() = default;
 
 void RepeatBase::incr_state_change_no()
 {

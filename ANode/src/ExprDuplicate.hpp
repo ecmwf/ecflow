@@ -31,7 +31,7 @@ class AstTop;
 // reclaim memory allocated in map, Avoid valgrind errors
 class ExprDuplicate : private boost::noncopyable {
 public:
-   ExprDuplicate() {}
+   ExprDuplicate() = default;
    ~ExprDuplicate();
 
    // for debug only

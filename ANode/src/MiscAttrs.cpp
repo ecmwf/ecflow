@@ -32,7 +32,7 @@ MiscAttrs::MiscAttrs(const MiscAttrs& rhs)
   zombies_(rhs.zombies_),verifys_(rhs.verifys_),queues_(rhs.queues_), generics_(rhs.generics_)
 {}
 
-MiscAttrs::~MiscAttrs(){}
+MiscAttrs::~MiscAttrs()= default;
 
 // needed by node serialisation
 void MiscAttrs::set_node(Node* n)

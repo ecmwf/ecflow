@@ -22,7 +22,7 @@ namespace ecf {
 class DurationTimer {
 public:
 	DurationTimer() : start_time_(boost::posix_time::microsec_clock::universal_time()) {}
-	~DurationTimer() {}
+	~DurationTimer() = default;
 
 	int duration() const {
 		boost::posix_time::time_duration duration = boost::posix_time::microsec_clock::universal_time() - start_time_;

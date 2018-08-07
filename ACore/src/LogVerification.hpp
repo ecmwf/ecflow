@@ -35,7 +35,7 @@ public:
  	static bool compareNodeStates( const std::string& logfile, const std::string& goldenRefLogFile, std::string& errorMsg);
 
 private:
-	LogVerification() {}
+	LogVerification() = default;
 };
 }
 #endif

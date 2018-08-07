@@ -38,8 +38,7 @@ NodeSearchDialog::NodeSearchDialog(QWidget *parent) :
 }
 
 NodeSearchDialog::~NodeSearchDialog()
-{
-}
+= default;
 
 NodeSearchWidget* NodeSearchDialog::queryWidget() const
 {

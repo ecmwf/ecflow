@@ -28,7 +28,7 @@ using namespace std;
 namespace ecf {
 
 ///////////////////////////////////////////////////////////////////////////////
-FlatAnalyserVisitor::FlatAnalyserVisitor() {}
+FlatAnalyserVisitor::FlatAnalyserVisitor() = default;
 
 void FlatAnalyserVisitor::visitDefs( Defs* d) {
 	BOOST_FOREACH(suite_ptr s, d->suiteVec()) { s->acceptVisitTraversor(*this); }

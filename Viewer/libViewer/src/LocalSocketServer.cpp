@@ -43,8 +43,7 @@ LocalSocketServer::LocalSocketServer(QString serverId,QObject* parent) :
 }
 
 LocalSocketServer::~LocalSocketServer()
-{
-}
+= default;
 
 void LocalSocketServer::slotMessageReceived()
 {

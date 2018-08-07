@@ -81,8 +81,7 @@ NodeQueryViewDelegate::NodeQueryViewDelegate(QWidget *parent)
 }
 
 NodeQueryViewDelegate::~NodeQueryViewDelegate()
-{
-}
+= default;
 
 void NodeQueryViewDelegate::updateSettings()
 {

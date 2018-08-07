@@ -19,8 +19,8 @@ class VServerChange;
 class ServerObserver
 {
 public:
-    ServerObserver() {}
-    virtual ~ServerObserver() {}
+    ServerObserver() = default;
+    virtual ~ServerObserver() = default;
 	virtual void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a)=0;
 	virtual void notifyServerDelete(ServerHandler* server)=0;
     virtual void notifyBeginServerClear(ServerHandler* server) {}

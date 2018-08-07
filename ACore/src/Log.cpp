@@ -276,7 +276,7 @@ LogImpl::LogImpl(const std::string& filename,bool enable_auto_flush)
 	}
 }
 
-LogImpl::~LogImpl() {}
+LogImpl::~LogImpl() = default;
 
 
 static void append_log_type(std::string& str, Log::LogType lt)

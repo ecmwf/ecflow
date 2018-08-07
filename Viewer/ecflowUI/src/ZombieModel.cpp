@@ -25,8 +25,7 @@ ZombieModel::ZombieModel(QObject *parent) :
 }
 
 ZombieModel::~ZombieModel()
-{
-}
+= default;
 
 void ZombieModel::setData(const std::vector<Zombie>& data)
 {

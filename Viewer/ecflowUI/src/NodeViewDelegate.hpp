@@ -32,7 +32,7 @@ struct BaseNodeDelegateBox
        leftMargin(0), rightMargin(0), topPadding(0), bottomPadding(0),
        leftPadding(0), rightPadding(0), sizeHintCache(QSize(10,10)), spacing(2), selectRm(2) {}
 
-    virtual ~BaseNodeDelegateBox() {}
+    virtual ~BaseNodeDelegateBox() = default;
 
     virtual void adjust(const QFont& f)=0;
     virtual QRect adjustTextRect(const QRect& rIn) const { QRect r=rIn; return r;}
@@ -98,7 +98,7 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
 //Attr renderer properties
 struct AttrDelegateBox : public BaseNodeDelegateBox
 {
-    AttrDelegateBox() {}
+    AttrDelegateBox() = default;
 
     void adjust(const QFont& f) {
          QFontMetrics fm(f);

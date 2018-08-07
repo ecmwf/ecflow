@@ -54,7 +54,7 @@ class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialo
 
 public:
 	explicit ChangeNotifyDialogWidget(QWidget* parent=0);
-    ~ChangeNotifyDialogWidget() {}
+    ~ChangeNotifyDialogWidget() = default;
 
 	void init(ChangeNotify*);
     void updateSettings();

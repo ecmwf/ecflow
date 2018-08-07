@@ -27,8 +27,7 @@ TriggerTableModel::TriggerTableModel(Mode mode,QObject *parent) :
 }
 
 TriggerTableModel::~TriggerTableModel()
-{
-}
+= default;
 
 
 void TriggerTableModel::clearData()

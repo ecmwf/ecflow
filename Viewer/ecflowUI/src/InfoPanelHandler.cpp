@@ -30,8 +30,7 @@ InfoPanelDef::InfoPanelDef(const std::string& name) :
 }
 
 InfoPanelHandler::InfoPanelHandler()
-{
-}
+= default;
 
 InfoPanelHandler* InfoPanelHandler::instance()
 {

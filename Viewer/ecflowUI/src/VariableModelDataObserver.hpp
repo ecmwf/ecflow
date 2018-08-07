@@ -15,7 +15,7 @@ class VariableModelDataHandler;
 class VariableModelDataObserver
 {
 public:
-      VariableModelDataObserver() {}
+      VariableModelDataObserver() = default;
       virtual void notifyCleared(VariableModelDataHandler*)=0;
       virtual void notifyUpdated(VariableModelDataHandler*)=0;
 };

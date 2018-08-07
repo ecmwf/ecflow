@@ -91,7 +91,7 @@ class BaseNodeCondition
 {
 public:
     BaseNodeCondition() {delayUnwinding_ = false;}
-    virtual ~BaseNodeCondition() {}
+    virtual ~BaseNodeCondition() = default;
 
     bool execute(VInfo_ptr nodeInfo);
     virtual bool execute(VItem* item)=0;
@@ -117,7 +117,7 @@ class AndNodeCondition : public BaseNodeCondition
 {
 public:
     AndNodeCondition() {delayUnwinding_ = true;}
-    ~AndNodeCondition() {}
+    ~AndNodeCondition() = default;
 
     bool execute(VItem* node);
     int  numOperands() {return 2;}
@@ -130,7 +130,7 @@ class OrNodeCondition : public BaseNodeCondition
 {
 public:
     OrNodeCondition()  {delayUnwinding_ = true;}
-    ~OrNodeCondition() {}
+    ~OrNodeCondition() = default;
 
     bool execute(VItem* node);
     int  numOperands() {return 2;}
@@ -142,8 +142,8 @@ public:
 class NotNodeCondition : public BaseNodeCondition
 {
 public:
-    NotNodeCondition()  {}
-    ~NotNodeCondition() {}
+    NotNodeCondition()  = default;
+    ~NotNodeCondition() = default;
 
     bool execute(VItem* node);
     int  numOperands() {return 1;}
@@ -163,7 +163,7 @@ class StringMatchBase
 {
 public:
     StringMatchBase(bool caseSensitive)  {caseSensitive_ = caseSensitive;}
-    virtual ~StringMatchBase() {}
+    virtual ~StringMatchBase() = default;
 
     virtual bool match(std::string searchFor, std::string searchIn) = 0;
 
@@ -175,7 +175,7 @@ class StringMatchExact : public StringMatchBase
 {
 public:
     StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {}
-    ~StringMatchExact() {}
+    ~StringMatchExact() = default;
 
     bool match(std::string searchFor, std::string searchIn);
 };
@@ -184,7 +184,7 @@ class StringMatchContains : public StringMatchBase
 {
 public:
     StringMatchContains(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
-    ~StringMatchContains() {}
+    ~StringMatchContains() = default;
 
     bool match(std::string searchFor, std::string searchIn);
 };
@@ -193,7 +193,7 @@ class StringMatchWildcard : public StringMatchBase
 {
 public:
     StringMatchWildcard(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
-    ~StringMatchWildcard() {}
+    ~StringMatchWildcard() = default;
 
     bool match(std::string searchFor, std::string searchIn);
 };
@@ -202,7 +202,7 @@ class StringMatchRegexp : public StringMatchBase
 {
 public:
     StringMatchRegexp(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
-    ~StringMatchRegexp() {}
+    ~StringMatchRegexp() = default;
 
     bool match(std::string searchFor, std::string searchIn);
 };
@@ -236,8 +236,8 @@ private:
 class TrueNodeCondition : public BaseNodeCondition
 {
 public:
-    TrueNodeCondition()  {}
-    ~TrueNodeCondition() {}
+    TrueNodeCondition()  = default;
+    ~TrueNodeCondition() = default;
 
     bool execute(VItem*) {return true;}
     std::string print() {return std::string("true");}
@@ -246,8 +246,8 @@ public:
 class FalseNodeCondition : public BaseNodeCondition
 {
 public:
-    FalseNodeCondition()  {}
-    ~FalseNodeCondition() {}
+    FalseNodeCondition()  = default;
+    ~FalseNodeCondition() = default;
 
     bool execute(VItem*) {return false;}
     std::string print() {return std::string("false");}
@@ -263,7 +263,7 @@ class TypeNodeCondition : public BaseNodeCondition
 {
 public:
     explicit TypeNodeCondition(NodeExpressionParser::NodeType type) {type_ = type;}
-    ~TypeNodeCondition() {}
+    ~TypeNodeCondition() = default;
 
     bool execute(VItem* node);
     std::string print() {return NodeExpressionParser::instance()->typeName(type_);}
@@ -282,7 +282,7 @@ class StateNodeCondition : public BaseNodeCondition
 {
 public:
     explicit StateNodeCondition(QString stateName) : stateName_(stateName) {}
-    ~StateNodeCondition() {}
+    ~StateNodeCondition() = default;
 
     bool execute(VItem* node);
     std::string print() {return stateName_.toStdString();}
@@ -301,7 +301,7 @@ class NodeMenuModeCondition : public BaseNodeCondition
 {
 public:
     explicit NodeMenuModeCondition(QString menuModeName) : menuModeName_(menuModeName) {}
-    ~NodeMenuModeCondition() {}
+    ~NodeMenuModeCondition() = default;
 
     bool execute(VItem*);
     std::string print() {return menuModeName_.toStdString();}
@@ -320,7 +320,7 @@ class UIStateCondition : public BaseNodeCondition
 {
 public:
     explicit UIStateCondition(const std::string& uiStateName) : uiStateName_(uiStateName) {}
-    ~UIStateCondition() {}
+    ~UIStateCondition() = default;
 
     bool execute(VItem*);
     std::string print() {return uiStateName_;}
@@ -340,7 +340,7 @@ class NodeAttributeCondition : public BaseNodeCondition
 {
 public:
     explicit NodeAttributeCondition(QString nodeAttrName) : nodeAttrName_(nodeAttrName) {}
-    ~NodeAttributeCondition() {}
+    ~NodeAttributeCondition() = default;
 
     bool execute(VItem*);
     std::string print() {return nodeAttrName_.toStdString();}
@@ -359,7 +359,7 @@ class NodeFlagCondition : public BaseNodeCondition
 {
 public:
     explicit NodeFlagCondition(QString nodeFlagName) : nodeFlagName_(nodeFlagName) {}
-    ~NodeFlagCondition() {}
+    ~NodeFlagCondition() = default;
 
     bool execute(VItem*);
     std::string print() {return nodeFlagName_.toStdString();}
@@ -377,7 +377,7 @@ class IsoDateCondition : public BaseNodeCondition
 {
 public:
     explicit IsoDateCondition(QString str=QString());
-    ~IsoDateCondition() {}
+    ~IsoDateCondition() = default;
 
     bool execute(VItem*) {return false;}
     std::string print();
@@ -395,8 +395,8 @@ private:
 class NodeStatusChangeDateCondition : public IsoDateCondition
 {
 public:
-    explicit NodeStatusChangeDateCondition() {}
-    ~NodeStatusChangeDateCondition() {}
+    explicit NodeStatusChangeDateCondition() = default;
+    ~NodeStatusChangeDateCondition() = default;
 
     bool execute(VItem*) {return false;}
     std::string print();
@@ -410,8 +410,8 @@ public:
 class IsoDateGreaterThanEqualCondition : public BaseNodeCondition
 {
 public:
-    IsoDateGreaterThanEqualCondition() {}
-    ~IsoDateGreaterThanEqualCondition() {}
+    IsoDateGreaterThanEqualCondition() = default;
+    ~IsoDateGreaterThanEqualCondition() = default;
 
     bool execute(VItem *node);
     int  numOperands() {return 2;}
@@ -421,8 +421,8 @@ public:
 class IsoDateLessThanEqualCondition : public BaseNodeCondition
 {
 public:
-    IsoDateLessThanEqualCondition() {}
-    ~IsoDateLessThanEqualCondition() {}
+    IsoDateLessThanEqualCondition() = default;
+    ~IsoDateLessThanEqualCondition() = default;
 
     bool execute(VItem *node);
     int  numOperands() {return 2;}
@@ -479,7 +479,7 @@ class AttributeCondition : public BaseNodeCondition
 public:
     //explicit AttributeCondition(NodeExpressionParser::AttributeType type) {type_ = type;}
     explicit AttributeCondition(VAttributeType* type) : type_(type) {}
-    ~AttributeCondition() {}
+    ~AttributeCondition() = default;
 
     bool execute(VItem*);
     //std::string print() {return NodeExpressionParser::instance()->toAttrName(type_);}
@@ -498,7 +498,7 @@ class AttributeStateCondition : public BaseNodeCondition
 {
 public:
     explicit AttributeStateCondition(QString attrState) : attrState_(attrState) {}
-    ~AttributeStateCondition() {}
+    ~AttributeStateCondition() = default;
 
     bool execute(VItem*);
     std::string print() {return attrState_.toStdString();}

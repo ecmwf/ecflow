@@ -890,8 +890,8 @@ WhatToSearchInOperand::WhatToSearchInOperand(std::string what, bool &attr)
 }
 
 
-WhatToSearchInOperand::~WhatToSearchInOperand() {}
-WhatToSearchForOperand::~WhatToSearchForOperand() {}
+WhatToSearchInOperand::~WhatToSearchInOperand() = default;
+WhatToSearchForOperand::~WhatToSearchForOperand() = default;
 
 //====================================================
 //

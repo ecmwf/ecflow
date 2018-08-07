@@ -40,8 +40,7 @@ CommandOutputDialog::CommandOutputDialog(QWidget *parent) :
 }
 
 CommandOutputDialog::~CommandOutputDialog()
-{
-}
+= default;
 
 void CommandOutputDialog::closeEvent(QCloseEvent * event)
 {

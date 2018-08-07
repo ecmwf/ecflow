@@ -25,9 +25,7 @@ VariableSearchLine::VariableSearchLine(QWidget *parent) :
 }
 
 VariableSearchLine::~VariableSearchLine()
-{
-
-}
+= default;
 
 //This should only be called once!!
 void VariableSearchLine::setView(QTreeView* view)

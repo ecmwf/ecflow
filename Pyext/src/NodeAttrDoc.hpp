@@ -51,6 +51,6 @@ public:
   	static const char* cron_doc();
  	static const char* clock_doc();
 private:
-	NodeAttrDoc(){}
+	NodeAttrDoc()= default;
 };
 #endif

@@ -26,8 +26,7 @@ TableNodeSortModel::TableNodeSortModel(TableNodeModel* nodeModel,QObject *parent
 }
 
 TableNodeSortModel::~TableNodeSortModel()
-{
-}
+= default;
 
 VInfo_ptr TableNodeSortModel::nodeInfo(const QModelIndex& index)
 {

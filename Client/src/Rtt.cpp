@@ -55,7 +55,7 @@ Rtt::Rtt(const std::string& filename)
    }
 }
 
-Rtt::~Rtt(){}
+Rtt::~Rtt()= default;
 
 void Rtt::log(const std::string& message)
 {

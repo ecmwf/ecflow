@@ -33,9 +33,7 @@ VTaskNode::VTaskNode(VNode* parent,node_ptr node) :
 }
 
 VTaskNode::~VTaskNode()
-{
-
-}
+= default;
 
 void VTaskNode::internalState(VNodeInternalState& st)
 {

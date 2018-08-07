@@ -23,7 +23,7 @@ public:
 	enum Status {NoStatus,TaskDone,TaskFailed,TaskCancelled};
 	enum FileReadMode {NoReadMode,LocalReadMode,ServerReadMode,LogServerReadMode};
     VReply(void* sender=NULL) : sender_(sender), status_(NoStatus), readMode_(NoReadMode),readTruncatedTo_(-1) {}
-	~VReply() {}
+	~VReply() = default;
 
 	void reset();
 

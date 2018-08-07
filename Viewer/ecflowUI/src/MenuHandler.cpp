@@ -770,8 +770,7 @@ MenuItem::MenuItem(const std::string &name) :
 }
 
 MenuItem::~MenuItem()
-{
-}
+= default;
 
 void MenuItem::setCommand(const std::string &command)
 {

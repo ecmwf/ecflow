@@ -732,9 +732,7 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) :
 }
 
 VariableItemWidget::~VariableItemWidget()
-{
-
-}
+= default;
 
 QWidget* VariableItemWidget::realWidget()
 {

@@ -65,9 +65,7 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
 }
 
 AbstractNodeView::~AbstractNodeView()
-{
-
-}
+= default;
 
 //Connect the models signal to the view. Must only be called once!!
 void AbstractNodeView::attachModel()

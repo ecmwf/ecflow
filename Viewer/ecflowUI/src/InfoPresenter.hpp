@@ -24,7 +24,7 @@ class InfoPresenter
 {
 public:
     InfoPresenter() : infoProvider_(0) {}
-    virtual ~InfoPresenter() {}
+    virtual ~InfoPresenter() = default;
     virtual void infoReady(VReply*) {}
     virtual void infoFailed(VReply*) {}
     virtual void infoProgress(VReply*) {}

@@ -22,7 +22,7 @@ using namespace ecf;
 //#define DEBUG_MEMENTO 1
 
 // ===============================================================
-Memento::~Memento() {}
+Memento::~Memento() = default;
 
 // ===============================================================
 void CompoundMemento::incremental_sync(defs_ptr client_def) const

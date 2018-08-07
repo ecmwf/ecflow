@@ -24,7 +24,7 @@ class GenericAttr {
 public:
    GenericAttr(const std::string& name, const std::vector<std::string>& values);
    GenericAttr(const std::string& name);
-   GenericAttr() {}
+   GenericAttr() = default;
 
    bool operator==(const GenericAttr& rhs) const;
    std::ostream& print(std::ostream&) const;

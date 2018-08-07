@@ -16,8 +16,8 @@ class SuiteFilter;
 class SuiteFilterObserver
 {
 public:
-      SuiteFilterObserver() {}
-      virtual ~SuiteFilterObserver() {}
+      SuiteFilterObserver() = default;
+      virtual ~SuiteFilterObserver() = default;
 
 	  virtual void notifyChange(SuiteFilter*)=0;
 	  virtual void notifyDelete(SuiteFilter*)=0;

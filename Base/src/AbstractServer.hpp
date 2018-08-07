@@ -30,7 +30,7 @@ class Defs;
 ///
 class AbstractServer {
 public:
-	virtual ~AbstractServer() {}
+	virtual ~AbstractServer() = default;
 
 	/// returns the current state of the server
 	/// The following table shows the effect of state, on server behaviour:

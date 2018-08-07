@@ -30,7 +30,7 @@ namespace po = boost::program_options;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-QueryCmd::~QueryCmd() {}
+QueryCmd::~QueryCmd() = default;
 
 std::ostream& QueryCmd::print(std::ostream& os) const
 {
