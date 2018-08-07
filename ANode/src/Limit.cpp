@@ -184,7 +184,7 @@ void Limit::set_state(int limit, int value, const std::set<std::string>& paths)
 
 bool Limit::delete_path( const std::string& abs_node_path)
 {
-   std::set<std::string>::iterator i = paths_.find(abs_node_path);
+   auto i = paths_.find(abs_node_path);
    if (i != paths_.end()) {
       paths_.erase(i);
       update_change_no();

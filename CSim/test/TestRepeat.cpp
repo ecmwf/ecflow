@@ -416,7 +416,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated )
    theDefs.getAllTasks(theServerTasks);
    BOOST_FOREACH(Task* t, theServerTasks) {
       // verify repeat has the last value
-      Family* family = dynamic_cast<Family*>(t->parent());
+      auto* family = dynamic_cast<Family*>(t->parent());
       const Repeat& repeat = family->findRepeat("ENUM");
       BOOST_REQUIRE_MESSAGE(!repeat.empty(),"Expected to find repeat on family " << family->absNodePath() );
       BOOST_REQUIRE_MESSAGE(!repeat.valid(),"Expected invalid repeat");
@@ -466,7 +466,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_string )
  	theDefs.getAllTasks(theServerTasks);
  	BOOST_FOREACH(Task* t, theServerTasks) {
  	   // verify repeat has the last value
- 	   Family* family = dynamic_cast<Family*>(t->parent());
+ 	   auto* family = dynamic_cast<Family*>(t->parent());
  	   const Repeat& repeat = family->findRepeat("STRING");
  	   BOOST_REQUIRE_MESSAGE(!repeat.empty(),"Expected to find repeat on family " << family->absNodePath() );
  	   BOOST_REQUIRE_MESSAGE(!repeat.valid(),"Expected invalid repeat");

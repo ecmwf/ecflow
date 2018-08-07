@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
 
    {
       // **** Note using node_ptr can extend the life of the Node, hence we use scoping ***
-      Defs* theDefs = new Defs;
+      auto* theDefs = new Defs;
       std::vector<MyObserver*> obs_vec;
       {
          {

@@ -105,7 +105,7 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
    // ECF_CLIENT_EXE_PATH allows dependence on client exe without installation
    // Allow user to add SLEEPTIME, otherwise add a default
    int customSmsCnt = 0;
-   int taskSmsMapSize = static_cast<int>(customTaskSmsMap.size());
+   auto taskSmsMapSize = static_cast<int>(customTaskSmsMap.size());
    BOOST_FOREACH(suite_ptr s, theClientDefs.suiteVec()) {
 
       // Always override these to correctly locate files.
@@ -431,7 +431,7 @@ void ServerTestHarness::createDirAndEcfFiles(
 #endif
          // Create ECF file with default template or custom  file.
          std::ofstream theEcfFile( ecf_file.c_str() );
-         std::map<std::string,std::string>::const_iterator it = customTaskSmsMap.find(t->absNodePath());
+         auto it = customTaskSmsMap.find(t->absNodePath());
          if (it == customTaskSmsMap.end()) theEcfFile << getDefaultTemplateEcfFile(t);
          else  {
             theEcfFile << (*it).second;

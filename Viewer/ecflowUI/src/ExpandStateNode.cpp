@@ -64,7 +64,7 @@ void ExpandStateNode::reserveChildren(std::size_t num)
 //Allocate a new child and place it into then children vector at the specified position
 ExpandStateNode* ExpandStateNode::setChildAt(std::size_t index,VNode* node,bool expanded)
 {
-    ExpandStateNode *exn=new ExpandStateNode(node,expanded);
+    auto *exn=new ExpandStateNode(node,expanded);
     children_[index]=exn;
     return exn;
 }

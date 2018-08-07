@@ -950,14 +950,14 @@ void VariableModelDataHandler::findBlock(VInfo_ptr info,int& block) const
 
 void VariableModelDataHandler::addObserver(VariableModelDataObserver* o)
 {
-    std::vector<VariableModelDataObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+    auto it=std::find(observers_.begin(),observers_.end(),o);
     if(it == observers_.end())
         observers_.push_back(o);
 }
 
 void VariableModelDataHandler::removeObserver(VariableModelDataObserver* o)
 {
-    std::vector<VariableModelDataObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+    auto it=std::find(observers_.begin(),observers_.end(),o);
     if(it != observers_.end())
         observers_.erase(it);
 }

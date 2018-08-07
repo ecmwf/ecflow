@@ -30,7 +30,7 @@ namespace po = boost::program_options;
 
 bool RunNodeCmd::equals(ClientToServerCmd* rhs) const
 {
-	RunNodeCmd* the_rhs = dynamic_cast< RunNodeCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< RunNodeCmd* > ( rhs );
 	if ( !the_rhs ) return false;
 	if (paths_ != the_rhs->paths()) return false;
 	if (force_ != the_rhs->force()) return false;

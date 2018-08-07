@@ -54,7 +54,7 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
 
 bool StcCmd::equals(ServerToClientCmd* rhs) const
 {
-	StcCmd* the_rhs = dynamic_cast<StcCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<StcCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (api_ != the_rhs->api()) return false;
 	return ServerToClientCmd::equals(rhs);

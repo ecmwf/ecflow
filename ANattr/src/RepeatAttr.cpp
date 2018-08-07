@@ -216,7 +216,7 @@ void RepeatDate::update_repeat_genvar() const
 
 bool RepeatDate::compare(RepeatBase* rb) const
 {
-	RepeatDate* rhs = dynamic_cast<RepeatDate*>(rb);
+	auto* rhs = dynamic_cast<RepeatDate*>(rb);
 	if(!rhs) return false;
 	return operator==(*rhs);
 }
@@ -415,7 +415,7 @@ RepeatInteger::RepeatInteger() : start_( 0 ), end_( 0 ), delta_( 0 ), value_( 0 
 
 bool RepeatInteger::compare(RepeatBase* rb) const
 {
-	RepeatInteger* rhs = dynamic_cast<RepeatInteger*>(rb);
+	auto* rhs = dynamic_cast<RepeatInteger*>(rb);
 	if(!rhs) return false;
 	return operator==(*rhs);
 }
@@ -598,7 +598,7 @@ int RepeatEnumerated::end() const   {
 
 bool RepeatEnumerated::compare(RepeatBase* rb) const
 {
-	RepeatEnumerated* rhs = dynamic_cast<RepeatEnumerated*>(rb);
+	auto* rhs = dynamic_cast<RepeatEnumerated*>(rb);
 	if(!rhs) return false;
 	return operator==(*rhs);
 }
@@ -710,7 +710,7 @@ void RepeatEnumerated::change( const std::string& newValue)
 
 	// If the value is convertible to an integer, treat as an index
   	try {
- 		long the_new_value = boost::lexical_cast< long >( newValue );
+ 		auto the_new_value = boost::lexical_cast< long >( newValue );
  		changeValue(the_new_value); // can throw if out of range
  		return;
 	}
@@ -793,7 +793,7 @@ int RepeatString::end() const   {
 
 bool RepeatString::compare(RepeatBase* rb) const
 {
-	RepeatString* rhs = dynamic_cast<RepeatString*>(rb);
+	auto* rhs = dynamic_cast<RepeatString*>(rb);
 	if(!rhs) return false;
 	return operator==(*rhs);
 }
@@ -919,7 +919,7 @@ bool RepeatString::operator==(const RepeatString& rhs) const
 
 bool RepeatDay::compare(RepeatBase* rb) const
 {
-	RepeatDay* rhs = dynamic_cast<RepeatDay*>(rb);
+	auto* rhs = dynamic_cast<RepeatDay*>(rb);
 	if(!rhs) return false;
 	return operator==(*rhs);
 }

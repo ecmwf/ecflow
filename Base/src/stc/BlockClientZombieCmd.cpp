@@ -40,7 +40,7 @@ bool BlockClientZombieCmd::handle_server_response( ServerReply& server_reply, Cm
 
 bool BlockClientZombieCmd::equals(ServerToClientCmd* rhs) const
 {
-   BlockClientZombieCmd* the_rhs = dynamic_cast<BlockClientZombieCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<BlockClientZombieCmd*>(rhs);
    if (!the_rhs) return false;
    if (zombie_type_ != the_rhs->zombie_type()) return false;
    return ServerToClientCmd::equals(rhs);

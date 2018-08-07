@@ -777,7 +777,7 @@ int StandardView::itemAtCoordinate(const QPoint& coordinate) const
 
 bool StandardView::isPointInExpandIndicator(int item,QPoint p) const
 {
-    const int itemCount = static_cast<int>(viewItems_.size());
+    const auto itemCount = static_cast<int>(viewItems_.size());
     return item >=0 && item < itemCount &&
            p.x() > viewItems_[item].x-expandIndicatorBoxWidth_ &&
            p.x() < viewItems_[item].x-2;

@@ -107,7 +107,7 @@ std::string Rtt::analyis(const std::string& filename)
       time_duration td(duration_from_string(time));
 //      cout << "  cmd:(" << cmd << ") time(" << to_simple_string(td) << ")\n";
 
-      map<string,vector<time_duration> >::iterator cmd_iterator = cmd_time_map.find(cmd);
+      auto cmd_iterator = cmd_time_map.find(cmd);
       if ( cmd_iterator == cmd_time_map.end()) {
          vector<time_duration> vec;
          vec.push_back(td);
@@ -162,7 +162,7 @@ std::string Rtt::analyis(const std::string& filename)
           }
 
           double avg =  total_diff_from_avg/p.second.size();
-          int stdd = (int)sqrt(avg);
+          auto stdd = (int)sqrt(avg);
 //          if (debug) cout << "avg: " << avg << " stdd: " << stdd << "\n";
 
           ss << setw(9) << right << min.total_microseconds() ;

@@ -82,7 +82,7 @@ void DefsAnalyserVisitor::analyse(Node* node,std::set<Node*>& dependentNodes, bo
  		analyseExpressions(node,dependentNodes,false,dependent);
 
  		// follow child nodes
-  		NodeContainer* nc =  dynamic_cast<NodeContainer*>(node);
+  		auto* nc =  dynamic_cast<NodeContainer*>(node);
  		if (nc) {
  			  BOOST_FOREACH(node_ptr t, nc->nodeVec())       { t->acceptVisitTraversor(*this);}
  		}
@@ -94,7 +94,7 @@ void DefsAnalyserVisitor::analyse(Node* node,std::set<Node*>& dependentNodes, bo
  		analyseExpressions(node,dependentNodes,true,dependent);
 
 		// follow child nodes
- 		NodeContainer* nc =  dynamic_cast<NodeContainer*>(node);
+ 		auto* nc =  dynamic_cast<NodeContainer*>(node);
  		if (nc) {
  			BOOST_FOREACH(node_ptr t, nc->nodeVec())       { t->acceptVisitTraversor(*this);}
   		}

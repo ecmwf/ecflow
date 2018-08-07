@@ -123,7 +123,7 @@ QVariant NodeQueryResultModel::data( const QModelIndex& index, int role ) const
 	if(row < 0 || row >= data_->size())
 		return QVariant();
 
-    ColumnType id=static_cast<ColumnType>(index.column());
+    auto id=static_cast<ColumnType>(index.column());
 	NodeQueryResultItem* d=data_->itemAt(row);
 
 	if(role == Qt::DisplayRole)
@@ -184,7 +184,7 @@ QVariant NodeQueryResultModel::headerData( const int section, const Qt::Orientat
 	if ( orient != Qt::Horizontal)
       		  return QAbstractItemModel::headerData( section, orient, role );
 
-    ColumnType id=static_cast<ColumnType>(section);
+    auto id=static_cast<ColumnType>(section);
 
 	if(role == Qt::DisplayRole)
 		return columns_->label(section);

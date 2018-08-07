@@ -84,7 +84,7 @@ ServerItem* ServerList::add(const std::string& name,const std::string& host,
         return 0;
     }
 
-    ServerItem* item=new ServerItem(name,host,port,favourite);
+    auto* item=new ServerItem(name,host,port,favourite);
 
     items_.push_back(item);
 
@@ -98,7 +98,7 @@ ServerItem* ServerList::add(const std::string& name,const std::string& host,
 
 void ServerList::remove(ServerItem *item)
 {
-	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),item);
+	auto it=std::find(items_.begin(),items_.end(),item);
 	if(it != items_.end())
 	{
 		items_.erase(it);
@@ -112,7 +112,7 @@ void ServerList::remove(ServerItem *item)
 
 void ServerList::reset(ServerItem* item,const std::string& name,const std::string& host,const std::string& port)
 {
-	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),item);
+	auto it=std::find(items_.begin(),items_.end(),item);
 	if(it != items_.end())
 	{
 		//Check if there is an item with the same name. names have to be unique!
@@ -128,7 +128,7 @@ void ServerList::reset(ServerItem* item,const std::string& name,const std::strin
 
 void ServerList::setFavourite(ServerItem* item,bool b)
 {
-	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),item);
+	auto it=std::find(items_.begin(),items_.end(),item);
 	if(it != items_.end())
 	{
 		item->setFavourite(b);
@@ -560,7 +560,7 @@ void ServerList::clearSyncChange()
 
 void ServerList::addObserver(ServerListObserver* o)
 {
-	std::vector<ServerListObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it == observers_.end())
 	{
 		observers_.push_back(o);
@@ -569,7 +569,7 @@ void ServerList::addObserver(ServerListObserver* o)
 
 void ServerList::removeObserver(ServerListObserver* o)
 {
-	std::vector<ServerListObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it != observers_.end())
 	{
 		observers_.erase(it);

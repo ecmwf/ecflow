@@ -141,8 +141,8 @@ std::ostream& Expression::print(std::ostream& os, const std::string& exprType) c
 
 std::string Expression::compose_expression(const std::vector<PartExpression>& vec) {
     string ret;
-    std::vector<PartExpression>::const_iterator theEnd = vec.end();
-    for(std::vector<PartExpression>::const_iterator expr = vec.begin(); expr!= theEnd; ++expr) {
+    auto theEnd = vec.end();
+    for(auto expr = vec.begin(); expr!= theEnd; ++expr) {
        if ( (*expr).andExpr() )       ret += " AND ";
        else  if ( (*expr).orExpr() )  ret += " OR ";
        ret  += (*expr).expression();

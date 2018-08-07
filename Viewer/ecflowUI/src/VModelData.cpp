@@ -1287,7 +1287,7 @@ void VModelData::notifyServerFilterRemoved(ServerItem* item)
 #endif
 
 	int i=0;
-	for(std::vector<VModelServer*>::iterator it=servers_.begin(); it!= servers_.end(); ++it)
+	for(auto it=servers_.begin(); it!= servers_.end(); ++it)
 	{
 		if((*it)->server_ == item->serverHandler())
 		{

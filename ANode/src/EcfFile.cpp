@@ -1013,7 +1013,7 @@ void EcfFile::removeCommentAndManual()
    std::vector<int> pp_stack;
    std::vector<std::string> tokens;
 
-   for(std::vector<std::string>::iterator i=jobLines_.begin(); i!=jobLines_.end(); ++i) {
+   for(auto i=jobLines_.begin(); i!=jobLines_.end(); ++i) {
 
        // take into account micro char during  removal of comment/manual
        string::size_type ecfmicro_pos = (*i).find(ecfMicro);
@@ -1109,7 +1109,7 @@ void EcfFile::remove_nopp_end_tokens()
    bool nopp = false;
    bool erase = false;
 
-   for(std::vector<std::string>::iterator i=jobLines_.begin(); i!=jobLines_.end(); ++i) {
+   for(auto i=jobLines_.begin(); i!=jobLines_.end(); ++i) {
 
       string::size_type ecfmicro_pos = (*i).find(ecfMicro);
       if ( ecfmicro_pos == 0) {

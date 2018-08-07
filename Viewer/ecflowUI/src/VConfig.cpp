@@ -124,7 +124,7 @@ void VConfig::loadInit(const std::string& parFile)
 
         //Get the group name and create it
         std::string groupName=itGr->first;
-        VProperty *grProp=new VProperty(groupName);
+        auto *grProp=new VProperty(groupName);
         groups_.push_back(grProp);
 
         UiLog().dbg() << "VConfig::loadInit() read config group: " << groupName;
@@ -163,7 +163,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
     	//If it is just a key/value pair "line"
     	else if(name == "line" && ptProp.empty())
     	{
-    		VProperty *chProp=new VProperty(name);
+    		auto *chProp=new VProperty(name);
     		prop->addChild(chProp);
     		std::string val=ptProp.get_value<std::string>();
 
@@ -216,7 +216,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
         //are ignored.
     	else if(!ptProp.empty())
         {
-            VProperty *chProp=new VProperty(name);
+            auto *chProp=new VProperty(name);
             prop->addChild(chProp);
             loadProperty(ptProp,chProp);
             chProp->adjustAfterLoad();

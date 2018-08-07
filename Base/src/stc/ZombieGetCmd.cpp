@@ -33,7 +33,7 @@ void ZombieGetCmd::init(AbstractServer* as)
 
 bool ZombieGetCmd::equals(ServerToClientCmd* rhs) const
 {
-	ZombieGetCmd* the_rhs = dynamic_cast<ZombieGetCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<ZombieGetCmd*>(rhs);
 	if (!the_rhs) return false;
 	return ServerToClientCmd::equals(rhs);
 }

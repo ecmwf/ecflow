@@ -159,14 +159,14 @@ std::string VInfo::storedNodePath() const
 
 void VInfo::addObserver(VInfoObserver* o)
 {
-	std::vector<VInfoObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it == observers_.end())
 		observers_.push_back(o);
 }
 
 void VInfo::removeObserver(VInfoObserver* o)
 {
-	std::vector<VInfoObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it != observers_.end())
 		observers_.erase(it);
 }

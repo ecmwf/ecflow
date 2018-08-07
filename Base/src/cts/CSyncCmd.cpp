@@ -42,7 +42,7 @@ std::ostream& CSyncCmd::print(std::ostream& os) const
 
 bool CSyncCmd::equals(ClientToServerCmd* rhs) const
 {
-	CSyncCmd* the_rhs = dynamic_cast< CSyncCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< CSyncCmd* > ( rhs );
 	if ( !the_rhs ) return false;
 	if (api_ != the_rhs->api()) return false;
 	if (client_handle_ != the_rhs->client_handle()) return false;

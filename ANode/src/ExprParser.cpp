@@ -551,7 +551,7 @@ bool ExprParser::doParse(std::string& errorMsg)
 void do_print(const tree_iter_t& i,  const std::map< parser_id, std::string >& rule_names)
 {
    Indentor in;
-   std::map< parser_id, std::string >::const_iterator iter = rule_names.find(i->value.id());
+   auto iter = rule_names.find(i->value.id());
    if (iter != rule_names.end()) {
       Indentor::indent(cout) << "Rule " << (*iter).second << "(size:" << i->children.size() << ")"
          << "  " << string( i->value.begin(), i->value.end() ) << endl;
@@ -562,7 +562,7 @@ void do_print(const tree_iter_t& i,  const std::map< parser_id, std::string >& r
    }
 
    Indentor in2;
-   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t) { do_print( t, rule_names );  }
+   for (auto t = i->children.begin(); t != i->children.end(); ++t) { do_print( t, rule_names );  }
 }
 
 void print(tree_parse_info<> info,
@@ -595,9 +595,9 @@ AstRoot* createRootNode(const tree_iter_t& i,  const std::map< parser_id, std::s
    if ( i->value.id() == ExpressionGrammer::and_ID ) return new AstAnd();
    if ( i->value.id() == ExpressionGrammer::or_ID ) return new AstOr();
    // Needed so that testing , when recreating expression uses same name for not.
-   if ( i->value.id() == ExpressionGrammer::not1_ID ) { AstNot* astnot = new AstNot(); astnot->set_root_name("not "); return astnot;}
-   if ( i->value.id() == ExpressionGrammer::not2_ID ) { AstNot* astnot = new AstNot(); astnot->set_root_name("~ "); return astnot;}
-   if ( i->value.id() == ExpressionGrammer::not3_ID ) { AstNot* astnot = new AstNot(); astnot->set_root_name("! "); return astnot;}
+   if ( i->value.id() == ExpressionGrammer::not1_ID ) { auto* astnot = new AstNot(); astnot->set_root_name("not "); return astnot;}
+   if ( i->value.id() == ExpressionGrammer::not2_ID ) { auto* astnot = new AstNot(); astnot->set_root_name("~ "); return astnot;}
+   if ( i->value.id() == ExpressionGrammer::not3_ID ) { auto* astnot = new AstNot(); astnot->set_root_name("! "); return astnot;}
    if ( i->value.id() == ExpressionGrammer::plus_ID ) return new AstPlus();
 
    if ( i->value.id() == ExpressionGrammer::not_equal_1_ID ) return new AstNotEqual();
@@ -729,8 +729,8 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
    }
    else if ( i->value.id() == ExpressionGrammer::basic_variable_path_ID) {
       LOG_ASSERT((i->children.size() == 2), "");
-      tree_iter_t theNodePathIter = i->children.begin();
-      tree_iter_t theNameIter = i->children.begin()+1;
+      auto theNodePathIter = i->children.begin();
+      auto theNameIter = i->children.begin()+1;
 
       string nodePath( theNodePathIter->value.begin(), theNodePathIter->value.end() );
       string name( theNameIter->value.begin(), theNameIter->value.end() );
@@ -741,7 +741,7 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
    else if ( i->value.id() == ExpressionGrammer::parent_variable_ID) {
 
        // tree_iter_t the_colon = i->children.begin(); ignore
-       tree_iter_t the_variable_t = i->children.begin()+1;
+       auto the_variable_t = i->children.begin()+1;
 
        string the_variable(the_variable_t->value.begin(),the_variable_t->value.end() );
        boost::algorithm::trim(the_variable ); // don't know why we get leading/trailing spaces
@@ -781,7 +781,7 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
 
       string thevalue( i->value.begin(), i->value.end() );
       boost::algorithm::trim(thevalue); // don't know why we get leading/trailing spaces
-      int theInt = boost::lexical_cast<int>(thevalue);
+      auto theInt = boost::lexical_cast<int>(thevalue);
       return new AstInteger(theInt);
    }
    else if ( i->value.id() == ExpressionGrammer::node_state_aborted_ID) {
@@ -819,8 +819,8 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
    else if ( i->value.id() == ExpressionGrammer::flag_path_ID) {
 
       LOG_ASSERT((i->children.size() == 2), "");
-      tree_iter_t theNodePathIter = i->children.begin();
-      tree_iter_t theFlagIter = i->children.begin()+1;
+      auto theNodePathIter = i->children.begin();
+      auto theFlagIter = i->children.begin()+1;
 
       string nodePath( theNodePathIter->value.begin(), theNodePathIter->value.end() );
       string flag( theFlagIter->value.begin(), theFlagIter->value.end() );
@@ -956,7 +956,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
       stack<Ast*> childs;
       stack<Ast*> parents;
       Ast* not_ast = NULL;
-      for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t) {
+      for (auto t = i->children.begin(); t != i->children.end(); ++t) {
          if (is_root_node(t) && !is_not(t)) {
             Ast* and_ast = createRootNode(  t, rule_names  );
             assert(and_ast);
@@ -1115,8 +1115,8 @@ bool SimpleExprParser::doParse()
       }
       else {
          try {
-            int left = boost::lexical_cast<int>(tokens[0]);
-            int right = boost::lexical_cast<int>(tokens[1]);
+            auto left = boost::lexical_cast<int>(tokens[0]);
+            auto right = boost::lexical_cast<int>(tokens[1]);
             ast_ = std::make_unique<AstTop>();
             Ast* someRoot = new AstEqual();
             someRoot->addChild(new AstInteger(left));

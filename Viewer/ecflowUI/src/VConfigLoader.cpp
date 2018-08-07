@@ -33,7 +33,7 @@ VConfigLoader::~VConfigLoader()
 bool VConfigLoader::process(const std::string& name,VProperty *prop)
 {
     Map::size_type entries=makers->count(name);
-    Map::iterator it=makers->find(name);
+    auto it=makers->find(name);
 
     bool retVal=false;
     for(Map::size_type cnt=0; cnt != entries; ++cnt, ++it)

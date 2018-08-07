@@ -209,7 +209,7 @@ CustomSavedCommandHandler* CustomSavedCommandHandler::instance()
 
 CustomCommand* CustomSavedCommandHandler::add(const std::string& name, const std::string& command, bool context, bool saveSettings)
 {
-    CustomCommand *item=new CustomCommand(name, command, context);
+    auto *item=new CustomCommand(name, command, context);
     items_.push_back(item);
 
     if (saveSettings)
@@ -255,7 +255,7 @@ CustomCommand* CustomCommandHistoryHandler::add(const std::string& name, const s
 
     if (index == -1)  // not already in the list
     {
-        CustomCommand *item=new CustomCommand(name, command, context);
+        auto *item=new CustomCommand(name, command, context);
         items_.push_front(item);  // add it to the front
 
         if(static_cast<int>(items_.size()) > maxCommands_)  // too many commands?

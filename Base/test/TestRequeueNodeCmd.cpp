@@ -272,7 +272,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_based_requeue_resets_relative_duration )
 
    task_ptr t1 = f->add_task("uk2fsb");
 
-   TimeSeries& theTime = const_cast<TimeSeries&>(f->timeVec().back().time_series());
+   auto& theTime = const_cast<TimeSeries&>(f->timeVec().back().time_series());
 
    the_defs->beginAll();
    BOOST_CHECK_MESSAGE(theTime.is_valid(), "Expected time to be holding");

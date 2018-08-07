@@ -94,7 +94,7 @@ void PropertyEditor::build()
 
 	holder_=new QWidget(scAreaContents_);
     holder_->setObjectName("h");
-	QVBoxLayout *vb=new QVBoxLayout(holder_);
+	auto *vb=new QVBoxLayout(holder_);
 	vb->setContentsMargins(0,0,0,0);
 	vBox_->addWidget(holder_);
 
@@ -229,7 +229,7 @@ PropertyLine* PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout,Q
 
             if(slw)
             {
-            	QHBoxLayout* hb=new QHBoxLayout;
+            	auto* hb=new QHBoxLayout;
                 hb->addWidget(item->item());
                 hb->addWidget(slw);
                 gridLayout->addLayout(hb,row,1,Qt::AlignLeft);
@@ -238,7 +238,7 @@ PropertyLine* PropertyEditor::addLine(VProperty *vProp,QGridLayout *gridLayout,Q
             {
             	if(item->canExpand())
             	{
-            		QHBoxLayout* hb=new QHBoxLayout;
+            		auto* hb=new QHBoxLayout;
             	    hb->addWidget(item->item());
             	    gridLayout->addLayout(hb,row,1,Qt::AlignLeft);
             	}
@@ -284,7 +284,7 @@ void PropertyEditor::addGroup(VProperty* vProp,QVBoxLayout * layout,QWidget *par
    
    QGroupBox *groupBox = new QGroupBox(vProp->param("title"),parent);
    groupBox->setObjectName("editorGroupBox");
-   QGridLayout *grid=new QGridLayout();
+   auto *grid=new QGridLayout();
    grid->setColumnStretch(1,1);
    groupBox->setLayout(grid);
    layout->addWidget(groupBox);
@@ -307,7 +307,7 @@ void PropertyEditor::addGrid(VProperty* vProp,QVBoxLayout *layout,QWidget *paren
         
     QGroupBox *groupBox = new QGroupBox(vProp->param("title"),parent);
     groupBox->setObjectName("editorGroupBox");
-    QGridLayout* grid=new QGridLayout();
+    auto* grid=new QGridLayout();
     groupBox->setLayout(grid);
         
     layout->addWidget(groupBox);
@@ -381,7 +381,7 @@ void PropertyEditor::addGridRow(VProperty* vProp,QGridLayout *grid,QWidget *pare
             QToolButton* masterTb=item->masterTb();
             if(defTb || masterTb)
             {
-                QHBoxLayout *hb=new QHBoxLayout();
+                auto *hb=new QHBoxLayout();
                 hb->addWidget(item->item());
                 if(defTb)
                 	hb->addWidget(defTb);
@@ -415,16 +415,16 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
 
     //ChangeNotifyEditor* ne=new ChangeNotifyEditor(parent);
 
-    QTabWidget* tab=new QTabWidget(parent);
+    auto* tab=new QTabWidget(parent);
 
     bool useGroup=(vProp->param("group") == "true");
 
     if(useGroup)
     {
     	QString labelText=vProp->param("title");
-    	QGroupBox *groupBox = new QGroupBox(labelText,parent);
+    	auto *groupBox = new QGroupBox(labelText,parent);
     	groupBox->setObjectName("editorGroupBox");
-    	QVBoxLayout* vb=new QVBoxLayout();
+    	auto* vb=new QVBoxLayout();
     	groupBox->setLayout(vb);
     	vb->addWidget(tab);
     	layout->addWidget(groupBox);
@@ -445,7 +445,7 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
     		QList<PropertyLine*> lineLst;
 
     		QWidget* w=new QWidget(parent);
-    		QVBoxLayout* vb=new QVBoxLayout(w);
+    		auto* vb=new QVBoxLayout(w);
     		//vb->setContentsMargins(4,4,4,4);
 
             currentGrid_=0;
@@ -516,7 +516,7 @@ void PropertyEditor::addTabs(VProperty* vProp,QVBoxLayout *layout,QWidget* paren
     if(vProp->name() != "tabs")
         return;
     
-    QTabWidget *t=new QTabWidget(parent);
+    auto *t=new QTabWidget(parent);
     t->setObjectName("tab");
     layout->addWidget(t);
    
@@ -535,7 +535,7 @@ void PropertyEditor::addTab(VProperty* vProp,QTabWidget* tab)
         return;
 
     QWidget *w=new QWidget(tab);
-    QVBoxLayout* vb=new QVBoxLayout();
+    auto* vb=new QVBoxLayout();
     w->setLayout(vb);
     
     tab->addTab(w,vProp->param("label"));

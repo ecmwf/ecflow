@@ -382,7 +382,7 @@ void NodeQueryEditor::slotOptionEditChanged()
 {
     if(!initIsOn_)
     {      
-        NodeQueryOptionEdit *e=static_cast<NodeQueryOptionEdit*>(sender());
+        auto *e=static_cast<NodeQueryOptionEdit*>(sender());
         Q_ASSERT(e);
         if(e->optionId() == "attribute")
            setAttributePanel(attrList_->selection());

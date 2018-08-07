@@ -699,11 +699,11 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) :
 	}
 
 	//Add context menu actions to the view
-	QAction* sep1=new QAction(this);
+	auto* sep1=new QAction(this);
 	sep1->setSeparator(true);
-	QAction* sep2=new QAction(this);
+	auto* sep2=new QAction(this);
 	sep2->setSeparator(true);
-	QAction* sep3=new QAction(this);
+	auto* sep3=new QAction(this);
 	sep3->setSeparator(true);
 
 	//Build context menu
@@ -976,7 +976,7 @@ void VariableItemWidget::addItem(const QModelIndex& index)
     if(data_->count() > 0)
     {
         //Start add dialog (will be deleted on close - deleteOnClose is set)
-        VariableAddDialog* d=new VariableAddDialog(data_,this);
+        auto* d=new VariableAddDialog(data_,this);
         connect(d,SIGNAL(accepted()),
                 this,SLOT(slotVariableAdded()));
         connect(this,SIGNAL(suspendedChanged(bool)),
@@ -1038,7 +1038,7 @@ void VariableItemWidget::removeItem(const QModelIndex& index)
 //Called when the variable has been edited in the dialogue
 void VariableItemWidget::slotVariableEdited()
 {
-    VariablePropDialog* d=static_cast<VariablePropDialog*>(sender());
+    auto* d=static_cast<VariablePropDialog*>(sender());
     Q_ASSERT(d);
 
     if(data_->count() > 0)
@@ -1055,7 +1055,7 @@ void VariableItemWidget::slotVariableEdited()
 
 void VariableItemWidget::slotVariableAdded()
 {
-    VariableAddDialog* d=static_cast<VariableAddDialog*>(sender());
+    auto* d=static_cast<VariableAddDialog*>(sender());
     Q_ASSERT(d);
     Q_ASSERT(data_->count() > 0);
     //We always perform the alter variable operation on the selected

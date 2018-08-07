@@ -77,7 +77,7 @@ VAttributeType* VMeterAttr::type() const
 
 QStringList VMeterAttr::data(bool /*firstLine*/) const
 {
-    static VMeterAttrType* atype=static_cast<VMeterAttrType*>(type());
+    static auto* atype=static_cast<VMeterAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
@@ -102,7 +102,7 @@ void VMeterAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     if(vnode->node_)
     {
         const std::vector<Meter>& v=vnode->node_->meters();
-        int n=static_cast<int>(v.size());
+        auto n=static_cast<int>(v.size());
         for(int i=0; i < n; i++)
         {
             vec.push_back(new VMeterAttr(vnode,v[i],i));

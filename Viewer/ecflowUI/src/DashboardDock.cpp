@@ -89,7 +89,7 @@ void DashboardDockTitleWidget::addActions(QList<QAction*> lst)
 {  
     Q_FOREACH(QAction* ac,lst)
 	{
-    	 QToolButton *tb=new QToolButton(this);
+    	 auto *tb=new QToolButton(this);
          tb->setProperty("docktitle","1");
          tb->setDefaultAction(ac);
          tb->setAutoRaise(true);
@@ -167,7 +167,7 @@ void DashboardDockTitleWidget::on_floatTb__clicked(bool)
 
 void DashboardDockTitleWidget::on_closeTb__clicked(bool)
 {
-	if(QDockWidget *dw = qobject_cast<QDockWidget*>(parentWidget()))
+	if(auto *dw = qobject_cast<QDockWidget*>(parentWidget()))
 	{
 		dw->close();
 	}
@@ -210,7 +210,7 @@ DashboardDock::DashboardDock(DashboardWidget *dw,QWidget * parent) :
 {
 	setFeatures(QDockWidget::DockWidgetClosable|QDockWidget::DockWidgetMovable);
 
-	DashboardDockTitleWidget *dt=new DashboardDockTitleWidget(this);
+	auto *dt=new DashboardDockTitleWidget(this);
 
 	setTitleBarWidget(dt);
 

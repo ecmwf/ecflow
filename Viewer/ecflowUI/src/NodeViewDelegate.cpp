@@ -196,7 +196,7 @@ void NodeViewDelegate::updateBaseSettings()
     if(limitShape_ == CircleLimitShape)
     {
         QFontMetrics fm(attrFont_);
-        int itemSize=static_cast<int>(static_cast<float>(fm.ascent())*0.8);
+        auto itemSize=static_cast<int>(static_cast<float>(fm.ascent())*0.8);
 
         QImage img(itemSize,itemSize,QImage::Format_ARGB32_Premultiplied);
         img.fill(Qt::transparent);
@@ -329,7 +329,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
                                         -attrBox_->bottomMargin-attrBox_->bottomPadding);
 
     //The status rectangle
-    int stHeight=static_cast<int>(static_cast<float>(fm.ascent())*0.8);
+    auto stHeight=static_cast<int>(static_cast<float>(fm.ascent())*0.8);
     int stHeightDiff=(contRect.height()-stHeight)/2;
 
     QRect stRect=contRect.adjusted(attrBox_->leftPadding,stHeightDiff,0,-stHeightDiff);
@@ -373,7 +373,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
         float valPercent=static_cast<float>(val-min)/static_cast<float>(max-min);
         if(threshold > min && threshold < max && val > threshold)
         {
-            int progWidth=static_cast<int>(static_cast<float>(stRect.width())*valPercent);
+            auto progWidth=static_cast<int>(static_cast<float>(stRect.width())*valPercent);
             if(val < max)
             {
                 progRect.setWidth(progWidth);
@@ -387,7 +387,7 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
         }
         else
         {
-            int progWidth=static_cast<int>(static_cast<float>(stRect.width())*valPercent);
+            auto progWidth=static_cast<int>(static_cast<float>(stRect.width())*valPercent);
             if(val < max)
             {
                 progRect.setWidth(progWidth);
@@ -681,7 +681,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
     QRect contRect=option.rect.adjusted(attrBox_->leftMargin,attrBox_->topMargin,0,-attrBox_->bottomMargin);
 
 	//The control rect
-    int ctHeight=static_cast<int>(static_cast<float>(fm.ascent())*0.8);
+    auto ctHeight=static_cast<int>(static_cast<float>(fm.ascent())*0.8);
     int ctHeightDiff=qMax((contRect.height()-ctHeight)/2,2);
 
     QRect ctRect=contRect.adjusted(attrBox_->leftPadding,ctHeightDiff,0,-ctHeightDiff);

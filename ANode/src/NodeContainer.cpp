@@ -304,7 +304,7 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 	SuiteChanged1 changed(suite());
 	switch (ord) {
 		case NOrder::TOP:  {
-			for(std::vector<node_ptr>::iterator i = nodes_.begin(); i != nodes_.end(); ++i) {
+			for(auto i = nodes_.begin(); i != nodes_.end(); ++i) {
  				if ((*i).get() == immediateChild) {
  					node_ptr node = (*i);
 					nodes_.erase(i);
@@ -316,7 +316,7 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 			throw std::runtime_error("NodeContainer::order TOP, immediate child not found");
 		}
 		case NOrder::BOTTOM:  {
-			for(std::vector<node_ptr>::iterator i = nodes_.begin(); i != nodes_.end(); ++i) {
+			for(auto i = nodes_.begin(); i != nodes_.end(); ++i) {
  				if ((*i).get() == immediateChild) {
  					node_ptr node = (*i);
 					nodes_.erase(i);
@@ -703,7 +703,7 @@ node_ptr NodeContainer::find_relative_node( const std::vector< std::string >& pa
 //    cout << " family = "; BOOST_FOREACH(family_ptr f, familyVec_ ) { cout << " " << f->name();} cout << "\n";
 //#endif
  	if (pathToNode.empty())  return node_ptr();
-	int pathSize = static_cast<int>(pathToNode.size());
+	auto pathSize = static_cast<int>(pathToNode.size());
 
 #ifdef DEBUG_FIND_NODE
 	cout << "NodeContainer::find_relative_node name = '" << name() << "' pathToNode[0] = '" << pathToNode[0] << "'\n";
@@ -733,7 +733,7 @@ node_ptr NodeContainer::find_relative_node( const std::vector< std::string >& pa
 
 void NodeContainer::find_closest_matching_node( const std::vector< std::string >& pathToNode, int indexIntoPathNode, node_ptr& closest_matching_node )
 {
-	int pathSize = static_cast<int>(pathToNode.size());
+	auto pathSize = static_cast<int>(pathToNode.size());
 	if (indexIntoPathNode >= pathSize)  return;
 
 	int index = indexIntoPathNode;
@@ -755,7 +755,7 @@ void NodeContainer::find_closest_matching_node( const std::vector< std::string >
 
 void NodeContainer::match_closest_children(const std::vector<std::string>& pathToNode, int indexIntoPathNode, node_ptr& closest_matching_node)
 {
-	int pathSize = static_cast<int>(pathToNode.size());
+	auto pathSize = static_cast<int>(pathToNode.size());
 	if (indexIntoPathNode >= pathSize)  return;
 
 	bool lastIndex = ( indexIntoPathNode == pathSize - 1);
@@ -1237,8 +1237,8 @@ void NodeContainer::sort_attributes(ecf::Attr::Type attr,bool recursive)
 bool NodeContainer::doDeleteChild(Node* child)
 {
 	SuiteChanged1 changed(suite());
-	std::vector<node_ptr>::iterator theTaskEnd = nodes_.end();
- 	for(std::vector<node_ptr>::iterator t = nodes_.begin(); t!=theTaskEnd; ++t) {
+	auto theTaskEnd = nodes_.end();
+ 	for(auto t = nodes_.begin(); t!=theTaskEnd; ++t) {
  		if ( (*t).get() == child) {
  		   child->set_parent(NULL); // must set to NULL, allow it to be re-added to different parent
   			nodes_.erase(t);

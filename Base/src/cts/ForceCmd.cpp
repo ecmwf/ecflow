@@ -32,7 +32,7 @@ namespace po = boost::program_options;
 
 bool ForceCmd::equals(ClientToServerCmd* rhs) const
 {
-	ForceCmd* the_rhs = dynamic_cast<ForceCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<ForceCmd*>(rhs);
 	if (!the_rhs)  return false;
 	if ( paths_                != the_rhs->paths()) { return false;}
 	if ( stateOrEvent_         != the_rhs->stateOrEvent()) { return false; }

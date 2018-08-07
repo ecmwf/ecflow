@@ -44,7 +44,7 @@ void SSuitesCmd::init(AbstractServer* as)
 
 bool SSuitesCmd::equals(ServerToClientCmd* rhs) const
 {
-	SSuitesCmd* the_rhs = dynamic_cast<SSuitesCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<SSuitesCmd*>(rhs);
 	if (!the_rhs) return false;
  	return ServerToClientCmd::equals(rhs);
 }

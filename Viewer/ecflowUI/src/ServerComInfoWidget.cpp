@@ -975,7 +975,7 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
             UI_ASSERT(progress >= 0. && progress <= 1.0001, "progress=" << progress);
             if(progress >= 1.) progress=1;
 
-            int progressW=static_cast<int>(static_cast<float>(actProgRect.width())*progress);
+            auto progressW=static_cast<int>(static_cast<float>(actProgRect.width())*progress);
             if(progressW <0) progressW=0;
             else if(progressW > progRect_.width()) progressW=progRect_.width();
             actProgRect.setWidth(progressW);

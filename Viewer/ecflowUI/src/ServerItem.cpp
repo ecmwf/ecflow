@@ -106,7 +106,7 @@ void ServerItem::registerUsageEnd()
 
 void ServerItem::addObserver(ServerItemObserver* o)
 {
-	std::vector<ServerItemObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it == observers_.end())
 	{	
 		registerUsageBegin();
@@ -118,7 +118,7 @@ void ServerItem::addObserver(ServerItemObserver* o)
 
 void ServerItem::removeObserver(ServerItemObserver* o)
 {
-	std::vector<ServerItemObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it != observers_.end())
 	{
 		observers_.erase(it);

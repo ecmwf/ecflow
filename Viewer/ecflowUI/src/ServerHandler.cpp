@@ -154,7 +154,7 @@ ServerHandler::~ServerHandler()
 		delete comQueue_;
 
 	//Remove itself from the server vector
-	std::vector<ServerHandler*>::iterator it=std::find(servers_.begin(),servers_.end(),this);
+	auto it=std::find(servers_.begin(),servers_.end(),this);
 	if(it != servers_.end())
 		servers_.erase(it);
 
@@ -363,7 +363,7 @@ void ServerHandler::setActivity(Activity ac)
 
 ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port)
 {
-	ServerHandler* sh=new ServerHandler(name,host,port);
+	auto* sh=new ServerHandler(name,host,port);
     //Without the clinetinvoker we cannot use the serverhandler
     if(!sh->client_)
     {
@@ -375,7 +375,7 @@ ServerHandler* ServerHandler::addServer(const std::string& name,const std::strin
 
 void ServerHandler::removeServer(ServerHandler* server)
 {
-	std::vector<ServerHandler*>::iterator it=std::find(servers_.begin(), servers_.end(),server);
+	auto it=std::find(servers_.begin(), servers_.end(),server);
 	if(it != servers_.end())
 	{
 		ServerHandler *s=*it;
@@ -663,7 +663,7 @@ void ServerHandler::slotNodeChanged(const Node* nc,std::vector<ecf::Aspect::Type
 
 void ServerHandler::addNodeObserver(NodeObserver *obs)
 {
-	std::vector<NodeObserver*>::iterator it=std::find(nodeObservers_.begin(),nodeObservers_.end(),obs);
+	auto it=std::find(nodeObservers_.begin(),nodeObservers_.end(),obs);
 	if(it == nodeObservers_.end())
 	{
 		nodeObservers_.push_back(obs);
@@ -672,7 +672,7 @@ void ServerHandler::addNodeObserver(NodeObserver *obs)
 
 void ServerHandler::removeNodeObserver(NodeObserver *obs)
 {
-	std::vector<NodeObserver*>::iterator it=std::find(nodeObservers_.begin(),nodeObservers_.end(),obs);
+	auto it=std::find(nodeObservers_.begin(),nodeObservers_.end(),obs);
 	if(it != nodeObservers_.end())
 	{
 		nodeObservers_.erase(it);
@@ -736,7 +736,7 @@ void ServerHandler::slotDefsChanged(std::vector<ecf::Aspect::Type> aspect)
 
 void ServerHandler::addServerObserver(ServerObserver *obs)
 {
-	std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
+	auto it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
 	if(it == serverObservers_.end())
 	{
         serverObservers_.push_back(obs);
@@ -751,7 +751,7 @@ void ServerHandler::removeServerObserver(ServerObserver *obs)
 #ifdef __UI_SERVEROBSERVER_DEBUG
     UI_FUNCTION_LOG_S(this)
 #endif
-    std::vector<ServerObserver*>::iterator it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
+    auto it=std::find(serverObservers_.begin(),serverObservers_.end(),obs);
 	if(it != serverObservers_.end())
 	{
 		serverObservers_.erase(it);
@@ -798,7 +798,7 @@ void ServerHandler::broadcast(SoMethodV1 proc,const VServerChange& ch)
 
 void ServerHandler::addServerComObserver(ServerComObserver *obs)
 {
-    std::vector<ServerComObserver*>::iterator it=std::find(serverComObservers_.begin(),serverComObservers_.end(),obs);
+    auto it=std::find(serverComObservers_.begin(),serverComObservers_.end(),obs);
     if(it == serverComObservers_.end())
     {
         serverComObservers_.push_back(obs);
@@ -810,7 +810,7 @@ void ServerHandler::addServerComObserver(ServerComObserver *obs)
 
 void ServerHandler::removeServerComObserver(ServerComObserver *obs)
 {
-    std::vector<ServerComObserver*>::iterator it=std::find(serverComObservers_.begin(),serverComObservers_.end(),obs);
+    auto it=std::find(serverComObservers_.begin(),serverComObservers_.end(),obs);
     if(it != serverComObservers_.end())
     {
         serverComObservers_.erase(it);

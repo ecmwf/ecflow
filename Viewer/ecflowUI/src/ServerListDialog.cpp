@@ -238,11 +238,11 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
 	serverView->setModel(sortModel_);
 
 	//Add context menu actions to the view
-	QAction* sep1=new QAction(this);
+	auto* sep1=new QAction(this);
     sep1->setSeparator(true);
-    QAction* sep2=new QAction(this);
+    auto* sep2=new QAction(this);
     sep2->setSeparator(true);
-    QAction* sep3=new QAction(this);
+    auto* sep3=new QAction(this);
     sep3->setSeparator(true);
 
 	serverView->addAction(actionAdd);

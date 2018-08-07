@@ -76,7 +76,7 @@ VAttributeType* VLimiterAttr::type() const
 
 QStringList VLimiterAttr::data(bool /*firstLine*/) const
 {
-    static VLimiterAttrType* atype=static_cast<VLimiterAttrType*>(type());
+    static auto* atype=static_cast<VLimiterAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
@@ -101,7 +101,7 @@ void VLimiterAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     if(vnode->node_)
     {
         const std::vector<InLimit>& v=vnode->node_->inlimits();
-        int n=static_cast<int>(v.size());
+        auto n=static_cast<int>(v.size());
         for(int i=0; i < n; i++)
         {
             vec.push_back(new VLimiterAttr(vnode,v[i],i));

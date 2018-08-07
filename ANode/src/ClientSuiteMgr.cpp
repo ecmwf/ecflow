@@ -80,7 +80,7 @@ void ClientSuiteMgr::remove_client_suite(unsigned int client_handle)
 void ClientSuiteMgr::remove_client_suites(const std::string& user_to_drop)
 {
    bool did_drop = false;
-   for(std::vector<ecf::ClientSuites>::iterator i = clientSuites_.begin(); i!= clientSuites_.end(); ++i) {
+   for(auto i = clientSuites_.begin(); i!= clientSuites_.end(); ++i) {
       if ((*i).user() == user_to_drop) {
          did_drop = true;
          clientSuites_.erase(i--);

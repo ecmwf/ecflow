@@ -18,7 +18,7 @@ StringMatchTb::StringMatchTb(QWidget* parent) : QToolButton(parent)
    QIcon ic(QPixmap(":/viewer/edit.svg")); 
    setIcon(ic);
    setAutoRaise(true);
-   QMenu *menu=new QMenu(this);
+   auto *menu=new QMenu(this);
    menu->addAction("Contains"); //,StringMatchMode::ContainsMatch);
    menu->addAction("Matches"); //,StringMatchMode::WildcardMatch);
    menu->addAction("Regexp"); //,StringMatchMode::RegexpMatch);

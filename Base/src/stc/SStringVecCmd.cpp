@@ -23,7 +23,7 @@ using namespace boost;
 
 bool SStringVecCmd::equals(ServerToClientCmd* rhs) const
 {
-   SStringVecCmd* the_rhs = dynamic_cast<SStringVecCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<SStringVecCmd*>(rhs);
    if (!the_rhs) return false;
    if (vec_ != the_rhs->get_string_vec()) return false;
    return ServerToClientCmd::equals(rhs);

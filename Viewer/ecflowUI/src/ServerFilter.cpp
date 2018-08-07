@@ -67,7 +67,7 @@ void ServerFilter::removeServer(ServerItem *server)
 {
 	if(!server) return;
 
-	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),server);
+	auto it=std::find(items_.begin(),items_.end(),server);
 	if(it != items_.end())
 	{
 		//Remove the item from the filter. This should come
@@ -94,7 +94,7 @@ void ServerFilter::notifyServerItemDeletion(ServerItem *server)
 {
 	if(!server) return;
 
-	std::vector<ServerItem*>::iterator it=std::find(items_.begin(),items_.end(),server);
+	auto it=std::find(items_.begin(),items_.end(),server);
 	if(it != items_.end())
 	{
 		items_.erase(it);
@@ -197,7 +197,7 @@ void ServerFilter::broadcastChange(ServerItem *server)
 
 void ServerFilter::addObserver(ServerFilterObserver* o)
 {
-	std::vector<ServerFilterObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it == observers_.end())
 	{
 		observers_.push_back(o);
@@ -206,7 +206,7 @@ void ServerFilter::addObserver(ServerFilterObserver* o)
 
 void ServerFilter::removeObserver(ServerFilterObserver* o)
 {
-	std::vector<ServerFilterObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it != observers_.end())
 	{
 		observers_.erase(it);

@@ -67,7 +67,7 @@ VAttributeType* VUserVarAttr::type() const
 
 QStringList VUserVarAttr::data(bool /*firstLine*/) const
 {
-    static VUserVarAttrType* atype=static_cast<VUserVarAttrType*>(type());
+    static auto* atype=static_cast<VUserVarAttrType*>(type());
     QStringList s;
 
     //Node
@@ -119,7 +119,7 @@ void VUserVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         if(vnode->node_)
         {
             const std::vector<Variable>& v=vnode->node_->variables();
-            int n=static_cast<int>(v.size());
+            auto n=static_cast<int>(v.size());
             for(int i=0; i < n; i++)
             {
                 vec.push_back(new VUserVarAttr(vnode,v[i],i));
@@ -131,7 +131,7 @@ void VUserVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     {
         std::vector<Variable> v;
         vnode->variables(v);
-        int n=static_cast<int>(v.size());
+        auto n=static_cast<int>(v.size());
         for(int i=0; i < n; i++)
         {
             vec.push_back(new VUserVarAttr(vnode,v[i],i));

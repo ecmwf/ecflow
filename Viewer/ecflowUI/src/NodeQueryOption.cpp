@@ -70,7 +70,7 @@ NodeQueryOption* NodeQueryOptionFactory::create(VProperty *p)
         return 0;
 
     std::string type=p->param("type").toStdString();
-    std::map<std::string,NodeQueryOptionFactory*>::iterator j = makers->find(type);
+    auto j = makers->find(type);
     if(j != makers->end())
         return (*j).second->make(p);
 
@@ -203,7 +203,7 @@ QString NodeQueryStringOption::query() const
 
 void NodeQueryStringOption::swap(const NodeQueryOption* option)
 {
-    const NodeQueryStringOption* op=static_cast<const NodeQueryStringOption*>(option);
+    const auto* op=static_cast<const NodeQueryStringOption*>(option);
     Q_ASSERT(op);
 
     value_=op->value();
@@ -265,7 +265,7 @@ QString NodeQueryListOption::query(QString op) const
 
 void NodeQueryListOption::swap(const NodeQueryOption* option)
 {
-    const NodeQueryListOption* op=static_cast<const NodeQueryListOption*>(option);
+    const auto* op=static_cast<const NodeQueryListOption*>(option);
     Q_ASSERT(op);
     selection_=op->selection();
 }
@@ -337,7 +337,7 @@ void NodeQueryComboOption::setValue(QString val)
 
 void NodeQueryComboOption::swap(const NodeQueryOption* option)
 {
-    const NodeQueryComboOption* op=static_cast<const NodeQueryComboOption*>(option);
+    const auto* op=static_cast<const NodeQueryComboOption*>(option);
     Q_ASSERT(op);
     value_=op->value();
 }
@@ -454,7 +454,7 @@ QString NodeQueryPeriodOption::sqlQuery() const
 
 void NodeQueryPeriodOption::swap(const NodeQueryOption* option)
 {
-    const NodeQueryPeriodOption* op=static_cast<const NodeQueryPeriodOption*>(option);
+    const auto* op=static_cast<const NodeQueryPeriodOption*>(option);
     Q_ASSERT(op);
 
     if(op->mode_ == LastPeriodMode)

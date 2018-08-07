@@ -46,7 +46,7 @@ void ClientSuites::add_suite(const std::string& s)
       add_suite(suite);
    }
    else  {
-      std::vector<HSuite>::iterator i = find_suite(s);
+      auto i = find_suite(s);
       if (i != suites_.end()) {
          (*i).weak_suite_ptr_ = weak_suite_ptr();
       }
@@ -61,7 +61,7 @@ void ClientSuites::add_suite(suite_ptr suite)
    if (suite.get()) {
 
       // *IMPORTANT* update weak_suite_ptr_
-      std::vector<HSuite>::iterator i = find_suite(suite->name());
+      auto i = find_suite(suite->name());
       if (i != suites_.end()) {
          (*i).weak_suite_ptr_ = weak_suite_ptr(suite);
       }
@@ -80,7 +80,7 @@ void ClientSuites::add_suite(suite_ptr suite)
 
 void ClientSuites::remove_suite(const std::string& s)
 {
-   std::vector<HSuite>::iterator i = find_suite(s);
+   auto i = find_suite(s);
    if (i != suites_.end()) {
       if ( (*i).weak_suite_ptr_.lock().get() ) {
          handle_changed_ = true;
@@ -92,7 +92,7 @@ void ClientSuites::remove_suite(const std::string& s)
 bool ClientSuites::remove_suite(suite_ptr suite)
 {
    if (suite.get()) {
-      std::vector<HSuite>::iterator i = find_suite(suite->name());
+      auto i = find_suite(suite->name());
       if (i != suites_.end()) {
          handle_changed_ = true;
          suites_.erase(i);
@@ -108,7 +108,7 @@ void ClientSuites::suite_added_in_defs(suite_ptr suite)
    if (auto_add_new_suites_)  add_suite(suite);
    else {
       // *IF* and *ONLY IF* the suite was previously registered added, *UPDATE* its suite_ptr
-      std::vector<HSuite>::iterator i = find_suite(suite->name());
+      auto i = find_suite(suite->name());
       if (i != suites_.end()) {
          // previously registered suite, update
          add_suite(suite);
@@ -121,7 +121,7 @@ void ClientSuites::suite_deleted_in_defs(suite_ptr suite)
    // Deleted suites are *NOT* automatically removed
    // They have to be moved explicitly by the user. Reset to weak ptr
    if (suite.get()) {
-      std::vector<HSuite>::iterator i = find_suite(suite->name());
+      auto i = find_suite(suite->name());
       if (i != suites_.end()) {
          handle_changed_ = true;
          modify_change_no_ = Ecf::modify_change_no();  // need to pass back to client
@@ -148,10 +148,10 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const
    handle_changed_ = false;
 
    // If the user has registered *ALL* the suites just return the server defs
-   std::vector<HSuite>::const_iterator suites_end = suites_.end();
+   auto suites_end = suites_.end();
    if (suites_.size() == server_defs->suiteVec().size()) {
       size_t real_suite_count = 0;
-      for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; ++i) {
+      for(auto i = suites_.begin(); i != suites_end; ++i) {
          suite_ptr suite = (*i).weak_suite_ptr_.lock();
          if (suite.get()) real_suite_count++;
       }
@@ -192,7 +192,7 @@ defs_ptr ClientSuites::create_defs(defs_ptr server_defs) const
    the_max_modify_change_no = std::max( the_max_modify_change_no,  modify_change_no_  );
 
    // Suites should already be in order
-   for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; ++i) {
+   for(auto i = suites_.begin(); i != suites_end; ++i) {
       suite_ptr suite = (*i).weak_suite_ptr_.lock();
       if (suite.get()) {
 
@@ -256,8 +256,8 @@ void ClientSuites::max_change_no(unsigned int& the_max_state_change_no,unsigned 
 void ClientSuites::suites(std::vector<std::string>& names) const
 {
    names.reserve(suites_.size());
-   std::vector<HSuite>::const_iterator suites_end = suites_.end();
-   for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; ++i) {
+   auto suites_end = suites_.end();
+   for(auto i = suites_.begin(); i != suites_end; ++i) {
        names.push_back( (*i).name_ );
    }
 }
@@ -272,8 +272,8 @@ std::string ClientSuites::dump() const
    ss << "  handle(" << handle() << ") user(" << user_ << ") auto_add_new_suites(" << auto_add_new_suites_
       << ") suites_.size(" << suites_.size() << ") suites(";
 
-   std::vector<HSuite>::const_iterator suites_end = suites_.end();
-   for(std::vector<HSuite>::const_iterator i = suites_.begin(); i != suites_end; ++i) {
+   auto suites_end = suites_.end();
+   for(auto i = suites_.begin(); i != suites_end; ++i) {
       suite_ptr suite = (*i).weak_suite_ptr_.lock();
       if (suite.get()) {
          ss << " " << suite->name();
@@ -292,8 +292,8 @@ void ClientSuites::update_suite_order()
    const std::vector<suite_ptr>& server_suite_vec = defs_->suiteVec();
    size_t server_suite_vec_size = server_suite_vec.size();
 
-   std::vector<HSuite>::iterator suites_end = suites_.end();
-   for(std::vector<HSuite>::iterator i = suites_.begin(); i != suites_end; ++i) {
+   auto suites_end = suites_.end();
+   for(auto i = suites_.begin(); i != suites_end; ++i) {
       for(size_t s = 0;  s < server_suite_vec_size; s++) {
          if ((*i).name_ == server_suite_vec[s]->name()) {
             (*i).index_ = static_cast<int>(s);
@@ -311,8 +311,8 @@ void ClientSuites::update_suite_order()
 
 std::vector<HSuite>::iterator ClientSuites::find_suite(const std::string& name)
 {
-   std::vector<HSuite>::iterator suites_end = suites_.end();
-   for(std::vector<HSuite>::iterator i = suites_.begin(); i != suites_end; ++i) {
+   auto suites_end = suites_.end();
+   for(auto i = suites_.begin(); i != suites_end; ++i) {
       if ((*i).name_ == name) {
          return i;
       }

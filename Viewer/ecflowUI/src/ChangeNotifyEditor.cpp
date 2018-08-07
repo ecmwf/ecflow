@@ -105,7 +105,7 @@ void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidg
 	model_->add(label,propLst);
 
 	QWidget* w=new QWidget(this);
-	QVBoxLayout* vb=new QVBoxLayout();
+	auto* vb=new QVBoxLayout();
 	vb->setContentsMargins(0,5,0,5);
 	w->setLayout(vb);
 	vb->addWidget(stackContents);
@@ -331,7 +331,7 @@ int ChangeNotifyEditorModel::lineToRow(PropertyLine* line) const
 
 void ChangeNotifyEditorModel::slotEnabledChanged(QVariant v)
 {
-	PropertyLine *line=static_cast<PropertyLine*>(sender());
+	auto *line=static_cast<PropertyLine*>(sender());
 	assert(line);
 
 	int row=lineToRow(line);
@@ -350,7 +350,7 @@ void ChangeNotifyEditorModel::slotEnabledChanged(QVariant v)
 
 void ChangeNotifyEditorModel::slotEnabledMasterChanged(bool b)
 {
-	PropertyLine *line=static_cast<PropertyLine*>(sender());
+	auto *line=static_cast<PropertyLine*>(sender());
 	assert(line);
 
 	int row=lineToRow(line);

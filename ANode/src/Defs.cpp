@@ -253,9 +253,9 @@ static void remove_autocancelled(const std::vector<node_ptr>& auto_cancelled_nod
 {
    // Permanently remove any auto-cancelled nodes.
    if ( !auto_cancelled_nodes.empty() ) {
-      std::vector<node_ptr>::const_iterator theNodeEnd = auto_cancelled_nodes.end();
+      auto theNodeEnd = auto_cancelled_nodes.end();
       string msg;
-      for(std::vector<node_ptr>::const_iterator n = auto_cancelled_nodes.begin(); n != theNodeEnd; ++n) {
+      for(auto n = auto_cancelled_nodes.begin(); n != theNodeEnd; ++n) {
          // If we have two autocancel in the hierarchy, with same attributes. Then
          // (*n)->remove() on the second will fail( with a crash, SuiteChanged0 destructor,  no suite pointer)
          // since it would already be detached. See ECFLOW-556
@@ -272,8 +272,8 @@ static void remove_autocancelled(const std::vector<node_ptr>& auto_cancelled_nod
 static void auto_archive(const std::vector<node_ptr>& auto_archive_nodes)
 {
    if ( !auto_archive_nodes.empty() ) {
-      std::vector<node_ptr>::const_iterator theNodeEnd = auto_archive_nodes.end();
-      for(std::vector<node_ptr>::const_iterator n = auto_archive_nodes.begin(); n != theNodeEnd; ++n) {
+      auto theNodeEnd = auto_archive_nodes.end();
+      for(auto n = auto_archive_nodes.begin(); n != theNodeEnd; ++n) {
          // If we have two auto archive in the hierarchy, with same attributes. Then
          // By checking we can still reach the Defs we know we are not detached
          NodeContainer* nc = (*n)->isNodeContainer();
@@ -425,7 +425,7 @@ void Defs::add_suite_only(suite_ptr s, size_t position)
 
 suite_ptr Defs::removeSuite(suite_ptr s)
 {
-	std::vector<suite_ptr>::iterator i = std::find(suiteVec_.begin(), suiteVec_.end(),s);
+	auto i = std::find(suiteVec_.begin(), suiteVec_.end(),s);
  	if ( i != suiteVec_.end()) {
  	   s->set_defs(NULL);              // allows suite to added to different defs
 		suiteVec_.erase(i);             // iterator invalidated
@@ -628,8 +628,8 @@ std::ostream& Defs::print(std::ostream& os) const
 
    // In PrintStyle::MIGRATE we do NOT persist the externs. (+matches boost serialisation)
    if (PrintStyle::getStyle() != PrintStyle::MIGRATE) {
-      set<string>::const_iterator extern_end = externs_.end();
-      for(set<string>::const_iterator i = externs_.begin(); i != extern_end; ++i) {
+      auto extern_end = externs_.end();
+      for(auto i = externs_.begin(); i != extern_end; ++i) {
          os << "extern " << *i << "\n";
       }
    }
@@ -1008,8 +1008,8 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
 {
 //	std::cout << "Defs::doDeleteChild nodeToBeDeleted   = " << nodeToBeDeleted->debugNodePath() << "\n";
 
-	std::vector<suite_ptr>::iterator theSuiteEnd = suiteVec_.end();
- 	for(std::vector<suite_ptr>::iterator s = suiteVec_.begin(); s!=theSuiteEnd; ++s) {
+	auto theSuiteEnd = suiteVec_.end();
+ 	for(auto s = suiteVec_.begin(); s!=theSuiteEnd; ++s) {
  		if ( (*s).get() == nodeToBeDeleted) {
   		 	Ecf::incr_modify_change_no();
   		 	client_suite_mgr_.suite_deleted_in_defs(*s); // must be after Ecf::incr_modify_change_no();
@@ -1021,7 +1021,7 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
  	}
 
  	// recurse down only if we did not remove the suite
- 	for(std::vector<suite_ptr>::iterator s = suiteVec_.begin(); s!=theSuiteEnd; ++s) {
+ 	for(auto s = suiteVec_.begin(); s!=theSuiteEnd; ++s) {
  		// SuiteChanged is called within doDeleteChild
  		if ((*s)->doDeleteChild(nodeToBeDeleted)) {
  			return true;
@@ -1379,7 +1379,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 {
 	switch (ord) {
 		case NOrder::TOP:  {
-			for(std::vector<suite_ptr>::iterator i = suiteVec_.begin(); i != suiteVec_.end(); ++i) {
+			for(auto i = suiteVec_.begin(); i != suiteVec_.end(); ++i) {
 				suite_ptr s = (*i);
 				if (s.get() == immediateChild) {
 					suiteVec_.erase(i);
@@ -1392,7 +1392,7 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
          throw std::runtime_error("Defs::order: TOP, immediate child suite not found");
 		}
 		case NOrder::BOTTOM:  {
-			for(std::vector<suite_ptr>::iterator i = suiteVec_.begin(); i != suiteVec_.end(); ++i) {
+			for(auto i = suiteVec_.begin(); i != suiteVec_.end(); ++i) {
 				suite_ptr s = (*i);
 				if (s.get() == immediateChild) {
 					suiteVec_.erase(i);
@@ -1656,7 +1656,7 @@ void Defs::set_memento( const FlagMemento* memento,std::vector<ecf::Aspect::Type
 
 void Defs::add_edit_history(const std::string& path, const std::string& request)
 {
-   std::map<std::string, std::deque<std::string> >::iterator i = edit_history_.find(path);
+   auto i = edit_history_.find(path);
    if (i == edit_history_.end()) {
       std::deque<std::string> vec; vec.push_back(request);
       edit_history_.insert( std::make_pair(path,vec) );
@@ -1671,7 +1671,7 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
 
 const std::deque<std::string>& Defs::get_edit_history(const std::string& path) const
 {
-   std::map<std::string, std::deque<std::string> >::const_iterator i = edit_history_.find(path);
+   auto i = edit_history_.find(path);
    if (i != edit_history_.end()) {
       return (*i).second;
    }

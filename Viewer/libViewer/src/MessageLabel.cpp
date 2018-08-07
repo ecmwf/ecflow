@@ -87,24 +87,24 @@ MessageLabel::MessageLabel(QWidget *parent) :
     progLabel_=new QLabel(this);
     progBar_=new QProgressBar(this);
     progWidget_=new QWidget(this);
-    QHBoxLayout* progLayout=new QHBoxLayout(progWidget_);
+    auto* progLayout=new QHBoxLayout(progWidget_);
     progLayout->addWidget(progBar_);
     progLayout->addWidget(progLabel_);
 
 	layout_=new QHBoxLayout(this);
 	layout_->setContentsMargins(2,2,2,2);	    
 
-    QVBoxLayout *loadLayout=new QVBoxLayout();
+    auto *loadLayout=new QVBoxLayout();
     loadLayout->addWidget(loadLabel_);
     loadLayout->addStretch(1);
     layout_->addLayout(loadLayout);
 
-    QVBoxLayout *pixLayout=new QVBoxLayout();
+    auto *pixLayout=new QVBoxLayout();
     pixLayout->addWidget(pixLabel_);
     pixLayout->addStretch(1);
     layout_->addLayout(pixLayout);
 
-    QVBoxLayout* rightVb=new QVBoxLayout;
+    auto* rightVb=new QVBoxLayout;
     rightVb->addWidget(msgLabel_);
     rightVb->addWidget(progWidget_);
     rightVb->addStretch(1);

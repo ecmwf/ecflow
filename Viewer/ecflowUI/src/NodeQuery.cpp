@@ -96,7 +96,7 @@ NodeQuery* NodeQuery::clone()
 
 NodeQuery* NodeQuery::clone(const std::string& name)
 {
-	NodeQuery *q=new NodeQuery(name);
+	auto *q=new NodeQuery(name);
 	q->swap(this);
 
 	return q;
@@ -248,7 +248,7 @@ QStringList NodeQuery::attrSelection() const
 {
     NodeQueryOption *a=options_["attribute"];
     Q_ASSERT(a);
-    NodeQueryListOption* op=static_cast<NodeQueryListOption*>(a);
+    auto* op=static_cast<NodeQueryListOption*>(a);
     Q_ASSERT(op);
     return op->selection();
 }
@@ -428,7 +428,7 @@ void NodeQuery::load(VSettings* vs)
 	advanced_=vs->getAsBool("advanced",advanced_);
 	caseSensitive_=vs->getAsBool("case",caseSensitive_);
 
-	int maxNum=vs->get<int>("maxNum",maxNum_);
+	auto maxNum=vs->get<int>("maxNum",maxNum_);
 	if(maxNum_ > 1 && maxNum < 5000000)
 		maxNum_=maxNum;
 

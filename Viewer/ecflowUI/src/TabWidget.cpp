@@ -38,12 +38,12 @@ TabWidget::TabWidget(QWidget* parent) :
 		beingCleared_(false)
 {
 	//Main layout
-	QVBoxLayout* layout = new QVBoxLayout(this);
+	auto* layout = new QVBoxLayout(this);
 	layout->setSpacing(0);
 	layout->setContentsMargins(0, 0, 0, 0);
 
 	//Horizontal layout for the tab bar
-	QHBoxLayout* hb = new QHBoxLayout(this);
+	auto* hb = new QHBoxLayout(this);
 	hb->setSpacing(0);
 	hb->setContentsMargins(0, 0, 0, 0);
 	layout->addLayout(hb);
@@ -287,7 +287,7 @@ void TabWidget::setTabIcon(int index, QPixmap pix)
 {
 	if (index >= 0 && index < bar_->count())
 	{
-        QLabel *lab=static_cast<QLabel*>(bar_->tabButton(index,QTabBar::RightSide));
+        auto *lab=static_cast<QLabel*>(bar_->tabButton(index,QTabBar::RightSide));
         if(!lab)
         {
             lab=new QLabel();
@@ -371,11 +371,11 @@ void TabWidget::checkTabStatus()
 
 void TabWidget::slotTabList()
 {
-    QMenu* menu=new QMenu(tabListTb_);
+    auto* menu=new QMenu(tabListTb_);
 
     for(int i=0; i < bar_->count(); i++)
     {
-        QAction *ac=new QAction(menu);
+        auto *ac=new QAction(menu);
         ac->setText(bar_->tabWhatsThis(i));
         ac->setIcon(bar_->tabData(i).value<QIcon>());
         ac->setData(i);

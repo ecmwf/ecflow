@@ -107,7 +107,7 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type,bool userAdded
 	}
 	else if(type == "info")
 	{
-        InfoPanel* ctl=new InfoPanel(this);
+        auto* ctl=new InfoPanel(this);
 
         connect(ctl,SIGNAL(popInfoPanel(VInfo_ptr,QString)),
                 this,SLOT(slotPopInfoPanel(VInfo_ptr,QString)));
@@ -133,7 +133,7 @@ DashboardWidget* Dashboard::addWidgetCore(const std::string& type,bool userAdded
 
 void Dashboard::slotSelectionChanged(VInfo_ptr info)
 {
-    DashboardWidget* s=static_cast<DashboardWidget*>(sender());
+    auto* s=static_cast<DashboardWidget*>(sender());
 
     Q_FOREACH(DashboardWidget* dw,widgets_)
     {
@@ -176,7 +176,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type)
 		VInfo_ptr info=currentSelectionInView();
 		if(info && info.get())
 		{
-			if(InfoPanel* ip=static_cast<InfoPanel*>(w))
+			if(auto* ip=static_cast<InfoPanel*>(w))
 			{
 				ip->slotReload(info);
 			}
@@ -200,7 +200,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 	widgets_ << w;
 
     //Create a dockwidget
-	DashboardDock *dw = new DashboardDock(w, this);
+	auto *dw = new DashboardDock(w, this);
 
     dw->setAllowedAreas(Qt::RightDockWidgetArea);
 
@@ -229,7 +229,7 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 	//The DashBoard or any of its children cannot be the parent of the
 	//dialog because in this case it would be always on top its parent. This is
 	//the behaviour when the dialog's parent is QMainWindow.
-	DashboardDialog* dia=new DashboardDialog(0);
+	auto* dia=new DashboardDialog(0);
 
     //So the parent is 0 and we will emit a signal from the Dashboard
     //destructor to notify the dialog about the deletion. Then we can be
@@ -254,7 +254,7 @@ void Dashboard::addSearchDialog()
 {
 	//It will delete itself on close!!
 	//The parent is 0, for the reason see the comment in addDialog()
-	NodeSearchDialog* d=new NodeSearchDialog(0);
+	auto* d=new NodeSearchDialog(0);
 	d->queryWidget()->setServerFilter(serverFilter_);
 
     connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
@@ -274,7 +274,7 @@ void Dashboard::addSearchDialog(VInfo_ptr info)
 {
 	//It will delete itself on close!!
 	//The parent is 0, for the reason see the comment in addDialog()
-	NodeSearchDialog* d=new NodeSearchDialog(0);
+	auto* d=new NodeSearchDialog(0);
 	d->queryWidget()->setServerFilter(serverFilter_);
 	d->queryWidget()->setRootNode(info);
 
@@ -293,9 +293,9 @@ void Dashboard::addSearchDialog(VInfo_ptr info)
 
 void Dashboard::slotDockClose()
 {
-	if(DashboardDock *dock=static_cast<DashboardDock*>(sender()))
+	if(auto *dock=static_cast<DashboardDock*>(sender()))
 	{
-		if(DashboardWidget* dw=static_cast<DashboardWidget*>(dock->widget()))
+		if(auto* dw=static_cast<DashboardWidget*>(dock->widget()))
 		{
 			widgets_.removeOne(dw);
 			disconnect(this,0,dw,0);
@@ -326,7 +326,7 @@ void Dashboard::slotPopInfoPanel(QString name)
 {
 	if(DashboardWidget *dw=addDialog("info"))
 	{
-		if(InfoPanel* ip=static_cast<InfoPanel*>(dw))
+		if(auto* ip=static_cast<InfoPanel*>(dw))
 		{
             ip->setDetached(true);
 			ip->setCurrent(name.toStdString());
@@ -340,7 +340,7 @@ void Dashboard::slotPopInfoPanel(VInfo_ptr info,QString name)
 {
 	if(DashboardWidget *dw=addDialog("info"))
 	{
-		if(InfoPanel* ip=static_cast<InfoPanel*>(dw))
+		if(auto* ip=static_cast<InfoPanel*>(dw))
 		{
             //ip->setDetached(true);
             ip->slotReload(info);
@@ -384,7 +384,7 @@ void Dashboard::slotMaximisedChanged(DashboardWidget* w)
                 d->setVisible(true);
             else
             {
-                DashboardWidget* dw=static_cast<DashboardWidget*>(d->widget());
+                auto* dw=static_cast<DashboardWidget*>(d->widget());
                 Q_ASSERT(dw);
                 dw->resetMaximised();
                 d->setVisible(false);
@@ -424,7 +424,7 @@ void Dashboard::resetMaximised()
     QList<DashboardDock*> dLst=findChildren<DashboardDock*>(QString());
     Q_FOREACH(DashboardDock* d,dLst)
     {
-        DashboardWidget* dw=static_cast<DashboardWidget*>(d->widget());
+        auto* dw=static_cast<DashboardWidget*>(d->widget());
         Q_ASSERT(dw);
         dw->resetMaximised();
         d->setVisible(true);
@@ -450,7 +450,7 @@ void Dashboard::checkMaximisedState()
 
 void Dashboard::slotDialogFinished(int)
 {
-	if(DashboardDialog* dia=static_cast<DashboardDialog*>(sender()))
+	if(auto* dia=static_cast<DashboardDialog*>(sender()))
 	{
 		disconnect(this,0,dia->dashboardWidget(),0);
         popupWidgets_.removeOne(dia->dashboardWidget());
@@ -459,7 +459,7 @@ void Dashboard::slotDialogFinished(int)
 
 void Dashboard::slotDialogClosed()
 {
-    if(DashboardDialog* dia=static_cast<DashboardDialog*>(sender()))
+    if(auto* dia=static_cast<DashboardDialog*>(sender()))
     {
         disconnect(this,0,dia->dashboardWidget(),0);
         popupWidgets_.removeOne(dia->dashboardWidget());
@@ -544,7 +544,7 @@ void Dashboard::readSettings(VComboSettings* vs)
 	}
 
 	//Read the information about the dashboard widgets.
-	int cnt=vs->get<int>("widgetCount",0);
+	auto cnt=vs->get<int>("widgetCount",0);
 	for(int i=0; i < cnt; i++)
 	{
 		std::string id=Dashboard::widgetSettingsId(i);

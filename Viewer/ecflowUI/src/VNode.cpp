@@ -253,7 +253,7 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
     if(filter)
     {
         int n=0;
-        int cnt=static_cast<int>(attr_.size());
+        auto cnt=static_cast<int>(attr_.size());
         if(row >= cnt)
             return 0;
 
@@ -281,7 +281,7 @@ VAttribute* VNode::attributeForType(int row,VAttributeType *t) const
 {
     assert(row>=0);
 
-    int cnt=static_cast<int>(attr_.size());
+    auto cnt=static_cast<int>(attr_.size());
     if(row >= cnt)
         return 0;
 
@@ -312,7 +312,7 @@ int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
     if(filter)
     {
         int n=0;
-        int cnt=static_cast<int>(attr_.size());
+        auto cnt=static_cast<int>(attr_.size());
         for(int i=0; i < cnt; i++)
         {
             if(filter->isSet(attr_[i]->type())  || filter->forceShowAttr() == attr_[i]  )
@@ -326,7 +326,7 @@ int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
     }
     else
     {        
-        int cnt=static_cast<int>(attr_.size());
+        auto cnt=static_cast<int>(attr_.size());
         for(int i=0; i < cnt; i++)
         {
             if(a == attr_[i])
@@ -348,7 +348,7 @@ VAttribute* VNode::findAttribute(VAttributeType *t,const std::string& name)
 {
     Q_ASSERT(t);
 
-    int cnt=static_cast<int>(attr_.size());
+    auto cnt=static_cast<int>(attr_.size());
     bool hasType=false;
     for(int i=0; i < cnt; i++)
     {
@@ -399,7 +399,7 @@ void VNode::addChild(VNode* vn)
 
 void VNode::removeChild(VNode* vn)
 {
-	std::vector<VNode*>::iterator it=std::find(children_.begin(),children_.end(),vn);
+	auto it=std::find(children_.begin(),children_.end(),vn);
 	if(it != children_.end())
 	{
 		children_.erase(it);

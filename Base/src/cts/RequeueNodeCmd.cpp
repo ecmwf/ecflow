@@ -29,7 +29,7 @@ namespace po = boost::program_options;
 
 bool RequeueNodeCmd::equals(ClientToServerCmd* rhs) const
 {
-	RequeueNodeCmd* the_rhs = dynamic_cast< RequeueNodeCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< RequeueNodeCmd* > ( rhs );
 	if ( !the_rhs ) return false;
 	if (paths_ != the_rhs->paths()) return false;
 	if (option_ != the_rhs->option()) return false;

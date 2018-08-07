@@ -26,7 +26,7 @@ TriggerListCollector::~TriggerListCollector()
 
 bool TriggerListCollector::add(VItem* t, VItem* dep,Mode mode)
 {
-    TriggerListItem *item=new TriggerListItem(t,dep,mode) ;
+    auto *item=new TriggerListItem(t,dep,mode) ;
     items_.push_back(item);
     return true;
 

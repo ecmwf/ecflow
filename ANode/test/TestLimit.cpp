@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( test_limit_basics )
 	for(int i = 9; i >= 1; i--) {
 	   std::string path = boost::lexical_cast<std::string>(i);
 		l1.decrement(1,path);
-		std::set<std::string>::iterator iter = expected_paths.find(path); expected_paths.erase(iter);
+		auto iter = expected_paths.find(path); expected_paths.erase(iter);
 
  		if (l1.paths() != expected_paths) {
  			std::cout << " Expected:";

@@ -219,7 +219,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 
 static void test_persistence(const Defs& theFixtureDefs )
 {
-	Defs* fixtureDefs = const_cast<Defs*>(&theFixtureDefs);
+	auto* fixtureDefs = const_cast<Defs*>(&theFixtureDefs);
 	fixtureDefs->clear_externs();       // server does not have externs
 	MockServer mockServer(fixtureDefs); // creates shared ptr with a NULL deleter
 

@@ -216,9 +216,9 @@ bool PasswdFile::validateVersionNumber(const std::string& line, std::string& err
       }
 
       try {
-         int major = boost::lexical_cast< int >( versionNumberTokens[0] );
-         int minor = boost::lexical_cast< int >( versionNumberTokens[1] );
-         int part = boost::lexical_cast< int >( versionNumberTokens[2] );
+         auto major = boost::lexical_cast< int >( versionNumberTokens[0] );
+         auto minor = boost::lexical_cast< int >( versionNumberTokens[1] );
+         auto part = boost::lexical_cast< int >( versionNumberTokens[2] );
          if ( major < 4  ) {
             errorMsg += "Only passwd files with a version >= 4.5.0 is supported\n";
             return false;

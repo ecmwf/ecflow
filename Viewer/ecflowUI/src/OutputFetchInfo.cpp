@@ -21,7 +21,7 @@
 
 OutputFetchInfo::OutputFetchInfo(QWidget* parent) : QWidget(parent)
 {
-    QVBoxLayout *vb=new QVBoxLayout(this);
+    auto *vb=new QVBoxLayout(this);
     label_=new QLabel(this);
     label_->setText("<b>Additional information</b>");
 

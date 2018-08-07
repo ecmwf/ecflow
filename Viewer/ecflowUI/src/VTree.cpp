@@ -276,7 +276,7 @@ void VTree::remove(VTreeNode* node)
 {
     VTreeNode* p=node->parent();
     assert(p);
-    std::vector<VTreeNode*>::iterator it=std::find(p->children_.begin(),p->children_.end(),node);
+    auto it=std::find(p->children_.begin(),p->children_.end(),node);
     assert(it != p->children_.end());
     if(it != p->children_.end())
     {
@@ -297,7 +297,7 @@ void VTree::remove(VTreeNode* node)
 VTreeNode* VTree::makeBranch(const std::vector<VNode*>& filter,VTreeNode* parentNode)
 {
     VNode* vnode=parentNode->vnode();
-    VTreeNode *branch=new VTreeNode(vnode,0);
+    auto *branch=new VTreeNode(vnode,0);
 
     assert(filter[vnode->index()] != NULL);
 
@@ -339,7 +339,7 @@ VTreeNode* VTree::makeTopLevelBranch(const std::vector<VNode*>& filter,VNode* su
 {
     assert(suite);
     assert(suite->isSuite());
-    VTreeSuiteNode *branch=new VTreeSuiteNode(suite,0);
+    auto *branch=new VTreeSuiteNode(suite,0);
 
     for(int i=0; i < suite->numOfChildren();i++)
     {
@@ -360,7 +360,7 @@ void VTree::insertTopLevelBranch(VTreeNode* branch,int index)
 
     if(index < numOfChildren())
     {
-        std::vector<VTreeNode*>::iterator it=children_.begin();
+        auto it=children_.begin();
         children_.insert(it+index,branch);
     }
     else

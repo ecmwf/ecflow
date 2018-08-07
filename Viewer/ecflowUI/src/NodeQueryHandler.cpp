@@ -34,14 +34,14 @@ NodeQueryHandler* NodeQueryHandler::instance()
 
 NodeQuery* NodeQueryHandler::add(const std::string& name)
 {
-	NodeQuery *item=new NodeQuery(name);
+	auto *item=new NodeQuery(name);
 	items_.push_back(item);
 	return item;
 }
 
 NodeQuery* NodeQueryHandler::add(const std::string& name,const std::string& query)
 {
-	NodeQuery *item=new NodeQuery(name);
+	auto *item=new NodeQuery(name);
 	items_.push_back(item);
 	return item;
 }

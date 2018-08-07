@@ -85,7 +85,7 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
 
 bool ReplaceNodeCmd::equals(ClientToServerCmd* rhs) const
 {
-	ReplaceNodeCmd* the_rhs = dynamic_cast<ReplaceNodeCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<ReplaceNodeCmd*>(rhs);
 	if (!the_rhs)  return false;
 	if (!UserCmd::equals(rhs))  return false;
 	if (createNodesAsNeeded_ != the_rhs->createNodesAsNeeded()) { return false; }

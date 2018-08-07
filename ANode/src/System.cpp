@@ -210,8 +210,8 @@ static void catch_child(int sig)
 	//  - returns -1 on error
 	while ( (child_pid = waitpid( -1, &status, WNOHANG )) != -1 && child_pid != 0) {
 
-	   std::vector<Process>::iterator theEnd = processVec_.end();
-	   for(std::vector<Process>::iterator i = processVec_.begin(); i!= theEnd; ++i) {
+	   auto theEnd = processVec_.end();
+	   for(auto i = processVec_.begin(); i!= theEnd; ++i) {
 	      if ((*i).pid_ == child_pid) {
 
 #ifdef DEBUG_CATCH_CHILD

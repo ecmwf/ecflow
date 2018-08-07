@@ -104,7 +104,7 @@ LimitEditor::~LimitEditor()
 
 void LimitEditor::buildList(VAttribute *a)
 {
-    VLimitAttr* lim=static_cast<VLimitAttr*>(a);
+    auto* lim=static_cast<VLimitAttr*>(a);
     Q_ASSERT(lim);
 
     model_=new QStringListModel(this);
@@ -188,7 +188,7 @@ void LimitEditor::remove(bool all)
 
     VAttribute* a=info_->attribute();
     Q_ASSERT(a);
-    VLimitAttr* lim=static_cast<VLimitAttr*>(a);
+    auto* lim=static_cast<VLimitAttr*>(a);
     Q_ASSERT(lim);
 
     if(all)
@@ -220,7 +220,7 @@ void LimitEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect)
     {
         VAttribute* a=info_->attribute();
         Q_ASSERT(a);
-        VLimitAttr* lim=static_cast<VLimitAttr*>(a);
+        auto* lim=static_cast<VLimitAttr*>(a);
         Q_ASSERT(lim);
 
         QStringList aData=a->data();

@@ -341,7 +341,7 @@ bool ExpandState::needToExpandNewChild(ExpandStateNode* expandNode,const std::st
     //expand recursively all the new expand node
     std::vector<ExpandStateNode*> parents;
     collectParents(expandNodePath,parents);
-    for(std::vector<ExpandStateNode*>::reverse_iterator it=parents.rbegin();
+    for(auto it=parents.rbegin();
         it != parents.rend(); ++it)
     {
         if((*it)->expandedAll_ ==  1)

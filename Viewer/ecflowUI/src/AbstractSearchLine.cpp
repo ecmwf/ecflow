@@ -71,7 +71,7 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
 	// we have to add CTRL-G ourselves.
 
 	QKeySequence ctrlg(tr("Ctrl+G"));
-    QShortcut *shortcut = new QShortcut(ctrlg, parent); // should be destroyed by parent
+    auto *shortcut = new QShortcut(ctrlg, parent); // should be destroyed by parent
     connect(shortcut, SIGNAL(activated()), this, SLOT(slotFindNext()));
 
 	status_=true;
@@ -82,7 +82,7 @@ AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
 	caseSensitive_ = false;
 	wholeWords_    = false;
 	highlightAll_  = false;
-	QMenu *menu=new QMenu(this);
+	auto *menu=new QMenu(this);
 	menu->addAction(actionCaseSensitive_);
 	menu->addAction(actionWholeWords_);
 	menu->addAction(actionHighlightAll_);

@@ -36,7 +36,7 @@ std::ostream& GroupSTCCmd::print(std::ostream& os) const
 
 bool GroupSTCCmd::equals(ServerToClientCmd* rhs) const
 {
-	GroupSTCCmd* the_rhs = dynamic_cast< GroupSTCCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< GroupSTCCmd* > ( rhs );
 	if ( !the_rhs ) return false;
 
  	const std::vector<STC_Cmd_ptr>& rhsCmdVec = the_rhs->cmdVec();

@@ -124,7 +124,7 @@ QString  VServerSettings::stringValue(Param par) const
 
 VProperty* VServerSettings::property(Param par) const
 {
-	std::map<Param,VProperty*>::const_iterator it=parToProp_.find(par);
+	auto it=parToProp_.find(par);
 	if(it != parToProp_.end())
 	{
 		return it->second;
@@ -139,7 +139,7 @@ VProperty* VServerSettings::property(Param par) const
 
 void VServerSettings::notifyChange(VProperty* p)
 {
-	std::map<VProperty*,Param>::iterator it=propToPar_.find(p);
+	auto it=propToPar_.find(p);
 	if(it != propToPar_.end())
 	{
 		server_->confChanged(it->second,it->first);

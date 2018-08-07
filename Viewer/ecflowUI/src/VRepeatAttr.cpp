@@ -204,7 +204,7 @@ int VRepeatAttr::step() const
 
 QStringList VRepeatAttr::data(bool /*firstLine*/) const
 {
-    static VRepeatAttrType* atype=static_cast<VRepeatAttrType*>(type());
+    static auto* atype=static_cast<VRepeatAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {

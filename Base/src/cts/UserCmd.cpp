@@ -37,7 +37,7 @@ using namespace ecf;
 
 bool UserCmd::equals(ClientToServerCmd* rhs) const
 {
-   UserCmd* the_rhs = dynamic_cast< UserCmd* > ( rhs );
+   auto* the_rhs = dynamic_cast< UserCmd* > ( rhs );
    if ( !the_rhs ) return false;
    return user_ == the_rhs->user();
 }

@@ -286,7 +286,7 @@ ChangeNotifyDialog::~ChangeNotifyDialog()
 
 void ChangeNotifyDialog::add(ChangeNotify* notifier)
 {
-    ChangeNotifyDialogWidget* w=new ChangeNotifyDialogWidget(this);
+    auto* w=new ChangeNotifyDialogWidget(this);
     w->init(notifier);
 
     connect(w,SIGNAL(selectionChanged(VInfo_ptr)),
@@ -299,7 +299,7 @@ void ChangeNotifyDialog::add(ChangeNotify* notifier)
 
 
 
-    ChangeNotifyDialogButton *bw=new ChangeNotifyDialogButton(this);
+    auto *bw=new ChangeNotifyDialogButton(this);
     bw->setNotifier(notifier);
     buttonHb_->addWidget(bw);
     int buttonId=buttonGroup_->buttons().count();

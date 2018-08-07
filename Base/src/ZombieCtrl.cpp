@@ -444,7 +444,7 @@ void ZombieCtrl::get( std::vector< Zombie >& ret)   {
 
 void ZombieCtrl::remove_stale_zombies( const boost::posix_time::ptime& time_now )
 {
-	for(std::vector<Zombie>::iterator i = zombies_.begin(); i != zombies_.end(); ++i) {
+	for(auto i = zombies_.begin(); i != zombies_.end(); ++i) {
 		time_duration duration = time_now - (*i).creation_time();
 		if ( duration.total_seconds() > (*i).allowed_age()) {
 #ifdef DEBUG_ZOMBIE

@@ -21,7 +21,7 @@ ComboMulti::ComboMulti(QWidget *widget) :
 {
     setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
-    ComboMultiDelegate* del=new ComboMultiDelegate(this);
+    auto* del=new ComboMultiDelegate(this);
 
     connect(del,SIGNAL(itemChecked()),
             this,SLOT(slotChecked()));
@@ -219,7 +219,7 @@ QWidget* ComboMultiDelegate::createEditor(QWidget *parent,
          const QStyleOptionViewItem & option ,
          const QModelIndex & index ) const
 {
-     QCheckBox *editor = new QCheckBox(parent);
+     auto *editor = new QCheckBox(parent);
      return editor;
 }
 
@@ -227,7 +227,7 @@ void ComboMultiDelegate::setEditorData(QWidget *editor,
                                          const QModelIndex &index) const
 {
 	//set editor data
-	QCheckBox *myEditor = static_cast<QCheckBox*>(editor);
+	auto *myEditor = static_cast<QCheckBox*>(editor);
 	myEditor->setText(index.data(Qt::DisplayRole).toString());
 	myEditor->setChecked(index.data(Qt::CheckStateRole).toBool());
 
@@ -240,7 +240,7 @@ void ComboMultiDelegate::setModelData(QWidget *editor, QAbstractItemModel *model
              const QModelIndex &index) const
 {
 	//get the value from the editor (CheckBox)
-	QCheckBox *myEditor = static_cast<QCheckBox*>(editor);
+	auto *myEditor = static_cast<QCheckBox*>(editor);
     bool value = myEditor->isChecked();
 
     if(model->data(index,Qt::CheckStateRole).toBool() != value)
@@ -259,7 +259,7 @@ void ComboMultiDelegate::updateEditorGeometry(QWidget *editor,
 
 void ComboMultiDelegate::slotEdited(int)
 {
-    QCheckBox* cb = static_cast<QCheckBox*>(sender());
+    auto* cb = static_cast<QCheckBox*>(sender());
     if(cb)
     {
       Q_EMIT commitData(cb);

@@ -277,7 +277,7 @@ bool AbstractNodeView::viewportEvent(QEvent *event)
 {
     if(event->type() == QEvent::ToolTip)
     {
-        QHelpEvent *he = static_cast<QHelpEvent*>(event);
+        auto *he = static_cast<QHelpEvent*>(event);
         const QModelIndex index = indexAt(he->pos());
 
         //see qbatractitemdelegate::helpEvent()
@@ -578,7 +578,7 @@ int AbstractNodeView::viewIndex(const QModelIndex& index) const
     if(!index.isValid() || viewItems_.empty())
         return -1;
 
-    const int totalCount = static_cast<int>(viewItems_.size());
+    const auto totalCount = static_cast<int>(viewItems_.size());
     const QModelIndex topIndex = index.sibling(index.row(), 0);
     const int row = topIndex.row();
     const quintptr internalId = topIndex.internalId();
@@ -626,11 +626,11 @@ int AbstractNodeView::viewIndex(const QModelIndex& index) const
 
 void AbstractNodeView::insertViewItems(int pos, int count, const TreeNodeViewItem &viewItem)
 {
-    ViewItemIterator it=viewItems_.begin();
+    auto it=viewItems_.begin();
     viewItems_.insert(it+pos,count,viewItem);
 
     //We need to update the parentItem in the items after the insertion
-    const int itemsCount=static_cast<int>(viewItems_.size());
+    const auto itemsCount=static_cast<int>(viewItems_.size());
     for(int i = pos + count; i < itemsCount; i++)
         if (viewItems_[i].parentItem >= pos)
             viewItems_[i].parentItem += count;
@@ -639,11 +639,11 @@ void AbstractNodeView::insertViewItems(int pos, int count, const TreeNodeViewIte
 
 void AbstractNodeView::removeViewItems(int pos, int count)
 {
-    ViewItemIterator it=viewItems_.begin();
+    auto it=viewItems_.begin();
     viewItems_.erase(it+pos,it+pos+count);
 
     //We need to update the parentItem in the items after the deletion
-    const int itemsCount=static_cast<int>(viewItems_.size());
+    const auto itemsCount=static_cast<int>(viewItems_.size());
     for(int i=0; i < itemsCount; i++)
         if(viewItems_[i].parentItem >= pos)
            viewItems_[i].parentItem -= count;
@@ -694,7 +694,7 @@ void AbstractNodeView::expand(int item)
         totalNumOfExpandedChildren(idx,total);
 
         //Insert the required number items
-        ViewItemIterator it=viewItems_.begin();
+        auto it=viewItems_.begin();
         viewItems_.insert(it+item+1,total,TreeNodeViewItem());
 
         //recursively relayout the item
@@ -706,7 +706,7 @@ void AbstractNodeView::expand(int item)
         //We need to update the parentItem in the items after the insertion.
         //When layout() is called with the given arguments it is delayed to
         //this point to gain performance!
-        const int itemsCount=static_cast<int>(viewItems_.size());
+        const auto itemsCount=static_cast<int>(viewItems_.size());
         int count=viewItems_[item].total;
         for(int i = item + count+1; i < itemsCount; i++)
             if (viewItems_[i].parentItem >= item)
@@ -743,7 +743,7 @@ void AbstractNodeView::expandAll(const QModelIndex& idx)
         totalNumOfChildren(idx,total);
 
         //Insert the required number items
-        ViewItemIterator it=viewItems_.begin();
+        auto it=viewItems_.begin();
         viewItems_.insert(it+item+1,total,TreeNodeViewItem());
 
         //recursively relayout the item
@@ -755,7 +755,7 @@ void AbstractNodeView::expandAll(const QModelIndex& idx)
         //We need to update the parentItem in the items after the insertion.
         //When layout() is called with the given arguments it is delayed to
         //this point to gain performance!
-        const int itemsCount=static_cast<int>(viewItems_.size());
+        const auto itemsCount=static_cast<int>(viewItems_.size());
         int count=viewItems_[item].total;
         for(int i = item + count+1; i < itemsCount; i++)
             if (viewItems_[i].parentItem >= item)

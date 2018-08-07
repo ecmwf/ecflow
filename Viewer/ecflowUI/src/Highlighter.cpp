@@ -120,7 +120,7 @@ void Highlighter::toHtml(QString& html)
     QTextCursor cursor(document());
     cursor.select(QTextCursor::Document);
 
-    QTextDocument* tmpDoc(new QTextDocument());
+    auto* tmpDoc(new QTextDocument());
     Q_ASSERT(tmpDoc);
     QTextCursor tmpCursor(tmpDoc);
     tmpCursor.insertFragment(cursor.selection());

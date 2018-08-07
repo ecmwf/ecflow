@@ -449,7 +449,7 @@ void ServerComThread::update(const Defs* dc, const std::vector<ecf::Aspect::Type
 
 void ServerComThread::update_delete(const Node* nc)
 {
-    Node *n=const_cast<Node*>(nc);
+    auto *n=const_cast<Node*>(nc);
     n->detach(this);
 }
 
@@ -459,7 +459,7 @@ void ServerComThread::update_delete(const Defs* dc)
 {
     UiLog(serverName_).dbg() << "ServerComThread::update_delete -->";
 
-    Defs *d=const_cast<Defs*>(dc);
+    auto *d=const_cast<Defs*>(dc);
     d->detach(this);
 
     //If we are in  a SYNC_LOCAl task!!!!

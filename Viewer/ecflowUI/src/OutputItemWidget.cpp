@@ -81,7 +81,7 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	dirProvider_=new OutputDirProvider(this);
 
 	//The view
-    OutputDirLitsDelegate* dirDelegate=new OutputDirLitsDelegate(this);
+    auto* dirDelegate=new OutputDirLitsDelegate(this);
     dirView_->setItemDelegate(dirDelegate);
 	dirView_->setRootIsDecorated(false);
 	dirView_->setAllColumnsShowFocus(true);
@@ -123,14 +123,14 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 	browser_->setFontProperty(VConfig::instance()->find("panel.output.font"));
 
     fetchInfo_=new OutputFetchInfo(this);
-    QWidgetAction* fetchInfoAction=new QWidgetAction(this);
+    auto* fetchInfoAction=new QWidgetAction(this);
     fetchInfoAction->setDefaultWidget(fetchInfo_);
     fetchInfoTb_->addAction(fetchInfoAction);
 
     filterTb_->setProperty("strip","first");
     filterOptionTb_->setProperty("strip","last");
 
-    QMenu *menu=new QMenu(this);
+    auto *menu=new QMenu(this);
     menu->addAction(actionSaveFileAs_);
     menu->addAction(actionGotoLine_);
 
@@ -199,7 +199,7 @@ void OutputItemWidget::currentDesc(std::string& fullName,VDir::FetchMode& fetchM
     }
     else
     {
-        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
         fullName=op->joboutFileName();
         fetchMode=VDir::NoFetchMode;
     }
@@ -242,7 +242,7 @@ void OutputItemWidget::getCurrentFile(bool doReload)
             UiLog().dbg()  << "output selected: " << fullName;
 #endif
             //Fetch the file with given fetchmode
-            OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+            auto* op=static_cast<OutputFileProvider*>(infoProvider_);
 
             //If the fetchmode is not defined we use the normal fetch policy
             if(fetchMode == VDir::NoFetchMode)
@@ -334,7 +334,7 @@ void OutputItemWidget::infoReady(VReply* reply)
         //TODO: make it possible to show warning and info at the same time
         bool hasMessage=false;
         submittedWarning_=false;
-        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
         if(reply->fileName() == op->joboutFileName() && !op->isTryNoZero(reply->fileName()) &&
            info_ && info_->isNode() && info_->node() && info_->node()->isSubmitted())
         {
@@ -396,7 +396,7 @@ void OutputItemWidget::infoReady(VReply* reply)
             //We have dir info
             else
             {
-                OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+                auto* op=static_cast<OutputFileProvider*>(infoProvider_);
                 if(reply->fileName() == op->joboutFileName())
                 {
                     searchOnReload();
@@ -583,7 +583,7 @@ UI_FUNCTION_LOG
 
 	if(status)
 	{
-        OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+        auto* op=static_cast<OutputFileProvider*>(infoProvider_);
         op->setDirectories(dirs);
 
         std::string fullName;
@@ -791,7 +791,7 @@ void OutputItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect
                getLatestFile();
             else if(info_ && info_->node() == n && info_->node()->isSubmitted())
             {
-                OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
+                auto* op=static_cast<OutputFileProvider*>(infoProvider_);
                 Q_ASSERT(op);
                 std::string fullName;
                 VDir::FetchMode fetchMode;

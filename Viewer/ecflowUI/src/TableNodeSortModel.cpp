@@ -60,7 +60,7 @@ bool TableNodeSortModel::lessThan(const QModelIndex &left,
     if(skipSort_)
         return true;
 
-    TableNodeModel::ColumnType id=static_cast<TableNodeModel::ColumnType>(left.column());
+    auto id=static_cast<TableNodeModel::ColumnType>(left.column());
 
     if(id == TableNodeModel::PathColumn)
         return left.row() < right.row();

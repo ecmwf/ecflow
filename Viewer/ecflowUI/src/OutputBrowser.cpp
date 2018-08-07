@@ -41,7 +41,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     QWidget(parent),
     searchTb_(0)
 {
-    QVBoxLayout *vb=new QVBoxLayout(this);
+    auto *vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
     vb->setSpacing(2);
 

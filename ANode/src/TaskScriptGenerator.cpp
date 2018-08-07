@@ -107,7 +107,7 @@ void TaskScriptGenerator::generate(const std::map<std::string,std::string>& over
    // Create ECF file with default template or custom  file.
    //cout << "creating ecf file  " << ecf_file_path << "\n";
    std::string contents;
-   std::map<std::string,std::string>::const_iterator it = override.find(task_->absNodePath());
+   auto it = override.find(task_->absNodePath());
    if (it == override.end()) {
       contents = getDefaultTemplateEcfFile();
    }

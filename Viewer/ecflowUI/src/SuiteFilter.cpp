@@ -212,7 +212,7 @@ void SuiteFilter::selectOnlyOne(const std::string& oneSuite)
 
 SuiteFilter* SuiteFilter::clone()
 {
-    SuiteFilter* sf=new SuiteFilter();
+    auto* sf=new SuiteFilter();
     sf->items_=items_;
     sf->enabled_=enabled_;
     sf->autoAddNew_=autoAddNew_;
@@ -441,7 +441,7 @@ void SuiteFilter::addObserver(SuiteFilterObserver* o)
 
 void SuiteFilter::removeObserver(SuiteFilterObserver* o)
 {
-	std::vector<SuiteFilterObserver*>::iterator it=std::find(observers_.begin(),observers_.end(),o);
+	auto it=std::find(observers_.begin(),observers_.end(),o);
 	if(it != observers_.end())
 		observers_.erase(it);
 }

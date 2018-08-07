@@ -60,7 +60,7 @@ std::ostream& CtsCmd::print(std::ostream& os) const
 
 bool CtsCmd::equals(ClientToServerCmd* rhs) const
 {
-   CtsCmd* the_rhs = dynamic_cast< CtsCmd* > ( rhs );
+   auto* the_rhs = dynamic_cast< CtsCmd* > ( rhs );
    if ( !the_rhs ) return false;
    if (api_ != the_rhs->api()) return false;
    return UserCmd::equals(rhs);

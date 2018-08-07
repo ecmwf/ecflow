@@ -55,7 +55,7 @@ bool Node::set_event(const std::string& event_name_or_number ,bool value)
    // Test for numeric, and then casting, is ****faster***** than relying on exception alone
    if ( event_name_or_number.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
       try {
-         int eventNumber = boost::lexical_cast< int >( event_name_or_number );
+         auto eventNumber = boost::lexical_cast< int >( event_name_or_number );
          for(size_t i = 0; i < theSize; i++)   {
             if (events_[i].number() == eventNumber) {
                events_[i].set_value( value );
@@ -86,7 +86,7 @@ bool Node::set_event_used_in_trigger(const std::string& event_name_or_number)
    // Test for numeric, and then casting, is ****faster***** than relying on exception alone
    if ( event_name_or_number.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
       try {
-         int eventNumber = boost::lexical_cast< int >( event_name_or_number );
+         auto eventNumber = boost::lexical_cast< int >( event_name_or_number );
          for(size_t i = 0; i < theSize; i++)   {
             if (events_[i].number() == eventNumber) {
                events_[i].usedInTrigger( true );

@@ -181,7 +181,7 @@ ChangeNotifyWidget::ChangeNotifyWidget(QWidget *parent) : QWidget(parent)
 
 ChangeNotifyWidget::~ChangeNotifyWidget()
 {
-	std::vector<ChangeNotifyWidget*>::iterator it=std::find(widgets_.begin(),widgets_.end(),this);
+	auto it=std::find(widgets_.begin(),widgets_.end(),this);
 	if(it != widgets_.end())
 		widgets_.erase(it);
 }
@@ -197,7 +197,7 @@ ChangeNotifyButton* ChangeNotifyWidget::findButton(const std::string& id)
 
 void ChangeNotifyWidget::addTb(ChangeNotify* notifier)
 {
-	ChangeNotifyButton *tb=new ChangeNotifyButton(this);
+	auto *tb=new ChangeNotifyButton(this);
 	tb->setNotifier(notifier);
 	layout_->addWidget(tb);
 	if(!notifier->isEnabled())

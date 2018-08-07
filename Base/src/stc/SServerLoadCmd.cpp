@@ -23,7 +23,7 @@ using namespace boost;
 
 bool SServerLoadCmd::equals(ServerToClientCmd* rhs) const
 {
-   SServerLoadCmd* the_rhs = dynamic_cast<SServerLoadCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<SServerLoadCmd*>(rhs);
    if (!the_rhs) return false;
    if (log_file_path_ != the_rhs->log_file_path()) return false;
    return ServerToClientCmd::equals(rhs);

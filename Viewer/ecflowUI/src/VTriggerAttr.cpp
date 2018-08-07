@@ -88,7 +88,7 @@ VAttributeType* VTriggerAttr::type() const
 
 QStringList VTriggerAttr::data(bool /*firstLine*/) const
 {
-    static VTriggerAttrType* atype=static_cast<VTriggerAttrType*>(type());
+    static auto* atype=static_cast<VTriggerAttrType*>(type());
     QStringList s;
     if(node_ptr node=parent_->node())
     {

@@ -104,7 +104,7 @@ Animation* AnimationHandler::find(Animation::Type type, bool makeIt)
 	}
 	else if(makeIt)
 	{
-		Animation* an=new Animation(view_,type);
+		auto* an=new Animation(view_,type);
 		items_[type]=an;
 		return an;
 	}

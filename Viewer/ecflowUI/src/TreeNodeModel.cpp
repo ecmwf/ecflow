@@ -452,7 +452,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 
 	//The "child" cannot be a server attribute or a topLevel node so it must be a node or an attribute.
 	//Its internal pointer must point to the parent node.
-    else if(VTreeNode *parentNode=static_cast<VTreeNode*>(child.internalPointer()))
+    else if(auto *parentNode=static_cast<VTreeNode*>(child.internalPointer()))
 	{
 		//The parent is a topLevel node (suite): its internal pointer is the server
 		if(parentNode->isTopLevel())
@@ -587,7 +587,7 @@ VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex & index) const
     }
 
     //Otherwise the internal pointer points to the parent node.
-    else if(VTreeNode *parentNode=static_cast<VTreeNode*>(ip))
+    else if(auto *parentNode=static_cast<VTreeNode*>(ip))
     {
         //It is an attribute
         if(index.row() < parentNode->attrNum(atts_))
@@ -630,7 +630,7 @@ VTreeNode* TreeNodeModel::indexToAttrParentOrNode(const QModelIndex & index,bool
     }
 
     //Otherwise the internal pointer points to the parent node.
-    else if(VTreeNode *parentNode=static_cast<VTreeNode*>(ip))
+    else if(auto *parentNode=static_cast<VTreeNode*>(ip))
     {
         int attNum=parentNode->attrNum(atts_);
 
@@ -689,7 +689,7 @@ VTreeNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 		}
 
 		//Otherwise the internal pointer points to the parent node.
-        else if(VTreeNode *parentNode=static_cast<VTreeNode*>(index.internalPointer()))
+        else if(auto *parentNode=static_cast<VTreeNode*>(index.internalPointer()))
 		{
             int attNum=parentNode->attrNum(atts_);
 			if(index.row() >= attNum)
@@ -1023,7 +1023,7 @@ VInfo_ptr TreeNodeModel::nodeInfo(const QModelIndex& index)
 	}
 
 	//Otherwise the internal pointer points to the parent node
-    else if(VTreeNode *parentNode=static_cast<VTreeNode*>(index.internalPointer()))
+    else if(auto *parentNode=static_cast<VTreeNode*>(index.internalPointer()))
 	{       
         //If the attrNum is cached it is correct!
         int attNum=parentNode->attrNum(atts_);

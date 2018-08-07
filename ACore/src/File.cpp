@@ -188,7 +188,7 @@ std::string File::get_last_n_lines(const std::string& filename,int last_n_lines,
       newlineCount = std::count( buffer.begin(), buffer.end(), '\n');
    }
 
-   std::vector<char>::iterator start = buffer.begin();
+   auto start = buffer.begin();
    while ( newlineCount > last_n_lines ) {
       start = std::find( start, buffer.end(), '\n' ) + 1;
       -- newlineCount;

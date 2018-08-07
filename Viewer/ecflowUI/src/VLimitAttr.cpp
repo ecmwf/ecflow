@@ -77,7 +77,7 @@ VAttributeType* VLimitAttr::type() const
 
 QStringList VLimitAttr::data(bool /*firstLine*/) const
 {
-    static VLimitAttrType* atype=static_cast<VLimitAttrType*>(type());
+    static auto* atype=static_cast<VLimitAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
@@ -147,7 +147,7 @@ void VLimitAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     if(vnode->node_)
     {
         const std::vector<limit_ptr>& v=vnode->node_->limits();
-        int n=static_cast<int>(v.size());
+        auto n=static_cast<int>(v.size());
         for(int i=0; i < n; i++)
         {
             vec.push_back(new VLimitAttr(vnode,v[i],i));

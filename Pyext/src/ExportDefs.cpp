@@ -134,7 +134,7 @@ defs_ptr add_variable_dict(defs_ptr self,const bp::dict& dict) {
    std::vector<std::pair<std::string,std::string> > vec;
    BoostPythonUtil::dict_to_str_vec(dict,vec);
    std::vector<std::pair<std::string,std::string> >::iterator i;
-   std::vector<std::pair<std::string,std::string> >::iterator vec_end = vec.end();
+   auto vec_end = vec.end();
    for(i = vec.begin(); i != vec_end; ++i) {
       self->set_server().add_or_update_user_variables((*i).first,(*i).second);
    }

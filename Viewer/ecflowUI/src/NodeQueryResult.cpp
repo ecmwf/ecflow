@@ -348,7 +348,7 @@ void NodeQueryResult::attach(ServerHandler *s)
 
 void NodeQueryResult::detach(ServerHandler* s)
 {
-	std::map<ServerHandler*,NodeQueryResultBlock>::iterator it=blocks_.find(s);
+	auto it=blocks_.find(s);
 	if(it != blocks_.end())
 	{
 		blocks_.erase(it);
@@ -433,7 +433,7 @@ void NodeQueryResult::notifyEndNodeChange(const VNode*, const std::vector<ecf::A
 bool NodeQueryResult::range(const VNode* node,int &pos,int &cnt)
 {
 	 ServerHandler *server=node->server();
-	 std::map<ServerHandler*,NodeQueryResultBlock>::iterator it=blocks_.find(server);
+	 auto it=blocks_.find(server);
 	 if(it != blocks_.end())
 	 {
 		 if(it->second.find(node,pos,cnt))

@@ -86,7 +86,7 @@ const std::string& VTask::typeString() const
 const std::string& VTask::param(const std::string& key) const
 {
 	static std::string emptyStr("");
-	std::map<std::string,std::string>::const_iterator it=params_.find(key);
+	auto it=params_.find(key);
 	if(it != params_.end())
 		return it->second;
 	return emptyStr;
@@ -106,7 +106,7 @@ void VTask::setZombie(const Zombie& z)
 
 void VTask::removeObserver(VTaskObserver* o)
 {
-    std::vector<VTaskObserver*>::iterator it=std::find(observers_.begin(), observers_.end(),o);
+    auto it=std::find(observers_.begin(), observers_.end(),o);
     if(it != observers_.end())
     {
         observers_.erase(it);

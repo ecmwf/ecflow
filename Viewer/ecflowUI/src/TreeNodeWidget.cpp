@@ -57,7 +57,7 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
 	model_=new TreeNodeModel(serverFilter_,filterDef_,atts_,icons_,this);
 
 	//Create the view
-	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);
+	auto *hb=new QHBoxLayout(viewHolder_);
 	hb->setContentsMargins(0,0,0,0);
 	hb->setSpacing(0);
 
@@ -116,9 +116,9 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
 
     if(viewLayoutMode_ == CompactLayoutMode)
     {
-        TreeNodeModel* realModel=static_cast<TreeNodeModel*>(model_);
+        auto* realModel=static_cast<TreeNodeModel*>(model_);
 
-        TreeNodeView* gv=new TreeNodeView(new CompactView(realModel,this),
+        auto* gv=new TreeNodeView(new CompactView(realModel,this),
                                           realModel,filterDef_,this);
         viewHolder_->layout()->addWidget(gv->realWidget());
         //Store the pointer to the (non-QObject) base class of the view!!!
@@ -126,9 +126,9 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
     }
     else
     {
-        TreeNodeModel* realModel=static_cast<TreeNodeModel*>(model_);
+        auto* realModel=static_cast<TreeNodeModel*>(model_);
 
-        TreeNodeView *tv=new TreeNodeView(new StandardView(realModel,this),
+        auto *tv=new TreeNodeView(new StandardView(realModel,this),
                                           realModel,filterDef_,this);
         viewHolder_->layout()->addWidget(tv->realWidget());
         //Store the pointer to the (non-QObject) base class of the view!!!
@@ -180,12 +180,12 @@ void TreeNodeWidget::initAtts()
 void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 {
 	//Builds the menu for the settings tool button
-	QMenu *menu=new QMenu(this);
+	auto *menu=new QMenu(this);
 	menu->setTearOffEnabled(true);
 
 	menu->addAction(actionBreadcrumbs);
-    QMenu *menuState=new QMenu(this);
-    QMenu *menuType=new QMenu(this);
+    auto *menuState=new QMenu(this);
+    auto *menuType=new QMenu(this);
 	QMenu *menuIcon=menu->addMenu(tr("Icon"));
 
 	menuState->setTearOffEnabled(true);
@@ -207,13 +207,13 @@ void TreeNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 
     QList<QAction*> acLst;
 
-    QAction* acState=new QAction(this);
+    auto* acState=new QAction(this);
     acState->setIcon(QPixmap(":viewer/status.svg"));
     acState->setToolTip("Filter by status");
     acState->setMenu(menuState);
     acLst << acState;
 
-    QAction* acAttr=new QAction(this);
+    auto* acAttr=new QAction(this);
     acAttr->setIcon(QPixmap(":viewer/attribute.svg"));
     acAttr->setToolTip("Show attributes");
     acAttr->setMenu(menuType);

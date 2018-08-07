@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( test_simple_cmd )
  	{
  		std::string varValue;
 		if (t1->findParentUserVariableValue( Str::ECF_TRIES(), varValue ))  {
-			int ecf_tries = boost::lexical_cast< int > (varValue);
+			auto ecf_tries = boost::lexical_cast< int > (varValue);
 			while (1) {
             TestHelper::invokeRequest(&defs,Cmd_ptr( new AbortCmd(suite_f_t1,Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1)));
             TestHelper::invokeRequest(&defs,Cmd_ptr( new CtsCmd( CtsCmd::FORCE_DEP_EVAL)));

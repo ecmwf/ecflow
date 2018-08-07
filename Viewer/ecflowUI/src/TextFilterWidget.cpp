@@ -137,9 +137,9 @@ void TextFilterWidget::slotFilterEditor()
 
 void TextFilterWidget::buildMenu(QToolButton *tb)
 {
-    QMenu* menu=new QMenu(tb);
+    auto* menu=new QMenu(tb);
 
-    QAction *manageAc=new QAction(menu);
+    auto *manageAc=new QAction(menu);
     manageAc->setText(tr("Manage filters ..."));
     manageAc->setIcon(QPixmap(":/viewer/configure.svg"));
     menu->addAction(manageAc);
@@ -154,16 +154,16 @@ void TextFilterWidget::buildMenu(QToolButton *tb)
         menu->addAction(saveAc);
     }
 
-    QAction *sep=new QAction(menu);
+    auto *sep=new QAction(menu);
     sep->setSeparator(true);
     menu->addAction(sep);
 
-    QAction *clearAc=new QAction(menu);
+    auto *clearAc=new QAction(menu);
     clearAc->setText(tr("Clear filter"));
     if(!isActive()) clearAc->setEnabled(false);
     menu->addAction(clearAc);
 
-    QAction *sep1=new QAction(menu);
+    auto *sep1=new QAction(menu);
     sep1->setSeparator(true);
     menu->addAction(sep1);
 
@@ -266,13 +266,13 @@ void TextFilterWidget::addMenuSection(QMenu* menu,const std::vector<TextFilterIt
     if(items.empty())
         return;
 
-    QAction *sep1=new QAction(menu);
+    auto *sep1=new QAction(menu);
     sep1->setSeparator(true);
     menu->addAction(sep1);
 
     if(!title.isEmpty())
     {
-        QAction* acTitle = new QAction(menu);
+        auto* acTitle = new QAction(menu);
         acTitle->setText(title);
         QFont f=acTitle->font();
         f.setBold(true);
@@ -284,7 +284,7 @@ void TextFilterWidget::addMenuSection(QMenu* menu,const std::vector<TextFilterIt
     {
         if(data != "s" || items[i].contextMenu())
         {
-            QAction* ac=new QAction(this);
+            auto* ac=new QAction(this);
 
             QString txt=QString::fromStdString(items[i].filter());
             //Replace whitespace with Open Box U+2423 just for better interpretation

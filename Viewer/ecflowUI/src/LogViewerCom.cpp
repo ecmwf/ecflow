@@ -29,7 +29,7 @@ void LogViewerCom::closeApp()
 {
     if(!logViewerId_.isEmpty())
     {
-        QLocalSocket* socket = new QLocalSocket(this);
+        auto* socket = new QLocalSocket(this);
         socket->setServerName(logViewerId_);
 
         socket->connectToServer(QIODevice::WriteOnly);
@@ -81,7 +81,7 @@ void LogViewerCom::start(QStringList args)
     else
     {
         //Send message over local socket
-        QLocalSocket* socket = new QLocalSocket(this);
+        auto* socket = new QLocalSocket(this);
         socket->setServerName(logViewerId_);
         socket->connectToServer(QIODevice::WriteOnly);
 

@@ -46,7 +46,7 @@ SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
 	infoProvider_=new SuiteProvider(this);
 
 	model_=new SuiteModel(this);
-    QSortFilterProxyModel* sortModel=new QSortFilterProxyModel(this);
+    auto* sortModel=new QSortFilterProxyModel(this);
     sortModel->setSourceModel(model_);
 
     suiteView->setUniformRowHeights(true);

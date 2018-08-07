@@ -29,7 +29,7 @@ AttributeEditorFactory::~AttributeEditorFactory()
 
 AttributeEditor* AttributeEditorFactory::create(const std::string& type,VInfo_ptr info,QWidget* parent)
 {
-    std::map<std::string,AttributeEditorFactory*>::iterator j = makers->find(type);
+    auto j = makers->find(type);
     if(j != makers->end())
         return (*j).second->make(info,parent);
 

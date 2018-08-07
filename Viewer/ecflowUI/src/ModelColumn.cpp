@@ -45,13 +45,13 @@ int ModelColumn::indexOf(const std::string& id) const
 
 void ModelColumn::load(VProperty* group)
 {
-	ModelColumn* m=new ModelColumn(group->strName());
+	auto* m=new ModelColumn(group->strName());
 
 	for(int i=0; i < group->children().size(); i++)
     {
     	VProperty *p=group->children().at(i);
 
-    	ModelColumnItem* obj=new ModelColumnItem(p->strName());
+    	auto* obj=new ModelColumnItem(p->strName());
         obj->label_=p->param("label");
         obj->tooltip_=p->param("tooltip");
         obj->icon_=p->param("icon");

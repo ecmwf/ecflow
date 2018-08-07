@@ -96,7 +96,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
                 std::string cname = menuDef.get("name", "NoName");
                 UiLog().dbg() << "  " << cname;
-                Menu *menu = new Menu(cname);
+                auto *menu = new Menu(cname);
 
                 //ptree const &menuModesDef = menuDef.get_child("modes");
 
@@ -150,7 +150,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
                 UiLog().dbg() << "  " << name;
-                MenuItem *item = new MenuItem(name);
+                auto *item = new MenuItem(name);
                 item->setCommand(command);
 
 
@@ -301,7 +301,7 @@ void MenuHandler::refreshCustomMenuCommands()
             CustomCommand *cmd = customSavedCmds->commandFromIndex(i);
             if (cmd->inContextMenu())
             {
-                MenuItem *item = new MenuItem(cmd->name());
+                auto *item = new MenuItem(cmd->name());
                 item->setCommand(cmd->command());
                 item->setEnabledCondition(&trueCond_);
                 item->setVisibleCondition(&trueCond_);
@@ -332,7 +332,7 @@ void MenuHandler::refreshCustomMenuCommands()
         {
             CustomCommand *cmd = customRecentCmds->commandFromIndex(i);
 
-            MenuItem *item = new MenuItem(cmd->name());
+            auto *item = new MenuItem(cmd->name());
             item->setCommand(cmd->command());
             item->setEnabledCondition(&trueCond_);
             item->setVisibleCondition(&trueCond_);
@@ -365,7 +365,7 @@ MenuItem* MenuHandler::findItem(QAction* ac)
 	{
 		for(auto & menu : menus_)
 		{
-			for(std::vector<MenuItem*>::iterator it=menu->items().begin(); it!=menu->items().end(); ++it)
+			for(auto it=menu->items().begin(); it!=menu->items().end(); ++it)
 			{
 				if((*it)->id() == ac->data().toInt())
 				{
@@ -470,7 +470,7 @@ void MenuHandler::interceptCommandsThatNeedConfirmation(MenuItem *item)
 
 		// is this command one of the ones that requires a prompt?
 		MenuHandler::ConfirmationMap &list = getCommandsThatRequireConfirmation();
-		MenuHandler::ConfirmationMap::iterator it=list.find(cmdName);
+		auto it=list.find(cmdName);
 		if(it != list.end())
 		{
 			// does the command already have a 'yes'?
@@ -732,12 +732,12 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 	nodeLabel->setObjectName("nodeLabel");
 
 	QWidget* titleW=new QWidget(qmenu);
-	QVBoxLayout *titleLayout=new QVBoxLayout(titleW);
+	auto *titleLayout=new QVBoxLayout(titleW);
 	titleLayout->setContentsMargins(2,2,2,2);
 	titleLayout->addWidget(nodeLabel);
 	nodeLabel->setParent(titleW);
 
-	QWidgetAction *wAction = new QWidgetAction(qmenu);
+	auto *wAction = new QWidgetAction(qmenu);
 	wAction->setObjectName("title");
 	//Qt doc says: the ownership of the widget is passed to the widgetaction.
 	//So when the action is deleted it will be deleted as well.
@@ -817,7 +817,7 @@ bool MenuItem::isValidView(const std::string& view) const
 
 QAction* MenuItem::createAction(QWidget* parent)
 {
-	QAction *ac=new QAction(parent);
+	auto *ac=new QAction(parent);
     ac->setObjectName(QString::fromStdString(name_));
     ac->setText(QString::fromStdString(name_));
 	ac->setIcon(icon_);

@@ -77,7 +77,7 @@ void VAttributeType::scan(VNode* vnode,std::vector<VAttribute*>& v)
 
 int VAttributeType::keyToDataIndex(const std::string& key) const
 {
-    std::map<std::string,int>::const_iterator it=keyToData_.find(key);
+    auto it=keyToData_.find(key);
     if(it != keyToData_.end())
         return it->second;
 
@@ -86,7 +86,7 @@ int VAttributeType::keyToDataIndex(const std::string& key) const
 
 int VAttributeType::searchKeyToDataIndex(const std::string& key) const
 {
-    std::map<std::string,int>::const_iterator it=searchKeyToData_.find(key);
+    auto it=searchKeyToData_.find(key);
     if(it != searchKeyToData_.end())
         return it->second;
 

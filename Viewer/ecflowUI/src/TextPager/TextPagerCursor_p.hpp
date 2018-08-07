@@ -57,7 +57,7 @@ class TextLayoutCacheManager : public QObject
 public:
     static TextLayoutCacheManager *instance()
     {
-        static TextLayoutCacheManager *inst = new TextLayoutCacheManager(QCoreApplication::instance());
+        static auto *inst = new TextLayoutCacheManager(QCoreApplication::instance());
         return inst;
     }
     // ### this class doesn't react to TextSections added or removed. I

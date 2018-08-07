@@ -53,7 +53,7 @@ CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, 
    if (!input_max_lines.empty()){
       try {
          // Note: max_lines_ if type size_t, hence we cast to int to check for negative numbers
-         int the_max_lines =  boost::lexical_cast<int>( input_max_lines );
+         auto the_max_lines =  boost::lexical_cast<int>( input_max_lines );
          if (the_max_lines <= 0)  the_max_lines = File::MAX_LINES();
          max_lines_ = the_max_lines;
       }
@@ -94,7 +94,7 @@ std::string CFileCmd::toString(CFileCmd::File_t ft)
 
 bool CFileCmd::equals(ClientToServerCmd* rhs) const
 {
-	CFileCmd* the_rhs = dynamic_cast<CFileCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<CFileCmd*>(rhs);
 	if (!the_rhs)  return false;
 	if ( file_       != the_rhs->fileType())   { return false; }
 	if ( max_lines_  != the_rhs->max_lines())  { return false; }

@@ -26,7 +26,7 @@ PlainTextSearchLine::~PlainTextSearchLine()
 
 void PlainTextSearchLine::setEditor(QPlainTextEdit *e)
 {
-	PlainTextSearchInterface *pti=static_cast<PlainTextSearchInterface*>(interface_);
+	auto *pti=static_cast<PlainTextSearchInterface*>(interface_);
 	assert(pti);
 	pti->setEditor(e);
 }

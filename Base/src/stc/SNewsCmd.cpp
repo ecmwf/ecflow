@@ -232,7 +232,7 @@ bool SNewsCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr /*cts_
 
 bool SNewsCmd::equals(ServerToClientCmd* rhs) const
 {
-	SNewsCmd* the_rhs = dynamic_cast<SNewsCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<SNewsCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (news_ != the_rhs->news()) return false;
 	return ServerToClientCmd::equals(rhs);

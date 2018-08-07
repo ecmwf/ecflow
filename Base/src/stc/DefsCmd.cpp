@@ -47,7 +47,7 @@ void DefsCmd::init(AbstractServer* as,bool save_edit_history)
 
 bool DefsCmd::equals(ServerToClientCmd* rhs) const
 {
-	DefsCmd* the_rhs = dynamic_cast<DefsCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<DefsCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (!ServerToClientCmd::equals(rhs)) return false;
 	return true;

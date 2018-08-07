@@ -43,7 +43,7 @@ std::ostream& BeginCmd::print(std::ostream& os) const
 
 bool BeginCmd::equals(ClientToServerCmd* rhs) const
 {
-	BeginCmd* the_rhs = dynamic_cast< BeginCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< BeginCmd* > ( rhs );
 	if ( !the_rhs ) return false;
 	if (suiteName_ != the_rhs->suiteName()) return false;
 	if (force_ != the_rhs->force()) return false;

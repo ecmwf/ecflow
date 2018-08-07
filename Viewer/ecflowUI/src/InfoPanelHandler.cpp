@@ -78,7 +78,7 @@ void InfoPanelHandler::init(const std::string &configFile)
 
                 UiLog().dbg() <<  "  " << cname;
 
-                InfoPanelDef* def= new InfoPanelDef(cname);
+                auto* def= new InfoPanelDef(cname);
 
                 def->setLabel(panelPt.get("label",""));
                 def->setIcon(panelPt.get("icon",""));

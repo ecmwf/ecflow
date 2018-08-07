@@ -179,15 +179,15 @@ void ServerState::add_or_update_server_variables( const NameValueVec& env)
 {
    // n2 could use map to speed things up.
    NameValueVec::const_iterator i;
-   NameValueVec::const_iterator theEnd = env.end();
+   auto theEnd = env.end();
    for(i = env.begin(); i!=theEnd; ++i) {
       add_or_update_server_variable((*i).first, (*i).second);
    }
 }
 void ServerState::add_or_update_server_variable( const std::string& name, const std::string& value)
 {
-   std::vector<Variable>::iterator var_end = server_variables_.end();
-   for(std::vector<Variable>::iterator i = server_variables_.begin(); i!=var_end; ++i) {
+   auto var_end = server_variables_.end();
+   for(auto i = server_variables_.begin(); i!=var_end; ++i) {
       if ((*i).name() == name) {
          (*i).set_value( value );
 //         std::cout << "   Server Variables: Updating " << name << "   " << value << "\n";
@@ -205,8 +205,8 @@ void ServerState::set_server_variables(const std::vector<Variable>& e)
 
 void ServerState::delete_server_variable( const std::string& var)
 {
-   std::vector<Variable>::iterator var_end = server_variables_.end();
-   for(std::vector<Variable>::iterator i = server_variables_.begin(); i!=var_end; ++i) {
+   auto var_end = server_variables_.end();
+   for(auto i = server_variables_.begin(); i!=var_end; ++i) {
       if ((*i).name() == var) {
          server_variables_.erase(i);
          break;
@@ -220,7 +220,7 @@ void ServerState::add_or_update_user_variables( const NameValueVec& env)
 {
    // n2 could use map to speed things up.
    NameValueVec::const_iterator i;
-   NameValueVec::const_iterator theEnd = env.end();
+   auto theEnd = env.end();
    for(i = env.begin(); i!=theEnd; ++i) {
       add_or_update_user_variables((*i).first, (*i).second);
    }
@@ -228,16 +228,16 @@ void ServerState::add_or_update_user_variables( const NameValueVec& env)
 
 void ServerState::add_or_update_user_variables( const std::vector<Variable>& env)
 {
-   std::vector<Variable>::const_iterator var_end = env.end();
-   for(std::vector<Variable>::const_iterator i = env.begin(); i!=var_end; ++i) {
+   auto var_end = env.end();
+   for(auto i = env.begin(); i!=var_end; ++i) {
       add_or_update_user_variables( (*i).name(), (*i).theValue());
    }
 }
 
 void ServerState::add_or_update_user_variables( const std::string& name, const std::string& value)
 {
-   std::vector<Variable>::iterator var_end = user_variables_.end();
-   for(std::vector<Variable>::iterator i = user_variables_.begin(); i!=var_end; ++i) {
+   auto var_end = user_variables_.end();
+   for(auto i = user_variables_.begin(); i!=var_end; ++i) {
       if ((*i).name() == name) {
          (*i).set_value( value );
          variable_state_change_no_ = Ecf::incr_state_change_no();
@@ -260,8 +260,8 @@ void ServerState::delete_user_variable( const std::string& var)
       return;
    }
 
-   std::vector<Variable>::iterator var_end = user_variables_.end();
-   for(std::vector<Variable>::iterator i = user_variables_.begin(); i!=var_end; ++i) {
+   auto var_end = user_variables_.end();
+   for(auto i = user_variables_.begin(); i!=var_end; ++i) {
       if ((*i).name() == var) {
          user_variables_.erase(i);
          variable_state_change_no_ = Ecf::incr_state_change_no();
@@ -272,8 +272,8 @@ void ServerState::delete_user_variable( const std::string& var)
 
 bool ServerState::find_user_variable(const std::string& name,std::string& value) const
 {
-   std::vector<Variable>::const_iterator user_var_end = user_variables_.end();
-   for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=user_var_end; ++i) {
+   auto user_var_end = user_variables_.end();
+   for(auto i = user_variables_.begin(); i!=user_var_end; ++i) {
       if ((*i).name() == name) {
          value = (*i).theValue();
          return true;
@@ -285,8 +285,8 @@ bool ServerState::find_user_variable(const std::string& name,std::string& value)
 const std::string& ServerState::find_variable(const std::string& theVarName) const
 {
    // SEARCH USER variables FIRST
-   std::vector<Variable>::const_iterator user_var_end = user_variables_.end();
-   for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=user_var_end; ++i) {
+   auto user_var_end = user_variables_.end();
+   for(auto i = user_variables_.begin(); i!=user_var_end; ++i) {
       if ((*i).name() == theVarName) {
 //			cerr << "FOUND '" << (*i).first << "'   '" << (*i).second << "'\n";
  			return (*i).theValue();
@@ -294,8 +294,8 @@ const std::string& ServerState::find_variable(const std::string& theVarName) con
 	}
 
    // NOW search server variables
-   std::vector<Variable>::const_iterator ser_var_end = server_variables_.end();
-   for(std::vector<Variable>::const_iterator i = server_variables_.begin(); i!=ser_var_end; ++i) {
+   auto ser_var_end = server_variables_.end();
+   for(auto i = server_variables_.begin(); i!=ser_var_end; ++i) {
       if ((*i).name() == theVarName) {
 //       cerr << "FOUND '" << (*i).first << "'   '" << (*i).second << "'\n";
          LOG_ASSERT(!(*i).theValue().empty(),"");
@@ -310,8 +310,8 @@ const std::string& ServerState::find_variable(const std::string& theVarName) con
 const Variable& ServerState::findVariable(const std::string& name) const
 {
    // SEARCH USER variables FIRST
-   std::vector<Variable>::const_iterator var_end = user_variables_.end();
-   for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=var_end; ++i) {
+   auto var_end = user_variables_.end();
+   for(auto i = user_variables_.begin(); i!=var_end; ++i) {
       if ((*i).name() == name) {
          // if ((*i).theValue().empty() )  std::cout << (*i).name() << " has a empty value\n";
          return (*i);
@@ -319,8 +319,8 @@ const Variable& ServerState::findVariable(const std::string& name) const
    }
 
    // NOW search server variables
-   std::vector<Variable>::const_iterator ser_var_end = server_variables_.end();
-   for(std::vector<Variable>::const_iterator i = server_variables_.begin(); i!=ser_var_end; ++i) {
+   auto ser_var_end = server_variables_.end();
+   for(auto i = server_variables_.begin(); i!=ser_var_end; ++i) {
       if ((*i).name() == name) {
          LOG_ASSERT(!(*i).theValue().empty(),"");
          // if ((*i).theValue().empty() )  std::cout << (*i).name() << " has a empty value\n";
@@ -335,14 +335,14 @@ const Variable& ServerState::findVariable(const std::string& name) const
 bool ServerState::variable_exists(const std::string& name) const
 {
    // SEARCH USER variables FIRST
-   std::vector<Variable>::const_iterator var_end = user_variables_.end();
-   for(std::vector<Variable>::const_iterator i = user_variables_.begin(); i!=var_end; ++i) {
+   auto var_end = user_variables_.end();
+   for(auto i = user_variables_.begin(); i!=var_end; ++i) {
       if ((*i).name() == name) return true;
    }
 
    // NOW search server variables
-   std::vector<Variable>::const_iterator ser_var_end = server_variables_.end();
-   for(std::vector<Variable>::const_iterator i = server_variables_.begin(); i!=ser_var_end; ++i) {
+   auto ser_var_end = server_variables_.end();
+   for(auto i = server_variables_.begin(); i!=ser_var_end; ++i) {
       if ((*i).name() == name) return true;
    }
 

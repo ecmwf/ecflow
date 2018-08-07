@@ -56,7 +56,7 @@ void MenuConfigDialog::updateMenuTree(Menu *menu)
 	menuTreeWidget_->setColumnCount(1);
 
 
-	QTreeWidgetItem *topLevelItem = new QTreeWidgetItem(menuTreeWidget_);
+	auto *topLevelItem = new QTreeWidgetItem(menuTreeWidget_);
 	topLevelItem->setText(0, QString::fromStdString(menu->name()));
 	//topLevelItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 
@@ -74,7 +74,7 @@ void MenuConfigDialog::addChildrenToMenuTree(Menu *menu, QTreeWidgetItem *parent
 
 	for (auto & itItems : items)
 	{
-		QTreeWidgetItem *item = new QTreeWidgetItem(parent);
+		auto *item = new QTreeWidgetItem(parent);
 		item->setText(0, QString::fromStdString(itItems->name()));
 		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 

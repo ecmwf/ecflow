@@ -35,7 +35,7 @@ void SStatsCmd::init(AbstractServer* as)
 
 bool SStatsCmd::equals(ServerToClientCmd* rhs) const
 {
-	SStatsCmd* the_rhs = dynamic_cast<SStatsCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<SStatsCmd*>(rhs);
 	if (!the_rhs) return false;
 	return ServerToClientCmd::equals(rhs);
 }

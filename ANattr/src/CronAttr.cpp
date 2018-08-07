@@ -575,7 +575,7 @@ std::vector<int> extractOption(
 		if ( theIntToken.empty() ) continue;
 
 		try {
-			int theInt = boost::lexical_cast< int >( theIntToken );
+			auto theInt = boost::lexical_cast< int >( theIntToken );
  			theIntVec.push_back( theInt );
 		}
 		catch ( boost::bad_lexical_cast& ) {

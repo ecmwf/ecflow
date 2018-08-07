@@ -419,7 +419,7 @@ void VProperty::setUseMaster(bool b)
 
 VProperty* VProperty::clone(bool addLink,bool setMaster,bool useMaster)
 {
-	VProperty *cp=new VProperty(strName_);
+	auto *cp=new VProperty(strName_);
 
 	cp->value_=value_;
 	cp->defaultValue_=defaultValue_;

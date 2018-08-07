@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE( test_server_profile_threshold_environment_variable )
    cout << "Server:: ...test_server_profile_threshold_environment_variable\n";
    int argc = 1;char* argv[] = { const_cast<char*>("ServerEnvironment") };
    {
-      char* put = const_cast<char*>("ECF_TASK_THRESHOLD=9");
+      auto* put = const_cast<char*>("ECF_TASK_THRESHOLD=9");
       BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
    }
    ServerEnvironment serverEnv(argc,argv);

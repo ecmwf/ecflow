@@ -125,7 +125,7 @@ void TextFilterHandler::addLatest(const TextFilterItem& item)
         return;
 
     //Remove if exists
-    std::vector<TextFilterItem>::iterator it=std::find(latest_.begin(),latest_.end(),item) ;
+    auto it=std::find(latest_.begin(),latest_.end(),item) ;
     if(it != latest_.end())
        latest_.erase(it);
 

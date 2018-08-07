@@ -34,7 +34,7 @@ InfoPanelItemFactory::~InfoPanelItemFactory()
 
 InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 {
-	std::map<std::string,InfoPanelItemFactory*>::iterator j = makers->find(name);
+	auto j = makers->find(name);
 	if(j != makers->end())
         return (*j).second->make();
 

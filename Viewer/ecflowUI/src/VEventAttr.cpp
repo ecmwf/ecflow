@@ -76,7 +76,7 @@ VAttributeType* VEventAttr::type() const
 
 QStringList VEventAttr::data(bool /*firstLine*/) const
 {
-    static VEventAttrType* atype=static_cast<VEventAttrType*>(type());
+    static auto* atype=static_cast<VEventAttrType*>(type());
     QStringList s;
     if(node_ptr node=parent_->node_)
     {
@@ -101,7 +101,7 @@ void VEventAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     if(vnode->node_)
     {
         const std::vector<Event>& v=vnode->node_->events();
-        int n=static_cast<int>(v.size());
+        auto n=static_cast<int>(v.size());
         for(int i=0; i < n; i++)
         {
             vec.push_back(new VEventAttr(vnode,v[i],i));

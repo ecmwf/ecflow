@@ -211,7 +211,7 @@ SessionItem* SessionHandler::add(const std::string& name)
 	// only add if not already there
 	if (find(name) == NULL)
 	{
-		SessionItem *item=new SessionItem(name);
+		auto *item=new SessionItem(name);
 		sessions_.push_back(item);
 		return item;
 	}
@@ -229,7 +229,7 @@ void SessionHandler::remove(const std::string& sessionName)
 
 void SessionHandler::remove(SessionItem* session)
 {
-    std::vector<SessionItem*>::iterator it = std::find(sessions_.begin(), sessions_.end(), session);
+    auto it = std::find(sessions_.begin(), sessions_.end(), session);
     assert(it != sessions_.end());  // session was not found - should not be possible
 
 

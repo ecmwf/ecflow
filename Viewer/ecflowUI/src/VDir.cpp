@@ -49,7 +49,7 @@ void VDir::clear()
 
 void VDir::addItem(const std::string& name, unsigned int size,unsigned int mtime)
 {
-	VDirItem* item=new VDirItem;
+	auto* item=new VDirItem;
 
 	boost::filesystem::path p(name);
 	//std::string dirName=p.parent_path().string();
@@ -77,7 +77,7 @@ void VDir::reload()
     {
         if(is_regular_file(p) && boost::algorithm::starts_with(p.filename().string(),pattern_))
         {
-        	VDirItem* item=new VDirItem;
+        	auto* item=new VDirItem;
 
         	item->name_ = p.filename().string();
         	item->size_ =  boost::filesystem::file_size(p);

@@ -148,7 +148,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
         Chunk *current = 0;
         d->documentSize = 0; // in case of unicode
         do {
-            Chunk *c = new Chunk;
+            auto *c = new Chunk;
             c->data = ts.read(d->chunkSize);
             if (options & AutoDetectCarriageReturns) {
                 if (c->data.contains(QLatin1Char('\n'))) {
@@ -175,7 +175,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
         int index = 0;
         Chunk *current = 0;
         do {
-            Chunk *chunk = new Chunk;
+            auto *chunk = new Chunk;
             chunk->from = index;
             chunk->length = qMin<int>(d->documentSize - index, d->chunkSize);
             if (!current) {
@@ -206,7 +206,7 @@ bool TextPagerDocument::load(const QString &fileName, DeviceMode mode, QTextCode
         QFile from(fileName);
         return from.open(QIODevice::ReadOnly) && load(&from, mode, codec);
     } else {
-        QFile *file = new QFile(fileName);
+        auto *file = new QFile(fileName);
         if (file->open(QIODevice::ReadOnly) && load(file, mode, codec)) {
             d->ownDevice = true;
             return true;
@@ -1017,7 +1017,7 @@ TextPagerSection *TextPagerDocument::insertTextSection(int pos, int size,
     Q_ASSERT(size >= 0);
     Q_ASSERT(pos < d->documentSize);
 
-    TextPagerSection *l = new TextPagerSection(pos, size, this, format, data);
+    auto *l = new TextPagerSection(pos, size, this, format, data);
     QList<TextPagerSection*>::iterator it = qLowerBound<QList<TextPagerSection*>::iterator>(d->sections.begin(), d->sections.end(), l, compareTextSection);
     d->sections.insert(it, l);
     Q_EMIT sectionAdded(l);

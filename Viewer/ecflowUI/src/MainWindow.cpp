@@ -76,7 +76,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     winTitle_->update();
 
     //Create the main layout
-    QVBoxLayout* layout=new QVBoxLayout();
+    auto* layout=new QVBoxLayout();
     layout->setContentsMargins(0,0,0,0);
     QWidget *w=new QWidget(this);
     w->setObjectName("c");
@@ -157,7 +157,7 @@ MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     }
 
     //Add notification widget
-    ChangeNotifyWidget* chw=new ChangeNotifyWidget(this);
+    auto* chw=new ChangeNotifyWidget(this);
     statusBar()->addPermanentWidget(chw);
 
     //Add clock widget
@@ -415,7 +415,7 @@ void MainWindow::updateRefreshActions()
 
 void MainWindow::slotOpenInfoPanel()
 {
-	if(QAction* ac=static_cast<QAction*>(sender()))
+	if(auto* ac=static_cast<QAction*>(sender()))
 	{
 		std::string name=ac->data().toString().toStdString();
 		nodePanel_->openDialog(selection_,name);
@@ -544,7 +544,7 @@ void MainWindow::writeSettings(VComboSettings *vs)
 
 void MainWindow::readSettings(VComboSettings *vs)
 {
-	int cnt=vs->get<int>("infoPanelCount",0);
+	auto cnt=vs->get<int>("infoPanelCount",0);
 	for(int i=0; i < cnt ; i++)
 	{
 		//addInfoPanel();
@@ -740,8 +740,8 @@ void MainWindow::init()
 	}
 
 	//Get number of windows and topWindow index.
-	int cnt=vs.get<int>("windowCount",0);
-	int topWinId=vs.get<int>("topWindowId",-1);
+	auto cnt=vs.get<int>("windowCount",0);
+	auto topWinId=vs.get<int>("topWindowId",-1);
 
 	if(cnt > maxWindowNum_)
 	{
@@ -865,7 +865,7 @@ void MainWindow::startPreferences(MainWindow *w,QString option)
 {
     Q_ASSERT(w);
 
-    PropertyDialog* d=new PropertyDialog; //belongs to the whole app
+    auto* d=new PropertyDialog; //belongs to the whole app
 
     d->showPage(option);
 

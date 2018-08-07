@@ -44,7 +44,7 @@ void AstCollateVNodesVisitor::visitNode(AstNode* astNode)
 {
     if(Node* referencedNode = astNode->referencedNode())
     {
-        if(VNode* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
+        if(auto* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
         {           
             items_.push_back(n);
         }
@@ -55,7 +55,7 @@ void AstCollateVNodesVisitor::visitVariable(AstVariable* astVar)
 {
     if(Node* referencedNode = astVar->referencedNode())
     {
-        if(VNode* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
+        if(auto* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
         {
             std::size_t nType=attrTypes.size();
             std::size_t nItem=items_.size();
@@ -81,7 +81,7 @@ void AstCollateVNodesVisitor::visitParentVariable(AstParentVariable* astVar)
 {
     if(Node* referencedNode = astVar->referencedNode())
     {
-        if(VNode* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
+        if(auto* n=static_cast<VNode*>(referencedNode->graphic_ptr()))
         {
             std::size_t nType=attrTypes.size();
             std::size_t nItem=items_.size();

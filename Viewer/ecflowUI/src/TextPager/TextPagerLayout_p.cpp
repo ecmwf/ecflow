@@ -403,7 +403,7 @@ void TextPagerLayout::updateViewportPosition(int pos, Direction direction,bool a
     
         if (textEdit && !suppressTextEditUpdates) {
             textEdit->viewport()->update();
-            TextEditPrivate *p = static_cast<TextEditPrivate*>(this);
+            auto *p = static_cast<TextEditPrivate*>(this);
             p->pendingScrollBarUpdate = true;
             p->updateCursorPosition(p->lastHoverPos);
             if (!textEdit->verticalScrollBar()->isSliderDown()) {

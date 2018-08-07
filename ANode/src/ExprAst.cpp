@@ -64,7 +64,7 @@ void AstTop::accept(ExprAstVisitor& v)
 
 AstTop* AstTop::clone() const
 {
-   AstTop* top = new AstTop();
+   auto* top = new AstTop();
    top->addChild( root_->clone() );
    return top;
 }
@@ -279,7 +279,7 @@ void AstNot::accept(ExprAstVisitor& v)
 
 AstNot* AstNot::clone() const
 {
-   AstNot* ast = new AstNot();
+   auto* ast = new AstNot();
    if (left_) ast->addChild( left_->clone() );
    return ast;
 }
@@ -341,7 +341,7 @@ void AstPlus::accept(ExprAstVisitor& v)
 
 AstPlus* AstPlus::clone() const
 {
-   AstPlus* ast = new AstPlus();
+   auto* ast = new AstPlus();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -393,7 +393,7 @@ void AstMinus::accept(ExprAstVisitor& v)
 
 AstMinus* AstMinus::clone() const
 {
-   AstMinus* ast = new AstMinus();
+   auto* ast = new AstMinus();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -445,7 +445,7 @@ void AstDivide::accept(ExprAstVisitor& v)
 
 AstDivide* AstDivide::clone() const
 {
-   AstDivide* ast = new AstDivide();
+   auto* ast = new AstDivide();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -514,7 +514,7 @@ void AstMultiply::accept(ExprAstVisitor& v)
 
 AstMultiply* AstMultiply::clone() const
 {
-   AstMultiply* ast = new AstMultiply();
+   auto* ast = new AstMultiply();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -566,7 +566,7 @@ void AstModulo::accept(ExprAstVisitor& v)
 
 AstModulo* AstModulo::clone() const
 {
-   AstModulo* ast = new AstModulo();
+   auto* ast = new AstModulo();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -636,7 +636,7 @@ void AstAnd::accept(ExprAstVisitor& v)
 
 AstAnd* AstAnd::clone() const
 {
-   AstAnd* ast = new AstAnd();
+   auto* ast = new AstAnd();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -689,7 +689,7 @@ void AstOr::accept(ExprAstVisitor& v)
 
 AstOr* AstOr::clone() const
 {
-   AstOr* ast = new AstOr();
+   auto* ast = new AstOr();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -742,7 +742,7 @@ void AstEqual::accept(ExprAstVisitor& v)
 
 AstEqual* AstEqual::clone() const
 {
-   AstEqual* ast = new AstEqual();
+   auto* ast = new AstEqual();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -794,7 +794,7 @@ void AstNotEqual::accept(ExprAstVisitor& v)
 }
 AstNotEqual* AstNotEqual::clone() const
 {
-   AstNotEqual* ast = new AstNotEqual();
+   auto* ast = new AstNotEqual();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -846,7 +846,7 @@ void AstLessEqual::accept(ExprAstVisitor& v)
 }
 AstLessEqual* AstLessEqual::clone() const
 {
-   AstLessEqual* ast = new AstLessEqual();
+   auto* ast = new AstLessEqual();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -898,7 +898,7 @@ void AstGreaterEqual::accept(ExprAstVisitor& v)
 }
 AstGreaterEqual* AstGreaterEqual::clone() const
 {
-   AstGreaterEqual* ast = new AstGreaterEqual();
+   auto* ast = new AstGreaterEqual();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -950,7 +950,7 @@ void AstGreaterThan::accept(ExprAstVisitor& v)
 }
 AstGreaterThan* AstGreaterThan::clone() const
 {
-   AstGreaterThan* ast = new AstGreaterThan();
+   auto* ast = new AstGreaterThan();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -1003,7 +1003,7 @@ void AstLessThan::accept(ExprAstVisitor& v)
 
 AstLessThan* AstLessThan::clone() const
 {
-   AstLessThan* ast = new AstLessThan();
+   auto* ast = new AstLessThan();
    if (left_) ast->addChild( left_->clone() );
    if (right_) ast->addChild( right_->clone() );
    return ast;
@@ -1147,7 +1147,7 @@ void AstInteger::accept(ExprAstVisitor& v)
 
 AstInteger* AstInteger::clone() const
 {
-   AstInteger* ast = new AstInteger(value_);
+   auto* ast = new AstInteger(value_);
    return ast;
 }
 

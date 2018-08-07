@@ -71,7 +71,7 @@ std::ostream& PathsCmd::my_print(std::ostream& os,const std::vector<std::string>
 
 bool PathsCmd::equals(ClientToServerCmd* rhs) const
 {
-   PathsCmd* the_rhs = dynamic_cast< PathsCmd* > ( rhs );
+   auto* the_rhs = dynamic_cast< PathsCmd* > ( rhs );
    if ( !the_rhs ) return false;
    if (api_ != the_rhs->api()) return false;
    if (paths_ != the_rhs->paths()) return false;

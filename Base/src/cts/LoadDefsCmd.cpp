@@ -72,7 +72,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
 
 bool LoadDefsCmd::equals(ClientToServerCmd* rhs) const
 {
-	LoadDefsCmd* the_rhs = dynamic_cast<LoadDefsCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<LoadDefsCmd*>(rhs);
 	if (!the_rhs)  return false;
 	if (!UserCmd::equals(rhs))  return false;
 	if (defs_  != the_rhs->defs_as_string()) return false;

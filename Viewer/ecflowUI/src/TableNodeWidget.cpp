@@ -50,17 +50,17 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,bool interactive,QWi
     }
 
 	//Create the table model. It uses the datahandler to access the data.
-    TableNodeModel* tModel=new TableNodeModel(serverFilter_,filterDef_,this);
+    auto* tModel=new TableNodeModel(serverFilter_,filterDef_,this);
     model_=tModel;
 
 	//Create a filter model for the tree.
     sortModel_=new TableNodeSortModel(tModel,this);
 
 	//Create the view
-	QHBoxLayout *hb=new QHBoxLayout(viewHolder_);
+	auto *hb=new QHBoxLayout(viewHolder_);
 	hb->setContentsMargins(0,0,0,0);
 	hb->setSpacing(0);
-    TableNodeView *tv=new TableNodeView(sortModel_,filterDef_,this);
+    auto *tv=new TableNodeView(sortModel_,filterDef_,this);
 	hb->addWidget(tv);
 
 	//Store the pointer to the (non-QObject) base class of the view!!!
@@ -112,7 +112,7 @@ TableNodeWidget::~TableNodeWidget()
 void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
 {
 	//Builds the menu for the settings tool button
-	QMenu *menu=new QMenu(this);
+	auto *menu=new QMenu(this);
 	menu->setTearOffEnabled(true);
 
 	menu->addAction(actionBreadcrumbs);
@@ -137,7 +137,7 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     //tw->slotUpdateTitle("<b>Table</b>");
 
     QList<QAction*> acLst;
-    QAction* acFilterEdit=new QAction(this);
+    auto* acFilterEdit=new QAction(this);
     acFilterEdit->setIcon(QPixmap(":viewer/filter_edit.svg"));
     acFilterEdit->setToolTip("Edit filter ...");
     acLst << acFilterEdit;

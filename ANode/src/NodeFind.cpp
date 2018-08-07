@@ -290,7 +290,7 @@ const Event& Node::findEventByNameOrNumber( const std::string& theName) const
    // Test for numeric, and then casting, is ****faster***** than relying on exception alone
    if ( theName.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
       try {
-         int eventNumber = boost::lexical_cast< int >( theName );
+         auto eventNumber = boost::lexical_cast< int >( theName );
          return findEventByNumber(eventNumber);
       }
       catch ( boost::bad_lexical_cast&) {}
@@ -603,7 +603,7 @@ void Node::findExprVariableAndPrint( const std::string& name, ostream& os) const
 node_ptr findRelativeNode(	const vector<std::string>& theExtractedPath,node_ptr triggerNode, std::string& errorMsg )
 {
    // The referenced node could be itself(error) or most likely a sibling node.
-   int extractedPathSize = static_cast<int>(theExtractedPath.size());
+   auto extractedPathSize = static_cast<int>(theExtractedPath.size());
    if (extractedPathSize == 1 && triggerNode->name() == theExtractedPath[0]) {
       // self referencing node ?
       return triggerNode;

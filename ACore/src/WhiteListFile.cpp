@@ -182,7 +182,7 @@ static bool path_access(const std::string& path,const std::vector<std::string>& 
 
 bool WhiteListFile::verify_path_access(const std::string& user,const std::vector<std::string>& paths,const mymap& user_path_map) const
 {
-   mymap::const_iterator it = user_path_map.find(user);
+   auto it = user_path_map.find(user);
    if (it != user_path_map.end()) {
       return path_access(paths,it->second);
    }
@@ -191,7 +191,7 @@ bool WhiteListFile::verify_path_access(const std::string& user,const std::vector
 
 bool WhiteListFile::verify_path_access(const std::string& user,const std::string& path,const mymap& user_path_map) const
 {
-   mymap::const_iterator it = user_path_map.find(user);
+   auto it = user_path_map.find(user);
    if (it != user_path_map.end()) {
       return path_access(path,it->second);
    }
@@ -322,9 +322,9 @@ bool WhiteListFile::validateVersionNumber(const std::string& line, std::string& 
 		}
 
 		try {
-			int major = boost::lexical_cast< int >( versionNumberTokens[0] );
-			int minor = boost::lexical_cast< int >( versionNumberTokens[1] );
-			int part = boost::lexical_cast< int >( versionNumberTokens[2] );
+			auto major = boost::lexical_cast< int >( versionNumberTokens[0] );
+			auto minor = boost::lexical_cast< int >( versionNumberTokens[1] );
+			auto part = boost::lexical_cast< int >( versionNumberTokens[2] );
 			if ( major < 4  ) {
  				errorMsg += "Only white list files with a version >= 4.4.5 is supported\n";
 				return false;
@@ -484,14 +484,14 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
 
    if (read_only) {
       if (!all_users_have_read_access_) {
-         mymap::iterator it = users_with_read_access_.find(user);
+         auto it = users_with_read_access_.find(user);
          if (it == users_with_read_access_.end()) users_with_read_access_.insert(std::make_pair(user,paths));
          else  std::copy(paths.begin(),paths.end(),std::back_inserter(it->second));
       }
    }
    else {
       if ( !all_users_have_write_access_) {
-         mymap::iterator it = users_with_write_access_.find(user);
+         auto it = users_with_write_access_.find(user);
          if (it == users_with_write_access_.end()) users_with_write_access_.insert(std::make_pair(user,paths));
          else  std::copy(paths.begin(),paths.end(),std::back_inserter(it->second));
       }

@@ -39,7 +39,7 @@ std::ostream& QueryCmd::print(std::ostream& os) const
 
 bool QueryCmd::equals(ClientToServerCmd* rhs) const
 {
-   QueryCmd* the_rhs = dynamic_cast<QueryCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<QueryCmd*>(rhs);
    if (!the_rhs) return false;
    if (query_type_        != the_rhs->query_type()) return false;
    if (path_to_attribute_ != the_rhs->path_to_attribute()) return false;

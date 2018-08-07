@@ -59,7 +59,7 @@ RepeatEditor::RepeatEditor(VInfo_ptr info,QWidget* parent) :
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "repeat");
 
-    VRepeatAttr *rep=static_cast<VRepeatAttr*>(a);
+    auto *rep=static_cast<VRepeatAttr*>(a);
 
 #if 0
     if(a->data().count() < 7)
@@ -221,7 +221,7 @@ void RepeatIntEditor::initSpinner()
     Q_ASSERT(a->type());
     Q_ASSERT(a->type()->name() == "repeat");
 
-    VRepeatAttr *rep=static_cast<VRepeatAttr*>(a);
+    auto *rep=static_cast<VRepeatAttr*>(a);
 
     int startIndex=rep->startIndex();
     int endIndex=rep->endIndex();

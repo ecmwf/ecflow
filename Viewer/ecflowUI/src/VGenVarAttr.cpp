@@ -67,7 +67,7 @@ VAttributeType* VGenVarAttr::type() const
 
 QStringList VGenVarAttr::data(bool /*firstLine*/) const
 {
-    static VGenVarAttrType* atype=static_cast<VGenVarAttrType*>(type());
+    static auto* atype=static_cast<VGenVarAttrType*>(type());
     QStringList s;
     if(parent_->isServer() == 0)
     {
@@ -95,7 +95,7 @@ void VGenVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     {
         std::vector<Variable> v;
         vnode->genVariables(v);
-        int n=static_cast<int>(v.size());
+        auto n=static_cast<int>(v.size());
         for(int i=0; i < n; i++)
         {
             vec.push_back(new VGenVarAttr(vnode,v[i],i));

@@ -65,7 +65,7 @@ void EditItemWidget::reload(VInfo_ptr info)
     if(info_ && info_->isNode() && info_->node())
     {
         //Get file contents
-        EditProvider* ep=static_cast<EditProvider*>(infoProvider_);
+        auto* ep=static_cast<EditProvider*>(infoProvider_);
         ep->preproc(preproc());
         infoProvider_->info(info_);
     }
@@ -112,7 +112,7 @@ void EditItemWidget::on_submitTb__clicked(bool)
 		txt.push_back(s.toStdString());
 	}
 
-	EditProvider* ep=static_cast<EditProvider*>(infoProvider_);
+	auto* ep=static_cast<EditProvider*>(infoProvider_);
 	ep->submit(txt,alias());
 }
 

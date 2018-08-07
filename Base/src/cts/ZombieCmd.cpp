@@ -41,7 +41,7 @@ std::ostream& ZombieCmd::print(std::ostream& os) const
 
 bool ZombieCmd::equals(ClientToServerCmd* rhs) const
 {
-	ZombieCmd* the_rhs = dynamic_cast< ZombieCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< ZombieCmd* > ( rhs );
 	if ( !the_rhs ) return false;
 	if (paths_ != the_rhs->paths()) return false;
 	if (process_id_ != the_rhs->process_or_remote_id()) return false;

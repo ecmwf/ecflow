@@ -94,7 +94,7 @@ VAttributeType* VTimeAttr::type() const
 
 QStringList VTimeAttr::data(bool /*firstLine*/) const
 {
-    static VTimeAttrType* atype=static_cast<VTimeAttrType*>(type());
+    static auto* atype=static_cast<VTimeAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
@@ -154,7 +154,7 @@ void VTimeAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         const std::vector<ecf::TodayAttr>& tdV=vnode->node_->todayVec();
         const std::vector<ecf::CronAttr>& cV=vnode->node_->crons();
 
-        int n=static_cast<int>(tV.size());
+        auto n=static_cast<int>(tV.size());
         for(int i=0; i < n; i++)
         {
             vec.push_back(new VTimeAttr(vnode,tV[i],i));

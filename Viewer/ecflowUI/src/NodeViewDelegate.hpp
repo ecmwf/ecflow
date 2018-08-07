@@ -82,7 +82,7 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
          sizeHintCache=QSize(100,fullHeight);
          spacing=fm.width('A')*3/4;
 
-         int h=static_cast<int>(static_cast<float>(fm.height())*0.7);
+         auto h=static_cast<int>(static_cast<float>(fm.height())*0.7);
          iconSize=h;
          if(iconSize % 2 == 1)
              iconSize+=1;

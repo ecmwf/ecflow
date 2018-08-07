@@ -27,7 +27,7 @@
 
 ServerLoadItemWidget::ServerLoadItemWidget(QWidget *parent)
 {
-    QVBoxLayout* vb=new QVBoxLayout(this);
+    auto* vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
 #ifdef ECFLOW_LOGVIEW
     w_=new LogLoadWidget(this);

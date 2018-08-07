@@ -234,7 +234,7 @@ static void validChangeAttr(std::vector<std::string>& vec)
 
 bool AlterCmd::equals(ClientToServerCmd* rhs) const
 {
-   AlterCmd* the_rhs = dynamic_cast<AlterCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<AlterCmd*>(rhs);
    if (!the_rhs)  return false;
    if ( paths_             != the_rhs->paths())      { return false; }
    if ( name_              != the_rhs->name())       { return false; }

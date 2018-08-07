@@ -74,7 +74,7 @@ NodeExpressionParser::NodeExpressionParser()
 
 NodeExpressionParser::NodeType NodeExpressionParser::nodeType(const std::string &name) const
 {
-    std::map<std::string,NodeType>::const_iterator it=nameToNodeType_.find(name);
+    auto it=nameToNodeType_.find(name);
     if(it != nameToNodeType_.end())
         return it->second;
 
@@ -83,7 +83,7 @@ NodeExpressionParser::NodeType NodeExpressionParser::nodeType(const std::string 
 
 const std::string& NodeExpressionParser::typeName(const NodeType& type) const
 {
-    std::map<NodeType,std::string>::const_iterator it=nodeTypeToName_.find(type);
+    auto it=nodeTypeToName_.find(type);
     if(it != nodeTypeToName_.end())
         return it->second;
 
@@ -92,7 +92,7 @@ const std::string& NodeExpressionParser::typeName(const NodeType& type) const
 
 VAttributeType* NodeExpressionParser::toAttrType(const std::string &name) const
 {
-    std::map<std::string,VAttributeType*>::const_iterator it=nameToAttrType_.find(name);
+    auto it=nameToAttrType_.find(name);
     if(it != nameToAttrType_.end())
         return it->second;
 
@@ -271,7 +271,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
             // are we expecting an arbitrary string?
             if ((funcStack.size() > 0) && (funcStack.back()->operand2IsArbitraryString()))
             {
-                WhatToSearchForOperand *whatToSearchFor = new WhatToSearchForOperand(*i_);
+                auto *whatToSearchFor = new WhatToSearchForOperand(*i_);
                 operandStack.push_back(whatToSearchFor);
                 result = whatToSearchFor;
                 updatedOperands = true;
@@ -286,7 +286,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 NodeExpressionParser::NodeType type = nodeType(*i_);
                 if (type != BAD)
                 {
-                    TypeNodeCondition *typeCond = new TypeNodeCondition(type);
+                    auto *typeCond = new TypeNodeCondition(type);
                     operandStack.push_back(typeCond);
                     result = typeCond;
                     updatedOperands = true;
@@ -329,7 +329,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 // node status change date
                 else if (*i_ == "status_change_time")
                 {
-                    NodeStatusChangeDateCondition *chDateCond = new NodeStatusChangeDateCondition();
+                    auto *chDateCond = new NodeStatusChangeDateCondition();
                     operandStack.push_back(chDateCond);
                     result = chDateCond;
                     updatedOperands = true;
@@ -338,7 +338,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 //else if ((attrType = toAttrType(*i_)) != NodeExpressionParser::BADATTRIBUTE)
                 else if ((attrType = toAttrType(*i_)) != NULL)
                 {
-                    AttributeCondition *attrCond = new AttributeCondition(attrType);
+                    auto *attrCond = new AttributeCondition(attrType);
                     operandStack.push_back(attrCond);
                     result = attrCond;
                     updatedOperands = true;
@@ -373,7 +373,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 //iso date operator
                 else if (*i_ == "date::<=")
                 {
-                    IsoDateLessThanEqualCondition *dateCond = new IsoDateLessThanEqualCondition();
+                    auto *dateCond = new IsoDateLessThanEqualCondition();
                     funcStack.push_back(dateCond);
                     result = dateCond;
                 }
@@ -381,14 +381,14 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 //iso date operator
                 else if (*i_ == "date::>=")
                 {
-                    IsoDateGreaterThanEqualCondition *dateCond = new IsoDateGreaterThanEqualCondition();
+                    auto *dateCond = new IsoDateGreaterThanEqualCondition();
                     funcStack.push_back(dateCond);
                     result = dateCond;
                 }
 
                 else if (*i_ == "marked")
                 {
-                    UIStateCondition *uiCond = new UIStateCondition(*i_);
+                    auto *uiCond = new UIStateCondition(*i_);
                     operandStack.push_back(uiCond);
                     result = uiCond;
                     updatedOperands = true;
@@ -397,28 +397,28 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 // logical operators
                 else if (*i_ == "and")
                 {
-                    AndNodeCondition *andCond = new AndNodeCondition();
+                    auto *andCond = new AndNodeCondition();
                     funcStack.push_back(andCond);
                     result = andCond;
                 }
 
                 else if (*i_ == "or")
                 {
-                    OrNodeCondition *orCond = new OrNodeCondition();
+                    auto *orCond = new OrNodeCondition();
                     funcStack.push_back(orCond);
                     result = orCond;
                 }
 
                 else if (*i_ == "not")
                 {
-                    NotNodeCondition *notCond = new NotNodeCondition();
+                    auto *notCond = new NotNodeCondition();
                     funcStack.push_back(notCond);
                     result = notCond;
                 }
 
                 else if(StringMatchMode::operToMode(*i_) != StringMatchMode::InvalidMatch)
                 {
-                    StringMatchCondition *stringMatchCond = new StringMatchCondition(StringMatchMode::operToMode(*i_), caseSensitiveStringMatch);
+                    auto *stringMatchCond = new StringMatchCondition(StringMatchMode::operToMode(*i_), caseSensitiveStringMatch);
                     funcStack.push_back(stringMatchCond);
                     result = stringMatchCond;
                 }
@@ -657,13 +657,13 @@ bool StateNodeCondition::execute(VItem* item)
 {
     if(item->isServer())
     {
-        VServer* s=static_cast<VServer*>(item);
+        auto* s=static_cast<VServer*>(item);
         assert(s);
         return (s->serverStateName() == stateName_);
     }
     else
     {
-        VNode* n=static_cast<VNode*>(item);
+        auto* n=static_cast<VNode*>(item);
         assert(n);
         return (n->stateName() == stateName_);
     }
@@ -765,14 +765,14 @@ StringMatchCondition::StringMatchCondition(StringMatchMode::Mode matchMode, bool
 
 bool StringMatchCondition::execute(VItem *item)
 {
-    WhatToSearchForOperand *searchForOperand = static_cast<WhatToSearchForOperand*> (operands_[0]);
-    WhatToSearchInOperand  *searchInOperand  = static_cast<WhatToSearchInOperand*>  (operands_[1]);
+    auto *searchForOperand = static_cast<WhatToSearchForOperand*> (operands_[0]);
+    auto  *searchInOperand  = static_cast<WhatToSearchInOperand*>  (operands_[1]);
 
     std::string searchIn = searchInOperand->what();
 
     if(item->isNode())
     {
-        VNode* n=static_cast<VNode*>(item);
+        auto* n=static_cast<VNode*>(item);
         //TODO  XXXX check - name, label, variable, etc
         if(searchIn == "node_name")
         {
@@ -810,7 +810,7 @@ bool NodeAttributeCondition::execute(VItem* item)
 
     else if(item->isNode())
     {
-         VNode* n=static_cast<VNode*>(item);
+         auto* n=static_cast<VNode*>(item);
          node_ptr node = n->node();
 
         if (nodeAttrName_ == "has_time")
@@ -843,7 +843,7 @@ bool NodeFlagCondition::execute(VItem* item)
 	}
     else if(item->isNode())
 	{
-         VNode* vnode=static_cast<VNode*>(item);
+         auto* vnode=static_cast<VNode*>(item);
 
         if(nodeFlagName_ == "is_zombie")
 			return vnode->isFlagSet(ecf::Flag::ZOMBIE);
@@ -992,7 +992,7 @@ qint64 NodeStatusChangeDateCondition::secsSinceEpoch(VItem* item) const
     Q_ASSERT(item);
     if(item->isNode())
     {
-         VNode* vnode=static_cast<VNode*>(item);
+         auto* vnode=static_cast<VNode*>(item);
          Q_ASSERT(vnode);
          return vnode->statusChangeTime();
     }
@@ -1017,8 +1017,8 @@ bool IsoDateGreaterThanEqualCondition::execute(VItem *node)
     Q_ASSERT(operands_[0]);
     Q_ASSERT(operands_[1]);
     //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
-    IsoDateCondition* leftOperand=static_cast<IsoDateCondition*> (operands_[1]);
-    IsoDateCondition* rightOperand=static_cast<IsoDateCondition*> (operands_[0]);
+    auto* leftOperand=static_cast<IsoDateCondition*> (operands_[1]);
+    auto* rightOperand=static_cast<IsoDateCondition*> (operands_[0]);
     Q_ASSERT(leftOperand);
     Q_ASSERT(rightOperand);
 
@@ -1046,8 +1046,8 @@ bool IsoDateLessThanEqualCondition::execute(VItem *node)
     Q_ASSERT(operands_[0]);
     Q_ASSERT(operands_[1]);
     //The operand order is swapped in popLastNOperands(). So 1 is right, 0 is left here.
-    IsoDateCondition* leftOperand=static_cast<IsoDateCondition*> (operands_[1]);
-    IsoDateCondition* rightOperand=static_cast<IsoDateCondition*> (operands_[0]);
+    auto* leftOperand=static_cast<IsoDateCondition*> (operands_[1]);
+    auto* rightOperand=static_cast<IsoDateCondition*> (operands_[0]);
     Q_ASSERT(leftOperand);
     Q_ASSERT(rightOperand);
 

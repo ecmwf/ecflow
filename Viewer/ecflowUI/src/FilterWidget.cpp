@@ -43,7 +43,7 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString titl
 {
 	buildTitle(title,parent);
 
-	QAction* acSep = new QAction(this);
+	auto* acSep = new QAction(this);
 	acSep->setSeparator(true);
 	menu_->addAction(acSep);
 
@@ -126,7 +126,7 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString titl
         }
     }
 
-	QAction *ac = new QAction(this);
+	auto *ac = new QAction(this);
 	ac->setSeparator(true);
 	menu_->addAction(ac);
 
@@ -175,13 +175,13 @@ void VParamFilterMenu::buildTitle(QString title,QMenu* parent)
 	titleLabel->setStyleSheet(titleQss);
 
 	QWidget *w=new QWidget(menu_);
-	QVBoxLayout *vb=new QVBoxLayout(w);
+	auto *vb=new QVBoxLayout(w);
 	vb->setContentsMargins(2,topMargin,2,2);
 	//vb->addSpacing(2);
 	vb->addWidget(titleLabel);
 	//vb->addSpacing(2);
 
-	QWidgetAction *titleAc = new QWidgetAction(menu_);
+	auto *titleAc = new QWidgetAction(menu_);
 	//Qt doc says: the ownership of the widget is passed to the widgetaction.
 	//So when the action is deleted it will be deleted as well.
 	titleAc->setDefaultWidget(w);
@@ -192,7 +192,7 @@ void VParamFilterMenu::buildTitle(QString title,QMenu* parent)
 
 void VParamFilterMenu::addAction(QString name,QString id)
 {
-	QAction *ac = new QAction(this);
+	auto *ac = new QAction(this);
 	ac->setText(name);
 	ac->setData(id);
 	ac->setCheckable(true);
@@ -287,11 +287,11 @@ ServerFilterMenu::ServerFilterMenu(QMenu * parent) :
 	allMenu_=new QMenu("All servers",menu_);
 	menu_->addMenu(allMenu_);
 
-	QAction* acFavSep = new QAction(this);
+	auto* acFavSep = new QAction(this);
 	acFavSep->setSeparator(true);
 	menu_->addAction(acFavSep);
 
-	QAction* acFavTitle = new QAction(this);
+	auto* acFavTitle = new QAction(this);
 	acFavTitle->setText(tr("Favourite or loaded servers"));
 	QFont f=acFavTitle->font();
 	f.setBold(true);
@@ -383,7 +383,7 @@ void ServerFilterMenu::buildFavourite()
 
 QAction* ServerFilterMenu::createAction(QString name,int id)
 {
-	QAction *ac = new QAction(this);
+	auto *ac = new QAction(this);
 	ac->setText(name);
 	ac->setData(id);
 	ac->setCheckable(true);
@@ -402,7 +402,7 @@ void ServerFilterMenu::slotChanged(bool)
 	if(!filter_)
 		return;
 
-	if(QAction *ac=static_cast<QAction*>(sender()))
+	if(auto *ac=static_cast<QAction*>(sender()))
 	{
 		if(ac->isSeparator()) return;
 

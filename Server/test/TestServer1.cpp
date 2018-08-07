@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( test_server )
    if ( test_ecf_port ) the_port1 = test_ecf_port;
    cout << "Find free port to start server, starting with port " << the_port1 << "\n";
 
-   int the_port = boost::lexical_cast<int>(the_port1);
+   auto the_port = boost::lexical_cast<int>(the_port1);
    while (!EcfPortLock::is_free(the_port)) the_port++;
    std::string port = boost::lexical_cast<std::string>(the_port);
    EcfPortLock::create(port);

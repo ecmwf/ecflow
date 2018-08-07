@@ -30,7 +30,7 @@ namespace po = boost::program_options;
 
 bool FreeDepCmd::equals(ClientToServerCmd* rhs) const
 {
-	FreeDepCmd* the_rhs = dynamic_cast<FreeDepCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<FreeDepCmd*>(rhs);
 	if (!the_rhs)  return false;
 	if ( paths_   != the_rhs->paths())   { return false;}
 	if ( all_     != the_rhs->all())     { return false; }

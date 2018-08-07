@@ -53,7 +53,7 @@ public:
    int get_x() const { return x_;}
 
    virtual bool equals(BaseCmd* rhs ) const {
-      Derived1* the_rhs = dynamic_cast<Derived1*>(rhs);
+      auto* the_rhs = dynamic_cast<Derived1*>(rhs);
       if (!the_rhs) return false;
       if (x_ !=  the_rhs->get_x()) return false;
       return true;

@@ -33,7 +33,7 @@ std::ostream& ServerVersionCmd::print(std::ostream& os) const
 
 bool ServerVersionCmd::equals(ClientToServerCmd* rhs) const
 {
-   ServerVersionCmd* the_rhs = dynamic_cast< ServerVersionCmd* > ( rhs );
+   auto* the_rhs = dynamic_cast< ServerVersionCmd* > ( rhs );
    if ( !the_rhs ) return false;
    return UserCmd::equals(rhs);
 }

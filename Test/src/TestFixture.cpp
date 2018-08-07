@@ -172,7 +172,7 @@ void TestFixture::init(const std::string& project_test_dir)
       // Note: linux64 and linux64intel, can run on same machine, on different workspace
       // Hence the lock file is not sufficient. Hence we will make a client server call.
       cout << "Find free port to start server, starting with port " << port_ << "\n";
-      int the_port = boost::lexical_cast<int>(port_);
+      auto the_port = boost::lexical_cast<int>(port_);
       while (!EcfPortLock::is_free(the_port)) the_port++;
       port_ = ClientInvoker::find_free_port(the_port,true /*show debug output */);
       EcfPortLock::create(port_);
@@ -427,6 +427,6 @@ int TestFixture::server_version()
    // Could 4.0.8rc1
    Str::replace_all(the_server_version_str,"rc1","");
    Str::replace_all(the_server_version_str,"rc2","");
-   int the_server_version = boost::lexical_cast<int>(the_server_version_str);
+   auto the_server_version = boost::lexical_cast<int>(the_server_version_str);
    return the_server_version;
 }

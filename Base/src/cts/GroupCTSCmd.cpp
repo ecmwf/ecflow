@@ -182,7 +182,7 @@ std::ostream& GroupCTSCmd::print(std::ostream& os) const
 
 bool GroupCTSCmd::equals(ClientToServerCmd* rhs) const
 {
-	GroupCTSCmd* the_rhs = dynamic_cast< GroupCTSCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< GroupCTSCmd* > ( rhs );
 	if ( !the_rhs ) return false;
 
  	const std::vector<Cmd_ptr>& rhsCmdVec = the_rhs->cmdVec();

@@ -85,7 +85,7 @@ VAttributeType* VDateAttr::type() const
 
 QStringList VDateAttr::data(bool /*firstLine*/) const
 {
-    static VDateAttrType* atype=static_cast<VDateAttrType*>(type());
+    static auto* atype=static_cast<VDateAttrType*>(type());
     QStringList s;
     if(parent_->node_)
     {
@@ -132,7 +132,7 @@ void VDateAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         const std::vector<DateAttr>& dateV=vnode->node_->dates();
         const std::vector<DayAttr>& dayV=vnode->node_->days();
 
-        int n=static_cast<int>(dateV.size());
+        auto n=static_cast<int>(dateV.size());
         for(int i=0; i < n; i++)
         {
             vec.push_back(new VDateAttr(vnode,dateV[i],i));

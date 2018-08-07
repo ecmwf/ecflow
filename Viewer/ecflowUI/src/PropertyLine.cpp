@@ -78,7 +78,7 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* pa
 		return 0;
 
 	VProperty::GuiType t=p->link()->guiType();
-	std::map<VProperty::GuiType,PropertyLineFactory*>::iterator j = makers->find(t);
+	auto j = makers->find(t);
 	if(j != makers->end())
 		return (*j).second->make(p,addLabel,parent);
 
@@ -506,7 +506,7 @@ FontPropertyLine::FontPropertyLine(VProperty* guiProp,bool addLabel,QWidget * pa
 
 	holderW_=new QWidget(parent);
 
-	QHBoxLayout* hb=new QHBoxLayout(holderW_);
+	auto* hb=new QHBoxLayout(holderW_);
 	hb->setContentsMargins(0,0,0,0);
 
 	QFontDatabase db;
@@ -641,7 +641,7 @@ IntPropertyLine::IntPropertyLine(VProperty* guiProp,bool addLabel,QWidget * pare
 	le_=new QLineEdit(parent);
     le_->setObjectName(prop_->name());
 
-    QIntValidator* validator=new QIntValidator(le_);
+    auto* validator=new QIntValidator(le_);
 
 	QString s=guiProp->param("max");
 	if(!s.isEmpty())

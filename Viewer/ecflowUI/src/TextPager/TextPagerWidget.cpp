@@ -38,7 +38,7 @@ TextPagerWidget::TextPagerWidget(QWidget *parent) :
    doLineNumbers(true),
    gotoLineDialog_(NULL)
 {
-	QHBoxLayout* hb=new QHBoxLayout(this);
+	auto* hb=new QHBoxLayout(this);
 	hb->setContentsMargins(0,0,0,0);
 	hb->setSpacing(0);
 

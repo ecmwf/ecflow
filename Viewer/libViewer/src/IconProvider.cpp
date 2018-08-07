@@ -44,7 +44,7 @@ IconItem::IconItem(QString path) : path_(path), id_(idCnt++)
 
 QPixmap IconItem::pixmap(int size)
 {
- 	 std::map<int,QPixmap>::iterator it=pixmaps_.find(size);
+ 	 auto it=pixmaps_.find(size);
 	 if(it != pixmaps_.end())
 	   	return it->second;
 	 else
@@ -95,7 +95,7 @@ IconProvider::IconProvider()
 
 QString IconProvider::path(int id)
 {
-	std::map<int,IconItem*>::iterator it=iconsById_.find(id);
+	auto it=iconsById_.find(id);
 	if(it != iconsById_.end())
 		return it->second->path();
 
@@ -105,7 +105,7 @@ QString IconProvider::path(int id)
 
 int IconProvider::add(QString path,QString name)
 {
-	std::map<QString,IconItem*>::iterator it=icons_.find(name);
+	auto it=icons_.find(name);
 	if(it == icons_.end())
 	{
 		IconItem *p=new IconItem(path);
@@ -119,7 +119,7 @@ int IconProvider::add(QString path,QString name)
 
 IconItem* IconProvider::icon(QString name)
 {
-	std::map<QString,IconItem*>::iterator it=icons_.find(name);
+	auto it=icons_.find(name);
 	if(it != icons_.end())
 		return it->second;
 
@@ -128,7 +128,7 @@ IconItem* IconProvider::icon(QString name)
 
 IconItem* IconProvider::icon(int id)
 {
-	std::map<int,IconItem*>::iterator it=iconsById_.find(id);
+	auto it=iconsById_.find(id);
 	if(it != iconsById_.end())
 		return it->second;
 

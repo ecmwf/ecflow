@@ -235,7 +235,7 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as)
 
 bool SSyncCmd::equals(ServerToClientCmd* rhs) const
 {
-   SSyncCmd* the_rhs = dynamic_cast<SSyncCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<SSyncCmd*>(rhs);
    if (!the_rhs) return false;
    return ServerToClientCmd::equals(rhs);
 }

@@ -97,7 +97,7 @@ InfoPanel::~InfoPanel()
 
 QMenu* InfoPanel::buildOptionsMenu()
 {
-    QMenu *menu=new QMenu(this);
+    auto *menu=new QMenu(this);
     menu->setTearOffEnabled(true);
 
     menu->addAction(actionBreadcrumbs_);
@@ -132,17 +132,17 @@ void InfoPanel::populateDialog()
     QMenu *menu=buildOptionsMenu();
 
     QWidget *cornerW=new QWidget(this);
-    QHBoxLayout *hb=new QHBoxLayout(cornerW);
+    auto *hb=new QHBoxLayout(cornerW);
     hb->setContentsMargins(0,0,0,0);
     hb->setSpacing(1);
 
-    QToolButton *detachedTb=new QToolButton(this);
+    auto *detachedTb=new QToolButton(this);
     detachedTb->setAutoRaise(true);
     detachedTb->setDefaultAction(detachedAction_);
     hb->addWidget(detachedTb);
     setDetached(true); //by default a dialog is detached!
 
-    QToolButton* optionsTb=new QToolButton(this);
+    auto* optionsTb=new QToolButton(this);
     optionsTb->setAutoRaise(true);
     optionsTb->setIcon(QPixmap(":/viewer/cogwheel.svg"));
     optionsTb->setPopupMode(QToolButton::InstantPopup);
@@ -496,7 +496,7 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
         //the tab will stay its parent even if iw got removed from the tab!
 		//So when the tab is deleted all the iw-s will be correctly deleted as well.
 
-		InfoPanelItemHandler* h=new InfoPanelItemHandler(def,iw);
+		auto* h=new InfoPanelItemHandler(def,iw);
 		items_ << h;
 		return h;
 	}

@@ -121,13 +121,13 @@ TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget *parent) : QDialog(pare
 {
     setupUi(this);
 
-    QAction *sep1=new QAction(this);
+    auto *sep1=new QAction(this);
     sep1->setSeparator(true);
 
-    QAction *sep2=new QAction(this);
+    auto *sep2=new QAction(this);
     sep2->setSeparator(true);
 
-    QAction *sep3=new QAction(this);
+    auto *sep3=new QAction(this);
     sep3->setSeparator(true);
 
     table_->addAction(actionAdd_);
@@ -177,7 +177,7 @@ void TextFilterHandlerDialog::reloadTable()
         //Replace whitespace with Open Box U+2423 just for better interpretation
         filterTxt.replace(QChar(' '),QChar(9251));
 
-        QTableWidgetItem *filterItem = new QTableWidgetItem(filterTxt);
+        auto *filterItem = new QTableWidgetItem(filterTxt);
         QTableWidgetItem *matchedItem = new QTableWidgetItem((items[i].matched())?"match":"no match");
         QTableWidgetItem *caseItem = new QTableWidgetItem((items[i].caseSensitive())?"yes":"no");
         QTableWidgetItem *contextItem = new QTableWidgetItem((items[i].contextMenu())?"yes":"no");

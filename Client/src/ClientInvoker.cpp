@@ -317,7 +317,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 
 						   // If the command was a delete_all command, reset client_handle
 						   if (cts_cmd->delete_all_cmd()) {
-						      ClientInvoker* non_const_this = const_cast<ClientInvoker*>(this);
+						      auto* non_const_this = const_cast<ClientInvoker*>(this);
 						      non_const_this->reset();
 						   }
 							return 0; // the normal exit path

@@ -55,7 +55,7 @@ std::ostream& ClientHandleCmd::print(std::ostream& os) const
 
 bool ClientHandleCmd::equals(ClientToServerCmd* rhs) const
 {
-	ClientHandleCmd* the_rhs = dynamic_cast< ClientHandleCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< ClientHandleCmd* > ( rhs );
 	if ( !the_rhs ) return false;
    if (api_ != the_rhs->api()) return false;
    if (drop_user_ != the_rhs->drop_user()) return false;

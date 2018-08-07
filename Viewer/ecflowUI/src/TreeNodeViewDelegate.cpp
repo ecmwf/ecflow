@@ -96,7 +96,7 @@ public:
          sizeHintCache=QSize(100,fullHeight);
          spacing=fm.width('A')*3/4;
 
-         int h=static_cast<int>(static_cast<float>(fm.height())*0.7);
+         auto h=static_cast<int>(static_cast<float>(fm.height())*0.7);
          iconSize=h;
          if(iconSize % 2 == 1)
              iconSize+=1;
@@ -1107,7 +1107,7 @@ void TreeNodeViewDelegate::renderTimer(QPainter *painter,QRect target,int remain
     QPainter p(&img);
     p.setRenderHint(QPainter::Antialiasing,true);
 
-    int angle=static_cast<int>(360.*static_cast<float>(total-remaining)/static_cast<float>(total));
+    auto angle=static_cast<int>(360.*static_cast<float>(total-remaining)/static_cast<float>(total));
     /*angle-=90.;
     if(angle >=0 && angle <= 90) angle=90-angle;
     else
@@ -1154,7 +1154,7 @@ void TreeNodeViewDelegate::renderServerUpdate(QPainter* painter,const ServerUpda
         int dh=(data.br_.height()-fm.height()+1)/2;
         QRect r=data.br_.adjusted(r1.width()+4,2*dh,-r2.width()-4,-2*dh);
 
-        int pos=static_cast<int>(data.prog_* r.width());
+        auto pos=static_cast<int>(data.prog_* r.width());
         QRect rPrev=r.adjusted(0,0,-(r.width()-pos),0);
 
         QLinearGradient grad;

@@ -23,7 +23,7 @@ using namespace boost;
 
 bool SStringCmd::equals(ServerToClientCmd* rhs) const
 {
-	SStringCmd* the_rhs = dynamic_cast<SStringCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<SStringCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (str_ != the_rhs->get_string()) return false;
 	return ServerToClientCmd::equals(rhs);

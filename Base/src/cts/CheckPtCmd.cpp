@@ -31,7 +31,7 @@ std::ostream& CheckPtCmd::print(std::ostream& os) const
 
 bool CheckPtCmd::equals(ClientToServerCmd* rhs) const
 {
-   CheckPtCmd* the_rhs = dynamic_cast< CheckPtCmd* > ( rhs );
+   auto* the_rhs = dynamic_cast< CheckPtCmd* > ( rhs );
    if ( !the_rhs ) return false;
    if (mode_ != the_rhs->mode()) return false;
    if (check_pt_interval_ != the_rhs->check_pt_interval()) return false;

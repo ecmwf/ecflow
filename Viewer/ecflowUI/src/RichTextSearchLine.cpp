@@ -26,7 +26,7 @@ RichTextSearchLine::~RichTextSearchLine()
 
 void RichTextSearchLine::setEditor(QTextBrowser *e)
 {
-    RichTextSearchInterface *pti=static_cast<RichTextSearchInterface*>(interface_);
+    auto *pti=static_cast<RichTextSearchInterface*>(interface_);
     assert(pti);
     pti->setEditor(e);
 }

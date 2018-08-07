@@ -72,7 +72,7 @@ std::ostream& LogCmd::print(std::ostream& os) const
 
 bool LogCmd::equals(ClientToServerCmd* rhs) const
 {
-	LogCmd* the_rhs = dynamic_cast< LogCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< LogCmd* > ( rhs );
 	if ( !the_rhs ) return false;
 	if (api_ != the_rhs->api()) return false;
 	if (get_last_n_lines_ != the_rhs->get_last_n_lines()) return false;

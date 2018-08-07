@@ -38,7 +38,7 @@ namespace po = boost::program_options;
 
 bool PlugCmd::equals(ClientToServerCmd* rhs) const
 {
-   PlugCmd* the_rhs = dynamic_cast<PlugCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<PlugCmd*>(rhs);
    if (!the_rhs)  return false;
    if ( source_ != the_rhs->source()) { return false; }
    if ( dest_   != the_rhs->dest())   { return false; }
@@ -256,7 +256,7 @@ MoveCmd::~MoveCmd(){}
 
 bool MoveCmd::equals(ClientToServerCmd* rhs) const
 {
-   MoveCmd* the_rhs = dynamic_cast<MoveCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<MoveCmd*>(rhs);
    if (!the_rhs) return false;
    if (dest_   != the_rhs->dest())   { return false; }
    if (src_node_   != the_rhs->src_node())   { return false; }

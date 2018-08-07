@@ -65,7 +65,7 @@ void SClientHandleSuitesCmd::init(AbstractServer* as)
 
 bool SClientHandleSuitesCmd::equals(ServerToClientCmd* rhs) const
 {
-   SClientHandleSuitesCmd* the_rhs = dynamic_cast<SClientHandleSuitesCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<SClientHandleSuitesCmd*>(rhs);
    if (!the_rhs) return false;
    return ServerToClientCmd::equals(rhs);
 }

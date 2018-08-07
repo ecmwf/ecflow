@@ -77,7 +77,7 @@ void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
 	NodeQuery *q=filterDef_->query()->clone();
 	if(column == "status")
 	{
-		QMenu *menu=new QMenu(this);
+		auto *menu=new QMenu(this);
 		//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
 
 		NodeStateFilter sf;

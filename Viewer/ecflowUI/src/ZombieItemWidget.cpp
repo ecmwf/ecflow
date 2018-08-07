@@ -49,7 +49,7 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) :
             this,SLOT(slotDoubleClicked(const QModelIndex&)));
 
 	//Build context menu
-    QAction* sep1=new QAction(this);
+    auto* sep1=new QAction(this);
     sep1->setSeparator(true);
 
     zombieView->addAction(actionRescue);

@@ -121,7 +121,7 @@ void NodePanel::slotCurrentWidgetChanged(int /*index*/)
     {
         if(QWidget *w=widget(i))
         {
-            if(Dashboard* nw=static_cast<Dashboard*>(w))
+            if(auto* nw=static_cast<Dashboard*>(w))
                 nw->titleHandler()->setCurrent(i==currentIndex());
         }
      }
@@ -152,7 +152,7 @@ void NodePanel::slotSelection(VInfo_ptr n)
 
 void NodePanel::slotSelectionChangedInWidget(VInfo_ptr n)
 {
-    if(Dashboard *w=static_cast<Dashboard*>(sender()))
+    if(auto *w=static_cast<Dashboard*>(sender()))
     {
         if(w == currentDashboard())
             Q_EMIT selectionChangedInCurrent(n);
@@ -166,7 +166,7 @@ bool NodePanel::selectInTreeView(VInfo_ptr info)
     {
         if(QWidget *w=widget(i))
         {
-            if(Dashboard* nw=static_cast<Dashboard*>(w))
+            if(auto* nw=static_cast<Dashboard*>(w))
                 if(nw->selectInTreeView(info))
                 {
                     setCurrentIndex(i);
@@ -255,7 +255,7 @@ void NodePanel::adjustTabTitle()
         {
             if(QWidget *w=widget(i))
             {
-                if(Dashboard* nw=static_cast<Dashboard*>(w))
+                if(auto* nw=static_cast<Dashboard*>(w))
                     nw->titleHandler()->setMaxPixWidth(tabWidth);
             }
         }
@@ -304,7 +304,7 @@ void NodePanel::reload()
 	{
 		if(QWidget *w=widget(i))
 		{
-			if(Dashboard* nw=static_cast<Dashboard*>(w))
+			if(auto* nw=static_cast<Dashboard*>(w))
 				nw->reload();
 		}
 	}
@@ -316,7 +316,7 @@ void NodePanel::rerender()
 	{
 		if(QWidget *w=widget(i))
 		{
-			if(Dashboard* nw=static_cast<Dashboard*>(w))
+			if(auto* nw=static_cast<Dashboard*>(w))
 				nw->rerender();
 		}
 	}
@@ -394,8 +394,8 @@ void NodePanel::readSettings(VComboSettings *vs)
 {
 	using boost::property_tree::ptree;
 
-	int cnt=vs->get<int>("tabCount",0);
-	int currentIndex=vs->get<int>("currentTabId",-1);
+	auto cnt=vs->get<int>("tabCount",0);
+	auto currentIndex=vs->get<int>("currentTabId",-1);
 
 	for(int i=0; i < cnt; i++)
 	{

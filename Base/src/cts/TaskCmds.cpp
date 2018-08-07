@@ -35,7 +35,7 @@ namespace po = boost::program_options;
 ////////////////////////////////////////////////////////////////////////////////////////////////
 bool TaskCmd::equals(ClientToServerCmd* rhs) const
 {
-	TaskCmd* the_rhs = dynamic_cast<TaskCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<TaskCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (path_to_submittable_ !=  the_rhs->path_to_node()) return false;
 	if (jobs_password_ !=  the_rhs->jobs_password()) return false;
@@ -310,7 +310,7 @@ std::ostream& InitCmd::print(std::ostream& os) const
 
 bool InitCmd::equals(ClientToServerCmd* rhs) const
 {
-	InitCmd* the_rhs = dynamic_cast<InitCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<InitCmd*>(rhs);
 	if (!the_rhs) return false;
 	return TaskCmd::equals(rhs);
 }
@@ -393,7 +393,7 @@ std::ostream& CompleteCmd::print(std::ostream& os) const
 
 bool CompleteCmd::equals(ClientToServerCmd* rhs) const
 {
-	CompleteCmd* the_rhs = dynamic_cast<CompleteCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<CompleteCmd*>(rhs);
 	if (!the_rhs) return false;
  	return TaskCmd::equals(rhs);
 }
@@ -479,7 +479,7 @@ std::ostream& CtsWaitCmd::print(std::ostream& os) const
 
 bool CtsWaitCmd::equals(ClientToServerCmd* rhs) const
 {
-	CtsWaitCmd* the_rhs = dynamic_cast< CtsWaitCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< CtsWaitCmd* > ( rhs );
 	if ( !the_rhs ) return false;
  	if (expression_ != the_rhs->expression()) return false;
 	return TaskCmd::equals(rhs);
@@ -579,7 +579,7 @@ std::ostream& AbortCmd::print(std::ostream& os) const
 
 bool AbortCmd::equals(ClientToServerCmd* rhs) const
 {
-	AbortCmd* the_rhs = dynamic_cast<AbortCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<AbortCmd*>(rhs);
 	if (!the_rhs) return false;
  	if (reason_ != the_rhs->reason()) return false;
  	return TaskCmd::equals(rhs);
@@ -658,7 +658,7 @@ void AbortCmd::create( 	Cmd_ptr& cmd,
 
 bool EventCmd::equals(ClientToServerCmd* rhs) const
 {
-	EventCmd* the_rhs = dynamic_cast<EventCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<EventCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (name_ != the_rhs->name()) return false;
   	return TaskCmd::equals(rhs);
@@ -737,7 +737,7 @@ void EventCmd::create( 	Cmd_ptr& cmd,
 
 bool MeterCmd::equals(ClientToServerCmd* rhs) const
 {
-	MeterCmd* the_rhs = dynamic_cast<MeterCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<MeterCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (name_ != the_rhs->name()) return false;
 	if (value_ != the_rhs->value()) return false;
@@ -853,7 +853,7 @@ void MeterCmd::create( 	Cmd_ptr& cmd,
 
 bool LabelCmd::equals(ClientToServerCmd* rhs) const
 {
-	LabelCmd* the_rhs = dynamic_cast<LabelCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<LabelCmd*>(rhs);
 	if (!the_rhs) return false;
 	if (name_ != the_rhs->name()) return false;
 	if (label_ != the_rhs->label()) return false;
@@ -955,7 +955,7 @@ void LabelCmd::create( 	Cmd_ptr& cmd,
 
 bool QueueCmd::equals(ClientToServerCmd* rhs) const
 {
-   QueueCmd* the_rhs = dynamic_cast<QueueCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<QueueCmd*>(rhs);
    if (!the_rhs) return false;
    if (name_ != the_rhs->name()) return false;
    if (action_ != the_rhs->action()) return false;

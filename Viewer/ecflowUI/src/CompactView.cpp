@@ -367,7 +367,7 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
 {
     itemsInRow=0;
     bool leaf=false;
-    const int itemsCount = static_cast<int>(viewItems_.size());
+    const auto itemsCount = static_cast<int>(viewItems_.size());
 
     //Get the rowheight
     int iir=0;
@@ -709,7 +709,7 @@ void CompactView::rowProperties(int start,int& rowHeight,int &itemsInRow,std::ve
 {
     rowHeight=0;
     itemsInRow=0;
-    const int itemsCount = static_cast<int>(viewItems_.size());
+    const auto itemsCount = static_cast<int>(viewItems_.size());
 
     for(int i=start; i < itemsCount; i++)
     {
@@ -748,7 +748,7 @@ int CompactView::rowHeight(int start,int forward, int &itemsInRow) const
 {
     uint rh=0;
     itemsInRow=0;
-    const int itemsCount = static_cast<int>(viewItems_.size());
+    const auto itemsCount = static_cast<int>(viewItems_.size());
 
     if(forward == 1)
     {
@@ -851,7 +851,7 @@ int CompactView::firstVisibleItem(int &offset) const
 void CompactView::updateRowCount()
 {
     rowCount_=0;
-    const int itemsCount = static_cast<int>(viewItems_.size());
+    const auto itemsCount = static_cast<int>(viewItems_.size());
     for(int i=0; i < itemsCount; i++)
     {
         if(viewItems_[i].total == 0)

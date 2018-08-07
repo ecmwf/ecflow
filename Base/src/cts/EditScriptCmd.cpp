@@ -36,7 +36,7 @@ namespace fs = boost::filesystem;
 
 bool EditScriptCmd::equals(ClientToServerCmd* rhs) const
 {
-	EditScriptCmd* the_rhs = dynamic_cast<EditScriptCmd*>(rhs);
+	auto* the_rhs = dynamic_cast<EditScriptCmd*>(rhs);
 	if (!the_rhs)  return false;
 	if ( path_to_node_ != the_rhs->path_to_node()) { return false; }
    if ( edit_type_    != the_rhs->edit_type())    { return false; }

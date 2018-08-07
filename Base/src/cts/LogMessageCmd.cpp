@@ -33,7 +33,7 @@ std::ostream& LogMessageCmd::print(std::ostream& os) const
 
 bool LogMessageCmd::equals(ClientToServerCmd* rhs) const
 {
-	LogMessageCmd* the_rhs = dynamic_cast< LogMessageCmd* > ( rhs );
+	auto* the_rhs = dynamic_cast< LogMessageCmd* > ( rhs );
 	if ( !the_rhs ) return false;
 	if (msg_ != the_rhs->msg()) return false;
  	return UserCmd::equals(rhs);

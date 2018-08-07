@@ -60,7 +60,7 @@ std::ostream& CtsNodeCmd::print(std::ostream& os) const
 
 bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const
 {
-   CtsNodeCmd* the_rhs = dynamic_cast< CtsNodeCmd* > ( rhs );
+   auto* the_rhs = dynamic_cast< CtsNodeCmd* > ( rhs );
    if ( !the_rhs ) return false;
    if (api_ != the_rhs->api()) return false;
    if (absNodePath_ != the_rhs->absNodePath()) return false;

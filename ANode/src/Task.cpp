@@ -243,8 +243,8 @@ alias_ptr Task::add_alias(std::vector<std::string>& user_file_contents,const Nam
    // i.e it allows for  %A:1%, %A:2%, %A:3%
    // This is not really recommended but its what the old system supported.
    // **** Hence add_alias_variable by passes variable name checking ***
-   NameValueVec::const_iterator theEnd = user_variables.end();
-   for(NameValueVec::const_iterator i = user_variables.begin(); i!=theEnd; ++i) {
+   auto theEnd = user_variables.end();
+   for(auto i = user_variables.begin(); i!=theEnd; ++i) {
       alias->add_alias_variable((*i).first, (*i).second);
    }
 
@@ -495,7 +495,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
       if (findParentUserVariableValue( Str::ECF_TRIES(), varValue ))  {
          // std::cout << "tryNo_ = " << tryNo_ << " ECF_TRIES = " <<  varValue << "\n";
          try {
-            int ecf_tries = boost::lexical_cast< int > (varValue);
+            auto ecf_tries = boost::lexical_cast< int > (varValue);
             if ( try_no() >= ecf_tries ) {
 #ifdef DEBUG_DEPENDENCIES
                LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as tryNo_(" << tryNo_ ") >= ECF_TRIES(" << ecf_tries << ") state = " << NState::toString(state()));
@@ -608,8 +608,8 @@ node_ptr Task::removeChild(Node* child)
 bool Task::doDeleteChild(Node* child)
 {
    SuiteChanged1 changed(suite());
-   std::vector<alias_ptr>::iterator the_end = aliases_.end();
-   for(std::vector<alias_ptr>::iterator t = aliases_.begin(); t!=the_end; ++t) {
+   auto the_end = aliases_.end();
+   for(auto t = aliases_.begin(); t!=the_end; ++t) {
       if ( (*t).get() == child) {
          if (child && child->parent()) child->set_parent(NULL);
          aliases_.erase(t);
@@ -650,7 +650,7 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
    SuiteChanged1 changed(suite());
    switch (ord) {
       case NOrder::TOP:  {
-         for(std::vector<alias_ptr>::iterator i = aliases_.begin(); i != aliases_.end(); ++i) {
+         for(auto i = aliases_.begin(); i != aliases_.end(); ++i) {
             if ((*i).get() == immediateChild) {
                alias_ptr node = (*i);
                aliases_.erase(i);
@@ -662,7 +662,7 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
          throw std::runtime_error("Task::order TOP, immediate child not found");
       }
       case NOrder::BOTTOM:  {
-         for(std::vector<alias_ptr>::iterator i = aliases_.begin(); i != aliases_.end(); ++i) {
+         for(auto i = aliases_.begin(); i != aliases_.end(); ++i) {
             if ((*i).get() == immediateChild) {
                alias_ptr node = (*i);
                aliases_.erase(i);

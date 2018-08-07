@@ -515,7 +515,7 @@ BOOST_AUTO_TEST_CASE( test_calendar_julian )
       long boost_julian = cal_date.julian_day();
 
       std::string iso_string = to_iso_string(cal_date);
-      long date_as_long = boost::lexical_cast<long>(iso_string);
+      auto date_as_long = boost::lexical_cast<long>(iso_string);
       long ecmwf_julian = Cal::date_to_julian(date_as_long);
 
       BOOST_CHECK_MESSAGE(boost_julian == ecmwf_julian,"boost julian " << boost_julian << " != ecmwf julian " << ecmwf_julian << " for "  << iso_string);

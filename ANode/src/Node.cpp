@@ -1007,7 +1007,7 @@ void Node::decrementInLimit(std::set<Limit*>& limitSet)
 
 static bool search_user_edit_variables( const std::string& name, std::string& value, const NameValueMap& user_edit_variables )
 {
-   NameValueMap::const_iterator i = user_edit_variables.find(name);
+   auto i = user_edit_variables.find(name);
    if (i != user_edit_variables.end()) {
       if (((*i).second).empty()) {
          // when we call --edit_script submit file, before a job is submitted the values
@@ -1989,8 +1989,8 @@ void Node::bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags) 
       vec.push_back(theParent);
       theParent = theParent->parent();
    }
-   vector<Node*>::reverse_iterator r_end = vec.rend();
-   for(vector<Node*>::reverse_iterator r = vec.rbegin(); r!=r_end; ++r) {
+   auto r_end = vec.rend();
+   for(auto r = vec.rbegin(); r!=r_end; ++r) {
       (void)(*r)->why(theReasonWhy,false,html_tags);
    }
 }
@@ -2111,8 +2111,8 @@ std::string Node::absNodePath() const
       theParent = theParent->parent();
    }
    std::string ret; ret.reserve(Str::reserve_64());
-   vector<string>::reverse_iterator r_end = vec.rend();
-   for(vector<string>::reverse_iterator r = vec.rbegin(); r!=r_end; ++r) {
+   auto r_end = vec.rend();
+   for(auto r = vec.rbegin(); r!=r_end; ++r) {
       ret += '/';
       ret += *r;
    }

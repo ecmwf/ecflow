@@ -104,7 +104,7 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 	QTreeView::setModel(model_);
 
     //Create delegate to the view
-    TableNodeViewDelegate *delegate=new TableNodeViewDelegate(this);
+    auto *delegate=new TableNodeViewDelegate(this);
     setItemDelegate(delegate);
 
 	connect(delegate,SIGNAL(sizeHintChangedGlobal()),
@@ -323,7 +323,7 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
     }
 
 	QList<QAction*> lst;
-	QMenu *menu=new QMenu(this);
+	auto *menu=new QMenu(this);
 	QAction *ac;
 
 	for(int i=0; i <header_->count(); i++)

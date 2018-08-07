@@ -153,7 +153,7 @@ void InputEventLog::logMousePress(QObject* obj,QMouseEvent *event)
 
         if(cn == "QTabBar")
         {
-            if(QTabBar* t=static_cast<QTabBar*>(obj))
+            if(auto* t=static_cast<QTabBar*>(obj))
             {
                 int idx=t->tabAt(event->pos());
                 if(idx >=0)
@@ -164,7 +164,7 @@ void InputEventLog::logMousePress(QObject* obj,QMouseEvent *event)
         }
         else if(cn == "QMenu")
         {
-            if(QMenu* m=static_cast<QMenu*>(obj))
+            if(auto* m=static_cast<QMenu*>(obj))
             {
                 if(QAction* ac=m->actionAt(event->pos()))
                 {
@@ -185,7 +185,7 @@ void InputEventLog::logMouseRelease(QObject* obj,QMouseEvent *event)
         std::string s;
         ecf::TimeStamp::now_in_brief(s);
         out_ << s.c_str() << "mr " << cn << " " << objectPath(obj);
-        if(QMenu* m=static_cast<QMenu*>(obj))
+        if(auto* m=static_cast<QMenu*>(obj))
         {
             if(QAction* ac=m->actionAt(event->pos()))
             {

@@ -118,7 +118,7 @@ void VNodeList::remove(VNode *node)
 	if(!node)
 		return;
 
-	for(std::vector<VNodeListItem*>::iterator it=data_.begin(); it != data_.end(); it++)
+	for(auto it=data_.begin(); it != data_.end(); it++)
 	{
 		if((*it)->sameAs(node))
 		{
@@ -267,7 +267,7 @@ void VNodeList::attach(ServerHandler *s)
 
 void VNodeList::detach(ServerHandler* s)
 {
-	std::map<ServerHandler*,int>::iterator it=serverCnt_.find(s);
+	auto it=serverCnt_.find(s);
 	if(it != serverCnt_.end())
 	{
 		serverCnt_.erase(it);
@@ -278,7 +278,7 @@ void VNodeList::detach(ServerHandler* s)
 
 void VNodeList::detach(VNode *node)
 {
-	std::map<ServerHandler*,int>::iterator it=serverCnt_.find(node->server());
+	auto it=serverCnt_.find(node->server());
 	if(it != serverCnt_.end())
 	{
 		it->second--;

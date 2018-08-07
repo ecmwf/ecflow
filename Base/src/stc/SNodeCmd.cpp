@@ -48,7 +48,7 @@ node_ptr SNodeCmd::get_node_ptr(std::string& error_msg) const
 
 bool SNodeCmd::equals(ServerToClientCmd* rhs) const
 {
-   SNodeCmd* the_rhs = dynamic_cast<SNodeCmd*>(rhs);
+   auto* the_rhs = dynamic_cast<SNodeCmd*>(rhs);
    if (!the_rhs) return false;
    if (!ServerToClientCmd::equals(rhs)) return false;
    return true;

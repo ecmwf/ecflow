@@ -148,7 +148,7 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	if(!vnode || !vnode->node())
 		return QVariant();
 
-    ColumnType id=static_cast<ColumnType>(index.column());
+    auto id=static_cast<ColumnType>(index.column());
 
 	if(role == Qt::DisplayRole)
 	{

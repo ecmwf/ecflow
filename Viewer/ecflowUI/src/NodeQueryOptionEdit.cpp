@@ -291,7 +291,7 @@ NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGr
              this,SLOT(modeChanged(int)));
 
     holder_=new QWidget(parent);
-    QHBoxLayout* hb=new QHBoxLayout(holder_);
+    auto* hb=new QHBoxLayout(holder_);
     hb->setContentsMargins(0,0,0,0);
 
     //last period     

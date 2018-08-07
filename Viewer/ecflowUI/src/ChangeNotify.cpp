@@ -325,7 +325,7 @@ void ChangeNotify::updateNotificationStateFromServer(const std::string& id,bool 
 
 ChangeNotify*  ChangeNotify::find(const std::string& id)
 {
-	std::map<std::string,ChangeNotify*>::iterator it=items.find(id);
+	auto it=items.find(id);
 	if(it != items.end())
 		return it->second;
 

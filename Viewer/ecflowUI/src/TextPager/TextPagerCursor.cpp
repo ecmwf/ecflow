@@ -549,7 +549,7 @@ void TextPagerCursor::detach()
     int refint = d->ref.fetchAndAddRelaxed(0); // required to get past a bug in Qt 5.2.1 (see Ubuntu 14.04)
     if (refint > 1) {
         d->ref.deref();
-        TextCursorSharedPrivate *p = new TextCursorSharedPrivate;
+        auto *p = new TextCursorSharedPrivate;
         p->position = d->position;
         p->overrideColumn = d->overrideColumn;
         p->anchor = d->anchor;

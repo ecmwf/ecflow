@@ -87,7 +87,7 @@ void PropertyDialog::build()
             	  edPix=IconProvider::pixmap(iconStr,20);
               }    
 
-              PropertyEditor* ed=new PropertyEditor(this);
+              auto* ed=new PropertyEditor(this);
               ed->setObjectName(vPage->param("label"));
               ed->edit(vPage,edPix);
 
@@ -118,7 +118,7 @@ void PropertyDialog::reject()
 
 void PropertyDialog::addPage(QWidget *w,QPixmap pix,QString txt)
 {
-	QListWidgetItem *item = new QListWidgetItem(list_);
+	auto *item = new QListWidgetItem(list_);
     item->setData(Qt::DecorationRole, pix);
     item->setData(Qt::DisplayRole,txt);
     item->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
