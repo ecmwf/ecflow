@@ -39,6 +39,7 @@
 #include <boost/algorithm/string/trim.hpp>
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <utility>
 #include <stack>
@@ -1104,7 +1105,7 @@ bool SimpleExprParser::doParse()
 
       if (DState::isValid(tokens[1])) {
 
-         ast_.reset(new AstTop);
+         ast_ = std::make_unique<AstTop>();
          Ast* someRoot = new AstEqual();
          someRoot->addChild(new AstNode(tokens[0]));
          someRoot->addChild(new AstNodeState(DState::toState(tokens[1])));
@@ -1116,7 +1117,7 @@ bool SimpleExprParser::doParse()
          try {
             int left = boost::lexical_cast<int>(tokens[0]);
             int right = boost::lexical_cast<int>(tokens[1]);
-            ast_.reset(new AstTop);
+            ast_ = std::make_unique<AstTop>();
             Ast* someRoot = new AstEqual();
             someRoot->addChild(new AstInteger(left));
             someRoot->addChild(new AstInteger(right));
