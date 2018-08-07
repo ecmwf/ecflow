@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( test_label_parsing )
       BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),"Expected " << expected.dump() << " but found " << label.dump());
    }
    {
-      std::string line = "label name \"value\\nvalue\"";
+      std::string line = R"(label name "value\nvalue")";
       std::vector<string> linetokens;
       Str::split(line,linetokens);
 
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( test_label_parsing )
       BOOST_CHECK_MESSAGE(label.dump() == expected.dump(),"Expected " << expected.dump() << " but found " << label.dump());
    }
    {
-      std::string line = "label name \"value\\n that\\n is\\n multiple\\n token\\n and\\n new\\n \\nlines\"";
+      std::string line = R"(label name "value\n that\n is\n multiple\n token\n and\n new\n \nlines")";
       std::vector<string> linetokens;
       Str::split(line,linetokens);
 

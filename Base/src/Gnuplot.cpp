@@ -289,9 +289,9 @@ std::string Gnuplot::create_gnuplot_script(
 
 
    gnuplot_script << "plot \""
-                  << path_to_file << "\" using 1:4 title \"child\" with lines, \""
-                  << path_to_file << "\" using 1:5 title \"user\" with lines, \""
-                  << path_to_file << "\" using 1:3 smooth bezier title \"total-load\" with lines lt 3";
+                  << path_to_file << R"(" using 1:4 title "child" with lines, ")"
+                  << path_to_file << R"(" using 1:5 title "user" with lines, ")"
+                  << path_to_file << R"(" using 1:3 smooth bezier title "total-load" with lines lt 3)";
    if (!ordered_suites.empty()) gnuplot_script << ",";
    else                         gnuplot_script << "\n";
    for(size_t i = 0; i < ordered_suites.size(); i++) {
