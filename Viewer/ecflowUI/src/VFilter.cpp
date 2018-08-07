@@ -84,9 +84,9 @@ bool VParamSet::isSet(VParam* p) const
 
 bool VParamSet::isSet(const std::string &name) const
 {
-    for(std::vector<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
+    for(auto it : current_)
 	{
-		if((*it)->strName() == name)
+		if(it->strName() == name)
 				return true;
 	}
 	return false;
@@ -95,9 +95,9 @@ bool VParamSet::isSet(const std::string &name) const
 QStringList VParamSet::currentAsList() const
 {
 	QStringList lst;
-    for(std::vector<VParam*>::const_iterator it=current_.begin(); it != current_.end(); ++it)
+    for(auto it : current_)
 	{
-		lst << QString::fromStdString((*it)->strName());
+		lst << QString::fromStdString(it->strName());
 	}
 	return lst;
 }
@@ -545,9 +545,9 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
             assert(tree_->nodeVec().size() == match_.size());
 
             //Update the filter results
-            for(size_t i=0; i < topChange.size(); i++)
+            for(auto i : topChange)
             {
-                filterState(topChange[i],def_->nodeState_);
+                filterState(i,def_->nodeState_);
             }
 
 #ifdef _UI_VFILTER_DEBUG
@@ -562,10 +562,10 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
 
             //We collect the topmost nodes with changes. It could be different to
             //topChange so we need this step!
-            for(size_t i=0; i < topChange.size(); i++)
+            for(auto i : topChange)
             {
                 assert(topChange[i]->isSuite());
-                collectTopFilterChange(topChange[i],topFilterChange);
+                collectTopFilterChange(i,topFilterChange);
             }
 
 #ifdef _UI_VFILTER_DEBUG
@@ -577,8 +577,8 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
 
 #ifdef _UI_VFILTER_DEBUG
         UiLogS(server_).dbg() << " top level nodes that changed in filter:";
-        for(size_t i= 0; i < topFilterChange.size(); i++)
-            UiLogS(server_).dbg() << "  " <<  topFilterChange.at(i)->strName();
+        for(auto & i : topFilterChange)
+            UiLogS(server_).dbg() << "  " <<  i->strName();
 #endif
 
     }

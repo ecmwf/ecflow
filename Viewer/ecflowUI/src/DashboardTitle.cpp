@@ -43,9 +43,9 @@ void DashboardTitle::clear()
 		return;
 
 	filter_->removeObserver(this);
-	for(std::vector<ServerItem*>::const_iterator it=filter_->items().begin(); it !=filter_->items().end(); ++it)
+	for(auto it : filter_->items())
 	{
-		ServerHandler* s=(*it)->serverHandler();
+		ServerHandler* s=it->serverHandler();
 		s->removeServerObserver(this);
 	}
 
@@ -129,9 +129,9 @@ int DashboardTitle::fullWidth() const
     const int gap=1;
     const int padding=10;
     int w=0;
-    for(size_t i=0; i < filter_->items().size(); i++)
+    for(auto i : filter_->items())
     {
-        QString str=QString::fromStdString(filter_->items()[i]->name());
+        QString str=QString::fromStdString(i->name());
         int tw=fm.width(str);
         if(tw > w) w=tw;
     }
@@ -163,15 +163,15 @@ void DashboardTitle::updateTitle()
     QList<QColor> textColors;
 
     const std::vector<ServerItem*>& items=filter_->items();
-    for(std::vector<ServerItem*>::const_iterator it=items.begin(); it != items.end(); ++it)
+    for(auto item : items)
     {
         //Get text
-        QString str=QString::fromStdString((*it)->name());
-        QString host=QString::fromStdString((*it)->host());
-        QString port=QString::fromStdString((*it)->port());
+        QString str=QString::fromStdString(item->name());
+        QString host=QString::fromStdString(item->host());
+        QString port=QString::fromStdString(item->port());
 
         //Get server status
-        ServerHandler* server=(*it)->serverHandler();
+        ServerHandler* server=item->serverHandler();
         fillColors << server->vRoot()->stateColour();
         textColors << server->vRoot()->stateFontColour();
 

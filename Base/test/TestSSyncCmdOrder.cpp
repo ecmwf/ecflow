@@ -71,8 +71,8 @@ static defs_ptr create_defs()
       if ( 0 == j) { // only add family to first suite
          for(size_t k = 0; k <names.size(); k++)  {
             family_ptr f = s->add_family(names[k]);
-            for(size_t l = 0; l <names.size(); l++)  {
-               task_ptr t = f->add_task(names[l]);
+            for(const auto & name : names)  {
+               task_ptr t = f->add_task(name);
 //               t->add_alias_only(); // alias0
 //               t->add_alias_only(); // alias1
 //               t->add_alias_only(); // alias2

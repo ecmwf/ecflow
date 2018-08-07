@@ -75,7 +75,7 @@ std::vector<std::string> TaskApi::label(const std::string& label_name, const std
    std::string ret = "--label=";
    ret += label_name;
    retVec.push_back(ret);
-   for(size_t i = 0; i < labels.size(); i++) { retVec.push_back(labels[i]);}
+   for(const auto & label : labels) { retVec.push_back(label);}
    return retVec;
 }
 const char* TaskApi::labelArg()     { return "label"; }

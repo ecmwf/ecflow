@@ -166,8 +166,8 @@ std::string Zombie::pretty_print(const std::vector<Zombie>& zombies,int indent)
   std::stringstream ss;
   std::vector<std::string> list;
   pretty_print(zombies, list, indent);
-  for (size_t i=0; i<list.size(); ++i) {
-    ss << list[i] << "\n";
+  for (const auto & i : list) {
+    ss << i << "\n";
   }
   return ss.str();
 }

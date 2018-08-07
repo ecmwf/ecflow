@@ -41,9 +41,9 @@ ServerFilter::~ServerFilter()
 
 void ServerFilter::serverNames(std::vector<std::string>& vec) const
 {
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto item : items_)
 	{
-		vec.push_back((*it)->name());
+		vec.push_back(item->name());
 	}
 }
 
@@ -106,9 +106,9 @@ void ServerFilter::notifyServerItemDeletion(ServerItem *server)
 
 bool ServerFilter::isFiltered(ServerItem* item) const
 {
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto it : items_)
 	{
-		if((*it) == item)
+		if(it == item)
 			return true;
 	}
 	return false;
@@ -116,9 +116,9 @@ bool ServerFilter::isFiltered(ServerItem* item) const
 
 bool ServerFilter::isFiltered(ServerHandler* server) const
 {
-    for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(auto item : items_)
     {
-        if((*it)->serverHandler() == server)
+        if(item->serverHandler() == server)
             return true;
     }
     return false;
@@ -127,9 +127,9 @@ bool ServerFilter::isFiltered(ServerHandler* server) const
 void ServerFilter::writeSettings(VSettings* vs) const
 {
 	std::vector<std::string> array;
-	for(std::vector<ServerItem*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto item : items_)
 	{
-		array.push_back((*it)->name());
+		array.push_back(item->name());
 	}
 
 	vs->put("server",array);

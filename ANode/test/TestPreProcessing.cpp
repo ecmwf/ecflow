@@ -107,8 +107,8 @@ void autoDiscoverVariables(const std::string& directory, std::set<std::string>& 
 		    // open the file, and find variables.
 		    std::vector<std::string> lines;
 		 	if ( File::splitFileIntoLines(relPath.string(), lines) ) {
-		 		for(size_t i = 0; i < lines.size(); ++i) {
-		 			findVariable(lines[i], variables);
+		 		for(auto & line : lines) {
+		 			findVariable(line, variables);
 		 		}
 		 	}
 		}

@@ -103,7 +103,7 @@ void Node::py_add_trigger_expr(const std::vector<PartExpression>& vec)
    }
    else {
       Expression expr;
-      for(size_t i =0; i < vec.size(); i++) expr.add(vec[i]);
+      for(const auto & i : vec) expr.add(i);
       add_trigger_expression(expr);
    }
 }
@@ -117,7 +117,7 @@ void Node::py_add_complete_expr( const std::vector<PartExpression>& vec )
    }
    else {
       Expression expr;
-      for(size_t i =0; i < vec.size(); i++) expr.add(vec[i]);
+      for(const auto & i : vec) expr.add(i);
       add_complete_expression(expr);
    }
 }

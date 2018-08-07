@@ -319,11 +319,11 @@ void ServerList::save()
 
     out << "#Name Host Port Favourite System" << std::endl;
 
-	for(std::vector<ServerItem*>::iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto & item : items_)
 	{
-        std::string fav=((*it)->isFavourite())?"1":"0";
-        std::string sys=((*it)->isSystem())?"1":"0";
-        out << (*it)->name() << "," << (*it)->host() << "," <<  (*it)->port() <<  "," <<  fav << "," <<  sys << std::endl;
+        std::string fav=(item->isFavourite())?"1":"0";
+        std::string sys=(item->isSystem())?"1":"0";
+        out << item->name() << "," << item->host() << "," <<  item->port() <<  "," <<  fav << "," <<  sys << std::endl;
 	}
 	out.close();    
 }
@@ -426,24 +426,24 @@ void ServerList::syncSystemFile()
     in.close();
 
 #ifdef _UI_SERVERLIST_DEBUG
-    for(unsigned int i=0; i < sysVec.size(); i++)
-        UiLog().dbg() << sysVec[i].name() << "\t" + sysVec[i].host() << "\t" + sysVec[i].port();
+    for(auto & i : sysVec)
+        UiLog().dbg() << i.name() << "\t" + i.host() << "\t" + i.port();
 #endif
 
     bool changed=false;
     bool needBrodcast=false;
 
     //See what changed or was added
-    for(unsigned int i=0; i < sysVec.size(); i++)
+    for(auto & i : sysVec)
     {
 #ifdef _UI_SERVERLIST_DEBUG
-        UiLog().dbg() << sysVec[i].name() << "\t" + sysVec[i].host() << "\t" + sysVec[i].port();
+        UiLog().dbg() << i.name() << "\t" + i.host() << "\t" + i.port();
 #endif
         ServerItem *item=0;
 
         //There is a server with same name, host and port as in the local list. We
         //mark it as system
-        item=find(sysVec[i].name(),sysVec[i].host(),sysVec[i].port());
+        item=find(i.name(),i.host(),i.port());
         if(item)
         {            
             if(!item->isSystem())
@@ -452,7 +452,7 @@ void ServerList::syncSystemFile()
                 UiLog().dbg() << "  already in list (same name, host, port) -> mark as system";
 #endif
                 changed=true;
-                syncChange_.push_back(new ServerListSyncChangeItem(sysVec[i],sysVec[i],
+                syncChange_.push_back(new ServerListSyncChangeItem(i,i,
                                      ServerListSyncChangeItem::SetSysChange));
                 item->setSystem(true);
             }
@@ -460,21 +460,21 @@ void ServerList::syncSystemFile()
         }
 
         //There is no server with the same name in the local list
-        item=find(sysVec[i].name());
+        item=find(i.name());
         if(!item)
         {
 #ifdef _UI_SERVERLIST_DEBUG
             UiLog().dbg() << "  name not in list -> import as system";
 #endif
             changed=true;
-            std::string name=sysVec[i].name(),host=sysVec[i].host(), port=sysVec[i].port();
+            std::string name=i.name(),host=i.host(), port=i.port();
             try
             {
                 item=add(name,host,port,false,false);
                 UI_ASSERT(item != 0,"name=" << name << " host=" << host
                           << " port=" << port);
                 item->setSystem(true);
-                syncChange_.push_back(new ServerListSyncChangeItem(sysVec[i],sysVec[i],
+                syncChange_.push_back(new ServerListSyncChangeItem(i,i,
                                          ServerListSyncChangeItem::AddedChange));
             }
             catch(std::exception& e)
@@ -496,10 +496,10 @@ void ServerList::syncSystemFile()
             assert(item->name() == sysVec[i].name());
 
             ServerListTmpItem localTmp(item);
-            syncChange_.push_back(new ServerListSyncChangeItem(sysVec[i],localTmp,
+            syncChange_.push_back(new ServerListSyncChangeItem(i,localTmp,
                                      ServerListSyncChangeItem::MatchChange));
 
-            item->reset(sysVec[i].name(),sysVec[i].host(),sysVec[i].port());
+            item->reset(i.name(),i.host(),i.port());
             item->setSystem(true);
             broadcastChanged();
             continue;
@@ -514,9 +514,9 @@ void ServerList::syncSystemFile()
         if((*it)->isSystem())
         {
             bool found=false;
-            for(unsigned int i=0; i < sysVec.size(); i++)
+            for(auto & i : sysVec)
             {
-                if(sysVec[i].name() == (*it)->name())
+                if(i.name() == (*it)->name())
                 {
                     found=true;
                     break;
@@ -547,8 +547,8 @@ void ServerList::syncSystemFile()
 
 void ServerList::clearSyncChange()
 {
-    for(size_t i=0;i < syncChange_.size(); i++)
-        delete syncChange_[i];
+    for(auto & i : syncChange_)
+        delete i;
 
     syncChange_.clear();
 }

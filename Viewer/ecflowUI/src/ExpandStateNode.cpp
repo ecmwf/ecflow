@@ -44,9 +44,9 @@ void ExpandStateNode::clear()
     expanded_=0;
     expandedAll_=0;
     collapsedAll_=0;
-    for(unsigned int i=0; i < children_.size(); i++)
+    for(auto & i : children_)
     {
-        delete children_.at(i);
+        delete i;
     }
     children_=std::vector<ExpandStateNode*>();
 }

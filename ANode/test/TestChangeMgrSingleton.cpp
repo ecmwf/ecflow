@@ -97,22 +97,22 @@ BOOST_AUTO_TEST_CASE( test_change_mgr_singleton )
          std::vector<node_ptr> node_vec; theDefs->get_all_nodes(node_vec);
 
          // Need to make sure life time of observer is greater than Node tree
-         for(size_t i = 0; i < node_vec.size(); ++i) {
-            obs_vec.push_back( new MyObserver( node_vec[i].get() ) );
+         for(auto & i : node_vec) {
+            obs_vec.push_back( new MyObserver( i.get() ) );
          }
 
          // Do some updates
          std::vector<ecf::Aspect::Type> aspects;
-         for(size_t i = 0; i < node_vec.size(); ++i) {
-            node_vec[i]->notify(aspects);
-            node_vec[i]->notify(aspects);
+         for(auto & i : node_vec) {
+            i->notify(aspects);
+            i->notify(aspects);
          }
-         for(size_t i = 0; i < obs_vec.size(); ++i) {
-            BOOST_CHECK_MESSAGE( obs_vec[i]->update_count() == 2,"Expected 2 updates");
+         for(auto & i : obs_vec) {
+            BOOST_CHECK_MESSAGE( i->update_count() == 2,"Expected 2 updates");
          }
 
          // delete observers
-         for(size_t i = 0; i < obs_vec.size(); ++i) { delete  obs_vec[i]; }
+         for(auto & i : obs_vec) { delete  i; }
       }
 
       // make sure no node_ptr are in scope as they can *delay*

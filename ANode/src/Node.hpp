@@ -885,7 +885,7 @@ private:
       if (Archive::is_loading::value) {
          if (auto_restore_) auto_restore_->set_node(this);
          if (misc_attrs_) misc_attrs_->set_node(this);
-         for(std::vector<limit_ptr>::iterator i = limits_.begin(); i!= limits_.end(); ++i)  (*i)->set_node(this);
+         for(auto & limit : limits_)  limit->set_node(this);
       }
    }
 };

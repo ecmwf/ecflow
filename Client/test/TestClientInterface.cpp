@@ -202,8 +202,8 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.freeDep(paths,true,true,true,true) == 0, " should return 0\n" << theClient.errorMsg());
 
    std::vector<CFileCmd::File_t> fileTypesVec = CFileCmd::fileTypesVec();
-   for(size_t i = 0; i < fileTypesVec.size(); i++) {
-      BOOST_REQUIRE_MESSAGE( theClient.file("/s",CFileCmd::toString(fileTypesVec[i]),string("100")) == 0, " should return 0\n" << theClient.errorMsg());
+   for(auto & i : fileTypesVec) {
+      BOOST_REQUIRE_MESSAGE( theClient.file("/s",CFileCmd::toString(i),string("100")) == 0, " should return 0\n" << theClient.errorMsg());
    }
 
    BOOST_REQUIRE_MESSAGE( theClient.plug("/source","/dest") == 0, " should return 0\n" << theClient.errorMsg());
@@ -417,23 +417,23 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
 
 
    std::vector<std::string> dstates = DState::allStates();
-   for(size_t i = 0; i < dstates.size(); i++) {
-      BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","defstatus",dstates[i]) == 0,"--alter should return 0\n" << theClient.errorMsg());
+   for(const auto & dstate : dstates) {
+      BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","change","defstatus",dstate) == 0,"--alter should return 0\n" << theClient.errorMsg());
    }
 
    std::vector<std::string> flag_types;
    Flag::valid_flag_type(flag_types);
-   for(size_t i = 0; i <  flag_types.size(); i++) {
-      BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","set_flag",flag_types[i]) == 0,"--alter should return 0\n" << theClient.errorMsg());
-      BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","clear_flag",flag_types[i]) == 0,"--alter should return 0\n" << theClient.errorMsg());
+   for(const auto & flag_type : flag_types) {
+      BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","set_flag",flag_type) == 0,"--alter should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","clear_flag",flag_type) == 0,"--alter should return 0\n" << theClient.errorMsg());
    }
 
    // sort
    std::vector<std::string> sortable_attributes = Attr::all_attrs();
    BOOST_REQUIRE_MESSAGE(!sortable_attributes.empty(),"Expected to find attributes");
-   for(size_t i = 0; i <  sortable_attributes.size(); i++) {
-      BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attributes[i],true) == 0,"--alter should return 0\n" << theClient.errorMsg());
-      BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attributes[i],false) == 0,"--alter should return 0\n" << theClient.errorMsg());
+   for(const auto & sortable_attribute : sortable_attributes) {
+      BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attribute,true) == 0,"--alter should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.alter_sort("/s1",sortable_attribute,false) == 0,"--alter should return 0\n" << theClient.errorMsg());
    }
 }
 

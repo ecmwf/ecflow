@@ -85,25 +85,25 @@ std::string Rtt::analyis(const std::string& filename)
    /// Extract the command name and time, and add to map, to compute averages, min,max & standard deviation
    map<string,vector<time_duration> > cmd_time_map;
    size_t max_cmd_size = 0;
-   for(size_t i = 0; i < lines.size(); i++) {
+   for(auto & line : lines) {
 
-      if (lines[i].empty()) continue;
+      if (line.empty()) continue;
 //      cout << i << ":" << lines[i] << "   ";
-      string::size_type dash = lines[i].find("--");
-      string::size_type rtt_pos = lines[i].find(Rtt::tag());
+      string::size_type dash = line.find("--");
+      string::size_type rtt_pos = line.find(Rtt::tag());
       if (dash == std::string::npos) continue;
       if (rtt_pos == std::string::npos) continue;
 
 
       int cmd_length = 0;
-      string::size_type equals = lines[i].find("=",dash);
-      string::size_type space = lines[i].find(" ",dash);
+      string::size_type equals = line.find("=",dash);
+      string::size_type space = line.find(" ",dash);
       if (equals != std::string::npos)  cmd_length = equals;
       else if (space != std::string::npos)  cmd_length = space;
-      string cmd = lines[i].substr(0,cmd_length);
+      string cmd = line.substr(0,cmd_length);
       max_cmd_size = std::max(max_cmd_size,cmd.size());
 
-      string time = lines[i].substr(rtt_pos+4);
+      string time = line.substr(rtt_pos+4);
       time_duration td(duration_from_string(time));
 //      cout << "  cmd:(" << cmd << ") time(" << to_simple_string(td) << ")\n";
 
@@ -131,12 +131,12 @@ std::string Rtt::analyis(const std::string& filename)
       time_duration average_td(0,0,0,0);
       time_duration min(24,59,59,0);
       time_duration max(0,0,0,0);
-      for(size_t i = 0; i < p.second.size(); i++) {
-         average_td += p.second[i];
+      for(const auto & i : p.second) {
+         average_td += i;
          total_requests++;
-         total +=  p.second[i];
-         min = std::min(min,p.second[i]);
-         max = std::max(max,p.second[i]);
+         total +=  i;
+         min = std::min(min,i);
+         max = std::max(max,i);
       }
 
       ss << left << setw(max_cmd_size+1) << p.first << setw(5) << right << p.second.size();
@@ -154,8 +154,8 @@ std::string Rtt::analyis(const std::string& filename)
 
           // compute standard deviation
           unsigned int total_diff_from_avg = 0;
-          for(size_t i = 0; i < p.second.size(); i++) {
-             int diff = p.second[i].total_microseconds() - average;
+          for(auto & i : p.second) {
+             int diff = i.total_microseconds() - average;
              int diff_squared = diff * diff;
              total_diff_from_avg += diff_squared;
 //             if (debug) cout << "diff: " << diff << " diff_squared: " << diff_squared << " total_diff_from_avg: " << total_diff_from_avg << "\n";

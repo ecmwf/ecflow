@@ -828,9 +828,9 @@ void Task::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Typ
 
    std::vector<alias_ptr> vec; vec.reserve(aliases_.size());
    size_t node_vec_size = aliases_.size();
-   for(size_t i = 0; i < order.size(); i++) {
+   for(const auto & i : order) {
       for(size_t t = 0; t < node_vec_size; t++) {
-          if (order[i] == aliases_[t]->name()) {
+          if (i == aliases_[t]->name()) {
              vec.push_back(aliases_[t]);
              break;
           }

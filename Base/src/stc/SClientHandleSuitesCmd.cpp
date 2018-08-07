@@ -49,9 +49,9 @@ void SClientHandleSuitesCmd::init(AbstractServer* as)
 
       // Create user, and his list of handles
       bool fnd_user = false;
-      for(size_t u = 0; u < users_.size(); u++) {
-         if (users_[u].first == clientSuites[c].user()) {
-            users_[u].second.push_back(clientSuites[c].handle());
+      for(auto & user : users_) {
+         if (user.first == clientSuites[c].user()) {
+            user.second.push_back(clientSuites[c].handle());
             fnd_user = true;
             break;
          }
@@ -97,12 +97,12 @@ bool SClientHandleSuitesCmd::handle_server_response( ServerReply& server_reply, 
          cout << left << setw(10) << users_[u].first;
          for(size_t h = 0; h < users_[u].second.size(); h++) {
             unsigned int handle = users_[u].second[h];
-            for( size_t c = 0; c < client_handles_.size(); c++) {
-               if (handle == client_handles_[c].first) {
+            for(const auto & client_handle : client_handles_) {
+               if (handle == client_handle.first) {
                   if (h != 0) cout << "          "; // 10 spaces to align handles
                   cout << right << setw(6) << handle << "  ";
-                  const std::vector<std::string>& suites = client_handles_[c].second;
-                  for(size_t i = 0; i < suites.size(); i++) { cout << suites[i] << "  "; }
+                  const std::vector<std::string>& suites = client_handle.second;
+                  for(const auto & suite : suites) { cout << suite << "  "; }
                   cout << "\n";
                }
             }

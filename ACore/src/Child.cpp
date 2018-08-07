@@ -91,8 +91,8 @@ std::vector<Child::CmdType> Child::child_cmds(const std::string& s)
 	std::vector<std::string> tokens;
 	Str::split(s,tokens,",");
 	std::vector<Child::CmdType> ret; ret.reserve(tokens.size());
-	for(size_t i =0; i < tokens.size(); ++i) {
-		ret.push_back(child_cmd(tokens[i]));
+	for(const auto & token : tokens) {
+		ret.push_back(child_cmd(token));
 	}
 	return ret;
 }
@@ -121,8 +121,8 @@ bool Child::valid_child_cmds( const std::string& s)
 	// expect single or , separated tokens
 	std::vector<std::string> tokens;
 	Str::split(s,tokens,",");
-	for(size_t i =0; i < tokens.size(); ++i) {
-		if (!valid_child_cmd(tokens[i])) return false;
+	for(const auto & token : tokens) {
+		if (!valid_child_cmd(token)) return false;
 	}
 	return true;
 }

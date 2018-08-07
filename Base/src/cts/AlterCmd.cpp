@@ -35,12 +35,12 @@ namespace po = boost::program_options;
 static std::string dump_args(const std::vector<std::string>& options, const std::vector<std::string>& paths )
 {
    std::string the_args;
-   for(size_t i = 0; i < options.size(); i++) {
-      the_args += options[i];
+   for(const auto & option : options) {
+      the_args += option;
       the_args += " ";
    }
-   for(size_t i = 0; i < paths.size(); i++) {
-      the_args += paths[i];
+   for(const auto & path : paths) {
+      the_args += path;
       the_args += " ";
    }
    return the_args;

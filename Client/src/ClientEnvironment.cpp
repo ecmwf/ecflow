@@ -198,8 +198,8 @@ std::string ClientEnvironment::toString() const
 	if (host_vec_.empty())  ss << "   ECF_PORT =  \n";
 	else                    ss << "   ECF_PORT = " <<  host_vec_[host_vec_index_].second << "\n";
 	ss << "   NO_ECF = " << no_ecf_ << "\n";
-	for(size_t i = 0; i < env_.size(); i++) {
-		ss << "   " << env_[i].first << " = " << env_[i].second << "\n";
+	for(const auto & i : env_) {
+		ss << "   " << i.first << " = " << i.second << "\n";
 	}
 
    ss << "   ECF_DEBUG_CLIENT = " << debug_ << "\n";

@@ -1688,8 +1688,8 @@ static inline bool match(int pos, int size, const TextPagerSection *section, Tex
         return true;
     } else if (flags & TextPagerSection::IncludePartial) {
         const int boundaries[] = { pos, pos + size - 1 };
-        for (int i=0; i<2; ++i) {
-            if (::match(boundaries[i], sectionPos, sectionSize))
+        for (int boundarie : boundaries) {
+            if (::match(boundarie, sectionPos, sectionSize))
                 return true;
         }
     }

@@ -30,31 +30,31 @@ BOOST_AUTO_TEST_CASE( test_node_flags )
 
 	/// Set the flags
 	std::vector<Flag::Type> flag_list =  Flag::list();
-	for (size_t i = 0; i < flag_list.size(); ++i) {
-	   flag.set( flag_list[i] );
-	   BOOST_REQUIRE_MESSAGE(flag.is_set( flag_list[i] ), "Expected flag to be set");
+	for (auto & i : flag_list) {
+	   flag.set( i );
+	   BOOST_REQUIRE_MESSAGE(flag.is_set( i ), "Expected flag to be set");
 	}
    BOOST_REQUIRE_MESSAGE(flag.to_string() == expected_flags, "Expected string '" << expected_flags << "' but found '" << flag.to_string() << "'");
-	for (size_t i = 0; i < flag_list.size(); ++i) {
-	   BOOST_REQUIRE_MESSAGE(flag.is_set( flag_list[i] ), "Expected flag to be set");
+	for (auto & i : flag_list) {
+	   BOOST_REQUIRE_MESSAGE(flag.is_set( i ), "Expected flag to be set");
 	}
 
 	/// clears the flags
-	for (size_t i = 0; i < flag_list.size(); ++i) {
-	   flag.clear( flag_list[i] );
-	   BOOST_REQUIRE_MESSAGE(!flag.is_set( flag_list[i] ), "Expected flag to be clear");
+	for (auto & i : flag_list) {
+	   flag.clear( i );
+	   BOOST_REQUIRE_MESSAGE(!flag.is_set( i ), "Expected flag to be clear");
 	}
-	for (size_t i = 0; i < flag_list.size(); ++i) {
-	   BOOST_REQUIRE_MESSAGE(!flag.is_set( flag_list[i] ), "Expected flag to be clear");
+	for (auto & i : flag_list) {
+	   BOOST_REQUIRE_MESSAGE(!flag.is_set( i ), "Expected flag to be clear");
 	}
 
 	/// set all flags
- 	for (size_t i = 0; i < flag_list.size(); ++i) { flag.set( flag_list[i] );}
+ 	for (auto & i : flag_list) { flag.set( i );}
 
 	// reset, all flags should be clear
 	flag.reset();
-	for (size_t i = 0; i < flag_list.size(); ++i) {
- 	 	BOOST_REQUIRE_MESSAGE(!flag.is_set( flag_list[i] ), "Expected flag to be clear");
+	for (auto & i : flag_list) {
+ 	 	BOOST_REQUIRE_MESSAGE(!flag.is_set( i ), "Expected flag to be clear");
 	}
 }
 
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE( test_node_flags_parsing )
    /// Set the flags
    Flag flag;
    std::vector<Flag::Type> flag_list =  Flag::list();
-   for (size_t i = 0; i < flag_list.size(); ++i) flag.set( flag_list[i] );
+   for (auto & i : flag_list) flag.set( i );
 
    Flag flag2;
    flag2.set_flag(flag.to_string());

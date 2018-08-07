@@ -117,7 +117,7 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vecto
          std::string msg = "[ authentication failed ] User ";
          msg += user_;
          msg += " has no *write* access to paths(";
-         for(size_t i=0; i < paths.size(); ++i) { msg += paths[i];msg += ",";}
+         for(const auto & path : paths) { msg += path;msg += ",";}
          msg += ") Please see your administrator.";
          throw std::runtime_error( msg );
       }
@@ -130,7 +130,7 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vecto
    std::string msg = "[ authentication failed ] User '";
    msg += user_;
    msg += "' is not allowed any access. paths(";
-   for(size_t i=0; i < paths.size(); ++i) { msg += paths[i];msg += ",";}
+   for(const auto & path : paths) { msg += path;msg += ",";}
    msg += ")";
    throw std::runtime_error( msg );
 

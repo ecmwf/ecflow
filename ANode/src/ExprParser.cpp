@@ -668,8 +668,8 @@ static bool is_not(const tree_iter_t& i) {
    return false;
 }
 static bool child_has(const tree_iter_t& i, int id) {
-   for (tree_iter_t t = i->children.begin(); t != i->children.end(); ++t)  {
-      if ( t->value.id() == id) return true;
+   for (auto & t : i->children)  {
+      if ( t.value.id() == id) return true;
    }
    return false;
 }

@@ -262,9 +262,9 @@ bool DefsStructureParser::semiColonInEditVariable()
 		// all statements must start with a edit, else we have a semi colon inside variable
 		//    edit A fred;        edit B bill         # valid
 		//    edit A 'fred;bill'; edit B 'bill;bill'  # Can't cope with this, will be ONE variable !!!!
-		for(size_t i = 0; i < multi_statements_per_line_vec_.size(); i++) {
-			boost::algorithm::trim(multi_statements_per_line_vec_[i]);
-			if (multi_statements_per_line_vec_[i].find("edit") != 0) {
+		for(auto & i : multi_statements_per_line_vec_) {
+			boost::algorithm::trim(i);
+			if (i.find("edit") != 0) {
 				return true;
  			}
 		}

@@ -93,10 +93,10 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    // Note: we pick a task outside of a repeat, since setting a task to complete, inside a repeat will cause it to requeue
    // Avoid using ForceCmd to avoid side affects
    std::vector<std::string> states = NState::allStates();
-   for(size_t i = 0; i < states.size(); i++) {
-      task->setStateOnly( NState::toState(states[i]));
+   for(const auto & state : states) {
+      task->setStateOnly( NState::toState(state));
       res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("state", task->absNodePath(),"",task->absNodePath())), false);
-      BOOST_CHECK_MESSAGE(res == states[i] ,"expected query state to return " << states[i] << " but found: " << res);
+      BOOST_CHECK_MESSAGE(res == state ,"expected query state to return " << state << " but found: " << res);
    }
 
    TestHelper::invokeRequest(&defs,Cmd_ptr( new PathsCmd(PathsCmd::SUSPEND, task->absNodePath())));

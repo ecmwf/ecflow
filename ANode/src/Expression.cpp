@@ -174,8 +174,7 @@ void Expression::add(const PartExpression& t)
 
 void Expression::add_expr(const std::vector<PartExpression>& vec)
 {
-   for(size_t i = 0; i < vec.size(); i++) {
-      PartExpression part = vec[i];
+   for(auto part : vec) {
       if (!empty() && part.expr_type() == PartExpression::FIRST)  part.set_expr_type(PartExpression::AND);
       add(part);
    }

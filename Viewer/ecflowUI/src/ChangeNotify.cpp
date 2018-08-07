@@ -179,9 +179,9 @@ void ChangeNotify::setProperty(VProperty* prop)
 
 		QStringList lst;
 		const std::vector<std::string>& vals=Sound::instance()->sysSounds();
-        for(std::vector<std::string>::const_iterator it=vals.begin(); it != vals.end(); ++it)
+        for(const auto & val : vals)
 		{
-			lst << QString::fromStdString(*it);
+			lst << QString::fromStdString(val);
 		}
 		p->setParam("values",lst.join("/"));
 		p->setParam("values_label",lst.join("/"));
@@ -350,18 +350,18 @@ UI_FUNCTION_LOG
 		//This should be observed by each notification object
 		if(VProperty* p=group->find("notification.settings.max_item_num"))
 		{
-			for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+			for(auto & item : items)
 			{
-				p->addObserver(it->second);
-				it->second->data_->setMaxNum(p->value().toInt());
+				p->addObserver(item.second);
+				item.second->data_->setMaxNum(p->value().toInt());
 			}
 		}
 	}
 	else if(group->name() == "server")
 	{
-		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+		for(auto & item : items)
 		{
-			it->second->loadServerSettings();
+			item.second->loadServerSettings();
 		}
 	}
 #if 0
@@ -403,14 +403,14 @@ ChangeNotifyDialog* ChangeNotify::dialog()
 	if(!dialog_)
 	{
 		dialog_=new ChangeNotifyDialog();
-		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+		for(auto & item : items)
 		{
-            dialog_->add(it->second);
+            dialog_->add(item.second);
 		}
 
-		for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+		for(auto & item : items)
 		{
-            dialog_->setEnabled(it->second,it->second->isEnabled());
+            dialog_->setEnabled(item.second,item.second->isEnabled());
 		}
 	}
 
@@ -435,9 +435,9 @@ void  ChangeNotify::showDialog(ChangeNotifyconst std::string& id)
 
 void ChangeNotify::populate(ChangeNotifyWidget* w)
 {
-	for(std::map<std::string,ChangeNotify*>::iterator it=items.begin(); it != items.end(); ++it)
+	for(auto & item : items)
 	{
-		w->addTb(it->second);
+		w->addTb(item.second);
 	}
 }
 

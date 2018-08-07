@@ -190,17 +190,16 @@ void MainWindow::init(MainWindow *win)
 
 void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 {
-   for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
-           it != InfoPanelHandler::instance()->panels().end(); ++it)
+   for(auto it : InfoPanelHandler::instance()->panels())
    {
-	   if((*it)->show().find("toolbar") != std::string::npos)
+	   if(it->show().find("toolbar") != std::string::npos)
 	   {
-		   QAction *ac=toolbar->addAction(QString::fromStdString((*it)->label()));
-           QPixmap pix(":/viewer/" + QString::fromStdString((*it)->icon()));
-           ac->setObjectName(QString::fromStdString((*it)->label()));
+		   QAction *ac=toolbar->addAction(QString::fromStdString(it->label()));
+           QPixmap pix(":/viewer/" + QString::fromStdString(it->icon()));
+           ac->setObjectName(QString::fromStdString(it->label()));
            ac->setIcon(QIcon(pix));
-		   ac->setData(QString::fromStdString((*it)->name()));
-           ac->setToolTip(QString::fromStdString((*it)->buttonTooltip()));
+		   ac->setData(QString::fromStdString(it->name()));
+           ac->setToolTip(QString::fromStdString(it->buttonTooltip()));
 
 		   connect(ac,SIGNAL(triggered()),
 				   this,SLOT(slotOpenInfoPanel()));

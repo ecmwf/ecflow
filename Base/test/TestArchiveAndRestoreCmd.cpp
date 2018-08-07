@@ -174,26 +174,26 @@ BOOST_AUTO_TEST_CASE( test_archive_and_restore_all )
    std::vector<node_ptr> nodes;
    theDefs.get_all_nodes(nodes);
    std::vector<std::string> nc_vec;
-   for(size_t i = 0; i < nodes.size(); i++) {
-       NodeContainer* nc = nodes[i]->isNodeContainer();
+   for(auto & node : nodes) {
+       NodeContainer* nc = node->isNodeContainer();
        if (!nc) continue;
        nc_vec.push_back(nc->absNodePath());
    }
 
-   for(size_t i = 0; i < nc_vec.size(); i++) {
+   for(const auto & i : nc_vec) {
       // cout << "archive and restore " << nc_vec[i]  << "\n";
       {
-         TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::ARCHIVE,nc_vec[i],true))); // use force since jobs are active
-         node_ptr node = theDefs.findAbsNode(nc_vec[i]);
-         BOOST_REQUIRE_MESSAGE(node,"Could not find node " << nc_vec[i] );
+         TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::ARCHIVE,i,true))); // use force since jobs are active
+         node_ptr node = theDefs.findAbsNode(i);
+         BOOST_REQUIRE_MESSAGE(node,"Could not find node " << i );
          NodeContainer* nc = node->isNodeContainer();
          BOOST_CHECK_MESSAGE(nc->flag().is_set(ecf::Flag::ARCHIVED),"Archived flag not set " << nc->absNodePath());
          BOOST_CHECK_MESSAGE(fs::exists(nc->archive_path()),"Archive path" << nc->archive_path() << " not created");
          BOOST_CHECK_MESSAGE( nc->nodeVec().empty(),"Children not removed " << nc->absNodePath());
 
-         TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::RESTORE,nc_vec[i] )));
-         node = theDefs.findAbsNode(nc_vec[i]);
-         BOOST_REQUIRE_MESSAGE(node,"Could not find node " << nc_vec[i] );
+         TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::RESTORE,i )));
+         node = theDefs.findAbsNode(i);
+         BOOST_REQUIRE_MESSAGE(node,"Could not find node " << i );
          nc = node->isNodeContainer();
          BOOST_CHECK_MESSAGE(nc->flag().is_set(ecf::Flag::RESTORED),"restored flag should be set " << nc->absNodePath());
          BOOST_CHECK_MESSAGE(!nc->flag().is_set(ecf::Flag::ARCHIVED),"Archived flag not *cleared " << nc->absNodePath());
@@ -202,18 +202,18 @@ BOOST_AUTO_TEST_CASE( test_archive_and_restore_all )
       }
       {
          // Archive again but restore via re-queue
-         TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::ARCHIVE,nc_vec[i],true)));
-         node_ptr node = theDefs.findAbsNode(nc_vec[i]);
-         BOOST_REQUIRE_MESSAGE(node,"Could not find node " << nc_vec[i] );
+         TestHelper::invokeRequest(&theDefs,Cmd_ptr( new PathsCmd(PathsCmd::ARCHIVE,i,true)));
+         node_ptr node = theDefs.findAbsNode(i);
+         BOOST_REQUIRE_MESSAGE(node,"Could not find node " << i );
          NodeContainer* nc = node->isNodeContainer();
          BOOST_CHECK_MESSAGE(nc->flag().is_set(ecf::Flag::ARCHIVED),"Archived flag not set " << nc->absNodePath());
          BOOST_CHECK_MESSAGE(!nc->flag().is_set(ecf::Flag::RESTORED),"Restored flag should be clear " << nc->absNodePath());
          BOOST_CHECK_MESSAGE(fs::exists(nc->archive_path()),"Archive path" << nc->archive_path() << " not created");
          BOOST_CHECK_MESSAGE( nc->nodeVec().empty(),"Children not removed " << nc->absNodePath());
 
-         TestHelper::invokeRequest(&theDefs,Cmd_ptr( new RequeueNodeCmd(nc_vec[i],RequeueNodeCmd::FORCE)));
-         node = theDefs.findAbsNode(nc_vec[i]);
-         BOOST_REQUIRE_MESSAGE(node,"Could not find node " << nc_vec[i] );
+         TestHelper::invokeRequest(&theDefs,Cmd_ptr( new RequeueNodeCmd(i,RequeueNodeCmd::FORCE)));
+         node = theDefs.findAbsNode(i);
+         BOOST_REQUIRE_MESSAGE(node,"Could not find node " << i );
          nc = node->isNodeContainer();
          BOOST_CHECK_MESSAGE(!nc->flag().is_set(ecf::Flag::RESTORED),"Restored flag not *cleared " << nc->absNodePath());
          BOOST_CHECK_MESSAGE(!nc->flag().is_set(ecf::Flag::ARCHIVED),"Archived flag not *cleared " << nc->absNodePath());

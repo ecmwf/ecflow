@@ -149,9 +149,9 @@ void VSettings::put(const std::string& key,const std::string& val)
 void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 {
 	boost::property_tree::ptree array;
-	for(std::vector<std::string>::const_iterator it=val.begin(); it != val.end(); ++it)
+	for(const auto & it : val)
 	{
-		array.push_back(std::make_pair("",boost::property_tree::ptree((*it))));
+		array.push_back(std::make_pair("",boost::property_tree::ptree(it)));
 	}
 	pt_.put_child(path_.path(key),array);
 }
@@ -159,10 +159,10 @@ void VSettings::put(const std::string& key,const std::vector<std::string>& val)
 void VSettings::put(const std::string& key,const std::vector<int>& val)
 {
     boost::property_tree::ptree array;
-    for(std::vector<int>::const_iterator it=val.begin(); it != val.end(); ++it)
+    for(int it : val)
     {
         std::stringstream ss;
-        ss << (*it);
+        ss << it;
         array.push_back(std::make_pair("",boost::property_tree::ptree(ss.str())));
     }
     pt_.put_child(path_.path(key),array);
@@ -172,9 +172,9 @@ void VSettings::put(const std::string& key,const std::vector<int>& val)
 void VSettings::put(const std::string& key,const std::vector<VSettings>& val)
 {
 	boost::property_tree::ptree array;
-	for(std::vector<VSettings>::const_iterator it=val.begin(); it != val.end(); ++it)
+	for(const auto & it : val)
 	{
-		array.push_back(std::make_pair("",(*it).pt_));
+		array.push_back(std::make_pair("",it.pt_));
 	}
 	pt_.put_child(path_.path(key),array);
 }

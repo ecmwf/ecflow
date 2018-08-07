@@ -123,9 +123,9 @@ void TextFilterWidget::refreshCompleter()
     std::set<std::string> vals;
     TextFilterHandler::Instance()->allFilters(vals);
 
-    for(std::set<std::string>::const_iterator it=vals.begin(); it != vals.end(); ++it)
+    for(const auto & val : vals)
     {
-        lst << QString::fromStdString(*it);
+        lst << QString::fromStdString(val);
     }
     le_->setCompleter(new QCompleter(lst,le_));
 }

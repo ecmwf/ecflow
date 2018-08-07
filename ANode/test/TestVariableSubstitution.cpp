@@ -378,23 +378,23 @@ BOOST_AUTO_TEST_CASE( test_server_variable_substitution )
    suite_ptr s = defs.add_suite("suite");
 
    std::vector<std::string> vec = required_server_variables();
-   for(size_t i = 0; i < vec.size(); i++) {
-      if (vec[i] == "ECF_PID") continue;         // CANT test since, this is process ID of server
+   for(const auto & i : vec) {
+      if (i == "ECF_PID") continue;         // CANT test since, this is process ID of server
       std::string value;
-      BOOST_CHECK_MESSAGE(s->findParentVariableValue(vec[i],value),"Could not find Server variable " << vec[i]);
-      BOOST_CHECK_MESSAGE(!value.empty(),"Empty server variable value for " << vec[i]);
+      BOOST_CHECK_MESSAGE(s->findParentVariableValue(i,value),"Could not find Server variable " << i);
+      BOOST_CHECK_MESSAGE(!value.empty(),"Empty server variable value for " << i);
    }
 
-   for(size_t i = 0; i < vec.size(); i++) {
-      if (vec[i] == "ECF_JOB_CMD") continue;     // CANT test since it requires %ECF_JOB% and %ECF_JOBOUT%
-      if (vec[i] == "ECF_KILL_CMD") continue;    // CANT test since it requires %ECF_PID%
-      if (vec[i] == "ECF_STATUS_CMD") continue;  // CANT test since it requires %ECF_RID%
-      if (vec[i] == "ECF_PID") continue;         // CANT test since, this is process ID of server
+   for(const auto & i : vec) {
+      if (i == "ECF_JOB_CMD") continue;     // CANT test since it requires %ECF_JOB% and %ECF_JOBOUT%
+      if (i == "ECF_KILL_CMD") continue;    // CANT test since it requires %ECF_PID%
+      if (i == "ECF_STATUS_CMD") continue;  // CANT test since it requires %ECF_RID%
+      if (i == "ECF_PID") continue;         // CANT test since, this is process ID of server
       std::string cmd = "%";
-      cmd += vec[i];
+      cmd += i;
       cmd += "%";
-      BOOST_CHECK_MESSAGE(s->variableSubsitution(cmd)," substitution failed for " << vec[i] << " : " << cmd);
-      if (vec[i] == "ECF_VERSION") {
+      BOOST_CHECK_MESSAGE(s->variableSubsitution(cmd)," substitution failed for " << i << " : " << cmd);
+      if (i == "ECF_VERSION") {
          BOOST_CHECK_MESSAGE( cmd == Version::raw(), "expected '" << Version::raw() << "' but found '" << cmd << "'");
       }
    }

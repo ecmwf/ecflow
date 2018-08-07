@@ -67,10 +67,9 @@ void VInfo::dataLost()
     std::vector<VInfoObserver*> obsTmp=observers_;
 	observers_.clear();
 
-	for(std::vector<VInfoObserver*>::iterator it=obsTmp.begin(); it != obsTmp.end(); ++it)
+	for(auto o : obsTmp)
 	{
-		VInfoObserver* o=*it;
-		o->notifyDataLost(this);
+			o->notifyDataLost(this);
     }
 
     attr_=0;

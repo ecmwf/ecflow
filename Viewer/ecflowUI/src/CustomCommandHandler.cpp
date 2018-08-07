@@ -116,10 +116,10 @@ void CustomCommandHandler::swapCommandsByIndex(int i1, int i2)
 
 CustomCommand* CustomCommandHandler::find(const std::string& name) const
 {
-    for(std::deque<CustomCommand*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(auto item : items_)
     {
-        if((*it)->name() == name)
-            return *it;
+        if(item->name() == name)
+            return item;
     }
     return NULL;
 }
@@ -129,9 +129,9 @@ CustomCommand* CustomCommandHandler::find(const std::string& name) const
 int CustomCommandHandler::findIndexFromName(const std::string& name) const
 {
     int i = 0;
-    for(std::deque<CustomCommand*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(auto item : items_)
     {
-        if((*it)->name() == name)
+        if(item->name() == name)
             return i;
         i++;
     }
@@ -171,9 +171,9 @@ void CustomCommandHandler::readSettings()
         std::vector<VSettings> commands;
         vs.get("commands", commands);
 
-        for (std::size_t i = 0; i < commands.size(); i++)
+        for (auto & i : commands)
         {
-            VSettings *vsCommand = &commands[i];
+            VSettings *vsCommand = &i;
             std::string emptyDefault="";
             std::string name    = vsCommand->get("name",    emptyDefault);
             std::string command = vsCommand->get("command", emptyDefault);

@@ -70,36 +70,36 @@ bool SuiteFilter::adjustLoaded(const std::vector<std::string>& loaded)
 #endif
 
     std::vector<std::string> currentLoaded;
-    for(std::vector<SuiteFilterItem>::iterator it=items_.begin(); it != items_.end(); ++it)
+    for(auto & item : items_)
     {
-        bool ld=(std::find(loaded.begin(), loaded.end(),(*it).name_) != loaded.end());
-        if((*it).loaded_ != ld)
+        bool ld=(std::find(loaded.begin(), loaded.end(),item.name_) != loaded.end());
+        if(item.loaded_ != ld)
         {
-            (*it).loaded_=ld;
+            item.loaded_=ld;
             if(ld &&
               loadedInitialised_ && enabled_ && autoAddNew_)
             {
-                if(!(*it).filtered_)
+                if(!item.filtered_)
                 {
                     filteredChanged=true;
                 }
 
-                (*it).filtered_=true;
+                item.filtered_=true;
             }
             changed=true;
         }
         if(ld)
-            currentLoaded.push_back((*it).name_);
+            currentLoaded.push_back(item.name_);
     }
 
 
     //TODO: do we need to check enabled_
-    for(std::vector<std::string>::const_iterator it=loaded.begin(); it != loaded.end(); ++it)
+    for(const auto & it : loaded)
     {
-        if(std::find(currentLoaded.begin(), currentLoaded.end(),*it) == currentLoaded.end())
+        if(std::find(currentLoaded.begin(), currentLoaded.end(),it) == currentLoaded.end())
         {
             bool filtered=loadedInitialised_ && enabled_ && autoAddNew_;
-            items_.push_back(SuiteFilterItem(*it,true,filtered));
+            items_.push_back(SuiteFilterItem(it,true,filtered));
             changed=true;
             if(filtered)
             {
@@ -125,10 +125,10 @@ bool SuiteFilter::adjustLoaded(const std::vector<std::string>& loaded)
 std::vector<std::string> SuiteFilter::loaded() const
 {
     std::vector<std::string> fv;
-    for(std::vector<SuiteFilterItem>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(const auto & item : items_)
     {
-        if((*it).loaded_)
-           fv.push_back((*it).name());
+        if(item.loaded_)
+           fv.push_back(item.name());
     }
     return fv;
 }
@@ -139,23 +139,23 @@ void SuiteFilter::adjustFiltered(const std::vector<std::string>& filtered)
     bool changed=false;
 
     std::vector<std::string> currentFiltered;
-    for(std::vector<SuiteFilterItem>::iterator it=items_.begin(); it != items_.end(); ++it)
+    for(auto & item : items_)
     {
-        bool ld=(std::find(filtered.begin(), filtered.end(),(*it).name_) != filtered.end());
-        if((*it).filtered_ != ld)
+        bool ld=(std::find(filtered.begin(), filtered.end(),item.name_) != filtered.end());
+        if(item.filtered_ != ld)
         {
-            (*it).filtered_=ld;
+            item.filtered_=ld;
             changed=true;                      
         }
         if(ld)
-            currentFiltered.push_back((*it).name_);
+            currentFiltered.push_back(item.name_);
     }
 
-    for(std::vector<std::string>::const_iterator it=filtered.begin(); it != filtered.end(); ++it)
+    for(const auto & it : filtered)
     {
-        if(std::find(currentFiltered.begin(), currentFiltered.end(),*it) == currentFiltered.end())
+        if(std::find(currentFiltered.begin(), currentFiltered.end(),it) == currentFiltered.end())
         {
-            items_.push_back(SuiteFilterItem(*it,false,true));
+            items_.push_back(SuiteFilterItem(it,false,true));
             changed=true;
         }
     }
@@ -167,10 +167,10 @@ void SuiteFilter::adjustFiltered(const std::vector<std::string>& filtered)
 std::vector<std::string> SuiteFilter::filter() const
 {
     std::vector<std::string> fv;
-    for(std::vector<SuiteFilterItem>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(const auto & item : items_)
     {
-        if((*it).filtered_)
-           fv.push_back((*it).name());
+        if(item.filtered_)
+           fv.push_back(item.name());
     }
 
 #ifdef SUITEFILTER_UI_DEBUG_
@@ -200,11 +200,11 @@ void SuiteFilter::selectOnlyOne(const std::string& oneSuite)
         return;
 
     unselectAll();
-    for(std::vector<SuiteFilterItem>::iterator it=items_.begin(); it != items_.end(); ++it)
+    for(auto & item : items_)
     {
-        if((*it).name() == oneSuite)
+        if(item.name() == oneSuite)
         {
-            (*it).filtered_=true;
+            item.filtered_=true;
             return;
         }
     }
@@ -224,12 +224,12 @@ bool SuiteFilter::loadedSameAs(const std::vector<std::string>& loaded) const
 {
     int cnt=0;
 
-    for(std::vector<SuiteFilterItem>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    for(const auto & item : items_)
     {
-        bool ld=(std::find(loaded.begin(), loaded.end(),(*it).name()) != loaded.end());
-        if((*it).loaded() != ld)
+        bool ld=(std::find(loaded.begin(), loaded.end(),item.name()) != loaded.end());
+        if(item.loaded() != ld)
            return false;
-        else if(ld && (*it).loaded())
+        else if(ld && item.loaded())
             cnt++;
     }
 
@@ -315,19 +315,19 @@ bool SuiteFilter::merge(const SuiteFilter* sf)
     std::vector<SuiteFilterItem> oriItems=items_;
 
     items_=sf->items_;
-    for(size_t i=0; i < oriItems.size(); i++)
+    for(auto & oriItem : oriItems)
     {
-        for(size_t j=0; j < items_.size(); j++)
+        for(auto & item : items_)
         {
-            if(items_[j].name_ == oriItems[i].name_)
+            if(item.name_ == oriItem.name_)
             {
-                if(items_[j].filtered_ != oriItems[i].filtered_ )
+                if(item.filtered_ != oriItem.filtered_ )
                 {
                     filteredChanged=true;
                 }
 
                 //we keep the filtered state from the original items
-                items_[j].filtered_ = oriItems[i].filtered_;
+                item.filtered_ = oriItem.filtered_;
 
                 break;
             }
@@ -383,17 +383,17 @@ bool SuiteFilter::update(SuiteFilter* sf)
 
 void SuiteFilter::selectAll()
 {
-	for(size_t i=0; i < items_.size(); i++)
+	for(auto & item : items_)
 	{
-        items_[i].filtered_=true;        
+        item.filtered_=true;        
 	}
 }
 
 void SuiteFilter::unselectAll()
 {
-    for(size_t i=0; i < items_.size(); i++)
+    for(auto & item : items_)
     {
-        items_[i].filtered_=false;      
+        item.filtered_=false;      
     }
 }
 
@@ -402,11 +402,11 @@ bool SuiteFilter::removeUnloaded()
     std::vector<SuiteFilterItem> v;
 
     bool changed=false;
-    for(size_t i=0; i < items_.size(); i++)
+    for(auto & item : items_)
     {
-        if(items_[i].loaded())
+        if(item.loaded())
         {
-            v.push_back(items_[i]);
+            v.push_back(item);
         }
         else
         {
@@ -422,9 +422,9 @@ bool SuiteFilter::removeUnloaded()
 
 bool SuiteFilter::hasUnloaded() const
 {
-    for(size_t i=0; i < items_.size(); i++)
+    for(const auto & item : items_)
     {
-        if(!items_[i].loaded())
+        if(!item.loaded())
             return true;
     }
     return false;
@@ -457,9 +457,9 @@ void SuiteFilter::broadcastChange()
 std::ostream& operator<< ( std::ostream& aStream, const SuiteFilter& obj)
 {
     aStream << " " << obj.loadedInitialised_ << " " << obj.enabled_  << " " << obj.autoAddNew_ << std::endl;
-    for(std::vector<SuiteFilterItem>::const_iterator it=obj.items_.begin(); it != obj.items_.end(); ++it)
+    for(const auto & item : obj.items_)
     {
-        aStream << " " << (*it).name() << " " << (*it).filtered() << " " << (*it).loaded() << std::endl;
+        aStream << " " << item.name() << " " << item.filtered() << " " << item.loaded() << std::endl;
     }
     return aStream;
 }

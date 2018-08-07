@@ -313,16 +313,16 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
          // test set and clear flags of the definition
          // Note: we can not really test Flag::Message clear, since that act of clearing, sets the message
          std::vector<Flag::Type> flag_list = Flag::list();
-         for(size_t i =0; i < flag_list.size(); ++i) {
+         for(auto & i : flag_list) {
             // When any user command(including setting flags) invoked, we set Flag::MESSAGE on the defs.
             // Hence setting flag Flag::MESSAGE has no effect. Likewise clearing has no affect since it get set
-            if ( flag_list[i] == Flag::MESSAGE)  continue;
+            if ( i == Flag::MESSAGE)  continue;
 
-            TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/",flag_list[i],true)));
-            BOOST_CHECK_MESSAGE( defs.flag().is_set(flag_list[i]), "Expected flag " << flag_list[i] << " to be set ");
+            TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/",i,true)));
+            BOOST_CHECK_MESSAGE( defs.flag().is_set(i), "Expected flag " << i << " to be set ");
 
-            TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/",flag_list[i],false)));
-            BOOST_CHECK_MESSAGE( ! defs.flag().is_set(flag_list[i]), "Expected flag " << flag_list[i] << " to be clear ");
+            TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd("/",i,false)));
+            BOOST_CHECK_MESSAGE( ! defs.flag().is_set(i), "Expected flag " << i << " to be clear ");
          }
       }
    }
@@ -777,16 +777,16 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       // test set and clear flags
       // Note: we can not really test Flag::Message clear, since that act of clearing, sets the message
       std::vector<Flag::Type> flag_list = Flag::list();
-      for(size_t i =0; i < flag_list.size(); ++i) {
+      for(auto & i : flag_list) {
          // When any user command(including setting flags) invoked, we set Flag::MESSAGE on the defs.
          // Hence setting flag Flag::MESSAGE has no effect. Likewise clearing has no affect since it get set
-         if ( flag_list[i] == Flag::MESSAGE)  continue;
+         if ( i == Flag::MESSAGE)  continue;
 
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),flag_list[i],true)));
-         BOOST_CHECK_MESSAGE( s->flag().is_set(flag_list[i]), "Expected flag " << flag_list[i] << " to be set ");
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),i,true)));
+         BOOST_CHECK_MESSAGE( s->flag().is_set(i), "Expected flag " << i << " to be set ");
 
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),flag_list[i],false)));
-         BOOST_CHECK_MESSAGE( ! s->flag().is_set(flag_list[i]), "Expected flag " << flag_list[i] << " to be clear ");
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),i,false)));
+         BOOST_CHECK_MESSAGE( ! s->flag().is_set(i), "Expected flag " << i << " to be clear ");
       }
    }
 
@@ -795,8 +795,8 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
    {  // Change suite def status =====================================================================================================
       TestStateChanged changed(s);
       std::vector<std::string> dstates = DState::allStates();
-      for(size_t i = 0; i < dstates.size(); i++) {
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEFSTATUS,dstates[i])));
+      for(const auto & dstate : dstates) {
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEFSTATUS,dstate)));
       }
       // reset back to suspended
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEFSTATUS,"suspended")));

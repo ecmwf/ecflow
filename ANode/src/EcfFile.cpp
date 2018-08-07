@@ -960,14 +960,14 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
    std::vector<std::string> tokens;
 
    bool add = false;
-   for (std::vector< std::string >::const_iterator i = lines.begin(); i!= lines.end(); ++i){
-      if ( (*i).find(ecfMicro) == 0) {
-         if ( (*i).find( T_MANUAL ) == 1 )     { add = true;  continue; }
-         if ( add && (*i).find( T_END ) == 1 ) { add = false; continue; }
+   for (const auto & line : lines){
+      if ( line.find(ecfMicro) == 0) {
+         if ( line.find( T_MANUAL ) == 1 )     { add = true;  continue; }
+         if ( add && line.find( T_END ) == 1 ) { add = false; continue; }
 
-         if ((*i).find(T_ECFMICRO) == 1) {  // %ecfmicro #
+         if (line.find(T_ECFMICRO) == 1) {  // %ecfmicro #
             tokens.clear();
-            Str::split( (*i), tokens );
+            Str::split( line, tokens );
             if (tokens.size() < 2) {
                std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
                errormsg += ss.str();
@@ -982,7 +982,7 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
             continue;
          }
       }
-      if (add) { theManualLines.push_back(*i); }
+      if (add) { theManualLines.push_back(line); }
    }
    if (add) {
       std::stringstream ss; ss << "Unterminated manual. Matching 'end' is missing, for " << script_path_or_cmd_;
@@ -1482,9 +1482,9 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,c
          if (ecf_include.find(':') != std::string::npos) {
             std::vector<std::string> include_paths;
             Str::split(ecf_include,include_paths,":");
-            for(size_t i =0; i < include_paths.size();i++) {
+            for(const auto & include_path : include_paths) {
                ecf_include.clear();
-               ecf_include = include_paths[i];
+               ecf_include = include_path;
                ecf_include += '/';
                ecf_include += the_include_file;
 

@@ -271,8 +271,8 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
 std::string PasswdFile::dump() const
 {
    std::stringstream ss;
-   for (size_t i = 0; i < vec_.size(); i++) {
-      ss << vec_[i].user() << " " << vec_[i].host() << ":" << vec_[i].port() << "\n";
+   for (const auto & i : vec_) {
+      ss << i.user() << " " << i.host() << ":" << i.port() << "\n";
    }
    return ss.str();
 }

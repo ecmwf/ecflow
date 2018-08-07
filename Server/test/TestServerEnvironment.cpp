@@ -328,9 +328,9 @@ BOOST_AUTO_TEST_CASE( test_server_profile_threshold_environment_variable )
    dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=:");
    dodgy_thresholds.push_back("ECF_TASK_THRESHOLD=,,");
 
-   for(size_t i =0; i < dodgy_thresholds.size(); i++) {
+   for(auto & dodgy_threshold : dodgy_thresholds) {
       //cout << "check -------> " << dodgy_thresholds[i] << endl;
-      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(dodgy_thresholds[i].c_str())) == 0,"putenv failed for " << dodgy_thresholds[i]);
+      BOOST_CHECK_MESSAGE(putenv(const_cast<char*>(dodgy_threshold.c_str())) == 0,"putenv failed for " << dodgy_threshold);
       BOOST_CHECK_THROW(ServerEnvironment serverEnv(argc,argv), std::runtime_error );
    }
 

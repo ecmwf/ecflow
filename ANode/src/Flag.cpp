@@ -146,10 +146,10 @@ std::string Flag::to_string() const
 {
    std::string ret;
    std::vector<Flag::Type> flag_list =  Flag::list();
-   for (size_t i = 0; i < flag_list.size(); ++i) {
-      if ( is_set( flag_list[i] ) ) {
+   for (auto & i : flag_list) {
+      if ( is_set( i ) ) {
          if (!ret.empty()) ret += ',';
-         ret += enum_to_string( flag_list[i]);
+         ret += enum_to_string( i);
       }
    }
    return ret;
@@ -160,12 +160,12 @@ void Flag::set_flag(const std::string& flags)
    std::vector< std::string > the_flags_vec;
    Str::split(flags,the_flags_vec,",");
 
-   for(size_t i =0; i < the_flags_vec.size(); i++) {
-      if (the_flags_vec[i] == "migrated") continue; // 4.4.x release had migrated ignore. REMOVE when 5.0.0 is default
+   for(const auto & i : the_flags_vec) {
+      if (i == "migrated") continue; // 4.4.x release had migrated ignore. REMOVE when 5.0.0 is default
 
-      Flag::Type ft = string_to_flag_type(the_flags_vec[i]);
+      Flag::Type ft = string_to_flag_type(i);
       if (ft == Flag::NOT_SET) {
-         throw std::runtime_error("Flag::set_flag: Unknown flag types found: " + the_flags_vec[i]);
+         throw std::runtime_error("Flag::set_flag: Unknown flag types found: " + i);
       }
       set(ft);
    }

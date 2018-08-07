@@ -130,8 +130,8 @@ static void check(const std::string& line,
                   const std::vector<std::string>& expected )
 {
    std::vector<std::string> result;
-   for(size_t i =0; i < result2.size(); ++i) {
-      boost::string_view ref = result2[i]; result.push_back(string(ref.begin(),ref.end()));
+   for(auto ref : result2) {
+      result.push_back(string(ref.begin(),ref.end()));
    }
    check(line,result,expected);
 }

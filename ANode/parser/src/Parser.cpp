@@ -148,8 +148,8 @@ void Parser::popToContainerNode() const
 void Parser::dump(const std::vector<std::string>& lineTokens)
 {
    cout << "tokens:";
-   for(unsigned i=0; i < lineTokens.size(); i++) {
-      cout << " '" << lineTokens[i] << "' ";
+   for(const auto & lineToken : lineTokens) {
+      cout << " '" << lineToken << "' ";
    }
    cout << "\n";
 }

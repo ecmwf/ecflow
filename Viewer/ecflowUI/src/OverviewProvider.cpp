@@ -244,8 +244,8 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
 	//Zombies attribute
 	const std::vector<ZombieAttr> & vect = nn->zombies();
-	for (std::vector<ZombieAttr>::const_iterator it = vect.begin(); it != vect.end(); ++it)
-		f << inc << it->toString() << "\n";
+	for (const auto & it : vect)
+		f << inc << it.toString() << "\n";
 
 	//Autocancel
 	if(nn->hasAutoCancel() && nn->get_autocancel())
@@ -282,10 +282,10 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
     //Other attributes
     const std::vector<VAttribute*>& attr=node->attr();
-    for(std::vector<VAttribute*>::const_iterator it=attr.begin(); it != attr.end(); ++it)
+    for(auto it : attr)
     {
-        if((*it)->typeName() != "var" && (*it)->typeName() != "genvar")
-            f << inc << (*it)->definition().toStdString() << "\n";
+        if(it->typeName() != "var" && it->typeName() != "genvar")
+            f << inc << it->definition().toStdString() << "\n";
     }
 
 	//Print children

@@ -284,9 +284,9 @@ static void add_consumed_paths(Limit* limit, std::stringstream& ss)
    ss << "(";
    const std::set<std::string>& consumed_paths = limit->paths();
    int count = 0;
-   for (std::set<std::string>::const_iterator i = consumed_paths.begin(); i!=consumed_paths.end(); ++i) {
+   for (const auto & consumed_path : consumed_paths) {
       if ( 4 == count) { ss << "..."; break; }
-      ss << (*i) << ",";
+      ss << consumed_path << ",";
       count++;
    }
    ss << ")";
@@ -317,19 +317,19 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool top_down, bool html) co
  			}
  			else {
 // 		  		std::cout << "   Parent " << theParent->debugNodePath() << " Not in limit \n";
- 		 		for(size_t i = 0; i < theParent->inlimits().size(); i++ ) {
- 			 		Limit* limit = theParent->inlimits()[i].limit();
- 					if (limit &&  !limit->inLimit( theParent->inlimits()[i].tokens() )) {
+ 		 		for(const auto & i : theParent->inlimits()) {
+ 			 		Limit* limit = i.limit();
+ 					if (limit &&  !limit->inLimit( i.tokens() )) {
  						std::stringstream ss;
- 						if ( theParent->inlimits()[i].pathToNode().empty())
+ 						if ( i.pathToNode().empty())
  							ss << "limit " << limit->name() << " is full";
  						else {
  						   if (html) {
  						      std::stringstream s;
- 						      s << "[limit]" << theParent->inlimits()[i].pathToNode() << Str::COLON() << limit->name();
+ 						      s << "[limit]" << i.pathToNode() << Str::COLON() << limit->name();
  						      ss << Node::path_href_attribute(s.str()) << " is full";
  						   }
- 						   else ss << "limit " << theParent->inlimits()[i].pathToNode() << Str::COLON() << limit->name() << " is full";
+ 						   else ss << "limit " << i.pathToNode() << Str::COLON() << limit->name() << " is full";
  						}
 
  						// show node paths that have consumed a limit, Only show first 5, Otherwise string may be too long
@@ -347,20 +347,20 @@ bool InLimitMgr::why(std::vector<std::string>& vec, bool top_down, bool html) co
 #ifdef DEBUG_WHY
  		std::cout << "   InLimitMgr::why " << node_->debugNodePath() << " NOT in limit\n";
 #endif
-  		for(size_t i = 0; i < vec_.size(); i++ ) {
-	 		Limit* limit = vec_[i].limit();
-			if (limit &&  !limit->inLimit(vec_[i].tokens())) {
+  		for(auto & i : vec_) {
+	 		Limit* limit = i.limit();
+			if (limit &&  !limit->inLimit(i.tokens())) {
 				std::stringstream ss;
-				if (  vec_[i].pathToNode().empty()) {
+				if (  i.pathToNode().empty()) {
 					ss << "limit " << limit->name() << " is full";
 				}
 				else {
 				   if (html) {
 				      std::stringstream s;
-				      s << "[limit]" << vec_[i].pathToNode() << Str::COLON() << limit->name();
+				      s << "[limit]" << i.pathToNode() << Str::COLON() << limit->name();
 				      ss << Node::path_href_attribute(s.str()) << " is full";
 				   }
-				   else ss << "limit " <<  vec_[i].pathToNode() << Str::COLON() << limit->name() << " is full";
+				   else ss << "limit " <<  i.pathToNode() << Str::COLON() << limit->name() << " is full";
 				}
 
             // show node paths that have consumed a limit, Only show first 5, Otherwise string may be too long

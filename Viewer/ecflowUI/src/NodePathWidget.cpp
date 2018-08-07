@@ -1217,9 +1217,9 @@ void NodePathWidget::notifyBeginNodeChange(const VNode* node, const std::vector<
 		else if(std::find(aspect.begin(),aspect.end(),ecf::Aspect::ADD_REMOVE_NODE) != aspect.end())
 		{
 			std::vector<VNode*> nodes=info_->node()->ancestors(VNode::ParentToChildSort);
-			for(unsigned int i=0; i < nodes.size(); i++)
+			for(auto & i : nodes)
 			{
-				if(node == nodes.at(i))
+				if(node == i)
 				{
 					//Reload everything
 					setPath(info_);
@@ -1249,9 +1249,9 @@ void NodePathWidget::notifyDefsChanged(ServerHandler* server,const std::vector<e
         UiLog().dbg() << "Server change";
 
         //State changed
-        for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+        for(auto it : aspect)
         {
-            if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::SERVER_STATE)
+            if(it == ecf::Aspect::STATE || it == ecf::Aspect::SERVER_STATE)
             {
 #ifdef _UI_NODEPATHWIDGET_DEBUG
                 UiLog().dbg() << "   update server item";

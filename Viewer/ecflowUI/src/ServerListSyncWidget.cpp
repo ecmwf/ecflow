@@ -39,15 +39,15 @@ ServerListSyncWidget::ServerListSyncWidget(QWidget *parent) : QWidget(parent)
 
             const std::vector<ServerListSyncChangeItem*>& items=ServerList::instance()->syncChange();
             int matchCnt=0, addedCnt=0, setCnt=0, unsetCnt=0;
-            for(size_t i=0; i < items.size(); i++)
+            for(auto item : items)
             {
-                if(items[i]->type() == ServerListSyncChangeItem::MatchChange)
+                if(item->type() == ServerListSyncChangeItem::MatchChange)
                    matchCnt++;
-                else if(items[i]->type() == ServerListSyncChangeItem::AddedChange)
+                else if(item->type() == ServerListSyncChangeItem::AddedChange)
                     addedCnt++;
-                else if(items[i]->type() == ServerListSyncChangeItem::SetSysChange)
+                else if(item->type() == ServerListSyncChangeItem::SetSysChange)
                     setCnt++;
-                else if(items[i]->type() == ServerListSyncChangeItem::UnsetSysChange)
+                else if(item->type() == ServerListSyncChangeItem::UnsetSysChange)
                     unsetCnt++;
             }
 
@@ -120,9 +120,9 @@ void ServerListSyncWidget::slotTypeChanged(QListWidgetItem* item,QListWidgetItem
 
     QString s;
 
-    for(size_t i=0; i < items.size(); i++)
+    for(auto item : items)
     {
-        if(items[i]->type() == type)
+        if(item->type() == type)
         {
             if(!s.isEmpty())
                 s+="<hr>";
@@ -130,16 +130,16 @@ void ServerListSyncWidget::slotTypeChanged(QListWidgetItem* item,QListWidgetItem
             switch(type)
             {
             case ServerListSyncChangeItem::MatchChange:
-                s+=buildMatchChange(items[i]);
+                s+=buildMatchChange(item);
                 break;
             case  ServerListSyncChangeItem::UnsetSysChange:
-                s+=buildUnsetSysChange(items[i]);
+                s+=buildUnsetSysChange(item);
                 break;
             case  ServerListSyncChangeItem::AddedChange:
-                s+=buildAddedChange(items[i]);
+                s+=buildAddedChange(item);
                 break;
             case  ServerListSyncChangeItem::SetSysChange:
-                s+=buildSetSysChange(items[i]);
+                s+=buildSetSysChange(item);
                 break;
             default:
                 break;

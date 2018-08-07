@@ -51,7 +51,7 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
     std::map<ServerHandler*,std::string> targetParentFullNames;
 
     //Figure out what objects (node/server) the command should be applied to
-    for(std::size_t i=0; i < info.size(); i++)
+    for(auto & i : info)
     {
         std::string nodeFullName;
         std::string nodeName;
@@ -59,47 +59,45 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
 
         if(realCommand.find("<node_name>") != std::string::npos)
         {
-            nodeName=info[i]->name();
+            nodeName=i->name();
         }
 
         if(realCommand.find("<full_name>") != std::string::npos)
         {
-            if(info[i]->isNode())
-                nodeFullName = info[i]->node()->absNodePath();
-            else if(info[i]->isServer())
-                info[i]->server()->longName();
-            else if(info[i]->isAttribute())
-                parentFullName = info[i]->node()->absNodePath();
+            if(i->isNode())
+                nodeFullName = i->node()->absNodePath();
+            else if(i->isServer())
+                i->server()->longName();
+            else if(i->isAttribute())
+                parentFullName = i->node()->absNodePath();
         }
 
         if(realCommand.find("<parent_name>") != std::string::npos)
         {
-            if(info[i]->isNode())
+            if(i->isNode())
             {
-                if(VNode *p=info[i]->node()->parent())
+                if(VNode *p=i->node()->parent())
                     parentFullName = p->absNodePath();
             }
-            else if(info[i]->isAttribute())
-               parentFullName = info[i]->node()->absNodePath();
+            else if(i->isAttribute())
+               parentFullName = i->node()->absNodePath();
         }
 
         //Store the names per target servers
-        targetNodeNames[info[i]->server()] += " " + nodeName;
-        targetNodeFullNames[info[i]->server()] += " " + nodeFullName;
-        targetParentFullNames[info[i]->server()] += " " + parentFullName;
+        targetNodeNames[i->server()] += " " + nodeName;
+        targetNodeFullNames[i->server()] += " " + nodeFullName;
+        targetParentFullNames[i->server()] += " " + parentFullName;
 
         // add this to our list of target servers?
-        if(std::find(targetServers.begin(), targetServers.end(), info[i]->server()) == targetServers.end())
+        if(std::find(targetServers.begin(), targetServers.end(), i->server()) == targetServers.end())
         {
-            targetServers.push_back(info[i]->server());
+            targetServers.push_back(i->server());
         }
     }
 
     // for each target server, construct and send its command
-    for(size_t s = 0; s < targetServers.size(); s++)
+    for(auto serverHandler : targetServers)
     {
-        ServerHandler* serverHandler = targetServers[s];
-
         // replace placeholders with real node names
         std::string placeholder("<full_name>");
         ecf::Str::replace_all(realCommand, placeholder, targetNodeFullNames[serverHandler]);
@@ -199,10 +197,10 @@ void CommandHandler::run(VInfo_ptr info, const std::string& cmd)
 std::string CommandHandler::commandToString(const std::vector<std::string>& cmd)
 {   
     std::string s;
-    for(std::vector<std::string>::const_iterator it=cmd.begin(); it != cmd.end(); ++it)
+    for(const auto & it : cmd)
     {
         if(!s.empty()) s+=" ";
-        s+=*it;
+        s+=it;
     }
     return s;
 }

@@ -252,9 +252,9 @@ void NodeContainer::set_memento( const OrderMemento* memento,std::vector<ecf::As
 
    std::vector<node_ptr> vec; vec.reserve(nodes_.size());
    size_t node_vec_size = nodes_.size();
-   for(size_t i = 0; i < order.size(); i++) {
+   for(const auto & i : order) {
       for(size_t t = 0; t < node_vec_size; t++) {
-          if (order[i] == nodes_[t]->name()) {
+          if (i == nodes_[t]->name()) {
              vec.push_back(nodes_[t]);
              break;
           }

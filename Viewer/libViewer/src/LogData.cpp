@@ -144,9 +144,9 @@ void LogData::appendFromText(const std::string& txt)
 
 void LogData::appendFromText(const std::vector<std::string>& txtVec)
 {
-    for(std::size_t i=0; i < txtVec.size(); i++)
+    for(const auto & i : txtVec)
     {
-        QString s=QString::fromStdString(txtVec[i]);
+        QString s=QString::fromStdString(i);
         if(!s.simplified().isEmpty())
         {            
             data_.push_back(LogDataItem(s.toStdString(),refTimeInMs_));

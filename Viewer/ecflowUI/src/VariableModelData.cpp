@@ -82,9 +82,9 @@ void VariableModelData::removeDuplicates(const std::vector<Variable>& vars,std::
     for(std::vector<Variable>::const_iterator it=gvOri.begin(); it != gvOri.end(); ++it)
     {
          bool hasIt=false;
-         for(std::vector<Variable>::const_iterator itV=vars.begin(); itV != vars.end(); ++itV)
+         for(const auto & var : vars)
          {
-             if((*it).name() == (*itV).name())
+             if((*it).name() == var.name())
              {
                 hasIt=true;
                 break;
@@ -192,20 +192,20 @@ const std::string& VariableModelData::value(const std::string n,bool& hasIt) con
     if(n.empty())
         return defaultStr;
 
-    for(std::vector<Variable>::const_iterator it=vars_.begin(); it != vars_.end(); ++it)
+    for(const auto & var : vars_)
     {
-        if((*it).name() == n)
+        if(var.name() == n)
         {
             hasIt=true;
-            return (*it).theValue();
+            return var.theValue();
         }
     }
-    for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); ++it)
+    for(const auto & genVar : genVars_)
     {
-        if((*it).name() == n)
+        if(genVar.name() == n)
         {
             hasIt=true;
-            return (*it).theValue();
+            return genVar.theValue();
         }
     }
 
@@ -214,17 +214,17 @@ const std::string& VariableModelData::value(const std::string n,bool& hasIt) con
 
 bool VariableModelData::hasName(const std::string& n) const
 {
-	for(std::vector<Variable>::const_iterator it=vars_.begin(); it != vars_.end(); ++it)
+	for(const auto & var : vars_)
 	{
-		if((*it).name() == n)
+		if(var.name() == n)
 		{
 			return true;
 		}
 	}
 
-	for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); ++it)
+	for(const auto & genVar : genVars_)
 	{
-		if((*it).name() == n)
+		if(genVar.name() == n)
 		{
 			return true;
 		}
@@ -237,10 +237,10 @@ bool VariableModelData::hasName(const std::string& n) const
 int VariableModelData::indexOf(const std::string& varName,bool genVar) const
 {
     int idx=-1;
-    for(std::vector<Variable>::const_iterator it=vars_.begin(); it != vars_.end(); ++it)
+    for(const auto & var : vars_)
     {
         idx++;
-        if(!genVar && (*it).name() == varName)
+        if(!genVar && var.name() == varName)
         {
             return idx;
         }
@@ -249,10 +249,10 @@ int VariableModelData::indexOf(const std::string& varName,bool genVar) const
     if(!genVar)
         return -1;
 
-    for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); ++it)
+    for(const auto & genVar : genVars_)
     {
         idx++;
-        if((*it).name() == varName)
+        if(genVar.name() == varName)
         {
             return idx;
         }
@@ -336,9 +336,9 @@ bool VariableModelData::isGenVar(int index) const
 
 bool VariableModelData::isGenVar(const std::string& n) const
 {
-    for(std::vector<Variable>::const_iterator it=genVars_.begin(); it != genVars_.end(); ++it)
+    for(const auto & genVar : genVars_)
     {
-        if((*it).name() == n)
+        if(genVar.name() == n)
         {
             return true;
         }
@@ -384,36 +384,36 @@ bool VariableModelData::updateShadowed(std::set<std::string>& names)
 
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " ori shadowed:";
-    for(std::set<std::string>::const_iterator it=ori.begin(); it != ori.end(); ++it)
+    for(const auto & it : ori)
     {
-         UiLog().dbg() << "  "  << *it;
+         UiLog().dbg() << "  "  << it;
     }
 #endif
 
-    for(std::set<std::string>::const_iterator it = names.begin(); it != names.end(); ++it)
+    for(const auto & name : names)
     {
-        if(hasName(*it))
+        if(hasName(name))
         {
-            shadowed_.insert(*it);
-            if(ori.find(*it) == ori.end())
+            shadowed_.insert(name);
+            if(ori.find(name) == ori.end())
                 changed=true;
         }
     }
 
-    for(std::size_t i=0; i < vars_.size(); i++)
+    for(auto & var : vars_)
     {
-        names.insert(vars_[i].name());
+        names.insert(var.name());
     }
-    for(std::size_t i=0; i < genVars_.size(); i++)
+    for(auto & genVar : genVars_)
     {
-        names.insert(genVars_[i].name());
+        names.insert(genVar.name());
     }
 
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " shadowed:";
-    for(std::set<std::string>::const_iterator it=shadowed_.begin(); it != shadowed_.end(); ++it)
+    for(const auto & it : shadowed_)
     {
-        UiLog().dbg() << "  " <<  *it;
+        UiLog().dbg() << "  " <<  it;
     }
 
     UiLog().dbg() << " changed: " << changed;
@@ -478,11 +478,11 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
 
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
     UiLog().dbg() << " new list of variables:";
-    for(std::size_t i=0; i < v.size(); i++)
-         UiLog().dbg() << "  " <<  v[i].name() << "=" << v[i].theValue();
+    for(const auto & i : v)
+         UiLog().dbg() << "  " <<  i.name() << "=" << i.theValue();
     UiLog().dbg() << "   new list of generated variables:";
-    for(std::size_t i=0; i < vg.size(); i++)
-        UiLog().dbg() << "  " << vg[i].name() << "=" << vg[i].theValue();
+    for(const auto & i : vg)
+        UiLog().dbg() << "  " << i.name() << "=" << i.theValue();
 #endif
 
     //We must have the same number of variables
@@ -578,11 +578,9 @@ void VariableModelDataHandler::reload(VInfo_ptr info)
 
 		std::vector<VNode*> nodes=info->node()->ancestors(VNode::ChildToParentSort);
 
-		for(std::vector<VNode*>::iterator it=nodes.begin(); it != nodes.end(); ++it)
+		for(auto n : nodes)
 		{
-			VNode* n=*it;
-
-			if(n->isServer())
+				if(n->isServer())
 			{
 				VInfo_ptr ptr=VInfoServer::create(n->server());
 				data_.push_back(new VariableModelData(ptr));
@@ -661,9 +659,9 @@ void VariableModelDataHandler::clear(bool emitSignal)
     if(emitSignal)
         Q_EMIT reloadBegin();
 
-	for(std::vector<VariableModelData*>::iterator it=data_.begin(); it != data_.end(); ++it)
+	for(auto & it : data_)
 	{
-		delete *it;
+		delete it;
 	}
 
     server_=0;
@@ -880,11 +878,11 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
 const std::string& VariableModelDataHandler::value(const std::string& node,const std::string& name, bool& hasIt) const
 {
     hasIt=false;
-    for(unsigned int i=0; i < data_.size(); i++)
+    for(auto i : data_)
     {
-        if(data_.at(i)->name() == node)
+        if(i->name() == node)
         {
-            return data_.at(i)->value(name,hasIt);
+            return i->value(name,hasIt);
         }
     }
 

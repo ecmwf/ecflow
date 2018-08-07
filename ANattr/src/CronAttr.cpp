@@ -407,8 +407,8 @@ boost::gregorian::date CronAttr::last_day_of_month(const ecf::Calendar& calendar
 		// deal with case where we have:
 		//  	cron -w 0,1 -m 5,6,7,8
 		// Find the last Sunday/Monday for *THIS* month
-		for (size_t i = 0; i < weekDays_.size(); ++i) {
-			if ( todays_date.day_of_week().as_number() == weekDays_[i] ) {
+		for (int weekDay : weekDays_) {
+			if ( todays_date.day_of_week().as_number() == weekDay ) {
 //				cout << "CronAttr::last_day_of_month  ( todays_date.day_of_week().as_number() == weekDays_[i] ) " << weekDays_[i] << "\n";
 				if ( todays_date > max_date ) {
 					max_date = todays_date;
@@ -419,8 +419,8 @@ boost::gregorian::date CronAttr::last_day_of_month(const ecf::Calendar& calendar
 				// deal with case where we have:
 				//  	cron -w 0,1 -d 14,15,16
 				// Find the last date for *THIS* month
-				for (size_t d = 0; d < daysOfMonth_.size(); ++d) {
-					if ( todays_date.day() == daysOfMonth_[d] ) {
+				for (int d : daysOfMonth_) {
+					if ( todays_date.day() == d ) {
 //						cout << "CronAttr::last_day_of_month **( todays_date.day() == daysOfMonth_[d] ) " << daysOfMonth_[d] << "\n";
 						if ( todays_date > max_date ) {
 							max_date = todays_date;
@@ -434,8 +434,8 @@ boost::gregorian::date CronAttr::last_day_of_month(const ecf::Calendar& calendar
 		// deal with case where we have:
 		//  	cron -d 14,15,16 -m 5,6,7,8
 		// Find the last date for *THIS* month
-		for (size_t d = 0; d < daysOfMonth_.size(); ++d) {
-			if ( todays_date.day() == daysOfMonth_[d] ) {
+		for (int d : daysOfMonth_) {
+			if ( todays_date.day() == d ) {
 //				cout << "CronAttr::last_day_of_month ( todays_date.day() == daysOfMonth_[d] ) " << daysOfMonth_[d] << "\n";
 				if ( todays_date > max_date ) {
 					max_date = todays_date;
@@ -466,24 +466,24 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const
  		bool month_matches = months_.empty();              // month matches if no months
 
 		// deal with case where we have: cron -w 0,1
- 		for (size_t i = 0; i < weekDays_.size(); ++i) {
-			if ( future_date.day_of_week().as_number() == weekDays_[i] ) {
+ 		for (int weekDay : weekDays_) {
+			if ( future_date.day_of_week().as_number() == weekDay ) {
 				week_day_matches = true;
 				break;
 			}
 		}
 
  		// deal with case where we have: cron -w 0,1 -d 14,15,16
- 		for (size_t d = 0; d < daysOfMonth_.size(); ++d) {
-			if ( future_date.day() == daysOfMonth_[d] ) {
+ 		for (int d : daysOfMonth_) {
+			if ( future_date.day() == d ) {
 				day_of_month_matches = true;
 				break;
  			}
 		}
 
  		// deal with case where we have: cron -w 0,1 -d 14,15,16 -m 8, 9
- 		for (size_t m = 0; m < months_.size(); ++m) {
-			if ( future_date.month() == months_[m] ) {
+ 		for (int month : months_) {
+			if ( future_date.month() == month ) {
 				month_matches = true;
 				break;
   			}

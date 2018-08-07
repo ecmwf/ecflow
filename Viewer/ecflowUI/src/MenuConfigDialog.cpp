@@ -72,21 +72,21 @@ void MenuConfigDialog::addChildrenToMenuTree(Menu *menu, QTreeWidgetItem *parent
 
     std::vector<MenuItem *>&items = menu->items();
 
-	for (std::vector<MenuItem*>::iterator itItems = items.begin(); itItems != items.end(); ++itItems)
+	for (auto & itItems : items)
 	{
 		QTreeWidgetItem *item = new QTreeWidgetItem(parent);
-		item->setText(0, QString::fromStdString((*itItems)->name()));
+		item->setText(0, QString::fromStdString(itItems->name()));
 		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled);
 
-		if ((*itItems)->isSubMenu())
+		if (itItems->isSubMenu())
 		{
-			Menu *submenu = MenuHandler::findMenu((*itItems)->name());
+			Menu *submenu = MenuHandler::findMenu(itItems->name());
             if(menu)
 			{
 				addChildrenToMenuTree(submenu, item);
 			}
 		}
-		else if  ((*itItems)->isDivider())
+		else if  (itItems->isDivider())
 		{
 			//qmenu->addSeparator();
 		}

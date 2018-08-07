@@ -43,7 +43,7 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
    Str::split(cmdSeries,individualCmdVec,";");
    if ( individualCmdVec.empty())  throw std::runtime_error("GroupCTSCmd::GroupCTSCmd: Please provide a list of ';' separated commands\n" );
    if (clientEnv->debug()){
-      for(size_t i=0; i < individualCmdVec.size(); i++) { cout << "  CHILD COMMAND = " << individualCmdVec[i] << "\n";}
+      for(const auto & i : individualCmdVec) { cout << "  CHILD COMMAND = " << i << "\n";}
    }
 
 
@@ -54,10 +54,9 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
 
 
    std::string subCmd;
-   for(size_t i=0; i < individualCmdVec.size(); i++){
+   for(auto aCmd : individualCmdVec){
       // massage the commands so that, we add -- at the start of each command.
       // This is required by the boost program options.
-      std::string aCmd = individualCmdVec[i];
       boost::algorithm::trim(aCmd);
 
       subCmd.clear();
@@ -70,16 +69,16 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
       // This can only handle one level of quotes  hence can't cope with "fred \"joe fred\"
       bool start_quote = false;
       bool replaced_spaces =  false;
-      for(size_t i =0; i < subCmd.size(); ++i) {
+      for(char & i : subCmd) {
          if (start_quote) {
-            if (subCmd[i] == '"' || subCmd[i] == '\'') start_quote = false;
-            else if (subCmd[i] == ' ') {
-               subCmd[i] = '\b';  // "fre d ddy"  => "fre\bd\bddy"
+            if (i == '"' || i == '\'') start_quote = false;
+            else if (i == ' ') {
+               i = '\b';  // "fre d ddy"  => "fre\bd\bddy"
                replaced_spaces = true;
             }
          }
          else {
-            if (subCmd[i] == '"' || subCmd[i] == '\'') start_quote = true;
+            if (i == '"' || i == '\'') start_quote = true;
          }
       }
 
@@ -88,10 +87,9 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
       Str::split(subCmd,subCmdArgs);
 
       if (replaced_spaces) {
-         for(size_t i = 0; i < subCmdArgs.size(); ++i) {
-            std::string& str = subCmdArgs[i];
-            for(size_t j=0; j < str.size(); ++j) {
-               if (str[j] == '\b') str[j] = ' ';     // "fre\bd\bddy"  => "fre d ddy"
+         for(auto & str : subCmdArgs) {
+            for(char & j : str) {
+               if (j == '\b') j = ' ';     // "fre\bd\bddy"  => "fre d ddy"
             }
          }
       }
@@ -208,24 +206,24 @@ void GroupCTSCmd::addChild(Cmd_ptr childCmd)
 void GroupCTSCmd::setup_user_authentification(const std::string& user, const std::string& passwd)
 {
    UserCmd::setup_user_authentification(user,passwd);
- 	for(size_t i = 0; i < cmdVec_.size(); i++) {
- 		cmdVec_[i]->setup_user_authentification(user,passwd);
+ 	for(auto & i : cmdVec_) {
+ 		i->setup_user_authentification(user,passwd);
  	}
 }
 
 void GroupCTSCmd::setup_user_authentification(AbstractClientEnv& env)
 {
    UserCmd::setup_user_authentification(env);
-   for(size_t i = 0; i < cmdVec_.size(); i++) {
-      cmdVec_[i]->setup_user_authentification(env);
+   for(auto & i : cmdVec_) {
+      i->setup_user_authentification(env);
    }
 }
 
 void GroupCTSCmd::setup_user_authentification()
 {
    UserCmd::setup_user_authentification();
-   for(size_t i = 0; i < cmdVec_.size(); i++) {
-      cmdVec_[i]->setup_user_authentification();
+   for(auto & i : cmdVec_) {
+      i->setup_user_authentification();
    }
 }
 

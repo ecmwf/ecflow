@@ -86,9 +86,9 @@ const std::set<TriggerCollector::Mode>& TriggerTableItem::modes() const
 {
     if(modes_.empty())
     {
-        for(std::size_t i=0; i < deps_.size(); i++)
+        for(auto dep : deps_)
         {
-            modes_.insert(deps_[i].mode());
+            modes_.insert(dep.mode());
         }
     }
     return modes_;
@@ -108,11 +108,11 @@ bool TriggerTableCollector::add(VItem* trigger, VItem* dep,Mode mode)
     Q_ASSERT(trigger);
 
     TriggerTableItem *item=0;
-    for(std::size_t i=0; i < items_.size(); i++)
+    for(auto & i : items_)
     {
-        if(items_[i]->item() == trigger)
+        if(i->item() == trigger)
         {          
-            item=items_[i];
+            item=i;
             break;
         }
     }
@@ -135,9 +135,9 @@ void TriggerTableCollector::setDependency(bool b)
 
 void TriggerTableCollector::clear()
 {
-    for(size_t i=0; i < items_.size(); i++)
+    for(auto & item : items_)
     {
-        delete items_[i];
+        delete item;
     }
     items_.clear();
 }
@@ -149,9 +149,9 @@ bool TriggerTableCollector::contains(TriggerTableItem* item) const
 
 bool TriggerTableCollector::contains(const VNode* node,bool attrParents) const
 {
-    for(size_t i=0; i < items_.size(); i++)
+    for(auto item : items_)
     {
-        if(VItem* it=items_[i]->item())
+        if(VItem* it=item->item())
         {
             if(VNode *n=it->isNode())
             {
@@ -173,10 +173,10 @@ bool TriggerTableCollector::contains(const VNode* node,bool attrParents) const
 
 TriggerTableItem* TriggerTableCollector::find(const VItem* item) const
 {
-    for(size_t i=0; i < items_.size(); i++)
+    for(auto i : items_)
     {
-        if(items_[i]->item() == item)
-            return items_[i];
+        if(i->item() == item)
+            return i;
     }
     return 0;
 }
@@ -186,11 +186,11 @@ TriggerTableItem* TriggerTableCollector::findByContents(const VItem* item) const
     if(!item)
         return 0;
 
-    for(size_t i=0; i < items_.size(); i++)
+    for(auto i : items_)
     {
-        if(item->sameContents(items_[i]->item()))
+        if(item->sameContents(i->item()))
         {
-            return items_[i];
+            return i;
         }
     }
     return 0;

@@ -494,9 +494,9 @@ void NodeQueryEditor::updateServers()
 
 	if(serverFilter_)
 	{
-		for(std::vector<ServerItem*>::const_iterator it=serverFilter_->items().begin(); it != serverFilter_->items().end(); ++it)
+		for(auto it : serverFilter_->items())
 		{
-			serverCb_->addItem(QString::fromStdString((*it)->name()));
+			serverCb_->addItem(QString::fromStdString(it->name()));
 		}
 	}
 

@@ -357,8 +357,8 @@ void Defs::absorb(Defs* input_defs, bool force)
 
   	// This only works on the client side. since server does not store externs
   	const set<string>& ex = input_defs->externs();
-  	for(set<string>::const_iterator i = ex.begin(); i != ex.end(); ++i) {
-  	   add_extern(*i);
+  	for(const auto & i : ex) {
+  	   add_extern(i);
   	}
 }
 
@@ -587,9 +587,9 @@ void Defs::check_suite_can_begin(suite_ptr suite) const
       std::vector<Task*> tasks;
       getAllTasks(tasks);
       std::stringstream ts;
-      for(size_t i =0; i < tasks.size(); i++) {
-         if (tasks[i]->state() == NState::ACTIVE || tasks[i]->state() == NState::SUBMITTED) {
-            ts << "   " << tasks[i]->absNodePath() << "\n";
+      for(auto & task : tasks) {
+         if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) {
+            ts << "   " << task->absNodePath() << "\n";
             count++;
          }
       }
@@ -686,13 +686,13 @@ std::string Defs::write_state() const
 	   for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {
 		   Indentor::indent( os ) << "history " << (*i).first << " ";// node path
 		   const std::deque<std::string>& vec = (*i).second;   // list of requests
-		   for(std::deque<std::string>::const_iterator c = vec.begin(); c != vec.end(); ++c) {
+		   for(const auto & c : vec) {
 
 		      // We expect to output a single newline, hence if there are additional new lines
 		      // It can mess  up, re-parse. i.e during alter change label/value, user could have added newlines
-	         if ((*c).find("\n") == std::string::npos)  os << "\b" << *c;
+	         if (c.find("\n") == std::string::npos)  os << "\b" << c;
 	         else {
-	            std::string h = *c;
+	            std::string h = c;
 	            Str::replaceall(h,"\n","\\n");
 	            os << "\b" << h;
 	         }
@@ -749,8 +749,8 @@ void Defs::read_history(const std::string& line,const std::vector<std::string>& 
    parser.parse(line);
 
    const std::vector<std::string>& parsed_messages =  parser.parsed_messages();
-   for(size_t i = 0; i < parsed_messages.size(); i++) {
-      add_edit_history(lineTokens[1],parsed_messages[i]);
+   for(const auto & parsed_message : parsed_messages) {
+      add_edit_history(lineTokens[1],parsed_message);
    }
 }
 
@@ -1534,7 +1534,7 @@ void Defs::collate_defs_changes_only(DefsDelta& incremental_changes) const
    if (order_state_change_no_ > incremental_changes.client_state_change_no()) {
        if (!comp.get()) comp = std::make_shared<CompoundMemento>(Str::ROOT_PATH());
        std::vector<std::string> order; order.reserve(suiteVec_.size());
-       for(size_t i =0; i < suiteVec_.size(); i++)  order.push_back( suiteVec_[i]->name());
+       for(const auto & i : suiteVec_)  order.push_back( i->name());
        comp->add( std::make_shared<OrderMemento>( order ) );
    }
 
@@ -1627,9 +1627,9 @@ void Defs::set_memento( const OrderMemento* memento,std::vector<ecf::Aspect::Typ
 
    std::vector<suite_ptr> vec; vec.reserve(suiteVec_.size());
    size_t node_vec_size = suiteVec_.size();
-   for(size_t i = 0; i < order.size(); i++) {
+   for(const auto & i : order) {
       for(size_t t = 0; t < node_vec_size; t++) {
-          if (order[i] == suiteVec_[t]->name()) {
+          if (i == suiteVec_[t]->name()) {
              vec.push_back(suiteVec_[t]);
              break;
           }
@@ -1690,8 +1690,8 @@ void Defs::notify_delete()
 {
    // make a copy, to avoid iterating over observer list that is being changed
    std::vector<AbstractObserver*> copy_of_observers = observers_;
-   for(size_t i = 0; i < copy_of_observers.size(); i++) {
-      copy_of_observers[i]->update_delete(this);
+   for(auto & copy_of_observer : copy_of_observers) {
+      copy_of_observer->update_delete(this);
    }
 
    /// Check to make sure that the Observer called detach
@@ -1703,15 +1703,15 @@ void Defs::notify_delete()
 
 void Defs::notify_start(const std::vector<ecf::Aspect::Type>& aspects)
 {
-   for(size_t i = 0; i < observers_.size(); i++) {
-      observers_[i]->update_start(this,aspects);
+   for(auto & observer : observers_) {
+      observer->update_start(this,aspects);
    }
 }
 
 void Defs::notify(const std::vector<ecf::Aspect::Type>& aspects)
 {
-   for(size_t i = 0; i < observers_.size(); i++) {
-      observers_[i]->update(this,aspects);
+   for(auto & observer : observers_) {
+      observer->update(this,aspects);
    }
 }
 
@@ -1732,8 +1732,8 @@ void Defs::detach(AbstractObserver* obs)
 
 bool Defs::is_observed(AbstractObserver* obs) const
 {
-   for(size_t i = 0; i < observers_.size(); i++) {
-       if (observers_[i] == obs) {
+   for(auto observer : observers_) {
+       if (observer == obs) {
           return true;
        }
     }
@@ -1788,8 +1788,7 @@ void DefsHistoryParser::parse(const std::string& line)
 
 string::size_type DefsHistoryParser::find_log(const std::string& line, string::size_type pos) const
 {
-   for(size_t i = 0; i < log_types_.size(); i++) {
-      std::string log_type = log_types_[i];
+   for(auto log_type : log_types_) {
       log_type += ":[";
       string::size_type log_type_pos = line.find( log_type, pos );
       if (log_type_pos != std::string::npos) {

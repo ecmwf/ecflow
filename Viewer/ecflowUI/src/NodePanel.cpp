@@ -329,9 +329,9 @@ void NodePanel::refreshCurrent()
 	if(!filter)
 		return;
 
-	for(std::vector<ServerItem*>::const_iterator it=filter->items().begin(); it != filter->items().end(); ++it)
+	for(auto it : filter->items())
 	{
-		if(ServerHandler *sh=(*it)->serverHandler())
+		if(ServerHandler *sh=it->serverHandler())
 		{
 			sh->refresh();
 		}
@@ -345,9 +345,9 @@ void NodePanel::resetCurrent()
 	if(!filter)
 		return;
 
-	for(std::vector<ServerItem*>::const_iterator it=filter->items().begin(); it != filter->items().end(); ++it)
+	for(auto it : filter->items())
 	{
-		if(ServerHandler *sh=(*it)->serverHandler())
+		if(ServerHandler *sh=it->serverHandler())
 		{
 			sh->reset();
 		}

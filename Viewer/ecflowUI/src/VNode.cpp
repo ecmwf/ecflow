@@ -154,8 +154,8 @@ VNode::~VNode()
     if(data_)
         delete data_;
 
-    for(size_t i=0; i < attr_.size(); i++)
-        delete attr_[i];
+    for(auto & i : attr_)
+        delete i;
 }
 
 VServer* VNode::root() const
@@ -223,8 +223,8 @@ void VNode::scanAttr()
 
 void VNode::rescanAttr()
 {
-    for(size_t i=0; i < attr_.size(); i++)
-        delete attr_[i];
+    for(auto & i : attr_)
+        delete i;
 
     attr_=std::vector<VAttribute*>();
     scanAttr();
@@ -235,9 +235,9 @@ int VNode::attrNum(AttributeFilter *filter) const
     if(filter)
     {
         int n=0;
-        for(size_t i=0; i < attr_.size(); i++)
+        for(auto i : attr_)
         {
-            if(filter->isSet(attr_[i]->type()) || filter->forceShowAttr() == attr_[i])
+            if(filter->isSet(i->type()) || filter->forceShowAttr() == i)
                 n++;
         }
         return n;
@@ -436,10 +436,10 @@ int VNode::indexOfChild(node_ptr n) const
 
 VNode *VNode::findChild(const std::string& name) const
 {
-	for(unsigned int i=0; i < children_.size(); i++)
+	for(auto i : children_)
 	{
-        if(children_[i]->sameName(name))
-			return children_.at(i);
+        if(i->sameName(name))
+			return i;
 	}
 	return 0;
 }
@@ -927,9 +927,9 @@ void VNode::triggers(TriggerCollector* tlc)
                 node_->triggerAst()->accept(astVisitor);
 
             //Add the found items to the collector
-            for(std::vector<VItem*>::iterator it = theVec.begin(); it != theVec.end(); ++it)
+            for(auto & it : theVec)
             {
-                tlc->add(*it,nullItem, TriggerCollector::Normal);
+                tlc->add(it,nullItem, TriggerCollector::Normal);
             }
         }
 
@@ -996,11 +996,11 @@ void VNode::triggers(TriggerCollector* tlc)
 //Collect the triggers triggering node n in the children of parent
 void VNode::triggersInChildren(VNode *n,VNode* p,TriggerCollector* tlc)
 {
-    for(size_t i=0; i < p->children_.size(); i++)
+    for(auto & i : p->children_)
     {
-        TriggerChildCollector tcc(n,p->children_[i],tlc);
-        p->children_[i]->triggers(&tcc);
-        triggersInChildren(n,p->children_[i],tlc);
+        TriggerChildCollector tcc(n,i,tlc);
+        i->triggers(&tcc);
+        triggersInChildren(n,i,tlc);
   }
 }
 
@@ -1063,11 +1063,11 @@ void VNode::triggered(TriggerCollector* tlc,TriggeredScanner* scanner)
 
 void VNode::triggeredByChildren(VNode *n,VNode* p,TriggerCollector* tlc)
 {
-    for(size_t i=0; i < p->children_.size(); i++)
+    for(auto & i : p->children_)
     {
-        TriggerChildCollector tcc(n,p->children_[i],tlc);
-        p->children_[i]->triggered(&tcc);
-        triggeredByChildren(n,p->children_[i],tlc);
+        TriggerChildCollector tcc(n,i,tlc);
+        i->triggered(&tcc);
+        triggeredByChildren(n,i,tlc);
     }
 }
 
@@ -1156,8 +1156,8 @@ const std::string& VAliasNode::typeName() const
 void VNode::print()
 {
     UiLog().dbg() << name() << " " << children_.size();
-    for(std::size_t i=0; i < children_.size(); i++)
-        children_[i]->print();
+    for(auto & i : children_)
+        i->print();
 }
 
 //=================================================
@@ -1316,10 +1316,10 @@ std::string VServer::genVariable(const std::string& key) const
 {
 	std::string val;
 
-	for(std::vector<Variable>::const_iterator it=cache_.genVars_.begin(); it != cache_.genVars_.end(); ++it)
+	for(const auto & genVar : cache_.genVars_)
 	{
-	   if((*it).name() == key)
-		   val=(*it).theValue();
+	   if(genVar.name() == key)
+		   val=genVar.theValue();
 	}
 
 	return val;
@@ -1358,11 +1358,11 @@ std::string VServer::findVariable(const std::string& key,bool substitute) const
 	std::string val;
 
 	//Search user variables first
-	for(std::vector<Variable>::const_iterator it=cache_.vars_.begin(); it != cache_.vars_.end(); ++it)
+	for(const auto & var : cache_.vars_)
 	{
-		if((*it).name() == key)
+		if(var.name() == key)
 		{
-			val=(*it).theValue();
+			val=var.theValue();
 			if(substitute)
 				val=substituteVariableValue(val);
 
@@ -1371,11 +1371,11 @@ std::string VServer::findVariable(const std::string& key,bool substitute) const
 	}
 
 	//Then search server variables
-	for(std::vector<Variable>::const_iterator it=cache_.genVars_.begin(); it != cache_.genVars_.end(); ++it)
+	for(const auto & genVar : cache_.genVars_)
 	{
-		if((*it).name() == key)
+		if(genVar.name() == key)
 		{
-			val=(*it).theValue();
+			val=genVar.theValue();
 			if(substitute)
 				val=substituteVariableValue(val);
 
@@ -1470,9 +1470,9 @@ void VServer::endScan()
 		//Scan the suits.This will recursively scan all nodes in the tree.
 		const std::vector<suite_ptr> &suites = defs->suiteVec();
 
-		for(unsigned int i=0; i < suites.size();i++)
+		for(const auto & suite : suites)
 		{
-            VNode* vn=new VSuiteNode(this,suites.at(i));
+            VNode* vn=new VSuiteNode(this,suite);
 			totalNum_++;
 			scan(vn,hasNotifications);
 		}
@@ -1599,16 +1599,16 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
     //    -a trigger expression was added or removed (the aspect is ADD_REMOVE_ATTR)
     //--------------------------------------------------------------------------
 
-    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    for(auto it : aspect)
     {
-        if(*it == ecf::Aspect::ADD_REMOVE_ATTR)
+        if(it == ecf::Aspect::ADD_REMOVE_ATTR)
         {
             //we need to rescan the attributes belong to the node
             node->rescanAttr();
             clearNodeTriggerData();
             return;
         }
-        else if (*it == ecf::Aspect::EXPR_TRIGGER)
+        else if (it == ecf::Aspect::EXPR_TRIGGER)
         {
             clearNodeTriggerData();
         }
@@ -1801,6 +1801,6 @@ void VServer::clearNodeTriggerData()
 
 void VServer::print()
 {
-    for(std::size_t i=0; i < children_.size(); i++)
-        children_[i]->print();
+    for(auto & i : children_)
+        i->print();
 }

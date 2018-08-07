@@ -39,8 +39,8 @@ bool SStringVecCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr c
 {
    if (debug) cout << "  SStringVecCmd::handle_server_response str.size()= " << vec_.size() << "\n";
    if (server_reply.cli())  {
-      for(size_t i = 0; i < vec_.size(); i++) {
-         std::cout << vec_[i] << "\n";
+      for(const auto & i : vec_) {
+         std::cout << i << "\n";
       }
    }
    else server_reply.set_string_vec( vec_ );

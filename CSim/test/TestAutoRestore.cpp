@@ -155,8 +155,7 @@ BOOST_AUTO_TEST_CASE( test_autorestore_family )
    // make sure all familes has been archived
    std::vector<Family*> famVec;
    theDefs.getAllFamilies(famVec);
-   for(size_t i = 0; i < famVec.size(); i++) {
-      Family* f = famVec[i];
+   for(auto f : famVec) {
       if (f->name() == "do_autorestore") continue;
       BOOST_CHECK_MESSAGE(f->get_flag().is_set(ecf::Flag::RESTORED),"Expected family " << f->absNodePath() << " to be restored");
       BOOST_CHECK_MESSAGE(!f->get_flag().is_set(ecf::Flag::ARCHIVED),"Expected family " << f->absNodePath() << " to be restored");

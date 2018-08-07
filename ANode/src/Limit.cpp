@@ -91,8 +91,8 @@ std::ostream& Limit::print( std::ostream& os ) const {
    if (!PrintStyle::defsStyle()) {
       if (value_ != 0) {
          os << " # " << value_;
-         for(std::set<std::string>::const_iterator i = paths_.begin(); i != paths_.end(); ++i) {
-            os << " " << (*i);
+         for(const auto & path : paths_) {
+            os << " " << path;
          }
       }
    }

@@ -59,9 +59,9 @@ std::string GenericAttr::to_string() const
 {
    std::string ret = "generic ";
    ret += name_;
-   for(size_t i = 0; i < values_.size(); i++) {
+   for(const auto & value : values_) {
       ret += " ";
-      ret += values_[i];
+      ret += value;
    }
    return ret;
 }

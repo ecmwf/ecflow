@@ -90,25 +90,25 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic )
    vec.push_back(":YMD * :YMD < 5");
    vec.push_back(":YMD % :YMD < 5");
 
-   for(size_t i = 0; i < vec.size(); i++) {
+   for(const auto & i : vec) {
 
-      PartExpression part(vec[i]);
+      PartExpression part(i);
       string parseErrorMsg;
       std::unique_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
-      BOOST_REQUIRE_MESSAGE(ast.get(),"Failed to parse\n" << vec[i] << "  " << parseErrorMsg);
+      BOOST_REQUIRE_MESSAGE(ast.get(),"Failed to parse\n" << i << "  " << parseErrorMsg);
 
       std::stringstream s2;
       ast->print_flat(s2);
       std::string ast_expr = s2.str();
-      BOOST_CHECK_MESSAGE(vec[i]==ast_expr," Failed\n'" << vec[i] << "' != '" << ast_expr << "'" );
+      BOOST_CHECK_MESSAGE(i==ast_expr," Failed\n'" << i << "' != '" << ast_expr << "'" );
 
       std::string why; ast->why(why);
       //cout << "why: " << vec[i] << " -> " << why << "\n";
       if (ast->evaluate()) {
-         BOOST_CHECK_MESSAGE(why.empty(),"Expected why to be empty when expression evaluates: " << vec[i]);
+         BOOST_CHECK_MESSAGE(why.empty(),"Expected why to be empty when expression evaluates: " << i);
       }
       else {
-         BOOST_CHECK_MESSAGE(!why.empty(),"When ast does not evaluate we expect to find why: " << vec[i]);
+         BOOST_CHECK_MESSAGE(!why.empty(),"When ast does not evaluate we expect to find why: " << i);
       }
    }
 }
@@ -134,25 +134,25 @@ BOOST_AUTO_TEST_CASE( test_expression_parser_basic_with_brackets )
    vec.push_back("((./a:YMD - ./b:YMD) < 5)");
    vec.push_back("((:YMD + :YMD) < 5)");
 
-   for(size_t i = 0; i < vec.size(); i++) {
+   for(const auto & i : vec) {
 
-      PartExpression part(vec[i]);
+      PartExpression part(i);
       string parseErrorMsg;
       std::unique_ptr<AstTop> ast = part.parseExpressions( parseErrorMsg );
-      BOOST_REQUIRE_MESSAGE(ast.get(),"Failed to parse " << vec[i] << "  " << parseErrorMsg);
+      BOOST_REQUIRE_MESSAGE(ast.get(),"Failed to parse " << i << "  " << parseErrorMsg);
 
       std::stringstream s2;
       ast->print_flat(s2,true/*add_brackets*/);
       std::string ast_expr = s2.str();
-      BOOST_CHECK_MESSAGE(vec[i]==ast_expr," Failed '" << vec[i] << "' != '" << ast_expr << "'" );
+      BOOST_CHECK_MESSAGE(i==ast_expr," Failed '" << i << "' != '" << ast_expr << "'" );
 
       std::string why; ast->why(why);
       //cout << "why: " << vec[i] << " -> " << why << "\n";
       if (ast->evaluate()) {
-         BOOST_CHECK_MESSAGE(why.empty(),"Expected why to be empty when expression evaluates: " << vec[i]);
+         BOOST_CHECK_MESSAGE(why.empty(),"Expected why to be empty when expression evaluates: " << i);
       }
       else {
-         BOOST_CHECK_MESSAGE(!why.empty(),"When ast does not evaluate we expect to find why: " << vec[i]);
+         BOOST_CHECK_MESSAGE(!why.empty(),"When ast does not evaluate we expect to find why: " << i);
       }
    }
 }
@@ -497,9 +497,9 @@ BOOST_AUTO_TEST_CASE( test_date_to_julian_with_repeat_YMD )
     BOOST_CHECK_MESSAGE(theReasonWhy.empty() ,"When all is well expected empty reason vec");
 
     // be more flexible, of vector is returned we should not get: variable-not-found
-    for(size_t i = 0; i < theReasonWhy.size(); i++) {
-       cout << theReasonWhy[i] << "\n";
-       BOOST_CHECK_MESSAGE(theReasonWhy[i].find("variable-not-found") == string::npos,"Variable YMD not found: " << theReasonWhy[i]);
+    for(auto & i : theReasonWhy) {
+       cout << i << "\n";
+       BOOST_CHECK_MESSAGE(i.find("variable-not-found") == string::npos,"Variable YMD not found: " << i);
     }
 }
 

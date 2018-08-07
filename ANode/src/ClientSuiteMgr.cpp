@@ -33,8 +33,8 @@ unsigned int ClientSuiteMgr::create_client_suite(bool auto_add_new_suites, const
 	// Hence re-use handle 3
 	bool found_hole = false;
 	unsigned int new_handle = 1;
-  	for(size_t i = 0; i < clientSuites_.size(); i++) {
- 		if (clientSuites_[i].handle() == new_handle) {
+  	for(auto & clientSuite : clientSuites_) {
+ 		if (clientSuite.handle() == new_handle) {
  			new_handle++;
  		}
  		else {
@@ -102,8 +102,8 @@ void ClientSuiteMgr::add_suites(unsigned int client_handle, const std::vector<st
    size_t client_suites_size = clientSuites_.size();
    for(size_t i = 0; i < client_suites_size; i++) {
 		if (clientSuites_[i].handle() == client_handle) {
-			for(size_t s = 0; s < suites.size(); s++) {
-				clientSuites_[i].add_suite(suites[s]);
+			for(const auto & suite : suites) {
+				clientSuites_[i].add_suite(suite);
 			}
 #ifdef DEBUG_HANDLE
 			std::cout << "ClientSuiteMgr::add_suites: client_handle(" << client_handle << ") " << dump() << "\n";
@@ -122,8 +122,8 @@ void ClientSuiteMgr::remove_suites(unsigned int client_handle, const std::vector
    size_t client_suites_size = clientSuites_.size();
    for(size_t i = 0; i < client_suites_size; i++) {
 		if (clientSuites_[i].handle() == client_handle) {
-			for(size_t s = 0; s < suites.size(); s++) {
-				clientSuites_[i].remove_suite(suites[s]);
+			for(const auto & suite : suites) {
+				clientSuites_[i].remove_suite(suite);
 			}
 #ifdef DEBUG_HANDLE
          std::cout << "ClientSuiteMgr::remove_suites: client_handle(" << client_handle << ") " << dump() << "\n";

@@ -268,10 +268,10 @@ void ServerComQueue::stopTimer()
 
 bool ServerComQueue::hasTask(VTask::Type t) const
 {
-	for(std::deque<VTask_ptr>::const_iterator it=tasks_.begin(); it != tasks_.end(); ++it)
+	for(const auto & task : tasks_)
 	{
-		if(*it && (*it)->type() == t && (*it)->status() != VTask::CANCELLED &&
-		   (*it)->status() != VTask::ABORTED )
+		if(task && task->type() == t && task->status() != VTask::CANCELLED &&
+		   task->status() != VTask::ABORTED )
 			return true;
 
 	}

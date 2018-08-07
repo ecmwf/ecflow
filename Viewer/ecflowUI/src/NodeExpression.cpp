@@ -538,9 +538,9 @@ bool BaseNodeCondition::containsAttributeSearch()
     bool contains = false;
 
     // check child condition nodes
-    for(std::size_t i = 0; i < operands_.size(); i++)
+    for(auto & operand : operands_)
     {
-        contains = contains | operands_[i]->containsAttributeSearch();
+        contains = contains | operand->containsAttributeSearch();
     }
 
     // check this condition node

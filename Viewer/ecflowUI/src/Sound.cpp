@@ -60,9 +60,9 @@ Sound::Sound() :
 
 	DirectoryHandler::findFiles(sysDir_,formats_,res);
 
-	for(unsigned int i=0; i < res.size(); i++)
+	for(const auto & re : res)
 	{
-		sysSounds_.push_back(res.at(i));
+		sysSounds_.push_back(re);
 	}
 }
 

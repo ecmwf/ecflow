@@ -316,11 +316,11 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 	else
 	{
 		//Check the aspects
-		for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+		for(auto it : aspect)
 		{
 			//Changes in the nodes
-			if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::DEFSTATUS ||
-			   *it == ecf::Aspect::SUSPENDED)
+			if(it == ecf::Aspect::STATE || it == ecf::Aspect::DEFSTATUS ||
+			   it == ecf::Aspect::SUSPENDED)
 			{
                 if(node && node->isAttrInitialised())
                 {
@@ -336,9 +336,9 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 			}
 
 			//Changes might affect the icons
-			else if (*it == ecf::Aspect::FLAG || *it == ecf::Aspect::SUBMITTABLE ||
-					*it == ecf::Aspect::TODAY || *it == ecf::Aspect::TIME ||
-					*it == ecf::Aspect::DAY || *it == ecf::Aspect::CRON || *it == ecf::Aspect::DATE)
+			else if (it == ecf::Aspect::FLAG || it == ecf::Aspect::SUBMITTABLE ||
+					it == ecf::Aspect::TODAY || it == ecf::Aspect::TIME ||
+					it == ecf::Aspect::DAY || it == ecf::Aspect::CRON || it == ecf::Aspect::DATE)
 			{
                 if(node && node->isAttrInitialised())
                 {
@@ -347,12 +347,12 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 			}
 
 			//Changes in the attributes
-			if(*it == ecf::Aspect::METER ||  *it == ecf::Aspect::EVENT ||
-			   *it == ecf::Aspect::LABEL || *it == ecf::Aspect::LIMIT ||
-			   *it == ecf::Aspect::EXPR_TRIGGER || *it == ecf::Aspect::EXPR_COMPLETE ||
-			   *it == ecf::Aspect::REPEAT || *it == ecf::Aspect::NODE_VARIABLE ||
-			   *it == ecf::Aspect::LATE || *it == ecf::Aspect::TODAY || *it == ecf::Aspect::TIME ||
-			   *it == ecf::Aspect::DAY || *it == ecf::Aspect::CRON || *it == ecf::Aspect::DATE )
+			if(it == ecf::Aspect::METER ||  it == ecf::Aspect::EVENT ||
+			   it == ecf::Aspect::LABEL || it == ecf::Aspect::LIMIT ||
+			   it == ecf::Aspect::EXPR_TRIGGER || it == ecf::Aspect::EXPR_COMPLETE ||
+			   it == ecf::Aspect::REPEAT || it == ecf::Aspect::NODE_VARIABLE ||
+			   it == ecf::Aspect::LATE || it == ecf::Aspect::TODAY || it == ecf::Aspect::TIME ||
+			   it == ecf::Aspect::DAY || it == ecf::Aspect::CRON || it == ecf::Aspect::DATE )
 			{
                 if(node && node->isAttrInitialised())
                 {
@@ -438,8 +438,8 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
 #ifdef _UI_VMODELDATA_DEBUG      
         if(suitesChanged.size() < 0)
             UiLogS(server_).dbg() << " suites changed:";
-        for(size_t i= 0; i < suitesChanged.size(); i++)
-            UiLogS(server_).dbg() << "  " << suitesChanged[i]->strName();
+        for(auto i : suitesChanged)
+            UiLogS(server_).dbg() << "  " << i->strName();
 #endif
         //Update the filter for the suites with a status change. topFilterChange
         //will contain the branches where the filter changed. A branch is
@@ -451,32 +451,32 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
 #ifdef _UI_VMODELDATA_DEBUG
         if(topFilterChange.size() > 0)
             UiLogS(server_).dbg() << " top level nodes that changed in filter:";
-        for(size_t i= 0; i < topFilterChange.size(); i++)
-            UiLogS(server_).dbg() << "  " << topFilterChange.at(i)->strName();
+        for(auto & i : topFilterChange)
+            UiLogS(server_).dbg() << "  " << i->strName();
 #endif
 
         //A topFilterChange branch cannot be the root (server)
-        for(size_t i=0; i < topFilterChange.size(); i++)
+        for(auto & i : topFilterChange)
         {
-            Q_ASSERT(!topFilterChange[i]->isServer());
+            Q_ASSERT(!i->isServer());
         }
 #ifdef _UI_VMODELDATA_DEBUG
         UiLogS(server_).dbg() << " apply changes to branches";
 #endif
         //If something changed in the list of filtered nodes
-        for(size_t i=0; i < topFilterChange.size(); i++)
+        for(auto & i : topFilterChange)
         {
 #ifdef _UI_VMODELDATA_DEBUG
-            UiLogS(server_).dbg() << "  branch: " << topFilterChange[i]->absNodePath();
+            UiLogS(server_).dbg() << "  branch: " << i->absNodePath();
 #endif
             //If the filter status of a SUITE has changed
-            if(topFilterChange[i]->isSuite())
+            if(i->isSuite())
             {
-                VNode *suite=topFilterChange[i];
+                VNode *suite=i;
                 Q_ASSERT(suite);
 
                 //This is the branch where there is a change in the filter
-                VTreeNode* tn=tree_->find(topFilterChange[i]);
+                VTreeNode* tn=tree_->find(i);
 
                 //Remove the suite if it is in the tree
                 if(tn)
@@ -513,7 +513,7 @@ void VTreeServer::updateFilter(const std::vector<VNode*>& suitesChanged)
             else
             {
                 //We need to find the nearest existing parent in the tree
-                VTreeNode* tn=tree_->findAncestor(topFilterChange[i]);
+                VTreeNode* tn=tree_->findAncestor(i);
 
                 //This must be at most a suite. It cannot be the root!
                 Q_ASSERT(tn);
@@ -1137,9 +1137,9 @@ void VModelData::init()
 {
 	serverFilter_->addObserver(this);
 
-	for(unsigned int i=0; i < serverFilter_->items().size(); i++)
+	for(auto i : serverFilter_->items())
 	{
-        if(ServerHandler *server=serverFilter_->items().at(i)->serverHandler())
+        if(ServerHandler *server=i->serverHandler())
 		{
             UI_ASSERT(indexOfServer(server) == -1,"server=" << server->name());
 
@@ -1165,9 +1165,9 @@ void VModelData::clear()
 
     serverFilter_=NULL;
 
-    for(std::size_t i=0; i < servers_.size(); i++)
+    for(auto & server : servers_)
 	{
-        delete servers_[i];
+        delete server;
 	}
 
 	servers_.clear();

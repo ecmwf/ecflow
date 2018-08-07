@@ -54,8 +54,8 @@ std::ostream& QueueAttr::print(std::ostream& os) const
    Indentor::indent(os) << toString();
    if ( !PrintStyle::defsStyle() ) {
       os << " # " <<  currentIndex_;
-      for(size_t i=0; i <  state_vec_.size(); i++) {
-         os << " " << NState::toString(state_vec_[i]);
+      for(auto i : state_vec_) {
+         os << " " << NState::toString(i);
       }
    }
    os << "\n";
@@ -107,7 +107,7 @@ NState::State QueueAttr::state(const std::string& step) const
 void QueueAttr::requeue()
 {
    currentIndex_ = 0;
-   for(size_t i=0; i < state_vec_.size(); i++) state_vec_[i] = NState::QUEUED;
+   for(auto & i : state_vec_) i = NState::QUEUED;
    incr_state_change_no();
 }
 
@@ -152,8 +152,8 @@ void QueueAttr::aborted(const std::string& step)
 std::string QueueAttr::no_of_aborted() const
 {
    int count = 0;
-   for(size_t i=0; i < state_vec_.size(); i++) {
-      if (state_vec_[i] == NState::ABORTED) count++;
+   for(auto i : state_vec_) {
+      if (i == NState::ABORTED) count++;
    }
    if (count !=0) return boost::lexical_cast<std::string>(count);
    return std::string();
@@ -175,9 +175,9 @@ std::string QueueAttr::toString() const
    std::string ret;
    ret = "queue ";
    ret += name_;
-   for(size_t i = 0; i < theQueue_.size(); i++) {
+   for(const auto & i : theQueue_) {
       ret += " ";
-      ret += theQueue_[i];
+      ret += i;
    }
    return ret;
 }
@@ -186,7 +186,7 @@ std::string QueueAttr::dump() const
 {
    std::stringstream ss;
    ss << toString() << " # " << currentIndex_;
-   for(size_t i=0; i < state_vec_.size(); i++) ss << " " << state_vec_[i];
+   for(auto i : state_vec_) ss << " " << i;
    return ss.str();
 }
 

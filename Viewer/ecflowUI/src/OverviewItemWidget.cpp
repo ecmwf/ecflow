@@ -120,10 +120,10 @@ void OverviewItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 	if(frozen_)
 		return;
 
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+	for(auto it : aspect)
 	{
-		if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::ADD_REMOVE_NODE || *it == ecf::Aspect::ADD_REMOVE_ATTR ||
-		   *it == ecf::Aspect::DEFSTATUS || *it == ecf::Aspect::SUSPENDED || *it == ecf::Aspect::NODE_VARIABLE)
+		if(it == ecf::Aspect::STATE || it == ecf::Aspect::ADD_REMOVE_NODE || it == ecf::Aspect::ADD_REMOVE_ATTR ||
+		   it == ecf::Aspect::DEFSTATUS || it == ecf::Aspect::SUSPENDED || it == ecf::Aspect::NODE_VARIABLE)
 		{
 			reload();
 			return;
@@ -136,9 +136,9 @@ void OverviewItemWidget::defsChanged(const std::vector<ecf::Aspect::Type>& aspec
 	if(frozen_)
 		return;
 
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+	for(auto it : aspect)
 	{
-		if(*it == ecf::Aspect::SERVER_STATE || *it == ecf::Aspect::SERVER_VARIABLE || *it == ecf::Aspect::ADD_REMOVE_ATTR)
+		if(it == ecf::Aspect::SERVER_STATE || it == ecf::Aspect::SERVER_VARIABLE || it == ecf::Aspect::ADD_REMOVE_ATTR)
 		{
 			reload();
 			return;

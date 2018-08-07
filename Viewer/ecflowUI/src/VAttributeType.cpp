@@ -96,9 +96,9 @@ int VAttributeType::searchKeyToDataIndex(const std::string& key) const
 QStringList VAttributeType::searchKeys() const
 {
     QStringList lst;
-    for(std::map<std::string,int>::const_iterator it=searchKeyToData_.begin(); it != searchKeyToData_.end(); it++)
+    for(const auto & it : searchKeyToData_)
     {
-        lst << QString::fromStdString(it->first);
+        lst << QString::fromStdString(it.first);
     }
     return lst;
 }

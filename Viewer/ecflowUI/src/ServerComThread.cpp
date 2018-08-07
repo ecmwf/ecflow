@@ -495,9 +495,9 @@ void ServerComThread::attach(defs_ptr d)
     d->attach(this);
 
     const std::vector<suite_ptr> &suites = d->suiteVec();
-    for(unsigned int i=0; i < suites.size();i++)
+    for(const auto & suite : suites)
     {
-        attach(suites.at(i).get());
+        attach(suite.get());
     }
 }
 
@@ -537,9 +537,9 @@ void ServerComThread::detach(defs_ptr d)
     d->detach(this);
 
     const std::vector<suite_ptr> &suites = d->suiteVec();
-    for(unsigned int i=0; i < suites.size();i++)
+    for(const auto & suite : suites)
     {
-        detach(suites.at(i).get());
+        detach(suite.get());
     }
 }
 
@@ -559,10 +559,10 @@ void ServerComThread::detach(Node *node)
 
 void ServerComThread::aspectToStr(std::stringstream& ss,const std::vector<ecf::Aspect::Type>& t) const
 {
-    for(std::vector<ecf::Aspect::Type>::const_iterator it=t.begin(); it != t.end(); ++it)
+    for(auto it : t)
     {
         if(!ss.str().empty())
             ss << ",";
-        ss << *it;
+        ss << it;
     }
 }

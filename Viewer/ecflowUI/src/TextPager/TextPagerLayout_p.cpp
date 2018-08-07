@@ -436,8 +436,7 @@ QString TextPagerLayout::dump() const
     ts << "viewportPosition " << viewportPosition
        << " layoutEnd " << layoutEnd
        << " viewportWidth " << viewportWidth() << '\n';
-    for (int i=0; i<textLayouts.size(); ++i) {
-        QTextLayout *layout = textLayouts.at(i);
+    for (auto layout : textLayouts) {
         for (int j=0; j<layout->lineCount(); ++j) {
             QTextLine line = layout->lineAt(j);
             ts << layout->text().mid(line.textStart(), line.textLength());

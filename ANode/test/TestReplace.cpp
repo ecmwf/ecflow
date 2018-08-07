@@ -769,16 +769,16 @@ BOOST_AUTO_TEST_CASE( test_trigger_references_during_replace )
       std::vector<Task*> theTasks;
       server_suite->getAllTasks(theTasks);
       BOOST_REQUIRE_MESSAGE(theTasks.size() == 3, "Expected 3 tasks but found, " << theTasks.size());
-      for(size_t i = 0; i < theTasks.size(); i++) {
+      for(auto & theTask : theTasks) {
 
          std::set<Node*>  referenced_nodes;
-         theTasks[i]->getAllAstNodes(referenced_nodes);
+         theTask->getAllAstNodes(referenced_nodes);
          BOOST_REQUIRE_MESSAGE(referenced_nodes.size() ==1," expected 1 referenced node" );
 
          // The reference nodes must exist in the server. Otherwise replace has still kept references to old nodes in the triggers
          bool found_reference = false;
-         for(size_t n = 0; n < all_server_nodes.size(); n++) {
-            if (all_server_nodes[n] == (*referenced_nodes.begin())) {
+         for(auto & all_server_node : all_server_nodes) {
+            if (all_server_node == (*referenced_nodes.begin())) {
                found_reference = true; break;
             }
          }

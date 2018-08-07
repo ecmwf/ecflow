@@ -579,11 +579,11 @@ void Node::set_memento( const NodeTodayMemento* memento,std::vector<ecf::Aspect:
       return;
    }
 
-   for(size_t i = 0; i < todays_.size(); ++i) {
+   for(auto & today : todays_) {
       // We need to ignore state changes in TodayAttr, (ie we don't use equality operator)
       // otherwise today will never compare
-      if ( todays_[i].structureEquals(memento->attr_) ) {
-         todays_[i] = memento->attr_;  // need to copy over time series state
+      if ( today.structureEquals(memento->attr_) ) {
+         today = memento->attr_;  // need to copy over time series state
          return;
       }
    }
@@ -602,11 +602,11 @@ void Node::set_memento( const NodeTimeMemento* memento,std::vector<ecf::Aspect::
       return;
    }
 
-   for(size_t i = 0; i < times_.size(); ++i) {
+   for(auto & time : times_) {
       // We need to ignore state changes in TimeAttr, (ie we don't use equality operator)
       // otherwise time will never compare
-      if ( times_[i].structureEquals(memento->attr_) ) {
-         times_[i] = memento->attr_;    // need to copy over time series state
+      if ( time.structureEquals(memento->attr_) ) {
+         time = memento->attr_;    // need to copy over time series state
          return;
       }
    }
@@ -625,12 +625,12 @@ void Node::set_memento( const NodeDayMemento* memento,std::vector<ecf::Aspect::T
       return;
    }
 
-   for(size_t i = 0; i < days_.size(); ++i) {
+   for(auto & day : days_) {
       // We need to ignore state changes (ie we don't use equality operator)
       // otherwise attributes will never compare
-      if ( days_[i].structureEquals(memento->attr_) ) {
-         if (memento->attr_.isSetFree()) days_[i].setFree();
-         else                            days_[i].clearFree();
+      if ( day.structureEquals(memento->attr_) ) {
+         if (memento->attr_.isSetFree()) day.setFree();
+         else                            day.clearFree();
          return;
       }
    }
@@ -649,12 +649,12 @@ void Node::set_memento( const NodeDateMemento* memento,std::vector<ecf::Aspect::
       return;
    }
 
-   for(size_t i = 0; i < dates_.size(); ++i) {
+   for(auto & date : dates_) {
       // We need to ignore state changes (ie we don't use equality operator)
       // otherwise attributes will never compare
-      if ( dates_[i].structureEquals(memento->attr_) ) {
-         if (memento->attr_.isSetFree()) dates_[i].setFree();
-         else                            dates_[i].clearFree();
+      if ( date.structureEquals(memento->attr_) ) {
+         if (memento->attr_.isSetFree()) date.setFree();
+         else                            date.clearFree();
          return;
       }
    }
@@ -673,11 +673,11 @@ void Node::set_memento( const NodeCronMemento* memento,std::vector<ecf::Aspect::
       return;
    }
 
-   for(size_t i = 0; i < crons_.size(); ++i) {
+   for(auto & cron : crons_) {
       // We need to ignore state changes (ie we don't use equality operator)
       // otherwise attributes will never compare
-      if ( crons_[i].structureEquals(memento->attr_) ) {
-         crons_[i] = memento->attr_;   // need to copy over time series state
+      if ( cron.structureEquals(memento->attr_) ) {
+         cron = memento->attr_;   // need to copy over time series state
          return ;
       }
    }

@@ -32,7 +32,7 @@ std::ostream& AutoRestoreAttr::print(std::ostream& os) const
 {
    Indentor in;
    Indentor::indent(os) << "autorestore";
-   for(size_t i = 0; i < nodes_to_restore_.size(); ++i) os << " " << nodes_to_restore_[i];
+   for(const auto & i : nodes_to_restore_) os << " " << i;
    os << "\n";
    return os;
 }
@@ -41,7 +41,7 @@ std::string AutoRestoreAttr::toString() const
 {
    std::stringstream ss;
    ss << "autorestore";
-   for(size_t i = 0; i < nodes_to_restore_.size(); ++i) ss << " " << nodes_to_restore_[i];
+   for(const auto & i : nodes_to_restore_) ss << " " << i;
    return ss.str();
 }
 
@@ -62,14 +62,14 @@ bool AutoRestoreAttr::operator==(const AutoRestoreAttr& rhs) const
 void AutoRestoreAttr::do_autorestore()
 {
    string warning_message;
-   for(size_t i =0; i <nodes_to_restore_.size(); i++) {
+   for(const auto & i : nodes_to_restore_) {
 
       warning_message.clear();
-      node_ptr referenceNode = node_->findReferencedNode( nodes_to_restore_[i] , warning_message);
+      node_ptr referenceNode = node_->findReferencedNode( i , warning_message);
       if (!referenceNode.get()) {
          /// Could not find the references node
          std::stringstream ss;
-         ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a path '" << nodes_to_restore_[i]  << "' which can not be found\n";
+         ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a path '" << i  << "' which can not be found\n";
          log(Log::ERR,ss.str());
          continue;
       }
@@ -84,7 +84,7 @@ void AutoRestoreAttr::do_autorestore()
       }
       else {
          std::stringstream ss;
-         ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a node '" << nodes_to_restore_[i]  << "' which can not be restored. Only family and suite nodes can be restored";
+         ss << "AutoRestoreAttr::do_auto_restore: " << node_->debugType() << " references a node '" << i  << "' which can not be restored. Only family and suite nodes can be restored";
          log(Log::ERR,ss.str());
       }
    }
@@ -94,22 +94,22 @@ void AutoRestoreAttr::check(std::string& errorMsg) const
 {
    std::vector<NodeContainer*> vec;
    string warning_message;
-   for(size_t i =0; i < nodes_to_restore_.size(); i++) {
+   for(const auto & i : nodes_to_restore_) {
 
       warning_message.clear();
-      node_ptr referenceNode = node_->findReferencedNode( nodes_to_restore_[i] , warning_message);
+      node_ptr referenceNode = node_->findReferencedNode( i , warning_message);
       if (!referenceNode.get()) {
          /// Could not find the references node
 
          // OK a little bit of duplication, since findReferencedNode, will also look for externs
          // See if the Path:name is defined as an extern, in which case *DONT* error:
          // This is client side specific, since server does not have externs.
-         if (node_->defs()->find_extern( nodes_to_restore_[i], Str::EMPTY())) {
+         if (node_->defs()->find_extern( i, Str::EMPTY())) {
             continue;
          }
 
          std::stringstream ss;
-         ss << "Error: autorestore on node " << node_->debugType() << " references a path '" << nodes_to_restore_[i]  << "' which can not be found\n";
+         ss << "Error: autorestore on node " << node_->debugType() << " references a path '" << i  << "' which can not be found\n";
          errorMsg += ss.str();
          continue;
       }
@@ -118,7 +118,7 @@ void AutoRestoreAttr::check(std::string& errorMsg) const
       NodeContainer* nc = referenceNode->isNodeContainer();
       if (!nc) {
           std::stringstream ss;
-          ss << "Error: autorestore on node " << node_->debugType() << " references a node '" << nodes_to_restore_[i]  << "' which is a task. restore only works with suites or family nodes";
+          ss << "Error: autorestore on node " << node_->debugType() << " references a node '" << i  << "' which is a task. restore only works with suites or family nodes";
           errorMsg += ss.str();
       }
 
@@ -126,7 +126,7 @@ void AutoRestoreAttr::check(std::string& errorMsg) const
       if (find(vec.begin(),vec.end(),nc) == vec.end()) vec.push_back(nc);
       else {
          std::stringstream ss;
-         ss << "Error: autorestore on node " << node_->debugType() << ", duplicate references to node '" << nodes_to_restore_[i]  << "'";
+         ss << "Error: autorestore on node " << node_->debugType() << ", duplicate references to node '" << i  << "'";
          errorMsg += ss.str();
       }
    }

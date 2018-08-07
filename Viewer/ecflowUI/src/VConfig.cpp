@@ -39,9 +39,9 @@ VConfig::VConfig()
 
 VConfig::~VConfig()
 {
-    for(std::vector<VProperty*>::iterator it=groups_.begin(); it != groups_.end(); ++it)
+    for(auto & group : groups_)
     {
-        delete *it;
+        delete group;
     }
     groups_.clear();
 }
@@ -267,10 +267,9 @@ VProperty* VConfig::cloneServerGui(VProperty *linkTarget)
 
 	std::vector<VProperty*> chVec;
 	cGr->collectChildren(chVec);
-	for(std::vector<VProperty*>::iterator it=chVec.begin(); it != chVec.end(); ++it)
+	for(auto p : chVec)
 	{
-		VProperty *p=*it;
-		if(p->link())
+			if(p->link())
 		{
 			p->setLink(linkTarget->find(p->link()->path()));
 		}

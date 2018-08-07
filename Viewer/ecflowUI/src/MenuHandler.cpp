@@ -347,11 +347,11 @@ void MenuHandler::refreshCustomMenuCommands()
 
 Menu *MenuHandler::findMenu(const std::string &name)
 {
-    for (std::vector<Menu *>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
+    for (auto & menu : menus_)
     {
-        if ((*itMenus)->name() == name)
+        if (menu->name() == name)
         {
-            return (*itMenus);
+            return menu;
         }
     }
 
@@ -363,9 +363,9 @@ MenuItem* MenuHandler::findItem(QAction* ac)
 	// ac could be NULL, e.g. if the user clicked on a separator instead of a menu item
 	if (ac)
 	{
-		for(std::vector<Menu*>::iterator itMenus = menus_.begin(); itMenus != menus_.end(); ++itMenus)
+		for(auto & menu : menus_)
 		{
-			for(std::vector<MenuItem*>::iterator it=(*itMenus)->items().begin(); it!=(*itMenus)->items().end(); ++it)
+			for(std::vector<MenuItem*>::iterator it=menu->items().begin(); it!=menu->items().end(); ++it)
 			{
 				if((*it)->id() == ac->data().toInt())
 				{
@@ -513,10 +513,10 @@ Menu::Menu(const std::string &name) : name_(name)
 
 Menu::~Menu()
 {
-    for (std::vector<MenuItem*>::iterator itItems = itemsCombined_.begin(); itItems != itemsCombined_.end(); ++itItems)
+    for (auto & itItems : itemsCombined_)
     {
-        if (*itItems)
-            delete (*itItems);
+        if (itItems)
+            delete itItems;
     }
 }
 
@@ -574,41 +574,41 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     itemsCombined_ = itemsFixed_;
     itemsCombined_.insert(itemsCombined_.end(), itemsCustom_.begin(), itemsCustom_.end());
 
-    for (std::vector<MenuItem*>::iterator itItems = itemsCombined_.begin(); itItems != itemsCombined_.end(); ++itItems)
+    for (auto & itItems : itemsCombined_)
     {
         //  is this item valid for the current selection?
 
-    	if((*itItems)->hidden())
+    	if(itItems->hidden())
     		continue;
 
-    	if(!(*itItems)->isValidView(view))
+    	if(!itItems->isValidView(view))
     		continue;
 
         bool visible = true;
 
-        for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
+        for (auto & node : nodes)
         {
             //compatible = compatible && (*itItems)->compatibleWithNode(*itNodes);
             //compatible = compatible && (nodeCond != NULL && nodeCond->execute(*itNodes));
-            visible = visible && (*itItems)->visibleCondition()->execute(*itNodes);
+            visible = visible && itItems->visibleCondition()->execute(node);
         }
 
         if (visible)
         {
             bool enabled = true;
 
-            for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
+            for (auto & node : nodes)
             {
-                enabled = enabled && (*itItems)->enabledCondition()->execute(*itNodes);
+                enabled = enabled && itItems->enabledCondition()->execute(node);
             }
 
             //Check multiple selection
-            if(nodes.size() > 1 && !(*itItems)->multiSelect())
+            if(nodes.size() > 1 && !itItems->multiSelect())
                 enabled = false;
 
-            if ((*itItems)->isSubMenu())
+            if (itItems->isSubMenu())
             {
-                Menu *menu = MenuHandler::findMenu((*itItems)->name());
+                Menu *menu = MenuHandler::findMenu(itItems->name());
                 if (menu)
                 {
                     //The submenu will be added to qmenu and it will take ownership of it.
@@ -616,7 +616,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
                     subMenu->setEnabled(enabled);
                 }
             }
-            else if  ((*itItems)->isDivider())
+            else if  (itItems->isDivider())
             {
                 qmenu->addSeparator();
             }
@@ -631,7 +631,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
             	//These actions will have "parent" as the parent, otherwise the statustip would not work
             	//on qmainwindows. The downside is that we need to delete these actions separately when the qmenu is deleted.
             	//In theory the parent of the actions could be the qmenu as well, but in this case the statustip does not work!
-            	QAction* action=(*itItems)->createAction(parent);
+            	QAction* action=itItems->createAction(parent);
             	qmenu->addAction(action);
                 action->setEnabled(enabled);
                 acLst << action;
@@ -799,9 +799,9 @@ bool MenuItem::shouldAskQuestion(std::vector<VInfo_ptr> &nodes)
     bool askQuestion = false;
 
     // ask the question if any of the nodes require it
-    for (std::vector<VInfo_ptr>::iterator itNodes = nodes.begin(); itNodes != nodes.end(); ++itNodes)
+    for (auto & node : nodes)
     {
-        askQuestion = askQuestion || questionCondition()->execute(*itNodes);
+        askQuestion = askQuestion || questionCondition()->execute(node);
     }
 
     return askQuestion;

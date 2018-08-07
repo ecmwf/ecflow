@@ -89,8 +89,8 @@ bool ZombieAttr::fob( ecf::Child::CmdType child_cmd) const
 
 	// If we have child commands specified, then the action is only applicable for that child cmd
 	// for all other child cmds we block
- 	for(size_t i = 0; i < child_cmds_.size(); i++) {
-		if (child_cmds_[i] == child_cmd ) {
+ 	for(auto i : child_cmds_) {
+		if (i == child_cmd ) {
 			return true;
 		}
 	}
@@ -104,8 +104,8 @@ bool ZombieAttr::fail( ecf::Child::CmdType child_cmd) const
 
 	// If we have child commands specified, then the action is only applicable for that child cmd
 	// for all other child cmds we block
- 	for(size_t i = 0; i < child_cmds_.size(); i++) {
-		if (child_cmds_[i] == child_cmd ) {
+ 	for(auto i : child_cmds_) {
+		if (i == child_cmd ) {
 			return true;
 		}
 	}
@@ -119,8 +119,8 @@ bool ZombieAttr::adopt( ecf::Child::CmdType child_cmd) const
 
 	// If we have child commands specified, then the action is only applicable for that child cmd
 	// for all other child cmds we block
- 	for(size_t i = 0; i < child_cmds_.size(); i++) {
-		if (child_cmds_[i] == child_cmd ) {
+ 	for(auto i : child_cmds_) {
+		if (i == child_cmd ) {
 			return true;
 		}
 	}
@@ -134,8 +134,8 @@ bool ZombieAttr::remove( ecf::Child::CmdType child_cmd) const
 
 	// If we have child commands specified, then the action is only applicable for that child cmd
 	// for all other child cmds we block
- 	for(size_t i = 0; i < child_cmds_.size(); i++) {
-		if (child_cmds_[i] == child_cmd ) {
+ 	for(auto i : child_cmds_) {
+		if (i == child_cmd ) {
 			return true;
 		}
 	}
@@ -149,8 +149,8 @@ bool ZombieAttr::block( ecf::Child::CmdType child_cmd) const
 
 	// If we have child commands specified, then the action is only applicable for that child cmd
 	// for all other child cmds we block
- 	for(size_t i = 0; i < child_cmds_.size(); i++) {
-		if (child_cmds_[i] == child_cmd ) {
+ 	for(auto i : child_cmds_) {
+		if (i == child_cmd ) {
 			return true;
 		}
 	}
@@ -164,8 +164,8 @@ bool ZombieAttr::kill( ecf::Child::CmdType child_cmd) const
 
    // If we have child commands specified, then the action is only applicable for that child cmd
    // for all other child cmds we block
-   for(size_t i = 0; i < child_cmds_.size(); i++) {
-      if (child_cmds_[i] == child_cmd ) {
+   for(auto i : child_cmds_) {
+      if (i == child_cmd ) {
          return true;
       }
    }

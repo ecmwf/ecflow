@@ -37,8 +37,8 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_empty_server )
    defs_ptr new_defs = Defs::create();
 
    // Register new handle on an EMPTY server. register the suite
-   for(size_t j = 0; j < suite_names.size(); j++)  {
-      std::vector<std::string> names; names.push_back(suite_names[j]);
+   for(const auto & suite_name : suite_names)  {
+      std::vector<std::string> names; names.push_back(suite_name);
       TestHelper::invokeRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(names,false)),bypass_state_modify_change_check);
    }
 
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_register_and_drop )
 	for(int i=0; i < 5; i++)  suite_names.push_back( "s" + boost::lexical_cast<std::string>(i) );
 
 	Defs defs;
-	for(size_t j = 0; j < suite_names.size(); j++)  defs.addSuite( Suite::create(suite_names[j]) );
+	for(const auto & suite_name : suite_names)  defs.addSuite( Suite::create(suite_name) );
 
 	// Register new handle
 	for(size_t j = 0; j < suite_names.size(); j++)  {
@@ -92,8 +92,8 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_register_and_drop )
 
 	// Drop the handles. take a copy, since we about to delete clientSuites
 	std::vector<ecf::ClientSuites> clientSuites = defs.client_suite_mgr().clientSuites();
-	for(size_t k =0; k< clientSuites.size(); k++) {
-		TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd( clientSuites[k].handle() )),bypass_state_modify_change_check);
+	for(auto & clientSuite : clientSuites) {
+		TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd( clientSuite.handle() )),bypass_state_modify_change_check);
 	}
 	BOOST_CHECK_MESSAGE(defs.client_suite_mgr().clientSuites().empty(),"Expected  no client handles, but found " << defs.client_suite_mgr().clientSuites().size());
 }
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_auto_add )
 	for(int i=0; i < 5; i++)  suite_names.push_back( "s" + boost::lexical_cast<std::string>(i) );
 
 	Defs defs;
-	for(size_t j = 0; j < suite_names.size(); j++)  defs.addSuite( Suite::create(suite_names[j]) );
+	for(const auto & suite_name : suite_names)  defs.addSuite( Suite::create(suite_name) );
 
 	// Register new handle, with no suites, but with auto add new suites
 	std::vector<std::string> names;
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_auto_add )
 	// now add new suite, they should get added to the new client handles
 	names.clear();
 	for(int i=5; i < 10; i++)  names.push_back( "s" + boost::lexical_cast<std::string>(i) );
-	for(size_t j = 0; j < names.size(); j++)  defs.addSuite( Suite::create(names[j]) );
+	for(const auto & name : names)  defs.addSuite( Suite::create(name) );
 
 	std::vector<ecf::ClientSuites> clientSuites = defs.client_suite_mgr().clientSuites();
 	std::vector<std::string> handle_suites;
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_add_remove )
 	for(int i=0; i < 5; i++)  suite_names.push_back( "s" + boost::lexical_cast<std::string>(i) );
 
 	defs_ptr defs =  Defs::create();
-	for(size_t j = 0; j < suite_names.size(); j++)  defs->addSuite( Suite::create(suite_names[j]) );
+	for(const auto & suite_name : suite_names)  defs->addSuite( Suite::create(suite_name) );
 	std::vector<std::string> empty_vec;
 
 	// Register new handle, with no suites,
@@ -202,13 +202,13 @@ static bool check_ordering(Defs& defs)
    // make sure order of suites in handles is the same as server order
    const std::vector<suite_ptr>& suite_vec = defs.suiteVec();
    std::vector<std::string> suite_names;
-   for(size_t i = 0; i <  suite_vec.size(); i++) suite_names.push_back(suite_vec[i]->name());
+   for(const auto & i : suite_vec) suite_names.push_back(i->name());
 
    // Drop the handles. take a copy, since we about to delete clientSuites
    std::vector<ecf::ClientSuites> clientSuites = defs.client_suite_mgr().clientSuites();
-   for(size_t k =0; k< clientSuites.size(); k++) {
+   for(auto & clientSuite : clientSuites) {
       std::vector<std::string> names; names.reserve(6);
-      clientSuites[k].suites(names);
+      clientSuite.suites(names);
       if (names != suite_names) return false;
    }
    return true;
@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE( test_client_handle_suite_ordering )
    for(int i=0; i < 5; i++)  suite_names.push_back( "s" + boost::lexical_cast<std::string>(i) );
 
    Defs defs;
-   for(size_t j = 0; j < suite_names.size(); j++)  defs.addSuite( Suite::create(suite_names[j]) );
+   for(const auto & suite_name : suite_names)  defs.addSuite( Suite::create(suite_name) );
 
    // Register 3 new handle
    TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(suite_names,true)),bypass_state_modify_change_check);

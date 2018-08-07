@@ -497,8 +497,8 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir)
 			// if original path had leading slash then add it here, to preserve path
 			if (pathToFileOrDir[0] == '/') pathToCreate += Str::PATH_SEPERATOR();
 
-			for (size_t i = 0; i < thePath.size(); i++) {
-				pathToCreate += thePath[i];
+			for (const auto & i : thePath) {
+				pathToCreate += i;
 				if ( !fs::exists( pathToCreate ) ) {
 #ifdef INTEL_DEBUG_ME
 	            std::cout << "   " << pathToCreate << " does not exist, creating directory " << std::endl;

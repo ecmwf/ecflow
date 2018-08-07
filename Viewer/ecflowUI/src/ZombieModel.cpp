@@ -41,10 +41,10 @@ bool ZombieModel::updateData(const std::vector<Zombie>& data)
 	if(hasData() && data.size() == data_.size())
 	{
 		sameAs=true;
-		for(std::vector<Zombie>::const_iterator it=data.begin(); it != data.end(); it++)
+		for(const auto & it : data)
 		{
 			bool hasIt=false;
-			std::string p=(*it).path_to_task();
+			std::string p=it.path_to_task();
 			for(std::vector<Zombie>::const_iterator itM=data_.begin(); itM != data_.end(); itM++)
 			{
 				if(p == (*itM).path_to_task())

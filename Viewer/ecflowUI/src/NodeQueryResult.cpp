@@ -217,10 +217,10 @@ void NodeQueryResult::add(std::vector<VInfo_ptr> items)
 
     //Count the needed items
     int num=0;
-    for(unsigned int i=0; i < items.size(); i++)
+    for(auto & item : items)
 	{   
         assert(items.at(i) && items.at(i).get());
-        if(items.at(i)->isServer() || items.at(i)->isNode())
+        if(item->isServer() || item->isNode())
         {
             num++;
         }
@@ -228,12 +228,12 @@ void NodeQueryResult::add(std::vector<VInfo_ptr> items)
         
 	Q_EMIT beginAppendRows(items.size());
 
-	for(unsigned int i=0; i < items.size(); i++)
+	for(auto & item : items)
 	{           
-        if(items.at(i)->isServer() || items.at(i)->isNode())
+        if(item->isServer() || item->isNode())
         {
-            VNode *node=items.at(i)->node();
-            ServerHandler *s=items.at(i)->server();
+            VNode *node=item->node();
+            ServerHandler *s=item->server();
             attach(s);
             data_.push_back(new NodeQueryResultItem(node));
             blocks_[s].add(node,data_.size()-1);
@@ -271,9 +271,9 @@ void NodeQueryResult::clear(ServerHandler* server)
 	//Adjust the servers
 	detach(server);
 
-	for(std::map<ServerHandler*,NodeQueryResultBlock>::iterator it=blocks_.begin(); it != blocks_.end(); it++)
+	for(auto & block : blocks_)
 	{
-		it->second.clear();
+		block.second.clear();
 	}
 
 	//Adjust data
@@ -308,9 +308,9 @@ void NodeQueryResult::serverScan(ServerHandler* server)
 	std::vector<NodeQueryResultItem*> prev=data_;
 	data_.clear();
 
-	for(std::map<ServerHandler*,NodeQueryResultBlock>::iterator it=blocks_.begin(); it != blocks_.end(); it++)
+	for(auto & block : blocks_)
 	{
-		it->second.clear();
+		block.second.clear();
 	}
 
 	for(std::vector<NodeQueryResultItem*>::const_iterator it=prev.begin(); it != prev.end(); ++it)
@@ -402,10 +402,10 @@ void NodeQueryResult::notifyEndServerScan(ServerHandler* server)
 void NodeQueryResult::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange& vn)
 {
 	bool changed=false;
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+	for(auto it : aspect)
 	{
 		//Changes in the nodes
-		if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::SUSPENDED)
+		if(it == ecf::Aspect::STATE || it == ecf::Aspect::SUSPENDED)
 		{
 			changed=true;
 			break;

@@ -188,14 +188,14 @@ std::string Gnuplot::create_gnuplot_file(
                       << (child_requests_per_second + user_request_per_second) << " "
                       << child_requests_per_second << " "
                       << user_request_per_second << " ";
-         for(size_t i = 0; i < suite_vec.size(); i++) { gnuplot_file << suite_vec[i].request_per_second_ << " ";}
+         for(auto & i : suite_vec) { gnuplot_file << i.request_per_second_ << " ";}
          gnuplot_file << "\n";
 
 
          // clear request per second
          child_requests_per_second = 0;
          user_request_per_second = 0;
-         for(size_t i= 0; i < suite_vec.size();i++) { suite_vec[i].request_per_second_ = 0; }
+         for(auto & i : suite_vec) { i.request_per_second_ = 0; }
 
          // start of *new* time
          if (child_cmd) child_requests_per_second++;
@@ -277,9 +277,9 @@ std::string Gnuplot::create_gnuplot_script(
 //   cout << "now determine which columns the top suites belong to, **THIS** time <int> indicates column\n";
    std::vector< std::pair<std::string,int> > ordered_suites;
    for(size_t column = 0; column < suite_vec.size(); column++) {
-      for(size_t j = 0; j < suites.size(); j++) {
-         if (suites[j] == suite_vec[column].suite_name_) {
-            ordered_suites.push_back ( std::make_pair(suites[j], column));
+      for(auto & suite : suites) {
+         if (suite == suite_vec[column].suite_name_) {
+            ordered_suites.push_back ( std::make_pair(suite, column));
          }
       }
    }

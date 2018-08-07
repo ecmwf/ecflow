@@ -69,8 +69,8 @@ void DefsAnalyserVisitor::analyse(Node* node,std::set<Node*>& dependentNodes, bo
 	if (node->state() == NState::QUEUED) {
 		std::vector<std::string> theReasonWhy;
 		node->why(theReasonWhy);
-		for(size_t i = 0; i < theReasonWhy.size(); ++i) {
-			Indentor::indent(ss_) << "Reason: " << theReasonWhy[i] << "\n";
+		for(const auto & i : theReasonWhy) {
+			Indentor::indent(ss_) << "Reason: " << i << "\n";
 		}
 	}
 

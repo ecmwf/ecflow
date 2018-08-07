@@ -65,10 +65,10 @@ void NodeQueryHandler::remove(NodeQuery*)
 
 NodeQuery* NodeQueryHandler::find(const std::string& name) const
 {
-	for(std::vector<NodeQuery*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+	for(auto item : items_)
 	{
-		if((*it)->name() == name)
-			return *it;
+		if(item->name() == name)
+			return item;
 	}
 	return NULL;
 }

@@ -241,8 +241,8 @@ BOOST_AUTO_TEST_CASE( test_trigger_after_delete )
 		suite2->get_all_tasks(suite2_tasks);
 		BOOST_REQUIRE_MESSAGE(suite2_tasks.size() == 5, "Expected 5 tasks on suite2 but found " << suite2_tasks.size());
 
-		for(size_t i = 0; i < suite2_tasks.size(); i++) {
-			BOOST_REQUIRE_MESSAGE( suite2_tasks[i]->triggerAst()->evaluate(), "Expected task " << suite2_tasks[i]->absNodePath() << " to evaluate");
+		for(auto & suite2_task : suite2_tasks) {
+			BOOST_REQUIRE_MESSAGE( suite2_task->triggerAst()->evaluate(), "Expected task " << suite2_task->absNodePath() << " to evaluate");
 		}
  	}
 
@@ -264,8 +264,8 @@ BOOST_AUTO_TEST_CASE( test_trigger_after_delete )
 		suite2->get_all_tasks(suite2_tasks);
 		BOOST_REQUIRE_MESSAGE(suite2_tasks.size() == 5, "Expected 5 tasks on suite2 but found " << suite2_tasks.size());
 
-		for(size_t i = 0; i < suite2_tasks.size(); i++) {
-			BOOST_REQUIRE_MESSAGE( !suite2_tasks[i]->triggerAst()->evaluate(), "Expected task " << suite2_tasks[i]->absNodePath() << " to fail evaluation");
+		for(auto & suite2_task : suite2_tasks) {
+			BOOST_REQUIRE_MESSAGE( !suite2_task->triggerAst()->evaluate(), "Expected task " << suite2_task->absNodePath() << " to fail evaluation");
 		}
  	}
 

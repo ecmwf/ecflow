@@ -130,9 +130,9 @@ static void add_queue(std::string& content,const std::string& client_exe, const 
       content += "\n";
       content += "for i in";
       const std::vector<std::string>& queue_list = queue.list();
-      for(size_t i = 0; i < queue_list.size(); i++) {
+      for(const auto & i : queue_list) {
          content += " ";
-         content += queue_list[i];
+         content += i;
       }
       content += "\n";
       content += "do\n";

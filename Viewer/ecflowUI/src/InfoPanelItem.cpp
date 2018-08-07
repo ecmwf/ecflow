@@ -105,9 +105,9 @@ void InfoPanelItem::clear()
 
 	info_.reset();
 
-    for(std::vector<InfoProvider*>::iterator it=infoProviders_.begin(); it != infoProviders_.end(); ++it)
+    for(auto & infoProvider : infoProviders_)
     {
-        (*it)->clear();
+        infoProvider->clear();
     }
 }
 
@@ -120,9 +120,9 @@ void InfoPanelItem::setActive(bool active)
     if(active_)
 	{
         //Enable the infoProviders
-        for(std::vector<InfoProvider*>::iterator it=infoProviders_.begin(); it != infoProviders_.end(); ++it)
+        for(auto & infoProvider : infoProviders_)
         {
-            (*it)->setActive(true);
+            infoProvider->setActive(true);
         }
 	}
 	else
@@ -133,10 +133,10 @@ void InfoPanelItem::setActive(bool active)
         suspended_=false;
 
         //Disable the info provider
-        for(std::vector<InfoProvider*>::iterator it=infoProviders_.begin(); it != infoProviders_.end(); ++it)
+        for(auto & infoProvider : infoProviders_)
         {
             //This will clear the providers again
-            (*it)->setActive(false);
+            infoProvider->setActive(false);
         }
 	}
 

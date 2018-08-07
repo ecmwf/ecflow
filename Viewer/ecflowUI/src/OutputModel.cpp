@@ -34,11 +34,11 @@ void OutputModel::setData(const std::vector<VDir_ptr>& dirs,const std::string& j
     dirs_=dirs;
     joboutRows_.clear();
 
-    for(std::size_t i=0; i < dirs_.size(); i++)
+    for(auto & dir : dirs_)
     {
-        if(dirs_[i])
+        if(dir)
         {
-            int idx=dirs_[i]->findByFullName(jobout);
+            int idx=dir->findByFullName(jobout);
             if(idx != -1)
             {
                 joboutRows_.insert(idx);
@@ -70,10 +70,10 @@ int OutputModel::rowCount( const QModelIndex& parent) const
 	if(!parent.isValid())
     {
         int cnt=0;
-        for(std::size_t i=0; i < dirs_.size(); i++)
+        for(const auto & dir : dirs_)
         {
-            if(dirs_[i])
-                cnt+=dirs_[i]->count();
+            if(dir)
+                cnt+=dir->count();
         }
         return cnt;
     }
@@ -207,16 +207,16 @@ QModelIndex OutputModel::parent(const QModelIndex &child) const
 
 VDirItem* OutputModel::itemAt(int row,VDir_ptr& dir) const
 {
-    for(std::size_t i=0; i < dirs_.size(); i++)
+    for(const auto & i : dirs_)
     {
-        if(dirs_[i])
+        if(i)
         {
-            int cnt=dirs_[i]->count();
+            int cnt=i->count();
             if(row < cnt)
             {
                 Q_ASSERT(row>=0);
-                dir=dirs_[i];
-                return dirs_[i]->items()[row];
+                dir=i;
+                return i->items()[row];
             }
 
             row-=cnt;
@@ -228,8 +228,8 @@ VDirItem* OutputModel::itemAt(int row,VDir_ptr& dir) const
 
 bool OutputModel::hasData() const
 {
-    for(std::size_t i=0; i < dirs_.size(); i++)
-        if(dirs_[i])
+    for(const auto & dir : dirs_)
+        if(dir)
             return true;
 
     return false;
@@ -241,15 +241,15 @@ std::string OutputModel::fullName(const QModelIndex& index) const
 		return std::string();
 
     int row=index.row();
-    for(std::size_t i=0; i < dirs_.size(); i++)
+    for(const auto & dir : dirs_)
     {
-        if(dirs_[i])
+        if(dir)
         {
-            int cnt=dirs_[i]->count();
+            int cnt=dir->count();
             if(row < cnt)
             {
                 Q_ASSERT(row >=0);
-                return dirs_[i]->fullName(row);
+                return dir->fullName(row);
             }
             row-=cnt;
        }
@@ -266,16 +266,16 @@ void OutputModel::itemDesc(const QModelIndex& index,std::string& itemFullName,VD
         return;
 
     int row=index.row();
-    for(std::size_t i=0; i < dirs_.size(); i++)
+    for(const auto & dir : dirs_)
     {
-        if(dirs_[i])
+        if(dir)
         {
-            int cnt=dirs_[i]->count();
+            int cnt=dir->count();
             if(row < cnt)
             {
                 Q_ASSERT(row >=0);
-                itemFullName=dirs_[i]->fullName(row);
-                mode=dirs_[i]->fetchMode();
+                itemFullName=dir->fullName(row);
+                mode=dir->fetchMode();
                 return;
             }
             row-=cnt;
@@ -286,18 +286,18 @@ void OutputModel::itemDesc(const QModelIndex& index,std::string& itemFullName,VD
 QModelIndex OutputModel::itemToIndex(const std::string& itemFullName,VDir::FetchMode fetchMode) const
 {
     int row=0;;
-    for(std::size_t i=0; i < dirs_.size(); i++)
+    for(const auto & dir : dirs_)
     {
-        if(dirs_[i])
+        if(dir)
         {
-            if(dirs_[i]->fetchMode() == fetchMode)
+            if(dir->fetchMode() == fetchMode)
             {
-                for(int j=0; j < dirs_[i]->count(); j++, row++)
-                    if(dirs_[i]->fullName(j) == itemFullName)
+                for(int j=0; j < dir->count(); j++, row++)
+                    if(dir->fullName(j) == itemFullName)
                         return index(row,0);
             }
             else
-                row+=dirs_[i]->count();
+                row+=dir->count();
         }
     }
     return QModelIndex();

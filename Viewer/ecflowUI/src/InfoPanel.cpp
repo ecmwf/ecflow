@@ -81,10 +81,9 @@ InfoPanel::InfoPanel(QWidget* parent) :
     WidgetNameProvider::nameChildren(this);
 
     //Create the handler for all the possible panels!
-    for(std::vector<InfoPanelDef*>::const_iterator it=InfoPanelHandler::instance()->panels().begin();
-        it != InfoPanelHandler::instance()->panels().end(); ++it)
+    for(auto it : InfoPanelHandler::instance()->panels())
     {
-        createHandler(*it);
+        createHandler(it);
     }
 }
 
@@ -393,9 +392,9 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		//Remove the pages but does not delete them.
 		clearTab();
 
-        for(std::vector<InfoPanelDef*>::iterator it=ids.begin(); it != ids.end(); ++it)
+        for(auto & id : ids)
 		{
-			if(InfoPanelItemHandler* d=findHandler(*it))
+			if(InfoPanelItemHandler* d=findHandler(id))
 			{
                 d->addToTab(tab_);
                 d->item()->setActive(true);

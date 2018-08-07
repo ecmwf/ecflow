@@ -572,9 +572,9 @@ UI_FUNCTION_LOG
 		updateDirTimer_->stop();
 
     bool status=false;
-    for(std::size_t i=0; i < dirs.size(); i++)
+    for(const auto & dir : dirs)
     {
-        if(dirs[i] && dirs[i]->count() > 0)
+        if(dir && dir->count() > 0)
         {
             status=true;
             break;
@@ -782,10 +782,10 @@ void OutputItemWidget::on_copyPathTb__clicked()
 void OutputItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
 {
     //Changes in the nodes
-    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    for(auto it : aspect)
     {
-        if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::DEFSTATUS ||
-            *it == ecf::Aspect::SUSPENDED)
+        if(it == ecf::Aspect::STATE || it == ecf::Aspect::DEFSTATUS ||
+            it == ecf::Aspect::SUSPENDED)
         {
             if(submittedWarning_)
                getLatestFile();

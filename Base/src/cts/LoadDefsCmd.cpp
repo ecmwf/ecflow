@@ -152,11 +152,11 @@ void LoadDefsCmd::create( 	Cmd_ptr& cmd,
 	bool force = false;
 	bool print = false;
 	std::string defs_filename;
-	for(size_t i = 0; i < args.size(); i++) {
-		if (args[i] == "force") force = true;
-      else if (args[i] == "check_only") check_only = true;
-      else if (args[i] == "print") print = true;
-		else defs_filename = args[i];
+	for(const auto & arg : args) {
+		if (arg == "force") force = true;
+      else if (arg == "check_only") check_only = true;
+      else if (arg == "print") print = true;
+		else defs_filename = arg;
 	}
 	if (clientEnv->debug()) cout << "  LoadDefsCmd::create:  Defs file '" <<  defs_filename << "'.\n";
 

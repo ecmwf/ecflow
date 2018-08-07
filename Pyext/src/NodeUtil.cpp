@@ -64,7 +64,7 @@ node_ptr NodeUtil::add_variable_dict(node_ptr self,const bp::dict& dict)
 {
    std::vector<Variable> vec;
    BoostPythonUtil::dict_to_str_vec(dict,vec);
-   for(size_t i = 0; i < vec.size(); i++) self->addVariable(vec[i]);
+   for(const auto & i : vec) self->addVariable(i);
    return self;
 }
 
@@ -81,7 +81,7 @@ object NodeUtil::do_add(node_ptr self, const bp::object& arg){
    if (extract<Edit>(arg).check()) {
       Edit edit = extract<Edit>(arg);
       const std::vector<Variable>& vec = edit.variables();
-      for(size_t i=0; i < vec.size(); i++) self->addVariable(vec[i]);
+      for(const auto & i : vec) self->addVariable(i);
    }
    else if (extract<node_ptr>(arg).check()) {
       // std::cout << "  do_add node_ptr\n";

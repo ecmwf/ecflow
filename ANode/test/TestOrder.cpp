@@ -58,8 +58,8 @@ BOOST_AUTO_TEST_CASE( test_order )
  			suite_ptr suite = theDefs.add_suite( vec[s] ) ;
  			for(size_t f = 0; f < vec.size(); f++) {
  				family_ptr fam = suite->add_family( vec[f] ) ;
- 				for(size_t t = 0; t < vec.size(); t++) {
- 			 		fam->add_task( vec[t] );
+ 				for(const auto & t : vec) {
+ 			 		fam->add_task( t );
  				}
  			}
 		}

@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( test_state_parser )
       // Change state other the default
       defs.beginAll();
       suite->set_state(NState::ABORTED);
-      for (size_t i = 0; i < flag_list.size(); ++i)  suite->flag().set( flag_list[i] );
+      for (auto & i : flag_list)  suite->flag().set( i );
       suite->suspend();
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs),"Add one suite failed: " << helper.errorMsg());
    }
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE( test_state_parser )
 
       // Change state other the default
       f1->set_state(NState::COMPLETE);
-      for (size_t i = 0; i < flag_list.size(); ++i)  f1->flag().set( flag_list[i] );
+      for (auto & i : flag_list)  f1->flag().set( i );
       f1->suspend();
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs),"Add one family failed: " <<  helper.errorMsg());
 
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( test_state_parser )
       family_ptr f1 = defs.add_suite("s1")->add_family("f1");
       task_ptr t1 = f1->add_task("t1");
 
-      for (size_t i = 0; i < flag_list.size(); ++i)  t1->flag().set( flag_list[i] );
+      for (auto & i : flag_list)  t1->flag().set( i );
       t1->suspend();
       t1->set_state(NState::COMPLETE);
 
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE( test_state_parser )
       Defs defs;
       task_ptr task = defs.add_suite("s1")->add_family("f1")->add_task("t1");
       alias_ptr t1 = task->add_alias_only();
-      for (size_t i = 0; i < flag_list.size(); ++i)  t1->flag().set( flag_list[i] );
+      for (auto & i : flag_list)  t1->flag().set( i );
       t1->suspend();
       t1->set_state(NState::COMPLETE);
       // Use memento to modify alias state

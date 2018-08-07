@@ -58,9 +58,9 @@ void OutputFetchInfo::setInfo(VReply *reply,VInfo_ptr info)
     QString html;
 
     int cnt=1;
-    for(std::vector<std::string>::const_iterator it=reply->log().begin(); it != reply->log().end(); ++it)
+    for(const auto & it : reply->log())
     {
-        QString s=QString::fromStdString(*it);
+        QString s=QString::fromStdString(it);
         if(s.startsWith("REMARK>"))
         {
             remarks << s.remove(0,7);

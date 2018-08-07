@@ -101,9 +101,9 @@ void LogModel::appendData(const std::vector<std::string>& data)
 {
 	int num=0;
 
-    for(std::vector<std::string>::const_iterator it=data.begin(); it != data.end(); ++it)
+    for(const auto & it : data)
 	{
-		QString s=QString::fromStdString(*it);
+		QString s=QString::fromStdString(it);
 		if(!s.simplified().isEmpty())
 		{
 			num++;

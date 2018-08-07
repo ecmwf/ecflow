@@ -52,13 +52,13 @@ bool MiscAttrs::checkInvariants(std::string& errorMsg) const
 void MiscAttrs::begin()
 {
    // reset verification
-   for(size_t i = 0; i < verifys_.size(); i++) { verifys_[i].reset(); }
-   for(size_t i = 0; i < queues_.size(); i++)  { queues_[i].requeue(); }
+   for(auto & verify : verifys_) { verify.reset(); }
+   for(auto & queue : queues_)  { queue.requeue(); }
 }
 
 void MiscAttrs::requeue()
 {
-   for(size_t i = 0; i < queues_.size(); i++) { queues_[i].requeue(); }
+   for(auto & queue : queues_) { queue.requeue(); }
 }
 
 std::ostream& MiscAttrs::print(std::ostream& os) const
@@ -205,9 +205,9 @@ void MiscAttrs::delete_zombie(Child::ZombieType zt)
 const ZombieAttr& MiscAttrs::findZombie( ecf::Child::ZombieType zombie_type) const
 {
    /// There should only be one of each type
-   for(size_t i = 0; i < zombies_.size(); i++) {
-      if ( zombies_[i].zombie_type() == zombie_type ) {
-         return zombies_[i];
+   for(const auto & zombie : zombies_) {
+      if ( zombie.zombie_type() == zombie_type ) {
+         return zombie;
       }
    }
    return ZombieAttr::EMPTY();
@@ -277,9 +277,9 @@ void MiscAttrs::delete_queue(const std::string& name)
 
 const QueueAttr& MiscAttrs::find_queue( const std::string& name) const
 {
-   for(size_t i = 0; i < queues_.size(); i++) {
-      if ( queues_[i].name() == name ) {
-         return queues_[i];
+   for(const auto & queue : queues_) {
+      if ( queue.name() == name ) {
+         return queue;
       }
    }
    return QueueAttr::EMPTY();
@@ -287,9 +287,9 @@ const QueueAttr& MiscAttrs::find_queue( const std::string& name) const
 
 QueueAttr& MiscAttrs::findQueue(const std::string& name)
 {
-   for(size_t i = 0; i < queues_.size(); i++) {
-      if ( queues_[i].name() == name ) {
-         return queues_[i];
+   for(auto & queue : queues_) {
+      if ( queue.name() == name ) {
+         return queue;
       }
    }
    return QueueAttr::EMPTY1();
@@ -313,9 +313,9 @@ void MiscAttrs::delete_generic(const std::string& name)
 
 const GenericAttr& MiscAttrs::find_generic( const std::string& name) const
 {
-   for(size_t i = 0; i < generics_.size(); i++) {
-      if (  generics_[i].name() == name ) {
-         return generics_[i];
+   for(const auto & generic : generics_) {
+      if (  generic.name() == name ) {
+         return generic;
       }
    }
    return GenericAttr::EMPTY();
@@ -333,10 +333,10 @@ void MiscAttrs::set_memento(const NodeGenericMemento* m)
 
 void MiscAttrs::set_memento(const NodeQueueIndexMemento* m )
 {
-   for(size_t i = 0; i < queues_.size(); i++) {
-      if (queues_[i].name() == m->name_) {
-         queues_[i].set_index( m->index_);
-         queues_[i].set_state_vec(m->state_vec_);
+   for(auto & queue : queues_) {
+      if (queue.name() == m->name_) {
+         queue.set_index( m->index_);
+         queue.set_state_vec(m->state_vec_);
       }
    }
 }

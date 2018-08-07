@@ -369,9 +369,9 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     }
 
     //For certain changes we need to reload the triggers
-    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    for(auto it : aspect)
     {
-        if(*it == ecf::Aspect::ADD_REMOVE_ATTR || *it == ecf::Aspect::EXPR_TRIGGER)
+        if(it == ecf::Aspect::ADD_REMOVE_ATTR || it == ecf::Aspect::EXPR_TRIGGER)
         {
             load();
             return;
@@ -379,10 +379,10 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     }
 
     //For other changes we only reload the triggers if the change happened to an item in the collected triggers
-    for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+    for(auto it : aspect)
     {
-        if(*it == ecf::Aspect::NODE_VARIABLE || *it == ecf::Aspect::METER || *it == ecf::Aspect::LIMIT ||
-                *it == ecf::Aspect::EVENT)
+        if(it == ecf::Aspect::NODE_VARIABLE || it == ecf::Aspect::METER || it == ecf::Aspect::LIMIT ||
+                it == ecf::Aspect::EVENT)
         {
            if(triggerCollector_->contains(n,true) || triggeredCollector_->contains(n,true))
            {

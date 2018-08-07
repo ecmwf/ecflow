@@ -92,10 +92,10 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // ONLY Re-queue the aborted tasks
 	      std::vector<Task*> taskVec;
 	      theNodeToRequeue->getAllTasks(taskVec);
-	      for(size_t i=0; i < taskVec.size(); i++) {
-	         if (taskVec[i]->state() == NState::ABORTED) {
-	            taskVec[i]->requeue(args);
-	            taskVec[i]->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
+	      for(auto & i : taskVec) {
+	         if (i->state() == NState::ABORTED) {
+	            i->requeue(args);
+	            i->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
 	         }
 	      }
 
@@ -107,8 +107,8 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // ONLY Re-queue if there no tasks in submitted or active states
 	      std::vector<Task*> taskVec;
 	      theNodeToRequeue->getAllTasks(taskVec);
-	      for(size_t i=0; i < taskVec.size(); i++) {
-	         if (taskVec[i]->state() == NState::SUBMITTED || taskVec[i]->state() == NState::ACTIVE) {
+	      for(auto & i : taskVec) {
+	         if (i->state() == NState::SUBMITTED || i->state() == NState::ACTIVE) {
 	            return PreAllocatedReply::ok_cmd();
 	         }
 	      }

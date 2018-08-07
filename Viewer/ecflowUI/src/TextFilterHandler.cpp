@@ -168,13 +168,13 @@ void TextFilterHandler::update(int index,const TextFilterItem& item)
 void TextFilterHandler::allFilters(std::set<std::string>& v)
 {
     v.clear();
-    for(std::size_t i = 0; i < items_.size() ; i++)
+    for(auto & item : items_)
     {
-        v.insert(items_[i].filter());
+        v.insert(item.filter());
     }
-    for(std::size_t i = 0; i < latest_.size() ; i++)
+    for(auto & i : latest_)
     {
-        v.insert(latest_[i].filter());
+        v.insert(i.filter());
     }
 }
 
@@ -191,19 +191,19 @@ void TextFilterHandler::writeSettings()
     VSettings vs(settingsFilePath);
 
     std::vector<VSettings> vsItems;
-    for(std::size_t i = 0; i < items_.size() ; i++)
+    for(auto & item : items_)
     {
         VSettings vsThisItem(dummyFileName);
-        items_[i].save(&vsThisItem);
+        item.save(&vsThisItem);
         vsItems.push_back(vsThisItem);
     }
     vs.put("saved",vsItems);
 
     vsItems.clear();
-    for(std::size_t i = 0; i < latest_.size() ; i++)
+    for(auto & i : latest_)
     {
         VSettings vsThisItem(dummyFileName);
-        latest_[i].save(&vsThisItem);
+        i.save(&vsThisItem);
         vsItems.push_back(vsThisItem);
     }
     vs.put("latest",vsItems);
@@ -222,16 +222,16 @@ void TextFilterHandler::readSettings()
     {
         std::vector<VSettings> vsItems;
         vs.get("saved",vsItems);
-        for (std::size_t i = 0; i < vsItems.size(); i++)
+        for (auto & vsItem : vsItems)
         {
-            add(TextFilterItem::make(&vsItems[i]));
+            add(TextFilterItem::make(&vsItem));
         }
 
         vsItems.clear();
         vs.get("latest",vsItems);
-        for (std::size_t i = 0; i < vsItems.size(); i++)
+        for (auto & vsItem : vsItems)
         {
-            addLatest(TextFilterItem::make(&vsItems[i]));
+            addLatest(TextFilterItem::make(&vsItem));
         }
     }
     //If there is no settings file at all we automatically add this filter

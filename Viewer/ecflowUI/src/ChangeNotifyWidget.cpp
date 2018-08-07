@@ -212,13 +212,13 @@ void ChangeNotifyWidget::addTb(ChangeNotify* notifier)
 
 void ChangeNotifyWidget::setEnabled(const std::string& id,bool b)
 {
-    for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); ++it)
+    for(auto & widget : widgets_)
 	{
-		if(ChangeNotifyButton* tb=(*it)->findButton(id))
+		if(ChangeNotifyButton* tb=widget->findButton(id))
 		{
             tb->setEnabled(b);
             tb->setVisible(b);
-            (*it)->updateVisibility();
+            widget->updateVisibility();
 		}
 
     }
@@ -231,10 +231,9 @@ void ChangeNotifyWidget::updateVisibility()
 
 bool ChangeNotifyWidget::hasVisibleButton() const
 {
-    for(std::map<std::string,ChangeNotifyButton*>::const_iterator it=buttons_.begin();
-        it != buttons_.end(); ++it)
+    for(const auto & button : buttons_)
     {
-        if(it->second->isEnabled())
+        if(button.second->isEnabled())
             return true;
     }
     return false;
@@ -242,9 +241,9 @@ bool ChangeNotifyWidget::hasVisibleButton() const
 
 void ChangeNotifyWidget::updateSettings(const std::string& id)
 {
-    for(std::vector<ChangeNotifyWidget*>::iterator it=widgets_.begin(); it!= widgets_.end(); ++it)
+    for(auto & widget : widgets_)
 	{
-		if(ChangeNotifyButton* tb=(*it)->findButton(id))
+		if(ChangeNotifyButton* tb=widget->findButton(id))
 		{
 			tb->updateIcon();
 		}

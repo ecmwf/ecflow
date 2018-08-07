@@ -15,9 +15,9 @@
 
 PropertyMapper::PropertyMapper(const std::vector<std::string>&  names,VPropertyObserver* obs) : obs_(obs)
 {
-	for(std::vector<std::string>::const_iterator it=names.begin(); it != names.end(); ++it)
+	for(const auto & name : names)
 	{
-		if(VProperty* p=VConfig::instance()->find(*it))
+		if(VProperty* p=VConfig::instance()->find(name))
 		{
 			p->addObserver(obs);
 			props_.push_back(p);
@@ -35,10 +35,10 @@ PropertyMapper::~PropertyMapper()
 
 VProperty* PropertyMapper::find(const std::string& path,bool failOnError) const
 {
-	for(std::vector<VProperty*>::const_iterator it=props_.begin(); it != props_.end(); ++it)
+	for(auto prop : props_)
 	{
-		if((*it)->path() == path)
-			return *it;
+		if(prop->path() == path)
+			return prop;
 	}
 
     if(failOnError)
@@ -49,9 +49,9 @@ VProperty* PropertyMapper::find(const std::string& path,bool failOnError) const
 
 void PropertyMapper::initObserver(VPropertyObserver *obs) const
 {
-    for(std::vector<VProperty*>::const_iterator it=props_.begin(); it != props_.end(); ++it)
+    for(auto prop : props_)
     {
-        obs->notifyChange(*it);
+        obs->notifyChange(prop);
     }
 }
 

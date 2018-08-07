@@ -50,20 +50,20 @@ BOOST_AUTO_TEST_CASE( test_version_against_VERSION_cmake )
    //   set( ${PROJECT_NAME}_VERSION_STR  "${ECFLOW_RELEASE}.${ECFLOW_MAJOR}.${ECFLOW_MINOR}" )
    // Compare against VERSION
    std::string ecflow_release,ecflow_major,ecflow_minor;
-   for(size_t i =0; i < lines.size(); ++i) {
+   for(auto & line : lines) {
       std::vector<std::string> tokens;
-      Str::split(lines[i],tokens);
+      Str::split(line,tokens);
 
       // expecting third token to contain version data
-      if (lines[i].find("set( ECFLOW_RELEASE") != std::string::npos && tokens.size() >= 3) {
+      if (line.find("set( ECFLOW_RELEASE") != std::string::npos && tokens.size() >= 3) {
          ecflow_release = tokens[2];
          Str::removeQuotes(ecflow_release);
       }
-      if (lines[i].find("set( ECFLOW_MAJOR") != std::string::npos && tokens.size() >= 3) {
+      if (line.find("set( ECFLOW_MAJOR") != std::string::npos && tokens.size() >= 3) {
          ecflow_major = tokens[2];
          Str::removeQuotes(ecflow_major);
       }
-      if (lines[i].find("set( ECFLOW_MINOR") != std::string::npos && tokens.size() >= 3) {
+      if (line.find("set( ECFLOW_MINOR") != std::string::npos && tokens.size() >= 3) {
          ecflow_minor = tokens[2];
          Str::removeQuotes(ecflow_minor);
       }

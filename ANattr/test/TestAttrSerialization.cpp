@@ -185,8 +185,8 @@ BOOST_AUTO_TEST_CASE( test_DayAttr_serialisation )
 	dvec.push_back(DayAttr::THURSDAY);
 	dvec.push_back(DayAttr::FRIDAY);
 	dvec.push_back(DayAttr::SATURDAY);
-	for(size_t d = 0; d < dvec.size(); d++) {
-		DayAttr saved(dvec[d]);
+	for(auto & d : dvec) {
+		DayAttr saved(d);
 		doSaveAndRestore(fileName,saved);
 	}
 }

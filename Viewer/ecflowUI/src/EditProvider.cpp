@@ -83,18 +83,18 @@ void EditProvider::submit(const std::vector<std::string>& txt,bool alias)
 	std::string comEnd= micro + comEndText;
 
     bool inVars = false;
-    for(std::vector<std::string>::const_iterator it=txt.begin(); it != txt.end(); ++it)
+    for(const auto & it : txt)
     {
-    	const std::string& line=*it;
+    	const std::string& line=it;
 
     	//We are in the variable block
     	if(inVars)
     	{
-    		std::size_t pos = (*it).find("=");
-    		if(pos != std::string::npos && pos+1 != (*it).size())
+    		std::size_t pos = it.find("=");
+    		if(pos != std::string::npos && pos+1 != it.size())
     		{
-    			std::string name=(*it).substr(0,pos);
-    			std::string val=(*it).substr(pos+1);
+    			std::string name=it.substr(0,pos);
+    			std::string val=it.substr(pos+1);
     			boost::trim(name);
     			boost::trim(val);
     			vars.push_back(std::make_pair(name,val));

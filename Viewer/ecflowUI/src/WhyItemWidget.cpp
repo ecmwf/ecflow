@@ -181,9 +181,9 @@ QString WhyItemWidget::makeHtml(const std::vector<std::string>& bottomUpTxt,
 QString WhyItemWidget::makeHtml(const std::vector<std::string>& rawTxt) const
 { 
     QString s;
-    for(std::vector<std::string>::const_iterator it=rawTxt.begin(); it != rawTxt.end(); ++it)
+    for(const auto & it : rawTxt)
     {
-        QString line=QString::fromStdString(*it);
+        QString line=QString::fromStdString(it);
 
         //UiLog().dbg() << line;
 

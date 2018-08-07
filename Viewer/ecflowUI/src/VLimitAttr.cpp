@@ -105,9 +105,9 @@ QStringList VLimitAttr::paths() const
         if(index_ >=0 && index_ < static_cast<int>(parent_->node_->limits().size()))
         {
             const std::set<std::string>& s=parent_->node_->limits()[index_]->paths();
-            for(std::set<std::string>::const_iterator it=s.begin(); it != s.end(); ++it)
+            for(const auto & it : s)
             {
-                lst << QString::fromStdString(*it);
+                lst << QString::fromStdString(it);
             }
         }
     }
@@ -121,9 +121,9 @@ void VLimitAttr::removePaths(const std::vector<std::string>& paths)
         if(index_ >=0 && index_ < static_cast<int>(parent_->node_->limits().size()))
         {
             limit_ptr lim=parent_->node_->limits()[index_];
-            for(std::vector<std::string>::const_iterator it=paths.begin(); it != paths.end(); ++it)
+            for(const auto & path : paths)
             {
-                lim->delete_path(*it);
+                lim->delete_path(path);
             }
             return;
          }

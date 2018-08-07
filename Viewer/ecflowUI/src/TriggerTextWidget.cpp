@@ -48,10 +48,10 @@ QString TriggerTextWidget::makeHtml(TriggerTableItem *ti,QString directTitle,QSt
     QString s;
     const std::vector<TriggerDependencyItem>& items=ti->dependencies();
 
-    for(unsigned int i=0; i < items.size(); i++)
+    for(auto item : items)
     {
-        VItem *t=items[i].dep();
-        TriggerCollector::Mode mode=items[i].mode();
+        VItem *t=item.dep();
+        TriggerCollector::Mode mode=item.mode();
 
         if(!t)
             continue;

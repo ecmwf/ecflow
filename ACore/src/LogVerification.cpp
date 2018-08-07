@@ -40,15 +40,15 @@ bool LogVerification::extractNodePathAndState(	const std::string& logfile,
 	}
 
   	//int line_number = 0;
-	for(std::vector<std::string>::iterator i=lines.begin(); i!=lines.end(); ++i) {
+	for(auto & line : lines) {
 
 		//line_number++;
-		if ((*i).find("LOG:") == std::string::npos) {
+		if (line.find("LOG:") == std::string::npos) {
 			continue; // State changes have type Log::LOG
 		}
 
 		std::vector< std::string > lineTokens;
-	    Str::split(*i, lineTokens);
+	    Str::split(line, lineTokens);
 	    if (lineTokens.size() < 3) {
 	    	continue;
 	    }

@@ -174,9 +174,9 @@ BOOST_AUTO_TEST_CASE( test_autoarchive_ast_node_reset )
 
    // Auto archive should archive suite s2 and s3, leaving one suite i.e s1
    const std::vector<suite_ptr>& suites = theDefs.suiteVec();
-   for(size_t i =0; i < suites.size(); ++i) {
-      if (suites[i]->name() == "s2" || suites[i]->name() == "s3") {
-         BOOST_CHECK_MESSAGE(suites[i]->get_flag().is_set(ecf::Flag::ARCHIVED),"Expected suite " << suites[i]->absNodePath() << " to be archived");
+   for(const auto & suite : suites) {
+      if (suite->name() == "s2" || suite->name() == "s3") {
+         BOOST_CHECK_MESSAGE(suite->get_flag().is_set(ecf::Flag::ARCHIVED),"Expected suite " << suite->absNodePath() << " to be archived");
       }
    }
 
@@ -243,8 +243,7 @@ BOOST_AUTO_TEST_CASE( test_autoarchive_family )
    // make sure all familes has been archived
    std::vector<Family*> famVec;
    theDefs.getAllFamilies(famVec);
-   for(size_t i = 0; i < famVec.size(); i++) {
-      Family* f = famVec[i];
+   for(auto f : famVec) {
       BOOST_CHECK_MESSAGE(f->get_flag().is_set(ecf::Flag::ARCHIVED),"Expected family " << f->absNodePath() << " to be archived");
       BOOST_CHECK_MESSAGE(fs::exists(f->archive_path()),"Expected family " << f->absNodePath() << " to be archived");
       BOOST_CHECK_MESSAGE(f->nodeVec().empty(),"Expected family " << f->absNodePath() << " to be empty");

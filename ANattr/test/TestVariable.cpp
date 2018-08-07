@@ -70,10 +70,10 @@ BOOST_AUTO_TEST_CASE( test_variable_value )
    values.push_back("000");
    values.push_back("0000");
    values.push_back("0000000000000");
-   for(size_t i=0; i < values.size(); i++) {
+   for(const auto & value : values) {
       Variable var("name","");
-      var.set_value(values[i]);
-      BOOST_CHECK_MESSAGE(var.value() == 0,"expected 0 but found " << var.value() << " for " << values[i]);
+      var.set_value(value);
+      BOOST_CHECK_MESSAGE(var.value() == 0,"expected 0 but found " << var.value() << " for " << value);
    }
 
    {

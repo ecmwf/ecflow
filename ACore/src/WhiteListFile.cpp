@@ -292,13 +292,13 @@ std::string WhiteListFile::dump_valid_users() const
    for(i=users_with_read_access_.begin(); i!= users_with_read_access_.end(); ++i) {
       ss << " User: " << (*i).first << " ";
       const std::vector<std::string>& paths = (*i).second;
-      for(size_t i = 0; i < paths.size(); i++)  ss << paths[i] << ",";
+      for(const auto & path : paths)  ss << path << ",";
       ss << " has read access\n";
    }
    for(i=users_with_write_access_.begin(); i!= users_with_write_access_.end(); ++i) {
       ss << " User: " << (*i).first << " ";
       const std::vector<std::string>& paths = (*i).second;
-      for(size_t i = 0; i < paths.size(); i++)  ss << paths[i] << ",";
+      for(const auto & path : paths)  ss << path << ",";
       ss << " has read/write access\n";
    }
 
@@ -419,8 +419,7 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
    bool read_only = false;
    std::string user;
    std::vector<std::string> paths;
-   for(size_t i = 0; i < tokens.size(); i++) {
-      std::string tok = tokens[i];
+   for(auto tok : tokens) {
       if (tok.empty()) continue;
       if (tok[0] == '-') {
          // read only user for a given set of paths
@@ -443,8 +442,8 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
          std::copy(local_paths.begin(),local_paths.end(),std::back_inserter(paths));
 
          // root path '/' means apply to all suites, in which case the paths may as well be empty.
-         for(size_t i = 0; i < paths.size(); ++i) {
-            if (paths[i] == "/") {
+         for(const auto & path : paths) {
+            if (path == "/") {
                clear_paths = true;
                break;
             }
@@ -476,8 +475,8 @@ bool WhiteListFile::add_user(std::vector<std::string>& tokens, std::string& erro
    }
 
    // check all paths start with '/'
-   for(size_t i = 0; i<paths.size(); i++) {
-      if (!paths[i].empty() && paths[i][0] != '/') {
+   for(auto & path : paths) {
+      if (!path.empty() && path[0] != '/') {
          error_msg = "Paths must start with '/'";
          return false;
       }

@@ -21,7 +21,7 @@
 
 std::string CtsApi::to_string(const std::vector<std::string>& vec) {
    std::string ret;
-   for(size_t i = 0; i < vec.size(); i++) { ret += vec[i]; ret += " "; }
+   for(const auto & i : vec) { ret += i; ret += " "; }
    return ret;
 }
 
@@ -76,7 +76,7 @@ std::vector<std::string> CtsApi::ch_register( bool auto_add_new_suites , const s
    if ( auto_add_new_suites ) ret += "true";
    else                       ret += "false";
    retVec.push_back(ret);
-   for(size_t i = 0; i < suites.size(); i++) { retVec.push_back(suites[i]);}
+   for(const auto & suite : suites) { retVec.push_back(suite);}
    return retVec;
 }
 const char* CtsApi::ch_register_arg() { return "ch_register"; }
@@ -109,7 +109,7 @@ std::vector<std::string> CtsApi::ch_add( int client_handle, const std::vector<st
    std::string ret = "--ch_add=";
    ret += boost::lexical_cast<std::string>(client_handle);
    retVec.push_back(ret);
-   for(size_t i = 0; i < suites.size(); i++) { retVec.push_back(suites[i]);}
+   for(const auto & suite : suites) { retVec.push_back(suite);}
    return retVec;
 }
 const char* CtsApi::ch_add_arg() { return "ch_add"; }
@@ -120,7 +120,7 @@ std::vector<std::string> CtsApi::ch_remove( int client_handle, const std::vector
    std::string ret = "--ch_rem=";
    ret += boost::lexical_cast<std::string>(client_handle);
    retVec.push_back(ret);
-   for(size_t i = 0; i < suites.size(); i++) { retVec.push_back(suites[i]); }
+   for(const auto & suite : suites) { retVec.push_back(suite); }
    return retVec;
 }
 const char* CtsApi::ch_remove_arg() { return "ch_rem"; }

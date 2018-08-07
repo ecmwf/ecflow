@@ -557,10 +557,10 @@ VDir_ptr OutputFileProvider::dirToFile(const std::string& fileName) const
     if(fileName.empty())
        return dir;
 
-    for(std::size_t i=0; i < dirs_.size(); i++)
+    for(const auto & dir : dirs_)
     {
-        if(dirs_[i] && fileName.find(dirs_[i]->path()) == 0)
-            return dirs_[i];
+        if(dir && fileName.find(dir->path()) == 0)
+            return dir;
 
     }
     return dir;

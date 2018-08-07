@@ -129,13 +129,12 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
     //The attribute parser
     UiLog().dbg() << " full attr part: " << query_->attrQueryPart().toStdString();
 
-    for(std::vector<VAttributeType*>::const_iterator it=VAttributeType::types().begin();
-        it != VAttributeType::types().end(); ++it)
+    for(auto it : VAttributeType::types())
     {
-        if(query_->hasAttribute(*it))
+        if(query_->hasAttribute(it))
         {
-            QString attrPart=(query_->attrQueryPart(*it));
-            UiLog().dbg() << "  " << (*it)->strName() << ": " << attrPart.toStdString();
+            QString attrPart=(query_->attrQueryPart(it));
+            UiLog().dbg() << "  " << it->strName() << ": " << attrPart.toStdString();
             BaseNodeCondition* ac=NodeExpressionParser::instance()->parseWholeExpression(attrPart.toStdString(), query->caseSensitive());
             if(!ac)
             {
@@ -143,7 +142,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
                 UserMessage::message(UserMessage::ERROR,true, "Error, unable to parse attribute query: " + attrPart.toStdString());
                 return false;
             }
-            attrParser_[*it]=ac;
+            attrParser_[it]=ac;
          }
     }
 
@@ -215,14 +214,14 @@ void NodeQueryEngine::runRecursively(VNode *node)
                 //Process a given attribute type
                 const std::vector<VAttribute*>& av=node->attr();
                 bool hasType=false;
-                for(size_t i=0; i < av.size(); i++)
+                for(auto i : av)
                 {
-                    if(av[i]->type() == it.key())
+                    if(i->type() == it.key())
                     {
                         hasType=true;
-                        if(it.value()->execute(av[i]))
+                        if(it.value()->execute(i))
                         {
-                            broadcastFind(node,av[i]->data(true));
+                            broadcastFind(node,i->data(true));
                             scanCnt_++;
                          }
                     }

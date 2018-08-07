@@ -399,8 +399,8 @@ BOOST_AUTO_TEST_CASE( test_cron_time_series)
       else if (time >= timeSeries.time_series().start().duration() && time <=timeSeries.time_series().finish().duration()) {
 
          bool matches_free_slot = false;
-         for(size_t i = 0; i < timeSeries_free_slots.size(); i++) {
-            if (time == timeSeries_free_slots[i]) { matches_free_slot = true; break; }
+         for(const auto & timeSeries_free_slot : timeSeries_free_slots) {
+            if (time == timeSeries_free_slot) { matches_free_slot = true; break; }
          }
          if (matches_free_slot) BOOST_CHECK_MESSAGE(timeSeries.isFree(calendar),timeSeries.toString() << " should be free at time " << time );
          else                   BOOST_CHECK_MESSAGE(!timeSeries.isFree(calendar),timeSeries.toString() << " should be fail at time " << time );
@@ -416,8 +416,8 @@ BOOST_AUTO_TEST_CASE( test_cron_time_series)
       else if (time >= timeSeries2.time_series().start().duration() && time <=timeSeries2.time_series().finish().duration()) {
 
          bool matches_free_slot = false;
-         for(size_t i = 0; i < timeSeries2_free_slots.size(); i++) {
-            if (time == timeSeries2_free_slots[i]) { matches_free_slot = true; break;}
+         for(const auto & timeSeries2_free_slot : timeSeries2_free_slots) {
+            if (time == timeSeries2_free_slot) { matches_free_slot = true; break;}
          }
          if (matches_free_slot) BOOST_CHECK_MESSAGE(timeSeries2.isFree(calendar),timeSeries2.toString() << " should be free at time " << time );
          else                   BOOST_CHECK_MESSAGE(!timeSeries2.isFree(calendar),timeSeries2.toString() << " should be fail at time " << time );

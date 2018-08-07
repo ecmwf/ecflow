@@ -65,17 +65,17 @@ STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const
 	// Hence the Command level interface  will make do with just the path to the task.
 	// The first zombie whose corresponding task where password does *NOT* match is acted upon
 	if ( process_id_.empty() && password_.empty()) {
-	   for(size_t i = 0; i < paths_.size(); i++) {
-	      node_ptr node = as->defs()->findAbsNode(paths_[i]);
+	   for(const auto & path : paths_) {
+	      node_ptr node = as->defs()->findAbsNode(path);
 	      Task* task = NULL;
 	      if (node.get()) task = node->isTask();
 	      switch (user_action_) {
-	         case User::FOB:   as->zombie_ctrl().fobCli(paths_[i],task); break;
-	         case User::FAIL:  as->zombie_ctrl().failCli(paths_[i],task); break;
-	         case User::ADOPT: as->zombie_ctrl().adoptCli(paths_[i],task); break;
-	         case User::REMOVE:as->zombie_ctrl().removeCli(paths_[i],task); break;
-	         case User::BLOCK: as->zombie_ctrl().blockCli(paths_[i],task); break;
-	         case User::KILL:  as->zombie_ctrl().killCli(paths_[i],task); break;
+	         case User::FOB:   as->zombie_ctrl().fobCli(path,task); break;
+	         case User::FAIL:  as->zombie_ctrl().failCli(path,task); break;
+	         case User::ADOPT: as->zombie_ctrl().adoptCli(path,task); break;
+	         case User::REMOVE:as->zombie_ctrl().removeCli(path,task); break;
+	         case User::BLOCK: as->zombie_ctrl().blockCli(path,task); break;
+	         case User::KILL:  as->zombie_ctrl().killCli(path,task); break;
 	      }
 	   }
 	}

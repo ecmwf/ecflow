@@ -654,8 +654,8 @@ BOOST_AUTO_TEST_CASE( test_limits_after_requeue_task_ECFLOW_196 )
       f1->add_trigger("1 == 0");
       f2->add_trigger("1 == 0");
 
-      for(size_t i =0; i < tasks.size(); i++) {
-         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(tasks[i]->absNodePath(),RequeueNodeCmd::FORCE)));
+      for(auto & task : tasks) {
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new RequeueNodeCmd(task->absNodePath(),RequeueNodeCmd::FORCE)));
          expected_limit_value--;
          BOOST_CHECK_MESSAGE( the_A_limit->value() == expected_limit_value,"Expected limit value " << expected_limit_value << " but found " << the_A_limit->value());
          BOOST_CHECK_MESSAGE( the_B_limit->value() == expected_limit_value,"Expected limit value " << expected_limit_value << " but found " << the_B_limit->value());

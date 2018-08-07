@@ -117,8 +117,8 @@ void VTask::broadcast()
 {
 	//VTask always exists as a shared pointer, so it is safe to pass on
 	//this shared pointer to the observer.    
-    for(std::vector<VTaskObserver*>::iterator it=observers_.begin(); it != observers_.end(); ++it)
+    for(auto & observer : observers_)
 	{
-        (*it)->taskChanged(shared_from_this());
+        observer->taskChanged(shared_from_this());
 	}
 }

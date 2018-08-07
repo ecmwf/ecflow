@@ -95,23 +95,23 @@ static void doForce(MockServer& mockServer,
    STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
    BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force for node " << node->debugNodePath());
 
-   for(size_t i = 0; i < nodes.size(); i++) {
+   for(auto node : nodes) {
       if (NState::isValid(stateOrEvent)) {
          NState::State state = NState::toState(stateOrEvent);
 
          // Force Cmd recursive does **NOT** apply to aliases.
-         if (nodes[i]->isAlias()) {
+         if (node->isAlias()) {
             // The alias should still be in default QUEUED state
-            BOOST_CHECK_MESSAGE( nodes[i]->state() == NState::QUEUED, "Expected state NState::QUEUED for alias but found " << NState::toString(nodes[i]->state()) << " for alias " << nodes[i]->debugNodePath());
+            BOOST_CHECK_MESSAGE( node->state() == NState::QUEUED, "Expected state NState::QUEUED for alias but found " << NState::toString(node->state()) << " for alias " << node->debugNodePath());
          }
          else {
-            BOOST_CHECK_MESSAGE( nodes[i]->state() == state, "Expected state " << NState::toString(state) << " but found " << NState::toString(nodes[i]->state()) << " for node " << nodes[i]->debugNodePath());
+            BOOST_CHECK_MESSAGE( node->state() == state, "Expected state " << NState::toString(state) << " but found " << NState::toString(node->state()) << " for node " << node->debugNodePath());
          }
       }
       else  BOOST_CHECK_MESSAGE(false, "oops");
 
-      if (!(nodes[i]->repeat().empty())) {
-         BOOST_CHECK_MESSAGE( !nodes[i]->repeat().valid(), "Expected repeat to be set to last value. ie in valid");
+      if (!(node->repeat().empty())) {
+         BOOST_CHECK_MESSAGE( !node->repeat().valid(), "Expected repeat to be set to last value. ie in valid");
       }
    }
 }

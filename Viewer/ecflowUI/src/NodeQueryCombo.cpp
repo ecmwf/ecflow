@@ -17,10 +17,9 @@
 
 NodeQueryCombo::NodeQueryCombo(QWidget* parent) : QComboBox(parent)
 {
-	for(std::vector<NodeQuery*>::const_iterator it=NodeQueryHandler::instance()->items().begin();
-		it != NodeQueryHandler::instance()->items().end(); ++it)
+	for(auto it : NodeQueryHandler::instance()->items())
 	{
-		addItem(QString::fromStdString((*it)->name()));
+		addItem(QString::fromStdString(it->name()));
 	}
 
 	connect(this,SIGNAL(currentIndexChanged(int)),

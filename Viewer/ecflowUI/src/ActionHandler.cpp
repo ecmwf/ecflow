@@ -65,9 +65,9 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
     // count how many attributes and non-attributes are selected
     long numAttrs=0, numNonAttrNodes=0;
-    for (std::vector<VInfo_ptr>::iterator itNodes = nodesLst.begin(); itNodes != nodesLst.end(); ++itNodes)
+    for (auto & itNodes : nodesLst)
     {
-        if ((*itNodes)->isAttribute())
+        if (itNodes->isAttribute())
             numAttrs++;
         else
             numNonAttrNodes++;
@@ -76,10 +76,10 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     std::vector<VInfo_ptr> filteredNodes;
     if (numAttrs > 0 && numNonAttrNodes > 0)  // just keep the non-attribute nodes
     {
-        for (std::vector<VInfo_ptr>::iterator itNodes = nodesLst.begin(); itNodes != nodesLst.end(); ++itNodes)
+        for (auto & itNodes : nodesLst)
         {
-            if (!((*itNodes)->isAttribute()))
-                filteredNodes.push_back(*itNodes);
+            if (!(itNodes->isAttribute()))
+                filteredNodes.push_back(itNodes);
         }
     }
     else  // keep all the nodes

@@ -160,13 +160,13 @@ static object do_rshift(node_ptr self, const bp::object& arg){
       std::vector<node_ptr> children;
       nc->immediateChildren(children);
       node_ptr previous_child;
-      for(size_t i =0; i < children.size(); i++) {
-         if (previous_child && children[i] == child) {
+      for(auto & i : children) {
+         if (previous_child && i == child) {
             // if existing trigger, add new trigger as AND
             if (child->get_trigger()) child->add_part_trigger( PartExpression( previous_child->name() + " == complete", PartExpression::AND) );
             else child->add_trigger_expr( Expression(previous_child->name() + " == complete"));
          }
-         if (children[i]->defStatus() != DState::COMPLETE)  previous_child = children[i];
+         if (i->defStatus() != DState::COMPLETE)  previous_child = i;
       }
    }
    return object(self);

@@ -48,10 +48,10 @@ VParamFilterMenu::VParamFilterMenu(QMenu * parent,VParamSet* filter,QString titl
 	menu_->addAction(acSep);
 
 	//Param name must be unique
-    for(std::vector<VParam*>::const_iterator it=filter_->all().begin(); it != filter_->all().end(); ++it)
+    for(auto it : filter_->all())
 	{
-		addAction((*it)->label(),
-				  (*it)->name());
+		addAction(it->label(),
+				  it->name());
 	}
 
     //For status

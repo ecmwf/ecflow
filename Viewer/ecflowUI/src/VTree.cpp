@@ -35,8 +35,8 @@ VTreeNode::VTreeNode(VNode* n,VTreeNode* parent) :
 
 VTreeNode::~VTreeNode()
 {
-    for(std::vector<VTreeNode*>::iterator it=children_.begin(); it != children_.end();++it)
-        delete *it;
+    for(auto & it : children_)
+        delete it;
 }
 
 VTree* VTreeNode::root() const
@@ -56,10 +56,10 @@ void VTreeNode::addChild(VTreeNode* ch)
 
 VTreeNode* VTreeNode::findChild(const std::string& name) const
 {
-    for(unsigned int i=0; i < children_.size(); i++)
+    for(auto i : children_)
     {
-        if(children_[i]->vnode_->strName() == name)
-            return children_[i];
+        if(i->vnode_->strName() == name)
+            return i;
     }
 
     return NULL;
@@ -123,9 +123,9 @@ void VTreeNode::updateAttrNum(AttributeFilter *filter,bool showOneMore)
 void VTreeNode::resetAttrNum()
 {
     attrNum_=-1;
-    for(unsigned int i=0; i < children_.size(); i++)
+    for(auto & i : children_)
     {
-        children_[i]->resetAttrNum();
+        i->resetAttrNum();
     }
 }
 
@@ -135,10 +135,10 @@ void VTreeNode::countChildren() const
 
 void VTreeNode::countChildren(int& num) const
 {
-    for(unsigned int i=0; i < children_.size(); i++)
+    for(auto i : children_)
     {
         num++;
-        children_[i]->countChildren(num);
+        i->countChildren(num);
     }
 }
 
@@ -261,11 +261,11 @@ int VTree::indexOfTopLevelToInsert(VNode* suite) const
 
 void VTree::removeChildren(VTreeNode* node)
 {
-    for(std::vector<VTreeNode*>::iterator it=node->children_.begin(); it != node->children_.end();++it)
+    for(auto & it : node->children_)
     {
-        nodeVec_[(*it)->vnode()->index()]=NULL;
-        removeChildren(*it);
-        delete *it;
+        nodeVec_[it->vnode()->index()]=NULL;
+        removeChildren(it);
+        delete it;
         totalNum_--;
     }
 
@@ -375,8 +375,8 @@ void VTree::insertTopLevelBranch(VTreeNode* branch,int index)
 
 void VTree::clear()
 {
-    for(std::vector<VTreeNode*>::iterator it=children_.begin(); it != children_.end();++it)
-        delete *it;
+    for(auto & it : children_)
+        delete it;
 
     children_.clear();
     nodeVec_.clear();

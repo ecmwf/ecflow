@@ -281,11 +281,11 @@ void CompactView::paint(QPainter *painter,const QRegion& region)
     bool multipleRects = (rects.size() > 1);
 
     //Iterate through the rectangles in the region
-    for(int a = 0; a < rects.size(); ++a)
+    for(auto rect : rects)
     {
         const QRect area = (multipleRects
-                            ? QRect(0, rects.at(a).y(), viewportWidth, rects.at(a).height())
-                            : rects.at(a));
+                            ? QRect(0, rect.y(), viewportWidth, rect.height())
+                            : rect);
 #ifdef _UI_COMPACTVIEW_DEBUG
         UiLog().dbg() << " area=" << area;
 #endif

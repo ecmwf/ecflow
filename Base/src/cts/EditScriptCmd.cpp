@@ -170,8 +170,8 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 			/// Using the User edited variables, generate the job using the ECF/USR file accessible from the server
 			/// Convert from vector to map
 			NameValueMap user_variables_map;
-			for(size_t i = 0; i < user_variables_.size(); i++) {
-				user_variables_map.insert( std::make_pair(user_variables_[i].first, user_variables_[i].second ));
+			for(const auto & user_variable : user_variables_) {
+				user_variables_map.insert( std::make_pair(user_variable.first, user_variable.second ));
 			}
 
 			/// Do job submission, but creating .usr file first
@@ -202,8 +202,8 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 
 		      /// Convert from vector to map
 		      NameValueMap user_variables_map;
-		      for(size_t i = 0; i < user_variables_.size(); i++) {
-		         user_variables_map.insert( std::make_pair(user_variables_[i].first, user_variables_[i].second ));
+		      for(const auto & user_variable : user_variables_) {
+		         user_variables_map.insert( std::make_pair(user_variable.first, user_variable.second ));
 		      }
 
 		      /// Do job submission, *USING* the user supplied file , will create .usr file
@@ -330,8 +330,8 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 	/// Check edit_type is valid
 	bool ok = false;
 	std::vector<std::string> edit_types = valid_edit_types();
-	for(size_t i = 0; i < edit_types.size(); i++) {
-		if (edit_type_str == edit_types[i]) {
+	for(const auto & i : edit_types) {
+		if (edit_type_str == i) {
 			if (edit_type_str == "edit")                  edit_type =  EditScriptCmd::EDIT;
 			else if (edit_type_str == "pre_process")      edit_type =  EditScriptCmd::PREPROCESS;
 			else if (edit_type_str == "submit")           edit_type =  EditScriptCmd::SUBMIT;

@@ -43,8 +43,8 @@ void VDir::path(const std::string& path,bool doReload)
 
 void VDir::clear()
 {
-	for(std::vector<VDirItem*>::iterator it=items_.begin(); it != items_.end(); ++it)
-		delete (*it);
+	for(auto & item : items_)
+		delete item;
 }
 
 void VDir::addItem(const std::string& name, unsigned int size,unsigned int mtime)

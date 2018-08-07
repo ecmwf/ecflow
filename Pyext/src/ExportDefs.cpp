@@ -164,7 +164,7 @@ static object do_add(defs_ptr self, const bp::object& arg) {
    else if (extract<Edit>(arg).check()) {
       Edit edit = extract<Edit>(arg);
       const std::vector<Variable>& vec = edit.variables();
-      for(size_t i=0; i < vec.size(); i++) self->set_server().add_or_update_user_variables(vec[i].name(),vec[i].theValue());
+      for(const auto & i : vec) self->set_server().add_or_update_user_variables(i.name(),i.theValue());
    }
    else if (extract<bp::list>(arg).check()){
       bp::list the_list = extract<bp::list>(arg);

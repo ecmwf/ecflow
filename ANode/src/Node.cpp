@@ -104,8 +104,8 @@ Node::Node(const Node& rhs)
 
    if (auto_restore_) auto_restore_->set_node(this);
 
-   for (size_t l = 0;  l< rhs.limits_.size(); l++ ) {
-      limit_ptr the_limit = std::make_shared<Limit>( *rhs.limits_[l]);
+   for (const auto & limit : rhs.limits_) {
+      limit_ptr the_limit = std::make_shared<Limit>( *limit);
       the_limit->set_node(this);
       limits_.push_back( the_limit );
    }
@@ -182,8 +182,8 @@ Node& Node::operator=(const Node& rhs)
       if (auto_restore_) auto_restore_->set_node(this);
 
       limits_.clear();
-      for (size_t l = 0;  l< rhs.limits_.size(); l++ ) {
-         limit_ptr the_limit = std::make_shared<Limit>( *rhs.limits_[l]);
+      for (const auto & limit : rhs.limits_) {
+         limit_ptr the_limit = std::make_shared<Limit>( *limit);
          the_limit->set_node(this);
          limits_.push_back( the_limit );
       }
@@ -240,22 +240,22 @@ void Node::begin()
    flag_.reset();
    repeat_.reset();         // if repeat is empty reset() does nothing
 
-   for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
-   for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
-   for(size_t i = 0; i < labels_.size(); i++)     {   labels_[i].reset(); }
+   for(auto & meter : meters_)     {   meter.reset(); }
+   for(auto & event : events_)     {   event.reset(); }
+   for(auto & label : labels_)     {   label.reset(); }
 
    if (late_) late_->reset();
-   for(size_t i = 0; i < limits_.size(); i++)   { limits_[i]->reset(); }
+   for(auto & limit : limits_)   { limit->reset(); }
 
    // Let time base attributes use, relative duration if applicable
    {
       const Calendar& calendar = suite()->calendar();
-      for(size_t i = 0; i < todays_.size(); i++)  { todays_[i].reset(calendar);}
-      for(size_t i = 0; i < times_.size(); i++)   {  times_[i].reset(calendar);}
-      for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].reset(calendar);}
+      for(auto & today : todays_)  { today.reset(calendar);}
+      for(auto & time : times_)   {  time.reset(calendar);}
+      for(auto & cron : crons_)     {    cron.reset(calendar);}
 
-      for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
-      for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
+      for(auto & day : days_)      {  day.clearFree(); }
+      for(auto & date : dates_)     { date.clearFree(); }
       markHybridTimeDependentsAsComplete();
    }
 
@@ -324,16 +324,16 @@ void Node::requeue(Requeue_args& args)
 
    if (late_) late_->reset();
 
-   for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
-   for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
+   for(auto & meter : meters_)     {   meter.reset(); }
+   for(auto & event : events_)     {   event.reset(); }
    // ECFLOW-195, only clear labels, if they are on Suites/Family not tasks(typically only specified on tasks)
    if (isNodeContainer()) {
-      for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
+      for(auto & label : labels_)  {   label.reset(); }
    }
 
    if (misc_attrs_) misc_attrs_->requeue();
 
-   for(size_t i = 0; i < limits_.size(); i++) { limits_[i]->reset(); }
+   for(auto & limit : limits_) { limit->reset(); }
 
    // ECFLOW-196, ensure the re-queue release tokens held by Limits higher up the tree.
    // Note: Its safe to call decrementInLimit, even when no limit consumed
@@ -351,23 +351,23 @@ void Node::reset()
 
    repeat_.reset(); // if repeat is empty reset() does nothing
 
-   for(size_t i = 0; i < todays_.size(); i++)  { todays_[i].resetRelativeDuration(); todays_[i].reset_only();}
-   for(size_t i = 0; i < times_.size(); i++)   {  times_[i].resetRelativeDuration(); times_[i].reset_only();}
-   for(size_t i = 0; i < crons_.size(); i++)     {    crons_[i].resetRelativeDuration(); crons_[i].reset_only();}
-   for(size_t i = 0; i < days_.size(); i++)      {  days_[i].clearFree(); }
-   for(size_t i = 0; i < dates_.size(); i++)     { dates_[i].clearFree(); }
+   for(auto & today : todays_)  { today.resetRelativeDuration(); today.reset_only();}
+   for(auto & time : times_)   {  time.resetRelativeDuration(); time.reset_only();}
+   for(auto & cron : crons_)     {    cron.resetRelativeDuration(); cron.reset_only();}
+   for(auto & day : days_)      {  day.clearFree(); }
+   for(auto & date : dates_)     { date.clearFree(); }
 
    flag_.reset();
 
    if (late_) late_->reset();
 
-   for(size_t i = 0; i < meters_.size(); i++)     {   meters_[i].reset(); }
-   for(size_t i = 0; i < events_.size(); i++)     {   events_[i].reset(); }
+   for(auto & meter : meters_)     {   meter.reset(); }
+   for(auto & event : events_)     {   event.reset(); }
    if (isNodeContainer()) {
-      for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
+      for(auto & label : labels_)  {   label.reset(); }
    }
 
-   for(size_t i = 0; i < limits_.size(); i++) { limits_[i]->reset(); }
+   for(auto & limit : limits_) { limit->reset(); }
 }
 
 
@@ -382,7 +382,7 @@ void Node::requeue_time_attrs()
 void Node::requeue_labels()
 {
    // ECFLOW-195, clear labels before a task is run.
-   for(size_t i = 0; i < labels_.size(); i++)  {   labels_[i].reset(); }
+   for(auto & label : labels_)  {   label.reset(); }
 }
 
 void Node::calendarChanged(
@@ -2045,11 +2045,11 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
       // postfix  = <attr-type dependent> <next run time > < optional current state>
       std::string postFix;
       const Calendar& c = suite()->calendar();
-      for(size_t i = 0; i < days_.size(); i++)    { postFix.clear(); if (days_[i].why(c,postFix))    { vec.push_back(prefix + postFix); why_found=true;}}
-      for(size_t i = 0; i < dates_.size(); i++)   { postFix.clear(); if (dates_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
-      for(size_t i = 0; i < todays_.size(); i++){ postFix.clear(); if (todays_[i].why(c,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
-      for(size_t i = 0; i < times_.size(); i++) { postFix.clear(); if (times_[i].why(c,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
-      for(size_t i = 0; i < crons_.size(); i++)   { postFix.clear(); if (crons_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
+      for(auto day : days_)    { postFix.clear(); if (day.why(c,postFix))    { vec.push_back(prefix + postFix); why_found=true;}}
+      for(const auto & date : dates_)   { postFix.clear(); if (date.why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
+      for(const auto & today : todays_){ postFix.clear(); if (today.why(c,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
+      for(const auto & time : times_) { postFix.clear(); if (time.why(c,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
+      for(const auto & cron : crons_)   { postFix.clear(); if (cron.why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
    }
 
    // **************************************************************************************
@@ -2314,8 +2314,8 @@ void Node::notify_delete()
 {
    // make a copy, to avoid iterating over observer list that is being changed
    std::vector<AbstractObserver*> copy_of_observers = observers_;
-   for(size_t i = 0; i < copy_of_observers.size(); i++) {
-      copy_of_observers[i]->update_delete(this);
+   for(auto & copy_of_observer : copy_of_observers) {
+      copy_of_observer->update_delete(this);
    }
 
    /// Check to make sure that the Observer called detach
@@ -2366,8 +2366,8 @@ void Node::detach(AbstractObserver* obs)
 
 bool Node::is_observed(AbstractObserver* obs) const
 {
-   for(size_t i = 0; i < observers_.size(); i++) {
-      if (observers_[i] == obs) {
+   for(auto observer : observers_) {
+      if (observer == obs) {
          return true;
       }
    }

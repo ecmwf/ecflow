@@ -96,8 +96,7 @@ void test_defs(const std::string& directory, bool pass)
 				   // Make sure all nodes can be found
 				   std::vector<Node*> all_nodes;
 				   defs.getAllNodes(all_nodes);
-				   for(size_t i= 0; i < all_nodes.size(); i++) {
-				      Node* node = all_nodes[i];
+				   for(auto node : all_nodes) {
 				      node_ptr found_node = defs.findAbsNode(node->absNodePath());
 				      BOOST_CHECK_MESSAGE(found_node.get(),"Could not find node " <<  node->debugNodePath());
 				      BOOST_CHECK_MESSAGE(found_node.get() == node," Expected to find " <<  node->debugNodePath() << " but found " << found_node->debugNodePath());
