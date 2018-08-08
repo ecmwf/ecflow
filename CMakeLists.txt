@@ -78,7 +78,7 @@ if(ENABLE_UI)
     ecbuild_info("ecFlowUI is enabled - searching for Qt5; if not found, will try Qt4")
     ecbuild_info("To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH")
 
-    find_package(Qt5Widgets 5.0.0)
+    find_package(Qt5Widgets 5.11.0)
     if (Qt5Widgets_FOUND)
         find_package(Qt5Gui 5.0.0)
         if (Qt5Gui_FOUND)
