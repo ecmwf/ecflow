@@ -27,7 +27,7 @@
 #include "TimeStamp.hpp"
 #include "UiLog.hpp"
 
-InputEventLog* InputEventLog::instance_=0;
+InputEventLog* InputEventLog::instance_=nullptr;
 static bool firstStart=true;
 
 static QString objectPath(QObject *obj)
@@ -65,7 +65,7 @@ InputEventLog::~InputEventLog()
 InputEventLog* InputEventLog::instance()
 {
     if(!instance_)
-        instance_=new InputEventLog(0);
+        instance_=new InputEventLog(nullptr);
     return instance_;
 }
 
@@ -95,12 +95,12 @@ void InputEventLog::stop()
 {
     qApp->removeEventFilter(this);
     outFile_->close();
-    out_.setDevice(0);
+    out_.setDevice(nullptr);
 }
 
 void InputEventLog::truncateLogBegin()
 {
-    paused_=(out_.device() != 0);
+    paused_=(out_.device() != nullptr);
     stop();
 }
 

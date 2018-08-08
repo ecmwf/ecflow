@@ -21,7 +21,7 @@ class VReply;
 class FileInfoLabel : public QLabel
 {
 public:
-	explicit FileInfoLabel(QWidget* parent=0);
+	explicit FileInfoLabel(QWidget* parent=nullptr);
 
 	void update(VReply*,QString str=QString());
     QString formatDate(QDateTime) const;
@@ -31,7 +31,7 @@ public:
 class DirInfoLabel : public FileInfoLabel
 {
 public:
-	explicit DirInfoLabel(QWidget* parent=0) : FileInfoLabel(parent) {}
+	explicit DirInfoLabel(QWidget* parent=nullptr) : FileInfoLabel(parent) {}
 
     void update(VReply*);
 

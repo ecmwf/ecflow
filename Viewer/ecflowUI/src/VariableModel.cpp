@@ -343,7 +343,7 @@ VariableModelData* VariableModel::indexToData(const QModelIndex& index,int& bloc
     if(block != -1)
         return data_->data(block);
 
-    return NULL;
+    return nullptr;
 }
 
 VInfo_ptr VariableModel::indexToInfo(const QModelIndex& index) const

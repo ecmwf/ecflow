@@ -33,7 +33,7 @@ class TreeNodeViewDelegate : public NodeViewDelegate
 Q_OBJECT
 
 public:
-    explicit TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent=0);
+    explicit TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent=nullptr);
     ~TreeNodeViewDelegate();
 
     bool isSingleHeight(int h) const;

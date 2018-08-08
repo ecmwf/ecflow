@@ -13,7 +13,7 @@ public:
 
     enum CustomItemRole {SelectRole = Qt::UserRole+1};
 
-	explicit ComboMulti(QWidget *widget = 0);
+	explicit ComboMulti(QWidget *widget = nullptr);
     virtual ~ComboMulti();
     bool eventFilter(QObject *object, QEvent *event);
     virtual void paintEvent(QPaintEvent *);

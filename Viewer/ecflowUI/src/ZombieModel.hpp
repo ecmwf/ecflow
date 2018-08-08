@@ -13,7 +13,7 @@ class ModelColumn;
 class ZombieModel : public QAbstractItemModel
 {
 public:
-   	explicit ZombieModel(QObject *parent=0);
+   	explicit ZombieModel(QObject *parent=nullptr);
    	~ZombieModel();
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;

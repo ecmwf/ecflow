@@ -17,8 +17,8 @@ VTask::VTask(Type t,VTaskObserver* obs) :
 	type_(t),
 	status_(NOSTATUS),
 	targetPath_("/"),
-	node_(0),
-	reply_(0)
+	node_(nullptr),
+	reply_(nullptr)
 {
 	if(obs)
 		observers_.push_back(obs);
@@ -29,7 +29,7 @@ VTask::VTask(Type t,VNode *node,VTaskObserver* obs) :
 	type_(t),
 	status_(NOSTATUS),
 	node_(node),
-	reply_(0)
+	reply_(nullptr)
 {
 	if(node_)
 		targetPath_=node_->absNodePath();

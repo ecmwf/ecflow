@@ -90,7 +90,7 @@ bool ServerDialogChecker::checkPort(QString port)
 
 void ServerDialogChecker::error(QString msg)
 {
-	QMessageBox::critical(0,QObject::tr("Server item"),errorText_ + "<br>"+ msg);
+	QMessageBox::critical(nullptr,QObject::tr("Server item"),errorText_ + "<br>"+ msg);
 }
 
 //======================================
@@ -400,7 +400,7 @@ void ServerListDialog::addItem()
 	if(d.exec() == QDialog::Accepted)
 	{
 		model_->dataIsAboutToChange();
-        ServerItem* item=0;
+        ServerItem* item=nullptr;
         try {
             item=ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),false);
         }
@@ -876,7 +876,7 @@ bool ServerListModel::setData(const QModelIndex& idx, const QVariant & value, in
 
 QModelIndex ServerListModel::index(int row, int column, const QModelIndex& /*parent*/) const
 {
-	return createIndex(row,column,static_cast<void*>(0));
+	return createIndex(row,column,static_cast<void*>(nullptr));
 }
 
 QModelIndex ServerListModel::parent(const QModelIndex &) const

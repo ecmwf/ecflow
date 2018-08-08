@@ -17,7 +17,7 @@ class TriggerTableItem;
 class TriggerTextWidget : public QTextBrowser
 {
 public:
-    explicit TriggerTextWidget(QWidget *parent=0);
+    explicit TriggerTextWidget(QWidget *parent=nullptr);
     void reload(TriggerTableItem* item);
 
 private:

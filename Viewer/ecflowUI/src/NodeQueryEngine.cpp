@@ -28,14 +28,14 @@ static bool metaRegistered=false;
 NodeQueryEngine::NodeQueryEngine(QObject* parent) :
     QThread(parent),
     query_(new NodeQuery("tmp")),
-    parser_(NULL),
+    parser_(nullptr),
     cnt_(0),
     scanCnt_(0),
     maxNum_(250000),
     chunkSize_(100),
     stopIt_(false),
     maxReached_(false),   
-    rootNode_(0)
+    rootNode_(nullptr)
 {
     //We will need to pass various non-Qt types via signals and slots
     //So we need to register these types.
@@ -70,7 +70,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
     res_.clear();
     cnt_=0;
     scanCnt_=0;
-    rootNode_=0;
+    rootNode_=nullptr;
 
     query_->swap(query);
 
@@ -82,7 +82,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
     if(parser_)
     {
         delete parser_;
-        parser_=NULL;
+        parser_=nullptr;
     }
 
     qDeleteAll(attrParser_);
@@ -92,7 +92,7 @@ bool NodeQueryEngine::runQuery(NodeQuery* query,QStringList allServers)
     UiLog().dbg() << " node part: " << query_->nodeQueryPart().toStdString();
 
     parser_=NodeExpressionParser::instance()->parseWholeExpression(query_->nodeQueryPart().toStdString(), query->caseSensitive());
-    if(parser_ == NULL)
+    if(parser_ == nullptr)
     {
         UiLog().err() << " unable to parse node query: " << query_->nodeQueryPart().toStdString();
         UserMessage::message(UserMessage::ERROR,true,"Error, unable to parse node query: " + query_->nodeQueryPart().toStdString());
@@ -337,10 +337,10 @@ void NodeQueryEngine::slotFailed()
 
 NodeFilterEngine::NodeFilterEngine(NodeFilter* owner) :
     query_(new NodeQuery("tmp")),
-    parser_(NULL),
-    server_(NULL),
+    parser_(nullptr),
+    server_(nullptr),
     owner_(owner),
-    rootNode_(0)
+    rootNode_(nullptr)
 {
 }
 
@@ -360,7 +360,7 @@ void NodeFilterEngine::setQuery(NodeQuery* query)
         delete parser_;
 
     parser_=NodeExpressionParser::instance()->parseWholeExpression(query_->query().toStdString());
-    if(parser_ == NULL)
+    if(parser_ == nullptr)
     {
         UiLog().err() << "Error, unable to parse enabled condition: " << query_->query().toStdString();
         UserMessage::message(UserMessage::ERROR, true,"Error, unable to parse enabled condition: " + query_->query().toStdString());
@@ -370,7 +370,7 @@ void NodeFilterEngine::setQuery(NodeQuery* query)
 
 bool NodeFilterEngine::runQuery(ServerHandler* server)
 {
-    rootNode_=0;
+    rootNode_=nullptr;
 
     if(!query_)
         return false;

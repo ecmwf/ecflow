@@ -27,7 +27,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-ServerList* ServerList::instance_=0;
+ServerList* ServerList::instance_=nullptr;
 
 #define _UI_SERVERLIST_DEBUG
 
@@ -51,7 +51,7 @@ ServerList* ServerList::instance()
 
 ServerItem* ServerList::itemAt(int index)
 {
-	return (index >=0 && index < static_cast<int>(items_.size()))?items_.at(index):0;
+	return (index >=0 && index < static_cast<int>(items_.size()))?items_.at(index):nullptr;
 }
 
 ServerItem* ServerList::find(const std::string& name)
@@ -61,7 +61,7 @@ ServerItem* ServerList::find(const std::string& name)
 		if((*it)->name() == name)
 			return *it;
 	}
-	return 0;
+	return nullptr;
 }
 
 ServerItem* ServerList::find(const std::string& name, const std::string& host, const std::string& port)
@@ -71,7 +71,7 @@ ServerItem* ServerList::find(const std::string& name, const std::string& host, c
 		if((*it)->name() == name && (*it)->host() == host && (*it)->port() == port)
 			return *it;
 	}
-	return 0;
+	return nullptr;
 }
 
 ServerItem* ServerList::add(const std::string& name,const std::string& host,
@@ -81,7 +81,7 @@ ServerItem* ServerList::add(const std::string& name,const std::string& host,
     if(!checkItemToAdd(name,host,port,true,errStr))
     {
         throw std::runtime_error(errStr);
-        return 0;
+        return nullptr;
     }
 
     auto* item=new ServerItem(name,host,port,favourite);
@@ -272,11 +272,11 @@ bool ServerList::load()
         if(sv.size() >= 3)
 		{           
             std::string name=sv[0], host=sv[1], port=sv[2];
-            ServerItem* item=0;
+            ServerItem* item=nullptr;
             try
             {
                 item=add(name,host,port,favourite,false);
-                UI_ASSERT(item != 0,"name=" << name << " host=" << host << " port=" << port);
+                UI_ASSERT(item != nullptr,"name=" << name << " host=" << host << " port=" << port);
                 item->setSystem(sys);
             }
             catch(std::exception& e)
@@ -439,7 +439,7 @@ void ServerList::syncSystemFile()
 #ifdef _UI_SERVERLIST_DEBUG
         UiLog().dbg() << i.name() << "\t" + i.host() << "\t" + i.port();
 #endif
-        ServerItem *item=0;
+        ServerItem *item=nullptr;
 
         //There is a server with same name, host and port as in the local list. We
         //mark it as system
@@ -471,7 +471,7 @@ void ServerList::syncSystemFile()
             try
             {
                 item=add(name,host,port,false,false);
-                UI_ASSERT(item != 0,"name=" << name << " host=" << host
+                UI_ASSERT(item != nullptr,"name=" << name << " host=" << host
                           << " port=" << port);
                 item->setSystem(true);
                 syncChange_.push_back(new ServerListSyncChangeItem(i,i,

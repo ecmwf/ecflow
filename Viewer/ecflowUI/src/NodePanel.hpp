@@ -28,7 +28,7 @@ class NodePanel : public TabWidget
     Q_OBJECT
 
 public:
-	explicit NodePanel(QWidget* parent=0);
+	explicit NodePanel(QWidget* parent=nullptr);
 	virtual ~NodePanel();
 
 	void setViewMode(Viewer::ViewMode);

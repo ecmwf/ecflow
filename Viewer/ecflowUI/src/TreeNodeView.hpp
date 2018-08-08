@@ -33,7 +33,7 @@ class TreeNodeView : public QObject, public NodeViewBase, public VPropertyObserv
 Q_OBJECT
 
 public:
-    TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
+    TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilterDef* filterDef,QWidget *parent=nullptr);
     ~TreeNodeView();
 
     void reload();

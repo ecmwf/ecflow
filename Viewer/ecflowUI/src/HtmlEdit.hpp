@@ -17,7 +17,7 @@
 class HtmlEdit : public QTextBrowser, public VPropertyObserver
 {
 public:
-    explicit HtmlEdit(QWidget* parent = 0);
+    explicit HtmlEdit(QWidget* parent = nullptr);
     ~HtmlEdit();
 
     void setFontProperty(VProperty* p);

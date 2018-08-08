@@ -32,7 +32,7 @@ InLimitMgr& InLimitMgr::operator=(const InLimitMgr& rhs)
 {
    if (this != &rhs) {
       vec_ = rhs.vec_;
-      node_ = NULL;
+      node_ = nullptr;
    }
    return *this;
 }
@@ -118,7 +118,7 @@ Limit* InLimitMgr::findLimitViaInLimit(const InLimit& theInLimit) const
  			return vec_[i].limit() ;
 		}
  	}
-	return NULL;
+	return nullptr;
 }
 
 bool InLimitMgr::findInLimitByNameAndPath(const InLimit& theInLimit) const

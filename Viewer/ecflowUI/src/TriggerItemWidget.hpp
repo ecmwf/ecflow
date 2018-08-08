@@ -29,7 +29,7 @@ class TriggerItemWidget : public QWidget, public InfoPanelItem, protected Ui::Tr
 Q_OBJECT
 
 public:
-	explicit TriggerItemWidget(QWidget *parent=0);
+	explicit TriggerItemWidget(QWidget *parent=nullptr);
     ~TriggerItemWidget();
 
 	void reload(VInfo_ptr);

@@ -58,11 +58,11 @@
 bool MainWindow::quitStarted_=false;
 QList<MainWindow*> MainWindow::windows_;
 int MainWindow::maxWindowNum_=25;
-LogViewerCom* MainWindow::logCom_=NULL;
+LogViewerCom* MainWindow::logCom_=nullptr;
 
 MainWindow::MainWindow(QStringList idLst,QWidget *parent) :
     QMainWindow(parent),
-    serverSyncNotifyTb_(0)
+    serverSyncNotifyTb_(nullptr)
 {
     setupUi(this);
     
@@ -211,7 +211,7 @@ void MainWindow::addInfoPanelActions(QToolBar *toolbar)
 
 ServerHandler* MainWindow::selectedServer() const
 {
-    return(selection_)?(selection_->server()):0;
+    return(selection_)?(selection_->server()):nullptr;
 }
 
 //==============================================================
@@ -279,7 +279,7 @@ void MainWindow::on_actionPreferences_triggered()
 
 void MainWindow::on_actionManageSessions_triggered()
 {
-	QMessageBox::information(0, tr("Manage Sessions"),
+	QMessageBox::information(nullptr, tr("Manage Sessions"),
 		tr("To manage sessions, please restart ecFlowUI with the -s command-line option"));
 }
 
@@ -396,7 +396,7 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 
 void MainWindow::updateRefreshActions()
 {
-    ServerHandler* s=0;
+    ServerHandler* s=nullptr;
 
     QString serverName;
     if(selection_)
@@ -407,7 +407,7 @@ void MainWindow::updateRefreshActions()
     serverComWidget_->setServer(s);
 
 
-    bool hasSel=(selection_!= 0);
+    bool hasSel=(selection_!= nullptr);
 	actionRefreshSelected->setEnabled(hasSel);
 	actionResetSelected->setEnabled(hasSel);
 }
@@ -435,7 +435,7 @@ void MainWindow::rerenderContents()
 
 void MainWindow::slotContentsChanged()
 {
-	MainWindow::saveContents(NULL);
+	MainWindow::saveContents(nullptr);
 }
 
 bool MainWindow::selectInTreeView(VInfo_ptr info)
@@ -663,7 +663,7 @@ bool MainWindow::aboutToClose(MainWindow* win)
 		  	int tabCnt=win->nodePanel_->count();
 			if(tabCnt > 1)
 			{
-		  		if(QMessageBox::question(0,tr("Confirm close"),tr("You are about to close <b>") + QString::number(tabCnt) + tr("</b> tabs. Are you sure you want to continue?"),
+		  		if(QMessageBox::question(nullptr,tr("Confirm close"),tr("You are about to close <b>") + QString::number(tabCnt) + tr("</b> tabs. Are you sure you want to continue?"),
 			    	      QMessageBox::Yes | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
 				{
 					return false;
@@ -702,7 +702,7 @@ bool MainWindow::aboutToQuit(MainWindow* topWin)
 		{
 			if (si->askToPreserveTemporarySession())
 			{
-				if(QMessageBox::question(0,tr("Delete temporary session?"),
+				if(QMessageBox::question(nullptr,tr("Delete temporary session?"),
 							tr("This was a temporary session - would you like to preserve it for future use?"),
 							QMessageBox::Yes | QMessageBox::No,QMessageBox::No) == QMessageBox::No)
 					SessionHandler::destroyInstance();
@@ -847,7 +847,7 @@ MainWindow* MainWindow::findWindow(QWidget *childW)
 			return w;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 MainWindow* MainWindow::firstWindow()
@@ -918,7 +918,7 @@ void MainWindowTitleHandler::update()
     Q_ASSERT(win_);
 
     char *userTitle = getenv("ECFLOWUI_TITLE");
-    std::string mainTitle = (userTitle != NULL) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
+    std::string mainTitle = (userTitle != nullptr) ? std::string(userTitle) + " (" + ecf::Version::raw() + ")"
                                                 : VConfig::instance()->appLongName();
     QString title=QString::fromStdString(mainTitle);
 

@@ -593,7 +593,7 @@ node_ptr Task::removeChild(Node* child)
    size_t node_vec_size = aliases_.size();
    for(size_t t = 0; t < node_vec_size; t++)     {
       if (aliases_[t].get() == child) {
-         child->set_parent(NULL);
+         child->set_parent(nullptr);
          node_ptr node = std::dynamic_pointer_cast<Alias>(aliases_[t]);
          aliases_.erase( aliases_.begin() + t);
          add_remove_state_change_no_ = Ecf::incr_state_change_no();
@@ -611,7 +611,7 @@ bool Task::doDeleteChild(Node* child)
    auto the_end = aliases_.end();
    for(auto t = aliases_.begin(); t!=the_end; ++t) {
       if ( (*t).get() == child) {
-         if (child && child->parent()) child->set_parent(NULL);
+         if (child && child->parent()) child->set_parent(nullptr);
          aliases_.erase(t);
          add_remove_state_change_no_ = Ecf::incr_state_change_no();
          return true;

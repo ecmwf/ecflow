@@ -23,7 +23,7 @@ class EditItemWidget : public QWidget, public InfoPanelItem, protected Ui::EditI
 Q_OBJECT
 
 public:
-	explicit EditItemWidget(QWidget *parent=0);
+	explicit EditItemWidget(QWidget *parent=nullptr);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

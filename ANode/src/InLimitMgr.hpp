@@ -36,8 +36,8 @@
 class InLimitMgr {
 public:
    explicit InLimitMgr(Node* n) : node_(n) {}
-   InLimitMgr(const InLimitMgr& rhs) : node_(NULL),vec_(rhs.vec_){}
-	InLimitMgr() : node_(NULL) {}
+   InLimitMgr(const InLimitMgr& rhs) : node_(nullptr),vec_(rhs.vec_){}
+	InLimitMgr() : node_(nullptr) {}
 
    // needed by node copy constructor
    void set_node(Node* n) { node_ = n; }

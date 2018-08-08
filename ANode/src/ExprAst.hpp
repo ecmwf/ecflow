@@ -39,12 +39,12 @@ public:
    virtual bool is_not() const { return false; }
    virtual bool isleaf() const { return false; }
 	virtual bool isRoot() const { return false; }
-   virtual AstTop* isTop() const { return NULL; }
+   virtual AstTop* isTop() const { return nullptr; }
    virtual bool is_evaluateable() const { return false; }
 
 	virtual void addChild(Ast*) {}
-	virtual Ast* left() const { return NULL;}
-	virtual Ast* right() const { return NULL;}
+	virtual Ast* left() const { return nullptr;}
+	virtual Ast* right() const { return nullptr;}
 	virtual bool evaluate() const { assert(false); return false;}
 	virtual bool empty() const { return true; }
    virtual int value() const { assert(false); return 0;} // only valid for leaf or operators
@@ -71,7 +71,7 @@ public:
 
 class AstTop : public Ast {
 public:
-	AstTop() : root_(NULL) {}
+	AstTop() : root_(nullptr) {}
 	virtual ~AstTop();
 
 	virtual void accept(ecf::ExprAstVisitor&);
@@ -105,7 +105,7 @@ private:
 // This if one of AND, OR, == != <= >= +, -,*,!,%,/
 class AstRoot : public Ast {
 public:
-   AstRoot() :left_(NULL), right_(NULL) {}
+   AstRoot() :left_(nullptr), right_(nullptr) {}
 	virtual ~AstRoot();
 
  	virtual bool isRoot() const { return true;}
@@ -474,7 +474,7 @@ private:
 
 class AstNode : public AstLeaf {
 public:
-   explicit AstNode(const std::string& n) : parentNode_(NULL), nodePath_(n) {}
+   explicit AstNode(const std::string& n) : parentNode_(nullptr), nodePath_(n) {}
 
 	virtual void accept(ecf::ExprAstVisitor&);
    virtual AstNode* clone() const;
@@ -503,7 +503,7 @@ private:
 
 class AstFlag : public AstLeaf {
 public:
-   AstFlag(const std::string& n,ecf::Flag::Type ft) : flag_(ft),parentNode_(NULL), nodePath_(n){}
+   AstFlag(const std::string& n,ecf::Flag::Type ft) : flag_(ft),parentNode_(nullptr), nodePath_(n){}
 
    virtual std::string name() const;
 
@@ -551,7 +551,7 @@ private:
 class AstVariable : public AstLeaf {
 public:
 	AstVariable(const std::string& nodePath, const std::string& variablename)
-	: parentNode_(NULL), nodePath_(nodePath), name_(variablename)  {}
+	: parentNode_(nullptr), nodePath_(nodePath), name_(variablename)  {}
 
 	virtual std::string name() const { return name_;}
    virtual bool is_attribute() const { return true; }
@@ -603,7 +603,7 @@ private:
 class AstParentVariable : public AstLeaf {
 public:
    explicit AstParentVariable(const std::string& variablename)
-   : parentNode_(NULL), name_(variablename)  {}
+   : parentNode_(nullptr), name_(variablename)  {}
 
    virtual std::string name() const { return name_;}
    virtual bool is_attribute() const { return true; }

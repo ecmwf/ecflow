@@ -25,9 +25,9 @@
 #include "VProperty.hpp"
 
 PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent), 
-    group_(0),
-    currentGrid_(0),
-    holder_(0),
+    group_(nullptr),
+    currentGrid_(nullptr),
+    holder_(nullptr),
     lineLabelLen_(-1)
 {
     setupUi(this);
@@ -75,10 +75,10 @@ void PropertyEditor::clear()
 	{
 		vBox_->removeWidget(holder_);
 		delete holder_;
-		holder_=NULL;
+		holder_=nullptr;
 	}
 
-	currentGrid_=0;
+	currentGrid_=nullptr;
 	lineItems_.clear();
 }
 
@@ -165,17 +165,17 @@ void PropertyEditor::addItem(VProperty* vProp,QVBoxLayout *layout,QWidget *paren
        
     else if(vProp->name() == "group")
     {
-		currentGrid_=0;
+		currentGrid_=nullptr;
         addGroup(vProp,layout,parent);
     }
     else if(vProp->name() == "grid")
     {
-        currentGrid_=0;
+        currentGrid_=nullptr;
         addGrid(vProp,layout,parent);
     }
     else if(vProp->name() == "custom-notification")
     {
-        currentGrid_=0;
+        currentGrid_=nullptr;
         addNotification(vProp,layout,parent);
     }
     else if(vProp->name() == "note")
@@ -191,7 +191,7 @@ void PropertyEditor::addItem(VProperty* vProp,QVBoxLayout *layout,QWidget *paren
     }
     else if(vProp->name() == "tabs")
     {
-        currentGrid_=0;
+        currentGrid_=nullptr;
         addTabs(vProp,layout,parent);
     }     
 
@@ -296,7 +296,7 @@ void PropertyEditor::addGroup(VProperty* vProp,QVBoxLayout * layout,QWidget *par
        //Add each item to the the editor
        addItem(chProp,layout,groupBox);
    }
-   currentGrid_=0;
+   currentGrid_=nullptr;
 }
 
 void PropertyEditor::addGrid(VProperty* vProp,QVBoxLayout *layout,QWidget *parent)
@@ -447,7 +447,7 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
     		auto* vb=new QVBoxLayout(w);
     		//vb->setContentsMargins(4,4,4,4);
 
-            currentGrid_=0;
+            currentGrid_=nullptr;
             
             if(VProperty *root=VConfig::instance()->find(chProp->param("root").toStdString()))
             {
@@ -468,9 +468,9 @@ void PropertyEditor::addNotification(VProperty* vProp,QVBoxLayout* layout,QWidge
     	    tab->addTab(w,labelText);
 
     	    //Connect up different components
-    	    PropertyLine* enabledLine=0;
-    	    PropertyLine* popupLine=0;
-    	    PropertyLine* soundLine=0;
+    	    PropertyLine* enabledLine=nullptr;
+    	    PropertyLine* popupLine=nullptr;
+    	    PropertyLine* soundLine=nullptr;
     	    Q_FOREACH(PropertyLine* pl,lineLst)
     		{
     			if(pl->property()->name() == "enabled")

@@ -24,7 +24,7 @@ class WhyItemWidget : public HtmlItemWidget, public InfoPanelItem
 Q_OBJECT
 
 public:
-	explicit WhyItemWidget(QWidget *parent=0);
+	explicit WhyItemWidget(QWidget *parent=nullptr);
 	~WhyItemWidget();
 
 	void reload(VInfo_ptr);

@@ -27,8 +27,8 @@ bool ShellCommand::envChecked_=false;
 bool ShellCommand::envHasToBeSet_=false;
 
 ShellCommand::ShellCommand(const std::string& cmdStr,const std::string& cmdDefStr) :
-    QObject(0),
-    proc_(0),
+    QObject(nullptr),
+    proc_(nullptr),
     commandDef_(QString::fromStdString(cmdDefStr))
 {
     QString cmdIn=QString::fromStdString(cmdStr);

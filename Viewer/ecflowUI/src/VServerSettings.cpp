@@ -29,12 +29,12 @@
 
 std::map<VServerSettings::Param,std::string> VServerSettings::notifyIds_;
 std::map<VServerSettings::Param,std::string> VServerSettings::parNames_;
-VProperty* VServerSettings::globalProp_=0;
+VProperty* VServerSettings::globalProp_=nullptr;
 
 VServerSettings::VServerSettings(ServerHandler* server) :
 	server_(server),
-	prop_(NULL),
-	guiProp_(NULL)
+	prop_(nullptr),
+	guiProp_(nullptr)
 {
 	if(parNames_.empty())
 	{
@@ -134,7 +134,7 @@ VProperty* VServerSettings::property(Param par) const
 		assert(0);
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void VServerSettings::notifyChange(VProperty* p)

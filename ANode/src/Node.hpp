@@ -311,12 +311,12 @@ public:
    virtual Defs* defs() const = 0;
 
    // Performance hack, to avoid casts
-   virtual Task* isTask() const   { return NULL;}
-   virtual Alias* isAlias() const { return NULL;}
-   virtual Submittable* isSubmittable() const { return NULL;}
-   virtual NodeContainer* isNodeContainer() const { return NULL;}
-   virtual Family* isFamily() const { return NULL;}
-   virtual Suite* isSuite() const  { return NULL;}
+   virtual Task* isTask() const   { return nullptr;}
+   virtual Alias* isAlias() const { return nullptr;}
+   virtual Submittable* isSubmittable() const { return nullptr;}
+   virtual NodeContainer* isNodeContainer() const { return nullptr;}
+   virtual Family* isFamily() const { return nullptr;}
+   virtual Suite* isSuite() const  { return nullptr;}
 
    ///  returns the absolute node path
    std::string absNodePath() const;

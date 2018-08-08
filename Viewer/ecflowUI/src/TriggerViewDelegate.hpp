@@ -27,7 +27,7 @@ class ModelColumn;
 class TriggerViewDelegate : public TreeNodeViewDelegate
 {
 public:
-    explicit TriggerViewDelegate(QWidget *parent=0);
+    explicit TriggerViewDelegate(QWidget *parent=nullptr);
     ~TriggerViewDelegate();
 
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;

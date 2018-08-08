@@ -188,7 +188,7 @@ void SuiteItemWidget::infoFailed(VReply* reply)
 
 void SuiteItemWidget::clearContents()
 {
-    model_->setData(0,0);
+    model_->setData(nullptr,nullptr);
 	InfoPanelItem::clear();
 	okTb->setEnabled(false);
     resetTb->setEnabled(false);

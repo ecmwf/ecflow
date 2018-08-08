@@ -18,7 +18,7 @@
 class AboutDialog : public QDialog, protected Ui::AboutDialog
 {
 public:
-    explicit AboutDialog(QWidget *parent=0);
+    explicit AboutDialog(QWidget *parent=nullptr);
 };
 
 #endif

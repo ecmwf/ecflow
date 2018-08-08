@@ -19,7 +19,7 @@ class AbstractSearchLine : public QWidget, protected Ui::SearchLineWidget
    Q_OBJECT
 
 public:
-	explicit AbstractSearchLine(QWidget *parent=0);
+	explicit AbstractSearchLine(QWidget *parent=nullptr);
 	virtual ~AbstractSearchLine();
 	virtual void clear();
 	virtual bool isEmpty();

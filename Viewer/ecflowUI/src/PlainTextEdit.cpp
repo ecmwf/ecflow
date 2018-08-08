@@ -26,12 +26,12 @@ PlainTextEdit::PlainTextEdit(QWidget * parent) :
     showLineNum_(true),
     rightMargin_(2),
     hyperlinkEnabled_(false),
-    gotoLineDialog_(0),    
+    gotoLineDialog_(nullptr),    
     numAreaBgCol_(232,231,230),
     numAreaFontCol_(102,102,102),
     numAreaSeparatorCol_(210,210,210),
     numAreaCurrentCol_(212,212,255),
-    fontProp_(0)
+    fontProp_(nullptr)
 {
     lineNumArea_ = new LineNumberArea(this);
 
@@ -128,7 +128,7 @@ void PlainTextEdit::cursorRowCol(int *row, int *col)
 QChar PlainTextEdit::characterBehindCursor(QTextCursor *cursor)
 {
     QTextCursor docTextCursor = textCursor();
-    QTextCursor *theCursor = (cursor == 0) ? &docTextCursor : cursor;
+    QTextCursor *theCursor = (cursor == nullptr) ? &docTextCursor : cursor;
     return document()->characterAt(theCursor->position() - 1);
 }
 

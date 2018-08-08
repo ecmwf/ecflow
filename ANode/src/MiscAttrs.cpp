@@ -28,7 +28,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 MiscAttrs::MiscAttrs(const MiscAttrs& rhs)
-: node_(NULL),
+: node_(nullptr),
   zombies_(rhs.zombies_),verifys_(rhs.verifys_),queues_(rhs.queues_), generics_(rhs.generics_)
 {}
 

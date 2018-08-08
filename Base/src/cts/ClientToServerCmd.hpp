@@ -175,12 +175,12 @@ protected:
             const std::string& jobsPassword,
             const std::string& process_or_remote_id,
             int try_no)
-   : submittable_(0),
+   : submittable_(nullptr),
      password_missmatch_(false), pid_missmatch_(false),
      path_to_submittable_(pathToSubmittable),
      jobs_password_(jobsPassword),process_or_remote_id_(process_or_remote_id), try_no_(try_no){}
 
-   TaskCmd() : submittable_(0), password_missmatch_(false), pid_missmatch_(false), try_no_(0) {}
+   TaskCmd() : submittable_(nullptr), password_missmatch_(false), pid_missmatch_(false), try_no_(0) {}
 
 public:
 

@@ -33,7 +33,7 @@
 // Expression parser classes
 // -------------------------
 
-NodeExpressionParser* NodeExpressionParser::instance_=NULL;
+NodeExpressionParser* NodeExpressionParser::instance_=nullptr;
 
 
 NodeExpressionParser* NodeExpressionParser::instance()
@@ -96,7 +96,7 @@ VAttributeType* NodeExpressionParser::toAttrType(const std::string &name) const
     if(it != nameToAttrType_.end())
         return it->second;
 
-    return NULL;
+    return nullptr;
 }
 
 bool NodeExpressionParser::isMenuMode(const std::string &str) const
@@ -247,7 +247,7 @@ BaseNodeCondition *NodeExpressionParser::parseWholeExpression(const std::string&
 BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStringMatch)
 {
     bool returnEarly = false;
-    BaseNodeCondition *result = NULL;
+    BaseNodeCondition *result = nullptr;
 
     std::vector<BaseNodeCondition *> funcStack;
     std::vector<BaseNodeCondition *> operandStack;
@@ -279,7 +279,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
             else
             {
                 bool attr = false;
-                VAttributeType* attrType=NULL;
+                VAttributeType* attrType=nullptr;
                 //NodeExpressionParser::AttributeType attrType=NodeExpressionParser::BADATTRIBUTE;
 
                 // node types
@@ -336,7 +336,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 }
                 // node attribute type
                 //else if ((attrType = toAttrType(*i_)) != NodeExpressionParser::BADATTRIBUTE)
-                else if ((attrType = toAttrType(*i_)) != NULL)
+                else if ((attrType = toAttrType(*i_)) != nullptr)
                 {
                     auto *attrCond = new AttributeCondition(attrType);
                     operandStack.push_back(attrCond);
@@ -502,7 +502,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                 if(result)
                 {
                     delete result;
-                    result=NULL;
+                    result=nullptr;
                 }
                 break;
             }
@@ -597,7 +597,7 @@ bool TypeNodeCondition::execute(VItem* item)
 {
     if (type_ == NodeExpressionParser::SERVER)
     {
-        return (item->isServer() != NULL);
+        return (item->isServer() != nullptr);
     }
 
     else if(item->isNode())
@@ -619,25 +619,25 @@ bool TypeNodeCondition::execute(VItem* item)
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
             UiLog().dbg() << "   SUITE";
 #endif
-            return (item->isSuite() != NULL);
+            return (item->isSuite() != nullptr);
             break;
         case NodeExpressionParser::TASK:
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
             UiLog().dbg() << "   TASK";
 #endif
-            return (item->isTask() != NULL);
+            return (item->isTask() != nullptr);
             break;
         case NodeExpressionParser::FAMILY:
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
             UiLog().dbg() << "   FAMILY";
 #endif
-            return (item->isFamily() != NULL);
+            return (item->isFamily() != nullptr);
             break;
         case NodeExpressionParser::ALIAS:
 #ifdef _UI_NODEXPRESSIONPARSEER_DEBUG
             UiLog().dbg() << "   ALIAS";
 #endif
-            return (item->isAlias() != NULL);
+            return (item->isAlias() != nullptr);
             break;
         default:
             break;

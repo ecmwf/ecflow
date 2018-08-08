@@ -21,7 +21,7 @@ class DashboardDialog : public QDialog, protected Ui::DashboardDialog
 Q_OBJECT
 
 public:
-	explicit DashboardDialog(QWidget *parent=0);
+	explicit DashboardDialog(QWidget *parent=nullptr);
     ~DashboardDialog();
 	
     void add(DashboardWidget*);

@@ -44,7 +44,7 @@ const char* Attr::to_string( Attr::Type s ) {
          assert(false); break;
    }
    assert(false);
-   return NULL;
+   return nullptr;
 }
 
 Attr::Type Attr::to_attr( const std::string& str ) {

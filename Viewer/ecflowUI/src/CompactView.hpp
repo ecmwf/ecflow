@@ -30,7 +30,7 @@ class CompactView : public AbstractNodeView
 {
 
 public:
-    explicit CompactView(TreeNodeModel* model,QWidget *parent=0);
+    explicit CompactView(TreeNodeModel* model,QWidget *parent=nullptr);
     ~CompactView();
 
     QRect visualRect(const QModelIndex &index) const;

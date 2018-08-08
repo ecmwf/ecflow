@@ -114,7 +114,7 @@ const char* PathsCmd::theArg() const
       default: break;
    }
    assert(false);
-   return NULL;
+   return nullptr;
 }
 
 bool PathsCmd::delete_all_cmd() const

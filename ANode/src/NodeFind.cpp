@@ -236,7 +236,7 @@ limit_ptr  Node::findLimitUpNodeTree(const std::string& name) const
    if (theFndLimit.get()) return theFndLimit;
 
    Node* theParent = parent();
-   while (theParent != NULL) {
+   while (theParent != nullptr) {
 
       limit_ptr theFndLimit = theParent->find_limit(name);
       if (theFndLimit.get()) return theFndLimit;

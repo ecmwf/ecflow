@@ -16,7 +16,7 @@
 class CustomTabWidget : public QTabWidget
 {
 public:
-	explicit CustomTabWidget(QWidget* parent=0);
+	explicit CustomTabWidget(QWidget* parent=nullptr);
 
 	void setCustomIcon(int index, QPixmap pix);
 

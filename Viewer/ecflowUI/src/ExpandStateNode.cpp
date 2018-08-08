@@ -56,7 +56,7 @@ void ExpandStateNode::reserveChildren(std::size_t num)
 {
     UI_ASSERT(children_.size() == 0,"children_.size()=" << children_.size());
 
-    ExpandStateNode *exn=0;
+    ExpandStateNode *exn=nullptr;
     children_=std::vector<ExpandStateNode*>();
     children_.resize(num,exn);
 }
@@ -117,7 +117,7 @@ ExpandStateNode* ExpandStateNode::find(const std::vector<std::string>& pathVec)
     std::vector<std::string> rest(pathVec.begin()+1,pathVec.end());
     ExpandStateNode*n = findChild(pathVec.at(0));
 
-    return n?n->find(rest):NULL;
+    return n?n->find(rest):nullptr;
 }
 
 //Find a child with the given name
@@ -130,7 +130,7 @@ ExpandStateNode* ExpandStateNode::findChild(const std::string& theName) const
         if(children_[i] && children_[i]->name_ == theName)
             return children_[i];
     }
-    return 0;
+    return nullptr;
 }
 
 //Find a child with the given name. Returns its position as well.
@@ -147,7 +147,7 @@ ExpandStateNode* ExpandStateNode::findChild(const std::string& theName,std::size
             return children_[i];
         }
     }
-    return 0;
+    return nullptr;
 }
 
 void ExpandStateNode::print(std::string& indent,bool recursive) const
@@ -203,17 +203,17 @@ bool ExpandStateNode::adjustContents(const VNode* node)
             if(ExpandStateNode* chExpand=findChild(node->childAt(i)->strName(),chPos))
             {
                 chVec.push_back(chExpand);
-                children_[chPos]=0;
+                children_[chPos]=nullptr;
             }
             else
-                chVec.push_back(0);
+                chVec.push_back(nullptr);
         }
 
         //Delete the children vector of the expand node. It eaither contains NULLs or
         //children objects which do not exist anymore!
         for(std::size_t i=0; i < numExpand; i++)
         {
-            if(children_[i] != 0)
+            if(children_[i] != nullptr)
                 delete children_[i];
         }
 

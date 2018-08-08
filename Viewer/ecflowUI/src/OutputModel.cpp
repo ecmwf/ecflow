@@ -192,7 +192,7 @@ QModelIndex OutputModel::index( int row, int column, const QModelIndex & parent 
 	//When parent is the root this index refers to a node or server
 	if(!parent.isValid())
 	{
-		return createIndex(row,column,static_cast<void*>(0));
+		return createIndex(row,column,static_cast<void*>(nullptr));
 	}
 
 	return QModelIndex();
@@ -223,7 +223,7 @@ VDirItem* OutputModel::itemAt(int row,VDir_ptr& dir) const
        }
     }
 
-    return 0;
+    return nullptr;
 }
 
 bool OutputModel::hasData() const

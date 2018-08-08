@@ -41,7 +41,7 @@ static ChangeNotify lateNotify("late");
 static ChangeNotify zombieNotify("zombie");
 static ChangeNotify aliasNotify("alias");
 
-ChangeNotifyDialog* ChangeNotify::dialog_=0;
+ChangeNotifyDialog* ChangeNotify::dialog_=nullptr;
 
 //==============================================
 //
@@ -52,11 +52,11 @@ ChangeNotifyDialog* ChangeNotify::dialog_=0;
 ChangeNotify::ChangeNotify(const std::string& id) :
 	id_(id),
 	enabled_(false),
-	data_(0),
-	model_(0),
-	proxyModel_(0),
-    prop_(0),
-    propEnabled_(0)
+	data_(nullptr),
+	model_(nullptr),
+	proxyModel_(nullptr),
+    prop_(nullptr),
+    propEnabled_(nullptr)
 {
 	data_=new VNodeList();
 	model_=new ChangeNotifyModel();
@@ -329,7 +329,7 @@ ChangeNotify*  ChangeNotify::find(const std::string& id)
 	if(it != items.end())
 		return it->second;
 
-	return 0;
+	return nullptr;
 }
 
 void ChangeNotify::load(VProperty* group)

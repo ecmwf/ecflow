@@ -203,7 +203,7 @@ void Expression::createAST( Node* node, const std::string& exprType, std::string
 				                                                        / \
 				                                                    root1  root2
              */
-            Ast* newRoot = NULL;
+            Ast* newRoot = nullptr;
             if ( vec_[i].andExpr() )       newRoot = new AstAnd();
             else  if ( vec_[i].orExpr() )  newRoot = new AstOr();
             else LOG_ASSERT(false,""); // what else can it be.
@@ -215,7 +215,7 @@ void Expression::createAST( Node* node, const std::string& exprType, std::string
 
                // Since we have transferred over root2 it must be set to NULL for top2,
                // to avoid its child destruction
-               ast->addChild(NULL); // since its an unique_ptr, no need for explicit delete
+               ast->addChild(nullptr); // since its an unique_ptr, no need for explicit delete
             }
          }
          else {

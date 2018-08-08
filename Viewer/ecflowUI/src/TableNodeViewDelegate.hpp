@@ -28,7 +28,7 @@ class TableNodeViewDelegate : public NodeViewDelegate
 {
  Q_OBJECT
 public:
-    explicit TableNodeViewDelegate(QWidget *parent=0);
+    explicit TableNodeViewDelegate(QWidget *parent=nullptr);
     ~TableNodeViewDelegate();
 
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;

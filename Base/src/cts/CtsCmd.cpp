@@ -123,7 +123,7 @@ const char* CtsCmd::theArg() const
       default: assert(false); break;
    }
    assert(false);
-   return NULL;
+   return nullptr;
 }
 
 STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const

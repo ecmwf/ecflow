@@ -16,7 +16,7 @@
 #include "File.hpp"
 #include "NodeQuery.hpp"
 
-NodeQueryHandler* NodeQueryHandler::instance_=0;
+NodeQueryHandler* NodeQueryHandler::instance_=nullptr;
 
 NodeQueryHandler::NodeQueryHandler() : suffix_("query")
 {
@@ -70,7 +70,7 @@ NodeQuery* NodeQueryHandler::find(const std::string& name) const
 		if(item->name() == name)
 			return item;
 	}
-	return NULL;
+	return nullptr;
 }
 
 void NodeQueryHandler::save()

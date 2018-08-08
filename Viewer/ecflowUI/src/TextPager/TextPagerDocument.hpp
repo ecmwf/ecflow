@@ -45,7 +45,7 @@ class TextPagerDocument : public QObject
     Q_FLAGS(FindMode)
 
 public:
-    TextPagerDocument(QObject *parent = 0);
+    TextPagerDocument(QObject *parent = nullptr);
     ~TextPagerDocument();
 
     enum DeviceMode {
@@ -73,8 +73,8 @@ public:
     { return load(device, mode, QTextCodec::codecForName(codecName)); }
     inline bool load(const QString &fileName, DeviceMode mode, const QByteArray &codecName)
     { return load(fileName, mode, QTextCodec::codecForName(codecName)); }
-    bool load(QIODevice *device, DeviceMode mode = Sparse, QTextCodec *codec = 0);
-    bool load(const QString &fileName, DeviceMode mode = Sparse, QTextCodec *codec = 0);
+    bool load(QIODevice *device, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
+    bool load(const QString &fileName, DeviceMode mode = Sparse, QTextCodec *codec = nullptr);
 
     void clear();
     DeviceMode deviceMode() const;
@@ -113,20 +113,20 @@ public:
 
     QIODevice *device() const;
 
-    TextPagerCursor find(const QRegExp &rx, const TextPagerCursor &cursor, FindMode flags = 0,int limit = -1) const;
-    TextPagerCursor find(const QString &ba, const TextPagerCursor &cursor, FindMode flags = 0, int limit = -1) const;
-    TextPagerCursor find(const QChar &ch, const TextPagerCursor &cursor, FindMode flags = 0) const;
+    TextPagerCursor find(const QRegExp &rx, const TextPagerCursor &cursor, FindMode flags = nullptr,int limit = -1) const;
+    TextPagerCursor find(const QString &ba, const TextPagerCursor &cursor, FindMode flags = nullptr, int limit = -1) const;
+    TextPagerCursor find(const QChar &ch, const TextPagerCursor &cursor, FindMode flags = nullptr) const;
     TextPagerCursor findLine(int lineNum, const TextPagerCursor &cursor) const;
 
-    inline TextPagerCursor find(const QRegExp &rx, int pos = 0, FindMode flags = 0) const
+    inline TextPagerCursor find(const QRegExp &rx, int pos = 0, FindMode flags = nullptr) const
     { return find(rx, TextPagerCursor(this, pos), flags); }
-    inline TextPagerCursor find(const QString &ba, int pos = 0, FindMode flags = 0) const
+    inline TextPagerCursor find(const QString &ba, int pos = 0, FindMode flags = nullptr) const
     { return find(ba, TextPagerCursor(this, pos), flags); }
-    inline TextPagerCursor find(const QChar &ch, int pos = 0, FindMode flags = 0) const
+    inline TextPagerCursor find(const QChar &ch, int pos = 0, FindMode flags = nullptr) const
     { return find(ch, TextPagerCursor(this, pos), flags); }
 
 
-    QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = 0) const;
+    QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = nullptr) const;
     inline TextPagerSection *sectionAt(int pos) const { return sections(pos, 1, TextPagerSection::IncludePartial).value(0); }
     TextPagerSection *insertTextSection(int pos, int size, const QTextCharFormat &format = QTextCharFormat(),
                                    const QVariant &data = QVariant());

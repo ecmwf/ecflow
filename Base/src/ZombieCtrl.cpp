@@ -80,7 +80,7 @@ bool ZombieCtrl::handle_path_zombie(
 	Zombie& theExistingZombie = find_zombie(path_to_task, process_or_remote_id, jobs_password );
  	if(!theExistingZombie.empty() ) {
  	   // When NULL is passed for task, we change existing zombie to be of type PATH
- 		return handle_existing_zombie(theExistingZombie,NULL/*task*/,closest_matching_node,task_cmd,action_taken,theReply);
+ 		return handle_existing_zombie(theExistingZombie,nullptr/*task*/,closest_matching_node,task_cmd,action_taken,theReply);
  	}
 
 	/// Create a zombie,
@@ -98,7 +98,7 @@ bool ZombieCtrl::handle_path_zombie(
  	zombies_.push_back( new_zombie );
 
  	/// The user action may end deleting the zombie just added. Depends on ZombieAttribute settings
-	return handle_user_actions(new_zombie,NULL /*task*/,task_cmd,action_taken,theReply);
+	return handle_user_actions(new_zombie,nullptr /*task*/,task_cmd,action_taken,theReply);
 }
 
 

@@ -166,7 +166,7 @@ QWidget* TabWidget::widget(int index) const
 		return stacked_->widget(index);
 	}
 
-	return 0;
+	return nullptr;
 }
 
 QWidget* TabWidget::currentWidget() const
@@ -295,7 +295,7 @@ void TabWidget::setTabIcon(int index, QPixmap pix)
         }
         else
         {
-            bar_->setTabButton(index,QTabBar::RightSide,0);
+            bar_->setTabButton(index,QTabBar::RightSide,nullptr);
         }
         lab->setPixmap(pix);
         lab->setFixedSize(pix.size());

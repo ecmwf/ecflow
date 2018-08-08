@@ -54,7 +54,7 @@ TextPagerDocument::~TextPagerDocument()
     {
         QWriteLocker locker(d->readWriteLock);
         Q_FOREACH(TextCursorSharedPrivate *cursor, d->textCursors) {
-            cursor->document = 0;
+            cursor->document = nullptr;
         }
         Chunk *c = d->first;
         while (c) {
@@ -65,8 +65,8 @@ TextPagerDocument::~TextPagerDocument()
             delete tmp;
         }
         Q_FOREACH(TextPagerSection *section, d->sections) {
-            section->d.document = 0;
-            section->d.textEdit = 0;
+            section->d.document = nullptr;
+            section->d.textEdit = nullptr;
             delete section;
         }
         if (d->ownDevice)
@@ -93,7 +93,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
 
     Q_FOREACH(TextPagerSection *section, d->sections) {
         Q_EMIT sectionRemoved(section);
-        section->d.document = 0;
+        section->d.document = nullptr;
         delete section;
     }
     d->sections.clear();
@@ -119,7 +119,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
         qWarning("Sparse mode doesn't really work with unicode data yet. I am working on it.\n--\nAnders");
     }
 #endif
-    d->first = d->last = 0;
+    d->first = d->last = nullptr;
 
     if (d->device) {
         if (d->ownDevice && d->device.data() != device) // this is done when saving to the same file
@@ -130,7 +130,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
     d->device = device;
     d->deviceMode = mode;
 #ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
-    d->cachedChunk = 0;
+    d->cachedChunk = nullptr;
     d->cachedChunkPos = -1;
     d->cachedChunkData.clear();
 #endif
@@ -145,7 +145,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
         QTextStream ts(device);
         if (d->textCodec)
             ts.setCodec(d->textCodec);
-        Chunk *current = 0;
+        Chunk *current = nullptr;
         d->documentSize = 0; // in case of unicode
         do {
             auto *c = new Chunk;
@@ -173,7 +173,7 @@ bool TextPagerDocument::load(QIODevice *device, DeviceMode mode, QTextCodec *cod
 
     case Sparse: {
         int index = 0;
-        Chunk *current = 0;
+        Chunk *current = nullptr;
         do {
             auto *chunk = new Chunk;
             chunk->from = index;
@@ -474,7 +474,7 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
     const QLatin1Char newline('\n');   
     bool ok = true;
     //int progressInterval = 0;
-    const FindScope scope(flags & FindAllowInterrupt ? &d->findState : 0);
+    const FindScope scope(flags & FindAllowInterrupt ? &d->findState : nullptr);
     QTime lastProgressTime;
     if (flags & FindAllowInterrupt) {
         //progressInterval = qMax<int>(1, (reverse
@@ -671,7 +671,7 @@ TextPagerCursor TextPagerDocument::find(const QString &in, const TextPagerCursor
     bool ok = true;
     //QChar ch = it.current();
     //int progressInterval = 0;
-    const FindScope scope(flags & FindAllowInterrupt ? &d->findState : 0);
+    const FindScope scope(flags & FindAllowInterrupt ? &d->findState : nullptr);
     QTime lastProgressTime;
     if (flags & FindAllowInterrupt) {
         //progressInterval = qMax<int>(1, (reverse
@@ -895,7 +895,7 @@ TextPagerCursor TextPagerDocument::find(const QChar &chIn, const TextPagerCursor
     const int initialPos = pos;
     int maxFindLength = 0;
     int progressInterval = 0;
-    const FindScope scope(flags & FindAllowInterrupt ? &d->findState : 0);
+    const FindScope scope(flags & FindAllowInterrupt ? &d->findState : nullptr);
     QTime lastProgressTime;
     if (flags & FindAllowInterrupt) {
         progressInterval = qMax<int>(1, (reverse
@@ -989,14 +989,14 @@ void TextPagerDocument::takeTextSection(TextPagerSection *section)
 
     // Moved this to the end as the slots called by sectionRemoved (presently) rely
     // on section->d.document to be valid.
-    section->d.textEdit = 0;
-    section->d.document = 0;
+    section->d.textEdit = nullptr;
+    section->d.document = nullptr;
 }
 
 QList<TextPagerSection*> TextPagerDocument::sections(int pos, int size, TextPagerSection::TextSectionOptions flags) const
 {
     QReadLocker locker(d->readWriteLock);
-    return d->getSections(pos, size, flags, 0);
+    return d->getSections(pos, size, flags, nullptr);
 }
 
 void TextPagerDocument::insertTextSection(TextPagerSection *section)
@@ -1184,7 +1184,7 @@ TextPagerCursor TextPagerDocument::findLine(int lineNum, const TextPagerCursor &
     int offset;
     Chunk *c = d->chunkAt(cursor.position(), &offset);
     
-    Q_ASSERT(c != NULL);
+    Q_ASSERT(c != nullptr);
     
     int pos=cursor.position() - offset;  //points to the chunks beginning
     d->updateChunkLineNumbers(c, pos);
@@ -1215,7 +1215,7 @@ TextPagerCursor TextPagerDocument::findLine(int lineNum, const TextPagerCursor &
 #endif           
         }  
         
-        Q_ASSERT(c != NULL && c->previous != NULL);
+        Q_ASSERT(c != nullptr && c->previous != nullptr);
         
         c=c->previous;
         pos-=c->size();
@@ -1254,7 +1254,7 @@ TextPagerCursor TextPagerDocument::findLine(int lineNum, const TextPagerCursor &
 void TextPagerDocument::setOptions(Options opt)
 {
     d->options = opt;
-    if ((d->options & Locking) != (d->readWriteLock != 0)) {
+    if ((d->options & Locking) != (d->readWriteLock != nullptr)) {
         if (d->readWriteLock) {
             delete d->readWriteLock;
         } else {
@@ -1450,7 +1450,7 @@ void TextDocumentPrivate::instantiateChunk(Chunk *chunk)
     // Don't want to cache this chunk since it's going away. If it
     // already was cached then sure, but otherwise don't
     if (chunk == cachedChunk) {
-        cachedChunk = 0;
+        cachedChunk = nullptr;
         cachedChunkPos = -1;
         cachedChunkData.clear();
     }
@@ -1473,7 +1473,7 @@ void TextDocumentPrivate::removeChunk(Chunk *c)
     }
 #ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
     if (c == cachedChunk) {
-        cachedChunk = 0;
+        cachedChunk = nullptr;
         cachedChunkPos = -1;
         cachedChunkData.clear();
     }
@@ -1667,7 +1667,7 @@ void TextDocumentPrivate::swapOutChunk(Chunk *c)
 #ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
     // ### do I want to do this?
     if (cachedChunk == c) {
-        cachedChunk = 0;
+        cachedChunk = nullptr;
         cachedChunkPos = -1;
         cachedChunkData.clear();
     }
@@ -1721,7 +1721,7 @@ QList<TextPagerSection*> TextDocumentPrivate::getSections(int pos, int size, Tex
         return ret;
     }
 
-    const TextPagerSection tmp(pos, size, static_cast<TextPagerDocument*>(0), QTextCharFormat(), QVariant());
+    const TextPagerSection tmp(pos, size, static_cast<TextPagerDocument*>(nullptr), QTextCharFormat(), QVariant());
     QList<TextPagerSection*>::const_iterator it = qLowerBound(sections.begin(), sections.end(), &tmp, compareTextSection);
     if (flags & TextPagerSection::IncludePartial && it != sections.begin()) {
         QList<TextPagerSection*>::const_iterator prev = it;
@@ -1748,7 +1748,7 @@ void TextDocumentPrivate::textEditDestroyed(TextPagerEdit *edit)
     while (i.hasNext()) {
         TextPagerSection *section = i.next();
         if (section->textEdit() == edit) {
-            section->d.document = 0;
+            section->d.document = nullptr;
             // Make sure we also remove it from the list of sections so it
             // isn't deleted in the TextDocument destructor too.
             i.remove();

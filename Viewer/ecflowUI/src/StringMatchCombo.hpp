@@ -19,7 +19,7 @@
 class StringMatchTb : public QToolButton
 {
 public:
-    StringMatchTb(QWidget* parent=0);
+    StringMatchTb(QWidget* parent=nullptr);
 };    
 
 class StringMatchCombo : public QComboBox
@@ -27,7 +27,7 @@ class StringMatchCombo : public QComboBox
 Q_OBJECT
 
 public:
-	explicit StringMatchCombo(QWidget* parent=0);
+	explicit StringMatchCombo(QWidget* parent=nullptr);
 
 	StringMatchMode::Mode matchMode(int) const;
 	StringMatchMode::Mode currentMatchMode() const;

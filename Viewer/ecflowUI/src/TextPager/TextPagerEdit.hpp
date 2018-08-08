@@ -42,7 +42,7 @@ class TextPagerEdit : public QAbstractScrollArea, public VPropertyObserver
     Q_PROPERTY(bool lineBreaking READ lineBreaking WRITE setLineBreaking)
 
 public:
-    TextPagerEdit(QWidget *parent = 0);
+    TextPagerEdit(QWidget *parent = nullptr);
     ~TextPagerEdit();
 
     TextPagerDocument *document() const;
@@ -71,7 +71,7 @@ public:
 
     //bool load(QIODevice *device, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
 
-    bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = 0);
+    bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = nullptr);
 
     void paintEvent(QPaintEvent *e);
     void scrollContentsBy(int dx, int dy);
@@ -122,7 +122,7 @@ public:
 
     TextPagerSection *sectionAt(const QPoint &pos) const;
 
-    QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = 0) const;
+    QList<TextPagerSection*> sections(int from = 0, int size = -1, TextPagerSection::TextSectionOptions opt = nullptr) const;
     inline TextPagerSection *sectionAt(int pos) const { return sections(pos, 1, TextPagerSection::IncludePartial).value(0); }
     TextPagerSection *insertTextSection(int pos, int size, const QTextCharFormat &format = QTextCharFormat(),
                                    const QVariant &data = QVariant());

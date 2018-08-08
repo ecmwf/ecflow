@@ -29,7 +29,7 @@ using namespace ecf;
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 Limit::Limit(const std::string& name,int limit)
-: state_change_no_(0),n_(name),lim_(limit),value_(0),node_(0)
+: state_change_no_(0),n_(name),lim_(limit),value_(0),node_(nullptr)
 {
    if ( !Str::valid_name( name ) ) {
       throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
@@ -37,7 +37,7 @@ Limit::Limit(const std::string& name,int limit)
 }
 
 Limit::Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths)
-: state_change_no_(0),n_(name),lim_(limit),value_(value),paths_(paths),node_(0)
+: state_change_no_(0),n_(name),lim_(limit),value_(value),paths_(paths),node_(nullptr)
 {
    if ( !Str::valid_name( name ) ) {
       throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
@@ -45,7 +45,7 @@ Limit::Limit(const std::string& name,int limit, int value, const std::set<std::s
 }
 
 Limit::Limit(const Limit& rhs)
-: state_change_no_(0), n_(rhs.n_),lim_(rhs.lim_),value_(rhs.value_),paths_(rhs.paths_),node_(0)
+: state_change_no_(0), n_(rhs.n_),lim_(rhs.lim_),value_(rhs.value_),paths_(rhs.paths_),node_(nullptr)
 {
 }
 

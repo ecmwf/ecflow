@@ -565,7 +565,7 @@ std::vector<int> extractOption(
 
 	// should have 0,1,2,3
 	std::vector< int > theIntVec;
-	char_separator< char > sep( ",", 0, boost::drop_empty_tokens );
+	char_separator< char > sep( ",", nullptr, boost::drop_empty_tokens );
 	typedef boost::tokenizer< boost::char_separator< char > > tokenizer;
 	tokenizer theTokenizer( theIntList, sep );
 

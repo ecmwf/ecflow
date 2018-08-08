@@ -35,7 +35,7 @@ protected Q_SLOTS:
     void truncateLogEnd();
 
 protected:
-    InputEventLog(QObject* parent=0);
+    InputEventLog(QObject* parent=nullptr);
 
     bool eventFilter(QObject *obj, QEvent *event);
     void logMousePress(QObject* obj,QMouseEvent *e);

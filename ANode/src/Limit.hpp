@@ -30,7 +30,7 @@ class Limit {
 public:
    Limit(const std::string& name,int limit);
    Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths);
-   Limit() : state_change_no_(0), lim_(0), value_(0),node_(0)  {}
+   Limit() : state_change_no_(0), lim_(0), value_(0),node_(nullptr)  {}
    Limit(const Limit& rhs);
 
    std::ostream& print(std::ostream&) const;

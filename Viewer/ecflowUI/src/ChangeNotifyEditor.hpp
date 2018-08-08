@@ -28,7 +28,7 @@ class ChangeNotifyEditor : public QWidget, protected Ui::ChangeNotifyEditor
 	Q_OBJECT
 
 public:
-	explicit ChangeNotifyEditor(QWidget* parent=0);
+	explicit ChangeNotifyEditor(QWidget* parent=nullptr);
 	void addRow(QString,QList<PropertyLine*>,QWidget*);
 
 protected Q_SLOTS:
@@ -42,7 +42,7 @@ private:
 class ChangeNotifyEditorModelData
 {
 public:
-	ChangeNotifyEditorModelData() : enabled_(NULL), enabledMaster_(false), enabledVal_(false) {}
+	ChangeNotifyEditorModelData() : enabled_(nullptr), enabledMaster_(false), enabledVal_(false) {}
 
 	QString label_;
 	QString desc_;
@@ -57,7 +57,7 @@ class ChangeNotifyEditorModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-   	explicit ChangeNotifyEditorModel(QObject *parent=0);
+   	explicit ChangeNotifyEditorModel(QObject *parent=nullptr);
    	~ChangeNotifyEditorModel();
 
    	void add(QString,QList<VProperty*>);

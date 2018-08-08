@@ -160,8 +160,8 @@ void AstTop::invalidate_trigger_references() const
 AstRoot::~AstRoot() {
 	delete left_;
 	delete right_;
-	left_ = 0;
-	right_ = 0;
+	left_ = nullptr;
+	right_ = nullptr;
 }
 
 void AstRoot::accept(ExprAstVisitor& v)
@@ -1272,7 +1272,7 @@ Node* AstNode::referencedNode() const
       ref_node_ = parentNode_->findReferencedNode( nodePath_, errorMsg );
       return get_ref_node(); // can be NULL
 	}
-	return NULL;
+	return nullptr;
 }
 
 Node* AstNode::referencedNode(std::string& errorMsg) const
@@ -1285,7 +1285,7 @@ Node* AstNode::referencedNode(std::string& errorMsg) const
 		ref_node_ = parentNode_->findReferencedNode( nodePath_, errorMsg );
 		return get_ref_node(); // can be NULL
 	}
-	return NULL;
+	return nullptr;
 }
 
 std::ostream& AstNode::print( std::ostream& os ) const {
@@ -1374,12 +1374,12 @@ Node* AstFlag::referencedNode() const
       return ref;
    }
    if ( parentNode_ ) {
-      if (nodePath_ == "/") return NULL; // reference to defs
+      if (nodePath_ == "/") return nullptr; // reference to defs
       std::string errorMsg;
       ref_node_ = parentNode_->findReferencedNode( nodePath_, errorMsg );
       return get_ref_node(); // can be NULL
    }
-   return NULL;
+   return nullptr;
 }
 
 Node* AstFlag::referencedNode(std::string& errorMsg) const
@@ -1389,11 +1389,11 @@ Node* AstFlag::referencedNode(std::string& errorMsg) const
       return ref;
    }
    if ( parentNode_ ) {
-      if (nodePath_ == "/") return NULL; // reference to defs
+      if (nodePath_ == "/") return nullptr; // reference to defs
       ref_node_ = parentNode_->findReferencedNode( nodePath_, ecf::Flag::enum_to_string( flag_ ), errorMsg );
       return get_ref_node(); // can be NULL
    }
-   return NULL;
+   return nullptr;
 }
 
 std::ostream& AstFlag::print( std::ostream& os ) const {
@@ -1574,7 +1574,7 @@ Node* AstVariable::referencedNode() const
       ref_node_ = parentNode_->findReferencedNode( nodePath_, name_, ignoredErrorMsg );
       return get_ref_node(); // can be NULL
    }
-	return NULL;
+	return nullptr;
 }
 
 Node* AstVariable::referencedNode(std::string& errorMsg) const
@@ -1587,7 +1587,7 @@ Node* AstVariable::referencedNode(std::string& errorMsg) const
 		ref_node_ = parentNode_->findReferencedNode( nodePath_, name_, errorMsg );
 		return get_ref_node(); // can be NULL
 	}
-	return NULL;
+	return nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -1599,7 +1599,7 @@ Node* AstParentVariable::find_node_which_references_variable() const
       if ( parent->findExprVariable(name_)) return parent;
       parent = parent->parent();
    }
-   return NULL;
+   return nullptr;
 }
 
 void AstParentVariable::accept(ExprAstVisitor& v)
@@ -1710,7 +1710,7 @@ std::string AstParentVariable::why_expression(bool html) const
 // class VariableHelper:
 // ===============================================================================
 VariableHelper::VariableHelper(const AstVariable* astVariable)
-: astVariable_(astVariable), theReferenceNode_(NULL)
+: astVariable_(astVariable), theReferenceNode_(nullptr)
 {
 	// For *this* constructor we don't care about errors'
 	std::string errorMsg;
@@ -1728,7 +1728,7 @@ VariableHelper::VariableHelper(const AstVariable* astVariable)
 // ********** It is used to report errors and to Flag whether meter or event is used
 // ********** in a trigger expression for the simulator
 VariableHelper::VariableHelper(const AstVariable* astVariable, std::string& errorMsg)
-: astVariable_(astVariable), theReferenceNode_(NULL)
+: astVariable_(astVariable), theReferenceNode_(nullptr)
 {
 	// for *this* constructor we want to report errors
 	theReferenceNode_ = astVariable_->referencedNode( errorMsg );
@@ -1759,7 +1759,7 @@ VariableHelper::VariableHelper(const AstVariable* astVariable, std::string& erro
 	// FAILED to find astVar->name(), for node theReferenceNode on event, meter,
 	// user variable, repeat, generated variable
 	// SET theReferenceNode_ to NULL, since it does nor reference the Expression variable
-	theReferenceNode_ = NULL;
+	theReferenceNode_ = nullptr;
 }
 
 int VariableHelper::value() const

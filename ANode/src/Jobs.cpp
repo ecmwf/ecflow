@@ -102,14 +102,14 @@ bool Jobs::generate( JobsParam& jobsParam) const
 
 bool Jobs::generate() const
 {
-	Defs* defs = NULL;
+	Defs* defs = nullptr;
 	if (defs_) {
 		defs = defs_;
-		LOG_ASSERT( defs != NULL ,"defs_ == NULL");
+		LOG_ASSERT( defs != nullptr ,"defs_ == NULL");
 	}
 	else {
 		defs = node_->defs();
-		LOG_ASSERT( defs != NULL ,"node_->defs() == NULL");
+		LOG_ASSERT( defs != nullptr ,"node_->defs() == NULL");
 	}
 
 	if (defs && defs->server().get_state() == SState::RUNNING) {

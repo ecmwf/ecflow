@@ -22,7 +22,7 @@ class DashboardDockTitleWidget : public QWidget, protected Ui::DashboardDockTitl
 Q_OBJECT
 
 public:
-	explicit DashboardDockTitleWidget(QWidget *parent=0);
+	explicit DashboardDockTitleWidget(QWidget *parent=nullptr);
 
     void addInfoPanelActions();
     QSize sizeHint() const;
@@ -57,7 +57,7 @@ class DashboardDock : public QDockWidget
 Q_OBJECT
 
 public:
-	explicit DashboardDock(DashboardWidget* dw,QWidget * parent=0);
+	explicit DashboardDock(DashboardWidget* dw,QWidget * parent=nullptr);
 
 Q_SIGNALS:
 	void closeRequested();

@@ -20,7 +20,7 @@ class CodeItemWidget : public QWidget, protected Ui::CodeItemWidget
 Q_OBJECT
 
 public:
-	explicit CodeItemWidget(QWidget *parent=0);
+	explicit CodeItemWidget(QWidget *parent=nullptr);
 	~CodeItemWidget();
 
 protected Q_SLOTS:

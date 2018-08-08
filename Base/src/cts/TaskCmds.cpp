@@ -295,7 +295,7 @@ Submittable* TaskCmd::get_submittable(AbstractServer* as) const
 {
 	node_ptr node = as->defs()->findAbsNode(path_to_submittable_);
 	if (!node.get()) {
-		return NULL;
+		return nullptr;
  	}
 
 	return node->isSubmittable();

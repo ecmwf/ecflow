@@ -55,9 +55,9 @@
 /// Note: in real life test 99% of job generation is done after child command
 class Jobs  : private boost::noncopyable  {
 public:
-   explicit Jobs(const defs_ptr& d) : defs_(d.get()), node_(NULL) {}
-   explicit Jobs(Defs* d) : defs_(d), node_(NULL) {}
-   explicit Jobs(Node* d) : defs_(NULL), node_(d) {}
+   explicit Jobs(const defs_ptr& d) : defs_(d.get()), node_(nullptr) {}
+   explicit Jobs(Defs* d) : defs_(d), node_(nullptr) {}
+   explicit Jobs(Node* d) : defs_(nullptr), node_(d) {}
 
  	bool generate( JobsParam& ) const;
  	bool generate() const;

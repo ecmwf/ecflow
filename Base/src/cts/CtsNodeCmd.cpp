@@ -96,7 +96,7 @@ const char* CtsNodeCmd::theArg() const
       default: throw std::runtime_error("CtsNodeCmd::theArg: Unrecognised command");break;
    }
    assert(false);
-   return NULL;
+   return nullptr;
 }
 
 PrintStyle::Type_t CtsNodeCmd::show_style() const

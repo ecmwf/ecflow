@@ -281,7 +281,7 @@ void AttributeFilter::setForceShowAttr(VAttribute* a)
 
 VAttribute* AttributeFilter::forceShowAttr() const
 {
-    return (forceShowAttr_)?(forceShowAttr_->attribute()):0;
+    return (forceShowAttr_)?(forceShowAttr_->attribute()):nullptr;
 }
 
 void AttributeFilter::clearForceShowAttr()
@@ -358,7 +358,7 @@ void IconFilter::readSettings(VSettings* vs)
 
 NodeFilterDef::NodeFilterDef(ServerFilter* serverFilter,Scope scope) :
 	serverFilter_(serverFilter),
-	nodeState_(0)
+	nodeState_(nullptr)
 {
 	nodeState_=new NodeStateFilter;
 
@@ -417,7 +417,7 @@ NodeFilter::NodeFilter(NodeFilterDef* def,ServerHandler* server) :
 	def_(def),
     matchMode_(VectorMatch),
     server_(server),
-    forceShowNode_(0)
+    forceShowNode_(nullptr)
 {
     assert(server_);
 
@@ -445,7 +445,7 @@ void NodeFilter::setForceShowNode(VNode* n)
 
 void NodeFilter::clearForceShowNode()
 {
-    forceShowNode_=0;
+    forceShowNode_=nullptr;
 }
 
 //============================================
@@ -514,7 +514,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
             //Deallocates the match vector
             match_=std::vector<VNode*>();
             //match_.reserve(root->totalNum());
-            VNode *n=0;
+            VNode *n=nullptr;
             match_.resize(root->totalNum(),n);
             //td::fill(match_.begin(), match_.end(), n);
             fullRun=true;
@@ -523,7 +523,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
         //The topchange vector is empty: it can only happen when we need to rerun everything
         else if(topChange.empty())
         {
-            VNode *n=0;
+            VNode *n=nullptr;
             //match_.clear();
             std::fill(match_.begin(), match_.end(), n);
             fullRun=true;
@@ -647,7 +647,7 @@ bool TreeNodeFilter::filterState(VNode* node,VParamSet* stateFilter)
     }
     else
     {
-        match_[node->index()]=NULL;
+        match_[node->index()]=nullptr;
     }
 
     return ok;
@@ -716,13 +716,13 @@ VNode* TableNodeFilter::nodeAt(int index) const
     case AllMatch:
         return server_->vRoot()->nodeAt(index);
     case NoneMatch:
-        return NULL;
+        return nullptr;
     default:
         assert(0);
-        return NULL;
+        return nullptr;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 bool TableNodeFilter::update()

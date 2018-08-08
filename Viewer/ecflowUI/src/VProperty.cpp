@@ -21,12 +21,12 @@
 VProperty::VProperty(const std::string& name) :
    strName_(name),
    name_(QString::fromStdString(name)),
-   parent_(0),
-   master_(0),
+   parent_(nullptr),
+   master_(nullptr),
    useMaster_(false),
    type_(StringType),
    guiType_(StringGui),
-   link_(0)
+   link_(nullptr)
 {
 }
 
@@ -314,13 +314,13 @@ VProperty* VProperty::findChild(QString name)
             return p;
     }
     
-    return 0;
+    return nullptr;
 }
 
 VProperty* VProperty::find(const std::string& fullPath)
 {
 	if(fullPath.empty())
-		return NULL;
+		return nullptr;
 
 	if(fullPath == strName_)
 		return this;
@@ -331,7 +331,7 @@ VProperty* VProperty::find(const std::string& fullPath)
 	if(pathVec.size() > 0)
 	{
 		if(pathVec.at(0) != strName_)
-			return NULL;
+			return nullptr;
 	}
 
 	return VProperty::find(pathVec);
@@ -341,7 +341,7 @@ VProperty* VProperty::find(const std::vector<std::string>& pathVec)
 {
 	if(pathVec.size() == 0)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	if(pathVec.size() == 1)
@@ -354,7 +354,7 @@ VProperty* VProperty::find(const std::vector<std::string>& pathVec)
 	std::vector<std::string> rest(pathVec.begin()+1,pathVec.end());
 	VProperty *n = findChild(QString::fromStdString(pathVec.at(1)));
 
-	return n?n->find(rest):NULL;
+	return n?n->find(rest):nullptr;
 }
 
 void VProperty::collectChildren(std::vector<VProperty*>& chVec) const

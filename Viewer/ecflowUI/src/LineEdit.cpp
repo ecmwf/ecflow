@@ -16,7 +16,7 @@
 
 LineEdit::LineEdit(QWidget *parent):
       QLineEdit(parent),
-      iconLabel_(0)
+      iconLabel_(nullptr)
 {
 	clearTb_=new QToolButton(this);
 	QPixmap pix(":/viewer/clear_left.svg");

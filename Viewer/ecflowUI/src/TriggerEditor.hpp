@@ -22,14 +22,14 @@ class TriggerEditorWidget :  public QWidget, protected Ui::TriggerEditorWidget
 {
 friend class TriggerEditor;
 public:
-    TriggerEditorWidget(QWidget *parent=0);
+    TriggerEditorWidget(QWidget *parent=nullptr);
 };
 
 class TriggerEditor : public AttributeEditor
 {
 Q_OBJECT
 public:
-    TriggerEditor(VInfo_ptr,QWidget* parent=0);
+    TriggerEditor(VInfo_ptr,QWidget* parent=nullptr);
     ~TriggerEditor();
 
 protected Q_SLOTS:

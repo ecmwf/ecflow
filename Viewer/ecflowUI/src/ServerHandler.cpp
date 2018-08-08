@@ -59,15 +59,15 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    name_(name),
    host_(host),
    port_(port),
-   client_(0),
+   client_(nullptr),
    updating_(false),
    communicating_(false),
    suiteFilter_(new SuiteFilter()),
-   comQueue_(0),
+   comQueue_(nullptr),
    activity_(NoActivity),
    connectState_(new ConnectState()),
    prevServerState_(SState::RUNNING),
-   conf_(0)
+   conf_(nullptr)
 {
 	if(localHostName_.empty())
 	{
@@ -88,7 +88,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
     {
         UiLog().err() << "Could not create ClientInvoker for host=" << host <<
                          " port= " << port << ". " <<  e.what();
-        client_=0;
+        client_=nullptr;
     }
 
     client_->set_retry_connection_period(1);
@@ -368,7 +368,7 @@ ServerHandler* ServerHandler::addServer(const std::string& name,const std::strin
     if(!sh->client_)
     {
         delete sh;
-        sh=0;
+        sh=nullptr;
     }
     return sh;
 }
@@ -395,7 +395,7 @@ ServerHandler* ServerHandler::findServer(const std::string &alias)
 			return s;
 		}
 	}
-	return NULL; // did not find it
+	return nullptr; // did not find it
 }
 
 
@@ -1194,7 +1194,7 @@ void ServerHandler::resetFinished()
 		ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
 
 		defs_ptr defs = defsAccess.defs();
-		if(defs != NULL)
+		if(defs != nullptr)
 		{
 			ServerState& st=defs->set_server();
 			st.hostPort(std::make_pair(host_,port_));
@@ -1601,5 +1601,5 @@ ServerHandler* ServerHandler::find(const std::string& name)
 	for(std::vector<ServerHandler*>::const_iterator it=servers_.begin(); it != servers_.end(); ++it)
 			if((*it)->name() == name)
 					return *it;
-	return NULL;
+	return nullptr;
 }

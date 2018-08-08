@@ -23,7 +23,7 @@ class MessageLabel;
 class ServerLoadItemWidget : public QWidget, public InfoPanelItem
 {
 public:
-    explicit ServerLoadItemWidget(QWidget *parent=0);
+    explicit ServerLoadItemWidget(QWidget *parent=nullptr);
     ~ServerLoadItemWidget();
 
     void reload(VInfo_ptr);

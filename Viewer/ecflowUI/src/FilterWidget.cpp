@@ -280,7 +280,7 @@ void VParamFilterMenu::checkActionState()
 
 ServerFilterMenu::ServerFilterMenu(QMenu * parent) :
  	menu_(parent),
-	filter_(NULL)
+	filter_(nullptr)
 {
 	loadFont_.setBold(true);
 
@@ -519,5 +519,5 @@ void ServerFilterMenu::notifyServerFilterChanged(ServerItem*)
 
 void ServerFilterMenu::notifyServerFilterDelete()
 {
-	reload(0);
+	reload(nullptr);
 }

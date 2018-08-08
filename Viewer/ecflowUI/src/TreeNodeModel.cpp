@@ -38,7 +38,7 @@
 TreeNodeModel::TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,
 		                     AttributeFilter *atts,IconFilter* icons,QObject *parent) :
    AbstractNodeModel(parent),
-   data_(0),
+   data_(nullptr),
    atts_(atts),
    icons_(icons),
    serverToolTip_(true),
@@ -412,7 +412,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 		//For the server the internal pointer is NULL
 		if(row < data_->count())
 		{			
-			return createIndex(row,column,(void*)NULL);
+			return createIndex(row,column,(void*)nullptr);
 		}
 	}
 
@@ -447,7 +447,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 	//and the parent is this server.
 	if((row=data_->indexOfServer(child.internalPointer())) != -1)
 	{
-		return createIndex(row,0,(void*)NULL);
+		return createIndex(row,0,(void*)nullptr);
 	}
 
 	//The "child" cannot be a server attribute or a topLevel node so it must be a node or an attribute.
@@ -487,7 +487,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 bool TreeNodeModel::isServer(const QModelIndex & index) const
 {
     //For the servers the internal pointer is NULL
-    return (index.isValid() && index.internalPointer() == 0);
+    return (index.isValid() && index.internalPointer() == nullptr);
 }
 
 //This has to be extrememly fast!
@@ -495,12 +495,12 @@ bool TreeNodeModel::isServer(const QModelIndex & index) const
 bool TreeNodeModel::isServerForValid(const QModelIndex & index) const
 {
     //For the servers the internal pointer is NULL
-    return index.internalPointer() == 0;
+    return index.internalPointer() == nullptr;
 }
 
 bool TreeNodeModel::isNode(const QModelIndex & index) const
 {
-    return (indexToNode(index) != NULL);
+    return (indexToNode(index) != nullptr);
 }
 
 bool TreeNodeModel::isAttribute(const QModelIndex & index) const
@@ -513,11 +513,11 @@ ServerHandler* TreeNodeModel::indexToServerHandler(const QModelIndex & index) co
 	//For servers the internal id is a null pointer
 	if(index.isValid())
 	{
-		if(index.internalPointer() == NULL)
+		if(index.internalPointer() == nullptr)
             return data_->serverHandler(index.row());
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 VTreeServer* TreeNodeModel::indexToServer(const QModelIndex & index) const
@@ -525,17 +525,17 @@ VTreeServer* TreeNodeModel::indexToServer(const QModelIndex & index) const
 	//For servers the internal id is a null pointer
 	if(index.isValid())
 	{
-		if(index.internalPointer() == NULL)
+		if(index.internalPointer() == nullptr)
             return data_->server(index.row())->treeServer();
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 VTreeServer* TreeNodeModel::nameToServer(const std::string& name) const
 {
      VModelServer* ms=data_->server(name);
-     return (ms)?ms->treeServer():NULL;
+     return (ms)?ms->treeServer():nullptr;
 }
 
 QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const
@@ -543,7 +543,7 @@ QModelIndex TreeNodeModel::serverToIndex(ServerHandler* server) const
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
 	if((i=data_->indexOfServer(server))!= -1)
-			return createIndex(i,0,(void*)NULL);
+			return createIndex(i,0,(void*)nullptr);
 
 	return {};
 }
@@ -553,7 +553,7 @@ QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const
 	//For servers the internal id is set to their position in servers_ + 1
 	int i;
 	if((i=data_->indexOfServer(server))!= -1)
-			return createIndex(i,0,(void*)NULL);
+			return createIndex(i,0,(void*)nullptr);
 
 	return {};
 }
@@ -568,8 +568,8 @@ QModelIndex TreeNodeModel::serverToIndex(VModelServer* server) const
 VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex & index) const
 {
     void *ip;
-    if((ip=index.internalPointer()) == NULL)
-        return 0;
+    if((ip=index.internalPointer()) == nullptr)
+        return nullptr;
 
     //If it is not a sever ...
 
@@ -594,15 +594,15 @@ VTreeNode* TreeNodeModel::indexToAttrParentNode(const QModelIndex & index) const
             return parentNode;
     }
 
-    return 0;
+    return nullptr;
 }
 
 //We can only call it when the index is valid!
 VTreeNode* TreeNodeModel::indexToAttrParentOrNode(const QModelIndex & index,bool &itIsANode) const
 {
     void *ip;
-    if((ip=index.internalPointer()) == NULL)
-        return 0;
+    if((ip=index.internalPointer()) == nullptr)
+        return nullptr;
 
     //If it is not a sever ...
 
@@ -646,7 +646,7 @@ VTreeNode* TreeNodeModel::indexToAttrParentOrNode(const QModelIndex & index,bool
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 VTreeNode* TreeNodeModel::indexToServerOrNode( const QModelIndex & index) const
@@ -679,7 +679,7 @@ VTreeNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 			//It is an attribute
 			if(index.row() < serverAttNum)
 			{
-				return NULL;
+				return nullptr;
 			}
 			//It is a top level node
 			else
@@ -699,7 +699,7 @@ VTreeNode* TreeNodeModel::indexToNode( const QModelIndex & index) const
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 //Find the index for the node! The VNode can be a server as well!!!
@@ -763,7 +763,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VTreeNode* node, int column) const
         return {};
 
     //It is a server
-    if(node->parent() == 0)
+    if(node->parent() == nullptr)
     {
         VTreeServer *server=node->server();
         Q_ASSERT(server);

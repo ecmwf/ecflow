@@ -61,7 +61,7 @@ Submittable& Submittable::operator=(const Submittable& rhs)
       tryNo_ = rhs.tryNo_;
 
       delete sub_gen_variables_;
-      sub_gen_variables_ = NULL;
+      sub_gen_variables_ = nullptr;
 
       state_change_no_ = Ecf::incr_state_change_no();
    }
@@ -167,7 +167,7 @@ void Submittable::calendarChanged(
       std::vector<node_ptr>& auto_archive_nodes,
       const ecf::LateAttr* inherited_late)
 {
-   Node::calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,NULL);
+   Node::calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,nullptr);
 
    // Late flag should ONLY be set on Submittable
    check_for_lateness(c,inherited_late);

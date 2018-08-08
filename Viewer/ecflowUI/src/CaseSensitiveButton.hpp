@@ -20,7 +20,7 @@ class CaseSensitiveButton : public QToolButton
 Q_OBJECT
 
 public:
-	explicit CaseSensitiveButton(QWidget* parent=0);
+	explicit CaseSensitiveButton(QWidget* parent=nullptr);
 
 protected Q_SLOTS:
 	void slotClicked(bool);

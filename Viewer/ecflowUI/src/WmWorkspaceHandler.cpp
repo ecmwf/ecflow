@@ -27,7 +27,7 @@ bool WmWorkspaceHandler::switchTo(QWidget* sourceWidget,QWidget* targetWidget)
 #endif
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    if(sourceWidget == 0 || targetWidget ==0)
+    if(sourceWidget == nullptr || targetWidget ==nullptr)
         return false;
 
     if(!hasCommand())

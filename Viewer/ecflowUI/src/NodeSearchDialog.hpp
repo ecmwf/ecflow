@@ -24,7 +24,7 @@ class NodeSearchDialog : public QDialog, protected Ui::NodeSearchDialog
     Q_OBJECT
 
 public:
-    explicit NodeSearchDialog(QWidget *parent = 0);
+    explicit NodeSearchDialog(QWidget *parent = nullptr);
     ~NodeSearchDialog();
 
     NodeSearchWidget* queryWidget() const;

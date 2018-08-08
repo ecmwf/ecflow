@@ -71,12 +71,12 @@ public:
 	void broadcast();
     void removeObserver(VTaskObserver*);
 
-	static VTask_ptr create(Type t,VTaskObserver* obs=0);
-	static VTask_ptr create(Type t,VNode *node,VTaskObserver* obs=0);
+	static VTask_ptr create(Type t,VTaskObserver* obs=nullptr);
+	static VTask_ptr create(Type t,VNode *node,VTaskObserver* obs=nullptr);
 
 protected:
-	VTask(Type t,VTaskObserver* obs=0);
-	VTask(Type t,VNode *node,VTaskObserver* obs=0);
+	VTask(Type t,VTaskObserver* obs=nullptr);
+	VTask(Type t,VNode *node,VTaskObserver* obs=nullptr);
 
 	Type type_;
 	Status status_;

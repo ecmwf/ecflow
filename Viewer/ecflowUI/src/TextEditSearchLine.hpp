@@ -27,7 +27,7 @@ public:
 	~TextEditSearchLine();
 	void setSearchInterface(AbstractTextEditSearchInterface*);
 	void searchOnReload(bool userClickedReload);
-    bool hasInterface() const {return interface_ != 0;}
+    bool hasInterface() const {return interface_ != nullptr;}
 
 public Q_SLOTS:
 	void slotFind(QString);

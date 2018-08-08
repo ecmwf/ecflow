@@ -20,7 +20,7 @@ class QProgressBar;
 class MessageLabel : public QWidget
 {
 public:
-	explicit MessageLabel(QWidget *parent=0);
+	explicit MessageLabel(QWidget *parent=nullptr);
 
     enum Type {NoType,InfoType,WarningType,ErrorType,TipType};
 

@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( test_environment_substitution )
     std::cout <<  "ANode:: ...test_environment_substitution\n";
 
     Defs defs;
-    Suite* s =  NULL;
+    Suite* s =  nullptr;
     {
 		suite_ptr suite = defs.add_suite( "suite" );  s =  suite.get();
 		suite->addVariable(Variable("AVI","avi"));

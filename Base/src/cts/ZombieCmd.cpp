@@ -67,7 +67,7 @@ STC_Cmd_ptr ZombieCmd::doHandleRequest(AbstractServer* as) const
 	if ( process_id_.empty() && password_.empty()) {
 	   for(const auto & path : paths_) {
 	      node_ptr node = as->defs()->findAbsNode(path);
-	      Task* task = NULL;
+	      Task* task = nullptr;
 	      if (node.get()) task = node->isTask();
 	      switch (user_action_) {
 	         case User::FOB:   as->zombie_ctrl().fobCli(path,task); break;
@@ -111,7 +111,7 @@ const char* ZombieCmd::theArg() const {
 		default: break;
  	}
 	assert(false);
-	return NULL;
+	return nullptr;
 }
 
 void ZombieCmd::addOption(boost::program_options::options_description& desc) const

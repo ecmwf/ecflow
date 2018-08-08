@@ -24,7 +24,7 @@ class SaveSessionAsDialog : public QDialog, protected Ui::SaveSessionAsDialog
     Q_OBJECT
 
 public:
-    explicit SaveSessionAsDialog(QWidget *parent = 0);
+    explicit SaveSessionAsDialog(QWidget *parent = nullptr);
     ~SaveSessionAsDialog();
 
 public Q_SLOTS:

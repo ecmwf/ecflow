@@ -65,17 +65,17 @@ bool SaveSessionAsDialog::validSaveName(const std::string &name)
 	// name empty?
 	if (name.empty())
 	{
-		QMessageBox::critical(0,boxName, tr("Please enter a name for the session"));
+		QMessageBox::critical(nullptr,boxName, tr("Please enter a name for the session"));
 		return false;
 	}
 
 
 	// is there already a session with this name?
-	bool sessionWithThisName = (SessionHandler::instance()->find(name) != NULL);
+	bool sessionWithThisName = (SessionHandler::instance()->find(name) != nullptr);
 
 	if (sessionWithThisName)
 	{
-		QMessageBox::critical(0,boxName, tr("A session with that name already exists - please choose another name"));
+		QMessageBox::critical(nullptr,boxName, tr("A session with that name already exists - please choose another name"));
 		return false;
 	}
 	else
@@ -103,11 +103,11 @@ void SaveSessionAsDialog::on_saveButton__clicked()
 			//SessionHandler::instance()->add(name);
 			refreshListOfSavedSessions();
 			SessionHandler::instance()->current(newSession);
-			QMessageBox::information(0,tr("Session"), tr("Session saved"));
+			QMessageBox::information(nullptr,tr("Session"), tr("Session saved"));
 		}
 		else
 		{
-			QMessageBox::critical(0,tr("Session"), tr("Failed to save session"));
+			QMessageBox::critical(nullptr,tr("Session"), tr("Failed to save session"));
 		}
 		close();
 	}

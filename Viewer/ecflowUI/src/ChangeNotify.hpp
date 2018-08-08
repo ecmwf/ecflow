@@ -46,7 +46,7 @@ public:
     QString toolTip() const;
     QString widgetText() const;
 
-    static void showDialog(ChangeNotify* notifier=0);
+    static void showDialog(ChangeNotify* notifier=nullptr);
 
 	//Form VPropertyObserver
 	void notifyChange(VProperty*);

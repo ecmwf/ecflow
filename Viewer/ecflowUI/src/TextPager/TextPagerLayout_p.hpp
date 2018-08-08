@@ -69,8 +69,8 @@ class TextPagerLayout : public TextDocumentBuffer
 {
 public:
     enum { MinimumBufferSize = 90000, LeftMargin = 3 };
-    TextPagerLayout(TextPagerDocument *doc = 0)
-        : TextDocumentBuffer(doc), textEdit(0),
+    TextPagerLayout(TextPagerDocument *doc = nullptr)
+        : TextDocumentBuffer(doc), textEdit(nullptr),
         viewportPosition(0), layoutEnd(-1), viewport(-1),
         visibleLines(-1), lastVisibleCharacter(-1), lastBottomMargin(0),
         widest(-1), maxViewportPosition(0), layoutDirty(true), sectionsDirty(true),
@@ -106,9 +106,9 @@ public:
 
     int doLayout(int index, QList<TextPagerSection*> *sections);
 
-    QTextLine lineForPosition(int pos, int *offsetInLine = 0,
-                              int *lineIndex = 0, bool *lastLine = 0) const;
-    QTextLayout *layoutForPosition(int pos, int *offset = 0, int *index = 0) const;
+    QTextLine lineForPosition(int pos, int *offsetInLine = nullptr,
+                              int *lineIndex = nullptr, bool *lastLine = nullptr) const;
+    QTextLayout *layoutForPosition(int pos, int *offset = nullptr, int *index = nullptr) const;
 
     int textPositionAt(const QPoint &pos) const;
     inline int bufferOffset() const { return viewportPosition - bufferPosition; }

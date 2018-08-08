@@ -45,7 +45,7 @@ ostream& operator<<(ostream& os, const vector<T>& v) {
 // ===============================================================================
 
 Parser::Parser( DefsStructureParser* p )
-: parent_(NULL),
+: parent_(nullptr),
   rootParser_( p )
 #ifdef SHOW_PARSER_STATS
   ,parserCount_(0)

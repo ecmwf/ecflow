@@ -38,7 +38,7 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
      NodeViewBase(filterDef),
      model_(model),
 	 needItemsLayout_(false),
-     prop_(NULL),
+     prop_(nullptr),
      setCurrentIsRunning_(false)
 {
     setObjectName("view");

@@ -50,12 +50,12 @@ private:
 };
 
 TextPagerCursor::TextPagerCursor()
-    : d(0), textEdit(0)
+    : d(nullptr), textEdit(nullptr)
 {
 }
 
 TextPagerCursor::TextPagerCursor(const TextPagerDocument *document, int pos, int anc)
-    : d(0), textEdit(0)
+    : d(nullptr), textEdit(nullptr)
 {
     if (document) {
         const int documentSize = document->d->documentSize;
@@ -76,7 +76,7 @@ TextPagerCursor::TextPagerCursor(const TextPagerDocument *document, int pos, int
 }
 
 TextPagerCursor::TextPagerCursor(const TextPagerEdit *edit, int pos, int anc)
-    : d(0), textEdit(0)
+    : d(nullptr), textEdit(nullptr)
 {
     if (edit) {
         TextPagerDocument *document = edit->document();
@@ -98,7 +98,7 @@ TextPagerCursor::TextPagerCursor(const TextPagerEdit *edit, int pos, int anc)
 }
 
 TextPagerCursor::TextPagerCursor(const TextPagerCursor &cursor)
-    : d(cursor.d), textEdit(0)
+    : d(cursor.d), textEdit(nullptr)
 {
     ref();
 }
@@ -107,7 +107,7 @@ TextPagerCursor &TextPagerCursor::operator=(const TextPagerCursor &other)
 {
     deref();
     d = other.d;
-    textEdit = 0;
+    textEdit = nullptr;
     ref();
     return *this;
 }
@@ -124,7 +124,7 @@ bool TextPagerCursor::isNull() const
 
 TextPagerDocument *TextPagerCursor::document() const
 {
-    return d ? d->document : 0;
+    return d ? d->document : nullptr;
 }
 
 void TextPagerCursor::setSelection(int pos, int length) // can be negative
@@ -220,7 +220,7 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op,TextPagerCu
         Q_ASSERT(textLayout);
         int index;
         bool currentIsLast;
-        const QTextLine currentLine = textLayout->lineForPosition(d->position, 0,
+        const QTextLine currentLine = textLayout->lineForPosition(d->position, nullptr,
                                                                   &index,
                                                                   &currentIsLast);
         Q_ASSERT(textLayout->lines.size() <= 1 || (index != -1 && currentLine.isValid()));
@@ -284,7 +284,7 @@ bool TextPagerCursor::movePosition(TextPagerCursor::MoveOperation op,TextPagerCu
         bool lastLine;
         TextPagerLayout *textLayout = TextLayoutCacheManager::requestLayout(*this, 1);
         QTextLine line = textLayout->lineForPosition(position(), &offset,
-                                                     0, &lastLine);
+                                                     nullptr, &lastLine);
         if (!line.isValid())
             return false;
         if (op ==TextPagerCursor::StartOfLine) {
@@ -567,7 +567,7 @@ bool TextPagerCursor::ref()
 bool TextPagerCursor::deref()
 {
     TextCursorSharedPrivate *dd = d;
-    d = 0;
+    d = nullptr;
     if (dd && !dd->ref.deref()) {
         if (dd->document) {
             const bool removed = dd->document->d->textCursors.remove(dd);
@@ -719,7 +719,7 @@ QString TextPagerCursor::cursorLine() const
     int layoutIndex = -1;
     TextPagerLayout *textLayout = TextLayoutCacheManager::requestLayout(*this, 2); // should I use 1?
 
-    QTextLine line = textLayout->lineForPosition(position(), 0, &layoutIndex);
+    QTextLine line = textLayout->lineForPosition(position(), nullptr, &layoutIndex);
     Q_ASSERT(line.isValid()); // ### could this be legitimate?
     Q_ASSERT(textLayout);
     return textLayout->textLayouts.at(layoutIndex)->text()
@@ -734,7 +734,7 @@ int TextPagerCursor::lineHeight() const
     Q_ASSERT(d && d->document);
     int layoutIndex = -1;
     TextPagerLayout *textLayout = TextLayoutCacheManager::requestLayout(*this, 2);
-    QTextLine line = textLayout->lineForPosition(position(), 0, &layoutIndex);
+    QTextLine line = textLayout->lineForPosition(position(), nullptr, &layoutIndex);
     if (line.isValid())
         res = line.height();
     return res;

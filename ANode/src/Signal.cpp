@@ -46,7 +46,7 @@ void Signal::block_sigchild()
    rc = pthread_sigmask(SIG_BLOCK, &set, 0 ); // not tested
    if (rc != 0) std::cerr << "Signal::~Signal(): pthread_sigmask(SIG_UNBLOCK, &set, 0) returned " << rc << "\n";
 #else
-   sigprocmask( SIG_BLOCK, &set, 0 );
+   sigprocmask( SIG_BLOCK, &set, nullptr );
 #endif
 }
 
@@ -59,7 +59,7 @@ void Signal::unblock_sigchild()
    int rc = pthread_sigmask(SIG_UNBLOCK, &set, 0 ); // not tested
    if (rc != 0) std::cerr << "Signal::~Signal(): pthread_sigmask(SIG_UNBLOCK, &set, 0) returned " << rc << "\n";
 #else
-   sigprocmask( SIG_UNBLOCK, &set, 0 );
+   sigprocmask( SIG_UNBLOCK, &set, nullptr );
 #endif
 }
 

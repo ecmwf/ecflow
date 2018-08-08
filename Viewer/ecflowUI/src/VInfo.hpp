@@ -90,7 +90,7 @@ public:
     static VInfo_ptr createFromItem(VItem*);
 
 protected:
-    VInfo(ServerHandler* server,VNode* node,VAttribute* attr=0);
+    VInfo(ServerHandler* server,VNode* node,VAttribute* attr=nullptr);
 	void dataLost();
 
 	mutable ServerHandler* server_;

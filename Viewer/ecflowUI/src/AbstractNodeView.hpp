@@ -59,7 +59,7 @@ Q_OBJECT
     friend class TreeNodeView;
 
 public:
-    explicit AbstractNodeView(TreeNodeModel* model,QWidget *parent=0);
+    explicit AbstractNodeView(TreeNodeModel* model,QWidget *parent=nullptr);
     virtual ~AbstractNodeView();
 
     QModelIndex currentIndex() const;

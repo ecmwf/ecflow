@@ -17,7 +17,7 @@
 #include "VConfig.hpp"
 #include "WidgetNameProvider.hpp"
 
-CommandOutputDialog* CommandOutputDialog::dialog_=0;
+CommandOutputDialog* CommandOutputDialog::dialog_=nullptr;
 
 CommandOutputDialog::CommandOutputDialog(QWidget *parent) :
     QDialog(parent)
@@ -45,21 +45,21 @@ CommandOutputDialog::~CommandOutputDialog()
 void CommandOutputDialog::closeEvent(QCloseEvent * event)
 {
     //queryWidget_->slotStop(); //The search thread might be running!!
-    dialog_=0;
+    dialog_=nullptr;
     event->accept();
     writeSettings();
 }
 
 void CommandOutputDialog::accept()
 {
-    dialog_=0;
+    dialog_=nullptr;
     writeSettings();
     QDialog::accept();
 }
 
 void CommandOutputDialog::reject()
 {
-    dialog_=0;
+    dialog_=nullptr;
     writeSettings();
     QDialog::reject();
 }
@@ -68,7 +68,7 @@ void CommandOutputDialog::showDialog()
 {
     if(!dialog_)
     {
-        dialog_=new CommandOutputDialog(0);
+        dialog_=new CommandOutputDialog(nullptr);
         dialog_->show();
     }
     dialog_->raise();

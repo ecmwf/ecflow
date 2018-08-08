@@ -20,7 +20,7 @@ class NodeFilterDef;
 class TableNodeSortModel : public QSortFilterProxyModel
 {
 public:
-    TableNodeSortModel(TableNodeModel*,QObject *parent=0);
+    TableNodeSortModel(TableNodeModel*,QObject *parent=nullptr);
     ~TableNodeSortModel();
 
 	//From QSortFilterProxyModel:

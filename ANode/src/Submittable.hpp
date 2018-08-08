@@ -26,12 +26,12 @@ protected:
    : Node(name),
      tryNo_(0),
      state_change_no_(0),
-     sub_gen_variables_(NULL) {}
+     sub_gen_variables_(nullptr) {}
 
    Submittable()
    : tryNo_(0),
      state_change_no_(0),
-     sub_gen_variables_(NULL) {}
+     sub_gen_variables_(nullptr) {}
 
    Submittable(const Submittable& rhs)
    : Node(rhs),
@@ -40,7 +40,7 @@ protected:
      abr_(rhs.abr_),
      tryNo_(rhs.tryNo_),
      state_change_no_(0),
-     sub_gen_variables_(NULL) {}
+     sub_gen_variables_(nullptr) {}
 
    Submittable& operator=(const Submittable&);
 

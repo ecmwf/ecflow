@@ -15,7 +15,7 @@
 class TreeView : public QTreeView
 {
 public:
-	explicit TreeView(QWidget* parent=0);
+	explicit TreeView(QWidget* parent=nullptr);
 };
 
 #endif /* VIEWER_SRC_TREEVIEW_HPP_ */

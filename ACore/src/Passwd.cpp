@@ -53,7 +53,7 @@ double ecf_drand48()
 #if defined(RAND_ONLY)
 		srand( (int) time(NULL) + getpid() );
 #else
-		srand48( (long) time( NULL ) + getpid() );
+		srand48( (long) time( nullptr ) + getpid() );
 #endif
 		been_here = 1;
 	}

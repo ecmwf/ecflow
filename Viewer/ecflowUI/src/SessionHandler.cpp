@@ -19,7 +19,7 @@
 #include "ServerList.hpp"
 
 
-SessionHandler* SessionHandler::instance_=0;
+SessionHandler* SessionHandler::instance_=nullptr;
 
 
 SessionItem::SessionItem(const std::string& name) :
@@ -106,7 +106,7 @@ std::string SessionItem::qtSettingsFile(const std::string name) const
 //=================================================
 
 SessionHandler::SessionHandler() :
-	current_(0)
+	current_(nullptr)
 {
 	//The default must always be exist!
 	current_=add(defaultSessionName());
@@ -140,7 +140,7 @@ void SessionHandler::destroyInstance()
 	if (instance_)
 		delete instance_;
 
-	instance_ = 0;
+	instance_ = nullptr;
 }
 
 std::string SessionHandler::sessionDirName(const std::string &sessionName)
@@ -161,7 +161,7 @@ SessionItem* SessionHandler::find(const std::string& name)
         if((*it)->name() == name)
             return *it;
     }
-    return NULL;
+    return nullptr;
 
 }
 
@@ -209,14 +209,14 @@ bool SessionHandler::loadLastSessionAtStartup()
 SessionItem* SessionHandler::add(const std::string& name)
 {
 	// only add if not already there
-	if (find(name) == NULL)
+	if (find(name) == nullptr)
 	{
 		auto *item=new SessionItem(name);
 		sessions_.push_back(item);
 		return item;
 	}
 	else
-		return NULL;
+		return nullptr;
 }
 
 void SessionHandler::remove(const std::string& sessionName)
@@ -339,7 +339,7 @@ void SessionHandler::setTemporarySessionIfReqested()
 			// does this exact server already exist in the user's list?
 			std::string host(sh);
             std::string port(sp);
-            if(ServerList::instance()->find(alias, host, port) == 0)
+            if(ServerList::instance()->find(alias, host, port) == nullptr)
 			{
 				// no - add it, and make sure it's got a unique alias
 				std::string uniqueName = ServerList::instance()->uniqueName(alias);
@@ -468,7 +468,7 @@ SessionItem *SessionHandler::copySession(SessionItem* source, std::string &destN
 	else
 	{
 		UserMessage::message(UserMessage::ERROR, true, errorMessage);
-		return NULL;
+		return nullptr;
 	}
 }
 

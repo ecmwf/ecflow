@@ -71,7 +71,7 @@ QStringList VUserVarAttr::data(bool /*firstLine*/) const
     QStringList s;
 
     //Node
-    if(parent_->isServer() == 0)
+    if(parent_->isServer() == nullptr)
     {
         if(parent_->node_)
         {
@@ -93,7 +93,7 @@ QStringList VUserVarAttr::data(bool /*firstLine*/) const
 std::string VUserVarAttr::strName() const
 {
     //Node
-    if(parent_->isServer() == 0)
+    if(parent_->isServer() == nullptr)
     {
         if(parent_->node_)
         {
@@ -114,7 +114,7 @@ std::string VUserVarAttr::strName() const
 void VUserVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
     //Node
-    if(vnode->isServer() == 0)
+    if(vnode->isServer() == nullptr)
     {
         if(vnode->node_)
         {

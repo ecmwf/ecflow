@@ -16,7 +16,7 @@
 #include "SessionHandler.hpp"
 #include "VSettings.hpp"
 
-TextFilterHandler* TextFilterHandler::instance_=0;
+TextFilterHandler* TextFilterHandler::instance_=nullptr;
 
 //==============================================
 //

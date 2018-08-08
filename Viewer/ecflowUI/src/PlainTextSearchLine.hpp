@@ -19,7 +19,7 @@ class AbstractTextSearchInterface;
 class PlainTextSearchLine : public TextEditSearchLine
 {
 public:
-	explicit PlainTextSearchLine(QWidget *parent=0);
+	explicit PlainTextSearchLine(QWidget *parent=nullptr);
 	~PlainTextSearchLine();
 	void setEditor(QPlainTextEdit*);
 

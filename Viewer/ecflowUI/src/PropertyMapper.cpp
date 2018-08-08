@@ -44,7 +44,7 @@ VProperty* PropertyMapper::find(const std::string& path,bool failOnError) const
     if(failOnError)
         UI_ASSERT(0,"Could not find property=" + path);
 
-	return 0;
+	return nullptr;
 }
 
 void PropertyMapper::initObserver(VPropertyObserver *obs) const

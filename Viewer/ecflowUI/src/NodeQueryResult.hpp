@@ -32,7 +32,7 @@ class NodeQueryResultItem
 	friend class TriggerGraphModel;
 
 public:
-	NodeQueryResultItem() : node_(NULL), server_(NULL) {}
+	NodeQueryResultItem() : node_(nullptr), server_(nullptr) {}
 	NodeQueryResultItem(VNode* node);
 	NodeQueryResultItem(NodeQueryResultTmp_ptr);
 
@@ -65,7 +65,7 @@ struct Pos
 
 struct NodeQueryResultBlock : public Pos
 {
-	NodeQueryResultBlock() : server_(0) {}
+	NodeQueryResultBlock() : server_(nullptr) {}
 	void add(VNode*,int);
 	void clear();
 	bool find(const VNode* node,int &pos, int &cnt);
@@ -80,7 +80,7 @@ class NodeQueryResult : public QObject, public ServerObserver, public NodeObserv
  Q_OBJECT
 
 public:
- 	explicit NodeQueryResult(QObject* parent=0);
+ 	explicit NodeQueryResult(QObject* parent=nullptr);
  	~NodeQueryResult();
 
  	int size() const {return data_.size();}

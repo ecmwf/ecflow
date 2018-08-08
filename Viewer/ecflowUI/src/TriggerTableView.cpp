@@ -28,7 +28,7 @@
 
 TriggerTableView::TriggerTableView(QWidget* parent) :
     QTreeView(parent),
-    model_(NULL),
+    model_(nullptr),
     needItemsLayout_(false)
 {
     setProperty("view","trigger");
@@ -82,7 +82,7 @@ TriggerTableView::~TriggerTableView()
 //We should only call it once!!!
 void TriggerTableView::setModel(TriggerTableModel* model)
 {
-    Q_ASSERT(model_==0);
+    Q_ASSERT(model_==nullptr);
     model_=model;
     QTreeView::setModel(model);  
 }

@@ -25,8 +25,8 @@
 
 NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
 	QTreeView(parent),
-	model_(NULL),
-	sortModel_(NULL),
+	model_(nullptr),
+	sortModel_(nullptr),
     needItemsLayout_(false)
 {
 	//setProperty("style","nodeView");

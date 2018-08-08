@@ -22,7 +22,7 @@ class MeterEditorWidget :  public QWidget, protected Ui::MeterEditorWidget
 {
 friend class MeterEditor;
 public:
-    MeterEditorWidget(QWidget *parent=0);
+    MeterEditorWidget(QWidget *parent=nullptr);
 };
 
 class MeterEditor : public AttributeEditor
@@ -30,7 +30,7 @@ class MeterEditor : public AttributeEditor
 Q_OBJECT
 
 public:
-    MeterEditor(VInfo_ptr,QWidget* parent=0);
+    MeterEditor(VInfo_ptr,QWidget* parent=nullptr);
     ~MeterEditor();
 
 protected Q_SLOTS:

@@ -28,7 +28,7 @@ bool NodeQueryStringOption::defaultCaseSensitive_=false;
 #define _UI_NODEQUERY_DEBUG
 
 class NodeQueryOptionFactory;
-static std::map<std::string,NodeQueryOptionFactory*>* makers = 0;
+static std::map<std::string,NodeQueryOptionFactory*>* makers = nullptr;
 
 //=========================================
 // Factory
@@ -58,7 +58,7 @@ public:
 
 NodeQueryOptionFactory::NodeQueryOptionFactory(const std::string& type)
 {
-    if(makers == 0)
+    if(makers == nullptr)
         makers = new std::map<std::string,NodeQueryOptionFactory*>;
 
     (*makers)[type] = this;
@@ -67,14 +67,14 @@ NodeQueryOptionFactory::NodeQueryOptionFactory(const std::string& type)
 NodeQueryOption* NodeQueryOptionFactory::create(VProperty *p)
 {
     if(!p)
-        return 0;
+        return nullptr;
 
     std::string type=p->param("type").toStdString();
     auto j = makers->find(type);
     if(j != makers->end())
         return (*j).second->make(p);
 
-    return 0;
+    return nullptr;
 }
 
 //===============================================
@@ -397,7 +397,7 @@ QString NodeQueryPeriodOption::query() const
     QString s;
     if(mode_ == LastPeriodMode)
     {
-        if(lastPeriod_ >=0 && lastPeriodUnits_ >=0)
+        if(lastPeriod_ >=0 && lastPeriodUnits_ >=nullptr)
         {
             QDateTime prev=QDateTime::currentDateTime();
             if(lastPeriodUnits_ == "minute")
@@ -435,7 +435,7 @@ QString NodeQueryPeriodOption::sqlQuery() const
     QString s;
     if(mode_ == LastPeriodMode)
     {
-        if(lastPeriod_ >=0 && lastPeriodUnits_ >=0)
+        if(lastPeriod_ >=0 && lastPeriodUnits_ >=nullptr)
         {
             s=name_ +" >= now() -interval " + QString::number(lastPeriod_) + " " + lastPeriodUnits_;
         }

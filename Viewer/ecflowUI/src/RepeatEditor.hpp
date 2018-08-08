@@ -29,7 +29,7 @@ friend class RepeatIntEditor;
 friend class RepeatStringEditor;
 friend class RepeatDateEditor;
 public:
-    RepeatEditorWidget(QWidget *parent=0);
+    RepeatEditorWidget(QWidget *parent=nullptr);
 protected:
     void hideRow(QWidget* w);
 };
@@ -39,7 +39,7 @@ class RepeatEditor : public AttributeEditor
 Q_OBJECT
 
 public:
-    RepeatEditor(VInfo_ptr,QWidget* parent=0);
+    RepeatEditor(VInfo_ptr,QWidget* parent=nullptr);
     ~RepeatEditor();
 
 protected Q_SLOTS:
@@ -63,7 +63,7 @@ class RepeatIntEditor : public RepeatEditor
 {
 Q_OBJECT
 public:
-    RepeatIntEditor(VInfo_ptr,QWidget* parent=0);
+    RepeatIntEditor(VInfo_ptr,QWidget* parent=nullptr);
 
 protected Q_SLOTS:
     void slotValueChanged(int);
@@ -80,7 +80,7 @@ class RepeatStringEditor : public RepeatEditor
 {
 Q_OBJECT
 public:
-    RepeatStringEditor(VInfo_ptr,QWidget* parent=0);
+    RepeatStringEditor(VInfo_ptr,QWidget* parent=nullptr);
 
 protected Q_SLOTS:
     void slotValueEdited(QString);
@@ -96,7 +96,7 @@ class RepeatDateEditor : public RepeatEditor
 {
 Q_OBJECT
 public:
-    RepeatDateEditor(VInfo_ptr,QWidget* parent=0);
+    RepeatDateEditor(VInfo_ptr,QWidget* parent=nullptr);
 
 protected Q_SLOTS:
     void slotValueEdited(QString);

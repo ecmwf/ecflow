@@ -40,7 +40,7 @@ class BcWidget : public QWidget, public VPropertyObserver
 Q_OBJECT
 
 public:
-    explicit BcWidget(QWidget *parent=0);
+    explicit BcWidget(QWidget *parent=nullptr);
     ~BcWidget();
     
     void reset(QString txt, int maxWidth);
@@ -174,7 +174,7 @@ class NodePathWidget : public QWidget, public NodeObserver, public ServerObserve
 Q_OBJECT
 
 public:
-	explicit NodePathWidget(QWidget* parent=0);
+	explicit NodePathWidget(QWidget* parent=nullptr);
 	~NodePathWidget();
 
     enum Mode {TextMode,GuiMode};

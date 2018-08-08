@@ -30,9 +30,9 @@ VFile::VFile(const std::string& name,const std::string& str,bool deleteFile) :
 	path_(name),
 	deleteFile_(deleteFile),
 	storageMode_(DiskStorage),
-	data_(0),
+	data_(nullptr),
 	dataSize_(0),
-	fp_(0),
+	fp_(nullptr),
     fetchMode_(NoFetchMode),
 	transferDuration_(0),
     truncatedTo_(0),
@@ -50,9 +50,9 @@ VFile::VFile(const std::string& name,bool deleteFile) :
 	path_(name),
 	deleteFile_(deleteFile),
 	storageMode_(DiskStorage),
-	data_(0),
+	data_(nullptr),
 	dataSize_(0),
-	fp_(0),
+	fp_(nullptr),
     fetchMode_(NoFetchMode),
     transferDuration_(0),
     truncatedTo_(0),
@@ -64,9 +64,9 @@ VFile::VFile(bool deleteFile) :
     path_(""),
 	deleteFile_(deleteFile),
 	storageMode_(MemoryStorage),
-	data_(0),
+	data_(nullptr),
 	dataSize_(0),
-	fp_(0),
+	fp_(nullptr),
     fetchMode_(NoFetchMode),
     transferDuration_(0),
     truncatedTo_(0),
@@ -156,9 +156,9 @@ void VFile::setStorageMode(StorageMode mode)
 
 			}
 			fclose(fp_);
-			fp_=NULL;
+			fp_=nullptr;
 			delete [] data_;
-			data_=0;
+			data_=nullptr;
 			dataSize_=0;
 		}
 	}
@@ -224,7 +224,7 @@ void VFile::close()
 	if(fp_)
 	{
 		fclose(fp_);
-		fp_=NULL;
+		fp_=nullptr;
 	}
 	if(data_)
 	{

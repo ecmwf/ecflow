@@ -37,7 +37,7 @@ static inline bool match(const TextPagerCursor &cursor, const TextPagerLayout *l
         return false;
     }
     int index = -1;
-    if (!layout->layoutForPosition(cursor.position(), 0, &index)) {
+    if (!layout->layoutForPosition(cursor.position(), nullptr, &index)) {
         // ### need an interface for this if I am going to have a mode
         // ### that doesn't break lines
         return false;
@@ -170,7 +170,7 @@ private Q_SLOTS:
             }
         }
         if (layouts.isEmpty()) {
-            disconnect(sender(), 0, this, 0);
+            disconnect(sender(), nullptr, this, nullptr);
             cache.remove(qobject_cast<TextPagerDocument*>(sender()));
         }
     }
@@ -191,7 +191,7 @@ struct TextCursorSharedPrivate
 public:
     TextCursorSharedPrivate() : ref(1), position(-1), anchor(-1),
         overrideColumn(-1), viewportWidth(-1),
-        document(0)
+        document(nullptr)
     {}
 
     ~TextCursorSharedPrivate()

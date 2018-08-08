@@ -23,7 +23,7 @@ class VReply;
 class InfoPresenter
 {
 public:
-    InfoPresenter() : infoProvider_(0) {}
+    InfoPresenter() : infoProvider_(nullptr) {}
     virtual ~InfoPresenter() = default;
     virtual void infoReady(VReply*) {}
     virtual void infoFailed(VReply*) {}

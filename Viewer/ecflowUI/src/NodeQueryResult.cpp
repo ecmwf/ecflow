@@ -23,7 +23,7 @@
 
 NodeQueryResultItem::NodeQueryResultItem(VNode* node)  :
 	node_(node),
-	server_(NULL)
+	server_(nullptr)
 {
 	if(node_)
 		server_=node_->server();
@@ -42,19 +42,19 @@ void NodeQueryResultItem::invalidateNode()
 {
 	assert(node_);
 	path_=node_->absNodePath();
-	node_=NULL;
+	node_=nullptr;
 }
 
 bool NodeQueryResultItem::updateNode()
 {
 	if(node_)
-		return (node_->server() != NULL);
+		return (node_->server() != nullptr);
 
 	else
 	{
 		node_=server_->vRoot()->find(path_);
 		path_.clear();
-		return (node_ != NULL);
+		return (node_ != nullptr);
 	}
 
 	return false;
@@ -172,7 +172,7 @@ NodeQueryResultItem* NodeQueryResult::itemAt(int i)
     if(i >= 0 && i < static_cast<int>(data_.size()))
 		return data_.at(i);
 
-	return NULL;
+	return nullptr;
 }
 
 void NodeQueryResult::add(NodeQueryResultTmp_ptr item)

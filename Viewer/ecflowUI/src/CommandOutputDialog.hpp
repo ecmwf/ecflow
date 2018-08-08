@@ -29,7 +29,7 @@ protected Q_SLOTS:
     void reject();
 
 protected:
-    explicit CommandOutputDialog(QWidget *parent = 0);
+    explicit CommandOutputDialog(QWidget *parent = nullptr);
     ~CommandOutputDialog();
 
     void closeEvent(QCloseEvent * event);

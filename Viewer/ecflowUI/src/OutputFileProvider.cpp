@@ -24,7 +24,7 @@
 
 OutputFileProvider::OutputFileProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::OutputTask),
-    outClient_(NULL),
+    outClient_(nullptr),
     useOutputClientOnly_(false)
 {
     outCache_=new OutputCache(this);
@@ -40,7 +40,7 @@ void OutputFileProvider::clear()
     if(outClient_)
 	{
 		delete outClient_;
-		outClient_=NULL;
+		outClient_=nullptr;
 	}
     InfoProvider::clear();
 

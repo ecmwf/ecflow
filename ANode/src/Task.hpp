@@ -82,7 +82,7 @@ public:
 	virtual void requeue(Requeue_args&);
 
    virtual Suite* suite() const { return parent()->suite(); }
-   virtual Defs* defs() const { return (parent()) ? parent()->defs() : NULL;} // exposed to python hence check for NULL first
+   virtual Defs* defs() const { return (parent()) ? parent()->defs() : nullptr;} // exposed to python hence check for NULL first
 	virtual Task* isTask() const   { return const_cast<Task*>(this);}
    virtual Submittable* isSubmittable() const { return const_cast<Task*>(this); }
 

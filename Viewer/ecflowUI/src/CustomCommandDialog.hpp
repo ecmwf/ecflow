@@ -20,7 +20,7 @@ class CustomCommandDialog : public QDialog, private Ui::CustomCommandDialog
 	Q_OBJECT
 
 public:
-	explicit CustomCommandDialog(QWidget *parent = 0);
+	explicit CustomCommandDialog(QWidget *parent = nullptr);
 	~CustomCommandDialog() = default;;
 
 	MenuItem &menuItem() {return commandDesigner_->menuItem();};

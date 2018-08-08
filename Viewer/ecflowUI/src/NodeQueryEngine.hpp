@@ -35,7 +35,7 @@ class NodeQueryEngine : public QThread
 Q_OBJECT
 
 public:
-	explicit NodeQueryEngine(QObject* parent=0);
+	explicit NodeQueryEngine(QObject* parent=nullptr);
 	~NodeQueryEngine();
 
     bool runQuery(NodeQuery* query,QStringList allServers);

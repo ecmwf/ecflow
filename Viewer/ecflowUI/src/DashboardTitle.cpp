@@ -49,7 +49,7 @@ void DashboardTitle::clear()
 		s->removeServerObserver(this);
 	}
 
-	filter_=0;
+	filter_=nullptr;
 }
 
 

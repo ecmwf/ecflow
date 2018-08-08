@@ -27,7 +27,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 
-VConfig* VConfig::instance_=0;
+VConfig* VConfig::instance_=nullptr;
 
 //#define _UI_CONFIG_LOAD_DEBUG
 
@@ -231,7 +231,7 @@ void VConfig::loadProperty(const boost::property_tree::ptree& pt,VProperty *prop
 
 VProperty* VConfig::find(const std::string& path)
 {
-	VProperty* res=0;
+	VProperty* res=nullptr;
 
 	for(std::vector<VProperty*>::const_iterator it=groups_.begin();it != groups_.end(); ++it)
 	{
@@ -254,7 +254,7 @@ VProperty* VConfig::group(const std::string& name)
 			return *it;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 VProperty* VConfig::cloneServerGui(VProperty *linkTarget)
@@ -286,7 +286,7 @@ void VConfig::saveSettings()
 
 	VProperty *guiProp=group("gui");
 
-	saveSettings(fName,guiProp,NULL,true);
+	saveSettings(fName,guiProp,nullptr,true);
 }
 
 //Saves the settings per server that can be edited through the servers option gui

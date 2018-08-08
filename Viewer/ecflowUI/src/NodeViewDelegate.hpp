@@ -113,7 +113,7 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
 class NodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
 {
 public:
-	explicit NodeViewDelegate(QWidget *parent=0);
+	explicit NodeViewDelegate(QWidget *parent=nullptr);
 	~NodeViewDelegate();
 
 	void notifyChange(VProperty*);

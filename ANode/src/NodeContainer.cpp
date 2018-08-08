@@ -388,7 +388,7 @@ void NodeContainer::calendarChanged(
    }
 
    // The late attribute is inherited, we only set late on the task/alias
-	Node::calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,NULL);
+	Node::calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,nullptr);
 
 	LateAttr overridden_late;
    if (inherited_late && !inherited_late->isNull()) {
@@ -483,7 +483,7 @@ node_ptr NodeContainer::removeChild(Node* child)
  	for(size_t t = 0; t < node_vec_size; t++)     {
  		if (nodes_[t].get() == child) {
  			node_ptr node = std::dynamic_pointer_cast<Node>(nodes_[t]);
- 			child->set_parent(NULL); // must set to NULL, allows it to be re-added to different parent
+ 			child->set_parent(nullptr); // must set to NULL, allows it to be re-added to different parent
  			nodes_.erase( nodes_.begin() + t);
  			add_remove_state_change_no_ = Ecf::incr_state_change_no();
  			return node ;
@@ -1153,7 +1153,7 @@ void NodeContainer::archive()
 
    // delete the child nodes, set parent to null first.
    size_t node_vec_size = nodes_.size();
-   for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->set_parent(NULL); }
+   for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->set_parent(nullptr); }
    nodes_.clear();
 
    std::vector<node_ptr>().swap(nodes_);                    // reclaim vector memory
@@ -1240,7 +1240,7 @@ bool NodeContainer::doDeleteChild(Node* child)
 	auto theTaskEnd = nodes_.end();
  	for(auto t = nodes_.begin(); t!=theTaskEnd; ++t) {
  		if ( (*t).get() == child) {
- 		   child->set_parent(NULL); // must set to NULL, allow it to be re-added to different parent
+ 		   child->set_parent(nullptr); // must set to NULL, allow it to be re-added to different parent
   			nodes_.erase(t);
          add_remove_state_change_no_ = Ecf::incr_state_change_no();
          set_most_significant_state_up_node_tree();

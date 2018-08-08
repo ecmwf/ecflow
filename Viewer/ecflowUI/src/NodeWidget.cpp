@@ -21,12 +21,12 @@
 NodeWidget::NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidget* parent) :
    DashboardWidget(type,parent),
    serverFilter_(serverFilter),
-   model_(0),
-   view_(0),
-   icons_(0),
-   atts_(0),
-   filterDef_(0),
-   states_(0),
+   model_(nullptr),
+   view_(nullptr),
+   icons_(nullptr),
+   atts_(nullptr),
+   filterDef_(nullptr),
+   states_(nullptr),
    broadcastSelection_(true)
 {
 	//Define the icon filter for the model. It controls what icons

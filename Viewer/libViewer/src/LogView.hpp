@@ -18,7 +18,7 @@ class LogView : public QTreeView
 {
     Q_OBJECT
 public:
-    LogView(QWidget* parent=0);
+    LogView(QWidget* parent=nullptr);
     void setLogModel(LogModel* );
     void setModel(QAbstractItemModel*);
 

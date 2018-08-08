@@ -23,7 +23,7 @@ class ChangeNotifyModel : public QAbstractItemModel
 {
  Q_OBJECT
 public:
-   	explicit ChangeNotifyModel(QObject *parent=0);
+   	explicit ChangeNotifyModel(QObject *parent=nullptr);
    	~ChangeNotifyModel();
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;

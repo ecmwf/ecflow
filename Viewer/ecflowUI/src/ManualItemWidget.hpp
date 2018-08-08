@@ -17,7 +17,7 @@
 class ManualItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
-	explicit ManualItemWidget(QWidget *parent=0);
+	explicit ManualItemWidget(QWidget *parent=nullptr);
 	~ManualItemWidget();
 
 	void reload(VInfo_ptr);

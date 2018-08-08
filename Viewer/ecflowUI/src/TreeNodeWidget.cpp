@@ -30,12 +30,12 @@
 
 #include "FilterWidget.hpp"
 
-AttributeFilter* TreeNodeWidget::lastAtts_=NULL;
+AttributeFilter* TreeNodeWidget::lastAtts_=nullptr;
 
 TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
     NodeWidget("tree",serverFilter,parent),
     viewLayoutMode_(StandardLayoutMode),
-    layoutProp_(0)
+    layoutProp_(nullptr)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -70,7 +70,7 @@ TreeNodeWidget::TreeNodeWidget(ServerFilter* serverFilter,QWidget* parent) :
         viewLayoutMode_=CompactLayoutMode;
     }
 
-    Q_ASSERT(view_==0);
+    Q_ASSERT(view_==nullptr);
     setViewLayoutMode(viewLayoutMode_);
 
     connect(model_,SIGNAL(firstScanEnded(const VTreeServer*)),
@@ -108,7 +108,7 @@ void TreeNodeWidget::setViewLayoutMode(TreeNodeWidget::ViewLayoutMode mode)
         QWidget *realW=view_->realWidget();
         viewHolder_->layout()->removeWidget(realW);
         delete view_;
-        view_=0;
+        view_=nullptr;
         delete realW;
         model_->data()->deleteExpandState();
     }

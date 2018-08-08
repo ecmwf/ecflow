@@ -78,7 +78,7 @@ Dashboard::~Dashboard()
 
 DashboardWidget* Dashboard::addWidgetCore(const std::string& type,bool userAddedView)
 {
-	DashboardWidget *w=0;
+	DashboardWidget *w=nullptr;
 
 	//Create a dashboard widget
 	if(type == "tree")
@@ -192,7 +192,7 @@ DashboardWidget* Dashboard::addWidget(const std::string& type,const std::string&
 
 	//If the db-widget creation fails we should do something!!!
 	if(!w)
-		return 0;
+		return nullptr;
 
 	//Store dockId in the db-widget
 	w->id(dockId);
@@ -224,12 +224,12 @@ DashboardWidget* Dashboard::addDialog(const std::string& type)
 
 	//If the db-widget creation fails we should do something!!!
 	if(!w)
-		return 0;
+		return nullptr;
 
 	//The DashBoard or any of its children cannot be the parent of the
 	//dialog because in this case it would be always on top its parent. This is
 	//the behaviour when the dialog's parent is QMainWindow.
-	auto* dia=new DashboardDialog(0);
+	auto* dia=new DashboardDialog(nullptr);
 
     //So the parent is 0 and we will emit a signal from the Dashboard
     //destructor to notify the dialog about the deletion. Then we can be
@@ -254,7 +254,7 @@ void Dashboard::addSearchDialog()
 {
 	//It will delete itself on close!!
 	//The parent is 0, for the reason see the comment in addDialog()
-	auto* d=new NodeSearchDialog(0);
+	auto* d=new NodeSearchDialog(nullptr);
 	d->queryWidget()->setServerFilter(serverFilter_);
 
     connect(d->queryWidget(),SIGNAL(selectionChanged(VInfo_ptr)),
@@ -274,7 +274,7 @@ void Dashboard::addSearchDialog(VInfo_ptr info)
 {
 	//It will delete itself on close!!
 	//The parent is 0, for the reason see the comment in addDialog()
-	auto* d=new NodeSearchDialog(0);
+	auto* d=new NodeSearchDialog(nullptr);
 	d->queryWidget()->setServerFilter(serverFilter_);
 	d->queryWidget()->setRootNode(info);
 
@@ -298,7 +298,7 @@ void Dashboard::slotDockClose()
 		if(auto* dw=static_cast<DashboardWidget*>(dock->widget()))
 		{
 			widgets_.removeOne(dw);
-			disconnect(this,0,dw,0);
+			disconnect(this,nullptr,dw,nullptr);
 
             if(dw->isMaximised())
                 resetMaximised();
@@ -452,7 +452,7 @@ void Dashboard::slotDialogFinished(int)
 {
 	if(auto* dia=static_cast<DashboardDialog*>(sender()))
 	{
-		disconnect(this,0,dia->dashboardWidget(),0);
+		disconnect(this,nullptr,dia->dashboardWidget(),nullptr);
         popupWidgets_.removeOne(dia->dashboardWidget());
 	}
 }
@@ -461,7 +461,7 @@ void Dashboard::slotDialogClosed()
 {
     if(auto* dia=static_cast<DashboardDialog*>(sender()))
     {
-        disconnect(this,0,dia->dashboardWidget(),0);
+        disconnect(this,nullptr,dia->dashboardWidget(),nullptr);
         popupWidgets_.removeOne(dia->dashboardWidget());
     }
 }

@@ -26,7 +26,7 @@ class ZombieItemWidget : public QWidget, public InfoPanelItem, protected Ui::Zom
 Q_OBJECT
 
 public:
-	explicit ZombieItemWidget(QWidget *parent=0);
+	explicit ZombieItemWidget(QWidget *parent=nullptr);
     ~ZombieItemWidget();
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

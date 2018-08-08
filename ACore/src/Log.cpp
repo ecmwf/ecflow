@@ -35,12 +35,12 @@ namespace fs = boost::filesystem;
 
 namespace ecf {
 
-Log* Log::instance_ = NULL;
+Log* Log::instance_ = nullptr;
 bool LogToCout::flag_ = false;
 
 void Log::create(const std::string& filename)
 {
-	if ( instance_ == NULL) {
+	if ( instance_ == nullptr) {
 		instance_ = new Log(filename);
 	}
 }
@@ -50,7 +50,7 @@ void Log::destroy()
 	if (instance_) instance_->flush();
 
 	delete instance_;
-	instance_ = NULL;
+	instance_ = nullptr;
 }
 
 Log::Log(const std::string& fileName)
@@ -61,7 +61,7 @@ Log::Log(const std::string& fileName)
 Log::~Log()
 {
 	delete logImpl_;
-	logImpl_ = NULL;
+	logImpl_ = nullptr;
 }
 
 bool Log::log(Log::LogType lt,const std::string& message)
@@ -109,7 +109,7 @@ void Log::flush()
  	// will close ofstream and force data to be written to disk.
 	// Forcing writing to physical medium can't be guaranteed though!
 	delete logImpl_;
-	logImpl_ = NULL;
+	logImpl_ = nullptr;
 }
 
 void Log::enable_auto_flush()

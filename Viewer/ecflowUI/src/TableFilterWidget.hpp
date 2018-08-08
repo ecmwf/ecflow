@@ -22,7 +22,7 @@ class TableFilterWidget : public QWidget, private Ui::TableFilterWidget
 Q_OBJECT
 
 public:
-    explicit TableFilterWidget(QWidget *parent=0);
+    explicit TableFilterWidget(QWidget *parent=nullptr);
     ~TableFilterWidget() = default;
 
     void build(NodeFilterDef*,ServerFilter*);

@@ -28,7 +28,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>
 
-Sound* Sound::instance_=NULL;
+Sound* Sound::instance_=nullptr;
 
 
 /*
@@ -50,7 +50,7 @@ Sound* Sound::instance_=NULL;
 Sound::Sound() :
 	prevPlayedAt_(0),
 	delay_(2),
-	prop_(NULL)
+	prop_(nullptr)
 {
 	formats_=".+\\.(wav|mp3|ogg|oga)";
 
@@ -84,7 +84,7 @@ void Sound::play(const std::string& fName,int loopCount)
 {
 	assert(loopCount < 6);
 
-	time_t t=time(NULL);
+	time_t t=time(nullptr);
 	if(t < prevPlayedAt_+delay_)
 		return;
 
@@ -103,7 +103,7 @@ void Sound::play(const std::string& fName,int loopCount)
 		}
 	}
 
-	prevPlayedAt_=time(NULL);
+	prevPlayedAt_=time(nullptr);
 }
 
 void  Sound::setCurrentPlayer(const std::string& current)

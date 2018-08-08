@@ -119,7 +119,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
     int last = 0;
     int children = 0;
     int level=(parentId >=0?viewItems_[parentId].level+1:0);
-    TreeNodeViewItem *item=0;
+    TreeNodeViewItem *item=nullptr;
 
 
 #ifdef _UI_STANDARDVIEW_DEBUG

@@ -44,7 +44,7 @@ public:
 #endif
     int attrNum(AttributeFilter* filter) const;
     bool isAttrInitialised() const;
-    void updateAttrNum(AttributeFilter* filter=0);
+    void updateAttrNum(AttributeFilter* filter=nullptr);
     void resetAttrNum();
 
     virtual bool isTopLevel() const {if(parent_) return (parent_->parent())?false:true; return false;}

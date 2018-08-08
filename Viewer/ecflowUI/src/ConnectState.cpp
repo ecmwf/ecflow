@@ -67,17 +67,17 @@ void ConnectState::state(State state)
 
 void ConnectState::logConnect()
 {
-	lastConnect_=time(0);
+	lastConnect_=time(nullptr);
 }
 
 void ConnectState::logFailed()
 {
-	lastFailed_=time(0);
+	lastFailed_=time(nullptr);
 }
 
 void ConnectState::logDisconnect()
 {
-	lastDisconnect_=time(0);
+	lastDisconnect_=time(nullptr);
 }
 
 void ConnectState::errorMessage(const std::string& str)

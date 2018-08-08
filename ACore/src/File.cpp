@@ -250,7 +250,7 @@ bool File::create(const std::string& filename,const std::vector<std::string>& li
 	// For very large file. This is about 1 second quicker. Than using streams
 	// See Test: TestFile.cpp:test_file_create_perf
 	FILE * theFile = fopen (filename.c_str(),"w");
-	if (theFile==NULL) {
+	if (theFile==nullptr) {
 		std::stringstream ss;
 		ss << "Could not create file '" << filename << " (" << strerror(errno) << "'\n";
 		errorMsg += ss.str();
@@ -875,7 +875,7 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
 {
    std::string test_file;
    char* work_space = getenv("WK"); // for ecbuild
-   if (work_space != NULL ) {
+   if (work_space != nullptr ) {
       test_file = std::string(work_space);
       if (!rel_path.empty() && rel_path[0] != '/' ) test_file += "/";
       test_file += rel_path;

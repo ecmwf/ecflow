@@ -74,7 +74,7 @@ const char* ClientHandleCmd::theArg() const
       case ClientHandleCmd::SUITES:    return CtsApi::ch_suites_arg(); break;
  	}
 	assert(false);
-	return NULL;
+	return nullptr;
 }
 
 STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const

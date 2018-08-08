@@ -105,7 +105,7 @@ void NodePanel::tabBarCommand(QString name,int index)
 Dashboard *NodePanel::nodeWidget(int index)
 {
   	QWidget *w=widget(index);
-  	return (w)?static_cast<Dashboard*>(w):0;
+  	return (w)?static_cast<Dashboard*>(w):nullptr;
 }
 
 Dashboard *NodePanel::currentDashboard()
@@ -192,7 +192,7 @@ Viewer::ViewMode NodePanel::viewMode()
 ServerFilter* NodePanel::serverFilter()
 {
   	Dashboard *w=currentDashboard();
-	return (w)?w->serverFilter():NULL;
+	return (w)?w->serverFilter():nullptr;
 }
 
 void NodePanel::addToDashboard(const std::string& type)

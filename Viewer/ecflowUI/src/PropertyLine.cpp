@@ -30,7 +30,7 @@
 
 #include <cassert>
 
-static std::map<VProperty::GuiType,PropertyLineFactory*>* makers = 0;
+static std::map<VProperty::GuiType,PropertyLineFactory*>* makers = nullptr;
 
 FontSizeSpin::FontSizeSpin(QWidget *parent) : QSpinBox(parent)
 {
@@ -61,7 +61,7 @@ QString FontSizeSpin::textFromValue(int value) const
 
 PropertyLineFactory::PropertyLineFactory(VProperty::GuiType type)
 {
-	if(makers == 0)
+	if(makers == nullptr)
 		makers = new std::map<VProperty::GuiType,PropertyLineFactory*>;
 
 	(*makers)[type] = this;
@@ -75,14 +75,14 @@ PropertyLineFactory::~PropertyLineFactory()
 PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* parent)
 {
 	if(!p || !p->link())
-		return 0;
+		return nullptr;
 
 	VProperty::GuiType t=p->link()->guiType();
 	auto j = makers->find(t);
 	if(j != makers->end())
 		return (*j).second->make(p,addLabel,parent);
 
-	return 0;
+	return nullptr;
 }
 
 //=========================================================================
@@ -93,15 +93,15 @@ PropertyLine* PropertyLineFactory::create(VProperty* p,bool addLabel,QWidget* pa
 
 PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	QObject(parent),
-	prop_(NULL),
+	prop_(nullptr),
 	guiProp_(guiProp),
-	label_(0),
-	suffixLabel_(0),
-	defaultTb_(0),
-	masterTb_(0),
+	label_(nullptr),
+	suffixLabel_(nullptr),
+	defaultTb_(nullptr),
+	masterTb_(nullptr),
 	enabled_(true),
     doNotEmitChange_(false),
-    ruleLine_(0)
+    ruleLine_(nullptr)
 {
 	prop_=guiProp_->link();
 	assert(prop_);
@@ -290,7 +290,7 @@ VProperty* PropertyLine::ruleProperty()
             }
         }
     }
-    return 0;
+    return nullptr;
 }
 
 void PropertyLine::addRuleLine(PropertyLine *r)
@@ -336,7 +336,7 @@ QWidget* StringPropertyLine::item()
 
 QWidget* StringPropertyLine::button()
 {
-	return NULL;
+	return nullptr;
 }
 
 void StringPropertyLine::slotReset(QVariant v)
@@ -411,7 +411,7 @@ QWidget* ColourPropertyLine::item()
 
 QWidget* ColourPropertyLine::button()
 {
-	return NULL;
+	return nullptr;
 }
 
 void ColourPropertyLine::slotReset(QVariant v)
@@ -546,7 +546,7 @@ QWidget* FontPropertyLine::item()
 
 QWidget* FontPropertyLine::button()
 {
-	return NULL; //tbEdit_;
+	return nullptr; //tbEdit_;
 }
 
 void FontPropertyLine::slotReset(QVariant v)
@@ -667,7 +667,7 @@ QWidget* IntPropertyLine::item()
 
 QWidget* IntPropertyLine::button()
 {
-	return NULL;
+	return nullptr;
 }
 
 void IntPropertyLine::slotReset(QVariant v)
@@ -729,7 +729,7 @@ QWidget* BoolPropertyLine::item()
 
 QWidget* BoolPropertyLine::button()
 {
-	return NULL;
+	return nullptr;
 }
 
 void BoolPropertyLine::slotReset(QVariant v)
@@ -810,7 +810,7 @@ QWidget* ComboPropertyLine::item()
 
 QWidget* ComboPropertyLine::button()
 {
-	return NULL;
+	return nullptr;
 }
 
 void ComboPropertyLine::slotReset(QVariant v)
@@ -905,7 +905,7 @@ QWidget* ComboMultiPropertyLine::item()
 
 QWidget* ComboMultiPropertyLine::button()
 {
-	return NULL;
+	return nullptr;
 }
 
 void ComboMultiPropertyLine::slotReset(QVariant v)
@@ -961,7 +961,7 @@ void ComboMultiPropertyLine::setEnabledEditable(bool b)
 
 SoundComboPropertyLine::SoundComboPropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	ComboPropertyLine(guiProp,addLabel,parent),
-	playTb_(NULL)
+	playTb_(nullptr)
 {
 	playTb_=new QToolButton(parent);
     playTb_->setObjectName(prop_->name());

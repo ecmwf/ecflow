@@ -107,7 +107,7 @@ bool TriggerTableCollector::add(VItem* trigger, VItem* dep,Mode mode)
 {
     Q_ASSERT(trigger);
 
-    TriggerTableItem *item=0;
+    TriggerTableItem *item=nullptr;
     for(auto & i : items_)
     {
         if(i->item() == trigger)
@@ -178,13 +178,13 @@ TriggerTableItem* TriggerTableCollector::find(const VItem* item) const
         if(i->item() == item)
             return i;
     }
-    return 0;
+    return nullptr;
 }
 
 TriggerTableItem* TriggerTableCollector::findByContents(const VItem* item) const
 {
     if(!item)
-        return 0;
+        return nullptr;
 
     for(auto i : items_)
     {
@@ -193,5 +193,5 @@ TriggerTableItem* TriggerTableCollector::findByContents(const VItem* item) const
             return i;
         }
     }
-    return 0;
+    return nullptr;
 }

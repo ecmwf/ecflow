@@ -24,7 +24,7 @@ class LogModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-   	explicit LogModel(QObject *parent=0);
+   	explicit LogModel(QObject *parent=nullptr);
    	~LogModel();
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -75,7 +75,7 @@ protected:
 class LogDelegate : public QStyledItemDelegate
 {
 public:
-    explicit LogDelegate(QWidget *parent=0);
+    explicit LogDelegate(QWidget *parent=nullptr);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
 

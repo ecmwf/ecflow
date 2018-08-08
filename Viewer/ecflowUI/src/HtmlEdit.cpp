@@ -16,7 +16,7 @@
 
 HtmlEdit::HtmlEdit(QWidget * parent) :
     QTextBrowser(parent),
-    fontProp_(0)
+    fontProp_(nullptr)
 {
 #if 0
     QFont f("Courier");

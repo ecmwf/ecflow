@@ -28,7 +28,7 @@ ModelColumn* ModelColumn::def(const std::string& id)
 	std::map<std::string,ModelColumn*>::const_iterator it=defs.find(id);
 	if(it != defs.end())
 		return it->second;
-	return NULL;
+	return nullptr;
 }
 
 

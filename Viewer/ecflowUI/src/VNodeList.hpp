@@ -47,7 +47,7 @@ class VNodeList : public QObject, public ServerObserver, public NodeObserver
  Q_OBJECT
 
 public:
- 	explicit VNodeList(QObject* parent=0);
+ 	explicit VNodeList(QObject* parent=nullptr);
  	~VNodeList();
 
  	int size() const {return data_.size();}

@@ -22,7 +22,7 @@ class NodeFilterDialog : public QDialog, protected Ui::NodeFilterDialog
     Q_OBJECT
 
 public:
-    explicit NodeFilterDialog(QWidget *parent = 0);
+    explicit NodeFilterDialog(QWidget *parent = nullptr);
     ~NodeFilterDialog();
 
     void setQuery(NodeQuery*);

@@ -90,7 +90,7 @@ CustomCommand* CustomCommandHandler::duplicate(int index)
     std::string newName = item->name() + postfix;
 
     // ensure we are creating a unique new name - if we find an existing item with the same name, add another postfix
-    while(find(newName) != NULL)
+    while(find(newName) != nullptr)
         newName += postfix;
 
     CustomCommand*newCmd = add(newName, item->command(), item->inContextMenu(), false);
@@ -120,7 +120,7 @@ CustomCommand* CustomCommandHandler::find(const std::string& name) const
         if(item->name() == name)
             return item;
     }
-    return NULL;
+    return nullptr;
 }
 
 
@@ -193,7 +193,7 @@ bool CustomCommandHandler::stringToBool(std::string &str)
 // CustomSavedCommandHandler
 // -------------------------
 
-CustomSavedCommandHandler* CustomSavedCommandHandler::instance_=0;
+CustomSavedCommandHandler* CustomSavedCommandHandler::instance_=nullptr;
 
 
 CustomSavedCommandHandler* CustomSavedCommandHandler::instance()
@@ -229,7 +229,7 @@ std::string CustomSavedCommandHandler::settingsFile()
 // ---------------------------
 
 
-CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance_=0;
+CustomCommandHistoryHandler* CustomCommandHistoryHandler::instance_=nullptr;
 
 CustomCommandHistoryHandler::CustomCommandHistoryHandler()
 {

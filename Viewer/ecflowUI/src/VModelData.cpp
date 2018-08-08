@@ -81,7 +81,7 @@ VTreeServer::VTreeServer(ServerHandler *server,NodeFilterDef* filterDef,Attribut
    firstScan_(true),
    firstScanTryNo_(0),
    maxFirstScanTry_(10),
-   expandState_(0)
+   expandState_(nullptr)
 {
     tree_=new VTree(this);
     filter_=new TreeNodeFilter(filterDef,server_,tree_);
@@ -237,7 +237,7 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 #ifdef _UI_VMODELDATA_DEBUG
     UI_FUNCTION_LOG_S(server_)
 #endif
-    if(vnode==NULL)
+    if(vnode==nullptr)
 		return;
 
     VTreeNode* node=tree_->find(vnode);
@@ -749,7 +749,7 @@ void VTreeServer::clearForceShow(const VItem* itemNext)
         }
         //Otherwise we pretend it is 0
         else
-            aPrev=0;
+            aPrev=nullptr;
     }
 
     //No forceShowNode or forceShow attribute is set. There is nothing to clear!
@@ -851,7 +851,7 @@ void VTreeServer::deleteExpandState()
 {
     if(expandState_)
         delete expandState_;
-    expandState_=0;
+    expandState_=nullptr;
 }
 
 void VTreeServer::setExpandState(ExpandState* es)
@@ -1061,7 +1061,7 @@ void VTableServer::clearForceShow(const VItem* item)
 VModelData::VModelData(NodeFilterDef *filterDef,AbstractNodeModel* model) :
 		QObject(model),
         serverNum_(0),
-        serverFilter_(0),
+        serverFilter_(nullptr),
 		filterDef_(filterDef),
         model_(model),
         active_(false)
@@ -1163,7 +1163,7 @@ void VModelData::clear()
     if(serverFilter_)
 		serverFilter_->removeObserver(this);
 
-    serverFilter_=NULL;
+    serverFilter_=nullptr;
 
     for(auto & server : servers_)
 	{
@@ -1176,12 +1176,12 @@ void VModelData::clear()
 
 VModelServer* VModelData::server(int n) const
 {
-    return (n >=0 && n < static_cast<int>(servers_.size()))?servers_[n]:0;
+    return (n >=0 && n < static_cast<int>(servers_.size()))?servers_[n]:nullptr;
 }
 
 ServerHandler* VModelData::serverHandler(int n) const
 {
-    return (n >=0 && n < static_cast<int>(servers_.size()))?servers_[n]->server_:0;
+    return (n >=0 && n < static_cast<int>(servers_.size()))?servers_[n]->server_:nullptr;
 }
 
 int VModelData::indexOfServer(void* idPointer) const
@@ -1199,7 +1199,7 @@ ServerHandler* VModelData::serverHandler(void* idPointer) const
         if(servers_[i] == idPointer)
             return servers_[i]->server_;
 
-	return NULL;
+	return nullptr;
 }
 
 VModelServer* VModelData::server(const void* idPointer) const
@@ -1208,7 +1208,7 @@ VModelServer* VModelData::server(const void* idPointer) const
         if(servers_[i] == idPointer)
             return servers_[i];
 
-	return NULL;
+	return nullptr;
 }
 
 VModelServer* VModelData::server(const std::string& name) const
@@ -1217,7 +1217,7 @@ VModelServer* VModelData::server(const std::string& name) const
         if(servers_[i]->server_->name()  == name)
             return servers_[i];
 
-    return NULL;
+    return nullptr;
 }
 
 VModelServer* VModelData::server(ServerHandler* s) const
@@ -1226,7 +1226,7 @@ VModelServer* VModelData::server(ServerHandler* s) const
         if(servers_[i]->server_ == s)
             return servers_[i];
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -1460,7 +1460,7 @@ void VTreeModelData::add(ServerHandler *server)
     //We need to check it. See the comment in VModelData::notifyServerFilterAdded
     UI_ASSERT(indexOfServer(server) == -1,"server=" << server->name());
 
-    VModelServer* d=NULL;
+    VModelServer* d=nullptr;
 
     d=new VTreeServer(server,filterDef_,attrFilter_);
 
@@ -1515,7 +1515,7 @@ void VTableModelData::add(ServerHandler *server)
     //We need to check it. See the comment in VModelData::notifyServerFilterAdded
     UI_ASSERT(indexOfServer(server) == -1,"server=" << server->name());
 
-    VModelServer* d=NULL;
+    VModelServer* d=nullptr;
 
 	d=new VTableServer(server,filterDef_);
 
@@ -1621,7 +1621,7 @@ VNode* VTableModelData::nodeAt(int totalRow)
 	int cnt=0;
 
 	if(totalRow < 0)
-		return NULL;
+		return nullptr;
 
     for(int i=0; i < serverNum_; i++)
 	{
@@ -1633,5 +1633,5 @@ VNode* VTableModelData::nodeAt(int totalRow)
         cnt+= servers_[i]->nodeNum();
 	}
 
-	return NULL;
+	return nullptr;
 }

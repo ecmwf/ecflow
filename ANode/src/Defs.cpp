@@ -427,7 +427,7 @@ suite_ptr Defs::removeSuite(suite_ptr s)
 {
 	auto i = std::find(suiteVec_.begin(), suiteVec_.end(),s);
  	if ( i != suiteVec_.end()) {
- 	   s->set_defs(NULL);              // allows suite to added to different defs
+ 	   s->set_defs(nullptr);              // allows suite to added to different defs
 		suiteVec_.erase(i);             // iterator invalidated
 	 	Ecf::incr_modify_change_no();
 	 	client_suite_mgr_.suite_deleted_in_defs(s); // must be after Ecf::incr_modify_change_no();
@@ -458,7 +458,7 @@ node_ptr Defs::removeChild(Node* child)
  	for(size_t t = 0; t < vecSize; t++)     {
  		if (suiteVec_[t].get() == child) {
  		 	Ecf::incr_modify_change_no();
- 		   suiteVec_[t]->set_defs(NULL); // Must be set to NULL, allows suite to be added to different defs
+ 		   suiteVec_[t]->set_defs(nullptr); // Must be set to NULL, allows suite to be added to different defs
  		 	client_suite_mgr_.suite_deleted_in_defs(suiteVec_[t]); // must be after Ecf::incr_modify_change_no();
  			node_ptr node = std::dynamic_pointer_cast<Node>(suiteVec_[t]);
  			suiteVec_.erase( suiteVec_.begin() + t);
@@ -1013,7 +1013,7 @@ bool Defs::doDeleteChild(Node* nodeToBeDeleted)
  		if ( (*s).get() == nodeToBeDeleted) {
   		 	Ecf::incr_modify_change_no();
   		 	client_suite_mgr_.suite_deleted_in_defs(*s); // must be after Ecf::incr_modify_change_no();
-  		 	(*s)->set_defs(NULL); // Must be set to NULL, allows re-added to a different defs
+  		 	(*s)->set_defs(nullptr); // Must be set to NULL, allows re-added to a different defs
   			suiteVec_.erase(s);
   			set_most_significant_state(); // must be after suiteVec_.erase(s);
   			return true;
@@ -1108,7 +1108,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 	// Create/Add nodes as needed for a *PARTIAL* match
 	// If the path is /a/b/c/d/e/f it may be that path /a/b already exists
 	// hence we need only create the missing nodes   c, d, e, f
-	LOG_ASSERT( serverNode == NULL, "" );
+	LOG_ASSERT( serverNode == nullptr, "" );
 	node_ptr server_parent;
 	Node* last_client_child = clientNode.get(); // remember the last child
  	Node* client_parent = clientNode->parent();
@@ -1120,7 +1120,7 @@ node_ptr Defs::replaceChild(const std::string& path,
       last_client_child = client_parent;
       client_parent = client_parent->parent();
 	}
-	if (server_parent.get() == NULL) {
+	if (server_parent.get() == nullptr) {
 		// NOT EVEN A PARTIAL path match, hence move over WHOLE suite, detach from client and add to server
       node_ptr client_suite_to_add = clientNode->suite()->remove();
  		bool addOk = addChild( client_suite_to_add  );

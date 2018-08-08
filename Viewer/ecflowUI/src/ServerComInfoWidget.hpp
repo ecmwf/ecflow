@@ -38,7 +38,7 @@ class ServerRefreshInfoWidget : public QWidget, public ServerObserver, public Se
 Q_OBJECT
 
 public:
-    explicit ServerRefreshInfoWidget(QAction* refreshAction,QWidget* parent=0);
+    explicit ServerRefreshInfoWidget(QAction* refreshAction,QWidget* parent=nullptr);
     ~ServerRefreshInfoWidget();
 
     void setServer(ServerHandler* server);
@@ -173,7 +173,7 @@ class ServerComActivityLine : public QWidget
 //Q_OBJECT
 
 public:
-    explicit ServerComActivityLine(QWidget* parent=0);
+    explicit ServerComActivityLine(QWidget* parent=nullptr);
 
     void setServer(ServerHandler* server);
 

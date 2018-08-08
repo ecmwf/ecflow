@@ -21,7 +21,7 @@
 
 DashboardDialog::DashboardDialog(QWidget *parent) :
 	QDialog(parent),
-	dw_(0)
+	dw_(nullptr)
 {
 	setupUi(this);
 

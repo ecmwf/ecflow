@@ -22,7 +22,7 @@ class PlainTextEdit : public QPlainTextEdit, public VPropertyObserver
 Q_OBJECT
 
 public:
-    explicit PlainTextEdit(QWidget* parent = 0);
+    explicit PlainTextEdit(QWidget* parent = nullptr);
 	~PlainTextEdit();
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
@@ -32,7 +32,7 @@ public:
     void setShowLineNumbers(bool b);
 
     void cursorRowCol(int *row, int *col);
-    QChar characterBehindCursor(QTextCursor *cursor=0);
+    QChar characterBehindCursor(QTextCursor *cursor=nullptr);
 
     int numLinesSelected();
     bool findString(const QString &,QTextDocument::FindFlags,bool replace=false,const QString &r=emptyString_);

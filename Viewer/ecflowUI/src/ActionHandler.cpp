@@ -165,12 +165,12 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 
         else
         {
-            CustomCommandDialog *customCommandDialog = NULL;
+            CustomCommandDialog *customCommandDialog = nullptr;
 
             if(item->command() == "custom")  // would expect this to be 'Custom...' but it's just 'Custom'
             {
                 // invoke the custom command dialogue
-                customCommandDialog = new CustomCommandDialog(0);
+                customCommandDialog = new CustomCommandDialog(nullptr);
                 customCommandDialog->setNodes(filteredNodes);
                 if (customCommandDialog->exec() == QDialog::Accepted)
                 {

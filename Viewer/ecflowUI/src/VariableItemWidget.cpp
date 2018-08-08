@@ -150,7 +150,7 @@ void VariablePropDialog::accept()
             {
                 QString type=QString::fromStdString(data_->data(i)->type());
                 QString path =QString::fromStdString(data_->data(i)->fullPath());
-                if(QMessageBox::question(0,tr("Confirm: create new variable"),
+                if(QMessageBox::question(nullptr,tr("Confirm: create new variable"),
                     tr("Variable <b>") + name + tr("</b> is originally defined in ") + type + " <b>" + path +
                        tr("</b>. A new user variable will be created for ") +  nodeType_ + " <b>"  + nodeName_ +
                        tr("</b> and shadow the original one.<br><br>Do you want to proceed?"),
@@ -167,7 +167,7 @@ void VariablePropDialog::accept()
         }
 
         //It is a ne variable
-		if(QMessageBox::question(0,tr("Confirm: create new variable"),
+		if(QMessageBox::question(nullptr,tr("Confirm: create new variable"),
                         tr("You are about to create a <b>new</b> variable in ") + nodeType_ + " <b>" + nodeName_ + "</b>." +
                             tr("<br>Do you want to proceed?"),
                         QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
@@ -182,7 +182,7 @@ void VariablePropDialog::accept()
 	}
     else if(data_->data(0)->isGenVar(name.toStdString()))
     {
-		if(QMessageBox::question(0,QObject::tr("Confirm: change variable"),
+		if(QMessageBox::question(nullptr,QObject::tr("Confirm: change variable"),
 						tr("You are about to modify a <b>generated variable</b>.<br>Do you want to proceed?"),
 					QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel)  == QMessageBox::Cancel)
 		{			
@@ -424,7 +424,7 @@ void VariableAddDialog::accept()
 
     if(name.simplified().isEmpty())
     {
-        QMessageBox::critical(0,tr("Invalid variable name"),
+        QMessageBox::critical(nullptr,tr("Invalid variable name"),
                      tr("Variable name cannot be empty! Please specify a valid name!"),
                       QMessageBox::Ok,QMessageBox::Ok);
         return;
@@ -450,7 +450,7 @@ void VariableAddDialog::accept()
                 tr(".<br>Do you want to overwrite it?");
         }
 
-        if(QMessageBox::question(0,tr("Confirm: overwrite variable"),q,
+        if(QMessageBox::question(nullptr,tr("Confirm: overwrite variable"),q,
            QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
         {
             return;
@@ -484,7 +484,7 @@ void VariableAddDialog::accept()
                     nodeName_ + tr(" </b> and shadow the original one. \
                     <br>Do you want to proceed?");
 
-            if(QMessageBox::question(0,tr("Confirm: overwrite variable"),q,
+            if(QMessageBox::question(nullptr,tr("Confirm: overwrite variable"),q,
 					    QMessageBox::Ok|QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Cancel)
             {
                 return;
@@ -625,7 +625,7 @@ void VariableAddDialog::readSettings()
 //========================================================
 
 VariableItemWidget::VariableItemWidget(QWidget *parent) :
-    shadowProp_(0),
+    shadowProp_(nullptr),
     canSaveLastSelection_(true)
 {
 	//This item displays all the ancestors of the info object
@@ -1003,7 +1003,7 @@ void VariableItemWidget::removeItem(const QModelIndex& index)
         std::string nodePath=data->fullPath();
         std::string nodeName=data->name();
 
-        if(QMessageBox::question(0,tr("Confirm: delete variable"),
+        if(QMessageBox::question(nullptr,tr("Confirm: delete variable"),
 						tr("Are you sure that you want to delete variable <b>") + name + "</b> from " +
 						QString::fromStdString(data->type()) + " <b>" + QString::fromStdString(data->name()) +  "</b>?",
 					    QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)

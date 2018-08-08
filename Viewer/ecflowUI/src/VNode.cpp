@@ -59,7 +59,7 @@ public:
         for(std::size_t i=0; i < num; i++)
         {
             VItem* triggered=s->nodeAt(data_[i]);
-            tc->add(triggered,0,TriggerCollector::Normal);
+            tc->add(triggered,nullptr,TriggerCollector::Normal);
         }
     }
     void add(VItem* n)
@@ -138,7 +138,7 @@ VNode::VNode(VNode* parent,node_ptr node) :
     cachedAttrNum_(-1),
 #endif
     index_(-1),
-    data_(NULL)
+    data_(nullptr)
 {
 	if(parent_)
 		parent_->addChild(this);
@@ -165,7 +165,7 @@ VServer* VNode::root() const
 
 ServerHandler* VNode::server() const
 {
-	return (parent_)?(parent_->server()):NULL;
+	return (parent_)?(parent_->server()):nullptr;
 }
 
 VNode* VNode::suite() const
@@ -183,7 +183,7 @@ VNode* VNode::suite() const
 
     assert(0);
 
-    return NULL;
+    return nullptr;
 }
 
 bool VNode::isTopLevel() const
@@ -255,7 +255,7 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
         int n=0;
         auto cnt=static_cast<int>(attr_.size());
         if(row >= cnt)
-            return 0;
+            return nullptr;
 
         for(int i=0; i < cnt; i++)
         {
@@ -274,7 +274,7 @@ VAttribute* VNode::attribute(int row,AttributeFilter *filter) const
         return attr_[row];
     }
 
-    return 0;
+    return nullptr;
 }
 
 VAttribute* VNode::attributeForType(int row,VAttributeType *t) const
@@ -283,7 +283,7 @@ VAttribute* VNode::attributeForType(int row,VAttributeType *t) const
 
     auto cnt=static_cast<int>(attr_.size());
     if(row >= cnt)
-        return 0;
+        return nullptr;
 
     bool hasIt=false;
     int rowCnt=0;
@@ -300,11 +300,11 @@ VAttribute* VNode::attributeForType(int row,VAttributeType *t) const
         }
         else if(hasIt)
         {
-            return 0;
+            return nullptr;
         }
     }
 
-    return 0;
+    return nullptr;
 }
 
 int VNode::indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const
@@ -341,7 +341,7 @@ VAttribute* VNode::findAttribute(const std::string& typeName,const std::string& 
 {
     VAttributeType *t=VAttributeType::find(typeName);
     Q_ASSERT(t);
-    return (t)?findAttribute(t,name):0;
+    return (t)?findAttribute(t,name):nullptr;
 }
 
 VAttribute* VNode::findAttribute(VAttributeType *t,const std::string& name)
@@ -359,9 +359,9 @@ VAttribute* VNode::findAttribute(VAttributeType *t,const std::string& name)
             hasType=true;
         }
         else if(hasType)
-            return 0;
+            return nullptr;
     }
-    return 0;
+    return nullptr;
 }
 
 
@@ -373,7 +373,7 @@ VAttribute* VNode::findAttribute(QStringList aData)
         if(attr_[i]->sameAs(aData))
             return attr_[i];
     }
-    return 0;
+    return nullptr;
 }
 
 void VNode::findAttributes(VAttributeType *t,std::vector<VAttribute*>& v)
@@ -441,7 +441,7 @@ VNode *VNode::findChild(const std::string& name) const
         if(i->sameName(name))
 			return i;
 	}
-	return 0;
+	return nullptr;
 }
 
 void VNode::collect(std::vector<VNode*>& vec) const
@@ -476,7 +476,7 @@ VNode* VNode::find(const std::vector<std::string>& pathVec)
 	std::vector<std::string> rest(pathVec.begin()+1,pathVec.end());
 	VNode *n = findChild(pathVec.at(0));
 
-	return n?n->find(rest):NULL;
+	return n?n->find(rest):nullptr;
 }
 
 std::string VNode::genVariable(const std::string& key) const
@@ -761,7 +761,7 @@ VNode* VNode::ancestorAt(int idx,SortMode sortMode)
         return nodes[idx];
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 const std::string&  VNode::nodeType()
@@ -909,7 +909,7 @@ void VNode::triggerExpr(std::string& trigger, std::string& complete) const
 //Collect the information about all the triggers triggering this node
 void VNode::triggers(TriggerCollector* tlc)
 {
-    VItem* nullItem=0;
+    VItem* nullItem=nullptr;
     //Check the node itself
     //if(tlr.self())
     {
@@ -1008,7 +1008,7 @@ void VNode::clearTriggerData()
 {
     if(data_)
         delete data_;
-    data_=0;
+    data_=nullptr;
 }
 
 //These are called during the scan for triggered nodes
@@ -1074,7 +1074,7 @@ void VNode::triggeredByChildren(VNode *n,VNode* p,TriggerCollector* tlc)
 VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
 {
    // if (!strncmp("/", path.c_str(), 1))
-   VAttribute* nullItem=0;
+   VAttribute* nullItem=nullptr;
 
 #if 0
    if(!path.empty() && path[0] == '/')
@@ -1167,7 +1167,7 @@ void VNode::print()
 //=================================================
 
 VServer::VServer(ServerHandler* server) :
-	VNode(0,node_ptr()),
+	VNode(nullptr,node_ptr()),
 	server_(server),
     totalNum_(0),
     triggeredScanned_(false)
@@ -1337,7 +1337,7 @@ VNode* VServer::toVNode(const Node* nc) const
 VNode* VServer::find(const std::string& fullPath)
 {
 	if(fullPath.empty())
-		return NULL;
+		return nullptr;
 
 	if(fullPath == "/")
 		return this;
@@ -1508,7 +1508,7 @@ void VServer::scan(VNode *node,bool hasNotifications)
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{
-		VNode* vn=NULL;
+		VNode* vn=nullptr;
 		if((*it)->isTask())
 		{
             vn=new VTaskNode(node,*it);
@@ -1572,7 +1572,7 @@ void VServer::beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspe
     //Update the generated variables. There is no notification about their change so we have to do it!!!
 	if(node->node())
 	{
-		Suite *s=NULL;
+		Suite *s=nullptr;
 		s=node->node()->isSuite();
 		if(!s)
 		{

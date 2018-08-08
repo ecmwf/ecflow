@@ -27,7 +27,7 @@ class CommandDesignerWidget : public QWidget, private Ui::commandDesignerWidget
 	Q_OBJECT
 
 public:
-	explicit CommandDesignerWidget(QWidget *parent = 0);
+	explicit CommandDesignerWidget(QWidget *parent = nullptr);
 	~CommandDesignerWidget();
 
 	MenuItem &menuItem();

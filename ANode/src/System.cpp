@@ -64,11 +64,11 @@ volatile int process_status_change_ = 0;
 // ===========================================================================
 // System
 // ===========================================================================
-System* System::instance_ = NULL;
+System* System::instance_ = nullptr;
 
 System* System::instance()
 {
-	if ( instance_ == NULL) {
+	if ( instance_ == nullptr) {
 
 	   // Block SIGCHLD so that we control, when child process termination is handled
 	   ecf::Signal::block_sigchild();
@@ -89,7 +89,7 @@ System* System::instance()
 void System::destroy()
 {
 	delete instance_;
-	instance_ = NULL;
+	instance_ = nullptr;
 }
 
 System::System() = default;
@@ -159,7 +159,7 @@ int System::sys(const std::string& cmdToSpawn,const std::string& absPath,std::st
       int fd_limit = sysconf(_SC_OPEN_MAX);
       for (int i=3; i<fd_limit; i++) close(i);
 
-		execl( "/bin/sh", "sh", "-c", cmdToSpawn.c_str(), (char *)NULL );
+		execl( "/bin/sh", "sh", "-c", cmdToSpawn.c_str(), (char *)nullptr );
 		/*
 		 *  Maybe the file protection failed (no executable bit set)
 		 *  or the shell couldn't be found. Look at man execve(2).

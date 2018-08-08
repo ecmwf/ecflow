@@ -34,7 +34,7 @@ class ChangeNotifyDialogButton : public QToolButton
 Q_OBJECT
 
 public:
-    explicit ChangeNotifyDialogButton(QWidget* parent=0);
+    explicit ChangeNotifyDialogButton(QWidget* parent=nullptr);
 
     void setNotifier(ChangeNotify*);
     void updateSettings();
@@ -53,7 +53,7 @@ class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialo
  Q_OBJECT
 
 public:
-	explicit ChangeNotifyDialogWidget(QWidget* parent=0);
+	explicit ChangeNotifyDialogWidget(QWidget* parent=nullptr);
     ~ChangeNotifyDialogWidget() = default;
 
 	void init(ChangeNotify*);
@@ -78,7 +78,7 @@ class ChangeNotifyDialog : public QDialog, protected Ui::ChangeNotifyDialog
 Q_OBJECT
 
 public:
-	explicit ChangeNotifyDialog(QWidget *parent=0);
+	explicit ChangeNotifyDialog(QWidget *parent=nullptr);
 	~ChangeNotifyDialog();
 
     void add(ChangeNotify*);

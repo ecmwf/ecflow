@@ -29,7 +29,7 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client) :
 	QObject(server),
 	server_(server),
 	client_(client),
-    comThread_(0),
+    comThread_(nullptr),
 	timeout_(5),
     ctStartTimeout_(1000),
     ctStartWaitTimeout_(500), //wait() is a blocking call, so it should be short
@@ -61,7 +61,7 @@ ServerComQueue::~ServerComQueue()
 	tasks_.clear();
 
 	//Disconnects all the signals from the thread
-	comThread_->disconnect(0,this);
+	comThread_->disconnect(nullptr,this);
 
 	//If the comthread is running we need to wait
 	//until it finishes its task.

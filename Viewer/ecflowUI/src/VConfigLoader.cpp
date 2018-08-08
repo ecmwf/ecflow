@@ -15,11 +15,11 @@
 
 typedef std::multimap<std::string,VConfigLoader*> Map;
 
-static Map* makers = 0;
+static Map* makers = nullptr;
 
 VConfigLoader::VConfigLoader(const std::string& name)
 {
-    if(makers == 0)
+    if(makers == nullptr)
         makers = new Map();
 
     makers->insert(Map::value_type(name,this));

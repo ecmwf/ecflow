@@ -53,7 +53,7 @@ class InfoPanel : public DashboardWidget, public ServerObserver, public VInfoObs
     Q_OBJECT
 
 public:
-    explicit InfoPanel(QWidget* parent=0);
+    explicit InfoPanel(QWidget* parent=nullptr);
 	virtual ~InfoPanel();
 	bool frozen() const;
     void clear();

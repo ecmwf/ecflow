@@ -26,7 +26,7 @@ class SuiteItemWidget : public QWidget, public InfoPanelItem, public SuiteFilter
 Q_OBJECT
 
 public:
-	explicit SuiteItemWidget(QWidget *parent=0);
+	explicit SuiteItemWidget(QWidget *parent=nullptr);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

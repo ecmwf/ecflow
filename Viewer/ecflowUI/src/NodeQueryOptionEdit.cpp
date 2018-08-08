@@ -48,10 +48,10 @@ void NodeQueryOptionEdit::init(NodeQuery* query)
 NodeQueryStringOptionEdit::NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,
                                                      QWidget* parent,bool sameRow) :
     NodeQueryOptionEdit(option->name(),grid,parent),
-    label_(0),
-    matchCb_(0),
-    le_(0),
-    option_(0)
+    label_(nullptr),
+    matchCb_(nullptr),
+    le_(nullptr),
+    option_(nullptr)
 {
     label_=new QLabel(option->label() + ":",parent_);
     matchCb_=new StringMatchCombo(parent_);
@@ -150,10 +150,10 @@ void NodeQueryStringOptionEdit::setVisible(bool st)
 
 NodeQueryListOptionEdit::NodeQueryListOptionEdit(NodeQueryOption *option,CustomListWidget* list,
                                                  QToolButton* tb,QWidget* parent) :
-     NodeQueryOptionEdit(option->name(),0,parent),
+     NodeQueryOptionEdit(option->name(),nullptr,parent),
      list_(list),
      resetTb_(tb),
-     option_(0)
+     option_(nullptr)
 {
     option_=static_cast<NodeQueryListOption*>(option);
     Q_ASSERT(option_);
@@ -206,8 +206,8 @@ void NodeQueryListOptionEdit::slotListChanged()
 
 NodeQueryComboOptionEdit::NodeQueryComboOptionEdit(NodeQueryOption *option,QGridLayout* grid, QWidget* parent) :
      NodeQueryOptionEdit(option->name(),grid,parent),
-     cb_(0),
-     option_(0)
+     cb_(nullptr),
+     option_(nullptr)
 {
     option_=static_cast<NodeQueryComboOption*>(option);
     Q_ASSERT(option_);
@@ -276,7 +276,7 @@ void NodeQueryComboOptionEdit::setVisible(bool st)
 
 NodeQueryPeriodOptionEdit::NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget *parent) :
   NodeQueryOptionEdit(option->name(),grid,parent),
-  option_(0)
+  option_(nullptr)
 {
     int row=grid_->rowCount();
 

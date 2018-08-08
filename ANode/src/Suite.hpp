@@ -27,23 +27,23 @@ class Suite : public NodeContainer {
 public:
    explicit Suite( const std::string& name )
    : NodeContainer(name),
-     defs_(NULL),
+     defs_(nullptr),
      begun_(false),
      state_change_no_(0),
      modify_change_no_(0),
      begun_change_no_(0),
      calendar_change_no_(0),
-     suite_gen_variables_(NULL)
+     suite_gen_variables_(nullptr)
      {}
 
    Suite()
-   : defs_(NULL),
+   : defs_(nullptr),
      begun_(false),
      state_change_no_(0),
      modify_change_no_(0),
      begun_change_no_(0),
      calendar_change_no_(0),
-     suite_gen_variables_(NULL)
+     suite_gen_variables_(nullptr)
      {}
 
    Suite( const Suite&);

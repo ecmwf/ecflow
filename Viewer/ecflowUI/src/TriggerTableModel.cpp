@@ -21,7 +21,7 @@
 
 TriggerTableModel::TriggerTableModel(Mode mode,QObject *parent) :
           QAbstractItemModel(parent),
-          tc_(0),      
+          tc_(nullptr),      
           mode_(mode)
 {
 }
@@ -33,7 +33,7 @@ TriggerTableModel::~TriggerTableModel()
 void TriggerTableModel::clearData()
 {
     beginResetModel();
-    tc_=0;
+    tc_=nullptr;
     endResetModel();
 }
 
@@ -151,7 +151,7 @@ QVariant TriggerTableModel::data( const QModelIndex& index, int role ) const
             }
             else if(role == IconRole)
             {
-                return VIcon::pixmapList(vnode,0);
+                return VIcon::pixmapList(vnode,nullptr);
             }
             else if(role  == NodeTypeRole)
             {
@@ -256,11 +256,11 @@ QModelIndex TriggerTableModel::itemToIndex(TriggerTableItem *item)
 TriggerTableItem* TriggerTableModel::indexToItem(const QModelIndex& index) const
 {
     if(!hasData())
-        return 0;
+        return nullptr;
 
     int row=index.row();
     if(row < 0 || row >= static_cast<int>(tc_->size()))
-        return 0;
+        return nullptr;
 
     const std::vector<TriggerTableItem*>& items=tc_->items();
     return items[row];

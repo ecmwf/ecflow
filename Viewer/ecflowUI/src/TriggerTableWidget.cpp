@@ -134,7 +134,7 @@ void TriggerTableWidget::setInfo(VInfo_ptr info)
     nodeCollector_->clear();
     if(info_)
     {
-        nodeCollector_->add(info_->item(),0,TriggerCollector::Normal);
+        nodeCollector_->add(info_->item(),nullptr,TriggerCollector::Normal);
     }
     nodeModel_->setTriggerCollector(nodeCollector_);
     nodeModel_->endUpdate();
@@ -167,7 +167,7 @@ void TriggerTableWidget::slotTriggerSelection(TriggerTableItem* item)
     QString tgName,tgType;
     QColor col(255,255,255);
 
-    VItem* currentItem=0;
+    VItem* currentItem=nullptr;
     if(info_)
         currentItem=info_->item();
 
@@ -221,7 +221,7 @@ void TriggerTableWidget::slotTriggeredSelection(TriggerTableItem* item)
     QString tgType,tgName;
     QColor col(255,255,255);
 
-    VItem* currentItem=0;
+    VItem* currentItem=nullptr;
     if(info_)
         currentItem=info_->item();
 

@@ -28,7 +28,7 @@ class LogProvider : public QObject, public InfoProvider
    Q_OBJECT
 
 public:
-   LogProvider(InfoPresenter* owner,QObject* parent=0);
+   LogProvider(InfoPresenter* owner,QObject* parent=nullptr);
 
    void visit(VInfoServer*);
    void clear();

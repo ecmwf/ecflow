@@ -54,7 +54,7 @@ void TextFilterAddDialog::accept()
     TextFilterItem it=item();
     if(TextFilterHandler::Instance()->contains(it.filter(),it.matched(),it.caseSensitive()))
     {
-        QMessageBox::critical(0,tr("Save text filter"), "Cannot save text filter! A text filter with the same regexp: <b>" +
+        QMessageBox::critical(nullptr,tr("Save text filter"), "Cannot save text filter! A text filter with the same regexp: <b>" +
                               QString::fromStdString(it.filter()) +
                               "</b> and settings already exists!");
         return;
@@ -99,7 +99,7 @@ void TextFilterEditDialog::accept()
 
         if(TextFilterHandler::Instance()->containsExceptOne(itemIndex_,it.filter(),it.matched(),it.caseSensitive()))
         {
-            QMessageBox::critical(0,tr("Save text filter"), "Cannot save text filter! A text filter with the same regexp: <b>" +
+            QMessageBox::critical(nullptr,tr("Save text filter"), "Cannot save text filter! A text filter with the same regexp: <b>" +
                                   QString::fromStdString(it.filter())+
                               "</b> and settings already exists!");
             return;

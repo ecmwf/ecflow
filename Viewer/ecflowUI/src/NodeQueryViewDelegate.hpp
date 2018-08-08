@@ -27,7 +27,7 @@ class ModelColumn;
 class NodeQueryViewDelegate : public NodeViewDelegate
 {
 public:
-    explicit NodeQueryViewDelegate(QWidget *parent=0);
+    explicit NodeQueryViewDelegate(QWidget *parent=nullptr);
     ~NodeQueryViewDelegate();
 
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;

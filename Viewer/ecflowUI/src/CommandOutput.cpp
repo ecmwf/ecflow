@@ -12,7 +12,7 @@
 
 #include "CommandOutputDialog.hpp"
 
-CommandOutputHandler* CommandOutputHandler::instance_=0;
+CommandOutputHandler* CommandOutputHandler::instance_=nullptr;
 
 //===============================================
 //
@@ -109,7 +109,7 @@ CommandOutputHandler::CommandOutputHandler(QObject* parent) :
 CommandOutputHandler* CommandOutputHandler::instance()
 {
     if(!instance_)
-        instance_=new CommandOutputHandler(0);
+        instance_=new CommandOutputHandler(nullptr);
 
     return instance_;
 }

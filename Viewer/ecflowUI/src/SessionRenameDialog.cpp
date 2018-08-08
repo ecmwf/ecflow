@@ -32,7 +32,7 @@ void SessionRenameDialog::on_buttonBox__accepted()
     // check it does not clash with an existing session name
     if (SessionHandler::instance()->find(newName_))
     {
-        QMessageBox::critical(0,tr("Rename session"), tr("A session with that name already exists - please choose another name"));
+        QMessageBox::critical(nullptr,tr("Rename session"), tr("A session with that name already exists - please choose another name"));
     }
     else
     {

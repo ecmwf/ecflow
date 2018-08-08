@@ -43,9 +43,9 @@ public:
     virtual void load(VSettings*)=0;
     virtual void save(VSettings*)=0;
 
-    virtual NodeQueryStringOption* isString() const {return NULL;}
-    virtual NodeQueryListOption* isList() const {return NULL;}
-    virtual NodeQueryComboOption* isCombo() const {return NULL;}
+    virtual NodeQueryStringOption* isString() const {return nullptr;}
+    virtual NodeQueryListOption* isList() const {return nullptr;}
+    virtual NodeQueryComboOption* isCombo() const {return nullptr;}
 
     static void build(NodeQuery*);
 

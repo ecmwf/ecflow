@@ -23,7 +23,7 @@
 
 OutputDirProvider::OutputDirProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::NoTask),
-    outClient_(NULL),
+    outClient_(nullptr),
     currentTask_(-1)
 {
 }
@@ -33,7 +33,7 @@ void OutputDirProvider::clear()
 	if(outClient_)
 	{
 		delete outClient_;
-		outClient_=NULL;
+		outClient_=nullptr;
 	}
 
     queue_.clear();
@@ -378,7 +378,7 @@ OutputDirClient* OutputDirProvider::makeOutputClient(const std::string& host,con
         if(outClient_->host() != host || outClient_->portStr() != port)
         {
             delete outClient_;
-            outClient_=0;
+            outClient_=nullptr;
         }
     }
 

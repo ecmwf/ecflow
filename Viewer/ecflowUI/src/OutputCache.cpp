@@ -97,7 +97,7 @@ void OutputCache::clear()
 OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,VFile_ptr file)
 {
     if(!file)
-        return NULL;
+        return nullptr;
 
 #ifdef _UI_OUTPUTCACHE_DEBUG
     UI_FUNCTION_LOG
@@ -134,13 +134,13 @@ OutputCacheItem* OutputCache::add(VInfo_ptr info,const std::string& sourcePath,V
         }
     }
 
-    return NULL;
+    return nullptr;
 }    
 
 //Attach one item and detach all the others
 OutputCacheItem* OutputCache::attachOne(VInfo_ptr info,const std::string& fileName)
 {
-    OutputCacheItem* attachedItem=0;
+    OutputCacheItem* attachedItem=nullptr;
     if(info && info->isNode() && info->server())
     {
         QString inPath=QString::fromStdString(info->path() + ":");

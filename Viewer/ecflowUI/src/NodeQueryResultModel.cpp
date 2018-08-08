@@ -21,7 +21,7 @@
 
 NodeQueryResultModel::NodeQueryResultModel(QObject *parent) :
           QAbstractItemModel(parent),
-          columns_(0)
+          columns_(nullptr)
 {
 	columns_=ModelColumn::def("query_columns");
     Q_ASSERT(columns_);

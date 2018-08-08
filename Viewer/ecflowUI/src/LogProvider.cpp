@@ -25,7 +25,7 @@
 LogProvider::LogProvider(InfoPresenter* owner,QObject* parent) :
 	QObject(parent),
 	InfoProvider(owner,VTask::HistoryTask),
-    fileWatcher_(0)
+    fileWatcher_(nullptr)
 {
     //NOTE: fileWatcher_'s parent (if it exists) will be "this", so
 	//fileWatcher_ will be automatically deleted in the destructor!
@@ -162,7 +162,7 @@ void LogProvider::stopWatchFile()
 	if(fileWatcher_)
 	{
 		delete fileWatcher_;
-		fileWatcher_=0;
+		fileWatcher_=nullptr;
 	}
 
 	inAutoUpdate_=false;

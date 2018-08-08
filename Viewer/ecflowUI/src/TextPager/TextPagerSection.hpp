@@ -49,7 +49,7 @@ public:
 private:
     struct Data {
         Data(int p, int s, TextPagerDocument *doc, const QTextCharFormat &f, const QVariant &d)
-            : position(p), size(s), priority(0), document(doc), textEdit(0), format(f), data(d), hasCursor(false)
+            : position(p), size(s), priority(0), document(doc), textEdit(nullptr), format(f), data(d), hasCursor(false)
         {}
         int position, size, priority;
         TextPagerDocument *document;

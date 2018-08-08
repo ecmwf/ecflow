@@ -36,7 +36,7 @@ bool add = false;
 TextPagerWidget::TextPagerWidget(QWidget *parent) :
    //TextPagerEdit(parent),
    doLineNumbers(true),
-   gotoLineDialog_(NULL)
+   gotoLineDialog_(nullptr)
 {
 	auto* hb=new QHBoxLayout(this);
 	hb->setContentsMargins(0,0,0,0);
@@ -58,7 +58,7 @@ void TextPagerWidget::clear()
 
 bool TextPagerWidget::load(const QString &fileName, TextPagerDocument::DeviceMode mode)
 {
-	return textEditor_->load(fileName, mode, NULL);
+	return textEditor_->load(fileName, mode, nullptr);
 }
 
 void TextPagerWidget::setText(const QString &txt)

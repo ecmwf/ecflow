@@ -911,7 +911,7 @@ void NodePathWidget::slotContextMenu(const QPoint& pos)
 
 void NodePathWidget::adjust(VInfo_ptr info,ServerHandler** serverOut,bool &sameServer)
 {
-    ServerHandler* server=0;
+    ServerHandler* server=nullptr;
 
   	//Check if there is data in info
     if(info)
@@ -994,7 +994,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
     setEnabled(true);
 
-  	ServerHandler *server=0;
+  	ServerHandler *server=nullptr;
   	bool sameServer=false;
 
   	VInfo_ptr info_ori=info_;
@@ -1051,7 +1051,7 @@ void NodePathWidget::setPath(VInfo_ptr info)
 
 		QColor col;
 		QString name;
-		NodePathItem* nodeItem=0;
+		NodePathItem* nodeItem=nullptr;
 
 		VNode *n=lst.at(i);
 		col=n->stateColour(); 

@@ -18,7 +18,7 @@
 
 DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
         QWidget(parent),
-        titleBc_(0)
+        titleBc_(nullptr)
 {
 	setupUi(this);
 

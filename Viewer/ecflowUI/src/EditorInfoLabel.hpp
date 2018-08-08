@@ -16,7 +16,7 @@
 class EditorInfoLabel : public QLabel
 {
 public:
-    explicit EditorInfoLabel(QWidget* parent=0);
+    explicit EditorInfoLabel(QWidget* parent=nullptr);
     void setInfo(QString parent,QString type);
 
     static QString formatKeyLabel(QString n);

@@ -31,13 +31,13 @@ public:
     virtual ~VItem() = default;
 
     VNode* parent() const {return parent_;}
-    virtual VServer* isServer() const {return NULL;}
-    virtual VNode* isNode() const {return NULL;}
-    virtual VSuiteNode* isSuite() const {return NULL;}
-    virtual VFamilyNode* isFamily() const {return NULL;}
-    virtual VTaskNode* isTask() const {return NULL;}
-    virtual VAliasNode* isAlias() const {return NULL;}
-    virtual VAttribute* isAttribute() const {return NULL;}
+    virtual VServer* isServer() const {return nullptr;}
+    virtual VNode* isNode() const {return nullptr;}
+    virtual VSuiteNode* isSuite() const {return nullptr;}
+    virtual VFamilyNode* isFamily() const {return nullptr;}
+    virtual VTaskNode* isTask() const {return nullptr;}
+    virtual VAliasNode* isAlias() const {return nullptr;}
+    virtual VAttribute* isAttribute() const {return nullptr;}
 
     virtual ServerHandler* server() const=0;
     virtual VServer* root() const=0;

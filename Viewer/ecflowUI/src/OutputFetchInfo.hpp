@@ -20,7 +20,7 @@ class QTextEdit;
 class OutputFetchInfo : public QWidget
 {
 public:
-    OutputFetchInfo(QWidget* parent=0);
+    OutputFetchInfo(QWidget* parent=nullptr);
     void setInfo(VReply*,VInfo_ptr);
     void clearInfo();
 

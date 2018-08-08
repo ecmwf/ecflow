@@ -17,7 +17,7 @@
 class OverviewItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
-	explicit OverviewItemWidget(QWidget *parent=0);
+	explicit OverviewItemWidget(QWidget *parent=nullptr);
 	~OverviewItemWidget();
 
 	void reload(VInfo_ptr);

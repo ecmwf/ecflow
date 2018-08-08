@@ -22,7 +22,7 @@ class TextFilterAddDialog : public QDialog, private Ui::TextFilterAddDialog
 Q_OBJECT
 
 public:
-    explicit TextFilterAddDialog(QWidget* parent=0);
+    explicit TextFilterAddDialog(QWidget* parent=nullptr);
     void init(const TextFilterItem& item);
 
 public Q_SLOTS:
@@ -37,7 +37,7 @@ class TextFilterEditDialog : public TextFilterAddDialog
 Q_OBJECT
 
 public:
-    explicit TextFilterEditDialog(QWidget* parent=0);
+    explicit TextFilterEditDialog(QWidget* parent=nullptr);
     void init(int itemIndex,const TextFilterItem& item);
 
 public Q_SLOTS:
@@ -52,7 +52,7 @@ class TextFilterHandlerDialog : public QDialog, private Ui::TextFilterHandlerDia
     Q_OBJECT
 
 public:
-    explicit TextFilterHandlerDialog(QWidget *parent = 0);
+    explicit TextFilterHandlerDialog(QWidget *parent = nullptr);
     ~TextFilterHandlerDialog();
 
     void setItemToSaveAs(QString name,QString filter,bool matched,bool caseSensitive);

@@ -15,7 +15,7 @@
 class UpdateTimer : public QTimer
 {
 public:
-    UpdateTimer(QObject* parent=0) : QTimer(parent) {}
+    UpdateTimer(QObject* parent=nullptr) : QTimer(parent) {}
     void drift(int,int);
 };
 

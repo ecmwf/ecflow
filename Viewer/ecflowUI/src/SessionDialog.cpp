@@ -183,7 +183,7 @@ void SessionDialog::on_deleteButton__clicked()
 	assert(!sessionName.empty());  // it should not be possible for the name to be empty
 
 	QString message = tr("Are you sure that you want to delete the session '") + QString::fromStdString(sessionName) + tr("'' from disk?");
-	if(QMessageBox::question(0,tr("Confirm: remove session"),
+	if(QMessageBox::question(nullptr,tr("Confirm: remove session"),
 		message,
 		QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)
 	{

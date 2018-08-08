@@ -17,7 +17,7 @@ class NodeQueryCombo : public QComboBox
 Q_OBJECT
 
 public:
-	explicit NodeQueryCombo(QWidget* parent=0);
+	explicit NodeQueryCombo(QWidget* parent=nullptr);
 
 protected Q_SLOTS:
 	void slotCurrentChanged(int current);

@@ -28,7 +28,7 @@
 #endif
 #include "TimeStamp.hpp"
 
-static LogTruncator *truncator=0;
+static LogTruncator *truncator=nullptr;
 
 //---------------------------------
 // UiFunctionLog

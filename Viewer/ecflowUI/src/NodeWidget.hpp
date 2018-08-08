@@ -53,7 +53,7 @@ protected Q_SLOTS:
     void slotSelectionChangedInBc(VInfo_ptr info);
 
 protected:
-	explicit NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidget* parent=0);
+	explicit NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidget* parent=nullptr);
 	virtual ~NodeWidget();
 
 	void updateActionState(VInfo_ptr);

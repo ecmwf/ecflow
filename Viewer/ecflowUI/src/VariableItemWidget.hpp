@@ -32,7 +32,7 @@ class VariablePropDialog : public QDialog, public VariableModelDataObserver, pri
 Q_OBJECT
 
 public:
-    VariablePropDialog(VariableModelDataHandler* data,int defineIndex,QString name,QString value,bool frozen,QWidget* parent=0);
+    VariablePropDialog(VariableModelDataHandler* data,int defineIndex,QString name,QString value,bool frozen,QWidget* parent=nullptr);
     ~VariablePropDialog();
 
 	QString name() const;
@@ -73,8 +73,8 @@ class VariableAddDialog : public QDialog, public VariableModelDataObserver, priv
 Q_OBJECT
 
 public:
-    VariableAddDialog(VariableModelDataHandler* data,QWidget* parent=0);
-    VariableAddDialog(VariableModelDataHandler* data,QString name,QString value,QWidget* parent=0);
+    VariableAddDialog(VariableModelDataHandler* data,QWidget* parent=nullptr);
+    VariableAddDialog(VariableModelDataHandler* data,QString name,QString value,QWidget* parent=nullptr);
     ~VariableAddDialog();
 
 	QString name() const;
@@ -107,7 +107,7 @@ class VariableItemWidget : public QWidget, public InfoPanelItem, protected Ui::V
 Q_OBJECT
 
 public:
-	explicit VariableItemWidget(QWidget *parent=0);
+	explicit VariableItemWidget(QWidget *parent=nullptr);
 	~VariableItemWidget();
 
 	void reload(VInfo_ptr);

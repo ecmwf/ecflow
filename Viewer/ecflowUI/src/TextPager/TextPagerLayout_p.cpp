@@ -26,7 +26,7 @@ int TextPagerLayout::viewportWidth() const
 
 int TextPagerLayout::doLayout(int index, QList<TextPagerSection*> *sections) // index is in document coordinates
 {
-    QTextLayout *textLayout = 0;
+    QTextLayout *textLayout = nullptr;
     if (!unusedTextLayouts.isEmpty()) {
         textLayout = unusedTextLayouts.takeLast();
         textLayout->clearAdditionalFormats();
@@ -233,7 +233,7 @@ void TextPagerLayout::relayoutByGeometry(int height)
     static const int extraLines = qMax(2, qgetenv("LAZYTEXTEDIT_EXTRA_LINES").toInt());
     int index = viewportPosition;
     while (index < max) {
-        index = doLayout(index, l.isEmpty() ? 0 : &l);
+        index = doLayout(index, l.isEmpty() ? nullptr : &l);
         Q_ASSERT(index == max || document->readCharacter(index - 1) == '\n');
         Q_ASSERT(!textLayouts.isEmpty());
         const int y = int(textLayouts.last()->boundingRect().bottom());
@@ -271,7 +271,7 @@ void TextPagerLayout::relayoutByPosition(int size)
     Q_ASSERT(viewportPosition == 0 || bufferReadCharacter(viewportPosition - 1) == '\n');
     int index = viewportPosition;
     while (index < max) {
-        index = doLayout(index, l.isEmpty() ? 0 : &l);
+        index = doLayout(index, l.isEmpty() ? nullptr : &l);
     }
     layoutEnd = index;
 
@@ -295,7 +295,7 @@ QTextLayout *TextPagerLayout::layoutForPosition(int pos, int *offset, int *index
         *index = -1;
 
     if (textLayouts.isEmpty() || pos < viewportPosition || pos > layoutEnd) {
-        return 0;
+        return nullptr;
     }
 
     int textLayoutOffset = viewportPosition;
@@ -312,7 +312,7 @@ QTextLayout *TextPagerLayout::layoutForPosition(int pos, int *offset, int *index
         ++i;
         textLayoutOffset += l->text().size() + 1;
     }
-    return 0;
+    return nullptr;
 }
 
 QTextLine TextPagerLayout::lineForPosition(int pos, int *offsetInLine, int *lineIndex, bool *lastLine) const

@@ -17,7 +17,7 @@
 
 VariableSearchLine::VariableSearchLine(QWidget *parent) :
     AbstractSearchLine(parent), 
-    view_(0),
+    view_(nullptr),
     currentResultItem_(-1)
 {
 	label_->hide();

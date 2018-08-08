@@ -17,7 +17,7 @@ static uint idCounter=0;
 VParam::VParam(const std::string& name) :
    name_(name),
    qName_(QString::fromStdString(name)),
-   prop_(0),
+   prop_(nullptr),
    colourPropName_("fill_colour"),
    fontColourPropName_("font_colour"),
    typeColourPropName_("type_colour"),

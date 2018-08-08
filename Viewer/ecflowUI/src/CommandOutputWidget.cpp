@@ -20,7 +20,7 @@
 
 CommandOutputModel::CommandOutputModel(QObject *parent) :
           QAbstractItemModel(parent),
-          columns_(0)
+          columns_(nullptr)
 {
     columns_=ModelColumn::def("output_columns");
 

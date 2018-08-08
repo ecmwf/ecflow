@@ -18,14 +18,14 @@
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 
-InfoPanelHandler* InfoPanelHandler::instance_=0;
+InfoPanelHandler* InfoPanelHandler::instance_=nullptr;
 
 
 InfoPanelDef::InfoPanelDef(const std::string& name) :
     name_(name),
     hidden_(false),
-	visibleCondition_(0),
-    enabledCondition_(0)
+	visibleCondition_(nullptr),
+    enabledCondition_(nullptr)
 {
 }
 
@@ -95,7 +95,7 @@ void InfoPanelHandler::init(const std::string &configFile)
                 }
 
                 BaseNodeCondition *enabledCond = NodeExpressionParser::instance()->parseWholeExpression(enabled);
-                if (enabledCond == NULL)
+                if (enabledCond == nullptr)
                 {
                 	UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + enabled));
                     enabledCond = new FalseNodeCondition();
@@ -104,7 +104,7 @@ void InfoPanelHandler::init(const std::string &configFile)
 
 
                 BaseNodeCondition *visibleCond = NodeExpressionParser::instance()->parseWholeExpression(visible);
-                if (visibleCond == NULL)
+                if (visibleCond == nullptr)
                 {
                 	UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse visible condition: " + visible));
                     visibleCond = new FalseNodeCondition();

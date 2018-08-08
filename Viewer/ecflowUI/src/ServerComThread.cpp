@@ -479,7 +479,7 @@ void ServerComThread::attach()
 {
     ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
     defs_ptr d = defsAccess.defs();
-    if(d == NULL)
+    if(d == nullptr)
         return;
 
     attach(d);
@@ -489,7 +489,7 @@ void ServerComThread::attach()
 //the defs is safe so we do not need to set a mutex on it.
 void ServerComThread::attach(defs_ptr d)
 {
-    if(d == NULL)
+    if(d == nullptr)
         return;
 
     d->attach(this);
@@ -520,7 +520,7 @@ void ServerComThread::detach()
 {
     ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
     defs_ptr d = defsAccess.defs();
-    if(d == NULL)
+    if(d == nullptr)
         return;
 
     detach(d);
@@ -531,7 +531,7 @@ void ServerComThread::detach()
 //the defs is safe so we do not need to set a mutex on it.
 void ServerComThread::detach(defs_ptr d)
 {
-    if(d == NULL)
+    if(d == nullptr)
         return;
 
     d->detach(this);

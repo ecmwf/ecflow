@@ -24,9 +24,9 @@ static std::vector<std::string> propVec;
 
 NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     QStyledItemDelegate(parent),
-    prop_(0),	
-    nodeBox_(0),
-    attrBox_(0),
+    prop_(nullptr),	
+    nodeBox_(nullptr),
+    attrBox_(nullptr),
     useStateGrad_(true),
     drawAttrSelectionRect_(false),
     limitShape_(RectLimitShape)

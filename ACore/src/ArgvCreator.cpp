@@ -33,14 +33,14 @@ ArgvCreator::ArgvCreator( const std::vector<std::string>& theArgs)
 		argv_[i] = (char*) malloc (sizeof(char) * (theArgs[i].size() + 1)); // allow +1 for \0
 	   strcpy (argv_[i], theArgs[i].c_str() );
 	}
-	argv_[argc_] = NULL;
+	argv_[argc_] = nullptr;
 }
 
 // Destroys argv array
 ArgvCreator::~ArgvCreator()
 {
 	// remove argv array
-	for (char** scan = argv_; *scan != NULL; scan++) { free (*scan);}
+	for (char** scan = argv_; *scan != nullptr; scan++) { free (*scan);}
 	free (argv_);
 }
 

@@ -12,7 +12,7 @@
 
 #include <QTextBrowser>
 
-RichTextSearchInterface::RichTextSearchInterface() : editor_(NULL)
+RichTextSearchInterface::RichTextSearchInterface() : editor_(nullptr)
 {
 }
 

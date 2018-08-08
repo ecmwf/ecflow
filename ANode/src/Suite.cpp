@@ -48,13 +48,13 @@ using namespace boost::gregorian;
 
 Suite::Suite(const Suite& rhs)
 : NodeContainer(rhs),
-  defs_(NULL),
+  defs_(nullptr),
   begun_(rhs.begun_),
   state_change_no_(0),
   modify_change_no_(0),
   begun_change_no_(0),
   calendar_change_no_(0),
-  suite_gen_variables_(NULL)
+  suite_gen_variables_(nullptr)
 {
    if (rhs.clockAttr_.get())
       clockAttr_ = std::make_shared<ClockAttr>( *rhs.clockAttr_ );
@@ -86,7 +86,7 @@ Suite& Suite::operator=(const Suite& rhs)
       calendar_change_no_ = 0;
 
       delete suite_gen_variables_;
-      suite_gen_variables_ = NULL;
+      suite_gen_variables_ = nullptr;
    }
    return *this;
 }
@@ -820,7 +820,7 @@ void SuiteGenVariables::update_generated_variables() const
       char *day_name[]= { const_cast<char*>("sunday"),   const_cast<char*>("monday"),
                           const_cast<char*>("tuesday"),  const_cast<char*>("wednesday"),
                           const_cast<char*>("thursday"), const_cast<char*>("friday"),
-                          const_cast<char*>("saturday"), NULL };
+                          const_cast<char*>("saturday"), nullptr };
       genvar_day_.set_value( day_name[suite_->calendar_.day_of_week()]  );
       //cout << "genvar_day_ = " << genvar_day_.theValue() << "\n";
 
@@ -839,7 +839,7 @@ void SuiteGenVariables::update_generated_variables() const
                            const_cast<char*>("april"),     const_cast<char*>("may"),       const_cast<char*>("june"),
                            const_cast<char*>("july"),      const_cast<char*>("august"),    const_cast<char*>("september"),
                            const_cast<char*>("october"),   const_cast<char*>("november"),  const_cast<char*>("december"),
-                                NULL } ;
+                                nullptr } ;
       genvar_month_.set_value( month_name[suite_->calendar_.month()-1]  );
       //cout << "genvar_month_ = " << genvar_month_.theValue() << "\n";
 

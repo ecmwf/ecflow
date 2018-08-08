@@ -30,13 +30,13 @@ VAttribute::~VAttribute()
 
 ServerHandler* VAttribute::server() const
 {
-    return (parent_)?parent_->server():NULL;
+    return (parent_)?parent_->server():nullptr;
 }
 
 
 VServer* VAttribute::root() const
 {
-    return (parent_)?parent_->root():NULL;
+    return (parent_)?parent_->root():nullptr;
 }
 
 QString VAttribute::toolTip() const

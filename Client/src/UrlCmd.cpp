@@ -20,7 +20,7 @@
 #include "Node.hpp"
 
 UrlCmd::UrlCmd(defs_ptr defs, const std::string& absNodePath)
-: defs_(defs),node_(NULL)
+: defs_(defs),node_(nullptr)
 {
 	if (!defs_.get()) {
 		throw std::runtime_error("UrlCmd: The definition parameter is empty");

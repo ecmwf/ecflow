@@ -25,14 +25,14 @@ class LimitEditorWidget :  public QWidget, protected Ui::LimitEditorWidget
 {
 friend class LimitEditor;
 public:
-    LimitEditorWidget(QWidget *parent=0);
+    LimitEditorWidget(QWidget *parent=nullptr);
 };
 
 class LimitEditor : public AttributeEditor
 {
 Q_OBJECT
 public:
-    LimitEditor(VInfo_ptr,QWidget* parent=0);
+    LimitEditor(VInfo_ptr,QWidget* parent=nullptr);
     ~LimitEditor();
 
 protected Q_SLOTS:

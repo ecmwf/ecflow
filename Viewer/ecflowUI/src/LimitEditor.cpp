@@ -37,7 +37,7 @@ LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
 
 LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) :
     AttributeEditor(info,"limit",parent),
-    model_(0)
+    model_(nullptr)
 {
     w_=new LimitEditorWidget(this);
     addForm(w_);

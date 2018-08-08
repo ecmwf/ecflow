@@ -44,8 +44,8 @@ TextPagerEdit::TextPagerEdit(QWidget *parent) :
    d(new TextEditPrivate(this)),
    useSearchHighlight_(false),
    showLineNum_(false),
-   lineNumArea_(0),
-   fontProp_(NULL)
+   lineNumArea_(nullptr),
+   fontProp_(nullptr)
 {
     viewport()->setCursor(Qt::IBeamCursor);
 
@@ -69,7 +69,7 @@ TextPagerEdit::TextPagerEdit(QWidget *parent) :
     } shortcuts[] = {
         { tr("Copy"), SLOT(copy()), QKeySequence::Copy },
         { tr("Select All"), SLOT(selectAll()), QKeySequence::SelectAll },
-        { QString(), 0, QKeySequence::UnknownKey } };
+        { QString(), nullptr, QKeySequence::UnknownKey } };
     for (int i=0; shortcuts[i].member; ++i) {
         d->actions[i] = new QAction(shortcuts[i].text, this);
         d->actions[i]->setShortcutContext(Qt::WidgetShortcut);
@@ -153,18 +153,18 @@ TextPagerEdit::~TextPagerEdit()
     if (d->document) {
         Q_FOREACH(SyntaxHighlighter *syntaxHighlighter, d->syntaxHighlighters) {
             if (syntaxHighlighter->parent() == this)
-                disconnect(syntaxHighlighter, 0, d, 0);
-            syntaxHighlighter->d->textEdit = 0;
-            syntaxHighlighter->d->textLayout = 0;
+                disconnect(syntaxHighlighter, nullptr, d, nullptr);
+            syntaxHighlighter->d->textEdit = nullptr;
+            syntaxHighlighter->d->textLayout = nullptr;
         }
-        disconnect(d->document, 0, this, 0);
-        disconnect(d->document, 0, d, 0);
-        disconnect(d->document->d, 0, this, 0);
-        disconnect(d->document->d, 0, d, 0);
+        disconnect(d->document, nullptr, this, nullptr);
+        disconnect(d->document, nullptr, d, nullptr);
+        disconnect(d->document->d, nullptr, this, nullptr);
+        disconnect(d->document->d, nullptr, d, nullptr);
 
         if (d->document->parent() == this) {
             delete d->document;
-            d->document = 0;
+            d->document = nullptr;
         } else {
             d->document->d->textEditDestroyed(this);
         }
@@ -202,10 +202,10 @@ void TextPagerEdit::setDocument(TextPagerDocument *doc)
         return;
 
     if (d->document) {
-        disconnect(d->document, 0, this, 0);
-        disconnect(d->document, 0, d, 0);
-        disconnect(d->document->d, 0, this, 0);
-        disconnect(d->document->d, 0, d, 0);
+        disconnect(d->document, nullptr, this, nullptr);
+        disconnect(d->document, nullptr, d, nullptr);
+        disconnect(d->document->d, nullptr, this, nullptr);
+        disconnect(d->document->d, nullptr, d, nullptr);
         if (d->document->parent() == this)
             delete d->document;
     }
@@ -216,7 +216,7 @@ void TextPagerEdit::setDocument(TextPagerDocument *doc)
     d->buffer.clear();
     d->sectionsDirty = true;
     d->document = doc;
-    d->sectionPressed = 0;
+    d->sectionPressed = nullptr;
     d->layoutDirty = true;
     qDeleteAll(d->unusedTextLayouts);
     d->unusedTextLayouts.clear();
@@ -387,7 +387,7 @@ void TextPagerEdit::paintEvent(QPaintEvent *e)
     selections.reserve(d->extraSelections.size() + 1);
     int textLayoutOffset = d->viewportPosition;
 
-    const QTextLayout *cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : 0;
+    const QTextLayout *cursorLayout = d->cursorVisible ? d->layoutForPosition(d->textCursor.position()) : nullptr;
     int extraSelectionIndex = 0;
     QTextLayout::FormatRange selectionRange;
     selectionRange.start = -1;
@@ -615,7 +615,7 @@ void TextPagerEdit::mouseReleaseEvent(QMouseEvent *e)
         if (d->sectionPressed && sectionAt(e->pos()) == d->sectionPressed) {
             Q_EMIT sectionClicked(d->sectionPressed, e->pos());
         }
-        d->sectionPressed = 0;
+        d->sectionPressed = nullptr;
     } else {
         QAbstractScrollArea::mouseReleaseEvent(e);
     }
@@ -948,7 +948,7 @@ void TextEditPrivate::adjustVerticalScrollBar()
 {
     int s=findLastPageSize();
     
-    int size=(document != 0)?(document->documentSize()):0;
+    int size=(document != nullptr)?(document->documentSize()):0;
   
 #ifdef DEBUG_TEXTPAGER_LASTPAGESIZE    
     qDebug() << "last page position" << s;
@@ -989,9 +989,9 @@ void TextPagerEdit::takeSyntaxHighlighter(SyntaxHighlighter *highlighter)
     const bool found = d->syntaxHighlighters.removeOne(highlighter);
     Q_ASSERT(found);
     Q_UNUSED(found);
-    highlighter->d->textEdit = 0;
-    highlighter->d->textLayout = 0;
-    disconnect(highlighter, 0, d, 0);
+    highlighter->d->textEdit = nullptr;
+    highlighter->d->textLayout = nullptr;
+    disconnect(highlighter, nullptr, d, nullptr);
 }
 
 void TextPagerEdit::removeSyntaxHighlighter(SyntaxHighlighter *highlighter)
@@ -1072,7 +1072,7 @@ void TextEditPrivate::onTextSectionRemoved(TextPagerSection *section)
 
     sectionsDirty = true;
     if (section == sectionPressed) {
-        sectionPressed = 0;
+        sectionPressed = nullptr;
     }
     if (section->hasCursor()) {
         updateCursorPosition(lastHoverPos);
@@ -1314,7 +1314,7 @@ void TextEditPrivate::updateScrollBarPageStep()
 
 void TextEditPrivate::onDocumentDestroyed()
 {
-    document = 0;
+    document = nullptr;
     textEdit->setDocument(new TextPagerDocument(this)); // there should always be a document
 }
 
@@ -1418,7 +1418,7 @@ void TextEditPrivate::updateCursorPosition(const QPoint &pos)
     if (sectionCursor) {
         textEdit->viewport()->setCursor(Qt::IBeamCursor);
         delete sectionCursor;
-        sectionCursor = 0;
+        sectionCursor = nullptr;
     }
 
     //To notify the line num area widge!

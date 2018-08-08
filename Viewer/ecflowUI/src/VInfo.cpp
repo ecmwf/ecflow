@@ -54,9 +54,9 @@ VInfo::~VInfo()
 
 void VInfo::notifyServerDelete(ServerHandler* /*server*/)
 {
-    server_=0;
-    node_=0;
-    attr_=0;
+    server_=nullptr;
+    node_=nullptr;
+    attr_=nullptr;
 
     //This function is called from the server destructor. We do not remove this object from the ServerObservers
 	dataLost();
@@ -72,21 +72,21 @@ void VInfo::dataLost()
 			o->notifyDataLost(this);
     }
 
-    attr_=0;
+    attr_=nullptr;
 }
 
 void VInfo::notifyBeginServerClear(ServerHandler* server)
 {    
     assert(server_==server);
-    node_=0;
-    attr_=0;
+    node_=nullptr;
+    attr_=nullptr;
 }
 
 void VInfo::notifyEndServerClear(ServerHandler* server)
 {
     assert(server_==server);
-    node_=0;   
-    attr_=0;
+    node_=nullptr;   
+    attr_=nullptr;
 }
 
 void VInfo::notifyEndServerScan(ServerHandler* server)
@@ -285,7 +285,7 @@ VInfo_ptr VInfo::createFromItem(VItem* item)
 //
 //=========================================
 
-VInfoServer::VInfoServer(ServerHandler *server) : VInfo(server,NULL)
+VInfoServer::VInfoServer(ServerHandler *server) : VInfo(server,nullptr)
 {
 	if(server_)
 	{
@@ -301,7 +301,7 @@ VInfo_ptr VInfoServer::create(ServerHandler *server)
 
 bool VInfoServer::hasData() const
 {
-    return server_ != 0;
+    return server_ != nullptr;
 }
 
 void VInfoServer::accept(VInfoVisitor* v)
@@ -342,7 +342,7 @@ VInfoNode::VInfoNode(ServerHandler* server,VNode* node) : VInfo(server,node)
 
 VInfo_ptr VInfoNode::create(VNode *node)
 {
-	ServerHandler* server=NULL;
+	ServerHandler* server=nullptr;
 	if(node)
 	{
 		server=node->server();
@@ -352,7 +352,7 @@ VInfo_ptr VInfoNode::create(VNode *node)
 
 bool VInfoNode::hasData() const
 {
-    return server_ != 0 && node_ != 0;
+    return server_ != nullptr && node_ != nullptr;
 }
 
 void VInfoNode::accept(VInfoVisitor* v)
@@ -432,7 +432,7 @@ VInfoAttribute::~VInfoAttribute()
 
 bool VInfoAttribute::hasData() const
 {
-    return server_ != 0 && node_ != 0 && attr_ != 0;
+    return server_ != nullptr && node_ != nullptr && attr_ != nullptr;
 }
 
 void VInfoAttribute::accept(VInfoVisitor* v)
@@ -442,7 +442,7 @@ void VInfoAttribute::accept(VInfoVisitor* v)
 
 VInfo_ptr VInfoAttribute::create(VAttribute* att)
 {
-    ServerHandler* server=NULL;
+    ServerHandler* server=nullptr;
     VNode* node=att->parent();
     if(node)
     {

@@ -19,7 +19,7 @@ class TextPagerWidget : public QWidget //TextPagerEdit
 {
     Q_OBJECT
 public:
-	TextPagerWidget(QWidget *parent = 0);
+	TextPagerWidget(QWidget *parent = nullptr);
 
 	TextPagerEdit* textEditor() const {return textEditor_;}
 	void clear();

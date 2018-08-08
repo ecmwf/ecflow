@@ -27,7 +27,7 @@ Q_OBJECT
 public:
     enum CustomItemRole {SortRole = Qt::UserRole + 1};
 
-   	explicit NodeQueryResultModel(QObject *parent=0);
+   	explicit NodeQueryResultModel(QObject *parent=nullptr);
    	~NodeQueryResultModel();
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;

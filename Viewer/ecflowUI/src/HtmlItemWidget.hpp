@@ -20,7 +20,7 @@ class HtmlItemWidget : public QWidget, protected Ui::HtmlItemWidget
 Q_OBJECT
 
 public:
-    explicit HtmlItemWidget(QWidget *parent=0);
+    explicit HtmlItemWidget(QWidget *parent=nullptr);
     ~HtmlItemWidget();
 
 protected Q_SLOTS:

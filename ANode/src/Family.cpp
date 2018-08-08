@@ -40,7 +40,7 @@ Family& Family::operator=(const Family& rhs)
    if (this != &rhs ) {
       NodeContainer::operator=(rhs);
       delete fam_gen_variables_;
-      fam_gen_variables_ = NULL;
+      fam_gen_variables_ = nullptr;
    }
    return *this;
 }

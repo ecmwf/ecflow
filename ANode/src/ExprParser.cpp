@@ -616,7 +616,7 @@ AstRoot* createRootNode(const tree_iter_t& i,  const std::map< parser_id, std::s
    if ( i->value.id() == ExpressionGrammer::divide_ID ) return new AstDivide();
    if ( i->value.id() == ExpressionGrammer::modulo_ID ) return new AstModulo();
    LOG_ASSERT(false,"");
-   return NULL;
+   return nullptr;
 }
 
 //static bool is_node_state(const tree_iter_t& i) {
@@ -829,7 +829,7 @@ Ast* createAst( const tree_iter_t& i, const std::map< parser_id, std::string >& 
 
       return new AstFlag( nodePath, ecf::Flag::string_to_flag_type(flag) );
    }
-   return NULL;
+   return nullptr;
 }
 
 // The evaluation function for the AST
@@ -955,7 +955,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
       //cout << "(i->children.size() >=5 ) \n";
       stack<Ast*> childs;
       stack<Ast*> parents;
-      Ast* not_ast = NULL;
+      Ast* not_ast = nullptr;
       for (auto t = i->children.begin(); t != i->children.end(); ++t) {
          if (is_root_node(t) && !is_not(t)) {
             Ast* and_ast = createRootNode(  t, rule_names  );
@@ -971,11 +971,11 @@ Ast* doCreateAst(  const tree_iter_t& i,
                 childs.push( not_ast );
             }
             else {
-               Ast* child_ast = doCreateAst(t, rule_names, /*Top*/NULL);
+               Ast* child_ast = doCreateAst(t, rule_names, /*Top*/nullptr);
                assert(child_ast);
                if (not_ast) {
                   not_ast->addChild(child_ast);
-                  not_ast = NULL;
+                  not_ast = nullptr;
                }
                else {
                   childs.push(child_ast );
@@ -1003,7 +1003,7 @@ Ast* doCreateAst(  const tree_iter_t& i,
       if (top && child) top->addChild(child);
       else return child;
    }
-   return NULL;
+   return nullptr;
 }
 
 AstTop* createTopAst(
@@ -1021,7 +1021,7 @@ AstTop* createTopAst(
    (void)doCreateAst(info.trees.begin(),rule_names,ast.get() );
 
    if (!ast->is_valid_ast(error_msg)) {
-      return NULL;
+      return nullptr;
    }
 
 #if defined(PRINT_AST)

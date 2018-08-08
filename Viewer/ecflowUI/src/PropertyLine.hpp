@@ -34,7 +34,7 @@ class PropertyLine;
 class FontSizeSpin : public QSpinBox
 {
 public:
-	FontSizeSpin(QWidget* parent=0);
+	FontSizeSpin(QWidget* parent=nullptr);
 	void setFamily(QString);
 
 protected:
@@ -83,7 +83,7 @@ class PropertyLine: public QObject
  Q_OBJECT
 
 public:
-	PropertyLine(VProperty*,bool addLabel,QWidget* parent=0);
+	PropertyLine(VProperty*,bool addLabel,QWidget* parent=nullptr);
 	virtual ~PropertyLine();
 
     QLabel* label() {return label_;}
@@ -148,7 +148,7 @@ class StringPropertyLine : public PropertyLine
 	Q_OBJECT
 
 public:
-	StringPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	StringPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
 	QWidget* item();
 	QWidget* button();
 	bool applyChange();
@@ -175,7 +175,7 @@ class ColourPropertyLine : public PropertyLine
 Q_OBJECT
 
 public:
-	ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
 	QWidget* item();
 	QWidget* button();
 	bool applyChange();
@@ -203,7 +203,7 @@ class FontPropertyLine : public PropertyLine
 Q_OBJECT
 
 public:
-	FontPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	FontPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
 	QWidget* item();
 	QWidget* button();
 	bool applyChange();
@@ -236,7 +236,7 @@ class IntPropertyLine : public PropertyLine
 	Q_OBJECT
 
 public:
-	IntPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	IntPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
 	QWidget* item();
 	QWidget* button();
 	bool applyChange();
@@ -262,7 +262,7 @@ class BoolPropertyLine : public PropertyLine
 	Q_OBJECT
 
 public:
-	BoolPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	BoolPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
 	QWidget* item();
 	QWidget* button();
 	bool applyChange();
@@ -288,7 +288,7 @@ class ComboPropertyLine : public PropertyLine
 	Q_OBJECT
 
 public:
-	ComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	ComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
 	QWidget* item();
 	QWidget* button();
 	bool applyChange();
@@ -315,7 +315,7 @@ class ComboMultiPropertyLine : public PropertyLine
 	Q_OBJECT
 
 public:
-	ComboMultiPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	ComboMultiPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
 	QWidget* item();
 	QWidget* button();
 	bool applyChange();
@@ -342,7 +342,7 @@ class SoundComboPropertyLine : public ComboPropertyLine
 	Q_OBJECT
 
 public:
-	SoundComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=0);
+	SoundComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
 	QWidget* item();
 	QWidget* button();
 

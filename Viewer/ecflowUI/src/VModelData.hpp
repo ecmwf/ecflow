@@ -75,8 +75,8 @@ public:
     virtual NodeFilter* filter() const=0;
 
     //Performance hack to avoid casts
-    virtual VTreeServer* treeServer() const {return NULL;}
-    virtual VTableServer* tableServer() const {return NULL;}
+    virtual VTreeServer* treeServer() const {return nullptr;}
+    virtual VTableServer* tableServer() const {return nullptr;}
 
 Q_SIGNALS:
     void dataChanged(VModelServer*);

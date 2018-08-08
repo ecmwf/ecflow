@@ -55,15 +55,15 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QStringList,QWidget *parent=0);
+    MainWindow(QStringList,QWidget *parent=nullptr);
     ~MainWindow();
     
     ServerHandler* selectedServer() const;
 
     static void init();
     static void showWindows();
-    static void openWindow(QString id,QWidget *fromW=0);
-    static void openWindow(QStringList id,QWidget *fromW=0);
+    static void openWindow(QString id,QWidget *fromW=nullptr);
+    static void openWindow(QStringList id,QWidget *fromW=nullptr);
     static void reload();
     static void saveSession(SessionItem*);
     static void lookUpInTree(VInfo_ptr);

@@ -34,7 +34,7 @@ Q_OBJECT
 friend class ChangeNotifyWidget;
 
 public:
-	explicit ChangeNotifyButton(QWidget* parent=0);
+	explicit ChangeNotifyButton(QWidget* parent=nullptr);
 
 	void setNotifier(ChangeNotify*);
 
@@ -56,7 +56,7 @@ class ChangeNotifyWidget : public QWidget
 friend class ChangeNotify;
 
 public:
-	explicit ChangeNotifyWidget(QWidget *parent=0);
+	explicit ChangeNotifyWidget(QWidget *parent=nullptr);
 	~ChangeNotifyWidget();
 
     void updateVisibility();

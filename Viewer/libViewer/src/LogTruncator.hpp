@@ -19,7 +19,7 @@ class LogTruncator : public QObject
 {
     Q_OBJECT
 public:
-    LogTruncator(QString, int,int,int,QObject* parent=0);
+    LogTruncator(QString, int,int,int,QObject* parent=nullptr);
 
 protected Q_SLOTS:
     void truncate();

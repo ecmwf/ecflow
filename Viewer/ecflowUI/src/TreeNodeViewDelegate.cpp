@@ -542,7 +542,7 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
     //The load icon (optional)
     QRect loadRect;
     bool hasLoad=index.data(AbstractNodeModel::LoadRole).toBool();
-    Animation* an=0;
+    Animation* an=nullptr;
 
     //Update load animation
     if(hasLoad)
@@ -563,7 +563,7 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
     //Stops load animation
     else
     {
-        if((an=animation_->find(Animation::ServerLoadType,false)) != NULL)
+        if((an=animation_->find(Animation::ServerLoadType,false)) != nullptr)
             an->removeTarget(server->vRoot());
     }
 
@@ -1222,7 +1222,7 @@ void TreeNodeViewDelegate::widthHintServer(const QModelIndex& index,int& itemWid
 
     //The load icon (optional)
     bool hasLoad=index.data(AbstractNodeModel::LoadRole).toBool();
-    Animation* an=0;
+    Animation* an=nullptr;
 
     //Update load animation
     if(hasLoad)

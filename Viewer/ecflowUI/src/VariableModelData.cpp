@@ -125,7 +125,7 @@ VNode* VariableModelData::node() const
 	if(info_ && info_->isNode())
 		return info_->node();
 
-	return NULL;
+	return nullptr;
 }
 
 VInfo_ptr VariableModelData::info(int index) const
@@ -555,7 +555,7 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
 //
 //==========================================
 
-VariableModelDataHandler::VariableModelDataHandler() : server_(0)
+VariableModelDataHandler::VariableModelDataHandler() : server_(nullptr)
 {
 }
 
@@ -663,7 +663,7 @@ void VariableModelDataHandler::clear(bool emitSignal)
 		delete it;
 	}
 
-    server_=0;
+    server_=nullptr;
     data_.clear();
     names_.clear();
 
@@ -686,7 +686,7 @@ VariableModelData* VariableModelDataHandler::data(int index) const
     if(index >=0 && index < static_cast<int>(data_.size()))
 		return data_.at(index);
 
-	return 0;
+	return nullptr;
 }
 
 //It is called when a node changed.

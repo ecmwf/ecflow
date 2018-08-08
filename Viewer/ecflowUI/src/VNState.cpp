@@ -71,7 +71,7 @@ std::vector<VParam*> VNState::filterItems()
 VNState* VNState::toState(const VNode *n)
 {
 	if(!n || !n->node().get())
-		return NULL;
+		return nullptr;
 
 	node_ptr node=n->node();
 
@@ -84,13 +84,13 @@ VNState* VNState::toState(const VNode *n)
 			return it->second;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 VNState* VNState::toRealState(const VNode *n)
 {
 	if(!n || !n->node().get())
-		return NULL;
+		return nullptr;
 
 	node_ptr node=n->node();
 
@@ -98,13 +98,13 @@ VNState* VNState::toRealState(const VNode *n)
 	if(it != stateMap_.end())
 		return it->second;
 
-	return NULL;
+	return nullptr;
 }
 
 VNState* VNState::toDefaultState(const VNode *n)
 {
     if(!n || !n->node())
-		return NULL;
+		return nullptr;
 
 	node_ptr node=n->node();
 
@@ -120,7 +120,7 @@ VNState* VNState::find(const std::string& name)
 	if(it != items_.end())
 				return it->second;
 
-	return NULL;
+	return nullptr;
 }
 
 //
@@ -176,7 +176,7 @@ QString VNState::toRealStateName(const VNode *n)
 VNState* VNState::toState(ServerHandler *s)
 {
 	if(!s)
-		return NULL;
+		return nullptr;
 
 	bool susp=false;
 	NState::State ns=s->state(susp);
@@ -190,7 +190,7 @@ VNState* VNState::toState(ServerHandler *s)
 			return it->second;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 QString VNState::toName(ServerHandler *s)

@@ -17,7 +17,7 @@ class CustomListWidget : public QListWidget
 Q_OBJECT
 
 public:
-	explicit CustomListWidget(QWidget* parent=0);
+	explicit CustomListWidget(QWidget* parent=nullptr);
 
 	void addItems(QStringList lst,bool checkState);
 	void addItems(QStringList lst,bool checkState,QList<QColor>);

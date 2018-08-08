@@ -18,9 +18,9 @@
 
 SuiteModel::SuiteModel(QObject *parent) :
      QAbstractItemModel(parent),
-     server_(0),
-     data_(0),
-     realData_(0),
+     server_(nullptr),
+     data_(nullptr),
+     realData_(nullptr),
      presentCol_(QColor(1,128,73)),
      notPresentCol_(QColor(255,0,0)),
      edited_(false)
@@ -36,17 +36,17 @@ SuiteModel::~SuiteModel()
 
 void SuiteModel::clearData()
 {
-    server_=0;
+    server_=nullptr;
 
     if(data_)
 		delete data_;
 
-	data_=0;
+	data_=nullptr;
 
 	if(realData_)
 		realData_->removeObserver(this);
 
-	realData_=0;
+	realData_=nullptr;
     edited_=false;
 }
 

@@ -201,7 +201,7 @@ VIcon* VIcon::find(const std::string& name)
 	if(it != items_.end())
 		return it->second;
 
-	return NULL;
+	return nullptr;
 }
 
 //Create the pixmap containing all the relevant icons for the given node according to the filter.

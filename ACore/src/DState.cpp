@@ -69,7 +69,7 @@ const char* DState::toString( DState::State s ) {
 			assert(false);break;
 	}
 	assert(false);
-	return NULL;
+	return nullptr;
 }
 
 const char* DState::to_html( DState::State s ) {
@@ -99,7 +99,7 @@ const char* DState::to_html( DState::State s ) {
          assert(false);break;
    }
    assert(false);
-   return NULL;
+   return nullptr;
 }
 
 DState::State DState::toState( const std::string& str ) {

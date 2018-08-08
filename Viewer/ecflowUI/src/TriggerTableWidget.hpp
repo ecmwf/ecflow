@@ -29,7 +29,7 @@ class TriggerTableWidget : public QWidget, private Ui::triggerTableWidget
 	Q_OBJECT
 
 public:
-    explicit TriggerTableWidget(QWidget *parent = 0);
+    explicit TriggerTableWidget(QWidget *parent = nullptr);
     ~TriggerTableWidget();
 
     void setInfo(VInfo_ptr);

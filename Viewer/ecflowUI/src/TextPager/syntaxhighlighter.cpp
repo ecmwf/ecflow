@@ -49,7 +49,7 @@ TextPagerEdit *SyntaxHighlighter::textEdit() const
 
 TextPagerDocument * SyntaxHighlighter::document() const
 {
-    return d->textEdit ? d->textEdit->document() : 0;
+    return d->textEdit ? d->textEdit->document() : nullptr;
 }
 
 void SyntaxHighlighter::rehighlight()

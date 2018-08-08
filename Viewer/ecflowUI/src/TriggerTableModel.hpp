@@ -26,7 +26,7 @@ class TriggerTableModel : public QAbstractItemModel
 public:
     enum Mode {TriggerMode,TriggeredMode,NodeMode};
 
-    explicit TriggerTableModel(Mode mode,QObject *parent=0);
+    explicit TriggerTableModel(Mode mode,QObject *parent=nullptr);
     ~TriggerTableModel();
 
     //The custom roles must have the same numerical value as in AbstractNodeModel.hpp because the

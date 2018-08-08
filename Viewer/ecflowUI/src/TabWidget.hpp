@@ -22,7 +22,7 @@ class QVBoxLayout;
 class IconTabBar : public QTabBar
 {
 public:
-    IconTabBar(QWidget* parent=0) : QTabBar(parent) {}
+    IconTabBar(QWidget* parent=nullptr) : QTabBar(parent) {}
 protected:
     void paintEvent(QPaintEvent *e);
 };
@@ -33,7 +33,7 @@ class TabWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit TabWidget(QWidget *parent=0);
+    explicit TabWidget(QWidget *parent=nullptr);
 
 	int currentIndex() const;
 	int indexOfWidget(QWidget*) const;

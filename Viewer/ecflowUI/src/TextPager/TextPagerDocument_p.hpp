@@ -67,7 +67,7 @@ static inline bool matchSection(const TextPagerSection *section, const TextPager
 
 
 struct Chunk {
-    Chunk() : previous(0), next(0), from(-1), length(0), firstLineIndex(-1)
+    Chunk() : previous(nullptr), next(nullptr), from(-1), length(0), firstLineIndex(-1)
 #ifndef TEXTDOCUMENT_LINENUMBER_CACHE
             , lines(-1)
 #endif
@@ -142,9 +142,9 @@ struct TextDocumentPrivate : public QObject
     Q_OBJECT
 public:
     TextDocumentPrivate(TextPagerDocument *doc)
-        : q(doc), first(0), last(0),
+        : q(doc), first(nullptr), last(nullptr),
 #ifndef NO_TEXTDOCUMENT_CHUNK_CACHE
-          cachedChunk(0), cachedChunkPos(-1),
+          cachedChunk(nullptr), cachedChunkPos(-1),
 #endif
 #ifndef NO_TEXTDOCUMENT_READ_CACHE
           cachePos(-1),
@@ -154,8 +154,8 @@ public:
           deviceMode(TextPagerDocument::Sparse), chunkSize(64*1024), //chunkSize(1024*64), //chunkSize(16384),
           //undoRedoStackCurrent(0), modifiedIndex(-1), undoRedoEnabled(true), ignoreUndoRedo(false),
           //collapseInsertUndo(false),
-		  hasChunksWithLineNumbers(false), textCodec(0), options(TextPagerDocument::DefaultOptions),
-          readWriteLock(0), cursorCommand(false)
+		  hasChunksWithLineNumbers(false), textCodec(nullptr), options(TextPagerDocument::DefaultOptions),
+          readWriteLock(nullptr), cursorCommand(false)
     {
         first = last = new Chunk;
     }
@@ -220,8 +220,8 @@ public:
     void undoRedo(bool undo);
 #endif
 
-    QString wordAt(int position, int *start = 0) const;
-    QString paragraphAt(int position, int *start = 0) const;
+    QString wordAt(int position, int *start = nullptr) const;
+    QString paragraphAt(int position, int *start = nullptr) const;
 
     uint wordBoundariesAt(int pos) const;
 

@@ -24,7 +24,7 @@ class ModelColumn;
 class CommandOutputModel : public QAbstractItemModel
 {
 public:
-    explicit  CommandOutputModel(QObject *parent=0);
+    explicit  CommandOutputModel(QObject *parent=nullptr);
     ~CommandOutputModel();
 
     int columnCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -53,7 +53,7 @@ class CommandOutputWidget : public QWidget, protected Ui::CommandOutputWidget
 Q_OBJECT
 
 public:
-    explicit CommandOutputWidget(QWidget *parent=0);
+    explicit CommandOutputWidget(QWidget *parent=nullptr);
     ~CommandOutputWidget();
 
     void readSettings(QSettings&);

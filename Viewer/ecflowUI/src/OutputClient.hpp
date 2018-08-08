@@ -30,7 +30,7 @@ public:
     const std::string& portStr() const {return portStr_;}
 
     const std::string& remoteFile() const {return remoteFile_;}
-    bool ok() const { return soc_ != NULL; }
+    bool ok() const { return soc_ != nullptr; }
 
 protected Q_SLOTS:
     virtual void slotError(QAbstractSocket::SocketError err)=0;

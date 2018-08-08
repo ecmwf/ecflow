@@ -912,7 +912,7 @@ void AbstractNodeView::setCurrentIndex(const QModelIndex &index)
 {
     if(selectionModel_ && index.isValid())
     {
-        QItemSelectionModel::SelectionFlags command = selectionCommand(index, 0);
+        QItemSelectionModel::SelectionFlags command = selectionCommand(index, nullptr);
         selectionModel_->setCurrentIndex(index, command);
         //currentIndexSet_ = true;
         QPoint offset;

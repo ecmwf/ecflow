@@ -24,7 +24,7 @@ class TableNodeWidget : public NodeWidget, protected Ui::TableNodeWidget
 Q_OBJECT
 
 public:
-    TableNodeWidget(ServerFilter* servers,bool interactive,QWidget* parent=0);
+    TableNodeWidget(ServerFilter* servers,bool interactive,QWidget* parent=nullptr);
 	~TableNodeWidget();
 
     void populateDockTitleBar(DashboardDockTitleWidget* tw);

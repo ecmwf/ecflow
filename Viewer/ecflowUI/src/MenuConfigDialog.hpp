@@ -66,7 +66,7 @@ class MenuConfigDialog : public QDialog, private Ui::MenuConfigDialog
 	Q_OBJECT
 
 public:
-	explicit MenuConfigDialog(QWidget *parent = 0);
+	explicit MenuConfigDialog(QWidget *parent = nullptr);
 	~MenuConfigDialog() = default;;
 
 	void updateMenuTree(Menu *menu);

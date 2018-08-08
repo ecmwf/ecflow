@@ -25,8 +25,8 @@
 
 TableFilterWidget::TableFilterWidget(QWidget *parent) :
    QWidget(parent),
-   filterDef_(0),
-   serverFilter_(0)
+   filterDef_(nullptr),
+   serverFilter_(nullptr)
 {
 	setupUi(this);
 
@@ -90,7 +90,7 @@ void TableFilterWidget::slotHeaderFilter(QString column,QPoint globalPos)
         new VParamFilterMenu(menu,&sf,"Status filter",
                           VParamFilterMenu::FilterMode,VParamFilterMenu::ColourDecor);
 
-		if(menu->exec(globalPos) != NULL)
+		if(menu->exec(globalPos) != nullptr)
 		{
             //if(sf.isComplete())
             //   op->setSelection(QStringList());

@@ -26,7 +26,7 @@ class TriggerTableView : public QTreeView
 Q_OBJECT
 
 public:
-    explicit TriggerTableView(QWidget *parent=0);
+    explicit TriggerTableView(QWidget *parent=nullptr);
     ~TriggerTableView();
 
     void setModel(TriggerTableModel* model);

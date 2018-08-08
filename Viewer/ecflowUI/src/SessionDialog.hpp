@@ -24,7 +24,7 @@ class SessionDialog : public QDialog, protected Ui::SessionDialog
     Q_OBJECT
 
 public:
-    explicit SessionDialog(QWidget *parent = 0);
+    explicit SessionDialog(QWidget *parent = nullptr);
     ~SessionDialog();
 
 public Q_SLOTS:

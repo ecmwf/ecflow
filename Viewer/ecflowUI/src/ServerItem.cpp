@@ -22,7 +22,7 @@ ServerItem::ServerItem(const std::string& name) :
   favourite_(false),
   system_(false),
   useCnt_(0),
-  handler_(0)
+  handler_(nullptr)
 {
 }
 
@@ -31,7 +31,7 @@ ServerItem::ServerItem(const std::string& name,const std::string& host,const std
   favourite_(favourite),
   system_(false),
   useCnt_(0),
-  handler_(0)
+  handler_(nullptr)
 {
 }
 
@@ -45,7 +45,7 @@ ServerItem::~ServerItem()
 
 bool ServerItem::isUsed() const
 {
-	return (handler_ != NULL);
+	return (handler_ != nullptr);
 }
 
 
@@ -96,7 +96,7 @@ void ServerItem::registerUsageEnd()
 	if(useCnt_ == 0 && handler_)
 	{
 		ServerHandler::removeServer(handler_);
-		handler_=0;
+		handler_=nullptr;
 	}
 }
 

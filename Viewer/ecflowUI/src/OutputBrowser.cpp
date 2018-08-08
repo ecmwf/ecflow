@@ -39,7 +39,7 @@ int OutputBrowser::minConfirmSearchSize_=5*1024*1024;
 
 OutputBrowser::OutputBrowser(QWidget* parent) :
     QWidget(parent),
-    searchTb_(0)
+    searchTb_(nullptr)
 {
     auto *vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
@@ -80,7 +80,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
 
     //This highlighter only works for jobs
     jobHighlighter_=new Highlighter(textEdit_->document(),"job");
-    jobHighlighter_->setDocument(NULL);
+    jobHighlighter_->setDocument(nullptr);
 
     //Pager for very large files
     textPager_=new TextPagerWidget(this);
@@ -178,7 +178,7 @@ void OutputBrowser::changeIndex(IndexType indexType,qint64 fileSize)
 
         //Disable search
         if(searchTb_) searchTb_->setEnabled(false);
-        searchLine_->setSearchInterface(0);
+        searchLine_->setSearchInterface(nullptr);
         searchLine_->hide();
 
         //Disable filter
@@ -340,7 +340,7 @@ void OutputBrowser::saveCurrentFile(QString &fileNameToSaveTo)
 
 bool OutputBrowser::isFileLoaded()
 {
-    return (file_ != 0);
+    return (file_ != nullptr);
 }
 
 bool OutputBrowser::isJobFile(QString fileName)
@@ -369,7 +369,7 @@ void OutputBrowser::adjustHighlighter(QString fileName)
     }
     else if(jobHighlighter_)
     {
-        jobHighlighter_->setDocument(NULL);
+        jobHighlighter_->setDocument(nullptr);
     }
 }
 

@@ -26,7 +26,7 @@ std::vector<ChangeNotifyWidget*> ChangeNotifyWidget::widgets_;
 
 ChangeNotifyButton::ChangeNotifyButton(QWidget* parent) :
 	QToolButton(parent),
-	notifier_(0)
+	notifier_(nullptr)
 {
 	setProperty("notify","1");
 	setAutoRaise(true);
@@ -192,7 +192,7 @@ ChangeNotifyButton* ChangeNotifyWidget::findButton(const std::string& id)
 	if(it != buttons_.end())
 		return it->second;
 
-	return 0;
+	return nullptr;
 }
 
 void ChangeNotifyWidget::addTb(ChangeNotify* notifier)

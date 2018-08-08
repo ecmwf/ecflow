@@ -34,7 +34,7 @@ Q_OBJECT
 
 public:
 
-	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
+	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=nullptr);
     ~TableNodeView();
 
     void reload() {}
@@ -98,7 +98,7 @@ class TableNodeHeader : public QHeaderView
 Q_OBJECT
 
 public:
-	explicit TableNodeHeader(QWidget *parent=0);
+	explicit TableNodeHeader(QWidget *parent=nullptr);
 
 	QSize sizeHint() const;
 	void setModel(QAbstractItemModel *model);

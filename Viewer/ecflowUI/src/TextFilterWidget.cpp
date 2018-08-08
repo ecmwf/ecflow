@@ -27,8 +27,8 @@
 TextFilterWidget::TextFilterWidget(QWidget *parent) :
     QWidget(parent),
     status_(EditStatus),
-    statusTb_(0),
-    optionTb_(0)
+    statusTb_(nullptr),
+    optionTb_(nullptr)
 {
     setupUi(this);
 
@@ -144,7 +144,7 @@ void TextFilterWidget::buildMenu(QToolButton *tb)
     manageAc->setIcon(QPixmap(":/viewer/configure.svg"));
     menu->addAction(manageAc);
 
-    QAction *saveAc=0;
+    QAction *saveAc=nullptr;
     if(isVisible())
     {
         saveAc=new QAction(menu);

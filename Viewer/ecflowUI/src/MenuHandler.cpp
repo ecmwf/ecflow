@@ -155,7 +155,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
 
                 BaseNodeCondition *enabledCond = NodeExpressionParser::instance()->parseWholeExpression(enabled);
-                if (enabledCond == NULL)
+                if (enabledCond == nullptr)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse enabled condition: " + enabled));
                     enabledCond = new FalseNodeCondition();
@@ -164,7 +164,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
 
 
                 BaseNodeCondition *visibleCond = NodeExpressionParser::instance()->parseWholeExpression(visible);
-                if (visibleCond == NULL)
+                if (visibleCond == nullptr)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse visible condition: " + visible));
                     visibleCond = new FalseNodeCondition();
@@ -172,7 +172,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setVisibleCondition(visibleCond);
 
                 BaseNodeCondition *questionCond = NodeExpressionParser::instance()->parseWholeExpression(questFor);
-                if (questionCond == NULL)
+                if (questionCond == nullptr)
                 {
                     UserMessage::message(UserMessage::ERROR, true, std::string("Error, unable to parse question condition: " + questFor));
                     questionCond = new FalseNodeCondition();
@@ -355,7 +355,7 @@ Menu *MenuHandler::findMenu(const std::string &name)
         }
     }
 
-    return NULL; // if we got to here, then the menu was not found
+    return nullptr; // if we got to here, then the menu was not found
 }
 
 MenuItem* MenuHandler::findItem(QAction* ac)
@@ -375,12 +375,12 @@ MenuItem* MenuHandler::findItem(QAction* ac)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 MenuItem* MenuHandler::newItem(const std::string &name)
 {
-	return NULL;
+	return nullptr;
 }
 
 bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
@@ -406,7 +406,7 @@ bool MenuHandler::addItemToMenu(MenuItem *item, const std::string &menuName)
 
 MenuItem *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo_ptr> nodes, QPoint pos, QWidget *parent,const std::string& view)
 {
-    MenuItem *selectedItem = NULL;
+    MenuItem *selectedItem = nullptr;
     Menu *menu = findMenu(menuName);
 
     if (menu)
@@ -415,7 +415,7 @@ MenuItem *MenuHandler::invokeMenu(const std::string &menuName, std::vector<VInfo
 
     	//While create the menus we collect all the actions created with "parent" as the parent.
     	//QMenu does not take ownership of these actions so we need to delete them.
-        QMenu *qMenu = menu->generateMenu(nodes, parent, NULL, view,acLst);
+        QMenu *qMenu = menu->generateMenu(nodes, parent, nullptr, view,acLst);
 
         if (qMenu)
         {
@@ -523,7 +523,7 @@ Menu::~Menu()
 
 QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* parentMenu,const std::string& view,QList<QAction*>& acLst)
 {
-	QMenu *qmenu=NULL;
+	QMenu *qmenu=nullptr;
 	if(parentMenu)
 	{
 		qmenu=parentMenu->addMenu(QString::fromStdString(name()));
@@ -536,7 +536,7 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
 	}
 
     if (nodes.empty())
-        return NULL;
+        return nullptr;
 
     //qmenu->setWindowFlags(Qt::Tool);
     //qmenu->setWindowTitle("my title");
@@ -671,7 +671,7 @@ void Menu::addSubHeading(std::string &name)
 */
 void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 {
-	QLabel *nodeLabel = NULL;
+	QLabel *nodeLabel = nullptr;
 
 
 	// we will only create a multiple-entry context menu if we have multiple non-attribute nodes
@@ -756,9 +756,9 @@ MenuItem::MenuItem(const std::string &name) :
    id_(idCnt_++),
    hidden_(false),
    multiSelect_(true),
-   visibleCondition_(NULL),
-   enabledCondition_(NULL),
-   questionCondition_(NULL),
+   visibleCondition_(nullptr),
+   enabledCondition_(nullptr),
+   questionCondition_(nullptr),
    isSubMenu_(false),
    isDivider_(false),
    isCustom_(false)

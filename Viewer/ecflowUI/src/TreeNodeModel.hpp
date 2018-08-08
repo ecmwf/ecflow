@@ -33,7 +33,7 @@ Q_OBJECT
 
 public:
    	TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,
-                  AttributeFilter *atts,IconFilter* icons,QObject *parent=0);
+                  AttributeFilter *atts,IconFilter* icons,QObject *parent=nullptr);
 
    	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;

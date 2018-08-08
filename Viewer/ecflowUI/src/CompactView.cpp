@@ -113,7 +113,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     int last = 0;
     int children = 0;
     int level=(parentId >=0?viewItems_[parentId].level+1:0);
-    TreeNodeViewItem *item=0;
+    TreeNodeViewItem *item=nullptr;
 
     std::vector<int> itemWidthVec;
     std::vector<int> itemHeightVec;

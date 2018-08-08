@@ -41,12 +41,12 @@ VTreeNode::~VTreeNode()
 
 VTree* VTreeNode::root() const
 {
-    return (parent_)?parent_->root():NULL;
+    return (parent_)?parent_->root():nullptr;
 }
 
 VTreeServer* VTreeNode::server() const
 {
-    return (parent_)?parent_->server():NULL;
+    return (parent_)?parent_->server():nullptr;
 }
 
 void VTreeNode::addChild(VTreeNode* ch)
@@ -62,7 +62,7 @@ VTreeNode* VTreeNode::findChild(const std::string& name) const
             return i;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -171,7 +171,7 @@ int VTreeSuiteNode::totalNumOfChildren() const
 //========================================================
 
 VTree::VTree(VTreeServer* server) :
-    VTreeNode(server->realServer()->vRoot(),0),
+    VTreeNode(server->realServer()->vRoot(),nullptr),
     server_(server),
     totalNum_(0)
 {
@@ -190,14 +190,14 @@ VTree* VTree::root() const
 
 VNode* VTree::vnodeAt(int index) const
 {
-    return (nodeVec_[index])?(nodeVec_[index]->vnode()):NULL;
+    return (nodeVec_[index])?(nodeVec_[index]->vnode()):nullptr;
 }
 
 VTreeNode* VTree::find(const VNode* vn) const
 {
     //This can happen when the tree is empty
     if(totalNum_ == 0)
-        return 0;
+        return nullptr;
 
     //Otherwise we must find the node!!!
     UI_ASSERT(vn->index()  < static_cast<int>(nodeVec_.size()),"vn index=" << vn->index() << " size=" << nodeVec_.size());
@@ -263,7 +263,7 @@ void VTree::removeChildren(VTreeNode* node)
 {
     for(auto & it : node->children_)
     {
-        nodeVec_[it->vnode()->index()]=NULL;
+        nodeVec_[it->vnode()->index()]=nullptr;
         removeChildren(it);
         delete it;
         totalNum_--;
@@ -282,7 +282,7 @@ void VTree::remove(VTreeNode* node)
     {
         removeChildren(node);
         p->children_.erase(it);
-        nodeVec_[node->vnode()->index()]=NULL;
+        nodeVec_[node->vnode()->index()]=nullptr;
         delete node;
         totalNum_--;
         assert(totalNum_ >=0);
@@ -297,7 +297,7 @@ void VTree::remove(VTreeNode* node)
 VTreeNode* VTree::makeBranch(const std::vector<VNode*>& filter,VTreeNode* parentNode)
 {
     VNode* vnode=parentNode->vnode();
-    auto *branch=new VTreeNode(vnode,0);
+    auto *branch=new VTreeNode(vnode,nullptr);
 
     assert(filter[vnode->index()] != NULL);
 
@@ -339,7 +339,7 @@ VTreeNode* VTree::makeTopLevelBranch(const std::vector<VNode*>& filter,VNode* su
 {
     assert(suite);
     assert(suite->isSuite());
-    auto *branch=new VTreeSuiteNode(suite,0);
+    auto *branch=new VTreeSuiteNode(suite,nullptr);
 
     for(int i=0; i < suite->numOfChildren();i++)
     {
@@ -393,7 +393,7 @@ void VTree::build(const std::vector<VNode*>& filter)
     clear();
     VServer* s=server_->realServer()->vRoot();
     nodeVec_.resize(s->totalNum());
-    VTreeNode *nptr=0;
+    VTreeNode *nptr=nullptr;
     std::fill(nodeVec_.begin(), nodeVec_.end(), nptr);
 
     if(filter.empty())
@@ -425,7 +425,7 @@ bool VTree::build(VTreeNode* parent,VNode* node,const std::vector<VNode*>& filte
 {
      if(filter[node->index()])
      {
-         VTreeNode *n=0;
+         VTreeNode *n=nullptr;
          if(node->isSuite())
              n=new VTreeSuiteNode(node,parent);
          else
@@ -461,7 +461,7 @@ void VTree::build()
     clear();
     VServer* s=server_->realServer()->vRoot();
     nodeVec_.resize(s->totalNum());
-    VTreeNode *nptr=0;
+    VTreeNode *nptr=nullptr;
     std::fill(nodeVec_.begin(), nodeVec_.end(), nptr);
 
     //int prevTotalNum=0;
@@ -477,7 +477,7 @@ void VTree::build()
 
 void VTree::build(VTreeNode* parent,VNode* vnode)
 {
-    VTreeNode *n=0;
+    VTreeNode *n=nullptr;
     if(vnode->isSuite())
         n=new VTreeSuiteNode(vnode,parent);
     else

@@ -16,11 +16,11 @@
 
 #include <map>
 
-static std::map<std::string,InfoPanelItemFactory*>* makers = 0;
+static std::map<std::string,InfoPanelItemFactory*>* makers = nullptr;
 
 InfoPanelItemFactory::InfoPanelItemFactory(const std::string& name)
 {
-	if(makers == 0)
+	if(makers == nullptr)
 		makers = new std::map<std::string,InfoPanelItemFactory*>;
 
 	// Put in reverse order...
@@ -38,7 +38,7 @@ InfoPanelItem* InfoPanelItemFactory::create(const std::string& name)
 	if(j != makers->end())
         return (*j).second->make();
 
-	return 0;
+	return nullptr;
 }
 
 //=======================================================

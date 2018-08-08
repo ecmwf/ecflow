@@ -47,9 +47,9 @@ ChangeNotifyEditor::ChangeNotifyEditor(QWidget* parent) : QWidget(parent)
 
 void ChangeNotifyEditor::addRow(QString label,QList<PropertyLine*> lineLst,QWidget *stackContents)
 {
-	PropertyLine* enabledLine=0;
-	PropertyLine* popupLine=0;
-	PropertyLine* soundLine=0;
+	PropertyLine* enabledLine=nullptr;
+	PropertyLine* popupLine=nullptr;
+	PropertyLine* soundLine=nullptr;
 
 	QList<VProperty*> propLst;
 	Q_FOREACH(PropertyLine* pl,lineLst)

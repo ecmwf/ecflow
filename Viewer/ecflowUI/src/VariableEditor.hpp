@@ -22,14 +22,14 @@ class VariableEditorWidget :  public QWidget, protected Ui::VariableEditorWidget
 {
 friend class VariableEditor;
 public:
-    VariableEditorWidget(QWidget *parent=0);
+    VariableEditorWidget(QWidget *parent=nullptr);
 };
 
 class VariableEditor : public AttributeEditor
 {
 Q_OBJECT
 public:
-    VariableEditor(VInfo_ptr,QWidget* parent=0);
+    VariableEditor(VInfo_ptr,QWidget* parent=nullptr);
     ~VariableEditor();
 
 protected Q_SLOTS:

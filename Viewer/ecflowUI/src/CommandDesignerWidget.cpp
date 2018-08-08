@@ -386,7 +386,7 @@ bool CommandDesignerWidget::validSaveName(const std::string &name)
 	// name empty?
 	if (name.empty())
 	{
-		QMessageBox::critical(0,QObject::tr("Custom command"), tr("Please enter a name for the command"));
+		QMessageBox::critical(nullptr,QObject::tr("Custom command"), tr("Please enter a name for the command"));
 		return false;
 	}
 
@@ -401,7 +401,7 @@ bool CommandDesignerWidget::validSaveName(const std::string &name)
 
 	if (!nameUnique)
 	{
-		QMessageBox::critical(0,QObject::tr("Custom command"), tr("A command with that name already exists - please choose another name"));
+		QMessageBox::critical(nullptr,QObject::tr("Custom command"), tr("A command with that name already exists - please choose another name"));
 		return false;
 	}
 	else
@@ -650,7 +650,7 @@ MenuItem &CommandDesignerWidget::menuItem()
 	menuItem_.setCommand(commandLineEdit_->text().toStdString());
 	menuItem_.setCustom(true);
 
-	if (menuItem_.visibleCondition() == NULL)
+	if (menuItem_.visibleCondition() == nullptr)
 	{
 		BaseNodeCondition *trueCond  = new TrueNodeCondition();
 		menuItem_.setEnabledCondition(trueCond);

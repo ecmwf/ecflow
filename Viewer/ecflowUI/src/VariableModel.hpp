@@ -21,7 +21,7 @@ Q_OBJECT
 friend class VariableSortModel;
 
 public:
-   	VariableModel(VariableModelDataHandler* data,QObject *parent=0);
+   	VariableModel(VariableModelDataHandler* data,QObject *parent=nullptr);
 
     enum CustomItemRole {ReadOnlyRole = Qt::UserRole+1,GenVarRole = Qt::UserRole+2,ShadowRole = Qt::UserRole+3};
 
@@ -81,7 +81,7 @@ class VariableSortModel : public QSortFilterProxyModel
 public:
 	enum MatchMode {FilterMode,SearchMode};
 
-	VariableSortModel(VariableModel*,QObject *parent=0);
+	VariableSortModel(VariableModel*,QObject *parent=nullptr);
     ~VariableSortModel() = default;
 
 	MatchMode matchMode() const {return matchMode_;}

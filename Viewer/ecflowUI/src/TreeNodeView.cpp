@@ -45,7 +45,7 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilte
     view_(view),
     model_(model),
     needItemsLayout_(false),
-    prop_(NULL),
+    prop_(nullptr),
     setCurrentIsRunning_(false),
     setCurrentFromExpandIsRunning_(false),
     canRegainCurrentFromExpand_(true),
@@ -87,7 +87,7 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilte
 
     prop_=new PropertyMapper(propVec,this);
 
-    VProperty *prop=0;
+    VProperty *prop=nullptr;
     std::string propName;
 
     //Initialise indentation

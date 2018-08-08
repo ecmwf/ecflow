@@ -30,7 +30,7 @@ Q_OBJECT
     friend class TableNodeSortModel;
 
 public:
-   	TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,QObject *parent=0);
+   	TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,QObject *parent=nullptr);
 
 	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
    	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -75,8 +75,8 @@ Q_SIGNALS:
 
 protected:
    	bool isServer(const QModelIndex & index) const {return false;}
-	ServerHandler* indexToRealServer(const QModelIndex & index) const {return NULL;}
-	VModelServer* indexToServer(const QModelIndex & index) const {return NULL;}
+	ServerHandler* indexToRealServer(const QModelIndex & index) const {return nullptr;}
+	VModelServer* indexToServer(const QModelIndex & index) const {return nullptr;}
 	QModelIndex serverToIndex(ServerHandler*) const {return {};}
 
     QModelIndex nodeToIndex(VTableServer* server,const VNode* node, int column) const;

@@ -42,7 +42,7 @@ class ServerEditDialog : public QDialog, private Ui::ServerEditDialog, public Se
 Q_OBJECT
 
 public:
-	ServerEditDialog(QString name,QString host, QString port,bool favourite,QWidget* parent=0);
+	ServerEditDialog(QString name,QString host, QString port,bool favourite,QWidget* parent=nullptr);
 
 	QString name() const;
 	QString host() const;
@@ -62,7 +62,7 @@ class ServerAddDialog : public QDialog, private Ui::ServerAddDialog, public Serv
 Q_OBJECT
 
 public:
-	explicit ServerAddDialog(QWidget* parent=0);
+	explicit ServerAddDialog(QWidget* parent=nullptr);
 
 	QString name() const;
 	QString host() const;
@@ -81,7 +81,7 @@ Q_OBJECT
 public:
 	enum Mode {SelectionMode,ManageMode};
 
-	ServerListDialog(Mode,ServerFilter*,QWidget *parent=0);
+	ServerListDialog(Mode,ServerFilter*,QWidget *parent=nullptr);
 	~ServerListDialog();
 
      void showSysSyncLog();
@@ -126,7 +126,7 @@ protected:
 class ServerListModel : public QAbstractItemModel
 {
 public:
-	explicit ServerListModel(ServerFilter*,QObject *parent=0);
+	explicit ServerListModel(ServerFilter*,QObject *parent=nullptr);
 	~ServerListModel();
 
 	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
@@ -158,7 +158,7 @@ protected:
 class ServerListFilterModel : public QSortFilterProxyModel
 {
 public:
-	explicit ServerListFilterModel(QObject *parent=0);
+	explicit ServerListFilterModel(QObject *parent=nullptr);
     ~ServerListFilterModel() = default;
 	void setFilterStr(QString);
 	void setFilterFavourite(bool b);

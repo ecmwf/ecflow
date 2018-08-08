@@ -28,7 +28,7 @@ class ServerSettingsItemWidget : public QWidget, public InfoPanelItem, protected
 Q_OBJECT
 
 public:
-	explicit ServerSettingsItemWidget(QWidget *parent=0);
+	explicit ServerSettingsItemWidget(QWidget *parent=nullptr);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

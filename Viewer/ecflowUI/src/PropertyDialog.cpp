@@ -22,7 +22,7 @@
 #include "VProperty.hpp"
 #include "WidgetNameProvider.hpp"
 
-VProperty* PropertyDialog::prop_=0;
+VProperty* PropertyDialog::prop_=nullptr;
 
 PropertyDialog::PropertyDialog(QWidget* parent) :
 		QDialog(parent),

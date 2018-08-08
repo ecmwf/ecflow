@@ -26,7 +26,7 @@ bool VariableParser::doParse(
          std::vector<std::string >& lineTokens )
 {
    // Note: For migrate the defs can have variables
-   Node* node =  NULL;
+   Node* node =  nullptr;
    if ( nodeStack().empty()) {
       if (!parsing_defs_) throw std::runtime_error("VariableParser::doParse: Could not add variable, as node stack is empty at line: " + line );
    }

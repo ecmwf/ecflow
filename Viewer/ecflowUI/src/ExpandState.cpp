@@ -22,7 +22,7 @@
 //#define _UI_EXPANDSTATE_DEBUG
 
 ExpandState::ExpandState(AbstractNodeView* view,TreeNodeModel* model) :
-    view_(view), model_(model), root_(0)
+    view_(view), model_(model), root_(nullptr)
 {
 }
 
@@ -55,7 +55,7 @@ void ExpandState::clear()
     if(root_)
         delete root_;
 
-    root_=0;
+    root_=nullptr;
 }
 
 
@@ -309,10 +309,10 @@ void ExpandState::saveCollapseAll(const VNode* node)
 ExpandStateNode* ExpandState::find(const std::string& fullPath)
 {
     if(!root_)
-        return NULL;
+        return nullptr;
 
     if(fullPath.empty())
-        return NULL;
+        return nullptr;
 
     if(fullPath == "/")
         return root_;
@@ -377,7 +377,7 @@ void ExpandState::collectParents(const std::string& fullPath,std::vector<ExpandS
 
     ExpandStateNode *p=root_;
     std::size_t num=pathVec.size();
-    for(std::size_t i=0; i < num && p != 0; i++)
+    for(std::size_t i=0; i < num && p != nullptr; i++)
     {
         parents.push_back(p);
         p=p->findChild(pathVec[i]);

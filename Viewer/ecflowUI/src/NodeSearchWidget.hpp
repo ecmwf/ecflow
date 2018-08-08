@@ -30,7 +30,7 @@ class NodeSearchWidget : public QWidget, protected Ui::NodeSearchWidget
     Q_OBJECT
 
 public:
-    explicit NodeSearchWidget(QWidget *parent = 0);
+    explicit NodeSearchWidget(QWidget *parent = nullptr);
     ~NodeSearchWidget();
 
     void setServerFilter(ServerFilter*);

@@ -170,7 +170,7 @@ std::string UserCmd::get_user()
       errno = 0;
       uid_t real_user_id_of_process = getuid();
       struct passwd * thePassWord = getpwuid ( real_user_id_of_process );
-      if (thePassWord == 0 ) {
+      if (thePassWord == nullptr ) {
          if ( errno != 0) {
             std::string theError = strerror(errno);
             throw std::runtime_error("UserCmd::get_user: could not determine user name. Because: " + theError);

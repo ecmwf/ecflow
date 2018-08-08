@@ -12,11 +12,11 @@
 
 #include <map>
 
-static std::map<std::string,AttributeEditorFactory*>* makers = 0;
+static std::map<std::string,AttributeEditorFactory*>* makers = nullptr;
 
 AttributeEditorFactory::AttributeEditorFactory(const std::string& type)
 {
-    if(makers == 0)
+    if(makers == nullptr)
         makers = new std::map<std::string,AttributeEditorFactory*>;
 
     (*makers)[type] = this;
@@ -33,5 +33,5 @@ AttributeEditor* AttributeEditorFactory::create(const std::string& type,VInfo_pt
     if(j != makers->end())
         return (*j).second->make(info,parent);
 
-    return 0;
+    return nullptr;
 }

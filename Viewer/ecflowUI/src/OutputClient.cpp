@@ -13,7 +13,7 @@
 
 OutputClient::OutputClient(const std::string& host,const std::string& portStr,QObject* parent) :
 	QObject(parent),
-	soc_(NULL),
+	soc_(nullptr),
 	host_(host),
 	portStr_(portStr),
 	port_(19999),
@@ -22,7 +22,7 @@ OutputClient::OutputClient(const std::string& host,const std::string& portStr,QO
 	if(!portStr_.empty())
 		port_=atoi(portStr.c_str());
 
-	soc_=new QTcpSocket(0);
+	soc_=new QTcpSocket(nullptr);
 	connect(soc_,SIGNAL(readyRead()),
 		  this, SLOT(slotRead()));
 

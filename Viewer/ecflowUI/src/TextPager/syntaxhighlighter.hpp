@@ -30,7 +30,7 @@ class SyntaxHighlighter : public QObject
 {
     Q_OBJECT
 public:
-    SyntaxHighlighter(QObject *parent = 0);
+    SyntaxHighlighter(QObject *parent = nullptr);
     SyntaxHighlighter(TextPagerEdit *parent);
     ~SyntaxHighlighter();
     void setTextEdit(TextPagerEdit *doc);
@@ -60,7 +60,7 @@ public Q_SLOTS:
     void rehighlight();
 private:
     struct Private {
-        Private() : textEdit(0), textLayout(0), previousBlockState(0), currentBlockState(0),
+        Private() : textEdit(nullptr), textLayout(nullptr), previousBlockState(0), currentBlockState(0),
                     currentBlockPosition(-1) {}
         TextPagerEdit *textEdit;
         TextPagerLayout *textLayout;

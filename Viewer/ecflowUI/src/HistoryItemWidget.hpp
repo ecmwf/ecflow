@@ -25,7 +25,7 @@ class HistoryItemWidget :  public QWidget, public InfoPanelItem, protected Ui::H
 Q_OBJECT
 
 public:
-	explicit HistoryItemWidget(QWidget *parent=0);
+	explicit HistoryItemWidget(QWidget *parent=nullptr);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

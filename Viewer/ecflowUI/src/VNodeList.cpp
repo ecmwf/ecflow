@@ -43,7 +43,7 @@ bool VNodeListItem::sameAs(VNode *node) const
 
 void VNodeListItem::invalidateNode()
 {
-	node_=NULL;
+	node_=nullptr;
 }
 
 bool VNodeListItem::updateNode(ServerHandler* s)
@@ -53,7 +53,7 @@ bool VNodeListItem::updateNode(ServerHandler* s)
 	else if(s->name() == server_)
 	{
 		node_=s->vRoot()->find(path_);
-		return (node_ != NULL);
+		return (node_ != nullptr);
 	}
 
 	return false;
@@ -81,7 +81,7 @@ VNodeListItem* VNodeList::itemAt(int i)
     if(i >= 0 && i < static_cast<int>(data_.size()))
 		return data_.at(i);
 
-	return NULL;
+	return nullptr;
 }
 
 void VNodeList::setMaxNum(int maxNum)

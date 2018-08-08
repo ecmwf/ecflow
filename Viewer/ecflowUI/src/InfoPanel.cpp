@@ -402,7 +402,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		}
 
 		//Try to set the previous current widget as current again
-        currentItem=0;
+        currentItem=nullptr;
         bool hasCurrent=false;
 		for(int i=0 ; i < tab_->count(); i++)
 		{
@@ -447,7 +447,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 InfoPanelItem* InfoPanel::findItem(QWidget* w)
 {
 	if(!w)
-		return 0;
+		return nullptr;
 
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
@@ -455,13 +455,13 @@ InfoPanelItem* InfoPanel::findItem(QWidget* w)
             return d->item();
 	}
 
-	return 0;
+	return nullptr;
 }
 
 InfoPanelItemHandler* InfoPanel::findHandler(QWidget* w)
 {
 	if(!w)
-		return 0;
+		return nullptr;
 
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 	{
@@ -469,7 +469,7 @@ InfoPanelItemHandler* InfoPanel::findHandler(QWidget* w)
             return d;
 	}
 
-	return 0;
+	return nullptr;
 }
 
 InfoPanelItemHandler* InfoPanel::findHandler(InfoPanelDef* def)
@@ -500,7 +500,7 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
 		items_ << h;
 		return h;
 	}
-	return 0;
+	return nullptr;
 }
 
 //We clicked on another tab

@@ -234,7 +234,7 @@ void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         {
             std::string t=r.toString();
 
-            VRepeatAttr *a=0;
+            VRepeatAttr *a=nullptr;
 
             if(t.find("date") != std::string::npos)
                 a=new VRepeatDateAttr(vnode);

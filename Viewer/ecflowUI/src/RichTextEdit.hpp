@@ -19,7 +19,7 @@ class RichTextEdit : public QTextBrowser, public VPropertyObserver
 Q_OBJECT
 
 public:
-    explicit RichTextEdit(QWidget* parent = 0);
+    explicit RichTextEdit(QWidget* parent = nullptr);
     ~RichTextEdit();
 
     void setFontProperty(VProperty* p);

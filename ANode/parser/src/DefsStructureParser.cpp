@@ -67,7 +67,7 @@ DefsStructureParser::DefsStructureParser(Defs* defsfile, const std::string& str,
 DefsStructureParser::DefsStructureParser(const std::string& defs_node_string)
 : parsing_node_string_(true),
   infile_(""),
-  defsfile_(NULL),
+  defsfile_(nullptr),
   defsParser_(this,true/* only parse nodes */),
   lineNumber_(0),
   file_type_(PrintStyle::MIGRATE),
@@ -152,7 +152,7 @@ bool DefsStructureParser::do_parse_line(const std::string& line,std::vector<std:
    // Process each line, according to the parser which is on *top* of the stack
    // If the *top* of the stack is empty use the DefsParser
    Parser* theCurrentParser  = (nodeStack_.empty()) ? &defsParser_ : const_cast<Parser*>(nodeStack_.top().second) ;
-   if ( theCurrentParser == NULL ) {
+   if ( theCurrentParser == nullptr ) {
       std::stringstream ss;
       ss << "No parser found: Could not parse '" << line << "' around line number " << lineNumber_ << "\n";
       ss << Version::description() << "\n\n";

@@ -26,7 +26,7 @@ class NodeQueryResultView : public QTreeView
 Q_OBJECT
 
 public:
-	explicit NodeQueryResultView(QWidget *parent=0);
+	explicit NodeQueryResultView(QWidget *parent=nullptr);
 	~NodeQueryResultView();
 
 	void reload();

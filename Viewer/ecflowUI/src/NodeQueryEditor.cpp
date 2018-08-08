@@ -51,7 +51,7 @@ void NodeQuerySaveDialog::accept()
 
 	if(!name.contains(QRegExp("[\\w|\\s]+")))
 	{
-		QMessageBox::critical(0,tr("Invalid character"),
+		QMessageBox::critical(nullptr,tr("Invalid character"),
 				"Query names can only contain alphanumeric characters, whitespaces and \"_\". Please choose a different name.");
 		return;
 
@@ -59,7 +59,7 @@ void NodeQuerySaveDialog::accept()
 
 	if(NodeQueryHandler::instance()->find(name.toStdString()))
 	{
-		QMessageBox::critical(0,tr("Duplicated"),
+		QMessageBox::critical(nullptr,tr("Duplicated"),
 					"The specified name is already used by another query. Please choose a different name.");
 		return;
 	}
@@ -75,8 +75,8 @@ void NodeQuerySaveDialog::accept()
 
 NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
     QWidget(parent),
-	query_(NULL),
-	serverFilter_(NULL),
+	query_(nullptr),
+	serverFilter_(nullptr),
 	queryTeCanExpand_(false),
 	initIsOn_(false),
     canBeRun_(false),
@@ -198,7 +198,7 @@ NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
 
         Q_FOREACH(NodeQueryOption* op,aGrp->options())
         {
-            NodeQueryOptionEdit *e=0;
+            NodeQueryOptionEdit *e=nullptr;
             //TODO: use factory here
             if(op->type() == "string")
                 e=new NodeQueryStringOptionEdit(op,attrGrid_,this,false);
@@ -556,7 +556,7 @@ void NodeQueryEditor::notifyServerFilterChanged(ServerItem*)
 void NodeQueryEditor::notifyServerFilterDelete()
 {
 	serverFilter_->removeObserver(this);
-	serverFilter_=0;
+	serverFilter_=nullptr;
 }
 
 //------------------------------------------

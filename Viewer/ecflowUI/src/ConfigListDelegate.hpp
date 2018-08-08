@@ -23,7 +23,7 @@
 class ConfigListDelegate : public QStyledItemDelegate
 {
 public:
-    explicit ConfigListDelegate(int,int,QWidget *parent=0);
+    explicit ConfigListDelegate(int,int,QWidget *parent=nullptr);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;

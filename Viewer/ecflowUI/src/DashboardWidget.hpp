@@ -28,7 +28,7 @@ class DashboardWidget : public QWidget
 Q_OBJECT
 
 public:
-	DashboardWidget(const std::string& type, QWidget* parent=0);
+	DashboardWidget(const std::string& type, QWidget* parent=nullptr);
     virtual ~DashboardWidget() = default;
 
     virtual void populateDockTitleBar(DashboardDockTitleWidget*)=0;

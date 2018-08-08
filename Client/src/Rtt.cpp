@@ -30,11 +30,11 @@ using namespace boost::posix_time;
 
 namespace ecf {
 
-Rtt* Rtt::instance_ = NULL;
+Rtt* Rtt::instance_ = nullptr;
 
 void Rtt::create(const std::string& filename)
 {
-   if ( instance_ == NULL) {
+   if ( instance_ == nullptr) {
       instance_ = new Rtt(filename);
    }
 }
@@ -42,7 +42,7 @@ void Rtt::create(const std::string& filename)
 void Rtt::destroy()
 {
    delete instance_;
-   instance_ = NULL;
+   instance_ = nullptr;
 }
 
 

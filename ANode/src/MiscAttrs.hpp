@@ -29,7 +29,7 @@ class MiscAttrs : private boost::noncopyable {
 public:
    explicit MiscAttrs(Node* node) : node_(node){}
    MiscAttrs(const MiscAttrs& rhs);
-   MiscAttrs() : node_(NULL){}
+   MiscAttrs() : node_(nullptr){}
    ~MiscAttrs();
 
    // needed by node serialisation

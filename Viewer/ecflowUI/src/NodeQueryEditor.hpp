@@ -31,7 +31,7 @@ class NodeQuerySaveDialog : public QDialog, protected Ui::NodeQuerySaveDialog
 Q_OBJECT
 
 public:
-    explicit NodeQuerySaveDialog(QWidget *parent = 0);
+    explicit NodeQuerySaveDialog(QWidget *parent = nullptr);
     ~NodeQuerySaveDialog() = default;
     QString name() const;
 
@@ -44,7 +44,7 @@ class NodeQueryEditor : public QWidget, protected Ui::NodeQueryEditor, public Se
     Q_OBJECT
 
 public:
-    explicit NodeQueryEditor(QWidget *parent = 0);
+    explicit NodeQueryEditor(QWidget *parent = nullptr);
     ~NodeQueryEditor();
 
     void setServerFilter(ServerFilter*);

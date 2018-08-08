@@ -46,8 +46,8 @@ VAttributeType* columnToAttrType(TableNodeModel::ColumnType ct)
 
 TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,QObject *parent) :
 	AbstractNodeModel(parent),
-	data_(0),
-	columns_(0)
+	data_(nullptr),
+	columns_(nullptr)
 {
 	columns_=ModelColumn::def("table_columns");
 
@@ -190,7 +190,7 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	else if(role == IconRole)
 	{
         if(id == PathColumn)
-			return VIcon::pixmapList(vnode,0);
+			return VIcon::pixmapList(vnode,nullptr);
 		else
 			return QVariant();
 	}
@@ -255,7 +255,7 @@ VNode* TableNodeModel::indexToNode( const QModelIndex & index) const
 	{
 		return static_cast<VNode*>(index.internalPointer());
 	}
-	return NULL;
+	return nullptr;
 }
 
 QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const

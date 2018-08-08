@@ -29,7 +29,7 @@ class Dashboard : public QMainWindow, public ServerFilterObserver
     Q_OBJECT
 
 public:
-  	Dashboard(QString,QWidget* parent=0);
+  	Dashboard(QString,QWidget* parent=nullptr);
 	~Dashboard();
 
 	void reload();

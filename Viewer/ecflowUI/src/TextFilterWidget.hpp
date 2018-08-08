@@ -25,7 +25,7 @@ class TextFilterWidget : public QWidget, private Ui::TextFilterWidget
 Q_OBJECT
 
 public:
-    explicit TextFilterWidget(QWidget *parent=0);
+    explicit TextFilterWidget(QWidget *parent=nullptr);
     ~TextFilterWidget() = default;
 
     enum FilterStatus {EditStatus,FoundStatus,NotFoundStatus};

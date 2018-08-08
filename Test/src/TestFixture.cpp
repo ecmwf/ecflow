@@ -304,7 +304,7 @@ std::string TestFixture::theClientExePath()
 	if ( serverOnLocalMachine() ) return File::find_ecf_client_path();
 
 	char* client_path_p = getenv("ECF_CLIENT_EXE_PATH");
-	if ( client_path_p == NULL) {
+	if ( client_path_p == nullptr) {
 
 		// Try this before complaining
       std::string path = "/usr/local/apps/ecflow/current/bin/ecflow_client";
@@ -331,7 +331,7 @@ std::string TestFixture::pathToLogFile()
 	}
 
 	char* pathToRemoteLog_p = getenv("ECF_LOG");
-	if ( pathToRemoteLog_p == NULL) {
+	if ( pathToRemoteLog_p == nullptr) {
 		cout << "TestFixture::pathToLogFile(): assert failed\n";
 		cout << "Please set ECF_LOG. This needs to be set to path to the log file\n";
 		cout << "that can be seen by the client and server\n";

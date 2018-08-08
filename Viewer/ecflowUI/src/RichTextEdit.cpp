@@ -21,7 +21,7 @@
 
 RichTextEdit::RichTextEdit(QWidget * parent) :
     QTextBrowser(parent),
-    fontProp_(0)
+    fontProp_(nullptr)
 {
     QFont f("Courier");
     //QFont f("Monospace");

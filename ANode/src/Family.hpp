@@ -21,9 +21,9 @@ class FamGenVariables;
 
 class Family : public NodeContainer {
 public:
-   explicit Family( const std::string& name ) : NodeContainer(name),fam_gen_variables_(NULL) {}
-   Family() : fam_gen_variables_(NULL)  {}
-   Family(const Family& rhs) : NodeContainer(rhs), fam_gen_variables_(NULL) {}
+   explicit Family( const std::string& name ) : NodeContainer(name),fam_gen_variables_(nullptr) {}
+   Family() : fam_gen_variables_(nullptr)  {}
+   Family(const Family& rhs) : NodeContainer(rhs), fam_gen_variables_(nullptr) {}
    Family& operator=(const Family&);
    virtual node_ptr clone() const;
 
@@ -32,7 +32,7 @@ public:
 	static family_ptr create(const std::string& name);
 
 	virtual Suite* suite() const { return parent()->suite(); }
-	virtual Defs* defs() const { return (parent()) ? parent()->defs() : NULL;}     // exposed to python hence check for NULL first
+	virtual Defs* defs() const { return (parent()) ? parent()->defs() : nullptr;}     // exposed to python hence check for NULL first
  	virtual Family* isFamily() const { return const_cast<Family*>(this);}
    virtual NodeContainer* isNodeContainer() const { return const_cast<Family*>(this); }
 

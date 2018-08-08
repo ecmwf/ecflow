@@ -25,7 +25,7 @@ class ServerListSyncWidget : public QWidget, protected Ui::ServerListSyncWidget
     Q_OBJECT
 
 public:
-    ServerListSyncWidget(QWidget *parent = 0);
+    ServerListSyncWidget(QWidget *parent = nullptr);
     ~ServerListSyncWidget();
 
 protected Q_SLOTS:

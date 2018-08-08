@@ -22,14 +22,14 @@ class LabelEditorWidget :  public QWidget, protected Ui::LabelEditorWidget
 {
 friend class LabelEditor;
 public:
-    LabelEditorWidget(QWidget *parent=0);
+    LabelEditorWidget(QWidget *parent=nullptr);
 };
 
 class LabelEditor : public AttributeEditor
 {
 Q_OBJECT
 public:
-    LabelEditor(VInfo_ptr,QWidget* parent=0);    
+    LabelEditor(VInfo_ptr,QWidget* parent=nullptr);    
     ~LabelEditor();
 
 protected Q_SLOTS:

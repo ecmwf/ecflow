@@ -26,7 +26,7 @@ class PropertyEditor : public QWidget, protected Ui::PropertyEditor
 Q_OBJECT
 
 public:
-    explicit PropertyEditor(QWidget *parent=0);
+    explicit PropertyEditor(QWidget *parent=nullptr);
     ~PropertyEditor();
 
     void edit(VProperty*,QPixmap pixmap);

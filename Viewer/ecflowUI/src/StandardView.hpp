@@ -32,7 +32,7 @@ class QStyledItemDelegate;
 class StandardView : public AbstractNodeView
 {
 public:
-    explicit StandardView(TreeNodeModel* model,QWidget *parent=0);
+    explicit StandardView(TreeNodeModel* model,QWidget *parent=nullptr);
     ~StandardView();
 
     QRect visualRect(const QModelIndex &index) const;

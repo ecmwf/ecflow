@@ -29,7 +29,7 @@
 #include "UiLog.hpp"
 #include "VNode.hpp"
 
-QIcon* ServerRefreshInfoWidget::icon_=0;
+QIcon* ServerRefreshInfoWidget::icon_=nullptr;
 QBrush ServerRefreshInfoWidget::buttonBgBrush_(QColor(229,228,227));
 QBrush ServerRefreshInfoWidget::serverBgBrush_(QColor(241,242,243));
 QPen ServerRefreshInfoWidget::borderPen_(QColor(197,197,197));
@@ -79,7 +79,7 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
 ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget *parent) :
     QWidget(parent),
     refreshAction_(refreshAction),
-    server_(0),
+    server_(nullptr),
     fontServer_(QFont()),
     fontPeriod_(QFont()),
     fontLast_(QFont()),
@@ -95,7 +95,7 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
     progRectHeight_(2),
     serverRectHeight_(10),
     serverYPadding_(2),
-    prop_(0),
+    prop_(nullptr),
     mode_(NoMode),
     noBlinkLimit_(15),
     hasInfo_(false),
@@ -282,7 +282,7 @@ void ServerRefreshInfoWidget::notifyServerDelete(ServerHandler* server)
     {
         server_->removeServerObserver(this);
         server_->removeServerComObserver(this);
-        server_=0;
+        server_=nullptr;
         serverName_.clear();
         serverText_.clear();
         hasInfo_=false;
@@ -1146,7 +1146,7 @@ ServerComActivityLine::ServerComActivityLine(QWidget *parent) :
     QWidget(parent),
     font_(QFont()),
     fm_(font_),
-    server_(0)
+    server_(nullptr)
 {
     font_.setPointSize(font_.pointSize()-1);
     fm_=QFontMetrics(font_);

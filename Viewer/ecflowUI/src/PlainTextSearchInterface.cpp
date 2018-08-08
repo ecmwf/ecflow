@@ -13,7 +13,7 @@
 #include <QPlainTextEdit>
 
 
-PlainTextSearchInterface::PlainTextSearchInterface() : editor_(NULL)
+PlainTextSearchInterface::PlainTextSearchInterface() : editor_(nullptr)
 {
 }
 

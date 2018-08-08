@@ -21,7 +21,7 @@ class MessageItemWidget : public QWidget, public InfoPanelItem, protected Ui::Me
 {
     Q_OBJECT
 public:
-	explicit MessageItemWidget(QWidget *parent=0);
+	explicit MessageItemWidget(QWidget *parent=nullptr);
 
 	void reload(VInfo_ptr);
 	QWidget* realWidget();

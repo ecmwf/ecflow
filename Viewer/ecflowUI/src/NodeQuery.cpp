@@ -142,7 +142,7 @@ NodeQueryOption* NodeQuery::option(QString name) const
     QMap<QString,NodeQueryOption*>::const_iterator it = options_.find(name);
     if(it != options_.constEnd())
         return it.value();
-    return NULL;
+    return nullptr;
 }
 
 QString NodeQuery::query() const

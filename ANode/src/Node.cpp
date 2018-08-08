@@ -49,12 +49,12 @@ using namespace boost::posix_time;
 //#define DEBUG_FIND_REFERENCED_NODE 1
 
 Node::Node(const std::string& n)
-: parent_(NULL),n_(n),
+: parent_(nullptr),n_(n),
   suspended_(false),
   st_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
   inLimitMgr_(this),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
-  graphic_ptr_(0)
+  graphic_ptr_(nullptr)
 {
    string msg;
    if (!Str::valid_name(n, msg)) {
@@ -63,23 +63,23 @@ Node::Node(const std::string& n)
 }
 
 Node::Node()
-: parent_(NULL),
+: parent_(nullptr),
   suspended_(false),
   st_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
   inLimitMgr_(this),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
-  graphic_ptr_(0)
+  graphic_ptr_(nullptr)
 {}
 
 Node::Node(const Node& rhs)
-: parent_(NULL),
+: parent_(nullptr),
   n_(rhs.n_),
   suspended_(rhs.suspended_),
   st_( rhs.st_),
   d_st_(rhs.d_st_),
   vars_(rhs.vars_),
-  c_expr_( (rhs.c_expr_) ? new Expression(*rhs.c_expr_) : NULL ),
-  t_expr_(  (rhs.t_expr_) ? new Expression(*rhs.t_expr_) : NULL ),
+  c_expr_( (rhs.c_expr_) ? new Expression(*rhs.c_expr_) : nullptr ),
+  t_expr_(  (rhs.t_expr_) ? new Expression(*rhs.t_expr_) : nullptr ),
   meters_(rhs.meters_),
   events_(rhs.events_),
   labels_(rhs.labels_),
@@ -88,16 +88,16 @@ Node::Node(const Node& rhs)
   crons_(rhs.crons_),
   dates_(rhs.dates_),
   days_(rhs.days_),
-  late_((rhs.late_) ? new ecf::LateAttr(*rhs.late_) : NULL),
-  misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : NULL),
+  late_((rhs.late_) ? new ecf::LateAttr(*rhs.late_) : nullptr),
+  misc_attrs_((rhs.misc_attrs_) ? new MiscAttrs(*rhs.misc_attrs_) : nullptr),
   repeat_( rhs.repeat_),
   inLimitMgr_(rhs.inLimitMgr_),
   flag_(rhs.flag_),
-  auto_cancel_((rhs.auto_cancel_)    ? new AutoCancelAttr(*rhs.auto_cancel_) : NULL),
-  auto_archive_((rhs.auto_archive_ ) ? new AutoArchiveAttr(*rhs.auto_archive_) : NULL),
-  auto_restore_((rhs.auto_restore_ ) ? new AutoRestoreAttr(*rhs.auto_restore_) : NULL),
+  auto_cancel_((rhs.auto_cancel_)    ? new AutoCancelAttr(*rhs.auto_cancel_) : nullptr),
+  auto_archive_((rhs.auto_archive_ ) ? new AutoArchiveAttr(*rhs.auto_archive_) : nullptr),
+  auto_restore_((rhs.auto_restore_ ) ? new AutoRestoreAttr(*rhs.auto_restore_) : nullptr),
   state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
-  graphic_ptr_(0)
+  graphic_ptr_(nullptr)
 {
    inLimitMgr_.set_node(this);
    if ( misc_attrs_ ) misc_attrs_->set_node(this);
@@ -175,7 +175,7 @@ Node& Node::operator=(const Node& rhs)
       state_change_no_ = 0;
       variable_change_no_ = 0;
       suspended_change_no_ = 0;
-      graphic_ptr_ = 0;
+      graphic_ptr_ = nullptr;
 
       if ( misc_attrs_ ) misc_attrs_->set_node(this);
 
@@ -2190,7 +2190,7 @@ AstTop* Node::completeAst() const
       std::string ignoredErrorMsg;
       return completeAst(ignoredErrorMsg);
    }
-   return NULL;
+   return nullptr;
 }
 
 AstTop* Node::triggerAst() const
@@ -2199,13 +2199,13 @@ AstTop* Node::triggerAst() const
       std::string ignoredErrorMsg;
       return triggerAst(ignoredErrorMsg);
    }
-   return NULL;
+   return nullptr;
 }
 
 AstTop* Node::completeAst(std::string& errorMsg) const
 {
    if (c_expr_) {
-      if (c_expr_->get_ast() == NULL) {
+      if (c_expr_->get_ast() == nullptr) {
 
          c_expr_->createAST(const_cast<Node*>(this),"complete",errorMsg);
 #ifdef DEBUG
@@ -2214,13 +2214,13 @@ AstTop* Node::completeAst(std::string& errorMsg) const
       }
       return c_expr_->get_ast();
    }
-   return NULL;
+   return nullptr;
 }
 
 AstTop* Node::triggerAst(std::string& errorMsg) const
 {
    if (t_expr_) {
-      if (t_expr_->get_ast() == NULL) {
+      if (t_expr_->get_ast() == nullptr) {
 
          t_expr_->createAST(const_cast<Node*>(this),"trigger",errorMsg);
 #ifdef DEBUG
@@ -2229,7 +2229,7 @@ AstTop* Node::triggerAst(std::string& errorMsg) const
       }
       return t_expr_->get_ast();
    }
-   return NULL;
+   return nullptr;
 }
 
 void Node::invalidate_trigger_references() const

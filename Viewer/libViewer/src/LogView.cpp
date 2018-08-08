@@ -13,7 +13,7 @@
 
 LogView::LogView(QWidget *parent) :
     QTreeView(parent),
-    logModel_(0)
+    logModel_(nullptr)
 {
     setProperty("log","1");
     setRootIsDecorated(false);

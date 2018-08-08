@@ -58,7 +58,7 @@ VAttributeType* VAttributeType::find(const std::string& name)
     if(it != typesMap_.end())
         return it->second;
 
-    return 0;
+    return nullptr;
 }
 
 VAttributeType* VAttributeType::find(int id)

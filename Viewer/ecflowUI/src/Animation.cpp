@@ -109,5 +109,5 @@ Animation* AnimationHandler::find(Animation::Type type, bool makeIt)
 		return an;
 	}
 
-	return 0;
+	return nullptr;
 }

@@ -16,7 +16,7 @@
 class OutputModel : public QAbstractItemModel
 {
 public:
-    explicit OutputModel(QObject *parent=0);
+    explicit OutputModel(QObject *parent=nullptr);
 
     void setData(const std::vector<VDir_ptr>&,const std::string& jobout);
    	void clearData();
@@ -52,7 +52,7 @@ protected:
 class OutputSortModel : public QSortFilterProxyModel
 {
 public:
-	explicit OutputSortModel(QObject *parent=0);
+	explicit OutputSortModel(QObject *parent=nullptr);
     ~OutputSortModel() = default;
 
 	QModelIndex fullNameToIndex(const std::string& fullName);
@@ -61,7 +61,7 @@ public:
 class OutputDirLitsDelegate : public QStyledItemDelegate
 {
 public:
-    explicit OutputDirLitsDelegate(QWidget *parent=0);
+    explicit OutputDirLitsDelegate(QWidget *parent=nullptr);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const;
 

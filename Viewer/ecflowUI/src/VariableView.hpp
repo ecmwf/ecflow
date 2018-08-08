@@ -46,7 +46,7 @@ protected:
 class VariableView : public TreeView
 {
 public:
-	explicit VariableView(QWidget *parent=0);
+	explicit VariableView(QWidget *parent=nullptr);
 
 protected:
     void drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const;

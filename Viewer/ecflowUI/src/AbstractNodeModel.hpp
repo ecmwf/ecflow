@@ -30,7 +30,7 @@ class AbstractNodeModel : public QAbstractItemModel
 	Q_OBJECT
 
 public:
-	explicit AbstractNodeModel(QObject *parent=0);
+	explicit AbstractNodeModel(QObject *parent=nullptr);
    	virtual ~AbstractNodeModel();
 
    	enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,

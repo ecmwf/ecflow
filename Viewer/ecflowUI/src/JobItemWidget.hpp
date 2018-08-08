@@ -20,7 +20,7 @@
 class JobItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
-	explicit JobItemWidget(QWidget *parent=0);
+	explicit JobItemWidget(QWidget *parent=nullptr);
 	~JobItemWidget();
 
 	void reload(VInfo_ptr);

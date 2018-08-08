@@ -34,7 +34,7 @@ class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObs
 friend class InfoPanel;
 
 public:
-    InfoPanelItem() : owner_(0), active_(false), selected_(false), suspended_(false),
+    InfoPanelItem() : owner_(nullptr), active_(false), selected_(false), suspended_(false),
                       frozen_(false), detached_(false), unselectedFlags_(KeepContents),                     
                       useAncestors_(false),handleAnyChange_(false),
                       keepServerDataOnLoad_(false) {}

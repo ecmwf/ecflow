@@ -51,7 +51,7 @@ const char* NState::toString( NState::State s ) {
 			assert(false); break;
 	}
 	assert(false);
-	return NULL;
+	return nullptr;
 }
 
 
@@ -79,7 +79,7 @@ const char* NState::to_html( NState::State s ) {
          assert(false); break;
    }
    assert(false);
-   return NULL;
+   return nullptr;
 }
 
 NState::State NState::toState( const std::string& str ) {
