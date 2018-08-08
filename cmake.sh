@@ -149,7 +149,7 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     # [-Wdeprecated-register] /usr/local/apps/python/2.7.12-01/include/python2.7/unicodeobject.h:534:5: warning: 'register' storage class specifier is deprecated and incompatible with C++17 [-Wdeprecated-register]
     # [-Wmacro-redefined]     /usr/local/apps/python/2.7.12-01/include/python2.7/pyconfig.h:1215:9: warning: '_XOPEN_SOURCE' macro redefined
     CXX_FLAGS=""
-    CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined"
+    CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
 
 	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
 	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
