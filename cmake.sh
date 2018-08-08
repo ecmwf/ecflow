@@ -148,7 +148,7 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     # ecflow fails to write boost files with clang 6.0.1, but in debug all tests pass. No point in debugging!
     module unload gnu
     module unload clang
-	module load clang/5.0.1
+    module load clang/5.0.1
     cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-5.0.1/boost_1_53_0"
 
     CXX_FLAGS=""

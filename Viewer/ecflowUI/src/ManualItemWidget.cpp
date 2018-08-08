@@ -105,10 +105,9 @@ void ManualItemWidget::infoFailed(VReply* reply)
     QString s=QString::fromStdString(reply->errorText());
     messageLabel_->showError(s);
     textEdit_->setPlainText(
-"# You can create a man page with 
-# a file <node>.man located in <ECF_FILE> or as
-# <ECF_HOME>/<ECF_NAME>.man
-");
+"# You can create a man page with "
+"a file <node>.man located in <ECF_FILE> or as "
+"<ECF_HOME>/<ECF_NAME>.man");
     reloadTb_->setEnabled(true);
 }
 
