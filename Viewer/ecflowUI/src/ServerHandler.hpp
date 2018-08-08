@@ -117,7 +117,7 @@ public:
 
 protected:
 	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
-	~ServerHandler();
+	~ServerHandler() override;
 
     //Only friend classes can access it. Practically it means we
     //we can only run it through CommandHandler!!!

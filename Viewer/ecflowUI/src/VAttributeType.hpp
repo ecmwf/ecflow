@@ -24,7 +24,7 @@ class VAttribute;
 class VAttributeType : public VParam
 {
 public:
-    virtual ~VAttributeType() = default;
+    ~VAttributeType() override = default;
 
     static std::vector<VParam*> filterItems();
     static VAttributeType* find(const std::string& name);

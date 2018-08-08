@@ -86,7 +86,7 @@ Q_OBJECT
 
 public:
 	VariableModelDataHandler();
-	~VariableModelDataHandler();
+	~VariableModelDataHandler() override;
 
     void reload(VInfo_ptr info);
     void clear(bool emitSignal=true);

@@ -14,9 +14,9 @@ public:
     enum CustomItemRole {SelectRole = Qt::UserRole+1};
 
 	explicit ComboMulti(QWidget *widget = nullptr);
-    virtual ~ComboMulti();
-    bool eventFilter(QObject *object, QEvent *event);
-    virtual void paintEvent(QPaintEvent *);
+    ~ComboMulti() override;
+    bool eventFilter(QObject *object, QEvent *event) override;
+    void paintEvent(QPaintEvent *) override;
     void setDisplayText(QString text);
     QString displayText() const;
     bool hasSelection() const {return !selection_.isEmpty();}
@@ -50,14 +50,14 @@ public:
     explicit ComboMultiDelegate(QObject *parent);
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
-             const QModelIndex &index) const;
+             const QModelIndex &index) const override;
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem & option,
-              const QModelIndex & index ) const;
+              const QModelIndex & index ) const override;
 
-    void setEditorData(QWidget *editor,const QModelIndex &index) const;
-    void setModelData(QWidget *editor, QAbstractItemModel *model,const QModelIndex &index) const;
-    void updateEditorGeometry(QWidget *editor,const QStyleOptionViewItem &option, const QModelIndex &index ) const;
+    void setEditorData(QWidget *editor,const QModelIndex &index) const override;
+    void setModelData(QWidget *editor, QAbstractItemModel *model,const QModelIndex &index) const override;
+    void updateEditorGeometry(QWidget *editor,const QStyleOptionViewItem &option, const QModelIndex &index ) const override;
 
 protected Q_SLOTS:
     void slotEdited(int);

@@ -40,7 +40,7 @@ Q_OBJECT
 
 public:
     RepeatEditor(VInfo_ptr,QWidget* parent=nullptr);
-    ~RepeatEditor();
+    ~RepeatEditor() override;
 
 protected Q_SLOTS:
     void slotSelectedInView(const QModelIndex&,const QModelIndex&);
@@ -70,10 +70,10 @@ protected Q_SLOTS:
 
 protected:    
     void initSpinner();
-    void apply();
-    void setValue(QString val);
-    void resetValue();
-    bool isValueChanged();
+    void apply() override;
+    void setValue(QString val) override;
+    void resetValue() override;
+    bool isValueChanged() override;
 };
 
 class RepeatStringEditor : public RepeatEditor
@@ -86,10 +86,10 @@ protected Q_SLOTS:
     void slotValueEdited(QString);
 
 protected:
-    void apply();
-    void setValue(QString val);
-    void resetValue();
-    bool isValueChanged();
+    void apply() override;
+    void setValue(QString val) override;
+    void resetValue() override;
+    bool isValueChanged() override;
 };
 
 class RepeatDateEditor : public RepeatEditor
@@ -102,10 +102,10 @@ protected Q_SLOTS:
     void slotValueEdited(QString);
 
 protected:
-    void apply();
-    void setValue(QString val);
-    void resetValue();
-    bool isValueChanged();
+    void apply() override;
+    void setValue(QString val) override;
+    void resetValue() override;
+    bool isValueChanged() override;
 };
 
 #endif // REPEATEDITOR_HPP

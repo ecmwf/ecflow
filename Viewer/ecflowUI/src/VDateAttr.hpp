@@ -28,8 +28,8 @@ class VDateAttrType : public VAttributeType
 {
 public:
     explicit VDateAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
+    QString toolTip(QStringList d) const override;
+    QString definition(QStringList d) const override;
     void encode(const DateAttr& d,QStringList& data);
     void encode(const DayAttr& d,QStringList& data);
 
@@ -46,9 +46,9 @@ public:
     VDateAttr(VNode *parent,const DateAttr&,int index);
     VDateAttr(VNode *parent,const DayAttr&,int index);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 

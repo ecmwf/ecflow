@@ -31,15 +31,15 @@ Q_OBJECT
 
 public:
     MeterEditor(VInfo_ptr,QWidget* parent=nullptr);
-    ~MeterEditor();
+    ~MeterEditor() override;
 
 protected Q_SLOTS:
     void slotValueChanged(int);
 
 protected:
-    void apply();
-    void resetValue();
-    bool isValueChanged();
+    void apply() override;
+    void resetValue() override;
+    bool isValueChanged() override;
     void readSettings();
     void writeSettings();
 

@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE( TestServer )
 class TestServer : public Server {
 public:
    explicit TestServer(ServerEnvironment& s) : Server(s) {}
-   virtual ~TestServer() = default;
+   ~TestServer() override = default;
 
    // abort server if check pt files exist, but can't be loaded
    //   bool load_check_pt_file_on_startup();
@@ -52,37 +52,37 @@ public:
    //   void set_server_state(SState::State);
 
    /// AbstractServer functions
-   virtual SState::State state() const { return Server::state(); }
-   virtual std::pair<std::string,std::string> hostPort() const { return Server::hostPort(); }
-   virtual defs_ptr defs() const { return Server::defs();}
+   SState::State state() const override { return Server::state(); }
+   std::pair<std::string,std::string> hostPort() const override { return Server::hostPort(); }
+   defs_ptr defs() const override { return Server::defs();}
    // virtual void updateDefs(defs_ptr,bool force);
-   virtual void clear_defs() { Server::clear_defs();}
+   void clear_defs() override { Server::clear_defs();}
    //   virtual void checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
    //                               int check_pt_interval = 0,
    //                               int check_pt_save_time_alarm = 0);
-   virtual void restore_defs_from_checkpt() { Server::restore_defs_from_checkpt();}
-   virtual void nodeTreeStateChanged()  { Server::nodeTreeStateChanged(); }
-   virtual bool allowTaskCommunication() const { return Server::allowTaskCommunication();}
-   virtual void shutdown() { Server::shutdown(); }
-   virtual void halted() { Server::halted(); }
-   virtual void restart() { Server::restart(); }
+   void restore_defs_from_checkpt() override { Server::restore_defs_from_checkpt();}
+   void nodeTreeStateChanged() override  { Server::nodeTreeStateChanged(); }
+   bool allowTaskCommunication() const override { return Server::allowTaskCommunication();}
+   void shutdown() override { Server::shutdown(); }
+   void halted() override { Server::halted(); }
+   void restart() override { Server::restart(); }
 
-   virtual bool reloadWhiteListFile(std::string& errorMsg) { return Server::reloadWhiteListFile(errorMsg);}
-   virtual bool reloadPasswdFile(std::string& errorMsg) { return Server::reloadPasswdFile(errorMsg);}
+   bool reloadWhiteListFile(std::string& errorMsg) override { return Server::reloadWhiteListFile(errorMsg);}
+   bool reloadPasswdFile(std::string& errorMsg) override { return Server::reloadPasswdFile(errorMsg);}
 
-   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd) { return Server::authenticateReadAccess(user,passwd); }
-   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd, const std::string& path) { return Server::authenticateReadAccess(user,passwd,path); }
-   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd, const std::vector<std::string>& paths){ return Server::authenticateReadAccess(user,passwd,paths); }
+   bool authenticateReadAccess(const std::string& user,const std::string& passwd) override { return Server::authenticateReadAccess(user,passwd); }
+   bool authenticateReadAccess(const std::string& user,const std::string& passwd, const std::string& path) override { return Server::authenticateReadAccess(user,passwd,path); }
+   bool authenticateReadAccess(const std::string& user,const std::string& passwd, const std::vector<std::string>& paths) override{ return Server::authenticateReadAccess(user,passwd,paths); }
 
-   virtual bool authenticateWriteAccess(const std::string& user) { return Server::authenticateWriteAccess(user); }
-   virtual bool authenticateWriteAccess(const std::string& user, const std::string& path) { return Server::authenticateWriteAccess(user,path); }
-   virtual bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths){ return Server::authenticateWriteAccess(user,paths); }
+   bool authenticateWriteAccess(const std::string& user) override { return Server::authenticateWriteAccess(user); }
+   bool authenticateWriteAccess(const std::string& user, const std::string& path) override { return Server::authenticateWriteAccess(user,path); }
+   bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) override{ return Server::authenticateWriteAccess(user,paths); }
 
-   virtual bool lock(const std::string& user) { return Server::lock(user); }
-   virtual void unlock() { Server::unlock();}
-   virtual const std::string& lockedUser() const { return Server::lockedUser(); }
+   bool lock(const std::string& user) override { return Server::lock(user); }
+   void unlock() override { Server::unlock();}
+   const std::string& lockedUser() const override { return Server::lockedUser(); }
    //   virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now, bool user_cmd_context) const;
-   virtual int poll_interval() const { return Server::poll_interval();}
+   int poll_interval() const override { return Server::poll_interval();}
    //   virtual void debug_server_on();
    //   virtual void debug_server_off();
    //   virtual bool debug() const;

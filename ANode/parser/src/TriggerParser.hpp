@@ -32,15 +32,15 @@ protected:
 class TriggerParser : public TriggerCompleteParser {
 public:
    explicit TriggerParser(DefsStructureParser* p) : TriggerCompleteParser(p) {}
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
-	virtual const char* keyword() const { return "trigger"; }
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
+	const char* keyword() const override { return "trigger"; }
 };
 
 class CompleteParser : public TriggerCompleteParser {
 public:
    explicit CompleteParser(DefsStructureParser* p) : TriggerCompleteParser(p) {}
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) ;
-	virtual const char* keyword() const { return "complete"; }
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override ;
+	const char* keyword() const override { return "complete"; }
 };
 
 #endif

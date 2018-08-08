@@ -54,7 +54,7 @@ class InfoPanel : public DashboardWidget, public ServerObserver, public VInfoObs
 
 public:
     explicit InfoPanel(QWidget* parent=nullptr);
-	virtual ~InfoPanel();
+	~InfoPanel() override;
 	bool frozen() const;
     void clear();
 	void setCurrent(const std::string& name);
@@ -62,35 +62,35 @@ public:
     void relayInfoPanelCommand(VInfo_ptr info,QString cmd);
     void relayDashboardCommand(VInfo_ptr info,QString cmd);
 
-    void populateDialog();
+    void populateDialog() override;
 
     //From DashboardWidget
-    void populateDockTitleBar(DashboardDockTitleWidget*);
-    void reload() {}
-	void rerender();
-    void writeSettings(VComboSettings*);
-    void readSettings(VComboSettings*);
-    void writeSettingsForDialog();
-    void readSettingsForDialog();
+    void populateDockTitleBar(DashboardDockTitleWidget*) override;
+    void reload() override {}
+	void rerender() override;
+    void writeSettings(VComboSettings*) override;
+    void readSettings(VComboSettings*) override;
+    void writeSettingsForDialog() override;
+    void readSettingsForDialog() override;
 
 	//From VInfoObserver
-    void notifyDelete(VInfo*) {}
-	void notifyDataLost(VInfo*);
+    void notifyDelete(VInfo*) override {}
+	void notifyDataLost(VInfo*) override;
 
 	//From ServerObserver
-	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
-	void notifyServerDelete(ServerHandler* server);
-	void notifyBeginServerClear(ServerHandler* server);
-    void notifyEndServerClear(ServerHandler* server) {}
-    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
-	void notifyEndServerScan(ServerHandler* server);
-	void notifyServerConnectState(ServerHandler* server);
-	void notifyServerSuiteFilterChanged(ServerHandler* server);
-    void notifyEndServerSync(ServerHandler* server);
+	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
+	void notifyServerDelete(ServerHandler* server) override;
+	void notifyBeginServerClear(ServerHandler* server) override;
+    void notifyEndServerClear(ServerHandler* server) override {}
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override {}
+	void notifyEndServerScan(ServerHandler* server) override;
+	void notifyServerConnectState(ServerHandler* server) override;
+	void notifyServerSuiteFilterChanged(ServerHandler* server) override;
+    void notifyEndServerSync(ServerHandler* server) override;
 
 public Q_SLOTS:
 	void slotReload(VInfo_ptr node);
-	void setCurrentSelection(VInfo_ptr node) {slotReload(node);}
+	void setCurrentSelection(VInfo_ptr node) override {slotReload(node);}
 
 protected Q_SLOTS:
     void slotReloadFromBc(VInfo_ptr node);
@@ -102,7 +102,7 @@ Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
 
 protected:
-    void detachedChanged();
+    void detachedChanged() override;
 
 private:
     void localClear();

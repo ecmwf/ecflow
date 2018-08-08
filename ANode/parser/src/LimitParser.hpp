@@ -21,8 +21,8 @@
 class LimitParser : public Parser {
 public:
    explicit LimitParser(DefsStructureParser* p) : Parser(p) {}
-	virtual const char* keyword() const { return "limit"; }
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
+	const char* keyword() const override { return "limit"; }
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };
 
 #endif /* LIMITPARSER_HPP_ */

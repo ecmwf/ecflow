@@ -21,7 +21,7 @@ Q_OBJECT
 
 public:
 	explicit CodeItemWidget(QWidget *parent=nullptr);
-	~CodeItemWidget();
+	~CodeItemWidget() override;
 
 protected Q_SLOTS:
 	void on_searchTb__clicked();

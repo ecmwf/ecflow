@@ -30,7 +30,7 @@ class Dashboard : public QMainWindow, public ServerFilterObserver
 
 public:
   	Dashboard(QString,QWidget* parent=nullptr);
-	~Dashboard();
+	~Dashboard() override;
 
 	void reload();
 	void rerender();
@@ -48,10 +48,10 @@ public:
     bool hasMaximised() const;
     bool hasMaximisedApplied() const;
 
-	void notifyServerFilterAdded(ServerItem* item);
-	void notifyServerFilterRemoved(ServerItem* item);
-	void notifyServerFilterChanged(ServerItem*);
-	void notifyServerFilterDelete();
+	void notifyServerFilterAdded(ServerItem* item) override;
+	void notifyServerFilterRemoved(ServerItem* item) override;
+	void notifyServerFilterChanged(ServerItem*) override;
+	void notifyServerFilterDelete() override;
 
 	void writeSettings(VComboSettings*);
 	void readSettings(VComboSettings*);
@@ -74,7 +74,7 @@ protected Q_SLOTS:
     void slotMaximisedChanged(DashboardWidget* w);
 
 protected:
-   void contextMenuEvent(QContextMenuEvent* e);
+   void contextMenuEvent(QContextMenuEvent* e) override;
 
 private:
     DashboardWidget* addWidgetCore(const std::string& type,bool userAddedView);

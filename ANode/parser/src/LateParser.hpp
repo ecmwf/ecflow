@@ -21,7 +21,7 @@
 class LateParser : public Parser {
 public:
    explicit LateParser(DefsStructureParser* p) : Parser(p) {}
-	virtual const char* keyword() const { return "late"; }
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
+	const char* keyword() const override { return "late"; }
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };
 #endif

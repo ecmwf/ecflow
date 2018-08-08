@@ -26,7 +26,7 @@ Q_OBJECT
     
 public:
     explicit PropertyDialog(QWidget *parent=nullptr);
-    ~PropertyDialog() = default;
+    ~PropertyDialog() override = default;
 
     bool isConfigChanged() const {return configChanged_;}
     void showPage(QString);
@@ -35,8 +35,8 @@ public:
     static void load(VProperty*);
 
 public Q_SLOTS:
-    void accept();
-    void reject();
+    void accept() override;
+    void reject() override;
     void slotChangePage(QListWidgetItem *current, QListWidgetItem *previous);
     void slotButton(QAbstractButton*);
 
@@ -49,7 +49,7 @@ private:
     void manageChange(bool);
     void apply();
 
-    void closeEvent(QCloseEvent * event);
+    void closeEvent(QCloseEvent * event) override;
     void readSettings();
     void writeSettings();
 

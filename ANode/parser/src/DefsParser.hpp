@@ -22,7 +22,7 @@ class DefsParser : public Parser {
 public:
    explicit DefsParser(DefsStructureParser* p);
    DefsParser(DefsStructureParser* p, bool node_parser_only);
-	virtual const char* keyword() const { return "DEFS" ;}
+	const char* keyword() const override { return "DEFS" ;}
 };
 
 #endif

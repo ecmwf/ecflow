@@ -21,23 +21,23 @@ class JobItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit JobItemWidget(QWidget *parent=nullptr);
-	~JobItemWidget();
+	~JobItemWidget() override;
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents();
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override;
 
 	//From VInfoPresenter
-    void infoReady(VReply*);
-    void infoFailed(VReply*);
-    void infoProgress(VReply*);
+    void infoReady(VReply*) override;
+    void infoFailed(VReply*) override;
+    void infoProgress(VReply*) override;
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected:
-    void updateState(const ChangeFlags&);
-    void reloadRequested();
+    void updateState(const ChangeFlags&) override;
+    void reloadRequested() override;
 };
 
 #endif

@@ -46,7 +46,7 @@ public:
    /// Constructor opens the acceptor and starts waiting for the first incoming
    /// connection.
    explicit Server(ServerEnvironment&);
-   virtual ~Server();
+   ~Server() override;
 
    /// Start the server
    /// The Server::run/io_service::run() call will block until all asynchronous operations
@@ -97,36 +97,36 @@ private:
 protected: // Allow test to override
 
    /// AbstractServer functions
-   virtual SState::State state() const { return serverState_; }
-   virtual std::pair<std::string,std::string> hostPort() const;
-   virtual defs_ptr defs() const { return defs_;}
-   virtual void updateDefs(defs_ptr,bool force);
-   virtual void clear_defs();
-   virtual void checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
+   SState::State state() const override { return serverState_; }
+   std::pair<std::string,std::string> hostPort() const override;
+   defs_ptr defs() const override { return defs_;}
+   void updateDefs(defs_ptr,bool force) override;
+   void clear_defs() override;
+   void checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
                                int check_pt_interval = 0,
-                               int check_pt_save_time_alarm = 0);
-   virtual void restore_defs_from_checkpt();
-   virtual void nodeTreeStateChanged();
-   virtual bool allowTaskCommunication() const;
-   virtual void shutdown();
-   virtual void halted();
-   virtual void restart();
-   virtual bool reloadWhiteListFile(std::string& errorMsg);
-   virtual bool reloadPasswdFile(std::string& errorMsg);
-   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd);
-   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path);
-   virtual bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths);
-   virtual bool authenticateWriteAccess(const std::string& user);
-   virtual bool authenticateWriteAccess(const std::string& user, const std::string& path);
-   virtual bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths);
-   virtual bool lock(const std::string& user);
-   virtual void unlock();
-   virtual const std::string& lockedUser() const;
-   virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now, bool user_cmd_context) const;
-   virtual int poll_interval() const;
-   virtual void debug_server_on();
-   virtual void debug_server_off();
-   virtual bool debug() const;
+                               int check_pt_save_time_alarm = 0) override;
+   void restore_defs_from_checkpt() override;
+   void nodeTreeStateChanged() override;
+   bool allowTaskCommunication() const override;
+   void shutdown() override;
+   void halted() override;
+   void restart() override;
+   bool reloadWhiteListFile(std::string& errorMsg) override;
+   bool reloadPasswdFile(std::string& errorMsg) override;
+   bool authenticateReadAccess(const std::string& user,const std::string& passwd) override;
+   bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path) override;
+   bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths) override;
+   bool authenticateWriteAccess(const std::string& user) override;
+   bool authenticateWriteAccess(const std::string& user, const std::string& path) override;
+   bool authenticateWriteAccess(const std::string& user, const std::vector<std::string>& paths) override;
+   bool lock(const std::string& user) override;
+   void unlock() override;
+   const std::string& lockedUser() const override;
+   void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now, bool user_cmd_context) const override;
+   int poll_interval() const override;
+   void debug_server_on() override;
+   void debug_server_off() override;
+   bool debug() const override;
 
    // used in signal, for emergency check point during system session
    void sigterm_signal_handler();

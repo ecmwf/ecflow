@@ -34,7 +34,7 @@ private:
 template<class T>
 class AttributeEditorMaker : public AttributeEditorFactory
 {
-    AttributeEditor* make(VInfo_ptr info,QWidget* parent) { return new T(info,parent); }
+    AttributeEditor* make(VInfo_ptr info,QWidget* parent) override { return new T(info,parent); }
 public:
     explicit AttributeEditorMaker(const std::string& t) : AttributeEditorFactory(t) {}
 };

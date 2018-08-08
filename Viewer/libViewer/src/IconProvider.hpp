@@ -39,7 +39,7 @@ public:
   	explicit UnknownIconItem(QString);
 
 protected:
-  	QPixmap unknown(int);
+  	QPixmap unknown(int) override;
 };
 
 

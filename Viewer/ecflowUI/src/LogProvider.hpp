@@ -30,9 +30,9 @@ class LogProvider : public QObject, public InfoProvider
 public:
    LogProvider(InfoPresenter* owner,QObject* parent=nullptr);
 
-   void visit(VInfoServer*);
-   void clear();
-   void setAutoUpdate(bool);
+   void visit(VInfoServer*) override;
+   void clear() override;
+   void setAutoUpdate(bool) override;
 
    public Q_SLOTS:
    void slotLinesAppend(QStringList);

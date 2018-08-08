@@ -21,8 +21,8 @@
 class LabelParser : public Parser {
 public:
    explicit LabelParser(DefsStructureParser* p) : Parser(p) {}
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
-	virtual const char* keyword() const { return "label"; }
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
+	const char* keyword() const override { return "label"; }
 };
 
 #endif /* LABELPARSER_HPP_ */

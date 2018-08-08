@@ -25,15 +25,15 @@ public:
 
     enum CustomItemRole {ReadOnlyRole = Qt::UserRole+1,GenVarRole = Qt::UserRole+2,ShadowRole = Qt::UserRole+3};
 
-   	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-   	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+   	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+   	int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
 
-   	Qt::ItemFlags flags ( const QModelIndex & index) const;
-   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+   	Qt::ItemFlags flags ( const QModelIndex & index) const override;
+   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
 
-   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-   	QModelIndex parent (const QModelIndex & ) const;
+   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+   	QModelIndex parent (const QModelIndex & ) const override;
 
 	bool variable(const QModelIndex& index, QString& name,QString& value,bool& genVar) const;
 
@@ -82,21 +82,21 @@ public:
 	enum MatchMode {FilterMode,SearchMode};
 
 	VariableSortModel(VariableModel*,QObject *parent=nullptr);
-    ~VariableSortModel() = default;
+    ~VariableSortModel() override = default;
 
 	MatchMode matchMode() const {return matchMode_;}
 	void setMatchMode(MatchMode mode);
 	void setMatchText(QString text);
 
-	bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
-	bool filterAcceptsRow(int,const QModelIndex &) const;
+	bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+	bool filterAcceptsRow(int,const QModelIndex &) const override;
 
 	//From QSortFilterProxyModel:
 	//we set the source model in the constructor. So this function should not do anything.
-    void setSourceModel(QAbstractItemModel*) {}
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
+    void setSourceModel(QAbstractItemModel*) override {}
+    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
 	
-    QModelIndexList match(const QModelIndex& start,int role,const QVariant& value,int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap )) const;
+    QModelIndexList match(const QModelIndex& start,int role,const QVariant& value,int hits = 1, Qt::MatchFlags flags = Qt::MatchFlags( Qt::MatchStartsWith | Qt::MatchWrap )) const override;
 
 #if 0
     void test();

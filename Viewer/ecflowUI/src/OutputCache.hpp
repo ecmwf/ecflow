@@ -51,7 +51,7 @@ class OutputCache:  public QObject
 
 public:   
     OutputCache(QObject* parent=nullptr);
-    ~OutputCache();
+    ~OutputCache() override;
 
     OutputCacheItem* add(VInfo_ptr info,const std::string& sourcePath,VFile_ptr file);
     OutputCacheItem* attachOne(VInfo_ptr info,const std::string& fileName);

@@ -34,20 +34,20 @@ Q_OBJECT
 
 public:
     TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilterDef* filterDef,QWidget *parent=nullptr);
-    ~TreeNodeView();
+    ~TreeNodeView() override;
 
-    void reload();
-    void rerender();
-    QWidget* realWidget();
-    QObject* realObject();
-    VInfo_ptr currentSelection();
-    void setCurrentSelection(VInfo_ptr n);
-    void selectFirstServer();
+    void reload() override;
+    void rerender() override;
+    QWidget* realWidget() override;
+    QObject* realObject() override;
+    VInfo_ptr currentSelection() override;
+    void setCurrentSelection(VInfo_ptr n) override;
+    void selectFirstServer() override;
 
-    void notifyChange(VProperty* p);
+    void notifyChange(VProperty* p) override;
 
-    void readSettings(VSettings* vs) {}
-    void writeSettings(VSettings* vs) {}
+    void readSettings(VSettings* vs) override {}
+    void writeSettings(VSettings* vs) override {}
 
 public Q_SLOTS:
     void slotContextMenu(const QPoint &position);

@@ -35,28 +35,28 @@ public:
    	TreeNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,
                   AttributeFilter *atts,IconFilter* icons,QObject *parent=nullptr);
 
-   	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-   	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+   	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+   	int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
 
-   	Qt::ItemFlags flags ( const QModelIndex & index) const;
-   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+   	Qt::ItemFlags flags ( const QModelIndex & index) const override;
+   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
 
-   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-   	QModelIndex parent (const QModelIndex & ) const;
+   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+   	QModelIndex parent (const QModelIndex & ) const override;
 
-    QModelIndex serverToIndex(ServerHandler*) const;
+    QModelIndex serverToIndex(ServerHandler*) const override;
 
     QModelIndex nodeToIndex(const VTreeNode*,int column=0) const;
-    QModelIndex nodeToIndex(const VNode*,int column=0) const;
+    QModelIndex nodeToIndex(const VNode*,int column=0) const override;
     VTreeServer* indexToServer(const QModelIndex & index) const;
     VTreeServer* nameToServer(const std::string&) const;
     VTreeNode* indexToNode( const QModelIndex & index) const;
     VTreeNode* indexToServerOrNode( const QModelIndex & index) const;
 
-    QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
+    QModelIndex attributeToIndex(const VAttribute* a, int column=0) const override;
 
-    VInfo_ptr nodeInfo(const QModelIndex& index);
+    VInfo_ptr nodeInfo(const QModelIndex& index) override;
     void setForceShow(VInfo_ptr);
     void selectionChanged(QModelIndexList lst);
 
@@ -64,13 +64,13 @@ public:
     void setEnableNodeToolTip(bool st) {nodeToolTip_=st;}
     void setEnableAttributeToolTip(bool st) {attributeToolTip_=st;}
 
-   	VModelData* data() const;
+   	VModelData* data() const override;
 
 public Q_SLOTS:
-	void slotServerAddBegin(int row);
-	void slotServerAddEnd();
-    void slotServerRemoveBegin(VModelServer*,int);
-    void slotServerRemoveEnd(int);
+	void slotServerAddBegin(int row) override;
+	void slotServerAddEnd() override;
+    void slotServerRemoveBegin(VModelServer*,int) override;
+    void slotServerRemoveEnd(int) override;
 
     void slotNodeChanged(VTreeServer*,const VTreeNode*);
     void slotAttributesChanged(VTreeServer*,const VTreeNode*);
@@ -86,11 +86,11 @@ public Q_SLOTS:
     void slotEndFilterUpdateInsertTop(VTreeServer*,int);
 
 	//void slotResetBranch(VModelServer*,const VNode*);
-    void slotDataChanged(VModelServer*);
-    void slotBeginServerScan(VModelServer* server,int);
-	void slotEndServerScan(VModelServer* server,int);
-	void slotBeginServerClear(VModelServer* server,int);
-	void slotEndServerClear(VModelServer* server,int);
+    void slotDataChanged(VModelServer*) override;
+    void slotBeginServerScan(VModelServer* server,int) override;
+	void slotEndServerScan(VModelServer* server,int) override;
+	void slotBeginServerClear(VModelServer* server,int) override;
+	void slotEndServerClear(VModelServer* server,int) override;
 
     int iconNum(VNode*) const;
     bool isNode(const QModelIndex & index) const;

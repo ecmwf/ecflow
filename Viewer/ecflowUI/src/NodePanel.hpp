@@ -29,7 +29,7 @@ class NodePanel : public TabWidget
 
 public:
 	explicit NodePanel(QWidget* parent=nullptr);
-	virtual ~NodePanel();
+	~NodePanel() override;
 
 	void setViewMode(Viewer::ViewMode);
 	Viewer::ViewMode viewMode();
@@ -70,12 +70,12 @@ Q_SIGNALS:
 	void contentsChanged();
 
 protected:
-    void resizeEvent(QResizeEvent *e);
+    void resizeEvent(QResizeEvent *e) override;
     void adjustTabTitle();
     int tabAreaWidth() const;
 
     Dashboard* addWidget(QString);
-	void tabBarCommand(QString, int);
+	void tabBarCommand(QString, int) override;
 	Dashboard* nodeWidget(int index);
 	static std::string tabSettingsId(int i);
 };

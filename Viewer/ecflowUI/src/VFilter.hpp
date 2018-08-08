@@ -40,7 +40,7 @@ Q_OBJECT
 
 public:
 	VParamSet();
-    virtual ~VParamSet() = default;
+    ~VParamSet() override = default;
 
     const std::vector<VParam*>& all() const {return all_;}
     const std::vector<VParam*>& current() const {return current_;}
@@ -101,7 +101,7 @@ class IconFilter : public VParamSet
 {
 public:
     IconFilter();
-    void readSettings(VSettings* vs);
+    void readSettings(VSettings* vs) override;
 };
 
 
@@ -118,7 +118,7 @@ friend class  TableNodeFilter;
 public:
 	enum Scope {NodeStateScope,GeneralScope};
 	NodeFilterDef(ServerFilter*,Scope);
-	~NodeFilterDef();
+	~NodeFilterDef() override;
 
 	NodeStateFilter* nodeState() const {return nodeState_;}
 
@@ -182,11 +182,11 @@ class TreeNodeFilter : public NodeFilter
 public:
     explicit TreeNodeFilter(NodeFilterDef* def,ServerHandler*,VTree*);
 
-    void clear();
-    bool isNull();
-    bool isComplete();
-    int  matchCount() const {return 0;}
-    bool update();
+    void clear() override;
+    bool isNull() override;
+    bool isComplete() override;
+    int  matchCount() const override {return 0;}
+    bool update() override;
     bool update(const std::vector<VNode*>& topChange,
                 std::vector<VNode*>& topFilterChange);
 
@@ -202,11 +202,11 @@ class TableNodeFilter : public NodeFilter
 public:
     explicit TableNodeFilter(NodeFilterDef* def,ServerHandler*);
 
-	void clear();
-    bool isNull();
-    bool isComplete();
-    int  matchCount() const {return matchCount_;}
-    bool update();
+	void clear() override;
+    bool isNull() override;
+    bool isComplete() override;
+    int  matchCount() const override {return matchCount_;}
+    bool update() override;
     int indexOf(const VNode*) const;
     VNode* nodeAt(int index) const;
 

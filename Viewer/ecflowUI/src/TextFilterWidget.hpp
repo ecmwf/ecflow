@@ -26,7 +26,7 @@ Q_OBJECT
 
 public:
     explicit TextFilterWidget(QWidget *parent=nullptr);
-    ~TextFilterWidget() = default;
+    ~TextFilterWidget() override = default;
 
     enum FilterStatus {EditStatus,FoundStatus,NotFoundStatus};
     void setStatus(FilterStatus,bool force=false);
@@ -59,8 +59,8 @@ Q_SIGNALS:
     void statusChanged(FilterStatus);
 
 protected:
-    void paintEvent(QPaintEvent *);
-    void showEvent(QShowEvent *);
+    void paintEvent(QPaintEvent *) override;
+    void showEvent(QShowEvent *) override;
 
 private:
     void init(const TextFilterItem& item);

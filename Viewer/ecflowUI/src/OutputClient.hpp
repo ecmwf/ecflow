@@ -23,7 +23,7 @@ class OutputClient : public QObject
 
 public:
     OutputClient(const std::string& host,const std::string& port,QObject *parent);
-    ~OutputClient();
+    ~OutputClient() override;
 
     const std::string& host() const {return host_;}
     int port() const {return port_;}

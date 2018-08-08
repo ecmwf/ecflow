@@ -27,7 +27,7 @@ class VGenVarAttrType : public VAttributeType
 {
 public:
     explicit VGenVarAttrType();
-    QString toolTip(QStringList d) const;
+    QString toolTip(QStringList d) const override;
     void encode(const Variable&,QStringList&) const;
 
 private:
@@ -39,9 +39,9 @@ class VGenVarAttr : public VAttribute
 public:
     VGenVarAttr(VNode *parent,const Variable&,int index);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
     static bool isReadOnly(const std::string&);
 };

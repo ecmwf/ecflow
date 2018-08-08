@@ -25,17 +25,17 @@ class LogModel : public QAbstractItemModel
     Q_OBJECT
 public:
    	explicit LogModel(QObject *parent=nullptr);
-   	~LogModel();
+   	~LogModel() override;
 
-   	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-   	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+   	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+   	int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
 
-   	Qt::ItemFlags flags ( const QModelIndex & index) const;
-   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-   	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+   	Qt::ItemFlags flags ( const QModelIndex & index) const override;
+   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+   	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
 
-   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-   	QModelIndex parent (const QModelIndex & ) const;
+   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+   	QModelIndex parent (const QModelIndex & ) const override;
 
     void loadFromFile(const std::string&,size_t startPos=0);
     void setData(const std::string&);
@@ -77,9 +77,9 @@ class LogDelegate : public QStyledItemDelegate
 public:
     explicit LogDelegate(QWidget *parent=nullptr);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
+                   const QModelIndex& index) const override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
 };
 
 

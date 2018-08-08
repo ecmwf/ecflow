@@ -35,21 +35,21 @@ Q_OBJECT
 public:
 
 	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=nullptr);
-    ~TableNodeView();
+    ~TableNodeView() override;
 
-    void reload() {}
-	void rerender();
-    QWidget* realWidget();
-    QObject* realObject();
-	VInfo_ptr currentSelection();
-    void setCurrentSelection(VInfo_ptr n);
-	void selectFirstServer() {}
+    void reload() override {}
+	void rerender() override;
+    QWidget* realWidget() override;
+    QObject* realObject() override;
+	VInfo_ptr currentSelection() override;
+    void setCurrentSelection(VInfo_ptr n) override;
+	void selectFirstServer() override {}
 	void setModel(TableNodeSortModel *model);
 
-	void notifyChange(VProperty* p);
+	void notifyChange(VProperty* p) override;
 
-    void readSettings(VSettings*);
-    void writeSettings(VSettings*);
+    void readSettings(VSettings*) override;
+    void writeSettings(VSettings*) override;
 
 public Q_SLOTS:
 	void slotDoubleClickItem(const QModelIndex&);
@@ -69,7 +69,7 @@ protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 	void adjustBackground(QColor col);
-	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
     void setSortingEnabledNoExec(bool b);
 
     TableNodeSortModel* model_;
@@ -100,8 +100,8 @@ Q_OBJECT
 public:
 	explicit TableNodeHeader(QWidget *parent=nullptr);
 
-	QSize sizeHint() const;
-	void setModel(QAbstractItemModel *model);
+	QSize sizeHint() const override;
+	void setModel(QAbstractItemModel *model) override;
 
 public Q_SLOTS:
 	void slotSectionResized(int i);
@@ -110,9 +110,9 @@ Q_SIGNALS:
 	void customButtonClicked(QString,QPoint);
 
 protected:
-	void showEvent(QShowEvent *QSize);
-	void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const;
-	void mousePressEvent(QMouseEvent *event);
+	void showEvent(QShowEvent *QSize) override;
+	void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const override;
+	void mousePressEvent(QMouseEvent *event) override;
 
 	QPixmap customPix_;
 	mutable QMap<int,TableNodeHeaderButton> customButton_;

@@ -89,19 +89,19 @@ public:
 
 
 // AbstractClientEnv functions:
- 	virtual bool checkTaskPathAndPassword(std::string& errorMsg) const;
- 	virtual const std::string& task_path() const { return task_path_; }
- 	virtual int task_try_no() const { return task_try_num_; }
-	virtual const std::string& jobs_password() const { return jobs_password_ ;}
-	virtual const std::string& process_or_remote_id() const { return remote_id_; }
-   virtual void set_host_port(const std::string& host, const std::string& port);
-   virtual const std::string& host() const;
-   virtual const std::string& port() const;
-	virtual const std::vector<std::pair<std::string,std::string> >& env() const { return env_;}
-	virtual const std::string& get_user_password() const;
-	virtual bool debug() const { return debug_;} //enabled if ECF_DEBUG_CLIENT set
-   virtual void set_test() { under_test_ = true; }
-   virtual bool under_test() const { return under_test_; }
+ 	bool checkTaskPathAndPassword(std::string& errorMsg) const override;
+ 	const std::string& task_path() const override { return task_path_; }
+ 	int task_try_no() const override { return task_try_num_; }
+	const std::string& jobs_password() const override { return jobs_password_ ;}
+	const std::string& process_or_remote_id() const override { return remote_id_; }
+   void set_host_port(const std::string& host, const std::string& port) override;
+   const std::string& host() const override;
+   const std::string& port() const override;
+	const std::vector<std::pair<std::string,std::string> >& env() const override { return env_;}
+	const std::string& get_user_password() const override;
+	bool debug() const override { return debug_;} //enabled if ECF_DEBUG_CLIENT set
+   void set_test() override { under_test_ = true; }
+   bool under_test() const override { return under_test_; }
 
    // Support for python child commands, and python jobs
    void set_child_path(const std::string& path) { task_path_ = path;}

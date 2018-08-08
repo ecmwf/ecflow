@@ -24,7 +24,7 @@ class IconTabBar : public QTabBar
 public:
     IconTabBar(QWidget* parent=nullptr) : QTabBar(parent) {}
 protected:
-    void paintEvent(QPaintEvent *e);
+    void paintEvent(QPaintEvent *e) override;
 };
 
 

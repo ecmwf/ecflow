@@ -35,32 +35,32 @@ public:
 	// Only in server side do we increment state/modify numbers, controlled by: Ecf::set_server(true)
 	explicit MockServer(Defs* defs) : defs_(defs_ptr(defs,MockServer::null_deleter())) { Ecf::set_server(true); }
 	explicit MockServer(defs_ptr defs) : defs_(defs)                                   { Ecf::set_server(true); }
-	~MockServer() { Ecf::set_server(false); }
+	~MockServer() override { Ecf::set_server(false); }
 
-	virtual SState::State state() const { return  SState::RUNNING;}
-	virtual std::pair<std::string,std::string> hostPort() const { assert(defs_.get()); return defs_->server().hostPort(); }
-	virtual defs_ptr defs() const { return defs_;}
-	virtual void updateDefs(defs_ptr d, bool force) { assert(defs_.get()); defs_->absorb(d.get(),force); }
- 	virtual void clear_defs() { if (defs_.get()) defs_->clear(); } // dont delete since we pass in Fixture defs. Otherwise it will crash
-   virtual void checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
+	SState::State state() const override { return  SState::RUNNING;}
+	std::pair<std::string,std::string> hostPort() const override { assert(defs_.get()); return defs_->server().hostPort(); }
+	defs_ptr defs() const override { return defs_;}
+	void updateDefs(defs_ptr d, bool force) override { assert(defs_.get()); defs_->absorb(d.get(),force); }
+ 	void clear_defs() override { if (defs_.get()) defs_->clear(); } // dont delete since we pass in Fixture defs. Otherwise it will crash
+   void checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
                                int check_pt_interval = 0,
-                               int check_pt_save_time_alarm = 0) {}
- 	virtual void restore_defs_from_checkpt() {}
-	virtual void nodeTreeStateChanged() {}
-	virtual bool allowTaskCommunication() const { return true;}
- 	virtual void shutdown() {}
- 	virtual void halted() {}
- 	virtual void restart() {}
-	virtual bool reloadWhiteListFile(std::string&) { return true;}
-   virtual bool reloadPasswdFile(std::string& errorMsg) { return true;}
- 	virtual bool authenticateReadAccess(const std::string&,const std::string& passwd) { return true;}
-   virtual bool authenticateReadAccess(const std::string&,const std::string& passwd, const std::string&){ return true;}
-   virtual bool authenticateReadAccess(const std::string&,const std::string& passwd, const std::vector<std::string>&) { return true;}
- 	virtual bool authenticateWriteAccess(const std::string&) { return true;}
-   virtual bool authenticateWriteAccess(const std::string&, const std::string&){ return true;}
-   virtual bool authenticateWriteAccess(const std::string&, const std::vector<std::string>&){ return true;}
+                               int check_pt_save_time_alarm = 0) override {}
+ 	void restore_defs_from_checkpt() override {}
+	void nodeTreeStateChanged() override {}
+	bool allowTaskCommunication() const override { return true;}
+ 	void shutdown() override {}
+ 	void halted() override {}
+ 	void restart() override {}
+	bool reloadWhiteListFile(std::string&) override { return true;}
+   bool reloadPasswdFile(std::string& errorMsg) override { return true;}
+ 	bool authenticateReadAccess(const std::string&,const std::string& passwd) override { return true;}
+   bool authenticateReadAccess(const std::string&,const std::string& passwd, const std::string&) override{ return true;}
+   bool authenticateReadAccess(const std::string&,const std::string& passwd, const std::vector<std::string>&) override { return true;}
+ 	bool authenticateWriteAccess(const std::string&) override { return true;}
+   bool authenticateWriteAccess(const std::string&, const std::string&) override{ return true;}
+   bool authenticateWriteAccess(const std::string&, const std::vector<std::string>&) override{ return true;}
 
- 	virtual bool lock(const std::string& user) {
+ 	bool lock(const std::string& user) override {
  		if (userWhoHasLock_.empty()) {
  			userWhoHasLock_ = user;
  			shutdown();
@@ -68,19 +68,19 @@ public:
  		}
  		return false;
  	}
- 	virtual void unlock() { userWhoHasLock_.clear(); restart(); }
- 	virtual const std::string& lockedUser() const { return userWhoHasLock_;}
-   virtual void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,bool user_cmd_context) const {
+ 	void unlock() override { userWhoHasLock_.clear(); restart(); }
+ 	const std::string& lockedUser() const override { return userWhoHasLock_;}
+   void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,bool user_cmd_context) const override {
       if (state() == SState::RUNNING && defs_.get()) {
           JobsParam jobsParam(poll_interval(), false /* as->allow_job_creation_during_tree_walk() */ );
           Jobs jobs(defs_);
           if (!jobs.generate(jobsParam))  ecf::log(ecf::Log::ERR,jobsParam.getErrorMsg());    // will automatically add end of line
        }
    }
-   virtual int poll_interval() const { return 60; }
- 	virtual void debug_server_on(){}
- 	virtual void debug_server_off(){}
-   virtual bool debug() const { return true; }
+   int poll_interval() const override { return 60; }
+ 	void debug_server_on() override{}
+ 	void debug_server_off() override{}
+   bool debug() const override { return true; }
 
 private:
 	defs_ptr defs_;

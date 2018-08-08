@@ -20,7 +20,7 @@ class LogView : public QTreeView
 public:
     LogView(QWidget* parent=nullptr);
     void setLogModel(LogModel* );
-    void setModel(QAbstractItemModel*);
+    void setModel(QAbstractItemModel*) override;
 
 public Q_SLOTS:
     //void setHighlightPeriod(qint64,qint64,qint64);

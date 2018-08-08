@@ -63,7 +63,7 @@ friend class VTreeModelData;
 
 public:
     explicit VModelServer(ServerHandler *server);
-    virtual ~VModelServer();
+    ~VModelServer() override;
 
     ServerHandler* realServer() const {return server_;}
 
@@ -98,14 +98,14 @@ Q_OBJECT
 
 public:
      VTreeServer(ServerHandler *server,NodeFilterDef* filterDef,AttributeFilter *attrFilter);
-	 ~VTreeServer();
+	 ~VTreeServer() override;
 
-     void reload();
+     void reload() override;
      void filterChanged();
-     int nodeNum() const;
-     NodeFilter* filter() const;
+     int nodeNum() const override;
+     NodeFilter* filter() const override;
      VTree* tree() const {return tree_;}
-     VTreeServer* treeServer() const {return const_cast<VTreeServer*>(this);}
+     VTreeServer* treeServer() const override {return const_cast<VTreeServer*>(this);}
      void attrFilterChanged();
      void setForceShowNode(const VNode* node);
      void setForceShowAttribute(const VAttribute* node);
@@ -117,19 +117,19 @@ public:
      void deleteExpandState();
 
      //From ServerObserver
-	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
-     void notifyServerDelete(ServerHandler*);
-	 void notifyBeginServerClear(ServerHandler* server);
-	 void notifyEndServerClear(ServerHandler* server);
-	 void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
-	 void notifyEndServerScan(ServerHandler* server);
-	 void notifyServerConnectState(ServerHandler* server);
-	 void notifyServerActivityChanged(ServerHandler* server);
-	 void notifyEndServerSync(ServerHandler* server);
+	 void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
+     void notifyServerDelete(ServerHandler*) override;
+	 void notifyBeginServerClear(ServerHandler* server) override;
+	 void notifyEndServerClear(ServerHandler* server) override;
+	 void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override;
+	 void notifyEndServerScan(ServerHandler* server) override;
+	 void notifyServerConnectState(ServerHandler* server) override;
+	 void notifyServerActivityChanged(ServerHandler* server) override;
+	 void notifyEndServerSync(ServerHandler* server) override;
 
 	 //From NodeObserver
-	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
-	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
+	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
 
 Q_SIGNALS:
      void beginAddRemoveAttributes(VTreeServer*,const VTreeNode*,int,int);
@@ -164,33 +164,33 @@ class VTableServer : public VModelServer
  Q_OBJECT
 public:
 	 VTableServer(ServerHandler *server,NodeFilterDef* filterDef);
-	 ~VTableServer();
+	 ~VTableServer() override;
 
-     void reload();
+     void reload() override;
      void filterChanged() {}
-     int nodeNum() const;
+     int nodeNum() const override;
      VNode* nodeAt(int) const;
      int indexOf(const VNode* node) const;
-     NodeFilter* filter() const;
-     VTableServer* tableServer() const {return const_cast<VTableServer*>(this);}
+     NodeFilter* filter() const override;
+     VTableServer* tableServer() const override {return const_cast<VTableServer*>(this);}
      void setForceShowNode(const VNode* node);
      void setForceShowAttribute(const VAttribute* node);
      void clearForceShow(const VItem*);
 
 	 //From ServerObserver
-     void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
-     void notifyServerDelete(ServerHandler*);
-	 void notifyBeginServerClear(ServerHandler* server);
-     void notifyEndServerClear(ServerHandler* server);
-     void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
-	 void notifyEndServerScan(ServerHandler* server);
-	 void notifyServerConnectState(ServerHandler* server);
-	 void notifyServerActivityChanged(ServerHandler* server);
-	 void notifyEndServerSync(ServerHandler* server);
+     void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
+     void notifyServerDelete(ServerHandler*) override;
+	 void notifyBeginServerClear(ServerHandler* server) override;
+     void notifyEndServerClear(ServerHandler* server) override;
+     void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override;
+	 void notifyEndServerScan(ServerHandler* server) override;
+	 void notifyServerConnectState(ServerHandler* server) override;
+	 void notifyServerActivityChanged(ServerHandler* server) override;
+	 void notifyEndServerSync(ServerHandler* server) override;
 
 	 //From NodeObserver
-	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
-	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+	 void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
+	 void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
 
 Q_SIGNALS:
      void nodeChanged(VTableServer*,const VNode*);
@@ -211,7 +211,7 @@ public:
 	enum ModelType {TreeModel,TableModel};
 
 	VModelData(NodeFilterDef* filterDef,AbstractNodeModel* model);
-	~VModelData();
+	~VModelData() override;
 
     void setActive(bool);
     void clear();
@@ -235,10 +235,10 @@ public:
 
 
 	//From ServerFilterObserver
-	void notifyServerFilterAdded(ServerItem*);
-	void notifyServerFilterRemoved(ServerItem*);
-	void notifyServerFilterChanged(ServerItem*);
-	void notifyServerFilterDelete();
+	void notifyServerFilterAdded(ServerItem*) override;
+	void notifyServerFilterRemoved(ServerItem*) override;
+	void notifyServerFilterChanged(ServerItem*) override;
+	void notifyServerFilterDelete() override;
 
 public Q_SLOTS:
     void slotFilterDefChanged();
@@ -272,14 +272,14 @@ class VTreeModelData : public VModelData
 
 public:
     VTreeModelData(NodeFilterDef* filterDef,AttributeFilter* attrFilter,AbstractNodeModel* model);
-    void deleteExpandState();
+    void deleteExpandState() override;
 
 protected Q_SLOTS:
     void slotAttrFilterChanged();
 
 protected:
-    void add(ServerHandler *server);
-    void connectToModel(VModelServer* d);
+    void add(ServerHandler *server) override;
+    void connectToModel(VModelServer* d) override;
 
     AttributeFilter *attrFilter_;
 };
@@ -297,8 +297,8 @@ public:
     bool position(VTableServer* server,int& start,int& count);
 
 protected:
-    void add(ServerHandler *server);
-    void connectToModel(VModelServer* d);
+    void add(ServerHandler *server) override;
+    void connectToModel(VModelServer* d) override;
 };
 
 #endif

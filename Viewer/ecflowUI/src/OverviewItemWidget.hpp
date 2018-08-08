@@ -18,25 +18,25 @@ class OverviewItemWidget : public CodeItemWidget, public InfoPanelItem
 {
 public:
 	explicit OverviewItemWidget(QWidget *parent=nullptr);
-	~OverviewItemWidget();
+	~OverviewItemWidget() override;
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents();
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override;
 
 	//From VInfoPresenter
-	void infoReady(VReply*);
-	void infoFailed(VReply*);
-	void infoProgress(VReply*);
+	void infoReady(VReply*) override;
+	void infoFailed(VReply*) override;
+	void infoProgress(VReply*) override;
 
-	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
-	void defsChanged(const std::vector<ecf::Aspect::Type>&);
-	void connectStateChanged();
+	void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
+	void defsChanged(const std::vector<ecf::Aspect::Type>&) override;
+	void connectStateChanged() override;
 
 protected:
 	void reload();
-    void updateState(const ChangeFlags&);
-    void reloadRequested();
+    void updateState(const ChangeFlags&) override;
+    void reloadRequested() override;
 
 	int lastScrollPos_;
 };

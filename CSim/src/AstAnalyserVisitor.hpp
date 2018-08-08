@@ -27,36 +27,36 @@ namespace ecf {
 class AstAnalyserVisitor : public ExprAstVisitor {
 public:
 	AstAnalyserVisitor();
-	virtual ~AstAnalyserVisitor();
+	~AstAnalyserVisitor() override;
 
 	const std::set<Node*>& dependentNodes() const { return dependentNodes_;}
 	const std::set<std::string>& dependentNodePaths() const { return dependentNodePaths_;}
 
-  	virtual void visitTop(AstTop*);
- 	virtual void visitRoot(AstRoot*);
- 	virtual void visitAnd(AstAnd*);
- 	virtual void visitNot(AstNot*);
- 	virtual void visitPlus(AstPlus*);
- 	virtual void visitMinus(AstMinus*);
- 	virtual void visitDivide(AstDivide*);
-   virtual void visitMultiply(AstMultiply*);
-   virtual void visitModulo(AstModulo*);
- 	virtual void visitOr(AstOr*);
- 	virtual void visitEqual(AstEqual*);
- 	virtual void visitNotEqual(AstNotEqual*);
- 	virtual void visitLessEqual(AstLessEqual*);
- 	virtual void visitGreaterEqual(AstGreaterEqual*);
- 	virtual void visitGreaterThan(AstGreaterThan*);
- 	virtual void visitLessThan(AstLessThan*);
- 	virtual void visitLeaf(AstLeaf*);
-   virtual void visitInteger(AstInteger*);
-   virtual void visitFunction(AstFunction*);
- 	virtual void visitNodeState(AstNodeState*);
- 	virtual void visitEventState(AstEventState*);
- 	virtual void visitNode(AstNode*);
-   virtual void visitVariable(AstVariable*);
-   virtual void visitParentVariable(AstParentVariable*);
-   virtual void visitFlag(AstFlag*);
+  	void visitTop(AstTop*) override;
+ 	void visitRoot(AstRoot*) override;
+ 	void visitAnd(AstAnd*) override;
+ 	void visitNot(AstNot*) override;
+ 	void visitPlus(AstPlus*) override;
+ 	void visitMinus(AstMinus*) override;
+ 	void visitDivide(AstDivide*) override;
+   void visitMultiply(AstMultiply*) override;
+   void visitModulo(AstModulo*) override;
+ 	void visitOr(AstOr*) override;
+ 	void visitEqual(AstEqual*) override;
+ 	void visitNotEqual(AstNotEqual*) override;
+ 	void visitLessEqual(AstLessEqual*) override;
+ 	void visitGreaterEqual(AstGreaterEqual*) override;
+ 	void visitGreaterThan(AstGreaterThan*) override;
+ 	void visitLessThan(AstLessThan*) override;
+ 	void visitLeaf(AstLeaf*) override;
+   void visitInteger(AstInteger*) override;
+   void visitFunction(AstFunction*) override;
+ 	void visitNodeState(AstNodeState*) override;
+ 	void visitEventState(AstEventState*) override;
+ 	void visitNode(AstNode*) override;
+   void visitVariable(AstVariable*) override;
+   void visitParentVariable(AstParentVariable*) override;
+   void visitFlag(AstFlag*) override;
 
 private:
 	std::set<Node*> dependentNodes_;

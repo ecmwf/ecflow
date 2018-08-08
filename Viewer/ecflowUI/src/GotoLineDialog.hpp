@@ -21,7 +21,7 @@ class GotoLineDialog : public QDialog, private Ui::GotoLineDialogQ
 
 public:
     explicit GotoLineDialog(QWidget *parent = nullptr);
-    ~GotoLineDialog();
+    ~GotoLineDialog() override;
     void setupUIBeforeShow();
 
 Q_SIGNALS:

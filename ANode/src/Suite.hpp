@@ -48,39 +48,39 @@ public:
 
    Suite( const Suite&);
    Suite& operator=(const Suite&);
-   virtual node_ptr clone() const;
+   node_ptr clone() const override;
 
-   virtual ~Suite();
+   ~Suite() override;
 
    static suite_ptr create(const std::string& name);
 
-   virtual Suite* suite() const { return const_cast<Suite*>(this); }
-   virtual Defs* defs() const { return defs_;}
+   Suite* suite() const override { return const_cast<Suite*>(this); }
+   Defs* defs() const override { return defs_;}
    void set_defs(Defs* d) { defs_ = d;}
-   virtual Suite* isSuite() const  {  return const_cast<Suite*>(this); }
-   virtual NodeContainer* isNodeContainer() const { return const_cast<Suite*>(this); }
+   Suite* isSuite() const override  {  return const_cast<Suite*>(this); }
+   NodeContainer* isNodeContainer() const override { return const_cast<Suite*>(this); }
 
    /// Overridden to take into account begin()
-   virtual bool resolveDependencies(JobsParam& );
+   bool resolveDependencies(JobsParam& ) override;
 
-   virtual void accept(ecf::NodeTreeVisitor&);
-   virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
-   virtual void reset();
-   virtual void begin();
-   virtual void requeue(Requeue_args& args);
+   void accept(ecf::NodeTreeVisitor&) override;
+   void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
+   void reset() override;
+   void begin() override;
+   void requeue(Requeue_args& args) override;
    bool begun() const { return begun_; }
    void reset_begin();
-   virtual void update_generated_variables() const;
+   void update_generated_variables() const override;
 
-   virtual const Variable& findGenVariable(const std::string& name) const;
-   virtual void gen_variables(std::vector<Variable>&) const;
+   const Variable& findGenVariable(const std::string& name) const override;
+   void gen_variables(std::vector<Variable>&) const override;
 
    void updateCalendar( const ecf::CalendarUpdateParams &, std::vector<node_ptr>& auto_cancelled_nodes,std::vector<node_ptr>& auto_archive_nodes);
 
-   virtual const std::string& debugType() const;
+   const std::string& debugType() const override;
 
    bool operator==(const Suite& rhs) const;
-   std::ostream& print(std::ostream&) const;
+   std::ostream& print(std::ostream&) const override;
 
    void addClock( const ClockAttr& , bool initialize_calendar = true); // throw std::run_time if more than one clock is added
    void add_end_clock( const ClockAttr& );
@@ -96,10 +96,10 @@ public:
    clock_ptr clockAttr() const { return clockAttr_;}
    clock_ptr clock_end_attr() const { return clock_end_attr_;}
 
-   virtual bool checkInvariants(std::string& errorMsg) const;
+   bool checkInvariants(std::string& errorMsg) const override;
 
    // Memento functions
-   virtual void collateChanges(DefsDelta&) const;
+   void collateChanges(DefsDelta&) const override;
    void set_memento(const SuiteClockMemento*,std::vector<ecf::Aspect::Type>& aspects,bool);
    void set_memento(const SuiteBeginDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects,bool);
    void set_memento(const SuiteCalendarMemento*,std::vector<ecf::Aspect::Type>& aspects,bool);
@@ -111,14 +111,14 @@ public:
    void set_modify_change_no( unsigned int x ) { modify_change_no_ = x;}
    unsigned int modify_change_no() const       { return modify_change_no_; }
 
-   virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
+   void read_state(const std::string& line,const std::vector<std::string>& lineTokens) override;
 
 private:
    void reset_begin_only();
    void begin_calendar();
    void requeue_calendar();
    void handle_clock_attribute_change();
-   virtual std::string write_state() const;
+   std::string write_state() const override;
 
    friend class cereal::access;
    template<class Archive>

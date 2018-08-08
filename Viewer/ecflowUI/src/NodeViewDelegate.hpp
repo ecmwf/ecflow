@@ -74,7 +74,7 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
     int iconPreGap;
     int iconGap;
 
-    void adjust(const QFont& f) {
+    void adjust(const QFont& f) override {
          QFontMetrics fm(f);
          fontHeight=fm.height();
          height=fontHeight+topPadding+bottomPadding;
@@ -100,7 +100,7 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
 {
     AttrDelegateBox() = default;
 
-    void adjust(const QFont& f) {
+    void adjust(const QFont& f) override {
          QFontMetrics fm(f);
          fontHeight=fm.height();
          height=fontHeight+topPadding+bottomPadding;
@@ -114,9 +114,9 @@ class NodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
 {
 public:
 	explicit NodeViewDelegate(QWidget *parent=nullptr);
-	~NodeViewDelegate();
+	~NodeViewDelegate() override;
 
-	void notifyChange(VProperty*);
+	void notifyChange(VProperty*) override;
 
 protected:
 	virtual void updateSettings()=0;

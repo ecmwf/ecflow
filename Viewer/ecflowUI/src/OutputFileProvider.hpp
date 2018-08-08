@@ -28,8 +28,8 @@ Q_OBJECT
 public:
 	 explicit OutputFileProvider(InfoPresenter* owner);
 
-	 void visit(VInfoNode*);
-	 void clear();
+	 void visit(VInfoNode*) override;
+	 void clear() override;
 
 	 //Get a particular jobout file
      void file(const std::string& fileName,bool useCache=true);

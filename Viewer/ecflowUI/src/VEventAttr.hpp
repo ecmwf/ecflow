@@ -28,8 +28,8 @@ class VEventAttrType : public VAttributeType
 {
 public:
     explicit VEventAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
+    QString toolTip(QStringList d) const override;
+    QString definition(QStringList d) const override;
     void encode(const Event&,QStringList&) const;
 
 private:
@@ -41,9 +41,9 @@ class VEventAttr : public VAttribute
 public:
     VEventAttr(VNode *parent,const Event&,int index);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };

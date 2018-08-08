@@ -27,7 +27,7 @@ friend class Dashboard;
 
 public:
     DashboardTitle(ServerFilter*,Dashboard *parent);
-	~DashboardTitle();
+	~DashboardTitle() override;
 
     Dashboard* dashboard() const {return dashboard_;}
     QString title() const {return title_;}
@@ -39,20 +39,20 @@ public:
     void setCurrent(bool b);
     int fullWidth() const;
 
-	void notifyServerFilterAdded(ServerItem* item);
-	void notifyServerFilterRemoved(ServerItem* item);
-	void notifyServerFilterChanged(ServerItem*);
-	void notifyServerFilterDelete();
+	void notifyServerFilterAdded(ServerItem* item) override;
+	void notifyServerFilterRemoved(ServerItem* item) override;
+	void notifyServerFilterChanged(ServerItem*) override;
+	void notifyServerFilterDelete() override;
 
-	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
-	void notifyServerDelete(ServerHandler* server);
-    void notifyBeginServerClear(ServerHandler* server) {}
-	void notifyEndServerClear(ServerHandler* server);
-    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
-	void notifyEndServerScan(ServerHandler* server);
-	void notifyServerConnectState(ServerHandler* server);
-	void notifyServerActivityChanged(ServerHandler* server);
-    void notifyServerSuiteFilterChanged(ServerHandler* server) {}
+	void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
+	void notifyServerDelete(ServerHandler* server) override;
+    void notifyBeginServerClear(ServerHandler* server) override {}
+	void notifyEndServerClear(ServerHandler* server) override;
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override {}
+	void notifyEndServerScan(ServerHandler* server) override;
+	void notifyServerConnectState(ServerHandler* server) override;
+	void notifyServerActivityChanged(ServerHandler* server) override;
+    void notifyServerSuiteFilterChanged(ServerHandler* server) override {}
 
 Q_SIGNALS:
     void changed(DashboardTitle*);

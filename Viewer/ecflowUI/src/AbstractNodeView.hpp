@@ -60,7 +60,7 @@ Q_OBJECT
 
 public:
     explicit AbstractNodeView(TreeNodeModel* model,QWidget *parent=nullptr);
-    virtual ~AbstractNodeView();
+    ~AbstractNodeView() override;
 
     QModelIndex currentIndex() const;
     QModelIndexList selectedIndexes() const;
@@ -95,14 +95,14 @@ Q_SIGNALS:
     void selectionChangedInView(const QItemSelection &selected, const QItemSelection &deselected);
 
 protected:
-    void mousePressEvent(QMouseEvent* event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
-    void keyPressEvent(QKeyEvent *event);
-    void paintEvent(QPaintEvent *event);
-    void resizeEvent(QResizeEvent *event);
-    bool viewportEvent(QEvent *event);
-    void timerEvent(QTimerEvent *event);
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseDoubleClickEvent(QMouseEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    bool viewportEvent(QEvent *event) override;
+    void timerEvent(QTimerEvent *event) override;
 
     void attachModel();
     void insertItems(const QModelIndex& parent, int);

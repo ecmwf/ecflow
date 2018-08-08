@@ -48,77 +48,77 @@ class VWaitIcon : public VIcon
 {
 public:
     explicit VWaitIcon(const std::string& name) : VIcon(name) {}
-	bool show(VNode*);
+	bool show(VNode*) override;
 };
 
 class VRerunIcon : public VIcon
 {
 public:
     explicit VRerunIcon(const std::string& name) : VIcon(name) {}
-	bool show(VNode*);
+	bool show(VNode*) override;
 };
 
 class VNodeLogIcon : public VIcon
 {
 public:
     explicit VNodeLogIcon(const std::string& name) : VIcon(name) {}
-	bool show(VNode*);
+	bool show(VNode*) override;
 };
 
 class VCompleteIcon : public VIcon
 {
 public:
     explicit VCompleteIcon(const std::string& name) : VIcon(name) {}
-	bool show(VNode*);
+	bool show(VNode*) override;
 };
 
 class VTimeIcon : public VIcon
 {
 public:
     explicit VTimeIcon(const std::string& name) : VIcon(name) {}
-	bool show(VNode*);
+	bool show(VNode*) override;
 };
 
 class VDateIcon : public VIcon
 {
 public:
     explicit VDateIcon(const std::string& name) : VIcon(name) {}
-	bool show(VNode*);
+	bool show(VNode*) override;
 };
 
 class VZombieIcon : public VIcon
 {
 public:
     explicit VZombieIcon(const std::string& name) : VIcon(name) {}
-	bool show(VNode*);
+	bool show(VNode*) override;
 };
 
 class VLateIcon : public VIcon
 {
 public:
     explicit VLateIcon(const std::string& name) : VIcon(name) {}
-	bool show(VNode*);
+	bool show(VNode*) override;
 };
 
 class VSlowIcon : public VIcon
 {
 public:
     explicit VSlowIcon(const std::string& name) : VIcon(name) {}
-	bool show(VNode*);
+	bool show(VNode*) override;
 };
 
 class VKilledIcon : public VIcon
 {
 public:
     explicit VKilledIcon(const std::string& name) : VIcon(name) {}
-    bool show(VNode*);
+    bool show(VNode*) override;
 };
 
 class VMigratedIcon : public VIcon
 {
 public:
     explicit VMigratedIcon(const std::string& name) : VIcon(name) {}
-    bool show(VNode*);
+    bool show(VNode*) override;
 };
 
 //==========================================================

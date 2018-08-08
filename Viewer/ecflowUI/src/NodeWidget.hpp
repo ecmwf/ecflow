@@ -39,14 +39,14 @@ public:
 	bool active() const;
 	NodeViewBase* view() const {return view_;}
 	QWidget* widget();
-	VInfo_ptr currentSelection();
+	VInfo_ptr currentSelection() override;
 	//void currentSelection(VInfo_ptr info);
-	void reload();
-    void populateDialog() {}
-    QList<QAction*> dockTitleActions() {return dockActions_;}
+	void reload() override;
+    void populateDialog() override {}
+    QList<QAction*> dockTitleActions() override {return dockActions_;}
 
 public Q_SLOTS:
-	void setCurrentSelection(VInfo_ptr);
+	void setCurrentSelection(VInfo_ptr) override;
 
 protected Q_SLOTS:
 	void slotInfoPanelAction();
@@ -54,7 +54,7 @@ protected Q_SLOTS:
 
 protected:
 	explicit NodeWidget(const std::string& type,ServerFilter* serverFilter,QWidget* parent=nullptr);
-	virtual ~NodeWidget();
+	~NodeWidget() override;
 
 	void updateActionState(VInfo_ptr);
     bool broadcastSelection() const {return broadcastSelection_;}

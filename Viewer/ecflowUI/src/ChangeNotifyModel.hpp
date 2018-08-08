@@ -24,16 +24,16 @@ class ChangeNotifyModel : public QAbstractItemModel
  Q_OBJECT
 public:
    	explicit ChangeNotifyModel(QObject *parent=nullptr);
-   	~ChangeNotifyModel();
+   	~ChangeNotifyModel() override;
 
-   	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-   	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+   	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+   	int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
 
-   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-   	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+   	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
 
-   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-   	QModelIndex parent (const QModelIndex & ) const;
+   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+   	QModelIndex parent (const QModelIndex & ) const override;
 
    	void setData(VNodeList *);
 	bool hasData() const;

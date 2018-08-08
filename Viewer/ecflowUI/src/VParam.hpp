@@ -19,7 +19,7 @@ class VParam : public VPropertyObserver
 {
 public:
 		explicit VParam(const std::string& name);
-        ~VParam();
+        ~VParam() override;
 
         uint id() const {return id_;}
 		QString name() const {return qName_;}
@@ -31,7 +31,7 @@ public:
         QColor typeColour() const {return typeColour_;}
 
 		void setProperty(VProperty*);
-		void notifyChange(VProperty*);
+		void notifyChange(VProperty*) override;
 
 		/*
 		int number(const std::string&) const;

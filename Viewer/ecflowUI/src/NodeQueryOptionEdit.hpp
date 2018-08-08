@@ -62,15 +62,15 @@ class NodeQueryStringOptionEdit : public  NodeQueryOptionEdit
 Q_OBJECT
 public:
     NodeQueryStringOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget* parent, bool sameRow);
-    void setVisible(bool);
-    void clear();
+    void setVisible(bool) override;
+    void clear() override;
 
 protected Q_SLOTS:
     void slotEdited(QString val);
     void slotMatchChanged(int val);
 
 protected:
-    void init(NodeQueryOption*);
+    void init(NodeQueryOption*) override;
 
     QLabel* label_;
     StringMatchCombo* matchCb_;
@@ -83,14 +83,14 @@ class NodeQueryListOptionEdit : public  NodeQueryOptionEdit
 Q_OBJECT
 public:
     NodeQueryListOptionEdit(NodeQueryOption* option,CustomListWidget* cl,QToolButton*,QWidget*);
-    void setVisible(bool) {}
-    void clear();
+    void setVisible(bool) override {}
+    void clear() override;
 
 protected Q_SLOTS:
     void slotListChanged();
 
 protected:
-    void init(NodeQueryOption*);
+    void init(NodeQueryOption*) override;
 
     CustomListWidget* list_;
     QToolButton *resetTb_;
@@ -102,13 +102,13 @@ class NodeQueryComboOptionEdit : public  NodeQueryOptionEdit
 Q_OBJECT
 public:
     NodeQueryComboOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget*);
-    void setVisible(bool);
+    void setVisible(bool) override;
 
 protected Q_SLOTS:
     void slotCbChanged(int);
 
 protected:
-    void init(NodeQueryOption*);
+    void init(NodeQueryOption*) override;
 
     QLabel* label_;
     QComboBox* cb_;
@@ -120,10 +120,10 @@ class NodeQueryPeriodOptionEdit : public NodeQueryOptionEdit
 Q_OBJECT
 public:
     NodeQueryPeriodOptionEdit(NodeQueryOption* option,QGridLayout* grid,QWidget *parent);
-    void setVisible(bool);
+    void setVisible(bool) override;
 
 protected:
-    void init(NodeQueryOption*);
+    void init(NodeQueryOption*) override;
 
 protected Q_SLOTS:
     void updateOptions();

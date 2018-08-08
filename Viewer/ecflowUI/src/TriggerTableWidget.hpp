@@ -30,7 +30,7 @@ class TriggerTableWidget : public QWidget, private Ui::triggerTableWidget
 
 public:
     explicit TriggerTableWidget(QWidget *parent = nullptr);
-    ~TriggerTableWidget();
+    ~TriggerTableWidget() override;
 
     void setInfo(VInfo_ptr);
     void setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2);

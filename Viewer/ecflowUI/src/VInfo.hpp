@@ -44,7 +44,7 @@ typedef std::shared_ptr<VInfo> VInfo_ptr;
 class VInfo : public ServerObserver
 {
 public:
-	virtual ~VInfo();
+	~VInfo() override;
 
 	virtual bool isServer() {return false;}
 	virtual bool isNode()  {return false;}
@@ -72,15 +72,15 @@ public:
 	void removeObserver(VInfoObserver*);
 
 	//Form ServerObserver
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
-    void notifyServerDelete(ServerHandler* server);
-    void notifyBeginServerClear(ServerHandler* server);
-    void notifyEndServerClear(ServerHandler* server);
-    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
-    void notifyEndServerScan(ServerHandler* server);
-    void notifyServerConnectState(ServerHandler* server) {}
-    void notifyServerActivityChanged(ServerHandler* server) {}
-    void notifyServerSuiteFilterChanged(ServerHandler* server) {}
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
+    void notifyServerDelete(ServerHandler* server) override;
+    void notifyBeginServerClear(ServerHandler* server) override;
+    void notifyEndServerClear(ServerHandler* server) override;
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override {}
+    void notifyEndServerScan(ServerHandler* server) override;
+    void notifyServerConnectState(ServerHandler* server) override {}
+    void notifyServerActivityChanged(ServerHandler* server) override {}
+    void notifyServerSuiteFilterChanged(ServerHandler* server) override {}
 
     bool operator ==(const VInfo&);
 
@@ -105,15 +105,15 @@ protected:
 class VInfoServer : public VInfo, public std::enable_shared_from_this<VInfo>
 {
 public:
-	bool isServer() {return true;}
-    bool isEmpty() {return false;}
-    bool hasData() const;
-    VItem* item() const;
+	bool isServer() override {return true;}
+    bool isEmpty() override {return false;}
+    bool hasData() const override;
+    VItem* item() const override;
 
-    void accept(VInfoVisitor*);   
-    std::string name();
-    std::string path();
-    std::string nodePath() {return "/";}
+    void accept(VInfoVisitor*) override;   
+    std::string name() override;
+    std::string path() override;
+    std::string nodePath() override {return "/";}
     static VInfo_ptr create(ServerHandler*);
 
 protected:
@@ -125,16 +125,16 @@ protected:
 class VInfoNode: public VInfo, public std::enable_shared_from_this<VInfo>
 {
 public:
-	bool isNode() {return true;}
-	bool isEmpty() {return false;}
-    bool hasData() const;
-    void accept(VInfoVisitor*);
-    std::string path();  
-	std::string name();	
-	std::string serverAlias();
-    std::string nodePath();
-    std::string relativePath();
-    VItem* item() const;
+	bool isNode() override {return true;}
+	bool isEmpty() override {return false;}
+    bool hasData() const override;
+    void accept(VInfoVisitor*) override;
+    std::string path() override;  
+	std::string name() override;	
+	std::string serverAlias() override;
+    std::string nodePath() override;
+    std::string relativePath() override;
+    VItem* item() const override;
 
     static VInfo_ptr create(VNode*);
 
@@ -147,16 +147,16 @@ protected:
 class VInfoAttribute: public VInfo, public std::enable_shared_from_this<VInfo>
 {
 public:
-    ~VInfoAttribute();
+    ~VInfoAttribute() override;
     VAttribute* attribute() const {return attr_;}
-    bool isAttribute() {return true;}
-	bool isEmpty() {return false;}
-    bool hasData() const;
-    void accept(VInfoVisitor*);
-    std::string name();
-    std::string path();
-    std::string nodePath();
-    VItem* item() const;
+    bool isAttribute() override {return true;}
+	bool isEmpty() override {return false;}
+    bool hasData() const override;
+    void accept(VInfoVisitor*) override;
+    std::string name() override;
+    std::string path() override;
+    std::string nodePath() override;
+    VItem* item() const override;
 
     static VInfo_ptr create(VAttribute*);
 

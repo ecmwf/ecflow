@@ -33,9 +33,9 @@ public:
 
 	void init(AbstractServer* as);
 
-	virtual std::ostream& print(std::ostream& os) const;
-	virtual bool equals(ServerToClientCmd*) const;
-	virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;
+	std::ostream& print(std::ostream& os) const override;
+	bool equals(ServerToClientCmd*) const override;
+	bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
 
 private:
  	Stats stats_;

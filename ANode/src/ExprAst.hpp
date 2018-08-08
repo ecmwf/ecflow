@@ -72,30 +72,30 @@ public:
 class AstTop : public Ast {
 public:
 	AstTop() : root_(nullptr) {}
-	virtual ~AstTop();
+	~AstTop() override;
 
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstTop* clone() const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstTop* clone() const override;
 
- 	virtual Ast* left() const { return root_;}
- 	virtual void addChild(Ast* r) { root_ = r;}
-	virtual AstTop* isTop() const { return const_cast<AstTop*>(this); }
- 	virtual bool evaluate() const;
-   virtual bool check(std::string& error_msg) const;
+ 	Ast* left() const override { return root_;}
+ 	void addChild(Ast* r) override { root_ = r;}
+	AstTop* isTop() const override { return const_cast<AstTop*>(this); }
+ 	bool evaluate() const override;
+   bool check(std::string& error_msg) const override;
 
-	virtual bool empty() const { return (root_) ? false : true ; }
-	virtual std::ostream& print(std::ostream&) const ;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
+	bool empty() const override { return (root_) ? false : true ; }
+	std::ostream& print(std::ostream&) const override ;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
 
-	virtual bool why(std::string& theReasonWhy,bool html = false) const;
-	virtual std::string type() const { return stype();}
-	virtual void exprType(const std::string& s) { exprType_ = s;}
+	bool why(std::string& theReasonWhy,bool html = false) const override;
+	std::string type() const override { return stype();}
+	void exprType(const std::string& s) override { exprType_ = s;}
 	static std::string stype() { return "top";}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
-	virtual void setParentNode(Node*);
-   virtual void invalidate_trigger_references() const;
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
+	void setParentNode(Node*) override;
+   void invalidate_trigger_references() const override;
 
 private:
 	Ast*        root_;
@@ -106,22 +106,22 @@ private:
 class AstRoot : public Ast {
 public:
    AstRoot() :left_(nullptr), right_(nullptr) {}
-	virtual ~AstRoot();
+	~AstRoot() override;
 
- 	virtual bool isRoot() const { return true;}
-   virtual bool is_evaluateable() const { return true; }
+ 	bool isRoot() const override { return true;}
+   bool is_evaluateable() const override { return true; }
 
-   virtual bool check(std::string& error_msg) const;
-	virtual void accept(ecf::ExprAstVisitor&);
-	virtual void addChild(Ast* n);
- 	virtual Ast* left() const { return left_;}
- 	virtual Ast* right() const { return right_;}
-	virtual std::ostream& print(std::ostream& os) const;
-	virtual bool empty() const { return (left_ && right_) ? false : true ; }
-	virtual void setParentNode(Node*);
+   bool check(std::string& error_msg) const override;
+	void accept(ecf::ExprAstVisitor&) override;
+	void addChild(Ast* n) override;
+ 	Ast* left() const override { return left_;}
+ 	Ast* right() const override { return right_;}
+	std::ostream& print(std::ostream& os) const override;
+	bool empty() const override { return (left_ && right_) ? false : true ; }
+	void setParentNode(Node*) override;
 
 	virtual void set_root_name(const std::string&) {}
-   virtual void invalidate_trigger_references() const;
+   void invalidate_trigger_references() const override;
 
 protected:
    std::string do_why_expression(const std::string& root,bool html) const;
@@ -139,20 +139,20 @@ protected:
 class AstNot : public AstRoot {
 public:
 	AstNot() : name_("! ") {}
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstNot* clone() const;
-   virtual bool is_not() const { return true;}
+	void accept(ecf::ExprAstVisitor&) override;
+   AstNot* clone() const override;
+   bool is_not() const override { return true;}
 
-	virtual bool evaluate() const { assert(!right_);  return ! left_->evaluate();}
-	virtual int value() const {  assert(!right_);     return ! left_->value();}
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	bool evaluate() const override { assert(!right_);  return ! left_->evaluate();}
+	int value() const override {  assert(!right_);     return ! left_->value();}
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
  	static std::string stype() { return "not";}
-   virtual void set_root_name(const std::string& n) { name_ = n;}
+   void set_root_name(const std::string& n) override { name_ = n;}
 private:
    std::string name_;
 };
@@ -161,84 +161,84 @@ private:
 class AstPlus : public AstRoot {
 public:
 	AstPlus() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstPlus* clone() const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstPlus* clone() const override;
 
-	virtual bool evaluate() const { return true;}
-	virtual int value() const { return left_->plus(right_);}
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	bool evaluate() const override { return true;}
+	int value() const override { return left_->plus(right_);}
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
  	static std::string stype() { return "plus";}
 };
 
 class AstMinus : public AstRoot {
 public:
 	AstMinus() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstMinus* clone() const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstMinus* clone() const override;
 
-	virtual bool evaluate() const { return true;}
-	virtual int value() const { return left_->minus(right_); }
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	bool evaluate() const override { return true;}
+	int value() const override { return left_->minus(right_); }
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
  	static std::string stype() { return "minus";}
 };
 
 class AstDivide : public AstRoot {
 public:
 	AstDivide() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstDivide* clone() const;
-	virtual bool evaluate() const { return true;}
-   virtual bool check(std::string& error_msg) const;
-	virtual int value() const; // Log error if right hand side has value of zero
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstDivide* clone() const override;
+	bool evaluate() const override { return true;}
+   bool check(std::string& error_msg) const override;
+	int value() const override; // Log error if right hand side has value of zero
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
  	static std::string stype() { return "divide";}
 };
 
 class AstMultiply : public AstRoot {
 public:
 	AstMultiply() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstMultiply* clone() const;
-	virtual bool evaluate() const { return true;}
-	virtual int value() const { return  (left_->value() * right_->value());}
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstMultiply* clone() const override;
+	bool evaluate() const override { return true;}
+	int value() const override { return  (left_->value() * right_->value());}
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "multiply";}
 };
 
 class AstModulo : public AstRoot {
 public:
    AstModulo()= default;
-   virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstModulo* clone() const;
-   virtual bool check(std::string& error_msg) const;
-   virtual bool evaluate() const { return true;}
-   virtual int value() const; // Log error if right hand side has value of zero
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-   virtual std::string type() const { return stype();}
-   virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+   void accept(ecf::ExprAstVisitor&) override;
+   AstModulo* clone() const override;
+   bool check(std::string& error_msg) const override;
+   bool evaluate() const override { return true;}
+   int value() const override; // Log error if right hand side has value of zero
+   std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+   std::string type() const override { return stype();}
+   std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
    static std::string stype() { return "modulo";}
 };
 
@@ -246,90 +246,90 @@ public:
 class AstAnd : public AstRoot {
 public:
 	AstAnd() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstAnd* clone() const;
-	virtual bool evaluate() const { return (left_->evaluate() && right_->evaluate());}
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstAnd* clone() const override;
+	bool evaluate() const override { return (left_->evaluate() && right_->evaluate());}
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "and";}
 };
 
 class AstOr : public AstRoot {
 public:
 	AstOr() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstOr* clone() const;
-	virtual bool evaluate() const { return (left_->evaluate() || right_->evaluate());}
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstOr* clone() const override;
+	bool evaluate() const override { return (left_->evaluate() || right_->evaluate());}
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "or";}
 };
 
 class AstEqual : public AstRoot {
 public:
 	AstEqual() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstEqual* clone() const;
-	virtual bool evaluate() const { return (left_->value() == right_->value()); }
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstEqual* clone() const override;
+	bool evaluate() const override { return (left_->value() == right_->value()); }
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "equal";}
 };
 
 class AstNotEqual : public AstRoot {
 public:
 	AstNotEqual() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstNotEqual* clone() const;
-	virtual bool evaluate() const { return (left_->value() != right_->value()); }
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstNotEqual* clone() const override;
+	bool evaluate() const override { return (left_->value() != right_->value()); }
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "not-equal";}
 };
 
 class AstLessEqual : public AstRoot {
 public:
 	AstLessEqual() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstLessEqual* clone() const;
-	virtual bool evaluate() const { return (left_->value() <= right_->value()); }
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstLessEqual* clone() const override;
+	bool evaluate() const override { return (left_->value() <= right_->value()); }
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "less-equal";}
 };
 
 class AstGreaterEqual : public AstRoot {
 public:
 	AstGreaterEqual() = default;
-	virtual bool evaluate() const { return (left_->value() >= right_->value()); }
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstGreaterEqual* clone() const;
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	bool evaluate() const override { return (left_->value() >= right_->value()); }
+	void accept(ecf::ExprAstVisitor&) override;
+   AstGreaterEqual* clone() const override;
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "greater-equal";}
 };
 
@@ -338,15 +338,15 @@ class AstGreaterThan : public AstRoot {
 public:
 	AstGreaterThan() = default;
 
-	virtual bool evaluate() const { return (left_->value() > right_->value()); }
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstGreaterThan* clone() const;
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	bool evaluate() const override { return (left_->value() > right_->value()); }
+	void accept(ecf::ExprAstVisitor&) override;
+   AstGreaterThan* clone() const override;
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "greater-than";}
 };
 
@@ -355,15 +355,15 @@ class AstLessThan : public AstRoot {
 public:
 	AstLessThan() = default;
 
-	virtual bool evaluate() const { return (left_->value() < right_->value()); }
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstLessThan* clone() const;
-	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual bool is_valid_ast(std::string& error_msg) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	bool evaluate() const override { return (left_->value() < right_->value()); }
+	void accept(ecf::ExprAstVisitor&) override;
+   AstLessThan* clone() const override;
+	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   bool is_valid_ast(std::string& error_msg) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "less-than";}
 };
 
@@ -374,30 +374,30 @@ public:
 class AstLeaf : public Ast {
 public:
   	AstLeaf() = default;
-	virtual void accept(ecf::ExprAstVisitor&);
-	virtual bool isleaf() const { return true; }
-   virtual bool is_valid_ast(std::string&) const { return true;}
+	void accept(ecf::ExprAstVisitor&) override;
+	bool isleaf() const override { return true; }
+   bool is_valid_ast(std::string&) const override { return true;}
 };
 
 class AstFunction : public AstLeaf {
 public:
    enum FuncType { DATE_TO_JULIAN, JULIAN_TO_DATE };
    AstFunction(FuncType ft, Ast* arg) : ft_(ft), arg_(arg) { assert(arg_);}
-   ~AstFunction() { delete arg_;}
+   ~AstFunction() override { delete arg_;}
 
-   virtual bool is_evaluateable() const { return true; }
-   virtual bool evaluate() const { return value() != 0 ? true: false; }
+   bool is_evaluateable() const override { return true; }
+   bool evaluate() const override { return value() != 0 ? true: false; }
 
-   virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstFunction* clone() const;
-   virtual int value() const;
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual std::string type() const { return stype();}
-   virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+   void accept(ecf::ExprAstVisitor&) override;
+   AstFunction* clone() const override;
+   int value() const override;
+   std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   std::string type() const override { return stype();}
+   std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
    static std::string stype() { return "AstFunction";}
-   virtual void setParentNode(Node* n);
+   void setParentNode(Node* n) override;
 
    Ast* arg() const { return arg_;}
    FuncType ft() const { return ft_;}
@@ -411,17 +411,17 @@ class AstInteger : public AstLeaf {
 public:
 	explicit AstInteger(int value) : value_(value) {}
 
-   virtual bool is_evaluateable() const { return true; }
-	virtual bool evaluate() const {  return value_; } // -1 -2 1 2 3 evaluates to true, 0 returns false
+   bool is_evaluateable() const override { return true; }
+	bool evaluate() const override {  return value_; } // -1 -2 1 2 3 evaluates to true, 0 returns false
 
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstInteger* clone() const;
- 	virtual int value() const {  return value_;}
- 	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstInteger* clone() const override;
+ 	int value() const override {  return value_;}
+ 	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "integer";}
 private:
 	int value_;
@@ -432,14 +432,14 @@ class AstNodeState : public AstLeaf {
 public:
    explicit AstNodeState(DState::State s) : state_(s) {}
 
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstNodeState* clone() const;
- 	virtual int value() const {  return static_cast<int>(state_);}
- 	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstNodeState* clone() const override;
+ 	int value() const override {  return static_cast<int>(state_);}
+ 	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "node-state";}
 private:
 	DState::State state_;
@@ -449,14 +449,14 @@ class AstEventState : public AstLeaf {
 public:
    explicit AstEventState(bool b) : state_(b) {}
 
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstEventState* clone() const;
- 	virtual int value() const {  return state_;}
- 	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
+	void accept(ecf::ExprAstVisitor&) override;
+   AstEventState* clone() const override;
+ 	int value() const override {  return state_;}
+ 	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
 	static std::string stype() { return "event-state";}
 private:
 	bool state_;
@@ -476,16 +476,16 @@ class AstNode : public AstLeaf {
 public:
    explicit AstNode(const std::string& n) : parentNode_(nullptr), nodePath_(n) {}
 
-	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstNode* clone() const;
- 	virtual int value() const { return static_cast<int>(state());}
-  	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-	virtual std::string type() const { return stype();}
-   virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
- 	virtual void setParentNode(Node* n) { parentNode_ = n; }
-   virtual void invalidate_trigger_references() const { ref_node_.reset();}
+	void accept(ecf::ExprAstVisitor&) override;
+   AstNode* clone() const override;
+ 	int value() const override { return static_cast<int>(state());}
+  	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+	std::string type() const override { return stype();}
+   std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
+ 	void setParentNode(Node* n) override { parentNode_ = n; }
+   void invalidate_trigger_references() const override { ref_node_.reset();}
 	static std::string stype() { return "node";}
 
 	const std::string& nodePath() const { return nodePath_;}
@@ -505,25 +505,25 @@ class AstFlag : public AstLeaf {
 public:
    AstFlag(const std::string& n,ecf::Flag::Type ft) : flag_(ft),parentNode_(nullptr), nodePath_(n){}
 
-   virtual std::string name() const;
+   std::string name() const override;
 
-   virtual bool is_attribute() const { return true; }
+   bool is_attribute() const override { return true; }
    // although AstFlag is leaf, However allow to evaluate to cope with
    //     ( ../family1/<flag>:late != 0 and ../family1/a:myEvent)
    // Treat this like an integer
-   virtual bool is_evaluateable() const { return true; }
-   virtual bool evaluate() const { return value() != 0 ? true: false; }
+   bool is_evaluateable() const override { return true; }
+   bool evaluate() const override { return value() != 0 ? true: false; }
 
-   virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstFlag* clone() const;
-   virtual int value() const;
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual std::string type() const { return stype();}
-   virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
-   virtual void setParentNode(Node* n) { parentNode_ = n; }
-   virtual void invalidate_trigger_references() const { ref_node_.reset();}
+   void accept(ecf::ExprAstVisitor&) override;
+   AstFlag* clone() const override;
+   int value() const override;
+   std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   std::string type() const override { return stype();}
+   std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
+   void setParentNode(Node* n) override { parentNode_ = n; }
+   void invalidate_trigger_references() const override { ref_node_.reset();}
    static std::string stype() { return "flag";}
 
    const std::string& nodePath() const { return nodePath_;}
@@ -553,28 +553,28 @@ public:
 	AstVariable(const std::string& nodePath, const std::string& variablename)
 	: parentNode_(nullptr), nodePath_(nodePath), name_(variablename)  {}
 
-	virtual std::string name() const { return name_;}
-   virtual bool is_attribute() const { return true; }
+	std::string name() const override { return name_;}
+   bool is_attribute() const override { return true; }
 
 	// although AstVariable is leaf, However allow to evaluate to cope with
    //     ( ../family1/a:myMeter >= 20 and ../family1/a:myEvent)
 	// Treat this like an integer
-   virtual bool is_evaluateable() const { return true; }
-   virtual bool evaluate() const { return value() != 0 ? true: false; }
+   bool is_evaluateable() const override { return true; }
+   bool evaluate() const override { return value() != 0 ? true: false; }
 
- 	virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstVariable* clone() const;
-	virtual int value() const;
- 	virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-	virtual std::string type() const { return stype();}
-	virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
- 	virtual void setParentNode(Node* n) { parentNode_ = n; }
-   virtual void invalidate_trigger_references() const { ref_node_.reset();}
+ 	void accept(ecf::ExprAstVisitor&) override;
+   AstVariable* clone() const override;
+	int value() const override;
+ 	std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+	std::string type() const override { return stype();}
+	std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
+ 	void setParentNode(Node* n) override { parentNode_ = n; }
+   void invalidate_trigger_references() const override { ref_node_.reset();}
 
-   virtual int minus(Ast* right) const;
-   virtual int plus(Ast* right) const;
+   int minus(Ast* right) const override;
+   int plus(Ast* right) const override;
 
 	Node* parentNode() const { return parentNode_; }
 	Node* referencedNode() const;
@@ -605,28 +605,28 @@ public:
    explicit AstParentVariable(const std::string& variablename)
    : parentNode_(nullptr), name_(variablename)  {}
 
-   virtual std::string name() const { return name_;}
-   virtual bool is_attribute() const { return true; }
+   std::string name() const override { return name_;}
+   bool is_attribute() const override { return true; }
 
    // although  AstParentVariable is leaf, However allow to evaluate to cope with
    //     ( :myMeter >= 20 and :myEvent)
    // Treat this like an integer
-   virtual bool is_evaluateable() const { return true; }
-   virtual bool evaluate() const { return value() != 0 ? true: false; }
+   bool is_evaluateable() const override { return true; }
+   bool evaluate() const override { return value() != 0 ? true: false; }
 
-   virtual void accept(ecf::ExprAstVisitor&);
-   virtual AstParentVariable* clone() const;
-   virtual int value() const;
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual void print_flat(std::ostream&,bool add_brackets = false) const;
-   virtual std::string type() const { return stype();}
-   virtual std::string expression() const;
-   virtual std::string why_expression(bool html = false) const;
-   virtual void setParentNode(Node* n) { parentNode_ = n; }
-   virtual void invalidate_trigger_references() const { ref_node_.reset();}
+   void accept(ecf::ExprAstVisitor&) override;
+   AstParentVariable* clone() const override;
+   int value() const override;
+   std::ostream& print(std::ostream& os) const override;
+   void print_flat(std::ostream&,bool add_brackets = false) const override;
+   std::string type() const override { return stype();}
+   std::string expression() const override;
+   std::string why_expression(bool html = false) const override;
+   void setParentNode(Node* n) override { parentNode_ = n; }
+   void invalidate_trigger_references() const override { ref_node_.reset();}
 
-   virtual int minus(Ast* right) const;
-   virtual int plus(Ast* right) const;
+   int minus(Ast* right) const override;
+   int plus(Ast* right) const override;
 
    Node* parentNode() const { return parentNode_; }
    static std::string stype() { return "parent_variable";}

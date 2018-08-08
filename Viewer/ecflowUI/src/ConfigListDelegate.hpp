@@ -25,8 +25,8 @@ class ConfigListDelegate : public QStyledItemDelegate
 public:
     explicit ConfigListDelegate(int,int,QWidget *parent=nullptr);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+                   const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
 
 protected:
     int iconSize_;

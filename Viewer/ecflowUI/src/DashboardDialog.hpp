@@ -22,13 +22,13 @@ Q_OBJECT
 
 public:
 	explicit DashboardDialog(QWidget *parent=nullptr);
-    ~DashboardDialog();
+    ~DashboardDialog() override;
 	
     void add(DashboardWidget*);
 	DashboardWidget* dashboardWidget() const {return dw_;} 
 
 public Q_SLOTS:	
-	void reject();
+	void reject() override;
     void slotUpdateTitle(QString,QString);
     void slotOwnerDelete();
 	
@@ -36,7 +36,7 @@ Q_SIGNALS:
     void aboutToClose();
 
 protected:
-	void closeEvent(QCloseEvent * event);
+	void closeEvent(QCloseEvent * event) override;
     void readSettings();
     void writeSettings();
     

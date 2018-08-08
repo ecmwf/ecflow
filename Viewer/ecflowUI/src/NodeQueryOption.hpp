@@ -64,10 +64,10 @@ class NodeQueryStringOption : public NodeQueryOption
 public:
     NodeQueryStringOption(VProperty*);
 
-    void swap(const NodeQueryOption*);
+    void swap(const NodeQueryOption*) override;
 
     QString value() const {return value_;}
-    QString valueAsString() const {return value();}
+    QString valueAsString() const override {return value();}
     const StringMatchMode&  matchMode() const {return matchMode_;}
     QString matchOperator() const {return QString::fromStdString(matchMode_.matchOperator());}
     bool caseSensitive() const {return caseSensitive_;}
@@ -77,11 +77,11 @@ public:
     void setMatchMode(const StringMatchMode& m) {matchMode_=m;}
     void setCaseSensitive(bool b) {caseSensitive_=b;}
 
-    QString query() const;
-    void load(VSettings*);
-    void save(VSettings*);
+    QString query() const override;
+    void load(VSettings*) override;
+    void save(VSettings*) override;
 
-    NodeQueryStringOption* isString() const {return const_cast<NodeQueryStringOption*>(this);}
+    NodeQueryStringOption* isString() const override {return const_cast<NodeQueryStringOption*>(this);}
 
 protected:
     QString value_;
@@ -97,19 +97,19 @@ class NodeQueryListOption : public NodeQueryOption
 public:
     NodeQueryListOption(VProperty*);
 
-    void swap(const NodeQueryOption*);
+    void swap(const NodeQueryOption*) override;
 
-    QString query(QString op) const;
-    void load(VSettings*);
-    void save(VSettings*);
+    QString query(QString op) const override;
+    void load(VSettings*) override;
+    void save(VSettings*) override;
 
-    QString valueAsString() const {return QString();}
+    QString valueAsString() const override {return QString();}
     QStringList values() const {return values_;}
     QStringList valueLabels() const {return valueLabels_;}
     void setSelection(QStringList lst) {selection_=lst;}
     QStringList selection() const {return selection_;}
 
-    NodeQueryListOption* isList() const {return const_cast<NodeQueryListOption*>(this);}
+    NodeQueryListOption* isList() const override {return const_cast<NodeQueryListOption*>(this);}
 
 protected:
     QStringList selection_;
@@ -122,19 +122,19 @@ class NodeQueryComboOption : public NodeQueryOption
 public:
     NodeQueryComboOption(VProperty*);
 
-    void swap(const NodeQueryOption*);
+    void swap(const NodeQueryOption*) override;
 
-    QString query() const;
-    void load(VSettings*);
-    void save(VSettings*);
+    QString query() const override;
+    void load(VSettings*) override;
+    void save(VSettings*) override;
 
     QStringList values() const {return values_;}
     QStringList valueLabels() const {return valueLabels_;}
     void setValue(QString);
     QString value() const {return value_;}
-    QString valueAsString() const {return value();}
+    QString valueAsString() const override {return value();}
     
-    NodeQueryComboOption* isCombo() const {return const_cast<NodeQueryComboOption*>(this);}
+    NodeQueryComboOption* isCombo() const override {return const_cast<NodeQueryComboOption*>(this);}
 
 protected:
     QString value_;
@@ -147,12 +147,12 @@ class NodeQueryPeriodOption : public NodeQueryOption
 public:
     NodeQueryPeriodOption(VProperty*);
 
-    void swap(const NodeQueryOption*);
+    void swap(const NodeQueryOption*) override;
 
-    QString query() const;
-    QString sqlQuery() const;
-    void load(VSettings*);
-    void save(VSettings*);
+    QString query() const override;
+    QString sqlQuery() const override;
+    void load(VSettings*) override;
+    void save(VSettings*) override;
 
     void clear();
     void setLastPeriod(int lastPeriod,QString lastPeriodUnits);
@@ -164,7 +164,7 @@ public:
     QString lastPeriodUnits() const {return lastPeriodUnits_;}
     QDateTime fromDate() const {return fromDate_;}
     QDateTime toDate() const {return toDate_;}
-    QString valueAsString() const {return QString();}
+    QString valueAsString() const override {return QString();}
 
 protected:
     Mode mode_;

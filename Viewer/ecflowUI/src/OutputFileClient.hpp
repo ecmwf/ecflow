@@ -30,9 +30,9 @@ public:
     void setDir(VDir_ptr);
 
 protected Q_SLOTS:
-    void slotError(QAbstractSocket::SocketError err);
-    void slotRead();
-    void slotConnected();
+    void slotError(QAbstractSocket::SocketError err) override;
+    void slotRead() override;
+    void slotConnected() override;
 
 private:
 	OutputFileClient(const OutputClient&);

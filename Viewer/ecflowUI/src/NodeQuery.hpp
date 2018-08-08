@@ -50,7 +50,7 @@ public:
     NodeQueryVarAttrGroup(QString name,QList<VAttributeType*> types,QList<NodeQueryOption*> options) :
       NodeQueryAttrGroup(name,types,options) {}
     
-    bool hasType(VAttributeType*) const;
+    bool hasType(VAttributeType*) const override;
 };
 
 class NodeQuery

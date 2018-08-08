@@ -58,20 +58,20 @@ class ChangeNotifyEditorModel : public QAbstractItemModel
 
 public:
    	explicit ChangeNotifyEditorModel(QObject *parent=nullptr);
-   	~ChangeNotifyEditorModel();
+   	~ChangeNotifyEditorModel() override;
 
    	void add(QString,QList<VProperty*>);
 
-   	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-   	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+   	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+   	int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
 
-   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-   	bool setData(const QModelIndex & index, const QVariant& value, int role = Qt::EditRole);
-   	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+   	bool setData(const QModelIndex & index, const QVariant& value, int role = Qt::EditRole) override;
+   	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
 
-   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-   	QModelIndex parent (const QModelIndex & ) const;
-   	Qt::ItemFlags flags ( const QModelIndex & index) const;
+   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+   	QModelIndex parent (const QModelIndex & ) const override;
+   	Qt::ItemFlags flags ( const QModelIndex & index) const override;
 
 public Q_SLOTS:
    	void slotEnabledChanged(QVariant v);

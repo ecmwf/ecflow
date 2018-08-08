@@ -39,23 +39,23 @@ Q_OBJECT
 
 public:
     explicit ServerRefreshInfoWidget(QAction* refreshAction,QWidget* parent=nullptr);
-    ~ServerRefreshInfoWidget();
+    ~ServerRefreshInfoWidget() override;
 
     void setServer(ServerHandler* server);
 
-    void notifyChange(VProperty* p);
+    void notifyChange(VProperty* p) override;
 
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
-    void notifyServerDelete(ServerHandler* server);
-    void notifyBeginServerClear(ServerHandler*);
-    void notifyEndServerScan(ServerHandler*);
-    void notifyServerActivityChanged(ServerHandler*);
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
+    void notifyServerDelete(ServerHandler* server) override;
+    void notifyBeginServerClear(ServerHandler*) override;
+    void notifyEndServerScan(ServerHandler*) override;
+    void notifyServerActivityChanged(ServerHandler*) override;
 
-    void notifyRefreshTimerStarted(ServerHandler* server);
-    void notifyRefreshTimerStopped(ServerHandler* server);
-    void notifyRefreshTimerChanged(ServerHandler* server);
-    void notifyRefreshScheduled(ServerHandler* server);
-    void notifyRefreshFinished(ServerHandler* server);
+    void notifyRefreshTimerStarted(ServerHandler* server) override;
+    void notifyRefreshTimerStopped(ServerHandler* server) override;
+    void notifyRefreshTimerChanged(ServerHandler* server) override;
+    void notifyRefreshScheduled(ServerHandler* server) override;
+    void notifyRefreshFinished(ServerHandler* server) override;
 
 protected Q_SLOTS:
     void slotTimeOut();
@@ -65,12 +65,12 @@ Q_SIGNALS:
      void serverSettingsEditRequested(ServerHandler*);
 
 protected:
-    void resizeEvent(QResizeEvent* event);
-    void mouseDoubleClickEvent(QMouseEvent* event);
-    void mousePressEvent(QMouseEvent* event);
-    void mouseMoveEvent(QMouseEvent* e);
-    void leaveEvent(QEvent*);
-    void paintEvent(QPaintEvent*);
+    void resizeEvent(QResizeEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void mouseMoveEvent(QMouseEvent* e) override;
+    void leaveEvent(QEvent*) override;
+    void paintEvent(QPaintEvent*) override;
 
     void updateSettings();
     void reloadAll();
@@ -178,7 +178,7 @@ public:
     void setServer(ServerHandler* server);
 
 protected:
-    void paintEvent(QPaintEvent*);
+    void paintEvent(QPaintEvent*) override;
 
     QFont font_;
     QFontMetrics fm_;

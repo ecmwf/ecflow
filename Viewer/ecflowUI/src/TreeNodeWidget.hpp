@@ -27,16 +27,16 @@ Q_OBJECT
 
 public:
 	TreeNodeWidget(ServerFilter*,QWidget* parent=nullptr);
-	~TreeNodeWidget();
+	~TreeNodeWidget() override;
 
-	void populateDockTitleBar(DashboardDockTitleWidget* tw);
+	void populateDockTitleBar(DashboardDockTitleWidget* tw) override;
 
-	void rerender();
-    bool initialSelectionInView();
-    void writeSettings(VComboSettings*);
-    void readSettings(VComboSettings*);
+	void rerender() override;
+    bool initialSelectionInView() override;
+    void writeSettings(VComboSettings*) override;
+    void readSettings(VComboSettings*) override;
 
-    void notifyChange(VProperty*);
+    void notifyChange(VProperty*) override;
 
 protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
@@ -48,7 +48,7 @@ protected:
     enum ViewLayoutMode {StandardLayoutMode,CompactLayoutMode};
 
     void initAtts();
-    void detachedChanged() {}
+    void detachedChanged() override {}
     void setViewLayoutMode(ViewLayoutMode);
 
 	VParamFilterMenu *stateFilterMenu_;

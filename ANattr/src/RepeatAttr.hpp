@@ -113,39 +113,39 @@ public:
    RepeatDate( const std::string& variable, int start, int end, int delta = 1/* always in days*/);
    RepeatDate() :  start_(0), end_(0), delta_(0), value_(0)  {}
 
-   virtual void gen_variables(std::vector<Variable>& vec) const;
-   virtual const Variable& find_gen_variable(const std::string& name) const;
-   virtual void update_repeat_genvar() const;
+   void gen_variables(std::vector<Variable>& vec) const override;
+   const Variable& find_gen_variable(const std::string& name) const override;
+   void update_repeat_genvar() const override;
 
-   virtual int start() const  { return start_; }
-   virtual int end() const    { return end_;   }
-   virtual int step() const   { return delta_; }
-   virtual long value() const { return value_; }
-   virtual long index_or_value() const { return value_;}
-   virtual long last_valid_value() const;
-   virtual long last_valid_value_minus(int value) const;
-   virtual long last_valid_value_plus(int value) const;
+   int start() const override  { return start_; }
+   int end() const override    { return end_;   }
+   int step() const override   { return delta_; }
+   long value() const override { return value_; }
+   long index_or_value() const override { return value_;}
+   long last_valid_value() const override;
+   long last_valid_value_minus(int value) const override;
+   long last_valid_value_plus(int value) const override;
 
    void delta(int d) { delta_ = d;}
    bool operator==(const RepeatDate& rhs) const;
 
-   virtual RepeatDate* clone() const { return new RepeatDate(name_, start_, end_, delta_, value_) ; }
-   virtual bool compare(RepeatBase*) const;
-   virtual bool valid() const { return (delta_ > 0) ? ( value_ <= end_) : (value_ >= end_); }
-   virtual std::string valueAsString() const;
-   virtual std::string value_as_string(int index) const;
-   virtual void setToLastValue();
-   virtual void reset();
-   virtual void increment();
-   virtual void change(const std::string& newValue); // can throw std::runtime_error
-   virtual void changeValue(long newValue);          // can throw std::runtime_error
-   virtual void set_value(long newValue);            // will NOT throw, allows any value
+   RepeatDate* clone() const override { return new RepeatDate(name_, start_, end_, delta_, value_) ; }
+   bool compare(RepeatBase*) const override;
+   bool valid() const override { return (delta_ > 0) ? ( value_ <= end_) : (value_ >= end_); }
+   std::string valueAsString() const override;
+   std::string value_as_string(int index) const override;
+   void setToLastValue() override;
+   void reset() override;
+   void increment() override;
+   void change(const std::string& newValue) override; // can throw std::runtime_error
+   void changeValue(long newValue) override;          // can throw std::runtime_error
+   void set_value(long newValue) override;            // will NOT throw, allows any value
 
-   virtual std::string toString() const;
-   virtual std::string dump() const;
+   std::string toString() const override;
+   std::string dump() const override;
 
    /// Simulator functions:
-   virtual bool isInfinite() const { return false;}
+   bool isInfinite() const override { return false;}
 
 private:
    RepeatDate( const std::string& name, int start, int end, int delta, long value)
@@ -183,29 +183,29 @@ public:
 
    bool operator==(const RepeatInteger& rhs) const;
 
-   virtual int start() const { return start_; }
-   virtual int end() const   { return end_; }
-   virtual int step() const  { return delta_;}
-   virtual long value() const { return value_;}
-   virtual long index_or_value() const { return value_;}
-   virtual long last_valid_value() const;
+   int start() const override { return start_; }
+   int end() const override   { return end_; }
+   int step() const override  { return delta_;}
+   long value() const override { return value_;}
+   long index_or_value() const override { return value_;}
+   long last_valid_value() const override;
 
-   virtual RepeatInteger* clone() const { return new RepeatInteger(name_, start_, end_, delta_, value_); }
-   virtual bool compare(RepeatBase*) const;
-   virtual bool valid() const { return (delta_ > 0) ? ( value_ <= end_) : (value_ >= end_); }
-   virtual std::string valueAsString() const;
-   virtual std::string value_as_string(int index) const;
-   virtual void setToLastValue();
-   virtual void reset();
-   virtual void increment();
-   virtual void change(const std::string& newValue); // can throw std::runtime_error
-   virtual void changeValue(long newValue);          // can throw std::runtime_error
-   virtual void set_value(long newValue);            // will NOT throw, allows any value
-   virtual std::string toString() const;
-   virtual std::string dump() const;
+   RepeatInteger* clone() const override { return new RepeatInteger(name_, start_, end_, delta_, value_); }
+   bool compare(RepeatBase*) const override;
+   bool valid() const override { return (delta_ > 0) ? ( value_ <= end_) : (value_ >= end_); }
+   std::string valueAsString() const override;
+   std::string value_as_string(int index) const override;
+   void setToLastValue() override;
+   void reset() override;
+   void increment() override;
+   void change(const std::string& newValue) override; // can throw std::runtime_error
+   void changeValue(long newValue) override;          // can throw std::runtime_error
+   void set_value(long newValue) override;            // will NOT throw, allows any value
+   std::string toString() const override;
+   std::string dump() const override;
 
    /// Simulator functions:
-   virtual bool isInfinite() const { return false;}
+   bool isInfinite() const override { return false;}
 
 private:
    RepeatInteger( const std::string& name, int start, int end, int delta, long value)
@@ -240,29 +240,29 @@ public:
 
    bool operator==(const RepeatEnumerated& rhs) const;
 
-   virtual int start() const { return 0; }
-   virtual int end() const;
-   virtual int step() const { return 1 ;}
-   virtual long value() const; // return value at index if cast-able to integer, otherwise return index
-   virtual long index_or_value() const { return currentIndex_;}
-   virtual long last_valid_value() const;
+   int start() const override { return 0; }
+   int end() const override;
+   int step() const override { return 1 ;}
+   long value() const override; // return value at index if cast-able to integer, otherwise return index
+   long index_or_value() const override { return currentIndex_;}
+   long last_valid_value() const override;
 
-   virtual RepeatBase* clone() const { return new RepeatEnumerated(name_,theEnums_,currentIndex_); }
-   virtual bool compare(RepeatBase*) const;
-   virtual bool valid() const { return  (currentIndex_ >=0 && currentIndex_ < static_cast<int>(theEnums_.size())); }
-   virtual std::string valueAsString() const;
-   virtual std::string value_as_string(int index) const;
-   virtual void setToLastValue();
-   virtual void reset();
-   virtual void increment();
-   virtual void change(const std::string& newValue); // can throw std::runtime_error
-   virtual void changeValue(long newValue);          // can throw std::runtime_error
-   virtual void set_value(long newValue);            // will NOT throw, allows any value
-   virtual std::string toString() const;
-   virtual std::string dump() const;
+   RepeatBase* clone() const override { return new RepeatEnumerated(name_,theEnums_,currentIndex_); }
+   bool compare(RepeatBase*) const override;
+   bool valid() const override { return  (currentIndex_ >=0 && currentIndex_ < static_cast<int>(theEnums_.size())); }
+   std::string valueAsString() const override;
+   std::string value_as_string(int index) const override;
+   void setToLastValue() override;
+   void reset() override;
+   void increment() override;
+   void change(const std::string& newValue) override; // can throw std::runtime_error
+   void changeValue(long newValue) override;          // can throw std::runtime_error
+   void set_value(long newValue) override;            // will NOT throw, allows any value
+   std::string toString() const override;
+   std::string dump() const override;
 
    /// Simulator functions:
-   virtual bool isInfinite() const { return false;}
+   bool isInfinite() const override { return false;}
 
 private:
    RepeatEnumerated( const std::string& variable, const std::vector<std::string>& theEnums, int index)
@@ -290,29 +290,29 @@ public:
 
    bool operator==(const RepeatString& rhs) const;
 
-   virtual int start() const { return 0; }
-   virtual int end() const;
-   virtual int step() const { return 1;}
-   virtual long value() const { return currentIndex_;}
-   virtual long index_or_value() const { return currentIndex_;}
-   virtual long last_valid_value() const; // returns the index
+   int start() const override { return 0; }
+   int end() const override;
+   int step() const override { return 1;}
+   long value() const override { return currentIndex_;}
+   long index_or_value() const override { return currentIndex_;}
+   long last_valid_value() const override; // returns the index
 
-   virtual RepeatBase* clone() const { return new RepeatString(name_,theStrings_,currentIndex_); }
-   virtual bool compare(RepeatBase*) const;
-   virtual bool valid() const { return  (currentIndex_ >=0 && currentIndex_ < static_cast<int>(theStrings_.size())); }
-   virtual std::string valueAsString() const;
-   virtual std::string value_as_string(int index) const;
-   virtual void setToLastValue();
-   virtual void reset();
-   virtual void increment();
-   virtual void change(const std::string& newValue); // can throw std::runtime_error
-   virtual void changeValue(long newValue);          // can throw std::runtime_error
-   virtual void set_value(long newValue);            // will NOT throw, allows any value
-   virtual std::string toString() const;
-   virtual std::string dump() const;
+   RepeatBase* clone() const override { return new RepeatString(name_,theStrings_,currentIndex_); }
+   bool compare(RepeatBase*) const override;
+   bool valid() const override { return  (currentIndex_ >=0 && currentIndex_ < static_cast<int>(theStrings_.size())); }
+   std::string valueAsString() const override;
+   std::string value_as_string(int index) const override;
+   void setToLastValue() override;
+   void reset() override;
+   void increment() override;
+   void change(const std::string& newValue) override; // can throw std::runtime_error
+   void changeValue(long newValue) override;          // can throw std::runtime_error
+   void set_value(long newValue) override;            // will NOT throw, allows any value
+   std::string toString() const override;
+   std::string dump() const override;
 
    /// Simulator functions:
-   virtual bool isInfinite() const { return false;}
+   bool isInfinite() const override { return false;}
 
 private:
    RepeatString( const std::string& variable, const std::vector<std::string>& theEnums, int index)
@@ -359,31 +359,31 @@ public:
 
    bool operator==(const RepeatDay& rhs) const;
 
-   virtual int start() const { return 0; }
-   virtual int end() const   { return 0; }
-   virtual int step() const  { return step_;}
-   virtual void increment() { /* do nothing */ }
-   virtual long value() const { return step_;}
-   virtual long index_or_value() const { return step_;}
-   virtual long last_valid_value() const { return step_;}
+   int start() const override { return 0; }
+   int end() const override   { return 0; }
+   int step() const override  { return step_;}
+   void increment() override { /* do nothing */ }
+   long value() const override { return step_;}
+   long index_or_value() const override { return step_;}
+   long last_valid_value() const override { return step_;}
 
-   virtual RepeatBase* clone() const { return new RepeatDay(step_,valid_); }
-   virtual bool compare(RepeatBase*) const;
-   virtual bool valid() const { return valid_;}
-   virtual std::string valueAsString() const { return std::string(); } ;
-   virtual std::string value_as_string(int ) const { return std::string(); }
-   virtual void setToLastValue() { /* do nothing  ?? */ }
-   virtual void reset() {  valid_ = true;  }
-   virtual void change(const std::string& /*newValue*/) { /* do nothing */ }
-   virtual void changeValue( long /*newValue*/)         { /* do nothing */ }
-   virtual void set_value(long /*newValue*/)            { /* do nothing */ }
-   virtual std::string toString() const;
-   virtual std::string dump() const;
+   RepeatBase* clone() const override { return new RepeatDay(step_,valid_); }
+   bool compare(RepeatBase*) const override;
+   bool valid() const override { return valid_;}
+   std::string valueAsString() const override { return std::string(); } ;
+   std::string value_as_string(int ) const override { return std::string(); }
+   void setToLastValue() override { /* do nothing  ?? */ }
+   void reset() override {  valid_ = true;  }
+   void change(const std::string& /*newValue*/) override { /* do nothing */ }
+   void changeValue( long /*newValue*/) override         { /* do nothing */ }
+   void set_value(long /*newValue*/) override            { /* do nothing */ }
+   std::string toString() const override;
+   std::string dump() const override;
 
    /// Simulator functions:
-   virtual bool isInfinite() const { return true;}
+   bool isInfinite() const override { return true;}
 
-   virtual bool is_repeat_day() const { return true; }
+   bool is_repeat_day() const override { return true; }
 
 private:
    RepeatDay( int step, bool valid) : RepeatBase("day"), step_(step),valid_(valid)  {}

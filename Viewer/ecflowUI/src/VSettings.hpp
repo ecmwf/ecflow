@@ -86,17 +86,17 @@ class VComboSettings : public VSettings
 {
 public:
 	VComboSettings(const std::string& file,const std::string& qsFile);
-	~VComboSettings();
+	~VComboSettings() override;
 
 	//void write(const std::string &fs);
-	void clear();
+	void clear() override;
 
-	void write();
+	void write() override;
 
 	bool containsQs(const std::string& key);
 
-	void beginGroup(const std::string&);
-	void endGroup();
+	void beginGroup(const std::string&) override;
+	void endGroup() override;
 
 	void putQs(const std::string& key,QVariant val);
 	QVariant getQs(const std::string& key);

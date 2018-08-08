@@ -30,11 +30,11 @@ public:
 
 	void init(AbstractServer* as, bool save_edit_history);
 
-  	virtual bool hasDefs() const { return true; }
-  	virtual bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const;
-  	virtual std::ostream& print(std::ostream& os) const;
-	virtual bool equals(ServerToClientCmd*) const;
-   virtual void cleanup() { std::string().swap(full_server_defs_as_string_); } /// run in the server, after command send to client
+  	bool hasDefs() const override { return true; }
+  	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
+  	std::ostream& print(std::ostream& os) const override;
+	bool equals(ServerToClientCmd*) const override;
+   void cleanup() override { std::string().swap(full_server_defs_as_string_); } /// run in the server, after command send to client
 
 private:
 

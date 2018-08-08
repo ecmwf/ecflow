@@ -27,17 +27,17 @@ Q_OBJECT
 public:
 	explicit HistoryItemWidget(QWidget *parent=nullptr);
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents(); 
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override; 
 
-    void infoReady(VReply*);
-    void infoFailed(VReply*);
-    void infoProgress(VReply*);
-    void infoAppended(VReply*);
+    void infoReady(VReply*) override;
+    void infoFailed(VReply*) override;
+    void infoProgress(VReply*) override;
+    void infoAppended(VReply*) override;
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected Q_SLOTS:
     void on_reloadTb__clicked(bool);
@@ -45,7 +45,7 @@ protected Q_SLOTS:
     void on_actionCopyRow__triggered();
 
 protected:
-    void updateState(const ChangeFlags&);
+    void updateState(const ChangeFlags&) override;
     void adjustColumnSize();
     void checkActionState();
     void toClipboard(QString txt) const;

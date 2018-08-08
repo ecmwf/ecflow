@@ -27,12 +27,12 @@ public:
 	FlatAnalyserVisitor();
 	std::string report() const { return ss_.str();}
 
-	virtual bool traverseObjectStructureViaVisitors() const { return true;}
-	virtual void visitDefs(Defs*);
-	virtual void visitSuite(Suite*);
-	virtual void visitFamily(Family*);
-	virtual void visitNodeContainer(NodeContainer*);
-	virtual void visitTask(Task*);
+	bool traverseObjectStructureViaVisitors() const override { return true;}
+	void visitDefs(Defs*) override;
+	void visitSuite(Suite*) override;
+	void visitFamily(Family*) override;
+	void visitNodeContainer(NodeContainer*) override;
+	void visitTask(Task*) override;
 
 private:
 	bool analyse(Node* n);

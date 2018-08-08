@@ -27,7 +27,7 @@ Q_OBJECT
 
 public:
     explicit TriggerTableView(QWidget *parent=nullptr);
-    ~TriggerTableView();
+    ~TriggerTableView() override;
 
     void setModel(TriggerTableModel* model);
 
@@ -43,7 +43,7 @@ public Q_SLOTS:
     void slotViewCommand(VInfo_ptr,QString);
     void slotRerender();
     void slotSizeHintChangedGlobal();
-    void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected);
+    void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected) override;
 
 Q_SIGNALS:
     void selectionChanged(TriggerTableItem*);

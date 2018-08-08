@@ -36,13 +36,13 @@ public:
    Task(const Task& rhs);
    Task& operator=(const Task&);
 
-   node_ptr clone() const;
+   node_ptr clone() const override;
 
-	virtual ~Task();
+	~Task() override;
 
 	static task_ptr create(const std::string& name);
 
-   std::ostream& print(std::ostream&) const;
+   std::ostream& print(std::ostream&) const override;
    bool operator==(const Task& rhs) const;
 
    /// Add an alias. The .usr is populated with contents of user_file_contents
@@ -63,65 +63,65 @@ public:
 
    /// return list of aliases held by this task
    const std::vector<alias_ptr>& aliases() { return aliases_; }
-   virtual void immediateChildren(std::vector<node_ptr>&) const;
+   void immediateChildren(std::vector<node_ptr>&) const override;
 
    /// Overidden from Submittable
-   virtual const std::string& script_extension() const;
+   const std::string& script_extension() const override;
 
-   virtual node_ptr find_node_up_the_tree(const std::string& name) const;
+   node_ptr find_node_up_the_tree(const std::string& name) const override;
 
    /// Added for consistency, really used to find relative nodes, aliases should never, be in referenced nodes
-   virtual node_ptr find_relative_node(const std::vector<std::string>& pathToNode) { return node_ptr();}
+   node_ptr find_relative_node(const std::vector<std::string>& pathToNode) override { return node_ptr();}
 
 	/// Overridden to reset the try number
 	/// The tasks job can be invoked multiple times. For each invocation we want to preserve
 	/// the output. The try number is used in SMSJOB/SMSJOBOUT to preserve the output when
 	/// there are multiple runs.  re-queue/begin() resets the try Number
-   virtual void reset();
-   virtual void begin();
-	virtual void requeue(Requeue_args&);
+   void reset() override;
+   void begin() override;
+	void requeue(Requeue_args&) override;
 
-   virtual Suite* suite() const { return parent()->suite(); }
-   virtual Defs* defs() const { return (parent()) ? parent()->defs() : nullptr;} // exposed to python hence check for NULL first
-	virtual Task* isTask() const   { return const_cast<Task*>(this);}
-   virtual Submittable* isSubmittable() const { return const_cast<Task*>(this); }
+   Suite* suite() const override { return parent()->suite(); }
+   Defs* defs() const override { return (parent()) ? parent()->defs() : nullptr;} // exposed to python hence check for NULL first
+	Task* isTask() const override   { return const_cast<Task*>(this);}
+   Submittable* isSubmittable() const override { return const_cast<Task*>(this); }
 
-	virtual void accept(ecf::NodeTreeVisitor&);
-	virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
+	void accept(ecf::NodeTreeVisitor&) override;
+	void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
 
-   virtual void getAllNodes(std::vector<Node*>&) const;
-   virtual void getAllTasks(std::vector<Task*>&) const;
-   virtual void getAllSubmittables(std::vector<Submittable*>&) const;
-   virtual void get_all_active_submittables(std::vector<Submittable*>&) const;
-   virtual void get_all_tasks(std::vector<task_ptr>&) const;
-   virtual void get_all_nodes(std::vector<node_ptr>&) const;
-   virtual void get_all_aliases(std::vector<alias_ptr>&) const;
+   void getAllNodes(std::vector<Node*>&) const override;
+   void getAllTasks(std::vector<Task*>&) const override;
+   void getAllSubmittables(std::vector<Submittable*>&) const override;
+   void get_all_active_submittables(std::vector<Submittable*>&) const override;
+   void get_all_tasks(std::vector<task_ptr>&) const override;
+   void get_all_nodes(std::vector<node_ptr>&) const override;
+   void get_all_aliases(std::vector<alias_ptr>&) const override;
 
-	virtual const std::string& debugType() const;
+	const std::string& debugType() const override;
 
 	/// submits the jobs of the dependencies resolve
-	virtual bool resolveDependencies(JobsParam& jobsParam);
+	bool resolveDependencies(JobsParam& jobsParam) override;
 
-  	virtual node_ptr removeChild( Node* child);
- 	virtual bool addChild( node_ptr child,size_t position = std::numeric_limits<std::size_t>::max());
- 	virtual bool isAddChildOk( Node* child, std::string& errorMsg) const;
+  	node_ptr removeChild( Node* child) override;
+ 	bool addChild( node_ptr child,size_t position = std::numeric_limits<std::size_t>::max()) override;
+ 	bool isAddChildOk( Node* child, std::string& errorMsg) const override;
 
-   virtual void order(Node* immediateChild, NOrder::Order);
-   virtual void generate_scripts( const std::map<std::string,std::string>& override) const;
+   void order(Node* immediateChild, NOrder::Order) override;
+   void generate_scripts( const std::map<std::string,std::string>& override) const override;
 
-   virtual bool checkInvariants(std::string& errorMsg) const;
+   bool checkInvariants(std::string& errorMsg) const override;
 
-   virtual void collateChanges(DefsDelta&) const;
+   void collateChanges(DefsDelta&) const override;
    void set_memento(const OrderMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool);
    void set_memento(const AliasChildrenMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool);
    void set_memento(const AliasNumberMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool);
    void set_memento(const SubmittableMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool f) { Submittable::set_memento(m,aspects,f); }
 
-   virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
+   void read_state(const std::string& line,const std::vector<std::string>& lineTokens) override;
 private:
    void copy(const Task&);
-   virtual size_t child_position(const Node*) const;
-   virtual std::string write_state() const;
+   size_t child_position(const Node*) const override;
+   std::string write_state() const override;
 
 private:
    /// For use by python interface,
@@ -131,11 +131,11 @@ private:
 
 private:
 	// Overridden from Node to increment/decrement limits
-	virtual void handleStateChange();
-   virtual bool doDeleteChild(Node* child);
+	void handleStateChange() override;
+   bool doDeleteChild(Node* child) override;
 
    // Overridden to locate alias's
-   virtual node_ptr findImmediateChild(const std::string& name, size_t& child_pos) const;
+   node_ptr findImmediateChild(const std::string& name, size_t& child_pos) const override;
 
    friend class cereal::access;
    template<class Archive>

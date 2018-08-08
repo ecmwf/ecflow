@@ -28,8 +28,8 @@ class VariableDelegate : public QStyledItemDelegate
 public:
     explicit VariableDelegate(QTreeView *parent);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+                   const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
 
 protected:
     QPen selectPen_;
@@ -49,7 +49,7 @@ public:
 	explicit VariableView(QWidget *parent=nullptr);
 
 protected:
-    void drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const;
+    void drawBranches(QPainter* painter,const QRect& rect,const QModelIndex& index ) const override;
 
     VariableDelegate *delegate_;
 };

@@ -28,7 +28,7 @@ public:
     void play(const std::string&,int repeat);
     bool isSoundFile(const std::string& fName) const;
 
-    void notifyChange(VProperty*) {};
+    void notifyChange(VProperty*) override {};
 
     //Called from VConfigLoader
     static void load(VProperty* group);

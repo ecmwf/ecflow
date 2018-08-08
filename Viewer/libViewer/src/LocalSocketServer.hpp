@@ -20,7 +20,7 @@ class LocalSocketServer : public QObject
 
 public:
     LocalSocketServer(QString serverId,QObject *parent);
-    ~LocalSocketServer();
+    ~LocalSocketServer() override;
 
     static QString generateServerName(QString serverId,qint64 pid);
     QString serverName();

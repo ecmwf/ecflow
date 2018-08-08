@@ -28,8 +28,8 @@ class VLimiterAttrType : public VAttributeType
 {
 public:
     explicit VLimiterAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
+    QString toolTip(QStringList d) const override;
+    QString definition(QStringList d) const override;
     void encode(const InLimit&,QStringList&) const;
     void scan(VNode* vnode,std::vector<VAttribute*>& vec);
     int totalNum(VNode* vnode);
@@ -44,9 +44,9 @@ class VLimiterAttr : public VAttribute
 public:
     VLimiterAttr(VNode *parent,const InLimit&,int index);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };

@@ -21,8 +21,8 @@
 class DateParser : public Parser {
 public:
    explicit DateParser(DefsStructureParser* p) : Parser(p) {}
-	virtual const char* keyword() const { return "date"; }
-	virtual bool doParse(const std::string& /*line*/, std::vector<std::string>& lineTokens);
+	const char* keyword() const override { return "date"; }
+	bool doParse(const std::string& /*line*/, std::vector<std::string>& lineTokens) override;
 };
 
 #endif

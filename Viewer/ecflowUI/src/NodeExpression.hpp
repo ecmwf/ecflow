@@ -117,11 +117,11 @@ class AndNodeCondition : public BaseNodeCondition
 {
 public:
     AndNodeCondition() {delayUnwinding_ = true;}
-    ~AndNodeCondition() = default;
+    ~AndNodeCondition() override = default;
 
-    bool execute(VItem* node);
-    int  numOperands() {return 2;}
-    std::string print() {return std::string("and") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";}
+    bool execute(VItem* node) override;
+    int  numOperands() override {return 2;}
+    std::string print() override {return std::string("and") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";}
 };
 
 // -----------------------------------------------------------------
@@ -130,11 +130,11 @@ class OrNodeCondition : public BaseNodeCondition
 {
 public:
     OrNodeCondition()  {delayUnwinding_ = true;}
-    ~OrNodeCondition() = default;
+    ~OrNodeCondition() override = default;
 
-    bool execute(VItem* node);
-    int  numOperands() {return 2;}
-    std::string print() {return std::string("or") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";}
+    bool execute(VItem* node) override;
+    int  numOperands() override {return 2;}
+    std::string print() override {return std::string("or") + "(" + operands_[0]->print() + "," + operands_[1]->print() + ")";}
 };
 
 // -----------------------------------------------------------------
@@ -143,11 +143,11 @@ class NotNodeCondition : public BaseNodeCondition
 {
 public:
     NotNodeCondition()  = default;
-    ~NotNodeCondition() = default;
+    ~NotNodeCondition() override = default;
 
-    bool execute(VItem* node);
-    int  numOperands() {return 1;}
-    std::string print() {return std::string("not") + "(" + operands_[0]->print() + ")";}
+    bool execute(VItem* node) override;
+    int  numOperands() override {return 1;}
+    std::string print() override {return std::string("not") + "(" + operands_[0]->print() + ")";}
 };
 
 
@@ -175,36 +175,36 @@ class StringMatchExact : public StringMatchBase
 {
 public:
     StringMatchExact(bool caseSensitive) : StringMatchBase(caseSensitive) {}
-    ~StringMatchExact() = default;
+    ~StringMatchExact() override = default;
 
-    bool match(std::string searchFor, std::string searchIn);
+    bool match(std::string searchFor, std::string searchIn) override;
 };
 
 class StringMatchContains : public StringMatchBase
 {
 public:
     StringMatchContains(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
-    ~StringMatchContains() = default;
+    ~StringMatchContains() override = default;
 
-    bool match(std::string searchFor, std::string searchIn);
+    bool match(std::string searchFor, std::string searchIn) override;
 };
 
 class StringMatchWildcard : public StringMatchBase
 {
 public:
     StringMatchWildcard(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
-    ~StringMatchWildcard() = default;
+    ~StringMatchWildcard() override = default;
 
-    bool match(std::string searchFor, std::string searchIn);
+    bool match(std::string searchFor, std::string searchIn) override;
 };
 
 class StringMatchRegexp : public StringMatchBase
 {
 public:
     StringMatchRegexp(bool caseSensitive)  : StringMatchBase(caseSensitive) {}
-    ~StringMatchRegexp() = default;
+    ~StringMatchRegexp() override = default;
 
-    bool match(std::string searchFor, std::string searchIn);
+    bool match(std::string searchFor, std::string searchIn) override;
 };
 
 // -----------------------------------------------------------------
@@ -217,12 +217,12 @@ class StringMatchCondition : public BaseNodeCondition
 {
 public:
     StringMatchCondition(StringMatchMode::Mode matchMode, bool caseSensitive);
-    ~StringMatchCondition() {if (matcher_) delete matcher_;}
+    ~StringMatchCondition() override {if (matcher_) delete matcher_;}
 
-    bool execute(VItem *node);
-    int  numOperands() {return 2;}
-    std::string print() {return operands_[0]->print() + " = " + operands_[1]->print();}
-    bool operand2IsArbitraryString() {return true;}
+    bool execute(VItem *node) override;
+    int  numOperands() override {return 2;}
+    std::string print() override {return operands_[0]->print() + " = " + operands_[1]->print();}
+    bool operand2IsArbitraryString() override {return true;}
 private:
     StringMatchBase *matcher_;
 };
@@ -237,20 +237,20 @@ class TrueNodeCondition : public BaseNodeCondition
 {
 public:
     TrueNodeCondition()  = default;
-    ~TrueNodeCondition() = default;
+    ~TrueNodeCondition() override = default;
 
-    bool execute(VItem*) {return true;}
-    std::string print() {return std::string("true");}
+    bool execute(VItem*) override {return true;}
+    std::string print() override {return std::string("true");}
 };
 
 class FalseNodeCondition : public BaseNodeCondition
 {
 public:
     FalseNodeCondition()  = default;
-    ~FalseNodeCondition() = default;
+    ~FalseNodeCondition() override = default;
 
-    bool execute(VItem*) {return false;}
-    std::string print() {return std::string("false");}
+    bool execute(VItem*) override {return false;}
+    std::string print() override {return std::string("false");}
 };
 
 // -----------------------------------------------------------------
@@ -263,10 +263,10 @@ class TypeNodeCondition : public BaseNodeCondition
 {
 public:
     explicit TypeNodeCondition(NodeExpressionParser::NodeType type) {type_ = type;}
-    ~TypeNodeCondition() = default;
+    ~TypeNodeCondition() override = default;
 
-    bool execute(VItem* node);
-    std::string print() {return NodeExpressionParser::instance()->typeName(type_);}
+    bool execute(VItem* node) override;
+    std::string print() override {return NodeExpressionParser::instance()->typeName(type_);}
 
 private:
     NodeExpressionParser::NodeType type_;
@@ -282,10 +282,10 @@ class StateNodeCondition : public BaseNodeCondition
 {
 public:
     explicit StateNodeCondition(QString stateName) : stateName_(stateName) {}
-    ~StateNodeCondition() = default;
+    ~StateNodeCondition() override = default;
 
-    bool execute(VItem* node);
-    std::string print() {return stateName_.toStdString();}
+    bool execute(VItem* node) override;
+    std::string print() override {return stateName_.toStdString();}
 
 private:
     QString stateName_;
@@ -301,10 +301,10 @@ class NodeMenuModeCondition : public BaseNodeCondition
 {
 public:
     explicit NodeMenuModeCondition(QString menuModeName) : menuModeName_(menuModeName) {}
-    ~NodeMenuModeCondition() = default;
+    ~NodeMenuModeCondition() override = default;
 
-    bool execute(VItem*);
-    std::string print() {return menuModeName_.toStdString();}
+    bool execute(VItem*) override;
+    std::string print() override {return menuModeName_.toStdString();}
 
 private:
     QString menuModeName_;
@@ -320,10 +320,10 @@ class UIStateCondition : public BaseNodeCondition
 {
 public:
     explicit UIStateCondition(const std::string& uiStateName) : uiStateName_(uiStateName) {}
-    ~UIStateCondition() = default;
+    ~UIStateCondition() override = default;
 
-    bool execute(VItem*);
-    std::string print() {return uiStateName_;}
+    bool execute(VItem*) override;
+    std::string print() override {return uiStateName_;}
 
 private:
     std::string uiStateName_;
@@ -340,10 +340,10 @@ class NodeAttributeCondition : public BaseNodeCondition
 {
 public:
     explicit NodeAttributeCondition(QString nodeAttrName) : nodeAttrName_(nodeAttrName) {}
-    ~NodeAttributeCondition() = default;
+    ~NodeAttributeCondition() override = default;
 
-    bool execute(VItem*);
-    std::string print() {return nodeAttrName_.toStdString();}
+    bool execute(VItem*) override;
+    std::string print() override {return nodeAttrName_.toStdString();}
 
 private:
     QString nodeAttrName_;
@@ -359,10 +359,10 @@ class NodeFlagCondition : public BaseNodeCondition
 {
 public:
     explicit NodeFlagCondition(QString nodeFlagName) : nodeFlagName_(nodeFlagName) {}
-    ~NodeFlagCondition() = default;
+    ~NodeFlagCondition() override = default;
 
-    bool execute(VItem*);
-    std::string print() {return nodeFlagName_.toStdString();}
+    bool execute(VItem*) override;
+    std::string print() override {return nodeFlagName_.toStdString();}
 
 private:
     QString nodeFlagName_;
@@ -377,10 +377,10 @@ class IsoDateCondition : public BaseNodeCondition
 {
 public:
     explicit IsoDateCondition(QString str=QString());
-    ~IsoDateCondition() = default;
+    ~IsoDateCondition() override = default;
 
-    bool execute(VItem*) {return false;}
-    std::string print();
+    bool execute(VItem*) override {return false;}
+    std::string print() override;
     virtual qint64 secsSinceEpoch(VItem*) const {return secsSinceEpoch_;}
 
 private:
@@ -396,11 +396,11 @@ class NodeStatusChangeDateCondition : public IsoDateCondition
 {
 public:
     explicit NodeStatusChangeDateCondition() = default;
-    ~NodeStatusChangeDateCondition() = default;
+    ~NodeStatusChangeDateCondition() override = default;
 
-    bool execute(VItem*) {return false;}
-    std::string print();
-    qint64 secsSinceEpoch(VItem*) const;
+    bool execute(VItem*) override {return false;}
+    std::string print() override;
+    qint64 secsSinceEpoch(VItem*) const override;
 };
 
 // --------------------------------
@@ -411,22 +411,22 @@ class IsoDateGreaterThanEqualCondition : public BaseNodeCondition
 {
 public:
     IsoDateGreaterThanEqualCondition() = default;
-    ~IsoDateGreaterThanEqualCondition() = default;
+    ~IsoDateGreaterThanEqualCondition() override = default;
 
-    bool execute(VItem *node);
-    int  numOperands() {return 2;}
-    std::string print();
+    bool execute(VItem *node) override;
+    int  numOperands() override {return 2;}
+    std::string print() override;
 };
 
 class IsoDateLessThanEqualCondition : public BaseNodeCondition
 {
 public:
     IsoDateLessThanEqualCondition() = default;
-    ~IsoDateLessThanEqualCondition() = default;
+    ~IsoDateLessThanEqualCondition() override = default;
 
-    bool execute(VItem *node);
-    int  numOperands() {return 2;}
-    std::string print();
+    bool execute(VItem *node) override;
+    int  numOperands() override {return 2;}
+    std::string print() override;
 };
 
 // -----------------------------------------------------------------
@@ -439,18 +439,18 @@ class WhatToSearchInOperand : public BaseNodeCondition
 {
 public:
     explicit WhatToSearchInOperand(std::string what, bool &attr);
-    ~WhatToSearchInOperand();
+    ~WhatToSearchInOperand() override;
 
     const std::string& name() const {return what_;}
-    bool execute(VItem* node)  {return false;} // not called
-    std::string print() {return what_;}
+    bool execute(VItem* node) override  {return false;} // not called
+    std::string print() override {return what_;}
     const std::string& what() const {return what_;}
 
 private:
     std::string what_;  // TODO XXX: optimise - we should store an enum here
     bool searchInAttributes_;
 
-    bool searchInAttributes() {return searchInAttributes_;}
+    bool searchInAttributes() override {return searchInAttributes_;}
 };
 
 // -----------------------------------------------------------------
@@ -459,11 +459,11 @@ class WhatToSearchForOperand : public BaseNodeCondition
 {
 public:
     explicit WhatToSearchForOperand(const std::string& what) : what_(what) {}
-    ~WhatToSearchForOperand();
+    ~WhatToSearchForOperand() override;
 
     std::string name() {return what_;}
-    bool execute(VItem* node) {return false;} // not called
-    std::string print() {return what_;}
+    bool execute(VItem* node) override {return false;} // not called
+    std::string print() override {return what_;}
     std::string what() {return what_;}
 
 private:
@@ -479,11 +479,11 @@ class AttributeCondition : public BaseNodeCondition
 public:
     //explicit AttributeCondition(NodeExpressionParser::AttributeType type) {type_ = type;}
     explicit AttributeCondition(VAttributeType* type) : type_(type) {}
-    ~AttributeCondition() = default;
+    ~AttributeCondition() override = default;
 
-    bool execute(VItem*);
+    bool execute(VItem*) override;
     //std::string print() {return NodeExpressionParser::instance()->toAttrName(type_);}
-    std::string print() {return ""; /*type_->strName();*/}
+    std::string print() override {return ""; /*type_->strName();*/}
 
 private:
     //NodeExpressionParser::AttributeType type_;
@@ -498,10 +498,10 @@ class AttributeStateCondition : public BaseNodeCondition
 {
 public:
     explicit AttributeStateCondition(QString attrState) : attrState_(attrState) {}
-    ~AttributeStateCondition() = default;
+    ~AttributeStateCondition() override = default;
 
-    bool execute(VItem*);
-    std::string print() {return attrState_.toStdString();}
+    bool execute(VItem*) override;
+    std::string print() override {return attrState_.toStdString();}
 
 private:
     QString attrState_;

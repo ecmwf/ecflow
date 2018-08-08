@@ -29,8 +29,8 @@ class VTimeAttrType : public VAttributeType
 {
 public:
     explicit VTimeAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
+    QString toolTip(QStringList d) const override;
+    QString definition(QStringList d) const override;
     void encode(const ecf::TimeAttr& d,QStringList& data);
     void encode(const ecf::TodayAttr& d,QStringList& data);
     void encode(const ecf::CronAttr& d,QStringList& data);
@@ -49,9 +49,9 @@ public:
     VTimeAttr(VNode *parent,const ecf::TodayAttr&,int index);
     VTimeAttr(VNode *parent,const ecf::CronAttr&,int index);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
     static int totalNum(VNode* vnode);

@@ -184,8 +184,8 @@ protected:
 
 public:
 
-   virtual bool isWrite() const { return true; }
-   virtual int timeout() const { return 190; }  // ECFLOW-157 80 -> 190
+   bool isWrite() const override { return true; }
+   int timeout() const override { return 190; }  // ECFLOW-157 80 -> 190
 
    const std::string& path_to_node() const { return path_to_submittable_;}
    const std::string& jobs_password() const { return jobs_password_;}
@@ -193,20 +193,20 @@ public:
    int try_no() const { return try_no_;}
    virtual ecf::Child::CmdType child_type() const = 0;
 
-   virtual bool equals(ClientToServerCmd*) const;
-   virtual bool task_cmd() const { return true; }
-   virtual bool connect_to_different_servers() const { return true; }
+   bool equals(ClientToServerCmd*) const override;
+   bool task_cmd() const override { return true; }
+   bool connect_to_different_servers() const override { return true; }
 
    bool password_missmatch() const { return password_missmatch_;}
    bool pid_missmatch() const { return pid_missmatch_;}
 
 protected:
    /// Overridden to do nothing since Task based commands don't need _user_ based authentication
-   virtual void setup_user_authentification(const std::string& user, const std::string& passwd){}
-   virtual void setup_user_authentification(AbstractClientEnv&){}
-   virtual void setup_user_authentification(){}
+   void setup_user_authentification(const std::string& user, const std::string& passwd) override{}
+   void setup_user_authentification(AbstractClientEnv&) override{}
+   void setup_user_authentification() override{}
 
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const; /// Task have their own mechanism,can throw std::runtime_error
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override; /// Task have their own mechanism,can throw std::runtime_error
    Submittable* get_submittable(AbstractServer* as) const ; // can throw std::runtime_error
 
 protected:
@@ -244,20 +244,20 @@ public:
 
    InitCmd() : TaskCmd()  {}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual ecf::Child::CmdType child_type() const { return ecf::Child::INIT; }
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   ecf::Child::CmdType child_type() const override { return ecf::Child::INIT; }
 
    friend class cereal::access;
    template<class Archive>
@@ -276,20 +276,20 @@ public:
    : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no) {}
    CompleteCmd() : TaskCmd() {}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual ecf::Child::CmdType child_type() const { return ecf::Child::COMPLETE; }
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   ecf::Child::CmdType child_type() const override { return ecf::Child::COMPLETE; }
 
    friend class cereal::access;
    template<class Archive>
@@ -312,21 +312,21 @@ public:
 
    const std::string& expression() const { return expression_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
 
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual ecf::Child::CmdType child_type() const { return ecf::Child::WAIT; }
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   ecf::Child::CmdType child_type() const override { return ecf::Child::WAIT; }
 
    std::string expression_;
 
@@ -350,20 +350,20 @@ public:
 
    const std::string& reason() const {return reason_; }
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual ecf::Child::CmdType child_type() const { return ecf::Child::ABORT; }
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   ecf::Child::CmdType child_type() const override { return ecf::Child::ABORT; }
 
    std::string reason_;
 
@@ -388,20 +388,20 @@ public:
 
    const std::string& name() const { return name_; }
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual ecf::Child::CmdType child_type() const { return ecf::Child::EVENT; }
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   ecf::Child::CmdType child_type() const override { return ecf::Child::EVENT; }
 
 private:
    std::string name_; // the events name
@@ -429,20 +429,20 @@ public:
    const std::string& name() const { return name_; }
    int value() const { return value_; }
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual ecf::Child::CmdType child_type() const { return ecf::Child::METER; }
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   ecf::Child::CmdType child_type() const override { return ecf::Child::METER; }
 
 private:
    std::string name_;  // the meters name
@@ -473,20 +473,20 @@ public:
    const std::string& name() const { return name_; }
    const std::string& label() const { return label_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void  create(   Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void  create(   Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual ecf::Child::CmdType child_type() const { return ecf::Child::LABEL; }
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   ecf::Child::CmdType child_type() const override { return ecf::Child::LABEL; }
 
 private:
    std::string name_;   // the label name
@@ -522,20 +522,20 @@ public:
    const std::string& step() const { return step_; }
    const std::string& path_to_node_with_queue() const { return path_to_node_with_queue_; }
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual ecf::Child::CmdType child_type() const { return ecf::Child::QUEUE; }
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   ecf::Child::CmdType child_type() const override { return ecf::Child::QUEUE; }
 
    std::string handle_queue(QueueAttr& queue_attr) const;
 
@@ -568,14 +568,14 @@ public:
    const std::string& user() const { return user_;}
    const std::string& passwd() const { return passwd_;}
 
-   virtual void setup_user_authentification(const std::string& user, const std::string& passwd);
-   virtual void setup_user_authentification(AbstractClientEnv&);
-   virtual void setup_user_authentification();
+   void setup_user_authentification(const std::string& user, const std::string& passwd) override;
+   void setup_user_authentification(AbstractClientEnv&) override;
+   void setup_user_authentification() override;
 
 protected:
 
-   virtual bool equals(ClientToServerCmd*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   bool equals(ClientToServerCmd*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
    bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const;
    bool do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const;
 
@@ -618,15 +618,15 @@ class ServerVersionCmd : public UserCmd {
 public:
    ServerVersionCmd()= default;
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
-   virtual const char* theArg() const;
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
+   const char* theArg() const override;
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
                            boost::program_options::variables_map& vm,
-                           AbstractClientEnv* clientEnv ) const;
+                           AbstractClientEnv* clientEnv ) const override;
 private:
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    friend class cereal::access;
    template<class Archive>
@@ -666,23 +666,23 @@ public:
 
    Api api() const { return api_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual bool isWrite() const;
-   virtual bool terminate_cmd() const { return api_ == TERMINATE_SERVER; }
-   virtual bool ping_cmd() const { return api_ == PING; }
-   virtual int timeout() const;
+   bool isWrite() const override;
+   bool terminate_cmd() const override { return api_ == TERMINATE_SERVER; }
+   bool ping_cmd() const override { return api_ == PING; }
+   int timeout() const override;
 
-   virtual bool handleRequestIsTestable() const;
+   bool handleRequestIsTestable() const override;
 
-   virtual const char* theArg() const;
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override;
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    Api api_;
 
@@ -705,16 +705,16 @@ public:
    int check_pt_interval() const { return check_pt_interval_;}
    int check_pt_save_time_alarm() const { return check_pt_save_time_alarm_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
-   virtual bool isWrite() const;
-   virtual const char* theArg() const;
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
+   bool isWrite() const override;
+   const char* theArg() const override;
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
 private:
    ecf::CheckPt::Mode mode_;
@@ -762,22 +762,22 @@ public:
    int client_modify_change_no() const { return client_modify_change_no_;}
    int client_handle() const { return client_handle_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
-   virtual int timeout() const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
+   int timeout() const override;
 
-   virtual const char* theArg() const;
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override;
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
 
    /// Custom handling of command logging to add additional debug on same line
    /// makes it easier to debug errors in syncing.
-   virtual void do_log(AbstractServer*) const;
+   void do_log(AbstractServer*) const override;
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    Api api_;
    int client_handle_;
@@ -836,16 +836,16 @@ public:
    Api api() const { return api_;}
    const std::string& drop_user() const { return drop_user_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const;
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override;
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    Api api_;
    int client_handle_;
@@ -889,25 +889,25 @@ public:
    Api api() const { return api_;}
    const std::string& absNodePath() const { return absNodePath_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual PrintStyle::Type_t show_style() const;
+   PrintStyle::Type_t show_style() const override;
 
-   virtual int timeout() const;
-   virtual bool isWrite() const;
-   virtual bool handleRequestIsTestable() const { return !terminate_cmd();}
-   virtual bool why_cmd( std::string& nodePath) const;
-   virtual bool get_cmd() const { return api_ ==  GET; }
+   int timeout() const override;
+   bool isWrite() const override;
+   bool handleRequestIsTestable() const override { return !terminate_cmd();}
+   bool why_cmd( std::string& nodePath) const override;
+   bool get_cmd() const override { return api_ ==  GET; }
 
-   virtual const char* theArg() const;
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override;
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
 
 private:
    Api api_;
@@ -940,22 +940,22 @@ public:
    const std::vector<std::string>& paths() const { return paths_;}
    bool force() const { return force_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
+   std::ostream& print(std::ostream& os) const override;
+   std::ostream& print(std::ostream& os, const std::string& path) const override;
 
-   virtual bool equals(ClientToServerCmd*) const;
-   virtual bool isWrite() const;
-   virtual bool delete_all_cmd() const;
+   bool equals(ClientToServerCmd*) const override;
+   bool isWrite() const override;
+   bool delete_all_cmd() const override;
 
-   virtual const char* theArg() const;
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create(    Cmd_ptr& cmd,
+   const char* theArg() const override;
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after handlerequest
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after handlerequest
 
    std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
 
@@ -991,20 +991,20 @@ public:
    int get_last_n_lines() const { return get_last_n_lines_;}
    const std::string& new_path() const { return new_path_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual bool isWrite() const;
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   bool isWrite() const override;
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    LogApi api_;
    int get_last_n_lines_; // default to 100 -> ECFLOW-174
@@ -1029,16 +1029,16 @@ public:
 
    const std::string& msg() const { return msg_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
@@ -1063,22 +1063,22 @@ public:
    const std::string& suiteName() const { return suiteName_;}
    bool force() const { return force_;}
 
-   virtual int timeout() const { return 80; }
+   int timeout() const override { return 80; }
 
-   virtual bool isWrite() const { return true; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool isWrite() const override { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
 private:
    std::string suiteName_;
@@ -1104,17 +1104,17 @@ public:
    const std::string& process_or_remote_id() const { return process_id_;}
    const std::string& password() const { return password_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const;
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override;
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 
 private:
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    ecf::User::Action user_action_;
    std::string process_id_;         // should be empty for multiple paths and when using CLI
@@ -1148,23 +1148,23 @@ public:
    const std::vector<std::string>& paths() const { return paths_;}
    Option option() const { return option_;}
 
-   virtual bool isWrite() const { return true; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool isWrite() const override { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
 private:
    mutable std::vector<std::string>  paths_;  // mutable to allow swap to clear & reclaim memory, as soon as possible
@@ -1189,21 +1189,21 @@ public:
    const std::string& absNodepath() const { return absNodepath_;}
    NOrder::Order option() const { return option_;}
 
-   virtual bool isWrite() const { return true; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool isWrite() const override { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
 
 private:
    std::string   absNodepath_;
@@ -1234,23 +1234,23 @@ public:
    const std::vector<std::string>& paths() const { return paths_;}
    bool force() const { return force_;}
 
-   virtual bool isWrite() const { return true; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool isWrite() const override { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
 private:
    std::vector<std::string> paths_;
@@ -1276,24 +1276,24 @@ public:
    explicit ShowCmd(PrintStyle::Type_t s = PrintStyle::DEFS) : style_(s) {}
 
    // returns the showStyle
-   virtual bool show_cmd() const { return true ;}
-   virtual PrintStyle::Type_t show_style() const { return style_;}
+   bool show_cmd() const override { return true ;}
+   PrintStyle::Type_t show_style() const override { return style_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
    // The Show Cmd is processed on the client side,
    // Likewise the doHandleRequest does nothing,
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    PrintStyle::Type_t style_;
 
@@ -1320,23 +1320,23 @@ public:
    // Uses by equals only
    const std::string& defs_as_string() const { return defs_; }
 
-   virtual bool isWrite() const { return true; }
-   virtual int timeout() const { return time_out_for_load_sync_and_get(); }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool isWrite() const override { return true; }
+   int timeout() const override { return time_out_for_load_sync_and_get(); }
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
    static Cmd_ptr create(const std::string& defs_filename,bool force,bool check_only,bool print,AbstractClientEnv* clientEnv);
 
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the command as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    bool        force_;
    std::string defs_;
@@ -1365,16 +1365,16 @@ public:
    bool createNodesAsNeeded() const { return createNodesAsNeeded_;}
    bool force() const { return force_;}
 
-   virtual bool isWrite() const { return true; }
-   virtual int timeout() const { return 300; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool isWrite() const override { return true; }
+   int timeout() const override { return 300; }
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 
    //void set_client_env(const std::vector<std::pair<std::string,std::string> >& env ) { client_env_ = env;} // only used in test
 
@@ -1382,9 +1382,9 @@ private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   virtual void cleanup() { std::string().swap(clientDefs_);} /// run in the server, after command send to client
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   void cleanup() override { std::string().swap(clientDefs_);} /// run in the server, after command send to client
 
    bool        createNodesAsNeeded_;
    bool        force_;
@@ -1432,23 +1432,23 @@ public:
    bool recursive() const { return recursive_;}
    bool setRepeatToLastValue() const { return setRepeatToLastValue_;}
 
-   virtual bool isWrite() const { return true; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool isWrite() const override { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
 private:
    std::vector<std::string> paths_;
@@ -1496,23 +1496,23 @@ public:
    bool date() const    { return date_;}
    bool time() const    { return time_;}
 
-   virtual bool isWrite() const { return true; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool isWrite() const override { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
 private:
    std::vector<std::string> paths_;
@@ -1595,24 +1595,24 @@ public:
    ecf::Flag::Type flag_type() const { return flag_type_;}
    bool flag() const { return flag_;}
 
-   virtual bool isWrite() const { return true; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual std::ostream& print(std::ostream& os, const std::string& path) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool isWrite() const override { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   std::ostream& print(std::ostream& os, const std::string& path) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
    STC_Cmd_ptr alter_server_state(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
    void createAdd(    Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
    void createDelete( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths) const;
@@ -1669,21 +1669,21 @@ public:
    static std::vector<CFileCmd::File_t>  fileTypesVec();
    static std::string toString(File_t);
 
-   virtual bool handleRequestIsTestable() const { return false ;}
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool handleRequestIsTestable() const override { return false ;}
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
 
    File_t        file_;
    std::string   pathToNode_;
@@ -1740,23 +1740,23 @@ public:
    bool alias() const { return alias_;}
    bool run() const { return run_;}
 
-   virtual bool handleRequestIsTestable() const { return false ;}
-   virtual bool isWrite() const;
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool handleRequestIsTestable() const override { return false ;}
+   bool isWrite() const override;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   virtual void cleanup(){ std::vector<std::string>().swap(user_file_contents_);} /// run in the server, after doHandleRequest
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   void cleanup() override{ std::vector<std::string>().swap(user_file_contents_);} /// run in the server, after doHandleRequest
 
 private:
    EditType      edit_type_;
@@ -1789,22 +1789,22 @@ public:
    const std::string& source() const { return source_; }
    const std::string& dest() const { return dest_; }
 
-   virtual int timeout() const { return 120; }
-   virtual bool handleRequestIsTestable() const { return false ;}
-   virtual bool isWrite() const { return true; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   int timeout() const override { return 120; }
+   bool handleRequestIsTestable() const override { return false ;}
+   bool isWrite() const override { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
 private:
    std::string source_;
@@ -1824,27 +1824,27 @@ class MoveCmd : public UserCmd {
 public:
    MoveCmd(const std::pair<std::string,std::string>& host_port, Node* src, const std::string& dest);
    MoveCmd();
-   virtual ~MoveCmd();
+   ~MoveCmd() override;
 
    Node* source() const;
    const std::string& src_node() const { return src_node_;}
    const std::string& dest() const { return dest_; }
 
-   virtual bool handleRequestIsTestable() const { return false ;}
-   virtual bool isWrite() const { return true; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   bool handleRequestIsTestable() const override { return false ;}
+   bool isWrite() const override { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    bool check_source() const;
 
@@ -1876,27 +1876,27 @@ public:
             const std::string& path_to_task )
    : query_type_(query_type),path_to_attribute_(path_to_attribute),attribute_(attribute),path_to_task_(path_to_task){}
    QueryCmd() : UserCmd(){}
-   virtual ~QueryCmd();
+   ~QueryCmd() override;
 
    const std::string& query_type() const { return query_type_; }
    const std::string& path_to_attribute() const { return path_to_attribute_; }
    const std::string& attribute() const { return attribute_; }
    const std::string& path_to_task() const { return  path_to_task_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void  create(   Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void  create(   Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual bool handleRequestIsTestable() const { return false;}
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   bool handleRequestIsTestable() const override { return false;}
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
 private:
    std::string query_type_;        // [ state | dstate | event | meter | trigger ]
@@ -1932,35 +1932,35 @@ public:
    GroupCTSCmd(const std::string& list_of_commands,AbstractClientEnv* clientEnv);
    GroupCTSCmd()= default;
 
-   virtual bool isWrite() const;
-   virtual PrintStyle::Type_t show_style() const;
-   virtual bool get_cmd() const;
-   virtual bool task_cmd() const;
-   virtual bool terminate_cmd() const;
-   virtual bool why_cmd( std::string& ) const;
-   virtual bool group_cmd() const { return true; }
+   bool isWrite() const override;
+   PrintStyle::Type_t show_style() const override;
+   bool get_cmd() const override;
+   bool task_cmd() const override;
+   bool terminate_cmd() const override;
+   bool why_cmd( std::string& ) const override;
+   bool group_cmd() const override { return true; }
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ClientToServerCmd*) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ClientToServerCmd*) const override;
 
    void addChild(Cmd_ptr childCmd);
    const std::vector<Cmd_ptr>& cmdVec() const { return cmdVec_;}
 
-   virtual const char* theArg() const { return arg();}
-   virtual void addOption(boost::program_options::options_description& desc) const;
-   virtual void create( 	Cmd_ptr& cmd,
+   const char* theArg() const override { return arg();}
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
-            AbstractClientEnv* clientEnv ) const;
+            AbstractClientEnv* clientEnv ) const override;
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user
 
-   virtual void setup_user_authentification(const std::string& user, const std::string& passwd);
-   virtual void setup_user_authentification(AbstractClientEnv&);
-   virtual void setup_user_authentification();
+   void setup_user_authentification(const std::string& user, const std::string& passwd) override;
+   void setup_user_authentification(AbstractClientEnv&) override;
+   void setup_user_authentification() override;
 
-   virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
-   virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    std::vector<Cmd_ptr> cmdVec_;
 

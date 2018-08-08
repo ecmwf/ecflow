@@ -46,7 +46,7 @@ class TextPagerDocument : public QObject
 
 public:
     TextPagerDocument(QObject *parent = nullptr);
-    ~TextPagerDocument();
+    ~TextPagerDocument() override;
 
     enum DeviceMode {
         Sparse,

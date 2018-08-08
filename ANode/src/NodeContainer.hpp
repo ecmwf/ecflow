@@ -26,31 +26,31 @@ public:
    explicit NodeContainer( const std::string& name );
    NodeContainer(const NodeContainer& );
 	NodeContainer();
-	virtual ~NodeContainer();
+	~NodeContainer() override;
 
-	virtual void accept(ecf::NodeTreeVisitor&);
-	virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
-    virtual void reset();
-	virtual void begin();
-	virtual void requeue(Requeue_args&);
-   virtual void requeue_time_attrs();
-	virtual bool run(JobsParam& jobsParam, bool force);
-	virtual void kill(const std::string& zombie_pid = "");
-	virtual void status();
-	virtual bool top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
-	virtual void collateChanges(DefsDelta&) const;
+	void accept(ecf::NodeTreeVisitor&) override;
+	void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
+    void reset() override;
+	void begin() override;
+	void requeue(Requeue_args&) override;
+   void requeue_time_attrs() override;
+	bool run(JobsParam& jobsParam, bool force) override;
+	void kill(const std::string& zombie_pid = "") override;
+	void status() override;
+	bool top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const override;
+	void collateChanges(DefsDelta&) const override;
    void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
    void set_memento(const ChildrenMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
-   virtual void order(Node* immediateChild, NOrder::Order);
+   void order(Node* immediateChild, NOrder::Order) override;
 
-	virtual bool hasAutoCancel() const;
-   virtual void calendarChanged(const ecf::Calendar&,
+	bool hasAutoCancel() const override;
+   void calendarChanged(const ecf::Calendar&,
          std::vector<node_ptr>& auto_cancelled_nodes,
          std::vector<node_ptr>& auto_archive_nodes,
-         const ecf::LateAttr* inherited_late);
- 	virtual bool resolveDependencies(JobsParam& );
- 	virtual bool check(std::string& errorMsg, std::string& warningMsg) const;
-   virtual void invalidate_trigger_references() const;
+         const ecf::LateAttr* inherited_late) override;
+ 	bool resolveDependencies(JobsParam& ) override;
+ 	bool check(std::string& errorMsg, std::string& warningMsg) const override;
+   void invalidate_trigger_references() const override;
 
    task_ptr add_task(const std::string& task_name);
    family_ptr add_family(const std::string& family_name);
@@ -58,53 +58,53 @@ public:
  	void addFamily( family_ptr, size_t position = std::numeric_limits<std::size_t>::max());
  	void add_child(node_ptr,size_t position = std::numeric_limits<std::size_t>::max());
 
-	virtual void immediateChildren(std::vector<node_ptr>&) const;
- 	virtual void allChildren(std::set<Node*>&) const;
+	void immediateChildren(std::vector<node_ptr>&) const override;
+ 	void allChildren(std::set<Node*>&) const override;
 
- 	virtual node_ptr findImmediateChild(const std::string& name,size_t& child_pos) const;
-   virtual node_ptr find_node_up_the_tree(const std::string& name) const;
+ 	node_ptr findImmediateChild(const std::string& name,size_t& child_pos) const override;
+   node_ptr find_node_up_the_tree(const std::string& name) const override;
 
-	virtual node_ptr find_relative_node(const std::vector<std::string>& pathToNode);
+	node_ptr find_relative_node(const std::vector<std::string>& pathToNode) override;
 	void find_closest_matching_node( const std::vector< std::string >& pathToNode, int indexIntoPathNode, node_ptr& closest_matching_node );
 
    node_ptr find_by_name(const std::string& name) const;
 	family_ptr findFamily(const std::string& familyName) const;
 	task_ptr findTask(const std::string& taskName) const;
 	void getAllFamilies(std::vector<Family*>&) const;
-	virtual void getAllNodes(std::vector<Node*>&) const;
-   virtual void getAllTasks(std::vector<Task*>&) const;
-   virtual void getAllSubmittables(std::vector<Submittable*>&) const;
-   virtual void get_all_active_submittables(std::vector<Submittable*>&) const;
-   virtual void get_all_tasks(std::vector<task_ptr>&) const;
-   virtual void get_all_nodes(std::vector<node_ptr>&) const;
-   virtual void get_all_aliases(std::vector<alias_ptr>&) const;
-	virtual void getAllAstNodes(std::set<Node*>&) const;
+	void getAllNodes(std::vector<Node*>&) const override;
+   void getAllTasks(std::vector<Task*>&) const override;
+   void getAllSubmittables(std::vector<Submittable*>&) const override;
+   void get_all_active_submittables(std::vector<Submittable*>&) const override;
+   void get_all_tasks(std::vector<task_ptr>&) const override;
+   void get_all_nodes(std::vector<node_ptr>&) const override;
+   void get_all_aliases(std::vector<alias_ptr>&) const override;
+	void getAllAstNodes(std::set<Node*>&) const override;
  	const std::vector<node_ptr>& nodeVec() const { return nodes_;}
  	std::vector<task_ptr> taskVec() const;
  	std::vector<family_ptr> familyVec() const;
 
-	std::ostream& print(std::ostream&) const;
+	std::ostream& print(std::ostream&) const override;
 	bool operator==(const NodeContainer& rhs) const;
 
-	virtual bool hasTimeDependencies() const;
+	bool hasTimeDependencies() const override;
 
-	virtual void check_job_creation( job_creation_ctrl_ptr jobCtrl);
-   virtual void generate_scripts( const std::map<std::string,std::string>& override) const;
+	void check_job_creation( job_creation_ctrl_ptr jobCtrl) override;
+   void generate_scripts( const std::map<std::string,std::string>& override) const override;
 
-	virtual bool checkInvariants(std::string& errorMsg) const;
- 	virtual void verification(std::string& errorMsg) const;
+	bool checkInvariants(std::string& errorMsg) const override;
+ 	void verification(std::string& errorMsg) const override;
 
-	virtual NState::State computedState(Node::TraverseType) const;
+	NState::State computedState(Node::TraverseType) const override;
 
- 	virtual node_ptr removeChild( Node* child);
- 	virtual bool addChild( node_ptr child,size_t position = std::numeric_limits<std::size_t>::max());
- 	virtual bool isAddChildOk( Node* child, std::string& errorMsg) const;
+ 	node_ptr removeChild( Node* child) override;
+ 	bool addChild( node_ptr child,size_t position = std::numeric_limits<std::size_t>::max()) override;
+ 	bool isAddChildOk( Node* child, std::string& errorMsg) const override;
 
- 	virtual void setRepeatToLastValueHierarchically();
-	virtual void setStateOnlyHierarchically(NState::State s,bool force = false);
-	virtual void set_state_hierarchically(NState::State s, bool force);
-   virtual void update_limits();
-   virtual void sort_attributes(ecf::Attr::Type attr,bool recursive);
+ 	void setRepeatToLastValueHierarchically() override;
+	void setStateOnlyHierarchically(NState::State s,bool force = false) override;
+	void set_state_hierarchically(NState::State s, bool force) override;
+   void update_limits() override;
+   void sort_attributes(ecf::Attr::Type attr,bool recursive) override;
 
    void archive();
    void restore();
@@ -113,18 +113,18 @@ public:
 private:
    void restore_on_begin_or_requeue();
 
-   virtual size_t child_position(const Node*) const;
+   size_t child_position(const Node*) const override;
    void add_task_only( task_ptr ,size_t position = std::numeric_limits<std::size_t>::max());
    void add_family_only( family_ptr ,size_t position = std::numeric_limits<std::size_t>::max());
 
 	void handle_defstatus_propagation();
 	void match_closest_children(const std::vector<std::string>& pathToNode, int indexIntoPathToNode,node_ptr& closest_matching_node);
 
-	virtual void handleStateChange(); // called when a state change happens
+	void handleStateChange() override; // called when a state change happens
 
 	friend class Defs;
 	friend class Family;
-  	virtual bool doDeleteChild(Node* child);
+  	bool doDeleteChild(Node* child) override;
 
 	/// For use by python interface,
 	std::vector<node_ptr>::const_iterator node_begin() const { return nodes_.begin();}
@@ -135,7 +135,7 @@ protected:
    unsigned int order_state_change_no_;     // no need to persist
    unsigned int add_remove_state_change_no_;// no need to persist
 
-   virtual void force_sync();
+   void force_sync() override;
 
    void incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) const;
 

@@ -27,19 +27,19 @@ Q_OBJECT
 
 public:
 	explicit ZombieItemWidget(QWidget *parent=nullptr);
-    ~ZombieItemWidget();
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents();
-    bool hasSameContents(VInfo_ptr info);
+    ~ZombieItemWidget() override;
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override;
+    bool hasSameContents(VInfo_ptr info) override;
 
 	//From VInfoPresenter
-	void infoReady(VReply*);
-	void infoFailed(VReply*);
-    void infoProgress(VReply*) {}
+	void infoReady(VReply*) override;
+	void infoFailed(VReply*) override;
+    void infoProgress(VReply*) override {}
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected Q_SLOTS:
 	void on_actionTerminate_triggered();
@@ -53,8 +53,8 @@ protected Q_SLOTS:
     void slotItemSelected(QModelIndex,QModelIndex);
 
 protected:
-    void updateState(const ChangeFlags&);
-	void serverSyncFinished();
+    void updateState(const ChangeFlags&) override;
+	void serverSyncFinished() override;
 
 private:
 	void command(const std::string& cmdName);

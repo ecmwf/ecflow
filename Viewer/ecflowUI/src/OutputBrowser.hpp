@@ -47,7 +47,7 @@ Q_OBJECT
 
 public:
 	explicit OutputBrowser(QWidget* parent);
-	~OutputBrowser();
+	~OutputBrowser() override;
 
     void clear();
     void loadFile(VFile_ptr file);

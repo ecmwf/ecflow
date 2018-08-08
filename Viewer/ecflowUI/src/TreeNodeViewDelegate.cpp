@@ -77,7 +77,7 @@ public:
      int textTopCorrection;
      int textBottomCorrection;
 
-     void adjust(const QFont& f)
+     void adjust(const QFont& f) override
      {
          FontMetrics fm(f);
          realFontHeight=fm.realHeight();
@@ -108,7 +108,7 @@ public:
          iconPreGap=fm.width('A')/2;
      }
 
-     QRect adjustTextRect(const QRect& rIn) const
+     QRect adjustTextRect(const QRect& rIn) const override
      {
          //Q_ASSERT(rIn.height() == fontHeight);
          QRect r=rIn;
@@ -117,7 +117,7 @@ public:
          return r;
      }
 
-     QRect adjustSelectionRect(const QRect& optRect) const {
+     QRect adjustSelectionRect(const QRect& optRect) const override {
          QRect r=optRect;
          return r;
      }
@@ -142,7 +142,7 @@ public:
      int textTopCorrection;
      int textBottomCorrection;
 
-     void adjust(const QFont& f)
+     void adjust(const QFont& f) override
      {
          FontMetrics fm(f);
          realFontHeight=fm.realHeight();
@@ -156,7 +156,7 @@ public:
          spacing=fm.width('A')*3/4;
      }
 
-     QRect adjustTextRect(const QRect& rIn) const
+     QRect adjustTextRect(const QRect& rIn) const override
      {
          QRect r=rIn;
          r.setY(r.y()-textTopCorrection+1);
@@ -164,18 +164,18 @@ public:
          return r;
      }
 
-     QRect adjustTextBgRect(const QRect& rIn) const
+     QRect adjustTextBgRect(const QRect& rIn) const override
      {
          QRect r=rIn;
          return r.adjusted(0,-1,0,1);
      }
 
-     QRect adjustSelectionRect(const QRect& optRect) const {
+     QRect adjustSelectionRect(const QRect& optRect) const override {
          QRect r=optRect;
          return r.adjusted(0,-selectRm.topOffset(),0,-selectRm.bottomOffset());
      }
 
-     QRect adjustSelectionRectNonOpt(const QRect& optRect) const {
+     QRect adjustSelectionRectNonOpt(const QRect& optRect) const override {
          return adjustSelectionRect(optRect);
      }
 };

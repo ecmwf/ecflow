@@ -18,14 +18,14 @@ class HtmlEdit : public QTextBrowser, public VPropertyObserver
 {
 public:
     explicit HtmlEdit(QWidget* parent = nullptr);
-    ~HtmlEdit();
+    ~HtmlEdit() override;
 
     void setFontProperty(VProperty* p);
     void updateFont();
-    void notifyChange(VProperty* p);
+    void notifyChange(VProperty* p) override;
 
 protected:
-    void wheelEvent(QWheelEvent *event);
+    void wheelEvent(QWheelEvent *event) override;
 
 private:
     void fontSizeChangedByZoom();

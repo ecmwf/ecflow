@@ -25,21 +25,21 @@ Q_OBJECT
 
 public:
 	explicit WhyItemWidget(QWidget *parent=nullptr);
-	~WhyItemWidget();
+	~WhyItemWidget() override;
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents();
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override;
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected Q_SLOTS:
     void anchorClicked(const QUrl& link);
 
 protected:
-    void updateState(const ChangeFlags&);
-    void serverSyncFinished();
+    void updateState(const ChangeFlags&) override;
+    void serverSyncFinished() override;
 
 private:
     void load();

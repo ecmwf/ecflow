@@ -20,7 +20,7 @@ class AbstractSearchLine : public QWidget, protected Ui::SearchLineWidget
 
 public:
 	explicit AbstractSearchLine(QWidget *parent=nullptr);
-	virtual ~AbstractSearchLine();
+	~AbstractSearchLine() override;
 	virtual void clear();
 	virtual bool isEmpty();
 	void selectAll();
@@ -47,8 +47,8 @@ Q_SIGNALS:
 protected:
 	void updateButtons(bool);
 	void toDefaultState();
-	void hideEvent(QHideEvent* event);
-	void showEvent(QShowEvent* event);
+	void hideEvent(QHideEvent* event) override;
+	void showEvent(QShowEvent* event) override;
 
 	bool status_;
 	bool caseSensitive_;

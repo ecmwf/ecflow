@@ -22,7 +22,7 @@ public:
     void toHtml(QString& html);
 
 protected:
-	void highlightBlock(const QString &text);
+	void highlightBlock(const QString &text) override;
 	void addRule(QString,QTextCharFormat);
 
 private:

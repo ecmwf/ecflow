@@ -100,16 +100,16 @@ friend class VUserVarAttr;
 
 public:
 	VNode(VNode* parent,node_ptr);
-    virtual ~VNode();
+    ~VNode() override;
 
 	enum SortMode {ParentToChildSort,ChildToParentSort};
 
-    VServer *root() const;
-    ServerHandler* server() const;
+    VServer *root() const override;
+    ServerHandler* server() const override;
     virtual VNode* suite() const;
     node_ptr node() const {return node_;}  
-    VNode* isNode() const {return const_cast<VNode*>(this);}
-    bool isTopLevel() const;
+    VNode* isNode() const override {return const_cast<VNode*>(this);}
+    bool isTopLevel() const override;
 
     //Attributes
     const std::vector<VAttribute*>& attr() const {return attr_;}
@@ -141,13 +141,13 @@ public:
     //generated variables are searched.
     virtual std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
 
-    std::string fullPath() const;
+    std::string fullPath() const override;
     virtual std::string absNodePath() const;
 
     bool sameName(const std::string& name) const;
-    bool sameContents(VItem* item) const;
-    std::string strName() const;
-    QString name() const;
+    bool sameContents(VItem* item) const override;
+    std::string strName() const override;
+    QString name() const override;
     std::string serverName() const;
     virtual QString stateName();
     virtual QString serverStateName();
@@ -194,7 +194,7 @@ public:
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VItem* n);
 
-    QString nodeMenuMode() const;
+    QString nodeMenuMode() const override;
 
     virtual void print();
 
@@ -226,24 +226,24 @@ class VSuiteNode : public VNode
 {
 public:
     VSuiteNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
-    VSuiteNode* isSuite() const {return const_cast<VSuiteNode*>(this);}
-    const std::string& typeName() const;
+    VSuiteNode* isSuite() const override {return const_cast<VSuiteNode*>(this);}
+    const std::string& typeName() const override;
 };
 
 class VFamilyNode : public VNode
 {
 public:
     VFamilyNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
-    VFamilyNode* isFamily() const {return const_cast<VFamilyNode*>(this);}
-    const std::string& typeName() const;
+    VFamilyNode* isFamily() const override {return const_cast<VFamilyNode*>(this);}
+    const std::string& typeName() const override;
 };
 
 class VAliasNode : public VNode
 {
 public:
     VAliasNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
-    VAliasNode* isAlias() const {return const_cast<VAliasNode*>(this);}
-    const std::string& typeName() const;
+    VAliasNode* isAlias() const override {return const_cast<VAliasNode*>(this);}
+    const std::string& typeName() const override;
 };
 
 //This is the root node representing the Server.
@@ -254,15 +254,15 @@ class VServer : public VNode
 
 public:
 	explicit VServer(ServerHandler*);
-	~VServer();
+	~VServer() override;
 
-	ServerHandler* server() const {return server_;}
-    VNode* suite() const {return nullptr;}
+	ServerHandler* server() const override {return server_;}
+    VNode* suite() const override {return nullptr;}
 
 	bool isEmpty() const { return numOfChildren() == 0;}
-	bool isTopLevel() const {return false;}
-    VServer* isServer() const {return const_cast<VServer*>(this);}
-    VNode* isNode() const {return nullptr;}
+	bool isTopLevel() const override {return false;}
+    VServer* isServer() const override {return const_cast<VServer*>(this);}
+    VNode* isNode() const override {return nullptr;}
 
 	int totalNum() const {return totalNum_;}
 	int totalNumOfTopLevel(int) const;
@@ -277,43 +277,43 @@ public:
 	VNode* nodeAt(int) const;
 	const std::vector<VNode*>& nodes() const {return nodes_;}
 
-    const std::string& typeName() const;
-    QString toolTip();
+    const std::string& typeName() const override;
+    QString toolTip() override;
 
 	//From VNode
-	std::string absNodePath() const {return "/";}
-	QString stateName();
-	QString defaultStateName();
-    QString serverStateName();
-	bool isSuspended() const;
-	QColor  stateColour() const;
-	QColor  stateFontColour() const;
-	std::string strName() const;
-	int tryNo() const {return 0;}
+	std::string absNodePath() const override {return "/";}
+	QString stateName() override;
+	QString defaultStateName() override;
+    QString serverStateName() override;
+	bool isSuspended() const override;
+	QColor  stateColour() const override;
+	QColor  stateFontColour() const override;
+	std::string strName() const override;
+	int tryNo() const override {return 0;}
 
 	void suites(std::vector<std::string>&);
 	VNode* find(const std::string& fullPath);
 
 	//Get all the variables
-    int variablesNum() const;
-	int genVariablesNum() const;
-    void variables(std::vector<Variable>& vars) const;
-    void genVariables(std::vector<Variable>& genVars) const;
-	std::string genVariable(const std::string& key) const;
+    int variablesNum() const override;
+	int genVariablesNum() const override;
+    void variables(std::vector<Variable>& vars) const override;
+    void genVariables(std::vector<Variable>& genVars) const override;
+	std::string genVariable(const std::string& key) const override;
 
 	//Find a variable in the Defs. Both the user_variables and the
 	//server variables are searched.
-	std::string findVariable(const std::string& key,bool substitute=false) const;
-	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
+	std::string findVariable(const std::string& key,bool substitute=false) const override;
+	std::string findInheritedVariable(const std::string& key,bool substitute=false) const override;
 
-    std::string flagsAsStr() const;
-	bool isFlagSet(ecf::Flag::Type f) const;
+    std::string flagsAsStr() const override;
+	bool isFlagSet(ecf::Flag::Type f) const override;
 
-	void why(std::vector<std::string>& theReasonWhy) const;
+	void why(std::vector<std::string>& theReasonWhy) const override;
 
     bool triggeredScanned() const {return triggeredScanned_;}
 
-    void print();
+    void print() override;
 
 protected:
 	//Clear contents and rebuild the whole tree.

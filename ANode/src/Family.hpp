@@ -25,38 +25,38 @@ public:
    Family() : fam_gen_variables_(nullptr)  {}
    Family(const Family& rhs) : NodeContainer(rhs), fam_gen_variables_(nullptr) {}
    Family& operator=(const Family&);
-   virtual node_ptr clone() const;
+   node_ptr clone() const override;
 
-	virtual ~Family();
+	~Family() override;
 
 	static family_ptr create(const std::string& name);
 
-	virtual Suite* suite() const { return parent()->suite(); }
-	virtual Defs* defs() const { return (parent()) ? parent()->defs() : nullptr;}     // exposed to python hence check for NULL first
- 	virtual Family* isFamily() const { return const_cast<Family*>(this);}
-   virtual NodeContainer* isNodeContainer() const { return const_cast<Family*>(this); }
+	Suite* suite() const override { return parent()->suite(); }
+	Defs* defs() const override { return (parent()) ? parent()->defs() : nullptr;}     // exposed to python hence check for NULL first
+ 	Family* isFamily() const override { return const_cast<Family*>(this);}
+   NodeContainer* isNodeContainer() const override { return const_cast<Family*>(this); }
 
-   virtual void begin();
-   virtual bool resolveDependencies(JobsParam& ); // overriden to speicy family for job profiler
-    virtual void requeue(Requeue_args&);
-	virtual void accept(ecf::NodeTreeVisitor&);
-	virtual void acceptVisitTraversor(ecf::NodeTreeVisitor& v);
-	virtual void update_generated_variables() const;
-	virtual const Variable& findGenVariable(const std::string& name) const;
-	virtual void gen_variables(std::vector<Variable>&) const;
+   void begin() override;
+   bool resolveDependencies(JobsParam& ) override; // overriden to speicy family for job profiler
+    void requeue(Requeue_args&) override;
+	void accept(ecf::NodeTreeVisitor&) override;
+	void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
+	void update_generated_variables() const override;
+	const Variable& findGenVariable(const std::string& name) const override;
+	void gen_variables(std::vector<Variable>&) const override;
 
-	virtual const std::string& debugType() const;
+	const std::string& debugType() const override;
 
-	std::ostream& print(std::ostream&) const;
+	std::ostream& print(std::ostream&) const override;
 	bool operator==(const Family& rhs) const;
 
-	virtual void collateChanges(DefsDelta&) const;
+	void collateChanges(DefsDelta&) const override;
    void set_memento(const OrderMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool f) { NodeContainer::set_memento(m,aspects,f); }
    void set_memento(const ChildrenMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool f) { NodeContainer::set_memento(m,aspects,f); }
 
-   virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
+   void read_state(const std::string& line,const std::vector<std::string>& lineTokens) override;
 private:
-   virtual std::string write_state() const;
+   std::string write_state() const override;
 
    mutable FamGenVariables* fam_gen_variables_;
 

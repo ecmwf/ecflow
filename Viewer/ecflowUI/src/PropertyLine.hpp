@@ -38,7 +38,7 @@ public:
 	void setFamily(QString);
 
 protected:
-	QString textFromValue(int value) const;
+	QString textFromValue(int value) const override;
 
 	QList<int> vals_;
 
@@ -68,7 +68,7 @@ private:
 template<class T>
 class PropertyLineMaker : public PropertyLineFactory
 {
-	PropertyLine* make(VProperty* p,bool addLabel,QWidget* w) { return new T(p,addLabel,w); }
+	PropertyLine* make(VProperty* p,bool addLabel,QWidget* w) override { return new T(p,addLabel,w); }
 public:
 	explicit PropertyLineMaker(VProperty::GuiType t) : PropertyLineFactory(t) {}
 };
@@ -84,7 +84,7 @@ class PropertyLine: public QObject
 
 public:
 	PropertyLine(VProperty*,bool addLabel,QWidget* parent=nullptr);
-	virtual ~PropertyLine();
+	~PropertyLine() override;
 
     QLabel* label() {return label_;}
     QLabel* suffixLabel() {return suffixLabel_;}
@@ -149,18 +149,18 @@ class StringPropertyLine : public PropertyLine
 
 public:
 	StringPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
-	QWidget* item();
-	QWidget* button();
-	bool applyChange();
-    QVariant currentValue();
-    bool canExpand() const {return true;}
+	QWidget* item() override;
+	QWidget* button() override;
+	bool applyChange() override;
+    QVariant currentValue() override;
+    bool canExpand() const override {return true;}
 
 public Q_SLOTS:
 	void slotEdited(QString);
-	void slotReset(QVariant);
+	void slotReset(QVariant) override;
 
 protected:
-	void setEnabledEditable(bool);
+	void setEnabledEditable(bool) override;
 
 private:
 	QLineEdit* le_;
@@ -176,17 +176,17 @@ Q_OBJECT
 
 public:
 	ColourPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
-	QWidget* item();
-	QWidget* button();
-	bool applyChange();
-	QVariant currentValue();
+	QWidget* item() override;
+	QWidget* button() override;
+	bool applyChange() override;
+	QVariant currentValue() override;
 
 private Q_SLOTS:
 	void slotEdit(bool);
-	void slotReset(QVariant);
+	void slotReset(QVariant) override;
 
 protected:
-	void setEnabledEditable(bool);
+	void setEnabledEditable(bool) override;
 
 private:
 	QToolButton* cb_;
@@ -204,19 +204,19 @@ Q_OBJECT
 
 public:
 	FontPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
-	QWidget* item();
-	QWidget* button();
-	bool applyChange();
-	QVariant currentValue();
+	QWidget* item() override;
+	QWidget* button() override;
+	bool applyChange() override;
+	QVariant currentValue() override;
 
 private Q_SLOTS:
 	void slotEdit(bool);
-	void slotReset(QVariant);
+	void slotReset(QVariant) override;
 	void slotFamilyChanged(int);
 	void slotSizeChanged(int);
 
 protected:
-	void setEnabledEditable(bool);
+	void setEnabledEditable(bool) override;
 
 private:
 	QWidget* holderW_;
@@ -237,17 +237,17 @@ class IntPropertyLine : public PropertyLine
 
 public:
 	IntPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
-	QWidget* item();
-	QWidget* button();
-	bool applyChange();
-	QVariant currentValue();
+	QWidget* item() override;
+	QWidget* button() override;
+	bool applyChange() override;
+	QVariant currentValue() override;
 
 public Q_SLOTS:
 	void slotEdited(QString);
-	void slotReset(QVariant);
+	void slotReset(QVariant) override;
 
 protected:
-	void setEnabledEditable(bool);
+	void setEnabledEditable(bool) override;
 
 private:
 	QLineEdit* le_;
@@ -263,17 +263,17 @@ class BoolPropertyLine : public PropertyLine
 
 public:
 	BoolPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
-	QWidget* item();
-	QWidget* button();
-	bool applyChange();
-	QVariant currentValue();
+	QWidget* item() override;
+	QWidget* button() override;
+	bool applyChange() override;
+	QVariant currentValue() override;
 
 public Q_SLOTS:
 	void slotStateChanged(int);
-	void slotReset(QVariant);
+	void slotReset(QVariant) override;
 
 protected:
-	void setEnabledEditable(bool);
+	void setEnabledEditable(bool) override;
 
 private:
 	QCheckBox* cb_;
@@ -289,17 +289,17 @@ class ComboPropertyLine : public PropertyLine
 
 public:
 	ComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
-	QWidget* item();
-	QWidget* button();
-	bool applyChange();
-	QVariant currentValue();
+	QWidget* item() override;
+	QWidget* button() override;
+	bool applyChange() override;
+	QVariant currentValue() override;
 
 public Q_SLOTS:
 	void slotCurrentChanged(int);
-	void slotReset(QVariant);
+	void slotReset(QVariant) override;
 
 protected:
-	void setEnabledEditable(bool);
+	void setEnabledEditable(bool) override;
 
 protected:
 	QComboBox* cb_;
@@ -316,18 +316,18 @@ class ComboMultiPropertyLine : public PropertyLine
 
 public:
 	ComboMultiPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
-	QWidget* item();
-	QWidget* button();
-	bool applyChange();
-	QVariant currentValue();
-	bool canExpand() const {return true;}
+	QWidget* item() override;
+	QWidget* button() override;
+	bool applyChange() override;
+	QVariant currentValue() override;
+	bool canExpand() const override {return true;}
 
 public Q_SLOTS:
 	void slotCurrentChanged(int);
-	void slotReset(QVariant);
+	void slotReset(QVariant) override;
 
 protected:
-	void setEnabledEditable(bool);
+	void setEnabledEditable(bool) override;
 
 protected:
 	ComboMulti* cb_;
@@ -343,14 +343,14 @@ class SoundComboPropertyLine : public ComboPropertyLine
 
 public:
 	SoundComboPropertyLine(VProperty* vProp,bool addLabel,QWidget * parent=nullptr);
-	QWidget* item();
-	QWidget* button();
+	QWidget* item() override;
+	QWidget* button() override;
 
 public Q_SLOTS:
 	void slotPlay(bool);
 
 protected:
-	void setEnabledEditable(bool);
+	void setEnabledEditable(bool) override;
 
 private:
 	QToolButton* playTb_;

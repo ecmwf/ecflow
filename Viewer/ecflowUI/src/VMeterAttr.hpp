@@ -28,8 +28,8 @@ class VMeterAttrType : public VAttributeType
 {
 public:
     explicit VMeterAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
+    QString toolTip(QStringList d) const override;
+    QString definition(QStringList d) const override;
     void encode(const Meter&,QStringList&) const;
 
 private:
@@ -42,9 +42,9 @@ class VMeterAttr : public VAttribute
 public:
     VMeterAttr(VNode *parent,const Meter&,int index);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };

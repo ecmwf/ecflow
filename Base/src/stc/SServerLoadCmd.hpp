@@ -28,10 +28,10 @@ public:
 
    void init(const std::string& s) { log_file_path_ = s;}
    const std::string& log_file_path() const { return log_file_path_; }
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ServerToClientCmd*) const;
-   virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;
-   virtual void cleanup() { std::string().swap(log_file_path_);} /// run in the server, after command send to client
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ServerToClientCmd*) const override;
+   bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
+   void cleanup() override { std::string().swap(log_file_path_);} /// run in the server, after command send to client
 
 private:
    std::string log_file_path_;

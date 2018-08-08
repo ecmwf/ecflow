@@ -28,17 +28,17 @@ class TimeItemWidget
 public:
 	explicit TimeItemWidget(QWidget *parent=nullptr);
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents();
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override;
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
     QGraphicsView* view() { return graphicsView; }
 
 protected:
-   void updateState(const ChangeFlags&) {}
+   void updateState(const ChangeFlags&) override {}
 };
 
 #endif

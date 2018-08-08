@@ -18,8 +18,8 @@
 class GenericParser : public Parser {
 public:
    GenericParser(DefsStructureParser* p) : Parser(p) {}
-   virtual const char* keyword() const { return "generic"; }
-   virtual bool doParse( const std::string& line, std::vector<std::string >& lineTokens );
+   const char* keyword() const override { return "generic"; }
+   bool doParse( const std::string& line, std::vector<std::string >& lineTokens ) override;
 };
 
 #endif

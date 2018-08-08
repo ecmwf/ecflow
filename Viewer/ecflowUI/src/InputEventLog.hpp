@@ -23,7 +23,7 @@ class InputEventLog : public QObject
 {
     Q_OBJECT
 public:
-    ~InputEventLog();
+    ~InputEventLog() override;
 
     void start();
     void stop();
@@ -37,7 +37,7 @@ protected Q_SLOTS:
 protected:
     InputEventLog(QObject* parent=nullptr);
 
-    bool eventFilter(QObject *obj, QEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event) override;
     void logMousePress(QObject* obj,QMouseEvent *e);
     void logMouseRelease(QObject* obj,QMouseEvent *e);
     void logClose(QObject* obj,QCloseEvent *e);

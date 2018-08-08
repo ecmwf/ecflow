@@ -25,7 +25,7 @@ class SessionDialog : public QDialog, protected Ui::SessionDialog
 
 public:
     explicit SessionDialog(QWidget *parent = nullptr);
-    ~SessionDialog();
+    ~SessionDialog() override;
 
 public Q_SLOTS:
     void on_saveButton__clicked();

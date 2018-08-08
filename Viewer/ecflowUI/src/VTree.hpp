@@ -68,10 +68,10 @@ class VTreeSuiteNode : public VTreeNode
     friend class VTree;
 public:
     VTreeSuiteNode(VNode* vnode,VTreeNode* parent);
-    virtual int totalNumOfChildren() const;
+    int totalNumOfChildren() const override;
 
 protected:
-    void countChildren() const;
+    void countChildren() const override;
     mutable int num_;
 };
 
@@ -81,15 +81,15 @@ friend class VTreeServer;
 
 public:
      VTree(VTreeServer*);
-     ~VTree();
+     ~VTree() override;
 
      VTreeNode* find(const VNode*) const;
-     VTree* root() const;
-     VTreeServer* server() const {return server_;}
+     VTree* root() const override;
+     VTreeServer* server() const override {return server_;}
 
      VTreeNode *findAncestor(const VNode*);
-     bool isTopLevel() const {return false;}
-     bool isRoot() const {return true;}
+     bool isTopLevel() const override {return false;}
+     bool isRoot() const override {return true;}
      int totalNum() const {return totalNum_;}
      int totalNumOfTopLevel(VTreeNode*) const;
      int totalNumOfTopLevel(int i) const;

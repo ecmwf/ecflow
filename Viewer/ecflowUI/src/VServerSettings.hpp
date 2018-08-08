@@ -43,7 +43,7 @@ public:
 	void saveSettings();
 
 	//From VPropertyObserver
-	void notifyChange(VProperty*);
+	void notifyChange(VProperty*) override;
 
 	//Called from VConfigLoader
 	static void load(VProperty*);
@@ -52,7 +52,7 @@ public:
 
 protected:
 	explicit VServerSettings(ServerHandler* server);
-	~VServerSettings();
+	~VServerSettings() override;
 
 	VProperty* property(Param par) const;
 	void loadSettings();

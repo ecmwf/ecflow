@@ -20,11 +20,11 @@ Q_OBJECT
 
 public:
     explicit RichTextEdit(QWidget* parent = nullptr);
-    ~RichTextEdit();
+    ~RichTextEdit() override;
 
     void setFontProperty(VProperty* p);
     void updateFont();
-    void notifyChange(VProperty* p);
+    void notifyChange(VProperty* p) override;
 
 public Q_SLOTS:
      void slotZoomIn();

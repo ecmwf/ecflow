@@ -22,7 +22,7 @@ public:
 	 explicit EditProvider(InfoPresenter* owner) :
 		 InfoProvider(owner,VTask::OutputTask), preproc_(false) {}
 
-	 void visit(VInfoNode*);
+	 void visit(VInfoNode*) override;
 	 void submit(const std::vector<std::string>& txt,bool alias);
 
 	 void preproc(bool b) {preproc_=b;}

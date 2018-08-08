@@ -34,14 +34,14 @@ Q_OBJECT
 
 public:
     explicit TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent=nullptr);
-    ~TreeNodeViewDelegate();
+    ~TreeNodeViewDelegate() override;
 
     bool isSingleHeight(int h) const;
 
     //from baseclass
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const {}
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const;
+                   const QModelIndex& index) const override {}
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const override;
 
     //custom implementations
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -53,7 +53,7 @@ Q_SIGNALS:
     void sizeHintChangedGlobal();
 
 protected:
-    void updateSettings();
+    void updateSettings() override;
 
     int renderServer(QPainter *painter,const QModelIndex& index,
                         const QStyleOptionViewItem& option,QString text) const;

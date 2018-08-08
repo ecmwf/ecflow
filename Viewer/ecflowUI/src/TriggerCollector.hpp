@@ -49,10 +49,10 @@ public:
     TriggerListCollector(bool extended) :
         extended_(extended) {}
 
-    ~TriggerListCollector();
-    bool add(VItem*, VItem*,Mode);
-    bool scanParents() { return extended_; }
-    bool scanKids() { return extended_; }
+    ~TriggerListCollector() override;
+    bool add(VItem*, VItem*,Mode) override;
+    bool scanParents() override { return extended_; }
+    bool scanKids() override { return extended_; }
     void setDependency(bool);
     void clear();
     size_t size() const {return items_.size();}
@@ -70,7 +70,7 @@ public:
     TriggerChildCollector(VItem *n,VItem* child,TriggerCollector* collector) :
         node_(n), child_(child), collector_(collector) {}
 
-    bool add(VItem*, VItem*,Mode);
+    bool add(VItem*, VItem*,Mode) override;
 
 private:
   VItem* node_;
@@ -84,7 +84,7 @@ public:
     TriggerParentCollector(VItem* parent,TriggerCollector* collector) :
         parent_(parent), collector_(collector) {}
 
-    bool add(VItem*, VItem*,Mode);
+    bool add(VItem*, VItem*,Mode) override;
 
 private:
   VItem* parent_;
@@ -96,7 +96,7 @@ class TriggeredCollector : public TriggerListCollector
 public:
     TriggeredCollector(VNode* n) :
         TriggerListCollector(false), node_(n) {}
-    bool add(VItem*, VItem*,Mode);
+    bool add(VItem*, VItem*,Mode) override;
 
 private:
   VItem* node_;
@@ -157,10 +157,10 @@ public:
     TriggerTableCollector(bool extended) :
         extended_(extended) {}
 
-    ~TriggerTableCollector();
-    bool add(VItem*, VItem*,Mode);
-    bool scanParents() { return extended_; }
-    bool scanKids() { return extended_; }
+    ~TriggerTableCollector() override;
+    bool add(VItem*, VItem*,Mode) override;
+    bool scanParents() override { return extended_; }
+    bool scanKids() override { return extended_; }
     void setDependency(bool);
     void clear();
     size_t size() const {return items_.size();}

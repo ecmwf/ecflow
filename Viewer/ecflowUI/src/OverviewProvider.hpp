@@ -20,12 +20,12 @@ public:
 	explicit OverviewProvider(InfoPresenter* owner);
 
 	//From VInfoVisitor
-	void visit(VInfoServer*);
-	void visit(VInfoNode*);
-	void visit(VInfoAttribute*);
+	void visit(VInfoServer*) override;
+	void visit(VInfoNode*) override;
+	void visit(VInfoAttribute*) override;
 
 	//From VTaskObserver
-	void taskChanged(VTask_ptr);
+	void taskChanged(VTask_ptr) override;
 
 protected:
 	void serverInfo(VInfoServer*,std::stringstream& f);

@@ -32,7 +32,7 @@ class SyntaxHighlighter : public QObject
 public:
     SyntaxHighlighter(QObject *parent = nullptr);
     SyntaxHighlighter(TextPagerEdit *parent);
-    ~SyntaxHighlighter();
+    ~SyntaxHighlighter() override;
     void setTextEdit(TextPagerEdit *doc);
     TextPagerEdit *textEdit() const;
     TextPagerDocument *document() const;

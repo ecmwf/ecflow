@@ -52,12 +52,12 @@ public:
  	// then simulation can be speeded up, i.e by using hour increment
  	const boost::posix_time::time_duration& calendarIncrement() const { return ci_;}
 
-	virtual bool traverseObjectStructureViaVisitors() const { return true;}
-	virtual void visitDefs(Defs*);
-	virtual void visitSuite(Suite*);
-	virtual void visitFamily(Family*);
-	virtual void visitNodeContainer(NodeContainer*);
-	virtual void visitTask(Task*);
+	bool traverseObjectStructureViaVisitors() const override { return true;}
+	void visitDefs(Defs*) override;
+	void visitSuite(Suite*) override;
+	void visitFamily(Family*) override;
+	void visitNodeContainer(NodeContainer*) override;
+	void visitTask(Task*) override;
 
 private:
 	/// Commented out since, we need to find a way of truncating lon repeats

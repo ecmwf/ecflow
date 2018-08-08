@@ -33,16 +33,16 @@ Q_OBJECT
 
 public:
     VariablePropDialog(VariableModelDataHandler* data,int defineIndex,QString name,QString value,bool frozen,QWidget* parent=nullptr);
-    ~VariablePropDialog();
+    ~VariablePropDialog() override;
 
 	QString name() const;
 	QString value() const;
 
-    void notifyCleared(VariableModelDataHandler*);
-    void notifyUpdated(VariableModelDataHandler*);
+    void notifyCleared(VariableModelDataHandler*) override;
+    void notifyUpdated(VariableModelDataHandler*) override;
 
 public Q_SLOTS:
-	void accept();
+	void accept() override;
     void slotSuspendedChanged(bool s);
 
 protected Q_SLOTS:
@@ -75,16 +75,16 @@ Q_OBJECT
 public:
     VariableAddDialog(VariableModelDataHandler* data,QWidget* parent=nullptr);
     VariableAddDialog(VariableModelDataHandler* data,QString name,QString value,QWidget* parent=nullptr);
-    ~VariableAddDialog();
+    ~VariableAddDialog() override;
 
 	QString name() const;
 	QString value() const;
 
-    void notifyCleared(VariableModelDataHandler*);
-    void notifyUpdated(VariableModelDataHandler*) {}
+    void notifyCleared(VariableModelDataHandler*) override;
+    void notifyUpdated(VariableModelDataHandler*) override {}
 
 public Q_SLOTS:
-	void accept();
+	void accept() override;
     void slotSuspendedChanged(bool s);
 
 protected:
@@ -108,11 +108,11 @@ Q_OBJECT
 
 public:
 	explicit VariableItemWidget(QWidget *parent=nullptr);
-	~VariableItemWidget();
+	~VariableItemWidget() override;
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents();
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override;
 
 public Q_SLOTS:	
     void slotFilterTextChanged(QString text);
@@ -140,14 +140,14 @@ protected:
 	void duplicateItem(const QModelIndex& index);
 	void addItem(const QModelIndex& index);
 	void removeItem(const QModelIndex& index);
-    void updateState(const ChangeFlags&);
+    void updateState(const ChangeFlags&) override;
     void toClipboard(QString txt) const;
     void regainSelection();
     void saveExpandState();
     void restoreExpandState();
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
-	void defsChanged(const std::vector<ecf::Aspect::Type>&);
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
+	void defsChanged(const std::vector<ecf::Aspect::Type>&) override;
 
 	VariableModelDataHandler* data_;
 	VariableModel* model_;

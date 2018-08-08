@@ -21,8 +21,8 @@
 class InlimitParser : public Parser {
 public:
    explicit InlimitParser(DefsStructureParser* p) : Parser(p) {}
-	virtual const char* keyword() const { return "inlimit"; }
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) ;
+	const char* keyword() const override { return "inlimit"; }
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override ;
 };
 
 #endif /* INLIMITPARSER_HPP_ */

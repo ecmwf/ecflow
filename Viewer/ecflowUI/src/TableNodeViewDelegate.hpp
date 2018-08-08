@@ -29,17 +29,17 @@ class TableNodeViewDelegate : public NodeViewDelegate
  Q_OBJECT
 public:
     explicit TableNodeViewDelegate(QWidget *parent=nullptr);
-    ~TableNodeViewDelegate();
+    ~TableNodeViewDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
+                   const QModelIndex& index) const override;
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();
 
 protected:
-    void updateSettings();
+    void updateSettings() override;
 
     void renderNode(QPainter *painter,const QModelIndex& index,
                                         const QStyleOptionViewItem& option,QString text) const;

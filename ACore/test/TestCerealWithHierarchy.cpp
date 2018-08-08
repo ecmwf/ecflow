@@ -48,11 +48,11 @@ class Derived1 : public BaseCmd {
 public:
    Derived1() : x_(0) {}
    Derived1(int x) : BaseCmd(), x_(x) {}
-   virtual ~Derived1() = default;
+   ~Derived1() override = default;
 
    int get_x() const { return x_;}
 
-   virtual bool equals(BaseCmd* rhs ) const {
+   bool equals(BaseCmd* rhs ) const override {
       auto* the_rhs = dynamic_cast<Derived1*>(rhs);
       if (!the_rhs) return false;
       if (x_ !=  the_rhs->get_x()) return false;

@@ -25,20 +25,20 @@ Q_OBJECT
 
 public:
     TableNodeWidget(ServerFilter* servers,bool interactive,QWidget* parent=nullptr);
-	~TableNodeWidget();
+	~TableNodeWidget() override;
 
-    void populateDockTitleBar(DashboardDockTitleWidget* tw);
-    void rerender();
+    void populateDockTitleBar(DashboardDockTitleWidget* tw) override;
+    void rerender() override;
 
-    void writeSettings(VComboSettings*);
-    void readSettings(VComboSettings*);
+    void writeSettings(VComboSettings*) override;
+    void readSettings(VComboSettings*) override;
 
 protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
     void slotSelectionChangedInView(VInfo_ptr info);
 
 protected:
-    void detachedChanged() {}
+    void detachedChanged() override {}
 
 private:
     TableNodeSortModel *sortModel_;

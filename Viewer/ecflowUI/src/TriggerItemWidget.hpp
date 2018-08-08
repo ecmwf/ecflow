@@ -30,19 +30,19 @@ Q_OBJECT
 
 public:
 	explicit TriggerItemWidget(QWidget *parent=nullptr);
-    ~TriggerItemWidget();
+    ~TriggerItemWidget() override;
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents();
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override;
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
     bool dependency() const;
 
-    void writeSettings(VComboSettings* vs);
-    void readSettings(VComboSettings* vs);
+    void writeSettings(VComboSettings* vs) override;
+    void readSettings(VComboSettings* vs) override;
 
 protected Q_SLOTS:
     void on_dependTb__toggled(bool);
@@ -58,7 +58,7 @@ protected Q_SLOTS:
 
 protected:
     void load();
-    void updateState(const ChangeFlags&);
+    void updateState(const ChangeFlags&) override;
     TriggeredScanner* triggeredScanner() const {return scanner_;}
     void checkActionState();
     void clearTriggers();

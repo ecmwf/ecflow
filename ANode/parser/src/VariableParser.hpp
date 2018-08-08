@@ -39,8 +39,8 @@
 class VariableParser : public Parser {
 public:
    explicit VariableParser(DefsStructureParser* p, bool parsing_defs = false) : Parser(p), parsing_defs_(parsing_defs) {}
-	virtual const char* keyword() const { return "edit"; }
-	virtual bool doParse( const std::string& line, std::vector<std::string >& lineTokens );
+	const char* keyword() const override { return "edit"; }
+	bool doParse( const std::string& line, std::vector<std::string >& lineTokens ) override;
 private:
 	bool parsing_defs_;
 };

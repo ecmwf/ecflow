@@ -29,21 +29,21 @@ Q_OBJECT
 
 public:
 	explicit OutputItemWidget(QWidget *parent=nullptr);
-	~OutputItemWidget();
+	~OutputItemWidget() override;
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-	void clearContents();
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+	void clearContents() override;
 
 	//From VInfoPresenter
-	void infoReady(VReply*);
-	void infoFailed(VReply*);
-	void infoProgress(VReply*);
-    void infoProgressStart(const std::string& text,int max);
-    void infoProgress(const std::string& text,int value);
+	void infoReady(VReply*) override;
+	void infoFailed(VReply*) override;
+	void infoProgress(VReply*) override;
+    void infoProgressStart(const std::string& text,int max) override;
+    void infoProgress(const std::string& text,int value) override;
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&);
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override;
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected Q_SLOTS:
 	void slotOutputSelected(QModelIndex,QModelIndex);
@@ -62,7 +62,7 @@ protected:
     void updateDir(bool);
     void updateDir(const std::vector<VDir_ptr>&,bool);
 	void enableDir(bool);
-    void updateState(const FlagSet<ChangeFlag>&);
+    void updateState(const FlagSet<ChangeFlag>&) override;
 	void searchOnReload();
     void getCurrentFile(bool doReload);
 	void getLatestFile();

@@ -27,7 +27,7 @@ Q_OBJECT
 
 public:
     explicit PropertyEditor(QWidget *parent=nullptr);
-    ~PropertyEditor();
+    ~PropertyEditor() override;
 
     void edit(VProperty*,QPixmap pixmap);
     void edit(VProperty*,QString label);

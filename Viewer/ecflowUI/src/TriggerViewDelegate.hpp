@@ -28,14 +28,14 @@ class TriggerViewDelegate : public TreeNodeViewDelegate
 {
 public:
     explicit TriggerViewDelegate(QWidget *parent=nullptr);
-    ~TriggerViewDelegate();
+    ~TriggerViewDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
+                   const QModelIndex& index) const override;
 
 protected:
-    void updateSettings();
+    void updateSettings() override;
 
     QPen borderPen_;
 

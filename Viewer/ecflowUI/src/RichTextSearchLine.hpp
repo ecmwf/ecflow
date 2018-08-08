@@ -20,7 +20,7 @@ class RichTextSearchLine : public TextEditSearchLine
 {
 public:
     explicit RichTextSearchLine(QWidget *parent=nullptr);
-    ~RichTextSearchLine();
+    ~RichTextSearchLine() override;
     void setEditor(QTextBrowser*);
 
 private:

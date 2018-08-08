@@ -21,11 +21,11 @@ class TableNodeSortModel : public QSortFilterProxyModel
 {
 public:
     TableNodeSortModel(TableNodeModel*,QObject *parent=nullptr);
-    ~TableNodeSortModel();
+    ~TableNodeSortModel() override;
 
 	//From QSortFilterProxyModel:
 	//we set the source model in the constructor. So this function should not do anything.
-    void setSourceModel(QAbstractItemModel*) {}
+    void setSourceModel(QAbstractItemModel*) override {}
 
 	VInfo_ptr nodeInfo(const QModelIndex&);
 	QModelIndex infoToIndex(VInfo_ptr);
@@ -35,7 +35,7 @@ public:
 
 protected:
     bool lessThan(const QModelIndex &left,
-                                      const QModelIndex &right) const;
+                                      const QModelIndex &right) const override;
 
     TableNodeModel* nodeModel_;
     bool skipSort_;

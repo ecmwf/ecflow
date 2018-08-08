@@ -54,7 +54,7 @@ class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialo
 
 public:
 	explicit ChangeNotifyDialogWidget(QWidget* parent=nullptr);
-    ~ChangeNotifyDialogWidget() = default;
+    ~ChangeNotifyDialogWidget() override = default;
 
 	void init(ChangeNotify*);
     void updateSettings();
@@ -79,7 +79,7 @@ Q_OBJECT
 
 public:
 	explicit ChangeNotifyDialog(QWidget *parent=nullptr);
-	~ChangeNotifyDialog();
+	~ChangeNotifyDialog() override;
 
     void add(ChangeNotify*);
     void setCurrent(ChangeNotify*);
@@ -98,7 +98,7 @@ protected Q_SLOTS:
 protected:
     ChangeNotify* indexToNtf(int idx);
     int ntfToIndex(ChangeNotify* ntf);
-	void closeEvent(QCloseEvent*);
+	void closeEvent(QCloseEvent*) override;
     void clearCurrentData();
 	void writeSettings();
 	void readSettings();

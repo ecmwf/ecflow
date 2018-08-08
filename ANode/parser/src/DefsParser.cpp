@@ -71,9 +71,9 @@ class TextParser : public Parser {
 public:
    explicit TextParser(DefsStructureParser* p) : Parser(p) {}
 
-   virtual const char* keyword() const { return "text"; }
+   const char* keyword() const override { return "text"; }
 
-   virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
+   bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
 #ifdef DEBUG
       assert(*lineTokens.begin() == keyword());
 #endif
@@ -108,7 +108,7 @@ public:
       addParser( new GenericParser(p) );
    }
 
-   virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
+   bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
 
       const char* first_token = lineTokens[0].c_str();
       if (Str::local_strcmp(first_token,keyword()) == 0) {
@@ -126,7 +126,7 @@ public:
       return Parser::doParse(line,lineTokens);
    }
 
-   virtual const char* keyword() const { return "alias"; }
+   const char* keyword() const override { return "alias"; }
 
 private:
 
@@ -195,7 +195,7 @@ public:
       addParser( new GenericParser(p) );
    }
 
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
 
 	   const char* first_token = lineTokens[0].c_str();
 	   if (Str::local_strcmp(first_token,keyword()) == 0) {
@@ -210,7 +210,7 @@ public:
 		return Parser::doParse(line,lineTokens);
  	}
 
-	virtual const char* keyword() const { return "task"; }
+	const char* keyword() const override { return "task"; }
 
 private:
 
@@ -286,7 +286,7 @@ public:
       addParser( new GenericParser(p) );
    }
 
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
 
 	   const char* first_token = lineTokens[0].c_str();
 		if (Str::local_strcmp(first_token,keyword()) == 0) {
@@ -309,7 +309,7 @@ public:
 		return Parser::doParse(line,lineTokens);
  	}
 
-	virtual const char* keyword() const { return "family"; }
+	const char* keyword() const override { return "family"; }
 
 private:
 
@@ -401,7 +401,7 @@ public:
       addParser( new GenericParser(p) );
  	}
 
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens) {
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
 
       const char* first_token = lineTokens[0].c_str();
 		if (Str::local_strcmp(first_token,keyword()) == 0) {
@@ -428,7 +428,7 @@ public:
 		return Parser::doParse(line,lineTokens);
  	}
 
-	virtual const char* keyword() const { return "suite"; }
+	const char* keyword() const override { return "suite"; }
 
 private:
 

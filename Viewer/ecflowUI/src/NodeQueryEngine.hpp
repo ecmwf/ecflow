@@ -36,7 +36,7 @@ Q_OBJECT
 
 public:
 	explicit NodeQueryEngine(QObject* parent=nullptr);
-	~NodeQueryEngine();
+	~NodeQueryEngine() override;
 
     bool runQuery(NodeQuery* query,QStringList allServers);
 	void stopQuery();
@@ -53,7 +53,7 @@ Q_SIGNALS:
 	void found(QList<NodeQueryResultTmp_ptr>);
 
 protected:
-	void run();
+	void run() override;
 
 private:
 	void run(ServerHandler*,VNode*);

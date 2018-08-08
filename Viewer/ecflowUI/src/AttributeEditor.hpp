@@ -25,31 +25,31 @@ Q_OBJECT
 
 public:
     AttributeEditor(VInfo_ptr info,QString type,QWidget* parent);
-    virtual ~AttributeEditor();
+    ~AttributeEditor() override;
 
     //From VInfoObserver
-    void notifyDelete(VInfo*) {}
-    void notifyDataLost(VInfo*);
+    void notifyDelete(VInfo*) override {}
+    void notifyDataLost(VInfo*) override;
 
     //From NodeObserver
-    void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&);
-    void notifyEndNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&) {}
+    void notifyBeginNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&) override;
+    void notifyEndNodeChange(const VNode* vn, const std::vector<ecf::Aspect::Type>& a,const VNodeChange&) override {}
 
     //From ServerObserver
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a);
-    void notifyServerDelete(ServerHandler* server);
-    void notifyBeginServerClear(ServerHandler* server);
-    void notifyEndServerClear(ServerHandler* server) {}
-    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
-    void notifyEndServerScan(ServerHandler* server);
-    void notifyServerConnectState(ServerHandler* server);
-    void notifyServerSuiteFilterChanged(ServerHandler* server) {}
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override;
+    void notifyServerDelete(ServerHandler* server) override;
+    void notifyBeginServerClear(ServerHandler* server) override;
+    void notifyEndServerClear(ServerHandler* server) override {}
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override {}
+    void notifyEndServerScan(ServerHandler* server) override;
+    void notifyServerConnectState(ServerHandler* server) override;
+    void notifyServerSuiteFilterChanged(ServerHandler* server) override {}
     void notifyServerSyncFinished(ServerHandler* server) {}
 
     static void edit(VInfo_ptr info,QWidget *parent);
 
 public Q_SLOTS:
-    void accept();
+    void accept() override;
     void slotButton(QAbstractButton*);
 
 protected:

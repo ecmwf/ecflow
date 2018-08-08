@@ -48,7 +48,7 @@ class VProperty : public VPropertyObserver
 {
 public:
     explicit VProperty(const std::string& name);
-    ~VProperty();
+    ~VProperty() override;
 
     enum Type {StringType,IntType,BoolType,ColourType,FontType,SoundType};
 
@@ -98,7 +98,7 @@ public:
     void addObserver(VPropertyObserver*);
     void removeObserver(VPropertyObserver*);
 
-    void notifyChange(VProperty*);
+    void notifyChange(VProperty*) override;
 
     static bool isColour(const std::string&);
     static bool isFont(const std::string&);

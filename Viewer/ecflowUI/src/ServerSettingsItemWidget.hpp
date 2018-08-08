@@ -30,19 +30,19 @@ Q_OBJECT
 public:
 	explicit ServerSettingsItemWidget(QWidget *parent=nullptr);
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents();
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override;
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected Q_SLOTS:
 	void slotClicked(QAbstractButton* button);
 	void slotEditorChanged();
 
 protected:
-    void updateState(const ChangeFlags&);
+    void updateState(const ChangeFlags&) override;
 };
 
 #endif

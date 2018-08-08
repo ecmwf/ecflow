@@ -30,15 +30,15 @@ class TriggerEditor : public AttributeEditor
 Q_OBJECT
 public:
     TriggerEditor(VInfo_ptr,QWidget* parent=nullptr);
-    ~TriggerEditor();
+    ~TriggerEditor() override;
 
 protected Q_SLOTS:
     void slotValueChanged();
 
 protected:
-    void apply();
-    void resetValue();
-    bool isValueChanged();
+    void apply() override;
+    void resetValue() override;
+    bool isValueChanged() override;
     void readSettings();
     void writeSettings();
 

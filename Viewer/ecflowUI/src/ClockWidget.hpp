@@ -22,9 +22,9 @@ class ClockWidget : public QLabel, public VPropertyObserver
     Q_OBJECT
 public:
     ClockWidget(QWidget* parent=nullptr);
-    ~ClockWidget();
+    ~ClockWidget() override;
 
-    void notifyChange(VProperty*);
+    void notifyChange(VProperty*) override;
 
 protected Q_SLOTS:
     void slotTimeOut();

@@ -22,8 +22,8 @@ class RepeatParser : public Parser {
 public:
    explicit RepeatParser(DefsStructureParser* p) : Parser(p) {}
 
-	virtual const char* keyword() const { return "repeat"; }
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
+	const char* keyword() const override { return "repeat"; }
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 
 private:
 //	void extractDayMonthYear(const std::vector<std::string>& lineTokens,int& x, int& endDate);

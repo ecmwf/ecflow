@@ -24,22 +24,22 @@ class TextEditSearchLine : public AbstractSearchLine
 
 public:
 	 explicit TextEditSearchLine(QWidget *parent);
-	~TextEditSearchLine();
+	~TextEditSearchLine() override;
 	void setSearchInterface(AbstractTextEditSearchInterface*);
 	void searchOnReload(bool userClickedReload);
     bool hasInterface() const {return interface_ != nullptr;}
 
 public Q_SLOTS:
-	void slotFind(QString);
-	void slotFindNext();
-	void slotFindPrev();
+	void slotFind(QString) override;
+	void slotFindNext() override;
+	void slotFindPrev() override;
 	void slotFindNext(bool) {slotFindNext();}
 	void slotFindPrev(bool) {slotFindPrev();}
 	void matchModeChanged(int newIndex);
-	void on_actionCaseSensitive__toggled(bool);
-	void on_actionWholeWords__toggled(bool);
-	void on_actionHighlightAll__toggled(bool);
-	void slotClose();
+	void on_actionCaseSensitive__toggled(bool) override;
+	void on_actionWholeWords__toggled(bool) override;
+	void on_actionHighlightAll__toggled(bool) override;
+	void slotClose() override;
 	void slotHighlight();
 
 protected:

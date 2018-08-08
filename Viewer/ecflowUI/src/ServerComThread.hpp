@@ -39,17 +39,17 @@ class ServerComThread : public QThread, public AbstractObserver
 
 public:
 	ServerComThread(ServerHandler *server, ClientInvoker *ci);
-	~ServerComThread();
+	~ServerComThread() override;
 
 	void task(VTask_ptr);
 
 	//From AbstractObserver
-    virtual void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) {}
-    virtual void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) {}
-	void update(const Node*, const std::vector<ecf::Aspect::Type>&);
-	void update(const Defs*, const std::vector<ecf::Aspect::Type>&);
-	void update_delete(const Node*);
-	void update_delete(const Defs*);
+    void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) override {}
+    void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) override {}
+	void update(const Node*, const std::vector<ecf::Aspect::Type>&) override;
+	void update(const Defs*, const std::vector<ecf::Aspect::Type>&) override;
+	void update_delete(const Node*) override;
+	void update_delete(const Defs*) override;
 
 Q_SIGNALS:
 	void nodeChanged(const Node*, std::vector<ecf::Aspect::Type>);
@@ -59,7 +59,7 @@ Q_SIGNALS:
 	void suiteListChanged(const std::vector<std::string>&,const std::vector<std::string>&);
 
 protected:
-	void run();
+	void run() override;
 	void reset();
 	void sync_local();
 

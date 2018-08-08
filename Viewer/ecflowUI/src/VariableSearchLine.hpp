@@ -22,13 +22,13 @@ class  VariableSearchLine : public AbstractSearchLine
 
 public:
      explicit VariableSearchLine(QWidget *parent);
-    ~VariableSearchLine();
+    ~VariableSearchLine() override;
     void setView(QTreeView* view);
 
 public Q_SLOTS:
-    void slotFind(QString);
-    void slotFindNext();
-    void slotFindPrev();
+    void slotFind(QString) override;
+    void slotFindNext() override;
+    void slotFindPrev() override;
     void slotFindNext(bool) { slotFindNext();}
     void slotFindPrev(bool) {slotFindPrev();}
     void slotSortHappened(int,Qt::SortOrder);

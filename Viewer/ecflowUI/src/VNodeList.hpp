@@ -48,7 +48,7 @@ class VNodeList : public QObject, public ServerObserver, public NodeObserver
 
 public:
  	explicit VNodeList(QObject* parent=nullptr);
- 	~VNodeList();
+ 	~VNodeList() override;
 
  	int size() const {return data_.size();}
  	VNodeListItem* itemAt(int i);
@@ -59,16 +59,16 @@ public:
  	void setMaxNum(int);
 
     //From ServerObserver
-    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) {}
- 	void notifyServerDelete(ServerHandler* server);
-    void notifyBeginServerClear(ServerHandler* server);
- 	void notifyEndServerClear(ServerHandler* server);
- 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&);
-    void notifyEndServerScan(ServerHandler* server);
+    void notifyDefsChanged(ServerHandler* server, const std::vector<ecf::Aspect::Type>& a) override {}
+ 	void notifyServerDelete(ServerHandler* server) override;
+    void notifyBeginServerClear(ServerHandler* server) override;
+ 	void notifyEndServerClear(ServerHandler* server) override;
+ 	void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override;
+    void notifyEndServerScan(ServerHandler* server) override;
 
  	//From NodeObserver
-    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
- 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
+    void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
+ 	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
 
 Q_SIGNALS:
      void beginAppendRow();

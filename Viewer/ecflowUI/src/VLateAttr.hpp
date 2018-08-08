@@ -20,8 +20,8 @@ class VLateAttrType : public VAttributeType
 {
 public:
     explicit VLateAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
+    QString toolTip(QStringList d) const override;
+    QString definition(QStringList d) const override;
     void encode(ecf::LateAttr* late,QStringList& data) const;
 
 private:
@@ -33,8 +33,8 @@ class VLateAttr : public VAttribute
 public:
     VLateAttr(VNode *parent,const std::string&);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };

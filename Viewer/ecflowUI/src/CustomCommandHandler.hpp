@@ -79,13 +79,13 @@ class CustomSavedCommandHandler : public CustomCommandHandler
 {
 public:
     CustomSavedCommandHandler() = default;;
-    CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings);
+    CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings) override;
 
     static CustomSavedCommandHandler* instance();
 
 protected:
     static CustomSavedCommandHandler* instance_;
-    std::string settingsFile();
+    std::string settingsFile() override;
 };
 
 
@@ -98,12 +98,12 @@ class CustomCommandHistoryHandler : public CustomCommandHandler
 {
 public:
     CustomCommandHistoryHandler();
-    CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings);
+    CustomCommand* add(const std::string& name, const std::string& command, bool context, bool saveSettings) override;
     static CustomCommandHistoryHandler* instance();
 
 protected:
     static CustomCommandHistoryHandler* instance_;
-    std::string settingsFile();
+    std::string settingsFile() override;
     int maxCommands_;
 };
 

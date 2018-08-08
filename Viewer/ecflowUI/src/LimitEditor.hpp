@@ -33,7 +33,7 @@ class LimitEditor : public AttributeEditor
 Q_OBJECT
 public:
     LimitEditor(VInfo_ptr,QWidget* parent=nullptr);
-    ~LimitEditor();
+    ~LimitEditor() override;
 
 protected Q_SLOTS:
     void slotMaxChanged(int);
@@ -43,12 +43,12 @@ protected Q_SLOTS:
     void slotDoubleClicked(const QModelIndex &index);
 
 protected:
-    void resetValue();
-    void apply();
-    bool isValueChanged();
+    void resetValue() override;
+    void apply() override;
+    bool isValueChanged() override;
     void buildList(VAttribute *a);
     void remove(bool all);
-    void nodeChanged(const std::vector<ecf::Aspect::Type>& a);
+    void nodeChanged(const std::vector<ecf::Aspect::Type>& a) override;
     void setModelData(QStringList lst);
     void lookup(const QModelIndex &index);
     void readSettings();

@@ -22,7 +22,7 @@ class InfoProvider : public VTaskObserver, public VInfoVisitor
 {
 public:
 	InfoProvider(InfoPresenter* owner,VTask::Type);
-	virtual ~InfoProvider();
+	~InfoProvider() override;
 
 	void info(VInfo_ptr);
 	void command(VTask::Type);
@@ -34,12 +34,12 @@ public:
 	bool inAutoUpdate() const {return inAutoUpdate_;}
 
 	//From VInfoVisitor
-	void visit(VInfoServer*);
-	void visit(VInfoNode*);
-    void visit(VInfoAttribute*) {}
+	void visit(VInfoServer*) override;
+	void visit(VInfoNode*) override;
+    void visit(VInfoAttribute*) override {}
 
 	//From VTaskObserver
-	void taskChanged(VTask_ptr);
+	void taskChanged(VTask_ptr) override;
 
 protected:
     virtual void handleFileNotDefined(VReply *reply);
@@ -64,7 +64,7 @@ class JobProvider : public InfoProvider
 public:
 	 explicit JobProvider(InfoPresenter* owner);
 protected:
-	 bool handleFileMissing(const std::string& fileName,VReply *reply);
+	 bool handleFileMissing(const std::string& fileName,VReply *reply) override;
 };
 
 class ManualProvider : public InfoProvider

@@ -35,7 +35,7 @@ Q_OBJECT
 
 public:
     ServerComQueue(ServerHandler *server,ClientInvoker* client);
-	~ServerComQueue();
+	~ServerComQueue() override;
 
 	enum State {NoState,RunningState,SuspendedState,ResetState,DisabledState};
 	State state() const {return state_;}

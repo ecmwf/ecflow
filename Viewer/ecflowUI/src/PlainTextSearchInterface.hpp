@@ -22,15 +22,15 @@ public:
 	void setEditor(QPlainTextEdit* e) {editor_=e;}
 
 	bool findString (QString str, bool highlightAll, QTextDocument::FindFlags findFlags,
-					 QTextCursor::MoveOperation move, int iteration,StringMatchMode::Mode matchMode);
+					 QTextCursor::MoveOperation move, int iteration,StringMatchMode::Mode matchMode) override;
 
-	void automaticSearchForKeywords(bool);
-	void refreshSearch();
-    void clearHighlights();
-    void disableHighlights();
-    void enableHighlights() {}
-	bool highlightsNeedSearch() {return true;}
-	void gotoLastLine();
+	void automaticSearchForKeywords(bool) override;
+	void refreshSearch() override;
+    void clearHighlights() override;
+    void disableHighlights() override;
+    void enableHighlights() override {}
+	bool highlightsNeedSearch() override {return true;}
+	void gotoLastLine() override;
 
 protected:
 

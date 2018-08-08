@@ -23,19 +23,19 @@ class VTaskNode : public VNode
 
 public:
 	explicit VTaskNode(VNode* parent,node_ptr);
-	~VTaskNode();
+	~VTaskNode() override;
 
 	bool isEmpty() const { return true;}
     //bool isNode() const {return true;}
-    bool isTopLevel() const {return false;}
+    bool isTopLevel() const override {return false;}
     //bool isServer() const {return false;}
-    VTaskNode* isTask() const {return const_cast<VTaskNode*>(this);}
-	void internalState(VNodeInternalState&);
-    const std::string& typeName() const;
+    VTaskNode* isTask() const override {return const_cast<VTaskNode*>(this);}
+	void internalState(VNodeInternalState&) override;
+    const std::string& typeName() const override;
 
 protected:
-	void check(VServerSettings* conf,const VNodeInternalState&);
-	void check(VServerSettings* conf,bool);
+	void check(VServerSettings* conf,const VNodeInternalState&) override;
+	void check(VServerSettings* conf,bool) override;
 
 private:
 	void updatePrev(int,bool,bool,bool);

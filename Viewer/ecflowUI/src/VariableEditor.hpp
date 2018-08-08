@@ -30,15 +30,15 @@ class VariableEditor : public AttributeEditor
 Q_OBJECT
 public:
     VariableEditor(VInfo_ptr,QWidget* parent=nullptr);
-    ~VariableEditor();
+    ~VariableEditor() override;
 
 protected Q_SLOTS:
     void slotValueChanged();
 
 protected:
-    void apply();
-    void resetValue();
-    bool isValueChanged();
+    void apply() override;
+    void resetValue() override;
+    bool isValueChanged() override;
     void readSettings();
     void writeSettings();
 

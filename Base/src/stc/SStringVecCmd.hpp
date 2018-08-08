@@ -26,10 +26,10 @@ public:
    void init(const std::vector<std::string>& s) { vec_ = s;}
    const std::vector<std::string>& get_string_vec() const { return vec_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ServerToClientCmd*) const;
-   virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;
-   virtual void cleanup() { std::vector<std::string>().swap(vec_);} /// run in the server, after command send to client
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ServerToClientCmd*) const override;
+   bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
+   void cleanup() override { std::vector<std::string>().swap(vec_);} /// run in the server, after command send to client
 
 private:
    std::vector<std::string> vec_;

@@ -26,7 +26,7 @@ class ServerListSyncWidget : public QWidget, protected Ui::ServerListSyncWidget
 
 public:
     ServerListSyncWidget(QWidget *parent = nullptr);
-    ~ServerListSyncWidget();
+    ~ServerListSyncWidget() override;
 
 protected Q_SLOTS:
     void slotTypeChanged(QListWidgetItem* item,QListWidgetItem*);

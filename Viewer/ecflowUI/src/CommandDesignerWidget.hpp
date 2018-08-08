@@ -28,7 +28,7 @@ class CommandDesignerWidget : public QWidget, private Ui::commandDesignerWidget
 
 public:
 	explicit CommandDesignerWidget(QWidget *parent = nullptr);
-	~CommandDesignerWidget();
+	~CommandDesignerWidget() override;
 
 	MenuItem &menuItem();
 	void setNodes(std::vector<VInfo_ptr> &nodes);

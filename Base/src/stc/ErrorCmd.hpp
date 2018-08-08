@@ -22,13 +22,13 @@ public:
 	ErrorCmd() : ServerToClientCmd() {}
 
 	void init( const std::string& errorMsg);
-	virtual std::ostream& print(std::ostream& os) const;
-	virtual bool equals(ServerToClientCmd*) const;
-  	virtual bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const;
+	std::ostream& print(std::ostream& os) const override;
+	bool equals(ServerToClientCmd*) const override;
+  	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
 
- 	virtual std::string error() const { return error_msg_;}   /// Used by test
-	virtual bool ok() const { return false; }                 /// Used by group command
-   virtual void cleanup() { std::string().swap(error_msg_);} /// run in the server, after command send to client
+ 	std::string error() const override { return error_msg_;}   /// Used by test
+	bool ok() const override { return false; }                 /// Used by group command
+   void cleanup() override { std::string().swap(error_msg_);} /// run in the server, after command send to client
 
 private:
  	std::string error_msg_;

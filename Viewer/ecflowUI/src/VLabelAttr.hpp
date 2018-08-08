@@ -28,8 +28,8 @@ class VLabelAttrType : public VAttributeType
 {
 public:
     explicit VLabelAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
+    QString toolTip(QStringList d) const override;
+    QString definition(QStringList d) const override;
     void encode(const Label& label,QStringList& data,bool firstLine) const;
 
 private:
@@ -41,10 +41,10 @@ class VLabelAttr : public VAttribute
 public:
     VLabelAttr(VNode *parent,const Label&,int index);
 
-    int lineNum() const;
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    int lineNum() const override;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };

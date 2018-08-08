@@ -33,25 +33,25 @@ class StandardView : public AbstractNodeView
 {
 public:
     explicit StandardView(TreeNodeModel* model,QWidget *parent=nullptr);
-    ~StandardView();
+    ~StandardView() override;
 
-    QRect visualRect(const QModelIndex &index) const;
+    QRect visualRect(const QModelIndex &index) const override;
 
 protected:
-    void paint(QPainter *painter,const QRegion& region);
+    void paint(QPainter *painter,const QRegion& region) override;
     void drawRow(QPainter* painter,int start,int xOffset,int &yp,std::vector<int>&);
 
-    void layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized,bool preAllocated);
+    void layout(int parentId, bool recursiveExpanding,bool afterIsUninitialized,bool preAllocated) override;
 
-    int itemRow(int item) const;
+    int itemRow(int item) const override;
     int coordinateForItem(int item) const;
-    int itemAtCoordinate(const QPoint& coordinate) const;
-    bool isPointInExpandIndicator(int,QPoint) const;
+    int itemAtCoordinate(const QPoint& coordinate) const override;
+    bool isPointInExpandIndicator(int,QPoint) const override;
 
-    int  firstVisibleItem(int &offset) const;
-    void updateRowCount();
-    void updateScrollBars();
-    void updateViewport(const QRect rect);
+    int  firstVisibleItem(int &offset) const override;
+    void updateRowCount() override;
+    void updateScrollBars() override;
+    void updateViewport(const QRect rect) override;
 
     int expandIndicatorBoxWidth_;
     int expandIndicatorWidth_;

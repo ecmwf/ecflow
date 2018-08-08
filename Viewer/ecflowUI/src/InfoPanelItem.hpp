@@ -38,7 +38,7 @@ public:
                       frozen_(false), detached_(false), unselectedFlags_(KeepContents),                     
                       useAncestors_(false),handleAnyChange_(false),
                       keepServerDataOnLoad_(false) {}
-	virtual ~InfoPanelItem();
+	~InfoPanelItem() override;
 
     enum ChangeFlag {ActiveChanged=1,SelectedChanged=2,SuspendedChanged=4,FrozenChanged=8,DetachedChanged=16};
     typedef FlagSet<ChangeFlag> ChangeFlags;
@@ -63,18 +63,18 @@ public:
     bool keepServerDataOnLoad() const {return keepServerDataOnLoad_;}
 
 	//From VTaskObserver
-    void taskChanged(VTask_ptr) {}
+    void taskChanged(VTask_ptr) override {}
 
 	//From VInfoPresenter
-    void infoReady(VReply*) {}
-    void infoFailed(VReply*) {}
-    void infoProgress(VReply*) {}
+    void infoReady(VReply*) override {}
+    void infoFailed(VReply*) override {}
+    void infoProgress(VReply*) override {}
     void infoProgressStart(int min,int max,const std::string& text) {}
     void infoProgress(int value,const std::string& text) {}
 
 	//From NodeObserver
-	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
-	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) {}
+	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
+	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override {}
 
     virtual void writeSettings(VComboSettings* vs) {}
     virtual void readSettings(VComboSettings* vs) {}
@@ -132,7 +132,7 @@ private:
 template<class T>
 class InfoPanelItemMaker : public InfoPanelItemFactory
 {
-    InfoPanelItem* make() { return new T(); }
+    InfoPanelItem* make() override { return new T(); }
 public:
 	explicit InfoPanelItemMaker(const std::string& name) : InfoPanelItemFactory(name) {}
 };

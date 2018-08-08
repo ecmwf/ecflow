@@ -29,11 +29,11 @@ public:
 
    void init(AbstractServer* as, node_ptr node);
 
-   virtual bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const;
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ServerToClientCmd*) const;
-   virtual bool hasNode() const { return true; }                /// used by group command
-   virtual void cleanup() { std::string().swap(the_node_str_);} /// run in the server, after command send to client
+   bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ServerToClientCmd*) const override;
+   bool hasNode() const override { return true; }                /// used by group command
+   void cleanup() override { std::string().swap(the_node_str_);} /// run in the server, after command send to client
 
 private:
    node_ptr get_node_ptr(std::string& error_msg) const;

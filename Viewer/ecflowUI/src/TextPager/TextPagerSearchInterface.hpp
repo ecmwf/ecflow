@@ -23,15 +23,15 @@ public:
 	void setEditor(TextPagerEdit* e) {editor_=e;}
 
 	bool findString (QString str, bool highlightAll, QTextDocument::FindFlags findFlags,
-					 QTextCursor::MoveOperation move, int iteration,StringMatchMode::Mode matchMode);
+					 QTextCursor::MoveOperation move, int iteration,StringMatchMode::Mode matchMode) override;
 
-	void automaticSearchForKeywords(bool);
-	void refreshSearch();
-    void clearHighlights();
-    void disableHighlights();
-	void enableHighlights();
-	bool highlightsNeedSearch() {return false;}
-	void gotoLastLine();
+	void automaticSearchForKeywords(bool) override;
+	void refreshSearch() override;
+    void clearHighlights() override;
+    void disableHighlights() override;
+	void enableHighlights() override;
+	bool highlightsNeedSearch() override {return false;}
+	void gotoLastLine() override;
 
 protected:
 	TextPagerCursor::MoveOperation translateCursorMoveOp(QTextCursor::MoveOperation move);

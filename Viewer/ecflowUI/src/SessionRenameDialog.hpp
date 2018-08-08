@@ -25,7 +25,7 @@ class SessionRenameDialog : public QDialog, protected Ui::SessionRenameDialog
 
 public:
     explicit SessionRenameDialog(QWidget *parent = nullptr);
-    ~SessionRenameDialog();
+    ~SessionRenameDialog() override;
 
 	std::string newName() {return newName_;};
 

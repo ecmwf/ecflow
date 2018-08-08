@@ -56,7 +56,7 @@ class MainWindow : public QMainWindow, private Ui::MainWindow
 
 public:
     MainWindow(QStringList,QWidget *parent=nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
     
     ServerHandler* selectedServer() const;
 
@@ -104,7 +104,7 @@ protected Q_SLOTS:
 
 private:
     void init(MainWindow*);
-    void closeEvent(QCloseEvent*);
+    void closeEvent(QCloseEvent*) override;
     void addInfoPanelActions(QToolBar *toolbar);
     void reloadContents();
     void rerenderContents();

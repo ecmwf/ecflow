@@ -32,11 +32,11 @@ Q_OBJECT
 
 public:
     explicit NodeQuerySaveDialog(QWidget *parent = nullptr);
-    ~NodeQuerySaveDialog() = default;
+    ~NodeQuerySaveDialog() override = default;
     QString name() const;
 
 public Q_SLOTS:
-	void accept();
+	void accept() override;
 };
 
 class NodeQueryEditor : public QWidget, protected Ui::NodeQueryEditor, public ServerFilterObserver
@@ -45,7 +45,7 @@ class NodeQueryEditor : public QWidget, protected Ui::NodeQueryEditor, public Se
 
 public:
     explicit NodeQueryEditor(QWidget *parent = nullptr);
-    ~NodeQueryEditor();
+    ~NodeQueryEditor() override;
 
     void setServerFilter(ServerFilter*);
     void setRootNode(VInfo_ptr);
@@ -60,10 +60,10 @@ public:
     QStringList allServers() const;
     void setFilterMode(bool);
 
-    void notifyServerFilterAdded(ServerItem*);
-    void notifyServerFilterRemoved(ServerItem*);
-    void notifyServerFilterChanged(ServerItem*);
-    void notifyServerFilterDelete();
+    void notifyServerFilterAdded(ServerItem*) override;
+    void notifyServerFilterRemoved(ServerItem*) override;
+    void notifyServerFilterChanged(ServerItem*) override;
+    void notifyServerFilterDelete() override;
 
 public Q_SLOTS:
     void slotClear();

@@ -42,9 +42,9 @@ public:
    ServerReply::News_t news() const { return news_;} // used by equals only
    bool get_news() const { return ( news_ != ServerReply::NO_NEWS); }
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ServerToClientCmd*) const;
-   virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ServerToClientCmd*) const override;
+   bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
 
 private:
    ServerReply::News_t news_;

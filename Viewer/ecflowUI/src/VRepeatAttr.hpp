@@ -25,8 +25,8 @@ class VRepeatAttrType : public VAttributeType
 {
 public:
     explicit VRepeatAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
+    QString toolTip(QStringList d) const override;
+    QString definition(QStringList d) const override;
     void encode(const Repeat&,QStringList&,const std::string&,QString) const;
 
 private:
@@ -44,9 +44,9 @@ public:
     int step() const;
     virtual std::string value(int index) const=0;
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 
@@ -58,10 +58,10 @@ class VRepeatDateAttr : public VRepeatAttr
 {
 public:
     VRepeatDateAttr(VNode* n) : VRepeatAttr(n) {}
-    int endIndex() const;
-    int currentIndex() const;
-    std::string value(int index) const;
-    const std::string& subType() const {return subType_;}
+    int endIndex() const override;
+    int currentIndex() const override;
+    std::string value(int index) const override;
+    const std::string& subType() const override {return subType_;}
 
 protected:
     static std::string subType_;
@@ -71,10 +71,10 @@ class VRepeatDayAttr : public VRepeatAttr
 {
 public:
     VRepeatDayAttr(VNode* n) : VRepeatAttr(n) {}
-    int endIndex() const {return 0;}
-    int currentIndex() const {return 0;}
-    std::string value(int index) const;
-    const std::string& subType() const {return subType_;}
+    int endIndex() const override {return 0;}
+    int currentIndex() const override {return 0;}
+    std::string value(int index) const override;
+    const std::string& subType() const override {return subType_;}
 
 protected:
     static std::string subType_;
@@ -84,10 +84,10 @@ class VRepeatIntAttr : public VRepeatAttr
 {
 public:
     VRepeatIntAttr(VNode* n) : VRepeatAttr(n) {}
-    int endIndex() const;
-    int currentIndex() const;
-    std::string value(int index) const;
-    const std::string& subType() const {return subType_;}
+    int endIndex() const override;
+    int currentIndex() const override;
+    std::string value(int index) const override;
+    const std::string& subType() const override {return subType_;}
 
 protected:
     static std::string subType_;
@@ -97,11 +97,11 @@ class VRepeatEnumAttr : public VRepeatAttr
 {
 public:
     VRepeatEnumAttr(VNode* n) : VRepeatAttr(n) {}
-    int endIndex() const;
-    int currentIndex() const;
-    std::string value(int index) const;
-    const std::string& subType() const {return subType_;}
-    QString allValues() const;
+    int endIndex() const override;
+    int currentIndex() const override;
+    std::string value(int index) const override;
+    const std::string& subType() const override {return subType_;}
+    QString allValues() const override;
 
 protected:
     static std::string subType_;
@@ -111,11 +111,11 @@ class VRepeatStringAttr : public VRepeatAttr
 {
 public:
     VRepeatStringAttr(VNode* n) : VRepeatAttr(n) {}
-    int endIndex() const;
-    int currentIndex() const;
-    std::string value(int index) const;
-    const std::string& subType() const {return subType_;}
-    QString allValues() const;
+    int endIndex() const override;
+    int currentIndex() const override;
+    std::string value(int index) const override;
+    const std::string& subType() const override {return subType_;}
+    QString allValues() const override;
 
 protected:
     static std::string subType_;

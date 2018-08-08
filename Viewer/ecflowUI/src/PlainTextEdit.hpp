@@ -23,7 +23,7 @@ Q_OBJECT
 
 public:
     explicit PlainTextEdit(QWidget* parent = nullptr);
-	~PlainTextEdit();
+	~PlainTextEdit() override;
 
     void lineNumberAreaPaintEvent(QPaintEvent *event);
     int  lineNumberAreaWidth();
@@ -39,7 +39,7 @@ public:
 
     void setFontProperty(VProperty* p);
     void updateFont();
-    void notifyChange(VProperty* p);
+    void notifyChange(VProperty* p) override;
     bool isHyperlinkEnabled() {return hyperlinkEnabled_;}
     bool setHyperlinkEnabled(bool h);
 
@@ -60,13 +60,13 @@ Q_SIGNALS:
     void hyperlinkActivated(QString link);
 
 protected:
-    void resizeEvent(QResizeEvent *event);
-    void focusInEvent(QFocusEvent *event);
-    void focusOutEvent(QFocusEvent *event);
-    void wheelEvent(QWheelEvent *event);
-    void mousePressEvent(QMouseEvent *e);
-    void mouseReleaseEvent(QMouseEvent *e);
-    void mouseMoveEvent(QMouseEvent *e);
+    void resizeEvent(QResizeEvent *event) override;
+    void focusInEvent(QFocusEvent *event) override;
+    void focusOutEvent(QFocusEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
 
 private:
     void fontSizeChangedByZoom();
@@ -93,10 +93,10 @@ class LineNumberArea : public QWidget
 {
 public:
     explicit LineNumberArea(PlainTextEdit *editor) : QWidget(editor) {textEditor = editor;}
-    QSize sizeHint() const {return {textEditor->lineNumberAreaWidth(), 0};}
+    QSize sizeHint() const override {return {textEditor->lineNumberAreaWidth(), 0};}
 
 protected:
-    void paintEvent(QPaintEvent *event) { textEditor->lineNumberAreaPaintEvent(event);}
+    void paintEvent(QPaintEvent *event) override { textEditor->lineNumberAreaPaintEvent(event);}
 
 private:
     PlainTextEdit *textEditor;

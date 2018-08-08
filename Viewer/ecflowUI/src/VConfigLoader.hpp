@@ -32,7 +32,7 @@ private:
 
 template<class T>
 class SimpleLoader : public VConfigLoader {
-    void load(VProperty* prop) { T::load(prop); }
+    void load(VProperty* prop) override { T::load(prop); }
 public:
     explicit SimpleLoader(const std::string& name) : VConfigLoader(name) {}
 };

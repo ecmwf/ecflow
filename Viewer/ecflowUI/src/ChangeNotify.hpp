@@ -49,7 +49,7 @@ public:
     static void showDialog(ChangeNotify* notifier=nullptr);
 
 	//Form VPropertyObserver
-	void notifyChange(VProperty*);
+	void notifyChange(VProperty*) override;
 
 	static void add(const std::string&,VNode*,bool,bool);
 	static void remove(const std::string&,VNode*);
@@ -84,8 +84,8 @@ class AbortedNotify : public ChangeNotify
 {
 public:
 	explicit AbortedNotify(const std::string& id) : ChangeNotify(id) {}
-    QColor fillColour() const;
-    QColor textColour() const;
+    QColor fillColour() const override;
+    QColor textColour() const override;
 };
 
 #endif

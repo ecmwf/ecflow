@@ -19,13 +19,13 @@ Q_OBJECT
 
 public:
 	OneLineTextEdit(QWidget* parent=nullptr);
-	QSize sizeHint() const;
+	QSize sizeHint() const override;
 
 Q_SIGNALS:
 	void clicked();
 
 protected:
-	void mousePressEvent(QMouseEvent *e);
+	void mousePressEvent(QMouseEvent *e) override;
 };
 
 

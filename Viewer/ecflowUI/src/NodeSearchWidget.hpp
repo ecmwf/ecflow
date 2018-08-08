@@ -31,7 +31,7 @@ class NodeSearchWidget : public QWidget, protected Ui::NodeSearchWidget
 
 public:
     explicit NodeSearchWidget(QWidget *parent = nullptr);
-    ~NodeSearchWidget();
+    ~NodeSearchWidget() override;
 
     void setServerFilter(ServerFilter*);
     void setRootNode(VInfo_ptr);

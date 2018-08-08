@@ -27,9 +27,9 @@ public:
     void getDir(const std::string& name);
 
 protected Q_SLOTS:
-    void slotError(QAbstractSocket::SocketError err);
-    void slotRead();
-    void slotConnected();
+    void slotError(QAbstractSocket::SocketError err) override;
+    void slotRead() override;
+    void slotConnected() override;
     void slotCheckTimeout();
 
 private:

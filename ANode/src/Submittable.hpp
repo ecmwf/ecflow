@@ -47,7 +47,7 @@ protected:
    bool operator==(const Submittable& rhs) const;
 
 public:
-   virtual ~Submittable();
+   ~Submittable() override;
 
    /// Initialise the task. will set the state to NState::ACTIVE
    void init(const std::string& processId);
@@ -58,25 +58,25 @@ public:
    void complete();
 
    /// The late attribute, ONLY applies to the Submittable and not NodeContainer
-   virtual void calendarChanged(const ecf::Calendar&,
+   void calendarChanged(const ecf::Calendar&,
          std::vector<node_ptr>& auto_cancelled_nodes,
          std::vector<node_ptr>& auto_archive_nodes,
-         const ecf::LateAttr* inherited_late);
+         const ecf::LateAttr* inherited_late) override;
 
    /// Overridden to reset the try number
    /// The tasks job can be invoked multiple times. For each invocation we want to preserve
    /// the output. The try number is used in SMSJOB/SMSJOBOUT to preserve the output when
    /// there are multiple runs.  re-queue/begin() resets the try Number
-   virtual void reset();
-   virtual void begin();
-   virtual void requeue(Requeue_args&);
-   virtual bool run(JobsParam& jobsParam, bool force);
-   virtual void kill(const std::string& zombie_pid = "");
-   virtual void status();
+   void reset() override;
+   void begin() override;
+   void requeue(Requeue_args&) override;
+   bool run(JobsParam& jobsParam, bool force) override;
+   void kill(const std::string& zombie_pid = "") override;
+   void status() override;
 
-   virtual void update_generated_variables() const;
-   virtual const Variable& findGenVariable(const std::string& name) const;
-   virtual void gen_variables(std::vector<Variable>& vec) const;
+   void update_generated_variables() const override;
+   const Variable& findGenVariable(const std::string& name) const override;
+   void gen_variables(std::vector<Variable>& vec) const override;
 
 
    static const std::string& DUMMY_JOBS_PASSWORD();
@@ -94,12 +94,12 @@ public:
    bool submitJob( JobsParam& ) ;
 
    /// generates job file independent of dependencies, resets the try Number
-   virtual void check_job_creation( job_creation_ctrl_ptr jobCtrl);
+   void check_job_creation( job_creation_ctrl_ptr jobCtrl) override;
 
    /// See Defs.hpp
-   virtual void generate_scripts( const std::map<std::string,std::string>&) const {}
+   void generate_scripts( const std::map<std::string,std::string>&) const override {}
 
-   virtual NState::State computedState(Node::TraverseType) const { return state();}
+   NState::State computedState(Node::TraverseType) const override { return state();}
 
 /// data members accessor's and mutators:
    /// return the current try number as a string, and int
@@ -120,16 +120,16 @@ public:
    /// resubmit the job. However we *should* not do this immediately here, instead we
    /// wait of *next* call to resolveDependencies, as that will check if we are *inlimit*
    void aborted(const std::string& reason);
-   virtual const std::string& abortedReason() const { return abr_;}
+   const std::string& abortedReason() const override { return abr_;}
 
 // Memento functions:
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
    void set_memento(const SubmittableMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f);
 
-   virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
+   void read_state(const std::string& line,const std::vector<std::string>& lineTokens) override;
 protected:
 
-   virtual std::string write_state() const;
+   std::string write_state() const override;
    /// call just before job submission, reset data members, update try_no, and generate variable
    void increment_try_no(); // will increment state_change_no
 
@@ -137,7 +137,7 @@ protected:
    bool submit_job_only( JobsParam& );
 
    // Overridden from Node to increment/decrement limits
-   virtual void update_limits();
+   void update_limits() override;
 
 private:
    friend class ZombieCtrl;

@@ -28,14 +28,14 @@ class NodeQueryViewDelegate : public NodeViewDelegate
 {
 public:
     explicit NodeQueryViewDelegate(QWidget *parent=nullptr);
-    ~NodeQueryViewDelegate();
+    ~NodeQueryViewDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
+                   const QModelIndex& index) const override;
 
 protected:
-    void updateSettings();
+    void updateSettings() override;
 
     void renderNode(QPainter *painter,const QModelIndex& index,
                                         const QStyleOptionViewItem& option,QString text) const;

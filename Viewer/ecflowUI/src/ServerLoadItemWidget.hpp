@@ -24,19 +24,19 @@ class ServerLoadItemWidget : public QWidget, public InfoPanelItem
 {
 public:
     explicit ServerLoadItemWidget(QWidget *parent=nullptr);
-    ~ServerLoadItemWidget();
+    ~ServerLoadItemWidget() override;
 
-    void reload(VInfo_ptr);
-    QWidget* realWidget();
-    void clearContents();
-    bool hasSameContents(VInfo_ptr info);
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
+    void clearContents() override;
+    bool hasSameContents(VInfo_ptr info) override;
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected:
-    void updateState(const ChangeFlags&);
-    void serverSyncFinished();
+    void updateState(const ChangeFlags&) override;
+    void serverSyncFinished() override;
 
 private:
     void load();

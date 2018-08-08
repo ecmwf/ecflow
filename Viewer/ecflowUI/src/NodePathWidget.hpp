@@ -41,7 +41,7 @@ Q_OBJECT
 
 public:
     explicit BcWidget(QWidget *parent=nullptr);
-    ~BcWidget();
+    ~BcWidget() override;
     
     void reset(QString txt, int maxWidth);
     void reset(QList<NodePathItem*>,int);
@@ -52,17 +52,17 @@ public:
     void setTextColour(QColor c) {textCol_=c;}
     void setTextDisabledColour(QColor c) {textDisabledCol_=c;}
 
-    void notifyChange(VProperty*);
+    void notifyChange(VProperty*) override;
 
 Q_SIGNALS:
     void itemSelected(int);
     void menuSelected(int,QPoint);
     
 protected:
-    void paintEvent(QPaintEvent*);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent* event);
-    void changeEvent(QEvent* event);
+    void paintEvent(QPaintEvent*) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void changeEvent(QEvent* event) override;
 
     void updateSettings();
     void reset(int);
@@ -154,8 +154,8 @@ public:
     NodePathServerItem(BcWidget* owner,int index,QString text,QColor bgCol,QColor fontCol,bool hasMenu,bool current) :
          NodePathItem(owner,index,text,bgCol,fontCol,hasMenu,current) {}
 protected:
-    void makeShape(int xp,int yp,int len);
-    int rightPos(int xp,int len) const;
+    void makeShape(int xp,int yp,int len) override;
+    int rightPos(int xp,int len) const override;
 };
 
 
@@ -175,7 +175,7 @@ Q_OBJECT
 
 public:
 	explicit NodePathWidget(QWidget* parent=nullptr);
-	~NodePathWidget();
+	~NodePathWidget() override;
 
     enum Mode {TextMode,GuiMode};
 
@@ -185,22 +185,22 @@ public:
     void useTransparentBg(bool b);
 
 	//From NodeObserver
-	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&);
-	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) {}
+	void notifyBeginNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override;
+	void notifyEndNodeChange(const VNode*, const std::vector<ecf::Aspect::Type>&,const VNodeChange&) override {}
 
 	//From ServerObserver
-	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&);
-	void notifyServerDelete(ServerHandler* server);
-    void notifyBeginServerClear(ServerHandler* server);
-    void notifyEndServerClear(ServerHandler* server) {}
-    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) {}
-    void notifyEndServerScan(ServerHandler* server);
-	void notifyServerConnectState(ServerHandler* server);
-	void notifyServerActivityChanged(ServerHandler* server);
+	void notifyDefsChanged(ServerHandler* server,const std::vector<ecf::Aspect::Type>&) override;
+	void notifyServerDelete(ServerHandler* server) override;
+    void notifyBeginServerClear(ServerHandler* server) override;
+    void notifyEndServerClear(ServerHandler* server) override {}
+    void notifyBeginServerScan(ServerHandler* server,const VServerChange&) override {}
+    void notifyEndServerScan(ServerHandler* server) override;
+	void notifyServerConnectState(ServerHandler* server) override;
+	void notifyServerActivityChanged(ServerHandler* server) override;
 
     //From VInfoObserver
-    void notifyDelete(VInfo*) {}
-    void notifyDataLost(VInfo*);
+    void notifyDelete(VInfo*) override {}
+    void notifyDataLost(VInfo*) override;
 
 	void rerender();
 
@@ -226,8 +226,8 @@ protected:
 	void loadMenu(const QPoint& pos,VInfo_ptr p);
 	VInfo_ptr nodeAt(int);
 	void infoIndex(int idx);
-    void paintEvent(QPaintEvent *);
-    void resizeEvent(QResizeEvent *);
+    void paintEvent(QPaintEvent *) override;
+    void resizeEvent(QResizeEvent *) override;
 	void reset();
     void updateSettings();
     int bcWidth();

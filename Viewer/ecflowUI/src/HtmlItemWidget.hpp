@@ -21,7 +21,7 @@ Q_OBJECT
 
 public:
     explicit HtmlItemWidget(QWidget *parent=nullptr);
-    ~HtmlItemWidget();
+    ~HtmlItemWidget() override;
 
 protected Q_SLOTS:
     void on_searchTb__clicked();

@@ -23,18 +23,18 @@ class NodeFilterDialog : public QDialog, protected Ui::NodeFilterDialog
 
 public:
     explicit NodeFilterDialog(QWidget *parent = nullptr);
-    ~NodeFilterDialog();
+    ~NodeFilterDialog() override;
 
     void setQuery(NodeQuery*);
     NodeQuery* query() const;
     void setServerFilter(ServerFilter*);
 
 protected Q_SLOTS:
-	void accept();
-    void reject();
+	void accept() override;
+    void reject() override;
 
 protected:
-	void closeEvent(QCloseEvent * event);
+	void closeEvent(QCloseEvent * event) override;
 
 private:
     void readSettings();

@@ -26,23 +26,23 @@ class VAttribute : public VItem
 {
 public:
     VAttribute(VNode *parent,int index);
-    ~VAttribute();
+    ~VAttribute() override;
 
     virtual VAttributeType* type() const=0;
     virtual const std::string& subType() const;
     virtual int lineNum() const {return 1;}
-    ServerHandler* server() const;
-    VServer* root() const;
-    VAttribute* isAttribute() const {return const_cast<VAttribute*>(this);}
+    ServerHandler* server() const override;
+    VServer* root() const override;
+    VAttribute* isAttribute() const override {return const_cast<VAttribute*>(this);}
     QString toolTip() const;
-    QString name() const;
-    std::string strName() const;
-    const std::string& typeName() const;
-    std::string fullPath() const;
+    QString name() const override;
+    std::string strName() const override;
+    const std::string& typeName() const override;
+    std::string fullPath() const override;
     virtual QStringList data(bool firstLine=false) const=0;
     QString definition() const;
     bool sameAs(QStringList d) const;
-    bool sameContents(VItem*) const;
+    bool sameContents(VItem*) const override;
     bool value(const std::string& key,std::string& val) const;
 
     static void buildAlterCommand(std::vector<std::string>& cmd,

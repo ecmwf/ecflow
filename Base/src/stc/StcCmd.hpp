@@ -33,14 +33,14 @@ public:
    void init(Api a) { api_ = a;}
    Api api() const { return api_;}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ServerToClientCmd*) const;
-   virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ServerToClientCmd*) const override;
+   bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
 
    /// Other legitimate ServerToClientCmd commands also return ok() as true
    /// Hence must still have isOkCmd()
-   virtual bool ok() const { return api_ == OK; }      // used by group command
-   virtual bool isOkCmd() const { return api_ == OK; } // Used if no reply back from server
+   bool ok() const override { return api_ == OK; }      // used by group command
+   bool isOkCmd() const override { return api_ == OK; } // Used if no reply back from server
 
 private:
    Api api_;

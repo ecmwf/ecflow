@@ -25,14 +25,14 @@ public:
     static void showDialog();
 
 protected Q_SLOTS:
-    void accept();
-    void reject();
+    void accept() override;
+    void reject() override;
 
 protected:
     explicit CommandOutputDialog(QWidget *parent = nullptr);
-    ~CommandOutputDialog();
+    ~CommandOutputDialog() override;
 
-    void closeEvent(QCloseEvent * event);
+    void closeEvent(QCloseEvent * event) override;
 
 private:
     void readSettings();

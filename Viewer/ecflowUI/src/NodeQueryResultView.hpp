@@ -27,7 +27,7 @@ Q_OBJECT
 
 public:
 	explicit NodeQueryResultView(QWidget *parent=nullptr);
-	~NodeQueryResultView();
+	~NodeQueryResultView() override;
 
 	void reload();
 	void rerender();
@@ -48,7 +48,7 @@ public Q_SLOTS:
 	void slotSetCurrent(VInfo_ptr);
 	void slotRerender();
 	void slotSizeHintChangedGlobal();
-	void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected);
+	void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected) override;
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);

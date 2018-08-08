@@ -47,8 +47,8 @@ Q_OBJECT
 public:
 	 explicit OutputDirProvider(InfoPresenter* owner);
 
-	 void visit(VInfoNode*);
-	 void clear();
+	 void visit(VInfoNode*) override;
+	 void clear() override;
 
 private Q_SLOTS:
 	void slotOutputClientError(QString);

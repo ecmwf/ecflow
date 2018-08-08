@@ -25,8 +25,8 @@ public:
 	explicit DashboardDockTitleWidget(QWidget *parent=nullptr);
 
     void addInfoPanelActions();
-    QSize sizeHint() const;
-	QSize minimumSizeHint() const;
+    QSize sizeHint() const override;
+	QSize minimumSizeHint() const override;
 	QToolButton* optionsTb() const;
     void setBcWidget(QWidget *w);
 	void addActions(QList<QAction*> lst);
@@ -63,8 +63,8 @@ Q_SIGNALS:
 	void closeRequested();
 
 protected:
-	void showEvent(QShowEvent* event);
-	void closeEvent (QCloseEvent *event);
+	void showEvent(QShowEvent* event) override;
+	void closeEvent (QCloseEvent *event) override;
 };
 
 #endif

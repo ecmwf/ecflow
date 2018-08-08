@@ -21,8 +21,8 @@
 class TimeParser : public Parser {
 public:
    explicit TimeParser(DefsStructureParser* p) : Parser(p) {}
-	virtual const char* keyword() const { return "time"; }
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
+	const char* keyword() const override { return "time"; }
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };
 
 #endif /* TIMEPARSER_HPP_ */

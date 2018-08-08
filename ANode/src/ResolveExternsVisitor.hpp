@@ -28,12 +28,12 @@ class ResolveExternsVisitor : public NodeTreeVisitor {
 public:
    explicit ResolveExternsVisitor(Defs*);
 
-	virtual bool traverseObjectStructureViaVisitors() const { return true;}
-	virtual void visitDefs(Defs*);
-	virtual void visitSuite(Suite*);
-	virtual void visitFamily(Family*);
-	virtual void visitNodeContainer(NodeContainer*);
-	virtual void visitTask(Task*);
+	bool traverseObjectStructureViaVisitors() const override { return true;}
+	void visitDefs(Defs*) override;
+	void visitSuite(Suite*) override;
+	void visitFamily(Family*) override;
+	void visitNodeContainer(NodeContainer*) override;
+	void visitTask(Task*) override;
 
 private:
 	void setup(Node*);
@@ -45,33 +45,33 @@ private:
 class AstResolveExternVisitor : public ExprAstVisitor {
 public:
 	AstResolveExternVisitor( Node*, Defs*);
-	virtual ~AstResolveExternVisitor();
+	~AstResolveExternVisitor() override;
 
-  	virtual void visitTop(AstTop*){}
- 	virtual void visitRoot(AstRoot*){}
- 	virtual void visitAnd(AstAnd*){}
- 	virtual void visitNot(AstNot*){}
- 	virtual void visitPlus(AstPlus*){}
- 	virtual void visitMinus(AstMinus*){}
- 	virtual void visitDivide(AstDivide*){}
-   virtual void visitMultiply(AstMultiply*){}
-   virtual void visitModulo(AstModulo*){}
- 	virtual void visitOr(AstOr*){}
- 	virtual void visitEqual(AstEqual*){}
- 	virtual void visitNotEqual(AstNotEqual*){}
- 	virtual void visitLessEqual(AstLessEqual*){}
- 	virtual void visitGreaterEqual(AstGreaterEqual*){}
- 	virtual void visitGreaterThan(AstGreaterThan*){}
- 	virtual void visitLessThan(AstLessThan*){}
- 	virtual void visitLeaf(AstLeaf*){}
- 	virtual void visitInteger(AstInteger*){}
-   virtual void visitFunction(AstFunction*){}
- 	virtual void visitNodeState(AstNodeState*){}
- 	virtual void visitEventState(AstEventState*){}
- 	virtual void visitNode(AstNode*);
-   virtual void visitVariable(AstVariable*);
-   virtual void visitParentVariable(AstParentVariable*) {}
-   virtual void visitFlag(AstFlag*);
+  	void visitTop(AstTop*) override{}
+ 	void visitRoot(AstRoot*) override{}
+ 	void visitAnd(AstAnd*) override{}
+ 	void visitNot(AstNot*) override{}
+ 	void visitPlus(AstPlus*) override{}
+ 	void visitMinus(AstMinus*) override{}
+ 	void visitDivide(AstDivide*) override{}
+   void visitMultiply(AstMultiply*) override{}
+   void visitModulo(AstModulo*) override{}
+ 	void visitOr(AstOr*) override{}
+ 	void visitEqual(AstEqual*) override{}
+ 	void visitNotEqual(AstNotEqual*) override{}
+ 	void visitLessEqual(AstLessEqual*) override{}
+ 	void visitGreaterEqual(AstGreaterEqual*) override{}
+ 	void visitGreaterThan(AstGreaterThan*) override{}
+ 	void visitLessThan(AstLessThan*) override{}
+ 	void visitLeaf(AstLeaf*) override{}
+ 	void visitInteger(AstInteger*) override{}
+   void visitFunction(AstFunction*) override{}
+ 	void visitNodeState(AstNodeState*) override{}
+ 	void visitEventState(AstEventState*) override{}
+ 	void visitNode(AstNode*) override;
+   void visitVariable(AstVariable*) override;
+   void visitParentVariable(AstParentVariable*) override {}
+   void visitFlag(AstFlag*) override;
 
 private:
 	void addExtern(const std::string& absNodePath, const std::string& var = "");

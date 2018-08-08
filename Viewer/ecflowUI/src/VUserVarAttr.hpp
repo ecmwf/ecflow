@@ -27,7 +27,7 @@ class VUserVarAttrType : public VAttributeType
 {
 public:
     explicit VUserVarAttrType();
-    QString toolTip(QStringList d) const;
+    QString toolTip(QStringList d) const override;
     void encode(const Variable&,QStringList&) const;
 
 private:
@@ -39,9 +39,9 @@ class VUserVarAttr : public VAttribute
 public:
     VUserVarAttr(VNode *parent,const Variable&,int index);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
 };

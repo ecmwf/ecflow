@@ -51,7 +51,7 @@ private:
 template<class T>
 class NodeQueryOptionMaker : public NodeQueryOptionFactory
 {
-    NodeQueryOption* make(VProperty* p) { return new T(p); }
+    NodeQueryOption* make(VProperty* p) override { return new T(p); }
 public:
     explicit NodeQueryOptionMaker(const std::string& t) : NodeQueryOptionFactory(t) {}
 };

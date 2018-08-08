@@ -58,7 +58,7 @@ public:
     void updateScrollBarPosition();
     void updateScrollBarPageStep();
     void scrollLines(int lines);
-    void timerEvent(QTimerEvent *e);
+    void timerEvent(QTimerEvent *e) override;
     void updateCursorPosition(const QPoint &pos);
     int findLastPageSize() const;
     bool atBeginning() const { return viewportPosition == 0; }
@@ -67,7 +67,7 @@ public:
     void updateCopyAndCutEnabled();
     bool isSectionOnScreen(const TextPagerSection *section) const;
     void cursorMoveKeyEventReadOnly(QKeyEvent *e);
-    virtual void relayout(); // from TextPagerLayout
+    void relayout() override; // from TextPagerLayout
     void adjustVerticalScrollBar();
     
     int requestedScrollBarPosition, lastRequestedScrollBarPosition, cursorWidth, sectionCount,

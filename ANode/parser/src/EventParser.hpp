@@ -21,8 +21,8 @@
 class EventParser : public Parser {
 public:
    explicit EventParser(DefsStructureParser* p) : Parser(p) {}
-	virtual const char* keyword() const { return "event"; }
-	virtual bool doParse(const std::string& line, std::vector<std::string>& lineTokens);
+	const char* keyword() const override { return "event"; }
+	bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override;
 };
 
 #endif

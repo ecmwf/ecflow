@@ -46,12 +46,12 @@ public:
 
    SSyncCmd() : ServerToClientCmd(), full_defs_(false), incremental_changes_(0) {}
 
-   virtual std::ostream& print(std::ostream& os) const;
-   virtual bool equals(ServerToClientCmd*) const;
-   virtual bool hasDefs() const { return true; }
+   std::ostream& print(std::ostream& os) const override;
+   bool equals(ServerToClientCmd*) const override;
+   bool hasDefs() const override { return true; }
 
    // Client side functions:
-   virtual bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const;
+   bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
 
    /// do_sync() is invoked on the *client side*, Can throw std::runtime_error
    /// Either does a *FULL* or *INCREMENTAL sync depending on the
@@ -73,7 +73,7 @@ private:
 
    void reset_data_members(unsigned int client_state_change_no, bool sync_suite_clock);
    void full_sync(unsigned int client_handle,AbstractServer* as);
-   virtual void cleanup() { std::string().swap(server_defs_); } /// run in the server, after command send to client
+   void cleanup() override { std::string().swap(server_defs_); } /// run in the server, after command send to client
 
 private:
 

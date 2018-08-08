@@ -61,20 +61,20 @@ Q_OBJECT
 
 public:
 	explicit ServerFilterMenu(QMenu* parent);
-	~ServerFilterMenu();
+	~ServerFilterMenu() override;
 
 	void reload(ServerFilter*);
 	void aboutToDestroy(); //Called when the parent mainwindow is being destroyed
 
 	//From ServerListObserver
-	void notifyServerListChanged();
-	void notifyServerListFavouriteChanged(ServerItem*);
+	void notifyServerListChanged() override;
+	void notifyServerListFavouriteChanged(ServerItem*) override;
 
 	//From ConfigObserver
-	void notifyServerFilterAdded(ServerItem*);
-	void notifyServerFilterRemoved(ServerItem*);
-	void notifyServerFilterChanged(ServerItem*);
-	void notifyServerFilterDelete();
+	void notifyServerFilterAdded(ServerItem*) override;
+	void notifyServerFilterRemoved(ServerItem*) override;
+	void notifyServerFilterChanged(ServerItem*) override;
+	void notifyServerFilterDelete() override;
 
 protected Q_SLOTS:
 	void slotChanged(bool);

@@ -33,7 +33,7 @@ class ServerFilter : public ServerItemObserver
 {
 public:
 	ServerFilter();
-	~ServerFilter();
+	~ServerFilter() override;
 
 	enum ChangeAspect {Reset,Added,Removed};
 
@@ -53,8 +53,8 @@ public:
     void removeObserver(ServerFilterObserver*);
 
     //From ServerItemObserver
-    void notifyServerItemChanged(ServerItem*);
-    void notifyServerItemDeletion(ServerItem*);
+    void notifyServerItemChanged(ServerItem*) override;
+    void notifyServerItemDeletion(ServerItem*) override;
 
 protected:
     void broadcastAdd(ServerItem*);

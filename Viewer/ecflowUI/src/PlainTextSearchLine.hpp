@@ -20,7 +20,7 @@ class PlainTextSearchLine : public TextEditSearchLine
 {
 public:
 	explicit PlainTextSearchLine(QWidget *parent=nullptr);
-	~PlainTextSearchLine();
+	~PlainTextSearchLine() override;
 	void setEditor(QPlainTextEdit*);
 
 private:

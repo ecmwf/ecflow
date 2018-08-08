@@ -57,7 +57,7 @@ friend class ChangeNotify;
 
 public:
 	explicit ChangeNotifyWidget(QWidget *parent=nullptr);
-	~ChangeNotifyWidget();
+	~ChangeNotifyWidget() override;
 
     void updateVisibility();
 	static void setEnabled(const std::string& id,bool b);

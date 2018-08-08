@@ -28,19 +28,19 @@ Q_OBJECT
 public:
 	explicit SuiteItemWidget(QWidget *parent=nullptr);
 
-	void reload(VInfo_ptr);
-	QWidget* realWidget();
-    void clearContents();  
+	void reload(VInfo_ptr) override;
+	QWidget* realWidget() override;
+    void clearContents() override;  
 
-	void infoReady(VReply*);
-	void infoFailed(VReply*);
-    void infoProgress(VReply*) {}
+	void infoReady(VReply*) override;
+	void infoFailed(VReply*) override;
+    void infoProgress(VReply*) override {}
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
-    void notifyChange(SuiteFilter *filter);
-    void notifyDelete(SuiteFilter *filter);
+    void notifyChange(SuiteFilter *filter) override;
+    void notifyDelete(SuiteFilter *filter) override;
 
 protected Q_SLOTS:
 	void on_autoCb_clicked(bool);
@@ -56,7 +56,7 @@ protected Q_SLOTS:
 
 protected:
 	void updateData();    
-    void updateState(const ChangeFlags&);
+    void updateState(const ChangeFlags&) override;
     void checkActionState();
 
     SuiteModel *model_;

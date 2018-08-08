@@ -26,7 +26,7 @@ public:
     void init(const TextFilterItem& item);
 
 public Q_SLOTS:
-    void accept();
+    void accept() override;
 
 protected:
     TextFilterItem item();
@@ -41,7 +41,7 @@ public:
     void init(int itemIndex,const TextFilterItem& item);
 
 public Q_SLOTS:
-    void accept();
+    void accept() override;
 
 protected:
     int itemIndex_;
@@ -53,7 +53,7 @@ class TextFilterHandlerDialog : public QDialog, private Ui::TextFilterHandlerDia
 
 public:
     explicit TextFilterHandlerDialog(QWidget *parent = nullptr);
-    ~TextFilterHandlerDialog();
+    ~TextFilterHandlerDialog() override;
 
     void setItemToSaveAs(QString name,QString filter,bool matched,bool caseSensitive);
     int applyIndex() const {return applyIndex_;}

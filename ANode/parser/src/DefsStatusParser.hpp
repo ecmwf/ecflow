@@ -21,8 +21,8 @@
 class DefsStatusParser : public Parser {
 public:
    explicit DefsStatusParser(DefsStructureParser* p) : Parser(p) {}
-	virtual const char* keyword() const { return "defstatus"; }
-	virtual bool doParse(const std::string& line,std::vector<std::string>& lineTokens);
+	const char* keyword() const override { return "defstatus"; }
+	bool doParse(const std::string& line,std::vector<std::string>& lineTokens) override;
 };
 
 #endif /* DEFSSTATUSPARSER_HPP_ */

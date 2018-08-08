@@ -27,8 +27,8 @@ class VLimitAttrType : public VAttributeType
 {
 public:
     explicit VLimitAttrType();
-    QString toolTip(QStringList d) const;
-    QString definition(QStringList d) const;
+    QString toolTip(QStringList d) const override;
+    QString definition(QStringList d) const override;
     void encode(limit_ptr,QStringList&) const;
 
 private:
@@ -41,9 +41,9 @@ class VLimitAttr : public VAttribute
 public:
     VLimitAttr(VNode *parent,limit_ptr,int index);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
     QStringList paths() const;
     void removePaths(const std::vector<std::string>& paths);
     void resetPaths();

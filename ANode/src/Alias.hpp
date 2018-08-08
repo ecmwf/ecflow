@@ -22,69 +22,69 @@ public:
    Alias();
    Alias(const Alias&);
    Alias& operator=(const Alias&);
-   virtual node_ptr clone() const;
+   node_ptr clone() const override;
 
-   virtual ~Alias();
+   ~Alias() override;
 
    static alias_ptr create(const std::string& name);
 
-   std::ostream& print(std::ostream&) const;
+   std::ostream& print(std::ostream&) const override;
    bool operator==(const Alias& rhs) const;
 
    /// Overridden to reset the try number
    /// The tasks job can be invoked multiple times. For each invocation we want to preserve
    /// the output. The try number is used in SMSJOB/SMSJOBOUT to preserve the output when
    /// there are multiple runs.  re-queue/begin() resets the try Number
-   virtual void begin();
-   virtual void requeue(Requeue_args&);
+   void begin() override;
+   void requeue(Requeue_args&) override;
 
-   virtual Suite* suite() const { return parent()->suite(); }
-   virtual Defs* defs() const { return (parent()) ? parent()->defs() : nullptr;} // exposed to python hence check for NULL first
-   virtual Alias* isAlias() const   { return const_cast<Alias*>(this);}
-   virtual Submittable* isSubmittable() const { return const_cast<Alias*>(this); }
+   Suite* suite() const override { return parent()->suite(); }
+   Defs* defs() const override { return (parent()) ? parent()->defs() : nullptr;} // exposed to python hence check for NULL first
+   Alias* isAlias() const override   { return const_cast<Alias*>(this);}
+   Submittable* isSubmittable() const override { return const_cast<Alias*>(this); }
 
-   virtual const std::string& debugType() const;
+   const std::string& debugType() const override;
 
-   virtual node_ptr removeChild( Node* child);
-   virtual bool addChild( node_ptr child, size_t position = std::numeric_limits<std::size_t>::max());
-   virtual bool isAddChildOk( Node* child, std::string& errorMsg) const;
+   node_ptr removeChild( Node* child) override;
+   bool addChild( node_ptr child, size_t position = std::numeric_limits<std::size_t>::max()) override;
+   bool isAddChildOk( Node* child, std::string& errorMsg) const override;
 
-   virtual const std::string& script_extension() const;
+   const std::string& script_extension() const override;
 
-   virtual void collateChanges(DefsDelta&) const;
+   void collateChanges(DefsDelta&) const override;
    void set_memento(const SubmittableMemento* m,std::vector<ecf::Aspect::Type>& aspects,bool f) { Submittable::set_memento(m,aspects,f); }
 
-   virtual node_ptr find_node_up_the_tree(const std::string& name) const;
+   node_ptr find_node_up_the_tree(const std::string& name) const override;
 
    // Pure node Functions that are not implemented for aliases
-   virtual node_ptr find_relative_node(const std::vector<std::string>&) {return node_ptr();}
+   node_ptr find_relative_node(const std::vector<std::string>&) override {return node_ptr();}
 
-   virtual void get_all_nodes(std::vector<node_ptr>& nodes) const;
+   void get_all_nodes(std::vector<node_ptr>& nodes) const override;
 
 // Functions unique to aliases
    // Alias variable names by pass checking of valid names, allowing anything
    void add_alias_variable(const std::string& name, const std::string& value);
 
 private:
-   virtual size_t child_position(const Node*) const;
+   size_t child_position(const Node*) const override;
 
    /// Job creation checking is typically called from python API
    /// This has been disabled for Aliases
-   virtual void check_job_creation( job_creation_ctrl_ptr) {}
+   void check_job_creation( job_creation_ctrl_ptr) override {}
 
    // Overridden from Node to increment/decrement limits only
    // i.e we do not update parent computed states for aliases
-   virtual void handleStateChange();
+   void handleStateChange() override;
 
    // Pure node Functions that are not implemented for aliases
-   virtual void accept(ecf::NodeTreeVisitor&){}
-   virtual void acceptVisitTraversor(ecf::NodeTreeVisitor&){}
-   virtual void get_all_tasks(std::vector<task_ptr>&) const {}
-   virtual void get_all_aliases(std::vector<alias_ptr>&) const {}
-   virtual void getAllNodes(std::vector<Node*>&) const {}
-   virtual void getAllTasks(std::vector<Task*>&) const {}
-   virtual void getAllSubmittables(std::vector<Submittable*>&) const {}
-   virtual void get_all_active_submittables(std::vector<Submittable*>&) const {}
+   void accept(ecf::NodeTreeVisitor&) override{}
+   void acceptVisitTraversor(ecf::NodeTreeVisitor&) override{}
+   void get_all_tasks(std::vector<task_ptr>&) const override {}
+   void get_all_aliases(std::vector<alias_ptr>&) const override {}
+   void getAllNodes(std::vector<Node*>&) const override {}
+   void getAllTasks(std::vector<Task*>&) const override {}
+   void getAllSubmittables(std::vector<Submittable*>&) const override {}
+   void get_all_active_submittables(std::vector<Submittable*>&) const override {}
 
    friend class cereal::access;
    template<class Archive>

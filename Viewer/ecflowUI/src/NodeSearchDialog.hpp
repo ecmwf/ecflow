@@ -25,17 +25,17 @@ class NodeSearchDialog : public QDialog, protected Ui::NodeSearchDialog
 
 public:
     explicit NodeSearchDialog(QWidget *parent = nullptr);
-    ~NodeSearchDialog();
+    ~NodeSearchDialog() override;
 
     NodeSearchWidget* queryWidget() const;
 
 protected Q_SLOTS:
-	void accept();
-    void reject();
+	void accept() override;
+    void reject() override;
     void slotOwnerDelete();
 
 protected:
-	void closeEvent(QCloseEvent * event);
+	void closeEvent(QCloseEvent * event) override;
 
 private:
     void readSettings();

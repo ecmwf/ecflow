@@ -22,9 +22,9 @@ public:
 	SClientHandleCmd() : ServerToClientCmd() , handle_(0) {}
 
 	void init(int handle) { handle_ = handle; }
-	virtual std::ostream& print(std::ostream& os) const { return os << "cmd:SClientHandleCmd [ " << handle_ << " ]";}
-	virtual bool equals(ServerToClientCmd*) const;
-  	virtual bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const;
+	std::ostream& print(std::ostream& os) const override { return os << "cmd:SClientHandleCmd [ " << handle_ << " ]";}
+	bool equals(ServerToClientCmd*) const override;
+  	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
 
 private:
  	int handle_;

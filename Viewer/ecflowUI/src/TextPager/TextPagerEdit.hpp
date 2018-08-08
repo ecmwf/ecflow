@@ -43,7 +43,7 @@ class TextPagerEdit : public QAbstractScrollArea, public VPropertyObserver
 
 public:
     TextPagerEdit(QWidget *parent = nullptr);
-    ~TextPagerEdit();
+    ~TextPagerEdit() override;
 
     TextPagerDocument *document() const;
     void setDocument(TextPagerDocument *doc);
@@ -73,8 +73,8 @@ public:
 
     bool load(const QString &fileName, TextPagerDocument::DeviceMode mode = TextPagerDocument::Sparse, QTextCodec *codec = nullptr);
 
-    void paintEvent(QPaintEvent *e);
-    void scrollContentsBy(int dx, int dy);
+    void paintEvent(QPaintEvent *e) override;
+    void scrollContentsBy(int dx, int dy) override;
 
     bool moveCursorPosition(TextPagerCursor::MoveOperation op, TextPagerCursor::MoveMode = TextPagerCursor::MoveAnchor, int n = 1);
     void setCursorPosition(int pos, TextPagerCursor::MoveMode mode = TextPagerCursor::MoveAnchor);
@@ -136,7 +136,7 @@ public:
     
     void gotoLine(int);
     void setFontProperty(VProperty* p);
-    void notifyChange(VProperty* p);
+    void notifyChange(VProperty* p) override;
     void zoomIn();
     void zoomOut();
 
@@ -164,15 +164,15 @@ Q_SIGNALS:
 
 protected:
     //virtual void paste(int position, QClipboard::Mode mode);
-    virtual void changeEvent(QEvent *e);
-    virtual void keyPressEvent(QKeyEvent *e);
-    virtual void keyReleaseEvent(QKeyEvent *e);
-    virtual void wheelEvent(QWheelEvent *e);
-    virtual void mousePressEvent(QMouseEvent *e);
-    virtual void mouseDoubleClickEvent(QMouseEvent *);
-    virtual void mouseMoveEvent(QMouseEvent *e);
-    virtual void mouseReleaseEvent(QMouseEvent *e);
-    virtual void resizeEvent(QResizeEvent *e);
+    void changeEvent(QEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
+    void keyReleaseEvent(QKeyEvent *e) override;
+    void wheelEvent(QWheelEvent *e) override;
+    void mousePressEvent(QMouseEvent *e) override;
+    void mouseDoubleClickEvent(QMouseEvent *) override;
+    void mouseMoveEvent(QMouseEvent *e) override;
+    void mouseReleaseEvent(QMouseEvent *e) override;
+    void resizeEvent(QResizeEvent *e) override;
 
 private:
     void updateFont();
@@ -200,7 +200,7 @@ class TextPagerLineNumberArea : public QWidget
 {
 public:
     explicit TextPagerLineNumberArea(TextPagerEdit *editor);
-    QSize sizeHint() const {return {computeWidth(), 0};}
+    QSize sizeHint() const override {return {computeWidth(), 0};}
     int rightMargin() const {return rightMargin_;}
     void updateWidth(int maxLineNum=-1);
     QColor bgColour() const {return bgCol_;}
@@ -209,7 +209,7 @@ public:
     QColor currentColour() const {return currentCol_;}
 
 protected:
-    void paintEvent(QPaintEvent *event) { textEditor_->lineNumberAreaPaintEvent(event);}
+    void paintEvent(QPaintEvent *event) override { textEditor_->lineNumberAreaPaintEvent(event);}
 
 private:
     int computeWidth(int maxLineNum=-1) const;

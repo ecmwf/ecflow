@@ -32,7 +32,7 @@ Q_SIGNALS:
 
 protected:
 	void adjustSize();
-	void resizeEvent(QResizeEvent*);
+	void resizeEvent(QResizeEvent*) override;
 
 	QToolButton *clearTb_;
 	QLabel*	iconLabel_;

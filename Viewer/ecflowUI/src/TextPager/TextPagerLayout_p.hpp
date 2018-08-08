@@ -78,7 +78,7 @@ public:
     {
     }
 
-    virtual ~TextPagerLayout()
+    ~TextPagerLayout() override
     {
         qDeleteAll(textLayouts);
         qDeleteAll(unusedTextLayouts);

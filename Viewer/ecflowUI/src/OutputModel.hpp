@@ -21,15 +21,15 @@ public:
     void setData(const std::vector<VDir_ptr>&,const std::string& jobout);
    	void clearData();
     bool isEmpty() const {return (!hasData());}
-   	int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-   	int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+   	int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+   	int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
 
    	//Qt::ItemFlags flags ( const QModelIndex & index) const;
-   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+   	QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+	QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
 
-   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-   	QModelIndex parent (const QModelIndex & ) const;
+   	QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+   	QModelIndex parent (const QModelIndex & ) const override;
 
    	std::string fullName(const QModelIndex& index) const;
     void itemDesc(const QModelIndex& index,std::string& itemFullName,VDir::FetchMode& mode) const;
@@ -53,7 +53,7 @@ class OutputSortModel : public QSortFilterProxyModel
 {
 public:
 	explicit OutputSortModel(QObject *parent=nullptr);
-    ~OutputSortModel() = default;
+    ~OutputSortModel() override = default;
 
 	QModelIndex fullNameToIndex(const std::string& fullName);
 };
@@ -63,7 +63,7 @@ class OutputDirLitsDelegate : public QStyledItemDelegate
 public:
     explicit OutputDirLitsDelegate(QWidget *parent=nullptr);
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
+                   const QModelIndex& index) const override;
 
     //QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
 

@@ -28,24 +28,24 @@ public:
    explicit MyObserver(Defs* defs) : update_count_(0),defs_(defs),node_(nullptr) { defs->attach(this); }
    explicit MyObserver(Node* node) : update_count_(0),defs_(nullptr),node_(node) { node->attach(this); }
 
-   virtual ~MyObserver() {
+   ~MyObserver() override {
       /* std::cout << "~MyObserver()\n"; */
       if (defs_) defs_->detach(this);
       if (node_) node_->detach(this);
    }
 
-   virtual void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) {}
-   virtual void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) {}
+   void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) override {}
+   void update_start(const Defs*, const std::vector<ecf::Aspect::Type>&) override {}
 
-   virtual void update(const Node*, const std::vector<ecf::Aspect::Type>&){update_count_++;}
-   virtual void update(const Defs*, const std::vector<ecf::Aspect::Type>&){update_count_++;}
+   void update(const Node*, const std::vector<ecf::Aspect::Type>&) override{update_count_++;}
+   void update(const Defs*, const std::vector<ecf::Aspect::Type>&) override{update_count_++;}
 
    /// After this call, the node will be deleted, hence observers must *NOT* use the pointers
-   virtual void update_delete(const Node* node) {
+   void update_delete(const Node* node) override {
       //std::cout << "update_delete(const Node* node)\n";
       const_cast<Node*>(node)->detach(this);
    }
-   virtual void update_delete(const Defs* defs) {
+   void update_delete(const Defs* defs) override {
       //std::cout << "update_delete(const Defs* node)\n";
       const_cast<Defs*>(defs)->detach(this);
    }

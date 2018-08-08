@@ -23,7 +23,7 @@ Q_OBJECT
 
 public:
     explicit TableFilterWidget(QWidget *parent=nullptr);
-    ~TableFilterWidget() = default;
+    ~TableFilterWidget() override = default;
 
     void build(NodeFilterDef*,ServerFilter*);
 

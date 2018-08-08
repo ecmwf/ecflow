@@ -29,7 +29,7 @@ class VIcon : public VParam
 {
 public:
 	explicit VIcon(const std::string& name);
-	virtual ~VIcon();
+	~VIcon() override;
 
 	static std::vector<VParam*> filterItems();
 	static QVariantList pixmapList(VNode *vnode,VParamSet *filter);
