@@ -124,8 +124,8 @@ public:
     static InfoPanelItem* create(const std::string& name);
 
 private:
-	explicit InfoPanelItemFactory(const InfoPanelItemFactory&);
-	InfoPanelItemFactory& operator=(const InfoPanelItemFactory&);
+	explicit InfoPanelItemFactory(const InfoPanelItemFactory&) = delete;
+	InfoPanelItemFactory& operator=(const InfoPanelItemFactory&) = delete;
 
 };
 

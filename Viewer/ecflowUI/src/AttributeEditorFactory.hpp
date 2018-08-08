@@ -27,8 +27,8 @@ public:
     static AttributeEditor* create(const std::string&,VInfo_ptr,QWidget*);
 
 private:
-    explicit AttributeEditorFactory(const AttributeEditorFactory&);
-    AttributeEditorFactory& operator=(const AttributeEditorFactory&);
+    explicit AttributeEditorFactory(const AttributeEditorFactory&) = delete;
+    AttributeEditorFactory& operator=(const AttributeEditorFactory&) = delete;
 };
 
 template<class T>

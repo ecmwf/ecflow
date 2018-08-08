@@ -38,7 +38,7 @@ public:
 	static std::string generate();
 
 private:
-	Passwd();
+	Passwd() = delete;
 };
 
 #endif

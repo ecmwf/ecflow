@@ -41,6 +41,6 @@ public:
    static bool isValid(const std::string&);
 
 private:
-	SState();
+	SState() = delete;
 };
 #endif

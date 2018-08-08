@@ -34,8 +34,8 @@ public:
    static std::string next_only(bool debug = false);
 
 private:
-	SCPort();
-	~SCPort();
+	SCPort() = delete;
+	~SCPort() = delete;
 
 	static int thePort_;
 };

@@ -78,8 +78,8 @@ public:
 
 private:
     //No copy allowed
-    MenuItem(const MenuItem&);
-    MenuItem& operator=(const MenuItem&);
+    MenuItem(const MenuItem&) = delete;
+    MenuItem& operator=(const MenuItem&) = delete;
 
     //bool isNodeTypeValidForMenuItem(NodeType type);
 

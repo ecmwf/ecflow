@@ -62,7 +62,7 @@ public:
    }
 
 private:
-   EcfPortLock();
+   EcfPortLock() = delete;
 
    static std::string port_file(const std::string& the_port)
    {

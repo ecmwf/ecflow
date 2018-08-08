@@ -26,8 +26,8 @@ public:
     
 private:
     // No copy allowed
-    explicit VConfigLoader(const VConfigLoader&);
-    VConfigLoader& operator=(const VConfigLoader&);
+    explicit VConfigLoader(const VConfigLoader&) = delete;
+    VConfigLoader& operator=(const VConfigLoader&) = delete;
 };
 
 template<class T>

@@ -39,8 +39,8 @@ public:
     virtual bool scanSelf()    { return true; }
 
 private:
-    TriggerCollector(const TriggerCollector&);
-    TriggerCollector& operator=(const TriggerCollector&);
+    TriggerCollector(const TriggerCollector&) = delete;
+    TriggerCollector& operator=(const TriggerCollector&) = delete;
 };
 
 class TriggerListCollector : public TriggerCollector

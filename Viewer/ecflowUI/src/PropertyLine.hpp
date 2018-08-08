@@ -60,8 +60,8 @@ public:
 	static PropertyLine* create(VProperty* p,bool,QWidget* w);
 
 private:
-	explicit PropertyLineFactory(const PropertyLineFactory&);
-	PropertyLineFactory& operator=(const PropertyLineFactory&);
+	explicit PropertyLineFactory(const PropertyLineFactory&) = delete;
+	PropertyLineFactory& operator=(const PropertyLineFactory&) = delete;
 
 };
 

@@ -156,7 +156,7 @@ private:
 
 private:
    // prevent assignment since we have an unique_ptr
-   Expression& operator=(Expression const& f);
+   Expression& operator=(Expression const& f) = delete;
 
 private:
    friend class cereal::access;

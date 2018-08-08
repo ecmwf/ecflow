@@ -154,7 +154,7 @@ private:
    }
 
 private:
-	InvokeServer(const InvokeServer&);
+	InvokeServer(const InvokeServer&) = delete;
 	std::string port_;
 	std::string host_;
 	ecf::Host   host_name_;

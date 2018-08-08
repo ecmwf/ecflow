@@ -25,7 +25,7 @@ public:
    static long julian_to_date(long);
 
 private:
-   Cal();
+   Cal() = delete;
 };
 
 #endif

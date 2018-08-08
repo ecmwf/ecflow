@@ -41,7 +41,7 @@ public:
    static std::string raw();
 
 private:
-	Version();
+	Version() = delete;
 
 	static const std::string TAG; // alpha, beta, release
 

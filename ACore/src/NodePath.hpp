@@ -40,7 +40,7 @@ public:
 	static std::string removeHostPortFromPath(const std::string& path);
 
 private:
- 	NodePath();
+ 	NodePath() = delete;
 
 };
 #endif

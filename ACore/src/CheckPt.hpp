@@ -35,7 +35,7 @@ public:
    static int default_save_time_alarm() { return 20;}
 
 private:
-   CheckPt();
+   CheckPt() = delete;
 };
 
 }

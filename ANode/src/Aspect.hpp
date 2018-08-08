@@ -34,7 +34,7 @@ public:
               };
 
 private:
-   Aspect();
+   Aspect() = delete;
 };
 
 }

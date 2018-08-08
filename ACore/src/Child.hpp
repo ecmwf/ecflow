@@ -51,7 +51,7 @@ public:
 	static bool valid_child_cmd( const std::string& );
 
 private:
-	Child();
+	Child() = delete;
 };
 
 
@@ -64,7 +64,7 @@ public:
 	static std::string to_string(Action);
 
 private:
-	User();
+	User() = delete;
 };
 
 }

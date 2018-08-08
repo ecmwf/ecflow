@@ -59,8 +59,8 @@ private:
    friend class SSyncCmd;
    friend class DefsCmd;
 
-   DefsCache();
-   ~DefsCache();
+   DefsCache() = delete;
+   ~DefsCache() = delete;
    static std::string full_server_defs_as_string_;
    static unsigned int state_change_no_;        // detect state change in defs across clients
    static unsigned int modify_change_no_;       // detect state change in defs across clients

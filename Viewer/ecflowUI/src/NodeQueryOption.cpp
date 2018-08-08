@@ -44,8 +44,8 @@ public:
     static NodeQueryOption* create(VProperty* p);
 
 private:
-    explicit NodeQueryOptionFactory(const NodeQueryOptionFactory&);
-    NodeQueryOptionFactory& operator=(const NodeQueryOptionFactory&);
+    explicit NodeQueryOptionFactory(const NodeQueryOptionFactory&) = delete;
+    NodeQueryOptionFactory& operator=(const NodeQueryOptionFactory&) = delete;
 };
 
 template<class T>

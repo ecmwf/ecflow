@@ -40,7 +40,7 @@ public:
 private:
    void add( const PartExpression& t ) { vec_.push_back(t);}
    std::vector<PartExpression> vec_;
-   Trigger& operator=(Trigger const& f); // prevent assignment
+   Trigger& operator=(Trigger const& f) = delete; // prevent assignment
 };
 
 class Complete {
@@ -60,7 +60,7 @@ public:
 private:
    void add( const PartExpression& t ) { vec_.push_back(t); }
    std::vector<PartExpression> vec_;
-   Complete& operator=(Complete const& f); // prevent assignment
+   Complete& operator=(Complete const& f) = delete; // prevent assignment
 };
 
 #endif

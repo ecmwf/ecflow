@@ -51,7 +51,7 @@ public:
 	static int optionalInt(const std::vector<std::string>& lineTokens,
 	                       int pos,int defaultValue,const std::string& errorMsg);
 private:
-	Extract();
+	Extract() = delete;
 };
 
 #endif

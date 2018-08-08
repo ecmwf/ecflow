@@ -75,8 +75,8 @@ protected:
    std::string server_;
 
 private:
-   UiLog(const UiLog&);
-   UiLog& operator =(const UiLog&);
+   UiLog(const UiLog&) = delete;
+   UiLog& operator =(const UiLog&) = delete;
 };
 
 //Overload ostringstream for various objects
