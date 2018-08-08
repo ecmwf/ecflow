@@ -9,6 +9,7 @@
 
 #include "VariableModel.hpp"
 
+#include <QtGlobal>
 #include <QColor>
 
 #include "ServerHandler.hpp"
@@ -270,7 +271,7 @@ QModelIndex VariableModel::index( int row, int column, const QModelIndex & paren
 	//When parent is the root this index refers to a node or server
 	if(!parent.isValid())
 	{
-#ifdef ECFLOW_QT5
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 		return createIndex(row,column,quintptr(0));
 #else
 		return createIndex(row,column,0);

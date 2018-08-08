@@ -24,6 +24,7 @@ if __name__ == "__main__":
     print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
     print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
     print("sys.path:   " + str(sys.path))
+    print("Python version:   " + str(sys.version_info[0]) + "." + str(sys.version_info[1]))
     print("####################################################################")
     
     defs = ecflow.Defs()

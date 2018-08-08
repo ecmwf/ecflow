@@ -42,9 +42,9 @@ public:
     bool isEmpty() const {return size() == 0;}
     void clear() { refTimeInMs_=0; fileName_.clear(); data_.clear();}
 
-    QDateTime date(int idx) const {return
-                QDateTime::fromMSecsSinceEpoch(refTimeInMs_ +
-                           data_[idx].time_*1000); }
+    QDateTime date(int idx) const {
+        return QDateTime::fromMSecsSinceEpoch(refTimeInMs_ +
+                           static_cast<qint64>(data_[idx].time_)*1000); }
 
     QString  entry(int idx) const {return QString::fromStdString(data_[idx].entry_);}
     LogDataItem::Type type(int idx) const {return data_[idx].type_;}

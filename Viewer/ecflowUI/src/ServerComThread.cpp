@@ -30,7 +30,8 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
         rescanNeed_(false),
         hasSuiteFilter_(false),
         autoAddNewSuites_(false),
-        maxLineNum_(-1)
+        maxLineNum_(-1),
+        initialResetDone_(false)
 {
     assert(server_);
 }
@@ -321,7 +322,25 @@ void ServerComThread::reset()
     //to these changes and reset their handles! So it is a safe operation!!!
     try
     {
-        ci_->ch_drop_user();
+        //If it is not the first reset we drop the handle belonging to the current ecflowui instance
+        if(initialResetDone_)
+        {
+            if(ci_->client_handle() > 0)
+            {
+                ci_->ch1_drop();
+            }
+        }
+
+        //If it is the first reset we need a proper clean-up!
+        //We drop all the handles belonging to the current user!
+        //Other running instances of ecflow_ui under the same user will properly react
+        //to these changes and reset their handles! So it is a safe operation!!!
+        else
+        {
+           initialResetDone_=true;
+           ci_->ch_drop_user();
+        }
+
     }
     catch (std::exception &e)
     {

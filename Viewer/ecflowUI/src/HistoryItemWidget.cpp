@@ -40,7 +40,11 @@ HistoryItemWidget::HistoryItemWidget(QWidget *parent) : QWidget(parent)
 
     //make the horizontal scrollbar work
     treeView_->header()->setStretchLastSection(false);
+
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     treeView_->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+#endif
 
     checkActionState();
 

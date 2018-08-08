@@ -18,6 +18,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QStringList>
 
 LogDataItem::LogDataItem(const std::string& line,qint64& refTimeInMs) : type_(NoType)
 {

@@ -196,6 +196,8 @@ else
     #
     # ==========================================================================================
     # PYTHON3:
+    # To build BOTH python2 and Python 3 libraries, the order is important.
+    # - First build python3 and then python2. This is because in boost 1.53 not all python libs have the 3 tag.
     # Build:
     #   0/ ./b2 --with-python --clean # clean any previous python build. VERY IMPORTANT
     #   1/ module load python3, this update the $PATH
@@ -204,14 +206,20 @@ else
     #
     #      using python 
     #       : 3.5 
-    #       : /usr/local/apps/python3/3.5.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
-    #       : /usr/local/apps/python3/3.5.1-01/include/python3.5m # include directory
+    #       : /usr/local/apps/python3/3.6.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
+    #       : /usr/local/apps/python3/3.6.1-01/include/python3.6m # include directory
     #       ; 
     #       ...
     #      option.set includedir : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;  # ***MAKE*** sure this is set
     #
     #     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
     #     python 2.7 and 3.5, YUK, took ages to debug
+    #
+    # Python 2:
+    #   0/ ./b2 --with-python --clean   # Clean previous build
+    #   1/ module unload python; module load python2
+    #   2/ ./bootstrap.sh --with-python=/path/to/python2.7
+    #   3/ invoke this script
     #
     # Check:
     #   To check the build make sure we don't have symbol pulled in from python2 libs
