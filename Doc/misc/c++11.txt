@@ -1,0 +1,2 @@
+
+https://arne-mertz.de/2015/08/new-c-features-default-initializers-for-member-variables/
