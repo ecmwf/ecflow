@@ -1,2 +1,8 @@
 
 https://arne-mertz.de/2015/08/new-c-features-default-initializers-for-member-variables/
+
+https://www.cprogramming.com/c++11/rvalue-references-and-move-semantics-in-c++11.html
+
+https://en.cppreference.com/w/cpp/language/move_constructor
+ 
+        
