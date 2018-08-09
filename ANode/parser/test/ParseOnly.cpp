@@ -50,6 +50,23 @@ int main(int argc, char* argv[])
       return 1;
    }
 
+//   // Determine average number of variables for nodes with variables
+//   vector<Node*> nodes;
+//   defs.getAllNodes(nodes);
+//   cout << "Total number of nodes: " << nodes.size() << "\n";
+//   size_t number_of_variables = 0;
+//   size_t nodes_with_variables = 0;
+//   for(const auto& n : nodes) {
+//      // cout << n->variables().size() << "\n";
+//      if (n->variables().size() > 0) {
+//         number_of_variables +=  n->variables().size();
+//         nodes_with_variables++;
+//      }
+//   }
+//   cout << "number_of_variables " << number_of_variables << "\n";
+//   cout << "nodes_with_variables  " <<  nodes_with_variables << "\n";
+//   cout <<"Average number of variables per node " <<  (double)number_of_variables/nodes_with_variables  << "\n";
+
 //   PrintStyle style(PrintStyle::MIGRATE);
 //   cout << defs;
    return 0;

@@ -19,35 +19,49 @@
 using namespace ecf;
 using namespace std;
 
+bool Node::update_variable(const std::string& name, const std::string& value)
+{
+   size_t theSize = vars_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (vars_[i].name() == name) {
+         // Variable already exist, *UPDATE* its value
+         vars_[i].set_value(value );
+         if (0 == Ecf::debug_level())
+            std::cout << "Node::addVariable: Variable of name '" << name << "' already exist for node " << debugNodePath() << " updating with value '" << value << "'\n";
+         return true;
+      }
+   }
+   return false;
+}
+
 void Node::addVariable(const Variable& v )
 {
    state_change_no_ = Ecf::incr_state_change_no();
-
-   const std::string& variable_name = v.name();
-   size_t theSize = vars_.size();
-   for(size_t i = 0; i < theSize; i++) {
-      if (vars_[i].name() == variable_name) {
-         // Variable already exist, *UPDATE* its value
-         vars_[i].set_value(v.theValue());
-         if (0 == Ecf::debug_level())
-            std::cout << "Node::addVariable: Variable of name '" << v.name() << "' already exist for node " << debugNodePath() << " updating with value '" << v.theValue() << "'\n";
-         return;
-      }
-   }
-
+   if (update_variable(v.name(),v.theValue())) return;
    if (vars_.capacity() == 0) vars_.reserve(5);
 	vars_.push_back( v );
 }
 
 void Node::add_variable(const std::string& name, const std::string& value )
 {
-	addVariable( Variable(name, value) );
+   state_change_no_ = Ecf::incr_state_change_no();
+   if (update_variable(name,value)) return;
+   if (vars_.capacity() == 0) vars_.reserve(5);
+   vars_.emplace_back(name,value);
+}
+
+void Node::add_variable_bypass_name_check(const std::string& name, const std::string& value )
+{
+   state_change_no_ = Ecf::incr_state_change_no();
+   if (update_variable(name,value)) return;
+   if (vars_.capacity() == 0) vars_.reserve(5);
+   vars_.emplace_back(name,value,false);
 }
 
 void Node::add_variable_int(const std::string& name, int some_int )
 {
-	std::string value =  boost::lexical_cast<std::string>(some_int);
-	addVariable( Variable(name, value) );
+	std::string value = boost::lexical_cast<std::string>(some_int);
+	add_variable(name,value);
 }
 
 void Node::add_trigger(const std::string& string_expression)

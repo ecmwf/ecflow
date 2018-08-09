@@ -74,8 +74,8 @@ bool VariableParser::doParse(
       Str::removeQuotes(lineTokens[2]);       // if first *and* last character is "
       Str::removeSingleQuotes(lineTokens[2]); // if first *and* last character is '
       if (node) {
-         if (node->isAlias()) node->addVariable( Variable( lineTokens[1], lineTokens[2],false )); // bypass name checking
-         else node->addVariable( Variable( lineTokens[1], lineTokens[2] ));
+         if (node->isAlias()) node->add_variable_bypass_name_check( lineTokens[1], lineTokens[2] ); // bypass name checking
+         else node->add_variable( lineTokens[1], lineTokens[2]);
       }
       else defsfile()->set_server().add_or_update_user_variables(lineTokens[1], lineTokens[2]);
       return true;
@@ -96,8 +96,8 @@ bool VariableParser::doParse(
    Str::removeQuotes(value);
    Str::removeSingleQuotes(value);
    if (node) {
-      if (node->isAlias()) node->addVariable( Variable( lineTokens[1], value, false )); // bypass name checking
-      else                 node->addVariable( Variable( lineTokens[1], value )) ;
+      if (node->isAlias()) node->add_variable_bypass_name_check( lineTokens[1], value); // bypass name checking
+      else                 node->add_variable(lineTokens[1], value );
    }
    else {
       bool server_variable = false;

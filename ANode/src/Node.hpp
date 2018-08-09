@@ -406,6 +406,7 @@ public:
    void addVerify( const VerifyAttr& );  // for testing and verification Can throw std::runtime_error
    void addVariable(const Variable& );   // will throw std::runtime_error if duplicate
    void add_variable(const std::string& name, const std::string& value );// will write to std:out if duplicates
+   void add_variable_bypass_name_check(const std::string& name, const std::string& value );// will write to std:out if duplicates
    void add_variable_int(const std::string& name, int);// will throw std::runtime_error if duplicate
 
    void add_trigger(const std::string&);            // use for short complete expressions,Can throw std::runtime_error
@@ -705,6 +706,7 @@ private:
    void findExprVariableAndPrint( const std::string& name, std::ostream& os) const;
    friend class VariableHelper;
    friend class AstParentVariable;
+   bool update_variable(const std::string& name, const std::string& value);
 
 private:
    void add_trigger_expression(const Expression&);     // Can throw std::runtime_error
