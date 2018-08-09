@@ -23,8 +23,7 @@
 //========================================================
 
 OverviewItemWidget::OverviewItemWidget(QWidget *parent) :
-  CodeItemWidget(parent),
-  lastScrollPos_(0)
+  CodeItemWidget(parent)
 {
 	fileLabel_->hide();
 	externalTb_->hide();

@@ -23,7 +23,7 @@ class VReply;
 class InfoPresenter
 {
 public:
-    InfoPresenter() : infoProvider_(nullptr) {}
+    InfoPresenter()= default;
     virtual ~InfoPresenter() = default;
     virtual void infoReady(VReply*) {}
     virtual void infoFailed(VReply*) {}
@@ -36,7 +36,7 @@ public:
 
 protected:
 	VInfo_ptr info_;
-    InfoProvider* infoProvider_; //the main info provider
+    InfoProvider* infoProvider_{nullptr}; //the main info provider
     std::vector<InfoProvider*> infoProviders_; //the list of all the providers including the main one
 };
 

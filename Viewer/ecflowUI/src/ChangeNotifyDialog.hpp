@@ -45,7 +45,7 @@ public Q_SLOTS:
     void slotReset();
 
 protected:
-    ChangeNotify* notifier_;
+    ChangeNotify* notifier_{nullptr};
 };
 
 class ChangeNotifyDialogWidget : public QWidget, protected Ui::ChangeNotifyDialogWidget
@@ -70,7 +70,7 @@ Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
 
 protected:
-	ChangeNotify* notifier_;
+	ChangeNotify* notifier_{nullptr};
 };
 
 class ChangeNotifyDialog : public QDialog, protected Ui::ChangeNotifyDialog
@@ -107,10 +107,10 @@ protected:
     QList<ChangeNotifyDialogWidget*> ntfWidgets_;
     QList<ChangeNotifyDialogButton*> ntfButtons_;
     QButtonGroup* buttonGroup_;
-	bool ignoreCurrentChange_;
+	bool ignoreCurrentChange_{false};
 	QLinearGradient grad_;
     QHBoxLayout* buttonHb_;
-    VProperty* switchWsProp_;
+    VProperty* switchWsProp_{nullptr};
 };
 
 #endif

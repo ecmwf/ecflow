@@ -54,8 +54,7 @@ ClockAttr::ClockAttr(int day, int month, int year, bool hybrid )
 }
 
 ClockAttr::ClockAttr(bool hybrid)
-: hybrid_(hybrid), positiveGain_(false), startStopWithServer_(false), end_clock_(false),
-  gain_(0), day_(0),month_(0),year_(0),
+: hybrid_(hybrid),
   state_change_no_(Ecf::incr_state_change_no()) {}
 
 std::ostream& ClockAttr::print(std::ostream& os) const

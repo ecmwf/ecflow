@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-ClockWidget::ClockWidget(QWidget* parent) : QLabel(parent), showSec_(false)
+ClockWidget::ClockWidget(QWidget* parent) : QLabel(parent)
 {
     timer_=new QTimer(this);
     connect(timer_,SIGNAL(timeout()),

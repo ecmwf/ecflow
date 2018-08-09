@@ -28,7 +28,7 @@ public:
    explicit Trigger(const std::string& expression) { add(PartExpression(expression)); }
    Trigger(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
    explicit Trigger(const PartExpression& pe) { add(pe); }
-   Trigger(const Trigger& rhs) : vec_(rhs.vec_) {}
+   Trigger(const Trigger& rhs) = default;
    explicit Trigger(const boost::python::list& list );
 
    bool operator==( const Trigger& rhs) const { return vec_ == rhs.vec_;}
@@ -48,7 +48,7 @@ public:
    explicit Complete(const std::string& expression) { add(PartExpression(expression)); }
    Complete(const std::string& expression,bool and_type) { add(PartExpression(expression,and_type));}
    explicit Complete(const PartExpression& pe) { add(pe); }
-   Complete(const Complete& rhs) : vec_(rhs.vec_) {}
+   Complete(const Complete& rhs) = default;
    explicit Complete(const boost::python::list& list );
 
    bool operator==( const Complete& rhs) const { return vec_ == rhs.vec_;}

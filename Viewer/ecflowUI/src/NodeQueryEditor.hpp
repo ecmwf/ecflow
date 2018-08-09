@@ -89,12 +89,12 @@ private:
 	void checkGuiState();
     void setAttributePanel(QStringList lst);
 
-	NodeQuery* query_;
-	ServerFilter* serverFilter_;
-	bool queryTeCanExpand_;
-	bool initIsOn_;
-	bool canBeRun_;
-    bool filterMode_;
+	NodeQuery* query_{nullptr};
+	ServerFilter* serverFilter_{nullptr};
+	bool queryTeCanExpand_{false};
+	bool initIsOn_{false};
+	bool canBeRun_{false};
+    bool filterMode_{false};
 
     NodeQueryOptionEdit* nameEdit_;
     NodeQueryOptionEdit* pathEdit_;

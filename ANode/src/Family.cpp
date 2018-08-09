@@ -64,6 +64,12 @@ family_ptr Family::create(const std::string& name)
 	return std::make_shared<Family>( name );
 }
 
+bool Family::check_defaults() const
+{
+   if (fam_gen_variables_ != nullptr) throw std::runtime_error("Family ::check_defaults():  fam_gen_variables_ != nullptr");
+   return NodeContainer::check_defaults();
+}
+
 void Family::accept(ecf::NodeTreeVisitor& v)
 {
 	v.visitFamily(this);

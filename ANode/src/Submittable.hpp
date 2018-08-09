@@ -14,7 +14,6 @@
 //
 // Description :
 //============================================================================
-#include <boost/noncopyable.hpp>
 #include "Node.hpp"
 
 class EcfFile;
@@ -22,17 +21,8 @@ class SubGenVariables;
 
 class Submittable : public Node {
 protected:
-   Submittable( const std::string& name )
-   : Node(name),
-     tryNo_(0),
-     state_change_no_(0),
-     sub_gen_variables_(nullptr) {}
-
-   Submittable()
-   : tryNo_(0),
-     state_change_no_(0),
-     sub_gen_variables_(nullptr) {}
-
+   Submittable( const std::string& name ) : Node(name) {}
+   Submittable()= default;
    Submittable(const Submittable& rhs)
    : Node(rhs),
      paswd_(rhs.paswd_),
@@ -48,6 +38,7 @@ protected:
 
 public:
    ~Submittable() override;
+   bool check_defaults() const override;
 
    /// Initialise the task. will set the state to NState::ACTIVE
    void init(const std::string& processId);
@@ -164,9 +155,9 @@ private:
    std::string         paswd_;
    std::string         rid_;
    std::string         abr_;
-   int                 tryNo_;
-   unsigned int state_change_no_;               // *not* persisted, only used on server side
-   mutable SubGenVariables* sub_gen_variables_; // *not* persisted since they can be generated
+   int                 tryNo_{0};
+   unsigned int state_change_no_{0};               // *not* persisted, only used on server side
+   mutable SubGenVariables* sub_gen_variables_{nullptr}; // *not* persisted since they can be generated
    friend class SubGenVariables;
 
 private:

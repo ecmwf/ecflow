@@ -13,11 +13,7 @@
 
 static std::map<ConnectState::State,std::string> descMap;
 
-ConnectState::ConnectState() :
-	state_(Undef),
-	lastConnect_(0),
-	lastFailed_(0),
-	lastDisconnect_(0)
+ConnectState::ConnectState()
 {
 	init();
 }

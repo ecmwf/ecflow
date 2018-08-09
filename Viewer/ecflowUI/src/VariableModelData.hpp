@@ -126,7 +126,7 @@ protected:
     void broadcastUpdate();
 
 	std::vector<VariableModelData*> data_;
-	ServerHandler* server_;
+	ServerHandler* server_{nullptr};
     std::set<std::string> names_;
     std::vector<VariableModelDataObserver*> observers_;
 };

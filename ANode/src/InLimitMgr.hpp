@@ -37,7 +37,7 @@ class InLimitMgr {
 public:
    explicit InLimitMgr(Node* n) : node_(n) {}
    InLimitMgr(const InLimitMgr& rhs) : node_(nullptr),vec_(rhs.vec_){}
-	InLimitMgr() : node_(nullptr) {}
+	InLimitMgr()= default;
 
    // needed by node copy constructor
    void set_node(Node* n) { node_ = n; }
@@ -115,7 +115,7 @@ private:
  	limit_ptr find_limit(const InLimit&, std::string& errorMsg, std::string& warningMsg,bool reportErrors, bool reportWarnings) const;
 
 private:
- 	Node* node_; // Not persisted, constructor will always set this up.
+ 	Node* node_{nullptr}; // Not persisted, constructor will always set this up.
 
  	mutable std::vector<InLimit> vec_;
 

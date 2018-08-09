@@ -908,8 +908,7 @@ ServerItem* ServerListModel::indexToServer(const QModelIndex& index)
 //======================================
 
 ServerListFilterModel::ServerListFilterModel(QObject *parent) :
-	QSortFilterProxyModel(parent),
-	filterFavourite_(false)
+	QSortFilterProxyModel(parent)
 {
 
 }

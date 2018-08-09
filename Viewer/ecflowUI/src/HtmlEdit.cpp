@@ -15,8 +15,7 @@
 #include "UiLog.hpp"
 
 HtmlEdit::HtmlEdit(QWidget * parent) :
-    QTextBrowser(parent),
-    fontProp_(nullptr)
+    QTextBrowser(parent)
 {
 #if 0
     QFont f("Courier");

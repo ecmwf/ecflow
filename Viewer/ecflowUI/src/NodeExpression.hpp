@@ -384,7 +384,7 @@ public:
     virtual qint64 secsSinceEpoch(VItem*) const {return secsSinceEpoch_;}
 
 private:
-    qint64 secsSinceEpoch_;
+    qint64 secsSinceEpoch_{-1};
 
 };
 

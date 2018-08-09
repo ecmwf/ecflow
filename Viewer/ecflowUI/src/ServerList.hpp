@@ -22,8 +22,8 @@ class ServerList;
 class ServerListObserver
 {
 public:
-    ServerListObserver() {}
-    virtual ~ServerListObserver() {}
+    ServerListObserver() = default;
+    virtual ~ServerListObserver() = default;
 	virtual void notifyServerListChanged()=0;
 	virtual void notifyServerListFavouriteChanged(ServerItem*)=0;
 };
@@ -31,11 +31,11 @@ public:
 class ServerListTmpItem
 {
 public:
-    ServerListTmpItem() {}
+    ServerListTmpItem() = default;
     ServerListTmpItem(const std::string& name,const std::string& host, const std::string& port) :
         name_(name), host_(host), port_(port) {}
     explicit ServerListTmpItem(ServerItem* item);
-    ServerListTmpItem(const ServerListTmpItem& o) : name_(o.name_), host_(o.host_), port_(o.port_) {}
+    ServerListTmpItem(const ServerListTmpItem& ) = default;
 
     const std::string& name() const {return name_;}
     const std::string& host() const {return host_;}
@@ -95,8 +95,8 @@ public:
 	static ServerList* instance();
 
 protected:
-    ServerList() {}
-    ~ServerList() {}
+    ServerList() = default;
+    ~ServerList() = default;
 
 	static ServerList* instance_;
 

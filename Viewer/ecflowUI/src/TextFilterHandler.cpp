@@ -62,8 +62,8 @@ TextFilterHandler* TextFilterHandler::Instance()
     return instance_;
 }
 
-TextFilterHandler::TextFilterHandler() :
-    maxLatestNum_(5)
+TextFilterHandler::TextFilterHandler()
+    
 {
     readSettings();
 }

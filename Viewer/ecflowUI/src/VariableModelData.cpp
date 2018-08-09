@@ -555,9 +555,8 @@ bool VariableModelData::update(const std::vector<Variable>& v,const std::vector<
 //
 //==========================================
 
-VariableModelDataHandler::VariableModelDataHandler() : server_(nullptr)
-{
-}
+VariableModelDataHandler::VariableModelDataHandler()
+= default;
 
 VariableModelDataHandler::~VariableModelDataHandler()
 {

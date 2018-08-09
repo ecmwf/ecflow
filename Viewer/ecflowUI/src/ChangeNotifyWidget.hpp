@@ -47,7 +47,7 @@ public Q_SLOTS:
 protected:
 	void updateIcon();
 
-	ChangeNotify* notifier_;
+	ChangeNotify* notifier_{nullptr};
 	QLinearGradient grad_;
 };
 

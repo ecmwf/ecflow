@@ -34,10 +34,10 @@ class VNodeTriggerData;
 class VNodeInternalState
 {
 public:
-	VNodeInternalState() : tryNo_(0), flag_(0) {}
+	VNodeInternalState()= default;
 
-	unsigned char tryNo_;
-	unsigned char flag_;
+	unsigned char tryNo_{0};
+	unsigned char flag_{0};
 };
 
 
@@ -45,26 +45,24 @@ public:
 class VNodeChange
 {
 public:
-	VNodeChange() : cachedAttrNum_(-1), attrNum_(-1), cachedNodeNum_(-1),
-					nodeNum_(-1), nodeAddAt_(-1), nodeRemoveAt_(-1),
-					ignore_(false), rescan_(false) {}
-	int cachedAttrNum_;
-	int attrNum_;
-	int cachedNodeNum_;
-	int nodeNum_;
-	int nodeAddAt_;
-	int nodeRemoveAt_;
-	bool ignore_;
-	bool rescan_;
+	VNodeChange()= default;
+	int cachedAttrNum_{-1};
+	int attrNum_{-1};
+	int cachedNodeNum_{-1};
+	int nodeNum_{-1};
+	int nodeAddAt_{-1};
+	int nodeRemoveAt_{-1};
+	bool ignore_{false};
+	bool rescan_{false};
 };
 
 //Describes the major changes during an update
 class VServerChange
 {
 public:
-    VServerChange() : suiteNum_(0), attrNum_(0) {} //, totalNum_(0) {}
-	int suiteNum_;
-	int attrNum_;
+    VServerChange()= default; //, totalNum_(0) {}
+	int suiteNum_{0};
+	int attrNum_{0};
     //int totalNum_;
 };
 

@@ -15,8 +15,7 @@
 #include <QDebug>
 
 ChangeNotifyModel::ChangeNotifyModel(QObject *parent) :
-     QAbstractItemModel(parent),
-     data_(nullptr)
+     QAbstractItemModel(parent)
 {
 }
 

@@ -27,9 +27,7 @@
 #include "VNode.hpp"
 
 TriggerTableView::TriggerTableView(QWidget* parent) :
-    QTreeView(parent),
-    model_(nullptr),
-    needItemsLayout_(false)
+    QTreeView(parent)
 {
     setProperty("view","trigger");
 

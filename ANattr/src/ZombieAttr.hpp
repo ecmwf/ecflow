@@ -24,7 +24,7 @@
 class ZombieAttr {
 public:
 	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime = 0);
-	ZombieAttr() : zombie_type_(ecf::Child::NOT_SET), action_(ecf::User::BLOCK), zombie_lifetime_(0)  {}
+	ZombieAttr()= default;
 
  	bool operator==(const ZombieAttr& rhs) const;
 	std::ostream& print(std::ostream&) const;
@@ -63,9 +63,9 @@ public:
    static int minimum_zombie_life_time()      { return 60; }
 
 private:
-	ecf::Child::ZombieType           zombie_type_;      // User,path or ecf
-	ecf::User::Action                action_;           // fob, fail,remove, adopt, block, kill
-	int                              zombie_lifetime_;  // How long zombie lives in server
+	ecf::Child::ZombieType           zombie_type_{ecf::Child::NOT_SET};      // User,path or ecf
+	ecf::User::Action                action_{ecf::User::BLOCK};           // fob, fail,remove, adopt, block, kill
+	int                              zombie_lifetime_{0};  // How long zombie lives in server
 	std::vector<ecf::Child::CmdType> child_cmds_;       // init, event, meter,label, complete
 
    friend class cereal::access;

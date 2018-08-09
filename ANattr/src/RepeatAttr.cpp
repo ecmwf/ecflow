@@ -411,7 +411,7 @@ RepeatInteger::RepeatInteger( const std::string& variable, int start, int end, i
       throw std::runtime_error("RepeatInteger: Invalid name: " + variable);
    }
 }
-RepeatInteger::RepeatInteger() : start_( 0 ), end_( 0 ), delta_( 0 ), value_( 0 ) {}
+RepeatInteger::RepeatInteger() = default;
 
 bool RepeatInteger::compare(RepeatBase* rb) const
 {

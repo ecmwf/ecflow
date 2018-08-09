@@ -28,14 +28,14 @@ class TreeNodeViewDelegate;
 //all its children will be removed from viewItems.
 struct TreeNodeViewItem
 {
-    TreeNodeViewItem() : parentItem(-1), total(0), widestInSiblings(0), expanded(0), hasChildren(0),
+    TreeNodeViewItem() : expanded(0), hasChildren(0),
                       hasMoreSiblings(0), level(0), width(0), height(0), x(0) {}
 
     QModelIndex index; //the model index represented by the item.
                        //We remove items whenever the indexes are invalidated
-    int parentItem; // parent item index in viewItems
-    unsigned int total; // total number of visible children in the view
-    unsigned int widestInSiblings;
+    int parentItem{-1}; // parent item index in viewItems
+    unsigned int total{0}; // total number of visible children in the view
+    unsigned int widestInSiblings{0};
     unsigned int expanded : 1; //the item expanded
     unsigned int hasChildren : 1; // if the item has children in the model (it is
                           // independent of the expanded/collapsed state)

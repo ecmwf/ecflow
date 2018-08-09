@@ -47,11 +47,7 @@
 int OutputItemWidget::updateDirTimeout_=1000*60;
 
 OutputItemWidget::OutputItemWidget(QWidget *parent) :
-	QWidget(parent),
-	userClickedReload_(false),
-    ignoreOutputSelection_(false),
-    dirColumnsAdjusted_(false),
-    submittedWarning_(false)
+	QWidget(parent)
 {
     //We try to keep the contents when clicking away
     //tryToKeepContents_=true;

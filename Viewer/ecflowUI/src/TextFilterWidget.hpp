@@ -72,14 +72,14 @@ private:
     void addMenuSection(QMenu* menu,const std::vector<TextFilterItem>& items,
                         QString title,QString data);
 
-    FilterStatus status_;
+    FilterStatus status_{EditStatus};
     QBrush oriBrush_;
     QBrush redBrush_;
     QBrush greenBrush_;
     QCompleter* completer_;
     TextFilterCompleterModel* completerModel_;
-    QToolButton* statusTb_;
-    QToolButton* optionTb_;
+    QToolButton* statusTb_{nullptr};
+    QToolButton* optionTb_{nullptr};
 };
 
 #endif // TEXTFILTERWIDGET_HPP

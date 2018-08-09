@@ -14,7 +14,7 @@ template <class T>
 class FlagSet
 {
 public:
-    FlagSet() : flags_(0) {}
+    FlagSet()= default;
     FlagSet(T t) : flags_(0) {set(t);}
 
     void clear() {flags_=0;}
@@ -25,7 +25,7 @@ public:
     bool sameAs(T flag) const {return flags_ == flag;}
 
 private:
-    int flags_;
+    int flags_{0};
 
 };
 

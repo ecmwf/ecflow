@@ -47,11 +47,7 @@ public:
 
 static std::map<MessageLabel::Type,MessageLabelData> typeData;
 
-MessageLabel::MessageLabel(QWidget *parent) :
-	QWidget(parent),
-    showTypeTitle_(true),
-    narrowMode_(false),
-    currentType_(NoType)
+MessageLabel::MessageLabel(QWidget *parent) : QWidget(parent)
 {
 	setProperty("base","1");
 

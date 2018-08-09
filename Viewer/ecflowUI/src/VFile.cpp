@@ -62,15 +62,7 @@ VFile::VFile(const std::string& name,bool deleteFile) :
 
 VFile::VFile(bool deleteFile) :
     path_(""),
-	deleteFile_(deleteFile),
-	storageMode_(MemoryStorage),
-	data_(nullptr),
-	dataSize_(0),
-	fp_(nullptr),
-    fetchMode_(NoFetchMode),
-    transferDuration_(0),
-    truncatedTo_(0),
-    cached_(false)
+	deleteFile_(deleteFile)
 {
 }
 

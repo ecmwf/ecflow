@@ -54,12 +54,12 @@ private:
 	void addNote(VProperty* vProp,QVBoxLayout*,QWidget*);
 	void addNote(VProperty* vProp,QGridLayout* layout,QWidget*);
 
-    VProperty* group_;
-    QGridLayout* currentGrid_;
+    VProperty* group_{nullptr};
+    QGridLayout* currentGrid_{nullptr};
     QList<PropertyLine*> lineItems_;
     QString serverName_;
-    QWidget* holder_;
-    int lineLabelLen_;
+    QWidget* holder_{nullptr};
+    int lineLabelLen_{-1};
 };
 
 

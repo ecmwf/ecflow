@@ -44,7 +44,7 @@ public:
             unsigned int client_modify_change_no,
             AbstractServer* as);
 
-   SSyncCmd() : ServerToClientCmd(), full_defs_(false), incremental_changes_(0) {}
+   SSyncCmd() : ServerToClientCmd(), incremental_changes_(0) {}
 
    std::ostream& print(std::ostream& os) const override;
    bool equals(ServerToClientCmd*) const override;
@@ -77,7 +77,7 @@ private:
 
 private:
 
-   bool      full_defs_;
+   bool      full_defs_{false};
    DefsDelta incremental_changes_;
    std::string server_defs_;               // for returning a subset of the suites
    std::string full_server_defs_as_string_;

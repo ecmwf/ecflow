@@ -34,7 +34,7 @@ public:
 
 protected:
 
-	QPlainTextEdit *editor_;
+	QPlainTextEdit *editor_{nullptr};
 
 };
 

@@ -34,8 +34,8 @@ public Q_SLOTS:
 	void slotTotalNumChanged(int);
 
 private:
-	NodeFilterDef* filterDef_;
-	ServerFilter* serverFilter_;
+	NodeFilterDef* filterDef_{nullptr};
+	ServerFilter* serverFilter_{nullptr};
 };
 
 #endif

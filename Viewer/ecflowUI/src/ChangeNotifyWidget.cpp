@@ -25,8 +25,7 @@
 std::vector<ChangeNotifyWidget*> ChangeNotifyWidget::widgets_;
 
 ChangeNotifyButton::ChangeNotifyButton(QWidget* parent) :
-	QToolButton(parent),
-	notifier_(nullptr)
+	QToolButton(parent)
 {
 	setProperty("notify","1");
 	setAutoRaise(true);

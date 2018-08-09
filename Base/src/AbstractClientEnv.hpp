@@ -29,7 +29,7 @@
 
 class AbstractClientEnv : private boost::noncopyable {
 protected:
- 	AbstractClientEnv() : cli_(false) {}
+ 	AbstractClientEnv() = default;
 public:
  	virtual ~AbstractClientEnv() = default;
 
@@ -70,6 +70,6 @@ public:
 	virtual bool under_test() const = 0;
 
 private:
-   bool cli_;  // Command Line Interface. Controls whether output written to standard out, and argument checking
+   bool cli_{false};  // Command Line Interface. Controls whether output written to standard out, and argument checking
 };
 #endif

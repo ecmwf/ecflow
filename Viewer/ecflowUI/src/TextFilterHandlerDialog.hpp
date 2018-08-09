@@ -44,7 +44,7 @@ public Q_SLOTS:
     void accept() override;
 
 protected:
-    int itemIndex_;
+    int itemIndex_{-1};
 };
 
 class TextFilterHandlerDialog : public QDialog, private Ui::TextFilterHandlerDialog
@@ -75,7 +75,7 @@ private:
     void writeSettings();
     void readSettings();
 
-    int applyIndex_;
+    int applyIndex_{-1};
 };
 
 #endif // TEXTFILTERHANDLERDIALOG_HPP

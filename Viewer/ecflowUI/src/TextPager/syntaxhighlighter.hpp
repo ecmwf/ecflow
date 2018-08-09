@@ -60,11 +60,10 @@ public Q_SLOTS:
     void rehighlight();
 private:
     struct Private {
-        Private() : textEdit(nullptr), textLayout(nullptr), previousBlockState(0), currentBlockState(0),
-                    currentBlockPosition(-1) {}
-        TextPagerEdit *textEdit;
-        TextPagerLayout *textLayout;
-        int previousBlockState, currentBlockState, currentBlockPosition;
+        Private() = default;
+        TextPagerEdit *textEdit{nullptr};
+        TextPagerLayout *textLayout{nullptr};
+        int previousBlockState{0}, currentBlockState{0}, currentBlockPosition{-1};
         QList<QTextLayout::FormatRange> formatRanges;
         QTextBlockFormat blockFormat;
         QString currentBlock;

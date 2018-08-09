@@ -29,7 +29,7 @@
 class Label : public boost::equality_comparable<Label> {
 public:
    Label(const std::string& name, const std::string& value);
-   Label() : state_change_no_(0) {}
+   Label() = default;
 
    std::ostream& print(std::ostream&) const;
    const std::string& name() const      { return n_;}
@@ -69,7 +69,7 @@ private:
    std::string n_;
    std::string v_;
    std::string new_v_;
-   unsigned int state_change_no_;        // *not* persisted, only used on server side
+   unsigned int state_change_no_{0};        // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>
@@ -93,11 +93,7 @@ class Event {
 public:
    Event(int number, const std::string& eventName = "");
    explicit Event(const std::string& eventName);
-   Event()
-   : v_(false),
-     number_(std::numeric_limits<int>::max()),
-     used_(false),
-     state_change_no_(0){}
+   Event() : number_(std::numeric_limits<int>::max()) {}
 
    std::string name_or_number() const; // if name present return, else return number
    const std::string& name() const { return  n_;}
@@ -123,11 +119,11 @@ public:
    static const Event& EMPTY(); // Added to support return by reference
 
 private:
-   bool         v_;
+   bool         v_{false};
    int          number_;
    std::string  n_;
-   bool         used_;             // used by the simulator not persisted
-   unsigned int state_change_no_;  // *not* persisted, only used on server side
+   bool         used_{false};             // used by the simulator not persisted
+   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>
@@ -147,7 +143,7 @@ private:
 class Meter {
 public:
    Meter(const std::string& name,int min, int max, int colorChange = std::numeric_limits<int>::max());
-   Meter() : min_(0),max_(0), v_(0),cc_(0),used_(false), state_change_no_(0){}
+   Meter() = default;
 
    std::ostream& print(std::ostream&) const;
    void reset() { set_value(min_);}
@@ -176,13 +172,13 @@ private:
 
    bool isValidValue(int v) const { return (v >= min_ && v <= max_); }
 
-   int          min_;
-   int          max_;
-   int          v_;                // value
-   int          cc_;               // Colour change, used by gui ?
+   int          min_{0};
+   int          max_{0};
+   int          v_{0};                // value
+   int          cc_{0};               // Colour change, used by gui ?
    std::string  n_;                // name
-   bool         used_;             // used by the simulator not persisted
-   unsigned int state_change_no_;  // *not* persisted, only used on server side
+   bool         used_{false};             // used by the simulator not persisted
+   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>

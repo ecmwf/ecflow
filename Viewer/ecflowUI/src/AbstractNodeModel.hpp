@@ -82,7 +82,7 @@ protected:
     virtual void resetStateFilter(bool broadcast) {}
 	virtual QModelIndex serverToIndex(ServerHandler*) const=0;
 
-	bool active_;
+	bool active_{false};
 };
 
 #endif

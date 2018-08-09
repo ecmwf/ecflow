@@ -48,7 +48,7 @@ class UiLog
 public:
    enum Type {INFO,WARN,ERROR,DBG};
 
-   UiLog() : type_(INFO) {}   
+   UiLog()= default;
    UiLog(const std::string& server);
    ~UiLog();
 
@@ -70,7 +70,7 @@ protected:
    void output(const std::string& msg);
    void appendType(std::string& s,Type t) const;
 
-   Type type_;
+   Type type_{INFO};
    std::ostringstream os_;
    std::string server_;
 

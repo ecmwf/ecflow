@@ -41,11 +41,7 @@ QString logFileName;
 
 TextPagerEdit::TextPagerEdit(QWidget *parent) :
    QAbstractScrollArea(parent),
-   d(new TextEditPrivate(this)),
-   useSearchHighlight_(false),
-   showLineNum_(false),
-   lineNumArea_(nullptr),
-   fontProp_(nullptr)
+   d(new TextEditPrivate(this))
 {
     viewport()->setCursor(Qt::IBeamCursor);
 

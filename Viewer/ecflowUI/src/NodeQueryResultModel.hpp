@@ -69,7 +69,7 @@ public Q_SLOTS:
 
 protected:
 	NodeQueryResult *data_;
-	ModelColumn* columns_;
+	ModelColumn* columns_{nullptr};
 };
 
 #endif /* VIEWER_SRC_NODEQUERYRESULTMODEL_HPP_ */

@@ -41,12 +41,12 @@ Q_SIGNALS:
 
 private:
 
-    bool doLineNumbers;
+    bool doLineNumbers{true};
     QBasicTimer appendTimer, changeSelectionTimer;
     TextPagerEdit *textEditor_;
 
     TextPagerLineNumberArea *lineNumArea_;
-    GotoLineDialog *gotoLineDialog_;
+    GotoLineDialog *gotoLineDialog_{nullptr};
 };
 
 

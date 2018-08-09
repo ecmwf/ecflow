@@ -34,7 +34,7 @@ public:
 
 protected:
 
-    QTextBrowser *editor_;
+    QTextBrowser *editor_{nullptr};
 };
 
 #endif // RichTextSearchInterface_HPP

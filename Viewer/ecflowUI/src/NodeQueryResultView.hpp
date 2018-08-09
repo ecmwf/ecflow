@@ -59,10 +59,10 @@ protected:
 	QModelIndexList selectedList();
 	void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 
-	NodeQueryResultModel* model_;
-	QSortFilterProxyModel* sortModel_;
+	NodeQueryResultModel* model_{nullptr};
+	QSortFilterProxyModel* sortModel_{nullptr};
 	ActionHandler* actionHandler_;
-	bool needItemsLayout_;
+	bool needItemsLayout_{false};
 	NodeQueryViewDelegate* delegate_;
 };
 

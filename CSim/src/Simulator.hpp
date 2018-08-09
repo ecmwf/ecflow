@@ -62,7 +62,7 @@ private:
 	bool update_for_queues(Submittable* t,std::string& msg, std::vector<QueueAttr>& queues,Defs& theDefs, std::string& errormsg) const;
 
 	mutable std::map<Submittable*,int> taskIntMap_;
-	mutable int level_;
+	mutable int level_{0};
 	PrintStyle print_style_;   // by default show state when writing defs to standard out. RAII
 };
 }

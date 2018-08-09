@@ -92,7 +92,7 @@ protected:
 
      std::vector<VNodeListItem*> data_;
      std::map<ServerHandler*,int> serverCnt_;
-     int maxNum_;
+     int maxNum_{200};
 };
 
 #endif /* VIEWER_SRC_VNODELIST_HPP_ */

@@ -45,7 +45,7 @@ public:
     QModelIndex itemToStatusIndex(CommandOutput_ptr item) const;
 
 protected:
-    ModelColumn* columns_;
+    ModelColumn* columns_{nullptr};
 };
 
 class CommandOutputWidget : public QWidget, protected Ui::CommandOutputWidget

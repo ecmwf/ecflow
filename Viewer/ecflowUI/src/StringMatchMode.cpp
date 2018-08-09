@@ -13,8 +13,7 @@
 
 std::map<StringMatchMode::Mode,std::string> StringMatchMode::matchOper_;
 
-StringMatchMode::StringMatchMode() :
-  mode_(WildcardMatch)
+StringMatchMode::StringMatchMode()
 {
 	init();
 }

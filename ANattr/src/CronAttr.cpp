@@ -40,7 +40,7 @@ using namespace boost::posix_time;
 
 namespace ecf {
 
-CronAttr::CronAttr() :  free_(false),state_change_no_(0) {}
+CronAttr::CronAttr() = default;
 
 CronAttr::CronAttr(const std::string& str)
 :  free_(false),state_change_no_(0)

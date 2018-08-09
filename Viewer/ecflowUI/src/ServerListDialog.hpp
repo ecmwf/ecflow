@@ -168,7 +168,7 @@ protected:
      bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 
 	 QString filterStr_;
-	 bool filterFavourite_;
+	 bool filterFavourite_{false};
 };
 
 #endif

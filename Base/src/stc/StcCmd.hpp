@@ -28,7 +28,7 @@ public:
       BLOCK_CLIENT_ON_HOME_SERVER
    };
    explicit StcCmd(Api a) :  api_(a) {}
-   StcCmd() :  api_(OK) {}
+   StcCmd()= default;
 
    void init(Api a) { api_ = a;}
    Api api() const { return api_;}
@@ -43,7 +43,7 @@ public:
    bool isOkCmd() const override { return api_ == OK; } // Used if no reply back from server
 
 private:
-   Api api_;
+   Api api_{OK};
 
    friend class cereal::access;
    template<class Archive>

@@ -60,7 +60,7 @@ protected:
     QBrush redBrush_;
     QBrush greenBrush_;
 
-	bool confirmSearch_;
+	bool confirmSearch_{false};
 };
 
 #endif

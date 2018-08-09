@@ -31,12 +31,12 @@ public:
 protected:
 	bool isWordCharacter(const QChar& ch) const;
 
-	Mode mode_;
+	Mode mode_{NoMode};
 	QRegExp rx_;
 	QString text_;
 	QTextCharFormat format_;
-	bool caseSensitive_;
-	bool wholeWords_;
+	bool caseSensitive_{false};
+	bool wholeWords_{false};
 	static QColor bgColour_;
 };
 

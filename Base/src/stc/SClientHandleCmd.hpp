@@ -19,7 +19,7 @@
 class SClientHandleCmd : public ServerToClientCmd {
 public:
    explicit SClientHandleCmd(int handle) : handle_(handle) {}
-	SClientHandleCmd() : ServerToClientCmd() , handle_(0) {}
+	SClientHandleCmd() : ServerToClientCmd(){}
 
 	void init(int handle) { handle_ = handle; }
 	std::ostream& print(std::ostream& os) const override { return os << "cmd:SClientHandleCmd [ " << handle_ << " ]";}
@@ -27,7 +27,7 @@ public:
   	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
 
 private:
- 	int handle_;
+ 	int handle_{0};
 
    friend class cereal::access;
    template<class Archive>

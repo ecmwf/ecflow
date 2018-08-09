@@ -28,12 +28,7 @@ std::string SuiteFilter::dummySuite_="__DUMMY_FOR_UI__";
 //
 //=================================================================
 
-SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other) :
-	name_(other.name_),
-    loaded_(other.loaded_),
-	filtered_(other.filtered_)
-{
-}
+SuiteFilterItem::SuiteFilterItem(const SuiteFilterItem& other) = default;
 
 //=================================================================
 //

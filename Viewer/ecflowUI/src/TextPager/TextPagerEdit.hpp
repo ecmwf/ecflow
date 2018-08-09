@@ -188,11 +188,11 @@ private:
     friend class TextPagerCursor;
 
     TextPagerSearchHighlighter* searchHighlight_;
-    bool useSearchHighlight_;
+    bool useSearchHighlight_{false};
 
-    bool showLineNum_;
-    TextPagerLineNumberArea* lineNumArea_;
-    VProperty* fontProp_;
+    bool showLineNum_{false};
+    TextPagerLineNumberArea* lineNumArea_{nullptr};
+    VProperty* fontProp_{nullptr};
 };
 
 

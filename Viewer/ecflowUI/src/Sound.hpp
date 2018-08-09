@@ -46,9 +46,9 @@ protected:
     std::string formats_;
     std::string sysDir_;
     std::vector<std::string> sysSounds_;
-    time_t prevPlayedAt_;
-    int delay_;
-    VProperty* prop_;
+    time_t prevPlayedAt_{0};
+    int delay_{2};
+    VProperty* prop_{nullptr};
 };
 
 #endif

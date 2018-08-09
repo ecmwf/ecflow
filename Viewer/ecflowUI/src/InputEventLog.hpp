@@ -44,7 +44,7 @@ protected:
     void logContextMenu(QObject* obj,QContextMenuEvent *e);
 
     static InputEventLog* instance_;
-    bool paused_;
+    bool paused_{false};
     QFile *outFile_;
     QTextStream out_;
     LogTruncator* truncator_;

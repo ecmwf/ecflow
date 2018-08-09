@@ -23,13 +23,7 @@ int NodeViewDelegate::lighter_=150;
 static std::vector<std::string> propVec;
 
 NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
-    QStyledItemDelegate(parent),
-    prop_(nullptr),	
-    nodeBox_(nullptr),
-    attrBox_(nullptr),
-    useStateGrad_(true),
-    drawAttrSelectionRect_(false),
-    limitShape_(RectLimitShape)
+    QStyledItemDelegate(parent)
 {
 	hoverPen_=QPen(QColor(201,201,201));
 	hoverBrush_=QBrush(QColor(250,250,250,210));

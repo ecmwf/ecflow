@@ -29,10 +29,7 @@
 class ServerReply : private boost::noncopyable {
 public:
    enum News_t { NO_NEWS, NEWS, DO_FULL_SYNC };
- 	ServerReply()
- 	: cli_(false), in_sync_(false), full_sync_(false), news_(NO_NEWS),
- 	  block_client_on_home_server_(false),block_client_server_halted_(false),block_client_zombie_detected_(false),
- 	  client_handle_(0) {}
+ 	ServerReply()= default;
 
 	/// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle
 	/// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
@@ -118,13 +115,13 @@ public:
 
 private:
 	friend class SSyncCmd;
-	bool cli_;
- 	bool in_sync_;                          // clear at the start of invoke
- 	bool full_sync_;                        // clear at the start of invoke
-	News_t news_;                           // clear at the start of invoke
-	bool block_client_on_home_server_;      // clear at the start of invoke
-	bool block_client_server_halted_;       // clear at the start of invoke
-	bool block_client_zombie_detected_;     // clear at the start of invoke
+	bool cli_{false};
+ 	bool in_sync_{false};                          // clear at the start of invoke
+ 	bool full_sync_{false};                        // clear at the start of invoke
+	News_t news_{NO_NEWS};                           // clear at the start of invoke
+	bool block_client_on_home_server_{false};      // clear at the start of invoke
+	bool block_client_server_halted_{false};       // clear at the start of invoke
+	bool block_client_zombie_detected_{false};     // clear at the start of invoke
    std::string host_;                      // clear at the start of invoke
    std::string port_;                      // clear at the start of invoke
 	std::string str_;                       // clear at the start of invoke
@@ -135,7 +132,7 @@ private:
    std::vector<std::pair<unsigned int, std::vector<std::string> > > client_handle_suites_; // clear at the start of invoke
    Stats stats_;                        // Used for test only, ideally need to clear
 
-	int client_handle_;                  // set locally when suites are registered, and kept for reference
+	int client_handle_{0};                  // set locally when suites are registered, and kept for reference
    defs_ptr    client_defs_;            // server reply stored as the client side defs, kept locally
    node_ptr    client_node_;            // server reply stored as the client side node, kept locally
 };

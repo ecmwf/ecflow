@@ -171,8 +171,8 @@ private:
 	boost::posix_time::time_duration relativeDuration() const;
 
 private:
-	bool relativeToSuiteStart_;
-	bool isValid_;                                     // Needed for single slot to avoid multiple jobs submissions
+	bool relativeToSuiteStart_{false};
+	bool isValid_{true};                                     // Needed for single slot to avoid multiple jobs submissions
 	TimeSlot start_;
 	TimeSlot finish_;
 	TimeSlot incr_;

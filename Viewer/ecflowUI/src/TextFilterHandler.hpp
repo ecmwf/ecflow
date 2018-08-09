@@ -67,7 +67,7 @@ protected:
     void writeSettings();
 
     static TextFilterHandler* instance_;
-    const int maxLatestNum_;
+    const int maxLatestNum_{5};
     std::vector<TextFilterItem> items_;
     std::vector<TextFilterItem> latest_;
 };

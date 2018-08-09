@@ -145,9 +145,9 @@ private:  /// For use by python interface,
 
 private:
    std::vector<PartExpression> vec_;
-   bool                        free_;
+   bool                        free_{false};
 
-   unsigned int state_change_no_;                    // *not* persisted, only used on server side
+   unsigned int state_change_no_{0};                    // *not* persisted, only used on server side
 
    // They are created on demand. reasons:
    // 1/ Help with AIX serialisation

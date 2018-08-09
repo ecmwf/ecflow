@@ -76,7 +76,7 @@ public:
    explicit CompoundMemento(const std::string& absNodePath)
    : clear_attributes_(false),absNodePath_(absNodePath) {}
 
-   CompoundMemento() : clear_attributes_(false) {} // for serialization
+   CompoundMemento()= default; // for serialization
 
    void incremental_sync(defs_ptr client_def) const;
    void add(memento_ptr m) { vec_.push_back(m); }
@@ -86,7 +86,7 @@ public:
 
 private:
 
-   bool clear_attributes_;
+   bool clear_attributes_{false};
    std::string absNodePath_;
    std::vector<memento_ptr> vec_;
    mutable std::vector<ecf::Aspect::Type> aspects_; // not persisted only used on client side
@@ -105,12 +105,12 @@ private:
 class StateMemento : public Memento {
 public:
    explicit StateMemento(NState::State state) : state_(state) {}
-   StateMemento() : state_(NState::UNKNOWN) {}
+   StateMemento()= default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f)    const override { n->set_memento(this,aspects,f);}
    void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { defs->set_memento(this,aspects,f);}
 
-   NState::State state_;
+   NState::State state_{NState::UNKNOWN};
    friend class Node;
    friend class Defs;
 
@@ -194,11 +194,11 @@ private:
 class AliasNumberMemento : public Memento {
 public:
    explicit AliasNumberMemento(unsigned int alias_no ) : alias_no_(alias_no) {}
-   AliasNumberMemento() : alias_no_(0) {}
+   AliasNumberMemento()= default;
 private:
    void do_incremental_task_sync(Task* t,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { t->set_memento(this,aspects,f);}
 
-   unsigned int alias_no_;
+   unsigned int alias_no_{0};
    friend class Task;
 
    friend class cereal::access;
@@ -214,11 +214,11 @@ private:
 class SuspendedMemento : public Memento {
 public:
    explicit SuspendedMemento(bool suspended) : suspended_(suspended) {}
-   SuspendedMemento() : suspended_(false) {}
+   SuspendedMemento()= default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f)    const override { n->set_memento(this,aspects,f);}
 
-   bool suspended_;
+   bool suspended_{false};
    friend class Node;
    friend class Defs;
 
@@ -234,11 +234,11 @@ private:
 class ServerStateMemento : public Memento {
 public:
    explicit ServerStateMemento(SState::State s) : state_(s) {}
-   ServerStateMemento() : state_(SState::HALTED) {}
+   ServerStateMemento()= default;
 private:
    void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { defs->set_memento(this,aspects,f);}
 
-   SState::State state_;
+   SState::State state_{SState::HALTED};
    friend class Defs;
 
    friend class cereal::access;
@@ -272,11 +272,11 @@ private:
 class NodeDefStatusDeltaMemento : public Memento {
 public:
    explicit NodeDefStatusDeltaMemento(DState::State state) : state_(state) {}
-   NodeDefStatusDeltaMemento() : state_(DState::UNKNOWN) {}
+   NodeDefStatusDeltaMemento()= default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
 
-   DState::State state_;
+   DState::State state_{DState::UNKNOWN};
    friend class Node;
 
    friend class cereal::access;
@@ -390,11 +390,11 @@ class NodeQueueIndexMemento : public Memento {
 public:
    NodeQueueIndexMemento(const std::string& name, int index,const std::vector<NState::State>& state_vec)
     : index_(index), name_(name),state_vec_(state_vec) {}
-   NodeQueueIndexMemento() : index_(0) {}
+   NodeQueueIndexMemento()= default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
 
-   int index_;
+   int index_{0};
    std::string name_;
    std::vector<NState::State> state_vec_;
    friend class Node;
@@ -472,11 +472,11 @@ private:
 class NodeRepeatIndexMemento : public Memento {
 public:
    NodeRepeatIndexMemento( const Repeat& e ) : index_or_value_(e.index_or_value()) {}
-   NodeRepeatIndexMemento() : index_or_value_(0) {}
+   NodeRepeatIndexMemento()= default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
 
-   long index_or_value_;
+   long index_or_value_{0};
    friend class Node;
 
    friend class cereal::access;
@@ -737,7 +737,7 @@ public:
       rid_( process_or_remote_id ),
       abr_( abortedReason ),
       tryNo_( tryNo ) {}
-   SubmittableMemento() : tryNo_(0) {}
+   SubmittableMemento()= default;
 private:
    void do_incremental_task_sync(Task* n,std::vector<ecf::Aspect::Type>& aspects,bool f)   const override { n->set_memento(this,aspects,f);}
    void do_incremental_alias_sync(Alias* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
@@ -745,7 +745,7 @@ private:
    std::string  paswd_;
    std::string  rid_;
    std::string  abr_;
-   int          tryNo_;
+   int          tryNo_{0};
    friend class Submittable;
 
    friend class cereal::access;
@@ -782,11 +782,11 @@ private:
 class SuiteBeginDeltaMemento : public Memento {
 public:
    explicit SuiteBeginDeltaMemento(bool begun) : begun_(begun) {}
-   SuiteBeginDeltaMemento() : begun_(false) {}
+   SuiteBeginDeltaMemento()= default;
 private:
    void do_incremental_suite_sync(Suite* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
 
-   bool begun_;
+   bool begun_{false};
    friend class Suite;
 
    friend class cereal::access;

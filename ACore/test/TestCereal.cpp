@@ -32,7 +32,7 @@ namespace fs = boost::filesystem;
 class MyClass {
 public:
    enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5, SUSPENDED=6};
-   MyClass() : x(2),y(2),state_(State::SUSPENDED) {}
+   MyClass() = default;
    bool operator==(const MyClass & rhs) const { return x == rhs.x && y == rhs.y && state_ == rhs.state_;}
    void print(std::ostream &os) const {
       os << "MyClass: x("<< x << ") y(" << y << ") state(" << state_ << ")";
@@ -44,14 +44,14 @@ private:
    void serialize(Archive & archive, std::uint32_t const version) {
       archive( CEREAL_NVP(x), CEREAL_NVP(y), CEREAL_NVP(state_) );
    }
-   int x, y;
-   State state_;
+   int x{2}, y{2};
+   State state_{State::SUSPENDED};
 };
 CEREAL_CLASS_VERSION(MyClass , 1);
 
 class MyTop : public MyClass {
 public:
-   MyTop() : x_(1),y_(1),z_(1) {}
+   MyTop() = default;
    void set(int x,int y,int z) { x_ = x; y_ = y; z_=z;}
    bool operator==(const MyTop& rhs) const { return (MyClass::operator==(rhs)) && x_ == rhs.x_ && y_ == rhs.y_ && z_ == rhs.z_;}
    void print(std::ostream &os) const {
@@ -70,7 +70,7 @@ private:
                CEREAL_NVP(z_)
               );
    }
-   int x_, y_, z_;
+   int x_{1}, y_{1}, z_{1};
 };
 CEREAL_CLASS_VERSION(MyTop  , 1);
 

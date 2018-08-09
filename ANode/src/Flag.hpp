@@ -42,7 +42,7 @@ namespace  ecf {
 
 class Flag {
 public:
-   Flag() : flag_(0),state_change_no_(0) {}
+   Flag() = default;
 
    /// The BYRULE is used to distinguish between tasks that have RUN and completed
    /// and those that have completed by complete expression.
@@ -101,8 +101,8 @@ public:
    static void valid_flag_type(std::vector<std::string>& vec);
 
 private:
-   int          flag_;
-   unsigned int state_change_no_;  // *not* persisted, only used on server side
+   int          flag_{0};
+   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>

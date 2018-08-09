@@ -61,10 +61,10 @@ private:
     void adjustButtonState();
     void adjustButtonState(bool);
 
-	NodeQuery* query_;
+	NodeQuery* query_{nullptr};
 	NodeQueryEngine* engine_;
 	NodeQueryResultModel* model_;
-	bool columnsAdjusted_;
+	bool columnsAdjusted_{false};
     QTime elapsed_;
 };
 

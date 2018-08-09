@@ -19,7 +19,7 @@ class TextPagerEdit;
 class TextPagerSearchInterface : public AbstractTextEditSearchInterface
 {
 public:
-	TextPagerSearchInterface() : editor_(nullptr) {}
+	TextPagerSearchInterface()= default;
 	void setEditor(TextPagerEdit* e) {editor_=e;}
 
 	bool findString (QString str, bool highlightAll, QTextDocument::FindFlags findFlags,
@@ -35,7 +35,7 @@ public:
 
 protected:
 	TextPagerCursor::MoveOperation translateCursorMoveOp(QTextCursor::MoveOperation move);
-	TextPagerEdit *editor_;
+	TextPagerEdit *editor_{nullptr};
 
 };
 

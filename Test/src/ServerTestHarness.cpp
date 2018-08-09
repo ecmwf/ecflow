@@ -44,13 +44,7 @@ namespace fs = boost::filesystem;
 //#define DEBUG_TEST_HARNESS 1
 //#define DEBUG_DIFF 1
 
-ServerTestHarness::ServerTestHarness()
-: generateManFileForNodeContainers_(false),
-  check_task_duration_less_than_server_poll_(true),
-  add_default_sleep_time_(true),
-  serverUpdateCalendarCount_(0),
-  print_style_(PrintStyle::STATE)
-{}
+ServerTestHarness::ServerTestHarness() : print_style_(PrintStyle::STATE){}
 
 void ServerTestHarness::run(
          Defs& theClientDefs,

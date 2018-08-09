@@ -25,10 +25,7 @@
 #include "ViewerUtil.hpp"
 
 TextFilterWidget::TextFilterWidget(QWidget *parent) :
-    QWidget(parent),
-    status_(EditStatus),
-    statusTb_(nullptr),
-    optionTb_(nullptr)
+    QWidget(parent)
 {
     setupUi(this);
 

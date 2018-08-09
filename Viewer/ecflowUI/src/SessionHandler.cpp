@@ -105,8 +105,7 @@ std::string SessionItem::qtSettingsFile(const std::string name) const
 //
 //=================================================
 
-SessionHandler::SessionHandler() :
-	current_(nullptr)
+SessionHandler::SessionHandler()
 {
 	//The default must always be exist!
 	current_=add(defaultSessionName());

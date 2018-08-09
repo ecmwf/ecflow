@@ -100,10 +100,10 @@ private:
   	std::string getDefaultTemplateEcfFile(Task* t) const;
 
 private:
-	bool generateManFileForNodeContainers_;
-	bool check_task_duration_less_than_server_poll_;
-	bool add_default_sleep_time_;
-	int serverUpdateCalendarCount_;
+	bool generateManFileForNodeContainers_{false};
+	bool check_task_duration_less_than_server_poll_{true};
+	bool add_default_sleep_time_{true};
+	int serverUpdateCalendarCount_{0};
 	std::string defs_filename_;
 	PrintStyle print_style_; // by default show state when writing defs to standard out. RAII
 };

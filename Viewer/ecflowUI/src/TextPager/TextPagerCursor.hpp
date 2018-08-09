@@ -127,8 +127,8 @@ private:
     bool ref();
     bool deref();
 
-    TextCursorSharedPrivate *d;
-    TextPagerEdit *textEdit;
+    TextCursorSharedPrivate *d{nullptr};
+    TextPagerEdit *textEdit{nullptr};
     friend class TextPagerEdit;
     friend class TextLayoutCacheManager;
     friend class TextPagerDocument;

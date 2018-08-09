@@ -44,19 +44,9 @@ int NodePathItem::vPadding_=0;
 
 BcWidget::BcWidget(QWidget* parent) : 
     QWidget(parent),
-	hMargin_(1),
-	vMargin_(1),    
-	gap_(5),
-    width_(0),
-    maxWidth_(0),
-    itemHeight_(0),
-    text_("No selection"),
+	 text_("No selection"),
     textCol_(Qt::white),
-    textDisabledCol_(QColor(220,220,220)),
-    useGrad_(true),
-    gradLighter_(150),
-    hovered_(-1),
-    elided_(false)
+    textDisabledCol_(QColor(220,220,220))
 {
     font_=QFont();
     font_.setPointSize(font_.pointSize()-1);
@@ -809,8 +799,7 @@ NodePathEllipsisItem::NodePathEllipsisItem(BcWidget* owner) :
 //=============================================================
 
 NodePathWidget::NodePathWidget(QWidget *parent) :
-  QWidget(parent),
-  mode_(GuiMode)
+  QWidget(parent)
 {
 	layout_=new QHBoxLayout(this);
 	layout_->setSpacing(0);

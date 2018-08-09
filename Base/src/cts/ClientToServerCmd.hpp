@@ -180,7 +180,7 @@ protected:
      path_to_submittable_(pathToSubmittable),
      jobs_password_(jobsPassword),process_or_remote_id_(process_or_remote_id), try_no_(try_no){}
 
-   TaskCmd() : submittable_(nullptr), password_missmatch_(false), pid_missmatch_(false), try_no_(0) {}
+   TaskCmd() = default;
 
 public:
 
@@ -210,17 +210,17 @@ protected:
    Submittable* get_submittable(AbstractServer* as) const ; // can throw std::runtime_error
 
 protected:
-   mutable Submittable* submittable_; // stored during authentication and re-used handle request, not persisted, server side only
+   mutable Submittable* submittable_{nullptr}; // stored during authentication and re-used handle request, not persisted, server side only
 
 private:
-   mutable bool password_missmatch_; // stored during authentication and re-used handle request, not persisted, server side only
-   mutable bool pid_missmatch_;      // stored during authentication and re-used handle request, not persisted, server side only
+   mutable bool password_missmatch_{false}; // stored during authentication and re-used handle request, not persisted, server side only
+   mutable bool pid_missmatch_{false};      // stored during authentication and re-used handle request, not persisted, server side only
 
 private:
    std::string path_to_submittable_;
    std::string jobs_password_;
    std::string process_or_remote_id_;
-   int try_no_;
+   int try_no_{0};
 
    friend class cereal::access;
    template<class Archive>
@@ -424,7 +424,7 @@ public:
             const std::string& meterName,
             int meterValue)
    : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), name_(meterName), value_(meterValue) {}
-   MeterCmd() : TaskCmd(), value_(0) {}
+   MeterCmd() : TaskCmd() {}
 
    const std::string& name() const { return name_; }
    int value() const { return value_; }
@@ -446,7 +446,7 @@ private:
 
 private:
    std::string name_;  // the meters name
-   int value_;         // the meters value
+   int value_{0};         // the meters value
 
    friend class cereal::access;
    template<class Archive>
@@ -662,7 +662,7 @@ public:
      };
 
    explicit CtsCmd(Api a) : api_(a) {}
-   CtsCmd() : api_(NO_CMD) {}
+   CtsCmd()= default;
 
    Api api() const { return api_;}
 
@@ -684,7 +684,7 @@ public:
 private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
-   Api api_;
+   Api api_{NO_CMD};
 
    friend class cereal::access;
    template<class Archive>
@@ -699,7 +699,7 @@ class CheckPtCmd : public UserCmd {
 public:
    CheckPtCmd(ecf::CheckPt::Mode m, int interval,int checkpt_save_time_alarm)
    :  mode_(m), check_pt_interval_(interval),check_pt_save_time_alarm_(checkpt_save_time_alarm) {}
-   CheckPtCmd() : mode_(ecf::CheckPt::UNDEFINED), check_pt_interval_(0),check_pt_save_time_alarm_(0) {}
+   CheckPtCmd() = default;
 
    ecf::CheckPt::Mode mode() const { return mode_;}
    int check_pt_interval() const { return check_pt_interval_;}
@@ -717,9 +717,9 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
 private:
-   ecf::CheckPt::Mode mode_;
-   int check_pt_interval_;
-   int check_pt_save_time_alarm_;
+   ecf::CheckPt::Mode mode_{ecf::CheckPt::UNDEFINED};
+   int check_pt_interval_{0};
+   int check_pt_save_time_alarm_{0};
 
    friend class cereal::access;
    template<class Archive>
@@ -751,11 +751,7 @@ public:
      client_handle_(client_handle),
      client_state_change_no_(0),
      client_modify_change_no_(0) {}
-   CSyncCmd()
-   : api_(SYNC),
-     client_handle_(0),
-     client_state_change_no_(0),
-     client_modify_change_no_(0) {}
+   CSyncCmd()= default;
 
    Api api() const { return api_;}
    int client_state_change_no() const { return client_state_change_no_;}
@@ -779,10 +775,10 @@ private:
 
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
-   Api api_;
-   int client_handle_;
-   int client_state_change_no_;
-   int client_modify_change_no_;
+   Api api_{SYNC};
+   int client_handle_{0};
+   int client_state_change_no_{0};
+   int client_modify_change_no_{0};
 
    friend class cereal::access;
    template<class Archive>
@@ -801,9 +797,7 @@ public:
    enum Api { REGISTER, DROP, DROP_USER, ADD, REMOVE, AUTO_ADD , SUITES };
 
    explicit ClientHandleCmd(Api api = AUTO_ADD)
-   : api_(api),
-     client_handle_(0),
-     auto_add_new_suites_(false) {}
+   : api_(api) {}
 
    ClientHandleCmd(const std::vector<std::string>& suites, bool add_add_new_suites)
    : api_(REGISTER),
@@ -848,8 +842,8 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
    Api api_;
-   int client_handle_;
-   bool auto_add_new_suites_;
+   int client_handle_{0};
+   bool auto_add_new_suites_{false};
    std::string drop_user_;
    std::vector<std::string> suites_;
 
@@ -884,7 +878,7 @@ public:
    enum Api { NO_CMD, JOB_GEN, CHECK_JOB_GEN_ONLY, GET, WHY, GET_STATE, MIGRATE };
    CtsNodeCmd(Api a, const std::string& absNodePath) : api_(a),absNodePath_(absNodePath) {}
    explicit CtsNodeCmd(Api a) : api_(a) { assert(a != NO_CMD); }
-   CtsNodeCmd() : api_(NO_CMD) {}
+   CtsNodeCmd()= default;
 
    Api api() const { return api_;}
    const std::string& absNodePath() const { return absNodePath_;}
@@ -910,7 +904,7 @@ private:
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
 
 private:
-   Api api_;
+   Api api_{NO_CMD};
    std::string absNodePath_;
 
    friend class cereal::access;
@@ -929,12 +923,11 @@ public:
    enum Api { NO_CMD,  DELETE, SUSPEND, RESUME, KILL, STATUS, CHECK, EDIT_HISTORY, ARCHIVE, RESTORE };
 
    PathsCmd(Api api,const std::vector<std::string>& paths, bool force = false)
-   : api_(api),force_(force),paths_(paths){}
+      : api_(api),force_(force),paths_(paths){}
    PathsCmd(Api api,const std::string& absNodePath, bool force = false);
    explicit PathsCmd(Api api)
-   : api_(api), force_(false) { assert(api != NO_CMD); }
-   PathsCmd()
-   : api_(NO_CMD),force_(false) {}
+      : api_(api), force_(false) { assert(api != NO_CMD); }
+   PathsCmd() = default;
 
    Api api() const { return api_; }
    const std::vector<std::string>& paths() const { return paths_;}
@@ -960,8 +953,8 @@ private:
    std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
 
 private:
-   Api api_;
-   bool force_;
+   Api api_{NO_CMD};
+   bool force_{false};
    std::vector<std::string> paths_;
 
    friend class cereal::access;
@@ -1006,7 +999,7 @@ private:
 
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
-   LogApi api_;
+   LogApi api_{LogCmd::GET};
    int get_last_n_lines_; // default to 100 -> ECFLOW-174
    std::string new_path_;
 
@@ -1058,7 +1051,7 @@ private:
 class BeginCmd : public UserCmd {
 public:
    BeginCmd(const std::string& suiteName, bool force = false);
-   BeginCmd() : force_(false) {}
+   BeginCmd()= default;
 
    const std::string& suiteName() const { return suiteName_;}
    bool force() const { return force_;}
@@ -1082,7 +1075,7 @@ private:
 
 private:
    std::string suiteName_;
-   bool        force_;      // reset begin status on suites & bypass checks, can create zombies, used in test only
+   bool        force_{false};      // reset begin status on suites & bypass checks, can create zombies, used in test only
 
    friend class cereal::access;
    template<class Archive>
@@ -1143,7 +1136,7 @@ public:
    RequeueNodeCmd(const std::string& absNodepath, Option op = NO_OPTION)
    : paths_(std::vector<std::string>(1,absNodepath)), option_(op) {}
 
-   RequeueNodeCmd() : option_(NO_OPTION) {}
+   RequeueNodeCmd()= default;
 
    const std::vector<std::string>& paths() const { return paths_;}
    Option option() const { return option_;}
@@ -1168,7 +1161,7 @@ private:
 
 private:
    mutable std::vector<std::string>  paths_;  // mutable to allow swap to clear & reclaim memory, as soon as possible
-   Option                    option_;
+   Option                    option_{NO_OPTION};
 
    friend class cereal::access;
    template<class Archive>
@@ -1184,7 +1177,7 @@ class OrderNodeCmd : public UserCmd {
 public:
    OrderNodeCmd(const std::string& absNodepath, NOrder::Order op)
    : absNodepath_(absNodepath), option_(op) {}
-   OrderNodeCmd() : option_(NOrder::TOP) {}
+   OrderNodeCmd()= default;
 
    const std::string& absNodepath() const { return absNodepath_;}
    NOrder::Order option() const { return option_;}
@@ -1207,7 +1200,7 @@ private:
 
 private:
    std::string   absNodepath_;
-   NOrder::Order      option_;
+   NOrder::Order      option_{NOrder::TOP};
 
    friend class cereal::access;
    template<class Archive>
@@ -1229,7 +1222,7 @@ public:
    RunNodeCmd(const std::vector<std::string>& paths, bool force, bool test = false)
    : paths_(paths), force_(force), test_(test) {}
 
-   RunNodeCmd() : force_(false), test_(false) {}
+   RunNodeCmd()= default;
 
    const std::vector<std::string>& paths() const { return paths_;}
    bool force() const { return force_;}
@@ -1254,8 +1247,8 @@ private:
 
 private:
    std::vector<std::string> paths_;
-   bool        force_;
-   bool        test_;   // only for test, hence we don't serialise this
+   bool        force_{false};
+   bool        test_{false};   // only for test, hence we don't serialise this
 
    friend class cereal::access;
    template<class Archive>
@@ -1315,7 +1308,7 @@ public:
    LoadDefsCmd(const defs_ptr& defs, bool force = false);
    LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */,
                const std::vector<std::pair<std::string,std::string> >& client_env = std::vector<std::pair<std::string,std::string> >());
-   LoadDefsCmd() : force_(false) {}
+   LoadDefsCmd()= default;
 
    // Uses by equals only
    const std::string& defs_as_string() const { return defs_; }
@@ -1338,7 +1331,7 @@ private:
 
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
-   bool        force_;
+   bool        force_{false};
    std::string defs_;
    std::string defs_filename_;
 
@@ -1357,7 +1350,7 @@ class ReplaceNodeCmd : public UserCmd {
 public:
    ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, defs_ptr client_defs, bool force );
    ReplaceNodeCmd(const std::string& node_path, bool createNodesAsNeeded, const std::string& path_to_defs, bool force);
-   ReplaceNodeCmd() : createNodesAsNeeded_(false), force_(false) {}
+   ReplaceNodeCmd()= default;
 
    const std::string& the_client_defs() const  { return clientDefs_; }
    const std::string& pathToNode() const { return pathToNode_; }
@@ -1386,8 +1379,8 @@ private:
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
    void cleanup() override { std::string().swap(clientDefs_);} /// run in the server, after command send to client
 
-   bool        createNodesAsNeeded_;
-   bool        force_;
+   bool        createNodesAsNeeded_{false};
+   bool        force_{false};
    std::string pathToNode_;
    std::string path_to_defs_; // Can be empty if defs loaded in memory via python api
    std::string clientDefs_;
@@ -1424,7 +1417,7 @@ public:
             bool setRepeatToLastValue)
    : paths_(std::vector<std::string>(1,path)), stateOrEvent_(stateOrEvent),
      recursive_(recursive), setRepeatToLastValue_(setRepeatToLastValue) {}
-   ForceCmd() : recursive_(false), setRepeatToLastValue_(false) {}
+   ForceCmd()= default;
 
    // Uses by equals only
    const std::vector<std::string> paths() const { return paths_; }
@@ -1453,8 +1446,8 @@ private:
 private:
    std::vector<std::string> paths_;
    std::string              stateOrEvent_;
-   bool                     recursive_;
-   bool                     setRepeatToLastValue_;
+   bool                     recursive_{false};
+   bool                     setRepeatToLastValue_{false};
 
    friend class cereal::access;
    template<class Archive>
@@ -1487,7 +1480,7 @@ public:
    )
    : paths_(std::vector<std::string>(1,path)), trigger_(trigger), all_(all), date_(date), time_(time) {}
 
-   FreeDepCmd() : trigger_(true), all_(false), date_(false), time_(false){}
+   FreeDepCmd() = default;
 
    // Uses by equals only
    const std::vector<std::string>& paths() const { return paths_; }
@@ -1516,10 +1509,10 @@ private:
 
 private:
    std::vector<std::string> paths_;
-   bool          trigger_;
-   bool          all_;
-   bool          date_;
-   bool          time_;
+   bool          trigger_{true};
+   bool          all_{false};
+   bool          date_{false};
+   bool          time_{false};
 
    friend class cereal::access;
    template<class Archive>
@@ -1581,9 +1574,7 @@ public:
     : paths_(paths), name_(name),value_(value),add_attr_type_(ADD_ATTR_ND),
       del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false)  {}
 
-   AlterCmd()
-   : add_attr_type_(ADD_ATTR_ND), del_attr_type_(DELETE_ATTR_ND),
-     change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
+   AlterCmd()= default;
 
    // Uses by equals only
    const std::vector<std::string>& paths() const { return paths_; }
@@ -1626,11 +1617,11 @@ private:
    std::vector<std::string> paths_;
    std::string              name_;
    std::string              value_;
-   Add_attr_type            add_attr_type_;
-   Delete_attr_type         del_attr_type_;
-   Change_attr_type         change_attr_type_;
-   ecf::Flag::Type          flag_type_;
-   bool                     flag_; // true means set false means clear
+   Add_attr_type            add_attr_type_{ADD_ATTR_ND};
+   Delete_attr_type         del_attr_type_{DELETE_ATTR_ND};
+   Change_attr_type         change_attr_type_{CHANGE_ATTR_ND};
+   ecf::Flag::Type          flag_type_{ecf::Flag::NOT_SET};
+   bool                     flag_{false}; // true means set false means clear
 
    friend class cereal::access;
    template<class Archive>
@@ -1658,8 +1649,7 @@ public:
    CFileCmd(const std::string& pathToNode, File_t file, size_t max_lines)
    : file_(file),  pathToNode_(pathToNode), max_lines_(max_lines) {}
    CFileCmd(const std::string& pathToNode, const std::string& file_type, const std::string& max_lines);
-
-   CFileCmd() : file_(ECF),max_lines_(0) {}
+   CFileCmd() = default;
 
    // Uses by equals only
    const std::string& pathToNode() const { return pathToNode_; }
@@ -1685,9 +1675,9 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
 
-   File_t        file_;
+   File_t        file_{ECF};
    std::string   pathToNode_;
-   size_t        max_lines_;
+   size_t        max_lines_{0};
 
    friend class cereal::access;
    template<class Archive>
@@ -1732,7 +1722,7 @@ public:
       alias_(create_alias),run_(run_alias)
    {}
 
-   EditScriptCmd() : edit_type_(EDIT),alias_(false),run_(false) {}
+   EditScriptCmd()= default;
 
    // Uses by equals only
    const std::string& path_to_node() const { return path_to_node_; }
@@ -1759,12 +1749,12 @@ private:
    void cleanup() override{ std::vector<std::string>().swap(user_file_contents_);} /// run in the server, after doHandleRequest
 
 private:
-   EditType      edit_type_;
+   EditType      edit_type_{EDIT};
    std::string   path_to_node_;
    mutable std::vector<std::string>  user_file_contents_;
    NameValueVec user_variables_;
-   bool alias_;
-   bool run_;
+   bool alias_{false};
+   bool run_{false};
 
    friend class cereal::access;
    template<class Archive>

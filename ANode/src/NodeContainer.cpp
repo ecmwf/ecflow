@@ -51,8 +51,7 @@ using namespace std;
 NodeContainer::NodeContainer( const std::string& name )
 : Node(name),order_state_change_no_(0), add_remove_state_change_no_(0) {}
 
-NodeContainer::NodeContainer()
-: order_state_change_no_(0),add_remove_state_change_no_(0) {}
+NodeContainer::NodeContainer() = default;
 
 void NodeContainer::copy(const NodeContainer& rhs)
 {
@@ -95,6 +94,13 @@ NodeContainer& NodeContainer::operator=(const NodeContainer& rhs)
 }
 
 NodeContainer::~NodeContainer() = default;
+
+bool NodeContainer::check_defaults() const
+{
+   if (order_state_change_no_ != 0) throw std::runtime_error("NodeContainer::check_defaults(): order_state_change_no_ != 0");
+   if (add_remove_state_change_no_ != 0) throw std::runtime_error("NodeContainer::check_defaults(): add_remove_state_change_no_ != 0");
+   return Node::check_defaults();
+}
 
 void NodeContainer::accept(ecf::NodeTreeVisitor& v)
 {

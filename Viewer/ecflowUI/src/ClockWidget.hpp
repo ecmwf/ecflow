@@ -35,7 +35,7 @@ protected:
 
     PropertyMapper* prop_;
     QTimer* timer_;
-    bool showSec_;
+    bool showSec_{false};
 };
 
 #endif // CLOCKWIDGET_HPP

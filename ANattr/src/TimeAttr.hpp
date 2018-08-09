@@ -58,7 +58,7 @@ namespace ecf {
 class TimeAttr  {
 public:
    explicit TimeAttr(const std::string&);
-   TimeAttr() : free_(false), state_change_no_(0) {}
+   TimeAttr() = default;
 	TimeAttr(int hour, int minute, bool relative = false )
 		: ts_(hour, minute,relative), free_(false),state_change_no_(0) {}
 	TimeAttr(const TimeSlot& t,    bool relative = false )
@@ -113,8 +113,8 @@ private:
 
 private:
  	TimeSeries   ts_;
-	bool         free_;
-	unsigned int state_change_no_;  // *not* persisted, only used on server side
+	bool         free_{false};
+	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>

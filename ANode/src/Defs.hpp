@@ -340,18 +340,18 @@ private:
 
 private:
    /// Note: restoring from a check point file will reset, defs state and modify numbers
-   unsigned int    state_change_no_;            // persisted since passed to client, however side effect, is it will be in checkpoint file
-   unsigned int    modify_change_no_;           // persisted since passed to client, however side effect, is it will be in checkpoint file
-   unsigned int    updateCalendarCount_;
-   unsigned int    order_state_change_no_;      // *NOT* persisted
+   unsigned int    state_change_no_{0};            // persisted since passed to client, however side effect, is it will be in checkpoint file
+   unsigned int    modify_change_no_{ 0 };           // persisted since passed to client, however side effect, is it will be in checkpoint file
+   unsigned int    updateCalendarCount_{0};
+   unsigned int    order_state_change_no_{0};   // *NOT* persisted
    NState          state_;                      // state & change_no, i,e attribute changed
    ServerState     server_;
    std::vector<suite_ptr> suiteVec_;
    std::map<std::string, std::deque<std::string> > edit_history_;      // path,request
-   mutable bool                                    save_edit_history_; // NOT persisted
+   mutable bool                                    save_edit_history_{false}; // NOT persisted
    ecf::Flag                    flag_;
 
-   ClientSuiteMgr client_suite_mgr_;                    // NOT persisted
+   ClientSuiteMgr client_suite_mgr_{this};     // NOT persisted
 
    /// Externs are *NEVER* loaded in the server, since they can be computed and
    /// save on network band with, and check point file size.
@@ -363,7 +363,7 @@ private:
    /// Observer notifications Start. Allow client to query if they are in syncing with server
    void notify_start() { in_notification_ = true;  }
    void notify_end()   { in_notification_ = false; }
-   bool in_notification_;
+   bool in_notification_{false};
    std::vector<AbstractObserver*> observers_;
    friend class ChangeStartNotification;
    void notify_delete();

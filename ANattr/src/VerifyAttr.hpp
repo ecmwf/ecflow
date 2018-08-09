@@ -28,8 +28,7 @@ class VerifyAttr {
 public:
 	VerifyAttr(NState::State state,int expected,int actual = 0)
 		: state_(state), expected_(expected), actual_(actual), state_change_no_(0) {}
-	VerifyAttr()
-		: state_(NState::UNKNOWN), expected_(0), actual_(0),state_change_no_(0) {}
+	VerifyAttr() = default;
 
  	bool operator==(const VerifyAttr& rhs) const;
 	std::ostream& print(std::ostream&) const;
@@ -47,10 +46,10 @@ public:
 	std::string dump() const;
 
 private:
-	NState::State state_;
-	int           expected_;
-	int           actual_;
-	unsigned int state_change_no_;  // *not* persisted, only used on server side
+	NState::State state_{NState::UNKNOWN};
+	int           expected_{0};
+	int           actual_{0};
+	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>

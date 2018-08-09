@@ -28,9 +28,11 @@ public:
 	NodeContainer();
 	~NodeContainer() override;
 
-	void accept(ecf::NodeTreeVisitor&) override;
-	void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
-    void reset() override;
+   bool check_defaults() const override;
+
+   void accept(ecf::NodeTreeVisitor&) override;
+   void acceptVisitTraversor(ecf::NodeTreeVisitor& v) override;
+   void reset() override;
 	void begin() override;
 	void requeue(Requeue_args&) override;
    void requeue_time_attrs() override;
@@ -132,8 +134,8 @@ private:
 	friend void export_SuiteAndFamily();
 
 protected:
-   unsigned int order_state_change_no_;     // no need to persist
-   unsigned int add_remove_state_change_no_;// no need to persist
+   unsigned int order_state_change_no_{0};     // no need to persist
+   unsigned int add_remove_state_change_no_{0};// no need to persist
 
    void force_sync() override;
 

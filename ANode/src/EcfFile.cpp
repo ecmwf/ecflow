@@ -68,10 +68,7 @@ static void vector_to_string(const std::vector<std::string>& vec, std::string& s
    }
 }
 
-EcfFile::EcfFile()
-: node_(nullptr), script_type_(EcfFile::ECF_SCRIPT_CMD)
-{
-}
+EcfFile::EcfFile()= default;
 
 EcfFile& EcfFile::operator=(const EcfFile& rhs)
 {

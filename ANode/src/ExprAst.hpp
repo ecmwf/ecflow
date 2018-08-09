@@ -71,7 +71,7 @@ public:
 
 class AstTop : public Ast {
 public:
-	AstTop() : root_(nullptr) {}
+	AstTop()= default;
 	~AstTop() override;
 
 	void accept(ecf::ExprAstVisitor&) override;
@@ -98,14 +98,14 @@ public:
    void invalidate_trigger_references() const override;
 
 private:
-	Ast*        root_;
+	Ast*        root_{nullptr};
 	std::string exprType_; // trigger or complete
 };
 
 // This if one of AND, OR, == != <= >= +, -,*,!,%,/
 class AstRoot : public Ast {
 public:
-   AstRoot() :left_(nullptr), right_(nullptr) {}
+   AstRoot()= default;
 	~AstRoot() override;
 
  	bool isRoot() const override { return true;}
@@ -132,8 +132,8 @@ protected:
    std::string do_bracket_expression(const std::string& root ) const;
 
 protected:
-	Ast* left_;
-	Ast* right_;
+	Ast* left_{nullptr};
+	Ast* right_{nullptr};
 };
 
 class AstNot : public AstRoot {

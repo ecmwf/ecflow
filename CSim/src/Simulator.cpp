@@ -52,7 +52,7 @@ public:
 	~LogDestroyer() { Log::destroy(); }
 };
 
-Simulator::Simulator() : level_(0), print_style_(PrintStyle::STATE){}
+Simulator::Simulator() : print_style_(PrintStyle::STATE){}
 
 bool Simulator::run(const std::string& theDefsFile,std::string& errorMsg) const
 {

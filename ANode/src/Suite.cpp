@@ -105,6 +105,18 @@ suite_ptr Suite::create(const std::string& name)
 	return std::make_shared<Suite>( name );
 }
 
+bool Suite::check_defaults() const
+{
+   if (defs_ != nullptr) throw std::runtime_error("Suite::check_defaults(): defs_ != nullptr");
+   if (begun_ != false) throw std::runtime_error("Suite::check_defaults():  begun_ != false");
+   if (state_change_no_ != 0) throw std::runtime_error("Suite::check_defaults():  state_change_no_ != 0");
+   if (modify_change_no_ != 0 ) throw std::runtime_error("Suite::check_defaults(): modify_change_no_ != 0 ");
+   if (begun_change_no_ != 0) throw std::runtime_error("Suite::check_defaults():  begun_change_no_ != 0");
+   if (calendar_change_no_ != 0 ) throw std::runtime_error("Suite::check_defaults(): calendar_change_no_ != 0");
+   if (suite_gen_variables_ != nullptr) throw std::runtime_error("Suite::check_defaults(): suite_gen_variables_ != nullptr");
+   return NodeContainer::check_defaults();
+}
+
 void Suite::accept(ecf::NodeTreeVisitor& v)
 {
 	SuiteChanged1 changed(this);
@@ -786,12 +798,14 @@ void SuiteGenVariables::update_generated_variables() const
    //    assert( t.tm_year + 1900 == calendar_.year());
    //#endif
 
+   int hours = time_of_day.hours();
+   int minutes = time_of_day.minutes();
 
    char smstime[255];
-   sprintf(smstime,"%02d%02d", time_of_day.hours(),time_of_day.minutes());
+   sprintf(smstime,"%02d%02d", hours,minutes);
    genvar_time_.set_value( smstime );
 
-   sprintf(smstime,"%02d:%02d", time_of_day.hours(),time_of_day.minutes());
+   sprintf(smstime,"%02d:%02d", hours,minutes );
    genvar_ecf_time_.set_value( smstime );
 
    //cout << "genvar_time_ = " << genvar_time_.theValue() << "\n";

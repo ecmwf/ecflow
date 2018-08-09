@@ -18,12 +18,8 @@
 
 SuiteModel::SuiteModel(QObject *parent) :
      QAbstractItemModel(parent),
-     server_(nullptr),
-     data_(nullptr),
-     realData_(nullptr),
      presentCol_(QColor(1,128,73)),
-     notPresentCol_(QColor(255,0,0)),
-     edited_(false)
+     notPresentCol_(QColor(255,0,0))
 {
 }
 

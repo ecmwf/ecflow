@@ -29,7 +29,7 @@ class MiscAttrs : private boost::noncopyable {
 public:
    explicit MiscAttrs(Node* node) : node_(node){}
    MiscAttrs(const MiscAttrs& rhs);
-   MiscAttrs() : node_(nullptr){}
+   MiscAttrs()= default;
    ~MiscAttrs();
 
    // needed by node serialisation
@@ -92,7 +92,7 @@ private:
    std::vector<GenericAttr>::const_iterator generic_end() const { return  generics_.end();}
 
 private:
-   Node*        node_; // *NOT* persisted must be set by the parent class
+   Node*        node_{nullptr}; // *NOT* persisted must be set by the parent class
    friend class Node;
 
 private:

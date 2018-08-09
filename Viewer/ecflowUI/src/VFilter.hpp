@@ -73,8 +73,8 @@ private:
      void clearCurrent();
 
      std::vector<int> currentCache_; //we use to speed up the check in isSet()
-     bool empty_;
-     bool complete_;
+     bool empty_{true};
+     bool complete_{false};
 };
 
 class NodeStateFilter : public VParamSet

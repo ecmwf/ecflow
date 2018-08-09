@@ -29,7 +29,7 @@ class DState {
 public:
    enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5, SUSPENDED=6};
 	explicit DState(State s): st_(s), state_change_no_(0) {}
-	DState(): st_(default_state()),state_change_no_(0) {}
+	DState(): st_(default_state()) {}
 	static DState::State default_state() { return DState::QUEUED; }  // NEVER change, or will break client/server
 
 	State state() const { return st_;}
@@ -55,7 +55,7 @@ public:
 
 private:
 	State st_;
-	unsigned int state_change_no_;  // *not* persisted, only used on server side
+	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
 	template<class Archive>

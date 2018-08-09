@@ -20,8 +20,7 @@
 #include <QDebug>
 
 NodeQueryResultModel::NodeQueryResultModel(QObject *parent) :
-          QAbstractItemModel(parent),
-          columns_(nullptr)
+          QAbstractItemModel(parent)
 {
 	columns_=ModelColumn::def("query_columns");
     Q_ASSERT(columns_);

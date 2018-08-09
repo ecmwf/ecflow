@@ -24,9 +24,7 @@
 #include <cassert>
 
 TableFilterWidget::TableFilterWidget(QWidget *parent) :
-   QWidget(parent),
-   filterDef_(nullptr),
-   serverFilter_(nullptr)
+   QWidget(parent)
 {
 	setupUi(this);
 

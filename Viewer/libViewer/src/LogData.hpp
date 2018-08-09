@@ -36,7 +36,7 @@ class LogData
     friend class LogDataItem;
 
 public:
-    LogData() : refTimeInMs_(0) {}
+    LogData()= default;
 
     std::size_t size() const {return data_.size();}
     bool isEmpty() const {return size() == 0;}
@@ -58,7 +58,7 @@ public:
     void appendFromText(const std::vector<std::string>& txtVec);
 
 protected:
-    qint64 refTimeInMs_;
+    qint64 refTimeInMs_{0};
     std::string fileName_;
     std::vector<LogDataItem> data_;
 };

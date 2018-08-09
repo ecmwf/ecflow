@@ -12,8 +12,7 @@
 #include "LogModel.hpp"
 
 LogView::LogView(QWidget *parent) :
-    QTreeView(parent),
-    logModel_(nullptr)
+    QTreeView(parent)
 {
     setProperty("log","1");
     setRootIsDecorated(false);

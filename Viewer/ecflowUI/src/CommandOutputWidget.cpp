@@ -19,8 +19,7 @@
 #include "ViewerUtil.hpp"
 
 CommandOutputModel::CommandOutputModel(QObject *parent) :
-          QAbstractItemModel(parent),
-          columns_(nullptr)
+          QAbstractItemModel(parent)
 {
     columns_=ModelColumn::def("output_columns");
 

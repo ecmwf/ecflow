@@ -40,7 +40,7 @@ protected:
     void readSettings();
     void writeSettings();
     
-	DashboardWidget* dw_;
+	DashboardWidget* dw_{nullptr};
     
 };
 

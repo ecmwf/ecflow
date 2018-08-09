@@ -32,7 +32,7 @@ public:
             unsigned int client_state_change_no,
             unsigned int client_modify_change_no,
             AbstractServer* as);
-   SNewsCmd() : ServerToClientCmd(), news_(ServerReply::NO_NEWS) {}
+   SNewsCmd() : ServerToClientCmd(){}
 
    void init(unsigned int client_handle, // a reference to a set of suites used by client
             unsigned int client_state_change_no,
@@ -47,7 +47,7 @@ public:
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
 
 private:
-   ServerReply::News_t news_;
+   ServerReply::News_t news_{ServerReply::NO_NEWS};
 
    friend class cereal::access;
    template<class Archive>

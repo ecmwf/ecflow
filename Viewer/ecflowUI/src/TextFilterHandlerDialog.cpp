@@ -72,7 +72,7 @@ void TextFilterAddDialog::accept()
 //======================================
 
 TextFilterEditDialog::TextFilterEditDialog(QWidget *parent) :
-   TextFilterAddDialog(parent), itemIndex_(-1)
+   TextFilterAddDialog(parent)
 {
     setWindowTitle(tr("Edit item"));
 }
@@ -117,7 +117,7 @@ void TextFilterEditDialog::accept()
 //
 //======================================
 
-TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget *parent) : QDialog(parent), applyIndex_(-1)
+TextFilterHandlerDialog::TextFilterHandlerDialog(QWidget *parent) : QDialog(parent)
 {
     setupUi(this);
 

@@ -21,8 +21,8 @@
 
 
 AbstractNodeModel::AbstractNodeModel(QObject *parent) :
-   QAbstractItemModel(parent),
-   active_(false)
+   QAbstractItemModel(parent)
+   
 {
 	//At this point the model is not active and it cannot see its data!
 }

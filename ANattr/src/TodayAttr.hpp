@@ -93,7 +93,7 @@ namespace ecf {
 class TodayAttr  {
 public:
    explicit TodayAttr(const std::string&);
-	TodayAttr() : free_(false), state_change_no_(0) {}
+	TodayAttr() = default;
 	TodayAttr(int hour, int minute, bool relative = false )
 		: ts_(hour, minute,relative), free_(false),state_change_no_(0) {}
  	TodayAttr(const TimeSlot& t,    bool relative = false )
@@ -163,8 +163,8 @@ private:
 
 private:
 	TimeSeries    ts_;
-	bool          free_;         // persisted for use by why() on client side && for state changes
-	unsigned int state_change_no_;  // *not* persisted, only used on server side
+	bool          free_{false};         // persisted for use by why() on client side && for state changes
+	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>

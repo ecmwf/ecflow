@@ -113,8 +113,8 @@ private:
 	std::vector<int> weekDays_;
 	std::vector<int> daysOfMonth_;
 	std::vector<int> months_;
- 	bool             free_;         // persisted for use by why() on client side
-	unsigned int    state_change_no_;  // *not* persisted, only used on server side
+ 	bool             free_{false};         // persisted for use by why() on client side
+	unsigned int    state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
 	template<class Archive>

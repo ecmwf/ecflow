@@ -189,9 +189,7 @@ class TextPagerLayout;
 struct TextCursorSharedPrivate
 {
 public:
-    TextCursorSharedPrivate() : ref(1), position(-1), anchor(-1),
-        overrideColumn(-1), viewportWidth(-1),
-        document(nullptr)
+    TextCursorSharedPrivate() : ref(1)
     {}
 
     ~TextCursorSharedPrivate()
@@ -206,9 +204,9 @@ public:
     }
 
     mutable QAtomicInt ref;
-    int position, anchor, overrideColumn, viewportWidth;
+    int position{-1}, anchor{-1}, overrideColumn{-1}, viewportWidth{-1};
 
-    TextPagerDocument *document;
+    TextPagerDocument *document{nullptr};
 };
 
 

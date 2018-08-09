@@ -76,13 +76,13 @@ protected:
 
     QFont font_;
     QPixmap pix_;   
-    int hMargin_;
-    int vMargin_;   
-    int gap_;
-    int width_;
-    int maxWidth_;
+    int hMargin_{1};
+    int vMargin_{1};   
+    int gap_{5};
+    int width_{0};
+    int maxWidth_{0};
     int height_;
-    int itemHeight_;
+    int itemHeight_{0};
     QString text_;
     QRect textRect_;
     QColor textCol_;
@@ -91,10 +91,10 @@ protected:
     NodePathEllipsisItem* ellipsisItem_;
     
     PropertyMapper* prop_;
-    bool useGrad_;
-    int gradLighter_;
-    int hovered_;
-    bool elided_;
+    bool useGrad_{true};
+    int gradLighter_{150};
+    int hovered_{-1};
+    bool elided_{false};
 };
 
 class NodePathItem 
@@ -238,7 +238,7 @@ protected:
 	VInfo_ptr info_;
 	VInfo_ptr infoFull_;
     BcWidget* bc_;     
-    Mode mode_;
+    Mode mode_{GuiMode};
 };
 
 #endif

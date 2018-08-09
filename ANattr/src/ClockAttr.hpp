@@ -76,13 +76,13 @@ public:
 
 private:
 	bool hybrid_;
-	bool positiveGain_;
-	bool startStopWithServer_;  // see Calendar.hpp for more details
-	bool end_clock_;            // *NOT* persisted, used for end clock, simulator only
-	long gain_;                 // in seconds
-	int day_;
-	int month_;
-	int year_;
+	bool positiveGain_{false};
+	bool startStopWithServer_{false};  // see Calendar.hpp for more details
+	bool end_clock_{false};            // *NOT* persisted, used for end clock, simulator only
+	long gain_{0};                 // in seconds
+	int day_{0};
+	int month_{0};
+	int year_{0};
 
 	unsigned int   state_change_no_;  // *not* persisted, only used on server side
 

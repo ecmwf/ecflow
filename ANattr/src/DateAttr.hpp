@@ -28,9 +28,7 @@ class DateAttr {
 public:
    DateAttr(int day, int month, int year); // will throw std::out_of_range for if invalid date
    explicit DateAttr(const std::string&);           // will throw std::runtime_error for if invalid date
-   DateAttr()
-   : day_(0), month_(0), year_(0), free_(false),
-     state_change_no_(0) {} // for serialisation
+   DateAttr() = default; // for serialisation
    explicit DateAttr(const boost::gregorian::date& date)
    : day_(date.day()), month_(date.month()), year_(date.year()), free_(false),
      state_change_no_(0) {} // for test
@@ -77,11 +75,11 @@ private:
    bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
-   int          day_;
-   int          month_;
-   int          year_;
-   bool         free_; // persisted for use by why() on client side
-   unsigned int state_change_no_;  // *not* persisted, only used on server side
+   int          day_{0};
+   int          month_{0};
+   int          year_{0};
+   bool         free_{false}; // persisted for use by why() on client side
+   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>

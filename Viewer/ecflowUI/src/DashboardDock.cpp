@@ -17,8 +17,7 @@
 #include "IconProvider.hpp"
 
 DashboardDockTitleWidget::DashboardDockTitleWidget(QWidget *parent) :
-        QWidget(parent),
-        titleBc_(nullptr)
+        QWidget(parent)
 {
 	setupUi(this);
 

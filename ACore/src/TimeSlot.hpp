@@ -30,7 +30,7 @@ namespace ecf {
 class TimeSlot {
 public:
    static std::string type() { return "TimeSlot";}
-	TimeSlot() : h_(-1), m_(-1) {}
+	TimeSlot()= default;
 	TimeSlot(int hour, int min) : h_(hour), m_(min) { assert(hour >= 0  && min >=0 ); }
 	explicit TimeSlot(const boost::posix_time::time_duration& td)
 		: h_(td.hours()), m_(td.minutes())
@@ -56,8 +56,8 @@ public:
  	std::string toString() const;
 
 private:
- 	int h_;
- 	int m_;
+ 	int h_{-1};
+ 	int m_{-1};
 
  	friend class cereal::access;
  	template<class Archive>

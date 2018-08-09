@@ -16,8 +16,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 
 ZombieModel::ZombieModel(QObject *parent) :
-          QAbstractItemModel(parent),
-          columns_(nullptr)
+          QAbstractItemModel(parent)
 {
 	columns_=ModelColumn::def("zombie_columns");
 

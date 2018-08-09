@@ -27,9 +27,7 @@ using namespace ecf;
 using namespace std;
 using namespace boost;
 
-WhiteListFile::WhiteListFile()
-:  all_users_have_read_access_(false),
-   all_users_have_write_access_(false) {}
+WhiteListFile::WhiteListFile()= default;
 
 WhiteListFile::~WhiteListFile() = default;
 

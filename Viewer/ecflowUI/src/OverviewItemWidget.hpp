@@ -38,7 +38,7 @@ protected:
     void updateState(const ChangeFlags&) override;
     void reloadRequested() override;
 
-	int lastScrollPos_;
+	int lastScrollPos_{0};
 };
 
 #endif

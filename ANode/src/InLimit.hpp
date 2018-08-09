@@ -36,7 +36,7 @@ public:
            const std::string& path_to_node_with_referenced_limit = std::string(), // if empty, search for limit up parent hierarchy
            int tokens = 1,                                                        // tokens to consume in the Limit
            bool limit_this_node_only = false);                                    // if true limit this node only
-   InLimit() : tokens_(1),limit_this_node_only_(false),incremented_(false) {}
+   InLimit()= default;
 
    std::ostream& print(std::ostream&) const;
    bool operator==(const InLimit& rhs) const;
@@ -59,9 +59,9 @@ private:
 private:
    std::string            n_;
    std::string            path_;
-   int                    tokens_;
-   bool                   limit_this_node_only_;  // default is false,if True, will consume one token(s) only, regardless of number of children
-   bool                   incremented_;           // state
+   int                    tokens_{1};
+   bool                   limit_this_node_only_{false};  // default is false,if True, will consume one token(s) only, regardless of number of children
+   bool                   incremented_{false};           // state
    std::weak_ptr<Limit>   limit_;                 // NOT persisted since computed on the fly
 
    friend class cereal::access;

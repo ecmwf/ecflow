@@ -18,27 +18,14 @@
 
 class Task : public Submittable {
 public:
-   explicit Task( const std::string& name )
-   : Submittable(name),
-     order_state_change_no_(0),
-     add_remove_state_change_no_(0),
-     alias_change_no_(0),
-     alias_no_(0)
-     {}
-
-   Task()
-   : order_state_change_no_(0),
-     add_remove_state_change_no_(0),
-     alias_change_no_(0),
-     alias_no_(0)
-     {}
-
+   explicit Task( const std::string& name ) : Submittable(name) {}
+   Task()= default;
    Task(const Task& rhs);
    Task& operator=(const Task&);
-
    node_ptr clone() const override;
-
 	~Task() override;
+
+   bool check_defaults() const override;
 
 	static task_ptr create(const std::string& name);
 
@@ -165,11 +152,11 @@ private:
  	}
 
 private:
-   unsigned int order_state_change_no_;     // no need to persist
-   unsigned int add_remove_state_change_no_;// no need to persist
+   unsigned int order_state_change_no_{0};     // no need to persist
+   unsigned int add_remove_state_change_no_{0};// no need to persist
 
-   unsigned int alias_change_no_;           // no need to persist, for alias number only
- 	unsigned int alias_no_;
+   unsigned int alias_change_no_{0};           // no need to persist, for alias number only
+ 	unsigned int alias_no_{0};
  	std::vector<alias_ptr> aliases_;
 };
 

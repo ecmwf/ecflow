@@ -34,8 +34,7 @@ void IconTabBar::paintEvent(QPaintEvent *e)
 }
 
 TabWidget::TabWidget(QWidget* parent) :
-		QWidget(parent),
-		beingCleared_(false)
+		QWidget(parent)
 {
 	//Main layout
 	auto* layout = new QVBoxLayout(this);

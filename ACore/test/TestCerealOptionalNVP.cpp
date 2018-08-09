@@ -32,7 +32,7 @@ namespace fs = boost::filesystem;
 class Base {
 public:
    enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5, SUSPENDED=6};
-   Base() : x(2),y(2),state_(State::SUSPENDED),test_(false) {}
+   Base() = default;
    Base(bool test) : x(2),y(2),state_(State::SUSPENDED),test_(test) {}
    bool operator==(const Base & rhs) const { return x == rhs.x && y == rhs.y && state_ == rhs.state_ && test_ == rhs.test_;}
    void print(std::ostream &os) const {
@@ -46,9 +46,9 @@ private:
       ar( CEREAL_NVP(x), CEREAL_NVP(y), CEREAL_NVP(state_) );
       CEREAL_OPTIONAL_NVP(ar, test_, [this](){return test_; }); // conditionally save
    }
-   int x, y;
-   State state_;
-   bool test_;
+   int x{2}, y{2};
+   State state_{State::SUSPENDED};
+   bool test_{false};
 };
 
 std::ostream& operator<<(std::ostream &os, Base const &m) {

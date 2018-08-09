@@ -13,9 +13,8 @@
 #include <QPlainTextEdit>
 
 
-PlainTextSearchInterface::PlainTextSearchInterface() : editor_(nullptr)
-{
-}
+PlainTextSearchInterface::PlainTextSearchInterface()
+= default;
 
 
 bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QTextDocument::FindFlags flags,

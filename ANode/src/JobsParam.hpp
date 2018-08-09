@@ -27,8 +27,7 @@ class JobsParam : private boost::noncopyable {
 public:
    // This constructor is used in test
    explicit JobsParam(bool createJobs = false)
-      : timed_out_of_job_generation_(false),
-        createJobs_(createJobs), spawnJobs_(false), submitJobsInterval_(60){}
+      : createJobs_(createJobs){}
 
 	JobsParam(int submitJobsInterval, bool createJobs, bool spawn_jobs = true)
 	   : timed_out_of_job_generation_(false),
@@ -80,10 +79,10 @@ public:
    EcfFile& ecf_file() { return ecf_file_;}
 
 private:
-   bool timed_out_of_job_generation_;
+   bool timed_out_of_job_generation_{false};
 	bool createJobs_;
-	bool spawnJobs_;
-	int  submitJobsInterval_;
+	bool spawnJobs_{false};
+	int  submitJobsInterval_{60};
 	std::string errorMsg_;
 	std::string debugMsg_;
 	std::vector<Submittable*> submitted_;

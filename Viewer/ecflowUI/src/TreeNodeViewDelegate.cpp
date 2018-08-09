@@ -61,7 +61,7 @@ class TreeNodeDelegateBox : public NodeDelegateBox
 {
 public:
 
-    TreeNodeDelegateBox() : textTopCorrection(0), textBottomCorrection(0)
+    TreeNodeDelegateBox()
      {
          topMargin=2;
          bottomMargin=2;
@@ -74,8 +74,8 @@ public:
      }
 
      int realFontHeight;
-     int textTopCorrection;
-     int textBottomCorrection;
+     int textTopCorrection{0};
+     int textBottomCorrection{0};
 
      void adjust(const QFont& f) override
      {
@@ -126,7 +126,7 @@ public:
 class TreeAttrDelegateBox : public AttrDelegateBox
 {
 public:
-    TreeAttrDelegateBox() : textTopCorrection(0), textBottomCorrection(0)
+    TreeAttrDelegateBox()
      {
          topMargin=2;
          bottomMargin=2;
@@ -139,8 +139,8 @@ public:
      }
 
      int realFontHeight;
-     int textTopCorrection;
-     int textBottomCorrection;
+     int textTopCorrection{0};
+     int textBottomCorrection{0};
 
      void adjust(const QFont& f) override
      {

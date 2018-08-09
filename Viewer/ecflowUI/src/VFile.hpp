@@ -79,19 +79,19 @@ protected:
     std::string sourcePath_;
 	bool  deleteFile_;
 
-	StorageMode storageMode_;
+	StorageMode storageMode_{MemoryStorage};
 	static const size_t maxDataSize_;
-	char* data_;
-	size_t dataSize_;
-	FILE* fp_;
+	char* data_{nullptr};
+	size_t dataSize_{0};
+	FILE* fp_{nullptr};
 
-    FetchMode fetchMode_;
+    FetchMode fetchMode_{NoFetchMode};
     std::string fetchModeStr_;
     QDateTime fetchDate_;
-    unsigned int transferDuration_;
-    int truncatedTo_;
+    unsigned int transferDuration_{0};
+    int truncatedTo_{0};
 
-    bool cached_;
+    bool cached_{false};
     std::vector<std::string> log_;
 
 };

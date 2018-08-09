@@ -38,9 +38,8 @@
 //
 //==============================================
 
-VParamSet::VParamSet() : empty_(true), complete_(false)
-{
-}
+VParamSet::VParamSet()
+= default;
 
 void VParamSet::init(const std::vector<VParam*>& items)
 {

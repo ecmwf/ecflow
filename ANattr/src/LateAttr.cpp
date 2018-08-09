@@ -29,7 +29,7 @@ using namespace boost::posix_time;
 
 namespace ecf {
 
-LateAttr::LateAttr() :  c_is_rel_(false),isLate_(false),state_change_no_(0) {}
+LateAttr::LateAttr() = default;
 
 std::ostream& LateAttr::print(std::ostream& os) const
 {

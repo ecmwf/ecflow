@@ -57,9 +57,9 @@ protected:
     QModelIndexList selectedList();
     void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
 
-    TriggerTableModel* model_;
+    TriggerTableModel* model_{nullptr};
     ActionHandler* actionHandler_;
-    bool needItemsLayout_;
+    bool needItemsLayout_{false};
     TriggerViewDelegate* delegate_;
 };
 

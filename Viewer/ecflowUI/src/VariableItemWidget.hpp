@@ -156,9 +156,9 @@ protected:
 	LineEdit* filterLine_;
 	VariableSearchLine *searchLine_;
 
-    VProperty* shadowProp_;
+    VProperty* shadowProp_{nullptr};
     VInfo_ptr lastSelection_;
-    bool canSaveLastSelection_;
+    bool canSaveLastSelection_{true};
     QList<bool> expanded_;
 };
 

@@ -100,8 +100,7 @@ Expression::Expression(const PartExpression& exp)
    add(exp);
 }
 
-Expression::Expression()
-: free_(false), state_change_no_(0)  {}
+Expression::Expression() = default;
 
 Expression::Expression(const Expression& rhs)
 : vec_(rhs.vec_), free_(rhs.free_), state_change_no_(0)  {}

@@ -77,6 +77,7 @@ public:
    Node& operator=(const Node&);
    Node(const Node& rhs);
    virtual ~Node();
+   virtual bool check_defaults() const;
 
    // parse string and create suite || family || task || alias. Can return a NULL node_ptr() for errors
    static node_ptr create(const std::string& node_string);
@@ -797,10 +798,10 @@ private: /// For use by python interface,
    std::string to_string() const;                                  // For python interface
 
 private:
-   Node*        parent_; // *NOT* persisted must be set by the parent class
+   Node*        parent_{nullptr}; // *NOT* persisted must be set by the parent class
    std::string  n_;
-   bool                        suspended_;
-   std::pair<NState,boost::posix_time::time_duration> st_; // state and duration since suite start when state changed
+   bool                        suspended_{false};
+   std::pair<NState,boost::posix_time::time_duration> st_{NState(),boost::posix_time::time_duration(0,0,0,0)}; // state and duration since suite start when state changed
    DState                      d_st_;    // default value is QUEUED
 
    std::vector<Variable>       vars_;
@@ -822,7 +823,7 @@ private:
    Repeat                         repeat_;       // each node can only have one repeat. By value, since has pimpl
 
    std::vector<limit_ptr>      limits_;    // Ptrs since many in-limits can point to a single limit
-   InLimitMgr                  inLimitMgr_;  // manages the inlimit
+   InLimitMgr                  inLimitMgr_{this};  // manages the inlimit
 
    ecf::Flag                   flag_;
 
@@ -830,15 +831,15 @@ private:
    std::unique_ptr<ecf::AutoArchiveAttr>   auto_archive_; // Can only have 1 auto archive per node
    std::unique_ptr<ecf::AutoRestoreAttr>   auto_restore_; // Can only have 1 autorestore per node
 
-   unsigned int state_change_no_;     // *not* persisted, only used on server side,Used to indicate addition or deletion of attribute
-   unsigned int variable_change_no_;  // *not* persisted, placed here rather than Variable, to save memory
-   unsigned int suspended_change_no_; // *not* persisted,
+   unsigned int state_change_no_{0};     // *not* persisted, only used on server side,Used to indicate addition or deletion of attribute
+   unsigned int variable_change_no_{0};  // *not* persisted, placed here rather than Variable, to save memory
+   unsigned int suspended_change_no_{0}; // *not* persisted,
 
 #ifdef DEBUG
    boost::posix_time::ptime  submit_to_complete_duration_;  // *not* persisted
 #endif
 
-   void* graphic_ptr_;  // for use with the gui only
+   void* graphic_ptr_{nullptr};  // for use with the gui only
 
    friend class TimeDepAttrs;
    friend class MiscAttrs;

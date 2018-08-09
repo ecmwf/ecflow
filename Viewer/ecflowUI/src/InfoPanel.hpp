@@ -119,8 +119,8 @@ private:
 
 	QList<InfoPanelItemHandler*> items_;
 	VInfo_ptr info_;
-	bool tabBeingCleared_;
-	bool tabBeingAdjusted_;
+	bool tabBeingCleared_{false};
+	bool tabBeingAdjusted_{false};
 };
 
 #endif

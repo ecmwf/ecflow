@@ -113,21 +113,21 @@ private:
  	std::string task_path_;             // ECF_NAME = /aSuit/aFam/aTask
 	std::string jobs_password_;         // ECF_PASS jobs password
 	std::string remote_id_;             // ECF_RID process id of running job
- 	unsigned int task_try_num_;         // ECF_TRYNO. The task try number. The number of times the job has been run
+ 	unsigned int task_try_num_{1};         // ECF_TRYNO. The task try number. The number of times the job has been run
 	std::string host_file_;             // ECF_HOSTFILE. File that lists the backup hosts, port numbers must match
 	long timeout_;                      // ECF_TIMEOUT. Host file iteration time out
     long zombie_timeout_;               // ECF_ZOMBIE_TIMEOUT. Host file iteration time out for zombies, default same as ECF_TIMEOUT
-	int  connect_timeout_;              // default 0, ECF_CONNECT_TIMEOUT, connection timeout
-	bool denied_;                       // ECF_DENIED.If the server denies the communication, then the child command can be set to fail immediately
- 	bool no_ecf_;                       // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone
+	int  connect_timeout_{0};              // default 0, ECF_CONNECT_TIMEOUT, connection timeout
+	bool denied_{false};                       // ECF_DENIED.If the server denies the communication, then the child command can be set to fail immediately
+ 	bool no_ecf_{false};                       // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone
 
-	bool debug_;                        // For live debug, enabled by env variable ECF_CLIENT_DEBUG
-	bool under_test_;                   // Used in testing client interface
+	bool debug_{false};                        // For live debug, enabled by env variable ECF_CLIENT_DEBUG
+	bool under_test_{false};                   // Used in testing client interface
 	std::vector<std::pair<std::string,std::string> > env_; // For test allow env variable to be set on defs
 
-	bool host_file_read_;               // to ensure we read host file only once
+	bool host_file_read_{false};               // to ensure we read host file only once
 	std::vector<std::pair<std::string, std::string> > host_vec_; // The list of host:port pairs
-	int  host_vec_index_;               // index into host_vec;
+	int  host_vec_index_{0};               // index into host_vec;
 
    mutable std::string passwd_;
 

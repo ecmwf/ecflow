@@ -47,10 +47,7 @@ Sound* Sound::instance_=nullptr;
 //#endif
 
 
-Sound::Sound() :
-	prevPlayedAt_(0),
-	delay_(2),
-	prop_(nullptr)
+Sound::Sound()
 {
 	formats_=".+\\.(wav|mp3|ogg|oga)";
 

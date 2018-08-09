@@ -22,7 +22,7 @@ class FamGenVariables;
 class Family : public NodeContainer {
 public:
    explicit Family( const std::string& name ) : NodeContainer(name),fam_gen_variables_(nullptr) {}
-   Family() : fam_gen_variables_(nullptr)  {}
+   Family()= default;
    Family(const Family& rhs) : NodeContainer(rhs), fam_gen_variables_(nullptr) {}
    Family& operator=(const Family&);
    node_ptr clone() const override;
@@ -30,6 +30,8 @@ public:
 	~Family() override;
 
 	static family_ptr create(const std::string& name);
+
+   bool check_defaults() const override;
 
 	Suite* suite() const override { return parent()->suite(); }
 	Defs* defs() const override { return (parent()) ? parent()->defs() : nullptr;}     // exposed to python hence check for NULL first
@@ -58,7 +60,7 @@ public:
 private:
    std::string write_state() const override;
 
-   mutable FamGenVariables* fam_gen_variables_;
+   mutable FamGenVariables* fam_gen_variables_{nullptr};
 
 private:
    friend class cereal::access;

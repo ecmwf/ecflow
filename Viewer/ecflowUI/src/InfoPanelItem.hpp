@@ -34,10 +34,7 @@ class InfoPanelItem : public VTaskObserver, public InfoPresenter, public NodeObs
 friend class InfoPanel;
 
 public:
-    InfoPanelItem() : owner_(nullptr), active_(false), selected_(false), suspended_(false),
-                      frozen_(false), detached_(false), unselectedFlags_(KeepContents),                     
-                      useAncestors_(false),handleAnyChange_(false),
-                      keepServerDataOnLoad_(false) {}
+    InfoPanelItem() :  unselectedFlags_(KeepContents) {}
 	~InfoPanelItem() override;
 
     enum ChangeFlag {ActiveChanged=1,SelectedChanged=2,SuspendedChanged=4,FrozenChanged=8,DetachedChanged=16};
@@ -98,20 +95,20 @@ protected:
 	//Notifications about the node changes
 	virtual void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&)=0;
 	
-    InfoPanel* owner_;
-    bool active_;
-    bool selected_;
-    bool suspended_;
-    bool frozen_;
-    bool detached_;
+    InfoPanel* owner_{nullptr};
+    bool active_{false};
+    bool selected_{false};
+    bool suspended_{false};
+    bool frozen_{false};
+    bool detached_{false};
     UnselectedFlags unselectedFlags_;
-    bool useAncestors_;
-    bool handleAnyChange_;
+    bool useAncestors_{false};
+    bool handleAnyChange_{false};
 
     //do not reload the server data when a new info object is loaded. This
     //only makes sense if the this sever-related item(tab) is alawys visible
     //whatever node is selected!!!
-    bool keepServerDataOnLoad_;
+    bool keepServerDataOnLoad_{false};
 };
 
 class InfoPanelItemFactory

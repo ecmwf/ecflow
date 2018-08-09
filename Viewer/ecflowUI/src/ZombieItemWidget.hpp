@@ -64,7 +64,7 @@ private:
 
 	ZombieModel *model_;
 	QSortFilterProxyModel* sortModel_;
-	bool commandSent_;
+	bool commandSent_{false};
 	QStringList lastSelection_;
 };
 

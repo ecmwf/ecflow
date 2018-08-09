@@ -50,9 +50,7 @@ private:
 };
 
 TextPagerCursor::TextPagerCursor()
-    : d(nullptr), textEdit(nullptr)
-{
-}
+= default;
 
 TextPagerCursor::TextPagerCursor(const TextPagerDocument *document, int pos, int anc)
     : d(nullptr), textEdit(nullptr)

@@ -20,8 +20,7 @@
 #include "UiLog.hpp"
 
 RichTextEdit::RichTextEdit(QWidget * parent) :
-    QTextBrowser(parent),
-    fontProp_(nullptr)
+    QTextBrowser(parent)
 {
     QFont f("Courier");
     //QFont f("Monospace");

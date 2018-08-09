@@ -34,7 +34,7 @@ public:
 
 protected:
 	std::vector<Zombie> data_;
-	ModelColumn* columns_;
+	ModelColumn* columns_{nullptr};
 };
 
 

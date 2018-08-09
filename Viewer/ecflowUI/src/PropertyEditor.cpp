@@ -24,11 +24,7 @@
 #include "VConfig.hpp"
 #include "VProperty.hpp"
 
-PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent), 
-    group_(nullptr),
-    currentGrid_(nullptr),
-    holder_(nullptr),
-    lineLabelLen_(-1)
+PropertyEditor::PropertyEditor(QWidget* parent) : QWidget(parent)
 {
     setupUi(this);
 

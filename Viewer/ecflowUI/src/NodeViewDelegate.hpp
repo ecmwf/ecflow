@@ -28,9 +28,7 @@ class PropertyMapper;
 //Base class for the node/attr renderer properties
 struct BaseNodeDelegateBox
 {
-    BaseNodeDelegateBox() : fontHeight(10), height(10), fullHeight(10), topMargin(0), bottomMargin(0),
-       leftMargin(0), rightMargin(0), topPadding(0), bottomPadding(0),
-       leftPadding(0), rightPadding(0), sizeHintCache(QSize(10,10)), spacing(2), selectRm(2) {}
+    BaseNodeDelegateBox() : sizeHintCache(QSize(10,10)), selectRm(2) {}
 
     virtual ~BaseNodeDelegateBox() = default;
 
@@ -48,31 +46,30 @@ struct BaseNodeDelegateBox
         return r;
     }
 
-    int fontHeight;
-    int height;
-    int fullHeight;
-    int topMargin;
-    int bottomMargin;
-    int leftMargin;
-    int rightMargin;
-    int topPadding;
-    int bottomPadding;
-    int leftPadding;
-    int rightPadding;  
+    int fontHeight{10};
+    int height{10};
+    int fullHeight{10};
+    int topMargin{0};
+    int bottomMargin{0};
+    int leftMargin{0};
+    int rightMargin{0};
+    int topPadding{0};
+    int bottomPadding{0};
+    int leftPadding{0};
+    int rightPadding{0};  
     QSize sizeHintCache;
-    int spacing;
+    int spacing{2};
     RectMetrics selectRm;
 };
 
 //Node renderer properties
 struct NodeDelegateBox : public BaseNodeDelegateBox
 {
-    NodeDelegateBox() : iconSize(16), iconPreGap(2),
-       iconGap(2) {}
+    NodeDelegateBox() = default;
 
-    int iconSize;
-    int iconPreGap;
-    int iconGap;
+    int iconSize{16};
+    int iconPreGap{2};
+    int iconGap{2};
 
     void adjust(const QFont& f) override {
          QFontMetrics fm(f);
@@ -160,16 +157,16 @@ protected:
 
 	QMap<QString,AttributeRendererProc> attrRenderers_;
 
-	PropertyMapper* prop_;
+	PropertyMapper* prop_{nullptr};
 	QFont font_;
     QFont attrFont_;
-    NodeDelegateBox* nodeBox_;
-    AttrDelegateBox* attrBox_;
+    NodeDelegateBox* nodeBox_{nullptr};
+    AttrDelegateBox* attrBox_{nullptr};
 
-	bool useStateGrad_;
+	bool useStateGrad_{true};
 	mutable QLinearGradient grad_;
 	static int lighter_;
-    bool drawAttrSelectionRect_;
+    bool drawAttrSelectionRect_{false};
     QBrush  eventFillBrush_;
     QBrush  eventBgBrush_;
     QBrush  meterFillBrush_;
@@ -180,7 +177,7 @@ protected:
     QPixmap limitEmptyPix_;
     QPixmap limitExtraFillPix_;
     enum LimitShape {RectLimitShape,CircleLimitShape};
-    LimitShape  limitShape_;
+    LimitShape  limitShape_{RectLimitShape};
     QBrush  triggerBgBrush_;
     QPen    triggerBorderPen_;
     QPen    triggerFontPen_;

@@ -36,7 +36,7 @@ Q_SIGNALS:
 private:
     void fontSizeChangedByZoom();
 
-    VProperty *fontProp_;
+    VProperty *fontProp_{nullptr};
 };
 
 

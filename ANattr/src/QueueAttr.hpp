@@ -23,7 +23,7 @@
 class QueueAttr {
 public:
    QueueAttr(const std::string& name,const std::vector<std::string>& theQueue);
-   QueueAttr() : used_in_trigger_(false),currentIndex_(0),state_change_no_(0){}
+   QueueAttr()= default;
    ~QueueAttr();
 
    std::ostream& print(std::ostream&) const;
@@ -67,9 +67,9 @@ public:
    unsigned int state_change_no() const { return state_change_no_;}
 private:
    void incr_state_change_no();
-   bool used_in_trigger_;           // *not* persisted, used by simulator only
-   int currentIndex_;
-   unsigned int state_change_no_;  // *not* persisted, only used on server side
+   bool used_in_trigger_{false};           // *not* persisted, used by simulator only
+   int currentIndex_{0};
+   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
    std::string name_;
    std::vector<std::string>  theQueue_;
    std::vector<NState::State> state_vec_;

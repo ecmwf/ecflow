@@ -42,13 +42,13 @@ private:
 class ChangeNotifyEditorModelData
 {
 public:
-	ChangeNotifyEditorModelData() : enabled_(nullptr), enabledMaster_(false), enabledVal_(false) {}
+	ChangeNotifyEditorModelData() = default;
 
 	QString label_;
 	QString desc_;
-	VProperty* enabled_;
-	bool enabledMaster_;
-	bool enabledVal_;
+	VProperty* enabled_{nullptr};
+	bool enabledMaster_{false};
+	bool enabledVal_{false};
 };
 
 

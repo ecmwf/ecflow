@@ -130,17 +130,17 @@ public:
 
 private:
 
-	ecf::User::Action user_action_;        // [ fob, fail, remove, adopt, block, kill ]
- 	int try_no_;                           // task try number, set on construction
-	int duration_;                         // How long zombie been alive
-	int calls_;                            // Number of times we have communicated with server.
-	ecf::Child::ZombieType zombie_type_;   // [ ecf, ecf_pid, ecf_pid_passwd, ecf_passwd, path, user ]
-	ecf::Child::CmdType last_child_cmd_;   // [ init | event | meter | label | wait | queue | abort | complete ]
+	ecf::User::Action user_action_{ecf::User::BLOCK};        // [ fob, fail, remove, adopt, block, kill ]
+ 	int try_no_{0};                           // task try number, set on construction
+	int duration_{0};                         // How long zombie been alive
+	int calls_{1};                            // Number of times we have communicated with server.
+	ecf::Child::ZombieType zombie_type_{ecf::Child::USER};   // [ ecf, ecf_pid, ecf_pid_passwd, ecf_passwd, path, user ]
+	ecf::Child::CmdType last_child_cmd_{ecf::Child::INIT};   // [ init | event | meter | label | wait | queue | abort | complete ]
   	std::string path_to_task_;             // set on construction
 	std::string jobs_password_;            // set on construction
 	std::string process_or_remote_id_;     // set on construction
    std::string user_cmd_;                 // user cmd that created this zombie, empty otherwise
- 	bool user_action_set_;                   // Differentiate manual from automated, response, manual take precedence
+ 	bool user_action_set_{false};                   // Differentiate manual from automated, response, manual take precedence
 	ZombieAttr attr_;                        // Default or attribute obtained from node tree.
  	boost::posix_time::ptime  creation_time_;// When zombie was created. Needed to control lifetime
 

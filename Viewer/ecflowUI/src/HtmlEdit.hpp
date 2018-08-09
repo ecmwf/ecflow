@@ -30,7 +30,7 @@ protected:
 private:
     void fontSizeChangedByZoom();
 
-    VProperty *fontProp_;
+    VProperty *fontProp_{nullptr};
 };
 
 #endif // HTMLEDIT_HPP

@@ -60,8 +60,8 @@ protected:
     void checkActionState();
 
     SuiteModel *model_;
-    bool columnsAdjusted_;
-    bool edited_;
+    bool columnsAdjusted_{false};
+    bool edited_{false};
 };
 
 #endif

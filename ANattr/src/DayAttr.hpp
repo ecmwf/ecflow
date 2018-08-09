@@ -28,7 +28,7 @@ namespace ecf { class Calendar;} // forward declare class that is in a name spac
 class DayAttr {
 public:
 	enum Day_t { SUNDAY=0, MONDAY=1, TUESDAY=2, WEDNESDAY=3, THURSDAY=4, FRIDAY=5, SATURDAY=6 };
-   DayAttr() : day_(DayAttr::SUNDAY), free_(false),state_change_no_(0) {}
+   DayAttr() = default;
    explicit DayAttr(Day_t day) : day_(day), free_(false),state_change_no_(0) {}
    explicit DayAttr(const std::string& str) : day_(DayAttr::getDay(str)), free_(false),state_change_no_(0) {}
    explicit DayAttr(const boost::gregorian::date& date)
@@ -68,9 +68,9 @@ private:
    bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
-   DayAttr::Day_t day_;
-   bool           free_;         // persisted for use by why() on client side
-   unsigned int  state_change_no_;  // *not* persisted, only used on server side
+   DayAttr::Day_t day_{DayAttr::SUNDAY};
+   bool           free_{false};         // persisted for use by why() on client side
+   unsigned int  state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>

@@ -35,7 +35,7 @@ protected:
 	void resizeEvent(QResizeEvent*) override;
 
 	QToolButton *clearTb_;
-	QLabel*	iconLabel_;
+	QLabel*	iconLabel_{nullptr};
 };
 
 

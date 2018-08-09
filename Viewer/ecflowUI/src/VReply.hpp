@@ -22,7 +22,7 @@ class VReply
 public:
 	enum Status {NoStatus,TaskDone,TaskFailed,TaskCancelled};
 	enum FileReadMode {NoReadMode,LocalReadMode,ServerReadMode,LogServerReadMode};
-    VReply(void* sender=nullptr) : sender_(sender), status_(NoStatus), readMode_(NoReadMode),readTruncatedTo_(-1) {}
+    VReply(void* sender=nullptr) : sender_(sender){}
 	~VReply() = default;
 
 	void reset();
@@ -80,16 +80,16 @@ public:
 
 protected:
 	void* sender_;
-	Status status_;
+	Status status_{NoStatus};
     std::vector<std::string> errorText_;
     std::vector<std::string> warningText_;
     std::vector<std::string> infoText_;
 	std::string text_;
 	std::vector<std::string> textVec_;
 	std::string fileName_;
-	FileReadMode readMode_;
+	FileReadMode readMode_{NoReadMode};
 	std::string  readMethod_;
-	int readTruncatedTo_;
+	int readTruncatedTo_{-1};
     std::vector<std::string> log_;
 	VFile_ptr  tmpFile_;
     VDir_ptr dir_;

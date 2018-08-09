@@ -54,7 +54,7 @@ private:
     void writeSettings();
 
     QList<PropertyEditor*> editors_;
-    bool configChanged_;
+    bool configChanged_{false};
 
     static VProperty* prop_;
 

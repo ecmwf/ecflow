@@ -26,7 +26,7 @@
 class BlockClientZombieCmd : public ServerToClientCmd {
 public:
    BlockClientZombieCmd(ecf::Child::ZombieType zt) :  zombie_type_(zt) {}
-   BlockClientZombieCmd() :  zombie_type_(ecf::Child::NOT_SET) {}
+   BlockClientZombieCmd() = default;
 
    void init(ecf::Child::ZombieType zt) { zombie_type_ = zt; } // server context
    ecf::Child::ZombieType zombie_type() const { return zombie_type_;}
@@ -36,7 +36,7 @@ public:
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override; // client context
 
 private:
-   ecf::Child::ZombieType zombie_type_;
+   ecf::Child::ZombieType zombie_type_{ecf::Child::NOT_SET};
 
    friend class cereal::access;
    template<class Archive>

@@ -45,9 +45,7 @@ static void testTimeSlot( const ecf::TimeSlot& ts)
 namespace ecf {
 
 TimeSeries::TimeSeries()
-: relativeToSuiteStart_(false),
-  isValid_(true),
-  relativeDuration_(0,0,0,0),
+: relativeDuration_(0,0,0,0),
   lastTimeSlot_(0,0,0,0) {}
 
 TimeSeries::TimeSeries(int hour, int minute, bool relative)

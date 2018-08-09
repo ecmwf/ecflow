@@ -25,7 +25,7 @@ class AutoRestoreAttr  {
 public:
    AutoRestoreAttr(const AutoRestoreAttr& rhs) : node_(nullptr),nodes_to_restore_(rhs.nodes_to_restore_)  {}
    AutoRestoreAttr(const std::vector<std::string>& nodes_to_restore) : node_(nullptr),nodes_to_restore_(nodes_to_restore) {}
-   AutoRestoreAttr() : node_(nullptr) {}
+   AutoRestoreAttr() = default;
 
    // needed by node copy constructor and persistence
    void set_node(Node* n) { node_ = n; }
@@ -39,7 +39,7 @@ public:
    void check(std::string& errorMsg) const; // check auto restore can reference the nodes
 
 private:
-   Node* node_;                                // Not persisted, constructor will always set this up.
+   Node* node_{nullptr};                                // Not persisted, constructor will always set this up.
    std::vector<std::string> nodes_to_restore_; // must be suite or family
 
    friend class cereal::access;

@@ -27,8 +27,7 @@ static bool firstRun=true;
 //========================================================
 
 ZombieItemWidget::ZombieItemWidget(QWidget *parent) :
-	QWidget(parent),
-	commandSent_(false)
+	QWidget(parent)
 {
 	setupUi(this);
 

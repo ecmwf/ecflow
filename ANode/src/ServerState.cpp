@@ -30,12 +30,7 @@ using namespace boost;
 // When a Defs is loaded into a server:
 //       	o the jobSubmissionInterval_ is set
 //       	o the jobGeneration_ is set
-ServerState::ServerState() :
-	state_change_no_(0),
-   variable_state_change_no_(0),
-	server_state_( default_state() ),
- 	jobSubmissionInterval_( 60 ),
- 	jobGeneration_( true )
+ServerState::ServerState() : server_state_( default_state() )
 {
 	setup_default_env(Str::DEFAULT_PORT_NUMBER());
 }

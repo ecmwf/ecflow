@@ -51,7 +51,7 @@ public Q_SLOTS:
 	void slotEndReset();
 
 protected:
-	VNodeList* data_;
+	VNodeList* data_{nullptr};
 };
 
 #endif

@@ -1145,8 +1145,7 @@ void ServerRefreshInfoWidget::printStatus() const
 ServerComActivityLine::ServerComActivityLine(QWidget *parent) :
     QWidget(parent),
     font_(QFont()),
-    fm_(font_),
-    server_(nullptr)
+    fm_(font_)
 {
     font_.setPointSize(font_.pointSize()-1);
     fm_=QFontMetrics(font_);

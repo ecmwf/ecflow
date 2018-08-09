@@ -16,7 +16,6 @@
 
 ComboMulti::ComboMulti(QWidget *widget) :
     QComboBox(widget),
-	mode_(BasicMode),
     dpyText_("")
 {
     setSizeAdjustPolicy(QComboBox::AdjustToContents);

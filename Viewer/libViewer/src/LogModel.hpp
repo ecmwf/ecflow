@@ -64,12 +64,12 @@ protected:
 
     //QList<LogModelLine> data_;
     LogData data_;
-    bool filterPeriod_;
-    size_t periodStart_;
-    size_t periodEnd_;
-    bool highlightPeriod_;
-    size_t highlightStart_;
-    size_t highlightEnd_;
+    bool filterPeriod_{false};
+    size_t periodStart_{0};
+    size_t periodEnd_{0};
+    bool highlightPeriod_{false};
+    size_t highlightStart_{0};
+    size_t highlightEnd_{0};
 };
 
 class LogDelegate : public QStyledItemDelegate

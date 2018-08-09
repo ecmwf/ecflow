@@ -182,7 +182,7 @@ protected:
 
     QFont font_;
     QFontMetrics fm_;
-    ServerHandler* server_;
+    ServerHandler* server_{nullptr};
     QPixmap pix_;
     QTimer *timer_;
 };

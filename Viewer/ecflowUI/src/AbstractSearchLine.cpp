@@ -16,8 +16,7 @@
 #include "ViewerUtil.hpp"
 
 AbstractSearchLine::AbstractSearchLine(QWidget* parent) :
-  QWidget(parent),
-  confirmSearch_(false)
+  QWidget(parent)
 {
 	setupUi(this);
 

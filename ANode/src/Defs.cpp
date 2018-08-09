@@ -48,25 +48,9 @@ using namespace std;
 //#define DEBUG_JOB_SUBMISSION 1
 //#define DEBUG_MEMENTO 1
 
-Defs::Defs() :
-   state_change_no_(0),
-   modify_change_no_( 0 ),
-   updateCalendarCount_(0),
-   order_state_change_no_(0),
-   save_edit_history_(false),
-   client_suite_mgr_(this),
-   in_notification_(false) {}
+Defs::Defs() {}
 
-Defs::Defs(const std::string& port) :
-   state_change_no_(0),
-   modify_change_no_( 0 ),
-   updateCalendarCount_(0),
-   order_state_change_no_(0),
-   server_(port),
-   save_edit_history_(false),
-   client_suite_mgr_(this),
-   in_notification_(false) {}
-
+Defs::Defs(const std::string& port) : server_(port) {}
 
 Defs::Defs(const Defs& rhs) :
    state_change_no_(0),

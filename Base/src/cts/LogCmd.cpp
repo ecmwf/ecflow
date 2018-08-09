@@ -40,7 +40,7 @@ LogCmd::LogCmd(LogApi a, int get_last_n_lines)
 
 
 LogCmd::LogCmd()
-: api_(LogCmd::GET),get_last_n_lines_(Log::get_last_n_lines_default()) {}
+: get_last_n_lines_(Log::get_last_n_lines_default()) {}
 
 
 LogCmd::LogCmd(const std::string& path)

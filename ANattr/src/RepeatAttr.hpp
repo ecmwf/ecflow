@@ -31,7 +31,7 @@
 class RepeatBase {
 public:
    explicit RepeatBase(const std::string& name) : state_change_no_(0), name_(name) {}
-   RepeatBase() : state_change_no_(0) {}
+   RepeatBase() = default;
    virtual ~RepeatBase();
 
    /// make non virtual so that it can be in-lined. Called millions of times
@@ -93,7 +93,7 @@ public:
 protected:
    void incr_state_change_no();
 
-   unsigned int state_change_no_;  // *not* persisted, only used on server side
+   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
    std::string name_;
    mutable Variable var_;          // *not* persisted
 
@@ -111,7 +111,7 @@ private:
 class RepeatDate : public RepeatBase {
 public:
    RepeatDate( const std::string& variable, int start, int end, int delta = 1/* always in days*/);
-   RepeatDate() :  start_(0), end_(0), delta_(0), value_(0)  {}
+   RepeatDate() = default;
 
    void gen_variables(std::vector<Variable>& vec) const override;
    const Variable& find_gen_variable(const std::string& name) const override;
@@ -152,10 +152,10 @@ private:
    : RepeatBase(name),start_(start),end_(end),delta_(delta),value_(value) {}
 
 private:
-   int  start_;
-   int  end_;
-   int  delta_;
-   long value_;
+   int  start_{0};
+   int  end_{0};
+   int  delta_{0};
+   long value_{0};
 
    mutable Variable yyyy_;         // *not* persisted
    mutable Variable mm_;           // *not* persisted
@@ -212,10 +212,10 @@ private:
    : RepeatBase(name), start_(start), end_(end), delta_(delta), value_(value) {}
 
 private:
-   int  start_;
-   int  end_;
-   int  delta_;
-   long  value_;
+   int  start_{ 0 };
+   int  end_{ 0 };
+   int  delta_{ 0 };
+   long  value_{ 0 };
 
    friend class cereal::access;
    template<class Archive>
@@ -236,7 +236,7 @@ private:
 class RepeatEnumerated : public RepeatBase {
 public:
    RepeatEnumerated( const std::string& variable, const std::vector<std::string>& theEnums);
-   RepeatEnumerated() : currentIndex_(0) {}
+   RepeatEnumerated() = default;
 
    bool operator==(const RepeatEnumerated& rhs) const;
 
@@ -270,7 +270,7 @@ private:
 
 private:
    std::vector<std::string> theEnums_;
-   int currentIndex_;
+   int currentIndex_{0};
 
    friend class cereal::access;
    template<class Archive>
@@ -286,7 +286,7 @@ private:
 class RepeatString : public RepeatBase {
 public:
    RepeatString( const std::string& variable, const std::vector<std::string>& theEnums);
-   RepeatString() : currentIndex_(0) {}
+   RepeatString() = default;
 
    bool operator==(const RepeatString& rhs) const;
 
@@ -320,7 +320,7 @@ private:
 
 private:
    std::vector<std::string> theStrings_;
-   int currentIndex_;
+   int currentIndex_{0};
 
    friend class cereal::access;
    template<class Archive>
@@ -355,7 +355,7 @@ private:
 class RepeatDay : public RepeatBase {
 public:
    RepeatDay( int step ) : RepeatBase("day"), step_(step),valid_(true)  {}
-   RepeatDay() : step_(1),valid_(true)  {}
+   RepeatDay() = default;
 
    bool operator==(const RepeatDay& rhs) const;
 
@@ -389,8 +389,8 @@ private:
    RepeatDay( int step, bool valid) : RepeatBase("day"), step_(step),valid_(valid)  {}
 
 private:
-   int step_;
-   bool valid_;  // not persisted since only used in simulator
+   int step_{1};
+   bool valid_{true};  // not persisted since only used in simulator
 
    friend class cereal::access;
    template<class Archive>

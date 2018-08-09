@@ -41,8 +41,7 @@ Q_DECLARE_METATYPE(QList<int>)
 //===========================================================
 
 ChangeNotifyDialogButton::ChangeNotifyDialogButton(QWidget* parent) :
-    QToolButton(parent),
-    notifier_(nullptr)
+    QToolButton(parent)
 {
     setProperty("notify","1");
     setAutoRaise(true);
@@ -118,8 +117,7 @@ void ChangeNotifyDialogButton::updateSettings()
 //===========================================================
 
 ChangeNotifyDialogWidget::ChangeNotifyDialogWidget(QWidget *parent) :
-    QWidget(parent),
-	notifier_(nullptr)
+    QWidget(parent)
 {
 	setupUi(this);
 }
@@ -253,9 +251,7 @@ void ChangeNotifyDialogWidget::readSettings(const QSettings& settings)
 //===========================================================
 
 ChangeNotifyDialog::ChangeNotifyDialog(QWidget *parent) :
-	QDialog(parent),
-    ignoreCurrentChange_(false),
-    switchWsProp_(nullptr)
+	QDialog(parent)
 {
     setupUi(this);
 

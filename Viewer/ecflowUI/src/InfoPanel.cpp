@@ -56,9 +56,7 @@ void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
 //==============================================
 
 InfoPanel::InfoPanel(QWidget* parent) :
-  DashboardWidget("info",parent),
-  tabBeingCleared_(false),
-  tabBeingAdjusted_(false)
+  DashboardWidget("info",parent)
 {
 	setupUi(this);
 

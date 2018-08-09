@@ -70,11 +70,7 @@ class TextPagerLayout : public TextDocumentBuffer
 public:
     enum { MinimumBufferSize = 90000, LeftMargin = 3 };
     TextPagerLayout(TextPagerDocument *doc = nullptr)
-        : TextDocumentBuffer(doc), textEdit(nullptr),
-        viewportPosition(0), layoutEnd(-1), viewport(-1),
-        visibleLines(-1), lastVisibleCharacter(-1), lastBottomMargin(0),
-        widest(-1), maxViewportPosition(0), layoutDirty(true), sectionsDirty(true),
-        lineBreaking(false), suppressTextEditUpdates(false)
+        : TextDocumentBuffer(doc)
     {
     }
 
@@ -84,11 +80,11 @@ public:
         qDeleteAll(unusedTextLayouts);
     }
 
-    TextPagerEdit *textEdit;
+    TextPagerEdit *textEdit{nullptr};
     QList<SyntaxHighlighter*> syntaxHighlighters;
-    int viewportPosition, layoutEnd, viewport, visibleLines,
-        lastVisibleCharacter, lastBottomMargin, widest, maxViewportPosition;
-    bool layoutDirty, sectionsDirty, lineBreaking, suppressTextEditUpdates;
+    int viewportPosition{0}, layoutEnd{-1}, viewport{-1}, visibleLines{-1},
+        lastVisibleCharacter{-1}, lastBottomMargin{0}, widest{-1}, maxViewportPosition{0};
+    bool layoutDirty{true}, sectionsDirty{true}, lineBreaking{false}, suppressTextEditUpdates{false};
     QList<QTextLayout*> textLayouts, unusedTextLayouts;
     QHash<QTextLayout*, QTextBlockFormat> blockFormats;
     QList<TextPagerEdit::ExtraSelection> extraSelections;

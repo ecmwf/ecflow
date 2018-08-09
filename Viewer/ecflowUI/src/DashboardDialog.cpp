@@ -20,8 +20,7 @@
 #include <QSettings>
 
 DashboardDialog::DashboardDialog(QWidget *parent) :
-	QDialog(parent),
-	dw_(nullptr)
+	QDialog(parent)
 {
 	setupUi(this);
 

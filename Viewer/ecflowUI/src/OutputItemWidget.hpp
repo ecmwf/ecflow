@@ -74,13 +74,13 @@ protected:
 	OutputModel* dirModel_;
 	OutputSortModel* dirSortModel_;
 
-	bool userClickedReload_;
-	bool ignoreOutputSelection_;
+	bool userClickedReload_{false};
+	bool ignoreOutputSelection_{false};
 	QTimer* updateDirTimer_;
 	static int updateDirTimeout_;
     OutputFetchInfo* fetchInfo_;
-    bool dirColumnsAdjusted_;
-    bool submittedWarning_;
+    bool dirColumnsAdjusted_{false};
+    bool submittedWarning_{false};
 };
 
 #endif

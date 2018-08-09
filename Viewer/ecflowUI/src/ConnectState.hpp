@@ -36,10 +36,10 @@ protected:
 	void logFailed();
 	void logDisconnect();
 
-	State state_;
-	std::time_t lastConnect_;
-	std::time_t lastFailed_;
-	std::time_t lastDisconnect_;
+	State state_{Undef};
+	std::time_t lastConnect_{0};
+	std::time_t lastFailed_{0};
+	std::time_t lastDisconnect_{0};
 	std::string errMsg_;
 	std::string shortErrMsg_;
 };

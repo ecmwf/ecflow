@@ -33,10 +33,8 @@
 
 bool add = false;
 
-TextPagerWidget::TextPagerWidget(QWidget *parent) :
-   //TextPagerEdit(parent),
-   doLineNumbers(true),
-   gotoLineDialog_(nullptr)
+TextPagerWidget::TextPagerWidget(QWidget *parent)
+   // : TextPagerEdit(parent),
 {
 	auto* hb=new QHBoxLayout(this);
 	hb->setContentsMargins(0,0,0,0);

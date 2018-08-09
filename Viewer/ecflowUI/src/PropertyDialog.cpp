@@ -25,8 +25,7 @@
 VProperty* PropertyDialog::prop_=nullptr;
 
 PropertyDialog::PropertyDialog(QWidget* parent) :
-		QDialog(parent),
-		configChanged_(false)
+		QDialog(parent)
 {
 	setupUi(this);
 

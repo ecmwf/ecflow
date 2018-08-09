@@ -97,7 +97,7 @@ protected:
 	static SessionHandler* instance_;
 
 	std::vector<SessionItem*> sessions_;
-	SessionItem* current_;
+	SessionItem* current_{nullptr};
 	bool loadedLastSessionName_;
 	std::string lastSessionName_;
 };

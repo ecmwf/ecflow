@@ -28,7 +28,7 @@ public Q_SLOTS:
     void rerender();
 
 protected:
-    LogModel* logModel_;
+    LogModel* logModel_{nullptr};
 
 };
 

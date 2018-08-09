@@ -48,7 +48,7 @@ Q_SIGNALS:
 
 protected:
     QList<QToolButton*> actionTbList_;
-    QWidget* titleBc_;
+    QWidget* titleBc_{nullptr};
     QPixmap warnPix_;
 };
 

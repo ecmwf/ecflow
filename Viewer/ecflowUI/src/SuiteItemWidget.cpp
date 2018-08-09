@@ -37,9 +37,7 @@
 //that the changes are merged into the edited state.
 
 SuiteItemWidget::SuiteItemWidget(QWidget *parent) :
-    QWidget(parent),
-    columnsAdjusted_(false),
-    edited_(false)
+    QWidget(parent)
 {
 	setupUi(this);
 

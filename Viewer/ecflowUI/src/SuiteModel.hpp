@@ -47,12 +47,12 @@ protected:
 	void clearData();
 	void updateData();
 
-    ServerHandler* server_;
-	SuiteFilter* data_;
-	SuiteFilter* realData_;
+    ServerHandler* server_{nullptr};
+	SuiteFilter* data_{nullptr};
+	SuiteFilter* realData_{nullptr};
 	QColor presentCol_;
 	QColor notPresentCol_;
-    bool edited_;
+    bool edited_{false};
 };
 
 #endif

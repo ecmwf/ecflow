@@ -73,6 +73,14 @@ Submittable::~Submittable()
    delete sub_gen_variables_;
 }
 
+bool Submittable::check_defaults() const
+{
+   if (tryNo_ != 0) throw std::runtime_error("Submittable::check_defaults(): tryNo_ != 0");
+   if (state_change_no_  != 0) throw std::runtime_error("Submittable::check_defaults(): state_change_no_ != 0");
+   if (sub_gen_variables_  != nullptr) throw std::runtime_error("Submittable::check_defaults(): sub_gen_variables_ != nullptr");
+   return Node::check_defaults();
+}
+
 void Submittable::init( const std::string& the_process_or_remote_id)
 {
    set_state( NState::ACTIVE );

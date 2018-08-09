@@ -48,15 +48,7 @@ Zombie::Zombie( ecf::Child::ZombieType zombie_type,
   creation_time_( Calendar::second_clock_time() )
 {}
 
-Zombie::Zombie()
-: user_action_(User::BLOCK),
-  try_no_(0),
-  duration_(0),
-  calls_(1),
-  zombie_type_(Child::USER),
-  last_child_cmd_(Child::INIT),
-  user_action_set_(false)
-{}
+Zombie::Zombie() = default;
 
 bool Zombie::operator==(const Zombie& rhs) const
 {  // for python interface only

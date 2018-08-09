@@ -967,7 +967,7 @@ bool AttributeStateCondition::execute(VItem* item)
 //
 //==========================================
 
-IsoDateCondition::IsoDateCondition(QString dateStr) : secsSinceEpoch_(-1)
+IsoDateCondition::IsoDateCondition(QString dateStr)
 {
     QDateTime d=QDateTime::fromString(dateStr,Qt::ISODate);
     if(d.isValid())

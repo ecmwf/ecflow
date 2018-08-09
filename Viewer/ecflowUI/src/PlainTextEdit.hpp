@@ -71,21 +71,21 @@ protected:
 private:
     void fontSizeChangedByZoom();
 
-    bool showLineNum_;
+    bool showLineNum_{true};
     QWidget *lineNumArea_;
-    int rightMargin_;
-    bool hyperlinkEnabled_;
+    int rightMargin_{2};
+    bool hyperlinkEnabled_{false};
     QString lastFindString_;
     QString currentLink_;
     QTextDocument::FindFlags lastFindFlags_;
-    GotoLineDialog *gotoLineDialog_;
+    GotoLineDialog *gotoLineDialog_{nullptr};
     static QString emptyString_;
 
     QColor numAreaBgCol_;
     QColor numAreaFontCol_;
     QColor numAreaSeparatorCol_;
     QColor numAreaCurrentCol_;
-    VProperty *fontProp_;
+    VProperty *fontProp_{nullptr};
 };
 
 

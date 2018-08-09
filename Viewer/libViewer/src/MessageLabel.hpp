@@ -45,9 +45,9 @@ private:
     void showMessage(const Type&,QString);
     void appendMessage(const Type&,QString);
 
-	bool showTypeTitle_;
-    bool narrowMode_;
-	Type currentType_;
+	bool showTypeTitle_{true};
+    bool narrowMode_{false};
+	Type currentType_{NoType};
 	QLabel *pixLabel_;
 	QLabel* msgLabel_;
 	QLabel* loadLabel_;

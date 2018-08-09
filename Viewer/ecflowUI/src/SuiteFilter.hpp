@@ -65,7 +65,7 @@ protected:
 class SuiteFilter
 {
 public:
-    SuiteFilter() : autoAddNew_(false), enabled_(false), loadedInitialised_(false) {}
+    SuiteFilter() = default;
 	~SuiteFilter();
 
 	enum ChangeFlag {AutoAddChanged=1,EnabledChanged=2,ItemChanged=4};
@@ -120,9 +120,9 @@ private:
     void adjustFiltered(const std::vector<std::string>& filtered);
 
     std::vector<SuiteFilterItem> items_;
-    bool autoAddNew_;
-	bool enabled_;
-    bool loadedInitialised_;
+    bool autoAddNew_{false};
+	bool enabled_{false};
+    bool loadedInitialised_{false};
 	FlagSet<ChangeFlag> changeFlags_;
 	std::vector<SuiteFilterObserver*> observers_;
     static std::string dummySuite_;

@@ -24,10 +24,7 @@
 #include "VNode.hpp"
 
 NodeQueryResultView::NodeQueryResultView(QWidget* parent) :
-	QTreeView(parent),
-	model_(nullptr),
-	sortModel_(nullptr),
-    needItemsLayout_(false)
+	QTreeView(parent)
 {
 	//setProperty("style","nodeView");
 	setProperty("view","query");

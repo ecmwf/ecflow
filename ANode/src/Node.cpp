@@ -48,13 +48,7 @@ using namespace boost::posix_time;
 //#define DEBUG_REQUEUE 1
 //#define DEBUG_FIND_REFERENCED_NODE 1
 
-Node::Node(const std::string& n)
-: parent_(nullptr),n_(n),
-  suspended_(false),
-  st_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
-  inLimitMgr_(this),
-  state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
-  graphic_ptr_(nullptr)
+Node::Node(const std::string& n) : n_(n)
 {
    string msg;
    if (!Str::valid_name(n, msg)) {
@@ -62,14 +56,7 @@ Node::Node(const std::string& n)
    }
 }
 
-Node::Node()
-: parent_(nullptr),
-  suspended_(false),
-  st_( std::make_pair(NState(),time_duration(0,0,0,0)) ),
-  inLimitMgr_(this),
-  state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
-  graphic_ptr_(nullptr)
-{}
+Node::Node() {}
 
 Node::Node(const Node& rhs)
 : parent_(nullptr),
@@ -109,6 +96,18 @@ Node::Node(const Node& rhs)
       the_limit->set_node(this);
       limits_.push_back( the_limit );
    }
+}
+
+bool Node::check_defaults() const
+{
+   if (parent_ != nullptr) throw std::runtime_error("Node::check_defaults(): parent_ != nullptr");
+   if (graphic_ptr_ != nullptr) throw std::runtime_error("Node::check_defaults(): graphic_ptr_  != nullptr");
+   if (suspended_ != false) throw std::runtime_error("Node::check_defaults(): suspended_ != false");
+   if (state_change_no_ != 0) throw std::runtime_error("Node::check_defaults(): state_change_no_ != 0");
+   if (variable_change_no_  != 0) throw std::runtime_error("Node::check_defaults(): variable_change_no_  != 0");
+   if (suspended_change_no_  != 0) throw std::runtime_error("Node::check_defaults():  suspended_change_no_ != 0");
+   if (d_st_.state() != DState::QUEUED) throw std::runtime_error("Node::check_defaults(): d_st_.state() != DState::QUEUED");
+   return true;
 }
 
 void Node::delete_attributes() {

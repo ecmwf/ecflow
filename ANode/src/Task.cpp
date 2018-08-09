@@ -72,6 +72,15 @@ node_ptr Task::clone() const
    return std::make_shared<Task>( *this );
 }
 
+bool Task::check_defaults() const
+{
+   if (order_state_change_no_ != 0) throw std::runtime_error("Task::check_defaults(): order_state_change_no_ != 0");
+   if (add_remove_state_change_no_ != 0) throw std::runtime_error("Task::check_defaults(): add_remove_state_change_no_ != 0");
+   if (alias_change_no_ != 0) throw std::runtime_error("Task::check_defaults(): alias_change_no_ != 0");
+   if (alias_no_ != 0) throw std::runtime_error("Task::check_defaults(): alias_no_ != 0");
+   return Submittable::check_defaults();
+}
+
 Task& Task::operator=(const Task& rhs)
 {
    if (this != &rhs) {

@@ -63,17 +63,17 @@ private:
 	void broadcastChunk(bool);
 
 	NodeQuery* query_;
-    BaseNodeCondition* parser_;
+    BaseNodeCondition* parser_{nullptr};
     QMap<VAttributeType*,BaseNodeCondition*> attrParser_;
     std::vector<ServerHandler*> servers_;
-	int cnt_;
-	int scanCnt_;
-	int maxNum_;
-	int chunkSize_;
+	int cnt_{0};
+	int scanCnt_{0};
+	int maxNum_{250000};
+	int chunkSize_{100};
 	QList<NodeQueryResultTmp_ptr> res_;
-	bool stopIt_;
-    bool maxReached_;
-	VNode* rootNode_;
+	bool stopIt_{false};
+    bool maxReached_{false};
+	VNode* rootNode_{nullptr};
 };
 
 class NodeFilterEngine

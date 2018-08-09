@@ -38,9 +38,7 @@
 //======================================================
 
 NodeSearchWidget::NodeSearchWidget(QWidget *parent) :
-    QWidget(parent),
-	query_(nullptr),
-	columnsAdjusted_(false)
+    QWidget(parent)
 {
     setupUi(this);
 

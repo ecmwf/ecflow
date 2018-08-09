@@ -32,7 +32,7 @@ class NodeQueryResultItem
 	friend class TriggerGraphModel;
 
 public:
-	NodeQueryResultItem() : node_(nullptr), server_(nullptr) {}
+	NodeQueryResultItem() = default;
 	NodeQueryResultItem(VNode* node);
 	NodeQueryResultItem(NodeQueryResultTmp_ptr);
 
@@ -50,27 +50,27 @@ public:
     bool hasAttribute() const {return attr_.count() > 0;}
 
 protected:
-	VNode* node_;
-	ServerHandler* server_;
+	VNode* node_{nullptr};
+	ServerHandler* server_{nullptr};
 	QStringList attr_;
 	std::string path_;
 };
 
 struct Pos
 {
-	Pos() : pos_(-1), cnt_(0) {}
-	int pos_;
-	int cnt_;
+	Pos()= default;
+	int pos_{-1};
+	int cnt_{0};
 };
 
 struct NodeQueryResultBlock : public Pos
 {
-	NodeQueryResultBlock() : server_(nullptr) {}
+	NodeQueryResultBlock()= default;
 	void add(VNode*,int);
 	void clear();
 	bool find(const VNode* node,int &pos, int &cnt);
 
-	ServerHandler* server_;
+	ServerHandler* server_{nullptr};
 	QHash<VNode*,Pos> nodes_;
 };
 

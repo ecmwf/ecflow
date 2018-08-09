@@ -27,15 +27,7 @@ static bool metaRegistered=false;
 
 NodeQueryEngine::NodeQueryEngine(QObject* parent) :
     QThread(parent),
-    query_(new NodeQuery("tmp")),
-    parser_(nullptr),
-    cnt_(0),
-    scanCnt_(0),
-    maxNum_(250000),
-    chunkSize_(100),
-    stopIt_(false),
-    maxReached_(false),   
-    rootNode_(nullptr)
+    query_(new NodeQuery("tmp"))
 {
     //We will need to pass various non-Qt types via signals and slots
     //So we need to register these types.

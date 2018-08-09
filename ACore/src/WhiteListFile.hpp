@@ -80,8 +80,8 @@ private:
    bool verify_path_access(const std::string& user,const std::vector<std::string>& paths,const mymap&) const;
    bool verify_path_access(const std::string& user,const std::string& path,const mymap&) const;
 
-   bool all_users_have_read_access_;
-   bool all_users_have_write_access_;
+   bool all_users_have_read_access_{false};
+   bool all_users_have_write_access_{false};
 	std::string white_list_file_;
 	mymap users_with_read_access_;   // user,paths
 	mymap users_with_write_access_;  // user,paths

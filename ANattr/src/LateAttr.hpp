@@ -96,10 +96,10 @@ private:
 	TimeSlot s_;                    // relative by default
 	TimeSlot a_;
 	TimeSlot c_;
-	bool c_is_rel_;
-	bool isLate_;
+	bool c_is_rel_{false};
+	bool isLate_{false};
 
-	unsigned int state_change_no_;  // *not* persisted, only used on server side
+	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>

@@ -60,11 +60,7 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 
 
 ClientEnvironment::ClientEnvironment()
-: AbstractClientEnv(),
-  task_try_num_(1),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),connect_timeout_(0),
-  denied_(false),no_ecf_(false), debug_(false),under_test_(false),
-  host_file_read_(false),
-  host_vec_index_(0)
+: AbstractClientEnv(),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT)
 {
 	init();
 }

@@ -28,7 +28,7 @@
 // Note: For testing purposes we do not always want to create jobs
 class JobCreationCtrl : public std::enable_shared_from_this<JobCreationCtrl>, private boost::noncopyable {
 public:
-	JobCreationCtrl() : verbose_(false) {}
+	JobCreationCtrl()= default;
 
 	void set_node_path( const std::string& absNodePath ) { absNodePath_ = absNodePath;}
 	const std::string& node_path() const { return absNodePath_;}
@@ -52,7 +52,7 @@ public:
 	JobsParam& jobsParam() { return jobsParam_;}
 
 private:
-	bool verbose_;
+	bool verbose_{false};
 	std::string absNodePath_;
 	std::string tempDirForJobGeneration_;
 	std::string errorMsg_;

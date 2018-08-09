@@ -66,8 +66,8 @@ bool VNodeListItem::updateNode(ServerHandler* s)
 //========================================================
 
 VNodeList::VNodeList(QObject *parent) :
-   QObject(parent),
-   maxNum_(200)
+   QObject(parent)
+   
 {
 }
 

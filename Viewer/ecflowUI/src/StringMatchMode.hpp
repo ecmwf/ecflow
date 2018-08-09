@@ -33,7 +33,7 @@ public:
 private:
 	void init();
 
-	Mode mode_;
+	Mode mode_{WildcardMatch};
 	static std::map<Mode,std::string> matchOper_;
 };
 

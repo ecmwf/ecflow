@@ -21,11 +21,11 @@ typedef std::shared_ptr<NodeQueryResultTmp> NodeQueryResultTmp_ptr;
 
 struct  NodeQueryResultTmp
 {
-	NodeQueryResultTmp() : node_(nullptr) {}
+	NodeQueryResultTmp()= default;
     NodeQueryResultTmp(VNode *node) : node_(node) {}
     NodeQueryResultTmp(VNode *node,QStringList attr) : node_(node), attr_(attr) {}
 
-	VNode* node_;
+	VNode* node_{nullptr};
 	QStringList attr_;
 };
 

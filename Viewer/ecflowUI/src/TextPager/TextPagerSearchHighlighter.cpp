@@ -18,10 +18,7 @@
 QColor TextPagerSearchHighlighter::bgColour_=QColor(200, 255, 200);
 
 TextPagerSearchHighlighter::TextPagerSearchHighlighter(QObject *parent) :
-  SyntaxHighlighter(parent),
-  mode_(NoMode),
-  caseSensitive_(false),
-  wholeWords_(false)
+  SyntaxHighlighter(parent)
  {
 	if(VProperty *p=VConfig::instance()->find("panel.search.highlightColour"))
 	{

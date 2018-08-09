@@ -24,7 +24,7 @@ namespace ecf {
 // Use compiler ,  destructor, assignment, copy constructor
 class AutoArchiveAttr  {
 public:
-   AutoArchiveAttr() : relative_(true),days_(false) {}
+   AutoArchiveAttr()= default;
    AutoArchiveAttr(int hour, int minute, bool relative ) : time_(hour, minute), relative_(relative), days_(false) {}
    AutoArchiveAttr(const TimeSlot& ts,   bool relative ) : time_(ts),           relative_(relative), days_(false) {}
    AutoArchiveAttr(int days) : time_( TimeSlot(days*24,0) ), relative_(true), days_(true) {}
@@ -41,8 +41,8 @@ public:
 
 private:
    TimeSlot time_;
-   bool relative_;
-   bool days_;
+   bool relative_{true};
+   bool days_{false};
 
    friend class cereal::access;
    template<class Archive>

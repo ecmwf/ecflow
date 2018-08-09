@@ -78,7 +78,7 @@ private:
 	QStackedWidget *stacked_;
     QToolButton* addTb_;
     QToolButton* tabListTb_;
-	bool beingCleared_;
+	bool beingCleared_{false};
 };
 
 #endif

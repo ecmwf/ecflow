@@ -46,7 +46,7 @@ private:
 
 class Derived1 : public BaseCmd {
 public:
-   Derived1() : x_(0) {}
+   Derived1() = default;
    Derived1(int x) : BaseCmd(), x_(x) {}
    ~Derived1() override = default;
 
@@ -65,7 +65,7 @@ public:
       os << ": x("<< x_ << ")";
    }
 private:
-   int x_;
+   int x_{0};
 
    friend class cereal::access;
    template<class Archive>

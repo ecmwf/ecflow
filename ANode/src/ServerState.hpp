@@ -110,15 +110,15 @@ private:
 
 private:
 
-   unsigned int state_change_no_;                // *not* persisted, only used on server side
-   unsigned int variable_state_change_no_;       // *not* persisted, only used on server side
+   unsigned int state_change_no_{0};                // *not* persisted, only used on server side
+   unsigned int variable_state_change_no_{0};       // *not* persisted, only used on server side
 
  	SState::State server_state_;
    std::vector<Variable>  server_variables_;
    std::vector<Variable>  user_variables_;
 
- 	int jobSubmissionInterval_;                   // NOT persisted, since set in the server
- 	bool jobGeneration_;                          // NOT persisted, since set in the server
+ 	int jobSubmissionInterval_{ 60 };                   // NOT persisted, since set in the server
+ 	bool jobGeneration_{ true };                          // NOT persisted, since set in the server
  	std::pair<std::string,std::string> hostPort_; // NOT persisted, set by server hence no need to persist
 
 private:

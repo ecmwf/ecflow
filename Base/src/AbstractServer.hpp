@@ -187,10 +187,10 @@ public:
 	virtual bool debug() const = 0;
 
 protected:
-	AbstractServer() : job_gen_count_(0) {}
+	AbstractServer()= default;
 
 private:
-	int job_gen_count_;
+	int job_gen_count_{0};
 	ZombieCtrl zombie_ctrl_;
 	Stats stats_;
 };

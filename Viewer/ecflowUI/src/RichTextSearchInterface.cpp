@@ -12,9 +12,8 @@
 
 #include <QTextBrowser>
 
-RichTextSearchInterface::RichTextSearchInterface() : editor_(nullptr)
-{
-}
+RichTextSearchInterface::RichTextSearchInterface()
+= default;
 
 
 bool RichTextSearchInterface::findString (QString str, bool highlightAll, QTextDocument::FindFlags flags,

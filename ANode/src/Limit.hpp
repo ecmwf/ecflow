@@ -30,7 +30,7 @@ class Limit {
 public:
    Limit(const std::string& name,int limit);
    Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths);
-   Limit() : state_change_no_(0), lim_(0), value_(0),node_(nullptr)  {}
+   Limit()= default;
    Limit(const Limit& rhs);
 
    std::ostream& print(std::ostream&) const;
@@ -70,12 +70,12 @@ private:
    void update_change_no();
 
 private:
-   unsigned int             state_change_no_;  // *not* persisted, only used on server side
+   unsigned int             state_change_no_{0};  // *not* persisted, only used on server side
    std::string              n_;
-   int                      lim_;
-   int                      value_;
+   int                      lim_{0};
+   int                      value_{0};
    std::set<std::string>    paths_;           // Updated via increment()/decrement()/reset(). Typically task paths
-   Node*                    node_ ;           // The parent NOT persisted
+   Node*                    node_{nullptr} ;           // The parent NOT persisted
 
    friend class cereal::access;
    template<class Archive>

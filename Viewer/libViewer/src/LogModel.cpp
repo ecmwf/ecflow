@@ -16,9 +16,7 @@
 #include "UiLog.hpp"
 
 LogModel::LogModel(QObject *parent) :
-          QAbstractItemModel(parent),
-          filterPeriod_(false), periodStart_(0), periodEnd_(0),
-          highlightPeriod_(false), highlightStart_(0), highlightEnd_(0)
+          QAbstractItemModel(parent)
 {
 	IconProvider::add(":/viewer/log_error.svg","log_error");
 	IconProvider::add(":/viewer/log_info.svg","log_info");

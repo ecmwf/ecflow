@@ -34,11 +34,11 @@ class CursorCacheItem
 {
     friend class OutputBrowser;
 public:
-    CursorCacheItem() : pos_(0), verticalScrollValue_(0), viewportHeight_(0) {}
+    CursorCacheItem() = default;
 protected:
-    int pos_;
-    int verticalScrollValue_;
-    int viewportHeight_;
+    int pos_{0};
+    int verticalScrollValue_{0};
+    int viewportHeight_{0};
 };
 
 class OutputBrowser : public QWidget

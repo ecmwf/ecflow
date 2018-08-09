@@ -74,13 +74,7 @@ void NodeQuerySaveDialog::accept()
 //======================================================
 
 NodeQueryEditor::NodeQueryEditor(QWidget *parent) :
-    QWidget(parent),
-	query_(nullptr),
-	serverFilter_(nullptr),
-	queryTeCanExpand_(false),
-	initIsOn_(false),
-    canBeRun_(false),
-    filterMode_(false)
+    QWidget(parent)
 {
     setupUi(this);
 

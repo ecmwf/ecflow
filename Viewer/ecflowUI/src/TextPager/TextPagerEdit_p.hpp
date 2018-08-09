@@ -31,12 +31,12 @@ struct CursorData {
 };
 
 struct LastPageCache {
-    LastPageCache() : position(-1),height(-1),widest(-1), documentSize(-1) {}
+    LastPageCache()= default;
     void clear() {position=-1; height=-1; widest=-1; documentSize=-1;}
-    int position;
-    int height;
-    int widest;
-    int documentSize;
+    int position{-1};
+    int height{-1};
+    int widest{-1};
+    int documentSize{-1};
 };
 
 class TextEditPrivate : public QObject, public TextPagerLayout
