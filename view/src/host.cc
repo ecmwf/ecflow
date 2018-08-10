@@ -1920,3 +1920,24 @@ void ehost::stats( std::ostream& buf )
    catch ( std::exception& e ) {
    }
 }
+
+/*
+ECFLOWVIEW_INPUT=/tmp/ecflowview_listen
+mkfifo $ECFLOWVIEW_INPUT
+./bin/ecflowview &
+echo "\nselect eod /law/main" >> $ECFLOWVIEW_INPUT
+echo "\nselect eod /law" >> $ECFLOWVIEW_INPUT
+echo "\norder eod4:/era5eda_7 alpha" >> $ECFLOWVIEW_INPUT
+
+echo "\nselect eod /law/main/12/euroshelf/wamrun" >> $ECFLOWVIEW_INPUT
+echo "\nwindow -d -f Script" >> $ECFLOWVIEW_INPUT
+echo "\nwindow -d -f Manual" >> $ECFLOWVIEW_INPUT
+
+echo "\nlogin eod2"    >> $ECFLOWVIEW_INPUT
+echo "\nlogout eod2"  >> $ECFLOWVIEW_INPUT 
+echo "\nquit"  >> $ECFLOWVIEW_INPUT
+
+WINDOW:
+Check Collector Edit History Info Job Jobstatus Manual Messages
+Options Output Script Suites Timeline Triggers Variables Why Zombies
+*/
