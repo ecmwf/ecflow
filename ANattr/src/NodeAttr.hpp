@@ -28,7 +28,7 @@
 // Use compiler , generated destructor, assignment,  copy constructor
 class Label : public boost::equality_comparable<Label> {
 public:
-   Label(const std::string& name, const std::string& value);
+   Label(const std::string& name, const std::string& value, const std::string& new_value= "");
    Label() = default;
 
    std::ostream& print(std::ostream&) const;
@@ -63,6 +63,7 @@ public:
    std::string dump() const;
 
    void parse(const std::string& line, std::vector<std::string >& lineTokens, bool parse_state);
+   static void parse(const std::string& line, std::vector<std::string >& lineTokens, bool parse_state,std::string&,std::string&,std::string& );
    static const Label& EMPTY(); // Added to support return by reference
 
 private:

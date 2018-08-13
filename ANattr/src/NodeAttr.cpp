@@ -236,11 +236,11 @@ std::string Meter::dump() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-Label::Label(const std::string& name, const std::string& value)
-: n_(name),v_(value),state_change_no_(0)
+Label::Label(const std::string& name, const std::string& value, const std::string& new_value)
+: n_(name),v_(value),new_v_(new_value),state_change_no_(0)
 {
-   if ( !Str::valid_name( name ) ) {
-      throw std::runtime_error("Label::Label: Invalid Label name :" + name);
+   if ( !Str::valid_name( n_ ) ) {
+      throw std::runtime_error("Label::Label: Invalid Label name :" + n_);
    }
 }
 
@@ -309,64 +309,70 @@ void Label::reset() {
 
 void Label::parse(const std::string& line, std::vector<std::string >& lineTokens, bool parse_state)
 {
+   parse(line,lineTokens,parse_state,n_,v_,new_v_);
+}
+
+void Label::parse(const std::string& line, std::vector<std::string >& lineTokens, bool parse_state,
+                  std::string& the_name,std::string& the_value, std::string& the_new_value)
+{
    if ( lineTokens.size() < 3 )
-      throw std::runtime_error( "Label::parse: Invalid label :" + line );
+       throw std::runtime_error( "Label::parse: Invalid label :" + line );
 
-   n_ = lineTokens[1];
+    the_name = lineTokens[1];
 
-   // parsing will always STRIP single or double quotes, print will add double quotes
-   // label simple_label 'ecgems'
-   if ( lineTokens.size() == 3 ) {
-      Str::removeQuotes(lineTokens[2]);
-      Str::removeSingleQuotes(lineTokens[2]);
-      v_ = lineTokens[2];
-      if (v_.find("\\n") != std::string::npos) {
-         Str::replaceall(v_,"\\n","\n");
-      }
-   }
-   else {
+    // parsing will always STRIP single or double quotes, print will add double quotes
+    // label simple_label 'ecgems'
+    if ( lineTokens.size() == 3 ) {
+       Str::removeQuotes(lineTokens[2]);
+       Str::removeSingleQuotes(lineTokens[2]);
+       the_value = lineTokens[2];
+       if (the_value.find("\\n") != std::string::npos) {
+          Str::replaceall(the_value,"\\n","\n");
+       }
+    }
+    else {
 
-      // label complex_label "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # fred
-      // label simple_label "fred" #  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"
-      std::string value; value.reserve(line.size());
-      size_t line_token_size = lineTokens.size();
-      for (size_t i = 2; i < line_token_size; ++i) {
-         if ( lineTokens[i].at( 0 ) == '#' ) break;
-         if ( i != 2 ) value += " ";
-         value += lineTokens[i];
-      }
+       // label complex_label "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # fred
+       // label simple_label "fred" #  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"
+       std::string value; value.reserve(line.size());
+       size_t line_token_size = lineTokens.size();
+       for (size_t i = 2; i < line_token_size; ++i) {
+          if ( lineTokens[i].at( 0 ) == '#' ) break;
+          if ( i != 2 ) value += " ";
+          value += lineTokens[i];
+       }
 
-      Str::removeQuotes(value);
-      Str::removeSingleQuotes(value);
-      v_ = value;
-      if (v_.find("\\n") != std::string::npos) {
-         Str::replaceall(v_,"\\n","\n");
-      }
+       Str::removeQuotes(value);
+       Str::removeSingleQuotes(value);
+       the_value = value;
+       if (the_value.find("\\n") != std::string::npos) {
+          Str::replaceall(the_value,"\\n","\n");
+       }
 
 
-      // state
-      if (parse_state) {
-         // label name "value" # "new  value"
-         bool comment_fnd = false;
-         size_t first_quote_after_comment = 0;
-         size_t last_quote_after_comment = 0;
-         for(size_t i = line.size()-1; i > 0; i--) {
-            if (line[i] == '#') { comment_fnd = true; break; }
-            if (line[i] == '"') {
-               if (last_quote_after_comment == 0) last_quote_after_comment = i;
-               first_quote_after_comment = i;
-            }
-         }
-         if (comment_fnd && first_quote_after_comment != last_quote_after_comment) {
-            std::string new_value = line.substr(first_quote_after_comment+1,last_quote_after_comment-first_quote_after_comment-1);
-            //std::cout << "new label = '" << new_value << "'\n";
-            new_v_ = new_value;
+       // state
+       if (parse_state) {
+          // label name "value" # "new  value"
+          bool comment_fnd = false;
+          size_t first_quote_after_comment = 0;
+          size_t last_quote_after_comment = 0;
+          for(size_t i = line.size()-1; i > 0; i--) {
+             if (line[i] == '#') { comment_fnd = true; break; }
+             if (line[i] == '"') {
+                if (last_quote_after_comment == 0) last_quote_after_comment = i;
+                first_quote_after_comment = i;
+             }
+          }
+          if (comment_fnd && first_quote_after_comment != last_quote_after_comment) {
+             std::string new_value = line.substr(first_quote_after_comment+1,last_quote_after_comment-first_quote_after_comment-1);
+             //std::cout << "new label = '" << new_value << "'\n";
+             the_new_value = new_value;
 
-            if (new_v_.find("\\n") != std::string::npos) {
-               Str::replaceall(new_v_,"\\n","\n");
-            }
-         }
-      }
-   }
+             if (the_new_value.find("\\n") != std::string::npos) {
+                Str::replaceall(the_new_value,"\\n","\n");
+             }
+          }
+       }
+    }
 }
 

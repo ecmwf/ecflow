@@ -27,9 +27,9 @@ bool LabelParser::doParse( const std::string& line,
 		throw std::runtime_error("LabelParser::doParse: Could not add label as node stack is empty at line: " + line );
 	}
 
-	Label label;
-	label.parse(line,lineTokens,rootParser()->get_file_type() != PrintStyle::DEFS);
-	nodeStack_top()->addLabel( label );
+	std::string name,value,new_value;
+	Label::parse(line,lineTokens,rootParser()->get_file_type() != PrintStyle::DEFS,name,value,new_value);
+	nodeStack_top()->add_label(name,value,new_value);
 
 	return true;
 }

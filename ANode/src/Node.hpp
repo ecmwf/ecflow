@@ -431,6 +431,7 @@ public:
    void addEvent( const Event& );       // will throw std::runtime_error if duplicate
    void addMeter( const Meter& );       // will throw std::runtime_error if duplicate
    void addLabel( const Label& );       // will throw std::runtime_error if duplicate
+   void add_label(const std::string& name,const std::string& value, const std::string& new_value);
    void addAutoCancel( const ecf::AutoCancelAttr& );
    void add_autoarchive( const ecf::AutoArchiveAttr& );
    void add_autorestore( const ecf::AutoRestoreAttr& );

@@ -243,6 +243,17 @@ void Node::addLabel( const Label& l)
     state_change_no_ = Ecf::incr_state_change_no();
 }
 
+void Node::add_label(const std::string& name,const std::string& value, const std::string& new_value)
+{
+   if (findLabel(name)) {
+      std::stringstream ss;
+      ss << "Add Label failed: Duplicate label of name '" << name << "' already exist for node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+   labels_.emplace_back(name,value,new_value);
+   state_change_no_ = Ecf::incr_state_change_no();
+}
+
 
 void Node::addMeter( const Meter& m)
 {
