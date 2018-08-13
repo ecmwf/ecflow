@@ -31,11 +31,11 @@ class PartExpression  {
 public:
    enum ExprType { FIRST, AND, OR };
 
-   explicit PartExpression(const std::string& expression)
-   : exp_(expression), type_(default_expr_type()) {}
+   explicit PartExpression(const std::string& expression) : exp_(expression), type_(default_expr_type()) {}
+   explicit PartExpression(std::string&& expression) : exp_(std::move(expression)), type_(default_expr_type()) {}
 
-   PartExpression(const std::string& expression, bool and_type)
-   : exp_(expression), type_( (and_type) ? AND : OR) {}
+   PartExpression(const std::string& expression, bool and_type) : exp_(expression), type_( (and_type) ? AND : OR) {}
+   PartExpression(std::string&& expression, bool and_type) : exp_(std::move(expression)), type_( (and_type) ? AND : OR) {}
 
    PartExpression() : type_(default_expr_type() ) {}
 

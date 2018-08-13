@@ -150,9 +150,9 @@ bool TriggerParser::doParse( const std::string& line, std::vector<std::string >&
 
 	if ( !nodeStack().empty() ) {
 		Node* node = nodeStack_top();
-		if (!andExp && !orExp) node->add_part_trigger( PartExpression( expression )) ;
-		else if (andExp)       node->add_part_trigger( PartExpression( expression, true)) ;
-		else if (orExp)        node->add_part_trigger( PartExpression( expression, false)) ;
+		if (!andExp && !orExp) node->add_part_trigger( PartExpression( std::move(expression) )) ;
+		else if (andExp)       node->add_part_trigger( PartExpression( std::move(expression) , true)) ;
+		else if (orExp)        node->add_part_trigger( PartExpression( std::move(expression) , false)) ;
 		else throw std::runtime_error( "Invalid trigger " + line );
 		if (isFree) node->freeTrigger();
 	}
@@ -170,9 +170,9 @@ bool CompleteParser::doParse( const std::string& line, std::vector<std::string >
 
 	if ( !nodeStack().empty() ) {
 		Node* node = nodeStack_top();
-      if (!andExp && !orExp) node->add_part_complete( PartExpression( expression )) ;
-      else if (andExp)       node->add_part_complete( PartExpression( expression, true)) ;
-      else if (orExp)        node->add_part_complete( PartExpression( expression, false)) ;
+      if (!andExp && !orExp) node->add_part_complete( PartExpression( std::move(expression)  )) ;
+      else if (andExp)       node->add_part_complete( PartExpression( std::move(expression) , true)) ;
+      else if (orExp)        node->add_part_complete( PartExpression( std::move(expression), false)) ;
       else throw std::runtime_error( "Invalid complete trigger " + line );
 		if (isFree) node->freeComplete();
 	}
