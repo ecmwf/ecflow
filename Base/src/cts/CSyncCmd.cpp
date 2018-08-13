@@ -65,7 +65,7 @@ const char* CSyncCmd::theArg() const
 
 int CSyncCmd::timeout() const
 {
-   if (api_ == CSyncCmd::SYNC || api_ == CSyncCmd::SYNC_FULL || CSyncCmd::SYNC_CLOCK) {
+   if (api_ == CSyncCmd::SYNC || api_ == CSyncCmd::SYNC_FULL || api_ == CSyncCmd::SYNC_CLOCK) {
       return time_out_for_load_sync_and_get();
    }
    return 20; // CSyncCmd::NEWS
