@@ -691,4 +691,64 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //   }
 //}
 
+
+BOOST_AUTO_TEST_CASE( test_str_valid_name )
+{
+   cout << "ACore:: ...test_str_valid_name\n";
+
+   std::vector<std::string> valid;
+   valid.push_back("a");
+   valid.push_back("a122345");
+   valid.push_back("_a122345");
+   valid.push_back("_");
+   valid.push_back("0");
+   valid.push_back("1");
+   valid.push_back("2");
+   valid.push_back("3");
+   valid.push_back("4");
+   valid.push_back("5");
+   valid.push_back("6");
+   valid.push_back("7");
+   valid.push_back("8");
+   valid.push_back("9");
+   valid.push_back("11");
+   valid.push_back("111");
+   for(size_t i = 0; i < valid.size(); i++) {
+      std::string msg;
+      BOOST_CHECK_MESSAGE( Str::valid_name( valid[i],msg ) ,"Expected " <<  valid[i] << " to be valid" );
+      BOOST_CHECK_MESSAGE( Str::valid_name( valid[i]) ,"Expected " <<  valid[i] << " to be valid" );
+   }
+
+   BOOST_CHECK_MESSAGE( !Str::valid_name( "") ,"Expected empty string to be in-valid" );
+   BOOST_CHECK_MESSAGE( !Str::valid_name( ".") ,"Expected '.' string to be in-valid" );
+   std::vector<std::string> invalid;
+   invalid.push_back("?");
+   invalid.push_back("!");
+   invalid.push_back("\"");
+   invalid.push_back("$");
+   invalid.push_back("%");
+   invalid.push_back("^");
+   invalid.push_back("*");
+   invalid.push_back("(");
+   invalid.push_back(")");
+   invalid.push_back("-");
+   invalid.push_back("+");
+   invalid.push_back(":");
+   invalid.push_back(";");
+   invalid.push_back("@");
+   invalid.push_back("~");
+   invalid.push_back("<");
+   invalid.push_back(">");
+   invalid.push_back("!");
+   for(size_t i = 0; i < invalid.size(); i++) {
+      std::string msg;
+      BOOST_CHECK_MESSAGE( !Str::valid_name( invalid[i],msg ) ,"Expected " << invalid[i] << " to be in-valid" );
+      BOOST_CHECK_MESSAGE( !Str::valid_name( invalid[i]) ,"Expected " << invalid[i] << " to be in-valid" );
+
+      std::string s = "a" + invalid[i];
+      BOOST_CHECK_MESSAGE( !Str::valid_name( s,msg ) ,"Expected " <<  s << " to be in-valid" );
+      BOOST_CHECK_MESSAGE( !Str::valid_name( s ) ,"Expected " <<  s << " to be in-valid" );
+   }
+}
+
 BOOST_AUTO_TEST_SUITE_END()
