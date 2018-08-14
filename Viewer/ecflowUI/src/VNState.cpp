@@ -38,8 +38,11 @@ static VNState submittedSt("submitted",NState::SUBMITTED);
 static VNState activeSt("active",NState::ACTIVE);
 static VNState suspendedSt("suspended");
 
+static unsigned char ucIdCnt=0;
+
 VNState::VNState(const std::string& name,NState::State nstate) :
-	VParam(name)
+    VParam(name),
+    ucId_(ucIdCnt++)
 {
 	items_[name]=this;
 	stateMap_[nstate]=this;
@@ -50,6 +53,8 @@ VNState::VNState(const std::string& name) :
 {
 	items_[name]=this;
 }
+
+
 
 //===============================================================
 //
@@ -121,6 +126,17 @@ VNState* VNState::find(const std::string& name)
 				return it->second;
 
 	return NULL;
+}
+
+VNState* VNState::find(unsigned char ucId)
+{
+    for(std::map<std::string,VNState*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
+    {
+        if(it->second->ucId() == ucId)
+            return it->second;
+    }
+
+    return NULL;
 }
 
 //

@@ -21,6 +21,8 @@
 #include "VNode.hpp"
 #include "VNState.hpp"
 
+#include "TimelineData.hpp"
+
 TimelineItemWidget::TimelineItemWidget(QWidget *parent)
 {
     QVBoxLayout* vb=new QVBoxLayout(this);
@@ -70,7 +72,8 @@ void TimelineItemWidget::reload(VInfo_ptr info)
 
 void TimelineItemWidget::load()
 {
-
+    TimelineData data;
+    data.loadLogFile("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log",100);
 }
 
 void TimelineItemWidget::clearContents()

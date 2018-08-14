@@ -154,6 +154,7 @@ set(viewer_srcs
     TextFilterWidget.cpp   
     TimeItemWidget.cpp
     TimelineItemWidget.cpp
+    TimelineData.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
