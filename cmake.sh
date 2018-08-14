@@ -335,7 +335,7 @@ $ecbuild $source_dir \
             ${gui_options} \
             ${ssl_options} \
             ${log_options} \
-            ${test_options}
+            ${test_options} # -DCMAKE_PREFIX_PATH="/tmp/$USER/opt/qt5/"
             
             #-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=memory -fPIE -pie' 
             #-DENABLE_STATIC_BOOST_LIBS=ON \
@@ -349,7 +349,8 @@ $ecbuild $source_dir \
             #-DENABLE_SERVER=OFF   \
             #-DENABLE_PROFILING=ON \
             #-DECBUILD_GPROF_FLAGS \
-        
+# export PATH=/tmp/$USER/opt/qt5/bin:$PATH
+
 if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
     python $WK/build_scripts/run-clang-tidy.py
 fi

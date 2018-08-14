@@ -94,25 +94,25 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
     if(!item || !dir)
         return QVariant();
 
-	if(role == Qt::DisplayRole)
-	{
-		switch(index.column())
-		{
-		case 0:
-            return QString::fromStdString(item->name_);
-        case 1:
-            return QString::fromStdString(dir->path());
-        case 2:
-			return formatSize(item->size_);
-        case 3:
-			return formatAgo(item->mtime_);
-        case 4:
-            return formatDate(item->mtime_);
-        case 5:
-            return QString::fromStdString(dir->fetchModeStr());
-		default:
-			break;
-		}
+    if(role == Qt::DisplayRole)
+    {
+	  switch(index.column())
+	    {
+	    case 0:
+	      return QString::fromStdString(item->name_);
+	    case 1:
+	      return QString::fromStdString(dir->path());
+	    case 2:
+	      return formatSize(item->size_);
+	    case 3:
+	      return formatAgo(item->mtime_);
+	    case 4:
+	      return formatDate(item->mtime_);
+	    case 5:
+	      return QString::fromStdString(dir->fetchModeStr());
+	    default:
+	      break;
+	    }
     }
     else if(role == Qt::ForegroundRole)
     {
@@ -165,11 +165,11 @@ QVariant  OutputModel::data(const QModelIndex& index, int role) const
 
 QVariant OutputModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
-	if ( orient != Qt::Horizontal || role != Qt::DisplayRole )
-      		  return QAbstractItemModel::headerData( section, orient, role );
+  if ( orient != Qt::Horizontal || role != Qt::DisplayRole )
+    return QAbstractItemModel::headerData( section, orient, role );
 
-   	switch ( section )
-	{
+  switch ( section )
+    {
     case 0: return tr("Name");
     case 1: return tr("Path");
     case 2: return tr("Size");
@@ -177,7 +177,7 @@ QVariant OutputModel::headerData( const int section, const Qt::Orientation orien
     case 4: return tr("Modified");
     case 5: return tr("Source");
    	default: return QVariant();
-   	}
+    }
 
     return QVariant();
 }

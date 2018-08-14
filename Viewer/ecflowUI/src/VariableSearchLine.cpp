@@ -8,7 +8,7 @@
 //============================================================================
 
 #include <cassert>
-
+#include <QHeaderView>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTreeView>

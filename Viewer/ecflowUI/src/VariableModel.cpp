@@ -248,17 +248,28 @@ bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& valu
 
 QVariant VariableModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
-	if ( orient != Qt::Horizontal || role != Qt::DisplayRole )
-      		  return QAbstractItemModel::headerData( section, orient, role );
+  if ( orient != Qt::Horizontal || (role != Qt::DisplayRole &&  role != Qt::ToolTipRole))
+    return QAbstractItemModel::headerData( section, orient, role );
 
+  if(role == Qt::DisplayRole)
+  {
    	switch ( section )
 	{
    	case 0: return tr("Name");  
-    case 1: return tr("Value");
+        case 1: return tr("Value");
    	default: return QVariant();
    	}
-
-    return QVariant();
+  }
+  else if(role== Qt::ToolTipRole)
+  {
+   	switch ( section )
+	{
+   	case 0: return tr("Name");  
+        case 1: return tr("Value");
+   	default: return QVariant();
+   	}
+  }
+  return QVariant();
 }
 
 QModelIndex VariableModel::index( int row, int column, const QModelIndex & parent ) const
@@ -324,7 +335,7 @@ int VariableModel::indexToLevel(const QModelIndex& index) const
 	int id=index.internalId();
 	if(id >=0 && id < 1000)
 	{
-			return 1;
+	  return 1;
 	}
 	return 2;
 }

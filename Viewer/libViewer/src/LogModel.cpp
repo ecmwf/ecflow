@@ -308,7 +308,7 @@ QVariant LogModel::data( const QModelIndex& index, int role ) const
 QVariant LogModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
 	if ( orient != Qt::Horizontal || (role != Qt::DisplayRole &&  role != Qt::ToolTipRole))
-      		  return QAbstractItemModel::headerData( section, orient, role );
+	  return QAbstractItemModel::headerData( section, orient, role );
 
    	if(role == Qt::DisplayRole)
    	{
