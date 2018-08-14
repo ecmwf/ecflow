@@ -106,15 +106,15 @@ int main(int argc, char* argv[])
       return 1;
    }
 
-#ifdef DEBUG
-   cout << "remove dodgy suites, these are based on localhost\n";
-#endif
 //   std::vector<std::string> suites_to_remove;
 //   suites_to_remove.push_back("codes_ui");
 //   suites_to_remove.push_back("libemos_test");
 //   suites_to_remove.push_back("metview");
 //   suites_to_remove.push_back("ecflow");
 //   suites_to_remove.push_back("mir_bundle");
+//#ifdef DEBUG
+//   cout << "remove dodgy suites, these are based on localhost\n";
+//#endif
 //   for(size_t i = 0; i < suites_to_remove.size(); ++i) {
 //      suite_ptr suite = defs.findSuite(suites_to_remove[i]);
 //      if (suite) suite->remove();
