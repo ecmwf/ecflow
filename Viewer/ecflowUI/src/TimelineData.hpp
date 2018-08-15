@@ -36,6 +36,9 @@ class TimelineData
 public:
     TimelineData() {}
     void loadLogFile(const std::string& logFile,int numOfRows);
+    size_t size() const {return  items_.size();}
+    const std::vector<TimelineItem>& items() const {return items_;}
+
 protected:
 
     void clear(){}

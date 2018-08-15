@@ -32,8 +32,12 @@ TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned
 
 void TimelineItem::add(unsigned char status,unsigned int time)
 {
+    if(end_.size() > 0)
+        end_[end_.size()-1]=time;
+
     status_.push_back(status);
     start_.push_back(time);
+    end_.push_back(0);
 }
 
 void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)

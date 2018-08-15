@@ -22,17 +22,15 @@
 #include "VNState.hpp"
 
 #include "TimelineData.hpp"
+#include "TimelineWidget.hpp"
 
 TimelineItemWidget::TimelineItemWidget(QWidget *parent)
 {
     QVBoxLayout* vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
 
-    w_=new MessageLabel(this);
-    w_->showWarning("The <b>server load view</b> is only avialable when ecFlowUI is built with <b>QtCharts</b>.");
+    w_=new TimelineWidget(this);
     vb->addWidget(w_);
-    vb->addStretch(1);
-
 
     //This tab is always visible whatever node is selected!!!
     //We keep the data unchanged unless a new server is selected
@@ -72,12 +70,28 @@ void TimelineItemWidget::reload(VInfo_ptr info)
 
 void TimelineItemWidget::load()
 {
-    TimelineData data;
-    data.loadLogFile("/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log",100);
+    if(info_ && info_->server())
+    {
+        ServerHandler *sh=info_->server();
+        Q_ASSERT(sh);
+        QString logFile;
+        if(VServer* vs=sh->vRoot())
+        {
+            logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
+
+            logFile="/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log";
+
+            w_->load(QString::fromStdString(sh->name()),
+                         QString::fromStdString(sh->host()),
+                         QString::fromStdString(sh->port()),
+                         logFile,-50000); //last 50000 rows are read
+        }
+    }
 }
 
 void TimelineItemWidget::clearContents()
 {
+    w_->clear();
     InfoPanelItem::clear();
 }
 

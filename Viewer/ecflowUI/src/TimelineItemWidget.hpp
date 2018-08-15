@@ -11,14 +11,13 @@
 #ifndef TIMELINEITEMWIDGET_HPP
 #define TIMELINEITEMWIDGET_HPP
 
-#include <QPlainTextEdit>
-
 #include "InfoPanelItem.hpp"
 #include "VInfo.hpp"
 
+#include <QWidget>
+
 class VNode;
-class LogLoadWidget;
-class MessageLabel;
+class TimelineWidget;
 
 class TimelineItemWidget : public QWidget, public InfoPanelItem
 {
@@ -40,7 +39,8 @@ protected:
 
 private:
     void load();
-    MessageLabel* w_;
+
+    TimelineWidget* w_;
 };
 
 #endif // TIMELINEITEMWIDGET_HPP
