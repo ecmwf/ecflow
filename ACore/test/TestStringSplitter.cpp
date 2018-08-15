@@ -46,6 +46,24 @@ static void check(const std::string& line,
    }
 }
 
+static void check(const std::string& line, const std::vector<std::string>& expected, const char* delims = " \t" )
+{
+   std::vector<std::string> result;
+   std::vector<boost::string_view> result2;
+   StringSplitter::split2(line,result2,delims);
+   for(const auto& s: result2) {
+      //std::cout << "ref:'" <<  s << "'\n";
+      result.emplace_back(std::string(s.begin(),s.end()));
+   }
+   BOOST_CHECK_MESSAGE(result.size() == expected.size(),"expected size " << expected.size() << " but found " << result.size() << " for '" << line << "'");
+   BOOST_CHECK_MESSAGE(result == expected,"failed for '" << line  << "'");
+   if (result != expected) {
+      cout << "Line    :'" << line << "'\n";
+      cout << "Actual  :"; BOOST_FOREACH(const string& t, result)   { cout << "'" << t << "'"; } cout << "\n";
+      cout << "Expected:"; BOOST_FOREACH(const string& t, expected) { cout << "'" << t << "'"; } cout << "\n";
+   }
+}
+
 BOOST_AUTO_TEST_CASE( test_StringSplitter )
 {
    cout << "ACore:: ...test_StringSplitter\n";
@@ -56,7 +74,8 @@ BOOST_AUTO_TEST_CASE( test_StringSplitter )
    expected.emplace_back("This"); expected.emplace_back("is"); expected.emplace_back("a"); expected.emplace_back("string");
    expected.emplace_back("please"); expected.emplace_back("split"); expected.emplace_back("me");
    StringSplitter string_splitter(line);
-   check(line, string_splitter,expected);
+   check(line, string_splitter ,expected);
+   check(line,expected);
 
    // reset
    string_splitter.reset();
@@ -75,54 +94,65 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
 
    expected.emplace_back("This"); expected.emplace_back("is"); expected.emplace_back("a"); expected.emplace_back("string");
    check(line, StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear();
    line = "";
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear();
    line = "  ";
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear();
    line = "a";
    expected.emplace_back("a");
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    // Some implementation fail this test
    expected.clear();
    line = "\n";
    expected.emplace_back("\n");
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear();
    line = "a ";
    expected.emplace_back("a");
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear(); expected.emplace_back("a");
    line = " a";
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear();
    line = " a"; // check tabs
    expected.emplace_back("a");
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear();
    line = "  a  "; // check sequential tabs
    expected.emplace_back("a");
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear();
    line = " a ";
    expected.emplace_back("a");
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear();
    line = "        a     b     c       d        ";
    expected.emplace_back("a"); expected.emplace_back("b"); expected.emplace_back("c"); expected.emplace_back("d");
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    expected.clear();
    line = " - !   $ % ^  & * ( ) - + ? ";
@@ -131,6 +161,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    expected.emplace_back("("); expected.emplace_back(")"); expected.emplace_back("-"); expected.emplace_back("+");
    expected.emplace_back("?");
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    // Check tabs
    expected.clear();
@@ -139,35 +170,42 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    expected.emplace_back("sundays");expected.emplace_back("in");expected.emplace_back("october");expected.emplace_back("hence");
    expected.emplace_back("expect");expected.emplace_back("8");expected.emplace_back("task");expected.emplace_back("completions");
    check(line,StringSplitter(line),expected);
+   check(line,expected);
 
    // Check paths
    expected.clear(); expected.emplace_back("a");
    line = "/a";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,expected,"/");
 
    expected.clear();
    line = "";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,expected,"/");
 
    expected.clear();
    expected.emplace_back("a");expected.emplace_back("b");expected.emplace_back("c");expected.emplace_back("c");expected.emplace_back("e");
    line = "/a/b/c/c//e";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,expected,"/");
 
    expected.clear();
    expected.emplace_back("a");expected.emplace_back("b");expected.emplace_back("c");expected.emplace_back("c");expected.emplace_back("e");
    line = "///a/b/c/c//e";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,expected,"/");
 
    expected.clear();
    expected.emplace_back("a");expected.emplace_back("b");expected.emplace_back("c");expected.emplace_back("c");expected.emplace_back("e");
    line = "//a/b/c/c//e/";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,expected,"/");
 
    expected.clear();
    expected.emplace_back("a ");expected.emplace_back("b");expected.emplace_back("c");expected.emplace_back("c e");
    line = "/a /b/c/c e";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,expected,"/");
 }
 
 //BOOST_AUTO_TEST_CASE( test_StringSplitter_iterator )

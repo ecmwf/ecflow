@@ -58,8 +58,12 @@ public:
 
    /// The preferred splitter as it does not create strings
    static void split(const std::string& str,
-                     std::vector< boost::string_view >& lineTokens,
+                     std::vector<boost::string_view >& lineTokens,
                      boost::string_view delimiters = " \t");
+
+   static void split2(boost::string_view str ,
+                     std::vector<boost::string_view>& lineTokens,
+                     const char* delimiters = " \t");
 
    /// This was added to maintain compatibility, slightly faster than original Str::split
    static void split(const std::string& str,

@@ -46,9 +46,11 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
    // make_split_iterator  4.13
    // boost::string_view    1.86
    std::vector<std::string> result;
-   std::string line = "This is a long string that is going to be used to test the performance of splitting with different Implementations   extra   empty tokens   ";
+   std::string line = "This is a long string that is going to be used to test the performance of splitting with different Implementations the fastest times wins ";
    size_t times = 1000000;
    cout << "This test will split a line " << times << " times: '" << line << "'\n";
+
+   string reconstructed;reconstructed.reserve(line.size());
 
    { // BOOST SPLIT
       boost::timer timer;  // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
@@ -56,23 +58,25 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          result.clear();
          boost::algorithm::split(result, line, boost::is_any_of(" \t"),boost::algorithm::token_compress_on);
 
-         string reconstructed;
+         reconstructed.clear();
          BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
          //cout << "boost::split: reconstructed " << reconstructed << "\n";
       }
       cout << "Time for boost::split " << times << " times = " << timer.elapsed() << "\n";
+      // BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'"); add extra space
    }
 
-   { // Str::split
+   { // Str::split_orig
       boost::timer timer;
       for (size_t i = 0; i < times; i++) {
-         result.clear(); Str::split(line,result);
+         result.clear(); Str::split_orig(line,result);
 
-         string reconstructed;
+         reconstructed.clear();
          BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
-         //cout << "Str::split reconstructed " << reconstructed << "\n";
+         //cout << "Str::split_orig reconstructed " << reconstructed << "\n";
       }
-      cout << "Time for Str::split " << times << " times = " << timer.elapsed() << "\n";
+      cout << "Time for Str::split_orig " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(line==reconstructed," error");
    }
 
    typedef boost::split_iterator<string::const_iterator> split_iter_t;
@@ -87,10 +91,11 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
              boost::iterator_range<string::const_iterator> range = *tokens;
              ss << range << " ";
          }
-         string reconstructed = ss.str();
+         reconstructed = ss.str();
          //cout << "boost::make_split_iterator: reconstructed " << reconstructed << "\n";
       }
       cout << "Time for make_split_iterator::split " << times << " times = " << timer.elapsed() << "\n";
+      // BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
    }
 
    { // boost::string_view
@@ -98,7 +103,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
       for (size_t i = 0; i < times; i++) {
          StringSplitter string_splitter(line);
 
-         string reconstructed;
+         reconstructed.clear();
          while(!string_splitter.finished())  {
             reconstructed += std::string(string_splitter.next());
             reconstructed += " ";
@@ -106,6 +111,26 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          //cout << "StringSplitter:: reconstructed " << reconstructed << "\n";
       }
       cout << "Time for boost::string_view " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
+   }
+
+   { // boost::string_view
+      boost::timer timer;
+      std::vector<boost::string_view> result;
+      for (size_t i = 0; i < times; i++) {
+
+         result.clear();
+         StringSplitter::split2(line,result);
+
+         reconstructed.clear();
+         for( const auto& s: result) {
+            reconstructed += std::string(s.begin(),s.end());
+            reconstructed += " ";
+         }
+      }
+      //cout << "StringSplitter:: reconstructed " << reconstructed << "\n";
+      cout << "Time for boost::string_view(2) " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
    }
 }
 
@@ -140,12 +165,12 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
          boost::timer timer;
          for(size_t i = 0; i < file_contents.size(); i++) {
             result.clear();
-            Str::split(file_contents[i],result);
+            Str::split_orig(file_contents[i],result);
 
             string reconstructed;
             BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
          }
-         cout << "Time for Str::split " << file_contents.size() << " times = " << timer.elapsed() << "\n";
+         cout << "Time for Str::split_orig " << file_contents.size() << " times = " << timer.elapsed() << "\n";
       }
       {
          typedef boost::split_iterator<string::const_iterator> split_iter_t;
@@ -177,6 +202,23 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
             }
          }
          cout << "Time for boost::string_view " << file_contents.size() << " times = " << timer.elapsed() << "\n";
+      }
+
+      {
+         std::vector<boost::string_view> result;
+         boost::timer timer;
+         for(size_t i = 0; i < file_contents.size(); i++) {
+
+            result.clear();
+            StringSplitter::split2(file_contents[i],result);
+
+            string reconstructed;
+            for(const auto& s: result) {
+               reconstructed += std::string(s.begin(),s.end());
+               reconstructed += " ";
+            }
+         }
+         cout << "Time for boost::string_view(2) " << file_contents.size() << " times = " << timer.elapsed() << "\n";
       }
    }
 }

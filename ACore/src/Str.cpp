@@ -155,20 +155,7 @@ void Str::split(const std::string& line, std::vector< std::string >& tokens,cons
 #ifdef USE_STRINGSPLITTER
    StringSplitter::split(line,tokens,delimiters);
 #else
-	// ***************************************************************************
-	//	Time for split 1000000 times = 5.81
-
-	// Skip delimiters at beginning.
-	string::size_type lastPos = line.find_first_not_of( delimiters, 0 );
-
-	// Find first "non-delimiter".
-	string::size_type pos = line.find_first_of( delimiters, lastPos );
-
-	while ( string::npos != pos || string::npos != lastPos ) {
-		tokens.push_back( line.substr( lastPos, pos - lastPos ) ); // Found a token, add it to the vector.
-		lastPos = line.find_first_not_of( delimiters, pos );       // Skip delimiters.  Note the "not_of"
-		pos = line.find_first_of( delimiters, lastPos );           // Find next "non-delimiter"
-	}
+   Str::split_orig(line,tokens,delimiters);
 #endif
 
 //	// ***************************************************************************
@@ -208,6 +195,20 @@ void Str::split(const std::string& line, std::vector< std::string >& tokens,cons
 //	 }
 }
 
+void Str::split_orig(const std::string& line, std::vector< std::string >& tokens,const std::string& delimiters )
+{
+   // Skip delimiters at beginning.
+   string::size_type lastPos = line.find_first_not_of( delimiters, 0 );
+
+   // Find first "non-delimiter".
+   string::size_type pos = line.find_first_of( delimiters, lastPos );
+
+   while ( string::npos != pos || string::npos != lastPos ) {
+      tokens.push_back( line.substr( lastPos, pos - lastPos ) ); // Found a token, add it to the vector.
+      lastPos = line.find_first_not_of( delimiters, pos );       // Skip delimiters.  Note the "not_of"
+      pos = line.find_first_of( delimiters, lastPos );           // Find next "non-delimiter"
+   }
+}
 
 boost::split_iterator<std::string::const_iterator> Str::make_split_iterator(const std::string& line,const std::string& delimiters)
 {

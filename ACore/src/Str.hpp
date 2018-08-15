@@ -63,6 +63,10 @@ public:
 	                  std::vector< std::string >& tokens,
 	                  const std::string& delimiters = " \t");
 
+   static void split_orig(const std::string& line,
+                     std::vector< std::string >& tokens,
+                     const std::string& delimiters = " \t");
+
 	// Uses boost::make_split_iterator will remove
 	// consecutive delimiters in the middle of the string
 	// ** However preserves leading and trailing empty tokens *IF* delimiters at start/end

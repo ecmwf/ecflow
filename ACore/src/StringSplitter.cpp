@@ -60,6 +60,33 @@ void StringSplitter::split(const std::string& str, std::vector< boost::string_vi
    }
 }
 
+void StringSplitter::split2(boost::string_view  str, std::vector<boost::string_view>& ret,const char* delims)
+{
+//   // Skip delimiters at beginning.
+//   boost::string_view ::size_type lastPos = str.find_first_not_of( delims, 0 );
+//
+//   // Find first "non-delimiter".
+//   boost::string_view::size_type pos = str.find_first_of( delims, lastPos );
+//
+//   while (  boost::string_view::npos != pos ||  boost::string_view::npos != lastPos ) {
+//      ret.push_back( str.substr( lastPos, pos - lastPos ) ); // Found a token, add it to the vector.
+//      lastPos = str.find_first_not_of( delims, pos );       // Skip delimiters.  Note the "not_of"
+//      pos = str.find_first_of( delims, lastPos );           // Find next "non-delimiter"
+//   }
+
+   boost::string_view::size_type start = 0;
+   auto pos = str.find_first_of(delims, start);
+   while (pos != boost::string_view::npos) {
+      if (pos != start) {
+         ret.push_back(str.substr(start, pos - start));
+      }
+      start = pos + 1;
+      pos = str.find_first_of(delims, start);
+   }
+   if (start < str.length())
+      ret.push_back(str.substr(start, str.length() - start));
+}
+
 void StringSplitter::split(const std::string& str,std::vector<std::string>& lineTokens, boost::string_view delimiters)
 {
    StringSplitter string_splitter(str,delimiters);
