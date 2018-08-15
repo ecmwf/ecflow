@@ -199,8 +199,14 @@ host::host( const std::string& name, const std::string& host, int number )
       gui::add_host(name);
    }
 
-   if (timeout_ < 30) timeout_ = 30;
-   if (maximum_ < 30) maximum_ = 30;
+   if (timeout_ < 30) {
+     timeout_ = 30;
+     gui::error("%s: timeout reset to 30!", this->name());
+   }
+   if (maximum_ < 30) {
+     maximum_ = 30;
+     gui::error("%s: maximum reset to 30!", this->name());
+   }
    frequency(timeout_);
 }
 
@@ -953,7 +959,13 @@ void host::to_check( node& n )
 
 void host::changed( resource& r )
 {
-   if (&r == &timeout_) frequency(timeout_);
+  if (&r == &timeout_) {
+    if (timeout_ < 30) {
+      timeout_ = 30;
+      gui::error("%s: timeout reset to 30!", this->name());
+    }
+    frequency(timeout_);
+  }
 }
 
 void ehost::changed( resource& r )
