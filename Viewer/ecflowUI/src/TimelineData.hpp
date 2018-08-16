@@ -23,7 +23,7 @@ public:
     const std::string& path() const {return path_;}
     void add(unsigned char status,unsigned int time);
 
-protected:
+//protected:
     std::string path_;
     std::vector<unsigned int> start_;
     std::vector<unsigned int> end_;
@@ -34,19 +34,22 @@ protected:
 class TimelineData
 {
 public:
-    TimelineData() {}
+    TimelineData() : timeStart_(0), timeEnd_(0) {}
     void loadLogFile(const std::string& logFile,int numOfRows);
     size_t size() const {return  items_.size();}
     const std::vector<TimelineItem>& items() const {return items_;}
+    unsigned int timeStart() const {return timeStart_;}
+    unsigned int timeEnd() const {return timeEnd_;}
 
 protected:
 
-    void clear(){}
+    void clear();
     int indexOfItem(const std::string&);
 
     std::vector<TimelineItem> items_;
     int numOfRows_;
-
+    unsigned int timeStart_;
+    unsigned int timeEnd_;
 };
 
 

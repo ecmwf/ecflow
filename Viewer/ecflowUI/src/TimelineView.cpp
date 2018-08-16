@@ -23,6 +23,7 @@
 #include "ActionHandler.hpp"
 #include "IconProvider.hpp"
 #include "PropertyMapper.hpp"
+#include "TimelineData.hpp"
 #include "TimelineModel.hpp"
 #include "UiLog.hpp"
 #include "VFilter.hpp"
@@ -126,7 +127,7 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
     if(index.column() == 1)
     {
-        renderTimeline(index.row());
+        renderTimeline(painter,option,index.row());
 
         //QString text=index.data(Qt::DisplayRole).toString();
         //renderNode(painter,index,vopt,text);
@@ -180,9 +181,39 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 }
 
 
-void TimelineDelegate::renderTimeline(int row) const
+void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,int row) const
 {
     TimelineData *data=model_->data();
+    if(!data)
+        return;
+
+    bool selected=option.state & QStyle::State_Selected;
+    QFontMetrics fm(font_);
+
+    for(int i=0; i < data->items()[row].size(); i++)
+    {
+        int xp=timeToPos(option.rect,data->items()[row].start_[i]);
+
+        painter->fillRect(QRect(xp,option.rect.y(),10,10),Qt::red);
+    }
+
+    //The initial filled rect (we will adjust its  width)
+    //QRect itemRect=option.rect.adjusted(nodeBox_->leftMargin,nodeBox_->topMargin,0,-nodeBox_->bottomMargin);
+
+
+
+}
+
+int TimelineDelegate::timeToPos(QRect r,unsigned int time) const
+{
+    unsigned int start=model_->data()->timeStart();
+    unsigned int end=model_->data()->timeEnd();
+
+    if(start >= end)
+        return r.x();
+
+    return r.x()+static_cast<float>(time-start)*static_cast<float>(r.width())/static_cast<float>((end-start));
+
 }
 
 

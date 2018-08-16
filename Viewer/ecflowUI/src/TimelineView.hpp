@@ -44,7 +44,8 @@ Q_SIGNALS:
 
 protected:
     void updateSettings();
-    void renderTimeline(int) const;
+    void renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,int) const;
+    int timeToPos(QRect r,unsigned int time) const;
 
     //void renderNode(QPainter *painter,const QModelIndex& index,
     //                const QStyleOptionViewItem& option,QString text) const;
