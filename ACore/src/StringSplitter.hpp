@@ -70,6 +70,8 @@ public:
                      std::vector< std::string >& lineTokens,
                      boost::string_view delimiters = " \t");
 
+   /// return the token at pos, otherwise returns false.
+   static bool get_token(boost::string_view line,size_t pos,std::string& token,boost::string_view sep = " \t");
 
 //   class const_iterator : public boost::iterator_facade<const_iterator, boost::string_view, boost::single_pass_traversal_tag>
 //   {

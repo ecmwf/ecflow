@@ -96,4 +96,20 @@ void StringSplitter::split(const std::string& str,std::vector<std::string>& line
    }
 }
 
+bool StringSplitter::get_token(boost::string_view line,size_t pos,std::string& token,boost::string_view sep)
+{
+   size_t count = 0;
+   StringSplitter string_splitter(line,sep);
+   while( !string_splitter.finished() ) {
+      boost::string_view the_token = string_splitter.next();
+      if (count == pos) {
+         token = std::string(the_token.begin(),the_token.end());
+         return true;
+      }
+      else if (count > pos) return false;
+      count++;
+   }
+   return false;
+}
+
 }

@@ -208,6 +208,44 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    check(line,expected,"/");
 }
 
+
+static void test_get_token(const std::string& line, const char* delims = " \t" )
+{
+    std::vector< std::string > tokens;
+    Str::split_orig(line,tokens,delims);
+    for(size_t i = 0; i < tokens.size(); i++) {
+       std::string token;
+       BOOST_CHECK_MESSAGE(StringSplitter::get_token(line,i,token,delims) && token == tokens[i] ,"Expected to find " << tokens[i] << " but found " << token);
+    }
+    std::string token;
+    BOOST_CHECK_MESSAGE(!StringSplitter::get_token(line,tokens.size(),token),"Expected to fail");
+}
+
+BOOST_AUTO_TEST_CASE( test_StringSplitter_get_token )
+{
+   cout << "ACore:: ...test_StringSplitter_get_token \n";
+
+   std::vector<std::string> test_data = {
+                                         "This is a string",
+                                         "a",
+                                         " a",
+                                         "a ",
+                                         " a ",
+                                         "        a     b     c       d        ",
+                                         " - !   $ % ^  & * ( ) - + ? ",
+                                         "\n"
+                                         };
+
+   std::vector<std::string> test_data1 = {
+                                         "/a",
+                                         "///a/b/c/c//e",
+                                         "//a/b/c/c//e/",
+                                         };
+
+   for(const auto& s: test_data) { test_get_token(s);}
+   for(const auto& s: test_data1) { test_get_token(s,"/");}
+}
+
 //BOOST_AUTO_TEST_CASE( test_StringSplitter_iterator )
 //{
 //   cout << "ACore:: ...test_StringSplitter_iterator\n";

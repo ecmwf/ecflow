@@ -22,6 +22,7 @@
 #include "boost/filesystem/operations.hpp"
 #include <boost/algorithm/string/trim.hpp>
 
+#include "StringSplitter.hpp"
 #include "EcfFile.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
@@ -586,6 +587,22 @@ bool EcfFile::replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::str
    return true;
 }
 
+bool EcfFile::extract_ecfmicro(const std::string& line, std::string& ecfmicro, std::string& error_msg) const
+{
+   if (!StringSplitter::get_token(line,1,ecfmicro)) {
+      std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
+      error_msg += ss.str();
+      return false;
+   }
+   // This is typically a single character, however $/£ will be multi-character i.e size 2
+   if (ecfmicro.size() > 2) {
+      std::stringstream ss; ss << "Expected ecfmicro replacement to be a single character, but found '" << ecfmicro << "' " <<  ecfmicro.size() << " in file : " << script_path_or_cmd_;
+      error_msg += ss.str();
+      return false;
+   }
+   return true;
+}
+
 void EcfFile::variableSubstitution(JobsParam& jobsParam)
 {
    // Allow variable substitution in comment and manual blocks.
@@ -605,7 +622,6 @@ void EcfFile::variableSubstitution(JobsParam& jobsParam)
    const int COMMENT = 1;
    const int MANUAL = 2;
    std::vector<int> pp_stack;
-   std::vector<std::string> tokens;
 
    bool nopp =  false;
    size_t jobLines_size = jobLines_.size();
@@ -627,16 +643,13 @@ void EcfFile::variableSubstitution(JobsParam& jobsParam)
          }
 
          if (jobLines_[i].find(T_ECFMICRO) == 1) {   // %ecfmicro #
-
-            tokens.clear();
-            Str::split( jobLines_[i], tokens );
-            if (tokens.size() < 2) {
-               std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
-               throw std::runtime_error("EcfFile::variableSubstitution: failed : " + ss.str());
+            // override ecfMicro char
+            std::string error_msg;
+            if (!extract_ecfmicro(jobLines_[i],ecfMicro,error_msg)) {
+               throw std::runtime_error("EcfFile::variableSubstitution: failed : " + error_msg);
             }
-            ecfMicro = tokens[1];
             microChar = ecfMicro[0];
-            continue; // no point in doing variable subs on %ecfmicro ^
+            continue;                                                      // no point in doing variable subs on %ecfmicro ^
          }
       }
       if ( nopp ) continue;
@@ -740,7 +753,6 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
 
    bool nopp =  false;
    std::stringstream ss;
-   std::vector<std::string> tokens;
 
    size_t job_lines_size = jobLines_.size();
    for(size_t i=0; i < job_lines_size; ++i) {
@@ -763,14 +775,11 @@ bool EcfFile::get_used_variables(NameValueMap& used_variables, std::string& erro
          }
 
          if (!nopp && jobLines_[i].find(T_ECFMICRO) == 1) {  // %ecfmicro #
-
-            tokens.clear();
-            Str::split( jobLines_[i], tokens );
-            if (tokens.size() < 2) {
-               std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
-               throw std::runtime_error("EcfFile::get_used_variables: failed : " + ss.str());
+            // override ecfMicro char
+            std::string error_msg;
+            if (!extract_ecfmicro(jobLines_[i],ecfMicro,error_msg)) {
+               throw std::runtime_error("EcfFile::get_used_variables: failed : " + error_msg);
             }
-            ecfMicro = tokens[1];
             microChar = ecfMicro[0];
             continue;
          }
@@ -954,7 +963,6 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
    // all the includes have been pre-procssed, hence most errors should have been caught
    // get the cached ECF_MICRO variable, typically its one char.
    string ecfMicro = ecfMicroCache_;
-   std::vector<std::string> tokens;
 
    bool add = false;
    for (const auto & line : lines){
@@ -963,19 +971,11 @@ bool EcfFile::extractManual(const std::vector< std::string >& lines,
          if ( add && line.find( T_END ) == 1 ) { add = false; continue; }
 
          if (line.find(T_ECFMICRO) == 1) {  // %ecfmicro #
-            tokens.clear();
-            Str::split( line, tokens );
-            if (tokens.size() < 2) {
-               std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
-               errormsg += ss.str();
+
+            if (!extract_ecfmicro(line,ecfMicro,errormsg )) {
                return false;
             }
-            ecfMicro = tokens[1];
-            if (ecfMicro.size() > 2) {
-               std::stringstream ss; ss << "Expected ecfmicro replacement to be a single character, but found '" << ecfMicro << "' " <<  ecfMicro.size() << " in file : " << script_path_or_cmd_;
-               errormsg += ss.str();
-               return false;
-            }
+
             continue;
          }
       }
@@ -1008,7 +1008,6 @@ void EcfFile::removeCommentAndManual()
    bool nopp = false;
    bool erase = false;
    std::vector<int> pp_stack;
-   std::vector<std::string> tokens;
 
    for(auto i=jobLines_.begin(); i!=jobLines_.end(); ++i) {
 
@@ -1062,14 +1061,11 @@ void EcfFile::removeCommentAndManual()
           }
 
           if (!nopp && (*i).find(T_ECFMICRO) == 1) {
-
-             tokens.clear();
-             Str::split( (*i), tokens );
-             if (tokens.size() < 2) {
-                std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
-                throw std::runtime_error("EcfFile::removeCommentAndManual: failed " + ss.str());
+             // override ecfMicro char
+             std::string error_msg;
+             if (!extract_ecfmicro((*i),ecfMicro,error_msg)) {
+                throw std::runtime_error("EcfFile::get_used_variables: failed : " + error_msg);
              }
-             ecfMicro = tokens[1];
           }
        }
        if ( nopp ) continue;
@@ -1102,7 +1098,6 @@ void EcfFile::remove_nopp_end_tokens()
    const int COMMENT = 1;
    const int MANUAL = 2;
    std::vector<int> pp_stack;
-   std::vector< std::string > tokens;
    bool nopp = false;
    bool erase = false;
 
@@ -1135,16 +1130,12 @@ void EcfFile::remove_nopp_end_tokens()
           }
           if (!nopp && (*i).find(T_ECFMICRO) == 1) {  // %ecfmicro #
 
-             tokens.clear();
-             Str::split( *i, tokens );
-             if (tokens.size() < 2) {
-                std::stringstream ss;
-                ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
-                throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed " + ss.str());
+             // override ecfMicro char
+             std::string error_msg;
+             if (!extract_ecfmicro((*i),ecfMicro,error_msg)) {
+                throw std::runtime_error("EcfFile::remove_nopp_end_tokens: failed : " + error_msg);
              }
-
-             ecfMicro = tokens[1];         // override ecfMicro char
-             jobLines_.erase( i-- );       // remove %ecfmicro &
+             jobLines_.erase( i-- );      // remove %ecfmicro &                    // remove %ecfmicro &
              continue;
           }
       }
@@ -1317,26 +1308,13 @@ void PreProcessor::preProcess_line(const std::string& script_line)
    // =================================================================================
    // Handle ecfmicro replacement
    // =================================================================================
-   tokens_.clear();
-   Str::split( script_line, tokens_ );
    if (script_line.find(T_ECFMICRO) == 1) {    // %ecfmicro #
+
       // keep %ecfmicro in jobs file later processing, i.e for comments/manuals
-
-      if (tokens_.size() < 2) {
-         std::stringstream ss;
-         ss << "ecfmicro does not have a replacement character, in " << ecfile_->script_path_or_cmd_;
-         error_msg_ += ss.str();
+      if (!ecfile_->extract_ecfmicro(script_line,ecf_micro_,error_msg_)) {
          return;
       }
 
-      // This is typically a single character, however $/£ will be multi-character i.e size 2
-      ecf_micro_ = tokens_[1];
-      if (ecf_micro_.size() > 2) {
-         std::stringstream ss;
-         ss << "Expected ecfmicro replacement to be a single character, but found '" << ecf_micro_ << "' " <<  ecf_micro_.size() << " in file : " << ecfile_->script_path_or_cmd_;
-         error_msg_ += ss.str();
-         return;
-      }
       pp_nopp_ = ecf_micro_;    pp_nopp_    += T_NOOP;
       pp_comment_ = ecf_micro_; pp_comment_ += T_COMMENT;
       pp_manual_ = ecf_micro_;  pp_manual_  += T_MANUAL;
@@ -1344,8 +1322,6 @@ void PreProcessor::preProcess_line(const std::string& script_line)
 
       return;
    }
-
-   if (tokens_.size() < 2) return;
 
    // we only end up here if we have includes
    preProcess_includes(script_line);
@@ -1369,13 +1345,19 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    // remove %include from the job lines, since were going to expand or ignore it.
    jobLines_.pop_back();
 
+   std::string the_include_token;
+   if (!StringSplitter::get_token(script_line,1,the_include_token)) {
+      error_msg_+= "Could not extract include token at : " + script_line;
+      return;
+   }
+
 #ifdef DEBUG_PRE_PROCESS_INCLUDES
    // Output the includes for debug purposes. Will appear in preProcess.ecf
    // Note: Will interfere with diff
-   jobLines_.push_back("========== include of " + tokens_[1] + " ===========================");
+   jobLines_.push_back("========== include of " + the_include_token  + " ===========================");
 #endif
 
-   std::string includedFile = getIncludedFilePath(tokens_[1], script_line);
+   std::string includedFile = getIncludedFilePath(the_include_token, script_line);
    if (!error_msg_.empty()) return;
 
    // handle %includeonce

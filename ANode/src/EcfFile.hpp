@@ -134,6 +134,8 @@ private:
    boost::filesystem::path file_creation_path() const;
    std::string script_or_job_path() const;
 
+   bool extract_ecfmicro(const std::string& line, std::string& ecfmicro, std::string& error_msg) const;
+
 /// User edit functions:
  	void get_used_variables(std::string& used_variables) const;
  	bool get_used_variables(NameValueMap& used_variables, std::string& errorMsg) const;
@@ -144,6 +146,7 @@ private:
  	std::string  ecfMicroCache_;         // cache value of ECF_MICRO
  	std::string  script_path_or_cmd_;    // path to .ecf, .usr file or command
  	std::vector<std::string> jobLines_;  // Lines that will form the job file.
+
  	mutable std::vector<std::shared_ptr<IncludeFileCache> > include_file_cache_; // only open include file once
  	mutable std::vector<std::pair<std::string,bool> > file_stat_cache_; // Minimise calls to stat/kernel calls
  	mutable std::string  job_size_;      // to be placed in log file during job submission
@@ -183,7 +186,6 @@ private:
    std::string ecf_micro_;                 // constant until ecfmicro changes, then reset
 
    std::vector<std::string>& jobLines_;
-   std::vector<std::string> tokens_;       // re-use to save memory
 
    std::vector<std::pair<std::string,int> > globalIncludedFileSet_;// test for recursive includes, <no _of times it was included>
    std::vector<std::string> include_once_set_;
