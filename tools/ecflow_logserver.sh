@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/bash
 
 #=========================================================================================
 # Syntax
@@ -6,7 +6,7 @@
 #
 #=========================================================================================
 
-USAGE(){
+USAGE() {
 echo "Usage: $0 [-d <dir>] [-m <map>] [-l <logfile>] [-h]"
 echo "       -d <dir>     specify the directory name where files will be served"
 echo "                    from - default is \$HOME"
@@ -54,17 +54,17 @@ else
 fi
 
 
-if [[ "${EC_TIMECRIT_UID}" = "yes" ]] ; then
+if [[ "${EC_TIMECRIT_UID}" == "yes" ]] ; then
 
 # Time-critical user with no $HOME set
 
-  if [[ "${server_dir:-}" = "" ]] ; then
+  if [[ "${server_dir:-}" == "" ]] ; then
     echo "Set the location of the server directory with -d" 
     echo ""
     USAGE
     exit 1
   fi
-  if  [[ "${server_logfile:-}" = "" ]] ; then
+  if  [[ "${server_logfile:-}" == "" ]] ; then
     echo "Set the location of the server log file with -l" 
     echo ""
     USAGE
@@ -92,22 +92,21 @@ export LOGMAP=${server_map:-$LOGPATH:$LOGPATH}
 
 # prognum is set based on the unique users numeric uid.
 
-username=`id -u`
+username=$(id -u)
 base=35000
 prognum=$((base+username))
 
-PROG=`which $0`
-PROG_PATH=`readlink -f $PROG`
+PROG=$(which $0)
+PROG_PATH=$(readlink -f $PROG)
 PATH_NAME=$ecflow_DIR/bin
-# `dirname $PROG_PATH`
 
 export LOGPORT=$prognum
-LOGDIR=`dirname $LOGFILE`
+LOGDIR=$(dirname $LOGFILE)
 
 [[ ! -d $LOGDIR ]] && mkdir -p $LOGDIR
 
-check=`ps -fu ${USER} | grep ecflow_logsvr.pl | grep -v grep 1>/dev/null 2>&1 \
- && echo 1 || echo 0`
+check=$(ps -fu ${USER} | grep ecflow_logsvr.pl | grep -v grep 1>/dev/null 2>&1 \
+ && echo 1 || echo 0)
 if [ $check = 0 ] ; then
   nohup $PATH_NAME/ecflow_logsvr.pl 1>$LOGFILE 2>&1 &
 else
@@ -116,8 +115,8 @@ fi
 
 sleep 1
 
-check=`ps -fu ${USER} | grep ecflow_logsvr.pl | grep -v grep 1>/dev/null 2>&1 \
- && echo 1 || echo 0`
+check=$(ps -fu ${USER} | grep ecflow_logsvr.pl | grep -v grep 1>/dev/null 2>&1 \
+ && echo 1 || echo 0)
 if [ $check = 0 ] ; then
   /usr/bin/tail -n 30 $LOGFILE | /bin/mail -s "$(hostname -s): logserver for ${USER} did not start. Please investigate..." -c "root" ${USER}
   exit 1
@@ -125,7 +124,7 @@ fi
 
 
 if [[ -f ${LOGSERVERLIST} ]] ; then
-  logserverfound=`grep $LOGPORT ${LOGSERVERLIST} | grep $USER`
+  logserverfound=$(grep $LOGPORT ${LOGSERVERLIST} | grep $USER)
   if [[ -z $logserverfound ]]; then
     echo $USER    $LOGPORT   $LOGPATH $LOGMAP>> ${LOGSERVERLIST}
   fi  
