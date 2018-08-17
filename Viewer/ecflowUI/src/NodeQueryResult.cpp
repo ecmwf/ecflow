@@ -219,7 +219,7 @@ void NodeQueryResult::add(std::vector<VInfo_ptr> items)
     int num=0;
     for(auto & item : items)
 	{   
-        assert(items.at(i) && items.at(i).get());
+        //assert(items.at(i) && items.at(i).get());
         if(item->isServer() || item->isNode())
         {
             num++;

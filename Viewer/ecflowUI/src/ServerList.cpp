@@ -493,7 +493,7 @@ void ServerList::syncSystemFile()
 #endif
             changed=true;
             needBrodcast=true;
-            assert(item->name() == sysVec[i].name());
+            //assert(item->name() == sysVec[i].name());
 
             ServerListTmpItem localTmp(item);
             syncChange_.push_back(new ServerListSyncChangeItem(i,localTmp,

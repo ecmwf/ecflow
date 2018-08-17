@@ -563,7 +563,7 @@ bool TreeNodeFilter::update(const std::vector<VNode*>& topChange,std::vector<VNo
             //topChange so we need this step!
             for(auto i : topChange)
             {
-                assert(topChange[i]->isSuite());
+                assert(i->isSuite());
                 collectTopFilterChange(i,topFilterChange);
             }
 
