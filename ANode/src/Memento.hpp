@@ -162,9 +162,6 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-//      ar.register_type(static_cast<Task *>(NULL));
-//      ar.register_type(static_cast<Family *>(NULL));
-
       ar(cereal::base_class<Memento>(this),
          CEREAL_NVP(children_));
    }
@@ -184,8 +181,6 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-//      ar.register_type(static_cast<Alias *>(NULL));
-
       ar(cereal::base_class<Memento>(this),
          CEREAL_NVP(children_));
    }
