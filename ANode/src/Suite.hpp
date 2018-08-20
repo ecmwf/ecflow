@@ -75,8 +75,8 @@ public:
    void changeClockSync();
 
    /// return the suites calendar
-   const ecf::Calendar& calendar() const { return calendar_;}
-   ecf::Calendar& set_calendar() { return calendar_;}
+   const ecf::Calendar& calendar() const { return cal_;}
+   ecf::Calendar& set_calendar() { return cal_;}
    clock_ptr clockAttr() const { return clockAttr_;}
    clock_ptr clock_end_attr() const { return clock_end_attr_;}
 
@@ -111,12 +111,12 @@ private:
       ar(cereal::base_class<NodeContainer>(this));
       CEREAL_OPTIONAL_NVP(ar, begun_,     [this](){return begun_; });           // conditionally save
       CEREAL_OPTIONAL_NVP(ar, clockAttr_, [this](){return clockAttr_.get(); }); // conditionally save
-      ar(CEREAL_NVP(calendar_));
+      ar(CEREAL_NVP(cal_));
 
       // The calendar does not persist the clock type or start stop with server since
       // that is persisted with the clock attribute
       if (Archive::is_loading::value) {
-         if (clockAttr_.get()) clockAttr_->init_calendar(calendar_);
+         if (clockAttr_.get()) clockAttr_->init_calendar(cal_);
       }
    }
 
@@ -125,7 +125,7 @@ private:
    bool                       begun_{false};
    clock_ptr                  clockAttr_;
    clock_ptr                  clock_end_attr_;      // *NOT* persisted, used by simulator only
-   ecf::Calendar              calendar_;            // *Only* persisted since used by the why() on client side
+   ecf::Calendar              cal_;            // *Only* persisted since used by the why() on client side
    unsigned int               state_change_no_{0};     // no need to persist
    unsigned int               modify_change_no_{0};    // no need to persist
    unsigned int               begun_change_no_{0};     // no need to persist,  record changes to begun_. Needed for SSyncCmd

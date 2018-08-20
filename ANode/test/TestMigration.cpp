@@ -30,24 +30,28 @@ using namespace boost::posix_time;
 using namespace boost::gregorian;
 namespace fs = boost::filesystem;
 
+//#define UPDATE_TESTS 1
+
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
 BOOST_AUTO_TEST_CASE( test_default_constructor_persistence )
 {
    cout << "ANode:: ...test_default_constructor_persistence\n";
 
-   std::string file_name = File::test_data("ANode/test/data/","ANode");
+   std::string file_name = File::test_data("ANode/test/data/migration/","ANode");
 
    Defs defs;
    Suite suite;
    Family family;
    Task   task;
 
+#ifdef UPDATE_TESTS
    doSave(file_name + "Defs.def",defs);
    doSave(file_name + "Suite.def",suite);
    doSave(file_name + "Family.def",family);
    doSave(file_name + "Task.def",task);
    doSave(file_name + "Limit.def",Limit());
+#endif
 
    DebugEquality debug_equality; // only as affect in DEBUG build
    do_restore<Defs>(file_name + "Defs.def",defs);
@@ -55,35 +59,27 @@ BOOST_AUTO_TEST_CASE( test_default_constructor_persistence )
    do_restore<Family>(file_name + "Family.def",family);
    do_restore<Task>(file_name + "Task.def",task);
    do_restore<Limit>(file_name + "Limit.def",Limit());
-
-   fs::remove(file_name + "Defs.def");
-   fs::remove(file_name + "Suite.def");
-   fs::remove(file_name + "Family.def");
-   fs::remove(file_name + "Task.def");
-   fs::remove(file_name + "Limit.def");
 }
 
 BOOST_AUTO_TEST_CASE( test_compare_boost_and_defs_checkpt_file )
 {
    cout << "ANode:: ...test_compare_boost_and_defs_checkpt_file\n";
 
-   std::string file_name = File::test_data("ANode/test/data/","ANode");
+   std::string file_name = File::test_data("ANode/test/data/migration/","ANode");
 
    MyDefsFixture fixture;
 
-   doSave(file_name + "boost.checkpt",fixture.fixtureDefsFile());
+#ifdef UPDATE_TESTS
+   doSave(file_name + "cereal.checkpt",fixture.fixtureDefsFile());
    fixture.fixtureDefsFile().save_as_checkpt(file_name + "defs.checkpt");
-
+#endif
 
    DebugEquality debug_equality; // only as affect in DEBUG build
-   do_restore<Defs>(file_name + "boost.checkpt",fixture.fixtureDefsFile());
+   do_restore<Defs>(file_name + "cereal.checkpt",fixture.fixtureDefsFile());
 
    Defs defs;
    defs.restore( file_name + "defs.checkpt" );
    BOOST_CHECK_MESSAGE(defs == fixture.fixtureDefsFile()," ");
-
-   fs::remove(file_name + "boost.checkpt");
-   fs::remove(file_name + "defs.checkpt");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

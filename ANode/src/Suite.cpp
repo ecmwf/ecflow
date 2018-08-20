@@ -62,7 +62,7 @@ Suite::Suite(const Suite& rhs)
    if (rhs.clock_end_attr_.get())
       clock_end_attr_ = std::make_shared<ClockAttr>( *rhs.clock_end_attr_ );
 
-   calendar_ = rhs.calendar_;
+   cal_ = rhs.cal_;
 }
 
 node_ptr Suite::clone() const
@@ -78,7 +78,7 @@ Suite& Suite::operator=(const Suite& rhs)
       begun_ = rhs.begun_;
       if (rhs.clockAttr_.get()) clockAttr_ = std::make_shared<ClockAttr>( *rhs.clockAttr_ );
       if (rhs.clock_end_attr_.get()) clock_end_attr_ = std::make_shared<ClockAttr>( *rhs.clock_end_attr_ );
-      calendar_ = rhs.calendar_;
+      cal_ = rhs.cal_;
 
       state_change_no_ = 0;
       modify_change_no_ = Ecf::incr_modify_change_no();
@@ -208,11 +208,11 @@ void Suite::begin_calendar()
 	// Get the local time, second level resolution, based on the
 	// time zone settings of the computer.
 	if (clockAttr_.get())  {
-	   clockAttr_->init_calendar(calendar_);  // *IF* AlterCmd was used, wait till Suite is requed
-	   clockAttr_->begin_calendar(calendar_);
+	   clockAttr_->init_calendar(cal_);  // *IF* AlterCmd was used, wait till Suite is requed
+	   clockAttr_->begin_calendar(cal_);
 	}
 	else {
-	   calendar_.begin(Calendar::second_clock_time());
+	   cal_.begin(Calendar::second_clock_time());
 	}
 }
 
@@ -224,11 +224,11 @@ void Suite::requeue_calendar()
    if ( clockAttr_.get() && clockAttr_->hybrid() && repeat().is_repeat_day()) {
 
       // Get the current time, but with the *existing* date of the suite
-      boost::gregorian::date suite_date = calendar_.suiteTime().date();
+      boost::gregorian::date suite_date = cal_.suiteTime().date();
       suite_date += date_duration(repeat().step());
 
       ptime suiteTime = ptime(suite_date, Calendar::second_clock_time().time_of_day() );
-      calendar_.begin( suiteTime );
+      cal_.begin( suiteTime );
 
       // make sure update variable regenerates all suite variables, i.e like ECF_DATE, etc
       // Needed since we have changed calendar date
@@ -263,13 +263,13 @@ void Suite::updateCalendar(
 
       SuiteChanged1 changed(this);
 
-		/// The calendar_ will cache server poll period/job submission interval, as calendar increment for easy access
-		calendar_.update( calParams );
+		/// The cal_ will cache server poll period/job submission interval, as calendar increment for easy access
+		cal_.update( calParams );
 	   calendar_change_no_ = Ecf::state_change_no() + 1; // ** See: collateChanges **
 
 		update_generated_variables();
 
- 		calendarChanged(calendar_,auto_cancelled_nodes,auto_archive_nodes,get_late());
+ 		calendarChanged(cal_,auto_cancelled_nodes,auto_archive_nodes,get_late());
 	}
 }
 
@@ -332,7 +332,7 @@ std::ostream& Suite::print(std::ostream& os) const
    if (clockAttr_.get()) clockAttr_->print(os);
    if (clock_end_attr_.get()) clock_end_attr_->print(os);
 	if (!PrintStyle::defsStyle()) {
-	   std::string calendar_state = calendar_.write_state();
+	   std::string calendar_state = cal_.write_state();
 	   if (!calendar_state.empty()) {
 	      Indentor indent;
 	      Indentor::indent(os) << "calendar" << calendar_state << "\n";
@@ -378,7 +378,7 @@ void Suite::addClock( const ClockAttr& c,bool initialize_calendar)
     }
 
 	clockAttr_ = std::make_shared<ClockAttr>(c);
-	if (initialize_calendar) clockAttr_->init_calendar(calendar_);
+	if (initialize_calendar) clockAttr_->init_calendar(cal_);
 
    // clock_end_attr_ is always same type as clock
    if (clock_end_attr_.get())  clock_end_attr_->hybrid(clockAttr_->hybrid());
@@ -543,7 +543,7 @@ void Suite::handle_clock_attribute_change()
 
 bool Suite::checkInvariants(std::string& errorMsg) const
 {
-	if (!calendar_.checkInvariants(errorMsg)) {
+	if (!cal_.checkInvariants(errorMsg)) {
 		return false;
 	}
    if (clockAttr_.get()) {
@@ -665,7 +665,7 @@ void Suite::collateChanges(DefsDelta& changes) const
 	   size_t after = changes.size();
 	   if ((before != after || changes.sync_suite_clock() ) && calendar_change_no_ > changes.client_state_change_no() ) {
 	      compound_memento_ptr compound_ptr =  std::make_shared<CompoundMemento>(absNodePath());
-	      compound_ptr->add( std::make_shared<SuiteCalendarMemento>( calendar_ ) );
+	      compound_ptr->add( std::make_shared<SuiteCalendarMemento>( cal_ ) );
 	      changes.add( compound_ptr );
 	   }
 	}
@@ -701,10 +701,10 @@ void Suite::set_memento( const SuiteCalendarMemento* memento,std::vector<ecf::As
 
 	// The calendar does *NOT* persist the calendar type (hybrid/real) since we can derive this for clock attribute
 	// Hence make sure calendar/clock are in sync. part of the suite invariants
-	calendar_ = memento->cal_;
+	cal_ = memento->cal_;
    if  (clockAttr_.get()) {
-      if (clockAttr_->hybrid()) calendar_.set_clock_type(ecf::Calendar::HYBRID);
-      else                      calendar_.set_clock_type(ecf::Calendar::REAL);
+      if (clockAttr_->hybrid()) cal_.set_clock_type(ecf::Calendar::HYBRID);
+      else                      cal_.set_clock_type(ecf::Calendar::REAL);
    }
 }
 
@@ -764,17 +764,17 @@ void SuiteGenVariables::update_generated_variables() const
 {
    genvar_suite_.set_value(suite_->name());
 
-   // The calendar_ is only initialised once the suite has begun
+   // The cal_ is only initialised once the suite has begun
    if (!suite_->begun_) {
       return;
    }
 
    // The code below ASSUMES calendar has been initialised
-   boost::posix_time::time_duration time_of_day = suite_->calendar_.suiteTime().time_of_day();
+   boost::posix_time::time_duration time_of_day = suite_->cal_.suiteTime().time_of_day();
 
    //#ifdef DEBUG
    //    using namespace boost::gregorian;
-   //    tm t = to_tm(suite_->calendar_.suiteTime());  // to_tm can be a bit of a performance hog
+   //    tm t = to_tm(suite_->cal_.suiteTime());  // to_tm can be a bit of a performance hog
    ////  cerr << "\ntm_year = " << t.tm_year << "\n";  /* year - 1900              */
    ////  cerr << "tm_mon = " << t.tm_mon << "\n";      /* month of year (0 - 11)   */
    ////  cerr << "tm_mday = " << t.tm_mday << "\n";    /* day of month (1 - 31)    */
@@ -787,15 +787,15 @@ void SuiteGenVariables::update_generated_variables() const
    //    // ***IMPORTANT*** suiteTime is only valid for real clock, note that
    //    // *************** for hybrid the day does not change. hence assertion
    //    // *************** needs to take into account calendar type
-   //       if (!suite_->calendar_.hybrid()) {
-   //          assert( t.tm_wday   == calendar_.day_of_week());
-   //          assert( t.tm_mday   == calendar_.day_of_month());
-   //          assert( t.tm_yday+1 == calendar_.day_of_year());
-   //          assert( t.tm_mon+1  == calendar_.month());
+   //       if (!suite_->cal_.hybrid()) {
+   //          assert( t.tm_wday   == cal_.day_of_week());
+   //          assert( t.tm_mday   == cal_.day_of_month());
+   //          assert( t.tm_yday+1 == cal_.day_of_year());
+   //          assert( t.tm_mon+1  == cal_.month());
    //       }
    //    assert( time_of_day.hours() == t.tm_hour);
    //    assert( time_of_day.minutes() == t.tm_min);
-   //    assert( t.tm_year + 1900 == calendar_.year());
+   //    assert( t.tm_year + 1900 == cal_.year());
    //#endif
 
    int hours = time_of_day.hours();
@@ -816,18 +816,18 @@ void SuiteGenVariables::update_generated_variables() const
    // The following generated variable need only be updated if NULL or if day changed
    // Under: HYBRID the day will never change, hence a one time update
    // **********************************************************************
-   if (suite_->calendar_.dayChanged() || genvar_yyyy_.theValue().empty() || force_update_) {
+   if (suite_->cal_.dayChanged() || genvar_yyyy_.theValue().empty() || force_update_) {
 
       force_update_ = false;
-      genvar_yyyy_.set_value(boost::lexical_cast<std::string>(suite_->calendar_.year()));
-      genvar_dow_.set_value( boost::lexical_cast<std::string>(suite_->calendar_.day_of_week()) );
-      genvar_doy_.set_value( boost::lexical_cast<std::string>(suite_->calendar_.day_of_year()) );
+      genvar_yyyy_.set_value(boost::lexical_cast<std::string>(suite_->cal_.year()));
+      genvar_dow_.set_value( boost::lexical_cast<std::string>(suite_->cal_.day_of_week()) );
+      genvar_doy_.set_value( boost::lexical_cast<std::string>(suite_->cal_.day_of_year()) );
       //cout << "genvar_yyyy_ = " << genvar_yyyy_.theValue() << "\n";
       //cout << "genvar_dow_ = " << genvar_dow_.theValue() << "\n";
       //cout << "genvar_doy_ = " << genvar_doy_.theValue() << "\n";
 
       char ddmmyyyyBuffer[255];
-      sprintf(ddmmyyyyBuffer,"%02d.%02d.%04d", suite_->calendar_.day_of_month(), suite_->calendar_.month(), suite_->calendar_.year());
+      sprintf(ddmmyyyyBuffer,"%02d.%02d.%04d", suite_->cal_.day_of_month(), suite_->cal_.month(), suite_->cal_.year());
       genvar_date_.set_value( ddmmyyyyBuffer );
       //cout << "genvar_date_ = " << genvar_date_.theValue() << "\n";
 
@@ -835,16 +835,16 @@ void SuiteGenVariables::update_generated_variables() const
                           const_cast<char*>("tuesday"),  const_cast<char*>("wednesday"),
                           const_cast<char*>("thursday"), const_cast<char*>("friday"),
                           const_cast<char*>("saturday"), nullptr };
-      genvar_day_.set_value( day_name[suite_->calendar_.day_of_week()]  );
+      genvar_day_.set_value( day_name[suite_->cal_.day_of_week()]  );
       //cout << "genvar_day_ = " << genvar_day_.theValue() << "\n";
 
       char dd[255];
-      sprintf(dd,"%02d",suite_->calendar_.day_of_month());
+      sprintf(dd,"%02d",suite_->cal_.day_of_month());
       genvar_dd_.set_value( dd  );
       //cout << "genvar_dd_ = " << genvar_dd_.theValue() << "\n";
 
       char mm[255];
-      sprintf(mm,"%02d",suite_->calendar_.month());
+      sprintf(mm,"%02d",suite_->cal_.month());
       genvar_mm_.set_value( mm  );
       //cout << "genvar_mm_ = " << genvar_mm_.theValue() << "\n";
 
@@ -854,21 +854,21 @@ void SuiteGenVariables::update_generated_variables() const
                            const_cast<char*>("july"),      const_cast<char*>("august"),    const_cast<char*>("september"),
                            const_cast<char*>("october"),   const_cast<char*>("november"),  const_cast<char*>("december"),
                                 nullptr } ;
-      genvar_month_.set_value( month_name[suite_->calendar_.month()-1]  );
+      genvar_month_.set_value( month_name[suite_->cal_.month()-1]  );
       //cout << "genvar_month_ = " << genvar_month_.theValue() << "\n";
 
       char smsdate[255];
-      sprintf(smsdate,"%04d%02d%02d", suite_->calendar_.year(), suite_->calendar_.month() , suite_->calendar_.day_of_month());
+      sprintf(smsdate,"%04d%02d%02d", suite_->cal_.year(), suite_->cal_.month() , suite_->cal_.day_of_month());
       genvar_ecf_date_.set_value( smsdate );
       //cout << "genvar_ecf_date_ = " << genvar_ecf_date_.theValue() << "\n";
 
       char smsclock[255];
-      sprintf(smsclock,"%s:%s:%d:%d", day_name[suite_->calendar_.day_of_week()], month_name[suite_->calendar_.month()-1],suite_->calendar_.day_of_week(),suite_->calendar_.day_of_year());
+      sprintf(smsclock,"%s:%s:%d:%d", day_name[suite_->cal_.day_of_week()], month_name[suite_->cal_.month()-1],suite_->cal_.day_of_week(),suite_->cal_.day_of_year());
       genvar_ecf_clock_.set_value( smsclock );
       //cout << "genvar_ecf_clock_ = " << genvar_ecf_clock_.theValue() << "\n";
 
 
-      genvar_ecf_julian_.set_value( boost::lexical_cast<std::string>( suite_->calendar_.suiteTime().date().julian_day()) );
+      genvar_ecf_julian_.set_value( boost::lexical_cast<std::string>( suite_->cal_.suiteTime().date().julian_day()) );
    }
 }
 
