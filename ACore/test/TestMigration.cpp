@@ -19,6 +19,8 @@
 
 #include "TimeSeries.hpp"
 #include "Calendar.hpp"
+#include "DState.hpp"
+#include "NState.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
 #include "SerializationTest.hpp"
@@ -57,6 +59,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_cereal )
    doSave(file_name + "timeslot"  + cereal_version + "11",TimeSlot(1,1));
    doSave(file_name + "timeslot"  + cereal_version + "9959",TimeSlot(99,59));
    doSave(file_name + "timeseries" + cereal_version + "1010",TimeSeries(TimeSlot(10,10)));
+   doSave(file_name + "dstate" + cereal_version,DState());
+   doSave(file_name + "nstate" + cereal_version,NState());
 #else
    do_restore<TimeSlot>(file_name   + "timeslot_default_constructor" + cereal_version,TimeSlot());
    do_restore<TimeSeries>(file_name + "timeseries_default_constructor" + cereal_version ,TimeSeries());
@@ -64,6 +68,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_cereal )
    do_restore<TimeSlot>(file_name   + "timeslot"  + cereal_version + "11",   TimeSlot(1,1));
    do_restore<TimeSlot>(file_name   + "timeslot"  + cereal_version + "9959", TimeSlot(99,59));
    do_restore<TimeSeries>(file_name + "timeseries" + cereal_version + "1010",TimeSeries(TimeSlot(10,10)));
+   do_restore<DState>(file_name + "dstate" + cereal_version,DState());
+   do_restore<NState>(file_name + "nstate" + cereal_version,NState());
 #endif
 }
 
