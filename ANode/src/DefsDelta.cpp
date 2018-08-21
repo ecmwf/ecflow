@@ -12,7 +12,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/bind.hpp>
 #include "DefsDelta.hpp"
 using namespace std;
 
