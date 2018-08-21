@@ -33,7 +33,7 @@ queue queue1 000 001 002 # 0 queued queued queued
 generic gen1 000 001 002
 generic gen2 000 001 002
 clock real 1.1.2009 +3600 -s
-calendar initTime:2018-Aug-20 12:19:33 suiteTime:2018-Aug-20 12:19:33 duration:00:00:00 initLocalTime:2018-Aug-20 12:19:33 lastTime:2018-Aug-20 12:19:33 calendarIncrement:00:01:00
+calendar initTime:2018-Aug-21 08:38:58 suiteTime:2018-Aug-21 08:38:58 duration:00:00:00 initLocalTime:2018-Aug-21 08:38:58 lastTime:2018-Aug-21 08:38:58 calendarIncrement:00:01:00
 task t1
 task t2
 task t3
@@ -217,6 +217,6 @@ endalias
 endfamily
 endsuite
 suite EmptySuite
-calendar initTime:2018-Aug-20 12:19:33 suiteTime:2018-Aug-20 12:19:33 duration:00:00:00 initLocalTime:2018-Aug-20 12:19:33 lastTime:2018-Aug-20 12:19:33 calendarIncrement:00:01:00
+calendar initTime:2018-Aug-21 08:38:58 suiteTime:2018-Aug-21 08:38:58 duration:00:00:00 initLocalTime:2018-Aug-21 08:38:58 lastTime:2018-Aug-21 08:38:58 calendarIncrement:00:01:00
 endsuite
 # enddef

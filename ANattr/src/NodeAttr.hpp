@@ -74,7 +74,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar)
    {
       ar( CEREAL_NVP(n_));
       CEREAL_OPTIONAL_NVP(ar,v_,     [this](){return !v_.empty();});
@@ -128,7 +128,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar)
    {
       CEREAL_OPTIONAL_NVP(ar,number_, [this](){return number_ != std::numeric_limits<int>::max();});
       CEREAL_OPTIONAL_NVP(ar,n_,   [this](){return !n_.empty();});
@@ -177,13 +177,13 @@ private:
    int          max_{0};
    int          v_{0};                // value
    int          cc_{0};               // Colour change, used by gui ?
-   std::string  n_;                // name
-   bool         used_{false};             // used by the simulator not persisted
+   std::string  n_;                   // name
+   bool         used_{false};         // used by the simulator not persisted
    unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar)
    {
       ar( CEREAL_NVP(min_),
           CEREAL_NVP(max_),

@@ -65,7 +65,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar)
    {
       ar(CEREAL_NVP(exp_));
       CEREAL_OPTIONAL_NVP(ar,type_,  [this](){return type_ != default_expr_type();}); // conditionally save
@@ -161,7 +161,7 @@ private:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
+   void serialize(Archive & ar)
    {
       ar(CEREAL_NVP(vec_));
       CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save

@@ -64,7 +64,7 @@ public:
       NO_REQUE_IF_SINGLE_TIME_DEP = 14,  //
       ARCHIVED      = 15,  // Container*
       RESTORED      = 16,  // Container*, Avoid re-archiving node that is restored, until it is re-queued again
-      THRESHOLD     = 17,  // Job threshold exceeded.(slow disk,large includes/huge scripts,overloaded machice,server)
+      THRESHOLD     = 17,  // Job threshold exceeded.(slow disk,large includes/huge scripts,overloaded machine,server)
       NOT_SET       = 18
    };
 
