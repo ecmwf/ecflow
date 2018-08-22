@@ -727,7 +727,9 @@ void TimelineView::writeSettings(VSettings* vs)
 // TimelineHeader
 //=========================================
 
-TimelineHeader::TimelineHeader(QWidget *parent) : QHeaderView(Qt::Horizontal, parent)
+TimelineHeader::TimelineHeader(QWidget *parent) :
+    QHeaderView(Qt::Horizontal, parent),
+    fm_(QFont())
 {
     setStretchLastSection(true);
 
@@ -737,6 +739,10 @@ TimelineHeader::TimelineHeader(QWidget *parent) : QHeaderView(Qt::Horizontal, pa
     int pixId=IconProvider::add(":viewer/filter_decor.svg","filter_decor");
 
     customPix_=IconProvider::pixmap(pixId,10);
+
+    font_= QFont();
+    font_.setPointSize(font_.pointSize()-2);
+    fm_=QFontMetrics(font_);
 
 
      //connect(this, SIGNAL(sectionMoved(int, int, int)), this,
@@ -782,11 +788,12 @@ void TimelineHeader::slotSectionResized(int i)
 
 QSize TimelineHeader::sizeHint() const
 {
-    return QHeaderView::sizeHint();
+    //return QHeaderView::sizeHint();
 
-    QSize s = size();
+    QSize s = QHeaderView::sizeHint(); //size();
     //s.setHeight(headerSections[0]->minimumSizeHint().height() + 35);
     //s.setHeight(2*35);
+    s.setHeight(fm_.height()*2+20);
     return s;
 }
 
@@ -975,6 +982,7 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
 
     int minorTic=1;
     qint64 firstTic=1;
+    int tickGap=4;
 
 
     if(period < 3600)
@@ -985,27 +993,32 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
 
     qint64 actSec=firstTic;
 
-    QFont f;
-    QFontMetrics fm(f);
 
     Q_ASSERT(actSec >= startSec);
     while(actSec <= endSec)
     {
         int xp=secToPos(actSec-startSec,rect);
 
-        int yp=rect.bottom()-1-fm.height();
+        int yp=rect.bottom()-1-fm_.height()-tickGap;
 
 
-        painter->drawLine(xp,rect.top()+4,xp,yp-1);
+        painter->drawLine(xp,rect.top()+4,xp,yp);
 
 
         if(actSec % 600 == 0)
         {
-            QString s=QString::number(QDateTime::fromMSecsSinceEpoch(actSec * 1000).time().minute());
+            //Day
+            QString majorText=QDateTime::fromMSecsSinceEpoch(actSec*1000).toString("yyyy-MM-dd");
 
-            int textW=fm.width(s);
+
+
+            QString s=QDateTime::fromMSecsSinceEpoch(actSec * 1000).toString("H:mm");
+
+            int textW=fm_.width(s);
+            int tickTextY=yp+tickGap;
             //int yp=rect.bottom()-1-fm.height();
-            painter->drawText(QRect(xp-textW/2,yp,textW,fm.height()),Qt::AlignHCenter | Qt::AlignVCenter,s);
+            painter->setFont(font_);
+            painter->drawText(QRect(xp-textW/2, tickTextY,textW,fm_.height()),Qt::AlignHCenter | Qt::AlignVCenter,s);
         }
 
 

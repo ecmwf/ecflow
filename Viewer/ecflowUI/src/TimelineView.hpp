@@ -140,6 +140,9 @@ protected:
     QDateTime startDate_;
     QDateTime endDate_;
     QPixmap customPix_;
+    QFont font_;
+    QFontMetrics fm_;
+
     //mutable QMap<int,TableNodeHeaderButton> customButton_;
 };
 
