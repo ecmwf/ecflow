@@ -197,6 +197,19 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
         setAllVisible(false);
     }
 
+
+    ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
+    ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());
+    ui_->fromTimeEdit->setDateTime(data_->qStartTime());
+
+    ui_->toTimeEdit->setMinimumDateTime(data_->qStartTime());
+    ui_->toTimeEdit->setMaximumDateTime(data_->qEndTime());
+    ui_->toTimeEdit->setDateTime(data_->qEndTime());
+
+    view_->setPeriod(data_->qStartTime(),data_->qEndTime());
+
+            //QDateTime::fromMSecsSinceTheEpoch(static_cast<qint64>data_->timeStart()*1000.
+
     model_->setData(data_);
 
     //logModel_->loadFromFile(logFile_.toStdString(),viewHandler_->data()->startPos());

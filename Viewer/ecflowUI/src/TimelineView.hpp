@@ -15,6 +15,7 @@
 #include <QStyledItemDelegate>
 #include <QTreeView>
 #include <QPen>
+#include <QDateTime>
 
 #include "VInfo.hpp"
 #include "VProperty.hpp"
@@ -83,7 +84,9 @@ public Q_SLOTS:
     void slotHeaderContextMenu(const QPoint &position);
     void slotSizeHintChangedGlobal();
     void slotRerender();
-
+    void setStartDate(QDateTime);
+    void setEndDate(QDateTime);
+    void setPeriod(QDateTime t1,QDateTime t2);
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
@@ -117,6 +120,10 @@ public:
     QSize sizeHint() const;
     void setModel(QAbstractItemModel *model);
 
+    void setStartDate(QDateTime);
+    void setEndDate(QDateTime);
+    void setPeriod(QDateTime t1,QDateTime t2);
+
 public Q_SLOTS:
     void slotSectionResized(int i);
 
@@ -128,6 +135,10 @@ protected:
     void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const;
     void mousePressEvent(QMouseEvent *event);
 
+    int secToPos(qint64 t,QRect rect) const;
+
+    QDateTime startDate_;
+    QDateTime endDate_;
     QPixmap customPix_;
     //mutable QMap<int,TableNodeHeaderButton> customButton_;
 };

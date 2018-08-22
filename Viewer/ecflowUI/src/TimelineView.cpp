@@ -193,7 +193,7 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
     for(int i=0; i < data->items()[row].size(); i++)
     {
         int xp=timeToPos(option.rect,data->items()[row].start_[i]);
-
+        UiLog().dbg() << "xp=" << xp << " time=" << data->items()[row].start_[i];
         painter->fillRect(QRect(xp,option.rect.y(),10,10),Qt::red);
     }
 
@@ -206,8 +206,8 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
 
 int TimelineDelegate::timeToPos(QRect r,unsigned int time) const
 {
-    unsigned int start=model_->data()->timeStart();
-    unsigned int end=model_->data()->timeEnd();
+    unsigned int start=model_->data()->startTime();
+    unsigned int end=model_->data()->endTime()+3600;
 
     if(start >= end)
         return r.x();
@@ -580,6 +580,22 @@ void TimelineView::notifyChange(VProperty* p)
     }
 }
 
+void TimelineView::setStartDate(QDateTime t)
+{
+    header_->setStartDate(t);
+}
+
+void TimelineView::setEndDate(QDateTime t)
+{
+    header_->setEndDate(t);
+}
+
+void TimelineView::setPeriod(QDateTime t1,QDateTime t2)
+{
+    header_->setPeriod(t1,t2);
+
+}
+
 //=========================================
 // Header
 //=========================================
@@ -728,6 +744,9 @@ TimelineHeader::TimelineHeader(QWidget *parent) : QHeaderView(Qt::Horizontal, pa
 
      //setMovable(true);
 }
+
+
+
 
 void TimelineHeader::showEvent(QShowEvent *e)
 {
@@ -940,8 +959,58 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
     QRect textRect=rect;
     textRect.setRight(rightPos-5);
 
-    painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
+    //painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
 
+
+    if(logicalIndex == 0)
+    {
+       painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
+       return;
+    }
+
+    qint64 startSec=startDate_.toMSecsSinceEpoch()/1000;
+    qint64 endSec=endDate_.toMSecsSinceEpoch()/1000;
+
+    qint64 period=endSec-startSec;
+
+    int minorTic=1;
+    qint64 firstTic=1;
+
+
+    if(period < 3600)
+    {
+        minorTic=60;
+        firstTic=(startSec/60)*60+60;
+    }
+
+    qint64 actSec=firstTic;
+
+    QFont f;
+    QFontMetrics fm(f);
+
+    Q_ASSERT(actSec >= startSec);
+    while(actSec <= endSec)
+    {
+        int xp=secToPos(actSec-startSec,rect);
+
+        int yp=rect.bottom()-1-fm.height();
+
+
+        painter->drawLine(xp,rect.top()+4,xp,yp-1);
+
+
+        if(actSec % 600 == 0)
+        {
+            QString s=QString::number(QDateTime::fromMSecsSinceEpoch(actSec * 1000).time().minute());
+
+            int textW=fm.width(s);
+            //int yp=rect.bottom()-1-fm.height();
+            painter->drawText(QRect(xp-textW/2,yp,textW,fm.height()),Qt::AlignHCenter | Qt::AlignVCenter,s);
+        }
+
+
+        actSec+=minorTic;
+    }
 
     //for(int i=0; i < 10; i++)
     //{
@@ -950,6 +1019,14 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
     //}
 
     //style()->drawControl(QStyle::CE_PushButton, &optButton,painter,this);
+}
+
+int TimelineHeader::secToPos(qint64 t,QRect rect) const
+{
+    //qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
+    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch())/1000;
+    return rect.x() + static_cast<int>(static_cast<float>(t)/static_cast<float>(period)*static_cast<float>(rect.width()));
+
 }
 
 void TimelineHeader::mousePressEvent(QMouseEvent *event)
@@ -994,3 +1071,20 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
     hoverIndex_=-1;
 }*/
 
+
+void TimelineHeader::setStartDate(QDateTime t)
+{
+   startDate_=t;
+}
+
+void TimelineHeader::setEndDate(QDateTime t)
+{
+    endDate_=t;
+}
+
+void TimelineHeader::setPeriod(QDateTime t1,QDateTime t2)
+{
+    startDate_=t1;
+    endDate_=t2;
+    update();
+}

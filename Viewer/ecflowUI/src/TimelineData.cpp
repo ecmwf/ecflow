@@ -42,8 +42,8 @@ void TimelineItem::add(unsigned char status,unsigned int time)
 
 void TimelineData::clear()
 {
-    timeStart_=0;
-    timeEnd_=0;
+    startTime_=0;
+    endTime_=0;
 }
 
 void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
@@ -220,11 +220,11 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
         unsigned int statusTime=QDateTime::fromString(QString::fromStdString(time_stamp),
                        "hh:mm:ss d.M.yyyy").toMSecsSinceEpoch()/1000;
 
-        if(timeStart_ == 0)
-            timeStart_=statusTime;
+        if(startTime_ == 0)
+            startTime_=statusTime;
 
-        if(statusTime > timeEnd_)
-            timeEnd_=statusTime;
+        if(statusTime > endTime_)
+            endTime_=statusTime;
 
         int idx=indexOfItem(name);
         if(idx != -1)

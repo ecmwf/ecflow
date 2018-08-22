@@ -13,6 +13,7 @@
 
 #include <string>
 #include <vector>
+#include <QDateTime>
 
 class TimelineItem
 {
@@ -22,6 +23,9 @@ public:
     //const std::string& name() const {return name_;}
     const std::string& path() const {return path_;}
     void add(unsigned char status,unsigned int time);
+
+    static QDateTime toQDateTime(unsigned int t)
+          {return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t)*1000);}
 
 //protected:
     std::string path_;
@@ -34,12 +38,14 @@ public:
 class TimelineData
 {
 public:
-    TimelineData() : timeStart_(0), timeEnd_(0) {}
+    TimelineData() : startTime_(0), endTime_(0) {}
     void loadLogFile(const std::string& logFile,int numOfRows);
     size_t size() const {return  items_.size();}
     const std::vector<TimelineItem>& items() const {return items_;}
-    unsigned int timeStart() const {return timeStart_;}
-    unsigned int timeEnd() const {return timeEnd_;}
+    unsigned int startTime() const {return startTime_;}
+    unsigned int endTime() const {return endTime_;}
+    QDateTime qStartTime() const {return TimelineItem::toQDateTime(startTime_);}
+    QDateTime qEndTime() const {return TimelineItem::toQDateTime(endTime_);}
 
 protected:
 
@@ -48,8 +54,8 @@ protected:
 
     std::vector<TimelineItem> items_;
     int numOfRows_;
-    unsigned int timeStart_;
-    unsigned int timeEnd_;
+    unsigned int startTime_;
+    unsigned int endTime_;
 };
 
 
