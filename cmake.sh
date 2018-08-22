@@ -155,6 +155,16 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 	fi
 fi
+if [[ "$intel_arg" = intel ]] ; then
+    # fails because:
+    # /tmp/ma0/workspace/ecflow/ACore/src/cereal_optional_nvp.hpp(52): error: namespace "std" has no member "enable_if_t"
+    module unload eccodes
+    module unload gnu
+    module load intel/18.0.1
+    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/intel-18/boost_1_67_0"
+    CXX_FLAGS="-std=c++17"
+    #CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
+fi
 
 # ==============================================================================================
 # sanitisers
