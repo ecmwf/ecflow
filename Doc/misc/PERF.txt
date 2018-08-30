@@ -1,26 +1,26 @@
 Use of perf:  http://www.brendangregg.com/perf.html
 ===============================================================
   cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
-  Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  Base/bin/gcc-6.3.0/release/perf_job_gen ./metabuilder.def
   
   # Show system call overhead,as a summary.
-  strace -c Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  strace -c Base/bin/gcc-6.3.0/release/perf_job_gen ./metabuilder.def
   
   # Show page faults, data and instruction cache misses use:
-  perf stat -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  perf stat -d Base/bin/gcc-6.3.0/release/perf_job_gen ./metabuilder.def
   
   # perf stat to run the same test workload multiple times and get for each count, the standard deviation from the mean.
-  perf stat -r 5 -d Base/bin/gcc-5.3.0/release/perf_job_gen ./metabuilder.def
+  perf stat -r 5 -d Base/bin/gcc-6.3.0/release/perf_job_gen ./metabuilder.def
   
   # For more detail and higher level overview, compile debug, -g means record stack traces
-  perf record -g Base/bin/gcc-5.3.0/debug/perf_job_gen ./metabuilder.def
+  perf record -g Base/bin/gcc-6.3.0/debug/perf_job_gen ./metabuilder.def
   perf report --sort comm,dso  # high level overview
   
   # for a graphical display, you can use flame graphs. This *ONLY* works properly with debug builds
   # and you must use -g (collect stack traces)
   # assume you have down loaded Flamegraph, git clone https://github.com/brendangregg/FlameGraph
   # The wider the graph the more time is spent.
-  perf record -g Base/bin/gcc-5.3.0/debug/perf_job_gen ./metabuilder.def
+  perf record -g Base/bin/gcc-6.3.0/debug/perf_job_gen ./metabuilder.def
   perf script | $HOME/FlameGraph/stackcollapse-perf.pl > out.perf-folded
   cat out.perf-folded | $HOME/FlameGraph/flamegraph.pl > my_perf.svg
   display my_perf.svg
@@ -29,7 +29,7 @@ Use of perf:  http://www.brendangregg.com/perf.html
 
 The metabuilder.def below needs preparation for perf test below: 
 o/ module load ecflow/new
-o/ ecflow_client --port 5062 --host ecflow-metab --get > metabuilder.def
+o/ ecflow_client --port 3142 --host ecflow-metab --get > metabuilder.def
 o/ Edit metabuilder.def and replace 
       edit ECF_HOME '/home/ma/deploy/servers/ecflow-metab.5062/metabuilder/...'
    with
@@ -45,7 +45,8 @@ o/ cd metabuilder workspace edit <package.py> remove code
         ./generate.py -s codes_ui
         ./generate.py -s cgal
         ./generate.py -s boost
-        ./generate.py -s metview
+        mb
+        
    This generate the scripts
 
 Use of perf:  http://www.brendangregg.com/perf.html

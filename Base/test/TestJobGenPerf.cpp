@@ -144,6 +144,10 @@ int main(int argc, char* argv[])
       all_nodes[i]->freeTrigger();
       all_nodes[i]->freeHoldingDateDependencies();
       all_nodes[i]->freeHoldingTimeDependencies();
+
+      const std::vector<InLimit>& inlimits = all_nodes[i]->inlimits();
+      for(const auto&  inlim: inlimits)  all_nodes[i]->deleteInlimit( inlim.name());
+
       if (all_nodes[i]->state() == NState::COMPLETE && all_nodes[i]->isTask()) {
          all_nodes[i]->set_state(NState::QUEUED);
       }
@@ -154,23 +158,31 @@ int main(int argc, char* argv[])
    Log::create(log_path);
 
    // This controls the log output when job generation > submitJobsInterval
-   JobProfiler::set_task_threshold(5); // 5ms 1000 is one second
+   JobProfiler::set_task_threshold(100); // 100ms where 1000ms is one second
 
    JobsParam jobParam(20 /*submitJobsInterval*/, true /*createJobs*/, false/* spawn jobs */);
    Jobs job(&defs);
    if (!job.generate( jobParam )) cout << " generate failed: " << jobParam.getErrorMsg();
    cout << "submitted " << jobParam.submitted().size() << " out of " << tasks.size() << "\n";
 
-//   for(size_t i = 0; i < tasks.size(); i++) {
-//      if (tasks[i]->state() != NState::SUBMITTED) {
-//         cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
-//         Node* parent = tasks[i]->parent();
-//         while (parent) {
-//            cout << "node " << parent->absNodePath() << " state: " << NState::toString(parent->state()) << "\n";
-//            parent = parent->parent();
-//         }
-//      }
-//   }
-   // fs::remove(log_path);
+   if ( jobParam.submitted().size() != tasks.size()) {
+      for(size_t i = 0; i < tasks.size(); i++) {
+         if (tasks[i]->state() != NState::SUBMITTED) {
+            cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
+
+            Node* parent = tasks[i]->parent();
+            while (parent) {
+               cout << " node " << parent->absNodePath() << " state: " << NState::toString(parent->state()) << "\n";
+               parent = parent->parent();
+            }
+
+            std::vector<std::string> theReasonWhy;
+            tasks[i]->bottom_up_why(theReasonWhy,false/*html tags*/);
+            for(const auto & i : theReasonWhy) {  cout << "  Reason: " << i << "\n";}
+         }
+      }
+   }
+
+   fs::remove(log_path);
    return 0;
 }
