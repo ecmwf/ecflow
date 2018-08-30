@@ -13,7 +13,6 @@
 // Description : Delegates argument parsing to the registered commands
 //============================================================================
 #include <boost/lexical_cast.hpp>
-#include <boost/bind.hpp>
 #include <iostream>
 #include <iomanip>
 #include <memory>
@@ -216,10 +215,11 @@ void ClientOptions::show_all_commands(const char* title) const
    std::vector< boost::shared_ptr<po::option_description> > options = desc_->options();
 
    // sort using long_name
+   using opt_desc = boost::shared_ptr<po::option_description>;
    std::sort(options.begin(),options.end(),
-            boost::bind(std::less<std::string>(),
-                          boost::bind(&po::option_description::long_name,_1),
-                          boost::bind(&po::option_description::long_name,_2)));
+             [](const opt_desc& a,const opt_desc& b) { return a->long_name() < b->long_name();}
+   );
+
 
    size_t vec_size = options.size();
    size_t max_width = 0;
@@ -241,10 +241,10 @@ void ClientOptions::show_cmd_summary(const char *title,const std::string& user_o
    std::vector< boost::shared_ptr<po::option_description> > options = desc_->options();
 
    // sort using long_name
+   using opt_desc = boost::shared_ptr<po::option_description>;
    std::sort(options.begin(),options.end(),
-            boost::bind(std::less<std::string>(),
-                          boost::bind(&po::option_description::long_name,_1),
-                          boost::bind(&po::option_description::long_name,_2)));
+             [](const opt_desc& a,const opt_desc& b) { return a->long_name() < b->long_name();}
+   );
 
    size_t vec_size = options.size();
    size_t max_width = 0;

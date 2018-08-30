@@ -15,8 +15,6 @@
 #include <cassert>
 #include <deque>
 
-#include <boost/bind.hpp>
-
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
@@ -2375,32 +2373,26 @@ bool Node::is_observed(AbstractObserver* obs) const
 
 void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
 {
+   auto caseInsen = [](const auto& a, const auto& b){ return Str::caseInsLess(a.name(),b.name());};
+
    state_change_no_ = Ecf::incr_state_change_no();
    switch ( attr ) {
       case Attr::EVENT:
-         sort(events_.begin(),events_.end(),boost::bind(Str::caseInsLess,
-                                   boost::bind(&Event::name_or_number,_1),
-                                   boost::bind(&Event::name_or_number,_2)));
+         sort(events_.begin(),events_.end(),
+              [](const Event& a, const Event& b){ return Str::caseInsLess(a.name_or_number(),b.name_or_number());});
          break;
       case Attr::METER:
-         sort(meters_.begin(),meters_.end(),boost::bind(Str::caseInsLess,
-                                   boost::bind(&Meter::name,_1),
-                                   boost::bind(&Meter::name,_2)));
+         sort(meters_.begin(),meters_.end(),caseInsen);
          break;
       case Attr::LABEL:
-         sort(labels_.begin(),labels_.end(),boost::bind(Str::caseInsLess,
-                                   boost::bind(&Label::name,_1),
-                                   boost::bind(&Label::name,_2)));
+         sort(labels_.begin(),labels_.end(),caseInsen);
          break;
       case Attr::LIMIT:
-         sort(limits_.begin(),limits_.end(),boost::bind(Str::caseInsLess,
-                                   boost::bind(&Limit::name,_1),
-                                   boost::bind(&Limit::name,_2)));
+         sort(limits_.begin(),limits_.end(),
+              [](const limit_ptr& a, const limit_ptr& b){ return Str::caseInsLess(a->name(),b->name());});
          break;
       case Attr::VARIABLE:
-         sort(vars_.begin(),vars_.end(),boost::bind(Str::caseInsLess,
-                                   boost::bind(&Variable::name,_1),
-                                   boost::bind(&Variable::name,_2)));
+         sort(vars_.begin(),vars_.end(),caseInsen);
          break;
       case Attr::UNKNOWN: break;
       default:            break;

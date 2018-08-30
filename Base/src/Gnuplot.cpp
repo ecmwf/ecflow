@@ -18,7 +18,6 @@
 #include <sstream>
 #include <fstream>
 #include <sys/stat.h> // for chmod
-#include <boost/bind.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
@@ -259,9 +258,9 @@ std::string Gnuplot::create_gnuplot_script(
 
 //   cout << "sort vector according to load\n";
    std::sort(suite_vec_copy.begin(),suite_vec_copy.end(),
-            boost::bind(std::greater<int>(),
-               boost::bind(&SuiteLoad::total_request_per_second_, _1),
-               boost::bind(&SuiteLoad::total_request_per_second_, _2)));
+             [](const SuiteLoad& a, const SuiteLoad& b)  {
+                   return a.total_request_per_second_ > b.total_request_per_second_;
+             });
 //   for(size_t i = 0; i < suite_vec_copy.size(); i++) {
 //      cout << " " << suite_vec_copy[i].first << " " << suite_vec_copy[i].second << "\n";
 //   }

@@ -7,7 +7,6 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <boost/bind.hpp>
 #include <boost/enable_shared_from_this.hpp>
 
 #include <QMessageBox>
@@ -219,10 +218,10 @@ void CommandDesignerWidget::addClientCommandsToComponentList()
 	// sort the commands into alphabetical order
 	std::vector< boost::shared_ptr<po::option_description> > options = clientOptionsDescriptions_->options();
 
-	std::sort(options.begin(),options.end(),
-		boost::bind(std::less<std::string>(),
-			boost::bind(&po::option_description::long_name,_1),
-			boost::bind(&po::option_description::long_name,_2)));
+   using opt_desc = boost::shared_ptr<po::option_description>;
+   std::sort(options.begin(),options.end(),
+             [](const opt_desc& a,const opt_desc& b) { return a->long_name() < b->long_name();}
+   );
 
 	// loop through the sorted commands and add them to the list
 	size_t numOptions = options.size();

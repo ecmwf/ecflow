@@ -53,11 +53,15 @@ BOOST_AUTO_TEST_CASE( test_defstatus )
  	theDefs.getAllNodes(nodes);
  	theDefs.getAllTasks(tasks);
 
+ 	BOOST_CHECK_MESSAGE(!suite->begun() ,"Expected suite not to be begun ");
+
+
  	/// It should be noted that once a suite has begun, it stays begun, however for test purposes we had
  	/// added ability to reset the begin state.
 
  	/// Test 1: with no defstatus. All nodes should be set to NState::QUEUED
  	theDefs.beginAll();
+   BOOST_CHECK_MESSAGE(suite->begun() ,"Expected suite to be begun ");
  	BOOST_FOREACH(Node* n,nodes) { BOOST_CHECK_MESSAGE(n->state() == NState::QUEUED,"Expected queued but found " << NState::toString(n->state())); }
 
    theDefs.requeue();
@@ -67,6 +71,8 @@ BOOST_AUTO_TEST_CASE( test_defstatus )
  	/// Test 2: with defstatus on suite. With complete the status should have been propagated down
  	suite->addDefStatus(DState::COMPLETE);
  	theDefs.reset_begin(); // for test purposes only
+   BOOST_CHECK_MESSAGE(!suite->begun() ,"Expected suite not to be begun ");
+
  	theDefs.beginAll();
  	BOOST_FOREACH(Node* n,nodes) {
  		BOOST_CHECK_MESSAGE(n->state() == NState::COMPLETE,"Expected complete but found " << NState::toString(n->state()));

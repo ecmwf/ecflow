@@ -21,7 +21,6 @@
 #include <boost/timer.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/bind.hpp>
 #include <boost/algorithm/string.hpp>
 #include <algorithm>
 
@@ -551,11 +550,11 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //private:
 //	int i_;
 //};
-//
+
 //BOOST_AUTO_TEST_CASE( test_loop )
 //{
 //	// DEBUG release shows BOOST_FOREACH has worst perf, however in release mode its par with the fastest.
-//	size_t vecSize = 20000000;
+//	size_t vecSize = 200000000;
 //	std::vector<Fred> vec;
 //	vec.reserve(vecSize);
 //	for (size_t i = 0; i < vecSize ; i++) { vec.push_back(Fred(i));}
@@ -564,9 +563,13 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //	BOOST_FOREACH(Fred& fred, vec) { fred.inc(); }
 // 	cout << "Time: BOOST_FOREACH(Fred& fred, vec) { fred.inc(); }                                       " << timer.elapsed() << "\n";
 //
-// 	timer.restart();
-//	std::for_each(vec.begin(),vec.end(),boost::bind(&Fred::inc,_1) );
-// 	cout << "Time: std::for_each(vec.begin(),vec.end(),boost::bind(&Fred::inc,_1) );                    " << timer.elapsed() << "\n";
+//   timer.restart();
+//   for(auto &fred : vec) { fred.inc(); }
+//   cout << "Time: for(auto &fred : vec) { fred.inc(); }                                                " << timer.elapsed() << "\n";
+//
+//   timer.restart();
+//   std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );
+//   cout << "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 " << timer.elapsed() << "\n";
 //
 // 	timer.restart();
 //	std::vector<Fred>::iterator theEnd = vec.end();

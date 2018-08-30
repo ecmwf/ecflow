@@ -14,7 +14,6 @@
 //============================================================================
 #include <cassert>
 #include <iostream>
-#include <boost/bind.hpp>
 
 #include "ServerState.hpp"
 #include "Str.hpp"
@@ -159,13 +158,9 @@ void ServerState::sort_variables()
 {
    variable_state_change_no_ = Ecf::incr_state_change_no();
 
-   sort(user_variables_.begin(),user_variables_.end(),boost::bind(Str::caseInsLess,
-                              boost::bind(&Variable::name,_1),
-                              boost::bind(&Variable::name,_2)));
-
-   sort(server_variables_.begin(),server_variables_.end(),boost::bind(Str::caseInsLess,
-                              boost::bind(&Variable::name,_1),
-                              boost::bind(&Variable::name,_2)));
+   auto caseless = [](const Variable& a, const Variable& b){ return Str::caseInsLess(a.name(),b.name());};
+   sort(user_variables_.begin(),user_variables_.end(),caseless);
+   sort(server_variables_.begin(),server_variables_.end(),caseless);
 }
 
 

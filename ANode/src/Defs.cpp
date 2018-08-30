@@ -15,7 +15,6 @@
 #include <cassert>
 #include <sstream>
 #include <fstream>
-#include <boost/bind.hpp>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -529,7 +528,7 @@ void Defs::beginAll()
 
 void Defs::reset_begin()
 {
-   std::for_each(suiteVec_.begin(),suiteVec_.end(),boost::bind(&Suite::reset_begin,_1));
+   std::for_each(suiteVec_.begin(),suiteVec_.end(),[](suite_ptr s){s->reset_begin();});
 }
 
 void Defs::requeue()
@@ -1390,18 +1389,14 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		}
 		case NOrder::ALPHA:  {
  			std::sort(suiteVec_.begin(),suiteVec_.end(),
-			            boost::bind(Str::caseInsLess,
-			                          boost::bind(&Node::name,_1),
-			                          boost::bind(&Node::name,_2)));
+ 			          [](const suite_ptr& a, const suite_ptr& b) { return Str::caseInsLess(a->name(),b->name());});
          order_state_change_no_ = Ecf::incr_state_change_no();
          client_suite_mgr_.update_suite_order();
 			break;
 		}
 		case NOrder::ORDER:  {
 			std::sort(suiteVec_.begin(),suiteVec_.end(),
-			            boost::bind(Str::caseInsGreater,
-			                          boost::bind(&Node::name,_1),
-			                          boost::bind(&Node::name,_2)));
+                   [](const suite_ptr& a, const suite_ptr& b) { return Str::caseInsGreater(a->name(),b->name());});
          order_state_change_no_ = Ecf::incr_state_change_no();
          client_suite_mgr_.update_suite_order();
 			break;

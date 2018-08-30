@@ -33,9 +33,9 @@ static void func(int const count = 100000)
    }
 }
 
-BOOST_AUTO_TEST_CASE( test_perf )
+BOOST_AUTO_TEST_CASE( test_perf_with_chrono )
 {
-   cout << "ACore:: ...test_perf\n" ;
+   cout << "ACore:: ...test_perf_with_chrono\n" ;
 
    // using namespace std::chrono_literals;
 
@@ -53,11 +53,12 @@ BOOST_AUTO_TEST_CASE( test_perf )
    auto t2 = perf_timer<std::chrono::microseconds>::duration(func,100);
    auto t3 = perf_timer<std::chrono::milliseconds>::duration(func,100000);
    std::cout << "   " << std::chrono::duration<double,std::milli>(t1 + t2 + t3).count() << " milli" << std::endl;
+   BOOST_CHECK_MESSAGE(true,"dummy to keep unit test happy");
 }
 
-BOOST_AUTO_TEST_CASE( test_timer)
+BOOST_AUTO_TEST_CASE( test_chrono_timer )
 {
-   cout << "ACore:: ... test_timer\n" ;
+   cout << "ACore:: ... test_chrono_timer\n" ;
 
    // using namespace std::chrono_literals;
    {
@@ -83,6 +84,7 @@ BOOST_AUTO_TEST_CASE( test_timer)
       func();
       timer.elapsed("   func with default args , seconds");
    }
+   BOOST_CHECK_MESSAGE(true,"dummy to keep unit test happy");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -13,8 +13,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/bind.hpp>
-
 #include "ClientSuites.hpp"
 #include "Suite.hpp"
 #include "Defs.hpp"
@@ -302,11 +300,7 @@ void ClientSuites::update_suite_order()
       }
    }
 
-   std::sort(suites_.begin(),suites_.end(),
-            boost::bind(std::less<int>(),
-                          boost::bind(&HSuite::index_,_1),
-                          boost::bind(&HSuite::index_,_2)));
-
+   std::sort(suites_.begin(),suites_.end(),[](const HSuite& a,const HSuite& b){return a.index_ < b.index_;});
 }
 
 std::vector<HSuite>::iterator ClientSuites::find_suite(const std::string& name)

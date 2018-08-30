@@ -16,7 +16,6 @@
 #include <limits>
 #include <cassert>
 #include <sstream>
-#include <boost/bind.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
@@ -335,17 +334,13 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 		}
 		case NOrder::ALPHA:  {
 			std::sort(nodes_.begin(),nodes_.end(),
-			            boost::bind(Str::caseInsLess,
-			                          boost::bind(&Node::name,_1),
-			                          boost::bind(&Node::name,_2)));
+			          [](const node_ptr& a,const node_ptr& b){ return Str::caseInsLess(a->name(),b->name());});
          order_state_change_no_ = Ecf::incr_state_change_no();
 			break;
 		}
 		case NOrder::ORDER:  {
 			std::sort(nodes_.begin(),nodes_.end(),
-			            boost::bind(Str::caseInsGreater,
-			                          boost::bind(&Node::name,_1),
-			                          boost::bind(&Node::name,_2)));
+                   [](const node_ptr& a,const node_ptr& b){ return Str::caseInsGreater(a->name(),b->name());});
          order_state_change_no_ = Ecf::incr_state_change_no();
 			break;
 		}

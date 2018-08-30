@@ -12,8 +12,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/bind.hpp>
-
 #include "ClientSuiteMgr.hpp"
 #include "Defs.hpp"
 #include "DefsDelta.hpp"
@@ -48,9 +46,7 @@ unsigned int ClientSuiteMgr::create_client_suite(bool auto_add_new_suites, const
 
 	// aesthetics only
 	std::sort(clientSuites_.begin(),clientSuites_.end(),
-	            boost::bind(std::less<unsigned int>(),
-	                          boost::bind(&ClientSuites::handle,_1),
-	                          boost::bind(&ClientSuites::handle,_2)));
+	          [](const ecf::ClientSuites& a, const ecf::ClientSuites& b) { return a.handle() < b.handle();});
 
 	// make sure all suites in ClientSuites are in same order as  Defs suites
    update_suite_order();
