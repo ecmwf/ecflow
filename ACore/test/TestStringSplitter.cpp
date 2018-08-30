@@ -94,16 +94,19 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
 
    expected.emplace_back("This"); expected.emplace_back("is"); expected.emplace_back("a"); expected.emplace_back("string");
    check(line, StringSplitter(line),expected);
+   check(line, StringSplitter("This is a string"),expected);
    check(line,expected);
 
    expected.clear();
    line = "";
    check(line,StringSplitter(line),expected);
+   check(line,StringSplitter(""),expected);
    check(line,expected);
 
    expected.clear();
    line = "  ";
    check(line,StringSplitter(line),expected);
+   check(line,StringSplitter("  "),expected);
    check(line,expected);
 
    expected.clear();
@@ -117,41 +120,41 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    line = "\n";
    expected.emplace_back("\n");
    check(line,StringSplitter(line),expected);
+   check(line,StringSplitter("\n"),expected);
    check(line,expected);
 
    expected.clear();
    line = "a ";
    expected.emplace_back("a");
    check(line,StringSplitter(line),expected);
+   check(line,StringSplitter("a "),expected);
    check(line,expected);
 
    expected.clear(); expected.emplace_back("a");
    line = " a";
    check(line,StringSplitter(line),expected);
-   check(line,expected);
-
-   expected.clear();
-   line = " a"; // check tabs
-   expected.emplace_back("a");
-   check(line,StringSplitter(line),expected);
+   check(line,StringSplitter(" a"),expected);
    check(line,expected);
 
    expected.clear();
    line = "  a  "; // check sequential tabs
    expected.emplace_back("a");
    check(line,StringSplitter(line),expected);
+   check(line,StringSplitter("  a  "),expected);
    check(line,expected);
 
    expected.clear();
    line = " a ";
    expected.emplace_back("a");
    check(line,StringSplitter(line),expected);
+   check(line,StringSplitter(" a "),expected);
    check(line,expected);
 
    expected.clear();
    line = "        a     b     c       d        ";
    expected.emplace_back("a"); expected.emplace_back("b"); expected.emplace_back("c"); expected.emplace_back("d");
    check(line,StringSplitter(line),expected);
+   check(line,StringSplitter("        a     b     c       d        "),expected);
    check(line,expected);
 
    expected.clear();
@@ -161,6 +164,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    expected.emplace_back("("); expected.emplace_back(")"); expected.emplace_back("-"); expected.emplace_back("+");
    expected.emplace_back("?");
    check(line,StringSplitter(line),expected);
+   check(line,StringSplitter(" - !   $ % ^  & * ( ) - + ? "),expected);
    check(line,expected);
 
    // Check tabs
@@ -170,17 +174,20 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    expected.emplace_back("sundays");expected.emplace_back("in");expected.emplace_back("october");expected.emplace_back("hence");
    expected.emplace_back("expect");expected.emplace_back("8");expected.emplace_back("task");expected.emplace_back("completions");
    check(line,StringSplitter(line),expected);
+   check(line,StringSplitter("     verify complete:8                      # 4 sundays in october hence expect 8 task completions"),expected);
    check(line,expected);
 
    // Check paths
    expected.clear(); expected.emplace_back("a");
    line = "/a";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,StringSplitter("/a","/"),expected);
    check(line,expected,"/");
 
    expected.clear();
    line = "";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,StringSplitter("","/"),expected);
    check(line,expected,"/");
 
    expected.clear();
@@ -193,18 +200,21 @@ BOOST_AUTO_TEST_CASE( test_str_split_StringSplitter )
    expected.emplace_back("a");expected.emplace_back("b");expected.emplace_back("c");expected.emplace_back("c");expected.emplace_back("e");
    line = "///a/b/c/c//e";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,StringSplitter("///a/b/c/c//e","/"),expected);
    check(line,expected,"/");
 
    expected.clear();
    expected.emplace_back("a");expected.emplace_back("b");expected.emplace_back("c");expected.emplace_back("c");expected.emplace_back("e");
    line = "//a/b/c/c//e/";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,StringSplitter("//a/b/c/c//e/","/"),expected);
    check(line,expected,"/");
 
    expected.clear();
    expected.emplace_back("a ");expected.emplace_back("b");expected.emplace_back("c");expected.emplace_back("c e");
    line = "/a /b/c/c e";
    check(line,StringSplitter(line,"/"),expected);
+   check(line,StringSplitter("/a /b/c/c e" ,"/"),expected);
    check(line,expected,"/");
 }
 

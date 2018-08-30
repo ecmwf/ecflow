@@ -41,17 +41,17 @@ class StringSplitter {
    mutable boost::string_view::size_type first_not_of_;
 
 public:
-   StringSplitter(boost::string_view src, boost::string_view sep = " \t") : src_(src),rem_(src), sep_(sep),finished_(false),first_not_of_(0) {}
-   //#if C++11
-      // this rules out temp strings, it also rules out char * because of two available overloads
-      //StringSplitter(const std::string&& src, boost::string_view sep) = delete;
+   StringSplitter(boost::string_view src, boost::string_view sep = " \t") : src_(src),rem_(src), sep_(sep),finished_(false),first_not_of_(0){}
 
-      // this re-enables support for string literals (which are never temp)
-      // it even handles correctly char arrays that contain a null terminated string
-      // because string_view does not have a char array constructor!
-      // template<std::size_t N>
-      //StringSplitter(const char (&sz)[N], boost::string_view sep) : src_(sz),rem_(sz),sep_(sep),finished_(false),first_not_of_(0) {}
-   //
+   // this rules out temp strings, it also rules out char * because of two available overloads
+   StringSplitter(const std::string&& src, boost::string_view sep) = delete;
+
+   // this re-enables support for string literals (which are never temp)
+   // it even handles correctly char arrays that contain a null terminated string
+   // because string_view does not have a char array constructor!
+   template<std::size_t N>
+   StringSplitter(const char (&sz)[N], boost::string_view sep = " \t") : src_(sz),rem_(sz),sep_(sep),finished_(false),first_not_of_(0){}
+
    boost::string_view next() const;
    bool finished() const;
    void reset();
@@ -61,6 +61,7 @@ public:
                      std::vector<boost::string_view >& lineTokens,
                      boost::string_view delimiters = " \t");
 
+   // This the fastest splitter at the moment
    static void split2(boost::string_view str ,
                      std::vector<boost::string_view>& lineTokens,
                      const char* delimiters = " \t");
