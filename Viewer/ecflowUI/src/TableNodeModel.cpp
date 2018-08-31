@@ -49,7 +49,7 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
 	data_(nullptr),
 	columns_(nullptr)
 {
-	columns_=ModelColumn::def("table_columns");
+    columns_=ModelColumn::def("table_columns");
 
     Q_ASSERT(columns_);
 
@@ -62,6 +62,9 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
     Q_ASSERT(columns_->id(EventColumn) == "event");
     Q_ASSERT(columns_->id(MeterColumn) == "meter");
     Q_ASSERT(columns_->id(StatusChangeColumn) == "statusChange");
+    // Q_ASSERT(columns_->id(PreviousStart) == "previousStart");
+    // Q_ASSERT(columns_->id(PreviousStop) == "previousStop");
+    // Q_ASSERT(columns_->id(Rid) == "rid");
 
     if(attrTypes.empty())
     {
@@ -178,6 +181,27 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
             QString s;
             vnode->statusChangeTime(s);
             return s;
+        }
+
+        else if(id == PreviousStart)
+        {
+	  std::string s = vnode->findVariable("ECF_JOB");
+	  QString out = s.c_str();
+	  return out;
+        }
+
+        else if(id == PreviousStop)
+        {
+	  std::string s = vnode->findVariable("ECF_JOBOUT");
+	  QString out = s.c_str();
+	  return out;
+        }
+
+        else if(id == Rid)
+        {
+	  std::string s = vnode->findVariable("ECF_RID");
+	  QString out = s.c_str();
+	  return out;
         }
 
         //else if(id == "icon")

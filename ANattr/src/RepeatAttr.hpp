@@ -27,7 +27,7 @@
 
 /////////////////////////////////////////////////////////////////////////
 // Node can only have one repeat.
-//
+// 
 class RepeatBase {
 public:
    explicit RepeatBase(const std::string& name) : state_change_no_(0), name_(name) {}
