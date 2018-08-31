@@ -30,7 +30,7 @@
 
                 "autoExpandLeafNode" : {
                     "label" : "Automatically expand leaf nodes",
-                    "default" : "true"
+                    "default" : "false"
                 },
 
                 "nodeFont" : {
