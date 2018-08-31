@@ -6,3 +6,85 @@ see: https://github.com/USCiLab/cereal/issues/30
 Versioning
 ==========================================================
 http://uscilab.github.io/cereal/serialization_functions.html
+
+
+Performance comparsion with boost
+=================================
+CEREAL:
+eurydice{/var/tmp/ma0/workspace/ecflow}:216 --> Client/bin/gcc-6.3.0/release/perf_test_large_defs                                                                                            
+Running 1 test case...
+Client:: ...test_perf_for_large_defs:   port(3142)
+
+/var/tmp/ma0/BIG_DEFS/od.def  : file size 11081032
+Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenced FAMILY '/lbc/perle/process' does not define the limit excl
+
+ Load:                883ms
+ Begin:               81ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 440(ms)
+ Download(Sync):      396 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 387 377 385 390 384 374 374 373 375 394 : Avg:0.3813(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      442 451 445 431 450 442 443 454 461 449 : Avg:0.4468(sec)  : get_defs() from different client
+ Suspend 43305 tasks : 0.223   news_local() : 0   sync_local() : 0.647
+ Resume 43305 tasks  : 0.19   news_local() : 0   sync_local() : 0.451
+ check  43305 tasks  : 0.226   news_local() : 0   sync_local() : 0.008
+ kill   43305 tasks  : 0.11   news_local() : 0   sync_local() : 0
+ force  43305 tasks  : 0.297   news_local() : 0   sync_local() : 0.903
+ log    43305 tasks  : 5.988
+ log(fl)43305 tasks  : 6.315
+ Check pt:            114 111 123 111 111 117 111 110 111 110 : Avg:0.1129(sec)
+ Delete:              82ms
+
+/var/tmp/ma0/BIG_DEFS/vsms2.31415.def  : file size 153539843
+ Load:                5970ms
+ Begin:               149ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 3891(ms)
+ Download(Sync):      3233 33 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 3278 3301 3235 3288 3219 3293 3260 3301 3252 3211 : Avg:3.2638(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      3958 3792 3681 3863 3763 3843 3770 3721 3702 3689 : Avg:3.7782(sec)  : get_defs() from different client
+ Suspend 262323 tasks : 1.591   news_local() : 0.001   sync_local() : 4.229
+ Resume 262323 tasks  : 1.31   news_local() : 0.001   sync_local() : 2.95
+ check  262323 tasks  : 0.441   news_local() : 0.001   sync_local() : 0.036
+ kill   262323 tasks  : 1.491   news_local() : 0.001   sync_local() : 0
+ force  262323 tasks  : 2.217   news_local() : 0.001   sync_local() : 6.62
+ log    100000 tasks  : 14.001
+ log(fl)100000 tasks  : 14.413
+ Check pt:            1094 1062 1058 1071 1042 1037 1070 1078 1040 1041 : Avg:1.0593(sec)
+ Delete:              443ms
+
+/var/tmp/ma0/BIG_DEFS/3199.def  : file size 59631577
+ Load:                3051ms
+ Begin:               404ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 2215(ms)
+ Download(Sync):      1883 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 1890 1900 1893 1973 1936 1967 1962 1918 1898 1894 : Avg:1.9231(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      2246 2163 2133 2323 2154 2186 2149 2193 2186 2226 : Avg:2.1959(sec)  : get_defs() from different client
+ Suspend 215437 tasks : 1.287   news_local() : 0   sync_local() : 3.554
+ Resume 215437 tasks  : 1.016   news_local() : 0   sync_local() : 2.337
+ check  215437 tasks  : 0.771   news_local() : 0   sync_local() : 0.028
+ kill   215437 tasks  : 0.6   news_local() : 0   sync_local() : 0
+ force  215437 tasks  : 1.694   news_local() : 0   sync_local() : 4.62
+ log    100000 tasks  : 13.888
+ log(fl)100000 tasks  : 14.59
+ Check pt:            640 572 566 577 583 578 573 568 573 578 : Avg:0.5808(sec)
+ Delete:              356ms
+
+/var/tmp/ma0/BIG_DEFS/mega.def  : file size 6723372
+ Load:                495ms
+ Begin:               50ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 363(ms)
+ Download(Sync):      227 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 228 228 225 227 232 228 229 244 244 222 : Avg:0.2307(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      275 282 273 275 274 286 273 276 277 287 : Avg:0.2778(sec)  : get_defs() from different client
+ Suspend 27436 tasks : 0.159   news_local() : 0   sync_local() : 0.431
+ Resume 27436 tasks  : 0.123   news_local() : 0   sync_local() : 0.292
+ check  27436 tasks  : 0.138   news_local() : 0   sync_local() : 0.005
+ kill   27436 tasks  : 0.075   news_local() : 0   sync_local() : 0
+ force  27436 tasks  : 0.209   news_local() : 0   sync_local() : 0.608
+ log    27436 tasks  : 3.985
+ log(fl)27436 tasks  : 4.174
+ Check pt:            97 93 85 84 83 84 85 82 82 82 : Avg:0.0857(sec)
+ Delete:              67ms
+
+
+BOOST 1.53  ecflow 4.9.11
+=====================================================================================
