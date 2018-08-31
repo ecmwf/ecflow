@@ -1,0 +1,9 @@
+
+Handling class evolution
+============================
+see: https://github.com/USCiLab/cereal/issues/30
+
+Versioning
+==========================================================
+http://uscilab.github.io/cereal/serialization_functions.html
+
