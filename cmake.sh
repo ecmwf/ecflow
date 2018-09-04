@@ -31,7 +31,7 @@ show_error_and_exit() {
    echo "                    copies the tar file to $SCRATCH"
    echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
    echo "\nTo Build with system boost, just call:"
-   echo " 'module load boost/1.67.0' "
+   echo " 'module load boost/1.68.0' "
    echo "first"
    exit 1
 }
@@ -138,13 +138,14 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 
 module load cmake/3.12.0
 module load ecbuild/2.9.0
-module load boost/1.67.0     # uncomment to use local BOOST_ROOT
+unset BOOST_ROOT;module load boost/1.68.0     # comment to use local BOOST_ROOT
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	module unload gnu
 	module load clang/6.0.1
-    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-6.0.1/boost_1_67_0"
+	module load boost/1.68.0
+    #cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-6.0.1/boost_1_67_0"
 
     # [-Wdeprecated-register] /usr/local/apps/python/2.7.12-01/include/python2.7/unicodeobject.h:534:5: warning: 'register' storage class specifier is deprecated and incompatible with C++17 [-Wdeprecated-register]
     # [-Wmacro-redefined]     /usr/local/apps/python/2.7.12-01/include/python2.7/pyconfig.h:1215:9: warning: '_XOPEN_SOURCE' macro redefined
@@ -199,7 +200,7 @@ if [[ "$ARCH" = cray ]] ; then
     fi
     module unload atp                     # must use for NON MPI code (ATP abnormal termination processing only works with cray MPI for ESM modes)
     module load craype-target-local_host  # must use for NON MPI code
-    module load boost/1.67.0
+    module load boost/1.68.0
     export CRAY_ADD_RPATH=yes
     export ECFLOW_CRAY_BATCH=1
 fi
