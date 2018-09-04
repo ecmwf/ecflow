@@ -45,8 +45,11 @@ BOOST_AUTO_TEST_CASE( test_default_constructor_persistence )
    Family family;
    Task   task;
 
-#ifdef UPDATE_TESTS
+   // Can't persist server variable are dependent on HOST.i.e ECF_LISTS,ECF_CHECK,etc
+   // Hence is not cross-platform
    doSave(file_name + "Defs.def",defs);
+
+#ifdef UPDATE_TESTS
    doSave(file_name + "Suite.def",suite);
    doSave(file_name + "Family.def",family);
    doSave(file_name + "Task.def",task);
@@ -67,12 +70,11 @@ BOOST_AUTO_TEST_CASE( test_compare_boost_and_defs_checkpt_file )
 
    std::string file_name = File::test_data("ANode/test/data/migration/","ANode");
 
+   // Cannot save these tests since server variable use HOST which is different for each platform
    MyDefsFixture fixture;
-
-#ifdef UPDATE_TESTS
    doSave(file_name + "cereal.checkpt",fixture.fixtureDefsFile());
    fixture.fixtureDefsFile().save_as_checkpt(file_name + "defs.checkpt");
-#endif
+
 
    DebugEquality debug_equality; // only as affect in DEBUG build
    do_restore<Defs>(file_name + "cereal.checkpt",fixture.fixtureDefsFile());
