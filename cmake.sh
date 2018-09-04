@@ -135,17 +135,13 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
-
 module load cmake/3.12.0
 module load ecbuild/2.9.0
-unset BOOST_ROOT;module load boost/1.68.0     # comment to use local BOOST_ROOT
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	module unload gnu
 	module load clang/6.0.1
-	module load boost/1.68.0
-    #cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-6.0.1/boost_1_67_0"
 
     # [-Wdeprecated-register] /usr/local/apps/python/2.7.12-01/include/python2.7/unicodeobject.h:534:5: warning: 'register' storage class specifier is deprecated and incompatible with C++17 [-Wdeprecated-register]
     # [-Wmacro-redefined]     /usr/local/apps/python/2.7.12-01/include/python2.7/pyconfig.h:1215:9: warning: '_XOPEN_SOURCE' macro redefined
@@ -200,7 +196,6 @@ if [[ "$ARCH" = cray ]] ; then
     fi
     module unload atp                     # must use for NON MPI code (ATP abnormal termination processing only works with cray MPI for ESM modes)
     module load craype-target-local_host  # must use for NON MPI code
-    module load boost/1.68.0
     export CRAY_ADD_RPATH=yes
     export ECFLOW_CRAY_BATCH=1
 fi
@@ -212,6 +207,9 @@ if [[ "$python3_arg" = python3 ]] ; then
     cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
 fi
  
+# This must be done after change of compiler/environment
+module load boost/1.68.0     # comment to use local BOOST_ROOT
+
 # ====================================================================================
 # default to Release  
 cmake_build_type=
