@@ -34,7 +34,11 @@ def create_defs(name,the_port):
     suite.add_variable("ECF_HOME", ecfhome);
     suite.add_variable("ECF_INCLUDE", ecf_includes());
     
-    prefix_job_cmd = "export PYTHONPATH=" + os.environ['PYTHONPATH'] +";" + "export LD_LIBRARY_PATH=" + os.environ['LD_LIBRARY_PATH'] +";"
+    prefix_job_cmd = ""
+    if 'PYTHONPATH' in os.environ:
+        prefix_job_cmd = "export PYTHONPATH=" + os.environ['PYTHONPATH'] +";" 
+    if 'LD_LIBRARY_PATH' in os.environ:
+        prefix_job_cmd += "export LD_LIBRARY_PATH=" + os.environ['LD_LIBRARY_PATH'] +";"
    
     # sys.version_info is a tuple containing (major,minor,micro,releaselevel,serial)
     # releaselevel = alpha beta candidate final
