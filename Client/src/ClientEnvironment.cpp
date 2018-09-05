@@ -101,6 +101,13 @@ void ClientEnvironment::init()
 	if (debug_) std::cout << toString() << "\n";
 }
 
+void ClientEnvironment::set_debug(bool flag)
+{
+   // show client environment when debug is enabled
+   debug_ = flag;
+   if (debug_) std::cout << toString() << "\n";
+}
+
 bool ClientEnvironment::get_next_host(std::string& errorMsg)
 {
 	if (debug_) cout << "ClientEnvironment::get_next_host() host_file_read_ = " << host_file_read_ << " host_file_ = " << host_file_ << "\n";

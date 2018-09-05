@@ -1153,7 +1153,9 @@ def test_client_alter_change(ci):
     task_t1 = ci.get_defs().find_abs_node(t1)
     variable = task_t1.find_variable("var")
     assert variable.value() == "changed_var", "Expected alter of variable to be 'change_var' but found " + variable.value()
+    ci.debug(True)
     res = ci.query('variable',task_t1.get_abs_node_path(),"var")
+    ci.debug(False)
     assert res == 'changed_var',"Expected alter of variable to be 'change_var' but found " + res
 
     ci.alter(t1,"change","meter","meter","10")   

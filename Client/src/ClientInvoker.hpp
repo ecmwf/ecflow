@@ -109,6 +109,8 @@ public:
    void enable_logging(const std::string& log_file_name);
    void disable_logging();
 
+   void debug(bool flag) { clientEnv_.set_debug(flag);}
+
  	/// The timeout feature allow the client to fail gracefully in the case
  	/// where the server has died/crashed. The timeout will ensure the socket is closed.
  	/// allowing the server to be restarted without getting the address is use error.

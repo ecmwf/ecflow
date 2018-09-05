@@ -87,6 +87,8 @@ public:
    // Needs to be the same value as supplied to child command init
    void set_remote_id(const std::string& rid) { remote_id_ = rid; }
 
+   // Used by python to enable debug of client api
+   void set_debug(bool flag);
 
 // AbstractClientEnv functions:
  	bool checkTaskPathAndPassword(std::string& errorMsg) const override;

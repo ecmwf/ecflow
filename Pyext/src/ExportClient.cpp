@@ -315,6 +315,8 @@ void export_Client()
    .def("debug_server_on",  &ClientInvoker::debug_server_on,  "Enable server debug, Will dump to standard out on server host.")
    .def("debug_server_off", &ClientInvoker::debug_server_off, "Disable server debug")
 
+   .def("debug", &ClientInvoker::debug, "enable/disable client api debug")
+
    .def("zombie_get",       &zombieGet, return_value_policy<copy_const_reference>())
    .def("zombie_fob",       &ClientInvoker::zombieFobCli )
    .def("zombie_fail",      &ClientInvoker::zombieFailCli )
