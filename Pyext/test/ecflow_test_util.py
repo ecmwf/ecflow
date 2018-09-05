@@ -174,6 +174,8 @@ class Server(object):
         if 'ECF_CHECKOLD' in os.environ: print("   ECF_CHECKOLD:",os.environ['ECF_CHECKOLD']) 
         if 'ECF_LOG' in os.environ:      print("   ECF_LOG:",os.environ['ECF_LOG']) 
         self.ci = Client("localhost", self.the_port)
+        self.ci.debug(True)   # dump client environemnt
+        self.ci.debug(False)
      
     def __enter__(self):
         try:
