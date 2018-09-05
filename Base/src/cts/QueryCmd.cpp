@@ -67,19 +67,24 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
    std::string query_type;
    std::string path_to_attribute;
    std::string attribute;
-   std::string path_to_task = clientEnv->task_path(); // can be empty, when cmd called from command line
 
    if (args.size()) query_type = args[0];
    if ( query_type == "event" || query_type == "meter" || query_type == "variable") {
       // second argument must be <path>:event_or_meter_or_variable
       std::string path_and_name ;
-      if (args.size() == 2) {
+      if (args.size() >= 2) {
          path_and_name = args[1];
          if ( !Extract::pathAndName( path_and_name , path_to_attribute, attribute  ) ) {
-            throw std::runtime_error( "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " + query_type );
+            throw std::runtime_error(
+                     "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query "
+                     + query_type + " : could not extract from:" + path_and_name );
          }
       }
-      else throw std::runtime_error( "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " + query_type);
+      else {
+         std::stringstream ss; ss << "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " << query_type;
+         ss << " args size = " << args.size() << " expected at least 2 arguments";
+         throw std::runtime_error(ss.str());
+      }
       if (attribute.empty()) throw std::runtime_error( "QueryCmd: no attribute specified: query type: " + query_type + " path+attribute: " + path_and_name + "\n" + string(QueryCmd::desc()) );
    }
    else if (query_type == "trigger") {
@@ -105,6 +110,7 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
 
    // path_to_task can be empty if invoked via the command line. ( used for logging, i.e identifying which task invoked this command)
    // However if invoked from the shell/python we expect the path_to_task(ECF_NAME) to have been set
+   std::string path_to_task = clientEnv->task_path(); // can be empty, when cmd called from command line
    if (! path_to_task.empty() && path_to_task[0] != '/') {
       throw std::runtime_error( "QueryCmd: invalid path to task: " +  path_to_task);
    }

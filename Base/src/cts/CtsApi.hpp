@@ -170,7 +170,7 @@ public:
  	                                            bool run = true);
    static std::vector<std::string> query(
             const std::string& query_type, const std::string& path_to_attribute,
-            const std::string& attribute, const std::string& path_to_task);
+            const std::string& attribute, const std::string& path_to_task = "");
 
  	// Only to be used in Cmd
    static const char* server_version_arg();
