@@ -62,6 +62,8 @@ BOOST_AUTO_TEST_CASE( test_default_constructor_persistence )
    do_restore<Family>(file_name + "Family.def",family);
    do_restore<Task>(file_name + "Task.def",task);
    do_restore<Limit>(file_name + "Limit.def",Limit());
+
+   fs::remove(file_name + "Defs.def" ); // Remove the file. Comment out for debugging
 }
 
 BOOST_AUTO_TEST_CASE( test_compare_boost_and_defs_checkpt_file )
@@ -82,6 +84,9 @@ BOOST_AUTO_TEST_CASE( test_compare_boost_and_defs_checkpt_file )
    Defs defs;
    defs.restore( file_name + "defs.checkpt" );
    BOOST_CHECK_MESSAGE(defs == fixture.fixtureDefsFile()," ");
+
+   fs::remove(file_name + "defs.checkpt" ); // Remove the file. Comment out for debugging
+   fs::remove(file_name + "cereal.checkpt" ); // Remove the file. Comment out for debugging
 }
 
 BOOST_AUTO_TEST_SUITE_END()
