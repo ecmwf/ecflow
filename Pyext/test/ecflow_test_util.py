@@ -164,6 +164,16 @@ class Server(object):
         # ON HPUX, having only one connection attempt, sometimes fails
         #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
         #ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
+        if 'ECF_HOME' in os.environ:     print("   ECF_HOME:",os.environ['ECF_HOME']) 
+        if 'ECF_PORT' in os.environ:     print("   ECF_PORT:",os.environ['ECF_PORT']) 
+        if 'ECF_HOST' in os.environ:     print("   ECF_HOST:",os.environ['ECF_HOST']) 
+        if 'ECF_NODE' in os.environ:     print("   ECF_NODE:",os.environ['ECF_NODE']) 
+        if 'ECF_RID' in os.environ:      print("   ECF_RID:",os.environ['ECF_RID']) 
+        if 'ECF_LISTS' in os.environ:    print("   ECF_LISTS:",os.environ['ECF_LISTS']) 
+        if 'ECF_CHECK' in os.environ:    print("   ECF_CHECK:",os.environ['ECF_CHECK']) 
+        if 'ECF_CHECKOLD' in os.environ: print("   ECF_CHECKOLD:",os.environ['ECF_CHECKOLD']) 
+        if 'ECF_LOG' in os.environ:      print("   ECF_LOG:",os.environ['ECF_LOG']) 
+        print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx8888888888888888888888888888888888888888888888888888888888")
         self.ci = Client("localhost", self.the_port)
      
     def __enter__(self):
