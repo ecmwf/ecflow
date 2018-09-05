@@ -71,7 +71,6 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1","eventxx","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite",event_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","xxxx/f/t1",event_name,"/suite/f/t1")));
-   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1",event_name,"xxx/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1","meterxx","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite",meter_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite","1 == ","/suite/f/t1")));
