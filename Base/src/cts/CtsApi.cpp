@@ -819,9 +819,9 @@ const char* CtsApi::edit_script_arg() { return "edit_script";}
 
 std::vector<std::string> CtsApi::query(
          const std::string& query_type, const std::string& path_to_attribute,
-         const std::string& attribute, const std::string& path_to_task )
+         const std::string& attribute)
 {
-   std::vector<std::string> retVec;  retVec.reserve(4);
+   std::vector<std::string> retVec;  retVec.reserve(3);
    std::string ret = "--query="; ret += query_type ;
    retVec.push_back(ret);
    if (query_type == "event" || query_type == "meter" || query_type == "variable") {
@@ -834,7 +834,6 @@ std::vector<std::string> CtsApi::query(
    else if (query_type == "state" || query_type == "dstate") {
       retVec.push_back(path_to_attribute);
    }
-   if (!path_to_task.empty()) retVec.push_back(path_to_task);
    return retVec;
 }
 const char* CtsApi::queryArg() { return "query";}

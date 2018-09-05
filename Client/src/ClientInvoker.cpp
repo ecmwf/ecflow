@@ -1022,7 +1022,7 @@ int ClientInvoker::plug( const std::string& sourcePath, const std::string& destP
 
 int ClientInvoker::query(const std::string& query_type, const std::string& path_to_attribute, const std::string& attribute)
 {
-   if (testInterface_) return invoke(CtsApi::query(query_type,path_to_attribute,attribute,clientEnv_.task_path()));
+   if (testInterface_) return invoke(CtsApi::query(query_type,path_to_attribute,attribute));
    return invoke(Cmd_ptr(new QueryCmd(query_type,path_to_attribute,attribute,clientEnv_.task_path() )));
 }
 
