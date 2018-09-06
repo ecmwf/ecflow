@@ -377,7 +377,7 @@ bool ZombieCtrl::handle_user_actions(
 }
 
 
-void ZombieCtrl::do_add_user_zombies(const std::vector<Submittable*>& tasks,const std::string& user_cmd)
+void ZombieCtrl::add_user_zombies(const std::vector<Submittable*>& tasks,const std::string& user_cmd)
 {
  	size_t taskVecSize = tasks.size();
 	for(size_t i = 0; i < taskVecSize; i++) {
@@ -408,7 +408,7 @@ void ZombieCtrl::add_user_zombies( node_ptr node,const std::string& user_cmd)
 	if (!node.get()) return;
 	std::vector<Submittable*> tasks;
 	node->get_all_active_submittables(tasks);
-	do_add_user_zombies(tasks,user_cmd);
+	add_user_zombies(tasks,user_cmd);
 }
 
 void ZombieCtrl::add_user_zombies( suite_ptr suite,const std::string& user_cmd)
@@ -416,7 +416,7 @@ void ZombieCtrl::add_user_zombies( suite_ptr suite,const std::string& user_cmd)
 	if (!suite.get()) return;
 	std::vector<Submittable*> tasks;
 	suite->get_all_active_submittables(tasks);
-	do_add_user_zombies(tasks,user_cmd);
+	add_user_zombies(tasks,user_cmd);
 }
 
 void ZombieCtrl::add_user_zombies( defs_ptr defs,const std::string& user_cmd)
@@ -424,7 +424,7 @@ void ZombieCtrl::add_user_zombies( defs_ptr defs,const std::string& user_cmd)
 	if (!defs.get()) return;
 	std::vector<Submittable*> tasks;
 	defs->get_all_active_submittables(tasks);
-	do_add_user_zombies(tasks,user_cmd);
+	add_user_zombies(tasks,user_cmd);
 }
 
 /// Returns the list of zombies, **updated** with seconds since creation

@@ -53,6 +53,7 @@ public:
 	void add_user_zombies(node_ptr,const std::string& user_cmd);
 	void add_user_zombies(suite_ptr,const std::string& user_cmd);
 	void add_user_zombies(defs_ptr,const std::string& user_cmd);
+   void add_user_zombies(const std::vector<Submittable*>& tasks,const std::string& user_cmd);
 
 	/// Returns the list of zombies, **updated** with seconds since creation
 	/// To avoid sending attr to client, we copy over its setting, if in effect
@@ -134,7 +135,6 @@ private:
 	Zombie& find_zombie(const std::string& path_to_task, const std::string& process_or_remote_id, const std::string& password);
 	Zombie& find(Submittable*);
 	const Zombie& find(Submittable*) const;
-	void do_add_user_zombies(const std::vector<Submittable*>& tasks,const std::string& user_cmd);
 	Zombie& find_by_path(const std::string& path_to_task);
 
 private:

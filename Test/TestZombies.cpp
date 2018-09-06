@@ -87,7 +87,8 @@ static void dump_tasks(const vector<Task*>& tasks) {
                 << task->absNodePath() << " "
                 << NState::toString(task->state())
                 << " passwd:" << task->jobsPassword()
-                << " pid:" << task->process_or_remote_id();
+                << " pid:" << task->process_or_remote_id()
+                << " flag:" << task->get_flag().to_string();
       if (task->state() == NState::ABORTED) std::cout << " " << task->abortedReason();
       cout << "\n";
    }
