@@ -87,7 +87,6 @@ private:
 	std::vector<std::string> filteredSuites_;
 	bool autoAddNewSuites_;
 	int maxLineNum_;
-    bool initialResetDone_;
 };
 
 #endif
