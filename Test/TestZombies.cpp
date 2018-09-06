@@ -999,26 +999,29 @@ BOOST_AUTO_TEST_CASE( test_zombie_kill )
 static void remove_all_user_zombies()
 {
    /// return the number of zombies set to user action;
-    if (ecf_debug_enabled)  cout << "\n   remove_all_user_zombies\n";
+   if (ecf_debug_enabled) {
+      cout << "\n   remove_all_user_zombies\n";
+      dump_zombies();
+   }
 
-    int removed_count = 0;
-    AssertTimer assertTimer(timeout,false); // Bomb out after n seconds, fall back if test fail
-    while(removed_count < NUM_OF_TASKS) {
-       TestFixture::client().zombieGet();
-       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-       BOOST_FOREACH(const Zombie& z, zombies) {
-          if (z.type() == ecf::Child::USER) {
-             TestFixture::client().zombieRemove(z);  // This should be immediate, and is not remembered
-             removed_count++;
-          }
-       }
-       // make sure test does not take too long.
-       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
-           BOOST_REQUIRE_MESSAGE(false,"aborting test_zombies_types_for_begin waiting to remove all zombies of type USER\n" << Zombie::pretty_print( zombies , 6));
-       }
-       sleep(1);
-    }
-    if (ecf_debug_enabled)  dump_task_status();
+   int removed_count = 0;
+   AssertTimer assertTimer(timeout,false); // Bomb out after n seconds, fall back if test fail
+   while(removed_count < NUM_OF_TASKS) {
+      TestFixture::client().zombieGet();
+      std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
+      BOOST_FOREACH(const Zombie& z, zombies) {
+         if (z.type() == ecf::Child::USER) {
+            TestFixture::client().zombieRemove(z);  // This should be immediate, and is not remembered
+            removed_count++;
+         }
+      }
+      // make sure test does not take too long.
+      if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
+         BOOST_REQUIRE_MESSAGE(false,"aborting test_zombies_types_for_begin waiting to remove all zombies of type USER\n" << Zombie::pretty_print( zombies , 6));
+      }
+      sleep(1);
+   }
+   if (ecf_debug_enabled) dump_zombies();
 }
 BOOST_AUTO_TEST_CASE( test_zombies_types_for_begin )
 {
