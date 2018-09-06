@@ -317,16 +317,16 @@ void ServerComThread::reset()
     detach(defsAccess.defs());
 
     //We drop the handle belonging to the current client!
-    try
+    if(ci_->client_handle() > 0)
     {
-        if(ci_->client_handle() > 0)
+        try
         {
             ci_->ch1_drop();
         }
-    }
-    catch (std::exception &e)
-    {
-        UiLog(serverName_).warn() << " cannot drop handle for current user: " << e.what();
+        catch (std::exception &e)
+        {
+            UiLog(serverName_).warn() << " cannot drop handle for client: " << e.what();
+        }
     }
 
     if(hasSuiteFilter_)
