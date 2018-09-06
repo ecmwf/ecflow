@@ -855,12 +855,12 @@ const std::string& EcfFile::doCreateJobFile(JobsParam& jobsParam) const
 
             error_msg.clear();
             if (!File::create(ecf_job, jobLines_,error_msg)) {
-               ss << "EcfFile::doCreateJobFile: Could not create job file : " << error_msg << " (" << strerror(errno) << ")";
+               ss << "EcfFile::doCreateJobFile: Could not create job file, even after clearing include cache: " << error_msg; // error_msg includes strerror(errno)
                throw std::runtime_error(ss.str());
             }
          }
          else {
-            ss << "EcfFile::doCreateJobFile: Could not create job file : " << error_msg << " (" << strerror(errno) << ")";
+            ss << "EcfFile::doCreateJobFile: Could not create job file : " << error_msg; // error_msg includes strerror(errno)
             throw std::runtime_error(ss.str());
          }
       }
