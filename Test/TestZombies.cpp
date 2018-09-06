@@ -81,9 +81,15 @@ static int timeout = 30;
 static int NUM_OF_TASKS = 5;
 
 static void dump_tasks(const vector<Task*>& tasks) {
-   cout << "     task status\n";
+   cout << "     task status: no of tasks(" << tasks.size() << ")\n";
    BOOST_FOREACH(const Task* task, tasks) {
-      std::cout << "     " << task->absNodePath() << " " << NState::toString(task->state()) << " passwd:" << task->jobsPassword() << " pid:" << task->process_or_remote_id() << "\n";
+      std::cout << "     "
+                << task->absNodePath() << " "
+                << NState::toString(task->state())
+                << " passwd:" << task->jobsPassword()
+                << " pid:" << task->process_or_remote_id();
+      if (task->state() == NState::ABORTED) std::cout << " " << task->abortedReason();
+      cout << "\n";
    }
    std::cout << "\n";
 }
@@ -376,7 +382,7 @@ static void wait_for_no_zombies(int max_time_to_wait)
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
       if (ecf_debug_enabled) {
          std::cout << "      Get zombies returned " << zombies.size() << "\n";
-         std::cout << Zombie::pretty_print( zombies , 6) << "\n";
+         if (!zombies.empty()) std::cout << Zombie::pretty_print( zombies , 6) << "\n";
       }
       if (zombies.empty()) return;
 
@@ -445,7 +451,13 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
       ///       with same password, BUT different process id ??????
       ///       i.e The begin has regenerate the job file, so we get job started twice.
       ///       This should be trapped by the server, as Task should be active
-      if (ecf_debug_enabled) std::cout << "   Calling begin_all_suites, now have 2 sets of jobs, The first/original set are now zombies\n";
+      if (ecf_debug_enabled) {
+         std::cout << "   Calling begin_all_suites, now have 2 sets of jobs, The first/original set are now zombies\n";
+         std::cout << "   - Second set of jobs can fail on creation with (Text File busy),\n";
+         std::cout << "     since server is creating a new job file, whilst zombie process in running the same job file\n";
+         std::cout << "   - The first set can fail, because process not created, but server and has created 2nd job file(same path),\n";
+         std::cout << "     but not made it executable yet. Hence expect (exited with status 126) i.e exe' found but not executable\n";
+      }
       TestFixture::client().set_throw_on_error(false);
       if (TestFixture::client().begin_all_suites( true /* force */) == 1) {
          std::cout << "   Begin raised exception: because " << TestFixture::client().errorMsg() << " ***\n";
@@ -1017,8 +1029,10 @@ BOOST_AUTO_TEST_CASE( test_zombies_types_for_begin )
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
    create_and_start_test("test_zombies_types_for_begin","begin");
 
-   /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
+   /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete or abort
+   /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
+   /// ie. server can create same job file second time, if zombie process is running the job file.
+   BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
 
 
    // wait and remove all user zombies.
