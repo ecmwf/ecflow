@@ -116,6 +116,9 @@ bool ZombieCtrl::handle_zombie(
 	const std::string& jobs_password = task_cmd->jobs_password();
 	const std::string& process_or_remote_id = task_cmd->process_or_remote_id();
 
+   /// Mark task as zombie
+   if (task) task->flag().set(ecf::Flag::ZOMBIE);
+
 	Zombie& theExistingZombie = find_zombie(path_to_task, process_or_remote_id, jobs_password );
  	if(!theExistingZombie.empty() ) {
  		return handle_existing_zombie(theExistingZombie,task,node_ptr(),task_cmd,action_taken,theReply);
@@ -160,9 +163,6 @@ bool ZombieCtrl::handle_zombie(
 #endif
 	Zombie new_zombie(zombie_type,child_type,attr,path_to_task,jobs_password,process_or_remote_id,task_cmd->try_no());
 	zombies_.push_back( new_zombie );
-
-	/// Mark task as zombie for xcdp
-	task->flag().set(ecf::Flag::ZOMBIE);
 
 	return handle_user_actions(new_zombie,task,task_cmd,action_taken,theReply);
 }
