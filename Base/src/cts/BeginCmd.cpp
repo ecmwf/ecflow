@@ -18,6 +18,7 @@
 #include "AbstractClientEnv.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
+#include "Task.hpp"
 #include "Str.hpp"
 
 using namespace ecf;
@@ -55,6 +56,8 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const
 	as->update_stats().begin_cmd_++;
 	defs_ptr defs = as->defs();
 
+   std::vector<Submittable*> tasks;
+
 	// If no suite name begin all suites, else begin the the specific suite
 	if ( suiteName_.empty()) {
 
@@ -67,12 +70,10 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const
 			}
 		}
 		else {
-			for(size_t s = 0; s < theSuiteVecSize; s++) {
-				as->zombie_ctrl().add_user_zombies(suiteVec[s],CtsApi::beginArg());
-			}
+		   defs->get_all_active_submittables(tasks);
+		   as->zombie_ctrl().add_user_zombies(tasks,CtsApi::beginArg());
 
-			// Force should *only* be used for test
-			defs->reset_begin();
+		   defs->reset_begin();  // Force should *only* be used for test
 		}
 
 		defs->beginAll();
@@ -89,15 +90,19 @@ STC_Cmd_ptr BeginCmd::doHandleRequest(AbstractServer* as) const
 		/// check_suite_can_begin will throw if suite can't begin
  		if (!force_) defs->check_suite_can_begin(suite);
 		else  {
-		   as->zombie_ctrl().add_user_zombies(suite,CtsApi::beginArg());
 
-         // Force should *only* be used for test
-		   suite->reset_begin();
+		   suite->get_all_active_submittables(tasks);
+		   as->zombie_ctrl().add_user_zombies(tasks,CtsApi::beginArg());
+
+		   suite->reset_begin();  // Force should *only* be used for test
 		}
-
 
  		defs->beginSuite(suite);
 	}
+
+	// The begin will clear the zombie flag: Hence reset it here.
+	for(auto task : tasks) task->flag().set(ecf::Flag::ZOMBIE);
+
 
 	// After begin do the first Job submission. This will kick of those
 	// jobs that have no dependencies, or relative time of +00:00
