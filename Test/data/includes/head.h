@@ -52,7 +52,7 @@ trap ERROR 0
 
 trap '{ echo "Killed by a signal"; ERROR ; }' 1 2 3 4 5 6 7 8 10 12 13 15
 
-
+%ADD_DELAY_BEFORE_INIT:% # ADD_DELAY_BEFORE_INIT is used by some tests, to slow things down on fast systems
 %ECF_CLIENT_EXE_PATH% --init=$$
 
 # record shell time

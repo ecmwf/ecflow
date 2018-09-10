@@ -64,10 +64,9 @@ namespace fs = boost::filesystem;
 #define DO_TEST7 1
 #define DO_TEST8 1
 #define DO_TEST9 1
-#define DO_TEST10 1  # Need to make reliable
+#define DO_TEST10 1
 #define DO_TEST11 1
 #define DO_TEST12 1
-
 
 static bool ecf_debug_enabled = false; // allow environment(ECF_DEBUG_ZOMBIES) to enable debug
 
@@ -148,6 +147,7 @@ static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState:
                if (state2 == state1) std::cout << "    All tasks(" << tasks.size() << ") have reached state " << NState::toString(state1) << " returning\n";
                else                  std::cout << "    All tasks(" << tasks.size() << ") have reached state " << NState::toString(state1) << " || " <<  NState::toString(state2) <<  " returning\n";
                dump_tasks(tasks);
+               dump_zombies();
             }
             return true;
          }
@@ -164,6 +164,7 @@ static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState:
       }
       sleep(1);
    }
+   dump_zombies();
    return false;
 }
 
@@ -1044,15 +1045,22 @@ static void remove_all_user_zombies()
 BOOST_AUTO_TEST_CASE( test_ecf_zombie_type_creation )
 {
    DurationTimer timer;
-   cout << "Test:: ...test_ecf_zombie_type_creation " << flush;
+   std::string suite_name = "test_ecf_zombie_type_creation";
+   cout << "Test:: ..." << suite_name << flush;
    TestClean clean_at_start_and_end;
 
-   // This command creates user zombies up front, these may not have a pid, if task in submitted state
-   create_and_start_test("test_ecf_zombie_type_creation","queued");
+   // some systems are really quick, where tasks are already active, when we make them zombies, then the next
+   // client command in the zombie is: --complete. This distorts the test. Since if the real task is complete and
+   // we get a zombie with --complete, the server lets it through and the zombie process terminates.
+   // To get round this we will introduce a delay, before we get --init
+   Defs theDefs;
+   populate_defs(theDefs,suite_name);
+   suite_ptr suite = theDefs.findSuite(suite_name);
+   suite->add_variable("ADD_DELAY_BEFORE_INIT","sleep 1"); // add delay before --init
+   create_and_start_test(theDefs,suite_name,"queued");
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
-
 
    // wait and remove all user zombies.
    remove_all_user_zombies();
