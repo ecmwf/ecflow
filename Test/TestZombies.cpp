@@ -465,6 +465,22 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
       }
       TestFixture::client().set_throw_on_error(true);
    }
+   else if (create_zombies_with == "queued") {
+      if (ecf_debug_enabled) {
+         std::cout << "   Creating zombies by setting all tasks to queued\n";
+         std::cout << "   This should increment the try number, avoiding (Text File busy) and (exited with status 126)\n";
+         std::cout << "   Zombies(first set) will have try_no:1 and the queued tasks(second set) will have try number2\n";
+      }
+      std::vector<Task*> tasks; theDefs.getAllTasks(tasks);
+      std::vector<std::string> paths;
+      for(auto task: tasks) paths.emplace_back(task->absNodePath());
+
+      TestFixture::client().set_throw_on_error(false);
+      if (TestFixture::client().force(paths,"queued") == 1) {
+         std::cout << "   force queued raised exception: because " << TestFixture::client().errorMsg() << " ***\n";
+      }
+      TestFixture::client().set_throw_on_error(true);
+   }
    else if (create_zombies_with == "complete") {
 
       if (ecf_debug_enabled) std::cout << "   create USER zombies by calling complete\n";
@@ -494,6 +510,9 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
       BOOST_FOREACH(const Zombie& z, zombies) {
          if (create_zombies_with == "begin") {
             BOOST_CHECK_MESSAGE(z.type() == Child::USER,"Creating zombies via begin, Expected 'user' zombie type but got: " << z);
+         }
+         else if (create_zombies_with == "queued") {
+            BOOST_CHECK_MESSAGE(z.type() == Child::USER,"Creating zombies via queued, Expected 'user' zombie type but got: " << z);
          }
          else if (create_zombies_with == "delete") {
             BOOST_CHECK_MESSAGE(z.type() == Child::USER || z.type() == Child::PATH,"Creating zombies via delete, Expected 'user | path' zombie type but got: " << z);
@@ -679,20 +698,20 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_begin )
 
 
 #ifdef DO_TEST5
-BOOST_AUTO_TEST_CASE( test_zombies_attr_for_begin )
+BOOST_AUTO_TEST_CASE( test_zombies_attr )
 {
    DurationTimer timer;
-   std::string suite_name  = "test_zombies_attr_for_begin";
+   std::string suite_name  = "test_zombies_attr";
    cout << "Test:: ..." << suite_name << " " << flush;
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
-   create_and_start_test(suite_name,"begin"); // create zombies via begin force
+   create_and_start_test(suite_name,"queued"); // create zombies re-queuing submitted/actice tasks
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete or abort
-   /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
-   /// Previously we had tried again, but fix for ECFLOW-1216, means we now don't try again,hence allow abort
-   BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
+   /// Creating zombies by queuing submitted/active tasks, increments try number of the second set.
+   /// This avoid text file busy,(i.e by using begin/requeue creating a job file, whilst its already running)
+   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
 
    check_at_least_one_zombie();
 
@@ -764,12 +783,10 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_adopt )
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
-   create_and_start_test(suite_name,"begin");
+   create_and_start_test(suite_name,"queued");
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-   /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
-   /// Previously we had tried again, but fix for ECFLOW-1216, means we now don't try again,hence allow abort
-   BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
+   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
 
    // expected 5 zombies, ie because we have NUM_OF_TASKS tasks. These should all be blocking
    check_at_least_one_zombie();
@@ -1024,19 +1041,17 @@ static void remove_all_user_zombies()
    }
    if (ecf_debug_enabled) dump_zombies();
 }
-BOOST_AUTO_TEST_CASE( test_zombies_types_for_begin )
+BOOST_AUTO_TEST_CASE( test_ecf_zombie_type_creation )
 {
    DurationTimer timer;
-   cout << "Test:: ...test_zombies_types_for_begin " << flush;
+   cout << "Test:: ...test_ecf_zombie_type_creation " << flush;
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
-   create_and_start_test("test_zombies_types_for_begin","begin");
+   create_and_start_test("test_ecf_zombie_type_creation","queued");
 
-   /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete or abort
-   /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
-   /// ie. server can create same job file second time, if zombie process is running the job file.
-   BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
+   /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
+   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
 
 
    // wait and remove all user zombies.
