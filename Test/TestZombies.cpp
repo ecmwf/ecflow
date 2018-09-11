@@ -1036,7 +1036,8 @@ static void remove_all_user_zombies()
       }
       // make sure test does not take too long.
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
-         BOOST_REQUIRE_MESSAGE(false,"aborting test_zombies_types_for_begin waiting to remove all zombies of type USER\n" << Zombie::pretty_print( zombies , 6));
+         BOOST_CHECK_MESSAGE(false,"removed " << removed_count << "user zombies. Quit waiting, to remove all zombies of type USER\n" << Zombie::pretty_print( zombies , 6));
+         return;
       }
       sleep(1);
    }
