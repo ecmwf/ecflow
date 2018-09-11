@@ -192,9 +192,8 @@ static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait)
 
          if (zombies.size() > 0) {
             if (ecf_debug_enabled) {
-               std::cout << "   Timeout out found only " << zombies.size()  << " zombies." << "\n";
+               std::cout << "   *Timeout* out found only " << zombies.size()  << " zombies." << " Quit waiting.\n";
                std::cout <<  Zombie::pretty_print( zombies , 3);
-               std::cout << "    Found " << no_of_zombies << " zombies. returning.\n";
             }
             return true;
          }
