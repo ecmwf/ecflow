@@ -2378,8 +2378,7 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
    state_change_no_ = Ecf::incr_state_change_no();
    switch ( attr ) {
       case Attr::EVENT:
-         sort(events_.begin(),events_.end(),
-              [](const Event& a, const Event& b){ return Str::caseInsLess(a.name_or_number(),b.name_or_number());});
+         sort(events_.begin(),events_.end(),[](const Event& a, const Event& b){ return Str::caseInsLess(a.name_or_number(),b.name_or_number());});
          break;
       case Attr::METER:
          sort(meters_.begin(),meters_.end(),caseInsen);
@@ -2388,21 +2387,18 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
          sort(labels_.begin(),labels_.end(),caseInsen);
          break;
       case Attr::LIMIT:
-         sort(limits_.begin(),limits_.end(),
-              [](const limit_ptr& a, const limit_ptr& b){ return Str::caseInsLess(a->name(),b->name());});
+         sort(limits_.begin(),limits_.end(),[](const limit_ptr& a, const limit_ptr& b){ return Str::caseInsLess(a->name(),b->name());});
          break;
       case Attr::VARIABLE:
          sort(vars_.begin(),vars_.end(),caseInsen);
          break;
       case Attr::ALL:
-            if (child_attrs_) child_attrs_->sort_attributes(attr);
-            sort(limitVec_.begin(),limitVec_.end(),boost::bind(Str::caseInsLess,
-                                      boost::bind(&Limit::name,_1),
-                                      boost::bind(&Limit::name,_2)));
-            sort(varVec_.begin(),varVec_.end(),boost::bind(Str::caseInsLess,
-                                       boost::bind(&Variable::name,_1),
-                                       boost::bind(&Variable::name,_2)));
-            break;
+         sort(vars_.begin(),vars_.end(),caseInsen);
+         sort(events_.begin(),events_.end(),[](const Event& a, const Event& b){ return Str::caseInsLess(a.name_or_number(),b.name_or_number());});
+         sort(meters_.begin(),meters_.end(),caseInsen);
+         sort(labels_.begin(),labels_.end(),caseInsen);
+         sort(limits_.begin(),limits_.end(),[](const limit_ptr& a, const limit_ptr& b){ return Str::caseInsLess(a->name(),b->name());});
+         break;
       case Attr::UNKNOWN: break;
       default:            break;
    }
