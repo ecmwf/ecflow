@@ -2394,6 +2394,15 @@ void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
       case Attr::VARIABLE:
          sort(vars_.begin(),vars_.end(),caseInsen);
          break;
+      case Attr::ALL:
+            if (child_attrs_) child_attrs_->sort_attributes(attr);
+            sort(limitVec_.begin(),limitVec_.end(),boost::bind(Str::caseInsLess,
+                                      boost::bind(&Limit::name,_1),
+                                      boost::bind(&Limit::name,_2)));
+            sort(varVec_.begin(),varVec_.end(),boost::bind(Str::caseInsLess,
+                                       boost::bind(&Variable::name,_1),
+                                       boost::bind(&Variable::name,_2)));
+            break;
       case Attr::UNKNOWN: break;
       default:            break;
    }

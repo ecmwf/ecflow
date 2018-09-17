@@ -551,7 +551,7 @@ void Defs::requeue()
 
 void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive)
 {
-   if (attr == ecf::Attr::VARIABLE) server_.sort_variables();
+   if (attr == ecf::Attr::VARIABLE || attr == ecf::Attr::ALL) server_.sort_variables();
 
    if (recursive) {
       size_t theSuiteVecSize = suiteVec_.size();

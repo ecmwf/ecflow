@@ -482,14 +482,14 @@ const char* AlterCmd::desc() {
          "           message | complete | queue_limit | task_waiting | locked | zombie ]\n"
          "             archived | restored]\n"
          "       For sort:\n"
-         "         [ event | meter | label | variable| limit ]\n"
+         "         [ event | meter | label | variable| limit | all ]\n"
          "arg3 = name/value\n"
          "       when changing, attributes like variable,meter,event,label,limits,late\n"
          "       we expect arguments to be quoted. For sort this argument can be called 'recursive'\n"
          "arg4 = new_value\n"
          "       specifies the new value only used for 'change'/'add'\n"
          "       values with spaces must be quoted\n"
-         "arg5 = paths : At lease one path required. The paths must start with a leading '/' character\n\n"
+         "arg5 = paths : At lease one node path required.The paths must start with a leading '/' character\n\n"
             "\nUsage:\n\n"
             "   ecflow_client --alter=add variable GLOBAL \"value\" /           # add server variable\n"
             "   ecflow_client --alter=add variable FRED \"value\" /path/to/node # add node variable\n"
@@ -1186,7 +1186,7 @@ void AlterCmd::create_flag( Cmd_ptr& cmd, const std::vector<std::string>& option
 void AlterCmd::create_sort_attributes(Cmd_ptr& cmd,const std::vector<std::string>& options,const std::vector<std::string>& paths) const
 {
    // options[0]  - sort
-   // options[1]  - [ event | meter | label | limit | variable ]
+   // options[1]  - [ event | meter | label | limit | variable | all ]
    // options[2]  - recursive
    std::stringstream ss;
 

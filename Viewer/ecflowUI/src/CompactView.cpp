@@ -519,7 +519,7 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
 
             painter->setPen(connectorColour_);
 
-            //If not a top level item (e.i. not a server)
+            //If not a top level item (i.e. not a server)
             if(item->parentItem >=0)
             {
                 //The parent item. It is always a node.

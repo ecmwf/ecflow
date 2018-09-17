@@ -155,6 +155,7 @@ protected:
     void setExpectedBg(QColor c) {expectedBg_=c;}
     void setConnectorColour(QColor c) {connectorColour_=c;}
     void setDrawConnector(bool b) {drawConnector_=b;}
+    void setAutoExpandLeafNode(bool b) {autoExpandLeafNode_=b;}
 
     void insertViewItems(int pos, int count, const TreeNodeViewItem &viewItem);
     void removeViewItems(int pos, int count);
@@ -187,6 +188,7 @@ protected:
     QColor connectorColour_;
     bool drawConnector_;
     int indentation_;
+    bool autoExpandLeafNode_;
 
 private:
     void expand(int item);

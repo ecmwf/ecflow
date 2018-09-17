@@ -37,6 +37,7 @@ ZombieItemWidget::ZombieItemWidget(QWidget *parent) :
 
 	sortModel_=new QSortFilterProxyModel(this);
 	sortModel_->setSourceModel(model_);
+    sortModel_->setSortRole(Qt::UserRole);
 
 	zombieView->setModel(sortModel_);
 

@@ -125,7 +125,8 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
 
 	QString id=columns_->id(index.column());
 
-	if(role == Qt::DisplayRole)
+    //UserRole is used for sorting
+    if(role == Qt::DisplayRole || role == Qt::UserRole)
 	{
 		if(id == "path")
             return QString::fromStdString(data_[row].path_to_task());
@@ -134,14 +135,34 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
 		else if(id == "tryno")
             return data_[row].try_no();
 		else if(id == "duration")
-            return QString::number(data_[row].duration()) + " s";
-		else if(id == "creation")
+        {
+            if(role == Qt::DisplayRole)
+            {
+                return QString::number(data_[row].duration()) + " s";
+            }
+            //sorting
+            else
+            {
+                return data_[row].duration();
+            }
+        }
+        else if(id == "creation")
 		{
-            const boost::posix_time::ptime& t=  data_[row].creation_time();
+            const boost::posix_time::ptime& t= data_[row].creation_time();
 			return QString::fromStdString(boost::posix_time::to_simple_string(t));
 		}
 		else if(id == "allowed")
-            return QString::number(data_[row].allowed_age()) + " s";
+        {
+            if(role == Qt::DisplayRole)
+            {
+                return QString::number(data_[row].allowed_age()) + " s";
+            }
+            //sorting
+            else
+            {
+                return data_[row].allowed_age();
+            }
+        }
 		else if(id == "calls")
             return data_[row].calls();
 		else if(id == "action")
@@ -154,7 +175,7 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
             return QString::fromStdString(data_[row].process_or_remote_id());
 		else
 			return QVariant();
-	}
+    }
 
 	return QVariant();
 }

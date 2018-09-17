@@ -77,13 +77,14 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilte
 
     //Properties
     std::vector<std::string> propVec;
-    propVec.emplace_back("view.tree.indentation");
-    propVec.emplace_back("view.tree.background");
-    propVec.emplace_back("view.tree.drawBranchLine");
-    propVec.emplace_back("view.tree.branchLineColour");
-    propVec.emplace_back("view.tree.serverToolTip");
-    propVec.emplace_back("view.tree.nodeToolTip");
-    propVec.emplace_back("view.tree.attributeToolTip");
+    propVec.push_back("view.tree.indentation");
+    propVec.push_back("view.tree.background");
+    propVec.push_back("view.tree.autoExpandLeafNode");
+    propVec.push_back("view.tree.drawBranchLine");
+    propVec.push_back("view.tree.branchLineColour");
+    propVec.push_back("view.tree.serverToolTip");
+    propVec.push_back("view.tree.nodeToolTip");
+    propVec.push_back("view.tree.attributeToolTip");
 
     prop_=new PropertyMapper(propVec,this);
 
@@ -97,6 +98,10 @@ TreeNodeView::TreeNodeView(AbstractNodeView* view,TreeNodeModel* model,NodeFilte
     //Init bg colour
     prop=prop_->find("view.tree.background",true);
     adjustBackground(prop->value().value<QColor>());
+
+    //Init branch line status (on/off)
+    prop=prop_->find("view.tree.autoExpandLeafNode",true);
+    adjustAutoExpandLeafNode(prop->value().toBool());
 
     //Init branch line status (on/off)
     prop=prop_->find("view.tree.drawBranchLine",true);
@@ -689,6 +694,11 @@ void TreeNodeView::adjustBackground(QColor col)
     }
 }
 
+void TreeNodeView::adjustAutoExpandLeafNode(bool b)
+{
+    view_->setAutoExpandLeafNode(b);
+}
+
 void TreeNodeView::adjustDrawBranchLine(bool b)
 {
     view_->setDrawConnector(b);
@@ -723,6 +733,10 @@ void TreeNodeView::notifyChange(VProperty* p)
     else if(p->path() == "view.tree.indentation")
     {
         adjustIndentation(p->value().toInt());
+    }
+    else if(p->path() == "view.tree.autoExpandLeafNode")
+    {
+        adjustAutoExpandLeafNode(p->value().toBool());
     }
     else if(p->path() == "view.tree.drawBranchLine")
     {

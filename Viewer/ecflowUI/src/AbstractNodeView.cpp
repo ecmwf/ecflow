@@ -44,6 +44,7 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     expandConnectorLenght_(20),   
     connectorColour_(Qt::black),
     drawConnector_(true),
+    autoExpandLeafNode_(true),
     indentation_(0),
     lastViewedItem_(0),
     noSelectionOnMousePress_(false),
@@ -697,6 +698,20 @@ void AbstractNodeView::expand(int item)
         //mark the item as expanded
         storeExpanded(idx);
         viewItems_[item].expanded = true;
+
+        if(autoExpandLeafNode_)
+        {
+            int count=model_->rowCount(idx);
+            for(int i=0; i < count; i++)
+            {
+                QModelIndex chIdx=model_->index(i,0,idx);
+                if(model_->isFlatNode(chIdx))
+                {
+                    if(!isIndexExpanded(chIdx))
+                        storeExpanded(chIdx);
+                }
+            }
+        }
 
         //The total number items to be inserted
         int total=0;

@@ -30,8 +30,7 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
         rescanNeed_(false),
         hasSuiteFilter_(false),
         autoAddNewSuites_(false),
-        maxLineNum_(-1),
-        initialResetDone_(false)
+        maxLineNum_(-1)
 {
     assert(server_);
 }
@@ -317,34 +316,17 @@ void ServerComThread::reset()
     //Detach the defs and the nodes from the observer
     detach(defsAccess.defs());
 
-    //We drop all the handles belonging to the current user to have a proper clean-up!
-    //Other running instances of ecflow_ui under the same user will properly react
-    //to these changes and reset their handles! So it is a safe operation!!!
-    try
+    //We drop the handle belonging to the current client!
+    if(ci_->client_handle() > 0)
     {
-        //If it is not the first reset we drop the handle belonging to the current ecflowui instance
-        if(initialResetDone_)
+        try
         {
-            if(ci_->client_handle() > 0)
-            {
-                ci_->ch1_drop();
-            }
+            ci_->ch1_drop();
         }
-
-        //If it is the first reset we need a proper clean-up!
-        //We drop all the handles belonging to the current user!
-        //Other running instances of ecflow_ui under the same user will properly react
-        //to these changes and reset their handles! So it is a safe operation!!!
-        else
+        catch (std::exception &e)
         {
-           initialResetDone_=true;
-           ci_->ch_drop_user();
+            UiLog(serverName_).warn() << " cannot drop handle for client: " << e.what();
         }
-
-    }
-    catch (std::exception &e)
-    {
-        UiLog(serverName_).warn() << " cannot drop handle for current user: " << e.what();
     }
 
     if(hasSuiteFilter_)

@@ -119,6 +119,7 @@
                         "title" : "Options",
                         "prefix" : "view",
 
+                        "line" : "tree.autoExpandLeafNode",
                         "line" : "tree.displayNodeType",
                         "line" : "tree.display_child_count",
                         "line" : "tree.indentation",

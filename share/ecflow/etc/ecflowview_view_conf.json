@@ -27,6 +27,12 @@
                     "values"  : "standard/compact",
                     "values_label" : "Standard/Compact"
                 },
+
+                "autoExpandLeafNode" : {
+                    "label" : "Automatically expand leaf nodes",
+                    "default" : "false"
+                },
+
                 "nodeFont" : {
 					"label" : "Nodes",
 					"default": "font(,)"

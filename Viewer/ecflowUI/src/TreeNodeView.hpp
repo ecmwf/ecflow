@@ -86,6 +86,7 @@ protected:
 
     void adjustBackground(QColor col);
     void adjustIndentation(int);
+    void adjustAutoExpandLeafNode(bool b);
     void adjustDrawBranchLine(bool b);
     void adjustBranchLineColour(QColor col);
     void adjustServerToolTip(bool);

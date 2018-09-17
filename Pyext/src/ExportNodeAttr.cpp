@@ -385,12 +385,13 @@ void export_NodeAttr()
 	.value("complete",Child::COMPLETE)
  	;
 
-   enum_<Attr::Type>("AttrType", "Sortable attribute type, currently [event | meter | label | limit | variable ]")
+   enum_<Attr::Type>("AttrType", "Sortable attribute type, currently [event | meter | label | limit | variable | all ]")
    .value("event",   Attr::EVENT)
    .value("meter",   Attr::METER)
    .value("label",   Attr::LABEL)
    .value("limit",   Attr::LIMIT)
    .value("variable",Attr::VARIABLE)
+   .value("all",     Attr::ALL)
    ;
 
 	// 	ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime);

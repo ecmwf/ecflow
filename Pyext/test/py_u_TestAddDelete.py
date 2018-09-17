@@ -41,12 +41,33 @@ if __name__ == "__main__":
     expected = ['AECF_URL','XECF_URL_BASE','YECF_URL_CMD','ZFRED']
     actual = []
     defs.sort_attributes("variable");
+    for v in defs.user_variables: actual.append(v.name())
+    assert actual == expected,"Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+
+    expected = ['AECF_URL','XECF_URL_BASE','YECF_URL_CMD','ZFRED','ZZ']
+    actual = []
+    defs.add_variable("ZZ", "x")
     defs.sort_attributes(ecflow.AttrType.variable);
     for v in defs.user_variables: actual.append(v.name())
     assert actual == expected,"Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+
+    expected = ['AA', 'AECF_URL','XECF_URL_BASE','YECF_URL_CMD','ZFRED','ZZ']
+    actual = []
+    defs.add_variable("AA", "x")
+    defs.sort_attributes("all");
+    for v in defs.user_variables: actual.append(v.name())
+    assert actual == expected,"Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+
+    expected = ['AA', 'AECF_URL', 'BB','XECF_URL_BASE','YECF_URL_CMD','ZFRED','ZZ']
+    actual = []
+    defs.add_variable("BB", "x")
+    defs.sort_attributes(ecflow.AttrType.all );
+    for v in defs.user_variables: actual.append(v.name())
+    assert actual == expected,"Attributes not sorted, expected:" + str(expected) + " but found:" + str(actual)
+
     
     
-    defs.delete_variable("ZFRED");assert len(list(defs.user_variables)) == 3, "Expected 3 variables since we just delete FRED"
+    defs.delete_variable("ZFRED");assert len(list(defs.user_variables)) == 6, "Expected 6 variables since we just delete ZFRED"
     defs.delete_variable("");     assert len(list(defs.user_variables)) == 0, "Expected 0 variables since we should have deleted all"
     
     a_dict = { "name":"value", "name2":"value2", "name3":"value3", "name4":"value4" }
