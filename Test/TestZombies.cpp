@@ -55,18 +55,18 @@ namespace fs = boost::filesystem;
 // i.e. where we have created a user Zombie but there is no associated process ??
 // *******************************************************************
 
-#define DO_TEST1 1
-#define DO_TEST2 1
-#define DO_TEST3 1
-#define DO_TEST4 1
-#define DO_TEST5 1
+//#define DO_TEST1 1
+//#define DO_TEST2 1
+//#define DO_TEST3 1
+//#define DO_TEST4 1
+//#define DO_TEST5 1
 #define DO_TEST6 1
-#define DO_TEST7 1
-#define DO_TEST8 1
-#define DO_TEST9 1
-#define DO_TEST10 1
-#define DO_TEST11 1
-#define DO_TEST12 1
+//#define DO_TEST7 1
+//#define DO_TEST8 1
+//#define DO_TEST9 1
+//#define DO_TEST10 1
+//#define DO_TEST11 1
+//#define DO_TEST12 1
 
 static bool ecf_debug_enabled = false; // allow environment(ECF_DEBUG_ZOMBIES) to enable debug
 
@@ -742,12 +742,16 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_adopt )
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
-   create_and_start_test(suite_name,"begin");
+   // Using "queued" to create zombies will mean we update try_no, zombies will not share output.
+   // This avoid'(Text file busy)'
+   Defs theDefs;
+   populate_defs(theDefs,suite_name);
+   suite_ptr suite = theDefs.findSuite(suite_name);
+   suite->add_variable("ADD_DELAY_BEFORE_INIT","sleep 1"); // add delay before --init
+   create_and_start_test(theDefs,suite_name,"queued");
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
-   /// The second set can still abort, if the first set are busy with job file. look for '(Text file busy)'
-   /// Previously we had tried again, but fix for ECFLOW-1216, means we now don't try again,hence allow abort
-   BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
+   BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
 
    check_at_least_one_zombie();
 
@@ -757,12 +761,10 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_adopt )
    if (ecf_debug_enabled) cout << "   found " << no_of_adopted_zombied << " zombies for adoption\n";
 
    /// The blocked zombies are free, start with blocked init command
-   /// This may fail on AIX, its too fast , task's may already be complete, hence don't fail
    (void)waitForTaskState(SINGLE,NState::ACTIVE,timeout);
 
    /// Now wait for all tasks to complete
    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected zombie tasks to complete");
-
 
    remove_stale_zombies();  // see notes above
 
