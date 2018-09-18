@@ -56,8 +56,6 @@ public:
 
     QModelIndex attributeToIndex(const VAttribute* a, int column=0) const override;
 
-    QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
-
     bool isFlatNode(const QModelIndex& index) const;
     VInfo_ptr nodeInfo(const QModelIndex& index);
     void setForceShow(VInfo_ptr);
