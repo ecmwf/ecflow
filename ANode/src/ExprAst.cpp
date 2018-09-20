@@ -45,7 +45,7 @@ bool Ast::why(std::string& theReasonWhy,bool html) const
 
    theReasonWhy = "expression ";
    theReasonWhy += why_expression(html); // provide additional state
-   theReasonWhy += " does not evaluate";
+   theReasonWhy += " is false";
 #ifdef DEBUG_WHY
    std::cout << "    Ast::why  reason = " << theReasonWhy << "\n";
 #endif
