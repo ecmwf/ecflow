@@ -16,14 +16,16 @@
 //============================================================================
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/noncopyable.hpp>
 #include "NodeFwd.hpp"
 #include "EcfFile.hpp"
 
 // Used as a utility class for controlling job creation.
 // Collates data during the node tree traversal
 // Note: For testing purposes we do not always want to create jobs or spawn jobs
-class JobsParam : private boost::noncopyable {
+class JobsParam {
+private:
+  JobsParam(const JobsParam&) = delete;
+  const JobsParam& operator=(const JobsParam&) = delete;
 public:
    // This constructor is used in test
    explicit JobsParam(bool createJobs = false)

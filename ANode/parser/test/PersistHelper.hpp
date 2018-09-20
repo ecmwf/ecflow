@@ -16,7 +16,6 @@
 //============================================================================
 
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include "PrintStyle.hpp"
 class Defs;
@@ -24,7 +23,7 @@ class Defs;
 /// Given a in memory defs file, this class will write it to disk
 /// and reload the definition file structure and will then make a comparison
 /// to ensure they are the same
-class PersistHelper : private boost::noncopyable {
+class PersistHelper {
 public:
 	explicit PersistHelper(bool compare_edit_history = false) : compare_edit_history_(compare_edit_history) {}
 
@@ -46,7 +45,10 @@ private:
                                  bool do_compare = true);
 
 private:
+  PersistHelper(const PersistHelper&) = delete;
+  const PersistHelper& operator=(const PersistHelper&) = delete;
 
+private:
 	std::string errorMsg_;
 	size_t file_size_{0};
 	bool compare_edit_history_;

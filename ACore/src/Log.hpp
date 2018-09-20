@@ -34,14 +34,13 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <boost/noncopyable.hpp>
 #include <boost/lambda/lambda.hpp>
 
 namespace ecf {
 
 class LogImpl;
 
-class Log : private boost::noncopyable {
+class Log {
 public:
    enum LogType { MSG, LOG, ERR, WAR, DBG, OTH };
    static void create(const std::string& filename);
@@ -99,10 +98,13 @@ public:
    static void get_log_types(std::vector<std::string>&);
 
 private:
-
    /// make sure path is not a directory & path has a parent directory.
    /// Will throw std::runtime_error for errors
    static void check_new_path(const std::string& new_path);
+
+private:
+  Log(const Log&) = delete;
+  const Log& operator=(const Log&) = delete;
 
 private:
    ~Log();
@@ -118,7 +120,7 @@ private:
 /// hint to OS that we want file to be written to physical medium.
 /// This is required for testing purposes, as each test run needs to clear/copy
 /// the log file
-class LogImpl : private boost::noncopyable {
+class LogImpl {
 public:
    LogImpl(const std::string& filename,bool enable_auto_flush);
    ~LogImpl();
@@ -138,6 +140,10 @@ private:
    bool check_file_write(const std::string& message) const;
 
 private:
+  LogImpl(const LogImpl&) = delete;
+  const LogImpl& operator=(const LogImpl&) = delete;
+
+private:
    bool enable_auto_flush_;
    std::string time_stamp_;
    mutable std::ofstream file_;
@@ -146,12 +152,14 @@ private:
 };
 
 /// Utility class used for debug. Enables log file messages to be written to standard out
-class LogToCout : private boost::noncopyable {
+class LogToCout {
 public:
    LogToCout()   { flag_ = true;}
    ~LogToCout()  { flag_ = false;}
    static bool ok() { return flag_;}
 private:
+   LogToCout(const LogToCout&) = delete;
+   const LogToCout& operator=(const LogToCout&) = delete;
    static bool flag_;
 };
 

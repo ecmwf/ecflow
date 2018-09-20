@@ -15,20 +15,21 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <string>
-#include <boost/noncopyable.hpp>
 
 namespace ecf {
 
 // returns a string of format : "[%02d:%02d:%02d %d.%d.%d] "
 //                              "[hour:min:sec day.month.year] "
 // i.e                          "[05:26:20 29.10.2014] "
-class TimeStamp : private boost::noncopyable {
+class TimeStamp {
 public:
    static std::string now();
    static void now(std::string&);
    static void now_in_brief(std::string&);
 private:
    TimeStamp() = delete;
+   TimeStamp(const TimeStamp&) = delete;
+   const TimeStamp& operator=(const TimeStamp&) = delete;
 };
 
 }

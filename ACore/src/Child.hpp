@@ -17,11 +17,10 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <string>
 #include <vector>
-#include <boost/noncopyable.hpp>
 
 namespace ecf {
 
-class Child : private boost::noncopyable {
+class Child {
 public:
 	enum CmdType    { INIT, EVENT, METER, LABEL, WAIT, QUEUE, ABORT, COMPLETE };
 
@@ -52,10 +51,12 @@ public:
 
 private:
 	Child() = delete;
+	Child(const Child&) = delete;
+	const Child& operator=(const Child&) = delete;
 };
 
 
-class User : private boost::noncopyable {
+class User {
 public:
 	enum Action   { FOB, FAIL, ADOPT, REMOVE, BLOCK, KILL };
 
@@ -64,6 +65,8 @@ public:
 	static std::string to_string(Action);
 
 private:
+	User(const User&) = delete;
+	const User& operator=(const User&) = delete;
 	User() = delete;
 };
 

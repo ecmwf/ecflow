@@ -22,12 +22,11 @@
 // current release
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include <string>
 
 namespace ecf {
 
-class Version : private boost::noncopyable {
+class Version {
 public:
 	/// Outputs a string of the form:
 	/// ECF <tag> version release_.major_.minor_
@@ -41,7 +40,9 @@ public:
    static std::string raw();
 
 private:
-	Version() = delete;
+   Version() = delete;
+   Version(const Version&) = delete;
+   const Version& operator=(const Version&) = delete;
 
 	static const std::string TAG; // alpha, beta, release
 

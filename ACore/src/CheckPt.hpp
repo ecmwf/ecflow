@@ -16,11 +16,10 @@
 // This class is used to ONLY serialise the edit history when check pointing
 // Also Provides enums for check pointing
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/noncopyable.hpp>
 
 namespace ecf {
 
-class CheckPt : private boost::noncopyable {
+class CheckPt  {
 public:
    /// NEVER   - the check pt file is never saved
    /// ON_TIME - the check pt file is saved periodically. specified by checkPtInterval.
@@ -36,6 +35,8 @@ public:
 
 private:
    CheckPt() = delete;
+   CheckPt(const CheckPt&) = delete;
+   const CheckPt& operator=(const CheckPt&) = delete;
 };
 
 }

@@ -16,12 +16,11 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include <string>
 
 namespace ecf {
 
-class Host : private boost::noncopyable {
+class Host {
 public:
 	/// can throw std::runtime_error if the gethostname fails
    Host();
@@ -48,6 +47,9 @@ public:
    /// Given a port and file name, will return <host>.<port>.file_name
    std::string prefix_host_and_port( const std::string& port,const std::string& file_name ) const;
 
+private:
+  Host(const Host&) = delete;
+  const Host& operator=(const Host&) = delete;
 private:
 	std::string host_port_prefix(const std::string& port) const;
 	void get_host_name(); // will cache host name, to avoid multiple sysm calls

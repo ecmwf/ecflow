@@ -20,7 +20,6 @@
 //  the performance of the server, especially when the server is running
 //  on virtual machines
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "NodeFwd.hpp"
@@ -28,7 +27,10 @@ class JobsParam;
 
 namespace ecf {
 
-class JobProfiler  : private boost::noncopyable  {
+class JobProfiler {
+private:
+  JobProfiler(const JobProfiler&) = delete;
+  const JobProfiler& operator=(const JobProfiler&) = delete;
 public:
    // Note: 1000 milliseconds = 1 second
    JobProfiler(Task*,JobsParam&,size_t threshold /* expected to be milli seconds */);

@@ -15,7 +15,6 @@
 // Description : Provides globals used by server for determining change
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <string>
 
 // class Ecf: This class is used in the server to determine incremental changes
@@ -28,7 +27,7 @@
 //       The client passes these two number back to server, the server then
 //       uses these two numbers to determine what's changed.
 //
-class Ecf : private boost::noncopyable {
+class Ecf  {
 public:
 	/// Increment and then return state change no
 	static unsigned int incr_state_change_no() ;
@@ -73,7 +72,10 @@ public:
 
 private:
 
-	Ecf()= default;
+   Ecf()= default;
+   Ecf(const Ecf&) = delete;
+   const Ecf& operator=(const Ecf&) = delete;
+
 	static bool server_;
 	static bool debug_equality_;
    static unsigned int debug_level_;
@@ -91,13 +93,15 @@ private:
 	unsigned int modify_change_no_;
 };
 
-class DebugEquality : private boost::noncopyable {
+class DebugEquality {
 public:
    DebugEquality() { Ecf::set_debug_equality(true); }
    ~DebugEquality(){ Ecf::set_debug_equality(false); set_ignore_server_variables(false);}
    static bool ignore_server_variables() { return ignore_server_variables_;}
    static void set_ignore_server_variables(bool flg) { ignore_server_variables_ = flg;}
 private:
+   DebugEquality(const DebugEquality&) = delete;
+   const DebugEquality& operator=(const DebugEquality&) = delete;
    static bool ignore_server_variables_;
 };
 #endif

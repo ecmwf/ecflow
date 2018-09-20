@@ -18,7 +18,6 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include "boost/filesystem.hpp"
 #include "boost/filesystem/operations.hpp"
 #include <boost/lexical_cast.hpp>
@@ -28,7 +27,7 @@
 
 namespace ecf {
 
-class EcfPortLock : private boost::noncopyable {
+class EcfPortLock  {
 public:
 
    static bool is_free(int port, bool debug = false)
@@ -63,6 +62,8 @@ public:
 
 private:
    EcfPortLock() = delete;
+   EcfPortLock(const EcfPortLock&) = delete;
+   const EcfPortLock& operator=(const EcfPortLock&) = delete;
 
    static std::string port_file(const std::string& the_port)
    {

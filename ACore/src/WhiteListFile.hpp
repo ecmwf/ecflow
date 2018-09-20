@@ -15,7 +15,6 @@
 // Description : Parser for while list file
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <map>
 #include <vector>
@@ -24,7 +23,7 @@
 // The whiteList file, is used to indicate users who are allowed
 // read/write access to the server when calling *user* commands
 
-class WhiteListFile : private boost::noncopyable {
+class WhiteListFile {
 public:
 	WhiteListFile();
 	~WhiteListFile();
@@ -70,6 +69,10 @@ public:
 
 	size_t read_access_size() const { return users_with_read_access_.size(); }
 	size_t write_access_size() const { return users_with_write_access_.size(); }
+
+private:
+  WhiteListFile(const WhiteListFile&) = delete;
+  const WhiteListFile& operator=(const WhiteListFile&) = delete;
 
 private:
 

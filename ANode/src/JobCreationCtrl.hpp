@@ -18,15 +18,16 @@
 #include <string>
 #include <vector>
 
-#include <boost/noncopyable.hpp>
-
 #include "NodeFwd.hpp"
 #include "JobsParam.hpp"
 
 // Used as a utility class for testing Job creation
 // Collates data during the node tree traversal
 // Note: For testing purposes we do not always want to create jobs
-class JobCreationCtrl : public std::enable_shared_from_this<JobCreationCtrl>, private boost::noncopyable {
+class JobCreationCtrl : public std::enable_shared_from_this<JobCreationCtrl> {
+private:
+  JobCreationCtrl(const JobCreationCtrl&) = delete;
+  const JobCreationCtrl& operator=(const JobCreationCtrl&) = delete;
 public:
 	JobCreationCtrl()= default;
 

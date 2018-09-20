@@ -35,11 +35,10 @@
 // ****************************************************************************
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include "ClientSuites.hpp"
 class DefsDelta;
 
-class ClientSuiteMgr : private boost::noncopyable {
+class ClientSuiteMgr {
 public:
    explicit ClientSuiteMgr(Defs*);
 
@@ -110,6 +109,10 @@ public:
 
 	/// For debug dumps
 	std::string dump() const;
+
+private:
+  ClientSuiteMgr(const ClientSuiteMgr&) = delete;
+  const ClientSuiteMgr& operator=(const ClientSuiteMgr&) = delete;
 
 private:
 	std::vector<ecf::ClientSuites> clientSuites_;

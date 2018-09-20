@@ -16,13 +16,12 @@
 // Description : This class is used as a helper class for file utilities
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <fstream>
 
 namespace ecf {
 
-class File_r : private boost::noncopyable {
+class File_r  {
 public:
    explicit File_r(const std::string& file_name);
    ~File_r();
@@ -35,6 +34,9 @@ public:
    const std::string& file_name() const { return file_name_; }
 
 private:
+   File_r(const File_r&) = delete;
+   const File_r& operator=(const File_r&) = delete;
+
    std::string file_name_;
    std::ifstream fp_;
 };

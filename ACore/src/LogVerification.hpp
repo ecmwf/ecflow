@@ -17,11 +17,10 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <vector>
 #include <string>
-#include <boost/noncopyable.hpp>
 
 namespace ecf {
 
-class LogVerification : private boost::noncopyable {
+class LogVerification {
 public:
 
     /// Given a log file, extract in order. The node_path and the state
@@ -35,7 +34,9 @@ public:
  	static bool compareNodeStates( const std::string& logfile, const std::string& goldenRefLogFile, std::string& errorMsg);
 
 private:
-	LogVerification() = default;
+ 	LogVerification() = default;
+ 	LogVerification(const LogVerification&) = delete;
+ 	const LogVerification& operator=(const LogVerification&) = delete;
 };
 }
 #endif

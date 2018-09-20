@@ -17,13 +17,11 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-
-#include <boost/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 namespace ecf {
 
-class CalendarUpdateParams : private boost::noncopyable {
+class CalendarUpdateParams {
 public:
 
 	// For use in the server
@@ -60,6 +58,10 @@ public:
  	const boost::posix_time::time_duration& serverPollPeriod() const { return serverPollPeriod_;}
  	bool serverRunning() const { return serverRunning_; }
  	bool forTest()       const { return forTest_;}
+
+private:
+   CalendarUpdateParams(const CalendarUpdateParams&) = delete;
+   const CalendarUpdateParams& operator=(const CalendarUpdateParams&) = delete;
 
 private:
   	boost::posix_time::ptime         timeNow_;         // Current time and date, not used in simulator

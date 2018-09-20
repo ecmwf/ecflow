@@ -77,7 +77,10 @@ std::ostream& operator<<(std::ostream& os, const Family&);
 // We can have several thousands Families. This class helps in avoiding
 // the creation of generated variables until required.
 // This improves client->server down load times by avoiding thousands of string constructions
-class FamGenVariables : private boost::noncopyable {
+class FamGenVariables  {
+private:
+  FamGenVariables(const FamGenVariables&) = delete;
+  const FamGenVariables& operator=(const FamGenVariables&) = delete;
 public:
    explicit FamGenVariables(const Family*);
 

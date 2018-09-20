@@ -18,11 +18,13 @@
 //               We want to control when child process termination is handled
 // Collaboration: System.hpp
 //============================================================================
-#include <boost/noncopyable.hpp>
 
 namespace ecf {
 
-class Signal : private boost::noncopyable {
+class Signal {
+private:
+  Signal(const Signal&) = delete;
+  const Signal& operator=(const Signal&) = delete;
 public:
    Signal();
 

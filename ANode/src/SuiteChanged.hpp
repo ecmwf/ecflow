@@ -16,7 +16,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include "NodeFwd.hpp"
 
 namespace ecf {
@@ -32,7 +31,10 @@ namespace ecf {
 // i.e suites are added to handles, hence we need a way to determine which
 // suites (and hence handle) changed, and hence minimise the need for updates.
 
-class SuiteChanged  : private boost::noncopyable {
+class SuiteChanged {
+private:
+  SuiteChanged(const SuiteChanged&) = delete;
+  const SuiteChanged& operator=(const SuiteChanged&) = delete;
 public:
    explicit SuiteChanged(suite_ptr s);
 	~SuiteChanged();
@@ -42,7 +44,10 @@ private:
 	unsigned int modify_change_no_;
 };
 
-class SuiteChanged0  : private boost::noncopyable {
+class SuiteChanged0  {
+private:
+  SuiteChanged0(const SuiteChanged0&) = delete;
+  const SuiteChanged0& operator=(const SuiteChanged0&) = delete;
 public:
    explicit SuiteChanged0(node_ptr s);
 	~SuiteChanged0();
@@ -54,7 +59,10 @@ private:
 };
 
 
-class SuiteChanged1  : private boost::noncopyable {
+class SuiteChanged1 {
+private:
+  SuiteChanged1(const SuiteChanged1&) = delete;
+  const SuiteChanged1& operator=(const SuiteChanged1&) = delete;
 public:
    explicit SuiteChanged1(Suite* s);
 	~SuiteChanged1();

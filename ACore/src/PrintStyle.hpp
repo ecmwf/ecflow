@@ -15,10 +15,9 @@
 // Description :
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <string>
 
-class PrintStyle : private boost::noncopyable {
+class PrintStyle {
 public:
 	// Used by the show Cmd
 	enum Type_t {
@@ -42,6 +41,10 @@ public:
 	// return current style as a string
    static std::string to_string();
    static std::string to_string(PrintStyle::Type_t);
+
+private:
+  PrintStyle(const PrintStyle&) = delete;
+  const PrintStyle& operator=(const PrintStyle&) = delete;
 
 private:
    Type_t old_style_;

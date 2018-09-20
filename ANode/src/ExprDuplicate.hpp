@@ -25,11 +25,13 @@
 
 #include <string>
 #include <memory> // for unique_ptr
-#include <boost/noncopyable.hpp>
 class AstTop;
 
 // reclaim memory allocated in map, Avoid valgrind errors
-class ExprDuplicate : private boost::noncopyable {
+class ExprDuplicate  {
+private:
+  ExprDuplicate(const ExprDuplicate&) = delete;
+  const ExprDuplicate& operator=(const ExprDuplicate&) = delete;
 public:
    ExprDuplicate() = default;
    ~ExprDuplicate();

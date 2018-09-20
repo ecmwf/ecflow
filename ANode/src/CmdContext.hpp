@@ -17,17 +17,18 @@
 // of a command.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
-
 namespace  ecf {
 
-class CmdContext : private boost::noncopyable {
+class CmdContext {
 public:
    CmdContext();
    ~CmdContext();
 
    static bool in_command() { return in_command_; }
 
+private:
+  CmdContext(const CmdContext&) = delete;
+  const CmdContext& operator=(const CmdContext&) = delete;
 private:
    static bool in_command_;
 };

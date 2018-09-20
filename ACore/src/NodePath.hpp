@@ -15,11 +15,10 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <vector>
 
-class NodePath : private boost::noncopyable {
+class NodePath {
 public:
 	/// returns the path as a vector of strings, preserving the order
 	/// Note: multiple path separator '/' are treated as one separator.
@@ -41,6 +40,7 @@ public:
 
 private:
  	NodePath() = delete;
-
+   NodePath(const NodePath&) = delete;
+   const NodePath& operator=(const NodePath&) = delete;
 };
 #endif

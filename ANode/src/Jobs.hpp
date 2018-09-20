@@ -14,7 +14,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/noncopyable.hpp>
 #include "NodeFwd.hpp"
 
 /// Job generation involves:
@@ -53,7 +52,10 @@
 ///     Typically the job will hold on the child commands.
 ///
 /// Note: in real life test 99% of job generation is done after child command
-class Jobs  : private boost::noncopyable  {
+class Jobs {
+private:
+  Jobs(const Jobs&) = delete;
+  const Jobs& operator=(const Jobs&) = delete;
 public:
    explicit Jobs(const defs_ptr& d) : defs_(d.get()), node_(nullptr) {}
    explicit Jobs(Defs* d) : defs_(d), node_(nullptr) {}

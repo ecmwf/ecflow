@@ -17,8 +17,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <string>
-#include <boost/noncopyable.hpp>
-
 #include "NodeFwd.hpp"
 
 namespace ecf {
@@ -35,7 +33,10 @@ namespace ecf {
 /// and hence this class will not in operations handle the death of the real job
 /// created by ecf_submit.
 
-class System : private boost::noncopyable {
+class System {
+private:
+  System(const System&) = delete;
+  const System& operator=(const System&) = delete;
 public:
     static System* instance();
 

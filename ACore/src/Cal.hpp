@@ -17,15 +17,15 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
-
-class Cal : private boost::noncopyable {
+class Cal {
 public:
    static long date_to_julian(long);
    static long julian_to_date(long);
 
 private:
    Cal() = delete;
+   Cal(const Cal&) = delete;
+   const Cal& operator=(const Cal&) = delete;
 };
 
 #endif

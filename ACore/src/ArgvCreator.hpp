@@ -17,11 +17,10 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include <vector>
 #include <string>
 
-class ArgvCreator : private boost::noncopyable {
+class ArgvCreator {
 public:
 	// Create argc/argv from a vector of strings
 	explicit ArgvCreator(const std::vector<std::string> & );
@@ -36,6 +35,9 @@ public:
 	std::string toString() const;
 
 private:
+	ArgvCreator(const ArgvCreator&) = delete;
+	const ArgvCreator& operator=(const ArgvCreator&) = delete;
+
 	int    argc_;
 	char** argv_;
 };

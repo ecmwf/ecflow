@@ -15,10 +15,9 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include <string>
 
-class Pid : private boost::noncopyable {
+class Pid {
 public:
    /// Returns the process pid as a string, otherwise throw exception(std::runtime_error)
    static std::string getpid();
@@ -28,8 +27,9 @@ public:
    static std::string unique_name(const std:: string& prefix);
 
 private:
-
    Pid()= default;
+   Pid(const Pid&) = delete;
+   const Pid& operator=(const Pid&) = delete;
 };
 
 #endif

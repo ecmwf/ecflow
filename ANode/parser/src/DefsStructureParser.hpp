@@ -32,12 +32,15 @@ class Node;
 class Parser;
 
 // This class is used get a line of defs format from a defs string
-class DefsString : private boost::noncopyable {
+class DefsString {
 public:
    explicit DefsString(const std::string& defs_as_string);
    bool good() const;
    void getline(std::string& line);
    bool empty() const { return empty_; }
+private:
+  DefsString(const DefsString&) = delete;
+  const DefsString& operator=(const DefsString&) = delete;
 private:
    bool empty_;
    size_t index_;
@@ -50,7 +53,10 @@ private:
 //    DEFS: This is the structure only (default)
 //    STATE: structure + state
 //    MIGRATE: structure + state (No checking, and no externs and fault tolerant)
-class DefsStructureParser : private boost::noncopyable {
+class DefsStructureParser {
+private:
+  DefsStructureParser(const DefsStructureParser&) = delete;
+  const DefsStructureParser& operator=(const DefsStructureParser&) = delete;
 public:
    DefsStructureParser(Defs* defsfile, const std::string& file_name);
    DefsStructureParser(Defs* defsfile, const std::string& def_str, bool);

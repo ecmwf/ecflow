@@ -18,12 +18,14 @@
 
 #include <string>
 #include <map>
-#include <boost/noncopyable.hpp>
 class Task;
 
 namespace ecf {
 
-class TaskScriptGenerator : private boost::noncopyable {
+class TaskScriptGenerator {
+private:
+  TaskScriptGenerator(const TaskScriptGenerator&) = delete;
+  const TaskScriptGenerator& operator=(const TaskScriptGenerator&) = delete;
 public:
    explicit TaskScriptGenerator(const Task*);
 

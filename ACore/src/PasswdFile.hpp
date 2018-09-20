@@ -15,7 +15,6 @@
 // Description : Parser for while list file
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <map>
 #include <vector>
@@ -42,7 +41,7 @@ private:
 };
 
 // This class is used to authenticate, user commands, i.e like ping,alter, etc
-class PasswdFile : private boost::noncopyable {
+class PasswdFile {
 public:
    PasswdFile();
    ~PasswdFile();
@@ -84,7 +83,10 @@ private:
    bool validateVersionNumber(const std::string& line, std::string& errorMsg) const;
 
 private:
+  PasswdFile(const PasswdFile&) = delete;
+  const PasswdFile& operator=(const PasswdFile&) = delete;
 
+private:
    std::string passwd_file_;
    std::vector<Pass_wd> vec_;
 };

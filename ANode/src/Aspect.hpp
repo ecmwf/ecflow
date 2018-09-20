@@ -18,12 +18,9 @@
 // whats changed. used as a part of the observer pattern
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-
-#include <boost/noncopyable.hpp>
-
 namespace ecf {
 
-class Aspect : private boost::noncopyable {
+class Aspect {
 public:
    enum Type { NOT_DEFINED, ORDER, ADD_REMOVE_NODE, ADD_REMOVE_ATTR,
                 METER, EVENT, LABEL, LIMIT, STATE, DEFSTATUS, SUSPENDED,
@@ -35,6 +32,8 @@ public:
 
 private:
    Aspect() = delete;
+   Aspect(const Aspect&) = delete;
+   const Aspect& operator=(const Aspect&) = delete;
 };
 
 }

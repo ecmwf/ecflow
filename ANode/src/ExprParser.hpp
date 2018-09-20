@@ -18,13 +18,15 @@
 
 #include <string>
 #include <memory> // for unique_ptr
-#include <boost/noncopyable.hpp>
 #include "ExprAst.hpp"
 
 
 /// This class will parse a expression and create the abstract syntax tree
 /// It will own the AST unless specifically released calling ast();
-class ExprParser : private boost::noncopyable {
+class ExprParser {
+private:
+  ExprParser(const ExprParser&) = delete;
+  const ExprParser& operator=(const ExprParser&) = delete;
 public:
    explicit ExprParser(const std::string& expression);
 
@@ -46,7 +48,10 @@ private:
 // This class was added to mitigate the slowness of the boost classic spirit parser
 // we will recognise very simple expression, and bypass spirit. Very limited
 // But the simple expression do form a very large subset
-class SimpleExprParser : private boost::noncopyable {
+class SimpleExprParser {
+private:
+  SimpleExprParser(const SimpleExprParser&) = delete;
+  const SimpleExprParser& operator=(const SimpleExprParser&) = delete;
 public:
    explicit SimpleExprParser(const std::string& expression) : expr_(expression) {}
 

@@ -16,9 +16,8 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <string>
-#include <boost/noncopyable.hpp>
 
-class SState : private boost::noncopyable {
+class SState {
 public:
    /// The following table shows the effect of state, on server behaviour:
    ///
@@ -41,6 +40,8 @@ public:
    static bool isValid(const std::string&);
 
 private:
-	SState() = delete;
+   SState() = delete;
+   SState(const SState&) = delete;
+   const SState& operator=(const SState&) = delete;
 };
 #endif

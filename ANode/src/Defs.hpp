@@ -25,7 +25,6 @@
 #include <ostream>
 #include <set>
 
-#include <boost/noncopyable.hpp>
 #include "boost/date_time/posix_time/posix_time_types.hpp"
 #include <boost/foreach.hpp> // used so often just placed here for convenience
 
@@ -406,7 +405,7 @@ std::ostream& operator<<(std::ostream& os, const Defs&);
 
 // =====================================================================
 // This class is used to read the History
-class DefsHistoryParser : private boost::noncopyable {
+class DefsHistoryParser {
 public:
    DefsHistoryParser();
 
@@ -414,21 +413,25 @@ public:
    const std::vector<std::string>& parsed_messages() const { return parsed_messages_;}
 
 private:
-
    std::string::size_type find_log(const std::string& line, std::string::size_type pos) const;
 
+private:
+  DefsHistoryParser(const DefsHistoryParser&) = delete;
+  const DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
 private:
    std::vector<std::string> log_types_;
    std::vector<std::string> parsed_messages_;
 };
 
 
-
 // Start notification. End notification automatically signalled, Even if exception raised.
-class ChangeStartNotification : private boost::noncopyable {
+class ChangeStartNotification {
 public:
    explicit ChangeStartNotification(defs_ptr defs) : defs_ptr_(defs) { defs_ptr_->notify_start();}
    ~ChangeStartNotification() {  defs_ptr_->notify_end();}
+private:
+  ChangeStartNotification(const ChangeStartNotification&) = delete;
+  const ChangeStartNotification& operator=(const ChangeStartNotification&) = delete;
 private:
    defs_ptr defs_ptr_;
 };

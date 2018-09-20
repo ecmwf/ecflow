@@ -178,7 +178,10 @@ private:
 // We can have several thousands Submittables. This class helps in avoiding
 // the creation of generated variables until required.
 // This improves client->server down load times by avoiding thousands of string constructions
-class SubGenVariables : private boost::noncopyable {
+class SubGenVariables {
+private:
+  SubGenVariables(const SubGenVariables&) = delete;
+  const SubGenVariables& operator=(const SubGenVariables&) = delete;
 public:
    explicit SubGenVariables(const Submittable*);
 

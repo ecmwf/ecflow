@@ -15,12 +15,11 @@
 // Description :
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <vector>
 
 namespace ecf {
-class Attr : private boost::noncopyable {
+class Attr {
 public:
    enum Type { UNKNOWN=0, EVENT=1, METER=2, LABEL=3, LIMIT=4, VARIABLE=5, ALL=6 };
 
@@ -29,6 +28,9 @@ public:
     static bool is_valid(const std::string& state);
     static std::vector<std::string> all_attrs();
     static std::vector<Attr::Type> attrs();
+private:
+  Attr(const Attr&) = delete;
+  const Attr& operator=(const Attr&) = delete;
 };
 }
 #endif

@@ -18,14 +18,13 @@
 #include <string>
 #include <vector>
 #include <limits>
-#include <boost/noncopyable.hpp>
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 
 namespace ecf {
 
-class Str : private boost::noncopyable {
+class Str {
 public:
 	static int reserve_4()  { return 4; }
 	static int reserve_8()  { return 8; }
@@ -169,7 +168,9 @@ public:
    static const std::string& WHITE_LIST_FILE();
    static const std::string& ECF_PASSWD();
 private:
-	Str()= default;
+   Str()= default;
+   Str(const Str&) = delete;
+   const Str& operator=(const Str&) = delete;
 };
 
 }

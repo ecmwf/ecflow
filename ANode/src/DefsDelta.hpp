@@ -28,7 +28,10 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "Memento.hpp"
 
-class DefsDelta : private boost::noncopyable {
+class DefsDelta {
+private:
+  DefsDelta(const DefsDelta&) = delete;
+  const DefsDelta& operator=(const DefsDelta&) = delete;
 public:
    ///=========================================================================
 	/// *Server side*

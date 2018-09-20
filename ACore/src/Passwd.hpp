@@ -28,10 +28,9 @@
 //    file is consulted.
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <string>
 
-class Passwd : private boost::noncopyable {
+class Passwd {
 public:
 
 	/// generate a random password
@@ -39,6 +38,8 @@ public:
 
 private:
 	Passwd() = delete;
+	Passwd(const Passwd&) = delete;
+	const Passwd& operator=(const Passwd&) = delete;
 };
 
 #endif

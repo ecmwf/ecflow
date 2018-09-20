@@ -17,12 +17,11 @@
 ////               At the moment only works on Linux
 ////============================================================================
 //
-//#include <boost/noncopyable.hpp>
 //#include <string>
 //
 //namespace ecf {
 //
-//class StackTrace : private boost::noncopyable {
+//class StackTrace {
 //public:
 //
 //	/// This function will produce a stack trace from where its called

@@ -18,9 +18,8 @@
 
 #include <string>
 #include <vector>
-#include <boost/noncopyable.hpp>
 
-class Extract : private boost::noncopyable {
+class Extract {
 public:
 
 	// token if of the form:
@@ -52,6 +51,8 @@ public:
 	                       int pos,int defaultValue,const std::string& errorMsg);
 private:
 	Extract() = delete;
+	Extract(const Extract&) = delete;
+	const Extract& operator=(const Extract&) = delete;
 };
 
 #endif

@@ -612,7 +612,10 @@ bool Submittable::non_script_based_job_submission(JobsParam& jobsParam)
    return false;
 }
 
-class JobCreationTimer : private boost::noncopyable {
+class JobCreationTimer {
+private:
+  JobCreationTimer(const JobCreationTimer&) = delete;
+  const JobCreationTimer& operator=(const JobCreationTimer&) = delete;
 public:
    explicit JobCreationTimer(Submittable* sub) : enabled_(false),failed_(false), sub_(sub) {}
    ~JobCreationTimer() {

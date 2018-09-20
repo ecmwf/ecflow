@@ -641,7 +641,10 @@ private:
 };
 
 // Helper class
-class VariableHelper : private boost::noncopyable {
+class VariableHelper {
+private:
+  VariableHelper(const VariableHelper&) = delete;
+  const VariableHelper& operator=(const VariableHelper&) = delete;
 public:
    explicit VariableHelper(const AstVariable* astVariable);
 	VariableHelper(const AstVariable* astVariable, std::string& errorMsg);

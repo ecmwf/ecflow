@@ -14,7 +14,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/noncopyable.hpp>
 #include "boost/filesystem/path.hpp"
 #include <fstream>
 #include <memory>
@@ -23,7 +22,10 @@
 // This class is used to minimise file I/0.
 // When job processing the same include file can be opened and closed many time
 // This cache serves to open the include file only once. It halves the job processing time.
-class IncludeFileCache : private boost::noncopyable {
+class IncludeFileCache {
+private:
+  IncludeFileCache(const IncludeFileCache&) = delete;
+  const IncludeFileCache& operator=(const IncludeFileCache&) = delete;
 public:
    explicit IncludeFileCache(const std::string& path);
    ~IncludeFileCache();
@@ -156,7 +158,10 @@ private:
 
 // This class is used in expanding(pre-processing) the includes.
 // The pre-processing is done in a depth first fashion (ECFLOW-673)
-class PreProcessor : private boost::noncopyable {
+class PreProcessor {
+private:
+  PreProcessor(const PreProcessor&) = delete;
+  const PreProcessor& operator=(const PreProcessor&) = delete;
 public:
    explicit PreProcessor(EcfFile*);
    ~PreProcessor();
