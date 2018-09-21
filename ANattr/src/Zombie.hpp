@@ -40,7 +40,6 @@
 //               know the process or remote id. Hence we will make do with the
 //               task path. We just find the first zombie, and act up on it
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <string>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "Child.hpp"
 #include "ZombieAttr.hpp"

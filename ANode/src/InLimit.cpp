@@ -19,6 +19,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <iostream>
+#include <ostream>
 
 #include "InLimit.hpp"
 #include "Limit.hpp"

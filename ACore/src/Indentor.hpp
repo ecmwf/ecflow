@@ -14,7 +14,7 @@
 //
 // Description : This class is used as a helper class to provide indented output
 //============================================================================
-#include <ostream>
+#include <iosfwd>
 
 namespace ecf {
 

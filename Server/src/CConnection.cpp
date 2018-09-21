@@ -24,7 +24,6 @@
 
 #include "CConnection.hpp"
 #include "Log.hpp"
-#include <vector>
 
 #include "Log.hpp"
 #include "Serialization.hpp"

@@ -15,9 +15,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <string>
-#include <vector>
-
 #include <boost/program_options.hpp>
 
 #include "PrintStyle.hpp"
@@ -29,7 +26,6 @@
 #include "Child.hpp"
 #include "CheckPt.hpp"
 #include "PreAllocatedReply.hpp"
-#include "Serialization.hpp"
 
 class AbstractServer;
 class AbstractClientEnv;

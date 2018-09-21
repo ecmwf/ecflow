@@ -13,10 +13,10 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <ostream>
-#include "Serialization.hpp"
+#include <iosfwd>
 #include <boost/utility.hpp>
 
+#include "Serialization.hpp"
 #include "NState.hpp"
 
 /////////////////////////////////////////////////////////////////////////

@@ -16,8 +16,6 @@
 // Description :
 //============================================================================
 
-#include <string>
-#include <vector>
 #include "Serialization.hpp"
 
 // NState: stores the state of a node.

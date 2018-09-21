@@ -15,7 +15,7 @@
 // Description :
 //============================================================================
 
-#include <ostream>
+#include <iosfwd>
 #include <boost/weak_ptr.hpp>
 
 #include "Serialization.hpp"

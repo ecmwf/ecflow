@@ -18,7 +18,6 @@
 
 #include <string>
 #include <vector>
-#include "Serialization.hpp"
 #include "NState.hpp"
 
 // DState: stores the state of a node.

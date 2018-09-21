@@ -21,7 +21,6 @@
 #include "Alias.hpp"
 #include "Ecf.hpp"
 #include "Log.hpp"
-#include "Serialization.hpp"
 
 using namespace std;
 using namespace boost;

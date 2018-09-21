@@ -14,6 +14,7 @@
 //============================================================================
 #include <sstream>
 #include <iostream>
+#include <ostream>
 
 #include "VerifyAttr.hpp"
 #include "PrintStyle.hpp"

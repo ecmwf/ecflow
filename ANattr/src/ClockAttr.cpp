@@ -13,6 +13,8 @@
 // Description :
 //============================================================================
 
+#include <ostream>
+
 #include "ClockAttr.hpp"
 #include "DateAttr.hpp"
 #include "Indentor.hpp"

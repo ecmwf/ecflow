@@ -14,6 +14,8 @@
 //============================================================================
 #include <sstream>
 #include <iostream>
+#include <ostream>
+
 #include <cassert>
 #include <boost/tokenizer.hpp>
 #include <boost/token_functions.hpp>

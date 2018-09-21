@@ -22,7 +22,7 @@
 // Hence externs are *ONLY* used on the client side.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <ostream>
+#include <iosfwd>
 #include <set>
 
 #include "boost/date_time/posix_time/posix_time_types.hpp"

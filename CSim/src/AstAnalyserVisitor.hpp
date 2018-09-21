@@ -16,10 +16,8 @@
 // Description :
 //============================================================================
 
-#include "ExprAstVisitor.hpp"
-#include <iostream>
-#include <sstream>
 #include <set>
+#include "ExprAstVisitor.hpp"
 class Node;
 
 namespace ecf {

@@ -27,7 +27,7 @@
 //          2/ Cut down on IPC load between client/server
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <ostream>
+#include <iosfwd>
 #include <set>
 #include <limits>
 

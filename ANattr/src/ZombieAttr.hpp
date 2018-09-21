@@ -14,7 +14,7 @@
 //
 // Description :
 //============================================================================
-#include <ostream>
+#include <iosfwd>
 #include "Serialization.hpp"
 #include "Child.hpp"
 

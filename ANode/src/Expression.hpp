@@ -16,7 +16,7 @@
 // Description :
 //============================================================================
 
-#include <ostream>
+#include <iosfwd>
 #include <memory> // for unique_ptr
 
 #include "Serialization.hpp"

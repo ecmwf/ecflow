@@ -20,9 +20,7 @@
 #endif
 
 #include <iomanip>
-#include <string>
 #include <sstream>
-#include <vector>
 #include <memory>
 
 #include <boost/asio.hpp>

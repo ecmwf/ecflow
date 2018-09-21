@@ -16,10 +16,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "TimeSlot.hpp"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/date_time/posix_time/time_serialize.hpp>
-#include "Serialization.hpp"
 #include "cereal.hpp"
 
 namespace ecf { class Calendar;} // forward declare class

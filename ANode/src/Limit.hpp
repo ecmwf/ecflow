@@ -21,7 +21,7 @@
 //               for incremental sync, since we directly access the parent suite
 //============================================================================
 
-#include <ostream>
+#include <iosfwd>
 #include "Serialization.hpp"
 class Node;
 

@@ -19,7 +19,6 @@
 #include "Ecf.hpp"
 #include "Log.hpp"
 #include "AbstractServer.hpp"
-#include "Serialization.hpp" // also collates boost archive includes
 
 using namespace std;
 using namespace boost;

@@ -14,6 +14,7 @@
 //============================================================================
 
 #include "Indentor.hpp"
+#include <ostream>
 
 namespace ecf {
 

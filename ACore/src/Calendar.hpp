@@ -79,9 +79,6 @@
 //  Resolution: Will support 1 minute resolution:
 //============================================================================
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/conversion.hpp>
-#include <boost/date_time/posix_time/time_serialize.hpp>
 #include "Serialization.hpp"
 #include "cereal.hpp"
 

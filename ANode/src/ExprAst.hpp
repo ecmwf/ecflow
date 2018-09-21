@@ -19,7 +19,7 @@
 
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <iosfwd>
 #include <boost/noncopyable.hpp>
 
 #include "DState.hpp"

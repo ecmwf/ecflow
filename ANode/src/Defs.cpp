@@ -14,7 +14,7 @@
 //============================================================================
 #include <cassert>
 #include <sstream>
-#include <fstream>
+#include <ostream>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -29,7 +29,6 @@
 #include "Ecf.hpp"
 #include "NodeState.hpp"
 #include "ExprAst.hpp"       // required for persistence
-#include "Serialization.hpp" // collates boost archive includes
 #include "JobCreationCtrl.hpp"
 #include "ResolveExternsVisitor.hpp"
 #include "DefsDelta.hpp"
