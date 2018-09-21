@@ -1,6 +1,5 @@
 #ifndef CHECKPTSAVER_HPP_
 #define CHECKPTSAVER_HPP_
-
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        : CheckPtSaver.cpp
 // Author      : Avi
@@ -24,13 +23,13 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
-
 class ServerEnvironment;
 class Server;
 
-class CheckPtSaver : private boost::noncopyable {
+class CheckPtSaver {
+   CheckPtSaver(const CheckPtSaver&) = delete;
+   const CheckPtSaver& operator=(const CheckPtSaver&) = delete;
 public:
 	CheckPtSaver(  Server* s,   boost::asio::io_service& io, const ServerEnvironment*);
 	~CheckPtSaver();

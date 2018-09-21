@@ -19,8 +19,6 @@
  * Standard Library Include Files                                            *
  *****************************************************************************/
 #include <algorithm> //for for_each()
-//#include <iostream>
-
 
 namespace ecf
 {

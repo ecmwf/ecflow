@@ -18,7 +18,6 @@
 
 #include <boost/asio.hpp>
 #include <boost/array.hpp>
-#include <boost/noncopyable.hpp>
 #include <memory>
 
 #include "ClientToServerRequest.hpp"
@@ -27,7 +26,9 @@
 class server;
 
 /// Represents a single connection from a client.
-class CConnection : public std::enable_shared_from_this<CConnection>, private boost::noncopyable {
+class CConnection : public std::enable_shared_from_this<CConnection> {
+   CConnection(const CConnection&) = delete;
+   const CConnection& operator=(const CConnection&) = delete;
 public:
    /// Construct a connection with the given io_service.
    explicit CConnection( boost::asio::io_service& io_service, server* );

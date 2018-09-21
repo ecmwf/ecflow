@@ -16,7 +16,6 @@
 //============================================================================
 
 #include <deque>
-#include <iostream>
 #include <sstream>
 #include "CheckPt.hpp"
 #include "Serialization.hpp"

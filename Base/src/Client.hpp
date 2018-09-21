@@ -21,7 +21,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/asio.hpp>
 
-#include "Connection.hpp" // Must come before boost/serialization headers.
+#include "Connection.hpp"
 #include "ClientToServerRequest.hpp"
 #include "ServerToClientResponse.hpp"
 

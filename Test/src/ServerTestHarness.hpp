@@ -15,7 +15,6 @@
 // Description :
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <map>
 #include "NodeFwd.hpp"
@@ -30,7 +29,9 @@ class ClientInvoker;
 // The Server is started/stopped by use of the Global text Fixture
 // See class TestFixture.hpp
 //
-class ServerTestHarness : private boost::noncopyable {
+class ServerTestHarness {
+   ServerTestHarness(const ServerTestHarness&) = delete;
+   const ServerTestHarness& operator=(const ServerTestHarness&) = delete;
 public:
 	// if standardVerification is true, we test task goes through normal life cycle
 	// changes. else we compare the log file states with golden log file

@@ -28,7 +28,6 @@
 #include <vector>
 #include <map>
 #include <exception>
-#include <boost/noncopyable.hpp>
 #include <boost/asio.hpp>
 
 #include "Host.hpp"
@@ -45,7 +44,9 @@ public:
 };
 
 
-class ServerEnvironment : private boost::noncopyable {
+class ServerEnvironment {
+   ServerEnvironment(const ServerEnvironment&) = delete;
+   const ServerEnvironment& operator=(const ServerEnvironment&) = delete;
 public:
    ServerEnvironment(int argc, char* argv[]);
    ServerEnvironment(int argc, char* argv[], const std::string& path_to_config_file); // *only used in test*

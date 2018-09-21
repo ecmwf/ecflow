@@ -14,16 +14,14 @@
 //============================================================================
 
 #include <ostream>
+#include <cassert>
+#include <sstream>
 
 #include "ClockAttr.hpp"
 #include "DateAttr.hpp"
 #include "Indentor.hpp"
 #include "Calendar.hpp"
 #include "Ecf.hpp"
-
-#include <boost/foreach.hpp>
-#include <cassert>
-#include <sstream>
 
 using namespace std;
 using namespace ecf;

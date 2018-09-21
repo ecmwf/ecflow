@@ -24,14 +24,15 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/asio.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 class Server;
 class ServerEnvironment;
 //#define DEBUG_TRAVERSER 1
 
-class NodeTreeTraverser : private boost::noncopyable {
+class NodeTreeTraverser {
+   NodeTreeTraverser(const NodeTreeTraverser&) = delete;
+   const NodeTreeTraverser& operator=(const NodeTreeTraverser&) = delete;
 public:
 	NodeTreeTraverser(  Server* s,  boost::asio::io_service& io, const ServerEnvironment& serverEnv);
 	~NodeTreeTraverser();

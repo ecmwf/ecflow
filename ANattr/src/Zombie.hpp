@@ -43,7 +43,6 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "Child.hpp"
 #include "ZombieAttr.hpp"
-#include "Serialization.hpp"
 
 /// Use default copy constructor ,assignment operator and destructor
 class Zombie {

@@ -13,12 +13,13 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include "Child.hpp"
 class ClientInvoker;
 
-//
-class ZombieUtil : private boost::noncopyable {
+class ZombieUtil {
+private:
+  ZombieUtil(const ZombieUtil&) = delete;
+  const ZombieUtil& operator=(const ZombieUtil&) = delete;
 public:
    static void test_clean_up(int timeout);
    static int do_zombie_user_action(ecf::User::Action uc,
@@ -27,7 +28,10 @@ public:
                                     bool fail_if_to_long = true);
 };
 
-class TestClean : private boost::noncopyable {
+class TestClean {
+private:
+  TestClean(const TestClean&) = delete;
+  const TestClean& operator=(const TestClean&) = delete;
 public:
    explicit TestClean(int timeout = 25) : timeout_(timeout)  { ZombieUtil::test_clean_up(timeout);}
    ~TestClean() { ZombieUtil::test_clean_up(timeout_);}

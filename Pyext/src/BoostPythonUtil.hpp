@@ -19,8 +19,6 @@
 
 #include <boost/noncopyable.hpp>
 #include <boost/python.hpp>
-#include <vector>
-#include <string>
 #include "Variable.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects

@@ -15,8 +15,6 @@
 // Description :
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <string>
-#include <vector>
 #include <boost/noncopyable.hpp>
 #include "NodeFwd.hpp"
 #include "Zombie.hpp"

@@ -20,11 +20,12 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/program_options.hpp>
-#include <boost/noncopyable.hpp>
-
 class ServerEnvironment;
 
-class ServerOptions : private boost::noncopyable {
+class ServerOptions {
+private:
+  ServerOptions(const ServerOptions&) = delete;
+  const ServerOptions& operator=(const ServerOptions&) = delete;
 public:
 	ServerOptions(int argc, char* argv[], ServerEnvironment*);
 
