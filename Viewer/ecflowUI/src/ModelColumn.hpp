@@ -15,14 +15,16 @@ class VProperty;
 #include <assert.h>
 
 #include <QList>
+#include <QObject>
 #include <QString>
-
 
 class ModelColumnItem
 {
 friend class ModelColumn;
 public:
-	explicit ModelColumnItem(const std::string& id);
+    explicit ModelColumnItem(const std::string& id,bool extra=false);
+    bool isExtra() const {return extra_;}
+    bool isEditable() const {return editable_;}
 
 protected:
 	QString label_;
@@ -30,29 +32,53 @@ protected:
 	int index_;
 	QString icon_;
 	QString tooltip_;
+    bool extra_;
+    bool editable_;
 };
 
-
-class ModelColumn
+class ModelColumn : public QObject
 {
+    Q_OBJECT
 public:
 	explicit ModelColumn(const std::string& id);
 
 	int count() const {return items_.size();}
-	int indexOf(const std::string&) const;
+    int indexOf(QString) const;
 	QString id(int i) const {assert(i>=0 && i < count()); return items_.at(i)->id_;}
 	QString label(int i) const {assert(i>=0 && i < count()); return items_.at(i)->label_;}
 	QString tooltip(int i) const {assert(i>=0 && i < count()); return items_.at(i)->tooltip_;}
+    bool isExtra(int i) const {assert(i>=0 && i < count()); return items_.at(i)->isExtra();}
+    bool isEditable(int i) const {assert(i>=0 && i < count()); return items_.at(i)->isEditable();}
+
+    void addExtraItem(QString,QString);
+    void changeExtraItem(int,QString,QString);
+    void removeExtraItem(QString);
 
 	static ModelColumn* def(const std::string& id);
 
 	//Called from VConfigLoader
 	static void load(VProperty* group);
 
-protected:
-	std::string id_;
-	QList<ModelColumnItem*> items_;
-};
+    //Called from VSettingsLoader
+    static void loadSettings();
 
+Q_SIGNALS:
+    void addItemBegin();
+    void addItemEnd();
+    void changeItemBegin(int);
+    void changeItemEnd(int);
+    void removeItemBegin(int);
+    void removeItemEnd(int);
+
+protected:
+    void save();
+    void loadItem(VProperty*);
+    void loadExtraItem(QString,QString);
+    void loadUserSettings();
+
+	std::string id_;
+    QList<ModelColumnItem*> items_;
+    std::string configPath_;
+};
 
 #endif

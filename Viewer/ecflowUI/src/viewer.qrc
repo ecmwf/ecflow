@@ -27,6 +27,7 @@
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>
     <file alias="add_tab.svg">../images/add_tab.svg</file> 
+    <file alias="add_variable_column.svg">../images/add_variable_column.svg</file>
     <file alias="attribute.svg">../images/attribute.svg</file>
     <file alias="chain.svg">../images/chain.svg</file>
     <file alias="chain_open.svg">../images/chain_open.svg</file>
@@ -43,6 +44,7 @@
     <file alias="dependency.svg">../images/dependency.svg</file>
     <file alias="dependency_detail.svg">../images/dependency_detail.svg</file>
     <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
+    <file alias="dock_add_variable_column.svg">../images/dock_add_variable_column.svg</file>
     <file alias="dock_chain_closed.svg">../images/dock_chain_closed.svg</file>
     <file alias="dock_chain_open.svg">../images/dock_chain_open.svg</file>
     <file alias="dock_config.svg">../images/dock_config.svg</file>

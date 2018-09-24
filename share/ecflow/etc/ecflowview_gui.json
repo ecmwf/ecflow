@@ -3,7 +3,8 @@
 
         "hidden" : {
             "visible" : "false",
-            "line" : "panel.variable.showShadowed"
+            "line" : "panel.variable.showShadowed",
+            "line" : "view.table.variableColumns"
         },
 
         "appearance":  {

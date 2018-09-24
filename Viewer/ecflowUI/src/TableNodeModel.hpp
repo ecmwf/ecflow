@@ -45,14 +45,14 @@ public:
   void selectionChanged(QModelIndexList lst);
   
   VModelData* data() const;
+  void removeColumn(QString);
   ModelColumn* columns() const {return columns_;}
-  
+
   //To speed up identifying a column. The mapping here must match the definition of
   //"table_columns" in ecflowview_view_conf.json !!!
-  enum ColumnType {PathColumn=0,StatusColumn=1,TypeColumn=2,TriggerColumn=3,
-		   LabelColumn=4, EventColumn=5, MeterColumn=6, StatusChangeColumn=7,
-		   PreviousStart=8, PreviousStop=9, Rid=10,
-  };
+  enum ColumnType {InvalidColumn=-1, PathColumn=0,StatusColumn=1,TypeColumn=2,TriggerColumn=3,
+           LabelColumn=4, EventColumn=5, MeterColumn=6, StatusChangeColumn=7,
+           ExtraColumn = 8 };
    
 public Q_SLOTS:
   void slotServerAddBegin(int);
@@ -70,7 +70,14 @@ public Q_SLOTS:
   void slotEndServerScan(VModelServer* server,int);
   void slotBeginServerClear(VModelServer* server,int);
   void slotEndServerClear(VModelServer* server,int);
-  
+
+  void slotAddColumnBegin();
+  void slotAddColumnEnd();
+  void slotChangeColumnBegin(int idx);
+  void slotChangeColumnEnd(int idx);
+  void slotRemoveColumnBegin(int idx);
+  void slotRemoveColumnEnd(int idx);
+
 Q_SIGNALS:
   void filterChangeBegun();
   void filterChangeEnded();

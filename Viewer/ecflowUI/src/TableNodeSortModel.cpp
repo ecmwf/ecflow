@@ -17,6 +17,7 @@ TableNodeSortModel::TableNodeSortModel(TableNodeModel* nodeModel,QObject *parent
         nodeModel_(nodeModel),
         skipSort_(false)
 {
+    Q_ASSERT(nodeModel_);
     //connect(nodeModel_,SIGNAL(filterChanged()),
     //		this,SLOT(slotFilterChanged()));
 
@@ -76,3 +77,15 @@ bool TableNodeSortModel::lessThan(const QModelIndex &left,
 
     return leftData.toString() < rightData.toString();
 }
+
+void TableNodeSortModel::removeColumn(QString name)
+{
+    nodeModel_->removeColumn(name);
+}
+
+ModelColumn* TableNodeSortModel::columns() const
+{
+     nodeModel_->columns();
+}
+
+

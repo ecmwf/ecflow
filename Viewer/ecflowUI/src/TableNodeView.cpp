@@ -14,6 +14,7 @@
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QMenu>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScrollBar>
@@ -21,6 +22,7 @@
 #include <QToolButton>
 
 #include "ActionHandler.hpp"
+#include "AddModelColumnDialog.hpp"
 #include "FilterWidget.hpp"
 #include "IconProvider.hpp"
 #include "TableNodeSortModel.hpp"
@@ -29,6 +31,7 @@
 #include "TableNodeViewDelegate.hpp"
 #include "UiLog.hpp"
 #include "VFilter.hpp"
+#include "VNode.hpp"
 #include "VSettings.hpp"
 
 #define _UI_TABLENODEVIEW_DEBUG
@@ -308,10 +311,60 @@ void TableNodeView::notifyChange(VProperty* p)
 // Header
 //=========================================
 
+void TableNodeView::collectVariableNames(std::set<std::string>& vars)
+{
+    Q_ASSERT(model_);
+
+    //collect the list of avialable variables using the selected node
+    //or if it is not valid the first row in the table
+    QModelIndex idx=currentIndex();
+    if(!idx.isValid())
+    {
+        idx=model_->index(0,0);
+    }
+
+    if(idx.isValid())
+    {
+        VInfo_ptr info=model_->nodeInfo(idx);
+        if(info)
+        {
+            if(VNode* vn=info->node())
+            {
+                vn->collectInheritedVariableNames(vars);
+            }
+        }
+    }
+}
+
+
+void TableNodeView::slotAddVariableColumn()
+{
+    Q_ASSERT(model_);
+
+    std::set<std::string> vars;
+    collectVariableNames(vars);
+
+    AddModelColumnDialog d(this);
+    d.init(model_->columns(),vars);
+    d.exec();
+}
+
+void TableNodeView::changeVariableColumn(QString varName)
+{
+    Q_ASSERT(model_);
+
+    std::set<std::string> vars;
+    collectVariableNames(vars);
+
+    ChangeModelColumnDialog d(this);
+    d.init(model_->columns(),vars,varName);
+    d.setColumn(varName);
+    d.exec();
+}
+
 void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 {
     int section=header_->logicalIndexAt(position);
-
 	if(section< 0 || section >= header_->count())
 		return;
 
@@ -326,35 +379,92 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
 	QMenu *menu=new QMenu(this);
 	QAction *ac;
 
+    //Show/hide current columns
+    QString name=header_->model()->headerData(section,Qt::Horizontal).toString();
+    ac=new QAction(menu);
+    ac->setData(section);
+    bool vis=!header_->isSectionHidden(section);
+    ac->setText(((!vis)?"Show column \'":"Hide column \'")  + name + "\'");
+    if(vis && visCnt <=1)
+    {
+        ac->setEnabled(false);
+    }
+    menu->addAction(ac);
+
+    menu->addSeparator();
+
+    //Add special menu for variable columns
+    bool varColumn=header_->model()->headerData(section,Qt::Horizontal,AbstractNodeModel::VariableRole).toBool();
+    QString varName;
+
+    if(varColumn)
+    {
+        varName=header_->model()->headerData(section,Qt::Horizontal).toString();
+
+        ac=new QAction(menu);
+        ac->setText(tr("Change column \'") + varName + "\'");
+        ac->setData("change");
+        menu->addAction(ac);
+
+        ac=new QAction(menu);
+        ac->setText(tr("Remove column \'") + varName + "\'");
+        ac->setIcon(QPixmap(":viewer/remove.svg"));
+        ac->setData("remove");
+        menu->addAction(ac);
+
+        menu->addSeparator();
+    }
+
+    //Submenu to control the visibility of other columns
+    QMenu *visMenu=menu->addMenu("Show/hide other columns");
 	for(int i=0; i <header_->count(); i++)
 	{
-	  	QString name=header_->model()->headerData(i,Qt::Horizontal).toString();
-		ac=new QAction(menu);
-		ac->setText(name);
-		ac->setCheckable(true);
-		ac->setData(i);
-
-        bool vis=!header_->isSectionHidden(i);
-        ac->setChecked(vis);
-
-        if(vis && visCnt <=1)
+        if(i != section)
         {
-            ac->setEnabled(false);
+            name=header_->model()->headerData(i,Qt::Horizontal).toString();
+            ac=new QAction(visMenu);
+            ac->setText(name);
+            ac->setCheckable(true);
+            ac->setData(i);
+
+            bool vis=!header_->isSectionHidden(i);
+            ac->setChecked(vis);
+
+            if(vis && visCnt <=1)
+            {
+                ac->setEnabled(false);
+            }
+
+            visMenu->addAction(ac);
         }
-
-		menu->addAction(ac);
 	}
 
-	//stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
-	//VParamFilterMenu stateFilterMenu(menu,filterDef_->nodeState(),VParamFilterMenu::ColourDecor);
-
+    //Show the context menu and check selected action
 	ac=menu->exec(header_->mapToGlobal(position));
-	if(ac && ac->isEnabled() && ac->isCheckable())
+    if(ac && ac->isEnabled())
 	{
-	  	int i=ac->data().toInt();
-	  	header_->setSectionHidden(i,!ac->isChecked());
+        if(ac->data().toString() == "change")
+        {
+            changeVariableColumn(varName);
+        }
+        else if(ac->data().toString() == "remove")
+        {
+            delete menu;
+            if(QMessageBox::question(0,tr("Confirm: remove column"),
+                            tr("Are you sure that you want to remove column <b>") + varName + "</b>?",
+                            QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)
+            {
+                model_->removeColumn(varName);
+            }
+            return;
+        }
+        else if(ac->isCheckable())
+        {
+            int i=ac->data().toInt();
+            header_->setSectionHidden(i,!ac->isChecked());
+        }
 	}
-	delete menu;
+    delete menu;
 }
 
 void TableNodeView::readSettings(VSettings* vs)
@@ -618,13 +728,14 @@ void TableNodeHeader::paintSection(QPainter *painter, const QRect &rect, int log
 	if(isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
 		opt.sortIndicator = (sortIndicatorOrder() == Qt::AscendingOrder)
                             ? QStyleOptionHeader::SortDown : QStyleOptionHeader::SortUp;
-		if (opt.sortIndicator != QStyleOptionHeader::None)
-		{
-			QStyleOptionHeader subopt = opt;
-			subopt.rect = style()->subElementRect(QStyle::SE_HeaderArrow, &opt, this);
-			rightPos=subopt.rect.left();
-		    style()->drawPrimitive(QStyle::PE_IndicatorHeaderArrow, &subopt, painter, this);
-		 }
+
+    if (opt.sortIndicator != QStyleOptionHeader::None)
+    {
+        QStyleOptionHeader subopt = opt;
+        subopt.rect = style()->subElementRect(QStyle::SE_HeaderArrow, &opt, this);
+        rightPos=subopt.rect.left();
+           style()->drawPrimitive(QStyle::PE_IndicatorHeaderArrow, &subopt, painter, this);
+    }
 
 
 	QMap<int,TableNodeHeaderButton>::iterator it=customButton_.find(logicalIndex);
