@@ -66,6 +66,12 @@ bool TableNodeSortModel::lessThan(const QModelIndex &left,
     if(id == TableNodeModel::PathColumn)
         return left.row() < right.row();
 
+    else if(id == TableNodeModel::MeterColumn)
+    {
+        return left.data(AbstractNodeModel::SortRole).toInt() <
+               right.data(AbstractNodeModel::SortRole).toInt();
+    }
+
     else if(id == TableNodeModel::StatusChangeColumn)
     {
         return left.data(AbstractNodeModel::SortRole).toUInt() <

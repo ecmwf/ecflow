@@ -229,7 +229,17 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
     else if(role == SortRole)
     {
-        if(id == StatusChangeColumn)
+        if(id == MeterColumn)
+        {
+            if(VAttribute* a=vnode->attributeForType(0,columnToAttrType(id)))
+            {
+                std::string val;
+                if(a->value("meter_value",val))
+                    return QString::fromStdString(val).toInt();
+            }
+            return -9999;
+        }
+        else if(id == StatusChangeColumn)
         {
             return vnode->statusChangeTime();
         }
