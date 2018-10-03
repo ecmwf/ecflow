@@ -16,13 +16,19 @@
 class VItemPathParser
 {
 public:
-    VItemPathParser(const std::string& path);
+    enum PathFormat {DefaultFormat, // [type]server://nodepath:atttibutename
+                     DiagFormat //host@port:/nodepath
+                    };
+
+    VItemPathParser(const std::string& path,PathFormat format=DefaultFormat);
 
     enum ItemType {ServerType,NodeType,AttributeType,NoType};
 
     ItemType  itemType() const {return itemType_;}
     const std::string type() const {return type_;}
     const std::string server() const {return server_;}
+    const std::string host() const {return host_;}
+    const std::string port() const {return port_;}
     const std::string node() const {return node_;}
     const std::string attribute() const {return attribute_;}
     std::string parent() const;
@@ -33,9 +39,13 @@ public:
     static std::string encodeAttribute(const std::string& parentPath,const std::string& attrName,const std::string& attrType);
 
 protected:
+    void extractHostPort(const std::string& server);
+
     ItemType itemType_;
     std::string type_;
     std::string server_;
+    std::string host_;
+    std::string port_;
     std::string node_;
     std::string attribute_;
 };

@@ -71,12 +71,14 @@ public Q_SLOTS:
   void slotBeginServerClear(VModelServer* server,int);
   void slotEndServerClear(VModelServer* server,int);
 
-  void slotAddColumnBegin();
-  void slotAddColumnEnd();
+  void slotAppendColumnBegin();
+  void slotAppendColumnEnd();
+  void slotAddColumnsBegin(int,int);
+  void slotAddColumnsEnd(int,int);
   void slotChangeColumnBegin(int idx);
   void slotChangeColumnEnd(int idx);
-  void slotRemoveColumnBegin(int idx);
-  void slotRemoveColumnEnd(int idx);
+  void slotRemoveColumnsBegin(int,int);
+  void slotRemoveColumnsEnd(int,int);
 
 Q_SIGNALS:
   void filterChangeBegun();
@@ -98,6 +100,7 @@ protected:
   
   VTableModelData* data_;
   ModelColumn* columns_;
+  int diagPixId_;
 };
 
 #endif

@@ -766,6 +766,21 @@ void TableNodeHeader::paintSection(QPainter *painter, const QRect &rect, int log
 
 	painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
 
+    //Draw icon to the left of the text
+    QVariant pixVa=model()->headerData(logicalIndex,Qt::Horizontal,Qt::DecorationRole);
+    if(pixVa.type() == QVariant::Pixmap)
+    {
+        QPixmap pix=pixVa.value<QPixmap>();
+        int pixH=qMin(pix.height(),rect.height()-2);
+
+        QFont f;
+        QFontMetrics fm(f);
+        int textLeft=textRect.center().x()-fm.width(text)/2-1;
+        QRect pixRect=QRect(rect.x()+3,rect.center().y()-pixH/2,
+                            pix.width(),pix.height());
+        if(pixRect.x()+pixRect.width() < textLeft)
+            painter->drawPixmap(pixRect,pix);
+    }
 
 	//style()->drawControl(QStyle::CE_PushButton, &optButton,painter,this);
 }

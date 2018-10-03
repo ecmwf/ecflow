@@ -18,6 +18,7 @@
 #include <QPixmap>
 
 #include "File.hpp"
+#include "DiagData.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
@@ -164,6 +165,9 @@ int main(int argc, char **argv)
 
         //Enable (daily) truncation for ui log
         UiLog::enableTruncation();
+
+        //Load extra diagnostic data
+        DiagData::instance()->load();
 
 		return app.exec();
 	}

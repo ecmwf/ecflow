@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2018 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,6 +13,7 @@
 
 #include <QDebug>
 
+#include "DiagData.hpp"
 #include "VConfig.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
@@ -20,7 +21,7 @@
 
 static std::map<std::string,ModelColumn*> defs;
 
-ModelColumn::ModelColumn(const std::string& id) : id_(id)
+ModelColumn::ModelColumn(const std::string& id) : id_(id), diagStart_(-1), diagEnd_(-1)
 {
 	defs[id_]=this;
 }
@@ -33,6 +34,10 @@ ModelColumn* ModelColumn::def(const std::string& id)
 	return NULL;
 }
 
+ModelColumn* ModelColumn::tableModelColumn()
+{
+    return ModelColumn::def("table_columns");
+}
 
 //int ModelColumn::indexOf(const std::string& id) const
 //{
@@ -66,6 +71,28 @@ void ModelColumn::loadExtraItem(QString name,QString label)
     obj->tooltip_=obj->label_;
     //obj->icon_=p->param("icon");
     obj->index_=items_.count();
+    obj->editable_=true;
+
+    if(hasDiag())
+    {
+        items_.insert(diagStart_,obj);
+        diagStart_++;
+        diagEnd_++;
+    }
+    else
+    {
+       items_ << obj;
+    }
+}
+
+void ModelColumn::loadDiagItem(QString name,QString label)
+{
+    ModelColumnItem* obj=new ModelColumnItem(name.toStdString(),true);
+    obj->label_=label;
+    obj->tooltip_=obj->label_;
+    //obj->icon_=p->param("icon");
+    obj->index_=items_.count();
+    obj->editable_=false;
     items_ << obj;
 }
 
@@ -74,9 +101,19 @@ void ModelColumn::addExtraItem(QString name,QString label)
     if(indexOf(name) !=  -1)
         return;
 
-    Q_EMIT addItemBegin();
+    //Editable extra items are always inserted in front of the diag items
+    int pos=items_.count();
+    if(hasDiag())
+    {
+        pos=diagStart_;
+        Q_ASSERT(pos >=0);
+    }
+
+    Q_EMIT addItemsBegin(pos,pos);
+    //Q_EMIT appendItemBegin();
     loadExtraItem(name,label);
-    Q_EMIT addItemEnd();
+    //Q_EMIT appendItemEnd();
+    Q_EMIT addItemsEnd(pos,pos);
 
     save();
 }
@@ -105,16 +142,78 @@ void ModelColumn::removeExtraItem(QString name)
     if(idx != -1 &&
        items_[idx]->isExtra() && items_[idx]->isEditable())
     {
-        Q_EMIT removeItemBegin(idx);
+        Q_EMIT removeItemsBegin(idx,idx);
 
         ModelColumnItem* obj=items_[idx];
         items_.removeAt(idx);
         delete obj;
 
-        Q_EMIT removeItemEnd(idx);
+        if(hasDiag())
+        {
+            diagStart_--;
+            diagEnd_--;
+            Q_ASSERT(diagStart_ >= 0);
+        }
+
+        Q_EMIT removeItemsEnd(idx,idx);
 
         save();
     }
+}
+
+bool ModelColumn::isSameDiag(DiagData *diag) const
+{
+    if(diagStart_ >=0 && diagEnd_ >=0 && diag->count() == diagEnd_-diagStart_+1)
+    {
+        for(int i=diagStart_; i <= diagEnd_; i++)
+        {
+            if(items_[i]->id_ !=
+                    QString::fromStdString(diag->columnName(i-diagStart_)))
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+void ModelColumn::setDiagData(DiagData *diag)
+{
+    if(isSameDiag(diag))
+        return;
+
+    //Remove the current diag items
+    if(diagStart_ >=0 && diagEnd_ >=0)
+    {
+        Q_EMIT removeItemsBegin(diagStart_,diagEnd_);
+        for(int i=diagStart_; i <= diagEnd_; i++)
+        {
+            ModelColumnItem* obj=items_[diagStart_];
+            items_.removeAt(diagStart_);
+            delete obj;
+        }
+        Q_EMIT removeItemsEnd(diagStart_,diagEnd_);
+        diagStart_=-1;
+        diagEnd_=-1;
+    }
+
+    //Add the current diag items to the back of the items
+    if(diag->count() <=0)
+        return;
+
+    diagStart_=items_.count();
+    diagEnd_=items_.count()+diag->count()-1;
+    Q_ASSERT(diagStart_ >= 0);
+    Q_ASSERT(diagStart_ <= diagEnd_);
+    Q_EMIT addItemsBegin(diagStart_,diagEnd_);
+
+    for(int i=0; i < diag->count(); i++)
+    {
+        QString n=QString::fromStdString(diag->columnName(i));
+        loadDiagItem(n,n);// these are not editable items!!!
+    }
+    Q_EMIT addItemsEnd(diagStart_,diagEnd_);
 }
 
 void ModelColumn::save()

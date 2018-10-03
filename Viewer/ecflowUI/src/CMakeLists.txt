@@ -38,6 +38,7 @@ set(viewer_srcs
     DashboardDock.cpp
     DashboardTitle.cpp
     DashboardWidget.cpp
+    DiagData.cpp
     EditItemWidget.cpp
     EditProvider.cpp
     EditorInfoLabel.cpp
