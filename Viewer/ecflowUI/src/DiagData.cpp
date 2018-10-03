@@ -127,10 +127,8 @@ void DiagData::clear()
 
 void DiagData::load()
 {
-    //if(const char *df=getenv("ECFLOWUI_DIAG_FILE"))
-    //   loadFile(std::string(df));
-
-    loadFile("/home/graphics/cgr/ecflow_extra_info.csv");
+    if(const char *df=getenv("ECFLOWUI_DIAG_FILE"))
+        loadFile(std::string(df));
 }
 
 void DiagData::loadFile(const std::string& fileName)
