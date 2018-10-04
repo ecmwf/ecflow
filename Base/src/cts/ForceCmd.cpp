@@ -45,7 +45,10 @@ std::ostream& ForceCmd::print(std::ostream& os) const
 {
    return user_cmd(os,CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
-
+std::ostream& ForceCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)); return os;
+}
 std::ostream& ForceCmd::print(std::ostream& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);

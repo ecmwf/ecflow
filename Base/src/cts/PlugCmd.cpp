@@ -49,6 +49,10 @@ std::ostream& PlugCmd::print(std::ostream& os) const
 {
    return user_cmd(os,CtsApi::to_string(CtsApi::plug(source_,dest_)));
 }
+std::ostream& PlugCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::to_string(CtsApi::plug(source_,dest_));return os;
+}
 
 /// Class to manage locking: Only unlock if acquired the lock,
 class Lock {

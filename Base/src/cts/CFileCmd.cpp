@@ -106,6 +106,10 @@ std::ostream& CFileCmd::print(std::ostream& os) const
 {
 	return user_cmd(os,CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_))));
 }
+std::ostream& CFileCmd::print_only(std::ostream& os) const
+{
+    os << CtsApi::to_string(CtsApi::file(pathToNode_,toString(file_),boost::lexical_cast<std::string>(max_lines_))); return os;
+}
 
 STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
 {

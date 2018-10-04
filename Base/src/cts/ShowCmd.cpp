@@ -35,6 +35,11 @@ std::ostream& ShowCmd::print(std::ostream& os) const
 {
 	return user_cmd(os,"show");
 }
+std::ostream& ShowCmd::print_only(std::ostream& os) const
+{
+   os << "show"; return os;
+}
+
 
 STC_Cmd_ptr ShowCmd::doHandleRequest(AbstractServer* as) const
 {

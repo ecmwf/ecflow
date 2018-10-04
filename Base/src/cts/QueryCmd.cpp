@@ -39,6 +39,13 @@ std::ostream& QueryCmd::print(std::ostream& os) const
    the_query_cmd += path_to_task_;
    return user_cmd(os,the_query_cmd );
 }
+std::ostream& QueryCmd::print_only(std::ostream& os) const
+{
+   std::string the_query_cmd = CtsApi::to_string(CtsApi::query(query_type_,path_to_attribute_,attribute_));
+   the_query_cmd += path_to_task_;
+   os << the_query_cmd;
+   return os;
+}
 
 bool QueryCmd::equals(ClientToServerCmd* rhs) const
 {

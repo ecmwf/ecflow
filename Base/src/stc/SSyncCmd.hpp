@@ -48,7 +48,8 @@ public:
 
    std::ostream& print(std::ostream& os) const override;
    bool equals(ServerToClientCmd*) const override;
-   bool hasDefs() const override { return true; }
+   bool is_returnable_in_group_cmd() const override { return true; }
+
 
    // Client side functions:
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;

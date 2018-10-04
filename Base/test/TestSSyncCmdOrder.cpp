@@ -180,7 +180,7 @@ static void reorder_suites_using_handles(defs_ptr theDefs) {
    // Hence after this call Ecf::server_ is false. Hence we need to ensure that following
    // commands/ DM function set Ecf::server_ to true.
    std::vector<std::string> suite_names = vector_abcd();
-   TestHelper::invokeRequest(theDefs.get(),Cmd_ptr( new ClientHandleCmd(suite_names,false)),bypass_state_modify_change_check);
+   TestHelper::invokeRequest(theDefs.get(),Cmd_ptr( new ClientHandleCmd(0,suite_names,false)),bypass_state_modify_change_check);
    BOOST_CHECK_MESSAGE(theDefs->client_suite_mgr().clientSuites().size() == 1,"Expected 1 Client suites but found " << theDefs->client_suite_mgr().clientSuites().size());
 
    TestHelper::invokeRequest(theDefs.get(),Cmd_ptr( new OrderNodeCmd("/a",NOrder::ALPHA)));
@@ -196,7 +196,7 @@ static void reorder_family_using_handles(defs_ptr theDefs) {
    // Hence after this call Ecf::server_ is false. Hence we need to ensure that following
    // commands/ DM function set Ecf::server_ to true.
    std::vector<std::string> suite_names ; suite_names.emplace_back("d"); // clinet handle for suite 'd' ONLY
-   TestHelper::invokeRequest(theDefs.get(),Cmd_ptr( new ClientHandleCmd(suite_names,false)),bypass_state_modify_change_check);
+   TestHelper::invokeRequest(theDefs.get(),Cmd_ptr( new ClientHandleCmd(0,suite_names,false)),bypass_state_modify_change_check);
    BOOST_CHECK_MESSAGE(theDefs->client_suite_mgr().clientSuites().size() == 1,"Expected 1 Client suites but found " << theDefs->client_suite_mgr().clientSuites().size());
 
    /// Don't call, data model function directly, since Ecf::server_ is false. *here*

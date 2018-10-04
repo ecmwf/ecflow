@@ -57,6 +57,20 @@ std::ostream& CtsNodeCmd::print(std::ostream& os) const
    }
    return os;
 }
+std::ostream& CtsNodeCmd::print_only(std::ostream& os) const
+{
+   switch (api_) {
+      case CtsNodeCmd::GET:                os << CtsApi::get(absNodePath_); break;
+      case CtsNodeCmd::GET_STATE:          os << CtsApi::get_state(absNodePath_); break;
+      case CtsNodeCmd::MIGRATE:            os << CtsApi::migrate(absNodePath_); break;
+      case CtsNodeCmd::JOB_GEN:            os << CtsApi::job_gen(absNodePath_); break;
+      case CtsNodeCmd::CHECK_JOB_GEN_ONLY: os << CtsApi::checkJobGenOnly(absNodePath_); break;
+      case CtsNodeCmd::WHY:                os << CtsApi::why(absNodePath_); break;
+      case CtsNodeCmd::NO_CMD:             break;
+      default: throw std::runtime_error("CtsNodeCmd::print_only : Unrecognised command");break;
+   }
+   return os;
+}
 
 bool CtsNodeCmd::equals(ClientToServerCmd* rhs) const
 {
@@ -82,6 +96,7 @@ bool CtsNodeCmd::isWrite() const
    assert(false);
    return false;
 }
+
 
 const char* CtsNodeCmd::theArg() const
 {

@@ -41,7 +41,7 @@ public:
    static std::string sync_full(unsigned int client_handle);
 	static std::vector<std::string> news(unsigned int client_handle, unsigned int state_change_no, unsigned int modify_change_no );
 
-	static std::vector<std::string> ch_register(  bool auto_add_new_suites, const std::vector<std::string>& suites);
+	static std::vector<std::string> ch_register(int client_handle, bool auto_add_new_suites, const std::vector<std::string>& suites);
    static std::string ch_suites();
    static std::string ch_drop(int client_handle);
    static std::string ch_drop_user(const std::string& user);

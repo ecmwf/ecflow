@@ -21,7 +21,12 @@
 
 std::string CtsApi::to_string(const std::vector<std::string>& vec) {
    std::string ret;
-   for(const auto & i : vec) { ret += i; ret += " "; }
+   size_t vec_size = vec.size();
+   for(size_t i = 0; i < vec_size; i++) {
+      if (vec[i].empty()) continue;
+      ret += vec[i];
+      if (i != vec_size-1) ret += " ";  // don't add space at the end
+   }
    return ret;
 }
 
@@ -69,13 +74,21 @@ const char* CtsApi::stats_reset_arg()  { return "stats_reset"; }
 std::string CtsApi::suites()    { return "--suites"; }
 const char* CtsApi::suitesArg() { return "suites"; }
 
-std::vector<std::string> CtsApi::ch_register( bool auto_add_new_suites , const std::vector<std::string>& suites )
+std::vector<std::string> CtsApi::ch_register( int client_handle, bool auto_add_new_suites , const std::vector<std::string>& suites )
 {
    std::vector<std::string> retVec; retVec.reserve(suites.size() +1);
    std::string ret = "--ch_register=";
-   if ( auto_add_new_suites ) ret += "true";
-   else                       ret += "false";
-   retVec.push_back(ret);
+   if (client_handle != 0) {
+      ret += boost::lexical_cast<std::string>(client_handle);
+      retVec.push_back(ret);
+      if ( auto_add_new_suites ) retVec.push_back("true");
+      else                       retVec.push_back("false");
+   }
+   else {
+      if ( auto_add_new_suites ) ret += "true";
+      else                       ret += "false";
+      retVec.push_back(ret);
+   }
    for(const auto & suite : suites) { retVec.push_back(suite);}
    return retVec;
 }

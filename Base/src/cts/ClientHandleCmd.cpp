@@ -38,7 +38,7 @@ namespace po = boost::program_options;
 std::ostream& ClientHandleCmd::print(std::ostream& os) const
 {
 	switch (api_) {
-		case ClientHandleCmd::REGISTER: return user_cmd(os,CtsApi::to_string(CtsApi::ch_register(auto_add_new_suites_,suites_))); break;
+		case ClientHandleCmd::REGISTER: return user_cmd(os,CtsApi::to_string(CtsApi::ch_register(client_handle_,auto_add_new_suites_,suites_))); break;
       case ClientHandleCmd::DROP:     return user_cmd(os,CtsApi::ch_drop(client_handle_)); break;
       case ClientHandleCmd::DROP_USER:{
          if (drop_user_.empty()) return user_cmd(os,CtsApi::ch_drop_user(user()));
@@ -52,6 +52,26 @@ std::ostream& ClientHandleCmd::print(std::ostream& os) const
  	}
   	return os;
 }
+
+std::ostream& ClientHandleCmd::print_only(std::ostream& os) const
+{
+   switch (api_) {
+      case ClientHandleCmd::REGISTER: os << CtsApi::to_string(CtsApi::ch_register(client_handle_,auto_add_new_suites_,suites_)); break;
+      case ClientHandleCmd::DROP:     os << CtsApi::ch_drop(client_handle_); break;
+      case ClientHandleCmd::DROP_USER:{
+         if (drop_user_.empty()) os << CtsApi::ch_drop_user(user());
+         else                    os << CtsApi::ch_drop_user(drop_user_);
+         break;
+      }
+      case ClientHandleCmd::ADD:      os << CtsApi::to_string(CtsApi::ch_add(client_handle_,suites_)); break;
+      case ClientHandleCmd::REMOVE:   os << CtsApi::to_string(CtsApi::ch_remove(client_handle_,suites_)); break;
+      case ClientHandleCmd::AUTO_ADD: os << CtsApi::to_string(CtsApi::ch_auto_add(client_handle_,auto_add_new_suites_)); break;
+      case ClientHandleCmd::SUITES:   os << CtsApi::ch_suites(); break;
+      default: assert(false); break;
+   }
+   return os;
+}
+
 
 bool ClientHandleCmd::equals(ClientToServerCmd* rhs) const
 {
@@ -77,6 +97,21 @@ const char* ClientHandleCmd::theArg() const
 	return nullptr;
 }
 
+bool ClientHandleCmd::cmd_updates_defs() const
+{
+   switch (api_) {
+      case ClientHandleCmd::REGISTER:  return true; break;
+      case ClientHandleCmd::DROP:      return true; break; // can be expensive for large defs
+      case ClientHandleCmd::DROP_USER: return true; break; // can be expensive for large defs
+      case ClientHandleCmd::ADD:       return true; break;
+      case ClientHandleCmd::REMOVE:    return true; break;
+      case ClientHandleCmd::AUTO_ADD:  return false; break;
+      case ClientHandleCmd::SUITES:    return false; break;
+   }
+   assert(false);
+   return false;
+}
+
 STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().ch_cmd_++;
@@ -84,16 +119,31 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
 	switch (api_) {
 		case ClientHandleCmd::REGISTER:  {
 
+		   // If existing handle is non zero drop it first
+		   if (client_handle_ != 0) {
+		      as->defs()->client_suite_mgr().remove_client_suite(client_handle_); // will throw if handle not found
+		   }
+
  			unsigned int client_handle = as->defs()->client_suite_mgr().create_client_suite(auto_add_new_suites_,suites_,user());
 //#ifdef DEBUG
-// 	      LOG(Log::DBG,as->defs()->client_suite_mgr().dump_max_change_no());
+// 	   LOG(Log::DBG,as->defs()->client_suite_mgr().dump_max_change_no());
 //#endif
+
+ 			// If this command is part of a group command, let the following sync command, know about the new handle
+ 			// So it return the defs with the right set of suites.
+ 			if (group_cmd_) group_cmd_->set_client_handle(client_handle);
+
 			// return the handle to the client
 		 	return PreAllocatedReply::client_handle_cmd(client_handle) ;
 		}
 
 		case ClientHandleCmd::DROP: {
 		   as->defs()->client_suite_mgr().remove_client_suite(client_handle_); // will throw if handle not found
+
+         // If this command is part of a group command, let the following sync command, know about the new handle
+         // So it return the defs with the right set of suites.
+		   // If used with following sync, will return *FULL* defs. Can be expensive
+         if (group_cmd_) group_cmd_->set_client_handle(0);
 
 		   // return the 0 handle to the client. The client stores the handle locally. Reset to zero.
 		   return PreAllocatedReply::client_handle_cmd(0) ;
@@ -105,6 +155,12 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
 		   else                    as->defs()->client_suite_mgr().remove_client_suites(drop_user_);
 
 		   if (drop_user_.empty() || drop_user_ == user()) {
+
+	         // If this command is part of a group command, let the following sync command, know about the new handle
+	         // So it return the defs with the right set of suites.
+	         // If used with following sync, will return *FULL* defs.
+	         if (group_cmd_) group_cmd_->set_client_handle(0);
+
 		      // return the 0 handle to the client. The client stores the handle locally. Reset to zero.
 		      return PreAllocatedReply::client_handle_cmd(0) ;
 		   }
@@ -131,7 +187,6 @@ STC_Cmd_ptr ClientHandleCmd::doHandleRequest(AbstractServer* as) const
       }
 
 		default: assert(false); break;
-
  	}
 	return PreAllocatedReply::ok_cmd();
 }
@@ -145,17 +200,20 @@ void ClientHandleCmd::addOption(boost::program_options::options_description& des
 			         "If a definition has lots of suites, but the client. is only interested in a small subset,\n"
 			         "Then using this command can reduce network bandwidth and synchronisation will be quicker.\n"
 			         "This command will create a client handle, which must be used for any other changes.\n"
-			         "The newly created handle can be shown with the --suites command\n"
+			         "The newly created handle can be shown with the --ch_suites command\n"
 			         "Deleted suites will stay registered, and must be explicitly removed/dropped.\n"
 			         "Note: Suites can be registered before they are loaded into the server\n"
-			         "This option affects news() and sync() commands\n"
+			         "This command affects news() and sync() commands\n"
 			         "   arg1 = true | false           # true means add new suites to my list, when they are created\n"
 			         "   arg2 = names                  # should be a list of suite names, names not in the definition are ignored\n"
 			         "Usage:\n"
 			         "   --ch_register=true s1 s2 s3   # register interest in suites s1,s2,s3 and any new suites\n"
 			         "   --ch_register=false s1 s2 s3  # register interest in suites s1,s2,s3 only\n"
 			         "   --ch_register=false           # register handle, suites will be added later on\n"
-			         "To list all suites and handles use --suites"
+                  "   --ch_register=1 true s1 s2 s3 # drop handle 1 then register interest in suites s1,s2,s3 and any new suites\n"
+			         "                                 # The client handle as the first argument is typically used by GUI/python"
+			         "                                 # When the client handle is no zero, then it is dropped first\n"
+			         "To list all suites and handles use --ch_suites"
  			);
 			break;
 		}
@@ -250,16 +308,28 @@ void ClientHandleCmd::create( 	Cmd_ptr& cmd,
 
 		case ClientHandleCmd::REGISTER:  {
 			vector<string> args = vm[  theArg() ].as< vector<string> >();
-			// args can be empty, otherwise first arg must be bool, true or false, subsequent args represent suite names
+			// args can be empty, otherwise first arg must be integer or bool true or false, subsequent args represent suite names
+			int client_handle = 0;
 			bool auto_add_new_suites = false;
 			std::vector<std::string> suite_names; suite_names.reserve( args.size() );
+			int suite_names_index = 1;
 			if (!args.empty()) {
-				if (args[0] == "true") auto_add_new_suites = true;
-				else if (args[0] == "false") auto_add_new_suites = false;
-				else throw std::runtime_error("ClientHandleCmd::create: First argument should be true | false. See help");
-				for(size_t i = 1; i < args.size(); i++) { suite_names.push_back( args[i] ); }
+			   try {
+			      client_handle = boost::lexical_cast<int>(args[0]);
+			      if (args.size() > 1) {
+			         if (args[1] == "true") auto_add_new_suites = true;
+			         else if (args[1] == "false") auto_add_new_suites = false;
+			         suite_names_index = 2;
+			      }
+			   }
+			   catch (...) {
+			      if (args[0] == "true") auto_add_new_suites = true;
+			      else if (args[0] == "false") auto_add_new_suites = false;
+			      else throw std::runtime_error("ClientHandleCmd::create: First argument should be integer | true | false. See help");
+			   }
+				for(size_t i = suite_names_index; i < args.size(); i++) { suite_names.push_back( args[i] ); }
 			}
-		 	cmd = Cmd_ptr(new ClientHandleCmd( suite_names, auto_add_new_suites ));
+		 	cmd = Cmd_ptr(new ClientHandleCmd(client_handle, suite_names, auto_add_new_suites ));
 			break;
 		}
 

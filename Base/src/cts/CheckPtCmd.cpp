@@ -28,6 +28,10 @@ std::ostream& CheckPtCmd::print(std::ostream& os) const
 {
    return user_cmd(os,CtsApi::checkPtDefs(mode_,check_pt_interval_,check_pt_save_time_alarm_));
 }
+std::ostream& CheckPtCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::checkPtDefs(mode_,check_pt_interval_,check_pt_save_time_alarm_); return os;
+}
 
 bool CheckPtCmd::equals(ClientToServerCmd* rhs) const
 {

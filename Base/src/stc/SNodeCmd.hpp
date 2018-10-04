@@ -32,7 +32,7 @@ public:
    bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
    std::ostream& print(std::ostream& os) const override;
    bool equals(ServerToClientCmd*) const override;
-   bool hasNode() const override { return true; }                /// used by group command
+   bool is_returnable_in_group_cmd() const override { return true; }
    void cleanup() override { std::string().swap(the_node_str_);} /// run in the server, after command send to client
 
 private:

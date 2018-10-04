@@ -107,7 +107,7 @@ void test_sync_scaffold( defs_change_cmd the_defs_change_command, const std::str
       /// create client handle which references suites s0 and s4, in the server defs
       /// Registering suites should change handle_changed boolean
       std::vector<std::string> suite_names; suite_names.emplace_back("s0"); suite_names.emplace_back("s4");
-      TestHelper::invokeRequest(server_defs.get(),Cmd_ptr( new ClientHandleCmd(suite_names,false)),bypass_state_modify_change_check);
+      TestHelper::invokeRequest(server_defs.get(),Cmd_ptr( new ClientHandleCmd(0,suite_names,false)),bypass_state_modify_change_check);
 
       BOOST_CHECK_MESSAGE(server_defs->client_suite_mgr().clientSuites().size() == 1,test_name << ": Expected 1 Client suites but found " <<server_defs->client_suite_mgr().clientSuites().size());
       client_handle = server_defs->client_suite_mgr().clientSuites().front().handle();
@@ -606,7 +606,7 @@ BOOST_AUTO_TEST_CASE( test_ssync_full_sync_using_handle  )
    suite_names.emplace_back("s2");
    suite_names.emplace_back("s3");
    suite_names.emplace_back("s4");
-   TestHelper::invokeRequest(server_defs.get(),Cmd_ptr( new ClientHandleCmd(suite_names,false)),bypass_state_modify_change_check);
+   TestHelper::invokeRequest(server_defs.get(),Cmd_ptr( new ClientHandleCmd(0,suite_names,false)),bypass_state_modify_change_check);
 
    /// make sure handle created.
    BOOST_CHECK_MESSAGE(server_defs->client_suite_mgr().clientSuites().size() == 1,"Expected 1 Client suites but found " <<server_defs->client_suite_mgr().clientSuites().size());

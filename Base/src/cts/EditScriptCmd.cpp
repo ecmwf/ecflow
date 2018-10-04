@@ -72,6 +72,11 @@ std::ostream& EditScriptCmd::print(std::ostream& os) const
 	return user_cmd(os,CtsApi::to_string(CtsApi::edit_script(path_to_node_,to_string(edit_type()),"",alias_,run_)));
 }
 
+std::ostream& EditScriptCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::to_string(CtsApi::edit_script(path_to_node_,to_string(edit_type()),"",alias_,run_)); return os;
+}
+
 bool EditScriptCmd::isWrite() const
 {
    switch (edit_type_) {

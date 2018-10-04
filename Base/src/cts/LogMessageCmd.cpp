@@ -30,6 +30,10 @@ std::ostream& LogMessageCmd::print(std::ostream& os) const
 {
 	return user_cmd(os,CtsApi::logMsg(msg_));
 }
+std::ostream& LogMessageCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::logMsg(msg_);  return os;
+}
 
 bool LogMessageCmd::equals(ClientToServerCmd* rhs) const
 {

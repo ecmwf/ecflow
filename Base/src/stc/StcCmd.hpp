@@ -41,6 +41,7 @@ public:
    /// Hence must still have isOkCmd()
    bool ok() const override { return api_ == OK; }      // used by group command
    bool isOkCmd() const override { return api_ == OK; } // Used if no reply back from server
+   bool is_returnable_in_group_cmd() const override { return api_ == OK;  }
 
 private:
    Api api_{OK};

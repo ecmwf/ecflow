@@ -36,8 +36,8 @@ public:
 
 	virtual const std::string& get_string() const;             /// Used by group command, can return any string, including file contents
 	virtual bool ok() const { return true;}                    /// Used by group command
-   virtual bool hasDefs() const { return false; }             /// used by group command
-   virtual bool hasNode() const { return false; }             /// used by group command
+   virtual bool is_returnable_in_group_cmd() const { return true; } /// used by group command
+
 	virtual std::string error() const { return std::string();} /// Used by test
 	virtual bool isOkCmd() const { return false; }             /// Used by server, to not respond back, client assumes OK
 

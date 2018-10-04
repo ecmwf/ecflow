@@ -35,6 +35,8 @@ public:
    bool equals(ServerToClientCmd*) const override;
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override; // client context
 
+   virtual bool is_returnable_in_group_cmd() const { return false; } /// used by group command
+
 private:
    ecf::Child::ZombieType zombie_type_{ecf::Child::NOT_SET};
 

@@ -54,6 +54,10 @@ public:
 	///   will still return 0 for success.
 	void set_throw_on_error(bool f) { on_error_throw_exception_ = f;}
 
+	/// Enable auto sync on each command that can modify the Defs state in the server
+	void set_auto_sync(bool f) { auto_sync_ = f;}
+	bool is_auto_sync_enabled() const { return auto_sync_;}
+
 	/// Return the time it takes to contact server and get a reply.
 	const boost::posix_time::time_duration& round_trip_time() const { return rtt_;}
 
@@ -212,10 +216,11 @@ public:
 	int ch_add(int client_handle, const std::vector<std::string>& suites) const;
 	int ch_remove(int client_handle, const std::vector<std::string>& suites) const;
 	int ch_auto_add(int client_handle, bool auto_add_new_suites) const;
-	int ch1_drop() const;
-	int ch1_add(const std::vector<std::string>& suites) const;
-	int ch1_remove(const std::vector<std::string>& suites) const;
-	int ch1_auto_add(bool auto_add_new_suites) const;
+   int ch1_register( bool auto_add_new_suites, const std::vector<std::string>& suites) const; // uses existing handle on client if any
+   int ch1_drop() const;                                                                      // uses existing handle on client
+	int ch1_add(const std::vector<std::string>& suites) const;                                 // uses existing handle on client
+	int ch1_remove(const std::vector<std::string>& suites) const;                              // uses existing handle on client
+	int ch1_auto_add(bool auto_add_new_suites) const;                                          // uses existing handle on client
 
 	int begin(const std::string& suiteName,bool force = false) const;
  	int begin_all_suites(bool force = false) const;
@@ -291,18 +296,14 @@ public:
 	          const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
 	          const std::string& attrType,
 	          const std::string& name = "",
-	          const std::string& value = "") const { return invoke(CtsApi::alter(paths,alterType,attrType,name,value)); }
+	          const std::string& value = "") const;
    int alter(const std::string& path,
              const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
              const std::string& attrType,
              const std::string& name = "",
-             const std::string& value = "") const { return invoke(CtsApi::alter(path,alterType,attrType,name,value)); }
-   int alter_sort(const std::vector<std::string>& paths,
-              const std::string& sortable_attribute_name,
-              bool recursive = true) const { return invoke(CtsApi::alter_sort(paths,sortable_attribute_name,recursive)); }
-   int alter_sort(const std::string& path,
-              const std::string& sortable_attribute_name,
-              bool recursive = true) const { return invoke(CtsApi::alter_sort(std::vector<std::string>(1,path),sortable_attribute_name,recursive)); }
+             const std::string& value = "") const;
+   int alter_sort(const std::vector<std::string>& paths, const std::string& sortable_attribute_name, bool recursive = true) const;
+   int alter_sort(const std::string& path, const std::string& sortable_attribute_name, bool recursive = true) const;
 
 	int reloadwsfile() const;
 	int reloadpasswdfile() const;
@@ -339,10 +340,15 @@ public:
 	                       bool run = true);                                                                   // ecFlowview SUBMIT_FILE
 
 private:
+  	int get_cmd_from_args(int argc, char* argv[], Cmd_ptr& cts_cmd) const;
+
 	/// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
 	int invoke( const std::string& arg ) const;
-	int invoke( const std::vector<std::string>& args ) const;
+   int invoke( const std::vector<std::string>& args ) const;
+   int invoke_group_sync_cmd( const std::vector<std::string>& args ) const;
    int invoke(Cmd_ptr) const; // assumes clients of Cmd_ptr constructor has caught exceptions
+
+   int invoke_group_sync_cmd( Cmd_ptr  ) const ;
 
    int do_invoke_cmd(Cmd_ptr) const;
 	int load_in_memory_defs( const defs_ptr& clientDefs, bool force) const; /// For clients that want to load a in memory definition into the server.
@@ -354,6 +360,7 @@ private:
    friend class RequestLogger;
 private:
 	bool on_error_throw_exception_;
+	bool auto_sync_;
 	bool test_;                            // used in testing only
 	bool testInterface_;                   // used in testing only
 	unsigned int connection_attempts_;     // No of attempts to establish connection with the server

@@ -30,6 +30,10 @@ std::ostream& ServerVersionCmd::print(std::ostream& os) const
 {
    return user_cmd(os,CtsApi::server_version());
 }
+std::ostream& ServerVersionCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::server_version();return os;
+}
 
 bool ServerVersionCmd::equals(ClientToServerCmd* rhs) const
 {

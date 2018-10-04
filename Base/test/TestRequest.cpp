@@ -108,7 +108,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::ADOPT,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
    cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::REMOVE,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
    cmd_vec.push_back( Cmd_ptr( new ZombieCmd(ecf::User::KILL,std::vector<std::string>(1,"/suiteName/familyName/taskName"),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),Submittable::DUMMY_JOBS_PASSWORD())));
-	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(suite_names,true)));                      // register
+	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(0,suite_names,true)));                    // register
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1,suite_names,ClientHandleCmd::ADD)));    // add
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1,suite_names,ClientHandleCmd::REMOVE))); // remove
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1, true)));                               // auto_add new suites

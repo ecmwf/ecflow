@@ -39,7 +39,7 @@ bool UserCmd::equals(ClientToServerCmd* rhs) const
 {
    auto* the_rhs = dynamic_cast< UserCmd* > ( rhs );
    if ( !the_rhs ) return false;
-   return user_ == the_rhs->user();
+   return user_ == the_rhs->user() && hostname_ == the_rhs->hostname();
 }
 
 bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const

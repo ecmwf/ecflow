@@ -69,6 +69,21 @@ std::ostream& LogCmd::print(std::ostream& os) const
    }
    return os;
 }
+std::ostream& LogCmd::print_only(std::ostream& os) const
+{
+    switch (api_) {
+      case LogCmd::GET:   os << CtsApi::to_string(CtsApi::getLog(get_last_n_lines_));  break;
+      case LogCmd::CLEAR: os << CtsApi::clearLog(); break;
+      case LogCmd::FLUSH: os << CtsApi::flushLog(); break;
+      case LogCmd::NEW:   os << CtsApi::to_string(CtsApi::new_log(new_path_));  break;
+      case LogCmd::PATH:  os << CtsApi::get_log_path(); break;
+      case LogCmd::ENABLE_AUTO_FLUSH:  os << CtsApi::enable_auto_flush(); break;
+      case LogCmd::DISABLE_AUTO_FLUSH: os << CtsApi::disable_auto_flush(); break;
+      case LogCmd::QUERY_AUTO_FLUSH:   os << CtsApi::query_auto_flush(); break;
+      default : throw std::runtime_error( "LogCmd::print: Unrecognised log api command,") ;
+   }
+   return os;
+}
 
 bool LogCmd::equals(ClientToServerCmd* rhs) const
 {

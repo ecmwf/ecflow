@@ -55,8 +55,9 @@ bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts
 {
 	if (debug) std::cout << "  GroupSTCCmd::handle_server_response\n";
 
+	bool ret_flag = true;
 	BOOST_FOREACH(STC_Cmd_ptr subCmd, cmdVec_) {
-		(void)subCmd->handle_server_response(server_reply, cts_cmd, debug);
+		if (!subCmd->handle_server_response(server_reply, cts_cmd, debug)) ret_flag = false; // one of the commands failed
   	}
 
 	/// This assumes the DefsCmd::handle_server_response() | SNodeCmd::handle_server_response has been called
@@ -115,7 +116,7 @@ bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts
 		std::cout << cmd.why() << "\n";
  	}
 
-	return true;
+	return ret_flag;
 }
 
 void GroupSTCCmd::addChild(STC_Cmd_ptr childCmd)

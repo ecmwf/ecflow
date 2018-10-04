@@ -27,6 +27,7 @@
 #include "CtsCmdRegistry.hpp"
 #include "ArgvCreator.hpp"
 #include "Log.hpp"
+#include "ErrorCmd.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -135,6 +136,12 @@ bool GroupCTSCmd::isWrite() const
  	return false;
 }
 
+bool GroupCTSCmd::cmd_updates_defs() const
+{
+   BOOST_FOREACH(Cmd_ptr subCmd, cmdVec_) { if (subCmd->cmd_updates_defs()) return true; }
+   return false;
+}
+
 bool GroupCTSCmd::get_cmd() const
 {
  	BOOST_FOREACH(Cmd_ptr subCmd, cmdVec_) { if (subCmd->get_cmd()) return true; }
@@ -174,10 +181,12 @@ std::ostream& GroupCTSCmd::print(std::ostream& os) const
    std::stringstream ss;
    size_t the_size = cmdVec_.size();
 	for(size_t i = 0; i < the_size; i++) {
- 		cmdVec_[i]->print(ss);
- 		ss <<"; ";
+	   if (i != 0) ss << "; ";
+ 		cmdVec_[i]->print_only(ss); //  avoid overhead of user@host for each child command
  	}
-	return user_cmd(os,CtsApi::group(ss.str()));
+	if (cli_) return user_cmd(os,CtsApi::group(ss.str()));
+	os << ss.str() << " :" << user() << '@' << hostname();
+	return os;
 }
 
 bool GroupCTSCmd::equals(ClientToServerCmd* rhs) const
@@ -250,6 +259,16 @@ bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const
  	return true;
 }
 
+
+// in the server
+void GroupCTSCmd::set_client_handle(int client_handle) const
+{
+   size_t cmd_vec_size = cmdVec_.size();
+   if (cmd_vec_size >= 2) {
+      cmdVec_[1]->set_client_handle(client_handle);
+   }
+}
+
 STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const
 {
 #ifdef	DEBUG_GROUP_CMD
@@ -262,44 +281,29 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const
 
 	// For the command to succeed all children MUST succeed
    size_t cmd_vec_size = cmdVec_.size();
-	for(size_t i = 0; i < cmd_vec_size; i++) {
-#ifdef	DEBUG_GROUP_CMD
-		std::cout << "  GroupCTSCmd::doHandleRequest calling "; cmdVec_[i]->print(std::cout);  // std::cout << "\n";
+   for(size_t i = 0; i < cmd_vec_size; i++) {
+#ifdef DEBUG_GROUP_CMD
+      std::cout << "  GroupCTSCmd::doHandleRequest calling "; cmdVec_[i]->print(std::cout);  // std::cout << "\n";
 #endif
+      // Let child know about Group command. Only used by ClientHandleCmd, to transfer client_handle to the sync cmd, in *this* group
+      cmdVec_[i]->set_group_cmd(this);
 
-		STC_Cmd_ptr theReturnCmd  = cmdVec_[i]->doHandleRequest(as);
+      STC_Cmd_ptr theReturnCmd;
+      try { theReturnCmd = cmdVec_[i]->doHandleRequest(as); }
+      catch ( std::exception& e ) {
+         theReturnedGroupCmd->addChild(std::make_shared<ErrorCmd>(e.what()));
+         continue;
+      }
 
 #ifdef DEBUG_GROUP_CMD
-		std::cout << " return Cmd = "; theReturnCmd->print(std::cout);  std::cout << "\n";
+      std::cout << " return Cmd = "; theReturnCmd->print(std::cout);  std::cout << " to client\n";
 #endif
 
-		if ( !theReturnCmd->ok() ) {
-			return theReturnCmd; // The Error Command
-		}
-
-		if ( !theReturnCmd->get_string().empty() ) {
-#ifdef	DEBUG_GROUP_CMD
-			std::cout << "  GroupCTSCmd::doHandleRequest returning Cmd = "; theReturnCmd->print(std::cout); std::cout << "  to client\n";
-#endif
-			theReturnedGroupCmd->addChild( theReturnCmd );
-			continue;
-		}
-
-		if ( theReturnCmd->hasDefs() ) {
-#ifdef	DEBUG_GROUP_CMD
-			std::cout << "  GroupCTSCmd::doHandleRequest returning Cmd = "; theReturnCmd->print(std::cout); std::cout << "  to client\n";
-#endif
-			theReturnedGroupCmd->addChild( theReturnCmd );
-         continue;
-		}
-
-      if ( theReturnCmd->hasNode() ) {
-#ifdef   DEBUG_GROUP_CMD
-         std::cout << "  GroupCTSCmd::doHandleRequest returning Cmd = "; theReturnCmd->print(std::cout); std::cout << "  to client\n";
-#endif
+      if (theReturnCmd->is_returnable_in_group_cmd() ) {
          theReturnedGroupCmd->addChild( theReturnCmd );
+         continue;
       }
-	}
+   }
 
 	if ( theReturnedGroupCmd->cmdVec().empty() ) {
 		// Nothing to return, i.e. no Defs, Node or Log file

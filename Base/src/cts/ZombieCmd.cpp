@@ -38,6 +38,19 @@ std::ostream& ZombieCmd::print(std::ostream& os) const
  	}
 	return os;
 }
+std::ostream& ZombieCmd::print_only(std::ostream& os) const
+{
+   switch (user_action_) {
+      case User::FOB:    os << CtsApi::to_string(CtsApi::zombieFob(paths_,process_id_,password_)); break;
+      case User::FAIL:   os << CtsApi::to_string(CtsApi::zombieFail(paths_,process_id_,password_)); break;
+      case User::ADOPT:  os << CtsApi::to_string(CtsApi::zombieAdopt(paths_,process_id_,password_)); break;
+      case User::REMOVE: os << CtsApi::to_string(CtsApi::zombieRemove(paths_,process_id_,password_)); break;
+      case User::BLOCK:  os << CtsApi::to_string(CtsApi::zombieBlock(paths_,process_id_,password_)); break;
+      case User::KILL:   os << CtsApi::to_string(CtsApi::zombieKill(paths_,process_id_,password_)); break;
+      default: break;
+   }
+   return os;
+}
 
 bool ZombieCmd::equals(ClientToServerCmd* rhs) const
 {

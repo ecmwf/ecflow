@@ -50,6 +50,10 @@ std::ostream& RequeueNodeCmd::print(std::ostream& os) const
 {
  	return user_cmd(os,CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_))));
 }
+std::ostream& RequeueNodeCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::to_string(CtsApi::requeue(paths_,to_string(option_)));return os;
+}
 
 std::ostream& RequeueNodeCmd::print(std::ostream& os, const std::string& path) const
 {

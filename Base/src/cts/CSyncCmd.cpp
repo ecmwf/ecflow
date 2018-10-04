@@ -39,6 +39,16 @@ std::ostream& CSyncCmd::print(std::ostream& os) const
    }
    return user_cmd(os,ss.str());
 }
+std::ostream& CSyncCmd::print_only(std::ostream& os) const
+{
+   switch (api_) {
+      case CSyncCmd::NEWS:      os << CtsApi::to_string(CtsApi::news(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
+      case CSyncCmd::SYNC:      os << CtsApi::to_string(CtsApi::sync(client_handle_,client_state_change_no_,client_modify_change_no_)); break;
+      case CSyncCmd::SYNC_FULL: os << CtsApi::sync_full(client_handle_); break;
+      case CSyncCmd::SYNC_CLOCK:os << CtsApi::to_string(CtsApi::sync_clock(client_handle_,client_state_change_no_,client_modify_change_no_));break;
+   }
+   return os;
+}
 
 bool CSyncCmd::equals(ClientToServerCmd* rhs) const
 {

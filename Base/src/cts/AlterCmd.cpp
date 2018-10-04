@@ -247,39 +247,53 @@ bool AlterCmd::equals(ClientToServerCmd* rhs) const
    return UserCmd::equals(rhs);
 }
 
+void AlterCmd::alter_and_attr_type(std::string& alter_type,std::string& attr_type ) const
+{
+   if (del_attr_type_ != AlterCmd::DELETE_ATTR_ND) {
+       alter_type = "delete";
+       attr_type = to_string(del_attr_type_);
+    }
+    else if (change_attr_type_ != AlterCmd::CHANGE_ATTR_ND) {
+       alter_type = "change";
+       attr_type = to_string(change_attr_type_);
+    }
+    else if (add_attr_type_ != AlterCmd::ADD_ATTR_ND) {
+       alter_type = "add";
+       attr_type = to_string(add_attr_type_);
+    }
+    else if (flag_type_ != ecf::Flag::NOT_SET) {
+       if (flag_) alter_type = "set_flag";
+       else       alter_type = "clear_flag";
+       attr_type = ecf::Flag::enum_to_string(flag_type_);
+    }
+    else {
+       alter_type = "sort";
+    }
+}
+
+std::ostream& AlterCmd::print_only(std::ostream& os) const
+{
+   std::string alter_type,attr_type;
+   alter_and_attr_type(alter_type, attr_type);
+   if (paths_.empty()) os << CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1," "),alter_type,attr_type,name_,value_));
+   else                os << CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,paths_[0]),alter_type,attr_type,name_,value_));
+   return os;
+}
+
 std::ostream& AlterCmd::print(std::ostream& os) const
 {
-   return my_print(os,paths_);
+   std::string alter_type,attr_type;
+   alter_and_attr_type(alter_type, attr_type);
+   return user_cmd(os,CtsApi::to_string(CtsApi::alter(paths_,alter_type,attr_type,name_,value_)));
 }
 
 std::ostream& AlterCmd::print(std::ostream& os, const std::string& path) const
 {
-   std::vector<std::string> paths(1,path);
-   return my_print(os,paths);
+   std::string alter_type,attr_type;
+   alter_and_attr_type(alter_type, attr_type);
+   return user_cmd(os,CtsApi::to_string(CtsApi::alter(std::vector<std::string>(1,path),alter_type,attr_type,name_,value_)));
 }
 
-std::ostream& AlterCmd::my_print(std::ostream& os, const std::vector<std::string>& paths) const
-{
-   std::string alter_type,attr_type;
-   if (del_attr_type_ != AlterCmd::DELETE_ATTR_ND) {
-      alter_type = "delete";
-      attr_type = to_string(del_attr_type_);
-   }
-   else if (change_attr_type_ != AlterCmd::CHANGE_ATTR_ND) {
-      alter_type = "change";
-      attr_type = to_string(change_attr_type_);
-   }
-   else if (add_attr_type_ != AlterCmd::ADD_ATTR_ND) {
-      alter_type = "add";
-      attr_type = to_string(add_attr_type_);
-   }
-   else if (flag_type_ != Flag::NOT_SET) {
-      if (flag_) alter_type = "set_flag";
-      else       alter_type = "clear_flag";
-      attr_type = Flag::enum_to_string(flag_type_);
-   }
-   return user_cmd(os,CtsApi::to_string(CtsApi::alter(paths,alter_type,attr_type,name_,value_)));
-}
 
 STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
 {

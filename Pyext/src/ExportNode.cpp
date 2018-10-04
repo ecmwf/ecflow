@@ -244,6 +244,10 @@ struct null_deleter {
 };
 void do_replace_on_server(node_ptr self,ClientInvoker& theClient,bool suspend_node_first, bool force_replace)
 {
+   //cout << "ExportNode: do_replace_on_server " << self->absNodePath() << "\n";
+   //cout << " suspend_node_first " << suspend_node_first << "\n";
+   //cout << " force_replace  " << force_replace  << "\n";
+
    // Need to make a defs_ptr from a Defs*  to avoid double delete use null_deletor
    defs_ptr defs = defs_ptr( self->defs(),null_deleter());
    bool create_parents_as_required = true;
@@ -410,6 +414,7 @@ void export_Node()
    .def("replace_on_server",&replace_on_server,(bp::arg("suspend_node_first")=true,bp::arg("force")=true),"replace node on the server.")
    .def("replace_on_server",&replace_on_server1,(bp::arg("suspend_node_first")=true,bp::arg("force")=true),"replace node on the server.")
    .def("replace_on_server",&replace_on_server2,(bp::arg("suspend_node_first")=true,bp::arg("force")=true),"replace node on the server.")
+   .def("replace_on_server",&do_replace_on_server,(bp::arg("suspend_node_first")=true,bp::arg("force")=true),"replace node on the server.")
    .add_property("meters",    bp::range( &Node::meter_begin,    &Node::meter_end) ,  "Returns a list of `meter`_ s")
    .add_property("events",    bp::range( &Node::event_begin,    &Node::event_end) ,  "Returns a list of `event`_ s")
    .add_property("variables", bp::range( &Node::variable_begin, &Node::variable_end),"Returns a list of user defined `variable`_ s" )

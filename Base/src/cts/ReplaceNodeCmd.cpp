@@ -146,6 +146,12 @@ std::ostream& ReplaceNodeCmd::print(std::ostream& os) const
    if (path_to_client_defs.empty()) path_to_client_defs = "<empty>"; // defs must have been loaded in memory via python api
 	return user_cmd(os,CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_)));
 }
+std::ostream& ReplaceNodeCmd::print_only(std::ostream& os) const
+{
+   std::string path_to_client_defs = path_to_defs_;
+   if (path_to_client_defs.empty()) path_to_client_defs = "<empty>"; // defs must have been loaded in memory via python api
+   os << CtsApi::to_string(CtsApi::replace(pathToNode_,path_to_client_defs,createNodesAsNeeded_,force_)); return os;
+}
 
 const char* ReplaceNodeCmd::arg()  { return CtsApi::replace_arg();}
 const char* ReplaceNodeCmd::desc() {

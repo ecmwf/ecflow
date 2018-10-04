@@ -37,6 +37,10 @@ std::ostream& OrderNodeCmd::print(std::ostream& os) const
 {
  	return user_cmd(os,CtsApi::to_string(CtsApi::order(absNodepath_,NOrder::toString(option_))));
 }
+std::ostream& OrderNodeCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::to_string(CtsApi::order(absNodepath_,NOrder::toString(option_))); return os;
+}
 
 STC_Cmd_ptr OrderNodeCmd::doHandleRequest(AbstractServer* as) const
 {

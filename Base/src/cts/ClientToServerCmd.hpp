@@ -29,6 +29,7 @@
 
 class AbstractServer;
 class AbstractClientEnv;
+class GroupCTSCmd;
 
 ///////////////////////////////////////////////////////////////////////////////////
 // Client->Server cmd's
@@ -43,6 +44,9 @@ public:
    /// when dealing with thousands of paths)
    virtual std::ostream& print(std::ostream& os) const = 0;
    virtual std::ostream& print(std::ostream& os, const std::string& path) const { return print(os); }
+
+   /// Print the command without trailing <user>@<host>. Used by Group command, avoids duplicate user@host for each child command
+   virtual std::ostream& print_only(std::ostream& os ) const { return print(os); }
 
    virtual bool equals(ClientToServerCmd* rhs) const = 0;
 
@@ -78,6 +82,11 @@ public:
    /// Used by the server for authentication since only write only users are allowed to edit.
    virtual bool isWrite() const { return false; /* returning false means read only */ }
 
+   /// Some commands modify the server but do not affect defs. i.e reload white list file,password file
+   /// Other like ClientHandleCmd make edits to defs(well kind off) but are read only.(i.e anyone can call them)
+   /// This return true for those commands that affect the defs, that we need sync on the client side.
+   virtual bool cmd_updates_defs() const { return isWrite(); }
+
    /// This Must be called for client->server commands.As this is required
    /// for authentication. *However* task based commands have their own authentication
    /// mechanism, and don't need setup_user_authentification().
@@ -103,6 +112,10 @@ public:
    virtual bool why_cmd( std::string& ) const { return false;}
    virtual bool show_cmd() const { return false ;}
    virtual bool delete_all_cmd() const { return false ;}
+
+   // used by group_cmd for postfix syncCmd on all user commands that modify defs
+   virtual void set_client_handle(int client_handle) {} // used by group_cmd
+   virtual void set_group_cmd(const GroupCTSCmd*) {}
 
    // CLIENT side Parse and command construction, create can throw std::runtime_error for errors
    virtual const char* theArg() const = 0;  // used for argument parsing
@@ -562,6 +575,7 @@ public:
 
    static std::string get_user();
    const std::string& user() const { return user_;}
+   const std::string& hostname() const { return hostname_;}
    const std::string& passwd() const { return passwd_;}
 
    void setup_user_authentification(const std::string& user, const std::string& passwd) override;
@@ -578,8 +592,9 @@ protected:
    /// Prompt the user for confirmation: If user responds with no, will exit client
    static void prompt_for_confirmation(const std::string& prompt);
 
-   /// All user commands will be pre_fixed with "--" and post_fixed with :user.
+   /// All user commands will be pre_fixed with "--" and post_fixed with :user@host
    std::ostream& user_cmd(std::ostream& os, const std::string& the_cmd) const;
+
 
    static int time_out_for_load_sync_and_get();
 
@@ -615,6 +630,7 @@ public:
    ServerVersionCmd()= default;
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
    const char* theArg() const override;
    void addOption(boost::program_options::options_description& desc) const override;
@@ -663,9 +679,11 @@ public:
    Api api() const { return api_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    bool isWrite() const override;
+   bool cmd_updates_defs() const  override;
    bool terminate_cmd() const override { return api_ == TERMINATE_SERVER; }
    bool ping_cmd() const override { return api_ == PING; }
    int timeout() const override;
@@ -702,6 +720,7 @@ public:
    int check_pt_save_time_alarm() const { return check_pt_save_time_alarm_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
    bool isWrite() const override;
    const char* theArg() const override;
@@ -754,7 +773,9 @@ public:
    int client_modify_change_no() const { return client_modify_change_no_;}
    int client_handle() const { return client_handle_;}
 
+   void set_client_handle(int client_handle) override { client_handle_ = client_handle;} // used by group_cmd
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
    int timeout() const override;
 
@@ -793,40 +814,47 @@ public:
    enum Api { REGISTER, DROP, DROP_USER, ADD, REMOVE, AUTO_ADD , SUITES };
 
    explicit ClientHandleCmd(Api api = AUTO_ADD)
-   : api_(api) {}
+   : api_(api),group_cmd_(nullptr) {}
 
-   ClientHandleCmd(const std::vector<std::string>& suites, bool add_add_new_suites)
+   ClientHandleCmd(int client_handle,const std::vector<std::string>& suites, bool add_add_new_suites)
    : api_(REGISTER),
-     client_handle_(0),
+     client_handle_(client_handle),
      auto_add_new_suites_(add_add_new_suites),
-     suites_(suites)  {}
+     suites_(suites),
+     group_cmd_(nullptr)  {}
 
    explicit ClientHandleCmd(int client_handle)
    : api_(DROP),
      client_handle_(client_handle),
-     auto_add_new_suites_(false) {}
+     auto_add_new_suites_(false),
+     group_cmd_(nullptr) {}
 
    explicit ClientHandleCmd(const std::string& drop_user)
     : api_(DROP_USER),
       client_handle_(0),
       auto_add_new_suites_(false),
-      drop_user_(drop_user){}
+      drop_user_(drop_user),
+      group_cmd_(nullptr){}
 
    ClientHandleCmd(int client_handle, const std::vector<std::string>& suites, Api api)
    : api_(api),  // Must be ADD or REMOVE
      client_handle_(client_handle),
      auto_add_new_suites_(false),
-     suites_(suites){}
+     suites_(suites),
+     group_cmd_(nullptr){}
 
    ClientHandleCmd(int client_handle, bool add_add_new_suites)
    : api_(AUTO_ADD),
      client_handle_(client_handle),
-     auto_add_new_suites_(add_add_new_suites) {}
+     auto_add_new_suites_(add_add_new_suites),
+     group_cmd_(nullptr) {}
 
    Api api() const { return api_;}
    const std::string& drop_user() const { return drop_user_;}
 
+   bool cmd_updates_defs() const override;
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override;
@@ -834,6 +862,10 @@ public:
    void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv ) const override;
+
+   // called in the server
+   virtual void set_group_cmd(const GroupCTSCmd* cmd) { group_cmd_ = cmd;}
+
 private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
@@ -854,6 +886,9 @@ private:
          CEREAL_NVP(drop_user_),
          CEREAL_NVP(suites_));
    }
+
+private:
+   const GroupCTSCmd* group_cmd_; // not persisted only used in server
 };
 
 // Collection of commands, that all take a abs node path as their only arg
@@ -880,6 +915,7 @@ public:
    const std::string& absNodePath() const { return absNodePath_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    PrintStyle::Type_t show_style() const override;
@@ -930,6 +966,7 @@ public:
    bool force() const { return force_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    std::ostream& print(std::ostream& os, const std::string& path) const override;
 
    bool equals(ClientToServerCmd*) const override;
@@ -947,6 +984,7 @@ private:
    void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after handlerequest
 
    std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
+   std::ostream& my_print_only(std::ostream& os, const std::vector<std::string>& paths) const;
 
 private:
    Api api_{NO_CMD};
@@ -981,6 +1019,7 @@ public:
    const std::string& new_path() const { return new_path_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    bool isWrite() const override;
@@ -1019,6 +1058,7 @@ public:
    const std::string& msg() const { return msg_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1056,6 +1096,7 @@ public:
 
    bool isWrite() const override { return true; }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1094,6 +1135,7 @@ public:
    const std::string& password() const { return password_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override;
@@ -1139,6 +1181,7 @@ public:
 
    bool isWrite() const override { return true; }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    std::ostream& print(std::ostream& os, const std::string& path) const override;
    bool equals(ClientToServerCmd*) const override;
 
@@ -1180,6 +1223,7 @@ public:
 
    bool isWrite() const override { return true; }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1225,6 +1269,7 @@ public:
 
    bool isWrite() const override { return true; }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    std::ostream& print(std::ostream& os, const std::string& path) const override;
    bool equals(ClientToServerCmd*) const override;
 
@@ -1269,6 +1314,7 @@ public:
    PrintStyle::Type_t show_style() const override { return style_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1312,6 +1358,7 @@ public:
    bool isWrite() const override { return true; }
    int timeout() const override { return time_out_for_load_sync_and_get(); }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1357,6 +1404,7 @@ public:
    bool isWrite() const override { return true; }
    int timeout() const override { return 300; }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1423,6 +1471,7 @@ public:
 
    bool isWrite() const override { return true; }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    std::ostream& print(std::ostream& os, const std::string& path) const override;
    bool equals(ClientToServerCmd*) const override;
 
@@ -1487,6 +1536,7 @@ public:
 
    bool isWrite() const override { return true; }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    std::ostream& print(std::ostream& os, const std::string& path) const override;
    bool equals(ClientToServerCmd*) const override;
 
@@ -1585,6 +1635,7 @@ public:
    bool isWrite() const override { return true; }
    std::ostream& print(std::ostream& os) const override;
    std::ostream& print(std::ostream& os, const std::string& path) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1607,8 +1658,7 @@ private:
    void create_flag(  Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const;
    void create_sort_attributes(Cmd_ptr& cmd,const std::vector<std::string>& options,const std::vector<std::string>& paths ) const;
 
-   std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
-
+   void alter_and_attr_type(std::string& alter_type,std::string& attr_type ) const;
 private:
    std::vector<std::string> paths_;
    std::string              name_;
@@ -1657,6 +1707,7 @@ public:
 
    bool handleRequestIsTestable() const override { return false ;}
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1729,6 +1780,7 @@ public:
    bool handleRequestIsTestable() const override { return false ;}
    bool isWrite() const override;
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1779,6 +1831,7 @@ public:
    bool handleRequestIsTestable() const override { return false ;}
    bool isWrite() const override { return true; }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1818,6 +1871,7 @@ public:
 
    bool handleRequestIsTestable() const override { return false ;}
    bool isWrite() const override { return true; }
+
    std::ostream& print(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
@@ -1870,6 +1924,7 @@ public:
    const std::string& path_to_task() const { return  path_to_task_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    const char* theArg() const override { return arg();}
@@ -1916,15 +1971,20 @@ private:
 class GroupCTSCmd : public UserCmd {
 public:
    GroupCTSCmd(const std::string& list_of_commands,AbstractClientEnv* clientEnv);
+   GroupCTSCmd(Cmd_ptr cmd) : cli_(false) { addChild(cmd);}
    GroupCTSCmd()= default;
 
    bool isWrite() const override;
+   bool cmd_updates_defs() const override;
+
    PrintStyle::Type_t show_style() const override;
    bool get_cmd() const override;
    bool task_cmd() const override;
    bool terminate_cmd() const override;
    bool why_cmd( std::string& ) const override;
    bool group_cmd() const override { return true; }
+
+   void set_client_handle(int client_handle) const; // used in group sync with client register
 
    std::ostream& print(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
@@ -1948,6 +2008,8 @@ private:
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
+private:
+   bool cli_ = true;
    std::vector<Cmd_ptr> cmdVec_;
 
    friend class cereal::access;
@@ -1955,6 +2017,7 @@ private:
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(cli_),
          CEREAL_NVP(cmdVec_));
    }
 };

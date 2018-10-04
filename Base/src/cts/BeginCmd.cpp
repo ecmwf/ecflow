@@ -42,6 +42,11 @@ std::ostream& BeginCmd::print(std::ostream& os) const
    return user_cmd(os,CtsApi::begin(suiteName_,force_));
 }
 
+std::ostream& BeginCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::begin(suiteName_,force_); return os;
+}
+
 bool BeginCmd::equals(ClientToServerCmd* rhs) const
 {
 	auto* the_rhs = dynamic_cast< BeginCmd* > ( rhs );

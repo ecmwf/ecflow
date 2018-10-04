@@ -58,6 +58,32 @@ std::ostream& CtsCmd::print(std::ostream& os) const
    return os;
 }
 
+std::ostream& CtsCmd::print_only(std::ostream& os) const
+{
+   switch (api_) {
+      case CtsCmd::GET_ZOMBIES:                os << CtsApi::zombieGet(); break;
+      case CtsCmd::RESTORE_DEFS_FROM_CHECKPT:  os << CtsApi::restoreDefsFromCheckPt(); break;
+      case CtsCmd::RESTART_SERVER:             os << CtsApi::restartServer(); break;
+      case CtsCmd::SHUTDOWN_SERVER:            os << CtsApi::shutdownServer(); break;
+      case CtsCmd::HALT_SERVER:                os << CtsApi::haltServer(); break;
+      case CtsCmd::TERMINATE_SERVER:           os << CtsApi::terminateServer(); break;
+      case CtsCmd::RELOAD_WHITE_LIST_FILE:     os << CtsApi::reloadwsfile(); break;
+      case CtsCmd::RELOAD_PASSWD_FILE:         os << CtsApi::reloadpasswdfile(); break;
+      case CtsCmd::FORCE_DEP_EVAL:             os << CtsApi::forceDependencyEval(); break;
+      case CtsCmd::PING:                       os << CtsApi::pingServer(); break;
+      case CtsCmd::STATS:                      os << CtsApi::stats(); break;
+      case CtsCmd::STATS_SERVER:               os << CtsApi::stats_server(); break;
+      case CtsCmd::STATS_RESET:                os << CtsApi::stats_reset(); break;
+      case CtsCmd::SUITES:                     os << CtsApi::suites(); break;
+      case CtsCmd::DEBUG_SERVER_ON:            os << CtsApi::debug_server_on(); break;
+      case CtsCmd::DEBUG_SERVER_OFF:           os << CtsApi::debug_server_off(); break;
+      case CtsCmd::SERVER_LOAD:                os << CtsApi::server_load(""); break;
+      case CtsCmd::NO_CMD:      assert(false); os << "CtsCmdCtsCmd::NO_CMD  !!!!"; break;
+      default: assert(false); os << "CtsCmd did not match api_ !!!!"; break;
+   }
+   return os;
+}
+
 bool CtsCmd::equals(ClientToServerCmd* rhs) const
 {
    auto* the_rhs = dynamic_cast< CtsCmd* > ( rhs );
@@ -86,6 +112,33 @@ bool CtsCmd::isWrite() const
       case CtsCmd::DEBUG_SERVER_ON:  return false; break;      // read only
       case CtsCmd::DEBUG_SERVER_OFF: return false; break;      // read only
       case CtsCmd::SERVER_LOAD:      return false; break;      // read only
+      case CtsCmd::NO_CMD:           assert(false); break;
+      default: assert(false); break;
+   }
+   assert(false);
+   return false;
+}
+
+bool CtsCmd::cmd_updates_defs() const
+{
+   switch (api_) {
+      case CtsCmd::GET_ZOMBIES:      return false; break;
+      case CtsCmd::RESTORE_DEFS_FROM_CHECKPT: return true; break;
+      case CtsCmd::RESTART_SERVER:   return true; break;
+      case CtsCmd::SHUTDOWN_SERVER:  return true; break;
+      case CtsCmd::HALT_SERVER:      return true; break;
+      case CtsCmd::TERMINATE_SERVER: return true; break;
+      case CtsCmd::RELOAD_WHITE_LIST_FILE:return false; break;
+      case CtsCmd::RELOAD_PASSWD_FILE:return false; break;
+      case CtsCmd::FORCE_DEP_EVAL:   return true; break;
+      case CtsCmd::PING:             return false; break;
+      case CtsCmd::STATS:            return false; break;
+      case CtsCmd::STATS_SERVER:     return false; break;
+      case CtsCmd::STATS_RESET:      return false; break;
+      case CtsCmd::SUITES:           return false; break;
+      case CtsCmd::DEBUG_SERVER_ON:  return false; break;
+      case CtsCmd::DEBUG_SERVER_OFF: return false; break;
+      case CtsCmd::SERVER_LOAD:      return false; break;
       case CtsCmd::NO_CMD:           assert(false); break;
       default: assert(false); break;
    }

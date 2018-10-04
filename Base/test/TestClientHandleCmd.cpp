@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_empty_server )
    // Register new handle on an EMPTY server. register the suite
    for(const auto & suite_name : suite_names)  {
       std::vector<std::string> names; names.push_back(suite_name);
-      TestHelper::invokeRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(names,false)),bypass_state_modify_change_check);
+      TestHelper::invokeRequest(new_defs.get(),Cmd_ptr( new ClientHandleCmd(0,names,false)),bypass_state_modify_change_check);
    }
 
    // We should have 5 handle, 1,2,3,4,5
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_register_and_drop )
 	// Register new handle
 	for(size_t j = 0; j < suite_names.size(); j++)  {
 		std::vector<std::string> names; names.push_back(suite_names[j]);
-		TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(names,false)),bypass_state_modify_change_check);
+		TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(0,names,false)),bypass_state_modify_change_check);
 		BOOST_CHECK_MESSAGE(defs.client_suite_mgr().clientSuites().size() == j+1,"Expected " << j+1 << " Client suites but found " << defs.client_suite_mgr().clientSuites().size());
 	}
 
@@ -96,6 +96,38 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_register_and_drop )
 		TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd( clientSuite.handle() )),bypass_state_modify_change_check);
 	}
 	BOOST_CHECK_MESSAGE(defs.client_suite_mgr().clientSuites().empty(),"Expected  no client handles, but found " << defs.client_suite_mgr().clientSuites().size());
+}
+
+BOOST_AUTO_TEST_CASE( test_client_handle_cmd_register__with_drop )
+{
+   cout << "Base:: ...test_client_handle_cmd_register_with_drop\n";
+
+   std::vector<std::string> suite_names; suite_names.reserve(6);
+   for(int i=0; i < 5; i++)  suite_names.push_back( "s" + boost::lexical_cast<std::string>(i) );
+
+   Defs defs;
+   for(const auto & suite_name : suite_names)  defs.addSuite( Suite::create(suite_name) );
+
+   // Register new handle
+   for(size_t j = 0; j < suite_names.size(); j++)  {
+      std::vector<std::string> names; names.push_back(suite_names[j]);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(0,names,false)),bypass_state_modify_change_check);
+      BOOST_CHECK_MESSAGE(defs.client_suite_mgr().clientSuites().size() == j+1,"Expected " << j+1 << " Client suites but found " << defs.client_suite_mgr().clientSuites().size());
+   }
+
+   // Register new handle and drop existing handle at the same time. The number of registered should stay the same
+   for(size_t j = 0; j < suite_names.size(); j++)  {
+      std::vector<std::string> names; names.push_back(suite_names[j]);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(j+1,names,false)),bypass_state_modify_change_check);
+      BOOST_CHECK_MESSAGE(defs.client_suite_mgr().clientSuites().size() == suite_names.size(),"Expected " << suite_names.size()  << " Client suites but found " << defs.client_suite_mgr().clientSuites().size());
+   }
+
+   // Drop the handles. take a copy, since we about to delete clientSuites
+   std::vector<ecf::ClientSuites> clientSuites = defs.client_suite_mgr().clientSuites();
+   for(auto & clientSuite : clientSuites) {
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd( clientSuite.handle() )),bypass_state_modify_change_check);
+   }
+   BOOST_CHECK_MESSAGE(defs.client_suite_mgr().clientSuites().empty(),"Expected  no client handles, but found " << defs.client_suite_mgr().clientSuites().size());
 }
 
 
@@ -111,7 +143,7 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_auto_add )
 
 	// Register new handle, with no suites, but with auto add new suites
 	std::vector<std::string> names;
-	TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(names,false/* auto_add */)),bypass_state_modify_change_check);
+	TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(0,names,false/* auto_add */)),bypass_state_modify_change_check);
 	BOOST_CHECK_MESSAGE(defs.client_suite_mgr().clientSuites().size() == 1,"Expected 1 Client suites but found " << defs.client_suite_mgr().clientSuites().size());
 	BOOST_CHECK_MESSAGE(defs.client_suite_mgr().clientSuites().front().auto_add_new_suites() == false,"Expected auto add to be disabled");
 
@@ -158,7 +190,7 @@ BOOST_AUTO_TEST_CASE( test_client_handle_cmd_add_remove )
 
 	// Register new handle, with no suites,
 	{
-	   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new ClientHandleCmd(empty_vec,false)),bypass_state_modify_change_check);
+	   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new ClientHandleCmd(0,empty_vec,false)),bypass_state_modify_change_check);
 	   BOOST_CHECK_MESSAGE(defs->client_suite_mgr().clientSuites().size() == 1,"Expected 1 Client suites but found " << defs->client_suite_mgr().clientSuites().size());
 	   BOOST_CHECK_MESSAGE(!defs->client_suite_mgr().handle_changed(1),"Expected No handle change, when no real suites added");
 
@@ -226,9 +258,9 @@ BOOST_AUTO_TEST_CASE( test_client_handle_suite_ordering )
    for(const auto & suite_name : suite_names)  defs.addSuite( Suite::create(suite_name) );
 
    // Register 3 new handle
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(suite_names,true)),bypass_state_modify_change_check);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(suite_names,true)),bypass_state_modify_change_check);
-   TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(suite_names,true)),bypass_state_modify_change_check);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(0,suite_names,true)),bypass_state_modify_change_check);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(0,suite_names,true)),bypass_state_modify_change_check);
+   TestHelper::invokeRequest(&defs,Cmd_ptr( new ClientHandleCmd(0,suite_names,true)),bypass_state_modify_change_check);
    BOOST_CHECK_MESSAGE(defs.client_suite_mgr().clientSuites().size() == 3,"Expected 3 Client suites but found " << defs.client_suite_mgr().clientSuites().size());
 
    // After registration make sure ordering is the same

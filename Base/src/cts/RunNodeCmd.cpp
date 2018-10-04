@@ -41,7 +41,10 @@ std::ostream& RunNodeCmd::print(std::ostream& os) const
 {
  	return user_cmd(os,CtsApi::to_string(CtsApi::run(paths_,force_)));
 }
-
+std::ostream& RunNodeCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::to_string(CtsApi::run(paths_,force_)); return os;
+}
 std::ostream& RunNodeCmd::print(std::ostream& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);

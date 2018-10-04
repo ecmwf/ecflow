@@ -44,7 +44,10 @@ std::ostream& FreeDepCmd::print(std::ostream& os) const
 {
 	return user_cmd(os,CtsApi::to_string(CtsApi::freeDep(paths_,trigger_,all_,date_,time_)));
 }
-
+std::ostream& FreeDepCmd::print_only(std::ostream& os) const
+{
+   os << CtsApi::to_string(CtsApi::freeDep(paths_,trigger_,all_,date_,time_)); return os;
+}
 std::ostream& FreeDepCmd::print(std::ostream& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);

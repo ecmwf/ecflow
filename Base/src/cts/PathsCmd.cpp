@@ -45,6 +45,11 @@ std::ostream& PathsCmd::print(std::ostream& os) const
    return my_print(os,paths_);
 }
 
+std::ostream& PathsCmd::print_only(std::ostream& os) const
+{
+   return my_print_only(os,paths_);
+}
+
 std::ostream& PathsCmd::print(std::ostream& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);
@@ -68,6 +73,24 @@ std::ostream& PathsCmd::my_print(std::ostream& os,const std::vector<std::string>
    }
    return os;
 }
+std::ostream& PathsCmd::my_print_only(std::ostream& os,const std::vector<std::string>& paths) const
+{
+   switch (api_) {
+      case PathsCmd::DELETE:             os << CtsApi::to_string(CtsApi::delete_node(paths,force_)); break;
+      case PathsCmd::SUSPEND:            os << CtsApi::to_string(CtsApi::suspend(paths)); break;
+      case PathsCmd::RESUME:             os << CtsApi::to_string(CtsApi::resume(paths)); break;
+      case PathsCmd::KILL:               os << CtsApi::to_string(CtsApi::kill(paths)); break;
+      case PathsCmd::STATUS:             os << CtsApi::to_string(CtsApi::status(paths)); break;
+      case PathsCmd::CHECK:              os << CtsApi::to_string(CtsApi::check(paths)); break;
+      case PathsCmd::EDIT_HISTORY:       os << CtsApi::to_string(CtsApi::edit_history(paths)); break;
+      case PathsCmd::ARCHIVE:            os << CtsApi::to_string(CtsApi::archive(paths,force_)); break;
+      case PathsCmd::RESTORE:            os << CtsApi::to_string(CtsApi::restore(paths)); break;
+      case PathsCmd::NO_CMD:       break;
+      default: assert(false);break;
+   }
+   return os;
+}
+
 
 bool PathsCmd::equals(ClientToServerCmd* rhs) const
 {

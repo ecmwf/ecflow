@@ -116,6 +116,13 @@ std::ostream& LoadDefsCmd::print(std::ostream& os) const
    }
    return user_cmd(os,CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/,false/*print*/)));
 }
+std::ostream& LoadDefsCmd::print_only(std::ostream& os) const
+{
+   if (defs_filename_.empty()) {
+      os << CtsApi::to_string(CtsApi::loadDefs("<in-memory-defs>",force_,false/*check_only*/,false/*print*/)); return os;
+   }
+   os << CtsApi::to_string(CtsApi::loadDefs(defs_filename_,force_,false/*check_only*/,false/*print*/)); return os;
+}
 
 const char* LoadDefsCmd::arg()  { return CtsApi::loadDefsArg();}
 const char* LoadDefsCmd::desc() {

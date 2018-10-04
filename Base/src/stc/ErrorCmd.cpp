@@ -55,7 +55,7 @@ bool ErrorCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
 
 	std::stringstream ss;
 	ss << "Error: request( "; cts_cmd->print(ss); ss << " ) failed!  Server replied with: '" <<  error_msg_ << "'\n";
-	server_reply.set_error_msg(ss.str());
+	server_reply.set_error_msg( server_reply.get_error_msg() + ss.str());  // append in-case multiple errors from group cmd
 	return false;
 }
 
