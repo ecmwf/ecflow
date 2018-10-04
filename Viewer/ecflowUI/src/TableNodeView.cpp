@@ -760,11 +760,11 @@ void TableNodeHeader::paintSection(QPainter *painter, const QRect &rect, int log
 		it.value().setRect(optButton.rect);
 	}
 
+    //Text is left aligned, a decoration icon might be added to left just before the text
 	QString text=model()->headerData(logicalIndex,Qt::Horizontal).toString();
 	QRect textRect=rect;
-	textRect.setRight(rightPos-5);
-
-	painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
+    textRect.setRight(rightPos-5);
+    textRect.adjust(2,0,0,0);
 
     //Draw icon to the left of the text
     QVariant pixVa=model()->headerData(logicalIndex,Qt::Horizontal,Qt::DecorationRole);
@@ -775,12 +775,17 @@ void TableNodeHeader::paintSection(QPainter *painter, const QRect &rect, int log
 
         QFont f;
         QFontMetrics fm(f);
-        int textLeft=textRect.center().x()-fm.width(text)/2-1;
+        int textLeft=textRect.x();
         QRect pixRect=QRect(rect.x()+3,rect.center().y()-pixH/2,
                             pix.width(),pix.height());
-        if(pixRect.x()+pixRect.width() < textLeft)
+        if(pixRect.x()+pixRect.width() + fm.width(text) + 4 < textRect.x() + textRect.width())
+        {
             painter->drawPixmap(pixRect,pix);
+            textRect.setX(pixRect.x()+pixRect.width() + 3);
+        }
     }
+
+    painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
 
 	//style()->drawControl(QStyle::CE_PushButton, &optButton,painter,this);
 }
