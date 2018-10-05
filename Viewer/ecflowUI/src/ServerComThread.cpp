@@ -316,30 +316,14 @@ void ServerComThread::reset()
     //Detach the defs and the nodes from the observer
     detach(defsAccess.defs());
 
-    //We drop the handle belonging to the current client!
-    if(ci_->client_handle() > 0)
-    {
-        try
-        {
-            ci_->ch1_drop();
-        }
-        catch (std::exception &e)
-        {
-            UiLog(serverName_).warn() << " cannot drop handle for client: " << e.what();
-        }
-    }
-
     if(hasSuiteFilter_)
     {
-        //reset client handle + defs
-        ci_->reset();
-
         if(!filteredSuites_.empty())
         {
             UiLog(serverName_).dbg() << " register suites=" << filteredSuites_;
 
             //This will add a new handle to the client
-            ci_->ch_register(autoAddNewSuites_, filteredSuites_);
+            ci_->ch_register(autoAddNewSuites_, filteredSuites_);  // will drop handle in server and auto_sync if enabled
         }
         //If the suite filter is empty
         else
@@ -351,17 +335,12 @@ void ServerComThread::reset()
 
             std::vector<std::string> fsl;
             fsl.push_back(SuiteFilter::dummySuite());
-            ci_->ch_register(autoAddNewSuites_, fsl);
+            ci_->ch_register(autoAddNewSuites_, fsl);   // will drop handle in server, and auto_sync if enabled
         }
-    }
-    else
-    {
-        // reset client handle + defs
-        ci_->reset();
     }
 
     UiLog(serverName_).dbg() << " sync begin";
-    ci_->sync_local();
+    if (!ci_->is_auto_sync_enabled())  ci_->sync_local();  // temp
     UiLog(serverName_).dbg() << " sync end";
 
     //Attach the nodes to the observer

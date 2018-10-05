@@ -462,7 +462,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 }
 
 
-void ClientInvoker::reset()
+void ClientInvoker::reset() const
 {
    server_reply_.set_client_defs( defs_ptr() );
    server_reply_.set_client_node( node_ptr() );
@@ -652,13 +652,16 @@ int ClientInvoker::debug_server_off() const
 
 int ClientInvoker::ch_register( bool auto_add_new_suites,const std::vector<std::string>& suites ) const
 {
+   reset();
    if (testInterface_) return invoke(CtsApi::ch_register(0, auto_add_new_suites, suites));
    return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(0, suites, auto_add_new_suites));
 }
 int ClientInvoker::ch1_register( bool auto_add_new_suites,const std::vector<std::string>& suites ) const
 {
-   if (testInterface_) return invoke(CtsApi::ch_register(server_reply_.client_handle(),auto_add_new_suites, suites));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(server_reply_.client_handle(),suites, auto_add_new_suites));
+   int client_handle = server_reply_.client_handle();
+   reset();
+   if (testInterface_) return invoke(CtsApi::ch_register(client_handle,auto_add_new_suites, suites));
+   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(client_handle,suites, auto_add_new_suites));
 }
 
 int ClientInvoker::ch_suites() const

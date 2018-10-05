@@ -127,7 +127,7 @@ public:
  	void set_connect_timeout(int t);
 
  	/// ServerReply Holds the reply from the server
- 	void reset(); // will clear local client definition and handle
+ 	void reset() const; // will clear local client definition and handle
  	const ServerReply& server_reply() const { return server_reply_;}
  	defs_ptr defs() const { return server_reply_.client_defs(); }
 	const std::string& get_string() const { return server_reply_.get_string(); }
