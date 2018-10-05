@@ -382,7 +382,7 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
     //Show/hide current columns
     QString name=header_->model()->headerData(section,Qt::Horizontal).toString();
     ac=new QAction(menu);
-    ac->setData(section);
+    ac->setData("show_current");
     bool vis=!header_->isSectionHidden(section);
     ac->setText(((!vis)?"Show column \'":"Hide column \'")  + name + "\'");
     if(vis && visCnt <=1)
@@ -458,11 +458,15 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
             }
             return;
         }
+        else if(ac->data().toString() == "show_current")
+        {
+            header_->setSectionHidden(section,!header_->isSectionHidden(section));
+        }
         else if(ac->isCheckable())
         {
             int i=ac->data().toInt();
             header_->setSectionHidden(i,!ac->isChecked());
-        }
+        }                  
 	}
     delete menu;
 }
