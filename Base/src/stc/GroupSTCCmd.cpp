@@ -59,7 +59,10 @@ bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts
 	BOOST_FOREACH(STC_Cmd_ptr subCmd, cmdVec_) {
 		if (!subCmd->handle_server_response(server_reply, cts_cmd, debug)) ret_flag = false; // one of the commands failed
   	}
+	if (!server_reply.cli()) return ret_flag;
 
+
+	/// CLI called from the command line.
 	/// This assumes the DefsCmd::handle_server_response() | SNodeCmd::handle_server_response has been called
 	/// this will populate ServerReply with the defs/node returned from the server
    defs_ptr defs = server_reply.client_defs();
