@@ -274,12 +274,17 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
       BOOST_REQUIRE_MESSAGE( theClient.ch_remove(1,suites) == 0,"--ch_remove \n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.ch_auto_add(1,true) == 0,"--ch_auto_add \n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.ch_auto_add(1,false) == 0,"--ch_auto_add \n" << theClient.errorMsg());
+
       // need test interface that allows client handle to set on ClinetInvoker
-//      BOOST_REQUIRE_MESSAGE( theClient.ch1_drop() == 0,"--ch1_drop \n" << theClient.errorMsg());
-//      BOOST_REQUIRE_MESSAGE( theClient.ch1_add(suites) == 0,"--ch1_add \n" << theClient.errorMsg());
-//      BOOST_REQUIRE_MESSAGE( theClient.ch1_remove(suites) == 0,"--ch1_remove \n" << theClient.errorMsg());
-//      BOOST_REQUIRE_MESSAGE( theClient.ch1_auto_add(true) == 0,"--ch1_auto_add \n" << theClient.errorMsg());
-//      BOOST_REQUIRE_MESSAGE( theClient.ch1_auto_add(false) == 0,"--ch1_auto_add \n" << theClient.errorMsg());
+      // ch1_add needs a non zero handle
+      ServerReply& svr = const_cast<ServerReply&>(theClient.server_reply());
+      svr.set_client_handle(1);
+      BOOST_REQUIRE_MESSAGE( theClient.ch1_register(true,suites) == 0,"--ch1_drop \n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.ch1_drop() == 0,"--ch1_drop \n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.ch1_add(suites) == 0,"--ch1_add \n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.ch1_remove(suites) == 0,"--ch1_remove \n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.ch1_auto_add(true) == 0,"--ch1_auto_add \n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.ch1_auto_add(false) == 0,"--ch1_auto_add \n" << theClient.errorMsg());
    }
 
    {

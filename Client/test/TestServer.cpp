@@ -30,6 +30,7 @@
 #include "DurationTimer.hpp"
 #include "Host.hpp"
 #include "Version.hpp"
+#include "perf_timer.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -117,6 +118,55 @@ BOOST_AUTO_TEST_CASE( test_server_state_changes )
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_server_state_changes_with_auto_sync )
+{
+   /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
+   InvokeServer invokeServer("Client:: ...test_server_state_changes_with_auto_sync:",SCPort::next());
+   BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
+
+   std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
+
+   ClientInvoker theClient(invokeServer.host(), invokeServer.port());
+   theClient.set_auto_sync(true);
+
+   BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0,"load defs failed \n" << theClient.errorMsg());
+   if (ClientEnvironment::hostSpecified().empty()) {
+      // server started locally
+      BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::HALTED,"Expected INITIAL server state HALTED but found " << SState::to_string(theClient.defs()->server().get_state()));
+   }
+
+   BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::SHUTDOWN,"Expected server state SHUTDOWN but found " << SState::to_string(theClient.defs()->server().get_state()));
+
+   BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,CtsApi::haltServer() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::HALTED,"Expected server state HALTED but found " << SState::to_string(theClient.defs()->server().get_state()));
+
+   BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::RUNNING,"Expected server state RUNNING but found " << SState::to_string(theClient.defs()->server().get_state()));
+
+   /// Repeat test using sync_local() to test incremental changes of server
+   BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::SHUTDOWN,"Expected server state SHUTDOWN but found " << SState::to_string(theClient.defs()->server().get_state()));
+
+   BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,CtsApi::haltServer() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::HALTED,"Expected server state HALTED but found " << SState::to_string(theClient.defs()->server().get_state()));
+
+   BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::RUNNING,"Expected server state RUNNING but found " << SState::to_string(theClient.defs()->server().get_state()));
+
+   if (ClientEnvironment::hostSpecified().empty()) {
+      // This check only valid if server was invoked locally. Ignore for remote servers
+
+      // make sure edit history updated
+      BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() ==  7,"Expected edit history of size 7, but found " << theClient.server_reply().get_string_vec().size());
+
+      // make sure edit history was *NOT* serialized, It is only serialized when check pointing
+      BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() ==  0,"Expected edit history of size 0, but found " <<  theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
+   }
+}
+
 
 BOOST_AUTO_TEST_CASE( test_server_stress_test )
 {
@@ -126,32 +176,69 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test )
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
-  	boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
-	DurationTimer duration_timer;
 	ClientInvoker theClient(invokeServer.host(), invokeServer.port());
 #ifdef ECF_OPENSSL
 	int load = 30;
 #else
 	int load = 125;
 #endif
-	for(int i = 0; i < load; i++) {
+	{
+	   boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+	   DurationTimer duration_timer;
+      Timer<std::chrono::milliseconds> chrono_timer;
+	   for(int i = 0; i < load; i++) {
 
-		BOOST_REQUIRE_MESSAGE(theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
- 	   BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0,"load defs failed \n" << theClient.errorMsg());
-		BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
-		BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,CtsApi::haltServer() << " should return 0\n" << theClient.errorMsg());
-		BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0\n" << theClient.errorMsg());
-		BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0\n" << theClient.errorMsg());
-		BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs() == 0,CtsApi::checkPtDefs() << " failed should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0,"load defs failed \n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
+         BOOST_REQUIRE_MESSAGE(theClient.suspend("/suite1") == 0,"should return 0\n" << theClient.errorMsg());
+         BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
+         BOOST_REQUIRE_MESSAGE(theClient.resume("/suite1") == 0,"should return 0\n" << theClient.errorMsg());
+         BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,CtsApi::haltServer() << " should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.force("/suite1","unknown",true) == 0,"check should return 0\n" << theClient.errorMsg());
+         BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "failed should return 0\n" << theClient.errorMsg());
 
- 		BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg());
-    	BOOST_REQUIRE_MESSAGE( theClient.defs().get(),"Server returned a NULL defs");
-  		BOOST_REQUIRE_MESSAGE( theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
- 	}
-	cout << " Server handled " << load * 8
-	     << " requests in boost_timer(" << boost_timer.elapsed()
-	     << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
-	     << ")" << endl;
+	      BOOST_REQUIRE_MESSAGE(theClient.defs().get(),"Server returned a NULL defs");
+	      BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
+	   }
+	   cout << " Server handled " << load * 16
+	            << " requests in boost_timer(" << boost_timer.elapsed() << ")"
+	            << " DurationTimer(" << to_simple_string(duration_timer.elapsed()) << ")"
+	            << " Chrono_timer(" << std::chrono::duration<double,std::milli>(chrono_timer.elapsed()).count() << " milli)"
+	            << endl;
+	}
+	{
+	   theClient.set_auto_sync(true);
+	   boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+	   DurationTimer duration_timer;
+      Timer<std::chrono::milliseconds> chrono_timer;
+	   for(int i = 0; i < load; i++) {
+
+	      BOOST_REQUIRE_MESSAGE(theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.loadDefs(path) == 0,"load defs failed \n" << theClient.errorMsg());
+         BOOST_REQUIRE_MESSAGE(theClient.suspend("/suite1") == 0,"should return 0\n" << theClient.errorMsg());
+         BOOST_REQUIRE_MESSAGE(theClient.resume("/suite1") == 0,"should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,CtsApi::haltServer() << " should return 0\n" << theClient.errorMsg());
+	      BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0\n" << theClient.errorMsg());
+         BOOST_REQUIRE_MESSAGE(theClient.force("/suite1","unknown",true) == 0,"check should return 0\n" << theClient.errorMsg());
+
+	      BOOST_REQUIRE_MESSAGE(theClient.defs().get(),"Server returned a NULL defs");
+	      BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
+	   }
+      cout << " Server handled " << load * 8
+               << " requests in boost_timer(" << boost_timer.elapsed() << ")"
+               << " DurationTimer(" << to_simple_string(duration_timer.elapsed()) << ")"
+               << " Chrono_timer(" << std::chrono::duration<double,std::milli>(chrono_timer.elapsed()).count() << " milli)"
+               << " *with* AUTO SYNC" << endl;
+	}
 }
 
 
@@ -170,7 +257,7 @@ BOOST_AUTO_TEST_CASE( test_server_group_stress_test )
 
 	std::string groupRequest = CtsApi::to_string(CtsApi::delete_node());
 	groupRequest += ";";
-	groupRequest +=	CtsApi::to_string(CtsApi::loadDefs(path,true/*force*/,false/*check_only*/,false/*print*/));
+	groupRequest += CtsApi::to_string(CtsApi::loadDefs(path,true/*force*/,false/*check_only*/,false/*print*/));
 	groupRequest += ";";
 	groupRequest += CtsApi::shutdownServer();
 	groupRequest += ";";

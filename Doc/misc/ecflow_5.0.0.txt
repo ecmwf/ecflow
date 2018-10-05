@@ -1,14 +1,18 @@
 Reason to move to ecflow 5.0.0
 ====================================
-o Built with c++11
+o Built with c++14
   - issue for rpm, force update to gcc 4.7 minimum version
   
 o Built with python3 
   - big implication for existing 2.7 code base
 
-o Uses the latest boost version
+o Uses the latest boost version boost 1.68
 
 o Allow family to be limited as well as tasks
+
+o Now support auto sync, this reduces the latency for GUI and python clients.
+  Auto sync allows us to make a change to the server defs, and automatically sync those changes
+  with the client definition. Previously these were two separate commands send to the server.
 
 o Functionality for archive and restore.( and auto migrate). 
   To cope with extra large suites
