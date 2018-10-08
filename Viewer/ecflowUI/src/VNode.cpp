@@ -1162,6 +1162,13 @@ QString VNode::nodeMenuMode() const
     return s->nodeMenuMode();
 }
 
+QString VNode::defStatusNodeMenuMode() const
+{
+    ServerHandler* s=server();
+    Q_ASSERT(s);
+    return s->defStatusNodeMenuMode();
+}
+
 const std::string& VSuiteNode::typeName() const
 {
    static std::string t("suite");

@@ -255,12 +255,22 @@
 
                 "line" : "server.menu.nodeMenuMode",
                 "note" : {
-                        "default" : "Operator and Administrator modes allow suites to be begun, nodes to be removed and servers to be unlocked. Administrator mode additionally enables the <I>Force</I> and <I>Order</I> menus."
-                },
+                        "default" : "Operator and Administrator modes allow suites to be <b>begun</b>, nodes to be <b>removed</b> and servers to be <b>unlocked</b>. Administrator mode additionally enables the <b><I>Force</I></b> and <b><I>Order</I></b> menus."
+                },                
                 "note" : {
                         "default" : "These settings can be customised for each server separately"
                 }
             },
+
+            "group" : {
+                "title" : "Node context menu control",
+
+                "line" : "server.menu.defStatusMenuModeControl",
+                "note" : {
+                        "default" : "These settings can be customised for each server separately"
+                }
+            },
+
             "group" : {
                 "title" : "Request confirmation when:",
                 "prefix" : "menu.confirm",

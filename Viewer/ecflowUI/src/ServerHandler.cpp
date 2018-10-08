@@ -1467,6 +1467,11 @@ QString ServerHandler::nodeMenuMode() const
     return conf_->stringValue(VServerSettings::NodeMenuMode);
 }
 
+QString ServerHandler::defStatusNodeMenuMode() const
+{
+    return conf_->stringValue(VServerSettings::NodeMenuModeForDefStatus);
+}
+
 void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 {
 	switch(par)

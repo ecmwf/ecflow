@@ -65,6 +65,7 @@ public:
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
     QString nodeMenuMode() const;
+    QString defStatusNodeMenuMode() const;
 
     void setSuiteFilterWithOne(VNode*);
 	void updateSuiteFilter(SuiteFilter*);

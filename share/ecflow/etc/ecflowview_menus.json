@@ -223,7 +223,7 @@
             "name"           : "Defstatus",
             "type"           : "Submenu",
             "menu"           : "Node",
-            "visible_for"    : "node or alias",
+            "visible_for"    : "(node or alias) and (defStatusMenuModeControl)",
             "command"        : "None"
         },
 

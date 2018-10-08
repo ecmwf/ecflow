@@ -101,7 +101,7 @@ VAttributeType* NodeExpressionParser::toAttrType(const std::string &name) const
 
 bool NodeExpressionParser::isMenuMode(const std::string &str) const
 {
-    if (str == "oper" || str == "admin")
+    if (str == "oper" || str == "admin" || str == "defStatusMenuModeControl")
         return true;
 
     return false;
@@ -680,7 +680,19 @@ bool NodeMenuModeCondition::execute(VItem* item)
 {
     if(item)
     {
-        return (item->nodeMenuMode() == menuModeName_);
+        if(menuModeName_ == "defStatusMenuModeControl")
+        {
+            Q_FOREACH(QString s,item->defStatusNodeMenuMode().split("/"))
+            {
+                if(item->nodeMenuMode() == s)
+                    return true;
+            }
+
+        }
+        else
+        {
+            return (item->nodeMenuMode() == menuModeName_);
+        }
     }
     return false;
 }
