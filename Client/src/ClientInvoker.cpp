@@ -243,31 +243,6 @@ int ClientInvoker::invoke( const std::vector<std::string>& args ) const
 	return invoke(argvCreator.argc(),argvCreator.argv());
 }
 
-int ClientInvoker::invoke_group_sync_cmd( const std::vector<std::string>& args ) const
-{
-//   cout << " ClientInvoker::invoke_group_sync_cmd( const std::vector<std::string>& args ) const\n";
-   std::vector<std::string> theArgs;
-   theArgs.emplace_back("ClientInvoker");
-   std::copy( args.begin(), args.end(), std::back_inserter(theArgs) );
-   ArgvCreator argvCreator( theArgs );
-
-   Cmd_ptr cts_cmd;
-   if (get_cmd_from_args(argvCreator.argc(),argvCreator.argv(),cts_cmd) == 1 ) {
-//      cout << " ClientInvoker::invoke_group_sync_cmd returning 1 \n";
-//      cout << server_reply_.get_error_msg() << "\n";
-      return 1;
-   }
-
-   if (!cts_cmd.get()) {
-      if (!testInterface_ && clientEnv_.debug()) {
-         cout << "args: "; for ( size_t x=0; x< args.size(); x++) cout << args[x] << " "; cout << "\n";
-      }
-//      cout << " ClientInvoker::invoke_group_sync_cmd returning 0 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n";
-      return 0;
-   }
-
-   return invoke_group_sync_cmd(cts_cmd);
-}
 
 int ClientInvoker::invoke(Cmd_ptr cts_cmd) const
 {
@@ -293,6 +268,19 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 	if (clientEnv_.no_ecf()) { cout << "NO_ECF\n"; return 0;} // success If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
 	if (testInterface_) return 0;       // The testInterface_ flag allows testing of client interface, parsing of args, without needing to contact server
 	assert(!clientEnv_.host().empty()); // make sure host is NOT empty.
+
+	// Add support for AUTO sync(using the group command), used by GUI and python *ONLY*
+   // only add to group those commands that actually update the defs
+   if (auto_sync_ && !cli() && cts_cmd->cmd_updates_defs() && !cts_cmd->group_cmd()) {
+
+      std::shared_ptr<GroupCTSCmd> grp_cmd = std::make_shared<GroupCTSCmd>(cts_cmd);
+      defs_ptr defs = server_reply_.client_defs();
+
+      if (defs.get()) grp_cmd->addChild( std::make_shared<CSyncCmd>(CSyncCmd::SYNC,server_reply_.client_handle(),defs->state_change_no(),defs->modify_change_no()));
+      else            grp_cmd->addChild( std::make_shared<CSyncCmd>(server_reply_.client_handle()) );
+
+      cts_cmd = grp_cmd;
+   }
 
 	/// retry_connection_period_ specifies the time to wait, before retrying to connect to server.
 	/// Added to get round glitches in the network.
@@ -541,31 +529,6 @@ int ClientInvoker::news_local() const
 }
 //=====================================================================================
 
-int ClientInvoker::invoke_group_sync_cmd( Cmd_ptr child_cmd ) const
-{
-   //cout << " invoke_group_sync_cmd  "; child_cmd->print_only(cout);
-   //cout << " cmd_updates_defs: " << child_cmd->cmd_updates_defs();
-   //cout << " auto_sync : " << auto_sync_ << " +++++++++++++++++++++++++++++++++++++++++++++++++\n";
-
-   // only add to group those commands that actually update the defs
-   if (!auto_sync_ || cli() || !child_cmd->cmd_updates_defs()) return invoke(child_cmd);
-
-   std::shared_ptr<GroupCTSCmd> grp_cmd = std::make_shared<GroupCTSCmd>(child_cmd);
-
-   defs_ptr defs = server_reply_.client_defs();
-   if (defs.get()) {      // Prevent infinite loops in change observers.
-      if ( defs->in_notification()) {
-         std::cout << "ecflow:ClientInvoker::invoke_group_sync_cmd() called in the middle of notification. Ignoring..... \n";
-         return 0;
-      }
-      grp_cmd->addChild( std::make_shared<CSyncCmd>(CSyncCmd::SYNC,server_reply_.client_handle(),defs->state_change_no(),defs->modify_change_no()));
-   }
-   else {
-      grp_cmd->addChild( std::make_shared<CSyncCmd>(server_reply_.client_handle()) );
-   }
-   return invoke( grp_cmd  );
-}
-
 int ClientInvoker::getDefs() const
 {
    if (testInterface_) return invoke(CtsApi::get());
@@ -582,7 +545,7 @@ int ClientInvoker::loadDefs(
    if (testInterface_) return invoke(CtsApi::loadDefs(filePath,force,check_only,print));
    Cmd_ptr cmd = LoadDefsCmd::create(filePath,force,check_only,print,&clientEnv_);
    // If check_only cmd will be empty
-   if (cmd) return invoke_group_sync_cmd(cmd);
+   if (cmd) return invoke(cmd);
    return 0;
 }
 
@@ -590,12 +553,12 @@ int ClientInvoker::loadDefs(
 int ClientInvoker::restartServer() const
 {
    if (testInterface_) return invoke(CtsApi::restartServer());
-   return invoke_group_sync_cmd(std::make_shared<CtsCmd>(CtsCmd::RESTART_SERVER) );
+   return invoke(std::make_shared<CtsCmd>(CtsCmd::RESTART_SERVER) );
 }
 int ClientInvoker::haltServer() const
 {
    if (testInterface_) return invoke(CtsApi::haltServer(true/*auto_confirm*/));
-   return invoke_group_sync_cmd( std::make_shared<CtsCmd>(CtsCmd::HALT_SERVER) );
+   return invoke( std::make_shared<CtsCmd>(CtsCmd::HALT_SERVER) );
 }
 int ClientInvoker::pingServer() const
 {
@@ -605,7 +568,7 @@ int ClientInvoker::pingServer() const
 int ClientInvoker::shutdownServer() const
 {
    if (testInterface_) return invoke(CtsApi::shutdownServer(true/*auto_confirm*/));
-   return invoke_group_sync_cmd(std::make_shared<CtsCmd>(CtsCmd::SHUTDOWN_SERVER) );
+   return invoke(std::make_shared<CtsCmd>(CtsCmd::SHUTDOWN_SERVER) );
 }
 int ClientInvoker::terminateServer() const
 {
@@ -654,66 +617,66 @@ int ClientInvoker::ch_register( bool auto_add_new_suites,const std::vector<std::
 {
    reset();
    if (testInterface_) return invoke(CtsApi::ch_register(0, auto_add_new_suites, suites));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(0, suites, auto_add_new_suites));
+   return invoke(std::make_shared<ClientHandleCmd>(0, suites, auto_add_new_suites));
 }
 int ClientInvoker::ch1_register( bool auto_add_new_suites,const std::vector<std::string>& suites ) const
 {
    int client_handle = server_reply_.client_handle();
    reset();
    if (testInterface_) return invoke(CtsApi::ch_register(client_handle,auto_add_new_suites, suites));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(client_handle,suites, auto_add_new_suites));
+   return invoke(std::make_shared<ClientHandleCmd>(client_handle,suites, auto_add_new_suites));
 }
 
 int ClientInvoker::ch_suites() const
 {
    if (testInterface_) return invoke(CtsApi::ch_suites());
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(ClientHandleCmd::SUITES));
+   return invoke(std::make_shared<ClientHandleCmd>(ClientHandleCmd::SUITES));
 }
 int ClientInvoker::ch_drop( int client_handle ) const
 {
    if (testInterface_) return invoke(CtsApi::ch_drop(client_handle));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(client_handle));
+   return invoke(std::make_shared<ClientHandleCmd>(client_handle));
 }
 int ClientInvoker::ch_drop_user( const std::string& user) const
 {
    if (testInterface_) return invoke(CtsApi::ch_drop_user(user));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(user));
+   return invoke(std::make_shared<ClientHandleCmd>(user));
 }
 int ClientInvoker::ch_add( int client_handle, const std::vector<std::string>& suites ) const
 {
    if (testInterface_) return invoke(CtsApi::ch_add(client_handle, suites));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(client_handle, suites, ClientHandleCmd::ADD));
+   return invoke(std::make_shared<ClientHandleCmd>(client_handle, suites, ClientHandleCmd::ADD));
 }
 int ClientInvoker::ch_remove( int client_handle, const std::vector<std::string>& suites ) const
 {
    if (testInterface_) return invoke(CtsApi::ch_remove(client_handle, suites));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(client_handle, suites, ClientHandleCmd::REMOVE));
+   return invoke(std::make_shared<ClientHandleCmd>(client_handle, suites, ClientHandleCmd::REMOVE));
 }
 int ClientInvoker::ch_auto_add( int client_handle, bool auto_add_new_suites ) const
 {
    if (testInterface_) return invoke(CtsApi::ch_auto_add(client_handle, auto_add_new_suites));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(client_handle,auto_add_new_suites));
+   return invoke(std::make_shared<ClientHandleCmd>(client_handle,auto_add_new_suites));
 }
 int ClientInvoker::ch1_drop() const
 {
    if (0 == server_reply_.client_handle()) return 0;
    if (testInterface_) return invoke(CtsApi::ch_drop(server_reply_.client_handle()));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(server_reply_.client_handle()));
+   return invoke(std::make_shared<ClientHandleCmd>(server_reply_.client_handle()));
 }
 int ClientInvoker::ch1_add( const std::vector<std::string>& suites ) const
 {
    if (testInterface_) return invoke(CtsApi::ch_add(server_reply_.client_handle(), suites));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(server_reply_.client_handle(), suites, ClientHandleCmd::ADD));
+   return invoke(std::make_shared<ClientHandleCmd>(server_reply_.client_handle(), suites, ClientHandleCmd::ADD));
 }
 int ClientInvoker::ch1_remove( const std::vector<std::string>& suites ) const
 {
    if (testInterface_) return invoke(CtsApi::ch_remove(server_reply_.client_handle(), suites));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>( server_reply_.client_handle(), suites, ClientHandleCmd::REMOVE));
+   return invoke(std::make_shared<ClientHandleCmd>( server_reply_.client_handle(), suites, ClientHandleCmd::REMOVE));
 }
 int ClientInvoker::ch1_auto_add( bool auto_add_new_suites ) const
 {
    if (testInterface_) return invoke(CtsApi::ch_auto_add(server_reply_.client_handle(), auto_add_new_suites));
-   return invoke_group_sync_cmd(std::make_shared<ClientHandleCmd>(server_reply_.client_handle(),auto_add_new_suites));
+   return invoke(std::make_shared<ClientHandleCmd>(server_reply_.client_handle(),auto_add_new_suites));
 }
 
 // ======================================================================================================
@@ -721,12 +684,12 @@ int ClientInvoker::ch1_auto_add( bool auto_add_new_suites ) const
 int ClientInvoker::begin( const std::string& suiteName, bool force ) const
 {
    if (testInterface_) return invoke(CtsApi::begin(suiteName, force));
-   return invoke_group_sync_cmd(std::make_shared<BeginCmd>(suiteName,force) );
+   return invoke(std::make_shared<BeginCmd>(suiteName,force) );
 }
 int ClientInvoker::begin_all_suites( bool force ) const
 {
    if (testInterface_) return invoke(CtsApi::begin("", force));
-   return invoke_group_sync_cmd( std::make_shared<BeginCmd>("",force));
+   return invoke( std::make_shared<BeginCmd>("",force));
 }
 // ======================================================================================================
 
@@ -827,7 +790,7 @@ int ClientInvoker::zombieKillCliPaths(const std::vector<std::string>& paths) con
 int ClientInvoker::job_gen( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::job_gen(absNodePath));
-   return invoke_group_sync_cmd(std::make_shared<CtsNodeCmd>(CtsNodeCmd::JOB_GEN, absNodePath));
+   return invoke(std::make_shared<CtsNodeCmd>(CtsNodeCmd::JOB_GEN, absNodePath));
 }
 
 int ClientInvoker::edit_history( const std::string& path ) const
@@ -838,12 +801,12 @@ int ClientInvoker::edit_history( const std::string& path ) const
 int ClientInvoker::kill( const std::vector<std::string>& paths ) const
 {
    if (testInterface_) return invoke(CtsApi::kill(paths));
-   return invoke_group_sync_cmd(std::make_shared<PathsCmd>( PathsCmd::KILL, paths));
+   return invoke(std::make_shared<PathsCmd>( PathsCmd::KILL, paths));
 }
 int ClientInvoker::kill( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::kill(absNodePath));
-   return invoke_group_sync_cmd(std::make_shared<PathsCmd>( PathsCmd::KILL, absNodePath ));
+   return invoke(std::make_shared<PathsCmd>( PathsCmd::KILL, absNodePath ));
 }
 int ClientInvoker::status( const std::vector<std::string>& paths ) const
 {
@@ -858,22 +821,22 @@ int ClientInvoker::status( const std::string& absNodePath ) const
 int ClientInvoker::suspend( const std::vector<std::string>& paths ) const
 {
    if (testInterface_) return invoke(CtsApi::suspend(paths));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::SUSPEND, paths));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::SUSPEND, paths));
 }
 int ClientInvoker::suspend( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::suspend(absNodePath));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::SUSPEND, absNodePath));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::SUSPEND, absNodePath));
 }
 int ClientInvoker::resume( const std::vector<std::string>& paths ) const
 {
    if (testInterface_) return invoke(CtsApi::resume(paths));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::RESUME, paths));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::RESUME, paths));
 }
 int ClientInvoker::resume( const std::string& absNodePath ) const
 {
    if (testInterface_) return invoke(CtsApi::resume(absNodePath));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::RESUME, absNodePath ));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::RESUME, absNodePath ));
 }
 int ClientInvoker::check( const std::vector<std::string>& paths ) const
 {
@@ -888,34 +851,34 @@ int ClientInvoker::check( const std::string& absNodePath ) const
 int ClientInvoker::delete_nodes( const std::vector<std::string>& paths, bool force ) const
 {
    if (testInterface_) return invoke(CtsApi::delete_node(paths, force, true/*auto_confirm*/));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::DELETE, paths,force ));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::DELETE, paths,force ));
 }
 int ClientInvoker::delete_node( const std::string& absNodePath, bool force ) const
 {
    if (testInterface_) return invoke(CtsApi::delete_node(absNodePath, force, true/*auto_confirm*/));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::DELETE, absNodePath,force ));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::DELETE, absNodePath,force ));
 }
 int ClientInvoker::delete_all( bool force) const
 {
    if (testInterface_) return invoke(CtsApi::delete_node(std::vector<std::string>(),force));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::DELETE,std::vector<std::string>(),force ));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::DELETE,std::vector<std::string>(),force ));
 }
 
 int ClientInvoker::archive(const std::vector<std::string>& paths,bool force) const {
    if (testInterface_) return invoke(CtsApi::archive(paths,force));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::ARCHIVE,paths,force ));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::ARCHIVE,paths,force ));
 }
 int ClientInvoker::archive(const std::string& absNodePath,bool force) const {
    if (testInterface_) return invoke(CtsApi::archive(absNodePath,force));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::ARCHIVE,absNodePath ,force ));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::ARCHIVE,absNodePath ,force ));
 }
 int ClientInvoker::restore(const std::vector<std::string>& paths) const {
    if (testInterface_) return invoke(CtsApi::restore(paths));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::RESTORE,paths));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::RESTORE,paths));
 }
 int ClientInvoker::restore(const std::string& absNodePath) const {
    if (testInterface_) return invoke(CtsApi::restore(absNodePath));
-   return invoke_group_sync_cmd( std::make_shared<PathsCmd>(PathsCmd::RESTORE,absNodePath));
+   return invoke( std::make_shared<PathsCmd>(PathsCmd::RESTORE,absNodePath));
 }
 
 // ======================================================================================================
@@ -942,7 +905,7 @@ int ClientInvoker::replace( const std::string& absNodePath, const std::string& p
       return 1;
    }
 
-   return invoke_group_sync_cmd(cts_cmd );
+   return invoke(cts_cmd );
 }
 
 int ClientInvoker::replace_1(const std::string& absNodePath, defs_ptr client_defs, bool create_parents_as_required, bool force)  const
@@ -963,7 +926,7 @@ int ClientInvoker::replace_1(const std::string& absNodePath, defs_ptr client_def
       return 1;
    }
 
-   return invoke_group_sync_cmd(cts_cmd );
+   return invoke(cts_cmd );
 }
 
 int ClientInvoker::requeue( const std::vector<std::string>& paths,  const std::string& option ) const
@@ -982,7 +945,7 @@ int ClientInvoker::requeue( const std::vector<std::string>& paths,  const std::s
          return 1;
       }
    }
-   return invoke_group_sync_cmd(std::make_shared<RequeueNodeCmd>(paths, the_option));
+   return invoke(std::make_shared<RequeueNodeCmd>(paths, the_option));
 }
 
 int ClientInvoker::requeue( const std::string& absNodePath, const std::string& option) const
@@ -999,18 +962,18 @@ int ClientInvoker::requeue( const std::string& absNodePath, const std::string& o
          return 1;
       }
    }
-   return invoke_group_sync_cmd(std::make_shared<RequeueNodeCmd>(absNodePath , the_option));
+   return invoke(std::make_shared<RequeueNodeCmd>(absNodePath , the_option));
 }
 
 int ClientInvoker::run( const std::vector<std::string>& paths, bool force ) const
 {
    if (testInterface_) return invoke(CtsApi::run(paths, force));
-   return invoke_group_sync_cmd(std::make_shared<RunNodeCmd>(paths, force));
+   return invoke(std::make_shared<RunNodeCmd>(paths, force));
 }
 int ClientInvoker::run( const std::string& absNodePath, bool force ) const
 {
    if (testInterface_) return invoke(CtsApi::run(absNodePath, force));
-   return invoke_group_sync_cmd(std::make_shared<RunNodeCmd>(absNodePath , force));
+   return invoke(std::make_shared<RunNodeCmd>(absNodePath , force));
 }
 int ClientInvoker::order( const std::string& absNodePath, const std::string& order ) const
 {
@@ -1021,11 +984,11 @@ int ClientInvoker::order( const std::string& absNodePath, const std::string& ord
       if (on_error_throw_exception_) throw std::runtime_error(server_reply_.error_msg());
       return 1;
    }
-   return invoke_group_sync_cmd(std::make_shared<OrderNodeCmd>(absNodePath,NOrder::toOrder(order)));
+   return invoke(std::make_shared<OrderNodeCmd>(absNodePath,NOrder::toOrder(order)));
 }
 int ClientInvoker::order(const std::string& absNodePath,NOrder::Order order) const
 {
-   return invoke_group_sync_cmd(std::make_shared<OrderNodeCmd>(absNodePath, order));
+   return invoke(std::make_shared<OrderNodeCmd>(absNodePath, order));
 }
 
 // ======================================================================================================
@@ -1038,29 +1001,29 @@ int ClientInvoker::checkPtDefs(ecf::CheckPt::Mode m,int check_pt_interval,int ch
 int ClientInvoker::restoreDefsFromCheckPt() const
 {
    if (testInterface_) return invoke(CtsApi::restoreDefsFromCheckPt());
-   return invoke_group_sync_cmd(std::make_shared<CtsCmd>(CtsCmd::RESTORE_DEFS_FROM_CHECKPT ));
+   return invoke(std::make_shared<CtsCmd>(CtsCmd::RESTORE_DEFS_FROM_CHECKPT ));
 }
 
 int ClientInvoker::force( const std::string& absNodePath, const std::string& state_or_event,bool recursive, bool set_repeats_to_last_value ) const
 {
    if (testInterface_) return invoke(CtsApi::force(absNodePath, state_or_event, recursive, set_repeats_to_last_value));
-   return invoke_group_sync_cmd(std::make_shared<ForceCmd>(absNodePath, state_or_event, recursive, set_repeats_to_last_value));
+   return invoke(std::make_shared<ForceCmd>(absNodePath, state_or_event, recursive, set_repeats_to_last_value));
 }
 int ClientInvoker::force( const std::vector<std::string>& paths, const std::string& state_or_event,bool recursive, bool set_repeats_to_last_value) const
 {
    if (testInterface_) return invoke(CtsApi::force(paths, state_or_event, recursive, set_repeats_to_last_value));
-   return invoke_group_sync_cmd(std::make_shared<ForceCmd>(paths, state_or_event, recursive, set_repeats_to_last_value));
+   return invoke(std::make_shared<ForceCmd>(paths, state_or_event, recursive, set_repeats_to_last_value));
 }
 
 int ClientInvoker::freeDep( const std::vector<std::string>& paths, bool trigger,bool all, bool date, bool the_time ) const
 {
    if (testInterface_) return invoke(CtsApi::freeDep(paths, trigger, all, date, the_time));
-   return invoke_group_sync_cmd(std::make_shared<FreeDepCmd>(paths,trigger,all,date,the_time));
+   return invoke(std::make_shared<FreeDepCmd>(paths,trigger,all,date,the_time));
 }
 int ClientInvoker::freeDep( const std::string& absNodePath, bool trigger, bool all,bool date, bool the_time ) const
 {
    if (testInterface_) return invoke(CtsApi::freeDep(absNodePath, trigger, all, date, the_time));
-   return invoke_group_sync_cmd(std::make_shared<FreeDepCmd>(absNodePath,trigger,all,date,the_time));
+   return invoke(std::make_shared<FreeDepCmd>(absNodePath,trigger,all,date,the_time));
 }
 
 int ClientInvoker::file( const std::string& absNodePath, const std::string& fileType, const std::string& max_lines ) const
@@ -1104,7 +1067,7 @@ int ClientInvoker::alter(const std::vector<std::string>& paths,
 {
 //   cout << " ClientInvoker::alter paths\n";
    if (testInterface_) return invoke(CtsApi::alter(paths,alterType,attrType,name,value));
-   return invoke_group_sync_cmd(CtsApi::alter(paths,alterType,attrType,name,value));
+   return invoke(CtsApi::alter(paths,alterType,attrType,name,value));
 }
 
 int ClientInvoker::alter(const std::string& path,
@@ -1115,7 +1078,7 @@ int ClientInvoker::alter(const std::string& path,
 {
 //   cout << " ClientInvoker::alter path\n";
    if (testInterface_) invoke(CtsApi::alter(path,alterType,attrType,name,value));
-   return invoke_group_sync_cmd(CtsApi::alter(path,alterType,attrType,name,value));
+   return invoke(CtsApi::alter(path,alterType,attrType,name,value));
 }
 
 int ClientInvoker::alter_sort(const std::vector<std::string>& paths,
@@ -1125,7 +1088,7 @@ int ClientInvoker::alter_sort(const std::vector<std::string>& paths,
    if (testInterface_) return invoke(CtsApi::alter_sort(paths,sortable_attribute_name,recursive));
    std::string value;
    if (recursive) value = "recursive";
-   return invoke_group_sync_cmd(std::make_shared<AlterCmd>(paths,sortable_attribute_name,value));
+   return invoke(std::make_shared<AlterCmd>(paths,sortable_attribute_name,value));
 }
 int ClientInvoker::alter_sort(const std::string& path,
             const std::string& sortable_attribute_name,
@@ -1134,7 +1097,7 @@ int ClientInvoker::alter_sort(const std::string& path,
    if (testInterface_) invoke(CtsApi::alter_sort(std::vector<std::string>(1,path),sortable_attribute_name,recursive));
    std::string value;
    if (recursive) value = "recursive";
-   return invoke_group_sync_cmd(std::make_shared<AlterCmd>( std::vector<std::string>(1,path),sortable_attribute_name,value));
+   return invoke(std::make_shared<AlterCmd>( std::vector<std::string>(1,path),sortable_attribute_name,value));
 }
 
 
@@ -1240,7 +1203,7 @@ int ClientInvoker::edit_script_preprocess(const std::string& path_to_task,const 
 
 int ClientInvoker::edit_script_submit(const std::string& path_to_task,const NameValueVec& used_variables)
 {
-   return invoke_group_sync_cmd(std::make_shared<EditScriptCmd>(path_to_task,used_variables));
+   return invoke(std::make_shared<EditScriptCmd>(path_to_task,used_variables));
 }
 
 int ClientInvoker::edit_script_submit(
@@ -1250,7 +1213,7 @@ int ClientInvoker::edit_script_submit(
          bool create_alias,
          bool run_alias)
 {
-   return invoke_group_sync_cmd(std::make_shared<EditScriptCmd>(path_to_task,used_variables,file_contents,create_alias,run_alias));
+   return invoke(std::make_shared<EditScriptCmd>(path_to_task,used_variables,file_contents,create_alias,run_alias));
 }
 
 std::string ClientInvoker::client_env_host_port() const
@@ -1377,7 +1340,7 @@ int ClientInvoker::load_in_memory_defs( const defs_ptr& clientDefs, bool force) 
       return 1;
    }
 
-   return invoke_group_sync_cmd(std::make_shared<LoadDefsCmd>( clientDefs, force /*force overwrite suite of same name*/) );
+   return invoke(std::make_shared<LoadDefsCmd>( clientDefs, force /*force overwrite suite of same name*/) );
 }
 
 

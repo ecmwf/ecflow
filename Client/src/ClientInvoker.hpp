@@ -345,10 +345,7 @@ private:
 	/// returns 1 on error and 0 on success. The errorMsg can be accessed via errorMsg()
 	int invoke( const std::string& arg ) const;
    int invoke( const std::vector<std::string>& args ) const;
-   int invoke_group_sync_cmd( const std::vector<std::string>& args ) const;
    int invoke(Cmd_ptr) const; // assumes clients of Cmd_ptr constructor has caught exceptions
-
-   int invoke_group_sync_cmd( Cmd_ptr  ) const ;
 
    int do_invoke_cmd(Cmd_ptr) const;
 	int load_in_memory_defs( const defs_ptr& clientDefs, bool force) const; /// For clients that want to load a in memory definition into the server.
