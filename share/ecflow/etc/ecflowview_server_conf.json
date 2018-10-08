@@ -94,8 +94,8 @@
                 },
 
                 "defStatusMenuModeControl": {
-                    "label": "Enable <b>Default status</b> submenu in these modes",
-                    "tooltip" : "Controls when Default status submenu is available",
+                    "label": "Enable <b>Defstatus</b> submenu in these modes",
+                    "tooltip" : "Controls when the Defstatus submenu is available",
                     "values"  : "user/oper/admin",
                     "values_label" : "User/Operator/Administrator",
                     "default": "user/oper/admin",
