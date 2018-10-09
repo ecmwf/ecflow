@@ -50,7 +50,10 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
  		}
       case StcCmd::DELETE_ALL: {
          if (debug) std::cout << "  StcCmd::handle_server_response DELETE_ALL\n";
-         server_reply.set_delete_all(); // clears clients defs and sets client_handle to zero
+         server_reply.set_client_defs(defs_ptr());
+         server_reply.set_client_node(node_ptr());
+         server_reply.set_client_handle(0);
+         ret = true;
          break;
       }
 		default: assert(false); break;

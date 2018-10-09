@@ -364,12 +364,6 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cts_cmd->print(cout); cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
 						return 1;
 					}
-					else if (server_reply_.delete_all()) {
-                  // Valid reply from server
-					   // User has invoked delete all
-                  if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cts_cmd->print(cout); cout << " OK : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
-					   return 0;
-					}
 					else {
 						std::cout << TimeStamp::now() << "ecflow:ClientInvoker: missed response? for request "; cts_cmd->print(cout); std::cout << " oops" << endl;
 					}

@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 BOOST_AUTO_TEST_CASE( test_client_handle_cmd )
 {
    /// This will remove checkpt and backup , to avoid server from loading it. (i.e from previous test)
-   InvokeServer invokeServer("Client:: ...test_client_handle_cmd :",SCPort::next());
+   InvokeServer invokeServer("Client:: ...test_client_handle_cmd ",SCPort::next());
    BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
    ClientInvoker theClient(invokeServer.host(), invokeServer.port());
    theClient.set_auto_sync(true);
