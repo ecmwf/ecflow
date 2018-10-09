@@ -76,10 +76,14 @@ Use of perf:  http://www.brendangregg.com/perf.html
   cat out.perf-folded | $HOME/FlameGraph/flamegraph.pl > my_perf.svg
   display my_perf.svg
   
+  
 Using valgrind
 ==========================================================================
-valgrind --tool=cachegrind Base/bin/gcc-6.3.0/debug/perf_job_gen ./metabuilder.def
-kcachegrind cachegrind.out.18473
+# To see the callgraph make sure you use valgrind --tool=callgrind
+# and *NOT* valgrind --tool=cachegrind
+valgrind --tool=callgrind Base/bin/gcc-6.3.0/debug/perf_job_gen ./metabuilder.def
+kcachegrind callgrind.out.18473
+
 
 test job creation
 ==========================================================================
