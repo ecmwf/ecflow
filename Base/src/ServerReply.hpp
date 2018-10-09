@@ -34,6 +34,10 @@ public:
  	/// and reset everything else
 	void clear_for_invoke(bool command_line_interface); // true if calling from command line
 
+	/// Used by the delete all command
+	bool delete_all() const { return delete_all_;}
+	void set_delete_all();
+
  	/// task based replies
  	bool block_client_on_home_server() const { return block_client_on_home_server_;}
  	void set_block_client_on_home_server() { block_client_on_home_server_ = true;}
@@ -120,6 +124,7 @@ private:
 	bool block_client_on_home_server_{false};      // clear at the start of invoke
 	bool block_client_server_halted_{false};       // clear at the start of invoke
 	bool block_client_zombie_detected_{false};     // clear at the start of invoke
+	bool delete_all_{false};                       // clear at the start of invoke
    std::string host_;                      // clear at the start of invoke
    std::string port_;                      // clear at the start of invoke
 	std::string str_;                       // clear at the start of invoke

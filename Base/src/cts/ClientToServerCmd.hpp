@@ -111,9 +111,8 @@ public:
    virtual bool ping_cmd() const { return false;}
    virtual bool why_cmd( std::string& ) const { return false;}
    virtual bool show_cmd() const { return false ;}
-   virtual bool delete_all_cmd() const { return false ;}
 
-   // used by group_cmd for postfix syncCmd on all user commands that modify defs
+   // used by group_cmd to postfix syncCmd on all user commands that modify defs
    virtual void set_client_handle(int client_handle) {} // used by group_cmd
    virtual void set_group_cmd(const GroupCTSCmd*) {}
 
@@ -888,7 +887,7 @@ private:
    }
 
 private:
-   const GroupCTSCmd* group_cmd_; // not persisted only used in server
+   const GroupCTSCmd* group_cmd_ = nullptr; // not persisted only used in server
 };
 
 // Collection of commands, that all take a abs node path as their only arg
@@ -950,9 +949,59 @@ private:
 };
 
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
+class DeleteCmd : public UserCmd {
+public:
+   DeleteCmd(const std::vector<std::string>& paths, bool force = false)
+      : force_(force),paths_(paths),group_cmd_(nullptr){}
+   DeleteCmd(const std::string& absNodePath, bool force = false);
+   DeleteCmd() : group_cmd_(nullptr) {};
+
+   const std::vector<std::string>& paths() const { return paths_;}
+   bool force() const { return force_;}
+
+   std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_only(std::ostream& os) const override;
+   std::ostream& print(std::ostream& os, const std::string& path) const override;
+
+   bool equals(ClientToServerCmd*) const override;
+   bool isWrite() const override { return true;}
+
+   const char* theArg() const override;
+   void addOption(boost::program_options::options_description& desc) const override;
+   void create(    Cmd_ptr& cmd,
+            boost::program_options::variables_map& vm,
+            AbstractClientEnv* clientEnv ) const override;
+
+   // called in the server
+   virtual void set_group_cmd(const GroupCTSCmd* cmd) { group_cmd_ = cmd;}
+
+   static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete);
+
+private:
+   STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
+   void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after handlerequest
+
+private:
+   bool force_{false};
+   std::vector<std::string> paths_;
+
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar(cereal::base_class< UserCmd >( this ),
+         CEREAL_NVP(force_),
+         CEREAL_NVP(paths_));
+   }
+private:
+   const GroupCTSCmd* group_cmd_; // not persisted only used in server
+};
+
+// DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
 class PathsCmd : public UserCmd {
 public:
-   enum Api { NO_CMD,  DELETE, SUSPEND, RESUME, KILL, STATUS, CHECK, EDIT_HISTORY, ARCHIVE, RESTORE };
+   enum Api { NO_CMD, SUSPEND, RESUME, KILL, STATUS, CHECK, EDIT_HISTORY, ARCHIVE, RESTORE };
 
    PathsCmd(Api api,const std::vector<std::string>& paths, bool force = false)
       : api_(api),force_(force),paths_(paths){}
@@ -971,7 +1020,6 @@ public:
 
    bool equals(ClientToServerCmd*) const override;
    bool isWrite() const override;
-   bool delete_all_cmd() const override;
 
    const char* theArg() const override;
    void addOption(boost::program_options::options_description& desc) const override;
@@ -2025,6 +2073,7 @@ private:
 std::ostream& operator<<(std::ostream& os, const ServerVersionCmd&);
 std::ostream& operator<<(std::ostream& os, const CtsCmd&);
 std::ostream& operator<<(std::ostream& os, const CtsNodeCmd&);
+std::ostream& operator<<(std::ostream& os, const DeleteCmd&);
 std::ostream& operator<<(std::ostream& os, const PathsCmd&);
 std::ostream& operator<<(std::ostream& os, const CheckPtCmd&);
 std::ostream& operator<<(std::ostream& os, const LoadDefsCmd&);

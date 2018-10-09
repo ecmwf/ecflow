@@ -202,7 +202,7 @@ void remove_all_aliases(defs_ptr defs) {
    BOOST_REQUIRE_MESSAGE( !aliases.empty(), "Expected at least one alias");
 
    BOOST_FOREACH(alias_ptr alias, aliases) {
-      TestHelper::invokeRequest(defs.get(),Cmd_ptr( new PathsCmd(PathsCmd::DELETE,alias->absNodePath())));
+      TestHelper::invokeRequest(defs.get(),Cmd_ptr( new DeleteCmd(alias->absNodePath())));
    }
 
    aliases.clear();

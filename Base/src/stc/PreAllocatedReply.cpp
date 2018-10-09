@@ -67,6 +67,12 @@ STC_Cmd_ptr PreAllocatedReply::block_client_on_home_server_cmd()
 	cmd->init(StcCmd::BLOCK_CLIENT_ON_HOME_SERVER);
 	return stc_cmd_;
 }
+STC_Cmd_ptr PreAllocatedReply::delete_all_cmd()
+{
+   auto* cmd = dynamic_cast<StcCmd*>(stc_cmd_.get());
+   cmd->init(StcCmd::DELETE_ALL);
+   return stc_cmd_;
+}
 
 STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd(ecf::Child::ZombieType zt)
 {

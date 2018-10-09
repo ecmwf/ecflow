@@ -285,7 +285,8 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const
 #ifdef DEBUG_GROUP_CMD
       std::cout << "  GroupCTSCmd::doHandleRequest calling "; cmdVec_[i]->print(std::cout);  // std::cout << "\n";
 #endif
-      // Let child know about Group command. Only used by ClientHandleCmd, to transfer client_handle to the sync cmd, in *this* group
+      // Let child know about Group command.
+      // Only used by ClientHandleCmd and DeleteCmd to transfer client_handle to the sync cmd, in *this* group
       cmdVec_[i]->set_group_cmd(this);
 
       STC_Cmd_ptr theReturnCmd;

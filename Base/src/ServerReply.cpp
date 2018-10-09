@@ -27,6 +27,7 @@ void ServerReply::clear_for_invoke(bool command_line_interface)
 	block_client_on_home_server_ = false;
 	block_client_server_halted_ = false;
 	block_client_zombie_detected_ = false;
+	delete_all_ = false;
 	host_.clear();
 	port_.clear();
 	error_msg_.clear();
@@ -36,3 +37,13 @@ void ServerReply::clear_for_invoke(bool command_line_interface)
 	client_handle_suites_.clear();
 	changed_nodes_.clear();
 }
+
+void ServerReply::set_delete_all()
+{
+   delete_all_ = true;
+   client_handle_ = 0;
+   client_defs_ = defs_ptr();
+   client_node_ = node_ptr();
+}
+
+

@@ -25,7 +25,8 @@ class StcCmd : public ServerToClientCmd {
 public:
    enum Api { OK,
       BLOCK_CLIENT_SERVER_HALTED,
-      BLOCK_CLIENT_ON_HOME_SERVER
+      BLOCK_CLIENT_ON_HOME_SERVER,
+      DELETE_ALL
    };
    explicit StcCmd(Api a) :  api_(a) {}
    StcCmd()= default;
@@ -41,7 +42,7 @@ public:
    /// Hence must still have isOkCmd()
    bool ok() const override { return api_ == OK; }      // used by group command
    bool isOkCmd() const override { return api_ == OK; } // Used if no reply back from server
-   bool is_returnable_in_group_cmd() const override { return api_ == OK;  }
+   bool is_returnable_in_group_cmd() const override { return api_ == OK || api_ == DELETE_ALL; }
 
 private:
    Api api_{OK};

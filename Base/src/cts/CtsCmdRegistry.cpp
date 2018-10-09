@@ -52,7 +52,7 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
    vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::SERVER_LOAD));
    vec_.push_back( std::make_shared<CtsNodeCmd>(CtsNodeCmd::JOB_GEN));
    vec_.push_back( std::make_shared<CtsNodeCmd>(CtsNodeCmd::CHECK_JOB_GEN_ONLY));
-   vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::DELETE));
+   vec_.push_back( std::make_shared<DeleteCmd>());
    vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::SUSPEND));
    vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::RESUME));
    vec_.push_back( std::make_shared<PathsCmd>(PathsCmd::KILL));

@@ -332,12 +332,6 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 						/// will return false if further action required
 						if (theClient.handle_server_response( server_reply_, clientEnv_.debug() )) {
 							// The normal response.  RoundTriprecorder will record in rtt_
-
-						   // If the command was a delete_all command, reset client_handle
-						   if (cts_cmd->delete_all_cmd()) {
-						      auto* non_const_this = const_cast<ClientInvoker*>(this);
-						      non_const_this->reset();
-						   }
 							return 0; // the normal exit path
 						}
 					}
@@ -369,6 +363,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 						// we fall through and try again.
 						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cts_cmd->print(cout); cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
 						return 1;
+					}
+					else if (server_reply_.delete_all()) {
+                  // Valid reply from server
+					   // User has invoked delete all
+                  if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cts_cmd->print(cout); cout << " OK : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
+					   return 0;
 					}
 					else {
 						std::cout << TimeStamp::now() << "ecflow:ClientInvoker: missed response? for request "; cts_cmd->print(cout); std::cout << " oops" << endl;
@@ -851,17 +851,17 @@ int ClientInvoker::check( const std::string& absNodePath ) const
 int ClientInvoker::delete_nodes( const std::vector<std::string>& paths, bool force ) const
 {
    if (testInterface_) return invoke(CtsApi::delete_node(paths, force, true/*auto_confirm*/));
-   return invoke( std::make_shared<PathsCmd>(PathsCmd::DELETE, paths,force ));
+   return invoke( std::make_shared<DeleteCmd>(paths,force ));
 }
 int ClientInvoker::delete_node( const std::string& absNodePath, bool force ) const
 {
    if (testInterface_) return invoke(CtsApi::delete_node(absNodePath, force, true/*auto_confirm*/));
-   return invoke( std::make_shared<PathsCmd>(PathsCmd::DELETE, absNodePath,force ));
+   return invoke( std::make_shared<DeleteCmd>(absNodePath,force ));
 }
 int ClientInvoker::delete_all( bool force) const
 {
    if (testInterface_) return invoke(CtsApi::delete_node(std::vector<std::string>(),force));
-   return invoke( std::make_shared<PathsCmd>(PathsCmd::DELETE,std::vector<std::string>(),force ));
+   return invoke( std::make_shared<DeleteCmd>(std::vector<std::string>(),force ));
 }
 
 int ClientInvoker::archive(const std::vector<std::string>& paths,bool force) const {

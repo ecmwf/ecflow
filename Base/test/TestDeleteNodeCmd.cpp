@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 	MockServer mockServer(&fixtureDef.defsfile_);
 
 	// IMPORTANT: ******************************************************************************
-	// If the PathsCmd is given a EMPTY list of paths, it will delete *EVERYTHING*
+	// If the DeleteCmd is given a EMPTY list of paths, it will delete *EVERYTHING*
 	// *****************************************************************************************
 
    // Delete all Aliases
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 
       size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
       BOOST_CHECK_MESSAGE( !paths.empty(),"Expected paths to be specified, *OTHERWISE* we delete all nodes");
-      PathsCmd cmd(PathsCmd::DELETE,paths);
+      DeleteCmd cmd(paths);
       cmd.setup_user_authentification();
       STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
       BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete aliases");
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 
       BOOST_CHECK_MESSAGE( !paths.empty(),"Expected paths to be specified, *OTHERWISE* we delete all nodes");
       size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
-      PathsCmd cmd(PathsCmd::DELETE,paths);
+      DeleteCmd cmd(paths);
 	   cmd.setup_user_authentification();
 	   STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 	   BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete tasks");
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 		      // Delete all Families
             // *********************************************************************************************
             // **EXPLICITLY** check for empty paths otherwise we can end up deleting ALL suites accidentally
-            // if PathsCmd is given an empty list, we will delete all nodes including the suites
+            // if DeleteCmd is given an empty list, we will delete all nodes including the suites
             // *********************************************************************************************
 		      std::vector<family_ptr> familyVec = s->familyVec();
 		      // 	DONT USE:
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 
 		      if (!paths.empty()) {
 		         size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
-		         PathsCmd cmd(PathsCmd::DELETE,paths);
+		         DeleteCmd cmd(paths);
 		         cmd.setup_user_authentification();
 		         STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 		         BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete families");
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 			// delete the suite
          size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
 			std::string absNodePath = s->absNodePath();
-	      PathsCmd cmd(PathsCmd::DELETE,absNodePath);
+	      DeleteCmd cmd(absNodePath);
 			cmd.setup_user_authentification();
 			STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 			BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete suite at path " << absNodePath);
@@ -160,37 +160,6 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 		BOOST_REQUIRE_MESSAGE( fixtureDef.defsfile_.suiteVec().empty(),"Expected all Suites to be deleted but found " << fixtureDef.defsfile_.suiteVec().size());
 	}
 }
-
-// Will break for valgrind hence commented out
-//BOOST_AUTO_TEST_CASE( test_delete_cmd_for_defs )
-//{
-//   std::string path_to_very_large_defs_file = "/var/tmp/ma0/BIG_DEFS/3199.def";
-//   cout << "Base:: ...test_delete_cmd_for_defs " << path_to_very_large_defs_file;
-//
-//   // Ok will only run locally, so don't fail, for other platforms
-//   if (!fs::exists(path_to_very_large_defs_file))  cout << " ... missing test\n";
-//   else {
-//      Defs defs;
-//      {
-//         DurationTimer duration_timer;
-//         std::string errorMsg,warningMsg;
-//         BOOST_REQUIRE_MESSAGE(defs.restore(path_to_very_large_defs_file,errorMsg,warningMsg),"failed to parse 3199.def");
-//         cout << " ...Loading took " << duration_timer.duration();
-//         BOOST_CHECK_MESSAGE( duration_timer.duration() < 20,"Loading defs "
-//                              << path_to_very_large_defs_file << " took " << duration_timer.duration() << " Expected to take < 20 seconds");
-//      }
-//
-//      DurationTimer duration_timer;
-//      MockServer mockServer(&defs);
-//      PathsCmd cmd(PathsCmd::DELETE,"",true);
-//      cmd.setup_user_authentification();
-//      STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
-//      BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete defs");
-//      cout << " ...Deleting took " << duration_timer.duration() << "\n";
-//      BOOST_CHECK_MESSAGE( duration_timer.duration() < 2,"Deleting defs "
-//                           << path_to_very_large_defs_file << " took " << duration_timer.duration() << " Expected to take < 2 seconds");
-//   }
-//}
 
 BOOST_AUTO_TEST_SUITE_END()
 

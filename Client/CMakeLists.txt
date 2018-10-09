@@ -81,6 +81,7 @@ if (ENABLE_SERVER)
     list(APPEND test_srcs
         test/SCPort.cpp
         test/TestClientTimeout.cpp
+        test/TestClientHandleCmd.cpp
         test/TestCheckPtDefsCmd.cpp
         test/TestGroupCmd.cpp
         test/TestLoadDefsCmd.cpp

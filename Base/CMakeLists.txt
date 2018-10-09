@@ -51,6 +51,7 @@
  src/cts/EditScriptCmd.cpp
  src/cts/FreeDepCmd.cpp
  src/cts/PathsCmd.cpp
+ src/cts/DeleteCmd.cpp
  src/cts/EditHistoryMgr.cpp
  src/cts/LogMessageCmd.cpp
  src/cts/CtsApi.cpp

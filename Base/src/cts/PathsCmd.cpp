@@ -30,10 +30,6 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-// forward declare static functions
-static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete);
-
-
 PathsCmd::PathsCmd(Api api,const std::string& absNodePath, bool force)
 : api_(api),force_(force)
 {
@@ -59,7 +55,6 @@ std::ostream& PathsCmd::print(std::ostream& os, const std::string& path) const
 std::ostream& PathsCmd::my_print(std::ostream& os,const std::vector<std::string>& paths) const
 {
    switch (api_) {
-      case PathsCmd::DELETE:             return user_cmd(os,CtsApi::to_string(CtsApi::delete_node(paths,force_))); break;
       case PathsCmd::SUSPEND:            return user_cmd(os,CtsApi::to_string(CtsApi::suspend(paths))); break;
       case PathsCmd::RESUME:             return user_cmd(os,CtsApi::to_string(CtsApi::resume(paths))); break;
       case PathsCmd::KILL:               return user_cmd(os,CtsApi::to_string(CtsApi::kill(paths))); break;
@@ -76,7 +71,6 @@ std::ostream& PathsCmd::my_print(std::ostream& os,const std::vector<std::string>
 std::ostream& PathsCmd::my_print_only(std::ostream& os,const std::vector<std::string>& paths) const
 {
    switch (api_) {
-      case PathsCmd::DELETE:             os << CtsApi::to_string(CtsApi::delete_node(paths,force_)); break;
       case PathsCmd::SUSPEND:            os << CtsApi::to_string(CtsApi::suspend(paths)); break;
       case PathsCmd::RESUME:             os << CtsApi::to_string(CtsApi::resume(paths)); break;
       case PathsCmd::KILL:               os << CtsApi::to_string(CtsApi::kill(paths)); break;
@@ -105,7 +99,6 @@ bool PathsCmd::equals(ClientToServerCmd* rhs) const
 bool PathsCmd::isWrite() const
 {
    switch (api_) {
-      case PathsCmd::DELETE:            return true;  break; // requires write privilege
       case PathsCmd::SUSPEND:           return true;  break; // requires write privilege
       case PathsCmd::RESUME:            return true;  break; // requires write privilege
       case PathsCmd::KILL:              return true;  break; // requires write privilege
@@ -124,7 +117,6 @@ bool PathsCmd::isWrite() const
 const char* PathsCmd::theArg() const
 {
    switch (api_) {
-      case PathsCmd::DELETE:             return CtsApi::delete_node_arg(); break;
       case PathsCmd::SUSPEND:            return CtsApi::suspend_arg(); break;
       case PathsCmd::RESUME:             return CtsApi::resume_arg(); break;
       case PathsCmd::KILL:               return CtsApi::kill_arg(); break;
@@ -138,14 +130,6 @@ const char* PathsCmd::theArg() const
    }
    assert(false);
    return nullptr;
-}
-
-bool PathsCmd::delete_all_cmd() const
-{
-   if (api_ == PathsCmd::DELETE && paths_.empty()) {
-      return true;
-   }
-   return false ;
 }
 
 STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
@@ -189,40 +173,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             std::string paths_not_fnd_error_msg = ss.str();
             if (!paths_not_fnd_error_msg.empty()) throw std::runtime_error( paths_not_fnd_error_msg );
             return PreAllocatedReply::string_cmd(acc_warning_msg);
-         }
-         break;
-      }
-
-      case PathsCmd::DELETE: {
-         as->update_stats().node_delete_++;
-
-         if ( paths_.empty() ) {
-            if (!force_) check_for_active_or_submitted_tasks(as,node_ptr());
-            else         as->zombie_ctrl().add_user_zombies(as->defs(),CtsApi::delete_node_arg());
-            as->clear_defs();
-         }
-         else {
-
-            size_t vec_size = paths_.size();
-            for(size_t i = 0; i < vec_size; i++) {
-
-               node_ptr theNodeToDelete =  as->defs()->findAbsNode(paths_[i]);
-               if (!theNodeToDelete.get()) {
-                  ss << "PathsCmd:Delete: Could not find node at path '" << paths_[i] << "'\n";
-                  LOG(Log::ERR,"Delete: Could not find node at path " << paths_[i]);
-                  continue;
-               }
-               // since node is to be deleted, we need to record the paths.
-               add_node_path_for_edit_history(paths_[i]);
-
-               if (!force_) check_for_active_or_submitted_tasks(as,theNodeToDelete);
-               else         as->zombie_ctrl().add_user_zombies(theNodeToDelete,CtsApi::delete_node_arg());
-
-               if (!as->defs()->deleteChild( theNodeToDelete.get() )) {
-                  std::string errorMsg = "Delete: Can not delete node " + theNodeToDelete->debugNodePath();
-                  throw std::runtime_error( errorMsg ) ;
-               }
-            }
          }
          break;
       }
@@ -325,7 +275,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             NodeContainer* container = theNode->isNodeContainer();
             if (!container) continue;
 
-            if (!force_) check_for_active_or_submitted_tasks(as,theNode);
+            if (!force_) DeleteCmd::check_for_active_or_submitted_tasks(as,theNode);
             else         as->zombie_ctrl().add_user_zombies(theNode,CtsApi::archive_arg());
 
             bool unique = true;
@@ -389,51 +339,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 bool PathsCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 {
    return do_authenticate(as,cmd,paths_);
-}
-
-static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete)
-{
-   vector<Task*> taskVec;
-   if ( theNodeToDelete.get() ) {
-      theNodeToDelete->getAllTasks(taskVec);
-   }
-   else {
-      as->defs()->getAllTasks(taskVec);
-   }
-
-   vector<Task*> activeVec,submittedVec;
-   BOOST_FOREACH(Task* t, taskVec) {
-      if (t->state() == NState::ACTIVE)  activeVec.push_back(t);
-      if (t->state() == NState::SUBMITTED)  submittedVec.push_back(t);
-   }
-   if (!activeVec.empty() || !submittedVec.empty()) {
-      std::stringstream ss;
-      if (theNodeToDelete.get()) ss << "Can not delete node " << theNodeToDelete->debugNodePath() << "\n";
-      else                       ss << "Can not delete all nodes.\n";
-      if (!activeVec.empty() ) {
-         ss << " There are " << activeVec.size() << " active tasks. First : " << activeVec.front()->absNodePath() << "\n";
-      }
-      if (!submittedVec.empty() ) {
-         ss << " There are " << submittedVec.size() << " submitted tasks. First : " << submittedVec.front()->absNodePath() << "\n";
-      }
-      ss << "Please use the 'force' option to bypass this check, at the expense of creating zombies\n";
-      throw std::runtime_error( ss.str() ) ;
-   }
-}
-
-static const char* delete_node_desc() {
-   return
-            "Deletes the specified node(s) or _ALL_ existing definitions( i.e delete all suites) in the server.\n"
-            "  arg1 = [ force | yes ](optional)  # Use this parameter to bypass checks, i.e. for active or submitted tasks\n"
-            "  arg2 = yes(optional)              # Use 'yes' to bypass the confirmation prompt\n"
-            "  arg3 = node paths | _all_         # _all_ means delete all suites\n"
-            "                                    # node paths must start with a leading '/'\n"
-            "Usage:\n"
-            "  --delete=_all_                    # Delete all suites in server. Use with care.\n"
-            "  --delete=/suite/f1/t1             # Delete node at /suite/f1/t1. This will prompt\n"
-            "  --delete=force /suite/f1/t1       # Delete node at /suite/f1/t1 even if active or submitted\n"
-            "  --delete=force yes /s1 /s2        # Delete suites s1,s2 even if active or submitted, bypassing prompt"
-            ;
 }
 
 static const char* get_check_desc() {
@@ -535,10 +440,6 @@ void PathsCmd::addOption(boost::program_options::options_description& desc) cons
          desc.add_options()(CtsApi::check_arg(),po::value< vector<string> >()->multitoken(),get_check_desc());
          break;
       }
-      case PathsCmd::DELETE:{
-         desc.add_options()( CtsApi::delete_node_arg(), po::value< vector<string> >()->multitoken(), delete_node_desc() );
-         break;
-      }
       case PathsCmd::SUSPEND:{
          desc.add_options()( CtsApi::suspend_arg(), po::value< vector<string> >()->multitoken(),suspend_desc());
          break;
@@ -585,38 +486,7 @@ void PathsCmd::create(   Cmd_ptr& cmd,
    split_args_to_options_and_paths(args,options,paths); // relative order is still preserved
 
    bool force = false;
-   if (api_ == PathsCmd::DELETE) {
-      bool all = false;
-      bool do_prompt = true;
-      size_t vec_size = options.size();
-      for(size_t i = 0; i < vec_size; i++) {
-         if (args[i] == "_all_") all = true;
-         if (args[i] == "force") force = true;
-         if (args[i] == "yes")   do_prompt = false;
-      }
-
-      if (!all && paths.empty()) {
-         std::stringstream ss;
-         ss << "Delete: No paths specified. Paths must begin with a leading '/' character\n";
-         throw std::runtime_error( ss.str() );
-      }
-
-      if (do_prompt) {
-         std::string confirm;
-         if (paths.empty()) confirm = "Are you sure you want to delete all the suites ? ";
-         else {
-            confirm = "Are you sure want to delete nodes at paths:\n";
-            size_t vec_size = paths.size();
-            for(size_t i = 0; i < vec_size; i++) {
-               confirm += "  " + paths[i];
-               if ( i == vec_size -1) confirm += " ? ";
-               else                   confirm += "\n";
-            }
-         }
-         prompt_for_confirmation(confirm);
-      }
-   }
-   else if (api_ == PathsCmd::CHECK) {
+   if (api_ == PathsCmd::CHECK) {
 
       bool all = false;
       size_t vec_size = options.size();

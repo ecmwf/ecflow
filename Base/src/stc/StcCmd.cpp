@@ -20,7 +20,8 @@ std::ostream& StcCmd::print(std::ostream& os) const
 	switch (api_) {
 		case StcCmd::OK:                          return os << "cmd:Ok"; break;
 		case StcCmd::BLOCK_CLIENT_SERVER_HALTED:  return os << "cmd:Server_halted"; break;
-		case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: return os << "cmd:Wait"; break;
+      case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: return os << "cmd:Wait"; break;
+      case StcCmd::DELETE_ALL:                  return os << "cmd:delete_all"; break;
 		default: assert(false); break;
  	}
 	assert(false); // unknown command
@@ -47,6 +48,11 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
 			server_reply.set_block_client_on_home_server(); // requires further work, by ClientInvoker
 			break;
  		}
+      case StcCmd::DELETE_ALL: {
+         if (debug) std::cout << "  StcCmd::handle_server_response DELETE_ALL\n";
+         server_reply.set_delete_all(); // clears clients defs and sets client_handle to zero
+         break;
+      }
 		default: assert(false); break;
  	}
 	return ret;
