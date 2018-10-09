@@ -113,12 +113,18 @@ BOOST_AUTO_TEST_CASE( test_load_defs_check_only )
 
    // Do not load the defs do a check only
    ClientInvoker theClient(invokeServer.host(),invokeServer.port());
-   BOOST_REQUIRE_MESSAGE( theClient.loadDefs(path,false,true/* check only*/) == 0,"Expected load to succeed\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.sync_local() == 0,"Expected sync to succeed\n" << theClient.errorMsg());
+   {
+      BOOST_REQUIRE_MESSAGE( theClient.loadDefs(path,false,true/* check only*/) == 0,"Expected load to succeed\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( theClient.sync_local() == 0,"Expected sync to succeed\n" << theClient.errorMsg());
 
-   // Note: when running with ECF_HOST=localhost the defs may exist, but the number of suites should be empty
-   BOOST_REQUIRE_MESSAGE( !theClient.defs() || theClient.defs()->suiteVec().empty(),"Expected no defs, since nothing should have been loaded\n" << theClient.errorMsg());
-
+      // Note: when running with ECF_HOST=localhost the defs may exist, but the number of suites should be empty
+      BOOST_REQUIRE_MESSAGE( !theClient.defs() || theClient.defs()->suiteVec().empty(),"Expected no defs, since nothing should have been loaded\n" << theClient.errorMsg());
+   }
+   {
+      theClient.set_auto_sync(true);
+      BOOST_REQUIRE_MESSAGE( theClient.loadDefs(path,false,true/* check only*/) == 0,"Expected load to succeed\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE( !theClient.defs() || theClient.defs()->suiteVec().empty(),"Expected no defs, since nothing should have been loaded\n" << theClient.errorMsg());
+   }
    // provide path to definition that should fail to parse
    std::string path_bad_def = File::test_data("Client/test/data/bad.def","Client");
    BOOST_REQUIRE_THROW( theClient.loadDefs(path_bad_def,false,true/* check only*/),std::runtime_error);
