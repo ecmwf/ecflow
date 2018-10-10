@@ -14,17 +14,17 @@ if [[ $# -ne 5 ]] ; then
     exit 1
 fi
 
-set -x
-
 uiDefs=$1
 host=$2
 port=$3
 nodePath=$4
 serverDefs=$5
 
-echo "Get defs via ecflow_client"
+echo "Get defs via ecflow_client:"
+echo "ecflow_client --host=${host} --port=${port} --migrate ${nodePath} > ${serverDefs}"
 ecflow_client --host=${host} --port=${port} --migrate ${nodePath} > ${serverDefs}
 
-echo "Compare defs with meld"
+echo "Compare defs with meld:"
+echo "meld ${uiDefs} ${serverDefs} &"
 meld ${uiDefs} ${serverDefs} &
 

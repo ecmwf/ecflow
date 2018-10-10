@@ -38,7 +38,7 @@ VNodeStateDiag::VNodeStateDiag(VInfo_ptr info)
                     s->host() + " " + s->port() + " \'" +
                     info->nodePath() + "\' \'" + tmpFile2->path() + "\'";
 
-            ShellCommand::run(cmd,cmd);
+            ShellCommand::run(cmd,"");
         }
     }
 }
