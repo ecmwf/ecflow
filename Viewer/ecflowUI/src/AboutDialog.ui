@@ -154,6 +154,20 @@
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab3W">
+      <attribute name="title">
+       <string>Environment</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QLabel" name="envLabel_">
+         <property name="text">
+          <string>envLabel_</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>

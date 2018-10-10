@@ -10,6 +10,7 @@
 
 #include "AboutDialog.hpp"
 
+#include "DirectoryHandler.hpp"
 #include "Version.hpp"
 #include "WidgetNameProvider.hpp"
 
@@ -57,7 +58,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     if(!ecfVersionTxt.isEmpty())
     {
         logoTxt+="<p>ecflow version: <b>" + ecfVersionTxt + "</b><br>";
-        logoTxt+="<i>Copyright 2009-2017 ECMWF</i><p>";
+        logoTxt+="<i>Copyright 2009-" + QString::number(QDate::currentDate().year()) + " ECMWF</i><p>";
     }
 
     logoTxt+="</td></tr></table>";
@@ -75,4 +76,17 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     licenseLabel_->setText(licenseText);
 
     WidgetNameProvider::nameChildren(this);
+
+    //ENV
+    std::string envText="<b>Log file:</b> ";
+
+    if(DirectoryHandler::uiLogFileName().empty())
+        envText+= "<i>not defined (log is written to stdout)</i><br>";
+    else
+        envText+=DirectoryHandler::uiLogFileName() + " <br>";
+
+    envText+="<b>UI event log file:</b> " + DirectoryHandler::uiEventLogFileName() +" <br>";
+    envText+="<b>Socket directory:</b> " + DirectoryHandler::socketDir() +" <br>";
+
+    envLabel_->setText(QString::fromStdString(envText));
 }
