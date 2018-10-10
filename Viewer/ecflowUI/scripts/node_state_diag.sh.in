@@ -1,0 +1,30 @@
+#!/bin/bash
+
+#============================================================================
+# Copyright 2009-2018 ECMWF.
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#============================================================================
+
+if [[ $# -ne 5 ]] ; then
+    echo "Error: wrong number of arguments = $# (must be 5)"
+    exit 1
+fi
+
+set -x
+
+uiDefs=$1
+host=$2
+port=$3
+nodePath=$4
+serverDefs=$5
+
+echo "Get defs via ecflow_client"
+ecflow_client --host=${host} --port=${port} --migrate ${nodePath} > ${serverDefs}
+
+echo "Compare defs with meld"
+meld ${uiDefs} ${serverDefs} &
+

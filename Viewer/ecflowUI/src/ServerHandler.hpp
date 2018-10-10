@@ -116,6 +116,9 @@ public:
 
 	static ServerHandler* find(const std::string& name);
 
+    void writeDefs(const std::string& fileName);
+    void writeDefs(VInfo_ptr info,const std::string& fileName);
+
 protected:
 	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
 	~ServerHandler();

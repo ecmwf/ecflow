@@ -109,7 +109,7 @@ bool NodeExpressionParser::isMenuMode(const std::string &str) const
 
 bool NodeExpressionParser::isEnvVar(const std::string &str) const
 {
-    if (str == "ECFLOWUI_ECMWF_OPERATOR_MODE")
+    if (str == "ECFLOWUI_ECMWF_OPERATOR_MODE" || str == "ECFLOWUI_DEVELOP_MODE")
         return true;
 
     return false;

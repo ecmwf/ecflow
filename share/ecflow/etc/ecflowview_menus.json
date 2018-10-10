@@ -479,6 +479,15 @@
 
         {
             "menu"           : "Special",
+            "name"           : "Check node state in UI",
+            "visible_for"    : "(server or node) and ECFLOWUI_DEVELOP_MODE)",
+            "command"        : "check_ui_node_state",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
             "name"           : "URL command",
             "command"        : "sh %ECF_URL_CMD%",
             "multi"          : "false",

@@ -37,6 +37,7 @@
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VNodeMover.hpp"
+#include "VNodeStateDiag.hpp"
 #include "VReportMaker.hpp"
 
 #define _UI_ACTIONHANDLER_DEBUG
@@ -149,6 +150,17 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 if(filteredNodes[0] && filteredNodes[0]->node())
                 {
                     VReportMaker::sendReport(filteredNodes[0]);
+                }
+            }
+        }
+
+        else if(item->command() == "check_ui_node_state")
+        {
+            if(filteredNodes.size() == 1)
+            {
+                if(filteredNodes[0] && filteredNodes[0]->node())
+                {
+                    VNodeStateDiag diag(filteredNodes[0]);
                 }
             }
         }

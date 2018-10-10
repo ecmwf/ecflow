@@ -194,6 +194,7 @@ set(viewer_srcs
     VNode.cpp
     VNodeList.cpp
     VNodeMover.cpp
+    VNodeStateDiag.cpp
     VNState.cpp
     VParam.cpp
     VProperty.cpp
