@@ -470,6 +470,15 @@
 
         {
             "menu"           : "Special",
+            "name"           : "Create JSD ticket",
+            "visible_for"    : "(task or alias or ECFLOWUI_ECMWF_OPERATOR_MODE)",
+            "command"        : "create_jsd_ticket",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
             "name"           : "URL command",
             "command"        : "sh %ECF_URL_CMD%",
             "multi"          : "false",

@@ -199,6 +199,7 @@ set(viewer_srcs
     VProperty.cpp
     VRepeatAttr.cpp
     VReply.cpp
+    VReportMaker.cpp
     VServerSettings.cpp
     VSettings.cpp
     VSettingsLoader.cpp

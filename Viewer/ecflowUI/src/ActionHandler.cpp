@@ -37,6 +37,7 @@
 #include "UserMessage.hpp"
 #include "VConfig.hpp"
 #include "VNodeMover.hpp"
+#include "VReportMaker.hpp"
 
 #define _UI_ACTIONHANDLER_DEBUG
 
@@ -140,6 +141,17 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     		 cb->setText(txt, QClipboard::Selection);
 #endif
     	}
+
+        else if(item->command() == "create_jsd_ticket")
+        {
+            if(filteredNodes.size() == 1)
+            {
+                if(filteredNodes[0] && filteredNodes[0]->node())
+                {
+                    VReportMaker::sendReport(filteredNodes[0]);
+                }
+            }
+        }
 
         else if(item->command() == "mark_for_move")
         {
