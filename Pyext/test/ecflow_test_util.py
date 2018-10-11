@@ -191,6 +191,7 @@ class Server(object):
             print("   Allow time for server to start")
             if self.ci.wait_for_server_reply() :
                 print("   Server has started")
+                print("   log_file_path:",os.path.join(os.getcwd(),log_file_path(str(self.the_port))))
             else:
                 print("   Server failed to start after 60 second !!!!!!")
                 assert False , "Server failed to start after 60 second !!!!!!"
@@ -208,7 +209,8 @@ class Server(object):
         print("   value:",value)
         print("   tb:",tb)
         print("   Terminate server")
-        self.ci.terminate_server()  
+        self.ci.terminate_server() 
+        time.sleep(4) 
         try:  
             self.ci.ping() 
             print("   Terminate server Failed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
