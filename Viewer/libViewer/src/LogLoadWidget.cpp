@@ -654,6 +654,23 @@ void LogLoadRequestModel::selectFirstFourItems()
     Q_EMIT dataChanged(startIdx,endIdx);
 }
 
+void LogLoadRequestModel::selectFirstItem()
+{
+    unselectAll();
+    for(int i=0; i < data_.size(); i++)
+    {
+        if(data_[i].rank_ ==0)
+        {
+            data_[i].checked_=true;
+            Q_EMIT checkStateChanged(i,true);
+        }
+    }
+
+    QModelIndex startIdx=index(0,0);
+    QModelIndex endIdx=index(rowCount(),columnCount()-1);
+    Q_EMIT dataChanged(startIdx,endIdx);
+}
+
 void LogLoadRequestModel::setShowColour(bool b)
 {
     showColour_=b;
@@ -2369,6 +2386,9 @@ void LogCmdSuiteRequestView::loadCore()
 
     //Total
     addTotal();
+
+    if(!cmdCtl_.isAnySet())
+        cmdCtl_.model_->selectFirstItem();
 }
 
 void LogCmdSuiteRequestView::buildScanTable(QString& txt,int idx)
@@ -2629,6 +2649,9 @@ void LogSuiteCmdRequestView::loadCore()
 
     //Total
     addTotal();
+
+    if(!suiteCtl_.isAnySet())
+        suiteCtl_.model_->selectFirstItem();
 }
 
 void LogSuiteCmdRequestView::buildScanTable(QString& txt,int idx)
@@ -2892,6 +2915,9 @@ void LogUidCmdRequestView::loadCore()
 
     //Total
     addTotal();
+
+    if(!uidCtl_.isAnySet())
+        uidCtl_.model_->selectFirstItem();
 }
 
 void LogUidCmdRequestView::buildScanTable(QString& txt,int idx)
@@ -3065,7 +3091,6 @@ void LogCmdUidRequestView::addRemoveUid(int uidIdx, bool st)
     }
 }
 
-
 void LogCmdUidRequestView::addUid(int uidIdx)
 {
     QString id=uidChartId(uidIdx);
@@ -3151,6 +3176,9 @@ void LogCmdUidRequestView::loadCore()
 
     //Total
     addTotal();
+
+    if(!cmdCtl_.isAnySet())
+        cmdCtl_.model_->selectFirstItem();
 }
 
 void LogCmdUidRequestView::buildScanTable(QString& txt,int idx)
