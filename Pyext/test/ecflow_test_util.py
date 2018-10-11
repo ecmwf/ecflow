@@ -209,7 +209,11 @@ class Server(object):
         print("   tb:",tb)
         print("   Terminate server")
         self.ci.terminate_server()  
-        print("   Terminate server OK")
+        try:  
+            self.ci.ping() 
+            print("   Terminate server Failed")
+        except RuntimeError as e:
+            print("   Terminate server OK")
         self.lock_file.remove(self.the_port)
         if not debugging():
             clean_up_server(str(self.the_port))
