@@ -211,15 +211,15 @@ class Server(object):
         self.ci.terminate_server()  
         try:  
             self.ci.ping() 
-            print("   Terminate server Failed")
+            print("   Terminate server Failed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         except RuntimeError as e:
             print("   Terminate server OK")
-        self.lock_file.remove(self.the_port)
-        if not debugging():
-            clean_up_server(str(self.the_port))
+            self.lock_file.remove(self.the_port)
+            if not debugging():
+                clean_up_server(str(self.the_port))
         
-        # Do not clean up data, if an assert was raised. This allow debug
-        if exctype == None and not debugging():
-            clean_up_data(str(self.the_port))
+            # Do not clean up data, if an assert was raised. This allow debug
+            if exctype == None and not debugging():
+                clean_up_data(str(self.the_port))
         return False
         
