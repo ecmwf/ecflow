@@ -1048,7 +1048,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_zombie_type_creation )
 {
    DurationTimer timer;
    std::string suite_name = "test_ecf_zombie_type_creation";
-   cout << "Test:: ..." << suite_name << flush;
+   cout << "Test:: ..." << suite_name << " " << flush;
    TestClean clean_at_start_and_end;
 
    // some systems are really quick, where tasks are already active, when we make them zombies, then the next

@@ -235,19 +235,21 @@ TestFixture::~TestFixture()
       }
 #endif
 
-      // Print the server suites
-      client().set_cli(true); // so server stats are written to standard out
+      std::cout << "   Print the server suites\n";
+      client().set_cli(true);               // so server stats are written to standard out
       client().set_throw_on_error( false ); // destructors should not allow exception propagation
       if (client().suites() != 0) {
          std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::suites() << " failed: " << client().errorMsg() << "\n";
       }
+      std::cout << "   End of Print the server suites, expected no suites\n";
 
-      // Print the server stats
+      std::cout << "   Print the server stats\n";
       if (client().stats() != 0) {
          std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::stats() << " failed: " << client().errorMsg() << "\n";
       }
+      std::cout << "   End of the server stats\n";
 
-      // Kill the server, as all suites are complete. will work for local or external
+      std::cout << "   Kill the server, as all suites are complete. will work for local or external\n";
       if (client().terminateServer() != 0) {
          std::cout << "TestFixture::~TestFixture():  ClientInvoker " << CtsApi::terminateServer() << " failed: " << client().errorMsg() << "\n";
          EcfPortLock::remove( port_ );
@@ -255,16 +257,16 @@ TestFixture::~TestFixture()
       }
       sleep(1); // allow time to update log file
 
-      // Remove the generated check point files, at end of test
+      std::cout << "   Remove the generated check point files, at end of test\n";
       Host host;
       boost::filesystem::remove(host.ecf_log_file(port_));
       boost::filesystem::remove(host.ecf_checkpt_file(port_));
       boost::filesystem::remove(host.ecf_backup_checkpt_file(port_));
 
-      // remove the lock file
+      std::cout << "   remove the lock file\n";
       EcfPortLock::remove( port_ );
 
-      // destroy, so that we flush the rtt_filename
+      std::cout << "   Rtt::destroy(), so that we flush the rtt_filename\n";
       Rtt::destroy();
 
       cout << "\nTiming: *NOTE*: The child commands *NOT* recorded. Since its a separate exe(ecflow_client), called via .ecf script\n";
@@ -277,6 +279,8 @@ TestFixture::~TestFixture()
  	catch (...) {
       std::cout << "TestFixture::~TestFixture() caught unknown exception\n";
  	}
+
+   std::cout << "TestFixture::~TestFixture() END\n";
 }
 
 int TestFixture::job_submission_interval()
