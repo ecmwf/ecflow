@@ -1027,7 +1027,10 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);
     if( !log_file.ok() )
-        throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
+    {
+        UiLog().warn() << "LogLoadData::loadLogFile: Could not open log file " <<  logFile;
+        return;
+    }
 
     //A collector total counts
     LogReqCounter total("total");
@@ -1106,7 +1109,7 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
             if ( first_open_bracket == std::string::npos)
             {
                 //std::cout << line << "\n";
-                assert(false);
+                //assert(false);
                 continue;
             }
             line.erase(0,first_open_bracket+1);
@@ -1115,7 +1118,7 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
             if ( first_closed_bracket ==  std::string::npos)
             {
                 //std::cout << line << "\n";
-                assert(false);
+                //assert(false);
                 continue;
             }
             std::string time_stamp = line.substr(0, first_closed_bracket);
@@ -1238,7 +1241,10 @@ std::streamoff LogLoadData::getStartPos(const std::string& logFile, int numOfRow
         /// The log file can be massive > 50Mb
         ecf::File_r log_file(logFile);
         if( !log_file.ok() )
-            throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
+        {
+            UiLog().warn() << "LogLoadData::getStartPos: Could not open log file " <<  logFile;
+            return startPos;
+        }
 
         int maxNum=-numOfRows;
         int cnt=0;
