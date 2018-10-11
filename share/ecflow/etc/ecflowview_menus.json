@@ -496,16 +496,6 @@
             "visible_for"    : "(task or alias) and ECFLOWUI_ECMWF_OPERATOR_MODE)"
         },
 
-
-        {
-            "menu"           : "Special",
-            "name"           : "Check node state in UI",
-            "visible_for"    : "node and ECFLOWUI_DEVELOP_MODE",
-            "command"        : "check_ui_node_state",
-            "multi"          : "false",
-            "status_tip"     : "__cmd__"
-        },
-
         {
             "menu"           : "Special",
             "name"           : "Check",
