@@ -470,24 +470,6 @@
 
         {
             "menu"           : "Special",
-            "name"           : "Create JSD ticket",
-            "visible_for"    : "(task or alias) and ECFLOWUI_ECMWF_OPERATOR_MODE)",
-            "command"        : "create_jsd_ticket",
-            "multi"          : "false",
-            "status_tip"     : "__cmd__"
-        },
-
-        {
-            "menu"           : "Special",
-            "name"           : "Check node state in UI",
-            "visible_for"    : "(server or node) and ECFLOWUI_DEVELOP_MODE)",
-            "command"        : "check_ui_node_state",
-            "multi"          : "false",
-            "status_tip"     : "__cmd__"
-        },
-
-        {
-            "menu"           : "Special",
             "name"           : "URL command",
             "command"        : "sh %ECF_URL_CMD%",
             "multi"          : "false",
@@ -501,8 +483,42 @@
 
         {
             "menu"           : "Special",
+            "name"           : "Create JSD ticket",
+            "visible_for"    : "(task or alias) and ECFLOWUI_ECMWF_OPERATOR_MODE)",
+            "command"        : "create_jsd_ticket",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "-",
+            "visible_for"    : "(task or alias) and ECFLOWUI_ECMWF_OPERATOR_MODE)"
+        },
+
+
+        {
+            "menu"           : "Special",
+            "name"           : "Check node state in UI",
+            "visible_for"    : "node and ECFLOWUI_DEVELOP_MODE",
+            "command"        : "check_ui_node_state",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
             "name"           : "Check",
             "command"        : "sh ecflow_client --port %ECF_PORT% --host %ECF_HOST% --check /%SUITE%/%FAMILY:%%TASK:%",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Check node state in UI",
+            "visible_for"    : "(server or node) and ECFLOWUI_DEVELOP_MODE)",
+            "command"        : "check_ui_node_state",
             "multi"          : "false",
             "status_tip"     : "__cmd__"
         },
