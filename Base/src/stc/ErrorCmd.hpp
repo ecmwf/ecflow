@@ -28,7 +28,6 @@ public:
 
  	std::string error() const override { return error_msg_;}   /// Used by test
 	bool ok() const override { return false; }                 /// Used by group command
-   bool is_returnable_in_group_cmd() const override { return true; }
    void cleanup() override { std::string().swap(error_msg_);} /// run in the server, after command send to client
 
 private:

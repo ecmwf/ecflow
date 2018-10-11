@@ -36,7 +36,6 @@ public:
    std::ostream& print(std::ostream& os) const override;
    bool equals(ServerToClientCmd*) const override;
    const std::string& get_string() const override { return str_;}
-   bool is_returnable_in_group_cmd() const override { return true; }
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
    void cleanup() override { std::string().swap(str_);} /// run in the server, after command send to client
 

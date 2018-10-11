@@ -30,7 +30,6 @@ public:
 
 	void init(AbstractServer* as, bool save_edit_history);
 
-	bool is_returnable_in_group_cmd() const override { return true; }
   	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
   	std::ostream& print(std::ostream& os) const override;
 	bool equals(ServerToClientCmd*) const override;

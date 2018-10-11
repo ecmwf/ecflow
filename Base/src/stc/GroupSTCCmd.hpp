@@ -28,6 +28,10 @@ public:
    void addChild(STC_Cmd_ptr childCmd);
  	const std::vector<STC_Cmd_ptr>& cmdVec() const { return cmdVec_;}
 
+ 	// these two must be opposite of each other
+   bool ok() const override;
+   std::string error() const override;
+
 private:
  	std::vector<STC_Cmd_ptr> cmdVec_;
 

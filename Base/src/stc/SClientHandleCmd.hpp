@@ -24,7 +24,6 @@ public:
 	void init(int handle) { handle_ = handle; }
 	std::ostream& print(std::ostream& os) const override { return os << "cmd:SClientHandleCmd [ " << handle_ << " ]";}
 	bool equals(ServerToClientCmd*) const override;
-   bool is_returnable_in_group_cmd() const override { return true; }
   	bool handle_server_response( ServerReply&, Cmd_ptr cts_cmd, bool debug ) const override;
 
 private:
