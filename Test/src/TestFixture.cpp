@@ -241,13 +241,11 @@ TestFixture::~TestFixture()
       if (client().suites() != 0) {
          std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::suites() << " failed: " << client().errorMsg() << "\n";
       }
-      std::cout << "   End of Print the server suites, expected no suites\n";
 
       std::cout << "   Print the server stats\n";
       if (client().stats() != 0) {
          std::cout << "TestFixture::~TestFixture(): ClientInvoker " << CtsApi::stats() << " failed: " << client().errorMsg() << "\n";
       }
-      std::cout << "   End of the server stats\n";
 
       std::cout << "   Kill the server, as all suites are complete. will work for local or external\n";
       if (client().terminateServer() != 0) {
