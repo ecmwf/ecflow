@@ -39,9 +39,7 @@ public:
    bool handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd, bool debug ) const override;
 
    /// Other legitimate ServerToClientCmd commands also return ok() as true
-   /// Hence must still have isOkCmd()
    bool ok() const override { return api_ == OK; }      // used by group command
-   bool isOkCmd() const override { return api_ == OK; } // Used if no reply back from server
    bool is_returnable_in_group_cmd() const override { return api_ == OK || api_ == DELETE_ALL; }
 
 private:

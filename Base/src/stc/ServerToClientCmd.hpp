@@ -39,7 +39,6 @@ public:
    virtual bool is_returnable_in_group_cmd() const { return true; } /// used by group command
 
 	virtual std::string error() const { return std::string();} /// Used by test
-	virtual bool isOkCmd() const { return false; }             /// Used by server, to not respond back, client assumes OK
 
   	// Called in client, if any data to be returned , the set on class ServerReply
 	// Cmd_ptr cts_cmd  can used for additional context.

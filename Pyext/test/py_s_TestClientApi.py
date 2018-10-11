@@ -24,6 +24,8 @@ from ecflow import Defs,Suite,Family,Task,Edit,Meter, Clock, DState,  Style, Sta
 
 def ecf_includes() :  return os.getcwd() + "/test/data/includes"
 
+def debugging() : return False  # Use to enable auto flush and disable log file tests
+
 def create_defs(name=""):
     defs = Defs()
     suite_name = name
@@ -102,8 +104,11 @@ def test_set_host_port():
 
 def print_test(ci,test_name):
     print(test_name)
-    ci.log_msg(test_name + " ========================================================== ")
-  
+    if ci.is_auto_sync_enabled():
+        ci.log_msg(test_name + " ============= AUTO SYNC ENABLED ================================ ")
+    else:
+        ci.log_msg(test_name + " ================================================================ ")
+
 def test_version(ci):
     print_test(ci,"test_version")
     client_version = ci.version();
@@ -127,6 +132,10 @@ def test_client_get_server_defs(ci):
 
 
 def test_client_new_log(ci, port):
+    if debugging() : 
+        ci.enable_auto_flush()
+        return   #  dont run this test when debugging as log file is lost
+    
     print_test(ci,"test_client_new_log")
     new_log_file_name = "./test_client_new_log_" + str(os.getpid()) + ".log"
     try : os.remove(new_log_file_name) # delete file if it exists
@@ -148,8 +157,8 @@ def test_client_new_log(ci, port):
     try: os.remove(new_log_file_name)
     except: pass
 
-
 def test_client_clear_log(ci, port):
+    if debugging() : return   #  dont run this test when debugging as log file is lost
     print_test(ci,"test_client_clear_log")
     # populate log
     ci.ping();
@@ -166,8 +175,9 @@ def test_client_clear_log(ci, port):
     finally: log_file.close();
     assert len(log_text) == 0, "Expected log file to be empty but found " + log_text
 
-
 def test_client_log_msg(ci, port):
+    if debugging() : return   #  dont run this test when debugging  
+
     print_test(ci,"test_client_log_msg")
     # Send a message to the log file, then make sure it was written
     ci.log_msg("Humpty dumpty sat on a wall!")
@@ -178,6 +188,8 @@ def test_client_log_msg(ci, port):
     assert log_text.find("Humpty dumpty sat on a wall!") != -1, "Expected to find Humpty dumpty in the log file"                
 
 def test_client_log_auto_flush(ci, port):
+    if debugging() : return   #  dont run this test when debugging  
+    
     print_test(ci,"test_client_log_auto_flush")
     assert not ci.query_auto_flush() , "By default auto flush should be disabled"
     ci.enable_auto_flush()

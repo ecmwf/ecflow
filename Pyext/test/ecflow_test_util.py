@@ -210,10 +210,11 @@ class Server(object):
         print("   tb:",tb)
         print("   Terminate server")
         self.ci.terminate_server() 
-        time.sleep(4) 
+        time.sleep(1) 
         try:  
             self.ci.ping() 
             print("   Terminate server Failed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            exit(1)
         except RuntimeError as e:
             print("   Terminate server OK")
             self.lock_file.remove(self.the_port)

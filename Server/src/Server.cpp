@@ -357,7 +357,7 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       //
       //      if (!serverEnv_.reply_back_if_ok()) {
       //
-      //         if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
+      //         if (!inbound_request_.terminateRequest()) {
       //
       //            // cleanly close down the connection
       //            if (serverEnv_.debug()) cout << "   Server::handle_read: NOT replying, since request is OK" << endl;
@@ -413,7 +413,7 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
    // *HOWEVER* only do this if the request was successful.
    //           we do this by checking that the out bound response was ok
    //           i.e a read only user should not be allowed to terminate server.
-   if (inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
+   if (inbound_request_.terminateRequest()) {
       if (serverEnv_.debug()) cout << "   <--Server::handle_write exiting server via terminate() port " << serverEnv_.port() << endl;
       terminate();
    }

@@ -125,7 +125,7 @@ void CConnection::handle_read_data(const boost::system::error_code& e)
    // To improve performance, when the reply, is OK, don't bother replying back to the client
    // The client will receive a EOF, and perceive this as OK.
    // Need to specifically *ignore* for terminate, otherwise server will not shutdown cleanly
-   if (!inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
+   if (!inbound_request_.terminateRequest()) {
       // cleanly close down the connection
       socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
       socket_.close();
@@ -222,7 +222,7 @@ void CConnection::handle_write(const boost::system::error_code& e)
   // *HOWEVER* only do this if the request was successful.
   //           we do this by checking that the out bound response was ok
   //           i.e a read only user should not be allowed to terminate server.
-  if (inbound_request_.terminateRequest() && outbound_response_.get_cmd()->isOkCmd()) {
+  if (inbound_request_.terminateRequest()) {
      // cout << "   <--server::handle_write exiting server via terminate() port " << endl;
 
      server_->terminate();
