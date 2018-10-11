@@ -15,7 +15,9 @@
 #include "WidgetNameProvider.hpp"
 
 #include <QDate>
+#include <QProcessEnvironment>
 #include <QRegExp>
+#include <QTreeWidgetItem>
 
 AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 {
@@ -77,16 +79,37 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 
     WidgetNameProvider::nameChildren(this);
 
-    //ENV
-    std::string envText="<b>Log file:</b> ";
+    //Paths
+    std::string pathText="<b>Log file:</b> ";
 
     if(DirectoryHandler::uiLogFileName().empty())
-        envText+= "<i>not defined (log is written to stdout)</i><br>";
+        pathText+= "<i>not defined (log is written to stdout)</i><br>";
     else
-        envText+=DirectoryHandler::uiLogFileName() + " <br>";
+        pathText+=DirectoryHandler::uiLogFileName() + " <br>";
 
-    envText+="<b>UI event log file:</b> " + DirectoryHandler::uiEventLogFileName() +" <br>";
-    envText+="<b>Socket directory:</b> " + DirectoryHandler::socketDir() +" <br>";
+    pathText+="<b>UI event log file:</b> " + DirectoryHandler::uiEventLogFileName() +" <br>";
+    pathText+="<b>Socket directory:</b> " + DirectoryHandler::socketDir() +" <br>";
 
-    envLabel_->setText(QString::fromStdString(envText));
+    pathLabel_->setText(QString::fromStdString(pathText));
+
+    //Env vars
+    envTree_->setRootIsDecorated(false);
+    envTree_->setColumnCount(2);
+    QStringList envCols;
+    envCols << "Variable" << "Value";
+    envTree_->setHeaderLabels(envCols);
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    Q_FOREACH(QString envKey,env.keys())
+    {
+        if(envKey.startsWith("ECFLOWUI_"))
+        {
+            QString envVal=env.value(envKey);
+            QTreeWidgetItem* item=new QTreeWidgetItem(envTree_);
+            item->setText(0,envKey);
+            item->setText(1,envVal);
+        }
+    }
+
+    envTree_->resizeColumnToContents(0);
 }

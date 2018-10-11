@@ -156,14 +156,30 @@
      </widget>
      <widget class="QWidget" name="tab3W">
       <attribute name="title">
-       <string>Environment</string>
+       <string>Paths</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QLabel" name="envLabel_">
+        <widget class="QLabel" name="pathLabel_">
          <property name="text">
-          <string>envLabel_</string>
+          <string>pathLabel_</string>
          </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab4W">
+      <attribute name="title">
+       <string>Environment</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QTreeWidget" name="envTree_">
+         <column>
+          <property name="text">
+           <string notr="true">1</string>
+          </property>
+         </column>
         </widget>
        </item>
       </layout>
