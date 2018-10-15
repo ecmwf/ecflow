@@ -40,7 +40,9 @@ public:
 
    /// Other legitimate ServerToClientCmd commands also return ok() as true
    bool ok() const override { return api_ == OK; }      // used by group command
-   bool is_returnable_in_group_cmd() const override { return api_ == OK || api_ == DELETE_ALL; }
+
+   // avoid adding OK to group command. Since groupCmd will return true from GroupSTCCmd::ok() *IF* there are no errors
+   bool is_returnable_in_group_cmd() const override { return api_ == DELETE_ALL; }
 
 private:
    Api api_{OK};
