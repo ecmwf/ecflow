@@ -13,6 +13,7 @@
 
 #include <QHeaderView>
 #include <QTreeView>
+#include <set>
 
 #include "NodeViewBase.hpp"
 
@@ -31,9 +32,7 @@ class TableNodeHeader;
 class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObserver
 {
 Q_OBJECT
-
 public:
-
 	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
     ~TableNodeView();
 
@@ -58,6 +57,7 @@ public Q_SLOTS:
 	void slotHeaderContextMenu(const QPoint &position);
 	void slotSizeHintChangedGlobal();
     void slotRerender();
+    void slotAddVariableColumn();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -71,6 +71,8 @@ protected:
 	void adjustBackground(QColor col);
 	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setSortingEnabledNoExec(bool b);
+    void collectVariableNames(std::set<std::string>& vars);
+    void changeVariableColumn(QString varName);
 
     TableNodeSortModel* model_;
 	ActionHandler* actionHandler_;

@@ -18,6 +18,7 @@
 #include <QPixmap>
 
 #include "File.hpp"
+#include "DiagData.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
 #include "MenuHandler.hpp"
@@ -32,6 +33,7 @@
 #include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VServerSettings.hpp"
+#include "VSettingsLoader.hpp"
 #include "SessionHandler.hpp"
 #include "SessionDialog.hpp"
 #include "UiLog.hpp"
@@ -135,6 +137,9 @@ int main(int argc, char **argv)
     	VServerSettings::importRcFiles();
     }
 
+    //Update objects with saved user settings (these are now stored in VConfig!!)
+    VSettingsLoader::process();
+
     //Initialise highlighter
     Highlighter::init(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
     		      "ecflowview_highlighter.json"));
@@ -160,6 +165,9 @@ int main(int argc, char **argv)
 
         //Enable (daily) truncation for ui log
         UiLog::enableTruncation();
+
+        //Load extra diagnostic data
+        DiagData::instance()->load();
 
 		return app.exec();
 	}

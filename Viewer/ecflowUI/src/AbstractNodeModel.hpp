@@ -41,7 +41,7 @@ public:
 			     AttributeLineRole = Qt::UserRole+11, AbortedReasonRole = Qt::UserRole + 12,
 			     NodeTypeRole = Qt::UserRole + 13, NodeTypeForegroundRole = Qt::UserRole + 14,
                  ServerPointerRole = Qt::UserRole + 15, SortRole = Qt::UserRole + 16,
-                 NodePointerRole = Qt::UserRole + 17};
+                 NodePointerRole = Qt::UserRole + 17, VariableRole = Qt::UserRole + 18};
 
 	void dataIsAboutToChange();
 	virtual VInfo_ptr nodeInfo(const QModelIndex& index)=0;

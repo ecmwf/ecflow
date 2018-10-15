@@ -366,15 +366,19 @@ void LogLoadDataItem::useFullStat()
 }
 
 void LogLoadDataItem::computeStat(size_t startIndex,size_t endIndex)
-{
+{   
     size_t max=0;
     size_t sum=0;
-    for(size_t i=startIndex; i <= endIndex; i++)
+
+    if(childReq_.size() != 0)
     {
-        size_t tot=childReq_[i] + userReq_[i];
-        sum+=tot;
-        if(max < tot)
-            max = tot;
+        for(size_t i=startIndex; i <= endIndex; i++)
+        {
+            size_t tot=childReq_[i] + userReq_[i];
+            sum+=tot;
+            if(max < tot)
+                max = tot;
+        }
     }
 
     periodStat_.sumTotal_=sum;
@@ -858,7 +862,7 @@ void LogLoadData::computeInitialStat()
 
 void LogLoadData::computeStat()
 {
-    size_t endIndex=(time_.empty())?0:(time_.size()-1);
+    size_t endIndex=(time_.empty())?-1:(time_.size()-1);
     computeStat(0,endIndex);
 }
 
@@ -966,15 +970,16 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
 
     maxNumOfRows_=numOfRows;
     numOfRows_=0;
+    startPos_=getStartPos(logFile,numOfRows);
 
-    /// The log file can be massive > 50Mb
-    ecf::File_r log_file(logFile);
-    if( !log_file.ok() )
-        throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
-
-    std::string line;
+#if 0
     if(numOfRows < 0)
     {
+        /// The log file can be massive > 50Mb
+        ecf::File_r log_file(logFile);
+        if( !log_file.ok() )
+            throw std::runtime_error("LogLoadData::loadLogFile: Could not open log file " + logFile );
+
         int maxNum=-numOfRows;
         int cnt=0;
         std::vector<std::streamoff> posVec(maxNum,0);
@@ -1015,7 +1020,16 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
         }
 
         startPos_=posVec[cnt % maxNum];
-        log_file.setPos(startPos_);
+        //log_file.setPos(startPos_);
+    }
+#endif
+
+    /// The log file can be massive > 50Mb
+    ecf::File_r log_file(logFile);
+    if( !log_file.ok() )
+    {
+        UiLog().warn() << "LogLoadData::loadLogFile: Could not open log file " <<  logFile;
+        return;
     }
 
     //A collector total counts
@@ -1031,6 +1045,7 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
     std::vector<std::string> old_time_stamp;
 
     std::map<std::string,size_t> uidCnt;
+    std::string line;
 
     while ( log_file.good() )
     {
@@ -1094,7 +1109,7 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
             if ( first_open_bracket == std::string::npos)
             {
                 //std::cout << line << "\n";
-                assert(false);
+                //assert(false);
                 continue;
             }
             line.erase(0,first_open_bracket+1);
@@ -1103,7 +1118,7 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
             if ( first_closed_bracket ==  std::string::npos)
             {
                 //std::cout << line << "\n";
-                assert(false);
+                //assert(false);
                 continue;
             }
             std::string time_stamp = line.substr(0, first_closed_bracket);
@@ -1214,6 +1229,60 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
    computeInitialStat();
 
    UiLog().dbg() << "REQCNT " << REQCNT;
+}
+
+std::streamoff LogLoadData::getStartPos(const std::string& logFile, int numOfRows)
+{
+    std::streamoff startPos=0;
+    std::string line;
+
+    if(numOfRows < 0)
+    {
+        /// The log file can be massive > 50Mb
+        ecf::File_r log_file(logFile);
+        if( !log_file.ok() )
+        {
+            UiLog().warn() << "LogLoadData::getStartPos: Could not open log file " <<  logFile;
+            return startPos;
+        }
+
+        int maxNum=-numOfRows;
+        int cnt=0;
+        std::vector<std::streamoff> posVec(maxNum,0);
+        while(log_file.good())
+        {
+            std::streamoff currentPos=log_file.pos();
+
+            log_file.getline(line); // default delimiter is /n
+
+            /// We are only interested in Commands (i.e MSG:), and not state changes
+            if (line.size() < 4)
+                continue;
+
+            if (line[0] != 'M' || line[1] != 'S' || line[2] != 'G' || line[3] != ':')
+                continue;
+
+            bool child_cmd = false;
+            bool user_cmd = false;
+            if (line.find(ecf::Str::CHILD_CMD()) != std::string::npos)
+            {
+                child_cmd = true;
+            }
+            else if (line.find(ecf::Str::USER_CMD()) != std::string::npos)
+            {
+                user_cmd = true;
+            }
+
+            if(!child_cmd && !user_cmd)
+                continue;
+
+            posVec[cnt % maxNum]=currentPos;
+            cnt++;
+        }
+        startPos=posVec[cnt % maxNum];
+    }
+
+    return startPos;
 }
 
 

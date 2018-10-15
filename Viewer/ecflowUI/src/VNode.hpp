@@ -12,6 +12,7 @@
 #define VNODE_HPP_
 
 #include <vector>
+#include <set>
 
 #include <QColor>
 #include <QStringList>
@@ -137,6 +138,8 @@ public:
     virtual std::string genVariable(const std::string& key) const;
     virtual std::string findVariable(const std::string& key,bool substitute=false) const;
 
+    virtual void collectInheritedVariableNames(std::set<std::string>& vars) const;
+
     //Find a variable in the given node or in its ancestors. Both the variables and the
     //generated variables are searched.
     virtual std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
@@ -195,6 +198,7 @@ public:
     void addTriggeredData(VItem* a,VItem* n);
 
     QString nodeMenuMode() const;
+    QString defStatusNodeMenuMode() const;
 
     virtual void print();
 

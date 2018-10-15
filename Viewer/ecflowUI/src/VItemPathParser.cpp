@@ -11,62 +11,87 @@
 #include "VItemPathParser.hpp"
 #include "VAttributeType.hpp"
 
-VItemPathParser::VItemPathParser(const std::string& path) : itemType_(NoType)
+//format:
+// [type]server://nodepath:atttibutename
+
+VItemPathParser::VItemPathParser(const std::string& path,PathFormat format) : itemType_(NoType)
 {
     if(path.empty())
         return;
 
     size_t pos;
     std::string p=path;
-    if(p.find("[") == 0)
+
+    if(format== DefaultFormat)
     {
-       pos=p.find("]");
-       if(pos != std::string::npos)
-       {
-           type_=path.substr(1,pos-1);
-           p=path.substr(pos+1);
-       }
-       else
-           return;
-    }
-
-    pos=p.find("://");
-
-    if(pos != std::string::npos)
-    {
-        server_=p.substr(0,pos);
-        p=p.substr(pos+2);
-    }
-
-    if(p.size() == 1 && p.find("/") == 0)
-    {
-        itemType_=ServerType;
-        return;
-    }
-
-    //Here we suppose that the node name cannot contain ":"
-    pos=p.find_first_of(":");
-    if(pos != std::string::npos)
-    {
-        node_=p.substr(0,pos);
-        attribute_=p.substr(pos+1);
-        itemType_=AttributeType;
-
-        if(type_ == "gen-variable")
-            type_="genvar";
-        else if(type_ == "user-variable")
-            type_="var";
-
-        if(!VAttributeType::find(type_))
+        if(p.find("[") == 0)
         {
-            itemType_=NoType;
-            type_.clear();
+            pos=p.find("]");
+            if(pos != std::string::npos)
+            {
+                type_=path.substr(1,pos-1);
+                p=path.substr(pos+1);
+            }
+            else
+               return;
+        }
+
+        pos=p.find("://");
+
+        if(pos != std::string::npos)
+        {
+            server_=p.substr(0,pos);
+            p=p.substr(pos+2);
+        }
+
+        if(p.size() == 1 && p.find("/") == 0)
+        {
+            itemType_=ServerType;
+            return;
+        }
+
+        //Here we suppose that the node name cannot contain ":"
+        pos=p.find_first_of(":");
+        if(pos != std::string::npos)
+        {
+            node_=p.substr(0,pos);
+            attribute_=p.substr(pos+1);
+            itemType_=AttributeType;
+
+            if(type_ == "gen-variable")
+                type_="genvar";
+            else if(type_ == "user-variable")
+                type_="var";
+
+            if(!VAttributeType::find(type_))
+            {
+                itemType_=NoType;
+                type_.clear();
+            }
+            else
+            {
+                node_=p;
+                itemType_=NodeType;
+            }
         }
     }
-    else
+    else if(format == DiagFormat)
     {
-        node_=p;
-        itemType_=NodeType;
+        pos=p.find(":/");
+        if(pos != std::string::npos)
+        {
+            server_=p.substr(0,pos);
+            extractHostPort(server_);
+            if(p.length() > pos+1)
+            {
+                node_=p.substr(pos+1);
+                itemType_=NodeType;
+            }
+            else
+            {
+                itemType_=ServerType;
+            }
+        }
     }
 }
 
@@ -124,4 +149,15 @@ std::string VItemPathParser::parent() const
     }
 
     return std::string();
+}
+
+void VItemPathParser::extractHostPort(const std::string& server)
+{
+    size_t pos=server.find("@");
+    if(pos !=  std::string::npos)
+    {
+        host_=server.substr(0,pos);
+        if(server.length() > pos +1)
+            port_=server.substr(pos+1);
+    }
 }

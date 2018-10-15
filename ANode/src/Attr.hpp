@@ -22,7 +22,7 @@
 namespace ecf {
 class Attr : private boost::noncopyable {
 public:
-   enum Type { UNKNOWN=0, EVENT=1, METER=2, LABEL=3, LIMIT=4, VARIABLE=5 };
+   enum Type { UNKNOWN=0, EVENT=1, METER=2, LABEL=3, LIMIT=4, VARIABLE=5, ALL=6 };
 
     static const char* to_string(Attr::Type s);
     static Attr::Type to_attr(const std::string& attr);

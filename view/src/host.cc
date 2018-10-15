@@ -190,6 +190,7 @@ host::host( const std::string& name, const std::string& host, int number )
 	 , history_len_(100)
 	 , updating_(false)
 	 , jobfile_length_(this, "jobfile_length", 10000)
+  , _input (getenv("ECFLOWVIEW_INPUT"))
 {
    if (number < 1) return; // dummy server OK;
 
@@ -198,9 +199,14 @@ host::host( const std::string& name, const std::string& host, int number )
       gui::add_host(name);
    }
 
-   if (timeout_ < 30) timeout_ = 30;
-   if (maximum_ < 30) maximum_ = 30;
-
+   if (timeout_ < 30) {
+     timeout_ = 30;
+     gui::error("%s: timeout reset to 30!", this->name());
+   }
+   if (maximum_ < 30) {
+     maximum_ = 30;
+     gui::error("%s: maximum reset to 30!", this->name());
+   }
    frequency(timeout_);
 }
 
@@ -366,6 +372,7 @@ void ehost::logout()
 void host::run()
 {
    if (!poll_) return;
+   if(_input != 0) { scripting::run(_input); }
    update();
    if (drift_) drift(5, maximum_ * 60);
 }
@@ -952,7 +959,13 @@ void host::to_check( node& n )
 
 void host::changed( resource& r )
 {
-   if (&r == &timeout_) frequency(timeout_);
+  if (&r == &timeout_) {
+    if (timeout_ < 30) {
+      timeout_ = 30;
+      gui::error("%s: timeout reset to 30!", this->name());
+    }
+    frequency(timeout_);
+  }
 }
 
 void ehost::changed( resource& r )
@@ -1749,6 +1762,8 @@ int ehost::update()
       gui::message("host::news-error: %s", e.what());
       XECFDEBUG std::cerr << "# host::news-error: " << e.what() << "\n";
    }
+
+   // if(_input != 0) { scripting::run(_input); }
    return err;
 }
 
@@ -1917,3 +1932,24 @@ void ehost::stats( std::ostream& buf )
    catch ( std::exception& e ) {
    }
 }
+
+/*
+ECFLOWVIEW_INPUT=/tmp/ecflowview_listen
+mkfifo $ECFLOWVIEW_INPUT
+./bin/ecflowview &
+echo "\nselect eod /law/main" >> $ECFLOWVIEW_INPUT
+echo "\nselect eod /law" >> $ECFLOWVIEW_INPUT
+echo "\norder eod4:/era5eda_7 alpha" >> $ECFLOWVIEW_INPUT
+
+echo "\nselect eod /law/main/12/euroshelf/wamrun" >> $ECFLOWVIEW_INPUT
+echo "\nwindow -d -f Script" >> $ECFLOWVIEW_INPUT
+echo "\nwindow -d -f Manual" >> $ECFLOWVIEW_INPUT
+
+echo "\nlogin eod2"    >> $ECFLOWVIEW_INPUT
+echo "\nlogout eod2"  >> $ECFLOWVIEW_INPUT 
+echo "\nquit"  >> $ECFLOWVIEW_INPUT
+
+WINDOW:
+Check Collector Edit History Info Job Jobstatus Manual Messages
+Options Output Script Suites Timeline Triggers Variables Why Zombies
+*/

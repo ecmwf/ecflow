@@ -1770,7 +1770,7 @@ def test_client_ch_with_drops_handles(the_port,top_ci):
             #print("Handle:",local_ci .ch_handle())
             local_ci.ch_suites()
             #raise RuntimeError("xxx") #check exeption is still caught
-    except RuntimeError, e:
+    except RuntimeError as e:
         print("Exception",e)
     print("after with:")
     # really need a way to get hold of the suites, via python api.

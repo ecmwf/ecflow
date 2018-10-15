@@ -13,8 +13,8 @@
 #       -DBUILD_SHARED_LIBS=OFF
 ##############################################################################
 
-# Need 3.12.0 for boost python3 libs to be found.
-cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
+# Need cmake(3.12.0) for boost python3 libs to be found.
+cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
 
 # ===========================================================================
 # Change the default if NO CMAKE_BUILD_TYPE specified
@@ -227,6 +227,9 @@ if (ENABLE_PYTHON)
     endif()
     if ( NOT PYTHONLIBS_FOUND )             
         ecbuild_error("ecflow python extension is enabled, but python libraries not found")
+    endif()
+    if ( PYTHON_VERSION_MAJOR EQUAL 3)
+        cmake_minimum_required( VERSION 3.12.0 FATAL_ERROR )
     endif()
     message( STATUS " PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
     message( STATUS " PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )

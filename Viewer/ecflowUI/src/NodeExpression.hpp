@@ -50,6 +50,7 @@ protected:
     NodeExpressionParser();
 
     bool isMenuMode(const std::string &str) const;
+    bool isEnvVar(const std::string &str) const;
     bool isNodeHasAttribute(const std::string &str) const;
     bool isNodeFlag(const std::string &str) const;
     bool isWhatToSearchIn(const std::string &str, bool &isAttribute) const;
@@ -311,6 +312,27 @@ private:
 };
 
 // -----------------------------------------------------------------
+
+// --------------------
+// Envvar condition
+// --------------------
+
+class EnvVarCondition : public BaseNodeCondition
+{
+public:
+    explicit EnvVarCondition(QString envVarName) : envVarName_(envVarName), defined_(-1) {}
+    ~EnvVarCondition() {}
+
+    bool execute(VItem*);
+    std::string print() {return envVarName_.toStdString();}
+
+private:
+    QString envVarName_;
+    int defined_;
+};
+
+// -----------------------------------------------------------------
+
 
 // --------------------
 // UI state condition

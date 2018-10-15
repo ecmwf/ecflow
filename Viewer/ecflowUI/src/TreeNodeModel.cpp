@@ -503,6 +503,36 @@ bool TreeNodeModel::isNode(const QModelIndex & index) const
     return (indexToNode(index) != NULL);
 }
 
+// A node is a flat node when:
+// -there are no child nodes (only attributes)
+// or
+// -any child node does not have children or attributes
+bool TreeNodeModel::isFlatNode(const QModelIndex& index) const
+{
+    if(VTreeNode *node=indexToNode(index))
+    {
+        if(node->numOfChildren() == 0)
+            return true;
+        else
+        {
+            for(int i=0; i < node->numOfChildren(); i++)
+            {
+                if(node->childAt(i)->numOfChildren() == 0)
+                {
+                   if(node->childAt(i)->attrNum(atts_) > 0)
+                       return false;
+                }
+                else
+                {
+                   return false;
+                }
+            }
+            return true;
+        }
+    }
+    return false;
+}
+
 bool TreeNodeModel::isAttribute(const QModelIndex & index) const
 {
 	return (index.isValid() && !isServer(index) && !isNode(index));
@@ -1386,3 +1416,4 @@ int TreeNodeModel::iconNum(VNode* n) const
     else
         return VIcon::pixmapNum(n,icons_);
 }
+

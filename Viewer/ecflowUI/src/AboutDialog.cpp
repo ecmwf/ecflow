@@ -10,11 +10,14 @@
 
 #include "AboutDialog.hpp"
 
+#include "DirectoryHandler.hpp"
 #include "Version.hpp"
 #include "WidgetNameProvider.hpp"
 
 #include <QDate>
+#include <QProcessEnvironment>
 #include <QRegExp>
+#include <QTreeWidgetItem>
 
 AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
 {
@@ -57,7 +60,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     if(!ecfVersionTxt.isEmpty())
     {
         logoTxt+="<p>ecflow version: <b>" + ecfVersionTxt + "</b><br>";
-        logoTxt+="<i>Copyright 2009-2017 ECMWF</i><p>";
+        logoTxt+="<i>Copyright 2009-" + QString::number(QDate::currentDate().year()) + " ECMWF</i><p>";
     }
 
     logoTxt+="</td></tr></table>";
@@ -75,4 +78,38 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     licenseLabel_->setText(licenseText);
 
     WidgetNameProvider::nameChildren(this);
+
+    //Paths
+    std::string pathText="<b>Log file:</b> ";
+
+    if(DirectoryHandler::uiLogFileName().empty())
+        pathText+= "<i>not defined (log is written to stdout)</i><br>";
+    else
+        pathText+=DirectoryHandler::uiLogFileName() + " <br>";
+
+    pathText+="<b>UI event log file:</b> " + DirectoryHandler::uiEventLogFileName() +" <br>";
+    pathText+="<b>Socket directory:</b> " + DirectoryHandler::socketDir() +" <br>";
+
+    pathLabel_->setText(QString::fromStdString(pathText));
+
+    //Env vars
+    envTree_->setRootIsDecorated(false);
+    envTree_->setColumnCount(2);
+    QStringList envCols;
+    envCols << "Variable" << "Value";
+    envTree_->setHeaderLabels(envCols);
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    Q_FOREACH(QString envKey,env.keys())
+    {
+        if(envKey.startsWith("ECFLOWUI_"))
+        {
+            QString envVal=env.value(envKey);
+            QTreeWidgetItem* item=new QTreeWidgetItem(envTree_);
+            item->setText(0,envKey);
+            item->setText(1,envVal);
+        }
+    }
+
+    envTree_->resizeColumnToContents(0);
 }
