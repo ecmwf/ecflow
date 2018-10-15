@@ -21,12 +21,12 @@ Process
    
    cd $WK                       # ecflow root directry
    rm -rf ../bdir               # *REMOVE* build tree
-   git pull                     # muke sue we use the latest
+   git pull                     # make sure we use the latest
    ./cmake.sh package_source    # this will place ecflow tar file in your $SCRATCH
 
-0/ Inform user support, allows user support to test rpm
+0/ Inform user support, allows user support to build/test rpm
    *Before* each release, make sure the ecflow tar file is
-   copied to $SCRATCH(done by the prevuous step) and inform Daniel. 
+   copied to $SCRATCH(done by the previous step) and inform Daniel. 
    This will allow him to make rpm packages, build on other linux flavours.
 
    This is important, so that release, used internally is in
