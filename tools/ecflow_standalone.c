@@ -126,7 +126,7 @@ int main(argc,argv) int argc; char **argv;
     strcpy(fname, template); /* Copy template */
 
     int fd = mkstemp(fname);
-    /* printf("input Filename is %s\n", fname);   /* Print it for information */
+    /* printf("input Filename is %s\n", fname);   Print it for information */
     infile = fname;
     close(fd);
 
