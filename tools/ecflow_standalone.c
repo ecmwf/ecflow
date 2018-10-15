@@ -15,6 +15,22 @@
 *
 *  test using:
 *  echo "xxx=\"hello worlds from $HOME\"\nfred=$USER" | ./ecflow_standalone -i in.txt -o out.txt
+*  cat > $(pwd)/exe.sh <<\!!
+xxx="hello worlds from /home/ma/map"
+printenv 
+echo $SHELL
+fred="axel.bonet@ecmwf.int"
+mail -s "$xxx" $fred <<@@
+$xxx
+@@
+!!
+ssh localhost $(pwd)/ecflow_standalone -s /bin/bash -o $(pwd)/out.txt < $(pwd)/exe.sh  # OK
+ssh localhost $(pwd)/ecflow_standalone -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # NOK
+
+std=/usr/local/apps/sms/bin/standalone
+ssh  eurus.ecmwf.int $std -s /bin/bash -o $(pwd)/out.txt < $(pwd)/exe.sh # OK
+ssh localhost $std -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # OK
+ gcc -g -Dlinux ecflow_standalone.c -o ecflow_standalone
 *
 *  in.txt
 *  xxx="hello worlds from /home/ma/ma0"
@@ -88,14 +104,24 @@ int main(argc,argv) int argc; char **argv;
     }
 
   /* Copy standard input to infile */
-  if( !infile ) infile=(char *)tmpnam(NULL);
-  if( !(fp=fopen(infile,"w")) ) {
-     perror("STANDALONE-INPUT-FILE");
-     exit(1);
+  if( !infile ) {
+    int fd = -1;
+    infile = strdup("tmp_ecfXXXXXX"); /* tmpnam(tmp_name); TBD */
+    fd = mkstemp(infile);
+    if (!(fp = fopen(infile, "r"))) {
+      perror("file.c, temp file creation error");      
+      exit(1);
+    } 
+    while( fgets(buff, MAXLEN-1, stdin)) {
+      /* fprintf(stderr, "%s", buff); */
+      fputs(buff,fp);
+    }
   }
-  while( fgets( buff,MAXLEN-1,stdin) )  fputs(buff,fp);
-  fclose(fp);
-
+  else if( !(fp=fopen(infile,"r")) ) {
+    perror("STANDALONE-INPUT-FILE cannot open");
+    exit(1);    
+  }
+  /* fclose(fp); */
 
   /* fork child process, closing the parent */
   switch(fork()) {
@@ -112,8 +138,8 @@ int main(argc,argv) int argc; char **argv;
    * makes newfd be the copy of oldfd, closing newfd first if necessary
    * */
   close(2);                        /* close standard error in child */
-  dup2(2,1);
   FILE* fout = fopen(outfile,"w"); /* Open file for output and error, when running execl(..) */
+  dup2(2,1);
   close(0);                        /* close standard in , in child */
 
 
@@ -121,8 +147,8 @@ int main(argc,argv) int argc; char **argv;
   if( !(fp=fopen(infile,"r")) ) {
     perror("STANDALONE-INPUT-FILE-FOR-SHELL");
     exit(1);
-  }
-  fclose(fp);
+    }
+  /* fclose(fp); */
 
   /* if( !keep_file ) unlink(infile); 
      for (n=3; n<65535 ;n++) fclose(n); */
@@ -139,8 +165,7 @@ int main(argc,argv) int argc; char **argv;
   }
 
   execl(shell,nameof(shell),"-x",infile,(char *)0);
-  /* if( !keep_file ) unlink(infile); */
-
-  fclose(fout); /* must be closed last */
+  /* if( !keep_file ) unlink(infile); 
+     fclose(fout); */
   exit(1);
 }
