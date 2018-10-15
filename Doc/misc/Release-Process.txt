@@ -18,7 +18,6 @@ Process
 0/ *make sure ecbuild in cmake.sh matches the metabuilder*
 
 0/ Create the tarball using cmake, in the build directory with  
-   This can be done using:
    
    cd $WK                       # ecflow root directry
    rm -rf ../bdir               # *REMOVE* build tree
@@ -36,7 +35,7 @@ Process
    - ** Check the size of tar file **, ensure that have not included redundant files.
    <Inform Daniel>
    
-0/ Two approaches, both use meta-builder: 
+0/ Build release: Two approaches, both use meta-builder: 
     1/ git flow release start  4.11.0 
        git_tag=release/4.11.0
        Use this approach when multiple people working on the release.
