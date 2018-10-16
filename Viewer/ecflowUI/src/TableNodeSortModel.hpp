@@ -16,6 +16,7 @@
 
 class TableNodeModel;
 class NodeFilterDef;
+class ModelColumn;
 
 class TableNodeSortModel : public QSortFilterProxyModel
 {
@@ -32,10 +33,11 @@ public:
     QModelIndex nodeToIndex(const VNode *node);
     void selectionChanged(QModelIndexList lst);
     void setSkipSort(bool b) {skipSort_=b;}
+    void removeColumn(QString);
+    ModelColumn* columns() const;
 
 protected:
-    bool lessThan(const QModelIndex &left,
-                                      const QModelIndex &right) const override;
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
 
     TableNodeModel* nodeModel_;
     bool skipSort_;

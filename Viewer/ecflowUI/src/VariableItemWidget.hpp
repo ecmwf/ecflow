@@ -20,6 +20,7 @@
 #include "VInfo.hpp"
 
 class LineEdit;
+class ModelColumn;
 class VariableModel;
 class VariableModelData;
 class VariableModelDataHandler;
@@ -127,7 +128,8 @@ protected Q_SLOTS:
     void on_actionSearch_triggered();
     void on_actionCopy_triggered();
     void on_actionCopyFull_triggered();
-    void on_shadowTb_clicked(bool showShadowed);
+    void on_actionAddToTableView_triggered();
+    void on_shadowTb_clicked(bool showShadowed);   
     void slotVariableEdited();
     void slotVariableAdded();
 
@@ -160,6 +162,7 @@ protected:
     VInfo_ptr lastSelection_;
     bool canSaveLastSelection_{true};
     QList<bool> expanded_;
+    ModelColumn *tableViewColumns_;
 };
 
 #endif

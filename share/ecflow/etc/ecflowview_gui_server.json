@@ -37,7 +37,8 @@
                 "title" : "Menus",
                 "prefix" : "server.menu",
 
-                "line"  : "nodeMenuMode"
+                "line"  : "nodeMenuMode",
+                "line"  : "defStatusMenuModeControl"
             },
 
             "custom-notification" : {

@@ -101,7 +101,15 @@ VAttributeType* NodeExpressionParser::toAttrType(const std::string &name) const
 
 bool NodeExpressionParser::isMenuMode(const std::string &str) const
 {
-    if (str == "oper" || str == "admin")
+    if (str == "oper" || str == "admin" || str == "defStatusMenuModeControl")
+        return true;
+
+    return false;
+}
+
+bool NodeExpressionParser::isEnvVar(const std::string &str) const
+{
+    if (str == "ECFLOWUI_ECMWF_OPERATOR_MODE" || str == "ECFLOWUI_DEVELOP_MODE")
         return true;
 
     return false;
@@ -301,7 +309,7 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     updatedOperands = true;
                 }
 
-                // node mneu mode
+                // node menu mode
                 else if (isMenuMode(*i_))
                 {
                     NodeMenuModeCondition *userCond = new NodeMenuModeCondition(QString::fromStdString(*i_));
@@ -350,6 +358,15 @@ BaseNodeCondition *NodeExpressionParser::parseExpression(bool caseSensitiveStrin
                     AttributeStateCondition *attrStateCond = new AttributeStateCondition(QString::fromStdString(*i_));
                     operandStack.push_back(attrStateCond);
                     result = attrStateCond;
+                    updatedOperands = true;
+                }
+
+                // env var
+                else if (isEnvVar(*i_))
+                {
+                    EnvVarCondition *envCond = new EnvVarCondition(QString::fromStdString(*i_));
+                    operandStack.push_back(envCond);
+                    result = envCond;
                     updatedOperands = true;
                 }
 
@@ -672,7 +689,7 @@ bool StateNodeCondition::execute(VItem* item)
 
 //=========================================================================
 //
-// UserMenuModeCondition
+// NodeMenuModeCondition
 //
 //=========================================================================
 
@@ -680,11 +697,46 @@ bool NodeMenuModeCondition::execute(VItem* item)
 {
     if(item)
     {
-        return (item->nodeMenuMode() == menuModeName_);
+        if(menuModeName_ == "defStatusMenuModeControl")
+        {
+            Q_FOREACH(QString s,item->defStatusNodeMenuMode().split("/"))
+            {
+                if(item->nodeMenuMode() == s)
+                    return true;
+            }
+
+        }
+        else
+        {
+            return (item->nodeMenuMode() == menuModeName_);
+        }
     }
     return false;
 }
 
+//=========================================================================
+//
+// NodeMenuModeCondition
+//
+//=========================================================================
+
+bool EnvVarCondition::execute(VItem* item)
+{
+    if(item)
+    {
+        if(defined_ == -1)
+        {
+            defined_=0;
+            if(const char* ch=getenv(envVarName_.toStdString().c_str()))
+            {
+                defined_=(strcmp(ch,"1") == 0)?1:0;
+            }
+        }
+
+        return defined_ == 1;
+    }
+    return false;
+}
 
 //=========================================================================
 //

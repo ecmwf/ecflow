@@ -13,6 +13,7 @@
 
 #include <QHeaderView>
 #include <QTreeView>
+#include <set>
 
 #include "NodeViewBase.hpp"
 
@@ -31,19 +32,17 @@ class TableNodeHeader;
 class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObserver
 {
 Q_OBJECT
-
 public:
+	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
+    ~TableNodeView();
 
-	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=nullptr);
-    ~TableNodeView() override;
-
-    void reload() override {}
-	void rerender() override;
-    QWidget* realWidget() override;
-    QObject* realObject() override;
-	VInfo_ptr currentSelection() override;
-    void setCurrentSelection(VInfo_ptr n) override;
-	void selectFirstServer() override {}
+    void reload() {}
+	void rerender();
+    QWidget* realWidget();
+    QObject* realObject();
+	VInfo_ptr currentSelection();
+    void setCurrentSelection(VInfo_ptr n);
+	void selectFirstServer() {}
 	void setModel(TableNodeSortModel *model);
 
 	void notifyChange(VProperty* p) override;
@@ -58,6 +57,7 @@ public Q_SLOTS:
 	void slotHeaderContextMenu(const QPoint &position);
 	void slotSizeHintChangedGlobal();
     void slotRerender();
+    void slotAddVariableColumn();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -71,6 +71,8 @@ protected:
 	void adjustBackground(QColor col);
 	void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
     void setSortingEnabledNoExec(bool b);
+    void collectVariableNames(std::set<std::string>& vars);
+    void changeVariableColumn(QString varName);
 
     TableNodeSortModel* model_;
 	ActionHandler* actionHandler_;

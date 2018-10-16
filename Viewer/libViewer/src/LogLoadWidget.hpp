@@ -160,6 +160,7 @@ public Q_SLOTS:
     void unselectAll();
     void selectAll();
     void selectFirstFourItems();
+    void selectFirstItem();
 
 protected:
     QString formatPrecentage(float perc) const;
@@ -288,6 +289,7 @@ public:
     LogRequestViewControlItem() : model_(0), sortModel_(0), tree_(0) {}
 
     void adjustColumnWidth();
+    bool isAnySet() const {return plotState_.contains(true);}
 
     LogLoadRequestModel* model_;
     QSortFilterProxyModel* sortModel_;

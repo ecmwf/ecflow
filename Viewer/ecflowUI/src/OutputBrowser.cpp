@@ -457,7 +457,8 @@ void OutputBrowser::slotRunFilter(QString filter,bool matched,bool caseSensitive
     if(stacked_->currentIndex() == HtmlIndex)
         return;
 
-    assert(file_);
+    if(!file_)
+        return;
 
     if(oriFile_)
         file_=oriFile_;

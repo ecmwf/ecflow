@@ -65,6 +65,7 @@ public:
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
     QString nodeMenuMode() const;
+    QString defStatusNodeMenuMode() const;
 
     void setSuiteFilterWithOne(VNode*);
 	void updateSuiteFilter(SuiteFilter*);
@@ -114,6 +115,9 @@ public:
     static bool checkNotificationState(const std::string& notifierId);
 
 	static ServerHandler* find(const std::string& name);
+
+    void writeDefs(const std::string& fileName);
+    void writeDefs(VInfo_ptr info,const std::string& fileName);
 
 protected:
 	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);

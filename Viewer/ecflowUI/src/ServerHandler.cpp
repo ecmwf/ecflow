@@ -1465,6 +1465,11 @@ QString ServerHandler::nodeMenuMode() const
     return conf_->stringValue(VServerSettings::NodeMenuMode);
 }
 
+QString ServerHandler::defStatusNodeMenuMode() const
+{
+    return conf_->stringValue(VServerSettings::NodeMenuModeForDefStatus);
+}
+
 void ServerHandler::confChanged(VServerSettings::Param par,VProperty* prop)
 {
 	switch(par)
@@ -1555,6 +1560,39 @@ void ServerHandler::loadConf()
 	//This will call confChanged for any non-default settings
 	conf_->loadSettings();
 }
+
+void ServerHandler::writeDefs(const std::string& fileName)
+{
+    comQueue_->suspend(true);
+    ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+    defs_ptr defs = defsAccess.defs();
+    if(defs)
+    {
+        defs->save_as_filename(fileName,PrintStyle::MIGRATE);
+    }
+    comQueue_->start();
+}
+
+void ServerHandler::writeDefs(VInfo_ptr info,const std::string& fileName)
+{
+    if(!info || !info->node())
+        return;
+
+    comQueue_->suspend(true);
+    ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
+    defs_ptr defs = defsAccess.defs();
+    if(defs)
+    {
+        PrintStyle style(PrintStyle::MIGRATE);
+        std::ofstream out(fileName.c_str());
+        out << "defs_state MIGRATE" << std::endl;
+        info->node()->node()->print(out);
+        out << std::endl;
+        out.close();
+    }
+    comQueue_->start();
+}
+
 
 //--------------------------------------------
 // Other

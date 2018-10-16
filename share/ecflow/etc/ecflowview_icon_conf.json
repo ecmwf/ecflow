@@ -38,12 +38,20 @@
             },
             "time" : {
                  "label" : "Time",
-                 "tooltip" : "Node has a time dependency.",
-                 "shortDesc" : "Has time dependency",
+                 "tooltip" : "Node has a holding time dependency.",
+                 "shortDesc" : "Has holding time dependency",
                  "icon"  : {
                 	 "default" : "icon_clock.svg"
                  }
             },                      
+            "time_free" : {
+                 "label" : "Time (non-holding)",
+                 "tooltip" : "Node has a non-holding time dependency.",
+                 "shortDesc" : "Has non-holding time dependency",
+                 "icon"  : {
+                     "default" : "icon_clock_free.svg"
+                 }
+            },
             "date" : {
                  "label" : "Date",
                  "tooltip" : "Node has date or day dependency.",

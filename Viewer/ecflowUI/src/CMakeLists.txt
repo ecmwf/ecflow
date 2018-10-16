@@ -7,6 +7,7 @@ set(viewer_srcs
     AbstractSearchLine.cpp
     AbstractTextEditSearchInterface.cpp
     ActionHandler.cpp
+    AddModelColumnDialog.cpp
     Animation.cpp
     AstCollateVNodesVisitor.cpp
     AttributeEditor.cpp
@@ -37,6 +38,7 @@ set(viewer_srcs
     DashboardDock.cpp
     DashboardTitle.cpp
     DashboardWidget.cpp
+    DiagData.cpp
     EditItemWidget.cpp
     EditProvider.cpp
     EditorInfoLabel.cpp
@@ -192,13 +194,16 @@ set(viewer_srcs
     VNode.cpp
     VNodeList.cpp
     VNodeMover.cpp
+    VNodeStateDiag.cpp
     VNState.cpp
     VParam.cpp
     VProperty.cpp
     VRepeatAttr.cpp
     VReply.cpp
+    VReportMaker.cpp
     VServerSettings.cpp
     VSettings.cpp
+    VSettingsLoader.cpp
     VSState.cpp
     VTask.cpp
     VTaskNode.cpp
@@ -241,6 +246,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     AbstractNodeView.hpp
     AbstractSearchLine.hpp
     ActionHandler.hpp
+    AddModelColumnDialog.hpp
     Animation.hpp
     AttributeEditor.hpp
     CaseSensitiveButton.hpp
@@ -278,6 +284,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     MenuConfigDialog.hpp
     MessageItemWidget.hpp
     MeterEditor.hpp
+    ModelColumn.hpp
     NodeFilterDialog.hpp
     NodePanel.hpp
     NodePathWidget.hpp
@@ -361,6 +368,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
 
 set(viewer_wrap_ui_files
     AboutDialog.ui
+    AddModelColumnDialog.ui
     AttributeEditorDialog.ui
     ChangeNotifyDialog.ui
     ChangeNotifyDialogWidget.ui

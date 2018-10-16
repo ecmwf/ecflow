@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( test_signal_SIGTERM )
    // Send a SIGTERM to the server and ensure that a check point file is created
    std::string sigterm = "kill -15 " + ecf_pid ;
    system(sigterm.c_str());
-   sleep(2); // allow time for system call
+   sleep(3); // allow time for system call
 
    // We expect a check point file to be save to disk, but *no* backup
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_checkpt_file()),CtsApi::checkPtDefs() << " failed file(" << invokeServer.ecf_checkpt_file() << ") not saved");
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( test_signal_SIGTERM )
 
    // Send a SIGTERM again. This time we expect the backup check point file to be created.
    system(sigterm.c_str());
-   sleep(2); // allow time for system call
+   sleep(3); // allow time for system call
 
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_checkpt_file()),CtsApi::checkPtDefs() << " failed No check pt file(" << invokeServer.ecf_checkpt_file() << ") saved");
    BOOST_REQUIRE_MESSAGE(fs::file_size(invokeServer.ecf_checkpt_file()) !=0,"Expected check point file(" << invokeServer.ecf_checkpt_file() << ") to have file size > 0  ");

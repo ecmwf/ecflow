@@ -11,11 +11,14 @@
 
 #include <QMetaMethod>
 
+#include "DiagData.hpp"
+#include "IconProvider.hpp"
 #include "ModelColumn.hpp"
 #include "ServerHandler.hpp"
 #include "UiLog.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
+#include "VConfig.hpp"
 #include "VFilter.hpp"
 #include "VIcon.hpp"
 #include "VModelData.hpp"
@@ -53,7 +56,7 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
 
     Q_ASSERT(columns_);
 
-    //Check the mapping between the enum and column ids
+    //Check the mapping between the enum and column ids (only for the non-extra columns!)
     Q_ASSERT(columns_->id(PathColumn) == "path");
     Q_ASSERT(columns_->id(StatusColumn) == "status");
     Q_ASSERT(columns_->id(TypeColumn) == "type");
@@ -62,9 +65,6 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
     Q_ASSERT(columns_->id(EventColumn) == "event");
     Q_ASSERT(columns_->id(MeterColumn) == "meter");
     Q_ASSERT(columns_->id(StatusChangeColumn) == "statusChange");
-    // Q_ASSERT(columns_->id(PreviousStart) == "previousStart");
-    // Q_ASSERT(columns_->id(PreviousStop) == "previousStop");
-    // Q_ASSERT(columns_->id(Rid) == "rid");
 
     if(attrTypes.empty())
     {
@@ -82,6 +82,34 @@ TableNodeModel::TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterD
 	data_=new VTableModelData(filterDef,this);
 
 	data_->reset(serverFilter);
+
+    //We need to react to changes in the extra columns!
+    connect(columns_,SIGNAL(appendItemBegin()),
+            this,SLOT(slotAppendColumnBegin()));
+
+    connect(columns_,SIGNAL(appendItemEnd()),
+            this,SLOT(slotAppendColumnEnd()));
+
+    connect(columns_,SIGNAL(addItemsBegin(int,int)),
+            this,SLOT(slotAddColumnsBegin(int,int)));
+
+    connect(columns_,SIGNAL(addItemsEnd(int,int)),
+            this,SLOT(slotAddColumnsEnd(int,int)));
+
+    connect(columns_,SIGNAL(changeItemBegin(int)),
+            this,SLOT(slotChangeColumnBegin(int)));
+
+    connect(columns_,SIGNAL(changeItemEnd(int)),
+            this,SLOT(slotChangeColumnEnd(int)));
+
+    connect(columns_,SIGNAL(removeItemsBegin(int,int)),
+            this,SLOT(slotRemoveColumnsBegin(int,int)));
+
+    connect(columns_,SIGNAL(removeItemsEnd(int,int)),
+            this,SLOT(slotRemoveColumnsEnd(int,int)));
+
+    //pixmap
+    diagPixId_=IconProvider::add(":/viewer/diag.svg","diag.svg");
 }
 
 VModelData* TableNodeModel::data() const
@@ -151,7 +179,14 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	if(!vnode || !vnode->node())
 		return QVariant();
 
-    auto id=static_cast<ColumnType>(index.column());
+    if(index.column() < 0)
+        return QVariant();
+
+    ColumnType id=ExtraColumn;
+    if(index.column() < ExtraColumn)
+    {
+        id=static_cast<ColumnType>(index.column());
+    }
 
 	if(role == Qt::DisplayRole)
 	{
@@ -182,30 +217,26 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
             vnode->statusChangeTime(s);
             return s;
         }
-
-        else if(id == PreviousStart)
+        //Extra columns added by the user - they all represent ecflow variables!!!
+        else if(id == ExtraColumn)
         {
-	  std::string s = vnode->findVariable("ECF_JOB");
-	  QString out = s.c_str();
-	  return out;
+            Q_ASSERT(columns_->isExtra(index.column()));
+            QString n=columns_->id(index.column());
+            if(!n.isEmpty())
+            {
+                //Standard variable column
+                if(columns_->isEditable(index.column()))
+                    return QString::fromStdString(vnode->findInheritedVariable(n.toStdString()));
+                //extra diagnostic column
+                else
+                {
+                    DiagData* diag=DiagData::instance();
+                    int diagCol=index.column()-columns_->diagStartIndex();
+                    if(diagCol >= 0)
+                        return QString::fromStdString(diag->dataAt(vnode,diagCol));
+                }
+            }
         }
-
-        else if(id == PreviousStop)
-        {
-	  std::string s = vnode->findVariable("ECF_JOBOUT");
-	  QString out = s.c_str();
-	  return out;
-        }
-
-        else if(id == Rid)
-        {
-	  std::string s = vnode->findVariable("ECF_RID");
-	  QString out = s.c_str();
-	  return out;
-        }
-
-        //else if(id == "icon")
-        //    return VIcon::pixmapList(vnode,0);
 	}
 	else if(role == Qt::BackgroundRole)
 	{
@@ -220,7 +251,17 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 	}
     else if(role == SortRole)
     {
-        if(id == StatusChangeColumn)
+        if(id == MeterColumn)
+        {
+            if(VAttribute* a=vnode->attributeForType(0,columnToAttrType(id)))
+            {
+                std::string val;
+                if(a->value("meter_value",val))
+                    return QString::fromStdString(val).toInt();
+            }
+            return -9999;
+        }
+        else if(id == StatusChangeColumn)
         {
             return vnode->statusChangeTime();
         }
@@ -231,16 +272,47 @@ QVariant TableNodeModel::nodeData(const QModelIndex& index, int role) const
 
 QVariant TableNodeModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
-	if ( orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole ))
+    if ( orient != Qt::Horizontal)
       		  return QAbstractItemModel::headerData( section, orient, role );
 
 	if (section < 0 || section >= columns_->count())  // this can happen during a server reset
 			return QVariant();
 
 	if(role == Qt::DisplayRole)
-		return columns_->label(section);
-	else if(role == Qt::UserRole)
-		return columns_->id(section);
+    {
+        return columns_->label(section);
+    }
+    //the id of the column
+    else if(role == Qt::UserRole)
+    {
+        return columns_->id(section);
+    }
+    else if(role == Qt::ToolTipRole)
+    {
+        if(section < ExtraColumn)
+        {
+            return columns_->tooltip(section);
+        }
+        else if(columns_->isEditable(section))
+        {
+            return tr("Displays the value of the given ecFlow variable (can be changed or removed)");
+        }
+        else
+        {
+            return tr("Extra diagnostic");
+        }
+    }
+    else if(role == VariableRole)
+    {
+        return (section >= ExtraColumn && columns_->isEditable(section))?true:false;
+    }
+    else if(role == Qt::DecorationRole)
+    {
+        if(section >= ExtraColumn && !columns_->isEditable(section))
+        {
+            return IconProvider::pixmap(diagPixId_,12);
+        }
+    }
 
 	return QVariant();
 }
@@ -470,4 +542,54 @@ void TableNodeModel::slotEndServerClear(VModelServer* server,int num)
 
 	if(num >0)
 		endRemoveRows();
+}
+
+//=======================================
+// Column management
+//=======================================
+
+void TableNodeModel::removeColumn(QString name)
+{
+    Q_ASSERT(columns_);
+    columns_->removeExtraItem(name);
+}
+
+void TableNodeModel::slotAppendColumnBegin()
+{
+    int col=columnCount();
+    beginInsertColumns(QModelIndex(),col,col);
+}
+
+void TableNodeModel::slotAppendColumnEnd()
+{
+    endInsertColumns();
+}
+
+void TableNodeModel::slotAddColumnsBegin(int idxStart,int idxEnd)
+{
+    beginInsertColumns(QModelIndex(),idxStart,idxEnd);
+}
+
+void TableNodeModel::slotAddColumnsEnd(int idxStart,int idxEnd)
+{
+    endInsertColumns();
+}
+
+void TableNodeModel::slotChangeColumnBegin(int /*idx*/)
+{
+}
+
+void TableNodeModel::slotChangeColumnEnd(int idx)
+{
+    Q_EMIT dataChanged(index(0,idx),index(rowCount(),idx));
+}
+
+void TableNodeModel::slotRemoveColumnsBegin(int idxStart,int idxEnd)
+{
+    beginRemoveColumns(QModelIndex(),idxStart,idxEnd);
+}
+
+void TableNodeModel::slotRemoveColumnsEnd(int idxStart,int idxEnd)
+{
+    endRemoveColumns();
 }

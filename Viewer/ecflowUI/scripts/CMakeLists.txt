@@ -1,7 +1,6 @@
 
 # the list of files we want to install
-set (files ecflow_ui ecflow_test_ui.sh)
-
+set (files ecflow_ui ecflow_test_ui.sh node_state_diag.sh)
 
 
 # set variables which will be expanded in the startup script

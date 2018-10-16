@@ -91,7 +91,16 @@
                      "values"  : "user/oper/admin",
                      "values_label" : "User/Operator/Administrator",
                      "default": "user"
-                }
+                },
+
+                "defStatusMenuModeControl": {
+                    "label": "Enable <b>Defstatus</b> submenu in these modes",
+                    "tooltip" : "Controls when the Defstatus submenu is available",
+                    "values"  : "user/oper/admin",
+                    "values_label" : "User/Operator/Administrator",
+                    "default": "user/oper/admin",
+                    "multi"   : "true"
+                 }
             },
 
             "notification": {

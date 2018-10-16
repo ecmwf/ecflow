@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2018 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -27,6 +27,7 @@
 
 #include "ComboMulti.hpp"
 #include "Sound.hpp"
+#include "UiLog.hpp"
 
 #include <cassert>
 
@@ -212,7 +213,7 @@ void PropertyLine::checkState()
 
 	if(enabled_)
 	{
-		if(prop_->defaultValue() != currentValue())
+        if(prop_->defaultValue() != currentValue())
 			defaultTb_->setEnabled(true);
 		else
 			defaultTb_->setEnabled(false);
@@ -883,8 +884,8 @@ ComboMultiPropertyLine::ComboMultiPropertyLine(VProperty* guiProp,bool addLabel,
 
 	cb_->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-	connect(cb_,SIGNAL(currentIndexChanged(int)),
-			   this,SLOT(slotCurrentChanged(int)));
+    connect(cb_,SIGNAL(selectionChanged()),
+                this,SLOT(slotSelectionChanged()));
 
 	QStringList lst=prop_->param("values_label").split("/");
     QStringList lstData=prop_->param("values").split("/");
@@ -936,12 +937,12 @@ bool ComboMultiPropertyLine::applyChange()
 
 QVariant ComboMultiPropertyLine::currentValue()
 {
-	QStringList lst=cb_->selection();
+    QStringList lst=cb_->selectionData();
 
 	return lst.join("/");
 }
 
-void ComboMultiPropertyLine::slotCurrentChanged(int)
+void ComboMultiPropertyLine::slotSelectionChanged()
 {
     PropertyLine::checkState();
     valueChanged();

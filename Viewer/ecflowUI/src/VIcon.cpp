@@ -79,6 +79,13 @@ public:
 	bool show(VNode*) override;
 };
 
+class VTimeFreeIcon : public VIcon
+{
+public:
+    explicit VTimeFreeIcon(const std::string& name) : VIcon(name) {}
+    bool show(VNode*);
+};
+
 class VDateIcon : public VIcon
 {
 public:
@@ -133,6 +140,7 @@ static VRerunIcon rerunIcon("rerun");
 static VCompleteIcon completeIcon("complete");
 static VLateIcon lateIcon("late");
 static VTimeIcon timeIcon("time");
+static VTimeFreeIcon timeFreeIcon("time_free");
 static VDateIcon dateIcon("date");
 static VWaitIcon waitIcon("wait");
 static VZombieIcon zombieIcon("zombie");
@@ -430,25 +438,43 @@ bool  VDateIcon::show(VNode *n)
 }
 
 //==========================================================
-// Time
+// Time - hasTimeHolding in ecflowview
 //==========================================================
 
 //Node only?
-bool  VTimeIcon::show(VNode *n)
+bool VTimeIcon::show(VNode *n)
 {
 	if(!n || n->isServer())
 		return false;
 
 	node_ptr node=n->node();
 
+    if(TimeDepAttrs *attr = node->get_time_dep_attrs())
+        return !attr->time_today_cron_is_free();
+
+    return false;
+}
+
+
+//==========================================================
+// TimeFree - hasTime in ecflowview
+//==========================================================
+
+//Node only?
+bool VTimeFreeIcon::show(VNode *n)
+{
+    if(!n || n->isServer())
+        return false;
+
+    if(timeIcon.show(n))
+        return false;
+
+    node_ptr node=n->node();
     if(node->timeVec().size() > 0 ||
        node->todayVec().size() > 0 ||
        node->crons().size() > 0)
     {
-        //if(TimeDepAttrs *attr = node->get_time_dep_attrs())
-        //    return !attr->time_today_cron_is_free();
         return true;
-
     }
     return false;
 }

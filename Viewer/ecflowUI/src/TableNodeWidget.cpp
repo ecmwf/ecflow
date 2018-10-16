@@ -135,13 +135,24 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     //tw->slotUpdateTitle("<b>Table</b>");
 
     QList<QAction*> acLst;
-    auto* acFilterEdit=new QAction(this);
+
+    //Edit filter
+    QAction* acFilterEdit=new QAction(this);
     acFilterEdit->setIcon(QPixmap(":viewer/filter_edit.svg"));
     acFilterEdit->setToolTip("Edit filter ...");
     acLst << acFilterEdit;
 
     connect(acFilterEdit,SIGNAL(triggered()),
     		filterW_,SLOT(slotEdit()));
+
+    //Add variable column
+    QAction* acVar=new QAction(this);
+    acVar->setIcon(QPixmap(":viewer/dock_add_variable_column.svg"));
+    acVar->setToolTip("Add variable column ...");
+    acLst << acVar;
+
+    connect(acVar,SIGNAL(triggered()),
+            view_->realWidget(),SLOT(slotAddVariableColumn()));
 
     tw->addActions(acLst);
 }
