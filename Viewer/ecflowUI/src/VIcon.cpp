@@ -449,10 +449,7 @@ bool VTimeIcon::show(VNode *n)
 
 	node_ptr node=n->node();
 
-    if(TimeDepAttrs *attr = node->get_time_dep_attrs())
-        return !attr->time_today_cron_is_free();
-
-    return false;
+	return node->time_today_cron_is_free();
 }
 
 

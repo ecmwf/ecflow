@@ -332,6 +332,7 @@ public:
    /// has cron,time,day,date or today time dependencies
    virtual bool hasTimeDependencies() const { return has_time_dependencies();}
    bool isTimeFree() const { return (hasTimeDependencies()) ? timeDependenciesFree() : false;}
+   bool time_today_cron_is_free() const; /* used by viewer */
 
    /// If no time dependencies then we have a resolution of 1 hour.
    /// If we have just day/date then we have a resolution of 1 hour
@@ -730,7 +731,6 @@ private:
    /// i.e if day,date,cron attributes does correspond to 24 hours of today, then we
    /// need make them as complete.
    void markHybridTimeDependentsAsComplete();
-   bool time_today_cron_is_free() const; /* used by viewer */
    bool testTimeDependenciesForRequeue() const;
    void calendar_changed_timeattrs(const ecf::Calendar& c );
    void do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion);
