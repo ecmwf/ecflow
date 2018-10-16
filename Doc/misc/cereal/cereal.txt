@@ -7,3 +7,51 @@ Versioning
 ==========================================================
 http://uscilab.github.io/cereal/serialization_functions.html
 
+
+
+Consider the following:
+
+    I have a pair of save / load functions that describe how a C++ structure must be serialized and deserialized. 
+    I have an existing library of files containing serialized data describing many instances of this structure that 
+    I would like to preserve.
+    
+    I would like to add a new member or data type to the save / load functions, 
+    while also preserving the ability to deserialize the older files in the existing 
+    library that lack this new data structure.
+
+How would I go about doing this to ensure backward compatibility? 
+Will this work so long as I always add the new members/data type to the end of the save/load functions? 
+Or is this impossible?
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+Let me preface this by saying that cereal was not designed with this use case as primary motivation,
+so it takes some extra work to accomplish this. Other serialization frameworks that use an explicit serialization specification 
+(file) tend to be more flexible in this regard.
+
+One other warning is that I'm writing this without testing any of the solutions, but they should be roughly accurate.
+If your data is stored in a format that is opaque (i.e., binary), it will not be possible to add or remove fields
+and have the existing serialization code load the data properly. 
+Text based data can search (we call this out of order loading) for the field and get around this restriction.
+
+The only way around this for binary files would be for the types (version X vs version X+1) to be distinct 
+and use the appropriate serialization code to do loading and storing.
+You'd have to maintain some kind of mock version of your class that was just a thin wrapper around the serialized code, 
+then determine at runtime what kind to use internally.
+A more principled way to do this in cereal would be to use versioning (see the docs), 
+where you would supply a version with each change to your serialized data. 
+This would give you a way, at runtime, to decide how to load or save the data, by looking at the version number. 
+With this scheme you would not need to preserve ordering either, so long as your serialization code for 
+each version is correct, it will load the data.
+
+Unfortunately code that was not versioned cannot be made versioned without doing an explicit conversion, 
+because the serialized representations are slightly different. 
+You would need to perform a one-time conversion, using a program that
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+It will not be possible in a single pass to load binary to a versioned function, 
+but it can be done by loading from binary, then writing out to json and saving that. 
+Then migrate your code to use the version parameter, and comment out the portion of cereal that throws 
+if the version key is missing from the json, then save again.
+
