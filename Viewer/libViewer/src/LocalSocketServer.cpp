@@ -9,6 +9,7 @@
 
 #include "LocalSocketServer.hpp"
 
+#include <QtGlobal>
 #include <QApplication>
 #include <QLocalServer>
 #include <QLocalSocket>
@@ -29,7 +30,7 @@ LocalSocketServer::LocalSocketServer(QString serverId,QObject* parent) :
     //Create the server
     server_ = new QLocalServer(parent);
 
-#ifdef EFLOW_QT5
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
     //Restrict access to the socket
     server_->setSocketOptions(QLocalServer::UserAccessOption);
 #endif

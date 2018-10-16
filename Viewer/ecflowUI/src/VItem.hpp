@@ -49,6 +49,7 @@ public:
     virtual bool sameContents(VItem*) const=0;
     virtual bool isAncestor(const VItem*) const;
     virtual QString nodeMenuMode() const {return QString();}
+    virtual QString defStatusNodeMenuMode() const {return QString();}
 
 protected:
     VNode* parent_;

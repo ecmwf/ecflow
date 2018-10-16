@@ -23,6 +23,7 @@ ECFLOWUI_SITE_TAG=@UI_LOG_SITE_TAG@
 cleanup(){
     status=$?
     trap "" EXIT ERR
+    set +e  # do not exit on errors during cleanup
 
     # restore stdout/stderr
     if [ x$ECFLOWUI_SLOG != xyes ]
@@ -40,62 +41,73 @@ cleanup(){
 
         if [ -e $ECFLOWUI_LOGFILE ] ; then
 
-            TAILNUM=50
-            UI_TAILNUM=50
+            # if the error message is something that's not really a crash, then we should
+            # not send a crash report
+            hhh=$(grep "The X11 connection broke" $ECFLOWUI_LOGFILE)  # 0 if x11 broke, 1 if not
+            x11notbroke=$?
 
-            if [ $ECFLOWUI_BT != "no" ] ; then
-                # find the backtrace tag if there
-                btline=$(grep -n "Backtrace:" $ECFLOWUI_LOGFILE | cut -f1 --delimiter=':')
-                gret=$?
-                if [ "$gret" = "0" -a "x$btline" != "x" ] ; then
-                    nlines=$(wc -l $ECFLOWUI_LOGFILE | cut -f1 --delimiter=' ')
-                    TAILNUM=$(expr $nlines - $btline + 100)
+            if [ "$x11notbroke" = "1" ] ; then
+
+                TAILNUM=50
+                UI_TAILNUM=50
+
+                if [ $ECFLOWUI_BT != "no" ] ; then
+                    # find the backtrace tag if there
+                    btline=$(grep -n "Backtrace:" $ECFLOWUI_LOGFILE | cut -f1 --delimiter=':')
+                    gret=$?
+                    if [ "$gret" = "0" -a "x$btline" != "x" ] ; then
+                        nlines=$(wc -l $ECFLOWUI_LOGFILE | cut -f1 --delimiter=' ')
+                        TAILNUM=$(expr $nlines - $btline + 100)
+                    fi
                 fi
-            fi
 
-            # Logic: ECFLOWUI_BT_EMAIL_ADDRESS_FILE is not set, then the log/backtrace
-            # will go to stdout; otherwise it will be e-mailed to the
-            # addresses instead (the user will not see the backtrace).
 
-            if [ $ECFLOWUI_BT_EMAIL_ADDRESS_FILE != "x" ] ; then
-                if [ -e $ECFLOWUI_BT_EMAIL_ADDRESS_FILE ] ; then
-                    EFLOWUI_LOGTAIL="${ECFLOWUI_LOGFILE}.tail"
-                    ecfuimsg="ecFlowUI backtrace from user $USER"
-                    echo "Sending crash report by e-mail..."
-                    echo "user/host          : $USER/$HOST"          >  $EFLOWUI_LOGTAIL
-                    echo "ecflow version     : $ECFLOWUI_VERSION"    >> $EFLOWUI_LOGTAIL
-                    echo "ecflow install dir : $ECFLOWUI_INSTALLDIR" >> $EFLOWUI_LOGTAIL
-                    echo "start time         : $ECFLOWUI_STARTTIME"  >> $EFLOWUI_LOGTAIL
-                    echo "stop time          : $(date)"              >> $EFLOWUI_LOGTAIL
-                    echo ""                                          >> $EFLOWUI_LOGTAIL
-                    echo $status_message                             >> $EFLOWUI_LOGTAIL
-                    tail -$TAILNUM $ECFLOWUI_LOGFILE                 >> $EFLOWUI_LOGTAIL
+                # Logic: ECFLOWUI_BT_EMAIL_ADDRESS_FILE is not set, then the log/backtrace
+                # will go to stdout; otherwise it will be e-mailed to the
+                # addresses instead (the user will not see the backtrace).
+
+                if [ $ECFLOWUI_BT_EMAIL_ADDRESS_FILE != "x" ] ; then
+                    if [ -e $ECFLOWUI_BT_EMAIL_ADDRESS_FILE ] ; then
+                        EFLOWUI_LOGTAIL="${ECFLOWUI_LOGFILE}.tail"
+                        ecfuimsg="ecFlowUI backtrace from user $USER"
+                        echo "Sending crash report by e-mail..."
+                        echo "user/host          : $USER/$HOST"          >  $EFLOWUI_LOGTAIL
+                        echo "ecflow version     : $ECFLOWUI_VERSION"    >> $EFLOWUI_LOGTAIL
+                        echo "ecflow install dir : $ECFLOWUI_INSTALLDIR" >> $EFLOWUI_LOGTAIL
+                        echo "start time         : $ECFLOWUI_STARTTIME"  >> $EFLOWUI_LOGTAIL
+                        echo "stop time          : $(date)"              >> $EFLOWUI_LOGTAIL
+                        echo ""                                          >> $EFLOWUI_LOGTAIL
+                        echo $status_message                             >> $EFLOWUI_LOGTAIL
+                        tail -$TAILNUM $ECFLOWUI_LOGFILE                 >> $EFLOWUI_LOGTAIL
+
+                        #Add the last lines from the user interaction log file
+                        if [ -e $ECFLOWUI_LOGFILE ] ; then
+                            echo ""                                      >> $EFLOWUI_LOGTAIL
+                            echo "Last $UI_TAILNUM lines of user interaction log file:" >> $EFLOWUI_LOGTAIL
+                            tail -${UI_TAILNUM} $ECFLOWUI_LOGFILE     >> $EFLOWUI_LOGTAIL
+                        fi
+
+                        addr=$(head -1 $ECFLOWUI_BT_EMAIL_ADDRESS_FILE)
+                        mail -s "$ecfuimsg"  $addr < $EFLOWUI_LOGTAIL
+                        rm -f $EFLOWUI_LOGTAIL
+                        echo "Report sent"
+                    else
+                        echo "No report sent because e-mail address file does not exist: $ECFLOWUI_BT_EMAIL_ADDRESS_FILE"
+                    fi
+                else
+                    echo "Last $TAILNUM lines of log file:"
+                    tail -$TAILNUM $ECFLOWUI_LOGFILE
 
                     #Add the last lines from the user interaction log file
                     if [ -e $ECFLOWUI_LOGFILE ] ; then
-                        echo ""                                      >> $EFLOWUI_LOGTAIL
-                        echo "Last $UI_TAILNUM lines of user interaction log file:" >> $EFLOWUI_LOGTAIL
-                        tail -${UI_TAILNUM} $ECFLOWUI_LOGFILE     >> $EFLOWUI_LOGTAIL
+                        echo ""
+                        echo "Last $UI_TAILNUM lines of user interaction log file:"
+                        tail -${UI_TAILNUM} $ECFLOWUI_LOGFILE
                     fi
-
-                    addr=$(head -1 $ECFLOWUI_BT_EMAIL_ADDRESS_FILE)
-                    mail -s "$ecfuimsg"  $addr < $EFLOWUI_LOGTAIL
-                    rm -f $EFLOWUI_LOGTAIL
-                    echo "Report sent"
-                else
-                    echo "No report sent because e-mail address file does not exist: $ECFLOWUI_BT_EMAIL_ADDRESS_FILE"
                 fi
             else
-                echo "Last $TAILNUM lines of log file:"
-                tail -$TAILNUM $ECFLOWUI_LOGFILE
-
-                #Add the last lines from the user interaction log file
-                if [ -e $ECFLOWUI_LOGFILE ] ; then
-                    echo ""
-                    echo "Last $UI_TAILNUM lines of user interaction log file:"
-                    tail -${UI_TAILNUM} $ECFLOWUI_LOGFILE
-                fi
-            fi
+                echo "X11 Connection broke - no report sent to developers"
+            fi # $x11notbroke
         fi
     fi
 

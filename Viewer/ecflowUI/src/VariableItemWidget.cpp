@@ -19,6 +19,7 @@
 
 #include "IconProvider.hpp"
 #include "LineEdit.hpp"
+#include "ModelColumn.hpp"
 #include "SessionHandler.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
@@ -626,7 +627,8 @@ void VariableAddDialog::readSettings()
 
 VariableItemWidget::VariableItemWidget(QWidget *parent) :
     shadowProp_(0),
-    canSaveLastSelection_(true)
+    canSaveLastSelection_(true),
+    tableViewColumns_(0)
 {
 	//This item displays all the ancestors of the info object
     useAncestors_=true;
@@ -634,6 +636,13 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) :
     setupUi(this);
 
 	data_=new VariableModelDataHandler();
+
+    //table view columns
+    tableViewColumns_=ModelColumn::def("table_columns");
+    if(!tableViewColumns_)
+    {
+        UiLog().warn() << "Cannot find ModelColumn object for \"table_columns\"";
+    }
 
 	//The model and the sort-filter model
 	model_=new VariableModel(data_,this);
@@ -704,7 +713,9 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) :
 	QAction* sep2=new QAction(this);
 	sep2->setSeparator(true);
 	QAction* sep3=new QAction(this);
-	sep3->setSeparator(true);
+    sep3->setSeparator(true);
+    QAction* sep4=new QAction(this);
+    sep4->setSeparator(true);
 
 	//Build context menu
 	varView->addAction(actionAdd);
@@ -716,6 +727,8 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) :
 	varView->addAction(actionDelete);
 	varView->addAction(sep3);
 	varView->addAction(actionProp);
+    varView->addAction(sep4);
+    varView->addAction(actionAddToTableView);
 
 	//Add actions for the toolbuttons
 	addTb->setDefaultAction(actionAdd);
@@ -835,6 +848,7 @@ void VariableItemWidget::checkActionState()
          actionDelete->setEnabled(false);
          actionCopy->setEnabled(false);
          actionCopyFull->setEnabled(false);
+         actionAddToTableView->setEnabled(false);
          return;
     }
 
@@ -845,6 +859,7 @@ void VariableItemWidget::checkActionState()
         actionDelete->setEnabled(false);
         actionCopy->setEnabled(false);
         actionCopyFull->setEnabled(false);
+        actionAddToTableView->setEnabled(false);
 	}
 	else
 	{
@@ -871,6 +886,16 @@ void VariableItemWidget::checkActionState()
             actionProp->setEnabled(true);
             actionCopy->setEnabled(true);
             actionCopyFull->setEnabled(true);
+
+            if(tableViewColumns_)
+            {
+                QString varName=model_->data(index).toString();
+                actionAddToTableView->setEnabled(tableViewColumns_->indexOf(varName) == -1);
+            }
+            else
+            {
+                actionAddToTableView->setEnabled(false);
+            }
 		}
 		//Server or nodes
 		else
@@ -886,7 +911,8 @@ void VariableItemWidget::checkActionState()
             actionProp->setEnabled(false);
             actionCopy->setEnabled(false);
             actionCopyFull->setEnabled(false);
-		}
+            actionAddToTableView->setEnabled(false);
+        }
 	}
 
     if(frozen_)
@@ -1136,6 +1162,16 @@ void VariableItemWidget::on_actionCopyFull_triggered()
    {
         toClipboard(name + "=" + val);
    }
+}
+
+void VariableItemWidget::on_actionAddToTableView_triggered()
+{
+    if(tableViewColumns_)
+    {
+        QModelIndex idx=sortModel_->mapToSource(varView->currentIndex());
+        QString name=model_->data(idx).toString();
+        tableViewColumns_->addExtraItem(name,name);
+    }
 }
 
 void VariableItemWidget::on_shadowTb_clicked(bool showShadowed)

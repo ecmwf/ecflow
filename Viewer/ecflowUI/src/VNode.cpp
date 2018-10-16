@@ -553,6 +553,33 @@ std::string VNode::findInheritedVariable(const std::string& key,bool substitute)
     return val;
 }
 
+void VNode::collectInheritedVariableNames(std::set<std::string>& vars) const
+{
+    if(!node_)
+        return;
+
+    std::vector<Variable> v,gv;
+    variables(v);
+    genVariables(gv);
+
+    for(size_t i=0; i < v.size(); i++)
+    {
+        vars.insert(v[i].name());
+    }
+
+    for(size_t i=0; i < gv.size(); i++)
+    {
+        vars.insert(gv[i].name());
+    }
+
+    //Try to find it in the parent
+    if(parent())
+    {
+        parent()->collectInheritedVariableNames(vars);
+    }
+}
+
+
 int VNode::variablesNum() const
 {
 	if(node_.get())
@@ -1133,6 +1160,13 @@ QString VNode::nodeMenuMode() const
     ServerHandler* s=server();
     Q_ASSERT(s);
     return s->nodeMenuMode();
+}
+
+QString VNode::defStatusNodeMenuMode() const
+{
+    ServerHandler* s=server();
+    Q_ASSERT(s);
+    return s->defStatusNodeMenuMode();
 }
 
 const std::string& VSuiteNode::typeName() const

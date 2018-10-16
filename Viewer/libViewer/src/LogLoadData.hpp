@@ -192,6 +192,7 @@ public:
     std::streamoff startPos() const { return startPos_;}
 
 private:
+    std::streamoff getStartPos(const std::string& logFile, int numOfRows);
     void getSeries(QLineSeries& series,const LogRequestItem& item,int& maxVal);
     void getSeries(QLineSeries& series,const std::vector<int>& vals,int& maxVal);
     void getSeries(QLineSeries& series,const std::vector<int>& vals1,

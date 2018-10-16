@@ -44,9 +44,11 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     expandConnectorLenght_(20),   
     connectorColour_(Qt::black),
     drawConnector_(true),
+    autoExpandLeafNode_(true),
     indentation_(0),
     lastViewedItem_(0),
-    noSelectionOnMousePress_(false)
+    noSelectionOnMousePress_(false),
+    autoScroll_(true)
 {  
     expandConnectorLenght_=itemGap_-2*connectorGap_;
 
@@ -193,11 +195,21 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
 
     if(index.isValid())
     {
+        bool autoScroll=autoScroll_;
+        autoScroll_=false;
         selectionModel_->setCurrentIndex(index, QItemSelectionModel::NoUpdate);
+        autoScroll_=autoScroll;
         QPoint p1=pressedRefPosition;
         QRect rect(p1,QSize(pos.x()-p1.x(),pos.y()-p1.y()));
 #ifdef _UI_QABSTRACTNODEVIEW_DEBUG
         UiLog().dbg() << " rect=" << rect << " p1=" << p1 << " p2=" << pos ;
+#endif
+#if 0
+        if (command.testFlag(QItemSelectionModel::Toggle))
+        {
+            command &= ~QItemSelectionModel::Toggle;
+            command |= selectionModel_->isSelected(index) ? QItemSelectionModel::Deselect : QItemSelectionModel::Select;
+        }
 #endif
         setSelection(rect, command);
     }
@@ -689,6 +701,20 @@ void AbstractNodeView::expand(int item)
         storeExpanded(idx);
         viewItems_[item].expanded = true;
 
+        if(autoExpandLeafNode_)
+        {
+            int count=model_->rowCount(idx);
+            for(int i=0; i < count; i++)
+            {
+                QModelIndex chIdx=model_->index(i,0,idx);
+                if(model_->isFlatNode(chIdx))
+                {
+                    if(!isIndexExpanded(chIdx))
+                        storeExpanded(chIdx);
+                }
+            }
+        }
+
         //The total number items to be inserted
         int total=0;
         totalNumOfExpandedChildren(idx,total);
@@ -1063,7 +1089,29 @@ void AbstractNodeView::select(const QModelIndex &topIndex, const QModelIndex &bo
     for (int i = 0; i < rangeStack.count(); ++i)
         selection.append(rangeStack.at(i));
 
+#if 0
+    UiLog().dbg() << "before";
+    Q_FOREACH(QModelIndex idx,selectionModel_->selectedIndexes())
+    {
+        UiLog().dbg() << " " << idx.data().toString();
+    }
+
+    UiLog().dbg() << "selection";
+    Q_FOREACH(QModelIndex idx,selection.indexes())
+    {
+        UiLog().dbg() << " " << idx.data().toString();
+    }
+#endif
+
     selectionModel_->select(selection, command);
+
+#if 0
+    UiLog().dbg() << "after";
+    Q_FOREACH(QModelIndex idx,selectionModel_->selectedIndexes())
+    {
+        UiLog().dbg() << " " << idx.data().toString();
+    }
+#endif
 }
 
 
@@ -1256,7 +1304,10 @@ void AbstractNodeView::currentChanged(const QModelIndex &current, const QModelIn
 
     if(current.isValid())
     {
-        scrollTo(current);
+        if(autoScroll_)
+        {
+            scrollTo(current);
+        }
         update(current);
     }
 }

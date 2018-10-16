@@ -9,6 +9,7 @@
 
 #include "VariableModel.hpp"
 
+#include <QtGlobal>
 #include <QColor>
 
 #include "ServerHandler.hpp"
@@ -247,17 +248,28 @@ bool VariableModel::variable(const QModelIndex& idx, QString& name,QString& valu
 
 QVariant VariableModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
 {
-	if ( orient != Qt::Horizontal || role != Qt::DisplayRole )
-      		  return QAbstractItemModel::headerData( section, orient, role );
+  if ( orient != Qt::Horizontal || (role != Qt::DisplayRole &&  role != Qt::ToolTipRole))
+    return QAbstractItemModel::headerData( section, orient, role );
 
+  if(role == Qt::DisplayRole)
+  {
    	switch ( section )
 	{
    	case 0: return tr("Name");  
-    case 1: return tr("Value");
+        case 1: return tr("Value");
    	default: return QVariant();
    	}
-
-    return QVariant();
+  }
+  else if(role== Qt::ToolTipRole)
+  {
+   	switch ( section )
+	{
+   	case 0: return tr("Name");  
+        case 1: return tr("Value");
+   	default: return QVariant();
+   	}
+  }
+  return QVariant();
 }
 
 QModelIndex VariableModel::index( int row, int column, const QModelIndex & parent ) const
@@ -270,7 +282,7 @@ QModelIndex VariableModel::index( int row, int column, const QModelIndex & paren
 	//When parent is the root this index refers to a node or server
 	if(!parent.isValid())
 	{
-#ifdef ECFLOW_QT5
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 		return createIndex(row,column,quintptr(0));
 #else
 		return createIndex(row,column,0);
@@ -323,7 +335,7 @@ int VariableModel::indexToLevel(const QModelIndex& index) const
 	int id=index.internalId();
 	if(id >=0 && id < 1000)
 	{
-			return 1;
+	  return 1;
 	}
 	return 2;
 }

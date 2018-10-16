@@ -248,6 +248,15 @@
     <string>Copy variable's name and value</string>
    </property>
   </action>
+  <action name="actionAddToTableView">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/add_variable_column.svg</normaloff>:/viewer/add_variable_column.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Add variable to table view </string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>

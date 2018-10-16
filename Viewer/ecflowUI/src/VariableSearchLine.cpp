@@ -8,7 +8,7 @@
 //============================================================================
 
 #include <assert.h>
-
+#include <QHeaderView>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTreeView>

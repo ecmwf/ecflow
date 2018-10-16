@@ -27,6 +27,12 @@
                     "values"  : "standard/compact",
                     "values_label" : "Standard/Compact"
                 },
+
+                "autoExpandLeafNode" : {
+                    "label" : "Automatically expand leaf nodes",
+                    "default" : "false"
+                },
+
                 "nodeFont" : {
 					"label" : "Nodes",
 					"default": "font(,)"
@@ -109,6 +115,10 @@
                 "popupFilter" : {
                     "label" : "Popup filter dialog when new table view is added",
                     "default" : "true"
+                },
+                "variableColumns" : {
+                    "label" : "Variable columns",
+                    "default" : "__none__"
                 }
 			},
 
@@ -236,7 +246,9 @@
     },
 
     "table_columns": {
-    	
+
+        "__config__" : "view.table.variableColumns",
+
     	"path" : {
     		"label" : "Node",
             "tooltip" : "Node"

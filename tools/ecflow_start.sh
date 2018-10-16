@@ -122,6 +122,7 @@ ecflow_client --port=$ECF_PORT --host=$host --ping && THERE=OK
 if [[ $THERE == OK ]]; then
   echo "server is already started"
   res="$(ps -lf -u $USER | grep ecflow_server | grep -v grep)"
+  # which netstat && res="$(netstat -lnptu 2>/dev/null | grep ecflow | grep $ECF_PORT)"
   echo "$res $(ecflow_client --stats)"
   if [ "$res" == "" ] ; then
     mail $USER -s "server is already started - server hijack?" <<EOF

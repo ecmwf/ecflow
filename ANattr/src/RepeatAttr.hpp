@@ -463,6 +463,13 @@ private:
    friend class boost::serialization::access;
    template<class Archive>
    void serialize(Archive & ar, const unsigned int /*version*/) {
+#if defined(__clang__)
+      ar.register_type(static_cast<RepeatDate *>(NULL));
+      ar.register_type(static_cast<RepeatInteger *>(NULL));
+      ar.register_type(static_cast<RepeatEnumerated *>(NULL));
+      ar.register_type(static_cast<RepeatString *>(NULL));
+      ar.register_type(static_cast<RepeatDay *>(NULL));
+#endif
       ar & repeatType_;
    }
 };

@@ -76,6 +76,17 @@ void ChildAttrs::sort_attributes( ecf::Attr::Type attr)
                                    boost::bind(&Label::name,_1),
                                    boost::bind(&Label::name,_2)));
          break;
+      case Attr::ALL:
+         sort(events_.begin(),events_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Event::name_or_number,_1),
+                                   boost::bind(&Event::name_or_number,_2)));
+         sort(meters_.begin(),meters_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Meter::name,_1),
+                                   boost::bind(&Meter::name,_2)));
+         sort(labels_.begin(),labels_.end(),boost::bind(Str::caseInsLess,
+                                   boost::bind(&Label::name,_1),
+                                   boost::bind(&Label::name,_2)));
+         break;
       case Attr::LIMIT:    break;
       case Attr::VARIABLE: break;
       case Attr::UNKNOWN:  break;

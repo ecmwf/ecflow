@@ -17,6 +17,7 @@ TableNodeSortModel::TableNodeSortModel(TableNodeModel* nodeModel,QObject *parent
         nodeModel_(nodeModel),
         skipSort_(false)
 {
+    Q_ASSERT(nodeModel_);
     //connect(nodeModel_,SIGNAL(filterChanged()),
     //		this,SLOT(slotFilterChanged()));
 
@@ -65,6 +66,12 @@ bool TableNodeSortModel::lessThan(const QModelIndex &left,
     if(id == TableNodeModel::PathColumn)
         return left.row() < right.row();
 
+    else if(id == TableNodeModel::MeterColumn)
+    {
+        return left.data(AbstractNodeModel::SortRole).toInt() <
+               right.data(AbstractNodeModel::SortRole).toInt();
+    }
+
     else if(id == TableNodeModel::StatusChangeColumn)
     {
         return left.data(AbstractNodeModel::SortRole).toUInt() <
@@ -76,3 +83,15 @@ bool TableNodeSortModel::lessThan(const QModelIndex &left,
 
     return leftData.toString() < rightData.toString();
 }
+
+void TableNodeSortModel::removeColumn(QString name)
+{
+    nodeModel_->removeColumn(name);
+}
+
+ModelColumn* TableNodeSortModel::columns() const
+{
+     nodeModel_->columns();
+}
+
+
