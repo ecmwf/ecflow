@@ -46,12 +46,7 @@ private:
 
  	friend class cereal::access;
  	template<class Archive>
- 	void serialize(Archive & ar, std::uint32_t const /*version*/)
- 	{
- 	   ar( CEREAL_NVP(time_ ) );
-      CEREAL_OPTIONAL_NVP(ar, relative_, [this](){return !relative_;}); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, days_,     [this](){return days_; });     // conditionally save
- 	}
+ 	void serialize(Archive & ar, std::uint32_t const /*version*/);
 };
 
 }

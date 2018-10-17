@@ -18,11 +18,11 @@
 #include "AutoRestoreAttr.hpp"
 #include "Indentor.hpp"
 #include "Ecf.hpp"
-#include "Node.hpp"
 #include "NodeContainer.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 
@@ -131,5 +131,14 @@ void AutoRestoreAttr::check(std::string& errorMsg) const
       }
    }
 }
+
+
+template<class Archive>
+void AutoRestoreAttr::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(CEREAL_NVP(nodes_to_restore_));
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(AutoRestoreAttr);
+
 
 }

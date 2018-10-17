@@ -20,7 +20,8 @@
 
 #include <boost/operators.hpp>
 #include <boost/utility.hpp>
-#include "Serialization.hpp"
+#include <cereal/access.hpp>
+
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Class Label:
@@ -73,12 +74,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      ar( CEREAL_NVP(n_));
-      CEREAL_OPTIONAL_NVP(ar,v_,     [this](){return !v_.empty();});
-      CEREAL_OPTIONAL_NVP(ar,new_v_, [this](){return !new_v_.empty();});  // conditionally save
-   }
+   void serialize(Archive & ar);
 };
 
 
@@ -127,12 +123,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      CEREAL_OPTIONAL_NVP(ar,number_, [this](){return number_ != std::numeric_limits<int>::max();});
-      CEREAL_OPTIONAL_NVP(ar,n_,   [this](){return !n_.empty();});
-      CEREAL_OPTIONAL_NVP(ar,v_,  [this](){return v_;});
-   }
+   void serialize(Archive & ar);
 };
 
 // Class Meter:
@@ -182,14 +173,6 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      ar( CEREAL_NVP(min_),
-          CEREAL_NVP(max_),
-          CEREAL_NVP(v_),
-          CEREAL_NVP(n_),
-          CEREAL_NVP(cc_)
-      );
-   }
+   void serialize(Archive & ar);
 };
 #endif

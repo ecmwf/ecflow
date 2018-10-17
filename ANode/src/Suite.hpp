@@ -18,10 +18,10 @@
 #include "NodeContainer.hpp"
 #include "Calendar.hpp"
 #include "ClockAttr.hpp"
+#include "NodeFwd.hpp"
 
 class SuiteGenVariables;
 namespace ecf { class CalendarUpdateParams;  } // forward declare
-
 
 class Suite : public NodeContainer {
 public:
@@ -106,19 +106,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class<NodeContainer>(this));
-      CEREAL_OPTIONAL_NVP(ar, begun_,     [this](){return begun_; });           // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, clockAttr_, [this](){return clockAttr_.get(); }); // conditionally save
-      ar(CEREAL_NVP(cal_));
-
-      // The calendar does not persist the clock type or start stop with server since
-      // that is persisted with the clock attribute
-      if (Archive::is_loading::value) {
-         if (clockAttr_.get()) clockAttr_->init_calendar(cal_);
-      }
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 
 private:
    Defs*                      defs_{nullptr};                // *NOT* persisted, set by parent Defs

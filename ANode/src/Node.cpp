@@ -19,6 +19,11 @@
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "AutoRestoreAttr.hpp"
+#include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
+#include "Limit.hpp"
+
 #include "Extract.hpp"
 
 #include "NodeState.hpp"
@@ -36,6 +41,8 @@
 #include "CmdContext.hpp"
 #include "AbstractObserver.hpp"
 #include "DefsStructureParser.hpp"
+#include "Serialization.hpp"
+#include "cereal_boost_time.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -2464,3 +2471,48 @@ std::vector<QueueAttr>::const_iterator Node::queue_begin()  const { if (misc_att
 std::vector<QueueAttr>::const_iterator Node::queue_end()    const { if (misc_attrs_) return misc_attrs_->queue_end(); return queues_.end();}
 std::vector<GenericAttr>::const_iterator Node::generic_begin()  const { if (misc_attrs_) return misc_attrs_->generic_begin(); return generics_.begin();}
 std::vector<GenericAttr>::const_iterator Node::generic_end()    const { if (misc_attrs_) return misc_attrs_->generic_end(); return generics_.end();}
+
+
+
+template<class Archive>
+void Node::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar( CEREAL_NVP(n_) );
+
+   CEREAL_OPTIONAL_NVP(ar, st_,         [this](){return st_.first != NState::default_state();}); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, suspended_,  [this](){return suspended_; });
+   CEREAL_OPTIONAL_NVP(ar, d_st_,       [this](){return d_st_.state() != DState::default_state();}); // conditionally save
+
+   CEREAL_OPTIONAL_NVP(ar, vars_ ,      [this](){return !vars_.empty(); }); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, c_expr_ ,    [this](){return c_expr_.get(); }); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, t_expr_ ,    [this](){return t_expr_.get(); }); // conditionally save
+
+   CEREAL_OPTIONAL_NVP(ar, meters_,     [this](){return !meters_.empty(); }); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, events_,     [this](){return !events_.empty(); }); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, labels_,     [this](){return !labels_.empty(); }); // conditionally save
+
+   CEREAL_OPTIONAL_NVP(ar, times_,      [this](){return !times_.empty(); });  // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, todays_,     [this](){return !todays_.empty(); }); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, crons_,      [this](){return !crons_.empty(); });    // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, dates_,      [this](){return !dates_.empty(); });    // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, days_,       [this](){return !days_.empty(); });     // conditionally save
+
+   CEREAL_OPTIONAL_NVP(ar, late_,       [this](){return late_.get(); });       // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, misc_attrs_, [this](){return misc_attrs_.get(); });     // conditionally save
+
+   CEREAL_OPTIONAL_NVP(ar, repeat_ ,    [this](){return !repeat_.empty(); });  // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, limits_ ,    [this](){return !limits_.empty(); });  // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, inLimitMgr_, [this](){return !inLimitMgr_.inlimits().empty() ; }); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, flag_ ,      [this](){return flag_.flag() !=0 ; }); // conditionally save
+
+   CEREAL_OPTIONAL_NVP(ar, auto_cancel_,  [this](){return auto_cancel_.get(); }); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, auto_archive_, [this](){return auto_archive_.get(); }); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, auto_restore_, [this](){return auto_restore_.get(); }); // conditionally save
+
+   if (Archive::is_loading::value) {
+      if (auto_restore_) auto_restore_->set_node(this);
+      if (misc_attrs_) misc_attrs_->set_node(this);
+      for(auto & limit : limits_)  limit->set_node(this);
+   }
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(Node);

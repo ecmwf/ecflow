@@ -20,6 +20,7 @@
 #include "NState.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
+#include "Limit.hpp"
 
 using namespace ecf;
 using namespace std;

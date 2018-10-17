@@ -24,6 +24,7 @@
 #include "Ecf.hpp"
 #include "Str.hpp"
 #include "Extract.hpp"
+#include "Serialization.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -515,3 +516,11 @@ void InLimitMgr::resolveInLimitReferences() const
       }
    }
 }
+
+
+template<class Archive>
+void InLimitMgr::serialize(Archive & ar)
+{
+   ar(CEREAL_NVP(vec_));
+}
+CEREAL_TEMPLATE_SPECIALIZE(InLimitMgr);

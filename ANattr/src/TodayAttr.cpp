@@ -21,6 +21,8 @@
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
+#include "Serialization.hpp"
+
 
 using namespace std;
 
@@ -207,5 +209,14 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 
    return true;
 }
+
+
+template<class Archive>
+void  TodayAttr::serialize(Archive & ar)
+{
+   ar( CEREAL_NVP(ts_));
+   CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
+}
+CEREAL_TEMPLATE_SPECIALIZE(TodayAttr);
 
 }

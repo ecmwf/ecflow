@@ -15,7 +15,9 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include "Serialization.hpp"
+#include <vector>
+#include <string>
+#include <cereal/access.hpp>
 
 namespace  ecf {
 
@@ -104,10 +106,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(CEREAL_NVP(flag_));
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 }
 

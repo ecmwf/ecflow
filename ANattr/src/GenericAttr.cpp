@@ -12,12 +12,12 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <iostream>
 #include <ostream>
 
 #include "GenericAttr.hpp"
 #include "Indentor.hpp"
 #include "Str.hpp"
+#include "Serialization.hpp"
 
 using namespace ecf;
 using namespace boost;
@@ -67,3 +67,12 @@ std::string GenericAttr::to_string() const
    return ret;
 }
 
+
+template<class Archive>
+void GenericAttr::serialize(Archive & ar)
+{
+   ar( CEREAL_NVP(name_),
+       CEREAL_NVP(values_)
+   );
+}
+CEREAL_TEMPLATE_SPECIALIZE(GenericAttr);

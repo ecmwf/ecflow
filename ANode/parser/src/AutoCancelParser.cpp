@@ -14,6 +14,7 @@
 //============================================================================
 
 #include "AutoCancelParser.hpp"
+#include "AutoCancelAttr.hpp"
 #include "TimeSeries.hpp"
 #include "Extract.hpp"
 #include "Node.hpp"

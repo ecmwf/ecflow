@@ -17,8 +17,8 @@
 
 #include <iosfwd>
 #include <boost/weak_ptr.hpp>
+#include <cereal/access.hpp>
 
-#include "Serialization.hpp"
 #include "LimitFwd.hpp"
 
 
@@ -66,14 +66,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      ar(CEREAL_NVP(n_));
-      CEREAL_OPTIONAL_NVP(ar,path_,                 [this](){return !path_.empty();});        // conditionally save
-      CEREAL_OPTIONAL_NVP(ar,tokens_,               [this](){return tokens_ !=1;});           // conditionally save
-      CEREAL_OPTIONAL_NVP(ar,limit_this_node_only_, [this](){return limit_this_node_only_;}); // conditionally save new to 5.0.0
-      CEREAL_OPTIONAL_NVP(ar,incremented_,          [this](){return incremented_;});          // conditionally save new to 5.0.0
-   }
+   void serialize(Archive & ar);
 };
 
 #endif

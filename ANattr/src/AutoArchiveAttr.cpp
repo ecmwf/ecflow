@@ -19,6 +19,8 @@
 #include "Calendar.hpp"
 #include "Indentor.hpp"
 #include "Log.hpp"
+#include "Serialization.hpp"
+
 
 #ifdef DEBUG
 #include <boost/date_time/posix_time/time_formatters.hpp>
@@ -99,5 +101,15 @@ bool AutoArchiveAttr::isFree(const ecf::Calendar& calendar,const boost::posix_ti
 
    return false;
 }
+
+
+template<class Archive>
+void AutoArchiveAttr::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar( CEREAL_NVP(time_));
+   CEREAL_OPTIONAL_NVP(ar, relative_, [this](){return !relative_;}); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, days_,     [this](){return days_; });     // conditionally save
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(AutoArchiveAttr);
 
 }

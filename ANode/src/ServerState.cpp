@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 #include <cassert>
-#include <iostream>
 
 #include "ServerState.hpp"
 #include "Str.hpp"
@@ -21,6 +20,7 @@
 #include "Host.hpp"
 #include "Ecf.hpp"
 #include "Version.hpp"
+#include "Serialization.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -509,3 +509,14 @@ bool ServerState::why(std::vector<std::string>& theReasonWhy) const
    if (server_state_ == SState::SHUTDOWN) { theReasonWhy.emplace_back("The server is shutdown"); return true;}
    return false;
 }
+
+
+
+template<class Archive>
+void ServerState::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(CEREAL_NVP(server_state_),
+      CEREAL_NVP(server_variables_));
+   CEREAL_OPTIONAL_NVP(ar,user_variables_, [this](){return !user_variables_.empty();});
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(ServerState);

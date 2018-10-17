@@ -24,6 +24,11 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Alias.hpp"
+#include "AutoRestoreAttr.hpp"
+#include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
+#include "Limit.hpp"
+
 #include <algorithm> //for for_each()
 // =======================================================================
 // This struct is used in the node migration tests.

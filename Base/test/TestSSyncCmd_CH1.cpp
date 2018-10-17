@@ -22,8 +22,11 @@
 #include "SSyncCmd.hpp"
 #include "SNewsCmd.hpp"
 #include "Ecf.hpp"
-#include "NodeFwd.hpp"
 #include "SuiteChanged.hpp"
+#include "Suite.hpp"
+#include "Family.hpp"
+#include "Task.hpp"
+#include "Limit.hpp"
 
 using namespace std;
 using namespace ecf;

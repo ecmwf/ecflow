@@ -17,7 +17,6 @@
 
 #include <vector>
 #include <boost/utility/string_view.hpp>
-#include <boost/iterator/iterator_facade.hpp>
 
 namespace ecf {
 
@@ -73,32 +72,6 @@ public:
 
    /// return the token at pos, otherwise returns false.
    static bool get_token(boost::string_view line,size_t pos,std::string& token,boost::string_view sep = " \t");
-
-//   class const_iterator : public boost::iterator_facade<const_iterator, boost::string_view, boost::single_pass_traversal_tag>
-//   {
-//         const StringSplitter* splitter_;
-//         boost::string_view value_;
-//      public:
-//         explicit const_iterator(const StringSplitter  * sp) : splitter_(sp) {}
-//
-//         const_iterator & operator ++() {
-//            if (! splitter_->finished())
-//               value_ = splitter_->next();
-//            else
-//               splitter_ = nullptr;
-//            return *this;
-//         }
-//
-//         reference operator *() { return value_; }
-//
-//         bool operator !=(const const_iterator & other) const { return splitter_ != other.splitter_; }
-//
-//
-//         friend class boost::iterator_core_access;
-//         void increment() {
-//            value_ = splitter_->next();
-//         }
-//   };
 
 };
 

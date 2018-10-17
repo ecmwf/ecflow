@@ -22,6 +22,7 @@
 #include "PrintStyle.hpp"
 #include "TimeSeries.hpp"
 #include "Str.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace boost::gregorian;
@@ -237,5 +238,16 @@ LateAttr LateAttr::create(const std::string& lateString)
    return lateAttr;
 }
 
+
+template<class Archive>
+void LateAttr::serialize(Archive & ar)
+{
+   CEREAL_OPTIONAL_NVP(ar, s_ ,       [this](){return !s_.isNULL();});
+   CEREAL_OPTIONAL_NVP(ar, a_,        [this](){return !a_.isNULL();});
+   CEREAL_OPTIONAL_NVP(ar, c_,        [this](){return !c_.isNULL();});
+   CEREAL_OPTIONAL_NVP(ar, c_is_rel_, [this](){return c_is_rel_;});
+   CEREAL_OPTIONAL_NVP(ar, isLate_,   [this](){return isLate_;});
+}
+CEREAL_TEMPLATE_SPECIALIZE(LateAttr);
 
 }

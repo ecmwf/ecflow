@@ -15,7 +15,6 @@
 
 #include <cassert>
 #include <sstream>
-#include <memory>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -37,6 +36,9 @@
 #include "Ecf.hpp"
 #include "DefsDelta.hpp"
 #include "Extract.hpp"
+#include "JobCreationCtrl.hpp"
+#include "Memento.hpp"
+#include "Serialization.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -1088,3 +1090,17 @@ void SubGenVariables::gen_variables(std::vector<Variable>& vec) const
    vec.push_back(genvar_ecfname_);
    vec.push_back(genvar_ecfpass_);
 }
+
+
+
+template<class Archive>
+void Submittable::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<Node>(this));
+
+   CEREAL_OPTIONAL_NVP(ar, paswd_, [this](){return !paswd_.empty(); }); // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, rid_,   [this](){return !rid_.empty(); });   // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, abr_,   [this](){return !abr_.empty(); });   // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, tryNo_, [this](){return tryNo_ != 0; });     // conditionally save
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(Submittable);

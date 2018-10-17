@@ -15,7 +15,7 @@
 // Description :
 //============================================================================
 #include <iosfwd>
-#include "Serialization.hpp"
+#include <cereal/access.hpp>
 #include "Child.hpp"
 
 // Class ZombieAttr:
@@ -70,14 +70,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar( CEREAL_NVP(zombie_type_),
-          CEREAL_NVP(action_),
-          CEREAL_NVP(zombie_lifetime_),
-          CEREAL_NVP(child_cmds_)
-      );
-	}
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 #endif

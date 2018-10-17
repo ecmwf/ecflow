@@ -26,6 +26,7 @@
 #include "Str.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
+#include "JobCreationCtrl.hpp"
 #include "MyDefsFixture.hpp"
 
 using namespace std;

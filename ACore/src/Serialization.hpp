@@ -80,4 +80,13 @@ void restore_from_string(const std::string& archive_data, T& restored)
 
 }
 
+//// Place archive in CPP file requires we template specialize the archives
+//// Note that we need to instantiate for both loading and saving, even
+//// if we use a single serialize function
+#define CEREAL_TEMPLATE_SPECIALIZE(T) template void T::serialize<cereal::JSONOutputArchive>( cereal::JSONOutputArchive & );\
+template void T::serialize<cereal::JSONInputArchive>( cereal::JSONInputArchive & )
+
+#define CEREAL_TEMPLATE_SPECIALIZE_V(T) template void T::serialize<cereal::JSONOutputArchive>( cereal::JSONOutputArchive &, std::uint32_t const /*version*/);\
+template void T::serialize<cereal::JSONInputArchive>( cereal::JSONInputArchive & ,std::uint32_t const /*version*/ )
+
 #endif

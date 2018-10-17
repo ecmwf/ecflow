@@ -8,6 +8,7 @@
 //
 //============================================================================
 
+#include "Limit.hpp"
 #include "VLimitAttr.hpp"
 #include "VAttributeType.hpp"
 #include "VNode.hpp"

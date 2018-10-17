@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "OverviewProvider.hpp"
+#include "AutoCancelAttr.hpp"
 
 #include "ConnectState.hpp"
 #include "ServerHandler.hpp"

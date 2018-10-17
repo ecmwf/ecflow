@@ -26,6 +26,7 @@
 #include "SuiteChanged.hpp"
 #include "Log.hpp"
 #include "Extract.hpp"
+#include "Limit.hpp"
 
 using namespace ecf;
 using namespace std;

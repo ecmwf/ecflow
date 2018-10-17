@@ -126,30 +126,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class<Submittable>(this));
-      CEREAL_OPTIONAL_NVP(ar, alias_no_, [this](){return alias_no_ != 0; });    // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, aliases_ , [this](){return !aliases_.empty(); }); // conditionally save
-
-      // Setup the alias parent pointers. Since they are not serialised
-      // ********************************************************************
-      // WE do not serialise the Alias parent pointer:
-      // WHY: AliasChildrenMenento saves a vector of aliases, had we serialised
-      //      the parent, it would also serialise the parent pointer(Task)
-      //      i.e the ENTIRE task, and then Task parent, and so on, up the parent hierarchy.
-      //      In our case it lead to unregistered class exception when trying to
-      //      serialise the Task's parent.
-      // SOLN: WE will not serialise the alias parent pointer. This will be left to
-      //       Parent task.
-      // ********************************************************************
-      if (Archive::is_loading::value) {
-         size_t vec_size = aliases_.size();
-         for(size_t i = 0; i < vec_size; i++) {
-            aliases_[i]->set_parent(this);
-         }
-      }
- 	}
+   void serialize(Archive & ar, std::uint32_t const version );
 
 private:
    unsigned int order_state_change_no_{0};     // no need to persist

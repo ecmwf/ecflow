@@ -28,6 +28,7 @@
 #include "Jobs.hpp"
 #include "System.hpp"
 #include "PrintStyle.hpp"
+#include "Limit.hpp"
 
 using namespace std;
 using namespace ecf;

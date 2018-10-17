@@ -17,7 +17,7 @@
 
 #include <iosfwd>
 #include "boost/date_time/posix_time/posix_time_types.hpp"
-#include "Serialization.hpp"
+#include <cereal/access.hpp>
 
 namespace ecf {
 
@@ -62,11 +62,7 @@ private:
    // *IMPORTANT* no version for a simple class
  	friend class cereal::access;
  	template<class Archive>
- 	void serialize(Archive & ar) {
- 	   ar( CEREAL_NVP(h_),
- 	       CEREAL_NVP(m_ )
- 	     );
- 	}
+ 	void serialize(Archive & ar);
 };
 
 std::ostream& operator<<(std::ostream& os, const TimeSlot*);

@@ -13,7 +13,6 @@
 // Description
 //============================================================================
 #include <sstream>
-#include <memory>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"

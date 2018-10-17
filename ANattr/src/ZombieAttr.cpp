@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 #include <sstream>
-#include <iostream>
 #include <ostream>
 
 #include <cassert>
@@ -24,6 +23,8 @@
 #include "ZombieAttr.hpp"
 #include "Indentor.hpp"
 #include "Str.hpp"
+#include "Serialization.hpp"
+
 
 using namespace ecf;
 using namespace boost;
@@ -244,3 +245,14 @@ ZombieAttr ZombieAttr::get_default_attr(ecf::Child::ZombieType zt)
 	return ZombieAttr(Child::ECF, std::vector<ecf::Child::CmdType>(), User::BLOCK, default_ecf_zombie_life_time());
 }
 
+
+template<class Archive>
+void ZombieAttr::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar( CEREAL_NVP(zombie_type_),
+       CEREAL_NVP(action_),
+       CEREAL_NVP(zombie_lifetime_),
+       CEREAL_NVP(child_cmds_)
+   );
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(ZombieAttr);

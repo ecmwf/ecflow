@@ -15,7 +15,10 @@
 // Description :
 //============================================================================
 
-#include "Serialization.hpp"
+#include <vector>
+#include <string>
+#include <cereal/access.hpp>
+
 class Node;
 
 namespace ecf {
@@ -44,10 +47,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(CEREAL_NVP(nodes_to_restore_));
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 }

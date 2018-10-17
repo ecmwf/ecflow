@@ -15,11 +15,10 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include "Serialization.hpp"
-
 #include "Cmd.hpp"
 #include "NodeFwd.hpp"
 #include "ServerReply.hpp"
+#include "Serialization.hpp"
 class AbstractServer;
 
 //================================================================================

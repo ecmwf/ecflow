@@ -168,11 +168,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar )
-	{
-      ar( CEREAL_NVP(ts_));
-      CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
-	}
+   void serialize(Archive & ar );
 };
 
 }

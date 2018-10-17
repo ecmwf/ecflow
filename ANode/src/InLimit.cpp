@@ -18,7 +18,6 @@
 #include <cassert>
 #include <sstream>
 #include <stdexcept>
-#include <iostream>
 #include <ostream>
 
 #include "InLimit.hpp"
@@ -27,6 +26,7 @@
 #include "PrintStyle.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -109,3 +109,14 @@ std::string InLimit::toString() const {
    return ret;
 }
 
+
+template<class Archive>
+void InLimit::serialize(Archive & ar)
+{
+   ar(CEREAL_NVP(n_));
+   CEREAL_OPTIONAL_NVP(ar,path_,                 [this](){return !path_.empty();});        // conditionally save
+   CEREAL_OPTIONAL_NVP(ar,tokens_,               [this](){return tokens_ !=1;});           // conditionally save
+   CEREAL_OPTIONAL_NVP(ar,limit_this_node_only_, [this](){return limit_this_node_only_;}); // conditionally save new to 5.0.0
+   CEREAL_OPTIONAL_NVP(ar,incremented_,          [this](){return incremented_;});          // conditionally save new to 5.0.0
+}
+CEREAL_TEMPLATE_SPECIALIZE(InLimit);

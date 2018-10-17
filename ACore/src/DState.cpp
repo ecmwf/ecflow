@@ -13,11 +13,12 @@
 // Description :
 //============================================================================
 #include <cassert>
-#include <iostream>
 #include <stdexcept>
+
 #include "DState.hpp"
 #include "Ecf.hpp"
-#include <stdexcept>
+#include "Serialization.hpp"
+
 
 void DState::setState( State s ) {
 	st_= s;
@@ -166,3 +167,11 @@ std::vector<DState::State> DState::states()
 	return vec;
 }
 
+// ==========================================================================
+
+template<class Archive>
+void DState::serialize(Archive & ar)
+{
+   ar(CEREAL_NVP(st_));
+}
+CEREAL_TEMPLATE_SPECIALIZE(DState);

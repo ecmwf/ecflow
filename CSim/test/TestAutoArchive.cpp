@@ -12,6 +12,16 @@
 //
 // Description :
 //============================================================================
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+
+#include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
+#include "boost/filesystem/path.hpp"
+#include "boost/progress.hpp"
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include "Simulator.hpp"
 #include "File.hpp"
 #include "Log.hpp"
@@ -22,16 +32,7 @@
 #include "Str.hpp"
 #include "TestUtil.hpp"
 #include "PrintStyle.hpp"
-
-#include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/progress.hpp"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
+#include "AutoArchiveAttr.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -100,10 +100,7 @@ protected:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      ar( CEREAL_NVP(name_) );
-   }
+   void serialize(Archive & ar);
 };
 
 ///
@@ -165,15 +162,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class<RepeatBase>(this),
-         CEREAL_NVP(start_),
-         CEREAL_NVP(end_),
-         CEREAL_NVP(delta_),
-         CEREAL_NVP(value_)
-      );
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 class RepeatInteger : public RepeatBase {
@@ -219,15 +208,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class<RepeatBase>(this),
-         CEREAL_NVP(start_),
-         CEREAL_NVP(end_),
-         CEREAL_NVP(delta_),
-         CEREAL_NVP(value_)
-      );
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 // Note:: Difference between RepeatEnumerated and  RepeatString, is that
@@ -274,13 +255,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class<RepeatBase>(this),
-         CEREAL_NVP(theEnums_),
-         CEREAL_NVP(currentIndex_)
-      );
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 class RepeatString : public RepeatBase {
@@ -324,13 +299,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class<RepeatBase>(this),
-         CEREAL_NVP(theStrings_),
-         CEREAL_NVP(currentIndex_)
-      );
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 /// The current repeat day is not that well defined or deterministic.
@@ -394,11 +363,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class<RepeatBase>(this),
-         CEREAL_NVP(step_));
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 class Repeat {
@@ -462,10 +427,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(CEREAL_NVP(type_));
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 #endif

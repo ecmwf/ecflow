@@ -13,6 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "Node.hpp"
+#include "Limit.hpp"
 #include "ExprAst.hpp"
 #include "Stl.hpp"
 #include "Ecf.hpp"

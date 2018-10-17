@@ -19,6 +19,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
+#include "Limit.hpp"
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"

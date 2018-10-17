@@ -26,6 +26,7 @@
 #include "Child.hpp"
 #include "CheckPt.hpp"
 #include "PreAllocatedReply.hpp"
+#include "Serialization.hpp"
 
 class AbstractServer;
 class AbstractClientEnv;

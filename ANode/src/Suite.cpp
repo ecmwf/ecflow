@@ -15,7 +15,6 @@
 
 #include <cassert>
 #include <sstream>
-#include <memory>
 #include <boost/lexical_cast.hpp>
 
 #include "Suite.hpp"
@@ -23,6 +22,7 @@
 #include "PrintStyle.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "DefsDelta.hpp"
+#include "Memento.hpp"
 
 #include "Stl.hpp"
 #include "Str.hpp"
@@ -33,6 +33,7 @@
 #include "CalendarUpdateParams.hpp"
 #include "SuiteChanged.hpp"
 #include "JobsParam.hpp"
+#include "Serialization.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -909,5 +910,21 @@ void SuiteGenVariables::gen_variables(std::vector<Variable>& vec) const
    vec.push_back(genvar_time_);
 }
 
+
+template<class Archive>
+void Suite::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<NodeContainer>(this));
+   CEREAL_OPTIONAL_NVP(ar, begun_,     [this](){return begun_; });           // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, clockAttr_, [this](){return clockAttr_.get(); }); // conditionally save
+   ar(CEREAL_NVP(cal_));
+
+   // The calendar does not persist the clock type or start stop with server since
+   // that is persisted with the clock attribute
+   if (Archive::is_loading::value) {
+      if (clockAttr_.get()) clockAttr_->init_calendar(cal_);
+   }
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(Suite);
 CEREAL_REGISTER_TYPE(Suite);
 

@@ -16,6 +16,7 @@
 #include "LimitParser.hpp"
 #include "Extract.hpp"
 #include "Node.hpp"
+#include "Limit.hpp"
 #include "DefsStructureParser.hpp"
 
 using namespace std;

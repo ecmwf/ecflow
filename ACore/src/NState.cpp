@@ -14,9 +14,9 @@
 //============================================================================
 
 #include <cassert>
-#include <iostream>
 #include "NState.hpp"
 #include "Ecf.hpp"
+#include "Serialization.hpp"
 
 void NState::setState( State s ) {
 	st_= s;
@@ -139,3 +139,12 @@ std::vector<NState::State> NState::states()
 	vec.push_back( NState::ACTIVE     );
  	return vec;
 }
+
+
+template<class Archive>
+void NState::serialize(Archive & ar)
+{
+   ar(CEREAL_NVP(st_));
+}
+CEREAL_TEMPLATE_SPECIALIZE(NState);
+

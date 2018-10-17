@@ -26,7 +26,8 @@
 //
 // Note:: updating state_change_no() on the *client side*  a no-op() it has no effect
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include "Memento.hpp"
+#include "NodeFwd.hpp"
+#include <cereal/access.hpp>
 
 class DefsDelta {
 private:
@@ -80,12 +81,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(CEREAL_NVP(server_state_change_no_),
-         CEREAL_NVP(server_modify_change_no_),
-         CEREAL_NVP(compound_mementos_));
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 #endif

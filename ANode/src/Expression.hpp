@@ -18,8 +18,8 @@
 
 #include <iosfwd>
 #include <memory> // for unique_ptr
+#include <cereal/access.hpp>
 
-#include "Serialization.hpp"
 #include "ExprAst.hpp"
 class Node;
 
@@ -65,11 +65,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      ar(CEREAL_NVP(exp_));
-      CEREAL_OPTIONAL_NVP(ar,type_,  [this](){return type_ != default_expr_type();}); // conditionally save
-   }
+   void serialize(Archive & ar);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -161,10 +157,6 @@ private:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      ar(CEREAL_NVP(vec_));
-      CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
-   }
+   void serialize(Archive & ar);
 };
 #endif

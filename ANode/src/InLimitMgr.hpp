@@ -15,8 +15,8 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iosfwd>
-
-#include "Serialization.hpp"
+#include <set>
+#include <cereal/access.hpp>
 
 #include "InLimit.hpp"
 #include "LimitFwd.hpp"
@@ -119,10 +119,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
- 	   ar(CEREAL_NVP(vec_));
- 	}
+   void serialize(Archive & ar);
 };
 
 #endif

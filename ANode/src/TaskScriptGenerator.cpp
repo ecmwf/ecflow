@@ -14,12 +14,14 @@
 //============================================================================
 
 #include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "TaskScriptGenerator.hpp"
 #include "Task.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
+#include "JobCreationCtrl.hpp"
 
 using namespace std;
 using namespace boost;

@@ -13,7 +13,12 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/lexical_cast.hpp>
+#include "AutoRestoreAttr.hpp"
+#include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
+#include "Limit.hpp"
 #include "Node.hpp"
+
 #include "Ecf.hpp"
 
 using namespace ecf;
@@ -323,7 +328,7 @@ void Node::addRepeat( const Repeat& r ){
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void Node::addAutoCancel( const AutoCancelAttr& ac)
+void Node::addAutoCancel( const ecf::AutoCancelAttr& ac)
 {
    if (auto_archive_) {
        std::stringstream ss;
@@ -339,7 +344,7 @@ void Node::addAutoCancel( const AutoCancelAttr& ac)
     state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void Node::add_autoarchive( const AutoArchiveAttr& aa)
+void Node::add_autoarchive( const ecf::AutoArchiveAttr& aa)
 {
    if (auto_cancel_) {
       std::stringstream ss;

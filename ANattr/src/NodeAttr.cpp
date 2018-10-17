@@ -26,6 +26,7 @@
 #include "PrintStyle.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -377,3 +378,34 @@ void Label::parse(const std::string& line, std::vector<std::string >& lineTokens
     }
 }
 
+
+template<class Archive>
+void Label::serialize(Archive & ar)
+{
+   ar( CEREAL_NVP(n_));
+   CEREAL_OPTIONAL_NVP(ar,v_,     [this](){return !v_.empty();});
+   CEREAL_OPTIONAL_NVP(ar,new_v_, [this](){return !new_v_.empty();});  // conditionally save
+}
+
+template<class Archive>
+void Event::serialize(Archive & ar)
+{
+   CEREAL_OPTIONAL_NVP(ar,number_,[this](){return number_ != std::numeric_limits<int>::max();});
+   CEREAL_OPTIONAL_NVP(ar,n_,     [this](){return !n_.empty();});
+   CEREAL_OPTIONAL_NVP(ar,v_,     [this](){return v_;});
+}
+
+template<class Archive>
+void Meter::serialize(Archive & ar)
+{
+   ar( CEREAL_NVP(min_),
+       CEREAL_NVP(max_),
+       CEREAL_NVP(v_),
+       CEREAL_NVP(n_),
+       CEREAL_NVP(cc_)
+   );
+}
+
+CEREAL_TEMPLATE_SPECIALIZE(Label);
+CEREAL_TEMPLATE_SPECIALIZE(Event);
+CEREAL_TEMPLATE_SPECIALIZE(Meter);

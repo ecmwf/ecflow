@@ -103,12 +103,6 @@ private:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      CEREAL_OPTIONAL_NVP(ar, zombies_,  [this](){return !zombies_.empty(); });  // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, verifys_,  [this](){return !verifys_.empty(); });  // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, queues_,   [this](){return !queues_.empty(); });   // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, generics_, [this](){return !generics_.empty(); }); // conditionally save
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 #endif

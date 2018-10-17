@@ -15,12 +15,15 @@
 
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
 #include "TimeSeries.hpp"
+
 #include "Indentor.hpp"
 #include "Calendar.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "Extract.hpp"
+#include "Serialization.hpp"
+#include "cereal_boost_time.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -834,5 +837,23 @@ void TimeSeries::testTime(int hour, int minute)
   	}
 }
 
-}
 
+
+template<class Archive>
+void TimeSeries::serialize(Archive & ar, std::uint32_t const  /*version*/)
+{
+   CEREAL_OPTIONAL_NVP(ar, relativeToSuiteStart_,[this](){return relativeToSuiteStart_ ;});
+   CEREAL_OPTIONAL_NVP(ar, isValid_,             [this](){return !isValid_ ;});
+   ar(CEREAL_NVP(start_ ));
+   CEREAL_OPTIONAL_NVP(ar,finish_,          [this](){return !finish_.isNULL();});
+   CEREAL_OPTIONAL_NVP(ar,incr_ ,           [this](){return !incr_.isNULL();});
+   CEREAL_OPTIONAL_NVP(ar,nextTimeSlot_,    [this](){return !nextTimeSlot_.isNULL() && nextTimeSlot_ != start_;});
+   CEREAL_OPTIONAL_NVP(ar,relativeDuration_,[this](){return relativeDuration_ != boost::posix_time::time_duration(0,0,0,0);});
+
+   if (Archive::is_loading::value) {
+      if (nextTimeSlot_.isNULL()) nextTimeSlot_ = start_;
+      if (!finish_.isNULL())  compute_last_time_slot();
+   }
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(TimeSeries);
+}

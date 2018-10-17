@@ -17,8 +17,9 @@
 //============================================================================
 
 #include <iosfwd>
-#include "Serialization.hpp"
+#include <vector>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <cereal/access.hpp>
 
 namespace ecf { class Calendar;} // forward declare class that is in a name space
 
@@ -72,10 +73,6 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar )
-   {
-      ar( CEREAL_NVP(day_));
-      CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
-   }
+   void serialize(Archive & ar );
 };
 #endif

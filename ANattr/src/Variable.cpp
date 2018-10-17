@@ -20,6 +20,7 @@
 #include "Variable.hpp"
 #include "Indentor.hpp"
 #include "Str.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -109,3 +110,12 @@ std::string Variable::dump() const
    return ss.str();
 }
 
+
+template<class Archive>
+void Variable::serialize(Archive & ar)
+{
+   ar( CEREAL_NVP(n_),
+       CEREAL_NVP(v_)
+   );
+}
+CEREAL_TEMPLATE_SPECIALIZE(Variable);

@@ -16,7 +16,8 @@
 // Description :
 //============================================================================
 
-#include "Serialization.hpp"
+#include <vector>
+#include <cereal/access.hpp>
 
 // NState: stores the state of a node.
 // *The class NState just used to define the enum, however we also
@@ -58,10 +59,7 @@ private:
    // *IMPORTANT* no version for a simple class
    friend class cereal::access;
 	template<class Archive>
-	void serialize(Archive & ar)
-	{
-	   ar(CEREAL_NVP(st_));
-	}
+	void serialize(Archive & ar);
 };
 
 #endif

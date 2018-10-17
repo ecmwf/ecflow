@@ -1,5 +1,5 @@
-#ifndef CEREAL_HPP_
-#define CEREAL_HPP_
+#ifndef CEREAL_BOOST_TIME_HPP_
+#define CEREAL_BOOST_TIME_HPP_
 
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :

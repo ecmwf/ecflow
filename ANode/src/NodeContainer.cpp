@@ -37,6 +37,8 @@
 #include "SuiteChanged.hpp"
 #include "DefsDelta.hpp"
 #include "Str.hpp"
+#include "Memento.hpp"
+#include "Serialization.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -1270,3 +1272,21 @@ void NodeContainer::generate_scripts( const std::map<std::string,std::string>& o
       nodes_[t]->generate_scripts( override );
    }
 }
+
+
+
+template<class Archive>
+void NodeContainer::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<Node>(this),
+      CEREAL_NVP(nodes_));
+
+   // Setup the parent pointers. Since they are not serialised
+   if (Archive::is_loading::value) {
+      size_t vec_size = nodes_.size();
+      for(size_t i = 0; i < vec_size; i++) {
+         nodes_[i]->set_parent(this);
+      }
+   }
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(NodeContainer);

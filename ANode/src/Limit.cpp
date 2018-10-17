@@ -23,6 +23,7 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "Suite.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -211,3 +212,15 @@ void Limit::update_change_no()
       if (suite) suite->set_state_change_no(state_change_no_);
    }
 }
+
+
+
+template<class Archive>
+void Limit::serialize(Archive & ar)
+{
+   ar(CEREAL_NVP(n_),
+      CEREAL_NVP(lim_));
+   CEREAL_OPTIONAL_NVP(ar, value_,  [this](){return value_ !=0; });      // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, paths_,  [this](){return !paths_.empty(); }); // conditionally save
+}
+CEREAL_TEMPLATE_SPECIALIZE(Limit);

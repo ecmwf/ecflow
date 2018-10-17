@@ -23,6 +23,7 @@
 #include "Log.hpp"
 #include "Ecf.hpp"
 #include "Memento.hpp"
+#include "Serialization.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -343,3 +344,13 @@ void MiscAttrs::set_memento(const NodeQueueIndexMemento* m )
    }
 }
 
+
+template<class Archive>
+void MiscAttrs::serialize(Archive & ar, std::uint32_t const version )
+{
+   CEREAL_OPTIONAL_NVP(ar, zombies_,  [this](){return !zombies_.empty(); });  // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, verifys_,  [this](){return !verifys_.empty(); });  // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, queues_,   [this](){return !queues_.empty(); });   // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, generics_, [this](){return !generics_.empty(); }); // conditionally save
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(MiscAttrs);

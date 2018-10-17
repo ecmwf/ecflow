@@ -21,6 +21,7 @@
 #include "Calendar.hpp"
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -195,3 +196,12 @@ std::vector< std::string > DayAttr::allDays() {
 	return vec;
 }
 
+
+
+template<class Archive>
+void DayAttr::serialize(Archive & ar )
+{
+   ar( CEREAL_NVP(day_));
+   CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
+}
+CEREAL_TEMPLATE_SPECIALIZE(DayAttr);

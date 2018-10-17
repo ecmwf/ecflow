@@ -36,14 +36,10 @@
 #include "DState.hpp"
 #include "NOrder.hpp"
 #include "NodeAttr.hpp"
-#include "Limit.hpp"
 #include "InLimit.hpp"
 #include "Variable.hpp"
 #include "LateAttr.hpp"
 #include "RepeatAttr.hpp"
-#include "AutoCancelAttr.hpp"
-#include "AutoArchiveAttr.hpp"
-#include "AutoRestoreAttr.hpp"
 #include "Expression.hpp"
 #include "InLimitMgr.hpp"
 
@@ -59,10 +55,6 @@
 #include "Aspect.hpp"
 #include "Attr.hpp"
 #include "PrintStyle.hpp"
-
-#include "AutoRestoreAttr.hpp"
-#include "AutoCancelAttr.hpp"
-#include "AutoArchiveAttr.hpp"
 
 class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
@@ -851,45 +843,6 @@ private:
    // conditionally save to cut down on client/server bandwidth.
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar( CEREAL_NVP(n_) );
-
-      CEREAL_OPTIONAL_NVP(ar, st_,         [this](){return st_.first != NState::default_state();}); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, suspended_,  [this](){return suspended_; });
-      CEREAL_OPTIONAL_NVP(ar, d_st_,       [this](){return d_st_.state() != DState::default_state();}); // conditionally save
-
-      CEREAL_OPTIONAL_NVP(ar, vars_ ,      [this](){return !vars_.empty(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, c_expr_ ,    [this](){return c_expr_.get(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, t_expr_ ,    [this](){return t_expr_.get(); }); // conditionally save
-
-      CEREAL_OPTIONAL_NVP(ar, meters_,     [this](){return !meters_.empty(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, events_,     [this](){return !events_.empty(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, labels_,     [this](){return !labels_.empty(); }); // conditionally save
-
-      CEREAL_OPTIONAL_NVP(ar, times_,      [this](){return !times_.empty(); });  // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, todays_,     [this](){return !todays_.empty(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, crons_,      [this](){return !crons_.empty(); });    // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, dates_,      [this](){return !dates_.empty(); });    // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, days_,       [this](){return !days_.empty(); });     // conditionally save
-
-      CEREAL_OPTIONAL_NVP(ar, late_,       [this](){return late_.get(); });       // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, misc_attrs_, [this](){return misc_attrs_.get(); });     // conditionally save
-
-      CEREAL_OPTIONAL_NVP(ar, repeat_ ,    [this](){return !repeat_.empty(); });  // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, limits_ ,    [this](){return !limits_.empty(); });  // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, inLimitMgr_, [this](){return !inLimitMgr_.inlimits().empty() ; }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, flag_ ,      [this](){return flag_.flag() !=0 ; }); // conditionally save
-
-      CEREAL_OPTIONAL_NVP(ar, auto_cancel_,  [this](){return auto_cancel_.get(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, auto_archive_, [this](){return auto_archive_.get(); }); // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, auto_restore_, [this](){return auto_restore_.get(); }); // conditionally save
-
-      if (Archive::is_loading::value) {
-         if (auto_restore_) auto_restore_->set_node(this);
-         if (misc_attrs_) misc_attrs_->set_node(this);
-         for(auto & limit : limits_)  limit->set_node(this);
-      }
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 #endif

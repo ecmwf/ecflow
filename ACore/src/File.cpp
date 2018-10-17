@@ -31,7 +31,6 @@
 #include "NodePath.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
-#include "ecflow_version.h"
 
 #ifdef CMAKE
 #include "ecflow_source_build_dir.h"

@@ -74,14 +74,7 @@ private:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar( CEREAL_NVP(currentIndex_),
-          CEREAL_NVP(name_),
-          CEREAL_NVP(theQueue_),
-          CEREAL_NVP(state_vec_)
-      );
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 #endif

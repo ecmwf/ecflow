@@ -21,6 +21,7 @@
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
+#include "Serialization.hpp"
 
 namespace ecf {
 
@@ -203,4 +204,16 @@ bool TimeAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 
  	return true;
 }
+
+
+template<class Archive>
+void TimeAttr::serialize(Archive & ar)
+{
+   ar( CEREAL_NVP(ts_));
+
+   // Only persisted for testing, see usage of isSetFree()
+   CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
+}
+CEREAL_TEMPLATE_SPECIALIZE(TimeAttr);
+
 }

@@ -17,6 +17,7 @@
 #include "DefsDelta.hpp"
 #include "ExprAst.hpp"
 #include "Stl.hpp"
+#include "Memento.hpp"
 
 using namespace ecf;
 using namespace std;

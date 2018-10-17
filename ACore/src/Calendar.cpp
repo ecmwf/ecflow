@@ -13,11 +13,14 @@
 //============================================================================
 
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
+
 #include "Calendar.hpp"
 #include "CalendarUpdateParams.hpp"
 #include "Log.hpp"
 #include "Ecf.hpp"
 #include "Extract.hpp"
+#include "Serialization.hpp"
+#include "cereal_boost_time.hpp"
 
 using namespace std;
 using namespace boost::gregorian;
@@ -377,4 +380,35 @@ boost::posix_time::ptime Calendar::second_clock_time()
  	return second_clock::universal_time();  // UTC
 }
 
+
+
+
+template<class Archive>
+void Calendar::serialize(Archive & ar, std::uint32_t const /*version*/)
+{
+   if (Archive::is_saving::value) {
+      if ( initTime_.is_special() ) {
+         // Initialise the ptimes to avoid serialisation exceptions
+         // The serialisation of ptime makes use of exceptions, especially
+         // when dealing with a date that has *not* been initialised.
+         // To avoid this we take a small hit to initialise the calendar with
+         // time now. This will get overridden with suite clock at begin
+         begin(second_clock_time());
+      }
+   }
+   ar( CEREAL_NVP(initTime_) );
+   CEREAL_OPTIONAL_NVP(ar,suiteTime_ ,   [this](){return suiteTime_     != initTime_;});
+   CEREAL_OPTIONAL_NVP(ar,initLocalTime_,[this](){return initLocalTime_ != initTime_;});
+   CEREAL_OPTIONAL_NVP(ar,lastTime_,     [this](){return lastTime_      != initTime_;});
+   CEREAL_OPTIONAL_NVP(ar,dayChanged_,   [this](){return dayChanged_;});
+   CEREAL_OPTIONAL_NVP(ar,duration_ ,    [this](){return duration_  != boost::posix_time::time_duration(0,0,0,0);});
+   CEREAL_OPTIONAL_NVP(ar,increment_,    [this](){return increment_ != boost::posix_time::time_duration(0,1,0,0);});
+
+   if (Archive::is_loading::value) {
+      if ( lastTime_.is_special())      lastTime_ = initTime_;
+      if ( initLocalTime_.is_special()) initLocalTime_ = initTime_;
+      if ( suiteTime_.is_special())     suiteTime_ = initTime_;
+   }
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(Calendar);
 }

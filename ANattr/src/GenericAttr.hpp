@@ -15,7 +15,8 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iosfwd>
-#include "Serialization.hpp"
+#include <vector>
+#include <cereal/access.hpp>
 
 // Class GenericAttr:
 // Use compiler , generated destructor, assignment, copy constructor
@@ -47,12 +48,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      ar( CEREAL_NVP(name_),
-          CEREAL_NVP(values_)
-      );
-   }
+   void serialize(Archive & ar);
 };
 
 #endif

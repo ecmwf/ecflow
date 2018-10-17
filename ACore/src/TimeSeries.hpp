@@ -15,8 +15,9 @@
 // Description : A single or set of times
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <vector>
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include "TimeSlot.hpp"
-#include "cereal.hpp"
 
 namespace ecf { class Calendar;} // forward declare class
 
@@ -183,21 +184,7 @@ private:
 	// Note: relativeDuration_ is persisted for use by why() command on the client side.
 	friend class cereal::access;
 	template<class Archive>
-	void serialize(Archive & ar, std::uint32_t const  /*version*/)
-	{
-      CEREAL_OPTIONAL_NVP(ar, relativeToSuiteStart_,  [this](){return relativeToSuiteStart_ ;});
-      CEREAL_OPTIONAL_NVP(ar, isValid_,               [this](){return !isValid_ ;});
-      ar(CEREAL_NVP(start_ ));
-      CEREAL_OPTIONAL_NVP(ar,finish_,          [this](){return !finish_.isNULL();});
-      CEREAL_OPTIONAL_NVP(ar,incr_ ,           [this](){return !incr_.isNULL();});
-      CEREAL_OPTIONAL_NVP(ar,nextTimeSlot_,    [this](){return !nextTimeSlot_.isNULL() && nextTimeSlot_ != start_;});
-      CEREAL_OPTIONAL_NVP(ar,relativeDuration_,[this](){return relativeDuration_ != boost::posix_time::time_duration(0,0,0,0);});
-
-	   if (Archive::is_loading::value) {
-         if (nextTimeSlot_.isNULL()) nextTimeSlot_ = start_;
-	      if (!finish_.isNULL())  compute_last_time_slot();
-	   }
-	}
+	void serialize(Archive & ar, std::uint32_t const  /*version*/);
 };
 
 std::ostream& operator<<(std::ostream& os, const TimeSeries*);

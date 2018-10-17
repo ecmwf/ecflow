@@ -28,7 +28,6 @@
 #include "Stl.hpp"
 #include "Ecf.hpp"
 #include "NodeState.hpp"
-#include "ExprAst.hpp"       // required for persistence
 #include "JobCreationCtrl.hpp"
 #include "ResolveExternsVisitor.hpp"
 #include "DefsDelta.hpp"
@@ -39,6 +38,8 @@
 #include "SuiteChanged.hpp"
 #include "DefsStructureParser.hpp" /// The reason why Parser code moved into Defs, avoid cyclic dependency
 #include "File.hpp"  
+#include "Serialization.hpp"
+#include "Memento.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -1775,3 +1776,29 @@ string::size_type DefsHistoryParser::find_log(const std::string& line, string::s
    }
    return std::string::npos;
 }
+
+
+template<class Archive>
+void Defs::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(CEREAL_NVP(state_change_no_),
+      CEREAL_NVP(modify_change_no_),
+      CEREAL_NVP(updateCalendarCount_),
+      CEREAL_NVP(state_),
+      CEREAL_NVP(server_),
+      CEREAL_NVP(suiteVec_));
+
+   CEREAL_OPTIONAL_NVP(ar, flag_ ,        [this](){return flag_.flag() !=0 ; }); // conditionally save
+
+   // only save the edit history when check pointing.
+   CEREAL_OPTIONAL_NVP(ar, edit_history_, [this](){return save_edit_history_ && !edit_history_.empty(); }); // conditionally save
+
+   if (Archive::is_loading::value) {
+      size_t vec_size = suiteVec_.size();
+      for(size_t i = 0; i < vec_size; i++) {
+         suiteVec_[i]->set_defs(this);
+      }
+   }
+}
+
+CEREAL_TEMPLATE_SPECIALIZE_V(Defs);

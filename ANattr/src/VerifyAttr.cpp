@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 #include <sstream>
-#include <iostream>
 #include <ostream>
 
 #include "VerifyAttr.hpp"
@@ -22,6 +21,7 @@
 #include "NState.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
+#include "Serialization.hpp"
 
 using namespace ecf;
 
@@ -76,3 +76,13 @@ std::string VerifyAttr::dump() const
  	return ss.str();
 }
 
+
+template<class Archive>
+void VerifyAttr::serialize(Archive & ar )
+{
+   ar( CEREAL_NVP(state_),
+       CEREAL_NVP(expected_),
+       CEREAL_NVP(actual_)
+   );
+}
+CEREAL_TEMPLATE_SPECIALIZE(VerifyAttr);

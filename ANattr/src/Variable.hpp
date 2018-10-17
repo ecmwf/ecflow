@@ -16,7 +16,7 @@
 //============================================================================
 
 #include <iosfwd>
-#include "Serialization.hpp"
+#include <cereal/access.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Class Variable:
@@ -58,12 +58,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      ar( CEREAL_NVP(n_),
-          CEREAL_NVP(v_)
-      );
-   }
+   void serialize(Archive & ar);
 };
 
 #endif

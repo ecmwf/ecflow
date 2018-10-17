@@ -24,6 +24,7 @@
 #include "Calendar.hpp"
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -303,3 +304,15 @@ void DateAttr::getDate(const std::string& date,int& day,int& month,int& year)
 //	cerr << " DateParser::getDate date=" << date << " day=" << day << " month=" << month << " year=" << year << "\n";
 }
 
+
+
+template<class Archive>
+void DateAttr::serialize(Archive & ar)
+{
+   ar( CEREAL_NVP(day_),
+       CEREAL_NVP(month_),
+       CEREAL_NVP(year_)
+   );
+   CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
+}
+CEREAL_TEMPLATE_SPECIALIZE(DateAttr);

@@ -65,10 +65,7 @@ private:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(cereal::base_class<NodeContainer>(this));
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 std::ostream& operator<<(std::ostream& os, const Family&);

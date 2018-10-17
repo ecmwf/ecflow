@@ -124,12 +124,7 @@ private:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(CEREAL_NVP(server_state_),
-         CEREAL_NVP(server_variables_));
-      CEREAL_OPTIONAL_NVP(ar,user_variables_, [this](){return !user_variables_.empty();});
- 	}
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 #endif

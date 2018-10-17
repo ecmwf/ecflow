@@ -24,6 +24,7 @@
 #include "Family.hpp"
 #include "Suite.hpp"
 #include "Defs.hpp"
+#include "Limit.hpp"
 
 using namespace std;
 using namespace ecf;

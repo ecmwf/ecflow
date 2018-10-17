@@ -18,7 +18,6 @@
 #include <boost/operators.hpp>
 #include "NState.hpp"
 
-
 // Class VerifyAttr:
 // This class is only used for testing/verification purposes. It allows us to
 // embed expected number of states, within the definition file and so
@@ -53,13 +52,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar )
-   {
-        ar( CEREAL_NVP(state_),
-            CEREAL_NVP(expected_),
-            CEREAL_NVP(actual_)
-        );
-    }
+   void serialize(Archive & ar );
 };
 
 #endif

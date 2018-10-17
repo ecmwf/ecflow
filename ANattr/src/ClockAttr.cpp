@@ -22,6 +22,7 @@
 #include "Indentor.hpp"
 #include "Calendar.hpp"
 #include "Ecf.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -224,4 +225,18 @@ boost::posix_time::ptime ClockAttr::ptime() const
    the_time += seconds(gain_);
    return the_time;
 }
+
+
+template<class Archive>
+void ClockAttr::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar( CEREAL_NVP(hybrid_) );
+   CEREAL_OPTIONAL_NVP(ar, positiveGain_,        [this](){return  positiveGain_;});
+   CEREAL_OPTIONAL_NVP(ar, startStopWithServer_, [this](){return startStopWithServer_ ;}); // ??
+   CEREAL_OPTIONAL_NVP(ar, gain_,                [this](){return gain_ != 0;});
+   CEREAL_OPTIONAL_NVP(ar, day_,                 [this](){return day_ != 0;});
+   CEREAL_OPTIONAL_NVP(ar, month_,               [this](){return month_ != 0;});
+   CEREAL_OPTIONAL_NVP(ar, year_,                [this](){return year_ != 0;});
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(ClockAttr);
 

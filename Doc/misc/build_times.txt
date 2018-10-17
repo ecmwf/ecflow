@@ -1,5 +1,3 @@
-
-
 ecflow: gcc6.3 leap42 boost 1.68 : Cereal persistence: defined in ccp file
 ======================================================================
 real     5m49.33s

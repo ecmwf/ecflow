@@ -15,6 +15,8 @@
 
 #include "../../ANode/parser/src/AutoArchiveParser.hpp"
 
+#include "AutoArchiveAttr.hpp"
+
 #include "TimeSeries.hpp"
 #include "Extract.hpp"
 #include "Node.hpp"

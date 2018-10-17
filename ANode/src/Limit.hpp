@@ -22,7 +22,9 @@
 //============================================================================
 
 #include <iosfwd>
-#include "Serialization.hpp"
+#include <set>
+#include <string>
+#include <cereal/access.hpp>
 class Node;
 
 // Class Limit: The limit is zero based, hence if limit is 10, increment must use < 10
@@ -79,13 +81,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar)
-   {
-      ar(CEREAL_NVP(n_),
-         CEREAL_NVP(lim_));
-      CEREAL_OPTIONAL_NVP(ar, value_,  [this](){return value_ !=0; });      // conditionally save
-      CEREAL_OPTIONAL_NVP(ar, paths_,  [this](){return !paths_.empty(); }); // conditionally save
-   }
+   void serialize(Archive & ar);
 };
 
 #endif

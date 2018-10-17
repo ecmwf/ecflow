@@ -33,7 +33,6 @@
 #include "NState.hpp"
 #include "NOrder.hpp"
 #include "NodeFwd.hpp"
-#include "JobCreationCtrl.hpp"
 #include "Suite.hpp"
 #include "CheckPt.hpp"
 #include "Attr.hpp"
@@ -377,27 +376,7 @@ public:
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar(CEREAL_NVP(state_change_no_),
-         CEREAL_NVP(modify_change_no_),
-         CEREAL_NVP(updateCalendarCount_),
-         CEREAL_NVP(state_),
-         CEREAL_NVP(server_),
-         CEREAL_NVP(suiteVec_));
-
-      CEREAL_OPTIONAL_NVP(ar, flag_ ,        [this](){return flag_.flag() !=0 ; }); // conditionally save
-
-      // only save the edit history when check pointing.
-      CEREAL_OPTIONAL_NVP(ar, edit_history_, [this](){return save_edit_history_ && !edit_history_.empty(); }); // conditionally save
-
-      if (Archive::is_loading::value) {
-         size_t vec_size = suiteVec_.size();
-         for(size_t i = 0; i < vec_size; i++) {
-            suiteVec_[i]->set_defs(this);
-         }
-      }
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 std::ostream& operator<<(std::ostream& os, const Defs*);

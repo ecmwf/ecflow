@@ -28,6 +28,7 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "Log.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -681,6 +682,17 @@ CronAttr CronAttr::create(const std::string& cronString)
 	return theCronAttr;
 }
 
+
+template<class Archive>
+void CronAttr::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar( CEREAL_NVP(timeSeries_));
+   CEREAL_OPTIONAL_NVP(ar, weekDays_ ,   [this](){return !weekDays_.empty() ;});   // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, daysOfMonth_, [this](){return !daysOfMonth_.empty() ;});// conditionally save
+   CEREAL_OPTIONAL_NVP(ar, months_,      [this](){return !months_.empty() ;});     // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, free_,        [this](){return free_; });                // conditionally save
+}
+CEREAL_TEMPLATE_SPECIALIZE_V(CronAttr);
 
 }
 

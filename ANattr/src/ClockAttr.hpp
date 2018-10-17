@@ -18,7 +18,7 @@
 
 #include <iosfwd>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include "Serialization.hpp"
+#include <cereal/access.hpp>
 
 namespace ecf { class Calendar;} // forward declare class that is in a namesapce
 
@@ -88,16 +88,7 @@ private:
 
    friend class cereal::access;
 	template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-	{
-      ar( CEREAL_NVP(hybrid_) );
-      CEREAL_OPTIONAL_NVP(ar, positiveGain_,        [this](){return  positiveGain_;});
-      CEREAL_OPTIONAL_NVP(ar, startStopWithServer_, [this](){return startStopWithServer_ ;}); // ??
-      CEREAL_OPTIONAL_NVP(ar, gain_,                [this](){return gain_ != 0;});
-      CEREAL_OPTIONAL_NVP(ar, day_,                 [this](){return day_ != 0;});
-      CEREAL_OPTIONAL_NVP(ar, month_,               [this](){return month_ != 0;});
-      CEREAL_OPTIONAL_NVP(ar, year_,                [this](){return year_ != 0;});
-	}
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 #endif

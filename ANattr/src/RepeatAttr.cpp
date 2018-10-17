@@ -29,6 +29,7 @@
 #include "Str.hpp"
 #include "PrintStyle.hpp"
 #include "Cal.hpp"
+#include "Serialization.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -944,6 +945,75 @@ bool RepeatDay::operator==(const RepeatDay& rhs) const
 	}
 	return true;
 }
+// =========================================================================================
+
+
+template<class Archive>
+void RepeatBase::serialize(Archive & ar)
+{
+   ar( CEREAL_NVP(name_) );
+}
+
+template<class Archive>
+void RepeatDate::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<RepeatBase>(this),
+      CEREAL_NVP(start_),
+      CEREAL_NVP(end_),
+      CEREAL_NVP(delta_),
+      CEREAL_NVP(value_)
+   );
+}
+
+template<class Archive>
+void RepeatInteger::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<RepeatBase>(this),
+      CEREAL_NVP(start_),
+      CEREAL_NVP(end_),
+      CEREAL_NVP(delta_),
+      CEREAL_NVP(value_)
+   );
+}
+
+template<class Archive>
+void RepeatEnumerated::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<RepeatBase>(this),
+      CEREAL_NVP(theEnums_),
+      CEREAL_NVP(currentIndex_)
+   );
+}
+
+template<class Archive>
+void RepeatString::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<RepeatBase>(this),
+      CEREAL_NVP(theStrings_),
+      CEREAL_NVP(currentIndex_)
+   );
+}
+
+template<class Archive>
+void RepeatDay::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<RepeatBase>(this),
+      CEREAL_NVP(step_));
+}
+
+template<class Archive>
+void Repeat::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(CEREAL_NVP(type_));
+}
+
+CEREAL_TEMPLATE_SPECIALIZE(RepeatBase);
+CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDate);
+CEREAL_TEMPLATE_SPECIALIZE_V(RepeatInteger);
+CEREAL_TEMPLATE_SPECIALIZE_V(RepeatEnumerated);
+CEREAL_TEMPLATE_SPECIALIZE_V(RepeatString);
+CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDay);
+CEREAL_TEMPLATE_SPECIALIZE_V(Repeat);
 
 CEREAL_REGISTER_TYPE(RepeatDate);
 CEREAL_REGISTER_TYPE(RepeatInteger);

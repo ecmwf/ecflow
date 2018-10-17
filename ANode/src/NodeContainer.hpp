@@ -147,19 +147,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-	   ar(cereal::base_class<Node>(this),
-	      CEREAL_NVP(nodes_));
-
-      // Setup the parent pointers. Since they are not serialised
-      if (Archive::is_loading::value) {
-         size_t vec_size = nodes_.size();
-         for(size_t i = 0; i < vec_size; i++) {
-            nodes_[i]->set_parent(this);
-         }
-      }
-	}
+   void serialize(Archive & ar, std::uint32_t const version );
 
 private:
   	std::vector<node_ptr> nodes_;

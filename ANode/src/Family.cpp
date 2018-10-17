@@ -27,6 +27,7 @@
 #include "Indentor.hpp"
 #include "DefsDelta.hpp"
 #include "JobsParam.hpp"
+#include "Serialization.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -216,5 +217,13 @@ void FamGenVariables::gen_variables(std::vector<Variable>& vec) const
    vec.push_back(genvar_family1_);
 }
 
+
+template<class Archive>
+void Family::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<NodeContainer>(this));
+}
+
+CEREAL_TEMPLATE_SPECIALIZE_V(Family);
 CEREAL_REGISTER_TYPE(Family);
 

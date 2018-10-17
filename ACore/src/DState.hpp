@@ -17,7 +17,6 @@
 //============================================================================
 
 #include <string>
-#include <vector>
 #include "NState.hpp"
 
 // DState: stores the state of a node.
@@ -59,10 +58,7 @@ private:
    // *IMPORTANT* no version for a simple class
    friend class cereal::access;
 	template<class Archive>
-	void serialize(Archive & ar)
-	{
-	   ar(CEREAL_NVP(st_));
-	}
+	void serialize(Archive & ar);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////

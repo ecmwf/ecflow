@@ -18,6 +18,7 @@
 
 #include "TimeSlot.hpp"
 #include "Str.hpp"
+#include "Serialization.hpp"
 
 using namespace boost::posix_time;
 
@@ -86,5 +87,14 @@ std::ostream& operator<<(std::ostream& os, const TimeSlot* d) {
 	return os << "TimeSlot == NULL";
 }
 std::ostream& operator<<(std::ostream& os, const TimeSlot& d)  { return d.print(os); }
+
+
+template<class Archive>
+void TimeSlot::serialize(Archive & ar) {
+   ar( CEREAL_NVP(h_),
+       CEREAL_NVP(m_ )
+     );
+}
+CEREAL_TEMPLATE_SPECIALIZE(TimeSlot);
 
 }

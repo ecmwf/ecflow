@@ -144,22 +144,7 @@ private:
 
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version )
-   {
-      ar( CEREAL_NVP(user_action_),
-          CEREAL_NVP(try_no_),
-          CEREAL_NVP(duration_),
-          CEREAL_NVP(calls_),
-          CEREAL_NVP(zombie_type_),
-          CEREAL_NVP(last_child_cmd_),
-          CEREAL_NVP(path_to_task_),
-          CEREAL_NVP(jobs_password_),
-          CEREAL_NVP(process_or_remote_id_),
-          CEREAL_NVP(user_cmd_),
-          CEREAL_NVP(user_action_set_),
-          CEREAL_NVP(attr_)
-      );
-   }
+   void serialize(Archive & ar, std::uint32_t const version );
 };
 
 std::ostream& operator<<(std::ostream& os, const Zombie&);

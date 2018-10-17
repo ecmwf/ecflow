@@ -31,6 +31,7 @@
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
 #include "AssertTimer.hpp"
+#include "Limit.hpp"
 #include "WhyCmd.hpp"
 
 using namespace std;
