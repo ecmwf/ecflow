@@ -82,7 +82,7 @@ static int NUM_OF_TASKS = 5;
 static void dump_tasks(const vector<Task*>& tasks) {
    cout << "     task status: no of tasks(" << tasks.size() << ")\n";
    BOOST_FOREACH(const Task* task, tasks) {
-      std::cout << "     "
+      std::cout << "      "
                 << task->absNodePath() << " "
                 << NState::toString(task->state())
                 << " passwd:" << task->jobsPassword()
@@ -105,7 +105,7 @@ static void dump_zombies()
 {
    TestFixture::client().zombieGet();
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-   std::cout <<  Zombie::pretty_print( zombies , 3);
+   std::cout <<  Zombie::pretty_print( zombies , 6);
    dump_task_status();
 }
 
@@ -213,14 +213,14 @@ static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait)
 
 static void remove_stale_zombies()
 {
-   // Remove those zombies that have only *ONE* call
+   // Remove those zombies that have only *ZERO* calls hence PID is empty
    // There is no associated process/child command that has updated the zombie
    if (ecf_debug_enabled) cout << "\n   remove_stale_zombies \n";
 
    BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
    BOOST_FOREACH(const Zombie& z, zombies) {
-      if (z.calls() == 1) {
+      if (z.process_or_remote_id().empty()) {
          cout << "\n      **** removing_stale_zombies ***** " << z << "\n";
          cout << "        Typically happens when a submitted job, never creates a process ?\n";
          cout << "        Since the process never communicated back, the pid is empty.\n";
@@ -270,17 +270,21 @@ static void check_expected_no_of_zombies(size_t expected)
 
    BOOST_CHECK_MESSAGE(zombies.size() == expected ,"Expected " << expected << " zombies but got " << zombies.size());
    if ( zombies.size() != expected) {
-      std::cout <<  Zombie::pretty_print( zombies , 3);
+      std::cout << Zombie::pretty_print( zombies, 6);
       return;
    }
 }
 
-static void check_at_least_one_zombie()
+static int check_at_least_one_zombie()
 {
    TestFixture::client().zombieGet();
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-   if (ecf_debug_enabled) std::cout << "\n   check_at_least_one_zombie: actual " << zombies.size() << "\n";
+   if (ecf_debug_enabled) {
+      std::cout << "\n   check_at_least_one_zombie: actual " << zombies.size() << "\n";
+      std::cout << Zombie::pretty_print( zombies, 6);
+   }
    BOOST_CHECK_MESSAGE(zombies.size() >= 1 ,"Expected at least one zombies but got nothing\n");
+   return zombies.size();
 }
 
 static bool wait_for_zombie_termination(int max_time_to_wait)
@@ -298,8 +302,8 @@ static bool wait_for_zombie_termination(int max_time_to_wait)
 
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
          if (ecf_debug_enabled)  {
-            std::cout << "wait_for_zombie_termination: taking longer than time constraint of " << assertTimer.timeConstraint() << " returning\n";
-            std::cout <<  Zombie::pretty_print( zombies , 3);
+            std::cout << "   wait_for_zombie_termination: taking longer than time constraint of " << assertTimer.timeConstraint() << " returning\n";
+            std::cout <<  Zombie::pretty_print( zombies, 6);
          }
          return false;
       }
@@ -350,7 +354,7 @@ static void wait_for_zombies_child_cmd(WaitType wait_type,ecf::Child::CmdType ch
       if ( completed_zombies == zombies.size() && child_type_found) {
          if (ecf_debug_enabled) {
             std::cout << "   Found ALL(" << completed_zombies << ") zombies of child type " << Child::to_string(child_cmd) << "\n";
-            std::cout << Zombie::pretty_print( zombies , 3);
+            std::cout << Zombie::pretty_print( zombies, 6);
          }
          if (do_delete) {
             BOOST_FOREACH(const Zombie& z, zombies) {
@@ -363,7 +367,7 @@ static void wait_for_zombies_child_cmd(WaitType wait_type,ecf::Child::CmdType ch
 
       // make sure test does not take too long.
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
-         std::cout << Zombie::pretty_print( zombies , 3);
+         std::cout << Zombie::pretty_print( zombies, 3);
          BOOST_REQUIRE_MESSAGE(assertTimer.duration() <  assertTimer.timeConstraint(),
                   "wait_for_zombies_child_cmd Test wait " << assertTimer.duration() <<
                   " taking longer than time constraint of " << assertTimer.timeConstraint() <<
@@ -389,7 +393,7 @@ static void wait_for_no_zombies(int max_time_to_wait)
 
       // make sure test does not take too long.
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
-         std::cout << "\n" << Zombie::pretty_print( zombies , 3);
+         std::cout << "\n" << Zombie::pretty_print( zombies , 6);
          BOOST_REQUIRE_MESSAGE(assertTimer.duration() <  assertTimer.timeConstraint(),
                   "wait_for_no_zombies Test wait " << assertTimer.duration() <<
                   " taking longer than time constraint of " << assertTimer.timeConstraint() <<
@@ -412,8 +416,7 @@ static void populate_defs(Defs& theDefs,const std::string& suite_name) {
 
 static void create_and_start_test(Defs& theDefs, const std::string& suite_name, const std::string& create_zombies_with) {
    if (ecf_debug_enabled) {
-      std::cout << "\n\n=============================================================================\n";
-      std::cout << "create_and_start_test  " << suite_name << "  using  " << create_zombies_with << "\n";
+      std::cout << "   create_and_start_test  " << suite_name << "  using  " << create_zombies_with << "\n";
    }
 
    /// Avoid side effects from previous test, by removing all zombies
@@ -535,7 +538,7 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
 
 static void create_and_start_test(const std::string& suite_name, const std::string& create_zombies_with) {
 
-   if (ecf_debug_enabled) std::cout << "   Creating defs\n";
+   if (ecf_debug_enabled) std::cout << "\n   Creating defs\n";
    Defs theDefs;
    populate_defs(theDefs,suite_name);
    create_and_start_test(theDefs,suite_name,create_zombies_with );
@@ -556,8 +559,9 @@ BOOST_AUTO_TEST_CASE( enable_debug_for_ECF_TRY_NO_Greater_than_one)
 #ifdef DO_TEST1
 BOOST_AUTO_TEST_CASE(test_path_zombie_creation)
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
-   cout << "Test:: ...test_path_zombie_creation " << flush;
+   cout << "Test:: ...test_path_zombie_creation " << flush; if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -597,8 +601,9 @@ BOOST_AUTO_TEST_CASE(test_path_zombie_creation)
 #ifdef DO_TEST2
 BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fob )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
-   cout << "Test:: ...test_user_zombies_for_delete_fob " << flush;
+   cout << "Test:: ...test_user_zombies_for_delete_fob " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -632,8 +637,9 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fob )
 #ifdef DO_TEST3
 BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fail )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
-   cout << "Test:: ...test_user_zombies_for_delete_fail " << flush;
+   cout << "Test:: ...test_user_zombies_for_delete_fail " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -661,11 +667,13 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fail )
 #ifdef DO_TEST4
 BOOST_AUTO_TEST_CASE( test_user_zombies_for_begin )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
-   cout << "Test:: ...test_user_zombies_for_begin " << flush;
+   cout << "Test:: ...test_user_zombies_for_begin " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
+   // Note: if when we start to create zombies and some tasks are still queued *NOT* all will be zombies.
    create_and_start_test("test_user_zombies_for_begin","begin");
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete or abort
@@ -673,7 +681,8 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_begin )
    /// Previously we had tried again, but fix for ECFLOW-1216, means we now don't try again,hence allow abort
    BOOST_REQUIRE_MESSAGE(waitForTaskStates(ALL,NState::COMPLETE,NState::ABORTED,timeout),"Expected non-zombie tasks to complete or abort");
 
-   check_at_least_one_zombie();
+   // Note: if when we started to create zombies and some tasks are still queued *NOT* all will be zombies.
+   int no_of_zombies = check_at_least_one_zombie();
 
    // Fob all the zombies. This will UNBLOCK the child commands allowing them to finish
    // Hence after this command, the number of fobed zombies may *NOT* be the same
@@ -681,8 +690,8 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_begin )
    // child command is received. 
    //
    /// When we have two sets of completes, we just fob, automatically. See TaskCmd::authenticate
-   int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
-   BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0,"Expected  some fobed zombies but found none ?");
+   int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, no_of_zombies, timeout);
+   BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0,"Expected some fobed zombies but found none ?");
 
    // Fobing does *NOT* alter node tree state, however child COMPLETE should auto delete the zombie
    if (!wait_for_zombie_termination(timeout)) {
@@ -700,9 +709,10 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_begin )
 #ifdef DO_TEST5
 BOOST_AUTO_TEST_CASE( test_zombies_attr )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
    std::string suite_name  = "test_zombies_attr";
-   cout << "Test:: ..." << suite_name << " " << flush;
+   cout << "Test:: ..." << suite_name << " " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -732,13 +742,13 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr )
 #endif
 
 
-
 #ifdef DO_TEST6
 BOOST_AUTO_TEST_CASE( test_user_zombies_for_adopt )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
    std::string suite_name  = "test_user_zombies_for_adopt";
-   cout << "Test:: ..." << suite_name << " " << flush;
+   cout << "Test:: ..." << suite_name << " " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -779,9 +789,10 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_adopt )
 #ifdef DO_TEST7
 BOOST_AUTO_TEST_CASE( test_zombies_attr_for_adopt )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
    std::string suite_name  = "test_zombies_attr_for_adopt";
-   cout << "Test:: ..." << suite_name << " " << flush;
+   cout << "Test:: ..." << suite_name << " " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -818,9 +829,10 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_adopt )
 #ifdef DO_TEST8
 BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_complete )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
    std::string suite_name  = "test_user_zombie_creation_via_complete";
-   cout << "Test:: ..." << suite_name << " " << flush;
+   cout << "Test:: ..." << suite_name << " " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -844,9 +856,10 @@ BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_complete )
 #ifdef DO_TEST9
 BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_abort )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
    std::string suite_name  = "test_user_zombie_creation_via_abort";
-   cout << "Test:: ..." << suite_name << " " << flush;
+   cout << "Test:: ..." << suite_name << " " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -871,9 +884,10 @@ BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_abort )
 #ifdef DO_TEST10
 BOOST_AUTO_TEST_CASE( test_zombie_inheritance )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
    std::string suite_name  = "test_zombie_inheritance";
-   cout << "Test:: ..." << suite_name << " " << flush;
+   cout << "Test:: ..." << suite_name << " " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // Add zombie attribute, make sure it inherited
@@ -925,9 +939,9 @@ static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait)
       if (killed == no_of_tasks)  return killed;
 
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
-         cout <<  "wait_for_killed_zombies Test wait " << assertTimer.duration() <<
+         cout <<  "   wait_for_killed_zombies Test wait " << assertTimer.duration() <<
                   " taking longer than time constraint of " << assertTimer.timeConstraint() <<
-                  " breaking out\n" << Zombie::pretty_print( zombies , 3) << "\n";
+                  " breaking out\n" << Zombie::pretty_print( zombies, 6) << "\n";
          return killed;
       }
       sleep(2);
@@ -937,9 +951,10 @@ static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait)
 
 BOOST_AUTO_TEST_CASE( test_zombie_kill )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
    std::string suite_name  = "test_zombie_kill";
-   cout << "Test:: ..." << suite_name << " " << flush;
+   cout << "Test:: ..." << suite_name << " " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
@@ -970,10 +985,10 @@ BOOST_AUTO_TEST_CASE( test_zombie_kill )
           }
           if (aborted + completed == NUM_OF_TASKS) break;
           if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
-             cout <<  "wait for for abort:  found " << aborted+completed<< " aborted & completed tasks. Test wait "
+             cout << "   wait for for abort:  found " << aborted+completed<< " aborted & completed tasks. Test wait "
                       << assertTimer.duration() <<
                       " taking longer than time constraint of " << assertTimer.timeConstraint() <<
-                      " breaking out\n" << Zombie::pretty_print( zombies , 3) << "\n";
+                      " breaking out\n" << Zombie::pretty_print( zombies, 6) << "\n";
              break;
           }
           sleep(1);
@@ -995,9 +1010,9 @@ BOOST_AUTO_TEST_CASE( test_zombie_kill )
           }
           if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
              if ( task_became_blocked ) {
-                cout <<  "Task became blocked, fobing" << assertTimer.duration() <<
+                cout <<  "   Task became blocked, fobing" << assertTimer.duration() <<
                          " taking longer than time constraint of " << assertTimer.timeConstraint() <<
-                         " breaking out\n" << Zombie::pretty_print( zombies , 3) << "\n";
+                         " breaking out\n" << Zombie::pretty_print( zombies , 6) << "\n";
              }
              break;
           }
@@ -1046,9 +1061,10 @@ static void remove_all_user_zombies()
 }
 BOOST_AUTO_TEST_CASE( test_ecf_zombie_type_creation )
 {
+   if (ecf_debug_enabled) std::cout << "\n\n=============================================================================\n";
    DurationTimer timer;
    std::string suite_name = "test_ecf_zombie_type_creation";
-   cout << "Test:: ..." << suite_name << " " << flush;
+   cout << "Test:: ..." << suite_name << " " << flush;if (ecf_debug_enabled) cout << "\n";
    TestClean clean_at_start_and_end;
 
    // some systems are really quick, where tasks are already active, when we make them zombies, then the next

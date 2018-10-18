@@ -133,9 +133,8 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
          break; // return
       }
 
-      if ( !continue_looping  && action_set > 0) {
+      if ( !continue_looping && action_set > 0) {
          if (expected_action_cnt == 0) break;          // return, some clients set this as 0
-         if (expected_action_cnt == action_set) break; // return
       }
 
       // make sure test does not take too long.
