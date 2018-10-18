@@ -536,11 +536,16 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
    }
 }
 
-static void create_and_start_test(const std::string& suite_name, const std::string& create_zombies_with) {
+static void create_and_start_test(const std::string& suite_name, const std::string& create_zombies_with, bool add_delay_before_init = false) {
 
    if (ecf_debug_enabled) std::cout << "\n   Creating defs\n";
    Defs theDefs;
    populate_defs(theDefs,suite_name);
+   if (add_delay_before_init) {
+      suite_ptr suite = theDefs.findSuite(suite_name);
+      suite->add_variable("ADD_DELAY_BEFORE_INIT","sleep 1"); // add delay before --init
+      if (ecf_debug_enabled) std::cout << "   adding a delay of 1 second before --init is called\n";
+   }
    create_and_start_test(theDefs,suite_name,create_zombies_with );
 }
 
@@ -754,11 +759,7 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_adopt )
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
    // Using "queued" to create zombies will mean we update try_no, zombies will not share output.
    // This avoid'(Text file busy)'
-   Defs theDefs;
-   populate_defs(theDefs,suite_name);
-   suite_ptr suite = theDefs.findSuite(suite_name);
-   suite->add_variable("ADD_DELAY_BEFORE_INIT","sleep 1"); // add delay before --init
-   create_and_start_test(theDefs,suite_name,"queued");
+   create_and_start_test(suite_name,"queued",true /* add delay before init */);
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
@@ -796,7 +797,7 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_adopt )
    TestClean clean_at_start_and_end;
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
-   create_and_start_test(suite_name,"queued");
+   create_and_start_test(suite_name,"queued", true /* add a delay before init */);
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
@@ -1071,11 +1072,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_zombie_type_creation )
    // client command in the zombie is: --complete. This distorts the test. Since if the real task is complete and
    // we get a zombie with --complete, the server lets it through and the zombie process terminates.
    // To get round this we will introduce a delay, before we get --init
-   Defs theDefs;
-   populate_defs(theDefs,suite_name);
-   suite_ptr suite = theDefs.findSuite(suite_name);
-   suite->add_variable("ADD_DELAY_BEFORE_INIT","sleep 1"); // add delay before --init
-   create_and_start_test(theDefs,suite_name,"queued");
+   create_and_start_test(suite_name,"queued", true /* add a delay before init */);
 
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
