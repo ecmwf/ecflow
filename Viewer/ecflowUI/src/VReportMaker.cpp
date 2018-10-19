@@ -28,55 +28,26 @@ void VReportMaker::run(VInfo_ptr info)
 
     info_=info;
 
-    //Get file contents
-    infoProvider_->info(info);
-
     //Get job output
+    infoProvider_->info(info);
 }
 
 void VReportMaker::infoReady(VReply* reply)
 {
-    OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-
-    if(reply->fileName() == op->joboutFileName() && !op->isTryNoZero(reply->fileName()) &&
-       info_ && info_->isNode() && info_->node() && info_->node()->isSubmitted())
-    {
-#if 0
-        hasMessage=true;
-        submittedWarning_=true;
-        messageLabel_->showWarning("This is the current job output (as defined by variable ECF_JOBOUT), but \
-               because the node status is <b>submitted</b> it may contain the ouput from a previous run!");
-#endif
-    }
-    else
-    {
-#if 0
-        if(reply->hasWarning())
-        {
-            messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
-            hasMessage=true;
-        }
-        else if(reply->hasInfo())
-        {
-            messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-            hasMessage=true;
-        }
-#endif
-    }
-
+    Q_ASSERT(reply);
     VFile_ptr f=reply->tmpFile();
-    sendReport(f);
+    sendJiraReport(f);
     deleteLater();
 }
 
 void VReportMaker::infoFailed(VReply*)
 {
     VFile_ptr f;
-    sendReport(f);
+    sendJiraReport(f);
     deleteLater();
 }
 
-void VReportMaker::sendReport(VFile_ptr file)
+void VReportMaker::sendJiraReport(VFile_ptr file)
 {
     if(info_->isNode() && info_->node())
     {

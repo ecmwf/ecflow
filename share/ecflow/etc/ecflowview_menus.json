@@ -483,7 +483,7 @@
 
         {
             "menu"           : "Special",
-            "name"           : "Create JSD ticket",
+            "name"           : "Create JIRA SD ticket",
             "visible_for"    : "(task or alias) and ECFLOWUI_ECMWF_OPERATOR_MODE)",
             "command"        : "create_jsd_ticket",
             "multi"          : "false",

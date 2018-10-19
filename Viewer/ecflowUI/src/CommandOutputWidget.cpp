@@ -183,13 +183,14 @@ QModelIndex CommandOutputModel::itemToStatusIndex(CommandOutput_ptr item) const
 //==============================================
 
 CommandOutputWidget::CommandOutputWidget(QWidget *parent) :
-  QWidget(parent)
+  QWidget(parent),
+  errCol_(QColor(204,0,0))
 {
     setupUi(this);
 
     infoLabel_->setProperty("fileInfo","1");
 
-    messageLabel_->hide();
+    errTe_->hide();
 
     model_=new CommandOutputModel(this);
 
@@ -202,9 +203,10 @@ CommandOutputWidget::CommandOutputWidget(QWidget *parent) :
     tree_->setColumnWidth(0,fm.width(" sh ecflow_client --port %ECF_PORT% --host %ECF_HOST% --stats--port %ECF_PORT%"));
     tree_->setColumnWidth(1,fm.width(" running "));
 
-    textEdit_->setShowLineNumbers(false);
+    errTe_->setShowLineNumbers(false);
+    outTe_->setShowLineNumbers(false);
 
-    searchLine_->setEditor(textEdit_);
+    searchLine_->setEditor(outTe_);
     searchLine_->setVisible(false);
 
     CommandOutputHandler* handler=CommandOutputHandler::instance();
@@ -276,15 +278,16 @@ void CommandOutputWidget::slotItemOutputAppend(CommandOutput_ptr item,QString tx
 {
     if(isCurrent(item))
     {
-        textEdit_->appendPlainText(txt);
+        outTe_->appendPlainText(txt);
     }
 }
 
 void CommandOutputWidget::slotItemErrorAppend(CommandOutput_ptr item,QString txt)
 {
     if(isCurrent(item))
-    {
-        messageLabel_->appendError(txt);
+    {      
+        errTe_->show();
+        errTe_->appendHtml(formatErrorText(txt));
     }
 }
 
@@ -292,7 +295,7 @@ void CommandOutputWidget::slotItemOutputReload(CommandOutput_ptr item)
 {
     if(isCurrent(item))
     {
-        textEdit_->setPlainText(item->output());
+        outTe_->setPlainText(item->output());
     }
 }
 
@@ -300,7 +303,9 @@ void CommandOutputWidget::slotItemErrorReload(CommandOutput_ptr item)
 {
     if(isCurrent(item))
     {
-         messageLabel_->showError(item->error());
+         errTe_->clear();
+         errTe_->show();
+         errTe_->appendHtml(formatErrorText(item->error()));
     }
 }
 
@@ -324,19 +329,20 @@ void CommandOutputWidget::loadItem(CommandOutput_ptr item)
 {
     if(item)
     {
-        textEdit_->clear();
-        messageLabel_->clear();
-        messageLabel_->hide();
+        outTe_->clear();
+        errTe_->clear();
+        errTe_->hide();
         updateInfoLabel(item);
 
         //Set output text
-        textEdit_->setPlainText(item->output());
+        outTe_->setPlainText(item->output());
 
         //Set error text
         QString err=item->error();
         if(!err.isEmpty())
         {
-            messageLabel_->showError(err);
+            errTe_->show();
+            errTe_->appendHtml(formatErrorText(err));
         }
         //return true;
     }
@@ -352,13 +358,18 @@ void CommandOutputWidget::updateInfoLabel(CommandOutput_ptr item)
 
     QColor boldCol(39,49,101);
     QColor defCol(90,90,90);
-    QString s=Viewer::formatBoldText("Command: ",boldCol) + item->command() + "<br>" +
-            Viewer::formatBoldText("Definition: ",boldCol) +
-            Viewer::formatText(item->commandDefinition(),defCol) + "<br>" +
-            Viewer::formatBoldText("Started at: ",boldCol) +
-            item->runTime().toString("yyyy-MM-dd hh:mm:ss") +
-            Viewer::formatBoldText(" &nbsp;Status: ", boldCol) +
-            Viewer::formatText(item->statusStr(),item->statusColour());
+    QString s=Viewer::formatBoldText("Command: ",boldCol) + item->command() + "<br>";
+
+    if(!item->commandDefinition().isEmpty())
+    {
+        s+=Viewer::formatBoldText("Definition: ",boldCol) +
+            Viewer::formatText(item->commandDefinition(),defCol) + "<br>";
+    }
+
+    s+=Viewer::formatBoldText("Started at: ",boldCol) +
+       item->runTime().toString("yyyy-MM-dd hh:mm:ss") +
+       Viewer::formatBoldText(" &nbsp;Status: ", boldCol) +
+       Viewer::formatText(item->statusStr(),item->statusColour());
 
     infoLabel_->setText(s);
 }
@@ -386,19 +397,24 @@ void CommandOutputWidget::on_searchTb__clicked()
 
 void CommandOutputWidget::on_gotoLineTb__clicked()
 {
-    textEdit_->gotoLine();
+    outTe_->gotoLine();
 }
 
 void CommandOutputWidget::on_fontSizeUpTb__clicked()
 {
     //We need to call a custom slot here instead of "zoomIn"!!!
-    textEdit_->slotZoomIn();
+    outTe_->slotZoomIn();
 }
 
 void CommandOutputWidget::on_fontSizeDownTb__clicked()
 {
     //We need to call a custom slot here instead of "zoomOut"!!!
-    textEdit_->slotZoomOut();
+    outTe_->slotZoomOut();
+}
+
+QString CommandOutputWidget::formatErrorText(QString txt)
+{
+    return Viewer::formatText(txt.replace('\n',"<br>"),errCol_);
 }
 
 void CommandOutputWidget::writeSettings(QSettings& settings)

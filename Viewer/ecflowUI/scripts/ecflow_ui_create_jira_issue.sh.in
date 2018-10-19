@@ -9,10 +9,12 @@
 # nor does it submit to any jurisdiction.
 #============================================================================
 
-set -x
 
 if [[ $# -ne 5 ]] ; then
     echo "Error: wrong number of arguments = $# (must be 5)"
+    if [[ $# -eq 1 ]] ; then
+        echo "This is script should only be called from within ecflow_ui."
+    fi
     exit 1
 fi
 
@@ -22,7 +24,8 @@ port=$3
 nodePath=$4
 nodeStatus=$5
 
-project="SD"
+#project="SD"
+project="METV"
 lastLines=50
 pattern="--abort"
 foundPattern=0
@@ -34,14 +37,14 @@ hasLog=0
 #-------------------
 logTmp=$(mktemp)
 ecflow_client --host=${host} --port=${port} --edit_history ${nodePath} > ${logTmp}
-if [[ $? -eq 0 && -fs ${logTmp} ]] ; then
+if [[ $? -eq 0 && -s ${logTmp} ]] ; then
     hasLog=1
 fi
 
 #-------------------
 # get task output
 #-------------------
-if [[ "${outFile}" != "_undef_" && -sf ${outFile}  ]] ; then
+if [[ "${outFile}" != "_undef_" && -s ${outFile}  ]] ; then
     hasOutFile=1
     outTmp=$(mktemp)
 
@@ -51,21 +54,20 @@ if [[ "${outFile}" != "_undef_" && -sf ${outFile}  ]] ; then
     #extract lines preceding last occurence of pattern from out file
     if [ $? -eq 0 ] ; then
         foundPattern=1
+        lineNum=$((lineNum-lastLines))
+        lineNum=$((lineNum+1))
         tail -n+${lineNum} ${outFile} | head -n${lastLines} > ${outTmp}
     else
         tail -${lastLines} ${lastLines} > ${outTmp}
     fi
 fi
 
-cat ${outTmp}
-
 #-------------------
 # build command
 #-------------------
 
 #define issue description
-desc="This report was generated automatically from ecflowUI\nServer: ${host}@${port}\n \
-  Node: ${nodePath}"
+desc="This report was generated automatically from ecflowUI. \\\\Server: ${host}@${port} \\\\Node: ${nodePath}"
 
 #jobout
 if [[ ${hasOutFile} -eq 1 ]] ; then
@@ -82,15 +84,15 @@ fi
 
 #log
 if [[ ${hasLog} -eq 1 ]] ; then
-    descLog="Entries from ecflow log: {code} $(cat ${logTmp}) {code}"
+    descLog="These are the entries for the given node in the ecflow log: {code}$(cat ${logTmp}) {code}"
 else
-    descLog="No entries were found in log"
+    descLog="No entries for the given node were found in the ecflow log"
 fi
 
-desc="${desc}\n\n${descOutFile}\n\n${descLog}"
+desc="${desc}\\\\ \\\\${descOutFile} \\\\${descLog}"
 
 #create jira issue
-echo "jira -S "${nodePath} status=${nodeStatus}" -D ${desc} -A ${outTmp} --justdoit +${SD}"
+jira -S "${nodePath} status=${nodeStatus}" -D "${desc}" -A ${outTmp} --justdoit +${project}
 
 #delete tmp files
 [[ -f ${logTmp} ]] && rm -f ${logTmp}
