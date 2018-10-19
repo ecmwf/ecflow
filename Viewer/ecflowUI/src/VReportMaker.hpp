@@ -34,7 +34,7 @@ public:
 protected:
      VReportMaker(QObject* parent=0);
      void run(VInfo_ptr);
-     void loadFile(VFile_ptr file);
+     void sendReport(VFile_ptr file);
 
      OutputFileProvider *infoProvider_;
 };

@@ -10,6 +10,8 @@
 
 #include "VReportMaker.hpp"
 
+#include "ServerHandler.hpp"
+#include "ShellCommand.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "OutputFileProvider.hpp"
@@ -63,46 +65,45 @@ void VReportMaker::infoReady(VReply* reply)
     }
 
     VFile_ptr f=reply->tmpFile();
-    if(f)
-    {
-        loadFile(f);
-
-        //browser_->loadFile(f);
-        //if(f->storageMode() == VFile::DiskStorage)
-        //    hasMessage=false;
-
-    }
-
+    sendReport(f);
     deleteLater();
 }
 
 void VReportMaker::infoFailed(VReply*)
 {
+    VFile_ptr f;
+    sendReport(f);
     deleteLater();
 }
 
-void VReportMaker::loadFile(VFile_ptr file)
+void VReportMaker::sendReport(VFile_ptr file)
 {
-    if(!file)
+    if(info_->isNode() && info_->node())
     {
-        //clear();
-        return;
-    }
+        VNode *node=info_->node();
+        ServerHandler* s=info_->server();
 
-    if(file->storageMode() == VFile::DiskStorage)
-    {
-        //loadFile(QString::fromStdString(file_->path()));
-        UiLog().dbg() << "REPORT " << file->path();
-    }
-    else
-    {
-        QString s(file->data());
-        //loadText(s,QString::fromStdString(file_->sourcePath()),true);
-        UiLog().dbg() << "REPORT " << s;
+        if(node && s)
+        {
+            std::string filePath="_undef_";
+            if(file)
+            {
+                if(file->storageMode() != VFile::DiskStorage)
+                    file->setStorageMode(VFile::DiskStorage);
+
+                filePath=file->path();
+            }
+
+            UiLog().dbg() << "REPORT outfile=" << filePath;
+
+            std::string cmd="sh ecflow_ui_create_jira_issue.sh \'" + filePath + "\' " +
+                    s->host() + " " + s->port() + " \'" +
+                    node->absNodePath() + "\' \'" + node->stateName().toStdString() + "\'";
+
+            ShellCommand::run(cmd,"");
+        }
     }
 }
-
-
 
 void VReportMaker::sendReport(VInfo_ptr info)
 {

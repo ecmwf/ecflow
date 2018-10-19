@@ -1,0 +1,97 @@
+#!/bin/bash
+
+#============================================================================
+# Copyright 2009-2018 ECMWF.
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#============================================================================
+
+set -x
+
+if [[ $# -ne 5 ]] ; then
+    echo "Error: wrong number of arguments = $# (must be 5)"
+    exit 1
+fi
+
+outFile=$1
+host=$2
+port=$3
+nodePath=$4
+nodeStatus=$5
+
+project="SD"
+lastLines=50
+pattern="--abort"
+foundPattern=0
+hasOutFile=0
+hasLog=0
+
+#-------------------
+# get node log
+#-------------------
+logTmp=$(mktemp)
+ecflow_client --host=${host} --port=${port} --edit_history ${nodePath} > ${logTmp}
+if [[ $? -eq 0 && -fs ${logTmp} ]] ; then
+    hasLog=1
+fi
+
+#-------------------
+# get task output
+#-------------------
+if [[ "${outFile}" != "_undef_" && -sf ${outFile}  ]] ; then
+    hasOutFile=1
+    outTmp=$(mktemp)
+
+    #line number of the last occurence of pattern in the output file
+    lineNum=$(grep -n -e ${pattern}  $outFile | tail -n 1 | cut -d : -f 1)
+
+    #extract lines preceding last occurence of pattern from out file
+    if [ $? -eq 0 ] ; then
+        foundPattern=1
+        tail -n+${lineNum} ${outFile} | head -n${lastLines} > ${outTmp}
+    else
+        tail -${lastLines} ${lastLines} > ${outTmp}
+    fi
+fi
+
+cat ${outTmp}
+
+#-------------------
+# build command
+#-------------------
+
+#define issue description
+desc="This report was generated automatically from ecflowUI\nServer: ${host}@${port}\n \
+  Node: ${nodePath}"
+
+#jobout
+if [[ ${hasOutFile} -eq 1 ]] ; then
+
+    if [ "${foundPattern}" = "1" ] ; then
+        descOutFile="See the last ${lastLines} lines preceding pattern=${pattern} from the node job output file attached."
+    else
+        descOutFile="See the last ${lastLines} lines from the node job output file attached."
+    fi
+else
+    descOutFile="Could not locate job output file."
+fi
+
+
+#log
+if [[ ${hasLog} -eq 1 ]] ; then
+    descLog="Entries from ecflow log: {code} $(cat ${logTmp}) {code}"
+else
+    descLog="No entries were found in log"
+fi
+
+desc="${desc}\n\n${descOutFile}\n\n${descLog}"
+
+#create jira issue
+echo "jira -S "${nodePath} status=${nodeStatus}" -D ${desc} -A ${outTmp} --justdoit +${SD}"
+
+#delete tmp files
+[[ -f ${logTmp} ]] && rm -f ${logTmp}
+[[ -f ${outTmp} ]] && rm -f ${outTmp}
