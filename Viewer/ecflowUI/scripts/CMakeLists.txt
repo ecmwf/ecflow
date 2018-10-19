@@ -1,6 +1,6 @@
 
 # the list of files we want to install
-set (files ecflow_ui ecflow_test_ui.sh node_state_diag.sh ecflow_ui_create_jira_issue.sh)
+set (files ecflow_ui ecflow_test_ui.sh ecflow_ui_node_state_diag.sh ecflow_ui_create_jira_issue.sh)
 
 
 # set variables which will be expanded in the startup script
