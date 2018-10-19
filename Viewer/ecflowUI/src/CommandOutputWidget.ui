@@ -156,7 +156,7 @@
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
-     <widget class="QWidget" name="widget" native="true">
+     <widget class="QWidget" name="errWidget_" native="true">
       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
        <property name="spacing">
         <number>0</number>

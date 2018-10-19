@@ -190,7 +190,7 @@ CommandOutputWidget::CommandOutputWidget(QWidget *parent) :
 
     infoLabel_->setProperty("fileInfo","1");
 
-    errTe_->hide();
+    errWidget_->hide();
 
     model_=new CommandOutputModel(this);
 
@@ -286,7 +286,7 @@ void CommandOutputWidget::slotItemErrorAppend(CommandOutput_ptr item,QString txt
 {
     if(isCurrent(item))
     {      
-        errTe_->show();
+        errWidget_->show();
         errTe_->appendHtml(formatErrorText(txt));
     }
 }
@@ -304,7 +304,7 @@ void CommandOutputWidget::slotItemErrorReload(CommandOutput_ptr item)
     if(isCurrent(item))
     {
          errTe_->clear();
-         errTe_->show();
+         errWidget_->show();
          errTe_->appendHtml(formatErrorText(item->error()));
     }
 }
@@ -331,7 +331,7 @@ void CommandOutputWidget::loadItem(CommandOutput_ptr item)
     {
         outTe_->clear();
         errTe_->clear();
-        errTe_->hide();
+        errWidget_->hide();
         updateInfoLabel(item);
 
         //Set output text
@@ -341,7 +341,7 @@ void CommandOutputWidget::loadItem(CommandOutput_ptr item)
         QString err=item->error();
         if(!err.isEmpty())
         {
-            errTe_->show();
+            errWidget_->show();
             errTe_->appendHtml(formatErrorText(err));
         }
         //return true;

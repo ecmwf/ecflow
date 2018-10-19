@@ -102,7 +102,7 @@ ShellCommand* ShellCommand::run(const std::string& cmd,const std::string& cmdDef
 
 void ShellCommand::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    if(!item_ && exitCode !=0)
+    if(!item_)
     {
         item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
     }
