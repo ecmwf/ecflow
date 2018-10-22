@@ -636,7 +636,7 @@ with defs.add_suite("experiment") as experiment:
     experiment.add_defstatus( ecflow.DState.suspended )
     experiment.add_variable("ECF_HOME", os.getenv("SCRATCH") + "/nightly")
     experiment.add_variable("ECF_INCLUDE",os.getenv("SCRATCH") + "/nightly")
-    experiment.add_variable("ECF_HOST","eurydice")
+    experiment.add_variable("ECF_HOST","polonius")
     experiment.add_variable("ECF_PORT","4141")
     with experiment.add_task("exp") as task:
         task.add_event("event_fred")
