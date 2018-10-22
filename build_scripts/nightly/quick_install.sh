@@ -24,14 +24,6 @@ rm -rf nightly
 cp -r $WK/build_scripts/nightly .
 
 # =======================================================================
-# Generate the defs, the is loaded into the server by load.py
-# =======================================================================
-python $WK/build_scripts/nightly/build.py
-if [[ $? = 1 ]] ; then
-   exit 1
-fi
-
-# =======================================================================
 # Kill the server
 # =======================================================================
 export ECF_PORT=4141
@@ -49,8 +41,6 @@ ecflow_server&
 sleep 4
 ecflow_client --server_version
 
-# =======================================================================
-# load the build defs, in the server then delete generated defs.
 # Make sure server is running
 # =======================================================================
 python $WK/build_scripts/nightly/load.py
