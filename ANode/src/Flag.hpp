@@ -60,12 +60,13 @@ public:
       QUEUELIMIT    = 10,  // Node                                   ( NOT USED currently)
       WAIT          = 11,  // task*  Set/cleared but never queried ? ( NOT USED currently )
       LOCKED        = 12,  // Server                                 ( NOT USED currently)
-      ZOMBIE        = 13,  // task*  Set/cleared but never queried ? ( NOT USED currently )
+      ZOMBIE        = 13,  // task*  Set/cleared but never queried by GUI
       NO_REQUE_IF_SINGLE_TIME_DEP = 14,  //
       ARCHIVED      = 15,  // Container*
       RESTORED      = 16,  // Container*, Avoid re-archiving node that is restored, until it is re-queued again
       THRESHOLD     = 17,  // Job threshold exceeded.(slow disk,large includes/huge scripts,overloaded machine,server)
-      NOT_SET       = 18
+      ECF_SIGTERM   = 18,  // Record on defs that server received SIGTERM signal, main used in test
+      NOT_SET       = 19
    };
 
    bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }

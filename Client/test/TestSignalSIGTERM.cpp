@@ -31,6 +31,22 @@ using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
+
+static void wait_for_sigterm_in_server(ClientInvoker& theClient)
+{
+    int count = 0;
+    while(1) {
+       count++;
+       sleep(1);
+       BOOST_REQUIRE_MESSAGE(theClient.sync_local() == 0, "Sync local failed\n" << theClient.errorMsg());
+       if ( theClient.defs()->get_flag().is_set(ecf::Flag::ECF_SIGTERM) )  {
+          // cout << "break after " << count << "s\n";
+          break;
+       }
+       BOOST_REQUIRE_MESSAGE(count > 9,"Server never received SIGTERM after 9 seconds");
+    }
+}
+
 // ************************************************************************************
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
 //
@@ -59,7 +75,10 @@ BOOST_AUTO_TEST_CASE( test_signal_SIGTERM )
    // Send a SIGTERM to the server and ensure that a check point file is created
    std::string sigterm = "kill -15 " + ecf_pid ;
    system(sigterm.c_str());
-   sleep(3); // allow time for system call
+   wait_for_sigterm_in_server(theClient);
+
+   // Clear sigterm flag
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/","clear_flag","sigterm") == 0,"--alter should return 0\n" << theClient.errorMsg());
 
    // We expect a check point file to be save to disk, but *no* backup
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_checkpt_file()),CtsApi::checkPtDefs() << " failed file(" << invokeServer.ecf_checkpt_file() << ") not saved");
@@ -69,9 +88,10 @@ BOOST_AUTO_TEST_CASE( test_signal_SIGTERM )
       BOOST_REQUIRE_MESSAGE(!fs::exists(invokeServer.ecf_backup_checkpt_file()), "Backup check point file(" << invokeServer.ecf_backup_checkpt_file() << ")should not exist,for very first time.");
    }
 
+
    // Send a SIGTERM again. This time we expect the backup check point file to be created.
    system(sigterm.c_str());
-   sleep(3); // allow time for system call
+   wait_for_sigterm_in_server(theClient);
 
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_checkpt_file()),CtsApi::checkPtDefs() << " failed No check pt file(" << invokeServer.ecf_checkpt_file() << ") saved");
    BOOST_REQUIRE_MESSAGE(fs::file_size(invokeServer.ecf_checkpt_file()) !=0,"Expected check point file(" << invokeServer.ecf_checkpt_file() << ") to have file size > 0  ");

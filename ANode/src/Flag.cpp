@@ -46,7 +46,7 @@ void Flag::reset() {
 
 std::vector<Flag::Type> Flag::list()
 {
-   std::vector<Flag::Type> ret; ret.reserve(18);
+   std::vector<Flag::Type> ret; ret.reserve(19);
    ret.push_back(Flag::FORCE_ABORT);
    ret.push_back(Flag::USER_EDIT);
    ret.push_back(Flag::TASK_ABORTED);
@@ -65,6 +65,7 @@ std::vector<Flag::Type> Flag::list()
    ret.push_back(Flag::ARCHIVED);
    ret.push_back(Flag::RESTORED);
    ret.push_back(Flag::THRESHOLD);
+   ret.push_back(Flag::ECF_SIGTERM);
    return ret;
 }
 
@@ -89,6 +90,7 @@ std::string Flag::enum_to_string(Flag::Type flag) {
       case Flag::ARCHIVED:     return "archived"; break;
       case Flag::RESTORED:     return "restored"; break;
       case Flag::THRESHOLD:    return "threshold"; break;
+      case Flag::ECF_SIGTERM:  return "sigterm"; break;
       case Flag::NOT_SET:      return "not_set"; break;
       default: break;
    };
@@ -116,12 +118,13 @@ Flag::Type Flag::string_to_flag_type(const std::string& s)
    if (s == "archived") return Flag::ARCHIVED;
    if (s == "restored") return Flag::RESTORED;
    if (s == "threshold") return Flag::THRESHOLD;
+   if (s == "sigterm") return Flag::ECF_SIGTERM;
    return Flag::NOT_SET;
 }
 
 void Flag::valid_flag_type(std::vector<std::string>& vec)
 {
-   vec.reserve(18);
+   vec.reserve(19);
    vec.emplace_back("force_aborted");
    vec.emplace_back("user_edit");
    vec.emplace_back("task_aborted");
@@ -140,6 +143,7 @@ void Flag::valid_flag_type(std::vector<std::string>& vec)
    vec.emplace_back("archived");
    vec.emplace_back("restored");
    vec.emplace_back("threshold");
+   vec.emplace_back("sigterm");
 }
 
 std::string Flag::to_string() const

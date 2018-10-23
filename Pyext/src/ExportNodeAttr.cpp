@@ -306,6 +306,7 @@ void export_NodeAttr()
          "- ARCHIVED      - Suite/Family\n"
          "- RESTORED      - Family/Family\n"
          "- THRESHOLD     - task\n"
+         "- SIGTERM       - Defs, records that server received a SIGTERM signal\n"
          "- NOT_SET\n"
    )
          .value("force_abort",  Flag::FORCE_ABORT)
@@ -326,6 +327,7 @@ void export_NodeAttr()
          .value("archived",     Flag::ARCHIVED)
          .value("restored",     Flag::RESTORED)
          .value("threshold",    Flag::THRESHOLD)
+         .value("sigterm",      Flag::ECF_SIGTERM)
          .value("not_set",      Flag::NOT_SET)
          ;
 

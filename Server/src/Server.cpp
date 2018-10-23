@@ -828,6 +828,7 @@ void Server::sigterm_signal_handler()
    if (serverEnv_.debug()) cout << "Server::sigterm_signal_handler(): Received SIGTERM : starting check pointing" << endl;
    ecf::log(Log::MSG,"Server::sigterm_signal_handler(): Received SIGTERM : starting check pointing");
 
+   defs_->flag().set(ecf::Flag::ECF_SIGTERM);
    checkPtDefs();
 
    ecf::log(Log::MSG,"Server::sigterm_signal_handler(): finished check pointing");
