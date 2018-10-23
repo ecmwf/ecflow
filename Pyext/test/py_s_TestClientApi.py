@@ -609,7 +609,7 @@ def test_client_ch_suites(ci):
 
     suite_names = [ 's1', 's2', 's3' ]
     ci.ch_register(True,suite_names)    # register interest in suites s1,s2,s3 and any new suites
-    print "ch_handle after register : " , ci.ch_handle()
+    print("ch_handle after register : " , ci.ch_handle())
     ci.ch_suites()  # writes to standard out, list of suites and handles
     sync_local(ci)
     assert len(list(ci.get_defs().suites)) == 3,"Expected 3 registered suites but found " + str(len(list((ci.get_defs().suites))))
@@ -908,10 +908,6 @@ def test_client_alter_add(ci):
     print_test(ci,"test_client_alter_add")
     ci.delete_all()     
     ci.load(create_defs("test_client_alter_add"))   
-
-    #print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
-    #print  ci.get_defs()
-    #print "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
 
     t1 = "/test_client_alter_add/f1/t1"
     ci.alter(t1,"add","variable","var","var_name")
