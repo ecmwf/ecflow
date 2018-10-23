@@ -843,7 +843,7 @@ void Node::setStateOnly(NState::State newState,bool force,const std::string& add
          // cout << debugNodePath() << " submit->active->complete time = " << td.total_seconds()  << " seconds.\n";
 
          // Avoid this check if we have meters. as we wait a second between each meter update
-         if ( td.total_seconds() >= jobSubmissionInterval && meters_.empty())) {
+         if ( td.total_seconds() >= jobSubmissionInterval && meters_.empty()) {
 
             const Variable& do_check = theSuite->findVariable("CHECK_TASK_DURATION_LESS_THAN_SERVER_POLL");
             if (!do_check.empty()) {
