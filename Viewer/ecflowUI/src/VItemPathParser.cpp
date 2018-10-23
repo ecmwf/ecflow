@@ -68,11 +68,11 @@ VItemPathParser::VItemPathParser(const std::string& path,PathFormat format) : it
                 itemType_=NoType;
                 type_.clear();
             }
-            else
-            {
-                node_=p;
-                itemType_=NodeType;
-            }
+        }
+        else
+        {
+            node_=p;
+            itemType_=NodeType;
         }
     }
     else if(format == DiagFormat)
