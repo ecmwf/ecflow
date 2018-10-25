@@ -10,6 +10,8 @@
 
 #include "VReportMaker.hpp"
 
+#include "ServerHandler.hpp"
+#include "ShellCommand.hpp"
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "OutputFileProvider.hpp"
@@ -26,83 +28,60 @@ void VReportMaker::run(VInfo_ptr info)
 
     info_=info;
 
-    //Get file contents
-    infoProvider_->info(info);
-
     //Get job output
+    infoProvider_->info(info);
 }
 
 void VReportMaker::infoReady(VReply* reply)
 {
-    OutputFileProvider* op=static_cast<OutputFileProvider*>(infoProvider_);
-
-    if(reply->fileName() == op->joboutFileName() && !op->isTryNoZero(reply->fileName()) &&
-       info_ && info_->isNode() && info_->node() && info_->node()->isSubmitted())
-    {
-#if 0
-        hasMessage=true;
-        submittedWarning_=true;
-        messageLabel_->showWarning("This is the current job output (as defined by variable ECF_JOBOUT), but \
-               because the node status is <b>submitted</b> it may contain the ouput from a previous run!");
-#endif
-    }
-    else
-    {
-#if 0
-        if(reply->hasWarning())
-        {
-            messageLabel_->showWarning(QString::fromStdString(reply->warningText()));
-            hasMessage=true;
-        }
-        else if(reply->hasInfo())
-        {
-            messageLabel_->showInfo(QString::fromStdString(reply->infoText()));
-            hasMessage=true;
-        }
-#endif
-    }
-
+    Q_ASSERT(reply);
     VFile_ptr f=reply->tmpFile();
-    if(f)
-    {
-        loadFile(f);
-
-        //browser_->loadFile(f);
-        //if(f->storageMode() == VFile::DiskStorage)
-        //    hasMessage=false;
-
-    }
-
+    sendJiraReport(f);
     deleteLater();
 }
 
 void VReportMaker::infoFailed(VReply*)
 {
+    VFile_ptr f;
+    sendJiraReport(f);
     deleteLater();
 }
 
-void VReportMaker::loadFile(VFile_ptr file)
+void VReportMaker::sendJiraReport(VFile_ptr file)
 {
-    if(!file)
+    if(info_->isNode() && info_->node())
     {
-        //clear();
-        return;
-    }
+        VNode *node=info_->node();
+        ServerHandler* s=info_->server();
 
-    if(file->storageMode() == VFile::DiskStorage)
-    {
-        //loadFile(QString::fromStdString(file_->path()));
-        UiLog().dbg() << "REPORT " << file->path();
-    }
-    else
-    {
-        QString s(file->data());
-        //loadText(s,QString::fromStdString(file_->sourcePath()),true);
-        UiLog().dbg() << "REPORT " << s;
+        if(node && s)
+        {
+            std::string filePath="_undef_";
+            if(file)
+            {
+                if(file->storageMode() != VFile::DiskStorage)
+                    file->setStorageMode(VFile::DiskStorage);
+
+                filePath=file->path();
+            }
+
+            UiLog().dbg() << "REPORT outfile=" << filePath;
+
+            std::string jiraProject="_undef_";
+            if(const char* ch=getenv("ECFLOWUI_JIRA_PROJECT"))
+            {
+                jiraProject=std::string(ch);
+            }
+
+            std::string cmd="sh ecflow_ui_create_jira_issue.sh \'" + filePath + "\' " +
+                    s->host() + " " + s->port() + " \'" +
+                    node->absNodePath() + "\' \'" + node->stateName().toStdString() + "\' " +
+                    jiraProject;
+
+            ShellCommand::run(cmd,"");
+        }
     }
 }
-
-
 
 void VReportMaker::sendReport(VInfo_ptr info)
 {

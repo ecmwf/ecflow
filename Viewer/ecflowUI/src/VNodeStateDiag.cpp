@@ -34,7 +34,7 @@ VNodeStateDiag::VNodeStateDiag(VInfo_ptr info)
             VFile_ptr tmpFile2=VFile::createTmpFile(false);
 
             s->writeDefs(info,tmpFile->path());
-            std::string cmd="sh node_state_diag.sh \'" + tmpFile->path() + "\' " +
+            std::string cmd="sh ecflow_ui_node_state_diag.sh \'" + tmpFile->path() + "\' " +
                     s->host() + " " + s->port() + " \'" +
                     info->nodePath() + "\' \'" + tmpFile2->path() + "\'";
 

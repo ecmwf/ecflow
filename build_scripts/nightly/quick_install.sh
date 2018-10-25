@@ -10,8 +10,8 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 
 if [[ "$#"  == 0 ]] ; then
-export PATH=/tmp/ma0/install/cmake/ecflow/4.11.0/bin:$PATH
-export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.11.0/lib/python2.7/site-packages
+export PATH=/tmp/ma0/install/cmake/ecflow/4.12.0/bin:$PATH
+export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.12.0/lib/python2.7/site-packages
 else
    module unload ecflow
    module load ecflow/new
@@ -22,14 +22,6 @@ fi
 # =======================================================================
 rm -rf nightly
 cp -r $WK/build_scripts/nightly .
-
-# =======================================================================
-# Generate the defs, the is loaded into the server by load.py
-# =======================================================================
-python $WK/build_scripts/nightly/build.py
-if [[ $? = 1 ]] ; then
-   exit 1
-fi
 
 # =======================================================================
 # Kill the server
@@ -49,8 +41,6 @@ ecflow_server&
 sleep 4
 ecflow_client --server_version
 
-# =======================================================================
-# load the build defs, in the server then delete generated defs.
 # Make sure server is running
 # =======================================================================
 python $WK/build_scripts/nightly/load.py

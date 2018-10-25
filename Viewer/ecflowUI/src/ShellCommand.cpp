@@ -66,7 +66,8 @@ ShellCommand::ShellCommand(const std::string& cmdStr,const std::string& cmdDefSt
     //When we develop the ui it is not the case so we need to add its path to PATH
     //whenever is possible. The same is true for node_state_diag.sh.
     if((command_.contains("ecflow_client") ||
-        command_.contains("node_state_diag.sh")) && envHasToBeSet_)
+        command_.contains("ecflow_ui_node_state_diag.sh") || command_.contains("ecflow_ui_create_jira_issue.sh")) &&
+            envHasToBeSet_)
     {
         QString exeDir=QString::fromStdString(DirectoryHandler::exeDir());
         Q_ASSERT(!exeDir.isEmpty());
@@ -101,7 +102,7 @@ ShellCommand* ShellCommand::run(const std::string& cmd,const std::string& cmdDef
 
 void ShellCommand::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
-    if(!item_ && exitCode !=0)
+    if(!item_)
     {
         item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
     }

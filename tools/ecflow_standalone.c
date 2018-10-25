@@ -1,5 +1,5 @@
 /*
-## Copyright 2009-2017 ECMWF.
+## Copyright 2009-2019 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 ## In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,7 +13,37 @@
 *  standard out, and duplicate standard out as standard error. The next fopen()
 *  is then used as standard out/error. i.e output file.
 *
-*  test using:
+# Build stand alone to test
+gcc -g -Dlinux ecflow_standalone.c -o ecflow_standalone
+
+# Create file exe.sh use in the test below.
+cat > $(pwd)/exe.sh <<\!!
+xxx="hello worlds from /home/ma/ma0"
+#printenv
+echo $SHELL
+fred="ma0@ecmwf.int"
+mail -s "$xxx" $fred <<@@
+$xxx
+@@
+!!
+
+# Both these tests must work.
+ssh localhost $(pwd)/ecflow_standalone -s /bin/bash -o $(pwd)/out.txt < $(pwd)/exe.sh   # EXPECT non empty out.txt, and mail
+ssh localhost $(pwd)/ecflow_standalone -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # EXPECT non empty out.txt, and mail
+
+# expected out.txt
++ xxx='hello worlds from /home/ma/map'
++ printenv
++ echo /bin/ksh
++ fred=ma0@ecmwf.int
++ mail -s 'hello worlds from /home/ma/map' ma0@ecmwf.int
+
+std=/usr/local/apps/sms/bin/standalone
+ssh  eurus.ecmwf.int $std -s /bin/bash -o $(pwd)/out.txt < $(pwd)/exe.sh # OK
+ssh localhost $std -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # OK
+
+*
+*  Other test using:
 *  echo "xxx=\"hello worlds from $HOME\"\nfred=$USER" | ./ecflow_standalone -i in.txt -o out.txt
 *
 *  in.txt
@@ -28,13 +58,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#ifdef SYG
-#define <unistd.h>
-#endif
-
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>
+#include <limits.h> /* for PATH_MAX  */
 
 #ifndef TRUE
 #  define TRUE  1
@@ -53,13 +80,14 @@ char *nameof(char *name) {
 
 int main(argc,argv) int argc; char **argv;
 {
+  char  buff[MAXLEN];                  /* Temp buffer to read in lines */
+  char fname[PATH_MAX];
   char *infile = NULL;             /* Temporary input file        */
   char *outfile= "/dev/null";      /* Output file (def /dev/null) */
   char *shell= "/bin/sh";          /* default shell */
   /* int   keep_file=FALSE;*/      /* Flag to keep the input file */
 
   FILE *fp;                        /* Temp to write the input file */
-  char  buff[MAXLEN];              /* Temp buffer to read in lines */
 
   int   option;
   extern char *optarg;             /* Needed for the getopt */
@@ -88,14 +116,32 @@ int main(argc,argv) int argc; char **argv;
     }
 
   /* Copy standard input to infile */
-  if( !infile ) infile=(char *)tmpnam(NULL);
-  if( !(fp=fopen(infile,"w")) ) {
-     perror("STANDALONE-INPUT-FILE");
-     exit(1);
-  }
-  while( fgets( buff,MAXLEN-1,stdin) )  fputs(buff,fp);
-  fclose(fp);
+  if( !infile ) {
+    /* printf("!infile\n"); */
+    static char template[] = "/tmp/tmp_ecflowXXXXXX";
+    strcpy(fname, template); /* Copy template */
 
+    int fd = mkstemp(fname);
+    /* printf("input Filename is %s\n", fname);   Print it for information */
+    infile = fname;
+    close(fd);
+
+    if (!(fp = fopen(infile, "w"))) {
+      perror("ecflow_standalone.c, temp file creation error");
+      exit(1);
+    } 
+    while( fgets(buff, MAXLEN-1, stdin)) {
+      /* fprintf(stderr, "%s", buff); */
+      fputs(buff,fp);
+    }
+  }
+  else {
+     if( !(fp=fopen(infile,"r")) ) {
+        perror("STANDALONE-INPUT-FILE cannot open");
+        exit(1);
+     }
+  }
+  fclose(fp);
 
   /* fork child process, closing the parent */
   switch(fork()) {
@@ -122,7 +168,7 @@ int main(argc,argv) int argc; char **argv;
     perror("STANDALONE-INPUT-FILE-FOR-SHELL");
     exit(1);
   }
-  fclose(fp);
+  /* fclose(fp); */
 
   /* if( !keep_file ) unlink(infile); 
      for (n=3; n<65535 ;n++) fclose(n); */
@@ -139,8 +185,7 @@ int main(argc,argv) int argc; char **argv;
   }
 
   execl(shell,nameof(shell),"-x",infile,(char *)0);
-  /* if( !keep_file ) unlink(infile); */
-
-  fclose(fout); /* must be closed last */
+  /* if( !keep_file ) unlink(infile); 
+     fclose(fout); */
   exit(1);
 }
