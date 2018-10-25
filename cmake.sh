@@ -140,7 +140,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 # To load module automatically requires Korn shell, system start scripts
 
 module load cmake/3.10.2      # need cmake 3.12.0 to build python3. Allow boost python libs to be found
-module load ecbuild/2.9.0
+module load ecbuild/new
 #module load boost/1.53.0     # uncomment to use local BOOST_ROOT
 
 cmake_extra_options=""
