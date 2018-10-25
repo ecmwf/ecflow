@@ -190,7 +190,7 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
     bool selected=option.state & QStyle::State_Selected;
     QFontMetrics fm(font_);
 
-    for(int i=0; i < data->items()[row].size(); i++)
+    for(size_t i=0; i < data->items()[row].size(); i++)
     {
         int xp=timeToPos(option.rect,data->items()[row].start_[i]);
         UiLog().dbg() << "xp=" << xp << " time=" << data->items()[row].start_[i];
@@ -975,6 +975,9 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
        return;
     }
 
+    renderTimeline(rect,painter);
+
+#if 0
     qint64 startSec=startDate_.toMSecsSinceEpoch()/1000;
     qint64 endSec=endDate_.toMSecsSinceEpoch()/1000;
 
@@ -1023,6 +1026,125 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
 
 
         actSec+=minorTic;
+    }
+
+    //for(int i=0; i < 10; i++)
+    //{
+    //    int xp=i*rect.width()/10;
+    //    painter->drawLine(xp,rect.top(),xp,rect.bottom());
+    //}
+
+    //style()->drawControl(QStyle::CE_PushButton, &optButton,painter,this);
+#endif
+}
+
+
+void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
+{
+    //period in secs
+    qint64 startSec=startDate_.toMSecsSinceEpoch()/1000;
+    qint64 endSec=endDate_.toMSecsSinceEpoch()/1000;
+    qint64 period=endSec-startSec;
+
+    int minorTick=1; //in secs (it is a delta)
+    int majorTick=1;  //in secs (it is a delta)
+    qint64 firstTick=1; //in secs since epoch
+
+    int hLineY=rect.center().y();
+    int timeTextGap=4; //the gap between the top of the time text and the bottom of the major tick in pixels
+    int majorTickTop=hLineY;
+    int majorTickBottom=rect.bottom()-1-fm_.height()-timeTextGap;
+    int minorTickTop=hLineY;
+    int minorTickBottom=majorTickBottom-3;
+    int dateTextY= hLineY-1;;
+    int timeTextY=rect.bottom()-1-fm_.height();
+
+    if(period < 3600)
+    {
+        minorTick=60;
+        majorTick=600;
+        firstTick=(startSec/60)*60+60;
+    }
+
+    //Find label positions for days
+    QList<QPair<int,QString> > dateLabels;
+    int dayNum=startDate_.date().daysTo(endDate_.date());
+
+    if(dayNum == 0)
+    {
+        int xp=secToPos((startSec+endSec)/2,rect);
+        dateLabels << qMakePair(xp,startDate_.toString("dd MMM"));
+    }
+    else
+    {
+        QDate  nextDay=startDate_.date().addDays(1);
+        QDate  lastDay=endDate_.date();
+        qint64 nextSec=QDateTime(nextDay).toMSecsSinceEpoch()/1000;
+
+        if((nextSec-startSec) < 3600)
+        {
+            int xp=secToPos((startSec+nextSec)/2,rect);
+            dateLabels << qMakePair(xp,nextDay.toString("dd MMM"));
+        }
+
+        QDate firstDay=nextDay;
+        for(QDate d=firstDay; d < lastDay; d=d.addDays(1))
+        {
+            int xp=secToPos((QDateTime(d).toMSecsSinceEpoch()/1000 +
+            QDateTime(d.addDays(1)).toMSecsSinceEpoch()/1000)/2,rect);
+            dateLabels << qMakePair(xp,d.toString("dd MMM"));
+        }
+
+        if(QDateTime(lastDay).toMSecsSinceEpoch()/1000 < endSec)
+        {
+            int xp=secToPos((QDateTime(lastDay).toMSecsSinceEpoch()/1000+endSec)/2,rect);
+            dateLabels << qMakePair(xp,lastDay.toString("dd MMM"));
+        }
+    }
+
+    for(int i=0; i < dateLabels.count(); i++)
+    {
+        int xp=dateLabels[i].first;
+        int textW=fm_.width(dateLabels[i].second);
+        //int yp=rect.bottom()-1-fm.height();
+        painter->setFont(font_);
+        painter->drawText(QRect(xp-textW/2, dateTextY,textW,fm_.height()),
+                          Qt::AlignHCenter | Qt::AlignVCenter,dateLabels[i].second);
+    }
+
+    //horizontal line
+    painter->drawLine(rect.x(),hLineY,rect.right(),hLineY);
+
+    qint64 actSec=firstTick;
+    Q_ASSERT(actSec >= startSec);
+
+    while(actSec <= endSec)
+    {
+        int xp=secToPos(actSec-startSec,rect);
+
+        //draw major tick + label
+        if(actSec % majorTick == 0)
+        {
+            painter->drawLine(xp,majorTickTop,xp,majorTickBottom);
+
+            //Day
+            QString majorText=QDateTime::fromMSecsSinceEpoch(actSec*1000).toString("yyyy-MM-dd");
+
+            QString s=QDateTime::fromMSecsSinceEpoch(actSec * 1000).toString("H:mm");
+
+            int textW=fm_.width(s);
+            //int yp=rect.bottom()-1-fm.height();
+            painter->setFont(font_);
+            painter->drawText(QRect(xp-textW/2, timeTextY,textW,fm_.height()),Qt::AlignHCenter | Qt::AlignVCenter,s);
+
+        }
+        //draw minor tick
+        else
+        {
+            painter->drawLine(xp,minorTickTop,xp,minorTickBottom);
+        }
+
+        actSec+=minorTick;
     }
 
     //for(int i=0; i < 10; i++)

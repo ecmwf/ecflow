@@ -75,6 +75,15 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->reloadTb,SIGNAL(clicked()),
             this,SLOT(slotReload()));
 
+    connect(ui_->wholePeriodTb,SIGNAL(clicked()),
+            this,SLOT(slotWholePeriod()));
+
+    connect(ui_->todayTb,SIGNAL(clicked()),
+            this,SLOT(slotToday()));
+
+    connect(ui_->yesterdayTb,SIGNAL(clicked()),
+            this,SLOT(slotYerterday()));
+
     //ui_->timeWidget->setStyleSheet("#timeWidget{background-color: rgb(212,212,212);}");
 }
 
@@ -146,6 +155,21 @@ void TimelineWidget::slotReload()
     {
         load(serverName_, host_, port_, logFile_,numOfRows_);
     }
+}
+
+void TimelineWidget::slotWholePeriod()
+{
+
+}
+
+void TimelineWidget::slotToday()
+{
+
+}
+
+void TimelineWidget::slotYesterday()
+{
+
 }
 
 void TimelineWidget::load(QString logFile,int numOfRows)

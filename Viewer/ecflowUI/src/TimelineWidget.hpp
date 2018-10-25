@@ -36,6 +36,9 @@ public:
 
 protected Q_SLOTS:
    void slotReload();
+   void slotWholePeriod();
+   void slotToday();
+   void slotYesterday();
 
 private:
     void load();

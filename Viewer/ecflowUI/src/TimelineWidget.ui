@@ -57,6 +57,16 @@
       <widget class="QLineEdit" name="filterLe"/>
      </item>
      <item>
+      <widget class="QToolButton" name="toolButton">
+       <property name="text">
+        <string>Tasks only</string>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="spacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -70,10 +80,39 @@
       </spacer>
      </item>
      <item>
-      <widget class="QDateTimeEdit" name="fromTimeEdit"/>
+      <widget class="QDateTimeEdit" name="fromTimeEdit">
+       <property name="calendarPopup">
+        <bool>true</bool>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QDateTimeEdit" name="toTimeEdit"/>
+      <widget class="QDateTimeEdit" name="toTimeEdit">
+       <property name="calendarPopup">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="wholePeriodTb">
+       <property name="text">
+        <string>All</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="todayTb">
+       <property name="text">
+        <string>Today</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="yesterdayTb">
+       <property name="text">
+        <string>Yesterday</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

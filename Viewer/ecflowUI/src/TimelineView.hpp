@@ -134,6 +134,7 @@ protected:
     void showEvent(QShowEvent *QSize);
     void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const;
     void mousePressEvent(QMouseEvent *event);
+    void renderTimeline(const QRect& rect,QPainter* painter) const;
 
     int secToPos(qint64 t,QRect rect) const;
 
