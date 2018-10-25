@@ -94,6 +94,7 @@ protected:
     QFont abortedReasonFont_;
     QFont typeFont_;
     QColor bgCol_;
+    QString subFailText_;
 
     TreeNodeModel* model_;
 };
