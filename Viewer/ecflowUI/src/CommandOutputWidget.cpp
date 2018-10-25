@@ -233,7 +233,9 @@ CommandOutputWidget::CommandOutputWidget(QWidget *parent) :
     connect(handler,SIGNAL(itemStatusChanged(CommandOutput_ptr)),
             this,SLOT(slotItemStatusChanged(CommandOutput_ptr)));
 
+    splitter_->setCollapsible(0,false);
     splitter_->setCollapsible(1,false);
+    splitter_->setCollapsible(2,false);
 
     //The selection changes in the view
     connect(tree_->selectionModel(),SIGNAL(currentChanged(QModelIndex,QModelIndex)),
@@ -420,7 +422,7 @@ QString CommandOutputWidget::formatErrorText(QString txt)
 void CommandOutputWidget::writeSettings(QSettings& settings)
 {
     settings.beginGroup("widget");
-    settings.setValue("splitter",splitter_->saveState());
+    settings.setValue("splitter_v1",splitter_->saveState());
     ViewerUtil::saveTreeColumnWidth(settings,"treeColumnWidth",tree_);
     settings.endGroup();
 }
@@ -431,9 +433,9 @@ void CommandOutputWidget::readSettings(QSettings& settings)
 
     ViewerUtil::initTreeColumnWidth(settings,"treeColumnWidth",tree_);
 
-    if(settings.contains("splitter"))
+    if(settings.contains("splitter_v1"))
     {
-        splitter_->restoreState(settings.value("splitter").toByteArray());
+        splitter_->restoreState(settings.value("splitter_v1").toByteArray());
     }
 
     settings.endGroup();

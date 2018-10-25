@@ -10,10 +10,10 @@
 #============================================================================
 
 
-if [[ $# -ne 5 ]] ; then
-    echo "Error: wrong number of arguments = $# (must be 5)"
+if [[ $# -ne 6 ]] ; then
+    echo "Error: wrong number of arguments = $# (must be 6)"
     if [[ $# -eq 1 ]] ; then
-        echo "This is script should only be called from within ecflow_ui."
+        echo "This script should only be called from within ecflow_ui."
     fi
     exit 1
 fi
@@ -23,20 +23,21 @@ host=$2
 port=$3
 nodePath=$4
 nodeStatus=$5
+project=$6
 
-#project="SD"
-project="METV"
+jiraExe="jira"
 lastLines=50
 pattern="--abort"
 foundPattern=0
 hasOutFile=0
 hasLog=0
+exitCode=0
 
 #-------------------
 # get node log
 #-------------------
 logTmp=$(mktemp)
-ecflow_client --host=${host} --port=${port} --edit_history ${nodePath} > ${logTmp}
+ecflow_client --host=${host} --port=${port} --edit_history ${nodePath} > ${logTmp} 2>&1
 if [[ $? -eq 0 && -s ${logTmp} ]] ; then
     hasLog=1
 fi
@@ -67,15 +68,15 @@ fi
 #-------------------
 
 #define issue description
-desc="This report was generated automatically from ecflowUI. \\\\Server: ${host}@${port} \\\\Node: ${nodePath}"
+desc="This report was generated automatically from ecflowUI at $(date). \\\\Server: ${host}@${port} \\\\Node: ${nodePath}"
 
 #jobout
 if [[ ${hasOutFile} -eq 1 ]] ; then
 
     if [ "${foundPattern}" = "1" ] ; then
-        descOutFile="See the last ${lastLines} lines preceding pattern=${pattern} from the node job output file attached."
+        descOutFile="These are the last ${lastLines} lines preceding pattern=${pattern} from the node job output file: {code}$(cat ${outTmp}) {code}"
     else
-        descOutFile="See the last ${lastLines} lines from the node job output file attached."
+        descOutFile="These are the last ${lastLines} lines from the node job output file:  {code}$(cat ${outTmp}) {code}"
     fi
 else
     descOutFile="Could not locate job output file."
@@ -91,9 +92,49 @@ fi
 
 desc="${desc}\\\\ \\\\${descOutFile} \\\\${descLog}"
 
+#-------------------
+# run command
+#-------------------
+
 #create jira issue
-jira -S "${nodePath} status=${nodeStatus}" -D "${desc}" -A ${outTmp} --justdoit +${project}
+jiraTmp=$(mktemp)
+
+if [[ $project != "_undef_" ]] ; then
+
+    jiraCmdStr="${jiraExe} -S \"${host}@${port}:${nodePath} status=${nodeStatus}\" -D \${desc} --justdoit +${project}"
+    ${jiraExe} -S "${nodePath} status=${nodeStatus}" -D "${desc}" --justdoit +${project} > ${jiraTmp} 2>&1
+
+else
+    #if no project is defined the defaultproject is taken from the .jirarc file!
+    jiraCmdStr="${jiraExe} -S \"${host}@${port}:${nodePath} status=${nodeStatus}\" -D \${desc} --justdoit +"
+    ${jiraExe} -S "${nodePath} status=${nodeStatus}" -D "${desc}" --justdoit + > ${jiraTmp} 2>&1
+fi
+
+cmdFailed=$?
+
+#the exit code is still 0 for certain errors so we check
+#if the output contains the string error
+if [[ $cmdFailed -eq 0  && -s ${jiraTmp} ]] ; then
+    if [[  $(grep -c -e "ERROR:" ${jiraTmp}) -gt 0  ]] ; then
+        cmdFailed=1
+    fi
+fi
+
+#if there is an error the command stdout and stderr is written to the stderr
+if [[ $cmdFailed -ne 0 ]] ; then
+    echo -e "Generating JIRA issue with command: \n   ${jiraCmdStr}\nfailed!" >&2
+    if [[ -s ${jiraTmp} ]] ; then
+        cat ${jiraTmp} >&2
+        exitCode=1
+    fi
+else
+    echo -e "Sucessfully generated JIRA issue with command: \n   ${jiraCmdStr}\n"
+fi
+
 
 #delete tmp files
 [[ -f ${logTmp} ]] && rm -f ${logTmp}
 [[ -f ${outTmp} ]] && rm -f ${outTmp}
+[[ -f ${jiraTmp} ]] && rm -f ${jiraTmp}
+
+exit ${exitCode}

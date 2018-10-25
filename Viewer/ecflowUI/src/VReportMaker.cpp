@@ -67,9 +67,16 @@ void VReportMaker::sendJiraReport(VFile_ptr file)
 
             UiLog().dbg() << "REPORT outfile=" << filePath;
 
+            std::string jiraProject="_undef_";
+            if(const char* ch=getenv("ECFLOWUI_JIRA_PROJECT"))
+            {
+                jiraProject=std::string(ch);
+            }
+
             std::string cmd="sh ecflow_ui_create_jira_issue.sh \'" + filePath + "\' " +
                     s->host() + " " + s->port() + " \'" +
-                    node->absNodePath() + "\' \'" + node->stateName().toStdString() + "\'";
+                    node->absNodePath() + "\' \'" + node->stateName().toStdString() + "\' " +
+                    jiraProject;
 
             ShellCommand::run(cmd,"");
         }
