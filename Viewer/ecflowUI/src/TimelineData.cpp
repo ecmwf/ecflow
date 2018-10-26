@@ -216,7 +216,7 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
             name=line.substr(first_colon+1,next_ws-first_colon);
         }
 
-        //Convert status time into int
+        //Convert status time into
         unsigned int statusTime=QDateTime::fromString(QString::fromStdString(time_stamp),
                        "hh:mm:ss d.M.yyyy").toMSecsSinceEpoch()/1000;
 

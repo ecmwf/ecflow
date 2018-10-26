@@ -143,6 +143,9 @@ protected:
     QPixmap customPix_;
     QFont font_;
     QFontMetrics fm_;
+    QColor timelineCol_;
+    QColor dateTextCol_;
+    QColor timeTextCol_;
 
     //mutable QMap<int,TableNodeHeaderButton> customButton_;
 };

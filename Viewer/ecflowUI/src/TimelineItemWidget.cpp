@@ -79,7 +79,7 @@ void TimelineItemWidget::load()
         {
             logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
 
-            logFile="/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log";
+            //logFile="/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log";
 
             w_->load(QString::fromStdString(sh->name()),
                          QString::fromStdString(sh->host()),
