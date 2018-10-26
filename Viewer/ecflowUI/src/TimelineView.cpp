@@ -27,6 +27,7 @@
 #include "TimelineModel.hpp"
 #include "UiLog.hpp"
 #include "VFilter.hpp"
+#include "VNState.hpp"
 #include "VSettings.hpp"
 
 #define _UI_TimelineView_DEBUG
@@ -41,7 +42,8 @@ static std::vector<std::string> propVec;
 
 TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     model_(model),
-    borderPen_(QPen(QColor(230,230,230)))
+    //borderPen_(QPen(QColor(230,230,230)))
+    borderPen_(QPen(QColor(216,216,216)))
 {
     Q_ASSERT(model_);
 
@@ -163,6 +165,7 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     //rest of the columns
     else
     {
+        painter->fillRect(option.rect,QColor(242,242,242));
         QString text=index.data(Qt::DisplayRole).toString();
         QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
         painter->setFont(font_);
@@ -190,13 +193,29 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
     bool selected=option.state & QStyle::State_Selected;
     QFontMetrics fm(font_);
 
+    QColor col(Qt::black);
     for(size_t i=0; i < data->items()[row].size(); i++)
     {
         int xp=timeToPos(option.rect,data->items()[row].start_[i]);
         if(xp >= 0)
         {
             //UiLog().dbg() << "xp=" << xp << " time=" << data->items()[row].start_[i];
-            painter->fillRect(QRect(xp,option.rect.y(),10,10),Qt::red);
+            if(VNState* vn=VNState::find(data->items()[row].status_[i]))
+            {
+                col=vn->colour();
+            }
+
+            int w=5;;
+            if(i < data->items()[row].size()-1)
+            {
+                int xp1=timeToPos(option.rect,data->items()[row].start_[i+1]);
+                if(xp1 >=0)
+                {
+                    w=xp1-xp;
+                }
+            }
+
+            painter->fillRect(QRect(xp,option.rect.y(),w,10),col);
         }
     }
 
