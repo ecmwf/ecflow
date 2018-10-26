@@ -193,21 +193,24 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
     for(size_t i=0; i < data->items()[row].size(); i++)
     {
         int xp=timeToPos(option.rect,data->items()[row].start_[i]);
-        UiLog().dbg() << "xp=" << xp << " time=" << data->items()[row].start_[i];
-        painter->fillRect(QRect(xp,option.rect.y(),10,10),Qt::red);
+        if(xp >= 0)
+        {
+            //UiLog().dbg() << "xp=" << xp << " time=" << data->items()[row].start_[i];
+            painter->fillRect(QRect(xp,option.rect.y(),10,10),Qt::red);
+        }
     }
 
     //The initial filled rect (we will adjust its  width)
     //QRect itemRect=option.rect.adjusted(nodeBox_->leftMargin,nodeBox_->topMargin,0,-nodeBox_->bottomMargin);
-
-
-
 }
 
 int TimelineDelegate::timeToPos(QRect r,unsigned int time) const
 {
-    unsigned int start=model_->data()->startTime();
-    unsigned int end=model_->data()->endTime()+3600;
+    unsigned int start=startDate_.toMSecsSinceEpoch()/1000;
+    unsigned int end=endDate_.toMSecsSinceEpoch()/1000;
+
+    if(time < start || time > end)
+        return -1;
 
     if(start >= end)
         return r.x();
@@ -216,6 +219,21 @@ int TimelineDelegate::timeToPos(QRect r,unsigned int time) const
 
 }
 
+void TimelineDelegate::setStartDate(QDateTime t)
+{
+    startDate_=t;
+}
+
+void TimelineDelegate::setEndDate(QDateTime t)
+{
+    endDate_=t;
+}
+
+void TimelineDelegate::setPeriod(QDateTime t1,QDateTime t2)
+{
+    startDate_=t1;
+    endDate_=t2;
+}
 
 #if 0
 void TimelineDelegate::renderNode(QPainter *painter,const QModelIndex& index,
@@ -377,10 +395,10 @@ TimelineView::TimelineView(TimelineModel* model,QWidget* parent) :
     QTreeView::setModel(model_);
 
     //Create delegate to the view
-    TimelineDelegate *delegate=new TimelineDelegate(model_,this);
-    setItemDelegate(delegate);
+    delegate_=new TimelineDelegate(model_,this);
+    setItemDelegate(delegate_);
 
-    connect(delegate,SIGNAL(sizeHintChangedGlobal()),
+    connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
             this,SLOT(slotSizeHintChangedGlobal()));
 
     //Properties
@@ -582,18 +600,24 @@ void TimelineView::notifyChange(VProperty* p)
 
 void TimelineView::setStartDate(QDateTime t)
 {
+    delegate_->setStartDate(t);
     header_->setStartDate(t);
+    rerender();
+    UiLog().dbg() << "startdate" << t;
 }
 
 void TimelineView::setEndDate(QDateTime t)
 {
+    delegate_->setEndDate(t);
     header_->setEndDate(t);
+    rerender();
 }
 
 void TimelineView::setPeriod(QDateTime t1,QDateTime t2)
 {
+    delegate_->setPeriod(t1,t2);
     header_->setPeriod(t1,t2);
-
+    rerender();
 }
 
 //=========================================
@@ -1177,17 +1201,19 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
 
 void TimelineHeader::setStartDate(QDateTime t)
 {
-   startDate_=t;
+    startDate_=t;
+    headerDataChanged(Qt::Horizontal,0,1);
 }
 
 void TimelineHeader::setEndDate(QDateTime t)
 {
     endDate_=t;
+    headerDataChanged(Qt::Horizontal,0,1);
 }
 
 void TimelineHeader::setPeriod(QDateTime t1,QDateTime t2)
 {
     startDate_=t1;
     endDate_=t2;
-    update();
+    headerDataChanged(Qt::Horizontal,0,1);
 }

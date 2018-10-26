@@ -40,6 +40,11 @@ public:
 
     void notifyChange(VProperty* p);
 
+    void setStartDate(QDateTime);
+    void setEndDate(QDateTime);
+    void setPeriod(QDateTime t1,QDateTime t2);
+
+
 Q_SIGNALS:
     void sizeHintChangedGlobal();
 
@@ -56,6 +61,8 @@ protected:
     PropertyMapper* prop_;
     QFont font_;
     QPen borderPen_;
+    QDateTime startDate_;
+    QDateTime endDate_;
 };
 
 
@@ -104,6 +111,7 @@ protected:
     TimelineModel* model_;
     ActionHandler* actionHandler_;
     TimelineHeader* header_;
+    TimelineDelegate *delegate_;
     bool needItemsLayout_;
     PropertyMapper* prop_;
     bool setCurrentIsRunning_;

@@ -12,6 +12,7 @@
 
 #include <QWidget>
 
+class QDateTime;
 class TimelineData;
 class TimelineModel;
 class TimelineView;
@@ -39,6 +40,8 @@ protected Q_SLOTS:
    void slotWholePeriod();
    void slotToday();
    void slotYesterday();
+   void slotFromTimeChanged(const QDateTime&);
+   void slotToTimeChanged(const QDateTime&);
 
 private:
     void load();

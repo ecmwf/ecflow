@@ -15,6 +15,7 @@
 #include "TimelineModel.hpp"
 #include "TimelineView.hpp"
 #include "TextFormat.hpp"
+#include "UiLog.hpp"
 
 #include "ui_TimelineWidget.h"
 
@@ -71,6 +72,12 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->logInfoLabel->setAutoFillBackground(true);
     ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
     ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+
+    connect(ui_->fromTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
+            this,SLOT(slotFromTimeChanged(QDateTime)));
+
+    connect(ui_->toTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
+            this,SLOT(slotToTimeChanged(QDateTime)));
 
     connect(ui_->reloadTb,SIGNAL(clicked()),
             this,SLOT(slotReload()));
@@ -155,6 +162,18 @@ void TimelineWidget::slotReload()
     {
         load(serverName_, host_, port_, logFile_,numOfRows_);
     }
+}
+
+void TimelineWidget::slotFromTimeChanged(const QDateTime& dt)
+{
+    //model_->setStartDate(dt);
+    UiLog().dbg() << "new startdate=" << dt;
+    view_->setStartDate(dt);
+}
+
+void TimelineWidget::slotToTimeChanged(const QDateTime& dt)
+{
+    view_->setEndDate(dt);
 }
 
 void TimelineWidget::slotWholePeriod()
