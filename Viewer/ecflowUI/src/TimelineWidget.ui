@@ -54,10 +54,10 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLineEdit" name="filterLe"/>
+      <widget class="QLineEdit" name="pathFilterLe"/>
      </item>
      <item>
-      <widget class="QToolButton" name="toolButton">
+      <widget class="QToolButton" name="taskOnlyTb">
        <property name="text">
         <string>Tasks only</string>
        </property>

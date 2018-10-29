@@ -37,18 +37,20 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     data_=new TimelineData;
 
-    //Log contents
+    //the models
     model_=new TimelineModel(this);
+    sortModel_=new TimelineSortModel(model_,this);
 
     model_->setData(data_);
 
-    view_=new TimelineView(model_,this);
+    view_=new TimelineView(sortModel_,this);
     view_->setProperty("log","1");
     view_->setProperty("log","1");
     view_->setRootIsDecorated(false);
     view_->setModel(model_);
     view_->setUniformRowHeights(true);
     view_->setAlternatingRowColors(false);
+    view_->setSortingEnabled(true);
     //ui_->view->setItemDelegate(new LogDelegate(this));
     view_->setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -72,6 +74,12 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->logInfoLabel->setAutoFillBackground(true);
     ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
     ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
+
+    connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
+            this,SLOT(slotPathFilter(QString)));
+
+    connect(ui_->taskOnlyTb,SIGNAL(setChecked(bool)),
+            this,SLOT(slotTaskOnly(bool)));
 
     connect(ui_->fromTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
             this,SLOT(slotFromTimeChanged(QDateTime)));
@@ -109,6 +117,7 @@ void TimelineWidget::clear()
     //viewHandler_->clear();
 
     model_->clearData();
+    data_->clear();
     logFile_.clear();
     serverName_.clear();
     host_.clear();
@@ -162,6 +171,16 @@ void TimelineWidget::slotReload()
     {
         load(serverName_, host_, port_, logFile_,numOfRows_);
     }
+}
+
+void TimelineWidget::slotTaskOnly(bool taskFilter)
+{
+    sortModel_->setTaskFilter(taskFilter);
+}
+
+void TimelineWidget::slotPathFilter(QString pattern)
+{
+    sortModel_->setPathFilter(pattern);
 }
 
 void TimelineWidget::slotFromTimeChanged(const QDateTime& dt)

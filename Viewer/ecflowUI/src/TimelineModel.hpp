@@ -41,6 +41,32 @@ protected:
     TimelineData* data_;
 };
 
+class TimelineSortModel : public QSortFilterProxyModel
+{
+public:
+    TimelineSortModel(TimelineModel*,QObject *parent=0);
+    ~TimelineSortModel();
+
+    //From QSortFilterProxyModel:
+    //we set the source model in the constructor. So this function should not do anything.
+    void setSourceModel(QAbstractItemModel*) {}
+    TimelineModel* tlModel() const {return tlModel_;}
+
+    void selectionChanged(QModelIndexList lst);
+    void setSkipSort(bool b) {skipSort_=b;}
+    void setPathFilter(QString);
+    void setTaskFilter(bool);
+
+protected:
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &/*sourceParent*/) const;
+
+    TimelineModel* tlModel_;
+    bool skipSort_;
+    QString pathFilter_;
+    bool taskFilter_;
+};
+
 
 #endif // TIMELINEMODEL_CPP
 

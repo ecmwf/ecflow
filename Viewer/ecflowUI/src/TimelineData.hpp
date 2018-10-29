@@ -18,17 +18,21 @@
 class TimelineItem
 {
 public:
-    TimelineItem(const std::string& path,unsigned char status,unsigned int time);
+    enum Type {UndeterminedType,ServerType,SuiteType,FamilyType,TaskType};
+
+    TimelineItem(const std::string& path,unsigned char status,unsigned int time,bool taskType);
     size_t size() const {return status_.size();}
     //const std::string& name() const {return name_;}
     const std::string& path() const {return path_;}
+    bool isTask() const {return type_ ==  TaskType;}
     void add(unsigned char status,unsigned int time);
-
+    void setTypeToTask() {type_ = TaskType;}
     static QDateTime toQDateTime(unsigned int t)
           {return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t)*1000);}
 
 //protected:
     std::string path_;
+    Type type_;
     std::vector<unsigned int> start_;
     std::vector<unsigned int> end_;
     std::vector<unsigned char> status_;
@@ -46,10 +50,9 @@ public:
     unsigned int endTime() const {return endTime_;}
     QDateTime qStartTime() const {return TimelineItem::toQDateTime(startTime_);}
     QDateTime qEndTime() const {return TimelineItem::toQDateTime(endTime_);}
+    void clear();
 
 protected:
-
-    void clear();
     int indexOfItem(const std::string&);
 
     std::vector<TimelineItem> items_;

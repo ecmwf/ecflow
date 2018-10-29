@@ -15,6 +15,7 @@
 class QDateTime;
 class TimelineData;
 class TimelineModel;
+class TimelineSortModel;
 class TimelineView;
 
 namespace Ui {
@@ -42,6 +43,8 @@ protected Q_SLOTS:
    void slotYesterday();
    void slotFromTimeChanged(const QDateTime&);
    void slotToTimeChanged(const QDateTime&);
+   void slotPathFilter(QString);
+   void slotTaskOnly(bool);
 
 private:
     void load();
@@ -57,6 +60,7 @@ private:
 
     TimelineData* data_;
     TimelineModel* model_;
+    TimelineSortModel* sortModel_;
     TimelineView* view_;
 };
 

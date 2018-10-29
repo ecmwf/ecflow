@@ -83,6 +83,13 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         else
             return QVariant();
     }
+    else if(role == Qt::UserRole)
+    {
+        if(index.column() == 0)
+            return data_->items()[row].isTask();
+        else
+            return QVariant();
+    }
 
     return QVariant();
 }
@@ -128,4 +135,87 @@ QModelIndex TimelineModel::index( int row, int column, const QModelIndex & paren
 QModelIndex TimelineModel::parent(const QModelIndex &child) const
 {
     return QModelIndex();
+}
+
+//===========================================
+//
+// TimelineSortModel
+//
+//===========================================
+
+TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
+        QSortFilterProxyModel(parent),
+        tlModel_(tlModel),
+        skipSort_(false),
+        taskFilter_(false)
+{
+    Q_ASSERT(tlModel_);
+    //connect(nodeModel_,SIGNAL(filterChanged()),
+    //		this,SLOT(slotFilterChanged()));
+
+    QSortFilterProxyModel::setSourceModel(tlModel_);
+
+    setDynamicSortFilter(true);
+}
+
+TimelineSortModel::~TimelineSortModel()
+{
+}
+
+#if 0
+void TimelineSortModel::selectionChanged(QModelIndexList lst)
+{
+    QModelIndexList lstm;
+    Q_FOREACH(QModelIndex idx,lst)
+        lstm << mapToSource(idx);
+
+    nodeModel_->selectionChanged(lstm);
+}
+#endif
+
+void TimelineSortModel::setPathFilter(QString pathFilter)
+{
+    pathFilter_=pathFilter;
+    invalidate();
+}
+
+void TimelineSortModel::setTaskFilter(bool taskFilter)
+{
+    taskFilter_=taskFilter;
+    invalidate();
+}
+
+bool TimelineSortModel::lessThan(const QModelIndex &left,
+                                 const QModelIndex &right) const
+{
+    return true;
+
+    if(skipSort_)
+        return true;
+
+    if(left.column() == 0)
+    {
+        QVariant leftData = tlModel_->data(left);
+        QVariant rightData = tlModel_->data(right);
+
+        return leftData.toString() < rightData.toString();
+    }
+    return true;
+}
+
+bool TimelineSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &/*sourceParent*/) const
+{
+    return true;
+    bool matched=true;
+    if(!pathFilter_.isEmpty())
+    {
+        matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilter_);
+    }
+
+    if(matched && taskFilter_)
+    {
+        matched=tlModel_->data(tlModel_->index(sourceRow,0),Qt::UserRole).toBool();
+    }
+
+    return matched;
 }

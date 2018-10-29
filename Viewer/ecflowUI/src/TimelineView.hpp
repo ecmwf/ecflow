@@ -24,6 +24,7 @@ class ActionHandler;
 class PropertyMapper;
 class TimelineHeader;
 class TimelineModel;
+class TimelineSortModel;
 class VSettings;
 
 class TimelineDelegate : public QStyledItemDelegate, public VPropertyObserver
@@ -71,7 +72,7 @@ class TimelineView : public QTreeView,public VPropertyObserver
 Q_OBJECT
 
 public:
-    explicit TimelineView(TimelineModel* model,QWidget *parent=0);
+    explicit TimelineView(TimelineSortModel* model,QWidget *parent=0);
     ~TimelineView();
 
     void rerender();
@@ -108,7 +109,7 @@ protected:
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setSortingEnabledNoExec(bool b);
 
-    TimelineModel* model_;
+    TimelineSortModel* model_;
     ActionHandler* actionHandler_;
     TimelineHeader* header_;
     TimelineDelegate *delegate_;

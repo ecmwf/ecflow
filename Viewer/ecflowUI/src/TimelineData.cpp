@@ -24,9 +24,13 @@
 #include "TimelineData.hpp"
 #include "VNState.hpp"
 
-TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned int time) :
-    path_(path)
+TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned int time,bool taskType) :
+    path_(path),
+    type_(UndeterminedType)
 {
+    if(taskType)
+        type_=TaskType;
+
     add(status,time);
 }
 
@@ -42,8 +46,10 @@ void TimelineItem::add(unsigned char status,unsigned int time)
 
 void TimelineData::clear()
 {
+    numOfRows_=0;
     startTime_=0;
     endTime_=0;
+    items_=std::vector<TimelineItem>();
 }
 
 void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
@@ -146,6 +152,7 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
         // MSG:[HH:MM:SS D.M.YYYY] --begin      [args | path(optional) ]    :<user>
 
         //LOG:[22:45:30 21.4.2018]  complete: path
+        //LOG:[22:45:30 21.4.2018]  submitted: path job_size:16408
 
         /// We are only interested in status changes (i.e LOG:)
         if (line.empty())
@@ -182,7 +189,7 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
 
         //line.erase(0,first_closed_bracket+1);
 
-        /// EXTRACT the status
+        ///extract the status
         std::string::size_type first_colon = line.find(':',first_closed_bracket);
         if(first_colon == std::string::npos)
             continue;
@@ -200,7 +207,7 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
         else
             continue;
 
-        /// EXTRACT the full name
+        //extract the full name
         first_char =  line.find_first_not_of(' ', first_colon+1);
         if(first_char  == std::string::npos)
               continue;
@@ -214,6 +221,15 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
         else
         {
             name=line.substr(first_colon+1,next_ws-first_colon);
+        }
+
+        //Try to figure out if it is a taks when status=submitted. If there is
+        //an item with "job_size:" it must be a task.
+        bool taskNode=false;
+        if(status == "submitted" && next_ws  != std::string::npos)
+        {
+            if(line.find("job_size:",next_ws) != std::string::npos)
+                taskNode=true;
         }
 
         //Convert status time into
@@ -230,10 +246,12 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
         if(idx != -1)
         {
             items_[idx].add(statusId,statusTime);
+            if(taskNode)
+                items_[idx].setTypeToTask();
         }
         else
         {
-            items_.push_back(TimelineItem(name,statusId,statusTime));
+            items_.push_back(TimelineItem(name,statusId,statusTime,taskNode));
         }
     }
 

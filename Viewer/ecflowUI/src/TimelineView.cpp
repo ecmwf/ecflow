@@ -185,7 +185,10 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
 
 void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,int row) const
-{
+{   
+    if(row < 0)
+        return;
+
     TimelineData *data=model_->data();
     if(!data)
         return;
@@ -344,7 +347,7 @@ void TimelineDelegate::renderNode(QPainter *painter,const QModelIndex& index,
 //
 //======================================================================
 
-TimelineView::TimelineView(TimelineModel* model,QWidget* parent) :
+TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
      QTreeView(parent),
      model_(model),
      needItemsLayout_(false),
@@ -414,7 +417,7 @@ TimelineView::TimelineView(TimelineModel* model,QWidget* parent) :
     QTreeView::setModel(model_);
 
     //Create delegate to the view
-    delegate_=new TimelineDelegate(model_,this);
+    delegate_=new TimelineDelegate(model_->tlModel(),this);
     setItemDelegate(delegate_);
 
     connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
