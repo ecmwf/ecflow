@@ -9,6 +9,7 @@
 
 #include "TimelineWidget.hpp"
 
+#include <QtGlobal>
 #include <QFileInfo>
 
 #include "TimelineData.hpp"
@@ -47,7 +48,6 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     view_->setProperty("log","1");
     view_->setProperty("log","1");
     view_->setRootIsDecorated(false);
-    view_->setModel(model_);
     view_->setUniformRowHeights(true);
     view_->setAlternatingRowColors(false);
     view_->setSortingEnabled(true);
@@ -75,10 +75,18 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
     ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+    ui_->pathFilterLe->setPlaceholderText(tr("Filter"));
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+    ui_->pathFilterLe->setClearButtonEnabled(true);
+#endif
+
     connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
             this,SLOT(slotPathFilter(QString)));
 
-    connect(ui_->taskOnlyTb,SIGNAL(setChecked(bool)),
+    connect(ui_->taskOnlyTb,SIGNAL(clicked(bool)),
             this,SLOT(slotTaskOnly(bool)));
 
     connect(ui_->fromTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),

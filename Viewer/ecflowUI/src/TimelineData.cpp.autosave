@@ -244,9 +244,9 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
             items_.push_back(TimelineItem(name,statusId,statusTime,
                                           guessNodeType(line,name,status,next_ws)));
         }
+    
+        numOfRows_++;
     }
-
-      numOfRows_++;
 }
 
 TimelineItem::Type TimelineData::guessNodeType(const std::string& line,const std::string& name,

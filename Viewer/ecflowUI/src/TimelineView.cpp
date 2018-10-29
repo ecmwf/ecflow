@@ -127,7 +127,7 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
     //QString id=columns_->id(index.column());
 
-    if(index.column() == 1)
+    if(index.column() == 2)
     {
         renderTimeline(painter,option,index.row());
 
@@ -552,6 +552,28 @@ void TimelineView::slotContextMenu(const QPoint &position)
 
 void TimelineView::handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget)
 {
+    if(!indexClicked.isValid())
+        return;
+
+    QAction *acDetails=new QAction(this);
+    acDetails->setText("Details");
+    acDetails->setData("details");
+
+    QMenu *menu=new QMenu(this);
+    menu->addAction(acDetails);
+
+    //Show the context menu and check selected action
+    QAction* ac=menu->exec(globalPos);
+    if(ac && ac->isEnabled() && !ac->isSeparator())
+    {
+        if(ac->data().toString() == "details")
+        {
+            showDetails(indexClicked);
+        }
+    }
+
+    delete menu;
+
 #if 0
     //Node actions
         if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
@@ -574,6 +596,11 @@ void TimelineView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
         {
         }
 #endif
+}
+
+void TimelineView::showDetails(const QModelIndex& indexClicked)
+{
+
 }
 
 void TimelineView::slotViewCommand(VInfo_ptr info,QString cmd)
@@ -1015,7 +1042,7 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
     QRect textRect=rect;
     textRect.setRight(rightPos-5);
 
-    if(logicalIndex == 0)
+    if(logicalIndex == 0 || logicalIndex == 1)
     {
        painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
        return;

@@ -20,13 +20,13 @@ class TimelineItem
 public:
     enum Type {UndeterminedType,ServerType,SuiteType,FamilyType,TaskType};
 
-    TimelineItem(const std::string& path,unsigned char status,unsigned int time,bool taskType);
+    TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type=UndeterminedType);
     size_t size() const {return status_.size();}
     //const std::string& name() const {return name_;}
     const std::string& path() const {return path_;}
+    Type type() const {return type_;}
     bool isTask() const {return type_ ==  TaskType;}
     void add(unsigned char status,unsigned int time);
-    void setTypeToTask() {type_ = TaskType;}
     static QDateTime toQDateTime(unsigned int t)
           {return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t)*1000);}
 
@@ -54,6 +54,12 @@ public:
 
 protected:
     int indexOfItem(const std::string&);
+    TimelineItem::Type guessNodeType(const std::string& line,const std::string& name,
+                                      const std::string& status,
+                                      std::string::size_type next_ws) const;
+    TimelineItem::Type guessNodeType(const std::string& line,
+                                      const std::string& status,
+                                      std::string::size_type next_ws) const;
 
     std::vector<TimelineItem> items_;
     int numOfRows_;

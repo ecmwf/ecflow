@@ -43,7 +43,7 @@ bool TimelineModel::hasData() const
 
 int TimelineModel::columnCount( const QModelIndex& /*parent */) const
 {
-     return 2;
+     return 3;
 }
 
 int TimelineModel::rowCount( const QModelIndex& parent) const
@@ -80,9 +80,27 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
     {
         if(index.column() == 0)
             return QString::fromStdString(data_->items()[row].path());
+        else if(index.column() == 1)
+        {
+            switch(data_->items()[row].type())
+            {
+            case TimelineItem::TaskType:
+                return "task";
+            case TimelineItem::FamilyType:
+                return "family";
+            case TimelineItem::SuiteType:
+                return "suite";
+            case TimelineItem::ServerType:
+                return "server";
+            default:
+                return "???";
+            }
+        }
         else
             return QVariant();
     }
+
+    //filter
     else if(role == Qt::UserRole)
     {
         if(index.column() == 0)
@@ -106,6 +124,8 @@ QVariant TimelineModel::headerData( const int section, const Qt::Orientation ori
         case 0:
             return "Path";
         case 1:
+            return "Type";
+        case 2:
             return "Time";
         default:
             return QVariant();
@@ -188,8 +208,6 @@ void TimelineSortModel::setTaskFilter(bool taskFilter)
 bool TimelineSortModel::lessThan(const QModelIndex &left,
                                  const QModelIndex &right) const
 {
-    return true;
-
     if(skipSort_)
         return true;
 
@@ -205,7 +223,6 @@ bool TimelineSortModel::lessThan(const QModelIndex &left,
 
 bool TimelineSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &/*sourceParent*/) const
 {
-    return true;
     bool matched=true;
     if(!pathFilter_.isEmpty())
     {

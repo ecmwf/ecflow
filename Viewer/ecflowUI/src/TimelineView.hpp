@@ -108,6 +108,7 @@ protected:
     void adjustBackground(QColor col);
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setSortingEnabledNoExec(bool b);
+    void showDetails(const QModelIndex& indexClicked);
 
     TimelineSortModel* model_;
     ActionHandler* actionHandler_;
