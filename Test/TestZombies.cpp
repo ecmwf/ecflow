@@ -55,18 +55,18 @@ namespace fs = boost::filesystem;
 // i.e. where we have created a user Zombie but there is no associated process ??
 // *******************************************************************
 
-//#define DO_TEST1 1
-//#define DO_TEST2 1
-//#define DO_TEST3 1
-//#define DO_TEST4 1
+#define DO_TEST1 1
+#define DO_TEST2 1
+#define DO_TEST3 1
+#define DO_TEST4 1
 #define DO_TEST5 1
-//#define DO_TEST6 1
-//#define DO_TEST7 1
-//#define DO_TEST8 1
-//#define DO_TEST9 1
-//#define DO_TEST10 1
-//#define DO_TEST11 1
-//#define DO_TEST12 1
+#define DO_TEST6 1
+#define DO_TEST7 1
+#define DO_TEST8 1
+#define DO_TEST9 1
+#define DO_TEST10 1
+#define DO_TEST11 1
+#define DO_TEST12 1
 
 static bool ecf_debug_enabled = false; // allow environment(ECF_DEBUG_ZOMBIES) to enable debug
 
