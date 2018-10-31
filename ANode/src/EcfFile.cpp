@@ -80,7 +80,8 @@ EcfFile& EcfFile::operator=(const EcfFile& rhs)
    script_path_or_cmd_ = rhs.script_path_or_cmd_;
    jobLines_.resize(0);  // the most expensive
    job_size_.clear();
-   script_type_ = rhs.script_type_;
+   script_origin_ = rhs.script_origin_;
+   ecf_file_search_algorithm_ = rhs.ecf_file_search_algorithm_;
    return *this;
 }
 
@@ -94,11 +95,13 @@ EcfFile& EcfFile::operator=(const EcfFile& rhs)
 // ===================================================================================
 EcfFile::EcfFile( Node* t,
                   const std::string& pathToEcfFileOrCommand,
-                  EcfFile::ScriptType  script_type
+                  EcfFile::Origin  script_origin,
+                  EcfFile::EcfFileSearchAlgorithm search_algo
 )
 : node_( t ),
   script_path_or_cmd_( pathToEcfFileOrCommand ),
-  script_type_( script_type )
+  script_origin_( script_origin ),
+  ecf_file_search_algorithm_( search_algo )
 {
    node_->findParentUserVariableValue(Str::ECF_MICRO(),ecfMicroCache_);
    if ( ecfMicroCache_.empty() || ecfMicroCache_.size() != 1) {
@@ -157,9 +160,52 @@ void EcfFile::manual(std::string& theManual)
    vector_to_string(theManualLines,theManual);
 }
 
+std::string EcfFile::origin_str(EcfFile::Origin origin)
+{
+   string ret;
+   switch (origin) {
+      case ECF_FILES:     ret = "ECF_FILES"; break;
+      case ECF_HOME:      ret = "ECF_HOME"; break;
+      case ECF_SCRIPT:    ret = "ECF_SCRIPT"; break;
+      case ECF_FETCH_CMD: ret = "ECF_FETCH"; break;
+      case ECF_SCRIPT_CMD:ret = "ECF_SCRIPT_CMD"; break;
+   }
+   return ret;
+}
+
+std::string EcfFile::search_algorithm_str(EcfFile::EcfFileSearchAlgorithm sa)
+{
+   string ret;
+   switch (sa) {
+      case PRUNE_ROOT:ret = "PRUNE_ROOT"; break;
+      case PRUNE_LEAF:ret = "PRUNE_LEAF"; break;
+   }
+   return ret;
+}
+
+std::string EcfFile::ecf_file_origin_dump() const
+{
+   string origin = "# ecf_script_origin :";
+   switch (script_origin_) {
+      case ECF_FILES:{    origin += " ECF_FILES(";
+                          if (ecf_file_search_algorithm_ == EcfFile::PRUNE_ROOT) origin += "PRUNE_ROOT) : ";
+                          else                                                   origin += "PRUNE_LEAF) : ";
+                          break;}
+      case ECF_HOME:{     origin += " ECF_HOME(";
+                          if (ecf_file_search_algorithm_ == EcfFile::PRUNE_ROOT) origin += "PRUNE_ROOT) : ";
+                          else                                                   origin += "PRUNE_LEAF) : ";
+                          break;}
+      case ECF_SCRIPT:    origin += " ECF_SCRIPT : "; break;
+      case ECF_FETCH_CMD: origin += " ECF_FETCH : "; break;
+      case ECF_SCRIPT_CMD:origin += " ECF_SCRIPT_CMD : "; break;
+   }
+   origin += script_path_or_cmd_;
+   return origin;
+}
+
 void EcfFile::script(std::string& theScript) const
 {
-   if ( script_type_ == EcfFile::ECF_FILE) {
+   if ( script_origin_ == EcfFile::ECF_SCRIPT) {
       if (!File::open(script_path_or_cmd_,theScript)) {
          std::stringstream ss;
          ss << "EcfFile::script: Could not open script for task/alias " << node_->absNodePath() << " at path " << script_path_or_cmd_ << " (" << strerror(errno) << ")";
@@ -167,7 +213,9 @@ void EcfFile::script(std::string& theScript) const
       }
       return;
    }
-   std::vector<std::string> lines;
+
+   // record script origin, as a comment on the first line
+   std::vector<std::string> lines; lines.push_back(ecf_file_origin_dump());
    std::string error_msg;
    if (!open_script_file(script_path_or_cmd_, EcfFile::SCRIPT, lines,  error_msg)) {
       std::stringstream ss;
@@ -381,8 +429,10 @@ bool EcfFile::open_script_file(
       return false;
    }
 
-   switch (script_type_) {
-      case ECF_FILE: {
+   switch (script_origin_) {
+      case ECF_FILES:
+      case ECF_HOME:
+      case ECF_SCRIPT: {
          if (type == EcfFile::INCLUDE) {
             return open_include_file(file_or_cmd,lines,errormsg);
          }
@@ -895,7 +945,7 @@ boost::filesystem::path EcfFile::file_creation_path() const
 
 std::string EcfFile::script_or_job_path() const
 {
-   if (script_type_ == ECF_FILE) return script_path_or_cmd_;
+   if (script_origin_ == ECF_SCRIPT) return script_path_or_cmd_;
 
    // ECF_FETCH or ECF_SCRIPT_CMD
    std::string ecf_job;

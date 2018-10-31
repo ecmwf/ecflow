@@ -323,7 +323,8 @@ BOOST_AUTO_TEST_CASE( test_ECF_SCRIPT_CMD_ECFLOW_427 )
       std::string script;
       try { ecfFile.script(script); }
       catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected script extraction to succeed " << e.what());}
-      BOOST_CHECK_MESSAGE(script == ecf_file ,"Expected:\n'" << ecf_file << "' but found:\n'" <<  script << "'");
+      string the_ecf_file = ecfFile.ecf_file_origin_dump() + "\n" + ecf_file;
+      BOOST_CHECK_MESSAGE(script == the_ecf_file ,"Expected:\n'" << the_ecf_file << "' but found:\n'" <<  script << "'");
    }
 
    /// Remove all the generated files

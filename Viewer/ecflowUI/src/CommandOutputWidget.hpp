@@ -59,7 +59,6 @@ public:
     void readSettings(QSettings&);
     void writeSettings(QSettings&);
 
-
 protected Q_SLOTS:
     void slotItemSelected(const QModelIndex&,const QModelIndex&);
     void slotItemAddBegin();
@@ -82,8 +81,10 @@ protected:
     void loadItem(CommandOutput_ptr);
     void updateInfoLabel(CommandOutput_ptr);
     void removeSpacer();
+    QString formatErrorText(QString txt);
 
     CommandOutputModel* model_;
+    QColor errCol_;
 };
 
 #endif // COMMANDOUTPUTWIDGET_HPP

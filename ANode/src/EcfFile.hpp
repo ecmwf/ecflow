@@ -50,10 +50,18 @@ private:
 
 class EcfFile {
 public:
-   enum ScriptType { ECF_FILE,      // Look for .ecf file, uses default algorithm to find %includes
-                     ECF_FETCH_CMD, // pre-process output of ECF_FETCH,     all %includes use same command
-                     ECF_SCRIPT_CMD // pre-process output of ECF_SCRIPT_CMD, uses default algorithm to find %includes
+   enum Origin { ECF_SCRIPT,     // Look for .ecf file, uses default algorithm to find %includes
+                 ECF_HOME,       // default directory for scripts
+                 ECF_FILES,      // User specified directory
+                 ECF_FETCH_CMD,  // pre-process output of ECF_FETCH,     all %includes use same command
+                 ECF_SCRIPT_CMD  // pre-process output of ECF_SCRIPT_CMD, uses default algorithm to find %includes
              };
+
+   // Use to record how the ecf_file was located from ECF_FILES and ECF_HOME directories. Default is PRUNE_ROOT
+   enum EcfFileSearchAlgorithm {
+      PRUNE_ROOT,
+      PRUNE_LEAF
+   };
 
    EcfFile();
 
@@ -63,7 +71,7 @@ public:
 	/// use default copy constructor, assignment, destructor
 	/// ECF_FETCH  is used obtain the script from running a command  i.e.
 	/// from the version control system.
-	EcfFile(Node*, const std::string& path_to_script_or_fetch_cmd, EcfFile::ScriptType = ECF_FILE );
+	EcfFile(Node*, const std::string& path_to_script_or_fetch_cmd, EcfFile::Origin = ECF_SCRIPT, EcfFile::EcfFileSearchAlgorithm = PRUNE_ROOT);
 
 	// The path to the ecf file, empty path means that ecf file could not be located
 	bool valid() const { return !script_path_or_cmd_.empty();}
@@ -73,9 +81,18 @@ public:
  	/// Will throw std::runtime_error for errors
 	void manual(std::string& theManual);
 
-	/// returns the script
+	/// returns the script, The first line contains the origin of the file/cmd.
 	/// Will throw std::runtime_error for errors
 	void script(std::string& theScript) const;
+
+	/// What is the origin of this ecf_file
+	std::string ecf_file_origin_dump() const;
+
+	/// simple accessors
+	Origin ecf_file_origin() const { return script_origin_;}
+	EcfFileSearchAlgorithm ecf_file_search_algorithm() const { return ecf_file_search_algorithm_;}
+   static std::string origin_str(Origin);
+   static std::string search_algorithm_str(EcfFileSearchAlgorithm);
 
 	/// Create the job file from with script of a task or alias.
 	/// Note: the location of the ecf file may not be the same as the job file
@@ -152,7 +169,8 @@ private:
  	mutable std::vector<std::shared_ptr<IncludeFileCache> > include_file_cache_; // only open include file once
  	mutable std::vector<std::pair<std::string,bool> > file_stat_cache_; // Minimise calls to stat/kernel calls
  	mutable std::string  job_size_;      // to be placed in log file during job submission
- 	EcfFile::ScriptType  script_type_{EcfFile::ECF_SCRIPT_CMD};   // get script from a file, or from running a command
+ 	EcfFile::Origin  script_origin_{EcfFile::ECF_SCRIPT};   // get script from a file, or from running a command
+ 	EcfFile::EcfFileSearchAlgorithm ecf_file_search_algorithm_{EcfFile::PRUNE_ROOT}; // only used for ECF_FILES and ECF_HOME
 };
 
 
