@@ -321,7 +321,7 @@ EcfFile Submittable::locatedEcfFile() const
 #ifdef DEBUG_TASK_LOCATION
       std::cout << "Submittable::locatedEcfFile() Submittable " << name() << " ECF_SCRIPT = '" << genvar_ecfscript.theValue() << "' exists\n";
 #endif
-      return EcfFile( const_cast<Submittable*>(this), genvar_ecfscript.theValue() );
+      return EcfFile( const_cast<Submittable*>(this), genvar_ecfscript.theValue(), EcfFile::ECF_SCRIPT );
    }
    else {
       reasonEcfFileNotFound += "   ECF_SCRIPT(";
@@ -370,6 +370,12 @@ EcfFile Submittable::locatedEcfFile() const
       reasonEcfFileNotFound += "   Variable ECF_SCRIPT_CMD not defined:\n";
    }
 
+   EcfFile::EcfFileSearchAlgorithm file_search_algo = EcfFile::PRUNE_ROOT;
+   std::string ecf_files_lookup ;
+   if (findParentUserVariableValue( "ECF_FILES_LOOKUP", ecf_files_lookup )) {
+      if (ecf_files_lookup == "prune_leaf" || ecf_files_lookup == "PRUNE_LEAF") file_search_algo = EcfFile::PRUNE_LEAF;
+   }
+
 
    std::string ecf_filesDirectory ;
    if (findParentUserVariableValue( Str::ECF_FILES() , ecf_filesDirectory)) {
@@ -379,13 +385,17 @@ EcfFile Submittable::locatedEcfFile() const
       if ( !ecf_filesDirectory.empty() && fs::is_directory( ecf_filesDirectory ) )
       {
          // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
-         std::string searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
+         std::string searchResult;
+         if (file_search_algo == EcfFile::PRUNE_ROOT) searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
+         else                                         searchResult = File::forwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
          if ( searchResult.empty()) {
             reasonEcfFileNotFound += "   Search of directory ECF_FILES(";
             reasonEcfFileNotFound += ecf_filesDirectory;
-            reasonEcfFileNotFound += ") failed:\n";
+            reasonEcfFileNotFound += ") failed ";
+            if (file_search_algo == EcfFile::PRUNE_ROOT) reasonEcfFileNotFound += "using prune_root:\n";
+            else                                         reasonEcfFileNotFound += "using prune_leaf:\n";
          }
-         else  return EcfFile(const_cast<Submittable*>(this), searchResult);
+         else return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_FILES, file_search_algo);
       }
       else {
          // Before failing try again but with variable Subsitution. ECFLOW-788
@@ -393,13 +403,15 @@ EcfFile Submittable::locatedEcfFile() const
          variableSubsitution(ecf_filesDirectory);
          if ( !ecf_filesDirectory.empty() && fs::is_directory(ecf_filesDirectory))
          {
-            // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
-            std::string searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
+            // If search fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
+            std::string searchResult;
+            if (file_search_algo == EcfFile::PRUNE_ROOT) searchResult = File::backwardSearch( ecf_filesDirectory, theAbsNodePath, script_extension() );
+            else                                         searchResult = File::forwardSearch(  ecf_filesDirectory, theAbsNodePath, script_extension() );
             if ( searchResult.empty()) {
                std::stringstream ss; ss << "   Search of directory ECF_FILES(variable substituted)(" << ecf_filesDirectory << ") failed:\n";
                reasonEcfFileNotFound += ss.str();
             }
-            else return EcfFile(const_cast<Submittable*>(this), searchResult);
+            else return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_FILES, file_search_algo);
          }
          else {
             std::stringstream ss;
@@ -420,15 +432,19 @@ EcfFile Submittable::locatedEcfFile() const
 #endif
    if ( !ecf_home.empty() && fs::is_directory( ecf_home ) )
    {
-      // If File::backwardSearch fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
-      std::string searchResult = File::backwardSearch( ecf_home, theAbsNodePath, script_extension() );
+      // If search fails it returns an empty string, i.e failure to locate script (Task/.ecf || Alias/.usr) file
+      std::string searchResult;
+      if (file_search_algo == EcfFile::PRUNE_ROOT) searchResult = File::backwardSearch( ecf_home, theAbsNodePath, script_extension() );
+      else                                         searchResult = File::forwardSearch(  ecf_home, theAbsNodePath, script_extension() );
       if ( searchResult.empty()) {
          reasonEcfFileNotFound += "   Search of directory ECF_HOME(";
          reasonEcfFileNotFound += ecf_home;
-         reasonEcfFileNotFound += ") failed:\n";
+         reasonEcfFileNotFound += ") failed ";
+         if (file_search_algo == EcfFile::PRUNE_ROOT) reasonEcfFileNotFound += "using prune_root:\n";
+         else                                         reasonEcfFileNotFound += "using prune_leaf:\n";
       }
       else {
-         return EcfFile(const_cast<Submittable*>(this), searchResult);
+         return EcfFile(const_cast<Submittable*>(this), searchResult, EcfFile::ECF_HOME, file_search_algo);
       }
    }
    else {
