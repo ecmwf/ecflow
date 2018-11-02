@@ -11,8 +11,8 @@
 #define TIMELINEWIDGET_HPP
 
 #include <QWidget>
+#include <QDateTime>
 
-class QDateTime;
 class TimelineData;
 class TimelineModel;
 class TimelineSortModel;
@@ -38,18 +38,22 @@ public:
 
 protected Q_SLOTS:
    void slotReload();
+   void slotResetStart();
+   void slotResetEnd();
    void slotWholePeriod();
    void slotToday();
    void slotYesterday();
-   void slotFromTimeChanged(const QDateTime&);
-   void slotToTimeChanged(const QDateTime&);
+   void slotStartChanged(const QDateTime&);
+   void slotEndChanged(const QDateTime&);
    void slotPathFilter(QString);
    void slotTaskOnly(bool);
+   void slotPeriodSelectedInView(QDateTime,QDateTime);
 
 private:
     void load();
     void updateInfoLabel();
     void setAllVisible(bool b);
+    void checkButtonState();
 
     Ui::TimelineWidget* ui_;
     QString serverName_;
@@ -62,6 +66,7 @@ private:
     TimelineModel* model_;
     TimelineSortModel* sortModel_;
     TimelineView* view_;
+    bool ignoreTimeEdited_;
 };
 
 #endif // TIMELINEWIDGET_HPP

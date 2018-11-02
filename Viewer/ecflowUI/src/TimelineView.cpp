@@ -25,6 +25,7 @@
 #include "PropertyMapper.hpp"
 #include "TimelineData.hpp"
 #include "TimelineModel.hpp"
+#include "TimelineInfoWidget.hpp"
 #include "UiLog.hpp"
 #include "VFilter.hpp"
 #include "VNState.hpp"
@@ -129,7 +130,7 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
     if(index.column() == 2)
     {
-        renderTimeline(painter,option,index.row());
+        renderTimeline(painter,option,index.data().toInt());
 
         //QString text=index.data(Qt::DisplayRole).toString();
         //renderNode(painter,index,vopt,text);
@@ -361,9 +362,9 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     setRootIsDecorated(false);
 
     //We enable sorting but do not want to perform it immediately
-    setSortingEnabledNoExec(true);
+    //setSortingEnabledNoExec(true);
 
-    //setSortingEnabled(false);
+    setSortingEnabled(false);
     //sortByColumn(-1,Qt::AscendingOrder);
 
     setAllColumnsShowFocus(true);
@@ -383,8 +384,8 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     //Context menu
     setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(this, SIGNAL(customContextMenuRequested(const QPoint &)),
-                        this, SLOT(slotContextMenu(const QPoint &)));
+    connect(this,SIGNAL(customContextMenuRequested(const QPoint&)),
+            this,SLOT(slotContextMenu(const QPoint&)));
 
     //Selection
     connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
@@ -407,6 +408,9 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
 
     connect(header_,SIGNAL(customButtonClicked(QString,QPoint)),
             this,SIGNAL(headerButtonClicked(QString,QPoint)));
+
+    connect(header_,SIGNAL(periodSelected(QDateTime,QDateTime)),
+            this,SLOT(periodSelectedInHeader(QDateTime,QDateTime)));
 
     //for(int i=0; i < model_->columnCount(QModelIndex())-1; i++)
     //  	resizeColumnToContents(i);
@@ -431,7 +435,7 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     //Initialise bg
     adjustBackground(prop_->find("view.table.background")->value().value<QColor>());
 
-    header_->setSortIndicatorShown(true);
+    //header_->setSortIndicatorShown(true);
 }
 
 TimelineView::~TimelineView()
@@ -481,6 +485,9 @@ QModelIndexList TimelineView::selectedList()
 // reimplement virtual function from QTreeView - called when the selection is changed
 void TimelineView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
+    QTreeView::selectionChanged(selected, deselected);
+
+
 #if 0
     QModelIndexList lst=selectedIndexes();
     if(lst.count() > 0)
@@ -536,8 +543,9 @@ void TimelineView::setCurrentSelection(VInfo_ptr info)
 #endif
 }
 
-void TimelineView::slotDoubleClickItem(const QModelIndex&)
+void TimelineView::slotDoubleClickItem(const QModelIndex& idx)
 {
+    showDetails(idx);
 }
 
 void TimelineView::slotContextMenu(const QPoint &position)
@@ -600,7 +608,15 @@ void TimelineView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
 
 void TimelineView::showDetails(const QModelIndex& indexClicked)
 {
+    QModelIndex idx=model_->mapToSource(indexClicked);
+    if(!idx.isValid())
+        return;
 
+    UiLog().dbg() << "row=" << idx.row() << " " << model_->data(model_->index(indexClicked.row(),0)).toString();
+
+    TimelineInfoDialog diag(this);
+    diag.infoW_->load("host","port",model_->tlModel()->data()->items()[idx.row()]);
+    diag.exec();
 }
 
 void TimelineView::slotViewCommand(VInfo_ptr info,QString cmd)
@@ -645,6 +661,13 @@ void TimelineView::notifyChange(VProperty* p)
     {
         adjustBackground(p->value().value<QColor>());
     }
+}
+
+void TimelineView::periodSelectedInHeader(QDateTime t1,QDateTime t2)
+{
+    delegate_->setPeriod(t1,t2);
+    rerender();
+    Q_EMIT periodSelected(t1,t2);
 }
 
 void TimelineView::setStartDate(QDateTime t)
@@ -805,10 +828,13 @@ TimelineHeader::TimelineHeader(QWidget *parent) :
     fm_(QFont()),
     timelineCol_(QColor(0,0,0)),
     dateTextCol_(QColor(33,95,161)),
-    timeTextCol_(QColor(30,30,30))
+    timeTextCol_(QColor(30,30,30)),
+    inZoom_(false),
+    timelineSection_(2),
+    timelineFrameSize_(2)
 {
     setStretchLastSection(true);
-
+setMouseTracking(true);
     connect(this, SIGNAL(sectionResized(int, int, int)),
              this, SLOT(slotSectionResized(int)));
 
@@ -840,12 +866,93 @@ void TimelineHeader::showEvent(QShowEvent *e)
        {
            widgets_[i]->setGeometry(sectionViewportPosition(i),0,
                                 sectionSize(i),height());
-           widgets_[i]->show();
+           widgets_[i]->shosetMouseTracking(true);w();
        }
     }
     */
 
     QHeaderView::showEvent(e);
+}
+
+void TimelineHeader::mousePressEvent(QMouseEvent *event)
+{
+    //Start new zoom
+    if(!inZoom_ && event->button() == Qt::MidButton &&
+       logicalIndexAt(event->pos()) == timelineSection_)
+    {
+        zoomStartPos_=event->pos();
+    }
+
+    //Unzoom
+    else if(!inZoom_ && event->button() == Qt::RightButton &&
+            logicalIndexAt(event->pos()) == timelineSection_)
+    {
+        if(zoomHistory_.count() >= 2)
+        {
+            zoomHistory_.pop();
+            QDateTime sDt=zoomHistory_.top().first;
+            QDateTime eDt=zoomHistory_.top().second;
+            if(sDt.isValid() && eDt.isValid())
+            {
+                setPeriodCore(sDt,eDt,false);
+                Q_EMIT periodSelected(sDt,eDt);
+            }
+        }
+    }
+
+    QHeaderView::mousePressEvent(event);
+}
+
+void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
+{
+    if(event->buttons().testFlag(Qt::MidButton))
+    {
+        int secStart=sectionPosition(timelineSection_);
+        int secEnd=secStart+sectionSize(timelineSection_);
+
+        inZoom_=true;
+        zoomEndPos_=event->pos();
+
+        if(event->pos().x() >= secStart && event->pos().x() <= secEnd)
+        {
+            if(event->pos().x() < zoomStartPos_.x())
+            {
+                zoomEndPos_=zoomStartPos_;
+            }
+        }
+        else if(event->pos().x() < secStart)
+        {
+            zoomEndPos_=zoomStartPos_;
+        }
+        else //if(event->pos().x() > secEnd)
+        {
+            zoomEndPos_=event->pos();
+            zoomEndPos_.setX(secEnd);
+        }
+
+        headerDataChanged(Qt::Horizontal,timelineSection_,timelineSection_);
+    }
+    else
+        QHeaderView::mouseMoveEvent(event);
+}
+
+void TimelineHeader::mouseReleaseEvent(QMouseEvent *event)
+{
+    if(inZoom_)
+    {        
+        QDateTime sDt=posToDate(zoomStartPos_);
+        QDateTime eDt=posToDate(zoomEndPos_);
+        zoomStartPos_=QPoint();
+        zoomEndPos_=QPoint();
+        inZoom_=false;
+        if(sDt.isValid() && eDt.isValid())
+        {
+            setPeriodCore(sDt,eDt,true);
+            Q_EMIT periodSelected(sDt,eDt);
+        }
+    }
+    else
+       QHeaderView::mouseReleaseEvent(event);
 }
 
 void TimelineHeader::slotSectionResized(int i)
@@ -1053,6 +1160,17 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
 
 void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
 {
+    painter->fillRect(rect.adjusted(0,2,0,-2),QColor(190,190,190));
+
+    if(inZoom_)
+    {
+        UiLog().dbg() << "paint zoom";
+        QRect zRect=rect;
+        zRect.setLeft(zoomStartPos_.x());
+        zRect.setRight(zoomEndPos_.x());
+        painter->fillRect(zRect,QColor(203,217,232));
+    }
+
     //period in secs
     qint64 startSec=startDate_.toMSecsSinceEpoch()/1000;
     qint64 endSec=endDate_.toMSecsSinceEpoch()/1000;
@@ -1202,9 +1320,27 @@ int TimelineHeader::secToPos(qint64 t,QRect rect) const
     //qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
     qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch())/1000;
     return rect.x() + static_cast<int>(static_cast<float>(t)/static_cast<float>(period)*static_cast<float>(rect.width()));
-
 }
 
+QDateTime TimelineHeader::posToDate(QPoint pos) const
+{
+    int xp=sectionPosition(timelineSection_);
+    int w=sectionSize(timelineSection_);
+
+    if(w <= 0 || pos.x() < xp)
+        return QDateTime();
+
+    float r=static_cast<float>(pos.x()-xp)/static_cast<float>(w);
+    if(r < 0 || r > 1)
+        return QDateTime();
+
+    //qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
+    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch());
+
+    return startDate_.addMSecs(r*period);
+}
+
+#if 0
 void TimelineHeader::mousePressEvent(QMouseEvent *event)
 {
   #if 0
@@ -1222,6 +1358,7 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
 #endif
     QHeaderView::mousePressEvent(event);
 }
+#endif
 
 /*void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
 {
@@ -1251,18 +1388,32 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
 void TimelineHeader::setStartDate(QDateTime t)
 {
     startDate_=t;
-    headerDataChanged(Qt::Horizontal,0,1);
+    zoomHistory_.clear();
+    zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
+    headerDataChanged(Qt::Horizontal,0,timelineSection_);
 }
 
 void TimelineHeader::setEndDate(QDateTime t)
 {
     endDate_=t;
-    headerDataChanged(Qt::Horizontal,0,1);
+    zoomHistory_.clear();
+    zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
+    headerDataChanged(Qt::Horizontal,0,timelineSection_);
 }
 
 void TimelineHeader::setPeriod(QDateTime t1,QDateTime t2)
 {
+    zoomHistory_.clear();
+    setPeriodCore(t1,t2,true);
+}
+
+void TimelineHeader::setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory)
+{
     startDate_=t1;
     endDate_=t2;
-    headerDataChanged(Qt::Horizontal,0,1);
+    if(addToHistory)
+    {
+        zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
+    }
+    headerDataChanged(Qt::Horizontal,0,timelineSection_);
 }

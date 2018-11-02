@@ -97,7 +97,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
             }
         }
         else
-            return QVariant();
+            return row;
     }
 
     //filter

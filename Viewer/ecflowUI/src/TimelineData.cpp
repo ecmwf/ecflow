@@ -217,7 +217,7 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
         }
         else
         {
-            name=line.substr(first_colon+1,next_ws-first_colon);
+            name=line.substr(first_colon+1,next_ws-first_colon-1);
         }
 
         //Convert status time into
@@ -230,7 +230,7 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
         if(statusTime > endTime_)
             endTime_=statusTime;
 
-        int idx=indexOfItem(name);
+        int idx=indexOfItem(name);       
         if(idx != -1)
         {
             items_[idx].add(statusId,statusTime);
@@ -244,9 +244,36 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
             items_.push_back(TimelineItem(name,statusId,statusTime,
                                           guessNodeType(line,name,status,next_ws)));
         }
+
+        numOfRows_++;
     }
 
-      numOfRows_++;
+    guessNodeType();
+}
+
+void TimelineData::guessNodeType()
+{
+    std::vector<size_t> taskIndex;
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i].isTask())
+            taskIndex.push_back(i);
+    }
+
+    for(size_t i=0; i < items_.size(); i++)
+    {
+        if(items_[i].type_ == TimelineItem::UndeterminedType)
+        {
+            for(size_t j=0; j < taskIndex.size(); j++)
+            {
+                if(items_[j].path_.find(items_[i].path_) != std::string::npos)
+                {
+                    items_[i].type_=TimelineItem::FamilyType;
+                    break;
+                }
+            }
+        }
+    }
 }
 
 TimelineItem::Type TimelineData::guessNodeType(const std::string& line,const std::string& name,

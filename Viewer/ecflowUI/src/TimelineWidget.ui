@@ -80,9 +80,56 @@
       </spacer>
      </item>
      <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Start:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="startTb">
+       <property name="toolTip">
+        <string>Extend period to the start</string>
+       </property>
+       <property name="text">
+        <string>start</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/arrow_to_start.svg</normaloff>:/viewer/arrow_to_start.svg</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QDateTimeEdit" name="fromTimeEdit">
        <property name="calendarPopup">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>End:</string>
        </property>
       </widget>
      </item>
@@ -94,9 +141,36 @@
       </widget>
      </item>
      <item>
+      <widget class="QToolButton" name="endTb">
+       <property name="toolTip">
+        <string>Extend period to the end</string>
+       </property>
+       <property name="text">
+        <string>end</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/arrow_to_end.svg</normaloff>:/viewer/arrow_to_end.svg</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QToolButton" name="wholePeriodTb">
+       <property name="statusTip">
+        <string>Show full period</string>
+       </property>
        <property name="text">
         <string>All</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/arrow_all.svg</normaloff>:/viewer/arrow_all.svg</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

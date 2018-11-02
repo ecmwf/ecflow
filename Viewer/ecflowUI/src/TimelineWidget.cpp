@@ -20,16 +20,18 @@
 
 #include "ui_TimelineWidget.h"
 
+
 //=======================================================
 //
-// LogLoadWidget
+// TimelineWidget
 //
 //=======================================================
 
 TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
     numOfRows_(0),
-    data_(0)
+    data_(0),
+    ignoreTimeEdited_(false)
 {
     ui_->setupUi(this);
 
@@ -50,7 +52,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     view_->setRootIsDecorated(false);
     view_->setUniformRowHeights(true);
     view_->setAlternatingRowColors(false);
-    view_->setSortingEnabled(true);
+    //view_->setSortingEnabled(true);
     //ui_->view->setItemDelegate(new LogDelegate(this));
     view_->setContextMenuPolicy(Qt::ActionsContextMenu);
 
@@ -90,10 +92,13 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
             this,SLOT(slotTaskOnly(bool)));
 
     connect(ui_->fromTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
-            this,SLOT(slotFromTimeChanged(QDateTime)));
+            this,SLOT(slotStartChanged(QDateTime)));
 
-    connect(ui_->toTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
-            this,SLOT(slotToTimeChanged(QDateTime)));
+    connect(ui_->startTb,SIGNAL(clicked()),
+            this,SLOT(slotResetStart()));
+
+    connect(ui_->endTb,SIGNAL(clicked()),
+            this,SLOT(slotResetEnd()));
 
     connect(ui_->reloadTb,SIGNAL(clicked()),
             this,SLOT(slotReload()));
@@ -106,6 +111,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     connect(ui_->yesterdayTb,SIGNAL(clicked()),
             this,SLOT(slotYerterday()));
+
+    connect(view_,SIGNAL(periodSelected(QDateTime,QDateTime)),
+            this,SLOT(slotPeriodSelectedInView(QDateTime,QDateTime)));
 
     //ui_->timeWidget->setStyleSheet("#timeWidget{background-color: rgb(212,212,212);}");
 }
@@ -162,6 +170,8 @@ void TimelineWidget::updateInfoLabel()
 
     ui_->logInfoLabel->setText(txt);
 
+    checkButtonState();
+
     //TODO: we need a better implementation
    // ui_->timeWidget->hide();
 }
@@ -178,7 +188,21 @@ void TimelineWidget::slotReload()
     if(!serverName_.isEmpty() && numOfRows_ != 0)
     {
         load(serverName_, host_, port_, logFile_,numOfRows_);
+        checkButtonState();
     }
+}
+
+void TimelineWidget::slotPeriodSelectedInView(QDateTime start,QDateTime end)
+{
+    Q_ASSERT(data_);
+    if(start >= data_->qStartTime() && end <= data_->qEndTime())
+    {
+        ignoreTimeEdited_=true;
+        ui_->fromTimeEdit->setDateTime(start);
+        ui_->toTimeEdit->setDateTime(end);
+        ignoreTimeEdited_=false;
+    }
+    checkButtonState();
 }
 
 void TimelineWidget::slotTaskOnly(bool taskFilter)
@@ -191,31 +215,67 @@ void TimelineWidget::slotPathFilter(QString pattern)
     sortModel_->setPathFilter(pattern);
 }
 
-void TimelineWidget::slotFromTimeChanged(const QDateTime& dt)
+void TimelineWidget::slotStartChanged(const QDateTime& dt)
 {
-    //model_->setStartDate(dt);
-    UiLog().dbg() << "new startdate=" << dt;
-    view_->setStartDate(dt);
+    if(!ignoreTimeEdited_)
+    {
+        //model_->setStartDate(dt);
+        UiLog().dbg() << "new startdate=" << dt;
+        view_->setStartDate(dt);
+    }
+    checkButtonState();
 }
 
-void TimelineWidget::slotToTimeChanged(const QDateTime& dt)
+void TimelineWidget::slotEndChanged(const QDateTime& dt)
 {
-    view_->setEndDate(dt);
+    if(!ignoreTimeEdited_)
+    {
+        view_->setEndDate(dt);
+    }
+    checkButtonState();
+}
+
+void TimelineWidget::slotResetStart()
+{
+    ui_->fromTimeEdit->setDateTime(data_->qStartTime());
+    checkButtonState();
+}
+
+void TimelineWidget::slotResetEnd()
+{
+    ui_->toTimeEdit->setDateTime(data_->qEndTime());
+    checkButtonState();
 }
 
 void TimelineWidget::slotWholePeriod()
 {
-
+    Q_ASSERT(data_);
+    ignoreTimeEdited_=true;
+    ui_->fromTimeEdit->setDateTime(data_->qStartTime());
+    ui_->toTimeEdit->setDateTime(data_->qEndTime());
+    ignoreTimeEdited_=false;
+    view_->setPeriod(data_->qStartTime(),data_->qEndTime());
+    checkButtonState();
 }
 
 void TimelineWidget::slotToday()
 {
-
+    checkButtonState();
 }
 
 void TimelineWidget::slotYesterday()
 {
+    checkButtonState();
+}
 
+void TimelineWidget::checkButtonState()
+{
+     bool fromStart=(ui_->fromTimeEdit->dateTime() == data_->qStartTime());
+     bool toEnd=(ui_->toTimeEdit->dateTime() == data_->qEndTime());
+
+     ui_->startTb->setEnabled(!fromStart);
+     ui_->endTb->setEnabled(!toEnd);
+     ui_->wholePeriodTb->setEnabled(!fromStart || !toEnd);
 }
 
 void TimelineWidget::load(QString logFile,int numOfRows)

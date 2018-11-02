@@ -16,6 +16,7 @@
 #include <QTreeView>
 #include <QPen>
 #include <QDateTime>
+#include <QStack>
 
 #include "VInfo.hpp"
 #include "VProperty.hpp"
@@ -79,27 +80,29 @@ public:
 
     VInfo_ptr currentSelection();
     void setCurrentSelection(VInfo_ptr n);
+    void setStartDate(QDateTime);
+    void setEndDate(QDateTime);
+    void setPeriod(QDateTime t1,QDateTime t2);
 
     void notifyChange(VProperty* p);
 
     void readSettings(VSettings*);
     void writeSettings(VSettings*);
 
-public Q_SLOTS:
+protected Q_SLOTS:
     void slotDoubleClickItem(const QModelIndex&);
     void slotContextMenu(const QPoint &position);
     void slotViewCommand(VInfo_ptr,QString);
     void slotHeaderContextMenu(const QPoint &position);
     void slotSizeHintChangedGlobal();
     void slotRerender();
-    void setStartDate(QDateTime);
-    void setEndDate(QDateTime);
-    void setPeriod(QDateTime t1,QDateTime t2);
+    void periodSelectedInHeader(QDateTime t1,QDateTime t2);
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
     void infoPanelCommand(VInfo_ptr,QString);
     void dashboardCommand(VInfo_ptr,QString);
+    void periodSelected(QDateTime,QDateTime);
     //void headerButtonClicked(QString,QPoint);
 
 protected:
@@ -134,19 +137,24 @@ public:
     void setEndDate(QDateTime);
     void setPeriod(QDateTime t1,QDateTime t2);
 
-public Q_SLOTS:
+protected Q_SLOTS:
     void slotSectionResized(int i);
 
 Q_SIGNALS:
     void customButtonClicked(QString,QPoint);
+    void periodSelected(QDateTime,QDateTime);
 
 protected:
     void showEvent(QShowEvent *QSize);
     void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const;
     void mousePressEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
     void renderTimeline(const QRect& rect,QPainter* painter) const;
 
+    void setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory);
     int secToPos(qint64 t,QRect rect) const;
+    QDateTime posToDate(QPoint pos) const;
 
     QDateTime startDate_;
     QDateTime endDate_;
@@ -156,6 +164,12 @@ protected:
     QColor timelineCol_;
     QColor dateTextCol_;
     QColor timeTextCol_;
+    QPoint zoomStartPos_;
+    QPoint zoomEndPos_;
+    bool inZoom_;
+    QStack<QPair<QDateTime,QDateTime> > zoomHistory_;
+    int timelineSection_;
+    int timelineFrameSize_;
 
     //mutable QMap<int,TableNodeHeaderButton> customButton_;
 };

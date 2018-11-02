@@ -145,6 +145,7 @@
         {
             "name"    : "timeline",
             "label"   : "Timeline",
+            "icon"    : "timeline.svg",
             "show" 	  : "toolbar",
             "visible_for" : "server or node"
 
