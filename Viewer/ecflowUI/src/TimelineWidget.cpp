@@ -109,6 +109,10 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(view_,SIGNAL(periodSelected(QDateTime,QDateTime)),
             this,SLOT(slotPeriodSelectedInView(QDateTime,QDateTime)));
 
+    connect(view_,SIGNAL(periodBeingZoomed(QDateTime,QDateTime)),
+            this,SLOT(slotPeriodBeingZoomedInView(QDateTime,QDateTime)));
+
+
     //ui_->timeWidget->setStyleSheet("#timeWidget{background-color: rgb(212,212,212);}");
 }
 
@@ -197,6 +201,19 @@ void TimelineWidget::slotPeriodSelectedInView(QDateTime start,QDateTime end)
         ignoreTimeEdited_=false;
     }
     checkButtonState();
+}
+
+void TimelineWidget::slotPeriodBeingZoomedInView(QDateTime start,QDateTime end)
+{
+    Q_ASSERT(data_);
+    if(start >= data_->qStartTime() && end <= data_->qEndTime())
+    {
+        ignoreTimeEdited_=true;
+        ui_->fromTimeEdit->setDateTime(start);
+        ui_->toTimeEdit->setDateTime(end);
+        ignoreTimeEdited_=false;
+    }
+    //checkButtonState();
 }
 
 void TimelineWidget::slotTaskOnly(bool taskFilter)

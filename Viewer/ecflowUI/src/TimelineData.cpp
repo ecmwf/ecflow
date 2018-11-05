@@ -21,6 +21,8 @@
 #include <QFileInfo>
 #include <QStringList>
 
+#include <functional>
+
 #include "TimelineData.hpp"
 #include "VNState.hpp"
 

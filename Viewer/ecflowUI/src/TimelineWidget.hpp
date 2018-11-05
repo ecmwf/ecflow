@@ -46,6 +46,7 @@ protected Q_SLOTS:
    void slotPathFilter(QString);
    void slotTaskOnly(bool);
    void slotPeriodSelectedInView(QDateTime,QDateTime);
+   void slotPeriodBeingZoomedInView(QDateTime,QDateTime);
 
 private:
     void load();

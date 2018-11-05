@@ -7,7 +7,6 @@
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns:svg="http://www.w3.org/2000/svg"
    xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="32"
@@ -40,16 +39,6 @@
          offset="1"
          id="stop3605" />
     </linearGradient>
-    <linearGradient
-       inkscape:collect="always"
-       xlink:href="#linearGradient3601-1"
-       id="linearGradient3607-9"
-       x1="4.5950575"
-       y1="3.9197154"
-       x2="28.083824"
-       y2="27.644129"
-       gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0,-0.53349696,-0.87083735,0,32.434326,24.541101)" />
     <linearGradient
        id="linearGradient3601-1">
       <stop
@@ -131,13 +120,13 @@
      id="layer1"
      inkscape:label="bar">
     <path
-       style="display:inline;fill:url(#linearGradient3607-9);fill-opacity:1;stroke:#004455;stroke-width:0.96774185px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       style="display:inline;fill:#3771c8;fill-opacity:1;stroke:#2c5aa0;stroke-width:0.96774185px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 30.69265,18.139137 -13.062559,0 0,5.868467 -10.4500472,-8.002455 10.4500472,-8.0024559 0,5.8684679 13.062559,0 z"
        id="path2850-0"
        sodipodi:nodetypes="cccccccc"
        inkscape:connector-curvature="0" />
     <rect
-       style="fill:#004455;fill-opacity:1;stroke:none"
+       style="fill:#3771c8;fill-opacity:1;stroke:none"
        id="rect3610-9"
        width="26"
        height="4"

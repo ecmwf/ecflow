@@ -167,7 +167,12 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     //rest of the columns
     else
     {
-        painter->fillRect(option.rect,QColor(242,242,242));
+        QRect bgRect=option.rect;
+        painter->fillRect(bgRect,QColor(242,242,242));
+        painter->setPen(borderPen_);
+        painter->drawLine(bgRect.x()+bgRect.width(),bgRect.top(),
+                          bgRect.x()+bgRect.width(),bgRect.bottom());
+
         QString text=index.data(Qt::DisplayRole).toString();
         QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
         painter->setFont(font_);
@@ -196,32 +201,99 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
         return;
 
     bool selected=option.state & QStyle::State_Selected;
-    QFontMetrics fm(font_);
 
-    QColor col(Qt::black);
+    int leftEdge=option.rect.x();
+    int rightEdge=option.rect.x()+option.rect.width();
+    int xpPrev=leftEdge-2;
+    int xpNext=rightEdge+2;
+
     for(size_t i=0; i < data->items()[row].size(); i++)
-    {
-        int xp=timeToPos(option.rect,data->items()[row].start_[i]);
-        if(xp >= 0)
-        {
-            //UiLog().dbg() << "xp=" << xp << " time=" << data->items()[row].start_[i];
-            if(VNState* vn=VNState::find(data->items()[row].status_[i]))
-            {
-                col=vn->colour();
-            }
+    {                              
+        bool hasRect=false;
+        bool hasGrad=false;
+        int xpLeft=0,xpRight=0;
+        QColor fillCol;
 
-            int w=5;;
-            if(i < data->items()[row].size()-1)
+        int xp=(i==0)?(timeToPos(option.rect,data->items()[row].start_[i])):xpNext;
+
+        if(i < data->items()[row].size()-1)
+        {
+            xpNext=timeToPos(option.rect,data->items()[row].start_[i+1]);
+        }
+        else
+        {
+            xpNext=rightEdge+2;
+        }
+
+        if(xp >= leftEdge && xp < rightEdge)
+        {           
+            if(i > 0 && xpPrev < leftEdge)
             {
-                int xp1=timeToPos(option.rect,data->items()[row].start_[i+1]);
-                if(xp1 >=0)
+                if(VNState* vn=VNState::find(data->items()[row].status_[i-1]))
                 {
-                    w=xp1-xp;
+                    hasRect=true;
+                    hasGrad=true;
+                    xpLeft=leftEdge;
+                    xpRight=xp;
+                    fillCol=vn->colour();
                 }
             }
 
-            painter->fillRect(QRect(xp,option.rect.y(),w,10),col);
+            if(VNState* vn=VNState::find(data->items()[row].status_[i]))
+            {
+                hasRect=true;
+                hasGrad=true;
+                xpLeft=xp;
+                xpRight=(xpNext <= rightEdge)?xpNext:rightEdge;
+                fillCol=vn->colour();
+            }
         }
+        else if(i > 0 && xp >= rightEdge && xpPrev < leftEdge)
+        {
+            if(VNState* vn=VNState::find(data->items()[row].status_[i-1]))
+            {
+                hasRect=true;
+                xpLeft=leftEdge;
+                xpRight=rightEdge;
+                fillCol=vn->colour();
+            }
+        }
+        else if(xp <= leftEdge && i == data->items()[row].size()-1)
+        {
+            if(VNState* vn=VNState::find(data->items()[row].status_[i]))
+            {
+                hasRect=true;
+                xpLeft=leftEdge;
+                xpRight=rightEdge;
+                fillCol=vn->colour();
+            }
+        }
+
+        if(hasRect)
+        {
+            QBrush fillBrush(fillCol);
+            if(hasGrad)
+            {
+                QLinearGradient gr;
+                gr.setCoordinateMode(QGradient::ObjectBoundingMode);
+                gr.setStart(0,0);
+                gr.setFinalStop(1,0);
+                fillCol.dark(110);
+                gr.setColorAt(0,fillCol);
+                fillCol.setAlpha(128);
+                gr.setColorAt(1,fillCol);
+                fillBrush=QBrush(gr);
+            }
+            painter->fillRect(QRect(xpLeft,option.rect.y(),
+                   xpRight-xpLeft+1,option.rect.height()-1),fillBrush);
+        }
+
+
+        if(xp >= rightEdge)
+            break;
+
+        xpPrev=xp;
+
     }
 
     //The initial filled rect (we will adjust its  width)
@@ -233,11 +305,14 @@ int TimelineDelegate::timeToPos(QRect r,unsigned int time) const
     unsigned int start=startDate_.toMSecsSinceEpoch()/1000;
     unsigned int end=endDate_.toMSecsSinceEpoch()/1000;
 
-    if(time < start || time > end)
-        return -1;
+    if(time < start)
+        return r.x()-2;
+
+    if(time >= end)
+        return r.x()+r.width()+2;
 
     if(start >= end)
-        return r.x();
+        return r.x()-2;
 
     return r.x()+static_cast<float>(time-start)*static_cast<float>(r.width())/static_cast<float>((end-start));
 
@@ -412,6 +487,9 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
 
     connect(header_,SIGNAL(periodSelected(QDateTime,QDateTime)),
             this,SLOT(periodSelectedInHeader(QDateTime,QDateTime)));
+
+    connect(header_,SIGNAL(periodBeingZoomed(QDateTime,QDateTime)),
+            this, SIGNAL(periodBeingZoomed(QDateTime,QDateTime)));
 
     //for(int i=0; i < model_->columnCount(QModelIndex())-1; i++)
     //  	resizeColumnToContents(i);
@@ -831,7 +909,7 @@ TimelineHeader::TimelineHeader(QWidget *parent) :
     dateTextCol_(QColor(33,95,161)),
     timeTextCol_(QColor(30,30,30)),
     inZoom_(false),
-    zoomCol_(203,217,232),
+    zoomCol_(224,236,248),
     timelineSection_(1),
     timelineFrameSize_(2)
 {
@@ -972,13 +1050,21 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
         }
 
         headerDataChanged(Qt::Horizontal,timelineSection_,timelineSection_);
+
+        QDateTime sDt=posToDate(zoomStartPos_);
+        QDateTime eDt=posToDate(zoomEndPos_);
+        if(sDt.isValid() && eDt.isValid())
+        {
+            Q_EMIT periodBeingZoomed(sDt,eDt);
+        }
     }
     else
     {
         //When we enter the timeline section we show a zoom cursor
         if(logicalIndexAt(event->pos()) == timelineSection_)
         {
-            if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
+            if((!hasCursor || cursor().shape() ==  Qt::SplitHCursor) &&
+               (canBeZoomed()))
                 setCursor(zoomCursor_);
         }
         //Otherwise remove the cursor unless it is the resize indicator
@@ -1005,6 +1091,10 @@ void TimelineHeader::mouseReleaseEvent(QMouseEvent *event)
         {
             setPeriodCore(sDt,eDt,true);
             Q_EMIT periodSelected(sDt,eDt);
+        }
+        else
+        {
+            Q_EMIT periodBeingZoomed(startDate_,endDate_);
         }
     }
     else
@@ -1054,7 +1144,7 @@ void TimelineHeader::setModel(QAbstractItemModel *model)
 
 bool TimelineHeader::canBeZoomed() const
 {
-    return (endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch()) > 60;
+    return (endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch()) > 60*1000;
 }
 
 void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const
@@ -1259,7 +1349,11 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
 
     QList<int> majorTickSec;
 
-    if(period < 600)
+    if(period < 60)
+    {
+        majorTickSec << 1 << 5 << 10 << 20 << 30;
+    }
+    else if(period < 600)
     {
         majorTickSec << 10 << 15 << 20 << 30 << 60 << 5*60 << 10*60;
     }
@@ -1313,6 +1407,9 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
     }
 
     minorTick=majorTick/4;
+    if(minorTick==0)
+        minorTick = majorTick;
+
     firstTick=(startSec/minorTick)*minorTick+minorTick;
 
     //Find label positions for days
@@ -1363,6 +1460,10 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
         }
     }
 
+    painter->save();
+    painter->setClipRect(rect);
+
+
     //Draw date labels
     painter->setPen(dateTextCol_);
     for(int i=0; i < dateLabels.count(); i++)
@@ -1403,7 +1504,7 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
             }
 
             int textW=fm_.width(s);
-            painter->setFont(font_);
+            painter->setFont(font_);            
             painter->drawText(QRect(xp-textW/2, timeTextY,textW,fm_.height()),
                               Qt::AlignHCenter | Qt::AlignVCenter,s);
         }
@@ -1415,6 +1516,8 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
 
         actSec+=minorTick;
     }
+
+    painter->restore();
 
     //for(int i=0; i < 10; i++)
     //{
@@ -1430,6 +1533,16 @@ int TimelineHeader::secToPos(qint64 t,QRect rect) const
     //qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
     qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch())/1000;
     return rect.x() + static_cast<int>(static_cast<float>(t)/static_cast<float>(period)*static_cast<float>(rect.width()));
+}
+
+int TimelineHeader::dateToPos(QDateTime dt) const
+{
+    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch())/1000;
+
+    int xp=sectionPosition(timelineSection_);
+    int w=sectionSize(timelineSection_);
+
+    return xp + static_cast<int>(static_cast<float>(dt.toMSecsSinceEpoch()/1000)/static_cast<float>(period)*static_cast<float>(w));
 }
 
 QDateTime TimelineHeader::posToDate(QPoint pos) const
@@ -1448,6 +1561,26 @@ QDateTime TimelineHeader::posToDate(QPoint pos) const
     qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch());
 
     return startDate_.addMSecs(r*period);
+}
+
+qint64 TimelineHeader::zoomPeriodInSec(QPoint startPos,QPoint endPos) const
+{
+    if(endPos.x() < startPos.x())
+        return false;
+
+    int xp=sectionPosition(timelineSection_);
+    int w=sectionSize(timelineSection_);
+
+    if(w <= 0 || startPos.x() < xp)
+        return false;
+
+    float r=static_cast<float>(endPos.x()-startPos.x())/static_cast<float>(w);
+    if(r < 0 || r > 1)
+        return false;
+
+    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch());
+
+    return r*period;
 }
 
 #if 0

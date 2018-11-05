@@ -103,6 +103,7 @@ Q_SIGNALS:
     void infoPanelCommand(VInfo_ptr,QString);
     void dashboardCommand(VInfo_ptr,QString);
     void periodSelected(QDateTime,QDateTime);
+    void periodBeingZoomed(QDateTime,QDateTime);
     //void headerButtonClicked(QString,QPoint);
 
 protected:
@@ -143,6 +144,7 @@ protected Q_SLOTS:
 Q_SIGNALS:
     void customButtonClicked(QString,QPoint);
     void periodSelected(QDateTime,QDateTime);
+    void periodBeingZoomed(QDateTime,QDateTime);
 
 protected:
     void showEvent(QShowEvent *QSize);
@@ -155,7 +157,9 @@ protected:
     void setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory);
     int secToPos(qint64 t,QRect rect) const;
     QDateTime posToDate(QPoint pos) const;
+    int dateToPos(QDateTime dt) const;
     bool canBeZoomed() const;
+    qint64 zoomPeriodInSec(QPoint startX,QPoint endX) const;
 
     QDateTime startDate_;
     QDateTime endDate_;
