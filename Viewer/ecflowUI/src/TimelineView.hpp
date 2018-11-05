@@ -155,6 +155,7 @@ protected:
     void setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory);
     int secToPos(qint64 t,QRect rect) const;
     QDateTime posToDate(QPoint pos) const;
+    bool canBeZoomed() const;
 
     QDateTime startDate_;
     QDateTime endDate_;

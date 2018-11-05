@@ -874,7 +874,8 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
 {
     //Start new zoom
     if(!inZoom_ && event->button() == Qt::LeftButton &&
-       logicalIndexAt(event->pos()) == timelineSection_)
+       logicalIndexAt(event->pos()) == timelineSection_ &&
+       canBeZoomed())
     {
         zoomStartPos_=event->pos();
     }
@@ -946,7 +947,7 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
             return;
         }
 
-        //In timelien zoom mode we show a zoom cursor
+        //In timeline zoom mode we show a zoom cursor
         if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
             setCursor(zoomCursor_);
 
@@ -980,7 +981,7 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
             if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
                 setCursor(zoomCursor_);
         }
-        //Otherwise set remove the cursor unless it is the resize indicator
+        //Otherwise remove the cursor unless it is the resize indicator
         else
         {
             if(hasCursor && cursor().shape() !=  Qt::SplitHCursor)
@@ -1049,6 +1050,11 @@ void TimelineHeader::setModel(QAbstractItemModel *model)
     }
 #endif
     QHeaderView::setModel(model);
+}
+
+bool TimelineHeader::canBeZoomed() const
+{
+    return (endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch()) > 60;
 }
 
 void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const
@@ -1228,6 +1234,8 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
         painter->drawRect(zRect.adjusted(0,1,0,-2));
     }
 
+    int w=sectionSize(timelineSection_);
+
     //period in secs
     qint64 startSec=startDate_.toMSecsSinceEpoch()/1000;
     qint64 endSec=endDate_.toMSecsSinceEpoch()/1000;
@@ -1246,42 +1254,66 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
     int dateTextY= rect.y() + (rect.height()/2 - fm_.height())/2 + 1;
     int timeTextY=rect.bottom()-1-fm_.height();
 
+    int timeItemW=fm_.width("223:442");
+    int dateItemW=fm_.width("2229 May22");
+
+    QList<int> majorTickSec;
+
+    if(period < 600)
+    {
+        majorTickSec << 10 << 15 << 20 << 30 << 60 << 5*60 << 10*60;
+    }
     if(period < 3600)
     {
-        minorTick=60;
-        majorTick=600;
-        firstTick=(startSec/60)*60+60;
+        majorTickSec << 60 << 2*60 << 3*60 << 4*60 << 5*60 << 10*60 << 20*60 << 30*60;
+    }
+    if(period < 12*3600)
+    {
+        majorTickSec << 15*60 << 30*60 << 3600 << 2*3600 << 3*3600 << 4*3600 << 6*3600;
+    }
+    else if(period <= 86400)
+    {
+        majorTickSec << 3600 << 2*3600 << 3*3600 << 4*3600 << 6*3600 << 12*3600;
     }
     else if(period < 7*86400)
     {
-        minorTick=3*3600;
-        majorTick=12*3600;
-        firstTick=(startSec/minorTick)*minorTick+minorTick;
+        majorTickSec << 3600 << 2*3600 << 3*3600 << 4*3600 << 6*3600 << 12*3600 << 24*3600;
     }
     else if(period < 14*86400)
     {
-        minorTick=6*3600;
-        majorTick=24*3600;
-        firstTick=(startSec/minorTick)*minorTick+minorTick;
+        majorTickSec << 12*3600 << 24*3600 << 36*3600 << 48*3600 << 72*3600 << 96*3600;
     }
     else if(period < 28*86400)
     {
-        minorTick=12*3600;
-        majorTick=2*24*3600;
-        firstTick=(startSec/minorTick)*minorTick+minorTick;
+        majorTickSec << 86400 << 2*86400 << 3*86400 << 4*86400 << 5*86400 << 10*86400;
     }
     else if(period < 60*86400)
     {
-        minorTick=24*3600;
-        majorTick=5*24*3600;
-        firstTick=(startSec/minorTick)*minorTick+minorTick;
+        majorTickSec << 86400 << 2*86400 << 3*86400 << 4*86400 << 5*86400 << 10*86400 << 20*86400;
+    }
+    else if(365 * 86400)
+    {
+        majorTickSec << 5*86400 << 10*86400 << 20*86400 << 30*86400 << 60*86400 << 90*86400 << 180*86400;
     }
     else
     {
-        minorTick=2*3600;
-        majorTick=10*24*3600;
-        firstTick=(startSec/minorTick)*minorTick+minorTick;
+        majorTickSec << 30*86400 << 60*86400 << 90*86400 << 180*86400 << 365*86400;
     }
+
+    Q_FOREACH(int mts,majorTickSec)
+    {
+       majorTick=mts;
+       int majorTickNum=period/majorTick;
+       int cover=timeItemW*majorTickNum;
+       int diff=w-cover;
+       if(diff > 100)
+       {
+           break;
+       }
+    }
+
+    minorTick=majorTick/4;
+    firstTick=(startSec/minorTick)*minorTick+minorTick;
 
     //Find label positions for days
     QList<QPair<int,QString> > dateLabels;
@@ -1304,8 +1336,20 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
             dateLabels << qMakePair(xp,nextDay.toString("dd MMM"));
         }
 
+        int dayFreq=1;
+        QList<int> dayFreqLst;
+        dayFreqLst << 1 << 2 << 3 << 5 << 10 << 20 << 30 << 60 << 90 << 120 << 180 << 365;
+        Q_FOREACH(int dfv,dayFreqLst)
+        {
+            if((dayNum/dfv)*dateItemW < w-100)
+            {
+                dayFreq=dfv;
+                break;
+            }
+        }
+
         QDate firstDay=nextDay;
-        for(QDate d=firstDay; d < lastDay; d=d.addDays(1))
+        for(QDate d=firstDay; d < lastDay; d=d.addDays(dayFreq))
         {
             int xp=secToPos((QDateTime(d).toMSecsSinceEpoch()/1000 +
             QDateTime(d.addDays(1)).toMSecsSinceEpoch()/1000)/2-startSec,rect);
@@ -1348,7 +1392,16 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
         {
             painter->drawLine(xp,majorTickTop,xp,majorTickBottom);
 
-            QString s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm");
+            QString s;
+            if(majorTick < 60)
+            {
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm:ss");
+            }
+            else
+            {
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm");
+            }
+
             int textW=fm_.width(s);
             painter->setFont(font_);
             painter->drawText(QRect(xp-textW/2, timeTextY,textW,fm_.height()),
