@@ -50,9 +50,9 @@ static const char* T_COMMENT     = "comment";
 static const char* T_MANUAL      = "manual";
 static const char* T_END         = "end";
 static const char* T_ECFMICRO    = "ecfmicro";
-static const char* T_INCLUDE     = "include";
-static const char* T_INCLUDENOPP = "includenopp";
-static const char* T_INCLUDEONCE = "includeonce";
+static const char* T_INCLUDE     = "include ";
+static const char* T_INCLUDENOPP = "includenopp ";
+static const char* T_INCLUDEONCE = "includeonce ";
 
 static void vector_to_string(const std::vector<std::string>& vec, std::string& str)
 {
@@ -1373,6 +1373,14 @@ void PreProcessor::preProcess_line(const std::string& script_line)
       return;
    }
 
+   if (tokens_.size() < 2) {
+      int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
+      if (ecfMicroCount % 2 != 0 ) {
+         error_msg_ += "unrecognised pre-processing directive at: '" + script_line + "'";
+      }
+      return;
+   }
+
    // we only end up here if we have includes
    preProcess_includes(script_line);
 }
@@ -1390,7 +1398,10 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
       fnd_includeonce = (script_line.find(T_INCLUDEONCE) == 1);
       if (!fnd_includeonce) fnd_include = (script_line.find(T_INCLUDE) == 1);
    }
-   if (!fnd_include && !fnd_includenopp && !fnd_includeonce) return;
+   if (!fnd_include && !fnd_includenopp && !fnd_includeonce) {
+      if (script_line.find("include") == 1) error_msg_ += ", unrecognised or miss-spelled include at: '" + script_line + "'";
+      return;
+   }
 
    // remove %include from the job lines, since were going to expand or ignore it.
    jobLines_.pop_back();
