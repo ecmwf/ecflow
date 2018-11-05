@@ -218,6 +218,7 @@ int ClientInvoker::invoke(int argc, char* argv[]) const
 
 	Cmd_ptr cts_cmd;
 	if (get_cmd_from_args(argc,argv,cts_cmd) == 1 ) return 1;
+	if (!cts_cmd) return 0; // For --help and --debug, --load defs check_only,  no command is created
 
    // Under debug we display round trip time for each request
 	request_logger.set_cts_cmd(cts_cmd);
