@@ -1399,8 +1399,13 @@ void PreProcessor::preProcess_line(const std::string& script_line)
       return;
    }
 
-   if (tokens_.size() < 2)  return;
-
+   if (tokens_.size() < 2) {
+      int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
+      if (ecfMicroCount % 2 != 0 ) {
+         error_msg_ += "unrecognised pre-processing directive at: '" + script_line + "'";
+      }
+      return;
+   }
 
    // we only end up here if we have includes
    preProcess_includes(script_line);
