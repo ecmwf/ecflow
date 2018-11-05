@@ -58,7 +58,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
          cout << defs;
       }
 
-      defs->save_as_string(defs_,PrintStyle::MIGRATE);
+      if (!check_only) defs->save_as_string(defs_,PrintStyle::MIGRATE);
 
       // Output any warning to standard output
       cout << warningMsg;
