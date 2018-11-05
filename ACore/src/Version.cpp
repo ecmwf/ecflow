@@ -16,6 +16,7 @@
 #include "Version.hpp"
 #include "ecflow_version.h"
 #include <boost/version.hpp>
+#include <boost/lexical_cast.hpp>
 
 namespace ecf {
 
@@ -79,16 +80,23 @@ std::string Version::description()
 
 std::string Version::version()
 {
-   std::stringstream ss;
-   ss << "ecflow_" << ECFLOW_RELEASE << "_" << ECFLOW_MAJOR << "_" << ECFLOW_MINOR;
-   return ss.str();
+   std::string ret = "ecflow_";
+   ret += boost::lexical_cast<std::string>(ECFLOW_RELEASE);
+   ret += "_";
+   ret += boost::lexical_cast<std::string>(ECFLOW_MAJOR);
+   ret += "_";
+   ret += boost::lexical_cast<std::string>(ECFLOW_MINOR);
+   return ret;
 }
 
 std::string Version::raw()
 {
-   std::stringstream ss;
-   ss << ECFLOW_RELEASE << "." << ECFLOW_MAJOR << "." << ECFLOW_MINOR;
-   return ss.str();
+   std::string ret = boost::lexical_cast<std::string>(ECFLOW_RELEASE);
+   ret += ".";
+   ret += boost::lexical_cast<std::string>(ECFLOW_MAJOR);
+   ret += ".";
+   ret += boost::lexical_cast<std::string>(ECFLOW_MINOR);
+   return ret;
 }
 
 std::string Version::boost()
