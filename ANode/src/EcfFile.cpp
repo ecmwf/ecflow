@@ -1373,7 +1373,11 @@ void PreProcessor::preProcess_line(const std::string& script_line)
       return;
    }
 
-   if (tokens_.size() < 2) {
+   // If there's no second token, when what kind of directive is it ?
+   // allow   : %FRED:val%
+   // disallow: %FRED
+   std::string the_include_token;
+   if (!StringSplitter::get_token(script_line,1,the_include_token)) {
       int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
       if (ecfMicroCount % 2 != 0 ) {
          error_msg_ += "unrecognised pre-processing directive at: '" + script_line + "'";
