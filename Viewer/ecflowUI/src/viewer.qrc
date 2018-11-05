@@ -4,6 +4,7 @@
     <file>../images/dock_float.svg</file>
     <file>../images/dock_close.svg</file>
     <file alias="configure.svg">../images/configure.svg</file>
+    <file alias="cursor_zoom.svg">../images/cursor_zoom.svg</file>
     <file alias="reset.svg">../images/reset.svg</file>
     <file alias="search.svg">../images/search.svg</file>
     <file alias="info.svg">../images/info.svg</file>

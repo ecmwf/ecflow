@@ -81,8 +81,14 @@
      </item>
      <item>
       <widget class="QLabel" name="label">
+       <property name="styleSheet">
+        <string notr="true">color: rgb(72, 81, 124);</string>
+       </property>
        <property name="text">
-        <string>Start:</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#717171;&quot;&gt;Start:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
        </property>
       </widget>
      </item>
@@ -129,7 +135,10 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>End:</string>
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#717171;&quot;&gt;End:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::RichText</enum>
        </property>
       </widget>
      </item>
@@ -158,9 +167,19 @@
       </widget>
      </item>
      <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QToolButton" name="wholePeriodTb">
-       <property name="statusTip">
+       <property name="toolTip">
         <string>Show full period</string>
+       </property>
+       <property name="statusTip">
+        <string/>
        </property>
        <property name="text">
         <string>All</string>
@@ -171,20 +190,6 @@
        </property>
        <property name="autoRaise">
         <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="todayTb">
-       <property name="text">
-        <string>Today</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="yesterdayTb">
-       <property name="text">
-        <string>Yesterday</string>
        </property>
       </widget>
      </item>

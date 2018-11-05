@@ -43,7 +43,7 @@ bool TimelineModel::hasData() const
 
 int TimelineModel::columnCount( const QModelIndex& /*parent */) const
 {
-     return 3;
+     return 2;
 }
 
 int TimelineModel::rowCount( const QModelIndex& parent) const
@@ -80,6 +80,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
     {
         if(index.column() == 0)
             return QString::fromStdString(data_->items()[row].path());
+#if 0
         else if(index.column() == 1)
         {
             switch(data_->items()[row].type())
@@ -96,6 +97,8 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
                 return "???";
             }
         }
+
+#endif
         else
             return row;
     }
@@ -122,11 +125,9 @@ QVariant TimelineModel::headerData( const int section, const Qt::Orientation ori
         switch(section)
         {
         case 0:
-            return "Path";
+            return "Path";       
         case 1:
-            return "Type";
-        case 2:
-            return "Time";
+            return "";
         default:
             return QVariant();
         }

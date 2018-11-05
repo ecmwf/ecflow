@@ -168,6 +168,8 @@ protected:
     QPoint zoomEndPos_;
     bool inZoom_;
     QStack<QPair<QDateTime,QDateTime> > zoomHistory_;
+    QCursor zoomCursor_;
+    QColor zoomCol_;
     int timelineSection_;
     int timelineFrameSize_;
 

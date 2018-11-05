@@ -106,12 +106,6 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->wholePeriodTb,SIGNAL(clicked()),
             this,SLOT(slotWholePeriod()));
 
-    connect(ui_->todayTb,SIGNAL(clicked()),
-            this,SLOT(slotToday()));
-
-    connect(ui_->yesterdayTb,SIGNAL(clicked()),
-            this,SLOT(slotYerterday()));
-
     connect(view_,SIGNAL(periodSelected(QDateTime,QDateTime)),
             this,SLOT(slotPeriodSelectedInView(QDateTime,QDateTime)));
 
@@ -255,16 +249,6 @@ void TimelineWidget::slotWholePeriod()
     ui_->toTimeEdit->setDateTime(data_->qEndTime());
     ignoreTimeEdited_=false;
     view_->setPeriod(data_->qStartTime(),data_->qEndTime());
-    checkButtonState();
-}
-
-void TimelineWidget::slotToday()
-{
-    checkButtonState();
-}
-
-void TimelineWidget::slotYesterday()
-{
     checkButtonState();
 }
 

@@ -41,8 +41,6 @@ protected Q_SLOTS:
    void slotResetStart();
    void slotResetEnd();
    void slotWholePeriod();
-   void slotToday();
-   void slotYesterday();
    void slotStartChanged(const QDateTime&);
    void slotEndChanged(const QDateTime&);
    void slotPathFilter(QString);

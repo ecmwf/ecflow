@@ -9,6 +9,7 @@
 
 #include "TimelineView.hpp"
 
+#include <QDebug>
 #include <QtGlobal>
 #include <QApplication>
 #include <QComboBox>
@@ -128,7 +129,7 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
     //QString id=columns_->id(index.column());
 
-    if(index.column() == 2)
+    if(index.column() == 1)
     {
         renderTimeline(painter,option,index.data().toInt());
 
@@ -830,11 +831,13 @@ TimelineHeader::TimelineHeader(QWidget *parent) :
     dateTextCol_(QColor(33,95,161)),
     timeTextCol_(QColor(30,30,30)),
     inZoom_(false),
-    timelineSection_(2),
+    zoomCol_(203,217,232),
+    timelineSection_(1),
     timelineFrameSize_(2)
 {
+    setMouseTracking(true);
+
     setStretchLastSection(true);
-setMouseTracking(true);
     connect(this, SIGNAL(sectionResized(int, int, int)),
              this, SLOT(slotSectionResized(int)));
 
@@ -846,15 +849,8 @@ setMouseTracking(true);
     font_.setPointSize(font_.pointSize()-2);
     fm_=QFontMetrics(font_);
 
-
-     //connect(this, SIGNAL(sectionMoved(int, int, int)), this,
-     //        SLOT(handleSectionMoved(int, int, int)));
-
-     //setMovable(true);
+    zoomCursor_=QCursor(QPixmap(":/viewer/cursor_zoom.svg"));
 }
-
-
-
 
 void TimelineHeader::showEvent(QShowEvent *e)
 {
@@ -877,7 +873,7 @@ void TimelineHeader::showEvent(QShowEvent *e)
 void TimelineHeader::mousePressEvent(QMouseEvent *event)
 {
     //Start new zoom
-    if(!inZoom_ && event->button() == Qt::MidButton &&
+    if(!inZoom_ && event->button() == Qt::LeftButton &&
        logicalIndexAt(event->pos()) == timelineSection_)
     {
         zoomStartPos_=event->pos();
@@ -899,16 +895,60 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
             }
         }
     }
-
-    QHeaderView::mousePressEvent(event);
+    else
+        QHeaderView::mousePressEvent(event);
 }
 
 void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
-{
-    if(event->buttons().testFlag(Qt::MidButton))
+{           
+    //When we enter the timeline section we show a zoom cursor
+    bool hasCursor=testAttribute(Qt::WA_SetCursor);
+
+#if 0
+    if(!event->buttons().testFlag(Qt::LeftButton))
+    {
+        if(logicalIndexAt(event->pos()) == timelineSection_)
+        {
+            if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
+                setCursor(zoomCursor_);
+        }
+        else if()
+        {
+
+        }
+    }
+    else
+    {
+        if(logicalIndexAt(event->pos()) == timelineSection_ && inZoom_)
+        {
+            if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
+                setCursor(zoomCursor_);
+        }
+        //if we enter another section we remove the cursor
+        else if(hasCursor && cursor().shape() !=  Qt::SplitHCursor &&
+                !event->buttons().testFlag(Qt::LeftButton))
+        {
+             unsetCursor();
+        }
+
+    }
+#endif
+
+    if(event->buttons().testFlag(Qt::LeftButton))
     {
         int secStart=sectionPosition(timelineSection_);
         int secEnd=secStart+sectionSize(timelineSection_);
+
+        //If we are in resize mode
+        if(!inZoom_ && zoomStartPos_.isNull())
+        {
+            QHeaderView::mouseMoveEvent(event);
+            return;
+        }
+
+        //In timelien zoom mode we show a zoom cursor
+        if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
+            setCursor(zoomCursor_);
 
         inZoom_=true;
         zoomEndPos_=event->pos();
@@ -933,7 +973,22 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
         headerDataChanged(Qt::Horizontal,timelineSection_,timelineSection_);
     }
     else
-        QHeaderView::mouseMoveEvent(event);
+    {
+        //When we enter the timeline section we show a zoom cursor
+        if(logicalIndexAt(event->pos()) == timelineSection_)
+        {
+            if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
+                setCursor(zoomCursor_);
+        }
+        //Otherwise set remove the cursor unless it is the resize indicator
+        else
+        {
+            if(hasCursor && cursor().shape() !=  Qt::SplitHCursor)
+                unsetCursor();
+
+            QHeaderView::mouseMoveEvent(event);
+        }
+    }
 }
 
 void TimelineHeader::mouseReleaseEvent(QMouseEvent *event)
@@ -1149,7 +1204,7 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
     QRect textRect=rect;
     textRect.setRight(rightPos-5);
 
-    if(logicalIndex == 0 || logicalIndex == 1)
+    if(logicalIndex != timelineSection_)
     {
        painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
        return;
@@ -1160,15 +1215,17 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
 
 void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
 {
-    painter->fillRect(rect.adjusted(0,2,0,-2),QColor(190,190,190));
+    //painter->fillRect(rect.adjusted(0,2,0,-2),QColor(190,190,190));
 
+    //render zoom rectangle
     if(inZoom_)
     {
-        UiLog().dbg() << "paint zoom";
         QRect zRect=rect;
         zRect.setLeft(zoomStartPos_.x());
         zRect.setRight(zoomEndPos_.x());
-        painter->fillRect(zRect,QColor(203,217,232));
+        painter->fillRect(zRect,zoomCol_);
+        painter->setPen(zoomCol_.darker(140));
+        painter->drawRect(zRect.adjusted(0,1,0,-2));
     }
 
     //period in secs
