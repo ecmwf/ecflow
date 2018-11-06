@@ -20,6 +20,7 @@
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
+#include "VSettings.hpp"
 
 #include "TimelineData.hpp"
 #include "TimelineWidget.hpp"
@@ -78,13 +79,10 @@ void TimelineItemWidget::load()
         if(VServer* vs=sh->vRoot())
         {
             logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
-
-            //logFile="/home/graphics/cgr/ecflow_dev/ecflow-metab.5062.ecf.log";
-
             w_->load(QString::fromStdString(sh->name()),
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
-                         logFile,-50000); //last 50000 rows are read
+                         logFile); //last 25 MB are read
         }
     }
 }
@@ -112,6 +110,20 @@ bool TimelineItemWidget::hasSameContents(VInfo_ptr info)
 //We are independent of the server's state
 void TimelineItemWidget::serverSyncFinished()
 {
+}
+
+void TimelineItemWidget::writeSettings(VComboSettings* vs)
+{
+    vs->beginGroup("timeline");
+    w_->writeSettings(vs);
+    vs->endGroup();
+}
+
+void TimelineItemWidget::readSettings(VComboSettings* vs)
+{
+    vs->beginGroup("timeline");
+    w_->readSettings(vs);
+    vs->endGroup();
 }
 
 static InfoPanelItemMaker<TimelineItemWidget> maker1("timeline");

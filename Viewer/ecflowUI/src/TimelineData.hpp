@@ -47,8 +47,8 @@ public:
 class TimelineData
 {
 public:
-    TimelineData() : startTime_(0), endTime_(0) {}
-    void loadLogFile(const std::string& logFile,int numOfRows);
+    TimelineData() : startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false) {}
+    void loadLogFile(const std::string& logFile,size_t maxReadSize);
     size_t size() const {return  items_.size();}
     const std::vector<TimelineItem>& items() const {return items_;}
     unsigned int startTime() const {return startTime_;}
@@ -57,6 +57,7 @@ public:
     QDateTime qEndTime() const {return TimelineItem::toQDateTime(endTime_);}
     void clear();    
     void setItemType(int index,TimelineItem::Type type);
+    bool isFullRead() const {return fullRead_;}
 
 protected:
     int indexOfItem(const std::string&);
@@ -73,6 +74,8 @@ protected:
     unsigned int startTime_;
     unsigned int endTime_;
     std::hash<std::string> pathHash_;
+    size_t maxReadSize_;
+    bool fullRead_;
 };
 
 

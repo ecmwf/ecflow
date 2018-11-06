@@ -26,6 +26,7 @@
 #include "TimelineView.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
+#include "ViewerUtil.hpp"
 #include "VNState.hpp"
 #include "WidgetNameProvider.hpp"
 
@@ -262,22 +263,16 @@ void TimelineInfoWidget::readSettings(QSettings& settings)
 {
     if(settings.contains("timeTreeColumnWidth"))
     {
-        QStringList lst=settings.value("timeTreeColumnWidth").toStringList();
-        for(int i=0; i < lst.count(); i++)
-            ui_->timeTree->setColumnWidth(i,lst[i].toInt());
-
-        if(lst.count() >= 2)
+        if(ViewerUtil::initTreeColumnWidth(settings,"timeTreeColumnWidth",ui_->timeTree))
+        {
             columnsAdjusted_=true;
+        }
     }
 }
 
 void TimelineInfoWidget::writeSettings(QSettings& settings)
 {
-    QStringList colW;
-    for(int i=0; i < model_->columnCount()-1; i++)
-        colW << QString::number(ui_->timeTree->columnWidth(i));
-
-    settings.setValue("timeTreeColumnWidth",colW);
+    ViewerUtil::saveTreeColumnWidth(settings,"timeTreeColumnWidth",ui_->timeTree);
 }
 
 //=======================================================

@@ -12,13 +12,16 @@
 #include <QtGlobal>
 #include <QFileInfo>
 
+#include "MainWindow.hpp"
 #include "ServerHandler.hpp"
 #include "TimelineData.hpp"
 #include "TimelineModel.hpp"
 #include "TimelineView.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
+#include "ViewerUtil.hpp"
 #include "VNode.hpp"
+#include "VSettings.hpp"
 
 #include "ui_TimelineWidget.h"
 
@@ -30,7 +33,7 @@
 
 TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
-    numOfRows_(0),
+    maxReadSize_(25*1024*1024),
     data_(0),
     ignoreTimeEdited_(false)
 {
@@ -48,14 +51,6 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     model_->setData(data_);
 
     view_=new TimelineView(sortModel_,this);
-    view_->setProperty("log","1");
-    view_->setProperty("log","1");
-    view_->setRootIsDecorated(false);
-    view_->setUniformRowHeights(true);
-    view_->setAlternatingRowColors(false);
-    //view_->setSortingEnabled(true);
-    //ui_->view->setItemDelegate(new LogDelegate(this));
-    view_->setContextMenuPolicy(Qt::ActionsContextMenu);
 
     ui_->viewHolderLayout->addWidget(view_);
 
@@ -116,8 +111,11 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(view_,SIGNAL(periodBeingZoomed(QDateTime,QDateTime)),
             this,SLOT(slotPeriodBeingZoomedInView(QDateTime,QDateTime)));
 
+    connect(view_,SIGNAL(lookupRequested(QString)),
+            this,SLOT(slotLookup(QString)));
 
-    //ui_->timeWidget->setStyleSheet("#timeWidget{background-color: rgb(212,212,212);}");
+    connect(view_,SIGNAL(copyPathRequested(QString)),
+            this,SLOT(slotCopyPath(QString)));
 }
 
 TimelineWidget::~TimelineWidget()
@@ -154,42 +152,26 @@ void TimelineWidget::updateInfoLabel()
          Viewer::formatBoldText(" Host: ",col) + host_ +
          Viewer::formatBoldText(" Port: ",col) + port_;
 
-#if 0
-    QDateTime startDt=viewHandler_->data()->startTime();
-    QDateTime endDt=viewHandler_->data()->endTime();
-    txt+=Viewer::formatBoldText(" Full period: ",col) +
-            startDt.toString("yyyy-MM-dd hh:mm:ss") + Viewer::formatBoldText(" to ",col) +
-            endDt.toString("yyyy-MM-dd hh:mm:ss");
-
-    int maxNum=viewHandler_->data()->maxNumOfRows();
-    int num=viewHandler_->data()->numOfRows();
-    if(maxNum != 0 && num == abs(maxNum))
+    if(!data_->isFullRead())
     {
         txt+=Viewer::formatBoldText(" Log entries: ",col) +
-           "last " + QString::number(abs(maxNum)) + " rows read (maximum reached)";
+           "parsed last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file (maximum reached)";
     }
-#endif
 
     ui_->logInfoLabel->setText(txt);
 
     checkButtonState();
-
-    //TODO: we need a better implementation
-   // ui_->timeWidget->hide();
 }
 
 void TimelineWidget::setAllVisible(bool b)
 {
-    //ui_->viewTab->setVisible(b);
-    //ui_->logView->setVisible(b);
-    //ui_->timeWidget->setVisible(b);
 }
 
 void TimelineWidget::slotReload()
 {
-    if(!serverName_.isEmpty() && numOfRows_ != 0)
+    if(!serverName_.isEmpty())
     {
-        load(serverName_, host_, port_, logFile_,numOfRows_);
+        load(serverName_, host_, port_, logFile_);
         checkButtonState();
     }
 }
@@ -233,9 +215,7 @@ void TimelineWidget::slotPathFilter(QString pattern)
 void TimelineWidget::slotStartChanged(const QDateTime& dt)
 {
     if(!ignoreTimeEdited_)
-    {
-        //model_->setStartDate(dt);
-        UiLog().dbg() << "new startdate=" << dt;
+    {        
         view_->setStartDate(dt);
     }
     checkButtonState();
@@ -273,6 +253,23 @@ void TimelineWidget::slotWholePeriod()
     checkButtonState();
 }
 
+void TimelineWidget::slotLookup(QString nodePath)
+{
+    if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
+    {
+        VInfo_ptr ni=VInfo::createFromPath(sh,nodePath.toStdString());
+        if(ni)
+        {
+            MainWindow::lookUpInTree(ni);
+        }
+    }
+}
+
+void TimelineWidget::slotCopyPath(QString nodePath)
+{
+    ViewerUtil::toClipboard(serverName_ + ":/" + nodePath);
+}
+
 void TimelineWidget::checkButtonState()
 {
      bool fromStart=(ui_->fromTimeEdit->dateTime() == data_->qStartTime());
@@ -283,12 +280,12 @@ void TimelineWidget::checkButtonState()
      ui_->wholePeriodTb->setEnabled(!fromStart || !toEnd);
 }
 
-void TimelineWidget::load(QString logFile,int numOfRows)
+void TimelineWidget::load(QString logFile)
 {
-    load("","","",logFile,numOfRows);
+    load("","","",logFile);
 }
 
-void TimelineWidget::load(QString serverName, QString host, QString port, QString logFile,int numOfRows)
+void TimelineWidget::load(QString serverName, QString host, QString port, QString logFile)
 {
     clear();
 
@@ -296,7 +293,6 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
     host_=host;
     port_=port;
     logFile_=logFile;
-    numOfRows_=numOfRows;
 
     updateInfoLabel();
 
@@ -323,8 +319,7 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
 
     try
     {
-        data_->loadLogFile(logFile_.toStdString(),numOfRows);
-        //viewHandler_->load(logFile_.toStdString(),numOfRows);
+        data_->loadLogFile(logFile_.toStdString(),maxReadSize_);
     }
     catch(std::runtime_error e)
     {
@@ -360,22 +355,18 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
 
     view_->setPeriod(data_->qStartTime(),data_->qEndTime());
 
-            //QDateTime::fromMSecsSinceTheEpoch(static_cast<qint64>data_->timeStart()*1000.
-
     model_->setData(data_);
-
-    //logModel_->loadFromFile(logFile_.toStdString(),viewHandler_->data()->startPos());
-
-    /*QDateTime startTime=viewHandler_->data()->startTime();
-    QDateTime endTime=viewHandler_->data()->endTime();
-    ui_->startTe->setMinimumDateTime(startTime);
-    ui_->startTe->setMaximumDateTime(endTime);
-    ui_->startTe->setDateTime(startTime);
-    ui_->endTe->setMinimumDateTime(startTime);
-    ui_->endTe->setMaximumDateTime(endTime);
-    ui_->endTe->setDateTime(endTime);*/
 
     updateInfoLabel();
 }
 
 
+void TimelineWidget::writeSettings(VComboSettings* vs)
+{
+    view_->writeSettings(vs);
+}
+
+void TimelineWidget::readSettings(VComboSettings* vs)
+{
+    view_->readSettings(vs);
+}

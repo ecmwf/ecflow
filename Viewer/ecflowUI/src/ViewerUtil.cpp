@@ -10,10 +10,12 @@
 
 #include "ViewerUtil.hpp"
 
+#include <QtGlobal>
 #include <QAbstractButton>
 #include <QAbstractItemModel>
 #include <QAction>
 #include <QButtonGroup>
+#include <QClipboard>
 #include <QComboBox>
 #include <QDebug>
 #include <QLabel>
@@ -22,6 +24,12 @@
 #include <QTabBar>
 #include <QTabWidget>
 #include <QTreeView>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QGuiApplication>
+#else
+#include <QApplication>
+#endif
 
 void ViewerUtil::initComboBox(QSettings& settings,QString key,QComboBox* cb)
 {
@@ -56,7 +64,7 @@ void ViewerUtil::initComboBoxByData(QString dataValue,QComboBox* cb)
         cb->setCurrentIndex(0);
 }
 
-void ViewerUtil::initTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree)
+bool ViewerUtil::initTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree)
 {
     Q_ASSERT(tree);
 
@@ -65,6 +73,8 @@ void ViewerUtil::initTreeColumnWidth(QSettings& settings,QString key,QTreeView *
     {
         tree->setColumnWidth(i,dataColumns[i].toInt());
     }
+
+    return (dataColumns.size() >= tree->model()->columnCount()-1);
 }
 
 void ViewerUtil::saveTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree)
@@ -135,3 +145,26 @@ QBrush ViewerUtil::lineEditBg(QColor col)
     grad.setColorAt(1,col);
     return QBrush(grad);
 }
+
+void ViewerUtil::toClipboard(QString txt)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QClipboard* cb=QGuiApplication::clipboard();
+    cb->setText(txt, QClipboard::Clipboard);
+    cb->setText(txt, QClipboard::Selection);
+#else
+    QClipboard* cb=QApplication::clipboard();
+    cb->setText(txt, QClipboard::Clipboard);
+    cb->setText(txt, QClipboard::Selection);
+#endif
+}
+
+QString ViewerUtil::fromClipboard()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    return QGuiApplication::clipboard()->text();
+#else
+    return QApplication::clipboard()->text();
+#endif
+}
+

@@ -104,7 +104,8 @@ Q_SIGNALS:
     void dashboardCommand(VInfo_ptr,QString);
     void periodSelected(QDateTime,QDateTime);
     void periodBeingZoomed(QDateTime,QDateTime);
-    //void headerButtonClicked(QString,QPoint);
+    void lookupRequested(QString);
+    void copyPathRequested(QString);
 
 protected:
     QModelIndexList selectedList();
@@ -113,6 +114,8 @@ protected:
     void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void setSortingEnabledNoExec(bool b);
     void showDetails(const QModelIndex& indexClicked);
+    void lookup(const QModelIndex&);
+    void copyPath(const QModelIndex&);
 
     TimelineSortModel* model_;
     ActionHandler* actionHandler_;
@@ -179,8 +182,6 @@ protected:
     QColor zoomCol_;
     int timelineSection_;
     int timelineFrameSize_;
-
-    //mutable QMap<int,TableNodeHeaderButton> customButton_;
 };
 
 #endif // TIMELINEVIEW_HPP

@@ -17,6 +17,7 @@ class TimelineData;
 class TimelineModel;
 class TimelineSortModel;
 class TimelineView;
+class VComboSettings;
 
 namespace Ui {
     class TimelineWidget;
@@ -32,9 +33,12 @@ public:
     ~TimelineWidget();
 
     void clear();
-    void load(QString logFile,int numOfRows=0);
-    void load(QString serverName, QString host, QString port, QString logFile,int numOfRows=0);
+    void load(QString logFile);
+    void load(QString serverName, QString host, QString port, QString logFile);
     QString logFile() const {return logFile_;}
+
+    void writeSettings(VComboSettings* vs);
+    void readSettings(VComboSettings* vs);
 
 protected Q_SLOTS:
    void slotReload();
@@ -47,6 +51,8 @@ protected Q_SLOTS:
    void slotTaskOnly(bool);
    void slotPeriodSelectedInView(QDateTime,QDateTime);
    void slotPeriodBeingZoomedInView(QDateTime,QDateTime);
+   void slotLookup(QString);
+   void slotCopyPath(QString);
 
 private:
     void load();
@@ -59,7 +65,7 @@ private:
     QString host_;
     QString port_;
     QString logFile_;
-    int numOfRows_;
+    size_t maxReadSize_;
 
     TimelineData* data_;
     TimelineModel* model_;

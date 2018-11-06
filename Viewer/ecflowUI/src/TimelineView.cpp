@@ -28,6 +28,7 @@
 #include "TimelineModel.hpp"
 #include "TimelineInfoWidget.hpp"
 #include "UiLog.hpp"
+#include "ViewerUtil.hpp"
 #include "VFilter.hpp"
 #include "VNState.hpp"
 #include "VSettings.hpp"
@@ -44,7 +45,6 @@ static std::vector<std::string> propVec;
 
 TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     model_(model),
-    //borderPen_(QPen(QColor(230,230,230)))
     borderPen_(QPen(QColor(216,216,216)))
 {
     Q_ASSERT(model_);
@@ -139,8 +139,8 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         QRect bgRect=option.rect;
         painter->fillRect(bgRect,QColor(244,244,245));
         painter->setPen(borderPen_);
-        painter->drawLine(bgRect.x()+bgRect.width(),bgRect.top(),
-                          bgRect.x()+bgRect.width(),bgRect.bottom());
+        painter->drawLine(bgRect.x()+bgRect.width()-1,bgRect.top(),
+                          bgRect.x()+bgRect.width()-1,bgRect.bottom());
 
         QString text=index.data(Qt::DisplayRole).toString();
         QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
@@ -317,9 +317,9 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
      setCurrentIsRunning_(false)
 {
     setObjectName("view");
-    setProperty("style","nodeView");
-    setProperty("view","table");
-
+    //setProperty("style","nodeView");
+    //setProperty("view","table");
+    setProperty("log","1");
     setRootIsDecorated(false);
 
     //We enable sorting but do not want to perform it immediately
@@ -330,6 +330,7 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
 
     setAllColumnsShowFocus(true);
     setUniformRowHeights(true);
+    setAlternatingRowColors(false);
     setMouseTracking(true);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -352,7 +353,7 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
             this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
-    actionHandler_=new ActionHandler(this,this);
+   // actionHandler_=new ActionHandler(this,this);
 
     //expandAll();
 
@@ -362,13 +363,13 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     setHeader(header_);
 
     //Set header ContextMenuPolicy
-    header_->setContextMenuPolicy(Qt::CustomContextMenu);
+    //header_->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    connect(header_,SIGNAL(customContextMenuRequested(const QPoint &)),
-                this, SLOT(slotHeaderContextMenu(const QPoint &)));
+    //connect(header_,SIGNAL(customContextMenuRequested(const QPoint &)),
+    //            this, SLOT(slotHeaderContextMenu(const QPoint &)));
 
-    connect(header_,SIGNAL(customButtonClicked(QString,QPoint)),
-            this,SIGNAL(headerButtonClicked(QString,QPoint)));
+    //connect(header_,SIGNAL(customButtonClicked(QString,QPoint)),
+    //        this,SIGNAL(headerButtonClicked(QString,QPoint)));
 
     connect(header_,SIGNAL(periodSelected(QDateTime,QDateTime)),
             this,SLOT(periodSelectedInHeader(QDateTime,QDateTime)));
@@ -406,17 +407,6 @@ TimelineView::~TimelineView()
 {
     delete prop_;
 }
-
-#if 0
-void TimelineView::setModel(TableNodeSortModel *model)
-{
-    model_= model;
-
-    //Set the model.
-    QTreeView::setModel(model_);
-}
-#endif
-
 
 //Enable sorting without actually performing it!!!
 void TimelineView::setSortingEnabledNoExec(bool b)
@@ -466,10 +456,6 @@ void TimelineView::selectionChanged(const QItemSelection &selected, const QItemS
         }
     }
     QTreeView::selectionChanged(selected, deselected);
-
-    //The model has to know about the selection in order to manage the
-    //nodes that are forced to be shown
-    model_->selectionChanged(lst);
 #endif
 }
 
@@ -514,12 +500,9 @@ void TimelineView::slotDoubleClickItem(const QModelIndex& idx)
 
 void TimelineView::slotContextMenu(const QPoint &position)
 {
-    UiLog().dbg() << "contextmenu called";
-
     QModelIndexList lst=selectedList();
     //QModelIndex index=indexAt(position);
     QPoint scrollOffset(horizontalScrollBar()->value(),verticalScrollBar()->value());
-
     handleContextMenu(indexAt(position),lst,mapToGlobal(position),position+scrollOffset,this);
 }
 
@@ -529,47 +512,49 @@ void TimelineView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
     if(!indexClicked.isValid())
         return;
 
-    QAction *acDetails=new QAction(this);
-    acDetails->setText("Details");
-    acDetails->setData("details");
-
     QMenu *menu=new QMenu(this);
-    menu->addAction(acDetails);
+
+    QAction *ac=new QAction(this);
+    ac->setText(tr("Show details"));
+    QFont fBold;
+    fBold.setBold(true);
+    ac->setFont(fBold); //default action with double click
+    ac->setData("details");
+    menu->addAction(ac);
+
+    ac=new QAction(this);
+    ac->setSeparator(true);
+    menu->addAction(ac);
+
+    ac=new QAction(this);
+    ac->setText(tr("Lookup in tree"));
+    ac->setData("lookup");
+    menu->addAction(ac);
+
+    ac=new QAction(this);
+    ac->setText(tr("Copy node path"));
+    ac->setData("copy");
+    menu->addAction(ac);
 
     //Show the context menu and check selected action
-    QAction* ac=menu->exec(globalPos);
+    ac=menu->exec(globalPos);
     if(ac && ac->isEnabled() && !ac->isSeparator())
     {
         if(ac->data().toString() == "details")
         {
             showDetails(indexClicked);
         }
+        else if(ac->data().toString() == "lookup")
+        {
+            lookup(indexClicked);
+        }
+        else if(ac->data().toString() == "copy")
+        {
+            copyPath(indexClicked);
+        }
     }
 
     delete menu;
-
-#if 0
-    //Node actions
-        if(indexClicked.isValid() && indexClicked.column() == 0)   //indexLst[0].isValid() && indexLst[0].column() == 0)
-        {
-            UiLog().dbg()  << "context menu " << indexClicked;
-
-            std::vector<VInfo_ptr> nodeLst;
-            for(int i=0; i < indexLst.count(); i++)
-            {
-                VInfo_ptr info=model_->nodeInfo(indexLst[i]);
-                if(!info->isEmpty())
-                    nodeLst.push_back(info);
-            }
-
-            actionHandler_->contextMenu(nodeLst,globalPos);
-        }
-
-        //Desktop actions
-        else
-        {
-        }
-#endif
 }
 
 void TimelineView::showDetails(const QModelIndex& indexClicked)
@@ -578,13 +563,31 @@ void TimelineView::showDetails(const QModelIndex& indexClicked)
     if(!idx.isValid())
         return;
 
-    UiLog().dbg() << "row=" << idx.row() << " " << model_->data(model_->index(indexClicked.row(),0)).toString();
-
     TimelineInfoDialog diag(this);
     diag.infoW_->load("host","port",model_->tlModel()->data(),idx.row(),
                       header_->startDate(),header_->endDate());
 
     diag.exec();
+}
+
+void TimelineView::lookup(const QModelIndex &indexClicked)
+{
+    QModelIndex idx=model_->mapToSource(indexClicked);
+    if(!idx.isValid())
+        return;
+
+    QString nodePath=QString::fromStdString(model_->tlModel()->data()->items()[idx.row()].path());
+    Q_EMIT(lookupRequested(nodePath));
+}
+
+void TimelineView::copyPath(const QModelIndex &indexClicked)
+{
+    QModelIndex idx=model_->mapToSource(indexClicked);
+    if(!idx.isValid())
+        return;
+
+    QString nodePath=QString::fromStdString(model_->tlModel()->data()->items()[idx.row()].path());
+    Q_EMIT(copyPathRequested(nodePath));
 }
 
 void TimelineView::slotViewCommand(VInfo_ptr info,QString cmd)
@@ -666,125 +669,36 @@ void TimelineView::setPeriod(QDateTime t1,QDateTime t2)
 
 void TimelineView::slotHeaderContextMenu(const QPoint &position)
 {
-#if 0
-    int section=header_->logicalIndexAt(position);
-
-    if(section< 0 || section >= header_->count())
-        return;
-
-    int visCnt=0;
-    for(int i=0; i <header_->count(); i++)
-    {
-        if(!header_->isSectionHidden(i))
-            visCnt++;
-    }
-
-    QList<QAction*> lst;
-    QMenu *menu=new QMenu(this);
-    QAction *ac;
-
-    for(int i=0; i <header_->count(); i++)
-    {
-        QString name=header_->model()->headerData(i,Qt::Horizontal).toString();
-        ac=new QAction(menu);
-        ac->setText(name);
-        ac->setCheckable(true);
-        ac->setData(i);
-
-        bool vis=!header_->isSectionHidden(i);
-        ac->setChecked(vis);
-
-        if(vis && visCnt <=1)
-        {
-            ac->setEnabled(false);
-        }
-
-        menu->addAction(ac);
-    }
-
-    //stateFilterMenu_=new StateFilterMenu(menuState,filter_->menu());
-    //VParamFilterMenu stateFilterMenu(menu,filterDef_->nodeState(),VParamFilterMenu::ColourDecor);
-
-    ac=menu->exec(header_->mapToGlobal(position));
-    if(ac && ac->isEnabled() && ac->isCheckable())
-    {
-        int i=ac->data().toInt();
-        header_->setSectionHidden(i,!ac->isChecked());
-    }
-    delete menu;
-
-#endif
 }
 
 void TimelineView::readSettings(VSettings* vs)
 {
-#if 0
-    vs->beginGroup("column");
-
-    std::vector<std::string> orderVec;
-    std::vector<int> visVec, wVec;
-
-    vs->get("order",orderVec);
-    vs->get("visible",visVec);
+    vs->beginGroup("view");
+    std::vector<int> wVec;
     vs->get("width",wVec);
-
     vs->endGroup();
 
-    if(orderVec.size() != visVec.size() || orderVec.size() != wVec.size())
-        return;
-
-    for(size_t i=0; i < orderVec.size(); i++)
+    for(size_t i=0; i < wVec.size() && i < static_cast<size_t>(model_->columnCount()); i++)
     {
-        std::string id=orderVec[i];
-        for(int j=0; j < model_->columnCount(QModelIndex()); j++)
-        {
-            if(model_->headerData(j,Qt::Horizontal,Qt::UserRole).toString().toStdString() == id)
-            {
-                if(visVec[i] == 0)
-                    header()->setSectionHidden(j,true);
-
-                else if(wVec[i] > 0)
-                    setColumnWidth(j,wVec[i]);
-
-                break;
-            }
-        }
+        if(wVec[i] > 0)
+            setColumnWidth(i,wVec[i]);
     }
-
-    if(header_->count() > 0)
-    {
-        int visCnt=0;
-        for(int i=0; i < header_->count(); i++)
-            if(!header_->isSectionHidden(i))
-                visCnt++;
-
-        if(visCnt==0)
-            header()->setSectionHidden(0,false);
-    }
-#endif
 }
 
 void TimelineView::writeSettings(VSettings* vs)
-{
-#if 0
-    vs->beginGroup("column");
+{   
+    vs->beginGroup("view");
 
-    std::vector<std::string> orderVec;
-    std::vector<int> visVec, wVec;
+    std::vector<int> wVec;
     for(int i=0; i < model_->columnCount(QModelIndex()); i++)
-    {
-        std::string id=model_->headerData(i,Qt::Horizontal,Qt::UserRole).toString().toStdString();
-        orderVec.push_back(id);
-        visVec.push_back((header()->isSectionHidden(i))?0:1);
+    {      
         wVec.push_back(columnWidth(i));
     }
 
-    vs->put("order",orderVec);
-    vs->put("visible",visVec);
     vs->put("width",wVec);
 
     vs->endGroup();
-#endif
+
 }
 
 //=========================================
