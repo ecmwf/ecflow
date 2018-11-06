@@ -1,0 +1,3 @@
+# test missnamed include
+%includeblahblah <good_head.h>
+%includeblah <good_tail.h>

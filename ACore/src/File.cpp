@@ -625,7 +625,6 @@ std::string File::backwardSearch( const std::string& rootPath, const std::string
 	//   	<root-path>/family/family2/task.ecf
 	//  	<root-path>/family2/task.ecf
 	//   	<root-path>/task.ecf
-	// See page 21 of SMS user guide
 
 	vector<std::string> nodePathTokens;
 	NodePath::split(nodePath, nodePathTokens);
@@ -679,6 +678,75 @@ std::string File::backwardSearch( const std::string& rootPath, const std::string
 
 	// failed to find file via backward search
 	return string();
+}
+
+std::string File::forwardSearch( const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn )
+{
+   /// Do a forward search of rootPath + nodePath + fileExtn
+   /// If task path if of the form /suite/family/family2/task, then we keep
+   /// on consuming the last path token this should leave:
+   ///   <root-path>/suite/family/family2/task.ecf
+   ///   <root-path>/suite/family/task.ecf
+   ///   <root-path>/suite/task.ecf
+   ///   <root-path>/task.ecf
+
+   vector<std::string> nodePathTokens;
+   NodePath::split(nodePath, nodePathTokens);
+   LOG_ASSERT(!nodePathTokens.empty(),"");
+
+   std::string leafName;
+   if ( !nodePathTokens.empty() )  leafName = nodePathTokens[ nodePathTokens.size() -1 ] ;
+
+#ifdef DEBUG_TASK_LOCATION
+   cout << "forwardSearch Node " << nodePath << " using root path " << rootPath << " nodePathTokens.size() = " << nodePathTokens.size() << "\n";
+#endif
+   while ( nodePathTokens.size() > 0 ) {
+
+      // Reconstitute the path
+      std::string path = NodePath::createPath( nodePathTokens ) ;
+      path += fileExtn; // .ecf, .man , etc
+
+      std::string combinedPath = rootPath;
+      combinedPath += path;
+
+      try {
+         if ( fs::exists( combinedPath )) {
+#ifdef DEBUG_TASK_LOCATION
+            cout << "forwardSearch Node " << nodePath << " the path " << combinedPath << " exists\n";
+#endif
+            return combinedPath;
+         }
+#ifdef DEBUG_TASK_LOCATION
+         else  cout << " forwardSearch Node " << nodePath << " the path " << combinedPath << " DOEST NOT EXIST\n";
+#endif
+      }
+      catch (fs::filesystem_error& e) {
+#ifdef DEBUG_TASK_LOCATION
+         std::cout << "Task::forwardSearch Caught exception for fs::exists('" << combinedPath <<"')\n" << e.what() << "\n";
+#endif
+      }
+
+      if ( nodePathTokens.size() >= 2  ) {
+         nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size()-2); // consume one from last path token
+      }
+      else {
+         nodePathTokens.erase(nodePathTokens.end());
+      }
+   }
+
+   // Look for file in the root path
+   std::string ecf_file = leafName + fileExtn;
+   fs::path ecf_filePath = fs::path( fs::path(rootPath) / ecf_file );
+   if (fs::exists(ecf_filePath)) {
+#ifdef DEBUG_TASK_LOCATION
+      std::cout << "forwardSearch Node " << leafName << " Found " << ecf_file << " in root path '" << rootPath << "'\n";
+#endif
+      std::string result = ecf_filePath.string(); // is returned by reference hence must take a copy
+      return result ;
+   }
+
+   // failed to find file via forward search
+   return string();
 }
 
 // Remove a directory recursively ****
