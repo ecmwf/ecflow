@@ -155,6 +155,7 @@ set(viewer_srcs
     TextFilterHandlerDialog.cpp
     TextFilterWidget.cpp   
     TimeItemWidget.cpp
+    TimelineInfoDelegate.cpp
     TimelineInfoWidget.cpp
     TimelineItemWidget.cpp
     TimelineData.cpp

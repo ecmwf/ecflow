@@ -11,6 +11,7 @@
 #define TIMELINEINFOWIDGET_HPP
 
 #include <QDialog>
+#include <QSettings>
 #include <QWidget>
 #include <QAbstractItemModel>
 
@@ -40,38 +41,37 @@ public:
     QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
     QModelIndex parent (const QModelIndex & ) const;
 
-    void setData(TimelineItem*);
+    void setData(TimelineItem*,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
+                 unsigned int endDateSec);
     void clearData();
     bool hasData() const;
 
 protected:
     TimelineItem* data_;
+    unsigned int viewStartDateSec_;
+    unsigned int viewEndDateSec_;
+    unsigned int endDateSec_;
 };
 
-
-class TimelineInfoWidget;
-
-class TimelineInfoDialog : public QDialog
-{
-public:
-    TimelineInfoDialog(QWidget* parent=0);
-    TimelineInfoWidget* infoW_;
-};
 
 //the main widget containing all components
 class TimelineInfoWidget : public QWidget
 {
 Q_OBJECT
 
+   friend class TimelineInfoDialog;
+
 public:
     explicit TimelineInfoWidget(QWidget *parent=0);
     ~TimelineInfoWidget() {}
 
     void clear() {}
-    void load(QString host,QString port,const TimelineItem& data);
+    void load(QString host,QString port,TimelineData*,int,QDateTime,QDateTime);
 
 private:
     void updateInfoLabel() {}
+    void readSettings(QSettings& settings);
+    void writeSettings(QSettings& settings);
 
     Ui::TimelineInfoWidget* ui_;
     QString serverName_;
@@ -83,6 +83,22 @@ private:
     TimelineItem data_;
     int currentRow_;
     TimelineInfoModel* model_;
+
+    static bool columnsAdjusted_;
+};
+
+class TimelineInfoDialog : public QDialog
+{
+public:
+    TimelineInfoDialog(QWidget* parent=0);
+    ~TimelineInfoDialog();
+
+    TimelineInfoWidget* infoW_;
+
+protected:
+    void closeEvent(QCloseEvent * event);
+    void readSettings();
+    void writeSettings();
 };
 
 #endif // TIMELINEINFOWIDGET_HPP

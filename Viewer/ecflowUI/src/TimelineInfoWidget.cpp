@@ -10,39 +10,26 @@
 #include "TimelineInfoWidget.hpp"
 
 #include <QtGlobal>
+#include <QCloseEvent>
+#include <QDialogButtonBox>
 #include <QFileInfo>
+#include <QPainter>
+#include <QSettings>
 #include <QToolButton>
 #include <QVBoxLayout>
 
+#include "SessionHandler.hpp"
+#include "TextFormat.hpp"
 #include "TimelineData.hpp"
+#include "TimelineInfoDelegate.hpp"
 #include "TimelineModel.hpp"
 #include "TimelineView.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "VNState.hpp"
+#include "WidgetNameProvider.hpp"
 
 #include "ui_TimelineInfoWidget.h"
-
-//=======================================================
-//
-// TimelineInfoDialog
-//
-//=======================================================
-
-TimelineInfoDialog::TimelineInfoDialog(QWidget* parent) : QDialog(parent)
-{
-        QVBoxLayout *vb=new QVBoxLayout(this);
-        infoW_=new TimelineInfoWidget(this);
-        vb->addWidget(infoW_);
-
-        QToolButton *closeTb=new QToolButton(this);
-        closeTb->setText("Close");
-        vb->addWidget(closeTb);
-
-        connect(closeTb,SIGNAL(clicked()),
-                this,SLOT(reject()));
-}
-
 
 //=======================================================
 //
@@ -59,9 +46,13 @@ TimelineInfoModel::~TimelineInfoModel()
 {
 }
 
-void TimelineInfoModel::setData(TimelineItem *data)
+void TimelineInfoModel::setData(TimelineItem *data,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
+                                unsigned int endDateSec)
 {
     beginResetModel();
+    viewStartDateSec_=viewStartDateSec;
+    viewEndDateSec_=viewEndDateSec;
+    endDateSec_=endDateSec;
     data_=data;
     endResetModel();
 }
@@ -116,32 +107,51 @@ QVariant TimelineInfoModel::data( const QModelIndex& index, int role ) const
     if(role == Qt::DisplayRole)
     {
         if(index.column() == 0)
-        {
-            return TimelineItem::toQDateTime(data_->start_[row]).toString("hh:mm:ss dd/MM/yyyy");
+        {          
+            return TimelineItem::toQDateTime(data_->start_[row]).toString("hh:mm:ss dd-MMM-yyyy");
         }
         else if(index.column() == 1)
-        {
-            //UiLog().dbg() << "xp=" << xp << " time=" << data->items()[row].start_[i];
+        {            
             if(VNState* vn=VNState::find(data_->status_[row]))
             {
                 return vn->name();
             }
         }
-        else
-            return QVariant();
+        else if(index.column() == 2)
+        {
+            qint64 dSec=-1;
+            if(row != static_cast<int>(data_->size())-1)
+            {
+                dSec=data_->start_[row+1]-data_->start_[row];
+            }
+            else
+            {
+                dSec=endDateSec_-data_->start_[row];
+            }
+
+            if(dSec >=0)
+            {
+                if(dSec < 60)
+                    return QString::number(dSec)  + "s";
+                else if (dSec < 3600)
+                    return QString::number(dSec / 60)  + "m " + QString::number(dSec % 60)  + "s";
+                else
+                    return "> 1h";
+            }
+        }
     }
 
     if(role == Qt::BackgroundRole)
     {
        if(index.column() == 1)
-       {
-            //UiLog().dbg() << "xp=" << xp << " time=" << data->items()[row].start_[i];
+       {          
             if(VNState* vn=VNState::find(data_->status_[row]))
             {
                 return vn->colour();
             }
        }
     }
+
     return QVariant();
 }
 
@@ -155,11 +165,11 @@ QVariant TimelineInfoModel::headerData( const int section, const Qt::Orientation
         switch(section)
         {
         case 0:
-            return "When";
+            return "Date";
         case 1:
-            return "Became";
+            return "State";
         case 2:
-            return "Time";
+            return "Duration in state";
         default:
             return QVariant();
         }
@@ -197,26 +207,155 @@ QModelIndex TimelineInfoModel::parent(const QModelIndex &child) const
 //
 //=======================================================
 
+bool TimelineInfoWidget::columnsAdjusted_=false;
+
 TimelineInfoWidget::TimelineInfoWidget(QWidget *parent) :
     ui_(new Ui::TimelineInfoWidget),
     numOfRows_(0)
 {
     ui_->setupUi(this);
 
-    //message label
-    //ui_->messageLabel->hide();
+    //title
+    ui_->titleLabel->setProperty("fileInfo","1");
+    ui_->titleLabel->setWordWrap(true);
+    ui_->titleLabel->setMargin(2);
+    ui_->titleLabel->setAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+    ui_->titleLabel->setAutoFillBackground(true);
+    ui_->titleLabel->setFrameShape(QFrame::StyledPanel);
+    ui_->titleLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
-    //the models
+    ui_->summaryLabel->hide();
+
+    TimelineInfoDelegate *delegate=new TimelineInfoDelegate(this);
+    ui_->timeTree->setItemDelegate(delegate);
+
     model_=new TimelineInfoModel(this);
-
     ui_->timeTree->setModel(model_);
 }
 
-void TimelineInfoWidget::load(QString host, QString port,const TimelineItem& data)
+void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, int itemIndex,QDateTime viewStartDate,
+                              QDateTime viewEndDate)
 {
+    Q_ASSERT(tlData);
     host_=host;
     port_=port;
-    data_=data;
+    data_=tlData->items()[itemIndex];
 
-    model_->setData(&data_);
+    QColor col(39,49,101);
+    QColor colText(30,30,30);
+    QString title=Viewer::formatBoldText("Node:",col) + QString::fromStdString(data_.path());
+
+    ui_->titleLabel->setText(title);
+
+    model_->setData(&data_,viewStartDate.toMSecsSinceEpoch()/1000,
+                    viewEndDate.toMSecsSinceEpoch()/1000,tlData->endTime());
+
+    if(!columnsAdjusted_)
+    {
+        ui_->timeTree->resizeColumnToContents(0);
+        ui_->timeTree->resizeColumnToContents(1);
+        columnsAdjusted_=true;
+    }
+}
+
+void TimelineInfoWidget::readSettings(QSettings& settings)
+{
+    if(settings.contains("timeTreeColumnWidth"))
+    {
+        QStringList lst=settings.value("timeTreeColumnWidth").toStringList();
+        for(int i=0; i < lst.count(); i++)
+            ui_->timeTree->setColumnWidth(i,lst[i].toInt());
+
+        if(lst.count() >= 2)
+            columnsAdjusted_=true;
+    }
+}
+
+void TimelineInfoWidget::writeSettings(QSettings& settings)
+{
+    QStringList colW;
+    for(int i=0; i < model_->columnCount()-1; i++)
+        colW << QString::number(ui_->timeTree->columnWidth(i));
+
+    settings.setValue("timeTreeColumnWidth",colW);
+}
+
+//=======================================================
+//
+// TimelineInfoDialog
+//
+//=======================================================
+
+TimelineInfoDialog::TimelineInfoDialog(QWidget* parent) : QDialog(parent)
+{
+    setWindowTitle(tr("ecFlowUI - Timeline details"));
+
+    QVBoxLayout *vb=new QVBoxLayout(this);
+    vb->setContentsMargins(4,4,4,4);
+
+    infoW_=new TimelineInfoWidget(this);
+    vb->addWidget(infoW_);
+
+    QDialogButtonBox *buttonBox=new QDialogButtonBox(this);
+    vb->addWidget(buttonBox);
+
+    buttonBox->addButton(QDialogButtonBox::Close);
+
+    connect(buttonBox,SIGNAL(rejected()),
+            this,SLOT(reject()));
+
+    readSettings();
+
+    WidgetNameProvider::nameChildren(this);
+}
+
+TimelineInfoDialog::~TimelineInfoDialog()
+{
+    writeSettings();
+}
+
+void TimelineInfoDialog::closeEvent(QCloseEvent * event)
+{
+    event->accept();
+    writeSettings();
+}
+
+void TimelineInfoDialog::writeSettings()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TimelineInfoDialog")),
+                       QSettings::NativeFormat);
+
+    //We have to clear it so that should not remember all the previous values
+    settings.clear();
+
+    settings.beginGroup("main");
+    settings.setValue("size",size());
+
+    infoW_->writeSettings(settings);
+
+    settings.endGroup();
+}
+
+void TimelineInfoDialog::readSettings()
+{
+    SessionItem* cs=SessionHandler::instance()->current();
+    Q_ASSERT(cs);
+    QSettings settings(QString::fromStdString(cs->qtSettingsFile("TimelineInfoDialog")),
+                       QSettings::NativeFormat);
+
+    settings.beginGroup("main");
+    if(settings.contains("size"))
+    {
+        resize(settings.value("size").toSize());
+    }
+    else
+    {
+        resize(QSize(480,420));
+    }
+
+    infoW_->readSettings(settings);
+
+    settings.endGroup();
 }

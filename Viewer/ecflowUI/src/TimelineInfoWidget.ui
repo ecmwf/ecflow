@@ -22,7 +22,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="timeTree"/>
+    <widget class="QTreeView" name="timeTree">
+     <property name="rootIsDecorated">
+      <bool>false</bool>
+     </property>
+     <property name="uniformRowHeights">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
    <item>
     <widget class="QLabel" name="summaryLabel">

@@ -12,14 +12,15 @@
 #include <QtGlobal>
 #include <QFileInfo>
 
+#include "ServerHandler.hpp"
 #include "TimelineData.hpp"
 #include "TimelineModel.hpp"
 #include "TimelineView.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
+#include "VNode.hpp"
 
 #include "ui_TimelineWidget.h"
-
 
 //=======================================================
 //
@@ -84,6 +85,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     ui_->pathFilterLe->setClearButtonEnabled(true);
 #endif
+
+    ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
+    ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
 
     connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
             this,SLOT(slotPathFilter(QString)));
@@ -328,6 +332,23 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
         setAllVisible(false);
     }
 
+    //Determine missing types
+    if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
+    {
+        for(size_t i=0; i < data_->items().size() ;i++)
+        {
+            if(data_->items()[i].type() == TimelineItem::UndeterminedType)
+            {
+                if(VNode *vn=sh->vRoot()->find(data_->items()[i].path()))
+                {
+                    if(vn->isTask())
+                       data_->setItemType(i,TimelineItem::TaskType);
+                    else if(vn->isFamily())
+                       data_->setItemType(i,TimelineItem::FamilyType);
+                }
+            }
+        }
+    }
 
     ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
     ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());

@@ -26,8 +26,9 @@
 #include "TimelineData.hpp"
 #include "VNState.hpp"
 
-TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type) :
+TimelineItem::TimelineItem(const std::string& path,size_t pathHash,unsigned char status,unsigned int time,Type type) :
     path_(path),
+    pathHash_(pathHash),
     type_(type)
 {
     add(status,time);
@@ -49,6 +50,11 @@ void TimelineData::clear()
     startTime_=0;
     endTime_=0;
     items_=std::vector<TimelineItem>();
+}
+
+void TimelineData::setItemType(int index,TimelineItem::Type type)
+{
+    items_[index].type_=type;
 }
 
 void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
@@ -243,7 +249,7 @@ void TimelineData::loadLogFile(const std::string& logFile,int numOfRows)
         }
         else
         {                               
-            items_.push_back(TimelineItem(name,statusId,statusTime,
+            items_.push_back(TimelineItem(name,pathHash_(name),statusId,statusTime,
                                           guessNodeType(line,name,status,next_ws)));
         }
 
@@ -306,11 +312,31 @@ TimelineItem::Type TimelineData::guessNodeType(const std::string& line,
 
 int TimelineData::indexOfItem(const std::string& p)
 {
+    size_t hval=pathHash_(p);
+    bool redo=false;
     for(size_t i=0; i < items_.size(); i++)
     {
-        if(items_[i].path() == p)
-            return i;
+        if(items_[i].pathHash_ == hval)
+        {
+            if(items_[i].path_ == p)
+                return i;
+            else
+            {
+                redo=true;
+                break;
+            }
+        }
     }
+
+    if(redo)
+    {
+        for(size_t i=0; i < items_.size(); i++)
+        {
+            if(items_[i].path_ == p)
+                    return i;
+        }
+    }
+
     return -1;
 }
 

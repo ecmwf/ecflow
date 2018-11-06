@@ -137,6 +137,8 @@ public:
     void setStartDate(QDateTime);
     void setEndDate(QDateTime);
     void setPeriod(QDateTime t1,QDateTime t2);
+    QDateTime startDate() const {return startDate_;}
+    QDateTime endDate() const {return endDate_;}
 
 protected Q_SLOTS:
     void slotSectionResized(int i);
