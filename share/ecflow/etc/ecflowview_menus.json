@@ -849,7 +849,7 @@
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "label or meter or limit or trigger or var or genvar",
+            "visible_for"    : "label or meter or event or limit or trigger or var or genvar",
             "command"        : "edit",
             "multi"          : "false",
             "handler"        : "tree",

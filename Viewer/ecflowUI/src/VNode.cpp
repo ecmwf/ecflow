@@ -44,13 +44,15 @@
 
 #define _UI_VNODE_DEBUG
 
-
 //For a given node this class stores all the nodes that this node itself triggers.
 //For memory efficiency we only store the AttributeFilterindex of the nodes not the pointers themselves.
 class VNodeTriggerData
 {
 public:
-    std::vector<int> data_;
+    std::vector<int> data_;   
+    std::map<std::string, std::vector<int> > eventData_;
+
+    //std::vector<int> attr_;
 
     void get(VNode* node ,TriggerCollector* tc)
     {
@@ -62,16 +64,45 @@ public:
             tc->add(triggered,0,TriggerCollector::Normal);
         }
     }
-    void add(VItem* n)
+
+    void getEvent(VNode* node ,const std::string& eventName,std::vector<std::string> &res)
     {
-        assert(n);
-        VNode* node=n->isNode();
-        assert(node);
-        data_.push_back(node->index());
+        std::map<std::string,std::vector<int> >::const_iterator it=eventData_.find(eventName);
+        if(it != eventData_.end())
+        {
+            VServer* s=node->root();
+            for(size_t i=0; i < it->second.size(); i++)
+            {
+                if(VNode* triggeredNode=s->nodeAt((it->second)[i]))
+                    res.push_back(triggeredNode->absNodePath());
+            }
+        }
     }
 
-    void add(VItem* /*triggered*/,VItem* /*trigger*/)
+    void add(VItem* triggered)
     {
+        assert(triggered);
+        VNode* triggeredNode=triggered->isNode();
+        assert(triggeredNode);
+        data_.push_back(triggeredNode->index());
+    }
+
+    void add(VItem* triggered,VAttribute* trigger)
+    {
+        static VAttributeType *eventType=NULL;
+        if(!eventType)
+            eventType=VAttributeType::find("event");
+
+        assert(trigger);
+        assert(triggered);
+        VNode* triggeredNode=triggered->isNode();
+        assert(triggeredNode);
+
+        //We only store the events
+        if(trigger->type() == eventType)
+        {
+            eventData_[trigger->strName()].push_back(triggeredNode->index());
+        }
     }
 };
 
@@ -1047,7 +1078,7 @@ void VNode::addTriggeredData(VItem* n)
     data_->add(n);
 }
 
-void VNode::addTriggeredData(VItem* triggered,VItem* trigger)
+void VNode::addTriggeredData(VItem* triggered,VAttribute* trigger)
 {
     if(!data_)
        data_=new VNodeTriggerData;
@@ -1097,6 +1128,23 @@ void VNode::triggeredByChildren(VNode *n,VNode* p,TriggerCollector* tlc)
         triggeredByChildren(n,p->children_[i],tlc);
     }
 }
+
+
+void VNode::triggeredByEvent(const std::string& name,std::vector<std::string>& triggeredVec,TriggeredScanner* scanner)
+{
+   if(scanner && !root()->triggeredScanned())
+   {
+       //unsigned int aNum=VAttribute::totalNum();
+       scanner->start(root());
+       root()->setTriggeredScanned(true);
+       //assert(aNum == VAttribute::totalNum());
+   }
+
+   //Get the nodes directly triggered by this event
+   if(data_)
+       data_->getEvent(this,name,triggeredVec);
+}
+
 
 VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
 {
@@ -1538,7 +1586,9 @@ void VServer::scan(VNode *node,bool hasNotifications)
 
     //Preallocates the children vector to the reqiuired size to save memory.
     if(nodes.size() > 0)
+    {
         node->children_.reserve(nodes.size());
+    }
 
 	for(std::vector<node_ptr>::const_iterator it=nodes.begin(); it != nodes.end(); ++it)
 	{

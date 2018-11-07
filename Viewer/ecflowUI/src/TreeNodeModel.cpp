@@ -365,7 +365,9 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role,VTreeNode* t
 QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role,VTreeNode* tnode) const
 {
     if(role == Qt::ToolTipRole && !attributeToolTip_)
+    {
         return QVariant();
+    }
 
 	if(role == Qt::BackgroundRole)
 		return QColor(220,220,220);

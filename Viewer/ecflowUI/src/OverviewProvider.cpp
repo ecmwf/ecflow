@@ -202,7 +202,9 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	f << "status  : " << statusName << "\n";
 
     if(!flags.empty())
+    {
         f << "flags   : " << flags << "\n";
+    }
 
 	node_ptr nn=node->node();
 
