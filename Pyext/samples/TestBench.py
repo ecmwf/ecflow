@@ -39,8 +39,8 @@ def get_root_source_dir():
         if tail.find("ecflow") != -1 :
             
             # bjam, already at the source directory
-            if os.path.exists(cwd + "/VERSION.cmake"): 
-                print("   Found VERSION.cmake in " + cwd)
+            if os.path.exists(cwd + "/Jamroot.jam"): 
+                print("   Found Jamroot.jam in " + cwd)
                 return cwd
         
         if tail != "Pyext" and tail != "migrate":
