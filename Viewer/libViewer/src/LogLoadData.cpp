@@ -446,12 +446,12 @@ qint64 LogLoadData::period() const
 
 QDateTime LogLoadData::startTime() const
 {
-    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[0]);
+    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[0],Qt::UTC);
 }
 
 QDateTime LogLoadData::endTime() const
 {
-    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[time_.size()-1]);
+    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[time_.size()-1],Qt::UTC);
 }
 
 //t is in ms
