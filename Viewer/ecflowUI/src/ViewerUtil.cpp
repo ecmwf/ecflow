@@ -168,3 +168,20 @@ QString ViewerUtil::fromClipboard()
 #endif
 }
 
+void ViewerUtil::setOverrideCursor(QCursor cursor)
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+    QGuiApplication::setOverrideCursor(cursor);
+#else
+    QApplication::setOverrideCursor(cursor);
+#endif
+}
+
+void ViewerUtil::restoreOverrideCursor()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#else
+    QApplication::restoreOverrideCursor();
+#endif
+}

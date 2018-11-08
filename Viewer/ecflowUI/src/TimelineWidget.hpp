@@ -68,6 +68,7 @@ private:
     QString logFile_;
     size_t maxReadSize_;
     std::vector<std::string> suites_;
+    bool loadFailed_;
 
     TimelineData* data_;
     TimelineModel* model_;

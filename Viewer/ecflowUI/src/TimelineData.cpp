@@ -51,6 +51,8 @@ void TimelineData::clear()
     endTime_=0;
     maxReadSize_=0;
     fullRead_=false;
+    loadTried_=false;
+    loadFailed_=false;
     items_=std::vector<TimelineItem>();
 }
 
@@ -66,13 +68,16 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
 
     maxReadSize_=maxReadSize;
     fullRead_=false;
+    loadTried_=true;
+    loadFailed_=false;
 
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);
     if( !log_file.ok() )
     {
+        loadFailed_=true;
         UiLog().warn() << "TimelineData::loadLogFile: Could not open log file " << logFile ;
-        return;
+        throw std::runtime_error("Could not open log file: " + logFile);
     }
 
     fullRead_=true;

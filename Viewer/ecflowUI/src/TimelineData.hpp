@@ -47,7 +47,7 @@ public:
 class TimelineData
 {
 public:
-    TimelineData() : startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false) {}
+    TimelineData() : startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadTried_(false), loadFailed_(false) {}
     void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
     size_t size() const {return  items_.size();}
     const std::vector<TimelineItem>& items() const {return items_;}
@@ -58,6 +58,8 @@ public:
     void clear();    
     void setItemType(int index,TimelineItem::Type type);
     bool isFullRead() const {return fullRead_;}
+    bool loadTried() const {return loadTried_;}
+    bool loadFailed() const {return loadFailed_;}
 
 protected:
     int indexOfItem(const std::string&);
@@ -76,6 +78,8 @@ protected:
     boost::hash<std::string> pathHash_;
     size_t maxReadSize_;
     bool fullRead_;
+    bool loadTried_;
+    bool loadFailed_;
 };
 
 

@@ -34,6 +34,7 @@
 TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
     maxReadSize_(25*1024*1024),
+    loadFailed_(false),
     data_(0),
     ignoreTimeEdited_(false)
 {
@@ -139,6 +140,7 @@ void TimelineWidget::clear()
     host_.clear();
     port_.clear();
     suites_.clear();
+    loadFailed_=false;
     //ui_->startTe->clear();
     //ui_->endTe->clear();
 
@@ -153,7 +155,7 @@ void TimelineWidget::updateInfoLabel()
          Viewer::formatBoldText(" Host: ",col) + host_ +
          Viewer::formatBoldText(" Port: ",col) + port_;
 
-    if(!data_->isFullRead())
+    if(!loadFailed_ && data_->loadTried() && !data_->isFullRead())
     {
         txt+=Viewer::formatBoldText(" Log entries: ",col) +
            "parsed last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file (maximum reached)";
@@ -166,6 +168,8 @@ void TimelineWidget::updateInfoLabel()
 
 void TimelineWidget::setAllVisible(bool b)
 {
+    ui_->viewControl->setVisible(b);
+    view_->setVisible(b);
 }
 
 void TimelineWidget::slotReload()
@@ -299,26 +303,9 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
 
     updateInfoLabel();
 
-    QFileInfo fInfo(logFile);
-    if(!fInfo.exists())
-    {
-        ui_->messageLabel->showError("The specified log file does not exist!");
-        return;
-    }
-
-    if(!fInfo.isReadable())
-    {
-        ui_->messageLabel->showError("The specified log file is not readable!");
-        return;
-    }
-
-    if(!fInfo.isFile())
-    {
-        ui_->messageLabel->showError("The specified log file is not a file!");
-        return;
-    }
-
-    setAllVisible(true);
+    //setAllVisible(false);
+    loadFailed_=false;
+    ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     try
     {
@@ -326,9 +313,33 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
     }
     catch(std::runtime_error e)
     {
-        ui_->messageLabel->showError(e.what());
+        loadFailed_=true;
+        std::string errTxt(e.what());
+
+        QFileInfo fInfo(logFile);
+        if(!fInfo.exists())
+        {
+            errTxt+=" The specified log file <b>does not exist</b> on disk!";
+        }
+        else if(!fInfo.isReadable())
+        {
+            errTxt+=" The specified log file is <b>not readable</b>!";
+        }
+        else if(!fInfo.isFile())
+        {
+            errTxt+=" The specified log file is <b>not a file</b>!";
+        }
+
+        ui_->messageLabel->showError(QString::fromStdString(errTxt));
+        data_->clear();
         setAllVisible(false);
+        updateInfoLabel();
+        ViewerUtil::restoreOverrideCursor();
+        return;
     }
+
+    setAllVisible(true);
+    updateInfoLabel();
 
     //Determine missing types
     if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
@@ -348,6 +359,8 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
         }
     }
 
+    ViewerUtil::restoreOverrideCursor();
+
     ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
     ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());
     ui_->fromTimeEdit->setDateTime(data_->qStartTime());
@@ -359,8 +372,6 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
     view_->setPeriod(data_->qStartTime(),data_->qEndTime());
 
     model_->setData(data_);
-
-    updateInfoLabel();
 }
 
 
