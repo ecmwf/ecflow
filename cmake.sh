@@ -227,6 +227,12 @@ if [[ $package_source_arg = package_source ]] ; then
 	source build_scripts/clean.sh
 fi
 
+# ====================================================================================
+# Use for local install
+release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+
 # =======================================================================================
 # Change directory
 #
@@ -314,11 +320,7 @@ if [[ $package_source_arg = package_source ]] ; then
     gui_options=  
 fi
 
-# ====================================================================================
-# Use for local install
-release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
-major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
-minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+
 install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
 
 ecbuild=ecbuild
