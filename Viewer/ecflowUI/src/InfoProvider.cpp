@@ -12,6 +12,7 @@
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
 #include "Submittable.hpp"
+#include "EcfFile.hpp"
 
 #include <QDateTime>
 
