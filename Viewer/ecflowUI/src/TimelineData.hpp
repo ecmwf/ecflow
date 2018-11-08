@@ -13,7 +13,7 @@
 
 #include <string>
 #include <vector>
-#include <functional>
+#include <boost/functional/hash.hpp>
 
 #include <QDateTime>
 
@@ -73,7 +73,7 @@ protected:
     int numOfRows_;
     unsigned int startTime_;
     unsigned int endTime_;
-    std::hash<std::string> pathHash_;
+    boost::hash<std::string> pathHash_;
     size_t maxReadSize_;
     bool fullRead_;
 };
