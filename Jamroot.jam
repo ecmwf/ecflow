@@ -85,7 +85,7 @@ constant ECFLOW_SHARED_DIR : $(ECFLOW_DESTDIR)$(ECFLOW_INSTALL_DIR)/share/ecflow
 #echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
 #echo  "ECFLOW_SHARED_DIR        = '$(ECFLOW_SHARED_DIR)'" ;
 
-#
+# ** NO LONGER used **
 # Allow the installation directory be be defined externally, by the environment variable ECFLOW_INSTALL_DIR
 #
 # However we want this to be explicit, as we dont need it on a day to day basis.
@@ -104,9 +104,6 @@ constant ECFLOW_SHARED_DIR : $(ECFLOW_DESTDIR)$(ECFLOW_INSTALL_DIR)/share/ecflow
 #
 # Note: Not all system have XLib, hence install ecFlowview manually by using:
 #      bjam -d2 install-viewer
-#
-# Make sure for ECMWF that ECFLOW_INSTALL_DIR leaf directory encompasses version number
-# that ties up with $WK/VERSION.cmake
 #
 
 # Do no call this on the command line, prefer bjam install-all || install-viewer
