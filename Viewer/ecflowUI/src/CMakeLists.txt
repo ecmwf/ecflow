@@ -155,6 +155,13 @@ set(viewer_srcs
     TextFilterHandlerDialog.cpp
     TextFilterWidget.cpp   
     TimeItemWidget.cpp
+    TimelineInfoDelegate.cpp
+    TimelineInfoWidget.cpp
+    TimelineItemWidget.cpp
+    TimelineData.cpp
+    TimelineModel.cpp
+    TimelineView.cpp
+    TimelineWidget.cpp
     TreeNodeModel.cpp
     TreeNodeView.cpp
     TreeNodeViewDelegate.cpp
@@ -337,6 +344,9 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TextEditSearchLine.hpp
     TextFilterHandlerDialog.hpp
     TextFilterWidget.hpp
+    TimelineInfoWidget.hpp
+    TimelineView.hpp
+    TimelineWidget.hpp
     TreeNodeModel.hpp
     TreeNodeView.hpp
     TreeNodeViewDelegate.hpp
@@ -418,6 +428,8 @@ set(viewer_wrap_ui_files
     TextFilterHandlerDialog.ui
     TextFilterWidget.ui
     TimeItemWidget.ui
+    TimelineInfoWidget.ui
+    TimelineWidget.ui
     TreeNodeWidget.ui
     TriggerEditorWidget.ui
     TriggerItemWidget.ui

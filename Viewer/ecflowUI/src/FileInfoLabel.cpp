@@ -99,6 +99,11 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
              s+=Viewer::formatBoldText(" at ",col) + formatDate(f->fetchDate());
          }
 
+         if(!reply->fileReadMethod().empty())
+         {
+            s+=Viewer::formatBoldText(" Lookup method: ",col) + QString::fromStdString(reply->fileReadMethod());
+         }
+
 	}
 	else if(reply->fileReadMode() == VReply::ServerReadMode)
 	{

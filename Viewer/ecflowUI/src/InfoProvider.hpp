@@ -83,6 +83,8 @@ class ScriptProvider : public InfoProvider
 {
 public:
 	 explicit ScriptProvider(InfoPresenter* owner);
+protected:
+     void visit(VInfoNode* info);
 };
 
 class HistoryProvider : public InfoProvider

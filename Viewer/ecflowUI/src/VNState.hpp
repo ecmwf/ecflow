@@ -48,12 +48,16 @@ public:
 
 	static std::vector<VParam*> filterItems();
 	static VNState* find(const std::string& name);
-	
+    static VNState* find(unsigned char ucId);
+
+    unsigned char ucId() const {return ucId_;}
+
     //Called from VConfigLoader
     static void load(VProperty*);
 
 private:
 	static std::map<std::string,VNState*> items_;
+    unsigned char ucId_;
 };
 
 #endif

@@ -37,7 +37,7 @@ public:
 
 	bool variable(const QModelIndex& index, QString& name,QString& value,bool& genVar) const;
 
-    VariableModelData* indexToData(const QModelIndex& index) const;
+    VariableModelData* indexToData(const QModelIndex& invarViewdex) const;
     VariableModelData* indexToData(const QModelIndex& index,int& block) const;
     VInfo_ptr indexToInfo(const QModelIndex& index) const;
     QModelIndex infoToIndex(VInfo_ptr info) const;

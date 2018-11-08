@@ -82,11 +82,11 @@ fi
 # =================================================================================================
 # Determine the release,major,minor numbers for this version 
 cd $WK
-release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
-major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
-minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+release=$(cat ACore/src/ecflow_version.h  | grep 'ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+major=$(cat ACore/src/ecflow_version.h    | grep 'ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+minor=$(cat  ACore/src/ecflow_version.h   | grep 'ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 ECFLOW_VERSION=$release.$major.$minor
-  
+
 export ECFLOW_INSTALL_DIR=/usr/local/apps/ecflow/$release.$major.$minor
 export ECFLOW_PYTHON_INSTALL_DIR=$ECFLOW_INSTALL_DIR/lib/python/2.7/site-packages/ecflow 
 

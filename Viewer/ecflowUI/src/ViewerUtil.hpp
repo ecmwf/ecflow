@@ -28,7 +28,7 @@ class ViewerUtil
 public:
    static void initComboBox(QSettings&,QString key,QComboBox* cb);
    static void initComboBoxByData(QString dataValue,QComboBox* cb);
-   static void initTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree);
+   static bool initTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree);
    static void saveTreeColumnWidth(QSettings& settings,QString key,QTreeView *tree);
    static void initStacked(QSettings& settings,QString key,QStackedWidget *stacked);
    static void initButtonGroup(QSettings& settings,QString key,QButtonGroup *bg);
@@ -36,6 +36,8 @@ public:
    static QBrush lineEditGreenBg();
    static QBrush lineEditRedBg();
    static QBrush lineEditBg(QColor col);
+   static void toClipboard(QString txt);
+   static QString fromClipboard();
 };
 
 #endif // VIEWERUTIL_HPP

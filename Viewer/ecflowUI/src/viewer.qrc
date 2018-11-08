@@ -4,6 +4,7 @@
     <file>../images/dock_float.svg</file>
     <file>../images/dock_close.svg</file>
     <file alias="configure.svg">../images/configure.svg</file>
+    <file alias="cursor_zoom.svg">../images/cursor_zoom.svg</file>
     <file alias="reset.svg">../images/reset.svg</file>
     <file alias="search.svg">../images/search.svg</file>
     <file alias="info.svg">../images/info.svg</file>
@@ -24,11 +25,14 @@
     <file alias="icon_zombie.svg">../images/icon_zombie.svg</file>  
     <file>../images/arrow_up.svg</file>
     <file>../images/arrow_down.svg</file>
+    <file alias="arrow_all.svg">../images/arrow_all.svg</file>
+    <file alias="arrow_to_end.svg">../images/arrow_to_end.svg</file>
+    <file alias="arrow_to_start.svg">../images/arrow_to_start.svg</file>
     <file>../images/add.svg</file>
     <file>../images/configure.svg</file>
     <file>../images/exit.svg</file>
     <file alias="add_tab.svg">../images/add_tab.svg</file> 
-    <file alias="add_variable_column.svg">../images/add_variable_column.svg</file>
+    <file alias="add_variable_column.svg">../images/add_variable_column.svg</file>    
     <file alias="attribute.svg">../images/attribute.svg</file>
     <file alias="chain.svg">../images/chain.svg</file>
     <file alias="chain_open.svg">../images/chain_open.svg</file>
@@ -118,6 +122,7 @@
     <file alias="sync.svg">../images/sync.svg</file>
     <file alias="sync_black.svg">../images/sync_black.svg</file>
     <file alias="terminate.svg">../images/terminate.svg</file>
+    <file alias="timeline.svg">../images/timeline.svg</file>
     <file alias="tip.svg">../images/tip.svg</file>
     <file alias="trigger.svg">../images/trigger.svg</file>   
     <file alias="trigger_left_arrow.svg">../images/trigger_left_arrow.svg</file>

@@ -76,7 +76,7 @@ constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 #echo "ECFLOW_INSTALL_DIR        = '$(ECFLOW_INSTALL_DIR)'" ;
 #echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
 
-#
+# ** NO LONGER used **
 # Allow the installation directory be be defined externally, by the environment variable ECFLOW_INSTALL_DIR
 #
 # However we want this to be explicit, as we dont need it on a day to day basis.
@@ -95,9 +95,6 @@ constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 #
 # Note: Not all system have XLib, hence install ecFlowview manually by using:
 #      bjam -d2 install-viewer
-#
-# Make sure for ECMWF that ECFLOW_INSTALL_DIR leaf directory encompasses version number
-# that ties up with $WK/VERSION.cmake
 #
 
 # Some linux RPM have requirements that 64 bit libs must be under lib64
