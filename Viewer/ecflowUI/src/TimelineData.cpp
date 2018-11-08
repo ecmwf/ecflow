@@ -21,7 +21,7 @@
 #include <QFileInfo>
 #include <QStringList>
 
-#include <functional>
+#include <algorithm>
 
 #include "TimelineData.hpp"
 #include "VNState.hpp"
@@ -59,7 +59,7 @@ void TimelineData::setItemType(int index,TimelineItem::Type type)
     items_[index].type_=type;
 }
 
-void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize)
+void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites)
 {
     //Clear all collected data
     clear();
@@ -170,6 +170,24 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize)
         else
         {
             name=line.substr(first_char,next_ws-first_char);
+        }
+
+        //Filter by suites
+        if(!suites.empty() && name.size() > 1 && name[0] == '/')
+        {
+            std::string suite;
+            std::string::size_type next_sep=name.find("/",1);
+            if(next_sep != std::string::npos)
+            {
+                suite=name.substr(1,next_sep-1);
+            }
+            else
+            {
+                suite=name.substr(1);
+            }
+
+            if(std::find(suites.begin(),suites.end(),suite) == suites.end())
+                continue;
         }
 
         //Convert status time into

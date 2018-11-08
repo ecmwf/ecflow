@@ -138,6 +138,7 @@ void TimelineWidget::clear()
     serverName_.clear();
     host_.clear();
     port_.clear();
+    suites_.clear();
     //ui_->startTe->clear();
     //ui_->endTe->clear();
 
@@ -171,7 +172,7 @@ void TimelineWidget::slotReload()
 {
     if(!serverName_.isEmpty())
     {
-        load(serverName_, host_, port_, logFile_);
+        load(serverName_, host_, port_, logFile_,suites_);
         checkButtonState();
     }
 }
@@ -282,10 +283,11 @@ void TimelineWidget::checkButtonState()
 
 void TimelineWidget::load(QString logFile)
 {
-    load("","","",logFile);
+    load("","","",logFile,suites_);
 }
 
-void TimelineWidget::load(QString serverName, QString host, QString port, QString logFile)
+void TimelineWidget::load(QString serverName, QString host, QString port, QString logFile,
+                          const std::vector<std::string>& suites)
 {
     clear();
 
@@ -293,6 +295,7 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
     host_=host;
     port_=port;
     logFile_=logFile;
+    suites_=suites;
 
     updateInfoLabel();
 
@@ -319,7 +322,7 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
 
     try
     {
-        data_->loadLogFile(logFile_.toStdString(),maxReadSize_);
+        data_->loadLogFile(logFile_.toStdString(),maxReadSize_,suites);
     }
     catch(std::runtime_error e)
     {

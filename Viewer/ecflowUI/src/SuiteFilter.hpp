@@ -78,7 +78,6 @@ public:
     std::vector<std::string> loaded() const;
     const std::vector<SuiteFilterItem>& items() const {return items_;}
 
-	void current(const std::vector<std::string>& suites);
 	int count() const {return static_cast<int>(items_.size());}
 	void setFiltered(int index,bool val);
     bool isOnlyOneFiltered(const std::string& oneSuite) const;

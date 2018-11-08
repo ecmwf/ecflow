@@ -34,7 +34,8 @@ public:
 
     void clear();
     void load(QString logFile);
-    void load(QString serverName, QString host, QString port, QString logFile);
+    void load(QString serverName, QString host, QString port, QString logFile,
+              const std::vector<std::string>& suites);
     QString logFile() const {return logFile_;}
 
     void writeSettings(VComboSettings* vs);
@@ -66,6 +67,7 @@ private:
     QString port_;
     QString logFile_;
     size_t maxReadSize_;
+    std::vector<std::string> suites_;
 
     TimelineData* data_;
     TimelineModel* model_;

@@ -17,6 +17,7 @@
 
 #include "MessageLabel.hpp"
 #include "ServerHandler.hpp"
+#include "SuiteFilter.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
@@ -78,11 +79,17 @@ void TimelineItemWidget::load()
         QString logFile;
         if(VServer* vs=sh->vRoot())
         {
+            std::vector<std::string> suites;
+            if(SuiteFilter* sf=sh->suiteFilter())
+            {
+                suites=sh->suiteFilter()->filter();
+            }
+
             logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
             w_->load(QString::fromStdString(sh->name()),
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
-                         logFile); //last 25 MB are read
+                         logFile, suites); //last 25 MB are read
         }
     }
 }

@@ -48,7 +48,7 @@ class TimelineData
 {
 public:
     TimelineData() : startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false) {}
-    void loadLogFile(const std::string& logFile,size_t maxReadSize);
+    void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
     size_t size() const {return  items_.size();}
     const std::vector<TimelineItem>& items() const {return items_;}
     unsigned int startTime() const {return startTime_;}
