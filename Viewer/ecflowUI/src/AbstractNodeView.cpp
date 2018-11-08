@@ -44,8 +44,8 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     expandConnectorLenght_(20),   
     connectorColour_(Qt::black),
     drawConnector_(true),
-    autoExpandLeafNode_(true),
     indentation_(0),
+    autoExpandLeafNode_(true),
     lastViewedItem_(0),
     noSelectionOnMousePress_(false),
     autoScroll_(true)

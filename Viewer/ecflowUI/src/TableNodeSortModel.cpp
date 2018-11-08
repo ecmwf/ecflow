@@ -91,7 +91,7 @@ void TableNodeSortModel::removeColumn(QString name)
 
 ModelColumn* TableNodeSortModel::columns() const
 {
-     nodeModel_->columns();
+    return nodeModel_->columns();
 }
 
 

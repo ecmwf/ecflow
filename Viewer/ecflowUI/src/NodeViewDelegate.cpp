@@ -305,7 +305,9 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
     size=QSize(totalWidth,attrBox_->fullHeight);
 
     if(data.count() < 6)
+    {
         return;
+    }
 
 	//The data
 	int	val=data.at(2).toInt();
@@ -801,7 +803,9 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
     size=QSize(totalWidth,attrBox_->fullHeight);
 
     if(data.count() < 4)
+    {
         return;
+    }
 
 	//The data
 	int	val=data.at(2).toInt();
