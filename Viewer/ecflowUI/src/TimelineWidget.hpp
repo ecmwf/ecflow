@@ -13,11 +13,14 @@
 #include <QWidget>
 #include <QDateTime>
 
+#include "VFile.hpp"
+
 class TimelineData;
 class TimelineModel;
 class TimelineSortModel;
 class TimelineView;
 class VComboSettings;
+class VFileTransfer;
 
 namespace Ui {
     class TimelineWidget;
@@ -54,9 +57,13 @@ protected Q_SLOTS:
    void slotPeriodBeingZoomedInView(QDateTime,QDateTime);
    void slotLookup(QString);
    void slotCopyPath(QString);
+   void slotFileTransferFinished();
+   void slotFileTransferFailed(QString);
+   void slotFileTransferStdOutput(QString msg);
 
 private:
     void load();
+    void loadCore(QString logFile);
     void updateInfoLabel();
     void setAllVisible(bool b);
     void checkButtonState();
@@ -66,6 +73,7 @@ private:
     QString host_;
     QString port_;
     QString logFile_;
+    VFile_ptr tmpLogFile_;
     size_t maxReadSize_;
     std::vector<std::string> suites_;
     bool loadFailed_;
@@ -75,6 +83,7 @@ private:
     TimelineSortModel* sortModel_;
     TimelineView* view_;
     bool ignoreTimeEdited_;
+    VFileTransfer* fileTransfer_;
 };
 
 #endif // TIMELINEWIDGET_HPP

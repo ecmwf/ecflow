@@ -20,6 +20,7 @@
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "ViewerUtil.hpp"
+#include "VFileTransfer.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
 
@@ -36,7 +37,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     maxReadSize_(25*1024*1024),
     loadFailed_(false),
     data_(0),
-    ignoreTimeEdited_(false)
+    ignoreTimeEdited_(false),
+    fileTransfer_(0)
 {
     ui_->setupUi(this);
 
@@ -141,6 +143,12 @@ void TimelineWidget::clear()
     port_.clear();
     suites_.clear();
     loadFailed_=false;
+    if(fileTransfer_)
+    {
+        fileTransfer_->stopTransfer();
+        ui_->messageLabel->stopLoadLabel();
+    }
+    tmpLogFile_.reset(); //TODO: we need to delete the file!!!
     //ui_->startTe->clear();
     //ui_->endTe->clear();
 
@@ -305,11 +313,72 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
 
     //setAllVisible(false);
     loadFailed_=false;
+
+    QFileInfo fInfo(logFile);
+
+    //try to get it over the network, ascynchronous
+    if(!fInfo.exists())
+    {
+        tmpLogFile_=VFile::createTmpFile(false);
+        ui_->messageLabel->showInfo("fetch file");
+        ui_->messageLabel->startLoadLabel();
+
+        if(!fileTransfer_)
+        {
+            fileTransfer_=new VFileTransfer(this);
+
+            connect(fileTransfer_,SIGNAL(transferFinished()),
+                    this,SLOT(slotFileTransferFinished()));
+
+            connect(fileTransfer_,SIGNAL(transferFailed(QString)),
+                    this,SLOT(slotFileTransferFailed(QString)));
+
+            connect(fileTransfer_,SIGNAL(stdOutputAvialable(QString)),
+                    this,SLOT(slotFileTransferStdOutput(QString)));
+        }
+
+        fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()));
+    }
+    else
+    {
+        loadCore(logFile_);
+    }
+}
+
+void TimelineWidget::slotFileTransferFinished()
+{
+    ui_->messageLabel->stopLoadLabel();
+    if(!logFile_.isEmpty())
+    {
+        loadCore(QString::fromStdString(tmpLogFile_->path()));
+    }
+}
+
+void TimelineWidget::slotFileTransferFailed(QString err)
+{
+    ui_->messageLabel->stopLoadLabel();
+    if(!logFile_.isEmpty())
+    {
+        loadFailed_=true;
+        ui_->messageLabel->showError("Could not fetch log file over the network! " + err);
+        data_->clear();
+        setAllVisible(false);
+        updateInfoLabel();
+    }
+}
+
+void TimelineWidget::slotFileTransferStdOutput(QString msg)
+{
+    ui_->messageLabel->showInfo(msg);
+}
+
+void TimelineWidget::loadCore(QString logFile)
+{
     ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     try
     {
-        data_->loadLogFile(logFile_.toStdString(),maxReadSize_,suites);
+        data_->loadLogFile(logFile.toStdString(),maxReadSize_,suites_);
     }
     catch(std::runtime_error e)
     {

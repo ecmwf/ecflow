@@ -191,6 +191,7 @@ set(viewer_srcs
     VInfo.cpp
     VFile.cpp
     VFileInfo.cpp
+    VFileTransfer.cpp
     VItem.cpp
     VItemPathParser.cpp
     VLabelAttr.cpp
@@ -363,6 +364,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     VariableModel.hpp
     VariableModelData.hpp
     VariableSearchLine.hpp
+    VFileTransfer.hpp
     VFilter.hpp
     VModelData.hpp
     VNodeList.hpp
