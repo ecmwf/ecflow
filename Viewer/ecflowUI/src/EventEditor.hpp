@@ -42,12 +42,13 @@ protected Q_SLOTS:
     void scanStarted();
     void scanFinished();
     void scanProgressed(int);
+    void buildList();
 
 protected:
+    void paintEvent(QPaintEvent *e);
     void resetValue();
     void apply();
     bool isValueChanged();
-    void buildList(VAttribute *a);
     void nodeChanged(const std::vector<ecf::Aspect::Type>& a);
     void setModelData(QStringList lst);
     void lookup(const QModelIndex &index);
@@ -58,6 +59,7 @@ protected:
     int oriVal_;
     QStringListModel* model_;
     QStringList modelData_;
+    bool scanned_;
 };
 
 #endif // EventEditor_HPP

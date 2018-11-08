@@ -12,7 +12,9 @@
 
 #include <QItemSelectionModel>
 #include <QSettings>
+#include <QShowEvent>
 #include <QStringListModel>
+#include <QTimer>
 
 #include "Aspect.hpp"
 
@@ -37,7 +39,8 @@ EventEditorWidget::EventEditorWidget(QWidget* parent) : QWidget(parent)
 
 EventEditor::EventEditor(VInfo_ptr info,QWidget* parent) :
     AttributeEditor(info,"event",parent),
-    model_(0)
+    model_(0),
+    scanned_(false)
 {
     w_=new EventEditorWidget(this);
     addForm(w_);
@@ -61,8 +64,6 @@ EventEditor::EventEditor(VInfo_ptr info,QWidget* parent) :
 
     w_->messageLabel_->hide();
     w_->messageLabel_->setShowTypeTitle(false);
-
-    buildList(a);
 
     connect(w_->actionLookUp_,SIGNAL(triggered()),
             this,SLOT(slotLookUp()));
@@ -88,13 +89,33 @@ EventEditor::~EventEditor()
     writeSettings();
 }
 
-void EventEditor::buildList(VAttribute *a)
+//This was the only way to guarantee that the trigger scanning is called
+//after the dialogue appears on screen (showEvent did not work!)
+void EventEditor::paintEvent(QPaintEvent *e)
+{
+    QDialog::paintEvent(e);
+    if(!scanned_)
+    {
+         QTimer::singleShot(0, this, SLOT(buildList()));
+    }
+}
+
+//We only build the list when the dialogoue is already visible so that
+//the progressbar could show the scanning process
+void EventEditor::buildList()
 {   
+    if(!info_)
+        return;
+
+    VAttribute* a=info_->attribute();
     if(!a)
         return;
 
-    model_=new QStringListModel(this);
-    w_->pathView_->setModel(model_);
+    if(!model_)
+    {
+        model_=new QStringListModel(this);
+        w_->pathView_->setModel(model_);
+    }
 
     if(VNode* node=info_->node())
     {
@@ -122,12 +143,14 @@ void EventEditor::buildList(VAttribute *a)
         setModelData(lst);
 
         delete scanner;
+
+        scanned_=true;
     }
 }
 
 void EventEditor::scanStarted()
 {
-    w_->messageLabel_->showInfo("Mapping dependencies on this event  ...");
+    w_->messageLabel_->showInfo("Scanning dependencies based on this event ...");
     w_->messageLabel_->startProgress(100);
 }
 
