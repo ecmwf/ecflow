@@ -24,8 +24,8 @@ public:
 	explicit FileInfoLabel(QWidget* parent=0);
 
 	void update(VReply*,QString str=QString());
-    QString formatDate(QDateTime) const;
-    QString formatFileSize(QString,qint64 size) const;
+    static QString formatDate(QDateTime);
+    static QString formatFileSize(QString,qint64 size);
 };
 
 class DirInfoLabel : public FileInfoLabel

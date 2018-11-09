@@ -200,14 +200,14 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	setText(labelText);
 }
 
-QString FileInfoLabel::formatDate(QDateTime dt) const
+QString FileInfoLabel::formatDate(QDateTime dt)
 {
     QColor col(34,107,138);
     QString s=dt.toString("yyyy-MM-dd") + "&nbsp;&nbsp;" +dt.toString("HH:mm:ss");
     return Viewer::formatBoldText(s,col);
 }
 
-QString FileInfoLabel::formatFileSize(QString str,qint64 size) const
+QString FileInfoLabel::formatFileSize(QString str,qint64 size)
 {
 	if(size > 10*1024*1024)
         return Viewer::formatText(str,QColor(Qt::red));

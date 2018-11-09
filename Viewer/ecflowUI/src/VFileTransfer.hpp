@@ -11,6 +11,7 @@
 #ifndef VFILETRANSFER_HPP
 #define VFILETRANSFER_HPP
 
+#include <QDateTime>
 #include <QProcess>
 
 class VFileTransfer : public QObject
@@ -19,7 +20,7 @@ class VFileTransfer : public QObject
 
 public:
     VFileTransfer(QObject* parent=0);
-    void transfer(QString sourceFile,QString host,QString targetFile);
+    void transfer(QString sourceFile,QString host,QString targetFile,size_t lastBytes);
     void stopTransfer();
 
 protected Q_SLOTS:
@@ -35,6 +36,5 @@ protected:
     QProcess* proc_;
     QString targetFile_;
 };
-
 
 #endif // VFILETRANSFER_HPP

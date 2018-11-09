@@ -49,6 +49,7 @@ class TimelineData
 public:
     TimelineData() : startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadTried_(false), loadFailed_(false) {}
     void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
+    QDateTime loadedAt() const {return loadedAt_;}
     size_t size() const {return  items_.size();}
     const std::vector<TimelineItem>& items() const {return items_;}
     unsigned int startTime() const {return startTime_;}
@@ -76,6 +77,7 @@ protected:
     unsigned int startTime_;
     unsigned int endTime_;
     boost::hash<std::string> pathHash_;
+    QDateTime loadedAt_;
     size_t maxReadSize_;
     bool fullRead_;
     bool loadTried_;

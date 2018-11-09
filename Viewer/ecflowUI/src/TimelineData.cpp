@@ -54,6 +54,7 @@ void TimelineData::clear()
     loadTried_=false;
     loadFailed_=false;
     items_=std::vector<TimelineItem>();
+    loadedAt_=QDateTime();
 }
 
 void TimelineData::setItemType(int index,TimelineItem::Type type)
@@ -70,6 +71,7 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
     fullRead_=false;
     loadTried_=true;
     loadFailed_=false;
+    loadedAt_=QDateTime::currentDateTime();
 
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);

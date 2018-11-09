@@ -12,6 +12,7 @@
 #include <QtGlobal>
 #include <QFileInfo>
 
+#include "FileInfoLabel.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
 #include "TimelineData.hpp"
@@ -35,9 +36,11 @@
 TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
     maxReadSize_(25*1024*1024),
-    loadFailed_(false),
     data_(0),
     ignoreTimeEdited_(false),
+    localLog_(true),
+    logLoaded_(false),
+    logTransferred_(false),
     fileTransfer_(0)
 {
     ui_->setupUi(this);
@@ -142,7 +145,10 @@ void TimelineWidget::clear()
     host_.clear();
     port_.clear();
     suites_.clear();
-    loadFailed_=false;
+    localLog_=true;
+    logLoaded_=false;
+    logTransferred_=false;
+    transferredAt_=QDateTime();
     if(fileTransfer_)
     {
         fileTransfer_->stopTransfer();
@@ -155,7 +161,7 @@ void TimelineWidget::clear()
     setAllVisible(false);
 }
 
-void TimelineWidget::updateInfoLabel()
+void TimelineWidget::updateInfoLabel(bool showDetails)
 {
     QColor col(39,49,101);
     QString txt=Viewer::formatBoldText("Log file: ",col) + logFile_;
@@ -163,10 +169,44 @@ void TimelineWidget::updateInfoLabel()
          Viewer::formatBoldText(" Host: ",col) + host_ +
          Viewer::formatBoldText(" Port: ",col) + port_;
 
-    if(!loadFailed_ && data_->loadTried() && !data_->isFullRead())
+    if(showDetails)
     {
-        txt+=Viewer::formatBoldText(" Log entries: ",col) +
-           "parsed last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file (maximum reached)";
+        txt+=Viewer::formatBoldText("Source: ",col);
+
+        //fetch method and time
+        if(localLog_)
+        {
+            txt+=" read from disk ";
+            if(data_->loadedAt().isValid())
+                txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
+        }
+        else
+        {
+            if(logTransferred_)
+            {
+                txt+=" fetched from remote host ";
+            }
+            else
+            {
+                txt+=" fetch failed from remote host ";
+            }
+            if(transferredAt_.isValid())
+                txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(transferredAt_);
+        }
+
+        if(logLoaded_ && data_->loadTried())
+        {
+            if(localLog_ && data_->isFullRead())
+                txt+="(parsed last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file - " +
+                    Viewer::formatText("maximum reached",QColor(255,0,0)) + ")";
+            else
+            {
+                if(tmpLogFile_ && tmpLogFile_->dataSize() == maxReadSize_)
+                    txt+="(fetched last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file - " +
+                        Viewer::formatText("maximum reached",QColor(255,0,0)) + ")";
+            }
+        }
+
     }
 
     ui_->logInfoLabel->setText(txt);
@@ -308,19 +348,20 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
     port_=port;
     logFile_=logFile;
     suites_=suites;
+    logLoaded_=false;
+    logTransferred_=false;
+    localLog_=true;
 
-    updateInfoLabel();
-
-    //setAllVisible(false);
-    loadFailed_=false;
+    updateInfoLabel(false);
 
     QFileInfo fInfo(logFile);
 
     //try to get it over the network, ascynchronous
     if(!fInfo.exists())
     {
-        tmpLogFile_=VFile::createTmpFile(false);
-        ui_->messageLabel->showInfo("fetch file");
+        localLog_=false;
+        tmpLogFile_=VFile::createTmpFile(true); //will be deleted automatically
+        ui_->messageLabel->showInfo("Fetching file from remote host ... <br>");
         ui_->messageLabel->startLoadLabel();
 
         if(!fileTransfer_)
@@ -333,11 +374,11 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
             connect(fileTransfer_,SIGNAL(transferFailed(QString)),
                     this,SLOT(slotFileTransferFailed(QString)));
 
-            connect(fileTransfer_,SIGNAL(stdOutputAvialable(QString)),
+            connect(fileTransfer_,SIGNAL(stdOutputAvailable(QString)),
                     this,SLOT(slotFileTransferStdOutput(QString)));
         }
 
-        fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()));
+        fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),maxReadSize_);
     }
     else
     {
@@ -347,7 +388,12 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
 
 void TimelineWidget::slotFileTransferFinished()
 {
+    logTransferred_=true;
     ui_->messageLabel->stopLoadLabel();
+    ui_->messageLabel->hide();
+    ui_->messageLabel->update();
+
+    //we are not ina cleared state
     if(!logFile_.isEmpty())
     {
         loadCore(QString::fromStdString(tmpLogFile_->path()));
@@ -356,11 +402,14 @@ void TimelineWidget::slotFileTransferFinished()
 
 void TimelineWidget::slotFileTransferFailed(QString err)
 {
+    logTransferred_=false;
     ui_->messageLabel->stopLoadLabel();
+
+    //we are not in a cleared state
     if(!logFile_.isEmpty())
     {
-        loadFailed_=true;
-        ui_->messageLabel->showError("Could not fetch log file over the network! " + err);
+        logLoaded_=false;
+        ui_->messageLabel->showError("Could not fetch log file from remote host! <br>" + err);
         data_->clear();
         setAllVisible(false);
         updateInfoLabel();
@@ -369,7 +418,7 @@ void TimelineWidget::slotFileTransferFailed(QString err)
 
 void TimelineWidget::slotFileTransferStdOutput(QString msg)
 {
-    ui_->messageLabel->showInfo(msg);
+    ui_->messageLabel->showInfo("Fetching file form remote host ... <br>" + msg);
 }
 
 void TimelineWidget::loadCore(QString logFile)
@@ -382,7 +431,7 @@ void TimelineWidget::loadCore(QString logFile)
     }
     catch(std::runtime_error e)
     {
-        loadFailed_=true;
+        logLoaded_=false;
         std::string errTxt(e.what());
 
         QFileInfo fInfo(logFile);
@@ -407,6 +456,7 @@ void TimelineWidget::loadCore(QString logFile)
         return;
     }
 
+    logLoaded_=true;
     setAllVisible(true);
     updateInfoLabel();
 

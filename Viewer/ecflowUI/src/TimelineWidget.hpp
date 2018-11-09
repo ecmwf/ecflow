@@ -64,7 +64,7 @@ protected Q_SLOTS:
 private:
     void load();
     void loadCore(QString logFile);
-    void updateInfoLabel();
+    void updateInfoLabel(bool showDetails=true);
     void setAllVisible(bool b);
     void checkButtonState();
 
@@ -76,14 +76,18 @@ private:
     VFile_ptr tmpLogFile_;
     size_t maxReadSize_;
     std::vector<std::string> suites_;
-    bool loadFailed_;
 
     TimelineData* data_;
     TimelineModel* model_;
     TimelineSortModel* sortModel_;
     TimelineView* view_;
     bool ignoreTimeEdited_;
+
+    bool localLog_;
+    bool logLoaded_;
+    bool logTransferred_;
     VFileTransfer* fileTransfer_;
+    QDateTime transferredAt_;
 };
 
 #endif // TIMELINEWIDGET_HPP
