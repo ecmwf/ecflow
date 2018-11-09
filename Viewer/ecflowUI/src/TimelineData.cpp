@@ -85,15 +85,18 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
     }
 
     fullRead_=true;
-    size_t fSize=0;
+    QFileInfo fInfo(QString::fromStdString(logFile));
+    size_t fSize=fInfo.size();
+    size_t progressChunk=fSize/200;
+    if(progressChunk==0) progressChunk=fSize;
+    size_t percent=0;
+
     if(maxReadSize_ > 0)
     {
-        QFileInfo fInfo(QString::fromStdString(logFile));
-        fSize=fInfo.size();
-
         if(fSize > maxReadSize_)
         {
             fullRead_=false;
+            progressChunk=maxReadSize_/200;
             log_file.setPos(fSize - maxReadSize_);
         }
     }
@@ -224,6 +227,14 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
             items_.push_back(TimelineItem(name,pathHash_(name),statusId,statusTime,
                                           guessNodeType(line,name,status,next_ws)));
             lastIndex_=items_.size()-1;
+        }
+
+        size_t current=log_file.pos();
+        if(current > (percent+1)*progressChunk)
+        {
+            percent=current/progressChunk;
+            if(percent <= 100)
+                Q_EMIT loadProgress(current,fSize);
         }
 
         numOfRows_++;

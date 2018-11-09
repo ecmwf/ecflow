@@ -49,7 +49,10 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     //message label
     ui_->messageLabel->hide();
 
-    data_=new TimelineData;
+    data_=new TimelineData(this);
+
+    connect(data_,SIGNAL(loadProgress(size_t,size_t)),
+            this,SLOT(slotLogLoadProgress(size_t,size_t)));
 
     //the models
     model_=new TimelineModel(this);
@@ -425,6 +428,15 @@ void TimelineWidget::slotFileTransferStdOutput(QString msg)
     ui_->messageLabel->showInfo("Fetching file form remote host ... <br>" + msg);
 }
 
+
+void TimelineWidget::slotLogLoadProgress(size_t current,size_t total)
+{
+    int percent=100*current/total;
+    if(percent >=0 && percent <=100)
+        ui_->messageLabel->progress(QString::number(current/(1024*1024)) + "MB/" +
+                                    QString::number(total/(1024*1024)) + "MB",percent);
+}
+
 void TimelineWidget::loadCore(QString logFile)
 {
     ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
@@ -434,6 +446,8 @@ void TimelineWidget::loadCore(QString logFile)
     QTime timer;
     timer.start();
 
+    ui_->messageLabel->startProgress(100);
+
     try
     {
         data_->loadLogFile(logFile.toStdString(),maxReadSize_,suites_);
@@ -441,6 +455,8 @@ void TimelineWidget::loadCore(QString logFile)
     catch(std::runtime_error e)
     {
         logLoaded_=false;
+        ui_->messageLabel->stopProgress();
+
         std::string errTxt(e.what());
 
         QFileInfo fInfo(logFile);
@@ -467,6 +483,7 @@ void TimelineWidget::loadCore(QString logFile)
 
     UiLog().dbg() << "Logfile parsed: " << timer.elapsed()/1000 << "s";
 
+    ui_->messageLabel->stopProgress();
     ui_->messageLabel->hide();
     logLoaded_=true;
     setAllVisible(true);
@@ -504,7 +521,6 @@ void TimelineWidget::loadCore(QString logFile)
 
     model_->setData(data_);
 }
-
 
 void TimelineWidget::writeSettings(VComboSettings* vs)
 {

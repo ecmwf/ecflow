@@ -347,6 +347,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TextEditSearchLine.hpp
     TextFilterHandlerDialog.hpp
     TextFilterWidget.hpp
+    TimelineData.hpp
     TimelineInfoWidget.hpp
     TimelineView.hpp
     TimelineWidget.hpp

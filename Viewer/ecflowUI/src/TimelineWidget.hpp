@@ -60,6 +60,7 @@ protected Q_SLOTS:
    void slotFileTransferFinished();
    void slotFileTransferFailed(QString);
    void slotFileTransferStdOutput(QString msg);
+   void slotLogLoadProgress(size_t current, size_t total);
 
 private:
     void load();

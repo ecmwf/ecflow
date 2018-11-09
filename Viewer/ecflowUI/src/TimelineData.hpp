@@ -16,6 +16,7 @@
 #include <boost/functional/hash.hpp>
 
 #include <QDateTime>
+#include <QObject>
 
 class TimelineItem
 {
@@ -43,11 +44,13 @@ public:
     std::vector<unsigned char> status_;
 };
 
-
-class TimelineData
+class TimelineData : public QObject
 {
+    Q_OBJECT
 public:
-    TimelineData() : startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadTried_(false), loadFailed_(false) {}
+    TimelineData(QObject* parent=0) : QObject(parent),
+        startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadTried_(false), loadFailed_(false) {}
+
     void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
     QDateTime loadedAt() const {return loadedAt_;}
     size_t size() const {return  items_.size();}
@@ -61,6 +64,9 @@ public:
     bool isFullRead() const {return fullRead_;}
     bool loadTried() const {return loadTried_;}
     bool loadFailed() const {return loadFailed_;}
+
+Q_SIGNALS:
+    void loadProgress(size_t current,size_t total);
 
 protected:
     bool indexOfItem(const std::string&,size_t&);
