@@ -11,6 +11,7 @@
 
 #include <QtGlobal>
 #include <QFileInfo>
+#include <QTime>
 
 #include "FileInfoLabel.hpp"
 #include "MainWindow.hpp"
@@ -428,6 +429,11 @@ void TimelineWidget::loadCore(QString logFile)
 {
     ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
 
+    ui_->messageLabel->showInfo("Loading timeline data from log file ...");
+
+    QTime timer;
+    timer.start();
+
     try
     {
         data_->loadLogFile(logFile.toStdString(),maxReadSize_,suites_);
@@ -459,6 +465,9 @@ void TimelineWidget::loadCore(QString logFile)
         return;
     }
 
+    UiLog().dbg() << "Logfile parsed: " << timer.elapsed()/1000 << "s";
+
+    ui_->messageLabel->hide();
     logLoaded_=true;
     setAllVisible(true);
     updateInfoLabel();

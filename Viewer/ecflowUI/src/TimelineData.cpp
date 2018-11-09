@@ -53,6 +53,7 @@ void TimelineData::clear()
     fullRead_=false;
     loadTried_=false;
     loadFailed_=false;
+    lastIndex_=0;
     items_=std::vector<TimelineItem>();
     loadedAt_=QDateTime();
 }
@@ -71,6 +72,7 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
     fullRead_=false;
     loadTried_=true;
     loadFailed_=false;
+    lastIndex_=0;
     loadedAt_=QDateTime::currentDateTime();
 
     /// The log file can be massive > 50Mb
@@ -207,19 +209,21 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
         if(statusTime > endTime_)
             endTime_=statusTime;
 
-        int idx=indexOfItem(name);       
-        if(idx != -1)
+        size_t idx=0;
+        if(indexOfItem(name,idx))
         {
             items_[idx].add(statusId,statusTime);
             if(items_[idx].type_ == TimelineItem::UndeterminedType)
             {
                 items_[idx].type_=guessNodeType(line,status,next_ws);
             }
+            lastIndex_=idx;
         }
         else
         {                               
             items_.push_back(TimelineItem(name,pathHash_(name),statusId,statusTime,
                                           guessNodeType(line,name,status,next_ws)));
+            lastIndex_=items_.size()-1;
         }
 
         numOfRows_++;
@@ -279,16 +283,25 @@ TimelineItem::Type TimelineData::guessNodeType(const std::string& line,
     return TimelineItem::UndeterminedType;
 }
 
-int TimelineData::indexOfItem(const std::string& p)
+//It has to be very fast!!!!
+bool TimelineData::indexOfItem(const std::string& p,size_t& idx)
 {
     size_t hval=pathHash_(p);
     bool redo=false;
-    for(size_t i=0; i < items_.size(); i++)
+    size_t cacheRange=100;
+    size_t startIndex=(lastIndex_ > cacheRange)?lastIndex_-cacheRange:0;
+    size_t endIndex=(lastIndex_ > items_.size()-cacheRange)?(lastIndex_+cacheRange):items_.size();
+
+    //the range around the last index
+    for(size_t i=startIndex; i < endIndex; i++)
     {
         if(items_[i].pathHash_ == hval)
         {
             if(items_[i].path_ == p)
-                return i;
+            {
+                idx=i;
+                return true;
+            }
             else
             {
                 redo=true;
@@ -297,15 +310,60 @@ int TimelineData::indexOfItem(const std::string& p)
         }
     }
 
-    //If the hash is not unique!
+    if(!redo)
+    {
+        //the range before
+        for(size_t i=0; i < startIndex; i++)
+        {
+            if(items_[i].pathHash_ == hval)
+            {
+                if(items_[i].path_ == p)
+                {
+                    idx=i;
+                    return true;
+                }
+                else
+                {
+                    redo=true;
+                    break;
+                }
+            }
+        }
+    }
+
+    if(!redo)
+    {
+        //the range after
+        for(size_t i=endIndex; i < items_.size(); i++)
+        {
+            if(items_[i].pathHash_ == hval)
+            {
+                if(items_[i].path_ == p)
+                {
+                    idx=i;
+                    return true;
+                }
+                else
+                {
+                    redo=true;
+                    break;
+                }
+            }
+        }
+    }
+
+    //If the hash is not unique we need to use string comparision
     if(redo)
     {
         for(size_t i=0; i < items_.size(); i++)
         {
             if(items_[i].path_ == p)
-                    return i;
+            {
+                idx=i;
+                return true;
+            }
         }
     }
 
-    return -1;
+    return false;
 }

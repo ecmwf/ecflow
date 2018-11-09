@@ -63,7 +63,7 @@ public:
     bool loadFailed() const {return loadFailed_;}
 
 protected:
-    int indexOfItem(const std::string&);
+    bool indexOfItem(const std::string&,size_t&);
     void guessNodeType();
     TimelineItem::Type guessNodeType(const std::string& line,const std::string& name,
                                       const std::string& status,
@@ -82,6 +82,7 @@ protected:
     bool fullRead_;
     bool loadTried_;
     bool loadFailed_;
+    size_t lastIndex_;
 };
 
 
