@@ -171,7 +171,7 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
 
     if(showDetails)
     {
-        txt+=Viewer::formatBoldText("Source: ",col);
+        txt+=Viewer::formatBoldText(" Source: ",col);
 
         //fetch method and time
         if(localLog_)
@@ -197,13 +197,16 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
         if(logLoaded_ && data_->loadTried())
         {
             if(localLog_ && data_->isFullRead())
-                txt+="(parsed last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file - " +
+                txt+=" (parsed last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file - " +
                     Viewer::formatText("maximum reached",QColor(255,0,0)) + ")";
-            else
+            else if(tmpLogFile_)
             {
-                if(tmpLogFile_ && tmpLogFile_->dataSize() == maxReadSize_)
-                    txt+="(fetched last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file - " +
+                QFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
+                if(static_cast<size_t>(fi.size()) == maxReadSize_)
+                {
+                    txt+=" (fetched last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file - " +
                         Viewer::formatText("maximum reached",QColor(255,0,0)) + ")";
+                }
             }
         }
 
