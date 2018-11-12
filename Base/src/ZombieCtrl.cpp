@@ -133,7 +133,7 @@ bool ZombieCtrl::handle_zombie(
 	ZombieAttr attr = ZombieAttr::get_default_attr( zombie_type );
 
 	/// Look for any Zombie attribute up node tree, use this to construct & configure zombie
-	task->findParentZombie(zombie_type, attr );
+	if (task) task->findParentZombie(zombie_type, attr );
 
 	/// Handle corner case ,where we have two jobs with different process id, but same password
 	/// Can happen if jobs is started externally, or via test, occasionally
