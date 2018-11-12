@@ -48,8 +48,10 @@ class TimelineData : public QObject
 {
     Q_OBJECT
 public:
+    enum LoadStatus {LoadNotTried,LoadFailed,LoadDone};
+
     TimelineData(QObject* parent=0) : QObject(parent),
-        startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadTried_(false), loadFailed_(false) {}
+        startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadStatus_(LoadNotTried) {}
 
     void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
     QDateTime loadedAt() const {return loadedAt_;}
@@ -62,8 +64,7 @@ public:
     void clear();    
     void setItemType(int index,TimelineItem::Type type);
     bool isFullRead() const {return fullRead_;}
-    bool loadTried() const {return loadTried_;}
-    bool loadFailed() const {return loadFailed_;}
+    LoadStatus loadStatus() const {return loadStatus_;}
 
 Q_SIGNALS:
     void loadProgress(size_t current,size_t total);
@@ -86,8 +87,7 @@ protected:
     QDateTime loadedAt_;
     size_t maxReadSize_;
     bool fullRead_;
-    bool loadTried_;
-    bool loadFailed_;
+    LoadStatus loadStatus_;
     size_t lastIndex_;
 };
 

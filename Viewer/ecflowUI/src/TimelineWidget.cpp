@@ -198,7 +198,7 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
                 txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(transferredAt_);
         }
 
-        if(logLoaded_ && data_->loadTried())
+        if(data_->loadStatus() == TimelineData::LoadDone)
         {
             if(localLog_ && data_->isFullRead())
                 txt+=" (parsed last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file - " +
@@ -433,8 +433,8 @@ void TimelineWidget::slotLogLoadProgress(size_t current,size_t total)
 {
     int percent=100*current/total;
     if(percent >=0 && percent <=100)
-        ui_->messageLabel->progress(QString::number(current/(1024*1024)) + "MB/" +
-                                    QString::number(total/(1024*1024)) + "MB",percent);
+        ui_->messageLabel->progress("",percent);
+
 }
 
 void TimelineWidget::loadCore(QString logFile)

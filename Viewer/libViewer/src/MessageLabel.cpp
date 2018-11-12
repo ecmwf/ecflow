@@ -251,7 +251,7 @@ void MessageLabel::progress(QString text,int value)
     progBar_->setValue(value);
     progLabel_->setText(text);
 
-    //UiLog().dbg() << "MessageLabel::progress --> " << value << "%";
+    //UiLog().dbg() << "MessageLabel::progress --> " << value << "%" << " " << text;
 }
 
 void MessageLabel::setShowTypeTitle(bool b)

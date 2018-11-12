@@ -49,10 +49,9 @@ void TimelineData::clear()
     numOfRows_=0;
     startTime_=0;
     endTime_=0;
-    maxReadSize_=0;
+    maxReadSize_=0;    
     fullRead_=false;
-    loadTried_=false;
-    loadFailed_=false;
+    loadStatus_=LoadNotTried;
     lastIndex_=0;
     items_=std::vector<TimelineItem>();
     loadedAt_=QDateTime();
@@ -70,8 +69,7 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
 
     maxReadSize_=maxReadSize;
     fullRead_=false;
-    loadTried_=true;
-    loadFailed_=false;
+    loadStatus_=LoadNotTried;
     lastIndex_=0;
     loadedAt_=QDateTime::currentDateTime();
 
@@ -79,7 +77,7 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
     ecf::File_r log_file(logFile);
     if( !log_file.ok() )
     {
-        loadFailed_=true;
+        loadStatus_=LoadFailed;
         UiLog().warn() << "TimelineData::loadLogFile: Could not open log file " << logFile ;
         throw std::runtime_error("Could not open log file: " + logFile);
     }
@@ -89,7 +87,11 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
     size_t fSize=fInfo.size();
     size_t progressChunk=fSize/200;
     if(progressChunk==0) progressChunk=fSize;
+    size_t currentProgressChunk=0;
     size_t percent=0;
+
+    if(fSize ==0)
+        return;
 
     if(maxReadSize_ > 0)
     {
@@ -230,15 +232,18 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
         }
 
         size_t current=log_file.pos();
-        if(current > (percent+1)*progressChunk)
+        if(current/progressChunk > currentProgressChunk)
         {
-            percent=current/progressChunk;
+            currentProgressChunk=current/progressChunk;
+            percent=current/fSize;
             if(percent <= 100)
                 Q_EMIT loadProgress(current,fSize);
         }
 
         numOfRows_++;
     }
+
+    loadStatus_=LoadDone;
 
     //guessNodeType();
 }
