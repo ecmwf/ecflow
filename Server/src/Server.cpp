@@ -552,7 +552,7 @@ void Server::update_defs_server_state()
    serverEnv_.variables(envVec);
    defs_->set_server().add_or_update_server_variables(envVec);
 
-   defs_->set_server().hostPort(  hostPort() );
+   defs_->set_server().hostPort(  serverEnv_.hostPort()  );
    defs_->set_server().set_state( serverState_ );
 
    // let the defs store the job submission interval, & whether we want job generation.testing can disable this
