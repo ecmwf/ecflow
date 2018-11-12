@@ -138,7 +138,7 @@ bool ZombieCtrl::handle_zombie(
 	/// Handle corner case ,where we have two jobs with different process id, but same password
 	/// Can happen if jobs is started externally, or via test, occasionally
  	ecf::Child::CmdType child_type = task_cmd->child_type();
-	if (child_type == Child::INIT && task->state() == NState::ACTIVE) {
+	if (child_type == Child::INIT && task && task->state() == NState::ACTIVE) {
 
 		/// Find zombie by path only, and remove it. Re-added again below. With updated, data<<<<
 #ifdef DEBUG_ZOMBIE
