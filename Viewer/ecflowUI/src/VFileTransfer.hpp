@@ -33,8 +33,12 @@ Q_SIGNALS:
     void stdOutputAvailable(QString);
 
 protected:
+    QString stdErr();
+
     QProcess* proc_;
     QString targetFile_;
+    bool ignoreSetX_;
+    QString scriptName_;
 };
 
 #endif // VFILETRANSFER_HPP

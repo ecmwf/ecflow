@@ -26,7 +26,8 @@
 #include "TimelineData.hpp"
 #include "TimelineWidget.hpp"
 
-TimelineItemWidget::TimelineItemWidget(QWidget *parent)
+TimelineItemWidget::TimelineItemWidget(QWidget *parent) :
+    delayedLoad_(false)
 {
     QVBoxLayout* vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
@@ -76,20 +77,30 @@ void TimelineItemWidget::load()
     {
         ServerHandler *sh=info_->server();
         Q_ASSERT(sh);
-        QString logFile;
-        if(VServer* vs=sh->vRoot())
-        {
-            std::vector<std::string> suites;
-            if(SuiteFilter* sf=sh->suiteFilter())
-            {
-                suites=sh->suiteFilter()->filter();
-            }
 
-            logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
-            w_->load(QString::fromStdString(sh->name()),
+        if(sh->activity() == ServerHandler::LoadActivity)
+        {
+            delayedLoad_=true;
+        }
+        else
+        {
+            if(VServer* vs=sh->vRoot())
+            {
+                QString logFile=vs->findVariable("ECF_LOG",false);
+                if(!logFile.isEmpty())
+                {
+                    std::vector<std::string> suites;
+                    if(SuiteFilter* sf=sh->suiteFilter())
+                    {
+                        suites=sh->suiteFilter()->filter();
+                    }
+
+                    w_->load(QString::fromStdString(sh->name()),
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
                          logFile, suites); //last 25 MB are read
+                }
+            }
         }
     }
 }
@@ -97,6 +108,7 @@ void TimelineItemWidget::load()
 void TimelineItemWidget::clearContents()
 {
     w_->clear();
+    delayedLoad_=false;
     InfoPanelItem::clear();
 }
 
@@ -114,9 +126,10 @@ bool TimelineItemWidget::hasSameContents(VInfo_ptr info)
     return false;
 }
 
-//We are independent of the server's state
 void TimelineItemWidget::serverSyncFinished()
 {
+    if(delayedLoad_)
+        load();
 }
 
 void TimelineItemWidget::writeSettings(VComboSettings* vs)

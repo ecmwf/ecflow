@@ -39,6 +39,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     maxReadSize_(25*1024*1024),
     data_(0),
     ignoreTimeEdited_(false),
+    beingCleared_(false),
+    typesDetermined_(false),
     localLog_(true),
     logLoaded_(false),
     logTransferred_(false),
@@ -135,7 +137,14 @@ TimelineWidget::~TimelineWidget()
 }
 
 void TimelineWidget::clear()
-{
+{   
+    beingCleared_=true;
+    if(fileTransfer_)
+    {
+        fileTransfer_->stopTransfer();
+        ui_->messageLabel->stopLoadLabel();
+    }
+
     ui_->messageLabel->clear();
     ui_->messageLabel->hide();
 
@@ -149,20 +158,19 @@ void TimelineWidget::clear()
     host_.clear();
     port_.clear();
     suites_.clear();
+    typesDetermined_=false;
     localLog_=true;
     logLoaded_=false;
     logTransferred_=false;
     transferredAt_=QDateTime();
-    if(fileTransfer_)
-    {
-        fileTransfer_->stopTransfer();
-        ui_->messageLabel->stopLoadLabel();
-    }
+
     tmpLogFile_.reset(); //TODO: we need to delete the file!!!
     //ui_->startTe->clear();
     //ui_->endTe->clear();
 
     setAllVisible(false);
+
+    beingCleared_=false;
 }
 
 void TimelineWidget::updateInfoLabel(bool showDetails)
@@ -264,6 +272,11 @@ void TimelineWidget::slotPeriodBeingZoomedInView(QDateTime start,QDateTime end)
 
 void TimelineWidget::slotTaskOnly(bool taskFilter)
 {
+    if(taskFilter)
+    {
+        determineNodeTypes();
+    }
+
     sortModel_->setTaskFilter(taskFilter);
 }
 
@@ -350,6 +363,9 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
 {
     clear();
 
+    if(logFile.empty())
+       return;
+
     serverName_=serverName;
     host_=host;
     port_=port;
@@ -394,27 +410,24 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
 }
 
 void TimelineWidget::slotFileTransferFinished()
-{
-    logTransferred_=true;
-    ui_->messageLabel->stopLoadLabel();
-    ui_->messageLabel->hide();
-    ui_->messageLabel->update();
-
-    //we are not ina cleared state
-    if(!logFile_.isEmpty())
+{ 
+    //we are not in a cleared state
+    if(!beingCleared_)
     {
+        logTransferred_=true;
+        ui_->messageLabel->stopLoadLabel();
+        ui_->messageLabel->hide();
+        ui_->messageLabel->update();
         loadCore(QString::fromStdString(tmpLogFile_->path()));
     }
 }
 
 void TimelineWidget::slotFileTransferFailed(QString err)
 {
-    logTransferred_=false;
-    ui_->messageLabel->stopLoadLabel();
-
-    //we are not in a cleared state
-    if(!logFile_.isEmpty())
+    if(!beingCleared_)
     {
+        logTransferred_=false;
+        ui_->messageLabel->stopLoadLabel();
         logLoaded_=false;
         ui_->messageLabel->showError("Could not fetch log file from remote host! <br>" + err);
         data_->clear();
@@ -489,24 +502,6 @@ void TimelineWidget::loadCore(QString logFile)
     setAllVisible(true);
     updateInfoLabel();
 
-    //Determine missing types
-    if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
-    {
-        for(size_t i=0; i < data_->items().size() ;i++)
-        {
-            if(data_->items()[i].type() == TimelineItem::UndeterminedType)
-            {
-                if(VNode *vn=sh->vRoot()->find(data_->items()[i].path()))
-                {
-                    if(vn->isTask())
-                       data_->setItemType(i,TimelineItem::TaskType);
-                    else if(vn->isFamily())
-                       data_->setItemType(i,TimelineItem::FamilyType);
-                }
-            }
-        }
-    }
-
     ViewerUtil::restoreOverrideCursor();
 
     ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
@@ -520,6 +515,36 @@ void TimelineWidget::loadCore(QString logFile)
     view_->setPeriod(data_->qStartTime(),data_->qEndTime());
 
     model_->setData(data_);
+}
+
+//Determine missing types
+void TimelineWidget::determineNodeTypes()
+{
+    if(typesDetermined_)
+        return;
+
+    if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
+    {
+        ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+        for(size_t i=0; i < data_->items().size() ;i++)
+        {
+            if(data_->items()[i].type() == TimelineItem::UndeterminedType)
+            {
+                if(VNode *vn=sh->vRoot()->find(data_->items()[i].path()))
+                {
+                    if(vn->isTask())
+                        data_->setItemType(i,TimelineItem::TaskType);
+                    else if(vn->isFamily())
+                        data_->setItemType(i,TimelineItem::FamilyType);
+                }
+            }
+        }
+
+        ViewerUtil::restoreOverrideCursor();
+    }
+
+    typesDetermined_=true;
 }
 
 void TimelineWidget::writeSettings(VComboSettings* vs)

@@ -68,6 +68,7 @@ private:
     void updateInfoLabel(bool showDetails=true);
     void setAllVisible(bool b);
     void checkButtonState();
+    void determineNodeTypes();
 
     Ui::TimelineWidget* ui_;
     QString serverName_;
@@ -83,7 +84,9 @@ private:
     TimelineSortModel* sortModel_;
     TimelineView* view_;
     bool ignoreTimeEdited_;
+    bool beingCleared_;
 
+    bool typesDetermined_;
     bool localLog_;
     bool logLoaded_;
     bool logTransferred_;

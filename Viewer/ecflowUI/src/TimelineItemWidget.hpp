@@ -44,6 +44,7 @@ private:
     void load();
 
     TimelineWidget* w_;
+    bool delayedLoad_;
 };
 
 #endif // TIMELINEITEMWIDGET_HPP

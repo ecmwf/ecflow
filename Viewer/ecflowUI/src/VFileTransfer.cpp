@@ -14,11 +14,14 @@
 #include <QFileInfo>
 #include <QProcess>
 
+#include "DirectoryHandler.hpp"
 #include "UiLog.hpp"
 
 VFileTransfer::VFileTransfer(QObject* parent) :
     QObject(parent),
-    proc_(NULL)
+    proc_(NULL),
+    ignoreSetX_(true),
+    scriptName_("ecflow_ui_transfer_file.sh")
 {
 }
 
@@ -45,27 +48,26 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
 
     Q_ASSERT(proc_->state() == QProcess::NotRunning);
 
+    lastBytes=0;
+
     targetFile_=targetFile;
 
-    QString userId = qgetenv("USER");
-    if (userId.isEmpty())
-        userId = qgetenv("USERNAME");
+    //If there is an exe dir we check if it is added to the PATH env
+    //variable
+    QString exeDir=QString::fromStdString(DirectoryHandler::exeDir());
+    if(!exeDir.isEmpty())
+    {
+      QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+      QString envPath=env.value("PATH");
+      if(!envPath.contains(exeDir))
+      {
+          env.insert("PATH",exeDir + ":" + envPath);
+          proc_->setProcessEnvironment(env);
+      }
+    }
 
-    QString command;
-    //fetch the lastBytes
-    if(lastBytes != 0)
-    {
-        command="ssh " + userId  + "@" + host +
-                " \'tail -c " + QString::number(lastBytes) + " " + sourceFile + "\'"; // > " + targetFile;
-        proc_->setStandardOutputFile(targetFile_);
-    }
-    //fetch the whole file
-    else
-    {
-        command="scp " + host + ":/" + sourceFile + " " + targetFile_;
-        //with script we will write the progress into the stdout
-        command="script -q -c \'" + command + "\'";
-    }
+    QString command=scriptName_ + " ";
+    command+="\'" + sourceFile + "\' " + host + " \'" + targetFile + "\' " +  QString::number(lastBytes);
 
     proc_->start("/bin/sh -c \"" + command + "\"");
     //UiLog().dbg() << "/bin/sh -c \"" + command + "\"";
@@ -82,12 +84,21 @@ void VFileTransfer::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatu
     if(!proc_)
         return;
 
-    bool failed=false;
-    QString errTxt=QString(proc_->readAllStandardOutput()) + " " + QString(proc_->readAllStandardError());
+    QString stdOutTxt(proc_->readAllStandardOutput());
+    QString stdErrTxt=stdErr();
+
+    QString errTxt=stdOutTxt;
+    if(!errTxt.isEmpty())
+    {
+        errTxt+="/n";
+    }
+    errTxt+=stdErrTxt;
+    errTxt.prepend("Script <b>" + scriptName_ + "</b> failed!. Output:\n\n");
+
     if(exitCode == 0 && exitStatus == QProcess::NormalExit)
     {
         QFileInfo fi(targetFile_);
-        if(fi.exists())
+        if(fi.exists() && fi.size() >0)
         {
             Q_EMIT transferFinished();
             return;
@@ -109,3 +120,19 @@ void VFileTransfer::slotStdOutput()
     Q_EMIT stdOutputAvailable(proc_->readAllStandardOutput());
 }
 
+QString VFileTransfer::stdErr()
+{
+    if(ignoreSetX_)
+    {
+        QString res;
+        QString txt(proc_->readAllStandardError());
+        Q_FOREACH(QString s,txt.split("\n"))
+        {
+            if(!s.startsWith("+ "))
+                res+=s + "\n";
+        }
+        return res;
+    }
+
+    return QString(proc_->readAllStandardError());
+}

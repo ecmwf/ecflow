@@ -1,0 +1,70 @@
+#!/bin/bash
+
+#============================================================================
+# Copyright 2009-2018 ECMWF.
+# This software is licensed under the terms of the Apache Licence version 2.0
+# which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+# In applying this licence, ECMWF does not waive the privileges and immunities
+# granted to it by virtue of its status as an intergovernmental organisation
+# nor does it submit to any jurisdiction.
+#============================================================================
+
+set -x #goes to stderr
+
+echo " Arguments=$*" >&2
+
+if [[ $# -ne 4 ]] ; then
+    echo "Error: wrong number of arguments = $# (must be 4)" >&2
+    if [[ $# -eq 0 ]] ; then
+        echo "This script should only be called from within ecflow_ui." >&2
+    fi
+    exit 1
+fi
+
+sourceFile=$1
+host=$2
+targetFile=$3
+lastBytes=$4
+
+echo ""
+echo "sourceFile=$sourceFile" >&2
+echo "host=$host" >&2
+echo "targetFile=$targetFile" >&2
+echo "lastBytes=$lastBytes" >&2
+echo ""
+
+if [[ $sourceFile == "" ]] ; then
+    echo "Error: sourceFile is empty!" >&2
+    exit 1
+fi
+
+if [[ $host == "" ]] ; then
+    echo "Error: host is empty!" >&2
+    exit 1
+fi
+
+if [[ $targetFile == "" ]] ; then
+    echo "Error: targetFile is empty!" >&2
+    exit 1
+fi
+
+if [[ $lastBytes == "" ]] ; then
+    echo "Error: lastBytes is empty!" >&2
+    exit 1
+fi
+
+if [[ $lastBytes -lt 0 ]] ; then
+    echo "Error: lastBytes (=${lastBytes}) must be positive!" >&2
+    exit 1
+fi
+
+# transfer the whole file
+if [[ lastBytes -eq 0 ]] ; then
+
+    script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+
+#transfer the last bytes of the file
+else
+    ssh ${USER}@${host} "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
+fi
+
