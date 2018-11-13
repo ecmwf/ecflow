@@ -471,3 +471,14 @@ QToolButton[strip="last"]:hover {
    background-color: rgb(226,227,228);
 }
 
+QProgressBar::chunk {
+    background:  #61A2E2;
+    border: none;
+}
+
+QProgressBar {
+    border-radius: 3px;
+    border: 1px solid rgb(80,80,80);
+    text: rgb(20,20,20);
+    text-align: center;
+}

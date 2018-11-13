@@ -32,8 +32,15 @@ public:
         pix_=IconProvider::pixmap(id,16);
         pixSmall_=IconProvider::pixmap(id,12);
 
-        bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
-	}
+        if(bg == bgLight)
+        {
+            bg_=bg.name();
+        }
+        else
+        {
+            bg_="qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " + bg.name() +", stop: 1 " + bgLight.name() + ")";
+        }
+    }
 
     MessageLabelData()  {}
 
@@ -56,21 +63,21 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	setProperty("base","1");
 
 	if(typeData.empty())
-	{
-		QColor bg(236,246,252);
-		QColor bgLight=bg.lighter(105);
-		typeData[InfoType]=MessageLabelData(":/viewer/info.svg","Info",bg,bgLight,QColor(180,194,230));
+	{        
+        QColor bg(239,244,249);
+        QColor bgLight=bg; //bg.lighter(105);
+        typeData[InfoType]=MessageLabelData(":/viewer/info.svg","Info",bg,bgLight,QColor(95,145,200));
 
 		bg=QColor(234,215,150);
-		bgLight=bg.lighter(112);
+        bgLight=bg;//bg.lighter(112);
         typeData[WarningType]=MessageLabelData(":/viewer/warning.svg","Warning",bg,bgLight,QColor(226,170,91)); //QColor(226,195,110)); //226,170,91
 
 		bg=QColor(255,231,231);
-		bgLight=bg.lighter(105);
+        bgLight=bg;//bg.lighter(105);
 		typeData[ErrorType]=MessageLabelData(":/viewer/error.svg","Error",bg,bgLight,QColor(223,152,152));
 
         bg=QColor(232,249,236);
-        bgLight=bg.lighter(105);
+        bgLight=bg;//bg.lighter(105);
         typeData[TipType]=MessageLabelData(":/viewer/tip.svg","Tip",bg,bgLight,QColor(190,220,190));
 	}
 
@@ -88,8 +95,15 @@ MessageLabel::MessageLabel(QWidget *parent) :
     progBar_=new QProgressBar(this);
     progWidget_=new QWidget(this);
     QHBoxLayout* progLayout=new QHBoxLayout(progWidget_);
+    progLayout->setContentsMargins(2,2,2,2);
     progLayout->addWidget(progBar_);
     progLayout->addWidget(progLabel_);
+
+    QFont f;
+    f.setPointSize(f.pointSize()-1);
+    progBar_->setFont(f);
+    QFontMetrics fm(f);
+    progBar_->setFixedHeight(fm.height()+4);
 
 	layout_=new QHBoxLayout(this);
 	layout_->setContentsMargins(2,2,2,2);	    
