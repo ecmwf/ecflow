@@ -13,18 +13,18 @@
 
 #include <string>
 #include <vector>
-#include <boost/functional/hash.hpp>
 
 #include <QDateTime>
 #include <QObject>
+#include <QHash>
 
 class TimelineItem
 {
 public:
     enum Type {UndeterminedType,ServerType,SuiteType,FamilyType,TaskType};
 
-    TimelineItem() : pathHash_(0), type_(UndeterminedType) {}
-    TimelineItem(const std::string& path,size_t pathHash,unsigned char status,unsigned int time,Type type=UndeterminedType);
+    TimelineItem() : type_(UndeterminedType) {}
+    TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type=UndeterminedType);
     size_t size() const {return status_.size();}
     const std::string& path() const {return path_;}
     Type type() const {return type_;}
@@ -37,7 +37,6 @@ public:
 
 //protected:
     std::string path_;
-    size_t pathHash_;
     Type type_;
     std::vector<unsigned int> start_;
     std::vector<unsigned int> end_;
@@ -83,12 +82,11 @@ protected:
     int numOfRows_;
     unsigned int startTime_;
     unsigned int endTime_;
-    boost::hash<std::string> pathHash_;
     QDateTime loadedAt_;
     size_t maxReadSize_;
     bool fullRead_;
     LoadStatus loadStatus_;
-    size_t lastIndex_;
+    QHash<QString,size_t> pathHash_;
 };
 
 

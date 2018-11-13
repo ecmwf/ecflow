@@ -26,9 +26,8 @@
 #include "TimelineData.hpp"
 #include "VNState.hpp"
 
-TimelineItem::TimelineItem(const std::string& path,size_t pathHash,unsigned char status,unsigned int time,Type type) :
+TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type) :
     path_(path),
-    pathHash_(pathHash),
     type_(type)
 {
     add(status,time);
@@ -52,9 +51,9 @@ void TimelineData::clear()
     maxReadSize_=0;    
     fullRead_=false;
     loadStatus_=LoadNotTried;
-    lastIndex_=0;
     items_=std::vector<TimelineItem>();
     loadedAt_=QDateTime();
+    pathHash_.clear();
 }
 
 void TimelineData::setItemType(int index,TimelineItem::Type type)
@@ -70,7 +69,6 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
     maxReadSize_=maxReadSize;
     fullRead_=false;
     loadStatus_=LoadNotTried;
-    lastIndex_=0;
     loadedAt_=QDateTime::currentDateTime();
 
     /// The log file can be massive > 50Mb
@@ -222,13 +220,13 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
             {
                 items_[idx].type_=guessNodeType(line,status,next_ws);
             }
-            lastIndex_=idx;
         }
         else
         {                               
-            items_.push_back(TimelineItem(name,pathHash_(name),statusId,statusTime,
+            items_.push_back(TimelineItem(name,statusId,statusTime,
                                           guessNodeType(line,name,status,next_ws)));
-            lastIndex_=items_.size()-1;
+
+            pathHash_.insert(QString::fromStdString(name),items_.size()-1);
         }
 
         size_t current=log_file.pos();
@@ -302,84 +300,11 @@ TimelineItem::Type TimelineData::guessNodeType(const std::string& line,
 //It has to be very fast!!!!
 bool TimelineData::indexOfItem(const std::string& p,size_t& idx)
 {
-    size_t hval=pathHash_(p);
-    bool redo=false;
-    size_t cacheRange=100;
-    size_t startIndex=(lastIndex_ > cacheRange)?lastIndex_-cacheRange:0;
-    size_t endIndex=(lastIndex_ > items_.size()-cacheRange)?(lastIndex_+cacheRange):items_.size();
-
-    //the range around the last index
-    for(size_t i=startIndex; i < endIndex; i++)
+    size_t v=pathHash_.value(QString::fromStdString(p),SIZE_MAX);
+    if(v != SIZE_MAX)
     {
-        if(items_[i].pathHash_ == hval)
-        {
-            if(items_[i].path_ == p)
-            {
-                idx=i;
-                return true;
-            }
-            else
-            {
-                redo=true;
-                break;
-            }
-        }
+        idx=v;
+        return true;
     }
-
-    if(!redo)
-    {
-        //the range before
-        for(size_t i=0; i < startIndex; i++)
-        {
-            if(items_[i].pathHash_ == hval)
-            {
-                if(items_[i].path_ == p)
-                {
-                    idx=i;
-                    return true;
-                }
-                else
-                {
-                    redo=true;
-                    break;
-                }
-            }
-        }
-    }
-
-    if(!redo)
-    {
-        //the range after
-        for(size_t i=endIndex; i < items_.size(); i++)
-        {
-            if(items_[i].pathHash_ == hval)
-            {
-                if(items_[i].path_ == p)
-                {
-                    idx=i;
-                    return true;
-                }
-                else
-                {
-                    redo=true;
-                    break;
-                }
-            }
-        }
-    }
-
-    //If the hash is not unique we need to use string comparision
-    if(redo)
-    {
-        for(size_t i=0; i < items_.size(); i++)
-        {
-            if(items_[i].path_ == p)
-            {
-                idx=i;
-                return true;
-            }
-        }
-    }
-
     return false;
 }
