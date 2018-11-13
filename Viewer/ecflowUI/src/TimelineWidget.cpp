@@ -363,7 +363,7 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
 {
     clear();
 
-    if(logFile.empty())
+    if(logFile.isEmpty())
        return;
 
     serverName_=serverName;

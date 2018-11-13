@@ -86,7 +86,7 @@ void TimelineItemWidget::load()
         {
             if(VServer* vs=sh->vRoot())
             {
-                QString logFile=vs->findVariable("ECF_LOG",false);
+                QString logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
                 if(!logFile.isEmpty())
                 {
                     std::vector<std::string> suites;
