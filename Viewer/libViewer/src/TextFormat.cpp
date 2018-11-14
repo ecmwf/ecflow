@@ -52,6 +52,11 @@ QString formatBoldText(QString txt,QColor col)
     return "<b><font color=\'" + col.name() + "\'>" +txt + "</font></b>";
 }
 
+QString formatItalicText(QString txt,QColor col)
+{
+    return "<i><font color=\'" + col.name() + "\'>" +txt + "</font></i>";
+}
+
 QString formatText(QString txt,QColor col)
 {
     return "<font color=\'" + col.name() + "\'>" +txt + "</font>";

@@ -112,11 +112,6 @@ void TimelineItemWidget::clearContents()
     InfoPanelItem::clear();
 }
 
-//We are independent of the server's state
-void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
-{
-}
-
 bool TimelineItemWidget::hasSameContents(VInfo_ptr info)
 {
     if(info && info_ && info->server())
@@ -130,6 +125,32 @@ void TimelineItemWidget::serverSyncFinished()
 {
     if(delayedLoad_)
         load();
+}
+
+void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    if(flags.isSet(SuspendedChanged))
+    {
+        //Suspend
+        if(suspended_)
+        {
+            //reloadTb_->setEnabled(false);
+        }
+        //Resume
+        else
+        {
+            if(info_ && info_->node())
+            {
+                //reloadTb_->setEnabled(true);
+                if(delayedLoad_)
+                    load();
+            }
+            else
+            {
+                clearContents();
+            }
+        }
+    }
 }
 
 void TimelineItemWidget::writeSettings(VComboSettings* vs)

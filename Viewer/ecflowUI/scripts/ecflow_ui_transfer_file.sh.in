@@ -9,9 +9,10 @@
 # nor does it submit to any jurisdiction.
 #============================================================================
 
+set -e
 set -x #goes to stderr
 
-echo " Arguments=$*" >&2
+echo " arguments=$*" >&2
 
 if [[ $# -ne 4 ]] ; then
     echo "Error: wrong number of arguments = $# (must be 4)" >&2
@@ -65,6 +66,12 @@ if [[ lastBytes -eq 0 ]] ; then
 
 #transfer the last bytes of the file
 else
-    ssh ${USER}@${host} "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
+    ssh ${USER}@${host} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}" > sourceSize
+
+    if [[ ${sourceSize} -gt 0 && ${sourceSize} -le ${lastBytes} ]] ; then
+        script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+    else
+        ssh ${USER}@${host} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
+    fi
 fi
 

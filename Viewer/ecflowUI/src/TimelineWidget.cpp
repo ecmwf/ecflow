@@ -22,6 +22,7 @@
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
 #include "ViewerUtil.hpp"
+#include "VFileInfo.hpp"
 #include "VFileTransfer.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
@@ -36,7 +37,7 @@
 
 TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
-    maxReadSize_(25*1024*1024),
+    maxReadSize_(10*1024*1024),
     data_(0),
     ignoreTimeEdited_(false),
     beingCleared_(false),
@@ -183,6 +184,23 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
 
     if(showDetails)
     {
+        if(data_->loadStatus() == TimelineData::LoadDone)
+        {
+            if(localLog_)
+            {
+                VFileInfo fi(logFile_);
+                txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
+            }
+            else
+            {
+                 VFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
+                 if(fi.size() < static_cast<qint64>(maxReadSize_))
+                 {
+                     txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
+                 }
+            }
+        }
+
         txt+=Viewer::formatBoldText(" Source: ",col);
 
         //fetch method and time
@@ -208,17 +226,26 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
 
         if(data_->loadStatus() == TimelineData::LoadDone)
         {
-            if(localLog_ && data_->isFullRead())
-                txt+=" (parsed last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file - " +
-                    Viewer::formatText("maximum reached",QColor(255,0,0)) + ")";
+            QColor warnCol(255,193,91);
+
+            QString warnVerb;
+            if(localLog_ && !data_->isFullRead())
+            {
+                warnVerb="parsed";
+            }
             else if(tmpLogFile_)
             {
                 QFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
                 if(static_cast<size_t>(fi.size()) == maxReadSize_)
                 {
-                    txt+=" (fetched last " + QString::number(maxReadSize_/(1024*1024)) + " MB of file - " +
-                        Viewer::formatText("maximum reached",QColor(255,0,0)) + ")";
+                    warnVerb="fetched";
                 }
+            }
+
+            if(!warnVerb.isEmpty())
+            {
+                txt+=Viewer::formatItalicText(" (" + warnVerb + " last " + QString::number(maxReadSize_/(1024*1024)) +
+                                    " MB of file - maximum reached)",warnCol);
             }
         }
 

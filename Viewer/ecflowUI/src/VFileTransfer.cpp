@@ -48,8 +48,6 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
 
     Q_ASSERT(proc_->state() == QProcess::NotRunning);
 
-    lastBytes=0;
-
     targetFile_=targetFile;
 
     //If there is an exe dir we check if it is added to the PATH env

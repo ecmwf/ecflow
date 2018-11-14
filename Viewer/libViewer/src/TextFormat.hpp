@@ -22,6 +22,7 @@ namespace Viewer
     QString formatShortCut(QAction*);
     void addShortCutToToolTip(QList<QAction*>);
     QString formatBoldText(QString,QColor);
+    QString formatItalicText(QString,QColor);
     QString formatText(QString,QColor);
     QString formatTableThText(QString txt,QColor col);
     QString formatTableTrBg(QString txt,QColor col);
