@@ -143,9 +143,12 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
                           bgRect.x()+bgRect.width()-1,bgRect.bottom());
 
         QString text=index.data(Qt::DisplayRole).toString();
-        QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
+        QFontMetrics fm(font_);
+        //QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
+        QRect textRect = bgRect.adjusted(2,0,-2,0);
+        text=fm.elidedText(text,Qt::ElideMiddle,textRect.width());
         painter->setFont(font_);
-        painter->setPen(Qt::black);
+        painter->setPen(Qt::black);        
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
     }
 
