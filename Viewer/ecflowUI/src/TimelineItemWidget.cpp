@@ -127,6 +127,15 @@ void TimelineItemWidget::serverSyncFinished()
         load();
 }
 
+void TimelineItemWidget::connectStateChanged()
+{
+    if(frozen_)
+        return;
+
+    if(delayedLoad_)
+        load();
+}
+
 void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
     if(flags.isSet(SuspendedChanged))

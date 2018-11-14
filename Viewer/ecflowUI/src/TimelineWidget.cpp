@@ -37,7 +37,7 @@
 
 TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
-    maxReadSize_(10*1024*1024),
+    maxReadSize_(100*1024*1024),
     data_(0),
     ignoreTimeEdited_(false),
     beingCleared_(false),
@@ -226,7 +226,7 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
 
         if(data_->loadStatus() == TimelineData::LoadDone)
         {
-            QColor warnCol(255,193,91);
+            QColor warnCol(218,142,18);
 
             QString warnVerb;
             if(localLog_ && !data_->isFullRead())
@@ -245,7 +245,7 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
             if(!warnVerb.isEmpty())
             {
                 txt+=Viewer::formatItalicText(" (" + warnVerb + " last " + QString::number(maxReadSize_/(1024*1024)) +
-                                    " MB of file - maximum reached)",warnCol);
+                                    " MB of file - maximum size reached)",warnCol);
             }
         }
 

@@ -39,7 +39,7 @@ public:
 protected:
     void updateState(const ChangeFlags&);
     void serverSyncFinished();
-
+    void connectStateChanged();
 private:
     void load();
 
