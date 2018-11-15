@@ -293,7 +293,7 @@ void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool ha
     if(lighter)
     {
         fillCol.light(120);
-        fillCol.setAlpha(180);
+        fillCol.setAlpha(150);
     }
 
     QBrush fillBrush(fillCol);
@@ -305,7 +305,7 @@ void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool ha
         gr.setFinalStop(1,0);
         fillCol.dark(110);
         gr.setColorAt(0,fillCol);
-        fillCol.setAlpha(lighter?90:128);
+        fillCol.setAlpha(lighter?80:128);
         gr.setColorAt(1,fillCol);
         fillBrush=QBrush(gr);
     }
