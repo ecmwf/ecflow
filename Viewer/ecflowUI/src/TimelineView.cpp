@@ -637,6 +637,11 @@ void TimelineView::notifyChange(VProperty* p)
     }
 }
 
+void TimelineView::setZoomActions(QAction* zoomInAction,QAction* zoomOutAction)
+{
+    header_->setZoomActions(zoomInAction,zoomOutAction);
+}
+
 void TimelineView::periodSelectedInHeader(QDateTime t1,QDateTime t2)
 {
     delegate_->setPeriod(t1,t2);
@@ -710,20 +715,34 @@ void TimelineView::writeSettings(VSettings* vs)
 
 TimelineHeader::TimelineHeader(QWidget *parent) :
     QHeaderView(Qt::Horizontal, parent),
-    fm_(QFont()),
-    timelineCol_(QColor(0,0,0)),
-    dateTextCol_(QColor(33,95,161)),
-    timeTextCol_(QColor(30,30,30)),
+    fm_(QFont()),  
+    timelineCol_(50,50,50),
+    dateTextCol_(33,95,161),
+    timeTextCol_(30,30,30),
+    timelineFrameBorderCol_(150,150,150),
+    zoomCol_(224,236,248,190),
     inZoom_(false),
-    zoomCol_(224,236,248),
     timelineSection_(1),
-    timelineFrameSize_(2)
+    timelineFrameSize_(4),
+    majorTickSize_(5),
+    zoomInAction_(0),
+    zoomOutAction_(0)
 {
     setMouseTracking(true);
 
     setStretchLastSection(true);
     connect(this, SIGNAL(sectionResized(int, int, int)),
              this, SLOT(slotSectionResized(int)));
+
+    QColor bg0(214,214,214);
+    QColor bg1(194,194,194);
+    QLinearGradient gr;
+    gr.setCoordinateMode(QGradient::ObjectBoundingMode);
+    gr.setStart(0,0);
+    gr.setFinalStop(0,1);
+    gr.setColorAt(0,bg0);
+    gr.setColorAt(1,bg1);
+    timelineBrush_=QBrush(gr);
 
     int pixId=IconProvider::add(":viewer/filter_decor.svg","filter_decor");
 
@@ -734,6 +753,18 @@ TimelineHeader::TimelineHeader(QWidget *parent) :
     fm_=QFontMetrics(font_);
 
     zoomCursor_=QCursor(QPixmap(":/viewer/cursor_zoom.svg"));
+}
+
+
+QSize TimelineHeader::sizeHint() const
+{
+    //return QHeaderView::sizeHint();
+
+    QSize s = QHeaderView::sizeHint(); //size();
+    //s.setHeight(headerSections[0]->minimumSizeHint().height() + 35);
+    //s.setHeight(2*35);
+    s.setHeight(timelineFrameSize_ + fm_.height() + 6 + majorTickSize_ + fm_.height() + 6 + timelineFrameSize_);
+    return s;
 }
 
 void TimelineHeader::showEvent(QShowEvent *e)
@@ -757,13 +788,14 @@ void TimelineHeader::showEvent(QShowEvent *e)
 void TimelineHeader::mousePressEvent(QMouseEvent *event)
 {
     //Start new zoom
-    if(!inZoom_ && event->button() == Qt::LeftButton &&
+    if(isZoomEnabled() &&
+       !inZoom_ && event->button() == Qt::LeftButton &&
        logicalIndexAt(event->pos()) == timelineSection_ &&
        canBeZoomed())
     {
         zoomStartPos_=event->pos();
     }
-
+#if 0
     //Unzoom
     else if(!inZoom_ && event->button() == Qt::RightButton &&
             logicalIndexAt(event->pos()) == timelineSection_)
@@ -780,6 +812,7 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
             }
         }
     }
+ #endif
     else
         QHeaderView::mousePressEvent(event);
 }
@@ -789,35 +822,13 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
     //When we enter the timeline section we show a zoom cursor
     bool hasCursor=testAttribute(Qt::WA_SetCursor);
 
-#if 0
-    if(!event->buttons().testFlag(Qt::LeftButton))
+    if(!isZoomEnabled())
     {
-        if(logicalIndexAt(event->pos()) == timelineSection_)
-        {
-            if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
-                setCursor(zoomCursor_);
-        }
-        else if()
-        {
-
-        }
+        QHeaderView::mouseMoveEvent(event);
+        return;
     }
-    else
-    {
-        if(logicalIndexAt(event->pos()) == timelineSection_ && inZoom_)
-        {
-            if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
-                setCursor(zoomCursor_);
-        }
-        //if we enter another section we remove the cursor
-        else if(hasCursor && cursor().shape() !=  Qt::SplitHCursor &&
-                !event->buttons().testFlag(Qt::LeftButton))
-        {
-             unsetCursor();
-        }
 
-    }
-#endif
+    //When enabled ...
 
     if(event->buttons().testFlag(Qt::LeftButton))
     {
@@ -902,9 +913,17 @@ void TimelineHeader::mouseReleaseEvent(QMouseEvent *event)
         {
             Q_EMIT periodBeingZoomed(startDate_,endDate_);
         }
+
+        setZoomDisabled();
+
+        //bool hasCursor=testAttribute(Qt::WA_SetCursor);
+        //if(hasCursor && cursor().shape() !=  Qt::SplitHCursor)
+        //    unsetCursor();
     }
     else
-       QHeaderView::mouseReleaseEvent(event);
+    {
+        QHeaderView::mouseReleaseEvent(event);
+    }
 }
 
 void TimelineHeader::slotSectionResized(int i)
@@ -919,17 +938,6 @@ void TimelineHeader::slotSectionResized(int i)
                                    sectionSize(logical) - 16, height());
         }
    }*/
-}
-
-QSize TimelineHeader::sizeHint() const
-{
-    //return QHeaderView::sizeHint();
-
-    QSize s = QHeaderView::sizeHint(); //size();
-    //s.setHeight(headerSections[0]->minimumSizeHint().height() + 35);
-    //s.setHeight(2*35);
-    s.setHeight(fm_.height()*2+20);
-    return s;
 }
 
 void TimelineHeader::setModel(QAbstractItemModel *model)
@@ -1117,12 +1125,24 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
 
 void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
 {
-    //painter->fillRect(rect.adjusted(0,2,0,-2),QColor(190,190,190));
+    //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
 
-    //render zoom rectangle
+    //The timeline area bounded by the frame
+    QRect pRect=rect.adjusted(0,timelineFrameSize_,0,-timelineFrameSize_);
+
+    //Special appearance in for the timeline area
+    painter->fillRect(pRect,timelineBrush_);
+
+    painter->setPen(QPen(timelineFrameBorderCol_));
+    painter->drawLine(QPoint(rect.left(),pRect.top()),
+                      QPoint(rect.right(),pRect.top()));
+
+    painter->drawLine(QPoint(rect.left(),pRect.bottom()),
+                      QPoint(rect.right(),pRect.bottom()));
+
     if(inZoom_)
     {
-        QRect zRect=rect;
+        QRect zRect=pRect; //rect.adjusted(0,zoomFrameTop,0,-zoomFrameBottom-1);
         zRect.setLeft(zoomStartPos_.x());
         zRect.setRight(zoomEndPos_.x());
         painter->fillRect(zRect,zoomCol_);
@@ -1141,14 +1161,14 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
     int majorTick=1;  //in secs (it is a delta)
     qint64 firstTick=1; //in secs since epoch
 
-    int hLineY=rect.center().y();
+    int hLineY=pRect.center().y()-majorTickSize_/2-1;
     int timeTextGap=3; //the gap between the top of the time text and the bottom of the major tick in pixels
     int majorTickTop=hLineY;
-    int majorTickBottom=rect.bottom()-fm_.height()-timeTextGap;
+    int majorTickBottom=hLineY+majorTickSize_; //pRect.bottom()-fm_.height()-timeTextGap;
     int minorTickTop=hLineY;
     int minorTickBottom=majorTickBottom-3;
-    int dateTextY= rect.y() + (rect.height()/2 - fm_.height())/2 + 1;
-    int timeTextY=rect.bottom()-1-fm_.height();
+    int dateTextY= hLineY - (hLineY-pRect.y() - fm_.height())/2 - fm_.height() + 1;
+    int timeTextY= majorTickBottom + (pRect.bottom()-majorTickBottom - fm_.height())/2 - 1;
 
     int timeItemW=fm_.width("223:442");
     int dateItemW=fm_.width("2229 May22");
@@ -1433,6 +1453,75 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
     hoverIndex_=-1;
 }*/
 
+void TimelineHeader::setZoomActions(QAction* zoomInAction,QAction* zoomOutAction)
+{
+    if(!zoomInAction_)
+    {
+        zoomInAction_=zoomInAction;
+        zoomOutAction_=zoomOutAction;
+
+        connect(zoomInAction_,SIGNAL(toggled(bool)),
+                this,SLOT(slotZoomState(bool)));
+
+        connect(zoomOutAction_,SIGNAL(triggered(bool)),
+                this,SLOT(slotZoomOut(bool)));
+
+        checkActionState();
+    }
+}
+
+bool TimelineHeader::isZoomEnabled() const
+{
+    return (zoomInAction_ && zoomInAction_->isEnabled())?(zoomInAction_->isChecked()):false;
+}
+
+void TimelineHeader::setZoomDisabled()
+{
+    if(zoomInAction_)
+        zoomInAction_->setChecked(false);
+}
+
+void TimelineHeader::slotZoomState(bool)
+{
+    Q_ASSERT(zoomInAction_);
+    if(!zoomInAction_->isChecked())
+    {
+        bool hasCursor=testAttribute(Qt::WA_SetCursor);
+        if(hasCursor && cursor().shape() !=  Qt::SplitHCursor)
+                unsetCursor();
+    }
+
+    headerDataChanged(Qt::Horizontal,0,timelineSection_);
+}
+
+void TimelineHeader::slotZoomOut(bool)
+{
+    if(!inZoom_ && !isZoomEnabled())
+    {
+        if(zoomHistory_.count() >= 2)
+        {
+            zoomHistory_.pop();
+            QDateTime sDt=zoomHistory_.top().first;
+            QDateTime eDt=zoomHistory_.top().second;
+            if(sDt.isValid() && eDt.isValid())
+            {
+                setPeriodCore(sDt,eDt,false);
+                Q_EMIT periodSelected(sDt,eDt);
+            }
+
+            checkActionState();
+        }
+    }
+}
+
+void TimelineHeader::checkActionState()
+{
+    if(zoomInAction_)
+    {
+        zoomOutAction_->setEnabled(canBeZoomed() && zoomHistory_.count() >= 2);
+        zoomInAction_->setEnabled(canBeZoomed());
+    }
+}
 
 void TimelineHeader::setStartDate(QDateTime t)
 {
@@ -1440,6 +1529,7 @@ void TimelineHeader::setStartDate(QDateTime t)
     zoomHistory_.clear();
     zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
     headerDataChanged(Qt::Horizontal,0,timelineSection_);
+    checkActionState();
 }
 
 void TimelineHeader::setEndDate(QDateTime t)
@@ -1448,6 +1538,7 @@ void TimelineHeader::setEndDate(QDateTime t)
     zoomHistory_.clear();
     zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
     headerDataChanged(Qt::Horizontal,0,timelineSection_);
+    checkActionState();
 }
 
 void TimelineHeader::setPeriod(QDateTime t1,QDateTime t2)
@@ -1465,4 +1556,5 @@ void TimelineHeader::setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory)
         zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
     }
     headerDataChanged(Qt::Horizontal,0,timelineSection_);
+    checkActionState();
 }

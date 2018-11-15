@@ -133,6 +133,8 @@
     <file alias="warning.svg">../images/warning.svg</file>
     <file alias="why.svg">../images/why.svg</file>
     <file alias="zombie.svg">../images/zombie.svg</file>
+    <file alias="zoom_in.svg">../images/zoom_in.svg</file>
+    <file alias="zoom_out.svg">../images/zoom_out.svg</file>
     <file alias="trigger.css">trigger.css</file>
   </qresource>
 </RCC>

@@ -97,6 +97,11 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
     ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
 
+    ui_->zoomInTb->setDefaultAction(ui_->actionZoomIn);
+    ui_->zoomOutTb->setDefaultAction(ui_->actionZoomOut);
+
+    view_->setZoomActions(ui_->actionZoomIn,ui_->actionZoomOut);
+
     connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
             this,SLOT(slotPathFilter(QString)));
 

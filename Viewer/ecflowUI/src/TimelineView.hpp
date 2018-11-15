@@ -11,6 +11,7 @@
 #ifndef TIMELINEVIEW_HPP
 #define TIMELINEVIEW_HPP
 
+#include <QAction>
 #include <QHeaderView>
 #include <QStyledItemDelegate>
 #include <QTreeView>
@@ -83,6 +84,7 @@ public:
     void setStartDate(QDateTime);
     void setEndDate(QDateTime);
     void setPeriod(QDateTime t1,QDateTime t2);
+    void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
 
     void notifyChange(VProperty* p);
 
@@ -142,9 +144,12 @@ public:
     void setPeriod(QDateTime t1,QDateTime t2);
     QDateTime startDate() const {return startDate_;}
     QDateTime endDate() const {return endDate_;}
+    void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
 
 protected Q_SLOTS:
     void slotSectionResized(int i);
+    void slotZoomState(bool);
+    void slotZoomOut(bool);
 
 Q_SIGNALS:
     void customButtonClicked(QString,QPoint);
@@ -164,7 +169,10 @@ protected:
     QDateTime posToDate(QPoint pos) const;
     int dateToPos(QDateTime dt) const;
     bool canBeZoomed() const;
+    bool isZoomEnabled() const;
+    void setZoomDisabled();
     qint64 zoomPeriodInSec(QPoint startX,QPoint endX) const;
+    void checkActionState();
 
     QDateTime startDate_;
     QDateTime endDate_;
@@ -174,14 +182,19 @@ protected:
     QColor timelineCol_;
     QColor dateTextCol_;
     QColor timeTextCol_;
+    QColor timelineFrameBorderCol_;
+    QBrush timelineBrush_;
+    QColor zoomCol_;
     QPoint zoomStartPos_;
     QPoint zoomEndPos_;
     bool inZoom_;
     QStack<QPair<QDateTime,QDateTime> > zoomHistory_;
     QCursor zoomCursor_;
-    QColor zoomCol_;
     int timelineSection_;
     int timelineFrameSize_;
+    int majorTickSize_;
+    QAction* zoomInAction_;
+    QAction* zoomOutAction_;
 };
 
 #endif // TIMELINEVIEW_HPP

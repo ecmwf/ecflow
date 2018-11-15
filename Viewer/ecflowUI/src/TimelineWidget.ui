@@ -96,6 +96,73 @@
        </spacer>
       </item>
       <item>
+       <widget class="QToolButton" name="zoomInTb">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/zoom_in.svg</normaloff>:/viewer/zoom_in.svg</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="zoomOutTb">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/zoom_out.svg</normaloff>:/viewer/zoom_out.svg</iconset>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QToolButton" name="startTb">
+        <property name="toolTip">
+         <string>Extend period to the start</string>
+        </property>
+        <property name="text">
+         <string>start</string>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/arrow_to_start.svg</normaloff>:/viewer/arrow_to_start.svg</iconset>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="wholePeriodTb">
         <property name="toolTip">
          <string>Show full period</string>
@@ -104,17 +171,34 @@
          <string/>
         </property>
         <property name="text">
-         <string>Full period</string>
+         <string/>
         </property>
         <property name="icon">
          <iconset resource="viewer.qrc">
           <normaloff>:/viewer/arrow_all.svg</normaloff>:/viewer/arrow_all.svg</iconset>
         </property>
         <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonTextBesideIcon</enum>
+         <enum>Qt::ToolButtonIconOnly</enum>
         </property>
         <property name="autoRaise">
-         <bool>false</bool>
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="endTb">
+        <property name="toolTip">
+         <string>Extend period to the end</string>
+        </property>
+        <property name="text">
+         <string>end</string>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/arrow_to_end.svg</normaloff>:/viewer/arrow_to_end.svg</iconset>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -144,23 +228,6 @@
         </property>
         <property name="textFormat">
          <enum>Qt::PlainText</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="startTb">
-        <property name="toolTip">
-         <string>Extend period to the start</string>
-        </property>
-        <property name="text">
-         <string>start</string>
-        </property>
-        <property name="icon">
-         <iconset resource="viewer.qrc">
-          <normaloff>:/viewer/arrow_to_start.svg</normaloff>:/viewer/arrow_to_start.svg</iconset>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -207,23 +274,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QToolButton" name="endTb">
-        <property name="toolTip">
-         <string>Extend period to the end</string>
-        </property>
-        <property name="text">
-         <string>end</string>
-        </property>
-        <property name="icon">
-         <iconset resource="viewer.qrc">
-          <normaloff>:/viewer/arrow_to_end.svg</normaloff>:/viewer/arrow_to_end.svg</iconset>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -252,6 +302,33 @@
     </widget>
    </item>
   </layout>
+  <action name="actionZoomIn">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/zoom_in.svg</normaloff>:/viewer/zoom_in.svg</iconset>
+   </property>
+   <property name="text">
+    <string>zoomIn</string>
+   </property>
+   <property name="toolTip">
+    <string>Enter zoom mode in timelene header</string>
+   </property>
+  </action>
+  <action name="actionZoomOut">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/zoom_out.svg</normaloff>:/viewer/zoom_out.svg</iconset>
+   </property>
+   <property name="text">
+    <string>zoomOut</string>
+   </property>
+   <property name="toolTip">
+    <string>Zoom out</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
