@@ -54,6 +54,7 @@ Q_SIGNALS:
 protected:
     void updateSettings();
     void renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,int) const;
+    void drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const;
     int timeToPos(QRect r,unsigned int time) const;
 
     //void renderNode(QPainter *painter,const QModelIndex& index,
@@ -66,6 +67,7 @@ protected:
     QPen borderPen_;
     QDateTime startDate_;
     QDateTime endDate_;
+    unsigned int completeId_;
 };
 
 

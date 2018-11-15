@@ -45,9 +45,15 @@ static std::vector<std::string> propVec;
 
 TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     model_(model),
-    borderPen_(QPen(QColor(216,216,216)))
+    borderPen_(QPen(QColor(216,216,216))),
+    completeId_(100000)
 {
     Q_ASSERT(model_);
+
+    if(VNState* vn=VNState::find("complete"))
+    {
+        completeId_=vn->id();
+    }
 
     //columns_=ModelColumn::def("table_columns");
 
@@ -179,18 +185,21 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
     int xpPrev=leftEdge-2;
     int xpNext=rightEdge+2;
 
-    for(size_t i=0; i < data->items()[row].size(); i++)
+    const TimelineItem& item=data->items()[row];
+
+    for(size_t i=0; i < item.size(); i++)
     {                              
         bool hasRect=false;
         bool hasGrad=false;
+        bool lighter=false;
         int xpLeft=0,xpRight=0;
         QColor fillCol;
 
-        int xp=(i==0)?(timeToPos(option.rect,data->items()[row].start_[i])):xpNext;
+        int xp=(i==0)?(timeToPos(option.rect,item.start_[i])):xpNext;
 
-        if(i < data->items()[row].size()-1)
+        if(i < item.size()-1)
         {
-            xpNext=timeToPos(option.rect,data->items()[row].start_[i+1]);
+            xpNext=timeToPos(option.rect,item.start_[i+1]);
         }
         else
         {
@@ -201,49 +210,53 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
         {           
             if(i > 0 && xpPrev < leftEdge)
             {
-                if(VNState* vn=VNState::find(data->items()[row].status_[i-1]))
-                {
-                    hasRect=true;
-                    hasGrad=true;
+                if(VNState* vn=VNState::find(item.status_[i-1]))
+                {                                      
                     xpLeft=leftEdge;
                     xpRight=xp;
                     fillCol=vn->colour();
+                    lighter=(vn->id() == completeId_);
+                    drawCell(painter,QRect(xpLeft,option.rect.y(),xpRight-xpLeft+1,option.rect.height()-1),
+                             fillCol,true,lighter);
                 }
             }
 
-            if(VNState* vn=VNState::find(data->items()[row].status_[i]))
+            if(VNState* vn=VNState::find(item.status_[i]))
             {
                 hasRect=true;
                 hasGrad=true;
                 xpLeft=xp;
                 xpRight=(xpNext <= rightEdge)?xpNext:rightEdge;
+                lighter=(vn->id() == completeId_);
                 fillCol=vn->colour();
             }
         }
         else if(i > 0 && xp >= rightEdge && xpPrev < leftEdge)
         {
-            if(VNState* vn=VNState::find(data->items()[row].status_[i-1]))
+            if(VNState* vn=VNState::find(item.status_[i-1]))
             {
                 hasRect=true;
                 xpLeft=leftEdge;
                 xpRight=rightEdge;
+                lighter=(vn->id() == completeId_);
                 fillCol=vn->colour();
             }
         }
-        else if(xp <= leftEdge && i == data->items()[row].size()-1)
+        else if(xp <= leftEdge && i == item.size()-1)
         {
-            if(VNState* vn=VNState::find(data->items()[row].status_[i]))
+            if(VNState* vn=VNState::find(item.status_[i]))
             {
                 hasRect=true;
                 xpLeft=leftEdge;
                 xpRight=rightEdge;
+                lighter=(vn->id() == completeId_);
                 fillCol=vn->colour();
             }
         }
 
         if(hasRect)
         {
-            QBrush fillBrush(fillCol);
+            /*QBrush fillBrush(fillCol);
             if(hasGrad)
             {
                 QLinearGradient gr;
@@ -254,10 +267,13 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
                 gr.setColorAt(0,fillCol);
                 fillCol.setAlpha(128);
                 gr.setColorAt(1,fillCol);
-                fillBrush=QBrush(gr);
-            }
-            painter->fillRect(QRect(xpLeft,option.rect.y(),
-                   xpRight-xpLeft+1,option.rect.height()-1),fillBrush);
+                fillBrush=QBrush(gr);*/
+
+            drawCell(painter,QRect(xpLeft,option.rect.y(),xpRight-xpLeft+1,option.rect.height()-1),
+                     fillCol,hasGrad,lighter);
+
+            //painter->fillRect(QRect(xpLeft,option.rect.y(),
+            //       xpRight-xpLeft+1,option.rect.height()-1),fillBrush);
         }
 
 
@@ -270,6 +286,31 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
 
     //The initial filled rect (we will adjust its  width)
     //QRect itemRect=option.rect.adjusted(nodeBox_->leftMargin,nodeBox_->topMargin,0,-nodeBox_->bottomMargin);
+}
+
+void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const
+{
+    if(lighter)
+    {
+        fillCol.light(120);
+        fillCol.setAlpha(180);
+    }
+
+    QBrush fillBrush(fillCol);
+    if(hasGrad)
+    {
+        QLinearGradient gr;
+        gr.setCoordinateMode(QGradient::ObjectBoundingMode);
+        gr.setStart(0,0);
+        gr.setFinalStop(1,0);
+        fillCol.dark(110);
+        gr.setColorAt(0,fillCol);
+        fillCol.setAlpha(lighter?90:128);
+        gr.setColorAt(1,fillCol);
+        fillBrush=QBrush(gr);
+    }
+
+    painter->fillRect(r,fillBrush);
 }
 
 int TimelineDelegate::timeToPos(QRect r,unsigned int time) const
