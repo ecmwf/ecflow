@@ -86,6 +86,7 @@ protected:
     TimelineModel* tlModel_;
     bool skipSort_;
     SortMode sortMode_;
+    bool ascending_;
     QString pathFilter_;
     bool taskFilter_;
     QRegExp pathFilterRx_;

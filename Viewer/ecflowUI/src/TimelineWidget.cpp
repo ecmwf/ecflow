@@ -100,11 +100,11 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->sortCombo->addItem("Sort by time","time");
     ui_->sortCombo->setCurrentIndex(0);
 
-    ui_->sortUpTb->setChecked(true);
     QButtonGroup *sortGr = new QButtonGroup(this);
     sortGr->addButton(ui_->sortUpTb,0);
     sortGr->addButton(ui_->sortDownTb,1);
     sortGr->setExclusive(true);
+    ui_->sortUpTb->setChecked(true);
 
     ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
     ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
@@ -152,6 +152,10 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     connect(view_,SIGNAL(copyPathRequested(QString)),
             this,SLOT(slotCopyPath(QString)));
+
+    //forced init
+    slotSortMode(0);
+    slotSortOrderChanged(0);
 }
 
 TimelineWidget::~TimelineWidget()
@@ -637,12 +641,29 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
         vs->put("sortMode", ui_->sortCombo->currentData().toString().toStdString());
     }
 
+    vs->put("sortOrder",ui_->sortUpTb->isChecked()?"asc":"desc");
+
     view_->writeSettings(vs);
 }
 
 void TimelineWidget::readSettings(VComboSettings* vs)
 {
-    QString cbMode=QString::fromStdString(vs->get<std::string>("sortMode",std::string()));
-    ViewerUtil::initComboBoxByData(cbMode,ui_->sortCombo);
+    //at this point the model is empty so it is cheap to call sort
+
+    //sort mode
+    QString sortMode=QString::fromStdString(vs->get<std::string>("sortMode",std::string()));
+    ViewerUtil::initComboBoxByData(sortMode,ui_->sortCombo);
+
+    //sort order
+    QString sortOrder=QString::fromStdString(vs->get<std::string>("sortOrder",std::string()));
+    if(sortOrder == "asc")
+    {
+        ui_->sortUpTb->setChecked(true);
+    }
+    else if(sortOrder == "desc")
+    {
+        ui_->sortDownTb->setChecked(true);
+    }
+
     view_->readSettings(vs);
 }

@@ -329,6 +329,6 @@ void TimelineData::sortByPath()
     for(size_t i = 0; i < items_.size(); i++)
     {
         int idx=sortVec[i].first;
-        items_[idx].sortIndex_=items_.size()-i-1;
+        items_[idx].sortIndex_=i;
     }
 }

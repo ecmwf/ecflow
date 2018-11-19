@@ -196,6 +196,7 @@ TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
         tlModel_(tlModel),
         skipSort_(false),
         sortMode_(PathSortMode),
+        ascending_(true),
         taskFilter_(false)
 {
     Q_ASSERT(tlModel_);
@@ -216,25 +217,23 @@ void TimelineSortModel::slotPeriodChanged()
 {
     if(sortMode_ == TimeSortMode)
     {
-        sort(0,sortOrder());
-        //invalidate();
+        invalidate();
     }
 }
-
 
 void TimelineSortModel::setSortMode(SortMode mode)
 {
     if(sortMode_ != mode)
     {
         sortMode_ = mode;
-        sort(0,sortOrder());
-        //invalidate();
+        invalidate();
     }
 }
 
 void TimelineSortModel::setSortDirection(bool ascending)
 {
-    sort(0,ascending?Qt::AscendingOrder:Qt::DescendingOrder);
+    ascending_=ascending;
+    sort(0,(ascending_)?Qt::AscendingOrder:Qt::DescendingOrder);
 }
 
 void TimelineSortModel::setPathFilter(QString pathFilter)
