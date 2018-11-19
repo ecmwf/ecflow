@@ -12,7 +12,9 @@
 #include <QtGlobal>
 #include <QFileInfo>
 #include <QTime>
+#include <QButtonGroup>
 
+#include "IconProvider.hpp"
 #include "FileInfoLabel.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
@@ -94,6 +96,16 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->pathFilterLe->setClearButtonEnabled(true);
 #endif
 
+    ui_->sortCombo->addItem("Sort by path","path");
+    ui_->sortCombo->addItem("Sort by time","time");
+    ui_->sortCombo->setCurrentIndex(0);
+
+    ui_->sortUpTb->setChecked(true);
+    QButtonGroup *sortGr = new QButtonGroup(this);
+    sortGr->addButton(ui_->sortUpTb,0);
+    sortGr->addButton(ui_->sortDownTb,1);
+    sortGr->setExclusive(true);
+
     ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
     ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
 
@@ -107,6 +119,12 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     connect(ui_->taskOnlyTb,SIGNAL(clicked(bool)),
             this,SLOT(slotTaskOnly(bool)));
+
+    connect(ui_->sortCombo,SIGNAL(currentIndexChanged(int)),
+            this,SLOT(slotSortMode(int)));
+
+    connect(sortGr,SIGNAL(buttonClicked(int)),
+            this,SLOT(slotSortOrderChanged(int)));
 
     connect(ui_->fromTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
             this,SLOT(slotStartChanged(QDateTime)));
@@ -315,6 +333,21 @@ void TimelineWidget::slotTaskOnly(bool taskFilter)
 void TimelineWidget::slotPathFilter(QString pattern)
 {
     sortModel_->setPathFilter(pattern);
+}
+
+void TimelineWidget::slotSortMode(int)
+{
+    int idx=ui_->sortCombo->currentIndex();
+    if(idx == 0)
+        sortModel_->setSortMode(TimelineSortModel::PathSortMode);
+    else if (idx == 1)
+        sortModel_->setSortMode(TimelineSortModel::TimeSortMode);
+}
+
+void TimelineWidget::slotSortOrderChanged(int)
+{
+    bool ascending=ui_->sortUpTb->isChecked();
+    sortModel_->setSortDirection(ascending);
 }
 
 void TimelineWidget::slotStartChanged(const QDateTime& dt)
@@ -598,10 +631,18 @@ void TimelineWidget::determineNodeTypes()
 
 void TimelineWidget::writeSettings(VComboSettings* vs)
 {
+    int cbIdx=ui_->sortCombo->currentIndex();
+    if(cbIdx != -1)
+    {
+        vs->put("sortMode", ui_->sortCombo->currentData().toString().toStdString());
+    }
+
     view_->writeSettings(vs);
 }
 
 void TimelineWidget::readSettings(VComboSettings* vs)
 {
+    QString cbMode=QString::fromStdString(vs->get<std::string>("sortMode",std::string()));
+    ViewerUtil::initComboBoxByData(cbMode,ui_->sortCombo);
     view_->readSettings(vs);
 }

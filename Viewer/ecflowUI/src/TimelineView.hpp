@@ -139,7 +139,7 @@ class TimelineHeader : public QHeaderView
 Q_OBJECT
 
 public:
-    explicit TimelineHeader(QWidget *parent=0);
+    explicit TimelineHeader(QTreeView *parent=0);
 
     QSize sizeHint() const;
     void setModel(QAbstractItemModel *model);
@@ -179,6 +179,7 @@ protected:
     qint64 zoomPeriodInSec(QPoint startX,QPoint endX) const;
     void checkActionState();
 
+    QTreeView* view_;
     QDateTime startDate_;
     QDateTime endDate_;
     QPixmap customPix_;

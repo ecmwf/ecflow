@@ -29,6 +29,7 @@ public:
     const std::string& path() const {return path_;}
     Type type() const {return type_;}
     void setType(Type t) {type_ = t;}
+    size_t sortIndex() const {return sortIndex_;}
     bool isTask() const {return type_ ==  TaskType;}
     void add(unsigned char status,unsigned int time);
 
@@ -38,6 +39,7 @@ public:
 //protected:
     std::string path_;
     Type type_;
+    size_t sortIndex_;
     std::vector<unsigned int> start_;
     std::vector<unsigned int> end_;
     std::vector<unsigned char> status_;
@@ -77,6 +79,7 @@ protected:
     TimelineItem::Type guessNodeType(const std::string& line,
                                       const std::string& status,
                                       std::string::size_type next_ws) const;
+    void sortByPath();
 
     std::vector<TimelineItem> items_;
     int numOfRows_;

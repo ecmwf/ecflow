@@ -241,6 +241,8 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
         numOfRows_++;
     }
 
+    sortByPath();
+
     loadStatus_=LoadDone;
 
     //guessNodeType();
@@ -309,3 +311,24 @@ bool TimelineData::indexOfItem(const std::string& p,size_t& idx)
     return false;
 }
 
+bool sortVecFunction(const std::pair<size_t,std::string>& a, const std::pair<size_t,std::string>& b)
+{
+    return a.second < b.second;
+}
+
+void TimelineData::sortByPath()
+{
+    std::vector<std::pair<size_t, std::string> > sortVec;
+    for(size_t i = 0; i < items_.size(); i++)
+    {
+        sortVec.push_back(std::make_pair(i,items_[i].path_));
+    }
+
+    std::sort(sortVec.begin(), sortVec.end(),sortVecFunction);
+
+    for(size_t i = 0; i < items_.size(); i++)
+    {
+        int idx=sortVec[i].first;
+        items_[idx].sortIndex_=items_.size()-i-1;
+    }
+}

@@ -80,27 +80,36 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
     {
         if(index.column() == 0)
             return QString::fromStdString(data_->items()[row].path());
-#if 0
-        else if(index.column() == 1)
-        {
-            switch(data_->items()[row].type())
-            {
-            case TimelineItem::TaskType:
-                return "task";
-            case TimelineItem::FamilyType:
-                return "family";
-            case TimelineItem::SuiteType:
-                return "suite";
-            case TimelineItem::ServerType:
-                return "server";
-            default:
-                return "???";
-            }
-        }
-
-#endif
         else
             return row;
+    }
+
+    //sort roles
+    else if(role  == PathSortRole)
+    {
+        if(index.column() == 0)
+            return static_cast<qint64>(data_->items()[row].sortIndex());
+        else
+            return QVariant();
+    }
+
+    //sort roles
+    else if(role  == TimeSortRole)
+    {
+        unsigned int start=startDate_.toMSecsSinceEpoch()/1000;
+        unsigned int end=endDate_.toMSecsSinceEpoch()/1000;
+        for(size_t i=0; i <= data_->items()[row].size(); i++)
+        {
+            unsigned int val=data_->items()[row].start_[i];
+            if(val >= start)
+            {
+                if(val <=end)
+                    return val;
+                else
+                    return end+2;
+            }
+        }
+        return end+1;
     }
 
     //filter
@@ -158,6 +167,24 @@ QModelIndex TimelineModel::parent(const QModelIndex &child) const
     return QModelIndex();
 }
 
+void TimelineModel::setPeriod(QDateTime t1,QDateTime t2)
+{
+    startDate_=t1;
+    endDate_=t2;
+}
+
+void TimelineModel::setStartDate(QDateTime t)
+{
+    startDate_=t;
+    Q_EMIT periodChanged();
+}
+
+void TimelineModel::setEndDate(QDateTime t)
+{
+    endDate_=t;
+    Q_EMIT periodChanged();
+}
+
 //===========================================
 //
 // TimelineSortModel
@@ -168,11 +195,13 @@ TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
         QSortFilterProxyModel(parent),
         tlModel_(tlModel),
         skipSort_(false),
+        sortMode_(PathSortMode),
         taskFilter_(false)
 {
     Q_ASSERT(tlModel_);
-    //connect(nodeModel_,SIGNAL(filterChanged()),
-    //		this,SLOT(slotFilterChanged()));
+
+    connect(tlModel_,SIGNAL(periodChanged()),
+            this,SLOT(slotPeriodChanged()));
 
     QSortFilterProxyModel::setSourceModel(tlModel_);
 
@@ -183,16 +212,30 @@ TimelineSortModel::~TimelineSortModel()
 {
 }
 
-#if 0
-void TimelineSortModel::selectionChanged(QModelIndexList lst)
+void TimelineSortModel::slotPeriodChanged()
 {
-    QModelIndexList lstm;
-    Q_FOREACH(QModelIndex idx,lst)
-        lstm << mapToSource(idx);
-
-    nodeModel_->selectionChanged(lstm);
+    if(sortMode_ == TimeSortMode)
+    {
+        sort(0,sortOrder());
+        //invalidate();
+    }
 }
-#endif
+
+
+void TimelineSortModel::setSortMode(SortMode mode)
+{
+    if(sortMode_ != mode)
+    {
+        sortMode_ = mode;
+        sort(0,sortOrder());
+        //invalidate();
+    }
+}
+
+void TimelineSortModel::setSortDirection(bool ascending)
+{
+    sort(0,ascending?Qt::AscendingOrder:Qt::DescendingOrder);
+}
 
 void TimelineSortModel::setPathFilter(QString pathFilter)
 {
@@ -215,13 +258,17 @@ bool TimelineSortModel::lessThan(const QModelIndex &left,
     if(skipSort_)
         return true;
 
-    if(left.column() == 0)
+    if(sortMode_ == PathSortMode)
     {
-        QVariant leftData = tlModel_->data(left);
-        QVariant rightData = tlModel_->data(right);
-
-        return leftData.toString() < rightData.toString();
+        return tlModel_->data(left,TimelineModel::PathSortRole).toInt() <
+               tlModel_->data(right,TimelineModel::PathSortRole).toInt();
     }
+    else if(sortMode_ == TimeSortMode)
+    {
+         return tlModel_->data(left,TimelineModel::TimeSortRole).toUInt() <
+               tlModel_->data(right,TimelineModel::TimeSortRole).toUInt();
+    }
+
     return true;
 }
 

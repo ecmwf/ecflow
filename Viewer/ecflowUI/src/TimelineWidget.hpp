@@ -54,6 +54,8 @@ protected Q_SLOTS:
    void slotEndChanged(const QDateTime&);
    void slotPathFilter(QString);
    void slotTaskOnly(bool);
+   void slotSortMode(int);
+   void slotSortOrderChanged(int);
    void slotPeriodSelectedInView(QDateTime,QDateTime);
    void slotPeriodBeingZoomedInView(QDateTime,QDateTime);
    void slotLookup(QString);
@@ -86,6 +88,8 @@ private:
     TimelineView* view_;
     bool ignoreTimeEdited_;
     bool beingCleared_;
+    int sortUpPixId_;
+    int sortDownPixId_;
 
     bool typesDetermined_;
     bool localLog_;

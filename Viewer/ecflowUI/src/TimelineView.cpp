@@ -47,7 +47,7 @@ TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     model_(model),
     fm_(QFont()),
     borderPen_(QPen(QColor(216,216,216))),    
-    topPadding_(3),
+    topPadding_(2),
     bottomPadding_(2),
     completeId_(100000)
 {
@@ -59,15 +59,6 @@ TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     {
         completeId_=vn->id();
     }
-
-    //columns_=ModelColumn::def("table_columns");
-
-   // nodeBox_=new TableNodeDelegateBox;
-   // attrBox_=new TableAttrDelegateBox;
-
-   //nodeBox_->adjust(font_);
-    //attrFont_=font_;
-    //attrBox_->adjust(attrFont_);
 
     //Property
     if(propVec.empty())
@@ -385,8 +376,8 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     //We enable sorting but do not want to perform it immediately
     //setSortingEnabledNoExec(true);
 
-    setSortingEnabled(false);
-    //sortByColumn(-1,Qt::AscendingOrder);
+    //setSortingEnabled(true);
+    //sortByColumn(0,Qt::AscendingOrder);
 
     setAutoScroll(true);
     setAllColumnsShowFocus(true);
@@ -702,6 +693,7 @@ void TimelineView::setZoomActions(QAction* zoomInAction,QAction* zoomOutAction)
 void TimelineView::periodSelectedInHeader(QDateTime t1,QDateTime t2)
 {
     delegate_->setPeriod(t1,t2);
+    model_->tlModel()->setPeriod(t1,t2);
     rerender();
     Q_EMIT periodSelected(t1,t2);
 }
@@ -709,6 +701,7 @@ void TimelineView::periodSelectedInHeader(QDateTime t1,QDateTime t2)
 void TimelineView::setStartDate(QDateTime t)
 {
     delegate_->setStartDate(t);
+    model_->tlModel()->setStartDate(t);
     header_->setStartDate(t);
     rerender();
     UiLog().dbg() << "startdate" << t;
@@ -717,6 +710,7 @@ void TimelineView::setStartDate(QDateTime t)
 void TimelineView::setEndDate(QDateTime t)
 {
     delegate_->setEndDate(t);
+    model_->tlModel()->setEndDate(t);
     header_->setEndDate(t);
     rerender();
 }
@@ -724,6 +718,7 @@ void TimelineView::setEndDate(QDateTime t)
 void TimelineView::setPeriod(QDateTime t1,QDateTime t2)
 {
     delegate_->setPeriod(t1,t2);
+    model_->tlModel()->setPeriod(t1,t2);
     header_->setPeriod(t1,t2);
     rerender();
 }
@@ -770,8 +765,9 @@ void TimelineView::writeSettings(VSettings* vs)
 // TimelineHeader
 //=========================================
 
-TimelineHeader::TimelineHeader(QWidget *parent) :
+TimelineHeader::TimelineHeader(QTreeView *parent) :
     QHeaderView(Qt::Horizontal, parent),
+    view_(parent),
     fm_(QFont()),  
     timelineCol_(50,50,50),
     dateTextCol_(33,95,161),
@@ -785,6 +781,8 @@ TimelineHeader::TimelineHeader(QWidget *parent) :
     zoomInAction_(0),
     zoomOutAction_(0)
 {
+    Q_ASSERT(view_);
+
     setMouseTracking(true);
 
     setStretchLastSection(true);
@@ -871,7 +869,13 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
     }
  #endif
     else
+    {
+        bool canSort=(logicalIndexAt(event->pos()) != timelineSection_);
+        if(view_->isSortingEnabled() != canSort)
+            view_->setSortingEnabled(canSort);
+
         QHeaderView::mousePressEvent(event);
+    }
 }
 
 void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
@@ -1129,13 +1133,13 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
 
     painter->restore();
 
-
     int rightPos=rect.right();
     if(isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
         opt.sortIndicator = (sortIndicatorOrder() == Qt::AscendingOrder)
                             ? QStyleOptionHeader::SortDown : QStyleOptionHeader::SortUp;
 
-    if (opt.sortIndicator != QStyleOptionHeader::None)
+    //We only show the sort indicator on the first column
+    if (logicalIndex == 0 && opt.sortIndicator != QStyleOptionHeader::None)
         {
             QStyleOptionHeader subopt = opt;
             subopt.rect = style()->subElementRect(QStyle::SE_HeaderArrow, &opt, this);
