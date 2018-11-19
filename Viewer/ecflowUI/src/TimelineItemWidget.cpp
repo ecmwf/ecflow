@@ -68,7 +68,13 @@ void TimelineItemWidget::reload(VInfo_ptr info)
     info_=info;
 
     if(!same)
+    {
         load();
+    }
+    else if(info_)
+    {
+        w_->selectPathInView(info_->nodePath());
+    }
 }
 
 void TimelineItemWidget::load()
@@ -103,6 +109,11 @@ void TimelineItemWidget::load()
             }
         }
     }
+
+    if(info_)
+    {
+       w_->selectPathInView(info_->nodePath());
+    }
 }
 
 void TimelineItemWidget::clearContents()
@@ -119,6 +130,12 @@ bool TimelineItemWidget::hasSameContents(VInfo_ptr info)
         return info->server() == info_->server();
     }
     return false;
+}
+
+void TimelineItemWidget::notifyInfoChanged(const std::string& path)
+{
+    if(info_)
+        w_->selectPathInView(path);
 }
 
 void TimelineItemWidget::serverSyncFinished()

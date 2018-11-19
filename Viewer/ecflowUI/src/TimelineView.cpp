@@ -45,10 +45,14 @@ static std::vector<std::string> propVec;
 
 TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     model_(model),
-    borderPen_(QPen(QColor(216,216,216))),
+    fm_(QFont()),
+    borderPen_(QPen(QColor(216,216,216))),    
+    yPadding_(3),
     completeId_(100000)
 {
     Q_ASSERT(model_);
+
+    fm_=QFontMetrics(font_);
 
     if(VNState* vn=VNState::find("complete"))
     {
@@ -96,9 +100,7 @@ void TimelineDelegate::updateSettings()
         if(font_ != newFont)
         {
             font_=newFont;
-            //attrFont_=newFont;
-            //nodeBox_->adjust(font_);
-            //attrBox_->adjust(attrFont_);
+            fm_=QFontMetrics(font_);
             Q_EMIT sizeHintChangedGlobal();
         }
     }
@@ -110,7 +112,7 @@ void TimelineDelegate::updateSettings()
 QSize TimelineDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
     QSize size=QStyledItemDelegate::sizeHint(option,index);
-    //return QSize(size.width(),nodeBox_->sizeHintCache.height());
+    return QSize(size.width(),fm_.height() +2 * yPadding_);
     return size;
 }
 
@@ -129,6 +131,8 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
     const QStyle *style = vopt.widget ? vopt.widget->style() : QApplication::style();
     const QWidget* widget = vopt.widget;
+
+    bool selected=option.state & QStyle::State_Selected;
 
     //Save painter state
     painter->save();
@@ -149,13 +153,22 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
                           bgRect.x()+bgRect.width()-1,bgRect.bottom());
 
         QString text=index.data(Qt::DisplayRole).toString();
-        QFontMetrics fm(font_);
         //QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
-        QRect textRect = bgRect.adjusted(2,0,-2,0);
-        text=fm.elidedText(text,Qt::ElideMiddle,textRect.width());
+        QRect textRect = bgRect.adjusted(2,0,-3,0);
+        text=fm_.elidedText(text,Qt::ElideMiddle,textRect.width());
+        textRect.setWidth(fm_.width(text));
         painter->setFont(font_);
         painter->setPen(Qt::black);        
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+
+        if(selected)
+        {
+            QRect sr=textRect;
+            sr.setX(option.rect.x()+1);
+            sr.adjust(0,yPadding_-1,0,-yPadding_+1);
+            painter->setPen(QPen(Qt::black,2));
+            painter->drawRect(sr);
+        }
     }
 
     //Render the horizontal border for rows. We only render the top border line.
@@ -372,6 +385,7 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     setSortingEnabled(false);
     //sortByColumn(-1,Qt::AscendingOrder);
 
+    setAutoScroll(true);
     setAllColumnsShowFocus(true);
     setUniformRowHeights(true);
     setAlternatingRowColors(false);
@@ -484,7 +498,6 @@ QModelIndexList TimelineView::selectedList()
 void TimelineView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
     QTreeView::selectionChanged(selected, deselected);
-
 
 #if 0
     QModelIndexList lst=selectedIndexes();

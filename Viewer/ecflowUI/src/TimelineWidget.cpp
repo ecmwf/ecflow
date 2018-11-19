@@ -375,6 +375,23 @@ void TimelineWidget::slotCopyPath(QString nodePath)
     ViewerUtil::toClipboard(serverName_ + ":/" + nodePath);
 }
 
+void TimelineWidget::selectPathInView(const std::string& p)
+{
+    QModelIndex idx=sortModel_->mapToSource(view_->currentIndex());
+    if(idx.isValid() && idx.row() < static_cast<int>(data_->size()))
+    {
+        if(data_->items()[idx.row()].path() == p)
+            return;
+    }
+
+    size_t pos=0;
+    if(data_->indexOfItem(p,pos))
+    {
+        QModelIndex idx=sortModel_->mapFromSource(model_->index(pos,0));
+        view_->setCurrentIndex(idx);
+    }
+}
+
 void TimelineWidget::checkButtonState()
 {
      bool fromStart=(ui_->fromTimeEdit->dateTime() == data_->qStartTime());

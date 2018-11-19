@@ -40,6 +40,7 @@ public:
     void load(QString serverName, QString host, QString port, QString logFile,
               const std::vector<std::string>& suites);
     QString logFile() const {return logFile_;}
+    void selectPathInView(const std::string& p);
 
     void writeSettings(VComboSettings* vs);
     void readSettings(VComboSettings* vs);

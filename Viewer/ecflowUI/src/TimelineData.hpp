@@ -64,12 +64,12 @@ public:
     void setItemType(int index,TimelineItem::Type type);
     bool isFullRead() const {return fullRead_;}
     LoadStatus loadStatus() const {return loadStatus_;}
+    bool indexOfItem(const std::string&,size_t&);
 
 Q_SIGNALS:
     void loadProgress(size_t current,size_t total);
 
 protected:
-    bool indexOfItem(const std::string&,size_t&);
     void guessNodeType();
     TimelineItem::Type guessNodeType(const std::string& line,const std::string& name,
                                       const std::string& status,

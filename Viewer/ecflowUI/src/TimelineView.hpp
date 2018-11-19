@@ -64,7 +64,9 @@ protected:
     TimelineModel* model_;
     PropertyMapper* prop_;
     QFont font_;
+    QFontMetrics fm_;
     QPen borderPen_;
+    int yPadding_;
     QDateTime startDate_;
     QDateTime endDate_;
     unsigned int completeId_;

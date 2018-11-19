@@ -146,7 +146,9 @@ void InfoPanelItem::setActive(bool active)
 void InfoPanelItem::setSelected(bool selected,VInfo_ptr info)
 {
     if(selected_ == selected)
+    {
         return;
+    }
 
     ChangeFlags flags(SelectedChanged);
     selected_=selected;
