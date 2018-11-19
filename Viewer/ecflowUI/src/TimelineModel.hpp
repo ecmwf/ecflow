@@ -65,6 +65,7 @@ protected:
     bool skipSort_;
     QString pathFilter_;
     bool taskFilter_;
+    QRegExp pathFilterRx_;
 };
 
 

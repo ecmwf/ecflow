@@ -197,12 +197,15 @@ void TimelineSortModel::selectionChanged(QModelIndexList lst)
 void TimelineSortModel::setPathFilter(QString pathFilter)
 {
     pathFilter_=pathFilter;
+    pathFilterRx_=QRegExp(pathFilter_);
+    pathFilterRx_.setPatternSyntax(QRegExp::Wildcard);
+    pathFilterRx_.setCaseSensitivity(Qt::CaseInsensitive);
     invalidate();
 }
 
 void TimelineSortModel::setTaskFilter(bool taskFilter)
 {
-    taskFilter_=taskFilter;
+    taskFilter_=taskFilter;    
     invalidate();
 }
 
@@ -227,7 +230,7 @@ bool TimelineSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &/*sou
     bool matched=true;
     if(!pathFilter_.isEmpty())
     {
-        matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilter_);
+        matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilterRx_);
     }
 
     if(matched && taskFilter_)
