@@ -66,7 +66,8 @@ protected:
     QFont font_;
     QFontMetrics fm_;
     QPen borderPen_;
-    int yPadding_;
+    int topPadding_;
+    int bottomPadding_;
     QDateTime startDate_;
     QDateTime endDate_;
     unsigned int completeId_;

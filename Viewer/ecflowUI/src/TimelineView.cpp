@@ -47,7 +47,8 @@ TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     model_(model),
     fm_(QFont()),
     borderPen_(QPen(QColor(216,216,216))),    
-    yPadding_(3),
+    topPadding_(3),
+    bottomPadding_(2),
     completeId_(100000)
 {
     Q_ASSERT(model_);
@@ -112,7 +113,7 @@ void TimelineDelegate::updateSettings()
 QSize TimelineDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
     QSize size=QStyledItemDelegate::sizeHint(option,index);
-    return QSize(size.width(),fm_.height() +2 * yPadding_);
+    return QSize(size.width(),fm_.height() + topPadding_ + bottomPadding_);
     return size;
 }
 
@@ -154,7 +155,7 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
 
         QString text=index.data(Qt::DisplayRole).toString();
         //QRect textRect = style->subElementRect(QStyle::SE_ItemViewItemText, &vopt,widget);
-        QRect textRect = bgRect.adjusted(2,0,-3,0);
+        QRect textRect = bgRect.adjusted(2,topPadding_,-3,-bottomPadding_);
         text=fm_.elidedText(text,Qt::ElideMiddle,textRect.width());
         textRect.setWidth(fm_.width(text));
         painter->setFont(font_);
@@ -165,7 +166,9 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
         {
             QRect sr=textRect;
             sr.setX(option.rect.x()+1);
-            sr.adjust(0,yPadding_-1,0,-yPadding_+1);
+            sr.setY(option.rect.y()+2);
+            sr.setBottom(option.rect.bottom()-2);
+            sr.setRight(textRect.x()+textRect.width()+1);
             painter->setPen(QPen(Qt::black,2));
             painter->drawRect(sr);
         }
