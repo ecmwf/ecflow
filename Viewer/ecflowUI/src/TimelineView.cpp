@@ -376,8 +376,8 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     //We enable sorting but do not want to perform it immediately
     //setSortingEnabledNoExec(true);
 
-    //setSortingEnabled(true);
-    //sortByColumn(0,Qt::AscendingOrder);
+    //we need a custom sorting
+    setSortingEnabled(false);
 
     setAutoScroll(true);
     setAllColumnsShowFocus(true);
@@ -767,7 +767,6 @@ void TimelineView::writeSettings(VSettings* vs)
 
 TimelineHeader::TimelineHeader(QTreeView *parent) :
     QHeaderView(Qt::Horizontal, parent),
-    view_(parent),
     fm_(QFont()),  
     timelineCol_(50,50,50),
     dateTextCol_(33,95,161),
@@ -781,8 +780,6 @@ TimelineHeader::TimelineHeader(QTreeView *parent) :
     zoomInAction_(0),
     zoomOutAction_(0)
 {
-    Q_ASSERT(view_);
-
     setMouseTracking(true);
 
     setStretchLastSection(true);
@@ -870,10 +867,6 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
  #endif
     else
     {
-        bool canSort=(logicalIndexAt(event->pos()) != timelineSection_);
-        if(view_->isSortingEnabled() != canSort)
-            view_->setSortingEnabled(canSort);
-
         QHeaderView::mousePressEvent(event);
     }
 }

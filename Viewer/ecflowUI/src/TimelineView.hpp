@@ -179,7 +179,6 @@ protected:
     qint64 zoomPeriodInSec(QPoint startX,QPoint endX) const;
     void checkActionState();
 
-    QTreeView* view_;
     QDateTime startDate_;
     QDateTime endDate_;
     QPixmap customPix_;
