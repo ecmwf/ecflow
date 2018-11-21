@@ -93,6 +93,10 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
     //Save painter state
     painter->save();
 
+    QColor bg=index.data(Qt::UserRole).value<QColor>();
+    if(bg.isValid())
+        painter->fillRect(vopt.rect,bg);
+
     if(index.column() == 1)
     {
          renderStatus(painter,index,vopt);
@@ -100,7 +104,7 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 
     //rest of the columns
     else
-    {
+    {      
         QString text=index.data(Qt::DisplayRole).toString();
         QRect textRect = vopt.rect;
         textRect.setX(textRect.x()+4);
