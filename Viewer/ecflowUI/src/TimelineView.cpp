@@ -386,6 +386,8 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     setMouseTracking(true);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
 
+    QTreeView::setModel(model_);
+
     //!!!!We need to do it because:
     //The background colour between the views left border and the nodes cannot be
     //controlled by delegates or stylesheets. It always takes the QPalette::Highlight
@@ -434,8 +436,6 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
 
     /*connect(header(),SIGNAL(sectionMoved(int,int,int)),
                 this, SLOT(slotMessageTreeColumnMoved(int,int,int)));*/
-
-    QTreeView::setModel(model_);
 
     //Create delegate to the view
     delegate_=new TimelineDelegate(model_->tlModel(),this);
@@ -641,6 +641,12 @@ void TimelineView::copyPath(const QModelIndex &indexClicked)
     Q_EMIT(copyPathRequested(nodePath));
 }
 
+void TimelineView::slotHzScrollbar(int,int)
+{
+    if(QScrollBar *sb=horizontalScrollBar())
+        sb->setValue(sb->maximum());
+}
+
 void TimelineView::slotViewCommand(VInfo_ptr info,QString cmd)
 {
 }
@@ -783,6 +789,10 @@ TimelineHeader::TimelineHeader(QTreeView *parent) :
     setMouseTracking(true);
 
     setStretchLastSection(true);
+
+    connect(this,SIGNAL(sectionCountChanged(int,int)),
+            this,SLOT(adjustSectionResizeMode(int,int)));
+
     connect(this, SIGNAL(sectionResized(int, int, int)),
              this, SLOT(slotSectionResized(int)));
 
@@ -1572,7 +1582,7 @@ void TimelineHeader::checkActionState()
 {
     if(zoomInAction_)
     {
-        zoomOutAction_->setEnabled(canBeZoomed() && zoomHistory_.count() >= 2);
+        zoomOutAction_->setEnabled(zoomHistory_.count() >= 2);
         zoomInAction_->setEnabled(canBeZoomed());
     }
 }

@@ -104,6 +104,7 @@ protected Q_SLOTS:
     void slotSizeHintChangedGlobal();
     void slotRerender();
     void periodSelectedInHeader(QDateTime t1,QDateTime t2);
+    void slotHzScrollbar(int,int);
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
