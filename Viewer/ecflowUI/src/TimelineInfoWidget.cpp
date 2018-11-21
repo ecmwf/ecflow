@@ -158,7 +158,7 @@ QVariant TimelineInfoModel::data( const QModelIndex& index, int role ) const
         if(viewStartDateSec_ > data_->start_[row] ||
            viewEndDateSec_ < data_->start_[row])
         {
-            return QColor(226,226,226);
+            return QColor(240,240,240,116);
         }
     }
 
@@ -266,6 +266,10 @@ void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, i
         ui_->timeTree->resizeColumnToContents(1);
         columnsAdjusted_=true;
     }
+
+    int first=data_.firstInPeriod(viewStartDate,viewEndDate);
+    if(first != -1)
+        ui_->timeTree->setCurrentIndex(model_->index(first-1,0));
 }
 
 void TimelineInfoWidget::readSettings(QSettings& settings)

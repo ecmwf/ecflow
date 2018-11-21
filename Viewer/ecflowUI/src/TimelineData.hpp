@@ -32,6 +32,20 @@ public:
     size_t sortIndex() const {return sortIndex_;}
     bool isTask() const {return type_ ==  TaskType;}
     void add(unsigned char status,unsigned int time);
+    int firstInPeriod(QDateTime startDt,QDateTime endDt) const
+    {
+        unsigned int start=fromQDateTime(startDt);
+        unsigned int end=fromQDateTime(startDt);
+        for(size_t i=0; i < start_.size(); i++)
+        {
+            if(start_[i] >= start && start_[i] <= end)
+                return static_cast<int>(i);
+        }
+        return -1;
+    }
+
+    static unsigned int fromQDateTime(QDateTime dt)
+          {return dt.toMSecsSinceEpoch()/1000;}
 
     static QDateTime toQDateTime(unsigned int t)
           {return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t)*1000,Qt::UTC);}
