@@ -193,6 +193,7 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
     int xpNext=rightEdge+2;
 
     const TimelineItem& item=data->items()[row];
+    int extendedRight=-1;
 
     for(size_t i=0; i < item.size(); i++)
     {                              
@@ -233,7 +234,7 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
                 hasRect=true;
                 hasGrad=true;
                 xpLeft=xp;
-                xpRight=(xpNext <= rightEdge)?xpNext:rightEdge;
+                xpRight=(xpNext <= rightEdge)?xpNext:rightEdge;                
                 lighter=(vn->id() == completeId_);
                 fillCol=vn->colour();
             }
@@ -263,18 +264,21 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
 
         if(hasRect)
         {
-            /*QBrush fillBrush(fillCol);
-            if(hasGrad)
+            //small rects are extended and use no gradient
+            if(xpRight-xpLeft < 5)
             {
-                QLinearGradient gr;
-                gr.setCoordinateMode(QGradient::ObjectBoundingMode);
-                gr.setStart(0,0);
-                gr.setFinalStop(1,0);
-                fillCol.dark(110);
-                gr.setColorAt(0,fillCol);
-                fillCol.setAlpha(128);
-                gr.setColorAt(1,fillCol);
-                fillBrush=QBrush(gr);*/
+                hasGrad=false;
+                xpRight=xpLeft+4;
+                extendedRight=xpRight;
+            }
+            else
+            {
+                if(extendedRight > xpLeft)
+                {
+                    xpLeft=extendedRight;
+                }
+                extendedRight = -1;
+            }
 
             drawCell(painter,QRect(xpLeft,option.rect.y(),xpRight-xpLeft+1,option.rect.height()-1),
                      fillCol,hasGrad,lighter);
@@ -297,10 +301,15 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
 
 void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const
 {
+    QColor endCol;
     if(lighter)
     {
-        fillCol.light(120);
-        fillCol.setAlpha(150);
+        fillCol.light(130);
+        fillCol.setAlpha(110);
+    }
+    else
+    {
+        fillCol.dark(110);
     }
 
     QBrush fillBrush(fillCol);
@@ -310,9 +319,8 @@ void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool ha
         gr.setCoordinateMode(QGradient::ObjectBoundingMode);
         gr.setStart(0,0);
         gr.setFinalStop(1,0);
-        fillCol.dark(110);
         gr.setColorAt(0,fillCol);
-        fillCol.setAlpha(lighter?80:128);
+        fillCol.setAlpha(lighter?40:115);
         gr.setColorAt(1,fillCol);
         fillBrush=QBrush(gr);
     }
