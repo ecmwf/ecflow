@@ -192,7 +192,9 @@ void TimelineWidget::clear()
     logTransferred_=false;
     transferredAt_=QDateTime();
 
-    tmpLogFile_.reset(); //TODO: we need to delete the file!!!
+    ui_->pathFilterLe->clear();
+
+    tmpLogFile_.reset();
     //ui_->startTe->clear();
     //ui_->endTe->clear();
 
