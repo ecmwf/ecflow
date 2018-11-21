@@ -26,6 +26,16 @@ namespace Ui {
     class TimelineWidget;
 }
 
+struct TimelinePrevState
+{
+    TimelinePrevState() : valid(false), fullStart(false), fullEnd(false) {}
+    bool valid;
+    QDateTime startDt;
+    QDateTime endDt;
+    bool fullStart;
+    bool fullEnd;
+};
+
 //the main widget containing all components
 class TimelineWidget : public QWidget
 {
@@ -35,7 +45,7 @@ public:
     explicit TimelineWidget(QWidget *parent=0);
     ~TimelineWidget();
 
-    void clear();
+    void clear(bool inReload=false);
     void load(QString logFile);
     void load(QString serverName, QString host, QString port, QString logFile,
               const std::vector<std::string>& suites);
@@ -97,6 +107,8 @@ private:
     bool logTransferred_;
     VFileTransfer* fileTransfer_;
     QDateTime transferredAt_;
+
+    TimelinePrevState prevState_;
 };
 
 #endif // TIMELINEWIDGET_HPP

@@ -164,7 +164,7 @@ TimelineWidget::~TimelineWidget()
         delete data_;
 }
 
-void TimelineWidget::clear()
+void TimelineWidget::clear(bool inReload)
 {   
     beingCleared_=true;
     if(fileTransfer_)
@@ -192,7 +192,11 @@ void TimelineWidget::clear()
     logTransferred_=false;
     transferredAt_=QDateTime();
 
-    ui_->pathFilterLe->clear();
+    if(!inReload)
+    {
+        ui_->pathFilterLe->clear();
+        prevState_.valid=false;
+    }
 
     tmpLogFile_.reset();
     //ui_->startTe->clear();
@@ -449,7 +453,22 @@ void TimelineWidget::load(QString logFile)
 void TimelineWidget::load(QString serverName, QString host, QString port, QString logFile,
                           const std::vector<std::string>& suites)
 {
-    clear();
+    //if it is a reload we remember the current period
+    if(!serverName.isEmpty() && serverName == serverName_ && host == host_ && port == port_)
+    {
+        prevState_.valid=true;
+        prevState_.startDt=ui_->fromTimeEdit->dateTime();
+        prevState_.endDt=ui_->toTimeEdit->dateTime();
+        prevState_.fullStart=(prevState_.startDt == data_->qStartTime());
+        prevState_.fullEnd=(prevState_.endDt == data_->qEndTime());
+
+        clear(true);
+    }
+    else
+    {
+        prevState_.valid=false;
+        clear();
+    }
 
     if(logFile.isEmpty())
        return;
@@ -592,15 +611,44 @@ void TimelineWidget::loadCore(QString logFile)
 
     ViewerUtil::restoreOverrideCursor();
 
+    //set the period
+
+    ignoreTimeEdited_=true;
+
     ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
     ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());
-    ui_->fromTimeEdit->setDateTime(data_->qStartTime());
+
+    //try the set the previously used interval - for reload only
+    if(prevState_.valid)
+    {
+        if(prevState_.startDt <= data_->qStartTime() || prevState_.fullStart)
+            ui_->fromTimeEdit->setDateTime(data_->qStartTime());
+        else if(prevState_.startDt < data_->qEndTime())
+            ui_->fromTimeEdit->setDateTime(prevState_.startDt);
+    }
+    else
+    {
+        ui_->fromTimeEdit->setDateTime(data_->qStartTime());
+    }
 
     ui_->toTimeEdit->setMinimumDateTime(data_->qStartTime());
     ui_->toTimeEdit->setMaximumDateTime(data_->qEndTime());
-    ui_->toTimeEdit->setDateTime(data_->qEndTime());
 
-    view_->setPeriod(data_->qStartTime(),data_->qEndTime());
+    if(prevState_.valid)
+    {
+        if(prevState_.endDt >= data_->qEndTime() || prevState_.fullEnd)
+            ui_->toTimeEdit->setDateTime(data_->qEndTime());
+        else if(prevState_.endDt > data_->qStartTime())
+            ui_->toTimeEdit->setDateTime(prevState_.endDt);
+    }
+    else
+    {
+        ui_->toTimeEdit->setDateTime(data_->qEndTime());
+    }
+
+    ignoreTimeEdited_=false;
+
+    view_->setPeriod(ui_->fromTimeEdit->dateTime(),ui_->toTimeEdit->dateTime());
 
     model_->setData(data_);
 }
