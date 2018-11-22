@@ -112,7 +112,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         return end+1;
     }
 
-    //filter
+    //task filter
     else if(role == Qt::UserRole)
     {
         if(index.column() == 0)
@@ -120,6 +120,23 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         else
             return QVariant();
     }
+
+    //file = unchanged in period
+    else if(role  == UnchangedRole)
+    {
+        unsigned int start=startDate_.toMSecsSinceEpoch()/1000;
+        unsigned int end=endDate_.toMSecsSinceEpoch()/1000;
+        for(size_t i=0; i <= data_->items()[row].size(); i++)
+        {
+            unsigned int val=data_->items()[row].start_[i];
+            if(val >= start && val <= end)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
 
     return QVariant();
 }
@@ -171,6 +188,7 @@ void TimelineModel::setPeriod(QDateTime t1,QDateTime t2)
 {
     startDate_=t1;
     endDate_=t2;
+    Q_EMIT periodChanged();
 }
 
 void TimelineModel::setStartDate(QDateTime t)
@@ -197,7 +215,8 @@ TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
         skipSort_(false),
         sortMode_(PathSortMode),
         ascending_(true),
-        taskFilter_(false)
+        taskFilter_(false),
+        showChangedOnly_(true)
 {
     Q_ASSERT(tlModel_);
 
@@ -215,7 +234,7 @@ TimelineSortModel::~TimelineSortModel()
 
 void TimelineSortModel::slotPeriodChanged()
 {
-    if(sortMode_ == TimeSortMode)
+    if(sortMode_ == TimeSortMode || showChangedOnly_)
     {
         invalidate();
     }
@@ -251,6 +270,15 @@ void TimelineSortModel::setTaskFilter(bool taskFilter)
     invalidate();
 }
 
+void TimelineSortModel::setShowChangedOnly(bool h)
+{
+    if(showChangedOnly_ != h)
+    {
+        showChangedOnly_ = h;
+        invalidate();
+    }
+}
+
 bool TimelineSortModel::lessThan(const QModelIndex &left,
                                  const QModelIndex &right) const
 {
@@ -282,6 +310,11 @@ bool TimelineSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &/*sou
     if(matched && taskFilter_)
     {
         matched=tlModel_->data(tlModel_->index(sourceRow,0),Qt::UserRole).toBool();
+    }
+
+    if(matched && showChangedOnly_)
+    {
+        matched=(tlModel_->data(tlModel_->index(sourceRow,0),TimelineModel::UnchangedRole).toBool() == false);
     }
 
     return matched;

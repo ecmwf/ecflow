@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>733</width>
+    <width>764</width>
     <height>664</height>
    </rect>
   </property>
@@ -78,6 +78,22 @@
          <string>Show tasks only</string>
         </property>
         <property name="checkable">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="showChangedTb">
+        <property name="toolTip">
+         <string>Show only nodes with a state change in the current period</string>
+        </property>
+        <property name="text">
+         <string>Show changes only</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="autoRaise">
          <bool>true</bool>
         </property>
        </widget>

@@ -106,6 +106,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     sortGr->setExclusive(true);
     ui_->sortUpTb->setChecked(true);
 
+    ui_->showChangedTb->setChecked(true);
+
     ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
     ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
 
@@ -125,6 +127,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     connect(sortGr,SIGNAL(buttonClicked(int)),
             this,SLOT(slotSortOrderChanged(int)));
+
+    connect(ui_->showChangedTb,SIGNAL(clicked(bool)),
+            this,SLOT(slotShowChanged(bool)));
 
     connect(ui_->fromTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
             this,SLOT(slotStartChanged(QDateTime)));
@@ -156,6 +161,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     //forced init
     slotSortMode(0);
     slotSortOrderChanged(0);
+    slotShowChanged(true);
 }
 
 TimelineWidget::~TimelineWidget()
@@ -358,6 +364,11 @@ void TimelineWidget::slotSortOrderChanged(int)
 {
     bool ascending=ui_->sortUpTb->isChecked();
     sortModel_->setSortDirection(ascending);
+}
+
+void TimelineWidget::slotShowChanged(bool st)
+{
+    sortModel_->setShowChangedOnly(st);
 }
 
 void TimelineWidget::slotStartChanged(const QDateTime& dt)
@@ -692,6 +703,7 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
     }
 
     vs->put("sortOrder",ui_->sortUpTb->isChecked()?"asc":"desc");
+    vs->put("showChanged",ui_->showChangedTb->isChecked());
 
     view_->writeSettings(vs);
 }
@@ -714,6 +726,8 @@ void TimelineWidget::readSettings(VComboSettings* vs)
     {
         ui_->sortDownTb->setChecked(true);
     }
+
+    ui_->showChangedTb->setChecked(vs->get<bool>("showChanged",true));
 
     view_->readSettings(vs);
 }

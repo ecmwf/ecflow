@@ -21,7 +21,8 @@ class TimelineModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    enum CustomItemRole {PathSortRole = Qt::UserRole+1, TimeSortRole = Qt::UserRole+2};
+    enum CustomItemRole {PathSortRole = Qt::UserRole+1, TimeSortRole = Qt::UserRole+2,
+                        UnchangedRole = Qt::UserRole+3};
 
     explicit TimelineModel(QObject *parent=0);
     ~TimelineModel();
@@ -75,6 +76,7 @@ public:
     void setSkipSort(bool b) {skipSort_=b;}
     void setPathFilter(QString);
     void setTaskFilter(bool);
+    void setShowChangedOnly(bool);
 
 protected Q_SLOTS:
     void slotPeriodChanged();
@@ -90,6 +92,7 @@ protected:
     QString pathFilter_;
     bool taskFilter_;
     QRegExp pathFilterRx_;
+    bool showChangedOnly_;
 };
 
 

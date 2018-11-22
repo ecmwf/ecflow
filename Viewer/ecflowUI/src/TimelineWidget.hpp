@@ -66,6 +66,7 @@ protected Q_SLOTS:
    void slotTaskOnly(bool);
    void slotSortMode(int);
    void slotSortOrderChanged(int);
+   void slotShowChanged(bool st);
    void slotPeriodSelectedInView(QDateTime,QDateTime);
    void slotPeriodBeingZoomedInView(QDateTime,QDateTime);
    void slotLookup(QString);
