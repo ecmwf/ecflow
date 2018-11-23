@@ -31,7 +31,8 @@ void TimeStamp::now(std::string& time_stamp)
 {
    char t_fmt[255];
    time_t stamp = std::time( nullptr);
-   struct tm *tod = localtime(&stamp);   // cppcheck-suppress localtimeCalled
+   // cppcheck-suppress localtimeCalled
+   struct tm *tod = localtime(&stamp);
    sprintf(t_fmt, "[%02d:%02d:%02d %d.%d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
            tod->tm_mday, tod->tm_mon + 1, tod->tm_year + 1900);
 
@@ -40,9 +41,11 @@ void TimeStamp::now(std::string& time_stamp)
 
 void TimeStamp::now_in_brief(std::string& time_stamp)
 {
+
    char t_fmt[255];
    time_t stamp = time( nullptr);
-   struct tm *tod = localtime(&stamp);  // cppcheck-suppress localtimeCalled
+   // cppcheck-suppress localtimeCalled
+   struct tm *tod = localtime(&stamp);
    sprintf(t_fmt, "[%02d:%02d:%02d %d.%d] ", tod->tm_hour, tod->tm_min, tod->tm_sec,
            tod->tm_mday, tod->tm_mon + 1);
 
