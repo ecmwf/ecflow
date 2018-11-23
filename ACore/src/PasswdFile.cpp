@@ -288,7 +288,7 @@ bool PasswdFile::createWithAccess(
    lines.emplace_back("4.5.0");
 
    string line;
-   struct passwd * thePassWord = getpwuid ( getuid() );
+   struct passwd * thePassWord = getpwuid ( getuid() );  // cppcheck-suppress getpwuidCalled
    string user = string( thePassWord->pw_name ) ;  // equivalent to the login name
    line += user;
    line += " ";

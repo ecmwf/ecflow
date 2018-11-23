@@ -503,7 +503,7 @@ bool WhiteListFile::createWithReadAccess( const std::string& pathToFile,std::str
 	lines.emplace_back("4.4.14");
 
 	string user = "-";
-	struct passwd * thePassWord = getpwuid ( getuid() );
+	struct passwd * thePassWord = getpwuid ( getuid() );  // cppcheck-suppress getpwuidCalled
 	user += string( thePassWord->pw_name ) ;  // equivalent to the login name
 
  	lines.push_back(user);
@@ -517,7 +517,7 @@ bool WhiteListFile::createWithWriteAccess( const std::string& pathToFile , std::
 
 	lines.emplace_back("4.4.14");
 
- 	struct passwd * thePassWord = getpwuid ( getuid() );
+ 	struct passwd * thePassWord = getpwuid ( getuid() ); // cppcheck-suppress getpwuidCalled
 	string user( thePassWord->pw_name ) ;  // equivalent to the login name
 
  	lines.push_back(user);
