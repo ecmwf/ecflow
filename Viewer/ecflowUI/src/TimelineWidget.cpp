@@ -110,6 +110,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     sortGr->setExclusive(true);
     ui_->sortUpTb->setChecked(true);
 
+    ui_->taskOnlyTb->setChecked(false);
     ui_->showChangedTb->setChecked(true);
 
     ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
@@ -126,7 +127,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
             this,SLOT(slotPathFilter(QString)));
 
-    connect(ui_->taskOnlyTb,SIGNAL(clicked(bool)),
+    connect(ui_->taskOnlyTb,SIGNAL(toggled(bool)),
             this,SLOT(slotTaskOnly(bool)));
 
     connect(ui_->sortCombo,SIGNAL(currentIndexChanged(int)),
@@ -135,7 +136,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(sortGr,SIGNAL(buttonClicked(int)),
             this,SLOT(slotSortOrderChanged(int)));
 
-    connect(ui_->showChangedTb,SIGNAL(clicked(bool)),
+    connect(ui_->showChangedTb,SIGNAL(toggled(bool)),
             this,SLOT(slotShowChanged(bool)));
 
     connect(ui_->fromTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),

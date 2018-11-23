@@ -407,7 +407,7 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
     //bar
     QRect r(rect);
     r.setWidth(len);
-    r.adjust(1,1,-1,-1);
+    r.adjust(0,1,-1,-1);
     painter->fillRect(r,col);
 
     if(maxTextW <=0)
