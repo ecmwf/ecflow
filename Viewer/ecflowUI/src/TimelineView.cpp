@@ -135,6 +135,11 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     else if(index.column() == TimelineModel::SubmittedDurationColumn)
     {
         renderSubmittedDuration(painter,option,index);
+        QRect bgRect=option.rect;
+        painter->fillRect(bgRect,QColor(244,244,245));
+        painter->setPen(borderPen_);
+        painter->drawLine(bgRect.x()+bgRect.width()-1,bgRect.top(),
+                          bgRect.x()+bgRect.width()-1,bgRect.bottom());
     }
     else if(index.column() == TimelineModel::ActiveDurationColumn)
     {
@@ -311,12 +316,23 @@ void TimelineDelegate::renderSubmittedDuration(QPainter *painter,const QStyleOpt
         return;
 
     int val=index.data().toInt();
-    float meanVal=index.data(TimelineModel::MeanDurationRole).toInt();
     if(val > 0)
     {
         if(VNState* vn=VNState::find("submitted"))
-        {            
-            renderDuration(painter,val, meanVal, submittedMaxDuration_,vn->colour(),option.rect);
+        {
+            float meanVal=-1;
+            int num=0;
+            QVariant va=index.data(TimelineModel::MeanDurationRole);
+            if(va.type() == QVariant::List)
+            {
+                QVariantList lst=va.toList();
+                if(lst.count() == 2)
+                {
+                    meanVal=lst[0].toFloat();
+                    num=lst[1].toInt();
+                    renderDuration(painter,val, meanVal, submittedMaxDuration_, num, vn->colour(),option.rect);
+                }
+            }
         }
     }
 }
@@ -327,14 +343,26 @@ void TimelineDelegate::renderActiveDuration(QPainter *painter,const QStyleOption
         return;
 
     int val=index.data().toInt();
-    float meanVal=index.data(TimelineModel::MeanDurationRole).toInt();
     if(val > 0)
     {
         if(VNState* vn=VNState::find("active"))
-        {          
-            renderDuration(painter,val, meanVal, activeMaxDuration_,vn->colour(),option.rect);
+        {
+            float meanVal=-1;
+            int num=0;
+            QVariant va=index.data(TimelineModel::MeanDurationRole);
+            if(va.type() == QVariant::List)
+            {
+                QVariantList lst=va.toList();
+                if(lst.count() == 2)
+                {
+                    meanVal=lst[0].toFloat();
+                    num=lst[1].toInt();
+                    renderDuration(painter,val, meanVal, activeMaxDuration_, num, vn->colour(),option.rect);
+                }
+            }
         }
     }
+
 }
 
 void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const
@@ -366,7 +394,7 @@ void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool ha
     painter->fillRect(r,fillBrush);
 }
 
-void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal, int maxVal,QColor col, QRect rect) const
+void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect) const
 {
     int maxTextW=durationMaxTextWidth_;
     if(maxTextW <=0)
@@ -410,17 +438,17 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
         {
             //unicode U+2191 arrow up
             s+=QChar(8593);
-            painter->setPen(Qt::red);
+            //painter->setPen(Qt::red);
         }
         else
         {
             //unicode U+2193 arrow up
             s+=QChar(8595);
-            painter->setPen(QColor(11,111,34));
+            //painter->setPen(QColor(11,111,34));
             perc*=-1;
         }
 
-        s+=QString::number(perc) + "%";
+        s+=QString::number(perc) + "%[" + QString::number(num) + "]";
 
         r=rect;
         r.setX(right+5);
@@ -800,9 +828,7 @@ void TimelineView::notifyChange(VProperty* p)
 
 void TimelineView::setZoomActions(QAction* zoomInAction,QAction* zoomOutAction)
 {
-    zoomInAction_=zoomInAction;
-    zoomOutAction_=zoomOutAction;
-    header_->setZoomActions(zoomInAction_,zoomOutAction_);
+    header_->setZoomActions(zoomInAction,zoomOutAction);
 }
 
 void TimelineView::periodSelectedInHeader(QDateTime t1,QDateTime t2)
@@ -869,15 +895,14 @@ void TimelineView::setViewMode(ViewMode vm)
         {
             updateDurations();
         }
+
+        header_->viewModeChanged();
         rerender();
     }
 }
 
 void TimelineView::adjustHeader()
 {
-    //QSet<int> visCol;
-    //visCol << TimelineModel::PathColumn ;
-
     if(headerBeingAdjusted_)
         return;
 
@@ -885,21 +910,18 @@ void TimelineView::adjustHeader()
 
     if(viewMode_ == TimelineMode)
     {
-        //visCol << TimelineModel::TimelineColumn;
         header_->setSectionHidden(TimelineModel::SubmittedDurationColumn,true);
         header_->setSectionHidden(TimelineModel::ActiveDurationColumn,true);
         header_->setSectionHidden(TimelineModel::TimelineColumn,false);
     }
     else if(viewMode_ == DurationMode)
     {
-        //visCol << TimelineModel::ActiveDurationColumn << TimelineModel::SubmittedDurationColumn;
         header_->setSectionHidden(TimelineModel::SubmittedDurationColumn,false);
         header_->setSectionHidden(TimelineModel::ActiveDurationColumn,false);
         header_->setSectionHidden(TimelineModel::TimelineColumn,true);
     }
 
     headerBeingAdjusted_=false;
-    //model_->viewModeChanged(visCol);
 }
 
 int TimelineView::computeMaxDuration(QString state)

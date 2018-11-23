@@ -102,8 +102,6 @@ protected:
     ViewMode viewMode_;
     QDateTime startDate_;
     QDateTime endDate_;
-    QAction* zoomInAction_;
-    QAction* zoomOutAction_;
 };
 
 
@@ -134,7 +132,7 @@ protected:
     void renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,int) const;
     void renderSubmittedDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
     void renderActiveDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
-    void renderDuration(QPainter *painter, int val, float meanVal, int maxVal,QColor col, QRect rect) const;
+    void renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect) const;
     void drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const;
     int timeToPos(QRect r,unsigned int time) const;
 

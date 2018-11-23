@@ -33,6 +33,7 @@ public:
     QDateTime endDate() const {return endDate_;}
     void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
     void setMaxDurations(int submittedDuration,int activeDuration);
+    void viewModeChanged();
 
 protected Q_SLOTS:
     void slotZoomState(bool);

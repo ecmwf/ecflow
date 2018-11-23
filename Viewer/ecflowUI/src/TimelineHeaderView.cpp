@@ -203,7 +203,11 @@ void TimelineHeader::mouseReleaseEvent(QMouseEvent *event)
 
 bool TimelineHeader::canBeZoomed() const
 {
-    return (endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch()) > 60*1000;
+    if(isSectionHidden(TimelineModel::TimelineColumn) == false)
+    {
+        return (endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch()) > 60*1000;
+    }
+    return false;
 }
 
 void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const
@@ -305,7 +309,7 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
         QString text=model()->headerData(logicalIndex,Qt::Horizontal).toString();
         QRect textRect=rect;
         textRect.setRight(rightPos-5);
-        painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter,text);
+        painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter," " + text);
     }
 }
 
@@ -474,7 +478,6 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
 
     painter->save();
     painter->setClipRect(rect);
-
 
     //Draw date labels
     painter->setPen(dateTextCol_);
@@ -933,4 +936,13 @@ void TimelineHeader::setMaxDurations(int submittedDuration,int activeDuration)
 {
     submittedMaxDuration_=submittedDuration;
     activeMaxDuration_=activeDuration;
+}
+
+void TimelineHeader::viewModeChanged()
+{
+    if(isSectionHidden(TimelineModel::TimelineColumn))
+    {
+        zoomHistory_.clear();
+    }
+    checkActionState();
 }

@@ -23,7 +23,8 @@ class TimelineModel : public QAbstractItemModel
 
 public:
     enum CustomItemRole {PathSortRole = Qt::UserRole+1, TimeSortRole = Qt::UserRole+2,
-                        UnchangedRole = Qt::UserRole+3, MeanDurationRole = Qt::UserRole+4};
+                        UnchangedRole = Qt::UserRole+3, MeanDurationRole = Qt::UserRole+4,
+                        DurationStatRole = Qt::UserRole+5};
 
     enum ColumnType {PathColumn=0, TimelineColumn=1, SubmittedDurationColumn=2,
                      ActiveDurationColumn=3};

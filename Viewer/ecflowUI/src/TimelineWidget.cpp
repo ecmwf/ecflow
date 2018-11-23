@@ -168,6 +168,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     //forced init
     slotSortMode(0);
     slotSortOrderChanged(0);
+    slotTaskOnly(false);
     slotShowChanged(true);
 }
 
@@ -209,6 +210,8 @@ void TimelineWidget::clear(bool inReload)
     {
         ui_->pathFilterLe->clear();
         prevState_.valid=false;
+        //reset the view mode to timeline
+        view_->setViewMode(TimelineView::TimelineMode);
     }
 
     tmpLogFile_.reset();
@@ -720,6 +723,7 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
     }
 
     vs->put("sortOrder",ui_->sortUpTb->isChecked()?"asc":"desc");
+    vs->put("taskOnly",ui_->taskOnlyTb->isChecked());
     vs->put("showChanged",ui_->showChangedTb->isChecked());
 
     view_->writeSettings(vs);
@@ -745,6 +749,7 @@ void TimelineWidget::readSettings(VComboSettings* vs)
     }
 
     ui_->showChangedTb->setChecked(vs->get<bool>("showChanged",true));
+    ui_->taskOnlyTb->setChecked(vs->get<bool>("taskOnly",false));
 
     view_->readSettings(vs);
 }

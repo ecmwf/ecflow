@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>764</width>
+    <width>888</width>
     <height>664</height>
    </rect>
   </property>
@@ -37,9 +37,6 @@
         <string>TextLabel</string>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="modeCombo"/>
      </item>
      <item>
       <widget class="QToolButton" name="reloadTb">
@@ -77,11 +74,21 @@
       </item>
       <item>
        <widget class="QToolButton" name="taskOnlyTb">
-        <property name="text">
+        <property name="toolTip">
          <string>Show tasks only</string>
+        </property>
+        <property name="text">
+         <string>Tasks</string>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
         </property>
        </widget>
       </item>
@@ -91,13 +98,20 @@
          <string>Show only nodes with a state change in the current period</string>
         </property>
         <property name="text">
-         <string>Show changes only</string>
+         <string>State changes</string>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/filter_decor.svg</normaloff>:/viewer/filter_decor.svg</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
         </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextBesideIcon</enum>
+        </property>
         <property name="autoRaise">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -150,6 +164,16 @@
          <bool>true</bool>
         </property>
        </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>View:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="modeCombo"/>
       </item>
       <item>
        <spacer name="spacer">

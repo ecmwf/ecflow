@@ -146,15 +146,25 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
     //duration of first submitted task in period preceding the first active state
     else if(role  == MeanDurationRole)
     {
+        int num=0;
+        float meanVal=-1.;
+        QVariantList  vals;
         if(index.column() == SubmittedDurationColumn)
         {
-            return data_->items()[row].meanSubmittedDuration();
+            data_->items()[row].meanSubmittedDuration(meanVal,num);
+            vals << meanVal << num;
         }
         else if(index.column() == ActiveDurationColumn)
         {
-            return data_->items()[row].meanActiveDuration();
+            data_->items()[row].meanActiveDuration(meanVal,num);
+            vals << meanVal << num;
         }
-        return -1;
+        return vals;
+    }
+
+    //duration of first submitted task in period preceding the first active state
+    else if(role  == DurationStatRole)
+    {
     }
 
     return QVariant();

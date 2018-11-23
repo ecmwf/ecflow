@@ -93,10 +93,12 @@ int TimelineItem::firstActiveDuration(QDateTime startDt,QDateTime endDt) const
     return -1;
 }
 
-float TimelineItem::meanSubmittedDuration() const
+void TimelineItem::meanSubmittedDuration(float &meanVal,int& num) const
 {
     int sum=0;
-    int num=0;
+    num=0;
+    meanVal=0.;
+
     for(size_t i=0; i < start_.size()-1; i++)
     {
         if(VNState::isSubmitted(status_[i]))
@@ -106,23 +108,27 @@ float TimelineItem::meanSubmittedDuration() const
         }
     }
 
-    return (num>0)?(static_cast<float>(sum)/static_cast<float>(num)):0;
+    if(num > 0)
+        meanVal=static_cast<float>(sum)/static_cast<float>(num);
 }
 
-float TimelineItem::meanActiveDuration() const
+void TimelineItem::meanActiveDuration(float &meanVal,int& num) const
 {
     int sum=0;
-    int num=0;
+    num=0;
+    meanVal=0.;
+
     for(size_t i=0; i < start_.size()-1; i++)
     {
-        if(VNState::isActive(status_[i]))
+        if(VNState::isSubmitted(status_[i]))
         {
             sum+=start_[i+1]-start_[i]; //secs
             num++;
         }
     }
 
-    return (num>0)?(static_cast<float>(sum)/static_cast<float>(num)):0;
+    if(num > 0)
+        meanVal=static_cast<float>(sum)/static_cast<float>(num);
 }
 
 //====================================================================

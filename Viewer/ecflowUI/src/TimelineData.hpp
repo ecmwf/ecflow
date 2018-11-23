@@ -35,8 +35,8 @@ public:
     int firstInPeriod(QDateTime startDt,QDateTime endDt) const;
     int firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const;
     int firstActiveDuration(QDateTime startDt,QDateTime endDt) const;
-    float meanSubmittedDuration() const;
-    float meanActiveDuration() const;
+    void meanSubmittedDuration(float&,int&) const;
+    void meanActiveDuration(float&,int&) const;
 
     static unsigned int fromQDateTime(QDateTime dt)
           {return dt.toMSecsSinceEpoch()/1000;}
