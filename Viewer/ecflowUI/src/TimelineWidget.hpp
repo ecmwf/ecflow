@@ -62,6 +62,7 @@ protected Q_SLOTS:
    void slotWholePeriod();
    void slotStartChanged(const QDateTime&);
    void slotEndChanged(const QDateTime&);
+   void slotViewMode(int);
    void slotPathFilter(QString);
    void slotTaskOnly(bool);
    void slotSortMode(int);

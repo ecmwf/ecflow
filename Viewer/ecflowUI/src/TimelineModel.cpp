@@ -43,7 +43,7 @@ bool TimelineModel::hasData() const
 
 int TimelineModel::columnCount( const QModelIndex& /*parent */) const
 {
-     return 2;
+     return 4;
 }
 
 int TimelineModel::rowCount( const QModelIndex& parent) const
@@ -78,8 +78,14 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
 
     if(role == Qt::DisplayRole)
     {
-        if(index.column() == 0)
+        if(index.column() == PathColumn)
             return QString::fromStdString(data_->items()[row].path());
+        else if(index.column() == TimelineColumn)
+            return row;
+        else if(index.column() == SubmittedDurationColumn)
+            return data_->items()[row].firstSubmittedDuration(startDate_,endDate_);
+        else if(index.column() == ActiveDurationColumn)
+            return data_->items()[row].firstActiveDuration(startDate_,endDate_);
         else
             return row;
     }
@@ -87,7 +93,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
     //sort roles
     else if(role  == PathSortRole)
     {
-        if(index.column() == 0)
+        if(index.column() ==  PathColumn)
             return static_cast<qint64>(data_->items()[row].sortIndex());
         else
             return QVariant();
@@ -96,8 +102,8 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
     //sort roles
     else if(role  == TimeSortRole)
     {
-        unsigned int start=startDate_.toMSecsSinceEpoch()/1000;
-        unsigned int end=endDate_.toMSecsSinceEpoch()/1000;
+        unsigned int start=TimelineItem::fromQDateTime(startDate_);
+        unsigned int end=TimelineItem::fromQDateTime(endDate_);
         for(size_t i=0; i <= data_->items()[row].size(); i++)
         {
             unsigned int val=data_->items()[row].start_[i];
@@ -115,17 +121,17 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
     //task filter
     else if(role == Qt::UserRole)
     {
-        if(index.column() == 0)
+        if(index.column() ==  PathColumn)
             return data_->items()[row].isTask();
         else
             return QVariant();
     }
 
-    //file = unchanged in period
+    //filter = unchanged in period
     else if(role  == UnchangedRole)
     {
-        unsigned int start=startDate_.toMSecsSinceEpoch()/1000;
-        unsigned int end=endDate_.toMSecsSinceEpoch()/1000;
+        unsigned int start=TimelineItem::fromQDateTime(startDate_);
+        unsigned int end=TimelineItem::fromQDateTime(endDate_);
         for(size_t i=0; i <= data_->items()[row].size(); i++)
         {
             unsigned int val=data_->items()[row].start_[i];
@@ -137,6 +143,19 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         return true;
     }
 
+    //duration of first submitted task in period preceding the first active state
+    else if(role  == MeanDurationRole)
+    {
+        if(index.column() == SubmittedDurationColumn)
+        {
+            return data_->items()[row].meanSubmittedDuration();
+        }
+        else if(index.column() == ActiveDurationColumn)
+        {
+            return data_->items()[row].meanActiveDuration();
+        }
+        return -1;
+    }
 
     return QVariant();
 }
@@ -150,10 +169,14 @@ QVariant TimelineModel::headerData( const int section, const Qt::Orientation ori
     {
         switch(section)
         {
-        case 0:
-            return "Path";       
-        case 1:
+        case PathColumn:
+            return tr("Path");
+        case TimelineColumn:
             return "";
+        case SubmittedDurationColumn:
+            return tr("First submitted duration in period");
+        case ActiveDurationColumn:
+            return tr("First active duration in period");
         default:
             return QVariant();
         }
@@ -237,6 +260,7 @@ void TimelineSortModel::slotPeriodChanged()
     if(sortMode_ == TimeSortMode || showChangedOnly_)
     {
         invalidate();
+        Q_EMIT invalidateCalled();
     }
 }
 
@@ -246,6 +270,7 @@ void TimelineSortModel::setSortMode(SortMode mode)
     {
         sortMode_ = mode;
         invalidate();
+        Q_EMIT invalidateCalled();
     }
 }
 
@@ -262,12 +287,14 @@ void TimelineSortModel::setPathFilter(QString pathFilter)
     pathFilterRx_.setPatternSyntax(QRegExp::Wildcard);
     pathFilterRx_.setCaseSensitivity(Qt::CaseInsensitive);
     invalidate();
+    Q_EMIT invalidateCalled();
 }
 
 void TimelineSortModel::setTaskFilter(bool taskFilter)
 {
     taskFilter_=taskFilter;    
     invalidate();
+    Q_EMIT invalidateCalled();
 }
 
 void TimelineSortModel::setShowChangedOnly(bool h)
@@ -276,6 +303,7 @@ void TimelineSortModel::setShowChangedOnly(bool h)
     {
         showChangedOnly_ = h;
         invalidate();
+        Q_EMIT invalidateCalled();
     }
 }
 

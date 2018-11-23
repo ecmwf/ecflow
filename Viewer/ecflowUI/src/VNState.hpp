@@ -49,6 +49,9 @@ public:
 	static std::vector<VParam*> filterItems();
 	static VNState* find(const std::string& name);
     static VNState* find(unsigned char ucId);
+    static bool isActive(unsigned char ucId);
+    static bool isComplete(unsigned char ucId);
+    static bool isSubmitted(unsigned char ucId);
 
     unsigned char ucId() const {return ucId_;}
 

@@ -32,17 +32,11 @@ public:
     size_t sortIndex() const {return sortIndex_;}
     bool isTask() const {return type_ ==  TaskType;}
     void add(unsigned char status,unsigned int time);
-    int firstInPeriod(QDateTime startDt,QDateTime endDt) const
-    {
-        unsigned int start=fromQDateTime(startDt);
-        unsigned int end=fromQDateTime(startDt);
-        for(size_t i=0; i < start_.size(); i++)
-        {
-            if(start_[i] >= start && start_[i] <= end)
-                return static_cast<int>(i);
-        }
-        return -1;
-    }
+    int firstInPeriod(QDateTime startDt,QDateTime endDt) const;
+    int firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const;
+    int firstActiveDuration(QDateTime startDt,QDateTime endDt) const;
+    float meanSubmittedDuration() const;
+    float meanActiveDuration() const;
 
     static unsigned int fromQDateTime(QDateTime dt)
           {return dt.toMSecsSinceEpoch()/1000;}
@@ -55,7 +49,6 @@ public:
     Type type_;
     size_t sortIndex_;
     std::vector<unsigned int> start_;
-    std::vector<unsigned int> end_;
     std::vector<unsigned char> status_;
 };
 

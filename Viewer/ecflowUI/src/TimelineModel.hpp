@@ -13,6 +13,7 @@
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
 #include <QDateTime>
+#include <QSet>
 
 class TimelineData;
 
@@ -22,7 +23,10 @@ class TimelineModel : public QAbstractItemModel
 
 public:
     enum CustomItemRole {PathSortRole = Qt::UserRole+1, TimeSortRole = Qt::UserRole+2,
-                        UnchangedRole = Qt::UserRole+3};
+                        UnchangedRole = Qt::UserRole+3, MeanDurationRole = Qt::UserRole+4};
+
+    enum ColumnType {PathColumn=0, TimelineColumn=1, SubmittedDurationColumn=2,
+                     ActiveDurationColumn=3};
 
     explicit TimelineModel(QObject *parent=0);
     ~TimelineModel();
@@ -81,6 +85,9 @@ public:
 protected Q_SLOTS:
     void slotPeriodChanged();
 
+Q_SIGNALS:
+    void invalidateCalled();
+
 protected:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
     bool filterAcceptsRow(int sourceRow, const QModelIndex &/*sourceParent*/) const;
@@ -94,7 +101,6 @@ protected:
     QRegExp pathFilterRx_;
     bool showChangedOnly_;
 };
-
 
 #endif // TIMELINEMODEL_CPP
 

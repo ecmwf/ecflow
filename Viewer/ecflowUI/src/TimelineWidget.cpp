@@ -88,6 +88,10 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
     ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
+    ui_->modeCombo->addItem("Timeline","timeline");
+    ui_->modeCombo->addItem("Duration","duration");
+    ui_->modeCombo->setCurrentIndex(0);
+
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
     ui_->pathFilterLe->setPlaceholderText(tr("Filter"));
 #endif
@@ -115,6 +119,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->zoomOutTb->setDefaultAction(ui_->actionZoomOut);
 
     view_->setZoomActions(ui_->actionZoomIn,ui_->actionZoomOut);
+
+    connect(ui_->modeCombo,SIGNAL(currentIndexChanged(int)),
+            this,SLOT(slotViewMode(int)));
 
     connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
             this,SLOT(slotPathFilter(QString)));
@@ -335,6 +342,16 @@ void TimelineWidget::slotPeriodBeingZoomedInView(QDateTime start,QDateTime end)
     }
     //checkButtonState();
 }
+
+void TimelineWidget::slotViewMode(int)
+{
+    QString id=ui_->modeCombo->currentData().toString();
+    if(id == "timeline")
+        view_->setViewMode(TimelineView::TimelineMode);
+    else if (id == "duration")
+        view_->setViewMode(TimelineView::DurationMode);
+}
+
 
 void TimelineWidget::slotTaskOnly(bool taskFilter)
 {

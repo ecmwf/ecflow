@@ -35,13 +35,101 @@ TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned
 
 void TimelineItem::add(unsigned char status,unsigned int time)
 {
-    if(end_.size() > 0)
-        end_[end_.size()-1]=time;
-
     status_.push_back(status);
-    start_.push_back(time);
-    end_.push_back(0);
+    start_.push_back(time); 
 }
+
+int  TimelineItem::firstInPeriod(QDateTime startDt,QDateTime endDt) const
+{
+    unsigned int start=fromQDateTime(startDt);
+    unsigned int end=fromQDateTime(startDt);
+    for(size_t i=0; i < start_.size(); i++)
+    {
+        if(start_[i] >= start && start_[i] <= end)
+            return static_cast<int>(i);
+    }
+    return -1;
+}
+
+int TimelineItem::firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const
+{
+    unsigned int start=fromQDateTime(startDt);
+    unsigned int end=fromQDateTime(endDt);
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(start_[i] >= start)
+        {
+            if(VNState::isActive(status_[i]))
+                return -1;
+
+            if(VNState::isSubmitted(status_[i]) &&
+                 VNState::isActive(status_[i+1]))
+            {
+                return start_[i+1]-start_[i]; //secs
+            }
+        }
+        else if (start_[i] >= end)
+            return -1;
+    }
+    return -1;
+}
+
+int TimelineItem::firstActiveDuration(QDateTime startDt,QDateTime endDt) const
+{
+    unsigned int start=fromQDateTime(startDt);
+    unsigned int end=fromQDateTime(endDt);
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(start_[i] >= start)
+        {
+            if(VNState::isActive(status_[i]))
+            {
+                return start_[i+1]-start_[i]; //secs
+            }
+        }
+        else if (start_[i] >= end)
+            return -1;
+    }
+    return -1;
+}
+
+float TimelineItem::meanSubmittedDuration() const
+{
+    int sum=0;
+    int num=0;
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(VNState::isSubmitted(status_[i]))
+        {
+            sum+=start_[i+1]-start_[i]; //secs
+            num++;
+        }
+    }
+
+    return (num>0)?(static_cast<float>(sum)/static_cast<float>(num)):0;
+}
+
+float TimelineItem::meanActiveDuration() const
+{
+    int sum=0;
+    int num=0;
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(VNState::isActive(status_[i]))
+        {
+            sum+=start_[i+1]-start_[i]; //secs
+            num++;
+        }
+    }
+
+    return (num>0)?(static_cast<float>(sum)/static_cast<float>(num)):0;
+}
+
+//====================================================================
+//
+// TimelineData
+//
+//====================================================================
 
 void TimelineData::clear()
 {

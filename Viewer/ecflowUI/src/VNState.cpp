@@ -29,6 +29,7 @@
 
 std::map<std::string,VNState*> VNState::items_;
 static std::map<NState::State,VNState*> stateMap_;
+static std::map<unsigned char,VNState*> idMap_;
 
 static VNState unSt("unknown",NState::UNKNOWN);
 static VNState compSt("complete",NState::COMPLETE);
@@ -46,6 +47,7 @@ VNState::VNState(const std::string& name,NState::State nstate) :
 {
 	items_[name]=this;
 	stateMap_[nstate]=this;
+    idMap_[ucId_]=this;
 }
 
 VNState::VNState(const std::string& name) :
@@ -53,8 +55,6 @@ VNState::VNState(const std::string& name) :
 {
 	items_[name]=this;
 }
-
-
 
 //===============================================================
 //
@@ -130,11 +130,9 @@ VNState* VNState::find(const std::string& name)
 
 VNState* VNState::find(unsigned char ucId)
 {
-    for(std::map<std::string,VNState*>::const_iterator it=items_.begin(); it != items_.end(); ++it)
-    {
-        if(it->second->ucId() == ucId)
-            return it->second;
-    }
+    std::map<unsigned char,VNState*>::const_iterator it=idMap_.find(ucId);
+    if(it != idMap_.end())
+        return it->second;
 
     return NULL;
 }
@@ -183,6 +181,24 @@ QString VNState::toRealStateName(const VNode *n)
 {
     VNState *obj=VNState::toRealState(n);
     return (obj)?(obj->name()):QString();
+}
+
+bool VNState::isActive(unsigned char ucId)
+{
+    VNState *obj=VNState::find(ucId);
+    return (obj)?(obj->name() == "active"):false;
+}
+
+bool VNState::isComplete(unsigned char ucId)
+{
+    VNState *obj=VNState::find(ucId);
+    return (obj)?(obj->name() == "complete"):false;
+}
+
+bool VNState::isSubmitted(unsigned char ucId)
+{
+    VNState *obj=VNState::find(ucId);
+    return (obj)?(obj->name() == "submitted"):false;
 }
 
 //==================================================

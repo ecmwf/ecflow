@@ -39,6 +39,9 @@
       </widget>
      </item>
      <item>
+      <widget class="QComboBox" name="modeCombo"/>
+     </item>
+     <item>
       <widget class="QToolButton" name="reloadTb">
        <property name="text">
         <string>...</string>

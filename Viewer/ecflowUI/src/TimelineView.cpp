@@ -25,6 +25,7 @@
 #include "IconProvider.hpp"
 #include "PropertyMapper.hpp"
 #include "TimelineData.hpp"
+#include "TimelineHeaderView.hpp"
 #include "TimelineModel.hpp"
 #include "TimelineInfoWidget.hpp"
 #include "UiLog.hpp"
@@ -44,21 +45,19 @@ static std::vector<std::string> propVec;
 //======================================================================
 
 TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
+    QStyledItemDelegate(parent),
     model_(model),
     fm_(QFont()),
     borderPen_(QPen(QColor(216,216,216))),    
     topPadding_(2),
     bottomPadding_(2),
-    completeId_(100000)
-{
+    submittedMaxDuration_(-1),
+    activeMaxDuration_(-1),
+    durationMaxTextWidth_(-1)
+{  
     Q_ASSERT(model_);
 
     fm_=QFontMetrics(font_);
-
-    if(VNState* vn=VNState::find("complete"))
-    {
-        completeId_=vn->id();
-    }
 
     //Property
     if(propVec.empty())
@@ -129,13 +128,20 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     //Save painter state
     painter->save();
 
-    //QString id=columns_->id(index.column());
-
-    if(index.column() == 1)
-    {
+    if(index.column() == TimelineModel::TimelineColumn)
+    {        
         renderTimeline(painter,option,index.data().toInt());
     }
-    //rest of the columns
+    else if(index.column() == TimelineModel::SubmittedDurationColumn)
+    {
+        renderSubmittedDuration(painter,option,index);
+    }
+    else if(index.column() == TimelineModel::ActiveDurationColumn)
+    {
+        renderActiveDuration(painter,option,index);
+    }
+
+    //The path column
     else
     {
         QRect bgRect=option.rect;
@@ -223,7 +229,7 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
                     xpLeft=leftEdge;
                     xpRight=xp;
                     fillCol=vn->colour();
-                    lighter=(vn->id() == completeId_);
+                    lighter=(vn->name() == "complete");
                     drawCell(painter,QRect(xpLeft,option.rect.y(),xpRight-xpLeft+1,option.rect.height()-1),
                              fillCol,true,lighter);
                 }
@@ -235,7 +241,7 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
                 hasGrad=true;
                 xpLeft=xp;
                 xpRight=(xpNext <= rightEdge)?xpNext:rightEdge;                
-                lighter=(vn->id() == completeId_);
+                lighter=(vn->name() == "complete");
                 fillCol=vn->colour();
             }
         }
@@ -246,7 +252,7 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
                 hasRect=true;
                 xpLeft=leftEdge;
                 xpRight=rightEdge;
-                lighter=(vn->id() == completeId_);
+                lighter=(vn->name() == "complete");
                 fillCol=vn->colour();
             }
         }
@@ -257,7 +263,7 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
                 hasRect=true;
                 xpLeft=leftEdge;
                 xpRight=rightEdge;
-                lighter=(vn->id() == completeId_);
+                lighter=(vn->name() == "complete");
                 fillCol=vn->colour();
             }
         }
@@ -295,8 +301,40 @@ void TimelineDelegate::renderTimeline(QPainter *painter,const QStyleOptionViewIt
 
     }
 
-    //The initial filled rect (we will adjust its  width)
+    //The initial filled rect (we will adj }ust its  width)
     //QRect itemRect=option.rect.adjusted(nodeBox_->leftMargin,nodeBox_->topMargin,0,-nodeBox_->bottomMargin);
+}
+
+void TimelineDelegate::renderSubmittedDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex& index) const
+{
+    if(submittedMaxDuration_ <= 0)
+        return;
+
+    int val=index.data().toInt();
+    float meanVal=index.data(TimelineModel::MeanDurationRole).toInt();
+    if(val > 0)
+    {
+        if(VNState* vn=VNState::find("submitted"))
+        {            
+            renderDuration(painter,val, meanVal, submittedMaxDuration_,vn->colour(),option.rect);
+        }
+    }
+}
+
+void TimelineDelegate::renderActiveDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex& index) const
+{
+    if(activeMaxDuration_ <= 0)
+        return;
+
+    int val=index.data().toInt();
+    float meanVal=index.data(TimelineModel::MeanDurationRole).toInt();
+    if(val > 0)
+    {
+        if(VNState* vn=VNState::find("active"))
+        {          
+            renderDuration(painter,val, meanVal, activeMaxDuration_,vn->colour(),option.rect);
+        }
+    }
 }
 
 void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const
@@ -328,10 +366,74 @@ void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool ha
     painter->fillRect(r,fillBrush);
 }
 
+void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal, int maxVal,QColor col, QRect rect) const
+{
+    int maxTextW=durationMaxTextWidth_;
+    if(maxTextW <=0)
+        return;
+
+    if(rect.width() <= maxTextW)
+       maxTextW=0;
+
+    int len=(static_cast<float>(val)/static_cast<float>(maxVal))*static_cast<float>(rect.width()-maxTextW);
+
+    //bar
+    QRect r(rect);
+    r.setWidth(len);
+    r.adjust(1,1,-1,-1);
+    painter->fillRect(r,col);
+
+    if(maxTextW <=0)
+        return;
+
+    int right=r.x()+r.width();
+
+    //value
+    painter->setPen(QColor(100,100,100));
+    QString s=QString::number(val) + "s";
+    r=rect;
+    r.setX(right+5);
+    r.setWidth(fm_.width(s));
+    right=r.x()+r.width();
+    painter->drawText(r,s,Qt::AlignLeft | Qt::AlignVCenter);
+
+    //diff to mean
+    s.clear();
+    if(meanVal > 0.)
+    {
+         int perc=100.0*static_cast<float>(val-meanVal)/meanVal;
+
+        if(perc == 0)
+            return;
+
+        if(perc > 0)
+        {
+            //unicode U+2191 arrow up
+            s+=QChar(8593);
+            painter->setPen(Qt::red);
+        }
+        else
+        {
+            //unicode U+2193 arrow up
+            s+=QChar(8595);
+            painter->setPen(QColor(11,111,34));
+            perc*=-1;
+        }
+
+        s+=QString::number(perc) + "%";
+
+        r=rect;
+        r.setX(right+5);
+        r.setWidth(fm_.width(s));
+        painter->drawText(r,s,Qt::AlignLeft | Qt::AlignVCenter);
+    }
+}
+
+
 int TimelineDelegate::timeToPos(QRect r,unsigned int time) const
 {
-    unsigned int start=startDate_.toMSecsSinceEpoch()/1000;
-    unsigned int end=endDate_.toMSecsSinceEpoch()/1000;
+    unsigned int start=TimelineItem::fromQDateTime(startDate_);
+    unsigned int end=TimelineItem::fromQDateTime(endDate_);
 
     if(time < start)
         return r.x()-2;
@@ -362,6 +464,15 @@ void TimelineDelegate::setPeriod(QDateTime t1,QDateTime t2)
     endDate_=t2;
 }
 
+void TimelineDelegate::setMaxDurations(int submittedDuration,int activeDuration)
+{
+    submittedMaxDuration_=submittedDuration;
+    activeMaxDuration_=activeDuration;
+    QString s=QString::number(qMax(activeMaxDuration_,submittedMaxDuration_)) + " s AAA 999% A";
+    durationMaxTextWidth_=fm_.width(s);
+}
+
+
 //======================================================================
 //
 // TimelineView
@@ -371,9 +482,12 @@ void TimelineDelegate::setPeriod(QDateTime t1,QDateTime t2)
 TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
      QTreeView(parent),
      model_(model),
+     header_(NULL),
+     headerBeingAdjusted_(false),
      needItemsLayout_(false),
      prop_(NULL),
-     setCurrentIsRunning_(false)
+     setCurrentIsRunning_(false),
+     viewMode_(TimelineMode)
 {
     setObjectName("view");
     //setProperty("style","nodeView");
@@ -415,35 +529,22 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     connect(this,SIGNAL(doubleClicked(const QModelIndex&)),
             this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
-   // actionHandler_=new ActionHandler(this,this);
-
-    //expandAll();
-
     //Header
     header_=new TimelineHeader(this);
-
     setHeader(header_);
 
-    //Set header ContextMenuPolicy
-    //header_->setContextMenuPolicy(Qt::CustomContextMenu);
-
-    //connect(header_,SIGNAL(customContextMenuRequested(const QPoint &)),
-    //            this, SLOT(slotHeaderContextMenu(const QPoint &)));
-
-    //connect(header_,SIGNAL(customButtonClicked(QString,QPoint)),
-    //        this,SIGNAL(headerButtonClicked(QString,QPoint)));
-
     connect(header_,SIGNAL(periodSelected(QDateTime,QDateTime)),
-            this,SLOT(periodSelectedInHeader(QDateTime,QDateTime)));
+        this,SLOT(periodSelectedInHeader(QDateTime,QDateTime)));
 
     connect(header_,SIGNAL(periodBeingZoomed(QDateTime,QDateTime)),
-            this, SIGNAL(periodBeingZoomed(QDateTime,QDateTime)));
+        this, SIGNAL(periodBeingZoomed(QDateTime,QDateTime)));
 
-    //for(int i=0; i < model_->columnCount(QModelIndex())-1; i++)
-    //  	resizeColumnToContents(i);
+    adjustHeader();
 
-    /*connect(header(),SIGNAL(sectionMoved(int,int,int)),
-                this, SLOT(slotMessageTreeColumnMoved(int,int,int)));*/
+    //When the sort model is invalidated it might change the column visibility
+    //which we need to readjust!
+    connect(model_,SIGNAL(invalidateCalled()),
+            this,SLOT(adjustHeader()));
 
     //Create delegate to the view
     delegate_=new TimelineDelegate(model_->tlModel(),this);
@@ -459,8 +560,6 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
 
     //Initialise bg
     adjustBackground(prop_->find("view.table.background")->value().value<QColor>());
-
-    //header_->setSortIndicatorShown(true);
 }
 
 TimelineView::~TimelineView()
@@ -624,7 +723,7 @@ void TimelineView::showDetails(const QModelIndex& indexClicked)
 
     TimelineInfoDialog diag(this);
     diag.infoW_->load("host","port",model_->tlModel()->data(),idx.row(),
-                      header_->startDate(),header_->endDate());
+                      startDate_,endDate_);
 
     diag.exec();
 }
@@ -701,40 +800,134 @@ void TimelineView::notifyChange(VProperty* p)
 
 void TimelineView::setZoomActions(QAction* zoomInAction,QAction* zoomOutAction)
 {
-    header_->setZoomActions(zoomInAction,zoomOutAction);
+    zoomInAction_=zoomInAction;
+    zoomOutAction_=zoomOutAction;
+    header_->setZoomActions(zoomInAction_,zoomOutAction_);
 }
 
 void TimelineView::periodSelectedInHeader(QDateTime t1,QDateTime t2)
 {
+    startDate_=t1;
+    endDate_=t2;
     delegate_->setPeriod(t1,t2);
     model_->tlModel()->setPeriod(t1,t2);
+    updateDurations();
     rerender();
     Q_EMIT periodSelected(t1,t2);
 }
 
 void TimelineView::setStartDate(QDateTime t)
 {
+    startDate_=t;
     delegate_->setStartDate(t);
     model_->tlModel()->setStartDate(t);
     header_->setStartDate(t);
+    updateDurations();
     rerender();
-    UiLog().dbg() << "startdate" << t;
 }
 
 void TimelineView::setEndDate(QDateTime t)
 {
+    endDate_=t;
     delegate_->setEndDate(t);
     model_->tlModel()->setEndDate(t);
     header_->setEndDate(t);
+    updateDurations();
     rerender();
 }
 
 void TimelineView::setPeriod(QDateTime t1,QDateTime t2)
 {
+    startDate_=t1;
+    endDate_=t2;
     delegate_->setPeriod(t1,t2);
     model_->tlModel()->setPeriod(t1,t2);
     header_->setPeriod(t1,t2);
+    updateDurations();
     rerender();
+}
+
+void TimelineView::updateDurations()
+{
+    if(viewMode_ == DurationMode)
+    {
+        int submittedDuration=computeMaxDuration("submitted");
+        int activeDuration=computeMaxDuration("active");
+        delegate_->setMaxDurations(submittedDuration,activeDuration);
+        header_->setMaxDurations(submittedDuration,activeDuration);
+    }
+}
+
+void TimelineView::setViewMode(ViewMode vm)
+{
+    if(vm != viewMode_)
+    {
+        viewMode_ = vm;              
+        adjustHeader();
+
+        if(viewMode_ == DurationMode)
+        {
+            updateDurations();
+        }
+        rerender();
+    }
+}
+
+void TimelineView::adjustHeader()
+{
+    //QSet<int> visCol;
+    //visCol << TimelineModel::PathColumn ;
+
+    if(headerBeingAdjusted_)
+        return;
+
+    headerBeingAdjusted_=true;
+
+    if(viewMode_ == TimelineMode)
+    {
+        //visCol << TimelineModel::TimelineColumn;
+        header_->setSectionHidden(TimelineModel::SubmittedDurationColumn,true);
+        header_->setSectionHidden(TimelineModel::ActiveDurationColumn,true);
+        header_->setSectionHidden(TimelineModel::TimelineColumn,false);
+    }
+    else if(viewMode_ == DurationMode)
+    {
+        //visCol << TimelineModel::ActiveDurationColumn << TimelineModel::SubmittedDurationColumn;
+        header_->setSectionHidden(TimelineModel::SubmittedDurationColumn,false);
+        header_->setSectionHidden(TimelineModel::ActiveDurationColumn,false);
+        header_->setSectionHidden(TimelineModel::TimelineColumn,true);
+    }
+
+    headerBeingAdjusted_=false;
+    //model_->viewModeChanged(visCol);
+}
+
+int TimelineView::computeMaxDuration(QString state)
+{
+    int maxDuration=-1;
+    int col=0;
+
+    if(state == "submitted")
+    {
+        col=TimelineModel::SubmittedDurationColumn;
+    }
+    else if(state == "active")
+    {
+        col=TimelineModel::ActiveDurationColumn;
+    }
+    else
+        return -1;
+
+    for(int i=0; i < model_->rowCount(); i++)
+    {
+        QModelIndex idx=model_->index(i,col);
+        int val=model_->data(idx).toInt();
+        if(val > maxDuration)
+        {
+            maxDuration=val;
+        }
+    }
+    return maxDuration;
 }
 
 //=========================================
@@ -773,860 +966,4 @@ void TimelineView::writeSettings(VSettings* vs)
 
     vs->endGroup();
 
-}
-
-//=========================================
-// TimelineHeader
-//=========================================
-
-TimelineHeader::TimelineHeader(QTreeView *parent) :
-    QHeaderView(Qt::Horizontal, parent),
-    fm_(QFont()),  
-    timelineCol_(50,50,50),
-    dateTextCol_(33,95,161),
-    timeTextCol_(30,30,30),
-    timelineFrameBorderCol_(150,150,150),
-    zoomCol_(224,236,248,190),
-    inZoom_(false),
-    timelineSection_(1),
-    timelineFrameSize_(4),
-    majorTickSize_(5),
-    zoomInAction_(0),
-    zoomOutAction_(0)
-{
-    setMouseTracking(true);
-
-    setStretchLastSection(true);
-
-    connect(this,SIGNAL(sectionCountChanged(int,int)),
-            this,SLOT(adjustSectionResizeMode(int,int)));
-
-    connect(this, SIGNAL(sectionResized(int, int, int)),
-             this, SLOT(slotSectionResized(int)));
-
-    QColor bg0(214,214,214);
-    QColor bg1(194,194,194);
-    QLinearGradient gr;
-    gr.setCoordinateMode(QGradient::ObjectBoundingMode);
-    gr.setStart(0,0);
-    gr.setFinalStop(0,1);
-    gr.setColorAt(0,bg0);
-    gr.setColorAt(1,bg1);
-    timelineBrush_=QBrush(gr);
-
-    int pixId=IconProvider::add(":viewer/filter_decor.svg","filter_decor");
-
-    customPix_=IconProvider::pixmap(pixId,10);
-
-    font_= QFont();
-    font_.setPointSize(font_.pointSize()-2);
-    fm_=QFontMetrics(font_);
-
-    zoomCursor_=QCursor(QPixmap(":/viewer/cursor_zoom.svg"));
-}
-
-
-QSize TimelineHeader::sizeHint() const
-{
-    //return QHeaderView::sizeHint();
-
-    QSize s = QHeaderView::sizeHint(); //size();
-    //s.setHeight(headerSections[0]->minimumSizeHint().height() + 35);
-    //s.setHeight(2*35);
-    s.setHeight(timelineFrameSize_ + fm_.height() + 6 + majorTickSize_ + fm_.height() + 6 + timelineFrameSize_);
-    return s;
-}
-
-void TimelineHeader::showEvent(QShowEvent *e)
-{
-  /*  for(int i=0;i<count();i++)
-    {
-
-
-       if(1)
-       {
-           widgets_[i]->setGeometry(sectionViewportPosition(i),0,
-                                sectionSize(i),height());
-           widgets_[i]->shosetMouseTracking(true);w();
-       }
-    }
-    */
-
-    QHeaderView::showEvent(e);
-}
-
-void TimelineHeader::mousePressEvent(QMouseEvent *event)
-{
-    //Start new zoom
-    if(isZoomEnabled() &&
-       !inZoom_ && event->button() == Qt::LeftButton &&
-       logicalIndexAt(event->pos()) == timelineSection_ &&
-       canBeZoomed())
-    {
-        zoomStartPos_=event->pos();
-    }
-#if 0
-    //Unzoom
-    else if(!inZoom_ && event->button() == Qt::RightButton &&
-            logicalIndexAt(event->pos()) == timelineSection_)
-    {
-        if(zoomHistory_.count() >= 2)
-        {
-            zoomHistory_.pop();
-            QDateTime sDt=zoomHistory_.top().first;
-            QDateTime eDt=zoomHistory_.top().second;
-            if(sDt.isValid() && eDt.isValid())
-            {
-                setPeriodCore(sDt,eDt,false);
-                Q_EMIT periodSelected(sDt,eDt);
-            }
-        }
-    }
- #endif
-    else
-    {
-        QHeaderView::mousePressEvent(event);
-    }
-}
-
-void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
-{           
-    //When we enter the timeline section we show a zoom cursor
-    bool hasCursor=testAttribute(Qt::WA_SetCursor);
-
-    if(!isZoomEnabled())
-    {
-        QHeaderView::mouseMoveEvent(event);
-        return;
-    }
-
-    //When enabled ...
-
-    if(event->buttons().testFlag(Qt::LeftButton))
-    {
-        int secStart=sectionPosition(timelineSection_);
-        int secEnd=secStart+sectionSize(timelineSection_);
-
-        //If we are in resize mode
-        if(!inZoom_ && zoomStartPos_.isNull())
-        {
-            QHeaderView::mouseMoveEvent(event);
-            return;
-        }
-
-        //In timeline zoom mode we show a zoom cursor
-        if(!hasCursor || cursor().shape() ==  Qt::SplitHCursor )
-            setCursor(zoomCursor_);
-
-        inZoom_=true;
-        zoomEndPos_=event->pos();
-
-        if(event->pos().x() >= secStart && event->pos().x() <= secEnd)
-        {
-            if(event->pos().x() < zoomStartPos_.x())
-            {
-                zoomEndPos_=zoomStartPos_;
-            }
-        }
-        else if(event->pos().x() < secStart)
-        {
-            zoomEndPos_=zoomStartPos_;
-        }
-        else //if(event->pos().x() > secEnd)
-        {
-            zoomEndPos_=event->pos();
-            zoomEndPos_.setX(secEnd);
-        }
-
-        headerDataChanged(Qt::Horizontal,timelineSection_,timelineSection_);
-
-        QDateTime sDt=posToDate(zoomStartPos_);
-        QDateTime eDt=posToDate(zoomEndPos_);
-        if(sDt.isValid() && eDt.isValid())
-        {
-            Q_EMIT periodBeingZoomed(sDt,eDt);
-        }
-    }
-    else
-    {
-        //When we enter the timeline section we show a zoom cursor
-        if(logicalIndexAt(event->pos()) == timelineSection_)
-        {
-            if((!hasCursor || cursor().shape() ==  Qt::SplitHCursor) &&
-               (canBeZoomed()))
-                setCursor(zoomCursor_);
-        }
-        //Otherwise remove the cursor unless it is the resize indicator
-        else
-        {
-            if(hasCursor && cursor().shape() !=  Qt::SplitHCursor)
-                unsetCursor();
-
-            QHeaderView::mouseMoveEvent(event);
-        }
-    }
-}
-
-void TimelineHeader::mouseReleaseEvent(QMouseEvent *event)
-{
-    if(inZoom_)
-    {        
-        QDateTime sDt=posToDate(zoomStartPos_);
-        QDateTime eDt=posToDate(zoomEndPos_);
-        zoomStartPos_=QPoint();
-        zoomEndPos_=QPoint();
-        inZoom_=false;
-        if(sDt.isValid() && eDt.isValid())
-        {
-            setPeriodCore(sDt,eDt,true);
-            Q_EMIT periodSelected(sDt,eDt);
-        }
-        else
-        {
-            Q_EMIT periodBeingZoomed(startDate_,endDate_);
-        }
-
-        setZoomDisabled();
-
-        //bool hasCursor=testAttribute(Qt::WA_SetCursor);
-        //if(hasCursor && cursor().shape() !=  Qt::SplitHCursor)
-        //    unsetCursor();
-    }
-    else
-    {
-        QHeaderView::mouseReleaseEvent(event);
-    }
-}
-
-void TimelineHeader::slotSectionResized(int i)
-{
-    /*for (int j=visualIndex(i);j<count();j++)
-    {
-        int logical = logicalIndex(j);
-
-        if(combo_[logical])
-        {
-            combo_[logical]->setGeometry(sectionViewportPosition(logical), height()/2,
-                                   sectionSize(logical) - 16, height());
-        }
-   }*/
-}
-
-void TimelineHeader::setModel(QAbstractItemModel *model)
-{
-#if 0
-    if(model)
-    {
-        for(int i=0; i< model->columnCount(); i++)
-        {
-            QString id=model->headerData(i,Qt::Horizontal,Qt::UserRole).toString();
-            if(id == "status")
-                customButton_.insert(i,TimelineHeaderButton(id));
-        }
-    }
-#endif
-    QHeaderView::setModel(model);
-}
-
-bool TimelineHeader::canBeZoomed() const
-{
-    return (endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch()) > 60*1000;
-}
-
-void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const
-{
-    painter->save();
-    //QHeaderView::paintSection(painter, rect, logicalIndex);
-    //painter->restore();
-
-
-    /*QPixmap customPix(":viewer/filter_decor.svg");
-    QRect cbRect(0,0,12,12);
-    cbRect.moveCenter(QPoint(rect.right()-16-6,rect.center().y()));
-    customButton_[logicalIndex].setRect(cbRect);
-    painter->drawPixmap(cbRect,pix);*/
-
-    if (!rect.isValid())
-        return;
-
-     QStyleOptionHeader opt;
-     initStyleOption(&opt);
-     QStyle::State state = QStyle::State_None;
-     if(isEnabled())
-        state |= QStyle::State_Enabled;
-     if(window()->isActiveWindow())
-        state |= QStyle::State_Active;
-
-    bool clickable;
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-    clickable=sectionsClickable();
-#else
-    clickable=isClickable();
-#endif
-
-     if(clickable)
-     {
-         /*if (logicalIndex == d->hover)
-                state |= QStyle::State_MouseOver;
-            if (logicalIndex == d->pressed)
-                state |= QStyle::State_Sunken;
-            else if (d->highlightSelected) {
-                if (d->sectionIntersectsSelection(logicalIndex))
-                    state |= QStyle::State_On;
-                if (d->isSectionSelected(logicalIndex))
-                    state |= QStyle::State_Sunken;
-            }*/
-
-        }
-
-    // if(isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
-    //        opt.sortIndicator = (sortIndicatorOrder() == Qt::AscendingOrder)
-    //                            ? QStyleOptionHeader::SortDown : QStyleOptionHeader::SortUp;
-
-     // setup the style options structure
-     //QVariant textAlignment = model->headerData(logicalIndex, d->orientation,
-     //                                                 Qt::TextAlignmentRole);
-     opt.rect = rect;
-     opt.section = logicalIndex;
-     opt.state |= state;
-     //opt.textAlignment = Qt::Alignment(textAlignment.isValid()
-     //                                     ? Qt::Alignment(textAlignment.toInt())
-     //                                     : d->defaultAlignment);
-
-     //opt.text = model()->headerData(logicalIndex, Qt::Horizontal),
-     //                                    Qt::DisplayRole).toString();
-
-     QVariant foregroundBrush;
-     if (foregroundBrush.canConvert<QBrush>())
-         opt.palette.setBrush(QPalette::ButtonText, qvariant_cast<QBrush>(foregroundBrush));
-
-     QPointF oldBO = painter->brushOrigin();
-     QVariant backgroundBrush;
-     if (backgroundBrush.canConvert<QBrush>())
-     {
-            opt.palette.setBrush(QPalette::Button, qvariant_cast<QBrush>(backgroundBrush));
-            opt.palette.setBrush(QPalette::Window, qvariant_cast<QBrush>(backgroundBrush));
-            painter->setBrushOrigin(opt.rect.topLeft());
-     }
-
-    // the section position
-    int visual = visualIndex(logicalIndex);
-    assert(visual != -1);
-
-    if (count() == 1)
-        opt.position = QStyleOptionHeader::OnlyOneSection;
-    else if (visual == 0)
-        opt.position = QStyleOptionHeader::Beginning;
-    else if (visual == count() - 1)
-        opt.position = QStyleOptionHeader::End;
-    else
-        opt.position = QStyleOptionHeader::Middle;
-
-    opt.orientation = Qt::Horizontal;
-
-    // the selected position
-    /*bool previousSelected = d->isSectionSelected(logicalIndex(visual - 1));
-        bool nextSelected =  d->isSectionSelected(logicalIndex(visual + 1));
-        if (previousSelected && nextSelected)
-            opt.selectedPosition = QStyleOptionHeader::NextAndPreviousAreSelected;
-        else if (previousSelected)
-            opt.selectedPosition = QStyleOptionHeader::PreviousIsSelected;
-        else if (nextSelected)
-            opt.selectedPosition = QStyleOptionHeader::NextIsSelected;
-        else
-            opt.selectedPosition = QStyleOptionHeader::NotAdjacent;
-    */
-
-    // draw the section
-    style()->drawControl(QStyle::CE_Header, &opt, painter, this);
-    painter->setBrushOrigin(oldBO);
-
-    painter->restore();
-
-    int rightPos=rect.right();
-    if(isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
-        opt.sortIndicator = (sortIndicatorOrder() == Qt::AscendingOrder)
-                            ? QStyleOptionHeader::SortDown : QStyleOptionHeader::SortUp;
-
-    //We only show the sort indicator on the first column
-    if (logicalIndex == 0 && opt.sortIndicator != QStyleOptionHeader::None)
-        {
-            QStyleOptionHeader subopt = opt;
-            subopt.rect = style()->subElementRect(QStyle::SE_HeaderArrow, &opt, this);
-            rightPos=subopt.rect.left();
-            style()->drawPrimitive(QStyle::PE_IndicatorHeaderArrow, &subopt, painter, this);
-         }
-
-#if 0
-    QMap<int,TimelineHeaderButton>::iterator it=customButton_.find(logicalIndex);
-    if(it != customButton_.end())
-    {
-        //Custom button
-        QStyleOptionButton optButton;
-
-        //visPbOpt.text="Visualise";
-        optButton.state = QStyle::State_AutoRaise ; //QStyle::State_Active | QStyle::State_Enabled;
-        //optButton.icon=customIcon_;
-        //optButton.iconSize=QSize(12,12);
-
-        int buttonWidth=customPix_.width();
-        int buttonHeight=buttonWidth;
-        optButton.rect = QRect(rightPos-4-buttonWidth,(rect.height()-buttonWidth)/2,
-                                   buttonWidth,buttonHeight);
-
-        painter->drawPixmap(optButton.rect,customPix_);
-
-        rightPos=optButton.rect.left();
-        it.value().setRect(optButton.rect);
-    }
-#endif
-
-    QString text=model()->headerData(logicalIndex,Qt::Horizontal).toString();
-    QRect textRect=rect;
-    textRect.setRight(rightPos-5);
-
-    if(logicalIndex != timelineSection_)
-    {
-       painter->drawText(textRect,Qt::AlignHCenter | Qt::AlignVCenter,text);
-       return;
-    }
-
-    renderTimeline(rect,painter);
-}
-
-void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
-{
-    //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
-
-    //The timeline area bounded by the frame
-    QRect pRect=rect.adjusted(0,timelineFrameSize_,0,-timelineFrameSize_);
-
-    //Special appearance in for the timeline area
-    painter->fillRect(pRect,timelineBrush_);
-
-    painter->setPen(QPen(timelineFrameBorderCol_));
-    painter->drawLine(QPoint(rect.left(),pRect.top()),
-                      QPoint(rect.right(),pRect.top()));
-
-    painter->drawLine(QPoint(rect.left(),pRect.bottom()),
-                      QPoint(rect.right(),pRect.bottom()));
-
-    if(inZoom_)
-    {
-        QRect zRect=pRect; //rect.adjusted(0,zoomFrameTop,0,-zoomFrameBottom-1);
-        zRect.setLeft(zoomStartPos_.x());
-        zRect.setRight(zoomEndPos_.x());
-        painter->fillRect(zRect,zoomCol_);
-        painter->setPen(zoomCol_.darker(140));
-        painter->drawRect(zRect.adjusted(0,1,0,-2));
-    }
-
-    int w=sectionSize(timelineSection_);
-
-    //period in secs
-    qint64 startSec=startDate_.toMSecsSinceEpoch()/1000;
-    qint64 endSec=endDate_.toMSecsSinceEpoch()/1000;
-    qint64 period=endSec-startSec;
-
-    int minorTick=1; //in secs (it is a delta)
-    int majorTick=1;  //in secs (it is a delta)
-    qint64 firstTick=1; //in secs since epoch
-
-    int hLineY=pRect.center().y()-majorTickSize_/2-1;
-    int timeTextGap=3; //the gap between the top of the time text and the bottom of the major tick in pixels
-    int majorTickTop=hLineY;
-    int majorTickBottom=hLineY+majorTickSize_; //pRect.bottom()-fm_.height()-timeTextGap;
-    int minorTickTop=hLineY;
-    int minorTickBottom=majorTickBottom-3;
-    int dateTextY= hLineY - (hLineY-pRect.y() - fm_.height())/2 - fm_.height() + 1;
-    int timeTextY= majorTickBottom + (pRect.bottom()-majorTickBottom - fm_.height())/2 - 1;
-
-    int timeItemW=fm_.width("223:442");
-    int dateItemW=fm_.width("2229 May22");
-
-    QList<int> majorTickSec;
-
-    if(period < 60)
-    {
-        majorTickSec << 1 << 5 << 10 << 20 << 30;
-    }
-    else if(period < 600)
-    {
-        majorTickSec << 10 << 15 << 20 << 30 << 60 << 5*60 << 10*60;
-    }
-    if(period < 3600)
-    {
-        majorTickSec << 60 << 2*60 << 3*60 << 4*60 << 5*60 << 10*60 << 20*60 << 30*60;
-    }
-    if(period < 12*3600)
-    {
-        majorTickSec << 15*60 << 30*60 << 3600 << 2*3600 << 3*3600 << 4*3600 << 6*3600;
-    }
-    else if(period <= 86400)
-    {
-        majorTickSec << 3600 << 2*3600 << 3*3600 << 4*3600 << 6*3600 << 12*3600;
-    }
-    else if(period < 7*86400)
-    {
-        majorTickSec << 3600 << 2*3600 << 3*3600 << 4*3600 << 6*3600 << 12*3600 << 24*3600;
-    }
-    else if(period < 14*86400)
-    {
-        majorTickSec << 12*3600 << 24*3600 << 36*3600 << 48*3600 << 72*3600 << 96*3600;
-    }
-    else if(period < 28*86400)
-    {
-        majorTickSec << 86400 << 2*86400 << 3*86400 << 4*86400 << 5*86400 << 10*86400;
-    }
-    else if(period < 60*86400)
-    {
-        majorTickSec << 86400 << 2*86400 << 3*86400 << 4*86400 << 5*86400 << 10*86400 << 20*86400;
-    }
-    else if(365 * 86400)
-    {
-        majorTickSec << 5*86400 << 10*86400 << 20*86400 << 30*86400 << 60*86400 << 90*86400 << 180*86400;
-    }
-    else
-    {
-        majorTickSec << 30*86400 << 60*86400 << 90*86400 << 180*86400 << 365*86400;
-    }
-
-    Q_FOREACH(int mts,majorTickSec)
-    {
-       majorTick=mts;
-       int majorTickNum=period/majorTick;
-       int cover=timeItemW*majorTickNum;
-       int diff=w-cover;
-       if(diff > 100)
-       {
-           break;
-       }
-    }
-
-    minorTick=majorTick/4;
-    if(minorTick==0)
-        minorTick = majorTick;
-
-    firstTick=(startSec/minorTick)*minorTick+minorTick;
-
-    //Find label positions for days
-    QList<QPair<int,QString> > dateLabels;
-    int dayNum=startDate_.date().daysTo(endDate_.date());
-
-    if(dayNum == 0)
-    {
-        int xp=secToPos((startSec+endSec)/2-startSec,rect);
-        dateLabels << qMakePair(xp,startDate_.toString("dd MMM"));
-    }
-    else
-    {
-        QDate  nextDay=startDate_.date().addDays(1);
-        QDate  lastDay=endDate_.date();
-        qint64 nextSec=QDateTime(nextDay).toMSecsSinceEpoch()/1000;
-
-        if((nextSec-startSec) < 3600)
-        {
-            int xp=secToPos((startSec+nextSec)/2-startSec,rect);
-            dateLabels << qMakePair(xp,nextDay.toString("dd MMM"));
-        }
-
-        int dayFreq=1;
-        QList<int> dayFreqLst;
-        dayFreqLst << 1 << 2 << 3 << 5 << 10 << 20 << 30 << 60 << 90 << 120 << 180 << 365;
-        Q_FOREACH(int dfv,dayFreqLst)
-        {
-            if((dayNum/dfv)*dateItemW < w-100)
-            {
-                dayFreq=dfv;
-                break;
-            }
-        }
-
-        QDate firstDay=nextDay;
-        for(QDate d=firstDay; d < lastDay; d=d.addDays(dayFreq))
-        {
-            int xp=secToPos((QDateTime(d).toMSecsSinceEpoch()/1000 +
-            QDateTime(d.addDays(1)).toMSecsSinceEpoch()/1000)/2-startSec,rect);
-            dateLabels << qMakePair(xp,d.toString("dd MMM"));
-        }
-
-        if(QDateTime(lastDay).toMSecsSinceEpoch()/1000 < endSec)
-        {
-            int xp=secToPos((QDateTime(lastDay).toMSecsSinceEpoch()/1000+endSec)/2 - startSec,rect);
-            dateLabels << qMakePair(xp,lastDay.toString("dd MMM"));
-        }
-    }
-
-    painter->save();
-    painter->setClipRect(rect);
-
-
-    //Draw date labels
-    painter->setPen(dateTextCol_);
-    for(int i=0; i < dateLabels.count(); i++)
-    {
-        int xp=dateLabels[i].first;
-        int textW=fm_.width(dateLabels[i].second);
-        //int yp=rect.bottom()-1-fm.height();
-        painter->setFont(font_);
-        painter->drawText(QRect(xp-textW/2, dateTextY,textW,fm_.height()),
-                          Qt::AlignHCenter | Qt::AlignVCenter,dateLabels[i].second);
-    }
-
-    //horizontal line
-    painter->setPen(timelineCol_);
-    painter->drawLine(rect.x(),hLineY,rect.right(),hLineY);
-
-    qint64 actSec=firstTick;
-    Q_ASSERT(actSec >= startSec);
-    painter->setPen(timeTextCol_);
-
-    while(actSec <= endSec)
-    {
-        int xp=secToPos(actSec-startSec,rect);
-
-        //draw major tick + label
-        if(actSec % majorTick == 0)
-        {
-            painter->drawLine(xp,majorTickTop,xp,majorTickBottom);
-
-            QString s;
-            if(majorTick < 60)
-            {
-                s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm:ss");
-            }
-            else
-            {
-                s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm");
-            }
-
-            int textW=fm_.width(s);
-            painter->setFont(font_);            
-            painter->drawText(QRect(xp-textW/2, timeTextY,textW,fm_.height()),
-                              Qt::AlignHCenter | Qt::AlignVCenter,s);
-        }
-        //draw minor tick
-        else
-        {
-            painter->drawLine(xp,minorTickTop,xp,minorTickBottom);
-        }
-
-        actSec+=minorTick;
-    }
-
-    painter->restore();
-
-    //for(int i=0; i < 10; i++)
-    //{
-    //    int xp=i*rect.width()/10;
-    //    painter->drawLine(xp,rect.top(),xp,rect.bottom());
-    //}
-
-    //style()->drawControl(QStyle::CE_PushButton, &optButton,painter,this);
-}
-
-int TimelineHeader::secToPos(qint64 t,QRect rect) const
-{
-    //qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
-    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch())/1000;
-    return rect.x() + static_cast<int>(static_cast<float>(t)/static_cast<float>(period)*static_cast<float>(rect.width()));
-}
-
-int TimelineHeader::dateToPos(QDateTime dt) const
-{
-    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch())/1000;
-
-    int xp=sectionPosition(timelineSection_);
-    int w=sectionSize(timelineSection_);
-
-    return xp + static_cast<int>(static_cast<float>(dt.toMSecsSinceEpoch()/1000)/static_cast<float>(period)*static_cast<float>(w));
-}
-
-QDateTime TimelineHeader::posToDate(QPoint pos) const
-{
-    int xp=sectionPosition(timelineSection_);
-    int w=sectionSize(timelineSection_);
-
-    if(w <= 0 || pos.x() < xp)
-        return QDateTime();
-
-    float r=static_cast<float>(pos.x()-xp)/static_cast<float>(w);
-    if(r < 0 || r > 1)
-        return QDateTime();
-
-    //qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
-    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch());
-
-    return startDate_.addMSecs(r*period);
-}
-
-qint64 TimelineHeader::zoomPeriodInSec(QPoint startPos,QPoint endPos) const
-{
-    if(endPos.x() < startPos.x())
-        return false;
-
-    int xp=sectionPosition(timelineSection_);
-    int w=sectionSize(timelineSection_);
-
-    if(w <= 0 || startPos.x() < xp)
-        return false;
-
-    float r=static_cast<float>(endPos.x()-startPos.x())/static_cast<float>(w);
-    if(r < 0 || r > 1)
-        return false;
-
-    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch());
-
-    return r*period;
-}
-
-#if 0
-void TimelineHeader::mousePressEvent(QMouseEvent *event)
-{
-  #if 0
-
-    QMap<int,TimelineHeaderButton>::const_iterator it = customButton_.constBegin();
-    while(it != customButton_.constEnd())
-    {
-        if(it.value().rect_.contains(event->pos()))
-        {
-            UiLog().dbg() << "header " << it.key() << " clicked";
-            Q_EMIT customButtonClicked(it.value().id(),event->globalPos());
-        }
-         ++it;
-     }
-#endif
-    QHeaderView::mousePressEvent(event);
-}
-#endif
-
-/*void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
-{
-    int prevIndex=hoverIndex_;
-    QMap<int,TimelineHeaderButton>::const_iterator it = customButton_.constBegin();
-    while(it != customButton_.constEnd())
-    {
-        if(it.value().rect_.contains(event->pos()))
-        {
-            hoverIndex_=it.key();
-            if(hoveIndex != prevIndex)
-            {
-                rerender;
-            }
-        }
-        ++it;
-    }
-
-    if(preIndex !=-1)
-    {
-
-    }
-    hoverIndex_=-1;
-}*/
-
-void TimelineHeader::setZoomActions(QAction* zoomInAction,QAction* zoomOutAction)
-{
-    if(!zoomInAction_)
-    {
-        zoomInAction_=zoomInAction;
-        zoomOutAction_=zoomOutAction;
-
-        connect(zoomInAction_,SIGNAL(toggled(bool)),
-                this,SLOT(slotZoomState(bool)));
-
-        connect(zoomOutAction_,SIGNAL(triggered(bool)),
-                this,SLOT(slotZoomOut(bool)));
-
-        checkActionState();
-    }
-}
-
-bool TimelineHeader::isZoomEnabled() const
-{
-    return (zoomInAction_ && zoomInAction_->isEnabled())?(zoomInAction_->isChecked()):false;
-}
-
-void TimelineHeader::setZoomDisabled()
-{
-    if(zoomInAction_)
-        zoomInAction_->setChecked(false);
-}
-
-void TimelineHeader::slotZoomState(bool)
-{
-    Q_ASSERT(zoomInAction_);
-    if(!zoomInAction_->isChecked())
-    {
-        bool hasCursor=testAttribute(Qt::WA_SetCursor);
-        if(hasCursor && cursor().shape() !=  Qt::SplitHCursor)
-                unsetCursor();
-    }
-
-    headerDataChanged(Qt::Horizontal,0,timelineSection_);
-}
-
-void TimelineHeader::slotZoomOut(bool)
-{
-    if(!inZoom_ && !isZoomEnabled())
-    {
-        if(zoomHistory_.count() >= 2)
-        {
-            zoomHistory_.pop();
-            QDateTime sDt=zoomHistory_.top().first;
-            QDateTime eDt=zoomHistory_.top().second;
-            if(sDt.isValid() && eDt.isValid())
-            {
-                setPeriodCore(sDt,eDt,false);
-                Q_EMIT periodSelected(sDt,eDt);
-            }
-
-            checkActionState();
-        }
-    }
-}
-
-void TimelineHeader::checkActionState()
-{
-    if(zoomInAction_)
-    {
-        zoomOutAction_->setEnabled(zoomHistory_.count() >= 2);
-        zoomInAction_->setEnabled(canBeZoomed());
-    }
-}
-
-void TimelineHeader::setStartDate(QDateTime t)
-{
-    startDate_=t;
-    zoomHistory_.clear();
-    zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
-    headerDataChanged(Qt::Horizontal,0,timelineSection_);
-    checkActionState();
-}
-
-void TimelineHeader::setEndDate(QDateTime t)
-{
-    endDate_=t;
-    zoomHistory_.clear();
-    zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
-    headerDataChanged(Qt::Horizontal,0,timelineSection_);
-    checkActionState();
-}
-
-void TimelineHeader::setPeriod(QDateTime t1,QDateTime t2)
-{
-    zoomHistory_.clear();
-    setPeriodCore(t1,t2,true);
-}
-
-void TimelineHeader::setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory)
-{
-    startDate_=t1;
-    endDate_=t2;
-    if(addToHistory)
-    {
-        zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
-    }
-    headerDataChanged(Qt::Horizontal,0,timelineSection_);
-    checkActionState();
 }
