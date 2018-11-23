@@ -98,7 +98,7 @@
          <string>Show only nodes with a state change in the current period</string>
         </property>
         <property name="text">
-         <string>State changes</string>
+         <string>Changes</string>
         </property>
         <property name="icon">
          <iconset resource="viewer.qrc">
@@ -168,7 +168,7 @@
       <item>
        <widget class="QLabel" name="label_4">
         <property name="text">
-         <string>View:</string>
+         <string>View: </string>
         </property>
        </widget>
       </item>

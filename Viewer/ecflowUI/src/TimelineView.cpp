@@ -136,7 +136,6 @@ void TimelineDelegate::paint(QPainter *painter,const QStyleOptionViewItem &optio
     {
         renderSubmittedDuration(painter,option,index);
         QRect bgRect=option.rect;
-        painter->fillRect(bgRect,QColor(244,244,245));
         painter->setPen(borderPen_);
         painter->drawLine(bgRect.x()+bgRect.width()-1,bgRect.top(),
                           bgRect.x()+bgRect.width()-1,bgRect.bottom());

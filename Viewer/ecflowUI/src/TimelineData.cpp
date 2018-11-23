@@ -120,7 +120,7 @@ void TimelineItem::meanActiveDuration(float &meanVal,int& num) const
 
     for(size_t i=0; i < start_.size()-1; i++)
     {
-        if(VNState::isSubmitted(status_[i]))
+        if(VNState::isActive(status_[i]))
         {
             sum+=start_[i+1]-start_[i]; //secs
             num++;
