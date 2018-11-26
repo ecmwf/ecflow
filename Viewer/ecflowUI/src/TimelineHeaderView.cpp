@@ -71,9 +71,12 @@ StandardTimelineHeader::StandardTimelineHeader(QWidget *parent) :
 */
 
 QSize TimelineHeader::sizeHint() const
-{
+{    
     QSize s = QHeaderView::sizeHint(); //size();
-    s.setHeight(timelineFrameSize_ + fm_.height() + 6 + majorTickSize_ + fm_.height() + 6 + timelineFrameSize_);
+    if(hasTimelineColumn())
+    {
+        s.setHeight(timelineFrameSize_ + fm_.height() + 6 + majorTickSize_ + fm_.height() + 6 + timelineFrameSize_);
+    }
     return s;
 }
 
@@ -203,7 +206,7 @@ void TimelineHeader::mouseReleaseEvent(QMouseEvent *event)
 
 bool TimelineHeader::canBeZoomed() const
 {
-    if(isSectionHidden(TimelineModel::TimelineColumn) == false)
+    if(hasTimelineColumn())
     {
         return (endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch()) > 60*1000;
     }
@@ -710,6 +713,11 @@ bool TimelineHeader::inTimelineColumn(QPoint pos) const
     return logicalIndexAt(pos) == TimelineModel::TimelineColumn;
 }
 
+bool TimelineHeader::hasTimelineColumn() const
+{
+    return !isSectionHidden(TimelineModel::TimelineColumn);
+}
+
 void TimelineHeader::renderDuration(const QRect& rect,QPainter* painter,QBrush bgBrush,int duration) const
 {
     //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
@@ -940,7 +948,7 @@ void TimelineHeader::setMaxDurations(int submittedDuration,int activeDuration)
 
 void TimelineHeader::viewModeChanged()
 {
-    if(isSectionHidden(TimelineModel::TimelineColumn))
+    if(!hasTimelineColumn())
     {
         zoomHistory_.clear();
     }

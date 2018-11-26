@@ -63,6 +63,7 @@ protected:
     qint64 zoomPeriodInSec(QPoint startX,QPoint endX) const;
     void checkActionState();
     bool inTimelineColumn(QPoint pos) const;
+    bool hasTimelineColumn() const;
 
     QDateTime startDate_;
     QDateTime endDate_;

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>888</width>
+    <width>932</width>
     <height>664</height>
    </rect>
   </property>
@@ -30,13 +30,23 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0">
      <item>
       <widget class="QLabel" name="logInfoLabel">
        <property name="text">
         <string>TextLabel</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>  View mode: </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="modeCombo"/>
      </item>
      <item>
       <widget class="QToolButton" name="reloadTb">
@@ -164,16 +174,6 @@
          <bool>true</bool>
         </property>
        </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>View: </string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QComboBox" name="modeCombo"/>
       </item>
       <item>
        <spacer name="spacer">

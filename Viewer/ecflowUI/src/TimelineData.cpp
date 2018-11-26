@@ -22,9 +22,20 @@
 #include <QStringList>
 
 #include <algorithm>
+#include <limits>
 
 #include "TimelineData.hpp"
 #include "VNState.hpp"
+
+#include <limits>
+
+#ifndef SIZE_MAX
+#ifdef __SIZE_MAX__
+#define SIZE_MAX __SIZE_MAX__
+#else
+#define SIZE_MAX std::numeric_limits<size_t>::max()
+#endif
+#endif
 
 TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type) :
     path_(path),
