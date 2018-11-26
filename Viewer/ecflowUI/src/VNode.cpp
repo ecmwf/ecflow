@@ -524,6 +524,9 @@ std::string VNode::findVariable(const std::string& key,bool substitute) const
 	if(!node_ )
 	    return val;
 
+    //should set the def mutex because variableSubsitution
+    //might need information from the defs
+
 	const Variable& var=node_->findVariable(key);
 	if(!var.empty())
 	{
@@ -554,31 +557,17 @@ std::string VNode::findInheritedVariable(const std::string& key,bool substitute)
     if(!node_ )
     	return val;
 
-    const Variable& var=node_->findVariable(key);
-    if(!var.empty())
-    {
-    	val=var.theValue();
-    	if(substitute)
-    	{
-    		node_->variableSubsitution(val);
-    	}
-    	return val;
-    }
-    const Variable& gvar=node_->findGenVariable(key);
-    if(!gvar.empty())
-    {
-    	val=gvar.theValue();
-       	if(substitute)
-       	{
-       		node_->variableSubsitution(val);
-       	}
-       	return val;
-    }
+    //should set the def mutex because it might need information from the defs
+    //but it would be hang the GUI e.g. in the table view
 
-    //Try to find it in the parent
-    if(parent())
+    if(node_->findParentVariableValue(key,val))
     {
-    	return parent()->findInheritedVariable(key,substitute);
+        if(substitute)
+        {
+            //this must resolve ECF_MICRO all the time
+            node_->variableSubsitution(val);
+        }
+        return val;
     }
 
     return val;
