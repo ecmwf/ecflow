@@ -31,6 +31,7 @@ set(moc_files
     LogModel.hpp
     LogTruncator.hpp
     LogView.hpp
+    MessageLabel.hpp
 )
 
 if(ECFLOW_LOGVIEW)

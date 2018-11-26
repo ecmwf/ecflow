@@ -54,6 +54,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     //message label
     ui_->messageLabel->hide();
 
+    connect(ui_->messageLabel,SIGNAL(cancelLoad()),
+            this,SLOT(slotCancelFileTransfer()));
+
     data_=new TimelineData(this);
 
     connect(data_,SIGNAL(loadProgress(size_t,size_t)),
@@ -523,8 +526,8 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
     {
         localLog_=false;
         tmpLogFile_=VFile::createTmpFile(true); //will be deleted automatically
-        ui_->messageLabel->showInfo("Fetching file from remote host ... <br>");
-        ui_->messageLabel->startLoadLabel();
+        ui_->messageLabel->showInfo("Fetching file from remote host ...");
+        ui_->messageLabel->startLoadLabel(true);
 
         if(!fileTransfer_)
         {
@@ -577,7 +580,10 @@ void TimelineWidget::slotFileTransferFailed(QString err)
 
 void TimelineWidget::slotFileTransferStdOutput(QString msg)
 {
-    ui_->messageLabel->showInfo("Fetching file form remote host ... <br>" + msg);
+    if(!msg.simplified().isEmpty())
+    {
+        ui_->messageLabel->appendInfo(msg);
+    }
 }
 
 
@@ -587,6 +593,15 @@ void TimelineWidget::slotLogLoadProgress(size_t current,size_t total)
     if(percent >=0 && percent <=100)
         ui_->messageLabel->progress("",percent);
 
+}
+
+void TimelineWidget::slotCancelFileTransfer()
+{
+    if(fileTransfer_ && fileTransfer_->isActive())
+    {
+        //ui_->messageLabel->stopLoad();
+        fileTransfer_->stopTransfer();
+    }
 }
 
 void TimelineWidget::loadCore(QString logFile)

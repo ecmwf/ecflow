@@ -13,7 +13,11 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QMovie>
+#include <QPainter>
 #include <QProgressBar>
+#include <QStyle>
+#include <QStyleOption>
+#include <QToolButton>
 #include <QVariant>
 #include <QVBoxLayout>
 
@@ -85,19 +89,38 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	pixLabel_->setAlignment(Qt::AlignCenter);
 
 	msgLabel_=new QLabel(this);
-	msgLabel_->setWordWrap(true);
+    msgLabel_->setWordWrap(true);
 	msgLabel_->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
-	loadLabel_=new QLabel(this);
+    //load widget
+    loadWidget_=new QWidget(this);
+    loadTextLabel_=new QLabel("In progress ...",this);
+    loadIconLabel_=new QLabel(this);
+    loadCancelTb_=new QToolButton(this);
+    loadCancelTb_->setText(tr("Cancel"));
+    loadCancelTb_->setIcon(QPixmap(":/viewer/remove.svg"));
+    loadCancelTb_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+    QHBoxLayout* loadLayout=new QHBoxLayout(loadWidget_);
+    loadLayout->setContentsMargins(2,2,2,2);
+    loadLayout->addWidget(loadIconLabel_);
+    loadLayout->addWidget(loadTextLabel_);
+    loadLayout->addWidget(loadCancelTb_);
+    loadLayout->addStretch(1);
 
     //progress widget
     progLabel_=new QLabel(this);
     progBar_=new QProgressBar(this);
     progWidget_=new QWidget(this);
+    progCancelTb_=new QToolButton(this);
+    progCancelTb_->setText(tr("Cancel"));
+    progCancelTb_->hide();
+
     QHBoxLayout* progLayout=new QHBoxLayout(progWidget_);
     progLayout->setContentsMargins(2,2,2,2);
     progLayout->addWidget(progBar_);
     progLayout->addWidget(progLabel_);
+    progLayout->addWidget(progCancelTb_);
 
     QFont f;
     f.setPointSize(f.pointSize()-1);
@@ -108,11 +131,6 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	layout_=new QHBoxLayout(this);
 	layout_->setContentsMargins(2,2,2,2);	    
 
-    QVBoxLayout *loadLayout=new QVBoxLayout();
-    loadLayout->addWidget(loadLabel_);
-    loadLayout->addStretch(1);
-    layout_->addLayout(loadLayout);
-
     QVBoxLayout *pixLayout=new QVBoxLayout();
     pixLayout->addWidget(pixLabel_);
     pixLayout->addStretch(1);
@@ -121,6 +139,7 @@ MessageLabel::MessageLabel(QWidget *parent) :
     QVBoxLayout* rightVb=new QVBoxLayout;
     rightVb->addWidget(msgLabel_);
     rightVb->addWidget(progWidget_);
+    rightVb->addWidget(loadWidget_);
     rightVb->addStretch(1);
     layout_->addLayout(rightVb,1);
 
@@ -130,6 +149,13 @@ MessageLabel::MessageLabel(QWidget *parent) :
     stopProgress();
 
 	hide();
+
+    connect(loadCancelTb_,SIGNAL(clicked()),
+            this,SIGNAL(cancelLoad()));
+
+    connect(progCancelTb_,SIGNAL(clicked()),
+            this,SIGNAL(cancelProgress()));
+
 }
 
 void MessageLabel::clear()
@@ -208,7 +234,10 @@ void MessageLabel::showMessage(const Type& type,QString msg)
 	if(showTypeTitle_)
         s="<b>" + it->second.title_ + ": </b>" + s;
 
-	msgLabel_->setText(s);
+    if(s.endsWith("<br>"))
+        s=s.left(s.size()-4);
+
+    msgLabel_->setText(s);
 
 	show();
 }
@@ -219,26 +248,27 @@ void MessageLabel::appendMessage(const Type& type,QString msg)
     showMessage(type,message_);
 }
 
-void MessageLabel::startLoadLabel()
+void MessageLabel::startLoadLabel(bool showCancelButton)
 {
-	if(!loadLabel_->movie())
+    if(!loadIconLabel_->movie())
 	{
-		QMovie *movie = new QMovie(":viewer/spinning_wheel.gif", QByteArray(), loadLabel_);
-		loadLabel_->setMovie(movie);
+        QMovie *movie = new QMovie(":viewer/spinning_wheel.gif", QByteArray(), loadIconLabel_);
+        loadIconLabel_->setMovie(movie);
 	}
-	loadLabel_->show();
-	loadLabel_->movie()->start();
-}
 
+    loadWidget_->show();
+    loadCancelTb_->setVisible(showCancelButton);
+    loadIconLabel_->movie()->start();
+}
 
 void MessageLabel::stopLoadLabel()
 {
-	if(loadLabel_->movie())
+    if(loadIconLabel_->movie())
 	{
-		loadLabel_->movie()->stop();
+        loadIconLabel_->movie()->stop();
 	}
-
-	loadLabel_->hide();
+    loadCancelTb_->hide();
+    loadWidget_->hide();
 }
 
 void MessageLabel::startProgress(int max)
@@ -293,3 +323,10 @@ void MessageLabel::setNarrowMode(bool b)
     }*/
 }
 
+void  MessageLabel::paintEvent(QPaintEvent *)
+{
+     QStyleOption opt;
+     opt.init(this);
+     QPainter p(this);
+     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}

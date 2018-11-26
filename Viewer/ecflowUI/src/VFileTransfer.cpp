@@ -25,6 +25,11 @@ VFileTransfer::VFileTransfer(QObject* parent) :
 {
 }
 
+bool VFileTransfer::isActive() const
+{
+    return (proc_ && proc_->state() != QProcess::NotRunning);
+}
+
 void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,size_t lastBytes)
 {
     if(proc_)
@@ -91,7 +96,10 @@ void VFileTransfer::slotProcFinished(int exitCode,QProcess::ExitStatus exitStatu
         errTxt+="/n";
     }
     errTxt+=stdErrTxt;
-    errTxt.prepend("Script <b>" + scriptName_ + "</b> failed!. Output:\n\n");
+    QString errPreTxt="Script <b>" + scriptName_ + "</b> ";
+    errPreTxt+=(exitStatus==QProcess::CrashExit)?"interrupted!":"failed!";
+    errPreTxt+=" Output:\n\n";
+    errTxt.prepend(errPreTxt);
 
     if(exitCode == 0 && exitStatus == QProcess::NormalExit)
     {

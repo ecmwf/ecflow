@@ -22,6 +22,7 @@ public:
     VFileTransfer(QObject* parent=0);
     void transfer(QString sourceFile,QString host,QString targetFile,size_t lastBytes);
     void stopTransfer();
+    bool isActive() const;
 
 protected Q_SLOTS:
     void slotProcFinished(int,QProcess::ExitStatus);

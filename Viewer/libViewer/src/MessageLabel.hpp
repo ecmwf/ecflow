@@ -16,9 +16,11 @@
 class QHBoxLayout;
 class QLabel;
 class QProgressBar;
+class QToolButton;
 
 class MessageLabel : public QWidget
 {
+    Q_OBJECT
 public:
 	explicit MessageLabel(QWidget *parent=0);
 
@@ -32,14 +34,22 @@ public:
     void appendWarning(QString);
     void appendError(QString);
     void appendTip(QString);
-	void startLoadLabel();
+    void startLoadLabel(bool showCacelButton=false);
 	void stopLoadLabel();
     void startProgress(int max=0);
+    void showProgressCancelButton(bool);
     void stopProgress();
     void progress(QString text,int value);
 	void setShowTypeTitle(bool);
 	void clear();
     void setNarrowMode(bool);
+
+Q_SIGNALS:
+    void cancelProgress();
+    void cancelLoad();
+
+protected:
+    void paintEvent(QPaintEvent *);
 
 private:
     void showMessage(const Type&,QString);
@@ -50,13 +60,16 @@ private:
 	Type currentType_;
 	QLabel *pixLabel_;
 	QLabel* msgLabel_;
-	QLabel* loadLabel_;
+    QWidget* loadWidget_;
+    QLabel* loadIconLabel_;
+    QLabel* loadTextLabel_;
+    QToolButton* loadCancelTb_;
 	QHBoxLayout* layout_;
     QWidget* progWidget_;
     QLabel*  progLabel_;
     QProgressBar* progBar_;
+    QToolButton* progCancelTb_;
     QString message_;
-
 };
 
 #endif
