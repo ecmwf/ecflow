@@ -22,7 +22,7 @@ class MessageLabel : public QWidget
 {
     Q_OBJECT
 public:
-	explicit MessageLabel(QWidget *parent=nullptr);
+	explicit MessageLabel(QWidget *parent=0);
 
     enum Type {NoType,InfoType,WarningType,ErrorType,TipType};
 
@@ -55,9 +55,9 @@ private:
     void showMessage(const Type&,QString);
     void appendMessage(const Type&,QString);
 
-	bool showTypeTitle_{true};
-    bool narrowMode_{false};
-	Type currentType_{NoType};
+	bool showTypeTitle_;
+    bool narrowMode_;
+	Type currentType_;
 	QLabel *pixLabel_;
 	QLabel* msgLabel_;
     QWidget* loadWidget_;

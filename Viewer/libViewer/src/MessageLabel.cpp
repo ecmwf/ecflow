@@ -25,7 +25,7 @@
 #include "UiLog.hpp"
 
 #include <map>
-#include <cassert>
+#include <assert.h>
 
 class MessageLabelData {
 public:
@@ -46,7 +46,7 @@ public:
         }
     }
 
-    MessageLabelData()  = default;
+    MessageLabelData()  {}
 
 	QPixmap pix_;
     QPixmap pixSmall_;
@@ -58,7 +58,11 @@ public:
 
 static std::map<MessageLabel::Type,MessageLabelData> typeData;
 
-MessageLabel::MessageLabel(QWidget *parent) : QWidget(parent)
+MessageLabel::MessageLabel(QWidget *parent) :
+	QWidget(parent),
+    showTypeTitle_(true),
+    narrowMode_(false),
+    currentType_(NoType)
 {
 	setProperty("base","1");
 
@@ -108,18 +112,12 @@ MessageLabel::MessageLabel(QWidget *parent) : QWidget(parent)
     progLabel_=new QLabel(this);
     progBar_=new QProgressBar(this);
     progWidget_=new QWidget(this);
-<<<<<<< HEAD
-    auto* progLayout=new QHBoxLayout(progWidget_);
-||||||| merged common ancestors
-    QHBoxLayout* progLayout=new QHBoxLayout(progWidget_);
-=======
     progCancelTb_=new QToolButton(this);
     progCancelTb_->setText(tr("Cancel"));
     progCancelTb_->hide();
 
     QHBoxLayout* progLayout=new QHBoxLayout(progWidget_);
     progLayout->setContentsMargins(2,2,2,2);
->>>>>>> develop
     progLayout->addWidget(progBar_);
     progLayout->addWidget(progLabel_);
     progLayout->addWidget(progCancelTb_);
@@ -133,28 +131,12 @@ MessageLabel::MessageLabel(QWidget *parent) : QWidget(parent)
 	layout_=new QHBoxLayout(this);
 	layout_->setContentsMargins(2,2,2,2);	    
 
-<<<<<<< HEAD
-    auto *loadLayout=new QVBoxLayout();
-    loadLayout->addWidget(loadLabel_);
-    loadLayout->addStretch(1);
-    layout_->addLayout(loadLayout);
-
-    auto *pixLayout=new QVBoxLayout();
-||||||| merged common ancestors
-    QVBoxLayout *loadLayout=new QVBoxLayout();
-    loadLayout->addWidget(loadLabel_);
-    loadLayout->addStretch(1);
-    layout_->addLayout(loadLayout);
-
     QVBoxLayout *pixLayout=new QVBoxLayout();
-=======
-    QVBoxLayout *pixLayout=new QVBoxLayout();
->>>>>>> develop
     pixLayout->addWidget(pixLabel_);
     pixLayout->addStretch(1);
     layout_->addLayout(pixLayout);
 
-    auto* rightVb=new QVBoxLayout;
+    QVBoxLayout* rightVb=new QVBoxLayout;
     rightVb->addWidget(msgLabel_);
     rightVb->addWidget(progWidget_);
     rightVb->addWidget(loadWidget_);
