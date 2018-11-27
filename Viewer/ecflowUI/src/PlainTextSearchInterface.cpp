@@ -24,7 +24,9 @@ bool PlainTextSearchInterface::findString (QString str, bool highlightAll, QText
 		return false;
 
     if(editor_->document()->isEmpty())
+    {
         return false;
+    }
 
 	QTextCursor cursor(editor_->textCursor());
 

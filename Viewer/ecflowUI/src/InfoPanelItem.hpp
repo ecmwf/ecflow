@@ -58,6 +58,7 @@ public:
 
     bool isSuspended() const {return suspended_;}
     bool keepServerDataOnLoad() const {return keepServerDataOnLoad_;}
+    virtual void notifyInfoChanged(const std::string& path) {}
 
 	//From VTaskObserver
     void taskChanged(VTask_ptr) override {}

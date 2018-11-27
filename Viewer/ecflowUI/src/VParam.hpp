@@ -21,7 +21,7 @@ public:
 		explicit VParam(const std::string& name);
         ~VParam() override;
 
-        uint id() const {return id_;}
+        unsigned int id() const {return id_;}
 		QString name() const {return qName_;}
 		const std::string& strName() const {return name_;}
 

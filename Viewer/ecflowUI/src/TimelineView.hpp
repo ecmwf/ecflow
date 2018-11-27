@@ -11,6 +11,7 @@
 #ifndef TIMELINEVIEW_HPP
 #define TIMELINEVIEW_HPP
 
+#include <QAction>
 #include <QHeaderView>
 #include <QStyledItemDelegate>
 #include <QTreeView>
@@ -23,50 +24,13 @@
 
 class ActionHandler;
 class PropertyMapper;
-class TimelineHeader;
 class TimelineModel;
 class TimelineSortModel;
 class VSettings;
 
-class TimelineDelegate : public QStyledItemDelegate, public VPropertyObserver
-{
- Q_OBJECT
-
-public:
-    explicit TimelineDelegate(TimelineModel* model,QWidget *parent=0);
-    ~TimelineDelegate();
-
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
-
-    void notifyChange(VProperty* p);
-
-    void setStartDate(QDateTime);
-    void setEndDate(QDateTime);
-    void setPeriod(QDateTime t1,QDateTime t2);
-
-
-Q_SIGNALS:
-    void sizeHintChangedGlobal();
-
-protected:
-    void updateSettings();
-    void renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,int) const;
-    int timeToPos(QRect r,unsigned int time) const;
-
-    //void renderNode(QPainter *painter,const QModelIndex& index,
-    //                const QStyleOptionViewItem& option,QString text) const;
-
-    //ModelColumn* columns_;
-    TimelineModel* model_;
-    PropertyMapper* prop_;
-    QFont font_;
-    QPen borderPen_;
-    QDateTime startDate_;
-    QDateTime endDate_;
-};
-
+class TimelineHeader;
+class TimelineDelegate;
+class TimelineHeader;
 
 class TimelineView : public QTreeView,public VPropertyObserver
 {
@@ -76,6 +40,9 @@ public:
     explicit TimelineView(TimelineSortModel* model,QWidget *parent=0);
     ~TimelineView();
 
+    enum ViewMode {TimelineMode,DurationMode};
+    ViewMode viewMode() const {return viewMode_;}
+
     void rerender();
 
     VInfo_ptr currentSelection();
@@ -83,6 +50,8 @@ public:
     void setStartDate(QDateTime);
     void setEndDate(QDateTime);
     void setPeriod(QDateTime t1,QDateTime t2);
+    void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
+    void setViewMode(ViewMode);
 
     void notifyChange(VProperty* p);
 
@@ -97,6 +66,9 @@ protected Q_SLOTS:
     void slotSizeHintChangedGlobal();
     void slotRerender();
     void periodSelectedInHeader(QDateTime t1,QDateTime t2);
+    void slotHzScrollbar(int,int);
+    void adjustHeader();
+
 
 Q_SIGNALS:
     void selectionChanged(VInfo_ptr);
@@ -116,72 +88,66 @@ protected:
     void showDetails(const QModelIndex& indexClicked);
     void lookup(const QModelIndex&);
     void copyPath(const QModelIndex&);
+    void updateDurations();
+    int computeMaxDuration(QString);
 
     TimelineSortModel* model_;
     ActionHandler* actionHandler_;
     TimelineHeader* header_;
+    bool headerBeingAdjusted_;
     TimelineDelegate *delegate_;
     bool needItemsLayout_;
     PropertyMapper* prop_;
     bool setCurrentIsRunning_;
+    ViewMode viewMode_;
+    QDateTime startDate_;
+    QDateTime endDate_;
 };
 
 
-class TimelineHeader : public QHeaderView
+class TimelineDelegate : public QStyledItemDelegate, public VPropertyObserver
 {
-Q_OBJECT
+ Q_OBJECT
 
 public:
-    explicit TimelineHeader(QWidget *parent=0);
+    explicit TimelineDelegate(TimelineModel* model,QWidget *parent);
+    ~TimelineDelegate();
 
-    QSize sizeHint() const;
-    void setModel(QAbstractItemModel *model);
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    void paint(QPainter *painter,const QStyleOptionViewItem &option,
+                   const QModelIndex& index) const;
+
+    void notifyChange(VProperty* p);
 
     void setStartDate(QDateTime);
     void setEndDate(QDateTime);
     void setPeriod(QDateTime t1,QDateTime t2);
-    QDateTime startDate() const {return startDate_;}
-    QDateTime endDate() const {return endDate_;}
-
-protected Q_SLOTS:
-    void slotSectionResized(int i);
+    void setMaxDurations(int submittedDuration,int activeDuration);
 
 Q_SIGNALS:
-    void customButtonClicked(QString,QPoint);
-    void periodSelected(QDateTime,QDateTime);
-    void periodBeingZoomed(QDateTime,QDateTime);
+    void sizeHintChangedGlobal();
 
 protected:
-    void showEvent(QShowEvent *QSize);
-    void paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const;
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void renderTimeline(const QRect& rect,QPainter* painter) const;
+    void updateSettings();
+    void renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,int) const;
+    void renderSubmittedDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
+    void renderActiveDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
+    void renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect) const;
+    void drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const;
+    int timeToPos(QRect r,unsigned int time) const;
 
-    void setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory);
-    int secToPos(qint64 t,QRect rect) const;
-    QDateTime posToDate(QPoint pos) const;
-    int dateToPos(QDateTime dt) const;
-    bool canBeZoomed() const;
-    qint64 zoomPeriodInSec(QPoint startX,QPoint endX) const;
-
-    QDateTime startDate_;
-    QDateTime endDate_;
-    QPixmap customPix_;
+    TimelineModel* model_;
+    PropertyMapper* prop_;
     QFont font_;
     QFontMetrics fm_;
-    QColor timelineCol_;
-    QColor dateTextCol_;
-    QColor timeTextCol_;
-    QPoint zoomStartPos_;
-    QPoint zoomEndPos_;
-    bool inZoom_;
-    QStack<QPair<QDateTime,QDateTime> > zoomHistory_;
-    QCursor zoomCursor_;
-    QColor zoomCol_;
-    int timelineSection_;
-    int timelineFrameSize_;
+    QPen borderPen_;
+    int topPadding_;
+    int bottomPadding_;
+    QDateTime startDate_;
+    QDateTime endDate_;
+    int submittedMaxDuration_;
+    int activeMaxDuration_;
+    int durationMaxTextWidth_;
 };
 
 #endif // TIMELINEVIEW_HPP

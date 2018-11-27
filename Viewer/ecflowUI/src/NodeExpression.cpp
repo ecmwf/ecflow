@@ -1029,7 +1029,7 @@ IsoDateCondition::IsoDateCondition(QString dateStr)
 std::string IsoDateCondition::print()
 {
     if(secsSinceEpoch_ > 0)
-        return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_*1000).toString(Qt::ISODate).toStdString();
+        return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_*1000,Qt::UTC).toString(Qt::ISODate).toStdString();
     return std::string();
 }
 

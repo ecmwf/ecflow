@@ -438,6 +438,9 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 	if(currentItem)
     {
         currentItem->setSelected(true,info);
+        if(info_ && currentItem->keepServerDataOnLoad())
+            currentItem->notifyInfoChanged(info_->nodePath());
+
         //currentItem->reload(info);
 	}
 }

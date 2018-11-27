@@ -275,8 +275,8 @@ void LogLoadWidget::load(QString serverName, QString host, QString port, QString
 
 void LogLoadWidget::periodChanged(qint64 start,qint64 end)
 {
-    QDateTime startDt=QDateTime::fromMSecsSinceEpoch(start);
-    QDateTime endDt=QDateTime::fromMSecsSinceEpoch(end);
+    QDateTime startDt=QDateTime::fromMSecsSinceEpoch(start,Qt::UTC);
+    QDateTime endDt=QDateTime::fromMSecsSinceEpoch(end,Qt::UTC);
     ui_->startTe->setDateTime(startDt);
     ui_->endTe->setDateTime(endDt);
 }
@@ -905,8 +905,8 @@ void ChartView::doZoom(qint64 start,qint64 end)
     //QRectF r(chart()->mapToPosition(QPointF(start,left.y())),
     //         chart()->mapToPosition(QPointF(end,left.y()+1)));
 
-    UiLog().dbg() << "start " << QDateTime::fromMSecsSinceEpoch(start);
-    UiLog().dbg() << "end " << QDateTime::fromMSecsSinceEpoch(end);
+    UiLog().dbg() << "start " << QDateTime::fromMSecsSinceEpoch(start,Qt::UTC);
+    UiLog().dbg() << "end " << QDateTime::fromMSecsSinceEpoch(end,Qt::UTC);
 
     if(r.isValid())
     {
@@ -974,7 +974,7 @@ void ChartView::setCallout(qreal val)
     {
         qreal m=axisY->max();
         callout_->setAnchor(QPointF(val,m));
-        QString txt=QDateTime::fromMSecsSinceEpoch(val).toString("hh:mm:ss dd/MM/yyyy");
+        QString txt=QDateTime::fromMSecsSinceEpoch(val,Qt::UTC).toString("hh:mm:ss dd/MM/yyyy");
         callout_->setText(txt);
     }
 }
@@ -1919,11 +1919,9 @@ void LogRequestView::scanPositionChanged(qreal pos)
 
     //QColor dateCol(210,212,218);
     QColor dateCol(210,211,214);
-    //QString dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(data_->time()[idx]).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
-    //QString txt=Viewer::formatText("date (): " + dateTxt, dateCol);
 
     QString txt="<table width=\'100%\' cellpadding=\'4px\'>";
-    QString dateTxt=QDateTime::fromMSecsSinceEpoch(t).toString("hh:mm:ss dd/MM/yyyy");
+    QString dateTxt=QDateTime::fromMSecsSinceEpoch(t,Qt::UTC).toString("hh:mm:ss dd/MM/yyyy");
 
     txt="<tr>" +
         Viewer::formatTableTdText("Date (cursor): ",dateCol) +
@@ -1931,10 +1929,10 @@ void LogRequestView::scanPositionChanged(qreal pos)
         "</tr>";
 
     //Viewer::formatText("date (at cursor): </td>" +
-    //                QDateTime::fromMSecsSinceEpoch(t).toString("hh:mm:ss dd/MM/yyyy"),
+    //                QDateTime::fromMSecsSinceEpoch(t,Qt::UTC).toString("hh:mm:ss dd/MM/yyyy"),
     //                dateCol);
 
-    dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(seriesTime(idx)).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
+    dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(seriesTime(idx),Qt::UTC).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
     txt+="<tr>" +
         Viewer::formatTableTdText("Date (nearest):",dateCol) +
         Viewer::formatTableTdBg(dateTxt,dateCol) +

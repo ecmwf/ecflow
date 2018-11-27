@@ -42,6 +42,7 @@ set(viewer_srcs
     EditItemWidget.cpp
     EditProvider.cpp
     EditorInfoLabel.cpp
+    EventEditor.cpp
     ExpandState.cpp
     ExpandStateNode.cpp
     FlagSet.hpp
@@ -155,6 +156,7 @@ set(viewer_srcs
     TextFilterHandlerDialog.cpp
     TextFilterWidget.cpp   
     TimeItemWidget.cpp
+    TimelineHeaderView.cpp
     TimelineInfoDelegate.cpp
     TimelineInfoWidget.cpp
     TimelineItemWidget.cpp
@@ -190,6 +192,7 @@ set(viewer_srcs
     VInfo.cpp
     VFile.cpp
     VFileInfo.cpp
+    VFileTransfer.cpp
     VItem.cpp
     VItemPathParser.cpp
     VLabelAttr.cpp
@@ -276,6 +279,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     DashboardTitle.hpp
     DashboardWidget.hpp
     EditItemWidget.hpp
+    EventEditor.hpp
     FileWatcher.hpp
     FilterWidget.hpp
     GotoLineDialog.hpp
@@ -344,7 +348,10 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TextEditSearchLine.hpp
     TextFilterHandlerDialog.hpp
     TextFilterWidget.hpp
+    TimelineData.hpp
+    TimelineHeaderView.hpp
     TimelineInfoWidget.hpp
+    TimelineModel.hpp
     TimelineView.hpp
     TimelineWidget.hpp
     TreeNodeModel.hpp
@@ -361,6 +368,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     VariableModel.hpp
     VariableModelData.hpp
     VariableSearchLine.hpp
+    VFileTransfer.hpp
     VFilter.hpp
     VModelData.hpp
     VNodeList.hpp
@@ -391,6 +399,7 @@ set(viewer_wrap_ui_files
     DashboardDialog.ui
     DashboardDockTitleWidget.ui
     EditItemWidget.ui
+    EventEditorWidget.ui
     GotoLineDialog.ui
     HistoryItemWidget.ui
     HtmlItemWidget.ui

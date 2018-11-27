@@ -100,7 +100,7 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 
     //rest of the columns
     else
-    {
+    {      
         QString text=index.data(Qt::DisplayRole).toString();
         QRect textRect = vopt.rect;
         textRect.setX(textRect.x()+4);
@@ -125,6 +125,11 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
         }
 
     }
+
+    QColor fg=index.data(Qt::UserRole).value<QColor>();
+    if(fg.isValid())
+        painter->fillRect(vopt.rect,fg);
+
 
     //Render the horizontal border for rows. We only render the top border line.
     //With this technique we miss the bottom border line of the last row!!!

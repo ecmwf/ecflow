@@ -425,7 +425,9 @@ TextPagerCursor TextPagerDocument::find(const QRegExp &regexp, const TextPagerCu
 #endif
 
     if(documentSize() == 0)
+    {
         return TextPagerCursor();
+    }
 
 	if(regexp.isEmpty())
 		return TextPagerCursor();

@@ -17,6 +17,7 @@
 
 #include "MessageLabel.hpp"
 #include "ServerHandler.hpp"
+#include "SuiteFilter.hpp"
 #include "UiLog.hpp"
 #include "VNode.hpp"
 #include "VNState.hpp"
@@ -25,7 +26,8 @@
 #include "TimelineData.hpp"
 #include "TimelineWidget.hpp"
 
-TimelineItemWidget::TimelineItemWidget(QWidget *parent)
+TimelineItemWidget::TimelineItemWidget(QWidget *parent) :
+    delayedLoad_(false)
 {
     QVBoxLayout* vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
@@ -66,7 +68,13 @@ void TimelineItemWidget::reload(VInfo_ptr info)
     info_=info;
 
     if(!same)
+    {
         load();
+    }
+    else if(info_)
+    {
+        w_->selectPathInView(info_->nodePath());
+    }
 }
 
 void TimelineItemWidget::load()
@@ -75,27 +83,44 @@ void TimelineItemWidget::load()
     {
         ServerHandler *sh=info_->server();
         Q_ASSERT(sh);
-        QString logFile;
-        if(VServer* vs=sh->vRoot())
+
+        if(sh->activity() == ServerHandler::LoadActivity)
         {
-            logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
-            w_->load(QString::fromStdString(sh->name()),
+            delayedLoad_=true;
+        }
+        else
+        {
+            if(VServer* vs=sh->vRoot())
+            {
+                QString logFile=QString::fromStdString(vs->findVariable("ECF_LOG",false));
+                if(!logFile.isEmpty())
+                {
+                    std::vector<std::string> suites;
+                    if(SuiteFilter* sf=sh->suiteFilter())
+                    {
+                        suites=sh->suiteFilter()->filter();
+                    }
+
+                    w_->load(QString::fromStdString(sh->name()),
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
-                         logFile); //last 25 MB are read
+                         logFile, suites); //last 100 MB are read
+                }
+            }
         }
+    }
+
+    if(info_)
+    {
+       w_->selectPathInView(info_->nodePath());
     }
 }
 
 void TimelineItemWidget::clearContents()
 {
     w_->clear();
+    delayedLoad_=false;
     InfoPanelItem::clear();
-}
-
-//We are independent of the server's state
-void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
-{
 }
 
 bool TimelineItemWidget::hasSameContents(VInfo_ptr info)
@@ -107,9 +132,51 @@ bool TimelineItemWidget::hasSameContents(VInfo_ptr info)
     return false;
 }
 
-//We are independent of the server's state
+void TimelineItemWidget::notifyInfoChanged(const std::string& path)
+{
+    if(info_)
+        w_->selectPathInView(path);
+}
+
 void TimelineItemWidget::serverSyncFinished()
 {
+    if(delayedLoad_)
+        load();
+}
+
+void TimelineItemWidget::connectStateChanged()
+{
+    if(frozen_)
+        return;
+
+    if(delayedLoad_)
+        load();
+}
+
+void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
+{
+    if(flags.isSet(SuspendedChanged))
+    {
+        //Suspend
+        if(suspended_)
+        {
+            //reloadTb_->setEnabled(false);
+        }
+        //Resume
+        else
+        {
+            if(info_ && info_->node())
+            {
+                //reloadTb_->setEnabled(true);
+                if(delayedLoad_)
+                    load();
+            }
+            else
+            {
+                clearContents();
+            }
+        }
+    }
 }
 
 void TimelineItemWidget::writeSettings(VComboSettings* vs)

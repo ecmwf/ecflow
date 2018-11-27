@@ -29,6 +29,7 @@ public:
     QWidget* realWidget();
     void clearContents();
     bool hasSameContents(VInfo_ptr info);
+    void notifyInfoChanged(const std::string& path);
 
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
@@ -39,11 +40,12 @@ public:
 protected:
     void updateState(const ChangeFlags&);
     void serverSyncFinished();
-
+    void connectStateChanged();
 private:
     void load();
 
     TimelineWidget* w_;
+    bool delayedLoad_;
 };
 
 #endif // TIMELINEITEMWIDGET_HPP

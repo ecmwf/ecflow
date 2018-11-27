@@ -76,10 +76,17 @@ bool TriggeredCollector::add(VItem* trigger, VItem*,Mode)
     {
         n->addTriggeredData(node_);
     }
-    return false;
 
-    //else if(trigger->isAttribute())
-    //    trigger->parent()->addTriggeredData(node_,trigger);
+    else if(VAttribute* a=trigger->isAttribute())
+    {
+        trigger->parent()->addTriggeredData(node_,a);
+
+//        if(a->type() && a->type()->name() == "event")
+//        {
+//            trigger->parent()->addTriggeredData(node_,a);
+//        }
+    }
+    return false;
 }
 
 const std::set<TriggerCollector::Mode>& TriggerTableItem::modes() const

@@ -43,7 +43,7 @@ bool TimelineModel::hasData() const
 
 int TimelineModel::columnCount( const QModelIndex& /*parent */) const
 {
-     return 2;
+     return 4;
 }
 
 int TimelineModel::rowCount( const QModelIndex& parent) const
@@ -78,38 +78,93 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
 
     if(role == Qt::DisplayRole)
     {
-        if(index.column() == 0)
+        if(index.column() == PathColumn)
             return QString::fromStdString(data_->items()[row].path());
-#if 0
-        else if(index.column() == 1)
-        {
-            switch(data_->items()[row].type())
-            {
-            case TimelineItem::TaskType:
-                return "task";
-            case TimelineItem::FamilyType:
-                return "family";
-            case TimelineItem::SuiteType:
-                return "suite";
-            case TimelineItem::ServerType:
-                return "server";
-            default:
-                return "???";
-            }
-        }
-
-#endif
+        else if(index.column() == TimelineColumn)
+            return row;
+        else if(index.column() == SubmittedDurationColumn)
+            return data_->items()[row].firstSubmittedDuration(startDate_,endDate_);
+        else if(index.column() == ActiveDurationColumn)
+            return data_->items()[row].firstActiveDuration(startDate_,endDate_);
         else
             return row;
     }
 
-    //filter
+    //sort roles
+    else if(role  == PathSortRole)
+    {
+        if(index.column() ==  PathColumn)
+            return static_cast<qint64>(data_->items()[row].sortIndex());
+        else
+            return QVariant();
+    }
+
+    //sort roles
+    else if(role  == TimeSortRole)
+    {
+        unsigned int start=TimelineItem::fromQDateTime(startDate_);
+        unsigned int end=TimelineItem::fromQDateTime(endDate_);
+        for(size_t i=0; i <= data_->items()[row].size(); i++)
+        {
+            unsigned int val=data_->items()[row].start_[i];
+            if(val >= start)
+            {
+                if(val <=end)
+                    return val;
+                else
+                    return end+2;
+            }
+        }
+        return end+1;
+    }
+
+    //task filter
     else if(role == Qt::UserRole)
     {
-        if(index.column() == 0)
+        if(index.column() ==  PathColumn)
             return data_->items()[row].isTask();
         else
             return QVariant();
+    }
+
+    //filter = unchanged in period
+    else if(role  == UnchangedRole)
+    {
+        unsigned int start=TimelineItem::fromQDateTime(startDate_);
+        unsigned int end=TimelineItem::fromQDateTime(endDate_);
+        for(size_t i=0; i <= data_->items()[row].size(); i++)
+        {
+            unsigned int val=data_->items()[row].start_[i];
+            if(val >= start && val <= end)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    //duration of first submitted task in period preceding the first active state
+    else if(role  == MeanDurationRole)
+    {
+        int num=0;
+        float meanVal=-1.;
+        QVariantList  vals;
+        if(index.column() == SubmittedDurationColumn)
+        {
+            data_->items()[row].meanSubmittedDuration(meanVal,num);
+            vals << meanVal << num;
+        }
+        else if(index.column() == ActiveDurationColumn)
+        {
+            data_->items()[row].meanActiveDuration(meanVal,num);
+            vals << meanVal << num;
+        }
+        return vals;
+    }
+
+    //duration of first submitted task in period preceding the first active state
+    else if(role  == DurationStatRole)
+    {
     }
 
     return QVariant();
@@ -124,10 +179,14 @@ QVariant TimelineModel::headerData( const int section, const Qt::Orientation ori
     {
         switch(section)
         {
-        case 0:
-            return "Path";       
-        case 1:
+        case PathColumn:
+            return tr("Path");
+        case TimelineColumn:
             return "";
+        case SubmittedDurationColumn:
+            return tr("First submitted duration in period");
+        case ActiveDurationColumn:
+            return tr("First active duration in period");
         default:
             return QVariant();
         }
@@ -158,6 +217,25 @@ QModelIndex TimelineModel::parent(const QModelIndex &child) const
     return QModelIndex();
 }
 
+void TimelineModel::setPeriod(QDateTime t1,QDateTime t2)
+{
+    startDate_=t1;
+    endDate_=t2;
+    Q_EMIT periodChanged();
+}
+
+void TimelineModel::setStartDate(QDateTime t)
+{
+    startDate_=t;
+    Q_EMIT periodChanged();
+}
+
+void TimelineModel::setEndDate(QDateTime t)
+{
+    endDate_=t;
+    Q_EMIT periodChanged();
+}
+
 //===========================================
 //
 // TimelineSortModel
@@ -168,11 +246,15 @@ TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
         QSortFilterProxyModel(parent),
         tlModel_(tlModel),
         skipSort_(false),
-        taskFilter_(false)
+        sortMode_(PathSortMode),
+        ascending_(true),
+        taskFilter_(false),
+        showChangedOnly_(true)
 {
     Q_ASSERT(tlModel_);
-    //connect(nodeModel_,SIGNAL(filterChanged()),
-    //		this,SLOT(slotFilterChanged()));
+
+    connect(tlModel_,SIGNAL(periodChanged()),
+            this,SLOT(slotPeriodChanged()));
 
     QSortFilterProxyModel::setSourceModel(tlModel_);
 
@@ -183,27 +265,56 @@ TimelineSortModel::~TimelineSortModel()
 {
 }
 
-#if 0
-void TimelineSortModel::selectionChanged(QModelIndexList lst)
+void TimelineSortModel::slotPeriodChanged()
 {
-    QModelIndexList lstm;
-    Q_FOREACH(QModelIndex idx,lst)
-        lstm << mapToSource(idx);
-
-    nodeModel_->selectionChanged(lstm);
+    if(sortMode_ == TimeSortMode || showChangedOnly_)
+    {
+        invalidate();
+        Q_EMIT invalidateCalled();
+    }
 }
-#endif
+
+void TimelineSortModel::setSortMode(SortMode mode)
+{
+    if(sortMode_ != mode)
+    {
+        sortMode_ = mode;
+        invalidate();
+        Q_EMIT invalidateCalled();
+    }
+}
+
+void TimelineSortModel::setSortDirection(bool ascending)
+{
+    ascending_=ascending;
+    sort(0,(ascending_)?Qt::AscendingOrder:Qt::DescendingOrder);
+}
 
 void TimelineSortModel::setPathFilter(QString pathFilter)
 {
     pathFilter_=pathFilter;
+    pathFilterRx_=QRegExp(pathFilter_);
+    pathFilterRx_.setPatternSyntax(QRegExp::Wildcard);
+    pathFilterRx_.setCaseSensitivity(Qt::CaseInsensitive);
     invalidate();
+    Q_EMIT invalidateCalled();
 }
 
 void TimelineSortModel::setTaskFilter(bool taskFilter)
 {
-    taskFilter_=taskFilter;
+    taskFilter_=taskFilter;    
     invalidate();
+    Q_EMIT invalidateCalled();
+}
+
+void TimelineSortModel::setShowChangedOnly(bool h)
+{
+    if(showChangedOnly_ != h)
+    {
+        showChangedOnly_ = h;
+        invalidate();
+        Q_EMIT invalidateCalled();
+    }
 }
 
 bool TimelineSortModel::lessThan(const QModelIndex &left,
@@ -212,13 +323,17 @@ bool TimelineSortModel::lessThan(const QModelIndex &left,
     if(skipSort_)
         return true;
 
-    if(left.column() == 0)
+    if(sortMode_ == PathSortMode)
     {
-        QVariant leftData = tlModel_->data(left);
-        QVariant rightData = tlModel_->data(right);
-
-        return leftData.toString() < rightData.toString();
+        return tlModel_->data(left,TimelineModel::PathSortRole).toInt() <
+               tlModel_->data(right,TimelineModel::PathSortRole).toInt();
     }
+    else if(sortMode_ == TimeSortMode)
+    {
+         return tlModel_->data(left,TimelineModel::TimeSortRole).toUInt() <
+               tlModel_->data(right,TimelineModel::TimeSortRole).toUInt();
+    }
+
     return true;
 }
 
@@ -227,12 +342,17 @@ bool TimelineSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &/*sou
     bool matched=true;
     if(!pathFilter_.isEmpty())
     {
-        matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilter_);
+        matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilterRx_);
     }
 
     if(matched && taskFilter_)
     {
         matched=tlModel_->data(tlModel_->index(sourceRow,0),Qt::UserRole).toBool();
+    }
+
+    if(matched && showChangedOnly_)
+    {
+        matched=(tlModel_->data(tlModel_->index(sourceRow,0),TimelineModel::UnchangedRole).toBool() == false);
     }
 
     return matched;

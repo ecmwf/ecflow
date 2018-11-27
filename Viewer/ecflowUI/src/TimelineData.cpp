@@ -21,14 +21,24 @@
 #include <QFileInfo>
 #include <QStringList>
 
-#include <functional>
+#include <algorithm>
+#include <limits>
 
 #include "TimelineData.hpp"
 #include "VNState.hpp"
 
-TimelineItem::TimelineItem(const std::string& path,size_t pathHash,unsigned char status,unsigned int time,Type type) :
+#include <limits>
+
+#ifndef SIZE_MAX
+#ifdef __SIZE_MAX__
+#define SIZE_MAX __SIZE_MAX__
+#else
+#define SIZE_MAX std::numeric_limits<size_t>::max()
+#endif
+#endif
+
+TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type) :
     path_(path),
-    pathHash_(pathHash),
     type_(type)
 {
     add(status,time);
@@ -36,22 +46,119 @@ TimelineItem::TimelineItem(const std::string& path,size_t pathHash,unsigned char
 
 void TimelineItem::add(unsigned char status,unsigned int time)
 {
-    if(end_.size() > 0)
-        end_[end_.size()-1]=time;
-
     status_.push_back(status);
-    start_.push_back(time);
-    end_.push_back(0);
+    start_.push_back(time); 
 }
+
+int  TimelineItem::firstInPeriod(QDateTime startDt,QDateTime endDt) const
+{
+    unsigned int start=fromQDateTime(startDt);
+    unsigned int end=fromQDateTime(startDt);
+    for(size_t i=0; i < start_.size(); i++)
+    {
+        if(start_[i] >= start && start_[i] <= end)
+            return static_cast<int>(i);
+    }
+    return -1;
+}
+
+int TimelineItem::firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const
+{
+    unsigned int start=fromQDateTime(startDt);
+    unsigned int end=fromQDateTime(endDt);
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(start_[i] >= start)
+        {
+            if(VNState::isActive(status_[i]))
+                return -1;
+
+            if(VNState::isSubmitted(status_[i]) &&
+                 VNState::isActive(status_[i+1]))
+            {
+                return start_[i+1]-start_[i]; //secs
+            }
+        }
+        else if (start_[i] >= end)
+            return -1;
+    }
+    return -1;
+}
+
+int TimelineItem::firstActiveDuration(QDateTime startDt,QDateTime endDt) const
+{
+    unsigned int start=fromQDateTime(startDt);
+    unsigned int end=fromQDateTime(endDt);
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(start_[i] >= start)
+        {
+            if(VNState::isActive(status_[i]))
+            {
+                return start_[i+1]-start_[i]; //secs
+            }
+        }
+        else if (start_[i] >= end)
+            return -1;
+    }
+    return -1;
+}
+
+void TimelineItem::meanSubmittedDuration(float &meanVal,int& num) const
+{
+    int sum=0;
+    num=0;
+    meanVal=0.;
+
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(VNState::isSubmitted(status_[i]))
+        {
+            sum+=start_[i+1]-start_[i]; //secs
+            num++;
+        }
+    }
+
+    if(num > 0)
+        meanVal=static_cast<float>(sum)/static_cast<float>(num);
+}
+
+void TimelineItem::meanActiveDuration(float &meanVal,int& num) const
+{
+    int sum=0;
+    num=0;
+    meanVal=0.;
+
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(VNState::isActive(status_[i]))
+        {
+            sum+=start_[i+1]-start_[i]; //secs
+            num++;
+        }
+    }
+
+    if(num > 0)
+        meanVal=static_cast<float>(sum)/static_cast<float>(num);
+}
+
+//====================================================================
+//
+// TimelineData
+//
+//====================================================================
 
 void TimelineData::clear()
 {
     numOfRows_=0;
     startTime_=0;
     endTime_=0;
-    maxReadSize_=0;
+    maxReadSize_=0;    
     fullRead_=false;
+    loadStatus_=LoadNotTried;
     items_=std::vector<TimelineItem>();
+    loadedAt_=QDateTime();
+    pathHash_.clear();
 }
 
 void TimelineData::setItemType(int index,TimelineItem::Type type)
@@ -59,32 +166,42 @@ void TimelineData::setItemType(int index,TimelineItem::Type type)
     items_[index].type_=type;
 }
 
-void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize)
+void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites)
 {
     //Clear all collected data
     clear();
 
     maxReadSize_=maxReadSize;
     fullRead_=false;
+    loadStatus_=LoadNotTried;
+    loadedAt_=QDateTime::currentDateTime();
 
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);
     if( !log_file.ok() )
     {
+        loadStatus_=LoadFailed;
         UiLog().warn() << "TimelineData::loadLogFile: Could not open log file " << logFile ;
-        return;
+        throw std::runtime_error("Could not open log file: " + logFile);
     }
 
     fullRead_=true;
-    size_t fSize=0;
+    QFileInfo fInfo(QString::fromStdString(logFile));
+    size_t fSize=fInfo.size();
+    size_t progressChunk=fSize/200;
+    if(progressChunk==0) progressChunk=fSize;
+    size_t currentProgressChunk=0;
+    size_t percent=0;
+
+    if(fSize ==0)
+        return;
+
     if(maxReadSize_ > 0)
     {
-        QFileInfo fInfo(QString::fromStdString(logFile));
-        fSize=fInfo.size();
-
         if(fSize > maxReadSize_)
         {
             fullRead_=false;
+            progressChunk=maxReadSize_/200;
             log_file.setPos(fSize - maxReadSize_);
         }
     }
@@ -172,6 +289,24 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize)
             name=line.substr(first_char,next_ws-first_char);
         }
 
+        //Filter by suites
+        if(!suites.empty() && name.size() > 1 && name[0] == '/')
+        {
+            std::string suite;
+            std::string::size_type next_sep=name.find("/",1);
+            if(next_sep != std::string::npos)
+            {
+                suite=name.substr(1,next_sep-1);
+            }
+            else
+            {
+                suite=name.substr(1);
+            }
+
+            if(std::find(suites.begin(),suites.end(),suite) == suites.end())
+                continue;
+        }
+
         //Convert status time into
         unsigned int statusTime=QDateTime::fromString(QString::fromStdString(time_stamp),
                        "hh:mm:ss d.M.yyyy").toMSecsSinceEpoch()/1000;
@@ -182,8 +317,8 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize)
         if(statusTime > endTime_)
             endTime_=statusTime;
 
-        int idx=indexOfItem(name);       
-        if(idx != -1)
+        size_t idx=0;
+        if(indexOfItem(name,idx))
         {
             items_[idx].add(statusId,statusTime);
             if(items_[idx].type_ == TimelineItem::UndeterminedType)
@@ -193,12 +328,27 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize)
         }
         else
         {                               
-            items_.push_back(TimelineItem(name,pathHash_(name),statusId,statusTime,
+            items_.push_back(TimelineItem(name,statusId,statusTime,
                                           guessNodeType(line,name,status,next_ws)));
+
+            pathHash_.insert(QString::fromStdString(name),items_.size()-1);
+        }
+
+        size_t current=log_file.pos();
+        if(current/progressChunk > currentProgressChunk)
+        {
+            currentProgressChunk=current/progressChunk;
+            percent=current/fSize;
+            if(percent <= 100)
+                Q_EMIT loadProgress(current,fSize);
         }
 
         numOfRows_++;
     }
+
+    sortByPath();
+
+    loadStatus_=LoadDone;
 
     //guessNodeType();
 }
@@ -254,33 +404,36 @@ TimelineItem::Type TimelineData::guessNodeType(const std::string& line,
     return TimelineItem::UndeterminedType;
 }
 
-int TimelineData::indexOfItem(const std::string& p)
+//It has to be very fast!!!!
+bool TimelineData::indexOfItem(const std::string& p,size_t& idx)
 {
-    size_t hval=pathHash_(p);
-    bool redo=false;
-    for(size_t i=0; i < items_.size(); i++)
+    size_t v=pathHash_.value(QString::fromStdString(p),SIZE_MAX);
+    if(v != SIZE_MAX)
     {
-        if(items_[i].pathHash_ == hval)
-        {
-            if(items_[i].path_ == p)
-                return i;
-            else
-            {
-                redo=true;
-                break;
-            }
-        }
+        idx=v;
+        return true;
+    }
+    return false;
+}
+
+bool sortVecFunction(const std::pair<size_t,std::string>& a, const std::pair<size_t,std::string>& b)
+{
+    return a.second < b.second;
+}
+
+void TimelineData::sortByPath()
+{
+    std::vector<std::pair<size_t, std::string> > sortVec;
+    for(size_t i = 0; i < items_.size(); i++)
+    {
+        sortVec.push_back(std::make_pair(i,items_[i].path_));
     }
 
-    //If the hash is not unique!
-    if(redo)
-    {
-        for(size_t i=0; i < items_.size(); i++)
-        {
-            if(items_[i].path_ == p)
-                    return i;
-        }
-    }
+    std::sort(sortVec.begin(), sortVec.end(),sortVecFunction);
 
-    return -1;
+    for(size_t i = 0; i < items_.size(); i++)
+    {
+        int idx=sortVec[i].first;
+        items_[idx].sortIndex_=i;
+    }
 }

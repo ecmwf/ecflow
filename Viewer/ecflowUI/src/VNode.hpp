@@ -193,7 +193,8 @@ public:
     void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=nullptr);
     void clearTriggerData();
     void addTriggeredData(VItem* n);
-    void addTriggeredData(VItem* a,VItem* n);
+    void addTriggeredData(VItem* a,VAttribute* n);
+    void triggeredByEvent(const std::string& name,std::vector<std::string>& triggeredVec,TriggeredScanner* scanner);
 
     QString nodeMenuMode() const;
     QString defStatusNodeMenuMode() const;

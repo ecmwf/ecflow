@@ -12,6 +12,7 @@
 #define VIEWERUTIL_HPP
 
 #include <QBrush>
+#include <QCursor>
 #include <QPixmap>
 #include <QSettings>
 #include <QString>
@@ -38,6 +39,8 @@ public:
    static QBrush lineEditBg(QColor col);
    static void toClipboard(QString txt);
    static QString fromClipboard();
+   static void setOverrideCursor(QCursor cursor);
+   static void restoreOverrideCursor();
 };
 
 #endif // VIEWERUTIL_HPP

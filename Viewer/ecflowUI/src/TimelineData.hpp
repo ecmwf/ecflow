@@ -13,42 +13,56 @@
 
 #include <string>
 #include <vector>
-#include <functional>
 
 #include <QDateTime>
+#include <QObject>
+#include <QHash>
 
 class TimelineItem
 {
 public:
     enum Type {UndeterminedType,ServerType,SuiteType,FamilyType,TaskType};
 
-    TimelineItem() : pathHash_(0), type_(UndeterminedType) {}
-    TimelineItem(const std::string& path,size_t pathHash,unsigned char status,unsigned int time,Type type=UndeterminedType);
+    TimelineItem() : type_(UndeterminedType) {}
+    TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type=UndeterminedType);
     size_t size() const {return status_.size();}
     const std::string& path() const {return path_;}
     Type type() const {return type_;}
     void setType(Type t) {type_ = t;}
+    size_t sortIndex() const {return sortIndex_;}
     bool isTask() const {return type_ ==  TaskType;}
     void add(unsigned char status,unsigned int time);
+    int firstInPeriod(QDateTime startDt,QDateTime endDt) const;
+    int firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const;
+    int firstActiveDuration(QDateTime startDt,QDateTime endDt) const;
+    void meanSubmittedDuration(float&,int&) const;
+    void meanActiveDuration(float&,int&) const;
+
+    static unsigned int fromQDateTime(QDateTime dt)
+          {return dt.toMSecsSinceEpoch()/1000;}
 
     static QDateTime toQDateTime(unsigned int t)
           {return QDateTime::fromMSecsSinceEpoch(static_cast<qint64>(t)*1000,Qt::UTC);}
 
 //protected:
     std::string path_;
-    size_t pathHash_;
     Type type_;
+    size_t sortIndex_;
     std::vector<unsigned int> start_;
-    std::vector<unsigned int> end_;
     std::vector<unsigned char> status_;
 };
 
-
-class TimelineData
+class TimelineData : public QObject
 {
+    Q_OBJECT
 public:
-    TimelineData() : startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false) {}
-    void loadLogFile(const std::string& logFile,size_t maxReadSize);
+    enum LoadStatus {LoadNotTried,LoadFailed,LoadDone};
+
+    TimelineData(QObject* parent=0) : QObject(parent),
+        startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadStatus_(LoadNotTried) {}
+
+    void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
+    QDateTime loadedAt() const {return loadedAt_;}
     size_t size() const {return  items_.size();}
     const std::vector<TimelineItem>& items() const {return items_;}
     unsigned int startTime() const {return startTime_;}
@@ -58,9 +72,13 @@ public:
     void clear();    
     void setItemType(int index,TimelineItem::Type type);
     bool isFullRead() const {return fullRead_;}
+    LoadStatus loadStatus() const {return loadStatus_;}
+    bool indexOfItem(const std::string&,size_t&);
+
+Q_SIGNALS:
+    void loadProgress(size_t current,size_t total);
 
 protected:
-    int indexOfItem(const std::string&);
     void guessNodeType();
     TimelineItem::Type guessNodeType(const std::string& line,const std::string& name,
                                       const std::string& status,
@@ -68,14 +86,17 @@ protected:
     TimelineItem::Type guessNodeType(const std::string& line,
                                       const std::string& status,
                                       std::string::size_type next_ws) const;
+    void sortByPath();
 
     std::vector<TimelineItem> items_;
     int numOfRows_;
     unsigned int startTime_;
     unsigned int endTime_;
-    std::hash<std::string> pathHash_;
+    QDateTime loadedAt_;
     size_t maxReadSize_;
     bool fullRead_;
+    LoadStatus loadStatus_;
+    QHash<QString,size_t> pathHash_;
 };
 
 

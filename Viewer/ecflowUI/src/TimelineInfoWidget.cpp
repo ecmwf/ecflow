@@ -142,7 +142,7 @@ QVariant TimelineInfoModel::data( const QModelIndex& index, int role ) const
         }
     }
 
-    if(role == Qt::BackgroundRole)
+    else if(role == Qt::BackgroundRole)
     {
        if(index.column() == 1)
        {          
@@ -151,6 +151,15 @@ QVariant TimelineInfoModel::data( const QModelIndex& index, int role ) const
                 return vn->colour();
             }
        }
+    }
+
+    else if(role == Qt::UserRole)
+    {
+        if(viewStartDateSec_ > data_->start_[row] ||
+           viewEndDateSec_ < data_->start_[row])
+        {
+            return QColor(240,240,240,116);
+        }
     }
 
     return QVariant();
@@ -244,7 +253,7 @@ void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, i
 
     QColor col(39,49,101);
     QColor colText(30,30,30);
-    QString title=Viewer::formatBoldText("Node:",col) + QString::fromStdString(data_.path());
+    QString title=Viewer::formatBoldText("Node: ",col) + QString::fromStdString(data_.path());
 
     ui_->titleLabel->setText(title);
 
@@ -257,6 +266,10 @@ void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, i
         ui_->timeTree->resizeColumnToContents(1);
         columnsAdjusted_=true;
     }
+
+    int first=data_.firstInPeriod(viewStartDate,viewEndDate);
+    if(first != -1)
+        ui_->timeTree->setCurrentIndex(model_->index(first-1,0));
 }
 
 void TimelineInfoWidget::readSettings(QSettings& settings)

@@ -1109,9 +1109,11 @@ VInfo_ptr NodePathWidget::nodeAt(int idx)
 
     Q_ASSERT(mode_ == GuiMode);
     if(mode_ == TextMode)
+    {
         return VInfo_ptr();
+    }
 
-	ServerHandler* server=info_->server();
+    ServerHandler* server=info_->server();
 
 	if(info_ && server)
 	{
@@ -1405,10 +1407,13 @@ void NodePathWidget::readSettings(VSettings* vs)
     std::string modeStr=vs->get<std::string>("mode","");
 
     if(modeStr == "text")
+    {
         setMode(TextMode);
+    }
     else
+    {
         setMode(GuiMode);
-
+    }
 	vs->endGroup();
 }
 

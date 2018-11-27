@@ -115,7 +115,9 @@ void NodeQuery::swap(const NodeQuery* q)
 	ignoreMaxNum_=q->ignoreMaxNum_;
 
     for(QMap<QString,NodeQueryOption*>::const_iterator it = options_.constBegin(); it != options_.constEnd(); ++it)
+    {
         it.value()->swap(q->option(it.key()));
+    }
 
 	buildQueryString();
 }
@@ -295,7 +297,9 @@ void NodeQuery::buildQueryString()
     //Status change time
     QString periodPart=options_["status_change_time"]->query();
     if(!periodPart.isEmpty())
+    {
         extQuery_["status_change_time"]="(" + periodPart + ")";
+    }
 
 	//Attributes
 	QString attrPart;

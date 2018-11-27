@@ -44,7 +44,7 @@ public:
 
     QDateTime date(int idx) const {
         return QDateTime::fromMSecsSinceEpoch(refTimeInMs_ +
-                           static_cast<qint64>(data_[idx].time_)*1000); }
+                           static_cast<qint64>(data_[idx].time_)*1000,Qt::UTC); }
 
     QString  entry(int idx) const {return QString::fromStdString(data_[idx].entry_);}
     LogDataItem::Type type(int idx) const {return data_[idx].type_;}

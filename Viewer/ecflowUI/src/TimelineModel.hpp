@@ -12,12 +12,23 @@
 
 #include <QAbstractItemModel>
 #include <QSortFilterProxyModel>
+#include <QDateTime>
+#include <QSet>
 
 class TimelineData;
 
 class TimelineModel : public QAbstractItemModel
 {
+    Q_OBJECT
+
 public:
+    enum CustomItemRole {PathSortRole = Qt::UserRole+1, TimeSortRole = Qt::UserRole+2,
+                        UnchangedRole = Qt::UserRole+3, MeanDurationRole = Qt::UserRole+4,
+                        DurationStatRole = Qt::UserRole+5};
+
+    enum ColumnType {PathColumn=0, TimelineColumn=1, SubmittedDurationColumn=2,
+                     ActiveDurationColumn=3};
+
     explicit TimelineModel(QObject *parent=0);
     ~TimelineModel();
 
@@ -36,16 +47,28 @@ public:
     TimelineData* data() const {return data_;}
     void clearData();
     bool hasData() const;
+    void setPeriod(QDateTime t1,QDateTime t2);
+    void setStartDate(QDateTime t);
+    void setEndDate(QDateTime t);
+
+Q_SIGNALS:
+    void periodChanged();
 
 protected:
     TimelineData* data_;
+    QDateTime startDate_;
+    QDateTime endDate_;
 };
 
 class TimelineSortModel : public QSortFilterProxyModel
 {
+    Q_OBJECT
+
 public:
     TimelineSortModel(TimelineModel*,QObject *parent=0);
     ~TimelineSortModel();
+
+    enum SortMode {PathSortMode, TimeSortMode};
 
     //From QSortFilterProxyModel:
     //we set the source model in the constructor. So this function should not do anything.
@@ -53,9 +76,18 @@ public:
     TimelineModel* tlModel() const {return tlModel_;}
 
     void selectionChanged(QModelIndexList lst);
+    void setSortMode(SortMode);
+    void setSortDirection(bool ascending);
     void setSkipSort(bool b) {skipSort_=b;}
     void setPathFilter(QString);
     void setTaskFilter(bool);
+    void setShowChangedOnly(bool);
+
+protected Q_SLOTS:
+    void slotPeriodChanged();
+
+Q_SIGNALS:
+    void invalidateCalled();
 
 protected:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
@@ -63,10 +95,13 @@ protected:
 
     TimelineModel* tlModel_;
     bool skipSort_;
+    SortMode sortMode_;
+    bool ascending_;
     QString pathFilter_;
     bool taskFilter_;
+    QRegExp pathFilterRx_;
+    bool showChangedOnly_;
 };
-
 
 #endif // TIMELINEMODEL_CPP
 
