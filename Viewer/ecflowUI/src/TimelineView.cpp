@@ -417,7 +417,7 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
 
     //value
     painter->setPen(QColor(100,100,100));
-    QString s=QString::number(val) + "s";
+    QString s=ViewerUtil::formatDuration(val);
     r=rect;
     r.setX(right+5);
     r.setWidth(fm_.width(s));
@@ -495,8 +495,7 @@ void TimelineDelegate::setMaxDurations(int submittedDuration,int activeDuration)
 {
     submittedMaxDuration_=submittedDuration;
     activeMaxDuration_=activeDuration;
-    QString s=QString::number(qMax(activeMaxDuration_,submittedMaxDuration_)) + " s AAA 999% A";
-    durationMaxTextWidth_=fm_.width(s);
+    durationMaxTextWidth_=fm_.width(" 59d 59h 59m 59s");
 }
 
 

@@ -132,12 +132,7 @@ QVariant TimelineInfoModel::data( const QModelIndex& index, int role ) const
 
             if(dSec >=0)
             {
-                if(dSec < 60)
-                    return QString::number(dSec)  + "s";
-                else if (dSec < 3600)
-                    return QString::number(dSec / 60)  + "m " + QString::number(dSec % 60)  + "s";
-                else
-                    return "> 1h";
+                return ViewerUtil::formatDuration(dSec);
             }
         }
     }

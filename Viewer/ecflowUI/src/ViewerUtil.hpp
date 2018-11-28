@@ -41,6 +41,7 @@ public:
    static QString fromClipboard();
    static void setOverrideCursor(QCursor cursor);
    static void restoreOverrideCursor();
+   static QString formatDuration(unsigned int);
 };
 
 #endif // VIEWERUTIL_HPP

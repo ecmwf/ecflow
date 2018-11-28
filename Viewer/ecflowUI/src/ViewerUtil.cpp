@@ -185,3 +185,35 @@ void ViewerUtil::restoreOverrideCursor()
     QApplication::restoreOverrideCursor();
 #endif
 }
+
+QString ViewerUtil::formatDuration(unsigned int delta) //in seconds
+{
+    int day=delta/86400;
+    int hour=(delta%86400)/3600;
+    int min=(delta % 3600)/60;
+    int sec=delta % 60;
+
+    QString s;
+
+    if(day > 0)
+    {
+        s+=QString::number(day) + "d ";
+    }
+
+    if(hour > 0)
+    {
+        s+=QString::number(hour) + "h ";
+    }
+
+    if(min > 0)
+    {
+        s+=QString::number(min) + "m ";
+    }
+
+    if(sec > 0 || s.isEmpty())
+    {
+        s+=QString::number(sec) + "s";
+    }
+
+    return s;
+}
