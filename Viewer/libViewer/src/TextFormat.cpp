@@ -82,4 +82,17 @@ QString formatTableTdBg(QString txt,QColor col)
     return "<td bgcolor=\'" + col.name() + "\'>" +txt + "</td>";
 }
 
+QString formatTableRow(QString col1Text,QString col2Text,QColor bg,QColor fg, bool boldCol1)
+{
+    QString txt;
+    if(boldCol1)
+        txt="<td>" + formatBoldText(col1Text,fg) + "</td>";
+    else
+        txt=formatTableTdText(col1Text,fg);
+
+    txt+=formatTableTdText(col2Text,fg);
+
+    return formatTableTrBg(txt,bg);
+}
+
 } //namespace Viewer

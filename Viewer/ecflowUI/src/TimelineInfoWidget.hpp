@@ -20,6 +20,7 @@
 class QDateTime;
 class TimelineData;
 class TimelineItem;
+class VNState;
 
 namespace Ui {
     class TimelineInfoWidget;
@@ -69,6 +70,8 @@ public:
     void load(QString host,QString port,TimelineData*,int,QDateTime,QDateTime);
 
 private:
+    void createSummary();
+    QPixmap makeBoxPlot(VNState* state, int num,int mean,TimelineItemStats stats);
     void updateInfoLabel() {}
     void readSettings(QSettings& settings);
     void writeSettings(QSettings& settings);

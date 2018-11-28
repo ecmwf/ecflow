@@ -142,6 +142,36 @@ void TimelineItem::meanActiveDuration(float &meanVal,int& num) const
         meanVal=static_cast<float>(sum)/static_cast<float>(num);
 }
 
+void TimelineItem::durationStats(unsigned char statusId,int& num,float& mean, TimelineItemStats& stats) const
+{
+    int sum=0;
+    num=0;
+
+    std::vector<int> dvals;
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(status_[i] == statusId)
+        {
+            dvals.push_back(start_[i+1]-start_[i]); //secs
+            sum+=dvals.back();
+        }
+    }
+
+    if(dvals.size() > 0)
+    {
+        std::sort(dvals.begin(), dvals.end());
+        stats.min=dvals.front();
+        stats.max=dvals.back();
+        stats.perc25=dvals[dvals.size()/4];
+        stats.median=dvals[dvals.size()/2];
+        stats.perc75=dvals[3*dvals.size()/4];
+        num=dvals.size();
+        mean=static_cast<float>(sum)/static_cast<float>(dvals.size());
+    }
+}
+
+
+
 //====================================================================
 //
 // TimelineData

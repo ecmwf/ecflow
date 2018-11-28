@@ -10,6 +10,7 @@
 #include "TimelineInfoWidget.hpp"
 
 #include <QtGlobal>
+#include <QBuffer>
 #include <QCloseEvent>
 #include <QDialogButtonBox>
 #include <QFileInfo>
@@ -270,6 +271,79 @@ void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, i
     int first=data_.firstInPeriod(viewStartDate,viewEndDate);
     if(first != -1)
         ui_->timeTree->setCurrentIndex(model_->index(first-1,0));
+
+
+    //Set css for the text formatting
+    QString cssDoc="td {padding-left: 3px; paddig-top: 1px; padding-bottom: 1px; background-color: #F3F3F3;color: #000000;} \
+                    td.title {padding-left: 2px; padding-top: 1px; padding-bottom: 1px;background-color: #e3e6f3; color: #000000;}";
+
+
+    ui_->summaryTe->document()->setDefaultStyleSheet(cssDoc);
+
+    //TextBrowser
+    createSummary();
+}
+
+void TimelineInfoWidget::createSummary()
+{
+    QString s;
+
+    s=Viewer::formatBoldText("Active",Qt::black);
+
+    int num=0;
+    float mean=0.;
+    TimelineItemStats stats;
+    VNState *state=VNState::find("active");
+    unsigned char statusId=state->ucId();
+
+    data_.durationStats(statusId,num,mean,stats);
+
+    QColor bg(Qt::white);
+    QColor fg(Qt::black);
+
+    s+="<table>";
+    //Viewer::formatTableRow("Num",ViewerUtil  QString(num),bg,fg,true);
+    Viewer::formatTableRow("Minimum",QString(stats.min),bg,fg,true);
+
+    s+="<tr><td>Num</td><td>" + QString::number(num) + "</td></tr>";
+    s+="</table>";
+
+    QPixmap pix=makeBoxPlot(state,num,mean,stats);
+    QByteArray byteArray;
+    QBuffer buffer(&byteArray);
+    pix.save(&buffer, "PNG");
+
+    s +="<img src=\"data:image/png;base64," + byteArray.toBase64() + "\"/>";
+
+    ui_->summaryTe->setHtml(s);
+}
+
+QPixmap TimelineInfoWidget::makeBoxPlot(VNState* state, int num,int mean,TimelineItemStats stats)
+{
+    int w=200;
+    int h=50;
+    int boxH=25;
+    int boxTop=(h-boxH)/2;
+    int boxBottom=h-boxTop;
+    QColor col=state->colour();
+
+    QPixmap pix(w,h);
+    pix.fill(Qt::transparent);
+    QPainter painter(&pix);
+    painter.setPen(col);
+    painter.setBrush(col);
+
+    float xRate=static_cast<float>(h-20)/static_cast<float>(stats.max-stats.min);
+    int x25=10+static_cast<float>(stats.perc25-stats.min)*xRate;
+    int x50=10+static_cast<float>(stats.median-stats.min)*xRate;
+    int x75=10+static_cast<float>(stats.perc75-stats.min)*xRate;
+
+    painter.drawLine(QPoint(10,10),QPoint(10,h-10));
+    painter.drawLine(QPoint(w-10,10),QPoint(w-10,h-10));
+    painter.drawLine(QPoint(10,h/2),QPoint(w-10,h/2));
+    painter.fillRect(QRect(QPoint(x25,boxTop),QPoint(x75,boxBottom)),col);
+    painter.fillRect(QRect(QPoint(x50-2,boxTop),QPoint(x50+2,boxBottom)),col.darker(120));
+    return pix;
 }
 
 void TimelineInfoWidget::readSettings(QSettings& settings)

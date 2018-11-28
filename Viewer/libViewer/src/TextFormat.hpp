@@ -28,6 +28,7 @@ namespace Viewer
     QString formatTableTrBg(QString txt,QColor col);
     QString formatTableTdText(QString txt,QColor col);
     QString formatTableTdBg(QString txt,QColor col);
+    QString formatTableRow(QString col1Text,QString col2Text,QColor bg,QColor fg, bool boldCol1);
 } //namespace Viewer
 
 #endif // TEXTFORMAT_HPP

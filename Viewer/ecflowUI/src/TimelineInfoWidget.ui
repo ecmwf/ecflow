@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
    <item>
     <widget class="QLabel" name="titleLabel">
      <property name="text">
@@ -22,13 +22,19 @@
     </widget>
    </item>
    <item>
-    <widget class="QTreeView" name="timeTree">
-     <property name="rootIsDecorated">
-      <bool>false</bool>
+    <widget class="QSplitter" name="splitter">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <property name="uniformRowHeights">
-      <bool>true</bool>
-     </property>
+     <widget class="QTreeView" name="timeTree">
+      <property name="rootIsDecorated">
+       <bool>false</bool>
+      </property>
+      <property name="uniformRowHeights">
+       <bool>true</bool>
+      </property>
+     </widget>
+     <widget class="QTextBrowser" name="summaryTe"/>
     </widget>
    </item>
    <item>
