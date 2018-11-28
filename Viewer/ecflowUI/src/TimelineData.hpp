@@ -20,6 +20,7 @@
 
 struct TimelineItemStats
 {
+    int total;
     int min;
     int max;
     int perc25;

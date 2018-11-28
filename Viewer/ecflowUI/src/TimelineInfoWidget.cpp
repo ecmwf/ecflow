@@ -283,6 +283,16 @@ void TimelineInfoWidget::createSummary()
 {
     QString s;
 
+    s+="<table width=\'100%\'>";
+
+    createSummary(s,VNState::find("active"));
+    createSummary(s,VNState::find("submitted"));
+    createSummary(s,VNState::find("complete"));
+
+    s+="</table>";
+
+
+#if 0
     s=Viewer::formatBoldText("Active",Qt::black);
 
     int num=0;
@@ -293,51 +303,101 @@ void TimelineInfoWidget::createSummary()
 
     data_.durationStats(statusId,num,mean,stats);
 
-    QColor bg(Qt::white);
-    QColor fg(Qt::black);
+    QColor bg(233,233,233);
+    QColor fg(50,51,52);
 
-    s+="<table>";
-    //Viewer::formatTableRow("Num",ViewerUtil  QString(num),bg,fg,true);
-    Viewer::formatTableRow("Minimum",QString(stats.min),bg,fg,true);
+    s+="<table width=\'100%\'>";
+    s+=Viewer::formatTableRow("Number",QString::number(num),bg,fg,true);
+    s+=Viewer::formatTableRow("Total duration",ViewerUtil::formatDuration(stats.total),bg,fg,true);
+    s+=Viewer::formatTableRow("Minimum",ViewerUtil::formatDuration(stats.min),bg,fg,true);
+    s+=Viewer::formatTableRow("Maximum",ViewerUtil::formatDuration(stats.max),bg,fg,true);
+    s+=Viewer::formatTableRow("Mean",ViewerUtil::formatDuration(mean),bg,fg,true);
+    s+=Viewer::formatTableRow("Median",ViewerUtil::formatDuration(stats.median),bg,fg,true);
 
-    s+="<tr><td>Num</td><td>" + QString::number(num) + "</td></tr>";
-    s+="</table>";
+    //s+="<tr><td>Num</td><td>" + QString::number(num) + "</td></tr>";
+    //s+="</table>";
 
     QPixmap pix=makeBoxPlot(state,num,mean,stats);
     QByteArray byteArray;
     QBuffer buffer(&byteArray);
     pix.save(&buffer, "PNG");
 
-    s +="<img src=\"data:image/png;base64," + byteArray.toBase64() + "\"/>";
+    s +="<tr><td colspan=\'2\'><img src=\"data:image/png;base64," +
+            byteArray.toBase64() + "\"/></td></tr>";
+
+    s+="</table>";
+#endif
 
     ui_->summaryTe->setHtml(s);
+}
+
+void TimelineInfoWidget::createSummary(QString &txt,VNState* state)
+{
+    if(!state)
+        return;
+
+    QColor bg(233,233,233);
+    QColor fg(50,51,52);
+
+    txt+="<tr><td colspan=\'2\'>" + Viewer::formatBoldText("Active",fg) + "</td></tr>";
+
+    int num=0;
+    float mean=0.;
+    TimelineItemStats stats;
+    unsigned char statusId=state->ucId();
+
+    data_.durationStats(statusId,num,mean,stats);
+
+    txt+=Viewer::formatTableRow("Number",QString::number(num),bg,fg,true);
+
+    if(num <=0)
+        return;
+
+    txt+=Viewer::formatTableRow("Total duration",ViewerUtil::formatDuration(stats.total),bg,fg,true);
+    txt+=Viewer::formatTableRow("Minimum",ViewerUtil::formatDuration(stats.min),bg,fg,true);
+    txt+=Viewer::formatTableRow("Maximum",ViewerUtil::formatDuration(stats.max),bg,fg,true);
+    txt+=Viewer::formatTableRow("Mean",ViewerUtil::formatDuration(mean),bg,fg,true);
+    txt+=Viewer::formatTableRow("Median",ViewerUtil::formatDuration(stats.median),bg,fg,true);
+
+    if(num >=3)
+    {
+        QPixmap pix=makeBoxPlot(state,num,mean,stats);
+        QByteArray byteArray;
+        QBuffer buffer(&byteArray);
+        pix.save(&buffer, "PNG");
+
+        txt+="<tr><td colspan=\'2\'><img src=\"data:image/png;base64," +
+            byteArray.toBase64() + "\"/></td></tr>";
+    }
 }
 
 QPixmap TimelineInfoWidget::makeBoxPlot(VNState* state, int num,int mean,TimelineItemStats stats)
 {
     int w=200;
     int h=50;
+    int xPadding=10;
+    int yPadding=15;
     int boxH=25;
     int boxTop=(h-boxH)/2;
     int boxBottom=h-boxTop;
     QColor col=state->colour();
 
     QPixmap pix(w,h);
-    pix.fill(Qt::transparent);
+    pix.fill(QColor(239,239,239));
     QPainter painter(&pix);
-    painter.setPen(col);
+    painter.setPen(QPen(col.darker(140),2));
     painter.setBrush(col);
 
-    float xRate=static_cast<float>(h-20)/static_cast<float>(stats.max-stats.min);
-    int x25=10+static_cast<float>(stats.perc25-stats.min)*xRate;
-    int x50=10+static_cast<float>(stats.median-stats.min)*xRate;
-    int x75=10+static_cast<float>(stats.perc75-stats.min)*xRate;
+    float xRate=static_cast<float>(w-2*xPadding)/static_cast<float>(stats.max-stats.min);
+    int x25=xPadding+static_cast<float>(stats.perc25-stats.min)*xRate;
+    int x50=xPadding+static_cast<float>(stats.median-stats.min)*xRate;
+    int x75=xPadding+static_cast<float>(stats.perc75-stats.min)*xRate;
 
-    painter.drawLine(QPoint(10,10),QPoint(10,h-10));
-    painter.drawLine(QPoint(w-10,10),QPoint(w-10,h-10));
-    painter.drawLine(QPoint(10,h/2),QPoint(w-10,h/2));
-    painter.fillRect(QRect(QPoint(x25,boxTop),QPoint(x75,boxBottom)),col);
-    painter.fillRect(QRect(QPoint(x50-2,boxTop),QPoint(x50+2,boxBottom)),col.darker(120));
+    painter.drawLine(QPoint(xPadding,yPadding),QPoint(xPadding,h-yPadding));
+    painter.drawLine(QPoint(w-xPadding,yPadding),QPoint(w-xPadding,h-yPadding));
+    painter.drawLine(QPoint(xPadding,h/2),QPoint(w-xPadding,h/2));
+    painter.fillRect(QRect(QPoint(x25,boxTop),QPoint(x75,boxBottom)),col.darker(110));
+    painter.fillRect(QRect(QPoint(x50-1,boxTop),QPoint(x50+1,boxBottom)),col.darker(120));
     return pix;
 }
 

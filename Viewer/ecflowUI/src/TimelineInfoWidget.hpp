@@ -71,6 +71,7 @@ public:
 
 private:
     void createSummary();
+    void createSummary(QString &txt,VNState* state);
     QPixmap makeBoxPlot(VNState* state, int num,int mean,TimelineItemStats stats);
     void updateInfoLabel() {}
     void readSettings(QSettings& settings);

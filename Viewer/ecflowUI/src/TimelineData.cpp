@@ -160,6 +160,7 @@ void TimelineItem::durationStats(unsigned char statusId,int& num,float& mean, Ti
     if(dvals.size() > 0)
     {
         std::sort(dvals.begin(), dvals.end());
+        stats.total=sum;
         stats.min=dvals.front();
         stats.max=dvals.back();
         stats.perc25=dvals[dvals.size()/4];
