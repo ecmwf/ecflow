@@ -135,7 +135,7 @@ protected:
     }
 
     //selection
-    void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command);
+    void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command, bool shiftKeyPressed);
     void select(const QModelIndex &topIndex, const QModelIndex &bottomIndex,
                                   QItemSelectionModel::SelectionFlags command);
 

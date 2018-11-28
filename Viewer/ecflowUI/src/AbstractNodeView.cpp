@@ -171,7 +171,7 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
     //Get the selection flags
     QItemSelectionModel::SelectionFlags command = selectionCommand(index, event);
 
-    noSelectionOnMousePress_ = command == QItemSelectionModel::NoUpdate || !index.isValid();
+    noSelectionOnMousePress_ = (command == QItemSelectionModel::NoUpdate || !index.isValid());
 
 #ifdef _UI_QABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << "TreeNodeViewBase::mousePressEvent --> current=" << currentIndex().data().toString() <<
@@ -184,8 +184,9 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
     else if(!pressedRefIndex_.isValid())
         pressedRefIndex_ = currentIndex();
 
+    //The pressed ref position (e.g. shift selection) can be outside the
+    //viewport.
     QPoint pressedRefPosition=visualRect(pressedRefIndex_).center();
-
 
 #ifdef _UI_QABSTRACTNODEVIEW_DEBUG
     UiLog().dbg() << " pressedRefPosition=" << pressedRefPosition << " visrect=" << visualRect(currentIndex()) <<
@@ -211,7 +212,10 @@ void AbstractNodeView::mousePressEvent(QMouseEvent* event)
             command |= selectionModel_->isSelected(index) ? QItemSelectionModel::Deselect : QItemSelectionModel::Select;
         }
 #endif
-        setSelection(rect, command);
+
+        Qt::KeyboardModifiers modifiers = static_cast<const QMouseEvent*>(event)->modifiers();
+        const bool shiftKeyPressed = modifiers & Qt::ShiftModifier;
+        setSelection(rect, command, shiftKeyPressed);
     }
     else
     {
@@ -969,7 +973,8 @@ QModelIndexList AbstractNodeView::selectedIndexes() const
   Applies the selection command to the items in or touched by the
   rectangle rect.
 */
-void AbstractNodeView::setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command)
+void AbstractNodeView::setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command,
+                                    bool shiftKeyPressed)
 {
     if (!selectionModel_ || rect.isNull())
         return;
@@ -1008,7 +1013,33 @@ void AbstractNodeView::setSelection(const QRect &rect, QItemSelectionModel::Sele
         bottomRight = index.sibling(index.row(),0);
     }
 
-    select(topLeft, bottomRight, command);
+    //Special treatment for shift selection
+    if(shiftKeyPressed && pressedRefIndex_.isValid() && command & QItemSelectionModel::SelectCurrent)
+    {
+        QRect refRect=visualRect(pressedRefIndex_);
+        //the pressed ref index is out of the viewport!
+        if(!refRect.isValid())
+        {
+            int refVi=viewIndex(pressedRefIndex_);
+            int bottomVi=viewIndex(bottomRight);
+            if(refVi <= bottomVi)
+            {
+                select(pressedRefIndex_, bottomRight, command);
+            }
+            else
+            {
+                select(topLeft,pressedRefIndex_, command);
+            }
+        }
+        else
+        {
+            select(topLeft, bottomRight, command);
+        }
+    }
+    else
+    {
+        select(topLeft, bottomRight, command);
+    }
 }
 
 void AbstractNodeView::select(const QModelIndex &topIndex, const QModelIndex &bottomIndex,
