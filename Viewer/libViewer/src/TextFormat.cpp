@@ -72,9 +72,19 @@ QString formatTableTrBg(QString txt,QColor col)
     return "<tr bgcolor=\'" + col.name() + "\'>" +txt + "</tr>";
 }
 
+QString formatTableTrText(QString txt)
+{
+    return "<tr>" + txt + "</tr>";
+}
+
 QString formatTableTdText(QString txt,QColor col)
 {
     return "<td><font color=\'" + col.name() + "\'>" +txt + "</font></td>";
+}
+
+QString formatTableTdText(QString txt)
+{
+    return "<td>" + txt + "</td>";
 }
 
 QString formatTableTdBg(QString txt,QColor col)
@@ -94,5 +104,14 @@ QString formatTableRow(QString col1Text,QString col2Text,QColor bg,QColor fg, bo
 
     return formatTableTrBg(txt,bg);
 }
+
+QString formatTableRow(QString col1Text,QString col2Text, bool boldCol1)
+{
+    if(boldCol1)
+        col1Text = "<b>" + col1Text + "</b>";
+
+    return formatTableTrText(formatTableTdText(col1Text) +formatTableTdText(col2Text));
+}
+
 
 } //namespace Viewer

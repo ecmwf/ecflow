@@ -34,7 +34,7 @@
        <bool>true</bool>
       </property>
      </widget>
-     <widget class="QTextBrowser" name="summaryTe"/>
+     <widget class="QTextEdit" name="summaryTe"/>
     </widget>
    </item>
    <item>

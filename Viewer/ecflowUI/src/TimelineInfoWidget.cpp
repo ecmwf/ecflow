@@ -267,12 +267,11 @@ void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, i
     if(first != -1)
         ui_->timeTree->setCurrentIndex(model_->index(first-1,0));
 
-
     //Set css for the text formatting
-    QString cssDoc="td {padding-left: 3px; paddig-top: 1px; padding-bottom: 1px; background-color: #F3F3F3;color: #000000;} \
-                    td.title {padding-left: 2px; padding-top: 1px; padding-bottom: 1px;background-color: #e3e6f3; color: #000000;}";
+    QString cssDoc="td {padding-left: 3px; paddig-top: 1px; padding-bottom: 1px; background-color: #F3F3F3;color: #323232;} \
+                    td.title {padding-left: 2px; padding-top: 1px; padding-bottom: 1px;background-color: #e3e6f3; color: #323232;}";
 
-
+    ui_->summaryTe->setReadOnly(false);
     ui_->summaryTe->document()->setDefaultStyleSheet(cssDoc);
 
     //TextBrowser
@@ -288,45 +287,10 @@ void TimelineInfoWidget::createSummary()
     createSummary(s,VNState::find("active"));
     createSummary(s,VNState::find("submitted"));
     createSummary(s,VNState::find("complete"));
+    createSummary(s,VNState::find("aborted"));
+    createSummary(s,VNState::find("queued"));
 
     s+="</table>";
-
-
-#if 0
-    s=Viewer::formatBoldText("Active",Qt::black);
-
-    int num=0;
-    float mean=0.;
-    TimelineItemStats stats;
-    VNState *state=VNState::find("active");
-    unsigned char statusId=state->ucId();
-
-    data_.durationStats(statusId,num,mean,stats);
-
-    QColor bg(233,233,233);
-    QColor fg(50,51,52);
-
-    s+="<table width=\'100%\'>";
-    s+=Viewer::formatTableRow("Number",QString::number(num),bg,fg,true);
-    s+=Viewer::formatTableRow("Total duration",ViewerUtil::formatDuration(stats.total),bg,fg,true);
-    s+=Viewer::formatTableRow("Minimum",ViewerUtil::formatDuration(stats.min),bg,fg,true);
-    s+=Viewer::formatTableRow("Maximum",ViewerUtil::formatDuration(stats.max),bg,fg,true);
-    s+=Viewer::formatTableRow("Mean",ViewerUtil::formatDuration(mean),bg,fg,true);
-    s+=Viewer::formatTableRow("Median",ViewerUtil::formatDuration(stats.median),bg,fg,true);
-
-    //s+="<tr><td>Num</td><td>" + QString::number(num) + "</td></tr>";
-    //s+="</table>";
-
-    QPixmap pix=makeBoxPlot(state,num,mean,stats);
-    QByteArray byteArray;
-    QBuffer buffer(&byteArray);
-    pix.save(&buffer, "PNG");
-
-    s +="<tr><td colspan=\'2\'><img src=\"data:image/png;base64," +
-            byteArray.toBase64() + "\"/></td></tr>";
-
-    s+="</table>";
-#endif
 
     ui_->summaryTe->setHtml(s);
 }
@@ -336,37 +300,32 @@ void TimelineInfoWidget::createSummary(QString &txt,VNState* state)
     if(!state)
         return;
 
-    QColor bg(233,233,233);
-    QColor fg(50,51,52);
-
-    txt+="<tr><td colspan=\'2\'>" + Viewer::formatBoldText("Active",fg) + "</td></tr>";
-
     int num=0;
     float mean=0.;
     TimelineItemStats stats;
     unsigned char statusId=state->ucId();
-
     data_.durationStats(statusId,num,mean,stats);
-
-    txt+=Viewer::formatTableRow("Number",QString::number(num),bg,fg,true);
 
     if(num <=0)
         return;
 
-    txt+=Viewer::formatTableRow("Total duration",ViewerUtil::formatDuration(stats.total),bg,fg,true);
-    txt+=Viewer::formatTableRow("Minimum",ViewerUtil::formatDuration(stats.min),bg,fg,true);
-    txt+=Viewer::formatTableRow("Maximum",ViewerUtil::formatDuration(stats.max),bg,fg,true);
-    txt+=Viewer::formatTableRow("Mean",ViewerUtil::formatDuration(mean),bg,fg,true);
-    txt+=Viewer::formatTableRow("Median",ViewerUtil::formatDuration(stats.median),bg,fg,true);
+    txt+="<tr><td class=\'title\' bgcolor=\'" + state->colour().name() + "\' align=\'center\' colspan=\'2\' >" +
+            Viewer::formatText(state->label(),state->fontColour()) + "</td></tr>";
 
-    if(num >=3)
+    txt+=Viewer::formatTableRow("Number",QString::number(num),true);
+    txt+=Viewer::formatTableRow("Total duration",ViewerUtil::formatDuration(stats.total),true);
+    txt+=Viewer::formatTableRow("Minimum",ViewerUtil::formatDuration(stats.min),true);
+    txt+=Viewer::formatTableRow("Maximum",ViewerUtil::formatDuration(stats.max),true);
+    txt+=Viewer::formatTableRow("Mean",ViewerUtil::formatDuration(mean),true);
+
+    if(num >=4 && stats.max-stats.min >= 3)
     {
         QPixmap pix=makeBoxPlot(state,num,mean,stats);
         QByteArray byteArray;
         QBuffer buffer(&byteArray);
         pix.save(&buffer, "PNG");
 
-        txt+="<tr><td colspan=\'2\'><img src=\"data:image/png;base64," +
+        txt+="<tr><td align=\'center\' colspan=\'2\'><img src=\"data:image/png;base64," +
             byteArray.toBase64() + "\"/></td></tr>";
     }
 }
@@ -374,16 +333,18 @@ void TimelineInfoWidget::createSummary(QString &txt,VNState* state)
 QPixmap TimelineInfoWidget::makeBoxPlot(VNState* state, int num,int mean,TimelineItemStats stats)
 {
     int w=200;
-    int h=50;
+    int h=36;
     int xPadding=10;
-    int yPadding=15;
-    int boxH=25;
+    int extrH=12;
+    int extrTop=(h-extrH)/2;
+    int extrBottom=h-extrTop;
+    int boxH=20;
     int boxTop=(h-boxH)/2;
     int boxBottom=h-boxTop;
     QColor col=state->colour();
 
     QPixmap pix(w,h);
-    pix.fill(QColor(239,239,239));
+    pix.fill(QColor(243,243,243));
     QPainter painter(&pix);
     painter.setPen(QPen(col.darker(140),2));
     painter.setBrush(col);
@@ -393,8 +354,8 @@ QPixmap TimelineInfoWidget::makeBoxPlot(VNState* state, int num,int mean,Timelin
     int x50=xPadding+static_cast<float>(stats.median-stats.min)*xRate;
     int x75=xPadding+static_cast<float>(stats.perc75-stats.min)*xRate;
 
-    painter.drawLine(QPoint(xPadding,yPadding),QPoint(xPadding,h-yPadding));
-    painter.drawLine(QPoint(w-xPadding,yPadding),QPoint(w-xPadding,h-yPadding));
+    painter.drawLine(QPoint(xPadding,extrTop),QPoint(xPadding,extrBottom));
+    painter.drawLine(QPoint(w-xPadding,extrTop),QPoint(w-xPadding,extrBottom));
     painter.drawLine(QPoint(xPadding,h/2),QPoint(w-xPadding,h/2));
     painter.fillRect(QRect(QPoint(x25,boxTop),QPoint(x75,boxBottom)),col.darker(110));
     painter.fillRect(QRect(QPoint(x50-1,boxTop),QPoint(x50+1,boxBottom)),col.darker(120));
