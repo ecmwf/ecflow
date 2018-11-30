@@ -49,6 +49,7 @@ public:
     void meanSubmittedDuration(float&,int&) const;
     void meanActiveDuration(float&,int&) const;
     void durationStats(unsigned char statusId,int& num,float& mean, TimelineItemStats& stats) const;
+    void days(std::vector<unsigned int>&) const;
 
     static unsigned int fromQDateTime(QDateTime dt)
           {return dt.toMSecsSinceEpoch()/1000;}

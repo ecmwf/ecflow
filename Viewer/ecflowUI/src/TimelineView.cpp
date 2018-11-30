@@ -40,7 +40,7 @@ static std::vector<std::string> propVec;
 
 //======================================================================
 //
-// TimelineView
+// TimelineDelegate
 //
 //======================================================================
 
@@ -556,7 +556,7 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
             this,SLOT(slotDoubleClickItem(const QModelIndex)));
 
     //Header
-    header_=new TimelineHeader(this);
+    header_=new MainTimelineHeader(this);
     setHeader(header_);
 
     connect(header_,SIGNAL(periodSelected(QDateTime,QDateTime)),

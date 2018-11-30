@@ -171,6 +171,19 @@ void TimelineItem::durationStats(unsigned char statusId,int& num,float& mean, Ti
     }
 }
 
+void TimelineItem::days(std::vector<unsigned int>& lst) const
+{
+    unsigned int prevDay = 0;
+    for(size_t i=0; i < start_.size(); i++)
+    {
+       unsigned int day=start_[i]/86400;
+       if(prevDay != day)
+       {
+           prevDay=day;
+           lst.push_back(day*86400);
+       }
+    }
+}
 
 
 //====================================================================

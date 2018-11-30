@@ -30,7 +30,7 @@ class VSettings;
 
 class TimelineHeader;
 class TimelineDelegate;
-class TimelineHeader;
+class MainTimelineHeader;
 
 class TimelineView : public QTreeView,public VPropertyObserver
 {
@@ -93,7 +93,7 @@ protected:
 
     TimelineSortModel* model_;
     ActionHandler* actionHandler_;
-    TimelineHeader* header_;
+    MainTimelineHeader* header_;
     bool headerBeingAdjusted_;
     TimelineDelegate *delegate_;
     bool needItemsLayout_;
