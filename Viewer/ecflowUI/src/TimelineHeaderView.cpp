@@ -621,7 +621,6 @@ void TimelineHeader::renderDay(const QRect& rect,QPainter* painter,int logicalIn
     int timeTextY= majorTickBottom + (pRect.bottom()-majorTickBottom - fm_.height())/2 - 1;
 
     int timeItemW=fm_.width("223:442");
-    int dateItemW=fm_.width("2229 May22");
 
     QList<int> majorTickSec;
 
@@ -678,75 +677,15 @@ void TimelineHeader::renderDay(const QRect& rect,QPainter* painter,int logicalIn
     if(minorTick==0)
         minorTick = majorTick;
 
-    firstTick=(startSec/minorTick)*minorTick+minorTick;
+    firstTick=(startSec/minorTick)*minorTick;
+    if(firstTick< startSec)
+        firstTick+=minorTick;
 
     //Find label positions for days
     QList<QPair<int,QString> > dateLabels;
 
-#if 0
-    int dayNum=startDate_.date().daysTo(endDate_.date());
-
-    if(dayNum == 0)
-    {Duration
-        int xp=secToPos((startSec+endSec)/2-startSec,rect);
-        dateLabels << qMakePair(xp,startDate_.toString("dd MMM"));
-    }
-    else
-    {
-        QDate  nextDay=startDate_.date().addDays(1);
-        QDate  lastDay=endDate_.date();
-        qint64 nextSec=QDateTime(nextDay).toMSecsSinceEpoch()/1000;
-
-        if((nextSec-startSec) < 3600)
-        {
-            int xp=secToPos((startSec+nextSec)/2-startSec,rect);
-            dateLabels << qMakePair(xp,nextDay.toString("dd MMM"));
-        }
-
-        int dayFreq=1;
-        QList<int> dayFreqLst;
-        dayFreqLst << 1 << 2 << 3 << 5 << 10 << 20 << 30 << 60 << 90 << 120 << 180 << 365;
-        Q_FOREACH(int dfv,dayFreqLst)
-        {
-            if((dayNum/dfv)*dateItemW < w-100)
-            {
-                dayFreq=dfv;
-                break;
-            }
-        }
-
-        QDate firstDay=nextDay;
-        for(QDate d=firstDay; d < lastDay; d=d.addDays(dayFreq))
-        {
-            int xp=secToPos((QDateTime(d).toMSecsSinceEpoch()/1000 +
-            QDateTime(d.addDays(1)).toMSecsSinceEpoch()/1000)/2-startSec,rect);
-            //dateLabels << qMakePair(xp,d.toString("dd MMM"));
-        }
-
-        if(QDateTime(lastDay).toMSecsSinceEpoch()/1000 < endSec)
-        {
-            int xp=secToPos((QDateTime(lastDay).toMSecsSinceEpoch()/1000+endSec)/2 - startSec,rect);
-            //dateLabels << qMakePair(xp,lastDay.toString("dd MMM"));
-        }
-    }
-#endif
-
     painter->save();
     painter->setClipRect(rect);
-
-#if 0
-    //Draw date labels
-    painter->setPen(dateTextCol_);
-    for(int i=0; i < dateLabels.count(); i++)
-    {
-        int xp=dateLabels[i].first;
-        int textW=fm_.width(dateLabels[i].second);
-        //int yp=rect.bottom()-1-fm.height();
-        painter->setFont(font_);
-        painter->drawText(QRect(xp-textW/2, dateTextY,textW,fm_.height()),
-                          Qt::AlignHCenter | Qt::AlignVCenter,dateLabels[i].second);
-    }
-#endif
 
     //horizontal line
     painter->setPen(timelineCol_);
@@ -777,8 +716,22 @@ void TimelineHeader::renderDay(const QRect& rect,QPainter* painter,int logicalIn
 
             int textW=fm_.width(s);
             painter->setFont(font_);
-            painter->drawText(QRect(xp-textW/2, timeTextY,textW,fm_.height()),
+
+            if( xp-textW/2 < rect.x())
+            {
+                painter->drawText(QRect(rect.x()+1, timeTextY,textW,fm_.height()),
+                              Qt::AlignLeft | Qt::AlignVCenter,s);
+            }
+            else if( xp+textW/2+2 >= rect.x()+rect.width())
+            {
+                painter->drawText(QRect(rect.x()+rect.width()-textW-1, timeTextY,textW,fm_.height()),
+                              Qt::AlignRight | Qt::AlignVCenter,s);
+            }
+            else
+            {
+                painter->drawText(QRect(xp-textW/2, timeTextY,textW,fm_.height()),
                               Qt::AlignHCenter | Qt::AlignVCenter,s);
+            }
         }
         //draw minor tick
         else

@@ -133,7 +133,7 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
 
     if(cellMode == 3)
     {
-        QColor fg(230,230,230,80);
+        QColor fg(230,230,230,180);
         if(fg.isValid())
             painter->fillRect(vopt.rect,fg);
     }
@@ -148,13 +148,13 @@ void TimelineInfoDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
     //darker top border
     if(cellMode == 1)
     {
-        painter->setPen(QColor(190,190,190));
+        painter->setPen(QColor(180,180,180));
         painter->drawLine(bgRect.topLeft(),bgRect.topRight());
     }
     //darker top border
     else if(cellMode == 2)
     {
-        painter->setPen(QColor(190,190,190));
+        painter->setPen(QColor(180,180,180));
         painter->drawLine(bgRect.bottomLeft(),bgRect.bottomRight());
     }
 

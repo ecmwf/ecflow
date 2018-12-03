@@ -435,6 +435,8 @@ TimelineInfoWidget::TimelineInfoWidget(QWidget *parent) :
     ui_->timeTree->setModel(model_);
 
     //Daily tree
+    ui_->dailyToolbar->hide(); //we will add zoom buttons to it
+
     ui_->dailyTree->setRootIsDecorated(false);
     ui_->dailyTree->setSortingEnabled(false);
     ui_->dailyTree->setAutoScroll(true);
@@ -502,7 +504,8 @@ void TimelineInfoWidget::createSummary()
 
     s+="<table width=\'100%\'>";
 
-    s+="<tr><td class=\'title\' align=\'center\' colspan=\'2\' >Statistics for the whole log period</td></tr>";
+    s+="<tr><td class=\'title\' align=\'center\' colspan=\'2\' bgcolor=\'"  + QColor(238,238,238).name() +
+            "\'><b>Statistics for the whole log period</b></td></tr>";
 
     createSummary(s,VNState::find("active"));
     createSummary(s,VNState::find("submitted"));
@@ -591,11 +594,16 @@ void TimelineInfoWidget::readSettings(QSettings& settings)
             columnsAdjusted_=true;
         }
     }
+
+    int idx=settings.value("tab",0).toInt();
+    if(idx >=0 && idx < ui_->tabWidget->count())
+        ui_->tabWidget->setCurrentIndex(idx);
 }
 
 void TimelineInfoWidget::writeSettings(QSettings& settings)
 {
     ViewerUtil::saveTreeColumnWidth(settings,"timeTreeColumnWidth",ui_->timeTree);
+    settings.setValue("tab",ui_->tabWidget->currentIndex());
 }
 
 //=======================================================
