@@ -877,9 +877,11 @@ void TimelineHeader::setMaxDurations(int submittedDuration,int activeDuration)
 
 void TimelineHeader::viewModeChanged()
 {
+#if 0
     if(!hasZoomableColumn()) //????
     {
         zoomHistory_.clear();
     }
     checkActionState();
+#endif
 }

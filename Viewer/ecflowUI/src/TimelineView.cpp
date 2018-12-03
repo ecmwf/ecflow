@@ -428,12 +428,12 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
     s.clear();
     if(meanVal > 0.)
     {
-         int perc=100.0*static_cast<float>(val-meanVal)/meanVal;
+        int percent=100.0*static_cast<float>(val-meanVal)/meanVal;
 
-        if(perc == 0)
+        if(percent == 0)
             return;
 
-        if(perc > 0)
+        if(percent > 0)
         {
             //unicode U+2191 arrow up
             s+=QChar(8593);
@@ -444,10 +444,10 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
             //unicode U+2193 arrow up
             s+=QChar(8595);
             //painter->setPen(QColor(11,111,34));
-            perc*=-1;
+            percent*=-1;
         }
 
-        s+=QString::number(perc) + "%[" + QString::number(num) + "]";
+        s+=QString::number(percent) + "%[" + QString::number(num) + "]";
 
         r=rect;
         r.setX(right+5);
@@ -513,7 +513,8 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
      needItemsLayout_(false),
      prop_(NULL),
      setCurrentIsRunning_(false),
-     viewMode_(TimelineMode)
+     viewMode_(TimelineMode),
+     durationColumnWidthInitialised_(false)
 {
     setObjectName("view");
     //setProperty("style","nodeView");
@@ -892,9 +893,20 @@ void TimelineView::setViewMode(ViewMode vm)
         if(viewMode_ == DurationMode)
         {
             updateDurations();
+            if(!durationColumnWidthInitialised_)
+            {
+                durationColumnWidthInitialised_=true;
+                int w1=columnWidth(TimelineModel::SubmittedDurationColumn);
+                int w2=columnWidth(TimelineModel::ActiveDurationColumn);
+                w1=(w2+w1)/2;
+                if(w1 >10)
+                {
+                    setColumnWidth(TimelineModel::SubmittedDurationColumn,w1);
+                }
+            }
         }
 
-        header_->viewModeChanged();
+        //header_->viewModeChanged();
         rerender();
     }
 }

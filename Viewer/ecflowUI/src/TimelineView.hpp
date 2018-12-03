@@ -102,6 +102,7 @@ protected:
     ViewMode viewMode_;
     QDateTime startDate_;
     QDateTime endDate_;
+    bool durationColumnWidthInitialised_;
 };
 
 
