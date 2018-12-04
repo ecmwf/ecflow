@@ -1,53 +1,18 @@
-### ecflow python bindings
-# NOTES:
-#
-# To see the python link line: Do python-config  --ldflags, i.e
-#   > /usr/local/apps/python/2.7.8-01/bin/python-config  --ldflags
-#   > -lpthread -ldl -lutil -lm -lpython2.7 -Xlinker -export-dynamic
-#
-# However on cct we get:
-#   > /usr/local/apps/python/2.7.5-01/bin/python-config --ldflags
-#   > -L/usr/local/apps/python/2.7.5-01/lib/python2.7/config -lpthread -ldl -lutil -lm -lpython2.7 -Xlinker -export-dynamic
-#
-# cct is correct as it has the "-L" but on other machines we rely on /usr/lib/libpython2.7.so.1.0 being there!
-# lxop-test does not have /usr/lib/libpython2.7.so.1.0 so ecbuild fails
-#
-# For problems with the python build, please look in <build-dir>/ecbuild.log, typically non developmental python
-# installs may not include python libs or includes
-# For ubuntoo to install we need:
-#    sudo apt-get install libpython-dev
-#
-
-file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "../src/*.cpp" "../src/*.hpp" )
-
-# =====================================================================
-# local includes
-include_directories(  
-                     ../../ACore/src 
-                     ../..ANattr/src
-                     ../..ANode/src
-                     ../..Base/src
-                     ../..Base/src/cts
-                     ../..Base/src/stc
-                     ../..Client/src
-                     ../..CSim/src
-                    )
-
 # =====================================================================     
 # INCLUDES here is for external includes   
 #   NOINSTALL this stops double install, the one in i.e lib/ecflow.so
 #             The other install is in python2.7/site-packages/ecflow.so
 # if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
+file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "../src/*.cpp" "../src/*.hpp" )
 ecbuild_add_library( TARGET    ecflow
                      NOINSTALL
                      TYPE      MODULE
                      SOURCES   ${srcs}
-					 CONDITION PYTHONLIBS_FOUND
                      LIBS      libclient libsimu base node nodeattr core
                                ${PYTHON_LIBRARIES} ${OPENSSL_LIBRARIES}
                      INCLUDES 
                                ${Boost_INCLUDE_DIRS}
-                               ${PYTHON_INCLUDE_DIRS}
+                               ${PYTHON_INCLUDE_DIRS} 
                     )
 
 
@@ -72,7 +37,7 @@ set_target_properties(ecflow PROPERTIES
 ecbuild_add_test( TARGET py_u_TestMigrate
                   TYPE PYTHON 
                   ARGS ${CMAKE_CURRENT_SOURCE_DIR}/../migrate/py_u_TestMigrate.py
-                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" )
+                  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" )
 
 list( APPEND u_tests
         py_u_test_add   
@@ -111,7 +76,7 @@ foreach( test ${u_tests} )
     ecbuild_add_test( TARGET ${test} 
                       TYPE PYTHON 
                       ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/../test/${test}.py
-                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" 
+                      ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" 
                       TEST_DEPENDS u_base
                      )
 endforeach()
@@ -128,7 +93,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	    ecbuild_add_test( TARGET ${test} 
 	                      TYPE PYTHON 
 	                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/../test/${test}.py
-	                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" 
+	                      ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" 
 	                      TEST_DEPENDS u_base
 	                     )
 	endforeach()
@@ -137,17 +102,7 @@ if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	set_property(TEST py_s_TestPythonChildApi APPEND PROPERTY DEPENDS py_s_TestClientApi)
 endif()
 
-
-# =============================================================================
-# Configure __init__.py to add __version__
-# =============================================================================
-
-set(INIT_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/../ecflow/__init__.py.in")
-set(INIT_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/../ecflow/__init__.py")
-
-configure_file(${INIT_PY_IN} ${INIT_PY_OUT} )
-
-
+ 
 # ==========================================================================
 # install
 #    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
@@ -213,17 +168,4 @@ else()
          install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
       endif()
 endif()
-
-# ====================================================================================
-ecbuild_dont_pack( DIRS 
-                   ../test/data/CUSTOMER
-)
-
-# ignore files with passwords
-ecbuild_dont_pack( FILES 
-                   .pydevproject
-                   ../samples/test.py
-                   ../samples/confluence_add_attachment.py
-)
-
 
