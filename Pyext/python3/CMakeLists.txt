@@ -37,10 +37,10 @@ set_target_properties(ecflow3 PROPERTIES
 # =====================================================================
 # tests 
 
-ecbuild_add_test( TARGET py3_u_TestMigrate
-                  TYPE PYTHON 
-                  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/../migrate/py_u_TestMigrate.py
-                  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" )
+#ecbuild_add_test( TARGET py3_u_TestMigrate
+#                  TYPE PYTHON 
+#                  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/../migrate/py_u_TestMigrate.py
+#                  ENVIRONMENT "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}" )
 
 list( APPEND u_tests
         u_test_add   
