@@ -40,7 +40,7 @@ include_directories(
                      ../CSim/src
                     )
 
-message( STATUS " CMAKE_VERSION                      : ${CMAKE_VERSION}" )
+message( STATUS " CMAKE_VERSION                      : ${CMAKE_VERSION}, need cmake version >= 3.12.0 to build ecflow python3 extension" )
 if(${CMAKE_VERSION} VERSION_LESS "3.12.0") 
 	# We only support python2 extension for cmake less 3.12.0
 	# cmake 3.12.0 or greater allows multiple boost python libs & hence multiple extensions to be built
@@ -69,28 +69,29 @@ else()
 	find_package(Python2 COMPONENTS Interpreter Development)
 	message( STATUS "   Python2_FOUND                     : ${Python2_FOUND}" )
 	if (Python2_FOUND)
-		message( STATUS "   Python2_Interpreter_FOUND         : ${Python2_Interpreter_FOUND}" )
-		message( STATUS "   Python2_EXECUTABLE                : ${Python2_EXECUTABLE}" )
-		message( STATUS "   Python2_STDLIB                    : ${Python2_STDLIB}    Standard platform independent installation directory" )
-		message( STATUS "   Python2_STDARCH                   : ${Python2_STDARCH}   Standard platform dependent installation directory." )
-		message( STATUS "   Python2_Development_FOUND         : ${Python2_Development_FOUND}" )
-		message( STATUS "   Python2_INCLUDE_DIRS              : ${Python2_INCLUDE_DIRS}" )
-		message( STATUS "   Python2_LIBRARIES                 : ${Python2_LIBRARIES}" )
-		message( STATUS "   Python2_LIBRARY_DIRS              : ${Python2_LIBRARY_DIRS}" )
-		message( STATUS "   Python2_VERSION                   : ${Python2_VERSION}" )
-		message( STATUS "   Python2_VERSION_MAJOR             : ${Python2_VERSION_MAJOR}" )
-		message( STATUS "   Python2_VERSION_MINOR             : ${Python2_VERSION_MINOR}" )
-		message( STATUS "   Python2_VERSION_PATCH             : ${Python2_VERSION_PATCH}" )
 	    if ( NOT Python2_LIBRARIES )             
 	        ecbuild_error("ecflow python extension is enabled, but python2 libraries not found")
 	    endif()
 	
 	    # *****************************************************************************************
 	    # Although we have found python2 it could be that *ONLY* python3 was module loaded
-	    #    Otherwise test will python2 with python3 interpreter
+	    #    Otherwise will build for python2 and test with python3 interpreter
 	    # *****************************************************************************************
 	    ecbuild_find_python( VERSION 2.6 REQUIRED ) # if not included iterpreter not found ?
 	    if ( ${PYTHON_VERSION_MAJOR} EQUAL 2)
+			message( STATUS "   Python2_Interpreter_FOUND         : ${Python2_Interpreter_FOUND}" )
+			message( STATUS "   Python2_EXECUTABLE                : ${Python2_EXECUTABLE}" )
+			message( STATUS "   Python2_STDLIB                    : ${Python2_STDLIB}    Standard platform independent installation directory" )
+			message( STATUS "   Python2_STDARCH                   : ${Python2_STDARCH}   Standard platform dependent installation directory." )
+			message( STATUS "   Python2_Development_FOUND         : ${Python2_Development_FOUND}" )
+			message( STATUS "   Python2_INCLUDE_DIRS              : ${Python2_INCLUDE_DIRS}" )
+			message( STATUS "   Python2_LIBRARIES                 : ${Python2_LIBRARIES}" )
+			message( STATUS "   Python2_LIBRARY_DIRS              : ${Python2_LIBRARY_DIRS}" )
+			message( STATUS "   Python2_VERSION                   : ${Python2_VERSION}" )
+			message( STATUS "   Python2_VERSION_MAJOR             : ${Python2_VERSION_MAJOR}" )
+			message( STATUS "   Python2_VERSION_MINOR             : ${Python2_VERSION_MINOR}" )
+			message( STATUS "   Python2_VERSION_PATCH             : ${Python2_VERSION_PATCH}" )
+
 	    	message( STATUS "   PYTHON_FOUND                      : ${PYTHON_FOUND}" )
 	    	message( STATUS "   PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )
 	   		message( STATUS "   PYTHONLIBS_FOUND                  : ${PYTHONLIBS_FOUND}" )
