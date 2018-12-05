@@ -85,21 +85,27 @@ else()
 	        ecbuild_error("ecflow python extension is enabled, but python2 libraries not found")
 	    endif()
 	
+	    # *****************************************************************************************
+	    # Although we have found python2 it could be that *ONLY* python3 was module loaded
+	    #    Otherwise test will python2 with python3 interpreter
+	    # *****************************************************************************************
 	    ecbuild_find_python( VERSION 2.6 REQUIRED ) # if not included iterpreter not found ?
-	    message( STATUS "   PYTHON_FOUND                      : ${PYTHON_FOUND}" )
-	    message( STATUS "   PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )
-	    message( STATUS "   PYTHONLIBS_FOUND                  : ${PYTHONLIBS_FOUND}" )
-	    message( STATUS "   PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
-	    message( STATUS "   PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )
-	    message( STATUS "   PYTHON_VERSION_MINOR              : ${PYTHON_VERSION_MINOR}" )
-	    message( STATUS "   PYTHON_VERSION_PATCH              : ${PYTHON_VERSION_PATCH}" )
-	    message( STATUS "   PYTHON_CONFIG_EXECUTABLE          : ${PYTHON_CONFIG_EXECUTABLE}" )
-	    message( STATUS "   PYTHON_EXECUTABLE                 : ${PYTHON_EXECUTABLE}" )
-	    message( STATUS "   PYTHON_INCLUDE_DIRS               : ${PYTHON_INCLUDE_DIRS}" )
-	    message( STATUS "   PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
-
-	    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS python )
-		add_subdirectory( python2 )
+	    if ( ${PYTHON_VERSION_MAJOR} EQUAL 2)
+	    	message( STATUS "   PYTHON_FOUND                      : ${PYTHON_FOUND}" )
+	    	message( STATUS "   PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )
+	   		message( STATUS "   PYTHONLIBS_FOUND                  : ${PYTHONLIBS_FOUND}" )
+	    	message( STATUS "   PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
+	    	message( STATUS "   PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )
+	    	message( STATUS "   PYTHON_VERSION_MINOR              : ${PYTHON_VERSION_MINOR}" )
+	    	message( STATUS "   PYTHON_VERSION_PATCH              : ${PYTHON_VERSION_PATCH}" )
+	    	message( STATUS "   PYTHON_CONFIG_EXECUTABLE          : ${PYTHON_CONFIG_EXECUTABLE}" )
+	    	message( STATUS "   PYTHON_EXECUTABLE                 : ${PYTHON_EXECUTABLE}" )
+	    	message( STATUS "   PYTHON_INCLUDE_DIRS               : ${PYTHON_INCLUDE_DIRS}" )
+	    	message( STATUS "   PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
+	    	
+	    	find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS python )
+			add_subdirectory( python2 )
+		endif()
 	endif()
 	 
 	
