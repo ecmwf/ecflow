@@ -14,7 +14,9 @@
 #include <QApplication>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QScrollBar>
 #include <QStyle>
+#include <QTreeView>
 
 #include "IconProvider.hpp"
 #include "TimelineModel.hpp"
@@ -23,7 +25,7 @@
 #include "VNState.hpp"
 
 
-MainTimelineHeader::MainTimelineHeader(QWidget *parent) : TimelineHeader(parent)
+MainTimelineHeader::MainTimelineHeader(QTreeView *view) : TimelineHeader(view)
 {
     columnType_ << OtherColumn;
     columnType_ << TimelineColumn;
@@ -31,14 +33,15 @@ MainTimelineHeader::MainTimelineHeader(QWidget *parent) : TimelineHeader(parent)
     columnType_ << OtherColumn;
 }
 
-NodeTimelineHeader::NodeTimelineHeader(QWidget *parent) : TimelineHeader(parent)
+NodeTimelineHeader::NodeTimelineHeader(QTreeView *view) : TimelineHeader(view)
 {
     columnType_ << OtherColumn;
     columnType_ << DayColumn;
 }
 
-TimelineHeader::TimelineHeader(QWidget *parent) :
-    QHeaderView(Qt::Horizontal, parent),
+TimelineHeader::TimelineHeader(QTreeView *view) :
+    QHeaderView(Qt::Horizontal, view),
+    view_(view),
     fm_(QFont()),
     timelineCol_(50,50,50),
     dateTextCol_(33,95,161),
@@ -53,6 +56,8 @@ TimelineHeader::TimelineHeader(QWidget *parent) :
     submittedMaxDuration_(-1),
     activeMaxDuration_(-1)
 {
+    Q_ASSERT(view_);
+
     setMouseTracking(true);
 
     setStretchLastSection(true);
@@ -84,6 +89,14 @@ QSize TimelineHeader::sizeHint() const
     return s;
 }
 
+QPoint TimelineHeader::realPos(QPoint pos) const
+{
+    QPoint scrollOffset(view_->horizontalScrollBar()->value(),view_->verticalScrollBar()->value());
+    return pos+scrollOffset;
+}
+
+//Event pos is based on the visible portion of the widget! this is not the
+//real postion when scrollbars are visible!
 void TimelineHeader::mousePressEvent(QMouseEvent *event)
 {
     //Start new zoom
@@ -114,8 +127,8 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
 
     if(event->buttons().testFlag(Qt::LeftButton))
     {
-        int columnIndex=logicalIndexAt(zoomStartPos_);
-        int secStart=sectionPosition(columnIndex);
+        int columnIndex=logicalIndexAt(zoomStartPos_); //logicalIndexAt takes "visible position" -- scrollbars ignored
+        int secStart=sectionPosition(columnIndex); //real position - scroolbars taken into account
         int secEnd=secStart+sectionSize(columnIndex);
 
         //If we are in resize mode
@@ -132,14 +145,16 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
         inZoom_=true;
         zoomEndPos_=event->pos();
 
-        if(event->pos().x() >= secStart && event->pos().x() <= secEnd)
+        QPoint rPos=realPos(event->pos());
+
+        if(rPos.x() >= secStart && rPos.x() <= secEnd)
         {
             if(event->pos().x() < zoomStartPos_.x())
             {
                 zoomEndPos_=zoomStartPos_;
             }
         }
-        else if(event->pos().x() < secStart)
+        else if(rPos.x() < secStart)
         {
             zoomEndPos_=zoomStartPos_;
         }
@@ -708,6 +723,7 @@ int TimelineHeader::secToPos(qint64 t,QRect rect) const
     return rect.x() + static_cast<int>(static_cast<float>(t)/static_cast<float>(period)*static_cast<float>(rect.width()));
 }
 
+//pos is based on the visible portion ot the widget - scrollbars are ignored
 QDateTime TimelineHeader::posToDate(QPoint pos) const
 {
     int logicalIndex=logicalIndexAt(pos);
@@ -717,17 +733,20 @@ QDateTime TimelineHeader::posToDate(QPoint pos) const
     int xp=sectionPosition(logicalIndex);
     int w=sectionSize(logicalIndex);
 
-    if(w <= 0 || pos.x() < xp)
+    //take the scrollbar into account
+    QPoint rPos=realPos(pos);
+
+    if(w <= 0 || rPos.x() < xp)
         return QDateTime();
 
-    float r=static_cast<float>(pos.x()-xp)/static_cast<float>(w);
+    double r=static_cast<double>(rPos.x()-xp)/static_cast<double>(w);
     if(r < 0 || r > 1)
         return QDateTime();
 
     //qint64 sd=startDate_.toMSecsSinceEpoch()/1000;
-    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch());
+    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch())/1000;
 
-    return startDate_.addMSecs(r*period);
+    return startDate_.addMSecs((r*static_cast<double>(period))*1000);
 }
 
 void TimelineHeader::setZoomActions(QAction* zoomInAction,QAction* zoomOutAction)

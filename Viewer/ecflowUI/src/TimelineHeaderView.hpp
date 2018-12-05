@@ -17,6 +17,8 @@
 #include <QDateTime>
 #include <QStack>
 
+class QTreeView;
+
 class TimelineHeader : public QHeaderView
 {
 Q_OBJECT
@@ -24,7 +26,7 @@ Q_OBJECT
 public:
     enum ColumnType {TimelineColumn,DayColumn,OtherColumn};
 
-    explicit  TimelineHeader(QWidget *parent);
+    explicit  TimelineHeader(QTreeView *view);
 
     QSize sizeHint() const;
 
@@ -55,6 +57,7 @@ protected:
     void renderDay(const QRect& rect,QPainter* painter,int logicalIndex) const;
     int secToPos(qint64 t,QRect rect,qint64 period) const;
 
+    QPoint realPos(QPoint pos) const;
     void setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory);
     int secToPos(qint64 t,QRect rect) const;
     QDateTime posToDate(QPoint pos) const;
@@ -68,6 +71,7 @@ protected:
     bool hasTimeColumn() const;
     bool hasZoomableColumn() const;
 
+    QTreeView* view_;
     QList<ColumnType> columnType_;
     QDateTime startDate_;
     QDateTime endDate_;
@@ -98,13 +102,13 @@ protected:
 class MainTimelineHeader: public TimelineHeader
 {
 public:
-    MainTimelineHeader(QWidget *parent=0);
+    MainTimelineHeader(QTreeView *view);
 };
 
 class NodeTimelineHeader: public TimelineHeader
 {
 public:
-      NodeTimelineHeader(QWidget *parent=0);
+      NodeTimelineHeader(QTreeView *view);
 };
 
 

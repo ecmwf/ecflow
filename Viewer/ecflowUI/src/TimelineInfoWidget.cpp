@@ -449,7 +449,7 @@ TimelineInfoWidget::TimelineInfoWidget(QWidget *parent) :
     dailyModel_=new TimelineInfoDailyModel(this);
     ui_->dailyTree->setModel(dailyModel_);
 
-    dailyHeader_=new NodeTimelineHeader(this);
+    dailyHeader_=new NodeTimelineHeader(ui_->dailyTree);
     ui_->dailyTree->setHeader(dailyHeader_);
 
     TimelineInfoDailyDelegate *dailyDelegate=new TimelineInfoDailyDelegate(dailyModel_,this);
