@@ -211,7 +211,7 @@ void TimelineWidget::clear(bool inReload)
     transferredAt_=QDateTime();
 
     if(!inReload)
-    {
+    {        
         ui_->pathFilterLe->clear();
         prevState_.valid=false;
         //reset the view mode to timeline
@@ -319,7 +319,9 @@ void TimelineWidget::slotReload()
 {
     if(!serverName_.isEmpty())
     {
-        load(serverName_, host_, port_, logFile_,suites_);
+        //we need a copy because load() can clear suites_
+        std::vector<std::string> suites=suites_;
+        load(serverName_, host_, port_, logFile_,suites);
         checkButtonState();
     }
 }
@@ -698,6 +700,8 @@ void TimelineWidget::loadCore(QString logFile)
     view_->setPeriod(ui_->fromTimeEdit->dateTime(),ui_->toTimeEdit->dateTime());
 
     model_->setData(data_);
+
+    checkButtonState();
 }
 
 //Determine missing types
