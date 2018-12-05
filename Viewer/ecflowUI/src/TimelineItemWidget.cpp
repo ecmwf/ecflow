@@ -98,7 +98,8 @@ void TimelineItemWidget::load()
                     std::vector<std::string> suites;
                     if(SuiteFilter* sf=sh->suiteFilter())
                     {
-                        suites=sh->suiteFilter()->filter();
+                        if(sf->isEnabled())
+                            suites=sh->suiteFilter()->filter();
                     }
 
                     w_->load(QString::fromStdString(sh->name()),

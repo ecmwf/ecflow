@@ -18,6 +18,7 @@
 #include "FileInfoLabel.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
+#include "SuiteFilter.hpp"
 #include "TimelineData.hpp"
 #include "TimelineModel.hpp"
 #include "TimelineView.hpp"
@@ -338,8 +339,17 @@ void TimelineWidget::slotReload()
 {
     if(!serverName_.isEmpty())
     {
+        std::vector<std::string> suites;
         //we need a copy because load() can clear suites_
-        std::vector<std::string> suites=suites_;
+        if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
+        {
+            if(SuiteFilter* sf=sh->suiteFilter())
+            {
+                if(sf->isEnabled())
+                    suites=sh->suiteFilter()->filter();
+            }
+
+        }
         load(serverName_, host_, port_, logFile_,suites);
         checkButtonState();
     }
