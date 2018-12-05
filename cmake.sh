@@ -133,7 +133,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 # To load module automatically requires Korn shell, system start scripts
 module load cmake/3.12.0
 module load ecbuild/new
-# versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
+module load python2
 module load python3/3.6.5-01
 #cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
 
@@ -200,6 +200,7 @@ if [[ "$ARCH" = cray ]] ; then
 fi
 
 # This must be done after change of compiler/environment
+# versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
 module load boost/1.68.0     # comment to use local BOOST_ROOT
 
 # ====================================================================================
