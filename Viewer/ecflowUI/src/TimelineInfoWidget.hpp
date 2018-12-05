@@ -20,6 +20,8 @@
 class QDateTime;
 class TimelineData;
 class TimelineItem;
+class VNState;
+class NodeTimelineHeader;
 
 namespace Ui {
     class TimelineInfoWidget;
@@ -45,14 +47,46 @@ public:
                  unsigned int endDateSec);
     void clearData();
     bool hasData() const;
+    void determineRowsInPeriod();
 
 protected:
     TimelineItem* data_;
     unsigned int viewStartDateSec_;
     unsigned int viewEndDateSec_;
     unsigned int endDateSec_;
+    int firstRowInPeriod_;
+    int lastRowInPeriod_;
 };
 
+class TimelineInfoDailyModel : public QAbstractItemModel
+{
+public:
+    explicit TimelineInfoDailyModel(QObject *parent=0);
+    ~TimelineInfoDailyModel();
+
+    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
+    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+
+    Qt::ItemFlags flags ( const QModelIndex & index) const;
+    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
+    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+
+    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
+    QModelIndex parent (const QModelIndex & ) const;
+
+    TimelineItem* data() const {return data_;}
+    void setData(TimelineItem*,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
+                 unsigned int endDateSec);
+    void clearData();
+    bool hasData() const;
+
+protected:
+    TimelineItem* data_;
+    std::vector<unsigned int> days_;
+    unsigned int viewStartDateSec_;
+    unsigned int viewEndDateSec_;
+    unsigned int endDateSec_;
+};
 
 //the main widget containing all components
 class TimelineInfoWidget : public QWidget
@@ -69,6 +103,9 @@ public:
     void load(QString host,QString port,TimelineData*,int,QDateTime,QDateTime);
 
 private:
+    void createSummary();
+    void createSummary(QString &txt,VNState* state);
+    QPixmap makeBoxPlot(VNState* state, int num,int mean,TimelineItemStats stats);
     void updateInfoLabel() {}
     void readSettings(QSettings& settings);
     void writeSettings(QSettings& settings);
@@ -83,6 +120,10 @@ private:
     TimelineItem data_;
     int currentRow_;
     TimelineInfoModel* model_;
+
+
+    TimelineInfoDailyModel* dailyModel_;
+    NodeTimelineHeader* dailyHeader_;
 
     static bool columnsAdjusted_;
 };

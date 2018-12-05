@@ -22,6 +22,8 @@ class TimelineHeader : public QHeaderView
 Q_OBJECT
 
 public:
+    enum ColumnType {TimelineColumn,DayColumn,OtherColumn};
+
     explicit  TimelineHeader(QWidget *parent);
 
     QSize sizeHint() const;
@@ -49,22 +51,24 @@ protected:
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
-    void renderTimeline(const QRect& rect,QPainter* painter) const;
-    void renderDuration(const QRect& rect,QPainter* painter,QBrush bgBrush,int period) const;
+    void renderTimeline(const QRect& rect,QPainter* painter,int logicalIndex) const;
+    void renderDay(const QRect& rect,QPainter* painter,int logicalIndex) const;
     int secToPos(qint64 t,QRect rect,qint64 period) const;
 
     void setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory);
     int secToPos(qint64 t,QRect rect) const;
     QDateTime posToDate(QPoint pos) const;
     int dateToPos(QDateTime dt) const;
+    bool isColumnZoomable(QPoint pos) const;
     bool canBeZoomed() const;
     bool isZoomEnabled() const;
     void setZoomDisabled();
-    qint64 zoomPeriodInSec(QPoint startX,QPoint endX) const;
+    void doPeriodZoom();
     void checkActionState();
-    bool inTimelineColumn(QPoint pos) const;
-    bool hasTimelineColumn() const;
+    bool hasTimeColumn() const;
+    bool hasZoomableColumn() const;
 
+    QList<ColumnType> columnType_;
     QDateTime startDate_;
     QDateTime endDate_;
     QFont font_;
@@ -90,6 +94,20 @@ protected:
     int submittedMaxDuration_;
     int activeMaxDuration_;
 };
+
+class MainTimelineHeader: public TimelineHeader
+{
+public:
+    MainTimelineHeader(QWidget *parent=0);
+};
+
+class NodeTimelineHeader: public TimelineHeader
+{
+public:
+      NodeTimelineHeader(QWidget *parent=0);
+};
+
+
 
 #endif // TIMELINEHEADERVIEW_HPP
 

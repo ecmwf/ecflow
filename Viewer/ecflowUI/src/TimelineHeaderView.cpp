@@ -22,6 +22,21 @@
 #include "ViewerUtil.hpp"
 #include "VNState.hpp"
 
+
+MainTimelineHeader::MainTimelineHeader(QWidget *parent) : TimelineHeader(parent)
+{
+    columnType_ << OtherColumn;
+    columnType_ << TimelineColumn;
+    columnType_ << OtherColumn;
+    columnType_ << OtherColumn;
+}
+
+NodeTimelineHeader::NodeTimelineHeader(QWidget *parent) : TimelineHeader(parent)
+{
+    columnType_ << OtherColumn;
+    columnType_ << DayColumn;
+}
+
 TimelineHeader::TimelineHeader(QWidget *parent) :
     QHeaderView(Qt::Horizontal, parent),
     fm_(QFont()),
@@ -29,7 +44,6 @@ TimelineHeader::TimelineHeader(QWidget *parent) :
     dateTextCol_(33,95,161),
     timeTextCol_(30,30,30),
     timelineFrameBorderCol_(150,150,150),
-    //timelineSection_(1),
     timelineFrameSize_(4),
     majorTickSize_(5),
     zoomCol_(224,236,248,190),
@@ -60,20 +74,10 @@ TimelineHeader::TimelineHeader(QWidget *parent) :
     zoomCursor_=QCursor(QPixmap(":/viewer/cursor_zoom.svg"));
 }
 
-/*
-StandardTimelineHeader::StandardTimelineHeader(QWidget *parent) :
-    TimelineHeader(parent),
-    zoomCol_(224,236,248,190),
-    inZoom_(false)
-{
-    zoomCursor_=QCursor(QPixmap(":/viewer/cursor_zoom.svg"));
-}
-*/
-
 QSize TimelineHeader::sizeHint() const
 {    
     QSize s = QHeaderView::sizeHint(); //size();
-    if(hasTimelineColumn())
+    if(hasTimeColumn())
     {
         s.setHeight(timelineFrameSize_ + fm_.height() + 6 + majorTickSize_ + fm_.height() + 6 + timelineFrameSize_);
     }
@@ -85,7 +89,7 @@ void TimelineHeader::mousePressEvent(QMouseEvent *event)
     //Start new zoom
     if(isZoomEnabled() &&
        !inZoom_ && event->button() == Qt::LeftButton &&
-       inTimelineColumn(event->pos()) && canBeZoomed())
+       isColumnZoomable(event->pos()) && canBeZoomed())       
     {
         zoomStartPos_=event->pos();
     }
@@ -110,8 +114,9 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
 
     if(event->buttons().testFlag(Qt::LeftButton))
     {
-        int secStart=sectionPosition(TimelineModel::TimelineColumn);
-        int secEnd=secStart+sectionSize(TimelineModel::TimelineColumn);
+        int columnIndex=logicalIndexAt(zoomStartPos_);
+        int secStart=sectionPosition(columnIndex);
+        int secEnd=secStart+sectionSize(columnIndex);
 
         //If we are in resize mode
         if(!inZoom_ && zoomStartPos_.isNull())
@@ -144,19 +149,22 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
             zoomEndPos_.setX(secEnd);
         }
 
-        headerDataChanged(Qt::Horizontal,TimelineModel::TimelineColumn,TimelineModel::TimelineColumn);
+        headerDataChanged(Qt::Horizontal,columnIndex,columnIndex);
 
-        QDateTime sDt=posToDate(zoomStartPos_);
-        QDateTime eDt=posToDate(zoomEndPos_);
-        if(sDt.isValid() && eDt.isValid())
+        if(columnType_[columnIndex] == TimelineColumn)
         {
-            Q_EMIT periodBeingZoomed(sDt,eDt);
+            QDateTime sDt=posToDate(zoomStartPos_);
+            QDateTime eDt=posToDate(zoomEndPos_);
+            if(sDt.isValid() && eDt.isValid())
+            {
+                Q_EMIT periodBeingZoomed(sDt,eDt);
+            }
         }
     }
     else
     {
         //When we enter the timeline section we show a zoom cursor
-        if(inTimelineColumn(event->pos()))
+        if(isColumnZoomable(event->pos()))
         {
             if((!hasCursor || cursor().shape() ==  Qt::SplitHCursor) &&
                (canBeZoomed()))
@@ -177,26 +185,10 @@ void TimelineHeader::mouseReleaseEvent(QMouseEvent *event)
 {
     if(inZoom_)
     {
-        QDateTime sDt=posToDate(zoomStartPos_);
-        QDateTime eDt=posToDate(zoomEndPos_);
-        zoomStartPos_=QPoint();
-        zoomEndPos_=QPoint();
-        inZoom_=false;
-        if(sDt.isValid() && eDt.isValid())
-        {
-            setPeriodCore(sDt,eDt,true);
-            Q_EMIT periodSelected(sDt,eDt);
-        }
-        else
-        {
-            Q_EMIT periodBeingZoomed(startDate_,endDate_);
-        }
+         int columnIndex=logicalIndexAt(zoomStartPos_);
 
-        setZoomDisabled();
-
-        //bool hasCursor=testAttribute(Qt::WA_SetCursor);
-        //if(hasCursor && cursor().shape() !=  Qt::SplitHCursor)
-        //    unsetCursor();
+         if(columnType_[columnIndex] == TimelineColumn)
+            doPeriodZoom();
     }
     else
     {
@@ -204,9 +196,30 @@ void TimelineHeader::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
+void TimelineHeader::doPeriodZoom()
+{
+    QDateTime sDt=posToDate(zoomStartPos_);
+    QDateTime eDt=posToDate(zoomEndPos_);
+    zoomStartPos_=QPoint();
+    zoomEndPos_=QPoint();
+    inZoom_=false;
+    if(sDt.isValid() && eDt.isValid())
+    {
+        setPeriodCore(sDt,eDt,true);
+        Q_EMIT periodSelected(sDt,eDt);
+    }
+    else
+    {
+        Q_EMIT periodBeingZoomed(startDate_,endDate_);
+    }
+
+    setZoomDisabled();
+}
+
+
 bool TimelineHeader::canBeZoomed() const
 {
-    if(hasTimelineColumn())
+    if(hasZoomableColumn())
     {
         return (endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch()) > 60*1000;
     }
@@ -303,9 +316,13 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
 
     int rightPos=rect.right();
 
-    if(logicalIndex == TimelineModel::TimelineColumn)
+    if(columnType_[logicalIndex] == TimelineColumn)
     {
-        renderTimeline(rect,painter);
+        renderTimeline(rect,painter,logicalIndex);
+    }
+    else if(columnType_[logicalIndex] == DayColumn)
+    {
+        renderDay(rect, painter,logicalIndex);
     }
     else
     {
@@ -316,7 +333,7 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
     }
 }
 
-void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
+void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logicalIndex) const
 {
     //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
 
@@ -343,7 +360,7 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
         painter->drawRect(zRect.adjusted(0,1,0,-2));
     }
 
-    int w=sectionSize(TimelineModel::TimelineColumn);
+    int w=sectionSize(logicalIndex);
 
     //period in secs
     qint64 startSec=startDate_.toMSecsSinceEpoch()/1000;
@@ -536,15 +553,153 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter) const
     }
 
     painter->restore();
-
-    //for(int i=0; i < 10; i++)
-    //{
-    //    int xp=i*rect.width()/10;
-    //    painter->drawLine(xp,rect.top(),xp,rect.bottom());
-    //}
-
-    //style()->drawControl(QStyle::CE_PushButton, &optButton,painter,this);
 }
+
+void TimelineHeader::renderDay(const QRect& rect,QPainter* painter,int logicalIndex) const
+{
+    //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
+
+    //The timeline area bounded by the frame
+    QRect pRect=rect.adjusted(0,timelineFrameSize_,0,-timelineFrameSize_);
+
+    //Special appearance for the timeline area
+    painter->fillRect(pRect,timelineBrush_);
+
+    painter->setPen(QPen(timelineFrameBorderCol_));
+    painter->drawLine(QPoint(rect.left(),pRect.top()),
+                      QPoint(rect.right(),pRect.top()));
+
+    painter->drawLine(QPoint(rect.left(),pRect.bottom()),
+                      QPoint(rect.right(),pRect.bottom()));
+
+
+    int w=rect.width();  //sectionSize(TimelineModel::TimelineColumn);
+
+    //period in secs
+    qint64 startSec=0;
+    qint64 endSec=86400;
+    qint64 period=endSec-startSec;
+
+    int minorTick=1; //in secs (it is a delta)
+    int majorTick=1;  //in secs (it is a delta)
+    qint64 firstTick=1; //in secs since epoch
+
+    int hLineY=pRect.center().y()-majorTickSize_/2-1;
+    int majorTickTop=hLineY;
+    int majorTickBottom=hLineY+majorTickSize_; //pRect.bottom()-fm_.height()-timeTextGap;
+    int minorTickTop=hLineY;
+    int minorTickBottom=majorTickBottom-3;
+    int timeTextY= majorTickBottom + (pRect.bottom()-majorTickBottom - fm_.height())/2 - 1;
+
+    int timeItemW=fm_.width("223:442");
+
+    QList<int> majorTickSec;
+
+    if(period < 600)
+    {
+        majorTickSec << 60 ;
+    }
+    if(period < 1800)
+    {
+        majorTickSec << 5*60;
+    }
+    else if(period < 7200)
+    {
+        majorTickSec << 10*60 << 15*60 << 30*60;
+    }
+    if(period < 12*3600)
+    {
+        majorTickSec << 15*60 << 30*60 << 60*60 << 120*60 << 180*60;
+    }
+    else
+    {
+        majorTickSec << 30*60 << 3600 << 2*3600 << 3*3600 << 4*3600;
+    }
+
+    Q_FOREACH(int mts,majorTickSec)
+    {
+       majorTick=mts;
+       int majorTickNum=period/majorTick;
+       int cover=timeItemW*majorTickNum;
+       int diff=w-cover;
+       if(diff > 100)
+       {
+           break;
+       }
+    }
+
+    minorTick=majorTick/4;
+    if(minorTick==0)
+        minorTick = majorTick;
+
+    firstTick=(startSec/minorTick)*minorTick;
+    if(firstTick< startSec)
+        firstTick+=minorTick;
+
+    //Find label positions for days
+    QList<QPair<int,QString> > dateLabels;
+
+    painter->save();
+    painter->setClipRect(rect);
+
+    //horizontal line
+    painter->setPen(timelineCol_);
+    painter->drawLine(rect.x(),hLineY,rect.right(),hLineY);
+
+    qint64 actSec=firstTick;
+    Q_ASSERT(actSec >= startSec);
+    painter->setPen(timeTextCol_);
+
+    while(actSec <= endSec)
+    {
+        int xp=secToPos(actSec-startSec,rect,period);
+
+        //draw major tick + label
+        if(actSec % majorTick == 0)
+        {
+            painter->drawLine(xp,majorTickTop,xp,majorTickBottom);
+
+            QString s;
+            if(majorTick < 60)
+            {
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm:ss");
+            }
+            else
+            {
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm");
+            }
+
+            int textW=fm_.width(s);
+            painter->setFont(font_);
+
+            if( xp-textW/2 < rect.x())
+            {
+                painter->drawText(QRect(rect.x()+1, timeTextY,textW,fm_.height()),
+                              Qt::AlignLeft | Qt::AlignVCenter,s);
+            }
+            else if( xp+textW/2+2 >= rect.x()+rect.width())
+            {
+                painter->drawText(QRect(rect.x()+rect.width()-textW-1, timeTextY,textW,fm_.height()),
+                              Qt::AlignRight | Qt::AlignVCenter,s);
+            }
+            else
+            {
+                painter->drawText(QRect(xp-textW/2, timeTextY,textW,fm_.height()),
+                              Qt::AlignHCenter | Qt::AlignVCenter,s);
+            }
+        }
+        //draw minor tick
+        else
+        {
+            painter->drawLine(xp,minorTickTop,xp,minorTickBottom);
+        }
+
+        actSec+=minorTick;
+    }
+
+    painter->restore();
+}
+
 
 int TimelineHeader::secToPos(qint64 t,QRect rect) const
 {
@@ -553,20 +708,14 @@ int TimelineHeader::secToPos(qint64 t,QRect rect) const
     return rect.x() + static_cast<int>(static_cast<float>(t)/static_cast<float>(period)*static_cast<float>(rect.width()));
 }
 
-int TimelineHeader::dateToPos(QDateTime dt) const
-{
-    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch())/1000;
-
-    int xp=sectionPosition(TimelineModel::TimelineColumn);
-    int w=sectionSize(TimelineModel::TimelineColumn);
-
-    return xp + static_cast<int>(static_cast<float>(dt.toMSecsSinceEpoch()/1000)/static_cast<float>(period)*static_cast<float>(w));
-}
-
 QDateTime TimelineHeader::posToDate(QPoint pos) const
 {
-    int xp=sectionPosition(TimelineModel::TimelineColumn);
-    int w=sectionSize(TimelineModel::TimelineColumn);
+    int logicalIndex=logicalIndexAt(pos);
+    if(logicalIndex == -1)
+        return QDateTime();
+
+    int xp=sectionPosition(logicalIndex);
+    int w=sectionSize(logicalIndex);
 
     if(w <= 0 || pos.x() < xp)
         return QDateTime();
@@ -579,26 +728,6 @@ QDateTime TimelineHeader::posToDate(QPoint pos) const
     qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch());
 
     return startDate_.addMSecs(r*period);
-}
-
-qint64 TimelineHeader::zoomPeriodInSec(QPoint startPos,QPoint endPos) const
-{
-    if(endPos.x() < startPos.x())
-        return false;
-
-    int xp=sectionPosition(TimelineModel::TimelineColumn);
-    int w=sectionSize(TimelineModel::TimelineColumn);
-
-    if(w <= 0 || startPos.x() < xp)
-        return false;
-
-    float r=static_cast<float>(endPos.x()-startPos.x())/static_cast<float>(w);
-    if(r < 0 || r > 1)
-        return false;
-
-    qint64 period=(endDate_.toMSecsSinceEpoch()-startDate_.toMSecsSinceEpoch());
-
-    return r*period;
 }
 
 void TimelineHeader::setZoomActions(QAction* zoomInAction,QAction* zoomOutAction)
@@ -639,7 +768,7 @@ void TimelineHeader::slotZoomState(bool)
                 unsetCursor();
     }
 
-    headerDataChanged(Qt::Horizontal,0,TimelineModel::TimelineColumn);
+    //headerDataChanged(Qt::Horizontal,0,TimelineModel::TimelineColumn);
 }
 
 void TimelineHeader::slotZoomOut(bool)
@@ -676,7 +805,6 @@ void TimelineHeader::setStartDate(QDateTime t)
     startDate_=t;
     zoomHistory_.clear();
     zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
-    headerDataChanged(Qt::Horizontal,0,TimelineModel::TimelineColumn);
     checkActionState();
 }
 
@@ -685,7 +813,6 @@ void TimelineHeader::setEndDate(QDateTime t)
     endDate_=t;
     zoomHistory_.clear();
     zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
-    headerDataChanged(Qt::Horizontal,0,TimelineModel::TimelineColumn);
     checkActionState();
 }
 
@@ -703,236 +830,38 @@ void TimelineHeader::setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory)
     {
         zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
     }
-    headerDataChanged(Qt::Horizontal,0,TimelineModel::TimelineColumn);
     checkActionState();
 }
 
-
-bool TimelineHeader::inTimelineColumn(QPoint pos) const
+bool TimelineHeader::hasZoomableColumn() const
 {
-    return logicalIndexAt(pos) == TimelineModel::TimelineColumn;
+    for(int i=0; i < columnType_.count(); i++)
+    {
+        if((columnType_[i] == TimelineColumn || columnType_[i] == DayColumn) &&
+           !isSectionHidden(i))
+            return true;
+    }
+    return false;
 }
 
-bool TimelineHeader::hasTimelineColumn() const
+bool TimelineHeader::hasTimeColumn() const
 {
-    return !isSectionHidden(TimelineModel::TimelineColumn);
+    for(int i=0; i < columnType_.count(); i++)
+    {
+        if((columnType_[i] == TimelineColumn || columnType_[i] == DayColumn) &&
+           !isSectionHidden(i))
+            return true;
+    }
+    return false;
 }
 
-void TimelineHeader::renderDuration(const QRect& rect,QPainter* painter,QBrush bgBrush,int duration) const
+bool TimelineHeader::isColumnZoomable(QPoint pos) const
 {
-    //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
+    int logicalIndex=logicalIndexAt(pos);
+    if(logicalIndex != -1)
+        return columnType_[logicalIndex] == TimelineColumn;
 
-    //The timeline area bounded by the frame
-    QRect pRect=rect.adjusted(0,timelineFrameSize_,0,-timelineFrameSize_);
-
-    //Special appearance for the timeline area
-    painter->fillRect(pRect,bgBrush);
-
-    painter->setPen(QPen(timelineFrameBorderCol_));
-    painter->drawLine(QPoint(rect.left(),pRect.top()),
-                      QPoint(rect.right(),pRect.top()));
-
-    painter->drawLine(QPoint(rect.left(),pRect.bottom()),
-                      QPoint(rect.right(),pRect.bottom()));
-
-
-    int w=rect.width();  //sectionSize(TimelineModel::TimelineColumn);
-
-    //period in secs
-    qint64 startSec=0;
-    qint64 endSec=duration;
-    qint64 period=endSec-startSec;
-
-    int minorTick=1; //in secs (it is a delta)
-    int majorTick=1;  //in secs (it is a delta)
-    qint64 firstTick=1; //in secs since epoch
-
-    int hLineY=pRect.center().y()-majorTickSize_/2-1;
-    int majorTickTop=hLineY;
-    int majorTickBottom=hLineY+majorTickSize_; //pRect.bottom()-fm_.height()-timeTextGap;
-    int minorTickTop=hLineY;
-    int minorTickBottom=majorTickBottom-3;
-    int dateTextY= hLineY - (hLineY-pRect.y() - fm_.height())/2 - fm_.height() + 1;
-    int timeTextY= majorTickBottom + (pRect.bottom()-majorTickBottom - fm_.height())/2 - 1;
-
-    int timeItemW=fm_.width("223:442");
-    int dateItemW=fm_.width("2229 May22");
-
-    QList<int> majorTickSec;
-
-    if(period < 600)
-    {
-        majorTickSec << 60 ;
-    }
-    if(period < 1800)
-    {
-        majorTickSec << 5*60;
-    }
-    else if(period < 7200)
-    {
-        majorTickSec << 10*60 << 15*60 << 30*60;
-    }
-    if(period < 12*3600)
-    {
-        majorTickSec << 30*60 << 60*60 << 120*60 << 180*60;
-    }
-    else if(period < 86400)
-    {
-        majorTickSec  << 3600 << 2*3600 << 3*3600 << 4*3600;
-    }
-    else if(period < 28*86400)
-    {
-        majorTickSec << 86400 << 2*86400 << 3*86400 << 4*86400 << 5*86400 << 10*86400;
-    }
-    else if(period < 60*86400)
-    {
-        majorTickSec << 86400 << 2*86400 << 3*86400 << 4*86400 << 5*86400 << 10*86400 << 20*86400;
-    }
-    else if(365 * 86400)
-    {
-        majorTickSec << 5*86400 << 10*86400 << 20*86400 << 30*86400 << 60*86400 << 90*86400 << 180*86400;
-    }
-    else
-    {
-        majorTickSec << 30*86400 << 60*86400 << 90*86400 << 180*86400 << 365*86400;
-    }
-
-    Q_FOREACH(int mts,majorTickSec)
-    {
-       majorTick=mts;
-       int majorTickNum=period/majorTick;
-       int cover=timeItemW*majorTickNum;
-       int diff=w-cover;
-       if(diff > 100)
-       {
-           break;
-       }
-    }
-
-    minorTick=majorTick/4;
-    if(minorTick==0)
-        minorTick = majorTick;
-
-    firstTick=(startSec/minorTick)*minorTick+minorTick;
-
-    //Find label positions for days
-    QList<QPair<int,QString> > dateLabels;
-
-#if 0
-    int dayNum=startDate_.date().daysTo(endDate_.date());
-
-    if(dayNum == 0)
-    {Duration
-        int xp=secToPos((startSec+endSec)/2-startSec,rect);
-        dateLabels << qMakePair(xp,startDate_.toString("dd MMM"));
-    }
-    else
-    {
-        QDate  nextDay=startDate_.date().addDays(1);
-        QDate  lastDay=endDate_.date();
-        qint64 nextSec=QDateTime(nextDay).toMSecsSinceEpoch()/1000;
-
-        if((nextSec-startSec) < 3600)
-        {
-            int xp=secToPos((startSec+nextSec)/2-startSec,rect);
-            dateLabels << qMakePair(xp,nextDay.toString("dd MMM"));
-        }
-
-        int dayFreq=1;
-        QList<int> dayFreqLst;
-        dayFreqLst << 1 << 2 << 3 << 5 << 10 << 20 << 30 << 60 << 90 << 120 << 180 << 365;
-        Q_FOREACH(int dfv,dayFreqLst)
-        {
-            if((dayNum/dfv)*dateItemW < w-100)
-            {
-                dayFreq=dfv;
-                break;
-            }
-        }
-
-        QDate firstDay=nextDay;
-        for(QDate d=firstDay; d < lastDay; d=d.addDays(dayFreq))
-        {
-            int xp=secToPos((QDateTime(d).toMSecsSinceEpoch()/1000 +
-            QDateTime(d.addDays(1)).toMSecsSinceEpoch()/1000)/2-startSec,rect);
-            //dateLabels << qMakePair(xp,d.toString("dd MMM"));
-        }
-
-        if(QDateTime(lastDay).toMSecsSinceEpoch()/1000 < endSec)
-        {
-            int xp=secToPos((QDateTime(lastDay).toMSecsSinceEpoch()/1000+endSec)/2 - startSec,rect);
-            //dateLabels << qMakePair(xp,lastDay.toString("dd MMM"));
-        }
-    }
-#endif
-
-    painter->save();
-    painter->setClipRect(rect);
-
-#if 0
-    //Draw date labels
-    painter->setPen(dateTextCol_);
-    for(int i=0; i < dateLabels.count(); i++)
-    {
-        int xp=dateLabels[i].first;
-        int textW=fm_.width(dateLabels[i].second);
-        //int yp=rect.bottom()-1-fm.height();
-        painter->setFont(font_);
-        painter->drawText(QRect(xp-textW/2, dateTextY,textW,fm_.height()),
-                          Qt::AlignHCenter | Qt::AlignVCenter,dateLabels[i].second);
-    }
-#endif
-
-    //horizontal line
-    painter->setPen(timelineCol_);
-    painter->drawLine(rect.x(),hLineY,rect.right(),hLineY);
-
-    qint64 actSec=firstTick;
-    Q_ASSERT(actSec >= startSec);
-    painter->setPen(timeTextCol_);
-
-    while(actSec <= endSec)
-    {
-        int xp=secToPos(actSec-startSec,rect,period);
-
-        //draw major tick + label
-        if(actSec % majorTick == 0)
-        {
-            painter->drawLine(xp,majorTickTop,xp,majorTickBottom);
-
-            QString s;
-            if(majorTick < 60)
-            {
-                s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm:ss");
-            }
-            else
-            {
-                s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm");
-            }
-
-            int textW=fm_.width(s);
-            painter->setFont(font_);
-            painter->drawText(QRect(xp-textW/2, timeTextY,textW,fm_.height()),
-                              Qt::AlignHCenter | Qt::AlignVCenter,s);
-        }
-        //draw minor tick
-        else
-        {
-            painter->drawLine(xp,minorTickTop,xp,minorTickBottom);
-        }
-
-        actSec+=minorTick;
-    }
-
-    painter->restore();
-
-    //for(int i=0; i < 10; i++)
-    //{
-    //    int xp=i*rect.width()/10;
-    //    painter->drawLine(xp,rect.top(),xp,rect.bottom());
-    //}
-
-    //style()->drawControl(QStyle::CE_PushButton, &optButton,painter,this);
+    return false;
 }
 
 int TimelineHeader::secToPos(qint64 t,QRect rect,qint64 period) const
@@ -948,9 +877,11 @@ void TimelineHeader::setMaxDurations(int submittedDuration,int activeDuration)
 
 void TimelineHeader::viewModeChanged()
 {
-    if(!hasTimelineColumn())
+#if 0
+    if(!hasZoomableColumn()) //????
     {
         zoomHistory_.clear();
     }
     checkActionState();
+#endif
 }

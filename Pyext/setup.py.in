@@ -63,6 +63,7 @@ import glob
 boost_root=os.getenv("BOOST_ROOT") 
 include_dirs = [ "@CMAKE_CURRENT_SOURCE_DIR@/../ACore/src", 
                  "@CMAKE_CURRENT_SOURCE_DIR@/../ANattr/src", 
+                 "@CMAKE_CURRENT_SOURCE_DIR@/../ANode/parser/src",
                  "@CMAKE_CURRENT_SOURCE_DIR@/../ANode/src",
                  "@CMAKE_CURRENT_SOURCE_DIR@/../Base/src",
                  "@CMAKE_CURRENT_SOURCE_DIR@/../Base/src/cts",

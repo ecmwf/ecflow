@@ -18,6 +18,17 @@
 #include <QObject>
 #include <QHash>
 
+struct TimelineItemStats
+{
+    int total;
+    int min;
+    int max;
+    int perc25;
+    int median;
+    int perc75;
+};
+
+
 class TimelineItem
 {
 public:
@@ -37,6 +48,8 @@ public:
     int firstActiveDuration(QDateTime startDt,QDateTime endDt) const;
     void meanSubmittedDuration(float&,int&) const;
     void meanActiveDuration(float&,int&) const;
+    void durationStats(unsigned char statusId,int& num,float& mean, TimelineItemStats& stats) const;
+    void days(std::vector<unsigned int>&) const;
 
     static unsigned int fromQDateTime(QDateTime dt)
           {return dt.toMSecsSinceEpoch()/1000;}

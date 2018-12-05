@@ -196,29 +196,7 @@ ecbuild_info("")
 # =========================================================================================
 include_directories( ${CMAKE_SOURCE_DIR}/cereal/include )
  
-# =========================================================================================
-# Python make sure this is before boost
-# =========================================================================================
-if (ENABLE_PYTHON)
-    ecbuild_find_python( VERSION 2.7 REQUIRED )
-    if( NOT PYTHON_FOUND )
-        ecbuild_error("ecflow python extension is enabled, but python interpreter or libraries not found")
-    endif()
-    if ( NOT PYTHONLIBS_FOUND )
-        ecbuild_error("ecflow python extension is enabled, but python libraries not found")
-    endif()
-    message( STATUS " PYTHON_FOUND                      : ${PYTHON_FOUND}" )
-    message( STATUS " PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )
-    message( STATUS " PYTHONLIBS_FOUND                  : ${PYTHONLIBS_FOUND}" )
-    message( STATUS " PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
-    message( STATUS " PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )
-    message( STATUS " PYTHON_VERSION_MINOR              : ${PYTHON_VERSION_MINOR}" )
-    message( STATUS " PYTHON_VERSION_PATCH              : ${PYTHON_VERSION_PATCH}" )
-    message( STATUS " PYTHON_CONFIG_EXECUTABLE          : ${PYTHON_CONFIG_EXECUTABLE}" )
-    message( STATUS " PYTHON_EXECUTABLE                 : ${PYTHON_EXECUTABLE}" )
-    message( STATUS " PYTHON_INCLUDE_DIRS               : ${PYTHON_INCLUDE_DIRS}" )
-    message( STATUS " PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
-endif() 
+
 
 # =========================================================================================
 # Boost
@@ -243,18 +221,19 @@ set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON) # Set to ON to enable debug output from FindBoost
 
-find_package( Boost 1.64.0 REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
-if ( ENABLE_PYTHON )
-    if ( Boost_MINOR_VERSION GREATER 66 )
-        if ( PYTHON_VERSION_MAJOR EQUAL 3 )
-	       find_package( Boost 1.64.0 REQUIRED COMPONENTS python36 )
-	   else()
-           find_package( Boost 1.64.0 REQUIRED COMPONENTS python27 )
-	   endif()
-	else()
-	   find_package( Boost 1.64.0 REQUIRED COMPONENTS python )
-	endif()
-endif()
+set(ECFLOW_BOOST_VERSION, "1.64.0")
+find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+#if ( ENABLE_PYTHON )
+#    if ( Boost_MINOR_VERSION GREATER 66 )
+#        if ( PYTHON_VERSION_MAJOR EQUAL 3 )
+#	       find_package( Boost 1.64.0 REQUIRED COMPONENTS python36 )
+#	   else()
+#           find_package( Boost 1.64.0 REQUIRED COMPONENTS python27 )
+#	   endif()
+#	else()
+#	   find_package( Boost 1.64.0 REQUIRED COMPONENTS python )
+#	endif()
+#endif()
 
 #ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
