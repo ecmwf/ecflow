@@ -63,7 +63,8 @@ protected Q_SLOTS:
    void slotStartChanged(const QDateTime&);
    void slotEndChanged(const QDateTime&);
    void slotViewMode(int);
-   void slotPathFilter(QString);
+   void slotPathFilterChanged(QString);
+   void slotPathFilterEditFinished();
    void slotTaskOnly(bool);
    void slotSortMode(int);
    void slotSortOrderChanged(int);
@@ -79,6 +80,7 @@ protected Q_SLOTS:
    void slotCancelFileTransfer();
 
 private:
+    void updateFilterTriggerMode();
     void load();
     void loadCore(QString logFile);
     void updateInfoLabel(bool showDetails=true);
@@ -99,6 +101,8 @@ private:
     TimelineModel* model_;
     TimelineSortModel* sortModel_;
     TimelineView* view_;
+    bool filterTriggeredByEnter_;
+    unsigned int filterTriggerLimit_;
     bool ignoreTimeEdited_;
     bool beingCleared_;
     int sortUpPixId_;

@@ -41,6 +41,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
     maxReadSize_(100*1024*1024),
     data_(0),
+    filterTriggeredByEnter_(false),
+    filterTriggerLimit_(200000),
     ignoreTimeEdited_(false),
     beingCleared_(false),
     typesDetermined_(false),
@@ -128,7 +130,10 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
             this,SLOT(slotViewMode(int)));
 
     connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
-            this,SLOT(slotPathFilter(QString)));
+            this,SLOT(slotPathFilterChanged(QString)));
+
+    connect(ui_->pathFilterLe,SIGNAL(editingFinished()),
+            this,SLOT(slotPathFilterEditFinished()));
 
     connect(ui_->taskOnlyTb,SIGNAL(toggled(bool)),
             this,SLOT(slotTaskOnly(bool)));
@@ -223,6 +228,7 @@ void TimelineWidget::clear(bool inReload)
     //ui_->endTe->clear();
 
     setAllVisible(false);
+    updateFilterTriggerMode();
 
     beingCleared_=false;
 }
@@ -309,6 +315,19 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
     checkButtonState();
 }
 
+void TimelineWidget::updateFilterTriggerMode()
+{
+    filterTriggeredByEnter_=(data_ && data_->size() > filterTriggerLimit_);
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+    QString s=tr("Filter");
+    if(filterTriggeredByEnter_)
+    {
+        s+=tr(" (hit Enter to run)");
+    }
+    ui_->pathFilterLe->setPlaceholderText(s);
+#endif
+}
+
 void TimelineWidget::setAllVisible(bool b)
 {
     ui_->viewControl->setVisible(b);
@@ -372,9 +391,16 @@ void TimelineWidget::slotTaskOnly(bool taskFilter)
     sortModel_->setTaskFilter(taskFilter);
 }
 
-void TimelineWidget::slotPathFilter(QString pattern)
+void TimelineWidget::slotPathFilterChanged(QString pattern)
 {
-    sortModel_->setPathFilter(pattern);
+    if(!filterTriggeredByEnter_)
+        sortModel_->setPathFilter(pattern);
+}
+
+void TimelineWidget::slotPathFilterEditFinished()
+{
+    if(filterTriggeredByEnter_)
+        sortModel_->setPathFilter(ui_->pathFilterLe->text());
 }
 
 void TimelineWidget::slotSortMode(int)
@@ -657,6 +683,7 @@ void TimelineWidget::loadCore(QString logFile)
     logLoaded_=true;
     setAllVisible(true);
     updateInfoLabel();
+    updateFilterTriggerMode();
 
     ViewerUtil::restoreOverrideCursor();
 
