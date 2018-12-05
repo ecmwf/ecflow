@@ -13,7 +13,6 @@ show_error_and_exit() {
    echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
    echo ""
    echo "   make           - run make after cmake"
-   echo "   python3        - build with python3"
    echo "   ecbuild        - Use git cloned ecbuild over the module loaded ecbuild(default)"
    echo "   install        - install to /usr/local/apps/eflow.  defaults is /var/tmp/$USER/install/cmake/ecflow"
    echo "   test           - run all the tests"
@@ -52,7 +51,6 @@ verbose_arg=
 ctest_arg=
 clean_arg=
 no_gui_arg=
-python3_arg=
 ssl_arg=
 log_arg=
 asan_arg=
@@ -91,7 +89,6 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = copy_tarball ]] ; then copy_tarball_arg=$1 ;
    elif [[ "$1" = test ]] ;  then test_arg=$1 ;
    elif [[ "$1" = test_safe ]] ; then test_safe_arg=$1 ;
-   elif [[ "$1" = python3 ]] ;   then python3_arg=$1 ;
    elif [[ "$1" = ctest ]] ; then  
       ctest_arg=$1 ; 
       shift
@@ -118,7 +115,6 @@ echo "clang_tidy_arg=$clang_tidy_arg"
 echo "tsan_arg=$tsan_arg"
 echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
-echo "python3_arg=$python3_arg"
 echo "no_gui_arg=$no_gui_arg"
 echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
@@ -137,6 +133,9 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 # To load module automatically requires Korn shell, system start scripts
 module load cmake/3.12.0
 module load ecbuild/new
+# versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
+module load python3/3.6.5-01
+#cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
@@ -200,12 +199,6 @@ if [[ "$ARCH" = cray ]] ; then
     export ECFLOW_CRAY_BATCH=1
 fi
 
-if [[ "$python3_arg" = python3 ]] ; then
-    # versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
-    module load python3/3.6.5-01
-    #cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
-fi
- 
 # This must be done after change of compiler/environment
 module load boost/1.68.0     # comment to use local BOOST_ROOT
 

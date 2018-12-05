@@ -17,6 +17,8 @@ ecbuild_add_library( TARGET    ecflow3
 
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs 
+# Currently we only build optimised boost libs
+# versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
 if ( Boost_MINOR_VERSION GREATER 66 )
     target_link_libraries(ecflow3 ${Boost_PYTHON36_LIBRARY_RELEASE} )
 else()
