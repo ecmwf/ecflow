@@ -221,20 +221,8 @@ set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON) # Set to ON to enable debug output from FindBoost
 
-set(ECFLOW_BOOST_VERSION, "1.64.0")
+set(ECFLOW_BOOST_VERSION "1.64.0")
 find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
-#if ( ENABLE_PYTHON )
-#    if ( Boost_MINOR_VERSION GREATER 66 )
-#        if ( PYTHON_VERSION_MAJOR EQUAL 3 )
-#	       find_package( Boost 1.64.0 REQUIRED COMPONENTS python36 )
-#	   else()
-#           find_package( Boost 1.64.0 REQUIRED COMPONENTS python27 )
-#	   endif()
-#	else()
-#	   find_package( Boost 1.64.0 REQUIRED COMPONENTS python )
-#	endif()
-#endif()
-
 #ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 
