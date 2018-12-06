@@ -241,7 +241,7 @@ set(Boost_NO_SYSTEM_PATHS        ON)
 set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON)
 
-set(ECFLOW_BOOST_VERSION, "1.53.0")
+set(ECFLOW_BOOST_VERSION "1.53.0")
 find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS serialization system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
 
 #ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
