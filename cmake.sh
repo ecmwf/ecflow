@@ -141,7 +141,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 
 module load cmake/3.10.2      # need cmake 3.12.0 to build python3. Allow boost python libs to be found
 module load ecbuild/new
-#module load boost/1.53.0     # uncomment to use local BOOST_ROOT
+module load boost/1.53.0     # uncomment to use local BOOST_ROOT
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
@@ -200,13 +200,11 @@ if [[ "$ARCH" = cray ]] ; then
 fi
 
 if [[ "$python3_arg" = python3 ]] ; then
-    module unload python
     module load python3/3.6.5-01
-    
-    module unload cmake  # need cmake 3.12.0 to build python3. Allow boost python libs to be found
+    module unload cmake  # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found
     module load cmake/3.12.0      
-    
-    cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
+    # *** To test python3 when cmake < 3.12.0 we need this ****
+    #cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
 fi
  
 # ====================================================================================
