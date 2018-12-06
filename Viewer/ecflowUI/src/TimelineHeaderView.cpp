@@ -164,7 +164,9 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
             zoomEndPos_.setX(secEnd);
         }
 
-        headerDataChanged(Qt::Horizontal,columnIndex,columnIndex);
+        //we need to specify the full range here because otherwise the
+        //beginning of the timeline section is clipped
+        headerDataChanged(Qt::Horizontal,0,columnIndex);
 
         if(columnType_[columnIndex] == TimelineColumn)
         {
@@ -244,15 +246,6 @@ bool TimelineHeader::canBeZoomed() const
 void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logicalIndex) const
 {
     painter->save();
-    //QHeaderView::paintSection(painter, rect, logicalIndex);
-    //painter->restore();
-
-
-    /*QPixmap customPix(":viewer/filter_decor.svg");
-    QRect cbRect(0,0,12,12);
-    cbRect.moveCenter(QPoint(rect.right()-16-6,rect.center().y()));
-    customButton_[logicalIndex].setRect(cbRect);
-    painter->drawPixmap(cbRect,pix);*/
 
     if (!rect.isValid())
         return;
@@ -360,6 +353,8 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
         textRect.setRight(rightPos-5);
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter," " + text);
     }
+
+     painter->restore();
 }
 
 void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logicalIndex) const
@@ -368,6 +363,9 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logi
 
     //The timeline area bounded by the frame
     QRect pRect=rect.adjusted(0,timelineFrameSize_,0,-timelineFrameSize_);
+
+    painter->save();
+    painter->setClipRect(rect);
 
     //Special appearance in for the timeline area
     painter->fillRect(pRect,timelineBrush_);
@@ -380,10 +378,16 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logi
                       QPoint(rect.right(),pRect.bottom()));
 
     if(inZoom_)
-    {
-        QRect zRect=pRect; //rect.adjusted(0,zoomFrameTop,0,-zoomFrameBottom-1);
-        zRect.setLeft(zoomStartPos_.x());
-        zRect.setRight(zoomEndPos_.x());
+    {        
+        int sStart=sectionPosition(logicalIndex);
+        QPoint zStart=realPos(zoomStartPos_);
+        QPoint zEnd=realPos(zoomEndPos_);
+        zStart+=QPoint(rect.x()-sStart,0);
+        zEnd+=QPoint(rect.x()-sStart,0);
+
+        QRect zRect=pRect;
+        zRect.setLeft(zStart.x());
+        zRect.setRight(zEnd.x());
         painter->fillRect(zRect,zoomCol_);
         painter->setPen(zoomCol_.darker(140));
         painter->drawRect(zRect.adjusted(0,1,0,-2));
@@ -524,9 +528,6 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logi
             dateLabels << qMakePair(xp,lastDay.toString("dd MMM"));
         }
     }
-
-    painter->save();
-    painter->setClipRect(rect);
 
     //Draw date labels
     painter->setPen(dateTextCol_);
