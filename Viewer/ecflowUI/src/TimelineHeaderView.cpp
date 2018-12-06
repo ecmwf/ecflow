@@ -330,6 +330,20 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
     painter->restore();
 
     int rightPos=rect.right();
+    if(view_->isSortingEnabled())
+    {
+        if(isSortIndicatorShown() && sortIndicatorSection() == logicalIndex)
+            opt.sortIndicator = (sortIndicatorOrder() == Qt::AscendingOrder)
+                            ? QStyleOptionHeader::SortDown : QStyleOptionHeader::SortUp;
+
+        if (opt.sortIndicator != QStyleOptionHeader::None)
+        {
+            QStyleOptionHeader subopt = opt;
+            subopt.rect = style()->subElementRect(QStyle::SE_HeaderArrow, &opt, this);
+            rightPos=subopt.rect.left();
+            style()->drawPrimitive(QStyle::PE_IndicatorHeaderArrow, &subopt, painter, this);
+        }
+    }
 
     if(columnType_[logicalIndex] == TimelineColumn)
     {

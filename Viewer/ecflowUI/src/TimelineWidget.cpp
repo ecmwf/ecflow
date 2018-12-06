@@ -385,9 +385,24 @@ void TimelineWidget::slotViewMode(int)
 {
     QString id=ui_->modeCombo->currentData().toString();
     if(id == "timeline")
+    {
         view_->setViewMode(TimelineView::TimelineMode);
+        ui_->sortCombo->setEnabled(true);
+        ui_->sortUpTb->setEnabled(true);
+        ui_->sortDownTb->setEnabled(true);
+
+        //reset and reload the sort
+        slotSortMode(0);
+        slotSortOrderChanged(0);
+    }
     else if (id == "duration")
+    {
         view_->setViewMode(TimelineView::DurationMode);
+        ui_->sortCombo->setEnabled(false);
+        ui_->sortUpTb->setEnabled(false);
+        ui_->sortDownTb->setEnabled(false);
+        sortModel_->setSortMode(TimelineSortModel::QtSortMode);
+    }
 }
 
 
