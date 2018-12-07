@@ -432,9 +432,9 @@ BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
 
    BOOST_REQUIRE_MESSAGE( theClient.check("fred") == 1,CtsApi::to_string(CtsApi::check("fred")) << " should return 1\n" << theClient.errorMsg());
 
-   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","added","label","name","/value/with/paths") == 1,"--alter expected to fail\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","deleted","label","name") == 1,"--alter expected to fail\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","changed","late","-c +02:00 -a 20:00  -s +00:15") == 1,"--alter expected to fail\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","added","label","name","/value/with/paths") == 1,"--alter expected to fail\n" << theClient.errorMsg());
 
    /// test alter
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","time","") == 1,"--alter expected to fail\n" << theClient.errorMsg());
