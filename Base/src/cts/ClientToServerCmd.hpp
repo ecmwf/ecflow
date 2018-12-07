@@ -1731,6 +1731,8 @@ private:
    void check_sort_attr_type(const std::string&) const;
    void create_sort_attributes(Cmd_ptr& cmd,const std::vector<std::string>& options,const std::vector<std::string>& paths ) const;
 
+   void alter_and_attr_type(std::string& alter_type,std::string& attr_type ) const;
+
 private:
    std::vector<std::string> paths_;
    std::string              name_;

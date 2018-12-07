@@ -1054,48 +1054,6 @@ int ClientInvoker::query(const std::string& query_type, const std::string& path_
    return invoke(std::make_shared<QueryCmd>(query_type,path_to_attribute,attribute,clientEnv_.task_path() ));
 }
 
-int ClientInvoker::alter(const std::vector<std::string>& paths,
-          const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
-          const std::string& attrType,
-          const std::string& name,
-          const std::string& value) const
-{
-//   cout << " ClientInvoker::alter paths\n";
-   if (testInterface_) return invoke(CtsApi::alter(paths,alterType,attrType,name,value));
-   return invoke(CtsApi::alter(paths,alterType,attrType,name,value));
-}
-
-int ClientInvoker::alter(const std::string& path,
-          const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
-          const std::string& attrType,
-          const std::string& name,
-          const std::string& value) const
-{
-//   cout << " ClientInvoker::alter path\n";
-   if (testInterface_) invoke(CtsApi::alter(path,alterType,attrType,name,value));
-   return invoke(CtsApi::alter(path,alterType,attrType,name,value));
-}
-
-int ClientInvoker::alter_sort(const std::vector<std::string>& paths,
-            const std::string& sortable_attribute_name,
-            bool recursive) const
-{
-   if (testInterface_) return invoke(CtsApi::alter_sort(paths,sortable_attribute_name,recursive));
-   std::string value;
-   if (recursive) value = "recursive";
-   return invoke(std::make_shared<AlterCmd>(paths,sortable_attribute_name,value));
-}
-int ClientInvoker::alter_sort(const std::string& path,
-            const std::string& sortable_attribute_name,
-            bool recursive) const
-{
-   if (testInterface_) invoke(CtsApi::alter_sort(std::vector<std::string>(1,path),sortable_attribute_name,recursive));
-   std::string value;
-   if (recursive) value = "recursive";
-   return invoke(std::make_shared<AlterCmd>( std::vector<std::string>(1,path),sortable_attribute_name,value));
-}
-
-
 // ======================================================================================================
 
 int ClientInvoker::alter(const std::vector<std::string>& paths,
@@ -1139,6 +1097,26 @@ int ClientInvoker::alter( const std::string& path, const std::string& alterType,
    }
    return invoke( cts_cmd );
 }
+
+int ClientInvoker::alter_sort(const std::vector<std::string>& paths,
+            const std::string& sortable_attribute_name,
+            bool recursive) const
+{
+   if (testInterface_) return invoke(CtsApi::alter_sort(paths,sortable_attribute_name,recursive));
+   std::string value;
+   if (recursive) value = "recursive";
+   return invoke(std::make_shared<AlterCmd>(paths,sortable_attribute_name,value));
+}
+int ClientInvoker::alter_sort(const std::string& path,
+            const std::string& sortable_attribute_name,
+            bool recursive) const
+{
+   if (testInterface_) invoke(CtsApi::alter_sort(std::vector<std::string>(1,path),sortable_attribute_name,recursive));
+   std::string value;
+   if (recursive) value = "recursive";
+   return invoke(std::make_shared<AlterCmd>( std::vector<std::string>(1,path),sortable_attribute_name,value));
+}
+
 
 // ======================================================================================================
 

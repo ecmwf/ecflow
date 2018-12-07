@@ -907,8 +907,10 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,const std
       case AlterCmd::DEL_REPEAT:   break; // there can only be one repeat per node, so we delete by path
       case AlterCmd::DEL_LATE:     break; // there can only be one late per node, so we delete by path
       case AlterCmd::DEL_QUEUE:   {
-         std::vector<std::string> vec;vec.emplace_back("a");
-         if (!name.empty()) QueueAttr check(name,vec);  // will throw if not valid
+         if (!name.empty()) {
+            std::vector<std::string> vec;vec.emplace_back("a");
+            QueueAttr check(name,vec);  // will throw if not valid
+         }
          break;
       }
       case AlterCmd::DEL_GENERIC:   {
@@ -929,7 +931,7 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,const std
 		      if ( !Extract::pathAndName( name, path_to_limit, limitName ) ) {
 		         throw std::runtime_error( "AlterCmd::DEL_INLIMIT : Invalid inlimit : " +  name );
 		      }
-              InLimit check(limitName,path_to_limit);  // will throw if not valid
+            InLimit check(limitName,path_to_limit);  // will throw if not valid
 		   }
          break;
       }
@@ -941,41 +943,7 @@ void AlterCmd::check_for_delete(AlterCmd::Delete_attr_type theAttrType,const std
       }
       case AlterCmd::DEL_LIMIT_PATH: {
          if (name.empty()) {
-            std::stringstream ss;
-            ss << "Delete limit_path failed. No limit name provided. Expected 5 args: delete limit_path <limit_name> <path-to-limit> <path_to_node>\n";
-            ss << dump_args(options,paths) << "\n";
-            throw std::runtime_error(ss.str());
-         }
-
-      case AlterCmd::DEL_LIMIT:    {
-         if (!name.empty()) Limit check(name,10);  // will throw if not valid
-         break;
-      }
-      case AlterCmd::DEL_INLIMIT:  {
-         if (!name.empty()) {
-            // name can be:
-            //    limit_name
-            //    /path/to/limit:limit_name
-            string path_to_limit; // This can be empty
-            string limitName;
-            if ( !Extract::pathAndName( name, path_to_limit, limitName ) ) {
-               throw std::runtime_error( "AlterCmd::DEL_INLIMIT : Invalid inlimit : " +  name );
-            }
-            InLimit check(limitName,path_to_limit);  // will throw if not valid
-         }
-         break;
-      }
-      case AlterCmd::DEL_ZOMBIE:  {
-         if (!Child::valid_zombie_type(name)) {
-            throw std::runtime_error("Delete Zombie Attribute failed. Expected one of [ ecf | path | user ] but found " + name);
-         }
-         break;
-      }
-      case AlterCmd::DEL_LIMIT_PATH: {
-         if (name.empty()) {
-            std::stringstream ss;
-            ss << "Delete limit_path failed. No limit name provided\n";
-            throw std::runtime_error(ss.str());
+            throw std::runtime_error("Delete limit_path failed. No limit name provided");
          }
          return;
       }
@@ -1269,7 +1237,7 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,const std
 
    case AlterCmd::TRIGGER: {
       std::string error_msg = "AlterCmd: change trigger:";
-      std::auto_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
+      std::unique_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
       if (!ast.get()) {
          ss << error_msg << "\n" ;
          throw std::runtime_error( ss.str() );
@@ -1278,7 +1246,7 @@ void AlterCmd::check_for_change(AlterCmd::Change_attr_type theAttrType,const std
 
    case AlterCmd::COMPLETE: {
       std::string error_msg = "AlterCmd: change complete:";
-      std::auto_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
+      std::unique_ptr<AstTop> ast = Expression::parse_no_throw(name,error_msg);
       if (!ast.get()) {
          ss << error_msg << "\n";
          throw std::runtime_error( ss.str() );
