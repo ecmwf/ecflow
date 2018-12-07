@@ -697,6 +697,8 @@ void AlterCmd::check_for_add(AlterCmd::Add_attr_type theAttrType,const std::stri
 {
    // **** parse and check format, expect this argument to be single or double tick quoted ****
    // **** for time,date,day or zombie
+   if (name.empty())  throw std::runtime_error("Alter: check_for_add : name is empty ?");
+
    std::stringstream ss;
    switch (theAttrType) {
       case AlterCmd::ADD_TIME:  (void) TimeSeries::create(name); break;
@@ -1341,7 +1343,7 @@ AlterCmd::AlterCmd(const std::vector<std::string>& paths,
 {
    if ( alterType == "add") {
 
-      add_attr_type_  = get_add_attr_type(attrType);
+      add_attr_type_ = get_add_attr_type(attrType);
       check_for_add(add_attr_type_,name,value);
       return;
    }
