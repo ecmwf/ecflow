@@ -18,6 +18,7 @@
 #include "FileInfoLabel.hpp"
 #include "MainWindow.hpp"
 #include "ServerHandler.hpp"
+#include "SuiteFilter.hpp"
 #include "TimelineData.hpp"
 #include "TimelineModel.hpp"
 #include "TimelineView.hpp"
@@ -41,6 +42,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
     maxReadSize_(100*1024*1024),
     data_(0),
+    filterTriggeredByEnter_(false),
+    filterTriggerLimit_(200000),
     ignoreTimeEdited_(false),
     beingCleared_(false),
     typesDetermined_(false),
@@ -128,7 +131,10 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
             this,SLOT(slotViewMode(int)));
 
     connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
-            this,SLOT(slotPathFilter(QString)));
+            this,SLOT(slotPathFilterChanged(QString)));
+
+    connect(ui_->pathFilterLe,SIGNAL(editingFinished()),
+            this,SLOT(slotPathFilterEditFinished()));
 
     connect(ui_->taskOnlyTb,SIGNAL(toggled(bool)),
             this,SLOT(slotTaskOnly(bool)));
@@ -211,7 +217,7 @@ void TimelineWidget::clear(bool inReload)
     transferredAt_=QDateTime();
 
     if(!inReload)
-    {
+    {        
         ui_->pathFilterLe->clear();
         prevState_.valid=false;
         //reset the view mode to timeline
@@ -223,6 +229,7 @@ void TimelineWidget::clear(bool inReload)
     //ui_->endTe->clear();
 
     setAllVisible(false);
+    updateFilterTriggerMode();
 
     beingCleared_=false;
 }
@@ -309,6 +316,19 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
     checkButtonState();
 }
 
+void TimelineWidget::updateFilterTriggerMode()
+{
+    filterTriggeredByEnter_=(data_ && data_->size() > filterTriggerLimit_);
+#if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+    QString s=tr("Filter");
+    if(filterTriggeredByEnter_)
+    {
+        s+=tr(" (hit Enter to run)");
+    }
+    ui_->pathFilterLe->setPlaceholderText(s);
+#endif
+}
+
 void TimelineWidget::setAllVisible(bool b)
 {
     ui_->viewControl->setVisible(b);
@@ -319,7 +339,18 @@ void TimelineWidget::slotReload()
 {
     if(!serverName_.isEmpty())
     {
-        load(serverName_, host_, port_, logFile_,suites_);
+        std::vector<std::string> suites;
+        //we need a copy because load() can clear suites_
+        if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
+        {
+            if(SuiteFilter* sf=sh->suiteFilter())
+            {
+                if(sf->isEnabled())
+                    suites=sh->suiteFilter()->filter();
+            }
+
+        }
+        load(serverName_, host_, port_, logFile_,suites);
         checkButtonState();
     }
 }
@@ -354,9 +385,24 @@ void TimelineWidget::slotViewMode(int)
 {
     QString id=ui_->modeCombo->currentData().toString();
     if(id == "timeline")
+    {
         view_->setViewMode(TimelineView::TimelineMode);
+        ui_->sortCombo->setEnabled(true);
+        ui_->sortUpTb->setEnabled(true);
+        ui_->sortDownTb->setEnabled(true);
+
+        //reset and reload the sort
+        slotSortMode(0);
+        slotSortOrderChanged(0);
+    }
     else if (id == "duration")
+    {
         view_->setViewMode(TimelineView::DurationMode);
+        ui_->sortCombo->setEnabled(false);
+        ui_->sortUpTb->setEnabled(false);
+        ui_->sortDownTb->setEnabled(false);
+        sortModel_->setSortMode(TimelineSortModel::QtSortMode);
+    }
 }
 
 
@@ -370,9 +416,16 @@ void TimelineWidget::slotTaskOnly(bool taskFilter)
     sortModel_->setTaskFilter(taskFilter);
 }
 
-void TimelineWidget::slotPathFilter(QString pattern)
+void TimelineWidget::slotPathFilterChanged(QString pattern)
 {
-    sortModel_->setPathFilter(pattern);
+    if(!filterTriggeredByEnter_)
+        sortModel_->setPathFilter(pattern);
+}
+
+void TimelineWidget::slotPathFilterEditFinished()
+{
+    if(filterTriggeredByEnter_)
+        sortModel_->setPathFilter(ui_->pathFilterLe->text());
 }
 
 void TimelineWidget::slotSortMode(int)
@@ -655,6 +708,7 @@ void TimelineWidget::loadCore(QString logFile)
     logLoaded_=true;
     setAllVisible(true);
     updateInfoLabel();
+    updateFilterTriggerMode();
 
     ViewerUtil::restoreOverrideCursor();
 
@@ -698,6 +752,8 @@ void TimelineWidget::loadCore(QString logFile)
     view_->setPeriod(ui_->fromTimeEdit->dateTime(),ui_->toTimeEdit->dateTime());
 
     model_->setData(data_);
+
+    checkButtonState();
 }
 
 //Determine missing types

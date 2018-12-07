@@ -892,7 +892,7 @@ void TimelineView::setViewMode(ViewMode vm)
 
         if(viewMode_ == DurationMode)
         {
-            updateDurations();
+            updateDurations();           
             if(!durationColumnWidthInitialised_)
             {
                 durationColumnWidthInitialised_=true;
@@ -904,7 +904,13 @@ void TimelineView::setViewMode(ViewMode vm)
                     setColumnWidth(TimelineModel::SubmittedDurationColumn,w1);
                 }
             }
+            setSortingEnabled(true);
         }
+        else
+        {
+            setSortingEnabled(false);
+        }
+
 
         //header_->viewModeChanged();
         rerender();

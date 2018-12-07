@@ -1001,7 +1001,7 @@ class TestRepeat(unittest.TestCase):
     def setUp(self):
         Ecf.set_debug_equality(True)      
         
-        self.ecf_home     = File.build_dir() + "/Pyext/test/data/course"
+        self.ecf_home     = File.build_dir() + "/Pyext/test/data/course_" + str(os.getpid()) # allow paralled runs
         self.ecf_includes = File.source_dir() + "/Pyext/test/data/includes"
         #print("self.ecf_home ",self.ecf_home )
  

@@ -118,6 +118,19 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         return end+1;
     }
 
+    //Qt sort roles
+    else if(role  == QtSortRole)
+    {
+        if(index.column() ==  PathColumn)
+            return static_cast<qint64>(data_->items()[row].sortIndex());
+        else if(index.column() == SubmittedDurationColumn)
+            return data_->items()[row].firstSubmittedDuration(startDate_,endDate_);
+        else if(index.column() == ActiveDurationColumn)
+            return data_->items()[row].firstActiveDuration(startDate_,endDate_);
+
+        return QVariant();
+    }
+
     //task filter
     else if(role == Qt::UserRole)
     {
@@ -286,8 +299,13 @@ void TimelineSortModel::setSortMode(SortMode mode)
 
 void TimelineSortModel::setSortDirection(bool ascending)
 {
-    ascending_=ascending;
-    sort(0,(ascending_)?Qt::AscendingOrder:Qt::DescendingOrder);
+    Q_ASSERT(sortMode_ != QtSortMode);
+
+    if(sortMode_ != QtSortMode)
+    {
+        ascending_=ascending;
+        sort(0,(ascending_)?Qt::AscendingOrder:Qt::DescendingOrder);
+    }
 }
 
 void TimelineSortModel::setPathFilter(QString pathFilter)
@@ -332,6 +350,11 @@ bool TimelineSortModel::lessThan(const QModelIndex &left,
     {
          return tlModel_->data(left,TimelineModel::TimeSortRole).toUInt() <
                tlModel_->data(right,TimelineModel::TimeSortRole).toUInt();
+    }
+    else if(sortMode_ == QtSortMode)
+    {
+        return tlModel_->data(left,TimelineModel::QtSortRole).toInt() <
+                       tlModel_->data(right,TimelineModel::QtSortRole).toInt();
     }
 
     return true;

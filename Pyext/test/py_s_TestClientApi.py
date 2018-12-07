@@ -911,6 +911,12 @@ def test_client_alter_add(ci):
 
     t1 = "/test_client_alter_add/f1/t1"
     ci.alter(t1,"add","variable","var","var_name")
+    ci.alter(t1,"add","variable","var2","--")
+    ci.alter(t1,"add","variable","var3","--fred")
+    ci.alter(t1,"add","variable","var4"," --fred ")
+    ci.alter(t1,"add","variable","var5","--fred --jake")
+    ci.alter(t1,"add","variable","var6"," --fred --jake ")
+    ci.alter(t1,"add","variable","var7","")
     ci.alter(t1,"add","time","+00:30")
     ci.alter(t1,"add","time","01:30")
     ci.alter(t1,"add","time","01:30 20:00 00:30")
@@ -934,7 +940,7 @@ def test_client_alter_add(ci):
 
     sync_local(ci)
     task_t1 = ci.get_defs().find_abs_node(t1)
-    assert len(list(task_t1.variables)) == 1 ,"Expected 1 variable, but found:" + str(len(list(task_t1.variables))) + str(ci.get_defs())
+    assert len(list(task_t1.variables)) == 7 ,"Expected 7 variable :\n" + str(ci.get_defs())
     assert len(list(task_t1.times)) == 3 ,"Expected 3 time :\n" + str(ci.get_defs())
     assert len(list(task_t1.todays)) == 3 ,"Expected 3 today's :\n" + str(ci.get_defs())
     assert len(list(task_t1.dates)) == 4 ,"Expected 4 dates :\n" + str(ci.get_defs())
@@ -1182,6 +1188,25 @@ def test_client_alter_change(ci):
     assert variable.value() == "changed_var", "Expected alter of variable to be 'change_var' but found " + variable.value()
     res = ci.query('variable',task_t1.get_abs_node_path(),"var")
     assert res == 'changed_var',"Expected alter of variable to be 'change_var' but found " + res
+
+
+    ci.alter(t1,"change","variable","var","--")   
+    sync_local(ci)
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    variable = task_t1.find_variable("var")
+    assert variable.value() == "--", "Expected alter of variable to be '--' but found " + variable.value()
+    res = ci.query('variable',task_t1.get_abs_node_path(),"var")
+    assert res == '--"Expected alter of variable to be 'change_var' but found " + res
+    ci.alter(t1,"change","variable","var","--fred")   
+    sync_local(ci)
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    variable = task_t1.find_variable("var")
+    assert variable.value() == "--fred", "Expected alter of variable to be '--fred' but found " + variable.value()
+    ci.alter(t1,"change","variable","var","--fred --bill")   
+    sync_local(ci)
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    variable = task_t1.find_variable("var")
+    assert variable.value() == "--fred --bill", "Expected alter of variable to be '--fred --bill' but found " + variable.value()
 
     ci.alter(t1,"change","meter","meter","10")   
     sync_local(ci)

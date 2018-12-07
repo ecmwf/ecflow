@@ -24,7 +24,7 @@ class TimelineModel : public QAbstractItemModel
 public:
     enum CustomItemRole {PathSortRole = Qt::UserRole+1, TimeSortRole = Qt::UserRole+2,
                         UnchangedRole = Qt::UserRole+3, MeanDurationRole = Qt::UserRole+4,
-                        DurationStatRole = Qt::UserRole+5};
+                        DurationStatRole = Qt::UserRole+5,QtSortRole = Qt::UserRole+6};
 
     enum ColumnType {PathColumn=0, TimelineColumn=1, SubmittedDurationColumn=2,
                      ActiveDurationColumn=3};
@@ -68,7 +68,7 @@ public:
     TimelineSortModel(TimelineModel*,QObject *parent=0);
     ~TimelineSortModel();
 
-    enum SortMode {PathSortMode, TimeSortMode};
+    enum SortMode {PathSortMode, TimeSortMode, QtSortMode};
 
     //From QSortFilterProxyModel:
     //we set the source model in the constructor. So this function should not do anything.
