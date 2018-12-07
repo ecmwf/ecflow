@@ -982,6 +982,25 @@ int ClientInvoker::plug( const std::string& sourcePath, const std::string& destP
 
 // ======================================================================================================
 
+int ClientInvoker::alter(const std::vector<std::string>& paths,
+          const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
+          const std::string& attrType,
+          const std::string& name,
+          const std::string& value) const
+{
+   return invoke(Cmd_ptr(new AlterCmd(paths,alterType,attrType,name,value)));
+}
+
+int ClientInvoker::alter( const std::string& path, const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
+                          const std::string& attrType, const std::string& name,
+                          const std::string& value ) const
+{
+   return invoke(
+            Cmd_ptr(new AlterCmd(std::vector<std::string>(1, path), alterType, attrType, name, value)));
+}
+
+// ======================================================================================================
+
 int ClientInvoker::reloadwsfile() const
 {
    if (testInterface_) return invoke(CtsApi::reloadwsfile());

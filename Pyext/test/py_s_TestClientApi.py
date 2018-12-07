@@ -889,6 +889,7 @@ def test_client_alter_add(ci):
     ci.alter(t1,"add","variable","var4"," --fred ")
     ci.alter(t1,"add","variable","var5","--fred --jake")
     ci.alter(t1,"add","variable","var6"," --fred --jake ")
+    ci.alter(t1,"add","variable","var7","")
     ci.alter(t1,"add","time","+00:30")
     ci.alter(t1,"add","time","01:30")
     ci.alter(t1,"add","time","01:30 20:00 00:30")
@@ -912,7 +913,7 @@ def test_client_alter_add(ci):
 
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
-    assert len(list(task_t1.variables)) == 1 ,"Expected 6 variable :\n" + str(ci.get_defs())
+    assert len(list(task_t1.variables)) == 7 ,"Expected 7 variable :\n" + str(ci.get_defs())
     assert len(list(task_t1.times)) == 3 ,"Expected 3 time :\n" + str(ci.get_defs())
     assert len(list(task_t1.todays)) == 3 ,"Expected 3 today's :\n" + str(ci.get_defs())
     assert len(list(task_t1.dates)) == 4 ,"Expected 4 dates :\n" + str(ci.get_defs())

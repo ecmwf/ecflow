@@ -276,12 +276,12 @@ public:
 	          const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
 	          const std::string& attrType,
 	          const std::string& name = "",
-	          const std::string& value = "") const { return invoke(CtsApi::alter(paths,alterType,attrType,name,value)); }
+	          const std::string& value = "") const;
    int alter(const std::string& path,
              const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
              const std::string& attrType,
              const std::string& name = "",
-             const std::string& value = "") const { return invoke(CtsApi::alter(path,alterType,attrType,name,value)); }
+             const std::string& value = "") const;
    int alter_sort(const std::vector<std::string>& paths,
               const std::string& sortable_attribute_name,
               bool recursive = true) const { return invoke(CtsApi::alter_sort(paths,sortable_attribute_name,recursive)); }
