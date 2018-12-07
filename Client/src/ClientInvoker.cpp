@@ -988,15 +988,40 @@ int ClientInvoker::alter(const std::vector<std::string>& paths,
           const std::string& name,
           const std::string& value) const
 {
-   return invoke(Cmd_ptr(new AlterCmd(paths,alterType,attrType,name,value)));
+   /// *Note* server_reply_.client_handle_ is kept until the next call to register_client_handle
+   /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
+   server_reply_.clear_for_invoke(cli());
+
+   /// Handle command constructors that can throw
+   Cmd_ptr cts_cmd;
+   try { cts_cmd = Cmd_ptr( new AlterCmd(paths,alterType,attrType,name,value) ); }
+   catch (std::exception& e ){
+      std::stringstream ss; ss << "ClientInvoker::alter failed: " << e.what();
+      server_reply_.set_error_msg( ss.str() );
+      if (on_error_throw_exception_) throw std::runtime_error( server_reply_.error_msg() );
+      return 1;
+   }
+   return invoke( cts_cmd );
 }
 
 int ClientInvoker::alter( const std::string& path, const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
                           const std::string& attrType, const std::string& name,
                           const std::string& value ) const
 {
-   return invoke(
-            Cmd_ptr(new AlterCmd(std::vector<std::string>(1, path), alterType, attrType, name, value)));
+   /// *Note* server_reply_.client_handle_ is kept until the next call to register_client_handle
+   /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
+   server_reply_.clear_for_invoke(cli());
+
+   /// Handle command constructors that can throw
+   Cmd_ptr cts_cmd;
+   try { cts_cmd = Cmd_ptr( new AlterCmd(std::vector<std::string>(1, path), alterType, attrType, name, value)  ); }
+   catch (std::exception& e ){
+      std::stringstream ss; ss << "ClientInvoker::alter failed: " << e.what();
+      server_reply_.set_error_msg( ss.str() );
+      if (on_error_throw_exception_) throw std::runtime_error( server_reply_.error_msg() );
+      return 1;
+   }
+   return invoke( cts_cmd );
 }
 
 // ======================================================================================================
