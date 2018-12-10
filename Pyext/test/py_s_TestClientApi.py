@@ -1196,7 +1196,7 @@ def test_client_alter_change(ci):
     variable = task_t1.find_variable("var")
     assert variable.value() == "--", "Expected alter of variable to be '--' but found " + variable.value()
     res = ci.query('variable',task_t1.get_abs_node_path(),"var")
-    assert res == '--',"Expected alter of variable to be 'change_var' but found " + res
+    assert res == '--',"Expected alter of variable to be '--' but found " + res
     
     ci.alter(t1,"change","variable","var","--fred")   
     sync_local(ci)
