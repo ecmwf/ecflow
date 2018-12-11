@@ -1923,14 +1923,13 @@ def do_tests(ci,the_port):
 if __name__ == "__main__":
     Test.print_test_start()
 
-
     # server independent tests
     test_set_host_port();
     
     with Test.Server() as ci:
         server_version = ci.server_version();
         print("Running ecflow server version " + server_version)
-        assert Client().version() == server_version, " Client version not same as server version"
+        assert ci.version() == server_version, " Client version not same as server version"
         
         global the_port
         the_port = ci.get_port()
