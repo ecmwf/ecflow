@@ -118,6 +118,10 @@ def test_client_get_server_defs(ci):
 
 def test_client_new_log(ci, port):
     print("test_client_new_log")
+    log_path = Test.log_file_path(port)
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")    
+    
     new_log_file_name = "./test_client_new_log_" + str(os.getpid()) + ".log"
     try : os.remove(new_log_file_name) # delete file if it exists
     except: pass
@@ -125,47 +129,60 @@ def test_client_new_log(ci, port):
     ci.new_log(new_log_file_name) 
     ci.flush_log() # close log file and force write to disk
     assert os.path.exists(new_log_file_name),new_log_file_name + " : New log does not exist"
+    try: os.remove(new_log_file_name)
+    except: pass
     
     # reset new log to original
-    ci.new_log(Test.log_file_path(port)) 
+    ci.new_log(log_path) 
     ci.ping()
     ci.flush_log() # close log file and force write to disk    
-    log_file = open(Test.log_file_path(port))
+    log_file = open(log_path)
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert log_text.find("--ping") != -1, "Expected to find --ping in log file"
  
-    try: os.remove(new_log_file_name)
-    except: pass
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")
 
 
 def test_client_clear_log(ci, port):
     print("test_client_clear_log")
+    log_path = Test.log_file_path(port)
     # populate log
     ci.ping();
     ci.ping();
     ci.flush_log() # close log file and force write to disk    
-    log_file = open(Test.log_file_path(port))
+    log_file = open(log_path)
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert log_text.find("--ping") != -1, "Expected to find --ping in log file"
     
     ci.clear_log()    
-    log_file = open(Test.log_file_path(port))
+    log_file = open(log_path)
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert len(log_text) == 0, "Expected log file to be empty but found " + log_text
 
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")
+
 
 def test_client_log_msg(ci, port):
     print("test_client_log_msg")
+    log_path = Test.log_file_path(port)
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")
+
     # Send a message to the log file, then make sure it was written
     ci.log_msg("Humpty dumpty sat on a wall!")
     ci.flush_log(); # flush and close log file, so we can open it
-    log_file = open(Test.log_file_path(port))
+    log_file = open(log_path)
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert log_text.find("Humpty dumpty sat on a wall!") != -1, "Expected to find Humpty dumpty in the log file"                
+
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")
 
 def test_client_log_auto_flush(ci, port):
     print("test_client_log_auto_flush")
