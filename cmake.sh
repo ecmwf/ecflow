@@ -373,7 +373,8 @@ if [[ "$make_arg" != "" ]] ; then
 	# $make_arg VERBOSE=1
 	
     # generate the server file locally, and install it. Otherwise list of server will not be complete set
-	if [[ "$make_arg" == "make install" ]] ; then
+    echo $make_arg | grep -q "install"
+	if [[ $? -eq 0 ]] ; then
 		if [[ -f /home/ma/emos/bin/ecflow_site_server_install.sh ]] ; then
 
    			/home/ma/emos/bin/ecflow_site_server_install.sh -g
