@@ -13,19 +13,16 @@
 
 # code for testing addition and deletion 
 #
-import ecflow
 import sys
 import os
 import copy
 import unittest # for assertItemsEqual
- 
+import ecflow
+import ecflow_test_util as Test
+
 if __name__ == "__main__":
     
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
-    print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
-    print("sys.path:   " + str(sys.path))
-    print("####################################################################")
+    Test.print_test_start()
  
     #===========================================================================
     # Defs: add, delete and sort *USER* variables, use set(a).intersection(b) to compare lists

@@ -11,7 +11,8 @@
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 from ecflow import Defs, Client, debug_build
-     
+import ecflow_test_util as Test
+
 def create_defs_sequentially():
     local_defs = Defs()
     suite = local_defs.add_suite("s1")
@@ -47,9 +48,8 @@ def create_defs_functionally():
     
     
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version()  + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+        
+    Test.print_test_start()
 
     #
     # Add Nodes functional way

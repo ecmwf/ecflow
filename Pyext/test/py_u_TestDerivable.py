@@ -13,6 +13,7 @@
 
 #  code for testing derivation works
 import ecflow
+import ecflow_test_util as Test
 
 class MyDefs(ecflow.Defs): pass
 class MySuite(ecflow.Suite): pass
@@ -21,8 +22,6 @@ class MyTask(ecflow.Task): pass
 class MyClient(ecflow.Client): pass
 
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")")
-    print("####################################################################")
- 
+    
+    Test.print_test_start()
     print("All tests pass")

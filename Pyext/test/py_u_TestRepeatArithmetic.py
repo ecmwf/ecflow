@@ -17,11 +17,10 @@
 # The repeat variable in the expression must be on the LHS(left hand side)
 # of the expression, otherwise integer arithmetic is used
 import ecflow
- 
+import ecflow_test_util as Test
+
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) + ")")
-    print("####################################################################")
+    Test.print_test_start()
  
     defs = ecflow.Defs()
     s1 = defs.add_suite("s1");

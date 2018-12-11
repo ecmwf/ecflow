@@ -1921,10 +1921,8 @@ def do_tests(ci,the_port):
     test_ECFLOW_199(ci)         
 
 if __name__ == "__main__":
-    client_version = Client().version();
-    print("####################################################################")
-    print("Running ecflow client version " + client_version + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
+
 
     # server independent tests
     test_set_host_port();

@@ -17,6 +17,7 @@ import os
 from ecflow import Day, Date, Meter, Event, Queue, Clock, Variable, Label, Limit, InLimit, \
                    RepeatDate, RepeatEnumerated, RepeatInteger, RepeatString, \
                    Task, Family, Suite, Defs, Client, debug_build
+import ecflow_test_util as Test
 
 def check_day(day):
     try:    
@@ -163,9 +164,7 @@ def check_defs(path_to_defs):
         return False
           
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
  
     # Names with leading '.' should not be allowed. Will interfere with triggers
     # Empty names not allowed

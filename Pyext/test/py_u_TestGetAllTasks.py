@@ -13,7 +13,8 @@
 
 # Simple check for get all tasks
 from ecflow import Defs, Client, debug_build
-  
+import ecflow_test_util as Test
+
 def create_defs():
     defs = Defs()
     suite = defs.add_suite("test_get_all")
@@ -93,9 +94,7 @@ def test_get_all_nodes_from_nodes():
    
 
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
  
     test_get_all_tasks(create_defs())
     test_get_all_nodes(create_defs())

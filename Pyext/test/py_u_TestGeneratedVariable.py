@@ -14,11 +14,10 @@
 # code for testing  generated variables
 #
 import ecflow
-    
+import ecflow_test_util as Test
+
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
      
     #===========================================================================
     print("Defs: test generated variables")

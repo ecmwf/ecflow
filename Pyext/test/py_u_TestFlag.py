@@ -14,14 +14,11 @@
 import ecflow
 import sys
 import os
- 
+import ecflow_test_util as Test
+
 if __name__ == "__main__":
-    
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
-    print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
-    print("sys.path:   " + str(sys.path))
-    print("####################################################################")
+
+    Test.print_test_start()
  
     flag = ecflow.Flag()
     assert str(flag) == "", "expected empty string, for an empty flag"

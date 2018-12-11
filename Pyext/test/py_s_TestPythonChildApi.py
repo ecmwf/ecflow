@@ -164,16 +164,8 @@ def test_client_run(ci):
 # //////////////////////////////////////////////////////////////////////////////////////        
 
 if __name__ == "__main__":
-    client_version = Client().version();
-    print("####################################################################")
-    print("Running ecflow client version " + client_version + " debug build(" + str(debug_build()) +")")
-    try: print("PYTHONPATH:",os.environ['PYTHONPATH'].split(os.pathsep))
-    except KeyError: print("Could not get PYTHONPATH")    
-    try: print("LD_LIBRARY_PATH:",os.environ['LD_LIBRARY_PATH'].split(os.pathsep))
-    except KeyError: print("Could not get LD_LIBRARY_PATH")    
-    print("####################################################################")
+    Test.print_test_start()
 
-    #ci = Client("localhost","3141")
     with Test.Server() as ci:
     
         server_version = ci.server_version();

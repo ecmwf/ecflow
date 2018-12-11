@@ -106,9 +106,7 @@ def test_time_series():
     
 
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
  
     simulate_defs_with_time()
     simulate_deadlock()

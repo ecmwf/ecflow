@@ -18,11 +18,11 @@ from ecflow import Suite, Family, Task, Defs, Clock, DState, PartExpression, Var
                    Date, Day, Event, Meter, Label, Autocancel, Days, TimeSlot, TimeSeries, Style, State, \
                    RepeatString, RepeatDate, RepeatInteger, RepeatDay, RepeatEnumerated, \
                    Verify, PrintStyle, Time, Today, Late, Cron, Client, debug_build
+import ecflow_test_util as Test
+
 
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
     
     defs = Defs()
     s0 = defs.add_suite("s0")
