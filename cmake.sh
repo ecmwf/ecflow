@@ -13,7 +13,6 @@ show_error_and_exit() {
    echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
    echo ""
    echo "   make           - run make after cmake"
-   echo "   python3        - build with python3"
    echo "   ecbuild        - Use git cloned ecbuild over the module loaded ecbuild(default)"
    echo "   install        - install to /usr/local/apps/eflow.  defaults is /var/tmp/$USER/install/cmake/ecflow"
    echo "   test           - run all the tests"
@@ -53,7 +52,6 @@ verbose_arg=
 ctest_arg=
 clean_arg=
 no_gui_arg=
-python3_arg=
 ssl_arg=
 secure_user_arg=
 log_arg=
@@ -94,7 +92,6 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = copy_tarball ]] ; then copy_tarball_arg=$1 ;
    elif [[ "$1" = test ]] ;  then test_arg=$1 ;
    elif [[ "$1" = test_safe ]] ; then test_safe_arg=$1 ;
-   elif [[ "$1" = python3 ]] ;   then python3_arg=$1 ;
    elif [[ "$1" = ctest ]] ; then  
       ctest_arg=$1 ; 
       shift
@@ -121,7 +118,6 @@ echo "clang_tidy_arg=$clang_tidy_arg"
 echo "tsan_arg=$tsan_arg"
 echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
-echo "python3_arg=$python3_arg"
 echo "no_gui_arg=$no_gui_arg"
 echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
@@ -139,9 +135,10 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
-module load cmake/3.10.2      # need cmake 3.12.0 to build python3. Allow boost python libs to be found
 module load ecbuild/new
 module load boost/1.53.0     # uncomment to use local BOOST_ROOT
+module load python3/3.6.5-01
+module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
@@ -194,19 +191,12 @@ if [[ "$ARCH" = cray ]] ; then
     fi
     module unload atp                     # must use for NON MPI code (ATP abnormal termination processing only works with cray MPI for ESM modes)
     module load craype-target-local_host  # must use for NON MPI code
-    module load boost/1.53.0
     export CRAY_ADD_RPATH=yes
     export ECFLOW_CRAY_BATCH=1
 fi
 
-if [[ "$python3_arg" = python3 ]] ; then
-    module load python3/3.6.5-01
-    module unload cmake  # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found
-    module load cmake/3.12.0      
-    # *** To test python3 when cmake < 3.12.0 we need this ****
-    #cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
-fi
  
+########################################################################################
 # ====================================================================================
 # default to Release  
 cmake_build_type=
