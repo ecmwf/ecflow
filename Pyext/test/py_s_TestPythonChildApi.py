@@ -170,7 +170,7 @@ if __name__ == "__main__":
     
         server_version = ci.server_version();
         print("Running ecflow server version " + server_version)
-        assert client_version == server_version, "Client version not same as server version"
+        assert ci.version() == server_version, "Client version not same as server version"
 
         PrintStyle.set_style( Style.STATE ) # show node state 
         test_client_run(ci)  
