@@ -19,7 +19,7 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
 import ecflow_test_util as Test
 import unittest 
 import shutil   # used to remove directory tree
-import os
+import os,sys
 
 def test_def_file():
     #return "test.def"
@@ -1001,7 +1001,7 @@ class TestRepeat(unittest.TestCase):
     def setUp(self):
         Ecf.set_debug_equality(True)      
         
-        self.ecf_home     = File.build_dir() + "/Pyext/test/data/course_" + str(os.getpid()) # allow paralled runs
+        self.ecf_home     = File.build_dir() + "/Pyext/test/data/course_py" + str(sys.version_info[0]) + "_" + str(os.getpid()) # allow paralled runs
         self.ecf_includes = File.source_dir() + "/Pyext/test/data/includes"
         #print("self.ecf_home ",self.ecf_home )
  

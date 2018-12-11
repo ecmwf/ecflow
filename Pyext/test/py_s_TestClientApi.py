@@ -1799,9 +1799,7 @@ def test_client_ch_with_drops_handles(the_port,top_ci):
  
 
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
 
     # server independent tests
     test_set_host_port();

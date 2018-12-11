@@ -14,6 +14,7 @@
 #  code for testing pointers and hierarchy in python
 
 from ecflow import Suite, Family, Task, Defs, Client, debug_build
+import ecflow_test_util as Test
 
 def absNodePath(node):
     """ Given a node return its absolute node path. """
@@ -33,10 +34,8 @@ def absNodePath(node):
     return ret
     
 
-if __name__ == "__main__":    
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+if __name__ == "__main__":  
+    Test.print_test_start()
    
     suite = Suite("s1");
     family = Family("f1")

@@ -18,6 +18,7 @@ import os,sys,fnmatch
 import fcntl
 import datetime,time
 import shutil   # used to remove directory tree
+import platform # for python version info
 
 from ecflow import Client, debug_build, File
 
@@ -41,10 +42,11 @@ def debugging() : return False
 
 def ecf_home(port): 
     # debug_build() is defined for ecflow. Used in test to distinguish debug/release ecflow
-    # Vary ECF_HOME based on debug/release/port allowing multiple invocations of these tests
+    # Vary ECF_HOME based on debug/release/port/python version, allowing multiple invocations of these tests
+    ecf_home_base = "/test/data/ecf_home_py" + str(sys.version_info[0])
     if debug_build():
-        return os.getcwd() + "/test/data/ecf_home_debug_" + str(port)
-    return os.getcwd() + "/test/data/ecf_home_release_" + str(port)
+        return os.getcwd() + ecf_home_base + "_debug_" + str(port)
+    return os.getcwd() + ecf_home_base + "_release_" + str(port)
 
 def get_parent_dir(file_path):
     return os.path.dirname(file_path)
@@ -54,6 +56,15 @@ def checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.ch
 def backup_checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check.b"
 def white_list_file_path(port): return "./" + gethostname() + "." + port + ".ecf.lists"
 
+def print_test_start():
+    print("#######################################################################################")
+    print("ecflow version(" + Client().version() + ") debug build(" + str(debug_build()) +")  python(" + platform.python_version() + ")")
+    print("PYTHONPATH                : " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
+    #print("sys.path                  : " + str(sys.path))
+    print("Current working directory : " + str(os.getcwd()))
+    print("Python version            : " + str(sys.version_info[0]) + "." + str(sys.version_info[1]))
+    print("#######################################################################################")
+    
 def clean_up_server(port):
     print("   clean_up " + port)
     try: os.remove(log_file_path(port))
@@ -157,6 +168,9 @@ class Server(object):
         if not debugging():
             seed_port = 3153
             if debug_build(): seed_port = 3152
+            if sys.version_info[0] == 3: # python3 can run at same time
+                seed_port = 3200
+                if debug_build(): seed_port = 3201
             self.lock_file = EcfPortLock()
             self.the_port = self.lock_file.find_free_port(seed_port)   
         else:

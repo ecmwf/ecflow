@@ -94,9 +94,7 @@ def check_jobs(task_vec, ecf_home):
 
 
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
     
     workspace = File.source_dir();
     print(workspace)

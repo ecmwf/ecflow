@@ -136,9 +136,7 @@ def test_client_run(ci):
         shutil.rmtree(dir_to_remove)      
         
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
 
     with Test.Server() as ci:
         PrintStyle.set_style( Style.STATE ) # show node state 

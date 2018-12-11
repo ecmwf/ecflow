@@ -15,12 +15,11 @@
 # In our case it provides the ability to indent
 
 from ecflow import Defs, Suite, Task, Family, Client, Variable, Edit, debug_build
+import ecflow_test_util as Test
 import sys
     
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start()
  
     # sys.version_info is a tuple containing (major,minor,micro,releaselevel,serial)
     version = sys.version_info;
