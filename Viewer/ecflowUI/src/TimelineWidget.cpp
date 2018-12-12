@@ -221,7 +221,7 @@ void TimelineWidget::clear(bool inReload)
         ui_->pathFilterLe->clear();
         prevState_.valid=false;
         //reset the view mode to timeline
-        view_->setViewMode(TimelineView::TimelineMode);
+        ui_->modeCombo->setCurrentIndex(0);
     }
 
     tmpLogFile_.reset();
@@ -709,6 +709,10 @@ void TimelineWidget::loadCore(QString logFile)
     setAllVisible(true);
     updateInfoLabel();
     updateFilterTriggerMode();
+
+    //determine node types if task filter is on
+    if(ui_->taskOnlyTb->isChecked())
+        determineNodeTypes();
 
     ViewerUtil::restoreOverrideCursor();
 
