@@ -139,6 +139,8 @@ module load ecbuild/new
 module load boost/1.53.0     # uncomment to use local BOOST_ROOT
 module load python3/3.6.5-01
 module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
+# To build python3 when cmake < 3.12.0 use
+# -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
