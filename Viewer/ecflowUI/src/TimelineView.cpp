@@ -937,6 +937,8 @@ void TimelineView::adjustHeader()
         header_->setSectionHidden(TimelineModel::TimelineColumn,true);
     }
 
+    header_->viewModeChanged();
+
     headerBeingAdjusted_=false;
 }
 

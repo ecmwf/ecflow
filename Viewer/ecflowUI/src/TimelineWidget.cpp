@@ -151,6 +151,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->fromTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
             this,SLOT(slotStartChanged(QDateTime)));
 
+    connect(ui_->toTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
+            this,SLOT(slotEndChanged(QDateTime)));
+
     connect(ui_->startTb,SIGNAL(clicked()),
             this,SLOT(slotResetStart()));
 
