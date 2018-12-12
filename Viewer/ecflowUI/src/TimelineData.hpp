@@ -44,6 +44,7 @@ public:
     bool isTask() const {return type_ ==  TaskType;}
     void add(unsigned char status,unsigned int time);
     int firstInPeriod(QDateTime startDt,QDateTime endDt) const;
+    bool hasSubmittedOrActiveDuration(QDateTime startDt,QDateTime endDt) const;
     int firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const;
     int firstActiveDuration(QDateTime startDt,QDateTime endDt) const;
     void meanSubmittedDuration(float&,int&) const;

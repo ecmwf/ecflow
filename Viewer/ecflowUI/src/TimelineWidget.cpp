@@ -394,9 +394,13 @@ void TimelineWidget::slotViewMode(int)
         ui_->sortUpTb->setEnabled(true);
         ui_->sortDownTb->setEnabled(true);
 
+        //reload filter
+        slotShowChanged(ui_->showChangedTb->isChecked());
+
         //reset and reload the sort
         slotSortMode(0);
         slotSortOrderChanged(0);
+
     }
     else if (id == "duration")
     {
@@ -404,7 +408,13 @@ void TimelineWidget::slotViewMode(int)
         ui_->sortCombo->setEnabled(false);
         ui_->sortUpTb->setEnabled(false);
         ui_->sortDownTb->setEnabled(false);
+
+        //reload filter
+        slotShowChanged(ui_->showChangedTb->isChecked());
+
+        //reload sort
         sortModel_->setSortMode(TimelineSortModel::QtSortMode);
+        slotShowChanged(ui_->showChangedTb->isChecked());
     }
 }
 
@@ -448,7 +458,16 @@ void TimelineWidget::slotSortOrderChanged(int)
 
 void TimelineWidget::slotShowChanged(bool st)
 {
-    sortModel_->setShowChangedOnly(st);
+    if(view_->viewMode() == TimelineView::TimelineMode)
+    {
+        sortModel_->setChangeFilterMode(st?TimelineSortModel::TimelineChangeFilterMode:
+                                           TimelineSortModel::NoChangeFilterMode);
+    }
+    else if(view_->viewMode() == TimelineView::DurationMode)
+    {
+        sortModel_->setChangeFilterMode(st?TimelineSortModel::DurationChangeFilterMode:
+                                           TimelineSortModel::NoChangeFilterMode);
+    }
 }
 
 void TimelineWidget::slotStartChanged(const QDateTime& dt)
