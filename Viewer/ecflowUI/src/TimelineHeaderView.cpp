@@ -321,6 +321,8 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
     style()->drawControl(QStyle::CE_Header, &opt, painter, this);
     painter->setBrushOrigin(oldBO);
 
+    painter->restore();
+
     int rightPos=rect.right();
     if(view_->isSortingEnabled())
     {
@@ -358,6 +360,8 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
 
 void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logicalIndex) const
 {
+    painter->save();
+
     //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
 
     //The timeline area bounded by the frame
@@ -579,10 +583,14 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logi
 
         actSec+=minorTick;
     }
+
+    painter->restore();
 }
 
 void TimelineHeader::renderDay(const QRect& rect,QPainter* painter,int logicalIndex) const
 {
+    painter->save();
+
     //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
 
     //The timeline area bounded by the frame
