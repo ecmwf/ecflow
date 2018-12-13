@@ -405,35 +405,26 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
     int len=(static_cast<float>(val)/static_cast<float>(maxVal))*static_cast<float>(rect.width()-maxTextW);
 
     //bar
-    QRect r(rect);
-    r.setWidth(len);
-    r.adjust(0,1,-1,-1);
-    painter->fillRect(r,col);
+    QRect barRect(rect);
+    barRect.setWidth(len);
+    barRect.adjust(0,1,-1,-1);
+    int right=barRect.x()+barRect.width();
 
-    if(maxTextW <=0)
-        return;
+    QString text;
+    QRect textRect;
+    QString percentText;
+    QRect percentRect;
 
-    int right=r.x()+r.width();
-
-    //value
-    painter->setPen(QColor(100,100,100));
-    QString s=ViewerUtil::formatDuration(val);
-    r=rect;
-    r.setX(right+5);
-    r.setWidth(fm_.width(s));
-    right=r.x()+r.width();
-
-    const bool setClipRect = right > rect.right();
-    if(setClipRect)
+    if(maxTextW > 0)
     {
-        painter->save();
-        painter->setClipRect(rect.adjusted(0,0,0,-2));
+        text=ViewerUtil::formatDuration(val);
+        textRect=rect;
+        textRect.setX(right+5);
+        textRect.setWidth(fm_.width(text));
+        right=textRect.x()+textRect.width();
     }
 
-    painter->drawText(r,s,Qt::AlignLeft | Qt::AlignVCenter);
-
     //diff to mean
-    s.clear();
     if(meanVal > 0.)
     {
         int percent=100.0*static_cast<float>(val-meanVal)/meanVal;
@@ -444,23 +435,47 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
         if(percent > 0)
         {
             //unicode U+2191 arrow up
-            s+=QChar(8593);
+            percentText+=QChar(8593);
             //painter->setPen(Qt::red);
         }
         else
         {
             //unicode U+2193 arrow up
-            s+=QChar(8595);
+            percentText+=QChar(8595);
             //painter->setPen(QColor(11,111,34));
             percent*=-1;
         }
 
-        s+=QString::number(percent) + "%[" + QString::number(num) + "]";
+        percentText+=QString::number(percent) + "%[" + QString::number(num) + "]";
 
-        r=rect;
-        r.setX(right+5);
-        r.setWidth(fm_.width(s));
-        painter->drawText(r,s,Qt::AlignLeft | Qt::AlignVCenter);
+        percentRect=rect;
+        percentRect.setX(right+5);
+        percentRect.setWidth(fm_.width(percentText));
+        right=percentRect.x()+percentRect.width();
+    }
+
+    const bool setClipRect = right > rect.right();
+    if(setClipRect)
+    {
+        painter->save();
+        painter->setClipRect(rect.adjusted(0,0,0,-2));
+    }
+
+    //bar
+    painter->fillRect(barRect,col);
+
+    //value
+    if(!text.isEmpty())
+    {
+        painter->setPen(QColor(100,100,100));
+        painter->drawText(textRect,text,Qt::AlignLeft | Qt::AlignVCenter);
+    }
+
+    //value
+    if(!percentText.isEmpty())
+    {
+        painter->setPen(QColor(100,100,100));
+        painter->drawText(percentRect,percentText,Qt::AlignLeft | Qt::AlignVCenter);
     }
 
     if(setClipRect)
@@ -468,7 +483,6 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
         painter->restore();
     }
 }
-
 
 int TimelineDelegate::timeToPos(QRect r,unsigned int time) const
 {
@@ -581,6 +595,7 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     setAlternatingRowColors(false);
     setMouseTracking(true);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
+    //setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     QTreeView::setModel(model_);
 
@@ -953,6 +968,7 @@ void TimelineView::setViewMode(ViewMode vm)
                 }
             }
             setSortingEnabled(true);
+            sortByColumn(TimelineModel::ActiveDurationColumn,Qt::DescendingOrder);
         }
         else
         {
