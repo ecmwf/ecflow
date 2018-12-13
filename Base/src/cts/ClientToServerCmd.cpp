@@ -45,6 +45,9 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
    // Allow creating of new time stamp, when *not* in a command. i.e during node tree traversal in server
    CmdContext cmdContext;
 
+   // Automatically flush log file at the end of the command, if auto flush is *NOT* enabled
+   LogFlusher logFlusher;
+
    // Create the log time stamp once for a given request
    if (Log::instance()) Log::instance()->cache_time_stamp();
 

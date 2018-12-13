@@ -44,14 +44,14 @@ static std::string getLogPath() {
 
 BOOST_AUTO_TEST_CASE( test_log )
 {
-	cout << "ACore:: ...test_log\n";
-
 	std::string path = getLogPath();
+	cout << "ACore:: ...test_log " << path << "\n";
 
 	// delete the log file if it exists.
 	fs::remove(path);
 	BOOST_REQUIRE_MESSAGE(!fs::exists( path ), "log file not deleted " << path);
 
+	LogFlusher logFlusher;
 	Log::create(path);
 	LOG(Log::MSG,"First Message");
 	LOG(Log::LOG,"LOG");
@@ -65,17 +65,7 @@ BOOST_AUTO_TEST_CASE( test_log )
 
  	Log::instance()->log(Log::OTH,"OTHER2");
 
- 	// test default is with flushing disabled
-   BOOST_CHECK_MESSAGE(!Log::instance()->is_auto_flush_enabled()," By default automatic flushing should be disabled");
-   Log::instance()->enable_auto_flush();
-   BOOST_CHECK_MESSAGE(Log::instance()->is_auto_flush_enabled(),"expected flushing(of user and child commands) to be enabled");
-   Log::instance()->disable_auto_flush();
-   BOOST_CHECK_MESSAGE(!Log::instance()->is_auto_flush_enabled(),"expected flushing(of user and child commands) to be disabled");
-
 	BOOST_CHECK_MESSAGE(fs::exists( path ), "log file " << path << " not created \n");
-
-   // These following tests rely log being flushed
-   Log::instance()->enable_auto_flush();
 }
 
 BOOST_AUTO_TEST_CASE( test_log_append )
@@ -86,10 +76,13 @@ BOOST_AUTO_TEST_CASE( test_log_append )
 
 	BOOST_REQUIRE_MESSAGE(fs::exists( path ), "log file " << path << " not created by previous test\n");
 
- 	LOG(Log::MSG,"Last Message");
+	{
+	   LogFlusher logFlusher;
+	   LOG(Log::MSG,"Last Message");
+	}
 
 	// Load the log file into a vector, of strings, and test content
-    std::vector<std::string> lines;
+   std::vector<std::string> lines;
  	BOOST_REQUIRE_MESSAGE(File::splitFileIntoLines(path,lines,true/*IGNORE EMPTY LINE AT THE END*/),"Failed to open log file"<< " (" << strerror(errno) << ")");
  	BOOST_REQUIRE(lines.size() != 0);
 	BOOST_CHECK_MESSAGE(lines.size() == 10," Expected 10 lines in log, but found " << lines.size() << "\n");
