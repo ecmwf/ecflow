@@ -53,7 +53,8 @@ TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     bottomPadding_(2),
     submittedMaxDuration_(-1),
     activeMaxDuration_(-1),
-    durationMaxTextWidth_(-1)
+    submittedMaxTextWidth_(-1),
+    activeMaxTextWidth_(-1)
 {  
     Q_ASSERT(model_);
 
@@ -329,7 +330,7 @@ void TimelineDelegate::renderSubmittedDuration(QPainter *painter,const QStyleOpt
                 {
                     meanVal=lst[0].toFloat();
                     num=lst[1].toInt();
-                    renderDuration(painter,val, meanVal, submittedMaxDuration_, num, vn->colour(),option.rect);
+                    renderDuration(painter,val, meanVal, submittedMaxDuration_, num, vn->colour(),option.rect,submittedMaxTextWidth_);
                 }
             }
         }
@@ -356,7 +357,7 @@ void TimelineDelegate::renderActiveDuration(QPainter *painter,const QStyleOption
                 {
                     meanVal=lst[0].toFloat();
                     num=lst[1].toInt();
-                    renderDuration(painter,val, meanVal, activeMaxDuration_, num, vn->colour(),option.rect);
+                    renderDuration(painter,val, meanVal, activeMaxDuration_, num, vn->colour(),option.rect,activeMaxTextWidth_);
                 }
             }
         }
@@ -393,9 +394,8 @@ void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool ha
     painter->fillRect(r,fillBrush);
 }
 
-void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect) const
+void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect, int maxTextW) const
 {
-    int maxTextW=durationMaxTextWidth_;
     if(maxTextW <=0)
         return;
 
@@ -508,7 +508,41 @@ void TimelineDelegate::setMaxDurations(int submittedDuration,int activeDuration)
 {
     submittedMaxDuration_=submittedDuration;
     activeMaxDuration_=activeDuration;
-    durationMaxTextWidth_=fm_.width(" 59d 59h 59m 59s A999%[999]");
+
+    submittedMaxTextWidth_=getDurationMaxTextWidth(submittedMaxDuration_);
+    activeMaxTextWidth_=getDurationMaxTextWidth(activeMaxDuration_);
+}
+
+int TimelineDelegate::getDurationMaxTextWidth(int duration) const
+{
+    QString txt;
+
+    if(duration < 60)
+    {
+        txt=" 59s";
+    }
+    else if(duration < 3600)
+    {
+        txt=" 59m 59s";
+    }
+    else if(duration < 3600*24)
+    {
+        txt=" 23h 59m 59s";
+    }
+    else if(duration < 86400*10)
+    {
+        txt=" 9d 23h 59m 59s";
+    }
+    else if(duration < 86400*100)
+    {
+        txt=" 99d 23h 59m 59s";
+    }
+    else
+    {
+        txt=" 999d 23h 59m 59s";
+    }
+
+    return fm_.width(txt + " A999%[999] ");
 }
 
 
