@@ -316,7 +316,7 @@ void TimelineDelegate::renderSubmittedDuration(QPainter *painter,const QStyleOpt
         return;
 
     int val=index.data().toInt();
-    if(val > 0)
+    if(val >= 0)
     {
         if(VNState* vn=VNState::find("submitted"))
         {
@@ -343,7 +343,7 @@ void TimelineDelegate::renderActiveDuration(QPainter *painter,const QStyleOption
         return;
 
     int val=index.data().toInt();
-    if(val > 0)
+    if(val >= 0)
     {
         if(VNState* vn=VNState::find("active"))
         {
@@ -428,9 +428,6 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
     if(meanVal > 0.)
     {
         int percent=100.0*static_cast<float>(val-meanVal)/meanVal;
-
-        if(percent == 0)
-            return;
 
         if(percent > 0)
         {
