@@ -232,8 +232,8 @@ void TimelineHeader::doPeriodZoom()
     }
 
     setZoomDisabled();
+    checkActionState();
 }
-
 
 bool TimelineHeader::canBeZoomed() const
 {
@@ -929,10 +929,9 @@ void TimelineHeader::setMaxDurations(int submittedDuration,int activeDuration)
 
 void TimelineHeader::viewModeChanged()
 {
-    zoomHistory_.clear();
     if(hasZoomableColumn())
-    {
-        enableZoomActions(true);
+    {         
+         enableZoomActions(true);
     }
     else
     {

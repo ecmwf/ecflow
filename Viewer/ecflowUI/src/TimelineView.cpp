@@ -936,6 +936,7 @@ void TimelineView::setViewMode(ViewMode vm)
     {
         viewMode_ = vm;              
         adjustHeader();
+        header_->viewModeChanged();
 
         if(viewMode_ == DurationMode)
         {
@@ -983,8 +984,6 @@ void TimelineView::adjustHeader()
         header_->setSectionHidden(TimelineModel::ActiveDurationColumn,false);
         header_->setSectionHidden(TimelineModel::TimelineColumn,true);
     }
-
-    header_->viewModeChanged();
 
     headerBeingAdjusted_=false;
 }
