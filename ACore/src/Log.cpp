@@ -54,7 +54,7 @@ void Log::destroy()
 }
 
 Log::Log(const std::string& fileName)
-: fileName_(fileName), logImpl_( new LogImpl(fileName) )
+: count_(0),fileName_(fileName), logImpl_( new LogImpl(fileName) )
 {
 }
 
@@ -66,6 +66,7 @@ Log::~Log()
 
 bool Log::log(Log::LogType lt,const std::string& message)
 {
+   count_++;
 	if (!logImpl_) {
 		logImpl_ = new LogImpl(fileName_);
 	}
@@ -74,6 +75,7 @@ bool Log::log(Log::LogType lt,const std::string& message)
 
 bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 {
+   count_++;
    if (!logImpl_) {
       logImpl_ = new LogImpl(fileName_);
    }
@@ -82,6 +84,7 @@ bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 
 bool Log::append(const std::string& message)
 {
+   count_++;
    if (!logImpl_) {
       logImpl_ = new LogImpl(fileName_) ;
    }
@@ -106,6 +109,8 @@ const std::string& Log::get_cached_time_stamp() const
 
 void Log::flush()
 {
+   count_ = 0;
+
  	// will close ofstream and force data to be written to disk.
 	// Forcing writing to physical medium can't be guaranteed though!
 	delete logImpl_;
@@ -114,11 +119,11 @@ void Log::flush()
 
 void Log::flush_only()
 {
-   if (!logImpl_) {
-      logImpl_ = new LogImpl(fileName_) ;
-      return;
+   // cout << "Log::flush_only() count = " << count_ << endl;
+   if (count_ != 0 && logImpl_) {
+      count_ = 0;
+      logImpl_->flush();
    }
-   logImpl_->flush();
 }
 
 void Log::clear()

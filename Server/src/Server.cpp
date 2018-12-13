@@ -82,6 +82,8 @@ Server::Server( ServerEnvironment& serverEnv ) :
 #endif
                                 << endl;
 
+   LogFlusher logFlusher;
+
    // Register to handle the signals.
    // Support for emergency check pointing during system session.
    signals_.add(SIGTERM);
@@ -294,6 +296,7 @@ void Server::handle_accept( const boost::system::error_code& e, connection_ptr c
       if (e != boost::asio::error::operation_aborted) {
          // An error occurred. Log it
          LogToCout toCoutAsWell;
+         LogFlusher logFlusher;
          LOG(Log::ERR, "   Server::handle_accept error occurred  " <<  e.message());
       }
    }
@@ -335,6 +338,8 @@ void Server::handle_handshake(const boost::system::error_code& e,connection_ptr 
 
 void Server::handle_read(  const boost::system::error_code& e,connection_ptr conn )
 {
+   LogFlusher logFlusher;
+
    /// Handle completion of a write operation.
    // **********************************************************************************
    // This function *must* finish with write, otherwise it ends up being called recursively
@@ -395,6 +400,8 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
 
 void Server::handle_write( const boost::system::error_code& e, connection_ptr conn )
 {
+   LogFlusher logFlusher;
+
    // Handle completion of a write operation.
    // Nothing to do. The socket will be closed automatically when the last
    // reference to the connection object goes away.
@@ -438,6 +445,7 @@ bool Server::shutdown_socket(connection_ptr conn, const std::string& msg) const
    conn->socket_ll().shutdown(boost::asio::ip::tcp::socket::shutdown_both,ec);
    if (ec) {
       ecf::LogToCout logToCout;
+      LogFlusher logFlusher;
       std::stringstream ss; ss << msg << " socket shutdown both failed: " << ec.message() << " : for request " << inbound_request_;
       log(Log::ERR,ss.str());
       return false;

@@ -104,11 +104,12 @@ private:
    explicit Log(const std::string& fileName);
    static Log* instance_;
 
+   unsigned int count_;
    std::string fileName_;
    LogImpl* logImpl_;
 };
 
-// Flush log on destruction, but only if auto flush is disabled
+// Flush log on destruction
 class LogFlusher : private boost::noncopyable{
 public:
    LogFlusher(){}

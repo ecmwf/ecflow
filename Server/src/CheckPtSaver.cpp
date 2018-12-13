@@ -112,6 +112,8 @@ void CheckPtSaver::terminate()
 
 void CheckPtSaver::explicitSave(bool from_server) const
 {
+   LogFlusher logFlusher;
+
 	if ( server_->defs_ ) {
 
 		try {
@@ -172,6 +174,8 @@ void CheckPtSaver::explicitSave(bool from_server) const
 
 void CheckPtSaver::periodicSaveCheckPt(const boost::system::error_code& error )
 {
+   LogFlusher logFlusher;
+
 #ifdef DEBUG_CHECKPT
       std::cout << "      CheckPtSaver::periodicSaveCheckPt() interval = " << serverEnv_->checkPtInterval() << "  time: " << to_simple_string(boost::posix_time::second_clock::universal_time()) << "\n";
 #endif
