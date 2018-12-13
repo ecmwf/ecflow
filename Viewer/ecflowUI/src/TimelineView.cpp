@@ -422,6 +422,14 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
     r.setX(right+5);
     r.setWidth(fm_.width(s));
     right=r.x()+r.width();
+
+    const bool setClipRect = right > rect.right();
+    if(setClipRect)
+    {
+        painter->save();
+        painter->setClipRect(rect.adjusted(0,0,0,-2));
+    }
+
     painter->drawText(r,s,Qt::AlignLeft | Qt::AlignVCenter);
 
     //diff to mean
@@ -453,6 +461,11 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
         r.setX(right+5);
         r.setWidth(fm_.width(s));
         painter->drawText(r,s,Qt::AlignLeft | Qt::AlignVCenter);
+    }
+
+    if(setClipRect)
+    {
+        painter->restore();
     }
 }
 
@@ -495,7 +508,7 @@ void TimelineDelegate::setMaxDurations(int submittedDuration,int activeDuration)
 {
     submittedMaxDuration_=submittedDuration;
     activeMaxDuration_=activeDuration;
-    durationMaxTextWidth_=fm_.width(" 59d 59h 59m 59s");
+    durationMaxTextWidth_=fm_.width(" 59d 59h 59m 59s A999%[999]");
 }
 
 
