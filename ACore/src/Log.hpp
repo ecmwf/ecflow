@@ -108,7 +108,7 @@ private:
    LogImpl* logImpl_;
 };
 
-// Flush log on destruction, but only if auto flush is disabled
+// Flush log on destruction
 class LogFlusher : private boost::noncopyable{
 public:
    LogFlusher(){}
@@ -138,6 +138,7 @@ private:
    bool check_file_write(const std::string& message) const;
 
 private:
+   unsigned int count_;
    std::string time_stamp_;
    mutable std::ofstream file_;
 

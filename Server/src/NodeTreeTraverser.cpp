@@ -163,6 +163,8 @@ void NodeTreeTraverser::do_traverse()
 	// time_now >= next_poll_time_
 
 
+   LogFlusher logFlusher;
+
 	// We have SOFT real time, we poll every second, BUT only update the suite calendar at the job submission
 	// interval. However we can not guarantee to hit exactly at the next poll time
 	// *** traverse node tree and increment next_poll_time_ ***

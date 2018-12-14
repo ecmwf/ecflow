@@ -114,11 +114,7 @@ void Log::flush()
 
 void Log::flush_only()
 {
-   if (!logImpl_) {
-      logImpl_ = new LogImpl(fileName_) ;
-      return;
-   }
-   logImpl_->flush();
+   if (logImpl_) logImpl_->flush();
 }
 
 void Log::clear()
@@ -274,7 +270,7 @@ LogFlusher::~LogFlusher()
 
 //======================================================================================================
 LogImpl::LogImpl(const std::string& filename)
-:  file_(filename.c_str(), ios::out | ios::app)
+: count_(0), file_(filename.c_str(), ios::out | ios::app)
 {
  	if (!file_.is_open()) {
 		std::cerr << "LogImpl::LogImpl: Could not open log file '" << filename << "'\n";
@@ -303,6 +299,7 @@ bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
 //#if DEBUG_BLOCKING_DISK_IO
 //   ecf::DurationTimer timer;
 //#endif
+   count_++;
 
    // XXX:[HH:MM:SS D.M.YYYY] chd:fullname [+additional information]
    // XXX:[HH:MM:SS D.M.YYYY] --<user_cmd> [+additional information]
@@ -342,10 +339,17 @@ bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
 //#endif
 }
 
-void LogImpl::flush() { file_.flush();}
+void LogImpl::flush() {
+   // cout << "LogImpl::flush() count = " << count_ << endl;
+   if (count_ != 0) {
+      file_.flush();
+      count_ = 0;
+   }
+}
 
 bool LogImpl::append(const std::string& message)
 {
+   count_++;
    file_ << message << '\n';
    return check_file_write(message);
 }
