@@ -338,8 +338,6 @@ void Server::handle_handshake(const boost::system::error_code& e,connection_ptr 
 
 void Server::handle_read(  const boost::system::error_code& e,connection_ptr conn )
 {
-   LogFlusher logFlusher;
-
    /// Handle completion of a write operation.
    // **********************************************************************************
    // This function *must* finish with write, otherwise it ends up being called recursively
@@ -394,14 +392,13 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       //       Connection::handle_read_data boost::archive::archive_exception unregistered class
       //       Server::handle_read : Invalid argument
       LogToCout toCoutAsWell;
+      LogFlusher logFlusher;
       LOG(Log::ERR, "Server::handle_read: " <<  e.message());
    }
 }
 
 void Server::handle_write( const boost::system::error_code& e, connection_ptr conn )
 {
-   LogFlusher logFlusher;
-
    // Handle completion of a write operation.
    // Nothing to do. The socket will be closed automatically when the last
    // reference to the connection object goes away.
@@ -409,6 +406,7 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
       cout << "   Server::handle_write: client request " << inbound_request_ << " replying with  " << outbound_response_ << endl;
 
    if (e) {
+      LogFlusher logFlusher;
       ecf::LogToCout logToCout;
       std::stringstream ss; ss << "Server::handle_write: " << e.message() << " : for request " << inbound_request_;
       log(Log::ERR,ss.str());

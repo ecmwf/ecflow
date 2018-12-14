@@ -104,7 +104,6 @@ private:
    explicit Log(const std::string& fileName);
    static Log* instance_;
 
-   unsigned int count_;
    std::string fileName_;
    LogImpl* logImpl_;
 };
@@ -139,6 +138,7 @@ private:
    bool check_file_write(const std::string& message) const;
 
 private:
+   unsigned int count_;
    std::string time_stamp_;
    mutable std::ofstream file_;
 

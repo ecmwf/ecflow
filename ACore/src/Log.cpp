@@ -54,7 +54,7 @@ void Log::destroy()
 }
 
 Log::Log(const std::string& fileName)
-: count_(0),fileName_(fileName), logImpl_( new LogImpl(fileName) )
+: fileName_(fileName), logImpl_( new LogImpl(fileName) )
 {
 }
 
@@ -66,7 +66,6 @@ Log::~Log()
 
 bool Log::log(Log::LogType lt,const std::string& message)
 {
-   count_++;
 	if (!logImpl_) {
 		logImpl_ = new LogImpl(fileName_);
 	}
@@ -75,7 +74,6 @@ bool Log::log(Log::LogType lt,const std::string& message)
 
 bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 {
-   count_++;
    if (!logImpl_) {
       logImpl_ = new LogImpl(fileName_);
    }
@@ -84,7 +82,6 @@ bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 
 bool Log::append(const std::string& message)
 {
-   count_++;
    if (!logImpl_) {
       logImpl_ = new LogImpl(fileName_) ;
    }
@@ -109,8 +106,6 @@ const std::string& Log::get_cached_time_stamp() const
 
 void Log::flush()
 {
-   count_ = 0;
-
  	// will close ofstream and force data to be written to disk.
 	// Forcing writing to physical medium can't be guaranteed though!
 	delete logImpl_;
@@ -119,11 +114,7 @@ void Log::flush()
 
 void Log::flush_only()
 {
-   // cout << "Log::flush_only() count = " << count_ << endl;
-   if (count_ != 0 && logImpl_) {
-      count_ = 0;
-      logImpl_->flush();
-   }
+   if (logImpl_) logImpl_->flush();
 }
 
 void Log::clear()
@@ -279,7 +270,7 @@ LogFlusher::~LogFlusher()
 
 //======================================================================================================
 LogImpl::LogImpl(const std::string& filename)
-:  file_(filename.c_str(), ios::out | ios::app)
+: count_(0), file_(filename.c_str(), ios::out | ios::app)
 {
  	if (!file_.is_open()) {
 		std::cerr << "LogImpl::LogImpl: Could not open log file '" << filename << "'\n";
@@ -308,6 +299,7 @@ bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
 //#if DEBUG_BLOCKING_DISK_IO
 //   ecf::DurationTimer timer;
 //#endif
+   count_++;
 
    // XXX:[HH:MM:SS D.M.YYYY] chd:fullname [+additional information]
    // XXX:[HH:MM:SS D.M.YYYY] --<user_cmd> [+additional information]
@@ -347,10 +339,17 @@ bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
 //#endif
 }
 
-void LogImpl::flush() { file_.flush();}
+void LogImpl::flush() {
+   // cout << "LogImpl::flush() count = " << count_ << endl;
+   if (count_ != 0) {
+      file_.flush();
+      count_ = 0;
+   }
+}
 
 bool LogImpl::append(const std::string& message)
 {
+   count_++;
    file_ << message << '\n';
    return check_file_write(message);
 }
