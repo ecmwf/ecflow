@@ -151,6 +151,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->fromTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
             this,SLOT(slotStartChanged(QDateTime)));
 
+    connect(ui_->toTimeEdit,SIGNAL(dateTimeChanged(QDateTime)),
+            this,SLOT(slotEndChanged(QDateTime)));
+
     connect(ui_->startTb,SIGNAL(clicked()),
             this,SLOT(slotResetStart()));
 
@@ -221,7 +224,7 @@ void TimelineWidget::clear(bool inReload)
         ui_->pathFilterLe->clear();
         prevState_.valid=false;
         //reset the view mode to timeline
-        view_->setViewMode(TimelineView::TimelineMode);
+        ui_->modeCombo->setCurrentIndex(0);
     }
 
     tmpLogFile_.reset();
@@ -391,9 +394,13 @@ void TimelineWidget::slotViewMode(int)
         ui_->sortUpTb->setEnabled(true);
         ui_->sortDownTb->setEnabled(true);
 
+        //reload filter
+        slotShowChanged(ui_->showChangedTb->isChecked());
+
         //reset and reload the sort
         slotSortMode(0);
         slotSortOrderChanged(0);
+
     }
     else if (id == "duration")
     {
@@ -401,7 +408,13 @@ void TimelineWidget::slotViewMode(int)
         ui_->sortCombo->setEnabled(false);
         ui_->sortUpTb->setEnabled(false);
         ui_->sortDownTb->setEnabled(false);
+
+        //reload filter
+        slotShowChanged(ui_->showChangedTb->isChecked());
+
+        //reload sort
         sortModel_->setSortMode(TimelineSortModel::QtSortMode);
+        slotShowChanged(ui_->showChangedTb->isChecked());
     }
 }
 
@@ -445,7 +458,16 @@ void TimelineWidget::slotSortOrderChanged(int)
 
 void TimelineWidget::slotShowChanged(bool st)
 {
-    sortModel_->setShowChangedOnly(st);
+    if(view_->viewMode() == TimelineView::TimelineMode)
+    {
+        sortModel_->setChangeFilterMode(st?TimelineSortModel::TimelineChangeFilterMode:
+                                           TimelineSortModel::NoChangeFilterMode);
+    }
+    else if(view_->viewMode() == TimelineView::DurationMode)
+    {
+        sortModel_->setChangeFilterMode(st?TimelineSortModel::DurationChangeFilterMode:
+                                           TimelineSortModel::NoChangeFilterMode);
+    }
 }
 
 void TimelineWidget::slotStartChanged(const QDateTime& dt)
@@ -709,6 +731,10 @@ void TimelineWidget::loadCore(QString logFile)
     setAllVisible(true);
     updateInfoLabel();
     updateFilterTriggerMode();
+
+    //determine node types if task filter is on
+    if(ui_->taskOnlyTb->isChecked())
+        determineNodeTypes();
 
     ViewerUtil::restoreOverrideCursor();
 

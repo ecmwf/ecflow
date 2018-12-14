@@ -53,7 +53,8 @@ TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     bottomPadding_(2),
     submittedMaxDuration_(-1),
     activeMaxDuration_(-1),
-    durationMaxTextWidth_(-1)
+    submittedMaxTextWidth_(-1),
+    activeMaxTextWidth_(-1)
 {  
     Q_ASSERT(model_);
 
@@ -315,7 +316,7 @@ void TimelineDelegate::renderSubmittedDuration(QPainter *painter,const QStyleOpt
         return;
 
     int val=index.data().toInt();
-    if(val > 0)
+    if(val >= 0)
     {
         if(VNState* vn=VNState::find("submitted"))
         {
@@ -329,7 +330,7 @@ void TimelineDelegate::renderSubmittedDuration(QPainter *painter,const QStyleOpt
                 {
                     meanVal=lst[0].toFloat();
                     num=lst[1].toInt();
-                    renderDuration(painter,val, meanVal, submittedMaxDuration_, num, vn->colour(),option.rect);
+                    renderDuration(painter,val, meanVal, submittedMaxDuration_, num, vn->colour(),option.rect,submittedMaxTextWidth_);
                 }
             }
         }
@@ -342,7 +343,7 @@ void TimelineDelegate::renderActiveDuration(QPainter *painter,const QStyleOption
         return;
 
     int val=index.data().toInt();
-    if(val > 0)
+    if(val >= 0)
     {
         if(VNState* vn=VNState::find("active"))
         {
@@ -356,7 +357,7 @@ void TimelineDelegate::renderActiveDuration(QPainter *painter,const QStyleOption
                 {
                     meanVal=lst[0].toFloat();
                     num=lst[1].toInt();
-                    renderDuration(painter,val, meanVal, activeMaxDuration_, num, vn->colour(),option.rect);
+                    renderDuration(painter,val, meanVal, activeMaxDuration_, num, vn->colour(),option.rect,activeMaxTextWidth_);
                 }
             }
         }
@@ -393,9 +394,8 @@ void TimelineDelegate::drawCell(QPainter *painter,QRect r,QColor fillCol,bool ha
     painter->fillRect(r,fillBrush);
 }
 
-void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect) const
+void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect, int maxTextW) const
 {
-    int maxTextW=durationMaxTextWidth_;
     if(maxTextW <=0)
         return;
 
@@ -405,57 +405,81 @@ void TimelineDelegate::renderDuration(QPainter *painter, int val, float meanVal,
     int len=(static_cast<float>(val)/static_cast<float>(maxVal))*static_cast<float>(rect.width()-maxTextW);
 
     //bar
-    QRect r(rect);
-    r.setWidth(len);
-    r.adjust(0,1,-1,-1);
-    painter->fillRect(r,col);
+    QRect barRect(rect);
+    barRect.setWidth(len);
+    barRect.adjust(0,1,-1,-1);
+    int right=barRect.x()+barRect.width();
 
-    if(maxTextW <=0)
-        return;
+    QString text;
+    QRect textRect;
+    QString percentText;
+    QRect percentRect;
 
-    int right=r.x()+r.width();
-
-    //value
-    painter->setPen(QColor(100,100,100));
-    QString s=ViewerUtil::formatDuration(val);
-    r=rect;
-    r.setX(right+5);
-    r.setWidth(fm_.width(s));
-    right=r.x()+r.width();
-    painter->drawText(r,s,Qt::AlignLeft | Qt::AlignVCenter);
+    if(maxTextW > 0)
+    {
+        text=ViewerUtil::formatDuration(val);
+        textRect=rect;
+        textRect.setX(right+5);
+        textRect.setWidth(fm_.width(text));
+        right=textRect.x()+textRect.width();
+    }
 
     //diff to mean
-    s.clear();
     if(meanVal > 0.)
     {
         int percent=100.0*static_cast<float>(val-meanVal)/meanVal;
 
-        if(percent == 0)
-            return;
-
         if(percent > 0)
         {
             //unicode U+2191 arrow up
-            s+=QChar(8593);
+            percentText+=QChar(8593);
             //painter->setPen(Qt::red);
         }
         else
         {
             //unicode U+2193 arrow up
-            s+=QChar(8595);
+            percentText+=QChar(8595);
             //painter->setPen(QColor(11,111,34));
             percent*=-1;
         }
 
-        s+=QString::number(percent) + "%[" + QString::number(num) + "]";
+        percentText+=QString::number(percent) + "%[" + QString::number(num) + "]";
 
-        r=rect;
-        r.setX(right+5);
-        r.setWidth(fm_.width(s));
-        painter->drawText(r,s,Qt::AlignLeft | Qt::AlignVCenter);
+        percentRect=rect;
+        percentRect.setX(right+5);
+        percentRect.setWidth(fm_.width(percentText));
+        right=percentRect.x()+percentRect.width();
+    }
+
+    const bool setClipRect = right > rect.right();
+    if(setClipRect)
+    {
+        painter->save();
+        painter->setClipRect(rect.adjusted(0,0,0,-2));
+    }
+
+    //bar
+    painter->fillRect(barRect,col);
+
+    //value
+    if(!text.isEmpty())
+    {
+        painter->setPen(QColor(100,100,100));
+        painter->drawText(textRect,text,Qt::AlignLeft | Qt::AlignVCenter);
+    }
+
+    //value
+    if(!percentText.isEmpty())
+    {
+        painter->setPen(QColor(100,100,100));
+        painter->drawText(percentRect,percentText,Qt::AlignLeft | Qt::AlignVCenter);
+    }
+
+    if(setClipRect)
+    {
+        painter->restore();
     }
 }
-
 
 int TimelineDelegate::timeToPos(QRect r,unsigned int time) const
 {
@@ -495,7 +519,41 @@ void TimelineDelegate::setMaxDurations(int submittedDuration,int activeDuration)
 {
     submittedMaxDuration_=submittedDuration;
     activeMaxDuration_=activeDuration;
-    durationMaxTextWidth_=fm_.width(" 59d 59h 59m 59s");
+
+    submittedMaxTextWidth_=getDurationMaxTextWidth(submittedMaxDuration_);
+    activeMaxTextWidth_=getDurationMaxTextWidth(activeMaxDuration_);
+}
+
+int TimelineDelegate::getDurationMaxTextWidth(int duration) const
+{
+    QString txt;
+
+    if(duration < 60)
+    {
+        txt=" 59s";
+    }
+    else if(duration < 3600)
+    {
+        txt=" 59m 59s";
+    }
+    else if(duration < 3600*24)
+    {
+        txt=" 23h 59m 59s";
+    }
+    else if(duration < 86400*10)
+    {
+        txt=" 9d 23h 59m 59s";
+    }
+    else if(duration < 86400*100)
+    {
+        txt=" 99d 23h 59m 59s";
+    }
+    else
+    {
+        txt=" 999d 23h 59m 59s";
+    }
+
+    return fm_.width(txt + " A999%[999] ");
 }
 
 
@@ -534,6 +592,7 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
     setAlternatingRowColors(false);
     setMouseTracking(true);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
+    //setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     QTreeView::setModel(model_);
 
@@ -889,6 +948,7 @@ void TimelineView::setViewMode(ViewMode vm)
     {
         viewMode_ = vm;              
         adjustHeader();
+        header_->viewModeChanged();
 
         if(viewMode_ == DurationMode)
         {
@@ -905,6 +965,7 @@ void TimelineView::setViewMode(ViewMode vm)
                 }
             }
             setSortingEnabled(true);
+            sortByColumn(TimelineModel::ActiveDurationColumn,Qt::DescendingOrder);
         }
         else
         {

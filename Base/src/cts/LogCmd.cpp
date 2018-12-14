@@ -146,13 +146,9 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
             break;
          }
          case LogCmd::PATH:  return PreAllocatedReply::string_cmd(  Log::instance()->path() ); break;
-         case LogCmd::ENABLE_AUTO_FLUSH:  Log::instance()->enable_auto_flush();  break;
-         case LogCmd::DISABLE_AUTO_FLUSH: Log::instance()->disable_auto_flush(); break;
-         case LogCmd::QUERY_AUTO_FLUSH: {
-            if (Log::instance()->is_auto_flush_enabled()) return PreAllocatedReply::string_cmd(Log::flush_enabled());
-            else                                          return PreAllocatedReply::string_cmd(Log::flush_disabled());
-            break;
-         }
+         case LogCmd::ENABLE_AUTO_FLUSH:   break; /* Functionality is defunct, we auto flush at end of command */
+         case LogCmd::DISABLE_AUTO_FLUSH:  break; /* Functionality is defunct, we auto flush at end of command*/
+         case LogCmd::QUERY_AUTO_FLUSH: { return PreAllocatedReply::string_cmd("enabled"); break; } /* Functionality is defunct, we auto flush at end of command*/
 			default : throw std::runtime_error( "Unrecognised log api command,") ;
 		}
 	}
@@ -180,12 +176,6 @@ const char* LogCmd::desc() {
             "          Alternatively an explicit path can also be provided\n"
             "          in which case ECF_LOG is also updated\n"
             "  path -  Returns the path name to the existing log file\n"
-            "  query_auto_flush   - returns 'enabled' or 'disabled'\n"
-            "  enable_auto_flush  - After each user/child command automatically flush to "
-            "                       log file, used for debug\n"
-            "  disable_auto_flush - switch OFF Automatically of flush of log after each user/child command\n"
-            "                       log changes will be buffered, and then written in one go by\n"
-            "                       operating system defined interval. This is the default\n"
             " arg2 = [ new_path | optional last n lines ]\n"
             "         if get specified can specify lines to get. Value must be convertible to an integer\n"
             "         Otherwise if arg1 is 'new' then the second argument must be a path\n"
@@ -196,9 +186,6 @@ const char* LogCmd::desc() {
             "  --log=flush                      # Flush and close log file, next request will re-open log file\n"
             "  --log=new /path/to/new/log/file  # Close and flush log file, and create a new log file, updates ECF_LOG\n"
             "  --log=new                        # Close and flush log file, and create a new log file using ECF_LOG variable\n"
-            "  --log=enable_auto_flush          # flush child and user commands, to aid debug\n"
-            "  --log=disable_auto_flush         # switch of automatic flushing after each child/user command\n"
-            "  --log=query_auto_flush\n"
             ;
 }
 

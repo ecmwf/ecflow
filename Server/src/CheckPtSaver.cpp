@@ -182,6 +182,7 @@ void CheckPtSaver::periodicSaveCheckPt(const boost::system::error_code& error )
       return;
    }
    else if (error) {
+      LogFlusher logFlusher;
       LogToCout toCoutAsWell;
       LOG(Log::ERR, "CheckPtSaver::periodicSaveCheckPt "  <<  error.message());
       return;

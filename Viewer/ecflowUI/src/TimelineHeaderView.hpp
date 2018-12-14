@@ -63,6 +63,7 @@ protected:
     QDateTime posToDate(QPoint pos) const;
     int dateToPos(QDateTime dt) const;
     bool isColumnZoomable(QPoint pos) const;
+    void enableZoomActions(bool b);
     bool canBeZoomed() const;
     bool isZoomEnabled() const;
     void setZoomDisabled();
@@ -70,6 +71,7 @@ protected:
     void checkActionState();
     bool hasTimeColumn() const;
     bool hasZoomableColumn() const;
+    void rerender();
 
     QTreeView* view_;
     QList<ColumnType> columnType_;

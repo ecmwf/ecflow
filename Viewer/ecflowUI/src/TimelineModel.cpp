@@ -156,6 +156,12 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         return true;
     }
 
+    //filter = unchanged in period
+    else if(role  == DurationUnchangedRole)
+    {
+        return !data_->items()[row].hasSubmittedOrActiveDuration(startDate_,endDate_);
+    }
+
     //duration of first submitted task in period preceding the first active state
     else if(role  == MeanDurationRole)
     {
@@ -262,7 +268,7 @@ TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
         sortMode_(PathSortMode),
         ascending_(true),
         taskFilter_(false),
-        showChangedOnly_(true)
+        changeFilterMode_(NoChangeFilterMode)
 {
     Q_ASSERT(tlModel_);
 
@@ -280,7 +286,7 @@ TimelineSortModel::~TimelineSortModel()
 
 void TimelineSortModel::slotPeriodChanged()
 {
-    if(sortMode_ == TimeSortMode || showChangedOnly_)
+    if(sortMode_ == TimeSortMode || changeFilterMode_ != NoChangeFilterMode)
     {
         invalidate();
         Q_EMIT invalidateCalled();
@@ -325,11 +331,11 @@ void TimelineSortModel::setTaskFilter(bool taskFilter)
     Q_EMIT invalidateCalled();
 }
 
-void TimelineSortModel::setShowChangedOnly(bool h)
+void TimelineSortModel::setChangeFilterMode(ChangeFilterMode m)
 {
-    if(showChangedOnly_ != h)
+    if(changeFilterMode_ != m)
     {
-        showChangedOnly_ = h;
+        changeFilterMode_ = m;
         invalidate();
         Q_EMIT invalidateCalled();
     }
@@ -373,9 +379,16 @@ bool TimelineSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &/*sou
         matched=tlModel_->data(tlModel_->index(sourceRow,0),Qt::UserRole).toBool();
     }
 
-    if(matched && showChangedOnly_)
+    if(matched)
     {
-        matched=(tlModel_->data(tlModel_->index(sourceRow,0),TimelineModel::UnchangedRole).toBool() == false);
+        if(changeFilterMode_ == TimelineChangeFilterMode)
+        {
+            matched=(tlModel_->data(tlModel_->index(sourceRow,0),TimelineModel::UnchangedRole).toBool() == false);
+        }
+        else if(changeFilterMode_ == DurationChangeFilterMode)
+        {
+            matched=(tlModel_->data(tlModel_->index(sourceRow,0),TimelineModel::DurationUnchangedRole).toBool() == false);
+        }
     }
 
     return matched;

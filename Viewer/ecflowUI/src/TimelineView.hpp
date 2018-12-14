@@ -133,9 +133,10 @@ protected:
     void renderTimeline(QPainter *painter,const QStyleOptionViewItem& option,int) const;
     void renderSubmittedDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
     void renderActiveDuration(QPainter *painter,const QStyleOptionViewItem& option,const QModelIndex&) const;
-    void renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect) const;
+    void renderDuration(QPainter *painter, int val, float meanVal, int maxVal, int num, QColor col, QRect rect,int maxTextW) const;
     void drawCell(QPainter *painter,QRect r,QColor fillCol,bool hasGrad,bool lighter) const;
     int timeToPos(QRect r,unsigned int time) const;
+    int getDurationMaxTextWidth(int duration) const;
 
     TimelineModel* model_;
     PropertyMapper* prop_;
@@ -148,7 +149,9 @@ protected:
     QDateTime endDate_;
     int submittedMaxDuration_;
     int activeMaxDuration_;
-    int durationMaxTextWidth_;
+    int submittedMaxTextWidth_;
+    int activeMaxTextWidth_;
+
 };
 
 #endif // TIMELINEVIEW_HPP

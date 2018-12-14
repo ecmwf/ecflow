@@ -25,7 +25,7 @@
 #include <limits>
 
 #include "TimelineData.hpp"
-#include "VNState.hpp"
+#include "VNState.hpp"   PlainTextEdit.hpp
 
 #include <limits>
 
@@ -60,6 +60,29 @@ int  TimelineItem::firstInPeriod(QDateTime startDt,QDateTime endDt) const
             return static_cast<int>(i);
     }
     return -1;
+}
+
+bool TimelineItem::hasSubmittedOrActiveDuration(QDateTime startDt,QDateTime endDt) const
+{
+    unsigned int start=fromQDateTime(startDt);
+    unsigned int end=fromQDateTime(endDt);
+    for(size_t i=0; i < start_.size()-1; i++)
+    {
+        if(start_[i] >= start)
+        {
+            if(VNState::isActive(status_[i]))
+                return true;
+
+            if(VNState::isSubmitted(status_[i]) &&
+                 VNState::isActive(status_[i+1]))
+            {
+                return true;
+            }
+        }
+        else if (start_[i] >= end)
+            return false;
+    }
+    return false;
 }
 
 int TimelineItem::firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const

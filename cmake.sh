@@ -131,11 +131,12 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
-module load cmake/3.12.0
 module load ecbuild/new
 module load python2
 module load python3/3.6.5-01
-#cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
+module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
+# To build python3 when cmake < 3.12.0 use
+# -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then

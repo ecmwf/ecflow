@@ -24,7 +24,8 @@ class TimelineModel : public QAbstractItemModel
 public:
     enum CustomItemRole {PathSortRole = Qt::UserRole+1, TimeSortRole = Qt::UserRole+2,
                         UnchangedRole = Qt::UserRole+3, MeanDurationRole = Qt::UserRole+4,
-                        DurationStatRole = Qt::UserRole+5,QtSortRole = Qt::UserRole+6};
+                        DurationStatRole = Qt::UserRole+5,QtSortRole = Qt::UserRole+6,
+                        DurationUnchangedRole = Qt::UserRole+7};
 
     enum ColumnType {PathColumn=0, TimelineColumn=1, SubmittedDurationColumn=2,
                      ActiveDurationColumn=3};
@@ -69,6 +70,7 @@ public:
     ~TimelineSortModel();
 
     enum SortMode {PathSortMode, TimeSortMode, QtSortMode};
+    enum ChangeFilterMode {TimelineChangeFilterMode, DurationChangeFilterMode,NoChangeFilterMode};
 
     //From QSortFilterProxyModel:
     //we set the source model in the constructor. So this function should not do anything.
@@ -81,7 +83,7 @@ public:
     void setSkipSort(bool b) {skipSort_=b;}
     void setPathFilter(QString);
     void setTaskFilter(bool);
-    void setShowChangedOnly(bool);
+    void setChangeFilterMode(ChangeFilterMode m);
 
 protected Q_SLOTS:
     void slotPeriodChanged();
@@ -100,7 +102,7 @@ protected:
     QString pathFilter_;
     bool taskFilter_;
     QRegExp pathFilterRx_;
-    bool showChangedOnly_;
+    ChangeFilterMode changeFilterMode_;
 };
 
 #endif // TIMELINEMODEL_CPP

@@ -227,12 +227,13 @@ void TimelineHeader::doPeriodZoom()
     }
     else
     {
+        rerender();
         Q_EMIT periodBeingZoomed(startDate_,endDate_);
     }
 
     setZoomDisabled();
+    checkActionState();
 }
-
 
 bool TimelineHeader::canBeZoomed() const
 {
@@ -354,17 +355,18 @@ void TimelineHeader::paintSection(QPainter *painter, const QRect &rect, int logi
         painter->drawText(textRect,Qt::AlignLeft | Qt::AlignVCenter," " + text);
     }
 
-     painter->restore();
+    painter->restore();
 }
 
 void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logicalIndex) const
 {
+    painter->save();
+
     //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
 
     //The timeline area bounded by the frame
     QRect pRect=rect.adjusted(0,timelineFrameSize_,0,-timelineFrameSize_);
 
-    painter->save();
     painter->setClipRect(rect);
 
     //Special appearance in for the timeline area
@@ -587,6 +589,8 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logi
 
 void TimelineHeader::renderDay(const QRect& rect,QPainter* painter,int logicalIndex) const
 {
+    painter->save();
+
     //painter->fillRect(rect.adjusted(0,0,0,-1),timelineFrameBgCol_);
 
     //The timeline area bounded by the frame
@@ -781,6 +785,17 @@ void TimelineHeader::setZoomActions(QAction* zoomInAction,QAction* zoomOutAction
     }
 }
 
+void TimelineHeader::enableZoomActions(bool b)
+{
+    if(zoomInAction_)
+    {
+        Q_ASSERT(zoomOutAction_);
+        zoomInAction_->setEnabled(b);
+        zoomOutAction_->setEnabled(b);
+    }
+}
+
+
 bool TimelineHeader::isZoomEnabled() const
 {
     return (zoomInAction_ && zoomInAction_->isEnabled())?(zoomInAction_->isChecked()):false;
@@ -840,6 +855,7 @@ void TimelineHeader::setStartDate(QDateTime t)
     zoomHistory_.clear();
     zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
     checkActionState();
+    rerender();
 }
 
 void TimelineHeader::setEndDate(QDateTime t)
@@ -848,12 +864,13 @@ void TimelineHeader::setEndDate(QDateTime t)
     zoomHistory_.clear();
     zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
     checkActionState();
+    rerender();
 }
 
 void TimelineHeader::setPeriod(QDateTime t1,QDateTime t2)
 {
     zoomHistory_.clear();
-    setPeriodCore(t1,t2,true);
+    setPeriodCore(t1,t2,true);   
 }
 
 void TimelineHeader::setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory)
@@ -865,6 +882,7 @@ void TimelineHeader::setPeriodCore(QDateTime t1,QDateTime t2,bool addToHistory)
         zoomHistory_.push(qMakePair<QDateTime,QDateTime>(startDate_,endDate_));
     }
     checkActionState();
+    rerender();
 }
 
 bool TimelineHeader::hasZoomableColumn() const
@@ -911,6 +929,16 @@ void TimelineHeader::setMaxDurations(int submittedDuration,int activeDuration)
 
 void TimelineHeader::viewModeChanged()
 {
+    if(hasZoomableColumn())
+    {         
+         enableZoomActions(true);
+    }
+    else
+    {
+        enableZoomActions(false);
+    }
+    checkActionState();
+
 #if 0
     if(!hasZoomableColumn()) //????
     {
@@ -918,4 +946,9 @@ void TimelineHeader::viewModeChanged()
     }
     checkActionState();
 #endif
+}
+
+void TimelineHeader::rerender()
+{
+    headerDataChanged(Qt::Horizontal,0,count()-1);
 }

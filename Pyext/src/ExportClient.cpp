@@ -137,7 +137,7 @@ void replace_2(ClientInvoker* self,const std::string& absNodePath, const std::st
 
 void order(ClientInvoker* self,const std::string& absNodePath,const std::string& the_order){ self->order(absNodePath,the_order);}
 
-bool query_auto_flush(ClientInvoker* self){ self->query_auto_flush(); return (self->get_string() == ecf::Log::flush_enabled()) ? true: false; }
+bool query_auto_flush(ClientInvoker* self){  return true; /* func no longer needed */ }
 
 void alters(ClientInvoker* self,
           const bp::list& list,

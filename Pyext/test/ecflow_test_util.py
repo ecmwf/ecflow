@@ -100,8 +100,12 @@ class EcfPortLock(object):
         while 1:
             if self._free_port(port) == True:
                 print("   *FOUND* free server port " + str(port) + " : " + at_time)
-                if self._do_lock(port) == True:
-                    break;
+                file = self._lock_file(port)
+                at_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+                if os.path.exists(file):
+                    print("   *LOCKED* lock file exists " + file + " : " + at_time  + " ignoring")
+                else:
+                    break
             else:
                 print("   *Server* port " + str(port) + " busy, trying next port " + at_time)
             port = port + 1
@@ -117,7 +121,7 @@ class EcfPortLock(object):
         except RuntimeError as e:
             return True
             
-    def _do_lock(self,port):
+    def do_lock(self,port):
         file = self._lock_file(port)
         at_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
         if os.path.exists(file):
@@ -175,15 +179,13 @@ class Server(object):
             self.the_port = self.lock_file.find_free_port(seed_port)   
         else:
             self.the_port = "3152"
-     
+            
         # Only worth doing this test, if the server is running
         # ON HPUX, having only one connection attempt, sometimes fails
         #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
         #ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
         self.ci = Client("localhost", self.the_port)
-        #self.ci.debug(True)   # dumps client environemnt
-        #self.ci.debug(False)
-     
+
     def __enter__(self):
         try:
             st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
@@ -192,28 +194,35 @@ class Server(object):
             print("   ------- Server all ready running on port " + self.the_port + " *UNEXPECTED* ------")
             sys.exit(1)
         except RuntimeError as e:
-            print("   ------- Server *NOT* running on port " + self.the_port + " as *EXPECTED* ------ ") 
-            print("   ------- Start the server on port " + self.the_port + " ---------")  
-            clean_up_server(str(self.the_port))
-            clean_up_data(str(self.the_port))
-    
-            server_exe = File.find_server();
-            assert len(server_exe) != 0, "Could not locate the server executable"
+            while 1:
+                # Only worth doing this test, if the server is running
+                # ON HPUX, having only one connection attempt, sometimes fails
+                #ci.set_connection_attempts(1)     # improve responsiveness only make 1 attempt to connect to server
+                #ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
+                self.ci = Client("localhost", self.the_port)
+
+                print("   ------- Server *NOT* running on port " + self.the_port + " as *EXPECTED* ------ ") 
+                print("   ------- Start the server on port " + self.the_port + " ---------")  
+                clean_up_server(str(self.the_port))
+                clean_up_data(str(self.the_port))
         
-            server_exe += " --port=" + self.the_port + " --ecfinterval=4 &"
-            print("   TestClient.py: Starting server " + server_exe)
-            os.system(server_exe) 
-        
-            print("   Allow time for server to start")
-            if self.ci.wait_for_server_reply() :
-                print("   Server has started")
-                print("   log_file_path:",os.path.join(os.getcwd(),log_file_path(str(self.the_port))))
-            else:
-                print("   Server failed to start after 60 second !!!!!!")
-                assert False , "Server failed to start after 60 second !!!!!!"
+                server_exe = File.find_server();
+                assert len(server_exe) != 0, "Could not locate the server executable"
             
-        server_version = self.ci.server_version()
-        print("   Server version is : " + server_version)
+                server_exe += " --port=" + self.the_port + " --ecfinterval=4 &"
+                print("   TestClient.py: Starting server " + server_exe)
+                os.system(server_exe) 
+            
+                print("   Allow time for server to start")
+                if self.ci.wait_for_server_reply() :
+                    print("   Server has started, trying to lock file")
+                    locked = self.lock_file.do_lock( int(self.the_port) )
+                    assert locked ,"   Could not creat lock file for port " + self.the_port
+                    break
+                else:
+                    print("   Server failed to start after 60 second, trying next port !!!!!!")
+                    self.the_port = self.lock_file.find_free_port( int(self.the_port) + 1 )   
+             
         print("   Run the tests, leaving Server:__enter__:") 
 
         # return the Client, that can call to the server
