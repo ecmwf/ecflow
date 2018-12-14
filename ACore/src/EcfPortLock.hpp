@@ -73,7 +73,7 @@ private:
       if (ecf_port_lock_dir) path = ecf_port_lock_dir;
       else                   path = File::root_source_dir();
 
-      path += "/ECF_PORT_used_";
+      path += "/";
       path += the_port;
       path += ".lock";
 
