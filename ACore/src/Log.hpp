@@ -112,10 +112,13 @@ private:
 };
 
 // Flush log on destruction
-class LogFlusher : private boost::noncopyable{
+class LogFlusher {
 public:
    LogFlusher(){}
    ~LogFlusher();
+private:
+   LogFlusher(const  LogFlusher&) = delete;
+   const  LogFlusher& operator=(const LogFlusher&) = delete;
 };
 
 /// The LogImpl allows the ofstream object to be closed, and so provide strongest
