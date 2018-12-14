@@ -173,6 +173,9 @@ def test_client_clear_log(ci, port):
     assert log_text.find("--ping") != -1, "Expected to find --ping in log file"
     
     ci.clear_log()    
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")
+
     log_file = open(log_path)
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
