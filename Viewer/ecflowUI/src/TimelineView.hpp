@@ -51,7 +51,7 @@ public:
     void setEndDate(QDateTime);
     void setPeriod(QDateTime t1,QDateTime t2);
     void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
-    void setViewMode(ViewMode);
+    void setViewMode(ViewMode vm, bool force=false);
 
     void notifyChange(VProperty* p);
 
