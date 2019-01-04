@@ -62,9 +62,6 @@ std::ostream& LogCmd::print(std::ostream& os) const
       case LogCmd::FLUSH: return user_cmd(os,CtsApi::flushLog()); break;
       case LogCmd::NEW:   return user_cmd(os,CtsApi::to_string(CtsApi::new_log(new_path_)));  break;
       case LogCmd::PATH:  return user_cmd(os,CtsApi::get_log_path()); break;
-      case LogCmd::ENABLE_AUTO_FLUSH:  return user_cmd(os,CtsApi::enable_auto_flush()); break;
-      case LogCmd::DISABLE_AUTO_FLUSH: return user_cmd(os,CtsApi::disable_auto_flush()); break;
-      case LogCmd::QUERY_AUTO_FLUSH: return user_cmd(os,CtsApi::query_auto_flush()); break;
       default : throw std::runtime_error( "LogCmd::print: Unrecognised log api command,") ;
    }
    return os;
@@ -77,9 +74,6 @@ std::ostream& LogCmd::print_only(std::ostream& os) const
       case LogCmd::FLUSH: os << CtsApi::flushLog(); break;
       case LogCmd::NEW:   os << CtsApi::to_string(CtsApi::new_log(new_path_));  break;
       case LogCmd::PATH:  os << CtsApi::get_log_path(); break;
-      case LogCmd::ENABLE_AUTO_FLUSH:  os << CtsApi::enable_auto_flush(); break;
-      case LogCmd::DISABLE_AUTO_FLUSH: os << CtsApi::disable_auto_flush(); break;
-      case LogCmd::QUERY_AUTO_FLUSH:   os << CtsApi::query_auto_flush(); break;
       default : throw std::runtime_error( "LogCmd::print: Unrecognised log api command,") ;
    }
    return os;
@@ -104,9 +98,6 @@ bool LogCmd::isWrite() const
       case LogCmd::FLUSH: return false; break;
       case LogCmd::NEW:   return true;  break;
       case LogCmd::PATH:  return false; break;
-      case LogCmd::ENABLE_AUTO_FLUSH: return true;  break;
-      case LogCmd::DISABLE_AUTO_FLUSH: return true; break;
-      case LogCmd::QUERY_AUTO_FLUSH: return false; break;
       default : throw std::runtime_error( "LogCmd::isWrite: Unrecognised log api command,") ;
    }
    return false;
@@ -146,9 +137,6 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
             break;
          }
          case LogCmd::PATH:  return PreAllocatedReply::string_cmd(  Log::instance()->path() ); break;
-         case LogCmd::ENABLE_AUTO_FLUSH:   break; /* Functionality is defunct, we auto flush at end of command */
-         case LogCmd::DISABLE_AUTO_FLUSH:  break; /* Functionality is defunct, we auto flush at end of command*/
-         case LogCmd::QUERY_AUTO_FLUSH: { return PreAllocatedReply::string_cmd("enabled"); break; } /* Functionality is defunct, we auto flush at end of command*/
 			default : throw std::runtime_error( "Unrecognised log api command,") ;
 		}
 	}
@@ -270,36 +258,6 @@ void LogCmd::create( 	Cmd_ptr& cmd,
          path = args[1];
       }
       cmd = Cmd_ptr( new LogCmd( path ) );
-      return;
-   }
-   if (!args.empty() && args[0] == "enable_auto_flush")   {
-
-      if (args.size() != 1 ) {
-         std::stringstream ss;
-         ss << "LogCmd: Too many arguments. Please use " << CtsApi::enable_auto_flush() << "\n";
-         throw std::runtime_error( ss.str() );
-      }
-      cmd = Cmd_ptr( new LogCmd( LogCmd::ENABLE_AUTO_FLUSH ) );
-      return;
-   }
-   if (!args.empty() && args[0] == "disable_auto_flush")   {
-
-      if (args.size() != 1 ) {
-         std::stringstream ss;
-         ss << "LogCmd: Too many arguments. Please use " << CtsApi::disable_auto_flush() << "\n";
-         throw std::runtime_error( ss.str() );
-      }
-      cmd = Cmd_ptr( new LogCmd( LogCmd::DISABLE_AUTO_FLUSH ) );
-      return;
-   }
-   if (!args.empty() && args[0] == "query_auto_flush")   {
-
-      if (args.size() != 1 ) {
-         std::stringstream ss;
-         ss << "LogCmd: Too many arguments. Please use " << CtsApi::query_auto_flush() << "\n";
-         throw std::runtime_error( ss.str() );
-      }
-      cmd = Cmd_ptr( new LogCmd( LogCmd::QUERY_AUTO_FLUSH ) );
       return;
    }
 

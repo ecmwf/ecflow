@@ -206,18 +206,6 @@ const char* ClientDoc::log_msg()
    return "";
 }
 
-const char* ClientDoc::enable_auto_flush()
-{
-   return "";
-}
-const char* ClientDoc::disable_auto_flush()
-{
-   return "";
-}
-const char* ClientDoc::query_auto_flush()
-{
-   return "";
-}
 
 const char* ClientDoc::restart_server()   {
    return

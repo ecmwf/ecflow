@@ -213,9 +213,6 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
       BOOST_REQUIRE_MESSAGE( theClient.clearLog() == 0, CtsApi::clearLog() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.flushLog() == 0, CtsApi::flushLog() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.get_log_path() == 0, CtsApi::get_log_path() << " should return 0\n" << theClient.errorMsg());
-      BOOST_REQUIRE_MESSAGE( theClient.enable_auto_flush() == 0, CtsApi::enable_auto_flush() << " should return 0\n" << theClient.errorMsg());
-      BOOST_REQUIRE_MESSAGE( theClient.disable_auto_flush() == 0, CtsApi::disable_auto_flush() << " should return 0\n" << theClient.errorMsg());
-      BOOST_REQUIRE_MESSAGE( theClient.query_auto_flush() == 0, CtsApi::query_auto_flush() << " should return 0\n" << theClient.errorMsg());
 
       std::string new_log_path = File::test_data("Client/test/data/new_log.log","Client");
       BOOST_REQUIRE_MESSAGE( theClient.new_log(new_log_path) == 0, " should return 0\n" << theClient.errorMsg());
