@@ -38,8 +38,7 @@ ServerComThread::ServerComThread(ServerHandler *server, ClientInvoker *ci) :
 ServerComThread::~ServerComThread()
 {
     detach();
-}QStringList steps_;
-QStringList quantiles_;
+}
 
 void ServerComThread::task(VTask_ptr task)
 {

@@ -942,9 +942,9 @@ void TimelineView::updateDurations()
     }
 }
 
-void TimelineView::setViewMode(ViewMode vm)
+void TimelineView::setViewMode(ViewMode vm, bool force)
 {
-    if(vm != viewMode_)
+    if(vm != viewMode_ || force)
     {
         viewMode_ = vm;              
         adjustHeader();

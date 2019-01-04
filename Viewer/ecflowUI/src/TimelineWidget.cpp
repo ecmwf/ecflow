@@ -571,7 +571,6 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
         prevState_.endDt=ui_->toTimeEdit->dateTime();
         prevState_.fullStart=(prevState_.startDt == data_->qStartTime());
         prevState_.fullEnd=(prevState_.endDt == data_->qEndTime());
-
         clear(true);
     }
     else
@@ -778,6 +777,8 @@ void TimelineWidget::loadCore(QString logFile)
     view_->setPeriod(ui_->fromTimeEdit->dateTime(),ui_->toTimeEdit->dateTime());
 
     model_->setData(data_);
+
+    view_->setViewMode(view_->viewMode(),true);
 
     checkButtonState();
 }
