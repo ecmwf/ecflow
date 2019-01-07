@@ -25,7 +25,7 @@
 #include <limits>
 
 #include "TimelineData.hpp"
-#include "VNState.hpp"   PlainTextEdit.hpp
+#include "VNState.hpp"
 
 #include <limits>
 
