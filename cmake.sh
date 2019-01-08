@@ -7,7 +7,9 @@ set -u # fail when using an undefined variable
 # ensure correct permission for installation
 umask 0022
 
+# docker build?
 [[ -d opt/boost_1_53_0/ ]] && export BOOST_ROOT=/opt/boost_1_53_0/ ARCH=linux PYTHONPATH=/usr/local:${PYTHONPATH:=} LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH:=}
+
 # ====================================================================
 show_error_and_exit() {
    echo "cmake.sh expects at least one argument"
@@ -131,7 +133,7 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-address -std=c++11"
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-address"
  
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
@@ -174,7 +176,7 @@ if [[ "$asan_arg" = asan ]] ; then
    cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address'"  # LINK FLAGS
 fi
 if [[ "$msan_arg" = msan ]] ; then
-   CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fPIC -fno-omit-frame-pointer -fsanitize-memory-track-origins"
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fPIE -fno-omit-frame-pointer -fsanitize-memory-track-origins"
    cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=memory"  # LINK FLAGS
    #LINK_FLAGS='-DCMAKE_EXE_LINKER_FLAGS="-fsanitize=memory -fPIE -pie"'
 fi
