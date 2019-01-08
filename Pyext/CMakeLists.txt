@@ -77,7 +77,7 @@ else()
 	    # Although we have found python2 it could be that *ONLY* python3 was module loaded
 	    #    Otherwise will build for python2 and test with python3 interpreter
 	    # *****************************************************************************************
-	    ecbuild_find_python( VERSION 2.7 REQUIRED ) # if not included iterpreter not found ?
+	    ecbuild_find_python( VERSION 2.6 REQUIRED ) # if not included iterpreter not found ?
 	    if ( ${PYTHON_VERSION_MAJOR} EQUAL 2)
 			message( STATUS "   Python2_Interpreter_FOUND         : ${Python2_Interpreter_FOUND}" )
 			message( STATUS "   Python2_EXECUTABLE                : ${Python2_EXECUTABLE}" )
