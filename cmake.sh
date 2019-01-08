@@ -7,6 +7,7 @@ set -u # fail when using an undefined variable
 # ensure correct permission for installation
 umask 0022
 
+[[ -d opt/boost_1_53_0/ ]] && export BOOST_ROOT=/opt/boost_1_53_0/ ARCH=linux PYTHONPATH=/usr/local:${PYTHONPATH:=} LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH:=}
 # ====================================================================
 show_error_and_exit() {
    echo "cmake.sh expects at least one argument"
@@ -130,7 +131,7 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-address"
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-address -std=c++11"
  
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
@@ -141,8 +142,8 @@ module load python3/3.6.5-01
 module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
 # To build python3 when cmake < 3.12.0 use
 # -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
-
 cmake_extra_options=""
+cmake_extra_options="-DBOOST_ROOT=$BOOST_ROOT "
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     # ecflow fails to write boost ser' files with clang 6.0.1, but in debug all tests pass
     # Had to apply fix: http://clang-developers.42468.n3.nabble.com/boost-serialization-crash-with-clang-5-0-0-td4058283.html
@@ -151,7 +152,6 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     module unload clang
     module load clang/6.0.1
     cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-6.0.1/boost_1_53_0"
-
     CXX_FLAGS=""
     CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined"
 
@@ -174,7 +174,7 @@ if [[ "$asan_arg" = asan ]] ; then
    cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address'"  # LINK FLAGS
 fi
 if [[ "$msan_arg" = msan ]] ; then
-   CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fPIE -fno-omit-frame-pointer -fsanitize-memory-track-origins"
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fPIC -fno-omit-frame-pointer -fsanitize-memory-track-origins"
    cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=memory"  # LINK FLAGS
    #LINK_FLAGS='-DCMAKE_EXE_LINKER_FLAGS="-fsanitize=memory -fPIE -pie"'
 fi
