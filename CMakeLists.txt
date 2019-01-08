@@ -14,7 +14,6 @@
 ##############################################################################
 
 # Need cmake(3.12.0) for boost python3 libs to be found.
-cmake_minimum_required( VERSION 2.8.11 FATAL_ERROR )
 cmake_minimum_required( VERSION 2.12.0 FATAL_ERROR )
 
 # ===========================================================================
@@ -50,7 +49,6 @@ ecbuild_info( "ECFLOW_RELEASE           : ${ECFLOW_RELEASE}" )
 ecbuild_info( "ECFLOW_MAJOR             : ${ECFLOW_MAJOR}" )
 ecbuild_info( "ECFLOW_MINOR             : ${ECFLOW_MINOR}" )
 ecbuild_info( "ECFLOW_VERSION           : ${ECFLOW_VERSION_STR}" )
-set(Python_ADDITIONAL_VERSIONS 3.6)
 
 # =========================================================================================
 # Options , be aware of caching, when modifying on the command line. 
@@ -350,12 +348,10 @@ ecbuild_dont_pack( FILES
                    .pydevproject
                    build_scripts/.pydevproject
 )
-set(Python_ADDITIONAL_VERSIONS 3.6)
 
 # =========================================================================================
 # final
 # =========================================================================================
-find_package (Python3 COMPONENTS Interpreter Development)
 
 # prepares a tar.gz of your sources and/or binaries
 ecbuild_install_project( NAME ecFlow )
