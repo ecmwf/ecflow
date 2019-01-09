@@ -15,6 +15,7 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 from socket import gethostname 
 import os,sys,fnmatch
+import time
 import fcntl
 import datetime,time
 import shutil   # used to remove directory tree
@@ -94,25 +95,34 @@ class EcfPortLock(object):
         print("   EcfPortLock:__init__")
         pass
     
+    def at_time(self):
+        return datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+    
     def find_free_port(self,seed_port):
-        print("   EcfPortLock:find_free_port starting with " + str(seed_port))
-        at_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+        print("   EcfPortLock:find_free_port starting with " + str(seed_port) + " at time " + self.at_time())
         port = seed_port
         while 1:
-            if self._free_port(port) == True:
-                print("   *FOUND* free server port " + str(port) + " : " + at_time)
-                file = self._lock_file(port)
-                at_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
-                if os.path.exists(file):
-                    print("   *LOCKED* lock file exists " + file + " : " + at_time  + " ignoring")
-                else:
+            # port must be free for at least 15 seconds
+            if self._timed_free_port(port,15) == True:
+                print("   *FOUND* free server port " + str(port) + " : " + self.at_time())
+                if self.do_lock(port):
                     break
             else:
-                print("   *Server* port " + str(port) + " busy, trying next port " + at_time)
+                print("   *Server* port " + str(port) + " busy( by  ping), trying next port " + self.at_time())
             port = port + 1
             
         return str(port)  
     
+    def _timed_free_port(self,port,wait_time = 10):
+        count = 0
+        while count < wait_time:
+            if self._free_port(port) == True:
+                count = count + 1
+                time.sleep(1)
+            else:
+                return False
+        return self._free_port(port)
+            
     def _free_port(self,port):
         try:
             ci = Client()
@@ -124,29 +134,27 @@ class EcfPortLock(object):
             
     def do_lock(self,port):
         file = self._lock_file(port)
-        at_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
         if os.path.exists(file):
-            print("   *LOCKED* lock file exists " + file + " : " + at_time )
+            print("   *LOCKED* lock file exists " + file + " trying next port : " + self.at_time() )
             return False
         try:
             fp = open(file, 'w') 
             try:
-                self.lock_time = at_time
+                self.lock_time = self.at_time()
                 fcntl.lockf(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
                 self.lock_file_fp = fp
                 print("   *LOCKED* file " + file + " : " + self.lock_time )
                 return True;
             except IOError:
-                print("   Could *NOT* lock file " + file + " trying next port : " + at_time)
+                print("   Could *NOT* lock file " + file + " trying next port : " + self.at_time())
                 return False
         except IOError as e:
-             print("   Could not open file " + file + " for write trying next port : " + at_time)
-             return False
+            print("   Could not open file " + file + " for write trying next port : " + self.at_time())
+            return False
         
     def remove(self,port):
-        release_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
         file = self._lock_file(port)
-        print("   Remove lock file : " + file + " : lock_time: " + self.lock_time + " release_time: " + release_time)
+        print("   Remove lock file : " + file + " : lock_time: " + self.lock_time + " release_time: " + self.at_time() )
         self.lock_file_fp.close()
         os.remove(file)
     
@@ -186,12 +194,14 @@ class Server(object):
         #ci.set_retry_connection_period(0) # Only applicable when make more than one attempt. Added to check api.
         self.ci = Client("localhost", self.the_port)
 
+    def at_time(self):
+        return datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
     def __enter__(self):
         try:
-            st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-            print("Server:__enter__: About to ping localhost: " + self.the_port +  " : " + st)       
+            print("Server:__enter__: About to ping localhost: " + self.the_port +  " : " + self.at_time())       
             self.ci.ping() 
-            print("   ------- Server all ready running on port " + self.the_port + " *UNEXPECTED* ------")
+            print("   ------- Server all ready running on port " + self.the_port + " *UNEXPECTED* -- : " + self.at_time() )
             sys.exit(1)
         except RuntimeError as e:
             while 1:
@@ -213,14 +223,12 @@ class Server(object):
                 print("   TestClient.py: Starting server " + server_exe)
                 os.system(server_exe) 
             
-                print("   Allow time for server to start")
+                print("   Allow time for server to start " + self.at_time())
                 if self.ci.wait_for_server_reply() :
-                    print("   Server has started, trying to lock file")
-                    locked = self.lock_file.do_lock( int(self.the_port) )
-                    assert locked ,"   Could not creat lock file for port " + self.the_port
+                    print("   Server has started " +  self.at_time())
                     break
                 else:
-                    print("   Server failed to start after 60 second, trying next port !!!!!!")
+                    print("   Server failed to start after 60 second, trying next port !!!!!! " + self.at_time())
                     self.the_port = self.lock_file.find_free_port( int(self.the_port) + 1 )   
              
         print("   Run the tests, leaving Server:__enter__:") 
