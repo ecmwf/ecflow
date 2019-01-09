@@ -15,6 +15,7 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 from socket import gethostname 
 import os,sys,fnmatch
+import time
 import fcntl
 import datetime,time
 import shutil   # used to remove directory tree
@@ -94,25 +95,37 @@ class EcfPortLock(object):
         print("   EcfPortLock:__init__")
         pass
     
+    def at_time(self):
+        return datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+    
     def find_free_port(self,seed_port):
-        print("   EcfPortLock:find_free_port starting with " + str(seed_port))
-        at_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
+        print("   EcfPortLock:find_free_port starting with " + str(seed_port) + " at time " + self.at_time())
         port = seed_port
         while 1:
-            if self._free_port(port) == True:
-                print("   *FOUND* free server port " + str(port) + " : " + at_time)
+            # port must be free for at least 10 seconds
+            if self._timed_free_port(port,10) == True:
+                print("   *FOUND* free server port " + str(port) + " : " + self.at_time())
                 file = self._lock_file(port)
-                at_time = datetime.datetime.fromtimestamp(time.time()).strftime('%H:%M:%S')
                 if os.path.exists(file):
-                    print("   *LOCKED* lock file exists " + file + " : " + at_time  + " ignoring")
+                    print("   *LOCKED* lock file exists " + file + " : " + self.at_time()  + " ignoring")
                 else:
                     break
             else:
-                print("   *Server* port " + str(port) + " busy( by  ping), trying next port " + at_time)
+                print("   *Server* port " + str(port) + " busy( by  ping), trying next port " + self.at_time())
             port = port + 1
             
         return str(port)  
     
+    def _timed_free_port(self,port,wait_time = 10):
+        count = 0
+        while count < wait_time:
+            if self._free_port(port) == True:
+                count = count + 1
+                time.sleep(1)
+            else:
+                return False
+        return self._free_port(port)
+            
     def _free_port(self,port):
         try:
             ci = Client()
