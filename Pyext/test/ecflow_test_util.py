@@ -108,7 +108,7 @@ class EcfPortLock(object):
                 else:
                     break
             else:
-                print("   *Server* port " + str(port) + " busy, trying next port " + at_time)
+                print("   *Server* port " + str(port) + " busy( by  ping), trying next port " + at_time)
             port = port + 1
             
         return str(port)  
@@ -191,7 +191,8 @@ class Server(object):
             st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
             print("Server:__enter__: About to ping localhost: " + self.the_port +  " : " + st)       
             self.ci.ping() 
-            print("   ------- Server all ready running on port " + self.the_port + " *UNEXPECTED* ------")
+            st = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+            print("   ------- Server all ready running on port " + self.the_port + " *UNEXPECTED* -- : " + st)
             sys.exit(1)
         except RuntimeError as e:
             while 1:
