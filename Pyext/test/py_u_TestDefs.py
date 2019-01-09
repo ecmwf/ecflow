@@ -25,7 +25,7 @@ import ecflow_test_util as Test
 
 if __name__ == "__main__":
     
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
 
     suite = Suite("s1")
     assert (isinstance(suite, ecflow.Suite)), "Expected suite"

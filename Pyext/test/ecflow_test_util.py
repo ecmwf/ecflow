@@ -56,8 +56,9 @@ def checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.ch
 def backup_checkpt_file_path(port): return "./" + gethostname() + "." + port + ".ecf.check.b"
 def white_list_file_path(port): return "./" + gethostname() + "." + port + ".ecf.lists"
 
-def print_test_start():
+def print_test_start(test_name):
     print("#######################################################################################")
+    print(test_name)  
     print("ecflow version(" + Client().version() + ") debug build(" + str(debug_build()) +")  python(" + platform.python_version() + ")")
     print("PYTHONPATH                : " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
     #print("sys.path                  : " + str(sys.path))

@@ -106,7 +106,7 @@ def test_time_series():
     
 
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
  
     simulate_defs_with_time()
     simulate_deadlock()

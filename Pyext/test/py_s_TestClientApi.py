@@ -1808,7 +1808,7 @@ def test_client_ch_with_drops_handles(the_port,top_ci):
  
 
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))   
 
     # server independent tests
     test_set_host_port();

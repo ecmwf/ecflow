@@ -15,6 +15,7 @@
 
 from ecflow import Suite, Family, Task, Defs, Client, debug_build
 import ecflow_test_util as Test
+import os
 
 def create_defs(name=""):
     defs = Defs()
@@ -34,7 +35,7 @@ def create_defs(name=""):
 
 if __name__ == "__main__":   
     
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
  
     defs = create_defs()
     s1 = defs.find_suite("s1")

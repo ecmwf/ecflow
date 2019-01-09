@@ -155,7 +155,7 @@ def check_defs(path_to_defs):
         return False
           
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
  
     # Names with leading '.' should not be allowed. Will interfere with triggers
     # Empty names not allowed

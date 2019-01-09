@@ -195,7 +195,7 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
             break    
         
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
  
     cwd = os.getcwd()
     #print cwd

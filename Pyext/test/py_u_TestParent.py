@@ -15,6 +15,7 @@
 
 from ecflow import Suite, Family, Task, Defs, Client, debug_build
 import ecflow_test_util as Test
+import os
 
 def absNodePath(node):
     """ Given a node return its absolute node path. """
@@ -35,7 +36,7 @@ def absNodePath(node):
     
 
 if __name__ == "__main__":  
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
    
     suite = Suite("s1");
     family = Family("f1")

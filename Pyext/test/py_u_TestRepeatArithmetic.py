@@ -16,11 +16,12 @@
 # Addition and subtraction for repeat date, should follow data arithmetic
 # The repeat variable in the expression must be on the LHS(left hand side)
 # of the expression, otherwise integer arithmetic is used
+import os
 import ecflow
 import ecflow_test_util as Test
 
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
  
     defs = ecflow.Defs()
     s1 = defs.add_suite("s1");

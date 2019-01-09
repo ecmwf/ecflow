@@ -12,12 +12,13 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 # code for testing  generated variables
-#
+
+import os
 import ecflow
 import ecflow_test_util as Test
 
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
      
     #===========================================================================
     print("Defs: test generated variables")

@@ -16,10 +16,10 @@
 
 from ecflow import Defs, Suite, Task, Family, Client, Variable, Edit, debug_build
 import ecflow_test_util as Test
-import sys
+import sys,os
     
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
  
     # sys.version_info is a tuple containing (major,minor,micro,releaselevel,serial)
     version = sys.version_info;
@@ -27,7 +27,6 @@ if __name__ == "__main__":
         print("This test only run with python version 2.7 or greater, but found : " + str(version))
         exit(0)
     
-    print("start test")
     # Add with context manager, in our case this only provides ability to indent
     with Defs() as defs:
         with defs.add_suite("s2") as s2:
