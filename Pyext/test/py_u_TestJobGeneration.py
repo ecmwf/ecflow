@@ -94,7 +94,7 @@ def check_jobs(task_vec, ecf_home):
 
 
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
     
     workspace = File.source_dir();
     print(workspace)

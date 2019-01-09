@@ -54,7 +54,7 @@ DICT_SMS_ECF = {
     'SMSLOGTIMEOUT': 'ECF_LOGTIMEOUT',
 }
 
-DICT_ECF_SMS = dict((v, k) for k, v in DICT_SMS_ECF.iteritems())
+DICT_ECF_SMS = dict((v, k) for k, v in DICT_SMS_ECF.items())
       
 def translate(name, value=None):
     """ find and replace submit, kill and status command, according to
@@ -161,9 +161,9 @@ def sms2ecf(orig, dest):
                 for key in ignored:
                     if " %s " % key in line: 
                         continue                
-                print >> fop, line
+                print(line, file=fop)
         except:
-            print "oops"
+            print("oops")
 
 def load(name, host="localhost", port=31415):
     import ecflow as ec

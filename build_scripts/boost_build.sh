@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ## Copyright 2009-2017 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0 
@@ -65,6 +65,7 @@ test_uname ()
 layout=tagged
 
 CXXFLAGS=-d2     # dummy argument, since CXXFLAGS is quoted
+CXXFLAGS=cxxflags=-fPIC
 if test_uname Linux ; then
   X64=$(uname -m)
   if [ "$X64" = x86_64 ]

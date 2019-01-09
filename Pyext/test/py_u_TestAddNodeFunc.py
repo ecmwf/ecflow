@@ -12,6 +12,7 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 from ecflow import Defs, Client, debug_build
 import ecflow_test_util as Test
+import os
 
 def create_defs_sequentially():
     local_defs = Defs()
@@ -49,7 +50,7 @@ def create_defs_functionally():
     
 if __name__ == "__main__":
         
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
 
     #
     # Add Nodes functional way

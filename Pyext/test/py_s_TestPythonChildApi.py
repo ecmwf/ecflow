@@ -164,7 +164,7 @@ def test_client_run(ci):
 # //////////////////////////////////////////////////////////////////////////////////////        
 
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
 
     with Test.Server() as ci:
     

@@ -1927,7 +1927,7 @@ def do_tests(ci,the_port):
     test_ECFLOW_199(ci)         
 
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))   
 
     # server independent tests
     test_set_host_port();

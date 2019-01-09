@@ -7,6 +7,9 @@ set -u # fail when using an undefined variable
 # ensure correct permission for installation
 umask 0022
 
+# docker build?
+[[ -d opt/boost_1_53_0/ ]] && export BOOST_ROOT=/opt/boost_1_53_0/ ARCH=linux PYTHONPATH=/usr/local:${PYTHONPATH:=} LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH:=}
+
 # ====================================================================
 show_error_and_exit() {
    echo "cmake.sh expects at least one argument"

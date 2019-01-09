@@ -21,7 +21,7 @@ import ecflow_test_util as Test
 
 if __name__ == "__main__":
     
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
 
     defs = ecflow.Defs()
     defs.add_suite("a").add_family("f1").add_task("t1").add_variable("a","b").add_event(1).add_meter("meter", 0, 100).add_label("label", "v").add_time("+00:30 20:00 01:00")

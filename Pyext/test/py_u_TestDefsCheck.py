@@ -12,12 +12,12 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #  Test the error and waning checks defined in the defs work
-
+import os
 from ecflow import  Defs, Limit, InLimit, Client, debug_build
 import ecflow_test_util as Test
 
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
      
     defs = Defs()
     suite = defs.add_suite("s1");

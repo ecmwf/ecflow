@@ -30,8 +30,8 @@ except ImportError:
     sys.path.append(loc)  # elearning
     import ecflow
 ecflow.Ecf.set_debug_level(3)
-
 global DEFS
+
 DEFS = ecflow.Defs()
 # DEBUG = True
 DEBUG = False
@@ -318,7 +318,8 @@ class Extern(object):
             for ppp in path:
                 Extern(ppp)
 
-        elif type(path) in (str, unicode):
+        # elif type(path) in (str, unicode):
+        elif type(path) in (str, ):
             if DEBUG:
                 print("#MSG: extern", path)
             if ".Extern" in path: raise Exception
@@ -652,8 +653,7 @@ class Trigger(Attribute):
                     for index, another in enumerate(name):
                         name += item_to_string(name, index, another)
                 elif type(name) in (Node, Task, Family, Suite):
-                    if DEBUG:
-                        print(name.name())
+                    # if DEBUG: print(name.name())
                     fullname = name.fullname()
                     if fullname[0] == '/':
                         try:
@@ -691,7 +691,7 @@ class Trigger(Attribute):
                 try:
                     import inc_common as ic
                     if ic.psel() not in fullname:
-                        fullname = name.name()
+                        fullname = name.real.name()
                 except ImportError:
                     print("#WAR: trigger expcept")
             self.expr = fullname
@@ -749,9 +749,10 @@ class TriggerAlways(Trigger):
 
 class Complete(Trigger):
     """ class to host complete expression, added later to a node"""
-
-    def __init__(self, expression, unk=False, anded=False):
-        super(Complete, self).__init__(expression, unk, anded)
+    def __init__(self, expr, unk=False, anded=False):
+        if sys.version_info.major == 2:
+            super(Complete, self).__init__(expr, unk, anded)
+        else: super().__init__(expr, unk, anded)  # python3
 
     def add_to(self, node):
         if USE_TRIGGER and self.expr is not None:
@@ -1055,7 +1056,7 @@ class Limit(Attribute):
     def add_to(self, node):
         if USE_LIMIT and self.name is not None:
             if type(self.name) is dict:
-                for name, size in sorted_or_not(self.name.items(),
+                for name, size in sorted_or_not(list(self.name.items()),
                                                 sort=not LINKTASK):
                     size = self.name[name]
                     node.load.add_limit(name, size)
@@ -1161,24 +1162,24 @@ class Edit(Attribute):
 
         if len(args) > 0:
             if type(args) == list:
-                for item in args.iteritems():
+                for item in args.items():
                     key = item.name()
                     val = item.value()
                     python_true(key, val)
                     self._set_tvar(item.name(), item.value())
             elif type(args) == tuple:
-                for key, val in args.items():
+                for key, val in list(args.items()):
                     python_true(key, val)
                     self._set_tvar(key, val)
             else:
                 raise DefError
         if len(kwargs) > 0:
-            for key in sorted_or_not(kwargs.keys()):
+            for key in sorted_or_not(list(kwargs.keys())):
                 val = kwargs[key]
                 python_true(key, val)
                 self._set_tvar(key, val)
         if type(__a) == dict:
-            for key in sorted_or_not(__a.keys()):
+            for key in sorted_or_not(list(__a.keys())):
                 val = __a[key]
                 python_true(key, val)
                 self._set_tvar(key, val)
@@ -1213,7 +1214,7 @@ class Edit(Attribute):
                           "SCHOST": "infopsc",
                           "HOST": "infophs", }
                 # if 'seas' in ip.SELECTION: pass
-                for key in labels.keys():
+                for key in list(labels.keys()):
                     try:
                         info = labels[key]
                         msg = ""
@@ -1612,7 +1613,7 @@ def to_pyflow(node, container=None):
             container.update(to_pyflow(item, container))
         return container
 
-    if node.name() not in container.keys():
+    if node.name() not in list(container.keys()):
         container[node.name()] = dict()
     # steps follow
     upd = {
@@ -1637,7 +1638,7 @@ def to_pyflow(node, container=None):
         if item.tokens() > 1: arg += " %d" % item.tokens()
         upd['inlimits'][item.name()] = arg
     # ('variables', 'events', 'meters', 'labels', 'limits', 'inlimits'):
-    for key in upd.keys():
+    for key in list(upd.keys()):
         if len(upd[key]) == 0:
             del upd[key]
     # repeat time date days today
@@ -1667,7 +1668,7 @@ def to_dict(node, container=None):
             res[':suites'].append(to_dict(item))
         if 1:
           for item in node.externs:
-            if ':externs' not in res.keys(): res[':externs'] = []
+            if ':externs' not in list(res.keys()): res[':externs'] = []
             # print(item)
             res[':externs'].append("%s" % item)
         return res
@@ -1729,7 +1730,7 @@ def to_dict(node, container=None):
         out[':repeat'] = nat("%s" % node.get_repeat(), "repeat")
 
     # for key in sorted(temp.keys()):
-    for key in temp.keys():
+    for key in list(temp.keys()):
         if temp[key] == 'None':            continue  # WARNING ???
         out[':' + key] = temp[key]
 
@@ -1752,14 +1753,14 @@ def to_json(item, pyflow=False):
 def json_to_defs(treedict, parent=None):
     if treedict is None: return
     res = []
-    if ":externs" in treedict.keys():
+    if ":externs" in list(treedict.keys()):
         for item in treedict[":externs"]:
             res.append("extern %s" % item)
             # Extern(nat(item, "extern")))
-    if ":suites" in treedict.keys():
+    if ":suites" in list(treedict.keys()):
         for suite in treedict[":suites"]:
             res.append(from_json(suite))
-    for key in treedict.keys():
+    for key in list(treedict.keys()):
         if key not in (":externs", ":suites"):
             raise DefError("please use from_json", key)
     return res
@@ -1784,7 +1785,8 @@ def from_json(tree):
             return str(tree[0])
         raise Exception("#wwwwww", tree, type(tree))
 
-    elif type(tree) in (str, unicode):
+    # elif type(tree) in (str, unicode):
+    elif type(tree) in (str, ):
         print("#IGN", tree)
         return
 
@@ -1792,12 +1794,9 @@ def from_json(tree):
         raise Exception("#wwwwww", tree, type(tree))
 
     for k in sorted(tree.keys()):
-        if type(k) == unicode: sk = str(k)
-        else: sk = k
-        if type(tree[k]) == unicode:
-            tree[k] = str(tree[k])
-        # print("kkk", k, sk) # , tree[k], type(tree[k]), )
-        # if k in ITEMS.keys(): print("keys", k, ITEMS[k])
+        sk = k
+        # if type(k) == unicode: sk = str(k)
+        # if type(tree[k]) == unicode: tree[k] = str(tree[k])
         if sk in (':name', ):
             res = ITEMS[tree[':kind']](str(tree[':name']))
 
@@ -1818,7 +1817,7 @@ def from_json(tree):
 
         elif sk in (':meters', ):
             for item in tree[k]:
-                name = item.keys()[0]
+                name = list(item.keys())[0]
                 out.append(ITEMS[k](str(name),
                                     int(item[name]['min']),
                                     int(item[name]['max']),
@@ -1843,13 +1842,13 @@ def from_json(tree):
         #         for item in v:
         #             if item != '':
         #                 out.append(ITEMS[k](item))
-        elif sk in ITEMS.keys():
+        elif sk in list(ITEMS.keys()):
             raise Exception
 
         else:             
             if (type(tree[k]) == dict and 
                 len(tree[k]) == 1 and 
-                ['children', ] == tree[k].keys()):
+                ['children', ] == list(tree[k].keys())):
                 kids = tree[k]['children']
                 if type(kids) not in (list, tuple):
                     raise Exception(type(kids))
@@ -1857,7 +1856,7 @@ def from_json(tree):
                         if type(kid) in (str, unicode):
                             out.append((str(k), str(kid)))
                         elif type(kid) in (dict, ):
-                            for elt in kid.keys():
+                            for elt in list(kid.keys()):
                                 out.append((str(k), str(elt)))
                             anot = from_json(kid)
                             if anot is not None: out.append(anot)
@@ -1865,7 +1864,7 @@ def from_json(tree):
                 return out
             elif 1: raise Exception(k, tree[k], type(tree[k]),
                                     len(tree[k]),
-                                    tree[k].keys())
+                                    list(tree[k].keys()))
             else: out.append(from_json(tree[k]))
 
     if res is None: 
@@ -1975,7 +1974,11 @@ class Defs(object):
         self.load.auto_add_externs(true)
 
     def check(self):
-        self.load.check()
+        return self.load.check()
+    def simulate(self):
+        return self.load.simulate()
+    def generate_scripts(self):
+        return self.load.generate_scripts()
 
     def add_extern(self, path):
         if type(path) != str: raise DefError(type(path))
@@ -2032,11 +2035,6 @@ class Defs(object):
         suite = Suite(name)
         self.add(suite)
         return suite
-
-
-global DEFS
-# DEFS = ecflow.Defs()
-DEFS = Defs()
 
 
 class Client(object):

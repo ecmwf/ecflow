@@ -22,7 +22,7 @@ import ecflow_test_util as Test
 
 
 if __name__ == "__main__":
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
     
     defs = Defs()
     s0 = defs.add_suite("s0")

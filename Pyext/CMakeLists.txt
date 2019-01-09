@@ -113,8 +113,7 @@ else()
 			add_subdirectory( python2 )
 		endif()
 	endif()
-	 
-	
+
 	find_package(Python3 COMPONENTS Interpreter Development)
 	message( STATUS "   Python3_FOUND                     : ${Python3_FOUND}" )
 	if (Python3_FOUND)

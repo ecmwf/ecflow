@@ -12,6 +12,7 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #  code for testing derivation works
+import os
 import ecflow
 import ecflow_test_util as Test
 
@@ -23,5 +24,5 @@ class MyClient(ecflow.Client): pass
 
 if __name__ == "__main__":
     
-    Test.print_test_start()
+    Test.print_test_start(os.path.basename(__file__))
     print("All tests pass")
