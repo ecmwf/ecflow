@@ -169,13 +169,12 @@ class Server(object):
     """TestServer: allow debug and release version of python tests to run at the same
     time, by generating a unique port each time"""
     def __init__(self):
-        print("Server:__init__: Starting server")      
+        print("Server:__init__: Starting server")    
         if not debugging():
-            seed_port = 3153
-            if debug_build(): seed_port = 3152
+            seed_port = int(os.getenv('TEST_ECF_PORT', '3153'))
             if sys.version_info[0] == 3: # python3 can run at same time
-                seed_port = 3200
-                if debug_build(): seed_port = 3201
+                seed_port = int(os.getenv('TEST_ECF_PORT', '3154'))  
+            if debug_build(): seed_port = seed_port + 1 
             self.lock_file = EcfPortLock()
             self.the_port = self.lock_file.find_free_port(seed_port)   
         else:
