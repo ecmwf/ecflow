@@ -29,7 +29,7 @@ if __name__ == "__main__":
     #===========================================================================
     defs = ecflow.Defs()
     defs.add_variable("ZFRED", "/tmp/")
-    defs.add_variable("YECF_URL_CMD", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
+    defs.add_variable("YECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")
     defs.add_variable("XECF_URL_BASE", "http://www.ecmwf.int")
     defs.add_variable("AECF_URL", "publications/manuals/sms")
     assert len(list(defs.user_variables)) == 4, "Expected *user* 4 variable"    
@@ -87,7 +87,7 @@ if __name__ == "__main__":
     #===========================================================================
     suite = ecflow.Suite("s1")
     suite.add_variable(ecflow.Variable("ECF_HOME", "/tmp/"))
-    suite.add_variable("ZZZZZZ", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
+    suite.add_variable("ZZZZZZ", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")
     suite.add_variable("YYYYY", "http://www.ecmwf.int")
     suite.add_variable("aaaa", "publications/manuals/sms")
     assert len(list(suite.variables)) == 4, "Expected 4 variable"    

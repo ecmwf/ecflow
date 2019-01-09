@@ -4,7 +4,7 @@ suite s
       defstatus complete
       late -s +00:05 -c +00:15
       trigger pdb==complete 
-      edit ECF_URL_CMD '${BROWSER:=firefox} -remote 'openURL(%URL%'
+      edit ECF_URL_CMD '${BROWSER:=firefox} -new-tab %URL%'
       edit EMOS_TYPE '  family prod_wparam
   endfamily
 '

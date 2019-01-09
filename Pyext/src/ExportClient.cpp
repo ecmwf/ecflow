@@ -347,7 +347,7 @@ void export_Client()
 	         "\nUsage:\n"
 	         "Lets assume that the server has the following definition::\n\n"
 	         "   suite s\n"
-	         "      edit ECF_URL_CMD  \"${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'\"\n"
+	         "      edit ECF_URL_CMD  \"${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%\"\n"
 	         "      edit ECF_URL_BASE \"http://www.ecmwf.int\"\n"
 	         "      family f\n"
 	         "         task t1\n"

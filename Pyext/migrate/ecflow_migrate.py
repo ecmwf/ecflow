@@ -207,7 +207,7 @@ class MigrateForVariable(Migrator):
             else:
             
                 # process line, avoid ECF_URL_CMD as that could by error have uneven number of "'' i.e
-                #   edit ECF_URL_CMD '${BROWSER:=firefox} -remote 'openURL(%URL%'
+                #   edit ECF_URL_CMD '${BROWSER:=firefox} -new-tab %URL%'
                 # hence we use 
                 #    if no_of_label_quotes == 1: 
                 # instead of
