@@ -137,6 +137,7 @@ public:
 
     virtual std::string genVariable(const std::string& key) const;
     virtual std::string findVariable(const std::string& key,bool substitute=false) const;
+    virtual bool substituteVariableValue(std::string& val) const;
 
     virtual void collectInheritedVariableNames(std::set<std::string>& vars) const;
 
@@ -310,6 +311,7 @@ public:
 	//server variables are searched.
 	std::string findVariable(const std::string& key,bool substitute=false) const;
 	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
+    bool substituteVariableValue(std::string& val) const;
 
     std::string flagsAsStr() const;
 	bool isFlagSet(ecf::Flag::Type f) const;
@@ -332,7 +334,6 @@ private:
 	//void clear(VNode*);
     void scan(VNode*,bool);
     void deleteNode(VNode* node,bool);
-    std::string substituteVariableValue(const std::string& val) const;
     void updateCache();
     void updateCache(defs_ptr defs);
 

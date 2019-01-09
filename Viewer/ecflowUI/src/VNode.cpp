@@ -599,6 +599,15 @@ void VNode::collectInheritedVariableNames(std::set<std::string>& vars) const
     }
 }
 
+bool VNode::substituteVariableValue(std::string& val) const
+{
+    if(!node_ )
+        return false;
+
+    //should set the def mutex because variableSubsitution
+    //might need information from the defs
+    return node_->variableSubsitution(val);
+}
 
 int VNode::variablesNum() const
 {
@@ -1435,7 +1444,7 @@ std::string VServer::findVariable(const std::string& key,bool substitute) const
 		{
 			val=(*it).theValue();
 			if(substitute)
-				val=substituteVariableValue(val);
+                substituteVariableValue(val);
 
 			return val;
 		}
@@ -1448,7 +1457,7 @@ std::string VServer::findVariable(const std::string& key,bool substitute) const
 		{
 			val=(*it).theValue();
 			if(substitute)
-				val=substituteVariableValue(val);
+                substituteVariableValue(val);
 
 			return val;
 		}
@@ -1462,21 +1471,17 @@ std::string VServer::findInheritedVariable(const std::string& key,bool substitut
 	return findVariable(key,substitute);
 }
 
-std::string VServer::substituteVariableValue(const std::string& inVal) const
+bool VServer::substituteVariableValue(std::string& val) const
 {
-	std::string val=inVal;
-
 	if(val.empty())
-		return val;
+        return false;
 
 	ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
 	defs_ptr defs = defsAccess.defs();
 	if (!defs)
-		return val;
+        return false;
 
-	defs->server().variableSubsitution(val);
-
-	return val;
+    return defs->server().variableSubsitution(val);
 }
 
 //----------------------------------------------
