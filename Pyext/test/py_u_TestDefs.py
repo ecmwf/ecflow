@@ -54,7 +54,7 @@ if __name__ == "__main__":
  
     suite = defs.add_suite("s2");
     suite.add_variable(Variable("ECF_HOME","/tmp/"))
-    suite.add_variable("ECF_URL_CMD", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
+    suite.add_variable("ECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")
     suite.add_variable("ECF_URL_BASE","http://www.ecmwf.int")
     suite.add_variable("ECF_URL","publications/manuals/sms")
     suite.add_limit( Limit("limitName", 10) )

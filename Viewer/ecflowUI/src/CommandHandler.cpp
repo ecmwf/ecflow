@@ -220,10 +220,7 @@ void CommandHandler::substituteVariables(std::string& cmd,const std::vector<VInf
        if(!n || n->isAttribute())
             return;
 
-       //if(cmd.find("%") != std::string::npos)
-       //{
-            //should lock the mutex on the defs
-            n->node()->variableSubsitution(cmd);
-       //}
+       //this can lock the mutex on the defs
+       n->substituteVariableValue(cmd);
    }
 }

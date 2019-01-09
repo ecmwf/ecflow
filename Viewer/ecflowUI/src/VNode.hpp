@@ -35,10 +35,10 @@ class VNodeTriggerData;
 class VNodeInternalState
 {
 public:
-	VNodeInternalState()= default;
+	VNodeInternalState() : tryNo_(0), flag_(0) {}
 
-	unsigned char tryNo_{0};
-	unsigned char flag_{0};
+	unsigned char tryNo_;
+	unsigned char flag_;
 };
 
 
@@ -46,24 +46,26 @@ public:
 class VNodeChange
 {
 public:
-	VNodeChange()= default;
-	int cachedAttrNum_{-1};
-	int attrNum_{-1};
-	int cachedNodeNum_{-1};
-	int nodeNum_{-1};
-	int nodeAddAt_{-1};
-	int nodeRemoveAt_{-1};
-	bool ignore_{false};
-	bool rescan_{false};
+	VNodeChange() : cachedAttrNum_(-1), attrNum_(-1), cachedNodeNum_(-1),
+					nodeNum_(-1), nodeAddAt_(-1), nodeRemoveAt_(-1),
+					ignore_(false), rescan_(false) {}
+	int cachedAttrNum_;
+	int attrNum_;
+	int cachedNodeNum_;
+	int nodeNum_;
+	int nodeAddAt_;
+	int nodeRemoveAt_;
+	bool ignore_;
+	bool rescan_;
 };
 
 //Describes the major changes during an update
 class VServerChange
 {
 public:
-    VServerChange()= default; //, totalNum_(0) {}
-	int suiteNum_{0};
-	int attrNum_{0};
+    VServerChange() : suiteNum_(0), attrNum_(0) {} //, totalNum_(0) {}
+	int suiteNum_;
+	int attrNum_;
     //int totalNum_;
 };
 
@@ -99,21 +101,21 @@ friend class VUserVarAttr;
 
 public:
 	VNode(VNode* parent,node_ptr);
-    ~VNode() override;
+    virtual ~VNode();
 
 	enum SortMode {ParentToChildSort,ChildToParentSort};
 
-    VServer *root() const override;
-    ServerHandler* server() const override;
+    VServer *root() const;
+    ServerHandler* server() const;
     virtual VNode* suite() const;
     node_ptr node() const {return node_;}  
-    VNode* isNode() const override {return const_cast<VNode*>(this);}
-    bool isTopLevel() const override;
+    VNode* isNode() const {return const_cast<VNode*>(this);}
+    bool isTopLevel() const;
 
     //Attributes
     const std::vector<VAttribute*>& attr() const {return attr_;}
-    int attrNum(AttributeFilter* filter=nullptr) const;
-    VAttribute* attribute(int,AttributeFilter *filter=nullptr) const;
+    int attrNum(AttributeFilter* filter=0) const;
+    VAttribute* attribute(int,AttributeFilter *filter=0) const;
     VAttribute* attributeForType(int,VAttributeType*) const;
     int indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const;
     VAttribute* findAttribute(QStringList aData);
@@ -135,6 +137,7 @@ public:
 
     virtual std::string genVariable(const std::string& key) const;
     virtual std::string findVariable(const std::string& key,bool substitute=false) const;
+    virtual bool substituteVariableValue(std::string& val) const;
 
     virtual void collectInheritedVariableNames(std::set<std::string>& vars) const;
 
@@ -142,13 +145,13 @@ public:
     //generated variables are searched.
     virtual std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
 
-    std::string fullPath() const override;
+    std::string fullPath() const;
     virtual std::string absNodePath() const;
 
     bool sameName(const std::string& name) const;
-    bool sameContents(VItem* item) const override;
-    std::string strName() const override;
-    QString name() const override;
+    bool sameContents(VItem* item) const;
+    std::string strName() const;
+    QString name() const;
     std::string serverName() const;
     virtual QString stateName();
     virtual QString serverStateName();
@@ -190,7 +193,7 @@ public:
     void triggerExpr(std::string&,std::string&) const;
 
     void triggers(TriggerCollector*);   
-    void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=nullptr);
+    void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=0);
     void clearTriggerData();
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VAttribute* n);
@@ -229,24 +232,24 @@ class VSuiteNode : public VNode
 {
 public:
     VSuiteNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
-    VSuiteNode* isSuite() const override {return const_cast<VSuiteNode*>(this);}
-    const std::string& typeName() const override;
+    VSuiteNode* isSuite() const {return const_cast<VSuiteNode*>(this);}
+    const std::string& typeName() const;
 };
 
 class VFamilyNode : public VNode
 {
 public:
     VFamilyNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
-    VFamilyNode* isFamily() const override {return const_cast<VFamilyNode*>(this);}
-    const std::string& typeName() const override;
+    VFamilyNode* isFamily() const {return const_cast<VFamilyNode*>(this);}
+    const std::string& typeName() const;
 };
 
 class VAliasNode : public VNode
 {
 public:
     VAliasNode(VNode* parent,node_ptr node) : VNode(parent,node) {}
-    VAliasNode* isAlias() const override {return const_cast<VAliasNode*>(this);}
-    const std::string& typeName() const override;
+    VAliasNode* isAlias() const {return const_cast<VAliasNode*>(this);}
+    const std::string& typeName() const;
 };
 
 //This is the root node representing the Server.
@@ -257,15 +260,15 @@ class VServer : public VNode
 
 public:
 	explicit VServer(ServerHandler*);
-	~VServer() override;
+	~VServer();
 
-	ServerHandler* server() const override {return server_;}
-    VNode* suite() const override {return nullptr;}
+	ServerHandler* server() const {return server_;}
+    VNode* suite() const {return NULL;}
 
 	bool isEmpty() const { return numOfChildren() == 0;}
-	bool isTopLevel() const override {return false;}
-    VServer* isServer() const override {return const_cast<VServer*>(this);}
-    VNode* isNode() const override {return nullptr;}
+	bool isTopLevel() const {return false;}
+    VServer* isServer() const {return const_cast<VServer*>(this);}
+    VNode* isNode() const {return NULL;}
 
 	int totalNum() const {return totalNum_;}
 	int totalNumOfTopLevel(int) const;
@@ -284,39 +287,40 @@ public:
     QString toolTip() override;
 
 	//From VNode
-	std::string absNodePath() const override {return "/";}
-	QString stateName() override;
-	QString defaultStateName() override;
-    QString serverStateName() override;
-	bool isSuspended() const override;
-	QColor  stateColour() const override;
-	QColor  stateFontColour() const override;
-	std::string strName() const override;
-	int tryNo() const override {return 0;}
+	std::string absNodePath() const {return "/";}
+	QString stateName();
+	QString defaultStateName();
+    QString serverStateName();
+	bool isSuspended() const;
+	QColor  stateColour() const;
+	QColor  stateFontColour() const;
+	std::string strName() const;
+	int tryNo() const {return 0;}
 
 	void suites(std::vector<std::string>&);
 	VNode* find(const std::string& fullPath);
 
 	//Get all the variables
-    int variablesNum() const override;
-	int genVariablesNum() const override;
-    void variables(std::vector<Variable>& vars) const override;
-    void genVariables(std::vector<Variable>& genVars) const override;
-	std::string genVariable(const std::string& key) const override;
+    int variablesNum() const;
+	int genVariablesNum() const;
+    void variables(std::vector<Variable>& vars) const;
+    void genVariables(std::vector<Variable>& genVars) const;
+	std::string genVariable(const std::string& key) const;
 
 	//Find a variable in the Defs. Both the user_variables and the
 	//server variables are searched.
-	std::string findVariable(const std::string& key,bool substitute=false) const override;
-	std::string findInheritedVariable(const std::string& key,bool substitute=false) const override;
+	std::string findVariable(const std::string& key,bool substitute=false) const;
+	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
+    bool substituteVariableValue(std::string& val) const;
 
-    std::string flagsAsStr() const override;
-	bool isFlagSet(ecf::Flag::Type f) const override;
+    std::string flagsAsStr() const;
+	bool isFlagSet(ecf::Flag::Type f) const;
 
-	void why(std::vector<std::string>& theReasonWhy) const override;
+	void why(std::vector<std::string>& theReasonWhy) const;
 
     bool triggeredScanned() const {return triggeredScanned_;}
 
-    void print() override;
+    void print();
 
 protected:
 	//Clear contents and rebuild the whole tree.
@@ -330,7 +334,6 @@ private:
 	//void clear(VNode*);
     void scan(VNode*,bool);
     void deleteNode(VNode* node,bool);
-    std::string substituteVariableValue(const std::string& val) const;
     void updateCache();
     void updateCache(defs_ptr defs);
 
