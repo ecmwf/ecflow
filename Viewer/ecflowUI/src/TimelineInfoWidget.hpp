@@ -120,6 +120,7 @@ private:
     TimelineItem data_;
     int currentRow_;
     TimelineInfoModel* model_;
+    int tlEndTime_;
 
 
     TimelineInfoDailyModel* dailyModel_;

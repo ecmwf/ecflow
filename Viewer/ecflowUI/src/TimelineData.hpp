@@ -46,10 +46,10 @@ public:
     int firstInPeriod(QDateTime startDt,QDateTime endDt) const;
     bool hasSubmittedOrActiveDuration(QDateTime startDt,QDateTime endDt) const;
     int firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const;
-    int firstActiveDuration(QDateTime startDt,QDateTime endDt) const;
-    void meanSubmittedDuration(float&,int&) const;
-    void meanActiveDuration(float&,int&) const;
-    void durationStats(unsigned char statusId,int& num,float& mean, TimelineItemStats& stats) const;
+    int firstActiveDuration(QDateTime startDt,QDateTime endDt,unsigned int tlEndTime) const;
+    void meanSubmittedDuration(float&,int&,unsigned int tlEndTime) const;
+    void meanActiveDuration(float&,int&,unsigned int tlEndTime) const;
+    void durationStats(unsigned char statusId,int& num,float& mean, TimelineItemStats& stats,unsigned int tlEndTime) const;
     void days(std::vector<unsigned int>&) const;
 
     static unsigned int fromQDateTime(QDateTime dt)

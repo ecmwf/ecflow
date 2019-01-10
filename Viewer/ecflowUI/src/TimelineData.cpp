@@ -66,14 +66,14 @@ bool TimelineItem::hasSubmittedOrActiveDuration(QDateTime startDt,QDateTime endD
 {
     unsigned int start=fromQDateTime(startDt);
     unsigned int end=fromQDateTime(endDt);
-    for(size_t i=0; i < start_.size()-1; i++)
+    for(size_t i=0; i < start_.size(); i++)
     {
         if(start_[i] >= start)
         {
             if(VNState::isActive(status_[i]))
                 return true;
 
-            if(VNState::isSubmitted(status_[i]) &&
+            if(i < start_.size()-1 && VNState::isSubmitted(status_[i]) &&
                  VNState::isActive(status_[i+1]))
             {
                 return true;
@@ -85,6 +85,7 @@ bool TimelineItem::hasSubmittedOrActiveDuration(QDateTime startDt,QDateTime endD
     return false;
 }
 
+// find the first submitted duration preceding the first active duration in the given period
 int TimelineItem::firstSubmittedDuration(QDateTime startDt,QDateTime endDt) const
 {
     unsigned int start=fromQDateTime(startDt);
@@ -108,17 +109,18 @@ int TimelineItem::firstSubmittedDuration(QDateTime startDt,QDateTime endDt) cons
     return -1;
 }
 
-int TimelineItem::firstActiveDuration(QDateTime startDt,QDateTime endDt) const
+// find the first active duration in the given period
+int TimelineItem::firstActiveDuration(QDateTime startDt,QDateTime endDt,unsigned int tlEndTime) const
 {
     unsigned int start=fromQDateTime(startDt);
     unsigned int end=fromQDateTime(endDt);
-    for(size_t i=0; i < start_.size()-1; i++)
+    for(size_t i=0; i < start_.size(); i++)
     {
         if(start_[i] >= start)
         {
             if(VNState::isActive(status_[i]))
             {
-                return start_[i+1]-start_[i]; //secs
+                return ((i != start_.size()-1)?start_[i+1]:tlEndTime) - start_[i]; //secs
             }
         }
         else if (start_[i] >= end)
@@ -127,17 +129,17 @@ int TimelineItem::firstActiveDuration(QDateTime startDt,QDateTime endDt) const
     return -1;
 }
 
-void TimelineItem::meanSubmittedDuration(float &meanVal,int& num) const
+void TimelineItem::meanSubmittedDuration(float &meanVal,int& num,unsigned int tlEndTime) const
 {
     int sum=0;
     num=0;
     meanVal=0.;
 
-    for(size_t i=0; i < start_.size()-1; i++)
+    for(size_t i=0; i < start_.size(); i++)
     {
         if(VNState::isSubmitted(status_[i]))
         {
-            sum+=start_[i+1]-start_[i]; //secs
+            sum+=((i != start_.size()-1)?start_[i+1]:tlEndTime) - start_[i]; //secs
             num++;
         }
     }
@@ -146,17 +148,18 @@ void TimelineItem::meanSubmittedDuration(float &meanVal,int& num) const
         meanVal=static_cast<float>(sum)/static_cast<float>(num);
 }
 
-void TimelineItem::meanActiveDuration(float &meanVal,int& num) const
+
+void TimelineItem::meanActiveDuration(float &meanVal,int& num,unsigned int tlEndTime) const
 {
     int sum=0;
     num=0;
     meanVal=0.;
 
-    for(size_t i=0; i < start_.size()-1; i++)
+    for(size_t i=0; i < start_.size(); i++)
     {
         if(VNState::isActive(status_[i]))
         {
-            sum+=start_[i+1]-start_[i]; //secs
+            sum+=((i != start_.size()-1)?start_[i+1]:tlEndTime) - start_[i]; //secs
             num++;
         }
     }
@@ -165,17 +168,17 @@ void TimelineItem::meanActiveDuration(float &meanVal,int& num) const
         meanVal=static_cast<float>(sum)/static_cast<float>(num);
 }
 
-void TimelineItem::durationStats(unsigned char statusId,int& num,float& mean, TimelineItemStats& stats) const
+void TimelineItem::durationStats(unsigned char statusId,int& num,float& mean, TimelineItemStats& stats, unsigned int tlEndTime) const
 {
     int sum=0;
     num=0;
 
     std::vector<int> dvals;
-    for(size_t i=0; i < start_.size()-1; i++)
+    for(size_t i=0; i < start_.size(); i++)
     {
         if(status_[i] == statusId)
         {
-            dvals.push_back(start_[i+1]-start_[i]); //secs
+            dvals.push_back( ((i != start_.size()-1)?start_[i+1]:tlEndTime) - start_[i]); //secs
             sum+=dvals.back();
         }
     }

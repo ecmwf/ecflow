@@ -414,7 +414,8 @@ bool TimelineInfoWidget::columnsAdjusted_=false;
 
 TimelineInfoWidget::TimelineInfoWidget(QWidget *parent) :
     ui_(new Ui::TimelineInfoWidget),
-    numOfRows_(0)
+    numOfRows_(0),
+    tlEndTime_(0)
 {
     ui_->setupUi(this);
 
@@ -463,6 +464,7 @@ void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, i
     host_=host;
     port_=port;
     data_=tlData->items()[itemIndex];
+    tlEndTime_=tlData->endTime();
 
     QColor col(39,49,101);
     QColor colText(30,30,30);
@@ -527,7 +529,7 @@ void TimelineInfoWidget::createSummary(QString &txt,VNState* state)
     float mean=0.;
     TimelineItemStats stats;
     unsigned char statusId=state->ucId();
-    data_.durationStats(statusId,num,mean,stats);
+    data_.durationStats(statusId,num,mean,stats,tlEndTime_);
 
     if(num <=0)
         return;

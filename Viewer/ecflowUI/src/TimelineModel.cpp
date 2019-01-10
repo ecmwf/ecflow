@@ -85,7 +85,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         else if(index.column() == SubmittedDurationColumn)
             return data_->items()[row].firstSubmittedDuration(startDate_,endDate_);
         else if(index.column() == ActiveDurationColumn)
-            return data_->items()[row].firstActiveDuration(startDate_,endDate_);
+            return data_->items()[row].firstActiveDuration(startDate_,endDate_,data_->endTime());
         else
             return row;
     }
@@ -126,7 +126,7 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         else if(index.column() == SubmittedDurationColumn)
             return data_->items()[row].firstSubmittedDuration(startDate_,endDate_);
         else if(index.column() == ActiveDurationColumn)
-            return data_->items()[row].firstActiveDuration(startDate_,endDate_);
+            return data_->items()[row].firstActiveDuration(startDate_,endDate_,data_->endTime());
 
         return QVariant();
     }
@@ -170,12 +170,12 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         QVariantList  vals;
         if(index.column() == SubmittedDurationColumn)
         {
-            data_->items()[row].meanSubmittedDuration(meanVal,num);
+            data_->items()[row].meanSubmittedDuration(meanVal,num,data_->endTime());
             vals << meanVal << num;
         }
         else if(index.column() == ActiveDurationColumn)
         {
-            data_->items()[row].meanActiveDuration(meanVal,num);
+            data_->items()[row].meanActiveDuration(meanVal,num,data_->endTime());
             vals << meanVal << num;
         }
         return vals;
