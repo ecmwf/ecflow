@@ -19,8 +19,6 @@ suite suiteName
   task t1
     alias alias0
     
-         edit SMSURLCMD '${BROWSER:=firefox} -remote 'openURL(%SMSURLBASE%/%SMSURL%)'' # comment
-   
          edit VAR  "value !£$%^&*() ~@: ?><,."   #comment
    
          edit VAR1 '123'

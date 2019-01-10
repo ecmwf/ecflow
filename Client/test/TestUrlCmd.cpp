@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( test_url_cmd )
  	defs->beginAll();
 
 	UrlCmd urlCmd(defs,"/suite1/family1/a");
-	std::string expected = "${BROWSER:=firefox} -remote 'openURL(http://www.ecmwf.int/publications/manuals/sms)'";
+	std::string expected = "${BROWSER:=firefox} -new-tab https://confluence.ecmwf.int/display/ECFLOW/ecflow+home";
 	std::string actual = urlCmd.getUrl();
 	BOOST_CHECK_MESSAGE( expected == actual,"Expected '" << expected << "' but found " << actual);
 }

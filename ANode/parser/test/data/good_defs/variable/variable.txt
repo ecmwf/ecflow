@@ -1,6 +1,6 @@
 suite suiteName
  
-   edit SMSURLCMD '${BROWSER:=firefox} -remote 'openURL(%SMSURLBASE%/%SMSURL%)''
+   edit SMSURLCMD '${BROWSER:=firefox} -new-tab %SMSURLBASE%/%SMSURL%'
    
    edit VAR  "value !£$%^&*() ~@: ?><,."
    
@@ -17,7 +17,7 @@ endsuite
 
 suite s1
  
-   edit SMSURLCMD '${BROWSER:=firefox} -remote 'openURL(%SMSURLBASE%/%SMSURL%)''; edit VAR  "value !£$%^&*() ~@: ?><,."
+   edit SMSURLCMD '${BROWSER:=firefox} -new-tab %SMSURLBASE%/%SMSURL%'; edit VAR  "value !£$%^&*() ~@: ?><,."
    
    edit VAR1 '123'; edit VAR2 value2
    
