@@ -843,34 +843,30 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
         const int numNew=v.size()+vg.size();
         Q_ASSERT(data_[dataIndex]->varNum() == numNew);
 
-        //Find out if any names changed
         bool nameChanged=data_[dataIndex]->checkUpdateNames(v,vg);
 
-        //Update the names/values
-        if(data_[dataIndex]->update(v,vg))
+        //We reload the whole block. Previously we only tried to emit
+        //dataChanged(), but it led to random crashes typically after a
+        //variable's values was changed. When a debug Qt installation was used
+        //the crash (assertion) happended in the Qt source in
+        //qabstractitemmodel.ccp::removePersistentIndexData saying
+        //"persistent model indexes corrupted". See ECFLOW-1148
+
+        //Clear the block's contents in the model
+        Q_EMIT clearBegin(dataIndex,numNew);
+        data_[dataIndex]->clear();
+        Q_EMIT clearEnd(dataIndex,numNew);
+
+        //Load the new data for the block in the model
+        Q_EMIT loadBegin(dataIndex,numNew);
+        data_[dataIndex]->reset(v,vg);
+        Q_EMIT loadEnd(dataIndex,numNew);
+
+        if(nameChanged && updateShadowed())
         {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-            UiLog().dbg() << " Variable name or value changed";
-#endif
-            //At this point the stored variables are already updated
-            if(nameChanged)
-            {
-                 if(updateShadowed())
-                 {
-                     Q_EMIT rerunFilter();
-                 }
-                 else
-                 {
-                     //Update the data item in the model
-                     Q_EMIT dataChanged(dataIndex);
-                 }
-            }
-            else
-            {
-                //Update the data item in the model
-                Q_EMIT dataChanged(dataIndex);
-            }
+            Q_EMIT rerunFilter();
         }
+
         retVal=true;
     }
 
