@@ -1,7 +1,7 @@
 suite suite1
   edit ECF_URL_CMD  "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%"
-  edit ECF_URL_BASE "http://www.ecmwf.int"
-  edit ECF_URL      "publications/manuals/sms"
+  edit ECF_URL_BASE "https://confluence.ecmwf.int"
+  edit ECF_URL      "display/ECFLOW/ecflow+home"
   family family1
    	task a
         event 1 myEvent
