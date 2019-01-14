@@ -1285,7 +1285,10 @@ void TreeNodeModel::slotBeginServerClear(VModelServer* server,int)
 
         //We removes the attributes as well!!!
         int num=rowCount(idx);
-		beginRemoveRows(idx,0,num-1);
+        if(num > 0)
+            beginRemoveRows(idx,0,num-1);
+        else
+            beginRemoveRows(idx,0,0);
 	}
 }
 //The server clear has finished. The tree is empty only containing the rootnode

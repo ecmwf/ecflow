@@ -520,7 +520,7 @@ void VariableAddDialog::notifyCleared(VariableModelDataHandler*)
 
     //However, when the suspended mode finished the data_ is cleared and reloaded before
     //this dialogue gets the notification about the suspended mode change. So
-    //we delay the decision on what to do unitl we receieve this notification in
+    //we delay the decision on what to do until we receieve this notification in
     //slotSuspendedChanged()
 
 #if 0
