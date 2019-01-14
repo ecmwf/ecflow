@@ -531,10 +531,11 @@ node_ptr findRelativeNode(	const vector<std::string>& theExtractedPath,node_ptr 
          return theNode;
       }
    }
-
-   node_ptr constNode = triggerNode->parent()->find_relative_node(theExtractedPath);
-   if (constNode.get()) {
-      return constNode;
+   else {
+      node_ptr constNode = triggerNode->parent()->find_relative_node(theExtractedPath);
+      if (constNode.get()) {
+         return constNode;
+      }
    }
 
    errorMsg = "Could not find node '";

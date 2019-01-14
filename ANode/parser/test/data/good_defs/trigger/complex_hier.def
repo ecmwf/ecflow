@@ -10,7 +10,7 @@ suite s1
               task a
                  event 1 theEventName
                  meter myMeter 0 100
-                 trigger f4 == complete or ./bb == complete or ../f3 == complete  # f4 immediate parent and bb is sibling ../f3 is parents parent
+                 trigger ../f4 == complete or ./bb == complete or ../f3 == complete  # f4 immediate parent and bb is sibling ../f3 is parents parent
                task bb
             endfamily   
          endfamily
