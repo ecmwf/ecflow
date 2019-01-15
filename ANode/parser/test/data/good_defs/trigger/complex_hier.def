@@ -1,9 +1,10 @@
 # test node referencing in triggers
-#      o/ <node> == complete    i.e   a == complete   can mean sibling or parent node  # confusing
-#      o/ ./<node> == complete  i.e  ./a == complete  can mean sibling or parent node 
-#      o/ ../<node> == complete i.e  ../a == complete means current nodes parents parent
+#      o/ <node> == complete    i.e   a == complete   sibling    
+#      o/ ./<node> == complete  i.e  ./a == complete  sibling
+#      o/ ../<node> == complete i.e  ../a == complete means trigger nodes parent
 suite s1
   family f1
+     trigger f2/f3/f4/a == complete
      family f2
         family f3
            family f4

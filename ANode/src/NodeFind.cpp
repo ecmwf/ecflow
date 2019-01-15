@@ -532,7 +532,15 @@ node_ptr findRelativeNode(	const vector<std::string>& theExtractedPath,node_ptr 
       }
    }
    else {
+#ifdef DEBUG_FIND_REFERENCED_NODE
+      cout << "triggerNode: " << triggerNode->debugNodePath() << "\n";
+      cout << "triggerNode->parent(): " << triggerNode->parent()->debugNodePath() << "\n";
+#endif
       node_ptr constNode = triggerNode->parent()->find_relative_node(theExtractedPath);
+      if (constNode.get()) {
+         return constNode;
+      }
+      constNode = triggerNode->find_relative_node(theExtractedPath);
       if (constNode.get()) {
          return constNode;
       }

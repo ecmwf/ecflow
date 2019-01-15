@@ -689,12 +689,12 @@ node_ptr NodeContainer::find_node_up_the_tree(const std::string& the_name) const
 
 node_ptr NodeContainer::find_relative_node( const std::vector< std::string >& pathToNode)
 {
-//#ifdef DEBUG_FIND_NODE
-//	cout << "NodeContainer::find_relative_node for '" << name()
-//		 << "' path = '" << pathToNode << "\n";
-//    cout << " tasks = ";  BOOST_FOREACH(task_ptr t, nodeVec_ ) { cout << " " << t->name(); } cout << "\n";
-//    cout << " family = "; BOOST_FOREACH(family_ptr f, familyVec_ ) { cout << " " << f->name();} cout << "\n";
-//#endif
+#ifdef DEBUG_FIND_NODE
+	 cout << "NodeContainer::find_relative_node for '" << name() << "\n";
+	 cout << " path :";
+	 BOOST_FOREACH(const std::string& s,pathToNode ) { cout << " " << s;} cout << "\n";
+    BOOST_FOREACH(node_ptr t, nodeVec_ ) { cout << " " << t->name();} cout << "\n";
+#endif
  	if (pathToNode.empty())  return node_ptr();
 	int pathSize = static_cast<int>(pathToNode.size());
 
