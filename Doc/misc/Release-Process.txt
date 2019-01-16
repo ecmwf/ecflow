@@ -36,24 +36,24 @@ Process
    <Inform Daniel>
    
 0/ Build release: Two approaches, both use meta-builder: 
-    1/ git flow release start  4.11.0 
-       git_tag=release/4.11.0
+    1/ git flow release start  4.12.0 
+       git_tag=release/4.12.0
        Use this approach when multiple people working on the release.
       *Push* branch onto stash, otherwise we can not pull, from the remote machines
        - In eclipse, you *may* have to push this branch first Team->Push Branch
         *otherwise* the option Team->Push Upstream  may well be greyed out.
        
-    2/ git flow release start  4.11.0
-       git flow release finish 4.11.0  
+    2/ git flow release start  4.12.0
+       git flow release finish 4.12.0  
        push
-       git_tag=4.11.0
+       git_tag=4.12.0
        When single person making release
  
-0/ Update ECFLOW_GIT_BRANCH to "4.11.0" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.11.0)
+0/ Update ECFLOW_GIT_BRANCH to "4.12.0" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.12.0)
    Then use the meta builder to build/install.
    Note: if used 
-     > git flow release start 4.11.0        # -> it will create a branch release/4.11.0
-     > Either set package_version="4.11.0"
+     > git flow release start 4.12.0        # -> it will create a branch release/4.12.0
+     > Either set package_version="4.12.0"
      > Either set package_version=""        # extract version from VERSION.cmake
 
 0/ For a PREPIFS release change file:
