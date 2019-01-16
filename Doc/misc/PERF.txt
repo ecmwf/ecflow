@@ -8,7 +8,7 @@ o/ Edit metabuilder.def and replace
 o/ Edit metabuilder.def and replace:
       edit REMOTE_HOST 'ecflow-metab' | edit WSHOST 'ecflow-metab'
    with 
-      edit REMOTE_HOST 'eurydice' | edit WSHOST 'eurydice'
+      edit REMOTE_HOST 'polonius' | edit WSHOST 'polonius'
 o/ cd metabuilder workspace edit <package.py> remove code 
      if user != deploy ....
      as this stop the generation of scripts when user is not deploy. (to allow localhost checking)
