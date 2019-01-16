@@ -19,6 +19,7 @@
 #include "UiLog.hpp"
 #include "UIDebug.hpp"
 
+#include <QtGlobal>
 #include <QDateTime>
 #include <QFileInfo>
 #include <QHBoxLayout>
@@ -275,8 +276,13 @@ void LogLoadWidget::load(QString serverName, QString host, QString port, QString
 
 void LogLoadWidget::periodChanged(qint64 start,qint64 end)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     QDateTime startDt=QDateTime::fromMSecsSinceEpoch(start,Qt::UTC);
     QDateTime endDt=QDateTime::fromMSecsSinceEpoch(end,Qt::UTC);
+#else
+    QDateTime startDt=QDateTime::fromMSecsSinceEpoch(start).toUTC();
+    QDateTime endDt=QDateTime::fromMSecsSinceEpoch(end).toUTC();
+#endif
     ui_->startTe->setDateTime(startDt);
     ui_->endTe->setDateTime(endDt);
 }
@@ -905,9 +911,6 @@ void ChartView::doZoom(qint64 start,qint64 end)
     //QRectF r(chart()->mapToPosition(QPointF(start,left.y())),
     //         chart()->mapToPosition(QPointF(end,left.y()+1)));
 
-    UiLog().dbg() << "start " << QDateTime::fromMSecsSinceEpoch(start,Qt::UTC);
-    UiLog().dbg() << "end " << QDateTime::fromMSecsSinceEpoch(end,Qt::UTC);
-
     if(r.isValid())
     {
         chart()->zoomIn(r);
@@ -974,7 +977,11 @@ void ChartView::setCallout(qreal val)
     {
         qreal m=axisY->max();
         callout_->setAnchor(QPointF(val,m));
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         QString txt=QDateTime::fromMSecsSinceEpoch(val,Qt::UTC).toString("hh:mm:ss dd/MM/yyyy");
+#else
+        QString txt=QDateTime::fromMSecsSinceEpoch(val).toUTC().toString("hh:mm:ss dd/MM/yyyy");
+#endif
         callout_->setText(txt);
     }
 }
@@ -1921,7 +1928,11 @@ void LogRequestView::scanPositionChanged(qreal pos)
     QColor dateCol(210,211,214);
 
     QString txt="<table width=\'100%\' cellpadding=\'4px\'>";
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     QString dateTxt=QDateTime::fromMSecsSinceEpoch(t,Qt::UTC).toString("hh:mm:ss dd/MM/yyyy");
+#else
+    QString dateTxt=QDateTime::fromMSecsSinceEpoch(t).toUTC().toString("hh:mm:ss dd/MM/yyyy");
+#endif
 
     txt="<tr>" +
         Viewer::formatTableTdText("Date (cursor): ",dateCol) +
@@ -1932,7 +1943,11 @@ void LogRequestView::scanPositionChanged(qreal pos)
     //                QDateTime::fromMSecsSinceEpoch(t,Qt::UTC).toString("hh:mm:ss dd/MM/yyyy"),
     //                dateCol);
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(seriesTime(idx),Qt::UTC).toString("hh:mm:ss dd/MM/yyyy"):" N/A";
+#else
+    dateTxt=(hasData)?QDateTime::fromMSecsSinceEpoch(seriesTime(idx)).toUTC().toString("hh:mm:ss dd/MM/yyyy"):" N/A";
+#endif
     txt+="<tr>" +
         Viewer::formatTableTdText("Date (nearest):",dateCol) +
         Viewer::formatTableTdBg(dateTxt,dateCol) +

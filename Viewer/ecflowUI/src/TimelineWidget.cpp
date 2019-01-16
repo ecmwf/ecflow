@@ -386,7 +386,13 @@ void TimelineWidget::slotPeriodBeingZoomedInView(QDateTime start,QDateTime end)
 
 void TimelineWidget::slotViewMode(int)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
     QString id=ui_->modeCombo->currentData().toString();
+#else
+    QString id;
+    if(ui_->modeCombo->currentIndex() >=0)
+        id=ui_->modeCombo->itemData(ui_->modeCombo->currentIndex()).toString();
+#endif
     if(id == "timeline")
     {
         view_->setViewMode(TimelineView::TimelineMode);
@@ -818,7 +824,14 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
     int cbIdx=ui_->sortCombo->currentIndex();
     if(cbIdx != -1)
     {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         vs->put("sortMode", ui_->sortCombo->currentData().toString().toStdString());
+#else
+        if(ui_->sortCombo->currentIndex() >=0)
+        {
+            vs->put("sortMode", ui_->sortCombo->itemData(ui_->sortCombo->currentIndex()).toString().toStdString());
+        }
+#endif
     }
 
     vs->put("sortOrder",ui_->sortUpTb->isChecked()?"asc":"desc");

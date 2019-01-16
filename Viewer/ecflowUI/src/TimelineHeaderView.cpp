@@ -564,11 +564,19 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logi
             QString s;
             if(majorTick < 60)
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
                 s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm:ss");
+#else
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000).toUTC().toString("H:mm:ss");
+#endif
             }
             else
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
                 s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm");
+#else
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000).toUTC().toString("H:mm");
+#endif
             }
 
             int textW=fm_.width(s);
@@ -697,11 +705,19 @@ void TimelineHeader::renderDay(const QRect& rect,QPainter* painter,int logicalIn
             QString s;
             if(majorTick < 60)
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
                 s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm:ss");
+#else
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000).toUTC().toString("H:mm:ss");
+#endif
             }
             else
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
                 s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm");
+#else
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000).toUTC().toString("H:mm");
+#endif
             }
 
             int textW=fm_.width(s);
