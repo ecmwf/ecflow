@@ -5,7 +5,7 @@
 * dependencies
 
    - PYTHON_API:
-     python 2.7,  Python 3.0 not fully tested. 
+     python 2.7,  Python 3.0  
      If you intend to use ecFlow Python api, You will need to install python.
      The python installation should include the development packages
      
@@ -20,7 +20,7 @@
 * ecfFlow consists of two tar files i.e. :
    
    - boost_1_53_0.tar.gz
-   - ecFlow-4.7.0-Source.tar.gz
+   - ecFlow-4.12.0-Source.tar.gz
    
 * Create a directory for the build::
 
@@ -31,21 +31,19 @@
 * Un-zip then un-tar the two file files::
 
   > tar -zxf boost_1_53_0.tar.gz
-  > tar -zxf ecFlow-4.7.0-Source.tar.gz
+  > tar -zxf ecFlow-4.12.0-Source.tar.gz
    
 * You should have two directories created::
 
    - boost_1_53_0
-   - ecFlow-4.7.0-Source
+   - ecFlow-4.12.0-Source
     
 * Create two environment variables. These are used by some of scripts::
 
-  > export WK=/tmp/ecflow_build/ecFlow-4.7.0-Source
+  > export WK=/tmp/ecflow_build/ecFlow-4.12.0-Source
   > export BOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
    
-* There are two ways of building ecflow, boost-build/bjam or cmake
-  >> Preference should be given to using cmake <<
-  The new GUI ecflow_ui can only be built with cmake/ecbuild.
+* ecflow uses bjam to build BOOST libraries and cmake to build ecflow
   
 * To maintain compatibility between different releases of ecflow, you
   should use the same version of boost. If you do not care about this,
@@ -98,7 +96,7 @@ ecflowview
 cmake
 =====================================================================
 * By default will install /usr/local, hence may require root access rights
-  > cd /tmp/ecflow_build/ecFlow-4.7.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake ..  
   > make -j2
@@ -108,7 +106,7 @@ cmake
 
 * Optionally you can specify install prefix directory:
 
-  > cd /tmp/ecflow_build/ecFlow-4.7.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow 
   > make -j2
@@ -117,7 +115,7 @@ cmake
 
 * Optionally if you do *NOT* want to build the GUI(ecflowview) or UI(ecflow_ui) or Python api:
 
-  > cd /tmp/ecflow_build/ecFlow-4.7.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DENABLE_GUI=OFF           \
@@ -129,7 +127,7 @@ cmake
 
 * Optionally if you did not export BOOST_ROOT you can specify on the command line:
 
-  > cd /tmp/ecflow_build/ecFlow-4.7.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Debug \
@@ -140,7 +138,7 @@ cmake
 
 * On some platforms(AIX) you may need to specify the c++ compiler
 
-  > cd /tmp/ecflow_build/ecFlow-4.7.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_CXX_COMPILER=xlC_r"
@@ -148,51 +146,6 @@ cmake
   > make install
 
 
-boost/bjam:  This can not build the new UI(ecflow_ui)
-=====================================================================
-* For installation the following environment variables are required.
-  
-  ECFLOW_INSTALL_DIR         # Directory Location for client ,server and gui program's
-  ECFLOW_PYTHON_INSTALL_DIR  # Directory Location for ecflow python package
-    
-  The python installation can be customised, by changing Pyext/jamfile.jam 
-  and site-config.jam
-  
-* We now need to build ecFlow. Currently ecflowview is only built if 
-  environment variable of name ARCH is set to linux::
-  
-  > cd $WK
-  > bjam variant=release install-all
-  
-  On some systems like fedora/redhat you may run into compiler errors
-  which complain about the template depth being exceeded.
-  In this case compile using:
-  
-  > cd $WK
-  > bjam c++-template-depth=512 variant=release install-all
-  
-  using boost 1.53 with gcc 4.8, will have excessive warnings. To prune these warnings use:
-  > bjam c++-template-depth=512 cxxflags=-Wno-unused-local-typedefs variant=release
-  
-  If you have a multi-core machine, you can speed up the build using:
-  the -j<n> option. Where 'n' is an integer, of the number of cores.
-  
-  bjam variant=release -j4
-  
-  
-* Once ecFlow is built it can be installed. 
-  
-      bjam variant=release install-all
-      
-  This will create directories::
-  
-     <ECFLOW_INSTALL_DIR>/bin
-     <ECFLOW_INSTALL_DIR>/lib
-     <ECFLOW_INSTALL_DIR>/doc
-     <ECFLOW_INSTALL_DIR>/share
-     <ECFLOW_PYTHON_INSTALL_DIR> 
-      
-  Depending on your umask setting you may need to call chmod 755 on the executables  
      
 * To use the python_api, you need to add/change 
   PYTHONPATH and LD_LIBRARY_PATH
