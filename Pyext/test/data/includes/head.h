@@ -5,7 +5,7 @@ set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
-## Copyright 2009-2017 ECMWF.
+## Copyright 2009-2019 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 ## In applying this licence, ECMWF does not waive the privileges and immunities

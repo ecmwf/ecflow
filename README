@@ -5,7 +5,7 @@
 * dependencies
 
    - PYTHON_API:
-     python 2.7,  Python 3.0 not fully tested. 
+     python 2.7,  Python 3.0  
      If you intend to use ecFlow Python api, You will need to install python.
      The python installation should include the development packages
      
@@ -15,7 +15,7 @@
 * ecfFlow consists of two tar files i.e. :
    
    - boost_1_53_0.tar.gz
-   - ecFlow-4.10.0-Source.tar.gz
+   - ecFlow-4.12.0-Source.tar.gz
    
 * Create a directory for the build::
 
@@ -26,18 +26,20 @@
 * Un-zip then un-tar the two file files::
 
   > tar -zxf boost_1_53_0.tar.gz
-  > tar -zxf ecFlow-4.10.0-Source.tar.gz
+  > tar -zxf ecFlow-4.12.0-Source.tar.gz
    
 * You should have two directories created::
 
    - boost_1_53_0
-   - ecFlow-4.10.0-Source
+   - ecFlow-4.12.0-Source
     
 * Create two environment variables. These are used by some of scripts::
 
-  > export WK=/tmp/ecflow_build/ecFlow-4.10.0-Source
+  > export WK=/tmp/ecflow_build/ecFlow-4.12.0-Source
   > export BOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
    
+* ecflow uses bjam to build BOOST libraries and cmake to build ecflow
+  
 * To maintain compatibility between different releases of ecflow, you
   should use the same version of boost. If you do not care about this,
   then any boost version (> 1.53) should suffice. To use an existing
@@ -67,7 +69,7 @@ Use the following step to build boost from scratch:
 cmake
 =====================================================================
 * By default will install /usr/local, hence may require root access rights
-  > cd /tmp/ecflow_build/ecFlow-4.10.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake ..  
   > make -j2
@@ -77,16 +79,16 @@ cmake
 
 * Optionally you can specify install prefix directory:
 
-  > cd /tmp/ecflow_build/ecFlow-4.10.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow 
   > make -j2
   > make install
 
 
-* Optionally if you do *NOT* want to build the UI(ecflow_ui) or Python api:
+* Optionally if you do *NOT* want to build the GUI(ecflowview) or UI(ecflow_ui) or Python api:
 
-  > cd /tmp/ecflow_build/ecFlow-4.10.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DENABLE_UI=OFF            \
@@ -97,7 +99,7 @@ cmake
 
 * Optionally if you did not export BOOST_ROOT you can specify on the command line:
 
-  > cd /tmp/ecflow_build/ecFlow-4.10.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Debug \
@@ -108,7 +110,7 @@ cmake
 
 * On some platforms(AIX) you may need to specify the c++ compiler
 
-  > cd /tmp/ecflow_build/ecFlow-4.10.0-Source
+  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_CXX_COMPILER=xlC_r"
@@ -116,6 +118,7 @@ cmake
   > make install
 
 
+     
 * To use the python_api, you need to add/change 
   PYTHONPATH and LD_LIBRARY_PATH
   

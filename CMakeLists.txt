@@ -309,6 +309,7 @@ ecbuild_dont_pack( DIRS
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
                     cereal-1.2.2
+                    Debug
                     Doc
 )
 
@@ -317,6 +318,9 @@ ecbuild_dont_pack( FILES
                    .project
                    .cproject
                    .pydevproject
+                   Pyext/.pydevproject
+                   Pyext/samples/test.py
+                   Pyext/samples/confluence_add_attachment.py
                    build_scripts/.pydevproject
 )
 
