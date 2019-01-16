@@ -347,7 +347,7 @@ ecbuild_dont_pack( FILES
                    .project
                    .cproject
                    .pydevproject
-                   Pyext/test/.pydevproject
+                   Pyext/.pydevproject
                    Pyext/samples/test.py
                    Pyext/samples/confluence_add_attachment.py
                    build_scripts/.pydevproject
