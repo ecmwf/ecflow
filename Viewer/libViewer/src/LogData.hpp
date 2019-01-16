@@ -47,7 +47,7 @@ public:
     QDateTime date(int idx) const {
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         return QDateTime::fromMSecsSinceEpoch(refTimeInMs_ +
-                           static_cast<qint64>(data_[idx].time_)*1000,Qt::UTC); }
+                           static_cast<qint64>(data_[idx].time_)*1000,Qt::UTC);
 #else
         return QDateTime::fromMSecsSinceEpoch(refTimeInMs_ +
                            static_cast<qint64>(data_[idx].time_)*1000).toUTC();
