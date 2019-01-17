@@ -1,5 +1,5 @@
  ======================================================================================
-Subject: New release of ecFlow now available  
+Subject: New release of ecFlow(4.12.0) now available  
 
 A new version of the ecFlow(4.12.0) has been released:
 
