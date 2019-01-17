@@ -11,6 +11,7 @@
 #define LOGDATA_HPP
 
 #include <QDateTime>
+#include <QtGlobal>
 
 #include <string>
 #include <vector>
@@ -42,9 +43,16 @@ public:
     bool isEmpty() const {return size() == 0;}
     void clear() { refTimeInMs_=0; fileName_.clear(); data_.clear();}
 
+
     QDateTime date(int idx) const {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         return QDateTime::fromMSecsSinceEpoch(refTimeInMs_ +
-                           static_cast<qint64>(data_[idx].time_)*1000,Qt::UTC); }
+                           static_cast<qint64>(data_[idx].time_)*1000,Qt::UTC);
+#else
+        return QDateTime::fromMSecsSinceEpoch(refTimeInMs_ +
+                           static_cast<qint64>(data_[idx].time_)*1000).toUTC();
+#endif
+    }
 
     QString  entry(int idx) const {return QString::fromStdString(data_[idx].entry_);}
     LogDataItem::Type type(int idx) const {return data_[idx].type_;}

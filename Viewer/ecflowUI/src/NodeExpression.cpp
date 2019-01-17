@@ -10,6 +10,7 @@
 
 #include <QDateTime>
 #include <QRegExp>
+#include <QtGlobal>
 
 #include <boost/algorithm/string.hpp>
 
@@ -1029,7 +1030,11 @@ IsoDateCondition::IsoDateCondition(QString dateStr)
 std::string IsoDateCondition::print()
 {
     if(secsSinceEpoch_ > 0)
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
         return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_*1000,Qt::UTC).toString(Qt::ISODate).toStdString();
+#else
+        return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_*1000).toUTC().toString(Qt::ISODate).toStdString();
+#endif
     return std::string();
 }
 

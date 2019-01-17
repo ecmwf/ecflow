@@ -146,6 +146,7 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
         zoomEndPos_=event->pos();
 
         QPoint rPos=realPos(event->pos());
+        int deltaX=rPos.x()-event->pos().x();
 
         if(rPos.x() >= secStart && rPos.x() <= secEnd)
         {
@@ -161,7 +162,7 @@ void TimelineHeader::mouseMoveEvent(QMouseEvent *event)
         else //if(event->pos().x() > secEnd)
         {
             zoomEndPos_=event->pos();
-            zoomEndPos_.setX(secEnd);
+            zoomEndPos_.setX(secEnd-deltaX-1);
         }
 
         //we need to specify the full range here because otherwise the
@@ -563,11 +564,19 @@ void TimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int logi
             QString s;
             if(majorTick < 60)
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
                 s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm:ss");
+#else
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000).toUTC().toString("H:mm:ss");
+#endif
             }
             else
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
                 s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm");
+#else
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000).toUTC().toString("H:mm");
+#endif
             }
 
             int textW=fm_.width(s);
@@ -696,11 +705,19 @@ void TimelineHeader::renderDay(const QRect& rect,QPainter* painter,int logicalIn
             QString s;
             if(majorTick < 60)
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
                 s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm:ss");
+#else
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000).toUTC().toString("H:mm:ss");
+#endif
             }
             else
             {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
                 s=QDateTime::fromMSecsSinceEpoch(actSec*1000,Qt::UTC).toString("H:mm");
+#else
+                s=QDateTime::fromMSecsSinceEpoch(actSec*1000).toUTC().toString("H:mm");
+#endif
             }
 
             int textW=fm_.width(s);
@@ -742,7 +759,7 @@ int TimelineHeader::secToPos(qint64 t,QRect rect) const
     return rect.x() + static_cast<int>(static_cast<float>(t)/static_cast<float>(period)*static_cast<float>(rect.width()));
 }
 
-//pos is based on the visible portion ot the widget - scrollbars are ignored
+//pos is based on the visible portion of the widget - scrollbars are ignored
 QDateTime TimelineHeader::posToDate(QPoint pos) const
 {
     int logicalIndex=logicalIndexAt(pos);

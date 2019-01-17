@@ -2072,8 +2072,20 @@ class Client(object):
     def suites(self):
         return self.clnt.suites()
 
+    def begin_suite(self, name):
+        return self.clnt.begin_suite(name)
+
+    def resume(self, path):
+        return self.clnt.resume(path)    
+
+    def suspend(self, path):
+        return self.clnt.suspend(path)    
+
     def ping(self):
         self.clnt.ping()
+
+    def version(self):
+        self.clnt.version()        
 
     def __str__(self):
         return "ecflow client %s@%s v%s" % (
