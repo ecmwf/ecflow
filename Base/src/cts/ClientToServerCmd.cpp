@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #67 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -44,6 +44,9 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
 {
    // Allow creating of new time stamp, when *not* in a command. i.e during node tree traversal in server
    CmdContext cmdContext;
+
+   // Automatically flush log file at the end of the command
+   LogFlusher logFlusher;
 
    // Create the log time stamp once for a given request
    if (Log::instance()) Log::instance()->cache_time_stamp();

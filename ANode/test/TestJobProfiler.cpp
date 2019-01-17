@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -45,7 +45,6 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
    // Create a new log, file, we will look in here to see if job profiling is working
    // Hence this test relies on output to be flushed
    Log::create(log_path);
-   Log::instance()->enable_auto_flush();
 
 
    // SET ECF_HOME, re-use exist test of directory and scripts
@@ -73,6 +72,7 @@ BOOST_AUTO_TEST_CASE( test_job_profiler )
    BOOST_CHECK_MESSAGE(ok,"generate failed: " << jobParam.getErrorMsg());
 
    // Check the log file, has the profiling
+   Log::instance()->flush_only();
    std::string log_file_contents;
    BOOST_CHECK_MESSAGE(File::open(log_path,log_file_contents), "Could not open log file at " << log_path<< " (" << strerror(errno) << ")");
    BOOST_CHECK_MESSAGE(!log_file_contents.empty(),"log file is is empty ?");

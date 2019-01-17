@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -59,7 +59,6 @@ public:
     void readSettings(QSettings&);
     void writeSettings(QSettings&);
 
-
 protected Q_SLOTS:
     void slotItemSelected(const QModelIndex&,const QModelIndex&);
     void slotItemAddBegin();
@@ -82,8 +81,10 @@ protected:
     void loadItem(CommandOutput_ptr);
     void updateInfoLabel(CommandOutput_ptr);
     void removeSpacer();
+    QString formatErrorText(QString txt);
 
     CommandOutputModel* model_;
+    QColor errCol_;
 };
 
 #endif // COMMANDOUTPUTWIDGET_HPP

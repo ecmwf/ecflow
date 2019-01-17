@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -276,12 +276,12 @@ public:
 	          const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
 	          const std::string& attrType,
 	          const std::string& name = "",
-	          const std::string& value = "") const { return invoke(CtsApi::alter(paths,alterType,attrType,name,value)); }
+	          const std::string& value = "") const;
    int alter(const std::string& path,
              const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
              const std::string& attrType,
              const std::string& name = "",
-             const std::string& value = "") const { return invoke(CtsApi::alter(path,alterType,attrType,name,value)); }
+             const std::string& value = "") const;
    int alter_sort(const std::vector<std::string>& paths,
               const std::string& sortable_attribute_name,
               bool recursive = true) const { return invoke(CtsApi::alter_sort(paths,sortable_attribute_name,recursive)); }

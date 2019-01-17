@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -17,16 +17,12 @@ import ecflow
 import sys
 import os
 import copy
- 
+import ecflow_test_util as Test
+
 if __name__ == "__main__":
     
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
-    print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
-    print("sys.path:   " + str(sys.path))
-    print("Python version:   " + str(sys.version_info[0]) + "." + str(sys.version_info[1]))
-    print("####################################################################")
-    
+    Test.print_test_start(os.path.basename(__file__))
+
     defs = ecflow.Defs()
     defs.add_suite("a").add_family("f1").add_task("t1").add_variable("a","b").add_event(1).add_meter("meter", 0, 100).add_label("label", "v").add_time("+00:30 20:00 01:00")
     print(defs)
@@ -41,7 +37,7 @@ if __name__ == "__main__":
     #===========================================================================
     defs = ecflow.Defs()
     defs.add_variable("FRED", "/tmp/")
-    defs.add_variable("ECF_URL_CMD", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
+    defs.add_variable("ECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")
     defs.add_variable("ECF_URL_BASE", "http://www.ecmwf.int")
     defs.add_variable("ECF_URL", "publications/manuals/sms")
     assert len(list(defs.user_variables)) == 4, "Expected *user* 4 variable"    
@@ -57,7 +53,7 @@ if __name__ == "__main__":
     #===========================================================================
     suite = ecflow.Suite("s1")
     suite.add_variable(ecflow.Variable("ECF_HOME", "/tmp/"))
-    suite.add_variable("ECF_URL_CMD", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
+    suite.add_variable("ECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")
     suite.add_variable("ECF_URL_BASE", "http://www.ecmwf.int")
     suite.add_variable("ECF_URL", "publications/manuals/sms")
     assert len(list(suite.variables)) == 4, "Expected 4 variable"   

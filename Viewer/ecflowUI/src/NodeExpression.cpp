@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -10,6 +10,7 @@
 
 #include <QDateTime>
 #include <QRegExp>
+#include <QtGlobal>
 
 #include <boost/algorithm/string.hpp>
 
@@ -1029,7 +1030,11 @@ IsoDateCondition::IsoDateCondition(QString dateStr) : secsSinceEpoch_(-1)
 std::string IsoDateCondition::print()
 {
     if(secsSinceEpoch_ > 0)
-        return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_*1000).toString(Qt::ISODate).toStdString();
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+        return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_*1000,Qt::UTC).toString(Qt::ISODate).toStdString();
+#else
+        return QDateTime::fromMSecsSinceEpoch(secsSinceEpoch_*1000).toUTC().toString(Qt::ISODate).toStdString();
+#endif
     return std::string();
 }
 

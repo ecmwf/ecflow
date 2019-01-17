@@ -7,13 +7,15 @@ set -u # fail when using an undefined variable
 # ensure correct permission for installation
 umask 0022
 
+# docker build?
+[[ -d opt/boost_1_53_0/ ]] && export BOOST_ROOT=/opt/boost_1_53_0/ ARCH=linux PYTHONPATH=/usr/local:${PYTHONPATH:=} LD_LIBRARY_PATH=/usr/local/lib:${LD_LIBRARY_PATH:=}
+
 # ====================================================================
 show_error_and_exit() {
    echo "cmake.sh expects at least one argument"
    echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
    echo ""
    echo "   make           - run make after cmake"
-   echo "   python3        - build with python3"
    echo "   ecbuild        - Use git cloned ecbuild over the module loaded ecbuild(default)"
    echo "   install        - install to /usr/local/apps/eflow.  defaults is /var/tmp/$USER/install/cmake/ecflow"
    echo "   test           - run all the tests"
@@ -53,7 +55,6 @@ verbose_arg=
 ctest_arg=
 clean_arg=
 no_gui_arg=
-python3_arg=
 ssl_arg=
 secure_user_arg=
 log_arg=
@@ -94,7 +95,6 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = copy_tarball ]] ; then copy_tarball_arg=$1 ;
    elif [[ "$1" = test ]] ;  then test_arg=$1 ;
    elif [[ "$1" = test_safe ]] ; then test_safe_arg=$1 ;
-   elif [[ "$1" = python3 ]] ;   then python3_arg=$1 ;
    elif [[ "$1" = ctest ]] ; then  
       ctest_arg=$1 ; 
       shift
@@ -121,7 +121,6 @@ echo "clang_tidy_arg=$clang_tidy_arg"
 echo "tsan_arg=$tsan_arg"
 echo "mode_arg=$mode_arg"
 echo "verbose_arg=$verbose_arg"
-echo "python3_arg=$python3_arg"
 echo "no_gui_arg=$no_gui_arg"
 echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
@@ -139,11 +138,14 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
-module load cmake/3.10.2      # need cmake 3.12.0 to build python3. Allow boost python libs to be found
-module load ecbuild/2.9.0
-#module load boost/1.53.0     # uncomment to use local BOOST_ROOT
-
+module load ecbuild/new
+module load boost/1.53.0     # uncomment to use local BOOST_ROOT
+module load python3/3.6.5-01
+module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
+# To build python3 when cmake < 3.12.0 use
+# -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
 cmake_extra_options=""
+cmake_extra_options="-DBOOST_ROOT=$BOOST_ROOT "
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     # ecflow fails to write boost ser' files with clang 6.0.1, but in debug all tests pass
     # Had to apply fix: http://clang-developers.42468.n3.nabble.com/boost-serialization-crash-with-clang-5-0-0-td4058283.html
@@ -152,7 +154,6 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     module unload clang
     module load clang/6.0.1
     cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/clang-6.0.1/boost_1_53_0"
-
     CXX_FLAGS=""
     CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined"
 
@@ -194,21 +195,12 @@ if [[ "$ARCH" = cray ]] ; then
     fi
     module unload atp                     # must use for NON MPI code (ATP abnormal termination processing only works with cray MPI for ESM modes)
     module load craype-target-local_host  # must use for NON MPI code
-    module load boost/1.53.0
     export CRAY_ADD_RPATH=yes
     export ECFLOW_CRAY_BATCH=1
 fi
 
-if [[ "$python3_arg" = python3 ]] ; then
-    module unload python
-    module load python3/3.6.5-01
-    
-    module unload cmake  # need cmake 3.12.0 to build python3. Allow boost python libs to be found
-    module load cmake/3.12.0      
-    
-    cmake_extra_options="$cmake_extra_options -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3.6"
-fi
  
+########################################################################################
 # ====================================================================================
 # default to Release  
 cmake_build_type=
@@ -218,11 +210,6 @@ else
     cmake_build_type=Release
 fi
 
-# ====================================================================================
-# Use for local install
-release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
-major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
-minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 # ====================================================================================
 # clean up source before packaging, do this after deleting ecbuild
@@ -230,6 +217,12 @@ minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed
 if [[ $package_source_arg = package_source ]] ; then
 	source build_scripts/clean.sh
 fi
+
+# ====================================================================================
+# Use for local install
+release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 # =======================================================================================
 # Change directory
@@ -374,7 +367,8 @@ if [[ "$make_arg" != "" ]] ; then
 	# $make_arg VERBOSE=1
 	
     # generate the server file locally, and install it. Otherwise list of server will not be complete set
-	if [[ "$make_arg" == "make install" ]] ; then
+    echo $make_arg | grep -q "install"
+	if [[ $? -eq 0 ]] ; then
 		if [[ -f /home/ma/emos/bin/ecflow_site_server_install.sh ]] ; then
 
    			/home/ma/emos/bin/ecflow_site_server_install.sh -g

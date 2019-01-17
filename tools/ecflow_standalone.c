@@ -58,10 +58,6 @@ ssh localhost $std -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # OK
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
-#ifdef SYG
-#define <unistd.h>
-#endif
-
 #include <sys/types.h>
 #include <unistd.h>
 #include <string.h>

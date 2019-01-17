@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,26 +13,23 @@
 
 # code for testing addition and deletion 
 #
-import ecflow
 import sys
 import os
 import copy
 import unittest # for assertItemsEqual
- 
+import ecflow
+import ecflow_test_util as Test
+
 if __name__ == "__main__":
     
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version()  + " debug build(" + str(ecflow.debug_build()) +")")
-    print("PYTHONPATH: " + str(os.environ['PYTHONPATH'].split(os.pathsep)))
-    print("sys.path:   " + str(sys.path))
-    print("####################################################################")
+    Test.print_test_start(os.path.basename(__file__))
  
     #===========================================================================
     # Defs: add, delete and sort *USER* variables, use set(a).intersection(b) to compare lists
     #===========================================================================
     defs = ecflow.Defs()
     defs.add_variable("ZFRED", "/tmp/")
-    defs.add_variable("YECF_URL_CMD", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
+    defs.add_variable("YECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")
     defs.add_variable("XECF_URL_BASE", "http://www.ecmwf.int")
     defs.add_variable("AECF_URL", "publications/manuals/sms")
     assert len(list(defs.user_variables)) == 4, "Expected *user* 4 variable"    
@@ -90,7 +87,7 @@ if __name__ == "__main__":
     #===========================================================================
     suite = ecflow.Suite("s1")
     suite.add_variable(ecflow.Variable("ECF_HOME", "/tmp/"))
-    suite.add_variable("ZZZZZZ", "${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'")
+    suite.add_variable("ZZZZZZ", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")
     suite.add_variable("YYYYY", "http://www.ecmwf.int")
     suite.add_variable("aaaa", "publications/manuals/sms")
     assert len(list(suite.variables)) == 4, "Expected 4 variable"    

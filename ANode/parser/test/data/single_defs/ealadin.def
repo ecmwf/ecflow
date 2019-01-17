@@ -54,7 +54,7 @@ suite ealadin
   edit ECF_OUT '/vol/emos_nc/output'
   edit FSFAMILY 'undef'
   edit USE_YMD 'true'
-  edit ECF_URLCMD '${BROWSER:=firefox} -remote 'openURL(%ECF_URLBASE%/%ECF_URL%)''
+  edit ECF_URLCMD '${BROWSER:=firefox} -new-tab %ECF_URLBASE%/%ECF_URL%'
   edit NB_TASKS_LBC '32'
   edit DELTA_DAY '0'
   edit STHOST '/s1a'

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -24,8 +24,8 @@ public:
 	explicit FileInfoLabel(QWidget* parent=0);
 
 	void update(VReply*,QString str=QString());
-    QString formatDate(QDateTime) const;
-    QString formatFileSize(QString,qint64 size) const;
+    static QString formatDate(QDateTime);
+    static QString formatFileSize(QString,qint64 size);
 };
 
 class DirInfoLabel : public FileInfoLabel

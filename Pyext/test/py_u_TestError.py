@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -16,7 +16,8 @@
 import os
 from ecflow import Day, Date, Meter, Event, Clock, Variable, Label, Limit, InLimit, \
                    RepeatDate, RepeatEnumerated, RepeatInteger, RepeatString, \
-                   Task, Family, Suite, Defs, Client, debug_build
+                   Task, Family, Suite, Defs, Client, debug_build, Trigger
+import ecflow_test_util as Test
 
 def check_day(day):
     try:    
@@ -154,9 +155,7 @@ def check_defs(path_to_defs):
         return False
           
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start(os.path.basename(__file__))
  
     # Names with leading '.' should not be allowed. Will interfere with triggers
     # Empty names not allowed
@@ -392,6 +391,13 @@ if __name__ == "__main__":
         pass
     assert test_passed,"Adding a part complete trigger at suite level should fail"    
     print("check adding part complete trigger at the suite level: RuntimeError: ")
+
+    # =================================================================================
+    print("check adding trigger referencing parent should fail ECFLOW-1436")
+    defs = Defs()
+    defs += Suite("obs") + Family("anon", Task("t1", Trigger("anon == complete")))
+    assert len(defs.check()) > 0,"Adding a trigger referencing a parent without .. should fail"    
+
 
     # =================================================================================
     print("check duplicate family not allowed")

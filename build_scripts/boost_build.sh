@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-## Copyright 2009-2017 ECMWF.
+## Copyright 2009-2019 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -65,6 +65,7 @@ test_uname ()
 layout=tagged
 
 CXXFLAGS=-d2     # dummy argument, since CXXFLAGS is quoted
+CXXFLAGS=cxxflags=-fPIC
 if test_uname Linux ; then
   X64=$(uname -m)
   if [ "$X64" = x86_64 ]
@@ -156,8 +157,6 @@ echo "using compiler $tool with build $1 variants "
 #./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-thread variant=debug  -j2
 #./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-regex variant=debug  -j2   # ecflowUi
  
-
-
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
 # ========================================================================

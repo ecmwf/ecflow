@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -41,7 +41,8 @@ public:
 			     AttributeLineRole = Qt::UserRole+11, AbortedReasonRole = Qt::UserRole + 12,
 			     NodeTypeRole = Qt::UserRole + 13, NodeTypeForegroundRole = Qt::UserRole + 14,
                  ServerPointerRole = Qt::UserRole + 15, SortRole = Qt::UserRole + 16,
-                 NodePointerRole = Qt::UserRole + 17, VariableRole = Qt::UserRole + 18};
+                 NodePointerRole = Qt::UserRole + 17, VariableRole = Qt::UserRole + 18,
+                 FailedSubmissionRole = Qt::UserRole + 19};
 
 	void dataIsAboutToChange();
 	virtual VInfo_ptr nodeInfo(const QModelIndex& index)=0;

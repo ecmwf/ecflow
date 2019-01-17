@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -344,11 +344,13 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role,VTreeNode* t
         }
         return QVariant();
     }
-
-    //The number of nodes a suite has
     else if(role == AbortedReasonRole && vnode->isAborted())
     {
         return QString::fromStdString(vnode->abortedReason());
+    }
+    else if(role == FailedSubmissionRole)
+    {
+        return vnode->isFlagSet(ecf::Flag::JOBCMD_FAILED);
     }
 
 	return QVariant();
@@ -363,7 +365,9 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role,VTreeNode* t
 QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role,VTreeNode* tnode) const
 {
     if(role == Qt::ToolTipRole && !attributeToolTip_)
+    {
         return QVariant();
+    }
 
 	if(role == Qt::BackgroundRole)
 		return QColor(220,220,220);
@@ -1281,7 +1285,10 @@ void TreeNodeModel::slotBeginServerClear(VModelServer* server,int)
 
         //We removes the attributes as well!!!
         int num=rowCount(idx);
-		beginRemoveRows(idx,0,num-1);
+        if(num > 0)
+            beginRemoveRows(idx,0,num-1);
+        else
+            beginRemoveRows(idx,0,0);
 	}
 }
 //The server clear has finished. The tree is empty only containing the rootnode

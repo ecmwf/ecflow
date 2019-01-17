@@ -18,10 +18,17 @@
 #    sudo apt-get install libpython-dev
 #
 
-file( GLOB srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "src/*.cpp" "src/*.hpp" )
+# =============================================================================
+# Configure __init__.py to add __version__
+# =============================================================================
+set(INIT_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py.in")
+set(INIT_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
+configure_file(${INIT_PY_IN} ${INIT_PY_OUT} )
 
-# =====================================================================
+
+# ==============================================================================
 # local includes
+# ==============================================================================
 include_directories(  
                      ../ACore/src 
                      ../ANattr/src
@@ -33,201 +40,98 @@ include_directories(
                      ../CSim/src
                     )
 
-# =====================================================================     
-# INCLUDES here is for external includes   
-#   NOINSTALL this stops double install, the one in i.e lib/ecflow.so
-#             The other install is in python2.7/site-packages/ecflow.so
-# if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
-ecbuild_add_library( TARGET    ecflow
-                     NOINSTALL
-                     TYPE      MODULE
-                     SOURCES   ${srcs}
-					 CONDITION PYTHONLIBS_FOUND
-                     LIBS      libclient libsimu base node nodeattr core
-                               ${PYTHON_LIBRARIES} ${OPENSSL_LIBRARIES}
-                     INCLUDES 
-                               ${Boost_INCLUDE_DIRS}
-                               ${PYTHON_INCLUDE_DIRS}
-                    )
-
-
-# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs 
-if ( PYTHON_VERSION_MAJOR EQUAL 3)             
-   target_link_libraries(ecflow ${Boost_PYTHON3_LIBRARY_RELEASE} )
+message( STATUS " CMAKE_VERSION                      : ${CMAKE_VERSION}, need cmake version >= 3.12.0 to build ecflow python3 extension" )
+if(${CMAKE_VERSION} VERSION_LESS "3.12.0") 
+	# We only support python2 extension for cmake less 3.12.0
+	# cmake 3.12.0 or greater allows multiple boost python libs & hence multiple extensions to be built
+	ecbuild_find_python( VERSION 2.6 REQUIRED )  
+	message( STATUS "  PYTHON_FOUND                      : ${PYTHON_FOUND}" )
+    message( STATUS "  PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )
+    message( STATUS "  PYTHONLIBS_FOUND                  : ${PYTHONLIBS_FOUND}" )
+    message( STATUS "  PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
+    message( STATUS "  PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )
+    message( STATUS "  PYTHON_VERSION_MINOR              : ${PYTHON_VERSION_MINOR}" )
+    message( STATUS "  PYTHON_VERSION_PATCH              : ${PYTHON_VERSION_PATCH}" )
+    message( STATUS "  PYTHON_CONFIG_EXECUTABLE          : ${PYTHON_CONFIG_EXECUTABLE}" )
+    message( STATUS "  PYTHON_EXECUTABLE                 : ${PYTHON_EXECUTABLE}" )
+    message( STATUS "  PYTHON_INCLUDE_DIRS               : ${PYTHON_INCLUDE_DIRS}" )
+    message( STATUS "  PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
+	if (${PYTHON_VERSION_MAJOR} EQUAL 3)
+		ecbuild_error("Need cmake version >= 3.12.0 to build ecflow python3 extension, current cmake version is ${CMAKE_VERSION}")
+	endif()
+	find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS python )
+	add_subdirectory( python2 )
 else()
-   target_link_libraries(ecflow ${Boost_PYTHON_LIBRARY_RELEASE} )
-endif()
-
-#
-# Override default behaviour that add RPATHS during install
-# The only thing that seem to work is set INSTALL_RPATH to ""
-# Using SKIP_BUILD_RPATH,BUILD_WITH_INSTALL_RPATH,INSTALL_RPATH_USE_LINK_PATH
-# had no effect
-#         
-# by default cmake add prefix 'lib', we don't want this hence disable
-set_target_properties(ecflow PROPERTIES 
-                             PREFIX ""
-                             INSTALL_RPATH ""
-                     )
-                     
-# =====================================================================
-# tests 
-
-ecbuild_add_test( TARGET py_u_TestMigrate
-                  TYPE PYTHON 
-                  ARGS ${CMAKE_CURRENT_SOURCE_DIR}/migrate/py_u_TestMigrate.py
-                  ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" )
-
-list( APPEND u_tests
-        py_u_test_add   
-        py_u_test_collection   
-        py_u_test_cron  
-        py_u_test_defs_constructor 
-        py_u_test_get_attr  
-        py_u_test_manual   
-        py_u_test_late   
-        py_u_test_replace_node   
-        py_u_test_tutorial   
-        py_u_TestAddDelete   
-        py_u_TestAddDeleteFunc 
-        py_u_TestAddNodeFunc  
-        py_u_TestAutoAddExtern  
-        py_u_TestCopy        
-        py_u_TestDefs         
-        py_u_TestDefsCheck    
-        py_u_TestDerivable   
-        py_u_TestEcf  
-        py_u_TestError        
-        py_u_TestFind        
-        py_u_TestFlag      
-        py_u_TestGetAllTasks   
-        py_u_TestJobGeneration 
-        py_u_TestParent        
-        py_u_TestRemove
-        py_u_TestRepeatArithmetic
-        py_u_TestSimulator  
-        py_u_TestTraversal     
-        py_u_TestUserManual    
-        py_u_TestWith         
-)
-foreach( test ${u_tests} )
-
-    ecbuild_add_test( TARGET ${test} 
-                      TYPE PYTHON 
-                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
-                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" 
-                      TEST_DEPENDS u_base
-                     )
-endforeach()
-
-
-if ( ENABLE_ALL_TESTS AND ENABLE_SERVER)
-	list( APPEND s_tests
-	             py_s_TestClientApi    
-	             py_s_TestPythonChildApi
-	)
+	# ======================================================================================
+	# Attempt to build both python2 and python3 ecflow extension, depending on what is found
+	# this assumes cmake 3.12.0 min, which added support for boost python2 and python3
+	# ======================================================================================
+	find_package(Python2 COMPONENTS Interpreter Development)
+	message( STATUS "   Python2_FOUND                     : ${Python2_FOUND}" )
+	if (Python2_FOUND)
+	    if ( NOT Python2_LIBRARIES )             
+	        ecbuild_error("ecflow python extension is enabled, but python2 libraries not found")
+	    endif()
 	
-	foreach( test ${s_tests} )
-	
-	    ecbuild_add_test( TARGET ${test} 
-	                      TYPE PYTHON 
-	                      ARGS        ${CMAKE_CURRENT_SOURCE_DIR}/test/${test}.py
-	                      ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/Pyext" 
-	                      TEST_DEPENDS u_base
-	                     )
-	endforeach()
-	
-	set_property(TEST py_s_TestClientApi      APPEND PROPERTY DEPENDS s_test)
-	set_property(TEST py_s_TestPythonChildApi APPEND PROPERTY DEPENDS py_s_TestClientApi)
+	    # *****************************************************************************************
+	    # Although we have found python2 it could be that *ONLY* python3 was module loaded
+	    #    Otherwise will build for python2 and test with python3 interpreter
+	    # *****************************************************************************************
+	    ecbuild_find_python( VERSION 2.6 REQUIRED ) # if not included iterpreter not found ?
+	    if ( ${PYTHON_VERSION_MAJOR} EQUAL 2)
+			message( STATUS "   Python2_Interpreter_FOUND         : ${Python2_Interpreter_FOUND}" )
+			message( STATUS "   Python2_EXECUTABLE                : ${Python2_EXECUTABLE}" )
+			message( STATUS "   Python2_STDLIB                    : ${Python2_STDLIB}    Standard platform independent installation directory" )
+			message( STATUS "   Python2_STDARCH                   : ${Python2_STDARCH}   Standard platform dependent installation directory." )
+			message( STATUS "   Python2_Development_FOUND         : ${Python2_Development_FOUND}" )
+			message( STATUS "   Python2_INCLUDE_DIRS              : ${Python2_INCLUDE_DIRS}" )
+			message( STATUS "   Python2_LIBRARIES                 : ${Python2_LIBRARIES}" )
+			message( STATUS "   Python2_LIBRARY_DIRS              : ${Python2_LIBRARY_DIRS}" )
+			message( STATUS "   Python2_VERSION                   : ${Python2_VERSION}" )
+			message( STATUS "   Python2_VERSION_MAJOR             : ${Python2_VERSION_MAJOR}" )
+			message( STATUS "   Python2_VERSION_MINOR             : ${Python2_VERSION_MINOR}" )
+			message( STATUS "   Python2_VERSION_PATCH             : ${Python2_VERSION_PATCH}" )
+
+	    	message( STATUS "   PYTHON_FOUND                      : ${PYTHON_FOUND}" )
+	    	message( STATUS "   PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )
+	   		message( STATUS "   PYTHONLIBS_FOUND                  : ${PYTHONLIBS_FOUND}" )
+	    	message( STATUS "   PYTHON_VERSION_STRING             : ${PYTHON_VERSION_STRING}" )
+	    	message( STATUS "   PYTHON_VERSION_MAJOR              : ${PYTHON_VERSION_MAJOR}" )
+	    	message( STATUS "   PYTHON_VERSION_MINOR              : ${PYTHON_VERSION_MINOR}" )
+	    	message( STATUS "   PYTHON_VERSION_PATCH              : ${PYTHON_VERSION_PATCH}" )
+	    	message( STATUS "   PYTHON_CONFIG_EXECUTABLE          : ${PYTHON_CONFIG_EXECUTABLE}" )
+	    	message( STATUS "   PYTHON_EXECUTABLE                 : ${PYTHON_EXECUTABLE}" )
+	    	message( STATUS "   PYTHON_INCLUDE_DIRS               : ${PYTHON_INCLUDE_DIRS}" )
+	    	message( STATUS "   PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
+	    	
+	    	find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS python )
+			add_subdirectory( python2 )
+		endif()
+	endif()
+
+	find_package(Python3 COMPONENTS Interpreter Development)
+	message( STATUS "   Python3_FOUND                     : ${Python3_FOUND}" )
+	if (Python3_FOUND)
+		message( STATUS "   Python3_Interpreter_FOUND         : ${Python3_Interpreter_FOUND}" )
+		message( STATUS "   Python3_EXECUTABLE                : ${Python3_EXECUTABLE}" )
+		message( STATUS "   Python3_STDLIB                    : ${Python3_STDLIB}    Standard platform independent installation directory" )
+		message( STATUS "   Python3_STDARCH                   : ${Python3_STDARCH}   Standard platform dependent installation directory." )
+		message( STATUS "   Python3_Development_FOUND         : ${Python3_Development_FOUND}" )
+		message( STATUS "   Python3_INCLUDE_DIRS              : ${Python3_INCLUDE_DIRS}" )
+		message( STATUS "   Python3_LIBRARIES                 : ${Python3_LIBRARIES}" )
+		message( STATUS "   Python3_LIBRARY_DIRS              : ${Python3_LIBRARY_DIRS}" )
+		message( STATUS "   Python3_VERSION                   : ${Python3_VERSION}" )
+		message( STATUS "   Python3_VERSION_MAJOR             : ${Python3_VERSION_MAJOR}" )
+		message( STATUS "   Python3_VERSION_MINOR             : ${Python3_VERSION_MINOR}" )
+		message( STATUS "   Python3_VERSION_PATCH             : ${Python3_VERSION_PATCH}" )
+		
+	    if ( NOT Python3_LIBRARIES  )             
+	        ecbuild_error("ecflow python extension is enabled, but python3 libraries not found")
+	    endif()
+	    
+	    ecbuild_find_python( VERSION ${Python3_VERSION} REQUIRED )
+	    
+	    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS python3 )
+		add_subdirectory( python3 )
+	endif()
 endif()
-
-
-# =============================================================================
-# Configure __init__.py to add __version__
-# =============================================================================
-
-set(INIT_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py.in")
-set(INIT_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
-
-configure_file(${INIT_PY_IN} ${INIT_PY_OUT} )
-
-
-# ==========================================================================
-# install
-#    -DCMAKE_PYTHON_INSTALL_TYPE = [ local | setup | not defined ]
-#
-#    local | not defined : this will install to:
-#                          $INSTALL_PREFIX/$release.$major.$minor/lib/python2.7/site-packages/ecflow/
-#    setup               : experimental only,python way of installing
-#
-#    -DCMAKE_PYTHON_INSTALL_PREFIX should *only* used when using python setup.py (CMAKE_PYTHON_INSTALL_TYPE=setup)
-#    *AND* for testing python install to local directory
-#
-# Note:  To install only the python module
-#       cd  buildir
-#       cmake -DCMAKE_INSTALL_PREFIX=$INSTALL_DIR -DCOMPONENT=python -P cmake_install.cmake -- make install
-# ==========================================================================
-   
-if( CMAKE_PYTHON_INSTALL_TYPE MATCHES  "local"  OR NOT DEFINED CMAKE_PYTHON_INSTALL_TYPE )
-   
-      message(STATUS "python install *LOCAL* +++ lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages/ecflow +++++++")
-      set(PYTHON_SITE "lib/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
-      set(PYTHON_DEST "${PYTHON_SITE}/ecflow" )
-      
-      install( TARGETS ecflow                 DESTINATION ${PYTHON_DEST}  RENAME ecflow.so COMPONENT python )
-      install( FILES   ecflow/__init__.py     DESTINATION ${PYTHON_DEST}                   COMPONENT python )
-      
-      # Install files that Axel has asked for. 
-      # These are example of what Axel uses as a layer over ecflow api, for operations
-      install( FILES   samples/api/ecf.py     DESTINATION ${PYTHON_DEST}                COMPONENT python )
-      install( FILES   samples/api/sms2ecf.py DESTINATION ${PYTHON_DEST}                COMPONENT python )
-      
-else()
-	  message( STATUS "python found,  CMAKE_PYTHON_INSTALL_TYPE=${CMAKE_PYTHON_INSTALL_TYPE}")
-
-      # -------------------------------------------------------------------------------------
-      # Install using setup.py
-      # See: http://bloerg.net/2012/11/10/cmake-and-distutils.html
-      # -------------------------------------------------------------------------------------
-      message(STATUS "python install using *setup.py* ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-      message(STATUS "CMAKE_CURRENT_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}")
-      message(STATUS "CMAKE_BINARY_DIR=${CMAKE_BINARY_DIR}")
-      message(STATUS "CMAKE_PYTHON_INSTALL_PREFIX : ${CMAKE_PYTHON_INSTALL_PREFIX}" )  
-    
-      set(SETUP_PY_IN "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
-      set(SETUP_PY    "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
-      set(DEPS        "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
-      set(OUTPUT      "${CMAKE_CURRENT_SOURCE_DIR}/timestamp")
-
-      configure_file(${SETUP_PY_IN} ${SETUP_PY} )
-
-      add_custom_command(OUTPUT ${OUTPUT}
-                       COMMAND ${PYTHON} ${SETUP_PY} build
-                       COMMAND ${CMAKE_COMMAND} -E touch ${OUTPUT}
-                       DEPENDS ${DEPS})
-      add_custom_target(target ALL DEPENDS ${OUTPUT})
-
-
-      install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} build_ext)")
-    
-	  if( DEFINED CMAKE_PYTHON_INSTALL_PREFIX )
-         message(STATUS "custom/*test* python install prefix defined CMAKE_PYTHON_INSTALL_PREFIX=${CMAKE_PYTHON_INSTALL_PREFIX}")
-         install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install -f --prefix=${CMAKE_PYTHON_INSTALL_PREFIX})")
-      else()
-         install(CODE "execute_process(COMMAND ${PYTHON} ${SETUP_PY} install)")
-      endif()
-endif()
-
-# ====================================================================================
-ecbuild_dont_pack( DIRS 
-                   test/data/CUSTOMER
-)
-
-# ignore files with passwords
-ecbuild_dont_pack( FILES 
-                   .pydevproject
-                   samples/test.py
-                   samples/confluence_add_attachment.py
-)
-
-

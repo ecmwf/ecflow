@@ -73,14 +73,7 @@
             "button_tooltip" : "Open <b>triggers</b> tab in a new Info Panel dialog",
             "visible_for" : "node"
         },  
-        
-        {
-        	"name"    : "time",
-            "label"   : "Time line",
-            "hidden"  : "1",  
-            "visible_for" : "server or node"            
-        },  
-        
+
         {
         	"name"    : "variable",
              "label"  : "Variables",
@@ -141,6 +134,14 @@
             "show" 	  : "toolbar",
             "visible_for" : "server or node"
              
+        },
+        {
+            "name"    : "timeline",
+            "label"   : "Timeline",
+            "icon"    : "timeline.svg",
+            "show" 	  : "toolbar",
+            "visible_for" : "server or node"
+
         },
         {
             "name"    : "server_load",

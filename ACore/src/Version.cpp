@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #132 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -25,11 +25,8 @@ namespace ecf {
 //   see ACore/doc/extracting_version_number.ddoc
 //
 //   See ACore/src/ecflow_version.h"
-//   This file is generated from $WK/VERSION.cmake when cmake is run, i.e
+//   This file is generated when cmake is run, i.e
 //   sh -x $WK/cmake.sh debug
-//
-// It is also extracted by python, from VERSION.CMAKE check build_scripts/nightly/build.py
-// This minimises the places where we have hard code the version number.
 //
 // When changing the version change remember to:
 //    - re-login into remote system to update ECFLOW_INSTALL_DIR & ECFLOW_PYTHON_INSTALL_DIR

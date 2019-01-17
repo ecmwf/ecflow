@@ -1,6 +1,6 @@
 /***************************** LICENSE START ***********************************
 
- Copyright 2009-2017 ECMWF and INPE. This software is distributed under the terms
+ Copyright 2009-2019 ECMWF and INPE. This software is distributed under the terms
  of the Apache License version 2.0. In applying this license, ECMWF does not
  waive the privileges and immunities granted to it by virtue of its status as
  an Intergovernmental Organization or submit itself to any jurisdiction.
@@ -1120,9 +1120,11 @@ VInfo_ptr NodePathWidget::nodeAt(int idx)
 
     Q_ASSERT(mode_ == GuiMode);
     if(mode_ == TextMode)
+    {
         return VInfo_ptr();
+    }
 
-	ServerHandler* server=info_->server();
+    ServerHandler* server=info_->server();
 
 	if(info_ && server)
 	{
@@ -1416,10 +1418,13 @@ void NodePathWidget::readSettings(VSettings* vs)
     std::string modeStr=vs->get<std::string>("mode","");
 
     if(modeStr == "text")
+    {
         setMode(TextMode);
+    }
     else
+    {
         setMode(GuiMode);
-
+    }
 	vs->endGroup();
 }
 

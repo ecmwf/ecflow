@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -13,7 +13,9 @@
 
 #  code for testing pointers and hierarchy in python
 
+import os
 from ecflow import Suite, Family, Task, Defs, Client, debug_build
+import ecflow_test_util as Test
 
 def check_then_auto_add_extern(defs):
     error_msg = defs.check() 
@@ -24,10 +26,8 @@ def check_then_auto_add_extern(defs):
     error_msg = defs.check()
     assert len(error_msg) == 0,"Expect check to pass after auto add extern\n" + error_msg + "\n" + str(defs)
     
-if __name__ == "__main__":    
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+if __name__ == "__main__":   
+    Test.print_test_start(os.path.basename(__file__))
 
     defs = Defs()
     error_msg = defs.check();  assert len(error_msg) == 0,"Expect empty defs to pass check"

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -90,7 +90,7 @@ void autoDiscoverVariables(const std::string& directory, std::set<std::string>& 
 	BOOST_CHECK(fs::exists( full_path ));
 	BOOST_CHECK(fs::is_directory( full_path ));
 
-	//std::cout << "\nIn directory: " << full_path.directory_string() << "\n\n";
+	//std::cout << "\nIn directory: " << full_path << "\n\n";
 	fs::directory_iterator end_iter;
 	for ( fs::directory_iterator dir_itr( full_path ); dir_itr != end_iter; ++dir_itr ) {
 		try {
@@ -124,8 +124,6 @@ BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 // *Auto* discover the good/bad sms files
 void test_sms_preprocessing(const std::string& directory, bool pass)
 {
-//	cerr << " directory =  " << directory << "\n";
-
 	// SET ECF_HOME
 	std::string ecf_home = directory;
 
@@ -199,7 +197,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 	   else {        // test expected to fail
 	      BOOST_CHECK_MESSAGE(!ok,"Expected failure " << jobsParam.getErrorMsg() );
 	      BOOST_CHECK_MESSAGE(!ok,"expected no passes but found " <<  t->absNodePath() << " passes");
-	      //		cerr << "\n" << jobsParam.getErrorMsg() << " \n"; // un-comment to ensure correct error message
+	      //cerr << "\n" << jobsParam.getErrorMsg() << " \n"; // un-comment to ensure correct error message
 	   }
 	}
 }

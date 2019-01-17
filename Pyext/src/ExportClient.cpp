@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #85 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -125,7 +125,7 @@ void replace_2(ClientInvoker* self,const std::string& absNodePath, const std::st
 
 void order(ClientInvoker* self,const std::string& absNodePath,const std::string& the_order){ self->order(absNodePath,the_order);}
 
-bool query_auto_flush(ClientInvoker* self){ self->query_auto_flush(); return (self->get_string() == ecf::Log::flush_enabled()) ? true: false; }
+bool query_auto_flush(ClientInvoker* self){  return true; /* func no longer needed */ }
 
 void alters(ClientInvoker* self,
           const bp::list& list,
@@ -347,7 +347,7 @@ void export_Client()
 	         "\nUsage:\n"
 	         "Lets assume that the server has the following definition::\n\n"
 	         "   suite s\n"
-	         "      edit ECF_URL_CMD  \"${BROWSER:=firefox} -remote 'openURL(%ECF_URL_BASE%/%ECF_URL%)'\"\n"
+	         "      edit ECF_URL_CMD  \"${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%\"\n"
 	         "      edit ECF_URL_BASE \"http://www.ecmwf.int\"\n"
 	         "      family f\n"
 	         "         task t1\n"

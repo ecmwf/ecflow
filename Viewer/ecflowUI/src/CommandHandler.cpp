@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -113,7 +113,14 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
         //Shell command
         if(realCommand.find("sh ") == 0)
         {
-            substituteVariables(realCommand,info);
+            if(realCommand.find("%ECF_URL_CMD%") != std::string::npos)
+            {
+                substituteVariables(realCommand,info);
+            }
+            else
+            {
+                substituteVariables(realCommand,info);
+            }
             UiLog().dbg() << " final command: " << realCommand;
             ShellCommand::run(realCommand,cmd);
             return;
@@ -215,19 +222,7 @@ void CommandHandler::substituteVariables(std::string& cmd,const std::vector<VInf
        if(!n || n->isAttribute())
             return;
 
-       QString txt=QString::fromStdString(cmd);
-       QString txtRes=txt;
-       QRegExp rx("%(.*)%");
-       rx.setMinimal(true);
-       int pos=0;
-       while ((pos = rx.indexIn(txt, pos)) != -1)
-       {
-            QString name=rx.cap(1);
-            pos += rx.matchedLength();
-            std::string value=n->findInheritedVariable(name.toStdString(),true);
-            txtRes.replace("%" + name + "%",QString::fromStdString(value));
-       }
-
-       cmd = txtRes.toStdString();
+       //this can lock the mutex on the defs
+       n->substituteVariableValue(cmd);
    }
 }

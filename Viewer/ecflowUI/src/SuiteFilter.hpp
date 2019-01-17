@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -78,7 +78,6 @@ public:
     std::vector<std::string> loaded() const;
     const std::vector<SuiteFilterItem>& items() const {return items_;}
 
-	void current(const std::vector<std::string>& suites);
 	int count() const {return static_cast<int>(items_.size());}
 	void setFiltered(int index,bool val);
     bool isOnlyOneFiltered(const std::string& oneSuite) const;

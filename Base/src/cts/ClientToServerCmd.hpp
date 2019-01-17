@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #143 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -1461,6 +1461,13 @@ public:
       TRIGGER, COMPLETE, REPEAT, LIMIT_MAX, LIMIT_VAL, DEFSTATUS, CHANGE_ATTR_ND, CLOCK_SYNC, LATE };
 
    enum Add_attr_type  {  ADD_TIME, ADD_TODAY, ADD_DATE, ADD_DAY, ADD_ZOMBIE, ADD_VARIABLE, ADD_ATTR_ND, ADD_LATE, ADD_LIMIT, ADD_INLIMIT, ADD_LABEL };
+
+   // Python
+   AlterCmd(const std::vector<std::string>& paths,
+             const std::string& alterType, /* one of [ add | change | delete | set_flag | clear_flag ] */
+             const std::string& attrType,
+             const std::string& name,
+             const std::string& value);
    // add
    AlterCmd(const std::string& path, Add_attr_type  attr,  const std::string& name, const std::string& value = "" )
    : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(attr),
@@ -1530,13 +1537,28 @@ private:
    virtual bool authenticate(AbstractServer*, STC_Cmd_ptr&) const;
    virtual void cleanup() { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
 
-   void createAdd(    Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
-   void createDelete( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths) const;
-   void createChange( Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
-   void create_flag(  Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const;
-   void create_sort_attributes(Cmd_ptr& cmd,const std::vector<std::string>& options,const std::vector<std::string>& paths ) const;
-
    std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
+
+   Add_attr_type get_add_attr_type(const std::string&) const;
+   void createAdd(    Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
+   void extract_name_and_value_for_add(Add_attr_type ,std::string& name,std::string& value, std::vector<std::string>& options, std::vector<std::string>& paths) const;
+   void check_for_add(Add_attr_type ,const std::string& name, const std::string& value) const;
+
+   Delete_attr_type get_delete_attr_type(const std::string&) const;
+   void createDelete( Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths) const;
+   void extract_name_and_value_for_delete(Delete_attr_type,std::string& name,std::string& value,const std::vector<std::string>& options,const std::vector<std::string>& paths) const;
+   void check_for_delete(Delete_attr_type,const std::string& name, const std::string& value) const;
+
+   Change_attr_type get_change_attr_type(const std::string&) const;
+   void createChange( Cmd_ptr& cmd,       std::vector<std::string>& options,       std::vector<std::string>& paths) const;
+   void extract_name_and_value_for_change(Change_attr_type,std::string& name,std::string& value,std::vector<std::string>& options,std::vector<std::string>& paths) const;
+   void check_for_change(Change_attr_type,const std::string& name, const std::string& value) const;
+
+   ecf::Flag::Type  get_flag_type(const std::string&) const;
+   void create_flag(  Cmd_ptr& cmd, const std::vector<std::string>& options, const std::vector<std::string>& paths, bool flag) const;
+
+   void check_sort_attr_type(const std::string&) const;
+   void create_sort_attributes(Cmd_ptr& cmd,const std::vector<std::string>& options,const std::vector<std::string>& paths ) const;
 
 private:
    std::vector<std::string> paths_;

@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #11 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -199,26 +199,27 @@ void time_load_and_downloads(
                cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
                sync_and_news_local(theClient);
             }
-            size_t max_no_of_paths = 100000;
-            size_t max_path = std::min(paths.size(),max_no_of_paths);
-            {
-               cout << " log    " << max_path << " tasks  : "; cout.flush();
-               DurationTimer duration_timer;
-               for(size_t i =0; i < max_path; i++){ 
-                  theClient.logMsg(paths[i]);
-               }
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << endl;
-            }
-            {
-               cout << " log(fl)" << max_path << " tasks  : "; cout.flush();
-               theClient.enable_auto_flush();               
-               DurationTimer duration_timer;
-               for(size_t i =0; i < max_path; i++){
-                  theClient.logMsg(paths[i]);
-               }
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << endl;
-               theClient.disable_auto_flush();
-            }
+            // These tests take too long
+//            size_t max_no_of_paths = 100000;
+//            size_t max_path = std::min(paths.size(),max_no_of_paths);
+//            {
+//               cout << " log    " << max_path << " tasks  : "; cout.flush();
+//               DurationTimer duration_timer;
+//               for(size_t i =0; i < max_path; i++){
+//                  theClient.logMsg(paths[i]);
+//               }
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << endl;
+//            }
+//            {
+//               cout << " log(fl)" << max_path << " tasks  : "; cout.flush();
+//               theClient.enable_auto_flush();
+//               DurationTimer duration_timer;
+//               for(size_t i =0; i < max_path; i++){
+//                  theClient.logMsg(paths[i]);
+//               }
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << endl;
+//               theClient.disable_auto_flush();
+//            }
          }
          {
             cout << " Check pt:            "; cout.flush();

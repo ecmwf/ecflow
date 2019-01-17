@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -118,6 +118,10 @@ def test_client_get_server_defs(ci):
 
 def test_client_new_log(ci, port):
     print("test_client_new_log")
+    log_path = Test.log_file_path(port)
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")    
+    
     new_log_file_name = "./test_client_new_log_" + str(os.getpid()) + ".log"
     try : os.remove(new_log_file_name) # delete file if it exists
     except: pass
@@ -125,55 +129,60 @@ def test_client_new_log(ci, port):
     ci.new_log(new_log_file_name) 
     ci.flush_log() # close log file and force write to disk
     assert os.path.exists(new_log_file_name),new_log_file_name + " : New log does not exist"
+    try: os.remove(new_log_file_name)
+    except: pass
     
     # reset new log to original
-    ci.new_log(Test.log_file_path(port)) 
+    ci.new_log(log_path) 
     ci.ping()
     ci.flush_log() # close log file and force write to disk    
-    log_file = open(Test.log_file_path(port))
+    log_file = open(log_path)
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert log_text.find("--ping") != -1, "Expected to find --ping in log file"
  
-    try: os.remove(new_log_file_name)
-    except: pass
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")
 
 
 def test_client_clear_log(ci, port):
     print("test_client_clear_log")
+    log_path = Test.log_file_path(port)
     # populate log
     ci.ping();
     ci.ping();
     ci.flush_log() # close log file and force write to disk    
-    log_file = open(Test.log_file_path(port))
+    log_file = open(log_path)
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert log_text.find("--ping") != -1, "Expected to find --ping in log file"
     
     ci.clear_log()    
-    log_file = open(Test.log_file_path(port))
+    log_file = open(log_path)
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert len(log_text) == 0, "Expected log file to be empty but found " + log_text
 
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")
+
 
 def test_client_log_msg(ci, port):
     print("test_client_log_msg")
+    log_path = Test.log_file_path(port)
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")
+
     # Send a message to the log file, then make sure it was written
     ci.log_msg("Humpty dumpty sat on a wall!")
     ci.flush_log(); # flush and close log file, so we can open it
-    log_file = open(Test.log_file_path(port))
+    log_file = open(log_path)
     try:     log_text = log_file.read();     # assume log file not to big
     finally: log_file.close();
     assert log_text.find("Humpty dumpty sat on a wall!") != -1, "Expected to find Humpty dumpty in the log file"                
 
-def test_client_log_auto_flush(ci, port):
-    print("test_client_log_auto_flush")
-    assert not ci.query_auto_flush() , "By default auto flush should be disabled"
-    ci.enable_auto_flush()
-    assert ci.query_auto_flush(), "Enable auto flush not working"
-    ci.disable_auto_flush()
-    assert not ci.query_auto_flush(), "disabling auto flush not working"
+    if not os.path.exists(log_path):
+        print(log_path  + " : log does not exist ?")
 
 def test_client_restart_server(ci):
     print("test_client_restart_server")
@@ -884,6 +893,12 @@ def test_client_alter_add(ci):
 
     t1 = "/test_client_alter_add/f1/t1"
     ci.alter(t1,"add","variable","var","var_name")
+    ci.alter(t1,"add","variable","var2","--")
+    ci.alter(t1,"add","variable","var3","--fred")
+    ci.alter(t1,"add","variable","var4"," --fred ")
+    ci.alter(t1,"add","variable","var5","--fred --jake")
+    ci.alter(t1,"add","variable","var6"," --fred --jake ")
+    ci.alter(t1,"add","variable","var7","")
     ci.alter(t1,"add","time","+00:30")
     ci.alter(t1,"add","time","01:30")
     ci.alter(t1,"add","time","01:30 20:00 00:30")
@@ -907,7 +922,7 @@ def test_client_alter_add(ci):
 
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
-    assert len(list(task_t1.variables)) == 1 ,"Expected 1 variable :\n" + str(ci.get_defs())
+    assert len(list(task_t1.variables)) == 7 ,"Expected 7 variable :\n" + str(ci.get_defs())
     assert len(list(task_t1.times)) == 3 ,"Expected 3 time :\n" + str(ci.get_defs())
     assert len(list(task_t1.todays)) == 3 ,"Expected 3 today's :\n" + str(ci.get_defs())
     assert len(list(task_t1.dates)) == 4 ,"Expected 4 dates :\n" + str(ci.get_defs())
@@ -1153,7 +1168,22 @@ def test_client_alter_change(ci):
     task_t1 = ci.get_defs().find_abs_node(t1)
     variable = task_t1.find_variable("var")
     assert variable.value() == "changed_var", "Expected alter of variable to be 'change_var' but found " + variable.value()
-
+    ci.alter(t1,"change","variable","var","--")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    variable = task_t1.find_variable("var")
+    assert variable.value() == "--", "Expected alter of variable to be '--' but found " + variable.value()
+    ci.alter(t1,"change","variable","var","--fred")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    variable = task_t1.find_variable("var")
+    assert variable.value() == "--fred", "Expected alter of variable to be '--fred' but found " + variable.value()
+    ci.alter(t1,"change","variable","var","--fred --bill")   
+    ci.sync_local()
+    task_t1 = ci.get_defs().find_abs_node(t1)
+    variable = task_t1.find_variable("var")
+    assert variable.value() == "--fred --bill", "Expected alter of variable to be '--fred --bill' but found " + variable.value()
+    
     ci.alter(t1,"change","meter","meter","10")   
     ci.sync_local()
     task_t1 = ci.get_defs().find_abs_node(t1)
@@ -1778,9 +1808,7 @@ def test_client_ch_with_drops_handles(the_port,top_ci):
  
 
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start(os.path.basename(__file__))   
 
     # server independent tests
     test_set_host_port();
@@ -1795,7 +1823,6 @@ if __name__ == "__main__":
         test_client_new_log(ci, the_port)             
         test_client_clear_log(ci, the_port)             
         test_client_log_msg(ci, the_port)             
-        test_client_log_auto_flush(ci, the_port)             
              
         test_client_restart_server(ci)             
         test_client_halt_server(ci)             

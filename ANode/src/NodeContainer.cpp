@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #135 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -689,12 +689,12 @@ node_ptr NodeContainer::find_node_up_the_tree(const std::string& the_name) const
 
 node_ptr NodeContainer::find_relative_node( const std::vector< std::string >& pathToNode)
 {
-//#ifdef DEBUG_FIND_NODE
-//	cout << "NodeContainer::find_relative_node for '" << name()
-//		 << "' path = '" << pathToNode << "\n";
-//    cout << " tasks = ";  BOOST_FOREACH(task_ptr t, nodeVec_ ) { cout << " " << t->name(); } cout << "\n";
-//    cout << " family = "; BOOST_FOREACH(family_ptr f, familyVec_ ) { cout << " " << f->name();} cout << "\n";
-//#endif
+#ifdef DEBUG_FIND_NODE
+	 cout << "NodeContainer::find_relative_node for '" << name() << "\n";
+	 cout << " path :";
+	 BOOST_FOREACH(const std::string& s,pathToNode ) { cout << " " << s;} cout << "\n";
+    BOOST_FOREACH(node_ptr t, nodeVec_ ) { cout << " " << t->name();} cout << "\n";
+#endif
  	if (pathToNode.empty())  return node_ptr();
 	int pathSize = static_cast<int>(pathToNode.size());
 

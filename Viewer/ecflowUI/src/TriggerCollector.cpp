@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -76,10 +76,17 @@ bool TriggeredCollector::add(VItem* trigger, VItem*,Mode)
     {
         n->addTriggeredData(node_);
     }
-    return false;
 
-    //else if(trigger->isAttribute())
-    //    trigger->parent()->addTriggeredData(node_,trigger);
+    else if(VAttribute* a=trigger->isAttribute())
+    {
+        trigger->parent()->addTriggeredData(node_,a);
+
+//        if(a->type() && a->type()->name() == "event")
+//        {
+//            trigger->parent()->addTriggeredData(node_,a);
+//        }
+    }
+    return false;
 }
 
 const std::set<TriggerCollector::Mode>& TriggerTableItem::modes() const

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -137,6 +137,7 @@ public:
 
     virtual std::string genVariable(const std::string& key) const;
     virtual std::string findVariable(const std::string& key,bool substitute=false) const;
+    virtual bool substituteVariableValue(std::string& val) const;
 
     virtual void collectInheritedVariableNames(std::set<std::string>& vars) const;
 
@@ -195,7 +196,8 @@ public:
     void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=0);
     void clearTriggerData();
     void addTriggeredData(VItem* n);
-    void addTriggeredData(VItem* a,VItem* n);
+    void addTriggeredData(VItem* a,VAttribute* n);
+    void triggeredByEvent(const std::string& name,std::vector<std::string>& triggeredVec,TriggeredScanner* scanner);
 
     QString nodeMenuMode() const;
     QString defStatusNodeMenuMode() const;
@@ -309,6 +311,7 @@ public:
 	//server variables are searched.
 	std::string findVariable(const std::string& key,bool substitute=false) const;
 	std::string findInheritedVariable(const std::string& key,bool substitute=false) const;
+    bool substituteVariableValue(std::string& val) const;
 
     std::string flagsAsStr() const;
 	bool isFlagSet(ecf::Flag::Type f) const;
@@ -331,7 +334,6 @@ private:
 	//void clear(VNode*);
     void scan(VNode*,bool);
     void deleteNode(VNode* node,bool);
-    std::string substituteVariableValue(const std::string& val) const;
     void updateCache();
     void updateCache(defs_ptr defs);
 

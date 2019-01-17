@@ -20,6 +20,7 @@
 #include <QDateTime>
 #include <QFileInfo>
 #include <QStringList>
+#include <QtGlobal>
 
 static int REQCNT=0;
 
@@ -446,12 +447,20 @@ qint64 LogLoadData::period() const
 
 QDateTime LogLoadData::startTime() const
 {
-    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[0]);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[0],Qt::UTC);
+#else
+    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[0]).toUTC();
+#endif
 }
 
 QDateTime LogLoadData::endTime() const
 {
-    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[time_.size()-1]);
+#if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
+    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[time_.size()-1],Qt::UTC);
+#else
+    return (time_.empty())?QDateTime():QDateTime::fromMSecsSinceEpoch(time_[time_.size()-1]).toUTC();
+#endif
 }
 
 //t is in ms

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -48,12 +48,19 @@ public:
 
 	static std::vector<VParam*> filterItems();
 	static VNState* find(const std::string& name);
-	
+    static VNState* find(unsigned char ucId);
+    static bool isActive(unsigned char ucId);
+    static bool isComplete(unsigned char ucId);
+    static bool isSubmitted(unsigned char ucId);
+
+    unsigned char ucId() const {return ucId_;}
+
     //Called from VConfigLoader
     static void load(VProperty*);
 
 private:
 	static std::map<std::string,VNState*> items_;
+    unsigned char ucId_;
 };
 
 #endif

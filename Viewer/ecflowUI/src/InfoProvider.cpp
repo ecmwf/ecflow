@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,8 +11,11 @@
 #include "VNode.hpp"
 #include "VReply.hpp"
 #include "ServerHandler.hpp"
+#include "Submittable.hpp"
 
 #include <QDateTime>
+
+#include <fstream>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -262,6 +265,91 @@ ScriptProvider::ScriptProvider(InfoPresenter* owner) :
 			 for read access. Check for file presence and read access below files directory \
              or this may be a '<i>dummy</i>' task";
 }
+
+void ScriptProvider::visit(VInfoNode* info)
+{
+    reply_->reset();
+
+    if(!info->node() || !info->node()->node())
+    {
+        owner_->infoFailed(reply_);
+    }
+
+    //Check if we have a server
+    if(!info->server())
+    {
+        owner_->infoFailed(reply_);
+    }
+
+    VNode *n=info->node();
+
+    std::string fileName;
+
+    // We try to read the file directly from the disk
+    // Try client first.
+    // *THIS will minimize calls to the server. when .ecf is not in ECF_SCRIPT but still accessible from the client
+    try
+    {
+        if(Submittable* sb=info->node()->node()->isSubmittable())
+        {
+            EcfFile ecf_file = sb->locatedEcfFile(); // will throw std::runtime_error for errors
+            std::string fileContents, fileName, fileMethod;
+            ecf_file.script(fileContents);
+
+            //Check extra info in the first line
+            std::string pattern("# ecf_script_origin :");
+            if(fileContents.size() > pattern.size() &&
+               fileContents.substr(0,pattern.size()) == pattern)
+            {
+                 //strip off the first line
+                 std::string::size_type pos=fileContents.find('\n');
+                 if(pos != std::string::npos && fileContents.size() > pos)
+                 {
+                     QString s=QString::fromStdString(fileContents.substr(0,pos));
+                     QStringList sLst=s.split(":");
+                     if(sLst.count() == 3)
+                     {
+                         fileMethod=sLst[1].simplified().toStdString();
+                         fileName=sLst[2].simplified().toStdString();
+                     }
+
+                     fileContents=fileContents.substr(pos+1);
+                 }
+            }
+
+            reply_->text(fileContents);
+            reply_->fileReadMode(VReply::LocalReadMode);
+            reply_->fileName(fileName);
+            reply_->fileReadMethod(fileMethod);
+            owner_->infoReady(reply_);
+            return;
+        }
+    }
+
+    catch (std::exception& e)
+    {
+       // Try the server
+    }
+
+    //We try to get the file contents from the server
+    //(this will go through the threaded communication)
+
+    if(!fileVarName_.empty())
+    {
+        //Get the fileName
+        fileName=n->genVariable(fileVarName_);
+    }
+
+    //Define a task for getting the info from the server.
+    task_=VTask::create(taskType_,n,this);
+    task_->reply()->fileName(fileName);
+    task_->reply()->fileReadMode(VReply::ServerReadMode);
+
+    //Run the task in the server. When it finish taskFinished() is called. The text returned
+    //in the reply will be prepended to the string we generated above.
+    info->server()->run(task_);
+}
+
 
 HistoryProvider::HistoryProvider(InfoPresenter* owner) :
 	InfoProvider(owner,VTask::HistoryTask)

@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #5 $
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -73,7 +73,7 @@ private:
       if (ecf_port_lock_dir) path = ecf_port_lock_dir;
       else                   path = File::root_source_dir();
 
-      path += "/ECF_PORT_used_";
+      path += "/";
       path += the_port;
       path += ".lock";
 

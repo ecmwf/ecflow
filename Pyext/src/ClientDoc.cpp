@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #89 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -203,53 +203,20 @@ const char* ClientDoc::flush_log()
 
 const char* ClientDoc::log_msg()
 {
-   return
-            "Request the `ecflow_server`_ writes a string message to the log file.\n\n"
-            "\nUsage::\n\n"
-            "   try:\n"
-            "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.log_msg('A message') # Write message to log file\n"
-            "   except RuntimeError, e:\n"
-            "       print(str(e))\n"
-            ;
+   return "";
 }
 
 const char* ClientDoc::enable_auto_flush()
 {
-   return
-            "Enable automatic flush of log file for each user and child commands and state change.\n\n"
-            "\nUsage::\n\n"
-            "   try:\n"
-            "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.enable_auto_flush()\n"
-            "   except RuntimeError, e:\n"
-            "       print(str(e))\n"
-            ;
+   return "";
 }
 const char* ClientDoc::disable_auto_flush()
 {
-   return
-            "Disable automatic flush of log file for each user and child commands and state change.\n\n"
-            "\nUsage::\n\n"
-            "   try:\n"
-            "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       ci.disable_auto_flush()\n"
-            "   except RuntimeError, e:\n"
-            "       print(str(e))\n"
-            ;
+   return "";
 }
 const char* ClientDoc::query_auto_flush()
 {
-   return
-            "Query if the log file flush is enabled or disabled.\n\n"
-            "\nUsage::\n\n"
-            "   try:\n"
-            "       ci = Client()             # use default host(ECF_HOST) & port(ECF_PORT)\n"
-            "       if ci.query_auto_flush():\n"
-            "           print('enabled');\n"
-            "   except RuntimeError, e:\n"
-            "       print(str(e))\n"
-            ;
+   return "";
 }
 
 const char* ClientDoc::restart_server()   {

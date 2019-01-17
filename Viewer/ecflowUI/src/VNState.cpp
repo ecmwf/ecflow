@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -29,6 +29,7 @@
 
 std::map<std::string,VNState*> VNState::items_;
 static std::map<NState::State,VNState*> stateMap_;
+static std::map<unsigned char,VNState*> idMap_;
 
 static VNState unSt("unknown",NState::UNKNOWN);
 static VNState compSt("complete",NState::COMPLETE);
@@ -38,11 +39,15 @@ static VNState submittedSt("submitted",NState::SUBMITTED);
 static VNState activeSt("active",NState::ACTIVE);
 static VNState suspendedSt("suspended");
 
+static unsigned char ucIdCnt=0;
+
 VNState::VNState(const std::string& name,NState::State nstate) :
-	VParam(name)
+    VParam(name),
+    ucId_(ucIdCnt++)
 {
 	items_[name]=this;
 	stateMap_[nstate]=this;
+    idMap_[ucId_]=this;
 }
 
 VNState::VNState(const std::string& name) :
@@ -123,6 +128,15 @@ VNState* VNState::find(const std::string& name)
 	return NULL;
 }
 
+VNState* VNState::find(unsigned char ucId)
+{
+    std::map<unsigned char,VNState*>::const_iterator it=idMap_.find(ucId);
+    if(it != idMap_.end())
+        return it->second;
+
+    return NULL;
+}
+
 //
 //Has to be very quick!!
 //
@@ -167,6 +181,24 @@ QString VNState::toRealStateName(const VNode *n)
 {
     VNState *obj=VNState::toRealState(n);
     return (obj)?(obj->name()):QString();
+}
+
+bool VNState::isActive(unsigned char ucId)
+{
+    VNState *obj=VNState::find(ucId);
+    return (obj)?(obj->name() == "active"):false;
+}
+
+bool VNState::isComplete(unsigned char ucId)
+{
+    VNState *obj=VNState::find(ucId);
+    return (obj)?(obj->name() == "complete"):false;
+}
+
+bool VNState::isSubmitted(unsigned char ucId)
+{
+    VNState *obj=VNState::find(ucId);
+    return (obj)?(obj->name() == "submitted"):false;
 }
 
 //==================================================

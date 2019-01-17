@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -24,6 +24,7 @@
 #include "ServerHandler.hpp"
 #include "TreeNodeModel.hpp"
 #include "UiLog.hpp"
+#include "VNState.hpp"
 
 static std::vector<std::string> propVec;
 
@@ -188,6 +189,7 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent)
     nodeStyle_(ClassicNodeStyle),
     drawNodeType_(true),
     bgCol_(Qt::white),
+    subFailText_("submission failed"),
     model_(model)
 {
 
@@ -877,6 +879,21 @@ int TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
         }
     }
 
+    //Failed on submission
+    QRect subFailRect;
+    bool hasSubFail=index.data(AbstractNodeModel::FailedSubmissionRole).toBool();
+    QString subFailTxt;
+
+    if(hasSubFail)
+    {
+        QFontMetrics fmSubFail(abortedReasonFont_);
+        subFailRect = nodeText.br_;
+        subFailRect.setLeft(currentRight+fmSubFail.width('A')/2);
+        subFailTxt=fmSubFail.elidedText(subFailText_,Qt::ElideRight,220);
+        subFailRect.setWidth(fmSubFail.width(subFailTxt));
+        currentRight=subFailRect.x()+subFailRect.width();
+    }
+
     //The aborted reason
     QRect reasonRect;
     QString reasonTxt=index.data(AbstractNodeModel::AbortedReasonRole).toString();
@@ -923,6 +940,16 @@ int TreeNodeViewDelegate::renderNode(QPainter *painter,const QModelIndex& index,
         painter->setPen(childCountColour);
         painter->setFont(suiteNumFont_);
         painter->drawText(numRect,Qt::AlignLeft | Qt::AlignVCenter,numTxt);
+    }
+
+    //Draw aborted reason
+    if(hasSubFail)
+    {
+        VNState *abState=VNState::find("aborted");
+        Q_ASSERT(abState);
+        painter->setPen(abState->colour().darker(120));
+        painter->setFont(abortedReasonFont_);
+        painter->drawText(subFailRect,Qt::AlignLeft | Qt::AlignVCenter,subFailTxt);
     }
 
     //Draw aborted reason
@@ -1352,6 +1379,15 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,QString text) const
                 currentRight+=fmNum.width('A')/2+numWidth;
             }
         }
+    }
+
+
+    //failedOnSubmission
+    if(node->isFlagSet(ecf::Flag::JOBCMD_FAILED))
+    {
+        QFontMetrics fmSubFail(abortedReasonFont_);
+        QString subFailTxt=fmSubFail.elidedText(subFailText_,Qt::ElideRight,220);
+        currentRight+=fmSubFail.width('A')/2+fmSubFail.width(subFailTxt);
     }
 
     //The aborted reason

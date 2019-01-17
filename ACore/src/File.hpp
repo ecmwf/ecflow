@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #41 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -125,12 +125,20 @@ public:
 	/// on consuming the first path token this should leave:
 	///   	<root-path>/suite/family/family2/task.ecf
 	///   	<root-path>/family/family2/task.ecf
-	///  	<root-path>/family2/task.ecf
+	///  	   <root-path>/family2/task.ecf
 	///   	<root-path>/task.ecf
-	/// See page 21 of SMS user guide
-	//
 	/// Returns an empty string if file not found
 	static std::string backwardSearch( const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn );
+
+   /// Do a forward search of rootPath + nodePath + fileExtn
+   /// If task path if of the form /suite/family/family2/task, then we keep
+   /// on consuming the last path token this should leave:
+   ///      <root-path>/suite/family/family2/task.ecf
+   ///      <root-path>/suite/family/task.ecf
+   ///      <root-path>/suite/task.ecf
+   ///      <root-path>/task.ecf
+   /// Returns an empty string if file not found
+   static std::string forwardSearch( const std::string& rootPath, const std::string& nodePath, const std::string& fileExtn );
 
 	// Remove a directory recursively ****
 	static bool removeDir( const boost::filesystem::path& p);

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #101 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -162,6 +162,8 @@ void NodeTreeTraverser::do_traverse()
 	}
 	// time_now >= next_poll_time_
 
+
+   LogFlusher logFlusher;
 
 	// We have SOFT real time, we poll every second, BUT only update the suite calendar at the job submission
 	// interval. However we can not guarantee to hit exactly at the next poll time

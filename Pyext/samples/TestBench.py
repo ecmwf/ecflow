@@ -4,7 +4,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -39,8 +39,8 @@ def get_root_source_dir():
         if tail.find("ecflow") != -1 :
             
             # bjam, already at the source directory
-            if os.path.exists(cwd + "/VERSION.cmake"): 
-                print("   Found VERSION.cmake in " + cwd)
+            if os.path.exists(cwd + "/Jamroot.jam"): 
+                print("   Found Jamroot.jam in " + cwd)
                 return cwd
         
         if tail != "Pyext" and tail != "migrate":

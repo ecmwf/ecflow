@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -99,6 +99,11 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
              s+=Viewer::formatBoldText(" at ",col) + formatDate(f->fetchDate());
          }
 
+         if(!reply->fileReadMethod().empty())
+         {
+            s+=Viewer::formatBoldText(" Lookup method: ",col) + QString::fromStdString(reply->fileReadMethod());
+         }
+
 	}
 	else if(reply->fileReadMode() == VReply::ServerReadMode)
 	{
@@ -195,14 +200,14 @@ void FileInfoLabel::update(VReply* reply,QString extraText)
 	setText(labelText);
 }
 
-QString FileInfoLabel::formatDate(QDateTime dt) const
+QString FileInfoLabel::formatDate(QDateTime dt)
 {
     QColor col(34,107,138);
     QString s=dt.toString("yyyy-MM-dd") + "&nbsp;&nbsp;" +dt.toString("HH:mm:ss");
     return Viewer::formatBoldText(s,col);
 }
 
-QString FileInfoLabel::formatFileSize(QString str,qint64 size) const
+QString FileInfoLabel::formatFileSize(QString str,qint64 size)
 {
 	if(size > 10*1024*1024)
         return Viewer::formatText(str,QColor(Qt::red));

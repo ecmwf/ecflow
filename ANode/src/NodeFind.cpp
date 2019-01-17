@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #53 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -531,10 +531,19 @@ node_ptr findRelativeNode(	const vector<std::string>& theExtractedPath,node_ptr 
          return theNode;
       }
    }
-
-   node_ptr constNode = triggerNode->parent()->find_relative_node(theExtractedPath);
-   if (constNode.get()) {
-      return constNode;
+   else {
+#ifdef DEBUG_FIND_REFERENCED_NODE
+      cout << "triggerNode: " << triggerNode->debugNodePath() << "\n";
+      cout << "triggerNode->parent(): " << triggerNode->parent()->debugNodePath() << "\n";
+#endif
+      node_ptr constNode = triggerNode->parent()->find_relative_node(theExtractedPath);
+      if (constNode.get()) {
+         return constNode;
+      }
+      constNode = triggerNode->find_relative_node(theExtractedPath);
+      if (constNode.get()) {
+         return constNode;
+      }
    }
 
    errorMsg = "Could not find node '";

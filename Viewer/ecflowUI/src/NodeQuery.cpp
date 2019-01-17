@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -115,7 +115,9 @@ void NodeQuery::swap(const NodeQuery* q)
 	ignoreMaxNum_=q->ignoreMaxNum_;
 
     for(QMap<QString,NodeQueryOption*>::const_iterator it = options_.constBegin(); it != options_.constEnd(); ++it)
+    {
         it.value()->swap(q->option(it.key()));
+    }
 
 	buildQueryString();
 }
@@ -295,7 +297,9 @@ void NodeQuery::buildQueryString()
     //Status change time
     QString periodPart=options_["status_change_time"]->query();
     if(!periodPart.isEmpty())
+    {
         extQuery_["status_change_time"]="(" + periodPart + ")";
+    }
 
 	//Attributes
 	QString attrPart;

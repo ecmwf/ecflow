@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #5 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -59,7 +59,12 @@ BOOST_AUTO_TEST_CASE( test_signal_SIGTERM )
    // Send a SIGTERM to the server and ensure that a check point file is created
    std::string sigterm = "kill -15 " + ecf_pid ;
    system(sigterm.c_str());
-   sleep(3); // allow time for system call
+
+   // allow time for system call
+   for(int i=0; i < 6; i++) {
+      sleep(1);
+      if (fs::exists(invokeServer.ecf_checkpt_file())) break;
+   }
 
    // We expect a check point file to be save to disk, but *no* backup
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_checkpt_file()),CtsApi::checkPtDefs() << " failed file(" << invokeServer.ecf_checkpt_file() << ") not saved");
@@ -71,8 +76,12 @@ BOOST_AUTO_TEST_CASE( test_signal_SIGTERM )
 
    // Send a SIGTERM again. This time we expect the backup check point file to be created.
    system(sigterm.c_str());
-   sleep(3); // allow time for system call
 
+   // allow time for system call
+   for(int i=0; i < 6; i++) {
+      sleep(1);
+      if (fs::exists(invokeServer.ecf_checkpt_file()) && fs::exists(invokeServer.ecf_backup_checkpt_file())) break;
+   }
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_checkpt_file()),CtsApi::checkPtDefs() << " failed No check pt file(" << invokeServer.ecf_checkpt_file() << ") saved");
    BOOST_REQUIRE_MESSAGE(fs::file_size(invokeServer.ecf_checkpt_file()) !=0,"Expected check point file(" << invokeServer.ecf_checkpt_file() << ") to have file size > 0  ");
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_backup_checkpt_file()), "Expected backup check point file(" << invokeServer.ecf_backup_checkpt_file() << ") to be created");

@@ -1,16 +1,17 @@
 # test node referencing in triggers
-#      o/ <node> == complete    i.e   a == complete   can mean sibling or parent node  # confusing
-#      o/ ./<node> == complete  i.e  ./a == complete  can mean sibling or parent node 
-#      o/ ../<node> == complete i.e  ../a == complete means current nodes parents parent
+#      o/ <node> == complete    i.e   a == complete   sibling    
+#      o/ ./<node> == complete  i.e  ./a == complete  sibling
+#      o/ ../<node> == complete i.e  ../a == complete means trigger nodes parent
 suite s1
   family f1
+     trigger f2/f3/f4/a == complete
      family f2
         family f3
            family f4
               task a
                  event 1 theEventName
                  meter myMeter 0 100
-                 trigger f4 == complete or ./bb == complete or ../f3 == complete  # f4 immediate parent and bb is sibling ../f3 is parents parent
+                 trigger ../f4 == complete or ./bb == complete or ../f3 == complete  # f4 immediate parent and bb is sibling ../f3 is parents parent
                task bb
             endfamily   
          endfamily

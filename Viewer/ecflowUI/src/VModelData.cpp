@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -1187,27 +1187,30 @@ ServerHandler* VModelData::serverHandler(int n) const
 int VModelData::indexOfServer(void* idPointer) const
 {
     for(std::size_t i=0; i < servers_.size(); i++)
+    {
         if(servers_[i] == idPointer)
 			return i;
-
+    }
 	return -1;
 }
 
 ServerHandler* VModelData::serverHandler(void* idPointer) const
 {
     for(int i=0; i < serverNum_; i++)
+    {
         if(servers_[i] == idPointer)
             return servers_[i]->server_;
-
+    }
 	return NULL;
 }
 
 VModelServer* VModelData::server(const void* idPointer) const
 {
     for(int i=0; i < serverNum_; i++)
+    {
         if(servers_[i] == idPointer)
             return servers_[i];
-
+    }
 	return NULL;
 }
 
@@ -1233,9 +1236,11 @@ VModelServer* VModelData::server(ServerHandler* s) const
 int VModelData::indexOfServer(ServerHandler* s) const
 {
     for(int i=0; i < serverNum_; i++)
+    {
         if(servers_[i]->server_ == s)
 			return i;
-	return -1;
+    }
+    return -1;
 }
 
 int VModelData::numOfNodes(int index) const

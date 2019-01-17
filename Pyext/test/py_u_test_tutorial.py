@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,7 +19,7 @@ from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, C
 import ecflow_test_util as Test
 import unittest 
 import shutil   # used to remove directory tree
-import os
+import os,sys
 
 def test_def_file():
     #return "test.def"
@@ -84,8 +84,7 @@ class TestNewSuite(unittest.TestCase):
                             ECF_HOME=home))
         self.assertEqual(self.defs,defs,"defs not equal\n" + str(self.defs) + "\n" + str(defs))
 
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Task,Edit
    
 #xx print("Creating suite definition")
@@ -128,8 +127,7 @@ class TestFamilies(unittest.TestCase):
         self.defs = defs
          
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit
          
 def create_family_f1():
@@ -156,7 +154,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
 
     def test_me(self):
-        #!/usr/bin/env python2.7
         import os
          
         #print("Creating suite definition")
@@ -190,8 +187,7 @@ class TestVariables(unittest.TestCase):
         self.defs = defs
         
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """#import os
 from ecflow import Defs,Suite,Family,Task,Edit
 
 def create_family_f1():
@@ -218,7 +214,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
         
     def test_me2(self):
-        #!/usr/bin/env python2.7
         import os
         home = os.path.join(os.getenv("HOME"), "course")
   
@@ -233,7 +228,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
 
     def test_me3(self):
-        #!/usr/bin/env python2.7
         import os
         home = os.path.join(os.getenv("HOME"), "course")
   
@@ -265,8 +259,7 @@ class TestVariableInheritance(unittest.TestCase):
         self.defs = defs;
          
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit
 
 def create_family_f1():
@@ -294,7 +287,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
         
     def test_me(self):
-        #!/usr/bin/env python2.7
         import os
          
         def create_family_f1():
@@ -330,8 +322,7 @@ class TestTriggers(unittest.TestCase):
         self.defs = defs;
          
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger
 
 def create_family_f1():
@@ -363,7 +354,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
         
     def test_me(self):
-        #!/usr/bin/env python2.7
         import os
          
         home = os.path.join(os.getenv("HOME"), "course")
@@ -406,8 +396,7 @@ class TestEvents(unittest.TestCase):
         self.defs = defs;
          
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Event
 
 def create_family_f1():
@@ -446,7 +435,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
         
     def test_me(self):
-        #!/usr/bin/env python2.7
         import os
  
         def create_family_f1():
@@ -491,8 +479,7 @@ class TestComplete(unittest.TestCase):
         self.defs = defs;
          
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event
 
 def create_family_f1():
@@ -532,7 +519,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
         
     def test_me(self):
-        #!/usr/bin/env python2.7
         import os
  
         def create_family_f1():
@@ -581,8 +567,7 @@ class TestMeter(unittest.TestCase):
         self.defs = defs;
          
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter
 
 def create_family_f1():
@@ -619,7 +604,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
         
     def test_me(self):
-        #!/usr/bin/env python2.7
         import os
  
         def create_family_f1():
@@ -681,8 +665,7 @@ class TestTime(unittest.TestCase):
         self.defs = defs;
          
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date
 
 def create_family_f2():
@@ -719,7 +702,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
         
     def test_me(self):
-        #!/usr/bin/env python2.7
         import os
   
         def create_family_f2():
@@ -741,7 +723,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(self.defs,defs,"defs not equal:\n" + str(self.defs) + "\n" + str(defs))       
          
     def test_add(self):
-        #!/usr/bin/env python2.7
         import os
   
         def create_family_f2():
@@ -793,8 +774,7 @@ class TestCron(unittest.TestCase):
         self.defs = defs;
          
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Cron
   
 def create_family_house_keeping():
@@ -865,8 +845,7 @@ class TestIndentation(unittest.TestCase):
         self.defs = defs;
 
     def test_preferred(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date
 
 #xx print("Creating suite definition") 
@@ -906,7 +885,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
         
     def test_me(self):
-        #!/usr/bin/env python2.7
         import os
   
         home = os.path.join(os.getenv("HOME"), "course")
@@ -963,8 +941,7 @@ class TestLabel(unittest.TestCase):
         self.defs = defs;
         
     def test_me(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label
 
 def create_family_f3():
@@ -1001,7 +978,7 @@ class TestRepeat(unittest.TestCase):
     def setUp(self):
         Ecf.set_debug_equality(True)      
         
-        self.ecf_home     = File.build_dir() + "/Pyext/test/data/course"
+        self.ecf_home     = File.build_dir() + "/Pyext/test/data/course_py" + str(sys.version_info[0]) + "_" + str(os.getpid()) # allow paralled runs
         self.ecf_includes = File.source_dir() + "/Pyext/test/data/includes"
         #print("self.ecf_home ",self.ecf_home )
  
@@ -1048,8 +1025,7 @@ class TestRepeat(unittest.TestCase):
         result = defs.check_job_creation()
         self.assertEqual(result, "", "expected job creation to succeed " + result)
  
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
                    RepeatString,RepeatInteger,RepeatDate
         
@@ -1150,8 +1126,7 @@ class TestLimit(unittest.TestCase):
         self.defs = defs   
         
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
                    RepeatString,RepeatInteger,RepeatDate,InLimit,Limit
          
@@ -1214,8 +1189,7 @@ class TestLateAttribute(unittest.TestCase):
         self.defs = defs
         
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
                    RepeatString,RepeatInteger,RepeatDate,InLimit,Limit,Late
         
@@ -1345,8 +1319,7 @@ class TestDataAquistionSolution(unittest.TestCase):
         self.defs = defs
         
     def test_me0(self):
-        text = """#!/usr/bin/env python2.7
-import os
+        text = """import os
 from ecflow import Defs,Suite,Family,Task,Edit,Trigger,Complete,Event,Meter,Time,Day,Date,Label, \
                    RepeatString,RepeatInteger,RepeatDate
 
@@ -1385,7 +1358,6 @@ defs.save_as_defs('test.def')
         self.assertEqual(test_defs,self.defs,"defs not equal\n" + str(test_defs) + "\n" + str(self.defs))
 
     def test_me(self):
-        #!/usr/bin/env python2.7
         import os
         
         home = os.path.join(os.getenv("HOME"), "course")
@@ -1476,7 +1448,6 @@ class TestOperationalSolution(unittest.TestCase):
         self.defs = defs
         
     def test_sol1(self):
-        #!/usr/bin/env python2.7
         import os
          
         home = os.getenv("HOME") + "/course"
@@ -1565,7 +1536,6 @@ class TestBackArchivingSolution(unittest.TestCase):
         self.defs = defs
          
     def test_sol1(self):
-        #!/usr/bin/env python2.7
         import os
         home = os.path.join(os.getenv("HOME"), "course")
         defs = Defs( 

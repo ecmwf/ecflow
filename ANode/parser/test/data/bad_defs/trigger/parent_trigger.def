@@ -1,0 +1,7 @@
+suite s1
+  family f1
+    task a
+    task b
+   	   trigger f1 == complete   # f1 is not a sibling but a parent, expect error
+  endfamily
+endsuite

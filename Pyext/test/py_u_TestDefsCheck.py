@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,13 +12,12 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #  Test the error and waning checks defined in the defs work
-
+import os
 from ecflow import  Defs, Limit, InLimit, Client, debug_build
-            
+import ecflow_test_util as Test
+
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start(os.path.basename(__file__))
      
     defs = Defs()
     suite = defs.add_suite("s1");

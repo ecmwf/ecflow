@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -37,6 +37,8 @@ public:
     bool isEmpty() const;
 
 	StorageMode storageMode() const {return storageMode_;}
+    void setStorageMode(StorageMode);
+
 	static const size_t maxDataSize() {return maxDataSize_;}
 	size_t dataSize() const {return dataSize_;}
 	const char* data() const {return data_;}
@@ -74,7 +76,6 @@ protected:
 	VFile(const std::string& name,const std::string& str,bool deleteFile=true);
 	VFile(const std::string& str,bool deleteFile= true);
 	explicit VFile(bool deleteFile= true);
-	void setStorageMode(StorageMode);
 
 	std::string path_;
     std::string sourcePath_;

@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,12 +15,11 @@
 # In our case it provides the ability to indent
 
 from ecflow import Defs, Suite, Task, Family, Client, Variable, Edit, debug_build
-import sys
+import ecflow_test_util as Test
+import sys,os
     
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + Client().version() + " debug build(" + str(debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start(os.path.basename(__file__))
  
     # sys.version_info is a tuple containing (major,minor,micro,releaselevel,serial)
     version = sys.version_info;
@@ -28,7 +27,6 @@ if __name__ == "__main__":
         print("This test only run with python version 2.7 or greater, but found : " + str(version))
         exit(0)
     
-    print("start test")
     # Add with context manager, in our case this only provides ability to indent
     with Defs() as defs:
         with defs.add_suite("s2") as s2:

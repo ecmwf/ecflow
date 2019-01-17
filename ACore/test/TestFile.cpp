@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #24 $ 
 //
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -27,6 +27,7 @@
 #include "DurationTimer.hpp"
 #include "File.hpp"
 #include "NodePath.hpp"
+#include "Str.hpp"
 
 using namespace boost;
 using namespace std;
@@ -230,6 +231,76 @@ BOOST_AUTO_TEST_CASE( test_file_backwardSearch )
  		path = rootPath + "/" + dir + boost::lexical_cast<std::string>(i);
   		BOOST_CHECK_MESSAGE(File::removeDir( path ),"Failed to remove dir " << path);
    	}
+}
+
+BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
+{
+   cout << "ACore:: ...test_file_forwardSearch\n";
+
+   std::string dir_path = "/dir0/dir1/dir2/dir3/dir4";
+   std::string nodePath = dir_path + "/task";
+   std::string rootPath = File::test_data("ACore/test/data","ACore");
+   std::string expected = File::test_data("ACore/test/data","ACore") + nodePath;
+
+   std::string path = rootPath;
+   std::string dir = "dir";
+   for(int i = 0; i < 6; i++) {
+      if (i == 5) path += "/task" ;
+      else        path += "/" + dir + boost::lexical_cast<std::string>(i);
+   }
+   // Should have test/data/dir0/dir1/dir3/dir3/dir4/task
+   //         or  ACore/test/data/dir0/dir1/dir3/dir3/dir4/task
+   BOOST_REQUIRE_MESSAGE(path == expected," Error expected " << expected << " but found " << path);
+
+   // Create the directories
+   string combined_dir_path = rootPath + dir_path;
+   //cout << "creating directories: " <<  combined_dir_path  << "\n";
+   BOOST_REQUIRE_MESSAGE(File::createDirectories( combined_dir_path),"Failed to create dirs" << combined_dir_path);
+
+   // Create a file in each of the directories.
+   std::vector<std::string> fileContents; fileContents.push_back("something");
+   vector<std::string> nodePathTokens;
+   NodePath::split(nodePath,nodePathTokens);
+   while ( nodePathTokens.size() > 0 ) {
+
+      // Reconstitute the path
+      std::string path = NodePath::createPath(nodePathTokens);
+      std::string combinedPath = rootPath + path +  File::ECF_EXTN(); // .ecf, .man , etc
+
+      //cout << "Creating file       : " << combinedPath << "\n";
+      std::string errorMsg;
+      BOOST_REQUIRE_MESSAGE(File::create(combinedPath,fileContents,errorMsg),"Failed to create " << combinedPath << " because " << errorMsg);
+
+      // Preserve the last token
+      if ( nodePathTokens.size() >= 2 ) nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size()-2); // consume one from last path token
+      else nodePathTokens.erase(nodePathTokens.end());
+   }
+
+   // Now do a forward search for them:
+   // Expect the following files to be found:
+   // test/data/dir0/dir1/dir2/dir3/dir4/task.ecf
+   // test/data/dir0/dir1/dir2/dir3/task.ecf
+   // test/data/dir0/dir1/dir2/task.ecf
+   // test/data/dir0/dir1/task.ecf
+   // test/data/dir0/task.ecf
+   // test/data/task.ecf
+//   cout << "rootPath: " << rootPath << "\n";
+//   cout << "nodePath: " << nodePath << "\n";
+//   cout << "ECF_EXTN: " << File::ECF_EXTN()  << "\n";
+   int filesFound = 0;
+   for(int i = 0; i < 6; i++) {
+      std::string theFile = File::forwardSearch(rootPath,nodePath,File::ECF_EXTN());
+      BOOST_CHECK_MESSAGE( !theFile.empty(), i << ": Failed to find task.ecf with rootPath " << rootPath << " and node path " << nodePath);
+      if (!theFile.empty()) {
+         filesFound++;
+         //std::cout << "Found file at: " << theFile << "\n";
+         fs::remove(theFile); // *remove* so we don't find it again
+      }
+   }
+   BOOST_CHECK_MESSAGE( filesFound == 6 ," expect to find 6 files but found " << filesFound );
+
+   // Remove the test dir0. Comment out for debugging
+   BOOST_CHECK_MESSAGE(File::removeDir(   rootPath + "/dir0"  ),"Failed to remove dir " <<  rootPath + "/dir0" );
 }
 
 

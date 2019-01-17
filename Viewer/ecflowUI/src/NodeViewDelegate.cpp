@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -305,7 +305,9 @@ void NodeViewDelegate::renderMeter(QPainter *painter,QStringList data,const QSty
     size=QSize(totalWidth,attrBox_->fullHeight);
 
     if(data.count() < 6)
+    {
         return;
+    }
 
 	//The data
 	int	val=data.at(2).toInt();
@@ -801,7 +803,9 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
     size=QSize(totalWidth,attrBox_->fullHeight);
 
     if(data.count() < 4)
+    {
         return;
+    }
 
 	//The data
 	int	val=data.at(2).toInt();

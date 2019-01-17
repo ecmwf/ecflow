@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2017 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -95,25 +95,26 @@ void ServerComThread::run()
         {
             case VTask::CommandTask:
             {
-                // call the client invoker with the saved command
                 UiLog(serverName_).dbg() << " COMMAND";
-                ArgvCreator argvCreator(command_);
-#ifdef _UI_SERVERCOMTHREAD_DEBUG
-                UiLog(serverName_).dbg() << " args="  << argvCreator.toString();
-#endif
-                ci_->invoke(argvCreator.argc(), argvCreator.argv());
-
-                /*ci_->news_local();
-                switch (ci_->server_reply().get_news())
+                //special treatment for variable add/change to allow values with "--"  characters.
+                //See issue ECFLOW-1414. The command_ string is supposed to contain these values:
+                //ecflow_client --alter change variable NAME VALUE PATH
+                if(command_.size() >=7 && command_[1] == "--alter" && command_[3] == "variable" &&
+                   (command_[2] == "change" || command_[2] == "add"))
                 {
-                    case ServerReply::NO_NEWS:
-                    case ServerReply::NEWS:
-                        ci_->sync_local();
-                        break;
-                    case ServerReply::DO_FULL_SYNC:
+                    ci_->alter(command_[6],command_[2],command_[3],command_[4],command_[5]);
+                }
 
-                break;
-                }*/
+                // call the client invoker with the saved command
+                else
+                {
+                    ArgvCreator argvCreator(command_);
+#ifdef _UI_SERVERCOMTHREAD_DEBUG
+                    UiLog(serverName_).dbg() << " args="  << argvCreator.toString();
+#endif
+                    ci_->invoke(argvCreator.argc(), argvCreator.argv());
+                }
+
                 break;
             }
 

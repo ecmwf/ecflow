@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -17,6 +17,7 @@
 # then comparing the two. If traversal was correct. the file should be the same
 
 import ecflow
+import ecflow_test_util as Test
 import os,fnmatch
             
 class Indentor:
@@ -194,9 +195,7 @@ def all_files(root, patterns='*', single_level=False, yield_folders=False):
             break    
         
 if __name__ == "__main__":
-    print("####################################################################")
-    print("Running ecflow version " + ecflow.Client().version() + " debug build(" + str(ecflow.debug_build()) +")")
-    print("####################################################################")
+    Test.print_test_start(os.path.basename(__file__))
  
     cwd = os.getcwd()
     #print cwd

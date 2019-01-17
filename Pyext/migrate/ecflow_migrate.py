@@ -4,7 +4,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2017 ECMWF.
+# Copyright 2009-2019 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -207,7 +207,7 @@ class MigrateForVariable(Migrator):
             else:
             
                 # process line, avoid ECF_URL_CMD as that could by error have uneven number of "'' i.e
-                #   edit ECF_URL_CMD '${BROWSER:=firefox} -remote 'openURL(%URL%'
+                #   edit ECF_URL_CMD '${BROWSER:=firefox} -new-tab %URL%'
                 # hence we use 
                 #    if no_of_label_quotes == 1: 
                 # instead of
