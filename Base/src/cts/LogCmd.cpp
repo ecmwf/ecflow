@@ -137,7 +137,7 @@ STC_Cmd_ptr LogCmd::doHandleRequest(AbstractServer* as) const
             break;
          }
          case LogCmd::PATH:  return PreAllocatedReply::string_cmd(  Log::instance()->path() ); break;
-			default : throw std::runtime_error( "Unrecognised log api command,") ;
+		 default : throw std::runtime_error( "Unrecognised log api command,") ;
 		}
 	}
 	return PreAllocatedReply::ok_cmd();

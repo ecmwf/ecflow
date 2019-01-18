@@ -712,11 +712,6 @@ node_ptr NodeContainer::find_relative_node( const std::vector< std::string >& pa
 	cout << "NodeContainer::find_relative_node name = '" << name() << "' pathToNode[0] = '" << pathToNode[0] << "'\n";
 #endif
 
- 	if (pathSize == 1 && name() == pathToNode[0]) {
- 		// Match the Container i.e family or suite
-   	return shared_from_this();
- 	}
-
  	// Must match all children
 	int index = 0;
  	size_t child_pos = 0 ; // unused
