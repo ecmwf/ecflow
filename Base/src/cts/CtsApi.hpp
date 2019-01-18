@@ -143,9 +143,6 @@ public:
    static std::string get_log_path();
    static std::string clearLog();
    static std::string flushLog();
-   static std::string enable_auto_flush();
-   static std::string disable_auto_flush();
-   static std::string query_auto_flush();
 	static std::string forceDependencyEval();
 
    static std::string stats();
