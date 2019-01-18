@@ -1,0 +1,16 @@
+# test node referencing in triggers
+#      o/ <node> == complete    i.e   a == complete   sibling    
+#      o/ ./<node> == complete  i.e  ./a == complete  sibling
+#      o/ ../<node> == complete i.e  ../a == complete means trigger nodes parent
+suite s1
+  family f1
+     family f2
+        family f3
+           family f4
+              task a
+                 trigger ../f4 == complete or ../f3 == complete  # cant have ../f4 and ../f3 at same level, should be ../../f3
+            endfamily   
+         endfamily
+      endfamily
+   endfamily
+endsuite

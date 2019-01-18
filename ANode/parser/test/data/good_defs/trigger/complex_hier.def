@@ -2,17 +2,24 @@
 #      o/ <node> == complete    i.e   a == complete   sibling    
 #      o/ ./<node> == complete  i.e  ./a == complete  sibling
 #      o/ ../<node> == complete i.e  ../a == complete means trigger nodes parent
+suite s0
+  edit FIRE_YMD '19000101'
+  task t1
+endsuite
 suite s1
   family f1
-     trigger f2/f3/f4/a == complete
+     trigger f2/f3/f4/a == complete or ../s0:FIRE_YMD == 19000101  # allow relative suite access
      family f2
         family f3
            family f4
               task a
                  event 1 theEventName
                  meter myMeter 0 100
-                 trigger ../f4 == complete or ./bb == complete or ../f3 == complete  # f4 immediate parent and bb is sibling ../f3 is parents parent
-               task bb
+                 trigger ./b == complete or c == complete or ../f4 == complete or ../../f3 == complete or ../../../f2 == aborted 
+               task b
+                  trigger ../../../../../s0 == complete or  ../../../../../s0/t1<flag>late
+               task c
+                  trigger ../../../../../s0:FIRE_YMD == 10 
             endfamily   
          endfamily
       endfamily
@@ -27,11 +34,12 @@ suite s1
          family f2
             family f3
                family f4
-                  # ..          -> /s1/f0/f1/f2    The initial .. means parents parent 
-                  # ../..       -> /s1/f0/f1
-                  # ../../..    -> /s1/f0
-                  # ../../../.. -> /s1
-                  trigger ../../../../f1/f2/f3/f4/a == complete
+                  # ..             -> f3 level
+                  # ../..          -> f2 level
+                  # ../../..       -> f1 level
+                  # ../../../..    -> f0 level
+                  # ../../../../.. -> suite level
+                  trigger ../../../../f1/f2/f3/f4/a == complete or ../../../../../s1/f1/f2/f3/f4/a == complete or ../../../../../s0 == complete
             endfamily
          endfamily
       endfamily
