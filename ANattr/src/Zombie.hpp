@@ -54,6 +54,7 @@ public:
 	        const std::string& jobsPassword,        // from child ipc
 	        const std::string& process_or_remote_id,// from child ipc
 	        int try_no,
+	        const std::string& host,                // The host where the client was invoked
 	        const std::string& user_cmd = ""        // user cmd that created this zombie
      );
 	Zombie();
@@ -81,6 +82,7 @@ public:
 	const std::string& path_to_task() const { return path_to_task_; }
    const std::string& process_or_remote_id() const { return process_or_remote_id_; }
    const std::string& user_cmd() const { return user_cmd_; }
+   const std::string& host() const { return host_; }
  	int try_no() const { return try_no_; }
 	int duration() const { return duration_; }
 	ecf::User::Action user_action() const;
@@ -99,7 +101,8 @@ public:
 /// mutators
 	void set_attr( const ZombieAttr& attr) { attr_ = attr;}
  	void set_process_or_remote_id( const std::string&  s) { process_or_remote_id_ =  s;}
-	void set_last_child_cmd( ecf::Child::CmdType c) { last_child_cmd_ =  c;}
+	void set_last_child_cmd( ecf::Child::CmdType c) { last_child_cmd_ =  c;} // user cmd that created this zombie
+	void set_host( const std::string& h ) { host_ =  h;}                     // The host where client/zombie was created
 	void set_type(ecf::Child::ZombieType zt) { zombie_type_ = zt; }
 
 	/// User action must take precedence over Zombie attribute settings on node tree
@@ -138,8 +141,9 @@ private:
   	std::string path_to_task_;             // set on construction
 	std::string jobs_password_;            // set on construction
 	std::string process_or_remote_id_;     // set on construction
-   std::string user_cmd_;                 // user cmd that created this zombie, empty otherwise
- 	bool user_action_set_{false};                   // Differentiate manual from automated, response, manual take precedence
+    std::string user_cmd_;                 // user cmd that created this zombie, empty otherwise
+    std::string host_;                     // The client host name
+ 	bool user_action_set_{false};            // Differentiate manual from automated, response, manual take precedence
 	ZombieAttr attr_;                        // Default or attribute obtained from node tree.
  	boost::posix_time::ptime  creation_time_;// When zombie was created. Needed to control lifetime
 

@@ -32,6 +32,7 @@ Zombie::Zombie( ecf::Child::ZombieType zombie_type,
                 const std::string& jobsPassword,
                 const std::string& process_or_remote_id,
                 int try_no,
+                const std::string& host,
                 const std::string& user_cmd
 )
 : user_action_(User::BLOCK),
@@ -44,6 +45,7 @@ Zombie::Zombie( ecf::Child::ZombieType zombie_type,
   jobs_password_(jobsPassword),
   process_or_remote_id_(process_or_remote_id),
   user_cmd_(user_cmd),
+  host_(host),
   user_action_set_(false),
   attr_(attr),
   creation_time_( Calendar::second_clock_time() )
@@ -63,6 +65,7 @@ bool Zombie::operator==(const Zombie& rhs) const
    if (jobs_password_ != rhs.jobs_password_) return false;
    if (process_or_remote_id_ != rhs.process_or_remote_id_) return false;
    if (user_cmd_ != rhs.user_cmd_) return false;
+   if (host_ != rhs.host_) return false;
    if (user_action_set_ != rhs.user_action_set_) return false;
    if (!(attr_ == rhs.attr_)) return false;
    return true;
@@ -202,6 +205,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
    string try_no("try_no");
    string user_action("action");
    string child_type("child");
+   string host("host");
    string explanation("explanation");
 
    size_t path_width = path.size();
@@ -213,6 +217,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
    size_t user_action_width = user_action.size();  // max of FOB,FAIL,ADOPT,BLOCK,REMOVE + (manual- | auto- )
    size_t child_type_width = child_type.size();
    size_t calls_width = calls.size();
+   size_t host_width = host.size();
    size_t explanation_width = explanation.size();
 
    std::string ecf_pid_expl =        "PID miss-match, password matches. Job scheduled twice. Check submitter";
@@ -230,6 +235,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
       rid_width = std::max(rid_width,z.process_or_remote_id().size());
       std::string no_of_calls = boost::lexical_cast<std::string>(z.calls());
       calls_width = std::max(calls_width,no_of_calls.size());
+      host_width = std::max(host_width,z.host().size());
 
       std::string try_no_int = boost::lexical_cast<std::string>(z.try_no());
       tryno_width = std::max(tryno_width,try_no_int.size());
@@ -259,6 +265,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
             << setw(user_action_width) << user_action << " "
             << setw(child_type_width) << child_type << " "
             << setw(calls_width) << calls << " "
+            << setw(host_width) << host << " "
             << setw(explanation_width) << explanation
    ;
 
@@ -287,6 +294,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
                 << setw(user_action_width)   << z.user_action_str() << " "
                 << setw(child_type_width)    << Child::to_string(z.last_child_cmd())  << " "
                 << setw(calls_width)         << z.calls() << " "
+                << setw(host_width)          << z.host() << " "
                 << setw(explanation_width)   << exp ;
       list.push_back(ss.str());
    }
@@ -306,6 +314,7 @@ void Zombie::serialize(Archive & ar, std::uint32_t const version )
        CEREAL_NVP(jobs_password_),
        CEREAL_NVP(process_or_remote_id_),
        CEREAL_NVP(user_cmd_),
+       CEREAL_NVP(host_),
        CEREAL_NVP(user_action_set_),
        CEREAL_NVP(attr_)
    );

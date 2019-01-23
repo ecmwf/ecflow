@@ -39,6 +39,9 @@ class ClientToServerCmd  {
 public:
    virtual ~ClientToServerCmd();
 
+   /// The host where the client was called
+   const std::string& hostname() const { return cl_host_;}
+
    /// The second print is for use by EditHistoryMgr when we have commands that take multiple paths
    /// The EditHistoryMgr records what command was applied to each node. However when logging the
    /// the command we do not want logs all the paths, for each node.(performance bottleneck
@@ -49,7 +52,7 @@ public:
    /// Print the command without trailing <user>@<host>. Used by Group command, avoids duplicate user@host for each child command
    virtual std::ostream& print_only(std::ostream& os ) const { return print(os); }
 
-   virtual bool equals(ClientToServerCmd* rhs) const = 0;
+   virtual bool equals(ClientToServerCmd* rhs) const;
 
    /// Called by the _server_ to service the client depending on the Command
    /// The server will pass itself down via the AbstractServer
@@ -124,7 +127,7 @@ public:
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv) const = 0;
 protected:
-   ClientToServerCmd() = default;
+   ClientToServerCmd();
 
    /// called by handleRequest, part of the template pattern
    virtual STC_Cmd_ptr doHandleRequest(AbstractServer*) const = 0;
@@ -169,10 +172,15 @@ private:
    mutable std::vector<weak_node_ptr> edit_history_nodes_;       // NOT persisted
    mutable std::vector<std::string>   edit_history_node_paths_;  // NOT persisted, used when deleting
 
+   std::string cl_host_; // The host where the client was called
+
 private:
    friend class cereal::access;
    template<class Archive>
-   void serialize(Archive & ar, std::uint32_t const version ){}
+   void serialize(Archive & ar, std::uint32_t const version )
+   {
+      ar( CEREAL_NVP(cl_host_) );
+   }
 };
 
 //=================================================================================
@@ -187,7 +195,7 @@ protected:
    : submittable_(nullptr),
      password_missmatch_(false), pid_missmatch_(false),
      path_to_submittable_(pathToSubmittable),
-     jobs_password_(jobsPassword),process_or_remote_id_(process_or_remote_id), try_no_(try_no){}
+     jobs_password_(jobsPassword),process_or_remote_id_(process_or_remote_id), try_no_(try_no){assert(!hostname().empty());}
 
    TaskCmd() = default;
 
@@ -575,7 +583,6 @@ public:
 
    static std::string get_user();
    const std::string& user() const { return user_;}
-   const std::string& hostname() const { return hostname_;}
    const std::string& passwd() const { return passwd_;}
 
    void setup_user_authentification(const std::string& user, const std::string& passwd) override;
@@ -608,7 +615,6 @@ protected:
 private:
    std::string user_;
    std::string passwd_;
-   std::string hostname_;
 
    friend class cereal::access;
    template<class Archive>
@@ -616,8 +622,7 @@ private:
    {
       ar(cereal::base_class< ClientToServerCmd >( this ),
          CEREAL_NVP(user_),
-         CEREAL_NVP(passwd_),
-         CEREAL_NVP(hostname_));
+         CEREAL_NVP(passwd_));
    }
 };
 

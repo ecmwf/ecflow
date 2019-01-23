@@ -41,9 +41,7 @@ bool TaskCmd::equals(ClientToServerCmd* rhs) const
 	if (jobs_password_ !=  the_rhs->jobs_password()) return false;
 	if (process_or_remote_id_ !=  the_rhs->process_or_remote_id()) return false;
 	if (try_no_ !=  the_rhs->try_no()) return false;
-
-	// avoid calling base equals, as task cmd's don't use User(user_) variables.
-	return true;
+	return ClientToServerCmd::equals(rhs);
 }
 
 // **********************************************************************************

@@ -94,8 +94,8 @@ bool ZombieCtrl::handle_path_zombie(
 		closest_matching_node->findParentZombie(Child::PATH, attr ); // Override default from node tree
 	}
 
-	Zombie new_zombie(Child::PATH,task_cmd->child_type(),attr,path_to_task,jobs_password,process_or_remote_id,task_cmd->try_no());
- 	zombies_.push_back( new_zombie );
+	Zombie new_zombie(Child::PATH,task_cmd->child_type(),attr,path_to_task,jobs_password,process_or_remote_id,task_cmd->try_no(),task_cmd->hostname());
+ 	zombies_.emplace_back( new_zombie );
 
  	/// The user action may end deleting the zombie just added. Depends on ZombieAttribute settings
 	return handle_user_actions(new_zombie,nullptr /*task*/,task_cmd,action_taken,theReply);
@@ -161,7 +161,7 @@ bool ZombieCtrl::handle_zombie(
 #ifdef DEBUG_ZOMBIE
 	std::cout << " Creating ECF Zombie:";
 #endif
-	Zombie new_zombie(zombie_type,child_type,attr,path_to_task,jobs_password,process_or_remote_id,task_cmd->try_no());
+	Zombie new_zombie(zombie_type,child_type,attr,path_to_task,jobs_password,process_or_remote_id,task_cmd->try_no(),task_cmd->hostname());
 	zombies_.push_back( new_zombie );
 
 	return handle_user_actions(new_zombie,task,task_cmd,action_taken,theReply);
@@ -203,6 +203,8 @@ bool ZombieCtrl::handle_existing_zombie(
 	}
 	theExistingZombie.set_attr( attr );                            // Update attribute stored on the zombie
 	theExistingZombie.set_last_child_cmd( task_cmd->child_type() );// The zombie stores the last child command.
+	if (theExistingZombie.host().empty())
+		theExistingZombie.set_host( task_cmd->hostname() );
 	theExistingZombie.increment_calls();                           // record how times server handled with zombie
 
 
@@ -394,7 +396,7 @@ void ZombieCtrl::add_user_zombies(const std::vector<Submittable*>& tasks,const s
   				ZombieAttr attr = ZombieAttr::get_default_attr(Child::USER); // get the default USER zombie attribute
   				t->findParentZombie(Child::USER, attr );                     // Override default from the node tree
 
- 				zombies_.emplace_back(Child::USER,Child::INIT,attr,t->absNodePath(),t->jobsPassword(),t->process_or_remote_id(),t->try_no(),user_cmd);
+ 				zombies_.emplace_back(Child::USER,Child::INIT,attr,t->absNodePath(),t->jobsPassword(),t->process_or_remote_id(),t->try_no(),"",user_cmd);
 
  		 	  	/// Mark task as zombie for xcdp
  		 	  	t->flag().set(ecf::Flag::ZOMBIE);

@@ -31,6 +31,7 @@
 #include "Str.hpp"
 #include "CmdContext.hpp"
 #include "EditHistoryMgr.hpp"
+#include "Host.hpp"
 
 using namespace std;
 using namespace boost;
@@ -38,7 +39,14 @@ using namespace ecf;
 
 //#define DEBUG_INVARIANTS 1
 
+ClientToServerCmd::ClientToServerCmd() : cl_host_(Host().name()) {}
+
 ClientToServerCmd::~ClientToServerCmd()= default;
+
+bool ClientToServerCmd::equals(ClientToServerCmd* rhs) const
+{
+	return hostname() == rhs->hostname();
+}
 
 STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
 {

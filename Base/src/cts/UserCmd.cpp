@@ -39,7 +39,8 @@ bool UserCmd::equals(ClientToServerCmd* rhs) const
 {
    auto* the_rhs = dynamic_cast< UserCmd* > ( rhs );
    if ( !the_rhs ) return false;
-   return user_ == the_rhs->user() && hostname_ == the_rhs->hostname();
+   if (user_ != the_rhs->user()) return false;
+   return ClientToServerCmd::equals(rhs);
 }
 
 bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
@@ -142,9 +143,7 @@ void UserCmd::setup_user_authentification(const std::string& user, const std::st
    user_ = user;
    passwd_ = passwd;
 
-   Host host;
-   hostname_ = host.name(); // host name is cached.
-
+   assert(!hostname().empty());
    assert(!user_.empty());
 }
 
@@ -201,7 +200,7 @@ void UserCmd::prompt_for_confirmation(const std::string& prompt)
 
 std::ostream& UserCmd::user_cmd(std::ostream& os, const std::string& the_cmd) const
 {
-   return os << the_cmd << " :" << user_<< "@" << hostname_;
+   return os << the_cmd << " :" << user_<< "@" << hostname();
 }
 
 //#define DEBUG_ME 1

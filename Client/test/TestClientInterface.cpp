@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.query("dstate","/suite","") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
 
 
-   Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"/path/to/task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1);
+   Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"/path/to/task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1,"host");
    BOOST_REQUIRE_MESSAGE( theClient.zombieGet() == 0,CtsApi::zombieGet() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieFob(z) == 0,    " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.zombieFail(z) == 0,   " should return 0\n" << theClient.errorMsg());

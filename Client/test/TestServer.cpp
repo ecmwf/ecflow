@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
-   Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"path_to_task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1);
+   Zombie z(Child::USER,ecf::Child::INIT,ZombieAttr::get_default_attr(Child::USER),"path_to_task","DUMMY_JOBS_PASSWORD", "DUMMY_PROCESS_OR_REMOTE_ID",1,"host");
    std::vector<std::string> suites; suites.emplace_back("suite1"); suites.emplace_back("made_up_suite");
 
    std::vector<std::string> nodes_to_delete;
