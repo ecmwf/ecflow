@@ -318,9 +318,9 @@
     		"label" : "Calls",
             "tooltip" : "Password of the job"
         },
-        "calls" : {
-        "label" : "Explanation",
-        "tooltip" : "Explanation"
+        "explanation" : {
+            "label" : "Explanation",
+            "tooltip" : "Explanation"
     }
     },
 
