@@ -153,6 +153,29 @@ std::ostream& operator<<(std::ostream& os, const Zombie& z)
 	return os;
 }
 
+std::string Zombie::explanation() const
+{
+   std::string ecf_pid_expl =        "PID miss-match, password matches. Job scheduled twice. Check submitter";
+   std::string ecf_pid_passwd_expl = "Both PID and password miss-match. Re-queue & submit of active job?";
+   std::string ecf_passwd_expl =     "Password miss-match, PID matches, system has re-cycled PID or hacked job file?";
+   std::string ecf_expl =            "Two init commands or task complete or aborted but receives another child cmd";
+   std::string ecf_user =            "Created by user action(";
+   std::string ecf_path =            "Task not found. Nodes replaced whilst jobs were running";
+   std::string exp;
+
+   switch (zombie_type_) {
+         case Child::USER:           exp = ecf_user; exp += user_cmd_; exp += ")"; break;
+         case Child::PATH:           exp = ecf_path ; break;
+         case Child::ECF:            exp = ecf_expl ; break;
+         case Child::ECF_PID:        exp = ecf_pid_expl ; break;
+         case Child::ECF_PID_PASSWD: exp = ecf_pid_passwd_expl ; break;
+         case Child::ECF_PASSWD:     exp = ecf_passwd_expl ; break;
+         case Child::NOT_SET:        break;
+   }
+
+   return exp;
+}
+
 
 std::string Zombie::pretty_print(const std::vector<Zombie>& zombies,int indent)
 {
@@ -164,6 +187,7 @@ std::string Zombie::pretty_print(const std::vector<Zombie>& zombies,int indent)
   }
   return ss.str();
 }
+
 
 void Zombie::pretty_print(const std::vector<Zombie>& zombies,
 			  std::vector<std::string>& list,

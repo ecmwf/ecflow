@@ -173,7 +173,9 @@ QVariant ZombieModel::data( const QModelIndex& index, int role ) const
             return QString::fromStdString(ecf::Child::to_string(data_[row].last_child_cmd()));
 		else if(id == "pid")
             return QString::fromStdString(data_[row].process_or_remote_id());
-		else
+        else if(id == "explanation")
+            return QString::fromStdString(data_[row].explanation());
+        else
 			return QVariant();
     }
 

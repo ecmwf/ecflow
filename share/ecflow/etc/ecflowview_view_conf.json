@@ -316,8 +316,12 @@
     	},
     	"calls" : {
     		"label" : "Calls",
-    		"tooltip" : "password of the job"
-    	}   	
+            "tooltip" : "Password of the job"
+        },
+        "calls" : {
+        "label" : "Explanation",
+        "tooltip" : "Explanation"
+    }
     },
 
     "output_columns": {

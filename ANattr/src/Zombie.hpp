@@ -84,7 +84,8 @@ public:
  	int try_no() const { return try_no_; }
 	int duration() const { return duration_; }
 	ecf::User::Action user_action() const;
-	std::string user_action_str() const;
+    std::string user_action_str() const;
+    std::string explanation() const;
 
 
 	const boost::posix_time::ptime&  creation_time() const { return creation_time_; }
