@@ -302,7 +302,11 @@
     		"label" : "Pid",
     		"tooltip" : "Process or remote id"
     	},
-    	"tryno" : {
+        "host" : {
+            "label" : "Host",
+            "tooltip" : "Host"
+        },
+        "tryno" : {
     		"label" : "Try no",
     		"tooltip" : "Try number"
     	},
