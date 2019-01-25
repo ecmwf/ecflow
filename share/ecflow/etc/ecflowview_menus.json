@@ -603,7 +603,7 @@
             "name"           : "Archive children",
             "visible_for"    : "(suite or family)",
             "enabled_for"    : "(not is_archived and not is_restored)",
-            "command"        : "ecflow_client --alter set_flag archived <full_name>",
+            "command"        : "ecflow_client --archive <full_name>",
             "question"       : "This command will archive the children for everyone viewing this server. Ok?",
             "default_answer" : "No",
             "status_tip"     : "__cmd__"
@@ -614,7 +614,7 @@
             "name"           : "Restore children",
             "visible_for"    : "(suite or family)",
             "enabled_for"    : "is_archived",
-            "command"        : "ecflow_client --alter clear_flag archived <full_name>",
+            "command"        : "ecflow_client --restore <full_name>",
             "status_tip"     : "__cmd__"
         },
 
