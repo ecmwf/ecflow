@@ -95,6 +95,12 @@ void ServerComThread::run()
         {
             case VTask::CommandTask:
             {
+                //will automatically call ci_->sync_local() after he
+                //command finished!!!
+
+                //we need to lock the mitex on the defs
+                ServerDefsAccess defsAccess(server_);
+
                 UiLog(serverName_).dbg() << " COMMAND";
                 //special treatment for variable add/change to allow values with "--"  characters.
                 //See issue ECFLOW-1414. The command_ string is supposed to contain these values:
@@ -113,6 +119,16 @@ void ServerComThread::run()
                     UiLog(serverName_).dbg() << " args="  << argvCreator.toString();
 #endif
                     ci_->invoke(argvCreator.argc(), argvCreator.argv());
+                }
+
+                //ci_->sync_locale() was called!! We need to perform the same checks
+                //that we do in ServerComThread::sync_local() - see the comments there!!
+
+                if(rescanNeed_ || ci_->server_reply().full_sync())
+                {
+                    UiLog(serverName_).dbg() << " rescan needed!";
+                    detach(defsAccess.defs());
+                    attach(defsAccess.defs());
                 }
 
                 break;
@@ -263,6 +279,7 @@ void ServerComThread::run()
         errorString = ci_->server_reply().get_string();
     }
 
+    //we  failed or we have a string returned
     if (isMessage)
     {
         // note that we need to emit a signal rather than directly call a message function
@@ -361,7 +378,8 @@ void ServerComThread::reset()
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
     //This function can only be called during a SYNC_LOCAl task!!!!
-    assert(taskType_ == VTask::SyncTask || taskType_ == VTask::WhySyncTask);
+    assert(taskType_ == VTask::CommandTask ||
+           taskType_ == VTask::SyncTask || taskType_ == VTask::WhySyncTask);
 
     std::vector<ecf::Aspect::Type> typesCopy=types;
 

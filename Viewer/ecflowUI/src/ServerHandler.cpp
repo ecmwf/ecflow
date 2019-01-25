@@ -91,6 +91,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
         client_=nullptr;
     }
 
+    client_->set_auto_sync(true); //will call sync_local() after each command!!!
     client_->set_retry_connection_period(1);
     client_->set_connection_attempts(1);
 	client_->set_throw_on_error(true);
@@ -861,19 +862,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 	//See which type of task finished. What we do now will depend on that.
 	switch(task->type())
 	{
-		case VTask::CommandTask:
-		{
-			// a command was sent - we should now check whether there have been
-			// any updates on the server (there should have been, because we
-			// just did something!)
-
-            UiLogS(this).dbg() << " command finished - send SYNC command";
-			//comQueue_->addNewsTask();
-			comQueue_->addSyncTask();
-            updateRefreshTimer();
-			break;
-		}
-		case VTask::NewsTask:
+        case VTask::NewsTask:
 		{
 			// we've just asked the server if anything has changed - has it?
 
@@ -927,10 +916,29 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			}
 			break;
 		}
+
+        //WhySyncTask performs sync_local(true).
+        //CommandTask silently performs sync_local().
+        //So in both cases we have to do the same post-processing as
+        //with SyncTask!!!!!
 		case VTask::SyncTask:
         case VTask::WhySyncTask:
+        case VTask::CommandTask:
 		{
-            UiLogS(this).dbg() << " sync finished";
+            if(task->type() == VTask::CommandTask)
+            {
+                UiLogS(this).dbg() << " command + sync finished";
+                updateRefreshTimer();
+            }
+            else if(task->type() == VTask::WhySyncTask)
+            {
+                UiLogS(this).dbg() << " whysync finished";
+                updateRefreshTimer();
+            }
+            else
+            {
+                UiLogS(this).dbg() << " sync finished";
+            }
 
 			//This typically happens when a suite is added/removed
 			if(serverReply.full_sync() || vRoot_->isEmpty())
@@ -939,18 +947,6 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 
                 //This will update the suites + restart the timer
 				rescanTree();
-
-#if 0
-                {
-                    ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-                    defs_ptr defs = defsAccess.defs();
-                    if(defs)
-                    {
-                        std::cout << defs;
-                    }
-                }
-#endif
-
 			}
 			else
 			{
@@ -1069,6 +1065,7 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 	switch(task->type())
 	{
 		case VTask::SyncTask:
+        case VTask::WhySyncTask:
 			connectionLost(errMsg);
 			break;
 
@@ -1091,6 +1088,8 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 		}
 		case VTask::CommandTask:
 		{
+            //if the command failed sync local is not called after it sp we need to
+            //call it!
             comQueue_->addSyncTask();
             task->reply()->setErrorText(errMsg);
 			task->status(VTask::ABORTED);
