@@ -158,7 +158,7 @@ void ServerComThread::run()
             //This is called during reset
             case VTask::ResetTask:
             {
-                UiLog(serverName_).dbg() << " SYNC";
+                UiLog(serverName_).dbg() << " RESET";
                 reset();
                 break;
             }
@@ -365,7 +365,8 @@ void ServerComThread::reset()
     }
 
     UiLog(serverName_).dbg() << " sync begin";
-    if (!ci_->is_auto_sync_enabled())  ci_->sync_local();  // temp
+    ci_->sync_local();
+    //if (!ci_->is_auto_sync_enabled())  ci_->sync_local();  // temp
     UiLog(serverName_).dbg() << " sync end";
 
     //Attach the nodes to the observer
