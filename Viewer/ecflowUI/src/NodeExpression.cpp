@@ -127,7 +127,8 @@ bool NodeExpressionParser::isNodeHasAttribute(const std::string &str) const
 bool NodeExpressionParser::isNodeFlag(const std::string &str) const
 {
     if (str == "is_late" || str == "has_message" ||
-        str == "is_rerun" || str == "is_waiting" || str == "is_zombie" || str == "is_migrated" ||
+        str == "is_rerun" || str == "is_waiting" || str == "is_zombie" ||
+        str == "is_archived" || str == "is_restored" ||
         str ==  "is_ecfcmd_failed" || str == "is_killed")
         return true;
 
@@ -921,8 +922,11 @@ bool NodeFlagCondition::execute(VItem* item)
 		else if(nodeFlagName_ == "is_waiting")
             return vnode->isFlagSet(ecf::Flag::WAIT);
 
-        else if(nodeFlagName_ == "is_migrated")
+        else if(nodeFlagName_ == "is_archived")
             return vnode->isFlagSet(ecf::Flag::ARCHIVED);
+
+        else if(nodeFlagName_ == "is_restored")
+            return vnode->isFlagSet(ecf::Flag::RESTORED);
 
         else if(nodeFlagName_ == "is_ecfcmd_failed")
             return vnode->isFlagSet(ecf::Flag::JOBCMD_FAILED);

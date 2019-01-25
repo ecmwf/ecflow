@@ -91,6 +91,22 @@
                 "icon"  : {
                     "default" : "icon_killed.svg"
                 }
+            },
+            "archived" : {
+                "label" : "Archived children",
+                "tooltip" : "Child nodes archived by user",
+                "shortDesc" : "Children archived by user",
+                "icon"  : {
+                    "default" : "icon_children_hidden.svg"
+                }
+            },
+            "restored" : {
+                "label" : "Restored children",
+                "tooltip" : "Child nodes restored by user",
+                "shortDesc" : "Children restored by user",
+                "icon"  : {
+                    "default" : "icon_children_hidden.svg"
+                }
             }
      }
 }

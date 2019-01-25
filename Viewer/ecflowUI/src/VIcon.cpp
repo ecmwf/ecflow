@@ -121,6 +121,20 @@ public:
     bool show(VNode*) override;
 };
 
+class VArchivedIcon : public VIcon
+{
+public:
+    explicit VArchivedIcon(const std::string& name) : VIcon(name) {}
+    bool show(VNode*) override;
+};
+
+class VRestoredIcon : public VIcon
+{
+public:
+    explicit VRestoredIcon(const std::string& name) : VIcon(name) {}
+    bool show(VNode*) override;
+};
+
 //==========================================================
 //
 // Create VIcon instances
@@ -139,6 +153,8 @@ static VWaitIcon waitIcon("wait");
 static VZombieIcon zombieIcon("zombie");
 static VKilledIcon killedIcon("killed");
 static VSlowIcon slowIcon("slow");
+static VArchivedIcon archivedIcon("archived");
+static VRestoredIcon restoredIcon("restored");
 
 //==========================================================
 //
@@ -520,3 +536,28 @@ bool VKilledIcon::show(VNode *n)
     return n->isFlagSet(ecf::Flag::KILLED);
 }
 
+//==========================================================
+// Archived
+//==========================================================
+
+//Node only?
+bool VArchivedIcon::show(VNode *n)
+{
+    if(!n || n->isServer())
+        return false;
+
+    return n->isFlagSet(ecf::Flag::ARCHIVED);
+}
+
+//==========================================================
+// Restored
+//==========================================================
+
+//Node only?
+bool VRestoredIcon::show(VNode *n)
+{
+    if(!n || n->isServer())
+        return false;
+
+    return n->isFlagSet(ecf::Flag::RESTORED);
+}
