@@ -91,14 +91,6 @@
                 "icon"  : {
                     "default" : "icon_killed.svg"
                 }
-            },
-            "migrated" : {
-                "label" : "Hidden children",
-                "tooltip" : "Child nodes hidden by user",
-                "shortDesc" : "Children hidden by user",
-                "icon"  : {
-                    "default" : "icon_children_hidden.svg"
-                }
             }
      }
 }

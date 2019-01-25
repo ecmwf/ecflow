@@ -600,26 +600,6 @@
 
         {
             "menu"           : "Special",
-            "name"           : "Hide children",
-            "visible_for"    : "(suite or family)",
-            "enabled_for"    : "(not is_migrated)",
-            "command"        : "ecflow_client --alter set_flag migrated <full_name>",
-            "question"       : "This command will hide the children for everyone viewing this server. Ok?",
-            "default_answer" : "No",
-            "status_tip"     : "__cmd__"
-        },
-
-        {
-            "menu"           : "Special",
-            "name"           : "Show children",
-            "visible_for"    : "(suite or family)",
-            "enabled_for"    : "is_migrated",
-            "command"        : "ecflow_client --alter clear_flag migrated <full_name>",
-            "status_tip"     : "__cmd__"
-        },
-
-        {
-            "menu"           : "Special",
             "name"           : "-"
         },
 

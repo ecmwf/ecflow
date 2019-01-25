@@ -121,13 +121,6 @@ public:
     bool show(VNode*) override;
 };
 
-class VMigratedIcon : public VIcon
-{
-public:
-    explicit VMigratedIcon(const std::string& name) : VIcon(name) {}
-    bool show(VNode*) override;
-};
-
 //==========================================================
 //
 // Create VIcon instances
@@ -146,7 +139,6 @@ static VWaitIcon waitIcon("wait");
 static VZombieIcon zombieIcon("zombie");
 static VKilledIcon killedIcon("killed");
 static VSlowIcon slowIcon("slow");
-static VMigratedIcon migratedIcon("migrated");
 
 //==========================================================
 //
@@ -528,15 +520,3 @@ bool VKilledIcon::show(VNode *n)
     return n->isFlagSet(ecf::Flag::KILLED);
 }
 
-//==========================================================
-// Migrated
-//==========================================================
-
-bool VMigratedIcon::show(VNode *n)
-{
-    if(n && (n->isSuite() || n->isFamily()))
-    {
-        return n->isFlagSet(ecf::Flag::ARCHIVED);
-    }
-    return false;
-}
