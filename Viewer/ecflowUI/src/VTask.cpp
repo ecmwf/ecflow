@@ -66,7 +66,7 @@ const std::string& VTask::typeString() const
 		names[NoTask]="notask";
 		names[CommandTask]="command";
 		names[OverviewTask]="overview";
-		names[WhyTask]="why";
+        names[WhySyncTask]="whysync";
 		names[ManualTask]="manual";
 		names[ScriptTask]="script";
 		names[JobTask]="job";

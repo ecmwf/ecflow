@@ -104,10 +104,16 @@ void WhyItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
+    messageLabel_->hide();
+
     //set the info. we do not need to observe the node!!!
     info_=info;
 
-    load();
+    //Info must be a node
+    if(info_)
+    {
+        infoProvider_->info(info_);
+    }
 }
 
 void WhyItemWidget::load()
@@ -123,6 +129,27 @@ void WhyItemWidget::clearContents()
 {
 	InfoPanelItem::clear();
 	textEdit_->clear();
+}
+
+void WhyItemWidget::infoReady(VReply* reply)
+{
+    Q_ASSERT(reply);
+    messageLabel_->clear();
+    messageLabel_->hide();
+    load();
+}
+
+void WhyItemWidget::infoFailed(VReply* reply)
+{
+    QString s="Failed to refresh server before building the Why? output.\
+                     Time-related attributes might show out-of-date values.";
+
+    QString err=QString::fromStdString(reply->errorText());
+    if(!err.isEmpty())
+        s = s + "\n" + err;
+
+    messageLabel_->showWarning(s);
+    load();
 }
 
 QString WhyItemWidget::why() const

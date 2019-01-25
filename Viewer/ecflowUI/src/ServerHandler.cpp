@@ -532,6 +532,7 @@ void ServerHandler::run(VTask_ptr task)
 	case VTask::ScriptEditTask:
 	case VTask::ScriptSubmitTask:
 	case VTask::SuiteListTask:
+    case VTask::WhySyncTask:
     case VTask::ZombieListTask:
     case VTask::ZombieCommandTask:
 		comQueue_->addTask(task);
@@ -927,6 +928,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			break;
 		}
 		case VTask::SyncTask:
+        case VTask::WhySyncTask:
 		{
             UiLogS(this).dbg() << " sync finished";
 
@@ -954,7 +956,11 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			{
                 broadcast(&ServerObserver::notifyEndServerSync);
 			}
-			break;
+
+            //needed for WhySyncTask
+            task->status(VTask::FINISHED);
+
+            break;
 		}
 
 		case VTask::ResetTask:

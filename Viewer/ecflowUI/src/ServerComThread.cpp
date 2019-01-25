@@ -132,6 +132,13 @@ void ServerComThread::run()
                 break;
             }
 
+            case VTask::WhySyncTask:
+            {
+                UiLog(serverName_).dbg() << " WHYSYNC";
+                sync_local(true);
+                break;
+            }
+
             //This is called during reset
             case VTask::ResetTask:
             {
@@ -228,7 +235,7 @@ void ServerComThread::run()
             case VTask::ZombieListTask:
                 UiLog(serverName_).dbg() << " ZOMBIES";
                 ci_->zombieGet();
-                break;
+                break;  
 
             case VTask::LogOutTask:
                 UiLog(serverName_).dbg() << " LOGOUT";
@@ -279,14 +286,14 @@ void ServerComThread::run()
 }
 
 
-void ServerComThread::sync_local()
+void ServerComThread::sync_local(bool sync_suite_clock)
 {
     //For this part we need to lock the mutex on defs
     {
         ServerDefsAccess defsAccess(server_);
 
         UiLog(serverName_).dbg() << "ComThread::sync_local --> sync begin";
-        ci_->sync_local();
+        ci_->sync_local(sync_suite_clock);
         UiLog(serverName_).dbg() << " sync end";
 
         //If a rescan or fullscan is needed we have either added/remove nodes or deleted the defs.
@@ -354,7 +361,7 @@ void ServerComThread::reset()
 void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Type>& types)
 {
     //This function can only be called during a SYNC_LOCAl task!!!!
-    assert(taskType_ == VTask::SyncTask);
+    assert(taskType_ == VTask::SyncTask || taskType_ == VTask::WhySyncTask);
 
     std::vector<ecf::Aspect::Type> typesCopy=types;
 

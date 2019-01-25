@@ -31,6 +31,11 @@ public:
 	QWidget* realWidget() override;
     void clearContents() override;
 
+    //From VInfoPresenter
+    void infoReady(VReply*) override;
+    void infoFailed(VReply*) override;
+    void infoProgress(VReply*) override {}
+
     void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
     void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 

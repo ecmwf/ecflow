@@ -36,7 +36,7 @@ typedef std::shared_ptr<VTask> VTask_ptr;
 class VTask  : public std::enable_shared_from_this<VTask>
 {
 public:
-	enum Type {NoTask,CommandTask,OverviewTask,WhyTask,ManualTask,ScriptTask,
+    enum Type {NoTask,CommandTask,OverviewTask,WhySyncTask,ManualTask,ScriptTask,
 		       JobTask,MessageTask,OutputTask,StatsTask,NewsTask,SyncTask,ResetTask,SuiteAutoRegisterTask,
 			   SuiteListTask,ScriptEditTask,ScriptPreprocTask,ScriptSubmitTask,HistoryTask,LogOutTask,
                ZombieListTask,ZombieCommandTask};
