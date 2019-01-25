@@ -11,7 +11,8 @@
     <file>../images/add_info.svg</file>
     <file>../images/add_table.svg</file>
     <file>../images/add_tree.svg</file>
-    <file alias="icon_calendar.svg">../images/icon_calendar.svg</file>   
+    <file alias="icon_archived.svg">../images/icon_archived.svg</file>
+    <file alias="icon_calendar.svg">../images/icon_calendar.svg</file>
     <file alias="icon_clock.svg">../images/icon_clock.svg</file>     
     <file alias="icon_clock_free.svg">../images/icon_clock_free.svg</file>
     <file alias="icon_complete.svg">../images/icon_complete.svg</file>
@@ -20,7 +21,9 @@
     <file alias="icon_children_hidden.svg">../images/icon_children_hidden.svg</file>
     <file alias="icon_node_log.svg">../images/icon_node_log.svg</file>
     <file alias="icon_rerun.svg">../images/icon_rerun.svg</file>
+    <file alias="icon_restored.svg">../images/icon_restored.svg</file>
     <file alias="icon_slow.svg">../images/icon_slow.svg</file>   
+    <file alias="icon_slow_job_creation.svg">../images/icon_slow_job_creation.svg</file>
     <file alias="icon_waiting.svg">../images/icon_waiting.svg</file>  
     <file alias="icon_zombie.svg">../images/icon_zombie.svg</file>  
     <file>../images/arrow_up.svg</file>

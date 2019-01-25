@@ -135,6 +135,13 @@ public:
     bool show(VNode*) override;
 };
 
+class VSlowJobCreationIcon : public VIcon
+{
+public:
+    explicit VSlowJobCreationIcon(const std::string& name) : VIcon(name) {}
+    bool show(VNode*) override;
+};
+
 //==========================================================
 //
 // Create VIcon instances
@@ -155,7 +162,7 @@ static VKilledIcon killedIcon("killed");
 static VSlowIcon slowIcon("slow");
 static VArchivedIcon archivedIcon("archived");
 static VRestoredIcon restoredIcon("restored");
-
+static VSlowJobCreationIcon slowJobCreationIcon("slow_job");
 //==========================================================
 //
 // The VIcon baseclass
@@ -560,4 +567,17 @@ bool VRestoredIcon::show(VNode *n)
         return false;
 
     return n->isFlagSet(ecf::Flag::RESTORED);
+}
+
+//==========================================================
+// Slow job creation
+//==========================================================
+
+//Node only?
+bool VSlowJobCreationIcon::show(VNode *n)
+{
+    if(!n || n->isServer())
+        return false;
+
+    return n->isFlagSet(ecf::Flag::THRESHOLD);
 }

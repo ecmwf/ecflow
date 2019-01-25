@@ -97,7 +97,7 @@
                 "tooltip" : "Child nodes archived by user",
                 "shortDesc" : "Children archived by user",
                 "icon"  : {
-                    "default" : "icon_children_hidden.svg"
+                    "default" : "icon_archived.svg"
                 }
             },
             "restored" : {
@@ -105,7 +105,15 @@
                 "tooltip" : "Child nodes restored by user",
                 "shortDesc" : "Children restored by user",
                 "icon"  : {
-                    "default" : "icon_children_hidden.svg"
+                    "default" : "icon_restored.svg"
+                }
+            },
+            "slow_creation" : {
+                "label" : "Slow job creation",
+                "tooltip" : "Job ceration takes too long time",
+                "shortDesc" : "Slow job creation",
+                "icon"  : {
+                    "default" : "icon_slow_job_creation.svg"
                 }
             }
      }
