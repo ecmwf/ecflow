@@ -108,7 +108,7 @@
                     "default" : "icon_restored.svg"
                 }
             },
-            "slow_creation" : {
+            "slow_job" : {
                 "label" : "Slow job creation",
                 "tooltip" : "Job ceration takes too long time",
                 "shortDesc" : "Slow job creation",
