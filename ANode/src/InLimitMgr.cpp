@@ -29,6 +29,12 @@
 using namespace ecf;
 using namespace std;
 
+void InLimitMgr::reset(){
+	for(size_t i = 0; i < vec_.size(); i++) {
+		vec_[i].set_incremented(false);
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 InLimitMgr& InLimitMgr::operator=(const InLimitMgr& rhs)

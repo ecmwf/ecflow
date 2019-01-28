@@ -264,6 +264,8 @@ void Node::begin()
       markHybridTimeDependentsAsComplete();
    }
 
+   inLimitMgr_.reset(); // new to 5.0.0 clear inlimit.incremented() flag
+
    // DO *NOT* call update_generated_variables(). Called on a type specific bases, for begin
    // Typically we need only call update_generated_variables() for a task, at job creation time.
    // so that ECF_OUT, ECF_TRYNO, ECF_JOBOUT, ECF_PASS(paswd_) can be updated.
@@ -339,6 +341,7 @@ void Node::requeue(Requeue_args& args)
    if (misc_attrs_) misc_attrs_->requeue();
 
    for(auto & limit : limits_) { limit->reset(); }
+   inLimitMgr_.reset(); // new to 5.0.0 clear inlimit.incremented() flag
 
    // ECFLOW-196, ensure the re-queue release tokens held by Limits higher up the tree.
    // Note: Its safe to call decrementInLimit, even when no limit consumed

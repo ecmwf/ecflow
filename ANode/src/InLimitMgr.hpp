@@ -40,6 +40,9 @@ public:
    // needed by node copy constructor
    void set_node(Node* n) { node_ = n; }
 
+// Used by begin/re-queue
+   void reset(); // clear incremented flag, for family limited nodes.
+
 // standard functions: ==============================================
    InLimitMgr& operator=(const InLimitMgr&);
  	std::ostream& print(std::ostream&) const;

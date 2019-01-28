@@ -1,32 +1,32 @@
 suite test
- limit l1 2
+ limit l1 1
  family f1
-     inlimit -n l1
+     inlimit -n l1 
      task t1
      task t2
  endfamily
  family f2
-     inlimit -n l1
+     inlimit -n l1 
      task t1
      task t2
  endfamily
  family f3
-     inlimit -n l1
+     inlimit -n l1 
      task t1
      task t2
  endfamily
  family f4
-     inlimit -n l1
+     inlimit -n l1 
      task t1
      task t2
  endfamily
  family f5
-     inlimit -n l1
+     inlimit -n l1 
      task t1
      task t2
  endfamily
  family f6
-     inlimit -n l1
+     inlimit -n l1 
      task t1
      task t2
  endfamily
