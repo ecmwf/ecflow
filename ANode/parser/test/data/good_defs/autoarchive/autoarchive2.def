@@ -1,0 +1,39 @@
+suite test
+ limit fam 1
+ family f1
+     inlimit -n fam 
+     autoarchive 0      # archive immediately after complete
+     task t1
+     task t2
+ endfamily
+ family f2
+     inlimit -n fam 
+     autoarchive 0      # archive immediately after complete
+     task t1
+     task t2
+ endfamily
+ family f3
+     inlimit -n fam 
+     autoarchive 0      # archive immediately after complete
+     task t1
+     task t2
+ endfamily
+ family f4
+     inlimit -n fam 
+     autoarchive 0      # archive immediately after complete
+     task t1
+     task t2
+ endfamily
+ family f5
+     inlimit -n fam 
+     autoarchive 0      # archive immediately after complete
+     task t1
+     task t2
+ endfamily
+endsuite
+
+#suite test2
+#  task t1
+#     trigger /test/f1<flag>late and /test/f2<flag>late
+#     autorestore /test/f1 /test/f2
+#endsuite
