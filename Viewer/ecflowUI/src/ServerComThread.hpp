@@ -61,7 +61,6 @@ Q_SIGNALS:
 protected:
 	void run() override;
 	void reset();
-    void sync_local(bool sync_suite_clock = false);
 
 private:
     void attach();

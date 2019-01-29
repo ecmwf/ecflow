@@ -91,180 +91,219 @@ void ServerComThread::run()
 
     try
     {
-        switch (taskType_)
+        // define the tasks that will explicitly/implicitly call ci_->sync_local()
+        std::set<VTask::Type> sync_tasks = {VTask::CommandTask, VTask::SyncTask,
+                      VTask::WhySyncTask,VTask::ScriptSubmitTask,VTask::ZombieCommandTask};
+
+        // this is called during reset - it requires a special treatment
+        if(taskType_  == VTask::ResetTask)
         {
-            case VTask::CommandTask:
+            UiLog(serverName_).dbg() << " RESET";
+            reset();
+        }
+
+        // logout is also special!!!
+        else if(taskType_  == VTask::LogOutTask)
+        {
+            UiLog(serverName_).dbg() << " LOGOUT";
+            detach();
+            if(ci_->client_handle() > 0)
             {
-                //will automatically call ci_->sync_local() after he
-                //command finished!!!
+                ci_->ch1_drop();
+            }
+        }
 
-                //we need to lock the mitex on the defs
-                ServerDefsAccess defsAccess(server_);
+        // tasks that will explicitly/implicitly call ci_->sync_local()
+        else if(sync_tasks.find(taskType_) != sync_tasks.end())
+        {
+            //we need to lock the mutex on the defs
+            ServerDefsAccess defsAccess(server_);
 
-                UiLog(serverName_).dbg() << " COMMAND";
-                //special treatment for variable add/change to allow values with "--"  characters.
-                //See issue ECFLOW-1414. The command_ string is supposed to contain these values:
-                //ecflow_client --alter change variable NAME VALUE PATH
-                if(command_.size() >=7 && command_[1] == "--alter" && command_[3] == "variable" &&
-                   (command_[2] == "change" || command_[2] == "add"))
+            switch(taskType_)
+            {
+                case VTask::CommandTask:
                 {
-                    ci_->alter(command_[6],command_[2],command_[3],command_[4],command_[5]);
-                }
+                    //will automatically call ci_->sync_local() after the
+                    //command finished!!!
 
-                // call the client invoker with the saved command
-                else
-                {
-                    ArgvCreator argvCreator(command_);
+                    UiLog(serverName_).dbg() << " COMMAND";
+                    //special treatment for variable add/change to allow values with "--"  characters.
+                    //See issue ECFLOW-1414. The command_ string is supposed to contain these values:
+                    //ecflow_client --alter change variable NAME VALUE PATH
+                    if(command_.size() >=7 && command_[1] == "--alter" && command_[3] == "variable" &&
+                       (command_[2] == "change" || command_[2] == "add"))
+                    {
+                        ci_->alter(command_[6],command_[2],command_[3],command_[4],command_[5]);
+                    }
+
+                    // call the client invoker with the saved command
+                    else
+                    {
+                        ArgvCreator argvCreator(command_);
 #ifdef _UI_SERVERCOMTHREAD_DEBUG
-                    UiLog(serverName_).dbg() << " args="  << argvCreator.toString();
+                        UiLog(serverName_).dbg() << " args="  << argvCreator.toString();
 #endif
-                    ci_->invoke(argvCreator.argc(), argvCreator.argv());
+                        ci_->invoke(argvCreator.argc(), argvCreator.argv());
+                    }
+                    break;
                 }
 
-                //ci_->sync_locale() was called!! We need to perform the same checks
-                //that we do in ServerComThread::sync_local() - see the comments there!!
-
-                if(rescanNeed_ || ci_->server_reply().full_sync())
+                case VTask::SyncTask:
                 {
-                    UiLog(serverName_).dbg() << " rescan needed!";
-                    detach(defsAccess.defs());
-                    attach(defsAccess.defs());
+                    UiLog(serverName_).dbg() << " SYNC";
+                    UiLog(serverName_).dbg() << " sync begin";
+                    ci_->sync_local();
+                    UiLog(serverName_).dbg() << " sync end";
+                    break;
                 }
 
-                break;
-            }
+                case VTask::WhySyncTask:
+                {
+                    UiLog(serverName_).dbg() << " WHYSYNC";
+                    UiLog(serverName_).dbg() <<  "sync begin";
+                    ci_->sync_local(true); //sync_suite_clock
+                    UiLog(serverName_).dbg() << " sync end";
+                    break;
+                }
 
-            case VTask::NewsTask:
-            {
-                UiLog(serverName_).dbg() << " NEWS";
-                ci_->news_local(); // call the server
-                break;
-            }
-
-            case VTask::SyncTask:
-            {
-                UiLog(serverName_).dbg() << " SYNC";
-                sync_local();
-                break;
-            }
-
-            case VTask::WhySyncTask:
-            {
-                UiLog(serverName_).dbg() << " WHYSYNC";
-                sync_local(true);
-                break;
-            }
-
-            //This is called during reset
-            case VTask::ResetTask:
-            {
-                UiLog(serverName_).dbg() << " RESET";
-                reset();
-                break;
-            }
-
-            case VTask::JobTask:
-            case VTask::ManualTask:
-            case VTask::ScriptTask:
-            case VTask::OutputTask:
-            {
-                UiLog(serverName_).dbg() << " FILE" << " " << params_["clientPar"];
-                if(maxLineNum_ < 0)
-                    ci_->file(nodePath_,params_["clientPar"]);
-                else
-                    ci_->file(nodePath_,params_["clientPar"],boost::lexical_cast<std::string>(maxLineNum_));
-
-                break;
-            }
-
-            case VTask::MessageTask:
-            {
-                UiLog(serverName_).dbg() << " EDIT HISTORY";
-                ci_->edit_history(nodePath_);
-                break;
-            }
-
-            case VTask::StatsTask:
-            {
-                UiLog(serverName_).dbg() << " STATS";
-                ci_->stats();
-                break;
-            }
-
-            case VTask::HistoryTask:
-            {
-                UiLog(serverName_).dbg() << " SERVER LOG";
-                ci_->getLog(100);
-                break;
-            }
-
-            case VTask::ScriptPreprocTask:
-                UiLog(serverName_).dbg() << " SCRIP PREPROCESS";
-                ci_->edit_script_preprocess(nodePath_);
-                break;
-
-            case VTask::ScriptEditTask:
-                UiLog(serverName_).dbg() << " SCRIP EDIT";
-                ci_->edit_script_edit(nodePath_);
-                break;
-
-            case VTask::ScriptSubmitTask:
-                UiLog(serverName_).dbg() << " SCRIP SUBMIT";
-                ci_->edit_script_submit(nodePath_, vars_, contents_,
+                case VTask::ScriptSubmitTask:
+                {
+                    UiLog(serverName_).dbg() << " SCRIP SUBMIT";
+                    ci_->edit_script_submit(nodePath_, vars_, contents_,
                         (params_["alias"]=="1")?true:false,
                         (params_["run"] == "1")?true:false);
-                break;
-
-            case VTask::SuiteListTask:
-                UiLog(serverName_).dbg() << " SUITES";
-                ci_->suites();
-                break;
-
-            case VTask::SuiteAutoRegisterTask:
-                UiLog(serverName_).dbg() << " SUITE AUTO REGISTER";
-                if(hasSuiteFilter_)
-                {
-                    ci_->ch1_auto_add(autoAddNewSuites_);
+                    break;
                 }
-                break;
 
-            case VTask::ZombieCommandTask:
-            {
-                std::string cmd=params_["command"];
-                UiLog(serverName_).dbg() << " ZOMBIE COMMAND " << cmd << " path=" << zombie_.path_to_task();
-                if(cmd == "zombie_fob")
-                    ci_->zombieFob(zombie_);
-                else if(cmd == "zombie_fail")
-                    ci_->zombieFail(zombie_);
-                else if(cmd == "zombie_adopt")
-                    ci_->zombieAdopt(zombie_);
-                else if(cmd == "zombie_block")
-                    ci_->zombieBlock(zombie_);
-                else if(cmd == "zombie_remove")
-                    ci_->zombieRemove(zombie_);
-                else if(cmd == "zombie_kill")
-                    ci_->zombieKill(zombie_);
+                case VTask::ZombieCommandTask:
+                {
+                    std::string cmd=params_["command"];
+                    UiLog(serverName_).dbg() << " ZOMBIE COMMAND " << cmd << " path=" << zombie_.path_to_task();
+                    if(cmd == "zombie_fob")
+                        ci_->zombieFob(zombie_);
+                    else if(cmd == "zombie_fail")
+                        ci_->zombieFail(zombie_);
+                    else if(cmd == "zombie_adopt")
+                        ci_->zombieAdopt(zombie_);
+                    else if(cmd == "zombie_block")
+                        ci_->zombieBlock(zombie_);
+                    else if(cmd == "zombie_remove")
+                        ci_->zombieRemove(zombie_);
+                    else if(cmd == "zombie_kill")
+                        ci_->zombieKill(zombie_);
 
-                break;
+                    break;
+                 }
+
+                 default:
+                 {
+                    Q_ASSERT(0);
+                    exit(1);
+                 }
+
             }
 
-            case VTask::ZombieListTask:
-                UiLog(serverName_).dbg() << " ZOMBIES";
-                ci_->zombieGet();
-                break;  
+            //ci_->sync_local() was called!!
+            //If a rescan or fullscan is needed we have either added/remove nodes or deleted the defs.
+            //So there were significant changes.
 
-            case VTask::LogOutTask:
-                UiLog(serverName_).dbg() << " LOGOUT";
-                detach();
-                if(ci_->client_handle() > 0)
-                {
-                    ci_->ch1_drop();
-                }
-                break;
-            default:
-                break;
+            //We detach the nodes currently available in defs, then we attach them again. We can still have nodes
+            //that were removed from the defs but are still attached. These will be detached when in ServerHandler we
+            //clear the tree. This tree contains shared pointers to the nodes, so when the tree is cleared
+            //the shared pointer are reset, the node descturctor is called and finally update_delete is called and
+            //we can detach the node.
+
+            if(rescanNeed_ || ci_->server_reply().full_sync())
+            {
+                UiLog(serverName_).dbg() << " rescan needed!";
+                detach(defsAccess.defs());
+                attach(defsAccess.defs());
+            }
+
         }
-    }
+
+        // all the other tasks - these will not call ci_->sync_local(()
+        else
+        {
+
+            switch(taskType_)
+            {
+
+                case VTask::NewsTask:
+                {
+                    UiLog(serverName_).dbg() << " NEWS";
+                    ci_->news_local();
+                    break;
+                }
+
+                case VTask::JobTask:
+                case VTask::ManualTask:
+                case VTask::ScriptTask:
+                case VTask::OutputTask:
+                {
+                    UiLog(serverName_).dbg() << " FILE" << " " << params_["clientPar"];
+                    if(maxLineNum_ < 0)
+                        ci_->file(nodePath_,params_["clientPar"]);
+                    else
+                        ci_->file(nodePath_,params_["clientPar"],boost::lexical_cast<std::string>(maxLineNum_));
+
+                    break;
+                }
+
+                case VTask::MessageTask:
+                    UiLog(serverName_).dbg() << " EDIT HISTORY";
+                    ci_->edit_history(nodePath_);
+                    break;
+
+                case VTask::StatsTask:
+                    UiLog(serverName_).dbg() << " STATS";
+                    ci_->stats();
+                    break;
+
+                case VTask::HistoryTask:
+                    UiLog(serverName_).dbg() << " SERVER LOG";
+                    ci_->getLog(100);
+                    break;
+
+                case VTask::ScriptPreprocTask:
+                    UiLog(serverName_).dbg() << " SCRIP PREPROCESS";
+                    ci_->edit_script_preprocess(nodePath_);
+                    break;
+
+                case VTask::ScriptEditTask:
+                    UiLog(serverName_).dbg() << " SCRIP EDIT";
+                    ci_->edit_script_edit(nodePath_);
+                    break;
+
+                case VTask::SuiteListTask:
+                    UiLog(serverName_).dbg() << " SUITES";
+                    ci_->suites();
+                    break;
+
+                case VTask::SuiteAutoRegisterTask:
+                {
+                    UiLog(serverName_).dbg() << " SUITE AUTO REGISTER";
+                    if(hasSuiteFilter_)
+                    {
+                        ci_->ch1_auto_add(autoAddNewSuites_);
+                    }
+                    break;
+                }
+
+                case VTask::ZombieListTask:
+                    UiLog(serverName_).dbg() << " ZOMBIES";
+                    ci_->zombieGet();
+                    break;
+
+                default:
+                    break;
+
+           } //switch
+
+        } //if
+
+    } //try
+
     catch(std::exception& e)
     {
         isMessage = true;
@@ -302,7 +341,7 @@ void ServerComThread::run()
     //UserMessage::message(UserMessage::DBG, false, std::string("  ServerComThread::run finished"));
 }
 
-
+#if 0
 void ServerComThread::sync_local(bool sync_suite_clock)
 {
     //For this part we need to lock the mutex on defs
@@ -330,6 +369,7 @@ void ServerComThread::sync_local(bool sync_suite_clock)
         }
     }
 }
+#endif
 
 void ServerComThread::reset()
 {
@@ -363,11 +403,13 @@ void ServerComThread::reset()
             ci_->ch_register(autoAddNewSuites_, fsl);   // will drop handle in server, and auto_sync if enabled
         }
     }
-
-    UiLog(serverName_).dbg() << " sync begin";
-    ci_->sync_local();
-    //if (!ci_->is_auto_sync_enabled())  ci_->sync_local();  // temp
-    UiLog(serverName_).dbg() << " sync end";
+    else
+    {
+        UiLog(serverName_).dbg() << " sync begin";
+        ci_->sync_local();
+        //if (!ci_->is_auto_sync_enabled())  ci_->sync_local();  // temp
+        UiLog(serverName_).dbg() << " sync end";
+    }
 
     //Attach the nodes to the observer
     attach(defsAccess.defs());

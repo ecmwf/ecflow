@@ -60,13 +60,13 @@ VTask_ptr VTask::create(Type t,VNode *node,VTaskObserver* obs)
 
 const std::string& VTask::typeString() const
 {
-	static std::map<Type,std::string> names;
+    static std::map<Type,std::string> names;
 	if(names.empty())
 	{
 		names[NoTask]="notask";
 		names[CommandTask]="command";
 		names[OverviewTask]="overview";
-        names[WhySyncTask]="whysync";
+        names[WhySyncTask]="why_sync";
 		names[ManualTask]="manual";
 		names[ScriptTask]="script";
 		names[JobTask]="job";
@@ -74,7 +74,17 @@ const std::string& VTask::typeString() const
 		names[OutputTask]="output";
 		names[StatsTask]="stats";
 		names[NewsTask]="news";
-		names[SyncTask]="sync";
+        names[SyncTask]="sync";
+        names[ResetTask]="reset";
+        names[SuiteAutoRegisterTask]="suite_auto_register";
+        names[SuiteListTask]="suite_list";
+        names[ScriptEditTask]="script_edit";
+        names[ScriptPreprocTask]="script_preproc";
+        names[ScriptSubmitTask]="script_submit";
+        names[HistoryTask]="history";
+        names[LogOutTask]="logout";
+        names[ZombieListTask]="zombie_list";
+        names[ZombieCommandTask]="zombie_command";
 	}
 
 	if(names.find(type_) != names.end())

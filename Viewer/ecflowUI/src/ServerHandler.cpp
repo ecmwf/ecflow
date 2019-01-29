@@ -859,196 +859,178 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
     //The status of the tasks sent from the info panel must be properly set to
     //FINISHED!! Only that will notify the observers about the change!!
 
-	//See which type of task finished. What we do now will depend on that.
-	switch(task->type())
-	{
-        case VTask::NewsTask:
-		{
-			// we've just asked the server if anything has changed - has it?
+    // The news reply has to be carefully checked
+    if(task->type() == VTask::NewsTask)
+    {
+        // we've just asked the server if anything has changed - has it?
+        refreshFinished();
 
-            refreshFinished();
-
-			switch (serverReply.get_news())
-			{
-				case ServerReply::NO_NEWS:
-				{
-					// no news, nothing to do
-                    UiLogS(this).dbg() << " NO_NEWS";
-
-					//If we just regained the connection we need to reset
-					if(connectionGained())
-					{
-						reset();
-					}
-					break;
-				}
-
-				case ServerReply::NEWS:
-				{
-					// yes, something's changed - synchronise with the server
-
-					//If we just regained the connection we need to reset
-                    UiLogS(this).dbg() << " NEWS - send SYNC command";
-					if(connectionGained())
-					{
-						reset();
-					}
-					else
-					{
-						comQueue_->addSyncTask();
-					}
-					break;
-				}
-
-				case ServerReply::DO_FULL_SYNC:
-				{
-					// yes, a lot of things have changed - we need to reset!!!!!!                       
-                    UiLogS(this).dbg() << " DO_FULL_SYNC - will reset";
-					connectionGained();
-					reset();
-					break;
-				}
-
-				default:
-				{
-					break;
-				}
-			}
-			break;
-		}
-
-        //WhySyncTask performs sync_local(true).
-        //CommandTask silently performs sync_local().
-        //So in both cases we have to do the same post-processing as
-        //with SyncTask!!!!!
-		case VTask::SyncTask:
-        case VTask::WhySyncTask:
-        case VTask::CommandTask:
-		{
-            if(task->type() == VTask::CommandTask)
-            {
-                UiLogS(this).dbg() << " command + sync finished";
-                updateRefreshTimer();
-            }
-            else if(task->type() == VTask::WhySyncTask)
-            {
-                UiLogS(this).dbg() << " whysync finished";
-                updateRefreshTimer();
-            }
-            else
-            {
-                UiLogS(this).dbg() << " sync finished";
-            }
-
-			//This typically happens when a suite is added/removed
-			if(serverReply.full_sync() || vRoot_->isEmpty())
-			{
-                UiLogS(this).dbg() << " full sync requested - rescanTree";
-
-                //This will update the suites + restart the timer
-				rescanTree();
-			}
-			else
-			{
-                broadcast(&ServerObserver::notifyEndServerSync);
-			}
-
-            //needed for WhySyncTask
-            task->status(VTask::FINISHED);
-
-            break;
-		}
-
-		case VTask::ResetTask:
-		{
-			//If not yet connected but the sync task was successful
-			resetFinished();
-			break;
-		}
-
-		case VTask::ScriptTask:
-		case VTask::ManualTask:
-		case VTask::HistoryTask:
-		case VTask::JobTask:	
-		{
-			task->reply()->fileReadMode(VReply::ServerReadMode);
-            task->reply()->setText(serverReply.get_string());
-            task->reply()->setReadTruncatedTo(truncatedLinesFromServer(task->reply()->text()));
-			task->status(VTask::FINISHED);
-			break;
-		}
-
-        case VTask::OutputTask:
+        switch (serverReply.get_news())
         {
-            task->reply()->fileReadMode(VReply::ServerReadMode);
+            case ServerReply::NO_NEWS:
+            {
+                // no news, nothing to do
+                UiLogS(this).dbg() << " NO_NEWS";
 
-            std::string err;
-            VFile_ptr f(VFile::create(false));
-            f->setFetchMode(VFile::ServerFetchMode);
-            f->setFetchModeStr("fetched from server " + name());
-            f->setSourcePath(task->reply()->fileName());
-            f->setTruncatedTo(truncatedLinesFromServer(serverReply.get_string()));
-            f->write(serverReply.get_string(),err);
-            task->reply()->tmpFile(f);
+                //If we just regained the connection we need to reset
+                if(connectionGained())
+                {
+                    reset();
+                }
+                break;
+            }
 
-            task->status(VTask::FINISHED);
-            break;
+            case ServerReply::NEWS:
+            {
+                // yes, something's changed - synchronise with the server
+
+                //If we just regained the connection we need to reset
+                UiLogS(this).dbg() << " NEWS - send SYNC command";
+                if(connectionGained())
+                {
+                    reset();
+                }
+                else
+                {
+                    comQueue_->addSyncTask();
+                }
+                break;
+            }
+
+            case ServerReply::DO_FULL_SYNC:
+            {
+                // yes, a lot of things have changed - we need to reset!!!!!!
+                UiLogS(this).dbg() << " DO_FULL_SYNC - will reset";
+                connectionGained();
+                reset();
+                break;
+            }
+
+            default:
+            {
+                break;
+            }
+        }
+    }
+
+    // reset is also special
+    else if(task->type()  == VTask::ResetTask)
+    {
+        //If not yet connected but the sync task was successful
+        resetFinished();
+    }
+
+    // the rest of the tasks
+    else
+    {
+         UiLogS(this).dbg() << " " << task->typeString() << " finished";
+
+        // Potentially all the comands can call sync_local() implicitly so
+        // we need to check for all of them if a sync happened
+
+        //This typically happens when a suite is added/removed
+        if(serverReply.full_sync() || vRoot_->isEmpty())
+        {
+            UiLogS(this).dbg() << " full sync requested - rescanTree";
+
+            //This will update the suites + restart the timer
+            rescanTree();
+        }
+        else if(serverReply.in_sync())
+        {
+            broadcast(&ServerObserver::notifyEndServerSync);
         }
 
-        case VTask::MessageTask:
-		{
-			task->reply()->setTextVec(serverReply.get_string_vec());
-			task->status(VTask::FINISHED);
-			break;
-		}
+        //See which type of task finished. What we do now will depend on that.
+        switch(task->type())
+        {
 
-		case VTask::StatsTask:
-		{
-			task->reply()->text( serverReply.get_string() );
-			task->status(VTask::FINISHED);
-			break;
-		}
+            //CommandTask silently performs sync_local().
+            case VTask::CommandTask:
+            {
+                updateRefreshTimer();
+                break;
+            }
 
-		case VTask::ScriptPreprocTask:
-		case VTask::ScriptEditTask:
-		{
-			task->reply()->text(serverReply.get_string());
-			task->status(VTask::FINISHED);
-			break;
-		}
-		case VTask::ScriptSubmitTask:
-		{
-            UiLogS(this).dbg() << " script submit finished - send NEWS command";
+            //WhySyncTask performs sync_local(true).
+            case VTask::WhySyncTask:
+            {
+                updateRefreshTimer();
+                break;
+            }
 
-			task->reply()->text(serverReply.get_string());
-			task->status(VTask::FINISHED);
+            case VTask::ScriptTask:
+            case VTask::ManualTask:
+            case VTask::HistoryTask:
+            case VTask::JobTask:
+            {
+                task->reply()->fileReadMode(VReply::ServerReadMode);
+                task->reply()->setText(serverReply.get_string());
+                task->reply()->setReadTruncatedTo(truncatedLinesFromServer(task->reply()->text()));
+                break;
+            }
 
-			//Submitting the task was successful - we should now get updates from the server			
-            refresh();
-			break;
-		}
+            case VTask::OutputTask:
+            {
+                task->reply()->fileReadMode(VReply::ServerReadMode);
 
-		case VTask::SuiteListTask:
-		{
-			//Update the suite filter with the list of suites actually loaded onto the server.
-            //If the suitefilter is enabled this might have only a subset of it in our tree
-            updateSuiteFilterWithLoaded(serverReply.get_string_vec());
-            task->status(VTask::FINISHED);
-			break;
-		}
+                std::string err;
+                VFile_ptr f(VFile::create(false));
+                f->setFetchMode(VFile::ServerFetchMode);
+                f->setFetchModeStr("fetched from server " + name());
+                f->setSourcePath(task->reply()->fileName());
+                f->setTruncatedTo(truncatedLinesFromServer(serverReply.get_string()));
+                f->write(serverReply.get_string(),err);
+                task->reply()->tmpFile(f);
+                break;
+            }
 
-		case VTask::ZombieListTask:
-		{
-			task->reply()->zombies(serverReply.zombies());
-			task->status(VTask::FINISHED);
-			break;
-		}
+            case VTask::MessageTask:
+            {
+                task->reply()->setTextVec(serverReply.get_string_vec());
+                break;
+            }
 
-		default:
-            task->status(VTask::FINISHED);
-            break;
+            case VTask::StatsTask:
+            {
+                task->reply()->text( serverReply.get_string() );
+                break;
+            }
 
-	}                                             
+            case VTask::ScriptPreprocTask:
+            case VTask::ScriptEditTask:
+            {
+                task->reply()->text(serverReply.get_string());
+                break;
+            }
+
+            //Submitting the task was successful
+            case VTask::ScriptSubmitTask:
+            {
+                task->reply()->text(serverReply.get_string());
+                break;
+            }
+
+            case VTask::SuiteListTask:
+            {
+                //Update the suite filter with the list of suites actually loaded onto the server.
+                //If the suitefilter is enabled this might have only a subset of it in our tree
+                updateSuiteFilterWithLoaded(serverReply.get_string_vec());
+                break;
+            }
+
+            case VTask::ZombieListTask:
+            {
+                task->reply()->zombies(serverReply.zombies());
+                break;
+            }
+
+            default:
+                break;
+        }
+
+        task->status(VTask::FINISHED);
+    }
 }
 
 //-------------------------------------------------------------------
@@ -1061,46 +1043,25 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 
 	//TODO: suite filter  + ci_ observers
 
-	//See which type of task finished. What we do now will depend on that.
-	switch(task->type())
-	{
-		case VTask::SyncTask:
-        case VTask::WhySyncTask:
-			connectionLost(errMsg);
-			break;
+    if(task->type() == VTask::NewsTask)
+    {
+        connectionLost(errMsg);
+        refreshFinished();
+    }
 
-		//The initialisation failed
-		case VTask::ResetTask:
-		{
-			resetFailed(errMsg);
-			break;
-		}
-		case VTask::NewsTask:
-        {
+    else if(task->type() == VTask::ResetTask)
+    {
+        resetFailed(errMsg);
+    }
+
+    else
+    {
+        if(errMsg.empty())
             connectionLost(errMsg);
-            refreshFinished();
-            break;
-        }
-        case VTask::StatsTask:
-		{
-			connectionLost(errMsg);
-			break;
-		}
-		case VTask::CommandTask:
-		{
-            //if the command failed sync local is not called after it sp we need to
-            //call it!
-            comQueue_->addSyncTask();
-            task->reply()->setErrorText(errMsg);
-			task->status(VTask::ABORTED);
-			UserMessage::message(UserMessage::WARN, true, errMsg);           
-			break;
-		}
-		default:
-			task->reply()->setErrorText(errMsg);
-			task->status(VTask::ABORTED);
-			break;
-	}
+
+        task->reply()->setErrorText(errMsg);
+        task->status(VTask::ABORTED);
+    }
 }
 
 void ServerHandler::connectionLost(const std::string& errMsg)
