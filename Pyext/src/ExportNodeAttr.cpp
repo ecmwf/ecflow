@@ -681,7 +681,7 @@ void export_NodeAttr()
    .def(self == self )                                       // __eq__
    .def("__str__", &AutoRestoreAttr::toString)               // __str__
    .def("__copy__",copyObject<AutoRestoreAttr>)              // __copy__ uses copy constructor
-   .def("nodes_to_restore",&AutoRestoreAttr::nodes_to_restore, return_value_policy<copy_const_reference>(), "returns archive time as a TimeSlot")
+   .def("nodes_to_restore",&AutoRestoreAttr::nodes_to_restore, return_value_policy<copy_const_reference>(), "returns a list of nodes to be restored")
    ;
 #if defined(__clang__)
    boost::python::register_ptr_to_python< std::shared_ptr<AutoRestoreAttr> >(); // needed for mac and boost 1.6
