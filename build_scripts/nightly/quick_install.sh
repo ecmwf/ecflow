@@ -10,6 +10,7 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 
 if [[ "$#"  == 0 ]] ; then
+export ECF_PORT=4142
 export PATH=/tmp/ma0/install/cmake/ecflow/5.0.0/bin:$PATH
 export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/5.0.0/lib/python2.7/site-packages
 else
@@ -26,7 +27,7 @@ cp -r $WK/build_scripts/nightly .
 # =======================================================================
 # Kill the server
 # =======================================================================
-export ECF_PORT=4141
+export ECF_PORT=4142
 which ecflow_client
 ecflow_client --version
 ecflow_client --terminate=yes
@@ -34,7 +35,7 @@ ecflow_client --terminate=yes
 # =======================================================================
 # Start server. 
 # =======================================================================
-rm -rf `hostname`.4141.*
+rm -rf `hostname`.4142.*
 
 #export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
 ecflow_server&
