@@ -299,9 +299,6 @@ public:
 	int getLog(int lastLines = 0)  const;
 	int clearLog() const;
    int flushLog() const;
-   int enable_auto_flush() const;
-   int disable_auto_flush() const;
-   int query_auto_flush() const;
    int get_log_path() const;
 
 	int forceDependencyEval() const;

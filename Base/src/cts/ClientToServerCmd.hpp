@@ -912,7 +912,7 @@ private:
 /// The SStringCmd is used to transport the log file contents to the client
 class LogCmd : public UserCmd {
 public:
-   enum LogApi { GET, CLEAR, FLUSH, NEW , PATH, ENABLE_AUTO_FLUSH, DISABLE_AUTO_FLUSH, QUERY_AUTO_FLUSH};
+   enum LogApi { GET, CLEAR, FLUSH, NEW , PATH };
    LogCmd(LogApi a, int get_last_n_lines = 0); // for zero we take default from log. Avoid adding dependency on log.hpp
    explicit LogCmd(const std::string& path); // NEW
    LogCmd();
