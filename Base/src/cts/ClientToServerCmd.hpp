@@ -622,7 +622,8 @@ private:
    {
       ar(cereal::base_class< ClientToServerCmd >( this ),
          CEREAL_NVP(user_),
-         CEREAL_NVP(passwd_));
+		 CEREAL_OPTIONAL_NVP(ar,passwd_, [this](){return !passwd_.empty();})
+      );  // conditionally save
    }
 };
 
