@@ -122,8 +122,7 @@ void OverviewItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 
 	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
 	{
-		if(*it == ecf::Aspect::STATE || *it == ecf::Aspect::ADD_REMOVE_NODE || *it == ecf::Aspect::ADD_REMOVE_ATTR ||
-		   *it == ecf::Aspect::DEFSTATUS || *it == ecf::Aspect::SUSPENDED || *it == ecf::Aspect::NODE_VARIABLE)
+        if(*it != ecf::Aspect::ORDER && *it != ecf::Aspect::NOT_DEFINED)
 		{
 			reload();
 			return;
