@@ -83,6 +83,8 @@ public:
 	/// Will throw std::runtime_error for errors
 	void script(std::string& theScript) const;
 
+    const std::string&  script_path_or_cmd() const {return script_path_or_cmd_;}
+
 	/// What is the origin of this ecf_file
 	std::string ecf_file_origin_dump() const;
 
