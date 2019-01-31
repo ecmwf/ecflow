@@ -1402,11 +1402,11 @@ std::ostream& AstFlag::print( std::ostream& os ) const {
    Indentor in;
 
    if ( refNode ) {
-      Indentor::indent( os ) << "# LEAF_FLAG_NODE node_(Found) nodePath_('" << nodePath_ << "') ";
+      Indentor::indent( os ) << "# LEAF_FLAG_NODE nodePath('" << nodePath_ << "') ";
       os << ecf::Flag::enum_to_string( flag_ ) << "(" << static_cast<int>( refNode->flag().is_set(flag_)) << ")\n";
    }
    else {
-      Indentor::indent( os ) << "# LEAF_FLAG_NODE node_(NULL) nodePath_('" << nodePath_ << "') ";
+      Indentor::indent( os ) << "# LEAF_FLAG_NODE node(?NULL?) nodePath('" << nodePath_ << "') ";
       os << ecf::Flag::enum_to_string( flag_ ) << "(0)\n";
    }
    return os;
@@ -1646,9 +1646,8 @@ std::ostream& AstParentVariable::print( std::ostream& os ) const
 
    Node* ref_node = find_node_which_references_variable();
    if (ref_node) {
-      os << " (";
+      os << " ";
       ref_node->findExprVariableAndPrint(name_, os);
-      os << ")";
       os << "\n";
       return os;
    }
@@ -1802,9 +1801,8 @@ std::ostream& VariableHelper::print( 	std::ostream& os ) const
 	Indentor::indent( os ) << "# " << astVariable_->nodePath() << Str::COLON() << astVariable_->name();
 
 	if ( theReferenceNode_ ) {
-		os << " (";
+		os << " ";
 		theReferenceNode_->findExprVariableAndPrint(astVariable_->name(), os);
-		os << ")";
 	}
 	else {
 	   os << " referencedNode(NULL) nodePath_('" << astVariable_->nodePath() << "') value(0)";
