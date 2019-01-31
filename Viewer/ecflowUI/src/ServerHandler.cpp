@@ -929,15 +929,22 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
         // we need to check for all of them if a sync happened
 
         //This typically happens when a suite is added/removed
-        if(serverReply.full_sync() || vRoot_->isEmpty())
+        if(serverReply.full_sync())
         {
             UiLogS(this).dbg() << " full sync requested - rescanTree";
 
             //This will update the suites + restart the timer
             rescanTree();
-        }
+        }       
         else if(serverReply.in_sync())
         {
+            //The tree can be empty for various reasons, we might cleared it during a sync. In
+            //this case we need to rebuild it
+            //we only rebuild the tree when have a proper connection
+            if( vRoot_->isEmpty() && connectState_->state() == ConnectState::Normal)
+            {
+                rescanTree();
+            }
             broadcast(&ServerObserver::notifyEndServerSync);
         }
 
