@@ -182,6 +182,15 @@
                         "line" : "limitExtraFillColour"    
                     },
                     "group" : {
+                        "title" : "Repeats",
+                        "prefix" : "view.attribute",
+                        "line" : "repeatDateColour",
+                        "line" : "repeatDayColour",
+                        "line" : "repeatEnumColour",
+                        "line" : "repeatIntColour",
+                        "line" : "repeatStringColour"
+                    },
+                    "group" : {
                         "title" : "Triggers",
                         "prefix" : "view.attribute",
                         "line" : "triggerBackground",
