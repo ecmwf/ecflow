@@ -293,13 +293,16 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
             if((*it)->typeName() == "trigger" || (*it)->typeName() == "complete")
             {
-                std::string trigger_ast=VTriggerAttr::printAst(node);
-                if(!trigger_ast.empty())
+                if(VTriggerAttr* tgAtt=static_cast<VTriggerAttr*>(*it))
                 {
-                    f << inc << VTriggerAttr::printAst(node);
-                    if(trigger_ast[trigger_ast.size()-1] != '\n')
+                    std::string trigger_ast=tgAtt->ast_str();
+                    if(!trigger_ast.empty())
                     {
-                        f << "\n";
+                        f << inc << trigger_ast;
+                        if(trigger_ast[trigger_ast.size()-1] != '\n')
+                        {
+                            f << "\n";
+                        }
                     }
                 }
             }

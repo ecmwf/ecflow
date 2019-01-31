@@ -142,33 +142,37 @@ void VTriggerAttr::expressions(const VNode* vnode,std::string& trigger, std::str
     }
 }
 
-std::string VTriggerAttr::printAst(const VNode* vnode)
+std::string VTriggerAttr::ast_str() const
 {
     std::stringstream ss;
-    if(node_ptr node=vnode->node())
-    {
-        Expression* eT=node->get_trigger();
-        Expression* eC=node->get_complete();
-
-        if(eT)
+    if(node_ptr node=parent_->node())
+    {        
+        if(index_ == 0)
         {
-            if (eT->isFree() ) ecf::Indentor::indent(ss) << "# (free)\n";
+            if(Expression* e=node->get_trigger())
+            {
+                if (e->isFree() )
+                    ecf::Indentor::indent(ss) << "# (free)\n";
 
-            // show the Abstract Syntax Tree for the expression. This also uses Indentor
-            if(Ast* ast =  node->triggerAst())
-            ast->print(ss);
+                // show the Abstract Syntax Tree for the expression. This also uses Indentor
+                if(Ast* ast =  node->triggerAst())
+                    ast->print(ss);
+            }
         }
-        if(eC)
+        else
         {
-            if (eC->isFree() ) ecf::Indentor::indent(ss) << "# (free)\n";
+            if(Expression* e=node->get_complete())
+            {
+                if (e->isFree() )
+                    ecf::Indentor::indent(ss) << "# (free)\n";
 
-            // show the Abstract Syntax Tree for the expression. This also uses Indentor
-            if(Ast* ast =  node->completeAst())
-                ast->print(ss);
+                // show the Abstract Syntax Tree for the expression. This also uses Indentor
+                if(Ast* ast =  node->completeAst())
+                    ast->print(ss);
+            }
         }
-
-        return ss.str();
     }
+
     return ss.str();
 }
 

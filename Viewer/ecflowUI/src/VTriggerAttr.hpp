@@ -45,10 +45,10 @@ public:
     VAttributeType* type() const;
     QStringList data(bool firstLine) const;
     std::string strName() const;
+    std::string ast_str() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);
     static void expressions(const VNode* vnode,std::string& trigger, std::string& complete);
-    static std::string printAst(const VNode* vnode);
 };
 
 #endif // VTRIGGERATTR_HPP
