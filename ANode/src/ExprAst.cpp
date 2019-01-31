@@ -1153,7 +1153,7 @@ AstInteger* AstInteger::clone() const
 
 std::ostream& AstInteger::print( std::ostream& os ) const {
  	Indentor in;
-	return Indentor::indent( os ) << "# LEAF_INTEGER " << value() << "\n";
+	return Indentor::indent( os ) << "# INTEGER " << value() << "\n";
 }
 
 void AstInteger::print_flat(std::ostream& os,bool /*add_bracket*/) const {
@@ -1186,7 +1186,7 @@ AstNodeState* AstNodeState::clone() const
 
 std::ostream& AstNodeState::print( std::ostream& os ) const {
 	Indentor in;
-	return Indentor::indent( os ) << "# LEAF_NODE_STATE "
+	return Indentor::indent( os ) << "# NODE_STATE "
 			<< DState::toString( state_ ) << "(" << value() << ")\n";
 }
 
@@ -1219,7 +1219,7 @@ AstEventState* AstEventState::clone() const
 
 std::ostream& AstEventState::print( std::ostream& os ) const {
 	Indentor in;
-	return Indentor::indent( os ) << "# LEAF_EVENT_STATE " << state_ << "\n";
+	return Indentor::indent( os ) << "# EVENT_STATE " << state_ << "\n";
 }
 
 void AstEventState::print_flat(std::ostream& os,bool /*add_bracket*/) const {
@@ -1294,11 +1294,11 @@ std::ostream& AstNode::print( std::ostream& os ) const {
 	Indentor in;
 
 	if ( refNode ) {
-		Indentor::indent( os ) << "# LEAF_NODE node_(Found) nodePath_('" << nodePath_ << "') ";
+		Indentor::indent( os ) << "# NODE " << nodePath_ << " ";
 		os << DState::toString(  refNode->dstate()  ) << "(" << static_cast<int>( refNode->dstate()) << ")\n";
 	}
 	else {
-		Indentor::indent( os ) << "# LEAF_NODE node_(NULL) nodePath_('" << nodePath_ << "') ";
+		Indentor::indent( os ) << "# NODE node(?not-found?) " << nodePath_ << " ";
  		os << DState::toString( DState::UNKNOWN  ) << "(" << static_cast<int>(DState::UNKNOWN) << ")\n";
 	}
 	return os;
@@ -1402,11 +1402,11 @@ std::ostream& AstFlag::print( std::ostream& os ) const {
    Indentor in;
 
    if ( refNode ) {
-      Indentor::indent( os ) << "# LEAF_FLAG_NODE nodePath('" << nodePath_ << "') ";
+      Indentor::indent( os ) << "# FLAG_NODE " << nodePath_ << " ";
       os << ecf::Flag::enum_to_string( flag_ ) << "(" << static_cast<int>( refNode->flag().is_set(flag_)) << ")\n";
    }
    else {
-      Indentor::indent( os ) << "# LEAF_FLAG_NODE node(?NULL?) nodePath('" << nodePath_ << "') ";
+      Indentor::indent( os ) << "# FLAG_NODE node(?not-found?) " << nodePath_ << " ";
       os << ecf::Flag::enum_to_string( flag_ ) << "(0)\n";
    }
    return os;
@@ -1646,12 +1646,12 @@ std::ostream& AstParentVariable::print( std::ostream& os ) const
 
    Node* ref_node = find_node_which_references_variable();
    if (ref_node) {
-      os << " ";
+      os << " node(" << ref_node->name() << ") ";
       ref_node->findExprVariableAndPrint(name_, os);
       os << "\n";
       return os;
    }
-   os << " referencedNode(NULL) value(0)";
+   os << " node(?not-found?) value(0)";
    os << "\n";
    return os;
 }
@@ -1801,11 +1801,11 @@ std::ostream& VariableHelper::print( 	std::ostream& os ) const
 	Indentor::indent( os ) << "# " << astVariable_->nodePath() << Str::COLON() << astVariable_->name();
 
 	if ( theReferenceNode_ ) {
-		os << " ";
+		os << " node(" << theReferenceNode_->name() << ") ";
 		theReferenceNode_->findExprVariableAndPrint(astVariable_->name(), os);
 	}
 	else {
-	   os << " referencedNode(NULL) nodePath_('" << astVariable_->nodePath() << "') value(0)";
+	   os << " node(?not-found?) " << astVariable_->nodePath() << " value(0)";
 	}
 	os << "\n";
  	return os;
