@@ -583,7 +583,7 @@ public:
 
    static std::string get_user();
    const std::string& user() const { return user_;}
-   const std::string& passwd() const { return passwd_;}
+   const std::string& passwd() const { return pswd_;}
 
    void setup_user_authentification(const std::string& user, const std::string& passwd) override;
    void setup_user_authentification(AbstractClientEnv&) override;
@@ -614,16 +614,15 @@ protected:
 
 private:
    std::string user_;
-   std::string passwd_;
+   std::string pswd_;
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(cereal::base_class< ClientToServerCmd >( this ),
-         CEREAL_NVP(user_),
-		 CEREAL_OPTIONAL_NVP(ar,passwd_, [this](){return !passwd_.empty();})
-      );  // conditionally save
+      ar(cereal::base_class< ClientToServerCmd >( this ));
+      CEREAL_NVP(user_);
+      CEREAL_OPTIONAL_NVP(ar, pswd_, [this](){return !pswd_.empty(); }); // conditionally save
    }
 };
 
