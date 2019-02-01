@@ -33,6 +33,8 @@ public:
 	Ast() {}
 	virtual ~Ast();
 
+	std::string evaluate_str() const { return evaluate() ? "true" : "false" ;}
+
 	virtual void accept(ecf::ExprAstVisitor&) = 0;
    virtual Ast* clone() const = 0;
    virtual bool is_attribute() const { return false; }
