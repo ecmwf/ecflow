@@ -565,27 +565,27 @@ void Node::findExprVariableAndPrint( const std::string& name, ostream& os) const
 {
    const Event& event = findEventByNameOrNumber( name );
    if ( !event.empty() )  {
-      os << event.dump();
+      os << "EVENT value(" << event.value() << ")";
       return;
    }
    const Meter& meter = findMeter( name );
    if ( !meter.empty() ) {
-      os << meter.dump();
+      os << "METER value(" << meter.value() << ")";
       return;
    }
    const Variable& variable = findVariable( name );
    if ( !variable.empty() ) {
-      os << "USER-VARIABLE " << variable.dump();
+      os << "USER-VARIABLE value(" << variable.value() << ")";
       return;
    }
    const Repeat& repeat = findRepeat( name );
    if ( !repeat.empty() )  {
-      os << repeat.dump();
+      os << "REPEAT value(" << repeat.value() << ")";
       return;
    }
    const Variable& gen_variable = findGenVariable( name );
    if ( !gen_variable.empty() )  {
-      os << "GEN-VARIABLE " << gen_variable.dump();
+      os << "GEN-VARIABLE value(" << gen_variable.value() << ")";
       return;
    }
    limit_ptr limit = find_limit( name );
