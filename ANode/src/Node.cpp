@@ -2054,10 +2054,10 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
       std::string postFix;
       const Calendar& c = suite()->calendar();
       for(auto day : days_)    { postFix.clear(); if (day.why(c,postFix))    { vec.push_back(prefix + postFix); why_found=true;}}
-      for(const auto & date : dates_)   { postFix.clear(); if (date.why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
-      for(const auto & today : todays_){ postFix.clear(); if (today.why(c,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
-      for(const auto & time : times_) { postFix.clear(); if (time.why(c,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
-      for(const auto & cron : crons_)   { postFix.clear(); if (cron.why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
+      for(const auto & date : dates_)  { postFix.clear(); if (date.why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
+      for(const auto & today : todays_){ postFix.clear(); if (today.why(c,days_,dates_,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
+      for(const auto & time : times_) { postFix.clear(); if (time.why(c,days_,dates_,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
+      for(const auto & cron : crons_) { postFix.clear(); if (cron.why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
    }
 
    // **************************************************************************************

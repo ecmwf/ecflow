@@ -221,7 +221,7 @@ bool TodayAttr::why(const ecf::Calendar& c,const std::vector<DayAttr>& days,cons
         	  theReasonWhy += " next run tomorrow at ";
     	  }
 
-    	  theReasonWhy += timeSeries_.start().toString();
+    	  theReasonWhy += ts_.start().toString();
     	  theReasonWhy += " ";
     	  theReasonWhy += to_simple_string( the_min_next_date );
       }
