@@ -66,6 +66,8 @@ public:
    static void getDate(const std::string& date,int& day,int& month,int& year);
    static DateAttr create(const std::string& dateString);
 
+   boost::gregorian::date next_matching_date(const ecf::Calendar&) const;
+
    // access
    int day() const { return day_; }
    int month() const { return month_; }

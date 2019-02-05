@@ -63,6 +63,8 @@ public:
 	// access
 	DayAttr::Day_t day() const { return day_;}
 
+	boost::gregorian::date next_matching_date(const ecf::Calendar& c) const;
+
 private:
    bool is_free(const ecf::Calendar&) const; // ignores free_
 

@@ -56,6 +56,12 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     meterThresholdBrush_=QBrush(QColor(0,0,255));
     limitFillBrush_=QBrush(QColor(0,255,0));
     limitExtraFillBrush_=QBrush(QColor(0,0,255));
+    repeatDayPen_=QPen(QColor(0,0,0));
+    repeatDatePen_=QPen(QColor(0,0,0));
+    repeatEnumPen_=QPen(QColor(37,118,38));
+    repeatIntPen_=QPen(QColor(0,0,240));
+    repeatStringPen_=QPen(QColor(0,0,0));
+
     triggerBgBrush_=QBrush(QColor(230,230,230));
     triggerBorderPen_=QPen(QColor(150,150,150));
     triggerFontPen_=QPen(QColor(0,0,0));
@@ -103,6 +109,11 @@ void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
     propVec.push_back("view.attribute.limitShape");
     propVec.push_back("view.attribute.limitFillColour");
     propVec.push_back("view.attribute.limitExtraFillColour");
+    propVec.push_back("view.attribute.repeatDateColour");
+    propVec.push_back("view.attribute.repeatDayColour");
+    propVec.push_back("view.attribute.repeatEnumColour");
+    propVec.push_back("view.attribute.repeatIntColour");
+    propVec.push_back("view.attribute.repeatStringColour");
     propVec.push_back("view.attribute.triggerBackground");
     propVec.push_back("view.attribute.triggerBorderColour");
     propVec.push_back("view.attribute.triggerFontColour");
@@ -160,6 +171,26 @@ void NodeViewDelegate::updateBaseSettings()
     if(VProperty* p=prop_->find("view.attribute.limitExtraFillColour"))
     {
         limitExtraFillBrush_=QBrush(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.repeatDayColour"))
+    {
+        repeatDayPen_=QPen(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.repeatDateColour"))
+    {
+        repeatDatePen_=QPen(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.repeatEnumColour"))
+    {
+        repeatEnumPen_=QPen(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.repeatIntColour"))
+    {
+        repeatIntPen_=QPen(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.repeatStringColour"))
+    {
+        repeatStringPen_=QPen(p->value().value<QColor>());
     }
     if(VProperty* p=prop_->find("view.attribute.triggerBackground"))
     {
@@ -1224,11 +1255,15 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 
     bool selected=option.state & QStyle::State_Selected;
 
+    QPen rPen(Qt::black);
+
     //The contents rect (we will adjust its  width)
     QRect contRect=option.rect.adjusted(attrBox_->leftMargin,attrBox_->topMargin,0,-attrBox_->bottomMargin);
 
     if(type == "day")
     {
+        rPen = repeatDayPen_;
+
         QFont nameFont=attrFont_;
         QFontMetrics fm(nameFont);
         name="day=" + step;
@@ -1247,7 +1282,7 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
         }
 
         //Draw name
-        painter->setPen(Qt::black);
+        painter->setPen(rPen);
         painter->setFont(nameFont);
         painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
@@ -1265,6 +1300,23 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
     }
     else
     {
+        if(type == "enumerated")
+        {
+            rPen = repeatEnumPen_;
+        }
+        else if(type == "integer")
+        {
+            rPen = repeatIntPen_;
+        }
+        else if(type == "string")
+        {
+            rPen = repeatStringPen_;
+        }
+        else if(type == "date")
+        {
+            rPen = repeatDatePen_;
+        }
+
         QString endDot;
         if(start == val)
         {
@@ -1327,19 +1379,19 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
         }
 
         //Draw name
-        painter->setPen(Qt::black);
+        painter->setPen(rPen);
         painter->setFont(nameFont);
         painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
         //Draw value
-        painter->setPen(Qt::black);
+        painter->setPen(rPen);
         painter->setFont(valFont);
         painter->drawText(attrBox_->adjustTextRect(valRect),Qt::AlignLeft | Qt::AlignVCenter,val);
 
         //Draw end dots
         if(!endDot.isEmpty())
         {
-            painter->setPen(Qt::black);
+            painter->setPen(rPen);
             painter->setFont(nameFont);
             painter->drawText(attrBox_->adjustTextRect(dotRect),Qt::AlignLeft | Qt::AlignVCenter,"...");
         }

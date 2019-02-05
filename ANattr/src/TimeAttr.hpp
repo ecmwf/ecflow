@@ -49,6 +49,8 @@
 /// and will have to start at 12:00
 //============================================================================
 #include "TimeSeries.hpp"
+#include "DayAttr.hpp"  // Used in Why
+#include "DateAttr.hpp" // Used in Why
 
 namespace ecf { class Calendar;} // forward declare class
 
@@ -88,9 +90,9 @@ public:
 	bool isSetFree() const { return free_; }
  	bool isFree(const ecf::Calendar&) const;
    bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max) const
-   { return ts_.checkForRequeue(c,the_min,the_max);}
-	void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const {ts_.min_max_time_slots(the_min,the_max);}
- 	bool why(const ecf::Calendar&, std::string& theReasonWhy) const;
+   { return timeSeries_.checkForRequeue(c,the_min,the_max);}
+	void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const {timeSeries_.min_max_time_slots(the_min,the_max);}
+ 	bool why(const ecf::Calendar&,const std::vector<DayAttr>&,const std::vector<DateAttr>&, std::string& theReasonWhy) const;
 
  	bool checkInvariants(std::string& errormsg) const { return ts_.checkInvariants(errormsg);}
 

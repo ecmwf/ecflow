@@ -200,7 +200,7 @@ bool DateAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 	if (isFree(c)) return false;
 
 	std::stringstream ss;
-	ss << " is date dependent ( next run on " << toString() << " the current date is ";
+	ss << " is date dependent ( next run on " << to_simple_string(next_matching_date(c))  << " the current date is ";
 	ss << c.day_of_month() << "/" << c.month() << "/" << c.year() << " )";
 	theReasonWhy += ss.str();
 	return true;
@@ -304,7 +304,27 @@ void DateAttr::getDate(const std::string& date,int& day,int& month,int& year)
 //	cerr << " DateParser::getDate date=" << date << " day=" << day << " month=" << month << " year=" << year << "\n";
 }
 
+boost::gregorian::date DateAttr::next_matching_date(const ecf::Calendar& c) const
+{
+	boost::gregorian::date next_matching_date = c.date();  // todays date
 
+	boost::gregorian::date_duration one_day(1);
+
+	bool day_matches   = (day_ == 0) ? true : false;
+	bool month_matches = (month_ == 0) ? true : false;
+	bool year_matches  = (year_ == 0) ? true : false; ;
+
+	for(int i=0; i < 365; i++) {
+		next_matching_date += one_day;
+		if (day_ != 0 && next_matching_date.day() == day_)       day_matches = true;
+		if (month_ != 0 && next_matching_date.month() == month_) month_matches = true;
+		if (year_ != 0 && next_matching_date.year() == year_)    year_matches  = true;
+		if (day_matches && month_matches && year_matches) {
+			return next_matching_date;
+		}
+	}
+	return c.date();
+}
 
 template<class Archive>
 void DateAttr::serialize(Archive & ar)
