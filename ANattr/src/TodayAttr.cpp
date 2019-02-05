@@ -146,10 +146,13 @@ bool TodayAttr::is_free(const ecf::Calendar& calendar) const
    return timeSeries_.isFree(calendar);
 }
 
-bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
+bool TodayAttr::why(const ecf::Calendar& c,const std::vector<DayAttr>& days,const std::vector<DateAttr>& dates, std::string& theReasonWhy) const
 {
    if (isFree(c)) return false;
-   theReasonWhy += "is today dependent";
+   theReasonWhy += "is today ";
+   if (!days.empty()) theReasonWhy += "and day ";
+   if (!dates.empty()) theReasonWhy += "and date ";
+   theReasonWhy += "dependent";
 
    // Check to see if time has expired, if has not, then report why
    if (timeSeries_.is_valid()) {
@@ -193,14 +196,32 @@ bool TodayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
          theReasonWhy += " please *re-queue*, to reset the relative duration";
       }
       else {
-         boost::gregorian::date_duration one_day(1);
-         boost::gregorian::date the_next_date = c.date();  // todays date
-         the_next_date += one_day;                         // add one day, so its in the future
+    	  boost::gregorian::date the_min_next_date;
 
-         theReasonWhy += " next run tomorrow at ";
-         theReasonWhy += timeSeries_.start().toString();
-         theReasonWhy += " ";
-         theReasonWhy += to_simple_string( the_next_date );
+    	  if (!days.empty() || !dates.empty()) {
+    		  for(size_t i=0; i < days.size(); i++) {
+    			  boost::gregorian::date the_next_matching_date = days[i].next_matching_date(c);
+    			  if (the_min_next_date.is_special()) the_min_next_date = the_next_matching_date;
+    			  if (the_next_matching_date < the_min_next_date ) the_min_next_date = the_next_matching_date;
+    		  }
+    		  for(size_t i=0; i < dates.size(); i++) {
+    			  boost::gregorian::date the_next_matching_date = dates[i].next_matching_date(c);
+    			  if (the_min_next_date.is_special()) the_min_next_date = the_next_matching_date;
+    			  if (the_next_matching_date < the_min_next_date ) the_min_next_date = the_next_matching_date;
+    		  }
+
+        	  theReasonWhy += " next run at ";
+    	  }
+    	  else {
+    		  boost::gregorian::date_duration one_day(1);
+    		  the_min_next_date = c.date();                 // todays date
+    		  the_min_next_date += one_day;                 // add one day, so its in the future
+        	  theReasonWhy += " next run tomorrow at ";
+    	  }
+
+    	  theReasonWhy += timeSeries_.start().toString();
+    	  theReasonWhy += " ";
+    	  theReasonWhy += to_simple_string( the_min_next_date );
       }
    }
    theReasonWhy += " )";

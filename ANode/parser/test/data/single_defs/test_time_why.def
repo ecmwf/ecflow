@@ -1,0 +1,32 @@
+# Definition of the suite test
+suite test
+ family f2
+     edit SLEEP 20
+     task t1
+         date 5.*.*
+         time 00:30 23:30 00:30
+     task t2
+         day tuesday
+         day wednesday
+         day monday
+         day sunday
+         time 09:00
+    task t21
+         day tuesday
+         day wednesday
+         day monday
+         day sunday
+         today 09:00
+     task t3
+         date 1.*.*
+         time 08:00
+     task t4
+         date 6.*.*
+         date 7.*.*
+         date 8.*.*
+         date 5.*.*
+         time 09:02
+     task t5
+         time 08:00
+ endfamily
+endsuite

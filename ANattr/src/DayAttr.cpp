@@ -194,3 +194,19 @@ std::vector< std::string > DayAttr::allDays() {
 	return vec;
 }
 
+boost::gregorian::date DayAttr::next_matching_date(const ecf::Calendar& c) const
+{
+    boost::gregorian::date_duration one_day(1);
+    boost::gregorian::date the_next_matching_date = c.date();  // todays date
+
+    for(int i=0; i<7; i++) {
+    	the_next_matching_date += one_day;
+    	if (the_next_matching_date.day_of_week().as_number() == day_) {
+    		return the_next_matching_date;
+    	}
+    }
+    assert(false);
+    return c.date();
+}
+
+
