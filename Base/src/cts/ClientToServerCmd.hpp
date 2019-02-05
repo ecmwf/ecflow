@@ -620,8 +620,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(cereal::base_class< ClientToServerCmd >( this ));
-      CEREAL_NVP(user_);
+      ar(cereal::base_class< ClientToServerCmd >( this ),
+         CEREAL_NVP(user_));
       CEREAL_OPTIONAL_NVP(ar, pswd_, [this](){return !pswd_.empty(); }); // conditionally save
    }
 };
