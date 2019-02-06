@@ -297,9 +297,6 @@ def gen_suite(host=None, port=None, path=None):
             Inlimit("one"),
             gen_task(load_only=True),
             Variables(ALL_ECF=" "),
-                      # ALL_SMS=" ".join(all_sms)            
-            # Variables(DESTINATIONS= "vsms3@31415 vsms1@433334"),          #
-            # eurus@1630"),
             [Family(name).add(
                 Variables(DESTINATIONS=destinations[name]),
                 Label("info", ""),
@@ -336,7 +333,7 @@ $end
     """
 
     def _protect_oper(self, server):
-        if server == "vsms1@32112":
+        if server == "xyz@123":
             if 1:
                 child.report("abort", "protect")
             elif ("/o" in self.path or
