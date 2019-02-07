@@ -60,7 +60,7 @@ typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 class connection {
 public:
 	/// Allow tentative support for new client to talk to old server
-   /// by changing the boost serialisation archive version, hence tentative
+	/// by changing the boost serialisation archive version, hence tentative
 	~connection();
 
 #ifdef ECF_OPENSSL
@@ -73,8 +73,8 @@ public:
 	boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& socket() { return socket_;}
 #else
 	explicit connection(boost::asio::io_service& io_service);
-   boost::asio::ip::tcp::socket& socket_ll() { return socket_; }
-   boost::asio::ip::tcp::socket& socket() { return socket_; }
+	boost::asio::ip::tcp::socket& socket_ll() { return socket_; }
+	boost::asio::ip::tcp::socket& socket() { return socket_; }
 #endif
 
 	/// Asynchronously write a data structure to the socket.
@@ -86,13 +86,13 @@ public:
 #endif
 		// Serialise the data first so we know how large it is.
 		try {
-		   ecf::save_as_string(outbound_data_,t);
+			ecf::save_as_string(outbound_data_,t);
 		} catch (const std::exception& ae ) {
-		   // Unable to decode data. Something went wrong, inform the caller.
-		   log_archive_error("Connection::async_write, exception ",ae);
-		   boost::system::error_code error(boost::asio::error::invalid_argument);
-		   socket_.get_io_service().post(boost::bind(handler, error));
-		   return;
+			// Unable to decode data. Something went wrong, inform the caller.
+			log_archive_error("Connection::async_write, exception ",ae);
+			boost::system::error_code error(boost::asio::error::invalid_argument);
+			socket_.get_io_service().post(boost::bind(handler, error));
+			return;
 		}
 
 #ifdef DEBUG_CONNECTION
@@ -104,7 +104,7 @@ public:
 		header_stream << std::setw(header_length) << std::hex << outbound_data_.size();
 		if (!header_stream || header_stream.str().size() != header_length) {
 			// Something went wrong, inform the caller.
-		   log_error("Connection::async_write, could not format header");
+			log_error("Connection::async_write, could not format header");
 			boost::system::error_code error(boost::asio::error::invalid_argument);
 			socket_.get_io_service().post(boost::bind(handler, error));
 			return;
@@ -115,7 +115,7 @@ public:
 #ifdef DEBUG_CONNECTION_MEMORY
 		if (Ecf::server()) std::cout << "server::";
 		else               std::cout << "client::";
-   		std::cout << "async_write outbound_header_.size(" << outbound_header_.size() << ") outbound_data_.size(" << outbound_data_.size() << ")\n";
+		std::cout << "async_write outbound_header_.size(" << outbound_header_.size() << ") outbound_data_.size(" << outbound_data_.size() << ")\n";
 #endif
 
 #ifdef DEBUG_CONNECTION
@@ -143,7 +143,7 @@ public:
 
 		// Issue a read operation to read exactly the number of bytes in a header.
 		void (connection::*f)(const boost::system::error_code&, T&,boost::tuple<Handler>)
-		= &connection::handle_read_header<T, Handler>;
+				= &connection::handle_read_header<T, Handler>;
 
 		boost::asio::async_read(socket_, boost::asio::buffer(inbound_header_),
 				boost::bind(f, this, boost::asio::placeholders::error,
@@ -174,7 +174,7 @@ private:
 			// Start an asynchronous call to receive the data.
 			inbound_data_.resize(inbound_data_size);
 			void (connection::*f)(const boost::system::error_code&, T&,boost::tuple<Handler>)
-			= &connection::handle_read_data<T, Handler>;
+					= &connection::handle_read_data<T, Handler>;
 
 			boost::asio::async_read(socket_,
 					boost::asio::buffer(inbound_data_), boost::bind(f, this,
@@ -197,14 +197,14 @@ private:
 #ifdef DEBUG_CONNECTION_MEMORY
 				if (Ecf::server()) std::cout << "server::";
 				else               std::cout << "client::";
-            std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ") typeid(" << typeid(t).name() << ")\n";
-            std::cout << archive_data << "\n";
+				std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ") typeid(" << typeid(t).name() << ")\n";
+				std::cout << archive_data << "\n";
 #endif
 				ecf::restore_from_string(archive_data,t);
 			}
 			catch (std::exception& e) {
-			   log_archive_error("Connection::handle_read_data, Unable to decode data :",e);
- 				boost::system::error_code error( boost::asio::error::invalid_argument);
+				log_archive_error("Connection::handle_read_data, Unable to decode data :",e);
+				boost::system::error_code error( boost::asio::error::invalid_argument);
 				boost::get<0>(handler)(error);
 				return;
 			}
@@ -217,7 +217,7 @@ private:
 private:
 
 	static void log_error(const char* msg);
-   static void log_archive_error(const char* msg,const std::exception& ae);
+	static void log_archive_error(const char* msg,const std::exception& ae);
 
 private:
 #ifdef ECF_OPENSSL
