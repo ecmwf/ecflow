@@ -382,13 +382,21 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       // o/ If client has been killed/disconnected/timed out
       //       Server::handle_read : End of file
       //
-      // o/ If a *new* client talks to an *old* server, with an unrecognised request/command
+      // o/ If a *new* client talks to an *old* server, with an unrecognised request/command i.e mixing 4/5 series
       //    we will see:
-      //       Connection::handle_read_data boost::archive::archive_exception unregistered class
+      //       Connection::handle_read_data .............
       //       Server::handle_read : Invalid argument
       LogToCout toCoutAsWell;
       LogFlusher logFlusher;
       LOG(Log::ERR, "Server::handle_read: " <<  e.message());
+
+      // *Reply* back to the client: This should cause error in client if protocol is different
+      outbound_response_.set_cmd( PreAllocatedReply::error_cmd( "Server::handle_read: failed with : " + e.message()  ));
+      conn->async_write( outbound_response_,
+                          boost::bind(&Server::handle_write,
+                                    this,
+                                    boost::asio::placeholders::error,
+                                    conn ) );
    }
 }
 

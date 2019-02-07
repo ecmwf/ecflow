@@ -89,7 +89,7 @@ public:
 			ecf::save_as_string(outbound_data_,t);
 		} catch (const std::exception& ae ) {
 			// Unable to decode data. Something went wrong, inform the caller.
-			log_archive_error("Connection::async_write, exception ",ae);
+			log_archive_error("Connection::async_write, exception ",ae,outbound_data_);
 			boost::system::error_code error(boost::asio::error::invalid_argument);
 			socket_.get_io_service().post(boost::bind(handler, error));
 			return;
@@ -191,9 +191,8 @@ private:
 			boost::get<0>(handler)(e);
 		} else {
 			// Extract the data structure from the data just received.
+			std::string archive_data(&inbound_data_[0], inbound_data_.size());
 			try {
-				std::string archive_data(&inbound_data_[0], inbound_data_.size());
-
 #ifdef DEBUG_CONNECTION_MEMORY
 				if (Ecf::server()) std::cout << "server::";
 				else               std::cout << "client::";
@@ -203,7 +202,7 @@ private:
 				ecf::restore_from_string(archive_data,t);
 			}
 			catch (std::exception& e) {
-				log_archive_error("Connection::handle_read_data, Unable to decode data :",e);
+				log_archive_error("Connection::handle_read_data, Unable to decode data :",e,archive_data);
 				boost::system::error_code error( boost::asio::error::invalid_argument);
 				boost::get<0>(handler)(error);
 				return;
@@ -217,7 +216,7 @@ private:
 private:
 
 	static void log_error(const char* msg);
-	static void log_archive_error(const char* msg,const std::exception& ae);
+	static void log_archive_error(const char* msg,const std::exception& ae,const std::string& data);
 
 private:
 #ifdef ECF_OPENSSL
