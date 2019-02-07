@@ -394,6 +394,14 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       LogToCout toCoutAsWell;
       LogFlusher logFlusher;
       LOG(Log::ERR, "Server::handle_read: " <<  e.message());
+
+      // *Reply* back to the client, This may fail in the client;
+      outbound_response_.set_cmd( PreAllocatedReply::error_cmd( "Server::handle_read: failed with " +  e.message() ));
+      conn->async_write( outbound_response_,
+    		  boost::bind(&Server::handle_write,
+    				  this,
+					  boost::asio::placeholders::error,
+					  conn ) );
    }
 }
 

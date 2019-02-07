@@ -113,7 +113,7 @@ public:
 
 		} catch (const boost::archive::archive_exception& ae ) {
 			// Unable to decode data. Something went wrong, inform the caller.
-			log_archive_error("Connection::async_write, boost::archive::archive_exception ",ae);
+			log_archive_error("Connection::async_write, boost::archive::archive_exception ",ae,outbound_data_);
 			boost::system::error_code error(boost::asio::error::invalid_argument);
 			socket_.get_io_service().post(boost::bind(handler, error));
 			return;
@@ -214,9 +214,8 @@ private:
 			boost::get<0>(handler)(e);
 		} else {
 			// Extract the data structure from the data just received.
+			std::string archive_data(&inbound_data_[0], inbound_data_.size());
 			try {
-				std::string archive_data(&inbound_data_[0], inbound_data_.size());
-
 #ifdef DEBUG_CONNECTION_MEMORY
 				if (Ecf::server()) std::cout << "server::";
 				else               std::cout << "client::";
@@ -243,13 +242,12 @@ private:
 			catch (const boost::archive::archive_exception& ae ) {
 
 				// Log anyway so we know client <--> server incompatible
-				log_archive_error("Connection::handle_read_data, boost::archive::archive_exception ",ae);
+				log_archive_error("Connection::handle_read_data, boost::archive::archive_exception ",ae,archive_data);
 
 				// two context, client code or server, before giving up, try
 				// - Client context, new server  -> old client (* assumes old client updated, with this code *)
 				// - Server context, new client  -> old server (* assumes old server updated, with this code *)
 				// Match up the boost archive version in the string archive_data with current version
-				std::string archive_data(&inbound_data_[0], inbound_data_.size());
 				int current_archive_version = ecf::boost_archive::version();
 				int archive_version_in_data = ecf::boost_archive::extract_version(archive_data);
 				log_error(archive_data.c_str()); // ECFLOW-1025
@@ -285,7 +283,7 @@ private:
 private:
 
 	static void log_error(const char* msg);
-	static void log_archive_error(const char* msg,const boost::archive::archive_exception& ae);
+	static void log_archive_error(const char* msg,const boost::archive::archive_exception& ae, const std::string& data);
 
 private:
 	int allow_new_client_old_server_;

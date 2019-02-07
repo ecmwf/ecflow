@@ -78,10 +78,10 @@ void connection::log_error(const char* msg)
    LOG(ecf::Log::ERR, msg << in_context);
 }
 
-void connection::log_archive_error(const char* msg,const boost::archive::archive_exception& ae)
+void connection::log_archive_error(const char* msg,const boost::archive::archive_exception& ae,const std::string& data)
 {
    const char* in_context = ", in client";
    if (Ecf::server()) in_context = ", in server";
    ecf::LogToCout logToCout;
-   LOG(ecf::Log::ERR, msg << ae.what() << in_context);
+   LOG(ecf::Log::ERR, msg << ae.what() << in_context << " data:\n" << data);
 }
