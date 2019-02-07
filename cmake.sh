@@ -231,11 +231,11 @@ source_dir=$(pwd)
 workspace=$(pwd)/..
 
 if [[ $clean_arg = clean ]] ; then
-	rm -rf ../bdir/$mode_arg/ecflow
+	rm -rf ../bdir4/$mode_arg/ecflow
 fi
 
-mkdir -p ../bdir/$mode_arg/ecflow
-cd ../bdir/$mode_arg/ecflow
+mkdir -p ../bdir4/$mode_arg/ecflow
+cd ../bdir4/$mode_arg/ecflow
 
 # =============================================================================================
 # ctest
