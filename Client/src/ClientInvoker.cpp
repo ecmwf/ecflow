@@ -393,7 +393,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
  				ss << ", Failed to connect to "  << client_env_host_port()
  				   << ". After " << connection_attempts_ << " attempts. Is the server running ?\n";
  				// Only print client environment if not pinging
-            if (!cts_cmd->ping_cmd())  ss << "Client environment:\n" << clientEnv_.toString() << endl;
+            if (!cts_cmd->ping_cmd())  ss << clientEnv_.toString() << endl;
  				server_reply_.set_error_msg(ss.str());
  				return 1;
 			}
