@@ -391,7 +391,7 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       LOG(Log::ERR, "Server::handle_read: " <<  e.message());
 
       // *Reply* back to the client: This should cause error in client if protocol is different
-      outbound_response_.set_cmd( PreAllocatedReply::error_cmd( "Server::handle_read: failed with : " + e.message()  ));
+      outbound_response_.set_cmd( PreAllocatedReply::error_cmd( "Server(" + Version::raw() + ") replied with:\n" + e.message() ));
       conn->async_write( outbound_response_,
                           boost::bind(&Server::handle_write,
                                     this,
