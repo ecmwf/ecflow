@@ -933,17 +933,28 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
         {
             UiLogS(this).dbg() << " full sync requested - rescanTree";
 
-            //This will update the suites + restart the timer
-            rescanTree();
+            //we do not want a new suite list through rescanTree() if the task itself was
+            //to get a new suite list!!
+            //with this we try to avoid infinite recursion!!!
+            bool neednewSuiteList=task->type() != VTask::SuiteListTask;
+
+            //This might update the suites + restart the timer
+            rescanTree(neednewSuiteList);
         }       
         else if(serverReply.in_sync())
         {
-            //The tree can be empty for various reasons, we might cleared it during a sync. In
-            //this case we need to rebuild it
-            //we only rebuild the tree when have a proper connection
+            //The tree can be empty for various reasons, we might have cleared it during a sync. In
+            //this case we need to rebuild it.
+            //We only rebuild the tree when have a proper connection
             if( vRoot_->isEmpty() && connectState_->state() == ConnectState::Normal)
-            {
-                rescanTree();
+            {            
+                //we do not want a new suite list through rescanTree() unless the task itself
+                //was a sync!
+                //With this we try to avoid unnecessary calls to update the suite list and avoid infinite recursion!!!
+                bool neednewSuiteList= VTask::SyncTask;
+
+                //This might update the suites + restart the timer
+                rescanTree(neednewSuiteList);
             }
             broadcast(&ServerObserver::notifyEndServerSync);
         }
@@ -1193,7 +1204,7 @@ void ServerHandler::resetFinished()
     broadcast(&ServerObserver::notifyEndServerScan);
 
 	//The suites might have been changed
-	updateSuiteFilter();
+    updateSuiteFilter(true);
 
 	//Restart the timer
 	startRefreshTimer();
@@ -1252,7 +1263,7 @@ void ServerHandler::clearTree()
 }
 
 
-void ServerHandler::rescanTree()
+void ServerHandler::rescanTree(bool needNewSuiteList)
 {
     UiLogS(this).dbg() << "ServerHandler::rescanTree -->";
 
@@ -1297,8 +1308,8 @@ void ServerHandler::rescanTree()
 	//Restart the queue
 	comQueue_->start();
 
-	//The suites might have been changed
-	updateSuiteFilter();
+	//The suites might have been changed	
+    updateSuiteFilter(needNewSuiteList);
 
 	//Start the timer
 	startRefreshTimer();
@@ -1388,7 +1399,7 @@ UI_FUNCTION_LOG_S(this)
 }
 
 //Only called internally after reset or serverscan!!
-void ServerHandler::updateSuiteFilter()
+void ServerHandler::updateSuiteFilter(bool needNewSuiteList)
 {
 UI_FUNCTION_LOG_S(this)
     //We only fetch the full list of loaded suites from the server
@@ -1397,7 +1408,10 @@ UI_FUNCTION_LOG_S(this)
     if(suiteFilter_->isEnabled())
     {
         //This will call updateSuiteFilterWithLoaded()
-        comQueue_->addSuiteListTask();
+        if(needNewSuiteList)
+        {
+            comQueue_->addSuiteListTask();
+        }
     }
     //Otherwise the defs contains the full list of suites
     else

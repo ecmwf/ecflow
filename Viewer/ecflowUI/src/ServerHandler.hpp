@@ -168,12 +168,12 @@ private:
     void resetFinished();
 	void resetFailed(const std::string& errMsg);
 	void clearTree();
-	void rescanTree();
+    void rescanTree(bool needNewSuiteList=true);
 	void connectionLost(const std::string& errMsg);
 	bool connectionGained();
 
 	void updateSuiteFilterWithLoaded(const std::vector<std::string>&);
-	void updateSuiteFilter();
+    void updateSuiteFilter(bool needNewSuiteList);
 
 	//Handle the refresh timer
 	void stopRefreshTimer();
