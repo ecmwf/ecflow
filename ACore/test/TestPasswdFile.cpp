@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <crypt.h>
 
 #include "PasswdFile.hpp"
 #include "File.hpp"
@@ -150,11 +151,11 @@ BOOST_AUTO_TEST_CASE( test_passwd )
 //   tom host3 3143    x12ggg # sdsdsd
 
    std::vector<Pass_wd> expected_passwds;
-   expected_passwds.emplace_back("fred", "host", "3141",  "x12ggg");
-   expected_passwds.emplace_back("fred", "host3", "3143",  "passwd");
-   expected_passwds.emplace_back("fred", "host4", "3145",  "x12ggg");
-   expected_passwds.emplace_back("jake", "host", "3141",  "x12ggg");
-   expected_passwds.emplace_back("tom", "host3", "3143",  "x12ggg");
+   expected_passwds.emplace_back("fred", "host",  "3141", crypt("x12ggg","fred") );
+   expected_passwds.emplace_back("fred", "host3", "3143", crypt("passwd","fred") );
+   expected_passwds.emplace_back("fred", "host4", "3145", crypt("x12ggg","fred") );
+   expected_passwds.emplace_back("jake", "host",  "3141", crypt("x12ggg","jake") );
+   expected_passwds.emplace_back("tom",  "host3", "3143", crypt("x12ggg","tom") );
 
    BOOST_REQUIRE_MESSAGE(expected_passwds == theFile.passwds() ,"expected passwords to match");
 }

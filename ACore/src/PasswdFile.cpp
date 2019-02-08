@@ -13,6 +13,7 @@
 // Description : Parser for white list file
 //============================================================================
 #include <pwd.h>       /* getpwuid */
+#include <crypt.h>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -262,7 +263,7 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
       return false;
    }
 
-   vec_.emplace_back(tokens[0],tokens[1],tokens[2],tokens[3]);
+   vec_.emplace_back(tokens[0],tokens[1],tokens[2],crypt(tokens[3].c_str(),tokens[0].c_str()));
 
    return true;
 }
