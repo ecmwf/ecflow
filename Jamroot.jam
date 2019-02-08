@@ -8,7 +8,13 @@
 # export BOOST_ROOT=...
 # alias b8r='$BOOST_ROOT/bjam c++-template-depth=512 cxxflags="-Wno-unused-local-typedefs -Wno-unused-variable" -j8 -q release'
 
-project ecflow_top ;
+# ===============================================================================
+# force all exe to link with crypt 
+lib crypt : : <file>/usr/lib64/libcrypt.so ;
+explicit crypt ; 
+# ======================================================================
+
+project ecflow_top : requirements <library>crypt ;
 
 # ==================== OPENSSL ======================================================
 # OPENSSL support, should really be in site-config.jam
