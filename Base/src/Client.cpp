@@ -18,6 +18,7 @@
 #include <cassert>
 
 #include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
 
 #include "Client.hpp"
 #include "StcCmd.hpp"
@@ -315,25 +316,37 @@ void Client::handle_read( const boost::system::error_code& e )
 		// Successfully handled request
 	}
 	else {
-	   //
+		//
 		// A connection error occurred.
 		// In cases where ( to cut down network traffic), the server does a shutdown/closes
-	   // the socket without replying we will get End of File error.
-	   //
+		// the socket without replying we will get End of File error.
+		//
 		// i.e. client requests a response from the server, and it does not reply(or replies with shutdown/close)
-	   //
+		//
 
-	   // This code will handle  a no reply from the server & hence reduce network traffic
-	   // Server has shutdown and closed the socket.
-	   // See void Server::handle_read(...)
+		// This code will handle  a no reply from the server & hence reduce network traffic
+		// Server has shutdown and closed the socket.
+		// See void Server::handle_read(...)
 		if (e.value() == boost::asio::error::eof) {
 			// Treat a  *no* reply as OK, so that handle_server_response() returns OK
 #ifdef DEBUG_CLIENT
 			std::cout << "   Client::handle_read: No reply from server: Treat as OK" << std::endl;
 #endif
-			inbound_response_.set_cmd( STC_Cmd_ptr(new StcCmd(StcCmd::OK)) );
+			inbound_response_.set_cmd( boost::make_shared<StcCmd>(StcCmd::OK) );
 			return;
- 		}
+		}
+
+		// If we get back Invalid argument. It means server could *NOT* decode client message. Equally client could not decode server reply
+		//   - Could be boost version of client/server are incompatible
+		//   - 4 series ecflow can not talk to 5 series ecflow or vice versa
+		// We treat this specially
+		if (e.value() == boost::asio::error::invalid_argument) {
+#ifdef DEBUG_CLIENT
+			std::cout << "   Client::handle_read: Server replied with invalid argument (i.e could not decode client message) " << std::endl;
+#endif
+			inbound_response_.set_cmd( boost::make_shared<StcCmd>(StcCmd::INVALID_ARGUMENT) );
+			return;
+		}
 
 		std::stringstream ss;
 		ss << "Client::handle_read: connection error( " << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" << port_;

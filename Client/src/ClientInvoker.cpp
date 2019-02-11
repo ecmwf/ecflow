@@ -357,12 +357,17 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					   // fall through try again, then try other hosts
 						if (!report_block_client_zombie_detected || clientEnv_.debug()){ cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : zombie detected, continue waiting\n";report_block_client_zombie_detected = true;}
   					}
-					else  if (server_reply_.client_request_failed()) {
+					else if (server_reply_.client_request_failed()) {
 						// Valid reply from server
 						// This error is ONLY valid if we got a real reply from the server
 						// as opposed to some kind of connection errors. For connections errors
 						// we fall through and try again.
 						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cts_cmd->print(cout); cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
+						return 1;
+					}
+					else if (server_reply_.invalid_argument()) {
+						// Server could not decode client message and/or client could not decode server reply
+						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
 						return 1;
 					}
 					else {

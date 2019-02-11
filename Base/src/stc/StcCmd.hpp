@@ -26,7 +26,8 @@ public:
    enum Api { OK,
       BLOCK_CLIENT_SERVER_HALTED,
       BLOCK_CLIENT_ON_HOME_SERVER,
-      DELETE_ALL
+      DELETE_ALL,
+      INVALID_ARGUMENT       // Created on the Client side
    };
    explicit StcCmd(Api a) :  api_(a) {}
    StcCmd()= default;
