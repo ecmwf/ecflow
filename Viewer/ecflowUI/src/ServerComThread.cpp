@@ -113,6 +113,12 @@ void ServerComThread::run()
             }
         }
 
+        // this is very important to exclude non-compatible servers
+        else if(taskType_  == VTask::ServerVersionTask)
+        {
+            UiLog(serverName_).dbg() << " SERVER_VERSION";
+            ci_->server_version();
+        }
         // tasks that will explicitly/implicitly call ci_->sync_local()
         else if(sync_tasks.find(taskType_) != sync_tasks.end())
         {

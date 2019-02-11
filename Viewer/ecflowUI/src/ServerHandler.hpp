@@ -62,6 +62,7 @@ public:
 	Activity activity() const {return activity_;}
 	ConnectState* connectState() const {return connectState_;}
 	bool communicating() {return communicating_;}
+    bool isIncompatible() const {return incompatible_;}
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
     QString nodeMenuMode() const;
@@ -171,6 +172,9 @@ private:
     void rescanTree(bool needNewSuiteList=true);
 	void connectionLost(const std::string& errMsg);
 	bool connectionGained();
+    void checkServerVersion();
+    void compatibleServer();
+    void incompatibleServer(const std::string& version);
 
 	void updateSuiteFilterWithLoaded(const std::vector<std::string>&);
     void updateSuiteFilter(bool needNewSuiteList);
@@ -211,7 +215,7 @@ private:
 
     int truncatedLinesFromServer(const std::string& txt) const;
 
-	QMutex           defsMutex_;
+    QMutex   defsMutex_;
 	defs_ptr defs_;
 
 	ServerComQueue* comQueue_;
@@ -225,6 +229,7 @@ private:
 	Activity activity_;
 	ConnectState* connectState_;
 	SState::State prevServerState_;
+    bool incompatible_;
 
 	VServerSettings* conf_;
 

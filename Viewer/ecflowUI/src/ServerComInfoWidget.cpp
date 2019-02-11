@@ -21,6 +21,7 @@
 
 #include <boost/current_function.hpp>
 
+#include "ConnectState.hpp"
 #include "FontMetrics.hpp"
 #include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
@@ -260,11 +261,23 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
     periodTextWidth_=0;
     lastTextWidth_=0;
 
+    if(server_ && server_->connectState()->state() == ConnectState::Incompatible)
+    {
+        refreshAction_->setEnabled(false);
+        setEnabled(false);
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
     //Adjust width + get info
     adjustGeometry(true);
 
     //rerender
     update();
+
+
 }
 
 //-------------------------------
@@ -334,15 +347,39 @@ void ServerRefreshInfoWidget::notifyEndServerScan(ServerHandler* server)
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
-    refreshAction_->setEnabled(true);
+    if(server_ && server_->connectState()->state() == ConnectState::Incompatible)
+    {
+        refreshAction_->setEnabled(false);
+        setEnabled(false);
+    }
+    else
+    {
+        refreshAction_->setEnabled(true);
+        setEnabled(true);
+    }
     reloadAll();
 }
 
-//virtual void notifyServerConnectState(ServerHandler* server) {}
+void  ServerRefreshInfoWidget::notifyServerConnectState(ServerHandler* server)
+{
+    Q_ASSERT(server_ == server);
+
+    if(server_ && server_->connectState()->state() == ConnectState::Incompatible)
+    {
+        refreshAction_->setEnabled(false);
+        setEnabled(false);
+    }
+    else
+    {
+        setEnabled(true);
+    }
+}
+
 void ServerRefreshInfoWidget::notifyServerActivityChanged(ServerHandler* /*server*/)
 {
 
 }
+
 
 //-----------------------------------
 // Server com observer notifications
@@ -452,7 +489,7 @@ void ServerRefreshInfoWidget::fetchInfo()
     printStatus();
 #endif
 
-    if(!server_)
+    if(!server_  || !isEnabled())
     {
         mode_=NoMode;
         hasInfo_=false;
@@ -865,7 +902,7 @@ void ServerRefreshInfoWidget::drawButton(QPainter* painter)
 {
     painter->setRenderHint(QPainter::Antialiasing,true);
 
-    if(server_)
+    if(server_ && isEnabled())
     {
         //blink
         if(inRefresh_ &&
@@ -921,8 +958,20 @@ void ServerRefreshInfoWidget::drawProgress(QPainter* painter)
     //Server text
     QRect serverTextRect=serverRect_.adjusted(buttonRect_.width()/2-4+4,0,0,0);
     painter->setFont(fontServer_);
-    painter->setPen((refreshAction_->isEnabled())?serverTextPen_:disabledTextPen_);   
+
+    painter->setPen((refreshAction_->isEnabled())?serverTextPen_:disabledTextPen_);
     painter->drawText(serverTextRect,Qt::AlignHCenter | Qt::AlignVCenter,serverText_);
+
+    if(!isEnabled())
+    {
+        if(showLastAutoRefresh_)
+        {
+            painter->setBrush(lastBgBrush_);
+            painter->setPen((refreshAction_->isEnabled())?borderPen_:disabledBorderPen_);
+            painter->drawRect(lastRect_);
+        }
+        return;
+    }
 
     //The time rects and texts
     if(hasInfo_)
@@ -1168,6 +1217,14 @@ ServerComActivityLine::ServerComActivityLine(QWidget *parent) :
 void ServerComActivityLine::setServer(ServerHandler* server)
 {
     server_=server;
+    if(server_ && server_->connectState()->state() == ConnectState::Incompatible)
+    {
+        setDisabled(true);
+    }
+    else
+    {
+        setEnabled(true);
+    }
 }
 
 void ServerComActivityLine::paintEvent(QPaintEvent*)

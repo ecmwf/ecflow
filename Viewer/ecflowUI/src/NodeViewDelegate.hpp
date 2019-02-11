@@ -153,7 +153,9 @@ protected:
 	QPixmap errPix_;
 
 	QBrush lostConnectBgBrush_;
-	QBrush lostConnectBandBrush_;
+    QBrush lostConnectBandBrush_;
+    QBrush noConnectBgBrush_;
+    QBrush noConnectBandBrush_;
 
 	QMap<QString,AttributeRendererProc> attrRenderers_;
 

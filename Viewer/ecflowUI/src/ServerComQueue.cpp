@@ -358,6 +358,18 @@ void ServerComQueue::addSuiteAutoRegisterTask()
 	addTask(task);
 }
 
+void ServerComQueue::addServerVersionTask()
+{
+    if(state_ == DisabledState || state_ == ResetState)
+        return;
+
+    if(isNextTask(VTask::ServerVersionTask))
+        return;
+
+    VTask_ptr task=VTask::create(VTask::ServerVersionTask);
+    addTask(task);
+}
+
 void ServerComQueue::startCurrentTask()
 {
     taskStarted_=false;

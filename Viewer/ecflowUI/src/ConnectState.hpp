@@ -18,7 +18,7 @@ class ConnectState
 public:
 	ConnectState();
 
-	enum State {Undef,Normal,Disconnected,Lost};
+    enum State {Undef,Normal,Disconnected,Lost,Incompatible};
 
 	void state(State state);
 	State state() const {return state_;}

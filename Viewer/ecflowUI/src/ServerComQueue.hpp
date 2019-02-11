@@ -45,6 +45,7 @@ public:
 	void addSyncTask();
 	void addSuiteListTask();
 	void addSuiteAutoRegisterTask();
+    void addServerVersionTask();
 
 	void enable();
 	void disable();

@@ -50,6 +50,7 @@ public:
     void notifyBeginServerClear(ServerHandler*) override;
     void notifyEndServerScan(ServerHandler*) override;
     void notifyServerActivityChanged(ServerHandler*) override;
+    void notifyServerConnectState(ServerHandler* server) override;
 
     void notifyRefreshTimerStarted(ServerHandler* server) override;
     void notifyRefreshTimerStopped(ServerHandler* server) override;
