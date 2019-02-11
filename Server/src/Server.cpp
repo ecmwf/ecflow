@@ -86,7 +86,7 @@ Server::Server( ServerEnvironment& serverEnv ) :
    // Register to handle the signals.
    // Support for emergency check pointing during system session.
    signals_.add(SIGTERM);
-   signals_.async_wait(boost::bind(&Server::sigterm_signal_handler, this));
+   signals_.async_wait([this](boost::system::error_code /*ec*/, int /*signo*/) { sigterm_signal_handler();});
 
 
    // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
@@ -229,9 +229,7 @@ void Server::start_accept()
 #endif
 
    acceptor_.async_accept( new_conn->socket_ll(),
-                           boost::bind( &Server::handle_accept, this,
-                                 boost::asio::placeholders::error,
-                                 new_conn ) );
+		                   [this,new_conn](const boost::system::error_code& e ) { handle_accept(e,new_conn); });
 #endif // ECFLOW_MT
 }
 
@@ -462,7 +460,7 @@ void Server::terminate()
    if (serverEnv_.debug()) cout << "   Server::terminate(): posting call to Server::handle_terminate" << endl;
 
    // Post a call to the stop function so that Server::stop() is safe to call from any thread.
-   io_service_.post(boost::bind(&Server::handle_terminate, this));
+   io_service_.post( [this]() {handle_terminate();} ); // boost::bind(&Server::handle_terminate, this));
 }
 
 void Server::handle_terminate()
@@ -849,5 +847,5 @@ void Server::sigterm_signal_handler()
    if (serverEnv_.debug()) cout << "Server::sigterm_signal_handler(): finished check pointing" << endl;
 
    // We need re-wait each time signal handler is called
-   signals_.async_wait(boost::bind(&Server::sigterm_signal_handler, this));
+   signals_.async_wait([this](boost::system::error_code /*ec*/, int /*signo*/) { sigterm_signal_handler();});
 }

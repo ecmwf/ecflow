@@ -97,7 +97,7 @@ void Client::start(boost::asio::ip::tcp::resolver::iterator endpoint_iter)
    // Start the deadline actor. You will note that we're not setting any
    // particular deadline here. Instead, the connect and input actors will
    // update the deadline prior to each asynchronous operation.
-   deadline_.async_wait(boost::bind(&Client::check_deadline, this));
+   deadline_.async_wait([this](const boost::system::error_code&) {check_deadline();});
 }
 
 bool Client::start_connect(boost::asio::ip::tcp::resolver::iterator endpoint_iterator )
@@ -401,5 +401,5 @@ void Client::check_deadline()
    }
 
    // Put the actor back to sleep.
-   deadline_.async_wait(boost::bind(&Client::check_deadline, this));
+   deadline_.async_wait([this](const boost::system::error_code&) {check_deadline();});
 }
