@@ -261,14 +261,14 @@ void ServerRefreshInfoWidget::setServer(ServerHandler* server)
     periodTextWidth_=0;
     lastTextWidth_=0;
 
-    if(server_ && server_->connectState()->state() == ConnectState::Incompatible)
+    if(server_ && server_->isEnabled())
     {
-        refreshAction_->setEnabled(false);
-        setEnabled(false);
+        setEnabled(true);
     }
     else
     {
-        setEnabled(true);
+        refreshAction_->setEnabled(false);
+        setEnabled(false);
     }
 
     //Adjust width + get info
@@ -347,16 +347,19 @@ void ServerRefreshInfoWidget::notifyEndServerScan(ServerHandler* server)
     UI_FUNCTION_LOG
 #endif
     Q_ASSERT(server_ == server);
-    if(server_ && server_->connectState()->state() == ConnectState::Incompatible)
-    {
-        refreshAction_->setEnabled(false);
-        setEnabled(false);
-    }
-    else
+
+
+    if(server_ && server_->isEnabled())
     {
         refreshAction_->setEnabled(true);
         setEnabled(true);
     }
+    else
+    {
+        refreshAction_->setEnabled(false);
+        setEnabled(false);
+    }
+
     reloadAll();
 }
 
@@ -364,14 +367,14 @@ void  ServerRefreshInfoWidget::notifyServerConnectState(ServerHandler* server)
 {
     Q_ASSERT(server_ == server);
 
-    if(server_ && server_->connectState()->state() == ConnectState::Incompatible)
+    if(server_ && server_->isEnabled())
     {
-        refreshAction_->setEnabled(false);
-        setEnabled(false);
+        setEnabled(true);
     }
     else
     {
-        setEnabled(true);
+        refreshAction_->setEnabled(false);
+        setEnabled(false);
     }
 }
 
@@ -1217,13 +1220,13 @@ ServerComActivityLine::ServerComActivityLine(QWidget *parent) :
 void ServerComActivityLine::setServer(ServerHandler* server)
 {
     server_=server;
-    if(server_ && server_->connectState()->state() == ConnectState::Incompatible)
+    if(server_ && server_->isEnabled())
     {
-        setDisabled(true);
+        setEnabled(true);
     }
     else
     {
-        setEnabled(true);
+        setEnabled(false);
     }
 }
 

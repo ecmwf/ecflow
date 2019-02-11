@@ -20,6 +20,7 @@
 #include "IconProvider.hpp"
 #include "LineEdit.hpp"
 #include "ModelColumn.hpp"
+#include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
@@ -761,7 +762,18 @@ void VariableItemWidget::reload(VInfo_ptr info)
        return;
 
     clearContents();
-	adjust(info);
+
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
+    adjust(info);
 
 	data_->reload(info);
 	varView->expandAll();

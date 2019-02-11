@@ -14,6 +14,7 @@
 #include <QClipboard>
 
 #include "InfoProvider.hpp"
+#include "ServerHandler.hpp"
 #include "VReply.hpp"
 
 #include "LogModel.hpp"
@@ -64,6 +65,17 @@ void MessageItemWidget::reload(VInfo_ptr info)
         return;
 
     clearContents();
+
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
     info_=info;
 
     if(info_)

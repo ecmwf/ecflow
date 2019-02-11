@@ -53,6 +53,7 @@ class ServerHandler : public QObject
   
 public:
 	enum Activity {NoActivity,LoadActivity,RescanActivity};
+    enum Compatibility {Compatible, Incompatible, CanBeCompatible};
 
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
@@ -62,7 +63,9 @@ public:
 	Activity activity() const {return activity_;}
 	ConnectState* connectState() const {return connectState_;}
 	bool communicating() {return communicating_;}
-    bool isIncompatible() const {return incompatible_;}
+    bool isEnabled() const {return !isDisabled();}
+    bool isDisabled() const;
+
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
     QString nodeMenuMode() const;
@@ -131,7 +134,7 @@ protected:
 	void connectToServer();
 	void setCommunicatingStatus(bool c) {communicating_ = c;}
 	void clientTaskFinished(VTask_ptr task,const ServerReply& serverReply);
-	void clientTaskFailed(VTask_ptr task,const std::string& errMsg);
+    void clientTaskFailed(VTask_ptr task,const std::string& errMsg,const ServerReply& serverReply);
 
 	static void checkNotificationState(VServerSettings::Param par);
 
@@ -227,9 +230,9 @@ private:
     QDateTime lastRefresh_;
 
 	Activity activity_;
+    Compatibility compatibility_;
 	ConnectState* connectState_;
 	SState::State prevServerState_;
-    bool incompatible_;
 
 	VServerSettings* conf_;
 

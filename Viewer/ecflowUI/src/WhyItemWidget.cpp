@@ -106,6 +106,16 @@ void WhyItemWidget::reload(VInfo_ptr info)
 
     messageLabel_->hide();
 
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
     //set the info. we do not need to observe the node!!!
     info_=info;
 

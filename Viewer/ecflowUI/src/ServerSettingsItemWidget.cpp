@@ -53,6 +53,17 @@ void ServerSettingsItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        editor_->empty();
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
 	info_=info;
 
     if(info_ && info_->server())

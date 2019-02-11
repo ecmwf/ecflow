@@ -410,16 +410,16 @@ void MainWindow::updateRefreshActions()
 
     serverComWidget_->setServer(s);
 
-    if(s && s->connectState()->state() == ConnectState::Incompatible)
-    {
-        actionRefreshSelected->setEnabled(false);
-        actionResetSelected->setEnabled(false);
-    }
-    else
+    if(s && s->isEnabled())
     {
         bool hasSel=(selection_!= nullptr);
         actionRefreshSelected->setEnabled(hasSel);
         actionResetSelected->setEnabled(hasSel);
+    }
+    else
+    {
+        actionRefreshSelected->setEnabled(false);
+        actionResetSelected->setEnabled(false);
     }
 }
 

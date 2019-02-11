@@ -66,6 +66,16 @@ void ServerLoadItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
     bool same=hasSameContents(info);
 
     //set the info. We do not need to observe the node!!!

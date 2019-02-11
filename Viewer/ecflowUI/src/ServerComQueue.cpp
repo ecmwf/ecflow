@@ -631,7 +631,7 @@ void ServerComQueue::slotTaskFailed(std::string msg)
 	current_.reset();
 
 	//We notify the server that the task has failed
-	server_->clientTaskFailed(task,msg);
+    server_->clientTaskFailed(task,msg,client_->server_reply());
 
 	taskIsBeingFailed_=false;
 }

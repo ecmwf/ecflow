@@ -86,7 +86,18 @@ void ZombieItemWidget::reload(VInfo_ptr info)
         return;
 
     clearContents();
-	info_=info;
+
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
+    info_=info;
 
     if(info_ && info_->server())
 	{
