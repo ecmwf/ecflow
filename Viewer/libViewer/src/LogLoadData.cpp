@@ -1061,11 +1061,15 @@ void LogLoadData::loadLogFile(const std::string& logFile,int numOfRows)
         log_file.getline( line); // default delimiter is /n
 
         // The log file format we are interested is :
-        // 0             1         2            3
-        // MSG:[HH:MM:SS D.M.YYYY] chd:fullname [path +additional information]
-        // MSG:[HH:MM:SS D.M.YYYY] --begin      [args | path(optional) ]    :<user>
 
-        /// We are only interested in Commands (i.e MSG:), and not state changes
+        // MSG:[HH:MM:SS D.M.YYYY] chd:fullname [path +additional information]
+        // MSG:[HH:MM:SS D.M.YYYY] --begin      [args | path(optional) ]    :<user>@<host>
+
+        //Here is an example:
+        // MSG:[13:53:56 4.10.2018] --run /test_client_run; --sync=0 1435 442 :user@host
+        // MSG:[13:54:07 4.10.2018] --alter sort variable recursive /; --sync=0 1789 636 :user@host
+
+        // We are only interested in Commands (i.e MSG:), and not state changes
         if (line.empty())
             continue;
 
@@ -1419,7 +1423,8 @@ bool LogLoadData::extract_suite_path(
             //  MSG:[09:36:05 22.10.2013] --news=1 36506 6  :ma0 [server handle(36508,7) server(36508,7)
             //                     : *Large* scale changes (new handle or suites added/removed) :NEWS]
             //   the /removed was being interpreted as a suite
-            if (line.find("--news") != std::string::npos)
+            // Ignore the --load command as well, it does not have the path of the suite!
+            if (line.find("--news") != std::string::npos || line.find("--load") != std::string::npos)
                 return false;
         }
 
@@ -1428,6 +1433,10 @@ bool LogLoadData::extract_suite_path(
         if (space_pos != std::string::npos &&  space_pos > forward_slash)
         {
             path = line.substr(forward_slash,space_pos-forward_slash);
+            if(path.size() > 1 && path[path.size()-1] == ';')
+            {
+                path = path.substr(0,path.size()-1);
+            }
         }
 
         if (!path.empty())
