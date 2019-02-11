@@ -18,7 +18,6 @@
 #include <cassert>
 
 #include <boost/bind.hpp>
-#include <boost/make_shared.hpp>
 
 #include "Client.hpp"
 #include "StcCmd.hpp"
@@ -332,7 +331,7 @@ void Client::handle_read( const boost::system::error_code& e )
 #ifdef DEBUG_CLIENT
 			std::cout << "   Client::handle_read: No reply from server: Treat as OK" << std::endl;
 #endif
-			inbound_response_.set_cmd( boost::make_shared<StcCmd>(StcCmd::OK) );
+			inbound_response_.set_cmd( std::make_shared<StcCmd>(StcCmd::OK) );
 			return;
 		}
 
@@ -344,7 +343,7 @@ void Client::handle_read( const boost::system::error_code& e )
 #ifdef DEBUG_CLIENT
 			std::cout << "   Client::handle_read: Server replied with invalid argument (i.e could not decode client message) " << std::endl;
 #endif
-			inbound_response_.set_cmd( boost::make_shared<StcCmd>(StcCmd::INVALID_ARGUMENT) );
+			inbound_response_.set_cmd( std::make_shared<StcCmd>(StcCmd::INVALID_ARGUMENT) );
 			return;
 		}
 
