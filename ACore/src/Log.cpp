@@ -54,36 +54,30 @@ void Log::destroy()
 }
 
 Log::Log(const std::string& fileName)
-: fileName_(fileName), logImpl_( new LogImpl(fileName) )
+: fileName_(fileName), logImpl_( std::make_unique<LogImpl>(fileName) )
 {
-}
-
-Log::~Log()
-{
-	delete logImpl_;
-	logImpl_ = nullptr;
 }
 
 bool Log::log(Log::LogType lt,const std::string& message)
 {
 	if (!logImpl_) {
-		logImpl_ = new LogImpl(fileName_);
+		logImpl_ = std::make_unique<LogImpl>(fileName_);
 	}
 	return logImpl_->log(lt,message);
 }
 
 bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 {
-   if (!logImpl_) {
-      logImpl_ = new LogImpl(fileName_);
-   }
-   return logImpl_->log_no_newline(lt,message);
+	if (!logImpl_) {
+		logImpl_ = std::make_unique<LogImpl>(fileName_);
+	}
+	return logImpl_->log_no_newline(lt,message);
 }
 
 bool Log::append(const std::string& message)
 {
    if (!logImpl_) {
-      logImpl_ = new LogImpl(fileName_) ;
+		logImpl_ = std::make_unique<LogImpl>(fileName_);
    }
    return logImpl_->append(message);
 }
@@ -91,7 +85,7 @@ bool Log::append(const std::string& message)
 void Log::cache_time_stamp()
 {
 	if (!logImpl_) {
-		logImpl_ = new LogImpl(fileName_) ;
+      logImpl_ = std::make_unique<LogImpl>(fileName_);
 	}
 	logImpl_->create_time_stamp();
 }
@@ -108,8 +102,7 @@ void Log::flush()
 {
  	// will close ofstream and force data to be written to disk.
 	// Forcing writing to physical medium can't be guaranteed though!
-	delete logImpl_;
-	logImpl_ = nullptr;
+   logImpl_.reset();
 }
 
 void Log::flush_only()

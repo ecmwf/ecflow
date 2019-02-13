@@ -320,7 +320,7 @@ void CFileCmd::create( 	Cmd_ptr& cmd,
 	   max_lines = args[2];
 	}
 
-	cmd = Cmd_ptr( new CFileCmd(pathToNode, file_type, max_lines) );
+	cmd = std::make_shared<CFileCmd>(pathToNode, file_type, max_lines);
 }
 
 std::ostream& operator<<(std::ostream& os, const CFileCmd& c) { return c.print(os); }

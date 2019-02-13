@@ -41,11 +41,11 @@ const Repeat& Repeat::EMPTY() { static const Repeat REPEAT = Repeat(); return RE
 //=========================================================================
 
 Repeat::Repeat() = default;
-Repeat::Repeat( const RepeatDate& r) : type_(new RepeatDate(r)) {}
-Repeat::Repeat( const RepeatInteger& r) : type_(new RepeatInteger(r)) {}
-Repeat::Repeat( const RepeatEnumerated& r) : type_(new RepeatEnumerated(r)) {}
-Repeat::Repeat( const RepeatString& r) : type_(new RepeatString(r)) {}
-Repeat::Repeat( const RepeatDay& r) : type_(new RepeatDay(r)) {}
+Repeat::Repeat( const RepeatDate& r) : type_(std::make_unique<RepeatDate>(r)) {}
+Repeat::Repeat( const RepeatInteger& r) : type_(std::make_unique<RepeatInteger>(r)) {}
+Repeat::Repeat( const RepeatEnumerated& r) : type_(std::make_unique<RepeatEnumerated>(r)) {}
+Repeat::Repeat( const RepeatString& r) : type_(std::make_unique<RepeatString>(r)) {}
+Repeat::Repeat( const RepeatDay& r) : type_(std::make_unique<RepeatDay>(r)) {}
 
 Repeat::~Repeat() = default;
 

@@ -201,7 +201,7 @@ void CheckPtCmd::create(    Cmd_ptr& cmd,
 
    if (ace->debug())  cout << "  CheckPtCmd::create mode = " << m << " check_pt_interval = " << check_pt_interval << "\n";
 
-   cmd = Cmd_ptr(new CheckPtCmd(m,check_pt_interval,check_pt_save_time_alarm));
+   cmd = std::make_shared<CheckPtCmd>(m,check_pt_interval,check_pt_save_time_alarm);
 }
 
 std::ostream& operator<<(std::ostream& os, const CheckPtCmd& c) { return c.print(os); }

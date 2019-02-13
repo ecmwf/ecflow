@@ -78,7 +78,7 @@ void ServerVersionCmd::create(    Cmd_ptr& cmd,
    // testing client interface
    if (ace->under_test())  return;
 
-   cmd = Cmd_ptr(new ServerVersionCmd());
+   cmd = std::make_shared<ServerVersionCmd>();
 }
 
 std::ostream& operator<<(std::ostream& os, const ServerVersionCmd& c) { return c.print(os); }

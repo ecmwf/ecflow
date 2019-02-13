@@ -206,7 +206,7 @@ void DeleteCmd::create(   Cmd_ptr& cmd,
       prompt_for_confirmation(confirm);
    }
 
-   cmd = Cmd_ptr(new DeleteCmd(paths, force));
+   cmd = std::make_shared<DeleteCmd>(paths, force);
 }
 
 std::ostream& operator<<(std::ostream& os, const DeleteCmd& c) { return c.print(os); }

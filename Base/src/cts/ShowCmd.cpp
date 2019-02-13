@@ -103,7 +103,7 @@ void ShowCmd::create( 	Cmd_ptr& cmd,
 	   else if (show_state == "defs" ) style = PrintStyle::DEFS;
 	   else throw std::runtime_error("ShowCmd::create invalid show option expected one of [ defs | state | migrate ] but found " + show_state);
 	}
- 	cmd = Cmd_ptr( new ShowCmd( style ) );
+ 	cmd = std::make_shared<ShowCmd>( style );
 }
 
 std::ostream& operator<<(std::ostream& os, const ShowCmd& c) { return c.print(os); }

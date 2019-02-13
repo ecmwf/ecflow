@@ -209,7 +209,7 @@ void ReplaceNodeCmd::create( 	Cmd_ptr& cmd,
 	if ( args.size() == 3 && args[2] == "false") createNodesAsNeeded = false;
 	if ( args.size() == 4 && args[3] == "force") force = true;
 
-	cmd = Cmd_ptr( new ReplaceNodeCmd(pathToNode,createNodesAsNeeded, pathToDefsFile,force));
+	cmd = std::make_shared<ReplaceNodeCmd>(pathToNode,createNodesAsNeeded, pathToDefsFile,force);
 }
 
 std::ostream& operator<<(std::ostream& os, const ReplaceNodeCmd& c) { return c.print(os); }

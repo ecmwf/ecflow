@@ -252,7 +252,7 @@ void ZombieCmd::create( Cmd_ptr& cmd,
       }
    }
 
-	cmd = Cmd_ptr(new ZombieCmd(user_action_, paths, process_or_remote_id, password ));
+	cmd = std::make_shared<ZombieCmd>(user_action_, paths, process_or_remote_id, password );
 }
 
 std::ostream& operator<<(std::ostream& os, const ZombieCmd& c) { return c.print(os); }

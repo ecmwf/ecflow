@@ -375,11 +375,10 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 		throw std::runtime_error(ss.str());
 	}
 
-	cmd = Cmd_ptr( new InitCmd( clientEnv->task_path(),
+	cmd = std::make_shared<InitCmd>( clientEnv->task_path(),
 	                            clientEnv->jobs_password(),
 	                            process_or_remote_id,
 	                            clientEnv->task_try_no()
-	                          )
 	             );
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -451,10 +450,10 @@ void CompleteCmd::create( 	Cmd_ptr& cmd,
 	 	throw std::runtime_error( "CompleteCmd: " + errorMsg );
 	}
 
-	cmd = Cmd_ptr( new CompleteCmd( clientEnv->task_path(),
+	cmd = std::make_shared<CompleteCmd>( clientEnv->task_path(),
 	                                clientEnv->jobs_password(),
 	                                clientEnv->process_or_remote_id(),
-	                                clientEnv->task_try_no()) );
+	                                clientEnv->task_try_no()) ;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -546,11 +545,11 @@ void CtsWaitCmd::create( 	Cmd_ptr& cmd,
 	 	throw std::runtime_error( "CtsWaitCmd: " + errorMsg );
 	}
 
-	cmd = Cmd_ptr( new CtsWaitCmd( clientEnv->task_path(),
+	cmd = std::make_shared<CtsWaitCmd>( clientEnv->task_path(),
 	                               clientEnv->jobs_password(),
 	                               clientEnv->process_or_remote_id(),
 	                               clientEnv->task_try_no(),
-	                               expression) );
+	                               expression);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -646,11 +645,11 @@ void AbortCmd::create( 	Cmd_ptr& cmd,
 	 	throw std::runtime_error( "AbortCmd: " + errorMsg );
 	}
 
-	cmd = Cmd_ptr(new AbortCmd( clientEnv->task_path(),
+	cmd = std::make_shared<AbortCmd>( clientEnv->task_path(),
  	                            clientEnv->jobs_password(),
  	                            clientEnv->process_or_remote_id(),
  	                            clientEnv->task_try_no(),
- 	                            reason));
+ 	                            reason);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -724,11 +723,11 @@ void EventCmd::create( 	Cmd_ptr& cmd,
 	 	throw std::runtime_error( "EventCmd: " + errorMsg );
 	}
 
-  	cmd = Cmd_ptr(new EventCmd( clientEnv->task_path(),
+  	cmd = std::make_shared<EventCmd>( clientEnv->task_path(),
   	                            clientEnv->jobs_password(),
   	                            clientEnv->process_or_remote_id(),
   	                            clientEnv->task_try_no(),
-  	                            event ));
+  	                            event );
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -840,12 +839,12 @@ void MeterCmd::create( 	Cmd_ptr& cmd,
 	 	throw std::runtime_error( "MeterCmd: " + errorMsg );
 	}
 
-	cmd = Cmd_ptr(new MeterCmd( clientEnv->task_path(),
+	cmd = std::make_shared<MeterCmd>( clientEnv->task_path(),
 	                            clientEnv->jobs_password(),
 	                            clientEnv->process_or_remote_id(),
 	                            clientEnv->task_try_no(),
 	                            args[0],
-	                            value ));
+	                            value );
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -941,12 +940,12 @@ void LabelCmd::create( 	Cmd_ptr& cmd,
 	 	throw std::runtime_error( "LabelCmd: " + errorMsg );
 	}
 
-	cmd = Cmd_ptr(new LabelCmd( clientEnv->task_path(),
+	cmd = std::make_shared<LabelCmd>( clientEnv->task_path(),
 	                            clientEnv->jobs_password(),
 	                            clientEnv->process_or_remote_id(),
 	                            clientEnv->task_try_no(),
 	                            labelName,
-	                            labelValue));
+	                            labelValue);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1164,14 +1163,14 @@ void QueueCmd::create(  Cmd_ptr& cmd,
       throw std::runtime_error( "QueueCmd: " + errorMsg );
    }
 
-   cmd = Cmd_ptr(new QueueCmd( clientEnv->task_path(),
+   cmd = std::make_shared<QueueCmd>( clientEnv->task_path(),
                                clientEnv->jobs_password(),
                                clientEnv->process_or_remote_id(),
                                clientEnv->task_try_no(),
                                queue_name,
                                action,
                                step,
-                               path_to_node_with_queue ));
+                               path_to_node_with_queue );
 }
 
 std::ostream& operator<<(std::ostream& os, const InitCmd& c)        { return c.print(os); }

@@ -248,7 +248,7 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
   	      }
  	   }
  	}
-	cmd = Cmd_ptr( new ForceCmd(paths, stateOrEvent, recursive, setRepeatToLastValue  ) );
+	cmd = std::make_shared<ForceCmd>(paths, stateOrEvent, recursive, setRepeatToLastValue);
 }
 
 std::ostream& operator<<(std::ostream& os, const ForceCmd& c) { return c.print(os); }

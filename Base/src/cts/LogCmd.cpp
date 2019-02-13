@@ -212,7 +212,7 @@ void LogCmd::create( 	Cmd_ptr& cmd,
  			}
  		}
 
-	 	cmd = Cmd_ptr( new LogCmd( LogCmd::GET, value ) );
+	 	cmd = std::make_shared<LogCmd>( LogCmd::GET, value);
 	 	return ;
 	}
 
@@ -223,7 +223,7 @@ void LogCmd::create( 	Cmd_ptr& cmd,
 			ss << "LogCmd: Too many arguments. Please use " << CtsApi::clearLog() << " to clear the log file\n";
  			throw std::runtime_error( ss.str() );
 		}
- 		cmd = Cmd_ptr( new LogCmd( LogCmd::CLEAR ) );
+ 		cmd = std::make_shared<LogCmd>( LogCmd::CLEAR );
  		return;
  	}
  	if (!args.empty() && args[0] == "flush")   {
@@ -233,7 +233,7 @@ void LogCmd::create( 	Cmd_ptr& cmd,
 			ss << "LogCmd: Too many arguments. Please use " << CtsApi::flushLog() << " to flush the log file\n";
  			throw std::runtime_error( ss.str() );
 		}
- 		cmd = Cmd_ptr( new LogCmd( LogCmd::FLUSH ) );
+ 		cmd = std::make_shared<LogCmd>( LogCmd::FLUSH );
  		return;
  	}
    if (!args.empty() && args[0] == "path")   {
@@ -243,7 +243,7 @@ void LogCmd::create( 	Cmd_ptr& cmd,
          ss << "LogCmd: Too many arguments. Please use " << CtsApi::get_log_path() << " to get the log file path\n";
          throw std::runtime_error( ss.str() );
       }
-      cmd = Cmd_ptr( new LogCmd( LogCmd::PATH ) );
+      cmd = std::make_shared<LogCmd>( LogCmd::PATH ) ;
       return;
    }
    if (!args.empty() && args[0] == "new")   {
@@ -257,7 +257,7 @@ void LogCmd::create( 	Cmd_ptr& cmd,
       if ( args.size() == 2 ) {
          path = args[1];
       }
-      cmd = Cmd_ptr( new LogCmd( path ) );
+      cmd = std::make_shared<LogCmd>( path ) ;
       return;
    }
 

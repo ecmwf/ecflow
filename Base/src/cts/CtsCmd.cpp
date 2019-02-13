@@ -516,7 +516,7 @@ void CtsCmd::create( 	Cmd_ptr& cmd,
          return; // Don't create command, since with log file, it is client specific only
       }
    }
-   cmd = Cmd_ptr(new CtsCmd( api_ ));
+   cmd = std::make_shared<CtsCmd>( api_ );
 }
 
 std::ostream& operator<<(std::ostream& os, const CtsCmd& c) { return c.print(os); }

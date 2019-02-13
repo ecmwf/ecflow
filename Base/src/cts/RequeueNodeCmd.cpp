@@ -235,7 +235,7 @@ void RequeueNodeCmd::create( 	Cmd_ptr& cmd,
       throw std::runtime_error( ss.str() );
    }
 
- 	cmd = Cmd_ptr(new RequeueNodeCmd(paths,option));
+ 	cmd = std::make_shared<RequeueNodeCmd>(paths,option);
 }
 
 std::ostream& operator<<(std::ostream& os, const RequeueNodeCmd& c) { return c.print(os); }

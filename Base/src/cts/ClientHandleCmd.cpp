@@ -329,20 +329,20 @@ void ClientHandleCmd::create( 	Cmd_ptr& cmd,
 			   }
 				for(size_t i = suite_names_index; i < args.size(); i++) { suite_names.push_back( args[i] ); }
 			}
-		 	cmd = Cmd_ptr(new ClientHandleCmd(client_handle, suite_names, auto_add_new_suites ));
+		 	cmd = std::make_shared<ClientHandleCmd>(client_handle, suite_names, auto_add_new_suites );
 			break;
 		}
 
  		case ClientHandleCmd::DROP:  {
 			int client_handle = vm[  theArg() ].as< int >();
 			if ( 0 == client_handle) throw std::runtime_error("ClientHandleCmd::create: handles must have a value > 0");
-		 	cmd = Cmd_ptr(new ClientHandleCmd( client_handle ));
+		 	cmd = std::make_shared<ClientHandleCmd>( client_handle );
  			break;
  		}
 
       case ClientHandleCmd::DROP_USER:  {
          std::string the_user_to_drop = vm[  theArg() ].as< std::string >();
-         cmd = Cmd_ptr(new ClientHandleCmd( the_user_to_drop ));
+         cmd = std::make_shared<ClientHandleCmd>( the_user_to_drop );
          break;
       }
 
@@ -355,7 +355,7 @@ void ClientHandleCmd::create( 	Cmd_ptr& cmd,
 			if (0 == client_handle) throw std::runtime_error("ClientHandleCmd::create: handles must have a value > 0");
  			std::vector<std::string> suite_names; suite_names.reserve( args.size() );
 			for(size_t i = 1; i < args.size(); i++) { suite_names.push_back( args[i] ); }
-		 	cmd = Cmd_ptr(new ClientHandleCmd(client_handle, suite_names, ClientHandleCmd::ADD ));
+		 	cmd = std::make_shared<ClientHandleCmd>(client_handle, suite_names, ClientHandleCmd::ADD );
 			break;
 		}
 
@@ -368,7 +368,7 @@ void ClientHandleCmd::create( 	Cmd_ptr& cmd,
 			if ( 0 == client_handle ) throw std::runtime_error("ClientHandleCmd::create: handles must have a value > 0");
  			std::vector<std::string> suite_names; suite_names.reserve( args.size() );
 			for(size_t i = 1; i < args.size(); i++) { suite_names.push_back( args[i] ); }
-		 	cmd = Cmd_ptr(new ClientHandleCmd(client_handle, suite_names, ClientHandleCmd::REMOVE ));
+		 	cmd = std::make_shared<ClientHandleCmd>(client_handle, suite_names, ClientHandleCmd::REMOVE );
 			break;
 		}
 
@@ -383,12 +383,12 @@ void ClientHandleCmd::create( 	Cmd_ptr& cmd,
 			if (args[1] == "true") auto_add_new_suites = true;
 			else if (args[1] == "false") auto_add_new_suites = false;
 			else throw std::runtime_error("ClientHandleCmd::create: First argument should be true | false. See help");
-		 	cmd = Cmd_ptr(new ClientHandleCmd(client_handle, auto_add_new_suites ));
+		 	cmd = std::make_shared<ClientHandleCmd>(client_handle, auto_add_new_suites );
  			break;
  		}
 
       case ClientHandleCmd::SUITES:  {
-         cmd = Cmd_ptr(new ClientHandleCmd( ClientHandleCmd::SUITES ));
+         cmd = std::make_shared<ClientHandleCmd>( ClientHandleCmd::SUITES );
          break;
       }
 

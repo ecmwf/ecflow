@@ -644,7 +644,7 @@ void AlterCmd::createAdd( Cmd_ptr& cmd, std::vector<std::string>& options, std::
       throw std::runtime_error( ss.str() );
    }
 
-	cmd = Cmd_ptr( new AlterCmd(paths,theAttrType, name, value) );
+   cmd = std::make_shared<AlterCmd>(paths,theAttrType, name, value);
 }
 
 void AlterCmd::extract_name_and_value_for_add(AlterCmd::Add_attr_type theAttrType,std::string& name,std::string& value,std::vector<std::string>& options,std::vector<std::string>& paths) const
@@ -810,7 +810,7 @@ void AlterCmd::createDelete( Cmd_ptr& cmd, const std::vector<std::string>& optio
          << "\n for time,today and date the new value should be a quoted string\n" << dump_args(options,paths) << "\n";
 	   throw std::runtime_error( ss.str() );
 	}
-	cmd = Cmd_ptr( new AlterCmd(paths,theAttrType, name, value  ) );
+	cmd = std::make_shared<AlterCmd>(paths,theAttrType, name, value );
 }
 
 void AlterCmd::extract_name_and_value_for_delete(AlterCmd::Delete_attr_type theAttrType,std::string& name,std::string& value,const std::vector<std::string>& options,const std::vector<std::string>& paths) const
@@ -981,7 +981,7 @@ void AlterCmd::createChange( Cmd_ptr& cmd, std::vector<std::string>& options, st
 
 	std::string name, value;
 	extract_name_and_value_for_change(theAttrType,name,value,options,paths);
-	cmd = Cmd_ptr( new AlterCmd(paths,theAttrType, name, value  ) );
+	cmd = std::make_shared<AlterCmd>(paths,theAttrType, name, value );
 }
 
 void AlterCmd::extract_name_and_value_for_change(AlterCmd::Change_attr_type theAttrType,std::string& name,std::string& value, std::vector<std::string>& options,std::vector<std::string>& paths) const
@@ -1309,7 +1309,7 @@ void AlterCmd::create_flag( Cmd_ptr& cmd, const std::vector<std::string>& option
 	// options[1] = [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed | migrated | late | message | complete | queue_limit | task_waiting | locked | zombie ]
 
 	Flag::Type theFlagType = get_flag_type(options[1]);
-	cmd = Cmd_ptr( new AlterCmd(paths,theFlagType, flag  ) );
+	cmd = std::make_shared<AlterCmd>(paths,theFlagType, flag);
 }
 
 
@@ -1351,7 +1351,7 @@ void AlterCmd::create_sort_attributes(Cmd_ptr& cmd,const std::vector<std::string
       value = "recursive";
    }
 
-   cmd = Cmd_ptr( new AlterCmd(paths, name,value) );
+   cmd = std::make_shared<AlterCmd>(paths, name,value);
 }
 
 

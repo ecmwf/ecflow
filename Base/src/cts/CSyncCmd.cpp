@@ -183,12 +183,12 @@ void CSyncCmd::create( 	Cmd_ptr& cmd,
 	   unsigned int client_handle    = args[0];
 	   unsigned int state_change_no  = args[1];
 	   unsigned int modify_change_no = args[2];
-	   cmd = Cmd_ptr(new CSyncCmd( api_,client_handle,state_change_no,modify_change_no));
+	   cmd = std::make_shared<CSyncCmd>(api_,client_handle,state_change_no,modify_change_no);
 	   return;
 	}
 
    unsigned int client_handle = vm[ theArg() ].as< unsigned int >();
-   cmd = Cmd_ptr(new CSyncCmd(client_handle)); // FULL_SYNC
+   cmd = std::make_shared<CSyncCmd>(client_handle); // FULL_SYNC
 }
 
 std::ostream& operator<<(std::ostream& os, const CSyncCmd& c) { return c.print(os); }

@@ -181,7 +181,7 @@ void BeginCmd::create( 	Cmd_ptr& cmd,
       std::cout << "  BeginCmd::create force = " << force << "\n";
    }
 
-	cmd = Cmd_ptr(new BeginCmd( suiteName, force ));
+	cmd = std::make_shared<BeginCmd>( suiteName, force );
 }
 
 std::ostream& operator<<(std::ostream& os, const BeginCmd& c) { return c.print(os); }

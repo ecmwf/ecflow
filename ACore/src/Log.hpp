@@ -103,12 +103,11 @@ private:
   const Log& operator=(const Log&) = delete;
 
 private:
-   ~Log();
    explicit Log(const std::string& fileName);
    static Log* instance_;
 
    std::string fileName_;
-   LogImpl* logImpl_;
+   std::unique_ptr<LogImpl> logImpl_;
 };
 
 // Flush log on destruction

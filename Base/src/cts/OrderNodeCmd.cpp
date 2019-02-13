@@ -112,7 +112,7 @@ void OrderNodeCmd::create( 	Cmd_ptr& cmd,
  	 	throw std::runtime_error( "OrderNodeCmd: Invalid second option: please specify one of [ top, bottom, alpha, order, up, down ]\n");
  	}
 
- 	cmd = Cmd_ptr(new OrderNodeCmd( args[0],NOrder::toOrder(args[1])));
+ 	cmd = std::make_shared<OrderNodeCmd>( args[0],NOrder::toOrder(args[1]));
 }
 
 std::ostream& operator<<(std::ostream& os, const OrderNodeCmd& c) { return c.print(os); }

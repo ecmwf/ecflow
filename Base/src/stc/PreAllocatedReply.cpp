@@ -32,21 +32,21 @@
 #include "ZombieGetCmd.hpp"
 #include "BlockClientZombieCmd.hpp"
 
-STC_Cmd_ptr PreAllocatedReply::stc_cmd_                  = STC_Cmd_ptr( new StcCmd() );
-STC_Cmd_ptr PreAllocatedReply::defs_cmd_                 = STC_Cmd_ptr( new DefsCmd() );
-STC_Cmd_ptr PreAllocatedReply::node_cmd_                 = STC_Cmd_ptr( new SNodeCmd() );
-STC_Cmd_ptr PreAllocatedReply::stats_cmd_                = STC_Cmd_ptr( new SStatsCmd() );
-STC_Cmd_ptr PreAllocatedReply::suites_cmd_               = STC_Cmd_ptr( new SSuitesCmd() );
-STC_Cmd_ptr PreAllocatedReply::zombie_get_cmd_           = STC_Cmd_ptr( new ZombieGetCmd() );
-STC_Cmd_ptr PreAllocatedReply::error_cmd_                = STC_Cmd_ptr( new ErrorCmd() );
-STC_Cmd_ptr PreAllocatedReply::client_handle_cmd_        = STC_Cmd_ptr( new SClientHandleCmd() );
-STC_Cmd_ptr PreAllocatedReply::client_handle_suites_cmd_ = STC_Cmd_ptr( new SClientHandleSuitesCmd() );
-STC_Cmd_ptr PreAllocatedReply::string_cmd_               = STC_Cmd_ptr( new SStringCmd() );
-STC_Cmd_ptr PreAllocatedReply::string_vec_cmd_           = STC_Cmd_ptr( new SStringVecCmd() );
-STC_Cmd_ptr PreAllocatedReply::server_load_cmd_          = STC_Cmd_ptr( new SServerLoadCmd() );
-STC_Cmd_ptr PreAllocatedReply::news_cmd_                 = STC_Cmd_ptr( new SNewsCmd() );
-STC_Cmd_ptr PreAllocatedReply::sync_cmd_                 = STC_Cmd_ptr( new SSyncCmd() );
-STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd_  = STC_Cmd_ptr( new BlockClientZombieCmd() );
+STC_Cmd_ptr PreAllocatedReply::stc_cmd_                  = std::make_shared<StcCmd>();
+STC_Cmd_ptr PreAllocatedReply::defs_cmd_                 = std::make_shared<DefsCmd>();
+STC_Cmd_ptr PreAllocatedReply::node_cmd_                 = std::make_shared<SNodeCmd>();
+STC_Cmd_ptr PreAllocatedReply::stats_cmd_                = std::make_shared<SStatsCmd>();
+STC_Cmd_ptr PreAllocatedReply::suites_cmd_               = std::make_shared<SSuitesCmd>();
+STC_Cmd_ptr PreAllocatedReply::zombie_get_cmd_           = std::make_shared<ZombieGetCmd>();
+STC_Cmd_ptr PreAllocatedReply::error_cmd_                = std::make_shared<ErrorCmd>();
+STC_Cmd_ptr PreAllocatedReply::client_handle_cmd_        = std::make_shared<SClientHandleCmd>();
+STC_Cmd_ptr PreAllocatedReply::client_handle_suites_cmd_ = std::make_shared<SClientHandleSuitesCmd>();
+STC_Cmd_ptr PreAllocatedReply::string_cmd_               = std::make_shared<SStringCmd>();
+STC_Cmd_ptr PreAllocatedReply::string_vec_cmd_           = std::make_shared<SStringVecCmd>();
+STC_Cmd_ptr PreAllocatedReply::server_load_cmd_          = std::make_shared<SServerLoadCmd>();
+STC_Cmd_ptr PreAllocatedReply::news_cmd_                 = std::make_shared<SNewsCmd>();
+STC_Cmd_ptr PreAllocatedReply::sync_cmd_                 = std::make_shared<SSyncCmd>();
+STC_Cmd_ptr PreAllocatedReply::block_client_zombie_cmd_  = std::make_shared<BlockClientZombieCmd>();
 
 
 STC_Cmd_ptr PreAllocatedReply::ok_cmd()

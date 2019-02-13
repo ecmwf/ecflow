@@ -343,7 +343,7 @@ void GroupCTSCmd::create( 	Cmd_ptr& cmd,
    // Parse and split commands and then parse individually. Assumes commands are separated by ';'
    std::string cmdSeries = vm[GroupCTSCmd::arg()].as< std::string > ();
 
-   cmd = Cmd_ptr( new GroupCTSCmd(cmdSeries,clientEnv) );
+   cmd = std::make_shared<GroupCTSCmd>(cmdSeries,clientEnv);
 }
 
 std::ostream& operator<<(std::ostream& os, const GroupCTSCmd& c) { return c.print(os); }

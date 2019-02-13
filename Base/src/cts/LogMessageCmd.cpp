@@ -70,7 +70,7 @@ void LogMessageCmd::create( Cmd_ptr& cmd,
 {
 	string msg = vm[ arg() ].as< string >();
 	if (ace->debug()) { cout << "  LogMessageCmd::create arg = " << msg << "\n";}
-	cmd = Cmd_ptr( new LogMessageCmd( msg ) );
+	cmd = std::make_shared<LogMessageCmd>( msg );
 }
 
 std::ostream& operator<<(std::ostream& os, const LogMessageCmd& c) { return c.print(os); }

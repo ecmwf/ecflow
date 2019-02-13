@@ -175,7 +175,7 @@ void RunNodeCmd::create( 	Cmd_ptr& cmd,
 		   throw std::runtime_error( ss.str() );
  		}
 	}
- 	cmd = Cmd_ptr(new RunNodeCmd(paths,force));
+ 	cmd = std::make_shared<RunNodeCmd>(paths,force);
 }
 
 std::ostream& operator<<(std::ostream& os, const RunNodeCmd& c) { return c.print(os); }

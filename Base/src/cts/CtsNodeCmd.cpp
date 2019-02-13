@@ -322,7 +322,7 @@ void CtsNodeCmd::create(   Cmd_ptr& cmd,
 
    std::string absNodePath = vm[ theArg() ].as< std::string > ();
 
-   cmd = Cmd_ptr(new CtsNodeCmd( api_ , absNodePath));
+   cmd = std::make_shared<CtsNodeCmd>( api_ , absNodePath);
 }
 
 std::ostream& operator<<(std::ostream& os, const CtsNodeCmd& c) { return c.print(os); }

@@ -242,7 +242,7 @@ void PlugCmd::create( 	Cmd_ptr& cmd,
    std::string sourceNode = args[0];
    std::string destNode = args[1];
 
-   cmd = Cmd_ptr( new PlugCmd(sourceNode, destNode) );
+   cmd = std::make_shared<PlugCmd>(sourceNode, destNode);
 }
 
 // ===================================================================================

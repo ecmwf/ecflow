@@ -158,7 +158,7 @@ void FreeDepCmd::create( 	Cmd_ptr& cmd,
       }
    }
    assert(trigger || all || date ||  time); // at least one must be true
-	cmd = Cmd_ptr( new FreeDepCmd(paths, trigger, all, date , time) );
+	cmd = std::make_shared<FreeDepCmd>(paths, trigger, all, date , time);
 }
 
 std::ostream& operator<<(std::ostream& os, const FreeDepCmd& c) { return c.print(os); }

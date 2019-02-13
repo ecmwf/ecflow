@@ -356,7 +356,7 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 
 	if (args.size() == 2) {
 		if (edit_type == EditScriptCmd::EDIT || edit_type == EditScriptCmd::PREPROCESS) {
-			cmd = Cmd_ptr( new EditScriptCmd( path_to_task, edit_type) );
+			cmd = std::make_shared<EditScriptCmd>( path_to_task, edit_type);
 			return;
 		}
 		else {
@@ -401,16 +401,16 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 	 		BOOST_FOREACH(pair, used_variables_as_map) { used_variables_as_vec.push_back( std::make_pair(pair.first,pair.second) ); }
 
 	 		if (edit_type == EditScriptCmd::SUBMIT) {
-	 			cmd = Cmd_ptr( new EditScriptCmd( path_to_task, used_variables_as_vec ) ); //SUMBIT
+	 			cmd = std::make_shared<EditScriptCmd>( path_to_task, used_variables_as_vec); //SUMBIT
 	 			return;
 	 		}
 
- 			cmd = Cmd_ptr( new EditScriptCmd( path_to_task, used_variables_as_vec, script_lines, create_alias, run_alias ) ); // SUBMIT_USER_FILE
+ 			cmd = std::make_shared<EditScriptCmd>( path_to_task, used_variables_as_vec, script_lines, create_alias, run_alias); // SUBMIT_USER_FILE
  			return;
 	 	}
 	 	else if (edit_type == EditScriptCmd::PREPROCESS_USER_FILE ) {
 
- 			cmd = Cmd_ptr( new EditScriptCmd( path_to_task, script_lines ) );
+ 			cmd = std::make_shared<EditScriptCmd>( path_to_task, script_lines);
  			return;
 	 	}
 	}

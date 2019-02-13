@@ -125,10 +125,7 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
       throw std::runtime_error( "QueryCmd: invalid path to task: " +  path_to_task);
    }
 
-   cmd = Cmd_ptr(new QueryCmd( query_type,
-                               path_to_attribute,
-                               attribute,
-                               path_to_task));
+   cmd = std::make_shared<QueryCmd>( query_type, path_to_attribute, attribute, path_to_task);
 }
 
 const char*  QueryCmd::arg() { return CtsApi::queryArg();}

@@ -511,7 +511,7 @@ void PathsCmd::create(   Cmd_ptr& cmd,
       }
    }
 
-   cmd = Cmd_ptr(new PathsCmd( api_ , paths, force));
+   cmd = std::make_shared<PathsCmd>( api_ , paths, force);
 }
 
 std::ostream& operator<<(std::ostream& os, const PathsCmd& c) { return c.print(os); }
