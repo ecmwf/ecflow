@@ -89,6 +89,19 @@ int main(int argc, char **argv)
     }
     shFile.close();
 
+    //Set fontsize if defined in env var
+    if(const char* fontSizeCh=getenv("ECFLOWUI_FONT_SIZE"))
+    {
+        int fontSize=atoi(fontSizeCh);
+        if(fontSize < 8)
+            fontSize=8;
+        else if(fontSize > 32)
+            fontSize=32;
+        QFont f=app.font();
+        f.setPointSize(fontSize);
+        app.setFont(f);
+    }
+
     //Load the configurable menu items
     std::string menuFilename("ecflowview_menus.json");
     std::string menuPath = DirectoryHandler::concatenate(DirectoryHandler::etcDir(), menuFilename);
