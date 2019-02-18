@@ -99,6 +99,8 @@ private:
    /// Will throw std::runtime_error for errors
    static void check_new_path(const std::string& new_path);
 
+   void create_logimpl();
+
 private:
   Log(const Log&) = delete;
   const Log& operator=(const Log&) = delete;
