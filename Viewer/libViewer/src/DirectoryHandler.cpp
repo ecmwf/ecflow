@@ -12,7 +12,7 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/foreach.hpp>
 
-#include <boost/regex.hpp>
+#include <regex>
 
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -241,16 +241,16 @@ void DirectoryHandler::findDirContents(const std::string &dirPath,const std::str
     boost::filesystem::path path(dirPath);
     boost::filesystem::directory_iterator it(path), eod;
 
-    const boost::regex expr(filterStr);
+    const std::regex expr(filterStr);
 
     BOOST_FOREACH(boost::filesystem::path const &p, std::make_pair(it, eod ))
     {
-        boost::smatch what;
+        std::smatch what;
         std::string fileName=p.filename().string();
 
         bool rightType = (type == File) ? is_regular_file(p) : is_directory(p);  // file or directory?
 
-        if(rightType && boost::regex_match(fileName, what,expr))
+        if(rightType && std::regex_match(fileName, what,expr))
         {
             res.push_back(fileName);
         }

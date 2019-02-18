@@ -155,7 +155,6 @@ echo "using compiler $tool with build $1 release variants"
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=release  -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-thread variant=release  -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-regex variant=release  -j2
 
 
 # Allow python to be disabled  
