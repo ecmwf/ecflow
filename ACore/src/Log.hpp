@@ -31,6 +31,7 @@
 // log file, and hence can ensure that it gets written to disk
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <vector>
+#include <memory>
 #include <string>
 #include <fstream>
 #include <sstream>
