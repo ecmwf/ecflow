@@ -21,6 +21,15 @@
 
 #set -eux
 
+#===============================================================================
+# Get the absolute path THIS script. use it to locate ecflow_client and ecflow_server
+# This avoids mixing 4/5 version of ecflow.
+# and need absolute since we change dir later on.
+#
+ECFLOW_BINDIR="$( cd "$(dirname "$0")" ; pwd -P )" 
+#echo "-----> ${ECFLOW_BINDIR} <-------"
+
+
 PATH=$PATH:/usr/local/bin:/usr/bin
 export TZ=GMT LANG=en_GB.UTG-8
 host=$(hostname)
@@ -80,10 +89,6 @@ else
 fi
 
 export ECF_PORT=$port_number
-
-#===============================================================================
-# Get the directory of THIS script. use it to locate ecflow_client and ecflow_server
-ECFLOW_BINDIR=`dirname $0`
 
 #==========================================================================
 # HOST

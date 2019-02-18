@@ -19,6 +19,14 @@
 ###        Will start the ecflow_server in the background, using user id
 ###        to make a unique port number.
 
+#===============================================================================
+# Get the absolute path THIS script. use it to locate ecflow_client and ecflow_server
+# This avoids mixing 4/5 version of ecflow.
+# and need absolute since we change dir later on.
+#
+ECFLOW_BINDIR="$( cd "$(dirname "$0")" ; pwd -P )" 
+#echo "-----> ${ECFLOW_BINDIR} <-------"
+
 #==========================================================================
 export TZ=GMT LANG= # en_GB.UTF-8 unset, use locale -a to list available locales
 host=$(hostname)
@@ -99,10 +107,6 @@ else
 fi
 
 export ECF_PORT=$port_number
-
-#===============================================================================
-# Get the directory of THIS script. use it to locate ecflow_client and ecflow_server
-ECFLOW_BINDIR=`dirname $0`
 
 #===============================================================================
 # Setup ECF_HOME 
