@@ -222,7 +222,7 @@ set(Boost_DETAILED_FAILURE_MSG   ON)
 #set(Boost_DEBUG                 ON) # Set to ON to enable debug output from FindBoost
 
 set(ECFLOW_BOOST_VERSION "1.64.0")
-find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time regex)
+find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system thread unit_test_framework test_exec_monitor filesystem program_options date_time )
 #ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 
