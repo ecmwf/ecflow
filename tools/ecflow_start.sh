@@ -68,6 +68,7 @@ rerun=true
 h)
 echo "Usage: $0 [-b] [-d ecf_home directory] [-f] [-h]"
 echo "       -b        start ECF for backup server or e-suite"
+echo "       -c        test check point file for errors"
 echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
 echo "       -f        forces the ECF to be restarted"
 echo "       -v        verbose mode"
@@ -78,6 +79,7 @@ exit 0
 *)
 echo "Usage: $0 [-b] [-d ecf_home directory] [-f] [-h]"
 echo "       -b        start ECF for backup server or e-suite"
+echo "       -c        test check point file for errors"
 echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
 echo "       -f        forces the ECF to be restarted"
 echo "       -v        verbose mode"
