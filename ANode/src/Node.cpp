@@ -1458,20 +1458,22 @@ void Node::read_state(const std::string& line,const std::vector<std::string>& li
    std::string token;
    for(size_t i = 3; i < lineTokens.size(); i++) {
       token.clear();
-      if (lineTokens[i].find("state:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Node::read_state Invalid state specified for suite " + name());
-         if (!NState::isValid(token)) throw std::runtime_error( "Node::read_state Invalid state specified for node : " + name() );
-         set_state_only(NState::toState(token));
+      const std::string& line_token_i = lineTokens[i];
+      if (line_token_i.find("state:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state Invalid state specified for suite " + name());
+         std::pair<NState::State,bool> state_pair = NState::to_state(token);
+         if (!state_pair.second) throw std::runtime_error( "Node::read_state Invalid state specified for node : " + name() );
+         set_state_only( state_pair.first);
       }
-      else if (lineTokens[i].find("flag:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Node::read_state invalid flags for node "  + name());
+      else if (line_token_i.find("flag:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state invalid flags for node "  + name());
          flag().set_flag(token); // this can throw
       }
-      else if (lineTokens[i].find("dur:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Node::read_state invalid duration for node: " + name());
+      else if (line_token_i.find("dur:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state invalid duration for node: " + name());
          st_.second = duration_from_string(token);
       }
-      else if (lineTokens[i] == "suspended:1") suspend();
+      else if (line_token_i == "suspended:1") suspend();
    }
 }
 

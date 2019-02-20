@@ -235,7 +235,7 @@ public:
 
    node_ptr remove(); // gets the parent then calls removeChild
    virtual node_ptr removeChild( Node* child) = 0;
-   virtual bool addChild( node_ptr child,size_t position = std::numeric_limits<std::size_t>::max()) = 0; // return false if child of same name exist, leak!!!
+   virtual bool addChild( const node_ptr& child,size_t position = std::numeric_limits<std::size_t>::max()) = 0; // return false if child of same name exist, leak!!!
    virtual bool isAddChildOk( Node* child, std::string& errorMsg) const = 0; // return false if child of same name
 
    virtual void verification(std::string& errorMsg) const;
@@ -422,6 +422,7 @@ public:
    void auto_add_inlimit_externs(Defs* defs) { inLimitMgr_.auto_add_inlimit_externs(defs);}
    void addEvent( const Event& );       // will throw std::runtime_error if duplicate
    void addMeter( const Meter& );       // will throw std::runtime_error if duplicate
+   void add_meter(const std::string& name,int min,int max,int color_change,int value); // will throw std::runtime_error if duplicate
    void addLabel( const Label& );       // will throw std::runtime_error if duplicate
    void add_label(const std::string& name,const std::string& value, const std::string& new_value);
    void addAutoCancel( const ecf::AutoCancelAttr& );

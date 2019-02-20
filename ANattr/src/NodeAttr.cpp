@@ -152,8 +152,8 @@ bool Event::isValidState( const std::string& state ) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Meter::Meter( const std::string& name, int min, int max, int colorChange ) :
-	         min_( min ), max_( max ), v_( min ), cc_( colorChange ),
+Meter::Meter( const std::string& name, int min, int max, int colorChange, int value ) :
+	         min_( min ), max_( max ), v_( value ), cc_( colorChange ),
 	         n_( name ), used_( false ), state_change_no_( 0 )
 {
    if ( !Str::valid_name( name ) ) {
@@ -165,6 +165,10 @@ Meter::Meter( const std::string& name, int min, int max, int colorChange ) :
 
    if (colorChange == std::numeric_limits<int>::max()) {
       cc_ =  max_;
+   }
+
+   if (value == std::numeric_limits<int>::max()) {
+      v_ =  min_;
    }
 
    if ( cc_ < min || cc_ > max ) {

@@ -99,6 +99,25 @@ NState::State NState::toState( const std::string& str ) {
 	return NState::UNKNOWN;
 }
 
+ std::pair<NState::State,bool> NState::to_state(const std::string& str)
+ {
+    if ( str == "complete" )
+        return std::make_pair(NState::COMPLETE,true);
+     if ( str == "unknown" )
+        return std::make_pair(NState::UNKNOWN,true);
+     if ( str == "queued" )
+        return std::make_pair(NState::QUEUED,true);
+     if ( str == "aborted" )
+        return std::make_pair(NState::ABORTED,true);
+     if ( str == "submitted" )
+        return std::make_pair(NState::SUBMITTED,true);
+     if ( str == "active" )
+        return std::make_pair(NState::ACTIVE,true);
+
+     return std::make_pair(NState::UNKNOWN,false);
+ }
+
+
 bool NState::isValid( const std::string& state ) {
 	if ( state == "complete" )
 		return true;

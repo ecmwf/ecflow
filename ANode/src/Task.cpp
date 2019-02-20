@@ -630,7 +630,7 @@ bool Task::doDeleteChild(Node* child)
    return false;
 }
 
-bool Task::addChild( node_ptr, size_t)
+bool Task::addChild( const node_ptr&, size_t)
 {
    // Only used during PLUG: aliases can't be plugged.
 	LOG_ASSERT(false,"");

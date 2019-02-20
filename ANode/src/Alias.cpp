@@ -118,7 +118,7 @@ node_ptr Alias::removeChild(Node*)
    return node_ptr();
 }
 
-bool Alias::addChild( node_ptr , size_t )
+bool Alias::addChild( const node_ptr& , size_t )
 {
    LOG_ASSERT(false,"");
    return false;

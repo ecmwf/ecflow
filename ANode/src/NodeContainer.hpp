@@ -56,9 +56,9 @@ public:
 
    task_ptr add_task(const std::string& task_name);
    family_ptr add_family(const std::string& family_name);
- 	void addTask( task_ptr , size_t position = std::numeric_limits<std::size_t>::max());
- 	void addFamily( family_ptr, size_t position = std::numeric_limits<std::size_t>::max());
- 	void add_child(node_ptr,size_t position = std::numeric_limits<std::size_t>::max());
+ 	void addTask(  const task_ptr& , size_t position = std::numeric_limits<std::size_t>::max());
+ 	void addFamily(const family_ptr&,size_t position = std::numeric_limits<std::size_t>::max());
+ 	void add_child(const node_ptr&,  size_t position = std::numeric_limits<std::size_t>::max());
 
 	void immediateChildren(std::vector<node_ptr>&) const override;
  	void allChildren(std::set<Node*>&) const override;
@@ -99,7 +99,7 @@ public:
 	NState::State computedState(Node::TraverseType) const override;
 
  	node_ptr removeChild( Node* child) override;
- 	bool addChild( node_ptr child,size_t position = std::numeric_limits<std::size_t>::max()) override;
+ 	bool addChild( const node_ptr& child,size_t position = std::numeric_limits<std::size_t>::max()) override;
  	bool isAddChildOk( Node* child, std::string& errorMsg) const override;
 
  	void setRepeatToLastValueHierarchically() override;
@@ -116,8 +116,8 @@ private:
    void restore_on_begin_or_requeue();
 
    size_t child_position(const Node*) const override;
-   void add_task_only( task_ptr ,size_t position = std::numeric_limits<std::size_t>::max());
-   void add_family_only( family_ptr ,size_t position = std::numeric_limits<std::size_t>::max());
+   void add_task_only(const task_ptr& ,size_t position = std::numeric_limits<std::size_t>::max());
+   void add_family_only(const family_ptr& ,size_t position = std::numeric_limits<std::size_t>::max());
 
 	void handle_defstatus_propagation();
 	void match_closest_children(const std::vector<std::string>& pathToNode, int indexIntoPathToNode,node_ptr& closest_matching_node);

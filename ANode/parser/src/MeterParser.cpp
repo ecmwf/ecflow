@@ -32,23 +32,23 @@ bool MeterParser::doParse( const std::string& line, std::vector<std::string >& l
 
 	int min = Extract::theInt( lineTokens[2], "Invalid meter : " + line );
 	int max = Extract::theInt( lineTokens[3], "Invalid meter : " + line );
-	int colorChange = Extract::optionalInt( lineTokens, 4, 0, "Invalid meter : " + line );
-	Meter meter(lineTokens[1], min, max, colorChange );
+	int colorChange = Extract::optionalInt( lineTokens, 4, std::numeric_limits<int>::max(), "Invalid meter : " + line );
 
    // state
+	int value = std::numeric_limits<int>::max();
    if (rootParser()->get_file_type() != PrintStyle::DEFS) {
       bool comment_fnd =  false;
-      for(size_t i = 2; i < lineTokens.size(); i++) {
+      for(size_t i = 3; i < lineTokens.size(); i++) {
          if (comment_fnd) {
             // token after comment is the value
-            int value = Extract::theInt(lineTokens[i],"MeterParser::doParse, could not extract meter value");
-            meter.set_value(value); // can throw if value not in range
+            value = Extract::theInt(lineTokens[i],"MeterParser::doParse, could not extract meter value");
+            break;
          }
          if (lineTokens[i] == "#") comment_fnd = true;
       }
    }
 
-	nodeStack_top()->addMeter( meter ) ;
+	nodeStack_top()->add_meter( lineTokens[1], min, max, colorChange, value  ) ;
 
 	return true;
 }

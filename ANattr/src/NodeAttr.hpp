@@ -133,7 +133,7 @@ private:
 // range min-max
 class Meter {
 public:
-   Meter(const std::string& name,int min, int max, int colorChange = std::numeric_limits<int>::max());
+   Meter(const std::string& name,int min,int max,int colorChange = std::numeric_limits<int>::max(),int value = std::numeric_limits<int>::max());
    Meter() = default;
 
    std::ostream& print(std::ostream&) const;

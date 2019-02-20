@@ -377,7 +377,7 @@ suite_ptr Defs::add_suite(const std::string& name)
    return the_suite;
 }
 
-void Defs::addSuite(suite_ptr s, size_t position)
+void Defs::addSuite(const suite_ptr& s, size_t position)
 {
 	if (findSuite(s->name()).get()) {
  		std::stringstream ss;
@@ -387,7 +387,7 @@ void Defs::addSuite(suite_ptr s, size_t position)
 	add_suite_only( s , position);
 }
 
-void Defs::add_suite_only(suite_ptr s, size_t position)
+void Defs::add_suite_only(const suite_ptr& s, size_t position)
 {
    if (s->defs()) {
       std::stringstream ss;
@@ -456,7 +456,7 @@ node_ptr Defs::removeChild(Node* child)
 	return node_ptr();
 }
 
-bool Defs::addChild( node_ptr child, size_t position)
+bool Defs::addChild( const node_ptr& child, size_t position)
 {
 	LOG_ASSERT(child.get(),"");
 	LOG_ASSERT(child->isSuite(),"");
@@ -693,27 +693,29 @@ void Defs::read_state(const std::string& line,const std::vector<std::string>& li
    std::string token;
    for(size_t i = 2; i < lineTokens.size(); i++) {
       token.clear();
-      if (lineTokens[i].find("state>:") != std::string::npos) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Defs::read_state: state extraction failed : " + lineTokens[i] );
-         if (!NState::isValid(token)) throw std::runtime_error( "Defs::read_state: invalid state specified : " + token );
-         set_state_only(NState::toState(token));
+      const std::string& line_token_i = lineTokens[i];
+      if (line_token_i.find("state>:") != std::string::npos) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Defs::read_state: state extraction failed : " + line_token_i );
+         std::pair<NState::State,bool> state_pair = NState::to_state(token);
+         if (!state_pair.second) throw std::runtime_error( "Defs::read_state: Invalid state specified : " + token );
+         set_state_only( state_pair.first);
       }
-      else if (lineTokens[i].find("flag:") != std::string::npos) {
-         if (!Extract::split_get_second(lineTokens[i],token))throw std::runtime_error( "Defs::read_state: Invalid flag specified : " + line );
+      else if (line_token_i.find("flag:") != std::string::npos) {
+         if (!Extract::split_get_second(line_token_i,token))throw std::runtime_error( "Defs::read_state: Invalid flag specified : " + line );
          flag().set_flag(token); // this can throw
       }
-      else if (lineTokens[i].find("state_change:") != std::string::npos) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Defs::read_state: Invalid state_change specified : " + line );
+      else if (line_token_i.find("state_change:") != std::string::npos) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Defs::read_state: Invalid state_change specified : " + line );
          int sc = Extract::theInt(token,"Defs::read_state: invalid state_change specified : " + line);
          set_state_change_no(sc);
       }
-      else if (lineTokens[i].find("modify_change:") != std::string::npos) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Defs::read_state: Invalid modify_change specified : " + line );
+      else if (line_token_i.find("modify_change:") != std::string::npos) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Defs::read_state: Invalid modify_change specified : " + line );
          int mc = Extract::theInt(token,"Defs::read_state: invalid state_change specified : " + line);
          set_modify_change_no(mc);
       }
-      else if (lineTokens[i].find("server_state:") != std::string::npos) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Defs::read_state: Invalid server_state specified : " + line );
+      else if (line_token_i.find("server_state:") != std::string::npos) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Defs::read_state: Invalid server_state specified : " + line );
          if (!SState::isValid(token)) throw std::runtime_error( "Defs::read_state: Invalid server_state specified : " + line );
          set_server().set_state(SState::toState(token));
       }
@@ -1729,9 +1731,7 @@ std::ostream& operator<<(std::ostream& os, const Defs& d)  { return d.print(os);
 
 // =========================================================================
 
-DefsHistoryParser::DefsHistoryParser() {
-   Log::get_log_types(log_types_);
-}
+DefsHistoryParser::DefsHistoryParser() {}
 
 void DefsHistoryParser::parse(const std::string& line)
 {
@@ -1767,7 +1767,10 @@ void DefsHistoryParser::parse(const std::string& line)
 
 string::size_type DefsHistoryParser::find_log(const std::string& line, string::size_type pos) const
 {
-   for(auto log_type : log_types_) {
+   std::vector<std::string> log_types;
+   Log::get_log_types(log_types);
+
+   for(auto log_type : log_types) {
       log_type += ":[";
       string::size_type log_type_pos = line.find( log_type, pos );
       if (log_type_pos != std::string::npos) {

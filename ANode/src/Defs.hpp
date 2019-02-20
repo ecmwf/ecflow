@@ -126,7 +126,7 @@ public:
 
    /// Add a suite to the definition, will throw std::runtime_error if duplicate
    suite_ptr add_suite(const std::string& name);
-   void addSuite(suite_ptr,size_t position = std::numeric_limits<std::size_t>::max());
+   void addSuite(const suite_ptr&,size_t position = std::numeric_limits<std::size_t>::max());
    size_t child_position(const Node*) const;
 
    /// Externs refer to Nodes or, variable, events, meter, repeat, or generated variable
@@ -316,12 +316,12 @@ private:
    std::string write_state() const;
    void collate_defs_changes_only(DefsDelta&) const;
    void setupDefaultEnv();
-   void add_suite_only(suite_ptr, size_t position);
+   void add_suite_only(const suite_ptr&, size_t position);
 
    /// Removes the suite, from defs returned as suite_ptr, asserts if suite does not exist
    suite_ptr removeSuite(suite_ptr);
    node_ptr removeChild(Node*);
-   bool addChild( node_ptr, size_t position = std::numeric_limits<std::size_t>::max());
+   bool addChild( const node_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
    friend class Node;
 
    /// For use by python interface,
@@ -386,6 +386,8 @@ std::ostream& operator<<(std::ostream& os, const Defs&);
 // This class is used to read the History
 class DefsHistoryParser {
 public:
+   DefsHistoryParser(const DefsHistoryParser&) = delete;
+   const DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
    DefsHistoryParser();
 
    void parse(const std::string& line);
@@ -393,12 +395,6 @@ public:
 
 private:
    std::string::size_type find_log(const std::string& line, std::string::size_type pos) const;
-
-private:
-  DefsHistoryParser(const DefsHistoryParser&) = delete;
-  const DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
-private:
-   std::vector<std::string> log_types_;
    std::vector<std::string> parsed_messages_;
 };
 

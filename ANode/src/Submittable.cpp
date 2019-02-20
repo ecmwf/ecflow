@@ -210,17 +210,19 @@ void Submittable::read_state(const std::string& line,const std::vector<std::stri
    //  0    1   2
    // task name #
    for(size_t i = 3; i < lineTokens.size(); i++) {
-      if (lineTokens[i].find("passwd:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],paswd_))
+      const std::string& line_token_i = lineTokens[i];
+
+      if (line_token_i.find("passwd:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,paswd_))
             throw std::runtime_error( "Submittable::read_state failed for jobs password : " + name());
       }
-      else if (lineTokens[i].find("rid:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],rid_))
+      else if (line_token_i.find("rid:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,rid_))
             throw std::runtime_error( "Submittable::read_state failed for rid : " + name());
       }
-      else if (lineTokens[i].find("try:") != std::string::npos ) {
+      else if (line_token_i.find("try:") != std::string::npos ) {
          std::string try_number;
-         if (!Extract::split_get_second(lineTokens[i],try_number))
+         if (!Extract::split_get_second(line_token_i,try_number))
             throw std::runtime_error( "Submittable::read_state failed for try number : " + name());
          tryNo_ = Extract::theInt(try_number,"Submittable::read_state failed for try number");
       }

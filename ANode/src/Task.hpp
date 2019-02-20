@@ -90,7 +90,7 @@ public:
 	bool resolveDependencies(JobsParam& jobsParam) override;
 
   	node_ptr removeChild( Node* child) override;
- 	bool addChild( node_ptr child,size_t position = std::numeric_limits<std::size_t>::max()) override;
+ 	bool addChild( const node_ptr& child,size_t position = std::numeric_limits<std::size_t>::max()) override;
  	bool isAddChildOk( Node* child, std::string& errorMsg) const override;
 
    void order(Node* immediateChild, NOrder::Order) override;
