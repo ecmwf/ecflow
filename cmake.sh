@@ -144,6 +144,8 @@ module load python3/3.6.5-01
 module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
 # To build python3 when cmake < 3.12.0 use
 # -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
+
+
 cmake_extra_options=""
 cmake_extra_options="-DBOOST_ROOT=$BOOST_ROOT "
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
@@ -327,8 +329,6 @@ fi
 # cmake -C $workspace/ecflow/bamboo/macosx1010-flags.cmake $source_dir \
 #        -DCMAKE_MODULE_PATH=$workspace/ecbuild/cmake \
 #  .....
-# For gcc 6.3.0 default  
-#  -DCMAKE_CXX_STANDARD=98     # add -std=gnu++98
 
 $ecbuild $source_dir \
             -DCMAKE_BUILD_TYPE=$cmake_build_type \
@@ -343,6 +343,8 @@ $ecbuild $source_dir \
             ${log_options} \
             ${test_options} # -DCMAKE_PREFIX_PATH="/tmp/$USER/opt/qt5/"
             
+            # -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3 \
+            # -DPYTHON_EXECUTABLE=/usr/local/apps/python3/2.7.12-01/bin/python \
             #-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=memory -fPIE -pie' 
             #-DENABLE_STATIC_BOOST_LIBS=ON \
             #-DCMAKE_PYTHON_INSTALL_TYPE=local \
