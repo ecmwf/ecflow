@@ -317,7 +317,6 @@ if [[ $package_source_arg = package_source ]] ; then
     gui_options=  
 fi
 
-
 install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
 
 ecbuild=ecbuild
@@ -345,6 +344,8 @@ $ecbuild $source_dir \
             ${log_options} \
             ${test_options} # -DCMAKE_PREFIX_PATH="/tmp/$USER/opt/qt5/"
             
+            #-DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3 \
+            #-DPYTHON_EXECUTABLE=/usr/local/apps/python/2.7.12-01/bin/python \
             #-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=memory -fPIE -pie' 
             #-DENABLE_STATIC_BOOST_LIBS=ON \
             #-DCMAKE_PYTHON_INSTALL_TYPE=local \
