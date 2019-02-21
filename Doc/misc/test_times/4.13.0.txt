@@ -1,10 +1,9 @@
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
-
 real	0m1.45s
 user	0m1.36s
 sys	0m0.09s
-+ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 real	0m2.67s
 user	0m2.46s
 sys	0m0.19s
