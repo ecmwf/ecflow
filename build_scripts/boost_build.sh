@@ -142,20 +142,9 @@ fi
 #   stage/lib/
 # 
 
-# We use tagged as that allows the debug and release builds to built together
+# We use tagged as that allows the debug and release builds to built together, if required
 #
-echo "using compiler $tool with build $1 variants "
-# ========================================================================
-# Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
-# ========================================================================
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=debug -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=debug -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=debug  -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=debug -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-serialization  variant=debug -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=debug  -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-thread variant=debug  -j2
-#./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-regex variant=debug  -j2   # ecflowUi
+echo "using compiler $tool with build $1 release variants"
  
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
@@ -183,7 +172,7 @@ else
    #*** boost python in $BOOST_ROOT/bin.v2/
    #*** It appears to build boost python single threaded. (i.e you do not see threading-multi) in the directory path.
    #
-   # To prebuild the boost python, hence we need to do the following: For now build both variants, keeps cmake happy! (i.e when finding libs)
+   # To prebuild the boost python:
    #
    
     # ===============================================================================
@@ -202,7 +191,7 @@ else
     # remove duplicated 'using python'.  Typically we remove $HOME/user-config.jam is using python is defined in it.
     # for 2/ use    
     #    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/apps/python/2.7.12-01/include/python2.7/"
-    # *ONLY* if first soultion fails ???
+    # *ONLY* if first solution fails ???
     # 
     #
     # When installing BOOST-python libs, make sure to call module load python *FIRST*

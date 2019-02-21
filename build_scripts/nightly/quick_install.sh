@@ -10,8 +10,8 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 
 if [[ "$#"  == 0 ]] ; then
-export PATH=/tmp/ma0/install/cmake/ecflow/4.12.0/bin:$PATH
-export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.12.0/lib/python2.7/site-packages
+export PATH=/tmp/ma0/install/cmake/ecflow/4.13.0/bin:$PATH
+export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.13.0/lib/python2.7/site-packages
 else
    module unload ecflow
    module load ecflow/new
@@ -59,7 +59,7 @@ git checkout master
 # ========================================================================
 cd $WK
 python Pyext/samples/TestBench.py  ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
-python Pyext/samples/TestBench.py  ANode/parser/test/data/single_defs/error.def
+python Pyext/samples/TestBench.py  ANode/parser/test/data/single_defs/test_time_why.def
 
        
 # =======================================================================

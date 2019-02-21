@@ -356,7 +356,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					   // fall through try again, then try other hosts
 						if (!report_block_client_zombie_detected || clientEnv_.debug()){ cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : zombie detected, continue waiting\n";report_block_client_zombie_detected = true;}
   					}
-					else  if (server_reply_.client_request_failed()) {
+					else if (server_reply_.invalid_argument()) {
+						// Server could not decode client message and/or client could not decode server reply
+						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
+						return 1;
+					}
+					else if (server_reply_.client_request_failed()) {
 						// Valid reply from server
 						// This error is ONLY valid if we got a real reply from the server
 						// as opposed to some kind of connection errors. For connections errors
@@ -393,7 +398,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
  				ss << ", Failed to connect to "  << client_env_host_port()
  				   << ". After " << connection_attempts_ << " attempts. Is the server running ?\n";
  				// Only print client environment if not pinging
-            if (!cts_cmd->ping_cmd())  ss << "Client environment:\n" << clientEnv_.toString() << endl;
+            if (!cts_cmd->ping_cmd())  ss << clientEnv_.toString() << endl;
  				server_reply_.set_error_msg(ss.str());
  				return 1;
 			}
@@ -1080,21 +1085,6 @@ int ClientInvoker::flushLog() const
 {
    if (testInterface_) return invoke(CtsApi::flushLog());
    return invoke(Cmd_ptr(new LogCmd( LogCmd::FLUSH )));
-}
-int ClientInvoker::enable_auto_flush() const
-{
-   if (testInterface_) return invoke(CtsApi::enable_auto_flush());
-   return invoke(Cmd_ptr(new LogCmd( LogCmd::ENABLE_AUTO_FLUSH )));
-}
-int ClientInvoker::disable_auto_flush() const
-{
-   if (testInterface_) return invoke(CtsApi::disable_auto_flush());
-   return invoke(Cmd_ptr(new LogCmd( LogCmd::DISABLE_AUTO_FLUSH )));
-}
-int ClientInvoker::query_auto_flush() const
-{
-   if (testInterface_) return invoke(CtsApi::query_auto_flush());
-   return invoke(Cmd_ptr(new LogCmd( LogCmd::QUERY_AUTO_FLUSH)));
 }
 int ClientInvoker::get_log_path() const
 {

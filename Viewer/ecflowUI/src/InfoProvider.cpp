@@ -317,6 +317,11 @@ void ScriptProvider::visit(VInfoNode* info)
                  }
             }
 
+            else
+            {
+                fileName=ecf_file.script_path_or_cmd();
+            }
+
             reply_->text(fileContents);
             reply_->fileReadMode(VReply::LocalReadMode);
             reply_->fileName(fileName);

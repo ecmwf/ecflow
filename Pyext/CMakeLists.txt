@@ -44,6 +44,7 @@ message( STATUS " CMAKE_VERSION                      : ${CMAKE_VERSION}, need cm
 if(${CMAKE_VERSION} VERSION_LESS "3.12.0") 
 	# We only support python2 extension for cmake less 3.12.0
 	# cmake 3.12.0 or greater allows multiple boost python libs & hence multiple extensions to be built
+	# Using -DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3 is not suffcient as the wrong(python2) libs are found
 	ecbuild_find_python( VERSION 2.6 REQUIRED )  
 	message( STATUS "  PYTHON_FOUND                      : ${PYTHON_FOUND}" )
     message( STATUS "  PYTHONINTERP_FOUND                : ${PYTHONINTERP_FOUND}" )

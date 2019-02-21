@@ -27,6 +27,7 @@ void ServerReply::clear_for_invoke(bool command_line_interface)
 	block_client_on_home_server_ = false;
 	block_client_server_halted_ = false;
 	block_client_zombie_detected_ = false;
+	invalid_argument_ = false;
 	host_.clear();
 	port_.clear();
 	error_msg_.clear();

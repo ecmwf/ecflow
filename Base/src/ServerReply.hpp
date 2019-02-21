@@ -34,6 +34,7 @@ public:
  	ServerReply()
  	: cli_(false), in_sync_(false), full_sync_(false), news_(NO_NEWS),
  	  block_client_on_home_server_(false),block_client_server_halted_(false),block_client_zombie_detected_(false),
+	  invalid_argument_(false),
  	  client_handle_(0) {}
 
 	/// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle
@@ -50,6 +51,9 @@ public:
 
 	bool block_client_zombie_detected() const { return block_client_zombie_detected_;}
 	void set_block_client_zombie_detected() { block_client_zombie_detected_ = true;}
+
+	bool invalid_argument() const { return invalid_argument_;}
+	void set_invalid_argument() { invalid_argument_ = true;}
 
 	void set_host_port(const std::string& host, const std::string& port) { host_ = host; port_ = port;}
    const std::string& host() const { return host_;}
@@ -127,6 +131,7 @@ private:
 	bool block_client_on_home_server_;      // clear at the start of invoke
 	bool block_client_server_halted_;       // clear at the start of invoke
 	bool block_client_zombie_detected_;     // clear at the start of invoke
+	bool invalid_argument_;                  // clear at the start of invoke
    std::string host_;                      // clear at the start of invoke
    std::string port_;                      // clear at the start of invoke
 	std::string str_;                       // clear at the start of invoke

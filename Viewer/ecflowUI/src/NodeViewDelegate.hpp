@@ -181,6 +181,11 @@ protected:
     QPixmap limitExtraFillPix_;
     enum LimitShape {RectLimitShape,CircleLimitShape};
     LimitShape  limitShape_;
+    QPen    repeatDayPen_;
+    QPen    repeatDatePen_;
+    QPen    repeatEnumPen_;
+    QPen    repeatIntPen_;
+    QPen    repeatStringPen_;
     QBrush  triggerBgBrush_;
     QPen    triggerBorderPen_;
     QPen    triggerFontPen_;

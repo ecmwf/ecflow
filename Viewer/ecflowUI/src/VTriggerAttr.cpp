@@ -12,6 +12,9 @@
 #include "VAttributeType.hpp"
 #include "VNode.hpp"
 
+#include "Indentor.hpp"
+#include "ExprAst.hpp"
+
 #include "NodeAttr.hpp"
 
 //================================
@@ -138,4 +141,39 @@ void VTriggerAttr::expressions(const VNode* vnode,std::string& trigger, std::str
             complete=eC->expression();
     }
 }
+
+std::string VTriggerAttr::ast_str() const
+{
+    std::stringstream ss;
+    if(node_ptr node=parent_->node())
+    {        
+        if(index_ == 0)
+        {
+            if(Expression* e=node->get_trigger())
+            {
+                if (e->isFree() )
+                    ecf::Indentor::indent(ss) << "# (free)\n";
+
+                // show the Abstract Syntax Tree for the expression. This also uses Indentor
+                if(Ast* ast =  node->triggerAst())
+                    ast->print(ss);
+            }
+        }
+        else
+        {
+            if(Expression* e=node->get_complete())
+            {
+                if (e->isFree() )
+                    ecf::Indentor::indent(ss) << "# (free)\n";
+
+                // show the Abstract Syntax Tree for the expression. This also uses Indentor
+                if(Ast* ast =  node->completeAst())
+                    ast->print(ss);
+            }
+        }
+    }
+
+    return ss.str();
+}
+
 

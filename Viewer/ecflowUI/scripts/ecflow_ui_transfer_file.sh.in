@@ -66,7 +66,7 @@ if [[ lastBytes -eq 0 ]] ; then
 
 #transfer the last bytes of the file
 else
-    ssh ${USER}@${host} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}" > sourceSize
+    sourceSize=$(ssh ${USER}@${host} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}")
 
     if [[ ${sourceSize} -gt 0 && ${sourceSize} -le ${lastBytes} ]] ; then
         script -q -c "scp ${host}:/${sourceFile} ${targetFile}"

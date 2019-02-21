@@ -108,5 +108,7 @@ Process
      
 0/ Reset metabuilder and ecflow git_tag, back to develop
 
+0/ record the performance statistics for the release. ( see Doc/misc/test_times )
+
 0/ ** Check the security level of Jira issues for the release.
       If there is nothing sensitive, then set security level to None

@@ -16,6 +16,7 @@
 #include "VNState.hpp"
 #include "VSState.hpp"
 #include "VFileInfo.hpp"
+#include "VTriggerAttr.hpp"
 
 OverviewProvider::OverviewProvider(InfoPresenter* owner) : InfoProvider(owner,VTask::NoTask)
 {
@@ -287,7 +288,25 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
     for(std::vector<VAttribute*>::const_iterator it=attr.begin(); it != attr.end(); ++it)
     {
         if((*it)->typeName() != "var" && (*it)->typeName() != "genvar")
+        {
             f << inc << (*it)->definition().toStdString() << "\n";
+
+            if((*it)->typeName() == "trigger" || (*it)->typeName() == "complete")
+            {
+                if(VTriggerAttr* tgAtt=static_cast<VTriggerAttr*>(*it))
+                {
+                    std::string trigger_ast=tgAtt->ast_str();
+                    if(!trigger_ast.empty())
+                    {
+                        f << inc << trigger_ast;
+                        if(trigger_ast[trigger_ast.size()-1] != '\n')
+                        {
+                            f << "\n";
+                        }
+                    }
+                }
+            }
+        }
     }
 
 	//Print children
@@ -303,3 +322,4 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	//End block
 	f << "end" << typeName << " # " << nodeName << "\n";
 }
+

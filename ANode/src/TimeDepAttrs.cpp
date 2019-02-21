@@ -579,8 +579,8 @@ bool TimeDepAttrs::why(std::vector<std::string>& vec,const std::string& prefix) 
    const Calendar& c = node_->suite()->calendar();
    for(size_t i = 0; i < days_.size(); i++)    { postFix.clear(); if (days_[i].why(c,postFix))    { vec.push_back(prefix + postFix); why_found=true;}}
    for(size_t i = 0; i < dates_.size(); i++)   { postFix.clear(); if (dates_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
-   for(size_t i = 0; i < todayVec_.size(); i++){ postFix.clear(); if (todayVec_[i].why(c,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
-   for(size_t i = 0; i < timeVec_.size(); i++) { postFix.clear(); if (timeVec_[i].why(c,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < todayVec_.size(); i++){ postFix.clear(); if (todayVec_[i].why(c,days_,dates_,postFix)){ vec.push_back(prefix + postFix); why_found=true;}}
+   for(size_t i = 0; i < timeVec_.size(); i++) { postFix.clear(); if (timeVec_[i].why(c,days_,dates_,postFix)) { vec.push_back(prefix + postFix); why_found=true;}}
    for(size_t i = 0; i < crons_.size(); i++)   { postFix.clear(); if (crons_[i].why(c,postFix))   { vec.push_back(prefix + postFix); why_found=true;}}
    return why_found;
 }

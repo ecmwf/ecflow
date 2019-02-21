@@ -479,27 +479,27 @@ void Node::findExprVariableAndPrint( const std::string& name, ostream& os) const
 {
    const Event& event = findEventByNameOrNumber( name );
    if ( !event.empty() )  {
-      os << event.dump();
+      os << "EVENT value(" << event.value() << ")";
       return;
    }
    const Meter& meter = findMeter( name );
    if ( !meter.empty() ) {
-      os << meter.dump();
+      os << "METER value(" << meter.value() << ")";
       return;
    }
    const Variable& variable = findVariable( name );
    if ( !variable.empty() ) {
-      os << "USER-VARIABLE " << variable.dump();
+      os << "USER-VARIABLE value(" << variable.value() << ")";
       return;
    }
    const Repeat& repeat = findRepeat( name );
    if ( !repeat.empty() )  {
-      os << repeat.dump();
+      os << "REPEAT value(" << repeat.value() << ")";
       return;
    }
    const Variable& gen_variable = findGenVariable( name );
    if ( !gen_variable.empty() )  {
-      os << "GEN-VARIABLE " << gen_variable.dump();
+      os << "GEN-VARIABLE value(" << gen_variable.value() << ")";
       return;
    }
    limit_ptr limit = find_limit( name );
@@ -659,7 +659,7 @@ node_ptr Node::findReferencedNode(const std::string& nodePath, const std::string
    /// =============================================================================
    /// Path is something other than ABSOLUTE path
    /// =============================================================================
-  vector<string> theExtractedPath;
+   vector<string> theExtractedPath;
    NodePath::split( nodePath, theExtractedPath );
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
@@ -747,10 +747,8 @@ node_ptr Node::findReferencedNode(const std::string& nodePath, const std::string
    }
 
    // ********************************************************************
-   // Note  ./  This means go to the parent, then search down, i.e sibling
-   //       ../ This means go to the parents parent
-   //       This may be confusing, but this is how Axel expects it, hence I will use
-   //       the same understanding
+   // Note  ./   sibling go to parent and search down
+   //       ../  search at level of parent, requires we go up to parents parent to search down
    // **********************************************************************
    // Handle node path of the type "../a/b/c"  "../../a/b/c"
    if ( theExtractedPath.size() >= 2 && theExtractedPath[0] == "..") {
@@ -785,6 +783,18 @@ node_ptr Node::findReferencedNode(const std::string& nodePath, const std::string
          if (constNode) {
             return constNode;
          }
+      }
+      else {
+    	  // search suites, with the remaining path in theExtractedPath
+    	  std::string path;
+    	  for(size_t i = 0; i < theExtractedPath.size(); i++) {
+    		  path += Str::PATH_SEPERATOR();
+    		  path += theExtractedPath[i];
+    	  }
+    	  node_ptr fndNode = theDefs->findAbsNode(path);
+    	  if (fndNode) {
+    		  return fndNode;
+    	  }
       }
    }
 

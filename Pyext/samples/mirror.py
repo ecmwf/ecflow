@@ -4,6 +4,16 @@ from __future__ import print_function
 """an example for a simple python client to help ecFlow scheduling
  + unit test
  + task loading in the suite
+
+one script DO-IT-ALL:
+  - play suite + update suite holder aka def-file
+
+  - script as a wrapper for a task
+
+  - download content (passive client)
+
+  - upload statuses (active client)
+
 $manual
 
   MIRRORING suite from server to server
@@ -15,8 +25,9 @@ $comment
   a comment in a comment
 $end
 
+TODO: check MICRO robust sync
 """
-import getopt
+import argparse
 import os
 import pwd
 import sys
@@ -24,13 +35,8 @@ import time
 import unittest
 from time import gmtime, strftime
 
-from ecf import *  # mirror
-import ecf
-import ecflow
-
-import signal
 ECFLOWP = "/usr/local/apps/ecflow/current"
-ECFLOWC = ECFLOWP + "/bin/ecflow_client"
+ECFLOWC = ECFLOWP + "/bin/ecflow_client "
 sys.path.append(ECFLOWP + "/lib/python2.7/site-packages/ecflow")
 child = None
 
@@ -40,15 +46,13 @@ def getreq():
 
 
 def ymd():
-    return (Edit("YMD", "29090909"), Label("ymd", "29090909"))
+    return [Edit("YMD", "29090909"), Label("ymd", "29090909")]
 
 
 def excepthook(exctype, value, traceback):
     if exctype == KeyboardInterrupt:
         if child:
             child.report("abort", "keyb")
-    # elif exctype == NameError:
-    #     if child: child.report("abort", "name")
     else:
         sys.__excepthook__(exctype, value, traceback)
         if child:
@@ -56,41 +60,38 @@ def excepthook(exctype, value, traceback):
 
 
 def fullname(item):
-    if type(item) == cdp.sms_node:
-        if item.name != '/':
-            return fullname(item.parent) + '/' + item.name
     return ""
 
-
 sys.excepthook = excepthook
-CDP = None
+from ecf import *  # mirror
+import ecf
+import ecflow
 
 
-class Edit(ecf.Variables):
-    pass
-
+# class Edit(ecf.Variables):    pass
 
 MICRO = "$$"  # keep ecFlow pleased with micro character balance
 DEBUG = 1
 DEBUG = 0
 USER = "emos"
-XPING = "/usr/local/apps/sms/bin/smsping"
-x_status = {-1: "unknown",
-            0: "unknown",
-            1: "suspended",
-            2: "complete",
-            3: "queued",
-            4: "submitted",
-            5: "active",
-            6: "aborted",
-            7: "shutdown",
-            8: "halted",
-            9: "unknown", }
-x_type = {13: "definition",
-          12: "suite",
-          11: "family",
-          10: "task",
-          32: "alias", }
+# USER = "map"
+
+sms_status = {-1: "unknown",
+              0: "unknown",
+              1: "suspended",
+              2: "complete",
+              3: "queued",
+              4: "submitted",
+              5: "active",
+              6: "aborted",
+              7: "shutdown",
+              8: "halted",
+              9: "unknown", }
+sms_type = {13: "definition",
+            12: "suite",
+            11: "family",
+            10: "task",
+            32: "alias", }
 
 
 ############################
@@ -101,6 +102,7 @@ def usage():
       -t # unit test
       -r # load the task definition in a suite, associated with -p option
       -r # with -m, allow suite loading in destination
+      -u usage
 
 can also be used as a module: gen_task, gen_suite
 
@@ -126,15 +128,13 @@ def gen_task(var=True, load_only=False, kind=None):
     if '.' in name:
         name = name.split('.')[0]
     rec = "00:30"
-    if kind is None:
-        pass
-    cmd = "trimurti $USER$ $WSHOST$ $ECF_JOB$ $ECF_JOBOUT$"
+    cmd = "/home/ma/emos/bin/trimurti emos eurus $ECF_JOB$ $ECF_JOBOUT$"
+    cmd = "/usr/local/apps/python/2.7.12-01/bin/python $ECF_JOB$"
     WDIR = pwd
     ODIR = pwd
 
     load = (Label("info", "mirror suites..."),
             Variables(ECF_MICRO=MICRO[0],
-                      ECF_FILES=WDIR,
                       ECF_HOME=ODIR,
                       ECF_EXTN=".py",
                       ECF_JOB_CMD=cmd, ))
@@ -155,10 +155,11 @@ def gen_task(var=True, load_only=False, kind=None):
 #     sys.stderr.flush()
 #     sys.exit(num)
 def timer(a, b):
+    if child is None:
+        return
     child.report("timeout")
     child.report("complete")
-
-
+import signal
 signal.signal(signal.SIGALRM, timer)
 signal.alarm(180)
 
@@ -188,8 +189,26 @@ class Child(object):
             return
         print("#MSG: will communicate with server...")
         print("#MSG: kill: ssh %s kill -15 %d" % (os.uname()[1], os.getpid()))
+        for sig in (signal.SIGINT,
+                    signal.SIGHUP,
+                    signal.SIGQUIT,
+                    signal.SIGILL,
+                    signal.SIGTRAP,
+                    signal.SIGIOT,
+                    signal.SIGBUS,
+                    signal.SIGFPE,
+                    signal.SIGUSR1,
+                    signal.SIGUSR2,
+                    signal.SIGPIPE,
+                    signal.SIGTERM,
+                    signal.SIGXCPU,
+                    signal.SIGPWR):
+            signal.signal(sig, self.signal_handler)
+        self.set_client()
+
+    def set_client(self):
         self.client = ecflow.Client()
-        if MICRO[0] == MICRO:
+        if len(MICRO) == 2:
             host = env["ECF_HOST"]
             print(host)
             if host == "" or "%" in host:
@@ -216,32 +235,14 @@ class Child(object):
         self.client.set_child_timeout(20)
         print(self.client)
 
-        for sig in (signal.SIGINT,
-                    signal.SIGHUP,
-                    signal.SIGQUIT,
-                    signal.SIGILL,
-                    signal.SIGTRAP,
-                    signal.SIGIOT,
-                    signal.SIGBUS,
-                    signal.SIGFPE,
-                    signal.SIGUSR1,
-                    signal.SIGUSR2,
-                    signal.SIGPIPE,
-                    signal.SIGTERM,
-                    signal.SIGXCPU,
-                    signal.SIGPWR):
-            signal.signal(sig, self.signal_handler)
 
     def signal_handler(self, signum, frame):
         """ catch signal """
         print('Aborting: Signal handler called with signal ', signum)
-        if self.client:
-            self.client.child_abort(
-                "Signal handler called with signal " + str(signum))
+        self.report("abort", "Signal handler called with signal " + str(signum))
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self.client:
-            self.client.child_abort()
+        self.report("abort", "__exit__")
 
     def report(self, msg, meter=None):
         """ communicate with ecFlow server """
@@ -265,8 +266,7 @@ class Child(object):
         elif msg in ("abort", ):
             self.client.child_abort()
             self.client = None
-            if 1:
-                raise Exception(msg)
+            raise Exception(msg)
         elif meter:
             self.client.child_meter(msg, meter)
         else:
@@ -274,98 +274,108 @@ class Child(object):
 
 
 ############################
+destinations = {
+    "test": "${DEST_HOST:=ecgate}@${DEST_PORT=31415}",
+}
+
 def gen_suite(host=None, port=None, path=None):
     import ecf
     from ecf import (Task, Label, Variables, Suite, Defs,
                      Family, Trigger, Defstatus, Meter, Event)
     destinations = dict()
     defs = Defs()
-    if 1:
-        dest = "localhost@3141"
-        if path:
-            if path[0] == '/':
-                sname = path.split('/')[1]
-                print(sname)
-                if sname in definitions.keys():
-                    defs.add_suite(
-                        definitions[sname].add(
-                            Defstatus("suspended")))
-                    return defs
-
     sname = "mirror"
     if DEBUG:
         print(definitions.keys())
+
+    print(definitions.keys())
+    print(destinations.keys())
     defs.add_suite(
         Suite(sname).add(
             ecf.Defstatus("suspended"),
             Limit("one", 2),
             Inlimit("one"),
             gen_task(load_only=True),
-            Variables(ALL_ECF="localhost:31415",
-                      ALL_SMS="",
-                      [Family(name).add(
-                          Variables(DESTINATIONS=destinations[name]),
-                          Label("info", ""),
-                          gen_task(0, kind=name), )
-                          for name in definitions.keys()])))
+            Variables(ALL_ECF=" "),
+            [Family(name).add(
+                Variables(DESTINATIONS=destinations[name]),
+                Label("info", ""),
+                gen_task(0, kind=name), )
+             for name in definitions.keys()
+             # if name in destinations.keys()
+             ]))
     if DEBUG:
         print(defs)
     return defs
 
-
-def o5hres(name="gsup"):
-    return Family(name).add(
-        Family("an").add(
-            Family("main").add(
-                Family("ed00").add(
-                    Label("info", "YMD"),
-                    Edit("YMD", "21000101"),  # USE_YMD
-                    Task("an"),
-                    Task("fc")))))
 
 
 definitions = {  # strings as path for all nodes below sync
     # or suites, subset of the original, leaves are task...
     # or else not sync'ed
     # shall we add list of string/path ???
-    "aaa": "/aaa/run/ext",
 
     "test": Suite("test").add(
         Defstatus("suspended"),
-        gen_fcgroup1(name="abcd")), }
+        Family("f1").add(
+            Edit(YMD=20320101),
+            Task("t1"))), 
+}
+
 ############################
 
 
 class Mirror(object):
 
     """
-  $nopp
-
-  $end
+$nopp
+$end
     """
 
     def _protect_oper(self, server):
-        if server == "xxx@1234":
+        if server == "xyz@123":
             if 1:
                 child.report("abort", "protect")
-            elif ("/o" in self.path
-                  or self.path == "all"
-                  or "/eda" in self.path
-                  or "/mc" in self.path):
-                raise Exception("wont do that...")
+            elif ("/o" in self.path or
+                  self.path == "all" or
+                  "/eda" in self.path or
+                  "/mc" in self.path):
+                raise Exception("# wont do that...")
 
     def _warmup(self):
         self._set_register(self.path)
-        self.source.ch_register(False, self.register)
-        self.source.sync_local()
+        if not self.is_sms:
+            self.source.ch_register(False, self.register)
+            self.source.sync_local()
 
-    def __init__(self, server="eurus@1630", path="/e_41r2", replay=False):
+    def _send(self, msg="", client=None, send=False):
+        """ self.grouped is None: no buffering, immediate send
+            msg accumulate (send False by default)
+            msg is sent ("", client, send=True)
+        """
+        if self.grouped is None:
+            print("#MSG: send", self.grouped)
+            client.group(msg)
+            time.sleep(self.snap)
+            return
+
+        self.grouped += msg
+        if send and self.grouped != "":
+            print("#MSG: send", self.grouped)
+            client.group(self.grouped)
+            client.sync_local()
+            self.grouped = ""
+            time.sleep(self.snap)
+
+    def __init__(self, server="eurus@1630", path="/e_45r1", replay=False, is_sms=False):
+        self.is_sms = is_sms
         self.replay = replay  # allow replay from skel definition
         self.act = 1         # active ie force change allowed
         self.snap = 1        # sleep interval
         self.wait = 0  # refresh interval,continue as long as sub/act node exist
         self.path = path
-
+        self.grouped = None  # would use atomic alter
+        self.grouped = ""  # command to send to the server ... grouped
         self._set_register(path)
 
         if server == "all":
@@ -378,7 +388,8 @@ class Mirror(object):
         elif ":" in server:
             host, port = server.split(":")
             self.servers = ("%s:%s" % (host, port), )
-
+        if self.servers[-1] == "":
+            del self.servers[-1]
         host = os.getenv("ECF_HOST", "$ECF_HOST:none$")
         if MICRO[0] in host or host == "none":
             host = os.getenv("ECF_NODE", "$ECF_NODE$")
@@ -390,12 +401,22 @@ class Mirror(object):
         # aka reference/source  server name
         self.sname = "%s:%s" % (host, port)
 
-        if "$SOURCE:$" != "":
+        if "$SOURCE:$" != "" and MICRO[0] not in "$SOURCE:$":
             self.sname = "$SOURCE:$"
         if DEBUG:
             print("#DBG: source is", self.sname)
+        self.set_source()
+
+    def set_source(self):
         self.source = ecflow.Client(self.sname)
         self._warmup()
+
+    def __exit__(self):
+        if type(self.source) == ecflow.Client:
+            try:
+                self.source.ch_drop()
+            except:
+                pass
 
     def _set_register(self, path):
         if '/' == path[0]:
@@ -429,6 +450,7 @@ class Mirror(object):
 
                         defs = ecflow.Defs()
                         defs.add_suite(definitions[suite])
+                        host = "localhost"
                         client.load(defs)
                         client.suspend('/' + suite)
                         client.begin_suite(suite)
@@ -439,8 +461,8 @@ class Mirror(object):
                     pass
 
             elif server != self.sname and not (
-                    top.is_suspended()  # normal backup server
-                    or "%s" % top.get_state() == "unknown"):  # test server
+                    top.is_suspended() or  # normal backup server
+                    "%s" % top.get_state() == "unknown"):  # test server
                 print("#ERR: top node shall be suspended - NOGO")
                 print("#ERR:", server, top.name(), top.get_state())
                 if 1:
@@ -450,6 +472,9 @@ class Mirror(object):
 
             else:
                 pass
+
+            if suite not in definitions.keys():
+                raise Exception(definitions.keys(), suite)
 
             if type(definitions[suite]) == str:
                 path = definitions[suite]
@@ -467,11 +492,8 @@ class Mirror(object):
             if stop:
                 child.report("abort", "stop")
 
-    def update_var(self, var, nfrom, ndest, server, client, kind="edit"):
-        if type(var) == cdp.sms_variable:
-            name = var.name
-        else:
-            name = var.name()
+    def _update_var(self, var, nfrom, ndest, server, client, kind="edit"):
+        name = var.name()
         vfrom = None
         vdest = None
         repeat = nfrom.get_repeat()
@@ -483,18 +505,10 @@ class Mirror(object):
                 if vfrom.name() == name:
                     break
 
-        if type(ndest) == cdp.sms_node:
-            vdest = ndest.variable
-            while vdest:
-                if vdest.name == name:
-                    break
-                vdest = vdest.next
-            pnode = fullname(ndest)
-        else:
-            for vdest in ndest.variables:
+        for vdest in ndest.variables:
                 if vdest.name() == name:
                     break
-            pnode = ndest.get_abs_node_path()
+        pnode = ndest.get_abs_node_path()
         pnode = nfrom.get_abs_node_path()
 
         if vfrom is None:
@@ -506,12 +520,8 @@ class Mirror(object):
         if vdest is None:
             return
 
-        if type(vdest) == cdp.sms_variable:
-            vname = vdest.name
-            vval = vdest.value
-        else:
-            vname = vdest.name()
-            vval = vdest.value()
+        vname = vdest.name()
+        vval = vdest.value()
         if vname != name:
             return
 
@@ -535,7 +545,7 @@ class Mirror(object):
                 host, port = server.split(':')
 
                 if int(port) < 65536 and 0 == comm(
-                        ECFLOWC + " --ping --port %s --host %s" % (port, host)):
+                        ECFLOWC + "--ping --port %s --host %s" % (port, host), False):
                     client = ecflow.Client(server)
                     client.ch_register(False, self.register)
                     client.sync_local()
@@ -551,29 +561,7 @@ class Mirror(object):
                         # self.process(server, client, node) # update statuses
                         # self.process(server, client, node, "edit") # update
                         # variables
-
-                elif 0 == comm("SMS_PROG=%s %s %s" % (port, XPING, host)):
-                    port = int(port)
-                    os.putenv('SMS_PROG', "%d" % port)
-                    os.environ['SMS_PROG'] = "%d" % port
-                    cdp.cdp_init0()
-                    passw = "1"
-                    tout = 60
-                    top = cdp.sms_cdp_client_login(
-                        host, USER, passw, tout, port)
-                    if top is None:
-                        print("#ERR: node not found", host, port, USER, passw)
-                        return
-
-                    for suite in self.register:
-                        node = definitions[suite]
-                        if type(node) == str:
-                            node = self.source.get_defs().find_abs_node(node)
-                        # node.add(Label("memo", "This suite was generated by
-                        # mirror.py"))
-                        self.process(server, top, node, "repeat")
-                        # self.process(server, top, node)
-                        # self.process(server, top, node, "edit")
+                    client.ch_drop()
 
                 else:
                     # child.report("abort","res")
@@ -595,21 +583,12 @@ class Mirror(object):
 
         elif type(item) in (ecflow.Suite, ecf.Suite):
 
-            if isinstance(client, cdp.sms_node):
-                suite = cdp.sms_node_find(item.get_abs_node_path(), client)
-                if suite:
-                    if not sms_status[suite.status] == "suspended":
-                        print("#ERR: top node shall be suspended - stop",
-                              suite, server)
-                        return
-                    node = suite.kids
-                    while node:
-                        # print(node); print(node.name, server, client, var)
-                        self.process(server, client, node, var)
-                        node = node.next
+            if 0: pass
             else:
-                suite = client.get_defs().find_abs_node(item.get_abs_node_path())
-                print(type(client), item.get_abs_node_path(), type(suite))
+                # suite =
+                # client.get_defs().find_abs_node(item.get_abs_node_path())
+                suite = client.get_defs().find_abs_node(item.fullname())
+                # print(type(client), item.fullname(), type(suite))
                 if suite:
                     if not suite.is_suspended():
                         print("#ERR: top node shall be suspended - stop",
@@ -622,8 +601,7 @@ class Mirror(object):
         elif type(item) in (ecflow.Family, ecflow.Task):
             pnode = item.get_abs_node_path()
             nfrom = self.source.get_defs().find_abs_node(pnode)
-            if isinstance(client, cdp.sms_node):
-                ndest = cdp.sms_node_find(pnode, client)
+            if 0: pass
             else:
                 ndest = client.get_defs().find_abs_node(pnode)
 
@@ -642,23 +620,19 @@ class Mirror(object):
 
             else:
                 pass
-            if nfrom:
+            if nfrom is not None:
                 status = "%s" % nfrom.get_state()
             else:
-                print(pnode, self.source)
-                raise Exception
+                raise Exception(pnode, self.source, "nfrom is not")
 
-            if isinstance(ndest, cdp.sms_node):
-                dstate = sms_status[ndest.status]
+            if 0: pass
             else:
                 dstate = "%s" % ndest.get_state()
             is_task = type(item) == ecf.Task
 
             for evs in nfrom.events:
-                if isinstance(ndest, cdp.sms_node):
-                    break  # TODO
-
                 for evd in ndest.events:
+                    # if evd.name_or_number() != evs.name_or_number(): continue
                     if evd.name() == "" and evd.number() != evs.number():
                         continue
                     if evd.value() == evs.value():
@@ -666,20 +640,18 @@ class Mirror(object):
                     print("#event", evs.name(), evd.number(), evs.number(),
                           evd.value(), evs.value())
                     if evs.value():
-                        if 0:
-                            client.alter(pnode, "change", "event",
-                                         evs.name_or_number(), "set")
-                        elif evs.name() == "":
-                            client.alter(pnode, "change", "event",
-                                         "%d" % evs.number(), "set")
+                        if evs.name() == "":
+                            self._send("alter change event %d set %s;" %
+                                       (evs.number(), pnode), client)
+                            # client.alter(pnode, "change", "event", "%d" %
+                            # evs.number(), "set")
                         else:
-                            client.alter(pnode, "change", "event",
-                                         evs.name(), "set")
+                            self._send("alter change event %s set %s;" %
+                                       (evs.name(), pnode), client)
+                        # else: client.alter(pnode, "change", "event",
+                        # evs.name(), "set")
 
             for evs in nfrom.meters:
-                if isinstance(ndest, cdp.sms_node):
-                    break  # TODO
-
                 for evd in ndest.meters:
                     if evd.name() != evs.name():
                         continue
@@ -687,8 +659,14 @@ class Mirror(object):
                         break
                     print("#meter", evd.value(), evs.value())
                     try:
-                        client.alter(pnode, "change", "meter",
-                                     evs.name(), "%s" % evs.value())
+                        value = evs.value()
+                        if value > 100:
+                            value = 100
+                        if value > 0:
+                            self._send("alter change meter %s %s %s;" % (
+                                evs.name(), value, pnode), client)
+                        # client.alter(pnode, "change", "meter", evs.name(),
+                        # "%s" % evs.value())
                     except:
                         pass
 
@@ -698,15 +676,17 @@ class Mirror(object):
                     self.action(pnode, server, client, status, is_task,
                                 msg="forced complete")
                     if not is_task:
+                        self._send("", client, send=True)
                         return
+
                 elif status == "queued":
+                    # self._send("force queued %s;" % (pnode), client)
                     self.action(pnode, server, client, status, is_task,
                                 msg="forced queued")
                 elif status in ("submitted", "active", "unknown", "aborted", ):
-                    print("status is active/submit, ignored")
+                    print("#IGN: status is active/submit, ignored")
                 else:
-                    print(status)
-                    raise Exception
+                    raise Exception(status)
 
             if type(item) in (ecflow.Suite, ecflow.Family):
                 for node in item.nodes:
@@ -714,72 +694,14 @@ class Mirror(object):
 
             if var:
                 for edit in item.variables:
-                    self.update_var(edit, nfrom, ndest, server, client, var)
+                    self._update_var(edit, nfrom, ndest, server, client, var)
 
-        elif type(item) == cdp.sms_node:
-            pnode = fullname(item)
-            nfrom = self.source.get_defs().find_abs_node(pnode)
-            ndest = cdp.sms_node_find(pnode, client)
-            if nfrom is None:
-                if var:
-                    return  # ignore
-                print("#ERR: node not found, please update mirror.py skel",
-                      pnode, self.sname)
-                child.report("abort", "nfrom")
-
-            elif ndest is None:
-                if var:
-                    return  # ignore
-                print("#ERR: node not found, replay?", pnode, server)
-                return
-
-            else:
-                pass
-            if nfrom:
-                status = "%s" % nfrom.get_state()
-            else:
-                status = "unknown"
-            dstate = "%s" % x_status[ndest.status]
-            is_task = x_type[item.type]
-
-            if status != dstate or FORCE:
-                print("#WAR: diff ", pnode, status, dstate, )
-                if status == "complete":
-                    self.action(pnode, server, client, status, is_task,
-                                msg="forced complete")
-                    if not is_task:
-                        return
-
-                elif status == "queued":
-                    if is_task:
-                        self.action(pnode, server, client, status, is_task,
-                                    msg="forced queued")
-                    else:
-                        pass
-                elif status in ("submitted", "active", "aborted", "unknown"):
-                    print("status is active/submit, ignored")
-                else:
-                    print(status, dstate)
-                    raise Exception
-
-            if var:
-                edit = item.variable
-                while edit:
-                    self.update_var(edit, nfrom, ndest, server, client, var)
-                    edit = edit.next
-
-            if x_type[item.type] == "task":
-                return
-            node = item.kids
-            while node:
-                self.process(server, client, node, var)
-                node = node.next
-
+            self._send("", client, send=True)
         else:
-            print(type(item))
-            raise Exception
+            raise Exception(type(item), item)
 
-    def action(self, pnode, server, client, kind, is_task=False, value="20010101",
+    def action(self, pnode, server, client, kind, is_task=False,
+               value="20010101",
                msg=""):
         if not self.act:
             return
@@ -787,42 +709,20 @@ class Mirror(object):
         self._protect_oper(server)
 
         print("#MSG:", msg)
-        if type(client) == cdp.sms_node:
-            host, port = server.split(':')
-            CDP = "/usr/local/apps/sms/bin/cdp -q -c "
-            cmd = CDP + "'set SMS_PROG %s; login %s %s 1;" % (port, host, USER)
         if kind in ("active", "submitted", ):
             return
         elif FORCE:
-            pass
+            pass  # SMS ONLY
 
         elif kind == "complete":
             if is_task:
-                if DEBUG:
-                    print("#DBG: force complete")
-                if type(client) == cdp.sms_node:
-                    cmd += "force complete %s; exit 0;'" % pnode
-                    rc = comm(cmd)
-                else:
-                    client.force_state(pnode, ecflow.State.complete)
+                self._send("", client, True)
+                client.force_state(pnode, ecflow.State.complete)
             else:
-                if DEBUG:
-                    print("#DBG: force rec complete")
-                if type(client) == cdp.sms_node:
-                    cmd += "force -r complete %s; exit 0;'" % pnode
-                    rc = comm(cmd)
-                else:
-                    client.force_state_recursive(pnode, ecflow.State.complete)
-                    client.sync_local()
-
+                self._send("", client, True)
+                client.force_state_recursive(pnode, ecflow.State.complete)
         elif kind == "queued":  # and is_task:
-            if DEBUG:
-                print("#DBG: force queued")
-            if type(client) == cdp.sms_node:
-                cmd += "force queued %s; exit 0;'" % pnode
-                rc = comm(cmd)
-            else:
-                client.force_state(pnode, ecflow.State.queued)
+            self._send("force queued %s;" % pnode, client)
 
         elif kind == "repeat":
             raise Exception
@@ -832,27 +732,15 @@ class Mirror(object):
                 print("#DBG: update var", kind, value)
             if kind in ("queued", ):
                 pass
-            elif kind not in ("YMD", "JUL", "DAY", "SCHOST", "STHOST",
-                              "YYYY", "MM", "INIBEGINDATE", "MIXTASK"):
+            elif kind not in ("YMD", "JUL", "DAY", "SCHOST", "STHOST", 
+                              "YYYY", "MM", "ECF_FILES",
+                              "INIBEGINDATE", "MIXTASK"):
                 raise Exception(kind)
-            if type(client) == cdp.sms_node:
-                cmd0 = cmd
-                if kind in ("YMD", ):
-                    cmd += "requeue %s; " % (pnode)
-                cmd += "alter -V %s:%s %s; exit 0;'" % (pnode, kind, value)
-                rc = comm(cmd)
-                cmd += "alter -l %s:%s %s; exit 0;'" % (pnode, kind, value)
-                rc = comm(cmd)
+            if 0: pass
             else:
-                if kind in ("YMD", ):
-                    client.requeue(pnode)
-                client.alter(pnode, "change", "variable", kind, value)
-                try:
-                    client.alter(pnode, "change", "label", kind, value)
-                except:
-                    pass
-
-        time.sleep(self.snap)
+                client.requeue(pnode)
+                self._send("alter change variable %s %s %s;" %
+                           (kind, value, pnode), client, True)
 
 # ignore Family + queued while is might just be that we dont mirror all
 # fam/tasks and inheritance get it already complete in dest while still
@@ -872,12 +760,16 @@ def replay(path, defs=None):
         defs = gen_suite(host, port, path)
     if DEBUG:
         print(defs)
+    # print(defs)
+    if "localhost" in host and port in ("3141", 3141) and ("/test" in path) and "/mirror" not in path:
+        raise Exception("dont")
+
     print("#MSG: replacing %s in " % path, host, port, defs)
     client.replace(path, defs, 1, 1)
     return client
 
 
-def comm(cmd, rem=1):
+def comm(cmd, rem=True):
     import commands
     if rem and cmd in memo.keys():
         return memo[cmd]
@@ -888,127 +780,109 @@ def comm(cmd, rem=1):
     return rc
 
 
-def sms_replay(path, defs=None):
-    import commands
-    import ecf
-    miss = "@undef@"
-    host = os.getenv("ECF_HOST", miss)
-    if host == miss:
-        host = os.getenv("SMSNODE", "localhost")
-    prog = os.getenv("SMS_PROG", 314159)
-    deff = "mirror.tmp"
-    sname = path.split('/')[1]
-    if defs is None:
-        defs = Defs()
-        if type(definitions[sname]) == str:
-            server = "localhost:31415"
-            client = ecflow.Client(server)
-            client.ch_register(False, [sname, ])
-            client.sync_local()
-            defs = client.get_defs()
-        else:
-            defs.add_suite(definitions[sname])
-        if DEBUG:
-            print(defs)
-        fd = open(deff, "w")
-        print(defs, file=fd)
-        fd.close()
-    cmd = "cdp -c 'set SMS_PROG %s; login %s %s 1; play -r %s %s; exit 0'" % (
-        prog, host, USER, path, deff)
-    rc = comm(cmd)
-
-
 ############################
 class TestMirror(unittest.TestCase):
     """ a test case """
 
     def test_1(self, test_ok=1):
+        sname = "mirror"
         replay('/' + sname, gen_suite())
 
 
 memo = dict()
 ############################
 if __name__ == '__main__':
-    try:
-        OPTS, ARGS = getopt.getopt(
-            sys.argv[1:], "fhi:m:n:p:rstw",
-            ["force", "help", "interval", "mirror", "number", "path", "replay",
-             "sms", "test", "wait", ])
-    except getopt.GetoptError as err:
-        print("#what?", usage())
+    import argparse
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-?", default=0, help="help")
+    parser.add_argument("-f", "--force", action="store_true", help="force")
+    parser.add_argument("-h", default=0, help="help")
+    parser.add_argument(
+        "-m", "--mirror", default="localhost@31415", help="mirror")
+    parser.add_argument("-p", "--path", default="/mirror/test", help="path")
+    parser.add_argument("-r", "--replay", action="store_true", help="replay")
+    parser.add_argument("-t", "--test", action="store_true", help="test")
+    parser.add_argument("-u", "--usage", action="store_true", help="test")
 
+    parsed = parser.parse_args()
     global FORCE
-    FORCE = False  # FORCE = True
-    MIRROR = None
-    WAIT = False
-    PATH = None
-    NUM = None
-    INTERVAL = 30
-    REPLAY = False
-    ECFLOW = True
-
-    for o, a in OPTS:
-        if o in ("-h", "--help"):
-            usage()
-        elif o in ("-f", "--force"):
-            FORCE = True
-        elif o in ("-i", "--interval"):
-            INTERVAL = int(a)
-        elif o in ("-m", "--mirror"):
-            MIRROR = a
-        elif o in ("-n", "--number"):
-            NUM = int(a)
-        elif o in ("-p", "--path"):
-            PATH = a
-        elif o in ("-r", "--replay"):
-            REPLAY = True
-        elif o in ("-s", "--sms"):
-            ECFLOW = False
-        elif o in ("-t", "--test"):
-            unittest.main(argv=[sys.argv[0]])
-            sys.exit(0)
-        elif o in ("-w", "--wait"):
-            WAIT = True
-
+    FORCE = parsed.force
+    print(parsed.path, parsed.mirror, parsed.replay,
+          parsed.sms, parsed.force, parsed.test)
+    # raise Exception
     child = Child()
+
+    if parsed.usage:
+        print("""
+
+* mirror (slow real-time) a source suite from a source server to a destination server
+* mirror suite can be hosted on the source, on the destination or another server
+* this script was used in ecflow course to demonstrate
+  * one script that can be used from the command line
+  * defines a suite
+  * play/replace a suite/node
+  * a script can be used as task wrapper/template to generate jobs
+  * an ecflow client (passive) to download status/value from source
+  * an ecflow client (active) to change status/value on destination
+
+* update mirror.py: destination variable with the triplet suite host port
+
+* update mirror.py: definition with the key(suite) and the minimum suite-tree to mirror
+
+* update mirror.py: replay add "if" for "protection" not to overwrite source suite by mistake
+
+* download a copy from the source suite
+  ecflow_client --port ${ECF_PORT:3141} --host ${ECF_HOST:localhost} --get > tmp.def
+
+* load the mirror suite on the source server
+  SUITE=/test ECF_HOST=${ECF_HOST:=localhoast} ECF_PORT=${ECF_PORT:=3141} ./mirror.py -p /mirror/$SUITE -r # load
+
+* play (suspended) mirrored suite in destination
+  ECF_HOST=${DEST_HOST:=ecgate} ECF_PORT=${DEST_PORT:=31415} ./mirror.py -m $DEST_HOST@$DEST_PORT -p /$SUITE
+
+""")
+        sys.exit(2)
+
     if not MICRO[0] in "$ECF_PORT$":
-        MIRROR = "$DESTINATIONS$"
-        PATH = "/$FAMILY1$"
+        parsed.mirror = "$DESTINATIONS$"
+        parsed.path = "/$FAMILY1$"
         print("#MSG: ssh %s kill -9 %d" % (os.uname()[1], os.getpid()))
 
-    if PATH and REPLAY:
-        print("#MSG: path and replay", PATH, REPLAY)
-        if ECFLOW:
-            if 0:
-                replay(PATH)
-            else:
-                s = PATH.split('/')[1]
-                if "mirror" not in PATH:
-                    defs = Defs()
-                    defs.add_suite(definitions[s])
-                else:
-                    defs = None
-                replay(PATH, defs)
-        else:
-            sms_replay(PATH)
+    if parsed.test:
+        sys.argv.pop()
+        unittest.main()
 
-    elif MIRROR and PATH:
-        mirror = Mirror(MIRROR, PATH, REPLAY)
-        print("#MSG:step")
+`    elif parsed.path and parsed.replay:
+        print("#MSG: path and replay", parsed.path, parsed.replay)
+        port = int(os.getenv("SMS_PROG", 0))
+        s = parsed.path.split('/')[1]
+        defs = None
+        if "mirror" not in parsed.path:
+            defs = Defs()
+            defs.add_suite(definitions[s])
+        replay(parsed.path, defs)
+
+    elif parsed.mirror and parsed.path:
+        print(parsed.mirror, "#", parsed.path, parsed.replay, type(Mirror))
+        mirror = Mirror(parsed.mirror, parsed.path, parsed.replay, parsed.sms)
+        print("#MSG: step")
         mirror.process()
-        print("#MSG:step")
+        print("#MSG: step")
         child.report("complete")
-        print("#MSG:step")
-
-    elif NUM and PATH:
-        check3of5(NUM, PATH, WAIT, INTERVAL)
+        print("#MSG: step")
 
     else:
         usage()
-    print("#MSG:step")
-
+    print("#MSG: step")
     child.report("complete")
 """
 $nopp
+  export ECF_HOST=localhost ECF_PORT=$((1500 + $(id -u))) SUITE=/test
+  ecflow_client --port $ECF_PORT --host $ECF_HOST --get > tmp.def
+  ./mirror.py -p /mirror/$SUITE -r # load
+
+  ECF_HOST=${DEST_HOST:=localhost} ECF_PORT=${DEST_PORT:=31415} ./mirror.py -m $DEST_HOST@$DEST_PORT -p /$SUITE
+
+/tmp/map/work/git/ecflow/Pyext/samples/mirror.py
 $end
 """
