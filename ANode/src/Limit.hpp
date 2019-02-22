@@ -35,7 +35,7 @@ public:
    Limit()= default;
    Limit(const Limit& rhs);
 
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    bool operator==(const Limit& rhs) const;
    const std::string& name() const { return  n_;}
 

@@ -33,7 +33,7 @@ public:
    explicit CronAttr(const TimeSeries& ts ) : timeSeries_(ts),free_(false),state_change_no_(0) {}
    CronAttr(int h, int m, bool relative = false) : timeSeries_(h,m,relative),free_(false),state_change_no_(0) {}
 
-	std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
 	bool operator==(const CronAttr& rhs) const;
    bool operator<(const CronAttr& rhs) const { return timeSeries_ < rhs.timeSeries_; }
 	bool structureEquals(const CronAttr& rhs) const;

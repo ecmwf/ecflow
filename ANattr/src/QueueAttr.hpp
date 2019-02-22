@@ -23,7 +23,7 @@ public:
    QueueAttr()= default;
    ~QueueAttr();
 
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    bool operator==(const QueueAttr& rhs) const;
 
    /// Accessor

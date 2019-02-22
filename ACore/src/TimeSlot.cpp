@@ -56,10 +56,9 @@ bool TimeSlot::operator>=( const TimeSlot& rhs ) const
    return operator==(rhs);
 }
 
-std::ostream& TimeSlot::print(std::ostream& os) const
+void TimeSlot::print(std::string& os) const
 {
-	os << toString();
- 	return os;
+   os += toString();
 }
 
 std::string TimeSlot::toString() const
@@ -83,10 +82,15 @@ boost::posix_time::time_duration TimeSlot::duration() const
 }
 
 std::ostream& operator<<(std::ostream& os, const TimeSlot* d) {
-	if (d) return d->print(os);
+	if (d) {
+	   std::string s;
+	   d->print(s);
+	   os << s;
+	   return os;
+	}
 	return os << "TimeSlot == NULL";
 }
-std::ostream& operator<<(std::ostream& os, const TimeSlot& d)  { return d.print(os); }
+std::ostream& operator<<(std::ostream& os, const TimeSlot& d){std::string s; d.print(s); os << s; return os; }
 
 
 template<class Archive>

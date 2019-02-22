@@ -1704,7 +1704,7 @@ void ServerHandler::writeDefs(VInfo_ptr info,const std::string& fileName)
         PrintStyle style(PrintStyle::MIGRATE);
         std::ofstream out(fileName.c_str());
         out << "defs_state MIGRATE" << std::endl;
-        info->node()->node()->print(out);
+        out << info->node()->node()->print();
         out << std::endl;
         out.close();
     }

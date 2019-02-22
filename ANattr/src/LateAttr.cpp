@@ -32,15 +32,14 @@ namespace ecf {
 
 LateAttr::LateAttr() = default;
 
-std::ostream& LateAttr::print(std::ostream& os) const
+void LateAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) << toString();
+	Indentor::indent(os); os += toString();
    if (!PrintStyle::defsStyle()) {
-      if (isLate_) os << " # late";
+      if (isLate_) os += " # late";
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string LateAttr::toString() const

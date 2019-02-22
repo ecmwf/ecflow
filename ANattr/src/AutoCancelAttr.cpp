@@ -31,19 +31,19 @@ using namespace boost::posix_time;
 
 namespace ecf {
 
-std::ostream& AutoCancelAttr::print(std::ostream& os) const
+void AutoCancelAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) << "autocancel ";
+	Indentor::indent(os) ; os += "autocancel ";
 	if (days_) {
-		os << time_.hour()/24 << "\n";
-		return os;
+		os += boost::lexical_cast<std::string>(time_.hour()/24) ;
+		os += "\n";
+		return;
 	}
 
- 	if (relative_)  os << "+";
+ 	if (relative_) os += "+";
 	time_.print(os);
-	os << "\n";
-	return os;
+	os += "\n";
 }
 
 std::string AutoCancelAttr::toString() const

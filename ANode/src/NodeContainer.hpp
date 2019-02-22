@@ -85,7 +85,7 @@ public:
  	std::vector<task_ptr> taskVec() const;
  	std::vector<family_ptr> familyVec() const;
 
-	std::ostream& print(std::ostream&) const override;
+	void print(std::string&) const override;
 	bool operator==(const NodeContainer& rhs) const;
 
 	bool hasTimeDependencies() const override;

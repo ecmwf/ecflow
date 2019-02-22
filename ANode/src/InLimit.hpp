@@ -38,7 +38,7 @@ public:
            bool limit_this_node_only = false);                                    // if true limit this node only
    InLimit()= default;
 
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    bool operator==(const InLimit& rhs) const;
 
    const std::string& name() const { return  n_;}         // must be defined

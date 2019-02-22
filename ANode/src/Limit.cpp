@@ -87,19 +87,18 @@ bool Limit::operator==( const Limit& rhs ) const {
    return true;
 }
 
-std::ostream& Limit::print( std::ostream& os ) const {
+void Limit::print( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ) << toString();
+   Indentor::indent( os ); os += toString();
    if (!PrintStyle::defsStyle()) {
       if (value_ != 0) {
-         os << " # " << value_;
+         os += " # "; os += boost::lexical_cast<std::string>(value_);
          for(const auto & path : paths_) {
-            os << " " << path;
+            os += " "; os += path;
          }
       }
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string Limit::toString() const {

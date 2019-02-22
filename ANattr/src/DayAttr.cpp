@@ -120,15 +120,14 @@ bool DayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
  	return true;
 }
 
-std::ostream& DayAttr::print(std::ostream& os) const
+void DayAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) << toString();
+	Indentor::indent(os) ; os += toString();
    if (!PrintStyle::defsStyle()) {
-      if (free_) os << " # free";
+      if (free_) os += " # free";
    }
-	os << "\n";
-	return os;
+	os += "\n";
 }
 
 std::string DayAttr::toString() const

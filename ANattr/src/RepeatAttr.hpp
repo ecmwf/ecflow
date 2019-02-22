@@ -397,7 +397,7 @@ public:
    long last_valid_value_minus(int val) const { return (type_) ? type_->last_valid_value_minus(val) : -val;}
    long last_valid_value_plus(int val)  const { return (type_) ? type_->last_valid_value_plus(val)  : val;}
 
-   std::ostream& print(std::ostream& os) const;
+   void print(std::string& os) const;
    bool valid() const                           { return (type_) ? type_->valid() : false;}
    void setToLastValue()                        { if (type_) type_->setToLastValue() ; }
    std::string valueAsString() const            { return (type_) ? type_->valueAsString() : std::string(); }

@@ -105,7 +105,7 @@ public:
 	TodayAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative =  false)
 		: ts_(start,finish,incr,relative), free_(false),state_change_no_(0) {}
 
-	std::ostream& print(std::ostream&) const;
+	void print(std::string&) const;
 	bool operator==(const TodayAttr& rhs) const;
    bool operator<(const TodayAttr& rhs) const { return ts_ < rhs.ts_; }
 	bool structureEquals(const TodayAttr& rhs) const;

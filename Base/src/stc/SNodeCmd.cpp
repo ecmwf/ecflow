@@ -95,7 +95,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
             Defs defs;
             defs.addSuite(std::dynamic_pointer_cast<Suite>( node ));
             defs.auto_add_externs();
-            std::cout << defs;
+            std::cout << defs.print();
             return true;
          }
 
@@ -104,7 +104,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
          std::cout << *suite << "\n";
          return true;
       }
-      node->print(std::cout); cout << "\n";
+      cout << node->print() << "\n";
    }
    else {
       server_reply.set_client_node( node );

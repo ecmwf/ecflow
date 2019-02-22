@@ -49,7 +49,7 @@ public:
 
 	const std::string& debugType() const override;
 
-	std::ostream& print(std::ostream&) const override;
+	void print(std::string&) const override;
 	bool operator==(const Family& rhs) const;
 
 	void collateChanges(DefsDelta&) const override;

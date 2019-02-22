@@ -115,14 +115,13 @@ bool Event::operator==( const Event& rhs ) const {
    return true;
 }
 
-std::ostream& Event::print( std::ostream& os ) const {
+void Event::print( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ) << toString();
+   Indentor::indent( os ); os += toString();
    if ( !PrintStyle::defsStyle() ) {
-      if (v_)  os << " # " << Event::SET();
+      if (v_) { os += " # " ; os += Event::SET(); }
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string Event::toString() const {
@@ -213,14 +212,13 @@ bool Meter::operator==( const Meter& rhs ) const {
    return true;
 }
 
-std::ostream& Meter::print( std::ostream& os ) const {
+void Meter::print( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ) <<  toString();
+   Indentor::indent( os ) ; os +=  toString();
    if ( !PrintStyle::defsStyle() ) {
-      if (v_ != min_) os << " # " << v_;
+      if (v_ != min_) { os += " # " ; os += boost::lexical_cast<std::string>(v_); }
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string Meter::toString() const {
@@ -251,24 +249,23 @@ Label::Label(const std::string& name, const std::string& value, const std::strin
 }
 
 
-std::ostream& Label::print( std::ostream& os ) const {
+void Label::print( std::string& os ) const {
 
    Indentor in;
-   Indentor::indent( os ) << toString();
+   Indentor::indent( os ) ; os += toString();
    if (!PrintStyle::defsStyle()) {
       if (!new_v_.empty()) {
          if (new_v_.find("\n") == std::string::npos) {
-            os << " # \"" << new_v_ << "\"";
+            os += " # \"" ; os += new_v_ ; os += "\"";
          }
          else {
             std::string value = new_v_;
             Str::replaceall(value,"\n","\\n");
-            os << " # \"" << value << "\"";
+            os += " # \"" ; os += value ; os += "\"";
          }
       }
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string Label::toString() const {

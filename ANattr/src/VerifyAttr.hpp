@@ -30,7 +30,7 @@ public:
 	VerifyAttr() = default;
 
  	bool operator==(const VerifyAttr& rhs) const;
-	std::ostream& print(std::ostream&) const;
+ 	void print(std::string&) const;
 
 	NState::State state() const { return  state_;}
 	int expected() const { return  expected_;}

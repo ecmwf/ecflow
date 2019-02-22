@@ -27,7 +27,7 @@ public:
 	ZombieAttr()= default;
 
  	bool operator==(const ZombieAttr& rhs) const;
-	std::ostream& print(std::ostream&) const;
+ 	void print(std::string&) const;
 	bool empty() const { return zombie_type_ == ecf::Child::NOT_SET; }
 
 	ecf::Child::ZombieType zombie_type() const { return zombie_type_;}

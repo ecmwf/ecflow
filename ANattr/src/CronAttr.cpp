@@ -87,15 +87,14 @@ void CronAttr::addMonths( const std::vector<int>& m)
  	}
 }
 
-std::ostream& CronAttr::print(std::ostream& os) const
+void CronAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) << toString();
+	Indentor::indent(os) ; os += toString();
 	if (!PrintStyle::defsStyle()) {
-      os << timeSeries_.state_to_string(free_);
+      os += timeSeries_.state_to_string(free_);
 	}
-	os << "\n";
-	return os;
+	os += "\n";
 }
 
 std::string CronAttr::toString() const

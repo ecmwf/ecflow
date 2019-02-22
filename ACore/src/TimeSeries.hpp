@@ -112,7 +112,7 @@ public:
 	bool relative()  const  { return relativeToSuiteStart_; }
 	void free_slots(std::vector<boost::posix_time::time_duration>& ) const;
 
-	std::ostream& print(std::ostream&) const;
+	void print(std::string&) const;
  	bool operator==(const TimeSeries& rhs) const;
 	bool operator!=(const TimeSeries& rhs) const { return !operator==(rhs);}
    bool structureEquals(const TimeSeries& rhs) const;

@@ -28,6 +28,7 @@ public:
    }
 
    static std::ostream& indent( std::ostream& os , int char_spaces = 2);
+   static void indent( std::string& os , int char_spaces = 2);
 
 private:
    static int index_;

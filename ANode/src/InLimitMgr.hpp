@@ -45,7 +45,7 @@ public:
 
 // standard functions: ==============================================
    InLimitMgr& operator=(const InLimitMgr&);
- 	std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
  	bool operator==(const InLimitMgr& rhs) const;
  	void clear() { vec_.clear(); }
 

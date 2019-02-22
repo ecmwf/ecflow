@@ -318,14 +318,14 @@ bool Suite::operator==(const Suite& rhs) const
  	return NodeContainer::operator==(rhs);
 }
 
-std::ostream& Suite::print(std::ostream& os) const
+void Suite::print(std::string& os) const
 {
-   Indentor::indent(os) << "suite " << name();
+   Indentor::indent(os) ; os += "suite " ; os += name();
    if (!PrintStyle::defsStyle()) {
       std::string st = write_state();
-      if (!st.empty()) os << " #" << st;
+      if (!st.empty()) { os += " #" ; os += st; }
    }
-   os << "\n";
+   os += "\n";
 
 	Node::print(os);
 
@@ -336,14 +336,12 @@ std::ostream& Suite::print(std::ostream& os) const
 	   std::string calendar_state = cal_.write_state();
 	   if (!calendar_state.empty()) {
 	      Indentor indent;
-	      Indentor::indent(os) << "calendar" << calendar_state << "\n";
+	      Indentor::indent(os) ; os += "calendar" ; os += calendar_state ; os += "\n";
 	   }
 	}
 
 	NodeContainer::print(os);
-	Indentor::indent(os) << "endsuite\n";
-
-	return os;
+	Indentor::indent(os) ;  os += "endsuite\n";
 }
 
 std::string Suite::write_state() const
@@ -352,7 +350,7 @@ std::string Suite::write_state() const
    //             multiple statement on a single line i.e.
    //                 task a; task b;
    std::string ret;
-   if (begun_) ret += "  begun:1";
+   if (begun_) ret += " begun:1";
    ret += NodeContainer::write_state();
    return ret;
 }
@@ -365,7 +363,7 @@ void Suite::read_state(const std::string& line,const std::vector<std::string>& l
 
 const std::string& Suite::debugType() const { return ecf::Str::SUITE();}
 
-std::ostream& operator<<(std::ostream& os, const Suite& d) { return d.print(os); }
+std::ostream& operator<<(std::ostream& os, const Suite& d) { std::string s; d.print(s); os << s; return os; }
 
 void Suite::addClock( const ClockAttr& c,bool initialize_calendar)
 {

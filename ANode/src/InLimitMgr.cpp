@@ -46,10 +46,9 @@ InLimitMgr& InLimitMgr::operator=(const InLimitMgr& rhs)
    return *this;
 }
 
-std::ostream& InLimitMgr::print(std::ostream& os) const
+void InLimitMgr::print(std::string& os) const
 {
-	BOOST_FOREACH(const InLimit& i, vec_)     { i.print(os); }
- 	return os;
+	BOOST_FOREACH(const InLimit& i, vec_) { i.print(os); }
 }
 
 bool InLimitMgr::operator==(const InLimitMgr& rhs) const

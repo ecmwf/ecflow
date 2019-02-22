@@ -60,15 +60,14 @@ void TimeAttr::resetRelativeDuration()
    }
 }
 
-std::ostream& TimeAttr::print(std::ostream& os) const
+void TimeAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) << toString();
+   Indentor::indent(os) ; os += toString();
    if (!PrintStyle::defsStyle()) {
-      os << ts_.state_to_string(free_);
+      os += ts_.state_to_string(free_);
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string TimeAttr::toString() const

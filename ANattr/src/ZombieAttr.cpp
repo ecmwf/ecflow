@@ -63,12 +63,11 @@ bool ZombieAttr::operator==(const ZombieAttr& rhs) const
    return true;
 }
 
-std::ostream& ZombieAttr::print(std::ostream& os) const
+void ZombieAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) << toString();
-   os << "\n";
-   return os;
+   Indentor::indent(os); os += toString();
+   os += "\n";
 }
 
 std::string ZombieAttr::toString() const

@@ -1477,11 +1477,18 @@ void Node::read_state(const std::string& line,const std::vector<std::string>& li
    }
 }
 
-std::ostream& Node::print(std::ostream& os) const
+std::string Node::print() const
+{
+   std::string s;
+   print(s);
+   return s;
+}
+
+void Node::print(std::string& os) const
 {
    if ( d_st_ != DState::default_state() ) {
       Indentor in;
-      Indentor::indent(os) << "defstatus " << DState::toString(d_st_) << "\n";
+      Indentor::indent(os); os += "defstatus "; os += DState::toString(d_st_); os += "\n";
    }
 
    if (late_) late_->print(os);
@@ -1490,15 +1497,16 @@ std::ostream& Node::print(std::ostream& os) const
       c_expr_-> print(os,"complete");
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
-         if (c_expr_->isFree()) Indentor::indent(os) << "# (free)\n";
+         if (c_expr_->isFree()) { Indentor::indent(os); os += "# (free)\n"; }
          if ( completeAst() ) {
             if (!defs()) {
                // Full defs is required for extern checking, and finding absolute node paths
                // Hence print will with no defs can give in-accurate information
                Indentor in;
-               Indentor::indent(os) << "# Warning: Full/correct AST evaluation requires the definition\n";
+               Indentor::indent(os); os += "# Warning: Full/correct AST evaluation requires the definition\n";
             }
-            completeAst()->print(os);
+            std::stringstream ss; completeAst()->print(ss);
+            os += ss.str();
          }
       }
    }
@@ -1506,13 +1514,14 @@ std::ostream& Node::print(std::ostream& os) const
       t_expr_->print(os,"trigger");
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
-         if (t_expr_->isFree()) Indentor::indent(os) << "# (free)\n";
+         if (t_expr_->isFree()) { Indentor::indent(os); os += "# (free)\n"; }
          if ( triggerAst() ) {
             if (!defs()) {
                Indentor in;
-               Indentor::indent(os) << "# Warning: Full/correct AST evaluation requires the definition\n";
+               Indentor::indent(os); os += "# Warning: Full/correct AST evaluation requires the definition\n";
             }
-            triggerAst()->print(os);
+            std::stringstream ss;  triggerAst()->print(ss);
+            os += ss.str();
          }
       }
    }
@@ -1528,26 +1537,24 @@ std::ostream& Node::print(std::ostream& os) const
       BOOST_FOREACH(const Variable& v, gvec ) { v.print_generated(os); }
    }
 
-   BOOST_FOREACH(limit_ptr l, limits_)            { l->print(os); }
+   BOOST_FOREACH(limit_ptr l, limits_)       { l->print(os); }
    inLimitMgr_.print(os);
 
    BOOST_FOREACH(const Label& la, labels_ )  { la.print(os); }
    BOOST_FOREACH(const Meter& m, meters_ )   { m.print(os); }
    BOOST_FOREACH(const Event& e, events_ )   { e.print(os); }
 
-   BOOST_FOREACH(const ecf::TimeAttr& t, times_)  { t.print(os);    }
-   BOOST_FOREACH(const ecf::TodayAttr& t,todays_) { t.print(os);    }
-   BOOST_FOREACH(const DateAttr& date, dates_)      { date.print(os); }
-   BOOST_FOREACH(const DayAttr& day, days_)         { day.print(os);  }
-   BOOST_FOREACH(const CronAttr& cron, crons_)      { cron.print(os); }
+   BOOST_FOREACH(const ecf::TimeAttr& t, times_) { t.print(os);    }
+   BOOST_FOREACH(const ecf::TodayAttr& t,todays_){ t.print(os);    }
+   BOOST_FOREACH(const DateAttr& date, dates_)   { date.print(os); }
+   BOOST_FOREACH(const DayAttr& day, days_)      { day.print(os);  }
+   BOOST_FOREACH(const CronAttr& cron, crons_)   { cron.print(os); }
 
    if (auto_cancel_) auto_cancel_->print(os);
    if (auto_archive_) auto_archive_->print(os);
    if (auto_restore_) auto_restore_->print(os);
 
    if (misc_attrs_) misc_attrs_->print(os);
-
-   return os;
 }
 
 std::string Node::print(PrintStyle::Type_t p_style) const
@@ -1558,9 +1565,9 @@ std::string Node::print(PrintStyle::Type_t p_style) const
 
 std::string Node::to_string() const
 {
-   std::stringstream ss;
+   std::string ss;
    print(ss);
-   return ss.str();
+   return ss;
 }
 
 bool Node::operator==(const Node& rhs) const

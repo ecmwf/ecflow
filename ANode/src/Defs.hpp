@@ -55,7 +55,8 @@ public:
 
    void copy_defs_state_only(defs_ptr defs); // needed when creating defs for client handles
    bool operator==(const Defs& rhs) const;
-   std::ostream& print(std::ostream&) const ;
+   void print(std::string&) const;
+   std::string print() const;
 
    /// State related functions:
    /// Defs acts like the root node.
@@ -338,6 +339,7 @@ private:
 
 private:
    /// Note: restoring from a check point file will reset, defs state and modify numbers
+   mutable size_t print_cache_{0};                         // NOT persisted
    unsigned int    state_change_no_{0};            // persisted since passed to client, however side effect, is it will be in checkpoint file
    unsigned int    modify_change_no_{ 0 };           // persisted since passed to client, however side effect, is it will be in checkpoint file
    unsigned int    updateCalendarCount_{0};

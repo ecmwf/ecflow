@@ -28,7 +28,7 @@ public:
    GenericAttr() = default;
 
    bool operator==(const GenericAttr& rhs) const;
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    bool empty() const { return name_.empty(); }
 
    const std::string& name() const { return name_;}

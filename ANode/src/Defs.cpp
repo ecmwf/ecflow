@@ -52,6 +52,7 @@ Defs::Defs() {}
 Defs::Defs(const std::string& port) : server_(port) {}
 
 Defs::Defs(const Defs& rhs) :
+   print_cache_(0),
    state_change_no_(0),
    modify_change_no_( 0 ),
    updateCalendarCount_(0),
@@ -599,31 +600,49 @@ bool Defs::hasTimeDependencies() const
 	return false;
 }
 
-std::ostream& Defs::print(std::ostream& os) const
+std::string Defs::print() const
 {
-   os << "# " << ecf::Version::raw() << "\n";
-   if (!PrintStyle::defsStyle()) {
-      os << write_state();
-   }
+   std::string s;
+   print(s);
+   return s;
+}
+
+void Defs::print(std::string& os) const
+{
+   // cout << "Defs::print(start) print_cache_ " << print_cache_ << "\n";
+   os.clear();
+   if (print_cache_ != 0) os.reserve(print_cache_);
+   else                   os.reserve(4096);
+   os += "#";
+   os += ecf::Version::raw();
+   os += "\n";
+
+   if (!PrintStyle::defsStyle()) os += write_state();
+
    if (PrintStyle::getStyle() == PrintStyle::STATE) {
-      os << "# server state: " << SState::to_string(server().get_state()) << "\n";
+      os += "# server state: ";
+      os += SState::to_string(server().get_state());
+      os += "\n";
    }
 
    // In PrintStyle::MIGRATE we do NOT persist the externs. (+matches boost serialisation)
    if (PrintStyle::getStyle() != PrintStyle::MIGRATE) {
       auto extern_end = externs_.end();
       for(auto i = externs_.begin(); i != extern_end; ++i) {
-         os << "extern " << *i << "\n";
+         os += "extern ";
+         os += *i;
+         os += "\n";
       }
    }
 
    size_t the_size = suiteVec_.size();
    for(size_t s = 0; s < the_size; s++) {
-      os << *suiteVec_[s];
+      suiteVec_[s]->print(os);
    }
 
-   os << "# enddef\n"; // ECFLOW-1227 so user knows there was no truncation
-   return os;
+   os += "# enddef\n"; // ECFLOW-1227 so user knows there was no truncation
+   print_cache_ = os.size();
+//cout << "Defs::print print_cache_ " << print_cache_ << "\n";
 }
 
 
@@ -634,20 +653,20 @@ std::string Defs::write_state() const
    //                 task a; task b;
    // *IMPORTANT* make sure name are unique, i.e can't have state: and server_state:
    // Otherwise read_state() will mess up
-   std::stringstream os;
-   os << "defs_state";
-   os << " " << PrintStyle::to_string();
-   if (state_ != NState::UNKNOWN) os << " state>:" << NState::toString(state_); // make <state> is unique
-   if (flag_.flag() != 0) os << " flag:" << flag_.to_string();
-   if (state_change_no_ != 0) os << " state_change:" << state_change_no_;
-   if (modify_change_no_ != 0) os << " modify_change:" << modify_change_no_;
-   if (server().get_state() != ServerState::default_state()) os << " server_state:" << SState::to_string(server().get_state());
-   os << "\n";
+   std::string os;
+   os += "defs_state"; os += " "; os += PrintStyle::to_string();
+
+   if (state_ != NState::UNKNOWN){ os += " state>:"; os += NState::toString(state_);} // make <state> is unique
+   if (flag_.flag() != 0)        { os += " flag:";   os += flag_.to_string();}
+   if (state_change_no_ != 0)    { os += " state_change:"; os += boost::lexical_cast<std::string>(state_change_no_);}
+   if (modify_change_no_ != 0)   { os += " modify_change:"; os += boost::lexical_cast<std::string>(modify_change_no_);}
+   if (server().get_state() != ServerState::default_state()){ os += " server_state:"; os += SState::to_string(server().get_state());}
+   os += "\n";
 
    // This read by the DefsParser
    const std::vector<Variable>& server_user_variables = server().user_variables();
    size_t the_size = server_user_variables.size();
-   for(size_t i = 0; i < the_size; ++i)  server_user_variables[i].print(os);
+   for(size_t i = 0; i < the_size; ++i) server_user_variables[i].print(os);
 
    const std::vector<Variable>& server_variables = server().server_variables();
    the_size = server_variables.size();
@@ -667,24 +686,24 @@ std::string Defs::write_state() const
 	   Indentor in;
 	   std::map<std::string, std::deque<std::string> >::const_iterator i;
 	   for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {
-		   Indentor::indent( os ) << "history " << (*i).first << " ";// node path
-		   const std::deque<std::string>& vec = (*i).second;   // list of requests
+		   Indentor::indent( os ); os += "history "; os += (*i).first; os +=  " "; // node path
+		   const std::deque<std::string>& vec = (*i).second;                          // list of requests
 		   for(const auto & c : vec) {
 
 		      // We expect to output a single newline, hence if there are additional new lines
 		      // It can mess  up, re-parse. i.e during alter change label/value, user could have added newlines
-	         if (c.find("\n") == std::string::npos)  os << "\b" << c;
+	         if (c.find("\n") == std::string::npos) { os += "\b"; os += c;}
 	         else {
 	            std::string h = c;
 	            Str::replaceall(h,"\n","\\n");
-	            os << "\b" << h;
+	            os += "\b"; os += h;
 	         }
 		   }
-		   os << "\n";
+		   os += "\n";
 	   }
 	   save_edit_history_ = false;
    }
-   return os.str();
+   return os;
 }
 
 void Defs::read_state(const std::string& line,const std::vector<std::string>& lineTokens)
@@ -1197,7 +1216,9 @@ void Defs::save_as_filename(const std::string& the_fileName,PrintStyle::Type_t p
    PrintStyle printStyle(p_style);
 
    std::ofstream ofs( the_fileName.c_str() );
-   ofs << this;
+   std::string s;
+   print(s);
+   ofs << s;
 
    if (!ofs.good()) {
       std::stringstream ss; ss << "Defs::save_as_filename: path(" << the_fileName << ") failed";
@@ -1212,9 +1233,7 @@ void Defs::save_as_string(std::string& the_string,PrintStyle::Type_t p_style) co
    // Speed up check-pointing by avoiding indentation. i.e run_time and disk space
    // to view indented code use 'ecflow_client --load=checkpt_file check_only print'
    ecf::DisableIndentor disable_indentation;
-   std::stringstream ss;
-   ss << this;
-   the_string = ss.str();
+   print(the_string);
 }
 
 void Defs::restore(const std::string& the_fileName)
@@ -1724,10 +1743,12 @@ bool Defs::is_observed(AbstractObserver* obs) const
 
 std::ostream& operator<<(std::ostream& os, const Defs* d)
 {
-   if (d) return d->print(os);
+   if (d) {
+      std::string s; d->print(s); os << s; return os;
+   }
    return os << "DEFS == NULL\n";
 }
-std::ostream& operator<<(std::ostream& os, const Defs& d)  { return d.print(os); }
+std::ostream& operator<<(std::ostream& os, const Defs& d)  { std::string s; d.print(s); os << s; return os;  }
 
 // =========================================================================
 

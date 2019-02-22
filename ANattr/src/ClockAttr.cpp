@@ -16,6 +16,7 @@
 #include <ostream>
 #include <cassert>
 #include <sstream>
+#include "boost/lexical_cast.hpp"
 
 #include "ClockAttr.hpp"
 #include "DateAttr.hpp"
@@ -58,35 +59,41 @@ ClockAttr::ClockAttr(bool hybrid)
 : hybrid_(hybrid),
   state_change_no_(Ecf::incr_state_change_no()) {}
 
-std::ostream& ClockAttr::print(std::ostream& os) const
+void ClockAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) << toString() << "\n";
-	return os;
+	Indentor::indent(os) ; os += toString() ; os += "\n";
 }
 
 std::string ClockAttr::toString() const
 {
-	std::stringstream ss;
+	std::string ss;
 	if (!end_clock_) {
-	   ss << "clock ";
-	   if (hybrid_) ss << "hybrid ";
-	   else         ss << "real ";
+	   ss += "clock ";
+	   if (hybrid_) ss += "hybrid ";
+	   else         ss += "real ";
 	}
 	else  {
-	   ss << "endclock ";
+	   ss += "endclock ";
 	}
 
-	if (day_ != 0) ss << day_ << "." << month_ << "." << year_ << " ";
+	if (day_ != 0) {
+	   ss += boost::lexical_cast<std::string>(day_);
+	   ss += ".";
+	   ss += boost::lexical_cast<std::string>(month_);
+	   ss += ".";
+      ss += boost::lexical_cast<std::string>(year_);
+      ss += " ";
+	}
 
 	if (gain_ != 0) {
-		if (positiveGain_) ss << "+";
-		ss << gain_;
+		if (positiveGain_) ss += "+";
+		ss += boost::lexical_cast<std::string>(gain_);
 	}
 
-	if ( startStopWithServer_)  ss << " -s";
+	if ( startStopWithServer_) ss += " -s";
 
- 	return ss.str();
+ 	return ss;
 }
 
 bool ClockAttr::operator==(const ClockAttr& rhs) const

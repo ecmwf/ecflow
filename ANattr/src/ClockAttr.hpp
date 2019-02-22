@@ -42,7 +42,7 @@ public:
 	ClockAttr(int day, int month, int year, bool hybrid = false );
 	explicit ClockAttr(bool hybrid = false);
 
-	std::ostream& print(std::ostream&) const;
+	void print(std::string&) const;
 	bool operator==(const ClockAttr& rhs) const;
 
 	void date(int day, int month, int year);

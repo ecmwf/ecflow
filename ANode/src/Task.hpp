@@ -29,7 +29,7 @@ public:
 
 	static task_ptr create(const std::string& name);
 
-   std::ostream& print(std::ostream&) const override;
+	void print(std::string&) const override;
    bool operator==(const Task& rhs) const;
 
    /// Add an alias. The .usr is populated with contents of user_file_contents

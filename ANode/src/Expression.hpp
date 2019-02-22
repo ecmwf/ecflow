@@ -46,7 +46,7 @@ public:
    bool orExpr() const  { return (type_ == OR)  ? true : false ;}
 
    std::string toString(const std::string& exprType) const;
-   std::ostream& print(std::ostream&,const std::string& exprType,bool isFree) const;
+   void print(std::string&,const std::string& exprType,bool isFree) const;
 
    bool operator==(const PartExpression& rhs) const {
       return type_ == rhs.type_ && exp_ == rhs.exp_;
@@ -109,7 +109,7 @@ public:
    /// Need to pass in trigger tag, since expression may be split over multiple lines
    /// trigger    "a == complete"
    /// trigger -a "b == complete"
-   std::ostream& print(std::ostream&,const std::string& exprType) const;
+   void print(std::string&,const std::string& exprType) const;
 
    /// Use when we want to add compose a large expression form a set of smaller ones
    void add( const PartExpression& t );

@@ -14,6 +14,7 @@
 //============================================================================
 #include <sstream>
 #include <ostream>
+#include "boost/lexical_cast.hpp"
 
 #include "VerifyAttr.hpp"
 #include "PrintStyle.hpp"
@@ -32,15 +33,14 @@ bool VerifyAttr::operator==(const VerifyAttr& rhs) const
  	return true;
 }
 
-std::ostream& VerifyAttr::print(std::ostream& os) const
+void VerifyAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) << toString();
+   Indentor::indent(os) ; os += toString();
    if (!PrintStyle::defsStyle()) {
-      os << " # " << actual_;
+      os += " # " ; os += boost::lexical_cast<std::string>(actual_);
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 void VerifyAttr::incrementActual() {

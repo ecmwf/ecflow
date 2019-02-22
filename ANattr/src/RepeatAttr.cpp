@@ -77,12 +77,11 @@ const std::string& Repeat::name() const {
    return (type_.get()) ? type_->name() : Str::EMPTY();
 }
 
-std::ostream& Repeat::print( std::ostream& os ) const {
+void Repeat::print( std::string& os ) const {
 	if (type_) {
 		Indentor in;
-		Indentor::indent(os) << toString() << "\n";
+		Indentor::indent(os); os += toString(); os += "\n";
 	}
-	return os;
 }
 
 // =========================================================================

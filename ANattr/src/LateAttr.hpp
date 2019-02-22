@@ -46,7 +46,7 @@ class LateAttr  {
 public:
    LateAttr();
 
-	std::ostream& print(std::ostream&) const;
+	void print(std::string&) const;
 	bool operator==(const LateAttr& rhs) const;
 
 	void addSubmitted( const TimeSlot& s)    { s_  = s; }

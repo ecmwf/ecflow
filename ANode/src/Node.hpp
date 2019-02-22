@@ -244,7 +244,8 @@ public:
    virtual void generate_scripts( const std::map<std::string,std::string>& override) const = 0;
 
    // standard functions: ==============================================
-   virtual std::ostream& print(std::ostream&) const;
+   std::string print() const;
+   virtual void print(std::string&) const;
    std::string print(PrintStyle::Type_t type) const;
    bool operator==(const Node& rhs) const;
    virtual bool checkInvariants(std::string& errorMsg) const;

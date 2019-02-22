@@ -589,10 +589,9 @@ bool TimeSeries::operator==(const TimeSeries& rhs) const
 	return structureEquals(rhs);
 }
 
-std::ostream& TimeSeries::print(std::ostream& os) const
+void TimeSeries::print(std::string& os) const
 {
-	os << toString() << "\n";
-	return os;
+	os += toString(); os += "\n";
 }
 
 std::string TimeSeries::toString() const
@@ -668,10 +667,15 @@ bool TimeSeries::checkInvariants(std::string& errormsg) const
 }
 
 std::ostream& operator<<(std::ostream& os, const TimeSeries* d) {
-	if (d) return d->print(os);
+	if (d) {
+	   string s;
+	   d->print(s);
+	   os << s;
+	   return os;
+	}
 	return os << "TimeSlot == NULL";
 }
-std::ostream& operator<<(std::ostream& os, const TimeSeries& d)  { return d.print(os); }
+std::ostream& operator<<(std::ostream& os, const TimeSeries& d)  { string s; d.print(s); os << s; return os; }
 
 
 ecf::TimeSeries TimeSeries::create(const std::string& str)

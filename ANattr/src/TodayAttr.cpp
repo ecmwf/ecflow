@@ -40,15 +40,14 @@ TodayAttr::TodayAttr (const std::string& str)
    ts_  = TimeSeries::create(index,tokens,false/*parse_state*/);
 }
 
-std::ostream& TodayAttr::print(std::ostream& os) const
+void TodayAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) << toString();
+   Indentor::indent(os) ; os += toString();
    if (!PrintStyle::defsStyle()) {
-      os << ts_.state_to_string(free_);
+      os += ts_.state_to_string(free_);
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string TodayAttr::toString() const

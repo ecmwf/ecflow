@@ -28,7 +28,7 @@ public:
 
    static alias_ptr create(const std::string& name);
 
-   std::ostream& print(std::ostream&) const override;
+   void print(std::string&) const override;
    bool operator==(const Alias& rhs) const;
 
    /// Overridden to reset the try number

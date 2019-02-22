@@ -1023,11 +1023,10 @@ bool NodeContainer::operator==(const NodeContainer& rhs) const
    return Node::operator==(rhs);
 }
 
-std::ostream& NodeContainer::print(std::ostream& os) const
+void NodeContainer::print(std::string& os) const
 {
  	size_t node_vec_size = nodes_.size();
 	for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->print( os ); }
- 	return os;
 }
 
 bool NodeContainer::checkInvariants(std::string& errorMsg) const
