@@ -276,7 +276,7 @@ public:
    const std::deque<std::string>& get_edit_history(const std::string& path) const;
    void save_edit_history(bool f) const { save_edit_history_ = f ;}
    static const std::deque<std::string>& empty_edit_history();
-   static size_t max_edit_history_size_per_node() { return 20; }
+   constexpr static size_t max_edit_history_size_per_node() { return 10; }
 
    /// Memento functions:
    void collateChanges(unsigned int client_handle,DefsDelta&) const;
