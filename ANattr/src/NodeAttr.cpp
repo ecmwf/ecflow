@@ -117,7 +117,7 @@ bool Event::operator==( const Event& rhs ) const {
 
 void Event::print( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ); os += toString();
+   Indentor::indent( os ); write(os);
    if ( !PrintStyle::defsStyle() ) {
       if (v_) { os += " # " ; os += Event::SET(); }
    }
@@ -125,14 +125,20 @@ void Event::print( std::string& os ) const {
 }
 
 std::string Event::toString() const {
-   std::string ret = "event ";
+   std::string ret;
+   write(ret);
+   return ret;
+}
+
+void Event::write(std::string& ret) const
+{
+   ret += "event ";
    if ( number_ == std::numeric_limits< int >::max() )  ret += n_;
    else {
       ret += boost::lexical_cast<std::string>(number_);
       ret += " ";
       ret += n_;
    }
-   return ret;
 }
 
 std::string Event::dump() const {
@@ -214,7 +220,7 @@ bool Meter::operator==( const Meter& rhs ) const {
 
 void Meter::print( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ) ; os +=  toString();
+   Indentor::indent( os ) ; write(os);
    if ( !PrintStyle::defsStyle() ) {
       if (v_ != min_) { os += " # " ; os += boost::lexical_cast<std::string>(v_); }
    }
@@ -222,12 +228,17 @@ void Meter::print( std::string& os ) const {
 }
 
 std::string Meter::toString() const {
-   std::string ret = "meter ";
+   std::string ret;
+   write(ret);
+   return ret;
+}
+
+void Meter::write(std::string& ret) const {
+   ret += "meter ";
    ret += n_; ret += " ";
    ret += boost::lexical_cast<std::string>(min_); ret += " ";
    ret += boost::lexical_cast<std::string>(max_); ret += " ";
    ret += boost::lexical_cast<std::string>(cc_);
-   return ret;
 }
 
 std::string Meter::dump() const {
@@ -248,11 +259,10 @@ Label::Label(const std::string& name, const std::string& value, const std::strin
    }
 }
 
-
 void Label::print( std::string& os ) const {
 
    Indentor in;
-   Indentor::indent( os ) ; os += toString();
+   Indentor::indent( os ) ; write(os);
    if (!PrintStyle::defsStyle()) {
       if (!new_v_.empty()) {
          if (new_v_.find("\n") == std::string::npos) {
@@ -271,6 +281,12 @@ void Label::print( std::string& os ) const {
 std::string Label::toString() const {
    // parsing always STRIPS the quotes, hence add them back
    std::string ret; ret.reserve(n_.size() + v_.size() + 10);
+   write(ret);
+   return ret;
+}
+
+void Label::write(std::string& ret) const {
+   // parsing always STRIPS the quotes, hence add them back
    ret += "label ";
    ret += n_;
    ret += " \"";
@@ -282,7 +298,6 @@ std::string Label::toString() const {
       ret += value;
    }
    ret += "\"";
-   return ret;
 }
 
 std::string Label::dump() const {

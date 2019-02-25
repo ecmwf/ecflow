@@ -52,6 +52,8 @@ public:
    std::string toString() const;
 
 private:
+   void write(std::string&) const;
+
    void limit( limit_ptr l) { limit_ = std::weak_ptr<Limit>(l);}
    Limit* limit() const { return limit_.lock().get();}  // can return NULL
    friend class InLimitMgr;

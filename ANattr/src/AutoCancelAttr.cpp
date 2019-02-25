@@ -34,32 +34,28 @@ namespace ecf {
 void AutoCancelAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) ; os += "autocancel ";
-	if (days_) {
-		os += boost::lexical_cast<std::string>(time_.hour()/24) ;
-		os += "\n";
-		return;
-	}
-
- 	if (relative_) os += "+";
-	time_.print(os);
-	os += "\n";
+	Indentor::indent(os) ; write(os); os += "\n";
 }
 
 std::string AutoCancelAttr::toString() const
 {
-	std::stringstream ss;
-	ss << "autocancel ";
-	if (days_) {
-		ss << time_.hour()/24;
-		return ss.str();
-	}
-
- 	if (relative_)  ss << "+";
- 	ss << time_.toString();
- 	return ss.str();
+   std::string ret;
+   write(ret);
+   return ret;
 }
 
+void AutoCancelAttr::write(std::string& ret) const
+{
+   ret += "autocancel ";
+   if (days_) {
+      ret += boost::lexical_cast<std::string>(time_.hour()/24) ;
+      ret += "\n";
+      return;
+   }
+
+   if (relative_) ret += "+";
+   time_.print(ret);
+}
 
 bool AutoCancelAttr::operator==(const AutoCancelAttr& rhs) const
 {

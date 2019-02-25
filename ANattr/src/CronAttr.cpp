@@ -90,44 +90,51 @@ void CronAttr::addMonths( const std::vector<int>& m)
 void CronAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) ; os += toString();
+	Indentor::indent(os) ; write(os);
 	if (!PrintStyle::defsStyle()) {
-      os += timeSeries_.state_to_string(free_);
+     timeSeries_.write_state(os,free_);
 	}
 	os += "\n";
 }
 
 std::string CronAttr::toString() const
 {
-	std::string ret = "cron ";
-	if (!weekDays_.empty()) {
-		ret += "-w ";
-		for(size_t i=0; i<weekDays_.size();++i) {
-			ret += boost::lexical_cast<std::string>(weekDays_[i]);
-			if (i !=weekDays_.size()-1) ret += ",";
-		}
-		ret += " ";
-	}
-	if (!daysOfMonth_.empty()) {
-		ret += "-d ";
-		for(size_t i=0; i<daysOfMonth_.size();++i) {
-			ret += boost::lexical_cast<std::string>(daysOfMonth_[i]);
-			if (i !=daysOfMonth_.size()-1) ret += ",";
-		}
-		ret += " ";
-	}
-	if (!months_.empty()) {
-		ret += "-m ";
-		for(size_t i=0; i<months_.size();++i) {
-			ret += boost::lexical_cast<std::string>(months_[i]);
-			if (i !=months_.size()-1) ret += ",";
-		}
-		ret += " ";
-	}
-
-	ret += timeSeries_.toString(); // no new line added, up to caller
+	std::string ret;
+	write(ret);
  	return ret;
 }
+
+void CronAttr::write(std::string& ret) const
+{
+   ret += "cron ";
+   if (!weekDays_.empty()) {
+      ret += "-w ";
+      for(size_t i=0; i<weekDays_.size();++i) {
+         ret += boost::lexical_cast<std::string>(weekDays_[i]);
+         if (i !=weekDays_.size()-1) ret += ",";
+      }
+      ret += " ";
+   }
+   if (!daysOfMonth_.empty()) {
+      ret += "-d ";
+      for(size_t i=0; i<daysOfMonth_.size();++i) {
+         ret += boost::lexical_cast<std::string>(daysOfMonth_[i]);
+         if (i !=daysOfMonth_.size()-1) ret += ",";
+      }
+      ret += " ";
+   }
+   if (!months_.empty()) {
+      ret += "-m ";
+      for(size_t i=0; i<months_.size();++i) {
+         ret += boost::lexical_cast<std::string>(months_[i]);
+         if (i !=months_.size()-1) ret += ",";
+      }
+      ret += " ";
+   }
+
+   timeSeries_.write(ret); // no new line added, up to caller
+}
+
 
 std::string CronAttr::dump() const
 {

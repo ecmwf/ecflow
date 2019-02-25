@@ -40,6 +40,9 @@ public:
    bool days() const { return days_; }
 
 private:
+   void write(std::string&) const;
+
+private:
    TimeSlot time_;
    bool relative_{true};
    bool days_{false};

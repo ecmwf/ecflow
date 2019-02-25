@@ -429,7 +429,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TIME,"23:00")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TODAY,"02:00")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::ADD_TODAY,"03:00")));
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(task->absNodePath()).size() == 19, "expected edit_history of 19 to be added but found " <<  defs.get_edit_history(task->absNodePath()).size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(task->absNodePath()).size() == 10, "expected edit_history of 10 to be added but found " <<  defs.get_edit_history(task->absNodePath()).size());
 
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_DATE)));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(task->absNodePath(),AlterCmd::DEL_DAY)));
@@ -441,7 +441,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       BOOST_CHECK_MESSAGE( task->todayVec().size() == 0, "expected 0 today but found " <<  s->todayVec().size());
 
       /// Edit history should be truncated to max of 20
-      BOOST_CHECK_MESSAGE( defs.get_edit_history(task->absNodePath()).size() == 20, "expected edit_history to be truncated to 20, but found " <<  defs.get_edit_history(task->absNodePath()).size());
+      BOOST_CHECK_MESSAGE( defs.get_edit_history(task->absNodePath()).size() == 10, "expected edit_history to be truncated to 10, but found " <<  defs.get_edit_history(task->absNodePath()).size());
    }
 
    {   // test add variables
@@ -791,7 +791,7 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       }
    }
 
-   BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 20, "expected edit_history to be truncated to 20, but found " <<  defs.get_edit_history(s->absNodePath()).size());
+   BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 10, "expected edit_history to be truncated to 10, but found " <<  defs.get_edit_history(s->absNodePath()).size());
 
    {  // Change suite def status =====================================================================================================
       TestStateChanged changed(s);

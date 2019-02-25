@@ -35,7 +35,7 @@ LateAttr::LateAttr() = default;
 void LateAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os); os += toString();
+	Indentor::indent(os); write(os);
    if (!PrintStyle::defsStyle()) {
       if (isLate_) os += " # late";
    }
@@ -44,21 +44,27 @@ void LateAttr::print(std::string& os) const
 
 std::string LateAttr::toString() const
 {
-   std::string ret = "late";
+   std::string ret;
+   write(ret);
+   return ret;
+}
+
+void LateAttr::write(std::string& ret) const
+{
+   ret += "late";
    if (!s_.isNULL()) {
       ret += " -s +";
-      ret += s_.toString();
+      s_.write(ret);
    }
    if (!a_.isNULL()) {
       ret += " -a ";
-      ret += a_.toString();
+      a_.write(ret);
    }
    if (!c_.isNULL()) {
       ret += " -c ";
       if (c_is_rel_) ret += "+";
-      ret += c_.toString();
+      c_.write(ret);
    }
-   return ret;
 }
 
 bool LateAttr::operator==(const LateAttr& rhs) const

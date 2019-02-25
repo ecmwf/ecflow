@@ -35,30 +35,26 @@ namespace ecf {
 void AutoArchiveAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) ; os += "autoarchive ";
-   if (days_) {
-      os += boost::lexical_cast<std::string>(time_.hour()/24) ;
-      os += "\n";
-      return;
-   }
-
-   if (relative_) os += "+";
-   time_.print(os);
-   os += "\n";
+   Indentor::indent(os) ; write(os);  os += "\n";
 }
 
 std::string AutoArchiveAttr::toString() const
 {
-   std::stringstream ss;
-   ss << "autoarchive ";
-   if (days_) {
-      ss << time_.hour()/24;
-      return ss.str();
-   }
+   std::string ret;
+   write(ret);
+   return ret;
+}
 
-   if (relative_)  ss << "+";
-   ss << time_.toString();
-   return ss.str();
+void AutoArchiveAttr::write(std::string& ret) const
+{
+   ret += "autoarchive ";
+   if (days_) {
+      ret += boost::lexical_cast<std::string>(time_.hour()/24) ;
+      ret += "\n";
+      return;
+   }
+   if (relative_) ret += "+";
+   time_.print(ret);
 }
 
 

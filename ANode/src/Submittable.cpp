@@ -183,26 +183,25 @@ void Submittable::calendarChanged(
    check_for_lateness(c,inherited_late);
 }
 
-std::string Submittable::write_state() const
+void Submittable::write_state(std::string& ret, bool& added_comment_char) const
 {
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
    //             multiple statement on a single line i.e.
    //                 task a; task b;
-   std::string ret;
-   if ( !paswd_.empty() && paswd_!= Submittable::DUMMY_JOBS_PASSWORD()) { ret += " passwd:"; ret += paswd_;}
-   if ( !rid_.empty() )  { ret += " rid:"; ret += rid_; }
+   if ( !paswd_.empty() && paswd_!= Submittable::DUMMY_JOBS_PASSWORD()) { add_comment_char(ret,added_comment_char); ret += " passwd:"; ret += paswd_;}
+   if ( !rid_.empty() )  { add_comment_char(ret,added_comment_char); ret += " rid:"; ret += rid_; }
 
    // The abr_, can contain user generated messages, including \n and ;, hence remove these
    // as they can mess up the parsing on reload.
    if ( !abr_.empty() ) {
+      add_comment_char(ret,added_comment_char);
       std::string the_abort_reason = abr_;
       Str::replaceall(the_abort_reason,"\n","\\n");
       Str::replaceall(the_abort_reason,";"," ");
       ret += " abort<:"; ret += the_abort_reason; ret += ">abort";
    }
-   if ( tryNo_ != 0) { ret += " try:"; ret += boost::lexical_cast<std::string>(tryNo_); }
-   ret += Node::write_state();
-   return ret;
+   if ( tryNo_ != 0) { add_comment_char(ret,added_comment_char); ret += " try:"; ret += boost::lexical_cast<std::string>(tryNo_); }
+   Node::write_state(ret,added_comment_char);
 }
 
 void Submittable::read_state(const std::string& line,const std::vector<std::string>& lineTokens)

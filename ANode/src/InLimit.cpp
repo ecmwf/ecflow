@@ -81,7 +81,7 @@ bool InLimit::operator==( const InLimit& rhs ) const
 
 void InLimit::print( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ); os += toString();
+   Indentor::indent( os ); write(os);
 
    if (!PrintStyle::defsStyle()) {
 
@@ -92,7 +92,7 @@ void InLimit::print( std::string& os ) const {
          Limit* the_limit = limit();
          if ( the_limit ) {
             os += " # referenced limit(value) ";
-            os +=  the_limit->theLimit();
+            os += boost::lexical_cast<std::string>(the_limit->theLimit());
             os += "(";
             os += boost::lexical_cast<std::string>( the_limit->value());
             os += ")";
@@ -104,12 +104,17 @@ void InLimit::print( std::string& os ) const {
 }
 
 std::string InLimit::toString() const {
-   std::string ret = "inlimit ";
+   std::string ret;
+   write(ret);
+   return ret;
+}
+
+void InLimit::write(std::string& ret) const {
+   ret += "inlimit ";
    if (limit_this_node_only_) ret += "-n ";
    if ( path_.empty() )  ret += n_;
    else                      { ret += path_; ret += Str::COLON(); ret += n_; }
    if ( tokens_ != 1 )       { ret += " "; ret += boost::lexical_cast<std::string>(tokens_); }
-   return ret;
 }
 
 

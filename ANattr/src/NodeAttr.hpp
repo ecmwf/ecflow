@@ -67,6 +67,9 @@ public:
    static const Label& EMPTY(); // Added to support return by reference
 
 private:
+   void write(std::string&) const;
+
+private:
    std::string n_;
    std::string v_;
    std::string new_v_;
@@ -115,6 +118,9 @@ public:
    static const Event& EMPTY(); // Added to support return by reference
 
 private:
+   void write(std::string&) const;
+
+private:
    bool         v_{false};
    int          number_;
    std::string  n_;
@@ -160,7 +166,7 @@ public:
    static const Meter& EMPTY(); // Added to support return by reference
 
 private:
-
+   void write(std::string&) const;
    bool isValidValue(int v) const { return (v >= min_ && v <= max_); }
 
    int          min_{0};

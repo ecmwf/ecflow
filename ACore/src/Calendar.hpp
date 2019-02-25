@@ -160,7 +160,7 @@ public:
 	/// for debug,  must link with boost date and time library
 	std::string toString() const;
 
-	std::string write_state() const;
+	void write_state(std::string&) const;
    void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 
 	bool checkInvariants(std::string& errorMsg) const;
@@ -185,7 +185,7 @@ public:
 	//	TAI to UTC or local time depends on leap seconds, so you will not have exact agreement with wall-clock time.
 	static boost::posix_time::ptime second_clock_time();
 
-
+	bool is_special() const { return initTime_.is_special(); }
 private:
 	void assign( const Calendar& rhs);
 

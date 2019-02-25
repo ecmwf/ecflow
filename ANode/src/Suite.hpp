@@ -102,7 +102,7 @@ private:
    void begin_calendar();
    void requeue_calendar();
    void handle_clock_attribute_change();
-   std::string write_state() const override;
+   void write_state(std::string&, bool&) const override;
 
    friend class cereal::access;
    template<class Archive>

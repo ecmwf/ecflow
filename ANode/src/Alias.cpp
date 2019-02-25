@@ -87,8 +87,8 @@ void Alias::print(std::string& os) const
    Indentor in;
    Indentor::indent(os) ; os += "alias " ; os += name();
    if (!PrintStyle::defsStyle()) {
-      std::string st = write_state();
-      if (!st.empty()) { os += " #" ; os += st;}
+      bool added_comment_char = false;
+      write_state(os,added_comment_char);
    }
    os += "\n";
 

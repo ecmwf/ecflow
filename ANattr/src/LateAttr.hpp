@@ -91,6 +91,9 @@ public:
    static LateAttr create(const std::string& lateString);
 
 private:
+   void write(std::string&) const;
+
+private:
 
 	TimeSlot s_;                    // relative by default
 	TimeSlot a_;

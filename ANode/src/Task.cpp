@@ -114,8 +114,8 @@ void Task::print(std::string& os) const
    Indentor in;
    Indentor::indent(os) ; os += "task " ; os += name();
    if (!PrintStyle::defsStyle()) {
-      std::string st = write_state();
-      if (!st.empty()) { os += " #" ; os += st; }
+      bool added_comment_char = false;
+      write_state(os,added_comment_char);
    }
    os += "\n";
 
@@ -138,15 +138,17 @@ void Task::print(std::string& os) const
    // if ( PrintStyle::defsStyle() ) Indentor::indent(os); os += "endtask\n";
 }
 
-std::string Task::write_state() const
+void Task::write_state(std::string& ret, bool& added_comment_char) const
 {
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
    //             multiple statement on a single line i.e.
    //                 task a; task b;
-   std::string ret;
-   if (alias_no_ != 0) { ret += " alias_no:"; ret += boost::lexical_cast<std::string>(alias_no_);}
-   ret += Submittable::write_state();
-   return ret;
+   if (alias_no_ != 0) {
+      add_comment_char(ret,added_comment_char);
+      ret += " alias_no:";
+      ret += boost::lexical_cast<std::string>(alias_no_);
+   }
+   Submittable::write_state(ret,added_comment_char);
 }
 
 void Task::read_state(const std::string& line, const std::vector<std::string>& lineTokens) {

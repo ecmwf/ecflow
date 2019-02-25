@@ -314,7 +314,7 @@ public:
    bool compare_change_no(const Defs&) const;
 private:
    void do_generate_scripts( const std::map<std::string,std::string>& override) const;
-   std::string write_state() const;
+   void write_state(std::string&) const;
    void collate_defs_changes_only(DefsDelta&) const;
    void setupDefaultEnv();
    void add_suite_only(const suite_ptr&, size_t position);

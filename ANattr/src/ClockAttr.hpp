@@ -75,6 +75,9 @@ public:
    boost::posix_time::ptime ptime() const;
 
 private:
+   void write(std::string& os) const;
+
+private:
 	bool hybrid_;
 	bool positiveGain_{false};
 	bool startStopWithServer_{false};  // see Calendar.hpp for more details

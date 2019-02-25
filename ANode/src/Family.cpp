@@ -114,8 +114,8 @@ void Family::print(std::string& os) const
 	Indentor in;
 	Indentor::indent(os) ; os += "family " ; os += name();
    if (!PrintStyle::defsStyle()) {
-      std::string st = write_state();
-      if (!st.empty()) { os += " #" ; os += st; }
+      bool added_comment_char = false;
+      write_state(os,added_comment_char);
    }
    os += "\n";
 
@@ -124,9 +124,9 @@ void Family::print(std::string& os) const
 	Indentor::indent(os) ; os += "endfamily\n";
 }
 
-std::string Family::write_state() const
+void Family::write_state(std::string& ret, bool& added_comment_char) const
 {
-   return NodeContainer::write_state();
+   NodeContainer::write_state(ret,added_comment_char);
 }
 void Family::read_state(const std::string& line,const std::vector<std::string>& lineTokens)
 {

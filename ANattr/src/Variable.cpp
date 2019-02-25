@@ -68,7 +68,7 @@ void Variable::print( std::string& os ) const {
    //                  a/ On parsing always remove quotes ie single or double
    //                  b/ On serialising always add single quotes
    Indentor in;
-   Indentor::indent( os ); os += toString(); os += "\n";
+   Indentor::indent( os ); write(os); os += "\n";
 }
 
 void Variable::print_server_variable( std::string& os ) const {
@@ -77,17 +77,23 @@ void Variable::print_server_variable( std::string& os ) const {
    //                  a/ On parsing always remove quotes ie single or double
    //                  b/ On serialising always add single quotes
    Indentor in;
-   Indentor::indent( os ); os += toString(); os += " # server\n";
+   Indentor::indent( os );  write(os); os += " # server\n";
 }
 
 void Variable::print_generated( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ); os += "# "; os += toString(); os += "\n";
+   Indentor::indent( os ); os += "# ";  write(os); os += "\n";
 }
 
 std::string Variable::toString() const
 {
    std::string ret; ret.reserve(n_.size() + v_.size() + 8);
+   write(ret);
+   return ret;
+}
+
+void Variable::write(std::string& ret) const
+{
    ret += "edit ";
    ret += n_;
    ret += " '";
@@ -99,9 +105,7 @@ std::string Variable::toString() const
       ret += value;
    }
    ret += "'";
-   return ret;
 }
-
 
 std::string Variable::dump() const
 {

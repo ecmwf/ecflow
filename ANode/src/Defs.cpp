@@ -617,7 +617,7 @@ void Defs::print(std::string& os) const
    os += ecf::Version::raw();
    os += "\n";
 
-   if (!PrintStyle::defsStyle()) os += write_state();
+   if (!PrintStyle::defsStyle()) write_state(os);
 
    if (PrintStyle::getStyle() == PrintStyle::STATE) {
       os += "# server state: ";
@@ -646,18 +646,17 @@ void Defs::print(std::string& os) const
 }
 
 
-std::string Defs::write_state() const
+void Defs::write_state(std::string& os) const
 {
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
    //             multiple statement on a single line i.e.
    //                 task a; task b;
    // *IMPORTANT* make sure name are unique, i.e can't have state: and server_state:
    // Otherwise read_state() will mess up
-   std::string os;
-   os += "defs_state"; os += " "; os += PrintStyle::to_string();
+   os += "defs_state "; os += PrintStyle::to_string();
 
    if (state_ != NState::UNKNOWN){ os += " state>:"; os += NState::toString(state_);} // make <state> is unique
-   if (flag_.flag() != 0)        { os += " flag:";   os += flag_.to_string();}
+   if (flag_.flag() != 0)        { os += " flag:"; flag_.write(os);}
    if (state_change_no_ != 0)    { os += " state_change:"; os += boost::lexical_cast<std::string>(state_change_no_);}
    if (modify_change_no_ != 0)   { os += " modify_change:"; os += boost::lexical_cast<std::string>(modify_change_no_);}
    if (server().get_state() != ServerState::default_state()){ os += " server_state:"; os += SState::to_string(server().get_state());}
@@ -703,7 +702,6 @@ std::string Defs::write_state() const
 	   }
 	   save_edit_history_ = false;
    }
-   return os;
 }
 
 void Defs::read_state(const std::string& line,const std::vector<std::string>& lineTokens)

@@ -53,6 +53,9 @@ public:
    static const Variable& EMPTY();
 
 private:
+   void write(std::string&) const;
+
+private:
    std::string  n_;
    std::string  v_;
 

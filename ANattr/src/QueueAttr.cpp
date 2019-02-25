@@ -53,7 +53,7 @@ QueueAttr::~QueueAttr() = default;
 void QueueAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os); os += toString();
+   Indentor::indent(os); write(os);
    if ( !PrintStyle::defsStyle() ) {
       os += " # " ; os += boost::lexical_cast<std::string>(currentIndex_);
       for(auto i : state_vec_) {
@@ -174,13 +174,18 @@ void  QueueAttr::reset_index_to_first_queued_or_aborted()
 std::string QueueAttr::toString() const
 {
    std::string ret;
-   ret = "queue ";
+   write(ret);
+   return ret;
+}
+
+void QueueAttr::write(std::string& ret) const
+{
+   ret += "queue ";
    ret += name_;
    for(const auto & i : theQueue_) {
       ret += " ";
       ret += i;
    }
-   return ret;
 }
 
 std::string QueueAttr::dump() const

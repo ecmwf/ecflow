@@ -1426,29 +1426,39 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    return errorMsg.empty();
 }
 
-std::string Node::write_state() const
+void Node::add_comment_char(std::string& ret, bool& added_comment_char) const
+{
+   if (!added_comment_char) {
+      ret += " #";
+      added_comment_char = true;
+   }
+}
+
+void Node::write_state(std::string& ret, bool& added_comment_char) const
 {
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
    //             multiple statement on a single line i.e.
    //                 task a; task b;
    // If attribute correspond to the defaults don't write then out
-   std::string ret;
    if (state() != NState::UNKNOWN) {
+      add_comment_char(ret,added_comment_char);
       ret += " state:";
       ret += NState::toString(state());
    }
    if (st_.second.total_seconds() != 0) {
+      add_comment_char(ret,added_comment_char);
       ret += " dur:";
       ret += to_simple_string(st_.second);
    }
    if (flag_.flag() != 0) {
+      add_comment_char(ret,added_comment_char);
       ret += " flag:";
-      ret += flag_.to_string();
+      flag_.write(ret);
    }
    if (suspended_) {
+      add_comment_char(ret,added_comment_char);
       ret += " suspended:1";
    }
-   return ret;
 }
 
 void Node::read_state(const std::string& line,const std::vector<std::string>& lineTokens)

@@ -89,7 +89,7 @@ bool Limit::operator==( const Limit& rhs ) const {
 
 void Limit::print( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ); os += toString();
+   Indentor::indent( os ); write(os);
    if (!PrintStyle::defsStyle()) {
       if (value_ != 0) {
          os += " # "; os += boost::lexical_cast<std::string>(value_);
@@ -102,11 +102,17 @@ void Limit::print( std::string& os ) const {
 }
 
 std::string Limit::toString() const {
-   std::string ret = "limit ";
+   std::string ret;
+   write(ret);
+   return ret;
+}
+
+void Limit::write(std::string& ret) const
+{
+   ret += "limit ";
    ret += n_;
    ret += " ";
    ret += boost::lexical_cast<std::string>(lim_);
-   return ret;
 }
 
 void Limit::decrement( int tokens ,  const std::string& abs_node_path) {

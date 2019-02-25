@@ -31,17 +31,21 @@ namespace ecf {
 void AutoRestoreAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) ; os += toString();
-   os += "\n";
+   Indentor::indent(os); write(os); os += "\n";
 }
 
 std::string AutoRestoreAttr::toString() const
 {
-   std::string ss = "autorestore";
-   for(const auto & i : nodes_to_restore_) { ss += " "; ss += i;}
-   return ss;
+   std::string ret;
+   write(ret);
+   return ret;
 }
 
+void AutoRestoreAttr::write(std::string& ret) const
+{
+   ret += "autorestore";
+   for(const auto & i : nodes_to_restore_) { ret += " "; ret += i;}
+}
 
 bool AutoRestoreAttr::operator==(const AutoRestoreAttr& rhs) const
 {

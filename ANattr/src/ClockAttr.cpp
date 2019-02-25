@@ -62,38 +62,42 @@ ClockAttr::ClockAttr(bool hybrid)
 void ClockAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) ; os += toString() ; os += "\n";
+	Indentor::indent(os) ; write(os); os += "\n";
 }
 
 std::string ClockAttr::toString() const
 {
-	std::string ss;
-	if (!end_clock_) {
-	   ss += "clock ";
-	   if (hybrid_) ss += "hybrid ";
-	   else         ss += "real ";
-	}
-	else  {
-	   ss += "endclock ";
-	}
+	std::string ret;
+	write(ret);
+ 	return ret;
+}
 
-	if (day_ != 0) {
-	   ss += boost::lexical_cast<std::string>(day_);
-	   ss += ".";
-	   ss += boost::lexical_cast<std::string>(month_);
-	   ss += ".";
+void ClockAttr::write(std::string& ss) const
+{
+   if (!end_clock_) {
+      ss += "clock ";
+      if (hybrid_) ss += "hybrid ";
+      else         ss += "real ";
+   }
+   else  {
+      ss += "endclock ";
+   }
+
+   if (day_ != 0) {
+      ss += boost::lexical_cast<std::string>(day_);
+      ss += ".";
+      ss += boost::lexical_cast<std::string>(month_);
+      ss += ".";
       ss += boost::lexical_cast<std::string>(year_);
       ss += " ";
-	}
+   }
 
-	if (gain_ != 0) {
-		if (positiveGain_) ss += "+";
-		ss += boost::lexical_cast<std::string>(gain_);
-	}
+   if (gain_ != 0) {
+      if (positiveGain_) ss += "+";
+      ss += boost::lexical_cast<std::string>(gain_);
+   }
 
-	if ( startStopWithServer_) ss += " -s";
-
- 	return ss;
+   if ( startStopWithServer_) ss += " -s";
 }
 
 bool ClockAttr::operator==(const ClockAttr& rhs) const

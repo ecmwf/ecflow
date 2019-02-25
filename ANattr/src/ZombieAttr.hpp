@@ -63,6 +63,9 @@ public:
    static int minimum_zombie_life_time()      { return 60; }
 
 private:
+   void write(std::string&) const;
+
+private:
 	ecf::Child::ZombieType           zombie_type_{ecf::Child::NOT_SET};      // User,path or ecf
 	ecf::User::Action                action_{ecf::User::BLOCK};           // fob, fail,remove, adopt, block, kill
 	int                              zombie_lifetime_{0};  // How long zombie lives in server

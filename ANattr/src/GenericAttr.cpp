@@ -51,19 +51,25 @@ bool GenericAttr::operator==(const GenericAttr& rhs) const
 void GenericAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) ; os += to_string();
+   Indentor::indent(os) ; write(os);
    os += "\n";
 }
 
 std::string GenericAttr::to_string() const
 {
-   std::string ret = "generic ";
+   std::string ret;
+   write(ret);
+   return ret;
+}
+
+void GenericAttr::write(std::string& ret) const
+{
+   ret += "generic ";
    ret += name_;
    for(const auto & value : values_) {
       ret += " ";
       ret += value;
    }
-   return ret;
 }
 
 template<class Archive>

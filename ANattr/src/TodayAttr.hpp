@@ -153,7 +153,8 @@ public:
  	unsigned int state_change_no() const { return state_change_no_; }
 
  	std::string name() const { return toString(); } /* ABO */
- 	std::string toString() const;
+   std::string toString() const;
+   void write(std::string&) const;
  	std::string dump() const;
 
 	// access

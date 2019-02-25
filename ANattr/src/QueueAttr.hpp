@@ -64,6 +64,8 @@ public:
    unsigned int state_change_no() const { return state_change_no_;}
 private:
    void incr_state_change_no();
+   void write(std::string&) const;
+
    bool used_in_trigger_{false};           // *not* persisted, used by simulator only
    int currentIndex_{0};
    unsigned int state_change_no_{0};  // *not* persisted, only used on server side

@@ -673,7 +673,8 @@ protected:
    void update_repeat_genvar() const;
 
    // returns node state without trailing new lines
-   virtual std::string write_state() const;
+   virtual void write_state(std::string& ret, bool& added_comment_char) const;
+   void add_comment_char(std::string& ret, bool& added_comment_char) const;
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 
    // Observer notifications

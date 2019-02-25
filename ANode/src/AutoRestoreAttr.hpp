@@ -42,6 +42,9 @@ public:
    void check(std::string& errorMsg) const; // check auto restore can reference the nodes
 
 private:
+   void write(std::string&) const;
+
+private:
    Node* node_{nullptr};                                // Not persisted, constructor will always set this up.
    std::vector<std::string> nodes_to_restore_; // must be suite or family
 

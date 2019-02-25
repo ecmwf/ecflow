@@ -70,6 +70,7 @@ public:
 
 private:
    void update_change_no();
+   void write(std::string&) const;
 
 private:
    unsigned int             state_change_no_{0};  // *not* persisted, only used on server side

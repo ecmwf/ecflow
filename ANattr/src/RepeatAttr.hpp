@@ -80,7 +80,8 @@ public:
    virtual void change(const std::string& newValue) = 0; // can throw std::runtime_error
    virtual void changeValue(long newValue) = 0;          // can throw std::runtime_error
    virtual void set_value(long new_value_or_index) = 0;  // will NOT throw, allows any value
-   virtual std::string toString() const = 0;
+   std::string toString() const;
+   virtual void write(std::string&) const = 0;
    virtual std::string dump() const = 0;
 
    unsigned int state_change_no() const { return state_change_no_;}
@@ -138,7 +139,8 @@ public:
    void changeValue(long newValue) override;          // can throw std::runtime_error
    void set_value(long newValue) override;            // will NOT throw, allows any value
 
-   std::string toString() const override;
+   void write(std::string&) const override;
+
    std::string dump() const override;
 
    /// Simulator functions:
@@ -190,7 +192,7 @@ public:
    void change(const std::string& newValue) override; // can throw std::runtime_error
    void changeValue(long newValue) override;          // can throw std::runtime_error
    void set_value(long newValue) override;            // will NOT throw, allows any value
-   std::string toString() const override;
+   void write(std::string&) const override;
    std::string dump() const override;
 
    /// Simulator functions:
@@ -239,7 +241,7 @@ public:
    void change(const std::string& newValue) override; // can throw std::runtime_error
    void changeValue(long newValue) override;          // can throw std::runtime_error
    void set_value(long newValue) override;            // will NOT throw, allows any value
-   std::string toString() const override;
+   void write(std::string&) const override;
    std::string dump() const override;
 
    /// Simulator functions:
@@ -283,7 +285,7 @@ public:
    void change(const std::string& newValue) override; // can throw std::runtime_error
    void changeValue(long newValue) override;          // can throw std::runtime_error
    void set_value(long newValue) override;            // will NOT throw, allows any value
-   std::string toString() const override;
+   void write(std::string&) const override;
    std::string dump() const override;
 
    /// Simulator functions:
@@ -346,7 +348,7 @@ public:
    void change(const std::string& /*newValue*/) override { /* do nothing */ }
    void changeValue( long /*newValue*/) override         { /* do nothing */ }
    void set_value(long /*newValue*/) override            { /* do nothing */ }
-   std::string toString() const override;
+   void write(std::string&) const override;
    std::string dump() const override;
 
    /// Simulator functions:
@@ -421,6 +423,9 @@ public:
 
    /// Expose base for the GUI only, use with caution
    RepeatBase* repeatBase() const { return type_.get();}
+
+private:
+   void write(std::string& ret) const           {  if (type_) type_->write(ret); }
 
 private:
    std::unique_ptr<RepeatBase> type_;

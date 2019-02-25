@@ -66,6 +66,7 @@ public:
 	boost::gregorian::date next_matching_date(const ecf::Calendar& c) const;
 
 private:
+   void write(std::string&) const;
    bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:

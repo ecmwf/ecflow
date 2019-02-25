@@ -43,6 +43,9 @@ public:
    static const GenericAttr& EMPTY();
 
 private:
+   void write(std::string& ret) const;
+
+private:
    std::string name_;
    std::vector<std::string> values_;
 

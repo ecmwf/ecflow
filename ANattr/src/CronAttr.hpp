@@ -99,6 +99,9 @@ public:
  	static CronAttr create(const std::string& cronString);
 
 private:
+ 	void write(std::string&) const;
+
+private:
 	void clearFree(); // resets the free flag
    bool is_day_of_week_day_of_month_and_month_free( const ecf::Calendar&) const;
 

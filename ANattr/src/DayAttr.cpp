@@ -28,7 +28,7 @@ using namespace ecf;
 
 //===============================================================================
 
-static std::string theDay(DayAttr::Day_t day)
+static const char* theDay(DayAttr::Day_t day)
 {
    switch (day) {
       case DayAttr::SUNDAY:    return "sunday"; break;
@@ -40,7 +40,7 @@ static std::string theDay(DayAttr::Day_t day)
       case DayAttr::SATURDAY:  return "saturday"; break;
       default: assert(false);break;
    }
-   return std::string();
+   return nullptr;
 }
 
 //===============================================================================
@@ -123,7 +123,7 @@ bool DayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 void DayAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) ; os += toString();
+	Indentor::indent(os) ; write(os);
    if (!PrintStyle::defsStyle()) {
       if (free_) os += " # free";
    }
@@ -132,9 +132,15 @@ void DayAttr::print(std::string& os) const
 
 std::string DayAttr::toString() const
 {
-   std::string ret = "day ";
-   ret += theDay(day_);
+   std::string ret;
+   write(ret);
    return ret;
+}
+
+void DayAttr::write(std::string& ret) const
+{
+   ret += "day ";
+   ret += theDay(day_);
 }
 
 std::string DayAttr::dump() const

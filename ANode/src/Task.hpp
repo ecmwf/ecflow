@@ -108,7 +108,7 @@ public:
 private:
    void copy(const Task&);
    size_t child_position(const Node*) const override;
-   std::string write_state() const override;
+   void write_state(std::string&, bool&) const override;
 
 private:
    /// For use by python interface,
