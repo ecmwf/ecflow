@@ -387,6 +387,9 @@ void ServerComThread::reset()
     //Detach the defs and the nodes from the observer
     detach(defsAccess.defs());
 
+    // reset client handle + defs
+    ci_->reset();
+
     if(hasSuiteFilter_)
     {
         if(!filteredSuites_.empty())
