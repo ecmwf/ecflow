@@ -358,6 +358,18 @@ void ServerComQueue::addSuiteAutoRegisterTask()
 	addTask(task);
 }
 
+void ServerComQueue::addServerVersionTask()
+{
+    if(state_ == DisabledState || state_ == ResetState)
+        return;
+
+    if(isNextTask(VTask::ServerVersionTask))
+        return;
+
+    VTask_ptr task=VTask::create(VTask::ServerVersionTask);
+    addTask(task);
+}
+
 void ServerComQueue::startCurrentTask()
 {
     taskStarted_=false;
@@ -619,7 +631,7 @@ void ServerComQueue::slotTaskFailed(std::string msg)
 	current_.reset();
 
 	//We notify the server that the task has failed
-	server_->clientTaskFailed(task,msg);
+    server_->clientTaskFailed(task,msg,client_->server_reply());
 
 	taskIsBeingFailed_=false;
 }

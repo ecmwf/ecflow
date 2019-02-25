@@ -13,6 +13,7 @@
 #include <QAbstractItemModel>
 
 #include "AbstractNodeModel.hpp"
+#include "ConnectState.hpp"
 #include "Node.hpp"
 #include "VAttributeType.hpp"
 #include "Viewer.hpp"
@@ -125,6 +126,8 @@ private:
 	QVariant serverData(const QModelIndex& index,int role) const;
     QVariant nodeData(const QModelIndex& index,int role,VTreeNode*) const;
     QVariant attributesData(const QModelIndex& index,int role,VTreeNode*) const;
+
+    int serverConnectId(ConnectState::State st) const;
 
 	//Attribute filter
 	VTreeModelData* data_;

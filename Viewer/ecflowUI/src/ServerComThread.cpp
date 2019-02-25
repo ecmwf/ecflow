@@ -140,6 +140,14 @@ void ServerComThread::run()
                 break;
             }
 
+            // this is very important to exclude non-compatible servers
+            case VTask::ServerVersionTask:
+            {
+                 UiLog(serverName_).dbg() << " SERVER_VERSION";
+                 ci_->server_version();
+                 break;
+            }
+
             case VTask::JobTask:
             case VTask::ManualTask:
             case VTask::ScriptTask:

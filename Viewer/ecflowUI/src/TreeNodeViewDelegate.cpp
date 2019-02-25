@@ -376,12 +376,23 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
     //Save painter state
     painter->save();
 
-    if(index.data(AbstractNodeModel::ConnectionRole).toInt() == 0)
+    int connectId=index.data(AbstractNodeModel::ConnectionRole).toInt();
+
+    //lost
+    if(connectId == 1)
     {
         QRect fullRect=QRect(0,vopt.rect.y(),painter->device()->width(),vopt.rect.height());
         painter->fillRect(fullRect,lostConnectBgBrush_);
         QRect bandRect=QRect(0,vopt.rect.y(),5,vopt.rect.height());
         painter->fillRect(bandRect,lostConnectBandBrush_);
+    }
+    //disconnected or incompatible
+    if(connectId == 2 || connectId == 3)
+    {
+        QRect fullRect=QRect(0,vopt.rect.y(),painter->device()->width(),vopt.rect.height());
+        painter->fillRect(fullRect,noConnectBgBrush_);
+        QRect bandRect=QRect(0,vopt.rect.y(),5,vopt.rect.height());
+        painter->fillRect(bandRect,noConnectBandBrush_);
     }
 
     QVariant tVar=index.data(Qt::DisplayRole);

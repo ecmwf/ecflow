@@ -53,6 +53,7 @@ class ServerHandler : public QObject
   
 public:
 	enum Activity {NoActivity,LoadActivity,RescanActivity};
+    enum Compatibility {Compatible, Incompatible, CanBeCompatible};
 
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
@@ -62,6 +63,9 @@ public:
 	Activity activity() const {return activity_;}
 	ConnectState* connectState() const {return connectState_;}
 	bool communicating() {return communicating_;}
+    bool isEnabled() const {return !isDisabled();}
+    bool isDisabled() const;
+
 	bool readFromDisk() const;
 	SuiteFilter* suiteFilter() const {return suiteFilter_;}
     QString nodeMenuMode() const;
@@ -130,7 +134,7 @@ protected:
 	void connectToServer();
 	void setCommunicatingStatus(bool c) {communicating_ = c;}
 	void clientTaskFinished(VTask_ptr task,const ServerReply& serverReply);
-	void clientTaskFailed(VTask_ptr task,const std::string& errMsg);
+    void clientTaskFailed(VTask_ptr task,const std::string& errMsg,const ServerReply& serverReply);
 
 	static void checkNotificationState(VServerSettings::Param par);
 
@@ -168,12 +172,15 @@ private:
     void resetFinished();
 	void resetFailed(const std::string& errMsg);
 	void clearTree();
-	void rescanTree();
+    void rescanTree(bool needNewSuiteList=true);
 	void connectionLost(const std::string& errMsg);
 	bool connectionGained();
+    void checkServerVersion();
+    void compatibleServer();
+    void incompatibleServer(const std::string& version);
 
 	void updateSuiteFilterWithLoaded(const std::vector<std::string>&);
-	void updateSuiteFilter();
+    void updateSuiteFilter(bool needNewSuiteList);
 
 	//Handle the refresh timer
 	void stopRefreshTimer();
@@ -223,6 +230,7 @@ private:
     QDateTime lastRefresh_;
 
 	Activity activity_;
+    Compatibility compatibility_;
 	ConnectState* connectState_;
 	SState::State prevServerState_;
 

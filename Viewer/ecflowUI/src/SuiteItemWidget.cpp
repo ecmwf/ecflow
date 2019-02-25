@@ -105,11 +105,21 @@ void SuiteItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
-	info_=info;
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
+    info_=info;
 
     if(info_ && info_->server())
-	{
-		//Get the current suitefilter
+	{     
+        //Get the current suitefilter
 		SuiteFilter *sf=info_->server()->suiteFilter();
 
         UiLog().dbg() << "SuiteItemWidget::reload 1";

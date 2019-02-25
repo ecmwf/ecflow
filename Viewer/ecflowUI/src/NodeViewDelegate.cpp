@@ -41,6 +41,9 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
 	lostConnectBgBrush_=QBrush(QColor(150,150,150,150),Qt::Dense7Pattern);
 	lostConnectBandBrush_=QBrush(QColor(255,166,0,150));
 
+    noConnectBgBrush_=QBrush(QColor(186,16,16,150),Qt::Dense7Pattern);
+    noConnectBandBrush_=QBrush(QColor(186,16,16,240));
+
 	QImageReader imgR(":/viewer/warning.svg");
 	if(imgR.canRead())
 	{

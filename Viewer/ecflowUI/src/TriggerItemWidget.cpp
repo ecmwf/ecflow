@@ -117,6 +117,16 @@ void TriggerItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
     //set the info
     adjust(info);
 

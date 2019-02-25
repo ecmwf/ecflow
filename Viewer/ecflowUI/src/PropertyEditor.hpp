@@ -31,6 +31,7 @@ public:
 
     void edit(VProperty*,QPixmap pixmap);
     void edit(VProperty*,QString label);
+    void empty();
     bool applyChange();
     VProperty* property() const {return group_;}
 

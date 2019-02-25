@@ -13,6 +13,7 @@
 #include "Highlighter.hpp"
 #include "InfoProvider.hpp"
 #include "MessageLabel.hpp"
+#include "ServerHandler.hpp"
 #include "VConfig.hpp"
 #include "VReply.hpp"
 
@@ -50,8 +51,19 @@ void ManualItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
-    info_=info;
     messageLabel_->hide();
+
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
+    info_=info;
 
     //Info must be a node
     if(info_ && info_->isNode() && info_->node())
