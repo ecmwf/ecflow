@@ -81,11 +81,6 @@ int main(int argc, char* argv[])
 
    std::string path = argv[1];
 
-
-
-
-
-
    DurationTimer duration_timer;
    boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 
@@ -95,18 +90,34 @@ int main(int argc, char* argv[])
       timer.restart();
       std::string errorMsg,warningMsg;
       bool result = defs.restore(path,errorMsg,warningMsg);
-      std::cout << " Parsing Node tree and AST creation time = " << timer.elapsed() << " parse(" << result << ")" << endl;
+      cout << " Parsing Node tree and AST creation time         = " << timer.elapsed() << " parse(" << result << ")" << endl;
    }
-
    {
       Defs local_defs;
       timer.restart();
       TestDefsStructureParser checkPtParser( &local_defs, path);
       std::string errorMsg;
       bool result = checkPtParser.do_parse_file(errorMsg);
-      std::cout << " Parsing Node tree *only* time           = " << timer.elapsed() << " parse(" << result << ")" << endl;
+      cout << " Parsing Node tree *only* time                   = " << timer.elapsed() << " parse(" << result << ")" << endl;
    }
-
+   {
+      timer.restart();
+      std::string defs_as_string;
+      defs.save_as_string(defs_as_string,PrintStyle::DEFS);
+      Defs newDefs;
+      std::string error_msg,warning_msg; // ignore error since some input defs have invalid triggers
+      newDefs.restore_from_string( defs_as_string,error_msg,warning_msg );
+      cout << " Save and restore as string(DEFS)                = " << timer.elapsed() << "    -> string size(" << defs_as_string.size() << ")" << endl;
+   }
+   {
+      timer.restart();
+      std::string defs_as_string;
+      defs.save_as_string(defs_as_string,PrintStyle::MIGRATE);
+      Defs newDefs;
+      std::string error_msg,warning_msg; // ignore error since some input defs have invalid triggers
+      newDefs.restore_from_string( defs_as_string,error_msg,warning_msg );
+      cout << " Save and restore as string(MIGRATE)             = " << timer.elapsed() << "    -> string size(" << defs_as_string.size() << ")" << endl;
+   }
    {
       // Test time for persisting to defs file only
       std::string tmpFilename = "tmp.def";
@@ -165,6 +176,7 @@ int main(int argc, char* argv[])
       cout << " Checkpt(CEREAL) and reload , time taken         = ";
       cout << timer.elapsed() << " file_size(" << helper.file_size() << ")  result(" << result << ") msg(" << helper.errorMsg() << ")" << endl;
    }
+
 
    {
       timer.restart();
