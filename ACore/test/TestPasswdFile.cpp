@@ -22,7 +22,11 @@
 
 #include <iostream>
 #include <fstream>
+#if defined(__APPLE__)
+#include <unistd.h>
+#else
 #include <crypt.h>
+#endif
 
 #include "PasswdFile.hpp"
 #include "File.hpp"

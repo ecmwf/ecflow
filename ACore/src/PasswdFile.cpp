@@ -13,7 +13,11 @@
 // Description : Parser for white list file
 //============================================================================
 #include <pwd.h>       /* getpwuid */
+#if defined(__APPLE__)
+#include <unistd.h>
+#else
 #include <crypt.h>
+#endif
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>

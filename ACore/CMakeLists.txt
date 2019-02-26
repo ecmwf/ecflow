@@ -2,6 +2,12 @@
 # If new src or test is added make sure you touch this file
 #
 
+
+# crypt is not needed on Apple machines
+if(NOT DEFINED APPLE)
+    set(CRYPT_LIB crypt)
+endif()
+
 # Only really needed for File.cpp
 add_definitions( -DCMAKE )
 
@@ -28,7 +34,7 @@ ecbuild_add_library( TARGET core
 target_link_libraries(core debug ${Boost_FILESYSTEM_LIBRARY_DEBUG}      ${Boost_FILESYSTEM_LIBRARY_RELEASE}
                            debug ${Boost_DATE_TIME_LIBRARY_DEBUG}       ${Boost_DATE_TIME_LIBRARY_RELEASE}
                            debug ${Boost_SYSTEM_LIBRARY_DEBUG}          ${Boost_SYSTEM_LIBRARY_RELEASE}
-                           crypt
+                           ${CRYPT_LIB}
                            )                
                    
 #
