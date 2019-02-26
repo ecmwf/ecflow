@@ -33,7 +33,7 @@ public:
    explicit CronAttr(const TimeSeries& ts ) : timeSeries_(ts),free_(false),state_change_no_(0) {}
    CronAttr(int h, int m, bool relative = false) : timeSeries_(h,m,relative),free_(false),state_change_no_(0) {}
 
-	std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
 	bool operator==(const CronAttr& rhs) const;
    bool operator<(const CronAttr& rhs) const { return timeSeries_ < rhs.timeSeries_; }
 	bool structureEquals(const CronAttr& rhs) const;
@@ -97,6 +97,9 @@ public:
 	/// 	cron -w 0 -m 5,6,7,8 10:00 20:00 01:00 # run every sunday, between May-Aug, every hour between 10am and 8pm
 	static void parse( CronAttr&, const std::vector<std::string >& lineTokens, size_t index, bool parse_state = false );
  	static CronAttr create(const std::string& cronString);
+
+private:
+ 	void write(std::string&) const;
 
 private:
 	void clearFree(); // resets the free flag

@@ -101,6 +101,7 @@ fi
 # =======================================================================
 
 export ECF_PORT=4949
+export ECF_HOST=localhost
 $EXE_DIR/ecflow_client --version
 
 rm -rf `hostname`.${ECF_PORT}.*

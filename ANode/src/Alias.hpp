@@ -28,7 +28,7 @@ public:
 
    static alias_ptr create(const std::string& name);
 
-   std::ostream& print(std::ostream&) const override;
+   void print(std::string&) const override;
    bool operator==(const Alias& rhs) const;
 
    /// Overridden to reset the try number
@@ -46,7 +46,7 @@ public:
    const std::string& debugType() const override;
 
    node_ptr removeChild( Node* child) override;
-   bool addChild( node_ptr child, size_t position = std::numeric_limits<std::size_t>::max()) override;
+   bool addChild( const node_ptr& child, size_t position = std::numeric_limits<std::size_t>::max()) override;
    bool isAddChildOk( Node* child, std::string& errorMsg) const override;
 
    const std::string& script_extension() const override;

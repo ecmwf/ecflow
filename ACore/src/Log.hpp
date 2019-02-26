@@ -31,6 +31,7 @@
 // log file, and hence can ensure that it gets written to disk
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <vector>
+#include <memory>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -97,6 +98,8 @@ private:
    /// make sure path is not a directory & path has a parent directory.
    /// Will throw std::runtime_error for errors
    static void check_new_path(const std::string& new_path);
+
+   void create_logimpl();
 
 private:
   Log(const Log&) = delete;

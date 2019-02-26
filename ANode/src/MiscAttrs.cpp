@@ -64,13 +64,12 @@ void MiscAttrs::requeue()
    for(auto & queue : queues_) { queue.requeue(); }
 }
 
-std::ostream& MiscAttrs::print(std::ostream& os) const
+void MiscAttrs::print(std::string& os) const
 {
-   BOOST_FOREACH(const ZombieAttr& z, zombies_) { z.print(os); }
-   BOOST_FOREACH(const VerifyAttr& v, verifys_ ){ v.print(os);  }
-   BOOST_FOREACH(const QueueAttr& q, queues_ )  { q.print(os);  }
-   BOOST_FOREACH(const GenericAttr& g, generics_){ g.print(os);  }
-   return os;
+   BOOST_FOREACH(const ZombieAttr& z, zombies_)  { z.print(os); }
+   BOOST_FOREACH(const VerifyAttr& v, verifys_ ) { v.print(os); }
+   BOOST_FOREACH(const QueueAttr& q, queues_ )   { q.print(os); }
+   BOOST_FOREACH(const GenericAttr& g, generics_){ g.print(os); }
 }
 
 bool MiscAttrs::operator==(const MiscAttrs& rhs) const

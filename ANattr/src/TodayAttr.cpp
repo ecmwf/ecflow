@@ -40,22 +40,27 @@ TodayAttr::TodayAttr (const std::string& str)
    ts_  = TimeSeries::create(index,tokens,false/*parse_state*/);
 }
 
-std::ostream& TodayAttr::print(std::ostream& os) const
+void TodayAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) << toString();
+   Indentor::indent(os) ; write(os);
    if (!PrintStyle::defsStyle()) {
-      os << ts_.state_to_string(free_);
+      ts_.write_state(os,free_);
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string TodayAttr::toString() const
 {
-   std::string ret = "today ";
-   ret += ts_.toString();
+   std::string ret;
+   write(ret);
    return ret;
+}
+
+void TodayAttr::write(std::string& ret) const
+{
+   ret += "today ";
+   ts_.write(ret);
 }
 
 std::string TodayAttr::dump() const

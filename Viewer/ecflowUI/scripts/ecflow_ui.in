@@ -164,6 +164,11 @@ do
             shift
 			;;
 
+        -fs)
+           export ECFLOWUI_FONT_SIZE=$2
+           shift
+           ;;
+
         #Specify the location of the config dir. It is used for ui testing only.
         #We do not expose it in the usage() print out!!
         -confd)
@@ -201,6 +206,7 @@ then
     cat <<HEND
 EcflowUI
   Command-line flags:
+    -fs               : set fontsize (in points) for the user interface
     -log              : write log messages to standard output
     -s                : start via the session manager
     -ts <host> <port> : start a temporary session viewing the given server

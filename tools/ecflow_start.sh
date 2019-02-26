@@ -19,6 +19,14 @@
 ###        Will start the ecflow_server in the background, using user id
 ###        to make a unique port number.
 
+#===============================================================================
+# Get the absolute path THIS script. use it to locate ecflow_client and ecflow_server
+# This avoids mixing 4/5 version of ecflow.
+# and need absolute since we change dir later on.
+#
+ECFLOW_BINDIR="$( cd "$(dirname "$0")" ; pwd -P )" 
+#echo "-----> ${ECFLOW_BINDIR} <-------"
+
 #==========================================================================
 export TZ=GMT LANG= # en_GB.UTF-8 unset, use locale -a to list available locales
 host=$(hostname)
@@ -60,6 +68,7 @@ rerun=true
 h)
 echo "Usage: $0 [-b] [-d ecf_home directory] [-f] [-h]"
 echo "       -b        start ECF for backup server or e-suite"
+echo "       -c        test check point file for errors"
 echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
 echo "       -f        forces the ECF to be restarted"
 echo "       -v        verbose mode"
@@ -70,6 +79,7 @@ exit 0
 *)
 echo "Usage: $0 [-b] [-d ecf_home directory] [-f] [-h]"
 echo "       -b        start ECF for backup server or e-suite"
+echo "       -c        test check point file for errors"
 echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
 echo "       -f        forces the ECF to be restarted"
 echo "       -v        verbose mode"
@@ -102,7 +112,6 @@ export ECF_PORT=$port_number
 
 #===============================================================================
 # Setup ECF_HOME 
-
 export ECF_HOME=${ecf_home_directory:-$HOME/ecflow_server}
 export ECF_LISTS=${ECF_LISTS:-$ECF_HOME/ecf.lists}
 
@@ -118,12 +127,12 @@ if [ -f $fname ]; then host=$(cat $fname); fi
 
 mkdir -p $rcdir
 THERE=KO
-ecflow_client --port=$ECF_PORT --host=$host --ping && THERE=OK
+${ECFLOW_BINDIR}/ecflow_client --port=$ECF_PORT --host=$host --ping && THERE=OK
 if [[ $THERE == OK ]]; then
   echo "server is already started"
   res="$(ps -lf -u $USER | grep ecflow_server | grep -v grep)"
   # which netstat && res="$(netstat -lnptu 2>/dev/null | grep ecflow | grep $ECF_PORT)"
-  echo "$res $(ecflow_client --stats)"
+  echo "$res $(${ECFLOW_BINDIR}/ecflow_client --stats)"
   if [ "$res" == "" ] ; then
     mail $USER -s "server is already started - server hijack?" <<EOF
 Hello.
@@ -131,7 +140,7 @@ Hello.
 there was an attempt to start the ecFlow server while port is already in use
 by another user, see the ecflow stats output below.
 
-$(ecflow_client --stats)
+$(${ECFLOW_BINDIR}/ecflow_client --stats)
 EOF
     exit 1
   fi
@@ -191,9 +200,9 @@ echo
 
 #==========================================================================
 
-echo "client version is $(ecflow_client --version)"
+echo "client version is $(${ECFLOW_BINDIR}/ecflow_client --version)"
 echo "Checking if the server is already running on $ECF_HOST and port $ECF_PORT"
-ecflow_client --ping 
+${ECFLOW_BINDIR}/ecflow_client --ping 
 if [ $? -eq 0 ]; then
   echo "... The server on $ECF_HOST:$ECF_PORT is already running. Use 'netstat -lnptu' for listing active port" 
   exit 1
@@ -254,16 +263,16 @@ echo "OK starting ecFlow server..."
 echo "";
 
 if [ $check == true ]; then
-  ecflow_client --load $ECF_CHECK check_only
+  ${ECFLOW_BINDIR}/ecflow_client --load $ECF_CHECK check_only
 fi
 
-nohup ecflow_server > $ECF_OUT 2>&1 < /dev/null &
+nohup ${ECFLOW_BINDIR}/ecflow_server > $ECF_OUT 2>&1 < /dev/null &
 
 # the sleep allows time for server to start
 if [ "$force" = "true" ]; then
    echo "Placing server into RESTART mode..."
    sleep 5  
-   ecflow_client --restart || { echo "restart of server failed" ; exit 1; }
+   ${ECFLOW_BINDIR}/ecflow_client --restart || { echo "restart of server failed" ; exit 1; }
 fi
 
 

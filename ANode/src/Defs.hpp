@@ -55,7 +55,8 @@ public:
 
    void copy_defs_state_only(defs_ptr defs); // needed when creating defs for client handles
    bool operator==(const Defs& rhs) const;
-   std::ostream& print(std::ostream&) const ;
+   void print(std::string&) const;
+   std::string print() const;
 
    /// State related functions:
    /// Defs acts like the root node.
@@ -126,7 +127,7 @@ public:
 
    /// Add a suite to the definition, will throw std::runtime_error if duplicate
    suite_ptr add_suite(const std::string& name);
-   void addSuite(suite_ptr,size_t position = std::numeric_limits<std::size_t>::max());
+   void addSuite(const suite_ptr&,size_t position = std::numeric_limits<std::size_t>::max());
    size_t child_position(const Node*) const;
 
    /// Externs refer to Nodes or, variable, events, meter, repeat, or generated variable
@@ -275,7 +276,7 @@ public:
    const std::deque<std::string>& get_edit_history(const std::string& path) const;
    void save_edit_history(bool f) const { save_edit_history_ = f ;}
    static const std::deque<std::string>& empty_edit_history();
-   static size_t max_edit_history_size_per_node() { return 20; }
+   constexpr static size_t max_edit_history_size_per_node() { return 10; }
 
    /// Memento functions:
    void collateChanges(unsigned int client_handle,DefsDelta&) const;
@@ -313,15 +314,15 @@ public:
    bool compare_change_no(const Defs&) const;
 private:
    void do_generate_scripts( const std::map<std::string,std::string>& override) const;
-   std::string write_state() const;
+   void write_state(std::string&) const;
    void collate_defs_changes_only(DefsDelta&) const;
    void setupDefaultEnv();
-   void add_suite_only(suite_ptr, size_t position);
+   void add_suite_only(const suite_ptr&, size_t position);
 
    /// Removes the suite, from defs returned as suite_ptr, asserts if suite does not exist
    suite_ptr removeSuite(suite_ptr);
    node_ptr removeChild(Node*);
-   bool addChild( node_ptr, size_t position = std::numeric_limits<std::size_t>::max());
+   bool addChild( const node_ptr&, size_t position = std::numeric_limits<std::size_t>::max());
    friend class Node;
 
    /// For use by python interface,
@@ -338,6 +339,7 @@ private:
 
 private:
    /// Note: restoring from a check point file will reset, defs state and modify numbers
+   mutable size_t print_cache_{0};                         // NOT persisted
    unsigned int    state_change_no_{0};            // persisted since passed to client, however side effect, is it will be in checkpoint file
    unsigned int    modify_change_no_{ 0 };           // persisted since passed to client, however side effect, is it will be in checkpoint file
    unsigned int    updateCalendarCount_{0};
@@ -386,6 +388,8 @@ std::ostream& operator<<(std::ostream& os, const Defs&);
 // This class is used to read the History
 class DefsHistoryParser {
 public:
+   DefsHistoryParser(const DefsHistoryParser&) = delete;
+   const DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
    DefsHistoryParser();
 
    void parse(const std::string& line);
@@ -393,12 +397,6 @@ public:
 
 private:
    std::string::size_type find_log(const std::string& line, std::string::size_type pos) const;
-
-private:
-  DefsHistoryParser(const DefsHistoryParser&) = delete;
-  const DefsHistoryParser& operator=(const DefsHistoryParser&) = delete;
-private:
-   std::vector<std::string> log_types_;
    std::vector<std::string> parsed_messages_;
 };
 

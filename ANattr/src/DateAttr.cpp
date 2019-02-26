@@ -206,30 +206,34 @@ bool DateAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 	return true;
 }
 
-std::ostream& DateAttr::print(std::ostream& os) const
+void DateAttr::print(std::string& os) const
 {
 	Indentor in;
-	Indentor::indent(os) << toString();
+	Indentor::indent(os) ; write(os);
    if (!PrintStyle::defsStyle()) {
-      if (free_) os << " # free";
+      if (free_) os += " # free";
    }
-	os << "\n";
-	return os;
+	os += "\n";
 }
 
 std::string DateAttr::toString() const
 {
-	std::string ret = "date ";
-	if (day_ == 0) ret += "*.";
-	else         { ret += boost::lexical_cast<std::string>(day_); ret += ".";}
-
-	if (month_ == 0) ret += "*.";
-	else           { ret += boost::lexical_cast<std::string>(month_); ret += ".";}
-
-	if (year_ == 0) ret += "*";
-	else            ret += boost::lexical_cast<std::string>(year_);
-
+	std::string ret;
+	write(ret);
 	return ret;
+}
+
+void DateAttr::write(std::string& ret) const
+{
+   ret += "date ";
+   if (day_ == 0) ret += "*.";
+   else         { ret += boost::lexical_cast<std::string>(day_); ret += ".";}
+
+   if (month_ == 0) ret += "*.";
+   else           { ret += boost::lexical_cast<std::string>(month_); ret += ".";}
+
+   if (year_ == 0) ret += "*";
+   else            ret += boost::lexical_cast<std::string>(year_);
 }
 
 std::string DateAttr::dump() const

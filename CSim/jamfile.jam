@@ -20,8 +20,6 @@ use-project theNodeAttr : ../ANattr ;
 use-project theNode     : ../ANode ;  
 use-project theBase     : ../Base ;
 
-lib pthread ;
-
 #
 # Split into library, so that testing can use library, and hence same compiler option
 #
@@ -52,7 +50,6 @@ lib libsimu : [ glob src/*.cpp ]
 # IMPORTANT: server *MUST* not link with client or include any of the client code
 #
 exe c_csim : [ glob test/*.cpp : test/TestSingleSimulator.cpp ]
- 	         pthread
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node
@@ -71,7 +68,6 @@ exe c_csim : [ glob test/*.cpp : test/TestSingleSimulator.cpp ]
 # IMPORTANT: server *MUST* not link with client or include any of the client code
 #
 exe c_csim_single : [ glob test/TestSingleSimulator.cpp test/TestUtil.cpp ]
- 	         pthread
              /theCore//core
              /theNodeAttr//nodeattr
              /theNode//node

@@ -60,22 +60,27 @@ void TimeAttr::resetRelativeDuration()
    }
 }
 
-std::ostream& TimeAttr::print(std::ostream& os) const
+void TimeAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) << toString();
+   Indentor::indent(os) ; write(os);
    if (!PrintStyle::defsStyle()) {
-      os << ts_.state_to_string(free_);
+      ts_.write_state(os,free_);
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string TimeAttr::toString() const
 {
-   std::string ret = "time ";
-   ret += ts_.toString();
+   std::string ret;
+   write(ret);
    return ret;
+}
+
+void TimeAttr::write(std::string& ret) const
+{
+   ret += "time ";
+   ts_.write(ret);
 }
 
 std::string TimeAttr::dump() const

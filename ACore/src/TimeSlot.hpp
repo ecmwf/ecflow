@@ -47,13 +47,14 @@ public:
 	int hour() const { return h_;}
 	int minute() const { return m_;}
 	bool isNULL() const { return (h_ == -1 && m_ == -1); }
-	std::ostream& print(std::ostream&) const;
+	void print(std::string& os) const { write(os); }
 
 	/// returns the corresponding duration.
  	boost::posix_time::time_duration duration() const;
 
  	// returns  struct in the format hh:mm
  	std::string toString() const;
+ 	void write(std::string&) const;
 
 private:
  	int h_{-1};

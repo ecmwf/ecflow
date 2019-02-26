@@ -33,7 +33,7 @@ public:
    explicit DayAttr(const boost::gregorian::date& date)
 	: day_(static_cast<DayAttr::Day_t>(date.day_of_week().as_number())), free_(false),state_change_no_(0) {}
 
-	std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
 	bool operator==(const DayAttr& rhs) const;
    bool operator<(const DayAttr& rhs) const { return day_ < rhs.day_; }
 	bool structureEquals(const DayAttr& rhs) const;
@@ -66,6 +66,7 @@ public:
 	boost::gregorian::date next_matching_date(const ecf::Calendar& c) const;
 
 private:
+   void write(std::string&) const;
    bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:

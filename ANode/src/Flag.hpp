@@ -85,15 +85,18 @@ public:
 
    /// returns a comma separated list of all flags set
    std::string to_string() const;
+   void write(std::string&) const;
 
    /// returns the string equivalent
    static std::string enum_to_string(Flag::Type flag);
+   static const char* enum_to_char_star(Flag::Type flag);
 
    /// Used to determine change in state relative to client
    unsigned int state_change_no() const { return state_change_no_; }
 
    /// returns the list of all flag types
    static std::vector<Flag::Type> list();
+   static constexpr std::array<Flag::Type,19> array();
 
    /// Converts from string to flag types.
    static Flag::Type string_to_flag_type(const std::string& s);

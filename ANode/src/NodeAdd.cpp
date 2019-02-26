@@ -265,7 +265,6 @@ void Node::addMeter( const Meter& m)
 //   if ( isSuite() ) {
 //      throw std::runtime_error("Node::addMeter: Can not add meter to a Suite");
 //   }
-
    const Meter& meter = findMeter(m.name());
    if (!meter.empty()) {
       std::stringstream ss;
@@ -273,6 +272,18 @@ void Node::addMeter( const Meter& m)
       throw std::runtime_error( ss.str() );
    }
    meters_.push_back( m );
+   state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void Node::add_meter(const std::string& name,int min,int max,int color_change,int value)
+{
+   const Meter& meter = findMeter(name);
+   if (!meter.empty()) {
+      std::stringstream ss;
+      ss << "Add Meter failed: Duplicate Meter of name '" << name << "' already exist for node " << debugNodePath();
+      throw std::runtime_error( ss.str() );
+   }
+   meters_.emplace_back(name,min,max,color_change,value);
    state_change_no_ = Ecf::incr_state_change_no();
 }
 

@@ -82,23 +82,22 @@ bool Alias::operator==(const Alias& rhs) const
    return Submittable::operator==(rhs);
 }
 
-std::ostream& Alias::print(std::ostream& os) const
+void Alias::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) << "alias " << name();
+   Indentor::indent(os) ; os += "alias " ; os += name();
    if (!PrintStyle::defsStyle()) {
-      std::string st = write_state();
-      if (!st.empty()) os << " #" << st;
+      bool added_comment_char = false;
+      write_state(os,added_comment_char);
    }
-   os << "\n";
+   os += "\n";
 
    Node::print(os);
 
    // Generated variable are not persisted since they are created on demand
    // There *NO* point in printing them they will always be empty
-   return os;
 }
-std::ostream& operator<<(std::ostream& os, const Alias& d)  { return d.print(os); }
+std::ostream& operator<<(std::ostream& os, const Alias& d)  { std::string s; d.print(s); os << s; return os; }
 
 void Alias::begin()
 {
@@ -118,7 +117,7 @@ node_ptr Alias::removeChild(Node*)
    return node_ptr();
 }
 
-bool Alias::addChild( node_ptr , size_t )
+bool Alias::addChild( const node_ptr& , size_t )
 {
    LOG_ASSERT(false,"");
    return false;

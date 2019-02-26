@@ -46,7 +46,7 @@ class LateAttr  {
 public:
    LateAttr();
 
-	std::ostream& print(std::ostream&) const;
+	void print(std::string&) const;
 	bool operator==(const LateAttr& rhs) const;
 
 	void addSubmitted( const TimeSlot& s)    { s_  = s; }
@@ -89,6 +89,9 @@ public:
   
    static void parse(LateAttr&, const std::string& line, const std::vector<std::string >& lineTokens, size_t index);
    static LateAttr create(const std::string& lateString);
+
+private:
+   void write(std::string&) const;
 
 private:
 

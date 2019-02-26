@@ -1426,29 +1426,39 @@ bool Node::check(std::string& errorMsg, std::string& warningMsg) const
    return errorMsg.empty();
 }
 
-std::string Node::write_state() const
+void Node::add_comment_char(std::string& ret, bool& added_comment_char) const
+{
+   if (!added_comment_char) {
+      ret += " #";
+      added_comment_char = true;
+   }
+}
+
+void Node::write_state(std::string& ret, bool& added_comment_char) const
 {
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
    //             multiple statement on a single line i.e.
    //                 task a; task b;
    // If attribute correspond to the defaults don't write then out
-   std::string ret;
    if (state() != NState::UNKNOWN) {
+      add_comment_char(ret,added_comment_char);
       ret += " state:";
       ret += NState::toString(state());
    }
    if (st_.second.total_seconds() != 0) {
+      add_comment_char(ret,added_comment_char);
       ret += " dur:";
       ret += to_simple_string(st_.second);
    }
    if (flag_.flag() != 0) {
+      add_comment_char(ret,added_comment_char);
       ret += " flag:";
-      ret += flag_.to_string();
+      flag_.write(ret);
    }
    if (suspended_) {
+      add_comment_char(ret,added_comment_char);
       ret += " suspended:1";
    }
-   return ret;
 }
 
 void Node::read_state(const std::string& line,const std::vector<std::string>& lineTokens)
@@ -1458,28 +1468,37 @@ void Node::read_state(const std::string& line,const std::vector<std::string>& li
    std::string token;
    for(size_t i = 3; i < lineTokens.size(); i++) {
       token.clear();
-      if (lineTokens[i].find("state:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Node::read_state Invalid state specified for suite " + name());
-         if (!NState::isValid(token)) throw std::runtime_error( "Node::read_state Invalid state specified for node : " + name() );
-         set_state_only(NState::toState(token));
+      const std::string& line_token_i = lineTokens[i];
+      if (line_token_i.find("state:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state Invalid state specified for suite " + name());
+         std::pair<NState::State,bool> state_pair = NState::to_state(token);
+         if (!state_pair.second) throw std::runtime_error( "Node::read_state Invalid state specified for node : " + name() );
+         set_state_only( state_pair.first);
       }
-      else if (lineTokens[i].find("flag:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Node::read_state invalid flags for node "  + name());
+      else if (line_token_i.find("flag:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state invalid flags for node "  + name());
          flag().set_flag(token); // this can throw
       }
-      else if (lineTokens[i].find("dur:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Node::read_state invalid duration for node: " + name());
+      else if (line_token_i.find("dur:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state invalid duration for node: " + name());
          st_.second = duration_from_string(token);
       }
-      else if (lineTokens[i] == "suspended:1") suspend();
+      else if (line_token_i == "suspended:1") suspend();
    }
 }
 
-std::ostream& Node::print(std::ostream& os) const
+std::string Node::print() const
+{
+   std::string s;
+   print(s);
+   return s;
+}
+
+void Node::print(std::string& os) const
 {
    if ( d_st_ != DState::default_state() ) {
       Indentor in;
-      Indentor::indent(os) << "defstatus " << DState::toString(d_st_) << "\n";
+      Indentor::indent(os); os += "defstatus "; os += DState::toString(d_st_); os += "\n";
    }
 
    if (late_) late_->print(os);
@@ -1488,15 +1507,16 @@ std::ostream& Node::print(std::ostream& os) const
       c_expr_-> print(os,"complete");
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
-         if (c_expr_->isFree()) Indentor::indent(os) << "# (free)\n";
+         if (c_expr_->isFree()) { Indentor::indent(os); os += "# (free)\n"; }
          if ( completeAst() ) {
             if (!defs()) {
                // Full defs is required for extern checking, and finding absolute node paths
                // Hence print will with no defs can give in-accurate information
                Indentor in;
-               Indentor::indent(os) << "# Warning: Full/correct AST evaluation requires the definition\n";
+               Indentor::indent(os); os += "# Warning: Full/correct AST evaluation requires the definition\n";
             }
-            completeAst()->print(os);
+            std::stringstream ss; completeAst()->print(ss);
+            os += ss.str();
          }
       }
    }
@@ -1504,13 +1524,14 @@ std::ostream& Node::print(std::ostream& os) const
       t_expr_->print(os,"trigger");
       if ( PrintStyle::getStyle() == PrintStyle::STATE  ) {
          Indentor in;
-         if (t_expr_->isFree()) Indentor::indent(os) << "# (free)\n";
+         if (t_expr_->isFree()) { Indentor::indent(os); os += "# (free)\n"; }
          if ( triggerAst() ) {
             if (!defs()) {
                Indentor in;
-               Indentor::indent(os) << "# Warning: Full/correct AST evaluation requires the definition\n";
+               Indentor::indent(os); os += "# Warning: Full/correct AST evaluation requires the definition\n";
             }
-            triggerAst()->print(os);
+            std::stringstream ss;  triggerAst()->print(ss);
+            os += ss.str();
          }
       }
    }
@@ -1526,26 +1547,24 @@ std::ostream& Node::print(std::ostream& os) const
       BOOST_FOREACH(const Variable& v, gvec ) { v.print_generated(os); }
    }
 
-   BOOST_FOREACH(limit_ptr l, limits_)            { l->print(os); }
+   BOOST_FOREACH(limit_ptr l, limits_)       { l->print(os); }
    inLimitMgr_.print(os);
 
    BOOST_FOREACH(const Label& la, labels_ )  { la.print(os); }
    BOOST_FOREACH(const Meter& m, meters_ )   { m.print(os); }
    BOOST_FOREACH(const Event& e, events_ )   { e.print(os); }
 
-   BOOST_FOREACH(const ecf::TimeAttr& t, times_)  { t.print(os);    }
-   BOOST_FOREACH(const ecf::TodayAttr& t,todays_) { t.print(os);    }
-   BOOST_FOREACH(const DateAttr& date, dates_)      { date.print(os); }
-   BOOST_FOREACH(const DayAttr& day, days_)         { day.print(os);  }
-   BOOST_FOREACH(const CronAttr& cron, crons_)      { cron.print(os); }
+   BOOST_FOREACH(const ecf::TimeAttr& t, times_) { t.print(os);    }
+   BOOST_FOREACH(const ecf::TodayAttr& t,todays_){ t.print(os);    }
+   BOOST_FOREACH(const DateAttr& date, dates_)   { date.print(os); }
+   BOOST_FOREACH(const DayAttr& day, days_)      { day.print(os);  }
+   BOOST_FOREACH(const CronAttr& cron, crons_)   { cron.print(os); }
 
    if (auto_cancel_) auto_cancel_->print(os);
    if (auto_archive_) auto_archive_->print(os);
    if (auto_restore_) auto_restore_->print(os);
 
    if (misc_attrs_) misc_attrs_->print(os);
-
-   return os;
 }
 
 std::string Node::print(PrintStyle::Type_t p_style) const
@@ -1556,9 +1575,9 @@ std::string Node::print(PrintStyle::Type_t p_style) const
 
 std::string Node::to_string() const
 {
-   std::stringstream ss;
+   std::string ss;
    print(ss);
-   return ss.str();
+   return ss;
 }
 
 bool Node::operator==(const Node& rhs) const

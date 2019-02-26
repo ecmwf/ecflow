@@ -49,7 +49,7 @@ public:
 
 	const std::string& debugType() const override;
 
-	std::ostream& print(std::ostream&) const override;
+	void print(std::string&) const override;
 	bool operator==(const Family& rhs) const;
 
 	void collateChanges(DefsDelta&) const override;
@@ -58,7 +58,7 @@ public:
 
    void read_state(const std::string& line,const std::vector<std::string>& lineTokens) override;
 private:
-   std::string write_state() const override;
+   void write_state(std::string&, bool&) const override;
 
    mutable FamGenVariables* fam_gen_variables_{nullptr};
 

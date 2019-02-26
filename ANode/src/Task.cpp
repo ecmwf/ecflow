@@ -109,15 +109,15 @@ task_ptr Task::create(const std::string& name)
 	return std::make_shared<Task>( name );
 }
 
-std::ostream& Task::print(std::ostream& os) const
+void Task::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) << "task " << name();
+   Indentor::indent(os) ; os += "task " ; os += name();
    if (!PrintStyle::defsStyle()) {
-      std::string st = write_state();
-      if (!st.empty()) os << " #" << st;
+      bool added_comment_char = false;
+      write_state(os,added_comment_char);
    }
-   os << "\n";
+   os += "\n";
 
    Node::print(os);
 
@@ -131,23 +131,24 @@ std::ostream& Task::print(std::ostream& os) const
       for(size_t t = 0; t < node_vec_size; t++) { aliases_[t]->print( os ); }
       if (node_vec_size != 0) {
          Indentor in3;
-         Indentor::indent(os) << "endalias\n";
+         Indentor::indent(os); os += "endalias\n";
       }
    }
 
-   // if ( PrintStyle::defsStyle() ) Indentor::indent(os) << "endtask\n";
-   return os;
+   // if ( PrintStyle::defsStyle() ) Indentor::indent(os); os += "endtask\n";
 }
 
-std::string Task::write_state() const
+void Task::write_state(std::string& ret, bool& added_comment_char) const
 {
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
    //             multiple statement on a single line i.e.
    //                 task a; task b;
-   std::string ret;
-   if (alias_no_ != 0) { ret += " alias_no:"; ret += boost::lexical_cast<std::string>(alias_no_);}
-   ret += Submittable::write_state();
-   return ret;
+   if (alias_no_ != 0) {
+      add_comment_char(ret,added_comment_char);
+      ret += " alias_no:";
+      ret += boost::lexical_cast<std::string>(alias_no_);
+   }
+   Submittable::write_state(ret,added_comment_char);
 }
 
 void Task::read_state(const std::string& line, const std::vector<std::string>& lineTokens) {
@@ -165,7 +166,7 @@ void Task::read_state(const std::string& line, const std::vector<std::string>& l
    Submittable::read_state(line,lineTokens);
 }
 
-std::ostream& operator<<(std::ostream& os, const Task& d)  { return d.print(os); }
+std::ostream& operator<<(std::ostream& os, const Task& d) { std::string s; d.print(s); os << s; return os; }
 
 bool Task::operator==(const Task& rhs) const
 {
@@ -630,7 +631,7 @@ bool Task::doDeleteChild(Node* child)
    return false;
 }
 
-bool Task::addChild( node_ptr, size_t)
+bool Task::addChild( const node_ptr&, size_t)
 {
    // Only used during PLUG: aliases can't be plugged.
 	LOG_ASSERT(false,"");

@@ -49,6 +49,7 @@ public:
 	static const char* toString(const NState& ns) { return toString(ns.state());}
 	static NState::State toState(const std::string&);
 	static bool isValid(const std::string& state);
+	static std::pair<NState::State,bool> to_state(const std::string&);
 	static std::vector<std::string> allStates();
 	static std::vector<NState::State> states();
 

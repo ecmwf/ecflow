@@ -29,7 +29,7 @@ public:
 
 	static task_ptr create(const std::string& name);
 
-   std::ostream& print(std::ostream&) const override;
+	void print(std::string&) const override;
    bool operator==(const Task& rhs) const;
 
    /// Add an alias. The .usr is populated with contents of user_file_contents
@@ -90,7 +90,7 @@ public:
 	bool resolveDependencies(JobsParam& jobsParam) override;
 
   	node_ptr removeChild( Node* child) override;
- 	bool addChild( node_ptr child,size_t position = std::numeric_limits<std::size_t>::max()) override;
+ 	bool addChild( const node_ptr& child,size_t position = std::numeric_limits<std::size_t>::max()) override;
  	bool isAddChildOk( Node* child, std::string& errorMsg) const override;
 
    void order(Node* immediateChild, NOrder::Order) override;
@@ -108,7 +108,7 @@ public:
 private:
    void copy(const Task&);
    size_t child_position(const Node*) const override;
-   std::string write_state() const override;
+   void write_state(std::string&, bool&) const override;
 
 private:
    /// For use by python interface,

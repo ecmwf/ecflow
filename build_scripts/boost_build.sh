@@ -148,6 +148,7 @@ echo "using compiler $tool with build $1 release variants"
  
 # ========================================================================
 # Note: boost thread *ONLY* need to test multi-threaded server See: define ECFLOW_MT
+# <TODO> - boost system is header only from boosy version 1.69
 # ========================================================================
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=release  -j2
@@ -155,7 +156,6 @@ echo "using compiler $tool with build $1 release variants"
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=release  -j2
 ./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-thread variant=release  -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-regex variant=release  -j2
 
 
 # Allow python to be disabled  

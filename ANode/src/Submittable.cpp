@@ -183,26 +183,25 @@ void Submittable::calendarChanged(
    check_for_lateness(c,inherited_late);
 }
 
-std::string Submittable::write_state() const
+void Submittable::write_state(std::string& ret, bool& added_comment_char) const
 {
    // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
    //             multiple statement on a single line i.e.
    //                 task a; task b;
-   std::string ret;
-   if ( !paswd_.empty() && paswd_!= Submittable::DUMMY_JOBS_PASSWORD()) { ret += " passwd:"; ret += paswd_;}
-   if ( !rid_.empty() )  { ret += " rid:"; ret += rid_; }
+   if ( !paswd_.empty() && paswd_!= Submittable::DUMMY_JOBS_PASSWORD()) { add_comment_char(ret,added_comment_char); ret += " passwd:"; ret += paswd_;}
+   if ( !rid_.empty() )  { add_comment_char(ret,added_comment_char); ret += " rid:"; ret += rid_; }
 
    // The abr_, can contain user generated messages, including \n and ;, hence remove these
    // as they can mess up the parsing on reload.
    if ( !abr_.empty() ) {
+      add_comment_char(ret,added_comment_char);
       std::string the_abort_reason = abr_;
       Str::replaceall(the_abort_reason,"\n","\\n");
       Str::replaceall(the_abort_reason,";"," ");
       ret += " abort<:"; ret += the_abort_reason; ret += ">abort";
    }
-   if ( tryNo_ != 0) { ret += " try:"; ret += boost::lexical_cast<std::string>(tryNo_); }
-   ret += Node::write_state();
-   return ret;
+   if ( tryNo_ != 0) { add_comment_char(ret,added_comment_char); ret += " try:"; ret += boost::lexical_cast<std::string>(tryNo_); }
+   Node::write_state(ret,added_comment_char);
 }
 
 void Submittable::read_state(const std::string& line,const std::vector<std::string>& lineTokens)
@@ -210,17 +209,19 @@ void Submittable::read_state(const std::string& line,const std::vector<std::stri
    //  0    1   2
    // task name #
    for(size_t i = 3; i < lineTokens.size(); i++) {
-      if (lineTokens[i].find("passwd:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],paswd_))
+      const std::string& line_token_i = lineTokens[i];
+
+      if (line_token_i.find("passwd:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,paswd_))
             throw std::runtime_error( "Submittable::read_state failed for jobs password : " + name());
       }
-      else if (lineTokens[i].find("rid:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],rid_))
+      else if (line_token_i.find("rid:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,rid_))
             throw std::runtime_error( "Submittable::read_state failed for rid : " + name());
       }
-      else if (lineTokens[i].find("try:") != std::string::npos ) {
+      else if (line_token_i.find("try:") != std::string::npos ) {
          std::string try_number;
-         if (!Extract::split_get_second(lineTokens[i],try_number))
+         if (!Extract::split_get_second(line_token_i,try_number))
             throw std::runtime_error( "Submittable::read_state failed for try number : " + name());
          tryNo_ = Extract::theInt(try_number,"Submittable::read_state failed for try number");
       }

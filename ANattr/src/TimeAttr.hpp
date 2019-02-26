@@ -70,7 +70,7 @@ public:
 	TimeAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
 		: ts_(start,finish,incr,relative), free_(false),state_change_no_(0) {}
 
-	std::ostream& print(std::ostream&) const;
+	void print(std::string&) const;
    bool operator==(const TimeAttr& rhs) const;
    bool operator<(const TimeAttr& rhs) const { return ts_ < rhs.ts_; }
 	bool structureEquals(const TimeAttr& rhs) const;
@@ -103,7 +103,8 @@ public:
  	unsigned int state_change_no() const { return state_change_no_; }
 
    std::string name() const { return toString(); } /* ABO */
-	std::string toString() const;
+   std::string toString() const;
+   void write(std::string&) const;
 	std::string dump() const;
 
 	// access

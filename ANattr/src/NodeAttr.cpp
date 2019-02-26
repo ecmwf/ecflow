@@ -115,25 +115,30 @@ bool Event::operator==( const Event& rhs ) const {
    return true;
 }
 
-std::ostream& Event::print( std::ostream& os ) const {
+void Event::print( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ) << toString();
+   Indentor::indent( os ); write(os);
    if ( !PrintStyle::defsStyle() ) {
-      if (v_)  os << " # " << Event::SET();
+      if (v_) { os += " # " ; os += Event::SET(); }
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string Event::toString() const {
-   std::string ret = "event ";
+   std::string ret;
+   write(ret);
+   return ret;
+}
+
+void Event::write(std::string& ret) const
+{
+   ret += "event ";
    if ( number_ == std::numeric_limits< int >::max() )  ret += n_;
    else {
       ret += boost::lexical_cast<std::string>(number_);
       ret += " ";
       ret += n_;
    }
-   return ret;
 }
 
 std::string Event::dump() const {
@@ -152,8 +157,8 @@ bool Event::isValidState( const std::string& state ) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Meter::Meter( const std::string& name, int min, int max, int colorChange ) :
-	         min_( min ), max_( max ), v_( min ), cc_( colorChange ),
+Meter::Meter( const std::string& name, int min, int max, int colorChange, int value ) :
+	         min_( min ), max_( max ), v_( value ), cc_( colorChange ),
 	         n_( name ), used_( false ), state_change_no_( 0 )
 {
    if ( !Str::valid_name( name ) ) {
@@ -165,6 +170,10 @@ Meter::Meter( const std::string& name, int min, int max, int colorChange ) :
 
    if (colorChange == std::numeric_limits<int>::max()) {
       cc_ =  max_;
+   }
+
+   if (value == std::numeric_limits<int>::max()) {
+      v_ =  min_;
    }
 
    if ( cc_ < min || cc_ > max ) {
@@ -209,23 +218,27 @@ bool Meter::operator==( const Meter& rhs ) const {
    return true;
 }
 
-std::ostream& Meter::print( std::ostream& os ) const {
+void Meter::print( std::string& os ) const {
    Indentor in;
-   Indentor::indent( os ) <<  toString();
+   Indentor::indent( os ) ; write(os);
    if ( !PrintStyle::defsStyle() ) {
-      if (v_ != min_) os << " # " << v_;
+      if (v_ != min_) { os += " # " ; os += boost::lexical_cast<std::string>(v_); }
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string Meter::toString() const {
-   std::string ret = "meter ";
+   std::string ret;
+   write(ret);
+   return ret;
+}
+
+void Meter::write(std::string& ret) const {
+   ret += "meter ";
    ret += n_; ret += " ";
    ret += boost::lexical_cast<std::string>(min_); ret += " ";
    ret += boost::lexical_cast<std::string>(max_); ret += " ";
    ret += boost::lexical_cast<std::string>(cc_);
-   return ret;
 }
 
 std::string Meter::dump() const {
@@ -246,30 +259,34 @@ Label::Label(const std::string& name, const std::string& value, const std::strin
    }
 }
 
-
-std::ostream& Label::print( std::ostream& os ) const {
+void Label::print( std::string& os ) const {
 
    Indentor in;
-   Indentor::indent( os ) << toString();
+   Indentor::indent( os ) ; write(os);
    if (!PrintStyle::defsStyle()) {
       if (!new_v_.empty()) {
          if (new_v_.find("\n") == std::string::npos) {
-            os << " # \"" << new_v_ << "\"";
+            os += " # \"" ; os += new_v_ ; os += "\"";
          }
          else {
             std::string value = new_v_;
             Str::replaceall(value,"\n","\\n");
-            os << " # \"" << value << "\"";
+            os += " # \"" ; os += value ; os += "\"";
          }
       }
    }
-   os << "\n";
-   return os;
+   os += "\n";
 }
 
 std::string Label::toString() const {
    // parsing always STRIPS the quotes, hence add them back
    std::string ret; ret.reserve(n_.size() + v_.size() + 10);
+   write(ret);
+   return ret;
+}
+
+void Label::write(std::string& ret) const {
+   // parsing always STRIPS the quotes, hence add them back
    ret += "label ";
    ret += n_;
    ret += " \"";
@@ -281,7 +298,6 @@ std::string Label::toString() const {
       ret += value;
    }
    ret += "\"";
-   return ret;
 }
 
 std::string Label::dump() const {

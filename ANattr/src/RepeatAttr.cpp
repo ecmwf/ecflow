@@ -77,12 +77,11 @@ const std::string& Repeat::name() const {
    return (type_.get()) ? type_->name() : Str::EMPTY();
 }
 
-std::ostream& Repeat::print( std::ostream& os ) const {
+void Repeat::print( std::string& os ) const {
 	if (type_) {
 		Indentor in;
-		Indentor::indent(os) << toString() << "\n";
+		Indentor::indent(os); write(os); os += "\n";
 	}
-	return os;
 }
 
 // =========================================================================
@@ -106,6 +105,13 @@ void  RepeatBase::update_repeat_genvar() const
    // Note repeat::value() can be on e past the last valid value, at expiration of Repeat loop
    //      However Repeat::last_valid_value() will just return the last valid value.
    var_.set_value( valueAsString() );
+}
+
+std::string RepeatBase::toString() const
+{
+   std::string ret;
+   write(ret);
+   return ret;
 }
 
 // =============================================================
@@ -262,19 +268,19 @@ void RepeatDate::reset() {
 	incr_state_change_no();
 }
 
-std::string RepeatDate::toString() const
+void RepeatDate::write(std::string& ret) const
 {
-	std::string ret = "repeat date ";  ret += name_; ret += " ";
+   ret += "repeat date ";  ret += name_; ret += " ";
    ret += boost::lexical_cast<std::string>(start_); ret += " ";
    ret += boost::lexical_cast<std::string>(end_);   ret += " ";
    ret += boost::lexical_cast<std::string>(delta_);
 
-	if (!PrintStyle::defsStyle() && (value_ != start_)) {
-	   ret += " # ";
-	   ret += boost::lexical_cast<std::string>(value_);
-	}
-	return ret;
+   if (!PrintStyle::defsStyle() && (value_ != start_)) {
+      ret += " # ";
+      ret += boost::lexical_cast<std::string>(value_);
+   }
 }
+
 std::string RepeatDate::dump() const
 {
 	std::stringstream ss;
@@ -495,9 +501,9 @@ void RepeatInteger::setToLastValue()
 	incr_state_change_no();
 }
 
-std::string RepeatInteger::toString() const
+void RepeatInteger::write(std::string& ret) const
 {
-   std::string ret = "repeat integer ";  ret += name_; ret += " ";
+   ret += "repeat integer ";  ret += name_; ret += " ";
    ret += boost::lexical_cast<std::string>(start_);  ret += " ";
    ret += boost::lexical_cast<std::string>(end_);
    if (delta_ != 1) { ret += " ";  ret += boost::lexical_cast<std::string>(delta_); }
@@ -506,8 +512,8 @@ std::string RepeatInteger::toString() const
       ret += " # ";
       ret += boost::lexical_cast<std::string>(value_);
    }
-   return ret;
 }
+
 std::string RepeatInteger::dump() const
 {
 	std::stringstream ss;
@@ -605,16 +611,16 @@ bool RepeatEnumerated::compare(RepeatBase* rb) const
 	return operator==(*rhs);
 }
 
-std::string RepeatEnumerated::toString() const
+void RepeatEnumerated::write(std::string& ret) const
 {
-   std::string ret = "repeat enumerated ";  ret += name_;
+   ret += "repeat enumerated ";  ret += name_;
    BOOST_FOREACH(const string& s, theEnums_) { ret += " \""; ret += s; ret += "\""; }
    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
       ret += " # ";
       ret += boost::lexical_cast<std::string>(currentIndex_);
    }
-   return ret;
 }
+
 std::string RepeatEnumerated::dump() const
 {
 	std::stringstream ss;
@@ -800,16 +806,16 @@ bool RepeatString::compare(RepeatBase* rb) const
 	return operator==(*rhs);
 }
 
-std::string RepeatString::toString() const
+void RepeatString::write(std::string& ret) const
 {
-   std::string ret = "repeat string ";  ret += name_;
+   ret += "repeat string ";  ret += name_;
    BOOST_FOREACH(const string& s, theStrings_) { ret += " \""; ret += s; ret += "\""; }
    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
       ret += " # ";
       ret += boost::lexical_cast<std::string>(value());
    }
-   return ret;
 }
+
 std::string RepeatString::dump() const
 {
 	std::stringstream ss;
@@ -926,11 +932,10 @@ bool RepeatDay::compare(RepeatBase* rb) const
 	return operator==(*rhs);
 }
 
-std::string RepeatDay::toString() const
+void RepeatDay::write(std::string& ret) const
 {
-   std::string ret = "repeat day ";
+   ret += "repeat day ";
    ret += boost::lexical_cast<std::string>(step_);
-   return ret;
 }
 
 std::string RepeatDay::dump() const

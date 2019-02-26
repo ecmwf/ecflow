@@ -494,9 +494,6 @@ ecbuild_add_executable( TARGET   ecflow_ui.x
          ${OPENSSL_LIBRARIES}
 )
 
-# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
-target_link_libraries(ecflow_ui.x debug ${Boost_REGEX_LIBRARY_DEBUG}   ${Boost_REGEX_LIBRARY_RELEASE} )
-
 
 if(0)
 set(logviewer_srcs

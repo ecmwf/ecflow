@@ -31,7 +31,7 @@ public:
    Label(const std::string& name, const std::string& value, const std::string& new_value= "");
    Label() = default;
 
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    const std::string& name() const      { return n_;}
    const std::string& value() const     { return v_;}
    const std::string& new_value() const { return new_v_;}
@@ -67,6 +67,9 @@ public:
    static const Label& EMPTY(); // Added to support return by reference
 
 private:
+   void write(std::string&) const;
+
+private:
    std::string n_;
    std::string v_;
    std::string new_v_;
@@ -93,7 +96,7 @@ public:
 
    std::string name_or_number() const; // if name present return, else return number
    const std::string& name() const { return  n_;}
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    bool value() const { return v_;}
    void reset() { set_value(false);}
    bool empty() const { return (n_.empty() && number_ == std::numeric_limits<int>::max()); }
@@ -115,6 +118,9 @@ public:
    static const Event& EMPTY(); // Added to support return by reference
 
 private:
+   void write(std::string&) const;
+
+private:
    bool         v_{false};
    int          number_;
    std::string  n_;
@@ -133,10 +139,10 @@ private:
 // range min-max
 class Meter {
 public:
-   Meter(const std::string& name,int min, int max, int colorChange = std::numeric_limits<int>::max());
+   Meter(const std::string& name,int min,int max,int colorChange = std::numeric_limits<int>::max(),int value = std::numeric_limits<int>::max());
    Meter() = default;
 
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    void reset() { set_value(min_);}
    void set_value(int v); // can throw throw std::runtime_error if out of range
    bool empty() const { return n_.empty(); }
@@ -160,7 +166,7 @@ public:
    static const Meter& EMPTY(); // Added to support return by reference
 
 private:
-
+   void write(std::string&) const;
    bool isValidValue(int v) const { return (v >= min_ && v <= max_); }
 
    int          min_{0};

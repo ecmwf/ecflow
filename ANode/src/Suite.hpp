@@ -64,7 +64,7 @@ public:
    const std::string& debugType() const override;
 
    bool operator==(const Suite& rhs) const;
-   std::ostream& print(std::ostream&) const override;
+   void print(std::string&) const override;
 
    void addClock( const ClockAttr& , bool initialize_calendar = true); // throw std::run_time if more than one clock is added
    void add_end_clock( const ClockAttr& );
@@ -102,7 +102,7 @@ private:
    void begin_calendar();
    void requeue_calendar();
    void handle_clock_attribute_change();
-   std::string write_state() const override;
+   void write_state(std::string&, bool&) const override;
 
    friend class cereal::access;
    template<class Archive>

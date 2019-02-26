@@ -1008,7 +1008,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
                 //we do not want a new suite list through rescanTree() unless the task itself
                 //was a sync!
                 //With this we try to avoid unnecessary calls to update the suite list and avoid infinite recursion!!!
-                bool neednewSuiteList= VTask::SyncTask;
+                bool neednewSuiteList=task->type() != VTask::SyncTask;
 
                 //This might update the suites + restart the timer
                 rescanTree(neednewSuiteList);
@@ -1704,7 +1704,7 @@ void ServerHandler::writeDefs(VInfo_ptr info,const std::string& fileName)
         PrintStyle style(PrintStyle::MIGRATE);
         std::ofstream out(fileName.c_str());
         out << "defs_state MIGRATE" << std::endl;
-        info->node()->node()->print(out);
+        out << info->node()->node()->print();
         out << std::endl;
         out.close();
     }

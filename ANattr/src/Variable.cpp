@@ -62,32 +62,38 @@ bool Variable::operator==( const Variable& rhs ) const {
    return true;
 }
 
-std::ostream& Variable::print( std::ostream& os ) const {
+void Variable::print( std::string& os ) const {
    // see notes in VariableParser.h
    //               Hence we do the following:
    //                  a/ On parsing always remove quotes ie single or double
    //                  b/ On serialising always add single quotes
    Indentor in;
-   return Indentor::indent( os ) << toString() << "\n";
+   Indentor::indent( os ); write(os); os += "\n";
 }
 
-std::ostream& Variable::print_server_variable( std::ostream& os ) const {
+void Variable::print_server_variable( std::string& os ) const {
    // see notes in VariableParser.h
    //               Hence we do the following:
    //                  a/ On parsing always remove quotes ie single or double
    //                  b/ On serialising always add single quotes
    Indentor in;
-   return Indentor::indent( os ) << toString() << " # server\n";
+   Indentor::indent( os );  write(os); os += " # server\n";
 }
 
-std::ostream& Variable::print_generated( std::ostream& os ) const {
+void Variable::print_generated( std::string& os ) const {
    Indentor in;
-   return Indentor::indent( os ) << "# " << toString() << "\n";
+   Indentor::indent( os ); os += "# ";  write(os); os += "\n";
 }
 
 std::string Variable::toString() const
 {
    std::string ret; ret.reserve(n_.size() + v_.size() + 8);
+   write(ret);
+   return ret;
+}
+
+void Variable::write(std::string& ret) const
+{
    ret += "edit ";
    ret += n_;
    ret += " '";
@@ -99,9 +105,7 @@ std::string Variable::toString() const
       ret += value;
    }
    ret += "'";
-   return ret;
 }
-
 
 std::string Variable::dump() const
 {

@@ -27,7 +27,7 @@ public:
 	ZombieAttr()= default;
 
  	bool operator==(const ZombieAttr& rhs) const;
-	std::ostream& print(std::ostream&) const;
+ 	void print(std::string&) const;
 	bool empty() const { return zombie_type_ == ecf::Child::NOT_SET; }
 
 	ecf::Child::ZombieType zombie_type() const { return zombie_type_;}
@@ -61,6 +61,9 @@ public:
 	static int default_user_zombie_life_time() { return 300; }
    static int default_path_zombie_life_time() { return 900; }
    static int minimum_zombie_life_time()      { return 60; }
+
+private:
+   void write(std::string&) const;
 
 private:
 	ecf::Child::ZombieType           zombie_type_{ecf::Child::NOT_SET};      // User,path or ecf

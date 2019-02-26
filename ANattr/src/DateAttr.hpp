@@ -33,7 +33,7 @@ public:
    : day_(date.day()), month_(date.month()), year_(date.year()), free_(false),
      state_change_no_(0) {} // for test
 
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    bool operator==(const DateAttr& rhs) const;
    bool operator<(const DateAttr& rhs) const;
    bool structureEquals(const DateAttr& rhs) const;
@@ -74,6 +74,7 @@ public:
    int year() const { return year_; }
 
 private:
+   void write(std::string&) const;
    bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:

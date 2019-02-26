@@ -589,24 +589,29 @@ bool TimeSeries::operator==(const TimeSeries& rhs) const
 	return structureEquals(rhs);
 }
 
-std::ostream& TimeSeries::print(std::ostream& os) const
+void TimeSeries::print(std::string& os) const
 {
-	os << toString() << "\n";
-	return os;
+   write(os);
+	os += "\n";
 }
 
 std::string TimeSeries::toString() const
 {
    std::string ret ;
+   write(ret);
+   return ret;
+}
+
+void TimeSeries::write(std::string& ret) const
+{
    if (relativeToSuiteStart_) ret += "+";
-   ret += start_.toString();
+   start_.write(ret);
    if (!finish_.isNULL()) {
       ret += " ";
-      ret += finish_.toString();
+      finish_.write(ret);
       ret += " ";
-      ret += incr_.toString();
+      incr_.write(ret);
    }
-   return ret;
 }
 
 std::string TimeSeries::dump() const
@@ -668,10 +673,15 @@ bool TimeSeries::checkInvariants(std::string& errormsg) const
 }
 
 std::ostream& operator<<(std::ostream& os, const TimeSeries* d) {
-	if (d) return d->print(os);
+	if (d) {
+	   string s;
+	   d->print(s);
+	   os << s;
+	   return os;
+	}
 	return os << "TimeSlot == NULL";
 }
-std::ostream& operator<<(std::ostream& os, const TimeSeries& d)  { return d.print(os); }
+std::ostream& operator<<(std::ostream& os, const TimeSeries& d)  { string s; d.print(s); os << s; return os; }
 
 
 ecf::TimeSeries TimeSeries::create(const std::string& str)
@@ -690,6 +700,17 @@ std::string TimeSeries::state_to_string(bool isFree) const
    //             Hence use of '/' character
    // time 10:30 # free isValid:false nextTimeSlot/10:30 relativeDuration/00:00:00
    std::string ret;
+   write_state(ret,isFree);
+   return ret;
+}
+
+void TimeSeries::write_state(std::string& ret,bool isFree) const
+{
+   // *IMPORTANT* we *CANT* use ';' character, since is used in the parser, when we have
+   //             multiple statement on a single line i.e.
+   //                 task a; task b;
+   //             Hence use of '/' character
+   // time 10:30 # free isValid:false nextTimeSlot/10:30 relativeDuration/00:00:00
    bool next_time_slot_changed = ( nextTimeSlot_ != start_);
    bool relative_duration_changed = (!relativeDuration_.is_special() && relativeDuration_.total_seconds() != 0);
    if (isFree || !isValid_ || next_time_slot_changed || relative_duration_changed) {
@@ -699,7 +720,6 @@ std::string TimeSeries::state_to_string(bool isFree) const
       if (next_time_slot_changed) { ret += " nextTimeSlot/"; ret += nextTimeSlot_.toString(); }
       if (relative_duration_changed) { ret += " relativeDuration/"; ret += to_simple_string(relativeDuration_); }
    }
-   return ret;
 }
 
 void TimeSeries::parse_state(size_t index,const std::vector<std::string>& lineTokens, ecf::TimeSeries& ts)

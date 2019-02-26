@@ -28,23 +28,24 @@ using namespace std;
 
 namespace ecf {
 
-std::ostream& AutoRestoreAttr::print(std::ostream& os) const
+void AutoRestoreAttr::print(std::string& os) const
 {
    Indentor in;
-   Indentor::indent(os) << "autorestore";
-   for(const auto & i : nodes_to_restore_) os << " " << i;
-   os << "\n";
-   return os;
+   Indentor::indent(os); write(os); os += "\n";
 }
 
 std::string AutoRestoreAttr::toString() const
 {
-   std::stringstream ss;
-   ss << "autorestore";
-   for(const auto & i : nodes_to_restore_) ss << " " << i;
-   return ss.str();
+   std::string ret;
+   write(ret);
+   return ret;
 }
 
+void AutoRestoreAttr::write(std::string& ret) const
+{
+   ret += "autorestore";
+   for(const auto & i : nodes_to_restore_) { ret += " "; ret += i;}
+}
 
 bool AutoRestoreAttr::operator==(const AutoRestoreAttr& rhs) const
 {

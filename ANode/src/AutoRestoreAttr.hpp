@@ -33,13 +33,16 @@ public:
    // needed by node copy constructor and persistence
    void set_node(Node* n) { node_ = n; }
 
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    bool operator==(const AutoRestoreAttr& rhs) const;
    std::string toString() const;
 
    void do_autorestore();
    const std::vector<std::string>& nodes_to_restore() const { return nodes_to_restore_; }
    void check(std::string& errorMsg) const; // check auto restore can reference the nodes
+
+private:
+   void write(std::string&) const;
 
 private:
    Node* node_{nullptr};                                // Not persisted, constructor will always set this up.

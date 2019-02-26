@@ -221,9 +221,7 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as)
    }
    else {
       PrintStyle print_style(PrintStyle::MIGRATE);
-      std::stringstream ss;
-      the_server_defs->print(ss);
-      server_defs_ = ss.str();
+      the_server_defs->print(server_defs_);
    }
 
 #ifdef DEBUG_SERVER_SYNC

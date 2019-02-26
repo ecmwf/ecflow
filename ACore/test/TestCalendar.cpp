@@ -77,7 +77,8 @@ BOOST_AUTO_TEST_CASE( test_calendar_state_parsing )
  	boost::gregorian::date theDate(2009,2,10);
  	ptime time(theDate, hours(23) + minutes(59));
 	calendar.init(time, Calendar::REAL);
-	std::string calendar_state = calendar.write_state();
+	std::string calendar_state;
+	calendar.write_state(calendar_state);
 
 	// read the state, into a different calendar & compare
 	std::vector<std::string> lineTokens;
@@ -92,9 +93,12 @@ BOOST_AUTO_TEST_CASE( test_calendar_state_parsing )
 
    // re-compare after reloading state
    lineTokens.clear();
-   calendar_state = calendar.write_state();
+   calendar_state.clear();
+   calendar.write_state(calendar_state);
+
    Str::split(calendar_state,lineTokens);
    calendar2.read_state(calendar_state,lineTokens);
+
    BOOST_CHECK_MESSAGE(calendar == calendar2,"Calendar should be the same");
 }
 

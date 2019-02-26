@@ -58,35 +58,34 @@ Log::Log(const std::string& fileName)
 {
 }
 
+void Log::create_logimpl()
+{
+   if (!logImpl_) {
+      logImpl_ = std::make_unique<LogImpl>(fileName_);
+   }
+}
+
 bool Log::log(Log::LogType lt,const std::string& message)
 {
-	if (!logImpl_) {
-		logImpl_ = std::make_unique<LogImpl>(fileName_);
-	}
+   create_logimpl();
 	return logImpl_->log(lt,message);
 }
 
 bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 {
-	if (!logImpl_) {
-		logImpl_ = std::make_unique<LogImpl>(fileName_);
-	}
+   create_logimpl();
 	return logImpl_->log_no_newline(lt,message);
 }
 
 bool Log::append(const std::string& message)
 {
-   if (!logImpl_) {
-		logImpl_ = std::make_unique<LogImpl>(fileName_);
-   }
+   create_logimpl();
    return logImpl_->append(message);
 }
 
 void Log::cache_time_stamp()
 {
-	if (!logImpl_) {
-      logImpl_ = std::make_unique<LogImpl>(fileName_);
-	}
+   create_logimpl();
 	logImpl_->create_time_stamp();
 }
 

@@ -235,7 +235,7 @@ public:
 
    node_ptr remove(); // gets the parent then calls removeChild
    virtual node_ptr removeChild( Node* child) = 0;
-   virtual bool addChild( node_ptr child,size_t position = std::numeric_limits<std::size_t>::max()) = 0; // return false if child of same name exist, leak!!!
+   virtual bool addChild( const node_ptr& child,size_t position = std::numeric_limits<std::size_t>::max()) = 0; // return false if child of same name exist, leak!!!
    virtual bool isAddChildOk( Node* child, std::string& errorMsg) const = 0; // return false if child of same name
 
    virtual void verification(std::string& errorMsg) const;
@@ -244,7 +244,8 @@ public:
    virtual void generate_scripts( const std::map<std::string,std::string>& override) const = 0;
 
    // standard functions: ==============================================
-   virtual std::ostream& print(std::ostream&) const;
+   std::string print() const;
+   virtual void print(std::string&) const;
    std::string print(PrintStyle::Type_t type) const;
    bool operator==(const Node& rhs) const;
    virtual bool checkInvariants(std::string& errorMsg) const;
@@ -422,6 +423,7 @@ public:
    void auto_add_inlimit_externs(Defs* defs) { inLimitMgr_.auto_add_inlimit_externs(defs);}
    void addEvent( const Event& );       // will throw std::runtime_error if duplicate
    void addMeter( const Meter& );       // will throw std::runtime_error if duplicate
+   void add_meter(const std::string& name,int min,int max,int color_change,int value); // will throw std::runtime_error if duplicate
    void addLabel( const Label& );       // will throw std::runtime_error if duplicate
    void add_label(const std::string& name,const std::string& value, const std::string& new_value);
    void addAutoCancel( const ecf::AutoCancelAttr& );
@@ -671,7 +673,8 @@ protected:
    void update_repeat_genvar() const;
 
    // returns node state without trailing new lines
-   virtual std::string write_state() const;
+   virtual void write_state(std::string& ret, bool& added_comment_char) const;
+   void add_comment_char(std::string& ret, bool& added_comment_char) const;
    virtual void read_state(const std::string& line,const std::vector<std::string>& lineTokens);
 
    // Observer notifications

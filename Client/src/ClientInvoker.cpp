@@ -1073,7 +1073,7 @@ int ClientInvoker::alter(const std::vector<std::string>& paths,
 
    /// Handle command constructors that can throw
    Cmd_ptr cts_cmd;
-   try { cts_cmd = Cmd_ptr( new AlterCmd(paths,alterType,attrType,name,value) ); }
+   try { cts_cmd = std::make_shared<AlterCmd>(paths,alterType,attrType,name,value); }
    catch (std::exception& e ){
       std::stringstream ss; ss << "ClientInvoker::alter failed: " << e.what();
       server_reply_.set_error_msg( ss.str() );
@@ -1093,7 +1093,7 @@ int ClientInvoker::alter( const std::string& path, const std::string& alterType,
 
    /// Handle command constructors that can throw
    Cmd_ptr cts_cmd;
-   try { cts_cmd = Cmd_ptr( new AlterCmd(std::vector<std::string>(1, path), alterType, attrType, name, value)  ); }
+   try { cts_cmd = std::make_shared<AlterCmd>(std::vector<std::string>(1, path), alterType, attrType, name, value); }
    catch (std::exception& e ){
       std::stringstream ss; ss << "ClientInvoker::alter failed: " << e.what();
       server_reply_.set_error_msg( ss.str() );

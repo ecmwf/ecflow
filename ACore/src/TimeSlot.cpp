@@ -56,24 +56,23 @@ bool TimeSlot::operator>=( const TimeSlot& rhs ) const
    return operator==(rhs);
 }
 
-std::ostream& TimeSlot::print(std::ostream& os) const
-{
-	os << toString();
- 	return os;
-}
-
 std::string TimeSlot::toString() const
 {
-   if (isNULL())  return "00:00";
-
    std::string ret;
-	if (h_ < 10)  ret += "0";
-	ret += boost::lexical_cast<std::string>(h_);
+   write(ret);
+   return ret;
+}
 
-	ret += Str::COLON();
-	if (m_ < 10) ret += "0";
-	ret += boost::lexical_cast<std::string>(m_);
-	return ret;
+void TimeSlot::write(std::string& ret) const
+{
+   if (isNULL()) { ret += "00:00"; return;}
+
+   if (h_ < 10)  ret += "0";
+   ret += boost::lexical_cast<std::string>(h_);
+
+   ret += Str::COLON();
+   if (m_ < 10) ret += "0";
+   ret += boost::lexical_cast<std::string>(m_);
 }
 
 boost::posix_time::time_duration TimeSlot::duration() const
@@ -83,10 +82,15 @@ boost::posix_time::time_duration TimeSlot::duration() const
 }
 
 std::ostream& operator<<(std::ostream& os, const TimeSlot* d) {
-	if (d) return d->print(os);
+	if (d) {
+	   std::string s;
+	   d->print(s);
+	   os << s;
+	   return os;
+	}
 	return os << "TimeSlot == NULL";
 }
-std::ostream& operator<<(std::ostream& os, const TimeSlot& d)  { return d.print(os); }
+std::ostream& operator<<(std::ostream& os, const TimeSlot& d){std::string s; d.print(s); os << s; return os; }
 
 
 template<class Archive>

@@ -42,7 +42,7 @@ public:
 	ClockAttr(int day, int month, int year, bool hybrid = false );
 	explicit ClockAttr(bool hybrid = false);
 
-	std::ostream& print(std::ostream&) const;
+	void print(std::string&) const;
 	bool operator==(const ClockAttr& rhs) const;
 
 	void date(int day, int month, int year);
@@ -73,6 +73,9 @@ public:
  	bool is_virtual() const { return startStopWithServer_;}
 	std::string toString() const;
    boost::posix_time::ptime ptime() const;
+
+private:
+   void write(std::string& os) const;
 
 private:
 	bool hybrid_;

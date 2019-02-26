@@ -26,7 +26,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
+#include <regex>
 
 Sound* Sound::instance_=nullptr;
 
@@ -117,9 +117,9 @@ void  Sound::setCurrentPlayer(const std::string& current)
 
 bool Sound::isSoundFile(const std::string& fName) const
 {
-	const boost::regex expr(formats_);
-	boost::smatch what;
-	if(boost::regex_match(fName, what,expr))
+	const std::regex expr(formats_);
+	std::smatch what;
+	if(std::regex_match(fName, what,expr))
        return true;
     return false;
 }

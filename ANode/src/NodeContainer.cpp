@@ -497,7 +497,7 @@ node_ptr NodeContainer::removeChild(Node* child)
 	return node_ptr();
 }
 
-bool NodeContainer::addChild( node_ptr child, size_t position)
+bool NodeContainer::addChild( const node_ptr& child, size_t position)
 {
 	// *** CANT construct shared_ptr from a raw pointer, must use dynamic_pointer_cast,
 	// *** otherwise the reference counts will get messed up.
@@ -599,7 +599,7 @@ family_ptr NodeContainer::add_family(const std::string& family_name)
    return the_family;
 }
 
-void NodeContainer::addTask(task_ptr t,size_t position)
+void NodeContainer::addTask(const task_ptr& t,size_t position)
 {
 	if (find_by_name(t->name()).get()) {
 		std::stringstream ss;
@@ -609,7 +609,7 @@ void NodeContainer::addTask(task_ptr t,size_t position)
 	add_task_only( t, position);
 }
 
-void NodeContainer::add_task_only( task_ptr t, size_t position)
+void NodeContainer::add_task_only( const task_ptr& t, size_t position)
 {
    if (t->parent()) {
       std::stringstream ss;
@@ -627,7 +627,7 @@ void NodeContainer::add_task_only( task_ptr t, size_t position)
    add_remove_state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void NodeContainer::add_family_only( family_ptr f, size_t position)
+void NodeContainer::add_family_only( const family_ptr& f, size_t position)
 {
    if (f->parent()) {
       std::stringstream ss;
@@ -646,7 +646,7 @@ void NodeContainer::add_family_only( family_ptr f, size_t position)
 }
 
 
-void NodeContainer::addFamily(family_ptr f,size_t position)
+void NodeContainer::addFamily(const family_ptr& f,size_t position)
 {
 	if (find_by_name(f->name()).get()) {
 		std::stringstream ss;
@@ -656,7 +656,7 @@ void NodeContainer::addFamily(family_ptr f,size_t position)
 	add_family_only( f, position );
 }
 
-void NodeContainer::add_child(node_ptr child,size_t position)
+void NodeContainer::add_child(const node_ptr& child,size_t position)
 {
    if (child->isTask()) {
       task_ptr task_child = std::dynamic_pointer_cast<Task>( child );
@@ -1023,11 +1023,10 @@ bool NodeContainer::operator==(const NodeContainer& rhs) const
    return Node::operator==(rhs);
 }
 
-std::ostream& NodeContainer::print(std::ostream& os) const
+void NodeContainer::print(std::string& os) const
 {
  	size_t node_vec_size = nodes_.size();
 	for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->print( os ); }
- 	return os;
 }
 
 bool NodeContainer::checkInvariants(std::string& errorMsg) const

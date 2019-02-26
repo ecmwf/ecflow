@@ -69,6 +69,32 @@ std::vector<Flag::Type> Flag::list()
    return ret;
 }
 
+constexpr std::array<Flag::Type,19> Flag::array()
+{
+   return std::array<Flag::Type,19>{
+      Flag::FORCE_ABORT,
+      Flag::USER_EDIT,
+      Flag::TASK_ABORTED,
+      Flag::EDIT_FAILED,
+      Flag::JOBCMD_FAILED,
+      Flag::NO_SCRIPT,
+      Flag::KILLED,
+      Flag::LATE,
+      Flag::MESSAGE,
+      Flag::BYRULE,
+      Flag::QUEUELIMIT,
+      Flag::WAIT,
+      Flag::LOCKED,
+      Flag::ZOMBIE,
+      Flag::NO_REQUE_IF_SINGLE_TIME_DEP,
+      Flag::ARCHIVED,
+      Flag::RESTORED,
+      Flag::THRESHOLD,
+      Flag::ECF_SIGTERM
+   };
+}
+
+
 std::string Flag::enum_to_string(Flag::Type flag) {
 
    switch ( flag ) {
@@ -97,6 +123,33 @@ std::string Flag::enum_to_string(Flag::Type flag) {
    return std::string();
 }
 
+const char* Flag::enum_to_char_star(Flag::Type flag) {
+   switch ( flag ) {
+      case Flag::FORCE_ABORT:  return "force_aborted"; break;
+      case Flag::USER_EDIT :   return "user_edit"; break;
+      case Flag::TASK_ABORTED: return "task_aborted"; break;
+      case Flag::EDIT_FAILED:  return "edit_failed"; break;
+      case Flag::JOBCMD_FAILED:return "ecfcmd_failed"; break;
+      case Flag::NO_SCRIPT:    return "no_script"; break;
+      case Flag::KILLED:       return "killed"; break;
+      case Flag::LATE:         return "late"; break;
+      case Flag::MESSAGE:      return "message"; break;
+      case Flag::BYRULE:       return "by_rule"; break;
+      case Flag::QUEUELIMIT:   return "queue_limit"; break;
+      case Flag::WAIT:         return "task_waiting"; break;
+      case Flag::LOCKED:       return "locked"; break;
+      case Flag::ZOMBIE:       return "zombie"; break;
+      case Flag::NO_REQUE_IF_SINGLE_TIME_DEP: return "no_reque"; break;
+      case Flag::ARCHIVED:     return "archived"; break;
+      case Flag::RESTORED:     return "restored"; break;
+      case Flag::THRESHOLD:    return "threshold"; break;
+      case Flag::ECF_SIGTERM:  return "sigterm"; break;
+      case Flag::NOT_SET:      return "not_set"; break;
+      default: break;
+   };
+   assert(false);
+   return nullptr;
+}
 
 Flag::Type Flag::string_to_flag_type(const std::string& s)
 {
@@ -149,14 +202,21 @@ void Flag::valid_flag_type(std::vector<std::string>& vec)
 std::string Flag::to_string() const
 {
    std::string ret;
-   std::vector<Flag::Type> flag_list =  Flag::list();
+   write(ret);
+   return ret;
+}
+
+void Flag::write(std::string& ret) const
+{
+   bool added = false;
+   std::array<Flag::Type,19> flag_list = Flag::array();
    for (auto & i : flag_list) {
       if ( is_set( i ) ) {
-         if (!ret.empty()) ret += ',';
-         ret += enum_to_string( i);
+         if (added) ret += ',';
+         ret += enum_to_char_star( i);
+         added = true;
       }
    }
-   return ret;
 }
 
 void Flag::set_flag(const std::string& flags)

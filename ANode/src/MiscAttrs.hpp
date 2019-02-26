@@ -39,7 +39,7 @@ public:
    void requeue();
 
    // standard functions: ==============================================
-   std::ostream& print(std::ostream&) const;
+   void print(std::string&) const;
    bool operator==(const MiscAttrs& ) const;
 
    // Access functions: ======================================================

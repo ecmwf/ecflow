@@ -21,6 +21,15 @@
 
 #set -eux
 
+#===============================================================================
+# Get the absolute path THIS script. use it to locate ecflow_client and ecflow_server
+# This avoids mixing 4/5 version of ecflow.
+# and need absolute since we change dir later on.
+#
+ECFLOW_BINDIR="$( cd "$(dirname "$0")" ; pwd -P )" 
+#echo "-----> ${ECFLOW_BINDIR} <-------"
+
+
 PATH=$PATH:/usr/local/bin:/usr/bin
 export TZ=GMT LANG=en_GB.UTG-8
 host=$(hostname)
@@ -99,7 +108,7 @@ echo "Checking if the server is running on $host:$port_number"
 
 export ECF_HOST=$host
 
-ecflow_client --ping 
+${ECFLOW_BINDIR}/ecflow_client --ping 
 if [ $? -eq 1 ]; then
   echo "";
   echo "... The server on $host:$port_number has already been stopped" 
@@ -110,8 +119,8 @@ fi
 echo "";
 echo Halting, check pointing and terminating the server
 
-ecflow_client  --halt=yes
-ecflow_client  --check_pt
-ecflow_client  --terminate=yes
+${ECFLOW_BINDIR}/ecflow_client  --halt=yes
+${ECFLOW_BINDIR}/ecflow_client  --check_pt
+${ECFLOW_BINDIR}/ecflow_client  --terminate=yes
 
 exit 0

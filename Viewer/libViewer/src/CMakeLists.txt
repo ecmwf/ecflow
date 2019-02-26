@@ -77,7 +77,3 @@ ecbuild_add_library( TARGET viewer
                               ${Boost_INCLUDE_DIRS}
                               ${CMAKE_CURRENT_BINARY_DIR}
                     )
-
-
-# This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
-target_link_libraries(viewer debug ${Boost_REGEX_LIBRARY_DEBUG}   ${Boost_REGEX_LIBRARY_RELEASE} )

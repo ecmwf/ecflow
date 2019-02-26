@@ -33,9 +33,9 @@ public:
    Variable() = default;
 
    const std::string& name() const   { return  n_;}
-   std::ostream& print(std::ostream&) const;
-   std::ostream& print_server_variable(std::ostream&) const;
-   std::ostream& print_generated(std::ostream&) const;
+   void print(std::string&) const;
+   void print_server_variable(std::string&) const;
+   void print_generated(std::string&) const;
    bool empty() const { return n_.empty(); }
 
    void set_value(const std::string& v) { v_ = v; }
@@ -51,6 +51,9 @@ public:
 
    // Added to support return by reference
    static const Variable& EMPTY();
+
+private:
+   void write(std::string&) const;
 
 private:
    std::string  n_;

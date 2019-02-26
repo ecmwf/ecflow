@@ -454,13 +454,13 @@ private:
 DefsParser::DefsParser(DefsStructureParser* p) : Parser(p)
 {
    reserve_vec(5);
-   addParser( new ExternParser(p) );
+   addParser( new HistoryParser(p) );
    addParser( new SuiteParser(p) );
+   addParser( new VariableParser(p,true) );
+   addParser( new ExternParser(p) );
 
    // for defs stat only
    addParser( new DefsStateParser(p) );
-   addParser( new VariableParser(p,true) );
-   addParser( new HistoryParser(p) );
 }
 
 DefsParser::DefsParser(DefsStructureParser* p, bool/*node_parser_only*/) : Parser(p)

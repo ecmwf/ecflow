@@ -106,28 +106,27 @@ bool Family::operator==(const Family& rhs) const
 	return NodeContainer::operator==(rhs);
 }
 
-std::ostream& Family::print(std::ostream& os) const
+void Family::print(std::string& os) const
 {
 	// Generated variable are not persisted since they are created on demand
 	// There *NO* point in printing them they will always be empty
 
 	Indentor in;
-	Indentor::indent(os) << "family " << name();
+	Indentor::indent(os) ; os += "family " ; os += name();
    if (!PrintStyle::defsStyle()) {
-      std::string st = write_state();
-      if (!st.empty()) os << " #" << st;
+      bool added_comment_char = false;
+      write_state(os,added_comment_char);
    }
-   os << "\n";
+   os += "\n";
 
 	Node::print(os);
 	NodeContainer::print(os);
-	Indentor::indent(os) << "endfamily\n";
-	return os;
+	Indentor::indent(os) ; os += "endfamily\n";
 }
 
-std::string Family::write_state() const
+void Family::write_state(std::string& ret, bool& added_comment_char) const
 {
-   return NodeContainer::write_state();
+   NodeContainer::write_state(ret,added_comment_char);
 }
 void Family::read_state(const std::string& line,const std::vector<std::string>& lineTokens)
 {
@@ -136,7 +135,7 @@ void Family::read_state(const std::string& line,const std::vector<std::string>& 
 
 const std::string& Family::debugType() const { return ecf::Str::FAMILY();}
 
-std::ostream& operator<<(std::ostream& os, const Family& d) { return d.print(os); }
+std::ostream& operator<<(std::ostream& os, const Family& d) { std::string s; d.print(s); os << s; return os; }
 
 void Family::collateChanges(DefsDelta& changes) const
 {

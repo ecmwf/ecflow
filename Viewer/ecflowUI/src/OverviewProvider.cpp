@@ -243,7 +243,8 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 		// f << "clock    : ";
 		if (suite->clockAttr())
 		{
-			suite->clockAttr().get()->print(f); // f << "\n";
+		   std::string s;suite->clockAttr().get()->print(s);
+		   f << s; // f << "\n";
 		}
 	}
 

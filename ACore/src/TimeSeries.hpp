@@ -112,7 +112,7 @@ public:
 	bool relative()  const  { return relativeToSuiteStart_; }
 	void free_slots(std::vector<boost::posix_time::time_duration>& ) const;
 
-	std::ostream& print(std::ostream&) const;
+	void print(std::string&) const;
  	bool operator==(const TimeSeries& rhs) const;
 	bool operator!=(const TimeSeries& rhs) const { return !operator==(rhs);}
    bool structureEquals(const TimeSeries& rhs) const;
@@ -121,7 +121,9 @@ public:
 	bool isNULL() const { return  start_.isNULL(); }
 
    std::string state_to_string(bool isFree) const;
+   void write_state(std::string&,bool free) const;
    std::string toString() const;
+   void write(std::string&) const;
   	std::string dump() const;
  	bool checkInvariants(std::string& errormsg) const;
 
@@ -153,7 +155,6 @@ public:
 	// Is the time still valid, return false means time has expired.
 	bool is_valid() const { return isValid_;}
 private:
-
 	static void testTime(int hour, int minute);
 
 	// HANDLE CASE WHERE FINISH MINUTES IS NOT DIVISIBLE BY THE INCREMENT
