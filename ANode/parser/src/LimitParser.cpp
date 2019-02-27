@@ -55,7 +55,9 @@ bool LimitParser::doParse(
          if (lineTokens[i] == "#") comment_fnd = true;
       }
 
-      node->addLimit( Limit( lineTokens[1], limitValue, value, paths ) ) ;
+      bool check = (rootParser()->get_file_type() != PrintStyle::NET);
+
+      node->addLimit( Limit( lineTokens[1], limitValue, value, paths, check), check ) ;
    }
    else {
       // structure

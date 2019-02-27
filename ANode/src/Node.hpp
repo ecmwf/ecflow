@@ -418,14 +418,14 @@ public:
    void addDay( const DayAttr& );
    void addCron( const ecf::CronAttr& );
 
-   void addLimit(const Limit& );         // will throw std::runtime_error if duplicate
-   void addInLimit(const InLimit& l);    // will throw std::runtime_error if duplicate
+   void addLimit(const Limit&, bool check = true);         // will throw std::runtime_error if duplicate
+   void addInLimit(const InLimit& l, bool check = true);    // will throw std::runtime_error if duplicate
    void auto_add_inlimit_externs(Defs* defs) { inLimitMgr_.auto_add_inlimit_externs(defs);}
-   void addEvent( const Event& );       // will throw std::runtime_error if duplicate
-   void addMeter( const Meter& );       // will throw std::runtime_error if duplicate
-   void add_meter(const std::string& name,int min,int max,int color_change,int value); // will throw std::runtime_error if duplicate
+   void addEvent( const Event&,bool check = true );       // will throw std::runtime_error if duplicate
+   void addMeter( const Meter&, bool check = true);       // will throw std::runtime_error if duplicate
+   void add_meter(const std::string& name,int min,int max,int color_change,int value,bool check = true); // will throw std::runtime_error if duplicate
    void addLabel( const Label& );       // will throw std::runtime_error if duplicate
-   void add_label(const std::string& name,const std::string& value, const std::string& new_value);
+   void add_label(const std::string& name,const std::string& value, const std::string& new_value, bool check = true);
    void addAutoCancel( const ecf::AutoCancelAttr& );
    void add_autoarchive( const ecf::AutoArchiveAttr& );
    void add_autorestore( const ecf::AutoRestoreAttr& );

@@ -50,7 +50,6 @@ void AutoArchiveAttr::write(std::string& ret) const
    ret += "autoarchive ";
    if (days_) {
       ret += boost::lexical_cast<std::string>(time_.hour()/24) ;
-      ret += "\n";
       return;
    }
    if (relative_) ret += "+";

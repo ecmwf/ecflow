@@ -106,7 +106,7 @@ bool DefsStructureParser::doParse(std::string& errorMsg,std::string& warningMsg)
       }
    }
 
-   if (file_type_ == PrintStyle::MIGRATE || parsing_node_string_) {
+   if (PrintStyle::is_persist_style(file_type_) || parsing_node_string_) {
       warningMsg += faults_;
       return true;
    }
@@ -185,7 +185,7 @@ void DefsStructureParser::getNextLine(std::string& line)
 	   if (defs_as_string_.empty()) infile_.getline(line);
 	   else                         defs_as_string_.getline(line);
 		lineNumber_++;
-	   if (file_type_ == PrintStyle::MIGRATE) {
+	   if (PrintStyle::is_persist_style(file_type_)) {
 	      return; // ignore multiline for migrate, *BECAUSE* *history* for group command uses ';'
 	   }
 
@@ -273,14 +273,11 @@ bool DefsStructureParser::semiColonInEditVariable()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-DefsString::DefsString(const std::string& defs_as_string): empty_(defs_as_string.empty()), index_(0)
-{
-   if (!empty_) Str::split(defs_as_string,lines_,"\n");
-}
-bool DefsString::good() const { return index_ < lines_.size();}
+DefsString::DefsString(const std::string& defs_as_string): empty_(defs_as_string.empty()),splitter_(defs_as_string,"\n"){}
+bool DefsString::good() const { return !splitter_.finished();}
 void DefsString::getline(std::string& line)
 {
-   assert(good());
-   line = lines_[index_];
-   index_++;
+   line.clear();
+   boost::string_view ref = splitter_.next();
+   line += std::string(ref.begin(),ref.end());
 }

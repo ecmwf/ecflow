@@ -60,16 +60,17 @@ bool EventParser::doParse( const std::string& line,
 		name = lineTokens[1];
  	}
 
-	Event event( number, name );
-
    // state
+	bool value = false;
    if (rootParser()->get_file_type() != PrintStyle::DEFS) {
       if (lineTokens[lineTokens.size()-1] == Event::SET()) {
-         event.set_value(true);
+          value = true;
       }
    }
 
-   nodeStack_top()->addEvent( event ) ;
+   bool check = (rootParser()->get_file_type() != PrintStyle::NET);
+
+   nodeStack_top()->addEvent( Event(number,name,value,check), check ) ;
 
 	return true;
 }

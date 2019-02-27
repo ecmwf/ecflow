@@ -29,7 +29,10 @@ bool LabelParser::doParse( const std::string& line,
 
 	std::string name,value,new_value;
 	Label::parse(line,lineTokens,rootParser()->get_file_type() != PrintStyle::DEFS,name,value,new_value);
-	nodeStack_top()->add_label(name,value,new_value);
+
+   bool check = (rootParser()->get_file_type() != PrintStyle::NET);
+
+	nodeStack_top()->add_label(name,value,new_value,check);
 
 	return true;
 }

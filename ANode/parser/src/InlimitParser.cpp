@@ -49,7 +49,9 @@ bool InlimitParser::doParse( const std::string& line, std::vector<std::string >&
 	token_pos++;
 	int tokens = Extract::optionalInt( lineTokens, token_pos, 1, "Invalid in limit : " + line );
 
-	InLimit inlimit(limitName,path_to_node_holding_the_limit,tokens,limit_this_node_only);
+   bool check = (rootParser()->get_file_type() != PrintStyle::NET);
+
+	InLimit inlimit(limitName,path_to_node_holding_the_limit,tokens,limit_this_node_only,check);
 	if (rootParser()->get_file_type() != PrintStyle::DEFS) {
 	   token_pos++;
 	   bool incremented = false;
@@ -65,7 +67,7 @@ bool InlimitParser::doParse( const std::string& line, std::vector<std::string >&
 
 	//  cout << inlimit.toString() << "\n";
 	Node* node = nodeStack_top();
-	node->addInLimit(inlimit);
+	node->addInLimit(inlimit,check);
 
 	return true;
 }

@@ -53,7 +53,7 @@ public:
 	const std::vector<InLimit>&  inlimits()  const { return vec_; }
 
 // Add functions: ===============================================================
-	void addInLimit(const InLimit& );    // will throw std::runtime_error if duplicate
+	void addInLimit(const InLimit&, bool check = true);    // will throw std::runtime_error if duplicate
 
 // Delete functions: can throw std::runtime_error ===================================
 	// if name argument is empty, delete all attributes of that type

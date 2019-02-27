@@ -248,7 +248,7 @@ void PlugCmd::create( 	Cmd_ptr& cmd,
 // ===================================================================================
 
 MoveCmd::MoveCmd(const std::pair<std::string,std::string>& host_port, Node* src, const std::string& dest)
- : src_node_(src->print(PrintStyle::MIGRATE)),
+ : src_node_(src->print(PrintStyle::NET)),
    src_host_(host_port.first),
    src_port_(host_port.second),
    src_path_(src->absNodePath()),

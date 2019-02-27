@@ -26,6 +26,7 @@
 #include "PrintStyle.hpp"
 #include "DefsParser.hpp"
 #include "Node.hpp"
+#include "StringSplitter.hpp"
 
 class Defs;
 class Node;
@@ -43,8 +44,7 @@ private:
   const DefsString& operator=(const DefsString&) = delete;
 private:
    bool empty_;
-   size_t index_;
-   std::vector<std::string> lines_;
+   ecf::StringSplitter splitter_;
 };
 
 

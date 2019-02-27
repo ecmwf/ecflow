@@ -31,7 +31,7 @@ class Node;
 class Limit {
 public:
    Limit(const std::string& name,int limit);
-   Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths);
+   Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths, bool check = true);
    Limit()= default;
    Limit(const Limit& rhs);
 

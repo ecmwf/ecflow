@@ -14,6 +14,7 @@
 //============================================================================
 
 #include "VariableParser.hpp"
+#include "DefsStructureParser.hpp"
 #include "Node.hpp"
 #include "Str.hpp"
 #include "Defs.hpp"
@@ -62,6 +63,8 @@ bool VariableParser::doParse(
    // ** This is not really recommended but its what the old system supported.
    // ** Hence the variable construction by-passes variable name checking ***
 
+   bool net = (rootParser()->get_file_type() == PrintStyle::NET);
+
    // Note:
    // edit OWNER 'fred'               => value = fred
    // edit OWNER 'fred and "ginger"'  => value = fred and "ginger"
@@ -74,8 +77,8 @@ bool VariableParser::doParse(
       Str::removeQuotes(lineTokens[2]);       // if first *and* last character is "
       Str::removeSingleQuotes(lineTokens[2]); // if first *and* last character is '
       if (node) {
-         if (node->isAlias()) node->add_variable_bypass_name_check( lineTokens[1], lineTokens[2] ); // bypass name checking
-         else node->add_variable( lineTokens[1], lineTokens[2]);
+         if (net || node->isAlias()) node->add_variable_bypass_name_check( lineTokens[1], lineTokens[2] ); // bypass name checking
+         else                        node->add_variable( lineTokens[1], lineTokens[2]);
       }
       else defsfile()->set_server().add_or_update_user_variables(lineTokens[1], lineTokens[2]);
       return true;
@@ -96,8 +99,8 @@ bool VariableParser::doParse(
    Str::removeQuotes(value);
    Str::removeSingleQuotes(value);
    if (node) {
-      if (node->isAlias()) node->add_variable_bypass_name_check( lineTokens[1], value); // bypass name checking
-      else                 node->add_variable(lineTokens[1], value );
+      if (net || node->isAlias()) node->add_variable_bypass_name_check( lineTokens[1], value); // bypass name checking
+      else                        node->add_variable(lineTokens[1], value );
    }
    else {
       bool server_variable = false;

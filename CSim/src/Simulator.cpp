@@ -207,11 +207,7 @@ void Simulator::run_analyser(Defs& theDefs,std::string& errorMsg ) const
    Analyser analyser;
    analyser.run(theDefs);
    errorMsg += "Please see files .flat and .depth for analysis\n";
-
-   PrintStyle style(PrintStyle::MIGRATE);
-   std::stringstream ss;
-   ss << theDefs;
-   errorMsg += ss.str();
+   errorMsg += theDefs.print(PrintStyle::MIGRATE);
 }
 
 bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const

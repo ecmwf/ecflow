@@ -39,10 +39,10 @@ const Label& Label::EMPTY() { static const Label LABEL = Label(); return LABEL ;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Event::Event( int number, const std::string& eventName )
-: v_( false ), number_( number ), n_( eventName ), used_( false ), state_change_no_( 0 )
+Event::Event( int number, const std::string& eventName,bool value, bool check_name )
+: v_( value ), number_( number ), n_( eventName ), used_( false ), state_change_no_( 0 )
 {
-   if ( !eventName.empty() ) {
+   if ( !eventName.empty() && check_name) {
       string msg;
       if ( !Str::valid_name( eventName, msg ) ) {
          throw std::runtime_error( "Event::Event: Invalid event name : " + msg );
@@ -157,12 +157,14 @@ bool Event::isValidState( const std::string& state ) {
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Meter::Meter( const std::string& name, int min, int max, int colorChange, int value ) :
+Meter::Meter( const std::string& name, int min, int max, int colorChange, int value, bool check ) :
 	         min_( min ), max_( max ), v_( value ), cc_( colorChange ),
 	         n_( name ), used_( false ), state_change_no_( 0 )
 {
-   if ( !Str::valid_name( name ) ) {
-      throw std::runtime_error("Meter::Meter: Invalid Meter name: " + name);
+   if (check) {
+      if ( !Str::valid_name( name ) ) {
+         throw std::runtime_error("Meter::Meter: Invalid Meter name: " + name);
+      }
    }
 
    if ( min > max )
@@ -251,10 +253,10 @@ std::string Meter::dump() const {
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-Label::Label(const std::string& name, const std::string& value, const std::string& new_value)
+Label::Label(const std::string& name, const std::string& value, const std::string& new_value, bool check_name)
 : n_(name),v_(value),new_v_(new_value),state_change_no_(0)
 {
-   if ( !Str::valid_name( n_ ) ) {
+   if ( check_name && !Str::valid_name( n_ ) ) {
       throw std::runtime_error("Label::Label: Invalid Label name :" + n_);
    }
 }

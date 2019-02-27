@@ -38,10 +38,10 @@ Limit::Limit(const std::string& name,int limit)
    }
 }
 
-Limit::Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths)
+Limit::Limit(const std::string& name,int limit, int value, const std::set<std::string>& paths, bool check)
 : state_change_no_(0),n_(name),lim_(limit),value_(value),paths_(paths),node_(nullptr)
 {
-   if ( !Str::valid_name( name ) ) {
+   if (check && !Str::valid_name( name ) ) {
       throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);
    }
 }
