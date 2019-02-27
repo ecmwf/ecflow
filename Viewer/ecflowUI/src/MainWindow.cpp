@@ -412,7 +412,7 @@ void MainWindow::updateRefreshActions()
 
     if(s && s->isEnabled())
     {
-        bool hasSel=(selection_!= nullptr);
+        bool hasSel=(selection_ != 0);
         actionRefreshSelected->setEnabled(hasSel);
         actionResetSelected->setEnabled(hasSel);
     }
