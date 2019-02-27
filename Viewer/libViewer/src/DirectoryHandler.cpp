@@ -147,9 +147,16 @@ void DirectoryHandler::init(const std::string& exeStr)
 
         //TODO: make it work when we run it from within "bin"
 		boost::filesystem::path shareDir  = exePath.parent_path().parent_path();
-
-		shareDir  /= "share";
+		shareDir /= "share";
 		shareDir /= "ecflow";
+ 
+		// In some debugging environments the exe might be another level deeper
+		if(!boost::filesystem::exists(shareDir))
+		{
+			shareDir  = exePath.parent_path().parent_path().parent_path();
+			shareDir /= "share";
+			shareDir /= "ecflow";
+		}
 
 		boost::filesystem::path etcDir   = shareDir;
 		etcDir /= "etc";
