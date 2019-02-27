@@ -47,7 +47,7 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
       throw std::runtime_error( ss.str() );
    }
 
-   client_defs->save_as_string(clientDefs_, PrintStyle::MIGRATE);
+   client_defs->save_as_string(clientDefs_, PrintStyle::NET);
 
    // Out put any warning's to standard output
    cout << warningMsg;
@@ -77,7 +77,7 @@ ReplaceNodeCmd::ReplaceNodeCmd(const std::string& node_path, bool createNodesAsN
       throw std::runtime_error( ss.str() );
    }
 
-   client_defs->save_as_string(clientDefs_, PrintStyle::MIGRATE);
+   client_defs->save_as_string(clientDefs_, PrintStyle::NET);
 
    // Out put any warning's to standard output
    cout << warningMsg;

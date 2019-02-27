@@ -48,7 +48,9 @@ bool MeterParser::doParse( const std::string& line, std::vector<std::string >& l
       }
    }
 
-	nodeStack_top()->add_meter( lineTokens[1], min, max, colorChange, value  ) ;
+   bool check = (rootParser()->get_file_type() != PrintStyle::NET);
+
+	nodeStack_top()->add_meter( lineTokens[1], min, max, colorChange, value, check  ) ;
 
 	return true;
 }

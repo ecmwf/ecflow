@@ -1840,6 +1840,8 @@ bool Node::operator==(const Node& rhs) const
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
             std::cout << "Node::operator==   (!(meters_[i] == rhs.meters_[i] )) " << debugNodePath() << "\n";
+            std::cout << "   " << meters_[i].dump() << "\n";
+            std::cout << "   " << rhs.meters_[i].dump() << "\n";
          }
 #endif
          return false;

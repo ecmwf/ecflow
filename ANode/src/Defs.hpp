@@ -56,7 +56,7 @@ public:
    void copy_defs_state_only(defs_ptr defs); // needed when creating defs for client handles
    bool operator==(const Defs& rhs) const;
    void print(std::string&) const;
-   std::string print() const;
+   std::string print(PrintStyle::Type_t t = PrintStyle::MIGRATE) const;
 
    /// State related functions:
    /// Defs acts like the root node.

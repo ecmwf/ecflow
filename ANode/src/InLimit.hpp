@@ -35,7 +35,9 @@ public:
    explicit InLimit(const std::string& limit_name,                                // referenced limit
            const std::string& path_to_node_with_referenced_limit = std::string(), // if empty, search for limit up parent hierarchy
            int tokens = 1,                                                        // tokens to consume in the Limit
-           bool limit_this_node_only = false);                                    // if true limit this node only
+           bool limit_this_node_only = false,                                     // if true limit this node only
+           bool check = true                                                      // disable name checking
+           );
    InLimit()= default;
 
    void print(std::string&) const;

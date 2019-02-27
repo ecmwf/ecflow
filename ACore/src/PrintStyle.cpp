@@ -35,6 +35,22 @@ bool PrintStyle::defsStyle() {
 	return false;
 }
 
+bool PrintStyle::persist_style()
+{
+   if (getStyle() == PrintStyle::MIGRATE  || getStyle() == PrintStyle::NET ) {
+      return true;
+   }
+   return false;
+}
+
+bool PrintStyle::is_persist_style(PrintStyle::Type_t t)
+{
+   if (t == PrintStyle::MIGRATE || t == PrintStyle::NET ) {
+      return true;
+   }
+   return false;
+}
+
 std::string PrintStyle::to_string()
 {
    return to_string(getStyle());
@@ -44,9 +60,10 @@ std::string PrintStyle::to_string(PrintStyle::Type_t t)
 {
    switch ( t ) {
        case PrintStyle::NOTHING: return "NOTHING";break;
-       case PrintStyle::DEFS: return "DEFS";break;
-       case PrintStyle::STATE: return "STATE";break;
+       case PrintStyle::DEFS:    return "DEFS";break;
+       case PrintStyle::STATE:   return "STATE";break;
        case PrintStyle::MIGRATE: return "MIGRATE";break;
+       case PrintStyle::NET:     return "NET";break;
     }
     return std::string();
 }

@@ -176,6 +176,22 @@ void time_load_and_downloads(
                sync_and_news_local(theClient);
             }
             {
+               cout << " Suspend " << paths.size() << " tasks : "; cout.flush();
+               theClient.set_auto_sync(true);
+               DurationTimer duration_timer;
+               theClient.suspend(paths);
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+               theClient.set_auto_sync(false);
+            }
+            {
+               cout << " Resume " << paths.size() << " tasks  : "; cout.flush();
+               theClient.set_auto_sync(true);
+               DurationTimer duration_timer;
+               theClient.resume(paths);
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+               theClient.set_auto_sync(false);
+            }
+            {
                cout << " check  " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.check(paths);
@@ -198,17 +214,14 @@ void time_load_and_downloads(
                cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
                sync_and_news_local(theClient);
             }
-            // These tests take too long
-//            size_t max_no_of_paths = 100000;
-//            size_t max_path = std::min(paths.size(),max_no_of_paths);
-//            {
-//               cout << " log    " << max_path << " tasks  : "; cout.flush();
-//               DurationTimer duration_timer;
-//               for(size_t i =0; i < max_path; i++){
-//                  theClient.logMsg(paths[i]);
-//               }
-//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << endl;
-//            }
+            {
+               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
+               theClient.set_auto_sync(true);
+               DurationTimer duration_timer;
+               theClient.force(paths,"aborted");
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+               theClient.set_auto_sync(false);
+            }
          }
          {
             cout << " Check pt:            "; cout.flush();

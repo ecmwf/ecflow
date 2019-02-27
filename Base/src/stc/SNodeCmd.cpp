@@ -37,7 +37,7 @@ void SNodeCmd::init(AbstractServer* as, node_ptr node)
 {
    the_node_str_.clear();
    if (node.get()) {
-      the_node_str_ = node->print( PrintStyle::MIGRATE );
+      the_node_str_ = node->print( PrintStyle::NET );
    }
 }
 
@@ -86,7 +86,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
 
       Suite* suite = node->isSuite();
       if (suite) {
-         if (cts_cmd->show_style() != PrintStyle::MIGRATE) {
+         if (!PrintStyle::is_persist_style(cts_cmd->show_style())) {
             /// Auto generate externs, before writing to standard out. This can be expensive since
             /// All the trigger references need to to be resolved. & AST need to be created first
             /// The old spirit based parsing, horrendously, slow. Can't use Spirit QI, till IBM pull support it
@@ -100,7 +100,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
          }
 
          // with defs_state MIGRATE on --load we will recover the state.
-         if (cts_cmd->show_style() == PrintStyle::MIGRATE ) std::cout << "defs_state MIGRATE\n"; // see ECFLOW-1233
+         if (PrintStyle::is_persist_style(cts_cmd->show_style())) std::cout << "defs_state " << PrintStyle::to_string(cts_cmd->show_style()) << "\n"; // see ECFLOW-1233
          std::cout << *suite << "\n";
          return true;
       }

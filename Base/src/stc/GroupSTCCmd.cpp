@@ -90,7 +90,7 @@ bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts
 		      /// Auto generate externs, before writing to standard out. This can be expensive since
 		      /// All the trigger references need to to be resolved. & AST need to be created first
 		      /// The old spirit based parsing is horrendously, slow. Can't use Spirit QI, till IBM support it
-		      if (cts_cmd->show_style() != PrintStyle::MIGRATE) {
+		      if (!PrintStyle::is_persist_style(cts_cmd->show_style())) {
  		         defs->auto_add_externs();
 		      }
 

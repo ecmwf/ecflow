@@ -58,7 +58,7 @@ void DefsCache::update_cache(defs_ptr defs )
 #ifdef DEBUG_SERVER_SYNC
        cout << ": *updating* cache";
 #endif
-    defs->save_as_string(full_server_defs_as_string_,PrintStyle::MIGRATE); // update cache
+    defs->save_as_string(full_server_defs_as_string_,PrintStyle::NET); // update cache
     state_change_no_ = Ecf::state_change_no();
     modify_change_no_ =  Ecf::modify_change_no();
 }

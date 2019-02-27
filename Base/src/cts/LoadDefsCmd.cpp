@@ -32,7 +32,7 @@ LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force)
  : force_(force)
 {
    if (defs) {
-      defs->save_as_string(defs_,PrintStyle::MIGRATE);
+      defs->save_as_string(defs_,PrintStyle::NET);
    }
 }
 
@@ -54,11 +54,11 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
       defs->set_server().add_or_update_user_variables( client_env ); // use in test environment
 
       if (print) {
-         PrintStyle print_style(PrintStyle::MIGRATE);
+         PrintStyle print_style(PrintStyle::NET); // should be same as MIGRATE, only differ on reload
          cout << defs;
       }
 
-      if (!check_only) defs->save_as_string(defs_,PrintStyle::MIGRATE);
+      if (!check_only) defs->save_as_string(defs_,PrintStyle::NET);
 
       // Output any warning to standard output
       cout << warningMsg;

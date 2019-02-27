@@ -74,13 +74,12 @@ bool InLimitMgr::operator==(const InLimitMgr& rhs) const
 	return true;
 }
 
-void InLimitMgr::addInLimit(const InLimit& l )
+void InLimitMgr::addInLimit(const InLimit& l, bool check)
 {
-	if (!findInLimitByNameAndPath(l)) {
-		vec_.push_back( l );
-		return;
-	}
- 	throw std::runtime_error( "Add InLimit failed: Duplicate InLimit see node " + node_->debugNodePath() );
+   if (check && findInLimitByNameAndPath(l)) {
+      throw std::runtime_error( "Add InLimit failed: Duplicate InLimit see node " + node_->debugNodePath() );
+   }
+   vec_.push_back( l );
 }
 
 bool InLimitMgr::deleteInlimit(const std::string& name)

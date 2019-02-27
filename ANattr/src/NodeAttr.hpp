@@ -28,7 +28,7 @@
 // Use compiler , generated destructor, assignment,  copy constructor
 class Label : public boost::equality_comparable<Label> {
 public:
-   Label(const std::string& name, const std::string& value, const std::string& new_value= "");
+   Label(const std::string& name, const std::string& value, const std::string& new_value= "", bool check_name = true);
    Label() = default;
 
    void print(std::string&) const;
@@ -90,7 +90,7 @@ private:
 // use std::numeric_limits<int>::max()
 class Event {
 public:
-   Event(int number, const std::string& eventName = "");
+   Event(int number, const std::string& eventName = "", bool value = false, bool check_name = true);
    explicit Event(const std::string& eventName);
    Event() : number_(std::numeric_limits<int>::max()) {}
 
@@ -139,7 +139,10 @@ private:
 // range min-max
 class Meter {
 public:
-   Meter(const std::string& name,int min,int max,int colorChange = std::numeric_limits<int>::max(),int value = std::numeric_limits<int>::max());
+   Meter(const std::string& name,int min,int max,
+         int colorChange = std::numeric_limits<int>::max(),
+         int value = std::numeric_limits<int>::max(),
+         bool check = true);
    Meter() = default;
 
    void print(std::string&) const;

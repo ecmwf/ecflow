@@ -106,7 +106,7 @@ bool Parser::doParse(const std::string& line, std::vector<std::string>& lineToke
 	}
 
 	// in MIGRATE be fault tolerant, ignore unrecognised tokens
-	if (rootParser()->get_file_type() == PrintStyle::MIGRATE) {
+	if (PrintStyle::is_persist_style(rootParser()->get_file_type())) {
 	   rootParser()->faults() += errorMsg + " -> ignoring\n";
 	   return true;
 	}

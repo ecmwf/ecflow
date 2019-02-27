@@ -19,17 +19,20 @@
 
 class PrintStyle {
 public:
-	// Used by the show Cmd
+	// Use to control the print defs/node output to string or file
+   // Please note: with PrintStyle::NET is used to transfer Defs between client <->server
+   //              as such there is no need extensive checking on recreating defs.
+   //              i.e valid name, duplicate nodes, etc
 	enum Type_t {
-		NOTHING = 0,     // Does nothing
-		DEFS = 1,        // Output the definition that is fully parse-able
-      STATE = 2,       // Output definition that includes Node state, and AST,  fully parseable
-      MIGRATE = 3      // Output the definition that is fully parse-able & includes state
+		NOTHING = 0,  // Does nothing
+		DEFS = 1,     // Output the definition that is fully parse-able                       -> On reload *CHECK* everything
+      STATE = 2,    // Output definition that includes Node state, and AST, fully parseable -> On reload *CHECK* everything
+      MIGRATE = 3,  // Output the definition that is fully parse-able & includes state      -> On reload *CHECK* everything
+      NET = 4       // Output the definition that is fully parse-able & includes state      -> On reload relax checking
 	};
 
 	explicit PrintStyle(Type_t t) : old_style_(getStyle()) { setStyle(t);}
 	~PrintStyle() { setStyle(old_style_); } // reset to old style on destruction
-
 
 	/// We want to control the output, so that we can dump in old style defs format
 	/// or choose to dump for debug.
@@ -37,6 +40,8 @@ public:
 	static void setStyle(Type_t) ;
 
 	static bool defsStyle();
+   static bool persist_style();
+   static bool is_persist_style(Type_t);
 
 	// return current style as a string
    static std::string to_string();

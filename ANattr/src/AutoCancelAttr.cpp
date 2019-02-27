@@ -49,7 +49,6 @@ void AutoCancelAttr::write(std::string& ret) const
    ret += "autocancel ";
    if (days_) {
       ret += boost::lexical_cast<std::string>(time_.hour()/24) ;
-      ret += "\n";
       return;
    }
 

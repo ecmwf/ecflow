@@ -600,8 +600,9 @@ bool Defs::hasTimeDependencies() const
 	return false;
 }
 
-std::string Defs::print() const
+std::string Defs::print(PrintStyle::Type_t t) const
 {
+   PrintStyle style(t);
    std::string s;
    print(s);
    return s;
@@ -626,7 +627,7 @@ void Defs::print(std::string& os) const
    }
 
    // In PrintStyle::MIGRATE we do NOT persist the externs. (+matches boost serialisation)
-   if (PrintStyle::getStyle() != PrintStyle::MIGRATE) {
+   if (!PrintStyle::persist_style()) {
       auto extern_end = externs_.end();
       for(auto i = externs_.begin(); i != extern_end; ++i) {
          os += "extern ";

@@ -106,7 +106,7 @@ bool DefsStructureParser::doParse(std::string& errorMsg,std::string& warningMsg)
       }
    }
 
-   if (file_type_ == PrintStyle::MIGRATE || parsing_node_string_) {
+   if (PrintStyle::is_persist_style(file_type_) || parsing_node_string_) {
       warningMsg += faults_;
       return true;
    }
@@ -185,7 +185,7 @@ void DefsStructureParser::getNextLine(std::string& line)
 	   if (defs_as_string_.empty()) infile_.getline(line);
 	   else                         defs_as_string_.getline(line);
 		lineNumber_++;
-	   if (file_type_ == PrintStyle::MIGRATE) {
+	   if (PrintStyle::is_persist_style(file_type_)) {
 	      return; // ignore multiline for migrate, *BECAUSE* *history* for group command uses ';'
 	   }
 
