@@ -20,7 +20,7 @@ ecbuild_add_library( TARGET    ecflow
 # Currently we only build optimised boost libs
 # versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
 if ( Boost_MINOR_VERSION GREATER 66 )
-    target_link_libraries(ecflow ${Boost_PYTHON27_LIBRARY_RELEASE} )
+    target_link_libraries(ecflow ${Boost_PYTHON${Python2_VERSION_MAJOR}${Python2_VERSION_MINOR}_LIBRARY_RELEASE} )
 else()
     target_link_libraries(ecflow ${Boost_PYTHON_LIBRARY_RELEASE} )
 endif()
