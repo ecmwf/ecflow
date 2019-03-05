@@ -1,0 +1,4 @@
+suite cron
+     cron -w 0L,1L,2L,3L,4L,5L,6L -d 1,L 23:00  # run first and last day of month or last week of month
+     cron -d 1,L 23:00 
+endsuite

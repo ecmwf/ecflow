@@ -20,6 +20,7 @@
 #include <boost/tokenizer.hpp>
 #include <boost/token_functions.hpp>
 #include <boost/lexical_cast.hpp>
+#include "boost/date_time/gregorian/gregorian.hpp"
 
 #include "CronAttr.hpp"
 #include "Indentor.hpp"
@@ -44,7 +45,7 @@ namespace ecf {
 CronAttr::CronAttr() = default;
 
 CronAttr::CronAttr(const std::string& str)
-:  free_(false),state_change_no_(0)
+:  last_day_of_month_(false),free_(false),state_change_no_(0)
 {
    if (str.empty()) throw std::runtime_error("CronAttr::CronAttr : empty string passed");
    std::vector<std::string> tokens;
@@ -65,6 +66,17 @@ void CronAttr::addWeekDays( const std::vector<int>& w)
  		}
  	}
 }
+void CronAttr::add_last_week_days_of_month( const std::vector<int>& w)
+{
+   last_week_days_of_month_ = w;
+   BOOST_FOREACH(int day, last_week_days_of_month_) {
+      if (day < 0 || day > 6) {
+         std::stringstream ss; ss << "Invalid range for day(" << day << ") of the week expected range is 0==Sun to 6==Sat";
+         throw std::out_of_range(ss.str());
+      }
+   }
+}
+
 void CronAttr::addDaysOfMonth( const std::vector<int>& d)
 {
 	daysOfMonth_ = d;
@@ -113,16 +125,31 @@ void CronAttr::write(std::string& ret) const
          ret += boost::lexical_cast<std::string>(weekDays_[i]);
          if (i !=weekDays_.size()-1) ret += ",";
       }
+      if (last_week_days_of_month_.empty()) ret += " ";
+   }
+   if (!last_week_days_of_month_.empty()) {
+      if (weekDays_.empty()) ret += "-w ";
+      for(size_t i=0; i< last_week_days_of_month_.size();++i) {
+         ret += boost::lexical_cast<std::string>(weekDays_[i]);
+         ret += 'L';
+         if (i !=last_week_days_of_month_.size()-1) ret += ",";
+      }
       ret += " ";
    }
+
    if (!daysOfMonth_.empty()) {
       ret += "-d ";
       for(size_t i=0; i<daysOfMonth_.size();++i) {
          ret += boost::lexical_cast<std::string>(daysOfMonth_[i]);
          if (i !=daysOfMonth_.size()-1) ret += ",";
       }
-      ret += " ";
+      if (!last_day_of_month_) ret += " ";
    }
+   if (last_day_of_month_) {
+      if (daysOfMonth_.empty()) ret += "-d L";
+      else                      ret += ",L";
+   }
+
    if (!months_.empty()) {
       ret += "-m ";
       for(size_t i=0; i<months_.size();++i) {
@@ -140,7 +167,7 @@ std::string CronAttr::dump() const
 {
 	std::stringstream ss; ss << toString();
  	if (free_) ss << " (free)";
-	else           ss << " (holding)";
+	else       ss << " (holding)";
  	return ss.str();
 }
 
@@ -149,16 +176,19 @@ bool CronAttr::operator==(const CronAttr& rhs) const
 	if (free_ != rhs.free_) {
 		return false;
 	}
-
-	if (weekDays_ != rhs.weekDays_) return false;
+   if (last_day_of_month_ != rhs.last_day_of_month_) return false;
+   if (weekDays_ != rhs.weekDays_) return false;
+   if (last_week_days_of_month_  != rhs.last_week_days_of_month_) return false;
 	if (daysOfMonth_ != rhs.daysOfMonth_) return false;
 	if (months_ != rhs.months_) return false;
 	return timeSeries_.operator==(rhs.timeSeries_);
 }
 bool CronAttr::structureEquals(const CronAttr& rhs) const
 {
-	if (weekDays_ != rhs.weekDays_) return false;
+   if (last_day_of_month_ != rhs.last_day_of_month_) return false;
+   if (weekDays_ != rhs.weekDays_) return false;
 	if (daysOfMonth_ != rhs.daysOfMonth_) return false;
+   if (last_week_days_of_month_  != rhs.last_week_days_of_month_) return false;
 	if (months_ != rhs.months_) return false;
    return timeSeries_.structureEquals(rhs.timeSeries_);
 }
@@ -231,13 +261,14 @@ bool CronAttr::checkForRequeue( const ecf::Calendar& calendar) const
 bool CronAttr::validForHybrid(const ecf::Calendar& calendar) const
 {
 	if (timeSeries_.hasIncrement()) {
+	   if (last_day_of_month_)        return false; // relies on day change
 		if (!months_.empty() )         return false; // relies on day change
 		if (!daysOfMonth_.empty() )    return false; // relies on day change
 		if (!weekDays_.empty()  )  {
 			if ( weekDays_.size() != 1)  return false; // relies on day change
-
-   	 	  	return ( weekDays_[0] == calendar.day_of_week() );
+   	 	return ( weekDays_[0] == calendar.day_of_week() );
 		}
+
 
 		// cron 10:00 20:00 01:00  // valid for hybrid ?
 		return true;
@@ -359,12 +390,22 @@ bool CronAttr::is_day_of_week_day_of_month_and_month_free( const ecf::Calendar& 
    bool the_week_day_matches = weekDays_.empty();         // week day matches if no week days
    bool the_day_of_month_matches = daysOfMonth_.empty();  // day of month if no days of month
    bool the_month_matches = months_.empty();              // month matches if no months
+   bool the_last_week_day_of_month_matches = last_week_days_of_month_.empty(); // matches if EMPTY
+   bool last_day_of_month_matches = true;                 // if NOT defined it MATCHES
 
-   if ( !weekDays_.empty())    the_week_day_matches     = week_day_matches(c.day_of_week());
-   if ( !daysOfMonth_.empty()) the_day_of_month_matches = day_of_month_matches(c.day_of_month());
-   if ( !months_.empty()  )    the_month_matches        = month_matches(c.month());
+   if ( !weekDays_.empty())                the_week_day_matches      = week_day_matches(c.day_of_week());
+   if ( !last_week_days_of_month_.empty()) the_last_week_day_of_month_matches = last_week_day_of_month_matches(c);
+   if ( !daysOfMonth_.empty())             the_day_of_month_matches  = day_of_month_matches(c.day_of_month());
+   if ( !months_.empty()  )                the_month_matches         = month_matches(c.month());
+   if ( last_day_of_month_) {
+      last_day_of_month_matches = (c.date() == c.date().end_of_month());
+   }
 
-   return ( the_week_day_matches && the_day_of_month_matches && the_month_matches) ;
+   return ( the_week_day_matches &&
+            the_day_of_month_matches &&
+            the_month_matches &&
+            last_day_of_month_matches &&
+            the_last_week_day_of_month_matches) ;
 }
 
 bool CronAttr::week_day_matches( int theDayOfWeek ) const
@@ -373,6 +414,22 @@ bool CronAttr::week_day_matches( int theDayOfWeek ) const
  		if ( theDayOfWeek == theWeekDay)  return true;
  	}
  	return false;
+}
+
+bool CronAttr::last_week_day_of_month_matches( const ecf::Calendar& c  ) const
+{
+   int cal_day_of_week = c.day_of_week();
+   boost::gregorian::date last_day_of_month = c.date().end_of_month();
+   boost::gregorian::date_duration diff_current_date_and_last_day_of_month = last_day_of_month - c.date();
+
+   BOOST_FOREACH(int cron_last_week_day_of_month,last_week_days_of_month_ ) {
+      if ( cal_day_of_week == cron_last_week_day_of_month ) {
+         if ( diff_current_date_and_last_day_of_month.days() <= 7) {
+            return true;
+         }
+      }
+   }
+   return false;
 }
 
 bool CronAttr::day_of_month_matches(int theDayOfMonth) const
@@ -400,62 +457,6 @@ bool CronAttr::checkInvariants(std::string& errormsg) const
 
 //--------------------------------------------------------------
 
-boost::gregorian::date CronAttr::last_day_of_month(const ecf::Calendar& calendar) const
-{
-	boost::gregorian::date todays_date = calendar.date();
-	boost::gregorian::date lastdayOfMonth = todays_date.end_of_month();
-	boost::gregorian::date_duration one_day(1);
-
-//	cout << "CronAttr::last_day_of_month  " << calendar.toString() << " \n";
-
-	boost::gregorian::date max_date(neg_infin);
- 	while ( todays_date <= lastdayOfMonth ) {
-
-		// deal with case where we have:
-		//  	cron -w 0,1 -m 5,6,7,8
-		// Find the last Sunday/Monday for *THIS* month
-		for (int weekDay : weekDays_) {
-			if ( todays_date.day_of_week().as_number() == weekDay ) {
-//				cout << "CronAttr::last_day_of_month  ( todays_date.day_of_week().as_number() == weekDays_[i] ) " << weekDays_[i] << "\n";
-				if ( todays_date > max_date ) {
-					max_date = todays_date;
-//					cout << "CronAttr::last_day_of_month  max_date =  " << to_simple_string(max_date) << "\n";
-				}
-
-				// The day of week MAY NOT MATCH the day of month
-				// deal with case where we have:
-				//  	cron -w 0,1 -d 14,15,16
-				// Find the last date for *THIS* month
-				for (int d : daysOfMonth_) {
-					if ( todays_date.day() == d ) {
-//						cout << "CronAttr::last_day_of_month **( todays_date.day() == daysOfMonth_[d] ) " << daysOfMonth_[d] << "\n";
-						if ( todays_date > max_date ) {
-							max_date = todays_date;
-//							cout << "CronAttr::last_day_of_month  max_date =  " << to_simple_string(max_date) << "\n";
-						}
-					}
-				}
-			}
-		}
-
-		// deal with case where we have:
-		//  	cron -d 14,15,16 -m 5,6,7,8
-		// Find the last date for *THIS* month
-		for (int d : daysOfMonth_) {
-			if ( todays_date.day() == d ) {
-//				cout << "CronAttr::last_day_of_month ( todays_date.day() == daysOfMonth_[d] ) " << daysOfMonth_[d] << "\n";
-				if ( todays_date > max_date ) {
-					max_date = todays_date;
-//					cout << "CronAttr::last_day_of_month  max_date =  " << to_simple_string(max_date) << "\n";
-				}
-			}
-		}
-
-		todays_date += one_day;
-	}
-	return max_date;
-}
-
 boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const
 {
 	// Find the next date that matches, day of week, day of year, and month
@@ -466,11 +467,16 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const
 	boost::gregorian::date future_date = calendar.date();  // todays date
 	future_date += one_day;                                // add one day, so its in the future
 
+   boost::gregorian::date last_day_of_month = calendar.date().end_of_month();
+
  	while ( true ) {
 
  		bool week_day_matches = weekDays_.empty();         // week day matches if no week days
+ 	   bool the_last_week_day_of_month_matches = last_week_days_of_month_.empty(); // matches if EMPTY
  		bool day_of_month_matches = daysOfMonth_.empty();  // day of month if no days of month
  		bool month_matches = months_.empty();              // month matches if no months
+ 		bool last_day_of_the_month_matches = true;
+ 		if (last_day_of_month_) last_day_of_the_month_matches = false;
 
 		// deal with case where we have: cron -w 0,1
  		for (int weekDay : weekDays_) {
@@ -479,6 +485,17 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const
 				break;
 			}
 		}
+
+      // deal with case where we have: cron -w 1L   # last monday of the month
+      for (int weekDay : last_week_days_of_month_ ) {
+         if ( future_date.day_of_week().as_number() == weekDay ) {
+            boost::gregorian::date_duration diff = future_date - last_day_of_month ;
+            if (diff.days() <= 7 ) {
+               the_last_week_day_of_month_matches = true;
+            }
+            break;
+         }
+      }
 
  		// deal with case where we have: cron -w 0,1 -d 14,15,16
  		for (int d : daysOfMonth_) {
@@ -496,8 +513,13 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const
   			}
 		}
 
+ 		// deal with case where we have: cron -w 0,1 -d 14,15,16,L -m 8, 9   # L means last day of month
+ 		if (last_day_of_month_ && future_date == last_day_of_month) {
+ 		   last_day_of_the_month_matches = true;
+ 		}
+
  		// if it all matches, then return the future day
- 		if ( week_day_matches && day_of_month_matches && month_matches) {
+ 		if ( week_day_matches && day_of_month_matches && month_matches && last_day_of_the_month_matches && the_last_week_day_of_month_matches) {
  			break; // return future_date, replaced with break to  keep HPUX compiler happy
  			       // otherwise it complains that return at the end of the function is
  			       // unreachable
@@ -553,7 +575,7 @@ std::vector<int> extractOption(
                                const std::vector<std::string >& lineTokens,
                                const std::string& option)
 {
-	// cron -w 0 -m 5,6,7,8 10:00 20:00 01:00
+	// cron -w 0,1L,2L,3 -d 1,12,14,L   -m 5,6,7,8   10:00 20:00 01:00
 	assert(index < lineTokens.size());
 
 	// Collate the list of integers, these may have been separated by spaces
@@ -564,7 +586,7 @@ std::vector<int> extractOption(
 		if (theNextToken.empty()) break;
 		if (isOption( theNextToken )) break;
 		if (isTimeSpec( theNextToken )) break;
-		theIntList +=  theNextToken;
+		theIntList += theNextToken;
   	}
 #ifdef DEBUG_CRON_PARSING
 	cerr << "theIntList = " << theIntList << "\n";
@@ -597,10 +619,20 @@ void extractOption(CronAttr& cronAttr, size_t& index, const std::vector<std::str
 {
 	assert(index < lineTokens.size());
 	if (lineTokens[index] == "-w") {
- 		cronAttr.addWeekDays( extractOption(index, lineTokens, "week days" ) );
+      std::vector<int> days_of_week;
+      std::vector<int> last_week_days_of_month;
+      extract_days_of_week(index, lineTokens, "week days",days_of_week,last_week_days_of_month );
+
+      cronAttr.addWeekDays(days_of_week );
+      cronAttr.add_last_week_days_of_month( last_week_days_of_month );
  	}
 	else if (lineTokens[index] == "-d") {
- 		cronAttr.addDaysOfMonth( extractOption(index, lineTokens, "Days of the month" ) );
+      std::vector<int> days_of_month;
+      bool last_day_of_month = false;
+      extract_days_of_month(index, lineTokens, "Days of the month",days_of_month, last_day_of_month);
+
+ 		cronAttr.addDaysOfMonth( days_of_month );
+ 		if (last_day_of_month) cronAttr.add_last_day_of_month();
   	}
 	else if (lineTokens[index] == "-m") {
  		cronAttr.addMonths( extractOption(index, lineTokens,"Months" ) );
@@ -693,10 +725,12 @@ template<class Archive>
 void CronAttr::serialize(Archive & ar, std::uint32_t const version )
 {
    ar( CEREAL_NVP(timeSeries_));
-   CEREAL_OPTIONAL_NVP(ar, weekDays_ ,   [this](){return !weekDays_.empty() ;});   // conditionally save
-   CEREAL_OPTIONAL_NVP(ar, daysOfMonth_, [this](){return !daysOfMonth_.empty() ;});// conditionally save
-   CEREAL_OPTIONAL_NVP(ar, months_,      [this](){return !months_.empty() ;});     // conditionally save
-   CEREAL_OPTIONAL_NVP(ar, free_,        [this](){return free_; });                // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, weekDays_ ,              [this](){return !weekDays_.empty(); });   // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, last_week_days_of_month_,[this](){return !last_week_days_of_month_.empty(); });// conditionally save
+   CEREAL_OPTIONAL_NVP(ar, daysOfMonth_,            [this](){return !daysOfMonth_.empty(); });// conditionally save
+   CEREAL_OPTIONAL_NVP(ar, months_,                 [this](){return !months_.empty(); });     // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, free_,                   [this](){return free_; });                // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, last_day_of_month_,      [this](){return last_day_of_month_; });   // conditionally save
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(CronAttr);
 
