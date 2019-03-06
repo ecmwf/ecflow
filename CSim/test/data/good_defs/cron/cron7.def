@@ -17,4 +17,3 @@ suite leap_year       # use real clock otherwise the date wont change
    verify complete:366 # leap year has 366 days
  endfamily
 endsuite
-

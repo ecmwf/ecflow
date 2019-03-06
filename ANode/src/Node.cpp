@@ -920,7 +920,10 @@ void Node::setStateOnly(NState::State newState,bool force,const std::string& add
    if (misc_attrs_) {
       size_t theSize = misc_attrs_->verifys_.size();
       for(size_t i = 0; i < theSize; i++ ) {
-         if (misc_attrs_->verifys_[i].state() == newState)  misc_attrs_->verifys_[i].incrementActual();
+         if (misc_attrs_->verifys_[i].state() == newState) {
+            // cout << "Verify: calendar " << to_simple_string(calendar.date()) << "\n";
+            misc_attrs_->verifys_[i].incrementActual();
+         }
       }
    }
 }

@@ -63,6 +63,7 @@ public:
    bool checkForRequeue( const ecf::Calendar&) const;
    bool validForHybrid(const ecf::Calendar&) const;
    bool why(const ecf::Calendar&, std::string& theReasonWhy) const;
+   bool last_day_of_the_month() const { return last_day_of_month_;}
 
    // The state_change_no is never reset. Must be incremented if it can affect equality
    // Note: changes in state of timeSeries_, i.e affect the equality operator (used in test)
@@ -115,7 +116,7 @@ private:
 
    bool week_day_matches(int) const;
    bool last_week_day_of_month_matches(const ecf::Calendar& ) const;
-   bool day_of_month_matches(int) const;
+   bool day_of_month_matches(int,const ecf::Calendar& c) const;
    bool month_matches(int) const;
 
    boost::gregorian::date  next_date(const ecf::Calendar& calendar) const;

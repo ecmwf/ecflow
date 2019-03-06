@@ -289,7 +289,7 @@ const Event& Node::findEventByNameOrNumber( const std::string& theName) const
    }
 
    // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-   if ( theName.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
+   if ( theName.find_first_of( Str::NUMERIC(), 0 ) == 0 ) {
       try {
          auto eventNumber = boost::lexical_cast< int >( theName );
          return findEventByNumber(eventNumber);

@@ -123,12 +123,17 @@ static void extract_cron_keyword_arguments(std::shared_ptr<CronAttr> cron, bp::d
             std::vector<int> int_vec;
             BoostPythonUtil::list_to_int_vec(second,int_vec);
 
-            //  expected keywords are: days_of_week, days_of_month, months
+            //  expected keywords are: days_of_week,last_week_days_ofThe_month, days_of_month, months
             if (first == "days_of_week") cron->addWeekDays(int_vec);
             else if (first == "days_of_month") cron->addDaysOfMonth(int_vec);
             else if (first == "months") cron->addMonths(int_vec);
-            else throw std::runtime_error("extract_cron_keyword_arguments: keyword arguments, expected [days_of_week | days_of_month | months]");
+            else if (first == "last_week_days_of_the_month") cron->add_last_week_days_of_month(int_vec);
+            else throw std::runtime_error("extract_cron_keyword_arguments: keyword arguments, expected [days_of_week | last_week_days_of_the_month | days_of_month | months | last_day_of_the_month");
          }
+         else if (extract<bool>(dict[keys[i]]).check()) {
+            if (first == "last_day_of_the_month") cron->add_last_day_of_month();
+            else throw std::runtime_error("extract_cron_keyword_arguments: keyword arguments, expected [days_of_week | last_week_days_of_the_month | days_of_month | months | last_day_of_the_month]");
+        }
          else throw std::runtime_error("extract_cron_keyword_arguments: keyword arguments to be a list");
       }
    }
@@ -159,12 +164,22 @@ void set_week_days(CronAttr* cron,const bp::list& list)
    BoostPythonUtil::list_to_int_vec(list,int_vec);
    cron->addWeekDays(int_vec);
 }
+void set_last_week_days_of_month(CronAttr* cron,const bp::list& list)
+{
+   std::vector<int> int_vec;
+   BoostPythonUtil::list_to_int_vec(list,int_vec);
+   cron->add_last_week_days_of_month(int_vec);
+}
 
 void set_days_of_month(CronAttr* cron,const bp::list& list)
 {
    std::vector<int> int_vec;
    BoostPythonUtil::list_to_int_vec(list,int_vec);
    cron->addDaysOfMonth(int_vec);
+}
+void set_last_day_of_the_month(CronAttr* cron)
+{
+   cron->add_last_day_of_month();
 }
 
 void set_months(CronAttr* cron,const bp::list& list)
@@ -768,15 +783,19 @@ void export_NodeAttr()
 	.def(self == self )                                // __eq__
 	.def("__str__",            &CronAttr::toString)    // __str__
 	.def("__copy__",copyObject<CronAttr>)              // __copy__ uses copy constructor
-	.def( "set_week_days",     &set_week_days ,   "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
-	.def( "set_days_of_month", &set_days_of_month,"Specifies days of the month. Expects a list of integers with integer range 1-31" )
+   .def( "set_week_days",     &set_week_days ,   "Specifies days of week. Expects a list of integers, with integer range 0==Sun to 6==Sat")
+   .def( "set_last_week_days_of_the_month",&set_last_week_days_of_month,"Specifies last week days of the month. Expects a list of integers, with integer range 0==Sun to 6==Sat")
+   .def( "set_days_of_month", &set_days_of_month,"Specifies days of the month. Expects a list of integers with integer range 1-31" )
+   .def( "set_last_day_of_the_month",&set_last_day_of_the_month,"Set cron for the last day of the month" )
 	.def( "set_months",        &set_months  ,     "Specifies months. Expects a list of integers, with integer range 1-12")
 	.def( "set_time_series",   &CronAttr::add_time_series,(bp::arg("hour"),bp::arg("minute"),bp::arg("relative")=false),"time_series(hour(int),minute(int),relative to suite start(bool=false)), Add a time slot")
 	.def( "set_time_series",   add_time_series,   "Add a time series. This will never complete")
 	.def( "set_time_series",   add_time_series_2, "Add a time series. This will never complete")
 	.def( "set_time_series",   &add_time_series_3,"Add a time series. This will never complete")
-	.def( "time",              &CronAttr::time, return_value_policy<copy_const_reference>(), "return cron time as a TimeSeries")
-	.add_property( "week_days",    bp::range(&CronAttr::week_days_begin,    &CronAttr::week_days_end),     "returns a integer list of week days")
+   .def( "time",              &CronAttr::time, return_value_policy<copy_const_reference>(), "return cron time as a TimeSeries")
+   .def( "last_day_of_the_month", &CronAttr::last_day_of_the_month, "Return true if last day of month is enabled")
+   .add_property( "week_days",    bp::range(&CronAttr::week_days_begin,    &CronAttr::week_days_end),     "returns a integer list of week days")
+   .add_property( "last_week_days_of_the_month",bp::range(&CronAttr::last_week_days_of_month_begin,&CronAttr::last_week_days_end_of_month_end ),"returns a integer list of last week days of the month")
 	.add_property( "days_of_month",bp::range(&CronAttr::days_of_month_begin,&CronAttr::days_of_month_end), "returns a integer list of days of the month")
 	.add_property( "months",       bp::range(&CronAttr::months_begin,       &CronAttr::months_end),        "returns a integer list of months of the year")
  	;

@@ -39,6 +39,7 @@ using namespace boost::posix_time;
 
 //#define DEBUG_CRON_ATTR 1
 //#define DEBUG_CRON_PARSING 1
+//#define DEBUG_CRON_SIM 1
 
 namespace ecf {
 
@@ -64,6 +65,11 @@ void CronAttr::addWeekDays( const std::vector<int>& w)
 			std::stringstream ss; ss << "Invalid range for day(" << day << ") of the week expected range is 0==Sun to 6==Sat";
  			throw std::out_of_range(ss.str());
  		}
+		auto result = std::find(std::begin(last_week_days_of_month_), std::end(last_week_days_of_month_), day);
+		if (result != std::end(last_week_days_of_month_)) {
+         std::stringstream ss; ss << "Duplicate day(" << day << ") of the week also found in last week day of the month";
+         throw std::runtime_error(ss.str());
+		}
  	}
 }
 void CronAttr::add_last_week_days_of_month( const std::vector<int>& w)
@@ -73,6 +79,11 @@ void CronAttr::add_last_week_days_of_month( const std::vector<int>& w)
       if (day < 0 || day > 6) {
          std::stringstream ss; ss << "Invalid range for day(" << day << ") of the week expected range is 0==Sun to 6==Sat";
          throw std::out_of_range(ss.str());
+      }
+      auto result = std::find(std::begin(weekDays_), std::end(weekDays_), day);
+      if (result != std::end(weekDays_)) {
+         std::stringstream ss; ss << "Duplicate last week day (" << day << ") of the month also found in week day";
+         throw std::runtime_error(ss.str());
       }
    }
 }
@@ -126,11 +137,12 @@ void CronAttr::write(std::string& ret) const
          if (i !=weekDays_.size()-1) ret += ",";
       }
       if (last_week_days_of_month_.empty()) ret += " ";
+      else                                  ret += ",";
    }
    if (!last_week_days_of_month_.empty()) {
       if (weekDays_.empty()) ret += "-w ";
       for(size_t i=0; i< last_week_days_of_month_.size();++i) {
-         ret += boost::lexical_cast<std::string>(weekDays_[i]);
+         ret += boost::lexical_cast<std::string>( last_week_days_of_month_[i]);
          ret += 'L';
          if (i !=last_week_days_of_month_.size()-1) ret += ",";
       }
@@ -146,8 +158,8 @@ void CronAttr::write(std::string& ret) const
       if (!last_day_of_month_) ret += " ";
    }
    if (last_day_of_month_) {
-      if (daysOfMonth_.empty()) ret += "-d L";
-      else                      ret += ",L";
+      if (daysOfMonth_.empty()) ret += "-d L ";
+      else                      ret += ",L ";
    }
 
    if (!months_.empty()) {
@@ -387,25 +399,45 @@ bool CronAttr::isFree(const ecf::Calendar& c) const
 
 bool CronAttr::is_day_of_week_day_of_month_and_month_free( const ecf::Calendar& c) const
 {
-   bool the_week_day_matches = weekDays_.empty();         // week day matches if no week days
+#ifdef DEBUG_CRON_SIM
+   cout << toString() << "  cal : " << to_simple_string(c.date())
+            << " c.day_of_week:" << c.day_of_week() << " c.day_of_month:" << c.day_of_month();
+   cout.flush();
+#endif
+
+   bool the_week_day_matches = weekDays_.empty() && last_week_days_of_month_.empty();         // week day matches if no week days
    bool the_day_of_month_matches = daysOfMonth_.empty();  // day of month if no days of month
    bool the_month_matches = months_.empty();              // month matches if no months
-   bool the_last_week_day_of_month_matches = last_week_days_of_month_.empty(); // matches if EMPTY
-   bool last_day_of_month_matches = true;                 // if NOT defined it MATCHES
 
-   if ( !weekDays_.empty())                the_week_day_matches      = week_day_matches(c.day_of_week());
-   if ( !last_week_days_of_month_.empty()) the_last_week_day_of_month_matches = last_week_day_of_month_matches(c);
-   if ( !daysOfMonth_.empty())             the_day_of_month_matches  = day_of_month_matches(c.day_of_month());
-   if ( !months_.empty()  )                the_month_matches         = month_matches(c.month());
-   if ( last_day_of_month_) {
-      last_day_of_month_matches = (c.date() == c.date().end_of_month());
+   if ( !weekDays_.empty())
+      the_week_day_matches = week_day_matches(c.day_of_week());
+   if ( !the_week_day_matches && !last_week_days_of_month_.empty())
+      the_week_day_matches = last_week_day_of_month_matches(c);
+
+   if ( !daysOfMonth_.empty() || last_day_of_month_)
+      the_day_of_month_matches = day_of_month_matches(c.day_of_month(),c);
+   if ( !months_.empty()  )
+      the_month_matches         = month_matches(c.month());
+
+
+   // Remember we *AND* across -w, -d, -m or *OR* for each element in -w, -d,-m
+   bool matches = false;
+   if (daysOfMonth_.empty() && !last_day_of_month_ && months_.empty()) {
+      // cron -w 0L 10:00    # run on the last sunday of each month
+      matches = the_week_day_matches ; // only week day,
+   }
+   else {
+      matches = the_week_day_matches && the_day_of_month_matches && the_month_matches ;
    }
 
-   return ( the_week_day_matches &&
-            the_day_of_month_matches &&
-            the_month_matches &&
-            last_day_of_month_matches &&
-            the_last_week_day_of_month_matches) ;
+#ifdef DEBUG_CRON_SIM
+   if (matches) {
+      cout << " *MATCHES*";
+   }
+   cout << "\n";
+#endif
+
+   return matches;
 }
 
 bool CronAttr::week_day_matches( int theDayOfWeek ) const
@@ -424,7 +456,8 @@ bool CronAttr::last_week_day_of_month_matches( const ecf::Calendar& c  ) const
 
    BOOST_FOREACH(int cron_last_week_day_of_month,last_week_days_of_month_ ) {
       if ( cal_day_of_week == cron_last_week_day_of_month ) {
-         if ( diff_current_date_and_last_day_of_month.days() <= 7) {
+
+         if ( diff_current_date_and_last_day_of_month.days() < 7) {
             return true;
          }
       }
@@ -432,10 +465,13 @@ bool CronAttr::last_week_day_of_month_matches( const ecf::Calendar& c  ) const
    return false;
 }
 
-bool CronAttr::day_of_month_matches(int theDayOfMonth) const
+bool CronAttr::day_of_month_matches(int theDayOfMonth, const ecf::Calendar& c) const
 {
 	BOOST_FOREACH(int dayOfMonth, daysOfMonth_) {
 	 	if ( theDayOfMonth == dayOfMonth)  return true;
+	}
+	if (last_day_of_month_) {
+	   return c.date() == c.date().end_of_month();
 	}
 	return false;
 }
@@ -462,12 +498,14 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const
 	// Find the next date that matches, day of week, day of year, and month
 	// that is greater than todays date. This *ASSUMES* day of week, day of month,
 	// and month is *ANDED* together
-
  	boost::gregorian::date_duration one_day(1);
 	boost::gregorian::date future_date = calendar.date();  // todays date
-	future_date += one_day;                                // add one day, so its in the future
 
-   boost::gregorian::date last_day_of_month = calendar.date().end_of_month();
+#ifdef DEBUG_CRON_SIM
+   cout  << "cron : " << toString() << "\n";
+   cout << "future_date start : " << to_simple_string(future_date) << "\n";
+#endif
+	future_date += one_day;                     // add one day, so its in the future
 
  	while ( true ) {
 
@@ -475,8 +513,7 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const
  	   bool the_last_week_day_of_month_matches = last_week_days_of_month_.empty(); // matches if EMPTY
  		bool day_of_month_matches = daysOfMonth_.empty();  // day of month if no days of month
  		bool month_matches = months_.empty();              // month matches if no months
- 		bool last_day_of_the_month_matches = true;
- 		if (last_day_of_month_) last_day_of_the_month_matches = false;
+ 		if ( daysOfMonth_.empty() && last_day_of_month_) day_of_month_matches = false;
 
 		// deal with case where we have: cron -w 0,1
  		for (int weekDay : weekDays_) {
@@ -485,47 +522,50 @@ boost::gregorian::date CronAttr::next_date(const ecf::Calendar& calendar) const
 				break;
 			}
 		}
-
-      // deal with case where we have: cron -w 1L   # last monday of the month
+ 		// *IMPORTANT* the days in weekDays_ and last_week_days_of_month_ can *NOT* overlap.
       for (int weekDay : last_week_days_of_month_ ) {
          if ( future_date.day_of_week().as_number() == weekDay ) {
-            boost::gregorian::date_duration diff = future_date - last_day_of_month ;
-            if (diff.days() <= 7 ) {
+            boost::gregorian::date_duration diff = future_date - future_date.end_of_month();
+            if (diff.days() < 7 ) {
                the_last_week_day_of_month_matches = true;
             }
             break;
          }
       }
 
- 		// deal with case where we have: cron -w 0,1 -d 14,15,16
- 		for (int d : daysOfMonth_) {
-			if ( future_date.day() == d ) {
-				day_of_month_matches = true;
-				break;
- 			}
-		}
+ 		// deal with case where we have: cron  -d 14,15,16,L  # L means last day of month
+      if ( !daysOfMonth_.empty() || last_day_of_month_) {
+         for (int d : daysOfMonth_) {
+            if ( future_date.day() == d ) {
+               day_of_month_matches = true;
+               break;
+            }
+         }
+         if (last_day_of_month_ && future_date == future_date.end_of_month()) {
+            day_of_month_matches = true;
+         }
+      }
 
  		// deal with case where we have: cron -w 0,1 -d 14,15,16 -m 8, 9
- 		for (int month : months_) {
+ 		for(int month : months_) {
 			if ( future_date.month() == month ) {
 				month_matches = true;
 				break;
   			}
 		}
 
- 		// deal with case where we have: cron -w 0,1 -d 14,15,16,L -m 8, 9   # L means last day of month
- 		if (last_day_of_month_ && future_date == last_day_of_month) {
- 		   last_day_of_the_month_matches = true;
- 		}
-
  		// if it all matches, then return the future day
- 		if ( week_day_matches && day_of_month_matches && month_matches && last_day_of_the_month_matches && the_last_week_day_of_month_matches) {
+ 	   // Remember we *AND* across -w, -d, -m or *OR* for each element in -w, -d,-m
+ 		if ( ( week_day_matches || the_last_week_day_of_month_matches) && day_of_month_matches && month_matches ) {
  			break; // return future_date, replaced with break to  keep HPUX compiler happy
  			       // otherwise it complains that return at the end of the function is
  			       // unreachable
  		}
 
 		future_date += one_day;
+#ifdef DEBUG_CRON_SIM
+		cout << "future_date " << to_simple_string(future_date) << "\n";
+#endif
 	}
  	return future_date; // should never happen, i.e we can find future date that matches
 }
@@ -570,10 +610,7 @@ static std::string nextToken( size_t& index, const std::vector<std::string >& li
 	return string();
 }
 
-std::vector<int> extractOption(
-                               size_t& index,
-                               const std::vector<std::string >& lineTokens,
-                               const std::string& option)
+std::string extract_list( size_t& index, const std::vector<std::string >& lineTokens)
 {
 	// cron -w 0,1L,2L,3 -d 1,12,14,L   -m 5,6,7,8   10:00 20:00 01:00
 	assert(index < lineTokens.size());
@@ -591,28 +628,117 @@ std::vector<int> extractOption(
 #ifdef DEBUG_CRON_PARSING
 	cerr << "theIntList = " << theIntList << "\n";
 #endif
+	return theIntList;
+}
 
-	// should have 0,1,2,3
-	std::vector< int > theIntVec;
-	char_separator< char > sep( ",", nullptr, boost::drop_empty_tokens );
-	typedef boost::tokenizer< boost::char_separator< char > > tokenizer;
-	tokenizer theTokenizer( theIntList, sep );
+std::vector<int> extract_month(size_t& index,
+                               const std::vector<std::string >& lineTokens,
+                               const std::string& option)
+{
+   // cron -w 0,1L,2L,3 -d 1,12,14,L   -m 5,6,7,8   10:00 20:00 01:00
+   assert(index < lineTokens.size());
 
-	for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
-		string theIntToken = *beg;
-		boost::algorithm::trim( theIntToken );
-		if ( theIntToken.empty() ) continue;
+   // Collate the list of integers, these may have been separated by spaces
+   // since we stop on option or time spec, the top level code should decrement index
+   std::string theIntList = extract_list(index,lineTokens);
 
-		try {
-			auto theInt = boost::lexical_cast< int >( theIntToken );
- 			theIntVec.push_back( theInt );
-		}
-		catch ( boost::bad_lexical_cast& ) {
-			std::stringstream ss; ss << "Invalid cron option: " << option  ;
-			throw std::runtime_error( ss.str() );
-		}
-	}
-	return theIntVec;
+   // should have 0,1,2,3
+   std::vector< int > theIntVec;
+   char_separator< char > sep( ",", nullptr, boost::drop_empty_tokens );
+   typedef boost::tokenizer< boost::char_separator< char > > tokenizer;
+   tokenizer theTokenizer( theIntList, sep );
+
+   for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
+      string theIntToken = *beg;
+      boost::algorithm::trim( theIntToken );
+      if ( theIntToken.empty() ) continue;
+
+      try {
+         auto theInt = boost::lexical_cast< int >( theIntToken );
+         theIntVec.push_back( theInt );
+      }
+      catch ( boost::bad_lexical_cast& ) {
+         std::stringstream ss; ss << "Invalid cron option: " << option  ;
+         throw std::runtime_error( ss.str() );
+      }
+   }
+   return theIntVec;
+}
+
+void extract_days_of_week(size_t& index, const std::vector<std::string >& lineTokens, const std::string& option,
+                          std::vector<int>& days_of_week, std::vector<int>& last_week_days_of_month)
+{
+   // cron -w 0,1L,2L,3 10:00 20:00 01:00
+   assert(index < lineTokens.size());
+
+   // Collate the list of integers, these may have been separated by spaces
+   // since we stop on option or time spec, the top level code should decrement index
+   std::string theIntList = extract_list(index,lineTokens);
+
+   // should have 0,1,2,3,4L
+   char_separator< char > sep( ",", nullptr, boost::drop_empty_tokens );
+   typedef boost::tokenizer< boost::char_separator< char > > tokenizer;
+   tokenizer theTokenizer( theIntList, sep );
+
+   for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
+      string theIntToken = *beg;
+      boost::algorithm::trim( theIntToken );
+      if ( theIntToken.empty() ) continue;
+
+      try {
+         if (theIntToken.size() == 2) {
+            if (theIntToken[1] != 'L' ) {
+               std::stringstream ss; ss << "Invalid cron option: " << option << " " << theIntToken;
+               throw std::runtime_error( ss.str() );
+            }
+            auto theInt = boost::lexical_cast< int >( theIntToken[0] );
+            last_week_days_of_month.push_back(theInt);
+         }
+         else {
+            auto theInt = boost::lexical_cast< int >( theIntToken );
+            days_of_week.push_back( theInt );
+         }
+      }
+      catch ( boost::bad_lexical_cast& ) {
+         std::stringstream ss; ss << "Invalid cron option: " << option  ;
+         throw std::runtime_error( ss.str() );
+      }
+   }
+}
+
+void extract_days_of_month(size_t& index, const std::vector<std::string >& lineTokens, const std::string& option,
+                          std::vector<int>& days_of_month, bool& last_day_of_month)
+{
+   // cron -d 1,12,14,L 10:00 20:00 01:00
+
+   assert(index < lineTokens.size());
+
+   // Collate the list of integers, these may have been separated by spaces
+   // since we stop on option or time spec, the top level code should decrement index
+   std::string theIntList = extract_list(index,lineTokens);
+
+   // should have 0,1,2,3,4L
+   char_separator< char > sep( ",", nullptr, boost::drop_empty_tokens );
+   typedef boost::tokenizer< boost::char_separator< char > > tokenizer;
+   tokenizer theTokenizer( theIntList, sep );
+
+   for (tokenizer::iterator beg = theTokenizer.begin(); beg != theTokenizer.end(); ++beg) {
+      string theIntToken = *beg;
+      boost::algorithm::trim( theIntToken );
+      if ( theIntToken.empty() ) continue;
+
+      try {
+         if (theIntToken == "L")  last_day_of_month = true;
+         else {
+            auto theInt = boost::lexical_cast< int >( theIntToken );
+            days_of_month.push_back( theInt );
+         }
+      }
+      catch ( boost::bad_lexical_cast& ) {
+         std::stringstream ss; ss << "Invalid cron option: " << option  ;
+         throw std::runtime_error( ss.str() );
+      }
+   }
 }
 
 void extractOption(CronAttr& cronAttr, size_t& index, const std::vector<std::string >& lineTokens)
@@ -635,7 +761,7 @@ void extractOption(CronAttr& cronAttr, size_t& index, const std::vector<std::str
  		if (last_day_of_month) cronAttr.add_last_day_of_month();
   	}
 	else if (lineTokens[index] == "-m") {
- 		cronAttr.addMonths( extractOption(index, lineTokens,"Months" ) );
+ 		cronAttr.addMonths( extract_month(index, lineTokens,"Months" ) );
   	}
 	else throw std::runtime_error( "extractOption: Invalid cron option :" + lineTokens[index] );
 }
@@ -647,7 +773,8 @@ void CronAttr::parse( CronAttr& cronAttr, const std::vector<std::string>& lineTo
 	// cron -w 0,1 10:00          # run every sunday and monday at 10am
 	// cron -d 10,11,12 12:00     # run 10th, 11th and 12th of each month at noon
 	// cron -m 1,2,3 12:00        # run on Jan,Feb and March every day at noon.
-	// cron -w 0 -m 5,6,7,8 10:00 20:00 01:00 # run every sunday, between May-Aug, every hour between 10am and 8pm
+   // cron -w 0 -m 5,6,7,8 10:00 20:00 01:00 # run every sunday, between May-Aug, every hour between 10am and 8pm
+   // cron -w 0,1,2L -d 5,6,L  23:00 # run every sunday,monday, and last tuesday of the month, 5,6 on month, and *last* day of month @11 pm
 
    // make *sure* a time spec is specified
    bool time_spec_specified = false;

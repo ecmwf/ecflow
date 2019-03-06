@@ -58,7 +58,15 @@ class TestCron(unittest.TestCase):
         cron6.set_week_days([0, 1, 2, 3])
         self.cron6 = cron6
         
-    
+        cron7 = Cron()
+        cron7.set_week_days( [0,1,2] )                       # This cant overlap with last_week_days_of_the_month
+        cron7.set_last_week_days_of_the_month( [3,4,5,6] )   # This cant overlap with days_of_week
+        cron7.set_days_of_month( [1,2,3,4,5,6] )
+        cron7.set_months( [1,2,3,4,5,6] )
+        cron7.set_time_series( "+00:00 23:00 00:30" )
+        cron7.set_last_day_of_the_month()
+        self.cron7 = cron7
+
     def test_me0(self):
         cron = Cron("+00:00 23:00 00:30", days_of_week=[0,1,2,3,4,5,6],days_of_month=[1,2,3,4,5,6], months=[1,2,3,4,5,6])
         self.assertEqual(self.cron1, cron, "cron not equal\n" + str(self.cron1) + "\n" + str(cron))
@@ -78,6 +86,13 @@ class TestCron(unittest.TestCase):
         cron = Cron("+00:00 23:00 00:30",days_of_week=[0,1,2,3])
         self.assertEqual(self.cron6, cron, "cron not equal\n" + str(self.cron6) + "\n" + str(cron))
 
+        cron = Cron("+00:00 23:00 00:30",days_of_week=[0,1,2],                   # This cant overlap with last_week_days_of_the_month
+                                         last_week_days_of_the_month=[3,4,5,6],  # This cant overlap with days_of_week
+                                         days_of_month=[1,2,3,4,5,6],
+                                         months=[1,2,3,4,5,6],
+                                         last_day_of_the_month=True)
+        self.assertEqual(self.cron7, cron, "cron not equal\n" + str(self.cron7) + "\n" + str(cron))
+ 
     def test_fail(self):
         with self.assertRaises(RuntimeError):
             cron = Cron("");  # empty

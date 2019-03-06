@@ -1,0 +1,87 @@
+suite cron            # use real clock otherwise the date wont change
+ clock real 1.1.2019  # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2020  # When to finish. Cant use 31.12.2019, otherwise duration is 31.12.2019 - 1.1.2019 , short by one day
+ family cronFamily
+  task t
+   cron -d L 10:00    # run on the last of the month
+   verify complete:12
+ endfamily
+endsuite
+
+suite cron1            # use real clock otherwise the date wont change
+ clock real 1.1.2019  # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2020  # When to finish. Cant use 31.12.2019, otherwise duration is 31.12.2019 - 1.1.2019 , short by one day
+ family cronFamily
+  task t
+   cron -w 0L 10:00    # run on the last sunday of each month
+   verify complete:12
+ endfamily
+endsuite
+
+suite cron2             # use real clock otherwise the date wont change
+ clock real 1.1.2019    # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2020    # When to finish. Cant use 31.12.2019, otherwise duration is 31.12.2019 - 1.1.2019 , short by one day
+ family cronFamily
+  task t
+   cron -d 1,L 10:00    # run on the first and last of the month
+   verify complete:24
+ endfamily
+endsuite
+
+suite cron3             # use real clock otherwise the date wont change
+ clock real 1.1.2019    # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2020    # When to finish. Cant use 31.12.2019, otherwise duration is 31.12.2019 - 1.1.2019 , short by one day
+ family cronFamily
+  task t
+   cron -w 0L,1L,2L,3L,4L,5L,6L 10:00  # run on the last Monday,Tuesdat..Saturday,Sunday of the month
+   verify complete:84
+ endfamily
+endsuite
+
+suite cron4             # use real clock otherwise the date wont change
+ clock real 1.1.2019    # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2020    # When to finish. Cant use 31.12.2019, otherwise duration is 31.12.2019 - 1.1.2019 , short by one day
+ family cronFamily
+  task t
+   # run on the last thursday and Last of the month, this only occurs 3 times in a year
+   # Remember we *AND* accross -w, -d, -m or *OR* for each element in -w, -d,-m
+   cron -w 4L -d L 10:00    
+    
+   # In 2019, thursday was last of month 3 times
+   verify complete:3   
+ endfamily
+endsuite
+
+suite cron5             # use real clock otherwise the date wont change
+ clock real 1.1.2019     # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2020     # When to finish. Cant use 31.12.2019, otherwise duration is 31.12.2019 - 1.1.2019 , short by one day
+ family cronFamily
+  task t
+   cron -w 0,1L -m 1  10:00 # run every sunday and last Monday of the month, in January
+   verify complete:5
+ endfamily
+endsuite
+
+suite cron6             # use real clock otherwise the date wont change
+ clock real 1.1.2019     # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2020     # When to finish. Cant use 31.12.2019, otherwise duration is 31.12.2019 - 1.1.2019 , short by one day
+ family cronFamily
+  task t
+   # Remember we *AND* accross -w, -d, -m or *OR* for each element in -w, -d,-m
+   # There is *ONLY* one day in January, i.e Thursday 31 of january
+   cron -w 0,1,2,3,4,5,6L -d L -m 1 10:00 
+   verify complete:1
+ endfamily
+endsuite
+
+suite cron7              # use real clock otherwise the date wont change
+ clock real 1.1.2019     # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2020     # When to finish. Cant use 31.12.2019, otherwise duration is 31.12.2019 - 1.1.2019 , short by one day
+ family cronFamily
+  task t
+   # expect 0 days, since last of the month in January is a thursday, and thursday is missing from day of the week
+   cron -w 0,1,2,3,5,6L -d L -m 1  10:00  
+   verify complete:0
+ endfamily
+endsuite
+

@@ -15,6 +15,7 @@
 
 #include "VerifyParser.hpp"
 #include "Node.hpp"
+#include "DefsStructureParser.hpp"
 #include "Extract.hpp"
 
 using namespace ecf;
@@ -49,10 +50,12 @@ bool VerifyParser::doParse( const std::string& line, std::vector<std::string >& 
 
 		// STATE
 		int actual = 0;
-		if (lineTokens.size() >= 4) {
-		   if (lineTokens[2] == "#") {
-		      try { actual = boost::lexical_cast<int>( lineTokens[3] ); }
-		      catch ( boost::bad_lexical_cast& e ) { /* ignore could be other comment */}
+		if (rootParser()->get_file_type() != PrintStyle::DEFS) {
+		   if (lineTokens.size() >= 4) {
+		      if (lineTokens[2] == "#") {
+		         try { actual = boost::lexical_cast<int>( lineTokens[3] ); }
+		         catch ( boost::bad_lexical_cast& e ) { /* ignore could be other comment */}
+		      }
 		   }
 		}
 
