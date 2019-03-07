@@ -85,3 +85,14 @@ suite cron7              # use real clock otherwise the date wont change
  endfamily
 endsuite
 
+suite cron8             # use real clock otherwise the date wont change
+ clock real 1.1.2019    # need to define a date otherwise log file content varies according to the time 
+ endclock   1.1.2020    # When to finish. Cant use 31.12.2019, otherwise duration is 31.12.2019 - 1.1.2019 , short by one day
+ family cronFamily
+  task t
+   # run on the last saturday and Last of the month, this only occurs 2 times in a year
+   # Remember we *AND* accross -w, -d, -m or *OR* for each element in -w, -d,-m
+   cron -w 6L -d L 10:00    
+   verify complete:2
+ endfamily
+endsuite
