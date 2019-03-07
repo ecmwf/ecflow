@@ -28,18 +28,18 @@ bool GenericParser::doParse( const std::string& line, std::vector<std::string >&
    //    generic fred # sdsdsd
    if ( lineTokens.size() < 2 ) throw std::runtime_error( "GenericParser::doParse: Invalid generic :" + line );
 
-   if ( !nodeStack().empty() ) {
-      Node* node = nodeStack_top();
-
-      std::string key = lineTokens[1];
-      std::vector<std::string> values;
-
-      for (size_t i = 2; i < lineTokens.size(); i++) {
-         if (lineTokens[i][0] == '#') break;
-         values.push_back(lineTokens[i]);
-      }
-
-      node->add_generic( GenericAttr(key,values) ) ;
+   if ( nodeStack().empty() ) {
+      throw std::runtime_error("GenericParser::doParse: Could not add generic as node stack is empty at line: " + line );
    }
+
+   size_t line_tokens_size = lineTokens.size();
+   std::vector<std::string> values; values.reserve( line_tokens_size );
+   for (size_t i = 2; i <  line_tokens_size; i++) {
+      if (lineTokens[i][0] == '#') break;
+      values.push_back(lineTokens[i]);
+   }
+
+   Node* node = nodeStack_top();
+   node->add_generic( GenericAttr(lineTokens[1],values) ) ;
    return true;
 }
