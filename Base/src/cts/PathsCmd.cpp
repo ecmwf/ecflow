@@ -137,46 +137,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
    std::stringstream ss;
    switch (api_) {
 
-      case PathsCmd::CHECK:  {
-         as->update_stats().check_++;
-
-         if (  paths_.empty() ) {
-            // check all the defs,
-            std::string error_msg,warning_msg;
-            if (!as->defs()->check(error_msg,warning_msg)) {
-               error_msg += "\n";
-               error_msg += warning_msg;
-               return PreAllocatedReply::string_cmd(error_msg);
-            }
-            return PreAllocatedReply::string_cmd(warning_msg); // can be empty
-         }
-         else {
-            std::string acc_warning_msg;
-            size_t vec_size = paths_.size();
-            for(size_t i = 0; i < vec_size; i++) {
-
-               node_ptr theNodeToCheck =  as->defs()->findAbsNode(paths_[i]);
-               if (!theNodeToCheck.get()) {
-                  ss << "PathsCmd:Check: Could not find node at path '" << paths_[i] << "'\n";
-                  LOG(Log::ERR,"Check: Could not find node at path " << paths_[i]);
-                  continue;
-               }
-
-               std::string error_msg,warning_msg;
-               if (!theNodeToCheck->check(error_msg,warning_msg)) {
-                  error_msg += "\n";
-                  error_msg += warning_msg;
-                  return PreAllocatedReply::string_cmd(error_msg);
-               }
-               acc_warning_msg += warning_msg;
-            }
-            std::string paths_not_fnd_error_msg = ss.str();
-            if (!paths_not_fnd_error_msg.empty()) throw std::runtime_error( paths_not_fnd_error_msg );
-            return PreAllocatedReply::string_cmd(acc_warning_msg);
-         }
-         break;
-      }
-
       case PathsCmd::SUSPEND: {
          as->update_stats().node_suspend_++;
          size_t vec_size = paths_.size();
@@ -228,26 +188,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          break;
       }
 
-      case PathsCmd::STATUS: {
-         as->update_stats().node_status_++;
-         size_t vec_size = paths_.size();
-         for(size_t i = 0; i < vec_size; i++) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
-            if (!theNode.get()) {
-               ss << "PathsCmd:Status: Could not find node at path '" << paths_[i] << "'\n";
-               LOG(Log::ERR,"Status: Could not find node at path " << paths_[i]);
-               continue;
-            }
-            if (!theNode->suite()->begun()) {
-               std::stringstream ss;
-               ss << "Status failed. For " << paths_[i] << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
-               throw std::runtime_error( ss.str() ) ;
-            }
-            SuiteChanged0 changed(theNode);
-            theNode->status();   // this can throw std::runtime_error
-         }
-         break;
-      }
 
       case PathsCmd::EDIT_HISTORY: {
          as->update_stats().node_edit_history_++;
@@ -318,6 +258,68 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          }
          break;
       }
+
+      case PathsCmd::STATUS: {
+         as->update_stats().node_status_++;
+         size_t vec_size = paths_.size();
+         for(size_t i = 0; i < vec_size; i++) {
+            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
+            if (!theNode.get()) {
+               ss << "PathsCmd:Status: Could not find node at path '" << paths_[i] << "'\n";
+               LOG(Log::ERR,"Status: Could not find node at path " << paths_[i]);
+               continue;
+            }
+            if (!theNode->suite()->begun()) {
+               std::stringstream ss;
+               ss << "Status failed. For " << paths_[i] << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
+               throw std::runtime_error( ss.str() ) ;
+            }
+            SuiteChanged0 changed(theNode);
+            theNode->status();   // this can throw std::runtime_error
+         }
+         break;
+      }
+
+      case PathsCmd::CHECK:  {
+         as->update_stats().check_++;
+
+         if (  paths_.empty() ) {
+            // check all the defs,
+            std::string error_msg,warning_msg;
+            if (!as->defs()->check(error_msg,warning_msg)) {
+               error_msg += "\n";
+               error_msg += warning_msg;
+               return PreAllocatedReply::string_cmd(error_msg);
+            }
+            return PreAllocatedReply::string_cmd(warning_msg); // can be empty
+         }
+         else {
+            std::string acc_warning_msg;
+            size_t vec_size = paths_.size();
+            for(size_t i = 0; i < vec_size; i++) {
+
+               node_ptr theNodeToCheck =  as->defs()->findAbsNode(paths_[i]);
+               if (!theNodeToCheck.get()) {
+                  ss << "PathsCmd:Check: Could not find node at path '" << paths_[i] << "'\n";
+                  LOG(Log::ERR,"Check: Could not find node at path " << paths_[i]);
+                  continue;
+               }
+
+               std::string error_msg,warning_msg;
+               if (!theNodeToCheck->check(error_msg,warning_msg)) {
+                  error_msg += "\n";
+                  error_msg += warning_msg;
+                  return PreAllocatedReply::string_cmd(error_msg);
+               }
+               acc_warning_msg += warning_msg;
+            }
+            std::string paths_not_fnd_error_msg = ss.str();
+            if (!paths_not_fnd_error_msg.empty()) throw std::runtime_error( paths_not_fnd_error_msg );
+            return PreAllocatedReply::string_cmd(acc_warning_msg);
+         }
+         break;
+      }
+
       case PathsCmd::NO_CMD: assert(false); break;
 
       default: assert(false); break;

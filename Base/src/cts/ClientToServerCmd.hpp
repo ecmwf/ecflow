@@ -1200,6 +1200,7 @@ public:
 
 private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after handlerequest
 
    ecf::User::Action user_action_;
    std::string process_id_;         // should be empty for multiple paths and when using CLI

@@ -58,7 +58,7 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
          cout << defs;
       }
 
-      if (!check_only) defs->save_as_string(defs_,PrintStyle::NET);
+      if (!check_only) defs->save_as_string(defs_,PrintStyle::NET); // NET only takes affect on restore
 
       // Output any warning to standard output
       cout << warningMsg;
