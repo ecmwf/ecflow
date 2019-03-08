@@ -326,7 +326,7 @@ private:
 class RepeatDay : public RepeatBase {
 public:
    RepeatDay( int step ) : RepeatBase("day"), step_(step),valid_(true)  {}
-   RepeatDay() = default;
+   RepeatDay() : RepeatBase("day"), step_(1),valid_(true) {}
 
    bool operator==(const RepeatDay& rhs) const;
 
@@ -377,8 +377,10 @@ public:
    Repeat( const RepeatString& );
    Repeat( const RepeatDay& );
    Repeat( const Repeat& );
+   Repeat( Repeat&& rhs) : type_(std::move(rhs.type_)) {}
    ~Repeat();
    Repeat& operator=(const Repeat& rhs);
+   Repeat& operator=(Repeat&& rhs);
    bool operator==(const Repeat& rhs) const;
 
    bool empty() const { return (type_) ? false : true; }

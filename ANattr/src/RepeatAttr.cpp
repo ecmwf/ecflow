@@ -65,6 +65,12 @@ Repeat& Repeat::operator=(const Repeat& rhs)
 	return *this;
 }
 
+Repeat& Repeat::operator=(Repeat&& rhs)
+{
+   type_ = std::move(rhs.type_); // since rhs.type_ is a unique_ptr no need to set rhs.type_ to NULL
+   return *this;
+}
+
 bool Repeat::operator==(const Repeat& rhs) const
 {
 	if (!type_ && rhs.type_) return false;

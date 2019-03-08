@@ -181,8 +181,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(empty.end() == 0,"end should be 0");
       BOOST_CHECK_MESSAGE(empty.step() == 1,"default step should be 0 but found " <<  empty.step());
       BOOST_CHECK_MESSAGE(empty.value() == 1,"value should be 0 but found " << empty.value());
-      BOOST_CHECK_MESSAGE(empty.name().empty(),"name should be empty");
-      BOOST_CHECK_MESSAGE(empty.name() == "","name not as expected");
+      BOOST_CHECK_MESSAGE(empty.name() == "day","name not as expected");
    }
 }
 
@@ -324,6 +323,36 @@ BOOST_AUTO_TEST_CASE( test_repeat )
 		day.reset();
  		BOOST_CHECK_MESSAGE(day.valid(),"Should return true after reset");
 	}
+}
+
+BOOST_AUTO_TEST_CASE( test_repeat_move_semantics )
+{
+   cout << "ANattr:: ...test_repeat_move_semantics\n";
+
+   std::vector<std::string> stringList{ "a", "b", "c" };
+   {
+      Repeat x;
+      BOOST_CHECK_MESSAGE(x.empty(),"Construction failed");
+
+      Repeat l1(RepeatDate("YMD",20090916,20090930,1));
+      x = l1;
+      BOOST_CHECK_MESSAGE(!x.empty(),"copy assignment failed");
+      BOOST_CHECK_MESSAGE(x == l1,"Equality failed, after copy assignment");
+      x = std::move(l1);
+      BOOST_CHECK_MESSAGE(!x.empty(),"move assignment failed");
+      BOOST_CHECK_MESSAGE(l1.empty(),"move assignment failed");
+   }
+   {
+      Repeat r1(RepeatDate("YMD",20090916,20090930,1));
+      Repeat r2 = Repeat(r1); //copy construction
+      BOOST_CHECK_MESSAGE(!r1.empty()," copy construction failed");
+      BOOST_CHECK_MESSAGE(!r2.empty()," copy construction failed");
+      BOOST_CHECK_MESSAGE(r1 == r2,"Equality failed, after copy construction");
+
+      Repeat r3 = Repeat(std::move(r1)); // move construction
+      BOOST_CHECK_MESSAGE(r1.empty(),"move construction failed");
+      BOOST_CHECK_MESSAGE(r2 == r3,"Equality failed, after move construction");
+   }
 }
 
 
