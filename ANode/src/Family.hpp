@@ -21,7 +21,7 @@ class FamGenVariables;
 
 class Family : public NodeContainer {
 public:
-   explicit Family( const std::string& name ) : NodeContainer(name),fam_gen_variables_(nullptr) {}
+   explicit Family( const std::string& name,bool check = true ) : NodeContainer(name,check),fam_gen_variables_(nullptr) {}
    Family()= default;
    Family(const Family& rhs) : NodeContainer(rhs), fam_gen_variables_(nullptr) {}
    Family& operator=(const Family&);
@@ -29,7 +29,7 @@ public:
 
 	~Family() override;
 
-	static family_ptr create(const std::string& name);
+	static family_ptr create(const std::string& name, bool check = true);
 
    bool check_defaults() const override;
 

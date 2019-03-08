@@ -335,10 +335,16 @@ static void throwIfRepeatAllreadyExists(Node* node)
 		throw std::runtime_error(ss.str());
 	}
 }
-void Node::addRepeat( const Repeat& r ){
+void Node::addRepeat( Repeat&& r ){
 	throwIfRepeatAllreadyExists(this);
- 	repeat_ = Repeat(r);
+ 	repeat_ = std::move(r);
  	repeat_.update_repeat_genvar();
+   state_change_no_ = Ecf::incr_state_change_no();
+}
+void Node::addRepeat( const Repeat& r ){
+   throwIfRepeatAllreadyExists(this);
+   repeat_ = r;
+   repeat_.update_repeat_genvar();
    state_change_no_ = Ecf::incr_state_change_no();
 }
 

@@ -132,8 +132,10 @@ private:
 
    void addAlias(const std::string& line,std::vector<std::string>& lineTokens) const
    {
+      bool check = (rootParser()->get_file_type() != PrintStyle::NET);
+
       if ( nodeStack().empty() && rootParser()->parsing_node_string()) {
-          alias_ptr alias = Alias::create(lineTokens[1]);
+          alias_ptr alias = Alias::create(lineTokens[1],check);
           if (rootParser()->get_file_type() != PrintStyle::DEFS) alias->read_state(line,lineTokens);
           nodeStack().push( std::make_pair(alias.get(),this) );
           rootParser()->set_node_ptr(alias);
@@ -216,8 +218,10 @@ private:
 
 	void addTask(const std::string& line,std::vector<std::string>& lineTokens) const
 	{
+      bool check = (rootParser()->get_file_type() != PrintStyle::NET);
+
       if ( nodeStack().empty() && rootParser()->parsing_node_string()) {
-          task_ptr task = Task::create(lineTokens[1]);
+          task_ptr task = Task::create(lineTokens[1],check);
           if (rootParser()->get_file_type() != PrintStyle::DEFS) task->read_state(line,lineTokens);
           nodeStack().push( std::make_pair(task.get(),this) );
           rootParser()->set_node_ptr(task);
@@ -235,7 +239,7 @@ private:
 	   NodeContainer* lastAddedContainer = nodeStack_top()->isNodeContainer();
 	   if ( lastAddedContainer ) {
 
-	      task_ptr task = Task::create(lineTokens[1]);
+	      task_ptr task = Task::create(lineTokens[1],check);
          if (rootParser()->get_file_type() != PrintStyle::DEFS) task->read_state(line,lineTokens);
 	      nodeStack().push( std::make_pair(task.get(),this) );
 	      lastAddedContainer->addTask( task );
@@ -315,8 +319,10 @@ private:
 
 	void addFamily(const std::string& line,const std::vector<std::string>& lineTokens) const
 	{
+	   bool check = (rootParser()->get_file_type() != PrintStyle::NET);
+
 	   if ( nodeStack().empty() && rootParser()->parsing_node_string()) {
-         family_ptr family = Family::create(lineTokens[1]);
+         family_ptr family = Family::create(lineTokens[1],check);
          rootParser()->set_node_ptr(family);
          if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
          nodeStack().push( std::make_pair(family.get(),this) );
@@ -326,7 +332,7 @@ private:
 	      Suite* lastAddedSuite = nodeStack_top()->isSuite();
 	      if (lastAddedSuite ) {
 
-	         family_ptr family = Family::create(lineTokens[1]);
+	         family_ptr family = Family::create(lineTokens[1],check);
 	         if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
 
 	         nodeStack().push( std::make_pair(family.get(),this) );
@@ -337,7 +343,7 @@ private:
 	         Family* lastAddedFamily = nodeStack_top()->isFamily();
 	         if ( lastAddedFamily ) {
 
-	            family_ptr family = Family::create(lineTokens[1]);
+	            family_ptr family = Family::create(lineTokens[1],check);
 	            if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
 
 	            nodeStack().push( std::make_pair(family.get(),this));
@@ -438,7 +444,8 @@ private:
 	      throw std::runtime_error("SuiteParser::addSuite node stack should be empty");
 	   }
 
-	   suite_ptr suite = Suite::create(lineTokens[1]);
+      bool check = (rootParser()->get_file_type() != PrintStyle::NET);
+	   suite_ptr suite = Suite::create(lineTokens[1],check);
 	   if (rootParser()->get_file_type() != PrintStyle::DEFS) suite->read_state(line,lineTokens);
 
 	   nodeStack().push( std::make_pair(suite.get(),this) );

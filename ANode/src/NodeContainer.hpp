@@ -23,7 +23,7 @@ class NodeContainer : public Node {
 protected:
    NodeContainer& operator=(const NodeContainer&);
 public:
-   explicit NodeContainer( const std::string& name );
+   explicit NodeContainer( const std::string& name,bool check);
    NodeContainer(const NodeContainer& );
 	NodeContainer();
 	~NodeContainer() override;

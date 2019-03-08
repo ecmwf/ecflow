@@ -18,7 +18,7 @@
 
 class Task : public Submittable {
 public:
-   explicit Task( const std::string& name ) : Submittable(name) {}
+   explicit Task( const std::string& name, bool check = true ) : Submittable(name,check) {}
    Task()= default;
    Task(const Task& rhs);
    Task& operator=(const Task&);
@@ -27,7 +27,7 @@ public:
 
    bool check_defaults() const override;
 
-	static task_ptr create(const std::string& name);
+	static task_ptr create(const std::string& name, bool check = true);
 
 	void print(std::string&) const override;
    bool operator==(const Task& rhs) const;

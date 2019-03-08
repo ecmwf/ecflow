@@ -685,9 +685,9 @@ void Defs::write_state(std::string& os) const
    if (save_edit_history_) {
 	   Indentor in;
 	   std::map<std::string, std::deque<std::string> >::const_iterator i;
-	   for(i=edit_history_.begin(); i != edit_history_.end(); ++i) {
-		   Indentor::indent( os ); os += "history "; os += (*i).first; os +=  " "; // node path
-		   const std::deque<std::string>& vec = (*i).second;                          // list of requests
+	   for(const auto& i : edit_history_) {
+		   Indentor::indent( os ); os += "history "; os += i.first; os +=  " "; // node path
+		   const std::deque<std::string>& vec = i.second;                          // list of requests
 		   for(const auto & c : vec) {
 
 		      // We expect to output a single newline, hence if there are additional new lines

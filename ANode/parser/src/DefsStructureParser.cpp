@@ -118,8 +118,8 @@ bool DefsStructureParser::doParse(std::string& errorMsg,std::string& warningMsg)
 
 bool DefsStructureParser::do_parse_file(std::string& errorMsg)
 {
-   std::vector< std::string > lineTokens; lineTokens.reserve(30); // derived from 3199.def
-   string line;                           line.reserve(350);      // derived from 3199.def
+   std::vector< std::string > lineTokens; lineTokens.reserve(64);
+   string line;                           line.reserve(1024);
    while ( infile_.good() ) {
       getNextLine( line ); // will increment lineNumer_
       if (!do_parse_line(line,lineTokens, errorMsg)) {
@@ -131,8 +131,8 @@ bool DefsStructureParser::do_parse_file(std::string& errorMsg)
 
 bool DefsStructureParser::do_parse_string(std::string& errorMsg)
 {
-   std::vector< std::string > lineTokens; lineTokens.reserve(30); // derived from 3199.def
-   string line;                           line.reserve(350);      // derived from 3199.def
+   std::vector< std::string > lineTokens; lineTokens.reserve(64);
+   string line;                           line.reserve(1024);
    while ( defs_as_string_.good() ) {
       getNextLine( line ); // will increment lineNumer_
       if (!do_parse_line(line,lineTokens, errorMsg)) {

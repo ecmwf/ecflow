@@ -25,7 +25,7 @@ namespace ecf { class CalendarUpdateParams;  } // forward declare
 
 class Suite : public NodeContainer {
 public:
-   explicit Suite( const std::string& name) : NodeContainer(name) {}
+   explicit Suite( const std::string& name,bool check = true) : NodeContainer(name,check) {}
    Suite()= default;
 
    Suite( const Suite&);
@@ -34,7 +34,7 @@ public:
 
    ~Suite() override;
 
-   static suite_ptr create(const std::string& name);
+   static suite_ptr create(const std::string& name, bool check = true);
 
    bool check_defaults() const override;
 

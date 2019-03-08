@@ -54,11 +54,13 @@ using namespace boost::posix_time;
 //#define DEBUG_REQUEUE 1
 //#define DEBUG_FIND_REFERENCED_NODE 1
 
-Node::Node(const std::string& n) : n_(n)
+Node::Node(const std::string& n,bool check) : n_(n)
 {
-   string msg;
-   if (!Str::valid_name(n, msg)) {
-      throw std::runtime_error("Invalid node name : " + msg);
+   if (check) {
+      string msg;
+      if (!Str::valid_name(n, msg)) {
+         throw std::runtime_error("Invalid node name : " + msg);
+      }
    }
 }
 

@@ -38,8 +38,8 @@ using namespace std;
 using namespace boost;
 
 //==================================================================================
-Alias::Alias( const std::string& name )
-: Submittable(name)
+Alias::Alias( const std::string& name, bool check )
+: Submittable(name,check)
 {
    set_state_only(NState::QUEUED);
 }
@@ -72,9 +72,9 @@ Alias& Alias::operator=(const Alias& rhs)
    return *this;
 }
 
-alias_ptr Alias::create(const std::string& name)
+alias_ptr Alias::create(const std::string& name,bool check)
 {
-   return std::make_shared<Alias>( name );
+   return std::make_shared<Alias>( name, check );
 }
 
 bool Alias::operator==(const Alias& rhs) const

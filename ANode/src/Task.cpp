@@ -104,9 +104,9 @@ Task::~Task()
    }
 }
 
-task_ptr Task::create(const std::string& name)
+task_ptr Task::create(const std::string& name, bool check)
 {
-	return std::make_shared<Task>( name );
+	return std::make_shared<Task>( name, check );
 }
 
 void Task::print(std::string& os) const

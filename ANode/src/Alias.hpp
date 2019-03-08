@@ -18,7 +18,7 @@
 
 class Alias : public Submittable {
 public:
-   explicit Alias(const std::string& name);
+   explicit Alias(const std::string& name,bool check = true);
    Alias();
    Alias(const Alias&);
    Alias& operator=(const Alias&);
@@ -26,7 +26,7 @@ public:
 
    ~Alias() override;
 
-   static alias_ptr create(const std::string& name);
+   static alias_ptr create(const std::string& name, bool check = true);
 
    void print(std::string&) const override;
    bool operator==(const Alias& rhs) const;

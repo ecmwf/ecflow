@@ -60,9 +60,9 @@ Family::~Family()
    delete fam_gen_variables_;
 }
 
-family_ptr Family::create(const std::string& name)
+family_ptr Family::create(const std::string& name, bool check)
 {
-	return std::make_shared<Family>( name );
+	return std::make_shared<Family>( name, check );
 }
 
 bool Family::check_defaults() const

@@ -62,7 +62,7 @@ namespace ecf { class Calendar; class NodeTreeVisitor; } // forward declare clas
 
 class Node : public std::enable_shared_from_this<Node>  {
 protected:
-   Node(const std::string& name);
+   Node(const std::string& name,bool check);
    Node();
 public:
    Node& operator=(const Node&);
@@ -430,6 +430,7 @@ public:
    void add_autoarchive( const ecf::AutoArchiveAttr& );
    void add_autorestore( const ecf::AutoRestoreAttr& );
    void addLate( const ecf::LateAttr& );
+   void addRepeat( Repeat&& );           // will throw std::runtime_error if duplicate
    void addRepeat( const Repeat& );      // will throw std::runtime_error if duplicate
    void addZombie( const ZombieAttr& );  // will throw std::runtime_error if duplicate
    void add_queue( const QueueAttr& );   // will throw std::runtime_error if duplicate

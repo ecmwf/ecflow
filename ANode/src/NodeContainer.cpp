@@ -49,8 +49,8 @@ using namespace std;
 //#define DEBUG_JOB_SUBMISSION 1
 
 /////////////////////////////////////////////////////////////////////////////////////////
-NodeContainer::NodeContainer( const std::string& name )
-: Node(name),order_state_change_no_(0), add_remove_state_change_no_(0) {}
+NodeContainer::NodeContainer( const std::string& name, bool check)
+: Node(name,check),order_state_change_no_(0), add_remove_state_change_no_(0) {}
 
 NodeContainer::NodeContainer() = default;
 

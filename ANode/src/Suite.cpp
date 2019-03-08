@@ -101,9 +101,9 @@ Suite::~Suite()
    delete suite_gen_variables_;
 }
 
-suite_ptr Suite::create(const std::string& name)
+suite_ptr Suite::create(const std::string& name, bool check)
 {
-	return std::make_shared<Suite>( name );
+	return std::make_shared<Suite>( name, check );
 }
 
 bool Suite::check_defaults() const
