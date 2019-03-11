@@ -12,11 +12,6 @@
 //
 // Description :
 //============================================================================
-#if defined(HPUX)
-#include <map>
-#else
-#include <boost/unordered_map.hpp>
-#endif
 #include <boost/foreach.hpp>
 
 #include "ExprDuplicate.hpp"
@@ -26,14 +21,8 @@
 ////////////////////////////////////////////////////////////////////////////
 using namespace std;
 
-#if defined(HPUX)
-// boost 1.51 HPUX has problems with boost::unordered_map
-static std::map< std::string, AstTop* > duplicate_expr;
-typedef std::map< std::string, AstTop* > my_map;
-#else
-static boost::unordered_map< std::string, AstTop* > duplicate_expr;
-typedef boost::unordered_map< std::string, AstTop* > my_map;
-#endif
+static std::unordered_map< std::string, AstTop* > duplicate_expr;
+typedef std::unordered_map< std::string, AstTop* > my_map;
 
 
 ExprDuplicate::~ExprDuplicate()
