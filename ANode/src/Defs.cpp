@@ -679,7 +679,6 @@ void Defs::write_state(std::string& os) const
    // -  Used in commands
    if (save_edit_history_) {
 	   Indentor in;
-	   std::map<std::string, std::deque<std::string> >::const_iterator i;
 	   for(const auto& i : edit_history_) {
 		   Indentor::indent( os ); os += "history "; os += i.first; os +=  " "; // node path
 		   const std::vector<std::string>& vec = i.second;                          // list of requests
