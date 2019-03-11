@@ -119,7 +119,7 @@ bool Parser::doParse(const std::string& line, std::vector<std::string>& lineToke
 Defs* Parser::defsfile() const { return rootParser_->defsfile_ ;}
 std::stack< std::pair<Node*,const Parser*> >& Parser::nodeStack() const { return rootParser_->nodeStack_;}
 Node* Parser::nodeStack_top() const { return rootParser_->nodeStack_.top().first;}
-std::map<Node*,bool>& Parser::defStatusMap() const { return rootParser_->defStatusMap_;  }
+std::unordered_map<Node*,bool>& Parser::defStatusMap() const { return rootParser_->defStatusMap_;  }
 
 void Parser::dumpStackTop(const std::string& msg, const std::string& msg2) const
 {

@@ -96,7 +96,7 @@ private:
    std::vector<std::string> multi_statements_per_line_vec_;
    std::string faults_;       // In MIGRATE mode we ignore unrecognised tokens, store here for later reporting
    std::string error_;
-   std::map<Node*,bool> defStatusMap_;                       // check for duplicates
+   std::unordered_map<Node*,bool> defStatusMap_;                       // check for duplicates
    friend class Parser;
 
 private:

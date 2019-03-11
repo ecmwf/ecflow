@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 #include <stack>
-#include <map>
+#include <unordered_map>
 
 class DefsStructureParser;
 class Node;
@@ -44,7 +44,7 @@ public:
 	// convenience function that access DefsStructureParser
    std::stack< std::pair<Node*,const   Parser*> >& nodeStack() const;
    Node* nodeStack_top() const;
-	std::map<Node*,bool >& defStatusMap() const;
+	std::unordered_map<Node*,bool >& defStatusMap() const;
 
 #ifdef SHOW_PARSER_STATS
 	// The following function used in parser stats only

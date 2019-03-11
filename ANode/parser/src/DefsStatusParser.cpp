@@ -36,7 +36,7 @@ bool DefsStatusParser::doParse(
 		Node* node = nodeStack_top();
 
 		// Check default status not already defined for this node.
-		std::map< Node*, bool >::const_iterator it = defStatusMap().find( node );
+		auto it = defStatusMap().find( node );
 		if ( it != defStatusMap().end() ) {
 			if ( (*it).second ) {
 				std::stringstream ss;
