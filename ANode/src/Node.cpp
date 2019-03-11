@@ -1471,11 +1471,12 @@ void Node::read_state(const std::string& line,const std::vector<std::string>& li
    //  0    1   2
    // task name #
    std::string token;
-   for(size_t i = 3; i < lineTokens.size(); i++) {
+   size_t line_tokens_size = lineTokens.size();
+   for(size_t i = 3; i < line_tokens_size; i++) {
       token.clear();
       const std::string& line_token_i = lineTokens[i];
       if (line_token_i.find("state:") != std::string::npos ) {
-         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state Invalid state specified for suite " + name());
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state Invalid state specified for node " + name());
          std::pair<NState::State,bool> state_pair = NState::to_state(token);
          if (!state_pair.second) throw std::runtime_error( "Node::read_state Invalid state specified for node : " + name() );
          set_state_only( state_pair.first);

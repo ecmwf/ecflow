@@ -208,7 +208,8 @@ void Submittable::read_state(const std::string& line,const std::vector<std::stri
 {
    //  0    1   2
    // task name #
-   for(size_t i = 3; i < lineTokens.size(); i++) {
+   size_t line_tokens_size = lineTokens.size();
+   for(size_t i = 3; i < line_tokens_size; i++) {
       const std::string& line_token_i = lineTokens[i];
 
       if (line_token_i.find("passwd:") != std::string::npos ) {

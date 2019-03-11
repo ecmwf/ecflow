@@ -703,7 +703,8 @@ void Defs::read_state(const std::string& line,const std::vector<std::string>& li
 {
 //   cout << "line = " << line << "\n";
    std::string token;
-   for(size_t i = 2; i < lineTokens.size(); i++) {
+   size_t line_tokens_size = lineTokens.size();
+   for(size_t i = 2; i < line_tokens_size; i++) {
       token.clear();
       const std::string& line_token_i = lineTokens[i];
       if (line_token_i.find("state>:") != std::string::npos) {
@@ -745,7 +746,7 @@ void Defs::read_history(const std::string& line,const std::vector<std::string>& 
    DefsHistoryParser parser;
    parser.parse(line);
 
-   const std::vector<std::string>& parsed_messages =  parser.parsed_messages();
+   const std::vector<std::string>& parsed_messages = parser.parsed_messages();
    for(const auto & parsed_message : parsed_messages) {
       add_edit_history(lineTokens[1],parsed_message);
    }
@@ -1651,8 +1652,7 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
 {
    auto i = edit_history_.find(path);
    if (i == edit_history_.end()) {
-      std::vector<std::string> vec; vec.push_back(request);
-      edit_history_.insert( std::make_pair(path,vec) );
+      edit_history_.insert( std::make_pair(path,std::vector<std::string>(1,request) ) );
    }
    else {
       (*i).second.push_back(request);
