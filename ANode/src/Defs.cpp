@@ -72,13 +72,8 @@ Defs::Defs(const Defs& rhs) :
    }
 
    // edit history is not copied
-   // std::map<std::string, std::deque<std::string> > edit_history_;
-
-   /// externs not copied
-   // std::set<std::string> externs_;                      // NOT persisted
-
+   // externs not copied
    // observers not copied
-   // std::vector<AbstractObserver*> observers_;
 }
 
 void Defs::copy_defs_state_only(defs_ptr server_defs)
