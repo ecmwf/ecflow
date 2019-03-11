@@ -687,7 +687,7 @@ void Defs::write_state(std::string& os) const
 	   std::map<std::string, std::deque<std::string> >::const_iterator i;
 	   for(const auto& i : edit_history_) {
 		   Indentor::indent( os ); os += "history "; os += i.first; os +=  " "; // node path
-		   const std::deque<std::string>& vec = i.second;                          // list of requests
+		   const std::vector<std::string>& vec = i.second;                          // list of requests
 		   for(const auto & c : vec) {
 
 		      // We expect to output a single newline, hence if there are additional new lines
@@ -1657,18 +1657,18 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
 {
    auto i = edit_history_.find(path);
    if (i == edit_history_.end()) {
-      std::deque<std::string> vec; vec.push_back(request);
+      std::vector<std::string> vec; vec.push_back(request);
       edit_history_.insert( std::make_pair(path,vec) );
    }
    else {
       (*i).second.push_back(request);
       if ((*i).second.size() > Defs::max_edit_history_size_per_node()) {
-         (*i).second.pop_front();
+         (*i).second.erase((*i).second.begin() );
       }
    }
 }
 
-const std::deque<std::string>& Defs::get_edit_history(const std::string& path) const
+const std::vector<std::string>& Defs::get_edit_history(const std::string& path) const
 {
    auto i = edit_history_.find(path);
    if (i != edit_history_.end()) {
@@ -1677,9 +1677,9 @@ const std::deque<std::string>& Defs::get_edit_history(const std::string& path) c
    return empty_edit_history();
 }
 
-const std::deque<std::string>& Defs::empty_edit_history()
+const std::vector<std::string>& Defs::empty_edit_history()
 {
-   static std::deque<std::string> static_edit_history;
+   static std::vector<std::string> static_edit_history;
    return static_edit_history;
 }
 

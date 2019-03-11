@@ -193,10 +193,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          as->update_stats().node_edit_history_++;
          if (paths_.empty()) throw std::runtime_error( "No paths specified for edit history") ;
          // Only first path used
-         const std::deque<std::string>& edit_history = as->defs()->get_edit_history(paths_[0]);
-         std::vector<std::string> vec; vec.reserve(edit_history.size());
-         std::copy(edit_history.begin(),edit_history.end(),std::back_inserter(vec));
-         return PreAllocatedReply::string_vec_cmd(vec);
+         return PreAllocatedReply::string_vec_cmd( as->defs()->get_edit_history(paths_[0]) );
       }
 
       case PathsCmd::ARCHIVE: {

@@ -273,9 +273,9 @@ public:
    const ecf::Flag& get_flag() const { return flag_;}
 
    void add_edit_history(const std::string& path, const std::string& request);
-   const std::deque<std::string>& get_edit_history(const std::string& path) const;
+   const std::vector<std::string>& get_edit_history(const std::string& path) const;
    void save_edit_history(bool f) const { save_edit_history_ = f ;}
-   static const std::deque<std::string>& empty_edit_history();
+   static const std::vector<std::string>& empty_edit_history();
    constexpr static size_t max_edit_history_size_per_node() { return 10; }
 
    /// Memento functions:
@@ -339,15 +339,15 @@ private:
 
 private:
    /// Note: restoring from a check point file will reset, defs state and modify numbers
-   mutable size_t print_cache_{0};                         // NOT persisted
-   unsigned int    state_change_no_{0};            // persisted since passed to client, however side effect, is it will be in checkpoint file
-   unsigned int    modify_change_no_{ 0 };           // persisted since passed to client, however side effect, is it will be in checkpoint file
-   unsigned int    updateCalendarCount_{0};
-   unsigned int    order_state_change_no_{0};   // *NOT* persisted
-   NState          state_;                      // state & change_no, i,e attribute changed
-   ServerState     server_;
+   mutable size_t print_cache_{0};            // NOT persisted
+   unsigned int   state_change_no_{0};        // persisted since passed to client, however side effect, is it will be in checkpoint file
+   unsigned int   modify_change_no_{ 0 };     // persisted since passed to client, however side effect, is it will be in checkpoint file
+   unsigned int   updateCalendarCount_{0};
+   unsigned int   order_state_change_no_{0};  // *NOT* persisted
+   NState         state_;                     // state & change_no, i,e attribute changed
+   ServerState    server_;
    std::vector<suite_ptr> suiteVec_;
-   std::map<std::string, std::deque<std::string> > edit_history_;      // path,request
+   std::unordered_map<std::string, std::vector<std::string> > edit_history_;  // path,request
    mutable bool                                    save_edit_history_{false}; // NOT persisted
    ecf::Flag                    flag_;
 

@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
       BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete aliases");
       {
          // ECFLOW-434
-         const std::deque<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
+         const std::vector<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
          size_t edit_history_size_after = edit_history_size_before + paths.size();
          if ( edit_history_size_after > Defs::max_edit_history_size_per_node())
             edit_history_size_after = Defs::max_edit_history_size_per_node();
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 	   STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 	   BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete tasks");
       {
-         const std::deque<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
+         const std::vector<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
          size_t edit_history_size_after = edit_history_size_before + paths.size();
          if ( edit_history_size_after > Defs::max_edit_history_size_per_node())
             edit_history_size_after = Defs::max_edit_history_size_per_node();
@@ -132,7 +132,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 		         BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete families");
 		         BOOST_REQUIRE_MESSAGE( s->familyVec().empty(),"Expected all Families to be deleted but found " << s->familyVec().size());
 		         {
-		            const std::deque<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
+		            const std::vector<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
 	               size_t edit_history_size_after = edit_history_size_before + paths.size();
 	               if ( edit_history_size_after > Defs::max_edit_history_size_per_node())
 	                  edit_history_size_after = Defs::max_edit_history_size_per_node();
@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 			STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
 			BOOST_CHECK_MESSAGE(returnCmd->ok(),"Failed to delete suite at path " << absNodePath);
 	      {
-            const std::deque<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
+            const std::vector<std::string>& edit_history = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH());
             size_t edit_history_size_after = edit_history_size_before + 1;
             if ( edit_history_size_after > Defs::max_edit_history_size_per_node())
                edit_history_size_after = Defs::max_edit_history_size_per_node();
