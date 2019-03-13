@@ -1079,10 +1079,10 @@ const char* QueueCmd::desc()
             "        break;\n"
             "   fi\n"
             "   ...\n"
-            "   ecflow_client --queue=$QNAME $step complete   # tell ecflow this step completed\n"
+            "   ecflow_client --queue=$QNAME complete $step   # tell ecflow this step completed\n"
             "done\n"
             "\n"
-            "trap() { ecflow_client --queue=$QNAME $step aborted # tell ecflow this step failed }\n";
+            "trap() { ecflow_client --queue=$QNAME aborted $step # tell ecflow this step failed }\n";
 }
 
 void QueueCmd::addOption(boost::program_options::options_description& desc) const {
@@ -1144,10 +1144,10 @@ void QueueCmd::create(  Cmd_ptr& cmd,
    if ( (action == "complete" || action == "aborted") && step.empty()) {
       std::stringstream ss;
       ss << "QueueCmd: when --queue=name complete || --queue=name aborted is used a step must be provided.i.e\n"
-         << "--queue=name aborted $step\n"
-         << "--queue=name complete $step\n"
+         << "ecflow_client --queue=name aborted $step\n"
+         << "ecflow_client --queue=name complete $step\n"
          << "where step is value returned from active i.e\n"
-         << "step=$(ecflow_client --queue=STEP active)\n";
+         << "step=$(ecflow_client --queue=name active)\n";
       throw std::runtime_error( ss.str() );
    }
    if ((action == "active" || action == "reset" || action == "no_of_aborted") && !step.empty()) {
