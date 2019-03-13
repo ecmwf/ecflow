@@ -49,8 +49,6 @@ public:
 	void set_gain(int hour,int min,bool positiveGain = true);
 	void set_gain_in_seconds(long theGain,bool positiveGain = true);
 
-	void startStopWithServer(bool f);
-	bool startStopWithServer() const { return startStopWithServer_; }
  	void hybrid( bool f );
  	void set_end_clock() { end_clock_ = true;}
 
@@ -70,7 +68,6 @@ public:
  	long gain() const { return gain_;}
  	bool positive_gain() const { return positiveGain_;}
  	bool hybrid() const { return hybrid_;}
- 	bool is_virtual() const { return startStopWithServer_;}
 	std::string toString() const;
    boost::posix_time::ptime ptime() const;
 
@@ -80,8 +77,7 @@ private:
 private:
 	bool hybrid_;
 	bool positiveGain_{false};
-	bool startStopWithServer_{false};  // see Calendar.hpp for more details
-	bool end_clock_{false};            // *NOT* persisted, used for end clock, simulator only
+	bool end_clock_{false};        // *NOT* persisted, used for end clock, simulator only
 	long gain_{0};                 // in seconds
 	int day_{0};
 	int month_{0};

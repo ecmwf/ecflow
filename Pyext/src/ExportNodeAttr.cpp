@@ -808,22 +808,19 @@ void export_NodeAttr()
 	;
 
 
-	void (ClockAttr::*start_stop_with_server)(bool) = &ClockAttr::startStopWithServer;
 	class_<ClockAttr, std::shared_ptr<ClockAttr> >("Clock",NodeAttrDoc::clock_doc() ,init<int,int,int,optional<bool> > ())  // day, month, year, hybrid
     .def( init<int,int,int,bool>())
     .def( init<bool>())
 	.def(self == self )                                   // __eq__
 	.def("__str__",             &ClockAttr::toString)     // __str__
-    .def("__copy__",copyObject<ClockAttr>)                // __copy__ uses copy constructor
+   .def("__copy__",copyObject<ClockAttr>)                // __copy__ uses copy constructor
 	.def( "set_gain_in_seconds",&ClockAttr::set_gain_in_seconds, "Set the gain in seconds")
 	.def( "set_gain",     &ClockAttr::set_gain,                  "Set the gain in hours and minutes")
- 	.def( "set_virtual",  start_stop_with_server,   "Sets/unsets the clock as being virtual")
 	.def( "day",          &ClockAttr::day,          "Returns the day as an integer, range 1-31")
 	.def( "month",        &ClockAttr::month,        "Returns the month as an integer, range 1-12")
 	.def( "year",         &ClockAttr::year,         "Returns the year as an integer, > 1400")
 	.def( "gain",         &ClockAttr::gain,         "Returns the gain as an long. This represents seconds")
 	.def( "positive_gain",&ClockAttr::positive_gain,"Returns a boolean, where true means that the gain is positive")
-	.def( "virtual"      ,&ClockAttr::is_virtual,   "Returns a boolean, where true means that clock is virtual")
 	;
 #if ECF_ENABLE_PYTHON_PTR_REGISTER
    bp::register_ptr_to_python< std::shared_ptr<ClockAttr> >(); // needed for mac and boost 1.6

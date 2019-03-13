@@ -220,7 +220,6 @@ BOOST_AUTO_TEST_CASE( test_ClockAttr_serialisation )
 		ClockAttr saved(false);
 		saved.date(1,1,2009);
 		saved.set_gain_in_seconds(3600);
-		saved.startStopWithServer(true);
 
 		doSaveAndRestore(fileName,saved);
 	}

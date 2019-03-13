@@ -83,12 +83,6 @@ bool Calendar::operator==( const Calendar& rhs) const
 #endif
 	   return false;
 	}
-	if (startStopWithServer_ != rhs.startStopWithServer_) {
-#ifdef DEBUG
-      if (Ecf::debug_equality())  std::cout << "Calendar::operator== startStopWithServer_  don't match\n";
-#endif
-	   return false;
-	}
 	if (increment_ !=rhs.increment_) {
 #ifdef DEBUG
       if (Ecf::debug_equality())  std::cout << "Calendar::operator== increment_  don't match\n";
@@ -106,7 +100,6 @@ void Calendar::assign( const Calendar& rhs)
  	suiteTime_ = rhs.suiteTime_;
 	duration_ = rhs.duration_;
  	dayChanged_ = rhs.dayChanged_;
- 	startStopWithServer_ =  rhs.startStopWithServer_;
   	initLocalTime_ =  rhs.initLocalTime_;
  	lastTime_ =  rhs.lastTime_;
 	increment_ = rhs.increment_;
@@ -118,15 +111,14 @@ void Calendar::assign( const Calendar& rhs)
 	year_ = rhs.year_;                 // Cache
 }
 
-void Calendar::init(Clock_t clock, bool startStopWithServer)
+void Calendar::init(Clock_t clock)
 {
    ctype_ = clock;
-   startStopWithServer_ = startStopWithServer;
 }
 
-void Calendar::init(const boost::posix_time::ptime& time, Clock_t clock, bool startStopWithServer)
+void Calendar::init(const boost::posix_time::ptime& time, Clock_t clock)
 {
-   init(clock,startStopWithServer);
+   init(clock);
    begin(time);
 }
 
@@ -155,7 +147,7 @@ void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
  	int theDayOfWeek = currentdate.day_of_week().as_number();
 
  	// However there are two ways of incremented/updating calendar.
- 	if ( !startStopWithServer_ && !calUpdateParams.forTest() ) {
+ 	if ( !calUpdateParams.forTest() ) {
 
  	   if (calUpdateParams.serverPollPeriod().total_seconds() < 60) {
  	      // 0/ We are still testing. User wants to speed up calendar.
@@ -182,7 +174,7 @@ void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
  	      suiteTime_ += increment_;
  	      lastTime_ = time_now;
 #ifdef DEBUG_CALENDAR
- 	      std::cout << "Calendar::update:  if ( !startStopWithServer_ && !calUpdateParams.forTest() ) { \n";
+ 	      std::cout << "Calendar::update:  if ( !calUpdateParams.forTest() ) { \n";
 #endif
  	   }
 	}

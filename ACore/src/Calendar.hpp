@@ -100,13 +100,10 @@ public:
 	bool operator==( const Calendar&) const;
 
 	/// Initialise the Calendar.
-	/// The boolean startStopWithServer allows us to choose how we update the calendar:
-	//      False: Use system time to update the calendar:
-	//      True : Use the server poll, to update the calendar
-  	void init(Clock_t clock, bool startStopWithServer = false);
+  	void init(Clock_t clock);
 
    // for test init and begin calendar
-   void init(const boost::posix_time::ptime& time, Clock_t clock = Calendar::REAL, bool startStopWithServer = false);
+   void init(const boost::posix_time::ptime& time, Clock_t clock = Calendar::REAL);
 
    /// Start the Calendar.  Parameter time can include gain.
    void begin(const boost::posix_time::ptime&);
@@ -194,7 +191,6 @@ private:
  	boost::posix_time::ptime         suiteTime_;  // The suite time for hybrid DATE does not change.
 	boost::posix_time::time_duration duration_;   // duration since last call to init/begin, used on Node for late and autocancel
  	bool                             dayChanged_{false};
- 	bool                             startStopWithServer_{false}; //*NOT* persisted: false means real time calendar,  can be derived from suite clock attribute
 
   	boost::posix_time::ptime         initLocalTime_;   // Real Time: When calendar was started, used to work out duration_
  	boost::posix_time::ptime         lastTime_;        // Real Time: Used to calculate calendarIncrement

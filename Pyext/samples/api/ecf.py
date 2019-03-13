@@ -818,7 +818,6 @@ class Clock(Attribute):
             #except ValueError:
             #    print("#Value Error", arg, hybrid)
             #    self.load = ecflow.Clock(hybrid)
-            if self.load and sync: self.load.set_virtual(True)
         else:
             # print("#else", arg, hybrid)
             self.load = ecflow.Clock(arg, hybrid)

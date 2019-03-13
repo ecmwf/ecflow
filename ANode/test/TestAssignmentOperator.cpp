@@ -54,7 +54,6 @@ BOOST_AUTO_TEST_CASE( test_suite_assignment_operator )
    ClockAttr clockAttr(false);
    clockAttr.date(1,1,2009);
    clockAttr.set_gain_in_seconds(3600);
-   clockAttr.startStopWithServer(true);
    s1.addClock( clockAttr );
    s1.addAutoCancel( ecf::AutoCancelAttr(2) );
    s1.addVariable( Variable("VAR","value") );

@@ -118,25 +118,6 @@ bool ClockParser::doParse( const std::string& line,
 		}
 	}
 
-	// Look for the optional -s  , i.e start/stop calendar when the server starts/stops
-	// 	clock real 20.1.2007 +01:00  -s
-	// 	clock hybrid -s
-	size_t line_token_size = lineTokens.size();
- 	for(size_t i = 2; i < line_token_size; i++ ) {
- 	   if (lineTokens[i] == "-s") {
- 			clockAttr.startStopWithServer(true);
-			break;
-		}
-		// Reached the comment, no more valid tokens possible
-		if (lineTokens[i][0] == '#') {
-			// handles comments of the form:
-			//    # comment
-			//    #comment
-			// since we check the first character
-			break;
-		}
-	}
-
  	Suite* suite =  nodeStack_top()->isSuite();
  	if (!suite) throw std::runtime_error("Clock can only be added to suites and not " + nodeStack_top()->debugType()  );
 

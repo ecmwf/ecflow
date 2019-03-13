@@ -129,7 +129,6 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    ClockAttr clock_attr(false);
    clock_attr.date(1,1,2009);
    clock_attr.set_gain_in_seconds(3600);
-   clock_attr.startStopWithServer(true);
 
    std::vector<ecf::Child::CmdType> child_cmds = ecf::Child::list();
 

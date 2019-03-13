@@ -97,7 +97,6 @@ private:
       ClockAttr clockAttr(false);
       clockAttr.date(1,1,2009);
       clockAttr.set_gain_in_seconds(3600);
-      clockAttr.startStopWithServer(true);
       suite->addClock( clockAttr );
 
  		suite->addAutoCancel( ecf::AutoCancelAttr(2) );

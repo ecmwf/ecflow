@@ -250,17 +250,8 @@ void Suite::updateCalendar(
       )
 {
 	if (begun_) {
-
 //		cout << "Suite::updateCalendar " << debugNodePath()   << " serverRunning = " << calParams.serverRunning() << " jobSubInterval = " << to_simple_string(calParams.serverPollPeriod());
-//		if ( clockAttr_ )  cout << " clockAttr_->startStopWithServer() = " << clockAttr_->startStopWithServer();
 //		cout << "\n";
-
-		/// Some suite can elect to avoid updating the calendar when the server is stopped.
-		/// This allows normal and relative time dependencies to be honoured even
-		/// if the server is started/stopped many times.
-		if ( clockAttr_.get() &&  clockAttr_->startStopWithServer() && !calParams.serverRunning()) {
-			return;
-		}
 
       SuiteChanged1 changed(this);
 

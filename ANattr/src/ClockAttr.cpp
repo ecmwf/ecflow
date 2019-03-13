@@ -33,7 +33,7 @@ using namespace boost::posix_time;
 //==========================================================================================
 
 ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid,bool positiveGain)
-: hybrid_(hybrid), positiveGain_(positiveGain), startStopWithServer_(false), end_clock_(false),
+: hybrid_(hybrid), positiveGain_(positiveGain), end_clock_(false),
   gain_(0), day_(0),month_(0),year_(0),
   state_change_no_(Ecf::incr_state_change_no())
 {
@@ -47,7 +47,7 @@ ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid,bool posi
 }
 
 ClockAttr::ClockAttr(int day, int month, int year, bool hybrid )
-: hybrid_(hybrid), positiveGain_(false), startStopWithServer_(false), end_clock_(false),
+: hybrid_(hybrid), positiveGain_(false), end_clock_(false),
   gain_(0), day_(day),month_(month),year_(year),
   state_change_no_(Ecf::incr_state_change_no())
 {
@@ -96,8 +96,6 @@ void ClockAttr::write(std::string& ss) const
       if (positiveGain_) ss += "+";
       ss += boost::lexical_cast<std::string>(gain_);
    }
-
-   if ( startStopWithServer_) ss += " -s";
 }
 
 bool ClockAttr::operator==(const ClockAttr& rhs) const
@@ -111,14 +109,6 @@ bool ClockAttr::operator==(const ClockAttr& rhs) const
 	   return false;
 	}
 
-	if (startStopWithServer_ != rhs.startStopWithServer_) {
-#ifdef DEBUG
-      if (Ecf::debug_equality()) {
-         std::cout << "startStopWithServer_ (" <<  startStopWithServer_  << ") != rhs.startStopWithServer_ (" << rhs.startStopWithServer_  << ")\n";
-      }
-#endif
-	   return false;
-	}
 
 	if (day_ != rhs.day_) {
 #ifdef DEBUG
@@ -192,11 +182,6 @@ void ClockAttr::set_gain_in_seconds(long theGain,bool positiveGain)
    state_change_no_ =  Ecf::incr_state_change_no();
 }
 
-void ClockAttr::startStopWithServer(bool f) {
-   startStopWithServer_ = f;
-   state_change_no_ =  Ecf::incr_state_change_no();
-}
-
 void ClockAttr::hybrid( bool f ) {
    hybrid_ = f;
    state_change_no_ =  Ecf::incr_state_change_no();
@@ -215,7 +200,7 @@ void ClockAttr::sync() {
 void ClockAttr::init_calendar(ecf::Calendar& calendar)
 {
 	Calendar::Clock_t clockType = (hybrid_) ? Calendar::HYBRID : Calendar::REAL;
-   calendar.init(clockType, startStopWithServer_);
+   calendar.init(clockType);
 }
 
 void ClockAttr::begin_calendar(ecf::Calendar& calendar) const
@@ -242,8 +227,7 @@ template<class Archive>
 void ClockAttr::serialize(Archive & ar, std::uint32_t const version )
 {
    ar( CEREAL_NVP(hybrid_) );
-   CEREAL_OPTIONAL_NVP(ar, positiveGain_,        [this](){return  positiveGain_;});
-   CEREAL_OPTIONAL_NVP(ar, startStopWithServer_, [this](){return startStopWithServer_ ;}); // ??
+   CEREAL_OPTIONAL_NVP(ar, positiveGain_,        [this](){return positiveGain_;});
    CEREAL_OPTIONAL_NVP(ar, gain_,                [this](){return gain_ != 0;});
    CEREAL_OPTIONAL_NVP(ar, day_,                 [this](){return day_ != 0;});
    CEREAL_OPTIONAL_NVP(ar, month_,               [this](){return month_ != 0;});

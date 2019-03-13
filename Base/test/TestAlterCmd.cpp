@@ -289,7 +289,6 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       ClockAttr clockAttr(false); // real clock
       clockAttr.date(1,1,2009);
       clockAttr.set_gain_in_seconds(3600);
-      clockAttr.startStopWithServer(true);
       s->addClock( clockAttr );
       s->addDefStatus(DState::SUSPENDED); // avoid AlterCmd from job submission
    }
