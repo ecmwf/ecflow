@@ -1062,7 +1062,7 @@ const char* QueueCmd::desc()
             "     no_of_aborted: returns number of aborted steps as a string, i.e 10\n"
             "     reset: sets the index to the first queued/aborted step. Allows steps to be reprocessed for errors\n"
             "  arg2(string) = step:  value returned from. step=$(ecflow_client --queue=queue_name active)\n"
-            "                This is only only for complete and aborted steps\n"
+            "                This is only valid for complete and aborted steps\n"
             "  arg4(string) = path: (optional). The path where the queue is defined.\n"
             "                 By default we search for the queue up the node tree.\n\n"
             "If this child command is a zombie, then the default action will be to *block*,\n"
@@ -1071,17 +1071,18 @@ const char* QueueCmd::desc()
             "search for the queue up the node hierarchy. If no queue found, command fails\n\n"
             "Usage:\n"
             "step=\"\"\n"
+            "QNAME=\"my_queue_name\"\n"
             "while [1 == 1 ] ; do\n"
             "   # this return the first queued/aborted step, then increments to next step, return <NULL> when all steps processed\n"
-            "   step=$(ecflow_client --queue=STEP active) # of the form <int>:value  i.e 99:003. this step is now active\n"
-            "   if [[ $step == \"<NULL>\" ]] then\n"
+            "   step=$(ecflow_client --queue=$QNAME active) # of the form string  i.e \"003\". this step is now active\n"
+            "   if [[ $step == \"<NULL>\" ]] ; then\n"
             "        break;\n"
             "   fi\n"
             "   ...\n"
-            "   ecflow_client --queue=STEP $step complete   # tell ecflow this step completed\n"
+            "   ecflow_client --queue=$QNAME $step complete   # tell ecflow this step completed\n"
             "done\n"
             "\n"
-            "trap() { ecflow_client --queue=STEP $step aborted # tell ecflow this step failed }\n";
+            "trap() { ecflow_client --queue=$QNAME $step aborted # tell ecflow this step failed }\n";
 }
 
 void QueueCmd::addOption(boost::program_options::options_description& desc) const {
