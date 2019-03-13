@@ -25,6 +25,7 @@
 #include <QTextDocument>
 #endif
 
+#include "AddLabelDialog.hpp"
 #include "CommandHandler.hpp"
 #include "VNode.hpp"
 #include "Str.hpp"
@@ -142,6 +143,18 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     		 cb->setText(txt, QClipboard::Selection);
 #endif
     	}
+
+        else if(item->command() == "add_label")
+        {
+            if(filteredNodes.size() == 1)
+            {
+                if(filteredNodes[0] && filteredNodes[0]->node())
+                {
+                    AddLabelDialog labelDialog(filteredNodes[0]);
+                    labelDialog.exec();
+                }
+            }
+        }
 
         else if(item->command() == "create_jsd_ticket")
         {

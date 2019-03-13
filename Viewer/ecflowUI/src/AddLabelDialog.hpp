@@ -8,44 +8,37 @@
 //
 //============================================================================
 
-#ifndef LABELEDITOR_HPP
-#define LABELEDITOR_HPP
+#ifndef ADDLABELDIALOG_HPP
+#define ADDLABELDIALOG_HPP
 
-#include "ui_LabelEditorWidget.h"
+#include <QDialog>
 
-#include "AttributeEditor.hpp"
 #include "VInfo.hpp"
 
-class LabelEditor;
+class QCloseEvent;
 
-class LabelEditorWidget :  public QWidget, protected Ui::LabelEditorWidget
-{
-friend class LabelEditor;
-friend class AddLabelDialog;
-public:
-    LabelEditorWidget(QWidget *parent=0);
-};
+namespace Ui {
+    class AddLabelDialog;
+}
 
-class LabelEditor : public AttributeEditor
+class AddLabelDialog : public QDialog
 {
-Q_OBJECT
+    Q_OBJECT
+
 public:
-    LabelEditor(VInfo_ptr,QWidget* parent=0);    
-    ~LabelEditor();
+    AddLabelDialog(VInfo_ptr info, QWidget* parent=0);
 
 protected Q_SLOTS:
-    void slotValueChanged();
+    void accept();
+    void reject();
 
 protected:
-    void apply();
-    void resetValue();
-    bool isValueChanged();
+    void closeEvent(QCloseEvent * event);
+    void writeSettings();
     void readSettings();
-    void writeSettings();   
 
-    LabelEditorWidget* w_;
-    QString oriVal_;
+    Ui::AddLabelDialog* ui_;
+    VInfo_ptr info_;
 };
 
-#endif // LABELEDITOR_HPP
-
+#endif // ADDLABELDIALOG_HPP
