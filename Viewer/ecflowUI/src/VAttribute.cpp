@@ -155,3 +155,4 @@ void VAttribute::buildAlterCommand(std::vector<std::string>& cmd,
 
     cmd.emplace_back("<full_name>");
 }
+

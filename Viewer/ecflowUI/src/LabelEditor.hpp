@@ -21,6 +21,7 @@ class LabelEditor;
 class LabelEditorWidget :  public QWidget, protected Ui::LabelEditorWidget
 {
 friend class LabelEditor;
+friend class AddLabelDialog;
 public:
     LabelEditorWidget(QWidget *parent=nullptr);
 };
