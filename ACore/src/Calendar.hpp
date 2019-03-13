@@ -186,16 +186,14 @@ public:
 private:
 	void assign( const Calendar& rhs);
 
-	Clock_t                          ctype_{Calendar::REAL};      // *NOT* persisted: can be derived from suite clock attribute
  	boost::posix_time::ptime         initTime_;   // When calendar was started, suite time(could be in the past OR real time)
  	boost::posix_time::ptime         suiteTime_;  // The suite time for hybrid DATE does not change.
 	boost::posix_time::time_duration duration_;   // duration since last call to init/begin, used on Node for late and autocancel
- 	bool                             dayChanged_{false};
-
   	boost::posix_time::ptime         initLocalTime_;   // Real Time: When calendar was started, used to work out duration_
  	boost::posix_time::ptime         lastTime_;        // Real Time: Used to calculate calendarIncrement
-
 	boost::posix_time::time_duration increment_;
+	Clock_t                          ctype_{Calendar::REAL};      // *NOT* persisted: can be derived from suite clock attribute
+ 	bool                             dayChanged_{false};
 
 private:
    void update_cache() const;
