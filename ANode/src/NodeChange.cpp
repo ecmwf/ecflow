@@ -38,7 +38,7 @@ void Node::changeVariable(const std::string& name,const std::string& value)
  	throw std::runtime_error("Node::changeVariable: Could not find variable " + name);
 }
 
-bool Node::set_event(const std::string& event_name_or_number ,bool value)
+bool Node::set_event(const std::string& event_name_or_number,bool value)
 {
    if (events_.empty()) {
       return false;
@@ -54,7 +54,7 @@ bool Node::set_event(const std::string& event_name_or_number ,bool value)
    }
 
    // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-   if ( event_name_or_number.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
+   if ( event_name_or_number.find_first_of( Str::NUMERIC() ) == 0 ) {
       try {
          auto eventNumber = boost::lexical_cast< int >( event_name_or_number );
          for(size_t i = 0; i < theSize; i++)   {
@@ -85,7 +85,7 @@ bool Node::set_event_used_in_trigger(const std::string& event_name_or_number)
    }
 
    // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-   if ( event_name_or_number.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
+   if ( event_name_or_number.find_first_of( Str::NUMERIC() ) == 0 ) {
       try {
          auto eventNumber = boost::lexical_cast< int >( event_name_or_number );
          for(size_t i = 0; i < theSize; i++)   {

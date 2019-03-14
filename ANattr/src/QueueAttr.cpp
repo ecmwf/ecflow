@@ -211,7 +211,7 @@ void QueueAttr::parse(QueueAttr& queAttr, const std::string& line, std::vector<s
    }
 
    // queue name "first" "second" "last" #   current_index state state state
-   //   0     1        2       3        4    5   6
+   //   0     1     2        3       4   5   6
    queAttr.set_name(lineTokens[1]);
 
    std::vector<std::string> theEnums; theEnums.reserve(line_tokens_size);
@@ -230,12 +230,12 @@ void QueueAttr::parse(QueueAttr& queAttr, const std::string& line, std::vector<s
 
    if (parse_state) {
       // queue VARIABLE a b c d # index active complete aborted queued
-      for(size_t i = 0; i < lineTokens.size(); i++) {
-         if (lineTokens[i] == "#" && i+1 < lineTokens.size()) {
+      for(size_t i = 3; i < line_tokens_size; i++) {
+         if (lineTokens[i] == "#" && i+1 < line_tokens_size) {
             i++;
             index = Extract::theInt(lineTokens[i] ,"QueueAttr::parse, could not extract index");
             i++;
-            for(;i < lineTokens.size(); i++) {
+            for(;i < line_tokens_size; i++) {
                NState::State state = NState::toState(lineTokens[i]);
                state_vec.push_back( state );
             }

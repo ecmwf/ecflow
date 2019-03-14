@@ -596,7 +596,7 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //{
 //	// 0.81
 //	// for bad conversion istringstream seems to return 0, hence add guard
-//	if ( str.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
+//	if ( str.find_first_of( Str::NUMERIC(), 0 ) == 0 ) {
 //		int number = 0;
 //		std::istringstream ( str ) >> number;
 //		numberRes.push_back( number );
@@ -626,7 +626,7 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //                      std::vector<int>& numberRes)
 //{
 //	// 0.6
-//	if ( str.find_first_of( Str::NUMERIC(), 0 ) != std::string::npos ) {
+//	if ( str.find_first_of( Str::NUMERIC(), 0 ) == 0 ) {
 //		try {
 //			int number = boost::lexical_cast< int >( str );
 //			numberRes.push_back( number );

@@ -67,7 +67,7 @@ Event::Event(  const std::string& eventName )
    // which then did *not* load.
    //
    // Test for numeric, and then casting, is ****faster***** than relying on exception alone
-   if ( eventName.find_first_of( Str::NUMERIC() ) != std::string::npos ) {
+   if ( eventName.find_first_of( Str::NUMERIC() ) == 0 ) {
       try {
          number_ = boost::lexical_cast< int >( eventName );
          n_.clear();
@@ -335,14 +335,15 @@ void Label::parse(const std::string& line, std::vector<std::string >& lineTokens
 void Label::parse(const std::string& line, std::vector<std::string >& lineTokens, bool parse_state,
                   std::string& the_name,std::string& the_value, std::string& the_new_value)
 {
-   if ( lineTokens.size() < 3 )
+   size_t line_token_size = lineTokens.size();
+   if ( line_token_size < 3 )
        throw std::runtime_error( "Label::parse: Invalid label :" + line );
 
     the_name = lineTokens[1];
 
     // parsing will always STRIP single or double quotes, print will add double quotes
     // label simple_label 'ecgems'
-    if ( lineTokens.size() == 3 ) {
+    if ( line_token_size == 3 ) {
        Str::removeQuotes(lineTokens[2]);
        Str::removeSingleQuotes(lineTokens[2]);
        the_value = lineTokens[2];
@@ -355,7 +356,6 @@ void Label::parse(const std::string& line, std::vector<std::string >& lineTokens
        // label complex_label "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"  # fred
        // label simple_label "fred" #  "smsfetch -F %ECF_FILES% -I %ECF_INCLUDE%"
        std::string value; value.reserve(line.size());
-       size_t line_token_size = lineTokens.size();
        for (size_t i = 2; i < line_token_size; ++i) {
           if ( lineTokens[i].at( 0 ) == '#' ) break;
           if ( i != 2 ) value += " ";

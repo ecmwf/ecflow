@@ -26,7 +26,8 @@ bool LimitParser::doParse(
                            std::vector<std::string >& lineTokens )
 {
    // limit name the_limit # value path1 path2
-	if ( lineTokens.size() < 3 )
+   size_t line_tokens_size = lineTokens.size();
+	if ( line_tokens_size < 3 )
 		throw std::runtime_error( "LimitParser::doParse: Invalid limit " + line );
 
    if ( nodeStack().empty() )
@@ -42,7 +43,7 @@ bool LimitParser::doParse(
       std::set<std::string> paths;
       bool comment_fnd  = false;
       bool value_processed = false;
-      for(size_t i = 3; i < lineTokens.size(); i++) {
+      for(size_t i = 3; i < line_tokens_size; i++) {
          if (comment_fnd) {
             if (!value_processed) {
                value = Extract::theInt(lineTokens[i],"LimitParser::doParse: Could not extract limit value: " + lineTokens[i]);

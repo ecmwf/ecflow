@@ -778,12 +778,14 @@ void CronAttr::parse( CronAttr& cronAttr, const std::vector<std::string>& lineTo
 
    // make *sure* a time spec is specified
    bool time_spec_specified = false;
- 	while (index < lineTokens.size() ) {
+   size_t line_tokens_size = lineTokens.size();
+ 	while (index < line_tokens_size) {
 
-		std::string token = lineTokens[index];
+		const std::string& token = lineTokens[index];
 #ifdef DEBUG_CRON_PARSING
 		cerr << "CronAttr::doParse " << token << "\n";
 #endif
+
 		if (isOption(token)) {
 #ifdef DEBUG_CRON_PARSING
 			cerr << "CronAttr::doParse isOption \n";
@@ -800,7 +802,7 @@ void CronAttr::parse( CronAttr& cronAttr, const std::vector<std::string>& lineTo
 			time_spec_specified = true;
 			if (parse_state) {
 			   //  if index is on the comment, back track, so that we can add cron state( free)
-			   if (index < lineTokens.size() && lineTokens[index] == "#") {
+			   if (index < line_tokens_size && lineTokens[index] == "#") {
 			      index--;
 			   }
 			}
@@ -808,8 +810,8 @@ void CronAttr::parse( CronAttr& cronAttr, const std::vector<std::string>& lineTo
  		}
 		else if (isComment(token)) {
 		   // cron -m 1,2,3 12:00        # free
-		   if (parse_state && index+1 < lineTokens.size()) {
-		      if ( lineTokens[index+1] == "free") {
+		   if (parse_state && index+1 < line_tokens_size) {
+		      if (lineTokens[index+1] == "free") {
 		         cronAttr.setFree();
 		      }
 		   }

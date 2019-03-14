@@ -733,7 +733,8 @@ void TimeSeries::parse_state(size_t index,const std::vector<std::string>& lineTo
    // time 10:30              # free isValid:false nextTimeSlot/10:30 relativeDuration/00:00:00
    // cron 10:00 20:00 01:00  # free isValid:false nextTimeSlot/10:30 relativeDuration/00:00:00
    bool comment_fnd = false;
-   for(size_t i = index; i < lineTokens.size(); i++) {
+   size_t line_tokens_size = lineTokens.size();
+   for(size_t i = index; i < line_tokens_size; i++) {
       if (comment_fnd) {
          if (lineTokens[i] == "isValid:false") { ts.isValid_ = false; continue;}
          if (lineTokens[i].find("nextTimeSlot") != std::string::npos) {
@@ -763,7 +764,8 @@ void TimeSeries::parse_state(size_t index,const std::vector<std::string>& lineTo
 
 ecf::TimeSeries TimeSeries::create( size_t& index,const std::vector<std::string>& lineTokens,bool read_state )
 {
-	assert( index < lineTokens.size() );
+   size_t line_tokens_size = lineTokens.size();
+	assert( index < line_tokens_size );
 	int startHour = -1;
 	int startMin = -1;
 
@@ -780,11 +782,11 @@ ecf::TimeSeries TimeSeries::create( size_t& index,const std::vector<std::string>
 	TimeSlot start( startHour, startMin );
 
 	index++; // on 20:00
-	if ( index < lineTokens.size() && lineTokens[index][0] != '#' ) {
+	if ( index < line_tokens_size && lineTokens[index][0] != '#' ) {
 
 		// if third token is not a comment the time must be of the form
 		// cron 10:00 20:00 01:00
-		if ( index+1 >= lineTokens.size() ) throw std::runtime_error( "TimeSeries::create: Invalid time series :");
+		if ( index+1 >= line_tokens_size ) throw std::runtime_error( "TimeSeries::create: Invalid time series :");
 
 		int finishHour = -1;
 		int finishMin = -1;

@@ -24,9 +24,7 @@
 using namespace ecf;
 using namespace std;
 
-bool QueueParser::doParse(
-         const std::string& line,
-         std::vector<std::string >& lineTokens )
+bool QueueParser::doParse(const std::string& line, std::vector<std::string >& lineTokens )
 {
    if ( nodeStack().empty()) {
       throw std::runtime_error("QueueParser::doParse: Could not add queue, as node stack is empty at line: " + line );

@@ -315,41 +315,43 @@ void Calendar::read_state(const std::string& line,const std::vector<std::string>
    // initTime:2012-Jul-16 16:19:35 suiteTime:2012-Jul-16 16:19:35 duration:00:00:00 dayChanged:0 initLocalTime:2012-Jul-16 16:19:35 lastTime:2012-Jul-16 16:19:35 calendarIncrement:00:00:00
 //   std::cout << "Calendar::read_state:"  << line << "\n";
    std::string time;
-   for(size_t i = 0; i < lineTokens.size(); i++) {
+   size_t line_tokens_size = lineTokens.size();
+   for(size_t i = 0; i < line_tokens_size; i++) {
       time.clear();
-      if (lineTokens[i].find("initTime:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],time)) throw std::runtime_error( "Calendar::read_state failed: (initTime)");
-         if (i + 1 < lineTokens.size()) { time += " "; time += lineTokens[i+1]; }
+      const std::string& line_token = lineTokens[i];
+      if (line_token.find("initTime:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token,time)) throw std::runtime_error( "Calendar::read_state failed: (initTime)");
+         if (i + 1 < line_tokens_size) { time += " "; time += lineTokens[i+1]; }
          else throw std::runtime_error( "Calendar::read_state failed: 1");
          initTime_ = time_from_string(time);
       }
-      else if (lineTokens[i].find("suiteTime:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],time)) throw std::runtime_error( "Calendar::read_state failed: (suiteTime)");
-         if (i + 1 < lineTokens.size()) { time += " "; time += lineTokens[i+1]; }
+      else if (line_token.find("suiteTime:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token,time)) throw std::runtime_error( "Calendar::read_state failed: (suiteTime)");
+         if (i + 1 < line_tokens_size) { time += " "; time += lineTokens[i+1]; }
          else throw std::runtime_error( "Calendar::read_state failed: 1");
          suiteTime_ = time_from_string(time);
       }
-      else if (lineTokens[i].find("initLocalTime:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],time)) throw std::runtime_error( "Calendar::read_state failed: (initLocalTime)");
-         if (i + 1 < lineTokens.size()) { time += " "; time += lineTokens[i+1]; }
+      else if (line_token.find("initLocalTime:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token,time)) throw std::runtime_error( "Calendar::read_state failed: (initLocalTime)");
+         if (i + 1 < line_tokens_size) { time += " "; time += lineTokens[i+1]; }
          else throw std::runtime_error( "Calendar::read_state failed: 1");
          initLocalTime_ = time_from_string(time);
       }
-      else if (lineTokens[i].find("lastTime:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],time)) throw std::runtime_error( "Calendar::read_state failed: (lastTime)");
-         if (i + 1 < lineTokens.size()) { time += " "; time += lineTokens[i+1]; }
+      else if (line_token.find("lastTime:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token,time)) throw std::runtime_error( "Calendar::read_state failed: (lastTime)");
+         if (i + 1 < line_tokens_size) { time += " "; time += lineTokens[i+1]; }
          else throw std::runtime_error( "Calendar::read_state failed: 1");
          lastTime_ = time_from_string(time);
       }
-      else if (lineTokens[i].find("duration:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],time)) throw std::runtime_error( "Calendar::read_state failed: (duration)");
+      else if (line_token.find("duration:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token,time)) throw std::runtime_error( "Calendar::read_state failed: (duration)");
          duration_ =  duration_from_string(time);
       }
-      else if (lineTokens[i].find("calendarIncrement:") != std::string::npos ) {
-         if (!Extract::split_get_second(lineTokens[i],time)) throw std::runtime_error( "Calendar::read_state failed: (calendarIncrement)");
+      else if (line_token.find("calendarIncrement:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token,time)) throw std::runtime_error( "Calendar::read_state failed: (calendarIncrement)");
          increment_ = duration_from_string(time);
       }
-      else if (lineTokens[i] == "dayChanged:1") dayChanged_ = true;
+      else if (line_token == "dayChanged:1") dayChanged_ = true;
    }
 }
 

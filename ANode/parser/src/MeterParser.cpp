@@ -23,7 +23,8 @@ using namespace std;
 bool MeterParser::doParse( const std::string& line, std::vector<std::string >& lineTokens )
 {
    // meter 0 100 100 # value
-	if ( lineTokens.size() < 4 )
+   size_t line_tokens_size = lineTokens.size();
+	if ( line_tokens_size < 4 )
 		throw std::runtime_error("MeterParser::doParse: Invalid meter :" + line );
 
 	if ( nodeStack().empty() ) {
@@ -38,7 +39,7 @@ bool MeterParser::doParse( const std::string& line, std::vector<std::string >& l
 	int value = std::numeric_limits<int>::max();
    if (rootParser()->get_file_type() != PrintStyle::DEFS) {
       bool comment_fnd =  false;
-      for(size_t i = 3; i < lineTokens.size(); i++) {
+      for(size_t i = 3; i < line_tokens_size; i++) {
          if (comment_fnd) {
             // token after comment is the value
             value = Extract::theInt(lineTokens[i],"MeterParser::doParse, could not extract meter value");

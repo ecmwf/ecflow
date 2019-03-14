@@ -45,7 +45,7 @@ bool EventParser::doParse( const std::string& line,
 	int number = std::numeric_limits<int>::max();
 
 	// Test for numeric, and then casting, is ****faster***** than relying on exception alone
-	if ( lineTokens[1].find_first_of( Str::NUMERIC() ) != std::string::npos ) {
+	if ( lineTokens[1].find_first_of( Str::NUMERIC() ) == 0 ) {
 		try {
 			number = boost::lexical_cast< int >( lineTokens[1] );
 			if ( lineTokens.size() >= 3 && lineTokens[2][0] != '#' ) {
