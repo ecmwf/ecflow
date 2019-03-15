@@ -53,7 +53,7 @@ public:
 
    ~Defs();
 
-   void copy_defs_state_only(defs_ptr defs); // needed when creating defs for client handles
+   void copy_defs_state_only(const defs_ptr& defs); // needed when creating defs for client handles
    bool operator==(const Defs& rhs) const;
    void print(std::string&) const;
    std::string print(PrintStyle::Type_t t = PrintStyle::MIGRATE) const;
@@ -105,8 +105,8 @@ public:
    /// dependencies are free'd
    void updateCalendar( const ecf::CalendarUpdateParams &);
 
-   /// Used by simulator
-   void update_calendar(suite_ptr suite, const ecf::CalendarUpdateParams& cal_update_params ); // used by simulator
+   /// Used by simulator & catch_up_to_real_time
+   void update_calendar(Suite* suite, const ecf::CalendarUpdateParams& cal_update_params ); // used by simulator
 
    /// returns the number of times the calendar has been updated. For DEBUG
    unsigned int updateCalendarCount() const { return updateCalendarCount_;}
@@ -158,7 +158,7 @@ public:
    /// Flag the chosen suite, so that it can resolve dependencies. This also
    /// changes the state of all children to QUEUED/defstatus and initialise the node attributes
    /// Once a suite is begun, it stays in that state
-   void beginSuite(suite_ptr);
+   void beginSuite(const suite_ptr&);
 
    /// Enables all suites to resolve dependencies
    /// Once a suite is begun, it stays in that state
@@ -168,7 +168,7 @@ public:
    void reset_begin();
 
    /// throws runtime_error if suite cant begin
-   void check_suite_can_begin(suite_ptr) const;
+   void check_suite_can_begin(const suite_ptr&) const;
 
    /// Will requeue all suites. Current used in test only
    void requeue();

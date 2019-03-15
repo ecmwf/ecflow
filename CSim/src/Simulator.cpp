@@ -162,7 +162,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  		BOOST_FOREACH(suite_ptr suite, suiteVec ) {
  		   boost::posix_time::time_duration max_duration_for_suite = simiVisitor.max_simulation_period(suite.get());
  		   if (duration < max_duration_for_suite) {
- 		      theDefs.update_calendar(suite, calUpdateParams );
+ 		      theDefs.update_calendar(suite.get(), calUpdateParams );
  		   }
  		}
  		duration += calendarIncrement;

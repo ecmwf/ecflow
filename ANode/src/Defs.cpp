@@ -79,7 +79,7 @@ Defs::Defs(const Defs& rhs) :
    // observers not copied
 }
 
-void Defs::copy_defs_state_only(defs_ptr server_defs)
+void Defs::copy_defs_state_only(const defs_ptr& server_defs)
 {
    if ( !server_defs ) return;
 
@@ -286,7 +286,7 @@ void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
    auto_archive(auto_archive_nodes);
 }
 
-void Defs::update_calendar(suite_ptr suite, const ecf::CalendarUpdateParams& cal_update_params )
+void Defs::update_calendar(Suite* suite, const ecf::CalendarUpdateParams& cal_update_params )
 {
    /// Collate any auto cancelled nodes as a result of calendar update
    std::vector<node_ptr> auto_cancelled_nodes;
@@ -319,7 +319,7 @@ bool Defs::catch_up_to_real_time()
             suite_time += schedule_increment;
             while(suite_time <= time_now) {
 
-               update_calendar(suite, ecf::CalendarUpdateParams(suite_time, schedule_increment, true) );
+               update_calendar(suite.get(), ecf::CalendarUpdateParams(suite_time, schedule_increment, true) );
 
                //cout << suite->name() << " : " << suite->calendar().toString() << "\n";
                suite_time += schedule_increment;
@@ -517,7 +517,7 @@ void Defs::auto_add_externs(bool remove_existing_externs_first)
 	acceptVisitTraversor(visitor);
 }
 
-void Defs::beginSuite(suite_ptr suite)
+void Defs::beginSuite(const suite_ptr& suite)
 {
    if (!suite.get()) throw std::runtime_error( "Defs::beginSuite: Begin failed as suite is not loaded" );
 
@@ -593,7 +593,7 @@ void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive)
    }
 }
 
-void Defs::check_suite_can_begin(suite_ptr suite) const
+void Defs::check_suite_can_begin(const suite_ptr& suite) const
 {
    NState::State suiteState = suite->state();
    if (!suite->begun() && suiteState != NState::UNKNOWN && suiteState != NState::COMPLETE) {
