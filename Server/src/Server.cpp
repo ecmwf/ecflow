@@ -527,15 +527,24 @@ void Server::loadCheckPtFile()
 
 bool Server::restore_from_checkpt(const std::string& filename,bool& failed)
 {
-   // cout << "Server::restore_from_checkpt " <<  filename;
+   // cout << "Server::restore_from_checkpt " << filename;
    if (fs::exists(filename)) {
       // cout << " file exists\n";
-      LOG(Log::MSG, "Loading check point file " << filename << " port = " << serverEnv_.port());
+
+      std::string s = "Loading check point file "; s += filename; s += " port:"; s+= serverEnv_.the_port();
+      log(Log::MSG,s);
 
       try {
-         defs_->restore(filename);      // this can throw
-         update_defs_server_state();    // works on def_
+         defs_->restore(filename);                      // this can throw
+         update_defs_server_state();                    // works on def_
          LOG(Log::MSG, "Loading of *DEFS* check point file SUCCEDED. Loaded "<< defs_->suiteVec().size() << " suites");
+
+         // fast forward any time attributes, if suite clock is *ONLY* 1 hour behind real time
+         // This may remove autocancelled nodes, may autoarchive, may set late attribute,
+         // may expire time based attributes which will start jobs when server starts
+         if (defs_->catch_up_to_real_time()) {
+            log(Log::MSG, "Suite time attributes updated to catch up with real time. Down time was less than 1 hour");
+         }
          return true;
       }
       catch (exception& e) {

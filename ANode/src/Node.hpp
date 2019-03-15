@@ -96,6 +96,10 @@ public:
    // *************************************************************************************
    virtual bool resolveDependencies(JobsParam& jobsParam);
 
+   /// When the server is terminated and then restarted, Allow time attributes to catch up.
+   /// We need to check all attributes dependent on time.
+   virtual bool has_time_based_attributes() const;
+
    /// Command related functions:
    /// suspend generation of jobs. Below this node.
    /// Note: When a node is suspended. time/date dependencies are still handled

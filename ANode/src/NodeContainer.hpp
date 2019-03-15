@@ -51,6 +51,7 @@ public:
          std::vector<node_ptr>& auto_archive_nodes,
          const ecf::LateAttr* inherited_late) override;
  	bool resolveDependencies(JobsParam& ) override;
+   bool has_time_based_attributes() const override;
  	bool check(std::string& errorMsg, std::string& warningMsg) const override;
    void invalidate_trigger_references() const override;
 

@@ -111,6 +111,13 @@ public:
    /// returns the number of times the calendar has been updated. For DEBUG
    unsigned int updateCalendarCount() const { return updateCalendarCount_;}
 
+   /// When the server is terminated and then restarted, Allow time attributes to catch up.
+   /// This may expire time attributes allowing the task to run
+   /// We only update suite that have time attributes and where the calendars that are 1 hour out of sync with real time.
+   /// It can be quite expensive to update time attributes 1 minute at a time, hence we chose 1 hour.
+   /// Return true if any suite where updated
+   bool catch_up_to_real_time();
+
    // Implements visitor pattern
    void accept(ecf::NodeTreeVisitor&); // Node Tree structure does the traversal
    void acceptVisitTraversor(ecf::NodeTreeVisitor& v); // visitor does traversal

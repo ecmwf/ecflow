@@ -462,6 +462,15 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
  	return true;
 }
 
+bool NodeContainer::has_time_based_attributes() const
+{
+   if (Node::has_time_based_attributes()) return true;
+   for(const auto& node: nodes_) {
+      if (node->has_time_based_attributes()) return true;
+   }
+   return false;
+}
+
 NState::State NodeContainer::computedState(Node::TraverseType traverseType) const
 {
 	if (nodes_.empty()) {

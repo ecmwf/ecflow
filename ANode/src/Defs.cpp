@@ -40,7 +40,10 @@
 #include "File.hpp"  
 #include "Serialization.hpp"
 #include "Memento.hpp"
+#include "CalendarUpdateParams.hpp"
 
+using namespace boost::gregorian;
+using namespace boost::posix_time;
 using namespace ecf;
 using namespace std;
 
@@ -296,6 +299,38 @@ void Defs::update_calendar(suite_ptr suite, const ecf::CalendarUpdateParams& cal
 
    // Archive any nodes with auto archive attribute, Must be suite/family
    auto_archive(auto_archive_nodes);
+}
+
+
+bool Defs::catch_up_to_real_time()
+{
+   auto time_now = Calendar::second_clock_time();
+
+//   cout << "Time Now: " << to_simple_string(time_now) << "\n";
+//   for(const auto& suite : suiteVec_)  cout << suite->calendar().toString() << "\n";
+//   cout << "===================================================================\n";
+   bool updated = false;
+   time_duration schedule_increment(0,0,server_.jobSubmissionInterval(),0);
+   for(const auto& suite : suiteVec_) {
+      // Check if suite has time,today,date,day,cron,late,autocancel,autoarchive attributes
+      if (suite->has_time_based_attributes()) {
+         auto suite_time = suite->calendar().suiteTime();
+         if ( time_now - suite_time <= hours(1)) {
+            suite_time += schedule_increment;
+            while(suite_time <= time_now) {
+
+               update_calendar(suite, ecf::CalendarUpdateParams(suite_time, schedule_increment, true) );
+
+               //cout << suite->name() << " : " << suite->calendar().toString() << "\n";
+               suite_time += schedule_increment;
+               updated = true;
+            }
+         }
+      }
+   }
+//   cout << "===================================================================\n";
+//   for(const auto& suite : suiteVec_)  cout << suite->calendar().toString() << "\n";
+   return updated;
 }
 
 

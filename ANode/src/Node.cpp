@@ -690,6 +690,15 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
    return false;
 }
 
+bool Node::has_time_based_attributes() const
+{
+   if (has_time_dependencies()) return true;
+   if (auto_cancel_) return true;
+   if (auto_archive_) return true;
+   if(late_)  return true;
+   return false;
+}
+
 void Node::freeTrigger() const
 {
    if (t_expr_) t_expr_->setFree();
