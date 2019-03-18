@@ -405,7 +405,7 @@ bool CronAttr::is_day_of_week_day_of_month_and_month_free( const ecf::Calendar& 
    cout.flush();
 #endif
 
-   bool the_week_day_matches = weekDays_.empty() && last_week_days_of_month_.empty();         // week day matches if no week days
+   bool the_week_day_matches = weekDays_.empty() && last_week_days_of_month_.empty(); // week day matches if no week days
    bool the_day_of_month_matches = daysOfMonth_.empty();  // day of month if no days of month
    bool the_month_matches = months_.empty();              // month matches if no months
 
@@ -417,7 +417,7 @@ bool CronAttr::is_day_of_week_day_of_month_and_month_free( const ecf::Calendar& 
    if ( !daysOfMonth_.empty() || last_day_of_month_)
       the_day_of_month_matches = day_of_month_matches(c.day_of_month(),c);
    if ( !months_.empty()  )
-      the_month_matches         = month_matches(c.month());
+      the_month_matches   = month_matches(c.month());
 
 
    // Remember we *AND* across -w, -d, -m or *OR* for each element in -w, -d,-m
