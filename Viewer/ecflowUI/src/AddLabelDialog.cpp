@@ -23,6 +23,7 @@
 
 AddLabelDialog::AddLabelDialog(VInfo_ptr info, QWidget* parent) :
     QDialog(parent),
+    ui_(new Ui::AddLabelDialog),
     info_(info)
 {
     if(!info_ || !info_->isNode() || !info_->node())

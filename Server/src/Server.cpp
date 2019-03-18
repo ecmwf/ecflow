@@ -388,8 +388,11 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       LogFlusher logFlusher;
       LOG(Log::ERR, "Server::handle_read: " <<  e.message());
 
-      // *Reply* back to the client: This should cause error in client if protocol is different
-      outbound_response_.set_cmd( PreAllocatedReply::error_cmd( "Server(" + Version::raw() + ") replied with:\n" + e.message() ));
+      // *Reply* back to the client, This may fail in the client;
+      std::pair<std::string,std::string> host_port = hostPort();
+      std::string msg = " ->Server:"; msg += host_port.first; msg += "@"; msg += host_port.second; msg += " (";
+      msg += Version::raw(); msg += ") replied with:\n"; msg += e.message();
+      outbound_response_.set_cmd( PreAllocatedReply::error_cmd(msg));
       conn->async_write( outbound_response_,
                           boost::bind(&Server::handle_write,
                                     this,
