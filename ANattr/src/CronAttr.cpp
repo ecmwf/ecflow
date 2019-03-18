@@ -46,7 +46,7 @@ namespace ecf {
 CronAttr::CronAttr() = default;
 
 CronAttr::CronAttr(const std::string& str)
-:  last_day_of_month_(false),free_(false),state_change_no_(0)
+:  last_day_of_month_(false),free_(false),w_(0),state_change_no_(0)
 {
    if (str.empty()) throw std::runtime_error("CronAttr::CronAttr : empty string passed");
    std::vector<std::string> tokens;
@@ -860,6 +860,7 @@ void CronAttr::serialize(Archive & ar, std::uint32_t const version )
    CEREAL_OPTIONAL_NVP(ar, months_,                 [this](){return !months_.empty(); });     // conditionally save
    CEREAL_OPTIONAL_NVP(ar, free_,                   [this](){return free_; });                // conditionally save
    CEREAL_OPTIONAL_NVP(ar, last_day_of_month_,      [this](){return last_day_of_month_; });   // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, w_,                      [this](){return w_ != 0; });              // conditionally save
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(CronAttr);
 

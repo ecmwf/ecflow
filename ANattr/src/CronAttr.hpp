@@ -29,9 +29,9 @@ class CronAttr  {
 public:
    CronAttr();
    explicit CronAttr(const std::string& time_series);
-   CronAttr(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) : timeSeries_(s,f,i),free_(false),state_change_no_(0) {}
-   explicit CronAttr(const TimeSeries& ts ) : timeSeries_(ts),free_(false),state_change_no_(0) {}
-   CronAttr(int h, int m, bool relative = false) : timeSeries_(h,m,relative),free_(false),state_change_no_(0) {}
+   CronAttr(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) : timeSeries_(s,f,i),free_(false),w_(0),state_change_no_(0) {}
+   explicit CronAttr(const TimeSeries& ts ) : timeSeries_(ts),free_(false),w_(0),state_change_no_(0) {}
+   CronAttr(int h, int m, bool relative = false) : timeSeries_(h,m,relative),free_(false),w_(0),state_change_no_(0) {}
 
    void print(std::string&) const;
    bool operator==(const CronAttr& rhs) const;
@@ -128,6 +128,7 @@ private:
    std::vector<int> months_;
    bool             last_day_of_month_{false};
    bool             free_{false};         // persisted for use by why() on client side
+   unsigned int     w_{0};                // NOT implemented, weekday nearest the given day of the month 15W
    unsigned int     state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;
