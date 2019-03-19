@@ -16,7 +16,7 @@
 //============================================================================
 
 #include <string>
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 // ----------------------------------------------------------------
@@ -79,7 +79,7 @@ private:
 	bool validateVersionNumber(const std::string& line, std::string& errorMsg) const;
 	bool add_user(std::vector<std::string>& tokens, std::string& error_msg);
 
-	typedef std::map<std::string,std::vector<std::string> > mymap;
+	typedef std::unordered_map<std::string,std::vector<std::string> > mymap;
    bool verify_path_access(const std::string& user,const std::vector<std::string>& paths,const mymap&) const;
    bool verify_path_access(const std::string& user,const std::string& path,const mymap&) const;
 
