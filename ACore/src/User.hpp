@@ -31,7 +31,7 @@ public:
 
 private:
    User(const User&) = delete;
-   const User& operator=(const User&) = delete
+   const User& operator=(const User&) = delete;
    User() = delete;
 };
 
