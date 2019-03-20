@@ -289,11 +289,9 @@ bool PasswdFile::createWithAccess(
       const std::string& passwd,
       std::string& errorMsg)
 {
-   std::vector<std::string> lines; lines.reserve( 2 );
+   std::vector<std::string> lines; lines.reserve( 3 );
 
    lines.emplace_back("4.5.0");
-
-   lines.push_back("4.5.0");
 
    string line;
    line += User::login_name();
