@@ -424,7 +424,7 @@ const std::string& ClientEnvironment::get_user_password() const
             throw std::runtime_error(ss.str());
          }
          //std::cout << "ClientEnvironment::get_user_password() PasswdFile.dump()\n" << passwd_file.dump() << "\n";
-         passwd_ = passwd_file.get_passwd(UserCmd::get_user(), host(), port());
+         passwd_ = passwd_file.get_passwd(User::login_name(), host(), port());
          //cout << "  ClientEnvironment::get_user_password() returning " << passwd_ << "\n";
          return passwd_;
       }

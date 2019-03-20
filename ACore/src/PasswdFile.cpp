@@ -12,7 +12,6 @@
 //
 // Description : Parser for white list file
 //============================================================================
-#include <pwd.h>       /* getpwuid */
 #include <vector>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
@@ -22,6 +21,7 @@
 #include "File.hpp"
 #include "Str.hpp"
 #include "Log.hpp"
+#include "User.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -271,9 +271,7 @@ bool PasswdFile::createWithAccess(
    lines.push_back("4.5.0");
 
    string line;
-   struct passwd * thePassWord = getpwuid ( getuid() );
-   string user = string( thePassWord->pw_name ) ;  // equivalent to the login name
-   line += user;
+   line += User::login_name();
    line += " ";
    line += host;
    line += " ";
@@ -283,7 +281,7 @@ bool PasswdFile::createWithAccess(
    lines.push_back(line);
 
    line.clear();
-   line += user;
+   line += User::login_name();
    line += " ";
    line += Str::LOCALHOST();
    line += " ";

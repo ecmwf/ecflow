@@ -186,6 +186,8 @@ private:
 
 	void change_dir_to_ecf_home_and_check_accesibility();
 
+	bool load_whitelist_file(std::string& err) const;
+
 private:
 	ecf::Host host_name_;
 	std::string serverHost_; // must be after host_name_, since used in init

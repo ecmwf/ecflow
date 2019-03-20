@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <boost/noncopyable.hpp>
+#include "User.hpp"
 
 namespace ecf {
 
@@ -49,19 +50,5 @@ public:
 private:
 	Child();
 };
-
-
-class User : private boost::noncopyable {
-public:
-	enum Action   { FOB, FAIL, ADOPT, REMOVE, BLOCK, KILL };
-
-	static bool valid_user_action( const std::string& );
-	static Action user_action( const std::string& );
-	static std::string to_string(Action);
-
-private:
-	User();
-};
-
 }
 #endif

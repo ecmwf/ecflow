@@ -501,7 +501,6 @@ class UserCmd : public ClientToServerCmd {
 public:
    UserCmd(){}
 
-   static std::string get_user();
    const std::string& user() const { return user_;}
    const std::string& passwd() const { return passwd_;}
 
