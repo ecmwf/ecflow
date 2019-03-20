@@ -17,6 +17,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <string>
 #include <vector>
+#include "User.hpp"
 
 namespace ecf {
 
@@ -53,21 +54,6 @@ private:
 	Child() = delete;
 	Child(const Child&) = delete;
 	const Child& operator=(const Child&) = delete;
-};
-
-
-class User {
-public:
-	enum Action   { FOB, FAIL, ADOPT, REMOVE, BLOCK, KILL };
-
-	static bool valid_user_action( const std::string& );
-	static Action user_action( const std::string& );
-	static std::string to_string(Action);
-
-private:
-	User(const User&) = delete;
-	const User& operator=(const User&) = delete;
-	User() = delete;
 };
 
 }

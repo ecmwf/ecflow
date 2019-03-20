@@ -16,12 +16,8 @@
 #include <sstream>
 #include <fstream>
 
-#include <pwd.h>       /* getpwuid */
 #include <sys/types.h>
-#include <unistd.h>
-#include <cstdio>      /* tolower */
-#include <cstring>     // for strerror()
-#include <cerrno>      // for errno()
+#include <stdio.h>      /* tolower */
 
 #include "ClientToServerCmd.hpp"
 
@@ -30,6 +26,7 @@
 #include "Log.hpp"
 #include "Str.hpp"
 #include "Host.hpp"
+#include "User.hpp"
 
 using namespace std;
 using namespace boost;
@@ -149,44 +146,16 @@ void UserCmd::setup_user_authentification(const std::string& user, const std::st
 
 void UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv)
 {
-   setup_user_authentification(UserCmd::get_user(),clientEnv.get_user_password());
+   setup_user_authentification(User::login_name(),clientEnv.get_user_password());
 }
 
 void UserCmd::setup_user_authentification()
 {
    if (user_.empty()) {
-      setup_user_authentification(UserCmd::get_user(),Str::EMPTY());
+      setup_user_authentification(User::login_name(),Str::EMPTY());
    }
 }
 
-std::string UserCmd::get_user()
-{
-   static std::string the_user_name;
-   if (the_user_name.empty()) {
-
-      // Get the uid of the running process and use it to get a record from /etc/passwd */
-      // getuid() can not fail, but getpwuid can fail.
-      errno = 0;
-      uid_t real_user_id_of_process = getuid();
-      struct passwd * thePassWord = getpwuid ( real_user_id_of_process );
-      if (thePassWord == nullptr ) {
-         if ( errno != 0) {
-            std::string theError = strerror(errno);
-            throw std::runtime_error("UserCmd::get_user: could not determine user name. Because: " + theError);
-         }
-
-         std::stringstream ss;
-         ss << "UserCmd::get_user: could not determine user name for uid " << real_user_id_of_process;
-         throw std::runtime_error(ss.str());
-      }
-
-      the_user_name = thePassWord->pw_name;  // equivalent to the login name
-      if ( the_user_name.empty() ) {
-         throw std::runtime_error("UserCmd::get_user: could not determine user name. Because: thePassWord->pw_name is empty");
-      }
-   }
-   return the_user_name;
-}
 
 void UserCmd::prompt_for_confirmation(const std::string& prompt)
 {

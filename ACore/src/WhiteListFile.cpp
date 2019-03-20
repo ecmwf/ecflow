@@ -12,7 +12,7 @@
 //
 // Description : Parser for white list file
 //============================================================================
-#include <pwd.h>       /* getpwuid */
+#include <vector>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -21,6 +21,7 @@
 #include "File.hpp"
 #include "Str.hpp"
 #include "Log.hpp"
+#include "User.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -500,14 +501,8 @@ bool WhiteListFile::createWithReadAccess( const std::string& pathToFile,std::str
 {
 	std::vector<std::string> lines; lines.reserve( 2 );
 
-	lines.emplace_back("4.4.14");
-
-	string user = "-";
-	// cppcheck-suppress getpwuidCalled
-	struct passwd * thePassWord = getpwuid ( getuid() );
-	user += string( thePassWord->pw_name ) ;  // equivalent to the login name
-
- 	lines.push_back(user);
+	lines.push_back("4.4.14");
+ 	lines.push_back("-" + User::login_name());
 
 	return File::create(pathToFile,lines,errorMsg);
 }
@@ -516,13 +511,42 @@ bool WhiteListFile::createWithWriteAccess( const std::string& pathToFile , std::
 {
 	std::vector<std::string> lines; lines.reserve( 2 );
 
-	lines.emplace_back("4.4.14");
-
-	// cppcheck-suppress getpwuidCalled
- 	struct passwd * thePassWord = getpwuid ( getuid() );
-	string user( thePassWord->pw_name ) ;  // equivalent to the login name
-
- 	lines.push_back(user);
+	lines.push_back("4.4.14");
+	lines.push_back(User::login_name()); // equivalent to the login name
 
 	return File::create(pathToFile,lines,errorMsg);
 }
+
+bool WhiteListFile::createWithNoAccess( const std::string& pathToFile,std::string& errorMsg)
+{
+   std::vector<std::string> lines; lines.reserve(5);
+
+   lines.push_back("4.4.14");
+   lines.push_back("userXX");
+   lines.push_back("userYY");
+   lines.push_back("-userZZ");
+   lines.push_back("-userZY");
+
+   return File::create(pathToFile,lines,errorMsg);
+}
+
+bool WhiteListFile::createEmpty( const std::string& pathToFile,std::string& errorMsg)
+{
+   std::vector<std::string> lines; lines.reserve( 1 );
+   lines.push_back("4.4.14");
+
+   return File::create(pathToFile,lines,errorMsg);
+}
+
+void WhiteListFile::allow_write_access_for_server_user()
+{
+   std::string user = User::login_name();
+   if (verify_write_access(user)) return;
+
+   // add write access
+   mymap::iterator it = users_with_write_access_.find(user);
+   if (it == users_with_write_access_.end()) {
+      users_with_write_access_.insert(std::make_pair(user,std::vector<std::string>() ));
+   }
+}
+

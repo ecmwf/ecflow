@@ -65,10 +65,15 @@ public:
 	// Function used in test:
 	// Will overwrite the existing file
 	static bool createWithReadAccess( const std::string& pathToFile, std::string& errorMsg);
-	static bool createWithWriteAccess( const std::string& pathToFile, std::string& errorMsg);
+   static bool createWithWriteAccess( const std::string& pathToFile, std::string& errorMsg);
+   static bool createWithNoAccess( const std::string& pathToFile, std::string& errorMsg);
+   static bool createEmpty( const std::string& pathToFile, std::string& errorMsg);
 
 	size_t read_access_size() const { return users_with_read_access_.size(); }
 	size_t write_access_size() const { return users_with_write_access_.size(); }
+
+	// return true if current user has write access
+	void allow_write_access_for_server_user();
 
 private:
   WhiteListFile(const WhiteListFile&) = delete;

@@ -154,42 +154,4 @@ std::vector<Child::CmdType> Child::list()
    return child_cmds;
 }
 
-//=====================================================================
-
-bool User::valid_user_action( const std::string& s)
-{
-	if (s == "fob") return true;
-	if (s == "fail") return true;
-	if (s == "adopt") return true;
-	if (s == "remove") return true;
-   if (s == "block") return true;
-   if (s == "kill") return true;
- 	return false;
-}
-
-User::Action User::user_action( const std::string& s)
-{
-	if (s == "fob") return User::FOB;
-	if (s == "fail") return User::FAIL;
-	if (s == "adopt") return User::ADOPT;
-	if (s == "remove") return User::REMOVE;
-   if (s == "block") return User::BLOCK;
-   if (s == "kill") return User::KILL;
- 	return User::BLOCK;
-}
-
-std::string User::to_string(User::Action uc)
-{
-	switch (uc) {
- 		case User::FOB:  return "fob"; break;
- 		case User::FAIL: return "fail"; break;
- 		case User::ADOPT: return "adopt"; break;
- 		case User::REMOVE: return "remove"; break;
-      case User::BLOCK: return "block"; break;
-      case User::KILL: return "kill"; break;
-  	}
-	assert(false);
- 	return std::string();
-}
-
 }
