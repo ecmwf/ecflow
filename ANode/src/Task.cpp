@@ -496,7 +496,8 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
          return false; // .ecf file location failed
       }
       if (get_flag().is_set(ecf::Flag::JOBCMD_FAILED)) {
-         return false; // variable substituion on JOB cmd failed
+         return false; // Process exited with non-zero exit.
+                       // *OR* Job submission failed.
       }
 
 
