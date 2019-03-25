@@ -1,8 +1,0 @@
-
-%include <help_manual.h>
-
-This is the manual for suite there is no manual
-This file will pre-processed even thought there is no manual directives
-ECF_HOME is %ECF_HOME%
-
-Check unknown variables %FREDDDDDDDDDDD%

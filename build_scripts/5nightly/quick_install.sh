@@ -19,10 +19,10 @@ else
 fi
 
 # =======================================================================
-# Create build scripts files. Must be before python $WK/build_scripts/nightly/build.py
+# Create build scripts files. Must be before python $WK/build_scripts/5nightly/build.py
 # =======================================================================
-rm -rf nightly
-cp -r $WK/build_scripts/nightly .
+rm -rf 5nightly
+cp -r $WK/build_scripts/5nightly .
 
 # =======================================================================
 # Kill the server
@@ -43,7 +43,7 @@ ecflow_client --server_version
 
 # Make sure server is running
 # =======================================================================
-python $WK/build_scripts/nightly/load.py
+python $WK/build_scripts/5nightly/load.py
 
 
 # ======================================================================
@@ -58,8 +58,8 @@ git checkout master
 # test suites
 # ========================================================================
 cd $WK
-python Pyext/samples/TestBench.py  ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
-python Pyext/samples/TestBench.py  ANode/parser/test/data/single_defs/test_time_why.def
+python Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
+python Pyext/samples/TestBench.py ANode/parser/test/data/single_defs/test_time_why.def
 
        
 # =======================================================================
