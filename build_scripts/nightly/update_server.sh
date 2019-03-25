@@ -11,16 +11,16 @@ set -x # echo script lines as they are executed
 # Kill the server
 # =======================================================================
 ecflow_client --version
-ecflow_client --terminate=yes --port=4141
+ecflow_client --terminate=yes --port=4142
  
 # =======================================================================
 # Start server. 
 # This *MUST* be a compatible version with the clients on different hosts
 # =======================================================================
-rm -rf `hostname`.4141.*
+rm -rf `hostname`.4142.*
 
 export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
-nohup ecflow_server --port=4141 &
+nohup ecflow_server --port=4142 &
 sleep 4
 
 # =======================================================================

@@ -27,7 +27,6 @@ cp -r $WK/build_scripts/nightly .
 # =======================================================================
 # Kill the server
 # =======================================================================
-export ECF_PORT=4142
 which ecflow_client
 ecflow_client --version
 ecflow_client --terminate=yes
