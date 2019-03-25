@@ -19,5 +19,4 @@ rm -rf Client/bin
 rm -rf Server/bin 
 rm -rf Test/bin
 rm -rf Pyext/bin 
-rm -rf view/bin 
    
