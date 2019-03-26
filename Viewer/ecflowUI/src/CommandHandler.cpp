@@ -19,6 +19,8 @@
 #include "ShellCommand.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
+#include "VAttribute.hpp"
+#include "VConfig.hpp"
 #include "VNode.hpp"
 
 #include <QRegExp>
@@ -199,6 +201,41 @@ void CommandHandler::run(VInfo_ptr info, const std::string& cmd)
 
     ecf::Str::split(cmd, commands);
     run(info, commands);
+}
+
+void CommandHandler::openLinkInBrowser(VInfo_ptr info)
+{
+    if(info && info->isAttribute())
+    {
+        if(VAttribute* a = info->attribute())
+        {
+            std::string str_val;
+            if(a->value("label_value", str_val))
+            {
+                QString s = QString::fromStdString(str_val);
+                QRegExp rx("(http:\\/\\/\\S+|https:\\/\\/\\S+)");
+                if(rx.indexIn(s) >= 0)
+                {
+                    QString url=rx.cap(1);
+                    if(!url.isEmpty())
+                    {
+                        QString browser;
+                        if(VProperty* prop=VConfig::instance()->find("menu.web.defaultBrowser"))
+                        {
+                            browser = prop->valueAsString();
+                        }
+
+                        if(browser.isEmpty())
+                            browser = "firefox";
+
+                        std::string cmd="sh " + browser.toStdString() + " " + url.toStdString();
+                        ShellCommand::run(cmd, cmd, false);
+                    }
+                }
+
+            }
+        }
+    }
 }
 
 std::string CommandHandler::commandToString(const std::vector<std::string>& cmd)

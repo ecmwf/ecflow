@@ -134,17 +134,11 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
-module load ecbuild/new
-module load python2
-module load python3/3.6.5-01
-module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
-# To build python3 when cmake < 3.12.0 use
-# -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	module unload gnu
-	module load clang/6.0.1
+	module load clang/7.0.1
 
     # [-Wdeprecated-register] /usr/local/apps/python/2.7.12-01/include/python2.7/unicodeobject.h:534:5: warning: 'register' storage class specifier is deprecated and incompatible with C++17 [-Wdeprecated-register]
     # [-Wmacro-redefined]     /usr/local/apps/python/2.7.12-01/include/python2.7/pyconfig.h:1215:9: warning: '_XOPEN_SOURCE' macro redefined
@@ -165,6 +159,14 @@ if [[ "$intel_arg" = intel ]] ; then
     CXX_FLAGS="-std=c++17"
     #CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
 fi
+
+module load ecbuild/new
+module load python2
+module load python3/3.6.5-01
+module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
+# To build python3 when cmake < 3.12.0 use
+# -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
+
 
 # ==============================================================================================
 # sanitisers

@@ -13,7 +13,7 @@
 #include <QProcess>
 #include <QString>
 
-#include <cstdio>
+#include <stdio.h>
 
 #include "CommandOutputDialog.hpp"
 #include "DirectoryHandler.hpp"
@@ -26,10 +26,11 @@
 bool ShellCommand::envChecked_=false;
 bool ShellCommand::envHasToBeSet_=false;
 
-ShellCommand::ShellCommand(const std::string& cmdStr,const std::string& cmdDefStr) :
-    QObject(nullptr),
-    proc_(nullptr),
-    commandDef_(QString::fromStdString(cmdDefStr))
+ShellCommand::ShellCommand(const std::string& cmdStr,const std::string& cmdDefStr, bool addToDialog) :
+    QObject(0),
+    proc_(0),
+    commandDef_(QString::fromStdString(cmdDefStr)),
+    addToDialog_(addToDialog)
 {
     QString cmdIn=QString::fromStdString(cmdStr);
 
@@ -95,13 +96,16 @@ QString ShellCommand::command() const
     return command_;
 }
 
-ShellCommand* ShellCommand::run(const std::string& cmd,const std::string& cmdDef)
+ShellCommand* ShellCommand::run(const std::string& cmd,const std::string& cmdDef,bool addToDialog)
 {
-    return new ShellCommand(cmd,cmdDef);
+    return new ShellCommand(cmd,cmdDef,addToDialog);
 }
 
 void ShellCommand::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    if(!addToDialog_ && exitCode == 0 && exitStatus == QProcess::NormalExit)
+        return;
+
     if(!item_)
     {
         item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);
@@ -120,6 +124,9 @@ void ShellCommand::procFinished(int exitCode, QProcess::ExitStatus exitStatus)
 
 void ShellCommand::slotStdOutput()
 {
+    if(!addToDialog_)
+        return;
+
     if(!item_)
     {
         item_=CommandOutputHandler::instance()->addItem(command_,commandDef_,startTime_);

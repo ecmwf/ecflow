@@ -150,7 +150,19 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             {
                 if(filteredNodes[0] && filteredNodes[0]->node())
                 {
-                    AddLabelDialog labelDialog(filteredNodes[0]);
+                    AddLabelDialog labelDialog(filteredNodes[0],"");
+                    labelDialog.exec();
+                }
+            }
+        }
+
+        else if(item->command() == "add_jira_label")
+        {
+            if(filteredNodes.size() == 1)
+            {
+                if(filteredNodes[0] && filteredNodes[0]->node())
+                {
+                    AddLabelDialog labelDialog(filteredNodes[0],"Jira");
                     labelDialog.exec();
                 }
             }
@@ -163,6 +175,17 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 if(filteredNodes[0] && filteredNodes[0]->node())
                 {
                     VReportMaker::sendReport(filteredNodes[0]);
+                }
+            }
+        }
+
+        else if(item->command() == "open_link_in_browser")
+        {
+            if(filteredNodes.size() == 1)
+            {
+                if(filteredNodes[0] && filteredNodes[0]->node())
+                {
+                    CommandHandler::openLinkInBrowser(filteredNodes[0]);
                 }
             }
         }
