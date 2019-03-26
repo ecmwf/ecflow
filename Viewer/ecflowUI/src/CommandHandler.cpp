@@ -215,8 +215,8 @@ void CommandHandler::openLinkInBrowser(VInfo_ptr info)
             if(a->value("label_value", str_val))
             {
                 QString s = QString::fromStdString(str_val);
-                QRegExp rx("(http:\\/\\/\\S+|http:\\/\\/\\S+)");
-                if(rx.indexIn(s) > 1)
+                QRegExp rx("(http:\\/\\/\\S+|https:\\/\\/\\S+)");
+                if(rx.indexIn(s) >= 0)
                 {
                     QString url=rx.cap(1);
                     if(!url.isEmpty())
