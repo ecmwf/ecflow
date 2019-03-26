@@ -21,7 +21,7 @@
 
 #include "ui_AddLabelDialog.h"
 
-AddLabelDialog::AddLabelDialog(VInfo_ptr info, QWidget* parent) :
+AddLabelDialog::AddLabelDialog(VInfo_ptr info, QString labelName, QWidget* parent) :
     QDialog(parent),
     ui_(new Ui::AddLabelDialog),
     info_(info)
@@ -46,6 +46,8 @@ AddLabelDialog::AddLabelDialog(VInfo_ptr info, QWidget* parent) :
             this, SLOT(accept()));
     connect(ui_->buttonBox, SIGNAL(rejected()),
             this, SLOT(reject()));
+
+    ui_->nameLe->setText(labelName);
 
     readSettings();
 }

@@ -504,7 +504,14 @@
             "multi"          : "false",
             "status_tip"     : "__cmd__"
         },
-
+        {
+            "menu"           : "Special",
+            "name"           : "Add JIRA label",
+            "visible_for"    : "node",
+            "command"        : "add_jira_label",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
         {
             "menu"           : "Special",
             "name"           : "Check",
@@ -862,7 +869,7 @@
             "command"        : "ecflow_client --alter delete label <node_name> <parent_name>",
             "multi"          : "false",
             "status_tip"     : "__cmd__"
-        },
+        },       
         {
             "menu"           : "Node",
             "name"           : "Edit ...",
@@ -880,7 +887,22 @@
             "multi"          : "false",
             "handler"        : "tree",
             "view"           : "tree/trigger"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Open link in browser",
+            "visible_for"    : "label",
+            "command"        : "open_link_in_browser",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
         }
+
     ]
 
 }

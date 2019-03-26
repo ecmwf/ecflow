@@ -23,6 +23,7 @@ public:
     static void run(std::vector<VInfo_ptr>,const std::string&);
     static void run(VInfo_ptr,const std::vector<std::string>&);
     static void run(VInfo_ptr,const std::string&);
+    static void openLinkInBrowser(VInfo_ptr);
 
 protected:
     static std::string commandToString(const std::vector<std::string>& cmd);

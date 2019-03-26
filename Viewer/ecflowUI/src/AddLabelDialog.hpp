@@ -26,7 +26,7 @@ class AddLabelDialog : public QDialog
     Q_OBJECT
 
 public:
-    AddLabelDialog(VInfo_ptr info, QWidget* parent=0);
+    AddLabelDialog(VInfo_ptr info, QString labelName, QWidget* parent=0);
 
 protected Q_SLOTS:
     void accept();

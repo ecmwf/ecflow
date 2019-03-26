@@ -25,7 +25,7 @@ class ShellCommand : public QObject
 {
     Q_OBJECT
 public:
-    static ShellCommand* run(const std::string&,const std::string&);
+    static ShellCommand* run(const std::string&,const std::string&, bool addToDialog =  true);
 
     QString command() const;
     QString commandDef() const {return commandDef_;}
@@ -37,13 +37,14 @@ protected Q_SLOTS:
     void slotStdError();
 
 protected:
-    ShellCommand(const std::string&,const std::string&);
+    ShellCommand(const std::string&,const std::string&, bool);
 
     QProcess *proc_;
     QString command_;
     QString commandDef_;
     QDateTime startTime_;
     CommandOutput_ptr item_;
+    bool addToDialog_;
     static bool envChecked_;
     static bool envHasToBeSet_;
 };
