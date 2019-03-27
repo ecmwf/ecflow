@@ -785,10 +785,10 @@ BOOST_AUTO_TEST_CASE( test_str_valid_name )
    valid.push_back("9");
    valid.push_back("11");
    valid.push_back("111");
-   for(size_t i = 0; i < valid.size(); i++) {
+   for(const auto & i : valid) {
       std::string msg;
-      BOOST_CHECK_MESSAGE( Str::valid_name( valid[i],msg ) ,"Expected " <<  valid[i] << " to be valid" );
-      BOOST_CHECK_MESSAGE( Str::valid_name( valid[i]) ,"Expected " <<  valid[i] << " to be valid" );
+      BOOST_CHECK_MESSAGE( Str::valid_name( i,msg ) ,"Expected " <<  i << " to be valid" );
+      BOOST_CHECK_MESSAGE( Str::valid_name( i) ,"Expected " <<  i << " to be valid" );
    }
 
    BOOST_CHECK_MESSAGE( !Str::valid_name( "") ,"Expected empty string to be in-valid" );
@@ -812,12 +812,12 @@ BOOST_AUTO_TEST_CASE( test_str_valid_name )
    invalid.push_back("<");
    invalid.push_back(">");
    invalid.push_back("!");
-   for(size_t i = 0; i < invalid.size(); i++) {
+   for(const auto & i : invalid) {
       std::string msg;
-      BOOST_CHECK_MESSAGE( !Str::valid_name( invalid[i],msg ) ,"Expected " << invalid[i] << " to be in-valid" );
-      BOOST_CHECK_MESSAGE( !Str::valid_name( invalid[i]) ,"Expected " << invalid[i] << " to be in-valid" );
+      BOOST_CHECK_MESSAGE( !Str::valid_name( i,msg ) ,"Expected " << i << " to be in-valid" );
+      BOOST_CHECK_MESSAGE( !Str::valid_name( i) ,"Expected " << i << " to be in-valid" );
 
-      std::string s = "a" + invalid[i];
+      std::string s = "a" + i;
       BOOST_CHECK_MESSAGE( !Str::valid_name( s,msg ) ,"Expected " <<  s << " to be in-valid" );
       BOOST_CHECK_MESSAGE( !Str::valid_name( s ) ,"Expected " <<  s << " to be in-valid" );
    }

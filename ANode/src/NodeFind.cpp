@@ -878,9 +878,9 @@ node_ptr Node::findReferencedNode(const std::string& nodePath, const std::string
       else {
     	  // search suites, with the remaining path in theExtractedPath
     	  std::string path;
-    	  for(size_t i = 0; i < theExtractedPath.size(); i++) {
+    	  for(const auto & i : theExtractedPath) {
     		  path += Str::PATH_SEPERATOR();
-    		  path += theExtractedPath[i];
+    		  path += i;
     	  }
     	  node_ptr fndNode = theDefs->findAbsNode(path);
     	  if (fndNode) {

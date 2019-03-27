@@ -201,13 +201,13 @@ bool TimeAttr::why(const ecf::Calendar& c,const std::vector<DayAttr>& days,const
     	  boost::gregorian::date the_min_next_date;
 
     	  if (!days.empty() || !dates.empty()) {
-    		  for(size_t i=0; i < days.size(); i++) {
-    			  boost::gregorian::date the_next_matching_date = days[i].next_matching_date(c);
+    		  for(const auto& day : days) {
+    			  boost::gregorian::date the_next_matching_date = day.next_matching_date(c);
     			  if (the_min_next_date.is_special()) the_min_next_date = the_next_matching_date;
     			  if (the_next_matching_date < the_min_next_date ) the_min_next_date = the_next_matching_date;
     		  }
-    		  for(size_t i=0; i < dates.size(); i++) {
-    			  boost::gregorian::date the_next_matching_date = dates[i].next_matching_date(c);
+    		  for(const auto & date : dates) {
+    			  boost::gregorian::date the_next_matching_date = date.next_matching_date(c);
     			  if (the_min_next_date.is_special()) the_min_next_date = the_next_matching_date;
     			  if (the_next_matching_date < the_min_next_date ) the_min_next_date = the_next_matching_date;
     		  }

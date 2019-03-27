@@ -30,8 +30,8 @@ using namespace ecf;
 using namespace std;
 
 void InLimitMgr::reset(){
-	for(size_t i = 0; i < vec_.size(); i++) {
-		vec_[i].set_incremented(false);
+	for(auto & i : vec_) {
+		i.set_incremented(false);
 	}
 }
 

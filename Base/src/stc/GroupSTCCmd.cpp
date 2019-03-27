@@ -131,16 +131,16 @@ void GroupSTCCmd::addChild(STC_Cmd_ptr childCmd)
 // these two must be opposite of each other
 bool GroupSTCCmd::ok() const
 {
-   for(size_t i = 0; i < cmdVec_.size(); i++) {
-      if (!cmdVec_[i]->ok()) return false; // if child is ErrorCmd will return false
+   for(const auto & i : cmdVec_) {
+      if (!i->ok()) return false; // if child is ErrorCmd will return false
    }
    return true;
 }
 
 std::string GroupSTCCmd::error() const
 {
-   for(size_t i = 0; i < cmdVec_.size(); i++) {
-      std::string error_str = cmdVec_[i]->error();
+   for(const auto & i : cmdVec_) {
+      std::string error_str = i->error();
       if (!error_str.empty()) {
          return error_str;
       }
