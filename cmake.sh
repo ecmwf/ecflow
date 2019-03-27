@@ -144,10 +144,6 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     # [-Wmacro-redefined]     /usr/local/apps/python/2.7.12-01/include/python2.7/pyconfig.h:1215:9: warning: '_XOPEN_SOURCE' macro redefined
     CXX_FLAGS=""
     CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
-
-	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
-	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
-	fi
 fi
 if [[ "$intel_arg" = intel ]] ; then
     # fails because:
