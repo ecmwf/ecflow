@@ -498,6 +498,22 @@
 
         {
             "menu"           : "Special",
+            "name"           : "Add label",
+            "visible_for"    : "node",
+            "command"        : "add_label",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+        {
+            "menu"           : "Special",
+            "name"           : "Add JIRA label",
+            "visible_for"    : "node",
+            "command"        : "add_jira_label",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },
+        {
+            "menu"           : "Special",
             "name"           : "Check",
             "command"        : "sh ecflow_client --port %ECF_PORT% --host %ECF_HOST% --check /%SUITE%/%FAMILY:%%TASK:%",
             "multi"          : "false",
@@ -848,6 +864,14 @@
         },
         {
             "menu"           : "Node",
+            "name"           : "Delete",
+            "visible_for"    : "label",
+            "command"        : "ecflow_client --alter delete label <node_name> <parent_name>",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
+        },       
+        {
+            "menu"           : "Node",
             "name"           : "Edit ...",
             "visible_for"    : "label or meter or event or limit or trigger or var or genvar",
             "command"        : "edit",
@@ -863,7 +887,22 @@
             "multi"          : "false",
             "handler"        : "tree",
             "view"           : "tree/trigger"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "-"
+        },
+
+        {
+            "menu"           : "Node",
+            "name"           : "Open link in browser",
+            "visible_for"    : "label",
+            "command"        : "open_link_in_browser",
+            "multi"          : "false",
+            "status_tip"     : "__cmd__"
         }
+
     ]
 
 }

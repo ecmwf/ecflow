@@ -50,7 +50,8 @@ void PropertyEditor::edit(VProperty * vGroup,QPixmap pix)
 	 group_=vGroup;
 
 	 QString txt=group_->param("desc");
-	 headerLabel_->setText(txt);
+     headerWidget_->show();
+     headerLabel_->setText(txt);
 
 	 pixLabel_->setPixmap(pix);
 
@@ -68,6 +69,13 @@ void PropertyEditor::edit(VProperty * vGroup,QString serverName)
 	 serverName_=serverName;
 
 	 build();
+}
+
+void PropertyEditor::empty()
+{
+     clear();
+     headerWidget_->hide();
+     serverName_.clear();
 }
 
 void PropertyEditor::clear()

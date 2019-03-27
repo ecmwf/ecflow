@@ -40,7 +40,7 @@ public:
 	enum Type {NoTask,CommandTask,OverviewTask,WhyTask,ManualTask,ScriptTask,
 		       JobTask,MessageTask,OutputTask,StatsTask,NewsTask,SyncTask,ResetTask,SuiteAutoRegisterTask,
 			   SuiteListTask,ScriptEditTask,ScriptPreprocTask,ScriptSubmitTask,HistoryTask,LogOutTask,
-               ZombieListTask,ZombieCommandTask};
+               ZombieListTask,ZombieCommandTask,ServerVersionTask};
 	enum Status {NOSTATUS,QUEUED,RUNNING,FINISHED,CANCELLED,ABORTED,REJECTED};
 
 	virtual ~VTask();

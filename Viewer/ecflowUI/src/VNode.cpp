@@ -1864,7 +1864,13 @@ QString VServer::toolTip()
 		{			
 			txt+="<b><font color=" + colErr.name() +">Server is disconnected!</b><br>";
 			txt+="<b>Disconnected</b>: " + VFileInfo::formatDateAgo(st->lastDisconnectTime()) + "<br>";
-		}
+        }
+        else if(st->state() == ConnectState::Incompatible)
+        {
+            txt+="<b><font color=" + colErr.name() +">Server version is incompatible with client!</b><br>";
+            if(!st->errorMessage().empty())
+                txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage());
+        }
 	}
 	return txt;
 }

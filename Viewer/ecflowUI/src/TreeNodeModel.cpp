@@ -208,7 +208,9 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 
         //The colour of the server node
 		if(role == ConnectionRole)
-			return (server->connectState()->state() == ConnectState::Lost)?0:1;
+        {
+            return serverConnectId(server->connectState()->state());
+        }
 
 		//The colour of the server node
 		else if(role == Qt::BackgroundRole)
@@ -284,7 +286,7 @@ QVariant TreeNodeModel::nodeData(const QModelIndex& index, int role,VTreeNode* t
 
     else if(role == ConnectionRole)
     {
-        return (vnode->server()->connectState()->state() == ConnectState::Lost)?0:1;
+        return serverConnectId(vnode->server()->connectState()->state());
     }
 
     else if(role == Qt::DisplayRole)
@@ -377,7 +379,7 @@ QVariant TreeNodeModel::attributesData(const QModelIndex& index, int role,VTreeN
 
     if(role == ConnectionRole)
 	{
-        return (vnode->server()->connectState()->state() == ConnectState::Lost)?0:1;
+        return serverConnectId(vnode->server()->connectState()->state());
 	}
 	else if(role == Qt::DisplayRole)
     {
@@ -1424,3 +1426,18 @@ int TreeNodeModel::iconNum(VNode* n) const
         return VIcon::pixmapNum(n,icons_);
 }
 
+int TreeNodeModel::serverConnectId(ConnectState::State st) const
+{
+    switch(st)
+    {
+        case ConnectState::Lost:
+            return 1;
+        case ConnectState::Disconnected:
+            return 2;
+        case ConnectState::Incompatible:
+            return 3;
+        default:
+            return 0;
+    }
+    return 0;
+}

@@ -338,12 +338,8 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
 
 	/// read in the ecf white list file that specifies valid users and their access rights
 	/// If the file can't be opened returns false and an error message and false;
-	bool parse_result = white_list_file_.load(ecf_white_list_file_, debug(), errorMsg);
-
-   if (debug()) {
-      std::cout << white_list_file_.dump_valid_users() << "\n";
-   }
-	return parse_result;
+	/// Automatically add server admin(user) with write access, as this will allow admin reload
+	return load_whitelist_file(errorMsg);
 }
 
 std::pair<std::string,std::string> ServerEnvironment::hostPort() const
@@ -413,8 +409,21 @@ bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)
 		return false;
 	}
 
-	// Only override valid users if we successfully opened and parsed file
-	return white_list_file_.load(ecf_white_list_file_, debug(), errorMsg );
+	return load_whitelist_file(errorMsg);
+}
+
+bool ServerEnvironment::load_whitelist_file(std::string& errorMsg) const
+{
+   // Only override valid users if we successfully opened and parsed file
+   if (white_list_file_.load(ecf_white_list_file_, debug(), errorMsg )) {
+      // If user accidentally remove the server/user from white list,
+      // they will not be able reload white list, since it requires write access.
+      // (Requires terminate, modify white list, restart to fix)
+      // Hence always allow server user write access *IF* required for non empty file
+      white_list_file_.allow_write_access_for_server_user();
+      return true;
+   }
+   return false;
 }
 
 bool ServerEnvironment::reloadPasswdFile(std::string& errorMsg)

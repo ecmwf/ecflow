@@ -47,6 +47,16 @@
                 "tooltip" : "Controls if a confirmation is needed for killing a suite or family.",
                 "default": "true"
             }
-        }
+        },
+        "web": {
+            "label" : "",
+            "tooltip" : "",
+
+            "defaultBrowser": {
+                "label": "Default browser for web links",
+                "tooltip" : "Specifies the default browser used to open wev links",
+                "default": "firefox"
+            }
+       }
     }
 }

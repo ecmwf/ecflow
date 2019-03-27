@@ -28,6 +28,7 @@
 #include "ChangeNotify.hpp"
 #include "ChangeNotifyWidget.hpp"
 #include "ClockWidget.hpp"
+#include "ConnectState.hpp"
 #include "FilterWidget.hpp"
 #include "InfoPanel.hpp"
 #include "InfoPanelHandler.hpp"
@@ -410,10 +411,17 @@ void MainWindow::updateRefreshActions()
 
     serverComWidget_->setServer(s);
 
-
-    bool hasSel=(selection_!= 0);
-	actionRefreshSelected->setEnabled(hasSel);
-	actionResetSelected->setEnabled(hasSel);
+    if(s && s->isEnabled())
+    {
+        bool hasSel=(selection_ != 0);
+        actionRefreshSelected->setEnabled(hasSel);
+        actionResetSelected->setEnabled(hasSel);
+    }
+    else
+    {
+        actionRefreshSelected->setEnabled(false);
+        actionResetSelected->setEnabled(false);
+    }
 }
 
 

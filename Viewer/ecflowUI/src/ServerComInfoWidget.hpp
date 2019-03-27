@@ -50,7 +50,8 @@ public:
     void notifyBeginServerClear(ServerHandler*);
     void notifyEndServerScan(ServerHandler*);
     void notifyServerActivityChanged(ServerHandler*);
-
+    void notifyServerConnectState(ServerHandler* server);
+    
     void notifyRefreshTimerStarted(ServerHandler* server);
     void notifyRefreshTimerStopped(ServerHandler* server);
     void notifyRefreshTimerChanged(ServerHandler* server);

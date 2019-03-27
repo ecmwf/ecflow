@@ -68,6 +68,17 @@ void HistoryItemWidget::reload(VInfo_ptr info)
     }
 
 	clearContents();    
+
+    if(info && info->server() && info->server()->isDisabled())
+    {
+        setEnabled(false);
+        return;
+    }
+    else
+    {
+        setEnabled(true);
+    }
+
     info_=info;
 
     if(info_)

@@ -8,16 +8,24 @@ ecbuild_add_library( TARGET    ecflow
                      NOINSTALL
                      TYPE      MODULE
                      SOURCES   ${srcs}
-                     LIBS      libclient libsimu base node nodeattr core
-                               ${PYTHON_LIBRARIES} ${OPENSSL_LIBRARIES}
-                     INCLUDES 
-                               ${Boost_INCLUDE_DIRS}
+                     INCLUDES  ${Boost_INCLUDE_DIRS}
                                ${PYTHON_INCLUDE_DIRS} 
                     )
 
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs 
-target_link_libraries(ecflow ${Boost_PYTHON_LIBRARY_RELEASE} )
+# Currently we only build optimised boost libs
+# versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
+if ( Boost_MINOR_VERSION GREATER 66 )
+    target_link_libraries(ecflow  libclient libsimu base node nodeattr core
+                                  ${PYTHON_LIBRARIES} ${OPENSSL_LIBRARIES}
+                                  ${Boost_PYTHON${Python2_VERSION_MAJOR}${Python2_VERSION_MINOR}_LIBRARY_RELEASE} )
+else()
+    target_link_libraries(ecflow  libclient libsimu base node nodeattr core
+                                  ${PYTHON_LIBRARIES} ${OPENSSL_LIBRARIES}
+                                  ${Boost_PYTHON_LIBRARY_RELEASE} )
+endif()
+
 
 #
 # Override default behaviour that add RPATHS during install

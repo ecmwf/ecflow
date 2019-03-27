@@ -25,6 +25,7 @@
 #include <QTextDocument>
 #endif
 
+#include "AddLabelDialog.hpp"
 #include "CommandHandler.hpp"
 #include "VNode.hpp"
 #include "Str.hpp"
@@ -143,6 +144,30 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
 #endif
     	}
 
+        else if(item->command() == "add_label")
+        {
+            if(filteredNodes.size() == 1)
+            {
+                if(filteredNodes[0] && filteredNodes[0]->node())
+                {
+                    AddLabelDialog labelDialog(filteredNodes[0],"");
+                    labelDialog.exec();
+                }
+            }
+        }
+
+        else if(item->command() == "add_jira_label")
+        {
+            if(filteredNodes.size() == 1)
+            {
+                if(filteredNodes[0] && filteredNodes[0]->node())
+                {
+                    AddLabelDialog labelDialog(filteredNodes[0],"Jira");
+                    labelDialog.exec();
+                }
+            }
+        }
+
         else if(item->command() == "create_jsd_ticket")
         {
             if(filteredNodes.size() == 1)
@@ -150,6 +175,17 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 if(filteredNodes[0] && filteredNodes[0]->node())
                 {
                     VReportMaker::sendReport(filteredNodes[0]);
+                }
+            }
+        }
+
+        else if(item->command() == "open_link_in_browser")
+        {
+            if(filteredNodes.size() == 1)
+            {
+                if(filteredNodes[0] && filteredNodes[0]->node())
+                {
+                    CommandHandler::openLinkInBrowser(filteredNodes[0]);
                 }
             }
         }

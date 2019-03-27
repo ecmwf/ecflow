@@ -7,6 +7,7 @@ set(viewer_srcs
     AbstractSearchLine.cpp
     AbstractTextEditSearchInterface.cpp
     ActionHandler.cpp
+    AddLabelDialog.cpp
     AddModelColumnDialog.cpp
     Animation.cpp
     AstCollateVNodesVisitor.cpp
@@ -256,6 +257,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     AbstractNodeView.hpp
     AbstractSearchLine.hpp
     ActionHandler.hpp
+    AddLabelDialog.hpp
     AddModelColumnDialog.hpp
     Animation.hpp
     AttributeEditor.hpp
@@ -386,6 +388,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
 
 set(viewer_wrap_ui_files
     AboutDialog.ui
+    AddLabelDialog.ui
     AddModelColumnDialog.ui
     AttributeEditorDialog.ui
     ChangeNotifyDialog.ui

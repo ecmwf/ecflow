@@ -65,6 +65,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    suiteFilter_(new SuiteFilter()),
    comQueue_(0),
    activity_(NoActivity),
+   compatibility_(CanBeCompatible), //not yet known!
    connectState_(new ConnectState()),
    prevServerState_(SState::RUNNING),
    conf_(0)
@@ -136,8 +137,11 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 	//Indicate that we start an init (initial load)
 	//activity_=LoadActivity;
 
-	//Try to connect to the server and load the defs etc. This might fail!
-	reset();
+    //Check if the server is compatible with the client. If it is fine
+    //reset() will be called to connect to the server and load the defs etc.
+    //This is a safety check to avoid communicating with incompatible
+    //servers!!!!
+    checkServerVersion();
 }
 
 ServerHandler::~ServerHandler()
@@ -167,6 +171,13 @@ ServerHandler::~ServerHandler()
 		delete client_;
 
 	delete conf_;
+}
+
+bool ServerHandler::isDisabled() const
+{
+    return (connectState_->state() == ConnectState::Disconnected ||
+       connectState_->state() == ConnectState::Incompatible ||
+       compatibility_ == Incompatible);
 }
 
 //-----------------------------------------------
@@ -226,8 +237,8 @@ void ServerHandler::startRefreshTimer()
 
     //If we are not connected to the server the
 	//timer should not run.
-	if(connectState_->state() == ConnectState::Disconnected)
-		return;
+    if(isDisabled())
+		return;    
 
     if(!refreshTimer_->isActive())
 	{
@@ -255,7 +266,7 @@ void ServerHandler::updateRefreshTimer()
 
     //If we are not connected to the server the
 	//timer should not run.
-	if(connectState_->state() == ConnectState::Disconnected)
+    if(isDisabled())
 		return;
 
     int rate=conf_->intValue(VServerSettings::UpdateRate);
@@ -490,6 +501,17 @@ defs_ptr ServerHandler::safelyAccessSimpleDefsMembers()
 //we can only run it through CommandHandler!!!
 void ServerHandler::runCommand(const std::vector<std::string>& cmd)
 {
+    if(isDisabled())
+        return;
+
+    //We do not know if the server is compatible
+    if(compatibility_ ==  CanBeCompatible)
+    {
+        //aync - will call reset if successfull
+        checkServerVersion();
+        return;
+    }
+
     //Shell command - we should not reach this point
     if(cmd.size() > 0 && cmd[0]=="sh")
     {
@@ -497,9 +519,6 @@ void ServerHandler::runCommand(const std::vector<std::string>& cmd)
         return;
     }
 
-    //ecflow_client command
-    if(connectState_->state() == ConnectState::Disconnected)
-		return;
 
 	VTask_ptr task=VTask::create(VTask::CommandTask);
 	task->command(cmd);
@@ -508,8 +527,16 @@ void ServerHandler::runCommand(const std::vector<std::string>& cmd)
 
 void ServerHandler::run(VTask_ptr task)
 {
-	if(connectState_->state() == ConnectState::Disconnected)
+    if(isDisabled())
 		return;
+
+    //We do not know if the server is compatible
+    if(compatibility_ ==  CanBeCompatible)
+    {
+        //aync - will call reset if successfull
+        checkServerVersion();
+        return;
+    }
 
 	switch(task->type())
 	{
@@ -595,6 +622,17 @@ void ServerHandler::refreshInternal()
 //called after a user command was issued
 void ServerHandler::refresh()
 {
+    if(isDisabled())
+        return;
+
+    //We do not know if the server is compatible
+    if(compatibility_ ==  CanBeCompatible)
+    {
+        //aync - will call reset if successfull
+        checkServerVersion();
+        return;
+    }
+
     refreshInternal();
 
     //Reset the timer to its original value (i.e. remove the drift)
@@ -857,6 +895,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
     //The status of the tasks sent from the info panel must be properly set to
     //FINISHED!! Only that will notify the observers about the change!!
 
+
 	//See which type of task finished. What we do now will depend on that.
 	switch(task->type())
 	{
@@ -935,21 +974,27 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			{
                 UiLogS(this).dbg() << " full sync requested - rescanTree";
 
+                //we do not want a new suite list through rescanTree() if the task itself was
+                //not to get a new suite list!!
+
                 //This will update the suites + restart the timer
-				rescanTree();
-
-#if 0
-                {
-                    ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
-                    defs_ptr defs = defsAccess.defs();
-                    if(defs)
-                    {
-                        std::cout << defs;
-                    }
-                }
-#endif
-
+                rescanTree(false);
 			}
+            else if(serverReply.in_sync())
+            {
+                //The tree can be empty for various reasons, we might have cleared it during a sync. In
+                //this case we need to rebuild it.
+                //We only rebuild the tree when have a proper connection
+                if( vRoot_->isEmpty() && connectState_->state() == ConnectState::Normal)
+                {
+                    //we do not want a new suite list through rescanTree() unless the task itself
+                    //was a sync!
+
+                    //This might update the suites + restart the timer
+                    rescanTree(false);
+                }
+                broadcast(&ServerObserver::notifyEndServerSync);
+            }
 			else
 			{
                 broadcast(&ServerObserver::notifyEndServerSync);
@@ -963,6 +1008,28 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 			resetFinished();
 			break;
 		}
+
+        // the very first command sent to a server
+        case VTask::ServerVersionTask:
+        {
+            QString version=QString::fromStdString(serverReply.get_string());
+            int majorVersion=0;
+            if(!version.isEmpty())
+            {
+                QStringList versionLst=version.split(".");
+                if(versionLst.count() > 0)
+                    majorVersion=versionLst[0].toInt();
+            }
+            if(majorVersion <= 4)
+            {
+                compatibleServer();
+            }
+            else
+            {
+                incompatibleServer(version.toStdString());
+            }
+            break;
+        }
 
 		case VTask::ScriptTask:
 		case VTask::ManualTask:
@@ -1055,12 +1122,58 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
 // This slot is called when the comThread failed the given task!!
 //-------------------------------------------------------------------
 
-void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
+void ServerHandler::clientTaskFailed(VTask_ptr task, const std::string& errMsg, const ServerReply& serverReply)
 {
     UiLogS(this).dbg() << "ServerHandler::clientTaskFailed -->";
 
 	//TODO: suite filter  + ci_ observers
 
+     if(task->type() == VTask::NewsTask)
+     {
+         connectionLost(errMsg);
+         refreshFinished();
+     }
+
+     else if(task->type() == VTask::SyncTask)
+     {
+         connectionLost(errMsg);
+     }
+
+     else if(task->type() == VTask::ResetTask)
+     {
+         resetFailed(errMsg);
+     }
+
+     // the very first command sent to a server
+     else if(task->type()  == VTask::ServerVersionTask)
+     {
+         if(serverReply.invalid_argument())
+         {
+             incompatibleServer("");
+         }
+         else
+         {
+             connectionLost(errMsg);
+         }
+     }
+
+     else if(task->type()  == VTask::CommandTask)
+     {
+         comQueue_->addSyncTask();
+         task->reply()->setErrorText(errMsg);
+         task->status(VTask::ABORTED);
+         UserMessage::message(UserMessage::WARN, true, errMsg);
+     }
+     else
+     {
+         if(errMsg.empty())
+             connectionLost(errMsg);
+
+         task->reply()->setErrorText(errMsg);
+         task->status(VTask::ABORTED);
+     }
+
+#if 0
 	//See which type of task finished. What we do now will depend on that.
 	switch(task->type())
 	{
@@ -1098,6 +1211,7 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg)
 			task->status(VTask::ABORTED);
 			break;
 	}
+#endif
 }
 
 void ServerHandler::connectionLost(const std::string& errMsg)
@@ -1151,9 +1265,40 @@ void ServerHandler::connectServer()
 	}
 }
 
+void ServerHandler::checkServerVersion()
+{
+    comQueue_->addServerVersionTask();
+}
+
+void ServerHandler::compatibleServer()
+{
+    compatibility_=Compatible;
+    reset();
+}
+
+void ServerHandler::incompatibleServer(const std::string& version)
+{
+    compatibility_=Incompatible;
+    stopRefreshTimer();
+    comQueue_->disable();
+
+    connectState_->state(ConnectState::Incompatible);
+    connectState_->errorMessage("Server version = " +
+                ((version.empty())?"UNKNOWN":version) +
+                 " !  Client can only communicate to servers of version 4 ");
+    broadcast(&ServerObserver::notifyServerConnectState);
+}
+
 void ServerHandler::reset()
 {
     UiLogS(this).dbg() << "ServerHandler::reset -->";
+
+    if(connectState_->state() == ConnectState::Disconnected ||
+       connectState_->state() == ConnectState::Incompatible ||
+       compatibility_ == Incompatible)
+    {
+        return;
+    }
 
 	//---------------------------------
 	// First part of reset: clearing
@@ -1222,7 +1367,7 @@ void ServerHandler::resetFinished()
     broadcast(&ServerObserver::notifyEndServerScan);
 
 	//The suites might have been changed
-	updateSuiteFilter();
+    updateSuiteFilter(true);
 
 	//Restart the timer
 	startRefreshTimer();
@@ -1281,7 +1426,7 @@ void ServerHandler::clearTree()
 }
 
 
-void ServerHandler::rescanTree()
+void ServerHandler::rescanTree(bool needNewSuiteList)
 {
     UiLogS(this).dbg() << "ServerHandler::rescanTree -->";
 
@@ -1327,7 +1472,7 @@ void ServerHandler::rescanTree()
 	comQueue_->start();
 
 	//The suites might have been changed
-	updateSuiteFilter();
+    updateSuiteFilter(needNewSuiteList);
 
 	//Start the timer
 	startRefreshTimer();
@@ -1370,6 +1515,18 @@ void ServerHandler::setSuiteFilterWithOne(VNode* n)
 void ServerHandler::updateSuiteFilter(SuiteFilter* sf)
 {
 UI_FUNCTION_LOG_S(this)
+
+    if(isDisabled())
+        return;
+
+    //We do not know if the server is compatible
+    if(compatibility_ ==  CanBeCompatible)
+    {
+        //aync - will call reset if successfull
+        checkServerVersion();
+        return;
+    }
+
     if(suiteFilter_->update(sf))
 	{
 		//If only this flag has changed we exec a custom task for it
@@ -1417,16 +1574,31 @@ UI_FUNCTION_LOG_S(this)
 }
 
 //Only called internally after reset or serverscan!!
-void ServerHandler::updateSuiteFilter()
+void ServerHandler::updateSuiteFilter(bool needNewSuiteList)
 {
 UI_FUNCTION_LOG_S(this)
+
+    if(isDisabled())
+        return;
+
+    //We do not know if the server is compatible
+    if(compatibility_ ==  CanBeCompatible)
+    {
+        //aync - will call reset if successfull
+        checkServerVersion();
+        return;
+    }
+
     //We only fetch the full list of loaded suites from the server
     //via the thread when
     //  -the suiteFilter is enabled!
     if(suiteFilter_->isEnabled())
     {
         //This will call updateSuiteFilterWithLoaded()
-        comQueue_->addSuiteListTask();
+        if(needNewSuiteList)
+        {
+            comQueue_->addSuiteListTask();
+        }
     }
     //Otherwise the defs contains the full list of suites
     else
@@ -1565,6 +1737,9 @@ void ServerHandler::loadConf()
 
 void ServerHandler::writeDefs(const std::string& fileName)
 {
+    if(isDisabled() || compatibility_ ==  CanBeCompatible)
+        return;
+
     comQueue_->suspend(true);
     ServerDefsAccess defsAccess(this);  // will reliquish its resources on destruction
     defs_ptr defs = defsAccess.defs();
@@ -1577,6 +1752,9 @@ void ServerHandler::writeDefs(const std::string& fileName)
 
 void ServerHandler::writeDefs(VInfo_ptr info,const std::string& fileName)
 {
+    if(isDisabled() || compatibility_ ==  CanBeCompatible)
+        return;
+
     if(!info || !info->node())
         return;
 
@@ -1602,12 +1780,18 @@ void ServerHandler::writeDefs(VInfo_ptr info,const std::string& fileName)
 
 void ServerHandler::searchBegan()
 {
+    if(isDisabled() || compatibility_ ==  CanBeCompatible)
+        return;
+
     UiLogS(this).dbg() << "ServerHandler::searchBegan --> suspend queue";
 	comQueue_->suspend(true);
 }
 
 void ServerHandler::searchFinished()
 {
+    if(isDisabled() || compatibility_ ==  CanBeCompatible)
+        return;
+
     UiLogS(this).dbg() << "ServerHandler::searchFinished --> start queue";
 	comQueue_->start();
 

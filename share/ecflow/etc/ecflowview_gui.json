@@ -292,8 +292,14 @@
                 "line" : "confirmForceAborted",
                 "line" : "confirmKillTask",
                 "line" : "confirmKillSuite"
-            }
+            },
 
+            "group" : {
+                "title" : "Request confirmation when:",
+                "prefix" : "menu.web",
+
+                "line" : "defaultBrowser"
+            }
         },
 
         "notification":  {
