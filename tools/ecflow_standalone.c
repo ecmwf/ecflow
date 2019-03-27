@@ -108,6 +108,10 @@ int main(argc,argv) int argc; char **argv;
 
       case 's':
         shell = optarg;
+        if (shell == NULL) {
+           fprintf(stderr,"usage: %s [-i inputfile] -o [outputfile] -s shell # empty shell argument passed for -s\n",*argv);
+           exit(0);
+        }
         break;
 
       default:
