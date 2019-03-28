@@ -544,7 +544,7 @@ void WhiteListFile::allow_write_access_for_server_user()
    if (verify_write_access(user)) return;
 
    // add write access
-   mymap::iterator it = users_with_write_access_.find(user);
+   auto it = users_with_write_access_.find(user);
    if (it == users_with_write_access_.end()) {
       users_with_write_access_.insert(std::make_pair(user,std::vector<std::string>() ));
    }
