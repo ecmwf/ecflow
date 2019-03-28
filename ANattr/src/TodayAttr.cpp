@@ -29,7 +29,7 @@ using namespace std;
 namespace ecf {
 
 TodayAttr::TodayAttr (const std::string& str)
-: free_(false), state_change_no_(0)
+:  state_change_no_(0)
 {
    if (str.empty()) throw std::runtime_error("Today::Today: empty string passed");
    std::vector<std::string> tokens;

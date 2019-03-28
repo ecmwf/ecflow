@@ -353,11 +353,11 @@ private:
    friend class RoundTripRecorder;
    friend class RequestLogger;
 private:
-	bool on_error_throw_exception_;
-	bool auto_sync_;
-	bool test_;                            // used in testing only
-	bool testInterface_;                   // used in testing only
-	unsigned int connection_attempts_;     // No of attempts to establish connection with the server
+	bool on_error_throw_exception_{true};
+	bool auto_sync_{false};
+	bool test_{false};                            // used in testing only
+	bool testInterface_{false};                   // used in testing only
+	unsigned int connection_attempts_{2};     // No of attempts to establish connection with the server
 	unsigned int retry_connection_period_; // No of seconds to wait before trying to connect in case of failure.
 
 	mutable boost::posix_time::time_duration rtt_;// record latency for each cmd.

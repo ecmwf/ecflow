@@ -32,8 +32,7 @@ public:
       : createJobs_(createJobs){}
 
 	JobsParam(int submitJobsInterval, bool createJobs, bool spawn_jobs = true)
-	   : timed_out_of_job_generation_(false),
-	     createJobs_(createJobs),spawnJobs_(spawn_jobs), submitJobsInterval_(submitJobsInterval)
+	   : createJobs_(createJobs),spawnJobs_(spawn_jobs), submitJobsInterval_(submitJobsInterval)
 	   { if (!createJobs_) spawnJobs_ = false;}
 
 	// Allow JobsParam to be re-used. Preserve cache in EcfFile. ECFLOW-1210

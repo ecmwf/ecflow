@@ -193,7 +193,6 @@ protected:
             const std::string& process_or_remote_id,
             int try_no)
    : submittable_(nullptr),
-     password_missmatch_(false), pid_missmatch_(false),
      path_to_submittable_(pathToSubmittable),
      jobs_password_(jobsPassword),process_or_remote_id_(process_or_remote_id), try_no_(try_no){assert(!hostname().empty());}
 
@@ -767,9 +766,8 @@ public:
      client_modify_change_no_(client_modify_change_no) {}
    explicit CSyncCmd(unsigned int client_handle)
    : api_(SYNC_FULL),
-     client_handle_(client_handle),
-     client_state_change_no_(0),
-     client_modify_change_no_(0) {}
+     client_handle_(client_handle)
+     {}
    CSyncCmd()= default;
 
    Api api() const { return api_;}
@@ -818,40 +816,36 @@ public:
    enum Api { REGISTER, DROP, DROP_USER, ADD, REMOVE, AUTO_ADD , SUITES };
 
    explicit ClientHandleCmd(Api api = AUTO_ADD)
-   : api_(api),group_cmd_(nullptr) {}
+   : api_(api) {}
 
    ClientHandleCmd(int client_handle,const std::vector<std::string>& suites, bool add_add_new_suites)
    : api_(REGISTER),
      client_handle_(client_handle),
      auto_add_new_suites_(add_add_new_suites),
-     suites_(suites),
-     group_cmd_(nullptr)  {}
+     suites_(suites)
+      {}
 
    explicit ClientHandleCmd(int client_handle)
    : api_(DROP),
-     client_handle_(client_handle),
-     auto_add_new_suites_(false),
-     group_cmd_(nullptr) {}
+     client_handle_(client_handle)
+     {}
 
    explicit ClientHandleCmd(const std::string& drop_user)
     : api_(DROP_USER),
-      client_handle_(0),
-      auto_add_new_suites_(false),
-      drop_user_(drop_user),
-      group_cmd_(nullptr){}
+      drop_user_(drop_user)
+      {}
 
    ClientHandleCmd(int client_handle, const std::vector<std::string>& suites, Api api)
    : api_(api),  // Must be ADD or REMOVE
      client_handle_(client_handle),
-     auto_add_new_suites_(false),
-     suites_(suites),
-     group_cmd_(nullptr){}
+     suites_(suites)
+     {}
 
    ClientHandleCmd(int client_handle, bool add_add_new_suites)
    : api_(AUTO_ADD),
      client_handle_(client_handle),
-     auto_add_new_suites_(add_add_new_suites),
-     group_cmd_(nullptr) {}
+     auto_add_new_suites_(add_add_new_suites)
+     {}
 
    Api api() const { return api_;}
    const std::string& drop_user() const { return drop_user_;}
@@ -959,7 +953,7 @@ public:
    DeleteCmd(const std::vector<std::string>& paths, bool force = false)
       : force_(force),paths_(paths),group_cmd_(nullptr){}
    DeleteCmd(const std::string& absNodePath, bool force = false);
-   DeleteCmd() : group_cmd_(nullptr) {};
+   DeleteCmd()  {};
 
    const std::vector<std::string>& paths() const { return paths_;}
    bool force() const { return force_;}
@@ -1000,7 +994,7 @@ private:
          CEREAL_NVP(paths_));
    }
 private:
-   const GroupCTSCmd* group_cmd_; // not persisted only used in server
+   const GroupCTSCmd* group_cmd_{nullptr}; // not persisted only used in server
 };
 
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
@@ -1012,7 +1006,7 @@ public:
       : api_(api),force_(force),paths_(paths){}
    PathsCmd(Api api,const std::string& absNodePath, bool force = false);
    explicit PathsCmd(Api api)
-      : api_(api), force_(false) { assert(api != NO_CMD); }
+      : api_(api) { assert(api != NO_CMD); }
    PathsCmd() = default;
 
    Api api() const { return api_; }
@@ -1647,39 +1641,31 @@ public:
              const std::string& value);
    // add
    AlterCmd(const std::string& path, Add_attr_type  attr,  const std::string& name, const std::string& value = "" )
-   : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(attr),
-     del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
+   : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(attr) {}
    AlterCmd(const std::vector<std::string>& paths, Add_attr_type  attr,  const std::string& name, const std::string& value = "" )
-   : paths_(paths), name_(name), value_(value), add_attr_type_(attr),
-     del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
+   : paths_(paths), name_(name), value_(value), add_attr_type_(attr) {}
    // delete
    AlterCmd(const std::string& path,  Delete_attr_type  del, const std::string& name = "" , const std::string& value = "")
-   : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(ADD_ATTR_ND),
-     del_attr_type_(del), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
+   : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), 
+     del_attr_type_(del) {}
    AlterCmd(const std::vector<std::string>& paths,  Delete_attr_type  del, const std::string& name = "" , const std::string& value = "")
-   : paths_(paths), name_(name), value_(value), add_attr_type_(ADD_ATTR_ND),
-     del_attr_type_(del), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
+   : paths_(paths), name_(name), value_(value), 
+     del_attr_type_(del) {}
    // change
    AlterCmd(const std::string& path, Change_attr_type  attr, const std::string& name, const std::string& value = "")
-   : paths_(std::vector<std::string>(1,path)), name_(name), value_(value), add_attr_type_(ADD_ATTR_ND),
-     del_attr_type_(DELETE_ATTR_ND), change_attr_type_(attr),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
+   : paths_(std::vector<std::string>(1,path)), name_(name), value_(value),  change_attr_type_(attr) {}
    AlterCmd(const std::vector<std::string>& paths, Change_attr_type  attr, const std::string& name, const std::string& value = "")
-   : paths_(paths), name_(name), value_(value), add_attr_type_(ADD_ATTR_ND),
-     del_attr_type_(DELETE_ATTR_ND), change_attr_type_(attr),flag_type_(ecf::Flag::NOT_SET), flag_(false) {}
+   : paths_(paths), name_(name), value_(value),  change_attr_type_(attr) {}
    // flag
    AlterCmd(const std::string& path, ecf::Flag::Type ft,  bool flag)
-   : paths_(std::vector<std::string>(1,path)), add_attr_type_(ADD_ATTR_ND),
-     del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ft), flag_(flag) {}
+   : paths_(std::vector<std::string>(1,path)), flag_type_(ft), flag_(flag) {}
    AlterCmd(const std::vector<std::string>& paths, ecf::Flag::Type ft,  bool flag)
-   : paths_(paths), add_attr_type_(ADD_ATTR_ND),
-     del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ft), flag_(flag) {}
+   : paths_(paths), flag_type_(ft), flag_(flag) {}
    // sort
    AlterCmd(const std::string& path, const std::string& name,const std::string& value)
-    : paths_(std::vector<std::string>(1,path)), name_(name),value_(value),add_attr_type_(ADD_ATTR_ND),
-      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false)  {}
+    : paths_(std::vector<std::string>(1,path)), name_(name),value_(value)  {}
    AlterCmd(const std::vector<std::string>& paths, const std::string& name,const std::string& value)
-    : paths_(paths), name_(name),value_(value),add_attr_type_(ADD_ATTR_ND),
-      del_attr_type_(DELETE_ATTR_ND), change_attr_type_(CHANGE_ATTR_ND),flag_type_(ecf::Flag::NOT_SET), flag_(false)  {}
+    : paths_(paths), name_(name),value_(value)  {}
 
    AlterCmd()= default;
 
@@ -1824,18 +1810,15 @@ class EditScriptCmd : public UserCmd {
 public:
    enum EditType { EDIT, PREPROCESS, SUBMIT,  PREPROCESS_USER_FILE, SUBMIT_USER_FILE  };
    EditScriptCmd(const std::string& path_to_node,EditType et) // EDIT or PREPROCESS
-   :  edit_type_(et), path_to_node_(path_to_node),
-      alias_(false),run_(false)
+   :  edit_type_(et), path_to_node_(path_to_node)
    {}
 
    EditScriptCmd(const std::string& path_to_node, const NameValueVec& user_variables)
-   :  edit_type_(SUBMIT), path_to_node_(path_to_node), user_variables_(user_variables),
-      alias_(false),run_(false)
+   :  edit_type_(SUBMIT), path_to_node_(path_to_node), user_variables_(user_variables)
    {}
 
    EditScriptCmd(const std::string& path_to_node, const std::vector<std::string>& user_file_contents)
-   :  edit_type_(PREPROCESS_USER_FILE), path_to_node_(path_to_node), user_file_contents_(user_file_contents),
-      alias_(false),run_(false)
+   :  edit_type_(PREPROCESS_USER_FILE), path_to_node_(path_to_node), user_file_contents_(user_file_contents)
    {}
 
    EditScriptCmd( const std::string& path_to_node,

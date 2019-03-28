@@ -34,7 +34,7 @@ using namespace ecf;
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 InLimit::InLimit(const std::string& name, const std::string& pathToNode, int tokens,bool limit_this_node_only, bool check)
-: n_(name),path_(pathToNode),tokens_(tokens),limit_this_node_only_(limit_this_node_only),incremented_(false)
+: n_(name),path_(pathToNode),tokens_(tokens),limit_this_node_only_(limit_this_node_only)
 {
    if (check && !Str::valid_name( name ) ) {
       throw std::runtime_error("InLimit::InLimit: Invalid InLimit name: " + name);

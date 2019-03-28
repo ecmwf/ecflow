@@ -74,7 +74,7 @@ private:
 class CompoundMemento  {
 public:
    explicit CompoundMemento(const std::string& absNodePath)
-   : clear_attributes_(false),absNodePath_(absNodePath) {}
+   : absNodePath_(absNodePath) {}
 
    CompoundMemento()= default; // for serialization
 

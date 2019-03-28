@@ -62,10 +62,8 @@ Defs::Defs(const Defs& rhs) :
    order_state_change_no_(0),
    state_(rhs.state_),
    server_(rhs.server_),
-   save_edit_history_(false),
    flag_(rhs.flag_),
-   client_suite_mgr_(this),
-   in_notification_(false)
+   client_suite_mgr_(this)
 {
    size_t theSize = rhs.suiteVec_.size();
    for(size_t s = 0; s < theSize; s++) {

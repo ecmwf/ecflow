@@ -68,10 +68,7 @@ ClientEnvironment::ClientEnvironment()
 // test constructor
 ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::string& host, const std::string& port)
 : AbstractClientEnv(),
-  task_try_num_(1),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),connect_timeout_(0),
-  denied_(false),no_ecf_(false), debug_(false),under_test_(false),
-  host_file_read_(false),
-  host_vec_index_(0)
+  task_try_num_(1),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT)
 {
 	init();
 

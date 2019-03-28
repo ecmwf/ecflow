@@ -56,8 +56,7 @@ using namespace boost::posix_time;
 // ==================================================================================
 // class ClientInvoker
 ClientInvoker::ClientInvoker()
-: on_error_throw_exception_(true),auto_sync_(false), test_(false),testInterface_(false),
-  connection_attempts_(2),retry_connection_period_(RETRY_CONNECTION_PERIOD)
+: retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
 	if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 1=================start=================\n";
 }

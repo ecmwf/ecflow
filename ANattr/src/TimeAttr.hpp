@@ -62,13 +62,13 @@ public:
    explicit TimeAttr(const std::string&);
    TimeAttr() = default;
 	TimeAttr(int hour, int minute, bool relative = false )
-		: ts_(hour, minute,relative), free_(false),state_change_no_(0) {}
+		: ts_(hour, minute,relative), state_change_no_(0) {}
 	TimeAttr(const TimeSlot& t,    bool relative = false )
-		: ts_(t,relative), free_(false),state_change_no_(0) {}
+		: ts_(t,relative), state_change_no_(0) {}
 	explicit TimeAttr(const TimeSeries& ts)
-		: ts_(ts), free_(false),state_change_no_(0) {}
+		: ts_(ts), state_change_no_(0) {}
 	TimeAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
-		: ts_(start,finish,incr,relative), free_(false),state_change_no_(0) {}
+		: ts_(start,finish,incr,relative), state_change_no_(0) {}
 
 	void print(std::string&) const;
    bool operator==(const TimeAttr& rhs) const;

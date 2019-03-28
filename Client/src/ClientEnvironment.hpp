@@ -118,7 +118,7 @@ private:
  	unsigned int task_try_num_{1};         // ECF_TRYNO. The task try number. The number of times the job has been run
 	std::string host_file_;             // ECF_HOSTFILE. File that lists the backup hosts, port numbers must match
 	long timeout_;                      // ECF_TIMEOUT. Host file iteration time out
-    long zombie_timeout_;               // ECF_ZOMBIE_TIMEOUT. Host file iteration time out for zombies, default same as ECF_TIMEOUT
+   long zombie_timeout_;               // ECF_ZOMBIE_TIMEOUT. Host file iteration time out for zombies, default same as ECF_TIMEOUT
 	int  connect_timeout_{0};              // default 0, ECF_CONNECT_TIMEOUT, connection timeout
 	bool denied_{false};                       // ECF_DENIED.If the server denies the communication, then the child command can be set to fail immediately
  	bool no_ecf_{false};                       // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone

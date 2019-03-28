@@ -40,7 +40,7 @@ const Label& Label::EMPTY() { static const Label LABEL = Label(); return LABEL ;
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 Event::Event( int number, const std::string& eventName,bool value, bool check_name )
-: v_( value ), number_( number ), n_( eventName ), used_( false ), state_change_no_( 0 )
+: v_( value ), number_( number ), n_( eventName ),  state_change_no_( 0 )
 {
    if ( !eventName.empty() && check_name) {
       string msg;
@@ -51,7 +51,7 @@ Event::Event( int number, const std::string& eventName,bool value, bool check_na
 }
 
 Event::Event(  const std::string& eventName )
-: v_( false ), number_( std::numeric_limits<int>::max() ), n_( eventName ), used_( false ), state_change_no_( 0 )
+:  number_( std::numeric_limits<int>::max() ), n_( eventName ),  state_change_no_( 0 )
 {
    if ( eventName.empty() ) {
       throw std::runtime_error( "Event::Event: Invalid event name : name must be specified if no number supplied");
@@ -159,7 +159,7 @@ bool Event::isValidState( const std::string& state ) {
 
 Meter::Meter( const std::string& name, int min, int max, int colorChange, int value, bool check ) :
 	         min_( min ), max_( max ), v_( value ), cc_( colorChange ),
-	         n_( name ), used_( false ), state_change_no_( 0 )
+	         n_( name ),  state_change_no_( 0 )
 {
    if (check) {
       if ( !Str::valid_name( name ) ) {

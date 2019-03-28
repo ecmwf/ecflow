@@ -1362,12 +1362,7 @@ AlterCmd::AlterCmd(const std::vector<std::string>& paths,
          const std::string& value)
 : paths_(paths),
   name_(name),
-  value_(value),
-  add_attr_type_(ADD_ATTR_ND),
-  del_attr_type_(DELETE_ATTR_ND),
-  change_attr_type_(CHANGE_ATTR_ND),
-  flag_type_(ecf::Flag::NOT_SET),
-  flag_(false)
+  value_(value)
 {
    if ( alterType == "add") {
 

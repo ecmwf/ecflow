@@ -15,7 +15,7 @@ class FlagSet
 {
 public:
     FlagSet()= default;
-    FlagSet(T t) : flags_(0) {set(t);}
+    FlagSet(T t)  {set(t);}
 
     void clear() {flags_=0;}
     void set(T flag ) { flags_ |= (1 << flag); }

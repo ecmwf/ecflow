@@ -31,7 +31,7 @@ using namespace ecf;
 /////////////////////////////////////////////////////////////////////////////////////////////
 
 Limit::Limit(const std::string& name,int limit)
-: state_change_no_(0),n_(name),lim_(limit),value_(0),node_(nullptr)
+: state_change_no_(0),n_(name),lim_(limit),node_(nullptr)
 {
    if ( !Str::valid_name( name ) ) {
       throw std::runtime_error("Limit::Limit: Invalid Limit name: " + name);

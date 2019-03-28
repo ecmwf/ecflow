@@ -72,6 +72,29 @@ BOOST_AUTO_TEST_CASE( test_day_attr)
    }
 }
 
+BOOST_AUTO_TEST_CASE( test_day_attr_constructor )
+{
+   cout << "ANattr:: ...test_day_attr_constructor \n";
+   {
+      DayAttr day;
+      BOOST_CHECK_MESSAGE(day.day() == DayAttr::SUNDAY,"");
+      BOOST_CHECK_MESSAGE(day.state_change_no() == 0,"");
+      BOOST_CHECK_MESSAGE(day.isSetFree() == false,"");
+   }
+   {
+      DayAttr day(DayAttr::WEDNESDAY);
+      BOOST_CHECK_MESSAGE(day.day() == DayAttr::WEDNESDAY,"");
+      BOOST_CHECK_MESSAGE(day.state_change_no() == 0,"");
+      BOOST_CHECK_MESSAGE(day.isSetFree() == false,"");
+   }
+   {
+      DayAttr day("monday");
+      BOOST_CHECK_MESSAGE(day.day() == DayAttr::MONDAY,"");
+      BOOST_CHECK_MESSAGE(day.state_change_no() == 0,"");
+      BOOST_CHECK_MESSAGE(day.isSetFree() == false,"");
+   }
+}
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

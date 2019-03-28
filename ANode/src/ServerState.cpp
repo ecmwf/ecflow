@@ -37,9 +37,7 @@ ServerState::ServerState() : server_state_( default_state() )
 ServerState::ServerState(const std::string& port)  :
     state_change_no_(0),
     variable_state_change_no_(0),
-    server_state_( default_state() ),
-    jobSubmissionInterval_( 60 ),
-    jobGeneration_( true )
+    server_state_( default_state() )
 {
    setup_default_env(port);
 }

@@ -34,13 +34,13 @@ using namespace boost::posix_time;
 //==========================================================================================
 
 DateAttr::DateAttr( int day, int month, int year )
-: day_( day ), month_( month ), year_( year ), free_( false ), state_change_no_(0)
+: day_( day ), month_( month ), year_( year ),  state_change_no_(0)
 {
 	checkDate(day_,month_,year_,true /* allow wild cards */);
 }
 
 DateAttr::DateAttr(const std::string& str)
-: day_(0), month_(0), year_(0), free_(false), state_change_no_(0)
+:  state_change_no_(0)
 {
    DateAttr::getDate(str,day_,month_,year_);
    checkDate(day_,month_,year_,true /* allow wild cards */);

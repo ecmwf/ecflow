@@ -97,13 +97,13 @@ public:
    explicit TodayAttr(const std::string&);
 	TodayAttr() = default;
 	TodayAttr(int hour, int minute, bool relative = false )
-		: ts_(hour, minute,relative), free_(false),state_change_no_(0) {}
+		: ts_(hour, minute,relative), state_change_no_(0) {}
  	TodayAttr(const TimeSlot& t,    bool relative = false )
-		: ts_(t,relative), free_(false),state_change_no_(0) {}
+		: ts_(t,relative), state_change_no_(0) {}
  	explicit TodayAttr(const TimeSeries& ts)
-		: ts_(ts), free_(false),state_change_no_(0) {}
+		: ts_(ts), state_change_no_(0) {}
 	TodayAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative =  false)
-		: ts_(start,finish,incr,relative), free_(false),state_change_no_(0) {}
+		: ts_(start,finish,incr,relative), state_change_no_(0) {}
 
 	void print(std::string&) const;
 	bool operator==(const TodayAttr& rhs) const;

@@ -29,9 +29,9 @@ class CronAttr  {
 public:
    CronAttr();
    explicit CronAttr(const std::string& time_series);
-   CronAttr(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) : timeSeries_(s,f,i),free_(false),w_(0),state_change_no_(0) {}
-   explicit CronAttr(const TimeSeries& ts ) : timeSeries_(ts),free_(false),w_(0),state_change_no_(0) {}
-   CronAttr(int h, int m, bool relative = false) : timeSeries_(h,m,relative),free_(false),w_(0),state_change_no_(0) {}
+   CronAttr(const TimeSlot& s, const TimeSlot& f, const TimeSlot& i) : timeSeries_(s,f,i) {}
+   explicit CronAttr(const TimeSeries& ts ) : timeSeries_(ts) {}
+   CronAttr(int h, int m, bool relative = false) : timeSeries_(h,m,relative) {}
 
    void print(std::string&) const;
    bool operator==(const CronAttr& rhs) const;

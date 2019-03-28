@@ -33,7 +33,7 @@ SSyncCmd::SSyncCmd(
          unsigned int client_modify_change_no,
          AbstractServer* as
 )
-: full_defs_(false), incremental_changes_(client_state_change_no)
+:  incremental_changes_(client_state_change_no)
 {
    init(client_handle, client_state_change_no, client_modify_change_no, false, false, as);
 }

@@ -595,7 +595,7 @@ std::string RepeatInteger::value_as_string(int index) const
 //======================================================================================
 
 RepeatEnumerated::RepeatEnumerated( const std::string& variable, const std::vector<std::string>& theEnums)
-: RepeatBase(variable), theEnums_(theEnums), currentIndex_(0)
+: RepeatBase(variable), theEnums_(theEnums) 
 {
    if ( !Str::valid_name( variable ) ) {
       throw std::runtime_error("RepeatEnumerated: Invalid name: " + variable);
@@ -790,7 +790,7 @@ bool RepeatEnumerated::operator==(const RepeatEnumerated& rhs) const
 //======================================================================================
 
 RepeatString::RepeatString( const std::string& variable, const std::vector<std::string>& theEnums)
-: RepeatBase(variable), theStrings_(theEnums), currentIndex_(0)
+: RepeatBase(variable), theStrings_(theEnums) 
 {
    if ( !Str::valid_name( variable ) ) {
       throw std::runtime_error("RepeatString:: Invalid name: " + variable);

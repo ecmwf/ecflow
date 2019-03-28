@@ -35,10 +35,8 @@ Zombie::Zombie( ecf::Child::ZombieType zombie_type,
                 const std::string& host,
                 const std::string& user_cmd
 )
-: user_action_(User::BLOCK),
+: 
   try_no_(try_no),
-  duration_(0),
-  calls_(0),
   zombie_type_(zombie_type),
   last_child_cmd_(cmd),
   path_to_task_(pathToTask),
@@ -46,7 +44,6 @@ Zombie::Zombie( ecf::Child::ZombieType zombie_type,
   process_or_remote_id_(process_or_remote_id),
   user_cmd_(user_cmd),
   host_(host),
-  user_action_set_(false),
   attr_(attr),
   creation_time_( Calendar::second_clock_time() )
 {}

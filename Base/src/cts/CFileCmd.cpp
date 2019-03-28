@@ -34,7 +34,7 @@ namespace po = boost::program_options;
 namespace fs = boost::filesystem;
 
 CFileCmd::CFileCmd(const std::string& pathToNode, const std::string& file_type, const std::string& input_max_lines)
-: file_(ECF), pathToNode_(pathToNode), max_lines_(File::MAX_LINES())
+:  pathToNode_(pathToNode), max_lines_(File::MAX_LINES())
 {
    // std::cout << "CFileCmd::CFileCmd the_max_lines " << the_max_lines << "\n";
 

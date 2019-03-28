@@ -25,9 +25,9 @@ namespace ecf {
 class AutoCancelAttr  {
 public:
 	AutoCancelAttr() = default;
-	AutoCancelAttr(int hour, int minute, bool relative ) : time_(hour, minute), relative_(relative), days_(false) {}
- 	AutoCancelAttr(const TimeSlot& ts,   bool relative ) : time_(ts),           relative_(relative), days_(false) {}
- 	explicit AutoCancelAttr(int days) : time_( TimeSlot(days*24,0) ), relative_(true), days_(true) {}
+	AutoCancelAttr(int hour, int minute, bool relative ) : time_(hour, minute), relative_(relative) {}
+ 	AutoCancelAttr(const TimeSlot& ts,   bool relative ) : time_(ts),           relative_(relative) {}
+ 	explicit AutoCancelAttr(int days) : time_( TimeSlot(days*24,0) ),  days_(true) {}
 
  	void print(std::string&) const;
 	bool operator==(const AutoCancelAttr& rhs) const;

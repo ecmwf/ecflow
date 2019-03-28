@@ -33,7 +33,7 @@ class Base {
 public:
    enum State { UNKNOWN =0, COMPLETE=1,  QUEUED=2, ABORTED=3, SUBMITTED=4, ACTIVE=5, SUSPENDED=6};
    Base() = default;
-   Base(bool test) : x(2),y(2),state_(State::SUSPENDED),test_(test) {}
+   Base(bool test) : test_(test) {}
    bool operator==(const Base & rhs) const { return x == rhs.x && y == rhs.y && state_ == rhs.state_ && test_ == rhs.test_;}
    void print(std::ostream &os) const {
       os << "Base: x("<< x << ") y(" << y << ") state(" << state_ << ") test(" << test_ << ")";

@@ -33,8 +33,8 @@ using namespace boost::posix_time;
 //==========================================================================================
 
 ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid,bool positiveGain)
-: hybrid_(hybrid), positiveGain_(positiveGain), end_clock_(false),
-  gain_(0), day_(0),month_(0),year_(0),
+: hybrid_(hybrid), positiveGain_(positiveGain), 
+  gain_(0), 
   state_change_no_(Ecf::incr_state_change_no())
 {
 	boost::gregorian::date theDate = time.date();
@@ -47,7 +47,7 @@ ClockAttr::ClockAttr(const boost::posix_time::ptime& time, bool hybrid,bool posi
 }
 
 ClockAttr::ClockAttr(int day, int month, int year, bool hybrid )
-: hybrid_(hybrid), positiveGain_(false), end_clock_(false),
+: hybrid_(hybrid), 
   gain_(0), day_(day),month_(month),year_(year),
   state_change_no_(Ecf::incr_state_change_no())
 {

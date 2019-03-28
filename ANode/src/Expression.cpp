@@ -89,13 +89,13 @@ std::unique_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) 
 //===========================================================================
 
 Expression::Expression(const std::string& expression)
-:  free_(false), state_change_no_(0)
+:   state_change_no_(0)
 {
    add(PartExpression(expression));
 }
 
 Expression::Expression(const PartExpression& exp)
-: free_(false), state_change_no_(0)
+:  state_change_no_(0)
 {
    add(exp);
 }

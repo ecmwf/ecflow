@@ -325,8 +325,8 @@ private:
 /// Note: this applies to the clone as well
 class RepeatDay : public RepeatBase {
 public:
-   RepeatDay( int step ) : RepeatBase("day"), step_(step),valid_(true)  {}
-   RepeatDay() : RepeatBase("day"), step_(1),valid_(true) {}
+   RepeatDay( int step ) : RepeatBase("day"), step_(step) {}
+   RepeatDay() : RepeatBase("day") {}
 
    bool operator==(const RepeatDay& rhs) const;
 

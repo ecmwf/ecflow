@@ -53,7 +53,7 @@ TimeSeries::TimeSeries()
 
 TimeSeries::TimeSeries(int hour, int minute, bool relative)
 : relativeToSuiteStart_(relative),
-  isValid_(true),
+  
   start_(hour,minute),
   nextTimeSlot_(hour,minute),
   relativeDuration_(0,0,0,0),
@@ -64,7 +64,7 @@ TimeSeries::TimeSeries(int hour, int minute, bool relative)
 
 TimeSeries::TimeSeries(const TimeSlot& t,bool relative)
 : relativeToSuiteStart_(relative),
-  isValid_(true),
+  
   start_(t),
   nextTimeSlot_(t),
   relativeDuration_(0,0,0,0),
@@ -75,7 +75,7 @@ TimeSeries::TimeSeries(const TimeSlot& t,bool relative)
 
 TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative)
 : relativeToSuiteStart_(relative),
-  isValid_(true),
+  
   start_( start ),
   finish_( finish ),
   incr_( incr ),

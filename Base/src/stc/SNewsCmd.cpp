@@ -31,7 +31,6 @@ SNewsCmd::SNewsCmd( unsigned int client_handle,
                     unsigned int client_state_change_no,
                     unsigned int client_modify_change_no,
                     AbstractServer* as)
-: news_(ServerReply::NO_NEWS)
 {
    init(client_handle,client_state_change_no,client_modify_change_no,as);
 }
