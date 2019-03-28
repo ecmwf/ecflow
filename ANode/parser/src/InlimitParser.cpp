@@ -39,6 +39,14 @@ bool InlimitParser::doParse( const std::string& line, std::vector<std::string >&
 	   limit_this_node_only = true;
 	   token_pos++;
 	}
+	bool limit_submission = false;
+   if (lineTokens[token_pos] == "-s") {
+      limit_submission = true;
+      token_pos++;
+   }
+   if (limit_this_node_only && limit_submission ) {
+      throw std::runtime_error("InlimitParser::doParse: can't limit family only(-n) and limit submission(-s) at the same time");
+   }
 
 	string path_to_node_holding_the_limit;
 	string limitName;
@@ -51,7 +59,7 @@ bool InlimitParser::doParse( const std::string& line, std::vector<std::string >&
 
    bool check = (rootParser()->get_file_type() != PrintStyle::NET);
 
-	InLimit inlimit(limitName,path_to_node_holding_the_limit,tokens,limit_this_node_only,check);
+	InLimit inlimit(limitName,path_to_node_holding_the_limit,tokens,limit_this_node_only,limit_submission,check);
 	if (rootParser()->get_file_type() != PrintStyle::DEFS) {
 	   token_pos++;
 	   bool incremented = false;

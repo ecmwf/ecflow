@@ -65,6 +65,18 @@ BOOST_AUTO_TEST_CASE( test_inlimit_basics )
          BOOST_CHECK_MESSAGE(testCopy == inlim,"Assignment failed");
       }
    }
+   {
+      InLimit inlim("fred","/path/to/node",1,false,true);
+      {
+         InLimit testCopy = inlim;
+         BOOST_CHECK_MESSAGE(testCopy == inlim,"Copy constructor failed");
+      }
+      {
+         InLimit testCopy;
+         testCopy = inlim;
+         BOOST_CHECK_MESSAGE(testCopy == inlim,"Assignment failed");
+      }
+   }
 }
 
 BOOST_AUTO_TEST_CASE( test_inlimit_duplicates )
@@ -90,16 +102,25 @@ static std::string fileName = "test_InLimit_serialisation.txt";
 BOOST_AUTO_TEST_CASE( test_InLimit_serialisation )
 {
     cout << "ANode:: ...test_InLimit_serialisation\n";
+    {
+       // save and restore the default constructor
+       doSaveAndRestore<InLimit>(fileName);
 
-    // save and restore the default constructor
-    doSaveAndRestore<InLimit>(fileName);
+       InLimit saved("limitName","/path/to/some/node",20,true);
+       save(fileName,saved);
 
-    InLimit saved("limitName","/path/to/some/node",20,true);
-    save(fileName,saved);
+       InLimit restored;  restore(fileName,restored);
+       BOOST_CHECK_MESSAGE(saved == restored," save and restored don't match");
+       std::remove(fileName.c_str());
+    }
+    {
+       InLimit saved("limitName","/path/to/some/node",20,false,true);
+       save(fileName,saved);
 
-    InLimit restored;      restore(fileName,restored);
-    BOOST_CHECK_MESSAGE(saved == restored," save and restored don't match");
-    std::remove(fileName.c_str());
+       InLimit restored;  restore(fileName,restored);
+       BOOST_CHECK_MESSAGE(saved == restored," save and restored don't match");
+       std::remove(fileName.c_str());
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

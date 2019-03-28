@@ -650,6 +650,7 @@ protected:
    /// After job aborts or completes we need to decrement the in limit, to indicate that
    /// additional resource is available. The set ensure we only update once during a traversal
    void decrementInLimit(std::set<Limit*>& limitSet);
+   void decrementInLimitForSubmission(std::set<Limit*>& limitSet);
 
    friend class InLimitMgr;
    bool check_in_limit() const { return inLimitMgr_.inLimit(); }

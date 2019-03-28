@@ -509,13 +509,15 @@ void export_NodeAttr()
 			.def( init<std::string>() )
 			.def( init<std::string,std::string>() )
 			.def( init<std::string,std::string,int>() )
-			.def( init<std::string,std::string,int,bool>() )
+         .def( init<std::string,std::string,int,bool>() )
+         .def( init<std::string,std::string,int,bool,bool>() )
 			.def(self == self )                                  // __eq__
 			.def("__str__",     &InLimit::toString)              // __str__
 			.def("__copy__",   copyObject<InLimit>)              // __copy__ uses copy constructor
 			.def("name",        &InLimit::name,       return_value_policy<copy_const_reference>(), "Return the `inlimit`_ name as string")
 			.def("path_to_node",&InLimit::pathToNode, return_value_policy<copy_const_reference>(), "Path to the node that holds the limit, can be empty")
-			.def("limit_this_node_only",&InLimit::limit_this_node_only ,                           "Only this node is limited. i.e. typically Family or Suite")
+         .def("limit_this_node_only",&InLimit::limit_this_node_only ,                           "Only this node is limited. i.e. typically Family or Suite")
+         .def("limit_submission",&InLimit::limit_submission,                                    "Limit submission only")
 			.def("tokens",      &InLimit::tokens,                                                  "The number of token to consume from the Limit")
 			;
 

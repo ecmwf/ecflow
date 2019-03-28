@@ -1,0 +1,18 @@
+suite test_limit_on_submission
+    limit disk 1
+    family anon    
+    	inlimit -s disk   # Inlimit submission
+    	task t1
+    	task t2
+    	task t3
+    	task t4
+    	task t5
+    	task t6
+    	task t7
+    	task t8
+    	task t9
+    	task t10
+    	task t11
+    	task t12
+    endfamily
+endsuite

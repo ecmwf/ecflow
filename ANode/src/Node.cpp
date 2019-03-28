@@ -1027,6 +1027,19 @@ void Node::decrementInLimit(std::set<Limit*>& limitSet)
    }
 }
 
+void Node::decrementInLimitForSubmission(std::set<Limit*>& limitSet)
+{
+   //cout << "Node::decrementInLimit " << absNodePath() << endl;
+   std::string the_abs_node_path = absNodePath();
+   inLimitMgr_.decrementInLimitForSubmission(limitSet,the_abs_node_path);
+
+   Node* theParent = parent();
+   while (theParent) {
+      theParent->inLimitMgr_.decrementInLimitForSubmission(limitSet,the_abs_node_path);
+      theParent = theParent->parent();
+   }
+}
+
 static bool search_user_edit_variables( const std::string& name, std::string& value, const NameValueMap& user_edit_variables )
 {
    auto i = user_edit_variables.find(name);

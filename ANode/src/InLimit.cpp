@@ -33,11 +33,14 @@ using namespace ecf;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-InLimit::InLimit(const std::string& name, const std::string& pathToNode, int tokens,bool limit_this_node_only, bool check)
-: n_(name),path_(pathToNode),tokens_(tokens),limit_this_node_only_(limit_this_node_only)
+InLimit::InLimit(const std::string& name,const std::string& pathToNode,int tokens,bool limit_this_node_only,bool limit_submission,bool check)
+: n_(name),path_(pathToNode),tokens_(tokens),limit_this_node_only_(limit_this_node_only), limit_submission_(limit_submission)
 {
    if (check && !Str::valid_name( name ) ) {
       throw std::runtime_error("InLimit::InLimit: Invalid InLimit name: " + name);
+   }
+   if (limit_this_node_only_ && limit_submission_) {
+      throw std::runtime_error("InLimit::InLimit: can't limit family only(-n) and limit submission(-s) at the same time");
    }
 }
 
@@ -67,6 +70,12 @@ bool InLimit::operator==( const InLimit& rhs ) const
       if (Ecf::debug_equality())std::cout << "InLimit::operator==    limit_this_node_only_(" << limit_this_node_only_  << ") != rhs.limit_this_node_only_(" << rhs.limit_this_node_only_ << ")\n";
 #endif
       return false;
+   }
+   if ( limit_submission_ != rhs.limit_submission_ ) {
+ #ifdef DEBUG
+       if (Ecf::debug_equality())std::cout << "InLimit::operator==     limit_submission_(" <<  limit_submission_  << ") != rhs.limit_submission_ (" << rhs.limit_submission_  << ")\n";
+ #endif
+       return false;
    }
    if ( incremented_ != rhs.incremented_ ) {
 #ifdef DEBUG
@@ -112,6 +121,7 @@ std::string InLimit::toString() const {
 void InLimit::write(std::string& ret) const {
    ret += "inlimit ";
    if (limit_this_node_only_) ret += "-n ";
+   if (limit_submission_)     ret += "-s ";
    if ( path_.empty() )  ret += n_;
    else                      { ret += path_; ret += Str::COLON(); ret += n_; }
    if ( tokens_ != 1 )       { ret += " "; ret += boost::lexical_cast<std::string>(tokens_); }
@@ -125,6 +135,7 @@ void InLimit::serialize(Archive & ar)
    CEREAL_OPTIONAL_NVP(ar,path_,                 [this](){return !path_.empty();});        // conditionally save
    CEREAL_OPTIONAL_NVP(ar,tokens_,               [this](){return tokens_ !=1;});           // conditionally save
    CEREAL_OPTIONAL_NVP(ar,limit_this_node_only_, [this](){return limit_this_node_only_;}); // conditionally save new to 5.0.0
+   CEREAL_OPTIONAL_NVP(ar,limit_submission_,     [this](){return limit_submission_;});     // conditionally save new to 5.0.0
    CEREAL_OPTIONAL_NVP(ar,incremented_,          [this](){return incremented_;});          // conditionally save new to 5.0.0
 }
 CEREAL_TEMPLATE_SPECIALIZE(InLimit);

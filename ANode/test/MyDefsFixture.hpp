@@ -155,15 +155,13 @@ private:
 
       std::string suiteLimit = "suiteLimit";
       std::string suiteLimit2 = "suiteLimit2";
+      std::string suiteLimit3 = "suiteLimit3";
       suite->addLimit( Limit(suiteLimit,10) );
       suite->addLimit( Limit(suiteLimit2,10) );
-
-      std::vector<std::string> stringList; stringList.reserve(3);
-      stringList.emplace_back("10");
-      stringList.emplace_back("20");
-      stringList.emplace_back("30");
+      suite->addLimit( Limit(suiteLimit3,10) );
 
       // Add tasks with all the repeat variants
+      std::vector<std::string> stringList{"10","20","30"};
       task_ptr t5 = suite->add_task( "t5" );
       t5->addRepeat( RepeatEnumerated("AEnum",stringList));
 
@@ -225,7 +223,8 @@ private:
  			task->addToday( ecf::TodayAttr(ecf::TimeSlot(10,12)) );
  			task->addToday( ecf::TodayAttr(ecf::TimeSlot(0,1),ecf::TimeSlot(0,3),ecf::TimeSlot(0,1),true) );
  			task->addDefStatus( DState::COMPLETE );
- 			task->addInLimit( InLimit(suiteLimit,"/" + sname ));
+         task->addInLimit( InLimit(suiteLimit,"/" + sname ));
+         task->addInLimit( InLimit(suiteLimit3,"/" + sname,1,false/*limit this node only*/,true/*limit submission*/ ));
  			task->addVerify( VerifyAttr(NState::COMPLETE,3) );
  			task->addLate( lateAttr );
          task->add_queue(QueueAttr("queue1",queue_items));

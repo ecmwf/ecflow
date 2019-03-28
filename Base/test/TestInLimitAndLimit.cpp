@@ -44,6 +44,9 @@ BOOST_AUTO_TEST_CASE( test_add_limit )
 
 	suite->addInLimit(InLimit("fast","/suite")); //" Adding in-limit first time should be ok");
  	BOOST_REQUIRE_THROW(suite->addInLimit(InLimit("fast","/suite")), std::runtime_error); // " Adding in-limit second time should fail");
+
+ 	// adding inlimit with limit node only and submission should fail
+   BOOST_REQUIRE_THROW(suite->addInLimit(InLimit("limit","/suite",1,true,/*limit_this_node_only*/true/*limit submission*/)), std::runtime_error); // " Adding in-limit second time should fail");
 }
 
 BOOST_AUTO_TEST_CASE( test_limit_increment )
@@ -986,6 +989,89 @@ BOOST_AUTO_TEST_CASE( test_inlimit_ECFLOW_878 )
 
       const std::set<std::string>& t_limit_paths =  the_T_limit->paths();
       BOOST_CHECK_MESSAGE( t_limit_paths.size()==1 , "Expected one path in limit but found " <<  t_limit_paths.size());
+   }
+
+   //PrintStyle::setStyle(PrintStyle::MIGRATE);
+   //cout << defs;
+}
+
+BOOST_AUTO_TEST_CASE( test_inlimit_submission_only )
+{
+   cout << "Base:: ...test_inlimit_submission_only \n";
+
+   // Create the following def. with inlimit -s, we limit submission
+   // suite s0
+   //   limit T 1   # Only allow one task at a time to start
+   // suite s1
+   //   family f1
+   //     inlimit -s T
+   //     task t1
+   //     task t2
+   //   family f2
+   //     inlimit -s T
+   //     task t1
+   //     task t2
+   //   family f3
+   //     inlimit -s T
+   //     task t1
+   //     task t2
+
+   Defs defs;
+   suite_ptr s0 =  defs.add_suite("s0");
+   s0->addLimit(Limit("T",1));
+
+   suite_ptr s1 =  defs.add_suite("s1");
+   family_ptr f1 = s1->add_family("f1");
+   f1->addInLimit(InLimit("T","/s0",1,false,true));
+   task_ptr f1_t1 = f1->add_task("t1");
+   task_ptr f1_t2 = f1->add_task("t2");
+   family_ptr f2 = s1->add_family("f2");
+   f2->addInLimit(InLimit("T","/s0",1,false,true));
+   task_ptr f2_t1 = f2->add_task("t1");
+   task_ptr f2_t2 = f2->add_task("t2");
+   family_ptr f3 = s1->add_family("f3");
+   f3->addInLimit(InLimit("T","/s0",1,false,true));
+   task_ptr f3_t1 = f3->add_task("t1");
+   task_ptr f3_t2 = f3->add_task("t2");
+
+   //cout << defs;
+   limit_ptr the_T_limit = s0->find_limit("T");
+   BOOST_CHECK_MESSAGE( the_T_limit, "Could not find limits");
+
+   // Create a request to begin suite
+   // make sure chosen suite can begin to resolve dependencies.
+   // beginning the suite will:
+   //     1/ set all children to the QUEUED state
+   //     2/ Begin job submission, and hence changes state  queued->submitted->active
+   //        Hence under test scenario there is no delay between submitted->active , hence limit is incremented and decrement
+   {
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new BeginCmd("/s1")));
+
+      //PrintStyle::setStyle(PrintStyle::MIGRATE);
+      //cout << defs;
+
+      BOOST_CHECK_MESSAGE( s1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(s1->state()));
+      BOOST_CHECK_MESSAGE( f1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1->state()));
+      BOOST_CHECK_MESSAGE( f1_t1->state() == NState::ACTIVE, "expected state NState::ACTIVE, but found to be " << NState::toString(f1_t1->state()));
+      BOOST_CHECK_MESSAGE( f1_t2->state() == NState::ACTIVE, "expected state NState::ACTIVE , but found to be " << NState::toString(f1_t2->state()));
+      BOOST_CHECK_MESSAGE( f2->state() == NState::ACTIVE, "expected state NState::ACTIVE , but found to be " << NState::toString(f2->state()));
+      BOOST_CHECK_MESSAGE( f2_t1->state() == NState::ACTIVE , "expected state NState::ACTIVE , but found to be " << NState::toString(f2_t1->state()));
+      BOOST_CHECK_MESSAGE( f2_t2->state() == NState::ACTIVE , "expected state NState::ACTIVE , but found to be " << NState::toString(f2_t2->state()));
+      BOOST_CHECK_MESSAGE( f3->state() == NState::ACTIVE , "expected state NState::ACTIVE , but found to be " << NState::toString(f3->state()));
+      BOOST_CHECK_MESSAGE( f3_t1->state() == NState::ACTIVE , "expected state NState::ACTIVE , but found to be " << NState::toString(f3_t1->state()));
+      BOOST_CHECK_MESSAGE( f3_t2->state() == NState::ACTIVE , "expected state NState::ACTIVE , but found to be " << NState::toString(f3_t2->state()));
+
+      // The active state *decrements* the inlimit/limit value
+      int expected_limit_value = 0;
+      BOOST_CHECK_MESSAGE( the_T_limit->value() == expected_limit_value,"Expected limit value to be " << expected_limit_value << " but found " << the_T_limit->value());
+
+//      // why f2_t1 is queued
+//      cout << "why ============================================";
+//      std::vector<std::string> vec;
+//      f2_t1->bottom_up_why(vec);
+//      for(size_t i =0; i < vec.size(); i++) {
+//         cout << "why:" << i << " " << vec[i] << "\n";
+//      }
    }
 
    //PrintStyle::setStyle(PrintStyle::MIGRATE);

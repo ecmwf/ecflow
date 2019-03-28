@@ -96,6 +96,10 @@ public:
  	         std::set<Limit*>& limitSet,  // The set ensure we only update once
  	         const std::string& task_path // The task that completed or aborted. Gives up the token
  	);
+   void decrementInLimitForSubmission(
+            std::set<Limit*>& limitSet,  // The set ensure we only update once
+            const std::string& task_path // The task that completed or aborted. Gives up the token
+   );
 
  	/// Check to see if inlimit's can reference their Limits
  	void check(std::string& errorMsg, std::string& warningMsg,bool reportErrors, bool reportWarnings) const;

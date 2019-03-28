@@ -892,7 +892,8 @@ void Submittable::update_limits()
        incrementInLimit(limitSet);    // will recurse up
    }
    else if (task_state == NState::ACTIVE) {
-      // *** Don't change limits in this state ***
+      // Only change those LIMITs where in-limit has -s i.e limit submission
+      decrementInLimitForSubmission(limitSet);  // will recurse up
    }
    else {
       // UNKNOWN, QUEUED

@@ -283,6 +283,26 @@ void InLimitMgr::decrementInLimit( std::set<Limit*>& limitSet,const std::string&
 	}
 }
 
+void InLimitMgr::decrementInLimitForSubmission( std::set<Limit*>& limitSet,const std::string& task_path)
+{
+   if (vec_.empty()) return;
+
+   resolveInLimitReferences();
+
+   std::vector<task_ptr> task_vec;
+   BOOST_FOREACH(InLimit& inlimit, vec_) {
+      Limit* limit = inlimit.limit();
+      if (limit && limitSet.find(limit) == limitSet.end()) {
+         limitSet.insert(limit);
+         // cout << "InLimitMgr::incrementInLimit " << node_->absNodePath() << " LIMIT decremented " << endl;
+
+         if (inlimit.limit_submission()) {
+            limit->decrement( inlimit.tokens(), task_path);
+         }
+      }
+   }
+}
+
 
 //#define DEBUG_WHY 1
 
