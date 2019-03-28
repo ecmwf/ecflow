@@ -156,6 +156,7 @@ if [[ "$intel_arg" = intel ]] ; then
     #CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
 fi
 
+module swap gnu/7.3.0     
 module load ecbuild/new
 module load python2
 module load python3/3.6.5-01
