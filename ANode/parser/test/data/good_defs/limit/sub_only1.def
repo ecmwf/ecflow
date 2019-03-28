@@ -1,5 +1,5 @@
 suite test_limit_on_submission
-    limit disk 1
+    limit disk 2
     family anon    
     	inlimit -s disk   # Inlimit submission
     	task t1
