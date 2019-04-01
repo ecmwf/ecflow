@@ -700,7 +700,7 @@ void NodeViewDelegate::renderEvent(QPainter *painter,QStringList data,const QSty
     //Add full path
     if(data.count() > 3)
     {
-        name.prepend(data[3] + ":/");
+        name.prepend(data[3] + ":");
     }
 
     bool selected=option.state & QStyle::State_Selected;
