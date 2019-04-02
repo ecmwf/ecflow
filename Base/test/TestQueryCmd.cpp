@@ -41,16 +41,20 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    //              event event
    //              trigger t2 == complete
    //          task t2
+   //              label name value new_value
+   //              label name2 value2
    //    endfamily
    //    task task
    // endsuite
    Defs defs;
    string suite_f_t1 = "suite/f/t1";
    task_ptr t1 = Task::create("t1");
+   task_ptr t2;
    task_ptr task = Task::create("task");
    string suite_task = "suite/task";
    std::string meter_name = "m";
    std::string event_name = "event";
+   std::string label_name = "name";
    {
       t1->addMeter( Meter(meter_name,0,100,100));
       t1->addEvent( Event(event_name));
@@ -61,10 +65,13 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
       family_ptr f = s->add_family("f");
       f->add_variable("var2","var2");
       f->addTask( t1 );
-      f->add_task("t2");
+      t2 = f->add_task("t2");
+      t2->add_label(label_name,"value","");
       s->addTask(task);
    }
-   defs.beginAll();
+
+   defs.beginAll(); // this will clear label new_value
+
 
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("state","/suite/f/t11","","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("dstate","/suite/f/t11","","/suite/f/t1")));
@@ -73,6 +80,8 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","xxxx/f/t1",event_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1","meterxx","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite",meter_name,"/suite/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("label","/suite/f/t1",label_name,"/suite/f/t1"))); // no label on t1
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("label","/suite/f/t2","fred","/suite/f/t2")));     // wrong label name
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite","1 == ","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","1 == ","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("variable","/suite/f/t1","XXXX","/suite/f/t1")));
@@ -108,6 +117,14 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
 
    res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1",meter_name,"/suite/f/t1")), false);
    BOOST_CHECK_MESSAGE(res == "0","expected query meter to return 0 but found: " << res);
+
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("label","/suite/f/t2",label_name,"/suite/f/t2")), false);
+   BOOST_CHECK_MESSAGE(res == "value","expected query label to return 'value' but found: " << res);
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new LabelCmd("/suite/f/t2",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,label_name,"new_value")));
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("label","/suite/f/t2",label_name,"/suite/f/t2")), false);
+   BOOST_CHECK_MESSAGE(res == "new_value","expected query label to return 'new_value' but found: " << res);
+
 
    res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("trigger","/suite/f/t1","t2 == complete","/suite/f/t1")), false);
    BOOST_CHECK_MESSAGE(res == "false","expected query trigger to return false but found: " << res);

@@ -2002,9 +2002,9 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
 private:
-   std::string query_type_;        // [ state | dstate | event | meter | trigger ]
+   std::string query_type_;        // [ state | dstate | event | meter | label | trigger ]
    std::string path_to_attribute_;
-   std::string attribute_;         // [ event_name | meter_name | variable_name | trigger expression] empty for state and dstate
+   std::string attribute_;         // [ event_name | meter_name | label_name | variable_name | trigger expression] empty for state and dstate
    std::string path_to_task_;      // The task the invoked this command, needed for logging
 
    friend class cereal::access;

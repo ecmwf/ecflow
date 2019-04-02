@@ -79,19 +79,19 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
    std::string attribute;
 
    if (args.size()) query_type = args[0];
-   if ( query_type == "event" || query_type == "meter" || query_type == "variable") {
-      // second argument must be <path>:event_or_meter_or_variable
+   if ( query_type == "event" || query_type == "meter" || query_type == "label" || query_type == "variable") {
+      // second argument must be <path>:event_or_meter_or_label_or_variable
       std::string path_and_name ;
       if (args.size() == 2) {
          path_and_name = args[1];
          if ( !Extract::pathAndName( path_and_name , path_to_attribute, attribute  ) ) {
             throw std::runtime_error(
-                     "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query "
+                     "QueryCmd: second argument must be of the form <path>:name for query\n, where name is [event | meter | label | variable ] name "
                      + query_type + " : could not extract from:" + path_and_name );
          }
       }
       else {
-         std::stringstream ss; ss << "QueryCmd: second argument must be of the form <path>:event_or_meter_or_var_name for query " << query_type;
+         std::stringstream ss; ss << "QueryCmd: second argument must be of the form <path>:name for query\n where name is [event | meter | label | variable ] name " << query_type;
          ss << " args size = " << args.size() << " expected 2 arguments";
          throw std::runtime_error(ss.str());
       }
@@ -132,11 +132,12 @@ const char*  QueryCmd::arg() { return CtsApi::queryArg();}
 
 const char* QueryCmd::desc() {
    return
-            "Query the status of attributes i.e state, event, meter, variable or trigger expression without blocking\n"
+            "Query the status of attributes i.e state, event, meter,label,variable or trigger expression without blocking\n"
             " - state    return [unknown | complete | queued |             aborted | submitted | active] to standard out\n"
             " - dstate   return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out\n"
             " - event    return 'set' | 'clear' to standard out\n"
             " - meter    return value of the meter to standard out\n"
+            " - label    return new value otherwise the old value\n"
             " - variable return value of the variable, repeat or generated variable to standard out,\n"
             "            will search up the node tree\n"
             " - trigger  returns 'true' if the expression is true, otherwise 'false'\n\n"
@@ -145,17 +146,19 @@ const char* QueryCmd::desc() {
             "The command will fail if the node path to the attribute does not exist in the definition and if:\n"
             " - event    The event is not found\n"
             " - meter    The meter is not found\n"
+            " - label    The label is not found\n"
             " - variable No user or generated variable or repeat of that name found on node, or any of its parents\n"
             " - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid\n"
             "Arguments:\n"
-            "  arg1 = [ state | event | meter | variable | trigger ]\n"
-            "  arg2 = <path> | <path>:name where name is name of a event, meter or variable\n"
+            "  arg1 = [ state | event | meter | label | variable | trigger ]\n"
+            "  arg2 = <path> | <path>:name where name is name of a event, meter, label or variable\n"
             "  arg3 = trigger expression\n\n"
             "Usage:\n"
             " ecflow_client --query state /path/to/node                         # return node state to standard out\n"
             " ecflow_client --query dstate /path/to/node                        # state that can included suspended\n"
             " ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out\n"
             " ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out\n"
+            " ecflow_client --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out\n"
             " ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out\n"
             " ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\" # return true if expression evaluates false otherwise\n"
             ;
@@ -184,6 +187,16 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
          throw std::runtime_error(ss.str());
       }
       return PreAllocatedReply::string_cmd(boost::lexical_cast<std::string>(meter.value()));
+   }
+
+   if (query_type_ == "label") {
+      const Label& label = node->find_label(attribute_);
+      if (label.empty()) {
+         std::stringstream ss; ss << "QueryCmd: Can not find label " << attribute_ << " on node " << path_to_attribute_;
+         throw std::runtime_error(ss.str());
+      }
+      if (label.new_value().empty()) return PreAllocatedReply::string_cmd(label.value());
+      return PreAllocatedReply::string_cmd(label.new_value());
    }
 
    if (query_type_ == "variable") {

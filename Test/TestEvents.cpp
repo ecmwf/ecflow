@@ -40,10 +40,10 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 // The data is created dynamically so that we can stress test the server
 // This test does not have any time dependencies in the def file.
 
-BOOST_AUTO_TEST_CASE( test_events )
+BOOST_AUTO_TEST_CASE( test_event_and_query )
 {
    DurationTimer timer;
-   cout << "Test:: ...test_events "<< flush;
+   cout << "Test:: ...test_event_and_query"<< flush;
    TestClean clean_at_start_and_end;
 
    // Create the defs file corresponding to the text below
@@ -60,8 +60,10 @@ BOOST_AUTO_TEST_CASE( test_events )
    //       task a
    //         event 1 myEvent
    //         meter myMeter 0 100
+   //         label task_a_label Label1
    //       task b
    //          trigger a == complete
+   //          label task_b_label label1
    //    endfamily
    //    family family2
    //          task aa
@@ -72,19 +74,20 @@ BOOST_AUTO_TEST_CASE( test_events )
    // endsuite
    Defs theDefs;
    task_ptr task_a;
+   task_ptr task_b;
    {
       suite_ptr suite = theDefs.add_suite("test_events" );
       {
          family_ptr fam = suite->add_family("family1");
          task_a = fam->add_task("a");
-         task_ptr task_b = fam->add_task("b");
          task_a->addMeter( Meter("myMeter",0,100,100) );             // ServerTestHarness will add correct ecf
          task_a->addEvent( Event(1,"myEvent") );                     // ServerTestHarness will add correct ecf
-         task_a->addLabel( Label("task_a_label","Label1") );         // ServerTestHarness will add correct ecf
+         task_a->addLabel( Label("task_a_label","task_a_label_value") );         // ServerTestHarness will add correct ecf
          task_a->addVerify( VerifyAttr(NState::COMPLETE,1) );
 
+         task_b = fam->add_task("b");
          task_b->add_trigger( "a == complete" );
-         task_b->addLabel( Label("task_b_label","label1 label2") );  // ServerTestHarness will add correct ecf
+         task_b->addLabel( Label("task_b_label","task_b_label_value","new_label_value") );  // ServerTestHarness will add correct ecf
          task_b->addVerify( VerifyAttr(NState::COMPLETE,1) );
       }
       {
@@ -114,6 +117,12 @@ BOOST_AUTO_TEST_CASE( test_events )
    BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == TestFixture::client().port(),"Expected query of variable(ECF_PORT) to return " << TestFixture::client().port() << " but found " << TestFixture::client().get_string());
    BOOST_CHECK_MESSAGE(TestFixture::client().query("trigger",task_a->absNodePath(),"b == complete")==0,"query command failed " << TestFixture::client().errorMsg());
    BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "true","Expected query of trigger to return 'true' but found " << TestFixture::client().get_string());
+
+   BOOST_CHECK_MESSAGE(TestFixture::client().query("label",task_a->absNodePath(),"task_a_label")==0,"query command failed " << TestFixture::client().errorMsg());
+   BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "task_a_label_value","Expected query of label to return 'task_a_label_value' but found " << TestFixture::client().get_string());
+
+   BOOST_CHECK_MESSAGE(TestFixture::client().query("label",task_b->absNodePath(),"task_b_label")==0,"query command failed " << TestFixture::client().errorMsg());
+   BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "new_label_value","Expected query of label to return 'new_label_value' but found " << TestFixture::client().get_string());
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
