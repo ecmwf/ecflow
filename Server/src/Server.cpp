@@ -205,8 +205,6 @@ void Server::handle_accept( const boost::system::error_code& e, connection_ptr c
 
    if ( !e ) {
       // Read and interpret message from the client
-      if (serverEnv_.debug()) cout << "   Server::handle_accept" << endl;
-
 #ifdef ECF_OPENSSL
          conn->socket().async_handshake(boost::asio::ssl::stream_base::server,
                                  boost::bind(&Server::handle_handshake, this,
