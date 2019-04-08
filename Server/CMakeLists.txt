@@ -5,7 +5,6 @@
  #    find src -name \*.cpp  -print | sort
  # =======================================================
 list( APPEND srcs
-   src/CConnection.cpp
    src/CheckPtSaver.cpp
    src/NodeTreeTraverser.cpp
    src/Server.cpp
