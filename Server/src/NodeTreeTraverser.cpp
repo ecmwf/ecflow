@@ -115,11 +115,7 @@ void NodeTreeTraverser::start()
 #endif
 				}
 			}
-#ifdef ECFLOW_MT
-			timer_.async_wait( server_->strand_.wrap( boost::bind( &NodeTreeTraverser::traverse, this, boost::asio::placeholders::error ) ) );
-#else
 			timer_.async_wait( server_->io_service_.wrap( boost::bind( &NodeTreeTraverser::traverse, this, boost::asio::placeholders::error ) ) );
-#endif
 		}
 	}
 }
@@ -276,11 +272,7 @@ void NodeTreeTraverser::start_timer()
 {
 	/// Appears that expires_from_now is more accurate then expires_at i.e timer_.expires_at( timer_.expires_at() + boost::posix_time::seconds( poll_at ) );
 	timer_.expires_from_now(  boost::posix_time::seconds( 1 ) );
-#ifdef ECFLOW_MT
-	timer_.async_wait( server_->strand_.wrap( boost::bind( &NodeTreeTraverser::traverse,this,boost::asio::placeholders::error ) ) );
-#else
 	timer_.async_wait( server_->io_service_.wrap( boost::bind( &NodeTreeTraverser::traverse,this,boost::asio::placeholders::error ) ) );
-#endif
 }
 
 void NodeTreeTraverser::traverse(const boost::system::error_code& error )

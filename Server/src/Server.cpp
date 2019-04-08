@@ -18,18 +18,14 @@
 //  o Dynamic and/or Private Ports.                    49151-65535
 //============================================================================
 
+#include <iostream>
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/bind.hpp>
-#ifdef ECFLOW_MT
-#include <boost/thread/thread.hpp> // needed for ECFLOW_MT and debug() to print thread ID
-#endif
-
-#include <iostream>
 
 #include "Server.hpp"  // Must come before boost/serialization headers.
-                       // defines ECFLOW_MT
 #include "Defs.hpp"
 #include "Log.hpp"
 #include "System.hpp"
@@ -59,28 +55,15 @@ Server::Server( ServerEnvironment& serverEnv ) :
 #endif
    signals_(io_service_),
    acceptor_(io_service_),
-#ifdef ECFLOW_MT
-   strand_(io_service_),
-   thread_pool_size_(serverEnv.threads()),
-   new_connection_(),
-#endif
    defs_(Defs::create()),      // ECFLOW-182
    traverser_   (this,  io_service_, serverEnv ),
    checkPtSaver_(this,  io_service_, &serverEnv ),
    serverState_(SState::HALTED),
    serverEnv_(serverEnv)
 {
-#ifdef ECFLOW_MT
-   std::cout << "Server: thread pool size = " << thread_pool_size_ << endl;
-#endif
-
    if (serverEnv_.debug()) cout << "-->Server::server starting server on port "
                                 << serverEnv.port()
-#ifdef ECFLOW_MT
-                                << " thread pool size = " << thread_pool_size_
-#endif
                                 << endl;
-
    LogFlusher logFlusher;
 
    // Register to handle the signals.
@@ -192,34 +175,11 @@ void Server::run()
   // have finished. While the server is running, there is always at least one
   // asynchronous operation outstanding: the asynchronous accept call waiting
   // for new incoming connections.
-
-#ifdef ECFLOW_MT
-  // Create a pool of threads to run all of the io_services.
-  std::vector<std::shared_ptr<boost::thread> > threads;
-  for (std::size_t i = 0; i < thread_pool_size_; ++i)
-  {
-      std::shared_ptr<boost::thread> thread(new boost::thread(
-          boost::bind(&boost::asio::io_service::run, &io_service_)));
-      threads.push_back(thread);
-  }
-  // Wait for all threads in the pool to exit.
-  for (std::size_t i = 0; i < threads.size(); ++i)
-    threads[i]->join();
-#else
   io_service_.run();
-#endif
 }
 
 void Server::start_accept()
 {
-#ifdef ECFLOW_MT
-   if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::start_accept()" << endl;
-   new_connection_.reset(new CConnection(io_service_, this));
-   acceptor_.async_accept(new_connection_->socket(),
-                          boost::bind(&Server::handle_accept, this,
-                                      boost::asio::placeholders::error));
-#else
-
    if (serverEnv_.debug()) cout << "   Server::start_accept()" << endl;
 
 #ifdef ECF_OPENSSL
@@ -230,30 +190,8 @@ void Server::start_accept()
 
    acceptor_.async_accept( new_conn->socket_ll(),
 		                   [this,new_conn](const boost::system::error_code& e ) { handle_accept(e,new_conn); });
-#endif // ECFLOW_MT
 }
 
-#ifdef ECFLOW_MT
-void Server::handle_accept(const boost::system::error_code& e)
-{
-   // Check whether the server was stopped by a signal before this completion
-   // handler had a chance to run.
-   if (!acceptor_.is_open()) {
-      if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_accept:  acceptor is closed, returning\n";
-      return;
-   }
-
-   if (!e) {
-      new_connection_->start();
-   }
-   else {
-      LogToCout toCoutAsWell;
-      LOG(Log::ERR, "Server::handle_accept error occurred : " <<  e.message());
-   }
-
-   start_accept();
-}
-#else
 void Server::handle_accept( const boost::system::error_code& e, connection_ptr conn )
 {
    if (serverEnv_.debug()) cout << "   Server::handle_accept" << endl;
@@ -302,7 +240,6 @@ void Server::handle_accept( const boost::system::error_code& e, connection_ptr c
    // However can this get into an infinite loop ???
    start_accept();
 }
-#endif
 
 #ifdef ECF_OPENSSL
 void Server::handle_handshake(const boost::system::error_code& e,connection_ptr new_conn )

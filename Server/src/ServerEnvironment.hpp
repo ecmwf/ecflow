@@ -137,11 +137,6 @@ public:
 
   	bool reloadPasswdFile(std::string& errorMsg);
 
-#ifdef ECFLOW_MT
-  	// returns the numbers threads to be used by the server.
-   size_t threads() const { return threads_; };
-#endif
-
 	/// There are several kinds of authentification:
 	///     a/ None
 	///     b/ List mode.   ASCII file based on ECF_LISTS is defined
@@ -188,9 +183,6 @@ private:
 	int  checkPtInterval_;
 	int  checkpt_save_time_alarm_;
 	int  submitJobsInterval_;
-#ifdef ECFLOW_MT
-	size_t threads_;
-#endif
 	bool jobGeneration_;   // used in debug/test mode only
 	bool debug_;
    bool help_option_;

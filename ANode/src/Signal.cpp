@@ -42,12 +42,7 @@ void Signal::block_sigchild()
    sigset_t set;
    sigemptyset( &set );
    sigaddset( &set, SIGCHLD );
-#ifdef ECFLOW_MT
-   rc = pthread_sigmask(SIG_BLOCK, &set, 0 ); // not tested
-   if (rc != 0) std::cerr << "Signal::~Signal(): pthread_sigmask(SIG_UNBLOCK, &set, 0) returned " << rc << "\n";
-#else
    sigprocmask( SIG_BLOCK, &set, nullptr );
-#endif
 }
 
 void Signal::unblock_sigchild()
@@ -55,12 +50,7 @@ void Signal::unblock_sigchild()
    sigset_t set;
    sigemptyset( &set );
    sigaddset( &set, SIGCHLD );
-#ifdef ECFLOW_MT
-   int rc = pthread_sigmask(SIG_UNBLOCK, &set, 0 ); // not tested
-   if (rc != 0) std::cerr << "Signal::~Signal(): pthread_sigmask(SIG_UNBLOCK, &set, 0) returned " << rc << "\n";
-#else
    sigprocmask( SIG_UNBLOCK, &set, nullptr );
-#endif
 }
 
 }

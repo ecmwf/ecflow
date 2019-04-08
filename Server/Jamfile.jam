@@ -26,9 +26,6 @@ lib pthread ;
 # The <include> means we will automatically add this directory to the include path
 # of any other target that uses this lib
 
-#
-# Note: boost_thread is *ONLY* needed to test multi-threaded server, i.e when ECFLOW_MT defined
-#
 lib libserver : [ glob src/*.cpp : src/*Main.cpp ]
               : <include>../ACore/src
                 <include>../ANattr/src 
@@ -41,7 +38,6 @@ lib libserver : [ glob src/*.cpp : src/*Main.cpp ]
                 <use>/theNode//node
                 <use>/theBase//base
                 <use>/site-config//boost_system
-                <use>/site-config//boost_thread
                 <use>/site-config//boost_filesystem
                 <use>/site-config//boost_program_options
                 <use>/site-config//boost_datetime
@@ -57,7 +53,6 @@ exe ecflow_server : [ glob src/*Main.cpp ]
              /theBase//base
              libserver
              /site-config//boost_system
-             /site-config//boost_thread
              /site-config//boost_filesystem
              /site-config//boost_datetime
              /site-config//boost_program_options
@@ -77,7 +72,6 @@ exe u_server : [ glob test/*.cpp ]
              /theBase//base
              libserver
              /site-config//boost_system
-             /site-config//boost_thread
              /site-config//boost_filesystem
              /site-config//boost_datetime
              /site-config//boost_program_options

@@ -24,15 +24,9 @@
 #include <memory>
 #include <boost/asio.hpp>
 
-// ECFLOW_MT See doc/multi-threaded-server.tar/ddoc
-//#define ECFLOW_MT 1
-#ifdef ECFLOW_MT
-#include "CConnection.hpp" // Must come before boost/serialisation headers.
-#else
 #include "Connection.hpp"  // Must come before boost/serialisation headers.
 #include "ClientToServerRequest.hpp"
 #include "ServerToClientResponse.hpp"
-#endif
 
 #include "NodeTreeTraverser.hpp"
 #include "CheckPtSaver.hpp"
@@ -61,11 +55,6 @@ public:
 
 private:
 
-#ifdef ECFLOW_MT
-   /// Handle completion of a accept operation.
-   void handle_accept(const boost::system::error_code& e);
-#else
-
 #ifdef ECF_OPENSSL
    void handle_handshake(const boost::system::error_code& error,connection_ptr conn);
    std::string get_password() const;
@@ -79,7 +68,6 @@ private:
 
    /// Handle completion of a read operation.
    void handle_read(const boost::system::error_code& e, connection_ptr conn);
-#endif
 
    void handle_terminate();
    void start_accept();
@@ -146,17 +134,9 @@ private:
    /// The acceptor object used to accept incoming socket connections.
    boost::asio::ip::tcp::acceptor acceptor_;
 
-#ifdef ECFLOW_MT
-   /// Strand to ensure the connection's handlers are not called concurrently.
-   boost::asio::io_service::strand strand_;
-   size_t  thread_pool_size_;
-   CConnection_ptr new_connection_;
-   friend class CConnection;
-#else
    /// The data, typically loaded once, and then sent to many clients
    ClientToServerRequest  inbound_request_;
    ServerToClientResponse outbound_response_;
-#endif
 
    defs_ptr defs_;             // shared because is deleted in Test, and used in System::instance()
    NodeTreeTraverser traverser_;

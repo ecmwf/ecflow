@@ -28,7 +28,6 @@ lib dl ;  # this dependency for using libcrypto, i.e dlopen,dlclose etc, when us
 #           pthread
 #           /site-config//boost_system
 #           /site-config//boost_serialization
-#           /site-config//boost_thread
 #           /site-config//boost_test
 #         : <include>../SCRATCH/src
 #           <variant>debug:<define>DEBUG

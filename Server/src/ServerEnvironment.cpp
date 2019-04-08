@@ -24,9 +24,6 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/lexical_cast.hpp>
-#ifdef ECFLOW_MT
-#include <boost/thread/thread.hpp> // needed for ECFLOW_MT and debug() to print thread ID
-#endif
 
 #include "ServerEnvironment.hpp"
 #include "ServerOptions.hpp"
@@ -72,9 +69,6 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   checkPtInterval_(0),
   checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()),
   submitJobsInterval_(defaultSubmitJobsInterval),
-#ifdef ECFLOW_MT
-  threads_(boost::thread::hardware_concurrency()),
-#endif
   jobGeneration_(true),
   debug_(false),
   help_option_(false),
@@ -93,9 +87,6 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& 
   checkPtInterval_(0),
   checkpt_save_time_alarm_(CheckPt::default_save_time_alarm()),
   submitJobsInterval_(defaultSubmitJobsInterval),
-#ifdef ECFLOW_MT
-  threads_(boost::thread::hardware_concurrency()),
-#endif
   jobGeneration_(true),
   debug_(false),
   help_option_(false),
@@ -639,9 +630,6 @@ std::string ServerEnvironment::dump() const
    ss << "Job generation " << jobGeneration_ << "\n";
    ss << "Server host name " << serverHost_ << "\n";
    ss << "ECF_PASSWD = " << ecf_passwd_file_ << "\n";
-#ifdef ECFLOW_MT
-   ss << "No of threads used by server " << threads_ << "\n";
-#endif
    if ( tcp_protocol_.family() ==  2 /*PF_INET*/)  ss << "TCP Protocol  v4 \n";
    else if ( tcp_protocol_.family() ==  10 /*PF_INET6*/)  ss << "TCP Protocol  v6 \n";
 

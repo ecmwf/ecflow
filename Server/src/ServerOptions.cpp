@@ -104,9 +104,6 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
                                       "If set will override the environment variable ECF_PORT"
 )
 ( "ecfinterval",  po::value< int >(), "<int> <Allowed range 1-60>  Submit jobs interval. For DEBUG/Test only" )
-#ifdef ECFLOW_MT
-( "threads",  po::value< int >(),      "<int> No of threads used by the server. Default is no of cores on machine" )
-#endif
 ( "v6",                               "Use IPv6 TCP protocol. Default is IPv4" )
 ( "dis_job_gen",                      "Disable job generation. For DEBUG/Test only." )
 ( "debug,d",                          "Enable debug output." )
@@ -141,13 +138,6 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 		if (env->debug_) cout << "ServerOptions: The dis_job_gen is set\n";
 		env->jobGeneration_ = false;
  	}
-
-#ifdef ECFLOW_MT
-   if ( vm_.count( "threads" ) ) {
-      if (env->debug_) cout << "ServerOptions: The numbers of threads set to '" << vm_["threads"].as< int > () << "'\n";
-      env->threads_ = vm_["threads"].as< int > ();
-   }
-#endif
 }
 
 bool ServerOptions::help_option() const
