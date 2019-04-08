@@ -28,7 +28,6 @@ local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 # we dont build debug boost anymore, hence debug uses release libs
 
 lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
-lib boost_thread : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
 lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
 lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
 lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
@@ -40,7 +39,6 @@ lib boost_python36_static : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 
 # profile uses release libs
 lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
-lib boost_thread : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
 lib boost_test   : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
 lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
 lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
@@ -50,7 +48,6 @@ lib boost_python_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_python36_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt.a ;
 
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
-lib boost_thread : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt.a ;
 lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
 lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
 lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;

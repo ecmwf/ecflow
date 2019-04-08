@@ -25,7 +25,6 @@ lib pthread ;
          
 #exe test : [ glob src/*.cpp  ] 
 #           pthread
-#           /site-config//boost_thread
 #           /site-config//boost_serialization
 #         : <include>src/
 #           <variant>debug:<define>DEBUG

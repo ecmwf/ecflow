@@ -41,7 +41,6 @@ switch $(MACHINE_NAME) {
 
 
 lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
-lib boost_thread : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
 lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
 lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
 lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-$(GCC_TAG)-mt-d-$(VERSION_TAG).a ;
@@ -51,7 +50,6 @@ lib boost_python_static   : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 
 # profile uses release libs
 lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
-lib boost_thread : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
 lib boost_test   : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
 lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
 lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
@@ -60,7 +58,6 @@ lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_python_static   : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python27-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
 
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
-lib boost_thread : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
 lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
 lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
 lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-$(GCC_TAG)-mt-$(VERSION_TAG).a ;
@@ -71,7 +68,6 @@ lib boost_python_static   : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 # INTEL ================================================================================================
 
 lib boost_system : :          <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-il-mt-d-$(VERSION_TAG).a ;
-lib boost_thread : :          <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-il-mt-d-$(VERSION_TAG).a ;
 lib boost_test   : :          <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-il-mt-d-$(VERSION_TAG).a ;
 lib boost_test_monitor : :    <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-il-mt-d-$(VERSION_TAG).a ;
 lib boost_program_options : : <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-il-mt-d-$(VERSION_TAG).a ;
@@ -80,7 +76,6 @@ lib boost_datetime        : : <toolset>intel <variant>debug <file>$(BOOST_ROOT)/
 lib boost_python_static : : <toolset>intel <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27-il-mt-d-$(VERSION_TAG).a ;
  
 lib boost_system : :          <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-il-mt-$(VERSION_TAG).a ;
-lib boost_thread : :          <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-il-mt-$(VERSION_TAG).a ;
 lib boost_test   : :          <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-il-mt-$(VERSION_TAG).a ;
 lib boost_test_monitor : :    <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-il-mt-$(VERSION_TAG).a ;
 lib boost_program_options : : <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-il-mt-$(VERSION_TAG).a ;
@@ -89,7 +84,6 @@ lib boost_datetime        : : <toolset>intel <variant>profile <file>$(BOOST_ROOT
 lib boost_python_static : : <toolset>intel <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python27-il-mt-$(VERSION_TAG).a ;
 
 lib boost_system : :          <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-il-mt-$(VERSION_TAG).a ;
-lib boost_thread : :          <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-il-mt-$(VERSION_TAG).a ;
 lib boost_test   : :          <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-il-mt-$(VERSION_TAG).a ;
 lib boost_test_monitor : :    <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-il-mt-$(VERSION_TAG).a ;
 lib boost_program_options : : <toolset>intel <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-il-mt-$(VERSION_TAG).a ;
@@ -99,7 +93,6 @@ lib boost_python_static : : <toolset>intel <variant>release <file>$(BOOST_ROOT)/
 
 # CRAY ================================================================================================
 lib boost_system : :          <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-d-$(VERSION_TAG).a ;
-lib boost_thread : :          <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-d-$(VERSION_TAG).a ;
 lib boost_test   : :          <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-d-$(VERSION_TAG).a ;
 lib boost_test_monitor : :    <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt-d-$(VERSION_TAG).a ;
 lib boost_program_options : : <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-d-$(VERSION_TAG).a ;
@@ -108,7 +101,6 @@ lib boost_datetime        : : <toolset>cray <variant>debug <file>$(BOOST_ROOT)/s
 lib boost_python_static : : <toolset>cray <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt-d-$(VERSION_TAG).a ;
 
 lib boost_system : :          <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-$(VERSION_TAG).a ;
-lib boost_thread : :          <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-$(VERSION_TAG).a ;
 lib boost_test   : :          <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-$(VERSION_TAG).a ;
 lib boost_test_monitor : :    <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt-$(VERSION_TAG).a ;
 lib boost_program_options : : <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-$(VERSION_TAG).a ;
@@ -117,7 +109,6 @@ lib boost_datetime        : : <toolset>cray <variant>profile <file>$(BOOST_ROOT)
 lib boost_python_static : : <toolset>cray <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt-$(VERSION_TAG).a ;
 
 lib boost_system : :          <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt-$(VERSION_TAG).a ;
-lib boost_thread : :          <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_thread-mt-$(VERSION_TAG).a ;
 lib boost_test   : :          <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt-$(VERSION_TAG).a ;
 lib boost_test_monitor : :    <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt-$(VERSION_TAG).a ;
 lib boost_program_options : : <toolset>cray <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-$(VERSION_TAG).a ;
