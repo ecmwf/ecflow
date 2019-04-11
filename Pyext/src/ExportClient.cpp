@@ -24,6 +24,9 @@
 #include "Version.hpp"
 #include "BoostPythonUtil.hpp"
 #include "Log.hpp"
+#ifdef ECF_OPENSSL
+#include "Openssl.hpp"
+#endif
 
 using namespace boost::python;
 using namespace std;
@@ -315,7 +318,7 @@ void export_Client()
    .def("debug", &ClientInvoker::debug, "enable/disable client api debug")
 
 #ifdef ECF_OPENSSL
-   .def("enable_ssl",       &ClientInvoker::enable_ssl, "Enable encrypted communication with a ecFlow ssl server")
+   .def("enable_ssl",       &ClientInvoker::enable_ssl, ecf::Openssl::ssl_info())
 #endif
    .def("zombie_get",       &zombieGet, return_value_policy<copy_const_reference>())
    .def("zombie_fob",       &ClientInvoker::zombieFobCli )
