@@ -34,12 +34,12 @@
 
 /// Constructor starts the asynchronous connect operation.
 SslClient::SslClient( boost::asio::io_service& io_service,
-           boost::asio::ssl::context& context,
-            Cmd_ptr cmd_ptr,
-            const std::string& host,
-            const std::string& port,
-            int timeout
-           )
+                      boost::asio::ssl::context& context,
+                      Cmd_ptr cmd_ptr,
+                      const std::string& host,
+                      const std::string& port,
+                      int timeout
+)
 : stopped_(false),host_( host ), port_( port ),
   connection_(io_service,context),
   deadline_(io_service),

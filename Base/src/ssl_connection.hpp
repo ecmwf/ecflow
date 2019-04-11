@@ -72,14 +72,14 @@ public:
          ecf::save_as_string(outbound_data_,t);
       } catch (const std::exception& ae ) {
          // Unable to decode data. Something went wrong, inform the caller.
-         log_archive_error("ssl_Connection::async_write, exception ",ae,outbound_data_);
+         log_archive_error("ssl_connection::async_write, exception ",ae,outbound_data_);
          boost::system::error_code error(boost::asio::error::invalid_argument);
          socket_.get_io_service().post(boost::bind(handler, error));
          return;
       }
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "ssl_Connection::async_write Format the header\n";
+      std::cout << "ssl_connection::async_write Format the header\n";
       std::cout << " " << outbound_data_ << "\n";
 #endif
       // Format the header.
@@ -185,7 +185,7 @@ private:
             ecf::restore_from_string(archive_data,t);
          }
          catch (std::exception& e) {
-            log_archive_error("ssl_onnection::handle_read_data, Unable to decode data :",e,archive_data);
+            log_archive_error("ssl_connection::handle_read_data, Unable to decode data :",e,archive_data);
             boost::system::error_code error( boost::asio::error::invalid_argument);
             boost::get<0>(handler)(error);
             return;
@@ -201,7 +201,7 @@ private:
    static void log_archive_error(const char* msg,const std::exception& ae,const std::string& data);
 
 private:
-   boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
+   ssl_socket  socket_;
    std::string outbound_header_;        /// Holds an out-bound header.
    std::string outbound_data_;          /// Holds the out-bound data.
    enum { header_length = 8 };          /// The size of a fixed length header.

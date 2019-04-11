@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : Connection.cpp
+// Name        : ssl_connection.cpp
 // Author      : Avi
 // Revision    : $Revision: #26 $
 //
@@ -14,7 +14,6 @@
 //============================================================================
 
 #include "ssl_connection.hpp"
-
 
 ssl_connection::~ssl_connection() {
 #ifdef DEBUG_CONNECTION

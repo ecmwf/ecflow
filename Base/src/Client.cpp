@@ -33,11 +33,11 @@
 
 /// Constructor starts the asynchronous connect operation.
 Client::Client( boost::asio::io_service& io_service,
-				Cmd_ptr cmd_ptr,
-				const std::string& host,
-				const std::string& port,
-				int timeout
-			  )
+                Cmd_ptr cmd_ptr,
+                const std::string& host,
+                const std::string& port,
+                int timeout
+)
 : stopped_(false),host_( host ), port_( port ),
   connection_(io_service),
   deadline_(io_service),
