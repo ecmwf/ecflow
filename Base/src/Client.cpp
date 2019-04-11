@@ -33,20 +33,13 @@
 
 /// Constructor starts the asynchronous connect operation.
 Client::Client( boost::asio::io_service& io_service,
-#ifdef ECF_OPENSSL
-           boost::asio::ssl::context& context,
-#endif
 				Cmd_ptr cmd_ptr,
 				const std::string& host,
 				const std::string& port,
 				int timeout
 			  )
 : stopped_(false),host_( host ), port_( port ),
-#ifdef ECF_OPENSSL
-  connection_(io_service,context),
-#else
   connection_(io_service),
-#endif
   deadline_(io_service),
   timeout_(timeout)
 {
@@ -183,48 +176,10 @@ void Client::handle_connect(  const boost::system::error_code& e,
 #endif
 
      // **Successfully** established connection to the server
-#ifdef ECF_OPENSSL
-     start_handshake();
-#else
      // Start operation to *SEND* a request to the server
      start_write();
-#endif
   }
 }
-
-#ifdef ECF_OPENSSL
-void Client::start_handshake()
-{
-#ifdef DEBUG_CLIENT
-   std::cout << "   Client::start_handshake " << outbound_request_ << std::endl;
-#endif
-   // expires_from_now cancels any pending asynchronous waits, and returns the number of asynchronous waits that were cancelled.
-   // If it returns 0 then you were too late and the wait handler has already been executed, or will soon be executed.
-   // If it returns 1 then the wait handler was successfully cancelled.
-   // Set a deadline for the write operation.
-   deadline_.expires_from_now(boost::posix_time::seconds(timeout_));
-
-   connection_.socket().async_handshake(boost::asio::ssl::stream_base::client,
-        boost::bind(&Client::handle_handshake, this, boost::asio::placeholders::error));
-}
-
-void Client::handle_handshake( const boost::system::error_code& e )
-{
-#ifdef DEBUG_CLIENT
-   std::cout << "   Client::handle_handshake " << std::endl;
-#endif
-   if (!e) {
-      start_write();
-   }
-   else {
-      // An error occurred.
-      stop();
-
-      std::stringstream ss;  ss << "Client::handle_handshake: error (" << e.message() << " ) for request( " << outbound_request_ << " ) on " << host_ << ":" <<  port_;
-      throw std::runtime_error(ss.str());
-   }
-}
-#endif
 
 void Client::start_write()
 {
@@ -316,22 +271,19 @@ void Client::handle_read( const boost::system::error_code& e )
 	}
 	else {
 		//
-		// A connection error occurred.
-		// In cases where ( to cut down network traffic), the server does a shutdown/closes
-		// the socket without replying we will get End of File error.
+		// A connection error occurred. EOF
+		//   - In cases where ( to cut down network traffic),
+	   //     the server does a shutdown/closes the socket without replying we will get End of File error.
+	   //   - if we have a NONSSL client talking to SSL server, the SSL server will not reply, we will get End of File error.
 		//
 		// i.e. client requests a response from the server, and it does not reply(or replies with shutdown/close)
-		//
+		// In both cases we will treat as an error
 
-		// This code will handle  a no reply from the server & hence reduce network traffic
-		// Server has shutdown and closed the socket.
-		// See void Server::handle_read(...)
 		if (e.value() == boost::asio::error::eof) {
-			// Treat a  *no* reply as OK, so that handle_server_response() returns OK
 #ifdef DEBUG_CLIENT
-			std::cout << "   Client::handle_read: No reply from server: Treat as OK" << std::endl;
+			std::cout << "   Client::handle_read: End of File (server did not reply or mixing ssl and non-ssl)" << std::endl;
 #endif
-			inbound_response_.set_cmd( std::make_shared<StcCmd>(StcCmd::OK) );
+			inbound_response_.set_cmd( std::make_shared<StcCmd>(StcCmd::END_OF_FILE) );
 			return;
 		}
 

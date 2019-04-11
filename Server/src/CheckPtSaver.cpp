@@ -18,7 +18,7 @@
 #include "boost/bind.hpp"
 
 #include "CheckPtSaver.hpp"
-#include "Server.hpp"
+#include "BaseServer.hpp"
 #include "ServerEnvironment.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
@@ -41,7 +41,7 @@ using namespace ecf;
 
 //-------------------------------------------------------------------------------------
 CheckPtSaver::CheckPtSaver(
-         Server* s,
+         BaseServer* s,
          boost::asio::io_service& io,
          const ServerEnvironment* serverEnv )
 : server_( s ),

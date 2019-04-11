@@ -68,7 +68,7 @@ std::string Version::description()
    ss << " protocol(JSON)";
 
 #ifdef ECF_OPENSSL
-   ss << " openssl";
+   ss << " openssl(enabled)";
 #endif
 
    ss << " Compiled on " << __DATE__ << " " << __TIME__;

@@ -174,9 +174,10 @@ void Stats::show(std::ostream& os) const
    os << left << setw(width) << "   Port " << port_ << "\n";
    os << left << setw(width) << "   Up since " << up_since_ << "\n";
    os << left << setw(width) << "   Job sub' interval " << job_sub_interval_ << "s\n";
-   os << left << setw(width) << "   ECF_HOME " <<   ECF_HOME_ << "\n";
-   os << left << setw(width) << "   ECF_LOG " <<   ECF_LOG_ << "\n";
-   os << left << setw(width) << "   ECF_CHECK " <<   ECF_CHECK_ << "\n";
+   os << left << setw(width) << "   ECF_HOME "  << ECF_HOME_ << "\n";
+   os << left << setw(width) << "   ECF_LOG "   << ECF_LOG_ << "\n";
+   os << left << setw(width) << "   ECF_CHECK " << ECF_CHECK_ << "\n";
+   os << left << setw(width) << "   ECF_SSL "   << ECF_SSL_ << "\n";
    os << left << setw(width) << "   Check pt interval " << checkpt_interval_ << "s\n";
    os << left << setw(width) << "   Check pt mode " << show_checkpt_mode(checkpt_mode_) << "\n";
    os << left << setw(width) << "   Check pt save time alarm " << checkpt_save_time_alarm_ << "s\n";

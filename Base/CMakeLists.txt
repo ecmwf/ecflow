@@ -68,7 +68,11 @@
 )
 
 if(OPENSSL_FOUND)
-  list( APPEND srcs src/Openssl.cpp )
+  list( APPEND srcs 
+     src/Openssl.cpp 
+     src/ssl_connection.cpp
+     src/SslClient.cpp
+  )
 endif()
 
 ecbuild_add_library( TARGET   base

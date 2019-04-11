@@ -29,9 +29,6 @@ class Client {
 public:
 	/// Constructor starts the asynchronous connect operation.
 	Client( boost::asio::io_service& io_service,
-#ifdef ECF_OPENSSL
-	        boost::asio::ssl::context& context,
-#endif
 	        Cmd_ptr cmd_ptr,
 	        const std::string& host, const std::string& port,
 	        int timout = 0);
@@ -42,7 +39,6 @@ public:
 	/// will throw std::runtime_error for errors
 	bool handle_server_response( ServerReply&,  bool debug ) const;
 
-
 private:
 
 	void start(boost::asio::ip::tcp::resolver::iterator);
@@ -50,11 +46,6 @@ private:
 	void check_deadline();
 
 	bool start_connect(boost::asio::ip::tcp::resolver::iterator);
-
-#ifdef ECF_OPENSSL
-	void start_handshake();
-	void handle_handshake( const boost::system::error_code& e );
-#endif
 	void start_write();
 	void start_read();
 
@@ -76,7 +67,6 @@ private:
 	ClientToServerRequest   outbound_request_; /// The request we will send to the server
 	ServerToClientResponse  inbound_response_; /// The response we get back from the server
 
-	std::string                 error_msg_;
 	boost::asio::deadline_timer deadline_;
 
 	//    connect        : timeout_ second

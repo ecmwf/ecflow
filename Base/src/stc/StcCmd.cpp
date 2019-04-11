@@ -1,5 +1,5 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        : Cmd
+// Name        : StcCmd
 // Author      : Avi
 // Revision    : $Revision: #7 $ 
 //
@@ -18,14 +18,15 @@
 
 std::ostream& StcCmd::print(std::ostream& os) const
 {
-	switch (api_) {
-		case StcCmd::OK:                          return os << "cmd:Ok"; break;
-		case StcCmd::BLOCK_CLIENT_SERVER_HALTED:  return os << "cmd:Server_halted"; break;
-        case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: return os << "cmd:Wait"; break;
-        case StcCmd::DELETE_ALL:                  return os << "cmd:delete_all"; break;
-		case StcCmd::INVALID_ARGUMENT:            return os << "cmd:Invalid_argumnet"; break;
-		default: assert(false); break;
- 	}
+   switch (api_) {
+      case StcCmd::OK:                          return os << "cmd:Ok"; break;
+      case StcCmd::BLOCK_CLIENT_SERVER_HALTED:  return os << "cmd:Server_halted"; break;
+      case StcCmd::BLOCK_CLIENT_ON_HOME_SERVER: return os << "cmd:Wait"; break;
+      case StcCmd::DELETE_ALL:                  return os << "cmd:delete_all"; break;
+      case StcCmd::END_OF_FILE:                 return os << "cmd:end_of_file"; break;
+      case StcCmd::INVALID_ARGUMENT:            return os << "cmd:Invalid_argument"; break;
+      default: assert(false); break;
+   }
 	assert(false); // unknown command
 	return os << "cmd:Unknown??";
 }
@@ -50,14 +51,22 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
 			server_reply.set_block_client_on_home_server(); // requires further work, by ClientInvoker
 			break;
  		}
-        case StcCmd::DELETE_ALL: {
-           if (debug) std::cout << "  StcCmd::handle_server_response DELETE_ALL\n";
-           server_reply.set_client_defs(defs_ptr());
-           server_reply.set_client_node(node_ptr());
-           server_reply.set_client_handle(0);
-           ret = true;
-           break;
-        }
+		case StcCmd::DELETE_ALL: {
+		   if (debug) std::cout << "  StcCmd::handle_server_response DELETE_ALL\n";
+		   server_reply.set_client_defs(defs_ptr());
+		   server_reply.set_client_node(node_ptr());
+		   server_reply.set_client_handle(0);
+		   ret = true;
+		   break;
+		}
+      case StcCmd::END_OF_FILE: {
+         if (debug) std::cout << "  StcCmd::handle_server_response END_OF_FILE\n";
+         server_reply.set_eof(); // requires further work, by ClientInvoker
+         std::stringstream ss;
+         ss << "Error: request( "; cts_cmd->print(ss); ss << " ) failed! Server replied with: EOF(Server did not reply or mixing ssl and non-ssl)\n";
+         server_reply.set_error_msg(ss.str());
+         break;
+      }
 		case StcCmd::INVALID_ARGUMENT: {
 			// This is created on the client side, after detecting a INVALID_ARGUMENT reply from the server
 			// This keeps compatibility with 4 servers

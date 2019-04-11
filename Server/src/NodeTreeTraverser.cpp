@@ -18,7 +18,7 @@
 
 #include "ServerEnvironment.hpp"
 #include "NodeTreeTraverser.hpp"
-#include "Server.hpp"
+#include "BaseServer.hpp"
 #include "Defs.hpp"
 #include "JobsParam.hpp"
 #include "Jobs.hpp"
@@ -39,7 +39,7 @@ using namespace boost::posix_time;
 // Hence we poll every second, and check it against the minute boundary
 // ************************************************************************
 
-NodeTreeTraverser::NodeTreeTraverser( Server* s,
+NodeTreeTraverser::NodeTreeTraverser( BaseServer* s,
 		boost::asio::io_service& io,
 		const ServerEnvironment& serverEnv)
 : server_( s ),

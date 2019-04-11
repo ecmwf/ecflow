@@ -13,13 +13,56 @@
 // Description : Server
 //============================================================================
 
-#include <memory>
-#include "Server.hpp"
 #include "Log.hpp"
 #include "ServerEnvironment.hpp"
 
+#include "Server.hpp"
+#ifdef ECF_OPENSSL
+#include "SslServer.hpp"
+#endif
+
 using namespace ecf;
 using namespace std;
+
+int invoke_server(ServerEnvironment& server_environment)
+{
+   Server theServer( server_environment ); // This can throw exception, bind address in use.
+    for(;;) {
+       try {
+          theServer.run();
+          if (server_environment.debug()) cout << "Normal exit from server\n";
+          break;
+       }
+       catch ( std::exception& e ) {
+          // deal with errors from the handlers
+          std::string msg = "invoke_server:: "; msg += e.what();
+          std::cerr << msg  << endl;
+          ecf::log(Log::ERR,msg);
+       }
+    }
+    return 0;
+}
+
+#ifdef ECF_OPENSSL
+int invoke_ssl_server(ServerEnvironment& server_environment)
+{
+   SslServer theServer( server_environment ); // This can throw exception, bind address in use.
+    for(;;) {
+       try {
+          theServer.run();
+          if (server_environment.debug()) cout << "Normal exit from ssl server\n";
+          break;
+       }
+       catch ( std::exception& e ) {
+          // deal with errors from the handlers
+          std::string msg = "invoke_ssl_server:: "; msg += e.what();
+          std::cerr << msg  << endl;
+          ecf::log(Log::ERR,msg);
+       }
+    }
+    return 0;
+}
+#endif
 
 int main( int argc, char* argv[] ) {
 
@@ -36,20 +79,13 @@ int main( int argc, char* argv[] ) {
       }
 
       if (server_environment.debug()) cout << "Server started: ------------------------------------------------>port:" << server_environment.port() <<  endl;
-      Server theServer( server_environment ); // This can throw exception, bind address in use.
-      for(;;) {
-         try {
-            theServer.run();
-            if (server_environment.debug()) cout << "Normal exit from server\n";
-            break;
-         }
-         catch ( std::exception& e ) {
-            // deal with errors from the handlers
-            std::string msg = "ServerMain:: "; msg += e.what();
-            std::cerr << msg  << endl;
-            ecf::log(Log::ERR,msg);
-         }
-      }
+
+#ifdef ECF_OPENSSL
+      if (server_environment.ssl() ) return invoke_ssl_server(server_environment);
+      else                           return invoke_server(server_environment);
+#else
+      return invoke_server(server_environment);
+#endif
 
       if (server_environment.debug()) cout << "Server EXITING: <------------------------------------------------ port:" << server_environment.port() <<  endl;
       return 0;

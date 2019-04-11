@@ -56,6 +56,10 @@ ClientOptions::ClientOptions()
             "port: If specified will override the environment variable ECF_PORT and default port number of 3141");
    desc_->add_options()("host",po::value< string >()->implicit_value( string("") ),
             "host: If specified will override the environment variable ECF_HOST and default host, localhost");
+#ifdef ECF_OPENSSL
+   desc_->add_options()("ssl",
+             "ssl: If specified will override the environment variable ECF_SSL");
+#endif
 }
 
 ClientOptions::~ClientOptions()
@@ -110,6 +114,12 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
       if (env->debug())  std::cout << "  rid " << rid << " overridden at the command line\n";
       env->set_remote_id(rid);
    }
+#ifdef ECF_OPENSSL
+   if ( vm.count( "ssl" ) ) {
+       if (env->debug())  std::cout << "  ssl at the command line\n";
+       env->enable_ssl();
+    }
+#endif
 
    // Defer the parsing of the command , to the command. This allows
    // all cmd functionality to be centralised with the command
@@ -190,12 +200,13 @@ void ClientOptions::show_help(const std::string & help_cmd) const
              cout << "\n\n";
              cout << od->description() << "\n\n";
              cout << client_env_description();
-             if ( od->long_name() == TaskApi::initArg()  ||
+             if ( od->long_name() == TaskApi::initArg()     ||
                   od->long_name() == TaskApi::completeArg() ||
-                  od->long_name() == TaskApi::abortArg()  ||
-                  od->long_name() == TaskApi::waitArg()  ||
-                  od->long_name() == TaskApi::eventArg()  ||
-                  od->long_name() == TaskApi::labelArg()  ||
+                  od->long_name() == TaskApi::abortArg()    ||
+                  od->long_name() == TaskApi::waitArg()     ||
+                  od->long_name() == TaskApi::eventArg()    ||
+                  od->long_name() == TaskApi::labelArg()    ||
+                  od->long_name() == TaskApi::queue_arg()   ||
                   od->long_name() == TaskApi::meterArg()) {
                 cout << "\n";
                 cout << client_task_env_description();
@@ -292,6 +303,9 @@ const char* client_env_description() {
             "|----------|----------|------------|-------------------------------------------------------------------|\n"
             "| ECF_HOST | <string> | Mandatory* | The host name of the main server. defaults to 'localhost'         |\n"
             "| ECF_PORT |  <int>   | Mandatory* | The TCP/IP port to call on the server. Must be unique to a server |\n"
+#ifdef ECF_OPENSSL
+            "| ECF_SSL  |  <any>   | Optional*  | Enable encrypted comms with SSL enabled server.                   |\n"
+#endif
             "|----------|----------|------------|-------------------------------------------------------------------|\n\n"
             "* The host and port must be specified in order for the client to communicate with the server, this can \n"
             "  be done by setting ECF_HOST, ECF_PORT or by specifying --host=<host> --port=<int> on the command line\n"

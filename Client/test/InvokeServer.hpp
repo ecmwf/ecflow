@@ -39,7 +39,13 @@ public:
 
    {
 		if (host_.empty()) {
-			if(!msg.empty()) std::cout << msg << "   port(" << port_ << ")" << std::endl;
+			if(!msg.empty()) {
+			   std::cout << msg << "   port(" << port_ << ")";
+#ifdef ECF_OPENSSL
+			   if (getenv("ECF_SSL")) std::cout << " (ssl)";
+#endif
+			   std::cout << std::endl;
+			}
 
 			doStart(port_,server_started_,disable_job_generation,remove_checkpt_file_before_server_start);
 		}

@@ -23,9 +23,10 @@
 #include "Task.hpp"
 #include "Family.hpp"
 #include "NodePath.hpp"
-#include "Client.hpp"
 #include "SuiteChanged.hpp"
+#include "Client.hpp"
 #ifdef ECF_OPENSSL
+#include "SslClient.hpp"
 #include "Openssl.hpp"
 #endif
 
@@ -142,22 +143,32 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 
             // Server is acting like a client, Send MoveCmd to another server
             // The source should end up being copied, when sent to remote server
+            ServerReply server_reply;
             boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
-            boost::asio::ssl::context ctx(ecf::Openssl::method());
-            ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
-            Client theClient( io_service, ctx, cts_cmd,  host, port  );
-#else
-            Client theClient( io_service, cts_cmd,  host, port  );
-#endif
-            io_service.run();
+            if (as->ssl()) {
+                boost::asio::ssl::context ctx(ecf::Openssl::method());
+                ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
 
-            ServerReply server_reply;
-            theClient.handle_server_response( server_reply, false /* debug */ );
-            if (server_reply.client_request_failed()) {
-               throw std::runtime_error( server_reply.error_msg() ) ;
+                SslClient theClient( io_service, ctx, cts_cmd,  host, port );
+                io_service.run();
+                theClient.handle_server_response( server_reply, false /* debug */ );
+                if (server_reply.client_request_failed()) {
+                   throw std::runtime_error( server_reply.error_msg() ) ;
+                }
             }
+            else {
+#endif
+               Client theClient( io_service, cts_cmd,  host, port );
+               io_service.run();
+               theClient.handle_server_response( server_reply, false /* debug */ );
+               if (server_reply.client_request_failed()) {
+                  throw std::runtime_error( server_reply.error_msg() ) ;
+               }
+            }
+#ifdef ECF_OPENSSL
          }
+#endif
 
          // The move command was ok, remove the source node, and delete its memory
          sourceNode->remove();

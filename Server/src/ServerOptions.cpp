@@ -92,6 +92,22 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
          "  The default threshold is 4000 milliseconds\n"
          "  Note: 1000 milliseconds = 1 second\n"
          "    export ECF_TASK_THRESHOLD=1500\n"
+#ifdef ECF_OPENSSL
+         "ECF_SSL:\n"
+         "  Enables encrypted communication between client and server.\n"
+         "  You will need to ensure open ssl in installed on your system\n"
+         "  In order to use openssl, we need set up some certificates.\n"
+         "  (These will be self signed certificates, rather than a certificate authority).\n"
+         "  The ecFlow client and server, will look for the certificates\n"
+         "  in $HOME/.ecflowrc/ssl directory.\n"
+         "  ecFlow server expects the following files in : $HOME/.ecflowrc/ssl\n"
+         "    - dh1024.pem\n"
+         "    - server.crt\n"
+         "    - server.key\n"
+         "    - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key.\n"
+         "  ecFlow client expects the following files in : $HOME/.ecflowrc/ssl\n"
+         "    - server.crt ( this must be the same as server)\n"
+#endif
          "\n"
          "These defaults along with several other can be specified in the file\n"
          "server_environment.cfg. The file should be placed in the current working\n"
@@ -105,6 +121,9 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 )
 ( "ecfinterval",  po::value< int >(), "<int> <Allowed range 1-60>  Submit jobs interval. For DEBUG/Test only" )
 ( "v6",                               "Use IPv6 TCP protocol. Default is IPv4" )
+#ifdef ECF_OPENSSL
+( "ssl",                              "ssl server. Client side use export ECF_SSL=1 *or* ecflow_client --ssl to communicate with ssl server")
+#endif
 ( "dis_job_gen",                      "Disable job generation. For DEBUG/Test only." )
 ( "debug,d",                          "Enable debug output." )
 ( "version,v",                        "Show ecflow version number,boost library version, compiler used and compilation date, then exit" )
@@ -121,7 +140,6 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 
 	if ( vm_.count( "debug" ) )  env->debug_ = true;
 
-
  	if ( vm_.count( "port" ) ) {
  		if (env->debug_) cout << "ServerOptions:: The port number set to '" << vm_["port"].as< int > () << "'\n";
 		env->serverPort_ = vm_["port"].as< int > ();
@@ -137,7 +155,13 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 	if ( vm_.count( "dis_job_gen" ) ) {
 		if (env->debug_) cout << "ServerOptions: The dis_job_gen is set\n";
 		env->jobGeneration_ = false;
- 	}
+	}
+#ifdef ECF_OPENSSL
+	if ( vm_.count( "ssl" ) ) {
+	   if (env->debug_) cout << "ServerOptions: ssl server\n";
+	   env->enable_ssl();
+	}
+#endif
 }
 
 bool ServerOptions::help_option() const

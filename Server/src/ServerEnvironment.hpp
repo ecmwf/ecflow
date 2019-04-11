@@ -62,6 +62,12 @@ public:
 	/// returns the server host and port
 	std::pair<std::string,std::string> hostPort() const;
 
+#ifdef ECF_OPENSSL
+	/// return true if ssl enable via command line, AND SSL libraries are found
+	bool ssl() const { return ssl_;}
+	void enable_ssl() { ssl_ = true;}
+#endif
+
 	/// returns the server port. This has a default value defined in server_environment.cfg
 	/// but can be overridden by the environment variable ECF_PORT
 	int port() const { return serverPort_;}
@@ -183,7 +189,7 @@ private:
 	int  checkPtInterval_;
 	int  checkpt_save_time_alarm_;
 	int  submitJobsInterval_;
-	bool jobGeneration_;   // used in debug/test mode only
+   bool jobGeneration_;   // used in debug/test mode only
 	bool debug_;
    bool help_option_;
    bool version_option_;
@@ -205,6 +211,10 @@ private:
 
    std::string ecf_passwd_file_;
    mutable PasswdFile passwd_file_;
+
+#ifdef ECF_OPENSSL
+   bool ssl_{false};
+#endif
 
 	boost::asio::ip::tcp tcp_protocol_;      // defaults to IPv4 TCP protocol
 	friend class ServerOptions;

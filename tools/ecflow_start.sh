@@ -35,10 +35,11 @@ backup_server=false
 verbose=false
 rerun=false
 check=false
+ssl=false
 
 #==========================================================================
 # Syntax
-# ecflow_start [-b] [-d ecf_home_directory] [-f] [-h] [-p port_number ]
+# ecflow_start [-b] [-d ecf_home_directory] [-f] [-h] [-s] [-p port_number ]
 #==========================================================================
 # get command line options if any.
 while getopts chfbd:vp:r option
@@ -65,6 +66,9 @@ ecf_port=$OPTARG
 r)
 rerun=true
 ;;
+s)
+ssl=true
+;;
 h)
 echo "Usage: $0 [-b] [-d ecf_home directory] [-f] [-h]"
 echo "       -b        start ECF for backup server or e-suite"
@@ -72,6 +76,7 @@ echo "       -c        test check point file for errors"
 echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
 echo "       -f        forces the ECF to be restarted"
 echo "       -v        verbose mode"
+echo "       -s        enable ssl server. Requires client/server built with openssl libs"
 echo "       -h        print this help page"
 echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1500+<UID> | 1000+<UID> for backup server"
 exit 0
@@ -83,13 +88,20 @@ echo "       -c        test check point file for errors"
 echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
 echo "       -f        forces the ECF to be restarted"
 echo "       -v        verbose mode"
+echo "       -s        enable ssl server. Requires client/server built with openssl libs"
 echo "       -h        print this help page"
 echo "       -p <num>  specify server port number(ECF_PORT number)  - default 1500+<UID> | 1000+<UID> for backup server"
 exit 1
 ;;
 esac
 done
- 
+
+# ================================================================================
+# SSL
+if [ "$ssl" = "true" ]; then
+     export ECF_SSL=1  # required for both client and server
+fi
+
 # =================================================================================
 # port_number is set based on the unique users numeric uid.
 

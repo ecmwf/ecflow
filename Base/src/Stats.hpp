@@ -43,6 +43,7 @@ struct Stats {
    std::string ECF_HOME_;
    std::string ECF_CHECK_;
    std::string ECF_LOG_;
+   std::string ECF_SSL_{"disabled"};
 
 	int request_count_{0};
 	int job_sub_interval_{0};
@@ -149,7 +150,8 @@ private:
 		ar & request_stats_;
 		ar & ECF_HOME_;
 		ar & ECF_CHECK_;
-		ar & ECF_LOG_;
+      ar & ECF_LOG_;
+      ar & ECF_SSL_;
 
 		ar & checkpt_;
 

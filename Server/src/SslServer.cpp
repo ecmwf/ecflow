@@ -1,69 +1,112 @@
 //============================================================================
-// Name        : Server.cpp
-// Author      : Avi
+// Name        : SslServer.cpp
+// Author      : Avi Bahra
 // Revision    : $Revision: #173 $
 //
 // Copyright 2009-2019 ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //============================================================================
 
 #include <iostream>
 #include <boost/bind.hpp>
+#include "boost/filesystem/operations.hpp"
 
-#include "Server.hpp"
+#include "SslServer.hpp"
 #include "Log.hpp"
 #include "ServerEnvironment.hpp"
 #include "Version.hpp"
+#include "Openssl.hpp"
+#include "File.hpp"
 
 using boost::asio::ip::tcp;
+namespace fs = boost::filesystem;
 
 using namespace std;
 using namespace ecf;
 
-Server::Server( ServerEnvironment& serverEnv ) : BaseServer(serverEnv)
+
+SslServer::SslServer( ServerEnvironment& serverEnv ) : BaseServer(serverEnv), ssl_context_(ecf::Openssl::method())
 {
+   stats().ECF_SSL_ = "enabled";
+
+   ssl_context_.set_options(
+            boost::asio::ssl::context::default_workarounds
+            | boost::asio::ssl::context::no_sslv2
+            | boost::asio::ssl::context::single_dh_use);
+   // this must be done before loading any keys. as below
+   ssl_context_.set_password_callback(boost::bind(&SslServer::get_password, this));
+
+   std::string home_path = ecf::Openssl::certificates_dir();
+   ssl_context_.use_certificate_chain_file(home_path + "server.crt" );
+   ssl_context_.use_private_key_file(home_path + "server.key", boost::asio::ssl::context::pem);
+   ssl_context_.use_tmp_dh_file(home_path + "dh1024.pem");
+
+
    start_accept();
 }
 
-void Server::start_accept()
+std::string SslServer::get_password() const
 {
-   if (serverEnv_.debug()) cout << "   Server::start_accept()" << endl;
-   connection_ptr new_conn = std::make_shared<connection>( boost::ref(io_service_) );
-   acceptor_.async_accept( new_conn->socket_ll(),
-		                   [this,new_conn](const boost::system::error_code& e ) { handle_accept(e,new_conn); });
+   // std::cout << "SslServer::get_password()\n";
+   std::string passwd_file = ecf::Openssl::certificates_dir();
+   passwd_file += "/server.passwd";
+   if (fs::exists(passwd_file)) {
+      std::string contents;
+      if (ecf::File::open(passwd_file,contents)) {
+         // remove /n added by editor.
+         if (!contents.empty() && contents[contents.size()-1] == '\n') contents.erase(contents.begin() + contents.size()-1);
+         //std::cout << "Server::get_password() passwd('" << contents << "')\n";
+         return contents;
+      }
+      else {
+         std::stringstream ss;
+         ss << "Server::get_password file " << passwd_file << " exists, but can't be opened (" << strerror(errno) << ")";
+         throw std::runtime_error(ss.str());
+      }
+   }
+   //std::cout << "Server::get_password() passwd('test')\n";
+   return "test";
 }
 
-void Server::handle_accept( const boost::system::error_code& e, connection_ptr conn )
+void SslServer::start_accept()
 {
-   if (serverEnv_.debug()) cout << "   Server::handle_accept" << endl;
+   if (serverEnv_.debug()) cout << "   SslServer::start_accept()" << endl;
+
+   ssl_connection_ptr new_conn = std::make_shared<ssl_connection>(  boost::ref(io_service_),  boost::ref(ssl_context_)) ;
+
+   acceptor_.async_accept( new_conn->socket_ll(),
+                         [this,new_conn](const boost::system::error_code& e ) { handle_accept(e,new_conn); });
+}
+
+
+void SslServer::handle_accept( const boost::system::error_code& e, ssl_connection_ptr conn )
+{
+   if (serverEnv_.debug()) cout << "   SslServer::handle_accept" << endl;
 
    // Check whether the server was stopped by a signal before this completion
    // handler had a chance to run.
    if (!acceptor_.is_open()) {
-      if (serverEnv_.debug()) cout << "   Server::handle_accept:  acceptor is closed, returning" << endl;
+      if (serverEnv_.debug()) cout << "   SslServer::handle_accept:  acceptor is closed, returning" << endl;
       return;
    }
 
    if ( !e ) {
       // Read and interpret message from the client
-      // Successfully accepted a new connection. Determine what the
-      // client sent to us. The connection::async_read() function will
-      // automatically. serialise the inbound_request_ data structure for us.
-      conn->async_read( inbound_request_,
-                     boost::bind( &Server::handle_read, this,
-                                boost::asio::placeholders::error,conn ) );
+      conn->socket().async_handshake(boost::asio::ssl::stream_base::server,
+                                     boost::bind(&SslServer::handle_handshake, this,
+                                                 boost::asio::placeholders::error,conn ));
    }
    else {
-      if (serverEnv_.debug()) cout << "   Server::handle_accept " << e.message() << endl;
+      if (serverEnv_.debug()) cout << "   SslServer::handle_accept " << e.message() << endl;
       if (e != boost::asio::error::operation_aborted) {
          // An error occurred. Log it
          LogToCout toCoutAsWell;
          LogFlusher logFlusher;
-         LOG(Log::ERR, "   Server::handle_accept error occurred  " <<  e.message());
+         LOG(Log::ERR, "   SslServer::handle_accept error occurred  " <<  e.message());
       }
    }
 
@@ -76,7 +119,28 @@ void Server::handle_accept( const boost::system::error_code& e, connection_ptr c
    start_accept();
 }
 
-void Server::handle_read(  const boost::system::error_code& e,connection_ptr conn )
+void SslServer::handle_handshake(const boost::system::error_code& e,ssl_connection_ptr new_conn )
+{
+   if (serverEnv_.debug()) cout << "   SslServer::handle_handshake" << endl;
+
+   if (!e)
+   {
+      // Successfully accepted a new connection. Determine what the
+      // client sent to us. The connection::async_read() function will
+      // automatically. serialise the inbound_request_ data structure for us.
+      new_conn->async_read( inbound_request_,
+                     boost::bind( &SslServer::handle_read, this,
+                                boost::asio::placeholders::error,new_conn ) );
+   }
+   else
+   {
+      // An error occurred.
+      LogToCout toCoutAsWell;
+      LOG(Log::ERR, "SslServer::handle_handshake: " <<  e.message());
+   }
+}
+
+void SslServer::handle_read(  const boost::system::error_code& e, ssl_connection_ptr conn )
 {
    /// Handle completion of a write operation.
    // **********************************************************************************
@@ -85,7 +149,7 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
    if ( !e ) {
 
       // See what kind of message we got from the client
-      if (serverEnv_.debug()) std::cout << "   Server::handle_read : client request " << inbound_request_ << endl;
+      if (serverEnv_.debug()) std::cout << "   SslServer::handle_read : client request " << inbound_request_ << endl;
 
       try {
          // Service the in bound request, handling the request will populate the outbound_response_
@@ -101,7 +165,7 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
 
       // Always *Reply* back to the client, Otherwise client will get EOF
       conn->async_write( outbound_response_,
-                          boost::bind(&Server::handle_write,
+                          boost::bind(&SslServer::handle_write,
                                     this,
                                     boost::asio::placeholders::error,
                                     conn ) );
@@ -109,15 +173,15 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
    else {
       // An error occurred.
       // o/ If client has been killed/disconnected/timed out
-      //       Server::handle_read : End of file
+      //       SslServer::handle_read : End of file
       //
       // o/ If a *new* client talks to an *old* server, with an unrecognised request/command i.e mixing 4/5 series
       //    we will see:
       //       Connection::handle_read_data .............
-      //       Server::handle_read : Invalid argument
+      //       SslServer::handle_read : Invalid argument
       LogToCout toCoutAsWell;
       LogFlusher logFlusher;
-      LOG(Log::ERR, "Server::handle_read: " <<  e.message());
+      LOG(Log::ERR, "SslServer::handle_read: " <<  e.message());
 
       // *Reply* back to the client, This may fail in the client;
       std::pair<std::string,std::string> host_port = hostPort();
@@ -125,25 +189,25 @@ void Server::handle_read(  const boost::system::error_code& e,connection_ptr con
       msg += Version::raw(); msg += ") replied with: "; msg += e.message();
       outbound_response_.set_cmd( PreAllocatedReply::error_cmd(msg));
       conn->async_write( outbound_response_,
-                          boost::bind(&Server::handle_write,
+                          boost::bind(&SslServer::handle_write,
                                     this,
                                     boost::asio::placeholders::error,
                                     conn ) );
    }
 }
 
-void Server::handle_write( const boost::system::error_code& e, connection_ptr conn )
+void SslServer::handle_write( const boost::system::error_code& e, ssl_connection_ptr conn )
 {
    // Handle completion of a write operation.
    // Nothing to do. The socket will be closed automatically when the last
    // reference to the connection object goes away.
    if (serverEnv_.debug())
-      cout << "   Server::handle_write: client request " << inbound_request_ << " replying with  " << outbound_response_ << endl;
+      cout << "   SslServer::handle_write: client request " << inbound_request_ << " replying with  " << outbound_response_ << endl;
 
    if (e) {
       LogFlusher logFlusher;
       ecf::LogToCout logToCout;
-      std::stringstream ss; ss << "Server::handle_write: " << e.message() << " : for request " << inbound_request_;
+      std::stringstream ss; ss << "SslServer::handle_write: " << e.message() << " : for request " << inbound_request_;
       log(Log::ERR,ss.str());
       return;
    }
@@ -151,7 +215,7 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
    // Do any necessary clean up after outbound_response_  has run. i.e like re-claiming memory
    outbound_response_.cleanup();
 
-   (void)shutdown_socket(conn,"Server::handle_write:");
+   (void)shutdown_socket(conn,"SslServer::handle_write:");
 
    // If asked to terminate we do it here rather than in handle_read.
    // So that we have responded to the client.
@@ -159,12 +223,12 @@ void Server::handle_write( const boost::system::error_code& e, connection_ptr co
    //           we do this by checking that the out bound response was ok
    //           i.e a read only user should not be allowed to terminate server.
    if (inbound_request_.terminateRequest()) {
-      if (serverEnv_.debug()) cout << "   <--Server::handle_write exiting server via terminate() port " << serverEnv_.port() << endl;
+      if (serverEnv_.debug()) cout << "   <--SslServer::handle_write exiting server via terminate() port " << serverEnv_.port() << endl;
       terminate();
    }
 }
 
-bool Server::shutdown_socket(connection_ptr conn, const std::string& msg) const
+bool SslServer::shutdown_socket(ssl_connection_ptr conn, const std::string& msg) const
 {
    // For portable behaviour with respect to graceful closure of a connected socket,
    // call shutdown() before closing the socket.
@@ -185,4 +249,3 @@ bool Server::shutdown_socket(connection_ptr conn, const std::string& msg) const
    }
    return true;
 }
-

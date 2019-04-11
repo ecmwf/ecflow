@@ -21,6 +21,7 @@
 #include <iterator>
 
 #include <boost/program_options.hpp>
+#include <boost/bind.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/lexical_cast.hpp>
@@ -572,6 +573,10 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 		debug_ = true; // can also be enabled via --debug option
 	}
 
+#ifdef ECF_OPENSSL
+   if (getenv("ECF_SSL")) enable_ssl();
+#endif
+
    char* threshold = getenv("ECF_TASK_THRESHOLD");
    if ( threshold ) {
       std::string task_threshold = threshold;
@@ -632,6 +637,10 @@ std::string ServerEnvironment::dump() const
    ss << "ECF_PASSWD = " << ecf_passwd_file_ << "\n";
    if ( tcp_protocol_.family() ==  2 /*PF_INET*/)  ss << "TCP Protocol  v4 \n";
    else if ( tcp_protocol_.family() ==  10 /*PF_INET6*/)  ss << "TCP Protocol  v6 \n";
+
+#ifdef ECF_OPENSSL
+   ss << "ECF_SSL = " << ssl_ << "\n";
+#endif
 
    ss << white_list_file_.dump_valid_users();
    return ss.str();

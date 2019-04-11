@@ -32,6 +32,9 @@ class AbstractServer {
 public:
 	virtual ~AbstractServer() = default;
 
+   /// return true if this is a ssl enabled server
+	virtual bool ssl() const { return false;}
+
 	/// returns the current state of the server
 	/// The following table shows the effect of state, on server behaviour:
 	///

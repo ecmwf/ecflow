@@ -27,7 +27,7 @@ show_error_and_exit() {
    echo "   asan           - is short for address sanitiser"
    echo "   msan           - is short for memory sanitiser"
    echo "   no_gui         - Don't build the gui"
-   echo "   ssl            - build using openssl"
+   echo "   no_ssl         - build without using openssl"
    echo "   log            - enable debug output"
    echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
@@ -54,7 +54,7 @@ verbose_arg=
 ctest_arg=
 clean_arg=
 no_gui_arg=
-ssl_arg=
+no_ssl_arg=
 log_arg=
 asan_arg=
 msan_arg=
@@ -77,8 +77,8 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break
-   elif [[ "$1" = no_gui ]] ; then no_gui_arg=$1 ;
-   elif [[ "$1" = ssl ]]   ; then ssl_arg=$1 ;
+   elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
+   elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
@@ -292,8 +292,8 @@ fi
 #
 
 ssl_options=
-if [[ $ssl_arg = ssl ]] ; then
-    ssl_options="-DENABLE_SSL=ON"
+if [[ $no_ssl_arg = no_ssl ]] ; then
+    ssl_options="-DENABLE_SSL=OFF"
 fi
 
 log_options=

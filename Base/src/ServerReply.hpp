@@ -47,6 +47,9 @@ public:
 	bool invalid_argument() const { return invalid_argument_;}
 	void set_invalid_argument() { invalid_argument_ = true;}
 
+   bool eof() const { return eof_;}
+   void set_eof() { eof_ = true;}
+
 	void set_host_port(const std::string& host, const std::string& port) { host_ = host; port_ = port;}
    const std::string& host() const { return host_;}
    const std::string& port() const { return port_;}
@@ -124,7 +127,8 @@ private:
 	bool block_client_server_halted_{false};       // clear at the start of invoke
 	bool block_client_zombie_detected_{false};     // clear at the start of invoke
 	bool delete_all_{false};                       // clear at the start of invoke
-	bool invalid_argument_{false};                  // clear at the start of invoke
+   bool invalid_argument_{false};                  // clear at the start of invoke
+   bool eof_{false};                       // clear at the start of invoke
    std::string host_;                      // clear at the start of invoke
    std::string port_;                      // clear at the start of invoke
 	std::string str_;                       // clear at the start of invoke

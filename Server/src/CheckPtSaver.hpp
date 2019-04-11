@@ -25,13 +25,13 @@
 
 #include <boost/asio.hpp>
 class ServerEnvironment;
-class Server;
+class BaseServer;
 
 class CheckPtSaver {
    CheckPtSaver(const CheckPtSaver&) = delete;
    const CheckPtSaver& operator=(const CheckPtSaver&) = delete;
 public:
-	CheckPtSaver(  Server* s,   boost::asio::io_service& io, const ServerEnvironment*);
+	CheckPtSaver(  BaseServer* s,   boost::asio::io_service& io, const ServerEnvironment*);
 	~CheckPtSaver();
 
 	/// Start periodical save of the checkpoint file
@@ -74,7 +74,7 @@ private:
 	/// This avoids writing out a checkpt file, unnecessarily & filling up log file
 	void periodicSaveCheckPt(const boost::system::error_code& error);
 
-	Server* server_;
+	BaseServer* server_;
  	boost::asio::deadline_timer timer_;
    bool firstTime_;
   	bool running_;

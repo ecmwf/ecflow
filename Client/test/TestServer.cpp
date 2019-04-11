@@ -177,11 +177,11 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test )
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
 	ClientInvoker theClient(invokeServer.host(), invokeServer.port());
-#ifdef ECF_OPENSSL
-	int load = 30;
-#else
 	int load = 125;
+#ifdef ECF_OPENSSL
+   if (getenv("ECF_SSL")) load = 30;
 #endif
+
 	{
 	   boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 	   DurationTimer duration_timer;
@@ -272,12 +272,13 @@ BOOST_AUTO_TEST_CASE( test_server_group_stress_test )
 	groupRequest += CtsApi::get();
 
 	//cout << "groupRequest = " << groupRequest << "\n";
-#ifdef ECF_OPENSSL
-   int load = 30;
-#else
+
    int load = 125;
+#ifdef ECF_OPENSSL
+   if (getenv("ECF_SSL")) load = 30;
 #endif
-	for(int i = 0; i < load; i++) {
+
+   for(int i = 0; i < load; i++) {
    	BOOST_REQUIRE_MESSAGE( theClient.group(groupRequest) == 0,"Group request " << CtsApi::group(groupRequest) << " failed should return 0\n" << theClient.errorMsg());
  	 	BOOST_REQUIRE_MESSAGE( theClient.defs().get(),"Server returned a NULL defs");
   		BOOST_REQUIRE_MESSAGE( theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
@@ -314,7 +315,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
 #endif
 
 #ifdef ECF_OPENSSL
-   load = 10;
+   if (getenv("ECF_SSL")) load = 10;
 #endif
 
    boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed

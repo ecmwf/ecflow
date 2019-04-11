@@ -18,6 +18,9 @@
 
 #include "ClientInvoker.hpp"
 #include "Client.hpp"
+#ifdef ECF_OPENSSL
+#include "SslClient.hpp"
+#endif
 #include "ClientEnvironment.hpp"
 #include "ClientOptions.hpp"
 #include "Defs.hpp"
@@ -29,9 +32,6 @@
 #include "DurationTimer.hpp"
 #include "TimeStamp.hpp"
 #include "Log.hpp"
-#ifdef ECF_OPENSSL
-#include "Openssl.hpp"
-#endif
 #include "PasswdFile.hpp"
 
 #ifdef DEBUG
@@ -316,29 +316,47 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 
 					cts_cmd->setup_user_authentification( clientEnv_ );
 
-					boost::asio::io_service io_service;
+               boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
-				   boost::asio::ssl::context ctx(ecf::Openssl::method());
-				   ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
-	            Client theClient(io_service,ctx,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout() );
-#else
-	            Client theClient(io_service,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
-#endif
-					io_service.run();
-					if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;;
+					if (clientEnv_.ssl()) {
+                  SslClient theClient(io_service,clientEnv_.ssl_context(),cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
+                  io_service.run();
+                  if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;
 
-					/// Let see how the server responded if at all.
-					try {
-						/// will return false if further action required
-						if (theClient.handle_server_response( server_reply_, clientEnv_.debug() )) {
-							// The normal response.  RoundTriprecorder will record in rtt_
-							return 0; // the normal exit path
-						}
+                  /// Let see how the server responded if at all.
+                  try {
+                     /// will return false if further action required
+                     if (theClient.handle_server_response( server_reply_, clientEnv_.debug() )) {
+                        // The normal response.  RoundTriprecorder will record in rtt_
+                        return 0; // the normal exit path
+                     }
+                  }
+                  catch (std::exception& e) {
+                     server_reply_.set_error_msg( e.what() );
+                     return 1;
+                  }
 					}
-					catch (std::exception& e) {
- 						server_reply_.set_error_msg( e.what() );
-						return 1;
+					else {
+#endif
+					   Client theClient(io_service,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
+					   io_service.run();
+					   if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;
+
+					   /// Let see how the server responded if at all.
+					   try {
+					      /// will return false if further action required
+					      if (theClient.handle_server_response( server_reply_, clientEnv_.debug() )) {
+					         // The normal response.  RoundTriprecorder will record in rtt_
+					         return 0; // the normal exit path
+					      }
+					   }
+					   catch (std::exception& e) {
+					      server_reply_.set_error_msg( e.what() );
+					      return 1;
+					   }
+#ifdef ECF_OPENSSL
 					}
+#endif
 
 					if ( server_reply_.block_client_on_home_server()) {
 						// Valid reply from server. Typically waiting on a expression
@@ -361,6 +379,11 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
 						return 1;
 					}
+               else if (server_reply_.eof()) {
+                  // Server did not reply or mixing ssl and non ssl
+                  if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
+                  return 1;
+               }
 					else if (server_reply_.client_request_failed()) {
 						// Valid reply from server
 						// This error is ONLY valid if we got a real reply from the server

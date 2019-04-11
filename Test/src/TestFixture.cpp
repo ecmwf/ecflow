@@ -104,6 +104,9 @@ void TestFixture::init(const std::string& project_test_dir)
    host_ = ClientEnvironment::hostSpecified();
    port_ = ClientEnvironment::portSpecified(); // returns ECF_PORT, otherwise Str::DEFAULT_PORT_NUMBER
    std::cout << "TestFixture::TestFixture()  jobSubmissionInterval = " << job_submission_interval() << "\n";
+#ifdef ECF_OPENSSL
+   if (getenv("ECF_SSL"))  std::cout << "   Openssl enabled\n";
+#endif
    if (!host_.empty() && host_ != Str::LOCALHOST()) {
 
       client().set_host_port(host_,port_);

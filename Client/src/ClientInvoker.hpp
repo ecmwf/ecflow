@@ -67,6 +67,11 @@ public:
 	void set_cli(bool f) { clientEnv_.set_cli(f); }
 	bool cli() const { return clientEnv_.get_cli(); }
 
+#ifdef ECF_OPENSSL
+	/// Override any ssl read from environment(ECF_SSL) or command line args(-ssl)
+   void enable_ssl() { clientEnv_.enable_ssl(); }
+#endif
+
 	/// This will override the environment setting.
 	/// In particular setting host explicitly will avoid cycling through server list,
 	/// if connection fails. hence will bomb out earlier

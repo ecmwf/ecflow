@@ -27,7 +27,8 @@ public:
       BLOCK_CLIENT_SERVER_HALTED,
       BLOCK_CLIENT_ON_HOME_SERVER,
       DELETE_ALL,
-      INVALID_ARGUMENT       // Created on the Client side
+      INVALID_ARGUMENT,       // Created on the Client side
+      END_OF_FILE
    };
    explicit StcCmd(Api a) :  api_(a) {}
    StcCmd()= default;

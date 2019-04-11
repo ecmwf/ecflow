@@ -314,6 +314,9 @@ void export_Client()
 
    .def("debug", &ClientInvoker::debug, "enable/disable client api debug")
 
+#ifdef ECF_OPENSSL
+   .def("enable_ssl",       &ClientInvoker::enable_ssl, "Enable encrypted communication with a ecFlow ssl server")
+#endif
    .def("zombie_get",       &zombieGet, return_value_policy<copy_const_reference>())
    .def("zombie_fob",       &ClientInvoker::zombieFobCli )
    .def("zombie_fail",      &ClientInvoker::zombieFailCli )

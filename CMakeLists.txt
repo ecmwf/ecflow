@@ -61,7 +61,7 @@ option( ENABLE_STATIC_BOOST_LIBS   "Link with boost libs statically" ON  )
 option( ENABLE_ALL_TESTS           "This includes performance/migration/regression tests" OFF )
 option( ENABLE_UI_BACKTRACE        "Print a UI debug backtrace"         OFF ) 
 option( ENABLE_UI_USAGE_LOG        "Enable UI usage logging"            OFF )
-option( ENABLE_SSL                 "Enable SSL encrypted communication" OFF )
+option( ENABLE_SSL                 "Enable SSL encrypted communication" ON )
 option( ENABLE_PYTHON_PTR_REGISTER "Some compilers/boost versions do not register shared ptr automatically" OFF  )
 
 # =========================================================================================
@@ -168,7 +168,7 @@ ecbuild_info( "ENABLE_PYTHON_PTR_REGISTER : ${ENABLE_PYTHON_PTR_REGISTER}" )
 ecbuild_info( "ENABLE_UI                  : ${ENABLE_UI}" )
 ecbuild_info( "ENABLE_ALL_TESTS           : ${ENABLE_ALL_TESTS}" )
 ecbuild_info( "ENABLE_STATIC_BOOST_LIBS   : ${ENABLE_STATIC_BOOST_LIBS}" )
-ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL}" )
+ecbuild_info( "ENABLE_SSL                 : ${ENABLE_SSL} *if* openssl libraries available" )
 
 
 if (ENABLE_UI)
@@ -239,11 +239,12 @@ endif()
 # =======================================================================
 if (ENABLE_SSL)
     find_package(OpenSSL REQUIRED)
-    if (NOT OPENSSL_FOUND )
-        ecbuild_error("Can not find openssl libraries")
+    if (OPENSSL_FOUND)
+    	include_directories( ${OPENSSL_INCLUDE_DIR} )
+    	add_definitions( -DECF_OPENSSL )
+    else()
+        ecbuild_warn("Can *not* find openssl libraries. ecflow will build without ssl support")
     endif() 
-    include_directories( ${OPENSSL_INCLUDE_DIR} )
-    add_definitions( -DECF_OPENSSL )
 endif()
 
 # =========================================================================================

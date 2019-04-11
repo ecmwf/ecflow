@@ -26,7 +26,7 @@
 #include <boost/asio.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-class Server;
+class BaseServer;
 class ServerEnvironment;
 //#define DEBUG_TRAVERSER 1
 
@@ -34,7 +34,7 @@ class NodeTreeTraverser {
    NodeTreeTraverser(const NodeTreeTraverser&) = delete;
    const NodeTreeTraverser& operator=(const NodeTreeTraverser&) = delete;
 public:
-	NodeTreeTraverser(  Server* s,  boost::asio::io_service& io, const ServerEnvironment& serverEnv);
+	NodeTreeTraverser( BaseServer* s,  boost::asio::io_service& io, const ServerEnvironment& serverEnv);
 	~NodeTreeTraverser();
 
 	/// If first time Starts traversing Node tree and resolving dependencies.
@@ -74,7 +74,7 @@ private:
 	void start_timer();
 	void update_suite_calendar_and_traverse_node_tree(const boost::posix_time::ptime& time_now);
 
-	Server* server_;
+	BaseServer* server_;
 	const ServerEnvironment& serverEnv_;
  	boost::asio::deadline_timer timer_;
 	boost::posix_time::ptime last_time_;        // ensure poll is in sync

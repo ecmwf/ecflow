@@ -7,10 +7,19 @@
 list( APPEND srcs
    src/CheckPtSaver.cpp
    src/NodeTreeTraverser.cpp
+   src/BaseServer.cpp
    src/Server.cpp
    src/ServerEnvironment.cpp
    src/ServerOptions.cpp
 )
+
+if (OPENSSL_FOUND)
+	list( APPEND srcs 
+          src/SslServer.cpp
+        )
+endif()
+
+
 ecbuild_add_library( TARGET libserver
                      NOINSTALL
                      TYPE     STATIC

@@ -1,16 +1,16 @@
-#ifndef CONNECTION_HPP_
-#define CONNECTION_HPP_
+#ifndef SSL_CONNECTION_HPP_
+#define SSL_CONNECTION_HPP_
 //============================================================================
 // Name        : Connection.cpp
 // Author      : Avi
-// Revision    : $Revision: #26 $ 
+// Revision    : $Revision: #26 $
 //
 // Copyright 2009-2019 ECMWF.
-// This software is licensed under the terms of the Apache Licence version 2.0 
-// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-// In applying this licence, ECMWF does not waive the privileges and immunities 
-// granted to it by virtue of its status as an intergovernmental organisation 
-// nor does it submit to any jurisdiction. 
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
 //
 // Description : Serves as the connection between client server
 //============================================================================
@@ -24,6 +24,7 @@
 #include <memory>
 
 #include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -31,6 +32,8 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "Serialization.hpp"
+
+typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 
 #ifdef DEBUG
 //#define DEBUG_CONNECTION 1
@@ -44,13 +47,18 @@
  * hexadecimal.
  * @li The serialized data.
  */
-class connection {
-public:
-   ~connection();
 
-   explicit connection(boost::asio::io_service& io_service);
-   boost::asio::ip::tcp::socket& socket() { return socket_; }
-   boost::asio::ip::tcp::socket& socket_ll() { return socket_; }
+class ssl_connection {
+public:
+   ~ssl_connection();
+
+   ssl_connection(boost::asio::io_service& io_service,boost::asio::ssl::context& context);
+   bool verify_certificate(bool preverified, boost::asio::ssl::verify_context& ctx);
+
+   /// Get the underlying socket. Used for making a connection or for accepting
+   /// an incoming connection.
+   ssl_socket::lowest_layer_type& socket_ll() { return socket_.lowest_layer();}
+   ssl_socket& socket() { return socket_;}
 
    /// Asynchronously write a data structure to the socket.
    template<typename T, typename Handler>
@@ -64,14 +72,14 @@ public:
          ecf::save_as_string(outbound_data_,t);
       } catch (const std::exception& ae ) {
          // Unable to decode data. Something went wrong, inform the caller.
-         log_archive_error("Connection::async_write, exception ",ae,outbound_data_);
+         log_archive_error("ssl_Connection::async_write, exception ",ae,outbound_data_);
          boost::system::error_code error(boost::asio::error::invalid_argument);
          socket_.get_io_service().post(boost::bind(handler, error));
          return;
       }
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_write Format the header\n";
+      std::cout << "ssl_Connection::async_write Format the header\n";
       std::cout << " " << outbound_data_ << "\n";
 #endif
       // Format the header.
@@ -79,7 +87,7 @@ public:
       header_stream << std::setw(header_length) << std::hex << outbound_data_.size();
       if (!header_stream || header_stream.str().size() != header_length) {
          // Something went wrong, inform the caller.
-         log_error("Connection::async_write, could not format header");
+         log_error("ssl_onnection::async_write, could not format header");
          boost::system::error_code error(boost::asio::error::invalid_argument);
          socket_.get_io_service().post(boost::bind(handler, error));
          return;
@@ -90,11 +98,11 @@ public:
 #ifdef DEBUG_CONNECTION_MEMORY
       if (Ecf::server()) std::cout << "server::";
       else               std::cout << "client::";
-      std::cout << "async_write outbound_header_.size(" << outbound_header_.size() << ") outbound_data_.size(" << outbound_data_.size() << ")\n";
+      std::cout << "ssl_async_write outbound_header_.size(" << outbound_header_.size() << ") outbound_data_.size(" << outbound_data_.size() << ")\n";
 #endif
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_write Write the serialized data to the socket. \n";
+      std::cout << "ssl_connection::async_write Write the serialized data to the socket. \n";
 #endif
       // Write the serialized data to the socket. We use "gather-write" to send
       // both the header and the data in a single write operation.
@@ -104,7 +112,7 @@ public:
       boost::asio::async_write(socket_, buffers, handler);
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_write END \n";
+      std::cout << "ssl_connection::async_write END \n";
 #endif
    }
 
@@ -113,12 +121,12 @@ public:
    void async_read(T& t, Handler handler) {
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_read\n";
+      std::cout << "ssl_connection::async_read\n";
 #endif
 
       // Issue a read operation to read exactly the number of bytes in a header.
-      void (connection::*f)(const boost::system::error_code&, T&,boost::tuple<Handler>)
-            = &connection::handle_read_header<T, Handler>;
+      void (ssl_connection::*f)(const boost::system::error_code&, T&,boost::tuple<Handler>)
+            = &ssl_connection::handle_read_header<T, Handler>;
 
       boost::asio::async_read(socket_, boost::asio::buffer(inbound_header_),
             boost::bind(f, this, boost::asio::placeholders::error,
@@ -148,8 +156,8 @@ private:
 
          // Start an asynchronous call to receive the data.
          inbound_data_.resize(inbound_data_size);
-         void (connection::*f)(const boost::system::error_code&, T&,boost::tuple<Handler>)
-               = &connection::handle_read_data<T, Handler>;
+         void (ssl_connection::*f)(const boost::system::error_code&, T&,boost::tuple<Handler>)
+               = &ssl_connection::handle_read_data<T, Handler>;
 
          boost::asio::async_read(socket_,
                boost::asio::buffer(inbound_data_), boost::bind(f, this,
@@ -171,13 +179,13 @@ private:
 #ifdef DEBUG_CONNECTION_MEMORY
             if (Ecf::server()) std::cout << "server::";
             else               std::cout << "client::";
-            std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ") typeid(" << typeid(t).name() << ")\n";
+            std::cout << "ssl handle_read_data inbound_data_.size(" << inbound_data_.size() << ") typeid(" << typeid(t).name() << ")\n";
             std::cout << archive_data << "\n";
 #endif
             ecf::restore_from_string(archive_data,t);
          }
          catch (std::exception& e) {
-            log_archive_error("Connection::handle_read_data, Unable to decode data :",e,archive_data);
+            log_archive_error("ssl_onnection::handle_read_data, Unable to decode data :",e,archive_data);
             boost::system::error_code error( boost::asio::error::invalid_argument);
             boost::get<0>(handler)(error);
             return;
@@ -193,7 +201,7 @@ private:
    static void log_archive_error(const char* msg,const std::exception& ae,const std::string& data);
 
 private:
-   boost::asio::ip::tcp::socket socket_;/// The underlying socket.
+   boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
    std::string outbound_header_;        /// Holds an out-bound header.
    std::string outbound_data_;          /// Holds the out-bound data.
    enum { header_length = 8 };          /// The size of a fixed length header.
@@ -201,6 +209,6 @@ private:
    std::vector<char> inbound_data_;     /// Holds the in-bound data.
 };
 
-typedef std::shared_ptr<connection> connection_ptr;
+typedef std::shared_ptr<ssl_connection> ssl_connection_ptr;
 
-#endif /* CONNECTION_HPP_ */
+#endif /* SSL_CONNECTION_HPP_ */

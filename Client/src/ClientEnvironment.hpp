@@ -17,6 +17,9 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "AbstractClientEnv.hpp"
+#ifdef ECF_OPENSSL
+#include <boost/asio/ssl.hpp>
+#endif
 
 class ClientEnvironment : public AbstractClientEnv {
 public:
@@ -90,6 +93,13 @@ public:
    // Used by python to enable debug of client api
    void set_debug(bool flag);
 
+#ifdef ECF_OPENSSL
+   /// return true if this is a ssl enabled server
+   bool ssl() const { return ssl_;}
+   boost::asio::ssl::context& ssl_context() { return ssl_context_;}
+   void enable_ssl();
+#endif
+
 // AbstractClientEnv functions:
  	bool checkTaskPathAndPassword(std::string& errorMsg) const override;
  	const std::string& task_path() const override { return task_path_; }
@@ -132,6 +142,11 @@ private:
 	int  host_vec_index_{0};               // index into host_vec;
 
    mutable std::string passwd_;
+
+#ifdef ECF_OPENSSL
+ 	bool ssl_{false};
+   boost::asio::ssl::context ssl_context_;
+#endif
 
 	/// The option read from the command line.
  	friend class ClientOptions;
