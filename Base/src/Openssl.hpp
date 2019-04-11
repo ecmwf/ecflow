@@ -38,8 +38,13 @@ public:
    /// The SSLv23_method() API and its variants may be used when the compatibility with the peer is important.
    /// An SSL server with the SSLv23 method can understand any of the SSLv2, SSLv3, and TLSv1 hello messages.
    /// However, the SSL client using the SSLv23 method cannot establish connection with the SSL server
-   //  with the SSLv3/TLSv1 method because SSLv2 hello message is sent by the client
+   ///  with the SSLv3/TLSv1 method because SSLv2 hello message is sent by the client
    static boost::asio::ssl::context::method method() { return boost::asio::ssl::context::sslv23;}
+
+   /// Check the right files exist
+   static void check_server_certificates();
+   static void check_client_certificates();
+   static const char* ssl_info();
 
 private:
    Openssl();

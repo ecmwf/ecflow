@@ -31,6 +31,8 @@ using namespace ecf;
 
 SslServer::SslServer( ServerEnvironment& serverEnv ) : BaseServer(serverEnv), ssl_context_(ecf::Openssl::method())
 {
+   ecf::Openssl::check_server_certificates();
+
    stats().ECF_SSL_ = "enabled";
 
    ssl_context_.set_options(

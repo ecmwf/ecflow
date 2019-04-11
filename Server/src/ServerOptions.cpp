@@ -18,6 +18,10 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 
+#ifdef ECF_OPENSSL
+#include "Openssl.hpp"
+#endif
+
 using namespace std;
 using namespace ecf;
 namespace po = boost::program_options;
@@ -98,15 +102,6 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
          "  You will need to ensure open ssl in installed on your system\n"
          "  In order to use openssl, we need set up some certificates.\n"
          "  (These will be self signed certificates, rather than a certificate authority).\n"
-         "  The ecFlow client and server, will look for the certificates\n"
-         "  in $HOME/.ecflowrc/ssl directory.\n"
-         "  ecFlow server expects the following files in : $HOME/.ecflowrc/ssl\n"
-         "    - dh1024.pem\n"
-         "    - server.crt\n"
-         "    - server.key\n"
-         "    - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key.\n"
-         "  ecFlow client expects the following files in : $HOME/.ecflowrc/ssl\n"
-         "    - server.crt ( this must be the same as server)\n"
 #endif
          "\n"
          "These defaults along with several other can be specified in the file\n"
@@ -122,7 +117,7 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 ( "ecfinterval",  po::value< int >(), "<int> <Allowed range 1-60>  Submit jobs interval. For DEBUG/Test only" )
 ( "v6",                               "Use IPv6 TCP protocol. Default is IPv4" )
 #ifdef ECF_OPENSSL
-( "ssl",                              "ssl server. Client side use export ECF_SSL=1 *or* ecflow_client --ssl to communicate with ssl server")
+( "ssl",                              ecf::Openssl::ssl_info())
 #endif
 ( "dis_job_gen",                      "Disable job generation. For DEBUG/Test only." )
 ( "debug,d",                          "Enable debug output." )

@@ -384,6 +384,7 @@ void ClientEnvironment::enable_ssl()
 {
    if (!ssl_) {
       ssl_ = true;
+      ecf::Openssl::check_client_certificates();
       ssl_context_.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
    }
 }
