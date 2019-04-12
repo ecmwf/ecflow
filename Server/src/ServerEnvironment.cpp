@@ -575,7 +575,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 
 #ifdef ECF_OPENSSL
 	char* ecf_ssl = getenv("ECF_SSL");
-   if (ecf_ssl) ssl_.enable(ecf_ssl);
+   if (ecf_ssl) {
+      ssl_.enable(ecf_ssl);
+   }
 #endif
 
    char* threshold = getenv("ECF_TASK_THRESHOLD");

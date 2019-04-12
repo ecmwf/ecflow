@@ -45,9 +45,6 @@ private:
 
    void start_accept();
    bool shutdown_socket(ssl_connection_ptr conn, const std::string& msg) const;
-
-private:
-   ecf::Openssl ssl_;
 };
 
 #endif

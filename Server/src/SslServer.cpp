@@ -31,7 +31,7 @@ SslServer::SslServer( ServerEnvironment& serverEnv ) : BaseServer(serverEnv)
 {
    stats().ECF_SSL_ = "enabled";
 
-   ssl_.init_for_server(serverEnv.hostPort().first, serverEnv.hostPort().second );
+   serverEnv.openssl().init_for_server(serverEnv.hostPort().first, serverEnv.hostPort().second );
 
    start_accept();
 }
@@ -40,7 +40,7 @@ void SslServer::start_accept()
 {
    if (serverEnv_.debug()) cout << "   SslServer::start_accept()" << endl;
 
-   ssl_connection_ptr new_conn = std::make_shared<ssl_connection>(  boost::ref(io_service_),  boost::ref(ssl_.context())) ;
+   ssl_connection_ptr new_conn = std::make_shared<ssl_connection>(  boost::ref(io_service_),  boost::ref(serverEnv_.openssl().context())) ;
 
    acceptor_.async_accept( new_conn->socket_ll(),
                          [this,new_conn](const boost::system::error_code& e ) { handle_accept(e,new_conn); });

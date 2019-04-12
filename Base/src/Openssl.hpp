@@ -38,7 +38,7 @@ public:
    ///  with the SSLv3/TLSv1 method because SSLv2 hello message is sent by the client
    Openssl() : ssl_context_(boost::asio::ssl::context::sslv23){}
 
-   bool enabled() const {return !ssl_.empty();}
+   bool enabled() const { return !ssl_.empty();}
 
    void enable(const std::string&);
    void init_for_server(const std::string& host, const std::string& port);
@@ -52,15 +52,22 @@ public:
    void print(std::ostream &os) const { os << ssl_;}
 
 private:
-   void check_client_certificates() const;
-   void check_server_certificates() const;
+   void check_client_certificates(const std::string& host, const std::string& port) const;
+   void check_server_certificates(const std::string& host, const std::string& port) const;
    void load_verify_file( boost::asio::ssl::context&);   /// load server.crt file into the ssl context
    std::string certificates_dir() const;                       /// Directory where ssl certificates are held
    std::string get_password() const;
 
+   std::string pem(const std::string& host, const std::string& port) const;
+   std::string crt(const std::string& host, const std::string& port) const;
+   std::string key(const std::string& host, const std::string& port) const;
+   std::string passwd(const std::string& host, const std::string& port) const;
+
 private:
    bool init_for_client_{false};
    std::string ssl_; // Non empty if ssl has been enabled
+   std::string host_;
+   std::string port_;
    boost::asio::ssl::context ssl_context_;
 };
 

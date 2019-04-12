@@ -68,6 +68,7 @@ public:
 
 #ifdef ECF_OPENSSL
 	/// return true if ssl enable via command line, AND SSL libraries are found
+	ecf::Openssl& openssl() { return ssl_;}
 	bool ssl() const { return ssl_.enabled();}
 	void enable_ssl(const std::string& ssl) { ssl_.enable(ssl);}
 #endif

@@ -1,5 +1,5 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-// Name        :
+// Name        : Openssl
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
@@ -30,42 +30,46 @@ namespace ecf {
 
 void Openssl::enable(const std::string& ssl)
 {
+//   cout << "Openssl::enable input ssl:'" << ssl << "'\n";
    if (ssl.empty()) ssl_ = "1";
    else ssl_ = ssl;
+//   cout << "Openssl::enable input ssl_:'" << ssl_ << "'\n";
 }
 
 void Openssl::init_for_server(const std::string& host, const std::string& port)
 {
-   check_server_certificates();
+//   std::cout << " Openssl::init_for_server  host :" << host << "@" << port << "\n";
+//   std::cout << " Openssl::init_for_server ssl_:'" << ssl_ << "'\n";
 
-    ssl_context_.set_options(
-             boost::asio::ssl::context::default_workarounds
-             | boost::asio::ssl::context::no_sslv2
-             | boost::asio::ssl::context::single_dh_use);
-    // this must be done before loading any keys. as below
-    ssl_context_.set_password_callback(boost::bind(&Openssl::get_password, this));
+   host_ = host;
+   port_ = port;
+   check_server_certificates(host,port);
 
-    std::string home_path = ecf::Openssl::certificates_dir();
-    ssl_context_.use_certificate_chain_file(home_path + "server.crt" );
-    ssl_context_.use_private_key_file(home_path + "server.key", boost::asio::ssl::context::pem);
-    ssl_context_.use_tmp_dh_file(home_path + "dh1024.pem");
+   ssl_context_.set_options(
+            boost::asio::ssl::context::default_workarounds
+            | boost::asio::ssl::context::no_sslv2
+            | boost::asio::ssl::context::single_dh_use);
+   // this must be done before loading any keys. as below
+   ssl_context_.set_password_callback(boost::bind(&Openssl::get_password, this));
+   ssl_context_.use_certificate_chain_file( crt(host,port) );
+   ssl_context_.use_private_key_file( key(host,port), boost::asio::ssl::context::pem);
+   ssl_context_.use_tmp_dh_file( pem(host,port) );
 }
 
 void Openssl::init_for_client(const std::string& host, const std::string& port)
 {
-   // std::cout << " Openssl::init_for_client host :" << host << "@" << port << "\n";
+//   std::cout << " Openssl::init_for_client host :" << host << "@" << port << "\n";
    if (!init_for_client_) {
       init_for_client_ = true;
-      check_client_certificates();
-      ssl_context_.load_verify_file(certificates_dir() + "server.crt");
+      check_client_certificates(host,port);
+      ssl_context_.load_verify_file(crt(host,port));
    }
 }
 
 std::string Openssl::get_password() const
 {
    // std::cout << "Openssl::get_password()\n";
-   std::string passwd_file = certificates_dir();
-   passwd_file += "/server.passwd";
+   std::string passwd_file = passwd(host_,port_);
    if (fs::exists(passwd_file)) {
       std::string contents;
       if (ecf::File::open(passwd_file,contents)) {
@@ -92,19 +96,72 @@ std::string Openssl::certificates_dir() const
    return home_path;
 }
 
+std::string Openssl::pem(const std::string& host, const std::string& port) const
+{
+   std::string str = certificates_dir();
+   if (ssl_ == "1") { str += "dh1024.pem"; return str;}
+   str += host;
+   str += ".";
+   str += port;
+   str += ".pem";
+   return str;
+}
+
+std::string Openssl::crt(const std::string& host, const std::string& port) const
+{
+   std::string str = certificates_dir();
+   if (ssl_ == "1") { str += "server.crt"; return str;}
+   str += host;
+   str += ".";
+   str += port;
+   str += ".crt";
+   return str;
+}
+
+std::string Openssl::key(const std::string& host, const std::string& port) const
+{
+   std::string str = certificates_dir();
+   if (ssl_ == "1") { str += "server.key"; return str; }
+   str += host;
+   str += ".";
+   str += port;
+   str += ".key";
+   return str;
+}
+
+std::string Openssl::passwd(const std::string& host, const std::string& port) const
+{
+   std::string str = certificates_dir();
+   if (ssl_ == "1") { str += "server.passwd"; return str;}
+   str += host;
+   str += ".";
+   str += port;
+   str += ".passwd";
+   return str;
+}
+
 const char* Openssl::ssl_info() {
    return
-            "ecFlow client and server are SSL enabled. This can be done in 2 ways, choose one:\n"
+            "ecFlow client and server are SSL enabled. The certificates can be shared\n"
+            "with all server/clients. This can be done in 2 ways, choose one:\n"
             "   1. export ECF_SSL=1 # define an environment variable\n"
-            "   2. use --ssl argument on ecflow_client/ecflow_server\n"
+            "   2. use --ssl        # argument on ecflow_client/ecflow_server\n"
             "      Typically ssl server can be started with ecflow_start.sh -s\n\n"
             "ecflow_server expects the following files in : $HOME/.ecflowrc/ssl\n"
             "   - dh1024.pem\n"
             "   - server.crt\n"
             "   - server.key\n"
-            "   - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key\n\n"
+            "   - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key\n"
             "ecflow_client expects the following files in : $HOME/.ecflowrc/ssl\n"
             "   - server.crt (this must be the same as server)\n\n"
+            "Alternatively you can have different setting for each server using:\n"
+            "   1. export ECF_SSL=host_port # define an environment variable\n"
+            "   2. use --ssl=host_port      # argument on ecflow_client/ecflow_server\n"
+            "Then server/client expect files of the type\n"
+            "   - <host>.<port>.pem\n"
+            "   - <host>.<port>.crt\n"
+            "   - <host>.<port>.key\n"
+            "   - <host>.<port>.passwd (optional)\n\n"
             "The following steps, show you how to create the certificate files.\n"
             "- Generate a password protected private key. This will request a pass phrase.\n"
             "  This key is a 1024 bit RSA key which is encrypted using Triple-DES and stored\n"
@@ -127,35 +184,38 @@ const char* Openssl::ssl_info() {
             ;
 }
 
-void Openssl::check_server_certificates() const
+void Openssl::check_server_certificates(const std::string& host, const std::string& port) const
 {
+//   cout << "Openssl::check_server_certificates: ssl'" << ssl_ << "'\n";
+
    std::string cert_dir = certificates_dir();
    if (!fs::exists(cert_dir)) throw std::runtime_error("Error: The certificates directory '" + cert_dir + "' does not exist\n\n" + ssl_info());
 
    {
-      string server_key = cert_dir + "server.key";
+      string server_key = key(host,port);
       if (!fs::exists(server_key)) throw std::runtime_error("Error: The password protected private server key file '" + server_key  + "' does not exist\n\n" + ssl_info() );
    }
    {
-      string server_crt = cert_dir + "server.crt";
+      string server_crt = crt(host,port);
       if (!fs::exists(server_crt)) throw std::runtime_error("Error: The self signed certificate file(CRT) '" + server_crt  + "' does not exist\n\n" + ssl_info());
    }
    {
-      string pem = cert_dir + "dh1024.pem";
-      if (!fs::exists(pem)) throw std::runtime_error("Error: The dhparam file(pem) '" +  pem  + "' does not exist\n\n" + ssl_info());
+      string server_pem = pem(host,port);
+      if (!fs::exists(server_pem)) throw std::runtime_error("Error: The dhparam file(pem) '" +  server_pem  + "' does not exist\n\n" + ssl_info());
    }
 }
 
-void Openssl::check_client_certificates() const
+void Openssl::check_client_certificates(const std::string& host, const std::string& port) const
 {
+//   cout << "Openssl::check_client_certificates : ssl'" << ssl_ << "'\n";
+
    std::string cert_dir = certificates_dir();
    if (!fs::exists(cert_dir)) throw std::runtime_error("Error: The certificates directory '" + cert_dir + "' does not exist\n\n" + ssl_info());
    {
-      string server_crt = cert_dir + "server.crt";
+      string server_crt = crt(host,port);
       if (!fs::exists(server_crt)) throw std::runtime_error("Error: The self signed certificate file(CRT) '" + server_crt  + "' does not exist\n\n" + ssl_info());
    }
 }
-
 
 std::ostream& operator<<(std::ostream& os, const ecf::Openssl& ssl)
 {
