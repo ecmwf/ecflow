@@ -29,7 +29,7 @@ public:
 private:
 
    /// AbstractServer functions
-   bool ssl() const override { return true;}
+   const std::string& ssl() const override;
 
    /// ssl and connection functions
    void handle_handshake(const boost::system::error_code& error,ssl_connection_ptr conn);

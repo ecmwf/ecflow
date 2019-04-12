@@ -22,6 +22,7 @@
 #include "ZombieCtrl.hpp"
 #include "SState.hpp"
 #include "CheckPt.hpp"
+#include "Str.hpp"
 
 class Defs;
 
@@ -33,7 +34,7 @@ public:
 	virtual ~AbstractServer() = default;
 
    /// return true if this is a ssl enabled server
-	virtual bool ssl() const { return false;}
+	virtual const std::string& ssl() const { return ecf::Str::EMPTY();}
 
 	/// returns the current state of the server
 	/// The following table shows the effect of state, on server behaviour:

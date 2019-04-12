@@ -36,6 +36,11 @@ SslServer::SslServer( ServerEnvironment& serverEnv ) : BaseServer(serverEnv)
    start_accept();
 }
 
+const std::string& SslServer::ssl() const
+{
+   return serverEnv_.openssl().ssl();
+}
+
 void SslServer::start_accept()
 {
    if (serverEnv_.debug()) cout << "   SslServer::start_accept()" << endl;

@@ -38,6 +38,7 @@ public:
    ///  with the SSLv3/TLSv1 method because SSLv2 hello message is sent by the client
    Openssl() : ssl_context_(boost::asio::ssl::context::sslv23){}
 
+   const std::string& ssl() const { return ssl_;}
    bool enabled() const { return !ssl_.empty();}
 
    void enable(const std::string&);
