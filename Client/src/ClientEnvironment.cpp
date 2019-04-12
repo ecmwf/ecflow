@@ -64,9 +64,6 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 
 ClientEnvironment::ClientEnvironment()
 : AbstractClientEnv(),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT)
-#ifdef ECF_OPENSSL
-,ssl_context_(ecf::Openssl::method())
-#endif
 {
 	init();
 }
@@ -75,9 +72,6 @@ ClientEnvironment::ClientEnvironment()
 ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::string& host, const std::string& port)
 : AbstractClientEnv(),
   task_try_num_(1),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT)
-#ifdef ECF_OPENSSL
-  ,ssl_context_(ecf::Openssl::method())
-#endif
 {
 	init();
 
@@ -214,7 +208,7 @@ std::string ClientEnvironment::toString() const
 
    ss << "   ECF_DEBUG_CLIENT = " << debug_ << "\n";
 #ifdef ECF_OPENSSL
-   if (ssl_)  ss << "   ECF_SSL = 1\n";
+   if (ssl()) ss << "   ECF_SSL = " << ssl_ << "\n";
 #endif
 	return ss.str();
 }
@@ -261,7 +255,7 @@ void ClientEnvironment::read_environment_variables()
 	if (getenv("NO_ECF")) no_ecf_ = true;
    if (getenv("ECF_DEBUG_CLIENT")) debug_ = true;
 #ifdef ECF_OPENSSL
-   if (getenv("ECF_SSL")) enable_ssl();
+   if (getenv("ECF_SSL")) ssl_.enable(getenv("ECF_SSL"));
 #endif
 
    char *debug_level = getenv("ECF_DEBUG_LEVEL");
@@ -378,14 +372,3 @@ const std::string& ClientEnvironment::get_user_password() const
    //cout << "  ClientEnvironment::get_user_password() returning EMPTY \n";
    return Str::EMPTY();
 }
-
-#ifdef ECF_OPENSSL
-void ClientEnvironment::enable_ssl()
-{
-   if (!ssl_) {
-      ssl_ = true;
-      ecf::Openssl::check_client_certificates();
-      ssl_context_.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
-   }
-}
-#endif

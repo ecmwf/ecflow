@@ -147,10 +147,10 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
             boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
             if (as->ssl()) {
-                boost::asio::ssl::context ctx(ecf::Openssl::method());
-                ctx.load_verify_file(ecf::Openssl::certificates_dir() + "server.crt");
+                ecf::Openssl openssl;
+                openssl.init_for_client(host,port);
 
-                SslClient theClient( io_service, ctx, cts_cmd,  host, port );
+                SslClient theClient( io_service, openssl.context(), cts_cmd,  host, port );
                 io_service.run();
                 theClient.handle_server_response( server_reply, false /* debug */ );
                 if (server_reply.client_request_failed()) {

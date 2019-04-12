@@ -18,7 +18,7 @@
 
 #include "AbstractClientEnv.hpp"
 #ifdef ECF_OPENSSL
-#include <boost/asio/ssl.hpp>
+#include "Openssl.hpp"
 #endif
 
 class ClientEnvironment : public AbstractClientEnv {
@@ -95,9 +95,9 @@ public:
 
 #ifdef ECF_OPENSSL
    /// return true if this is a ssl enabled server
-   bool ssl() const { return ssl_;}
-   boost::asio::ssl::context& ssl_context() { return ssl_context_;}
-   void enable_ssl();
+   ecf::Openssl& openssl() { return ssl_;}
+   bool ssl() const { return ssl_.enabled();}
+   void enable_ssl(const std::string& ssl) { ssl_.enable(ssl);}
 #endif
 
 // AbstractClientEnv functions:
@@ -144,8 +144,7 @@ private:
    mutable std::string passwd_;
 
 #ifdef ECF_OPENSSL
- 	bool ssl_{false};
-   boost::asio::ssl::context ssl_context_;
+ 	ecf::Openssl ssl_;
 #endif
 
 	/// The option read from the command line.

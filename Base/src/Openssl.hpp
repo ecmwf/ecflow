@@ -17,6 +17,7 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <ostream>
 #include <boost/noncopyable.hpp>
 #include <boost/asio/ssl.hpp>
 #include <string>
@@ -25,10 +26,6 @@ namespace ecf {
 
 class Openssl : private boost::noncopyable {
 public:
-
-   /// Directory where ssl certificates are held
-   static std::string certificates_dir();
-
    /// There is no SSL protocol version named SSLv23.
    /// The SSLv23_method() API and its variants choose SSLv2, SSLv3, or TLSv1 for compatibility with the peer
    /// Consider the incompatibility among the SSL/TLS versions when you develop
@@ -39,17 +36,35 @@ public:
    /// An SSL server with the SSLv23 method can understand any of the SSLv2, SSLv3, and TLSv1 hello messages.
    /// However, the SSL client using the SSLv23 method cannot establish connection with the SSL server
    ///  with the SSLv3/TLSv1 method because SSLv2 hello message is sent by the client
-   static boost::asio::ssl::context::method method() { return boost::asio::ssl::context::sslv23;}
+   Openssl() : ssl_context_(boost::asio::ssl::context::sslv23){}
+
+   bool enabled() const {return !ssl_.empty();}
+
+   void enable(const std::string&);
+   void init_for_server(const std::string& host, const std::string& port);
+   void init_for_client(const std::string& host, const std::string& port);
+
+   boost::asio::ssl::context& context() { return ssl_context_;}
 
    /// Check the right files exist
-   static void check_server_certificates();
-   static void check_client_certificates();
    static const char* ssl_info();
 
+   void print(std::ostream &os) const { os << ssl_;}
+
 private:
-   Openssl();
+   void check_client_certificates() const;
+   void check_server_certificates() const;
+   void load_verify_file( boost::asio::ssl::context&);   /// load server.crt file into the ssl context
+   std::string certificates_dir() const;                       /// Directory where ssl certificates are held
+   std::string get_password() const;
+
+private:
+   bool init_for_client_{false};
+   std::string ssl_; // Non empty if ssl has been enabled
+   boost::asio::ssl::context ssl_context_;
 };
 
-}
+std::ostream& operator<<(std::ostream& os, const ecf::Openssl&);
 
+}
 #endif

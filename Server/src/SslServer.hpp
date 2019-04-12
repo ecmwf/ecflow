@@ -18,6 +18,7 @@
 
 #include "BaseServer.hpp"
 #include "ssl_connection.hpp"
+#include "Openssl.hpp"
 
 class SslServer : public BaseServer {
 public:
@@ -45,10 +46,8 @@ private:
    void start_accept();
    bool shutdown_socket(ssl_connection_ptr conn, const std::string& msg) const;
 
-   std::string get_password() const;
-
 private:
-   boost::asio::ssl::context ssl_context_;
+   ecf::Openssl ssl_;
 };
 
 #endif

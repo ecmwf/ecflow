@@ -35,6 +35,10 @@
 #include "WhiteListFile.hpp"
 #include "PasswdFile.hpp"
 
+#ifdef ECF_OPENSSL
+#include "Openssl.hpp"
+#endif
+
 // Added ServerEvinronmentException so that it can be in the same scope as server
 // in ServerMain. Previously we had a separate try block
 // Also distinguish between server and environment errors
@@ -64,8 +68,8 @@ public:
 
 #ifdef ECF_OPENSSL
 	/// return true if ssl enable via command line, AND SSL libraries are found
-	bool ssl() const { return ssl_;}
-	void enable_ssl() { ssl_ = true;}
+	bool ssl() const { return ssl_.enabled();}
+	void enable_ssl(const std::string& ssl) { ssl_.enable(ssl);}
 #endif
 
 	/// returns the server port. This has a default value defined in server_environment.cfg
@@ -213,7 +217,7 @@ private:
    mutable PasswdFile passwd_file_;
 
 #ifdef ECF_OPENSSL
-   bool ssl_{false};
+   ecf::Openssl ssl_;
 #endif
 
 	boost::asio::ip::tcp tcp_protocol_;      // defaults to IPv4 TCP protocol

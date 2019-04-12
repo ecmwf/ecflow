@@ -13,19 +13,79 @@
 // Description :
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <stdlib.h>  // getenv
+#include <iostream>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
+#include <boost/bind.hpp>
 
 #include "Openssl.hpp"
-#include <stdlib.h>  // getenv
+#include "File.hpp"
 
 using namespace std;
 namespace fs = boost::filesystem;
 
 namespace ecf {
 
-std::string Openssl::certificates_dir()
+void Openssl::enable(const std::string& ssl)
+{
+   if (ssl.empty()) ssl_ = "1";
+   else ssl_ = ssl;
+}
+
+void Openssl::init_for_server(const std::string& host, const std::string& port)
+{
+   check_server_certificates();
+
+    ssl_context_.set_options(
+             boost::asio::ssl::context::default_workarounds
+             | boost::asio::ssl::context::no_sslv2
+             | boost::asio::ssl::context::single_dh_use);
+    // this must be done before loading any keys. as below
+    ssl_context_.set_password_callback(boost::bind(&Openssl::get_password, this));
+
+    std::string home_path = ecf::Openssl::certificates_dir();
+    ssl_context_.use_certificate_chain_file(home_path + "server.crt" );
+    ssl_context_.use_private_key_file(home_path + "server.key", boost::asio::ssl::context::pem);
+    ssl_context_.use_tmp_dh_file(home_path + "dh1024.pem");
+}
+
+void Openssl::init_for_client(const std::string& host, const std::string& port)
+{
+   // std::cout << " Openssl::init_for_client host :" << host << "@" << port << "\n";
+   if (!init_for_client_) {
+      init_for_client_ = true;
+      check_client_certificates();
+      ssl_context_.load_verify_file(certificates_dir() + "server.crt");
+   }
+}
+
+std::string Openssl::get_password() const
+{
+   // std::cout << "Openssl::get_password()\n";
+   std::string passwd_file = certificates_dir();
+   passwd_file += "/server.passwd";
+   if (fs::exists(passwd_file)) {
+      std::string contents;
+      if (ecf::File::open(passwd_file,contents)) {
+         // remove /n added by editor.
+         if (!contents.empty() && contents[contents.size()-1] == '\n') contents.erase(contents.begin() + contents.size()-1);
+         //std::cout << "Server::get_password() passwd('" << contents << "')\n";
+         return contents;
+      }
+      else {
+         std::stringstream ss;
+         ss << "Server::get_password file " << passwd_file << " exists, but can't be opened (" << strerror(errno) << ")";
+         throw std::runtime_error(ss.str());
+      }
+   }
+   //std::cout << "Server::get_password() passwd('test')\n";
+   return "test";
+}
+
+
+std::string Openssl::certificates_dir() const
 {
    std::string home_path = getenv("HOME");
    home_path += "/.ecflowrc/ssl/";
@@ -67,9 +127,9 @@ const char* Openssl::ssl_info() {
             ;
 }
 
-void Openssl::check_server_certificates()
+void Openssl::check_server_certificates() const
 {
-   std::string cert_dir = Openssl::certificates_dir();
+   std::string cert_dir = certificates_dir();
    if (!fs::exists(cert_dir)) throw std::runtime_error("Error: The certificates directory '" + cert_dir + "' does not exist\n\n" + ssl_info());
 
    {
@@ -86,14 +146,21 @@ void Openssl::check_server_certificates()
    }
 }
 
-void Openssl::check_client_certificates()
+void Openssl::check_client_certificates() const
 {
-   std::string cert_dir = Openssl::certificates_dir();
+   std::string cert_dir = certificates_dir();
    if (!fs::exists(cert_dir)) throw std::runtime_error("Error: The certificates directory '" + cert_dir + "' does not exist\n\n" + ssl_info());
    {
       string server_crt = cert_dir + "server.crt";
       if (!fs::exists(server_crt)) throw std::runtime_error("Error: The self signed certificate file(CRT) '" + server_crt  + "' does not exist\n\n" + ssl_info());
    }
+}
+
+
+std::ostream& operator<<(std::ostream& os, const ecf::Openssl& ssl)
+{
+   ssl.print(os);
+   return os;
 }
 
 }

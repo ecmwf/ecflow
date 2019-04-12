@@ -19,8 +19,6 @@
 #include "Log.hpp"
 #include "ServerEnvironment.hpp"
 #include "Version.hpp"
-#include "Openssl.hpp"
-#include "File.hpp"
 
 using boost::asio::ip::tcp;
 namespace fs = boost::filesystem;
@@ -29,56 +27,20 @@ using namespace std;
 using namespace ecf;
 
 
-SslServer::SslServer( ServerEnvironment& serverEnv ) : BaseServer(serverEnv), ssl_context_(ecf::Openssl::method())
+SslServer::SslServer( ServerEnvironment& serverEnv ) : BaseServer(serverEnv)
 {
-   ecf::Openssl::check_server_certificates();
-
    stats().ECF_SSL_ = "enabled";
 
-   ssl_context_.set_options(
-            boost::asio::ssl::context::default_workarounds
-            | boost::asio::ssl::context::no_sslv2
-            | boost::asio::ssl::context::single_dh_use);
-   // this must be done before loading any keys. as below
-   ssl_context_.set_password_callback(boost::bind(&SslServer::get_password, this));
-
-   std::string home_path = ecf::Openssl::certificates_dir();
-   ssl_context_.use_certificate_chain_file(home_path + "server.crt" );
-   ssl_context_.use_private_key_file(home_path + "server.key", boost::asio::ssl::context::pem);
-   ssl_context_.use_tmp_dh_file(home_path + "dh1024.pem");
-
+   ssl_.init_for_server(serverEnv.hostPort().first, serverEnv.hostPort().second );
 
    start_accept();
-}
-
-std::string SslServer::get_password() const
-{
-   // std::cout << "SslServer::get_password()\n";
-   std::string passwd_file = ecf::Openssl::certificates_dir();
-   passwd_file += "/server.passwd";
-   if (fs::exists(passwd_file)) {
-      std::string contents;
-      if (ecf::File::open(passwd_file,contents)) {
-         // remove /n added by editor.
-         if (!contents.empty() && contents[contents.size()-1] == '\n') contents.erase(contents.begin() + contents.size()-1);
-         //std::cout << "Server::get_password() passwd('" << contents << "')\n";
-         return contents;
-      }
-      else {
-         std::stringstream ss;
-         ss << "Server::get_password file " << passwd_file << " exists, but can't be opened (" << strerror(errno) << ")";
-         throw std::runtime_error(ss.str());
-      }
-   }
-   //std::cout << "Server::get_password() passwd('test')\n";
-   return "test";
 }
 
 void SslServer::start_accept()
 {
    if (serverEnv_.debug()) cout << "   SslServer::start_accept()" << endl;
 
-   ssl_connection_ptr new_conn = std::make_shared<ssl_connection>(  boost::ref(io_service_),  boost::ref(ssl_context_)) ;
+   ssl_connection_ptr new_conn = std::make_shared<ssl_connection>(  boost::ref(io_service_),  boost::ref(ssl_.context())) ;
 
    acceptor_.async_accept( new_conn->socket_ll(),
                          [this,new_conn](const boost::system::error_code& e ) { handle_accept(e,new_conn); });

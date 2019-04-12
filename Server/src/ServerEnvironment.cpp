@@ -574,7 +574,8 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 	}
 
 #ifdef ECF_OPENSSL
-   if (getenv("ECF_SSL")) enable_ssl();
+	char* ecf_ssl = getenv("ECF_SSL");
+   if (ecf_ssl) ssl_.enable(ecf_ssl);
 #endif
 
    char* threshold = getenv("ECF_TASK_THRESHOLD");
@@ -645,7 +646,6 @@ std::string ServerEnvironment::dump() const
    ss << white_list_file_.dump_valid_users();
    return ss.str();
 }
-
 
 std::vector<std::string> ServerEnvironment::expected_variables()
 {

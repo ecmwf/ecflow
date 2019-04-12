@@ -69,7 +69,7 @@ public:
 
 #ifdef ECF_OPENSSL
 	/// Override any ssl read from environment(ECF_SSL) or command line args(-ssl)
-   void enable_ssl() { clientEnv_.enable_ssl(); }
+   void enable_ssl(const std::string& ssl = "") { clientEnv_.enable_ssl(ssl); }
 #endif
 
 	/// This will override the environment setting.
