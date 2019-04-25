@@ -15,8 +15,8 @@ ecbuild_add_library( TARGET   nodeattr
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 
 ecbuild_add_test( TARGET       u_anattr
-                  BOOST
                   SOURCES      ${test_srcs}
-                  LIBS         nodeattr
+                  INCLUDES     ${Boost_INCLUDE_DIRS}
+                  LIBS         nodeattr ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                   TEST_DEPENDS u_acore
                  )

@@ -244,11 +244,11 @@ ecbuild_add_executable( TARGET    ecflowview
 # ===================================================================
 
 ecbuild_add_test( TARGET  test-view
-                  BOOST
                   CONDITION MOTIF_FOUND AND X11_FOUND AND CMAKE_THREAD_LIBS_INIT
                   SOURCES   test/TestRunner.cpp test/TestView.cpp
                   LIBS      libharness  ${OPENSSL_LIBRARIES} 
-                  INCLUDES  ../Test/src
+                            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                  INCLUDES  ../Test/src ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS s_test_zombies
                 )
                           
