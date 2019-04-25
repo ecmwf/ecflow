@@ -318,7 +318,6 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
             continue;
         }
         std::string time_stamp = line.substr(first_open_bracket+1,first_closed_bracket-first_open_bracket-1);
-
         //ecf::Str::split(time_stamp, new_time_stamp);
         //if (new_time_stamp.size() != 2)
         //    continue;
@@ -378,8 +377,10 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
         }
 
         //Convert status time into
-        unsigned int statusTime=QDateTime::fromString(QString::fromStdString(time_stamp),
-                       "hh:mm:ss d.M.yyyy").toMSecsSinceEpoch()/1000;
+        QDateTime dt = QDateTime::fromString(QString::fromStdString(time_stamp),
+                                             "hh:mm:ss d.M.yyyy");
+        dt.setTimeSpec(Qt::UTC);
+        unsigned int statusTime=dt.toMSecsSinceEpoch()/1000;
 
         if(startTime_ == 0)
             startTime_=statusTime;

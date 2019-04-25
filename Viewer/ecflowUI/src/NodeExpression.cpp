@@ -1023,6 +1023,7 @@ bool AttributeStateCondition::execute(VItem* item)
 IsoDateCondition::IsoDateCondition(QString dateStr) : secsSinceEpoch_(-1)
 {
     QDateTime d=QDateTime::fromString(dateStr,Qt::ISODate);
+    d.setTimeSpec(Qt::UTC);
     if(d.isValid())
         secsSinceEpoch_=d.toMSecsSinceEpoch()/1000;
 }

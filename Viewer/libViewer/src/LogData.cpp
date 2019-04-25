@@ -42,15 +42,20 @@ LogDataItem::LogDataItem(const std::string& line,qint64& refTimeInMs) : type_(No
     if(pos1+1 < line.size())
         entry_=line.substr(pos1+1);
 
+    QDateTime dt = QDateTime::fromString(QString::fromStdString(d),
+                                         "hh:mm:ss d.M.yyyy");
+    dt.setTimeSpec(Qt::UTC);
+
     if(refTimeInMs == 0)
     {
-       time_=0;
-       refTimeInMs=QDateTime::fromString(QString::fromStdString(d),
-                                         "hh:mm:ss d.M.yyyy").toMSecsSinceEpoch();
+        time_=0;
+        refTimeInMs=dt.toMSecsSinceEpoch();
     }
     else
-        time_=(QDateTime::fromString(QString::fromStdString(d),
-                                "hh:mm:ss d.M.yyyy").toMSecsSinceEpoch()-refTimeInMs)/1000;
+    {
+        time_=(dt.toMSecsSinceEpoch()-refTimeInMs)/1000;
+    }
+
     if(t == "MSG:")
     {
         type_=MessageType;
@@ -87,8 +92,9 @@ qint64 LogDataItem::getTimeInMs(const std::string& line)
         return 0;
 
     QString d=QString::fromStdString(line.substr(pos+1,pos1-pos-1));
-
-    return QDateTime::fromString(d,"hh:mm:ss d.M.yyyy").toMSecsSinceEpoch();
+    QDateTime dt = QDateTime::fromString(d,"hh:mm:ss d.M.yyyy");
+    dt.setTimeSpec(Qt::UTC);
+    return dt.toMSecsSinceEpoch();
 }
 
 void LogData::loadFromFile(const std::string& logFile,size_t startPos)
