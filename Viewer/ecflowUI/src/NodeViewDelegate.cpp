@@ -996,8 +996,8 @@ void NodeViewDelegate::renderLimiter(QPainter *painter,QStringList data,const QS
     if(data[3] != "1")
         name+=" " + data[3];
 
-    if(data.count() == 5)
-        name.prepend(data[4] + ":");
+    if(data.count() == 7)
+        name.prepend(data[6] + ":");
 
     bool selected=option.state & QStyle::State_Selected;
 

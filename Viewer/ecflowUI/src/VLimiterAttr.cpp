@@ -20,7 +20,7 @@
 
 VLimiterAttrType::VLimiterAttrType() : VAttributeType("limiter")
 {
-    dataCount_=4;
+    dataCount_=6;
     searchKeyToData_["limiter_name"]=NameIndex;
     searchKeyToData_["limiter_path"]=PathIndex;
     searchKeyToData_["name"]=NameIndex;
@@ -35,6 +35,15 @@ QString VLimiterAttrType::toolTip(QStringList d) const
         t+="<b>Limit:</b> " + d[NameIndex] + "<br>";
         t+="<b>Node:</b> " + d[PathIndex] + "<br>";
         t+="<b>Tokens:</b> " + d[TokenIndex];
+
+        if(d[SubmissionIndex] == "1")
+        {
+            t+="<br><b>Submission</b> is limited (<b>-s</b>)";
+        }
+        if(d[FamiliesIndex] == "1")
+        {
+            t+="<br><b>Familiy</b> is limited (<b>-n</b>)";
+        }
     }
     return t;
 }
@@ -44,6 +53,15 @@ QString VLimiterAttrType::definition(QStringList d) const
     QString t="inlimit";
     if(d.count() == dataCount_)
     {
+        if(d[SubmissionIndex] == "1")
+        {
+            t+=" -s";
+        }
+        if(d[FamiliesIndex] == "1")
+        {
+            t+=" -n";
+        }
+
         t+=" " + d[PathIndex] + ":" + d[NameIndex] + " " + d[TokenIndex];
     }
     return t;
@@ -54,7 +72,9 @@ void VLimiterAttrType::encode(const InLimit& lim,QStringList& data) const
     data << qName_ <<
            QString::fromStdString(lim.name()) <<
            QString::fromStdString(lim.pathToNode()) <<
-           QString::number(lim.tokens());
+           QString::number(lim.tokens()) <<
+           QString((lim.limit_submission())?"1":"0") <<
+           QString((lim.limit_this_node_only())?"1":"0");
 }
 
 //=====================================================
