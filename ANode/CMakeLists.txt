@@ -67,18 +67,18 @@ test/TestZombies.cpp
 )
 
 ecbuild_add_test(TARGET  u_anode
-                 BOOST
                  SOURCES      ${test_srcs}
-                 LIBS         node  
+                 INCLUDES     ${Boost_INCLUDE_DIRS}
+                 LIBS         node ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                  TEST_DEPENDS u_anattr
                  )
 
 if (ENABLE_ALL_TESTS)
 	list( APPEND stest_srcs   test/TestSingleExprParse.cpp )                    
 	ecbuild_add_test( TARGET       u_anode_stest
-                      BOOST
                       SOURCES      ${stest_srcs}
-                      LIBS         node 
+                      INCLUDES     ${Boost_INCLUDE_DIRS}
+                      LIBS         node ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                       TEST_DEPENDS u_anattr
                     )
 endif()

@@ -16,14 +16,15 @@ list( APPEND test_srcs
    test/TestVariableParsing.cpp
 )
 ecbuild_add_test( TARGET       u_aparser
-                  BOOST
                   SOURCES      ${test_srcs}
                   LIBS         node nodeattr core
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                   INCLUDES     src 
                                ../../ACore/src 
                                ../../ANattr/src 
                                ../test       # ANode/test
                                ../src        # ANode/src
+                               ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_anode
                 )
 
@@ -34,14 +35,15 @@ if (ENABLE_ALL_TESTS)
 	#
 	list( APPEND t2_src test/TestSingleDefsFile.cpp test/PersistHelper.cpp )                    
 	ecbuild_add_test( TARGET   perf_aparser
-                      BOOST
                       SOURCES  ${t2_src}
                       LIBS     node nodeattr core
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                       INCLUDES src 
                                ../../ACore/src 
                                ../../ANattr/src 
                                ../test       # ANode/test
                                ../src        # ANode/src
+                               ${Boost_INCLUDE_DIRS}
                     )
 
 	#

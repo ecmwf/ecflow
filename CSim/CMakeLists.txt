@@ -33,22 +33,22 @@ list( APPEND test_srcs
    test/TestAnalysis.cpp
 )
 ecbuild_add_test( TARGET   c_csim
-                  BOOST
                   SOURCES  ${test_srcs}
                   LIBS     libsimu        
                            pthread 
-                  INCLUDES ../ANode/test
+                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                  INCLUDES ../ANode/test ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_base
                  )
 
 if (ENABLE_ALL_TESTS)
 
 	ecbuild_add_test( TARGET       c_csim_single
-                      BOOST
                       SOURCES      test/TestSingleSimulator.cpp test/TestUtil.cpp
                       LIBS         libsimu   
                                    pthread 
-                      INCLUDES     ../ANode/test
+                                   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                      INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                       TEST_DEPENDS u_base
                  )
 endif()

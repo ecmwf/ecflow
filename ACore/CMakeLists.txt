@@ -37,12 +37,9 @@ target_link_libraries(core debug ${Boost_FILESYSTEM_LIBRARY_DEBUG}      ${Boost_
                            ${CRYPT_LIB}
                            )                
                    
-#
-# By use'ing BOOST tag we indicate this test should link with boost test libs
-#
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 ecbuild_add_test( TARGET   u_acore 
-                  BOOST
                   SOURCES  ${test_srcs}
-                  LIBS     core                           
+                  INCLUDES ${Boost_INCLUDE_DIRS}
+                  LIBS     core ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                 )

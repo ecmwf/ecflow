@@ -97,11 +97,12 @@ endif()
               
 # if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 ecbuild_add_test( TARGET    s_client
-                  BOOST
                   SOURCES   ${test_srcs}
                   LIBS      libclient ${OPENSSL_LIBRARIES}
+                            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                   INCLUDES  ../ANode/test
                             ../Base/test 
+                            ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_base
                  )
 
@@ -111,11 +112,12 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	# Simple stand alone test
 	#
 	ecbuild_add_test( TARGET   perf_test_large_defs 
-                      BOOST
                       SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
                       LIBS     libclient ${OPENSSL_LIBRARIES}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                       INCLUDES ../ANode/test
                                ../Base/test 
+                               ${Boost_INCLUDE_DIRS}
                       TEST_DEPENDS u_base
                 )
                
@@ -123,11 +125,12 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	# test migration
 	#
 	ecbuild_add_test( TARGET m_test_migration
-                      BOOST
                       SOURCES  test/TestMigration.cpp test/SCPort.cpp
                       LIBS     libclient ${OPENSSL_LIBRARIES}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                       INCLUDES ../ANode/test
                                ../Base/test 
+                               ${Boost_INCLUDE_DIRS}
                       TEST_DEPENDS u_base
                     )
 endif()

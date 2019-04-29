@@ -118,9 +118,9 @@ list( APPEND test_srcs
 
 # if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 ecbuild_add_test( TARGET       u_base
-                  BOOST
                   SOURCES      ${test_srcs}
                   LIBS         base pthread ${OPENSSL_LIBRARIES}
-                  INCLUDES     ../ANode/test
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                  INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_aparser
                   )

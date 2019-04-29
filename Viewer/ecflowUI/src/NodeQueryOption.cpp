@@ -372,6 +372,8 @@ void NodeQueryPeriodOption::clear()
    lastPeriodUnits_.clear();
    fromDate_=QDateTime();
    toDate_=QDateTime();
+   fromDate_.setTimeSpec(Qt::UTC);
+   toDate_.setTimeSpec(Qt::UTC);
 }
 
 void NodeQueryPeriodOption::setLastPeriod(int interval,QString intervalUnits)
@@ -523,7 +525,9 @@ void NodeQueryPeriodOption::load(VSettings* vs)
         QString to=QString::fromStdString(vs->get("to",fromDate_.toString(Qt::ISODate).toStdString()));
 
         fromDate_=QDateTime::fromString(from,Qt::ISODate);
-        toDate_=QDateTime::fromString(from,Qt::ISODate);
+        fromDate_.setTimeSpec(Qt::UTC);
+        toDate_=QDateTime::fromString(to,Qt::ISODate);
+        toDate_.setTimeSpec(Qt::UTC);
 
         //Check if dates are valis
         if(!fromDate_.isValid() || !fromDate_.isValid())

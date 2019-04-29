@@ -57,24 +57,27 @@ if (ENABLE_ALL_TESTS)
 	
 	# if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
 	ecbuild_add_test( TARGET s_test
-	                  BOOST
 	                  SOURCES  ${test_srcs}
+	                  INCLUDES ${Boost_INCLUDE_DIRS}
 	                  LIBS     libharness ${OPENSSL_LIBRARIES}
+	                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
 	                  TEST_DEPENDS s_client
 	                )
 	
 	ecbuild_add_test( TARGET  s_test_zombies
-	                  BOOST
 	                  SOURCES   ./TestZombies.cpp
+	                  INCLUDES  ${Boost_INCLUDE_DIRS}
 	                  LIBS      libharness ${OPENSSL_LIBRARIES}
+	                            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
 	                  TEST_DEPENDS s_test
 	                )
 	
 	# This test runs forever, hence not suitable for unit test.                          
 	#ecbuild_add_test( TARGET  singletest
-	#                  BOOST
 	#                  SOURCES   ./TestSingle.cpp
+	#                  INCLUDES  ${Boost_INCLUDE_DIRS}
 	#                  LIBS      libharness 
+	#                            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
 	#                  TEST_DEPENDS s_client
 	#               )
 endif()

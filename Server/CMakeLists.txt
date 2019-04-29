@@ -71,10 +71,11 @@ SET_TARGET_PROPERTIES(ecflow_server PROPERTIES
 # ================================================================================                         
 # TEST
 ecbuild_add_test( TARGET       u_server
-                  BOOST  
                   SOURCES      test/TestServerEnvironment.cpp 
                                test/TestServer1.cpp
+                  INCLUDES     ${Boost_INCLUDE_DIRS}
                   LIBS         libserver ${OPENSSL_LIBRARIES}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
                   TEST_DEPENDS u_base
               )
 
