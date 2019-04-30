@@ -1363,7 +1363,7 @@ void ServerHandler::sslIncompatibleServer(const std::string& msg)
     std::string errStr = "Cannot communicate to server.";
 #if ECF_OPENSSL
     if (ssl_) {
-        errStr += " Server is marked as SSL in the UI. Please check if the server is really SSL-enabled! Also check settings in Manage servers dialogue!"";
+        errStr += " Server is marked as SSL in the UI. Please check if the server is really SSL-enabled! Also check settings in Manage servers dialogue!";
     } else {
         errStr += " Server is marked as non-SSL in the UI. Please check if SSL is really disabled in the server! Also check settings in Manage servers dialogue!";
     }
