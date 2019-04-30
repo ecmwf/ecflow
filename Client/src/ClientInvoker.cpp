@@ -319,6 +319,8 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
                boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
 					if (clientEnv_.ssl()) {
+                  if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker: >>> OPEN SSL enabled <<<" << endl;
+
 					   clientEnv_.openssl().init_for_client( clientEnv_.host(),clientEnv_.port());
 
                   SslClient theClient(io_service,clientEnv_.openssl().context(),cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
