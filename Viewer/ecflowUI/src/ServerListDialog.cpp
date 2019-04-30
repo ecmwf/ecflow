@@ -116,8 +116,12 @@ ServerAddDialog::ServerAddDialog(QWidget *parent) :
 	portEdit->setValidator(new QIntValidator(1025,65535,this));
 
 #ifndef ECF_OPENSSL
+    sslMessageLabel->hide();
     sslCb->setChecked(false);
     sslCb->setEnabled(false);
+#else
+    sslMessageLabel->setShowTypeTitle(false);
+    sslMessageLabel->showWarning("Option <i><u>Use SSL </u></i> must <b>only</b> be enabled for servers using SSL communication!");
 #endif
 }
 
@@ -528,7 +532,8 @@ void ServerListDialog::on_serverView_doubleClicked(const QModelIndex& index)
 {
 	int col=index.column();
 	if(col == ServerListModel::NameColumn || col == ServerListModel::HostColumn ||
-	   col == ServerListModel::PortColumn)
+       col == ServerListModel::PortColumn || col == ServerListModel::SslColumn ||
+       col == ServerListModel::FavouriteColumn)
 	{
 		editItem(index);
 	}

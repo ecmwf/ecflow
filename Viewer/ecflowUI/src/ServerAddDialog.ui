@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>294</width>
-    <height>172</height>
+    <height>197</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -32,9 +32,6 @@
      <item row="0" column="1">
       <widget class="QLineEdit" name="nameEdit"/>
      </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="hostEdit"/>
-     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
@@ -44,6 +41,9 @@
         <cstring>hostEdit</cstring>
        </property>
       </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="hostEdit"/>
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="label_3">
@@ -58,7 +58,7 @@
      <item row="4" column="1">
       <widget class="QLineEdit" name="portEdit"/>
      </item>
-     <item row="6" column="1">
+     <item row="5" column="1">
       <widget class="QCheckBox" name="addToCurrentCb">
        <property name="text">
         <string>Add server to current &amp;view</string>
@@ -68,14 +68,53 @@
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
-      <widget class="QCheckBox" name="sslCb">
-       <property name="text">
-        <string>Server uses SSL communication</string>
+     <item row="7" column="1">
+      <widget class="MessageLabel" name="sslMessageLabel" native="true">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
       </widget>
      </item>
+     <item row="8" column="1">
+      <widget class="QCheckBox" name="sslCb">
+       <property name="text">
+        <string>Use SSL</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>10</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -89,6 +128,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MessageLabel</class>
+   <extends>QWidget</extends>
+   <header>MessageLabel.hpp</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections>
   <connection>
