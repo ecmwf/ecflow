@@ -14,6 +14,7 @@ export ECF_PORT=4142
 export PATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
 PYTHON=python3
 if [[ $PYTHON == "python3" ]] ; then
+   module load python3
    export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python3.6/site-packages
 else
    export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python2.7/site-packages
