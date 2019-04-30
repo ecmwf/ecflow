@@ -202,6 +202,8 @@ void ServerHandler::createClient()
 #ifdef ECF_OPENSSL
     if (ssl_) {
         client_->enable_ssl();
+    } else {
+        client_->disable_ssl();
     }
 #endif
 
