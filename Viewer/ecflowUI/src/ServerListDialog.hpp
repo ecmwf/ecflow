@@ -42,11 +42,12 @@ class ServerEditDialog : public QDialog, private Ui::ServerEditDialog, public Se
 Q_OBJECT
 
 public:
-	ServerEditDialog(QString name,QString host, QString port,bool favourite,QWidget* parent=nullptr);
+    ServerEditDialog(QString name,QString host, QString port, bool favourite, bool ssl, QWidget* parent=nullptr);
 
 	QString name() const;
 	QString host() const;
 	QString port() const;
+    bool isSsl() const;
 	bool isFavourite() const;
 
 public Q_SLOTS:
@@ -68,6 +69,7 @@ public:
 	QString host() const;
 	QString port() const;
 	bool addToView() const;
+    bool isSsl() const;
 
 public Q_SLOTS:
 	void accept() override;
@@ -98,6 +100,7 @@ protected Q_SLOTS:
 	 void on_actionRescan_triggered();
 	 void on_serverView_doubleClicked(const QModelIndex& index);
      void on_actionFavourite_triggered(bool checked);
+     void on_actionSsl_triggered(bool checked);
      void on_sysSyncTb_clicked(bool);
      void on_sysSyncLogTb_toggled(bool);
      void slotItemSelected(const QModelIndex&,const QModelIndex&);
@@ -111,7 +114,8 @@ protected:
 	void duplicateItem(const QModelIndex& index);
 	void addItem();
 	void removeItem(const QModelIndex& index);
-	void setFavouriteItem(const QModelIndex& index,bool b);
+    void setFavouriteItem(const QModelIndex& index,bool b);
+    void setSslItem(const QModelIndex& index,bool b);
 	void checkActionState();
 	void writeSettings();
 	void readSettings();
@@ -144,7 +148,8 @@ public:
    	void dataChangeFinished();
    	ServerItem* indexToServer(const QModelIndex& index);
 
-    enum Columns {LoadColumn=0, NameColumn=1, HostColumn=2, PortColumn=3, SystemColumn=4, FavouriteColumn=5, UseColumn=6};
+    enum Columns {LoadColumn=0, NameColumn=1, HostColumn=2, PortColumn=3, SystemColumn=4, SslColumn=5,
+                  FavouriteColumn=6, UseColumn=7};
     enum CustomItemRole {IconStatusRole = Qt::UserRole+1};
 
 protected:

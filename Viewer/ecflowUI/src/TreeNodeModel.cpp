@@ -1434,7 +1434,8 @@ int TreeNodeModel::serverConnectId(ConnectState::State st) const
             return 1;
         case ConnectState::Disconnected:
             return 2;
-        case ConnectState::Incompatible:
+        case ConnectState::VersionIncompatible:
+        case ConnectState::SslIncompatible:
             return 3;
         default:
             return 0;

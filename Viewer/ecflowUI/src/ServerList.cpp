@@ -75,7 +75,7 @@ ServerItem* ServerList::find(const std::string& name, const std::string& host, c
 }
 
 ServerItem* ServerList::add(const std::string& name,const std::string& host,
-                            const std::string& port,bool favourite,bool saveIt)
+                            const std::string& port,bool favourite, bool ssl, bool saveIt)
 {
     std::string errStr;
     if(!checkItemToAdd(name,host,port,true,errStr))
@@ -84,7 +84,7 @@ ServerItem* ServerList::add(const std::string& name,const std::string& host,
         return nullptr;
     }
 
-    auto* item=new ServerItem(name,host,port,favourite);
+    auto* item=new ServerItem(name,host,port,favourite,ssl);
 
     items_.push_back(item);
 
@@ -135,6 +135,15 @@ void ServerList::setFavourite(ServerItem* item,bool b)
 		for(std::vector<ServerListObserver*>::const_iterator it=observers_.begin(); it != observers_.end(); ++it)
 			(*it)->notifyServerListFavouriteChanged(item);
 	}
+}
+
+void ServerList::setSsl(ServerItem* item,bool b)
+{
+    auto it=std::find(items_.begin(),items_.end(),item);
+    if(it != items_.end())
+    {
+        item->setSsl(b);
+    }
 }
 
 std::string ServerList::uniqueName(const std::string& name)
@@ -269,13 +278,17 @@ bool ServerList::load()
         if(sv.size() >= 5)
             sys=(sv[4]=="1")?true:false;
 
+        bool ssl=false;
+        if(sv.size() >= 6)
+            ssl=(sv[5]=="1")?true:false;
+
         if(sv.size() >= 3)
 		{           
             std::string name=sv[0], host=sv[1], port=sv[2];
             ServerItem* item=nullptr;
             try
             {
-                item=add(name,host,port,favourite,false);
+                item=add(name,host,port,favourite,ssl,false);
                 UI_ASSERT(item != nullptr,"name=" << name << " host=" << host << " port=" << port);
                 item->setSystem(sys);
             }
@@ -322,8 +335,9 @@ void ServerList::save()
 	for(auto & item : items_)
 	{
         std::string fav=(item->isFavourite())?"1":"0";
+        std::string ssl=(item->isSsl())?"1":"0";
         std::string sys=(item->isSystem())?"1":"0";
-        out << item->name() << "," << item->host() << "," <<  item->port() <<  "," <<  fav << "," <<  sys << std::endl;
+        out << item->name() << "," << item->host() << "," <<  item->port() <<  "," <<  fav << "," <<  sys << "," <<  ssl << std::endl;
 	}
 	out.close();    
 }
@@ -358,7 +372,7 @@ bool ServerList::readRcFile()
                 std::string name=vec[0], host=vec[1], port=vec[2];                
                 try
                 {
-                    add(name,host,port,false,false);
+                    add(name,host,port,false,false,false);
                 }
                 catch(std::exception& e)
                 {
@@ -470,7 +484,7 @@ void ServerList::syncSystemFile()
             std::string name=i.name(),host=i.host(), port=i.port();
             try
             {
-                item=add(name,host,port,false,false);
+                item=add(name,host,port,false,false,false);
                 UI_ASSERT(item != nullptr,"name=" << name << " host=" << host
                           << " port=" << port);
                 item->setSystem(true);

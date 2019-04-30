@@ -59,6 +59,7 @@ public:
 	const std::string& host() const {return host_;}
 	const std::string& longName() const {return longName_;}
 	const std::string& port() const {return port_;}
+    void setSsl(bool);
 
 	Activity activity() const {return activity_;}
 	ConnectState* connectState() const {return connectState_;}
@@ -105,7 +106,7 @@ public:
 	static void saveSettings();
 
 	static const std::vector<ServerHandler*>& servers() {return servers_;}
-	static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port);
+    static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port, bool ssl);
 	static void removeServer(ServerHandler*);
 	static ServerHandler* findServer(const std::string &alias);
 
@@ -124,7 +125,7 @@ public:
     void writeDefs(VInfo_ptr info,const std::string& fileName);
 
 protected:
-	ServerHandler(const std::string& name,const std::string& host,const std::string&  port);
+    ServerHandler(const std::string& name,const std::string& host,const std::string&  port, bool ssl);
 	~ServerHandler() override;
 
     //Only friend classes can access it. Practically it means we
@@ -145,6 +146,7 @@ protected:
 	std::string name_;
 	std::string host_;
 	std::string port_;
+    bool ssl_;
 	ClientInvoker* client_;
 	std::string longName_;
 	bool updating_;
@@ -167,7 +169,8 @@ private Q_SLOTS:
 	void slotRescanNeed();
 
 private:
-	//Begin and end the initialisation by connecting to the server and syncing.
+    void createClient();
+    void deleteClient();
     void refreshInternal();
     void resetFinished();
 	void resetFailed(const std::string& errMsg);
@@ -178,6 +181,7 @@ private:
     void checkServerVersion();
     void compatibleServer();
     void incompatibleServer(const std::string& version);
+    void sslIncompatibleServer(const std::string& msg);
 
 	void updateSuiteFilterWithLoaded(const std::vector<std::string>&);
     void updateSuiteFilter(bool needNewSuiteList);

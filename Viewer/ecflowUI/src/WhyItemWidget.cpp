@@ -259,8 +259,6 @@ void WhyItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         }
     }
 
-    Q_ASSERT(!flags.isSet(SelectedChanged));
-
 }
 
 void WhyItemWidget::anchorClicked(const QUrl& link)

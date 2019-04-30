@@ -107,7 +107,6 @@ VServerSettings::~VServerSettings()
     delete guiProp_;
 }
 
-
 int  VServerSettings::intValue(Param par) const
 {
 	return property(par)->value().toInt();

@@ -33,7 +33,7 @@
           <string>Favourites and loaded</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="viewer.qrc">
            <normaloff>:/viewer/favourite.svg</normaloff>:/viewer/favourite.svg</iconset>
          </property>
          <property name="checkable">
@@ -59,7 +59,7 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="viewer.qrc">
            <normaloff>:/viewer/info.svg</normaloff>:/viewer/info.svg</iconset>
          </property>
          <property name="checkable">
@@ -261,7 +261,7 @@
   </layout>
   <action name="actionAdd">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/images/add.svg</normaloff>:/viewer/images/add.svg</iconset>
    </property>
    <property name="text">
@@ -276,7 +276,7 @@
   </action>
   <action name="actionDelete">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/close.svg</normaloff>:/viewer/close.svg</iconset>
    </property>
    <property name="text">
@@ -291,7 +291,7 @@
   </action>
   <action name="actionEdit">
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/images/configure.svg</normaloff>:/viewer/images/configure.svg</iconset>
    </property>
    <property name="text">
@@ -332,7 +332,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="viewer.qrc">
      <normaloff>:/viewer/favourite.svg</normaloff>:/viewer/favourite.svg</iconset>
    </property>
    <property name="text">
@@ -340,6 +340,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+B</string>
+   </property>
+  </action>
+  <action name="actionSsl">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use SSL communication</string>
+   </property>
+   <property name="toolTip">
+    <string>Use SSL communication for server</string>
    </property>
   </action>
   <zorder>buttonBox</zorder>
@@ -353,7 +364,9 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>buttonBox</sender>

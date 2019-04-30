@@ -73,10 +73,12 @@ public:
 	ServerItem* find(const std::string& name, const std::string& host, const std::string& port);
 
 	//Can be added or changed only via these static methods
-	ServerItem* add(const std::string&,const std::string&,const std::string&,bool,bool saveIt=true);
+    ServerItem* add(const std::string&,const std::string&,const std::string&,
+                    bool favorite, bool ssl, bool saveIt);
 	void remove(ServerItem*);
 	void reset(ServerItem*,const std::string& name,const std::string& host,const std::string& port);
 	void setFavourite(ServerItem*,bool);
+    void setSsl(ServerItem*,bool);
 
 	std::string uniqueName(const std::string&);
 

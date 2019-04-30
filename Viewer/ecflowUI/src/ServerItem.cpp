@@ -21,15 +21,18 @@ ServerItem::ServerItem(const std::string& name) :
   name_(name),
   favourite_(false),
   system_(false),
+  ssl_(false),
   useCnt_(0),
   handler_(nullptr)
 {
 }
 
-ServerItem::ServerItem(const std::string& name,const std::string& host,const std::string& port, bool favourite) :
+ServerItem::ServerItem(const std::string& name,const std::string& host,const std::string& port,
+                       bool favourite, bool ssl) :
   name_(name), host_(host), port_(port),
   favourite_(favourite),
   system_(false),
+  ssl_(ssl),
   useCnt_(0),
   handler_(nullptr)
 {
@@ -67,6 +70,21 @@ void ServerItem::setFavourite(bool b)
 void ServerItem::setSystem(bool b)
 {
     system_=b;
+    if(isUsed())
+    {
+
+    }
+    //broadcastChanged();
+}
+
+void ServerItem::setSsl(bool b)
+{
+    if(ssl_ != b)
+    {
+        ssl_=b;
+        if(handler_)
+            handler_->setSsl(ssl_);
+    }
     //broadcastChanged();
 }
 
@@ -84,7 +102,7 @@ void ServerItem::registerUsageBegin()
 {
 	if(!handler_)
 	{
-		handler_=ServerHandler::addServer(name_,host_,port_);
+        handler_=ServerHandler::addServer(name_,host_,port_,ssl_);
     }
     if(handler_)
         useCnt_++;

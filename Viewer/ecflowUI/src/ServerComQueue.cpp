@@ -311,16 +311,26 @@ void ServerComQueue::addTask(VTask_ptr task)
 
 void ServerComQueue::addNewsTask()
 {
-	if(state_ == DisabledState || state_ == ResetState)
-		return;
+    addNewsTask("","");
+}
 
-	if(isNextTask(VTask::NewsTask))
-		return;
+void ServerComQueue::addNewsTask(const std::string& key, const std::string& value)
+{
+    if(state_ == DisabledState || state_ == ResetState)
+        return;
 
-	VTask_ptr task=VTask::create(VTask::NewsTask);
-	addTask(task);
+    if(isNextTask(VTask::NewsTask))
+        return;
+
+    VTask_ptr task=VTask::create(VTask::NewsTask);
+    if (!key.empty()) {
+        task->param(key, value);
+    }
+
+    addTask(task);
     server_->refreshScheduled();
 }
+
 
 void ServerComQueue::addSyncTask()
 {

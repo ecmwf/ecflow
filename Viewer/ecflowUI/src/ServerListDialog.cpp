@@ -114,6 +114,11 @@ ServerAddDialog::ServerAddDialog(QWidget *parent) :
 	//nameEdit->setValidator(new QRegExpValidator(""));
 	//hostEdit->setValidator(new QRegExpValidator(""));
 	portEdit->setValidator(new QIntValidator(1025,65535,this));
+
+#ifndef ECF_OPENSSL
+    sslCb->setChecked(false);
+    sslCb->setEnabled(false);
+#endif
 }
 
 void ServerAddDialog::accept()
@@ -143,6 +148,11 @@ QString ServerAddDialog::port() const
 	return portEdit->text();
 }
 
+bool ServerAddDialog::isSsl() const
+{
+    return sslCb->isChecked();
+}
+
 bool ServerAddDialog::addToView() const
 {
 	return addToCurrentCb->isChecked();
@@ -154,7 +164,8 @@ bool ServerAddDialog::addToView() const
 //
 //======================================
 
-ServerEditDialog::ServerEditDialog(QString name, QString host, QString port,bool favourite,QWidget *parent) :
+ServerEditDialog::ServerEditDialog(QString name, QString host, QString port,bool favourite,
+                                   bool ssl, QWidget *parent) :
    QDialog(parent),
    ServerDialogChecker(tr("Cannot modify server!")),
    oriName_(name)
@@ -164,7 +175,17 @@ ServerEditDialog::ServerEditDialog(QString name, QString host, QString port,bool
 	nameEdit->setText(name);
 	hostEdit->setText(host);
 	portEdit->setText(port);
-	favCh->setChecked(favourite);
+    favCh->setChecked(favourite);
+    sslCh->setChecked(ssl);
+
+#ifndef ECF_OPENSSL
+    sslMessageLabel->hide();
+    sslCh->setEnabled(false);
+    sslLabel->setEnabled(false);
+#else
+    sslMessageLabel->setShowTypeTitle(false);
+    sslMessageLabel->showWarning("Option <i><u>Use SSL </u></i> must <b>only</b> be enabled for servers using SSL communication!");
+#endif
 
 	//Validators
 	//nameEdit->setValidator(new QRegExpValidator(""));
@@ -205,6 +226,11 @@ bool ServerEditDialog::isFavourite() const
 	return favCh->isChecked();
 }
 
+bool ServerEditDialog::isSsl() const
+{
+    return sslCh->isChecked();
+}
+
 //======================================
 //
 // ServerListDialog
@@ -234,8 +260,12 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
 	serverView->setSortingEnabled(true);
 	serverView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	serverView->sortByColumn(ServerListModel::NameColumn,Qt::AscendingOrder);
+    serverView->setModel(sortModel_);
 
-	serverView->setModel(sortModel_);
+#ifndef ECF_OPENSSL
+    // has to be called after the model was initialised
+    serverView->hideColumn(ServerListModel::SslColumn);
+#endif
 
 	//Add context menu actions to the view
 	auto* sep1=new QAction(this);
@@ -251,7 +281,10 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
 	serverView->addAction(actionEdit);
 	serverView->addAction(sep2);
 	serverView->addAction(actionDelete);
-	serverView->addAction(sep3);
+    serverView->addAction(sep3);
+//#ifdef ECF_OPENSSL
+//    serverView->addAction(actionSsl);
+//#endif
 	serverView->addAction(actionFavourite);
 
 	//Add actions for the toolbuttons
@@ -355,7 +388,7 @@ void ServerListDialog::editItem(const QModelIndex& index)
         ServerEditDialog d(QString::fromStdString(item->name()),
 						   QString::fromStdString(item->host()),
 						   QString::fromStdString(item->port()),
-						   item->isFavourite(),this);
+                           item->isFavourite(),item->isSsl(),this);
 
 		//The dialog checks the name, host and port!
 		if(d.exec()== QDialog::Accepted)
@@ -368,6 +401,14 @@ void ServerListDialog::editItem(const QModelIndex& index)
 				QModelIndex idx=sortModel_->index(index.row(),ServerListModel::FavouriteColumn);
 				serverView->update(idx);
 			}
+
+            if(item->isSsl()  != d.isSsl())
+            {
+                ServerList::instance()->setSsl(item,d.isSsl());
+                QModelIndex idx=sortModel_->index(index.row(),ServerListModel::SslColumn);
+                serverView->update(idx);
+            }
+
 		}
 	}
 }
@@ -380,13 +421,14 @@ void ServerListDialog::duplicateItem(const QModelIndex& index)
 
 		ServerEditDialog d(QString::fromStdString(dname),
 						   QString::fromStdString(item->host()),
-                           QString::fromStdString(item->port()),item->isFavourite(),this);
+                           QString::fromStdString(item->port()),item->isFavourite(),item->isSsl(),this);
 
 		//The dialog checks the name, host and port!
 		if(d.exec() == QDialog::Accepted)
 		{
 			model_->dataIsAboutToChange();
-			ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),false);
+            ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),
+                                        item->isFavourite(), item->isSsl(), false);
 			model_->dataChangeFinished();
 		}
 	}
@@ -402,7 +444,8 @@ void ServerListDialog::addItem()
 		model_->dataIsAboutToChange();
         ServerItem* item=nullptr;
         try {
-            item=ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),false);
+            item=ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),
+                                             false, d.isSsl(), false);
         }
         catch(std::exception& e)
         {
@@ -468,6 +511,18 @@ void ServerListDialog::setFavouriteItem(const QModelIndex& index,bool b)
 	serverView->update(idx);
 }
 
+void ServerListDialog::setSslItem(const QModelIndex& index,bool b)
+{
+    ServerItem* item=model_->indexToServer(sortModel_->mapToSource(index));
+
+    if(!item)
+        return;
+
+    ServerList::instance()->setSsl(item,b);
+
+    QModelIndex idx=sortModel_->index(index.row(),ServerListModel::SslColumn);
+    serverView->update(idx);
+}
 
 void ServerListDialog::on_serverView_doubleClicked(const QModelIndex& index)
 {
@@ -506,6 +561,14 @@ void ServerListDialog::on_actionFavourite_triggered(bool checked)
 {
 	QModelIndex index=serverView->currentIndex();
 	setFavouriteItem(index,checked);
+}
+
+void ServerListDialog::on_actionSsl_triggered(bool checked)
+{
+#ifdef ECF_OPENSSL
+    QModelIndex index=serverView->currentIndex();
+    setSslItem(index,checked);
+#endif
 }
 
 void ServerListDialog::on_actionRescan_triggered()
@@ -590,6 +653,9 @@ void ServerListDialog::checkActionState()
 		actionDuplicate->setEnabled(false);
 		actionDelete->setEnabled(false);
 		actionFavourite->setEnabled(false);
+#ifdef ECF_OPENSSL
+        actionSsl->setEnabled(false);
+#endif
 	}
 	else
 	{
@@ -602,6 +668,10 @@ void ServerListDialog::checkActionState()
         actionDelete->setEnabled(!item->isSystem());
 		actionFavourite->setEnabled(true);
 		actionFavourite->setChecked(item->isFavourite());
+#ifdef ECF_OPENSSL
+        actionSsl->setEnabled(true);
+        actionFavourite->setChecked(item->isSsl());
+#endif
 	}
 }
 
@@ -696,7 +766,7 @@ void ServerListModel::dataChangeFinished()
 
 int ServerListModel::columnCount(const QModelIndex& parent) const
 {
-    return 6;
+    return 7;
 }
 
 int ServerListModel::rowCount(const QModelIndex& parent) const
@@ -729,6 +799,7 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 		case NameColumn: return QString::fromStdString(item->name());
 		case HostColumn: return QString::fromStdString(item->host());
         case PortColumn: return QString::fromStdString(item->port());
+        case SslColumn: return (item->isSsl())?"ssl":"";
         case UseColumn:
 		{
             int n=item->useCnt();
@@ -819,6 +890,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
     		case HostColumn: return tr("Host");
             case PortColumn: return tr("Port");
             case SystemColumn: return tr("S");
+            case SslColumn: return tr("SSL");
             case FavouriteColumn: return tr("F");
             case UseColumn: return tr("Loaded");
     		default: return QVariant();
@@ -834,6 +906,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
     		case PortColumn: return tr("Port number of the server");
             case SystemColumn: return tr("Indicates if a server appears in the centrally maintained <b>system server list</b>. \
                                          <br>The name, host and port of these server entries cannot be edited.");
+            case SslColumn: return tr("Indicates if a server uses SSL communication.");
             case FavouriteColumn: return tr("Indicates if a server is a <b>favourite</b>. Only favourite and loaded servers \
     				                        are appearing in the server list under the <b>Servers menu</b> in the menubar");
     		case UseColumn: return tr("Indicates the <b>number of tabs</b> where the server is loaded.");

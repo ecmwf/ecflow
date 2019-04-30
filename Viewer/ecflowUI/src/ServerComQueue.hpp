@@ -41,7 +41,8 @@ public:
 	State state() const {return state_;}
 
 	void addTask(VTask_ptr);
-	void addNewsTask();
+    void addNewsTask();
+    void addNewsTask(const std::string& key, const std::string& value);
 	void addSyncTask();
 	void addSuiteListTask();
 	void addSuiteAutoRegisterTask();

@@ -342,7 +342,7 @@ void SessionHandler::setTemporarySessionIfReqested()
 			{
 				// no - add it, and make sure it's got a unique alias
 				std::string uniqueName = ServerList::instance()->uniqueName(alias);
-                ServerList::instance()->add(uniqueName, host, port, false, true);
+                ServerList::instance()->add(uniqueName, host, port, false, false, true);
 			}
 		}
 	}

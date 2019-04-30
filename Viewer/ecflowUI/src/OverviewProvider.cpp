@@ -126,9 +126,13 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 		{
 			f << inc << "Disconnected  : " << VFileInfo::formatDate(cst->lastDisconnectTime()).toStdString() << "\n";
 		}
-        else if(cst->state() == ConnectState::Incompatible)
+        else if(cst->state() == ConnectState::VersionIncompatible)
         {
             f << inc << "Incompatible server version! " << cst->errorMessage() << "\n";
+        }
+        else if(cst->state() == ConnectState::SslIncompatible)
+        {
+            f << inc << "Possible SSL-related incompatibility! " << cst->errorMessage() << "\n";
         }
 
 		return;

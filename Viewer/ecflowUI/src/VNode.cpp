@@ -1865,12 +1865,19 @@ QString VServer::toolTip()
 			txt+="<b><font color=" + colErr.name() +">Server is disconnected!</b><br>";
 			txt+="<b>Disconnected</b>: " + VFileInfo::formatDateAgo(st->lastDisconnectTime()) + "<br>";
         }
-        else if(st->state() == ConnectState::Incompatible)
+        else if(st->state() == ConnectState::VersionIncompatible)
         {
             txt+="<b><font color=" + colErr.name() +">Server version is incompatible with client!</b><br>";
             if(!st->errorMessage().empty())
                 txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage());
         }
+        else if(st->state() == ConnectState::SslIncompatible)
+        {
+            txt+="<b><font color=" + colErr.name() +">Possible SSL incompatibility between server and client!</b><br>";
+            if(!st->errorMessage().empty())
+                txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n","<br>");
+        }
+
 	}
 	return txt;
 }

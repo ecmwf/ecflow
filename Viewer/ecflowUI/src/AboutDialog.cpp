@@ -28,6 +28,12 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
     QString desc=QString::fromStdString(ecf::Version::description());
     QString descTxt="<b>ecflow version:</b> " + ecfVersionTxt;
 
+#ifdef ECF_OPENSSL
+    descTxt+="<br><b>OpenSSL:</b> enabled";
+#else
+    descTxt+="<br><b>OpenSSL:</b> disabled";
+#endif
+
     int pos=0;
     QRegExp rx("boost\\((\\S+)\\)");
     if((pos = rx.indexIn(desc, pos)) != -1)

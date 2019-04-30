@@ -55,10 +55,11 @@ std::string ServerHandler::localHostName_;
 //#define __UI_SERVERCOMOBSERVER_DEBUG
 #define __UI_SERVERUPDATE_DEBUG
 
-ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port) :
+ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port, bool ssl) :
    name_(name),
    host_(host),
    port_(port),
+   ssl_(ssl),
    client_(nullptr),
    updating_(false),
    communicating_(false),
@@ -91,6 +92,12 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
                          " port= " << port << ". " <<  e.what();
         client_=nullptr;
     }
+
+#ifdef ECF_OPENSSL
+    if (ssl_) {
+        client_->enable_ssl();
+    }
+#endif
 
     client_->set_auto_sync(true); //will call sync_local() after each command!!!
     client_->set_retry_connection_period(1);
@@ -147,7 +154,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 ServerHandler::~ServerHandler()
 {
-	//Save setings
+    //Save settings
 	saveConf();
 
 	//Notify the observers
@@ -174,10 +181,106 @@ ServerHandler::~ServerHandler()
 	delete conf_;
 }
 
+// must be called after deleteClient()
+void ServerHandler::createClient()
+{
+    assert(client_ == nullptr);
+    assert(comQueue_ == nullptr);
+
+    //Create the client invoker. At this point it is empty.
+    try
+    {
+        client_=new ClientInvoker(host_, port_);
+    }
+    catch(std::exception& e)
+    {
+        UiLog().err() << "Could not create ClientInvoker for host=" << host_ <<
+                         " port= " << port_ << ". " <<  e.what();
+        client_=nullptr;
+    }
+
+#ifdef ECF_OPENSSL
+    if (ssl_) {
+        client_->enable_ssl();
+    }
+#endif
+
+    client_->set_auto_sync(true); //will call sync_local() after each command!!!
+    client_->set_retry_connection_period(1);
+    client_->set_connection_attempts(1);
+    client_->set_throw_on_error(true);
+
+    //Create the queue for the tasks to be sent to the client (via the ServerComThread)! It will
+    //create and take ownership of the ServerComThread. At this point the queue has not started yet.
+    comQueue_=new ServerComQueue (this,client_);
+
+    //Load settings ????
+    //loadConf();
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // At this point nothing is running or active!!!!
+
+    // we need to set it because in disconnected state reset is ignored!!!
+    connectState_->state(ConnectState::Undef);
+
+    //Check if the server is compatible with the client. If it is fine
+    //reset() will be called to connect to the server and load the defs etc.
+    //This is a safety check to avoid communicating with incompatible
+    //servers!!!!
+    checkServerVersion();
+}
+
+void ServerHandler::deleteClient()
+{
+    //Save settings
+    saveConf();
+
+    //We clear and stop everything before we delete the objects!!
+    clearTree();
+
+    //Create an object to inform the observers about the change
+    VServerChange change;
+    //Notify the observers that the scan has started
+    broadcast(&ServerObserver::notifyBeginServerScan,change);
+    //Notify the observers that scan has ended
+    broadcast(&ServerObserver::notifyEndServerScan);
+
+    connectState_->state(ConnectState::Disconnected);
+    connectState_->errorMessage("");
+    setActivity(NoActivity);
+
+    broadcast(&ServerObserver::notifyServerConnectState);
+
+
+    //The queue must be deleted before the client, since the thread might
+    //be running a job on the client!!
+    if (comQueue_)
+        delete comQueue_;
+
+    if(client_)
+        delete client_;
+
+    comQueue_ = nullptr;
+    client_ = nullptr;
+}
+
+void ServerHandler::setSsl(bool ssl)
+{
+    if (ssl != ssl_) {
+        ssl_ = ssl;
+
+        if (connectState_->state() != ConnectState::VersionIncompatible) {
+            deleteClient();
+            createClient();
+        }
+    }
+}
+
 bool ServerHandler::isDisabled() const
 {
     return (connectState_->state() == ConnectState::Disconnected ||
-       connectState_->state() == ConnectState::Incompatible ||
+       connectState_->state() == ConnectState::VersionIncompatible ||
+       connectState_->state() == ConnectState::SslIncompatible ||
        compatibility_ == Incompatible);
 }
 
@@ -373,9 +476,9 @@ void ServerHandler::setActivity(Activity ac)
 	broadcast(&ServerObserver::notifyServerActivityChanged);
 }
 
-ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port)
+ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port, bool ssl)
 {
-	auto* sh=new ServerHandler(name,host,port);
+    auto* sh=new ServerHandler(name,host,port,ssl);
     //Without the clinetinvoker we cannot use the serverhandler
     if(!sh->client_)
     {
@@ -898,6 +1001,13 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
     // The news reply has to be carefully checked
     if(task->type() == VTask::NewsTask)
     {
+        // this was a news() called to check the ssl-incompatibilty. If it works we
+        // can suppos everyting is fine and can continue with the init!!!
+        if (task->param("sslcheck") == "1") {
+            compatibleServer();
+            return;
+        }
+
         // we've just asked the server if anything has changed - has it?
         refreshFinished();
 
@@ -1120,8 +1230,14 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg,co
 
     if(task->type() == VTask::NewsTask)
     {
-        connectionLost(errMsg);
-        refreshFinished();
+        //This was a news() called after afterServerVersionTask failed!
+        if (task->param("sslcheck") == "1" &&
+            errMsg.find("possibly non-ssl server") != std::string::npos) {
+            sslIncompatibleServer(errMsg);
+        } else {
+            connectionLost(errMsg);
+            refreshFinished();
+        }
     }
 
     else if(task->type() == VTask::ResetTask)
@@ -1135,6 +1251,16 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg,co
         if(serverReply.invalid_argument())
         {
             incompatibleServer("");
+        }
+        // if there is no EOF it could be an SSL incomptability issue!
+        else if(!serverReply.eof())
+        {
+            // but ... the error message is not make it 100% certain!
+            // So we will ask for the news! It will give back an error message
+            // that could properly parsed to identify if it is really
+            // an SSL issue!
+            compatibility_ = Compatibility::CanBeCompatible;
+            comQueue_->addNewsTask("sslcheck","1");
         }
         else
         {
@@ -1220,10 +1346,32 @@ void ServerHandler::incompatibleServer(const std::string& version)
     stopRefreshTimer();
     comQueue_->disable();
 
-    connectState_->state(ConnectState::Incompatible);
+    connectState_->state(ConnectState::VersionIncompatible);
     connectState_->errorMessage("Server version = " +
                 ((version.empty())?"UNKNOWN":version) +
                  " !  Client can only communicate to servers with version >= 5.0.0! ");
+    broadcast(&ServerObserver::notifyServerConnectState);
+}
+
+void ServerHandler::sslIncompatibleServer(const std::string& msg)
+{
+    compatibility_=Incompatible;
+    stopRefreshTimer();
+    comQueue_->disable();
+
+    connectState_->state(ConnectState::SslIncompatible);
+    std::string errStr = "Cannot communicate to server.";
+#if ECF_OPENSSL
+    if (ssl_) {
+        errStr += " Server is marked as SSL in the UI. Please check if the server is really SSL-enabled! Also check settings in Manage servers dialogue!"";
+    } else {
+        errStr += " Server is marked as non-SSL in the UI. Please check if SSL is really disabled in the server! Also check settings in Manage servers dialogue!";
+    }
+#else
+    errStr += " ecFlow was built without SSL support but it migth be enabled in the server!";
+#endif
+
+    connectState_->errorMessage(errStr + "\n\n"+ msg);
     broadcast(&ServerObserver::notifyServerConnectState);
 }
 
@@ -1232,7 +1380,8 @@ void ServerHandler::reset()
     UiLogS(this).dbg() << "ServerHandler::reset -->";
 
     if(connectState_->state() == ConnectState::Disconnected ||
-       connectState_->state() == ConnectState::Incompatible ||
+       connectState_->state() == ConnectState::VersionIncompatible ||
+       connectState_->state() == ConnectState::SslIncompatible ||
        compatibility_ == Incompatible)
     {
         return;
@@ -1271,7 +1420,7 @@ void ServerHandler::reset()
 //The reset was successful
 void ServerHandler::resetFinished()
 {
-	setActivity(NoActivity);
+    setActivity(NoActivity);
 
 	//Set server host and port in defs. It is used to find the server of
 	//a given node in the viewer.
@@ -1343,6 +1492,8 @@ void ServerHandler::resetFailed(const std::string& errMsg)
 }
 
 //This function must be called during a SYNC!!!!!!!!
+//If it calls me must be sure that notifyEndServerScan is called
+//in the end!!!
 
 void ServerHandler::clearTree()
 {
