@@ -8,14 +8,15 @@ set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
-
-if [[ "$#"  == 0 ]] ; then
-   export ECF_PORT=4142
-   export PATH=/tmp/ma0/install/cmake/ecflow/5.0.1/bin:$PATH
-   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/5.0.1/lib/python2.7/site-packages
+ECFLOW_VERSION=5.0.1
+export ECF_SSL=1
+export ECF_PORT=4142
+export PATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
+PYTHON=python3
+if [[ $PYTHON == "python3" ]] ; then
+   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python3.6/site-packages
 else
-   module unload ecflow
-   module load ecflow/new
+   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python2.7/site-packages
 fi
 
 # =======================================================================
@@ -36,32 +37,34 @@ ecflow_client --terminate=yes
 # =======================================================================
 rm -rf `hostname`.4142.*
 
-#export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
 ecflow_server&
 sleep 4
 ecflow_client --server_version
 
-# Make sure server is running
 # =======================================================================
-python $WK/build_scripts/5nightly/load.py
+# start with a clean slate
+# =======================================================================
+ecflow_client --restart
+ecflow_client --delete=_all_ yes
 
 
 # ======================================================================
-# ecflow metabuilder
+# ecflow metabuilder. Metabuild *ONLY* work with python 2.7. TODO
 # ======================================================================
-cd /var/tmp/ma0/workspace/metabuilder
-git checkout develop
-./regenerate.sh ecflow
-git checkout master
+if [[ $PYTHON != "python3" ]] ; then
+	cd /var/tmp/ma0/workspace/metabuilder
+	git checkout develop
+	./regenerate.sh ecflow
+	git checkout master
+fi
 
 # ========================================================================
 # test suites
 # ========================================================================
 cd $WK
-python Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
-python Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/sub_only1.def
-python Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/inlimit_node.def
- 
+$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
+$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/sub_only1.def
+$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/inlimit_node.def
        
 # =======================================================================
 # Start the GUI
