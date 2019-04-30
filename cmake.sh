@@ -128,9 +128,10 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
 # GNU 5.3  -Wno-unused-variable         -> get round warning in boost headers
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
+# GNU 7.3  -Wno-maybe-uninitialized     -> boost python warnings, specific to Pyext only
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations"
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-maybe-uninitialized"
 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
