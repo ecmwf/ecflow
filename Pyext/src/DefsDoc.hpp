@@ -53,7 +53,9 @@ public:
 	static const char* add_time_doc();
 	static const char* add_cron_doc();
 	static const char* add_late_doc();
-	static const char* add_autocancel_doc();
+   static const char* add_autocancel_doc();
+   static const char* add_autoarchive_doc();
+   static const char* add_autorestore_doc();
 	static const char* add_verify_doc();
 	static const char* add_repeat_date_doc();
 	static const char* add_repeat_integer_doc();

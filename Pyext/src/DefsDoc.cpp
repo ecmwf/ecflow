@@ -723,6 +723,56 @@ const char* DefsDoc::add_autocancel_doc()
             ;
 }
 
+const char* DefsDoc::add_autoarchive_doc()
+{
+   return
+            "Add a `autoarchive` attribute. See :py:class:`ecflow.Autoarchive`\n\n"
+            "Provides a way to automatically archive a suite/family which has completed.(i.e remove children)\n"
+            "This is required when dealing with super large suite/families, they can be archived off, and then restored later.\n"
+            "The node can be recovered using 'autorestore',begin,re-queue and manually via ecflow_client --restore.\n"
+            "The archived node is written to disk, as ECF_HOME/<host>.<port>.ECF_NAME.check,\n"
+            "where '/' is replaced with ':' in ECF_NAME.\n"
+            "The removal may be delayed by an amount of time in hours and minutes or expressed as days\n"
+            "Node removal is not immediate. The nodes are checked once a minute\n"
+            "A Node may only have one autoarchive attribute\n"
+            "\nException:\n\n"
+            "- Throws a RuntimeError if more than one auto archive is added\n"
+            "\nUsage::\n\n"
+            "  t1 = Task('t1')\n"
+            "  t1.add_autoarchive( Autoarchive(20,10,False) )  # hour,min, relative\n"
+            "  t2 = Task('t2')\n"
+            "  t2.add_autoarchive( 3 )                        # 3 days \n"
+            "  t3 = Task('t3')\n"
+            "  t3.add_autoarchive( 20,10,True )               # hour,minutes,relative\n"
+            "  t4 = Task('t4')\n"
+            "  t4.add_autoarchive( TimeSlot(20,10),True )     # hour,minutes,relative\n\n"
+            "  # we can also create a Autoarchive in the Task constructor like any other attribute\n"
+            "  t2 = Task('t2',\n"
+            "            Autoarchive(20,10,False))\n"
+            ;
+}
+
+const char* DefsDoc::add_autorestore_doc()
+{
+   return
+            "Add a `autorestore` attribute. See :py:class:`ecflow.Autorestore`\n\n"
+            "Auto-restore is used to automatically restore a previously auto-archived node.\n"
+            "The restore will fail if:\n"
+            " - The node has not been archived\n"
+            " - The node has children.\n"
+            " - The file ECF_HOME/<host>.<port>.ECF_NAME.check does not exist\n"
+            "\nException:\n\n"
+            "- Throws a RuntimeError if more than one autorestore is added\n"
+            "\nUsage::\n\n"
+            "  t1 = Task('t1')\n"
+            "  t1.add_autorestore( ['/s1/f1'] )   \n"
+            "  t2 = Task('t2')\n"
+            "  t2.add_autorestore( Autorestore(['/s2/f1','/s1/f2']) )  \n"
+            "  # we can also create a Autorestore in the Task constructor like any other attribute\n"
+            "  t2 = Task('t2', Autorestore(['/s2/f1','/s1/f2'] ))\n"
+            ;
+}
+
 const char* DefsDoc::add_verify_doc()
 {
    return

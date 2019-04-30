@@ -473,29 +473,49 @@ const char* NodeAttrDoc::autocancel_doc()
 const char* NodeAttrDoc::autoarchive_doc()
 {
    return
-         "Provides a way to automatically archive a suite/family which has completed\n\n"
-         "This is required when dealing with super large suite/families, they can be archived off, and then restored later.\n"
-         "This reduced the time to checkpoint the definition and reduces network band width.\n"
-         "The archived node is written to disk, as ECF_HOME/ECF_NAME.check, where '/' is replaced with ':' in ECF_NAME.\n"
-         "The node can be recovered using 'autorestore', begin,re-queue and manually via ecflow_client --restore.\n"
-         "The archiving is never immediate. The nodes are checked one a minute, and expired autoarchive nodes are archived.\n"
-         "If the node is suspended or any of its parent are suspended then then the archive does not happen.\n"
-         "\nConstructor::\n\n"
-         "   AutoArchive(TimeSlot,relative)\n"
-         "      TimeSlot     : A time\n"
-         "      bool relative:   Relative to completion. False means archive the node at the real time specified.\n\n"
-         "   AutoArchive(hour,minute,relative)\n"
-         "      int hour:        hour in 24 hrs\n"
-         "      int minute:      minute <= 59\n"
-         "      bool relative:   Relative to completion. False means archive the node at the real time specified.\n\n"
-         "   AutoArchive(days)\n"
-         "      int days:        archive the node 'days' after completion\n"
-         "\nUsage::\n\n"
-         "   attr = AutoArchive( 1,30, true )              # archive node 1 hour and 30 minutes after completion\n"
-         "   attr = AutoArchive( TimeSlot(0,10), true )    # archive node 10 minutes after completion\n"
-         "   attr = AutoArchive( TimeSlot(10,10), false )  # archive node at 10:10 after completion\n"
-         "   attr = AutoArchive( 3  )                      # archive node 3 days after completion\n"
-         ;
+            "Provides a way to automatically archive a suite/family which has completed\n\n"
+            "This is required when dealing with super large suite/families, they can be archived off, and then restored later.\n"
+            "This reduces the time to checkpoint and network band width.\n"
+            "The archived node is written to disk, as ECF_HOME/<host>.<port>.ECF_NAME.check,\n"
+            "where '/' is replaced with ':' in ECF_NAME.\n"
+            "The node can be recovered using 'autorestore', begin,re-queue and manually via ecflow_client --restore.\n"
+            "The archiving is never immediate. The nodes are checked one a minute, and expired autoarchive nodes are archived.\n"
+            "If the node is suspended or any of its parent are suspended then then the archive does not happen.\n"
+            "\nConstructor::\n\n"
+            "   Autoarchive(TimeSlot,relative)\n"
+            "      TimeSlot     : A time\n"
+            "      bool relative:   Relative to completion. False means archive the node at the real time specified.\n\n"
+            "   Autoarchive(hour,minute,relative)\n"
+            "      int hour:        hour in 24 hrs\n"
+            "      int minute:      minute <= 59\n"
+            "      bool relative:   Relative to completion. False means archive the node at the real time specified.\n\n"
+            "   AutoArchive(days)\n"
+            "      int days:        archive the node 'days' after completion\n"
+            "\nUsage::\n\n"
+            "   attr = Autoarchive( 1,30, true )              # archive node 1 hour and 30 minutes after completion\n"
+            "   attr = Autoarchive( TimeSlot(0,10), true )    # archive node 10 minutes after completion\n"
+            "   attr = Autoarchive( TimeSlot(10,10), false )  # archive node at 10:10 after completion\n"
+            "   attr = Autoarchive( 3  )                      # archive node 3 days after completion\n"
+            ;
+}
+
+const char* NodeAttrDoc::autorestore_doc()
+{
+   return
+            "Provides a way to automatically restore a previously archived node\n\n"
+            "This is required when dealing with super large suite/families, they can be archived off, and then restored later.\n"
+            "This reduces the time to checkpoint the definition and network band width.\n"
+            "The archived node is written to disk, as ECF_HOME/<host>.<port>.ECF_NAME.check,\n"
+            "where '/' is replaced with ':' in ECF_NAME.\n"
+            "The node can be recovered using 'autorestore', begin,re-queue and manually via ecflow_client --restore.\n"
+            "The archiving is never immediate. The nodes are checked one a minute, and expired autoarchive nodes are archived.\n"
+            "If the node is suspended or any of its parent are suspended then then the archive does not happen.\n"
+            "\nConstructor::\n\n"
+            "   Autorestore( list of paths )\n"
+            "\nUsage::\n\n"
+            "   attr = Autorestore( ['/s1/f1'] )           # restore archived node at /s1/f1\n"
+            "   attr = Autorestore( ['/s1/f1','/s1/f2'] )  # restore archived node at /s1/f1 and /s1/f2\n"
+            ;
 }
 
 const char* NodeAttrDoc::repeat_doc()

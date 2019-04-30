@@ -676,7 +676,7 @@ void export_NodeAttr()
 
 
    class_<AutoArchiveAttr, std::shared_ptr<AutoArchiveAttr> >(
-         "Autoarchive",NodeAttrDoc::autocancel_doc() ,
+         "Autoarchive",NodeAttrDoc::autoarchive_doc() ,
          init<int,int,bool >()                             // hour, minute, relative
    )
    .def( init<int>())                                        // days
@@ -693,7 +693,7 @@ void export_NodeAttr()
 #endif
 
 
-   class_<AutoRestoreAttr, std::shared_ptr<AutoRestoreAttr> >( "Autorestore",NodeAttrDoc::autocancel_doc())
+   class_<AutoRestoreAttr, std::shared_ptr<AutoRestoreAttr> >( "Autorestore",NodeAttrDoc::autorestore_doc())
    .def("__init__",make_constructor(&create_AutoRestoreAttr) )
    .def(self == self )                                       // __eq__
    .def("__str__", &AutoRestoreAttr::toString)               // __str__
