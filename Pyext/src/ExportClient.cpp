@@ -319,6 +319,7 @@ void export_Client()
 
 #ifdef ECF_OPENSSL
    .def("enable_ssl",       &ClientInvoker::enable_ssl, ecf::Openssl::ssl_info())
+   .def("disable_ssl",      &ClientInvoker::disable_ssl, ecf::Openssl::ssl_info())
 #endif
    .def("zombie_get",       &zombieGet, return_value_policy<copy_const_reference>())
    .def("zombie_fob",       &ClientInvoker::zombieFobCli )

@@ -194,7 +194,7 @@ int ClientInvoker::get_cmd_from_args(int argc, char* argv[], Cmd_ptr& cts_cmd) c
       if (on_error_throw_exception_) throw std::runtime_error(server_reply_.error_msg());
    }
    catch ( ... ) {
-      server_reply_.set_error_msg("ecflow:ClientInvoker: caught exception: Parsing arguments: unknown type!\n");
+      server_reply_.set_error_msg("ClientInvoker: caught exception: Parsing arguments: unknown type!\n");
       if (on_error_throw_exception_) throw std::runtime_error(server_reply_.error_msg());
    }
    return 1;
@@ -304,22 +304,29 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
  			int no_of_tries = connection_attempts_;
 			while ( no_of_tries > 0 ) {
 				try {
-					if (clientEnv_.debug()) { cout << TimeStamp::now() << "ClientInvoker: >>> About to invoke "; cts_cmd->print(cout); cout << " on " << client_env_host_port() << " : retry_connection_period(" << retry_connection_period << ") no_of_tries(" << no_of_tries << ") cmd_connect_timeout(" << cts_cmd->timeout() << ") ECF_CONNECT_TIMEOUT(" << clientEnv_.connect_timeout() << ")<<<" << endl;}
+               /// *** Each call to io_service.run(); is a *REQUEST* to the server ***
+               /// *** Hence we *MUST* clear the server_reply before each call *******
+               /// *** Found during zombie test. i.e when blocking, we were responding to previous, reply, since server_reply was not being reset
+               /// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle
+               /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
+               /// However this is only done, if we are not using the Command Level Interface(cli)
+               server_reply_.clear_for_invoke(cli());
 
-					/// *** Each call to io_service.run(); is a *REQUEST* to the server ***
-					/// *** Hence we *MUST* clear the server_reply before each call *******
-					/// *** Found during zombie test. i.e when blocking, we were responding to previous, reply, since server_reply was not being reset
-					/// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle
-					/// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
-					/// However this is only done, if we are not using the Command Level Interface(cli)
-					server_reply_.clear_for_invoke(cli());
+               cts_cmd->setup_user_authentification( clientEnv_ );
 
-					cts_cmd->setup_user_authentification( clientEnv_ );
+					if (clientEnv_.debug()) {
+					   cout << TimeStamp::now() << "ClientInvoker: >>> "; cts_cmd->print(cout);
+					   cout << " on " << client_env_host_port() << " : retry_connection_period(" << retry_connection_period  << ") no_of_tries(" << no_of_tries << ") cmd_connect_timeout("
+					        << cts_cmd->timeout() << ") ECF_CONNECT_TIMEOUT(" << clientEnv_.connect_timeout()
+#ifdef ECF_OPENSSL
+					        << ") SSL(" << clientEnv_.ssl()
+#endif
+					        << ")<<<" << endl;
+					}
 
                boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
 					if (clientEnv_.ssl()) {
-                  if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker: >>> OPEN SSL enabled <<<" << endl;
 
 					   clientEnv_.openssl().init_for_client( clientEnv_.host(),clientEnv_.port());
 
@@ -365,27 +372,27 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					if ( server_reply_.block_client_on_home_server()) {
 						// Valid reply from server. Typically waiting on a expression
 						// Ok _Block_ on _current_ server, and continue waiting, until server reply is ok
-						if (!report_block_client_on_home_server || clientEnv_.debug()) { cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : WAITING on home server, continue waiting\n";report_block_client_on_home_server = true;}
+						if (!report_block_client_on_home_server || clientEnv_.debug()) { cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : WAITING on home server, continue waiting\n";report_block_client_on_home_server = true;}
 						no_of_tries++;
  					}
 					else if (server_reply_.block_client_server_halted()) {
 						// Valid reply from server.
 					   // fall through try again, then try other hosts
-						if (!report_block_client_server_halted || clientEnv_.debug()){ cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : server is HALTED, continue waiting\n";report_block_client_server_halted = true;}
+						if (!report_block_client_server_halted || clientEnv_.debug()){ cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : server is HALTED, continue waiting\n";report_block_client_server_halted = true;}
   					}
 					else if (server_reply_.block_client_zombie_detected()) {
 						// Valid reply from server.
 					   // fall through try again, then try other hosts
-						if (!report_block_client_zombie_detected || clientEnv_.debug()){ cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : zombie detected, continue waiting\n";report_block_client_zombie_detected = true;}
+						if (!report_block_client_zombie_detected || clientEnv_.debug()){ cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : zombie detected, continue waiting\n";report_block_client_zombie_detected = true;}
   					}
 					else if (server_reply_.invalid_argument()) {
 						// Server could not decode client message and/or client could not decode server reply
-						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
+						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ClientInvoker:"; cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
 						return 1;
 					}
                else if (server_reply_.eof()) {
                   // Server did not reply or mixing ssl and non ssl
-                  if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
+                  if (clientEnv_.debug()) {cout << TimeStamp::now() << "ClientInvoker:"; cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
                   return 1;
                }
 					else if (server_reply_.client_request_failed()) {
@@ -393,18 +400,18 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 						// This error is ONLY valid if we got a real reply from the server
 						// as opposed to some kind of connection errors. For connections errors
 						// we fall through and try again.
-						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ecflow:ClientInvoker:"; cts_cmd->print(cout); cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
+						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ClientInvoker:"; cts_cmd->print(cout); cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
 						return 1;
 					}
 					else {
-						std::cout << TimeStamp::now() << "ecflow:ClientInvoker: missed response? for request "; cts_cmd->print(cout); std::cout << " oops" << endl;
+						std::cout << TimeStamp::now() << "ClientInvoker: missed response? for request "; cts_cmd->print(cout); std::cout << " oops" << endl;
 					}
  				}
 				catch (std::exception& e) {
 					// *Some kind of connection error*: fall through and try again. Avoid this message when pinging, i.e to see if server is alive.
-				   if (clientEnv_.debug()) { cerr << TimeStamp::now() << "ecflow:ClientInvoker: Connection error: (" << e.what() <<  ")" << endl; }
+				   if (clientEnv_.debug()) { cerr << TimeStamp::now() << "ClientInvoker: Connection error: (" << e.what() <<  ")" << endl; }
 				   if (!cts_cmd->ping_cmd()) {
-				      cerr << TimeStamp::now() << "ecflow:ClientInvoker: Connection error: (" << e.what() <<  ")" << endl;
+				      cerr << TimeStamp::now() << "ClientInvoker: Connection error: (" << e.what() <<  ")" << endl;
 				   }
  				}
 
@@ -434,14 +441,14 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 			if (clientEnv_.debug()) { cout << "ClientInvoker: Time duration = " << duration.total_seconds() << " clientEnv_.max_child_cmd_timeout() = " << clientEnv_.max_child_cmd_timeout() << endl;}
 
 			if ( duration.total_seconds() >= clientEnv_.max_child_cmd_timeout() ) {
-				std::stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: Timed out after ECF_TIMOUT(" << clientEnv_.max_child_cmd_timeout() << ") seconds : for " << client_env_host_port() << "\n";
+				std::stringstream ss; ss << TimeStamp::now() << "ClientInvoker: Timed out after ECF_TIMOUT(" << clientEnv_.max_child_cmd_timeout() << ") seconds : for " << client_env_host_port() << "\n";
  				std::string msg = ss.str();
  				cout << msg;
 				server_reply_.set_error_msg(msg);
 				return 1;
 			}
          if (server_reply_.block_client_zombie_detected() && duration.total_seconds() >= clientEnv_.max_zombie_child_cmd_timeout() ) {
-            std::stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: *ZOMBIE* Timed out after ECF_ZOMBIE_TIMEOUT(" << clientEnv_.max_zombie_child_cmd_timeout() << ") seconds : for " << client_env_host_port() << "\n";
+            std::stringstream ss; ss << TimeStamp::now() << "ClientInvoker: *ZOMBIE* Timed out after ECF_ZOMBIE_TIMEOUT(" << clientEnv_.max_zombie_child_cmd_timeout() << ") seconds : for " << client_env_host_port() << "\n";
             std::string msg = ss.str();
             cout << msg;
             server_reply_.set_error_msg(msg);
@@ -455,21 +462,21 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 			std::string local_error_msg;
 			if (!clientEnv_.get_next_host(local_error_msg)) {
 			   /// Instead of exiting, Just spit out a warning
-			   cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " get next host failed because: " << local_error_msg  << endl;
+			   cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " get next host failed because: " << local_error_msg  << endl;
 			}
 
-			cout << TimeStamp::now() << "ecflow:ClientInvoker: "; cts_cmd->print(cout); cout << " current host(" << current_host_port << ") trying next host(" << client_env_host_port() << ")" << endl;
+			cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " current host(" << current_host_port << ") trying next host(" << client_env_host_port() << ")" << endl;
 
 			if( never_polled ) never_polled = false; // To avoid the first wait
 			else               sleep(NEXT_HOST_POLL_PERIOD);
 		}
 	}
 	catch ( std::exception& e ) {
-		stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: caught exception: " << e.what() << "\n";
+		stringstream ss; ss << TimeStamp::now() << "ClientInvoker: caught exception: " << e.what() << "\n";
  		server_reply_.set_error_msg(ss.str());
 	}
 	catch ( ... ) {
-      stringstream ss; ss << TimeStamp::now() << "ecflow:ClientInvoker: Caught Exception of unknown type!\n";
+      stringstream ss; ss << TimeStamp::now() << "ClientInvoker: Caught Exception of unknown type!\n";
 		server_reply_.set_error_msg(ss.str());
 	}
 	return 1;
@@ -511,7 +518,7 @@ int ClientInvoker::sync_local(bool sync_suite_clock) const
 
       // Prevent infinite loops in change observers.
       if ( defs->in_notification()) {
-         std::cout << "ecflow:ClientInvoker::sync_local() called in the middle of notification. Ignoring..... \n";
+         std::cout << "ClientInvoker::sync_local() called in the middle of notification. Ignoring..... \n";
          return 0;
       }
 
@@ -925,7 +932,7 @@ int ClientInvoker::replace( const std::string& absNodePath, const std::string& p
       cts_cmd = std::make_shared<ReplaceNodeCmd>(absNodePath,create_parents_as_required,path_to_client_defs,force);
    }
    catch (std::exception& e ){
-      std::stringstream ss; ss << "ecflow:ClientInvoker::replace(" << absNodePath << "," << path_to_client_defs << ", ...) failed: " << e.what();
+      std::stringstream ss; ss << "ClientInvoker::replace(" << absNodePath << "," << path_to_client_defs << ", ...) failed: " << e.what();
       server_reply_.set_error_msg( ss.str() );
       if (on_error_throw_exception_) throw std::runtime_error( server_reply_.error_msg() );
       return 1;
@@ -946,7 +953,7 @@ int ClientInvoker::replace_1(const std::string& absNodePath, defs_ptr client_def
       cts_cmd = std::make_shared<ReplaceNodeCmd>( absNodePath, create_parents_as_required, client_defs, force );
    }
    catch (std::exception& e ){
-      std::stringstream ss; ss << "ecflow:ClientInvoker::replace_1(" << absNodePath << " ...) failed: " << e.what();
+      std::stringstream ss; ss << "ClientInvoker::replace_1(" << absNodePath << " ...) failed: " << e.what();
       server_reply_.set_error_msg( ss.str() );
       if (on_error_throw_exception_) throw std::runtime_error( server_reply_.error_msg() );
       return 1;
@@ -964,7 +971,7 @@ int ClientInvoker::requeue( const std::vector<std::string>& paths,  const std::s
       if (option == "abort") the_option = RequeueNodeCmd::ABORT;
       else if (option == "force") the_option = RequeueNodeCmd::FORCE;
       else {
-         server_reply_.set_error_msg("ecflow:ClientInvoker::requeue: Expected option = [ force | abort ]");
+         server_reply_.set_error_msg("ClientInvoker::requeue: Expected option = [ force | abort ]");
          if (on_error_throw_exception_) {
             throw std::runtime_error(server_reply_.error_msg());
          }
@@ -983,7 +990,7 @@ int ClientInvoker::requeue( const std::string& absNodePath, const std::string& o
       if (option == "abort") the_option = RequeueNodeCmd::ABORT;
       else if (option == "force") the_option = RequeueNodeCmd::FORCE;
       else {
-         server_reply_.set_error_msg("ecflow:ClientInvoker::requeue: Expected option = [ force | abort ]");
+         server_reply_.set_error_msg("ClientInvoker::requeue: Expected option = [ force | abort ]");
          if (on_error_throw_exception_) throw std::runtime_error(server_reply_.error_msg());
          return 1;
       }
@@ -1006,7 +1013,7 @@ int ClientInvoker::order( const std::string& absNodePath, const std::string& ord
    if (testInterface_) return invoke(CtsApi::order(absNodePath, order));
 
    if (!NOrder::isValid(order)) {
-      server_reply_.set_error_msg("ecflow:ClientInvoker::order: please specify one of [ top, bottom, alpha, order, up, down ]\n");
+      server_reply_.set_error_msg("ClientInvoker::order: please specify one of [ top, bottom, alpha, order, up, down ]\n");
       if (on_error_throw_exception_) throw std::runtime_error(server_reply_.error_msg());
       return 1;
    }
@@ -1062,7 +1069,7 @@ int ClientInvoker::file( const std::string& absNodePath, const std::string& file
       cts_cmd = std::make_shared<CFileCmd>(absNodePath, fileType, max_lines);
    }
    catch (std::exception& e ){
-      std::stringstream ss; ss << "ecflow:ClientInvoker::file(" << absNodePath << "," << fileType << "," << max_lines << ") failed:\n" << e.what();
+      std::stringstream ss; ss << "ClientInvoker::file(" << absNodePath << "," << fileType << "," << max_lines << ") failed:\n" << e.what();
       server_reply_.set_error_msg( ss.str() );
       if (on_error_throw_exception_) {
          throw std::runtime_error( server_reply_.error_msg() );
@@ -1461,7 +1468,7 @@ RequestLogger::~RequestLogger() {
    // *assumes* destructor of RoundTripRecorder was invoked first, to allow recording of the time rtt_
    if (cmd_.get()) {
       if (ci_->clientEnv_.debug() && ci_->server_reply_.error_msg().empty()) {
-         cout << TimeStamp::now() << "ClientInvoker "; cmd_->print(cout); cout << " SUCCEDED " << to_simple_string(ci_->rtt_) << "\n";
+         cout << TimeStamp::now() << "ClientInvoker: "; cmd_->print(cout); cout << " SUCCEEDED " << to_simple_string(ci_->rtt_) << "\n";
       }
 
       if (Rtt::instance()) {

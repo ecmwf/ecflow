@@ -42,7 +42,7 @@ public:
    bool enabled() const { return !ssl_.empty();}
 
    void enable(const std::string&);
-   void disable() { ssl_.clear();}
+   void disable() { ssl_.clear();} // override environment setting for ECF_SSL
    void init_for_server(const std::string& host, const std::string& port);
    void init_for_client(const std::string& host, const std::string& port);
 
