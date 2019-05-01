@@ -63,6 +63,7 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    client_(nullptr),
    updating_(false),
    communicating_(false),
+   vRoot_(nullptr),
    suiteFilter_(new SuiteFilter()),
    comQueue_(nullptr),
    activity_(NoActivity),
@@ -81,77 +82,25 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 	conf_=new VServerSettings(this);
 
-	//Create the client invoker. At this point it is empty.
-    try
-    {
-        client_=new ClientInvoker(host,port);
-    }
-    catch(std::exception& e)
-    {
-        UiLog().err() << "Could not create ClientInvoker for host=" << host <<
-                         " port= " << port << ". " <<  e.what();
-        client_=nullptr;
-    }
-
-#ifdef ECF_OPENSSL
-    if (ssl_) {
-       client_->enable_ssl();
-    } else {
-       client_->disable_ssl();
-    }
-#endif
-
-    client_->set_auto_sync(true); //will call sync_local() after each command!!!
-    client_->set_retry_connection_period(1);
-    client_->set_connection_attempts(1);
-	client_->set_throw_on_error(true);
-
-	//Create the vnode root. This will represent the node tree in the viewer, but
-	//at this point it is empty.
-	vRoot_=new VServer(this);
-
-	//Connect up the timer for refreshing the server info. The timer has not
-	//started yet.
-
+    //Connect up the timer for refreshing the server info. The timer has not
+    //started yet.
     refreshTimer_=new UpdateTimer(this);
     connect(refreshTimer_, SIGNAL(timeout()),
-			this, SLOT(refreshServerInfo()));
+            this, SLOT(refreshServerInfo()));
 
+    //We will need to pass various non-Qt types via signals and slots for error messages.
+    //So we need to register these types.
+    if(servers_.empty())
+    {
+        qRegisterMetaType<std::string>("std::string");
+        qRegisterMetaType<QList<ecf::Aspect::Type> >("QList<ecf::Aspect::Type>");
+        qRegisterMetaType<std::vector<ecf::Aspect::Type> >("std::vector<ecf::Aspect::Type>");
+    }
 
-	//We will need to pass various non-Qt types via signals and slots for error messages.
-	//So we need to register these types.
-	if(servers_.empty())
-	{
-		qRegisterMetaType<std::string>("std::string");
-		qRegisterMetaType<QList<ecf::Aspect::Type> >("QList<ecf::Aspect::Type>");
-		qRegisterMetaType<std::vector<ecf::Aspect::Type> >("std::vector<ecf::Aspect::Type>");
-	}
+    //Add this instance to the servers_ list.
+    servers_.push_back(this);
 
-	//Add this instance to the servers_ list.
-	servers_.push_back(this);
-
-	//NOTE: we may not always want to create a thread here because of resource
-	// issues; another strategy would be to create threads on demand, only
-	// when server communication is about to start.
-
-	//Create the queue for the tasks to be sent to the client (via the ServerComThread)! It will
-    //create and take ownership of the ServerComThread. At this point the queue has not started yet.
-    comQueue_=new ServerComQueue (this,client_);
-
-	//Load settings
-	loadConf();
-
-	//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// At this point nothing is running or active!!!!
-
-	//Indicate that we start an init (initial load)
-	//activity_=LoadActivity;
-
-    //Check if the server is compatible with the client. If it is fine
-    //reset() will be called to connect to the server and load the defs etc.
-    //This is a safety check to avoid communicating with incompatible
-    //servers!!!!
-    checkServerVersion();
+    createClient(true);
 }
 
 ServerHandler::~ServerHandler()
@@ -183,8 +132,9 @@ ServerHandler::~ServerHandler()
 	delete conf_;
 }
 
-// must be called after deleteClient()
-void ServerHandler::createClient()
+// called from the constructor with init=true
+// must be called after deleteClient() with init=false
+void ServerHandler::createClient(bool init)
 {
     assert(client_ == nullptr);
     assert(comQueue_ == nullptr);
@@ -214,18 +164,33 @@ void ServerHandler::createClient()
     client_->set_connection_attempts(1);
     client_->set_throw_on_error(true);
 
+    //Create the vnode root. This will represent the node tree in the viewer, but
+    //at this point it is empty.
+    if (init) {
+        Q_ASSERT(vRoot_ == nullptr);
+        vRoot_=new VServer(this);
+    }
+
+    // NOTE: we may not always want to create a thread here because of resource
+    // issues; another strategy would be to create threads on demand, only
+    // when server communication is about to start.
+
     //Create the queue for the tasks to be sent to the client (via the ServerComThread)! It will
     //create and take ownership of the ServerComThread. At this point the queue has not started yet.
     comQueue_=new ServerComQueue (this,client_);
 
-    //Load settings ????
-    //loadConf();
+    //Load settings
+    if (init) {
+        loadConf();
+    }
 
-    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // At this point nothing is running or active!!!!
 
     // we need to set it because in disconnected state reset is ignored!!!
-    connectState_->state(ConnectState::Undef);
+    if (!init) {
+        connectState_->state(ConnectState::Undef);
+    }
 
     //Check if the server is compatible with the client. If it is fine
     //reset() will be called to connect to the server and load the defs etc.
@@ -275,7 +240,7 @@ void ServerHandler::setSsl(bool ssl)
 
         if (connectState_->state() != ConnectState::VersionIncompatible) {
             deleteClient();
-            createClient();
+            createClient(false);
         }
     }
 }

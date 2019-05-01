@@ -169,7 +169,7 @@ private Q_SLOTS:
 	void slotRescanNeed();
 
 private:
-    void createClient();
+    void createClient(bool init);
     void deleteClient();
     void refreshInternal();
     void resetFinished();
