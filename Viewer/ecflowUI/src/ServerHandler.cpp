@@ -95,7 +95,9 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
 
 #ifdef ECF_OPENSSL
     if (ssl_) {
-        client_->enable_ssl();
+       client_->enable_ssl();
+    } else {
+       client_->disable_ssl();
     }
 #endif
 
