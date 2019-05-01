@@ -78,7 +78,11 @@
                 	"tooltip": "",                          
                 	"default": "15000",
                 	"min" : "0"	
-                    }
+                    },
+                "uidForServerLogTransfer" : {
+                    "label" : "Remote username to fetch server logs",
+                     "default" : "$USER"
+                }
             },
             
             "menu":  {

@@ -30,7 +30,11 @@
                 "prefix" : "server.files",
                 
                 "line" : "readFilesFromDisk",
-                "line" : "maxOutputFileLines"              
+                "line" : "maxOutputFileLines",
+                "line" : "uidForServerLogTransfer",
+                "note" : {
+                    "default": "USER is the only shell variable that is substituted for this parameter!"
+                }
             },
 
             "group" : {

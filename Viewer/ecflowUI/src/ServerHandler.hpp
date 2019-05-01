@@ -67,7 +67,8 @@ public:
     bool isDisabled() const;
 
 	bool readFromDisk() const;
-	SuiteFilter* suiteFilter() const {return suiteFilter_;}
+    QString uidForServerLogTransfer() const;
+    SuiteFilter* suiteFilter() const {return suiteFilter_;}
     QString nodeMenuMode() const;
     QString defStatusNodeMenuMode() const;
 

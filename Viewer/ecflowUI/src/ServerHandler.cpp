@@ -1634,6 +1634,11 @@ bool ServerHandler::readFromDisk() const
 	return conf_->boolValue(VServerSettings::ReadFromDisk);
 }
 
+QString ServerHandler::uidForServerLogTransfer() const
+{
+    return conf_->stringValue(VServerSettings::UidForServerLogTransfer);
+}
+
 QString ServerHandler::nodeMenuMode() const
 {
     return conf_->stringValue(VServerSettings::NodeMenuMode);

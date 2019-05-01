@@ -48,7 +48,7 @@ public:
     void clear(bool inReload=false);
     void load(QString logFile);
     void load(QString serverName, QString host, QString port, QString logFile,
-              const std::vector<std::string>& suites);
+              const std::vector<std::string>& suites, QString remoteUid);
     QString logFile() const {return logFile_;}
     void selectPathInView(const std::string& p);
 
@@ -96,6 +96,7 @@ private:
     VFile_ptr tmpLogFile_;
     size_t maxReadSize_;
     std::vector<std::string> suites_;
+    QString remoteUid_;
 
     TimelineData* data_;
     TimelineModel* model_;

@@ -30,7 +30,8 @@ bool VFileTransfer::isActive() const
     return (proc_ && proc_->state() != QProcess::NotRunning);
 }
 
-void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,size_t lastBytes)
+void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,size_t lastBytes,
+                             QString remoteUid)
 {
     if(proc_)
     {
@@ -69,8 +70,12 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
       }
     }
 
+    if(remoteUid.isEmpty() || remoteUid == "$USER")
+       remoteUid = "__USER__";
+
     QString command=scriptName_ + " ";
-    command+="\'" + sourceFile + "\' " + host + " \'" + targetFile + "\' " +  QString::number(lastBytes);
+    command+="\'" + sourceFile + "\' " + host + " \'" + targetFile + "\' " +  QString::number(lastBytes) +
+            " " + remoteUid;
 
     proc_->start("/bin/sh -c \"" + command + "\"");
     //UiLog().dbg() << "/bin/sh -c \"" + command + "\"";

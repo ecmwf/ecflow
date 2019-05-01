@@ -50,6 +50,7 @@ VServerSettings::VServerSettings(ServerHandler* server) :
 
         parNames_[NodeMenuMode]="server.menu.nodeMenuMode";
         parNames_[NodeMenuModeForDefStatus]="server.menu.defStatusMenuModeControl";
+        parNames_[UidForServerLogTransfer]="server.files.uidForServerLogTransfer";
 
 		parNames_[NotifyAbortedEnabled]="server.notification.aborted.enabled";
 		parNames_[NotifyAbortedPopup]="server.notification.aborted.popup";
