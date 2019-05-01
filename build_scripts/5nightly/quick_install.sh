@@ -8,6 +8,7 @@ set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
+#export ECF_DEBUG_CLIENT=1
 ECFLOW_VERSION=5.0.1
 export ECF_SSL=1
 export ECF_PORT=4142
