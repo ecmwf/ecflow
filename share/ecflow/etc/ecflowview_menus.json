@@ -120,8 +120,15 @@
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --run <full_name>",
             "status_tip"     : "__cmd__"
+        },        
+        {
+            "menu"           : "Node",
+            "name"           : "Execute aborted",
+            "visible_for"    : "suite or family",
+            "enabled_for"    : "aborted or suspended",
+            "command"        : "execute_aborted",
+            "status_tip"     : "Execute (using command ecflow_client --run) all the aborted nodes in the given suite or family."
         },
-
         {
             "menu"           : "Node",
             "name"           : "Requeue",
