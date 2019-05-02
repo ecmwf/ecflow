@@ -152,12 +152,10 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
 	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 	fi
-else
-    cmake_extra_options="-DBOOST_ROOT=$BOOST_ROOT "
 fi
 
 module load ecbuild/new
-module load boost/1.53.0     # uncomment to use local BOOST_ROOT
+module load boost/1.53.0     # uncomment to use local BOOST_ROOT  may need -DBOOST_ROOT=$BOOST_ROOT 
 module load python3/3.6.5-01
 module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
 # To build python3 when cmake < 3.12.0 use
