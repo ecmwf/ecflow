@@ -57,7 +57,7 @@ exe ecflow_server : [ glob src/*Main.cpp ]
              /site-config//boost_datetime
              /site-config//boost_program_options
            : <variant>debug:<define>DEBUG
-             [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
+             <library>/ecflow_top//openssl_libs 
            ;
 
 #
@@ -77,5 +77,5 @@ exe u_server : [ glob test/*.cpp ]
              /site-config//boost_program_options
              /site-config//boost_test
            : <variant>debug:<define>DEBUG
-             [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
+             <library>/ecflow_top//openssl_libs 
            ;

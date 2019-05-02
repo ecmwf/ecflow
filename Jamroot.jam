@@ -14,14 +14,14 @@ lib crypt : : <file>/usr/lib64/libcrypt.so ;
 explicit crypt ; 
 # ======================================================================
 
-project ecflow_top : requirements <library>crypt ;
+project ecflow_top : requirements <library>crypt 
+                                  <define>ECF_OPENSSL 
+                   ;
 
 # ==================== OPENSSL ======================================================
 # OPENSSL support, should really be in site-config.jam
+# Currently we always build with ssl support#
 #
-# to enable use:   b2 ssl=on
-#
-
 # link with libdl.so, shared lib containing dlopen(),dlclose()dysym(),
 # these functions are used by OpenSSL internally & thus -ldl is an
 # indirect dependency when using -lcrypto(on Linux) Because we linking
@@ -30,10 +30,6 @@ lib libssl    : : <file>/usr/lib64/libssl.so ;
 lib libcrypto : : <file>/usr/lib64/libcrypto.so ;
 lib dl ;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
 alias openssl_libs : libssl libcrypto dl ;
-
-import feature : feature ;
-feature ssl : off on : optional composite propagated link-incompatible ;
-feature.compose <ssl>on : <define>ECF_OPENSSL ;
 
 # ===============================================================================
 # To clean all the sub projects just use: bjam --clean

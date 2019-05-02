@@ -67,7 +67,7 @@ exe ecflow_client : [ glob src/*Main.cpp ]
              /site-config//boost_datetime
 	         pthread
            : <variant>debug:<define>DEBUG
-             [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
+             <library>/ecflow_top//openssl_libs 
            ;
 
 #
@@ -89,7 +89,7 @@ exe s_client : [ glob test/*.cpp : test/TestSinglePerf.cpp test/TestMigration.cp
          : <include>../ANode/test
            <include>../Base/test
            <variant>debug:<define>DEBUG
-           [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
+           <library>/ecflow_top//openssl_libs 
 	     ;
 
 exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPort.cpp  ]
@@ -107,7 +107,7 @@ exe perf_test_large_defs : [ glob test/TestSinglePerf.cpp  ]   [ glob test/SCPor
          : <include>../ANode/test
            <include>../Base/test
            <variant>debug:<define>DEBUG
-           [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
+           <library>/ecflow_top//openssl_libs 
          ;
 
 exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp  ]
@@ -125,5 +125,5 @@ exe m_test_migration : [ glob test/TestMigration.cpp  ]   [ glob test/SCPort.cpp
          : <include>../ANode/test
            <include>../Base/test
            <variant>debug:<define>DEBUG
-           [ conditional <ssl>on : <library>/ecflow_top//openssl_libs ]
+           <library>/ecflow_top//openssl_libs 
          ;
