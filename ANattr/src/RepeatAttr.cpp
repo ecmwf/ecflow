@@ -243,14 +243,19 @@ void RepeatDate::setToLastValue()
 
 long RepeatDate::last_valid_value() const
 {
+   return valid_value(value_);
+}
+
+long RepeatDate::valid_value(long value) const
+{
    if (delta_ > 0) {
-      if (value_ < start_) return start_;
-      if (value_ > end_)   return end_;
-      return value_;
+      if (value < start_) return start_;
+      if (value > end_)   return end_;
+      return value;
    }
-   if (value_ > start_) return start_;
-   if (value_ < end_)   return end_;
-   return value_;
+   if (value > start_) return start_;
+   if (value < end_)   return end_;
+   return value;
 }
 
 long RepeatDate::last_valid_value_minus(int val) const
@@ -332,6 +337,32 @@ std::string RepeatDate::value_as_string(int index) const
    try {
       return boost::lexical_cast< std::string >( index );
    }
+   catch ( boost::bad_lexical_cast& ) {}
+   return string();
+}
+
+std::string RepeatDate::next_value_as_string() const
+{
+   long val = last_valid_value();
+
+   long julian = Cal::date_to_julian(val);
+   julian += delta_;
+   val = Cal::julian_to_date(julian);
+
+   try { return boost::lexical_cast< std::string >( valid_value(val) );}
+   catch ( boost::bad_lexical_cast& ) {}
+   return string();
+}
+
+std::string RepeatDate::prev_value_as_string() const
+{
+   long val = last_valid_value();
+
+   long julian = Cal::date_to_julian(val);
+   julian -= delta_;
+   val = Cal::julian_to_date(julian);
+
+   try { return boost::lexical_cast< std::string >( valid_value(val) );}
    catch ( boost::bad_lexical_cast& ) {}
    return string();
 }
@@ -441,14 +472,19 @@ void RepeatInteger::reset() {
 
 long RepeatInteger::last_valid_value() const
 {
+   return valid_value(value_);
+}
+
+long RepeatInteger::valid_value(long value) const
+{
    if (delta_ > 0) {
-      if (value_ < start_) return start_;
-      if (value_ > end_)   return end_;
-      return value_;
+      if (value < start_) return start_;
+      if (value > end_)   return end_;
+      return value;
    }
-   if (value_ > start_) return start_;
-   if (value_ < end_)   return end_;
-   return value_;
+   if (value > start_) return start_;
+   if (value < end_)   return end_;
+   return value;
 }
 
 void RepeatInteger::increment() {
@@ -592,6 +628,24 @@ std::string RepeatInteger::value_as_string(int index) const
    return string();
 }
 
+std::string RepeatInteger::next_value_as_string() const
+{
+   long val = last_valid_value();
+   val += delta_;
+   try { return boost::lexical_cast< std::string >( valid_value(val) );}
+   catch ( boost::bad_lexical_cast& ) {}
+   return string();
+}
+
+std::string RepeatInteger::prev_value_as_string() const
+{
+   long val = last_valid_value();
+   val -= delta_;
+   try { return boost::lexical_cast< std::string >( valid_value(val) );}
+   catch ( boost::bad_lexical_cast& ) {}
+   return string();
+}
+
 //======================================================================================
 
 RepeatEnumerated::RepeatEnumerated( const std::string& variable, const std::vector<std::string>& theEnums)
@@ -709,6 +763,28 @@ std::string RepeatEnumerated::value_as_string(int index) const
       return theEnums_[index];
    }
    return std::string();
+}
+
+std::string RepeatEnumerated::next_value_as_string() const
+{
+   if (theEnums_.empty()) return string();
+
+   int index = currentIndex_;
+   index++;
+   if (index < 0) return theEnums_[0]; // return first
+   if (index >= static_cast<int>(theEnums_.size())) return theEnums_[theEnums_.size()-1]; // return last
+   return theEnums_[index];
+}
+
+std::string RepeatEnumerated::prev_value_as_string() const
+{
+   if (theEnums_.empty()) return string();
+
+   int index = currentIndex_;
+   index--;
+   if (index < 0) return theEnums_[0]; // return first
+   if (index >= static_cast<int>(theEnums_.size())) return theEnums_[theEnums_.size()-1]; // return last
+   return theEnums_[index];
 }
 
 void RepeatEnumerated::change( const std::string& newValue)
@@ -842,6 +918,30 @@ long RepeatString::last_valid_value() const
       return currentIndex_;
    }
    return 0;
+}
+
+std::string RepeatString::next_value_as_string() const
+{
+   if (!theStrings_.empty()) {
+      int index = currentIndex_;
+      index++;
+      if (index < 0) return theStrings_[0]; // return first
+      if (index >= static_cast<int>(theStrings_.size())) return theStrings_[theStrings_.size()-1]; // return last
+      return theStrings_[index];
+   }
+   return string();
+}
+
+std::string RepeatString::prev_value_as_string() const
+{
+   if (!theStrings_.empty()) {
+      int index = currentIndex_;
+      index--;
+      if (index < 0) return theStrings_[0]; // return first
+      if (index >= static_cast<int>(theStrings_.size())) return theStrings_[theStrings_.size()-1]; // return last
+      return theStrings_[index];
+   }
+   return string();
 }
 
 void RepeatString::increment() {

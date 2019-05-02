@@ -55,6 +55,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(rep.step() == 1,"step should be 1");
       BOOST_CHECK_MESSAGE(rep.value() == 20090916,"value should be 20090916");
       BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20090916,"last_valid_value should be 20090916");
+      BOOST_CHECK_MESSAGE(rep.valueAsString() == "20090916","not as expected");
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "20090917","not as expected");
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "20090916","not as expected");
 
       Repeat cloned = Repeat(rep);
       BOOST_CHECK_MESSAGE(cloned == rep,"Equality failed");
@@ -65,6 +68,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(cloned.value() == 20090916,"not as expected");
       BOOST_CHECK_MESSAGE(cloned.valueAsString() == "20090916","not as expected");
       BOOST_CHECK_MESSAGE(cloned.last_valid_value() == 20090916,"last_valid_value should be 20090916");
+      BOOST_CHECK_MESSAGE(cloned.next_value_as_string() == "20090917","not as expected");
+      BOOST_CHECK_MESSAGE(cloned.prev_value_as_string() == "20090916","not as expected");
 
       RepeatDate empty;
       BOOST_CHECK_MESSAGE(empty.start() == 0,"Start should be 0");
@@ -73,6 +78,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(empty.value() == 0,"delta should be 0");
       BOOST_CHECK_MESSAGE(empty.name().empty(),"name should be empty");
       BOOST_CHECK_MESSAGE(empty.name() == "","name not as expected");
+      BOOST_CHECK_MESSAGE(empty.valueAsString() == "0","expected 0 but found " << empty.valueAsString());
+      BOOST_CHECK_MESSAGE(empty.next_value_as_string() == "0","expected 0 but found " << empty.next_value_as_string());
+      BOOST_CHECK_MESSAGE(empty.prev_value_as_string() == "0","expected 0 but found " << empty.prev_value_as_string());
    }
    {
       Repeat rep(RepeatDate("YMD",20090930,20090916,-1));
@@ -84,6 +92,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(rep.step() == -1,"step should be -1");
       BOOST_CHECK_MESSAGE(rep.value() == 20090930,"value should be 20090930");
       BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20090930,"last_valid_value should be 20090930");
+      BOOST_CHECK_MESSAGE(rep.valueAsString() == "20090930","not as expected");
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "20090929","expected 20090929 but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "20090930","expected 20090930 but found " << rep.prev_value_as_string());
 
       Repeat cloned = Repeat(rep);
       BOOST_CHECK_MESSAGE(cloned == rep,"Equality failed");
@@ -126,6 +137,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(!rep.empty()," Repeat should not be empty");
       BOOST_CHECK_MESSAGE(!rep.name().empty(),"name should not be empty");
       BOOST_CHECK_MESSAGE(rep.name() == "AEnum","name not as expected");
+      BOOST_CHECK_MESSAGE(rep.valueAsString() == "a","not as expected");
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "b","not as expected");
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "a","not as expected");
 
       Repeat cloned = Repeat(rep);
       BOOST_CHECK_MESSAGE(cloned == rep,"Equality failed");
@@ -134,6 +148,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(cloned.step() == 1,"not as expected");
       BOOST_CHECK_MESSAGE(cloned.value() == 0,"not as expected");
       BOOST_CHECK_MESSAGE(cloned.valueAsString() == "a","not as expected");
+      BOOST_CHECK_MESSAGE(cloned.next_value_as_string() == "b","not as expected");
+      BOOST_CHECK_MESSAGE(cloned.prev_value_as_string() == "a","not as expected");
 
       RepeatEnumerated empty;
       BOOST_CHECK_MESSAGE(empty.start() == 0,"Start should be 0");
@@ -142,12 +158,18 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(empty.value() == 0,"delta should be 0");
       BOOST_CHECK_MESSAGE(empty.name().empty(),"name should be empty");
       BOOST_CHECK_MESSAGE(empty.name() == "","name not as expected");
+      BOOST_CHECK_MESSAGE(empty.valueAsString() == "","not as expected");
+      BOOST_CHECK_MESSAGE(empty.next_value_as_string() == "","not as expected");
+      BOOST_CHECK_MESSAGE(empty.prev_value_as_string() == "","not as expected");
    }
    {
       Repeat rep(RepeatInteger("rep",0,100,1));
       BOOST_CHECK_MESSAGE(!rep.empty()," Repeat should not be empty");
       BOOST_CHECK_MESSAGE(!rep.name().empty(),"name should not be empty");
       BOOST_CHECK_MESSAGE(rep.name() == "rep","name not as expected");
+      BOOST_CHECK_MESSAGE(rep.valueAsString() == "0","not as expected");
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "1","not as expected");
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "0","not as expected");
 
       Repeat cloned = Repeat(rep);
       BOOST_CHECK_MESSAGE(cloned == rep,"Equality failed");
@@ -156,6 +178,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(cloned.end() == 100,"not as expected");
       BOOST_CHECK_MESSAGE(cloned.step() == 1,"not as expected");
       BOOST_CHECK_MESSAGE(cloned.value() == 0,"not as expected");
+      BOOST_CHECK_MESSAGE(cloned.valueAsString() == "0","not as expected");
+      BOOST_CHECK_MESSAGE(cloned.next_value_as_string() == "1","not as expected");
+      BOOST_CHECK_MESSAGE(cloned.prev_value_as_string() == "0","not as expected");
 
       RepeatInteger empty;
       BOOST_CHECK_MESSAGE(empty.start() == 0,"Start should be 0");
@@ -164,6 +189,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(empty.value() == 0,"delta should be 0");
       BOOST_CHECK_MESSAGE(empty.name().empty(),"name should be empty");
       BOOST_CHECK_MESSAGE(empty.name() == "","name not as expected");
+      BOOST_CHECK_MESSAGE(empty.valueAsString() == "0","not as expected");
+      BOOST_CHECK_MESSAGE(empty.next_value_as_string() == "0","not as expected");
+      BOOST_CHECK_MESSAGE(empty.prev_value_as_string() == "0","not as expected");
    }
    {
       Repeat rep(RepeatDay(2));
@@ -182,6 +210,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(empty.step() == 1,"default step should be 0 but found " <<  empty.step());
       BOOST_CHECK_MESSAGE(empty.value() == 1,"value should be 0 but found " << empty.value());
       BOOST_CHECK_MESSAGE(empty.name() == "day","name not as expected");
+      BOOST_CHECK_MESSAGE(empty.valueAsString() == "","not as expected");
+      BOOST_CHECK_MESSAGE(empty.next_value_as_string() == "","not as expected");
+      BOOST_CHECK_MESSAGE(empty.prev_value_as_string() == "","not as expected");
    }
 }
 
@@ -364,11 +395,17 @@ BOOST_AUTO_TEST_CASE( test_repeat_last_value )
       Repeat rep(RepeatDate("YMD",20090916,20090930,1));
       rep.setToLastValue();
       BOOST_CHECK_MESSAGE(rep.value() == 20090930,"Set to last value did not work, expected 20090930 but found " << rep.value());
+      BOOST_CHECK_MESSAGE(rep.valueAsString() == "20090930","Set to last value did not work, expected '20090930' but found " << rep.valueAsString());
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "20090930","next_value_as_string() did not work, expected 20090930 but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "20090929","prev_value_as_string() did not work, expected 20090929 but found " << rep.prev_value_as_string());
    }
    {
       Repeat rep(RepeatDate("YMD",20090930,20090916,-1));
       rep.setToLastValue();
       BOOST_CHECK_MESSAGE(rep.value() == 20090916,"Set to last value did not work, expected 20090916 but found " << rep.value());
+      BOOST_CHECK_MESSAGE(rep.valueAsString() == "20090916","Set to last value did not work, expected '20090916' but found " << rep.valueAsString());
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "20090916","next_value_as_string() did not work, expected 20090916 but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "20090917","prev_value_as_string() did not work, expected 20090917 but found " << rep.prev_value_as_string());
    }
 
    std::vector<std::string> stringList; stringList.reserve(3);
@@ -383,6 +420,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_last_value )
       BOOST_CHECK_MESSAGE(rep.value_as_string(0) == "a"," Expected 'a' but found " << rep.value_as_string(0));
       BOOST_CHECK_MESSAGE(rep.value_as_string(1) == "b"," Expected 'b' but found " << rep.value_as_string(1));
       BOOST_CHECK_MESSAGE(rep.value_as_string(2) == "c"," Expected 'c' but found " << rep.value_as_string(2));
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "c","next_value_as_string() did not work, expected c but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "b","prev_value_as_string() did not work, expected b but found " << rep.prev_value_as_string());
    }
    {
       Repeat rep(RepeatString("Str",stringList));
@@ -392,6 +431,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_last_value )
       BOOST_CHECK_MESSAGE(rep.value_as_string(0) == "a"," Expected 'a' but found " << rep.value_as_string(0));
       BOOST_CHECK_MESSAGE(rep.value_as_string(1) == "b"," Expected 'b' but found " << rep.value_as_string(1));
       BOOST_CHECK_MESSAGE(rep.value_as_string(2) == "c"," Expected 'c' but found " << rep.value_as_string(2));
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "c","next_value_as_string() did not work, expected c but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "b","prev_value_as_string() did not work, expected b but found " << rep.prev_value_as_string());
    }
 
    {
@@ -401,6 +442,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_last_value )
       BOOST_CHECK_MESSAGE(rep.value_as_string(0) == "0"," Expected '0' but found " << rep.value_as_string(0));
       BOOST_CHECK_MESSAGE(rep.value_as_string(1) == "1"," Expected '1' but found " << rep.value_as_string(1));
       BOOST_CHECK_MESSAGE(rep.value_as_string(2) == "2"," Expected '2' but found " << rep.value_as_string(2));
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "10","next_value_as_string() did not work, expected 10 but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "9","prev_value_as_string() did not work, expected 9 but found " << rep.prev_value_as_string());
    }
    {
       Repeat rep(RepeatInteger("integer",10,0,-1));
@@ -409,6 +452,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_last_value )
       BOOST_CHECK_MESSAGE(rep.value_as_string(0) == "0"," Expected '0' but found " << rep.value_as_string(0));
       BOOST_CHECK_MESSAGE(rep.value_as_string(1) == "1"," Expected '1' but found " << rep.value_as_string(1));
       BOOST_CHECK_MESSAGE(rep.value_as_string(2) == "2"," Expected '2' but found " << rep.value_as_string(2));
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "0","next_value_as_string() did not work, expected 0 but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "1","prev_value_as_string() did not work, expected 1 but found " << rep.prev_value_as_string());
    }
 }
 
@@ -429,6 +474,8 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated_as_string_integers )
       BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20130101," Expected 20130101 but found " << rep.last_valid_value());
       BOOST_CHECK_MESSAGE(rep.valueAsString() == "20130101"," Expected '20130101' but found " << rep.valueAsString());
       BOOST_CHECK_MESSAGE(rep.value_as_string(0) == "20130101"," Expected '20130101' but found " << rep.value_as_string(0));
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "20130102"," Expected '20130102' but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "20130101"," Expected '20130101' but found " << rep.prev_value_as_string());
 
       rep.increment();
       BOOST_CHECK_MESSAGE(rep.valid(),"Expected rep to be valid");
@@ -436,12 +483,16 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated_as_string_integers )
       BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20130102," Expected 20130102 but found " << rep.last_valid_value());
       BOOST_CHECK_MESSAGE(rep.valueAsString() == "20130102"," Expected '20130102' but found " << rep.valueAsString());
       BOOST_CHECK_MESSAGE(rep.value_as_string(1) == "20130102"," Expected '20130102' but found " << rep.value_as_string(1));
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "20130103"," Expected '20130103' but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "20130101"," Expected '20130101' but found " << rep.prev_value_as_string());
 
       rep.increment();
       BOOST_CHECK_MESSAGE(rep.value() == 20130103," Expected 20130103 but found " << rep.value());
       BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20130103," Expected 20130103 but found " << rep.last_valid_value());
       BOOST_CHECK_MESSAGE(rep.valueAsString() == "20130103"," Expected '20130103' but found " << rep.valueAsString());
       BOOST_CHECK_MESSAGE(rep.value_as_string(2) == "20130103"," Expected '20130103' but found " << rep.value_as_string(2));
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "20130103"," Expected '20130103' but found " << rep.next_value_as_string());
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "20130102"," Expected '20130102' but found " << rep.prev_value_as_string());
 
       rep.increment();
       BOOST_CHECK_MESSAGE(!rep.valid(),"Expected rep to be in-valid");

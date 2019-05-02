@@ -112,7 +112,18 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
       if (args.size() >= 1) path_to_attribute = args[1];
       if (args.size() > 2) throw std::runtime_error( "QueryCmd: invalid (state | dstate) query : " + args[2]);
    }
-   else throw std::runtime_error( "QueryCmd: first argument must be one of [ state | dstate | event | meter | variable | trigger ] but found:" + query_type);
+   else if (query_type == "repeat" ) {
+      // for repeat attribute can only be next or prev
+      if (args.size() >= 1) path_to_attribute = args[1];
+      if (args.size() == 3) {
+         attribute = args[2];
+         if (attribute != "next" && attribute != "prev") {
+            throw std::runtime_error( "QueryCmd: invalid (repeat) query expected 'next' or 'prev' but found " + attribute);
+         }
+      }
+      if (args.size() > 3) throw std::runtime_error( "QueryCmd: invalid (repeat) query : " + args[3]);
+   }
+   else throw std::runtime_error( "QueryCmd: first argument must be one of [ state | dstate | repeat | event | meter | variable | trigger ] but found:" + query_type);
 
    if (path_to_attribute.empty() || (!path_to_attribute.empty() &&  path_to_attribute[0] != '/')) {
       throw std::runtime_error( "QueryCmd: invalid path to attribute: " + path_to_attribute);
@@ -132,9 +143,11 @@ const char*  QueryCmd::arg() { return CtsApi::queryArg();}
 
 const char* QueryCmd::desc() {
    return
-            "Query the status of attributes i.e state, event, meter,label,variable or trigger expression without blocking\n"
+            "Query the status of attributes\n"
+            " i.e state,dstate,repeat,event,meter,label,variable or trigger expression without blocking\n"
             " - state    return [unknown | complete | queued |             aborted | submitted | active] to standard out\n"
             " - dstate   return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out\n"
+            " - repeat   returns current value as a string to standard out\n"
             " - event    return 'set' | 'clear' to standard out\n"
             " - meter    return value of the meter to standard out\n"
             " - label    return new value otherwise the old value\n"
@@ -144,18 +157,22 @@ const char* QueryCmd::desc() {
             "If this command is called within a '.ecf' script we will additionally log the task calling this command\n"
             "This is required to aid debugging for excessive use of this command\n"
             "The command will fail if the node path to the attribute does not exist in the definition and if:\n"
+            " - repeat   The repeat is not found\n"
             " - event    The event is not found\n"
             " - meter    The meter is not found\n"
             " - label    The label is not found\n"
             " - variable No user or generated variable or repeat of that name found on node, or any of its parents\n"
             " - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid\n"
             "Arguments:\n"
-            "  arg1 = [ state | event | meter | label | variable | trigger ]\n"
+            "  arg1 = [ state | dstate | repeat | event | meter | label | variable | trigger ]\n"
             "  arg2 = <path> | <path>:name where name is name of a event, meter, label or variable\n"
-            "  arg3 = trigger expression\n\n"
+            "  arg3 = trigger expression | prev | next # prev,next only used when arg1 is repeat\n\n"
             "Usage:\n"
             " ecflow_client --query state /path/to/node                         # return node state to standard out\n"
             " ecflow_client --query dstate /path/to/node                        # state that can included suspended\n"
+            " ecflow_client --query repeat /path/to/node                        # return the current value as a string\n"
+            " ecflow_client --query repeat /path/to/node prev                   # return the previous value as a string\n"
+            " ecflow_client --query repeat /path/to/node next                   # return the next value as a string\n"
             " ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out\n"
             " ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out\n"
             " ecflow_client --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out\n"
@@ -220,6 +237,19 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
 
    if (query_type_ == "dstate") {
       return PreAllocatedReply::string_cmd( DState::to_string(node->dstate()) );
+   }
+
+   if (query_type_ == "repeat") {
+      const Repeat& repeat = node->repeat();
+      if (repeat.empty()) {
+          std::stringstream ss; ss << "QueryCmd: Can not find repeat on node " << path_to_attribute_;
+          throw std::runtime_error(ss.str());
+      }
+      if (attribute_.empty())   return PreAllocatedReply::string_cmd( repeat.valueAsString() );
+      if (attribute_ == "next") return PreAllocatedReply::string_cmd( repeat.next_value_as_string() );
+      if (attribute_ == "prev") return PreAllocatedReply::string_cmd( repeat.prev_value_as_string() );
+      std::stringstream ss; ss << "QueryCmd: invalid repeat attribute expected next | prev but found " << attribute_ ;
+      throw std::runtime_error(ss.str());
    }
    else {
         std::stringstream ss;

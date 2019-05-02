@@ -77,6 +77,9 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.begin("/suite",true) == 0,CtsApi::begin("/suite",true) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.begin("/suite",false) == 0,CtsApi::begin("/suite",false) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.begin_all_suites() == 0,CtsApi::begin() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("repeat","/suite","") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("repeat","/suite","next") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("repeat","/suite","prev") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.query("event","/suite","event") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.query("meter","/suite","meter") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.query("variable","/suite","var") == 0, CtsApi::queryArg() << " should return 0\n" << theClient.errorMsg());
@@ -614,8 +617,11 @@ BOOST_AUTO_TEST_CASE( test_client_interface_for_fail )
    BOOST_REQUIRE_MESSAGE( theClient.query("trigger","","1 == 1") == 1, std::string(CtsApi::queryArg()) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.query("xxxx","/suite","1 == 1") == 1, std::string(CtsApi::queryArg()) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.query("","/suite","1 == 1") == 1, std::string(CtsApi::queryArg()) << " should return 0\n" << theClient.errorMsg());
-}
 
+   BOOST_REQUIRE_MESSAGE( theClient.query("repeat","/suite","xx") == 1, CtsApi::queryArg() << " should return 1\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("repeat","/suite","nextyyy") == 1, CtsApi::queryArg() << " should return 1\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.query("repeat","/suite","prevyyy") == 1, CtsApi::queryArg() << " should return 1\n" << theClient.errorMsg());
+}
 
 BOOST_AUTO_TEST_CASE( test_client_task_interface )
 {

@@ -841,6 +841,10 @@ std::vector<std::string> CtsApi::query(
       retVec.push_back(path_to_attribute);
       retVec.push_back(attribute);
    }
+   else if (query_type == "repeat") {
+       retVec.push_back(path_to_attribute);
+       if (!attribute.empty()) retVec.push_back(attribute);
+    }
    else if (query_type == "state" || query_type == "dstate") {
       retVec.push_back(path_to_attribute);
    }

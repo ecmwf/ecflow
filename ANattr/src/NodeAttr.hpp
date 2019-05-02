@@ -16,6 +16,7 @@
 //============================================================================
 
 #include <iosfwd>
+#include <vector>
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/operators.hpp>

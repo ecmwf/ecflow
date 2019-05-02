@@ -75,6 +75,8 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
 
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("state","/suite/f/t11","","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("dstate","/suite/f/t11","","/suite/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("repeat","/suite/f/t1","","/suite/f/t1")));        // no repeat on /suite/f/t1
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("repeat","/suite","fred","/suite")));              // Only next | prev are valid
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1","eventxx","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite",event_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","xxxx/f/t1",event_name,"/suite/f/t1")));
@@ -97,6 +99,15 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
 
    res  = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("dstate","/suite/f","","/suite/f/t1")), false);
    BOOST_CHECK_MESSAGE(res == "queued","expected query state to return queued but found: " << res);
+
+   res  = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("repeat","/suite","","/suite")), false);
+   BOOST_CHECK_MESSAGE(res == "20090916","expected query repeat to return '20090916' but found : " << res);
+
+   res  = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("repeat","/suite","prev","/suite")), false);
+   BOOST_CHECK_MESSAGE(res == "20090916","expected query repeat to return '20090916' but found : " << res);
+
+   res  = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("repeat","/suite","next","/suite")), false);
+   BOOST_CHECK_MESSAGE(res == "20090917","expected query repeat to return '20090917' but found : " << res);
 
    // Note: we pick a task outside of a repeat, since setting a task to complete, inside a repeat will cause it to requeue
    // Avoid using ForceCmd to avoid side affects

@@ -76,6 +76,8 @@ public:
    virtual void setToLastValue()  = 0;
    virtual std::string valueAsString() const = 0;            // uses last_valid_value
    virtual std::string value_as_string(int index) const = 0;// used in test only
+   virtual std::string next_value_as_string() const = 0;
+   virtual std::string prev_value_as_string() const = 0;
    virtual void reset()  = 0;
    virtual void change(const std::string& newValue) = 0; // can throw std::runtime_error
    virtual void changeValue(long newValue) = 0;          // can throw std::runtime_error
@@ -132,6 +134,9 @@ public:
    bool valid() const override { return (delta_ > 0) ? ( value_ <= end_) : (value_ >= end_); }
    std::string valueAsString() const override;
    std::string value_as_string(int index) const override;
+   std::string next_value_as_string() const override;
+   std::string prev_value_as_string() const override;
+
    void setToLastValue() override;
    void reset() override;
    void increment() override;
@@ -147,6 +152,8 @@ public:
    bool isInfinite() const override { return false;}
 
 private:
+   long valid_value(long value) const;
+
    RepeatDate( const std::string& name, int start, int end, int delta, long value)
    : RepeatBase(name),start_(start),end_(end),delta_(delta),value_(value) {}
 
@@ -186,6 +193,8 @@ public:
    bool valid() const override { return (delta_ > 0) ? ( value_ <= end_) : (value_ >= end_); }
    std::string valueAsString() const override;
    std::string value_as_string(int index) const override;
+   std::string next_value_as_string() const override;
+   std::string prev_value_as_string() const override;
    void setToLastValue() override;
    void reset() override;
    void increment() override;
@@ -199,6 +208,8 @@ public:
    bool isInfinite() const override { return false;}
 
 private:
+   long valid_value(long value) const;
+
    RepeatInteger( const std::string& name, int start, int end, int delta, long value)
    : RepeatBase(name), start_(start), end_(end), delta_(delta), value_(value) {}
 
@@ -235,6 +246,9 @@ public:
    bool valid() const override { return  (currentIndex_ >=0 && currentIndex_ < static_cast<int>(theEnums_.size())); }
    std::string valueAsString() const override;
    std::string value_as_string(int index) const override;
+   std::string next_value_as_string() const override;
+   std::string prev_value_as_string() const override;
+
    void setToLastValue() override;
    void reset() override;
    void increment() override;
@@ -279,6 +293,9 @@ public:
    bool valid() const override { return  (currentIndex_ >=0 && currentIndex_ < static_cast<int>(theStrings_.size())); }
    std::string valueAsString() const override;
    std::string value_as_string(int index) const override;
+   std::string next_value_as_string() const override;
+   std::string prev_value_as_string() const override;
+
    void setToLastValue() override;
    void reset() override;
    void increment() override;
@@ -343,6 +360,9 @@ public:
    bool valid() const override { return valid_;}
    std::string valueAsString() const override { return std::string(); } ;
    std::string value_as_string(int ) const override { return std::string(); }
+   std::string next_value_as_string() const override { return std::string(); }
+   std::string prev_value_as_string() const override { return std::string(); }
+
    void setToLastValue() override { /* do nothing  ?? */ }
    void reset() override {  valid_ = true;  }
    void change(const std::string& /*newValue*/) override { /* do nothing */ }
@@ -406,6 +426,9 @@ public:
    void setToLastValue()                        { if (type_) type_->setToLastValue() ; }
    std::string valueAsString() const            { return (type_) ? type_->valueAsString() : std::string(); }
    std::string value_as_string(int index) const { return (type_) ? type_->value_as_string(index) : std::string(); }
+   std::string next_value_as_string() const     { return (type_) ? type_->next_value_as_string() : std::string(); }
+   std::string prev_value_as_string() const     { return (type_) ? type_->prev_value_as_string() : std::string(); }
+
    void reset()                                 { if (type_) type_->reset();}
    void increment()                             { if (type_) type_->increment();}
    void change( const std::string& newValue )   { if (type_) type_->change(newValue); }
