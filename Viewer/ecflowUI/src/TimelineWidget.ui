@@ -329,6 +329,9 @@
         <property name="calendarPopup">
          <bool>true</bool>
         </property>
+        <property name="timeSpec">
+         <enum>Qt::UTC</enum>
+        </property>
        </widget>
       </item>
       <item>
@@ -362,8 +365,14 @@
       </item>
       <item>
        <widget class="QDateTimeEdit" name="toTimeEdit">
+        <property name="displayFormat">
+         <string>dd/MM/yyyy HH:mm</string>
+        </property>
         <property name="calendarPopup">
          <bool>true</bool>
+        </property>
+        <property name="timeSpec">
+         <enum>Qt::UTC</enum>
         </property>
        </widget>
       </item>

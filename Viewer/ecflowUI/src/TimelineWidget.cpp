@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2018 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -119,8 +119,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->taskOnlyTb->setChecked(false);
     ui_->showChangedTb->setChecked(true);
 
-    ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
-    ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
+    ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-yyyy");
+    ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-yyyy");
 
     ui_->zoomInTb->setDefaultAction(ui_->actionZoomIn);
     ui_->zoomOutTb->setDefaultAction(ui_->actionZoomOut);
@@ -755,7 +755,7 @@ void TimelineWidget::loadCore(QString logFile)
     ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
     ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());
 
-    //try the set the previously used interval - for reload only
+    //try to set the previously used interval - for reload only
     if(prevState_.valid)
     {
         if(prevState_.startDt <= data_->qStartTime() || prevState_.fullStart)
