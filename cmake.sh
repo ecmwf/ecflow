@@ -197,6 +197,7 @@ if [[ "$ARCH" = cray ]] ; then
     else
     	module swap PrgEnv-cray PrgEnv-gnu
     fi
+    module unload eccodes                 # Otherwise ecflow.so pulls in libeccodes.so
     module unload atp                     # must use for NON MPI code (ATP abnormal termination processing only works with cray MPI for ESM modes)
     module load craype-target-local_host  # must use for NON MPI code
     export CRAY_ADD_RPATH=yes
