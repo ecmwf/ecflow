@@ -190,7 +190,7 @@ if [[ "$ARCH" = cray ]] ; then
     # disable new UI, no QT on cray
     # Use the cray wrappers, these will add the correct flags.
     # Assumes we have CRAY_ADD_RPATH=yes
-    cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC -DCMAKE_Fortran_COMPILER=ftn"
+    cmake_extra_options="$cmake_extra_options -DENABLE_UI=OFF -DCMAKE_C_COMPILER=cc -DCMAKE_CXX_COMPILER=CC"
     
     if [[ $intel_arg = intel ]] ; then
         module swap PrgEnv-cray PrgEnv-intel
