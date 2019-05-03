@@ -41,10 +41,10 @@ public:
    const std::string& ssl() const { return ssl_;}
    bool enabled() const { return !ssl_.empty();}
 
-   void enable(const std::string&);
+   void enable(const std::string& host,const std::string& port);
    void disable() { ssl_.clear();} // override environment setting for ECF_SSL
-   void init_for_server(const std::string& host, const std::string& port);
-   void init_for_client(const std::string& host, const std::string& port);
+   void init_for_server();
+   void init_for_client();
 
    boost::asio::ssl::context& context() { return ssl_context_;}
 
@@ -54,16 +54,16 @@ public:
    void print(std::ostream &os) const { os << ssl_;}
 
 private:
-   void check_client_certificates(const std::string& host, const std::string& port) const;
-   void check_server_certificates(const std::string& host, const std::string& port) const;
+   void check_client_certificates() const;
+   void check_server_certificates() const;
    void load_verify_file( boost::asio::ssl::context&);   /// load server.crt file into the ssl context
    std::string certificates_dir() const;                       /// Directory where ssl certificates are held
    std::string get_password() const;
 
-   std::string pem(const std::string& host, const std::string& port) const;
-   std::string crt(const std::string& host, const std::string& port) const;
-   std::string key(const std::string& host, const std::string& port) const;
-   std::string passwd(const std::string& host, const std::string& port) const;
+   std::string pem() const;
+   std::string crt() const;
+   std::string key() const;
+   std::string passwd() const;
 
 private:
    bool init_for_client_{false};

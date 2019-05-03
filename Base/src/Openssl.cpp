@@ -28,22 +28,45 @@ namespace fs = boost::filesystem;
 
 namespace ecf {
 
-void Openssl::enable(const std::string& ssl)
+void Openssl::enable(const std::string& host,const std::string& port)
 {
-//   cout << "Openssl::enable input ssl:'" << ssl << "'\n";
-   if (ssl.empty()) ssl_ = "1";
-   else ssl_ = ssl;
-//   cout << "Openssl::enable input ssl_:'" << ssl_ << "'\n";
-}
-
-void Openssl::init_for_server(const std::string& host, const std::string& port)
-{
-//   std::cout << " Openssl::init_for_server  host :" << host << "@" << port << "\n";
-//   std::cout << " Openssl::init_for_server ssl_:'" << ssl_ << "'\n";
+//   cout << "Openssl::enable input host:" << host << " port:" << port << "\n";
 
    host_ = host;
    port_ = port;
-   check_server_certificates(host,port);
+
+   std::string cert_dir  = certificates_dir();
+   if (!fs::exists(cert_dir)) throw std::runtime_error("Openssl::enable Error: The certificates directory '" + cert_dir + "' does not exist\n\n" + ssl_info());
+
+   std::string host_port_crt = cert_dir;
+   host_port_crt += host;
+   host_port_crt += ".";
+   host_port_crt += port;
+   host_port_crt += ".crt";
+   if (fs::exists(host_port_crt)) {
+      ssl_ = host;
+      ssl_ += "_";
+      ssl_ += port;
+   }
+   else {
+      std::string server_crt = cert_dir;
+      server_crt += "server.crt";
+      if (!fs::exists(server_crt)) {
+         std::stringstream ss;
+         ss << "Openssl::enable(): Expected to find file " << host_port_crt << " *OR* " << server_crt << "\n\n" << ssl_info();
+         throw std::runtime_error(ss.str());
+      }
+      ssl_ = "1";
+   }
+//   cout << "Openssl::enable input ssl_:'" << ssl_ << "'\n";
+}
+
+void Openssl::init_for_server()
+{
+//   std::cout << " Openssl::init_for_server  host :" << host_ << "@" << port_ << "\n";
+//   std::cout << " Openssl::init_for_server ssl_:'" << ssl_ << "'\n";
+
+   check_server_certificates();
 
    ssl_context_.set_options(
             boost::asio::ssl::context::default_workarounds
@@ -51,25 +74,25 @@ void Openssl::init_for_server(const std::string& host, const std::string& port)
             | boost::asio::ssl::context::single_dh_use);
    // this must be done before loading any keys. as below
    ssl_context_.set_password_callback(boost::bind(&Openssl::get_password, this));
-   ssl_context_.use_certificate_chain_file( crt(host,port) );
-   ssl_context_.use_private_key_file( key(host,port), boost::asio::ssl::context::pem);
-   ssl_context_.use_tmp_dh_file( pem(host,port) );
+   ssl_context_.use_certificate_chain_file( crt() );
+   ssl_context_.use_private_key_file( key(), boost::asio::ssl::context::pem);
+   ssl_context_.use_tmp_dh_file( pem() );
 }
 
-void Openssl::init_for_client(const std::string& host, const std::string& port)
+void Openssl::init_for_client()
 {
-//   std::cout << " Openssl::init_for_client host :" << host << "@" << port << "\n";
+//   std::cout << " Openssl::init_for_client host :" << host_ << "@" << port_ << "\n";
    if (!init_for_client_) {
       init_for_client_ = true;
-      check_client_certificates(host,port);
-      ssl_context_.load_verify_file(crt(host,port));
+      check_client_certificates();
+      ssl_context_.load_verify_file(crt());
    }
 }
 
 std::string Openssl::get_password() const
 {
    // std::cout << "Openssl::get_password()\n";
-   std::string passwd_file = passwd(host_,port_);
+   std::string passwd_file = passwd();
    if (fs::exists(passwd_file)) {
       std::string contents;
       if (ecf::File::open(passwd_file,contents)) {
@@ -96,46 +119,46 @@ std::string Openssl::certificates_dir() const
    return home_path;
 }
 
-std::string Openssl::pem(const std::string& host, const std::string& port) const
+std::string Openssl::pem() const
 {
    std::string str = certificates_dir();
    if (ssl_ == "1") { str += "dh1024.pem"; return str;}
-   str += host;
+   str += host_;
    str += ".";
-   str += port;
+   str += port_;
    str += ".pem";
    return str;
 }
 
-std::string Openssl::crt(const std::string& host, const std::string& port) const
+std::string Openssl::crt() const
 {
    std::string str = certificates_dir();
    if (ssl_ == "1") { str += "server.crt"; return str;}
-   str += host;
+   str += host_;
    str += ".";
-   str += port;
+   str += port_;
    str += ".crt";
    return str;
 }
 
-std::string Openssl::key(const std::string& host, const std::string& port) const
+std::string Openssl::key() const
 {
    std::string str = certificates_dir();
    if (ssl_ == "1") { str += "server.key"; return str; }
-   str += host;
+   str += host_;
    str += ".";
-   str += port;
+   str += port_;
    str += ".key";
    return str;
 }
 
-std::string Openssl::passwd(const std::string& host, const std::string& port) const
+std::string Openssl::passwd() const
 {
    std::string str = certificates_dir();
    if (ssl_ == "1") { str += "server.passwd"; return str;}
-   str += host;
+   str += host_;
    str += ".";
-   str += port;
+   str += port_;
    str += ".passwd";
    return str;
 }
@@ -156,13 +179,14 @@ const char* Openssl::ssl_info() {
             "   - server.crt (this must be the same as server)\n\n"
             "Alternatively you can have different setting for each server using:\n"
             "   1. export ECF_SSL=host_port # define an environment variable\n"
-            "   2. use --ssl=host_port      # argument on ecflow_client/ecflow_server\n"
+            "   2. use --ssl                # argument on ecflow_client/ecflow_server\n"
             "Then server/client expect files of the type\n"
             "   - <host>.<port>.pem\n"
             "   - <host>.<port>.crt\n"
             "   - <host>.<port>.key\n"
             "   - <host>.<port>.passwd (optional)\n\n"
             "The following steps, show you how to create the certificate files.\n"
+            "This may need to be adapted if you want to use <host>.<port>.***\n"
             "- Generate a password protected private key. This will request a pass phrase.\n"
             "  This key is a 1024 bit RSA key which is encrypted using Triple-DES and stored\n"
             "  in a PEM format so that it is readable as ASCII text\n"
@@ -184,7 +208,7 @@ const char* Openssl::ssl_info() {
             ;
 }
 
-void Openssl::check_server_certificates(const std::string& host, const std::string& port) const
+void Openssl::check_server_certificates() const
 {
 //   cout << "Openssl::check_server_certificates: ssl'" << ssl_ << "'\n";
 
@@ -192,27 +216,27 @@ void Openssl::check_server_certificates(const std::string& host, const std::stri
    if (!fs::exists(cert_dir)) throw std::runtime_error("Error: The certificates directory '" + cert_dir + "' does not exist\n\n" + ssl_info());
 
    {
-      string server_key = key(host,port);
+      string server_key = key();
       if (!fs::exists(server_key)) throw std::runtime_error("Error: The password protected private server key file '" + server_key  + "' does not exist\n\n" + ssl_info() );
    }
    {
-      string server_crt = crt(host,port);
+      string server_crt = crt();
       if (!fs::exists(server_crt)) throw std::runtime_error("Error: The self signed certificate file(CRT) '" + server_crt  + "' does not exist\n\n" + ssl_info());
    }
    {
-      string server_pem = pem(host,port);
+      string server_pem = pem();
       if (!fs::exists(server_pem)) throw std::runtime_error("Error: The dhparam file(pem) '" +  server_pem  + "' does not exist\n\n" + ssl_info());
    }
 }
 
-void Openssl::check_client_certificates(const std::string& host, const std::string& port) const
+void Openssl::check_client_certificates() const
 {
 //   cout << "Openssl::check_client_certificates : ssl'" << ssl_ << "'\n";
 
    std::string cert_dir = certificates_dir();
    if (!fs::exists(cert_dir)) throw std::runtime_error("Error: The certificates directory '" + cert_dir + "' does not exist\n\n" + ssl_info());
    {
-      string server_crt = crt(host,port);
+      string server_crt = crt();
       if (!fs::exists(server_crt)) throw std::runtime_error("Error: The self signed certificate file(CRT) '" + server_crt  + "' does not exist\n\n" + ssl_info());
    }
 }

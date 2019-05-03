@@ -70,7 +70,7 @@ public:
 	/// return true if ssl enable via command line, AND SSL libraries are found
 	ecf::Openssl& openssl() { return ssl_;}
 	bool ssl() const { return ssl_.enabled();}
-	void enable_ssl(const std::string& ssl) { ssl_.enable(ssl);}
+	void enable_ssl() { ssl_.enable(serverHost_,the_port());}
 #endif
 
 	/// returns the server port. This has a default value defined in server_environment.cfg

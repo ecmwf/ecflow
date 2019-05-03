@@ -148,8 +148,8 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 #ifdef ECF_OPENSSL
             if (!as->ssl().empty()) {
                 ecf::Openssl openssl;
-                openssl.enable(as->ssl());
-                openssl.init_for_client(host,port);
+                openssl.enable(host,port);
+                openssl.init_for_client();
 
                 SslClient theClient( io_service, openssl.context(), cts_cmd,  host, port );
                 io_service.run();

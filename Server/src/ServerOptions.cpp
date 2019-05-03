@@ -117,7 +117,7 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 ( "ecfinterval",  po::value< int >(), "<int> <Allowed range 1-60>  Submit jobs interval. For DEBUG/Test only" )
 ( "v6",                               "Use IPv6 TCP protocol. Default is IPv4" )
 #ifdef ECF_OPENSSL
-( "ssl",     po::value< string >()->implicit_value( string("") ), ecf::Openssl::ssl_info())
+( "ssl",                              ecf::Openssl::ssl_info())
 #endif
 ( "dis_job_gen",                      "Disable job generation. For DEBUG/Test only." )
 ( "debug,d",                          "Enable debug output." )
@@ -153,8 +153,8 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 	}
 #ifdef ECF_OPENSSL
 	if ( vm_.count( "ssl" ) ) {
-	   if (env->debug_) cout << "ServerOptions: ssl server " << vm_["ssl"].as<std::string>() << "\n";
-	   env->enable_ssl( vm_["ssl"].as<std::string>() );
+	   if (env->debug_) cout << "ServerOptions: ssl server \n";
+	   env->enable_ssl();
 	}
 #endif
 }

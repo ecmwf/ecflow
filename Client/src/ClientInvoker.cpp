@@ -328,7 +328,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 #ifdef ECF_OPENSSL
 					if (clientEnv_.ssl()) {
 
-					   clientEnv_.openssl().init_for_client( clientEnv_.host(),clientEnv_.port());
+					   clientEnv_.openssl().init_for_client();
 
                   SslClient theClient(io_service,clientEnv_.openssl().context(),cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
                   io_service.run();

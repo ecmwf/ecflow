@@ -31,7 +31,7 @@ SslServer::SslServer( ServerEnvironment& serverEnv ) : BaseServer(serverEnv)
 {
    stats().ECF_SSL_ = "enabled";
 
-   serverEnv.openssl().init_for_server(serverEnv.hostPort().first, serverEnv.hostPort().second );
+   serverEnv.openssl().init_for_server();
 
    start_accept();
 }

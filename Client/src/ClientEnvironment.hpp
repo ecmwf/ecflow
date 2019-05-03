@@ -97,7 +97,7 @@ public:
    /// return true if this is a ssl enabled server
    ecf::Openssl& openssl() { return ssl_;}
    bool ssl() const { return ssl_.enabled();}
-   void enable_ssl(const std::string& ssl) { ssl_.enable(ssl);}
+   void enable_ssl()  { ssl_.enable(host(),port());}
    void disable_ssl() { ssl_.disable();}  // override environment setting for ECF_SSL
 #endif
 

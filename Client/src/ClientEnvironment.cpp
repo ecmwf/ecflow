@@ -30,9 +30,6 @@
 #include "TimeStamp.hpp"
 #include "Version.hpp"
 #include "PasswdFile.hpp"
-#ifdef ECF_OPENSSL
-#include "Openssl.hpp"
-#endif
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -254,9 +251,6 @@ void ClientEnvironment::read_environment_variables()
 	if (getenv("ECF_DENIED")) denied_ = true;
 	if (getenv("NO_ECF")) no_ecf_ = true;
    if (getenv("ECF_DEBUG_CLIENT")) debug_ = true;
-#ifdef ECF_OPENSSL
-   if (getenv("ECF_SSL")) ssl_.enable(getenv("ECF_SSL"));
-#endif
 
    char *debug_level = getenv("ECF_DEBUG_LEVEL");
    if (debug_level) {

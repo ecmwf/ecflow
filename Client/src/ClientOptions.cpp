@@ -57,8 +57,7 @@ ClientOptions::ClientOptions()
    desc_->add_options()("host",po::value< string >()->implicit_value( string("") ),
             "host: If specified will override the environment variable ECF_HOST and default host, localhost");
 #ifdef ECF_OPENSSL
-   desc_->add_options()("ssl",po::value< string >()->implicit_value( string("") ),
-             "ssl: If specified will override the environment variable ECF_SSL");
+   desc_->add_options()("ssl","ssl: If specified will override the environment variable ECF_SSL");
 #endif
 }
 
@@ -114,11 +113,12 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
       if (env->debug())  std::cout << "  rid " << rid << " overridden at the command line\n";
       env->set_remote_id(rid);
    }
+
 #ifdef ECF_OPENSSL
-   if ( vm.count( "ssl" ) ) {
-       if (env->debug())  std::cout << "  ssl at the command line " << vm["ssl"].as<std::string>() << "\n";
-       env->enable_ssl( vm["ssl"].as<std::string>() );
-    }
+   if ( vm.count( "ssl" ) || getenv("ECF_SSL") ) {
+       if (env->debug())  std::cout << "  ssl set via command line or via environment \n";
+       env->enable_ssl();
+   }
 #endif
 
    // Defer the parsing of the command , to the command. This allows
