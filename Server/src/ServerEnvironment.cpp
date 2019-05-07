@@ -77,6 +77,8 @@ ServerEnvironment::ServerEnvironment( int argc, char* argv[])
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
+   Ecf::set_server(true);
+
    init(argc,argv,"server_environment.cfg");
    if (debug_) std::cout << dump() << "\n";
 }
@@ -95,6 +97,8 @@ ServerEnvironment::ServerEnvironment(int argc, char* argv[], const std::string& 
   checkMode_(ecf::CheckPt::ON_TIME),
   tcp_protocol_(boost::asio::ip::tcp::v4())
 {
+   Ecf::set_server(true);
+
    init(argc,argv,path_to_config_file);
    if (debug_) std::cout << dump() << "\n";
 }
@@ -574,7 +578,7 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 	}
 
 #ifdef ECF_OPENSSL
-   if (  getenv("ECF_SSL")) ssl_.enable(serverHost_,the_port() );
+   if (getenv("ECF_SSL")) enable_ssl();
 #endif
 
    char* threshold = getenv("ECF_TASK_THRESHOLD");

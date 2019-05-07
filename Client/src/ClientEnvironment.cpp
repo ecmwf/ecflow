@@ -31,6 +31,10 @@
 #include "Version.hpp"
 #include "PasswdFile.hpp"
 
+#ifdef ECF_OPENSSL
+#include "Openssl.hpp"
+#endif
+
 namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
@@ -160,6 +164,11 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
    // Make sure we don't look in hosts file.
    // When there is only one host:port in host_vec_, calling get_next_host() will always return host_vec_[0]
    host_file_read_ = true;
+
+#ifdef ECF_OPENSSL
+   // Must be done *AFTER* host and port set
+   if (getenv("ECF_SSL")) enable_ssl();
+#endif
 }
 
 bool ClientEnvironment::checkTaskPathAndPassword(std::string& errorMsg) const
@@ -280,6 +289,13 @@ void ClientEnvironment::read_environment_variables()
 		host_vec_.clear(); // remove previous setting if any
  		host_vec_.emplace_back(host,port);
 	}
+
+#ifdef ECF_OPENSSL
+	// Note: This must be placed here for child commands, where we we typically only use environment variables
+   // Must be done last *AFTER* host and port set
+   // Cant use enable_sll(), since that calls host()/port() which use host_vec_, which may be empty
+   if (getenv("ECF_SSL")) ssl_.enable(host,port);
+#endif
 }
 
 bool ClientEnvironment::parseHostsFile(std::string& errorMsg)

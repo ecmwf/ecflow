@@ -13,6 +13,7 @@
 // nor does it submit to any jurisdiction. 
 //
 // Description : Serves as the connection between client server
+//               If you change this file then ssl_connection.hpp may also need changing
 //============================================================================
 
 #if defined(HPUX)
@@ -32,10 +33,8 @@
 #include "Ecf.hpp"
 #include "Serialization.hpp"
 
-#ifdef DEBUG
 //#define DEBUG_CONNECTION 1
 //#define DEBUG_CONNECTION_MEMORY 1
-#endif
 
 /// The connection class provides serialisation primitives on top of a socket.
 /**

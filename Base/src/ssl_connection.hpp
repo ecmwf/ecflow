@@ -1,7 +1,7 @@
 #ifndef SSL_CONNECTION_HPP_
 #define SSL_CONNECTION_HPP_
 //============================================================================
-// Name        : Connection.cpp
+// Name        : ssl_connection.cpp
 // Author      : Avi
 // Revision    : $Revision: #26 $
 //
@@ -13,6 +13,7 @@
 // nor does it submit to any jurisdiction.
 //
 // Description : Serves as the connection between client server
+//               If you change this file then Connection.hpp may also need changing
 //============================================================================
 
 #if defined(HPUX)
@@ -35,10 +36,8 @@
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 
-#ifdef DEBUG
 //#define DEBUG_CONNECTION 1
 //#define DEBUG_CONNECTION_MEMORY 1
-#endif
 
 /// The connection class provides serialisation primitives on top of a socket.
 /**
@@ -65,7 +64,7 @@ public:
    void async_write(const T& t, Handler handler) {
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_write, Serialise the data first so we know how large it is\n";
+      std::cout << "ssl_connection::async_write, Serialise the data first so we know how large it is\n";
 #endif
       // Serialise the data first so we know how large it is.
       try {
@@ -87,7 +86,7 @@ public:
       header_stream << std::setw(header_length) << std::hex << outbound_data_.size();
       if (!header_stream || header_stream.str().size() != header_length) {
          // Something went wrong, inform the caller.
-         log_error("ssl_onnection::async_write, could not format header");
+         log_error("ssl_connection::async_write, could not format header");
          boost::system::error_code error(boost::asio::error::invalid_argument);
          socket_.get_io_service().post(boost::bind(handler, error));
          return;

@@ -115,8 +115,8 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
    }
 
 #ifdef ECF_OPENSSL
-   if ( vm.count( "ssl" ) || getenv("ECF_SSL") ) {
-       if (env->debug())  std::cout << "  ssl set via command line or via environment \n";
+   if ( vm.count( "ssl" )) {
+       if (env->debug()) std::cout << "  ssl set via command line\n";
        env->enable_ssl();
    }
 #endif

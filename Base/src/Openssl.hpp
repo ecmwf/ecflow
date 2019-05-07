@@ -54,7 +54,6 @@ public:
    void print(std::ostream &os) const { os << ssl_;}
 
 private:
-   void check_client_certificates() const;
    void check_server_certificates() const;
    void load_verify_file( boost::asio::ssl::context&);   /// load server.crt file into the ssl context
    std::string certificates_dir() const;                       /// Directory where ssl certificates are held
