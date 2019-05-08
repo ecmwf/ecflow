@@ -376,6 +376,12 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
    // Reference variable, these should be read only
    theRetVec.emplace_back(std::string("ECF_PID"), ecf_pid_ );          // server PID
    theRetVec.emplace_back(std::string("ECF_VERSION"), Version::raw() );// server version
+
+#ifdef ECF_OPENSSL
+   if (ssl_.enabled()) {
+      theRetVec.emplace_back(std::string("ECF_SSL"), ssl_.ssl()); // 1 means shared ssl certificate, <host>.<port> means server specific certificates
+   }
+#endif
 }
 
 bool ServerEnvironment::reloadWhiteListFile(std::string& errorMsg)

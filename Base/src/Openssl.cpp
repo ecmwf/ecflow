@@ -26,14 +26,24 @@
 #include "Openssl.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
+#include "Host.hpp"
+#include "Str.hpp"
 
 using namespace std;
 namespace fs = boost::filesystem;
 
 namespace ecf {
 
-void Openssl::enable(const std::string& host,const std::string& port)
+std::string Openssl::info() const
 {
+   if (ssl_ == "1")  return "enabled : uses shared ssl certificates";
+   return "enabled : uses server/port specific ssl certificates";
+}
+
+void Openssl::enable(std::string host,const std::string& port)
+{
+   if (host == Str::LOCALHOST())  host = Host().name();
+
    // Avoid disk access if possible if this function is called many times.
    if (!ssl_.empty()) {
       //cout << "Openssl::enable() Already called before ssl_ " << ssl_ << " ***************************************\n";
@@ -69,7 +79,7 @@ void Openssl::enable(const std::string& host,const std::string& port)
       if (!fs::exists(crt())) {
 
          std::stringstream ss;
-         ss << "Openssl::enable(): Error: Expected to find the self signed certificate file(CRT)" << crt() << " *OR* server.crt\n\n" << ssl_info();
+         ss << "Openssl::enable(): Error: Expected to find the self signed certificate file(CRT) " << crt() << " *OR* server.crt\n\n" << ssl_info();
          throw std::runtime_error(ss.str());
       }
    }

@@ -41,7 +41,7 @@ public:
    const std::string& ssl() const { return ssl_;}
    bool enabled() const { return !ssl_.empty();}
 
-   void enable(const std::string& host,const std::string& port);
+   void enable(std::string host,const std::string& port);
    void disable() { ssl_.clear();} // override environment setting for ECF_SSL
    void init_for_server();
    void init_for_client();
@@ -52,6 +52,8 @@ public:
    static const char* ssl_info();
 
    void print(std::ostream &os) const { os << ssl_;}
+
+   std::string info() const;
 
 private:
    void check_server_certificates() const;

@@ -29,7 +29,7 @@ using namespace ecf;
 
 SslServer::SslServer( ServerEnvironment& serverEnv ) : BaseServer(serverEnv)
 {
-   stats().ECF_SSL_ = "enabled";
+   stats().ECF_SSL_ =  serverEnv.openssl().info();
 
    serverEnv.openssl().init_for_server();
 
