@@ -148,7 +148,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 #ifdef ECF_OPENSSL
             if (!as->ssl().empty()) {
                 ecf::Openssl openssl;
-                openssl.enable(host,port);
+                if (!openssl.enable_no_throw(host,port,as->ssl())) throw std::runtime_error("PlugCmd::doHandleRequest Could not enable ssl for " + as->ssl());
                 openssl.init_for_client();
 
                 SslClient theClient( io_service, openssl.context(), cts_cmd,  host, port );

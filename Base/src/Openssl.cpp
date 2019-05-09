@@ -36,48 +36,40 @@ namespace ecf {
 
 std::string Openssl::info() const
 {
-   if (ssl_ == "1")  return "enabled : uses shared ssl certificates";
-   return "enabled : uses server/port specific ssl certificates";
+   if (ssl_ == "1")  return "1 : enabled : uses shared ssl certificates";
+   return ssl_ + " : enabled : uses server/port specific ssl certificates";
 }
 
-bool Openssl::enable_no_throw(std::string host,const std::string& port)
+bool Openssl::enable_no_throw(std::string host,const std::string& port, const std::string& ecf_ssl_env)
 {
    if (host == Str::LOCALHOST())  host = Host().name();
 
-   // Avoid disk access if possible if this function is called many times.
-   if (!ssl_.empty()) {
-      //cout << "Openssl::enable() Already called before ssl_ " << ssl_ << " ***************************************\n";
-      if (ssl_ == "1") {
-         // server.crt exist
-         return true;
-      }
-      else {
-         if (host_ == host && port_ == port) {
-            // <host>.<port>.crt already exist
-            return true;
-         }
+   //   if (Ecf::server()) cout << "Openssl::enable(SERVER) ---> input host:" << host << " port:" << port << " ECF_SSL = " << ecf_ssl_env << "\n";
+   //   else               cout << "Openssl::enable(CLIENT) ---> input host:" << host << " port:" << port << " ECF_SSL = " << ecf_ssl_env << "\n";
 
-         // Carry on because host/port has changed.
+   if (ecf_ssl_env.empty() || ecf_ssl_env == "1") {
+      // LOOK for      $HOME/.ecflowrc/ssl/server.crt
+      // THEN LOOK for $HOME/.ecflowrc/ssl/<host>.<port>.crt
+      // Look for the certificate that HAVE to exist on both client and server. i.e Self signed certificate (CRT)
+      // Needed for testing, avoid <host>.<port>.crt when ports numbers are auto generated
+      ssl_ = "1";
+      if (!fs::exists(crt())) { // crt() uses ssl_
+
+         // More specific per server. But we take an extra hit on file access.
+         ssl_ = host;
+         ssl_ += ".";
+         ssl_ += port;
+         if (!fs::exists(crt())) {  // crt() uses ssl_
+            ssl_.clear();
+            return false;
+         }
       }
    }
-
-//   if (Ecf::server()) cout << "Openssl::enable(SERVER) ---> input host:" << host << " port:" << port << "\n";
-//   else               cout << "Openssl::enable(CLIENT) ---> input host:" << host << " port:" << port << "\n";
-
-   // Look for the certificate that HAVE to exist on both client and server. i.e Self signed certificate (CRT)
-   // Look for server.crt first. Done by setting ssl_ = "1";
-   // Needed for testing, avoid <host>.<port>.crt when ports numbers are auto generated
-   host_ = host;
-   port_ = port;
-   ssl_ = "1";
-   if (!fs::exists(crt())) { // crt() uses ssl_
-
-      // More specific per server. But we take an extra hit on file access.
+   else {
       ssl_ = host;
       ssl_ += ".";
       ssl_ += port;
       if (!fs::exists(crt())) {  // crt() uses ssl_
-
          ssl_.clear();
          return false;
       }
@@ -92,6 +84,25 @@ void Openssl::enable(std::string host,const std::string& port)
       std::stringstream ss;
       ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) server.crt or " << host << "." << port << ".crt in $HOME/.ecflowrc/ssl";
       throw std::runtime_error(ss.str());
+   }
+}
+
+void Openssl::enable_if_defined(std::string host,const std::string& port)
+{
+   char* ecf_ssl = getenv("ECF_SSL");
+   if ( ecf_ssl ) {
+      std::string ecf_ssl_env = ecf_ssl;
+
+      if (!enable_no_throw(host,port,ecf_ssl_env)) {
+         std::stringstream ss;
+         if (ecf_ssl_env == "1") {
+            ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) server.crt *OR* " << host << "." << port << ".crt in $HOME/.ecflowrc/ssl when ECF_SSL=1";
+         }
+         else {
+            ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) " << host << "." << port << ".crt in $HOME/.ecflowrc/ssl when ECF_SSL="<< host << "." << port;
+         }
+         throw std::runtime_error(ss.str());
+      }
    }
 }
 
@@ -191,13 +202,14 @@ std::string Openssl::passwd() const
 const char* Openssl::ssl_info() {
    return
             "ecFlow client and server are SSL enabled. To use SSL choose between:\n"
-            "  1. export ECF_SSL=1    # define an environment variable\n"
-            "  2. use --ssl           # argument on ecflow_client/ecflow_server\n"
+            "  1. export ECF_SSL=1              # search for server.crt otherwise <host>.<port>.crt\n"
+            "  2. export ECF_SSL=<host>.<port>  # Use server specific certificates <host>.<port>.***\n"
+            "  3. use --ssl           # argument on ecflow_client/ecflow_server, same as option 1.\n"
             "                         # Typically ssl server can be started with ecflow_start.sh -s\n"
-            "  3. Client.enable_ssl() # for python client\n\n"
+            "  4. Client.enable_ssl() # for python client\n\n"
             "ecFlow expects the certificates to be in directory $HOME/.ecflowrc/ssl\n"
             "The certificates can be shared if you have multiple servers running on\n"
-            "the same machine. To do this:\n"
+            "the same machine. In this case use ECF_SSL=1, then\n"
             "ecflow_server expects the following files in $HOME/.ecflowrc/ssl\n"
             "   - dh1024.pem\n"
             "   - server.crt\n"
@@ -205,7 +217,7 @@ const char* Openssl::ssl_info() {
             "   - server.passwd (optional) if this exists it must contain the pass phrase used to create server.key\n"
             "ecflow_client expects the following files in : $HOME/.ecflowrc/ssl\n"
             "   - server.crt (this must be the same as server)\n\n"
-            "Alternatively you can have different setting for each server.\n"
+            "Alternatively you can have different setting for each server ECF_SSL=<host>.<port>\n"
             "Then server expect files of the type:\n"
             "   - <host>.<port>.pem\n"
             "   - <host>.<port>.crt\n"
@@ -213,8 +225,8 @@ const char* Openssl::ssl_info() {
             "   - <host>.<port>.passwd (optional)\n"
             "and client expect files of the type:\n"
             "   - <host>.<port>.crt  # as before this must be same as the server\n"
-            "The server/client will automatically check existence of both variants.\n"
-            "but will give preference to NON <host>.<port>.*** variants first\n"
+            "The server/client will automatically check existence of both variants,\n"
+            "but will give preference to NON <host>.<port>.*** variants first, when ECF_SSL=1\n"
             "The following steps, show you how to create the certificate files.\n"
             "This may need to be adapted if you want to use <host>.<port>.***\n"
             "- Generate a password protected private key. This will request a pass phrase.\n"

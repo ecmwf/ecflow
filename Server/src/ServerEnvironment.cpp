@@ -584,7 +584,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
 	}
 
 #ifdef ECF_OPENSSL
-   if (getenv("ECF_SSL")) enable_ssl();
+	// IF ECF_SSL= 1 search server.crt
+	// ELSE          search <host>.<port>.crt
+   ssl_.enable_if_defined(serverHost_,the_port());
 #endif
 
    char* threshold = getenv("ECF_TASK_THRESHOLD");
@@ -678,6 +680,9 @@ std::vector<std::string> ServerEnvironment::expected_variables()
    expected_variables.push_back(  Str::ECF_HOST() );
    expected_variables.emplace_back("ECF_INTERVAL");
    expected_variables.emplace_back("ECF_PASSWD");
+#ifdef ECF_OPENSSL
+   if (getenv("ECF_SSL")) expected_variables.emplace_back("ECF_SSL");
+#endif
    return expected_variables;
 }
 

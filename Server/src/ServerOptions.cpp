@@ -154,7 +154,7 @@ ServerOptions::ServerOptions( int argc, char* argv[],ServerEnvironment* env )
 #ifdef ECF_OPENSSL
 	if ( vm_.count( "ssl" ) ) {
 	   if (env->debug_) cout << "ServerOptions: ssl server \n";
-	   env->enable_ssl();
+	   env->enable_ssl(); // search server.crt first, then <host>.<port>.crt
 	}
 #endif
 }

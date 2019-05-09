@@ -168,7 +168,7 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
 #ifdef ECF_OPENSSL
    // Must be done *AFTER* host and port set
    // Avoid enabling SSL for the GUI, via environment, this must be done explicitly by the GUI
-   if (!gui_ && getenv("ECF_SSL")) enable_ssl();
+   if (!gui_) enable_ssl_if_defined();
 #endif
 }
 
@@ -294,9 +294,9 @@ void ClientEnvironment::read_environment_variables()
 #ifdef ECF_OPENSSL
 	// Note: This must be placed here for child commands, where we we typically only use environment variables
    // Must be done last *AFTER* host and port set
-   // Cant use enable_sll(), since that calls host()/port() which use host_vec_, which may be empty
+   // Can't use enable_sll(), since that calls host()/port() which use host_vec_, which may be empty
    // Avoid enabling SSL for the GUI, via environment, this must be done explicitly by the GUI
-   if (!gui_ && getenv("ECF_SSL")) ssl_.enable(host,port);
+   if (!gui_) ssl_.enable_if_defined(host,port);
 #endif
 }
 

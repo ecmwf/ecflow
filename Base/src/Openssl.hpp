@@ -1,6 +1,5 @@
 #ifndef OPENSSL_HPP_
 #define OPENSSL_HPP_
-
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
@@ -41,25 +40,24 @@ public:
    const std::string& ssl() const { return ssl_;}
    bool enabled() const { return !ssl_.empty();}
 
-   bool enable_no_throw(std::string host,const std::string& port); // returns false if can not enable
+   bool enable_no_throw(std::string host,const std::string& port,const std::string& ecf_ssl_env = ""); // returns false if can not enable
    void enable(std::string host,const std::string& port); // Can throw if certificate (CRT) are missing
-   void disable() { ssl_.clear();}                        // override environment setting for ECF_SSL
+   void enable_if_defined(std::string host,const std::string& port); // Can throw if certificate (CRT) are missing
+   void disable() { ssl_.clear();}                                   // override environment setting for ECF_SSL
+
    void init_for_server();
    void init_for_client();
 
    boost::asio::ssl::context& context() { return ssl_context_;}
 
-   /// Check the right files exist
    static const char* ssl_info();
-
    void print(std::ostream &os) const { os << ssl_;}
-
    std::string info() const;
 
 private:
    void check_server_certificates() const;
-   void load_verify_file( boost::asio::ssl::context&);   /// load server.crt file into the ssl context
-   std::string certificates_dir() const;                       /// Directory where ssl certificates are held
+   void load_verify_file(boost::asio::ssl::context&);   /// load server.crt file into the ssl context
+   std::string certificates_dir() const;                /// Directory where ssl certificates are held
    std::string get_password() const;
 
    std::string pem() const;
@@ -70,8 +68,6 @@ private:
 private:
    bool init_for_client_{false};
    std::string ssl_; // Non empty if ssl has been enabled
-   std::string host_;
-   std::string port_;
    boost::asio::ssl::context ssl_context_;
 };
 

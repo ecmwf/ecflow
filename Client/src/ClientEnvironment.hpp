@@ -97,8 +97,9 @@ public:
    /// return true if this is a ssl enabled server
    ecf::Openssl& openssl() { return ssl_;}
    bool ssl() const { return ssl_.enabled();}
-   void enable_ssl()  { ssl_.enable(host(),port());}
-   bool enable_ssl_no_throw()  { return ssl_.enable_no_throw(host(),port());}
+   void enable_ssl_if_defined() { ssl_.enable_if_defined(host(),port());}    // IF ECF_SSL=1,search server.crt, ELSE search <host>.<port>.crt
+   void enable_ssl()  { ssl_.enable(host(),port());}                             // search server.crt first, then <host>.<port>.crt
+   bool enable_ssl_no_throw()  { return ssl_.enable_no_throw(host(),port());}    // search server.crt first, then <host>.<port>.crt
    void disable_ssl() { ssl_.disable();}  // override environment setting for ECF_SSL
 #endif
 
