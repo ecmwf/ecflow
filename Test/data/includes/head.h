@@ -17,6 +17,9 @@ export ECF_HOST=%ECF_HOST:%   # The hostname where the server is running
 export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
+if [[ "%ECF_SSL:%" != "" ]] ; then
+   export ECF_SSL=%ECF_SSL:%   # if server is SSL make sure client is
+fi
 
 # to debug client communication with the server, enable this environment
 #export ECF_DEBUG_CLIENT=

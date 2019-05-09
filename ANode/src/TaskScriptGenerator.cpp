@@ -236,7 +236,7 @@ void TaskScriptGenerator::generate_head_file() const
 
    std::string contents;
    contents += "#!/bin/ksh\n";
-   contents += "set -e          # stop the shell on first error\n";
+   contents += "set -e          # stop the shell on first error X\n";
    contents += "set -u          # fail when using an undefined variable\n";
    contents += "set -o pipefail # fail if last(rightmost) command exits with a non-zero status\n";
    contents += "set -x          # echo script lines as they are executed\n";
@@ -248,6 +248,9 @@ void TaskScriptGenerator::generate_head_file() const
    contents += "export ECF_PASS=%ECF_PASS%    # A unique password\n";
    contents += "export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task\n";
    contents += "export ECF_RID=$$\n";
+   contents += "if [[ \"%ECF_SSL:%\" != \"\" ]] ; then\n";
+   contents += "   export ECF_SSL=%ECF_SSL:%\n";
+   contents += "fi\n";
    contents += "\n";
    contents += "# Tell ecFlow we have started\n";
    contents += client_exe + "--init=$$\n";

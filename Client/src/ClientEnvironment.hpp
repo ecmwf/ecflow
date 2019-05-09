@@ -24,7 +24,7 @@
 class ClientEnvironment : public AbstractClientEnv {
 public:
 	/// The constructor will load the environment
-	ClientEnvironment();
+	ClientEnvironment(bool gui);
 
 	/// This constructor is only used in Test environment, as it allow the host file to be set
 	ClientEnvironment(const std::string& hostFile, const std::string& host = "", const std::string& port = "");
@@ -98,6 +98,7 @@ public:
    ecf::Openssl& openssl() { return ssl_;}
    bool ssl() const { return ssl_.enabled();}
    void enable_ssl()  { ssl_.enable(host(),port());}
+   bool enable_ssl_no_throw()  { return ssl_.enable_no_throw(host(),port());}
    void disable_ssl() { ssl_.disable();}  // override environment setting for ECF_SSL
 #endif
 
@@ -139,6 +140,7 @@ private:
 	std::vector<std::pair<std::string,std::string> > env_; // For test allow env variable to be set on defs
 
 	bool host_file_read_{false};               // to ensure we read host file only once
+	bool gui_{false};
 	std::vector<std::pair<std::string, std::string> > host_vec_; // The list of host:port pairs
 	int  host_vec_index_{0};               // index into host_vec;
 

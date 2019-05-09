@@ -20,6 +20,9 @@ export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 export ECF_RID=$$             # Let All child commands pass process id to server
+if [[ "%ECF_SSL:%" != "" ]] ; then
+   export ECF_SSL=%ECF_SSL:%   # if server is SSL make sure client is
+fi
 
 %ECF_CLIENT_EXE_PATH:ecflow_client% --version
 %ECF_CLIENT_EXE_PATH:ecflow_client% --init=$$

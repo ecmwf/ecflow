@@ -109,6 +109,9 @@ export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 export ECF_RID=$$             # record the process id. Also used for
                               # zombie detection
+if [[ "%ECF_SSL:%" != "" ]] ; then
+   export ECF_SSL=%ECF_SSL:%   # if server is SSL make sure client is
+fi
 
 # Define the path where to find ecflow_client
 # make sure client and server use the *same* version.

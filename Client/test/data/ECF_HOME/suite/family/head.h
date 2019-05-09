@@ -12,6 +12,9 @@ export ECF_HOST=%ECF_HOST%    # The hostname where the server is running
 export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
+if [[ "%ECF_SSL:%" != "" ]] ; then
+   export ECF_SSL=%ECF_SSL:%
+fi
 
 # Tell ECF_ we have stated
 # The ECF_ variable ECF_RID will be set to parameter of smsinit

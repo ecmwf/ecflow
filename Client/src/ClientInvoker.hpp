@@ -40,6 +40,7 @@ public:
 	/// By default will throw exception std::runtime_error for errors
    ClientInvoker();
    explicit ClientInvoker(const std::string& host_port);
+   ClientInvoker(bool GUI,const std::string& host, const std::string& port);
    ClientInvoker(const std::string& host, const std::string& port);
    ClientInvoker(const std::string& host, int port);
 
@@ -70,6 +71,7 @@ public:
 #ifdef ECF_OPENSSL
 	/// Override any ssl read from environment(ECF_SSL) or command line args(-ssl)
    void enable_ssl() { clientEnv_.enable_ssl(); }
+   bool enable_ssl_no_throw() { return clientEnv_.enable_ssl_no_throw(); }
    void disable_ssl() { clientEnv_.disable_ssl(); } // override environment setting for ECF_SSL
 #endif
 
@@ -359,6 +361,7 @@ private:
    friend class RoundTripRecorder;
    friend class RequestLogger;
 private:
+   bool gui_{false};
 	bool on_error_throw_exception_{true};
 	bool auto_sync_{false};
 	bool test_{false};                            // used in testing only

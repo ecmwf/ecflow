@@ -40,7 +40,7 @@ std::string Openssl::info() const
    return "enabled : uses server/port specific ssl certificates";
 }
 
-void Openssl::enable(std::string host,const std::string& port)
+bool Openssl::enable_no_throw(std::string host,const std::string& port)
 {
    if (host == Str::LOCALHOST())  host = Host().name();
 
@@ -49,12 +49,12 @@ void Openssl::enable(std::string host,const std::string& port)
       //cout << "Openssl::enable() Already called before ssl_ " << ssl_ << " ***************************************\n";
       if (ssl_ == "1") {
          // server.crt exist
-         return;
+         return true;
       }
       else {
          if (host_ == host && port_ == port) {
             // <host>.<port>.crt already exist
-            return;
+            return true;
          }
 
          // Carry on because host/port has changed.
@@ -70,20 +70,29 @@ void Openssl::enable(std::string host,const std::string& port)
    host_ = host;
    port_ = port;
    ssl_ = "1";
-   if (!fs::exists(crt())) {
+   if (!fs::exists(crt())) { // crt() uses ssl_
 
       // More specific per server. But we take an extra hit on file access.
       ssl_ = host;
       ssl_ += ".";
       ssl_ += port;
-      if (!fs::exists(crt())) {
+      if (!fs::exists(crt())) {  // crt() uses ssl_
 
-         std::stringstream ss;
-         ss << "Openssl::enable(): Error: Expected to find the self signed certificate file(CRT) " << crt() << " *OR* server.crt\n\n" << ssl_info();
-         throw std::runtime_error(ss.str());
+         ssl_.clear();
+         return false;
       }
    }
    //cout << "Openssl::enable input ssl_:'" << ssl_ << "'\n";
+   return true;
+}
+
+void Openssl::enable(std::string host,const std::string& port)
+{
+   if (!enable_no_throw(host,port)) {
+      std::stringstream ss;
+      ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) server.crt or " << host << "." << port << ".crt in $HOME/.ecflowrc/ssl";
+      throw std::runtime_error(ss.str());
+   }
 }
 
 void Openssl::init_for_server()

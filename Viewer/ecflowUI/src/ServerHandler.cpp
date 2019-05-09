@@ -142,7 +142,8 @@ void ServerHandler::createClient(bool init)
     //Create the client invoker. At this point it is empty.
     try
     {
-        client_=new ClientInvoker(host_, port_);
+        // True passed in to avoid reading SSL from the environment
+        client_=new ClientInvoker(true/*gui*/,host_, port_);
     }
     catch(std::exception& e)
     {
@@ -153,7 +154,8 @@ void ServerHandler::createClient(bool init)
 
 #ifdef ECF_OPENSSL
     if (ssl_) {
-        client_->enable_ssl();
+        bool ssl_enabled = client_->enable_ssl_no_throw();
+        // Handle case where ssl could not be enabled. TODO
     } else {
         client_->disable_ssl();
     }

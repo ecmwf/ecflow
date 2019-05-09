@@ -63,8 +63,8 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 }
 
 
-ClientEnvironment::ClientEnvironment()
-: AbstractClientEnv(),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT)
+ClientEnvironment::ClientEnvironment(bool gui)
+: AbstractClientEnv(),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),gui_(gui)
 {
 	init();
 }
@@ -167,7 +167,8 @@ void ClientEnvironment::set_host_port(const std::string& the_host, const std::st
 
 #ifdef ECF_OPENSSL
    // Must be done *AFTER* host and port set
-   if (getenv("ECF_SSL")) enable_ssl();
+   // Avoid enabling SSL for the GUI, via environment, this must be done explicitly by the GUI
+   if (!gui_ && getenv("ECF_SSL")) enable_ssl();
 #endif
 }
 
@@ -294,7 +295,8 @@ void ClientEnvironment::read_environment_variables()
 	// Note: This must be placed here for child commands, where we we typically only use environment variables
    // Must be done last *AFTER* host and port set
    // Cant use enable_sll(), since that calls host()/port() which use host_vec_, which may be empty
-   if (getenv("ECF_SSL")) ssl_.enable(host,port);
+   // Avoid enabling SSL for the GUI, via environment, this must be done explicitly by the GUI
+   if (!gui_ && getenv("ECF_SSL")) ssl_.enable(host,port);
 #endif
 }
 
