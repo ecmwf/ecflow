@@ -11,10 +11,6 @@
 // nor does it submit to any jurisdiction.
 //
 // Description :
-//  There are several ways of enabling SSL
-//    1/ ECF_SSL,   ecflow_client,ecflow_server,ecflow.so,ecfluw_ui
-//    2/ --ssl      ecflow_client,ecflow_server
-//    3/ ecflow_ui  This can enable and disable ssl, even if enabled via environment ECF_SSL
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <stdlib.h>  // getenv
 #include <iostream>
