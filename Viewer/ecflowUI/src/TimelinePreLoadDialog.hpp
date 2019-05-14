@@ -5,40 +5,34 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
+//
 //============================================================================
 
-#include "LineEdit.hpp"
+#ifndef TIMELINEPRELOADDIALOG_HPP
+#define TIMELINEPRELOADDIALOG_HPP
 
-#include "TimeItemWidget.hpp"
+#include <QDialog>
 
-#include "Node.hpp"
+class TimelineFileList;
 
-//========================================================
-//
-// TimeItemWidget
-//
-//========================================================
-
-TimeItemWidget::TimeItemWidget(QWidget *parent) : QWidget(parent)
-{
-  setupUi(this);
-  
+namespace Ui {
+    class TimelinePreLoadDialog;
 }
 
-QWidget* TimeItemWidget::realWidget()
+class TimelinePreLoadDialog : public QDialog
 {
-	return this;
-}
+public:
+    explicit TimelinePreLoadDialog(QWidget *parent=0);
+    ~TimelinePreLoadDialog();
 
-void TimeItemWidget::reload(VInfo_ptr nodeInfo)
-{
-	active_=true;
-}
+    void init(const TimelineFileList& lst);
 
-void TimeItemWidget::clearContents()
-{
-	InfoPanelItem::clear();
-}
+protected:
+    //void closeEvent(QCloseEvent * event);
+    void readSettings();
+    void writeSettings();
 
+    Ui::TimelinePreLoadDialog* ui_;
+};
 
-static InfoPanelItemMaker<TimeItemWidget> maker1("time");
+#endif // TIMELINEPRELOADDIALOG_HPP

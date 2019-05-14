@@ -30,11 +30,18 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0">
      <item>
       <widget class="QLabel" name="logInfoLabel">
        <property name="text">
         <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="loadFileTb">
+       <property name="text">
+        <string>Load file</string>
        </property>
       </widget>
      </item>

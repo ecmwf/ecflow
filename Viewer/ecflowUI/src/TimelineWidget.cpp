@@ -13,6 +13,7 @@
 #include <QFileInfo>
 #include <QTime>
 #include <QButtonGroup>
+#include <QFileDialog>
 
 #include "IconProvider.hpp"
 #include "FileInfoLabel.hpp"
@@ -21,6 +22,7 @@
 #include "SuiteFilter.hpp"
 #include "TimelineData.hpp"
 #include "TimelineModel.hpp"
+#include "TimelinePreLoadDialog.hpp"
 #include "TimelineView.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
@@ -41,6 +43,7 @@
 TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
     maxReadSize_(100*1024*1024),
+    logMode_(LatestMode),
     data_(0),
     filterTriggeredByEnter_(false),
     filterTriggerLimit_(200000),
@@ -178,6 +181,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(view_,SIGNAL(copyPathRequested(QString)),
             this,SLOT(slotCopyPath(QString)));
 
+    connect(ui_->loadFileTb,SIGNAL(clicked()),
+            this,SLOT(slotLoadCustomFile()));
+
     //forced init
     slotSortMode(0);
     slotSortOrderChanged(0);
@@ -271,8 +277,15 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
         if(localLog_)
         {
             txt+=" read from disk ";
-            if(data_->loadedAt().isValid())
-                txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
+            if (logMode_ == LatestMode)
+            {
+                if(data_->loadedAt().isValid())
+                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
+            }
+            else
+            {
+                txt+=" [archive]";
+            }
         }
         else
         {
@@ -564,14 +577,35 @@ void TimelineWidget::checkButtonState()
      ui_->wholePeriodTb->setEnabled(!fromStart || !toEnd);
 }
 
+void TimelineWidget::slotLoadCustomFile()
+{
+    QStringList fileNames = QFileDialog::getOpenFileNames(this);
+    if(fileNames.isEmpty())
+        return;
+
+    TimelineFileList fileLst(fileNames);
+    TimelinePreLoadDialog dialog;
+    dialog.setModal(true);
+    dialog.init(fileLst);
+    if(dialog.exec() == QDialog::Accepted)
+    {
+        logMode_ = ArchiveMode;
+        load(fileLst, serverName_,  host_, port_,suites_);
+    }
+}
+
 void TimelineWidget::load(QString logFile)
 {
     load("","","",logFile,suites_, remoteUid_);
 }
 
+// Loads a single logfile in LatestMode
+
 void TimelineWidget::load(QString serverName, QString host, QString port, QString logFile,
                           const std::vector<std::string>& suites, QString remoteUid)
 {
+    Q_ASSERT(logMode_ == LatestMode);
+
     //if it is a reload we remember the current period
     if(!serverName.isEmpty() && serverName == serverName_ && host == host_ && port == port_)
     {
@@ -634,6 +668,117 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
     {
         loadCore(logFile_);
     }
+}
+
+
+// Loads a single/multiple logfiles in ArchiveMode
+
+void TimelineWidget::load(const TimelineFileList& logFileLst,
+                          QString serverName, QString host, QString port,const std::vector<std::string>& suites)
+{
+    Q_ASSERT(logMode_ == ArchiveMode);
+
+    prevState_.valid=false;
+    clear();
+
+    serverName_=serverName;
+    host_=host;
+    port_=port;
+    logFile_="logFile";
+    suites_=suites;
+    logLoaded_=false;
+    logTransferred_=false;
+    localLog_=true;
+
+    ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    ui_->messageLabel->showInfo("Loading timeline data from log file ...");
+
+    bool loadDone=false;
+
+    QTime timer;
+    timer.start();
+
+    //std::vector<std::string> suites;
+    for(int i=0; i < logFileLst.items().count(); i++)
+    {
+        if(!logFileLst.items()[i].loadable_)
+            continue;
+
+        ui_->messageLabel->startProgress(100);
+
+        try
+        {
+            data_->loadMultiLogFile(logFileLst.items()[i].fileName_.toStdString(),suites,i);
+            loadDone=true;
+        }
+
+        catch(std::runtime_error e)
+        {
+            //logLoaded_=false;
+            ui_->messageLabel->stopProgress();
+
+            std::string errTxt(e.what());
+#if 0
+
+            QFileInfo fInfo(logFile);
+            if(!fInfo.exists())
+            {
+                errTxt+=" The specified log file <b>does not exist</b> on disk!";
+            }
+            else if(!fInfo.isReadable())
+            {
+                errTxt+=" The specified log file is <b>not readable</b>!";
+            }
+            else if(!fInfo.isFile())
+            {
+                errTxt+=" The specified log file is <b>not a file</b>!";
+            }
+
+            ui_->messageLabel->showError(QString::fromStdString(errTxt));
+            data_->clear();
+            setAllVisible(false);
+            updateInfoLabel();
+            ViewerUtil::restoreOverrideCursor();
+            return;
+#endif
+        }
+
+        UiLog().dbg() << "Logfile parsed: " << timer.elapsed()/1000 << "s";
+
+        ui_->messageLabel->stopProgress();
+        //ui_->messageLabel->hide();
+
+        //logLoaded_=true;
+        //setAllVisible(true);
+        //updateInfoLabel();
+        //updateFilterTriggerMode();
+
+        //determine node types if task filter is on
+        //if(ui_->taskOnlyTb->isChecked())
+        //    determineNodeTypes();
+    }
+
+    ui_->messageLabel->hide();
+
+    ViewerUtil::restoreOverrideCursor();
+
+    if(!loadDone)
+    {
+        ui_->messageLabel->showError(QString::fromStdString("Could not parse any of the specified log files!"));
+        data_->clear();
+        setAllVisible(false);
+        updateInfoLabel();
+        return;
+    }
+
+    logLoaded_=true;
+    data_->markAsLoadDone();
+    setAllVisible(true);
+    updateInfoLabel();
+    updateFilterTriggerMode();
+
+    initFromData();
 }
 
 void TimelineWidget::slotFileTransferFinished()
@@ -748,14 +893,65 @@ void TimelineWidget::loadCore(QString logFile)
 
     ViewerUtil::restoreOverrideCursor();
 
+    initFromData();
+
     //set the period
 
+#if 0
     ignoreTimeEdited_=true;
 
     ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
     ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());
 
     //try to set the previously used interval - for reload only
+    if(prevState_.valid)
+    {
+        if(prevState_.startDt <= data_->qStartTime() || prevState_.fullStart)
+            ui_->fromTimeEdit->setDateTime(data_->qStartTime());
+        else if(prevState_.startDt < data_->qEndTime())
+            ui_->fromTimeEdit->setDateTime(prevState_.startDt);
+    }
+    else
+    {
+        ui_->fromTimeEdit->setDateTime(data_->qStartTime());
+    }
+
+    ui_->toTimeEdit->setMinimumDateTime(data_->qStartTime());
+    ui_->toTimeEdit->setMaximumDateTime(data_->qEndTime());
+
+    if(prevState_.valid)
+    {
+        if(prevState_.endDt >= data_->qEndTime() || prevState_.fullEnd)
+            ui_->toTimeEdit->setDateTime(data_->qEndTime());
+        else if(prevState_.endDt > data_->qStartTime())
+            ui_->toTimeEdit->setDateTime(prevState_.endDt);
+    }
+    else
+    {
+        ui_->toTimeEdit->setDateTime(data_->qEndTime());
+    }
+
+    ignoreTimeEdited_=false;
+
+    view_->setPeriod(ui_->fromTimeEdit->dateTime(),ui_->toTimeEdit->dateTime());
+
+    model_->setData(data_);
+
+    view_->setViewMode(view_->viewMode(),true);
+
+    checkButtonState();
+#endif
+}
+
+void TimelineWidget::initFromData()
+{
+    //set the period
+    ignoreTimeEdited_=true;
+
+    ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
+    ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());
+
+    //try the set the previously used interval - for reload only
     if(prevState_.valid)
     {
         if(prevState_.startDt <= data_->qStartTime() || prevState_.fullStart)

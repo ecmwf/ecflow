@@ -21,6 +21,7 @@ class TimelineSortModel;
 class TimelineView;
 class VComboSettings;
 class VFileTransfer;
+class TimelineFileList;
 
 namespace Ui {
     class TimelineWidget;
@@ -49,6 +50,11 @@ public:
     void load(QString logFile);
     void load(QString serverName, QString host, QString port, QString logFile,
               const std::vector<std::string>& suites, QString remoteUid);
+
+    void load(const TimelineFileList& logFileLst,
+                        QString serverName, QString host, QString port,
+                        const std::vector<std::string>& suites);
+
     QString logFile() const {return logFile_;}
     void selectPathInView(const std::string& p);
 
@@ -78,15 +84,19 @@ protected Q_SLOTS:
    void slotFileTransferStdOutput(QString msg);
    void slotLogLoadProgress(size_t current, size_t total);
    void slotCancelFileTransfer();
+   void slotLoadCustomFile();
 
 private:
     void updateFilterTriggerMode();
     void load();
     void loadCore(QString logFile);
+    void initFromData();
     void updateInfoLabel(bool showDetails=true);
     void setAllVisible(bool b);
     void checkButtonState();
     void determineNodeTypes();
+
+    enum LogMode {LatestMode, ArchiveMode};
 
     Ui::TimelineWidget* ui_;
     QString serverName_;
@@ -97,6 +107,7 @@ private:
     size_t maxReadSize_;
     std::vector<std::string> suites_;
     QString remoteUid_;
+    LogMode logMode_;
 
     TimelineData* data_;
     TimelineModel* model_;
