@@ -117,12 +117,15 @@ QStringList VLabelAttr::data(bool firstLine) const
         const std::vector<Label>& v=parent_->node_->labels();
         if (index_ < static_cast<int>(v.size()))
             atype->encode(v[index_],s,firstLine);
+
         // this can happen temporarily during update when:
         // -an attribute was already deleted
         // -the notification was emmitted from the update thread but
         //  it not yet reached the main thread
-        // in this case we encode an empty attribute. When the notification arrives all the attributes
-        // of the given node will be rescanned and we will have a correct state.
+        // -here in the main thread we still have the old (incorrect) atribute number
+        // as safety measure,in this case we encode an empty attribute. When the
+        // notification arrives all the attributes of the given node will be rescanned
+        //and we will have a correct state.
         else
             atype->encode_empty(s);
     }
