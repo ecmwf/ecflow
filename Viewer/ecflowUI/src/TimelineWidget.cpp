@@ -247,7 +247,25 @@ void TimelineWidget::clear(bool inReload)
 void TimelineWidget::updateInfoLabel(bool showDetails)
 {
     QColor col(39,49,101);
-    QString txt=Viewer::formatBoldText("Log file: ",col) + logFile_;
+    QString txt;
+
+    if(logMode_ == LatestMode)
+    {
+        txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
+    }
+    else
+    {
+        if(archiveLogList_.items().count() == 1)
+        {
+           txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
+        }
+        else if(archiveLogList_.items().count() > 1)
+        {
+           txt= Viewer::formatBoldText("Log files: ",col) + "multiple ["+
+                   QString::number(archiveLogList_.items().count()) + "]";
+        }
+    }
+
     txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
          Viewer::formatBoldText(" Host: ",col) + host_ +
          Viewer::formatBoldText(" Port: ",col) + port_;
@@ -276,15 +294,11 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
         //fetch method and time
         if(localLog_)
         {
-            txt+=" read from disk ";
-            if (logMode_ == LatestMode)
+            if(logMode_ == LatestMode)
             {
+                txt+=" read from disk ";
                 if(data_->loadedAt().isValid())
                     txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
-            }
-            else
-            {
-                txt+=" [archive]";
             }
         }
         else
@@ -583,14 +597,14 @@ void TimelineWidget::slotLoadCustomFile()
     if(fileNames.isEmpty())
         return;
 
-    TimelineFileList fileLst(fileNames);
+    archiveLogList_ = TimelineFileList(fileNames);
     TimelinePreLoadDialog dialog;
     dialog.setModal(true);
-    dialog.init(fileLst);
+    dialog.init(archiveLogList_);
     if(dialog.exec() == QDialog::Accepted)
     {
         logMode_ = ArchiveMode;
-        load(fileLst, serverName_,  host_, port_,suites_);
+        load(archiveLogList_, serverName_,  host_, port_,suites_);
     }
 }
 
@@ -704,6 +718,9 @@ void TimelineWidget::load(const TimelineFileList& logFileLst,
     {
         if(!logFileLst.items()[i].loadable_)
             continue;
+
+        ui_->messageLabel->showInfo("Loading timeline data from log file [" +
+                                    QString::number(i+1) + "] ...");
 
         ui_->messageLabel->startProgress(100);
 

@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <QDateTime>
 
+#include "TimelineFileList.hpp"
 #include "VFile.hpp"
 
 class TimelineData;
@@ -21,7 +22,6 @@ class TimelineSortModel;
 class TimelineView;
 class VComboSettings;
 class VFileTransfer;
-class TimelineFileList;
 
 namespace Ui {
     class TimelineWidget;
@@ -108,6 +108,7 @@ private:
     std::vector<std::string> suites_;
     QString remoteUid_;
     LogMode logMode_;
+    TimelineFileList archiveLogList_;
 
     TimelineData* data_;
     TimelineModel* model_;

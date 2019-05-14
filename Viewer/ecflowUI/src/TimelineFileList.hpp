@@ -1,0 +1,47 @@
+//============================================================================
+// Copyright 2009-2019 ECMWF.
+// This software is licensed under the terms of the Apache Licence version 2.0
+// which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
+// In applying this licence, ECMWF does not waive the privileges and immunities
+// granted to it by virtue of its status as an intergovernmental organisation
+// nor does it submit to any jurisdiction.
+//=============================================================================
+
+#ifndef TIMELINEFILELIST_HPP
+#define TIMELINEFILELIST_HPP
+
+#include <QString>
+#include <QList>
+
+class TimelineFileListItem
+{
+public:
+    TimelineFileListItem(QString fileName,
+                         unsigned int startTime,unsigned int endTime) :
+        loadable_(true),fileName_(fileName), startTime_(startTime), endTime_(endTime) {}
+
+    TimelineFileListItem(QString fileName, QString message=QString()) :
+        loadable_(false),fileName_(fileName), startTime_(0), endTime_(0),
+        message_(message) {}
+
+    bool loadable_;
+    QString fileName_;
+    unsigned int startTime_;
+    unsigned int endTime_;
+    QString message_;
+};
+
+class TimelineFileList
+{
+public:
+    TimelineFileList() {}
+    TimelineFileList(QStringList exprLst);
+    QList<TimelineFileListItem> items() const {return items_;}
+    void clear() {items_.clear();}
+
+protected:
+    void add(QString logFile);
+
+    QList<TimelineFileListItem> items_;
+};
+#endif // TIMELINEFILELIST_HPP

@@ -16,6 +16,7 @@
 #include <QTreeWidgetItem>
 
 #include "TimelineData.hpp"
+#include "TimelineFileList.hpp"
 #include "SessionHandler.hpp"
 
 #include "ui_TimelinePreLoadDialog.h"
@@ -26,7 +27,7 @@ TimelinePreLoadDialog::TimelinePreLoadDialog(QWidget *parent) :
     ui_->setupUi(this);
 
     //the loadable files
-    ui_->label->setText(tr("List of the files to be <b>loaded</b>:"));
+    ui_->label->setText(tr("List of logs to be <b>loaded</b>:"));
 
     ui_->tree->setRootIsDecorated(false);
     ui_->tree->setAllColumnsShowFocus(true);
@@ -122,7 +123,7 @@ void TimelinePreLoadDialog::readSettings()
     }
     else
     {
-        resize(QSize(500,380));
+        resize(QSize(500,280));
     }
 
     settings.endGroup();

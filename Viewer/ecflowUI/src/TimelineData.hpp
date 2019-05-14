@@ -5,8 +5,7 @@
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
-//=============================================================
+//=============================================================================
 
 #ifndef TIMELINEDATA_HPP
 #define TIMELINEDATA_HPP
@@ -121,38 +120,6 @@ protected:
     bool fullRead_;
     LoadStatus loadStatus_;
     QHash<QString,size_t> pathHash_;
-};
-
-
-class TimelineFileListItem
-{
-public:
-    TimelineFileListItem(QString fileName,
-                         unsigned int startTime,unsigned int endTime) :
-        loadable_(true),fileName_(fileName), startTime_(startTime), endTime_(endTime) {}
-
-    TimelineFileListItem(QString fileName, QString message=QString()) :
-        loadable_(false),fileName_(fileName), startTime_(0), endTime_(0),
-        message_(message) {}
-
-    bool loadable_;
-    QString fileName_;
-    unsigned int startTime_;
-    unsigned int endTime_;
-    QString message_;
-};
-
-class TimelineFileList
-{
-public:
-    TimelineFileList(QStringList exprLst);
-    QList<TimelineFileListItem> items() const {return items_;}
-
-
-protected:
-    void add(QString logFile);
-
-    QList<TimelineFileListItem> items_;
 };
 
 #endif // TIMELINEDATA_HPP

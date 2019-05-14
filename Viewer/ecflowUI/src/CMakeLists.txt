@@ -161,6 +161,7 @@ set(viewer_srcs
     TimelineInfoWidget.cpp
     TimelineItemWidget.cpp
     TimelineData.cpp
+    TimelineFileList.cpp
     TimelineModel.cpp
     TimelinePreLoadDialog.cpp
     TimelineView.cpp
