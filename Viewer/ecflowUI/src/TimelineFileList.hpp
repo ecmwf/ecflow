@@ -36,6 +36,7 @@ class TimelineFileList
 public:
     TimelineFileList() {}
     TimelineFileList(QStringList exprLst);
+    TimelineFileList(const TimelineFileList& o) {items_=o.items();}
     QList<TimelineFileListItem> items() const {return items_;}
     void clear() {items_.clear();}
 

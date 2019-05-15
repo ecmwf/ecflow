@@ -37,6 +37,7 @@ struct TimelinePrevState
     bool fullEnd;
 };
 
+
 //the main widget containing all components
 class TimelineWidget : public QWidget
 {
@@ -46,16 +47,14 @@ public:
     explicit TimelineWidget(QWidget *parent=0);
     ~TimelineWidget();
 
-    void clear(bool inReload=false);
-    void load(QString logFile);
-    void load(QString serverName, QString host, QString port, QString logFile,
+    void clear();
+    void initLoad(QString serverName, QString host, QString port, QString logFile,
               const std::vector<std::string>& suites, QString remoteUid);
 
-    void load(const TimelineFileList& logFileLst,
-                        QString serverName, QString host, QString port,
-                        const std::vector<std::string>& suites);
-
     QString logFile() const {return logFile_;}
+
+    enum LogMode {LatestMode, ArchiveMode};
+    void setLogMode(LogMode logMode);
     void selectPathInView(const std::string& p);
 
     void writeSettings(VComboSettings* vs);
@@ -68,6 +67,7 @@ protected Q_SLOTS:
    void slotWholePeriod();
    void slotStartChanged(const QDateTime&);
    void slotEndChanged(const QDateTime&);
+   void slotLogMode(int);
    void slotViewMode(int);
    void slotPathFilterChanged(QString);
    void slotPathFilterEditFinished();
@@ -87,16 +87,17 @@ protected Q_SLOTS:
    void slotLoadCustomFile();
 
 private:
+    void clearData(bool usePrevState);
     void updateFilterTriggerMode();
-    void load();
+    void reloadLatest(bool canUsePrevState);
+    void loadLatest(bool usePrevState);
+    void loadArchive();
     void loadCore(QString logFile);
     void initFromData();
     void updateInfoLabel(bool showDetails=true);
     void setAllVisible(bool b);
     void checkButtonState();
     void determineNodeTypes();
-
-    enum LogMode {LatestMode, ArchiveMode};
 
     Ui::TimelineWidget* ui_;
     QString serverName_;

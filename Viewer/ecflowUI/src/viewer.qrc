@@ -62,6 +62,7 @@
     <file alias="down_arrow.svg">../images/down_arrow.svg</file>
     <file alias="drawer_open.svg">../images/drawer_open.svg</file>
     <file alias="drawer_close.svg">../images/drawer_close.svg</file>
+    <file alias="duration.svg">../images/duration.svg</file>
     <file alias="edit.svg">../images/edit.svg</file>
     <file alias="editcopy.svg">../images/editcopy.svg</file>
     <file alias="editpaste.svg">../images/editpaste.svg</file>
@@ -101,6 +102,7 @@
     <file alias="output.svg">../images/output.svg</file>
     <file alias="padlock.svg">../images/padlock.svg</file>
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
+    <file alias="period.svg">../images/period.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
     <file alias="reload_green.svg">../images/reload_green.svg</file>
     <file alias="reload_one.svg">../images/reload_one.svg</file>
