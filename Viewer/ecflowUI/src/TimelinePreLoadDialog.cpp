@@ -12,6 +12,7 @@
 #include <QtGlobal>
 #include <QFileInfo>
 #include <QButtonGroup>
+#include <QPushButton>
 #include <QSettings>
 #include <QTreeWidgetItem>
 
@@ -27,19 +28,14 @@ TimelinePreLoadDialog::TimelinePreLoadDialog(QWidget *parent) :
     ui_->setupUi(this);
 
     //the loadable files
-    ui_->label->setText(tr("List of logs to be <b>loaded</b>:"));
-
     ui_->tree->setRootIsDecorated(false);
     ui_->tree->setAllColumnsShowFocus(true);
     ui_->tree->setColumnCount(4);
     QStringList cols;
     cols << "File" << "Start date" << "End date" << "File size";
     ui_->tree->setHeaderLabels(cols);
-   // ui_->tree->setStyleSheet("QTreeWidget{background: rgb(234,245,227);}");
 
     //the wrong files
-    ui_->labelBad->setText(tr("List of the files <b>cannot be</b> loaded:"));
-
     ui_->treeBad->setRootIsDecorated(false);
     ui_->treeBad->setAllColumnsShowFocus(true);
     ui_->treeBad->setColumnCount(3);
@@ -58,6 +54,7 @@ TimelinePreLoadDialog::~TimelinePreLoadDialog()
 
 void TimelinePreLoadDialog::init(const TimelineFileList& lst)
 {
+    bool hasGoodFile=false;
     bool hasBadFile=false;
     for(int i=0; i < lst.items().count(); i++)
     {
@@ -72,6 +69,7 @@ void TimelinePreLoadDialog::init(const TimelineFileList& lst)
             item->setData(3,Qt::DisplayRole,
                           QString::number(lst.items()[i].size_/(1024*1024)) + " MB");
 
+            hasGoodFile=true;
         }
         else
         {
@@ -96,6 +94,12 @@ void TimelinePreLoadDialog::init(const TimelineFileList& lst)
     {
         ui_->labelBad->hide();
         ui_->treeBad->hide();
+    }
+
+    if(!hasGoodFile)
+    {
+        if(QPushButton* pb=ui_->buttonBox->button(QDialogButtonBox::Ok))
+            pb->setEnabled(false);
     }
 }
 

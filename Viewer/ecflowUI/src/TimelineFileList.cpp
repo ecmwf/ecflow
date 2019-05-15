@@ -86,7 +86,7 @@ void TimelineFileList::add(QString logFile)
 
     if(startTime == 0)
     {
-        items_ << TimelineFileListItem(logFile, fInfo.size(),"No status change found");
+        items_ << TimelineFileListItem(logFile, fInfo.size(),"No status change found (is it a log file?)");
         return;
     }
 

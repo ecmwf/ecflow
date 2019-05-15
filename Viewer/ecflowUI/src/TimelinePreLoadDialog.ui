@@ -17,7 +17,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>TextLabel</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Log files to be &lt;span style=&quot; font-weight:600;&quot;&gt;loaded&lt;/span&gt;:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
     </widget>
    </item>
@@ -33,7 +33,7 @@
    <item>
     <widget class="QLabel" name="labelBad">
      <property name="text">
-      <string>List bad</string>
+      <string>Log files &lt;b&gt;cannot be loaded&lt;/b&gt;:</string>
      </property>
     </widget>
    </item>
