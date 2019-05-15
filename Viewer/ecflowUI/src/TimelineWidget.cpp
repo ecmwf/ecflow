@@ -100,7 +100,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
     // log mode
-    ui_->logModeCombo->addItem("Latest log","latest");
+    ui_->logModeCombo->addItem("Current log","latest");
     ui_->logModeCombo->addItem("Archive log","archive");
     ui_->logModeCombo->setCurrentIndex(0);
     ui_->loadFileTb->hide();
@@ -259,6 +259,7 @@ void TimelineWidget::clear()
     ui_->reloadTb->show();
     ui_->loadFileTb->hide();
     archiveLogList_.clear();
+    ui_->logModeCombo->hide();
 
     setAllVisible(false);
     updateFilterTriggerMode();
@@ -355,15 +356,16 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
         //fetch method and time
         if(localLog_)
         {
+            txt+=" read from disk ";
             if(logMode_ == LatestMode)
             {
-                txt+=" read from disk ";
                 if(data_->loadedAt().isValid())
                     txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
             }
+
         }
         else
-        {
+        {          
             if(logTransferred_)
             {
                 txt+=" fetched from remote host ";
@@ -727,21 +729,19 @@ void TimelineWidget::slotLoadCustomFile()
     }
 }
 
-#if 0
-void TimelineWidget::load(QString logFile)
-{
-    load("","","",logFile,suites_, remoteUid_);
-}
-#endif
-
-// Initial load (we must be in Latest mode)
+// Initial load
 void TimelineWidget::initLoad(QString serverName, QString host, QString port, QString logFile,
                           const std::vector<std::string>& suites, QString remoteUid)
 {
-    Q_ASSERT(logMode_ == LatestMode);
+    if(logMode_ != LatestMode)
+        return;
+
     // we need to be in a clean state
     clear();
     Q_ASSERT(logMode_ == LatestMode);
+
+    // clear() hides it so we need to show it again
+    ui_->logModeCombo->show();
 
     // these must be kept until we call clear()!!!!
     serverName_=serverName;
@@ -847,7 +847,8 @@ void TimelineWidget::loadArchive()
             continue;
 
         ui_->messageLabel->showInfo("Loading timeline data from log file [" +
-                                    QString::number(i+1) + "] ...");
+                                    QString::number(i+1) + "/" + QString::number(archiveLogList_.items().count()) +
+                                    "] ...");
 
         ui_->messageLabel->startProgress(100);
 
@@ -1038,53 +1039,6 @@ void TimelineWidget::loadCore(QString logFile)
     ViewerUtil::restoreOverrideCursor();
 
     initFromData();
-
-    //set the period
-
-#if 0
-    ignoreTimeEdited_=true;
-
-    ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
-    ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());
-
-    //try to set the previously used interval - for reload only
-    if(prevState_.valid)
-    {
-        if(prevState_.startDt <= data_->qStartTime() || prevState_.fullStart)
-            ui_->fromTimeEdit->setDateTime(data_->qStartTime());
-        else if(prevState_.startDt < data_->qEndTime())
-            ui_->fromTimeEdit->setDateTime(prevState_.startDt);
-    }
-    else
-    {
-        ui_->fromTimeEdit->setDateTime(data_->qStartTime());
-    }
-
-    ui_->toTimeEdit->setMinimumDateTime(data_->qStartTime());
-    ui_->toTimeEdit->setMaximumDateTime(data_->qEndTime());
-
-    if(prevState_.valid)
-    {
-        if(prevState_.endDt >= data_->qEndTime() || prevState_.fullEnd)
-            ui_->toTimeEdit->setDateTime(data_->qEndTime());
-        else if(prevState_.endDt > data_->qStartTime())
-            ui_->toTimeEdit->setDateTime(prevState_.endDt);
-    }
-    else
-    {
-        ui_->toTimeEdit->setDateTime(data_->qEndTime());
-    }
-
-    ignoreTimeEdited_=false;
-
-    view_->setPeriod(ui_->fromTimeEdit->dateTime(),ui_->toTimeEdit->dateTime());
-
-    model_->setData(data_);
-
-    view_->setViewMode(view_->viewMode(),true);
-
-    checkButtonState();
-#endif
 }
 
 void TimelineWidget::initFromData()

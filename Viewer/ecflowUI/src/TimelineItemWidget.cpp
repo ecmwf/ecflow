@@ -116,6 +116,9 @@ void TimelineItemWidget::load()
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
                          logFile, suites, sh->uidForServerLogTransfer());//last 100 MB are read
+
+                    delayedLoad_=false;
+
                 }
             }
         }

@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,1,0,0,0,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0">
      <property name="spacing">
       <number>1</number>
      </property>
@@ -506,6 +506,9 @@
         <property name="icon">
          <iconset resource="viewer.qrc">
           <normaloff>:/viewer/sync_black.svg</normaloff>:/viewer/sync_black.svg</iconset>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
