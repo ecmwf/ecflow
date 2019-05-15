@@ -31,9 +31,9 @@ TimelinePreLoadDialog::TimelinePreLoadDialog(QWidget *parent) :
 
     ui_->tree->setRootIsDecorated(false);
     ui_->tree->setAllColumnsShowFocus(true);
-    ui_->tree->setColumnCount(3);
+    ui_->tree->setColumnCount(4);
     QStringList cols;
-    cols << "File" << "Start date" << "End date";
+    cols << "File" << "Start date" << "End date" << "File size";
     ui_->tree->setHeaderLabels(cols);
    // ui_->tree->setStyleSheet("QTreeWidget{background: rgb(234,245,227);}");
 
@@ -42,11 +42,11 @@ TimelinePreLoadDialog::TimelinePreLoadDialog(QWidget *parent) :
 
     ui_->treeBad->setRootIsDecorated(false);
     ui_->treeBad->setAllColumnsShowFocus(true);
-    ui_->treeBad->setColumnCount(2);
+    ui_->treeBad->setColumnCount(3);
     cols.clear();
-    cols << "File" << "Error message";
+    cols << "File" << "File size" << "Error message";
     ui_->treeBad->setHeaderLabels(cols);
-    //ui_->treeBad->setStyleSheet("QTreeWidget{background: rgb(255,239,239);}");
+    ui_->treeBad->setStyleSheet("QTreeWidget{color: rgb(222,15,32);}");
 
     readSettings();
 }
@@ -69,18 +69,24 @@ void TimelinePreLoadDialog::init(const TimelineFileList& lst)
                        TimelineItem::toQDateTime(lst.items()[i].startTime_).toString((" hh:mm:ss dd-MMM-yyyy")));
             item->setData(2,Qt::DisplayRole,
                       TimelineItem::toQDateTime(lst.items()[i].endTime_).toString((" hh:mm:ss dd-MMM-yyyy")));
+            item->setData(3,Qt::DisplayRole,
+                          QString::number(lst.items()[i].size_/(1024*1024)) + " MB");
+
         }
         else
         {
             hasBadFile=true;
             QTreeWidgetItem* item=new QTreeWidgetItem(ui_->treeBad);
             item->setData(0,Qt::DisplayRole,lst.items()[i].fileName_);
-            item->setData(1,Qt::DisplayRole,lst.items()[i].message_);
+            item->setData(1,Qt::DisplayRole,
+                          QString::number(lst.items()[i].size_/(1024*1024)) + " MB");
+            item->setData(2,Qt::DisplayRole,lst.items()[i].message_);
         }
     }
 
     ui_->tree->resizeColumnToContents(1);
     ui_->tree->resizeColumnToContents(2);
+    ui_->tree->resizeColumnToContents(3);
 
     if(hasBadFile)
     {

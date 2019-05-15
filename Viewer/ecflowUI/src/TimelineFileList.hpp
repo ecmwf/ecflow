@@ -17,17 +17,18 @@ class TimelineFileListItem
 {
 public:
     TimelineFileListItem(QString fileName,
-                         unsigned int startTime,unsigned int endTime) :
-        loadable_(true),fileName_(fileName), startTime_(startTime), endTime_(endTime) {}
+                         unsigned int startTime,unsigned int endTime, qint64 size) :
+        loadable_(true),fileName_(fileName), startTime_(startTime), endTime_(endTime), size_(size) {}
 
-    TimelineFileListItem(QString fileName, QString message=QString()) :
-        loadable_(false),fileName_(fileName), startTime_(0), endTime_(0),
+    TimelineFileListItem(QString fileName, qint64 size, QString message=QString()) :
+        loadable_(false),fileName_(fileName), startTime_(0), endTime_(0), size_(size),
         message_(message) {}
 
     bool loadable_;
     QString fileName_;
     unsigned int startTime_;
     unsigned int endTime_;
+    qint64 size_;
     QString message_;
 };
 

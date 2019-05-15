@@ -56,11 +56,15 @@ void TimelineFileList::add(QString logFile)
     {
         //UiLog().warn() << "TimelineData::loadLogFile: Could not open log file " << logFile ;
         //throw std::runtime_error("Could not open log file: " + logFile);
-        items_ << TimelineFileListItem(logFile,"Could not open log file");
+        items_ << TimelineFileListItem(logFile, 0,"Could not open log file");
         return;
     }
 
     std::string line;
+
+    //get the last time
+    QFileInfo fInfo(logFile);
+    size_t fSize=fInfo.size();
 
     unsigned int startTime=0;
     unsigned int endTime=0;
@@ -82,14 +86,11 @@ void TimelineFileList::add(QString logFile)
 
     if(startTime == 0)
     {
-        items_ << TimelineFileListItem(logFile,"No status change found");
+        items_ << TimelineFileListItem(logFile, fInfo.size(),"No status change found");
         return;
     }
 
     //get the last time
-    QFileInfo fInfo(logFile);
-    size_t fSize=fInfo.size();
-
     log_file.setPos(0);
     if(fSize > 10000)
     {
@@ -110,5 +111,5 @@ void TimelineFileList::add(QString logFile)
         }
     }
 
-    items_ << TimelineFileListItem(logFile,startTime,endTime);
+    items_ << TimelineFileListItem(logFile,startTime,endTime,fInfo.size());
 }
