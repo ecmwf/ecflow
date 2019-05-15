@@ -30,7 +30,8 @@ public:
 			   NotifyRestartedEnabled, NotifyRestartedPopup, NotifyRestartedSound,
 			   NotifyLateEnabled, NotifyLatePopup, NotifyLateSound,
 			   NotifyZombieEnabled, NotifyZombiePopup, NotifyZombieSound,
-               NotifyAliasEnabled, NotifyAliasPopup, NotifyAliasSound, UnknownParam};
+               NotifyAliasEnabled, NotifyAliasPopup, NotifyAliasSound,
+               UidForServerLogTransfer, UnknownParam};
 
 	int intValue(Param par) const;
 	bool boolValue(Param par) const;

@@ -13,11 +13,12 @@ umask 0022
 # ====================================================================
 show_error_and_exit() {
    echo "cmake.sh expects at least one argument"
-   echo " cmake.sh debug || release [clang] [san] [make] [verbose] [test] [stest] [no_gui] [package_source] [debug]"
+   echo " cmake.sh [ options] "
    echo ""
+   echo "   debug          - make a DEBUG build"
    echo "   make           - run make after cmake"
    echo "   ecbuild        - Use git cloned ecbuild over the module loaded ecbuild(default)"
-   echo "   install        - install to /usr/local/apps/eflow.  defaults is /var/tmp/$USER/install/cmake/ecflow"
+   echo "   sys_install    - install to /usr/local/apps/ecflow/<version>  defaults is /var/tmp/$USER/install/cmake/ecflow/<version>"
    echo "   test           - run all the tests"
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
@@ -32,12 +33,15 @@ show_error_and_exit() {
    echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    echo "                    copies the tar file to $SCRATCH"
    echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
+   echo ""
    echo "\nTo Build with system boost, just call:"
    echo " 'module load boost/1.68.0' "
-   echo "first"
+   echo "For a system install"
+   echo "./cmake.sh sys_install make -j8 install"
    exit 1
 }
 
+sys_install=
 ecbuild_arg=
 copy_tarball_arg=
 package_source_arg=
@@ -79,6 +83,7 @@ while [[ "$#" != 0 ]] ; do
       break
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
    elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
+   elif [[ "$1" = sys_install ]] ; then sys_install=$1 ;
    elif [[ "$1" = ecbuild ]] ; then ecbuild_arg=$1 ;
    elif [[ "$1" = log ]]   ; then log_arg=$1 ;
    elif [[ "$1" = clang ]] ; then clang_arg=$1 ;
@@ -320,6 +325,9 @@ if [[ $package_source_arg = package_source ]] ; then
 fi
 
 install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
+if [[ $sys_install = sys_install ]] ; then
+   install_prefix=/usr/local/apps/ecflow/$release.$major.$minor
+fi
 
 ecbuild=ecbuild
 if [[ $ecbuild_arg = ecbuild ]] ; then

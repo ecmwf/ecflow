@@ -238,6 +238,31 @@ void CommandHandler::openLinkInBrowser(VInfo_ptr info)
     }
 }
 
+void CommandHandler::executeAborted(VInfo_ptr info)
+{
+    if(info && info->isNode())
+    {
+        VNode* n = info->node();
+        assert(n);
+
+        if(n->isSuite() || n->isFamily())
+        {
+            std::vector<VNode*> nodes;
+            n->collectAborted(nodes);
+            if (!nodes.empty())
+            {
+                std::vector<VInfo_ptr> info_vec;
+                for(size_t i=0; i < nodes.size(); i++)
+                {
+                    info_vec.push_back(VInfoNode::create(nodes[i]));
+                }
+
+                CommandHandler::run(info_vec,"ecflow_client --run <full_name>");
+            }
+        }
+    }
+}
+
 std::string CommandHandler::commandToString(const std::vector<std::string>& cmd)
 {   
     std::string s;

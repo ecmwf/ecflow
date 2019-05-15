@@ -31,6 +31,7 @@ public:
     QString toolTip(QStringList d) const override;
     QString definition(QStringList d) const override;
     void encode(const Label& label,QStringList& data,bool firstLine) const;
+    void encode_empty(QStringList& data) const;
 
 private:
     enum DataIndex {TypeIndex=0,NameIndex=1,ValueIndex=2};

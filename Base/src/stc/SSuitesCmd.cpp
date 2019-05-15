@@ -61,15 +61,20 @@ bool SSuitesCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_
 
 	if (server_reply.cli() && !cts_cmd->group_cmd()) {
 	   /// This Could be part of a group command, hence ONLY if NOT group command
-
 	   if (suites_.empty()) {
 	      cout << "No suites\n";
 	   }
 
-	   int newline_at = 4;
+	   size_t max_suite_name_size = 0;
 	   size_t the_size = suites_.size();
+      for(size_t i = 0; i < the_size; i++) {
+         max_suite_name_size = std::max(max_suite_name_size,suites_[i].size());
+      }
+      max_suite_name_size += 1;
+
+	   int newline_at = 4;
 	   for(size_t i = 0; i < the_size; i++) {
-	      cout << left << setw(20) << suites_[i];
+	      cout << left << setw(max_suite_name_size) << suites_[i];
 	      if (i != 0 && (i % newline_at) == 0) {
 	         cout << "\n";
 	         newline_at += 5;

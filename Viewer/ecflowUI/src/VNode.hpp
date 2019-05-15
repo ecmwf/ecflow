@@ -128,6 +128,7 @@ public:
     int indexOfChild(node_ptr n) const;
     VNode* findChild(const std::string& name) const;
     void collect(std::vector<VNode*>& vec) const;
+    void collectAborted(std::vector<VNode*>& vec) const;
 
     //Get all the variables
     virtual int variablesNum() const;
@@ -170,6 +171,7 @@ public:
     bool hasAccessed() const;
     std::vector<VNode*> ancestors(SortMode sortMode);
     VNode* ancestorAt(int idx,SortMode sortMode);
+
 
     virtual std::string flagsAsStr() const;
     virtual bool isFlagSet(ecf::Flag::Type f) const;

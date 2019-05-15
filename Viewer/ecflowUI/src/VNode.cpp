@@ -484,6 +484,18 @@ void VNode::collect(std::vector<VNode*>& vec) const
 	}
 }
 
+void VNode::collectAborted(std::vector<VNode*>& vec) const
+{
+    for(int i=0; i < numOfChildren(); i++)
+    {
+        if(children_[i]->isAborted())
+        {
+            vec.push_back(children_[i]);
+        }
+        children_[i]->collect(vec);
+    }
+}
+
 int VNode::tryNo() const
 {
 	std::string v=genVariable("ECF_TRYNO");

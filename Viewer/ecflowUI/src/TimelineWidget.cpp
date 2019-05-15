@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2018 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -119,8 +119,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->taskOnlyTb->setChecked(false);
     ui_->showChangedTb->setChecked(true);
 
-    ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
-    ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-2018");
+    ui_->fromTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-yyyy");
+    ui_->toTimeEdit->setDisplayFormat("hh:mm:ss dd-MMM-yyyy");
 
     ui_->zoomInTb->setDefaultAction(ui_->actionZoomIn);
     ui_->zoomOutTb->setDefaultAction(ui_->actionZoomOut);
@@ -213,6 +213,7 @@ void TimelineWidget::clear(bool inReload)
     host_.clear();
     port_.clear();
     suites_.clear();
+    remoteUid_.clear();
     typesDetermined_=false;
     localLog_=true;
     logLoaded_=false;
@@ -343,9 +344,11 @@ void TimelineWidget::slotReload()
     if(!serverName_.isEmpty())
     {
         std::vector<std::string> suites;
+        QString remoteUid;
         //we need a copy because load() can clear suites_
         if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
         {
+            remoteUid = sh->uidForServerLogTransfer();
             if(SuiteFilter* sf=sh->suiteFilter())
             {
                 if(sf->isEnabled())
@@ -353,7 +356,7 @@ void TimelineWidget::slotReload()
             }
 
         }
-        load(serverName_, host_, port_, logFile_,suites);
+        load(serverName_, host_, port_, logFile_,suites, remoteUid);
         checkButtonState();
     }
 }
@@ -563,11 +566,11 @@ void TimelineWidget::checkButtonState()
 
 void TimelineWidget::load(QString logFile)
 {
-    load("","","",logFile,suites_);
+    load("","","",logFile,suites_, remoteUid_);
 }
 
 void TimelineWidget::load(QString serverName, QString host, QString port, QString logFile,
-                          const std::vector<std::string>& suites)
+                          const std::vector<std::string>& suites, QString remoteUid)
 {
     //if it is a reload we remember the current period
     if(!serverName.isEmpty() && serverName == serverName_ && host == host_ && port == port_)
@@ -593,6 +596,7 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
     port_=port;
     logFile_=logFile;
     suites_=suites;
+    remoteUid_=remoteUid;
     logLoaded_=false;
     logTransferred_=false;
     localLog_=true;
@@ -623,7 +627,8 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
                     this,SLOT(slotFileTransferStdOutput(QString)));
         }
 
-        fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),maxReadSize_);
+        fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),
+                                maxReadSize_,remoteUid_);
     }
     else
     {
@@ -750,7 +755,7 @@ void TimelineWidget::loadCore(QString logFile)
     ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
     ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());
 
-    //try the set the previously used interval - for reload only
+    //try to set the previously used interval - for reload only
     if(prevState_.valid)
     {
         if(prevState_.startDt <= data_->qStartTime() || prevState_.fullStart)

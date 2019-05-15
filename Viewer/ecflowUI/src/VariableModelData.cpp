@@ -780,91 +780,39 @@ bool VariableModelDataHandler::updateVariables(int dataIndex)
     //same block the user variables take precedence over the generated variables)
     int cntDiff=data_[dataIndex]->checkUpdateDiff(v,vg);
 
-    //If the number of the variables is not the same that we store
-    //we reset the given block in the model
-    if(cntDiff != 0)
-    {
-        const int numOld=data_[dataIndex]->varNum(); //the current num in the model
-        const int numNew=v.size()+vg.size(); //the new num
+    const int numOld=data_[dataIndex]->varNum(); //the current num in the model
+    const int numNew=v.size()+vg.size(); //the new num
 
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-        UiLog().dbg() << " cntDiff=" << cntDiff << " numOld=" << numOld <<
+    UiLog().dbg() << " cntDiff=" << cntDiff << " numOld=" << numOld <<
                          " numNew=" << numNew;
 #endif
 
-        //Clear the block's contents in the model
-        Q_EMIT clearBegin(dataIndex,numOld);
-        data_[dataIndex]->clear();
-        Q_EMIT clearEnd(dataIndex,numOld);
+    //Clear the block's contents in the model
+    Q_EMIT clearBegin(dataIndex,numOld);
+    data_[dataIndex]->clear();
+    Q_EMIT clearEnd(dataIndex,numOld);
 
-        //Load the new data for the block in the model
-        Q_EMIT loadBegin(dataIndex,numNew);
-        data_[dataIndex]->reset(v,vg);
-        Q_EMIT loadEnd(dataIndex,numNew);
+    //Load the new data for the block in the model
+    Q_EMIT loadBegin(dataIndex,numNew);
+    data_[dataIndex]->reset(v,vg);
+    Q_EMIT loadEnd(dataIndex,numNew);
 
-        Q_ASSERT(data_[dataIndex]->varNum() == numNew);
+    Q_ASSERT(data_[dataIndex]->varNum() == numNew);
 
-        //At this point the block is filtered and sorted!!!!
+    //At this point the block is filtered and sorted!!!!
 
-        //Check if the shadowed list of variables changed
-        if(updateShadowed())
-        {
+    //Check if the shadowed list of variables changed
+    if(updateShadowed())
+    {
 #ifdef _UI_VARIABLEMODELDATA_DEBUG
-            UiLog().dbg() << " emit rerunFilter";
+        UiLog().dbg() << " emit rerunFilter";
 #endif
-            //We need to rerun the filter!!
-            Q_EMIT rerunFilter();
-        }        
-#if 0
-        else
-        {
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-            UiLog().dbg() << " emit dataChanged";
-#endif
-            //Update the data item in the model
-            //Q_EMIT dataChanged(dataIndex);
-        }
-#endif
-
-        retVal=true;
+        //We need to rerun the filter!!
+        Q_EMIT rerunFilter();
     }
-    //Check if some variables' name or value changed
-    else
-    {      
-#ifdef _UI_VARIABLEMODELDATA_DEBUG
-        UiLog().dbg() << " cntDiff=" << cntDiff;
-#endif
-        Q_ASSERT(cntDiff==0);
-        //At this point we must have the same number of vars
-        const int numNew=v.size()+vg.size();
-        Q_ASSERT(data_[dataIndex]->varNum() == numNew);
 
-        bool nameChanged=data_[dataIndex]->checkUpdateNames(v,vg);
-
-        //We reload the whole block. Previously we only tried to emit
-        //dataChanged(), but it led to random crashes typically after a
-        //variable's values was changed. When a debug Qt installation was used
-        //the crash (assertion) happended in the Qt source in
-        //qabstractitemmodel.ccp::removePersistentIndexData saying
-        //"persistent model indexes corrupted". See ECFLOW-1148
-
-        //Clear the block's contents in the model
-        Q_EMIT clearBegin(dataIndex,numNew);
-        data_[dataIndex]->clear();
-        Q_EMIT clearEnd(dataIndex,numNew);
-
-        //Load the new data for the block in the model
-        Q_EMIT loadBegin(dataIndex,numNew);
-        data_[dataIndex]->reset(v,vg);
-        Q_EMIT loadEnd(dataIndex,numNew);
-
-        if(nameChanged && updateShadowed())
-        {
-            Q_EMIT rerunFilter();
-        }
-
-        retVal=true;
-    }
+    retVal=true;
 
     return retVal;
 }

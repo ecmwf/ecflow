@@ -20,7 +20,7 @@ class VFileTransfer : public QObject
 
 public:
     VFileTransfer(QObject* parent=0);
-    void transfer(QString sourceFile,QString host,QString targetFile,size_t lastBytes);
+    void transfer(QString sourceFile,QString host,QString targetFile,size_t lastBytes, QString remoteUid);
     void stopTransfer();
     bool isActive() const;
 
