@@ -48,6 +48,7 @@
     <file alias="copy_path.svg">../images/copy_path.svg</file>
     <file alias="dependency.svg">../images/dependency.svg</file>
     <file alias="dependency_detail.svg">../images/dependency_detail.svg</file>
+    <file alias="delta.svg">../images/delta.svg</file>
     <file alias="diag.svg">../images/diag.svg</file>
     <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
     <file alias="dock_add_variable_column.svg">../images/dock_add_variable_column.svg</file>
@@ -125,6 +126,7 @@
     <file alias="submit_round.svg">../images/submit_round.svg</file>
     <file alias="sync.svg">../images/sync.svg</file>
     <file alias="sync_black.svg">../images/sync_black.svg</file>
+    <file alias="task.svg">../images/task.svg</file>
     <file alias="terminate.svg">../images/terminate.svg</file>
     <file alias="timeline.svg">../images/timeline.svg</file>
     <file alias="tip.svg">../images/tip.svg</file>

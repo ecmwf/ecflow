@@ -102,18 +102,45 @@
        <widget class="QLineEdit" name="pathFilterLe"/>
       </item>
       <item>
+       <widget class="QToolButton" name="currentAsRootTb">
+        <property name="toolTip">
+         <string>Show only children of the current node</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/chain_closed.svg</normaloff>:/viewer/chain_closed.svg</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QToolButton" name="taskOnlyTb">
         <property name="toolTip">
          <string>Show tasks only</string>
         </property>
         <property name="text">
-         <string>Tasks</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/task.svg</normaloff>:/viewer/task.svg</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
         </property>
         <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonTextBesideIcon</enum>
+         <enum>Qt::ToolButtonIconOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -123,16 +150,20 @@
          <string>Show only nodes with a state change in the current period</string>
         </property>
         <property name="text">
-         <string>Changes</string>
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="viewer.qrc">
+          <normaloff>:/viewer/delta.svg</normaloff>:/viewer/delta.svg</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
         </property>
         <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonTextBesideIcon</enum>
+         <enum>Qt::ToolButtonIconOnly</enum>
         </property>
         <property name="autoRaise">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
        </widget>
       </item>

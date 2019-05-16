@@ -155,6 +155,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->pathFilterLe,SIGNAL(editingFinished()),
             this,SLOT(slotPathFilterEditFinished()));
 
+    connect(ui_->currentAsRootTb,SIGNAL(toggled(bool)),
+            this,SLOT(slotCurrentAsRoot(bool)));
+
     connect(ui_->taskOnlyTb,SIGNAL(toggled(bool)),
             this,SLOT(slotTaskOnly(bool)));
 
@@ -237,6 +240,7 @@ void TimelineWidget::clear()
     port_.clear();
     suites_.clear();
     remoteUid_.clear();
+    currentNodePath_.clear();
     typesDetermined_=false;
     localLog_=true;
     logLoaded_=false;
@@ -511,6 +515,17 @@ void TimelineWidget::slotViewMode(int)
     }
 }
 
+void TimelineWidget::slotCurrentAsRoot(bool b)
+{
+    if(b)
+    {
+        sortModel_->setRootNodeFilter(currentNodePath_);
+    }
+    else
+    {
+        sortModel_->setRootNodeFilter(QString());
+    }
+}
 
 void TimelineWidget::slotTaskOnly(bool taskFilter)
 {
@@ -623,6 +638,13 @@ void TimelineWidget::slotCopyPath(QString nodePath)
 
 void TimelineWidget::selectPathInView(const std::string& p)
 {
+    currentNodePath_=QString::fromStdString(p);
+
+    if(ui_->currentAsRootTb->isChecked())
+    {
+        sortModel_->setRootNodeFilter(currentNodePath_);
+    }
+
     QModelIndex idx=sortModel_->mapToSource(view_->currentIndex());
     if(idx.isValid() && idx.row() < static_cast<int>(data_->size()))
     {
@@ -731,7 +753,8 @@ void TimelineWidget::slotLoadCustomFile()
 
 // Initial load
 void TimelineWidget::initLoad(QString serverName, QString host, QString port, QString logFile,
-                          const std::vector<std::string>& suites, QString remoteUid)
+                          const std::vector<std::string>& suites, QString remoteUid,
+                          const std::string& currentNodePath)
 {
     if(logMode_ != LatestMode)
         return;
@@ -750,6 +773,7 @@ void TimelineWidget::initLoad(QString serverName, QString host, QString port, QS
     logFile_=logFile;
     suites_=suites;
     remoteUid_=remoteUid;
+    currentNodePath_=QString::fromStdString(currentNodePath);
 
     loadLatest(false);
 }
@@ -1133,6 +1157,7 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
 #endif
     }
 
+    vs->put("currentAsRoot",ui_->currentAsRootTb->isChecked());
     vs->put("sortOrder",ui_->sortUpTb->isChecked()?"asc":"desc");
     vs->put("taskOnly",ui_->taskOnlyTb->isChecked());
     vs->put("showChanged",ui_->showChangedTb->isChecked());
@@ -1159,6 +1184,7 @@ void TimelineWidget::readSettings(VComboSettings* vs)
         ui_->sortDownTb->setChecked(true);
     }
 
+    ui_->currentAsRootTb->setChecked(vs->get<bool>("currentAsRoot",false));
     ui_->showChangedTb->setChecked(vs->get<bool>("showChanged",true));
     ui_->taskOnlyTb->setChecked(vs->get<bool>("taskOnly",false));
 

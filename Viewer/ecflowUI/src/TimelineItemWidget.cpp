@@ -112,10 +112,12 @@ void TimelineItemWidget::load()
                             suites=sh->suiteFilter()->filter();
                     }
 
+                    //last 100 MB are read
                     w_->initLoad(QString::fromStdString(sh->name()),
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
-                         logFile, suites, sh->uidForServerLogTransfer());//last 100 MB are read
+                         logFile, suites, sh->uidForServerLogTransfer(),
+                         info_->nodePath());//last 100 MB are read
 
                     delayedLoad_=false;
 

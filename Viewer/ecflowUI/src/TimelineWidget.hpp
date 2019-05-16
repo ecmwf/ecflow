@@ -49,7 +49,8 @@ public:
 
     void clear();
     void initLoad(QString serverName, QString host, QString port, QString logFile,
-              const std::vector<std::string>& suites, QString remoteUid);
+              const std::vector<std::string>& suites, QString remoteUid,
+              const std::string& nodePath);
 
     QString logFile() const {return logFile_;}
 
@@ -71,6 +72,7 @@ protected Q_SLOTS:
    void slotViewMode(int);
    void slotPathFilterChanged(QString);
    void slotPathFilterEditFinished();
+   void slotCurrentAsRoot(bool);
    void slotTaskOnly(bool);
    void slotSortMode(int);
    void slotSortOrderChanged(int);
@@ -110,6 +112,7 @@ private:
     QString remoteUid_;
     LogMode logMode_;
     TimelineFileList archiveLogList_;
+    QString currentNodePath_;
 
     TimelineData* data_;
     TimelineModel* model_;
