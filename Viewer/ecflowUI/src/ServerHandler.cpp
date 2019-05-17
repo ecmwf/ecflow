@@ -139,7 +139,7 @@ void ServerHandler::createClient(bool init)
     assert(client_ == nullptr);
     assert(comQueue_ == nullptr);
 
-    //Create the client invoker. At this point it is empty.
+    //Create the client invoker. At this point it is empty.   
     try
     {
         // True passed in to avoid reading SSL from the environment
@@ -147,24 +147,45 @@ void ServerHandler::createClient(bool init)
     }
     catch(std::exception& e)
     {
-        UiLog().err() << "Could not create ClientInvoker for host=" << host_ <<
-                         " port= " << port_ << ". " <<  e.what();
+        std::string errMsg = "Could not create ClientInvoker for host=" +
+                              host_ + " port=" + port_ + " !";
+
+        if(e.what())
+            errMsg += " " +  std::string(e.what());
+
+        UiLog().err() << errMsg;
         client_=nullptr;
+        failedClientServer(errMsg);
     }
 
-#ifdef ECF_OPENSSL
-    if (ssl_) {
-        bool ssl_enabled = client_->enable_ssl_no_throw();
-        // Handle case where ssl could not be enabled. TODO
-    } else {
-        client_->disable_ssl();
-    }
+    bool ssl_enabled = false;
+    std::string ssl_error;
+
+    if(client_) {
+#ifdef ECF_OPENSSL        
+        if (ssl_) {
+            try
+            {
+                client_->enable_ssl();
+                ssl_enabled =true;
+            }
+            catch(std::exception& e)
+            {
+                ssl_error = std::string(e.what());
+            }
+            // this works when there is a problem with the certificate.
+            // The server can be still SSL-compatible if a certificate is there.
+            // We will detect this situation dutin the initial load!!!
+        } else {
+            client_->disable_ssl();
+        }
 #endif
 
-    client_->set_auto_sync(true); //will call sync_local() after each command!!!
-    client_->set_retry_connection_period(1);
-    client_->set_connection_attempts(1);
-    client_->set_throw_on_error(true);
+        client_->set_auto_sync(true); //will call sync_local() after each command!!!
+        client_->set_retry_connection_period(1);
+        client_->set_connection_attempts(1);
+        client_->set_throw_on_error(true);
+    }
 
     //Create the vnode root. This will represent the node tree in the viewer, but
     //at this point it is empty.
@@ -181,47 +202,57 @@ void ServerHandler::createClient(bool init)
     //create and take ownership of the ServerComThread. At this point the queue has not started yet.
     comQueue_=new ServerComQueue (this,client_);
 
-    //Load settings
-    if (init) {
-        loadConf();
+    if (client_) {
+        //Load settings
+        if (init) {
+            loadConf();
+        }
+
+        // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        // At this point nothing is running or active!!!!
+
+        // we need to set it because in disconnected state reset is ignored!!!
+        if (!init) {
+            connectState_->state(ConnectState::Undef);
+        }
+
+#ifdef ECF_OPENSSL
+        if(ssl_ && !ssl_enabled) {
+            sslCertificateError(ssl_error);
+            return;
+        }
+#endif
+
+        //Check if the server is compatible with the client. If it is fine
+        //reset() will be called to connect to the server and load the defs etc.
+        //This is a safety check to avoid communicating with incompatible
+        //servers!!!!
+        checkServerVersion();
     }
-
-    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    // At this point nothing is running or active!!!!
-
-    // we need to set it because in disconnected state reset is ignored!!!
-    if (!init) {
-        connectState_->state(ConnectState::Undef);
-    }
-
-    //Check if the server is compatible with the client. If it is fine
-    //reset() will be called to connect to the server and load the defs etc.
-    //This is a safety check to avoid communicating with incompatible
-    //servers!!!!
-    checkServerVersion();
 }
 
 void ServerHandler::deleteClient()
 {
-    //Save settings
-    saveConf();
+    if(client_) {
+        //Save settings
+        saveConf();
 
-    //We clear and stop everything before we delete the objects!!
-    clearTree();
+        //We clear and stop everything before we delete the objects!!
+        clearTree();
 
-    //Create an object to inform the observers about the change
-    VServerChange change;
-    //Notify the observers that the scan has started
-    broadcast(&ServerObserver::notifyBeginServerScan,change);
-    //Notify the observers that scan has ended
-    broadcast(&ServerObserver::notifyEndServerScan);
+        //Create an object to inform the observers about the change
+        VServerChange change;
+        //Notify the observers that the scan has started
+        broadcast(&ServerObserver::notifyBeginServerScan,change);
+        //Notify the observers that scan has ended
+        broadcast(&ServerObserver::notifyEndServerScan);
 
-    connectState_->state(ConnectState::Disconnected);
-    connectState_->errorMessage("");
-    setActivity(NoActivity);
+        connectState_->state(ConnectState::Disconnected);
+        connectState_->errorMessage("");
+        setActivity(NoActivity);
 
-    broadcast(&ServerObserver::notifyServerConnectState);
-
+        broadcast(&ServerObserver::notifyServerConnectState);
+    }
 
     //The queue must be deleted before the client, since the thread might
     //be running a job on the client!!
@@ -240,7 +271,8 @@ void ServerHandler::setSsl(bool ssl)
     if (ssl != ssl_) {
         ssl_ = ssl;
 
-        if (connectState_->state() != ConnectState::VersionIncompatible) {
+        if (connectState_->state() != ConnectState::VersionIncompatible &&
+            connectState_->state() != ConnectState::FailedClient) {
             deleteClient();
             createClient(false);
         }
@@ -252,6 +284,8 @@ bool ServerHandler::isDisabled() const
     return (connectState_->state() == ConnectState::Disconnected ||
        connectState_->state() == ConnectState::VersionIncompatible ||
        connectState_->state() == ConnectState::SslIncompatible ||
+       connectState_->state() == ConnectState::SslCertificateError ||
+       connectState_->state() == ConnectState::SslCertificateError ||
        compatibility_ == Incompatible);
 }
 
@@ -449,13 +483,7 @@ void ServerHandler::setActivity(Activity ac)
 
 ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port, bool ssl)
 {
-    auto* sh=new ServerHandler(name,host,port,ssl);
-    //Without the clinetinvoker we cannot use the serverhandler
-    if(!sh->client_)
-    {
-        delete sh;
-        sh=nullptr;
-    }
+    auto* sh=new ServerHandler(name,host,port,ssl);    
     return sh;
 }
 
@@ -1305,6 +1333,19 @@ void ServerHandler::checkServerVersion()
     comQueue_->addServerVersionTask();
 }
 
+void ServerHandler::failedClientServer(const std::string& msg)
+{
+    compatibility_=Incompatible;
+    stopRefreshTimer();
+    if(comQueue_) {
+        comQueue_->disable();
+    }
+
+    connectState_->state(ConnectState::FailedClient);
+    connectState_->errorMessage(msg);
+    broadcast(&ServerObserver::notifyServerConnectState);
+}
+
 void ServerHandler::compatibleServer()
 {
     compatibility_=Compatible;
@@ -1346,6 +1387,23 @@ void ServerHandler::sslIncompatibleServer(const std::string& msg)
     broadcast(&ServerObserver::notifyServerConnectState);
 }
 
+void ServerHandler::sslCertificateError(const std::string& msg)
+{
+#if ECF_OPENSSL
+    assert(ssl_);
+    compatibility_=Incompatible;
+    stopRefreshTimer();
+    comQueue_->disable();
+
+    connectState_->state(ConnectState::SslCertificateError);
+    std::string errStr = "Cannot communicate to server. Server is marked as SSL in the UI, but an SSL certificate error was detected.";
+
+    connectState_->errorMessage(errStr + "\n\n" + msg);
+    broadcast(&ServerObserver::notifyServerConnectState);
+#endif
+}
+
+
 void ServerHandler::reset()
 {
     UiLogS(this).dbg() << "ServerHandler::reset -->";
@@ -1353,6 +1411,8 @@ void ServerHandler::reset()
     if(connectState_->state() == ConnectState::Disconnected ||
        connectState_->state() == ConnectState::VersionIncompatible ||
        connectState_->state() == ConnectState::SslIncompatible ||
+       connectState_->state() == ConnectState::SslCertificateError ||
+       connectState_->state() == ConnectState::FailedClient ||
        compatibility_ == Incompatible)
     {
         return;

@@ -47,7 +47,8 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client) :
 			this,SLOT(slotRun()));
 
 
-    createThread();
+    if(client_)
+        createThread();
 }
 
 ServerComQueue::~ServerComQueue()
@@ -60,26 +61,31 @@ ServerComQueue::~ServerComQueue()
 	//Empty the tasks
 	tasks_.clear();
 
-	//Disconnects all the signals from the thread
-	comThread_->disconnect(nullptr,this);
+    if (comThread_) {
 
-	//If the comthread is running we need to wait
-	//until it finishes its task.
-    if(comThread_->wait(5000))
-    {
-        //Send a logout task
-        VTask_ptr task=VTask::create(VTask::LogOutTask);
-        comThread_->task(task);
+        //Disconnects all the signals from the thread
+        comThread_->disconnect(nullptr,this);
 
-        //Wait until the logout finishes
-        comThread_->wait(3000);
+        //If the comthread is running we need to wait
+        //until it finishes its task.
+        if(comThread_->wait(5000))
+        {
+            //Send a logout task
+            VTask_ptr task=VTask::create(VTask::LogOutTask);
+            comThread_->task(task);
+
+            //Wait until the logout finishes
+            comThread_->wait(3000);
+        }
+
+        delete comThread_;
     }
-
-	delete comThread_;
 }
 
 void ServerComQueue::createThread()
 {
+    assert(client_);
+
     if(comThread_)
         delete comThread_;
 
@@ -135,11 +141,14 @@ void ServerComQueue::disable()
 	//Stop the timer
     stopTimer();
 
-	//If the comthread is running we need to wait
-	//until it finishes its task.
-	comThread_->wait();
+    if (comThread_) {
 
-    UiLogS(server_).dbg() << " queue is disabled";
+        //If the comthread is running we need to wait
+        //until it finishes its task.
+        comThread_->wait();
+
+        UiLogS(server_).dbg() << " queue is disabled";
+    }
 
 	//Clear the current task
 	if(current_)
@@ -167,7 +176,7 @@ bool ServerComQueue::prepareReset()
 
 	//If the comthread is running we need to wait
 	//until it finishes its task.
-    if(comThread_->wait(5000))
+    if(comThread_ && comThread_->wait(5000))
     {
         //The thread cannot be running
         assert(comThread_->isRunning() == false);
@@ -185,17 +194,20 @@ void ServerComQueue::reset()
 {
 	assert(state_ == ResetState);
 
-	//The thread cannot be running
-	assert(comThread_->isRunning() == false);
+    if (comThread_) {
 
-	//We send a Reset command to the thread!! This is the only task that is allowed
-	//during the reset!!
-	VTask_ptr task=VTask::create(VTask::ResetTask);
-	tasks_.push_back(task);
+        //The thread cannot be running
+        assert(comThread_->isRunning() == false);
 
-	//TODO: why do we not run it directly
-	//We start the timer with a shorter interval
-	timer_->start(100);
+        //We send a Reset command to the thread!! This is the only task that is allowed
+        //during the reset!!
+        VTask_ptr task=VTask::create(VTask::ResetTask);
+        tasks_.push_back(task);
+
+        //TODO: why do we not run it directly
+        //We start the timer with a shorter interval
+        timer_->start(100);
+    }
 }
 
 void ServerComQueue::endReset()
@@ -213,7 +225,10 @@ void ServerComQueue::endReset()
 // -its timer is running
 void ServerComQueue::start()
 {
-	if(state_ != DisabledState && state_ != ResetState)
+    if(!client_ || !comThread_)
+        return;
+
+    if(state_ != DisabledState && state_ != ResetState)
 	{
         UiLogS(server_).dbg() << "ComQueue::start -->";
 
@@ -249,7 +264,7 @@ void ServerComQueue::suspend(bool wait)
 	{
 		state_=SuspendedState;
         stopTimer();
-        if(wait)
+        if(comThread_  && wait)
 		{
 			comThread_->wait();
 		}
@@ -382,14 +397,20 @@ void ServerComQueue::addServerVersionTask()
 
 void ServerComQueue::startCurrentTask()
 {
-    taskStarted_=false;
-    ctStartTime_.start();
-    comThread_->task(current_);
+    if (comThread_) {
+        taskStarted_=false;
+        ctStartTime_.start();
+        comThread_->task(current_);
+    }
 }
 
 void ServerComQueue::slotRun()
 {
-	if(state_ == DisabledState ||state_ == SuspendedState )
+    if (!client_ || !comThread_) {
+        return;
+    }
+
+    if(state_ == DisabledState ||state_ == SuspendedState )
     {
 #ifdef _UI_SERVERCOMQUEUE_DEBUG       
         UI_FUNCTION_LOG_S(server_);
@@ -579,6 +600,10 @@ void ServerComQueue::slotTaskStarted()
 //thread is not running so it is safe to access the ClientInvoker!
 void ServerComQueue::slotTaskFinished()
 {
+    if(!client_ || !comThread_) {
+        return;
+    }
+
     taskStarted_=false;
     taskIsBeingFinished_=true;
     startTimeoutTryCnt_=0;
@@ -611,6 +636,10 @@ void ServerComQueue::slotTaskFinished()
 //to the slotTaskFinished slot.
 void ServerComQueue::slotTaskFailed(std::string msg)
 {
+    if(!client_ || !comThread_) {
+        return;
+    }
+
     taskStarted_=false;
     taskIsBeingFailed_=true;
     startTimeoutTryCnt_=0;

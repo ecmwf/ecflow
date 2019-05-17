@@ -18,7 +18,8 @@ class ConnectState
 public:
 	ConnectState();
 
-    enum State {Undef,Normal,Disconnected,Lost,VersionIncompatible,SslIncompatible};
+    enum State {Undef,Normal,Disconnected,Lost,VersionIncompatible,
+                SslIncompatible,SslCertificateError,FailedClient};
 
 	void state(State state);
 	State state() const {return state_;}

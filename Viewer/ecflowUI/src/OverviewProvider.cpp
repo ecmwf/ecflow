@@ -134,7 +134,14 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
         {
             f << inc << "Possible SSL-related incompatibility! " << cst->errorMessage() << "\n";
         }
-
+        else if(cst->state() == ConnectState::SslCertificateError)
+        {
+            f << inc << "SSL certificate error! " << cst->errorMessage() << "\n";
+        }
+        else if(cst->state() == ConnectState::FailedClient)
+        {
+            f << inc << "Client creation error! " << cst->errorMessage() << "\n";
+        }
 		return;
 	}
 

@@ -1889,6 +1889,18 @@ QString VServer::toolTip()
             if(!st->errorMessage().empty())
                 txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n","<br>");
         }
+        else if(st->state() == ConnectState::SslCertificateError)
+        {
+            txt+="<b><font color=" + colErr.name() +">SSL certificate error!</b><br>";
+            if(!st->errorMessage().empty())
+                txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n","<br>");
+        }
+        else if(st->state() == ConnectState::FailedClient)
+        {
+            txt+="<b><font color=" + colErr.name() +">Could not create client object!</b><br>";
+            if(!st->errorMessage().empty())
+                txt+="<b>Error message</b>:<br>" + QString::fromStdString(st->errorMessage()).replace("\n","<br>");
+        }
 
 	}
 	return txt;

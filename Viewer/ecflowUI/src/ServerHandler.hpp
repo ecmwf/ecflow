@@ -180,9 +180,11 @@ private:
 	void connectionLost(const std::string& errMsg);
 	bool connectionGained();
     void checkServerVersion();
+    void failedClientServer(const std::string& msg);
     void compatibleServer();
     void incompatibleServer(const std::string& version);
     void sslIncompatibleServer(const std::string& msg);
+    void sslCertificateError(const std::string& msg);
 
 	void updateSuiteFilterWithLoaded(const std::vector<std::string>&);
     void updateSuiteFilter(bool needNewSuiteList);
