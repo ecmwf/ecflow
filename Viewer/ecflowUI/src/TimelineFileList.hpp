@@ -40,6 +40,8 @@ public:
     TimelineFileList(const TimelineFileList& o) {items_=o.items();}
     QList<TimelineFileListItem> items() const {return items_;}
     void clear() {items_.clear();}
+    int loadableCount() const;
+    qint64 totalSize() const;
 
 protected:
     void add(QString logFile);

@@ -113,3 +113,22 @@ void TimelineFileList::add(QString logFile)
 
     items_ << TimelineFileListItem(logFile,startTime,endTime,fInfo.size());
 }
+
+int TimelineFileList::loadableCount() const
+{
+    int t=0;
+    Q_FOREACH(TimelineFileListItem item, items_)
+        if(item.loadable_)
+            t++;
+    return t;
+}
+
+qint64 TimelineFileList::totalSize() const
+{
+    qint64 t=0;
+    Q_FOREACH(TimelineFileListItem item, items_)
+        if(item.loadable_)
+            t += item.size_;
+
+    return t;
+}

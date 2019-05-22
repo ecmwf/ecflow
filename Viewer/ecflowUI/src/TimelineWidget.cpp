@@ -319,93 +319,106 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
     if(logMode_ == LatestMode)
     {
         txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
-    }
-    else
-    {
-        if(archiveLogList_.items().count() == 1)
+
+        txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
+             Viewer::formatBoldText(" Host: ",col) + host_ +
+             Viewer::formatBoldText(" Port: ",col) + port_;
+
+        if(showDetails)
         {
-           txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
-        }
-        else if(archiveLogList_.items().count() > 1)
-        {
-           txt= Viewer::formatBoldText("Log files: ",col) + "multiple ["+
-                   QString::number(archiveLogList_.items().count()) + "]";
-        }
-    }
-
-    txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
-         Viewer::formatBoldText(" Host: ",col) + host_ +
-         Viewer::formatBoldText(" Port: ",col) + port_;
-
-    if(showDetails)
-    {
-        if(data_->loadStatus() == TimelineData::LoadDone)
-        {
-            if(localLog_)
+            if(data_->loadStatus() == TimelineData::LoadDone)
             {
-                VFileInfo fi(logFile_);
-                txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
-            }
-            else
-            {
-                 VFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
-                 if(fi.size() < static_cast<qint64>(maxReadSize_))
-                 {
-                     txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
-                 }
-            }
-        }
-
-        txt+=Viewer::formatBoldText(" Source: ",col);
-
-        //fetch method and time
-        if(localLog_)
-        {
-            txt+=" read from disk ";
-            if(logMode_ == LatestMode)
-            {
-                if(data_->loadedAt().isValid())
-                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
-            }
-
-        }
-        else
-        {          
-            if(logTransferred_)
-            {
-                txt+=" fetched from remote host ";
-            }
-            else
-            {
-                txt+=" fetch failed from remote host ";
-            }
-            if(transferredAt_.isValid())
-                txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(transferredAt_);
-        }
-
-        if(data_->loadStatus() == TimelineData::LoadDone)
-        {
-            QColor warnCol(218,142,18);
-
-            QString warnVerb;
-            if(localLog_ && !data_->isFullRead())
-            {
-                warnVerb="parsed";
-            }
-            else if(tmpLogFile_)
-            {
-                QFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
-                if(static_cast<size_t>(fi.size()) == maxReadSize_)
+                if(localLog_)
                 {
-                    warnVerb="fetched";
+                    VFileInfo fi(logFile_);
+                    txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
+                }
+                else
+                {
+                    VFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
+                    txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
                 }
             }
 
-            if(!warnVerb.isEmpty())
+            txt+=Viewer::formatBoldText(" Source: ",col);
+
+            //fetch method and time
+            if(localLog_)
             {
-                txt+=Viewer::formatItalicText(" (" + warnVerb + " last " + QString::number(maxReadSize_/(1024*1024)) +
-                                    " MB of file - maximum size reached)",warnCol);
+                txt+=" read from disk ";
+                if(data_->loadedAt().isValid())
+                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
             }
+            else
+            {
+                if(logTransferred_)
+                {
+                    txt+=" fetched from remote host ";
+                }
+                else
+                {
+                    txt+=" fetch failed from remote host ";
+                }
+                if(transferredAt_.isValid())
+                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(transferredAt_);
+            }
+
+            if(data_->loadStatus() == TimelineData::LoadDone)
+            {
+                QColor warnCol(218,142,18);
+
+                QString warnVerb;
+                if(localLog_ && !data_->isFullRead())
+                {
+                    warnVerb="parsed";
+                }
+                else if(tmpLogFile_)
+                {
+                    QFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
+                    if(maxReadSize_ > 0 && static_cast<size_t>(fi.size()) == maxReadSize_)
+                    {
+                        warnVerb="fetched";
+                    }
+                }
+
+                if(!warnVerb.isEmpty())
+                {
+                    txt+=Viewer::formatItalicText(" (" + warnVerb + " last " + QString::number(maxReadSize_/(1024*1024)) +
+                                        " MB of file - maximum size reached)",warnCol);
+                }
+            }
+        }
+    }
+
+    //archived
+    else
+    {
+        if(archiveLogList_.loadableCount() == 1)
+        {
+           txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
+        }
+        else if(archiveLogList_.loadableCount() > 1)
+        {
+           txt= Viewer::formatBoldText("Log files: ",col) + "multiple ["+
+                   QString::number(archiveLogList_.loadableCount())  + "]";
+        }
+
+        txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
+            Viewer::formatBoldText(" Host: ",col) + host_ +
+            Viewer::formatBoldText(" Port: ",col) + port_;
+
+        if(showDetails)
+        {
+            if(data_->loadStatus() == TimelineData::LoadDone)
+            {
+                if(archiveLogList_.loadableCount() == 1)
+                    txt+=Viewer::formatBoldText(" Size: ",col) + VFileInfo::formatSize(archiveLogList_.totalSize());
+                else if (archiveLogList_.loadableCount() > 1)
+                    txt+=Viewer::formatBoldText(" Total size: ",col) + VFileInfo::formatSize(archiveLogList_.totalSize());
+            }
+
+            txt+=Viewer::formatBoldText(" Source: ",col);
+            txt+=" read from disk ";         
         }
 
     }
@@ -720,6 +733,8 @@ void TimelineWidget::reloadLatest(bool usePrevState)
         if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
         {
             remoteUid_ = sh->uidForServerLogTransfer();
+            setMaxReadSize(sh->maxSizeForTimelineData());
+
             if(SuiteFilter* sf=sh->suiteFilter())
             {
                 if(sf->isEnabled())
@@ -754,7 +769,7 @@ void TimelineWidget::slotLoadCustomFile()
 
 // Initial load
 void TimelineWidget::initLoad(QString serverName, QString host, QString port, QString logFile,
-                          const std::vector<std::string>& suites, QString remoteUid,
+                          const std::vector<std::string>& suites, QString remoteUid, int maxReadSize,
                           const std::string& currentNodePath, bool detached)
 {
     if(logMode_ != LatestMode)
@@ -776,6 +791,7 @@ void TimelineWidget::initLoad(QString serverName, QString host, QString port, QS
     logFile_=logFile;
     suites_=suites;
     remoteUid_=remoteUid;
+    setMaxReadSize(maxReadSize);
     currentNodePath_=QString::fromStdString(currentNodePath);
 
     loadLatest(false);
@@ -1150,9 +1166,12 @@ void TimelineWidget::determineNodeTypes()
     typesDetermined_=true;
 }
 
-bool TimelineWidget::isSameServer(const std::string& host,const std::string& port) const
+void TimelineWidget::setMaxReadSize(int maxReadSizeInMb)
 {
-    return (host == host_.toStdString() && port == port_.toStdString());
+    if (maxReadSizeInMb <= 0)
+        maxReadSize_ = 0;
+    else
+        maxReadSize_ = static_cast<size_t>(maxReadSizeInMb)*1024*1024;
 }
 
 void TimelineWidget::writeSettings(VComboSettings* vs)

@@ -73,14 +73,16 @@ fi
 # transfer the whole file
 if [[ lastBytes -eq 0 ]] ; then
 
-    script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+    #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+    scp ${host}:/${sourceFile} ${targetFile}
 
 #transfer the last bytes of the file
 else
     sourceSize=$(ssh ${remoteUid}@${host} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}")
 
     if [[ ${sourceSize} -gt 0 && ${sourceSize} -le ${lastBytes} ]] ; then
-        script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+        #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+        scp ${host}:/${sourceFile} ${targetFile}
     else
         ssh ${remoteUid}@${host} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
     fi

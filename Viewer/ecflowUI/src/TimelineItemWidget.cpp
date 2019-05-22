@@ -117,6 +117,7 @@ void TimelineItemWidget::load()
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
                          logFile, suites, sh->uidForServerLogTransfer(),
+                         sh->maxSizeForTimelineData(),
                          info_->nodePath(), detached_);//last 100 MB are read
 
                     delayedLoad_=false;

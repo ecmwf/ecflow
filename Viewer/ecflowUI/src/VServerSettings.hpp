@@ -25,6 +25,7 @@ public:
     enum Param {AutoUpdate, UpdateRate,
                AdaptiveUpdate,AdaptiveUpdateIncrement,MaxAdaptiveUpdateRate,AdaptiveUpdateMode,
                MaxOutputFileLines,ReadFromDisk,
+               MaxSizeForTimelineData,
                NodeMenuMode,NodeMenuModeForDefStatus,
 	           NotifyAbortedEnabled, NotifyAbortedPopup, NotifyAbortedSound,
 			   NotifyRestartedEnabled, NotifyRestartedPopup, NotifyRestartedSound,

@@ -49,7 +49,7 @@ public:
 
     void clear();
     void initLoad(QString serverName, QString host, QString port, QString logFile,
-              const std::vector<std::string>& suites, QString remoteUid,
+              const std::vector<std::string>& suites, QString remoteUid,int maxReadSize,
               const std::string& nodePath, bool detached);
 
     QString logFile() const {return logFile_;}
@@ -58,7 +58,6 @@ public:
     void setLogMode(LogMode logMode);
     void selectPathInView(const std::string& p);
     void setDetached(bool);
-    bool isSameServer(const std::string& host,const std::string& post) const;
 
     void writeSettings(VComboSettings* vs);
     void readSettings(VComboSettings* vs);
@@ -102,6 +101,7 @@ private:
     void setAllVisible(bool b);
     void checkButtonState();
     void determineNodeTypes();
+    void setMaxReadSize(int maxReadSizeInMb);
 
     Ui::TimelineWidget* ui_;
     QString serverName_;

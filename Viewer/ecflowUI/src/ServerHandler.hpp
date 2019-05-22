@@ -68,6 +68,8 @@ public:
 
 	bool readFromDisk() const;
     QString uidForServerLogTransfer() const;
+    int maxSizeForTimelineData() const;
+
     SuiteFilter* suiteFilter() const {return suiteFilter_;}
     QString nodeMenuMode() const;
     QString defStatusNodeMenuMode() const;
