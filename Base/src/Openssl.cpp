@@ -76,6 +76,8 @@ bool Openssl::enable_no_throw(std::string host,const std::string& port, const st
 
 void Openssl::enable(std::string host,const std::string& port)
 {
+   if (host == Str::LOCALHOST())  host = Host().name();
+
    if (!enable_no_throw(host,port)) {
       std::stringstream ss;
       ss << "Openssl::enable: Error: Expected to find the self signed certificate file(CRT) server.crt or " << host << "." << port << ".crt in $HOME/.ecflowrc/ssl";
@@ -85,6 +87,8 @@ void Openssl::enable(std::string host,const std::string& port)
 
 void Openssl::enable_if_defined(std::string host,const std::string& port)
 {
+   if (host == Str::LOCALHOST())  host = Host().name();
+
    char* ecf_ssl = getenv("ECF_SSL");
    if ( ecf_ssl ) {
       std::string ecf_ssl_env = ecf_ssl;
