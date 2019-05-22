@@ -4,7 +4,7 @@
 # a/ use the system installed version, everywhere, avoid miss-match between different releases
 # b/ Test the latest release, requires compatible client/server versions
 
-set -e # stop the shell on first error
+#set -e # stop the shell on first error
 set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
