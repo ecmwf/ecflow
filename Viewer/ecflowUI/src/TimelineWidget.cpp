@@ -55,7 +55,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     localLog_(true),
     logLoaded_(false),
     logTransferred_(false),
-    fileTransfer_(0)
+    fileTransfer_(0),
+    detached_(false)
 {
     ui_->setupUi(this);
 
@@ -101,7 +102,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     // log mode
     ui_->logModeCombo->addItem("Current log","latest");
-    ui_->logModeCombo->addItem("Archive log","archive");
+    ui_->logModeCombo->addItem("Archived log","archive");
     ui_->logModeCombo->setCurrentIndex(0);
     ui_->loadFileTb->hide();
 
@@ -155,8 +156,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(ui_->pathFilterLe,SIGNAL(editingFinished()),
             this,SLOT(slotPathFilterEditFinished()));
 
-    connect(ui_->currentAsRootTb,SIGNAL(toggled(bool)),
-            this,SLOT(slotCurrentAsRoot(bool)));
+    connect(ui_->subTreeTb,SIGNAL(toggled(bool)),
+            this,SLOT(slotSubTree(bool)));
 
     connect(ui_->taskOnlyTb,SIGNAL(toggled(bool)),
             this,SLOT(slotTaskOnly(bool)));
@@ -515,7 +516,7 @@ void TimelineWidget::slotViewMode(int)
     }
 }
 
-void TimelineWidget::slotCurrentAsRoot(bool b)
+void TimelineWidget::slotSubTree(bool b)
 {
     if(b)
     {
@@ -640,7 +641,7 @@ void TimelineWidget::selectPathInView(const std::string& p)
 {
     currentNodePath_=QString::fromStdString(p);
 
-    if(ui_->currentAsRootTb->isChecked())
+    if(ui_->subTreeTb->isChecked())
     {
         sortModel_->setRootNodeFilter(currentNodePath_);
     }
@@ -754,7 +755,7 @@ void TimelineWidget::slotLoadCustomFile()
 // Initial load
 void TimelineWidget::initLoad(QString serverName, QString host, QString port, QString logFile,
                           const std::vector<std::string>& suites, QString remoteUid,
-                          const std::string& currentNodePath)
+                          const std::string& currentNodePath, bool detached)
 {
     if(logMode_ != LatestMode)
         return;
@@ -762,6 +763,8 @@ void TimelineWidget::initLoad(QString serverName, QString host, QString port, QS
     // we need to be in a clean state
     clear();
     Q_ASSERT(logMode_ == LatestMode);
+
+    setDetached(detached);
 
     // clear() hides it so we need to show it again
     ui_->logModeCombo->show();
@@ -1112,6 +1115,11 @@ void TimelineWidget::initFromData()
     checkButtonState();
 }
 
+void TimelineWidget::setDetached(bool d)
+{
+    detached_=d;
+}
+
 //Determine missing types
 void TimelineWidget::determineNodeTypes()
 {
@@ -1142,6 +1150,11 @@ void TimelineWidget::determineNodeTypes()
     typesDetermined_=true;
 }
 
+bool TimelineWidget::isSameServer(const std::string& host,const std::string& port) const
+{
+    return (host == host_.toStdString() && port == port_.toStdString());
+}
+
 void TimelineWidget::writeSettings(VComboSettings* vs)
 {
     int cbIdx=ui_->sortCombo->currentIndex();
@@ -1157,7 +1170,7 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
 #endif
     }
 
-    vs->put("currentAsRoot",ui_->currentAsRootTb->isChecked());
+    vs->put("subTree",ui_->subTreeTb->isChecked());
     vs->put("sortOrder",ui_->sortUpTb->isChecked()?"asc":"desc");
     vs->put("taskOnly",ui_->taskOnlyTb->isChecked());
     vs->put("showChanged",ui_->showChangedTb->isChecked());
@@ -1184,7 +1197,7 @@ void TimelineWidget::readSettings(VComboSettings* vs)
         ui_->sortDownTb->setChecked(true);
     }
 
-    ui_->currentAsRootTb->setChecked(vs->get<bool>("currentAsRoot",false));
+    ui_->subTreeTb->setChecked(vs->get<bool>("subTree",false));
     ui_->showChangedTb->setChecked(vs->get<bool>("showChanged",true));
     ui_->taskOnlyTb->setChecked(vs->get<bool>("taskOnly",false));
 

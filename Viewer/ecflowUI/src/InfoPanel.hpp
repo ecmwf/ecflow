@@ -106,7 +106,8 @@ protected:
 
 private:
     void localClear();
-    void reset(VInfo_ptr node);
+    bool reset(VInfo_ptr node);
+    bool reloadCore(VInfo_ptr node);
 	void adjustInfo(VInfo_ptr node);
     void adjustTabs(VInfo_ptr node);
 	InfoPanelItemHandler* findHandler(QWidget* w);
@@ -119,6 +120,7 @@ private:
 
 	QList<InfoPanelItemHandler*> items_;
 	VInfo_ptr info_;
+    VInfo_ptr lastBroadcastInfo_;
 	bool tabBeingCleared_;
 	bool tabBeingAdjusted_;
 };

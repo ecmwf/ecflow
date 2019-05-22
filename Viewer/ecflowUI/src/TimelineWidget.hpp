@@ -50,13 +50,15 @@ public:
     void clear();
     void initLoad(QString serverName, QString host, QString port, QString logFile,
               const std::vector<std::string>& suites, QString remoteUid,
-              const std::string& nodePath);
+              const std::string& nodePath, bool detached);
 
     QString logFile() const {return logFile_;}
 
     enum LogMode {LatestMode, ArchiveMode};
     void setLogMode(LogMode logMode);
     void selectPathInView(const std::string& p);
+    void setDetached(bool);
+    bool isSameServer(const std::string& host,const std::string& post) const;
 
     void writeSettings(VComboSettings* vs);
     void readSettings(VComboSettings* vs);
@@ -72,7 +74,7 @@ protected Q_SLOTS:
    void slotViewMode(int);
    void slotPathFilterChanged(QString);
    void slotPathFilterEditFinished();
-   void slotCurrentAsRoot(bool);
+   void slotSubTree(bool);
    void slotTaskOnly(bool);
    void slotSortMode(int);
    void slotSortOrderChanged(int);
@@ -133,6 +135,7 @@ private:
     QDateTime transferredAt_;
 
     TimelinePrevState prevState_;
+    bool detached_;
 };
 
 #endif // TIMELINEWIDGET_HPP

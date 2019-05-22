@@ -236,15 +236,18 @@ void InfoPanelItem::setFrozen(bool b)
 
 }
 
-void InfoPanelItem::setDetached(bool b)
+void InfoPanelItem::setDetached(bool b, bool update)
 {
 	detached_=b;
 
-    if(!active_)
-        return;
+    if(update)
+    {
+        if(!active_)
+            return;
 
-    //We update the derived class
-    updateState(DetachedChanged);
+        //We update the derived class
+        updateState(DetachedChanged);
+    }
 }
 
 bool InfoPanelItem::hasSameContents(VInfo_ptr)

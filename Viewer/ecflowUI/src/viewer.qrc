@@ -100,6 +100,7 @@
     <file alias="monitor.svg">../images/monitor.svg</file>
     <file alias="node_log.svg">../images/node_log.svg</file>
     <file alias="notification.svg">../images/notification.svg</file>
+    <file alias="open_file.svg">../images/open_file.svg</file>
     <file alias="output.svg">../images/output.svg</file>
     <file alias="padlock.svg">../images/padlock.svg</file>
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
@@ -124,6 +125,7 @@
     <file alias="system.svg">../images/system.svg</file>
     <file alias="submit.svg">../images/submit.svg</file>
     <file alias="submit_round.svg">../images/submit_round.svg</file>
+    <file alias="subtree.svg">../images/subtree.svg</file>
     <file alias="sync.svg">../images/sync.svg</file>
     <file alias="sync_black.svg">../images/sync_black.svg</file>
     <file alias="task.svg">../images/task.svg</file>

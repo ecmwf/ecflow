@@ -117,7 +117,7 @@ void TimelineItemWidget::load()
                          QString::fromStdString(sh->host()),
                          QString::fromStdString(sh->port()),
                          logFile, suites, sh->uidForServerLogTransfer(),
-                         info_->nodePath());//last 100 MB are read
+                         info_->nodePath(), detached_);//last 100 MB are read
 
                     delayedLoad_=false;
 
@@ -192,6 +192,28 @@ void TimelineItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
                 clearContents();
             }
         }
+    }
+
+    if(flags.isSet(DetachedChanged))
+    {
+        w_->setDetached(detached_);
+        if(!detached_ && info_)
+            w_->selectPathInView(info_->nodePath());
+#if 0
+        // we just returned from detached state
+        //if the server in the widget does not match the current one we need to reload
+        if(!detached_ && info_ && info_->server() &&
+           !w_->isSameServer(info_->server()->host(),info_->server()->port()))
+        {
+            load();
+        }
+        else
+        {
+            w_->setDetached(detached_);
+            if(!detached_ && info_)
+                w_->selectPathInView(info_->nodePath());
+        }
+#endif
     }
 }
 

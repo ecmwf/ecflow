@@ -213,15 +213,14 @@ void InfoPanel::localClear()
 	clearTab();
 }
 
-//TODO: It should be the slot
-void InfoPanel::reset(VInfo_ptr info)
+bool InfoPanel::reset(VInfo_ptr info)
 {
     if(info_ && info)
     {
         //UiLog().dbg() << "path: " << info_->path() << " " << info->path();
 
         if(*(info_.get()) == *(info.get()))
-            return;
+            return false;
 
         //it can happen that the stored info was not yet updated after a
         //server reload. If there is chance for it we try to regain its data and
@@ -232,7 +231,7 @@ void InfoPanel::reset(VInfo_ptr info)
         {
             info_->regainData();
             if(info_->node() == info->node())
-                return;
+                return false;
         }
     }
 
@@ -249,28 +248,43 @@ void InfoPanel::reset(VInfo_ptr info)
 	bcWidget_->setPath(info);
 
     updateTitle();
+
+    return true;
+}
+
+bool InfoPanel::reloadCore(VInfo_ptr info)
+{
+    bool retVal=false; // no real reset/reload happened!!
+
+    lastBroadcastInfo_ = info;
+
+    //When the mode is detached it cannot receive
+    //the reload request
+    if(info_ && detached())
+        return retVal;
+
+    if(info && info->isAttribute())
+    {
+        retVal=reset(VInfo::createParent(info));
+    }
+    else
+    {
+        retVal=reset(info);
+    }
+
+    return retVal;
 }
 
 //This slot is called when the info object is selected in another panel
 void InfoPanel::slotReload(VInfo_ptr info)
 {
-    //When the mode is detached it cannot receive
-	//the reload request
-    if(info_ && detached())
-		return;
-
-    if(info && info->isAttribute())
-    {
-        reset(VInfo::createParent(info));
-    }
-    else
-    {
-        reset(info);
-    }
+    reloadCore(info);
 }
 
 void InfoPanel::slotReloadFromBc(VInfo_ptr info)
 {
+    lastBroadcastInfo_ = info;
+
     reset(info);
     if(info_)
        Q_EMIT selectionChanged(info_);
@@ -494,7 +508,7 @@ InfoPanelItemHandler* InfoPanel::createHandler(InfoPanelDef* def)
         WidgetNameProvider::nameChildren(iw->realWidget());
         iw->setOwner(this);
         iw->setFrozen(frozen());
-		iw->setDetached(detached());
+        iw->setDetached(detached(),true);
 
 		//iw will be added to the tab so the tab will be its parent. Moreover
         //the tab will stay its parent even if iw got removed from the tab!
@@ -545,9 +559,28 @@ void InfoPanel::clearTab()
 
 void InfoPanel::detachedChanged()
 {
+    // if we leave the detached node we need to set the current
+    // broadcast node on the infopanel!!!
+    if(!detached() && lastBroadcastInfo_)
+    {
+        // just set the detached state on the panel items (tabs)
+        // without doing an update
+        Q_FOREACH(InfoPanelItemHandler *item,items_)
+        {
+            item->item()->setDetached(detached(), false);
+        }
+        lastBroadcastInfo_->regainData();
+        if(reloadCore(lastBroadcastInfo_))
+        {
+           return;
+        }
+    }
+
+    //if we are here no reset/update happened so we just need to
+    //notify/update all the items!!!
     Q_FOREACH(InfoPanelItemHandler *item,items_)
     {
-        item->item()->setDetached(detached());
+        item->item()->setDetached(detached(), true);
     }
     updateTitle();
 }
