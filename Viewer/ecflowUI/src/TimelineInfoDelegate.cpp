@@ -363,7 +363,14 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
             {
                 hasGrad=false;
                 xpLeft=xp;
-                xpRight=rightEdge;
+                if(item->start_[i]/86400 < model_->endDateSec()/86400)
+                   xpRight=rightEdge;
+                else
+                {
+                    xpRight=timeToPos(option.rect,model_->endDateSec());
+                    if(xpRight > rightEdge)
+                        xpRight=rightEdge;
+                }
             }
 
             //small rects are extended and use no gradient
@@ -464,3 +471,4 @@ void TimelineInfoDailyDelegate::setPeriod(QDateTime t1,QDateTime t2)
     endDate_=t2;
 }
 #endif
+

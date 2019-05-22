@@ -77,6 +77,7 @@ protected:
     int bottomPadding_;
     QDateTime startDate_;
     QDateTime endDate_;
+
     //int submittedMaxDuration_;
     //int activeMaxDuration_;
     //int durationMaxTextWidth_;

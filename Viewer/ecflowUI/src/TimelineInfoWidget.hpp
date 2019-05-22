@@ -79,6 +79,7 @@ public:
                  unsigned int endDateSec);
     void clearData();
     bool hasData() const;
+    unsigned int endDateSec() const {return endDateSec_;}
 
 protected:
     TimelineItem* data_;
