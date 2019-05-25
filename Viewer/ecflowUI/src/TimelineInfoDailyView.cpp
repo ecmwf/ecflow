@@ -338,13 +338,19 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
     int extendedRight=-1;
 
     unsigned int day=index.data().toUInt();
+    unsigned int sDate = day + startTime_.msecsSinceStartOfDay()/1000;
+    unsigned int eDate = day + endTime_.msecsSinceStartOfDay()/1000;
+    bool handledLast = false;
 
     for(size_t i=0; i < item->size(); i++)
     {
-        if(item->start_[i] < day)
+        if(item->start_[i] < sDate)
             continue;
-        if(item->start_[i] >= day + 86400)
+        if(item->start_[i] > eDate)
             break;
+
+        if(i==item->size()-1)
+            handledLast=true;
 
         bool hasGrad=false;
         bool lighter=false;
@@ -352,7 +358,9 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
         QColor fillCol;
         int xp=timeToPos(option.rect,item->start_[i]);
 
-        if(i > 0 && item->start_[i-1] < day)
+        // the previous item started before the startdate of the row
+        // -> we need to a draw rect to the start of the first item in the row (within the period)
+        if(i > 0 && item->start_[i-1] < sDate)
         {
             if(VNState* vn=VNState::find(item->status_[i-1]))
             {
@@ -372,7 +380,7 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
             lighter=(vn->name() == "complete");
             if(i < item->size()-1)
             {
-                if(item->start_[i+1] < day+86400)
+                if(item->start_[i+1] <= eDate)
                 {
                     hasGrad=true;
                     xpLeft=xp;
@@ -423,6 +431,33 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
                     xpLeft=extendedRight;
                 }
                 extendedRight = -1;
+            }
+
+            drawCell(painter,QRect(xpLeft,option.rect.y(),xpRight-xpLeft+1,option.rect.height()-1),
+                      fillCol,hasGrad,lighter);
+        }
+    }
+
+    // we are in the last day and the last item has not been dealt so far
+    if(!handledLast && day == (model_->endDateSec()/86400)*86400)
+    {
+        size_t pos=item->size()-1;
+
+        if(VNState* vn=VNState::find(item->status_[pos]))
+        {
+            int xpLeft=leftEdge,xpRight=0;
+            QColor fillCol;
+            fillCol=vn->colour();
+            bool lighter=(vn->name() == "complete");
+            bool hasGrad=false;
+
+            if(eDate < model_->endDateSec())
+               xpRight=rightEdge;
+            else
+            {
+                xpRight=timeToPos(option.rect,model_->endDateSec());
+                if(xpRight > rightEdge)
+                    xpRight=rightEdge;
             }
 
             drawCell(painter,QRect(xpLeft,option.rect.y(),xpRight-xpLeft+1,option.rect.height()-1),
