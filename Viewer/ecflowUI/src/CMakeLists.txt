@@ -157,6 +157,8 @@ set(viewer_srcs
     TextFilterHandlerDialog.cpp
     TextFilterWidget.cpp   
     TimelineHeaderView.cpp
+    TimelineInfoDailyView.cpp
+    TimelineInfoDailyWidget.cpp
     TimelineInfoDelegate.cpp
     TimelineInfoWidget.cpp
     TimelineItemWidget.cpp
@@ -353,6 +355,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TextFilterWidget.hpp
     TimelineData.hpp
     TimelineHeaderView.hpp
+    TimelineInfoDailyView.hpp
+    TimelineInfoDailyWidget.hpp
     TimelineInfoWidget.hpp
     TimelineModel.hpp
     TimelineView.hpp
@@ -440,6 +444,7 @@ set(viewer_wrap_ui_files
     TextFilterAddDialog.ui
     TextFilterHandlerDialog.ui
     TextFilterWidget.ui
+    TimelineInfoDailyWidget.ui
     TimelineInfoWidget.ui
     TimelinePreLoadDialog.ui
     TimelineWidget.ui

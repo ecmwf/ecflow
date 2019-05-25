@@ -543,7 +543,7 @@
     <string>zoomIn</string>
    </property>
    <property name="toolTip">
-    <string>Enter zoom mode in timelene header</string>
+    <string>Enter zoom mode in timeline header</string>
    </property>
   </action>
   <action name="actionZoomOut">

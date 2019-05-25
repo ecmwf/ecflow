@@ -58,36 +58,6 @@ protected:
     int lastRowInPeriod_;
 };
 
-class TimelineInfoDailyModel : public QAbstractItemModel
-{
-public:
-    explicit TimelineInfoDailyModel(QObject *parent=0);
-    ~TimelineInfoDailyModel();
-
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
-
-    Qt::ItemFlags flags ( const QModelIndex & index) const;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
-
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-    QModelIndex parent (const QModelIndex & ) const;
-
-    TimelineItem* data() const {return data_;}
-    void setData(TimelineItem*,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
-                 unsigned int endDateSec);
-    void clearData();
-    bool hasData() const;
-    unsigned int endDateSec() const {return endDateSec_;}
-
-protected:
-    TimelineItem* data_;
-    std::vector<unsigned int> days_;
-    unsigned int viewStartDateSec_;
-    unsigned int viewEndDateSec_;
-    unsigned int endDateSec_;
-};
 
 //the main widget containing all components
 class TimelineInfoWidget : public QWidget
@@ -124,7 +94,7 @@ private:
     int tlEndTime_;
 
 
-    TimelineInfoDailyModel* dailyModel_;
+    //TimelineInfoDailyModel* dailyModel_;
     NodeTimelineHeader* dailyHeader_;
 
     static bool columnsAdjusted_;
