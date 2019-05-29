@@ -86,14 +86,14 @@ char *nameof(char *name) {
 
 int main(argc,argv) int argc; char **argv;
 {
-  char  buff[MAXLEN];                  /* Temp buffer to read in lines */
-  char fname[PATH_MAX];
   char *infile = NULL;             /* Temporary input file        */
   char *outfile= "/dev/null";      /* Output file (def /dev/null) */
   char *shell= "/bin/sh";          /* default shell */
   /* int   keep_file=FALSE;*/      /* Flag to keep the input file */
 
-  FILE *fp;                        /* Temp to write the input file */
+  FILE *input_fp;                  /* Temp to write the input file */
+  char buff[MAXLEN];               /* Temp buffer to read in lines */
+  char fname[PATH_MAX];
 
   int   option;
   extern char *optarg;             /* Needed for the getopt */
@@ -136,22 +136,22 @@ int main(argc,argv) int argc; char **argv;
     infile = fname;
     close(fd);
 
-    if (!(fp = fopen(infile, "w"))) {
+    if (!(input_fp = fopen(infile, "w"))) {
       perror("ecflow_standalone.c, temp file creation error");
       exit(1);
     } 
     while( fgets(buff, MAXLEN-1, stdin)) {
       /* fprintf(stderr, "%s", buff); */
-      fputs(buff,fp);
+      fputs(buff,input_fp);
     }
   }
   else {
-     if( !(fp=fopen(infile,"r")) ) {
+     if( !(input_fp=fopen(infile,"r")) ) {
         perror("STANDALONE-INPUT-FILE cannot open");
         exit(1);
      }
   }
-  fclose(fp);
+  fclose(input_fp);
 
   /* fork child process, closing the parent */
   switch(fork()) {
@@ -173,11 +173,11 @@ int main(argc,argv) int argc; char **argv;
   close(0);                         /* close standard in , in child */
 
   /* make sure infile exists and is readable */
-  if( !(fp=fopen(infile,"r")) ) {
+  if( !(input_fp=fopen(infile,"r")) ) {
     perror("STANDALONE-INPUT-FILE-FOR-SHELL");
     exit(1);
   }
-  /* fclose(fp); */
+  /* fclose(input_fp); */
 
   /* if( !keep_file ) unlink(infile); 
      for (n=3; n<65535 ;n++) fclose(n); */
