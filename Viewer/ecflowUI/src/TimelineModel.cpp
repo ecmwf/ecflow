@@ -331,6 +331,16 @@ void TimelineSortModel::setTaskFilter(bool taskFilter)
     Q_EMIT invalidateCalled();
 }
 
+void TimelineSortModel::setRootNodeFilter(QString rootNodeFilter)
+{
+    if(rootNodeFilter != rootNodeFilter_)
+    {
+       rootNodeFilter_ =rootNodeFilter;
+       invalidate();
+       Q_EMIT invalidateCalled();
+    }
+}
+
 void TimelineSortModel::setChangeFilterMode(ChangeFilterMode m)
 {
     if(changeFilterMode_ != m)
@@ -369,7 +379,13 @@ bool TimelineSortModel::lessThan(const QModelIndex &left,
 bool TimelineSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &/*sourceParent*/) const
 {
     bool matched=true;
-    if(!pathFilter_.isEmpty())
+
+    if(!rootNodeFilter_.isEmpty())
+    {
+        matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().startsWith(rootNodeFilter_);
+    }
+
+    if(matched && !pathFilter_.isEmpty())
     {
         matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilterRx_);
     }

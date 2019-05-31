@@ -13,6 +13,7 @@
 #include <QFileInfo>
 #include <QTime>
 #include <QButtonGroup>
+#include <QFileDialog>
 
 #include "IconProvider.hpp"
 #include "FileInfoLabel.hpp"
@@ -21,9 +22,11 @@
 #include "SuiteFilter.hpp"
 #include "TimelineData.hpp"
 #include "TimelineModel.hpp"
+#include "TimelinePreLoadDialog.hpp"
 #include "TimelineView.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
+#include "UIDebug.hpp"
 #include "ViewerUtil.hpp"
 #include "VFileInfo.hpp"
 #include "VFileTransfer.hpp"
@@ -31,6 +34,7 @@
 #include "VSettings.hpp"
 
 #include "ui_TimelineWidget.h"
+
 
 //=======================================================
 //
@@ -41,6 +45,7 @@
 TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
     maxReadSize_(100*1024*1024),
+    logMode_(LatestMode),
     data_(0),
     filterTriggeredByEnter_(false),
     filterTriggerLimit_(200000),
@@ -50,7 +55,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     localLog_(true),
     logLoaded_(false),
     logTransferred_(false),
-    fileTransfer_(0)
+    fileTransfer_(0),
+    detached_(false)
 {
     ui_->setupUi(this);
 
@@ -94,9 +100,18 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->logInfoLabel->setFrameShape(QFrame::StyledPanel);
     ui_->logInfoLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
-    ui_->modeCombo->addItem("Timeline","timeline");
-    ui_->modeCombo->addItem("Duration","duration");
-    ui_->modeCombo->setCurrentIndex(0);
+    // log mode
+    ui_->logModeCombo->addItem("Current log","latest");
+    ui_->logModeCombo->addItem("Archived log","archive");
+    ui_->logModeCombo->setCurrentIndex(0);
+    ui_->loadFileTb->hide();
+
+    // view mode
+    QButtonGroup *viewModeGr = new QButtonGroup(this);
+    viewModeGr->addButton(ui_->timelineViewTb,0);
+    viewModeGr->addButton(ui_->durationViewTb,1);
+    viewModeGr->setExclusive(true);
+    ui_->timelineViewTb->setChecked(true);
 
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
     ui_->pathFilterLe->setPlaceholderText(tr("Filter"));
@@ -106,6 +121,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->pathFilterLe->setClearButtonEnabled(true);
 #endif
 
+    // sorting
     ui_->sortCombo->addItem("Sort by path","path");
     ui_->sortCombo->addItem("Sort by time","time");
     ui_->sortCombo->setCurrentIndex(0);
@@ -127,7 +143,11 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     view_->setZoomActions(ui_->actionZoomIn,ui_->actionZoomOut);
 
-    connect(ui_->modeCombo,SIGNAL(currentIndexChanged(int)),
+    // signal-slot
+    connect(ui_->logModeCombo,SIGNAL(currentIndexChanged(int)),
+            this,SLOT(slotLogMode(int)));
+
+    connect(viewModeGr,SIGNAL(buttonClicked(int)),
             this,SLOT(slotViewMode(int)));
 
     connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
@@ -135,6 +155,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     connect(ui_->pathFilterLe,SIGNAL(editingFinished()),
             this,SLOT(slotPathFilterEditFinished()));
+
+    connect(ui_->subTreeTb,SIGNAL(toggled(bool)),
+            this,SLOT(slotSubTree(bool)));
 
     connect(ui_->taskOnlyTb,SIGNAL(toggled(bool)),
             this,SLOT(slotTaskOnly(bool)));
@@ -178,6 +201,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     connect(view_,SIGNAL(copyPathRequested(QString)),
             this,SLOT(slotCopyPath(QString)));
 
+    connect(ui_->loadFileTb,SIGNAL(clicked()),
+            this,SLOT(slotLoadCustomFile()));
+
     //forced init
     slotSortMode(0);
     slotSortOrderChanged(0);
@@ -191,7 +217,8 @@ TimelineWidget::~TimelineWidget()
         delete data_;
 }
 
-void TimelineWidget::clear(bool inReload)
+// a complete clear
+void TimelineWidget::clear()
 {   
     beingCleared_=true;
     if(fileTransfer_)
@@ -214,23 +241,69 @@ void TimelineWidget::clear(bool inReload)
     port_.clear();
     suites_.clear();
     remoteUid_.clear();
+    currentNodePath_.clear();
     typesDetermined_=false;
     localLog_=true;
     logLoaded_=false;
     logTransferred_=false;
     transferredAt_=QDateTime();
 
-    if(!inReload)
-    {        
-        ui_->pathFilterLe->clear();
-        prevState_.valid=false;
-        //reset the view mode to timeline
-        ui_->modeCombo->setCurrentIndex(0);
-    }
+    ui_->pathFilterLe->clear();
+    prevState_.valid=false;
+
+    //reset the view mode to timeline
+    ui_->timelineViewTb->setChecked(true);
 
     tmpLogFile_.reset();
     //ui_->startTe->clear();
     //ui_->endTe->clear();
+
+    //reset the log mode to LatestMode
+    ui_->logModeCombo->setCurrentIndex(0);
+    logMode_ = LatestMode;
+    ui_->reloadTb->show();
+    ui_->loadFileTb->hide();
+    archiveLogList_.clear();
+    ui_->logModeCombo->hide();
+
+    setAllVisible(false);
+    updateFilterTriggerMode();
+
+    beingCleared_=false;
+}
+
+void TimelineWidget::clearData(bool usePrevState)
+{
+    beingCleared_=true;
+    if(fileTransfer_)
+    {
+        fileTransfer_->stopTransfer();
+        ui_->messageLabel->stopLoadLabel();
+    }
+
+    ui_->messageLabel->clear();
+    ui_->messageLabel->hide();
+    ui_->logInfoLabel->setText(QString());
+
+    model_->clearData();
+    data_->clear();
+    typesDetermined_=false;
+    localLog_=true;
+    logLoaded_=false;
+    logTransferred_=false;
+    transferredAt_=QDateTime();
+
+    if (!usePrevState)
+    {
+        ui_->pathFilterLe->clear();
+        prevState_.valid=false;
+        //reset the view mode to timeline
+        ui_->timelineViewTb->setChecked(true);
+        //ui_->startTe->clear();
+        //ui_->endTe->clear();
+    }
+
+    tmpLogFile_.reset();
 
     setAllVisible(false);
     updateFilterTriggerMode();
@@ -241,76 +314,111 @@ void TimelineWidget::clear(bool inReload)
 void TimelineWidget::updateInfoLabel(bool showDetails)
 {
     QColor col(39,49,101);
-    QString txt=Viewer::formatBoldText("Log file: ",col) + logFile_;
-    txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
-         Viewer::formatBoldText(" Host: ",col) + host_ +
-         Viewer::formatBoldText(" Port: ",col) + port_;
+    QString txt;
 
-    if(showDetails)
+    if(logMode_ == LatestMode)
     {
-        if(data_->loadStatus() == TimelineData::LoadDone)
-        {
-            if(localLog_)
-            {
-                VFileInfo fi(logFile_);
-                txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
-            }
-            else
-            {
-                 VFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
-                 if(fi.size() < static_cast<qint64>(maxReadSize_))
-                 {
-                     txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
-                 }
-            }
-        }
+        txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
 
-        txt+=Viewer::formatBoldText(" Source: ",col);
+        txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
+             Viewer::formatBoldText(" Host: ",col) + host_ +
+             Viewer::formatBoldText(" Port: ",col) + port_;
 
-        //fetch method and time
-        if(localLog_)
+        if(showDetails)
         {
-            txt+=" read from disk ";
-            if(data_->loadedAt().isValid())
-                txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
-        }
-        else
-        {
-            if(logTransferred_)
+            if(data_->loadStatus() == TimelineData::LoadDone)
             {
-                txt+=" fetched from remote host ";
-            }
-            else
-            {
-                txt+=" fetch failed from remote host ";
-            }
-            if(transferredAt_.isValid())
-                txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(transferredAt_);
-        }
-
-        if(data_->loadStatus() == TimelineData::LoadDone)
-        {
-            QColor warnCol(218,142,18);
-
-            QString warnVerb;
-            if(localLog_ && !data_->isFullRead())
-            {
-                warnVerb="parsed";
-            }
-            else if(tmpLogFile_)
-            {
-                QFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
-                if(static_cast<size_t>(fi.size()) == maxReadSize_)
+                if(localLog_)
                 {
-                    warnVerb="fetched";
+                    VFileInfo fi(logFile_);
+                    txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
+                }
+                else
+                {
+                    VFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
+                    txt+=Viewer::formatBoldText(" Size: ",col) + fi.formatSize();
                 }
             }
 
-            if(!warnVerb.isEmpty())
+            txt+=Viewer::formatBoldText(" Source: ",col);
+
+            //fetch method and time
+            if(localLog_)
             {
-                txt+=Viewer::formatItalicText(" (" + warnVerb + " last " + QString::number(maxReadSize_/(1024*1024)) +
-                                    " MB of file - maximum size reached)",warnCol);
+                txt+=" read from disk ";
+                if(data_->loadedAt().isValid())
+                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(data_->loadedAt());
             }
+            else
+            {
+                if(logTransferred_)
+                {
+                    txt+=" fetched from remote host ";
+                }
+                else
+                {
+                    txt+=" fetch failed from remote host ";
+                }
+                if(transferredAt_.isValid())
+                    txt+=Viewer::formatBoldText(" at ",col) + FileInfoLabel::formatDate(transferredAt_);
+            }
+
+            if(data_->loadStatus() == TimelineData::LoadDone)
+            {
+                QColor warnCol(218,142,18);
+
+                QString warnVerb;
+                if(localLog_ && !data_->isFullRead())
+                {
+                    warnVerb="parsed";
+                }
+                else if(tmpLogFile_)
+                {
+                    QFileInfo fi(QString::fromStdString(tmpLogFile_->path()));
+                    if(maxReadSize_ > 0 && static_cast<size_t>(fi.size()) == maxReadSize_)
+                    {
+                        warnVerb="fetched";
+                    }
+                }
+
+                if(!warnVerb.isEmpty())
+                {
+                    txt+=Viewer::formatItalicText(" (" + warnVerb + " last " + QString::number(maxReadSize_/(1024*1024)) +
+                                        " MB of file - maximum size reached)",warnCol);
+                }
+            }
+        }
+    }
+
+    //archived
+    else
+    {
+        if(archiveLogList_.loadableCount() == 1)
+        {
+           txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
+        }
+        else if(archiveLogList_.loadableCount() > 1)
+        {
+           txt= Viewer::formatBoldText("Log files: ",col) + "multiple ["+
+                   QString::number(archiveLogList_.loadableCount())  + "]";
+        }
+
+        txt+=Viewer::formatBoldText(" Server: ",col) + serverName_ +
+            Viewer::formatBoldText(" Host: ",col) + host_ +
+            Viewer::formatBoldText(" Port: ",col) + port_;
+
+        if(showDetails)
+        {
+            if(data_->loadStatus() == TimelineData::LoadDone)
+            {
+                if(archiveLogList_.loadableCount() == 1)
+                    txt+=Viewer::formatBoldText(" Size: ",col) + VFileInfo::formatSize(archiveLogList_.totalSize());
+                else if (archiveLogList_.loadableCount() > 1)
+                    txt+=Viewer::formatBoldText(" Total size: ",col) + VFileInfo::formatSize(archiveLogList_.totalSize());
+            }
+
+            txt+=Viewer::formatBoldText(" Source: ",col);
+            txt+=" read from disk ";         
         }
 
     }
@@ -339,28 +447,6 @@ void TimelineWidget::setAllVisible(bool b)
     view_->setVisible(b);
 }
 
-void TimelineWidget::slotReload()
-{
-    if(!serverName_.isEmpty())
-    {
-        std::vector<std::string> suites;
-        QString remoteUid;
-        //we need a copy because load() can clear suites_
-        if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
-        {
-            remoteUid = sh->uidForServerLogTransfer();
-            if(SuiteFilter* sf=sh->suiteFilter())
-            {
-                if(sf->isEnabled())
-                    suites=sh->suiteFilter()->filter();
-            }
-
-        }
-        load(serverName_, host_, port_, logFile_,suites, remoteUid);
-        checkButtonState();
-    }
-}
-
 void TimelineWidget::slotPeriodSelectedInView(QDateTime start,QDateTime end)
 {
     Q_ASSERT(data_);
@@ -387,16 +473,31 @@ void TimelineWidget::slotPeriodBeingZoomedInView(QDateTime start,QDateTime end)
     //checkButtonState();
 }
 
-void TimelineWidget::slotViewMode(int)
+
+void TimelineWidget::slotLogMode(int)
 {
+    if(beingCleared_)
+        return;
+
 #if QT_VERSION >= QT_VERSION_CHECK(5, 2, 0)
-    QString id=ui_->modeCombo->currentData().toString();
+    QString id=ui_->logModeCombo->currentData().toString();
 #else
     QString id;
-    if(ui_->modeCombo->currentIndex() >=0)
-        id=ui_->modeCombo->itemData(ui_->modeCombo->currentIndex()).toString();
+    if(ui_->logModeCombo->currentIndex() >=0)
+        id=ui_->logModeCombo->itemData(ui_->logModeCombo->currentIndex()).toString();
 #endif
-    if(id == "timeline")
+    if(id == "latest")
+        setLogMode(LatestMode);
+    else if(id == "archive")
+        setLogMode(ArchiveMode);
+}
+
+void TimelineWidget::slotViewMode(int)
+{
+    bool timelineMode=ui_->timelineViewTb->isChecked();
+
+    //timeline
+    if(timelineMode)
     {
         view_->setViewMode(TimelineView::TimelineMode);
         ui_->sortCombo->setEnabled(true);
@@ -411,7 +512,8 @@ void TimelineWidget::slotViewMode(int)
         slotSortOrderChanged(0);
 
     }
-    else if (id == "duration")
+    //duration
+    else
     {
         view_->setViewMode(TimelineView::DurationMode);
         ui_->sortCombo->setEnabled(false);
@@ -427,6 +529,17 @@ void TimelineWidget::slotViewMode(int)
     }
 }
 
+void TimelineWidget::slotSubTree(bool b)
+{
+    if(b)
+    {
+        sortModel_->setRootNodeFilter(currentNodePath_);
+    }
+    else
+    {
+        sortModel_->setRootNodeFilter(QString());
+    }
+}
 
 void TimelineWidget::slotTaskOnly(bool taskFilter)
 {
@@ -539,6 +652,13 @@ void TimelineWidget::slotCopyPath(QString nodePath)
 
 void TimelineWidget::selectPathInView(const std::string& p)
 {
+    currentNodePath_=QString::fromStdString(p);
+
+    if(ui_->subTreeTb->isChecked())
+    {
+        sortModel_->setRootNodeFilter(currentNodePath_);
+    }
+
     QModelIndex idx=sortModel_->mapToSource(view_->currentIndex());
     if(idx.isValid() && idx.row() < static_cast<int>(data_->size()))
     {
@@ -564,48 +684,153 @@ void TimelineWidget::checkButtonState()
      ui_->wholePeriodTb->setEnabled(!fromStart || !toEnd);
 }
 
-void TimelineWidget::load(QString logFile)
+void TimelineWidget::setLogMode(LogMode logMode)
 {
-    load("","","",logFile,suites_, remoteUid_);
-}
+    if(logMode_ == logMode)
+        return;
 
-void TimelineWidget::load(QString serverName, QString host, QString port, QString logFile,
-                          const std::vector<std::string>& suites, QString remoteUid)
-{
-    //if it is a reload we remember the current period
-    if(!serverName.isEmpty() && serverName == serverName_ && host == host_ && port == port_)
+    logMode_ = logMode;
+    if (logMode_ == LatestMode)
     {
-        prevState_.valid=true;
-        prevState_.startDt=ui_->fromTimeEdit->dateTime();
-        prevState_.endDt=ui_->toTimeEdit->dateTime();
-        prevState_.fullStart=(prevState_.startDt == data_->qStartTime());
-        prevState_.fullEnd=(prevState_.endDt == data_->qEndTime());
-        clear(true);
+        ui_->reloadTb->show();
+        ui_->loadFileTb->hide();
+        archiveLogList_.clear();
+        clearData(false);
+        reloadLatest(false);
+    }
+    else if(logMode_ == ArchiveMode)
+    {
+        ui_->reloadTb->hide();
+        ui_->loadFileTb->show();
+        archiveLogList_.clear();
+        clearData(false);
+        updateInfoLabel();
+        checkButtonState();
     }
     else
     {
-        prevState_.valid=false;
-        clear();
+        UI_ASSERT(0, "Invalid logMode=" << logMode);
     }
+}
 
-    if(logFile.isEmpty())
-       return;
+// The reload button was pressed in LatestMode
+void TimelineWidget::slotReload()
+{
+    Q_ASSERT(logMode_ == LatestMode);
+    reloadLatest(true);
+}
 
+// Reload the logfile in current mode.
+// canUsePrevState: false when we come form ArchiveMode or initial load,
+//                  true otherwise
+void TimelineWidget::reloadLatest(bool usePrevState)
+{
+    Q_ASSERT(logMode_ == LatestMode);
+    if(!serverName_.isEmpty())
+    {
+        std::vector<std::string> suites;
+        //we get the latest state of the suites and the remote uid
+        if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
+        {
+            remoteUid_ = sh->uidForServerLogTransfer();
+            setMaxReadSize(sh->maxSizeForTimelineData());
+
+            if(SuiteFilter* sf=sh->suiteFilter())
+            {
+                if(sf->isEnabled())
+                    suites=sh->suiteFilter()->filter();
+            }
+
+            suites_ = suites;
+        }
+
+        loadLatest(usePrevState);
+        checkButtonState();
+    }
+}
+
+void TimelineWidget::slotLoadCustomFile()
+{
+    Q_ASSERT(logMode_ == ArchiveMode);
+    QStringList fileNames = QFileDialog::getOpenFileNames(this);
+    if(fileNames.isEmpty())
+        return;
+
+    TimelineFileList archiveLogList = TimelineFileList(fileNames);
+    TimelinePreLoadDialog dialog;
+    dialog.setModal(true);
+    dialog.init(archiveLogList);
+    if(dialog.exec() == QDialog::Accepted)
+    {
+        archiveLogList_ = archiveLogList;
+        loadArchive();
+    }
+}
+
+// Initial load
+void TimelineWidget::initLoad(QString serverName, QString host, QString port, QString logFile,
+                          const std::vector<std::string>& suites, QString remoteUid, int maxReadSize,
+                          const std::string& currentNodePath, bool detached)
+{
+    if(logMode_ != LatestMode)
+        return;
+
+    // we need to be in a clean state
+    clear();
+    Q_ASSERT(logMode_ == LatestMode);
+
+    setDetached(detached);
+
+    // clear() hides it so we need to show it again
+    ui_->logModeCombo->show();
+
+    // these must be kept until we call clear()!!!!
     serverName_=serverName;
     host_=host;
     port_=port;
     logFile_=logFile;
     suites_=suites;
     remoteUid_=remoteUid;
+    setMaxReadSize(maxReadSize);
+    currentNodePath_=QString::fromStdString(currentNodePath);
+
+    loadLatest(false);
+}
+
+void TimelineWidget::loadLatest(bool usePrevState)
+{
+    Q_ASSERT(logMode_ == LatestMode);
+
+    //if it is a reload we remember the current period
+    if(usePrevState)
+    {
+        prevState_.valid=true;
+        prevState_.startDt=ui_->fromTimeEdit->dateTime();
+        prevState_.endDt=ui_->toTimeEdit->dateTime();
+        prevState_.fullStart=(prevState_.startDt == data_->qStartTime());
+        prevState_.fullEnd=(prevState_.endDt == data_->qEndTime());
+        clearData(true);
+    }
+    else
+    {
+        prevState_.valid=false;
+        clearData(false);
+    }
+
+    if(logFile_.isEmpty())
+       return;
+
     logLoaded_=false;
     logTransferred_=false;
     localLog_=true;
 
+    // at this point the file info label can only show some basic information
+    // we do not have the details
     updateInfoLabel(false);
 
-    QFileInfo fInfo(logFile);
+    QFileInfo fInfo(logFile_);
 
-    //try to get it over the network, ascynchronous
+    //try to get it over the network, ascynchronous - will call loadCore() in the end
     if(!fInfo.exists())
     {
         localLog_=false;
@@ -630,10 +855,118 @@ void TimelineWidget::load(QString serverName, QString host, QString port, QStrin
         fileTransfer_->transfer(logFile_,host_,QString::fromStdString(tmpLogFile_->path()),
                                 maxReadSize_,remoteUid_);
     }
+    // load local file
     else
     {
         loadCore(logFile_);
     }
+}
+
+
+// Load a single/multiple logfiles in ArchiveMode
+void TimelineWidget::loadArchive()
+{
+    Q_ASSERT(logMode_ == ArchiveMode);
+
+    clearData(false);
+
+    logLoaded_=false;
+    logTransferred_=false;
+    localLog_=true;
+
+    ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+    ui_->messageLabel->showInfo("Loading timeline data from log file ...");
+
+    bool loadDone=false;
+
+    QTime timer;
+    timer.start();
+
+    //std::vector<std::string> suites;
+    for(int i=0; i < archiveLogList_.items().count(); i++)
+    {
+        if(!archiveLogList_.items()[i].loadable_)
+            continue;
+
+        ui_->messageLabel->showInfo("Loading timeline data from log file [" +
+                                    QString::number(i+1) + "/" + QString::number(archiveLogList_.items().count()) +
+                                    "] ...");
+
+        ui_->messageLabel->startProgress(100);
+
+        try
+        {
+            data_->loadMultiLogFile(archiveLogList_.items()[i].fileName_.toStdString(),suites_,i);
+            loadDone=true;
+        }
+
+        catch(std::runtime_error e)
+        {
+            //logLoaded_=false;
+            ui_->messageLabel->stopProgress();
+
+            std::string errTxt(e.what());
+#if 0
+
+            QFileInfo fInfo(logFile);
+            if(!fInfo.exists())
+            {
+                errTxt+=" The specified log file <b>does not exist</b> on disk!";
+            }
+            else if(!fInfo.isReadable())
+            {
+                errTxt+=" The specified log file is <b>not readable</b>!";
+            }
+            else if(!fInfo.isFile())
+            {
+                errTxt+=" The specified log file is <b>not a file</b>!";
+            }
+
+            ui_->messageLabel->showError(QString::fromStdString(errTxt));
+            data_->clear();
+            setAllVisible(false);
+            updateInfoLabel();
+            ViewerUtil::restoreOverrideCursor();
+            return;
+#endif
+        }
+
+        UiLog().dbg() << "Logfile parsed: " << timer.elapsed()/1000 << "s";
+
+        ui_->messageLabel->stopProgress();
+        //ui_->messageLabel->hide();
+
+        //logLoaded_=true;
+        //setAllVisible(true);
+        //updateInfoLabel();
+        //updateFilterTriggerMode();
+
+        //determine node types if task filter is on
+        //if(ui_->taskOnlyTb->isChecked())
+        //    determineNodeTypes();
+    }
+
+    ui_->messageLabel->hide();
+
+    ViewerUtil::restoreOverrideCursor();
+
+    if(!loadDone)
+    {
+        ui_->messageLabel->showError(QString::fromStdString("Could not parse any of the specified log files!"));
+        data_->clear();
+        setAllVisible(false);
+        updateInfoLabel();
+        return;
+    }
+
+    logLoaded_=true;
+    data_->markAsLoadDone();
+    setAllVisible(true);
+    updateInfoLabel();
+    updateFilterTriggerMode();
+
+    initFromData();
 }
 
 void TimelineWidget::slotFileTransferFinished()
@@ -748,14 +1081,18 @@ void TimelineWidget::loadCore(QString logFile)
 
     ViewerUtil::restoreOverrideCursor();
 
-    //set the period
+    initFromData();
+}
 
+void TimelineWidget::initFromData()
+{
+    //set the period
     ignoreTimeEdited_=true;
 
     ui_->fromTimeEdit->setMinimumDateTime(data_->qStartTime());
     ui_->fromTimeEdit->setMaximumDateTime(data_->qEndTime());
 
-    //try to set the previously used interval - for reload only
+    //try the set the previously used interval - for reload only
     if(prevState_.valid)
     {
         if(prevState_.startDt <= data_->qStartTime() || prevState_.fullStart)
@@ -794,6 +1131,11 @@ void TimelineWidget::loadCore(QString logFile)
     checkButtonState();
 }
 
+void TimelineWidget::setDetached(bool d)
+{
+    detached_=d;
+}
+
 //Determine missing types
 void TimelineWidget::determineNodeTypes()
 {
@@ -824,6 +1166,14 @@ void TimelineWidget::determineNodeTypes()
     typesDetermined_=true;
 }
 
+void TimelineWidget::setMaxReadSize(int maxReadSizeInMb)
+{
+    if (maxReadSizeInMb <= 0)
+        maxReadSize_ = 0;
+    else
+        maxReadSize_ = static_cast<size_t>(maxReadSizeInMb)*1024*1024;
+}
+
 void TimelineWidget::writeSettings(VComboSettings* vs)
 {
     int cbIdx=ui_->sortCombo->currentIndex();
@@ -839,6 +1189,7 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
 #endif
     }
 
+    vs->put("subTree",ui_->subTreeTb->isChecked());
     vs->put("sortOrder",ui_->sortUpTb->isChecked()?"asc":"desc");
     vs->put("taskOnly",ui_->taskOnlyTb->isChecked());
     vs->put("showChanged",ui_->showChangedTb->isChecked());
@@ -865,6 +1216,7 @@ void TimelineWidget::readSettings(VComboSettings* vs)
         ui_->sortDownTb->setChecked(true);
     }
 
+    ui_->subTreeTb->setChecked(vs->get<bool>("subTree",false));
     ui_->showChangedTb->setChecked(vs->get<bool>("showChanged",true));
     ui_->taskOnlyTb->setChecked(vs->get<bool>("taskOnly",false));
 

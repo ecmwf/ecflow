@@ -1,12 +1,11 @@
 //============================================================================
-// Copyright 2009-2018 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
-//
-//=============================================================
+//=============================================================================
 
 #ifndef TIMELINEDATA_HPP
 #define TIMELINEDATA_HPP
@@ -83,6 +82,8 @@ public:
         startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadStatus_(LoadNotTried) {}
 
     void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
+    void loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,int logFileIndex);
+
     QDateTime loadedAt() const {return loadedAt_;}
     size_t size() const {return  items_.size();}
     const std::vector<TimelineItem>& items() const {return items_;}
@@ -94,19 +95,20 @@ public:
     void setItemType(int index,TimelineItem::Type type);
     bool isFullRead() const {return fullRead_;}
     LoadStatus loadStatus() const {return loadStatus_;}
+    void markAsLoadDone() {loadStatus_ = LoadDone;}
     bool indexOfItem(const std::string&,size_t&);
+
+    static bool parseLine(const std::string& line,std::string& name,
+                          unsigned char& statusId,unsigned int& statusTime);
 
 Q_SIGNALS:
     void loadProgress(size_t current,size_t total);
 
 protected:
+    void loadLogFileCore(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
     void guessNodeType();
-    TimelineItem::Type guessNodeType(const std::string& line,const std::string& name,
-                                      const std::string& status,
-                                      std::string::size_type next_ws) const;
-    TimelineItem::Type guessNodeType(const std::string& line,
-                                      const std::string& status,
-                                      std::string::size_type next_ws) const;
+    TimelineItem::Type guessNodeType(const std::string& line,const std::string& name) const;
+    TimelineItem::Type guessNodeType(const std::string& line) const;
     void sortByPath();
 
     std::vector<TimelineItem> items_;
@@ -119,6 +121,5 @@ protected:
     LoadStatus loadStatus_;
     QHash<QString,size_t> pathHash_;
 };
-
 
 #endif // TIMELINEDATA_HPP

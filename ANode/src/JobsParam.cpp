@@ -18,11 +18,15 @@
 
 bool JobsParam::check_for_job_generation_timeout()
 {
+   if (timed_out_of_job_generation_) return true;
+   return check_for_job_generation_timeout( boost::posix_time::microsec_clock::universal_time() );
+}
+
+bool JobsParam::check_for_job_generation_timeout(const boost::posix_time::ptime& start_time)
+{
    if (timed_out_of_job_generation_) {
       return true;
    }
-
-   boost::posix_time::ptime start_time = boost::posix_time::microsec_clock::universal_time();
    if (!next_poll_time_.is_special() && start_time >= next_poll_time_) {
       set_timed_out_of_job_generation(start_time);
       return true;

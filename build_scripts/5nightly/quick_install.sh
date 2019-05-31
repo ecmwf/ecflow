@@ -22,6 +22,7 @@ else
    export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python2.7/site-packages
 fi
 
+
 # =======================================================================
 # Create build scripts files. Must be before python $WK/build_scripts/5nightly/build.py
 # =======================================================================
@@ -38,7 +39,8 @@ ecflow_client --terminate=yes
 # =======================================================================
 # Start server. 
 # =======================================================================
-rm -rf `hostname`.4142.*
+rm -rf `hostname`.${ECF_PORT}.*
+
 
 ecflow_server&
 sleep 4

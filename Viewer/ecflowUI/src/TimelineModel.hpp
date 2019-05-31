@@ -84,6 +84,7 @@ public:
     void setPathFilter(QString);
     void setTaskFilter(bool);
     void setChangeFilterMode(ChangeFilterMode m);
+    void setRootNodeFilter(QString);
 
 protected Q_SLOTS:
     void slotPeriodChanged();
@@ -103,6 +104,7 @@ protected:
     bool taskFilter_;
     QRegExp pathFilterRx_;
     ChangeFilterMode changeFilterMode_;
+    QString rootNodeFilter_;
 };
 
 #endif // TIMELINEMODEL_CPP

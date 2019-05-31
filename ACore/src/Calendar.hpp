@@ -113,6 +113,9 @@ public:
  	/// The for_test parameter is *ONLY* used if we are using real time calendar
   	void update(const ecf::CalendarUpdateParams &);
 
+  	/// This is used to improve resolution of state change time. ECFLOW-1512
+   void update_duration_only(boost::posix_time::ptime& time_now);
+
   	// Used for test only, will call the function above
   	void update(const boost::posix_time::time_duration&);
   	void update(const boost::posix_time::ptime& time_now);

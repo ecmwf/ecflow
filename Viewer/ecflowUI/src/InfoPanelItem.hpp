@@ -54,7 +54,7 @@ public:
     void setSelected(bool,VInfo_ptr);
     void setSuspended(bool,VInfo_ptr);
 	void setFrozen(bool);
-	void setDetached(bool);
+    void setDetached(bool, bool update);
 
     bool isSuspended() const {return suspended_;}
     bool keepServerDataOnLoad() const {return keepServerDataOnLoad_;}

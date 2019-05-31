@@ -22,8 +22,15 @@ xxx="hello worlds from /home/ma/ma0"
 #printenv
 echo $SHELL
 fred="ma0@ecmwf.int"
-mail -s "$xxx" $fred <<@@
-$xxx
+
+if [ '"module unload emos" "module unload fftw" "module unload grib_api" "module unload eccodes" "module unload git" "module unload python" "module unload metview"' != '' ] ; then
+   array_of_module_cleanup=("module unload emos" "module unload fftw" "module unload grib_api" "module unload eccodes" "module unload git" "module unload python" "module unload metview")
+   for module_cleanup_i in "${array_of_module_cleanup[@]}";do
+      echo "${module_cleanup_i}"
+      ${module_cleanup_i}
+   done
+   echo $PATH
+fi
 @@
 !!
 
@@ -31,12 +38,11 @@ $xxx
 ssh localhost $(pwd)/ecflow_standalone -s /bin/bash -o $(pwd)/out.txt < $(pwd)/exe.sh   # EXPECT non empty out.txt, and mail
 ssh localhost $(pwd)/ecflow_standalone -s /bin/bash -o $(pwd)/out.txt -i $(pwd)/exe.sh  # EXPECT non empty out.txt, and mail
 
-# expected out.txt
-+ xxx='hello worlds from /home/ma/map'
-+ printenv
-+ echo /bin/ksh
-+ fred=ma0@ecmwf.int
-+ mail -s 'hello worlds from /home/ma/map' ma0@ecmwf.int
+# Compare ecflow_standalone with standalone
+/usr/local/apps/sms/bin/standalone -s /bin/bash -o $(pwd)/out1.txt < $(pwd)/exe.sh
+meld out.txt out1.txt
+
+# Make sure output of echo and module commands is shown
 
 std=/usr/local/apps/sms/bin/standalone
 ssh  eurus.ecmwf.int $std -s /bin/bash -o $(pwd)/out.txt < $(pwd)/exe.sh # OK
@@ -80,14 +86,14 @@ char *nameof(char *name) {
 
 int main(argc,argv) int argc; char **argv;
 {
-  char  buff[MAXLEN];                  /* Temp buffer to read in lines */
-  char fname[PATH_MAX];
   char *infile = NULL;             /* Temporary input file        */
   char *outfile= "/dev/null";      /* Output file (def /dev/null) */
   char *shell= "/bin/sh";          /* default shell */
   /* int   keep_file=FALSE;*/      /* Flag to keep the input file */
 
-  FILE *fp;                        /* Temp to write the input file */
+  FILE *input_fp;                  /* Temp to write the input file */
+  char buff[MAXLEN];               /* Temp buffer to read in lines */
+  char fname[PATH_MAX];
 
   int   option;
   extern char *optarg;             /* Needed for the getopt */
@@ -130,22 +136,22 @@ int main(argc,argv) int argc; char **argv;
     infile = fname;
     close(fd);
 
-    if (!(fp = fopen(infile, "w"))) {
+    if (!(input_fp = fopen(infile, "w"))) {
       perror("ecflow_standalone.c, temp file creation error");
       exit(1);
     } 
     while( fgets(buff, MAXLEN-1, stdin)) {
       /* fprintf(stderr, "%s", buff); */
-      fputs(buff,fp);
+      fputs(buff,input_fp);
     }
   }
   else {
-     if( !(fp=fopen(infile,"r")) ) {
+     if( !(input_fp=fopen(infile,"r")) ) {
         perror("STANDALONE-INPUT-FILE cannot open");
         exit(1);
      }
   }
-  fclose(fp);
+  fclose(input_fp);
 
   /* fork child process, closing the parent */
   switch(fork()) {
@@ -161,18 +167,17 @@ int main(argc,argv) int argc; char **argv;
    * int dup2(int oldfd, int newfd);
    * makes newfd be the copy of oldfd, closing newfd first if necessary
    * */
-  close(2);                        /* close standard error in child */
+  close(2);                         /* close standard error in child */
+  FILE* fout = fopen(outfile,"w");  /* Open file for output and error, when running execl(..) */
   dup2(2,1);
-  FILE* fout = fopen(outfile,"w"); /* Open file for output and error, when running execl(..) */
-  close(0);                        /* close standard in , in child */
-
+  close(0);                         /* close standard in , in child */
 
   /* make sure infile exists and is readable */
-  if( !(fp=fopen(infile,"r")) ) {
+  if( !(input_fp=fopen(infile,"r")) ) {
     perror("STANDALONE-INPUT-FILE-FOR-SHELL");
     exit(1);
   }
-  /* fclose(fp); */
+  /* fclose(input_fp); */
 
   /* if( !keep_file ) unlink(infile); 
      for (n=3; n<65535 ;n++) fclose(n); */

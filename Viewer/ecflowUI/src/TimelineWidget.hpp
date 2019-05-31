@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <QDateTime>
 
+#include "TimelineFileList.hpp"
 #include "VFile.hpp"
 
 class TimelineData;
@@ -36,6 +37,7 @@ struct TimelinePrevState
     bool fullEnd;
 };
 
+
 //the main widget containing all components
 class TimelineWidget : public QWidget
 {
@@ -45,12 +47,17 @@ public:
     explicit TimelineWidget(QWidget *parent=0);
     ~TimelineWidget();
 
-    void clear(bool inReload=false);
-    void load(QString logFile);
-    void load(QString serverName, QString host, QString port, QString logFile,
-              const std::vector<std::string>& suites, QString remoteUid);
+    void clear();
+    void initLoad(QString serverName, QString host, QString port, QString logFile,
+              const std::vector<std::string>& suites, QString remoteUid,int maxReadSize,
+              const std::string& nodePath, bool detached);
+
     QString logFile() const {return logFile_;}
+
+    enum LogMode {LatestMode, ArchiveMode};
+    void setLogMode(LogMode logMode);
     void selectPathInView(const std::string& p);
+    void setDetached(bool);
 
     void writeSettings(VComboSettings* vs);
     void readSettings(VComboSettings* vs);
@@ -62,9 +69,11 @@ protected Q_SLOTS:
    void slotWholePeriod();
    void slotStartChanged(const QDateTime&);
    void slotEndChanged(const QDateTime&);
+   void slotLogMode(int);
    void slotViewMode(int);
    void slotPathFilterChanged(QString);
    void slotPathFilterEditFinished();
+   void slotSubTree(bool);
    void slotTaskOnly(bool);
    void slotSortMode(int);
    void slotSortOrderChanged(int);
@@ -78,15 +87,21 @@ protected Q_SLOTS:
    void slotFileTransferStdOutput(QString msg);
    void slotLogLoadProgress(size_t current, size_t total);
    void slotCancelFileTransfer();
+   void slotLoadCustomFile();
 
 private:
+    void clearData(bool usePrevState);
     void updateFilterTriggerMode();
-    void load();
+    void reloadLatest(bool canUsePrevState);
+    void loadLatest(bool usePrevState);
+    void loadArchive();
     void loadCore(QString logFile);
+    void initFromData();
     void updateInfoLabel(bool showDetails=true);
     void setAllVisible(bool b);
     void checkButtonState();
     void determineNodeTypes();
+    void setMaxReadSize(int maxReadSizeInMb);
 
     Ui::TimelineWidget* ui_;
     QString serverName_;
@@ -97,6 +112,9 @@ private:
     size_t maxReadSize_;
     std::vector<std::string> suites_;
     QString remoteUid_;
+    LogMode logMode_;
+    TimelineFileList archiveLogList_;
+    QString currentNodePath_;
 
     TimelineData* data_;
     TimelineModel* model_;
@@ -117,6 +135,7 @@ private:
     QDateTime transferredAt_;
 
     TimelinePrevState prevState_;
+    bool detached_;
 };
 
 #endif // TIMELINEWIDGET_HPP

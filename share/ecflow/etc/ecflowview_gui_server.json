@@ -30,10 +30,18 @@
                 "prefix" : "server.files",
                 
                 "line" : "readFilesFromDisk",
-                "line" : "maxOutputFileLines",
+                "line" : "maxOutputFileLines"
+             },
+             "group" : {
+                "title" : "Timeline",
+                "prefix" : "server.files",
                 "line" : "uidForServerLogTransfer",
                 "note" : {
                     "default": "USER is the only shell variable that is substituted for this parameter!"
+                },
+                "line" : "maxSizeForTimelineData",
+                "note" : {
+                "default": "0 means there is no upper data limit!"
                 }
             },
 

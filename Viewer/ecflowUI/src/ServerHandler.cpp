@@ -1759,6 +1759,11 @@ QString ServerHandler::uidForServerLogTransfer() const
     return conf_->stringValue(VServerSettings::UidForServerLogTransfer);
 }
 
+int ServerHandler::maxSizeForTimelineData() const
+{
+    return conf_->intValue(VServerSettings::MaxSizeForTimelineData);
+}
+
 QString ServerHandler::nodeMenuMode() const
 {
     return conf_->stringValue(VServerSettings::NodeMenuMode);
