@@ -256,7 +256,11 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
 {
  	if (begun_) {
 
- 	   if (jobsParam.check_for_job_generation_timeout()) return false;
+ 	   // improve resolution of state change time. ECFLOW-1512
+ 	   boost::posix_time::ptime time_now = Calendar::second_clock_time();
+ 	   calendar_.update_duration_only(time_now);
+
+ 	   if (jobsParam.check_for_job_generation_timeout(time_now)) return false;
 
  	   SuiteChanged1 changed(this);
   		return NodeContainer::resolveDependencies(jobsParam);

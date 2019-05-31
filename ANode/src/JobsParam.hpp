@@ -75,6 +75,7 @@ public:
 
    // ensure that we avoid job generation close the server poll time.
    bool check_for_job_generation_timeout();
+   bool check_for_job_generation_timeout(const boost::posix_time::ptime& time_now);
 
    void set_ecf_file(const EcfFile& ecf_file) { ecf_file_ = ecf_file;}
    EcfFile& ecf_file() { return ecf_file_;}
