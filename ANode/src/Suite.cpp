@@ -259,6 +259,7 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
  	   // improve resolution of state change time. ECFLOW-1512
  	   boost::posix_time::ptime time_now = Calendar::second_clock_time();
  	   calendar_.update_duration_only(time_now);
+      calendar_change_no_ = Ecf::state_change_no() + 1;
 
  	   if (jobsParam.check_for_job_generation_timeout(time_now)) return false;
 
@@ -632,6 +633,7 @@ void Suite::collateChanges(DefsDelta& changes) const
 	/// *ONLY* create SuiteCalendarMemento, if something changed in the suite.
 	/// Additionally calendar_change_no_ updates should not register as a state change, i.e for tests
    /// SuiteCalendarMemento is need so that WhyCmd can work on the client side.
+	/// *AND* for showing the state change times.
    /// Need to use new compound since the suite may not have change, but it children may have.
 	/// Hence as side affect why command with reference to time will only be accurate
 	/// after some kind of state change. Discussed with Axel, who was happy with this.
