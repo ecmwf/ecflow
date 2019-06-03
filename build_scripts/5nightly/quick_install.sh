@@ -54,14 +54,14 @@ ecflow_client --delete=_all_ yes
 
 
 # ======================================================================
-# ecflow metabuilder. Metabuild *ONLY* work with python 2.7. TODO
+# ecflow metabuilder.  
 # ======================================================================
-if [[ $PYTHON != "python3" ]] ; then
-	cd /var/tmp/ma0/workspace/metabuilder
-	git checkout develop
-	./regenerate.sh ecflow
-	git checkout master
-fi
+cd /var/tmp/ma0/workspace/metabuilder
+git checkout develop
+$PYTHON ./clean.py -s ecflow 
+$PYTHON ./generate.py -s ecflow
+$PYTHON ./reload.py -s ecflow
+git checkout master
 
 # ========================================================================
 # test suites
