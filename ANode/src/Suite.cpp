@@ -272,11 +272,12 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
  	   // improve resolution of state change time. ECFLOW-1512
  	   boost::posix_time::ptime time_now = Calendar::second_clock_time();
  	   calendar_.update_duration_only(time_now);
+       calendar_change_no_ = Ecf::state_change_no() + 1;
 
  	   if (jobsParam.check_for_job_generation_timeout(time_now)) return false;
 
  	   SuiteChanged1 changed(this);
-  		return NodeContainer::resolveDependencies(jobsParam);
+  	   return NodeContainer::resolveDependencies(jobsParam);
  	}
  	return true;
 }
@@ -652,12 +653,13 @@ void Suite::collateChanges(DefsDelta& changes) const
 	   /// *ONLY* create SuiteCalendarMemento, if something changed in the suite.
 	   /// *OR* if it has been specifically requested. see ECFLOW-631
 	   /// Additionally calendar_change_no_ updates should not register as a state change, i.e for tests
+	   /// *AND* for showing the state change times.
 	   /// SuiteCalendarMemento is needed so that WhyCmd can work on the client side.
 	   /// Need to use new compound since the suite may not have change, but it children may have.
 	   /// Hence as side affect why command with reference to time will only be accurate
 	   /// after some kind of state change. Fixed with ECFLOW-631 (Client must do sync_clock, before calling why)
 	   size_t after = changes.size();
-	   if ((before != after || changes.sync_suite_clock() ) && calendar_change_no_ > changes.client_state_change_no() ) {
+	   if ((before != after || changes.sync_suite_clock() ) && calendar_change_no_ > changes.client_state_change_no()) {
 	      compound_memento_ptr compound_ptr =  std::make_shared<CompoundMemento>(absNodePath());
 	      compound_ptr->add( std::make_shared<SuiteCalendarMemento>( cal_ ) );
 	      changes.add( compound_ptr );
