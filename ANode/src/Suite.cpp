@@ -271,8 +271,8 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
 
  	   // improve resolution of state change time. ECFLOW-1512
  	   boost::posix_time::ptime time_now = Calendar::second_clock_time();
- 	   calendar_.update_duration_only(time_now);
-       calendar_change_no_ = Ecf::state_change_no() + 1;
+ 	   cal_.update_duration_only(time_now);
+      calendar_change_no_ = Ecf::state_change_no() + 1;
 
  	   if (jobsParam.check_for_job_generation_timeout(time_now)) return false;
 
