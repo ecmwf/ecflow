@@ -11,7 +11,7 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 #export ECF_DEBUG_CLIENT=1
 ECFLOW_VERSION=5.1.0
-export ECF_SSL=polonius.4142 # use server specfic <host>.<port>.*** certificates
+#export ECF_SSL=polonius.4142 # use server specfic <host>.<port>.*** certificates
 export ECF_PORT=4142
 export PATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
 PYTHON=python3
