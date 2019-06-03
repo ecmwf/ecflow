@@ -1266,7 +1266,13 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg,co
             connectionLost(errMsg);
         }
     }
-
+    else if(task->type()  == VTask::CommandTask)
+    {
+        //comQueue_->addSyncTask();
+        task->reply()->setErrorText(errMsg);
+        task->status(VTask::ABORTED);
+        UserMessage::message(UserMessage::WARN, true, errMsg);
+    }
     else
     {
         if(errMsg.empty())
