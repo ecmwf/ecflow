@@ -26,6 +26,7 @@
 #include "NodePath.hpp"
 #include "Client.hpp"
 #include "SuiteChanged.hpp"
+#include "PlugCmdContext.hpp"
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
 #endif
@@ -65,6 +66,7 @@ private:
 STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().plug_++;
+   PlugCmdContext plug_cmd_context; // save migrated children
 
    Lock lock(user(),as);
    if (!lock.ok()) {
