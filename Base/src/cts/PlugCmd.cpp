@@ -66,6 +66,17 @@ private:
    AbstractServer* as_;
 };
 
+static void restore(NodeContainer* container)
+{
+   if (container && container->get_flag().is_set(ecf::Flag::ARCHIVED)) {
+      container->restore();
+      std::vector<family_ptr> family_vec = container->familyVec();
+      for(family_ptr node : family_vec ) {
+         restore(node->isNodeContainer());
+      }
+   }
+}
+
 STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().plug_++;
@@ -93,6 +104,10 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
        errorMsg += " is a Alias. Alias can not be moved";
        throw std::runtime_error( errorMsg ) ;
    }
+
+   // If the source node or *any* of its children are archived restore them first.
+   // Must be done in a top down manner.
+   restore( sourceNode->isNodeContainer() );
 
 
    // Check to see if dest node is on the same server
