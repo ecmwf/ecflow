@@ -39,7 +39,9 @@
 
 TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type) :
     path_(path),
-    type_(type)
+    type_(type),
+    sortIndex_(0),
+    treeIndex_(0)
 {
     add(status,time);
 }
@@ -229,11 +231,17 @@ void TimelineData::clear()
     items_=std::vector<TimelineItem>();
     loadedAt_=QDateTime();
     pathHash_.clear();
+    sortIndex_=std::vector<size_t>();
 }
 
 void TimelineData::setItemType(int index,TimelineItem::Type type)
 {
     items_[index].type_=type;
+}
+
+void TimelineData::setItemTreeIndex(size_t index,size_t treeIndex)
+{
+    items_[index].treeIndex_=treeIndex;
 }
 
 void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites)
@@ -659,10 +667,13 @@ bool sortVecFunction(const std::pair<size_t,std::string>& a, const std::pair<siz
 
 void TimelineData::sortByPath()
 {
-    std::vector<std::pair<size_t, std::string> > sortVec;
+    sortIndex_=std::vector<size_t>();
+    sortIndex_.resize(items_.size(),0);
+
+    std::vector<std::pair<size_t, std::string> > sortVec(items_.size());
     for(size_t i = 0; i < items_.size(); i++)
     {
-        sortVec.push_back(std::make_pair(i,items_[i].path_));
+        sortVec[i]=std::make_pair(i,items_[i].path_);
     }
 
     std::sort(sortVec.begin(), sortVec.end(),sortVecFunction);
@@ -671,5 +682,6 @@ void TimelineData::sortByPath()
     {
         int idx=sortVec[i].first;
         items_[idx].sortIndex_=i;
+        sortIndex_[i]=idx;
     }
 }

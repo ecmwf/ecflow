@@ -101,6 +101,7 @@ private:
     void setAllVisible(bool b);
     void checkButtonState();
     void determineNodeTypes();
+    void determineTreeOrder();
     void setMaxReadSize(int maxReadSizeInMb);
 
     Ui::TimelineWidget* ui_;
@@ -128,6 +129,7 @@ private:
     int sortDownPixId_;
 
     bool typesDetermined_;
+    bool treeOrderDetermined_;
     bool localLog_;
     bool logLoaded_;
     bool logTransferred_;

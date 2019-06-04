@@ -34,13 +34,15 @@ class TimelineItem
 public:
     enum Type {UndeterminedType,ServerType,SuiteType,FamilyType,TaskType};
 
-    TimelineItem() : type_(UndeterminedType) {}
+    TimelineItem() : type_(UndeterminedType), sortIndex_(0), treeIndex_(0) {}
     TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type=UndeterminedType);
     size_t size() const {return status_.size();}
     const std::string& path() const {return path_;}
     Type type() const {return type_;}
     void setType(Type t) {type_ = t;}
     size_t sortIndex() const {return sortIndex_;}
+    size_t treeIndex() const {return treeIndex_;}
+    void setTreeIndex(size_t t) {treeIndex_=t;}
     bool isTask() const {return type_ ==  TaskType;}
     void add(unsigned char status,unsigned int time);
     int firstInPeriod(QDateTime startDt,QDateTime endDt) const;
@@ -68,8 +70,11 @@ public:
     std::string path_;
     Type type_;
     size_t sortIndex_;
+    size_t treeIndex_;
+    size_t parentIndex_;
     std::vector<unsigned int> start_;
     std::vector<unsigned char> status_;
+
 };
 
 class TimelineData : public QObject
@@ -93,10 +98,12 @@ public:
     QDateTime qEndTime() const {return TimelineItem::toQDateTime(endTime_);}
     void clear();    
     void setItemType(int index,TimelineItem::Type type);
+    void setItemTreeIndex(size_t index,size_t treeIndex);
     bool isFullRead() const {return fullRead_;}
     LoadStatus loadStatus() const {return loadStatus_;}
     void markAsLoadDone() {loadStatus_ = LoadDone;}
     bool indexOfItem(const std::string&,size_t&);
+    const std::vector<size_t>& sortIndex() const {return sortIndex_;}
 
     static bool parseLine(const std::string& line,std::string& name,
                           unsigned char& statusId,unsigned int& statusTime);
@@ -120,6 +127,7 @@ protected:
     bool fullRead_;
     LoadStatus loadStatus_;
     QHash<QString,size_t> pathHash_;
+    std::vector<size_t> sortIndex_;
 };
 
 #endif // TIMELINEDATA_HPP

@@ -25,7 +25,7 @@ public:
     enum CustomItemRole {PathSortRole = Qt::UserRole+1, TimeSortRole = Qt::UserRole+2,
                         UnchangedRole = Qt::UserRole+3, MeanDurationRole = Qt::UserRole+4,
                         DurationStatRole = Qt::UserRole+5,QtSortRole = Qt::UserRole+6,
-                        DurationUnchangedRole = Qt::UserRole+7};
+                        DurationUnchangedRole = Qt::UserRole+7, TreeSortRole = Qt::UserRole+8};
 
     enum ColumnType {PathColumn=0, TimelineColumn=1, SubmittedDurationColumn=2,
                      ActiveDurationColumn=3};
@@ -69,7 +69,7 @@ public:
     TimelineSortModel(TimelineModel*,QObject *parent=0);
     ~TimelineSortModel();
 
-    enum SortMode {PathSortMode, TimeSortMode, QtSortMode};
+    enum SortMode {PathSortMode, TimeSortMode, TreeSortMode, QtSortMode};
     enum ChangeFilterMode {TimelineChangeFilterMode, DurationChangeFilterMode,NoChangeFilterMode};
 
     //From QSortFilterProxyModel:
@@ -85,6 +85,7 @@ public:
     void setTaskFilter(bool);
     void setChangeFilterMode(ChangeFilterMode m);
     void setRootNodeFilter(QString);
+    SortMode sortMode() const {return sortMode_;}
 
 protected Q_SLOTS:
     void slotPeriodChanged();
