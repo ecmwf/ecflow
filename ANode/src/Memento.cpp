@@ -71,7 +71,9 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
 
  		if (clear_attributes_)  aspects_.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
 
+ 		// cout << "CompoundMemento::incremental_sync " << absNodePath_ << "\n";
  		BOOST_FOREACH(memento_ptr m, vec_) {
+ 		   // cout << "   " << typeid(*(m.get())).name() << "\n";
  			if (task)        m->do_incremental_task_sync( task, aspects_,true/* collect aspects only, don't make any changes*/ );
          else if (alias)  m->do_incremental_alias_sync( alias, aspects_,true/* collect aspects only, don't make any changes*/ );
          else if (suite)  m->do_incremental_suite_sync( suite , aspects_,true/* collect aspects only, don't make any changes*/);
