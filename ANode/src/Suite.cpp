@@ -557,9 +557,9 @@ bool Suite::checkInvariants(std::string& errorMsg) const
          errorMsg += ss.str();
          return false;
       }
-      if (calendar_change_no_ > Ecf::state_change_no() ) {
+      if (calendar_change_no_ > Ecf::state_change_no()+1 ) {
          std::stringstream ss;
-         ss << "Suite::checkInvariants: calendar_change_no_(" << calendar_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n";
+         ss << "Suite::checkInvariants: calendar_change_no_(" << calendar_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no()+1 << ")\n";
          errorMsg += ss.str();
          return false;
       }
