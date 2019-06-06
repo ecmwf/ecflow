@@ -259,6 +259,11 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
  	   // improve resolution of state change time. ECFLOW-1512
  	   boost::posix_time::ptime time_now = Calendar::second_clock_time();
  	   calendar_.update_duration_only(time_now);
+
+ 	   //  ** See: collateChanges  and ECFLOW-1512
+ 	   // Updating calendar_change_no_ ensure we sync suite calendar.
+ 	   // additionally this will end up adding an one more memento(SuiteCalendarMemento),
+ 	   // and thus affects python changed_node_paths
       calendar_change_no_ = Ecf::state_change_no() + 1;
 
  	   if (jobsParam.check_for_job_generation_timeout(time_now)) return false;
@@ -552,9 +557,9 @@ bool Suite::checkInvariants(std::string& errorMsg) const
          errorMsg += ss.str();
          return false;
       }
-      if (calendar_change_no_ > Ecf::state_change_no() + 1 ) {
+      if (calendar_change_no_ > Ecf::state_change_no() ) {
          std::stringstream ss;
-         ss << "Suite::checkInvariants: calendar_change_no_(" << calendar_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no()+1 << ")\n";
+         ss << "Suite::checkInvariants: calendar_change_no_(" << calendar_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n";
          errorMsg += ss.str();
          return false;
       }
