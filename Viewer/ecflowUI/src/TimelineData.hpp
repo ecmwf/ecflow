@@ -87,7 +87,7 @@ public:
         startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadStatus_(LoadNotTried) {}
 
     void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
-    void loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,int logFileIndex);
+    void loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,int logFileIndex, bool last);
 
     QDateTime loadedAt() const {return loadedAt_;}
     size_t size() const {return  items_.size();}
@@ -112,7 +112,7 @@ Q_SIGNALS:
     void loadProgress(size_t current,size_t total);
 
 protected:
-    void loadLogFileCore(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);
+    void loadLogFileCore(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites, bool multi);
     void guessNodeType();
     TimelineItem::Type guessNodeType(const std::string& line,const std::string& name) const;
     TimelineItem::Type guessNodeType(const std::string& line) const;

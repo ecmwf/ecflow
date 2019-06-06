@@ -906,7 +906,8 @@ void TimelineWidget::loadArchive()
 
         try
         {
-            data_->loadMultiLogFile(archiveLogList_.items()[i].fileName_.toStdString(),suites_,i);
+            data_->loadMultiLogFile(archiveLogList_.items()[i].fileName_.toStdString(),suites_,
+                                    i, (i == archiveLogList_.items().count()-1));
             loadDone=true;
         }
 
