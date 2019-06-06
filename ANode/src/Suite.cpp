@@ -255,6 +255,7 @@ void Suite::updateCalendar( const ecf::CalendarUpdateParams & calParams, std::ve
 bool Suite::resolveDependencies(JobsParam& jobsParam)
 {
  	if (begun_) {
+      SuiteChanged1 changed(this);
 
  	   // improve resolution of state change time. ECFLOW-1512
  	   boost::posix_time::ptime time_now = Calendar::second_clock_time();
@@ -266,9 +267,9 @@ bool Suite::resolveDependencies(JobsParam& jobsParam)
  	   // and thus affects python changed_node_paths
       calendar_change_no_ = Ecf::state_change_no() + 1;
 
- 	   if (jobsParam.check_for_job_generation_timeout(time_now)) return false;
+      // cout << "Suite::resolveDependencies calendar_change_no_:" << calendar_change_no_ << "\n";
 
- 	   SuiteChanged1 changed(this);
+ 	   if (jobsParam.check_for_job_generation_timeout(time_now)) return false;
   		return NodeContainer::resolveDependencies(jobsParam);
  	}
  	return true;
@@ -644,6 +645,9 @@ void Suite::collateChanges(DefsDelta& changes) const
 	/// after some kind of state change. Discussed with Axel, who was happy with this.
    size_t after = changes.size();
    if (before != after && calendar_change_no_ > changes.client_state_change_no()) {
+#ifdef DEBUG_MEMENTO
+      cout << "   Suite::collateChanges: creating SuiteCalendarMemento\n";
+#endif
       compound_memento_ptr compound_ptr =  boost::make_shared<CompoundMemento>(absNodePath());
       compound_ptr->add( boost::make_shared<SuiteCalendarMemento>( calendar_ ) );
       changes.add( compound_ptr );
