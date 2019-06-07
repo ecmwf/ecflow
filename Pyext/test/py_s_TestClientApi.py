@@ -1819,17 +1819,25 @@ def test_ECFLOW_199(ci):
     assert len(list(ci.changed_node_paths)) == 0, "Expected first call to sync_local, to have no changed paths but found " + str(len(list(ci.changed_node_paths)))
     
     # ok now resume t1/t2, they should remain queued, since the Suite is still suspended
+    # Note: ECFLOW-1512, we may get additional paths.( i.e. suite path) due to changes in suite calendar
     ci.resume("/test_ECFLOW_199/f1/t1")
-    sync_local(ci) 
+    sync_local(ci)
+    found_path = False
     for path in ci.changed_node_paths:
         print("   changed node path " + path);
-    assert len(list(ci.changed_node_paths)) == 1, "Expected 1 changed path but found " + str(len(list(ci.changed_node_paths)))
+        if path == "/test_ECFLOW_199/f1/t1":
+            found_path = True
+    assert found_path, "Expected '/test_ECFLOW_199/f1/t1' in list of changed paths"
 
     ci.resume("/test_ECFLOW_199/f1/t2")
-    sync_local(ci) 
+    sync_local(ci)
+    found_path = False
     for path in ci.changed_node_paths:
         print("   changed node path " + path);
-    assert len(list(ci.changed_node_paths)) == 1, "Expected 1 changed path but found " + str(len(list(ci.changed_node_paths)))
+        if path == "/test_ECFLOW_199/f1/t2":
+            found_path = True
+    assert found_path, "Expected '/test_ECFLOW_199/f1/t2' in list of changed paths"
+
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_ECFLOW_199"
     shutil.rmtree(dir_to_remove)      

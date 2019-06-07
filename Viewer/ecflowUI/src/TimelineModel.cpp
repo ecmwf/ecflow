@@ -118,6 +118,15 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
         return end+1;
     }
 
+    //sort roles
+    else if(role  == TreeSortRole)
+    {
+        if(index.column() ==  PathColumn)
+            return static_cast<qint64>(data_->items()[row].treeIndex());
+        else
+            return QVariant();
+    }
+
     //Qt sort roles
     else if(role  == QtSortRole)
     {
@@ -366,6 +375,11 @@ bool TimelineSortModel::lessThan(const QModelIndex &left,
     {
          return tlModel_->data(left,TimelineModel::TimeSortRole).toUInt() <
                tlModel_->data(right,TimelineModel::TimeSortRole).toUInt();
+    }
+    else if(sortMode_ == TreeSortMode)
+    {
+         return tlModel_->data(left,TimelineModel::TreeSortRole).toUInt() <
+               tlModel_->data(right,TimelineModel::TreeSortRole).toUInt();
     }
     else if(sortMode_ == QtSortMode)
     {

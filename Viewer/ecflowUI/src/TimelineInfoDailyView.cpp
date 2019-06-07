@@ -343,19 +343,39 @@ void TimelineInfoDailyDelegate::renderTimeline(QPainter *painter,const QStyleOpt
     bool handledLast = false;
 
     for(size_t i=0; i < item->size(); i++)
-    {
-        if(item->start_[i] < sDate)
+    {        
+        bool hasGrad=false;
+        bool lighter=false;
+        int xpLeft=0,xpRight=0;
+        QColor fillCol;
+
+        // the item is stretching through the whole period
+        if(item->start_[i] < sDate &&
+          ((i < item->size()-1 && item->start_[i+1] > eDate) ||
+           (i == item->size()-1 && eDate < model_->endDateSec())))
+        {
+            if(VNState* vn=VNState::find(item->status_[i]))
+            {
+                hasGrad=true;
+                xpLeft=leftEdge;
+                xpRight=rightEdge;
+                fillCol=vn->colour();
+                lighter=(vn->name() == "complete");
+                drawCell(painter,QRect(xpLeft,option.rect.y(),xpRight-xpLeft+1,option.rect.height()-1),
+                         fillCol,hasGrad,lighter);
+            }
             continue;
+        }
+
+        if(item->start_[i] < sDate)
+           continue;
+
         if(item->start_[i] > eDate)
             break;
 
         if(i==item->size()-1)
             handledLast=true;
 
-        bool hasGrad=false;
-        bool lighter=false;
-        int xpLeft=0,xpRight=0;
-        QColor fillCol;
         int xp=timeToPos(option.rect,item->start_[i]);
 
         // the previous item started before the startdate of the row

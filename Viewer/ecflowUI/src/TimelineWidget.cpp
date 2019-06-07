@@ -52,6 +52,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ignoreTimeEdited_(false),
     beingCleared_(false),
     typesDetermined_(false),
+    treeOrderDetermined_(false),
     localLog_(true),
     logLoaded_(false),
     logTransferred_(false),
@@ -124,6 +125,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     // sorting
     ui_->sortCombo->addItem("Sort by path","path");
     ui_->sortCombo->addItem("Sort by time","time");
+    ui_->sortCombo->addItem("Sort by tree","tree");
     ui_->sortCombo->setCurrentIndex(0);
 
     QButtonGroup *sortGr = new QButtonGroup(this);
@@ -243,6 +245,7 @@ void TimelineWidget::clear()
     remoteUid_.clear();
     currentNodePath_.clear();
     typesDetermined_=false;
+    treeOrderDetermined_=false;
     localLog_=true;
     logLoaded_=false;
     logTransferred_=false;
@@ -288,6 +291,7 @@ void TimelineWidget::clearData(bool usePrevState)
     model_->clearData();
     data_->clear();
     typesDetermined_=false;
+    treeOrderDetermined_=false;
     localLog_=true;
     logLoaded_=false;
     logTransferred_=false;
@@ -570,6 +574,11 @@ void TimelineWidget::slotSortMode(int)
         sortModel_->setSortMode(TimelineSortModel::PathSortMode);
     else if (idx == 1)
         sortModel_->setSortMode(TimelineSortModel::TimeSortMode);
+    else if (idx == 2)
+    {
+        determineTreeOrder();
+        sortModel_->setSortMode(TimelineSortModel::TreeSortMode);
+    }
 }
 
 void TimelineWidget::slotSortOrderChanged(int)
@@ -897,7 +906,8 @@ void TimelineWidget::loadArchive()
 
         try
         {
-            data_->loadMultiLogFile(archiveLogList_.items()[i].fileName_.toStdString(),suites_,i);
+            data_->loadMultiLogFile(archiveLogList_.items()[i].fileName_.toStdString(),suites_,
+                                    i, (i == archiveLogList_.items().count()-1));
             loadDone=true;
         }
 
@@ -1079,6 +1089,10 @@ void TimelineWidget::loadCore(QString logFile)
     if(ui_->taskOnlyTb->isChecked())
         determineNodeTypes();
 
+    //determine tree order when in tree sort mode
+    if(sortModel_->sortMode() == TimelineSortModel::TreeSortMode)
+        determineTreeOrder();
+
     ViewerUtil::restoreOverrideCursor();
 
     initFromData();
@@ -1164,6 +1178,49 @@ void TimelineWidget::determineNodeTypes()
     }
 
     typesDetermined_=true;
+}
+
+//Determine missing types
+void TimelineWidget::determineTreeOrder()
+{
+    if(treeOrderDetermined_)
+        return;
+
+    if(ServerHandler *sh=ServerHandler::find(serverName_.toStdString()))
+    {
+        ViewerUtil::setOverrideCursor(QCursor(Qt::WaitCursor));
+
+        // treeIndex = 0 is the server!!!!
+        const std::vector<VNode*>& nv = sh->vRoot()->nodes();
+        for(size_t i=0; i < nv.size(); i++)
+        {
+            size_t dataIdx=0;
+            if(data_->indexOfItem(nv[i]->absNodePath(), dataIdx))
+                data_->setItemTreeIndex(dataIdx, i+1);
+        }
+
+        // Now for all the nodes in the tree we have the treeIndex_ set.
+        // We deal with the rest of it (i.e. with nodes in the timeline data but
+        // not appearing in the tree!
+        int idx = nv.size()+1;
+
+        // iterate through the timeline items alphabetically
+        const std::vector<size_t>& sortIndex=data_->sortIndex();
+        for(size_t i=0; i < sortIndex.size() ;i++)
+        {
+            int dataIdx=sortIndex[i];
+            if(data_->items()[dataIdx].type() != TimelineItem::ServerType &&
+               data_->items()[dataIdx].treeIndex() == 0)
+            {
+               data_->setItemTreeIndex(dataIdx, idx);
+               idx++;
+            }
+        }
+
+        ViewerUtil::restoreOverrideCursor();
+    }
+
+    treeOrderDetermined_=true;
 }
 
 void TimelineWidget::setMaxReadSize(int maxReadSizeInMb)
