@@ -68,4 +68,8 @@ python Pyext/samples/TestBench.py  ANode/parser/test/data/single_defs/test_time_
 # Start the GUI
 # =======================================================================
 cd $SCRATCH
+export ECFLOWUI_DEVELOP_MODE=1      # enable special menu to diff ecflowui defs and downloaded defs
+#export ECFLOWUI_SESSION_MANAGER=1  # to minimise output for debug, use session with a single server
+#ecflow_ui.x > ecflow_ui.log 2>&1 & 
 ecflow_ui &
+
