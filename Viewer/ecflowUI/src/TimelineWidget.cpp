@@ -114,6 +114,8 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     viewModeGr->setExclusive(true);
     ui_->timelineViewTb->setChecked(true);
 
+    ui_->pathFilterMatchModeCb->setMatchMode(StringMatchMode(StringMatchMode::WildcardMatch));  // set the default match mode
+
 #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
     ui_->pathFilterLe->setPlaceholderText(tr("Filter"));
 #endif
@@ -151,6 +153,9 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
 
     connect(viewModeGr,SIGNAL(buttonClicked(int)),
             this,SLOT(slotViewMode(int)));
+
+    connect(ui_->pathFilterMatchModeCb,SIGNAL(currentIndexChanged(int)),
+        this, SLOT(pathFilterMatchModeChanged(int)));
 
     connect(ui_->pathFilterLe,SIGNAL(textChanged(QString)),
             this,SLOT(slotPathFilterChanged(QString)));
@@ -553,6 +558,11 @@ void TimelineWidget::slotTaskOnly(bool taskFilter)
     }
 
     sortModel_->setTaskFilter(taskFilter);
+}
+
+void TimelineWidget::pathFilterMatchModeChanged(int)
+{
+     sortModel_->setPathMatchMode(ui_->pathFilterMatchModeCb->currentMatchMode());
 }
 
 void TimelineWidget::slotPathFilterChanged(QString pattern)
@@ -1246,6 +1256,8 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
 #endif
     }
 
+    vs->put("pathFilterMatchMode",ui_->pathFilterMatchModeCb->currentIndex());
+
     vs->put("subTree",ui_->subTreeTb->isChecked());
     vs->put("sortOrder",ui_->sortUpTb->isChecked()?"asc":"desc");
     vs->put("taskOnly",ui_->taskOnlyTb->isChecked());
@@ -1257,6 +1269,13 @@ void TimelineWidget::writeSettings(VComboSettings* vs)
 void TimelineWidget::readSettings(VComboSettings* vs)
 {
     //at this point the model is empty so it is cheap to call sort
+
+    int matchModeIdx=vs->get<int>("pathFilterMatchMode",1);
+    StringMatchMode matchMode=ui_->pathFilterMatchModeCb->matchMode(matchModeIdx);
+    if(matchMode.mode() != StringMatchMode::InvalidMatch)
+    {
+        ui_->pathFilterMatchModeCb->setMatchMode(matchMode);
+    }
 
     //sort mode
     QString sortMode=QString::fromStdString(vs->get<std::string>("sortMode",std::string()));

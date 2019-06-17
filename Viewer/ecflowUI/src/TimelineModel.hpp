@@ -14,6 +14,7 @@
 #include <QSortFilterProxyModel>
 #include <QDateTime>
 #include <QSet>
+#include "StringMatchMode.hpp"
 
 class TimelineData;
 
@@ -81,6 +82,7 @@ public:
     void setSortMode(SortMode);
     void setSortDirection(bool ascending);
     void setSkipSort(bool b) {skipSort_=b;}
+    void setPathMatchMode(StringMatchMode);
     void setPathFilter(QString);
     void setTaskFilter(bool);
     void setChangeFilterMode(ChangeFilterMode m);
@@ -101,6 +103,7 @@ protected:
     bool skipSort_;
     SortMode sortMode_;
     bool ascending_;
+    StringMatchMode pathMatchMode_;
     QString pathFilter_;
     bool taskFilter_;
     QRegExp pathFilterRx_;
