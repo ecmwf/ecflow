@@ -216,6 +216,7 @@ void TaskScriptGenerator::generate_head_file() const
    contents += "export ECF_PASS=%ECF_PASS%    # A unique password\n";
    contents += "export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task\n";
    contents += "export ECF_RID=$$\n";
+   contents += "export ECF_TIMEOUT=120 # Only wait 2 minutes, if the server cannot be contacted (note default is 24 hours) before failing\n";
    contents += "\n";
    contents += "# Tell ecFlow we have started\n";
    contents += client_exe + "--init=$$\n";
@@ -223,6 +224,7 @@ void TaskScriptGenerator::generate_head_file() const
    contents += "# Defined a error handler\n";
    contents += "ERROR() {\n";
    contents += "   set +e                      # Clear -e flag, so we don't fail\n";
+   contents += "   wait                        # wait for background process to stop\n";
    contents += "   " + client_exe + "--abort=trap   # Notify ecFlow that something went wrong, using 'trap' as the reason\n";
    contents += "   trap 0                      # Remove the trap\n";
    contents += "   exit 0                      # End the script\n";
