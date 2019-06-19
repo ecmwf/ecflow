@@ -214,7 +214,7 @@ class Server(object):
                 print("   ------- Server *NOT* running on port " + self.the_port + " as *EXPECTED* ------ ") 
                 print("   ------- Start the server on port " + self.the_port + " ---------")  
                 clean_up_server(str(self.the_port))
-                clean_up_data(str(self.the_port))
+                #clean_up_data(str(self.the_port)) temp while debugging centos7
         
                 server_exe = File.find_server();
                 assert len(server_exe) != 0, "Could not locate the server executable"

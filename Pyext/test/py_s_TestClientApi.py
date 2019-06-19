@@ -349,8 +349,8 @@ def test_client_run(ci):
             assert False, "test_client_run aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
         
     ci.log_msg("Looped " + str(count) + " times")
-    
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_run"
+    print(">>>>>> About to delete directory",dir_to_remove)
     shutil.rmtree(dir_to_remove, ignore_errors=True)  
 
 
