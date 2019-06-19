@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2018 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -276,6 +276,7 @@ TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
         skipSort_(false),
         sortMode_(PathSortMode),
         ascending_(true),
+        pathMatchMode_(StringMatchMode::WildcardMatch),
         taskFilter_(false),
         changeFilterMode_(NoChangeFilterMode)
 {
@@ -323,12 +324,32 @@ void TimelineSortModel::setSortDirection(bool ascending)
     }
 }
 
+void TimelineSortModel::setPathMatchMode(StringMatchMode matchMode)
+{
+    pathMatchMode_ = matchMode;
+    setPathFilter(pathFilter_);
+}
+
 void TimelineSortModel::setPathFilter(QString pathFilter)
 {
     pathFilter_=pathFilter;
-    pathFilterRx_=QRegExp(pathFilter_);
-    pathFilterRx_.setPatternSyntax(QRegExp::Wildcard);
-    pathFilterRx_.setCaseSensitivity(Qt::CaseInsensitive);
+
+    if(pathMatchMode_.mode() == StringMatchMode::WildcardMatch ||
+       pathMatchMode_.mode() == StringMatchMode::RegexpMatch)
+    {
+        pathFilterRx_=QRegExp(pathFilter_);
+
+        if(pathMatchMode_.mode() == StringMatchMode::WildcardMatch)
+        {
+            pathFilterRx_.setPatternSyntax(QRegExp::Wildcard);
+        }
+        else
+        {
+            pathFilterRx_.setPatternSyntax(QRegExp::RegExp);
+        }
+        pathFilterRx_.setCaseSensitivity(Qt::CaseInsensitive);
+    }
+
     invalidate();
     Q_EMIT invalidateCalled();
 }
@@ -401,7 +422,14 @@ bool TimelineSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &/*sou
 
     if(matched && !pathFilter_.isEmpty())
     {
-        matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilterRx_);
+        if(pathMatchMode_.mode() != StringMatchMode::ContainsMatch)
+        {
+            matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilterRx_);
+        }
+        else
+        {
+            matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilter_);
+        }
     }
 
     if(matched && taskFilter_)

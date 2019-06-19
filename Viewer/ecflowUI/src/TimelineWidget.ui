@@ -30,7 +30,7 @@
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0">
      <property name="spacing">
       <number>1</number>
      </property>
@@ -78,6 +78,88 @@
        </property>
       </widget>
      </item>
+     <item>
+      <spacer name="horizontalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="timelineViewTb">
+       <property name="toolTip">
+        <string>Timeline view mode</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/period.svg</normaloff>:/viewer/period.svg</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="durationViewTb">
+       <property name="toolTip">
+        <string>Duration view mode</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/duration.svg</normaloff>:/viewer/duration.svg</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="reloadTb">
+       <property name="toolTip">
+        <string>Reload logfile</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/sync_black.svg</normaloff>:/viewer/sync_black.svg</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -98,6 +180,9 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
+      <item>
+       <widget class="StringMatchCombo" name="pathFilterMatchModeCb"/>
+      </item>
       <item>
        <widget class="QLineEdit" name="pathFilterLe"/>
       </item>
@@ -223,7 +308,7 @@
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
+         <enum>QSizePolicy::Expanding</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
@@ -341,7 +426,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_2">
+       <spacer name="horizontalSpacer_5">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -380,7 +465,7 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
+       <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -422,86 +507,20 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer_4">
+       <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>40</width>
+          <width>2</width>
           <height>20</height>
          </size>
         </property>
        </spacer>
-      </item>
-      <item>
-       <widget class="QToolButton" name="timelineViewTb">
-        <property name="toolTip">
-         <string>Timeline view mode</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="viewer.qrc">
-          <normaloff>:/viewer/period.svg</normaloff>:/viewer/period.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>16</width>
-          <height>16</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="durationViewTb">
-        <property name="toolTip">
-         <string>Duration view mode</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="viewer.qrc">
-          <normaloff>:/viewer/duration.svg</normaloff>:/viewer/duration.svg</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>16</width>
-          <height>16</height>
-         </size>
-        </property>
-        <property name="checkable">
-         <bool>true</bool>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QToolButton" name="reloadTb">
-        <property name="toolTip">
-         <string>Reload logfile</string>
-        </property>
-        <property name="text">
-         <string>...</string>
-        </property>
-        <property name="icon">
-         <iconset resource="viewer.qrc">
-          <normaloff>:/viewer/sync_black.svg</normaloff>:/viewer/sync_black.svg</iconset>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>
@@ -565,6 +584,11 @@
    <extends>QWidget</extends>
    <header>MessageLabel.hpp</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>StringMatchCombo</class>
+   <extends>QComboBox</extends>
+   <header>StringMatchCombo.hpp</header>
   </customwidget>
  </customwidgets>
  <resources>

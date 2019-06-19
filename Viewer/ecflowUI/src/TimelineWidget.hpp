@@ -88,6 +88,7 @@ protected Q_SLOTS:
    void slotLogLoadProgress(size_t current, size_t total);
    void slotCancelFileTransfer();
    void slotLoadCustomFile();
+   void pathFilterMatchModeChanged(int newIndex);
 
 private:
     void clearData(bool usePrevState);
