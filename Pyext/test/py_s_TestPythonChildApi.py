@@ -77,18 +77,18 @@ def wait_for_suite_to_complete(ci,suite_name):
         
     ci.log_msg("Looped " + str(count) + " times")
     
-def test_client_run(ci):            
-    print("\ntest_client_run " + ci.get_host() + ":" + str(ci.get_port()))
+def test_python_child_api(ci):            
+    print("\ntest_python_child_api " + ci.get_host() + ":" + str(ci.get_port()))
     print(" ECF_HOME(" + Test.ecf_home(ci.get_port()) + ")")
     print(" ECF_INCLUDES(" + ecf_includes() + ")")
     ci.delete_all(True)     
-    defs = create_defs("test_client_run",ci.get_port())  
-    suite = defs.find_suite("test_client_run")
+    defs = create_defs("test_python_child_api",ci.get_port())  
+    suite = defs.find_suite("test_python_child_api")
     suite.add_defstatus(DState.suspended)
 
-    # create the ecf file /test_client_run/f1/t1
+    # create the ecf file /test_python_child_api/f1/t1
     ecf_home = Test.ecf_home(ci.get_port())
-    dir = ecf_home + "/test_client_run/f1"
+    dir = ecf_home + "/test_python_child_api/f1"
     
     # on cray creating recursive directories can fail, try again. yuk
     try:
@@ -99,9 +99,9 @@ def test_client_run(ci):
         except:
             # try breaking down
             if not os.path.exists(ecf_home): os.makedirs(ecf_home)
-            new_dir = ecf_home + "/test_client_run"
+            new_dir = ecf_home + "/test_python_child_api"
             if not os.path.exists(new_dir): os.makedirs(new_dir)
-            new_dir = ecf_home + "/test_client_run/f1"
+            new_dir = ecf_home + "/test_python_child_api/f1"
             if not os.path.exists(new_dir): os.makedirs(new_dir)
     if not os.path.exists(dir): os.makedirs(dir)
 
@@ -130,17 +130,17 @@ def test_client_run(ci):
     open(file,'w').write(contents)
     print(" Created file " + file)
       
-    # create the ecf file /test_client_run/f1/t2
+    # create the ecf file /test_python_child_api/f1/t2
     file = dir + "/t2.ecf"
     contents = "%include <head.py>\n\n"
     contents += "with Client() as ci:\n"
-    contents += "    print('Waiting for /test_client_run/f1/t1 == complete')\n"
-    contents += "    ci.child_wait('/test_client_run/f1/t1 == complete')\n"
+    contents += "    print('Waiting for /test_python_child_api/f1/t1 == complete')\n"
+    contents += "    ci.child_wait('/test_python_child_api/f1/t1 == complete')\n"
     contents += "    print('Finished waiting')\n"
     open(file,'w').write(contents)
     print(" Created file " + file)
     
-    # create the ecf file /test_client_run/f1/t3
+    # create the ecf file /test_python_child_api/f1/t3
     file = dir + "/t3.ecf"
     contents = "%include <head.py>\n\n"
     contents += "with Client() as ci:\n"
@@ -152,12 +152,12 @@ def test_client_run(ci):
     ci.load(defs)          
     ci.begin_all_suites()
     print(" Running the test, wait for suite to complete ...")  
-    ci.run("/test_client_run", False)
+    ci.run("/test_python_child_api", False)
 
-    wait_for_suite_to_complete(ci,"test_client_run");
+    wait_for_suite_to_complete(ci,"test_python_child_api");
     
     if not Test.debugging():
-        dir_to_remove = Test.ecf_home(ci.get_port()) + "/" + "test_client_run"
+        dir_to_remove = Test.ecf_home(ci.get_port()) + "/" + "test_python_child_api"
         print((" Test OK: removing directory " , dir_to_remove))
         shutil.rmtree(dir_to_remove)      
         
@@ -174,5 +174,5 @@ if __name__ == "__main__":
         assert ci.version() == server_version, "Client version not same as server version"
 
         PrintStyle.set_style( Style.STATE ) # show node state 
-        test_client_run(ci)  
+        test_python_child_api(ci)  
         print("\nAll Tests pass ======================================================================")    
