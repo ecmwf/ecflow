@@ -21,7 +21,13 @@ export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 export ECF_RID=$$             # Let All child commands pass process id to server
 
+echo "About to run ecflow_client --version"
 %ECF_CLIENT_EXE_PATH:ecflow_client% --version
+
+echo "About to run ecflow_client --ping"
+%ECF_CLIENT_EXE_PATH:ecflow_client% --ping
+
+echo "About to run ecflow_client --init"
 %ECF_CLIENT_EXE_PATH:ecflow_client% --init=$$
 
 # Define a error hanlder
