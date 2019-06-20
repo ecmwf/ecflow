@@ -21,11 +21,11 @@ export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 export ECF_RID=$$             # Let All child commands pass process id to server
 
+# SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
+host %ECF_HOST%
+
 echo "About to run ecflow_client --version"
 %ECF_CLIENT_EXE_PATH:ecflow_client% --version
-
-echo "About to run ecflow_client --ping"
-%ECF_CLIENT_EXE_PATH:ecflow_client% --ping
 
 echo "About to run ecflow_client --init"
 %ECF_CLIENT_EXE_PATH:ecflow_client% --init=$$
@@ -33,6 +33,7 @@ echo "About to run ecflow_client --init"
 # Define a error hanlder
 
 ERROR() {
+   echo "ERROR() called"
 	set +e                                       # Clear -e flag, so we don't fail
 	wait                                         # wait for background process to stop
 	%ECF_CLIENT_EXE_PATH:ecflow_client% --abort  # Notify ECF_ that something went wrong

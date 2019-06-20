@@ -14,6 +14,9 @@ export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 
+# SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
+host %ECF_HOST%
+
 # Tell ECF_ we have stated
 # The ECF_ variable ECF_RID will be set to parameter of smsinit
 # Here we give the current PID.
@@ -27,7 +30,7 @@ ERROR() {
    # If we did not have background jobs, closly called foreround jobs
    # may arrive out of order at the server, causing unnecessary zombies
    # The wait should prevent this.
-
+   echo "ERROR() called"
 	set +e        # Clear -e flag, so we don't fail
 	wait          # wait for background process to stop
    smsabort      # Notify ECF_ that something went wrong

@@ -219,11 +219,15 @@ void TaskScriptGenerator::generate_head_file() const
    contents += "export ECF_TIMEOUT=300 # Only wait 5 minutes, if the server cannot be contacted (note default is 24 hours) before failing\n";
    contents += "#export ECF_DEBUG_CLIENT=1\n";
    contents += "\n";
+   contents += "# SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address\n";
+   contents += "host %ECF_HOST%\n";
+   contents += "\n";
    contents += "# Tell ecFlow we have started\n";
    contents += client_exe + "--init=$$\n";
    contents += "\n";
    contents += "# Defined a error handler\n";
    contents += "ERROR() {\n";
+   contents += "   echo 'ERROR() called'\n";
    contents += "   set +e                      # Clear -e flag, so we don't fail\n";
    contents += "   wait                        # wait for background process to stop\n";
    contents += "   " + client_exe + "--abort=trap   # Notify ecFlow that something went wrong, using 'trap' as the reason\n";
