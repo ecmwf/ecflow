@@ -230,10 +230,16 @@ class Server(object):
                 else:
                     print("   Server failed to start after 60 second, trying next port !!!!!! " + self.at_time())
                     self.the_port = self.lock_file.find_free_port( int(self.the_port) + 1 )   
-             
-        print("   Run the tests, leaving Server:__enter__:") 
-
+      
+        try:
+            print("   About to ping(again) localhost: " + self.the_port +  " : " + self.at_time())       
+            self.ci.ping() 
+        except RuntimeError as e:
+            print("   Server failed to start: ping failed ?????? " + self.at_time())
+            exit(1)
+            
         # return the Client, that can call to the server
+        print("   Run the tests, leaving Server:__enter__:") 
         return self.ci
     
     def __exit__(self,exctype,value,tb):
