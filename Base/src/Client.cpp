@@ -23,7 +23,7 @@
 #include "Client.hpp"
 #include "StcCmd.hpp"
 
-//#define DEBUG_CLIENT 1;
+#define DEBUG_CLIENT 1;
 
 #ifdef DEBUG_CLIENT
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
