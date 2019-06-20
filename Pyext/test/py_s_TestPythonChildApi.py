@@ -137,9 +137,8 @@ def test_python_child_api(ci):
         
 if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))
-    print("Temp disable test for centos7 debugging")
 
-#     with Test.Server() as ci:
-#         PrintStyle.set_style( Style.STATE ) # show node state 
-#         test_python_child_api(ci)  
-#         print("\nAll Tests pass ======================================================================")    
+    with Test.Server() as ci:
+        PrintStyle.set_style( Style.STATE ) # show node state 
+        test_python_child_api(ci)  
+        print("\nAll Tests pass ======================================================================")    
