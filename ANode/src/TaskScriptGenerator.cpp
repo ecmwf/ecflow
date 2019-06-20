@@ -223,7 +223,6 @@ void TaskScriptGenerator::generate_head_file() const
    contents += "date\n";
    contents += "ps -ef | grep ecflow\n";
    contents += "netstat -lnptu\n";
-   contents += client_exe + "--ping\n";
    contents += client_exe + "--init=$$\n";
    contents += "\n";
    contents += "# Defined a error handler\n";
