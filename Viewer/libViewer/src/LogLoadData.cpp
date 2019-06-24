@@ -820,7 +820,10 @@ void LogLoadData::add(std::vector<std::string> time_stamp,const LogReqCounter& t
 
     QString s=QString::fromStdString(time_stamp[0]) + " " +
             QString::fromStdString(time_stamp[1]);
-    time_.push_back(QDateTime::fromString(s,"HH:mm:ss d.M.yyyy").toMSecsSinceEpoch());
+
+    QDateTime dt = QDateTime::fromString(s,"HH:mm:ss d.M.yyyy");
+    dt.setTimeSpec(Qt::UTC);
+    time_.push_back(dt.toMSecsSinceEpoch());
 
     size_t index=time_.size()-1;
 

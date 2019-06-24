@@ -52,18 +52,18 @@ def create_defs(name,the_port):
     return defs;
     
 
-def test_client_run(ci):            
-    print("\ntest_client_run " + ci.get_host() + ":" + str(ci.get_port()))
+def test_python_child_api(ci):            
+    print("\ntest_python_child_api " + ci.get_host() + ":" + str(ci.get_port()))
     print(" ECF_HOME(" + Test.ecf_home(ci.get_port()) + ")")
     print(" ECF_INCLUDES(" + ecf_includes() + ")")
     ci.delete_all()     
-    defs = create_defs("test_client_run",ci.get_port())  
-    suite = defs.find_suite("test_client_run")
+    defs = create_defs("test_python_child_api",ci.get_port())  
+    suite = defs.find_suite("test_python_child_api")
     suite.add_defstatus(DState.suspended)
 
-    # create the ecf file /test_client_run/f1/t1
+    # create the ecf file /test_python_child_api/f1/t1
     ecf_home = Test.ecf_home(ci.get_port())
-    dir = ecf_home + "/test_client_run/f1"
+    dir = ecf_home + "/test_python_child_api/f1"
     
     # on cray creating recursive directories can fail, try again. yuk
     try:
@@ -74,9 +74,9 @@ def test_client_run(ci):
         except:
             # try breaking down
             if not os.path.exists(ecf_home): os.makedirs(ecf_home)
-            new_dir = ecf_home + "/test_client_run"
+            new_dir = ecf_home + "/test_python_child_api"
             if not os.path.exists(new_dir): os.makedirs(new_dir)
-            new_dir = ecf_home + "/test_client_run/f1"
+            new_dir = ecf_home + "/test_python_child_api/f1"
             if not os.path.exists(new_dir): os.makedirs(new_dir)
     if not os.path.exists(dir): os.makedirs(dir)
 
@@ -94,12 +94,12 @@ def test_client_run(ci):
     open(file,'w').write(contents)
     print(" Created file " + file)
       
-    # create the ecf file /test_client_run/f1/t2
+    # create the ecf file /test_python_child_api/f1/t2
     file = dir + "/t2.ecf"
     contents = "%include <head.py>\n\n"
-    contents += "print('Waiting for /test_client_run/f1/t1 == complete')\n"
+    contents += "print('Waiting for /test_python_child_api/f1/t1 == complete')\n"
     contents += "try:\n"
-    contents += "    ci.child_wait('/test_client_run/f1/t1 == complete')\n"
+    contents += "    ci.child_wait('/test_python_child_api/f1/t1 == complete')\n"
     contents += "    print('Finished waiting')\n"
     contents += "except:\n"
     contents += "    ci.child_abort()\n\n"
@@ -110,15 +110,15 @@ def test_client_run(ci):
     ci.restart_server()
     ci.load(defs)           
     ci.begin_all_suites()
-    ci.run("/test_client_run", False)
+    ci.run("/test_python_child_api", False)
     print(" Running the test, wait for suite to complete ...")  
 
     count = 0
     while 1:
         count += 1
         ci.sync_local() # get the changes, synced with local defs
-        suite = ci.get_defs().find_suite("test_client_run")
-        assert suite != None, " Expected to find suite test_client_run:\n" + str(ci.get_defs())
+        suite = ci.get_defs().find_suite("test_python_child_api")
+        assert suite != None, " Expected to find suite test_python_child_api:\n" + str(ci.get_defs())
         if suite.get_state() == State.complete:
             break;
         if suite.get_state() == State.aborted:
@@ -126,13 +126,13 @@ def test_client_run(ci):
             assert False," Suite aborted \n"  
         time.sleep(2)
         if count > 20:
-            assert False, " test_client_run aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
+            assert False, " test_python_child_api aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
         
     ci.log_msg("Looped " + str(count) + " times")
     
     if not Test.debugging():
-        dir_to_remove = Test.ecf_home(ci.get_port()) + "/" + "test_client_run"
-        print((" Test OK: removing directory " , dir_to_remove))
+        dir_to_remove = Test.ecf_home(ci.get_port()) + "/" + "test_python_child_api"
+        print(" Test OK: removing directory " , dir_to_remove)
         shutil.rmtree(dir_to_remove)      
         
 if __name__ == "__main__":
@@ -140,5 +140,5 @@ if __name__ == "__main__":
 
     with Test.Server() as ci:
         PrintStyle.set_style( Style.STATE ) # show node state 
-        test_client_run(ci)  
+        test_python_child_api(ci)  
         print("\nAll Tests pass ======================================================================")    

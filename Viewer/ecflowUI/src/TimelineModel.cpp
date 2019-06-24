@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2018 ECMWF.
+// Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -116,6 +116,15 @@ QVariant TimelineModel::data( const QModelIndex& index, int role ) const
             }
         }
         return end+1;
+    }
+
+    //sort roles
+    else if(role  == TreeSortRole)
+    {
+        if(index.column() ==  PathColumn)
+            return static_cast<qint64>(data_->items()[row].treeIndex());
+        else
+            return QVariant();
     }
 
     //Qt sort roles
@@ -267,6 +276,7 @@ TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
         skipSort_(false),
         sortMode_(PathSortMode),
         ascending_(true),
+        pathMatchMode_(StringMatchMode::WildcardMatch),
         taskFilter_(false),
         changeFilterMode_(NoChangeFilterMode)
 {
@@ -314,12 +324,32 @@ void TimelineSortModel::setSortDirection(bool ascending)
     }
 }
 
+void TimelineSortModel::setPathMatchMode(StringMatchMode matchMode)
+{
+    pathMatchMode_ = matchMode;
+    setPathFilter(pathFilter_);
+}
+
 void TimelineSortModel::setPathFilter(QString pathFilter)
 {
     pathFilter_=pathFilter;
-    pathFilterRx_=QRegExp(pathFilter_);
-    pathFilterRx_.setPatternSyntax(QRegExp::Wildcard);
-    pathFilterRx_.setCaseSensitivity(Qt::CaseInsensitive);
+
+    if(pathMatchMode_.mode() == StringMatchMode::WildcardMatch ||
+       pathMatchMode_.mode() == StringMatchMode::RegexpMatch)
+    {
+        pathFilterRx_=QRegExp(pathFilter_);
+
+        if(pathMatchMode_.mode() == StringMatchMode::WildcardMatch)
+        {
+            pathFilterRx_.setPatternSyntax(QRegExp::Wildcard);
+        }
+        else
+        {
+            pathFilterRx_.setPatternSyntax(QRegExp::RegExp);
+        }
+        pathFilterRx_.setCaseSensitivity(Qt::CaseInsensitive);
+    }
+
     invalidate();
     Q_EMIT invalidateCalled();
 }
@@ -329,6 +359,16 @@ void TimelineSortModel::setTaskFilter(bool taskFilter)
     taskFilter_=taskFilter;    
     invalidate();
     Q_EMIT invalidateCalled();
+}
+
+void TimelineSortModel::setRootNodeFilter(QString rootNodeFilter)
+{
+    if(rootNodeFilter != rootNodeFilter_)
+    {
+       rootNodeFilter_ =rootNodeFilter;
+       invalidate();
+       Q_EMIT invalidateCalled();
+    }
 }
 
 void TimelineSortModel::setChangeFilterMode(ChangeFilterMode m)
@@ -357,6 +397,11 @@ bool TimelineSortModel::lessThan(const QModelIndex &left,
          return tlModel_->data(left,TimelineModel::TimeSortRole).toUInt() <
                tlModel_->data(right,TimelineModel::TimeSortRole).toUInt();
     }
+    else if(sortMode_ == TreeSortMode)
+    {
+         return tlModel_->data(left,TimelineModel::TreeSortRole).toUInt() <
+               tlModel_->data(right,TimelineModel::TreeSortRole).toUInt();
+    }
     else if(sortMode_ == QtSortMode)
     {
         return tlModel_->data(left,TimelineModel::QtSortRole).toInt() <
@@ -369,9 +414,22 @@ bool TimelineSortModel::lessThan(const QModelIndex &left,
 bool TimelineSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &/*sourceParent*/) const
 {
     bool matched=true;
-    if(!pathFilter_.isEmpty())
+
+    if(!rootNodeFilter_.isEmpty())
     {
-        matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilterRx_);
+        matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().startsWith(rootNodeFilter_);
+    }
+
+    if(matched && !pathFilter_.isEmpty())
+    {
+        if(pathMatchMode_.mode() != StringMatchMode::ContainsMatch)
+        {
+            matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilterRx_);
+        }
+        else
+        {
+            matched=tlModel_->data(tlModel_->index(sourceRow,0)).toString().contains(pathFilter_);
+        }
     }
 
     if(matched && taskFilter_)

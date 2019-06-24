@@ -255,10 +255,21 @@ void Suite::updateCalendar( const ecf::CalendarUpdateParams & calParams, std::ve
 bool Suite::resolveDependencies(JobsParam& jobsParam)
 {
  	if (begun_) {
+      SuiteChanged1 changed(this);
 
- 	   if (jobsParam.check_for_job_generation_timeout()) return false;
+ 	   // improve resolution of state change time. ECFLOW-1512
+ 	   boost::posix_time::ptime time_now = Calendar::second_clock_time();
+ 	   calendar_.update_duration_only(time_now);
 
- 	   SuiteChanged1 changed(this);
+ 	   //  ** See: collateChanges  and ECFLOW-1512
+ 	   // Updating calendar_change_no_ ensure we sync suite calendar.
+ 	   // additionally this will end up adding an one more memento(SuiteCalendarMemento),
+ 	   // and thus affects python changed_node_paths
+      calendar_change_no_ = Ecf::state_change_no() + 1;
+
+      // cout << "Suite::resolveDependencies calendar_change_no_:" << calendar_change_no_ << "\n";
+
+ 	   if (jobsParam.check_for_job_generation_timeout(time_now)) return false;
   		return NodeContainer::resolveDependencies(jobsParam);
  	}
  	return true;
@@ -547,9 +558,9 @@ bool Suite::checkInvariants(std::string& errorMsg) const
          errorMsg += ss.str();
          return false;
       }
-      if (calendar_change_no_ > Ecf::state_change_no() ) {
+      if (calendar_change_no_ > Ecf::state_change_no()+1 ) {
          std::stringstream ss;
-         ss << "Suite::checkInvariants: calendar_change_no_(" << calendar_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no() << ")\n";
+         ss << "Suite::checkInvariants: calendar_change_no_(" << calendar_change_no_ << ") > Ecf::state_change_no(" << Ecf::state_change_no()+1 << ")\n";
          errorMsg += ss.str();
          return false;
       }
@@ -628,11 +639,15 @@ void Suite::collateChanges(DefsDelta& changes) const
 	/// *ONLY* create SuiteCalendarMemento, if something changed in the suite.
 	/// Additionally calendar_change_no_ updates should not register as a state change, i.e for tests
    /// SuiteCalendarMemento is need so that WhyCmd can work on the client side.
+	/// *AND* for showing the state change times.
    /// Need to use new compound since the suite may not have change, but it children may have.
 	/// Hence as side affect why command with reference to time will only be accurate
 	/// after some kind of state change. Discussed with Axel, who was happy with this.
    size_t after = changes.size();
    if (before != after && calendar_change_no_ > changes.client_state_change_no()) {
+#ifdef DEBUG_MEMENTO
+      cout << "   Suite::collateChanges: creating SuiteCalendarMemento\n";
+#endif
       compound_memento_ptr compound_ptr =  boost::make_shared<CompoundMemento>(absNodePath());
       compound_ptr->add( boost::make_shared<SuiteCalendarMemento>( calendar_ ) );
       changes.add( compound_ptr );

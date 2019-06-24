@@ -17,8 +17,11 @@ export ECF_NAME=%ECF_NAME%    # The name of this current task
 export ECF_PASS=%ECF_PASS%    # A unique password
 export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 
+# SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
+host %ECF_HOST%
+
 # to debug client communication with the server, enable this environment
-#export ECF_DEBUG_CLIENT=
+#export ECF_DEBUG_CLIENT=1
 
 # Typically we dont set this, however the zombie automated test require this.
 # it allows us to disambiguate a zombie from a real job.
@@ -31,8 +34,9 @@ export ECF_RID=$$
 
 # Defined a error hanlder
 ERROR() {
-	echo "ERROR called"
+	echo "ERROR() called"
 	set +e        # Clear -e flag, so we don't fail
+   wait          # wait for background process to stop
    # when the following signals arrive do nothing, stops recursive signals/error function being called
 	trap 0 1 2 3 4 5 6 7 8 10 12 13 15
    # Notify ECF_ that something went wrong

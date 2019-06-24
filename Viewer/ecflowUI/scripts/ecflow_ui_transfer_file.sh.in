@@ -14,8 +14,8 @@ set -x #goes to stderr
 
 echo " arguments=$*" >&2
 
-if [[ $# -ne 4 ]] ; then
-    echo "Error: wrong number of arguments = $# (must be 4)" >&2
+if [[ $# -ne 5 ]] ; then
+    echo "Error: wrong number of arguments = $# (must be 5)" >&2
     if [[ $# -eq 0 ]] ; then
         echo "This script should only be called from within ecflow_ui." >&2
     fi
@@ -26,12 +26,14 @@ sourceFile=$1
 host=$2
 targetFile=$3
 lastBytes=$4
+remoteUid=$5
 
 echo ""
 echo "sourceFile=$sourceFile" >&2
 echo "host=$host" >&2
 echo "targetFile=$targetFile" >&2
 echo "lastBytes=$lastBytes" >&2
+echo "remoteUid=$remoteUid" >&2
 echo ""
 
 if [[ $sourceFile == "" ]] ; then
@@ -59,19 +61,30 @@ if [[ $lastBytes -lt 0 ]] ; then
     exit 1
 fi
 
+if [[ $remoteUid == "" ]] ; then
+    echo "Error: remoteUid is empty!" >&2
+    exit 1
+fi
+
+if [[ $remoteUid == "__USER__" ]]  ; then
+    remoteUid=${USER}
+fi
+
 # transfer the whole file
 if [[ lastBytes -eq 0 ]] ; then
 
-    script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+    #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+    scp ${host}:/${sourceFile} ${targetFile}
 
 #transfer the last bytes of the file
 else
-    sourceSize=$(ssh ${USER}@${host} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}")
+    sourceSize=$(ssh ${remoteUid}@${host} -o StrictHostKeyChecking=no "wc -c < ${sourceFile}")
 
     if [[ ${sourceSize} -gt 0 && ${sourceSize} -le ${lastBytes} ]] ; then
-        script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+        #script -q -c "scp ${host}:/${sourceFile} ${targetFile}"
+        scp ${host}:/${sourceFile} ${targetFile}
     else
-        ssh ${USER}@${host} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
+        ssh ${remoteUid}@${host} -o StrictHostKeyChecking=no "tail -c ${lastBytes} ${sourceFile}" > ${targetFile}
     fi
 fi
 

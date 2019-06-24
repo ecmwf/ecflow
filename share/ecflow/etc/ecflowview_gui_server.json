@@ -18,7 +18,7 @@
                 "line" : "updateRateInSec",
                 "line" : "adaptiveUpdate",
                 "note" : {
-                    "default": "When enabled the server refresh period is <u>increased at every automatic refresh</u> until the maximum period is reached. If the user in the meantime refreshes the server manually the refresh period is set back to its original value and whole process starts again."
+                    "default": "When enabled the server refresh period is <u>increased at every automatic refresh</u> until the maximum period is reached. If the user in the meantime refreshes the server manually the refresh period is set back to its original value and the whole process starts again."
                 },
                 "line" : "adaptiveUpdateMode",
                 "line" : "adaptiveUpdateIncrementInSec",
@@ -30,7 +30,19 @@
                 "prefix" : "server.files",
                 
                 "line" : "readFilesFromDisk",
-                "line" : "maxOutputFileLines"              
+                "line" : "maxOutputFileLines"
+             },
+             "group" : {
+                "title" : "Timeline",
+                "prefix" : "server.files",
+                "line" : "uidForServerLogTransfer",
+                "note" : {
+                    "default": "USER is the only shell variable that is substituted for this parameter!"
+                },
+                "line" : "maxSizeForTimelineData",
+                "note" : {
+                "default": "0 means there is no upper data limit!"
+                }
             },
 
             "group" : {

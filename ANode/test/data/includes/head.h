@@ -32,6 +32,9 @@ export ECF_TRYNO=%ECF_TRYNO%  # Current try number of the task
 # to debug client communication with the server, enable this environment
 #export ECF_DEBUG_CLIENT=
 
+# SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
+host %ECF_HOST%
+
 # Typically we dont set this, however the zombie automated test require this.
 # it allows us to disambiguate a zomie from a real job.
 export ECF_RID=$$
@@ -43,10 +46,10 @@ export ECF_RID=$$
 
 # Defined a error hanlder
 ERROR() {
-	echo "ERROR called"
+	echo "ERROR() called"
 	set +e        # Clear -e flag, so we don't fail
-    #smsabort      # Notify ECF_ that something went wrong
-	%ECF_CLIENT_EXE_PATH:ecflow_client% --abort
+	wait          # wait for background process to stop
+	%ECF_CLIENT_EXE_PATH:ecflow_client% --abort # Notify ECF_ that something went wrong
 	trap 0        # Remove the trap
 	exit 0        # End the script
 }

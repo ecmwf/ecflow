@@ -234,6 +234,19 @@ void Calendar::update( const ecf::CalendarUpdateParams & calUpdateParams )
 #endif
 }
 
+
+void Calendar::update_duration_only( boost::posix_time::ptime& time_now )
+{
+   // 1. Always Maintain phase with system clock. The calUpdateParams.timeNow()
+   //    time was constructed from a system call in the server.
+   //
+   // Take a difference, which means we can ignore dates
+   boost::posix_time::time_duration dur = time_period( initLocalTime_, time_now ).length();
+   if (dur > duration_) {
+      duration_ =  dur;
+   }
+}
+
 void Calendar::update_cache() const
 {
    // begin() has not been called yet

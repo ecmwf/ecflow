@@ -201,6 +201,17 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             }
         }
 
+        else if(item->command() == "execute_aborted")
+        {
+            if(filteredNodes.size() == 1)
+            {
+                if(filteredNodes[0] && filteredNodes[0]->node())
+                {
+                    CommandHandler::executeAborted(filteredNodes[0]);
+                }
+            }
+        }
+
         else if(item->command() == "mark_for_move")
         {
             if(filteredNodes.size() > 1)

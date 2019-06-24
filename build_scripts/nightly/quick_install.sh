@@ -8,14 +8,17 @@ set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
-
-if [[ "$#"  == 0 ]] ; then
-export PATH=/tmp/ma0/install/cmake/ecflow/4.14.0/bin:$PATH
-export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/4.14.0/lib/python2.7/site-packages
+ECFLOW_VERSION=4.15.0
+export ECF_PORT=4141
+export PATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
+PYTHON=python
+if [[ $PYTHON == "python3" ]] ; then
+   module load python3
+   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python3.6/site-packages
 else
-   module unload ecflow
-   module load ecflow/new
+   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python2.7/site-packages
 fi
+
 
 # =======================================================================
 # Create build scripts files. Must be before python $WK/build_scripts/nightly/build.py
@@ -26,7 +29,6 @@ cp -r $WK/build_scripts/nightly .
 # =======================================================================
 # Kill the server
 # =======================================================================
-export ECF_PORT=4141
 which ecflow_client
 ecflow_client --version
 ecflow_client --terminate=yes
@@ -34,7 +36,7 @@ ecflow_client --terminate=yes
 # =======================================================================
 # Start server. 
 # =======================================================================
-rm -rf `hostname`.4141.*
+rm -rf `hostname`.${ECF_PORT}.*
 
 #export ECF_ALLOW_OLD_CLIENT_NEW_SERVER=9
 ecflow_server&
@@ -66,4 +68,8 @@ python Pyext/samples/TestBench.py  ANode/parser/test/data/single_defs/test_time_
 # Start the GUI
 # =======================================================================
 cd $SCRATCH
+export ECFLOWUI_DEVELOP_MODE=1      # enable special menu to diff ecflowui defs and downloaded defs
+#export ECFLOWUI_SESSION_MANAGER=1  # to minimise output for debug, use session with a single server
+#ecflow_ui.x > ecflow_ui.log 2>&1 & 
 ecflow_ui &
+

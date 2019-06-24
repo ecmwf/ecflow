@@ -14,6 +14,7 @@
 #include <QSortFilterProxyModel>
 #include <QDateTime>
 #include <QSet>
+#include "StringMatchMode.hpp"
 
 class TimelineData;
 
@@ -25,7 +26,7 @@ public:
     enum CustomItemRole {PathSortRole = Qt::UserRole+1, TimeSortRole = Qt::UserRole+2,
                         UnchangedRole = Qt::UserRole+3, MeanDurationRole = Qt::UserRole+4,
                         DurationStatRole = Qt::UserRole+5,QtSortRole = Qt::UserRole+6,
-                        DurationUnchangedRole = Qt::UserRole+7};
+                        DurationUnchangedRole = Qt::UserRole+7, TreeSortRole = Qt::UserRole+8};
 
     enum ColumnType {PathColumn=0, TimelineColumn=1, SubmittedDurationColumn=2,
                      ActiveDurationColumn=3};
@@ -69,7 +70,7 @@ public:
     TimelineSortModel(TimelineModel*,QObject *parent=0);
     ~TimelineSortModel();
 
-    enum SortMode {PathSortMode, TimeSortMode, QtSortMode};
+    enum SortMode {PathSortMode, TimeSortMode, TreeSortMode, QtSortMode};
     enum ChangeFilterMode {TimelineChangeFilterMode, DurationChangeFilterMode,NoChangeFilterMode};
 
     //From QSortFilterProxyModel:
@@ -81,9 +82,12 @@ public:
     void setSortMode(SortMode);
     void setSortDirection(bool ascending);
     void setSkipSort(bool b) {skipSort_=b;}
+    void setPathMatchMode(StringMatchMode);
     void setPathFilter(QString);
     void setTaskFilter(bool);
     void setChangeFilterMode(ChangeFilterMode m);
+    void setRootNodeFilter(QString);
+    SortMode sortMode() const {return sortMode_;}
 
 protected Q_SLOTS:
     void slotPeriodChanged();
@@ -99,10 +103,12 @@ protected:
     bool skipSort_;
     SortMode sortMode_;
     bool ascending_;
+    StringMatchMode pathMatchMode_;
     QString pathFilter_;
     bool taskFilter_;
     QRegExp pathFilterRx_;
     ChangeFilterMode changeFilterMode_;
+    QString rootNodeFilter_;
 };
 
 #endif // TIMELINEMODEL_CPP

@@ -213,8 +213,9 @@ class Server(object):
 
                 print("   ------- Server *NOT* running on port " + self.the_port + " as *EXPECTED* ------ ") 
                 print("   ------- Start the server on port " + self.the_port + " ---------")  
-                clean_up_server(str(self.the_port))
-                clean_up_data(str(self.the_port))
+                if not debugging():
+                    clean_up_server(str(self.the_port))   
+                    clean_up_data(str(self.the_port))    
         
                 server_exe = File.find_server();
                 assert len(server_exe) != 0, "Could not locate the server executable"
@@ -230,25 +231,31 @@ class Server(object):
                 else:
                     print("   Server failed to start after 60 second, trying next port !!!!!! " + self.at_time())
                     self.the_port = self.lock_file.find_free_port( int(self.the_port) + 1 )   
-             
-        print("   Run the tests, leaving Server:__enter__:") 
-
+      
+        try:
+            print("   About to ping(again) localhost: " + self.the_port +  " : " + self.at_time())       
+            self.ci.ping() 
+        except RuntimeError as e:
+            print("   Server failed to start: ping failed ?????? " + self.at_time())
+            exit(1)
+            
         # return the Client, that can call to the server
+        print("   Run the tests, leaving Server:__enter__:") 
         return self.ci
     
     def __exit__(self,exctype,value,tb):
-        print("Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME")
+        print("Server:__exit__: Kill the server, clean up log file, check pt files and lock files, ECF_HOME " + self.at_time())
         print("   exctype:",exctype)
         print("   value:",value)
         print("   tb:",tb)
-        print("   Terminate server")
+        print("   Terminate server "+ self.at_time() )
         self.ci.terminate_server()  
-        print("   Terminate server OK")
+        print("   Terminate server OK " + self.at_time() )
         self.lock_file.remove(self.the_port)
-        clean_up_server(str(self.the_port))
         
         # Do not clean up data, if an assert was raised. This allow debug
         if exctype == None:
+            clean_up_server(str(self.the_port))
             clean_up_data(str(self.the_port))
         return False
         

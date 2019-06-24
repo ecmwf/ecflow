@@ -39,7 +39,9 @@
 
 TimelineItem::TimelineItem(const std::string& path,unsigned char status,unsigned int time,Type type) :
     path_(path),
-    type_(type)
+    type_(type),
+    sortIndex_(0),
+    treeIndex_(0)
 {
     add(status,time);
 }
@@ -229,11 +231,17 @@ void TimelineData::clear()
     items_=std::vector<TimelineItem>();
     loadedAt_=QDateTime();
     pathHash_.clear();
+    sortIndex_=std::vector<size_t>();
 }
 
 void TimelineData::setItemType(int index,TimelineItem::Type type)
 {
     items_[index].type_=type;
+}
+
+void TimelineData::setItemTreeIndex(size_t index,size_t treeIndex)
+{
+    items_[index].treeIndex_=treeIndex;
 }
 
 void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites)
@@ -242,16 +250,54 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
     clear();
 
     maxReadSize_=maxReadSize;
+    if (maxReadSize_ < 0)
+        maxReadSize_=0;
+
     fullRead_=false;
     loadStatus_=LoadNotTried;
     loadedAt_=QDateTime::currentDateTime();
+
+    loadLogFileCore(logFile,maxReadSize,suites, false);
+}
+
+void TimelineData::loadMultiLogFile(const std::string& logFile,const std::vector<std::string>& suites,int logFileIndex, bool last)
+{
+    //Clear all collected data
+    if(logFileIndex == 0)
+    {
+        clear();
+
+        maxReadSize_=0;
+        fullRead_=true;
+        loadStatus_=LoadNotTried;
+        loadedAt_=QDateTime::currentDateTime();
+    }
+
+    loadLogFileCore(logFile,-1,suites, true);
+
+    if(last)
+    {
+        sortByPath();
+        loadStatus_=LoadDone;
+    }
+}
+
+void TimelineData::loadLogFileCore(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites, bool multi)
+{
+    //Clear all collected data
+    //clear();
+
+    //maxReadSize_=maxReadSize;
+    //fullRead_=false;
+    //loadStatus_=LoadNotTried;
+    //loadedAt_=QDateTime::currentDateTime();
 
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);
     if( !log_file.ok() )
     {
         loadStatus_=LoadFailed;
-        UiLog().warn() << "TimelineData::loadLogFile: Could not open log file " << logFile ;
+        UiLog().warn() << "TimelineData::loadLogFileCore: Could not open log file " << logFile ;
         throw std::runtime_error("Could not open log file: " + logFile);
     }
 
@@ -282,145 +328,148 @@ void TimelineData::loadLogFile(const std::string& logFile,size_t maxReadSize,con
     {
         log_file.getline(line); // default delimiter is /n
 
-        // The log file format we are interested is :
-        // 0             1         2            3
-        // MSG:[HH:MM:SS D.M.YYYY] chd:fullname [path +additional information]
-        // MSG:[HH:MM:SS D.M.YYYY] --begin      [args | path(optional) ]    :<user>
-
-        //LOG:[22:45:30 21.4.2018]  complete: path
-        //LOG:[22:45:30 21.4.2018]  submitted: path job_size:16408
-
-        /// We are only interested in status changes (i.e LOG:)
-        if (line.empty())
-            continue;
-
-        if (line[0] != 'L')
-            continue;
-
-        std::string::size_type log_pos = line.find("LOG:");
-        if (log_pos != 0)
-            continue;
-
-        /// LOG:[HH:MM:SS D.M.YYYY] status: fullname [+additional information]
-        /// EXTRACT the date
-        std::string::size_type first_open_bracket = line.find('[');
-        if ( first_open_bracket == std::string::npos)
-        {
-            assert(false);
-            continue;
-        }
-        //line.erase(0,first_open_bracket+1);
-
-        std::string::size_type first_closed_bracket = line.find(']',first_open_bracket);
-        if ( first_closed_bracket ==  std::string::npos)
-        {
-            //assert(false);
-            continue;
-        }
-        std::string time_stamp = line.substr(first_open_bracket+1,first_closed_bracket-first_open_bracket-1);
-
-        //ecf::Str::split(time_stamp, new_time_stamp);
-        //if (new_time_stamp.size() != 2)
-        //    continue;
-
-        //line.erase(0,first_closed_bracket+1);
-
-        ///extract the status
-        std::string::size_type first_colon = line.find(':',first_closed_bracket);
-        if(first_colon == std::string::npos)
-            continue;
-
-        std::string::size_type first_char = line.find_first_not_of(' ',first_closed_bracket+1);
-        if(first_char  == std::string::npos)
-            continue;
-
-        std::string status=line.substr(first_char,first_colon-first_char);
-
-        //get the status id
-        unsigned char statusId;
-        if(VNState* vn=VNState::find(status))
-            statusId=vn->ucId();
-        else
-            continue;
-
-        //extract the full name
-        first_char =  line.find_first_not_of(' ', first_colon+1);
-        if(first_char  == std::string::npos)
-              continue;
-
-        std::string::size_type next_ws = line.find(' ', first_char+1);
         std::string name;
-        if(next_ws  == std::string::npos)
+        unsigned char statusId=0;
+        unsigned int statusTime=0;
+        if(parseLine(line,name,statusId,statusTime))
         {
-            name=line.substr(first_char);
-        }
-        else
-        {
-            name=line.substr(first_char,next_ws-first_char);
-        }
-
-        //Filter by suites
-        if(!suites.empty() && name.size() > 1 && name[0] == '/')
-        {
-            std::string suite;
-            std::string::size_type next_sep=name.find("/",1);
-            if(next_sep != std::string::npos)
+            //Filter by suites
+            if(!suites.empty() && name.size() > 1 && name[0] == '/')
             {
-                suite=name.substr(1,next_sep-1);
+                std::string suite;
+                std::string::size_type next_sep=name.find("/",1);
+                if(next_sep != std::string::npos)
+                {
+                    suite=name.substr(1,next_sep-1);
+                }
+                else
+                {
+                    suite=name.substr(1);
+                }
+
+                if(std::find(suites.begin(),suites.end(),suite) == suites.end())
+                    continue;
+            }
+
+            if(startTime_ == 0)
+                startTime_=statusTime;
+
+            if(statusTime > endTime_)
+                endTime_=statusTime;
+
+            size_t idx=0;
+            //exsiting item
+            if(indexOfItem(name,idx))
+            {
+                items_[idx].add(statusId,statusTime);
+                if(items_[idx].type_ == TimelineItem::UndeterminedType)
+                {
+                    items_[idx].type_=guessNodeType(line);
+                }
             }
             else
             {
-                suite=name.substr(1);
+                items_.push_back(TimelineItem(name,statusId,statusTime,
+                                              guessNodeType(line,name)));
+
+                pathHash_.insert(QString::fromStdString(name),items_.size()-1);
             }
 
-            if(std::find(suites.begin(),suites.end(),suite) == suites.end())
-                continue;
-        }
-
-        //Convert status time into
-        unsigned int statusTime=QDateTime::fromString(QString::fromStdString(time_stamp),
-                       "hh:mm:ss d.M.yyyy").toMSecsSinceEpoch()/1000;
-
-        if(startTime_ == 0)
-            startTime_=statusTime;
-
-        if(statusTime > endTime_)
-            endTime_=statusTime;
-
-        size_t idx=0;
-        if(indexOfItem(name,idx))
-        {
-            items_[idx].add(statusId,statusTime);
-            if(items_[idx].type_ == TimelineItem::UndeterminedType)
+            size_t current=log_file.pos();
+            if(current/progressChunk > currentProgressChunk)
             {
-                items_[idx].type_=guessNodeType(line,status,next_ws);
+                currentProgressChunk=current/progressChunk;
+                percent=current/fSize;
+                if(percent <= 100)
+                    Q_EMIT loadProgress(current,fSize);
             }
-        }
-        else
-        {                               
-            items_.push_back(TimelineItem(name,statusId,statusTime,
-                                          guessNodeType(line,name,status,next_ws)));
 
-            pathHash_.insert(QString::fromStdString(name),items_.size()-1);
-        }
+            numOfRows_++;
 
-        size_t current=log_file.pos();
-        if(current/progressChunk > currentProgressChunk)
-        {
-            currentProgressChunk=current/progressChunk;
-            percent=current/fSize;
-            if(percent <= 100)
-                Q_EMIT loadProgress(current,fSize);
         }
-
-        numOfRows_++;
     }
 
-    sortByPath();
+    if(!multi)
+    {
+        sortByPath();
+        loadStatus_=LoadDone;
+    }
+}
 
-    loadStatus_=LoadDone;
+bool TimelineData::parseLine(const std::string& line,std::string& name,
+                             unsigned char& statusId,unsigned int& statusTime)
+{
+    // The log file format we are interested is :
+    //LOG:[22:45:30 21.4.2018]  complete: path
+    //LOG:[22:45:30 21.4.2018]  submitted: path job_size:16408
 
-    //guessNodeType();
+    /// We are only interested in status changes (i.e LOG:)
+    if (line.empty())
+        return false;
+
+    if (line[0] != 'L')
+        return false;
+
+    std::string::size_type log_pos = line.find("LOG:");
+    if (log_pos != 0)
+        return false;
+
+    /// LOG:[HH:MM:SS D.M.YYYY] status: fullname [+additional information]
+    /// EXTRACT the date
+    std::string::size_type first_open_bracket = line.find('[');
+    if ( first_open_bracket == std::string::npos)
+    {
+        return false;
+    }
+
+    std::string::size_type first_closed_bracket = line.find(']',first_open_bracket);
+    if ( first_closed_bracket ==  std::string::npos)
+    {
+        return false;
+    }
+
+    std::string time_stamp = line.substr(first_open_bracket+1,first_closed_bracket-first_open_bracket-1);
+
+    ///extract the status
+    std::string::size_type first_colon = line.find(':',first_closed_bracket);
+    if(first_colon == std::string::npos)
+        return false;
+
+    std::string::size_type first_char = line.find_first_not_of(' ',first_closed_bracket+1);
+    if(first_char  == std::string::npos)
+        return false;
+
+    std::string status=line.substr(first_char,first_colon-first_char);
+
+    //get the status id
+    //unsigned char statusId;
+    if(VNState* vn=VNState::find(status))
+        statusId=vn->ucId();
+    else
+        return false;
+
+    //extract the full name
+    first_char =  line.find_first_not_of(' ', first_colon+1);
+    if(first_char  == std::string::npos)
+          return false;
+
+    std::string::size_type next_ws = line.find(' ', first_char+1);
+    if(next_ws  == std::string::npos)
+    {
+        name=line.substr(first_char);
+    }
+    else
+    {
+        name=line.substr(first_char,next_ws-first_char);
+    }
+
+    //Convert status time into secs
+    QDateTime dt = QDateTime::fromString(QString::fromStdString(time_stamp),
+                                         "hh:mm:ss d.M.yyyy");
+    dt.setTimeSpec(Qt::UTC);
+    statusTime=dt.toMSecsSinceEpoch()/1000;
+
+    return true;
 }
 
 void TimelineData::guessNodeType()
@@ -448,29 +497,23 @@ void TimelineData::guessNodeType()
     }
 }
 
-TimelineItem::Type TimelineData::guessNodeType(const std::string& line,const std::string& name,
-                                  const std::string& status,
-                                  std::string::size_type next_ws) const
+TimelineItem::Type TimelineData::guessNodeType(const std::string& line,const std::string& name) const
 {
     if(name.find_last_of("/") == 0)
     {
         return TimelineItem::SuiteType;
     }
 
-    return guessNodeType(line,status,next_ws);
+    return guessNodeType(line);
 }
 
-TimelineItem::Type TimelineData::guessNodeType(const std::string& line,
-                                  const std::string& status,
-                                  std::string::size_type next_ws) const
+TimelineItem::Type TimelineData::guessNodeType(const std::string& line) const
 {
     //Try to figure out if it is a taks when status=submitted. If there is
     //an item with "job_size:" it must be a task.
-    if(status == "submitted" && next_ws  != std::string::npos)
-    {
-       if(line.find("job_size:",next_ws) != std::string::npos)
-           return TimelineItem::TaskType;
-    }
+    if(line.find("job_size:") != std::string::npos)
+        return TimelineItem::TaskType;
+
     return TimelineItem::UndeterminedType;
 }
 
@@ -493,10 +536,13 @@ bool sortVecFunction(const std::pair<size_t,std::string>& a, const std::pair<siz
 
 void TimelineData::sortByPath()
 {
-    std::vector<std::pair<size_t, std::string> > sortVec;
+    sortIndex_=std::vector<size_t>();
+    sortIndex_.resize(items_.size(),0);
+
+    std::vector<std::pair<size_t, std::string> > sortVec(items_.size());
     for(size_t i = 0; i < items_.size(); i++)
     {
-        sortVec.push_back(std::make_pair(i,items_[i].path_));
+        sortVec[i]=std::make_pair(i,items_[i].path_);
     }
 
     std::sort(sortVec.begin(), sortVec.end(),sortVecFunction);
@@ -505,5 +551,6 @@ void TimelineData::sortByPath()
     {
         int idx=sortVec[i].first;
         items_[idx].sortIndex_=i;
+        sortIndex_[i]=idx;
     }
 }

@@ -349,9 +349,9 @@ def test_client_run(ci):
             assert False, "test_client_run aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
         
     ci.log_msg("Looped " + str(count) + " times")
-    
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_run"
-    shutil.rmtree(dir_to_remove)      
+    shutil.rmtree(dir_to_remove, ignore_errors=True)  
+
 
 def test_client_run_with_multiple_paths(ci):            
     print("test_client_run_with_multiple_paths")
@@ -385,7 +385,7 @@ def test_client_run_with_multiple_paths(ci):
     ci.log_msg("Looped " + str(count) + " times")
     
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_run_with_multiple_paths"
-    shutil.rmtree(dir_to_remove)      
+    shutil.rmtree(dir_to_remove, ignore_errors=True)     
 
     
 def test_client_requeue(ci):
@@ -414,7 +414,7 @@ def test_client_requeue(ci):
     assert suite.get_state() == State.queued, "Expected to find suite with state queued"
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_requeue"
-    shutil.rmtree(dir_to_remove)      
+    shutil.rmtree(dir_to_remove, ignore_errors=True)     
 
 def test_client_requeue_with_multiple_paths(ci):
     print("test_client_requeue_with_multiple_paths")
@@ -447,7 +447,7 @@ def test_client_requeue_with_multiple_paths(ci):
     assert task2.get_state() == State.queued, "Expected to find task t2 with state queued"
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_requeue_with_multiple_paths"
-    shutil.rmtree(dir_to_remove)      
+    shutil.rmtree(dir_to_remove, ignore_errors=True)     
 
 
 def test_client_free_dep(ci):
@@ -510,7 +510,7 @@ def test_client_free_dep(ci):
         time.sleep(3)       
             
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_free_dep"
-    shutil.rmtree(dir_to_remove)             
+    shutil.rmtree(dir_to_remove, ignore_errors=True)   
 
 
 def test_client_stats(ci):
@@ -799,7 +799,7 @@ def test_client_get_file(ci):
         print(str(e))
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_get_file"
-    shutil.rmtree(dir_to_remove,True)   # True means ignore errors   
+    shutil.rmtree(dir_to_remove, ignore_errors=True)  
 
     
 def test_client_plug(ci):
@@ -1697,7 +1697,7 @@ def test_client_check_defstatus(ci):
     assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_state())
    
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_check_defstatus"
-    shutil.rmtree(dir_to_remove)      
+    shutil.rmtree(dir_to_remove, ignore_errors=True)     
     
 def test_ECFLOW_189(ci):
     # Bug, when a node is resumed it ignored holding dependencies higher up the tree.
@@ -1745,7 +1745,7 @@ def test_ECFLOW_189(ci):
     assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_dstate())
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_ECFLOW_189"
-    shutil.rmtree(dir_to_remove)      
+    shutil.rmtree(dir_to_remove, ignore_errors=True)    
 
 
 def test_ECFLOW_199(ci):
@@ -1771,20 +1771,27 @@ def test_ECFLOW_199(ci):
     assert len(list(ci.changed_node_paths)) == 0, "Expected first call to sync_local, to have no changed paths but found " + str(len(list(ci.changed_node_paths)))
     
     # ok now resume t1/t2, they should remain queued, since the Suite is still suspended
+    # Note: ECFLOW-1512, we may get additional paths.( i.e. suite path) due to changes in suite calendar
     ci.resume("/test_ECFLOW_199/f1/t1")
     ci.sync_local() 
+    found_path = False
     for path in ci.changed_node_paths:
         print("   changed node path " + path);
-    assert len(list(ci.changed_node_paths)) == 1, "Expected 1 changed path but found " + str(len(list(ci.changed_node_paths)))
+        if path == "/test_ECFLOW_199/f1/t1":
+            found_path = True
+    assert found_path, "Expected '/test_ECFLOW_199/f1/t1' in list of changed paths"
 
     ci.resume("/test_ECFLOW_199/f1/t2")
     ci.sync_local() 
+    found_path = False
     for path in ci.changed_node_paths:
         print("   changed node path " + path);
-    assert len(list(ci.changed_node_paths)) == 1, "Expected 1 changed path but found " + str(len(list(ci.changed_node_paths)))
+        if path == "/test_ECFLOW_199/f1/t2":
+            found_path = True
+    assert found_path, "Expected '/test_ECFLOW_199/f1/t2' in list of changed paths"
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_ECFLOW_199"
-    shutil.rmtree(dir_to_remove)      
+    shutil.rmtree(dir_to_remove, ignore_errors=True)  
 
 def test_client_ch_with_drops_handles(the_port,top_ci):
     print("test_client_ch_with_drops_handles")

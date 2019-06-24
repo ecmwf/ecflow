@@ -37,7 +37,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
  		if ( absNodePath_ != Str::ROOT_PATH()) throw std::runtime_error("CompoundMemento::incremental_sync: could not find path " + absNodePath_ );
 
 #ifdef DEBUG_MEMENTO
- 		cout << "CompoundMemento::incremental_sync: ROOT_PATH   changed_nodes.size()=" << changed_nodes.size() << "\n";
+ 		cout << "CompoundMemento::incremental_sync: ROOT_PATH\n";
 #endif
  		//
       // Notify observers what aspect is going to change, before make-ing data model changes
@@ -53,6 +53,9 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
  		/// Notify any interested parties incremental changes
       /// Aspects records the kind of changes.
       BOOST_FOREACH(memento_ptr m, vec_) {
+#ifdef DEBUG_MEMENTO
+          cout << "   " << typeid(*(m.get())).name() << "\n";
+#endif
           m->do_incremental_defs_sync( client_def.get(), aspects_,false/*Data model changes only*/);
       }
       assert(aspect_size == aspects_.size()); // aspect size should not change, when making data model changes
@@ -61,7 +64,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
  	else {
 
 #ifdef DEBUG_MEMENTO
- 		cout << "CompoundMemento::incremental_sync: " << node->debugNodePath() << "  changed_nodes.size()=" << changed_nodes.size() << "\n";
+ 		cout << "CompoundMemento::incremental_sync: " << node->debugNodePath() << "\n";
 #endif
  		// Notify observers what aspect, is going to change.
       Task* task = node->isTask();
@@ -72,6 +75,9 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
  		if (clear_attributes_)  aspects_.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
 
  		BOOST_FOREACH(memento_ptr m, vec_) {
+#ifdef DEBUG_MEMENTO
+ 		   cout << "   " << typeid(*(m.get())).name() << "\n";
+#endif
  			if (task)        m->do_incremental_task_sync( task, aspects_,true/* collect aspects only, don't make any changes*/ );
          else if (alias)  m->do_incremental_alias_sync( alias, aspects_,true/* collect aspects only, don't make any changes*/ );
          else if (suite)  m->do_incremental_suite_sync( suite , aspects_,true/* collect aspects only, don't make any changes*/);

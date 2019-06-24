@@ -265,144 +265,6 @@ QModelIndex TimelineInfoModel::parent(const QModelIndex &child) const
     return QModelIndex();
 }
 
-//=======================================================
-//
-// TimelineInfoDailyModel
-//
-//=======================================================
-
-TimelineInfoDailyModel::TimelineInfoDailyModel(QObject *parent) :
-          QAbstractItemModel(parent), data_(0)
-{
-}
-
-TimelineInfoDailyModel::~TimelineInfoDailyModel()
-{
-}
-
-void TimelineInfoDailyModel::setData(TimelineItem *data,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
-                                unsigned int endDateSec)
-{
-    beginResetModel();
-    viewStartDateSec_=viewStartDateSec;
-    viewEndDateSec_=viewEndDateSec;
-    endDateSec_=endDateSec;
-    data_=data;
-    days_.clear();
-    if(data_)
-    {
-        data_->days(days_);
-    }
-    endResetModel();
-}
-
-void TimelineInfoDailyModel::clearData()
-{
-    beginResetModel();
-    data_=0;
-    days_.clear();
-    endResetModel();
-}
-
-bool TimelineInfoDailyModel::hasData() const
-{
-    return (data_ != NULL);
-}
-
-int TimelineInfoDailyModel::columnCount( const QModelIndex& /*parent */) const
-{
-     return 2;
-}
-
-int TimelineInfoDailyModel::rowCount( const QModelIndex& parent) const
-{
-    if(!hasData())
-        return 0;
-
-    //Parent is the root:
-    if(!parent.isValid())
-    {
-        return static_cast<int>(days_.size());
-    }
-
-    return 0;
-}
-
-Qt::ItemFlags TimelineInfoDailyModel::flags ( const QModelIndex & index) const
-{
-    return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-}
-
-QVariant TimelineInfoDailyModel::data(const QModelIndex& index, int role ) const
-{
-    if(!index.isValid() || !hasData())
-    {
-        return QVariant();
-    }
-
-    int row=index.row();
-    if(row < 0 || row >= static_cast<int>(days_.size()))
-        return QVariant();
-
-    if(role == Qt::DisplayRole)
-    {
-        if(index.column() == 0)
-        {
-            return TimelineItem::toQDateTime(days_[row]).toString("dd-MMM-yyyy");
-        }
-        else if(index.column() == 1)
-        {
-            return days_[row];
-
-        }
-    }
-
-    return QVariant();
-}
-
-QVariant TimelineInfoDailyModel::headerData( const int section, const Qt::Orientation orient , const int role ) const
-{
-    if ( orient != Qt::Horizontal || (role != Qt::DisplayRole && role != Qt::UserRole ))
-              return QAbstractItemModel::headerData( section, orient, role );
-
-    if(role == Qt::DisplayRole)
-    {
-        switch(section)
-        {
-        case 0:
-            return "Date";
-        case 1:
-            return "Daily cycle";
-        default:
-            return QVariant();
-        }
-    }
-
-    return QVariant();
-}
-
-QModelIndex TimelineInfoDailyModel::index( int row, int column, const QModelIndex & parent ) const
-{
-    if(!hasData() || row < 0 || column < 0)
-    {
-        return QModelIndex();
-    }
-
-    //When parent is the root this index refers to a node or server
-    if(!parent.isValid())
-    {
-        return createIndex(row,column);
-    }
-
-    return QModelIndex();
-
-}
-
-QModelIndex TimelineInfoDailyModel::parent(const QModelIndex &child) const
-{
-    return QModelIndex();
-}
-
 
 //=======================================================
 //
@@ -435,6 +297,7 @@ TimelineInfoWidget::TimelineInfoWidget(QWidget *parent) :
     model_=new TimelineInfoModel(this);
     ui_->timeTree->setModel(model_);
 
+#if 0
     //Daily tree
     ui_->dailyToolbar->hide(); //we will add zoom buttons to it
 
@@ -455,6 +318,8 @@ TimelineInfoWidget::TimelineInfoWidget(QWidget *parent) :
 
     TimelineInfoDailyDelegate *dailyDelegate=new TimelineInfoDailyDelegate(dailyModel_,this);
     ui_->dailyTree->setItemDelegate(dailyDelegate);
+#endif
+
 }
 
 void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, int itemIndex,QDateTime viewStartDate,
@@ -475,8 +340,8 @@ void TimelineInfoWidget::load(QString host, QString port,TimelineData *tlData, i
     model_->setData(&data_,viewStartDate.toMSecsSinceEpoch()/1000,
                     viewEndDate.toMSecsSinceEpoch()/1000,tlData->endTime());
 
-    dailyModel_->setData(&data_,viewStartDate.toMSecsSinceEpoch()/1000,
-                    viewEndDate.toMSecsSinceEpoch()/1000,tlData->endTime());
+    ui_->dailyW->load(&data_,viewStartDate.toMSecsSinceEpoch()/1000,
+                      viewEndDate.toMSecsSinceEpoch()/1000,tlData->endTime());
 
     if(!columnsAdjusted_)
     {
@@ -600,12 +465,15 @@ void TimelineInfoWidget::readSettings(QSettings& settings)
     int idx=settings.value("tab",0).toInt();
     if(idx >=0 && idx < ui_->tabWidget->count())
         ui_->tabWidget->setCurrentIndex(idx);
+
+    ui_->dailyW->readSettings(settings);
 }
 
 void TimelineInfoWidget::writeSettings(QSettings& settings)
 {
     ViewerUtil::saveTreeColumnWidth(settings,"timeTreeColumnWidth",ui_->timeTree);
     settings.setValue("tab",ui_->tabWidget->currentIndex());
+    ui_->dailyW->writeSettings(settings);
 }
 
 //=======================================================
@@ -684,6 +552,5 @@ void TimelineInfoDialog::readSettings()
     }
 
     infoW_->readSettings(settings);
-
     settings.endGroup();
 }

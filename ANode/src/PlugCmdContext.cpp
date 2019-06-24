@@ -1,4 +1,8 @@
 //============================================================================
+// Name        :
+// Author      : Avi
+// Revision    : $Revision: #16 $
+//
 // Copyright 2009-2019 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
@@ -6,39 +10,19 @@
 // granted to it by virtue of its status as an intergovernmental organisation
 // nor does it submit to any jurisdiction.
 //============================================================================
+#include "PlugCmdContext.hpp"
 
-#include "LineEdit.hpp"
+namespace ecf {
+bool PlugCmdContext::in_plug_ =  false;
 
-#include "TimeItemWidget.hpp"
-
-#include "Node.hpp"
-
-//========================================================
-//
-// TimeItemWidget
-//
-//========================================================
-
-TimeItemWidget::TimeItemWidget(QWidget *parent) : QWidget(parent)
+PlugCmdContext::PlugCmdContext()
 {
-  setupUi(this);
-  
+   in_plug_  = true;
 }
 
-QWidget* TimeItemWidget::realWidget()
+PlugCmdContext::~PlugCmdContext()
 {
-	return this;
+   in_plug_  = false;
 }
 
-void TimeItemWidget::reload(VInfo_ptr nodeInfo)
-{
-	active_=true;
 }
-
-void TimeItemWidget::clearContents()
-{
-	InfoPanelItem::clear();
-}
-
-
-static InfoPanelItemMaker<TimeItemWidget> maker1("time");

@@ -25,12 +25,14 @@ public:
     enum Param {AutoUpdate, UpdateRate,
                AdaptiveUpdate,AdaptiveUpdateIncrement,MaxAdaptiveUpdateRate,AdaptiveUpdateMode,
                MaxOutputFileLines,ReadFromDisk,
+               MaxSizeForTimelineData,
                NodeMenuMode,NodeMenuModeForDefStatus,
 	           NotifyAbortedEnabled, NotifyAbortedPopup, NotifyAbortedSound,
 			   NotifyRestartedEnabled, NotifyRestartedPopup, NotifyRestartedSound,
 			   NotifyLateEnabled, NotifyLatePopup, NotifyLateSound,
 			   NotifyZombieEnabled, NotifyZombiePopup, NotifyZombieSound,
-               NotifyAliasEnabled, NotifyAliasPopup, NotifyAliasSound, UnknownParam};
+               NotifyAliasEnabled, NotifyAliasPopup, NotifyAliasSound,
+               UidForServerLogTransfer, UnknownParam};
 
 	int intValue(Param par) const;
 	bool boolValue(Param par) const;

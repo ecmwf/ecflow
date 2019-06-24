@@ -48,6 +48,7 @@
     <file alias="copy_path.svg">../images/copy_path.svg</file>
     <file alias="dependency.svg">../images/dependency.svg</file>
     <file alias="dependency_detail.svg">../images/dependency_detail.svg</file>
+    <file alias="delta.svg">../images/delta.svg</file>
     <file alias="diag.svg">../images/diag.svg</file>
     <file alias="directory_arrow.svg">../images/directory_arrow.svg</file>
     <file alias="dock_add_variable_column.svg">../images/dock_add_variable_column.svg</file>
@@ -62,6 +63,7 @@
     <file alias="down_arrow.svg">../images/down_arrow.svg</file>
     <file alias="drawer_open.svg">../images/drawer_open.svg</file>
     <file alias="drawer_close.svg">../images/drawer_close.svg</file>
+    <file alias="duration.svg">../images/duration.svg</file>
     <file alias="edit.svg">../images/edit.svg</file>
     <file alias="editcopy.svg">../images/editcopy.svg</file>
     <file alias="editpaste.svg">../images/editpaste.svg</file>
@@ -98,9 +100,11 @@
     <file alias="monitor.svg">../images/monitor.svg</file>
     <file alias="node_log.svg">../images/node_log.svg</file>
     <file alias="notification.svg">../images/notification.svg</file>
+    <file alias="open_file.svg">../images/open_file.svg</file>
     <file alias="output.svg">../images/output.svg</file>
     <file alias="padlock.svg">../images/padlock.svg</file>
     <file alias="path_arrow.svg">../images/path_arrow.svg</file>
+    <file alias="period.svg">../images/period.svg</file>
     <file alias="reload.svg">../images/reload.svg</file>
     <file alias="reload_green.svg">../images/reload_green.svg</file>
     <file alias="reload_one.svg">../images/reload_one.svg</file>
@@ -121,8 +125,10 @@
     <file alias="system.svg">../images/system.svg</file>
     <file alias="submit.svg">../images/submit.svg</file>
     <file alias="submit_round.svg">../images/submit_round.svg</file>
+    <file alias="subtree.svg">../images/subtree.svg</file>
     <file alias="sync.svg">../images/sync.svg</file>
     <file alias="sync_black.svg">../images/sync_black.svg</file>
+    <file alias="task.svg">../images/task.svg</file>
     <file alias="terminate.svg">../images/terminate.svg</file>
     <file alias="timeline.svg">../images/timeline.svg</file>
     <file alias="tip.svg">../images/tip.svg</file>
