@@ -158,7 +158,7 @@ def test_python_child_api(ci):
     
     if not Test.debugging():
         dir_to_remove = Test.ecf_home(ci.get_port()) + "/" + "test_python_child_api"
-        print((" Test OK: removing directory " , dir_to_remove))
+        print(" Test OK: removing directory " , dir_to_remove)
         shutil.rmtree(dir_to_remove)      
         
 # //////////////////////////////////////////////////////////////////////////////////////        

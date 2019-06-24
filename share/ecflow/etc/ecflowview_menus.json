@@ -131,6 +131,14 @@
         },
         {
             "menu"           : "Node",
+            "name"           : "Rerun aborted",
+            "visible_for"    : "suite or family",
+            "enabled_for"    : "aborted or suspended",
+            "command"        : "rerun_aborted",
+            "status_tip"     : "rerun (using command ecflow_client --force queued) all the aborted nodes in the given suite or family."
+        },
+        {
+            "menu"           : "Node",
             "name"           : "Requeue",
             "visible_for"    : "task or suite or family",
             "enabled_for"    : "(not active) and (not submitted)",

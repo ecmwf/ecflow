@@ -25,6 +25,7 @@ public:
     static void run(VInfo_ptr,const std::string&);
     static void openLinkInBrowser(VInfo_ptr);
     static void executeAborted(VInfo_ptr);
+    static void rerunAborted(VInfo_ptr);
 
 protected:
     static std::string commandToString(const std::vector<std::string>& cmd);

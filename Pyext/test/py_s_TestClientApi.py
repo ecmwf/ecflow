@@ -368,9 +368,8 @@ def test_client_run(ci):
             assert False, "test_client_run aborted after " + str(count) + " loops:\n" + str(ci.get_defs())
         
     ci.log_msg("Looped " + str(count) + " times")
-    
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_run"
-    shutil.rmtree(self.ecf_home, ignore_errors=True)  
+    shutil.rmtree(dir_to_remove, ignore_errors=True)  
 
 
 def test_client_run_with_multiple_paths(ci):            
@@ -405,7 +404,7 @@ def test_client_run_with_multiple_paths(ci):
     ci.log_msg("Looped " + str(count) + " times")
     
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_run_with_multiple_paths"
-    shutil.rmtree(self.ecf_home, ignore_errors=True)     
+    shutil.rmtree(dir_to_remove, ignore_errors=True)     
 
     
 def test_client_requeue(ci):
@@ -434,7 +433,7 @@ def test_client_requeue(ci):
     assert suite.get_state() == State.queued, "Expected to find suite with state queued"
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_requeue"
-    shutil.rmtree(self.ecf_home, ignore_errors=True)     
+    shutil.rmtree(dir_to_remove, ignore_errors=True)     
 
 def test_client_requeue_with_multiple_paths(ci):
     print_test(ci,"test_client_requeue_with_multiple_paths")
@@ -467,7 +466,7 @@ def test_client_requeue_with_multiple_paths(ci):
     assert task2.get_state() == State.queued, "Expected to find task t2 with state queued"
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_requeue_with_multiple_paths"
-    shutil.rmtree(self.ecf_home, ignore_errors=True)     
+    shutil.rmtree(dir_to_remove, ignore_errors=True)     
 
 
 def test_client_free_dep(ci):
@@ -530,7 +529,7 @@ def test_client_free_dep(ci):
         time.sleep(3)       
             
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_free_dep"
-    shutil.rmtree(self.ecf_home, ignore_errors=True)   
+    shutil.rmtree(dir_to_remove, ignore_errors=True)   
 
 
 def test_client_stats(ci):
@@ -825,7 +824,7 @@ def test_client_get_file(ci):
         print(str(e))
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_get_file"
-    shutil.rmtree(self.ecf_home, ignore_errors=True)  
+    shutil.rmtree(dir_to_remove, ignore_errors=True)  
 
     
 def test_client_plug(ci):
@@ -1746,7 +1745,7 @@ def test_client_check_defstatus(ci):
     assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_state())
    
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_client_check_defstatus"
-    shutil.rmtree(self.ecf_home, ignore_errors=True)     
+    shutil.rmtree(dir_to_remove, ignore_errors=True)     
     
 def test_ECFLOW_189(ci):
     # Bug, when a node is resumed it ignored holding dependencies higher up the tree.
@@ -1794,7 +1793,7 @@ def test_ECFLOW_189(ci):
     assert task_t2.get_dstate() == DState.queued, "Expected state queued but found " + str(task_t2.get_dstate())
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_ECFLOW_189"
-    shutil.rmtree(self.ecf_home, ignore_errors=True)    
+    shutil.rmtree(dir_to_remove, ignore_errors=True)    
 
 
 def test_ECFLOW_199(ci):
@@ -1841,7 +1840,7 @@ def test_ECFLOW_199(ci):
 
 
     dir_to_remove = Test.ecf_home(the_port) + "/" + "test_ECFLOW_199"
-    shutil.rmtree(self.ecf_home, ignore_errors=True)  
+    shutil.rmtree(dir_to_remove, ignore_errors=True)  
 
 def test_client_ch_with_drops_handles(the_port,top_ci):
     print_test(ci,"test_client_ch_with_drops_handles")
