@@ -1,4 +1,6 @@
- 
+Using GNU 7.3
+=================================================================================================
+
 + ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
 real	0m1.42s
 user	0m1.32s
