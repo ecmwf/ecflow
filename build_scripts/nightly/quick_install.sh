@@ -60,6 +60,7 @@ git checkout master
 # test suites
 # ========================================================================
 cd $WK
+python Pyext/samples/TestBench.py  ANode/parser/test/data/good_defs/limit/basic.def
 python Pyext/samples/TestBench.py  ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
 python Pyext/samples/TestBench.py  ANode/parser/test/data/single_defs/test_time_why.def
 
