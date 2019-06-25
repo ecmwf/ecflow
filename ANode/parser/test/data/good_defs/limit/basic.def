@@ -1,0 +1,13 @@
+suite limit_basic
+ limit disk 1
+ family anon    
+   inlimit disk  
+   task t1
+   task t2
+   task t3
+   task t4
+   task t5
+   task t6
+   task t7
+ endfamily
+endsuite

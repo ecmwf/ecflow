@@ -319,58 +319,18 @@ static void add_consumed_paths(Limit* limit, std::stringstream& ss)
    ss << ")";
 }
 
-bool InLimitMgr::why(std::vector<std::string>& vec, bool top_down, bool html) const
+bool InLimitMgr::why(std::vector<std::string>& vec, bool html) const
 {
+   // Note: if this correspond to a leaf node, like a task. Then it may not be
+   // sufficient to just check in limits at this level  *BUT*
+   // Node::top_down_why() and Node::bottom_up_why() will traverse the hierarchy
+   // so we don't need to replicate it here.
+
 #ifdef DEBUG_WHY
-	std::cout << "InLimitMgr::why " << node_->debugNodePath() << "\n";
+	std::cout << "InLimitMgr::why " << node_->debugNodePath() << " top_down:" << top_down << "\n";
 #endif
 	bool why_found = false;
- 	// Note: if this correspond to a leaf node, like a task. Then it may not be
- 	// sufficient to just check in limits at this level. Will need to look up hierarchy.
- 	if (inLimit()) {
-#ifdef DEBUG_WHY
- 		std::cout << "   Node   " << node_->debugNodePath() << " is *in limit*, checking parent\n";
-#endif
-
- 		// When traversing top down, no need to look up the hierarchy
- 		if (top_down) return why_found;
-
- 		Node* theParent = node_->parent();
- 		while( theParent ) {
-
- 			if (theParent->check_in_limit())  {
-// 		  		std::cout << "   Parent " << theParent->debugNodePath() << " is *in limit* \n";
-   				theParent = theParent->parent();
- 			}
- 			else {
-// 		  		std::cout << "   Parent " << theParent->debugNodePath() << " Not in limit \n";
- 		 		for(const auto & i : theParent->inlimits()) {
- 			 		Limit* limit = i.limit();
- 					if (limit &&  !limit->inLimit( i.tokens() )) {
- 						std::stringstream ss;
- 						if ( i.pathToNode().empty())
- 							ss << "limit " << limit->name() << " is full";
- 						else {
- 						   if (html) {
- 						      std::stringstream s;
- 						      s << "[limit]" << i.pathToNode() << Str::COLON() << limit->name();
- 						      ss << Node::path_href_attribute(s.str()) << " is full";
- 						   }
- 						   else ss << "limit " << i.pathToNode() << Str::COLON() << limit->name() << " is full";
- 						}
-
- 						// show node paths that have consumed a limit, Only show first 5, Otherwise string may be too long
- 						add_consumed_paths(limit,ss);
-
- 						vec.push_back(ss.str());
- 						why_found = true;
- 					}
- 				}
- 		 		break;
- 			}
- 		}
- 	}
- 	else {
+ 	if (!inLimit()){
 #ifdef DEBUG_WHY
  		std::cout << "   InLimitMgr::why " << node_->debugNodePath() << " NOT in limit\n";
 #endif

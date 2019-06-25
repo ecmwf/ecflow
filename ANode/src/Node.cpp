@@ -2028,7 +2028,7 @@ bool Node::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) c
 #ifdef DEBUG_WHY
    cout << "Node::top_down_why\n";
 #endif
-   return why(theReasonWhy,true/* top down */,html_tags);
+   return why(theReasonWhy,html_tags);
 }
 
 void Node::bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
@@ -2048,11 +2048,11 @@ void Node::bottom_up_why(std::vector<std::string>& theReasonWhy,bool html_tags) 
    }
    auto r_end = vec.rend();
    for(auto r = vec.rbegin(); r!=r_end; ++r) {
-      (void)(*r)->why(theReasonWhy,false,html_tags);
+      (void)(*r)->why(theReasonWhy,html_tags);
    }
 }
 
-bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
+bool Node::why(std::vector<std::string>& vec,bool html) const
 {
 #ifdef DEBUG_WHY
    std::cout << "Node::why " << debugNodePath() << " (" << NState::toString(state()) << ") top_down(" << top_down << ") html(" << html << ")\n";
@@ -2085,7 +2085,7 @@ bool Node::why(std::vector<std::string>& vec,bool top_down,bool html) const
    }
 
    // Check limits using in limit manager
-   if (inLimitMgr_.why(vec,top_down,html)) why_found = true ; // return true if why found
+   if (inLimitMgr_.why(vec,html)) why_found = true ; // return true if why found
 
    // Prefix <node-type> <path> <state>
    std::string prefix = debugType();
