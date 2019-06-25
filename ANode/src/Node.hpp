@@ -388,7 +388,7 @@ public:
    virtual void immediateChildren(std::vector<node_ptr>&) const {}
 
    /// retrieve _ALL_ children by hierarchically traversing down the node tree
-   virtual void allChildren(std::set<Node*>&) const {}
+   virtual void allChildren(std::vector<node_ptr>&) const {}
 
    // Add functions: ===============================================================
    void addVerify( const VerifyAttr& );  // for testing and verification Can throw std::runtime_error
