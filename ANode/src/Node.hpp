@@ -669,7 +669,7 @@ public:
    bool is_observed(AbstractObserver*) const ; // return true if we have this observer in our list
 
 private:
-   bool why(std::vector<std::string>& theReasonWhy,bool top_down = false,bool html_tags = false) const;
+   bool why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
    /// Function used as a part of trigger and complete expressions.
    /// The search pattern is event,meter,user-variable,repeat, generated-variable
    int findExprVariableValue( const std::string& name) const;
