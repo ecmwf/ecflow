@@ -62,8 +62,8 @@ public:
  	void add_child(const node_ptr&,  size_t position = std::numeric_limits<std::size_t>::max());
 
 	void immediateChildren(std::vector<node_ptr>&) const override;
- 	void allChildren(std::set<Node*>&) const override;
-
+ 	virtual void allChildren(std::vector<node_ptr>&) const;
+ 
  	node_ptr findImmediateChild(const std::string& name,size_t& child_pos) const override;
    node_ptr find_node_up_the_tree(const std::string& name) const override;
 

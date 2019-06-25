@@ -846,12 +846,12 @@ void NodeContainer::immediateChildren(std::vector<node_ptr>& theChildren) const
 	}
 }
 
-void NodeContainer::allChildren(std::set<Node*>& theSet) const
+void NodeContainer::allChildren(std::vector<node_ptr>& vec) const
 {
  	size_t node_vec_size = nodes_.size();
  	for(size_t f = 0; f < node_vec_size; f++) {
-		theSet.insert(nodes_[f].get());
-		nodes_[f]->allChildren(theSet);
+		vec.push_back(nodeVec_[f]);
+		nodeVec_[f]->allChildren(vec); // for task does nothing
 	}
 }
 
