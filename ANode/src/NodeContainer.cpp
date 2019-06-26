@@ -202,7 +202,7 @@ void NodeContainer::status()
 
 bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {
-   bool why_found = Node::why(theReasonWhy,true/*top down*/,html_tags);
+   bool why_found = Node::why(theReasonWhy,html_tags);
    if (!why_found) {
       size_t node_vec_size = nodeVec_.size();
       for(size_t t = 0; t < node_vec_size; t++)   {
@@ -827,12 +827,12 @@ void NodeContainer::immediateChildren(std::vector<node_ptr>& theChildren) const
 	}
 }
 
-void NodeContainer::allChildren(std::set<Node*>& theSet) const
+void NodeContainer::allChildren(std::vector<node_ptr>& vec) const
 {
  	size_t node_vec_size = nodeVec_.size();
  	for(size_t f = 0; f < node_vec_size; f++) {
-		theSet.insert(nodeVec_[f].get());
-		nodeVec_[f]->allChildren(theSet);
+		vec.push_back(nodeVec_[f]);
+		nodeVec_[f]->allChildren(vec); // for task does nothing
 	}
 }
 
