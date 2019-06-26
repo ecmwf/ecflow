@@ -1,0 +1,11 @@
+
+
+0/ make sure git_tag in metabuilder is: develop
+             package_version = <version>-%GIT_TAG%   # this can be done on the ecflow_ui as well
+
+0/ In ecflow_ui: 
+     ALLOW_INSTALL_TO_OVERWRITE : TRUE
+     METAB_INSTALL_REMOVE_WRITE_PERMISSIONS : FALSE
+     
+0/ Typically the develop version is only installed on leap42,
+     
