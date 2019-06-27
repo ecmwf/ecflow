@@ -56,6 +56,8 @@ ClientOptions::ClientOptions()
             "port: If specified will override the environment variable ECF_PORT and default port number of 3141");
    desc_->add_options()("host",po::value< string >()->implicit_value( string("") ),
             "host: If specified will override the environment variable ECF_HOST and default host, localhost");
+   desc_->add_options()("user",po::value< string >()->implicit_value( string("") ),
+            "user: The user name to be used when contacting the server. Can only be used when password is also specified");
 #ifdef ECF_OPENSSL
    desc_->add_options()("ssl","ssl: If specified will override the environment variable ECF_SSL");
 #endif
@@ -113,6 +115,11 @@ Cmd_ptr ClientOptions::parse(int argc, char* argv[],ClientEnvironment* env) cons
       if (env->debug())  std::cout << "  rid " << rid << " overridden at the command line\n";
       env->set_remote_id(rid);
    }
+   if ( vm.count( "user" ) ) {
+       std::string user = vm[ "user" ].as< std::string > ();
+       if (env->debug())  std::cout << "  user " << user << " overridden at the command line\n";
+       env->set_user_name(user);
+    }
 
 #ifdef ECF_OPENSSL
    if ( vm.count( "ssl" )) {

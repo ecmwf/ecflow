@@ -37,7 +37,7 @@ private:
    std::string user_;
    std::string host_;
    std::string port_;
-   std::string passwd_;
+   std::string passwd_;  // always stored as crypted
 };
 
 // This class is used to authenticate, user commands, i.e like ping,alter, etc

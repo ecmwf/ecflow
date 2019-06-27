@@ -61,7 +61,12 @@ public:
 	virtual bool debug() const = 0 ;
 
    // Returns the user password. This value is cached, so we only read passwd file once
-   virtual const std::string& get_user_password() const = 0;
+   virtual const std::string& get_user_password(const std::string& user) const = 0;
+   virtual void clear_user_password() = 0; // force password check again
+
+   // returns a user specified user name. When this is used a password must be provided
+   virtual const std::string& get_user_name() const = 0;
+   virtual void set_user_name(const std::string&) = 0;
 
 	/// Some commands work on construction. to avoid this under test. Call set_test
 	/// i.e Command like CtsCmd::SERVER_LOAD can be client side only, in which case

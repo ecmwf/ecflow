@@ -123,6 +123,11 @@ const std::string& ClientInvoker::port() const
    return clientEnv_.port();
 }
 
+void ClientInvoker::set_user_name(const std::string& user) {
+   clientEnv_.set_user_name(user);
+   clientEnv_.clear_user_password(); // force re-check of password
+}
+
 void ClientInvoker::taskPath(const std::string& s) {
 	test_ = true;
 	clientEnv_.taskPath(s);
@@ -320,7 +325,10 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
                /// However this is only done, if we are not using the Command Level Interface(cli)
                server_reply_.clear_for_invoke(cli());
 
-               cts_cmd->setup_user_authentification( clientEnv_ );
+               if (!cts_cmd->setup_user_authentification( clientEnv_ )) {
+                  server_reply_.set_error_msg( "Invalid user or password" );
+                  return 1;
+               }
 
 					if (clientEnv_.debug()) {
 					   cout << TimeStamp::now() << "ClientInvoker: >>> "; cts_cmd->print(cout);

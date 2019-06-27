@@ -83,6 +83,7 @@ if (ENABLE_SERVER)
         test/TestClientTimeout.cpp
         test/TestClientHandleCmd.cpp
         test/TestCheckPtDefsCmd.cpp
+        test/TestCustomUser.cpp
         test/TestGroupCmd.cpp
         test/TestLoadDefsCmd.cpp
         test/TestPasswdFile.cpp

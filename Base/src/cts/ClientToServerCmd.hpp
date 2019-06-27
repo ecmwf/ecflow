@@ -95,7 +95,7 @@ public:
    /// for authentication. *However* task based commands have their own authentication
    /// mechanism, and don't need setup_user_authentification().
    virtual void setup_user_authentification(const std::string& user, const std::string& passwd) = 0; // Used by PlugCmd
-   virtual void setup_user_authentification(AbstractClientEnv&) = 0; // set user and passwd
+   virtual bool setup_user_authentification(AbstractClientEnv&) = 0; // set user and passwd
    virtual void setup_user_authentification() = 0;                   // if user empty setup.
 
    /// Allow control over connection to different servers/hosts if the main server is down
@@ -219,7 +219,7 @@ public:
 protected:
    /// Overridden to do nothing since Task based commands don't need _user_ based authentication
    void setup_user_authentification(const std::string& user, const std::string& passwd) override{}
-   void setup_user_authentification(AbstractClientEnv&) override{}
+   bool setup_user_authentification(AbstractClientEnv&) override{return true;}
    void setup_user_authentification() override{}
 
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override; /// Task have their own mechanism,can throw std::runtime_error
@@ -584,7 +584,7 @@ public:
    const std::string& passwd() const { return pswd_;}
 
    void setup_user_authentification(const std::string& user, const std::string& passwd) override;
-   void setup_user_authentification(AbstractClientEnv&) override;
+   bool setup_user_authentification(AbstractClientEnv&) override;
    void setup_user_authentification() override;
 
 protected:
@@ -2064,7 +2064,7 @@ private:
    static const char* desc(); // The description of the argument as provided to user
 
    void setup_user_authentification(const std::string& user, const std::string& passwd) override;
-   void setup_user_authentification(AbstractClientEnv&) override;
+   bool setup_user_authentification(AbstractClientEnv&) override;
    void setup_user_authentification() override;
 
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;

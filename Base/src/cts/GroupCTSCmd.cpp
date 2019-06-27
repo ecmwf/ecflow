@@ -220,12 +220,13 @@ void GroupCTSCmd::setup_user_authentification(const std::string& user, const std
  	}
 }
 
-void GroupCTSCmd::setup_user_authentification(AbstractClientEnv& env)
+bool GroupCTSCmd::setup_user_authentification(AbstractClientEnv& env)
 {
-   UserCmd::setup_user_authentification(env);
+   if (!UserCmd::setup_user_authentification(env)) return false;
    for(auto & i : cmdVec_) {
-      i->setup_user_authentification(env);
+      if (!i->setup_user_authentification(env)) return false;
    }
+   return true;
 }
 
 void GroupCTSCmd::setup_user_authentification()

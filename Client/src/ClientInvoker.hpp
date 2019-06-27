@@ -84,6 +84,10 @@ public:
    const std::string& host() const;
    const std::string& port() const;
 
+   /// This will override the environment setting. ECF_USER or --user
+   /// Clear password, so that re-validate users password from password file
+   void set_user_name(const std::string& user);
+
 	/// Whenever there is a connections failure we wait a number of seconds
 	/// before trying again. ( i.e. to get round glitches in the network.)
 	/// For the ping command this is set as 1 second

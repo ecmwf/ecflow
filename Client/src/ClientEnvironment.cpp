@@ -246,7 +246,8 @@ void ClientEnvironment::read_environment_variables()
 	if (getenv(Str::ECF_PASS().c_str())) jobs_password_ = getenv(Str::ECF_PASS().c_str());
  	if (getenv(Str::ECF_TRYNO().c_str()))  task_try_num_ = atoi(getenv(Str::ECF_TRYNO().c_str()));
 	if (getenv("ECF_HOSTFILE")) host_file_ = getenv("ECF_HOSTFILE");
-	if (getenv(Str::ECF_RID().c_str())) remote_id_ = getenv(Str::ECF_RID().c_str());
+   if (getenv(Str::ECF_RID().c_str())) remote_id_ = getenv(Str::ECF_RID().c_str());
+   if (getenv("ECF_USER")) user_name_ = getenv("ECF_USER");
 
 	if (getenv("ECF_TIMEOUT"))  timeout_ = atoi(getenv("ECF_TIMEOUT"));  // host file timeout
 	if( timeout_ > MAX_TIMEOUT ) timeout_ = MAX_TIMEOUT;
@@ -354,9 +355,10 @@ bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 }
 
 
-const std::string& ClientEnvironment::get_user_password() const
+const std::string& ClientEnvironment::get_user_password(const std::string& user) const
 {
-   //cout << "ClientEnvironment::get_user_password() passwd_(" << passwd_ << ")\n";
+   //cout << "ClientEnvironment::get_user_password() user:" << user << " passwd_(" << passwd_ << ")\n";
+   if (user.empty()) throw std::runtime_error("ClientEnvironment::get_user_password: No user specified");
    if (!passwd_.empty()) {
       //cout << "  ClientEnvironment::get_user_password() CACHED returning " << passwd_ << "\n";
       return passwd_;
@@ -375,7 +377,7 @@ const std::string& ClientEnvironment::get_user_password() const
             throw std::runtime_error(ss.str());
          }
          //std::cout << "ClientEnvironment::get_user_password() PasswdFile.dump()\n" << passwd_file.dump() << "\n";
-         passwd_ = passwd_file.get_passwd(User::login_name(), host(), port());
+         passwd_ = passwd_file.get_passwd(user, host(), port());
          //cout << "  ClientEnvironment::get_user_password() returning " << passwd_ << "\n";
          return passwd_;
       }

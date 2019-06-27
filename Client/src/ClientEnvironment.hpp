@@ -113,7 +113,10 @@ public:
    const std::string& host() const override;
    const std::string& port() const override;
 	const std::vector<std::pair<std::string,std::string> >& env() const override { return env_;}
-	const std::string& get_user_password() const override;
+	const std::string& get_user_password(const std::string& user) const override;
+   void clear_user_password() override { passwd_.clear();}
+   const std::string& get_user_name() const override { return user_name_;}
+   void set_user_name(const std::string& name) override { user_name_ = name;}
 	bool debug() const override { return debug_;} //enabled if ECF_DEBUG_CLIENT set
    void set_test() override { under_test_ = true; }
    bool under_test() const override { return under_test_; }
@@ -145,6 +148,7 @@ private:
 	std::vector<std::pair<std::string, std::string> > host_vec_; // The list of host:port pairs
 	int  host_vec_index_{0};               // index into host_vec;
 
+	std::string user_name_;
    mutable std::string passwd_;
 
 #ifdef ECF_OPENSSL

@@ -138,15 +138,26 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vecto
 void UserCmd::setup_user_authentification(const std::string& user, const std::string& passwd)
 {
    user_ = user;
-   pswd_ = passwd;
-
+   pswd_ = passwd; // assumes this has been crypted()
    assert(!hostname().empty());
    assert(!user_.empty());
 }
 
-void UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv)
+bool UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv)
 {
-   setup_user_authentification(User::login_name(),clientEnv.get_user_password());
+   const std::string& user_name = clientEnv.get_user_name(); // Using ECF_USER or --user <user>
+   if (!user_name.empty()) {
+      const std::string& passwd = clientEnv.get_user_password(user_name);
+      if (passwd.empty()) return false; // invalid user as password is empty, must have a password when user specified
+
+      setup_user_authentification(user_name,passwd);
+      return true;
+   }
+
+   std::string the_user = User::login_name();
+   const std::string& passwd = clientEnv.get_user_password( the_user );
+   setup_user_authentification(the_user,passwd);
+   return true;
 }
 
 void UserCmd::setup_user_authentification()
