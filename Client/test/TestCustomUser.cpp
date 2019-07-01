@@ -38,9 +38,9 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 //       is specified then *don't* shutdown the server
 // ************************************************************************************
 
-class Add_ECF_PASSWD_and_ECF_USER_env {
+class Add_ECF_CUSTOM_PASSWD_and_ECF_USER_env {
 public:
-   Add_ECF_PASSWD_and_ECF_USER_env(const std::string& passwd_file) : ecf_passwd_("ECF_PASSWD="),ecf_user_("ECF_USER=") {
+   Add_ECF_CUSTOM_PASSWD_and_ECF_USER_env(const std::string& passwd_file) : ecf_passwd_("ECF_CUSTOM_PASSWD="),ecf_user_("ECF_USER=") {
       ecf_passwd_ += passwd_file;
       auto* put = const_cast<char*>(ecf_passwd_.c_str());
       BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);
@@ -49,8 +49,8 @@ public:
       auto* put2 = const_cast<char*>(ecf_user_.c_str());
       BOOST_CHECK_MESSAGE(putenv(put2) == 0,"putenv failed for " << put2);
    }
-   ~Add_ECF_PASSWD_and_ECF_USER_env() {
-      putenv(const_cast<char*>("ECF_PASSWD")); // remove from env, otherwise valgrind complains
+   ~Add_ECF_CUSTOM_PASSWD_and_ECF_USER_env() {
+      putenv(const_cast<char*>("ECF_CUSTOM_PASSWD")); // remove from env, otherwise valgrind complains
       putenv(const_cast<char*>("ECF_USER"));   // remove from env, otherwise valgrind complains
    }
 private:
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( test_custom_user )
    Host the_host;
    std::string host = ClientEnvironment::hostSpecified();
    std::string port = SCPort::next();
-   std::string passwd_file = the_host.ecf_passwd_file(port);
+   std::string passwd_file = the_host.ecf_custom_passwd_file(port);
    std::string passwd = "xxxx";
    if (host.empty()) {
       // make sure NO passed file is present before the server is started.
@@ -76,21 +76,24 @@ BOOST_AUTO_TEST_CASE( test_custom_user )
       return;
    }
 
-   //cout << "passwd_file " << passwd_file << "\n";
+   {
+      // Create a valid passwd file; Before server start; make sure server closes before password file is deleted:
+      //cout << "\nCreating CUSTOM passwd_file " << passwd_file << "\n\n";
+      std::string errorMsg;
+      BOOST_REQUIRE_MESSAGE(PasswdFile::createWithAccess(passwd_file,the_host.name(),port,passwd,errorMsg),errorMsg);
+      BOOST_REQUIRE_MESSAGE( fs::exists(passwd_file), "passwd file NOT created" );
+   }
 
    {  // *** Need a separate scope so that server shuts down whilst password file is *STILL* present
       // *** Otherwise terminate of server will fail. i.e ECF_PASSWORD is still valid
 
       // Set ECF_USER and ECF_PASSWD environment variable. Use same file for client and server
       // add on construction, and remove at destruction.
-      Add_ECF_PASSWD_and_ECF_USER_env custom_user(passwd_file);
-
-      // Create a valid passwd file; Before server start; make sure server closes before password file is deleted:
-      std::string errorMsg;
-      BOOST_REQUIRE_MESSAGE(PasswdFile::createWithAccess(passwd_file,the_host.name(),port,passwd,errorMsg),errorMsg);
+      Add_ECF_CUSTOM_PASSWD_and_ECF_USER_env custom_user(passwd_file);
 
       // This will remove check pt and backup file before server start,
       // to avoid the server from loading previous test data
+      // make sure server closes before password file is deleted:
       InvokeServer invokeServer("Client:: ...test_custom_user",port);
       BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
@@ -98,6 +101,7 @@ BOOST_AUTO_TEST_CASE( test_custom_user )
       theClient.set_throw_on_error(false);
 
       // Invoking a client request that requires authorisation
+      BOOST_REQUIRE_MESSAGE( theClient.reloadcustompasswdfile() == 0, CtsApi::reloadcustompasswdfile() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.delete_all() == 0,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.haltServer() == 0,CtsApi::haltServer() << " should return 0\n" << theClient.errorMsg());
@@ -105,10 +109,9 @@ BOOST_AUTO_TEST_CASE( test_custom_user )
 
       // Change to a user not in password file
       theClient.set_user_name("dodgy_geezer"); // this should clear password, so that its reloaded when *next* cmd runs
-      errorMsg.clear();
 
       // all client command should now *FAIL*.
-      BOOST_CHECK_MESSAGE( theClient.reloadpasswdfile() == 1, CtsApi::reloadpasswdfile() << " should return 1\n" );
+      BOOST_CHECK_MESSAGE( theClient.reloadcustompasswdfile() == 1, CtsApi::reloadcustompasswdfile() << " should return 1\n" );
       BOOST_CHECK_MESSAGE( theClient.delete_all() == 1,CtsApi::to_string(CtsApi::delete_node()) << " should return 0\n" << theClient.errorMsg());
       BOOST_CHECK_MESSAGE( theClient.shutdownServer() == 1,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
       BOOST_CHECK_MESSAGE( theClient.haltServer() == 1,CtsApi::haltServer() << " should return 0\n" << theClient.errorMsg());
@@ -118,6 +121,7 @@ BOOST_AUTO_TEST_CASE( test_custom_user )
       theClient.set_user_name(User::login_name()); // this should clear password, so that its reloaded when *next* cmd runs
 
       // all client command should now pass. Invoking a client request that requires authorisation
+      BOOST_CHECK_MESSAGE( theClient.reloadcustompasswdfile() == 0, CtsApi::reloadcustompasswdfile() << " should return 0\n" );
       BOOST_CHECK_MESSAGE( theClient.shutdownServer() == 0,"should return 0\n" << theClient.errorMsg());
       BOOST_CHECK_MESSAGE( theClient.getDefs() == 0,"should return 0\n" << theClient.errorMsg());
       BOOST_CHECK_MESSAGE( theClient.sync_local() == 0,"should return 0\n" << theClient.errorMsg());

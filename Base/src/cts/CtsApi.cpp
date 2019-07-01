@@ -777,6 +777,9 @@ const char* CtsApi::reloadwsfileArg()  { return "reloadwsfile"; }
 std::string CtsApi::reloadpasswdfile()     { return "--reloadpasswdfile"; }
 const char* CtsApi::reloadpasswdfile_arg() { return "reloadpasswdfile";}
 
+std::string CtsApi::reloadcustompasswdfile()     { return "--reloadcustompasswdfile"; }
+const char* CtsApi::reloadcustompasswdfile_arg() { return "reloadcustompasswdfile";}
+
 std::string CtsApi::group(const std::string& cmds) {
    std::string ret = "--group=";
    ret += cmds;

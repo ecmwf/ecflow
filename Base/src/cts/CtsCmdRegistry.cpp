@@ -42,7 +42,8 @@ CtsCmdRegistry::CtsCmdRegistry(bool addGroupCmd)
 	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::SHUTDOWN_SERVER));
 	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::TERMINATE_SERVER));
 	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::RELOAD_WHITE_LIST_FILE));
-	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::RELOAD_PASSWD_FILE));
+   vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::RELOAD_PASSWD_FILE));
+   vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::RELOAD_CUSTOM_PASSWD_FILE));
 	vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::FORCE_DEP_EVAL));
    vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::STATS));
    vec_.push_back( std::make_shared<CtsCmd>(CtsCmd::STATS_SERVER));

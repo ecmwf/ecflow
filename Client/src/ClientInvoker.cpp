@@ -1186,6 +1186,12 @@ int ClientInvoker::reloadpasswdfile() const
    return invoke(std::make_shared<CtsCmd>( CtsCmd::RELOAD_PASSWD_FILE));
 }
 
+int ClientInvoker::reloadcustompasswdfile() const
+{
+   if (testInterface_) return invoke(CtsApi::reloadcustompasswdfile());
+   return invoke(std::make_shared<CtsCmd>( CtsCmd::RELOAD_CUSTOM_PASSWD_FILE));
+}
+
 int ClientInvoker::group( const std::string& groupRequest ) const
 {
    if (testInterface_)  return invoke(CtsApi::group(groupRequest));

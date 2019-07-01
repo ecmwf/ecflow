@@ -60,7 +60,10 @@ public:
 	/// debug client, when environment variable ECF_CLIENT_DEBUG is set.
 	virtual bool debug() const = 0 ;
 
-   // Returns the user password. This value is cached, so we only read passwd file once
+   /// Returns the user password read from the password file.
+	/// This value is cached, so we only read passwd file once
+	/// When the password is read in we crypt the password, using user name as a salt.
+   virtual const std::string& get_custom_user_password(const std::string& user) const = 0;
    virtual const std::string& get_user_password(const std::string& user) const = 0;
    virtual void clear_user_password() = 0; // force password check again
 

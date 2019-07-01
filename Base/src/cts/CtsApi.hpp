@@ -144,6 +144,7 @@ public:
 
 	static std::string reloadwsfile();
    static std::string reloadpasswdfile();
+   static std::string reloadcustompasswdfile();
 
 	// "expect string of the form "shutdown; get" must be ';' separated
 	static std::string group(const std::string& cmds);
@@ -233,6 +234,7 @@ public:
 	static const char* plugArg();
 	static const char* reloadwsfileArg();
    static const char* reloadpasswdfile_arg();
+   static const char* reloadcustompasswdfile_arg();
 	static const char* groupArg();
 	static const char* forceDependencyEvalArg();
 	static const char* alterArg();

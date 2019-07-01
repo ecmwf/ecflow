@@ -73,6 +73,7 @@ const std::string& Str::ECF_LOG()     { static std::string ECF_LOG = "ECF_LOG"; 
 
 const std::string& Str::WHITE_LIST_FILE() { static std::string WHITE_LIST_FILE = "ecf.lists"; return WHITE_LIST_FILE;}
 const std::string& Str::ECF_PASSWD() { static std::string ECF_PASSWD = "ecf.passwd"; return ECF_PASSWD;}
+const std::string& Str::ECF_CUSTOM_PASSWD() { static std::string ECF_CUSTOM_PASSWD = "ecf.custom_passwd"; return ECF_CUSTOM_PASSWD;}
 
 const std::string& Str::ALPHANUMERIC_UNDERSCORE()
 {

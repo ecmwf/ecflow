@@ -437,17 +437,23 @@ bool BaseServer::reloadPasswdFile(std::string& errorMsg)
    return serverEnv_.reloadPasswdFile(errorMsg);
 }
 
-bool BaseServer::authenticateReadAccess(const std::string& user,const std::string& passwd)
+bool BaseServer::reloadCustomPasswdFile(std::string& errorMsg)
 {
-   return serverEnv_.authenticateReadAccess(user,passwd);
+   if (serverEnv_.debug()) cout << "   BaseServer::reloadCustomPasswdFile " << endl;
+   return serverEnv_.reloadCustomPasswdFile(errorMsg);
 }
-bool BaseServer::authenticateReadAccess(const std::string& user,const std::string& passwd, const std::string& path)
+
+bool BaseServer::authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd)
 {
-   return serverEnv_.authenticateReadAccess(user,passwd,path);
+   return serverEnv_.authenticateReadAccess(user,custom_user,passwd);
 }
-bool BaseServer::authenticateReadAccess(const std::string& user,const std::string& passwd, const std::vector<std::string>& paths)
+bool BaseServer::authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd, const std::string& path)
 {
-   return serverEnv_.authenticateReadAccess(user,passwd,paths);
+   return serverEnv_.authenticateReadAccess(user,custom_user,passwd,path);
+}
+bool BaseServer::authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd, const std::vector<std::string>& paths)
+{
+   return serverEnv_.authenticateReadAccess(user,custom_user,passwd,paths);
 }
 
 bool BaseServer::authenticateWriteAccess(const std::string& user )

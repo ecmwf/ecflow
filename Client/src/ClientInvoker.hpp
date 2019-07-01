@@ -318,7 +318,8 @@ public:
    int alter_sort(const std::string& path, const std::string& sortable_attribute_name, bool recursive = true) const;
 
 	int reloadwsfile() const;
-	int reloadpasswdfile() const;
+   int reloadpasswdfile() const;
+   int reloadcustompasswdfile() const;
 
 	int group(const std::string& groupRequest) const;
 

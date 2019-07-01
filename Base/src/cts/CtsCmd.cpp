@@ -43,6 +43,7 @@ std::ostream& CtsCmd::print(std::ostream& os) const
       case CtsCmd::TERMINATE_SERVER:           return user_cmd(os,CtsApi::terminateServer()); break;
       case CtsCmd::RELOAD_WHITE_LIST_FILE:     return user_cmd(os,CtsApi::reloadwsfile()); break;
       case CtsCmd::RELOAD_PASSWD_FILE:         return user_cmd(os,CtsApi::reloadpasswdfile()); break;
+      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:  return user_cmd(os,CtsApi::reloadcustompasswdfile()); break;
       case CtsCmd::FORCE_DEP_EVAL:             return user_cmd(os,CtsApi::forceDependencyEval()); break;
       case CtsCmd::PING:                       return user_cmd(os,CtsApi::pingServer()); break;
       case CtsCmd::STATS:                      return user_cmd(os,CtsApi::stats()); break;
@@ -69,6 +70,7 @@ std::ostream& CtsCmd::print_only(std::ostream& os) const
       case CtsCmd::TERMINATE_SERVER:           os << CtsApi::terminateServer(); break;
       case CtsCmd::RELOAD_WHITE_LIST_FILE:     os << CtsApi::reloadwsfile(); break;
       case CtsCmd::RELOAD_PASSWD_FILE:         os << CtsApi::reloadpasswdfile(); break;
+      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:  os << CtsApi::reloadcustompasswdfile(); break;
       case CtsCmd::FORCE_DEP_EVAL:             os << CtsApi::forceDependencyEval(); break;
       case CtsCmd::PING:                       os << CtsApi::pingServer(); break;
       case CtsCmd::STATS:                      os << CtsApi::stats(); break;
@@ -103,6 +105,7 @@ bool CtsCmd::isWrite() const
       case CtsCmd::TERMINATE_SERVER: return true; break;  // requires write privilege
       case CtsCmd::RELOAD_WHITE_LIST_FILE:return true; break;  // requires write privilege
       case CtsCmd::RELOAD_PASSWD_FILE:return true; break;      // requires write privilege
+      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:return true; break;      // requires write privilege
       case CtsCmd::FORCE_DEP_EVAL:   return true; break;       // requires write privilege
       case CtsCmd::PING:             return false; break;      // read only
       case CtsCmd::STATS:            return false; break;      // read only
@@ -130,6 +133,7 @@ bool CtsCmd::cmd_updates_defs() const
       case CtsCmd::TERMINATE_SERVER: return true; break;
       case CtsCmd::RELOAD_WHITE_LIST_FILE:return false; break;
       case CtsCmd::RELOAD_PASSWD_FILE:return false; break;
+      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:return false; break;
       case CtsCmd::FORCE_DEP_EVAL:   return true; break;
       case CtsCmd::PING:             return false; break;
       case CtsCmd::STATS:            return false; break;
@@ -163,6 +167,7 @@ const char* CtsCmd::theArg() const
       case CtsCmd::TERMINATE_SERVER: return CtsApi::terminateServerArg(); break;
       case CtsCmd::RELOAD_WHITE_LIST_FILE:return CtsApi::reloadwsfileArg(); break;
       case CtsCmd::RELOAD_PASSWD_FILE:return CtsApi::reloadpasswdfile_arg(); break;
+      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:return CtsApi::reloadcustompasswdfile_arg(); break;
       case CtsCmd::FORCE_DEP_EVAL:   return CtsApi::forceDependencyEvalArg(); break;
       case CtsCmd::PING:             return CtsApi::pingServerArg(); break;
       case CtsCmd::STATS:            return CtsApi::statsArg(); break;
@@ -213,6 +218,14 @@ STC_Cmd_ptr CtsCmd::doHandleRequest(AbstractServer* as) const
          as->update_stats().reload_passwd_file_++;
          std::string errorMsg;
          if (!as->reloadPasswdFile(errorMsg)) {
+            throw std::runtime_error( errorMsg ) ;
+         }
+         break;
+      }
+      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE: {
+         as->update_stats().reload_passwd_file_++;
+         std::string errorMsg;
+         if (!as->reloadCustomPasswdFile(errorMsg)) {
             throw std::runtime_error( errorMsg ) ;
          }
          break;
@@ -384,7 +397,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
       }
       case CtsCmd::RELOAD_PASSWD_FILE:{
          desc.add_options()( CtsApi::reloadpasswdfile_arg(),
-               "Reload the server password file.\n"
+               "Reload the server password file. To be used when ALL users have a password\n"
                "Although the password file can be reloaded(i.e to add/remove users), its location can't be changed\n"
                "The password file is located by the ECF_PASSWD environment variable, both for the client and server\n"
                "On the server the default file name is <host>.<port>.ecf.passwd\n"
@@ -403,13 +416,44 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
                "For the password authentication to work. It must be:\n"
                "  - Defined for the client and server\n"
                "  - Creating an empty password file,(i.e with just the version) will mean, no client can reload it.\n"
-               "    Hence at least the server administrator needs to added to the file\n"
+               "    Hence at least the server administrator needs to be added to the file\n"
                "  - The password file permission's must be set for reading by the user only\n"
                "Usage:\n"
                " --reloadpasswdfile"
          );
          break;
       }
+      case CtsCmd::RELOAD_CUSTOM_PASSWD_FILE:{
+         desc.add_options()( CtsApi::reloadcustompasswdfile_arg(),
+               "Reload the server custom password file. For those user's who don't use login name\n"
+               "This should be used when most users use the machine login name, but a few users specify their own user name,\n"
+               "in this case these user must provide a password.\n"
+               "Although the password file can be reloaded(i.e to add/remove users), its location can't be changed\n"
+               "The password file is located by the ECF_CUSTOM_PASSWD environment variable, both for the client and server\n"
+               "On the server the default file name is <host>.<port>.ecf.custom_passwd\n"
+               "On the client the default file name is ecf.custom_passwd\n"
+               "The format of the file is same for client and server:\n\n"
+               "4.5.0\n"
+               "# comment\n"
+               "<user> <host> <port> <passwd> # comment\n\n"
+               "i.e\n"
+               "4.5.0 # the version\n"
+               "fred machine1 3142 xxyyyd\n"
+               "fred machine2 3133 xxyyyd # comment\n"
+               "bill machine2 3133 xxyggyyd\n\n"
+               "The same user may appear multiple times. i.e with different host/port. This allows the password file\n"
+               "to be used for multiple servers\n"
+               "For the password authentication to work. It must be:\n"
+               "  - Defined for the client and server\n"
+               "  - Creating an empty password file,(i.e with just the version) will mean, no client can reload it.\n"
+               "    Hence at least the server administrator needs to be added to the file\n"
+               "  - The password file permission's must be set for reading by the user only\n"
+               "Usage:\n"
+               " --reloadcustompasswdfile"
+         );
+         break;
+      }
+
       case CtsCmd::FORCE_DEP_EVAL:{
          desc.add_options()( CtsApi::forceDependencyEvalArg(),
                   "Force dependency evaluation. Used for DEBUG only."

@@ -357,23 +357,33 @@ bool ClientEnvironment::parseHostsFile(std::string& errorMsg)
 
 const std::string& ClientEnvironment::get_user_password(const std::string& user) const
 {
-   //cout << "ClientEnvironment::get_user_password() user:" << user << " passwd_(" << passwd_ << ")\n";
+   return get_password("ECF_PASSWD",user);
+}
+
+const std::string& ClientEnvironment::get_custom_user_password(const std::string& user) const
+{
+   return get_password("ECF_CUSTOM_PASSWD",user);
+}
+
+const std::string& ClientEnvironment::get_password(const char* env, const std::string& user) const
+{
+   //cout << "ClientEnvironment::get_user_password() env:" << env << " user:" << user << " passwd_(" << passwd_ << ")\n";
    if (user.empty()) throw std::runtime_error("ClientEnvironment::get_user_password: No user specified");
    if (!passwd_.empty()) {
       //cout << "  ClientEnvironment::get_user_password() CACHED returning " << passwd_ << "\n";
       return passwd_;
    }
 
-   char* file = getenv("ECF_PASSWD");
+   char* file = getenv(env);
    if (file) {
       std::string user_passwd_file = file;
-      //cout << "  ClientEnvironment::get_user_password() ECF_PASSWD " << user_passwd_file  << "\n";
+      //cout << "  ClientEnvironment::get_user_password() ECF_CUSTOM_PASSWD " << user_passwd_file  << "\n";
       if (!user_passwd_file.empty() && fs::exists(user_passwd_file)) {
          //cout << "  ClientEnvironment::get_user_password() LOADING password file\n";
          PasswdFile passwd_file;
          std::string errorMsg;
          if (!passwd_file.load(user_passwd_file,debug(),errorMsg)) {
-            std::stringstream ss; ss << "Could not parse ECF_PASSWD file. " << errorMsg;
+            std::stringstream ss; ss << "Could not parse ECF_CUSTOM_PASSWD file. " << errorMsg;
             throw std::runtime_error(ss.str());
          }
          //std::cout << "ClientEnvironment::get_user_password() PasswdFile.dump()\n" << passwd_file.dump() << "\n";
@@ -386,3 +396,4 @@ const std::string& ClientEnvironment::get_user_password(const std::string& user)
    //cout << "  ClientEnvironment::get_user_password() returning EMPTY \n";
    return Str::EMPTY();
 }
+

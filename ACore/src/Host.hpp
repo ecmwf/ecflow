@@ -44,6 +44,9 @@ public:
    /// return ecf.passwd file. Used for authentication
    std::string ecf_passwd_file(const std::string& port) const;
 
+   /// return ecf.custom_passwd file. Used for authentication
+   std::string ecf_custom_passwd_file(const std::string& port) const;
+
    /// Given a port and file name, will return <host>.<port>.file_name
    std::string prefix_host_and_port( const std::string& port,const std::string& file_name ) const;
 

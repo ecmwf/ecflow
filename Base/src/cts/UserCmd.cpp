@@ -44,7 +44,7 @@ bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 {
    // The user should NOT be empty. Rather than asserting and killing the server, fail authentication
    // ECFLOW-577 and ECFLOW-512. When user_ empty ??
-   if (!user_.empty() && as->authenticateReadAccess(user_,pswd_)) {
+   if (!user_.empty() && as->authenticateReadAccess(user_,cu_,pswd_)) {
 
       // Does this user command require write access
       if ( isWrite() ) {
@@ -73,7 +73,7 @@ bool UserCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
 
 bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::string& path) const
 {
-   if (!user_.empty() && as->authenticateReadAccess(user_,pswd_,path)) {
+   if (!user_.empty() && as->authenticateReadAccess(user_,cu_,pswd_,path)) {
 
       // Does this user command require write access
       if ( isWrite() ) {
@@ -104,7 +104,7 @@ bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::strin
 
 bool UserCmd::do_authenticate(AbstractServer* as, STC_Cmd_ptr&, const std::vector<std::string>& paths) const
 {
-   if (!user_.empty() && as->authenticateReadAccess(user_,pswd_,paths)) {
+   if (!user_.empty() && as->authenticateReadAccess(user_,cu_,pswd_,paths)) {
 
       // Does this user command require write access
       if ( isWrite() ) {
@@ -145,15 +145,23 @@ void UserCmd::setup_user_authentification(const std::string& user, const std::st
 
 bool UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv)
 {
-   const std::string& user_name = clientEnv.get_user_name(); // Using ECF_USER or --user <user>
+   // A Custom use is one where:
+   //   o/ ECF_USER environment used
+   //   o/ --user on the command line
+   //   o/ ClientInvoker::set_user_name()
+   // Having a custom user name is an exception, to avoid having ALL user to provide a password
+   // we have a CUSTOM password file ECF_CUSTOM_PASSWD,   <host>.<port>.ecf.custom_passwd
+   const std::string& user_name = clientEnv.get_user_name(); // Using ECF_USER || --user <user> || set_user_name()/GUI
    if (!user_name.empty()) {
-      const std::string& passwd = clientEnv.get_user_password(user_name);
+      cu_ = true;  // inform server side custom USER used, server will expect password in ECF_CUSTOM_PASSWD files
+      const std::string& passwd = clientEnv.get_custom_user_password(user_name);
       if (passwd.empty()) return false; // invalid user as password is empty, must have a password when user specified
 
       setup_user_authentification(user_name,passwd);
       return true;
    }
 
+   // User name is same as login name, if ECF_PASSWD is defined on server side *ALL* user must provide a password.
    std::string the_user = User::login_name();
    const std::string& passwd = clientEnv.get_user_password( the_user );
    setup_user_authentification(the_user,passwd);

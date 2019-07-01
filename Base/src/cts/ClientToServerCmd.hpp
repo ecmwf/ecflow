@@ -613,14 +613,15 @@ protected:
 private:
    std::string user_;
    std::string pswd_;
+   bool cu_ =  false;    // custom user, i.e used set_user_name() || ECF_USER || --user -> only check this password
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(cereal::base_class< ClientToServerCmd >( this ),
-         CEREAL_NVP(user_));
+      ar(cereal::base_class< ClientToServerCmd >( this ), CEREAL_NVP(user_));
       CEREAL_OPTIONAL_NVP(ar, pswd_, [this](){return !pswd_.empty(); }); // conditionally save
+      CEREAL_OPTIONAL_NVP(ar, cu_,   [this](){return cu_; });            // conditionally save
    }
 };
 
@@ -673,7 +674,8 @@ public:
       DEBUG_SERVER_ON, DEBUG_SERVER_OFF,
       SERVER_LOAD, STATS_RESET,
       RELOAD_PASSWD_FILE,
-      STATS_SERVER
+      STATS_SERVER,
+      RELOAD_CUSTOM_PASSWD_FILE
      };
 
    explicit CtsCmd(Api a) : api_(a) {}

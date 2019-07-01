@@ -142,6 +142,7 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
    assert(!log_file_name.empty());              // expect name of form "ecf.log"
    assert(!ecf_white_list_file_.empty());       // expect name of form "ecf.lists"
    assert(!ecf_passwd_file_.empty());           // expect name of form "ecf.passwd"
+   assert(!ecf_passwd_custom_file_.empty());    // expect name of form "ecf.custom_passwd"
 
    std::string port = boost::lexical_cast<std::string>(serverPort_);
 
@@ -171,6 +172,9 @@ void ServerEnvironment::init(int argc, char* argv[], const std::string& path_to_
 
    if (ecf_passwd_file_ == Str::ECF_PASSWD())
       ecf_passwd_file_ = host_name_.prefix_host_and_port(port,ecf_passwd_file_);
+
+   if (ecf_passwd_custom_file_ == Str::ECF_CUSTOM_PASSWD() )
+       ecf_passwd_custom_file_ = host_name_.prefix_host_and_port(port,ecf_passwd_custom_file_);
 
    // Change directory to ECF_HOME and check thats its accessible
    change_dir_to_ecf_home_and_check_accesibility();
@@ -206,6 +210,9 @@ ServerEnvironment::~ServerEnvironment()
 bool ServerEnvironment::valid(std::string& errorMsg) const
 {
    /// This must be called *AFTER* the constructor
+//   cout << "*****************************************************************************\n";
+//   cout << "ServerEnvironment::valid\n";
+//   cout << "*****************************************************************************\n";
 
  	if (serverHost_.empty()) {
   		errorMsg = "Could not determine the server host.";
@@ -319,6 +326,18 @@ bool ServerEnvironment::valid(std::string& errorMsg) const
  	   }
  	}
 
+   if (!ecf_passwd_custom_file_.empty() && fs::exists(ecf_passwd_custom_file_)) {
+      if (!passwd_custom_file_.load(ecf_passwd_custom_file_, debug(), errorMsg)) {
+         std::cout << "Error: could not parse ECF_CUSTOM_PASSWD file " << ecf_passwd_custom_file_  << "\n" << errorMsg << "\n";
+         return false;
+      }
+      if (!passwd_custom_file_.check_at_least_one_user_with_host_and_port(serverHost_,the_port())) {
+         std::cout << "Error: custom password file " << ecf_passwd_custom_file_;
+         std::cout << " does not contain any users, which match the host and port of this server\n";
+         return false;
+      }
+   }
+
 	// If the white list file is empty or does not exist, *ON* server start, its perfectly valid
 	// i.e any user is free to access the server
 	if (ecf_white_list_file_.empty()) return true;
@@ -360,8 +379,9 @@ void ServerEnvironment::variables(std::vector<std::pair<std::string,std::string>
 	// since they only affect the server
 	// ECF_CHECKINTERVAL
 
-   theRetVec.emplace_back(std::string("ECF_LISTS"), ecf_white_list_file_ ); // read only variable, changing it has no effect
-   theRetVec.emplace_back(std::string("ECF_PASSWD"), ecf_passwd_file_ );    // read only variable, changing it has no effect
+   theRetVec.emplace_back(std::string("ECF_LISTS"), ecf_white_list_file_ );           // read only variable, changing it has no effect
+   theRetVec.emplace_back(std::string("ECF_PASSWD"), ecf_passwd_file_ );              // read only variable, changing it has no effect
+   theRetVec.emplace_back(std::string("ECF_CUSTOM_PASSWD"), ecf_passwd_custom_file_ );// read only variable, changing it has no effect
 
 	// variables that can be overridden, in the suite definition
 	theRetVec.emplace_back(std::string("ECF_JOB_CMD"), ecf_cmd_ );
@@ -437,23 +457,48 @@ bool ServerEnvironment::reloadPasswdFile(std::string& errorMsg)
    return passwd_file_.load(ecf_passwd_file_, debug(), errorMsg );
 }
 
-bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd) const
+bool ServerEnvironment::reloadCustomPasswdFile(std::string& errorMsg)
 {
-   if (!passwd_file_.authenticate(user,passwd)) return false;
+   if (debug()) cout << "ServerEnvironment::reloadPasswdFile:(" << ecf_passwd_custom_file_ << ") CWD(" << fs::current_path().string() << ")\n";
+   if (ecf_passwd_custom_file_.empty()) {
+      errorMsg += "The ECF_CUSTOM_PASSWD file ";
+      errorMsg += ecf_passwd_custom_file_ ;
+      errorMsg += " has not been specified.";
+      return false;
+   }
+   if (!fs::exists(ecf_passwd_custom_file_)) {
+      errorMsg += "The ECF_CUSTOM_PASSWD file ";
+      errorMsg += ecf_passwd_custom_file_;
+      errorMsg += " does not exist. Server CWD : " + fs::current_path().string();
+      return false;
+   }
+
+   // Only override valid users if we successfully opened and parsed file
+   return passwd_custom_file_.load(ecf_passwd_custom_file_ , debug(), errorMsg );
+}
+
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd) const
+{
+   if (!custom_user){ if (!passwd_file_.authenticate(user,passwd)) return false;}
+   else             { if (!passwd_custom_file_.authenticate(user,passwd)) return false;}
 
    // if *NO* users specified then all users are valid
 	return white_list_file_.verify_read_access(user);
 }
 
-bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path) const
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd,const std::string& path) const
 {
-   if (!passwd_file_.authenticate(user,passwd)) return false;
+   if (!custom_user){ if (!passwd_file_.authenticate(user,passwd)) return false; }
+   else             { if (!passwd_custom_file_.authenticate(user,passwd)) return false;}
+
    return white_list_file_.verify_read_access(user,path);
 }
 
-bool ServerEnvironment::authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths) const
+bool ServerEnvironment::authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd,const std::vector<std::string>& paths) const
 {
-   if (!passwd_file_.authenticate(user,passwd)) return false;
+   if (!custom_user){ if (!passwd_file_.authenticate(user,passwd)) return false; }
+   else             { if (!passwd_custom_file_.authenticate(user,passwd)) return false;}
+
    return white_list_file_.verify_read_access(user,paths);
 }
 
@@ -505,6 +550,7 @@ void ServerEnvironment::read_config_file(std::string& log_file_name,const std::s
          ("ECF_MICRODEF",  po::value<std::string>(&ecf_micro_)->default_value(Ecf::MICRO()), "Preprocessor character for variable substitution and including files")
          ("ECF_LISTS",     po::value<std::string>(&ecf_white_list_file_)->default_value(Str::WHITE_LIST_FILE()), "Path name to file the list valid users and their access rights")
          ("ECF_PASSWD",    po::value<std::string>(&ecf_passwd_file_)->default_value(Str::ECF_PASSWD()), "Path name to passwd file")
+         ("ECF_CUSTOM_PASSWD",po::value<std::string>(&ecf_passwd_custom_file_)->default_value(Str::ECF_CUSTOM_PASSWD()), "Path name to custom passwd file, for user who don't use login name")
          ("ECF_TASK_THRESHOLD",po::value<int>(&the_task_threshold)->default_value(JobProfiler::task_threshold_default()),"The defaults thresholds when profiling job generation")
          ;
 
@@ -579,6 +625,9 @@ void ServerEnvironment::read_environment_variables(std::string& log_file_name)
    char* passwd = getenv("ECF_PASSWD");
    if (passwd) ecf_passwd_file_ = passwd;
 
+   char* custom_passwd = getenv("ECF_CUSTOM_PASSWD");
+   if (custom_passwd) ecf_passwd_custom_file_ = custom_passwd;
+
 	if (getenv("ECF_DEBUG_SERVER")) {
 		debug_ = true; // can also be enabled via --debug option
 	}
@@ -647,6 +696,7 @@ std::string ServerEnvironment::dump() const
    ss << "Job generation " << jobGeneration_ << "\n";
    ss << "Server host name " << serverHost_ << "\n";
    ss << "ECF_PASSWD = " << ecf_passwd_file_ << "\n";
+   ss << "ECF_CUSTOM_PASSWD = " << ecf_passwd_custom_file_ << "\n";
    if ( tcp_protocol_.family() ==  2 /*PF_INET*/)  ss << "TCP Protocol  v4 \n";
    else if ( tcp_protocol_.family() ==  10 /*PF_INET6*/)  ss << "TCP Protocol  v6 \n";
 
@@ -680,6 +730,7 @@ std::vector<std::string> ServerEnvironment::expected_variables()
    expected_variables.push_back(  Str::ECF_HOST() );
    expected_variables.emplace_back("ECF_INTERVAL");
    expected_variables.emplace_back("ECF_PASSWD");
+   expected_variables.emplace_back("ECF_CUSTOM_PASSWD");
 #ifdef ECF_OPENSSL
    if (getenv("ECF_SSL")) expected_variables.emplace_back("ECF_SSL");
 #endif

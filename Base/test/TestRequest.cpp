@@ -76,6 +76,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE)));
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_CUSTOM_PASSWD_FILE)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::FORCE_DEP_EVAL)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::STATS_SERVER)));
@@ -147,6 +148,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_WHITE_LIST_FILE))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_PASSWD_FILE))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RELOAD_CUSTOM_PASSWD_FILE))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::SERVER_LOAD))  );
    theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::SUSPEND,"EmptySuite"))  );
    theGroupCmd->addChild(  Cmd_ptr( new PathsCmd(PathsCmd::RESUME,"EmptySuite"))  );

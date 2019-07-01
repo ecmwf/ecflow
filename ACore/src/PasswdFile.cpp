@@ -41,14 +41,16 @@ PasswdFile::~PasswdFile() = default;
 // The parser expects version number  4.5.0
 bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMsg)
 {
-   if (debug)  std::cout << __func__ << "  " <<  passwd_file_ << " opening...\n";
-
+#ifdef DEBUG_ME
+   debug = true;
+#endif
    vec_.clear();
    passwd_file_ = file;
+   if (debug)  std::cout << __func__ << "  " <<  passwd_file_ << " opening...\n";
 
    std::vector<std::string> lines;
    if (!File::splitFileIntoLines(passwd_file_,lines,true /* ignore empty lines */)) {
-      errorMsg += "Could not open file specified by ECF_PASSWD ";
+      errorMsg += "Could not open file specified by ECF_PASSWD/ECF_CUSTOM_PASSWD ";
       errorMsg += passwd_file_;
       errorMsg += " (";
       errorMsg += strerror(errno);
@@ -82,7 +84,7 @@ bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMs
          if (!validateVersionNumber(lineTokens[0], errorMsg )) {
             std::stringstream ss;
             ss << " " << i + 1 << ": " << lines[i] << "\n";
-            ss << "for ECF_PASSWD file " << passwd_file_ << "\n";
+            ss << "for ECF_PASSWD/ECF_CUSTOM_PASSWD file " << passwd_file_ << "\n";
             errorMsg += ss.str();
             return false;
          }
@@ -97,7 +99,7 @@ bool PasswdFile::load(const std::string& file, bool debug,  std::string& errorMs
       }
    }
 
-   if (debug)  std::cout << dump() << "\n";
+   if (debug)  std::cout << dump();
 
    // Now check the user is unique for a given host/port:
    //   fred host 3141 xxxx
@@ -142,22 +144,23 @@ std::string PasswdFile::get_passwd(const std::string& user, const std::string& h
 
 bool PasswdFile::authenticate(const std::string& user, const std::string& passwd) const
 {
-//#ifdef DEBUG_ME
-//   cout << "   PasswdFile::authenticate user(" << user << ") passwd(" << passwd << ")\n";
-//#endif
+#ifdef DEBUG_ME
+   cout << "   PasswdFile::authenticate user:" << user << " passwd:" << passwd << " file:" <<  passwd_file_ << " vec_.size(): " << vec_.size() << "\n";
+   cout << dump() << "\n";
+#endif
 
    if (user.empty()) {
-      //#ifdef DEBUG_ME
-      //      cout << "      PasswdFile::authenticate: user empty:  FAIL\n";
-      //#endif
+#ifdef DEBUG_ME
+      cout << "      PasswdFile::authenticate: user empty:  FAIL\n";
+#endif
       return false;
    }
 
    // no password specified, and password file is empty
    if (passwd.empty() && vec_.empty()) {
-      //#ifdef DEBUG_ME
-      //      cout << "      PasswdFile::authenticate no password and password file empty: PASS\n";
-      //#endif
+#ifdef DEBUG_ME
+      cout << "      PasswdFile::authenticate no password and password file empty: PASS\n";
+#endif
       return true;
    }
 
@@ -166,15 +169,15 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
    for (size_t i = 0; i < vec_size; i++) {
       if (vec_[i].user() == user) {
          if (vec_[i].passwd() == passwd) {
-            //#ifdef DEBUG_ME
-            //            cout << "      PasswdFile::authenticate user and password match: PASS\n";
-            //#endif
+#ifdef DEBUG_ME
+            cout << "      PasswdFile::authenticate user and password match: PASS\n";
+#endif
             return true;
          }
          else {
-            //#ifdef DEBUG_ME
-            //      cout << "      PasswdFile::authenticate: user found but passwd did not match: FAIL\n";
-            //#endif
+#ifdef DEBUG_ME
+            cout << "      PasswdFile::authenticate: user found but passwd did not match: FAIL\n";
+#endif
             return false;
          }
       }
@@ -184,23 +187,23 @@ bool PasswdFile::authenticate(const std::string& user, const std::string& passwd
 
    // User not found, but if passwd is not empty, then fail.
    if (!passwd.empty()) {
-      //#ifdef DEBUG_ME
-      //         cout << "      PasswdFile::authenticate: user NOT found, passwd is NOT EMPTY: FAIL\n";
-      //#endif
+#ifdef DEBUG_ME
+     cout << "      PasswdFile::authenticate: user NOT found, passwd is NOT EMPTY: FAIL\n";
+#endif
       return false;
    }
 
    // Server has a password file, but user not found and passwd is empty.
    if (vec_.empty()) {
-//#ifdef DEBUG_ME
-//    cout << "      PasswdFile::authenticate: true, user NOT found, and passwd EMPTY, and password file EMPTY\n";
-//#endif
+#ifdef DEBUG_ME
+    cout << "      PasswdFile::authenticate: true, user NOT found, and passwd EMPTY, and password file EMPTY\n";
+#endif
       return true;
    }
 
-//#ifdef DEBUG_ME
-//  cout << "      PasswdFile::authenticate false, user NOT found, and passwd EMPTY\n";
-//#endif
+#ifdef DEBUG_ME
+  cout << "      PasswdFile::authenticate false, user NOT found, and passwd EMPTY\n";
+#endif
    return false;
 }
 
@@ -276,8 +279,10 @@ bool PasswdFile::add_user(std::vector<std::string>& tokens, std::string& error_m
 std::string PasswdFile::dump() const
 {
    std::stringstream ss;
+   int count = 1;
    for (const auto & i : vec_) {
-      ss << i.user() << " " << i.host() << ":" << i.port() << "\n";
+      ss << count << ": " << i.user() << " " << i.host() << ":" << i.port() << "\n";
+      count++;
    }
    return ss.str();
 }

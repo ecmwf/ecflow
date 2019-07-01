@@ -114,6 +114,7 @@ public:
    const std::string& port() const override;
 	const std::vector<std::pair<std::string,std::string> >& env() const override { return env_;}
 	const std::string& get_user_password(const std::string& user) const override;
+   const std::string& get_custom_user_password(const std::string& user) const override;
    void clear_user_password() override { passwd_.clear();}
    const std::string& get_user_name() const override { return user_name_;}
    void set_user_name(const std::string& name) override { user_name_ = name;}
@@ -176,6 +177,8 @@ private:
    void setEnv( const std::vector<std::pair<std::string,std::string> >& e) { env_= e;}
 
 	bool parseHostsFile(std::string& errorMsg);
+
+   const std::string& get_password(const char*, const std::string& user) const;
 };
 
 #endif

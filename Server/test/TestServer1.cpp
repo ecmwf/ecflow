@@ -70,9 +70,9 @@ public:
    bool reloadWhiteListFile(std::string& errorMsg) override { return Server::reloadWhiteListFile(errorMsg);}
    bool reloadPasswdFile(std::string& errorMsg) override { return Server::reloadPasswdFile(errorMsg);}
 
-   bool authenticateReadAccess(const std::string& user,const std::string& passwd) override { return Server::authenticateReadAccess(user,passwd); }
-   bool authenticateReadAccess(const std::string& user,const std::string& passwd, const std::string& path) override { return Server::authenticateReadAccess(user,passwd,path); }
-   bool authenticateReadAccess(const std::string& user,const std::string& passwd, const std::vector<std::string>& paths) override{ return Server::authenticateReadAccess(user,passwd,paths); }
+   bool authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd) override { return Server::authenticateReadAccess(user,custom_user,passwd); }
+   bool authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd, const std::string& path) override { return Server::authenticateReadAccess(user,custom_user,passwd,path); }
+   bool authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd, const std::vector<std::string>& paths) override{ return Server::authenticateReadAccess(user,custom_user,passwd,paths); }
 
    bool authenticateWriteAccess(const std::string& user) override { return Server::authenticateWriteAccess(user); }
    bool authenticateWriteAccess(const std::string& user, const std::string& path) override { return Server::authenticateWriteAccess(user,path); }

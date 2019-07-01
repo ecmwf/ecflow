@@ -167,6 +167,7 @@ public:
 
    static const std::string& WHITE_LIST_FILE();
    static const std::string& ECF_PASSWD();
+   static const std::string& ECF_CUSTOM_PASSWD();
 private:
    Str()= default;
    Str(const Str&) = delete;

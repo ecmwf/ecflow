@@ -146,7 +146,8 @@ public:
 	/// If errors arise the exist user still stay in affect
   	bool reloadWhiteListFile(std::string& errorMsg);
 
-  	bool reloadPasswdFile(std::string& errorMsg);
+   bool reloadPasswdFile(std::string& errorMsg);
+   bool reloadCustomPasswdFile(std::string& errorMsg);
 
 	/// There are several kinds of authentification:
 	///     a/ None
@@ -155,9 +156,9 @@ public:
 	/// At the moment we will only implement options a/ and b/
 	//
 	/// Returns true if the given user has access to the server, false otherwise
-   bool authenticateReadAccess(const std::string& user,const std::string& passwd)const;
-   bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::string& path)const;
-   bool authenticateReadAccess(const std::string& user,const std::string& passwd,const std::vector<std::string>& paths)const;
+   bool authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd)const;
+   bool authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd,const std::string& path)const;
+   bool authenticateReadAccess(const std::string& user,bool custom_user,const std::string& passwd,const std::vector<std::string>& paths)const;
  	bool authenticateWriteAccess(const std::string& user) const;
    bool authenticateWriteAccess(const std::string& user,const std::string& path)const;
    bool authenticateWriteAccess(const std::string& user,const std::vector<std::string>& paths)const;
@@ -215,7 +216,9 @@ private:
    mutable WhiteListFile white_list_file_;
 
    std::string ecf_passwd_file_;
+   std::string ecf_passwd_custom_file_;
    mutable PasswdFile passwd_file_;
+   mutable PasswdFile passwd_custom_file_;
 
 #ifdef ECF_OPENSSL
    ecf::Openssl ssl_;
