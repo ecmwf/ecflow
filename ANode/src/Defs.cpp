@@ -693,7 +693,7 @@ void Defs::write_state(std::string& os) const
 
    if (!PrintStyle::defsStyle()) {
       // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
-      os << "# updateCalendarCount_ " << updateCalendarCount_ << "\n";
+      os += "# updateCalendarCount_ "; os += boost::lexical_cast<std::string>(updateCalendarCount_); os += "\n";
    }
 
    // This read by the DefsParser
