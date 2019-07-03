@@ -691,6 +691,11 @@ void Defs::write_state(std::string& os) const
    if (server().get_state() != ServerState::default_state()){ os += " server_state:"; os += SState::to_string(server().get_state());}
    os += "\n";
 
+   if (!PrintStyle::defsStyle()) {
+      // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
+      os << "# updateCalendarCount_ " << updateCalendarCount_ << "\n";
+   }
+
    // This read by the DefsParser
    const std::vector<Variable>& server_user_variables = server().user_variables();
    size_t the_size = server_user_variables.size();

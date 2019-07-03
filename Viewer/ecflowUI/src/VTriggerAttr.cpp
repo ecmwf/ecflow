@@ -64,12 +64,23 @@ QString VTriggerAttrType::definition(QStringList d) const
 
 void VTriggerAttrType::encodeTrigger(Expression *e,QStringList& data) const
 {
-    data << qName_ << "0" << QString::fromStdString(e->expression());
+    if(e)
+        data << qName_ << "0" << QString::fromStdString(e->expression());
+    else
+        encode_empty(data);
 }
 
 void VTriggerAttrType::encodeComplete(Expression *e,QStringList& data) const
 {
-    data << qName_ << "1" << QString::fromStdString(e->expression());
+    if(e)
+        data << qName_ << "1" << QString::fromStdString(e->expression());
+    else
+        encode_empty(data);
+}
+
+void VTriggerAttrType::encode_empty(QStringList& data) const
+{
+    data << qName_ << "" << "";
 }
 
 //=====================================================

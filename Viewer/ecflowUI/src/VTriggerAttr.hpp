@@ -31,6 +31,7 @@ public:
     QString definition(QStringList d) const override;
     void encodeTrigger(Expression*,QStringList&) const;
     void encodeComplete(Expression*,QStringList&) const;
+    void encode_empty(QStringList& data) const;
 
 private:
     enum DataIndex {TypeIndex=0,CompleteIndex=1,ExprIndex=2};
