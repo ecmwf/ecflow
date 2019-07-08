@@ -204,25 +204,35 @@ void RepeatDate::update_repeat_genvar() const
    julian_.set_name( name_ + "_JULIAN");
 
    std::string date_as_string = valueAsString();
-   boost::gregorian::date the_date(from_undelimited_string(date_as_string));
-   if (the_date.is_special()) {
-      cout << "RepeatDate::update_repeat_genvar(): error the_date.is_special() " << date_as_string << "\n";
+   try {
+      boost::gregorian::date the_date(from_undelimited_string(date_as_string));
+      if (the_date.is_special()) {
+         std::stringstream ss;
+         ss << "RepeatDate::update_repeat_genvar : " << toString() << "\nThe current date(" << date_as_string  << ") is_special ?";
+         log(Log::ERR,ss.str());
+         return;
+      }
+      //int day_of_year  = the_date.day_of_year();
+      int day_of_week  = the_date.day_of_week().as_number();
+      int day_of_month = the_date.day();
+      int month        = the_date.month();
+      int year         = the_date.year();
+
+      yyyy_.set_value(boost::lexical_cast<std::string>(year));
+      mm_.set_value(boost::lexical_cast<std::string>(month));
+      dom_.set_value(boost::lexical_cast<std::string>(day_of_month));
+      dow_.set_value(boost::lexical_cast<std::string>(day_of_week));
+
+      long last_value = last_valid_value();
+      long julian = Cal::date_to_julian( last_value );
+      julian_.set_value(boost::lexical_cast<std::string>(julian));
    }
-
-   //int day_of_year  = the_date.day_of_year();
-   int day_of_week  = the_date.day_of_week().as_number();
-   int day_of_month = the_date.day();
-   int month        = the_date.month();
-   int year         = the_date.year();
-
-   yyyy_.set_value(boost::lexical_cast<std::string>(year));
-   mm_.set_value(boost::lexical_cast<std::string>(month));
-   dom_.set_value(boost::lexical_cast<std::string>(day_of_month));
-   dow_.set_value(boost::lexical_cast<std::string>(day_of_week));
-
-   long last_value = last_valid_value();
-   long julian = Cal::date_to_julian( last_value );
-   julian_.set_value(boost::lexical_cast<std::string>(julian));
+   catch (std::exception& e) {
+      std::stringstream ss;
+      ss << "RepeatDate::update_repeat_genvar : " << toString() << "\n The current date(" << date_as_string  << ") is not valid";
+      log(Log::ERR,ss.str());
+      return;
+   }
 }
 
 bool RepeatDate::compare(RepeatBase* rb) const
