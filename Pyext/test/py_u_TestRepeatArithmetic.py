@@ -20,12 +20,11 @@ import os
 import ecflow
 import ecflow_test_util as Test
 
-if __name__ == "__main__":
-    Test.print_test_start(os.path.basename(__file__))
- 
+
+def test_repeat_arithmetic(repeat_to_add,repeat_to_add2):
     defs = ecflow.Defs()
     s1 = defs.add_suite("s1");
-    t1 = s1.add_task("t1").add_repeat( ecflow.RepeatDate("YMD",20090101,20091231,1) );
+    t1 = s1.add_task("t1").add_repeat( repeat_to_add );
     t2 = s1.add_task("t2").add_trigger("t1:YMD ge 20100601");
  
     # Check trigger expressions
@@ -44,9 +43,16 @@ if __name__ == "__main__":
 
     # Check the end of each month + 1
     t1.delete_repeat();
-    t1.add_repeat( ecflow.RepeatDate("YMD",20090131,20101231,1)) 
+    t1.add_repeat( repeat_to_add2 ) 
     t2.change_trigger("t1:YMD + 1 eq 20090201");   
     assert t2.evaluate_trigger(), "Expected trigger to evaluate. 20090131 + 1  == 20090201"
+
+if __name__ == "__main__":
+    Test.print_test_start(os.path.basename(__file__))
+    
+    
+    test_repeat_arithmetic(ecflow.RepeatDate("YMD",20090101,20091231,1),    ecflow.RepeatDate("YMD",20090131,20101231,1))
+    test_repeat_arithmetic(ecflow.RepeatDateList("YMD",[20090101,20091231]),ecflow.RepeatDateList("YMD",[20090131,20101231]) )
 
     print("All Tests pass")
     

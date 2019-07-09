@@ -1,0 +1,10 @@
+suite s1
+    repeat datelist YMD 20090331 20121212 20121212 # status 0
+endsuite
+
+suite s2
+    repeat datelist YMD 20121212 20090331 20090331 # status 0
+endsuite
+
+suite s3; repeat datelist YMD 20090331 20121212 20090331 # status 0
+endsuite

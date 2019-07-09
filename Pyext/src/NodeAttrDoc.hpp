@@ -44,7 +44,8 @@ public:
    static const char* autoarchive_doc();
    static const char* autorestore_doc();
  	static const char* repeat_doc();
- 	static const char* repeat_date_doc();
+   static const char* repeat_date_doc();
+   static const char* repeat_date_list_doc();
  	static const char* repeat_integer_doc();
  	static const char* repeat_enumerated_doc();
  	static const char* repeat_string_doc();

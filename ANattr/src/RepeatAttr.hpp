@@ -49,6 +49,7 @@ public:
    // value to be beyond the last valid value
    // Depending on the kind of repeat the returned can be value or the current index
    // RepeatDate       -> value
+   // RepeatDateList   -> value
    // RepeatString     -> index into array of strings
    // RepeatInteger    -> value
    // RepeatEnumerated -> index | value return value at index if cast-able to integer, otherwise return index ******
@@ -57,6 +58,7 @@ public:
 
    // Depending on the kind of repeat the returned can be value or *current* index
    // RepeatDate       -> value
+   // RepeatDateList   -> value
    // RepeatString     -> index  ( will always return a index)
    // RepeatInteger    -> value
    // RepeatEnumerated -> index  ( will always return a index)
@@ -174,6 +176,65 @@ private:
    void serialize(Archive & ar, std::uint32_t const version );
 };
 
+class RepeatDateList : public RepeatBase {
+public:
+   RepeatDateList( const std::string& variable, const std::vector<int>&); // will throw for empty list
+   RepeatDateList () = default;
+
+   void gen_variables(std::vector<Variable>& vec) const override;
+   const Variable& find_gen_variable(const std::string& name) const override;
+   void update_repeat_genvar() const override;
+
+   bool operator==(const RepeatDateList& rhs) const;
+
+   int start() const override;
+   int end() const override;
+   int step() const override { return 1 ;}
+   long value() const override; // return value at index   otherwise return 0
+   long index_or_value() const override { return currentIndex_;}
+   long last_valid_value() const override;
+   long last_valid_value_minus(int value) const override;
+   long last_valid_value_plus(int value) const override;
+
+   RepeatBase* clone() const override { return new RepeatDateList(name_,list_,currentIndex_); }
+   bool compare(RepeatBase*) const override;
+   bool valid() const override { return (currentIndex_ >=0 && currentIndex_ < static_cast<int>(list_.size())); }
+   std::string valueAsString() const override;
+   std::string value_as_string(int index) const override;
+   std::string next_value_as_string() const override;
+   std::string prev_value_as_string() const override;
+
+   void setToLastValue() override;
+   void reset() override;
+   void increment() override;
+   void change(const std::string& newValue) override; // can throw std::runtime_error
+   void changeValue(long newValue) override;          // can throw std::runtime_error
+   void set_value(long newValue) override;            // will NOT throw, allows any value
+   void write(std::string&) const override;
+   std::string dump() const override;
+
+   /// Simulator functions:
+   bool isInfinite() const override { return false;}
+
+private:
+   RepeatDateList( const std::string& variable, const std::vector<int>& l, int index)
+   : RepeatBase(variable), currentIndex_(index) , list_(l) {}
+
+private:
+   int currentIndex_{0};
+   std::vector<int> list_;
+
+   mutable Variable yyyy_;         // *not* persisted
+   mutable Variable mm_;           // *not* persisted
+   mutable Variable dom_;          // *not* persisted
+   mutable Variable dow_;          // *not* persisted
+   mutable Variable julian_;       // *not* persisted
+
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version );
+};
+
 class RepeatInteger : public RepeatBase {
 public:
    RepeatInteger( const std::string& variable, int start, int end, int delta = 1);
@@ -273,6 +334,8 @@ private:
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version );
 };
+
+
 
 class RepeatString : public RepeatBase {
 public:
@@ -392,6 +455,7 @@ class Repeat {
 public:
    Repeat(); // for serialisation
    Repeat( const RepeatDate& );
+   Repeat( const RepeatDateList& );
    Repeat( const RepeatInteger& );
    Repeat( const RepeatEnumerated& );
    Repeat( const RepeatString& );

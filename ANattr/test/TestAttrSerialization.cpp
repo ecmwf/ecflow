@@ -53,7 +53,8 @@ BOOST_AUTO_TEST_CASE( test_AttrDefaultConstructor_serialisation )
 	doSaveAndRestore<VerifyAttr>(fileName);
 	doSaveAndRestore<TodayAttr>(fileName);
 	doSaveAndRestore<TimeAttr>(fileName);
-	doSaveAndRestore<RepeatDate>(fileName);
+   doSaveAndRestore<RepeatDate>(fileName);
+   doSaveAndRestore<RepeatDateList>(fileName);
 	doSaveAndRestore<RepeatInteger>(fileName);
 	doSaveAndRestore<RepeatEnumerated>(fileName);
 	doSaveAndRestore<RepeatString>(fileName);
@@ -127,6 +128,10 @@ BOOST_AUTO_TEST_CASE( test_RepeatAttr_serialisation )
 		RepeatDate saved("varname",20101210,20101230,3);
 		doSaveAndRestore(fileName,saved);
 	}
+   {
+      RepeatDateList saved("varname", {19990101,19990103} );
+      doSaveAndRestore(fileName,saved);
+   }
 	{
 		RepeatInteger saved("varname",0,10,1);
 		doSaveAndRestore(fileName,saved);
@@ -147,6 +152,10 @@ BOOST_AUTO_TEST_CASE( test_RepeatAttr_serialisation )
 		Repeat saved(RepeatDate("varname",20101210,20101230,3));
 		doSaveAndRestore(fileName,saved);
 	}
+   {
+      Repeat saved(RepeatDateList("varname",{19990101,19990103} ));
+      doSaveAndRestore(fileName,saved);
+   }
 	{
 		Repeat saved(RepeatInteger("varname",0,10,1));
 		doSaveAndRestore(fileName,saved);

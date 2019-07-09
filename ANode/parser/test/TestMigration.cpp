@@ -292,6 +292,10 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
         rep5.increment();
         t5->addRepeat( rep5 );
 
+        RepeatDateList rep6("YMD",{20090916,20090916});
+        rep6.increment();
+        t6->addRepeat( rep6 );
+
         //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
         BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Repeat state: failed: " << helper.errorMsg());
      }

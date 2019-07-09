@@ -46,6 +46,65 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(empty == empty2,"Equality failed");
    }
    {
+      //Repeat rep2(RepeatDateList("YMD",{20090916,20090916}));
+      Repeat rep(RepeatDateList("YMD",{20190929,20190131}));
+      BOOST_CHECK_MESSAGE(!rep.empty()," Repeat should not be empty");
+      BOOST_CHECK_MESSAGE(!rep.name().empty(),"name should not be empty");
+      BOOST_CHECK_MESSAGE(rep.name() == "YMD","name not as expected");
+      BOOST_CHECK_MESSAGE(rep.start() == 20190929,"Start should be 20190929");
+      BOOST_CHECK_MESSAGE(rep.end() == 20190131,"end should be 20190131");
+      BOOST_CHECK_MESSAGE(rep.step() == 1,"step should be 1");
+      BOOST_CHECK_MESSAGE(rep.value() == 20190929,"value should be 20190929");
+      BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20190929,"last_valid_value should be 20190929");
+      BOOST_CHECK_MESSAGE(rep.valueAsString() == "20190929","not as expected");
+      BOOST_CHECK_MESSAGE(rep.next_value_as_string() == "20190131","not as expected");
+      BOOST_CHECK_MESSAGE(rep.prev_value_as_string() == "20190929","not as expected");
+      BOOST_CHECK_MESSAGE(rep.last_valid_value_minus(1) == 20190928,"expected 20190928 but found " << rep.last_valid_value_minus(1));
+      BOOST_CHECK_MESSAGE(rep.last_valid_value_plus(1) == 20190930,"expected 20190930 but found " << rep.last_valid_value_minus(1));
+      BOOST_CHECK_MESSAGE(rep.last_valid_value_plus(2) == 20191001,"expected 20191001 but found " << rep.last_valid_value_minus(1));
+
+      Repeat cloned = Repeat(rep);
+      BOOST_CHECK_MESSAGE(cloned == rep,"Equality failed");
+      BOOST_CHECK_MESSAGE(cloned.name() == "YMD","not as expected");
+      BOOST_CHECK_MESSAGE(cloned.start() == 20190929,"not as expected");
+      BOOST_CHECK_MESSAGE(cloned.end() == 20190131,"not as expected");
+      BOOST_CHECK_MESSAGE(cloned.step() == 1,"not as expected");
+      BOOST_CHECK_MESSAGE(cloned.value() == 20190929,"not as expected");
+      BOOST_CHECK_MESSAGE(cloned.valueAsString() == "20190929","not as expected");
+      BOOST_CHECK_MESSAGE(cloned.last_valid_value() == 20190929,"last_valid_value should be 20190929");
+      BOOST_CHECK_MESSAGE(cloned.next_value_as_string() == "20190131","not as expected");
+      BOOST_CHECK_MESSAGE(cloned.prev_value_as_string() == "20190929","not as expected");
+
+      RepeatDateList empty;
+      BOOST_CHECK_MESSAGE(empty.start() == 0,"Start should be 0");
+      BOOST_CHECK_MESSAGE(empty.end() == 0,"end should be 0");
+      BOOST_CHECK_MESSAGE(empty.step() == 1,"step should be 1");
+      BOOST_CHECK_MESSAGE(empty.value() == 0,"delta should be 0");
+      BOOST_CHECK_MESSAGE(empty.name().empty(),"name should be empty");
+      BOOST_CHECK_MESSAGE(empty.name() == "","name not as expected");
+      BOOST_CHECK_MESSAGE(empty.valueAsString() == "0","expected 0 but found " << empty.valueAsString());
+      BOOST_CHECK_MESSAGE(empty.next_value_as_string() == "0","expected 0 but found " << empty.next_value_as_string());
+      BOOST_CHECK_MESSAGE(empty.prev_value_as_string() == "0","expected 0 but found " << empty.prev_value_as_string());
+   }
+   {
+      Repeat rep(RepeatDateList("YMD",{20190929,20190131}));
+      BOOST_CHECK_MESSAGE(rep.start() == 20190929,"Start should be 20190929");
+      BOOST_CHECK_MESSAGE(rep.end() ==  20190131,"end should be  20190131");
+      BOOST_CHECK_MESSAGE(rep.step() == 1,"step should be 1");
+      BOOST_CHECK_MESSAGE(rep.value() == 20190929,"value should be 20190929");
+      BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20190929,"last valid value should be 20190929");
+      rep.increment();
+      BOOST_CHECK_MESSAGE(rep.valid(),"RepeatDateList should be valid");
+      BOOST_CHECK_MESSAGE(rep.value() == 20190131 ,"value should be 20190131 ");
+      BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20190131,"last_valid_value should be 20190131 ");
+      rep.increment();
+      BOOST_CHECK_MESSAGE(!rep.valid(),"RepeatDateList should not be valid");
+      BOOST_CHECK_MESSAGE(rep.value() == 0 ,"expected 0 but found " << rep.value());
+      BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20190131,"expected 20190131 but found " << rep.last_valid_value());
+   }
+
+   ////////////////////////////////////////////////////////////////////////////
+   {
       Repeat rep(RepeatDate("YMD",20090916,20090930,1));
       BOOST_CHECK_MESSAGE(!rep.empty()," Repeat should not be empty");
       BOOST_CHECK_MESSAGE(!rep.name().empty(),"name should not be empty");
@@ -115,7 +174,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_invariants )
       BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20090916,"delta should be 20090916");
       rep.increment();
       BOOST_CHECK_MESSAGE(!rep.valid(),"RepeatDate should not be valid");
-      BOOST_CHECK_MESSAGE(rep.value() == 20090917,"value should be 20090916");
+      BOOST_CHECK_MESSAGE(rep.value() == 20090917,"value should be 20090917");
       BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20090916,"last_valid_value should be 20090916");
    }
    {

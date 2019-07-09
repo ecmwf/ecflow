@@ -456,6 +456,7 @@ int Node::findExprVariableValue( const std::string& name) const
    const Repeat& repeat = findRepeat( name );
    if ( !repeat.empty() )  {
       // RepeatDate       last_valid_value() returns the date by its real value as a long
+      // RepeatDatelist   last_valid_value() returns the date by its real value as a long
       // RepeatInteger    last_valid_value() returns the value, by the current value of integer
       // RepeatEnumerated last_valid_value() returns the current value if cast-able to integer otherwise position/index,
       //                                     (i.e. since enum can be anything)

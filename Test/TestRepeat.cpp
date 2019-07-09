@@ -138,6 +138,43 @@ BOOST_AUTO_TEST_CASE( test_repeat_date )
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
 
+BOOST_AUTO_TEST_CASE( test_repeat_date_list )
+{
+   DurationTimer timer;
+   cout << "Test:: ...test_repeat_date_list " << flush;
+   TestClean clean_at_start_and_end;
+
+   // ********************************************************************************
+   // IMPORTANT: A family will only complete when it has reached the end of the repeats
+   // *********************************************************************************
+   //suite test_repeat_date
+   // family family
+   //    repeat datelist DATE 20110630 20110632
+   //    task t<n>
+   //      ....
+   //    endfamily
+   //endsuite
+   Defs theDefs;  {
+      suite_ptr suite = theDefs.add_suite("test_repeat_date_list");
+      suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      family_ptr fam = suite->add_family("family" );
+      fam->addRepeat( RepeatDateList("DATE",{20110630,20110704}));
+      fam->addVerify( VerifyAttr(NState::COMPLETE,2) );
+      int taskSize = 2;
+      for(int i=0; i < taskSize; i++) {
+         task_ptr task = fam->add_task( "t" + boost::lexical_cast<std::string>(i) );
+         task->addVerify( VerifyAttr(NState::COMPLETE,2) );
+      }
+   }
+
+   // The test harness will create corresponding directory structure
+   // and populate with standard sms files.
+   ServerTestHarness serverTestHarness;
+   serverTestHarness.run(theDefs, ServerTestHarness::testDataDefsLocation("test_repeat_date.def"));
+
+   cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
+}
+
 
 BOOST_AUTO_TEST_CASE( test_repeat_enumerator )
 {

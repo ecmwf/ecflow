@@ -199,6 +199,12 @@ static std::shared_ptr<RepeatEnumerated> create_RepeatEnumerated(const std::stri
    BoostPythonUtil::list_to_str_vec(list,vec);
    return std::make_shared<RepeatEnumerated>( name,vec );
 }
+static std::shared_ptr<RepeatDateList> create_RepeatDateList(const std::string& name, const bp::list& list)
+{
+   std::vector<int> vec;
+   BoostPythonUtil::list_to_int_vec(list,vec);
+   return std::make_shared<RepeatDateList>( name,vec );
+}
 static std::shared_ptr<RepeatString> create_RepeatString(const std::string& name, const bp::list& list)
 {
    std::vector<std::string> vec;
@@ -714,6 +720,16 @@ void export_NodeAttr()
 	.def("end",            &RepeatDate::end,   "Return the end date as an integer in yyyymmdd format")
 	.def("step",           &RepeatDate::step,  "Return the step increment. This is used to update the repeat, until end date is reached")
 	;
+
+   class_<RepeatDateList>("RepeatDateList", NodeAttrDoc::repeat_date_list_doc())
+   .def("__init__",make_constructor(&create_RepeatDateList) )
+   .def(self == self )                              // __eq__
+   .def("__str__",        &RepeatDateList::toString)    // __str__
+   .def("__copy__",       copyObject<RepeatDateList>)   // __copy__ uses copy constructor
+   .def("name",           &RepeatDateList::name, return_value_policy<copy_const_reference>(),"Return the name of the repeat.")
+   .def("start",          &RepeatDateList::start ,"Return the start date as an integer in yyyymmdd format")
+   .def("end",            &RepeatDateList::end,   "Return the end date as an integer in yyyymmdd format")
+   ;
 
 	class_<RepeatInteger>("RepeatInteger",NodeAttrDoc::repeat_integer_doc(),init< std::string, int, int, optional<int> >()) // name, start, end , delta = 1
  	.def(self == self )                                  // __eq__

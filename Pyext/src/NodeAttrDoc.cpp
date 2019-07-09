@@ -531,6 +531,9 @@ const char* NodeAttrDoc::repeat_date_doc()
             "Allows a `node`_ to be repeated using a yyyymmdd format\n\n"
             "A node can only have one `repeat`_.\n"
             "The repeat name can be referenced in `trigger`_ expressions.\n"
+            "The trigger expression referencing a RepeatDate will use date arithmetic\n"
+            "Here (/suite/family:YMD + 1) uses date arithmetic only, the result is still an integer\n"
+            "   trigger /suite/family:YMD + 1 > 20190101\n"
             "\nConstructor::\n\n"
             "   RepeatDate(variable,start,end,delta)\n"
             "      string variable:     The name of the repeat. The current date can referenced in\n"
@@ -542,9 +545,32 @@ const char* NodeAttrDoc::repeat_date_doc()
             "- Throws a RuntimeError if start/end are not valid dates\n"
             "\nUsage::\n\n"
             "   rep = RepeatDate('YMD', 20050130, 20050203 )\n"
-            "   rep = RepeatDate('YMD', 20050130, 20050203, 2 )\n"
+            "   rep = RepeatDate('YMD', 20050130, 20050203, 2)\n"
             "   t = Task('t1',\n"
-            "            RepeatDate('YMD', 20050130, 20050203 ) )\n"
+            "            RepeatDate('YMD', 20050130, 20050203 ))\n"
+            ;
+}
+
+const char* NodeAttrDoc::repeat_date_list_doc()
+{
+   return
+            "Allows a `node`_ to be repeated using arbitrary list of yyyymmdd integers\n\n"
+            "A node can only have one `repeat`_.\n"
+            "The repeat name can be referenced in `trigger`_ expressions.\n"
+            "The trigger expression referencing a RepeatDateList will use date arithmetic\n"
+            "Here (/suite/family:YMD + 1) uses date arithmetic only, the result is still an integer\n"
+            "   trigger /suite/family:YMD + 1 > 20190101\n"
+            "\nConstructor::\n\n"
+            "   RepeatDateList(variable,list)\n"
+            "      string variable:     The name of the repeat. The current date can referenced in\n"
+            "                           in trigger expressions using the variable name\n"
+            "      list list_of_int:    Arbitrary list of integers following a yyyymmdd format\n"
+            "\nException:\n\n"
+            "- Throws a RuntimeError if list of integers are not valid dates\n"
+            "\nUsage::\n\n"
+            "   rep = RepeatDateList('YMD', [20050130, 20050203] )\n"
+            "   t = Task('t1',\n"
+            "            RepeatDateList('YMD',[20050130, 20050203] ))\n"
             ;
 }
 

@@ -105,6 +105,7 @@ object NodeUtil::do_add(node_ptr self, const bp::object& arg){
    else if (extract<LateAttr>(arg).check())  self->addLate(extract<LateAttr>(arg));
    else if (extract<ZombieAttr>(arg).check())self->addZombie(extract<ZombieAttr>(arg));
    else if (extract<RepeatDate>(arg).check())self->addRepeat(Repeat(extract<RepeatDate>(arg)  ));
+   else if (extract<RepeatDateList>(arg).check())self->addRepeat(Repeat(extract<RepeatDateList>(arg)  ));
    else if (extract<RepeatInteger>(arg).check())self->addRepeat(Repeat(extract<RepeatInteger>(arg)  ));
    else if (extract<RepeatEnumerated>(arg).check())self->addRepeat(Repeat(extract<RepeatEnumerated>(arg)  ));
    else if (extract<RepeatString>(arg).check())self->addRepeat(Repeat(extract<RepeatString>(arg)  ));

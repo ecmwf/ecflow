@@ -57,7 +57,8 @@ public:
    static const char* add_autoarchive_doc();
    static const char* add_autorestore_doc();
 	static const char* add_verify_doc();
-	static const char* add_repeat_date_doc();
+   static const char* add_repeat_date_doc();
+   static const char* add_repeat_date_list_doc();
 	static const char* add_repeat_integer_doc();
 	static const char* add_repeat_string_doc();
 	static const char* add_repeat_enumerated_doc();

@@ -48,6 +48,34 @@ bool RepeatParser::doParse( const std::string& line,
 
 		nodeStack_top()->addRepeat( Repeat( rep ) ) ;
 	}
+   else if ( lineTokens[1] == "datelist" ) {
+
+      if ( line_token_size < 4 ) throw std::runtime_error( errorMsg );
+
+      // repeat datelist VARIABLE "YYYYMMDD" "YYYYMMDD" "YYYYMMDD" # comment
+      string name = lineTokens[2];
+      std::vector<int> theEnums; theEnums.reserve(line_token_size);
+      for(size_t i = 3; i < line_token_size; i++) {
+         std::string theEnum = lineTokens[i];
+         if (theEnum[0] == '#') break;
+         Str::removeSingleQuotes(theEnum);// remove quotes, they get added back when we persist
+         Str::removeQuotes(theEnum);      // remove quotes, they get added back when we persist
+
+         int date = 0;
+         try { date = boost::lexical_cast< int >(theEnum );}
+         catch ( boost::bad_lexical_cast& ) {
+            throw std::runtime_error( "RepeatParser::doParse: repeat datelist " + name + ", invalid date : " + theEnum  );
+         }
+         theEnums.push_back(date);
+      }
+      if ( theEnums.empty() ) throw std::runtime_error( errorMsg );
+
+      RepeatDateList rep( name, theEnums) ;
+      int index = 0; // This is *assumed to be the index* and not the value
+      if (get_value(lineTokens,index)) rep.set_value(index);
+
+      nodeStack_top()->addRepeat( Repeat( rep ) ) ;
+   }
 	else if ( lineTokens[1] == "enumerated" ) {
 
 		if ( line_token_size < 4 ) throw std::runtime_error( errorMsg );

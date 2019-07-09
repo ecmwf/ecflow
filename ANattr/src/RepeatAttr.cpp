@@ -42,6 +42,7 @@ const Repeat& Repeat::EMPTY() { static const Repeat REPEAT = Repeat(); return RE
 
 Repeat::Repeat() = default;
 Repeat::Repeat( const RepeatDate& r) : type_(std::make_unique<RepeatDate>(r)) {}
+Repeat::Repeat( const RepeatDateList& r) : type_(std::make_unique<RepeatDateList>(r)) {}
 Repeat::Repeat( const RepeatInteger& r) : type_(std::make_unique<RepeatInteger>(r)) {}
 Repeat::Repeat( const RepeatEnumerated& r) : type_(std::make_unique<RepeatEnumerated>(r)) {}
 Repeat::Repeat( const RepeatString& r) : type_(std::make_unique<RepeatString>(r)) {}
@@ -200,32 +201,44 @@ void RepeatDate::update_repeat_genvar() const
 {
    RepeatBase::update_repeat_genvar();
 
-   yyyy_.set_name( name_ + "_YYYY");
-   mm_.set_name( name_ + "_MM");
-   dom_.set_name( name_ + "_DD");
-   dow_.set_name( name_ + "_DOW");
-   julian_.set_name( name_ + "_JULIAN");
+   yyyy_.set_name( name_ + "_YYYY");    yyyy_.set_value("<invalid>");
+   mm_.set_name( name_ + "_MM");        mm_.set_value("<invalid>" );
+   dom_.set_name( name_ + "_DD");       dom_.set_value("<invalid>");
+   dow_.set_name( name_ + "_DOW");      dom_.set_value("<invalid>");
+   julian_.set_name( name_ + "_JULIAN");julian_.set_value("<invalid>");
 
-   std::string date_as_string = valueAsString();
-   boost::gregorian::date the_date(from_undelimited_string(date_as_string));
-   if (the_date.is_special()) {
-      cout << "RepeatDate::update_repeat_genvar(): error the_date.is_special() " << date_as_string << "\n";
+   if (valid()) {
+      std::string date_as_string = valueAsString();
+      try {
+         boost::gregorian::date the_date(from_undelimited_string(date_as_string));
+         if (the_date.is_special()) {
+            std::stringstream ss;
+            ss << "RepeatDate::update_repeat_genvar(): invalid current date: " << date_as_string << " is_special";
+            log(Log::ERR,ss.str());
+            return;
+         }
+
+         //int day_of_year  = the_date.day_of_year();
+         int day_of_week  = the_date.day_of_week().as_number();
+         int day_of_month = the_date.day();
+         int month        = the_date.month();
+         int year         = the_date.year();
+
+         yyyy_.set_value(boost::lexical_cast<std::string>(year));
+         mm_.set_value(boost::lexical_cast<std::string>(month));
+         dom_.set_value(boost::lexical_cast<std::string>(day_of_month));
+         dow_.set_value(boost::lexical_cast<std::string>(day_of_week));
+
+         long last_value = last_valid_value();
+         long julian = Cal::date_to_julian( last_value );
+         julian_.set_value(boost::lexical_cast<std::string>(julian));
+      }
+      catch (std::exception& e) {
+         std::stringstream ss;
+         ss << "RepeatDate::update_repeat_genvar(): invalid current date: " << date_as_string;
+         log(Log::ERR,ss.str());
+      }
    }
-
-   //int day_of_year  = the_date.day_of_year();
-   int day_of_week  = the_date.day_of_week().as_number();
-   int day_of_month = the_date.day();
-   int month        = the_date.month();
-   int year         = the_date.year();
-
-   yyyy_.set_value(boost::lexical_cast<std::string>(year));
-   mm_.set_value(boost::lexical_cast<std::string>(month));
-   dom_.set_value(boost::lexical_cast<std::string>(day_of_month));
-   dow_.set_value(boost::lexical_cast<std::string>(day_of_week));
-
-   long last_value = last_valid_value();
-   long julian = Cal::date_to_julian( last_value );
-   julian_.set_value(boost::lexical_cast<std::string>(julian));
 }
 
 bool RepeatDate::compare(RepeatBase* rb) const
@@ -444,6 +457,305 @@ void RepeatDate::set_value(long the_new_date)
    // *hence* allow memento to copy the value as is.
    value_ = the_new_date;
    incr_state_change_no();
+}
+
+//======================================================================================
+
+RepeatDateList::RepeatDateList( const std::string& variable, const std::vector<int>& l)
+: RepeatBase(variable), list_(l)
+{
+   if ( !Str::valid_name( variable ) ) {
+      throw std::runtime_error("RepeatDateList: Invalid name: " + variable);
+   }
+   if (list_.empty()) throw std::runtime_error("RepeatDateList: " + variable + " is empty");
+
+   for(size_t i = 0; i < list_.size(); i++) {
+      std::string date_i = boost::lexical_cast< std::string >(list_[i]);
+      if (date_i.size() != 8) {
+         std::stringstream ss; ss << "Invalid Repeat datelist : " << variable << " the date " << list_[i]  << " is not valid. Please use yyyymmdd format.";
+         throw std::runtime_error("Invalid Repeat datelist " + ss.str());
+      }
+
+      try { boost::gregorian::date(from_undelimited_string(date_i));}
+      catch (std::exception& e) {
+         std::stringstream ss; ss << "Invalid Repeat datelist : " << variable << " the date " << list_[i]  << " is not valid. Please use yyyymmdd format.";
+         throw std::runtime_error("Invalid Repeat datelist " + ss.str());
+      }
+   }
+}
+
+void RepeatDateList::gen_variables(std::vector<Variable>& vec) const
+{
+   vec.push_back(yyyy_);
+   vec.push_back(mm_);
+   vec.push_back(dom_);
+   vec.push_back(dow_);
+   vec.push_back(julian_);
+   RepeatBase::gen_variables(vec);
+}
+
+const Variable& RepeatDateList::find_gen_variable(const std::string& name) const
+{
+   if (name == name_) return var_;
+   if (name == yyyy_.name()) return yyyy_;
+   if (name == mm_.name()) return mm_;
+   if (name == dom_.name()) return dom_;
+   if (name == dow_.name()) return dow_;
+   if (name == julian_.name()) return julian_;
+   return Variable::EMPTY();
+}
+
+void RepeatDateList::update_repeat_genvar() const
+{
+   RepeatBase::update_repeat_genvar();
+
+   yyyy_.set_name( name_ + "_YYYY");    yyyy_.set_value("<invalid>");
+   mm_.set_name( name_ + "_MM");        mm_.set_value("<invalid>" );
+   dom_.set_name( name_ + "_DD");       dom_.set_value("<invalid>");
+   dow_.set_name( name_ + "_DOW");      dom_.set_value("<invalid>");
+   julian_.set_name( name_ + "_JULIAN");julian_.set_value("<invalid>");
+
+   if (valid()) {
+      std::string date_as_string = valueAsString();
+      try {
+         boost::gregorian::date the_date(from_undelimited_string(date_as_string));
+         if (the_date.is_special()) {
+            std::stringstream ss;
+            ss << "RepeatDateList::update_repeat_genvar(): " << toString() << "\n invalid current date: " << date_as_string << " is special ";
+            log(Log::ERR,ss.str());
+            return;
+         }
+
+         //int day_of_year  = the_date.day_of_year();
+         int day_of_week  = the_date.day_of_week().as_number();
+         int day_of_month = the_date.day();
+         int month        = the_date.month();
+         int year         = the_date.year();
+
+         yyyy_.set_value(boost::lexical_cast<std::string>(year));
+         mm_.set_value(boost::lexical_cast<std::string>(month));
+         dom_.set_value(boost::lexical_cast<std::string>(day_of_month));
+         dow_.set_value(boost::lexical_cast<std::string>(day_of_week));
+
+         long last_value = last_valid_value();
+         long julian = Cal::date_to_julian( last_value );
+         julian_.set_value(boost::lexical_cast<std::string>(julian));
+      }
+      catch (std::exception& e) {
+         std::stringstream ss;
+         ss << "RepeatDateList::update_repeat_genvar(): " << toString() << "\n invalid current date: " << date_as_string;
+         log(Log::ERR,ss.str());
+      }
+   }
+}
+
+int RepeatDateList::start() const
+{
+   if (list_.empty()) return 0;
+   return list_[0];
+}
+int RepeatDateList::end() const
+{
+   if (list_.empty()) return 0;
+   return list_[list_.size() - 1];
+}
+
+bool RepeatDateList::compare(RepeatBase* rb) const
+{
+   auto* rhs = dynamic_cast<RepeatDateList*>(rb);
+   if(!rhs) return false;
+   return operator==(*rhs);
+}
+
+void RepeatDateList::write(std::string& ret) const
+{
+   ret += "repeat datelist ";  ret += name_;
+   BOOST_FOREACH(int date, list_) { ret += " \"";  ret += boost::lexical_cast<std::string>(date); ret += "\""; }
+   if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
+      ret += " # ";
+      ret += boost::lexical_cast<std::string>(currentIndex_);
+   }
+}
+
+std::string RepeatDateList::dump() const
+{
+   std::stringstream ss;
+   ss << toString() << " ordinal-value(" << value() << ") value-as-string(" << valueAsString() << ")";
+   return ss.str();
+}
+
+void RepeatDateList::reset() {
+   if (list_.empty()) return;
+   currentIndex_ = 0;
+   incr_state_change_no();
+}
+
+void RepeatDateList::increment() {
+   if (list_.empty()) return;
+   currentIndex_++;
+   incr_state_change_no();
+}
+
+long RepeatDateList::value() const
+{
+   if (list_.empty()) return 0;
+
+   if (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size()) ) {
+       return list_[currentIndex_] ;
+   }
+   return 0;
+}
+
+long RepeatDateList::last_valid_value() const
+{
+   if (list_.empty()) return 0;
+
+   if (currentIndex_ >= 0 && currentIndex_ < static_cast<int>(list_.size()) ) {
+       return list_[currentIndex_] ;
+   }
+   if (currentIndex_ < 0) return list_[0] ;
+   if ( currentIndex_ >= static_cast<int>(list_.size())) return list_[list_.size()-1] ;
+   return 0;
+}
+
+long  RepeatDateList::last_valid_value_minus(int val) const
+{
+   long last_value = last_valid_value();
+   if (last_value == 0) return 0;
+
+   long julian = Cal::date_to_julian(last_value);
+   julian -= val;
+   return Cal::julian_to_date(julian);
+}
+
+long RepeatDateList::last_valid_value_plus(int val) const
+{
+   long last_value = last_valid_value();
+   if (last_value == 0) return 0;
+
+   long julian = Cal::date_to_julian(last_value);
+   julian += val;
+   return Cal::julian_to_date(julian);
+}
+
+void RepeatDateList::setToLastValue()
+{
+   if (list_.empty()) return;
+   currentIndex_ = static_cast<int> ( list_.size()  - 1);
+   incr_state_change_no();
+}
+
+std::string RepeatDateList::valueAsString() const
+{
+   return boost::lexical_cast<std::string>( last_valid_value() );
+}
+
+std::string RepeatDateList::value_as_string(int index) const
+{
+   if (list_.empty()) return string("0");
+   if (index >= 0 && index < static_cast<int>(list_.size())) {
+      return boost::lexical_cast<std::string>( list_[index] ) ;
+   }
+   if (index < 0) return boost::lexical_cast<std::string>( list_[0] ) ;
+   if (index >= static_cast<int>(list_.size())) return boost::lexical_cast<std::string>( list_[ list_.size()-1] ) ;
+   return std::string();
+}
+
+std::string RepeatDateList::next_value_as_string() const
+{
+   if (list_.empty()) return string("0");
+
+   int index = currentIndex_;
+   index++;
+   return value_as_string(index);
+}
+
+std::string RepeatDateList::prev_value_as_string() const
+{
+   if (list_.empty()) return string("0");
+
+   int index = currentIndex_;
+   index--;
+   return value_as_string(index);
+}
+
+void RepeatDateList::change( const std::string& newValue)
+{
+   // See if if matches one of the dates
+   int new_val = 0;
+   try {  new_val =  boost::lexical_cast<int>( newValue  );}
+   catch ( ... ) {
+      std::stringstream ss;
+      ss << "RepeatDateList::change: " << toString() << "\nThe new value " << newValue << " is must be convertible to integer, and correspond to an existing value\n";
+      throw std::runtime_error(ss.str());
+   }
+
+   for(size_t i = 0; i < list_.size(); i++) {
+      if ( list_[i] == new_val) {
+         currentIndex_ = i;
+         incr_state_change_no();
+         return;
+      }
+   }
+
+   std::stringstream ss;
+   ss << "RepeatDateList::change: " << toString() << "\nThe new value " << newValue << " is not a valid member of the date list\n";
+   throw std::runtime_error(ss.str());
+}
+
+void RepeatDateList::changeValue( long the_new_index)
+{
+   if (list_.empty()) return;
+
+   if ( the_new_index < 0 || the_new_index >= static_cast<int>(list_.size())) {
+      std::stringstream ss;
+      ss << "RepeatDateList::changeValue:" << toString() << "\nThe new value '" << the_new_index << "' is not a valid index ";
+      ss << "expected range[0-" << list_.size()-1 << "] but found '" << the_new_index << "'";
+      throw std::runtime_error( ss.str() );
+   }
+   set_value(the_new_index);
+}
+
+void RepeatDateList::set_value(long the_new_index)
+{
+   if (list_.empty()) return;
+
+   // Note: the node is incremented one past, the last value
+   // In Node we increment() then check for validity
+   // hence the_new_value may be outside of the valid range.
+   // This can be seen when do a incremental sync,
+   // *hence* allow memento to copy the value as is.
+   currentIndex_ = the_new_index;
+   incr_state_change_no();
+}
+
+bool RepeatDateList::operator==(const RepeatDateList& rhs) const
+{
+   if (name_ != rhs.name_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatDateList::operator==( name_(" << name_ << ") != rhs.name_(" << rhs.name_ << "))\n";
+      }
+#endif
+      return false;
+   }
+   if (list_ != rhs.list_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatDateList::operator==( list_ != rhs.list_ )\n";
+      }
+#endif
+      return false;
+   }
+   if (currentIndex_ != rhs.currentIndex_) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "RepeatDateList::operator==( currentIndex_(" << currentIndex_ << ") != rhs.currentIndex_(" << rhs.currentIndex_ << "))\n";
+      }
+#endif
+      return false;
+   }
+   return true;
 }
 
 //======================================================================================
@@ -863,6 +1175,7 @@ bool RepeatEnumerated::operator==(const RepeatEnumerated& rhs) const
 	return true;
 }
 
+
 //======================================================================================
 
 RepeatString::RepeatString( const std::string& variable, const std::vector<std::string>& theEnums)
@@ -1097,6 +1410,15 @@ void RepeatEnumerated::serialize(Archive & ar, std::uint32_t const version )
 }
 
 template<class Archive>
+void RepeatDateList::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<RepeatBase>(this),
+      CEREAL_NVP(list_),
+      CEREAL_NVP(currentIndex_)
+   );
+}
+
+template<class Archive>
 void RepeatString::serialize(Archive & ar, std::uint32_t const version )
 {
    ar(cereal::base_class<RepeatBase>(this),
@@ -1120,6 +1442,7 @@ void Repeat::serialize(Archive & ar, std::uint32_t const version )
 
 CEREAL_TEMPLATE_SPECIALIZE(RepeatBase);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDate);
+CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDateList);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatInteger);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatEnumerated);
 CEREAL_TEMPLATE_SPECIALIZE_V(RepeatString);
@@ -1127,6 +1450,7 @@ CEREAL_TEMPLATE_SPECIALIZE_V(RepeatDay);
 CEREAL_TEMPLATE_SPECIALIZE_V(Repeat);
 
 CEREAL_REGISTER_TYPE(RepeatDate);
+CEREAL_REGISTER_TYPE(RepeatDateList);
 CEREAL_REGISTER_TYPE(RepeatInteger);
 CEREAL_REGISTER_TYPE(RepeatEnumerated);
 CEREAL_REGISTER_TYPE(RepeatString);

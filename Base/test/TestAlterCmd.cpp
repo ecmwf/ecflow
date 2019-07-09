@@ -654,6 +654,21 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       BOOST_CHECK_MESSAGE( s->repeat().valueAsString() == "20090917", "expected 20090917 but found " << s->repeat().valueAsString());
    }
    {
+      s->deleteRepeat();
+      TestStateChanged changed(s);
+      s->addRepeat( RepeatDateList("YMD",{20090916,20090930}));
+      BOOST_CHECK_MESSAGE( !s->repeat().empty(), "expected repeat to be added");
+
+      // test delete repeat
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_REPEAT)));
+      BOOST_CHECK_MESSAGE( s->repeat().empty(), "expected repeat to be deleted");
+
+      // test change repeat value, the changed value *MUST* correspond to one of the existing values
+      s->addRepeat( RepeatDateList("YMD",{20090916,20090930,20190930}));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::REPEAT,"20090930","")));
+      BOOST_CHECK_MESSAGE( s->repeat().valueAsString() == "20090930", "expected 20090930 but found " << s->repeat().valueAsString());
+   }
+   {
       TestStateChanged changed(s);
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::DEL_REPEAT))); // delete previous repeat
 

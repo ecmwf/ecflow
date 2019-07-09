@@ -41,6 +41,7 @@ test/TestEcfFileLocator.cpp
 test/TestEnviromentSubstitution.cpp
 test/TestExprParser.cpp
 test/TestExprRepeatDateArithmetic.cpp
+test/TestExprRepeatDateListArithmetic.cpp
 test/TestFindAbsNodePath.cpp
 test/TestFlag.cpp
 test/TestHistoryParser.cpp

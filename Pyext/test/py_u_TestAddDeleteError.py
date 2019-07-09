@@ -13,7 +13,7 @@
 
 import os
 from ecflow import Defs, Suite, Variable, Limit, InLimit, Task, PartExpression, \
-                   Event, Meter, Label, RepeatInteger, RepeatEnumerated, RepeatDate, RepeatString, \
+                   Event, Meter, Label, RepeatInteger, RepeatEnumerated, RepeatDate,RepeatDateList,RepeatString, \
                    TimeSlot, TimeSeries, Today, Time, Date, Day, Days, Cron, Autocancel, Late, \
                    DState, Clock, ChildCmdType, ZombieType, ZombieAttr, ZombieUserActionType, Client, debug_build
 import ecflow_test_util as Test
@@ -78,7 +78,16 @@ if __name__ == "__main__":
     except RuntimeError: 
         expected_error = True
     assert expected_error, "Suite should not allow any time based dependencies"
-     
+
+    # 
+    #Adding a RepeatDateList with a empty list should be an error
+    expected_error = False
+    task = Task("t")
+    try:
+        task.add_repeat(RepeatDateList("date",[]))
+    except RuntimeError: 
+        expected_error = True
+    assert expected_error, "RepeatDateList adding an empty date list should be an error"
 
     print("All Tests pass")
     

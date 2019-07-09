@@ -310,6 +310,46 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_for_loop2  )
    fs::remove(logFileName);
 }
 
+BOOST_AUTO_TEST_CASE( test_repeat_date_list  )
+{
+   cout << "Simulator:: ...test_repeat_date_list\n";
+   //suite suite
+   // clock real <fixed date + time>
+   // family family
+   //    repeat datelist YMD 20091001 20181001 20101001 # yyyymmdd
+   //    task t
+   //       time 10:00
+   //    endfamily
+   //endsuite
+
+   Defs theDefs;
+   {
+      ClockAttr clockAttr;
+      clockAttr.date(1,10,2009);
+      suite_ptr suite = theDefs.add_suite("test_repeat_date_list");
+      suite->addVerify( VerifyAttr(NState::COMPLETE,1) );
+      suite->addClock( clockAttr );
+
+      family_ptr fam = suite->add_family( "family" );
+      fam->addRepeat( RepeatDateList("YMD",{20091001,20181001,20101001}));
+      fam->addVerify( VerifyAttr(NState::COMPLETE,3) );
+
+      task_ptr task = fam->add_task("t");
+      task->addTime( ecf::TimeAttr( TimeSlot(10,0) ) );
+      task->addVerify( VerifyAttr(NState::COMPLETE,3) );      // task should complete 15 times
+
+//    cout << theDefs << "\n";
+   }
+
+   Simulator simulator;
+   std::string errorMsg;
+   BOOST_CHECK_MESSAGE(simulator.run(theDefs, TestUtil::testDataLocation("test_repeat_date.def"), errorMsg),errorMsg << "\n" << theDefs);
+
+   // remove generated log file. Comment out to debug
+   std::string logFileName = TestUtil::testDataLocation("test_repeat_date.def") + ".log";
+   fs::remove(logFileName);
+}
+
 BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
 {
  	cout << "Simulator:: ...test_repeat_with_cron\n";

@@ -116,11 +116,12 @@ std::string get_state_change_time(node_ptr self,const std::string& format)
    return to_simple_string(self->state_change_time());
 }
 
-node_ptr add_repeat_date(node_ptr self,const RepeatDate& d)       { self->addRepeat(d); return self; }
-node_ptr add_repeat_integer(node_ptr self,const RepeatInteger& d) { self->addRepeat(d); return self; }
-node_ptr add_repeat_string(node_ptr self,const RepeatString& d)   { self->addRepeat(d); return self; }
-node_ptr add_repeat_enum(node_ptr self,const RepeatEnumerated& d) { self->addRepeat(d); return self; }
-node_ptr add_repeat_day(node_ptr self,const RepeatDay& d)         { self->addRepeat(d); return self; }
+node_ptr add_repeat_date(node_ptr self,const RepeatDate& d)         { self->addRepeat(d); return self; }
+node_ptr add_repeat_date_list(node_ptr self,const RepeatDateList& d){ self->addRepeat(d); return self; }
+node_ptr add_repeat_integer(node_ptr self,const RepeatInteger& d)   { self->addRepeat(d); return self; }
+node_ptr add_repeat_string(node_ptr self,const RepeatString& d)     { self->addRepeat(d); return self; }
+node_ptr add_repeat_enum(node_ptr self,const RepeatEnumerated& d)   { self->addRepeat(d); return self; }
+node_ptr add_repeat_day(node_ptr self,const RepeatDay& d)           { self->addRepeat(d); return self; }
 
 void sort_attributes(node_ptr self,const std::string& attribute_name, bool recursive){
    std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
@@ -351,6 +352,7 @@ void export_Node()
    .def("add_autorestore",  &add_autorestore1)
    .def("add_verify",       &Node::addVerify,            DefsDoc::add_verify_doc())
    .def("add_repeat",       &add_repeat_date,            DefsDoc::add_repeat_date_doc())
+   .def("add_repeat",       &add_repeat_date_list,       DefsDoc::add_repeat_date_list_doc())
    .def("add_repeat",       &add_repeat_integer,         DefsDoc::add_repeat_integer_doc())
    .def("add_repeat",       &add_repeat_string,          DefsDoc::add_repeat_string_doc())
    .def("add_repeat",       &add_repeat_enum,            DefsDoc::add_repeat_enumerated_doc() )

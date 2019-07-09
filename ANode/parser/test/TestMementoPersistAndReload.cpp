@@ -216,6 +216,24 @@ BOOST_AUTO_TEST_CASE( test_memento_persist_and_reload )
       suite_ptr suite = defs.add_suite("s1");
       node_ptr t = suite->add_task("t1");
 
+      Repeat repeat(RepeatDateList("YMD",{20090916,20090916}));
+
+      NodeRepeatMemento memento(repeat);
+      t->set_memento(&memento,aspects,aspect_only); // add repeat;
+
+      PersistHelper helper;
+      BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs),"NodeRepeatMemento failed: " << helper.errorMsg());
+
+      repeat.increment();
+      NodeRepeatMemento memento1( repeat );          // change repeat
+      t->set_memento(&memento1,aspects,aspect_only);
+      BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs),"NodeRepeatMemento failed: " << helper.errorMsg());
+   }
+   {
+      Defs defs;
+      suite_ptr suite = defs.add_suite("s1");
+      node_ptr t = suite->add_task("t1");
+
       Limit limit("suiteLimit",10);
 
       NodeLimitMemento memento(limit);

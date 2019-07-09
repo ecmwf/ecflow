@@ -15,7 +15,7 @@
 from ecflow import Alias, AttrType, Autocancel, CheckPt, ChildCmdType, Client, Clock, Cron, DState, Date, Day, Days, \
                   Defs, Ecf, Event, Expression, Family, FamilyVec, File, Flag, FlagType, FlagTypeVec, InLimit, \
                   JobCreationCtrl, Label, Late, Limit, Meter, Node, NodeContainer, NodeVec, PartExpression, PrintStyle, \
-                  Repeat, RepeatDate, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
+                  Repeat, RepeatDate,RepeatDateList, RepeatDay, RepeatEnumerated, RepeatInteger, RepeatString, SState, State, Style, \
                   Submittable, Suite, SuiteVec, Task, TaskVec, Time, TimeSeries, TimeSlot, Today, UrlCmd, Variable, \
                   VariableList, Verify, WhyCmd, ZombieAttr, ZombieType, ZombieUserActionType, Trigger, Complete, Edit, Defstatus
 import unittest 
@@ -35,7 +35,8 @@ class Test_get_attr(unittest.TestCase):
         self.assertIsInstance(defs.s.f.t.var, Variable, "Expected Variable but found " + str(type(defs.s.f.t.var)))
         
     def test_get_attr_generated_variables(self):
-        defs = Defs() + (Suite('s') + Family('f').add((Task('t') + Edit(var="1") + RepeatDate("YMD", 20100111, 20100115, 2))))
+        defs = Defs() + (Suite('s') + Family('f').add((Task('t')  + Edit(var="1") + RepeatDate("YMD", 20100111, 20100115, 2)),
+                                                      (Task('t2') + Edit(var="1") + RepeatDateList("YMD",[20100111, 20100115 ]))))
         defs.s.f.t += Meter("meter",0,100)
         defs.s.f.t += Event("event")
         defs.s.f.t += Limit("limitx",10)
@@ -98,7 +99,15 @@ class Test_get_attr(unittest.TestCase):
         self.assertEqual(defs.s.f.t.YMD_JULIAN.value() , '2455208', "expected generated YMD of value")
         self.assertEqual(defs.s.f.t.event.value() , 0, "expected generated event of value 0 but found " + str(defs.s.f.t.event.value()))
         self.assertEqual(defs.s.f.t.meter.value() , 0, "expected generated meter of value 0 but found " + str(defs.s.f.t.meter.value()))
-        self.assertEqual(defs.s.f.t.limitx.value() , 0, "expected generated limit of value 0 but found " + str(defs.s.f.t.limitx.value()))
+        self.assertEqual(defs.s.f.t.limitx.value() , 0, "expected generated limit of value 0 but found " + str(defs.s.f.t.limitx.value()))#
+        
+        self.assertEqual(defs.s.f.t2.YMD.value() , '20100111', "expected generated YMD of value")
+        self.assertEqual(defs.s.f.t2.YMD_YYYY.value() , '2010', "expected generated YMD of value")
+        self.assertEqual(defs.s.f.t2.YMD_MM.value() , '1', "expected generated YMD of value")
+        self.assertEqual(defs.s.f.t2.YMD_DD.value() , '11', "expected generated YMD of value")
+        self.assertEqual(defs.s.f.t2.YMD_DOW.value() , '1', "expected generated YMD of value")
+        self.assertEqual(defs.s.f.t2.YMD_JULIAN.value() , '2455208', "expected generated YMD of value")
+
 
 if __name__ == "__main__":
     unittest.main()

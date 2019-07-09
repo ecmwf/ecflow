@@ -63,6 +63,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_def_con )
    doSave(file_name + "TodayAttr",TodayAttr());
    doSave(file_name + "TimeAttr",TimeAttr());
    doSave(file_name + "RepeatDate",RepeatDate());
+   doSave(file_name + "RepeatDateList",RepeatDateList());
    doSave(file_name + "RepeatInteger",RepeatInteger());
    doSave(file_name + "RepeatEnumerated",RepeatEnumerated());
    doSave(file_name + "RepeatString",RepeatString());
@@ -86,6 +87,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore_def_con )
    do_restore<TodayAttr>(file_name + "TodayAttr",TodayAttr());
    do_restore<TimeAttr>(file_name + "TimeAttr",TimeAttr());
    do_restore<RepeatDate>(file_name + "RepeatDate",RepeatDate());
+   do_restore<RepeatDateList>(file_name + "RepeatDateList",RepeatDateList());
    do_restore<RepeatInteger>(file_name + "RepeatInteger",RepeatInteger());
    do_restore<RepeatEnumerated>(file_name + "RepeatEnumerated",RepeatEnumerated());
    do_restore<RepeatString>(file_name + "RepeatString",RepeatString());
@@ -141,6 +143,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    doSave(file_name + "TodayAttr",TodayAttr(10,12));
    doSave(file_name + "TimeAttr",TimeAttr(10,12));
    doSave(file_name + "RepeatDate",RepeatDate("date",20110112,20110115));
+   doSave(file_name + "RepeatDateList",RepeatDateList("datelist",{19990101,19990102}));
    doSave(file_name + "RepeatInteger",RepeatInteger("integer",0,100,2));
    doSave(file_name + "RepeatEnumerated",RepeatEnumerated("enum",theVec));
    doSave(file_name + "RepeatString",RepeatString("string",theVec));
@@ -169,6 +172,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    do_restore<TodayAttr>(file_name + "TodayAttr",TodayAttr(10,12));
    do_restore<TimeAttr>(file_name + "TimeAttr",TimeAttr(10,12));
    do_restore<RepeatDate>(file_name + "RepeatDate",RepeatDate("date",20110112,20110115));
+   do_restore<RepeatDateList>(file_name + "RepeatDateList",RepeatDateList("datelist",{19990101,19990102} ));
    do_restore<RepeatInteger>(file_name + "RepeatInteger",RepeatInteger("integer",0,100,2));
    do_restore<RepeatEnumerated>(file_name + "RepeatEnumerated",RepeatEnumerated("enum",theVec));
    do_restore<RepeatString>(file_name + "RepeatString",RepeatString("string",theVec));

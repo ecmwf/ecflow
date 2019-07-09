@@ -1,0 +1,3 @@
+suite s1
+ repeat datelist YMD  # empty list
+endsuite

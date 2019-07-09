@@ -788,16 +788,39 @@ const char* DefsDoc::add_repeat_date_doc()
    return
             "Add a RepeatDate attribute. See :py:class:`ecflow.RepeatDate`\n\n"
             "A node can only have one repeat\n"
+            "Reference to a RepeatDate in a trigger will use date arithmetic in a sub expression. i.e.\n"
+            "Here (/suite/family:YMD + 1) uses date arithmetic only, the result is still an integer\n"
+            "   trigger /suite/family:YMD + 1 > 20190101\n"
             "\nException:\n\n"
             "- Throws a RuntimeError if more than one repeat is added\n"
             "\nUsage::\n\n"
             "  t1 = Task('t1')\n"
-            "  t1.add_repeat( RepeatDate('testDate',20100111,20100115) )\n\n"
+            "  t1.add_repeat( RepeatDate('YMD',20100111,20100115) )\n\n"
             "  # we can also create a repeat in Task constructor like any other attribute\n"
             "  t2 = Task('t2',\n"
-            "            RepeatDate('testDate',20100111,20100115))\n"
+            "            RepeatDate('YMD',20100111,20100115))\n"
             ;
 }
+
+const char* DefsDoc::add_repeat_date_list_doc()
+{
+   return
+            "Add a RepeatDateList attribute. See :py:class:`ecflow.RepeatDateList`\n\n"
+            "A node can only have one repeat\n"
+            "Reference to a RepeatDateList in a trigger will use date arithmetic. i.e.\n"
+            "Here (/suite/family:YMD + 1) uses date arithmetic only, the result is still an integer\n"
+            "   trigger /suite/family:YMD + 1 > 20190101\n"
+            "\nException:\n\n"
+            "- Throws a RuntimeError if more than one repeat is added\n"
+            "\nUsage::\n\n"
+            "  t1 = Task('t1')\n"
+            "  t1.add_repeat( RepeatDateList('YMD',[20100111,20100115]) )\n\n"
+            "  # we can also create a repeat in Task constructor like any other attribute\n"
+            "  t2 = Task('t2',\n"
+            "            RepeatDateList('YMD',[20100111,20100115]))\n"
+            ;
+}
+
 
 const char* DefsDoc::add_repeat_integer_doc()
 {

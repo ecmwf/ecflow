@@ -175,7 +175,10 @@ private:
       t8->addRepeat( RepeatDate("YMD",20090916,20090916,1) );
 
       task_ptr t9 = suite->add_task( "t9" );
-      t9->addRepeat( RepeatDay(2) );
+      t9->addRepeat( RepeatDateList("YMD",{20090916,20090916}) );
+
+      task_ptr t10 = suite->add_task( "t10" );
+      t10->addRepeat( RepeatDay(2) );
 
       family_ptr f1 = suite->add_family("f1");
       f1->add_autoarchive( ecf::AutoArchiveAttr( ecf::TimeSlot(1,0), true));
