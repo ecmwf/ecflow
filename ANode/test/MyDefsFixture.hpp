@@ -219,7 +219,8 @@ private:
 			task->addDay( DayAttr(DayAttr::MONDAY) );
 			task->addVariable( Variable("VAR1","\"value\"") );
 			task->addEvent( Event(i) );
-			task->addEvent( Event(i+1, eventName ) );
+         task->addEvent( Event(i+1, eventName ) );
+         task->addEvent( Event(i+2, "my_event", true/*init value*/ ) );
 			task->addMeter( Meter("myMeter",0,100,100) );
 			task->addLabel( Label(labelName,"\"labelValue\"") );
  			task->addTime( ecf::TimeAttr(ecf::TimeSlot(10,10),true) );
@@ -263,6 +264,7 @@ private:
 				task1->addVariable( Variable("VAR1","value") );
 				task1->addEvent( Event(i) );
 				task1->addEvent( Event(i+1, eventName ) );
+	         task1->addEvent( Event(i+2, "my_event", true/*init value*/ ) );
 				task1->addMeter( Meter("myMeter",0,100,100) );
 		 		task1->addAutoCancel( ecf::AutoCancelAttr( ecf::TimeSlot(0,1), false));
 			}

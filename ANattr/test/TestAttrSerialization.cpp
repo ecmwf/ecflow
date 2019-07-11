@@ -292,6 +292,14 @@ BOOST_AUTO_TEST_CASE( test_Event_serialisation )
 		Event saved(10+1,"event_name");
 		doSaveAndRestore(fileName,saved);
 	}
+	{
+	   Event saved(12,"event_name",true/*init value*/);
+	   doSaveAndRestore(fileName,saved);
+	}
+	{
+	   Event saved(12,"event_name",false/*init value*/);
+	   doSaveAndRestore(fileName,saved);
+	}
 }
 
 BOOST_AUTO_TEST_CASE( test_Meter_serialisation )

@@ -157,8 +157,8 @@ public:
 	   { return invoke(TaskApi::init(process_id)); }
 	int abortTask(const std::string& reason_why = "") const
 	   { return invoke(TaskApi::abort(reason_why)); }
-	int eventTask(const std::string& eventName)  const
-	   { return invoke(TaskApi::event(eventName)); }
+	int eventTask(const std::string& eventName,const std::string& value = "set")  const
+	   { return invoke(TaskApi::event(eventName,value)); }
 	int meterTask(const std::string& meterName, const std::string& new_meter_value) const
 	   { return invoke(TaskApi::meter(meterName,new_meter_value)); }
 	int labelTask(const std::string& labelName, const std::vector<std::string>& labels) const
@@ -180,7 +180,7 @@ public:
 
 	void child_init();
 	void child_abort(const std::string& reason  = "");
-	void child_event(const std::string& event_name_or_number);
+	void child_event(const std::string& event_name_or_number, bool value = true);
 	void child_meter(const std::string& meter_name, int meter_value);
 	void child_label(const std::string& label_name, const std::string& label_value);
    void child_wait(const std::string& on_expression);

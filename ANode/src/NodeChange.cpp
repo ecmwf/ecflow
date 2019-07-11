@@ -60,7 +60,7 @@ bool Node::set_event(const std::string& event_name_or_number,bool value)
          for(size_t i = 0; i < theSize; i++)   {
             if (events_[i].number() == eventNumber) {
                events_[i].set_value( value );
-               return true;;
+               return true;
             }
          }
       }

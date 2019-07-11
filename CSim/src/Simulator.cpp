@@ -269,7 +269,9 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
       std::string msg;
  		BOOST_FOREACH(Event& event, t->ref_events()) {
  			if (event.usedInTrigger()) { // event used in trigger/complete expression
- 				event.set_value(true);
+ 			   // initial value, if the value taken by the event on begin/re-queue. Child command is expected to invert the event
+ 			   if (event.initial_value()) event.set_value(false);  // initial value is set,   hence clear event
+ 			   else                       event.set_value(true);   // initial value is clear, hence set the event , (default)
 
  				msg.clear();
  				msg += Str::CHILD_CMD();

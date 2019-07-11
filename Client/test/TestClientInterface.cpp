@@ -634,7 +634,8 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface )
 
    BOOST_REQUIRE_MESSAGE( theClient.initTask(Submittable::DUMMY_PROCESS_OR_REMOTE_ID()) == 0,"--init should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.abortTask("reason for abort") == 0,"--abort should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE( theClient.eventTask("event_name") == 0,"--event should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.eventTask("event_name","set") == 0,"--event should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.eventTask("event_name","clear") == 0,"--event should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.meterTask("meter_name","20") == 0,"--meter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.waitTask("a == complete") == 0,"--wait should return 0\n" << theClient.errorMsg());
 
@@ -680,6 +681,20 @@ BOOST_AUTO_TEST_CASE( test_client_task_interface_for_fail )
       BOOST_REQUIRE_THROW( theClient.completeTask(),std::runtime_error);
       std::vector<std::string> labels; labels.emplace_back("test_client_task_interface");
       BOOST_REQUIRE_THROW( theClient.labelTask("label_name",labels),std::runtime_error);
+   }
+   {
+      ClientInvoker theClient ;
+      theClient.testInterface(); // stops submission to server
+      theClient.taskPath("/a/made/up/path");
+      theClient.set_jobs_password( Submittable::DUMMY_JOBS_PASSWORD() );
+
+      BOOST_REQUIRE_THROW( theClient.eventTask("","set"),std::runtime_error );         // event name is empty
+      BOOST_REQUIRE_THROW( theClient.eventTask("event",""),std::runtime_error );       // value is empty must be set | clear
+      BOOST_REQUIRE_THROW( theClient.eventTask("event","true"),std::runtime_error );   // value must be set | clear
+      BOOST_REQUIRE_THROW( theClient.eventTask("event","false"),std::runtime_error );  // value must be set | clear
+      BOOST_REQUIRE_THROW( theClient.meterTask("","20"),std::runtime_error);           // meter name is empty
+      BOOST_REQUIRE_THROW( theClient.meterTask("meter",""),std::runtime_error);        // meter value is empty
+      BOOST_REQUIRE_THROW( theClient.meterTask("meter","fred"),std::runtime_error);    // meter value not convertible to an integer
    }
    {  // No task path set expect exception
       ClientInvoker theClient ;

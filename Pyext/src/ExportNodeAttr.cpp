@@ -528,15 +528,18 @@ void export_NodeAttr()
 			;
 
 	class_<Event>("Event",NodeAttrDoc::event_doc(), init<int, optional<std::string> >())
-   .def( init<std::string> () )
+   .def( init<int,std::string,bool>() )   // here bool is the initial value, by default is false/clear. The value taken by begin/re-queue
+   .def( init<std::string,bool>() )       // here bool is the initial value, by default is false/clear. The value taken by begin/re-queue
+   .def( init<std::string>() )
 	.def(self == self )                                  // __eq__
-	.def("__str__",     &Event::toString)                // __str__
-   .def("__copy__",   copyObject<Event>)                // __copy__ uses copy constructor
-	.def("name",        &Event::name,       return_value_policy<copy_const_reference>(), "Return the Events name as string. If number supplied name may be empty.")
-	.def("number",      &Event::number,     "Return events number as a integer. If not specified return max integer value")
-   .def("name_or_number",&Event::name_or_number,"returns name or number as an string")
-   .def("value",       &Event::value,      "Return events current value")
-   .def("empty",       &Event::empty,      "Return true if the Event is empty. Used when returning a NULL Event, from a find")
+	.def("__str__",       &Event::toString)              // __str__
+   .def("__copy__",      copyObject<Event>)             // __copy__ uses copy constructor
+	.def("name",          &Event::name,       return_value_policy<copy_const_reference>(),"Return the Events name as string. If number supplied name may be empty.")
+	.def("number",        &Event::number,        "Return events number as a integer. If not specified return max integer value")
+   .def("name_or_number",&Event::name_or_number,"Returns name or number as string")
+   .def("value",         &Event::value,         "Return events current value")
+   .def("initial_value", &Event::initial_value, "Return events initial value, This is value taken for begin/re-queue")
+   .def("empty",         &Event::empty,         "Return true if the Event is empty. Used when returning a NULL Event, from a find")
 	;
 
 	class_<Meter>("Meter",NodeAttrDoc::meter_doc(),init<std::string,int,int,optional<int> >())

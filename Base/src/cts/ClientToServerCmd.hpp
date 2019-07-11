@@ -398,11 +398,13 @@ public:
             const std::string& jobsPassword,
             const std::string& process_or_remote_id,
             int try_no,
-            const std::string& eventName )
-   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), name_(eventName) {}
+            const std::string& eventName,
+            bool value = true) // true = set(default), false = clear
+   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no),value_(value), name_(eventName){}
    EventCmd() : TaskCmd() {}
 
    const std::string& name() const { return name_; }
+   bool value() const { return value_; }
 
    std::ostream& print(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
@@ -420,14 +422,15 @@ private:
    ecf::Child::CmdType child_type() const override { return ecf::Child::EVENT; }
 
 private:
+   bool value_{true}; // true = set(default), false = clear
    std::string name_; // the events name
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
-      ar(cereal::base_class< TaskCmd >( this ),
-      CEREAL_NVP(name_));
+      ar(cereal::base_class< TaskCmd >( this ), CEREAL_NVP(name_));
+      CEREAL_OPTIONAL_NVP(ar, value_, [this](){return !value_;}); // conditionally save if value is false
    }
 };
 

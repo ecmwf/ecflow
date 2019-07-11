@@ -121,7 +121,7 @@ BOOST_AUTO_TEST_CASE( test_client_lifecyle )
    {
       theClient.taskPath(suite1_family1_a);
       theClient.set_jobs_password(Submittable::DUMMY_JOBS_PASSWORD());
-      BOOST_REQUIRE_MESSAGE(theClient.eventTask("myEvent") == 0,TaskApi::event("myEvent") << " failed should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE(theClient.eventTask("myEvent") == 0," failed should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE(theClient.forceDependencyEval() == 0,CtsApi::forceDependencyEval() << " failed should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg());
       defs_ptr serverDefs =  theClient.defs();

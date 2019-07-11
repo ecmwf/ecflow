@@ -25,7 +25,7 @@ public:
    /// Used to construct arguments, for argc,argv
 	static std::string init(const std::string& process_id);
 	static std::string abort(const std::string& reason = "");
-	static std::string event(const std::string& eventName);
+	static std::vector<std::string> event(const std::string& eventName,const std::string& value = "set");
    static std::vector<std::string> meter(const std::string& meterName,const std::string& metervalue);
    static std::vector<std::string> queue(const std::string& queueName,const std::string& action, const std::string& step,const std::string& path_to_node_with_queue);
 	static std::vector<std::string> label(const std::string& label_name, const std::vector<std::string>& labels );

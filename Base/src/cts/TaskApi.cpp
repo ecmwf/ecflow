@@ -34,10 +34,12 @@ std::string TaskApi::abort(const std::string& reason)
 const char* TaskApi::abortArg()     { return "abort"; }
 
 
-std::string TaskApi::event(const std::string& eventName) {
-   std::string ret = "--event=";
-   ret += eventName;
-   return ret;
+std::vector<std::string> TaskApi::event(const std::string& eventName,const std::string& value) {
+   std::vector<std::string> retVec; retVec.reserve(2);
+   std::string ret = "--event=";ret += eventName ;
+   retVec.push_back(ret);
+   retVec.push_back(value);
+   return retVec;
 }
 const char* TaskApi::eventArg()     { return "event"; }
 

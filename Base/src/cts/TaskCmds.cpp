@@ -657,13 +657,14 @@ bool EventCmd::equals(ClientToServerCmd* rhs) const
 {
 	auto* the_rhs = dynamic_cast<EventCmd*>(rhs);
 	if (!the_rhs) return false;
-	if (name_ != the_rhs->name()) return false;
+   if (name_ != the_rhs->name()) return false;
+   if (value_ != the_rhs->value()) return false;
   	return TaskCmd::equals(rhs);
 }
 
 std::ostream& EventCmd::print(std::ostream& os) const
 {
- 	return os << Str::CHILD_CMD() << "event " << name_ << " " << path_to_node();
+ 	return os << Str::CHILD_CMD() << "event " << name_ << " " << value_ << " " << path_to_node();
 }
 
 STC_Cmd_ptr EventCmd::doHandleRequest(AbstractServer* as) const
@@ -674,7 +675,7 @@ STC_Cmd_ptr EventCmd::doHandleRequest(AbstractServer* as) const
 		SuiteChanged1 changed(submittable_->suite());
 
 		// The name could either be "string" or an integer either way it should be unique
-		if (!submittable_->set_event(name_,true)) {
+		if (!submittable_->set_event(name_,value_)) {
 			std::string ss; ss = "Event request failed as event '"; ss += name_; ss += "' does not exist on task "; ss += path_to_node();
 			ecf::log(Log::ERR,ss);
 			return PreAllocatedReply::ok_cmd();
@@ -691,23 +692,39 @@ const char* EventCmd::desc() {
    return
             "Change event. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
-            "  arg1(string | int) = event-name\n\n"
+            "  arg1(string | int)     = event-name\n\n"
+            "  arg2(string)(optional) = [ set | clear] defalt value is set\n\n"
             "If this child command is a zombie, then the default action will be to *fob*,\n"
             "i.e allow the ecflow client command to complete without an error\n"
             "The default can be overridden by using zombie attributes.\n\n"
             "Usage:\n"
-            "  ecflow_client --event=ev"
+            "  ecflow_client --event=ev       # set the event, default since event initial value is clear\n"
+            "  ecflow_client --event=ev set   # set the event, explicit\n"
+            "  ecflow_client --event=ev clear # clear the event, uses when event initial value is set\n"
             ;
 }
 
 void EventCmd::addOption(boost::program_options::options_description& desc) const {
-	desc.add_options()( EventCmd::arg(), po::value< string >(), EventCmd::desc() );
+   desc.add_options()( EventCmd::arg(), po::value< vector<string> >()->multitoken(), EventCmd::desc() );
 }
 void EventCmd::create( 	Cmd_ptr& cmd,
 						boost::program_options::variables_map& vm,
 						AbstractClientEnv* clientEnv ) const
 {
-	std::string event = vm[ arg() ].as< std::string > ();
+   vector<string> args = vm[ arg() ].as< vector<string> >();
+   std::string event;
+   if (args.size() >= 1) event = args[0];
+
+   bool value = true;
+   if (args.size() == 2 ) {
+      if (args[1] == "set") value = true;
+      else if (args[1] == "clear") value = false;
+      else {
+         std::stringstream ss;
+         ss << "EventCmd: The second argument must be [ set | clear ] but found " << args[1] ;
+         throw std::runtime_error( ss.str() );
+      }
+   }
 
 	if (clientEnv->debug())
 		cout << "  EventCmd::create " << EventCmd::arg()
@@ -715,7 +732,8 @@ void EventCmd::create( 	Cmd_ptr& cmd,
 		<< ") password(" << clientEnv->jobs_password()
 		<< ") remote_id(" << clientEnv->process_or_remote_id()
 		<< ") try_no(" << clientEnv->task_try_no()
-		<< ") event(" << event << ")\n";
+      << ") event(" << event << ")"
+      << ") value(" << value << ")\n";
 
 
 	std::string errorMsg;
@@ -723,11 +741,12 @@ void EventCmd::create( 	Cmd_ptr& cmd,
 	 	throw std::runtime_error( "EventCmd: " + errorMsg );
 	}
 
-  	cmd = std::make_shared<EventCmd>( clientEnv->task_path(),
-  	                            clientEnv->jobs_password(),
-  	                            clientEnv->process_or_remote_id(),
-  	                            clientEnv->task_try_no(),
-  	                            event );
+  	cmd = std::make_shared<EventCmd>(clientEnv->task_path(),
+  	                                 clientEnv->jobs_password(),
+  	                                 clientEnv->process_or_remote_id(),
+  	                                 clientEnv->task_try_no(),
+  	                                 event,
+  	                                 value);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////

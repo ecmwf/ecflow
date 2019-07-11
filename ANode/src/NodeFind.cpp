@@ -285,8 +285,9 @@ limit_ptr  Node::findLimitUpNodeTree(const std::string& name) const
 const Event& Node::findEvent(const Event& theEvent) const
 {
    size_t theSize = events_.size();
-   for(size_t i = 0; i < theSize; i++)   {
-      if (events_[i] == theEvent) {
+   for(size_t i = 0; i < theSize; i++) {
+      // compare ignores state like value_ and initial_value
+      if (events_[i].compare(theEvent)) {
          return events_[i];
       }
    }

@@ -1,0 +1,7 @@
+suite s
+   family f
+      task t
+         event name_1 set
+         event name_1
+     endfamily
+endsuite

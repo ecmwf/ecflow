@@ -1,0 +1,15 @@
+suite suite
+  clock real 5.1.2017        
+  family family
+     task t1
+        event event
+        event event_set set
+        verify complete:1
+     task t2
+        trigger t1:event
+        verify complete:1
+     task t3
+        trigger t2 == complete and t1:event_set == clear
+        verify complete:1
+  endfamily
+endsuite

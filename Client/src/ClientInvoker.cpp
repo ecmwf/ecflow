@@ -1434,11 +1434,11 @@ void ClientInvoker::child_abort(const std::string& reason )
    invoke( std::make_shared<AbortCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(),reason  ));
 }
 
-void ClientInvoker::child_event(const std::string& event_name_or_number)
+void ClientInvoker::child_event(const std::string& event_name_or_number, bool event_value)
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( std::make_shared<EventCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(),event_name_or_number  ));
+   invoke( std::make_shared<EventCmd>(clientEnv_.task_path(),clientEnv_.jobs_password(),clientEnv_.process_or_remote_id(),clientEnv_.task_try_no(),event_name_or_number,event_value));
 }
 
 void ClientInvoker::child_meter(const std::string& meter_name, int meter_value)

@@ -18,7 +18,7 @@ import sys  # determine python version
 from datetime import datetime
 import shutil   # used to remove directory tree
 
-from ecflow import Defs, Clock, DState,  Style, State, PrintStyle, File, Client, SState, File, debug_build
+from ecflow import Defs, Clock, DState, Event, Style, State, PrintStyle, File, Client, SState, File, debug_build
 import ecflow_test_util as Test
 
 
@@ -48,14 +48,15 @@ def create_defs(name,the_port):
         suite.add_variable("ECF_JOB_CMD",prefix_job_cmd + "python %ECF_JOB% 1> %ECF_JOBOUT% 2>&1")
 
     family = suite.add_family("f1")
-    task = family.add_task("t1")
-    task.add_event("event_fred")
-    task.add_meter("meter", 0, 100)
-    task.add_label("label_name", "value")
-    task.add_queue("q1",["1","2","3"])
+    t1 = family.add_task("t1")
+    t1.add_event("event_fred")
+    t1.add(Event("event_set",True)) # ECFLOW-1526
+    t1.add_meter("meter", 0, 100)
+    t1.add_label("label_name", "value")
+    t1.add_queue("q1",["1","2","3"])
 
     family.add_task("t2")  # test wait
-    family.add_task("t3").add_trigger(task.get_abs_node_path() + ":q1 >= 3") # wait on queue q1
+    family.add_task("t3").add_trigger("t1:q1 >= 3 and t1:event_fred and t1:event_set == clear") # wait on queue q1 and events
  
     return defs;
     
@@ -112,7 +113,8 @@ def test_python_child_api(ci):
     contents += "    print('doing some work: t1.ecf')\n"
     contents += "    if ci.version() != '" + server_version + "':\n"
     contents += "        assert False, 'Client and server versions different'\n"
-    contents += "    ci.child_event('event_fred')\n"
+    contents += "    ci.child_event('event_fred')      # set the event\n"
+    contents += "    ci.child_event('event_set',False) # clear the event ECFLOW-1526\n"
     contents += "    ci.child_meter('meter',100)\n"
     contents += "    ci.child_label('label_name','100')\n"
     contents += "    step = ci.child_queue('q1','active')\n"

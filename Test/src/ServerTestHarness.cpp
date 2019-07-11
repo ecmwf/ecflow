@@ -473,7 +473,10 @@ std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const
    templateEcfFile += "%include <head.h>\n";
    templateEcfFile += "\n";
    BOOST_FOREACH(const Event& e, t->events()) {
-      templateEcfFile += "%ECF_CLIENT_EXE_PATH% --event=" + e.name_or_number() + "\n";
+      // if initial value is set, then child cmd clears
+      // else if initial value is clear, then child cmd sets (default)
+      if (e.initial_value()) templateEcfFile += "%ECF_CLIENT_EXE_PATH% --event=" + e.name_or_number() + " clear\n";
+      else                   templateEcfFile += "%ECF_CLIENT_EXE_PATH% --event=" + e.name_or_number() + "\n";
    }
    BOOST_FOREACH(const Meter& m, t->meters()) {
       templateEcfFile += "for i in";

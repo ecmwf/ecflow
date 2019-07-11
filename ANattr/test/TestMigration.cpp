@@ -161,6 +161,7 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    doSave(file_name + "Variable",Variable("var_name","var_value"));
    doSave(file_name + "Event_1",Event(1));
    doSave(file_name + "Event_2",Event("event"));
+   doSave(file_name + "Event_3",Event(1,"event",true));
    doSave(file_name + "Meter",Meter("meter",10,100,100));
    doSave(file_name + "ZombieAttr",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB));
    doSave(file_name + "ZombieAttr1",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,500));
@@ -188,7 +189,8 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    do_restore<Label>(file_name + "Label",label);
    do_restore<Variable>(file_name + "Variable",Variable("var_name","var_value"));
    do_restore<Event>(file_name + "Event_1",Event(1));
-   do_restore<Event>(file_name + "Event_2",Event("event"));
+   do_restore<Event>(file_name + "Event_2",Event(string("event")));
+   do_restore<Event>(file_name + "Event_3",Event(1,string("event"),true));
    do_restore<Meter>(file_name + "Meter",Meter("meter",10,100,100));
    do_restore<ZombieAttr>(file_name + "ZombieAttr",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB));
    do_restore<ZombieAttr>(file_name + "ZombieAttr1",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,500));

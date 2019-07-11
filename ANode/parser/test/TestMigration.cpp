@@ -173,9 +173,13 @@ BOOST_AUTO_TEST_CASE( test_state_node_attributes )
       Event event("event");     event.set_value(true);
       Event event2(10,"event"); event2.set_value(true);
       Event event3(10);         event3.set_value(true);
+      Event event4(10,"event4",true/*init value*/,true/*value*/);
+      Event event5(10,"event5",true/*init value*/,false/*value*/);
       task->addEvent(event);
       task->addEvent(event2);
       task->addEvent(event3);
+      task->addEvent(event4);
+      task->addEvent(event5);
       //      PrintStyle style(PrintStyle::MIGRATE); std::cout << defs;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs), "Event state: failed: " << helper.errorMsg());
    }

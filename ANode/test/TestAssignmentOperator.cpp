@@ -139,6 +139,8 @@ BOOST_AUTO_TEST_CASE( test_task_assignment_operator )
    s1.addVariable( Variable("VAR1","\"value\"") );
    s1.addEvent( Event(1) );
    s1.addEvent( Event(2, "eventname" ) );
+   s1.addEvent( Event(3, "eventname2", true /* init value */) );
+   s1.addEvent( Event(4, "eventname4", true /* init value */, true/* value */) );
    s1.addMeter( Meter("myMeter",0,100,100) );
    s1.addLabel( Label("label","\"labelValue\"") );
    s1.addTime( ecf::TimeAttr(ecf::TimeSlot(10,10),true) );

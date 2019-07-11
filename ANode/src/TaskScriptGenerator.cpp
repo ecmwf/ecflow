@@ -176,7 +176,8 @@ std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const
    content += "\n";
    content += "echo do some work\n";
    BOOST_FOREACH(const Event& e, task_->events()) {
-      content += client_exe + "--event=" + e.name_or_number() + "\n";
+      if (e.initial_value()) content += client_exe + "--event=" + e.name_or_number() + " clear\n";
+      else                   content += client_exe + "--event=" + e.name_or_number() + "\n"; // same as set
       content += sleep;
    }
 

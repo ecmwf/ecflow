@@ -91,19 +91,22 @@ private:
 // use std::numeric_limits<int>::max()
 class Event {
 public:
-   Event(int number, const std::string& eventName = "", bool value = false, bool check_name = true);
-   explicit Event(const std::string& eventName);
+   Event(int number, const std::string& eventName = "", bool initial_val = false, bool check_name = true);
+   Event(const std::string& eventName,bool initial_val = false);
    Event() : number_(std::numeric_limits<int>::max()) {}
 
    std::string name_or_number() const; // if name present return, else return number
    const std::string& name() const { return  n_;}
    void print(std::string&) const;
    bool value() const { return v_;}
-   void reset() { set_value(false);}
+   void reset() { set_value(iv_);}
    bool empty() const { return (n_.empty() && number_ == std::numeric_limits<int>::max()); }
+   void set_initial_value(bool iv) { iv_ = iv;}
+   bool initial_value() const { return iv_;}
 
    int number() const { return number_;}
    bool operator==(const Event& rhs) const;
+   bool compare(const Event& rhs) const; // two events the same if name/number the same, ignores state
    void set_value(bool b);  // updates state_change_no_
    bool usedInTrigger() const { return used_;}
    void usedInTrigger(bool b) { used_ = b;}
@@ -123,9 +126,10 @@ private:
 
 private:
    bool         v_{false};
+   bool         iv_{false}; // initial value ECFLOW-1526
    int          number_;
    std::string  n_;
-   bool         used_{false};             // used by the simulator not persisted
+   bool         used_{false};         // used by the simulator not persisted
    unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
    friend class cereal::access;

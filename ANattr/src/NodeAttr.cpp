@@ -39,8 +39,8 @@ const Label& Label::EMPTY() { static const Label LABEL = Label(); return LABEL ;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 
-Event::Event( int number, const std::string& eventName,bool value, bool check_name )
-: v_( value ), number_( number ), n_( eventName ),  state_change_no_( 0 )
+Event::Event( int number, const std::string& eventName,bool iv, bool check_name )
+: v_( iv ), iv_(iv), number_( number ), n_( eventName ),  state_change_no_( 0 )
 {
    if ( !eventName.empty() && check_name) {
       string msg;
@@ -50,8 +50,8 @@ Event::Event( int number, const std::string& eventName,bool value, bool check_na
    }
 }
 
-Event::Event(  const std::string& eventName )
-:  number_( std::numeric_limits<int>::max() ), n_( eventName ),  state_change_no_( 0 )
+Event::Event( const std::string& eventName, bool iv )
+: v_(iv), iv_(iv), number_( std::numeric_limits<int>::max() ), n_( eventName ),  state_change_no_( 0 )
 {
    if ( eventName.empty() ) {
       throw std::runtime_error( "Event::Event: Invalid event name : name must be specified if no number supplied");
@@ -104,8 +104,42 @@ std::string Event::name_or_number() const {
 
 bool Event::operator==( const Event& rhs ) const {
    if ( v_ != rhs.v_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "v_ != rhs.v_   (v_:" << v_ << " rhs.v_:" << rhs.v_ << ") " << toString() << "\n";
+      }
+#endif
       return false;
    }
+   if ( number_ != rhs.number_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "number_ != rhs.number_   (number_:" << number_ << " rhs.number_:" << rhs.number_ << ") " << toString() << "\n";
+      }
+#endif
+      return false;
+   }
+   if ( n_ != rhs.n_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "n_ != rhs.n_  (n_:" <<  n_ << " rhs.n_:" << rhs.n_ << ") " << toString() << "\n";
+      }
+#endif
+      return false;
+   }
+   if ( iv_ != rhs.iv_ ) {
+#ifdef DEBUG
+      if (Ecf::debug_equality()) {
+         std::cout << "iv_ != rhs.iv_   (iv_:" <<  iv_ << " rhs.iv_:" << rhs.iv_ << ") " << toString() << "\n";
+      }
+#endif
+      return false;
+   }
+   return true;
+}
+
+bool Event::compare(const Event& rhs) const
+{
    if ( number_ != rhs.number_ ) {
       return false;
    }
@@ -119,7 +153,10 @@ void Event::print( std::string& os ) const {
    Indentor in;
    Indentor::indent( os ); write(os);
    if ( !PrintStyle::defsStyle() ) {
-      if (v_) { os += " # " ; os += Event::SET(); }
+      if (iv_ != v_) { // initial value and value differ
+         if (v_) { os += " # " ; os += Event::SET(); }
+         else    { os += " # " ; os += Event::CLEAR(); }
+      }
    }
    os += "\n";
 }
@@ -133,12 +170,14 @@ std::string Event::toString() const {
 void Event::write(std::string& ret) const
 {
    ret += "event ";
-   if ( number_ == std::numeric_limits< int >::max() )  ret += n_;
+   if ( number_ == std::numeric_limits< int >::max() ) ret += n_;
    else {
       ret += boost::lexical_cast<std::string>(number_);
       ret += " ";
       ret += n_;
    }
+
+   if (iv_)  ret += " set"; // initial value
 }
 
 std::string Event::dump() const {
@@ -411,6 +450,7 @@ void Event::serialize(Archive & ar)
    CEREAL_OPTIONAL_NVP(ar,number_,[this](){return number_ != std::numeric_limits<int>::max();});
    CEREAL_OPTIONAL_NVP(ar,n_,     [this](){return !n_.empty();});
    CEREAL_OPTIONAL_NVP(ar,v_,     [this](){return v_;});
+   CEREAL_OPTIONAL_NVP(ar,iv_,    [this](){return iv_;});
 }
 
 template<class Archive>
