@@ -1,10 +1,12 @@
-+ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
+Using GNU 7.3
+=================================================================================================
 
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
 real    0m1.44s
 user    0m1.35s
 sys 0m0.09s
-+ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
 real    0m2.29s
 user    0m2.15s
 sys 0m0.13s
