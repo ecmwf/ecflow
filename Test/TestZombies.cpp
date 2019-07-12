@@ -613,7 +613,7 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fob )
 
    // This command creates user zombies up front, these may not have a pid, if task in submitted state
    // User zombies will be converted to path zombies by the server
-   create_and_start_test("test_user_zombies_for_delete_fob","delete"); // create zombie via delete
+   create_and_start_test("test_user_zombies_for_delete_fob","delete",true /* add a delay before init */); // create zombie via delete
 
    // expect 5 zombies, ie because we have NUM_OF_TASKS tasks
    check_expected_no_of_zombies(NUM_OF_TASKS);
