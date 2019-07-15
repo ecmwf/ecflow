@@ -89,8 +89,7 @@ void CSyncCmd::do_log(AbstractServer* as) const
       /// The SNewsCmd will append additional debug and then add new line
       std::stringstream ss;
       print(ss);                                   // Populate the stream with command details:
-      bool ok = log_no_newline(Log::MSG,ss.str()); // log command without adding newline
-      if (!ok && as->defs()) {
+      if (!log_no_newline(Log::MSG,ss.str())) {    // log command without adding newline
          // problems writing to log file, warn user ECFLOW-536
          as->defs()->flag().set(ecf::Flag::LATE);
       }
