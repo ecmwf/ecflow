@@ -1,3 +1,37 @@
+Using GNU 6.3
+time Client/bin/gcc-6.3.0/release/ecflow_client --port 3141 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+real    0m6.74s
+user    0m3.34s
+sys     0m0.29s
+
+time Client/bin/gcc-6.3.0/release/ecflow_client --port 3141 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+real    0m6.73s
+user    0m3.39s
+sys     0m0.26s
+
+time Client/bin/gcc-6.3.0/release/ecflow_client --port 3141 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+real    0m6.73s
+user    0m3.31s
+sys     0m0.32s
+
+-----------------------------------------------------------------------------------
+time Client/bin/gcc-6.3.0/release/ecflow_client --port 3141 --sync_full 0  # first one caches
+real    0m4.57s
+user    0m3.03s
+sys     0m0.23s
+
+time Client/bin/gcc-6.3.0/release/ecflow_client --port 3141 --sync_full 0  # subsequent uses cache
+real    0m4.12s
+user    0m3.09s
+sys     0m0.18s
+
+time Client/bin/gcc-6.3.0/release/ecflow_client --port 3141 --sync_full 0  # subsequent uses cache
+real    0m4.12s
+user    0m3.04s
+sys     0m0.22s
+
+
+
 Using GNU 7.3
 =================================================================================================
 
