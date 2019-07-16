@@ -14,8 +14,6 @@
 //============================================================================
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp>
-
-#include <iostream>
 #include "perf_timer.hpp"
 
 using namespace boost;
@@ -83,6 +81,59 @@ BOOST_AUTO_TEST_CASE( test_chrono_timer )
       Timer<std::chrono::seconds> timer;
       func();
       timer.elapsed("   func with default args , seconds");
+   }
+   BOOST_CHECK_MESSAGE(true,"dummy to keep unit test happy");
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
+static void func4(int const count = 100000) {
+   ScopedTimer<> timer(__func__);
+   for (int i = 0; i < count; i++) {
+      std::string s = std::string("fred");
+      s += boost::lexical_cast<std::string>(i);
+   }
+}
+
+static void func3(int const count = 100000) {
+   ScopedTimer<> timer(__func__);
+   for (int i = 0; i < count; i++) {
+      std::string s = std::string("fred");
+      s += boost::lexical_cast<std::string>(i);
+   }
+   func4();
+}
+
+static void func2(int const count = 100000) {
+   ScopedTimer<> timer(__func__);
+   for (int i = 0; i < count; i++) {
+      std::string s = std::string("fred");
+      s += boost::lexical_cast<std::string>(i);
+   }
+   func3();
+}
+
+BOOST_AUTO_TEST_CASE( test_scoped_chrono_timer )
+{
+   cout << "ACore:: ... test_chrono_timer\n" ;
+   {
+      ScopedTimer<> timer(__func__);
+      func2();
+   }
+   {
+      ScopedTimer<std::chrono::milliseconds> timer("ScopedTimer func() milliseconds ");
+      func();
+   }
+   {
+      ScopedTimer <std::chrono::microseconds> timer("ScopedTimer func() microseconds");
+      func();
+   }
+   {
+      ScopedTimer <std::chrono::nanoseconds> timer("ScopedTimer func() nanoseconds");
+      func();
+   }
+   {
+      ScopedTimer<std::chrono::seconds> timer("ScopedTimer func() seconds");
+      func();
    }
    BOOST_CHECK_MESSAGE(true,"dummy to keep unit test happy");
 }
