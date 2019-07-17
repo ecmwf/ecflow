@@ -68,12 +68,12 @@ class ScopedIndentor{
 public:
    ScopedIndentor()  { pos_++; vec_.push_back(std::string());}
    ~ScopedIndentor() { pos_--;}
-   void cout(const char* msg,auto time) {
+   void cout(const char* msg,const std::string& time) {
       std::string str;
       for(int i=0; i < pos_; i++) str += ' '; // indent depending on scope
       str += msg;
       str += ' ';
-      str += boost::lexical_cast<std::string>(time);
+      str += time;
       assert(pos_ >= 0); vec_[pos_] = str;
       if (pos_ == 0) {
          for(size_t i=0; i < vec_.size(); i++) std::cout << vec_[i] << "\n";
@@ -101,7 +101,8 @@ public:
    ScopedTimer(const char* msg) : msg_(msg) { }
    ~ScopedTimer() {
       const auto end = Clock::now();
-      indentor_.cout(msg_,std::chrono::duration_cast<Resolution>(end - start_).count());
+      std::string time = boost::lexical_cast<std::string>( std::chrono::duration_cast<Resolution>(end - start_).count());
+      indentor_.cout(msg_,time);
    }
 };
 
