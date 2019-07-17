@@ -22,6 +22,7 @@
 
 #include "Client.hpp"
 #include "StcCmd.hpp"
+#include "DebugPerf.hpp"
 
 //#define DEBUG_CLIENT 1;
 
@@ -368,6 +369,9 @@ void Client::stop()
 /// Handle completion of a read operation.
 bool Client::handle_server_response( ServerReply& server_reply, bool debug ) const
 {
+#ifdef DEBUG_PERF
+   ecf::ScopedDurationTimer timer("  Client::handle_server_response");
+#endif
 	if (debug) std::cout << "  Client::handle_server_response" << std::endl;
 	server_reply.set_host_port(host_,port_); // client context, needed by some commands, ie. SServerLoadCmd
 	return inbound_response_.handle_server_response(server_reply, outbound_request_.get_cmd(), debug);

@@ -29,6 +29,7 @@
 #include "DurationTimer.hpp"
 #include "TimeStamp.hpp"
 #include "Log.hpp"
+#include "DebugPerf.hpp"
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
 #endif
@@ -269,6 +270,10 @@ int ClientInvoker::invoke(Cmd_ptr cts_cmd) const
 
 int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 {
+#ifdef DEBUG_PERF
+   ecf::ScopedDurationTimer timer("ClientInvoker::do_invoke_cmd");
+#endif
+
 	if (clientEnv_.debug()) cout << "\n" << TimeStamp::now() << "ClientInvoker::do_invoke_cmd : on_error_throw_exception_(" << on_error_throw_exception_ << ")" << std::endl;
 	if (clientEnv_.no_ecf()) { cout << "NO_ECF\n"; return 0;} // success If NO_ECF set then abort immediately. returning success. Useful in testing  jobs stand-alone.
 	if (testInterface_) return 0;       // The testInterface_ flag allows testing of client interface, parsing of args, without needing to contact server
@@ -318,7 +323,12 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 	            Client theClient(io_service,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
 #endif
 					if (clientEnv_.allow_new_client_old_server() != 0) theClient.allow_new_client_old_server(clientEnv_.allow_new_client_old_server());
-					io_service.run();
+					{
+#ifdef DEBUG_PERF
+					   ecf::ScopedDurationTimer timer(" io_service.run()");
+#endif
+					   io_service.run();
+					}
 					if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker: >>> After: io_service.run() <<<" << endl;;
 
 					/// Let see how the server responded if at all.
