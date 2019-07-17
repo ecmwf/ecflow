@@ -84,7 +84,7 @@ public:
 class AliasParser : public Parser {
 public:
    explicit AliasParser(DefsStructureParser* p) : Parser(p) {
-      reserve_vec(19);
+      reserve_vec(21);
       addParser( new VariableParser(p) );
       addParser( new LabelParser(p) );
       addParser( new MeterParser(p) );
@@ -170,7 +170,7 @@ private:
 class TaskParser : public Parser {
 public:
    explicit TaskParser(DefsStructureParser* p) : Parser(p) {
-      reserve_vec(21);
+      reserve_vec(25);
       addParser( new VariableParser(p) );
       addParser( new TriggerParser(p) );
       addParser( new LabelParser(p) );
@@ -262,7 +262,7 @@ class FamilyParser : public Parser {
 public:
    explicit FamilyParser(DefsStructureParser* p) : Parser(p)
    {
-      reserve_vec(21);
+      reserve_vec(25);
       addParser( new VariableParser(p) );
       addParser( new TaskParser(p) );
       addParser( new TriggerParser(p) );
@@ -382,7 +382,7 @@ class SuiteParser : public Parser {
 public:
    explicit SuiteParser(DefsStructureParser* p) : Parser(p), started_(false)
 	{
-      reserve_vec(18);
+      reserve_vec(25);
 	   addParser( new VariableParser(p) );
 	   addParser( new FamilyParser(p) );
 	   addParser( new TaskParser(p) );
