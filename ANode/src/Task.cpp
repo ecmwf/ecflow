@@ -153,14 +153,16 @@ void Task::write_state(std::string& ret, bool& added_comment_char) const
 
 void Task::read_state(const std::string& line, const std::vector<std::string>& lineTokens) {
 
-   // task t1 # alias_no:0 passwd:_DJP_
-   size_t line_tokens_size = lineTokens.size();
-   for(size_t i = 3; i < line_tokens_size; i++) {
-      if (lineTokens[i].find("alias_no:") != std::string::npos ) {
-         std::string token;
-         if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Task::read_state could not read alias_no for task " + name());
-         alias_no_ = Extract::theInt(token,"Task::read_state: invalid alias_no specified : " + line);
-         break;
+   if (line.find("alias_no:") != std::string::npos ) {
+      // task t1 # alias_no:0 passwd:_DJP_
+      size_t line_tokens_size = lineTokens.size();
+      for(size_t i = 3; i < line_tokens_size; i++) {
+         if (lineTokens[i].find("alias_no:") != std::string::npos ) {
+            std::string token;
+            if (!Extract::split_get_second(lineTokens[i],token)) throw std::runtime_error( "Task::read_state could not read alias_no for task " + name());
+            alias_no_ = Extract::theInt(token,"Task::read_state: invalid alias_no specified : " + line);
+            break;
+         }
       }
    }
    Submittable::read_state(line,lineTokens);
