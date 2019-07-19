@@ -26,7 +26,26 @@ sys     0m0.23s   sys     0m0.22s  sys     0m0.20s
 This shows that the sync_local/sync_full() in ecflow 4.X is quicker when using the cache ?
  
  
- 
+PERF
+===================================================================================================
+
++ perf stat -r 10 bin/ecflow_client --port 3160 --sync_full 0
+ Performance counter stats for 'bin/ecflow_client --port 3160 --sync_full 0' (10 runs):
+
+       3280.093726      task-clock (msec)         #    0.777 CPUs utilized            ( +-  0.13% )
+               750      context-switches          #    0.229 K/sec                    ( +-  1.76% )
+                 1      cpu-migrations            #    0.000 K/sec                    ( +- 30.49% )
+           214,747      page-faults               #    0.065 M/sec                    ( +-  0.00% )
+    12,628,966,576      cycles                    #    3.850 GHz                      ( +-  0.13% )
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+    17,654,516,293      instructions              #    1.40  insns per cycle          ( +-  0.00% )
+     4,381,007,849      branches                  # 1335.635 M/sec                    ( +-  0.00% )
+       226,855,619      branch-misses             #    5.18% of all branches          ( +-  0.11% )
+
+       4.221324935 seconds time elapsed                                          ( +-  0.10% )
+       
+       
 
 Using GNU 7.3
 =================================================================================================
