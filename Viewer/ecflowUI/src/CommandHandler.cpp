@@ -130,6 +130,11 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
 
         UiLog().dbg() << " final command: " << realCommand;
 
+        // change "alter=" into "alter " so we can treat it consistently in ServerComThread::run()
+        std::string alterToReplace("alter=");
+        std::string alterToReplaceBy("alter ");
+        ecf::Str::replace_all(realCommand, alterToReplace, alterToReplaceBy);
+
         // get the command into the right format by first splitting into tokens
         // and then converting to argc, argv format
         std::vector<std::string> strs;
