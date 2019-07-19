@@ -17,14 +17,16 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <ostream>
-#include <boost/noncopyable.hpp>
 #include <boost/asio/ssl.hpp>
 #include <string>
 
 namespace ecf {
 
-class Openssl : private boost::noncopyable {
+class Openssl {
 public:
+   Openssl(const Openssl&) = delete;
+   const Openssl& operator=(const Openssl&) = delete;
+
    /// There is no SSL protocol version named SSLv23.
    /// The SSLv23_method() API and its variants choose SSLv2, SSLv3, or TLSv1 for compatibility with the peer
    /// Consider the incompatibility among the SSL/TLS versions when you develop

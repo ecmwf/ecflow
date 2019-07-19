@@ -16,7 +16,6 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <memory>
-#include <boost/noncopyable.hpp>
 #include "boost/date_time/posix_time/posix_time_types.hpp"
 
 #include "ClientEnvironment.hpp"
@@ -34,8 +33,11 @@
 /// from a test suite.
 /// Important: We can make *many* calls with the same ClientInvoker.
 /// This is more efficient than creating a ClientInvoker for each request
-class ClientInvoker : private boost::noncopyable {
+class ClientInvoker {
 public:
+   ClientInvoker(const  ClientInvoker&) = delete;
+   const ClientInvoker& operator=(const ClientInvoker&) = delete;
+
 	/// Will create the *ClientEnvironment* once on construction
 	/// By default will throw exception std::runtime_error for errors
    ClientInvoker();
@@ -387,8 +389,11 @@ private:
 };
 
 // Allow logging and debug output of request round trip times
-class RequestLogger : private boost::noncopyable  {
+class RequestLogger {
 public:
+   RequestLogger(const RequestLogger&) = delete;
+   const RequestLogger& operator=(const RequestLogger&) = delete;
+
    explicit RequestLogger(const ClientInvoker* ci);
    ~RequestLogger();
    void set_cts_cmd(Cmd_ptr cmd) { cmd_ = cmd;}
@@ -397,8 +402,11 @@ private:
    Cmd_ptr cmd_;
 };
 
-class RoundTripRecorder : private boost::noncopyable  {
+class RoundTripRecorder {
 public:
+   RoundTripRecorder(const RoundTripRecorder&) = delete;
+   const  RoundTripRecorder& operator=(const RoundTripRecorder&) = delete;
+
    explicit RoundTripRecorder(const ClientInvoker* ci);
    ~RoundTripRecorder();
 private:

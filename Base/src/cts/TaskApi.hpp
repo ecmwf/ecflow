@@ -16,12 +16,14 @@
 //               The two variant api must correspond i.e '--get' and 'get'
 //               since this is used by boost program options
 //============================================================================
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <vector>
 
-class TaskApi : private boost::noncopyable  {
+class TaskApi {
 public:
+   TaskApi(const TaskApi&) = delete;
+   const TaskApi& operator=(const TaskApi&) = delete;
+
    /// Used to construct arguments, for argc,argv
 	static std::string init(const std::string& process_id);
 	static std::string abort(const std::string& reason = "");

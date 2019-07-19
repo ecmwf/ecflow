@@ -20,15 +20,17 @@
 //               must be added to this class.
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <boost/program_options.hpp>
 #include <vector>
 #include "Cmd.hpp"
 
 class AbstractClientEnv;
 
-class CtsCmdRegistry : private boost::noncopyable  {
+class CtsCmdRegistry {
 public:
+   CtsCmdRegistry(const CtsCmdRegistry&) = delete;
+   const CtsCmdRegistry& operator=(const CtsCmdRegistry&) = delete;
+
    explicit CtsCmdRegistry(bool addGroupCmd = true );
 
 	/// These option describe the arguments for each of the commands

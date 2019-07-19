@@ -14,7 +14,6 @@
 //
 // Description : (C)lient (t)o (s)erver API
 //============================================================================
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <vector>
 #include "NodeFwd.hpp"
@@ -24,8 +23,11 @@
 // *************************************************************************************
 // Note:: if the api requires multiple parameters it must return a std::vector<std::string>
 // ***************************************************************************************
-class CtsApi : private boost::noncopyable  {
+class CtsApi {
 public:
+   CtsApi(const CtsApi&) = delete;
+   const CtsApi& operator=(const CtsApi&) = delete;
+
 	static std::string to_string(const std::vector<std::string>& );
 
    static std::string server_version();

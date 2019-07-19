@@ -24,12 +24,14 @@
 // b/ override host and port number.
 // will throw std::runtime_error for invalid arguments
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/noncopyable.hpp>
 #include "CtsCmdRegistry.hpp"
 class ClientEnvironment;
 
-class ClientOptions : private boost::noncopyable {
+class ClientOptions {
 public:
+   ClientOptions(const ClientOptions &) = delete;
+   const ClientOptions& operator=(const ClientOptions&) = delete;
+
    /// Will create command register, & ask each cmd to describe their arguments
    ClientOptions();
    ~ClientOptions();

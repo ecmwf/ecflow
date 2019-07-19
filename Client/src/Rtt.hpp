@@ -18,13 +18,15 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <boost/noncopyable.hpp>
 #include <boost/lambda/lambda.hpp>
 
 namespace ecf {
 
-class Rtt : private boost::noncopyable {
+class Rtt {
 public:
+   Rtt(const Rtt&) = delete;
+   const Rtt& operator=(const Rtt&) = delete;
+
    static void create(const std::string& filename);
    static void destroy();
    static Rtt* instance() { return instance_;}

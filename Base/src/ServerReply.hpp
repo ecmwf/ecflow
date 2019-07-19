@@ -15,7 +15,6 @@
 // Description :
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/noncopyable.hpp>
 #include "NodeFwd.hpp"
 #include "Zombie.hpp"
 #include "Stats.hpp"
@@ -24,8 +23,11 @@
 /// *Note* server_reply_.client_handle_ is kept until the next call to register a new client_handle
 /// The client invoker can be used multiple times, hence keep value of defs, and client handle in server reply
 
-class ServerReply : private boost::noncopyable {
+class ServerReply {
 public:
+   ServerReply(const ServerReply&) = delete;
+   const ServerReply& operator=(const ServerReply&) = delete;
+
    enum News_t { NO_NEWS, NEWS, DO_FULL_SYNC };
  	ServerReply()= default;
 

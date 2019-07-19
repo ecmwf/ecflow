@@ -23,14 +23,16 @@
 // they should be added to this class, and the implementation in the derived class
 //============================================================================
 
-#include <boost/noncopyable.hpp>
 #include <string>
 #include <vector>
 
-class AbstractClientEnv : private boost::noncopyable {
+class AbstractClientEnv {
 protected:
  	AbstractClientEnv() = default;
 public:
+ 	AbstractClientEnv(const  AbstractClientEnv&) = delete;
+   const AbstractClientEnv& operator=(const AbstractClientEnv&) = delete;
+
  	virtual ~AbstractClientEnv() = default;
 
  	void set_cli(bool f) { cli_ = f ;}
