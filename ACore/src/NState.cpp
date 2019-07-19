@@ -85,51 +85,50 @@ const char* NState::to_html( NState::State s ) {
 NState::State NState::toState( const std::string& str ) {
 	if ( str == "complete" )
 		return NState::COMPLETE;
-	if ( str == "unknown" )
-		return NState::UNKNOWN;
 	if ( str == "queued" )
 		return NState::QUEUED;
 	if ( str == "aborted" )
 		return NState::ABORTED;
-	if ( str == "submitted" )
-		return NState::SUBMITTED;
 	if ( str == "active" )
 		return NState::ACTIVE;
+	if ( str == "submitted" )
+		return NState::SUBMITTED;
+	if ( str == "unknown" )
+		return NState::UNKNOWN;
 	assert(false);
 	return NState::UNKNOWN;
 }
 
- std::pair<NState::State,bool> NState::to_state(const std::string& str)
- {
-    if ( str == "complete" )
-        return std::make_pair(NState::COMPLETE,true);
-     if ( str == "unknown" )
-        return std::make_pair(NState::UNKNOWN,true);
-     if ( str == "queued" )
-        return std::make_pair(NState::QUEUED,true);
-     if ( str == "aborted" )
-        return std::make_pair(NState::ABORTED,true);
-     if ( str == "submitted" )
-        return std::make_pair(NState::SUBMITTED,true);
-     if ( str == "active" )
-        return std::make_pair(NState::ACTIVE,true);
+std::pair<NState::State,bool> NState::to_state(const std::string& str)
+{
+   if ( str == "complete" )
+      return std::make_pair(NState::COMPLETE,true);
+   if ( str == "queued" )
+      return std::make_pair(NState::QUEUED,true);
+   if ( str == "aborted" )
+      return std::make_pair(NState::ABORTED,true);
+   if ( str == "active" )
+      return std::make_pair(NState::ACTIVE,true);
+   if ( str == "submitted" )
+      return std::make_pair(NState::SUBMITTED,true);
+   if ( str == "unknown" )
+      return std::make_pair(NState::UNKNOWN,true);
 
-     return std::make_pair(NState::UNKNOWN,false);
- }
-
+   return std::make_pair(NState::UNKNOWN,false);
+}
 
 bool NState::isValid( const std::string& state ) {
 	if ( state == "complete" )
-		return true;
-	if ( state == "unknown" )
 		return true;
 	if ( state == "queued" )
 		return true;
 	if ( state == "aborted" )
 		return true;
+	if ( state == "active" )
+		return true;
 	if ( state == "submitted" )
 		return true;
-	if ( state == "active" )
+	if ( state == "unknown" )
 		return true;
 	return false;
 }
