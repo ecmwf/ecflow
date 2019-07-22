@@ -104,7 +104,7 @@ void ServerComThread::run()
                 if(command_.size() >=6 && command_[1] == "--alter" && command_[3] == "variable" &&
                    (command_[2] == "change" || command_[2] == "add"))
                 {
-                    std::vector<std::string> nodeList(command_.cbegin()+6, command_.cend());
+                    std::vector<std::string> nodeList(command_.begin()+6, command_.end());
                     ci_->alter(nodeList,command_[2],command_[3],command_[4],command_[5]);
                 }
 
