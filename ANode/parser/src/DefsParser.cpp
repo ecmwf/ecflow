@@ -137,7 +137,7 @@ private:
       if ( nodeStack().empty() && rootParser()->parsing_node_string()) {
           alias_ptr alias = Alias::create(lineTokens[1],check);
           if (rootParser()->get_file_type() != PrintStyle::DEFS) alias->read_state(line,lineTokens);
-          nodeStack().push( std::make_pair(alias.get(),this) );
+          nodeStack().emplace(alias.get(),this );
           rootParser()->set_node_ptr(alias);
           return;
        }
@@ -151,7 +151,7 @@ private:
 
          alias_ptr alias = lastAddedTask->add_alias(lineTokens[1]);
          alias->read_state(line,lineTokens);
-         nodeStack().push( std::make_pair(alias.get(),this) );
+         nodeStack().emplace( alias.get(),this );
       }
       else {
          if ( nodeStack_top()->isAlias() ) {
@@ -223,7 +223,7 @@ private:
       if ( nodeStack().empty() && rootParser()->parsing_node_string()) {
           task_ptr task = Task::create(lineTokens[1],check);
           if (rootParser()->get_file_type() != PrintStyle::DEFS) task->read_state(line,lineTokens);
-          nodeStack().push( std::make_pair(task.get(),this) );
+          nodeStack().emplace( task.get(),this );
           rootParser()->set_node_ptr(task);
           return;
        }
@@ -241,7 +241,7 @@ private:
 
 	      task_ptr task = Task::create(lineTokens[1],check);
          if (rootParser()->get_file_type() != PrintStyle::DEFS) task->read_state(line,lineTokens);
-	      nodeStack().push( std::make_pair(task.get(),this) );
+	      nodeStack().emplace( task.get(),this );
 	      lastAddedContainer->addTask( task );
 	   }
 	   else {
@@ -325,7 +325,7 @@ private:
          family_ptr family = Family::create(lineTokens[1],check);
          rootParser()->set_node_ptr(family);
          if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
-         nodeStack().push( std::make_pair(family.get(),this) );
+         nodeStack().emplace( family.get(),this );
 	   }
 	   else {
 	      assert( !nodeStack().empty() );
@@ -335,7 +335,7 @@ private:
 	         family_ptr family = Family::create(lineTokens[1],check);
 	         if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
 
-	         nodeStack().push( std::make_pair(family.get(),this) );
+	         nodeStack().emplace(family.get(),this );
 	         lastAddedSuite->addFamily( family );
 	      }
 	      else {
@@ -346,7 +346,7 @@ private:
 	            family_ptr family = Family::create(lineTokens[1],check);
 	            if (rootParser()->get_file_type() != PrintStyle::DEFS) family->read_state(line,lineTokens);
 
-	            nodeStack().push( std::make_pair(family.get(),this));
+	            nodeStack().emplace( family.get(),this);
 	            lastAddedFamily->addFamily( family );
 	         }
 	         else {
@@ -448,7 +448,7 @@ private:
 	   suite_ptr suite = Suite::create(lineTokens[1],check);
 	   if (rootParser()->get_file_type() != PrintStyle::DEFS) suite->read_state(line,lineTokens);
 
-	   nodeStack().push( std::make_pair(suite.get(),this) );
+	   nodeStack().emplace( suite.get(),this );
 	   if (defsfile()) defsfile()->addSuite( suite );
 	   rootParser()->set_node_ptr( suite );
 	}
