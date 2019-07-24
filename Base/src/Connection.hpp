@@ -34,7 +34,6 @@
 #include "Serialization.hpp"
 
 //#define DEBUG_CONNECTION 1
-//#define DEBUG_CONNECTION_MEMORY 1
 
 /// The connection class provides serialisation primitives on top of a socket.
 /**
@@ -56,7 +55,9 @@ public:
    void async_write(const T& t, Handler handler) {
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_write, Serialise the data first so we know how large it is\n";
+      if (Ecf::server()) std::cout << "SERVER: Connection::async_write\n";
+      else               std::cout << "CLIENT: Connection::async_write\n";
+      std::cout << "   Serialise the data first so we know how large it is\n";
 #endif
       // Serialise the data first so we know how large it is.
       try {
@@ -70,8 +71,7 @@ public:
       }
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_write Format the header\n";
-      std::cout << " " << outbound_data_ << "\n";
+      std::cout << "   Format the header:\n";
 #endif
       // Format the header.
       std::ostringstream header_stream;
@@ -85,15 +85,12 @@ public:
       }
       outbound_header_ = header_stream.str();
 
-
-#ifdef DEBUG_CONNECTION_MEMORY
-      if (Ecf::server()) std::cout << "server::";
-      else               std::cout << "client::";
-      std::cout << "async_write outbound_header_.size(" << outbound_header_.size() << ") outbound_data_.size(" << outbound_data_.size() << ")\n";
-#endif
-
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_write Write the serialized data to the socket. \n";
+      std::cout << "   Write the HEADER and serialised DATA to the socket\n";
+      std::cout << "   outbound_header_.size(" << outbound_header_.size() << ")\n";
+      std::cout << "   outbound_header_:'" <<  outbound_header_ << "' # this is the size in hex\n";
+      std::cout << "   outbound_data_.size(" << outbound_data_.size() << ")\n";
+      std::cout << "   hdr+data:'" << outbound_header_ << outbound_data_ << "'\n";
 #endif
       // Write the serialized data to the socket. We use "gather-write" to send
       // both the header and the data in a single write operation.
@@ -103,7 +100,7 @@ public:
       boost::asio::async_write(socket_, buffers, handler);
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_write END \n";
+      std::cout << "   END\n";
 #endif
    }
 
@@ -112,7 +109,8 @@ public:
    void async_read(T& t, Handler handler) {
 
 #ifdef DEBUG_CONNECTION
-      std::cout << "Connection::async_read\n";
+      if (Ecf::server()) std::cout << "SERVER: Connection::async_read\n";
+      else               std::cout << "CLIENT: Connection::async_read\n";
 #endif
 
       // Issue a read operation to read exactly the number of bytes in a header.
@@ -131,6 +129,11 @@ private:
    template<typename T, typename Handler>
    void handle_read_header(const boost::system::error_code& e, T& t,boost::tuple<Handler> handler)
    {
+#ifdef DEBUG_CONNECTION
+      if (Ecf::server()) std::cout << "SERVER: Connection::handle_read_header\n";
+      else               std::cout << "CLIENT: Connection::handle_read_header\n";
+      std::cout << "   header:'" << std::string(inbound_header_, header_length) << "'  # this size of payload in hex\n";
+#endif
       if (e) {
          boost::get<0>(handler)(e);
       } else {
@@ -140,6 +143,8 @@ private:
          if (!(is >> std::hex >> inbound_data_size)) {
 
             // Header doesn't seem to be valid. Inform the caller.
+            std::string err = "Connection::handle_read_header: invalid header : " + std::string(inbound_header_, header_length);
+            log_error(err.c_str());
             boost::system::error_code error(boost::asio::error::invalid_argument);
             boost::get<0>(handler)(error);
             return;
@@ -161,17 +166,20 @@ private:
    template<typename T, typename Handler>
    void handle_read_data(const boost::system::error_code& e, T& t, boost::tuple<Handler> handler)
    {
+#ifdef DEBUG_CONNECTION
+      if (Ecf::server()) std::cout << "SERVER: Connection::handle_read_data\n";
+      else               std::cout << "CLIENT: Connection::handle_read_data\n";
+#endif
+
       if (e) {
          boost::get<0>(handler)(e);
       } else {
          // Extract the data structure from the data just received.
          std::string archive_data(&inbound_data_[0], inbound_data_.size());
          try {
-#ifdef DEBUG_CONNECTION_MEMORY
-            if (Ecf::server()) std::cout << "server::";
-            else               std::cout << "client::";
-            std::cout << "handle_read_data inbound_data_.size(" << inbound_data_.size() << ") typeid(" << typeid(t).name() << ")\n";
-            std::cout << archive_data << "\n";
+#ifdef DEBUG_CONNECTION
+            std::cout << "   inbound_data_.size(" << inbound_data_.size() << ") typeid(" << typeid(t).name() << ")\n";
+            std::cout << "   '" << archive_data << "'\n";
 #endif
             ecf::restore_from_string(archive_data,t);
          }
