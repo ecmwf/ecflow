@@ -1,3 +1,7 @@
+general perf: http://www.brendangregg.com/USEmethod/use-linux.html
+==================================================================
+Good collection of performance debug
+
 Use of perf:  http://www.brendangregg.com/perf.html
 ===============================================================
   cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
