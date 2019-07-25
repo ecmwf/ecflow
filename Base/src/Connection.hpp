@@ -39,9 +39,7 @@
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 #endif
 
-#ifdef DEBUG
 //#define DEBUG_CONNECTION 1
-#endif
 
 /// The connection class provides serialisation primitives on top of a socket.
 /// ISSUES
