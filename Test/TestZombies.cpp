@@ -76,37 +76,39 @@ BOOST_GLOBAL_FIXTURE( TestFixture );
 BOOST_AUTO_TEST_SUITE( TestSuite  )
 
 enum WaitType { SINGLE, ALL };
-static int timeout = 30;
+static int timeout = 32;
 static int NUM_OF_TASKS = 5;
 
-static void dump_tasks(const vector<Task*>& tasks) {
-   cout << "     task status: no of tasks(" << tasks.size() << ")\n";
+static std::string dump_tasks(const vector<Task*>& tasks) {
+   std::stringstream ss;
+   ss << "     task status: no of tasks(" << tasks.size() << ")\n";
    BOOST_FOREACH(const Task* task, tasks) {
-      std::cout << "      "
-                << task->absNodePath() << " "
-                << NState::toString(task->state())
-                << " passwd:" << task->jobsPassword()
-                << " pid:" << task->process_or_remote_id()
-                << " flag:" << task->get_flag().to_string();
-      if (task->state() == NState::ABORTED) std::cout << " " << task->abortedReason();
-      cout << "\n";
+      ss << "      "
+         << task->absNodePath() << " "
+         << NState::toString(task->state())
+         << " passwd:" << task->jobsPassword()
+         << " pid:" << task->process_or_remote_id()
+         << " flag:" << task->get_flag().to_string();
+      if (task->state() == NState::ABORTED) ss << " " << task->abortedReason();
+      ss << "\n";
    }
-   std::cout << "\n";
+   ss << "\n";
+   return ss.str();
 }
 
-static void dump_task_status() {
+static std::string dump_task_status() {
    TestFixture::client().sync_local();
    defs_ptr defs = TestFixture::client().defs();
    vector<Task*> tasks; defs->getAllTasks(tasks);
-   dump_tasks(tasks);
+   return dump_tasks(tasks);
 }
 
 static void dump_zombies()
 {
    TestFixture::client().zombieGet();
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-   std::cout <<  Zombie::pretty_print( zombies , 6);
-   dump_task_status();
+   std::cout << Zombie::pretty_print( zombies , 6);
+   std::cout << dump_task_status();
 }
 
 static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState::State state2, int max_time_to_wait)
@@ -175,7 +177,7 @@ static bool waitForTaskState(WaitType wait_type,NState::State state1, int max_ti
 
 static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait)
 {
-   if (ecf_debug_enabled) std::cout << "\n   Waiting for " << no_of_zombies << " zombies to be created\n";
+   if (ecf_debug_enabled) std::cout << "\n   Waiting for " << no_of_zombies << " zombies to be created. max_time_to_wait:" << max_time_to_wait << "s\n";
 
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
@@ -184,12 +186,11 @@ static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait)
       if (zombies.size() == no_of_zombies) {
          if (ecf_debug_enabled) {
             std::cout <<  Zombie::pretty_print( zombies , 3);
-            std::cout << "    Found " << no_of_zombies << " zombies. returning.\n";
+            std::cout << "     Found " << no_of_zombies << " zombies. returning after " << assertTimer.duration() << "s\n";
          }
          return true;
       }
-      if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
-
+      if ( assertTimer.duration() >= assertTimer.timeConstraint() ) {
          if (zombies.size() > 0) {
             if (ecf_debug_enabled) {
                std::cout << "   *Timeout* out found only " << zombies.size()  << " zombies." << " Quit waiting.\n";
@@ -199,11 +200,11 @@ static bool waitForZombieCreation(size_t no_of_zombies, int max_time_to_wait)
          }
 
          BOOST_REQUIRE_MESSAGE(assertTimer.duration() <  assertTimer.timeConstraint(),
-                  "waitForZombieCreation expected " << no_of_zombies
+                  "\nwaitForZombieCreation expected " << no_of_zombies
                   << " zombies but found " << TestFixture::client().server_reply().zombies().size()
                   << " : Test taking longer than time constraint of "
-                  << assertTimer.timeConstraint() << " aborting\n"
-                  << Zombie::pretty_print( zombies , 3));
+                  << assertTimer.timeConstraint() << "s aborting\n"
+                  << dump_task_status());
          break;
       }
       sleep(1);
@@ -215,7 +216,7 @@ static void remove_stale_zombies()
 {
    // Remove those zombies that have only *ZERO* calls hence PID is empty
    // There is no associated process/child command that has updated the zombie
-   if (ecf_debug_enabled) cout << "\n   remove_stale_zombies \n";
+   if (ecf_debug_enabled) cout << "\n   remove_stale_zombies\n";
 
    BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
@@ -257,7 +258,7 @@ static void wait_for_zombies_of_type(Child::ZombieType zt, int no_of_tasks, int 
 
    if (ecf_debug_enabled) {
       cout << Zombie::pretty_print( zombies , 6) << "\n";
-      dump_task_status();
+      cout << dump_task_status();
    }
 }
 
@@ -289,21 +290,21 @@ static int check_at_least_one_zombie()
 
 static bool wait_for_zombie_termination(int max_time_to_wait)
 {
-   if (ecf_debug_enabled) std::cout << "\n   wait_for_zombie_termination:\n";
+   if (ecf_debug_enabled) std::cout << "\n   wait_for_zombie_termination: max_time_to_wait:" << max_time_to_wait << "\n";
 
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
       TestFixture::client().zombieGet();
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
       if (zombies.empty() ) {
-         if (ecf_debug_enabled) cout << "   zombies empty\n";
+         if (ecf_debug_enabled) cout << "      zombies empty. Waited for " << assertTimer.duration() << "s returning\n";
          break;
       }
 
-      if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
+      if ( assertTimer.duration() >= assertTimer.timeConstraint() ) {
          if (ecf_debug_enabled)  {
-            std::cout << "   wait_for_zombie_termination: taking longer than time constraint of " << assertTimer.timeConstraint() << " returning\n";
-            std::cout <<  Zombie::pretty_print( zombies, 6);
+            std::cout << "      wait_for_zombie_termination: taking longer than time constraint of " << assertTimer.timeConstraint() << " returning\n";
+            std::cout << Zombie::pretty_print( zombies, 6);
          }
          return false;
       }
@@ -379,7 +380,7 @@ static void wait_for_zombies_child_cmd(WaitType wait_type,ecf::Child::CmdType ch
 
 static void wait_for_no_zombies(int max_time_to_wait)
 {
-   if (ecf_debug_enabled) std::cout << "\n   wait_for_no_zombies\n";
+   if (ecf_debug_enabled) std::cout << "\n   wait_for_no_zombies, for " << max_time_to_wait << "s\n";
 
    AssertTimer assertTimer(max_time_to_wait,false); // Bomb out after n seconds, fall back if test fail
    while (1) {
@@ -389,7 +390,10 @@ static void wait_for_no_zombies(int max_time_to_wait)
          std::cout << "      Get zombies returned " << zombies.size() << "\n";
          if (!zombies.empty()) std::cout << Zombie::pretty_print( zombies , 6) << "\n";
       }
-      if (zombies.empty()) return;
+      if (zombies.empty()) {
+         if (ecf_debug_enabled) std::cout << "      returning after " << assertTimer.duration() << "s\n";
+         return;
+      }
 
       // make sure test does not take too long.
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
@@ -532,7 +536,7 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
       }
    }
    if (ecf_debug_enabled) {
-      dump_task_status();
+      cout << dump_task_status();
    }
 }
 
@@ -599,7 +603,7 @@ BOOST_AUTO_TEST_CASE(test_path_zombie_creation)
    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was recieved
    check_expected_no_of_zombies(0);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -615,8 +619,8 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fob )
    // User zombies will be converted to path zombies by the server
    create_and_start_test("test_user_zombies_for_delete_fob","delete",true /* add a delay before init */); // create zombie via delete
 
-   // expect 5 zombies, ie because we have NUM_OF_TASKS tasks
-   check_expected_no_of_zombies(NUM_OF_TASKS);
+   // expect at least one zombie
+   (void)check_at_least_one_zombie();
 
    // Fob all the zombies. This will UNBLOCK the child commands allowing them to finish
    // Fobing does *NOT* alter node tree state, however COMPLETE should auto delete the zombie
@@ -634,7 +638,7 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fob )
    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was recieved
    check_expected_no_of_zombies(0);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -663,7 +667,7 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_delete_fail )
    wait_for_zombies_child_cmd(ALL,ecf::Child::ABORT,timeout, true /* delete */);
 
    check_expected_no_of_zombies(0);
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -706,7 +710,7 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_begin )
    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was recieved
    check_expected_no_of_zombies(0);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -742,7 +746,7 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr )
    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was recieved
    check_expected_no_of_zombies(0);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -782,7 +786,7 @@ BOOST_AUTO_TEST_CASE( test_user_zombies_for_adopt )
    // After adoption the zombies should be removed
    check_expected_no_of_zombies(0);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -822,7 +826,7 @@ BOOST_AUTO_TEST_CASE( test_zombies_attr_for_adopt )
    // After adoption the zombies should be removed
    check_expected_no_of_zombies(0);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -850,7 +854,7 @@ BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_complete )
    // Wait for zombies to complete, they should get removed automatically
    wait_for_no_zombies( timeout);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -877,7 +881,7 @@ BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_abort )
    // Wait for zombies to complete, they should get removed automatically
    wait_for_no_zombies(timeout);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -918,7 +922,7 @@ BOOST_AUTO_TEST_CASE( test_zombie_inheritance )
    // Wait for zombies to complete, they should get removed automatically
    wait_for_no_zombies(timeout);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -937,7 +941,7 @@ static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait)
       }
       if (ecf_debug_enabled) std::cout << "   found " << killed << " killed zombies\n";
 
-      if (killed == no_of_tasks)  return killed;
+      if (killed == no_of_tasks) return killed;
 
       if ( assertTimer.duration() >=  assertTimer.timeConstraint() ) {
          cout <<  "   wait_for_killed_zombies Test wait " << assertTimer.duration() <<
@@ -1026,7 +1030,7 @@ BOOST_AUTO_TEST_CASE( test_zombie_kill )
 
    wait_for_no_zombies(timeout);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
@@ -1094,7 +1098,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_zombie_type_creation )
    // The fob should have forced removal of zombies, in the server. when the COMPLETE child command was received
    check_expected_no_of_zombies(0);
 
-   cout << timer.duration() << "\n";
+   cout << timer.duration() << "s\n";
 }
 #endif
 
