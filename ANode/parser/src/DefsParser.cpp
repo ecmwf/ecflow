@@ -66,21 +66,6 @@ ostream& operator<<(ostream& os, const vector<T>& v) {
    return os;
 }
 
-
-class TextParser : public Parser {
-public:
-   explicit TextParser(DefsStructureParser* p) : Parser(p) {}
-
-   const char* keyword() const override { return "text"; }
-
-   bool doParse(const std::string& line, std::vector<std::string>& lineTokens) override {
-#ifdef DEBUG
-      assert(*lineTokens.begin() == keyword());
-#endif
-      return true;
-   }
-};
-
 class AliasParser : public Parser {
 public:
    explicit AliasParser(DefsStructureParser* p) : Parser(p) {
@@ -191,7 +176,6 @@ public:
       addParser( new VerifyParser(p) );
       addParser( new ZombieAttrParser(p) );
       addParser( new AliasParser(p) );
-      addParser( new TextParser(p) );
       addParser( new QueueParser(p) );
       addParser( new AutoRestoreParser(p) );
       addParser( new GenericParser(p) );
@@ -283,7 +267,6 @@ public:
       addParser( new AutoCancelParser(p) );
       addParser( new VerifyParser(p) );
       addParser( new ZombieAttrParser(p) );
-      addParser( new TextParser(p) );
       addParser( new QueueParser(p) );
       addParser( new AutoArchiveParser(p) );
       addParser( new AutoRestoreParser(p) );
