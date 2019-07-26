@@ -273,11 +273,18 @@ bool DefsStructureParser::semiColonInEditVariable()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-DefsString::DefsString(const std::string& defs_as_string): empty_(defs_as_string.empty()),splitter_(defs_as_string,"\n"){}
-bool DefsString::good() const { return !splitter_.finished();}
+DefsString::DefsString(const std::string& defs_as_string): empty_(defs_as_string.empty()),line_pos_(0)
+{
+   lines_.reserve(256);
+   Str::split_using_string_view(defs_as_string,lines_,"\n");
+}
+
+bool DefsString::good() const
+{
+   return line_pos_ < lines_.size();
+}
+
 void DefsString::getline(std::string& line)
 {
-   line.clear();
-   boost::string_view ref = splitter_.next();
-   line += std::string(ref.begin(),ref.end());
+   line = lines_[line_pos_++];
 }

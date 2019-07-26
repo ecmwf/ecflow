@@ -22,7 +22,6 @@
 #include "boost/filesystem/operations.hpp"
 #include <boost/algorithm/string/trim.hpp>
 
-#include "StringSplitter.hpp"
 #include "EcfFile.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
@@ -639,7 +638,7 @@ bool EcfFile::replaceSmsChildCmdsWithEcf(const std::string& clientPath, std::str
 
 bool EcfFile::extract_ecfmicro(const std::string& line, std::string& ecfmicro, std::string& error_msg) const
 {
-   if (!StringSplitter::get_token(line,1,ecfmicro)) {
+   if (!Str::get_token(line,1,ecfmicro)) {
       std::stringstream ss; ss << "ecfmicro does not have a replacement character, in " << script_path_or_cmd_;
       error_msg += ss.str();
       return false;
@@ -1377,7 +1376,7 @@ void PreProcessor::preProcess_line(const std::string& script_line)
    // allow   : %FRED:val%
    // disallow: %FRED
    std::string the_include_token;
-   if (!StringSplitter::get_token(script_line,1,the_include_token)) {
+   if (!Str::get_token(script_line,1,the_include_token)) {
       int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
       if (ecfMicroCount % 2 != 0 ) {
          error_msg_ += "unrecognised pre-processing directive at: '" + script_line + "'";
@@ -1411,7 +1410,7 @@ void PreProcessor::preProcess_includes(const std::string& script_line)
    jobLines_.pop_back();
 
    std::string the_include_token;
-   if (!StringSplitter::get_token(script_line,1,the_include_token)) {
+   if (!Str::get_token(script_line,1,the_include_token)) {
       error_msg_+= "Could not extract include token at : " + script_line;
       return;
    }

@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <boost/utility/string_view.hpp>
 
 namespace ecf {
 
@@ -65,6 +66,16 @@ public:
    static void split_orig(const std::string& line,
                      std::vector< std::string >& tokens,
                      const std::string& delimiters = " \t");
+
+   static void split_orig1(const std::string& line,
+                     std::vector< std::string >& tokens,
+                     const std::string& delimiters = " \t");
+
+   static void split_using_string_view(boost::string_view line,
+                     std::vector< std::string >& tokens,
+                     boost::string_view delimiters = " \t");
+
+   static bool get_token(boost::string_view line,size_t pos,std::string& token,boost::string_view sep = " \t");
 
 	// Uses boost::make_split_iterator will remove
 	// consecutive delimiters in the middle of the string

@@ -31,8 +31,7 @@ using namespace boost;
 // IMPORTANT: Str:split uses StringSplitter:
 //            to run these tests, please switch off Str.cpp::USE_STRINGSPLITTER
 // **************************************************************************************************************
-//#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
-
+#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
@@ -47,6 +46,7 @@ std::vector<std::string> split_using_getline(const std::string& s, char delimite
    while (std::getline(tokenStream, token, delimiter)) { tokens.push_back(token);}
    return tokens;
 }
+
 
 
 BOOST_AUTO_TEST_CASE( test_str_split_perf )
@@ -117,6 +117,28 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
       }
       cout << " Time for Str::split_orig " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(line==reconstructed," error");
+   }
+   { // Str::split_orig1
+      boost::timer timer;
+      for (size_t i = 0; i < times; i++) {
+         result.clear(); Str::split_orig1(line,result);
+
+         reconstructed.clear();
+         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+      }
+      cout << " Time for Str::split_orig1 " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(line==reconstructed," error");
+   }
+   { // Str::split_using_string_view
+      boost::timer timer;
+      for (size_t i = 0; i < times; i++) {
+         result.clear(); Str::split_using_string_view(line,result);
+
+         reconstructed.clear();
+         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+      }
+      cout << " Time for Str::split_using_string_view " << times << " times = " << timer.elapsed() << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed," error");
    }
 
@@ -241,6 +263,26 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
          cout << " Time for Str::split_orig " << file_contents.size() << " times = " << timer.elapsed() << "\n";
       }
       {
+         boost::timer timer;
+         for(size_t i = 0; i < file_contents.size(); i++) {
+            result.clear();
+            Str::split_orig1(file_contents[i],result);
+
+            reconstruct_line(result);
+         }
+         cout << " Time for Str::split_orig1 " << file_contents.size() << " times = " << timer.elapsed() << "\n";
+      }
+      {
+         boost::timer timer;
+         for(size_t i = 0; i < file_contents.size(); i++) {
+            result.clear();
+            Str::split_using_string_view(file_contents[i],result);
+
+            reconstruct_line(result);
+         }
+         cout << " Time for Str::split_using_string_view " << file_contents.size() << " times = " << timer.elapsed() << "\n";
+      }
+      {
          typedef boost::split_iterator<string::const_iterator> split_iter_t;
          boost::timer timer;
          for(size_t i = 0; i < file_contents.size(); i++) {
@@ -291,6 +333,44 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
       }
    }
 }
+
+BOOST_AUTO_TEST_CASE( test_str_get_token_perf )
+{
+   cout << "ACore:: ...test_str_get_token_perf\n";
+
+   std::vector<std::string> result;
+   std::string line = "This is a long string that is going to be used to test the performance of splitting with different Implementations the fastest times wins ";
+   size_t times = 250000;
+   cout << " This test will split a line " << times << " times: '" << line << "'\n";
+
+   Str::split_using_string_view(line,result);
+
+   {
+      boost::timer timer;
+      std::string token;
+      for (size_t i = 0; i < times; i++) {
+         for(size_t i=0; i < result.size(); i++){
+            token.clear();
+            (void) Str::get_token(line,i,token);
+         }
+      }
+      cout << " Time for Str::get_token " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(true,"Keep compiler happy");
+   }
+   {
+       boost::timer timer;
+       std::string token;
+       for (size_t i = 0; i < times; i++) {
+          for(size_t i=0; i < result.size(); i++){
+             token.clear();
+             (void) StringSplitter::get_token(line,i,token);
+          }
+       }
+       cout << " Time for StringSplitter::get_token " << times << " times = " << timer.elapsed() << "\n";
+       BOOST_CHECK_MESSAGE(true,"Keep compiler happy");
+    }
+}
+
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()

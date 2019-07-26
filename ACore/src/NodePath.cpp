@@ -23,11 +23,6 @@ using namespace ecf;
 
 void NodePath::split( const std::string& path, std::vector<std::string>& thePath)
 {
-   // Timing using:
-   //    StringSplitter : 5.40
-   //    Str::split     : 6.85
-   // See: test_NodePath_perf
-
 	/// The path is of the form "/suite/family/task"
 	Str::split(path,thePath,Str::PATH_SEPERATOR());
 }

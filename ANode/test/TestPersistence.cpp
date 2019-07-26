@@ -74,13 +74,13 @@ BOOST_AUTO_TEST_CASE( test_node_defs_persistence  )
    for(auto & all_node : all_nodes) {
       std::string node_as_defs_string = all_node->print(PrintStyle::MIGRATE);
       node_ptr the_copy = Node::create(node_as_defs_string);
-      BOOST_REQUIRE_MESSAGE(the_copy,"Failed to create node " << all_node->absNodePath() << " from string " << node_as_defs_string);
+      BOOST_REQUIRE_MESSAGE(the_copy,"Failed to create node " << all_node->absNodePath() << " from string:\n" << node_as_defs_string);
       BOOST_REQUIRE_MESSAGE(*the_copy == *all_node,"Nodes not the same");
    }
    for(auto & all_node : all_nodes) {
       std::string node_as_defs_string = all_node->print(PrintStyle::NET);
       node_ptr the_copy = Node::create(node_as_defs_string);
-      BOOST_REQUIRE_MESSAGE(the_copy,"Failed to create node " << all_node->absNodePath() << " from string " << node_as_defs_string);
+      BOOST_REQUIRE_MESSAGE(the_copy,"Failed to create node " << all_node->absNodePath() << " from string:\n" << node_as_defs_string);
       BOOST_REQUIRE_MESSAGE(*the_copy == *all_node,"Nodes not the same");
    }
 }

@@ -118,7 +118,7 @@ static void check(const std::string& line,
  	BOOST_CHECK_MESSAGE(result.size() == expected.size(),"expected size " << expected.size() << " but found " << result.size() << " for '" << line << "'");
 	BOOST_CHECK_MESSAGE(result == expected,"failed for '" << line  << "'");
 	if (result != expected) {
-	    cout << "Line    :'" << line << "'\n";
+	   cout << "Line    :'" << line << "'\n";
 		cout << "Actual  :"; BOOST_FOREACH(const string& t, result)   { cout << "'" << t << "'"; } cout << "\n";
 		cout << "Expected:"; BOOST_FOREACH(const string& t, expected) { cout << "'" << t << "'"; } cout << "\n";
  	}
@@ -145,91 +145,90 @@ static void check(const std::string& line,
    check(line,result,expected);
 }
 
+static void check_splitters(const std::string& line,const std::vector<std::string>& expected)
+{
+   std::vector<std::string> result,result1,result2;
+   std::vector<boost::string_view> result3;
+
+   Str::split_orig(line,result);               check(line,result,expected);
+   Str::split_orig1(line,result1);             check(line,result1,expected);
+   Str::split_using_string_view(line,result2); check(line,result2,expected);
+   StringSplitter::split(line,result3);        check(line,result3,expected);
+
+   // While were at it also check get_token
+   for(size_t i=0; i < result1.size(); i++){
+      std::string token;
+      BOOST_CHECK_MESSAGE(Str::get_token(line,i,token) && token == result1[i],"Str::get_token failed for pos " << i << " line:'" << line << "' expected '" <<  result1[i] << "' but found '" << token << "'");
+
+      token.clear();
+      BOOST_CHECK_MESSAGE(StringSplitter::get_token(line,i,token) && token == result1[i],"StringSplitter::get_token failed for pos " << i << " line:'" << line << "' expected '" <<  result1[i] << "' but found '" << token << "'");
+   }
+}
+
 BOOST_AUTO_TEST_CASE( test_str_split )
 {
 	cout << "ACore:: ...test_str_split\n";
 
 	std::vector<std::string> expected;
-   std::vector<std::string> result;
-   std::vector<boost::string_view> result2;
 
 	std::string line = "This is a string";
 	expected.emplace_back("This"); expected.emplace_back("is"); expected.emplace_back("a"); expected.emplace_back("string");
-   Str::split(line,result);             check(line,result,expected);
-   StringSplitter::split(line,result2); check(line,result2,expected);
+	check_splitters(line,expected);
 
-	expected.clear(); result.clear(); result2.clear();
+	expected.clear();
 	line = "  ";
- 	Str::split(line,result);  check(line,result,expected);
- 	StringSplitter::split(line,result2); check(line,result2,expected);
+   check_splitters(line,expected);
 
-	expected.clear(); result.clear(); result2.clear();
 	line = "a";
-	expected.emplace_back("a");
- 	Str::split(line,result);  check(line,result,expected);
- 	StringSplitter::split(line,result2); check(line,result2,expected);
+   expected.clear(); expected.emplace_back("a");
+   check_splitters(line,expected);
 
 	// Some implementation fail this test
-	expected.clear(); result.clear();result2.clear();
 	line = "\n";
-	expected.emplace_back("\n");
-  	Str::split(line,result);  check(line,result,expected);
-  	StringSplitter::split(line,result2); check(line,result2,expected);
+   expected.clear(); expected.emplace_back("\n");
+   check_splitters(line,expected);
 
-	expected.clear(); result.clear(); result2.clear();
 	line = "a ";
-	expected.emplace_back("a");
- 	Str::split(line,result);  check(line,result,expected);
- 	StringSplitter::split(line,result2); check(line,result2,expected);
+   expected.clear(); expected.emplace_back("a");
+   check_splitters(line,expected);
 
-	expected.clear(); result.clear(); result2.clear();
 	line = " a";
-	expected.emplace_back("a");
- 	Str::split(line,result);  check(line,result,expected);
- 	StringSplitter::split(line,result2); check(line,result2,expected);
+   expected.clear(); expected.emplace_back("a");
+   check_splitters(line,expected);
 
-	expected.clear(); result.clear(); result2.clear();
 	line = "	a"; // check tabs
-	expected.emplace_back("a");
- 	Str::split(line,result);  check(line,result,expected);
- 	StringSplitter::split(line,result2); check(line,result2,expected);
+   expected.clear(); expected.emplace_back("a");
+   check_splitters(line,expected);
 
-	expected.clear(); result.clear(); result2.clear();
 	line = "		a		"; // check sequential tabs
-	expected.emplace_back("a");
- 	Str::split(line,result);  check(line,result,expected);
- 	StringSplitter::split(line,result2); check(line,result2,expected);
+   expected.clear(); expected.emplace_back("a");
+   check_splitters(line,expected);
 
-	expected.clear(); result.clear(); result2.clear();
 	line = " a ";
-	expected.emplace_back("a"); result2.clear();
- 	Str::split(line,result);  check(line,result,expected);
- 	StringSplitter::split(line,result2); check(line,result2,expected);
+   expected.clear();  expected.emplace_back("a");
+   check_splitters(line,expected);
 
-	expected.clear(); result.clear(); result2.clear();
 	line = "        a     b     c       d        ";
-	expected.emplace_back("a"); expected.emplace_back("b"); expected.emplace_back("c"); expected.emplace_back("d");
-  	Str::split(line,result); check(line,result,expected);
-  	StringSplitter::split(line,result2); check(line,result2,expected);
+   expected.clear(); expected.emplace_back("a"); expected.emplace_back("b"); expected.emplace_back("c"); expected.emplace_back("d");
+   check_splitters(line,expected);
 
-	expected.clear(); result.clear(); result2.clear();
 	line = " - !   $ % ^ & * ( ) - + ?";
+   expected.clear();
 	expected.emplace_back("-"); expected.emplace_back("!");  expected.emplace_back("$");
 	expected.emplace_back("%"); expected.emplace_back("^"); expected.emplace_back("&"); expected.emplace_back("*");
 	expected.emplace_back("("); expected.emplace_back(")"); expected.emplace_back("-"); expected.emplace_back("+");
 	expected.emplace_back("?");
-  	Str::split(line,result); check(line,result,expected);
-  	StringSplitter::split(line,result2); check(line,result2,expected);
+   check_splitters(line,expected);
 
 	// Check tabs
-	expected.clear(); result.clear(); result2.clear();
 	line = "		 verify complete:8		                # 4 sundays in october hence expect 8 task completions";
+   expected.clear();
 	expected.emplace_back("verify");expected.emplace_back("complete:8");expected.emplace_back("#");expected.emplace_back("4");
 	expected.emplace_back("sundays");expected.emplace_back("in");expected.emplace_back("october");expected.emplace_back("hence");
 	expected.emplace_back("expect");expected.emplace_back("8");expected.emplace_back("task");expected.emplace_back("completions");
-   Str::split(line,result);  check(line,result,expected);
-   StringSplitter::split(line,result2); check(line,result2,expected);
+   check_splitters(line,expected);
 }
+
 
 BOOST_AUTO_TEST_CASE( test_str_split_make_split_iterator )
 {
