@@ -189,7 +189,10 @@ public:
 	      addTask(line,lineTokens);
 	      return true;
 	   }
-	   else if (Str::local_strcmp(first_token,"endtask") == 0) { // optional
+      else if (Str::local_strcmp(first_token,"endfamily") == 0) {
+         if (parent()) return parent()->doParse(line,lineTokens);
+      }
+      else if (Str::local_strcmp(first_token,"endtask") == 0) { // optional
 	      popToContainerNode();
 	      return true;
 	   }
