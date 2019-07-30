@@ -221,20 +221,21 @@ void Str::split_using_string_view(boost::string_view strv, std::vector< std::str
 {
    size_t first = 0;
 
-    while (first < strv.size())
-    {
-        const auto second = strv.find_first_of(delims, first);
+   size_t strv_size = strv.size();
+   while (first < strv_size)
+   {
+      const auto second = strv.find_first_of(delims, first);
 
-        if (first != second) {
-           boost::string_view ref = strv.substr(first, second-first);
-           output.emplace_back(ref.begin(),ref.end());
-        }
+      if (first != second) {
+         boost::string_view ref = strv.substr(first, second-first);
+         output.emplace_back(ref.begin(),ref.end());
+      }
 
-        if (second == boost::string_view::npos)
-            break;
+      if (second == boost::string_view::npos)
+         break;
 
-        first = second + 1;
-    }
+      first = second + 1;
+   }
 }
 
 bool Str::get_token(boost::string_view strv,size_t pos,std::string& token,boost::string_view delims)
