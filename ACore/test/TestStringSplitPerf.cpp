@@ -31,7 +31,7 @@ using namespace boost;
 // IMPORTANT: Str:split uses StringSplitter:
 //            to run these tests, please switch off Str.cpp::USE_STRINGSPLITTER
 // **************************************************************************************************************
-#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
+//#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
