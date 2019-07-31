@@ -44,13 +44,13 @@ using namespace ecf;
 
 
 /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-BaseServer::BaseServer( ServerEnvironment& serverEnv ) :
-   io_service_(),
-   signals_(io_service_),
-   acceptor_(io_service_),
+BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& serverEnv ) :
+   io_service_(io_service),
+   signals_(io_service),
+   acceptor_(io_service),
    defs_(Defs::create()),      // ECFLOW-182
-   traverser_   (this,  io_service_, serverEnv ),
-   checkPtSaver_(this,  io_service_, &serverEnv ),
+   traverser_   (this,  io_service, serverEnv ),
+   checkPtSaver_(this,  io_service, &serverEnv ),
    serverState_(SState::HALTED),
    serverEnv_(serverEnv)
 {
@@ -118,15 +118,6 @@ BaseServer::~BaseServer()
    }
 #endif
    assert(defs_.use_count() == 0);
-}
-
-void BaseServer::run()
-{
-  // The io_service::run() call will block until all asynchronous operations
-  // have finished. While the server is running, there is always at least one
-  // asynchronous operation outstanding: the asynchronous accept call waiting
-  // for new incoming connections.
-  io_service_.run();
 }
 
 void BaseServer::terminate()

@@ -24,7 +24,7 @@ using boost::asio::ip::tcp;
 using namespace std;
 using namespace ecf;
 
-Server::Server( ServerEnvironment& serverEnv ) : BaseServer(serverEnv)
+Server::Server(boost::asio::io_service& io_service, ServerEnvironment& serverEnv ) : BaseServer(io_service,serverEnv)
 {
    start_accept();
 }

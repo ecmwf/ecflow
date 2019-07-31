@@ -23,7 +23,7 @@
 class SslServer : public BaseServer {
 public:
    /// Constructor opens the acceptor and starts waiting for the first incoming connection.
-   explicit SslServer(ServerEnvironment&);
+   explicit SslServer(boost::asio::io_service& io_service,ServerEnvironment&);
    ~SslServer() override {}
 
 private:

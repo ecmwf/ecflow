@@ -27,7 +27,7 @@ using namespace std;
 using namespace ecf;
 
 
-SslServer::SslServer( ServerEnvironment& serverEnv ) : BaseServer(serverEnv)
+SslServer::SslServer(boost::asio::io_service& io_service, ServerEnvironment& serverEnv ) : BaseServer(io_service,serverEnv)
 {
    stats().ECF_SSL_ =  serverEnv.openssl().info();
 

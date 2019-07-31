@@ -24,45 +24,29 @@
 using namespace ecf;
 using namespace std;
 
-int invoke_server(ServerEnvironment& server_environment)
+int run_server(boost::asio::io_service& io_service, ServerEnvironment& server_environment)
 {
-   Server theServer( server_environment ); // This can throw exception, bind address in use.
     for(;;) {
        try {
-          theServer.run();
+          /// Start the server
+          /// The io_service::run() call will block until all asynchronous operations
+          /// have finished. While the server is running, there is always at least one
+          /// asynchronous operation outstanding: the asynchronous accept call waiting
+          /// for new incoming connections.
+          io_service.run();
           if (server_environment.debug()) cout << "Normal exit from server\n";
           break;
        }
        catch ( std::exception& e ) {
           // deal with errors from the handlers
-          std::string msg = "invoke_server:: "; msg += e.what();
+          std::string msg = "run_server:: "; msg += e.what();
           std::cerr << msg  << endl;
           ecf::log(Log::ERR,msg);
        }
+       if (server_environment.debug()) cout << "Server EXITING: <------------------------------------------------ port:" << server_environment.port() <<  endl;
     }
     return 0;
 }
-
-#ifdef ECF_OPENSSL
-int invoke_ssl_server(ServerEnvironment& server_environment)
-{
-   SslServer theServer( server_environment ); // This can throw exception, bind address in use.
-    for(;;) {
-       try {
-          theServer.run();
-          if (server_environment.debug()) cout << "Normal exit from ssl server\n";
-          break;
-       }
-       catch ( std::exception& e ) {
-          // deal with errors from the handlers
-          std::string msg = "invoke_ssl_server:: "; msg += e.what();
-          std::cerr << msg  << endl;
-          ecf::log(Log::ERR,msg);
-       }
-    }
-    return 0;
-}
-#endif
 
 int main( int argc, char* argv[] ) {
 
@@ -80,15 +64,20 @@ int main( int argc, char* argv[] ) {
 
       if (server_environment.debug()) cout << "Server started: ------------------------------------------------>port:" << server_environment.port() <<  endl;
 
+      boost::asio::io_service io_service;
 #ifdef ECF_OPENSSL
-      if (server_environment.ssl() ) return invoke_ssl_server(server_environment);
-      else                           return invoke_server(server_environment);
+      if (server_environment.ssl() ) {
+         SslServer theServer(io_service, server_environment ); // This can throw exception, bind address in use.
+         return run_server(io_service, server_environment );
+      }
+      else                           {
+         Server theServer(io_service, server_environment ); // This can throw exception, bind address in use.
+         return run_server(io_service, server_environment );
+      }
 #else
-      return invoke_server(server_environment);
+      Server theServer(io_service, server_environment ); // This can throw exception, bind address in use.
+      return run_server(io_service, server_environment );
 #endif
-
-      if (server_environment.debug()) cout << "Server EXITING: <------------------------------------------------ port:" << server_environment.port() <<  endl;
-      return 0;
    }
    catch ( ServerEnvironmentException& e ) {
       // *** deal with server options and environment exceptions

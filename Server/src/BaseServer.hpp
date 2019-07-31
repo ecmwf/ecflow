@@ -38,21 +38,14 @@ class BaseServer : public AbstractServer {
 public:
    /// Constructor opens the acceptor and starts waiting for the first incoming
    /// connection.
-   explicit BaseServer(ServerEnvironment&);
+   explicit BaseServer(boost::asio::io_service& io_service,ServerEnvironment&);
    ~BaseServer() override;
 
-   /// Start the server
-   /// The Server::run/io_service::run() call will block until all asynchronous operations
-   /// have finished. While the server is running, there is always at least one
-   /// asynchronous operation outstanding: the asynchronous accept call waiting
-   /// for new incoming connections.
-   void run();
-
+protected:
    /// Terminate the server gracefully. Need to cancel all timers, close all sockets
    /// Server will hang if there are any pending async handlers
    void terminate();
 
-protected:
    void handle_terminate();
 
    // abort server if check pt files exist, but can't be loaded
@@ -103,7 +96,7 @@ protected: // Allow test to override
 protected:
 
    /// The io_service used to perform asynchronous operations.
-   boost::asio::io_service io_service_;
+   boost::asio::io_service& io_service_;
 
    /// The signal_set is used to register for automatic check pointing
    boost::asio::signal_set signals_;

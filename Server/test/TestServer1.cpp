@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_SUITE( TestServer )
 // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 class TestServer : public Server {
 public:
-   explicit TestServer(ServerEnvironment& s) : Server(s) {}
+   explicit TestServer(boost::asio::io_service& io_service, ServerEnvironment& s) : Server(io_service,s) {}
    ~TestServer() override = default;
 
    // abort server if check pt files exist, but can't be loaded
@@ -120,7 +120,8 @@ BOOST_AUTO_TEST_CASE( test_server )
    BOOST_CHECK_MESSAGE(server_environment.valid(errorMsg),errorMsg);
 
    {
-      TestServer theServer( server_environment ); // This can throw exception, bind address in use.
+      boost::asio::io_service io_service;
+      TestServer theServer(io_service, server_environment ); // This can throw exception, bind address in use.
 
       BOOST_REQUIRE_MESSAGE(theServer.defs(),"Expected defs to be created");
 
