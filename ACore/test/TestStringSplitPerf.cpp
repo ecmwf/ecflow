@@ -130,6 +130,17 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
       cout << " Time for Str::split_orig1 " << times << " times = " << timer.elapsed() << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed," error");
    }
+   { // Str::split_using_string_view2
+      boost::timer timer;
+      for (size_t i = 0; i < times; i++) {
+         result.clear(); Str::split_using_string_view2(line,result);
+
+         reconstructed.clear();
+         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+      }
+      cout << " Time for Str::split_using_string_view2 " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(line==reconstructed," error");
+   }
    { // Str::split_using_string_view
       boost::timer timer;
       for (size_t i = 0; i < times; i++) {
@@ -283,6 +294,16 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
          cout << " Time for Str::split_using_string_view " << file_contents.size() << " times = " << timer.elapsed() << "\n";
       }
       {
+         boost::timer timer;
+         for(size_t i = 0; i < file_contents.size(); i++) {
+            result.clear();
+            Str::split_using_string_view2(file_contents[i],result);
+
+            reconstruct_line(result);
+         }
+         cout << " Time for Str::split_using_string_view2 " << file_contents.size() << " times = " << timer.elapsed() << "\n";
+      }
+      {
          typedef boost::split_iterator<string::const_iterator> split_iter_t;
          boost::timer timer;
          for(size_t i = 0; i < file_contents.size(); i++) {
@@ -344,31 +365,53 @@ BOOST_AUTO_TEST_CASE( test_str_get_token_perf )
    cout << " This test will split a line " << times << " times: '" << line << "'\n";
 
    Str::split_using_string_view(line,result);
+   size_t result_size = result.size();
+   std::string token;
 
    {
       boost::timer timer;
-      std::string token;
       for (size_t i = 0; i < times; i++) {
-         for(size_t i=0; i < result.size(); i++){
+         for(size_t r=0; r < result_size; r++){
             token.clear();
-            (void) Str::get_token(line,i,token);
+            (void) StringSplitter::get_token(line,r,token);
          }
       }
-      cout << " Time for Str::get_token " << times << " times = " << timer.elapsed() << "\n";
+      cout << " Time for StringSplitter::get_token " << times << " times = " << timer.elapsed() << "\n";
       BOOST_CHECK_MESSAGE(true,"Keep compiler happy");
    }
    {
-       boost::timer timer;
-       std::string token;
-       for (size_t i = 0; i < times; i++) {
-          for(size_t i=0; i < result.size(); i++){
-             token.clear();
-             (void) StringSplitter::get_token(line,i,token);
-          }
-       }
-       cout << " Time for StringSplitter::get_token " << times << " times = " << timer.elapsed() << "\n";
-       BOOST_CHECK_MESSAGE(true,"Keep compiler happy");
-    }
+      boost::timer timer;
+      for (size_t i = 0; i < times; i++) {
+         for(size_t r=0; r < result_size; r++){
+            token.clear();
+            (void) Str::get_token(line,r,token);
+         }
+      }
+      cout << " Time for Str::get_token            " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(true,"Keep compiler happy");
+   }
+   {
+      boost::timer timer;
+      for (size_t i = 0; i < times; i++) {
+         for(size_t r=0; r <  result_size; r++){
+            token.clear();
+            (void) Str::get_token2(line,r,token);
+         }
+      }
+      cout << " Time for Str::get_token2           " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(true,"Keep compiler happy");
+   }
+   {
+      boost::timer timer;
+      for (size_t i = 0; i < times; i++) {
+         for(size_t r=0; r < result_size; r++){
+            token.clear();
+            (void) Str::get_token3(line,r,token);
+         }
+      }
+      cout << " Time for Str::get_token3           " << times << " times = " << timer.elapsed() << "\n";
+      BOOST_CHECK_MESSAGE(true,"Keep compiler happy");
+   }
 }
 
 #endif

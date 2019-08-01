@@ -147,18 +147,25 @@ static void check(const std::string& line,
 
 static void check_splitters(const std::string& line,const std::vector<std::string>& expected)
 {
-   std::vector<std::string> result,result1,result2;
-   std::vector<boost::string_view> result3;
+   std::vector<std::string> result,result1,result2,result3;
+   std::vector<boost::string_view> result4;
 
    Str::split_orig(line,result);               check(line,result,expected);
    Str::split_orig1(line,result1);             check(line,result1,expected);
    Str::split_using_string_view(line,result2); check(line,result2,expected);
-   StringSplitter::split(line,result3);        check(line,result3,expected);
+   Str::split_using_string_view2(line,result3);check(line,result3,expected);
+   StringSplitter::split(line,result4);        check(line,result4,expected);
 
    // While were at it also check get_token
    for(size_t i=0; i < result1.size(); i++){
       std::string token;
       BOOST_CHECK_MESSAGE(Str::get_token(line,i,token) && token == result1[i],"Str::get_token failed for pos " << i << " line:'" << line << "' expected '" <<  result1[i] << "' but found '" << token << "'");
+
+      token.clear();
+      BOOST_CHECK_MESSAGE(Str::get_token2(line,i,token) && token == result1[i],"Str::get_token2 failed for pos " << i << " line:'" << line << "' expected '" <<  result1[i] << "' but found '" << token << "'");
+
+      token.clear();
+      BOOST_CHECK_MESSAGE(Str::get_token3(line,i,token) && token == result1[i],"Str::get_token3 failed for pos " << i << " line:'" << line << "' expected '" <<  result1[i] << "' but found '" << token << "'");
 
       token.clear();
       BOOST_CHECK_MESSAGE(StringSplitter::get_token(line,i,token) && token == result1[i],"StringSplitter::get_token failed for pos " << i << " line:'" << line << "' expected '" <<  result1[i] << "' but found '" << token << "'");

@@ -158,28 +158,28 @@ void Str::split(const std::string& line, std::vector< std::string >& tokens,cons
 #else
    Str::split_orig(line,tokens,delimiters);
 #endif
-//   ACore:: ...test_str_split_perf
-//    This test will split a line 1000000 times: 'This is a long string that is going to be used to test the performance of splitting with different Implementations the fastest times wins '
-//    Time for istreamstream 1000000 times = 2.96773
-//    Time for std::getline 1000000 times = 2.39853
-//    Time for boost::split 1000000 times = 1.41008
-//    Time for Str::split_orig 1000000 times = 1.63299
-//    Time for Str::split_orig1 1000000 times = 1.04024
-//    Time for Str::split_using_string_view 1000000 times = 0.909371
-//    Time for make_split_iterator::split 1000000 times = 5.37671
-//    Time for boost::string_view 1000000 times = 1.40113
-//    Time for boost::string_view(2) 1000000 times = 1.15576
-//   ACore:: ...test_str_split_perf_with_file
-//    This test will split each line in file /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
-//    Time for istreamstream 2001774 times = 2.18118
-//    Time for std::getline 2001774 times = 3.62847
-//    Time for boost::split 2001774 times = 2.27996
-//    Time for Str::split_orig 2001774 times = 1.01041
-//    Time for Str::split_orig1 2001774 times = 0.788821
-//    Time for Str::split_using_string_view 2001774 times = 0.624599
-//    Time for boost::make_split_iterator 2001774 times = 4.91466
-//    Time for boost::string_view 2001774 times = 0.952638
-//    Time for boost::string_view(2) 2001774 times = 0.932978
+   //    Time for istreamstream                 1000000 times = 2.89956
+   //    Time for std::getline                  1000000 times = 2.35009
+   //    Time for boost::split                  1000000 times = 1.41382
+   //    Time for Str::split_orig               1000000 times = 1.66867
+   //    Time for Str::split_orig1              1000000 times = 0.922604
+   //    Time for Str::split_using_string_view2 1000000 times = 0.952284
+   //    Time for Str::split_using_string_view  1000000 times = 0.883083
+   //    Time for make_split_iterator::split    1000000 times = 5.39053
+   //    Time for boost::string_view            1000000 times = 1.42954
+   //    Time for boost::string_view(2)         1000000 times = 1.08913
+   //   ACore:: ...test_str_split_perf_with_file
+   //    This test will split each line in file /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+   //    Time for istreamstream 2001774                 times = 2.17015
+   //    Time for std::getline 2001774                  times = 3.712
+   //    Time for boost::split 2001774                  times = 2.30856
+   //    Time for Str::split_orig 2001774               times = 1.03166
+   //    Time for Str::split_orig1 2001774              times = 0.63027
+   //    Time for Str::split_using_string_view 2001774  times = 0.626403
+   //    Time for Str::split_using_string_view2 2001774 times = 0.653635
+   //    Time for boost::make_split_iterator 2001774    times = 4.91331
+   //    Time for boost::string_view 2001774            times = 0.994274
+   //    Time for boost::string_view(2) 2001774         times = 0.903887
 }
 
 void Str::split_orig(const std::string& line, std::vector< std::string >& tokens,const std::string& delimiters )
@@ -200,24 +200,34 @@ void Str::split_orig(const std::string& line, std::vector< std::string >& tokens
 void Str::split_orig1(const std::string& line, std::vector< std::string >& tokens,const std::string& delims )
 {
    auto first = std::cbegin(line);
+   auto end = std::cend(line);
 
-   while (first != std::cend(line))
+   while (first != end)
    {
-       const auto second = std::find_first_of(first, std::cend(line),
-                 std::cbegin(delims), std::cend(delims));
+       const auto second = std::find_first_of(first, end, std::cbegin(delims), std::cend(delims));
 
        if (first != second)
            tokens.emplace_back(first, second);
 
-       if (second == std::cend(line))
+       if (second == end)
            break;
 
        first = std::next(second);
    }
 }
 
-
 void Str::split_using_string_view(boost::string_view strv, std::vector< std::string >& output, boost::string_view delims )
+{
+   // Uses pointers
+   for (auto first = strv.data(), second = strv.data(), last = first + strv.size(); second != last && first != last; first = second + 1) {
+      second = std::find_first_of(first, last, std::cbegin(delims), std::cend(delims));
+
+      if (first != second)
+         output.emplace_back(first, second - first);
+   }
+}
+
+void Str::split_using_string_view2(boost::string_view strv, std::vector< std::string >& output, boost::string_view delims )
 {
    size_t first = 0;
 
@@ -238,31 +248,74 @@ void Str::split_using_string_view(boost::string_view strv, std::vector< std::str
    }
 }
 
-bool Str::get_token(boost::string_view strv,size_t pos,std::string& token,boost::string_view delims)
+bool Str::get_token(boost::string_view str,size_t pos,std::string& token,boost::string_view delims)
 {
-//   Time for Str::get_token 1000000 times = 2.83263
-//   Time for StringSplitter::get_token 1000000 times = 10.349
+   //   Time for StringSplitter::get_token 250000 times = 2.40008
+   //   Time for Str::get_token            250000 times = 0.813302
+   //   Time for Str::get_token2           250000 times = 0.917736
+   //   Time for Str::get_token3           250000 times = 1.04581
+
+   size_t current_pos = 0;
+   for (auto first = str.data(), second = str.data(), last = first + str.size(); second != last && first != last; first = second + 1) {
+
+      second = std::find_first_of(first, last, std::cbegin(delims), std::cend(delims));
+      if (first != second) {
+         if (current_pos == pos) {
+            token = std::string(first, second - first);
+            return true;
+         }
+         current_pos++;
+      }
+   }
+   return false;
+}
+
+bool Str::get_token2(boost::string_view strv,size_t pos,std::string& token,boost::string_view delims)
+{
    size_t current_pos = 0;
    size_t first = 0;
-    while (first < strv.size())
-    {
-        const auto second = strv.find_first_of(delims, first);
+   while (first < strv.size()) {
+      const auto second = strv.find_first_of(delims, first);
 
-        if (first != second) {
-           if (current_pos == pos) {
-              boost::string_view ref = strv.substr(first, second-first);
-              token = std::string(ref.begin(),ref.end());
-              return true;
-           }
-           current_pos++;
-        }
+      if (first != second) {
+         if (current_pos == pos) {
+            boost::string_view ref = strv.substr(first, second-first);
+            token = std::string(ref.begin(),ref.end());
+            return true;
+         }
+         current_pos++;
+      }
 
-        if (second == boost::string_view::npos)
-            break;
+      if (second == boost::string_view::npos)
+         break;
 
-        first = second + 1;
-    }
-    return false;
+      first = second + 1;
+   }
+   return false;
+}
+
+bool Str::get_token3(boost::string_view line,size_t pos,std::string& token,boost::string_view delims)
+{
+   size_t current_pos = 0;
+   auto first = std::cbegin(line);
+   auto end = std::cend(line);
+
+   while (first != end) {
+       const auto second = std::find_first_of(first, end, std::cbegin(delims), std::cend(delims));
+
+       if (first != second) {
+          if (current_pos == pos) {
+             token = std::string(first, second);
+             return true;
+          }
+          current_pos++;
+       }
+
+       if (second == end) break;
+
+       first = std::next(second);
+   }
+   return false;
 }
 
 boost::split_iterator<std::string::const_iterator> Str::make_split_iterator(const std::string& line,const std::string& delimiters)

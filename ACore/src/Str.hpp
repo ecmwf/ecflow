@@ -59,6 +59,7 @@ public:
 	/// The split is based on *ANY* of the characters in the delimiters.
 	/// **** Hence a delimiter of "==" will still split "a = complete"
 	/// **** sequential delimiter character are ignored ****
+   /// This function is used to choose the fastest implementation
 	static void split(const std::string& line,
 	                  std::vector< std::string >& tokens,
 	                  const std::string& delimiters = " \t");
@@ -75,7 +76,14 @@ public:
                      std::vector< std::string >& tokens,
                      boost::string_view delimiters = " \t");
 
+   static void split_using_string_view2(boost::string_view line,
+                     std::vector< std::string >& tokens,
+                     boost::string_view delimiters = " \t");
+
+   // Get token at a given pos. Two different implementations
    static bool get_token(boost::string_view line,size_t pos,std::string& token,boost::string_view sep = " \t");
+   static bool get_token2(boost::string_view line,size_t pos,std::string& token,boost::string_view sep = " \t");
+   static bool get_token3(boost::string_view line,size_t pos,std::string& token,boost::string_view sep = " \t");
 
 	// Uses boost::make_split_iterator will remove
 	// consecutive delimiters in the middle of the string
