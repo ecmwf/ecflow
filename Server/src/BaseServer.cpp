@@ -1,4 +1,4 @@
-//============================================================================
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        : BaseServer.cpp
 // Author      : Avi
 // Revision    : $Revision: #173 $
@@ -16,7 +16,7 @@
 // o the Well Known Ports, (require root permission)  0   -1023
 //  o the Registered Ports,                            1024-49151
 //  o Dynamic and/or Private Ports.                    49151-65535
-//============================================================================
+/////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <iostream>
 
@@ -47,7 +47,6 @@ using namespace ecf;
 BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& serverEnv ) :
    io_service_(io_service),
    signals_(io_service),
-   acceptor_(io_service),
    defs_(Defs::create()),      // ECFLOW-182
    traverser_   (this,  io_service, serverEnv ),
    checkPtSaver_(this,  io_service, &serverEnv ),
@@ -63,14 +62,6 @@ BaseServer::BaseServer(boost::asio::io_service& io_service, ServerEnvironment& s
    // Support for emergency check pointing during system session.
    signals_.add(SIGTERM);
    signals_.async_wait([this](boost::system::error_code /*ec*/, int /*signo*/) { sigterm_signal_handler();});
-
-
-   // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
-   boost::asio::ip::tcp::endpoint endpoint(serverEnv.tcp_protocol(), serverEnv.port());
-   acceptor_.open(endpoint.protocol());
-   acceptor_.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-   acceptor_.bind(endpoint);
-   acceptor_.listen();   // address is use error, when it comes, bombs out here
 
    // Update stats, this is returned via --stats command option
    stats().host_ = serverEnv.hostPort().first;
@@ -120,16 +111,6 @@ BaseServer::~BaseServer()
    assert(defs_.use_count() == 0);
 }
 
-void BaseServer::terminate()
-{
-   // The server is terminated by cancelling all outstanding asynchronous
-   // operations. Once all operations have finished the io_service::run() call  will exit.
-   if (serverEnv_.debug()) cout << "   Server::terminate(): posting call to Server::handle_terminate" << endl;
-
-   // Post a call to the stop function so that Server::stop() is safe to call from any thread.
-   io_service_.post( [this]() {handle_terminate();} ); // boost::bind(&Server::handle_terminate, this));
-}
-
 void BaseServer::handle_terminate()
 {
    // if (serverEnv_.debug()) cout << boost::this_thread::get_id() << "   Server::handle_terminate() : cancelling checkpt and traverser timers, and signals" << endl;
@@ -142,11 +123,6 @@ void BaseServer::handle_terminate()
    // Cancel async timers for check pointing and traversal
    traverser_.terminate();
    checkPtSaver_.terminate();
-
-   acceptor_.close();
-
-   // Stop the io_service object's event processing loop. Will cause run to return immediately
-   io_service_.stop();
 }
 
 // ============================== other privates ===========================================

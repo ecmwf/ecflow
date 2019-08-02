@@ -5,17 +5,20 @@
  #    find src -name \*.cpp  -print | sort
  # =======================================================
 list( APPEND srcs
+   src/BaseServer.cpp
    src/CheckPtSaver.cpp
    src/NodeTreeTraverser.cpp
-   src/BaseServer.cpp
    src/Server.cpp
    src/ServerEnvironment.cpp
    src/ServerOptions.cpp
+   src/TcpBaseServer.cpp
+   src/TcpServer.cpp
 )
 
 if (OPENSSL_FOUND)
 	list( APPEND srcs 
           src/SslServer.cpp
+          src/SslTcpServer.cpp
         )
 endif()
 

@@ -15,7 +15,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "BaseServer.hpp"
-#include "Connection.hpp"
+#include "TcpServer.hpp"
 
 class Server : public BaseServer {
 public:
@@ -24,18 +24,7 @@ public:
    ~Server() override {}
 
 private:
-
-   /// Handle completion of a accept operation.
-   void handle_accept(const boost::system::error_code& e, connection_ptr conn);
-
-   /// Handle completion of a write operation.
-   void handle_write(const boost::system::error_code& e, connection_ptr conn);
-
-   /// Handle completion of a read operation.
-   void handle_read(const boost::system::error_code& e, connection_ptr conn);
-
-   void start_accept();
-   bool shutdown_socket(connection_ptr conn, const std::string& msg) const;
+   TcpServer tcp_server_;
 };
 
 #endif

@@ -23,16 +23,11 @@
 
 #include <memory>
 #include <boost/asio.hpp>
-
-#include "ClientToServerRequest.hpp"
-#include "ServerToClientResponse.hpp"
-
 #include "NodeTreeTraverser.hpp"
 #include "CheckPtSaver.hpp"
 #include "AbstractServer.hpp"
 
 class ServerEnvironment;
-
 
 class BaseServer : public AbstractServer {
 public:
@@ -41,10 +36,6 @@ public:
    explicit BaseServer(boost::asio::io_service& io_service,ServerEnvironment&);
    ~BaseServer() override;
 
-protected:
-   /// Terminate the server gracefully. Need to cancel all timers, close all sockets
-   /// Server will hang if there are any pending async handlers
-   void terminate();
 
    void handle_terminate();
 
@@ -55,7 +46,6 @@ protected:
    void update_defs_server_state();
    void set_server_state(SState::State);
 
-protected: // Allow test to override
 
    /// AbstractServer functions
    SState::State state() const override { return serverState_; }
@@ -100,13 +90,6 @@ protected:
 
    /// The signal_set is used to register for automatic check pointing
    boost::asio::signal_set signals_;
-
-   /// The acceptor object used to accept incoming socket connections.
-   boost::asio::ip::tcp::acceptor acceptor_;
-
-   /// The data, typically loaded once, and then sent to many clients
-   ClientToServerRequest  inbound_request_;
-   ServerToClientResponse outbound_response_;
 
    defs_ptr defs_;             // shared because is deleted in Test, and used in System::instance()
    NodeTreeTraverser traverser_;
