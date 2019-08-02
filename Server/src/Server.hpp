@@ -15,7 +15,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "BaseServer.hpp"
-#include "Connection.hpp"  // Must come before boost/serialisation headers.
+#include "Connection.hpp"
 
 class Server : public BaseServer {
 public:
