@@ -470,6 +470,48 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       }
    }
 
+   {   // test add variable to multiple nodes
+      std::vector<node_ptr> all_nodes;
+      defs.get_all_nodes(all_nodes);
+      std::vector<std::string> paths;
+      for(size_t i=0; i<all_nodes.size();i++) paths.push_back(all_nodes[i]->absNodePath());
+      BOOST_CHECK_MESSAGE(paths.size() >= 2,"expected at least 2 nodes");
+
+      for(size_t i=0; i<all_nodes.size();i++) {
+         if (all_nodes[i]->variables().size() > 0) {
+            TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(all_nodes[i]->absNodePath(),AlterCmd::DEL_VARIABLE)));
+         }
+      }
+
+      TestStateChanged changed(s);
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::ADD_VARIABLE,"FRED1","_val_")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::ADD_VARIABLE,"FRED2","_val_")));
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::ADD_VARIABLE,"FRED3","_val_")));
+      for(size_t i=0; i<all_nodes.size();i++) {
+         BOOST_CHECK_MESSAGE( all_nodes[i]->variables().size() == 3, "expected 3 variable but found " << all_nodes[i]->variables().size());
+      }
+
+      // test change variable
+      {
+         TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::VARIABLE,"FRED1","BILL1")));
+         for(size_t i=0; i<all_nodes.size();i++) {
+            const Variable& v = s->findVariable("FRED1");
+            BOOST_CHECK_MESSAGE( !v.empty() && v.theValue() == "BILL1", "expected to find variable FRED1, with value BILL1");
+         }
+      }
+
+      // test delete variables
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::DEL_VARIABLE,"FRED1")));
+      for(size_t i=0; i<all_nodes.size();i++) {
+         BOOST_CHECK_MESSAGE( all_nodes[i]->variables().size() == 2, "expected 2 variable but found " << all_nodes[i]->variables().size());
+      }
+
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::DEL_VARIABLE)));
+      for(size_t i=0; i<all_nodes.size();i++) {
+         BOOST_CHECK_MESSAGE( all_nodes[i]->variables().size() == 0, "expected 0 variable but found " << all_nodes[i]->variables().size());
+      }
+   }
+
    {   // test add event
       TestStateChanged changed(s);
       s->addEvent( Event(1,"event1") );

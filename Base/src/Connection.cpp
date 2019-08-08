@@ -18,7 +18,8 @@
 
 connection::~connection() {
 #ifdef DEBUG_CONNECTION
-   std::cout << "Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
+   if (Ecf::server()) std::cout << "SERVER: Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
+   else               std::cout << "CLIENT: Connection::~connection  socket_.is_open() = " << socket_.is_open() << "\n\n";
 #endif
 }
 
@@ -29,7 +30,8 @@ connection::connection(boost::asio::io_service& io_service , boost::asio::ssl::c
   socket_(io_service,context)
 {
 #ifdef DEBUG_CONNECTION
-   std::cout << "Connection::connection openssl\n";
+   if (Ecf::server()) std::cout << "SERVER: Connection::connection openssl\n";
+   else               std::cout << "CLIENT: Connection::connection openssl\n";
 #endif
    socket_.set_verify_mode(boost::asio::ssl::verify_peer);
 
@@ -64,7 +66,8 @@ connection::connection(boost::asio::io_service& io_service)
   socket_(io_service)
 {
 #ifdef DEBUG_CONNECTION
-   std::cout << "Connection::connection\n";
+   if (Ecf::server()) std::cout << "SERVER: Connection::connection\n";
+   else               std::cout << "CLIENT: Connection::connection\n";
 #endif
 }
 #endif

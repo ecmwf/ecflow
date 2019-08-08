@@ -13,24 +13,25 @@
 
 #  code for testing pointers and hierarchy in python
 
-from ecflow import Suite, Family, Task, Defs, Client, debug_build
+from ecflow import Suite, Family, Task, Defs, Client, debug_build, Edit
 import ecflow_test_util as Test
 import os
 
 def create_defs(name=""):
-    defs = Defs()
-    defs.add_variable("DEFS_VAR","0")
     suite_name = name
     if len(suite_name) == 0: suite_name = "s1"
-    suite = defs.add_suite(suite_name);
-    suite.add_variable("SUITE_VAR","1")
-
-    f1 = suite.add_family("f1")
-    f1.add_task("f1_t1").add_variable("TASK_VAR","3")
-    f1.add_task("f1_t2").add_variable("TASK_VAR","3")
-    f2 = suite.add_family("f2")
-    f2.add_task("f2_t1").add_variable("TASK_VAR","3")
-    f2.add_task("f2_t2").add_variable("TASK_VAR","3")
+    defs =  Defs(Edit(FRED_2="XX",DEFS_VAR="0"),
+                Suite(suite_name, Edit(SUITE_VAR="1",FRED_1="%FRED_2%"),
+                    Family("f1",Edit(FRED_0="%FRED_1%"),
+                          Task("f1_t1", Edit(TASK_VAR="3",FRED="%FRED_0%")),
+                          Task("f1_t2", Edit(TASK_VAR="3",FRED="%FRED_0%"))
+                    ),
+                    Family("f2",Edit(FRED_0="%FRED_1%"),
+                          Task("f2_t1", Edit(TASK_VAR="3",FRED="%FRED_0%")),
+                          Task("f2_t2", Edit(TASK_VAR="3",FRED="%FRED_0%"))
+                    )
+                )
+            )
     return defs;
 
 if __name__ == "__main__":   
@@ -80,6 +81,12 @@ if __name__ == "__main__":
         var = task.find_parent_variable("TASK_VAR")
         assert not var.empty()
         assert var.value() == "3"
+        
+        var = task.find_parent_variable_sub_value("FRED")
+        assert var == "XX"
+
+        var = task.find_parent_variable_sub_value("ZZZZ")
+        assert var == ""
 
         var = task.find_variable("TASK_VAR")
         assert not var.empty()

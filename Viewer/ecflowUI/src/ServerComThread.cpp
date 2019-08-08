@@ -99,10 +99,13 @@ void ServerComThread::run()
                 //special treatment for variable add/change to allow values with "--"  characters.
                 //See issue ECFLOW-1414. The command_ string is supposed to contain these values:
                 //ecflow_client --alter change variable NAME VALUE PATH
-                if(command_.size() >=7 && command_[1] == "--alter" && command_[3] == "variable" &&
+                //note that we can assume there is a space, and not '=' after '--alter',
+                //as this is taken care of in CommandHandler.cpp
+                if(command_.size() >=6 && command_[1] == "--alter" && command_[3] == "variable" &&
                    (command_[2] == "change" || command_[2] == "add"))
                 {
-                    ci_->alter(command_[6],command_[2],command_[3],command_[4],command_[5]);
+                    std::vector<std::string> nodeList(command_.begin()+6, command_.end());
+                    ci_->alter(nodeList,command_[2],command_[3],command_[4],command_[5]);
                 }
 
                 // call the client invoker with the saved command
