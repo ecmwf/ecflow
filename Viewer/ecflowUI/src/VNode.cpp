@@ -488,7 +488,7 @@ void VNode::collectAborted(std::vector<VNode*>& vec) const
 {
     for(int i=0; i < numOfChildren(); i++)
     {
-        if(children_[i]->isAborted())
+        if(children_[i]->isTask() && children_[i]->isAborted())
         {
             vec.push_back(children_[i]);
         }
