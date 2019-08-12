@@ -26,7 +26,7 @@ using namespace boost::posix_time;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion)
+void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion, bool reset_day_date_reque_counter)
 {
    // must be done before the re-queue
    if (reset_relative_duartion) {
@@ -40,56 +40,93 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
    /// *NOTE* Update calendar will *free* time dependencies *even* time series. They rely
    /// on this function to clear the time dependencies so they *HOLD* the task.
    const Calendar& calendar = suite()->calendar();
-   for(auto & today : todays_)  { today.requeue(calendar,reset_next_time_slot);}
-   for(auto & time : times_)   {  time.requeue(calendar,reset_next_time_slot);}
-   for(auto & cron : crons_)     {    cron.requeue(calendar,reset_next_time_slot);}
+   for(auto & today : todays_) { today.requeue(calendar,reset_next_time_slot);}
+   for(auto & time : times_)   { time.requeue(calendar,reset_next_time_slot);}
+   for(auto & cron : crons_)   { cron.requeue(calendar,reset_next_time_slot);}
 
-   for(auto & day : days_)      {  day.clearFree(); }
-   for(auto & date : dates_)     { date.clearFree(); }
+   for(auto & day : days_)     {  day.requeue(reset_day_date_reque_counter); } // make sure only run once
+   for(auto & date : dates_)   { date.requeue(reset_day_date_reque_counter); } // make sure only run once
 }
 
-void Node::calendar_changed_timeattrs(const ecf::Calendar& c )
+void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_args& cal_args)
 {
    // For time/today/cron attributes if the time is free, it *remains* free until re-queued
    // However if we have day/date dependencies, that do NOT match, then we should *NOT* free
    // any time/today/cron attributes.
    //
    //   task t
-   //     day Monday
+   //     day Monday   # this will guard the time.
    //     time 10:00
    //
    // Hence if we are on Sunday we do *NOT* want to free the time on SUNDAY
    // (Otherwise we will end up running the task at Monday Midnight
    //  and not Monday at 10.00)
    //
+   // Likewise:
+   //   family f1
+   //     day monday     # this will guard the time(this is different to ecflow 4.0) holding_parent_day_or_date_
+   //     task t
+   //       time 10:00
+   //
+   //   family f1
+   //      time 10:00    # time will be set down at 10.00 am
+   //      task t
+   //        day monday  # Job will run at Monday morning *AND* at 10:00
+   if (cal_args.holding_parent_day_or_date_) {
+      // No point FREEING any of time attributes as we are HOLDING on parent day/date attribute
+      return;
+   }
 
    if (days_.empty() && dates_.empty() ) {
 
       // No Day or Date, If time matches  calendarChanged(c) will free time dependencies
-      for(auto & time : times_)  {  time.calendarChanged(c); }
+      for(auto & time  : times_)  {  time.calendarChanged(c); }
       for(auto & today : todays_) { today.calendarChanged(c); }
-      for(auto & cron : crons_)    {    cron.calendarChanged(c); }
+      for(auto & cron  : crons_)  {  cron.calendarChanged(c); }
    }
    else {
-
       bool at_least_one_day_free = false;
       for(auto & day : days_){
-         day.calendarChanged(c);
+         day.calendarChanged(c,cal_args.top_level_repeat_);
          if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
       }
 
       bool at_least_one_date_free = false;
       for(auto & date : dates_) {
-         date.calendarChanged(c);
+         date.calendarChanged(c,cal_args.top_level_repeat_);
          if (!at_least_one_date_free) at_least_one_date_free = date.isFree(c);
       }
 
       if ( at_least_one_day_free || at_least_one_date_free)  {
-         for(auto & time : times_)  {  time.calendarChanged(c); }
+         for(auto & time : times_)   { time.calendarChanged(c); }
          for(auto & today : todays_) { today.calendarChanged(c); }
-         for(auto & cron : crons_)    {    cron.calendarChanged(c); }
+         for(auto & cron : crons_)   { cron.calendarChanged(c); }
+      }
+      else {
+         // Node has *HOLDING* day or date dependency. Avoid free time dependencies of an child nodes
+         cal_args.holding_parent_day_or_date_ = this;
       }
    }
+}
+
+bool Node::holding_day_or_date(const ecf::Calendar& c) const
+{
+   if (days_.empty() && dates_.empty()) return false;
+
+   bool at_least_one_day_free = false;
+   for(auto & day : days_){
+      if (!at_least_one_day_free) at_least_one_day_free = day.is_free(c);
+   }
+
+   bool at_least_one_date_free = false;
+   for(auto & date : dates_) {
+      if (!at_least_one_date_free) at_least_one_date_free = date.is_free(c);
+   }
+
+   if (at_least_one_day_free || at_least_one_date_free ) {
+      return false;
+   }
+   return true;
 }
 
 void Node::markHybridTimeDependentsAsComplete()

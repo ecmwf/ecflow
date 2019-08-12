@@ -40,5 +40,6 @@ void JobsParam::clear() {
    submitted_.clear();
    user_edit_file_.clear();
    user_edit_variables_.clear();
+   holding_parent_day_or_date_ = nullptr;
 }
 

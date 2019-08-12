@@ -149,11 +149,16 @@ void NodeContainer::requeue(Requeue_args& args)
 	if (d_st_ == DState::COMPLETE )
 	   args.log_state_changes_ = false;
 
+	// date/day attributes under a repeat should only run once per repeat increment
+	bool reset_day_date_reueue_count = args.reset_day_date_reueue_count_;
+	if (!repeat().empty() && args.resetRepeats_) reset_day_date_reueue_count = true;
+
    Node::Requeue_args largs(true /* reset repeats, Moot for tasks */,
-                           args.clear_suspended_in_child_nodes_,
-                           args.reset_next_time_slot_,
-                           true /* reset relative duration */,
-                           args.log_state_changes_);
+                            reset_day_date_reueue_count,
+                            args.clear_suspended_in_child_nodes_,
+                            args.reset_next_time_slot_,
+                            true /* reset relative duration */,
+                            args.log_state_changes_);
 
  	size_t node_vec_size = nodes_.size();
  	for(size_t t = 0; t < node_vec_size; t++) {
@@ -381,8 +386,7 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 
 void NodeContainer::calendarChanged(
          const ecf::Calendar& c,
-         std::vector<node_ptr>& auto_cancelled_nodes,
-         std::vector<node_ptr>& auto_archive_nodes,
+         Node::Calendar_args& cal_args,
          const ecf::LateAttr* inherited_late)
 {
    // A node that is archived should not allow any change of state.
@@ -391,7 +395,9 @@ void NodeContainer::calendarChanged(
    }
 
    // The late attribute is inherited, we only set late on the task/alias
-	Node::calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,nullptr);
+   // This will set: cal_args.holding_parent_day_or_date_ = this;
+   // holding_parent_day_or_date_ is used to avoid freeing time attributes, when we have a holding parent day/date
+   Node::calendarChanged(c,cal_args,nullptr);
 
 	LateAttr overridden_late;
    if (inherited_late && !inherited_late->isNull()) {
@@ -401,10 +407,17 @@ void NodeContainer::calendarChanged(
 	   overridden_late.override_with(late_.get());
 	}
 
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++) {
-	   nodes_[t]->calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,&overridden_late);
-	}
+	// top_level_repeat_ is used in ensuring that day/date attributes stay free in calendarChanged(), even after midnight
+   cal_args.top_level_repeat_ = (!repeat().empty()) ? this : nullptr;
+
+   size_t node_vec_size = nodes_.size();
+   for(size_t t = 0; t < node_vec_size; t++) {
+      nodes_[t]->calendarChanged(c,cal_args,&overridden_late);
+   }
+
+   // clear *IF* at the *SAME* level
+   if ( cal_args.holding_parent_day_or_date_ == this) cal_args.holding_parent_day_or_date_ = nullptr;
+   if ( cal_args.top_level_repeat_           == this) cal_args.top_level_repeat_ = nullptr;
 }
 
 bool NodeContainer::hasAutoCancel() const
@@ -422,8 +435,34 @@ void NodeContainer::invalidate_trigger_references() const
    for(size_t t = 0; t < node_vec_size; t++) {  nodes_[t]->invalidate_trigger_references(); }
 }
 
+class HoldingDayOrDate {
+public:
+   HoldingDayOrDate(Node* n,JobsParam& jobsParam) : node_(n),jobsParam_(jobsParam)  {
+      if (!jobsParam.holding_parent_day_or_date()) {
+         if (node_->holding_day_or_date(node_->suite()->calendar()) ) {
+            jobsParam.set_holding_parent_day_or_date(node_);
+         }
+      }
+   }
+   ~HoldingDayOrDate()  {
+       if (jobsParam_.holding_parent_day_or_date()) {
+          jobsParam_.set_holding_parent_day_or_date(nullptr);
+       }
+    }
+private:
+   Node* node_;
+   JobsParam& jobsParam_;
+};
+
 bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
 {
+   //cout << "NodeContainer::resolveDependencies " << absNodePath() << endl;
+   HoldingDayOrDate holding_day_or_date(this,jobsParam);
+   if (jobsParam.holding_parent_day_or_date()) {
+      //cout << "   NodeContainer::resolveDependencies " << absNodePath() << " HOLDING day or date " << endl;
+      return false;
+   }
+
 	// Don't evaluate children unless parent is free. BOMB out early for this case.
 	// Note:: Task::resolveDependencies() will check inLimit up front. *** THIS CHECKS UP THE HIERARCHY ***
 	// Note:: Node::resolveDependencies() may have forced family node to complete, should have have
@@ -459,6 +498,7 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
  		// child t4 free
   		(void) nodes_[t]->resolveDependencies(jobsParam) ;
  	}
+
  	return true;
 }
 

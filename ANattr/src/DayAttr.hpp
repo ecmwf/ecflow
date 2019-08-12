@@ -38,10 +38,13 @@ public:
    bool operator<(const DayAttr& rhs) const { return day_ < rhs.day_; }
 	bool structureEquals(const DayAttr& rhs) const;
 
+   void reset();
+   void requeue(bool reset_queue_counter);
+
 	void setFree();   // ensures that isFree() always returns true
 	void clearFree(); // resets the free flag
 	bool isSetFree() const { return free_; }
-	void calendarChanged( const ecf::Calendar& c ) ; // can set attribute free
+	void calendarChanged( const ecf::Calendar& c, bool top_level_repeat ) ; // can set attribute free
 	bool isFree(const ecf::Calendar&) const;
 	bool checkForRequeue( const ecf::Calendar&) const;
 	bool validForHybrid(const ecf::Calendar&) const;
@@ -65,14 +68,15 @@ public:
 
 	boost::gregorian::date next_matching_date(const ecf::Calendar& c) const;
 
+   bool is_free(const ecf::Calendar&) const; // ignores free_
 private:
    void write(std::string&) const;
-   bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
    DayAttr::Day_t day_{DayAttr::SUNDAY};
    bool           free_{false};         // persisted for use by why() on client side
-   unsigned int  state_change_no_{0};  // *not* persisted, only used on server side
+   unsigned int state_change_no_{0};    // *not* persisted, only used on server side
+   unsigned int requeue_counter_{0};    // ensure we run only once per requeue
 
    friend class cereal::access;
    template<class Archive>

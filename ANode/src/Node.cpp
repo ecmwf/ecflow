@@ -257,12 +257,12 @@ void Node::begin()
    // Let time base attributes use, relative duration if applicable
    {
       const Calendar& calendar = suite()->calendar();
-      for(auto & today : todays_)  { today.reset(calendar);}
+      for(auto & today : todays_) { today.reset(calendar);}
       for(auto & time : times_)   {  time.reset(calendar);}
-      for(auto & cron : crons_)     {    cron.reset(calendar);}
+      for(auto & cron : crons_)   {  cron.reset(calendar);}
 
-      for(auto & day : days_)      {  day.clearFree(); }
-      for(auto & date : dates_)     { date.clearFree(); }
+      for(auto & day : days_)     {  day.reset(); }
+      for(auto & date : dates_)   { date.reset(); }
       markHybridTimeDependentsAsComplete();
    }
 
@@ -318,7 +318,7 @@ void Node::requeue(Requeue_args& args)
       }
 
       // must be done before the re-queue
-      do_requeue_time_attrs(reset_next_time_slot,args.reset_relative_duration_);
+      do_requeue_time_attrs(reset_next_time_slot,args.reset_relative_duration_,args.reset_day_date_reueue_count_);
       markHybridTimeDependentsAsComplete();
    }
 
@@ -361,11 +361,11 @@ void Node::reset()
 
    repeat_.reset(); // if repeat is empty reset() does nothing
 
-   for(auto & today : todays_)  { today.resetRelativeDuration(); today.reset_only();}
+   for(auto & today : todays_) { today.resetRelativeDuration(); today.reset_only();}
    for(auto & time : times_)   {  time.resetRelativeDuration(); time.reset_only();}
-   for(auto & cron : crons_)     {    cron.resetRelativeDuration(); cron.reset_only();}
-   for(auto & day : days_)      {  day.clearFree(); }
-   for(auto & date : dates_)     { date.clearFree(); }
+   for(auto & cron : crons_)   {  cron.resetRelativeDuration(); cron.reset_only();}
+   for(auto & day : days_)     {  day.reset(); }
+   for(auto & date : dates_)   { date.reset(); }
 
    flag_.reset();
 
@@ -386,7 +386,7 @@ void Node::requeue_time_attrs()
    // Note: we *dont* mark hybrid time dependencies as complete.
    //       i.e. since this is called during alter command, it could be that
    //        the task is in a submitted or active state.
-   do_requeue_time_attrs(true/*reset_next_time_slot*/, true /*reset_relative_duration*/);
+   do_requeue_time_attrs(true/*reset_next_time_slot*/,true /*reset_relative_duration*/,true /*reset day/date re-queue counters*/);
 }
 
 void Node::requeue_labels()
@@ -396,20 +396,19 @@ void Node::requeue_labels()
 }
 
 void Node::calendarChanged(
-         const ecf::Calendar& c,
-         std::vector<node_ptr>& auto_cancelled_nodes,
-         std::vector<node_ptr>& auto_archive_nodes,
-         const ecf::LateAttr*)
+			const ecf::Calendar& c,
+			Node::Calendar_args& cal_args,
+			const ecf::LateAttr*)
 {
-   calendar_changed_timeattrs(c);
+   calendar_changed_timeattrs(c,cal_args);
 
    if (checkForAutoCancel(c)) {
-      auto_cancelled_nodes.push_back(shared_from_this());
+      cal_args.auto_cancelled_nodes_.push_back(shared_from_this());
    }
 
    // Avoid automatically archiving a restored node. Wait till begin/re-queue
    if (!flag().is_set(ecf::Flag::RESTORED) && check_for_auto_archive(c)) {
-      auto_archive_nodes.push_back(shared_from_this());
+      cal_args.auto_archive_nodes_.push_back(shared_from_this());
    }
 }
 
@@ -528,6 +527,7 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             // That time attribute will have expired, typically we show next day. In the case where we have a parent repeat
             // we need to clear the flag, otherwise the task/family with time based attribute would wait for next day.
             Node::Requeue_args args(false /* don't reset repeats */,
+                                    false /* reset_day_date_reueue_count  */,
                                     clear_suspended_in_child_nodes,
                                     true /* reset_next_time_slot */,
                                     true /* reset relative duration */);
@@ -554,6 +554,7 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
          }
 
          Node::Requeue_args args(false /* don't reset repeats */,
+                                 false /* reset_day_date_reueue_count  */,
                                  clear_suspended_in_child_nodes,
                                  reset_next_time_slot ,
                                  false /*  don't reset relative duration */);

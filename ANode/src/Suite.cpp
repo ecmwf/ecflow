@@ -243,11 +243,7 @@ void Suite::requeue_calendar()
 }
 
 
-void Suite::updateCalendar(
-      const ecf::CalendarUpdateParams & calParams,
-      std::vector<node_ptr>& auto_cancelled_nodes,
-      std::vector<node_ptr>& auto_archive_nodes
-      )
+void Suite::updateCalendar(const ecf::CalendarUpdateParams & calParams, Node::Calendar_args& cal_args )
 {
 	if (begun_) {
 //		cout << "Suite::updateCalendar " << debugNodePath()   << " serverRunning = " << calParams.serverRunning() << " jobSubInterval = " << to_simple_string(calParams.serverPollPeriod());
@@ -261,7 +257,7 @@ void Suite::updateCalendar(
 
 		update_generated_variables();
 
- 		calendarChanged(cal_,auto_cancelled_nodes,auto_archive_nodes,get_late());
+ 		calendarChanged(cal_,cal_args,get_late());
 	}
 }
 

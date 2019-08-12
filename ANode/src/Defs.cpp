@@ -266,37 +266,38 @@ static void auto_archive(const std::vector<node_ptr>& auto_archive_nodes)
 
 void Defs::updateCalendar( const ecf::CalendarUpdateParams & calUpdateParams)
 {
-   std::vector<node_ptr> auto_cancelled_nodes; // Collate any auto cancelled nodes as a result of calendar update
-   std::vector<node_ptr> auto_archive_nodes;   // Collate any auto archive nodes as a result of calendar update
+   // Collate any auto cancelled nodes as a result of calendar update
+   // Collate any auto archive nodes as a result of calendar update
+   Node::Calendar_args cal_args;
 
    // updateCalendarCount_ is only used in *test*
    updateCalendarCount_++;
 
    size_t theSize = suiteVec_.size();
    for(size_t s = 0; s < theSize; s++) {
-      suiteVec_[s]->updateCalendar( calUpdateParams, auto_cancelled_nodes,auto_archive_nodes);
+      suiteVec_[s]->updateCalendar( calUpdateParams, cal_args);
    }
 
    // Permanently remove any auto-cancelled nodes.
-   remove_autocancelled(auto_cancelled_nodes);
+   remove_autocancelled(cal_args.auto_cancelled_nodes_);
 
    // Archive any nodes with auto archive attribute, Must be suite/family
-   auto_archive(auto_archive_nodes);
+   auto_archive(cal_args.auto_archive_nodes_);
 }
 
 void Defs::update_calendar(Suite* suite, const ecf::CalendarUpdateParams& cal_update_params )
 {
-   /// Collate any auto cancelled nodes as a result of calendar update
-   std::vector<node_ptr> auto_cancelled_nodes;
-   std::vector<node_ptr> auto_archive_nodes;   // Collate any auto archive nodes as a result of calendar update
+   // Collate any auto cancelled nodes as a result of calendar update
+   // Collate any auto archive nodes as a result of calendar update
+   Node::Calendar_args cal_args;
 
-   suite->updateCalendar( cal_update_params, auto_cancelled_nodes, auto_archive_nodes);
+   suite->updateCalendar(cal_update_params,cal_args);
 
    // Permanently remove any auto-cancelled nodes.
-   remove_autocancelled(auto_cancelled_nodes);
+   remove_autocancelled(cal_args.auto_cancelled_nodes_);
 
    // Archive any nodes with auto archive attribute, Must be suite/family
-   auto_archive(auto_archive_nodes);
+   auto_archive(cal_args.auto_archive_nodes_);
 }
 
 
@@ -567,6 +568,7 @@ void Defs::requeue()
    if (edit_history_set) flag().set(ecf::Flag::MESSAGE);
 
    Node::Requeue_args args(true /* reset repeats */,
+                           true /* reset_day_date_reueue_count  */,
                            0    /* clear_suspended_in_child_nodes*/,
                            true /* reset_next_time_slot */,
                            true /* reset relative duration */);

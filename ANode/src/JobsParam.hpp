@@ -80,6 +80,9 @@ public:
    void set_ecf_file(const EcfFile& ecf_file) { ecf_file_ = ecf_file;}
    EcfFile& ecf_file() { return ecf_file_;}
 
+   void set_holding_parent_day_or_date(Node* n) { holding_parent_day_or_date_ = n;}
+   Node* holding_parent_day_or_date() const { return holding_parent_day_or_date_;}
+
 private:
    bool timed_out_of_job_generation_{false};
 	bool createJobs_;
@@ -92,6 +95,7 @@ private:
 	NameValueMap user_edit_variables_;          // Used for User edit
 	boost::posix_time::ptime next_poll_time_;   // Aid early exit from job generation, if it takes to long
 	boost::posix_time::ptime time_out_time_;    // When we actually timed out must >= next_poll_time_
+   Node* holding_parent_day_or_date_{nullptr}; // Node with holding day/date, Avoid submission with incompatible hierarchical day/dates
 	EcfFile ecf_file_;                          // keep for lifetime, to optimise memory and cache include file
 };
 #endif

@@ -69,6 +69,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	// The clear_suspended_in_child_nodes *only* incremented for child nodes.
 	// Hence we only clear suspended for child nodes.
    Node::Requeue_args args(true /* reset repeats */,
+                           true /* reset_day_date_reueue_count  */,
                            0    /* clear_suspended_in_child_nodes */,
                            true /* reset_next_time_slot */,
                            true /* reset relative duration */);

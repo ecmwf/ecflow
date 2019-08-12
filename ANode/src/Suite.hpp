@@ -59,7 +59,7 @@ public:
    const Variable& findGenVariable(const std::string& name) const override;
    void gen_variables(std::vector<Variable>&) const override;
 
-   void updateCalendar( const ecf::CalendarUpdateParams &, std::vector<node_ptr>& auto_cancelled_nodes,std::vector<node_ptr>& auto_archive_nodes);
+   void updateCalendar( const ecf::CalendarUpdateParams &,Node::Calendar_args&);
 
    const std::string& debugType() const override;
 

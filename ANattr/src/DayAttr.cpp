@@ -45,18 +45,44 @@ static const char* theDay(DayAttr::Day_t day)
 
 //===============================================================================
 
-void DayAttr::calendarChanged( const ecf::Calendar& c )
+void DayAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat)
 {
-   // See ECFLOW-337
+   if (top_level_repeat) {
+      // Once free we stay free until re-queue, if we have a top level repeat
+      if (free_) {
+         return;
+      }
+   }
+
    if (c.dayChanged()) {
+      requeue_counter_ = 0;
       clearFree();
    }
+
    if (free_) {
       return;
    }
-   else if (isFree(c)) {
+ 
+   // This AFFECTs the code above with top_level_repeat.
+   // If we have been re-queued under a repeat(incremental), then once free stay free
+   if (requeue_counter_ == 0 && isFree(c)) {
       setFree();
    }
+}
+
+void DayAttr::reset()
+{
+   free_ = false;
+   requeue_counter_ = 0;
+   state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void DayAttr::requeue(bool reset_requeue_counter)
+{
+   free_ = false;
+   if (reset_requeue_counter) requeue_counter_ = 0; // Manual re-queue, set to true when repeats are reset.
+   else                       requeue_counter_++;
+   state_change_no_ = Ecf::incr_state_change_no();
 }
 
 bool DayAttr::isFree(const ecf::Calendar& calendar) const
@@ -148,7 +174,8 @@ std::string DayAttr::dump() const
 	std::stringstream ss;
 	ss << toString();
  	if (free_) ss << " (free)";
-	else           ss << " (holding)";
+	else       ss << " (holding)";
+ 	ss << " requeue_counter_:" << requeue_counter_;
   	return ss.str();
 }
 

@@ -172,12 +172,11 @@ void Submittable::requeue(Requeue_args& args)
 
 
 void Submittable::calendarChanged(
-      const ecf::Calendar& c,
-      std::vector<node_ptr>& auto_cancelled_nodes,
-      std::vector<node_ptr>& auto_archive_nodes,
-      const ecf::LateAttr* inherited_late)
+         const ecf::Calendar& c,
+         Node::Calendar_args& cal_args,
+         const ecf::LateAttr* inherited_late)
 {
-   Node::calendarChanged(c,auto_cancelled_nodes,auto_archive_nodes,nullptr);
+   Node::calendarChanged(c, cal_args, nullptr);
 
    // Late flag should ONLY be set on Submittable
    check_for_lateness(c,inherited_late);

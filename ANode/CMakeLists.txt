@@ -56,6 +56,7 @@ test/TestNodeState.cpp
 test/TestOrder.cpp
 test/TestPersistence.cpp
 test/TestPreProcessing.cpp
+test/TestRepeatWithTimeDependencies.cpp
 test/TestReplace.cpp
 test/TestSetState.cpp
 test/TestTaskScriptGenerator.cpp

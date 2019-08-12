@@ -46,10 +46,7 @@ public:
    void order(Node* immediateChild, NOrder::Order) override;
 
 	bool hasAutoCancel() const override;
-   void calendarChanged(const ecf::Calendar&,
-         std::vector<node_ptr>& auto_cancelled_nodes,
-         std::vector<node_ptr>& auto_archive_nodes,
-         const ecf::LateAttr* inherited_late) override;
+   void calendarChanged(const ecf::Calendar&,Node::Calendar_args&,const ecf::LateAttr* inherited_late) override;
  	bool resolveDependencies(JobsParam& ) override;
    bool has_time_based_attributes() const override;
  	bool check(std::string& errorMsg, std::string& warningMsg) const override;

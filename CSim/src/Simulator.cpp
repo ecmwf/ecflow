@@ -212,6 +212,9 @@ void Simulator::run_analyser(Defs& theDefs,std::string& errorMsg ) const
 
 bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 {
+//   const std::vector<suite_ptr>& suiteVec = theDefs.suiteVec();
+//   for(suite_ptr s: suiteVec) cout << s->debugNodePath() << " " << s->calendar().toString() <<  endl;
+
 	// For the simulation we ensure job submission takes less than 10 seconds
 	// Resolve dependencies and submit jobs
 	JobsParam jobsParam(10 /*submitJobsInterval */, false /*create jobs*/); // spawn jobs *will* be set to false

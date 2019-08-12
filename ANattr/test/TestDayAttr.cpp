@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( test_day_attr)
 
       // cout << " day_changed(" << day_changed << ") calendar.day_of_week() = " <<  calendar.day_of_week() << "\n";
 
-      day.calendarChanged( calendar );
+      day.calendarChanged( calendar, false);
 
       if ( calendar.day_of_week() < day.day() ) {
          BOOST_CHECK_MESSAGE(!day.isFree(calendar),day.toString() << " is free should fail at day " << calendar.day_of_week() );
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( test_day_attr)
       }
       else {
          BOOST_CHECK_MESSAGE(calendar.day_of_week() > day.day(),"");
-         BOOST_CHECK_MESSAGE(!day.isFree(calendar),day.toString() << " is free should fail at day " << calendar.day_of_week() );
+         BOOST_CHECK_MESSAGE(!day.isFree(calendar),day.toString() << " is free should pass at day " << calendar.day_of_week() );
          BOOST_CHECK_MESSAGE(!day.checkForRequeue(calendar),day.toString() << " checkForRequeue should fail at " << calendar.day_of_week() );
       }
    }
