@@ -484,7 +484,7 @@ void VNode::collect(std::vector<VNode*>& vec) const
 	}
 }
 
-void VNode::collectAborted(std::vector<VNode*>& vec) const
+void VNode::collectAbortedTasks(std::vector<VNode*>& vec) const
 {
     for(int i=0; i < numOfChildren(); i++)
     {
@@ -492,7 +492,7 @@ void VNode::collectAborted(std::vector<VNode*>& vec) const
         {
             vec.push_back(children_[i]);
         }
-        children_[i]->collect(vec);
+        children_[i]->collectAbortedTasks(vec);
     }
 }
 

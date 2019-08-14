@@ -121,22 +121,7 @@
             "command"        : "ecflow_client --run <full_name>",
             "status_tip"     : "__cmd__"
         },        
-        {
-            "menu"           : "Node",
-            "name"           : "Execute aborted",
-            "visible_for"    : "suite or family",
-            "enabled_for"    : "aborted or suspended",
-            "command"        : "execute_aborted",
-            "status_tip"     : "Execute (using command ecflow_client --run) all the aborted tasks in the given suite or family."
-        },
-        {
-            "menu"           : "Node",
-            "name"           : "Rerun aborted",
-            "visible_for"    : "suite or family",
-            "enabled_for"    : "aborted or suspended",
-            "command"        : "rerun_aborted",
-            "status_tip"     : "rerun (using command ecflow_client --force queued) all the aborted tasks in the given suite or family."
-        },
+
         {
             "menu"           : "Node",
             "name"           : "Requeue",
@@ -499,7 +484,7 @@
         {
             "menu"           : "Special",
             "name"           : "Create JIRA SD ticket",
-            "visible_for"    : "(task or alias) and ECFLOWUI_ECMWF_OPERATOR_MODE)",
+            "visible_for"    : "(task or alias) and ECFLOWUI_ECMWF_OPERATOR_MODE",
             "command"        : "create_jsd_ticket",
             "multi"          : "false",
             "status_tip"     : "__cmd__"
@@ -508,7 +493,7 @@
         {
             "menu"           : "Special",
             "name"           : "-",
-            "visible_for"    : "(task or alias) and ECFLOWUI_ECMWF_OPERATOR_MODE)"
+            "visible_for"    : "(task or alias) and ECFLOWUI_ECMWF_OPERATOR_MODE"
         },
 
         {
@@ -587,14 +572,45 @@
 
         {
             "menu"           : "Special",
+            "name"           : "-",
+            "visible_for"    : "suite or family"
+        },
+
+        {
+            "menu"           : "Special",
             "name"           : "Execute",
             "visible_for"    : "family",
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --run <full_name>",
             "status_tip"     : "__cmd__"
         },
+        {
+            "menu"           : "Special",
+            "name"           : "Execute aborted",
+            "visible_for"    : "suite or family",
+            "enabled_for"    : "aborted or suspended",
+            "command"        : "execute_aborted",
+            "question"       : "There were <task_num> aborted tasks found in <full_name>.<br>Confirm executing <b>all</b> these aborted tasks.",
+            "status_tip"     : "Execute (using command ecflow_client --run) all the aborted tasks in the given suite or family."
+        },
 
-{
+        {
+            "menu"           : "Special",
+            "name"           : "Rerun aborted",
+            "visible_for"    : "suite or family",
+            "enabled_for"    : "aborted or suspended",
+            "command"        : "rerun_aborted",
+            "question"       : "There were <task_num> aborted tasks found in <full_name>.<br>Confirm rerunning <b>all</b> these aborted tasks.",
+            "status_tip"     : "rerun (using command ecflow_client --force queued) all the aborted tasks in the given suite or family."
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "-",
+            "visible_for"    : "suite or family"
+        },
+
+        {
             "menu"           : "Special",
             "name"           : "Free password",
             "visible_for"    : "(task or alias)",
