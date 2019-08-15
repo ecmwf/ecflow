@@ -67,7 +67,7 @@ const char* OrderNodeCmd::desc() {
    return
             "Re-orders the nodes held by the server\n"
             "  arg1 = node path\n"
-            "  arg2 = [ top | bottom | alpha | order | up | down ]\n"
+            "  arg2 = [ top | bottom | alpha | order | up | down | runtime]\n"
             "It should be noted that in the absence of triggers and time/date dependencies,\n"
             "the tasks are submitted in order.\n"
             "This changes the order and hence affects the submission order::\n\n"
@@ -77,6 +77,9 @@ const char* OrderNodeCmd::desc() {
             "   o order   Arranges for all the peers of selected note to be sorted in reverse alphabet(case-insensitive)\n"
             "   o up      Moves the selected node up one place amongst its peers\n"
             "   o down    Moves the selected node down one place amongst its peers\n\n"
+            "   o runtime Orders the task according to state change runtime\n"
+            "             for families by accumulated runtime of its children\n"
+            "             useful to submit the task that take longer earlier\n\n"
             "This command can fail because:\n"
             "- The node path does not exist in the server\n"
             "- The order_type is not does not match one of arg2\n"
@@ -104,12 +107,13 @@ void OrderNodeCmd::create( 	Cmd_ptr& cmd,
 		ss << OrderNodeCmd::arg() << " pathToNode alpha\n";
 		ss << OrderNodeCmd::arg() << " pathToNode order\n";
 		ss << OrderNodeCmd::arg() << " pathToNode up\n";
-		ss << OrderNodeCmd::arg() << " pathToNode down\n";
+      ss << OrderNodeCmd::arg() << " pathToNode down\n";
+      ss << OrderNodeCmd::arg() << " pathToNode runtime\n";
 	 	throw std::runtime_error( ss.str() );
 	}
 
 	if (!NOrder::isValid(args[1])) {
- 	 	throw std::runtime_error( "OrderNodeCmd: Invalid second option: please specify one of [ top, bottom, alpha, order, up, down ]\n");
+ 	 	throw std::runtime_error( "OrderNodeCmd: Invalid second option: please specify one of [ top, bottom, alpha, order, up, down, runtime]\n");
  	}
 
  	cmd = std::make_shared<OrderNodeCmd>( args[0],NOrder::toOrder(args[1]));

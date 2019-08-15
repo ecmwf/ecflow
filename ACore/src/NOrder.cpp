@@ -23,7 +23,8 @@ std::string NOrder::toString(NOrder::Order s) {
  		case NOrder::ALPHA:   return "alpha"; break;
 		case NOrder::ORDER:   return "order"; break;
 		case NOrder::UP:      return "up"; break;
-		case NOrder::DOWN:    return "down"; break;
+      case NOrder::DOWN:    return "down"; break;
+      case NOrder::RUNTIME: return "runtime"; break;
 		default: assert(false); break;
 	}
 	assert(false);
@@ -37,19 +38,21 @@ NOrder::Order NOrder::toOrder(const std::string& str)
 	if (str == "alpha")   return NOrder::ALPHA;
 	if (str == "order")   return NOrder::ORDER;
 	if (str == "up")      return NOrder::UP;
-	if (str == "down")    return NOrder::DOWN;
+   if (str == "down")    return NOrder::DOWN;
+   if (str == "runtime") return NOrder::RUNTIME;
  	assert(false);
 	return NOrder::TOP;
 }
 
 bool NOrder::isValid(const std::string& order)
 {
-	if (order == "top")  return true;
-	if (order == "bottom")   return true;
-	if (order == "alpha")    return true;
-	if (order == "order")   return true;
-	if (order == "up") return true;
-	if (order == "down") return true;
+	if (order == "top")    return true;
+	if (order == "bottom") return true;
+	if (order == "alpha")  return true;
+	if (order == "order")  return true;
+	if (order == "up")     return true;
+   if (order == "down")   return true;
+   if (order == "runtime")return true;
  	return false;
 }
 

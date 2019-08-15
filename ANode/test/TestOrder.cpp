@@ -11,11 +11,21 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/test/unit_test.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
+#include "Jobs.hpp"
+#include "JobsParam.hpp"
+#include "CalendarUpdateParams.hpp"
+#include "PrintStyle.hpp"
+
+using namespace std;
+using namespace ecf;
+using namespace boost::posix_time;
+using namespace boost::gregorian;
 
 using namespace std;
 using namespace ecf;
@@ -333,4 +343,70 @@ BOOST_AUTO_TEST_CASE( test_alias_order )
    BOOST_REQUIRE_MESSAGE( toStrVec(task->aliases()) == expected,"NOrder::ORDER expected " << toString(expected) << " but found " << toString(toStrVec(task->aliases())) );
 }
 
+
+BOOST_AUTO_TEST_CASE( test_order_by_runtime )
+{
+   cout << "ANode:: ...test_order_by_runtime\n" ;
+   Defs defs; {
+      std::vector<string> vec{"3","2","1"};
+      for(const auto& str0: vec) {
+         suite_ptr s = defs.add_suite("s" + str0);
+         for(const auto& str: vec) {
+            family_ptr f1 = s->add_family("f" + str);
+            for(const auto& str2: vec) {
+               f1->add_task("t" + str2);
+            }
+         }
+      }
+   }
+   Defs expectedDefs; {
+      std::vector<string> vec{"1","2","3"};
+      for(const auto& str0: vec) {
+         suite_ptr s = expectedDefs.add_suite("s" + str0);
+         for(const auto& str: vec) {
+            family_ptr f1 = s->add_family("f" + str);
+            for(const auto& str2: vec) {
+               f1->add_task("t" + str2);
+            }
+         }
+      }
+   }
+   // std::cout << defs;
+
+   defs.beginAll();
+   expectedDefs.beginAll();
+
+   CalendarUpdateParams calUpdateParams( hours(1) );
+
+   Jobs jobs(&defs);
+   JobsParam jobsParam;
+   jobs.generate(jobsParam);
+
+   for(Submittable* s:  jobsParam.submitted()) {
+      defs.updateCalendar(calUpdateParams);
+      s->set_state(NState::ACTIVE);
+
+      defs.updateCalendar(calUpdateParams);
+      if (s->name() == "t2" || s->name() == "t1") defs.updateCalendar(calUpdateParams);
+      if (s->name() == "t1") defs.updateCalendar(calUpdateParams);
+      s->set_state(NState::COMPLETE);
+   }
+
+   //PrintStyle style(PrintStyle::MIGRATE);
+   //std::cout << defs;
+
+   defs.order(nullptr, NOrder::RUNTIME); // moot when you only have one suite
+   for(auto suite :  defs.suiteVec()) {
+      suite->order(nullptr, NOrder::RUNTIME);
+      for(auto family: suite->familyVec()) {
+         family->order(nullptr, NOrder::RUNTIME);
+      }
+   }
+   //std::cout << defs;
+
+   defs.requeue();
+   expectedDefs.requeue();
+
+   BOOST_CHECK_MESSAGE(defs == expectedDefs,"Defs are not the same" );
+}
 BOOST_AUTO_TEST_SUITE_END()

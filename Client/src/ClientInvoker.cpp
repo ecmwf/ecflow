@@ -1044,7 +1044,7 @@ int ClientInvoker::order( const std::string& absNodePath, const std::string& ord
    if (testInterface_) return invoke(CtsApi::order(absNodePath, order));
 
    if (!NOrder::isValid(order)) {
-      server_reply_.set_error_msg("ClientInvoker::order: please specify one of [ top, bottom, alpha, order, up, down ]\n");
+      server_reply_.set_error_msg("ClientInvoker::order: please specify one of [ top, bottom, alpha, order, up, down, runtime ]\n");
       if (on_error_throw_exception_) throw std::runtime_error(server_reply_.error_msg());
       return 1;
    }

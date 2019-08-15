@@ -381,7 +381,22 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 		   }
          throw std::runtime_error("NodeContainer::order DOWN, immediate child not found");
 		}
+      case NOrder::RUNTIME: {
+         (void) sum_runtime();
+         std::sort(nodes_.begin(),nodes_.end(),
+                   [](const node_ptr& a,const node_ptr& b){ return a->state_change_runtime() > b->state_change_runtime();});
+         order_state_change_no_ = Ecf::incr_state_change_no();
+         break;
+      }
 	}
+}
+
+boost::posix_time::time_duration NodeContainer::sum_runtime()
+{
+   boost::posix_time::time_duration rt = boost::posix_time::time_duration(0,0,0,0);
+   for(node_ptr node : nodes_) rt += node->sum_runtime();
+   set_runtime(rt);
+   return rt;
 }
 
 void NodeContainer::calendarChanged(

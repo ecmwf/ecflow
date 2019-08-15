@@ -110,6 +110,8 @@ public:
    void restore();
    std::string archive_path() const; //can throw if ECF_HOME not defined
 
+   boost::posix_time::time_duration sum_runtime() override;
+   
 private:
    void restore_on_begin_or_requeue();
 

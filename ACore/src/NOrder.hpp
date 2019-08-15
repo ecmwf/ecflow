@@ -21,7 +21,7 @@
 class NOrder {
 	NOrder() = default;
 public:
-	enum Order { TOP, BOTTOM, ALPHA, ORDER, UP, DOWN };
+	enum Order { TOP, BOTTOM, ALPHA, ORDER, UP, DOWN, RUNTIME /* state change runtime */ };
 
 	static std::string toString(NOrder::Order);
 	static NOrder::Order toOrder(const std::string&);

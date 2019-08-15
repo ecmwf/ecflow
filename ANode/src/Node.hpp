@@ -304,6 +304,10 @@ public:
    /// The returned time is *real time/computer UTC time* and *not* suite real time.
    boost::posix_time::ptime state_change_time() const;
 
+   /// Returns the difference between last two state changes, effectively state change runtime.
+   /// queued    -> submitted : 1hr 30s,  submitted -> active    : 30s, active    -> complete  : 59m  etc
+   const boost::posix_time::time_duration& state_change_runtime() const { return sc_rt_;}
+
    /// Sets the default status the node should have when the begin/re-queue is called
    /// *Distinguish* between adding a def status and changing it.
    /// Changing via d_st_.setState(s);  should alter state_change_no
@@ -640,7 +644,10 @@ public:
    /// check trigger expression have nodes and events,meter,repeat that resolve, will throw for error
    std::unique_ptr<AstTop> parse_and_check_expressions(const std::string& expr, bool trigger, const std::string& context);
 
+   virtual boost::posix_time::time_duration sum_runtime() { return sc_rt_;}
 protected:
+   void set_runtime(const boost::posix_time::time_duration& rt) { sc_rt_ = rt;}
+
    /// Used in conjunction with Node::position()
    /// returns std::numeric_limits<std::size_t>::max() if child not found
    virtual size_t child_position(const Node*) const = 0;
@@ -816,6 +823,7 @@ private:
    Node*        parent_{nullptr}; // *NOT* persisted must be set by the parent class
    std::string  n_;
    bool                        suspended_{false};
+   boost::posix_time::time_duration sc_rt_{boost::posix_time::time_duration(0,0,0,0)}; // state change runtime
    std::pair<NState,boost::posix_time::time_duration> st_{NState(),boost::posix_time::time_duration(0,0,0,0)}; // state and duration since suite start when state changed
    DState                      d_st_;    // default value is QUEUED
 
@@ -850,7 +858,7 @@ private:
    unsigned int variable_change_no_{0};  // *not* persisted, placed here rather than Variable, to save memory
    unsigned int suspended_change_no_{0}; // *not* persisted,
 
-#ifdef DEBUG
+#ifdef DEBUG_JOB_SUBMISSION_INTERVAL
    boost::posix_time::ptime  submit_to_complete_duration_;  // *not* persisted
 #endif
 

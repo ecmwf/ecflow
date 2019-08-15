@@ -1497,6 +1497,14 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
 		   }
          throw std::runtime_error("Defs::order: DOWN, immediate child suite not found");
 		}
+      case NOrder::RUNTIME: {
+         for(suite_ptr suite : suiteVec_) (void) suite->sum_runtime();
+         std::sort(suiteVec_.begin(),suiteVec_.end(),
+                   [](const suite_ptr& a, const suite_ptr& b) { return a->state_change_runtime() > b->state_change_runtime();});
+         order_state_change_no_ = Ecf::incr_state_change_no();
+         client_suite_mgr_.update_suite_order();
+         break;
+      }
 	}
 }
 

@@ -729,6 +729,13 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
          }
          throw std::runtime_error("Task::order DOWN, immediate child not found");
       }
+      case NOrder::RUNTIME: {
+         (void) sum_runtime();
+         std::sort(aliases_.begin(), aliases_.end(),
+                   [](const alias_ptr& a,const alias_ptr& b){ return a->state_change_runtime() > b->state_change_runtime();});
+         order_state_change_no_ = Ecf::incr_state_change_no();
+         break;
+      }
    }
 }
 
