@@ -230,21 +230,19 @@ void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
     if(vnode->node_)
     {
         const Repeat& r=vnode->node_->repeat();
-        if(r.empty() == false)
+        if(r.empty() == false && r.repeatBase())
         {
-            std::string t=r.toString();
-
             VRepeatAttr *a=0;
 
-            if(t.find("date") != std::string::npos)
+            if(r.repeatBase()->isDate())
                 a=new VRepeatDateAttr(vnode);
-            else if(t.find("integer") != std::string::npos)
+            else if(r.repeatBase()->isInteger())
                 a=new VRepeatIntAttr(vnode);
-            else if(t.find("string") != std::string::npos)
+            else if(r.repeatBase()->isString())
                 a=new VRepeatStringAttr(vnode);
-            else if(t.find("enumerated") != std::string::npos)
+            else if(r.repeatBase()->isEnumerated())
                 a=new VRepeatEnumAttr(vnode);
-            else if(t.find("day") != std::string::npos)
+            else if(r.repeatBase()->isDay())
                 a=new VRepeatDayAttr(vnode);
 
             if(a)

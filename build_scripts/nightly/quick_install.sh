@@ -8,7 +8,7 @@ set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
-ECFLOW_VERSION=4.15.0
+ECFLOW_VERSION=4.16.0
 export ECF_PORT=4141
 export PATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
 PYTHON=python
@@ -60,6 +60,7 @@ git checkout master
 # test suites
 # ========================================================================
 cd $WK
+python Pyext/samples/TestBench.py  ANode/parser/test/data/good_defs/limit/basic.def
 python Pyext/samples/TestBench.py  ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
 python Pyext/samples/TestBench.py  ANode/parser/test/data/single_defs/test_time_why.def
 

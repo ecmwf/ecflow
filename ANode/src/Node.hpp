@@ -388,7 +388,7 @@ public:
    virtual void immediateChildren(std::vector<node_ptr>&) const {}
 
    /// retrieve _ALL_ children by hierarchically traversing down the node tree
-   virtual void allChildren(std::set<Node*>&) const {}
+   virtual void allChildren(std::vector<node_ptr>&) const {}
 
    // Add functions: ===============================================================
    void addVerify( const VerifyAttr& );  // for testing and verification Can throw std::runtime_error
@@ -540,6 +540,7 @@ public:
 
    virtual node_ptr findImmediateChild(const std::string& /*name*/, size_t& /*child_pos*/) const { return node_ptr();}
    const Variable& findVariable(const std::string& name) const;
+   std::string find_parent_variable_sub_value(const std::string& name) const;
    const Variable& find_parent_variable(const std::string& name) const;
    virtual const Variable& findGenVariable(const std::string& name) const;
    bool findVariableValue( const std::string& name, std::string& returnedValue) const;
@@ -669,7 +670,7 @@ public:
    bool is_observed(AbstractObserver*) const ; // return true if we have this observer in our list
 
 private:
-   bool why(std::vector<std::string>& theReasonWhy,bool top_down = false,bool html_tags = false) const;
+   bool why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;
    /// Function used as a part of trigger and complete expressions.
    /// The search pattern is event,meter,user-variable,repeat, generated-variable
    int findExprVariableValue( const std::string& name) const;

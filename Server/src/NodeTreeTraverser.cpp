@@ -96,30 +96,23 @@ void NodeTreeTraverser::start()
 
 				if ( seconds_to_minute_boundary != 0) {
 
-#ifdef DEBUG_TRAVERSER
-					std::cout << "  NodeTreeTraverser::start: Do an immediate job generation. Since we don't want to wait for minute boundary, when starting.\n";
-#endif
-
 					// Make sure subsequent polls are *ALIGNED* to minute boundary
 					next_poll_time_ = last_time_ + seconds(seconds_to_minute_boundary);
+#ifdef DEBUG_TRAVERSER
+					std::cout << "  NodeTreeTraverser::start: next_poll_time_(" << to_simple_string(next_poll_time_) << ")\n";
+#endif
 
 					// ************************************************************************************************
 					// ** This relies on next_poll_time_ being set first, to ensure job generation does not take longer
 					// ************************************************************************************************
-					update_suite_calendar_and_traverse_node_tree(last_time_);
-
-					timer_.expires_from_now(  boost::posix_time::seconds( 1 ) );
-
 #ifdef DEBUG_TRAVERSER
-					std::cout << "  NodeTreeTraverser::start: next_poll_time_(" << to_simple_string(next_poll_time_) << ")\n";
+					std::cout << "  NodeTreeTraverser::start: Do an immediate job generation. Since we don't want to wait for minute boundary, when starting.\n";
 #endif
+					update_suite_calendar_and_traverse_node_tree(last_time_);
 				}
 			}
-#ifdef ECFLOW_MT
-			timer_.async_wait( server_->strand_.wrap( boost::bind( &NodeTreeTraverser::traverse, this, boost::asio::placeholders::error ) ) );
-#else
-			timer_.async_wait( server_->io_service_.wrap( boost::bind( &NodeTreeTraverser::traverse, this, boost::asio::placeholders::error ) ) );
-#endif
+
+			start_timer();
 		}
 	}
 }

@@ -231,6 +231,96 @@ BOOST_AUTO_TEST_CASE( test_replace_add_preserves_states )
    BOOST_REQUIRE_MESSAGE(serverDefs.state() == NState::ABORTED,"Aborted should have propagated to Defs");
 }
 
+BOOST_AUTO_TEST_CASE( test_replace_preserves_suspend )
+{
+   cout << "ANode:: ...test_replace_preserves_suspend\n" ;   // ECFLOW-1520
+   defs_ptr clientDef = Defs::create(); {
+       suite_ptr suite = clientDef->add_suite( "suite1" ) ;
+       family_ptr fam = suite->add_family("family" ) ;
+       fam->add_task( "t1" );
+       fam->add_task( "t2" );
+       fam->add_task( "t3" );
+       fam->add_task( "t4" );
+    }
+
+   Defs comparisonDef;  {
+      suite_ptr suite = comparisonDef.add_suite( "suite1" ) ;
+      family_ptr fam = suite->add_family( "family" ) ;
+      task_ptr t1 = fam->add_task( "t1" );
+      task_ptr t2 = fam->add_task( "t2" );
+      task_ptr t3 = fam->add_task( "t3" );
+      task_ptr t4 = fam->add_task( "t4" );
+      BOOST_CHECK_MESSAGE(comparisonDef == *clientDef,"client and comparisonDef should be the same");
+      comparisonDef.beginAll();
+
+      fam->suspend(); t1->suspend(); t2->suspend(); t3->suspend();t4->suspend();
+   }
+
+   defs_ptr serverDefs = Defs::create(); {
+      suite_ptr suite = serverDefs->add_suite( "suite1" ) ;
+      family_ptr fam = suite->add_family( "family" ) ;
+      task_ptr t1 = fam->add_task( "t1" );
+      task_ptr t2 = fam->add_task( "t2" );
+      task_ptr t3 = fam->add_task( "t3" );
+      task_ptr t4 = fam->add_task( "t4" );
+      serverDefs->beginAll();
+      fam->suspend(); t1->suspend(); t2->suspend(); t3->suspend();t4->suspend();
+   }
+
+//   PrintStyle style(PrintStyle::MIGRATE);
+//   cout << serverDefs;
+
+   ExpectStateChange expect_state_change;
+   std::string errorMsg;
+   BOOST_REQUIRE_MESSAGE( serverDefs->replaceChild("/suite1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+   BOOST_REQUIRE_MESSAGE( serverDefs->findSuite("suite1"),"Can't find suite1");
+   BOOST_REQUIRE_MESSAGE( serverDefs->findSuite("suite1")->begun(),"Expected replaced suite to preserve begun status");
+   DebugEquality debug_equality; // only has affect in DEBUG build
+   BOOST_CHECK_MESSAGE(comparisonDef == *serverDefs,"comparisonDef and servers defs should be the same");
+}
+
+BOOST_AUTO_TEST_CASE( test_replace_preserves_suspend2 )
+{
+   cout << "ANode:: ...test_replace_preserves_suspend2\n";  // ECFLOW-1520
+   defs_ptr clientDef = Defs::create(); {
+       suite_ptr suite = clientDef->add_suite( "suite1" ) ;
+       family_ptr f1 = suite->add_family("f1") ;
+       family_ptr fam = f1->add_family("fam") ;
+       fam->add_task( "t1" );
+    }
+
+   Defs comparisonDef;  {
+      suite_ptr suite =  comparisonDef.add_suite( "suite1" ) ;
+      family_ptr f1 = suite->add_family("f1") ;
+      family_ptr fam = f1->add_family("fam") ;
+      task_ptr t1 = fam->add_task( "t1" );
+
+      BOOST_CHECK_MESSAGE(comparisonDef == *clientDef,"client and comparisonDef should be the same");
+      comparisonDef.beginAll();
+
+      f1->suspend(); fam->suspend();
+   }
+
+   defs_ptr serverDefs = Defs::create(); {
+      suite_ptr suite = serverDefs->add_suite( "suite1" ) ;
+      family_ptr f1 = suite->add_family( "f1" ) ;
+      family_ptr fam = f1->add_family("fam") ;
+      serverDefs->beginAll();
+      f1->suspend(); fam->suspend();
+   }
+
+//   PrintStyle style(PrintStyle::MIGRATE);
+//   cout << serverDefs;
+
+   ExpectStateChange expect_state_change;
+   std::string errorMsg;
+   BOOST_REQUIRE_MESSAGE( serverDefs->replaceChild("/suite1/f1/fam/t1",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+   BOOST_REQUIRE_MESSAGE( serverDefs->findSuite("suite1"),"Can't find suite1");
+   BOOST_REQUIRE_MESSAGE( serverDefs->findSuite("suite1")->begun(),"Expected replaced suite to preserve begun status");
+   DebugEquality debug_equality; // only has affect in DEBUG build
+   BOOST_CHECK_MESSAGE(comparisonDef == *serverDefs,"comparisonDef and servers defs should be the same");
+}
+
 BOOST_AUTO_TEST_CASE( test_replace_preserves_sibling_states )
 {
    cout << "ANode:: ...test_replace_preserves_sibling_states\n" ;

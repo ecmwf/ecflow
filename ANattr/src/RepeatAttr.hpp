@@ -99,6 +99,12 @@ public:
 
    virtual bool is_repeat_day() const { return false; }
 
+   virtual bool isDate() const {return false;}
+   virtual bool isInteger() const {return false;}
+   virtual bool isEnumerated() const {return false;}
+   virtual bool isString() const {return false;}
+   virtual bool isDay() const {return false;}
+
 protected:
    void incr_state_change_no();
 
@@ -152,6 +158,7 @@ public:
 
    virtual std::string toString() const;
    virtual std::string dump() const;
+   virtual bool isDate() const {return true;}
 
    /// Simulator functions:
    virtual bool isInfinite() const { return false;}
@@ -210,6 +217,7 @@ public:
    virtual void set_value(long newValue);            // will NOT throw, allows any value
    virtual std::string toString() const;
    virtual std::string dump() const;
+   virtual bool isInteger() const {return true;}
 
    /// Simulator functions:
    virtual bool isInfinite() const { return false;}
@@ -265,6 +273,7 @@ public:
    virtual void set_value(long newValue);            // will NOT throw, allows any value
    virtual std::string toString() const;
    virtual std::string dump() const;
+   virtual bool isEnumerated() const {return true;}
 
    /// Simulator functions:
    virtual bool isInfinite() const { return false;}
@@ -313,6 +322,7 @@ public:
    virtual void set_value(long newValue);            // will NOT throw, allows any value
    virtual std::string toString() const;
    virtual std::string dump() const;
+   virtual bool isString() const {return true;}
 
    /// Simulator functions:
    virtual bool isInfinite() const { return false;}
@@ -380,6 +390,7 @@ public:
    virtual void set_value(long /*newValue*/)            { /* do nothing */ }
    virtual std::string toString() const;
    virtual std::string dump() const;
+   virtual bool isDay() const {return true;}
 
    /// Simulator functions:
    virtual bool isInfinite() const { return true;}

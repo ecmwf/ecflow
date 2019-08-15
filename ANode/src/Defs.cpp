@@ -640,6 +640,11 @@ std::string Defs::write_state() const
    if (server().get_state() != ServerState::default_state()) os << " server_state:" << SState::to_string(server().get_state());
    os << "\n";
 
+   if (!PrintStyle::defsStyle()) {
+      // This only works when the full defs is requested, otherwise zero as defs is fabricated for handles
+      os << "# updateCalendarCount_ " << updateCalendarCount_ << "\n";
+   }
+
    // This read by the DefsParser
    const std::vector<Variable>& server_user_variables = server().user_variables();
    size_t the_size = server_user_variables.size();
@@ -1060,6 +1065,15 @@ node_ptr Defs::replaceChild(const std::string& path,
 		// Copy over begun and suspended states, otherwise preserve state of client node
 		if (serverNode->suite()->begun()) clientNode->begin();
 		if (serverNode->isSuspended())    clientNode->suspend();
+
+		std::vector<node_ptr> all_server_node_children;
+		serverNode->allChildren( all_server_node_children);
+		for(std::vector<node_ptr>::iterator i = all_server_node_children.begin(); i != all_server_node_children.end(); i++){
+		   if ((*i)->isSuspended()) {
+		      node_ptr client_node = clientDefs->findAbsNode( (*i)->absNodePath() );
+		      if (client_node) client_node->suspend();
+		   }
+		}
 
  		// Find the position of the server node relative to its peers
  		// We use this to re-add client node at the same position

@@ -58,7 +58,7 @@ public:
  	void addFamily( family_ptr, size_t position = std::numeric_limits<std::size_t>::max());
 
 	virtual void immediateChildren(std::vector<node_ptr>&) const;
- 	virtual void allChildren(std::set<Node*>&) const;
+ 	virtual void allChildren(std::vector<node_ptr>&) const;
 
  	virtual node_ptr findImmediateChild(const std::string& name,size_t& child_pos) const;
    virtual node_ptr find_node_up_the_tree(const std::string& name) const;

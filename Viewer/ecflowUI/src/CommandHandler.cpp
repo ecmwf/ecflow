@@ -23,6 +23,7 @@
 #include "VConfig.hpp"
 #include "VNode.hpp"
 
+#include <QMessageBox>
 #include <QRegExp>
 #include <QString>
 
@@ -30,6 +31,9 @@
 
 //Send the same command for a list of objects (nodes/servers) specified in a VInfo vector.
 //The command is specified as a string.
+
+std::string CommandHandler::executeCmd_ = "ecflow_client --run <full_name>";
+std::string CommandHandler::rerunCmd_ = "ecflow_client --force queued <full_name>";
 
 void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
 {
@@ -129,6 +133,11 @@ void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
         }
 
         UiLog().dbg() << " final command: " << realCommand;
+
+        // change "alter=" into "alter " so we can treat it consistently in ServerComThread::run()
+        std::string alterToReplace("alter=");
+        std::string alterToReplaceBy("alter ");
+        ecf::Str::replace_all(realCommand, alterToReplace, alterToReplaceBy);
 
         // get the command into the right format by first splitting into tokens
         // and then converting to argc, argv format
@@ -240,29 +249,30 @@ void CommandHandler::openLinkInBrowser(VInfo_ptr info)
     }
 }
 
-void CommandHandler::executeAborted(VInfo_ptr info)
+void CommandHandler::executeAborted(const std::vector<VNode*>& nodes)
 {
-    if(info && info->isNode())
+    std::vector<VInfo_ptr> info_vec;
+    for(size_t i=0; i < nodes.size(); i++)
     {
-        VNode* n = info->node();
-        assert(n);
-
-        if(n->isSuite() || n->isFamily())
-        {
-            std::vector<VNode*> nodes;
-            n->collectAborted(nodes);
-            if (!nodes.empty())
-            {
-                std::vector<VInfo_ptr> info_vec;
-                for(size_t i=0; i < nodes.size(); i++)
-                {
-                    info_vec.push_back(VInfoNode::create(nodes[i]));
-                }
-
-                CommandHandler::run(info_vec,"ecflow_client --run <full_name>");
-            }
-        }
+        info_vec.push_back(VInfoNode::create(nodes[i]));
+        assert(nodes[i]);
+        assert(nodes[i]->isTask());
     }
+
+    CommandHandler::run(info_vec, executeCmd_);
+}
+
+void CommandHandler::rerunAborted(const std::vector<VNode*>& nodes)
+{
+    std::vector<VInfo_ptr> info_vec;
+    for(size_t i=0; i < nodes.size(); i++)
+    {
+        info_vec.push_back(VInfoNode::create(nodes[i]));
+        assert(nodes[i]);
+        assert(nodes[i]->isTask());
+    }
+
+    CommandHandler::run(info_vec, rerunCmd_);
 }
 
 std::string CommandHandler::commandToString(const std::vector<std::string>& cmd)

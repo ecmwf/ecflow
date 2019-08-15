@@ -21,6 +21,7 @@
 class QWidget;
 class Node;
 class ServerHandler;
+class MenuItem;
 
 class ActionHandler : public QObject
 {
@@ -37,6 +38,9 @@ Q_SIGNALS:
 	    void dashboardCommand(VInfo_ptr,QString);
 
 protected:      
+        bool confirmCommand(MenuItem* item,std::vector<VInfo_ptr>& filteredNodes,
+                            const std::string& commandDescStr = std::string(),
+                            std::size_t task_num=0);
         QObject *actionSender_;
         QWidget *menuParent_;
 };
