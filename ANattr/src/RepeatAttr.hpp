@@ -220,7 +220,7 @@ public:
    void set_value(long newValue) override;            // will NOT throw, allows any value
    void write(std::string&) const override;
    std::string dump() const override;
-   bool isDateList() constoverride { return true;}
+   bool isDateList() const override { return true;}
 
    /// Simulator functions:
    bool isInfinite() const override { return false;}
