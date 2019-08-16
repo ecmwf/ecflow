@@ -17,7 +17,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "ssl_connection.hpp"
 #include "TcpBaseServer.hpp"
-#include "Openssl.hpp"
 class SslServer;
 
 class SslTcpServer : public TcpBaseServer {
