@@ -207,7 +207,19 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             {
                 if(filteredNodes[0] && filteredNodes[0]->node())
                 {
-                    CommandHandler::executeAborted(filteredNodes[0]);
+                    VNode* n = filteredNodes[0]->node();
+                    assert(n);
+                    if(n->isSuite() || n->isFamily())
+                    {
+                        std::vector<VNode*> nodes;
+                        n->collectAbortedTasks(nodes);
+                        if (confirmCommand(item, filteredNodes,
+                                           CommandHandler::executeCmd(),
+                                           nodes.size()))
+                        {
+                            CommandHandler::executeAborted(nodes);
+                        }
+                    }
                 }
             }
         }
@@ -218,7 +230,19 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             {
                 if(filteredNodes[0] && filteredNodes[0]->node())
                 {
-                    CommandHandler::rerunAborted(filteredNodes[0]);
+                    VNode* n = filteredNodes[0]->node();
+                    assert(n);
+                    if(n->isSuite() || n->isFamily())
+                    {
+                        std::vector<VNode*> nodes;
+                        n->collectAbortedTasks(nodes);
+                        if (confirmCommand(item, filteredNodes,
+                                           CommandHandler::rerunCmd(),
+                                           nodes.size()))
+                        {
+                            CommandHandler::rerunAborted(nodes);
+                        }
+                    }
                 }
             }
         }
@@ -270,131 +294,120 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
                 }
             }
 
-            bool ok=true;
+            //bool ok=true;
             if (item->isCustom())
                 MenuHandler::interceptCommandsThatNeedConfirmation(item);
 
-            bool needQuestion=item && !item->question().empty() && item->shouldAskQuestion(filteredNodes);
-
-            //We can control if a confrmation is needed for a command from the config dialogue
-            if(needQuestion && !item->questionControl().empty())
-                if(VProperty* prop=VConfig::instance()->find(item->questionControl()))
-                    needQuestion=prop->value().toBool();
-
-            if(needQuestion)
-        	{
-                std::string fullNames("<ul>");
-                std::string nodeNames("<ul>");
-                if (filteredNodes.size() == 1)
-                {
-                    fullNames = filteredNodes[0]->path();
-                    nodeNames = "<b>" + filteredNodes[0]->name() + "</b>";
-                }
-                else
-                {                    
-                    int numNodes = filteredNodes.size();
-                    int numItemsToList = std::min(numNodes, 5);
-
-                    for(int i=0; i < numItemsToList; i++)
-                    {
-                        fullNames += "<li><b>";
-                        fullNames += filteredNodes[i]->path();
-                        fullNames += "</b></li>";
-
-                        nodeNames += "<li><b>";
-                        nodeNames += filteredNodes[i]->name();
-                        nodeNames += "</b></li>";                    
-                    }
-                    if(numItemsToList < static_cast<int>(filteredNodes.size()))
-                    {                  
-                        std::string numExtra = QString::number(numNodes-numItemsToList).toStdString();
-
-                        fullNames += "<b>...and " + numExtra + " more </b></li>";
-                        nodeNames += "<b>...and " + numExtra + " more </b></li>";
-                    }
-                    fullNames += "</ul>";
-                    nodeNames += "</ul>";
-                }
-
-                std::string question(item->question());
-
-                std::string placeholder("<full_name>");
-                ecf::Str::replace_all(question, placeholder, fullNames);
-                placeholder = "<node_name>";
-                ecf::Str::replace_all(question, placeholder, nodeNames);
-
-                QString msg=QString::fromStdString(question);
-
-                QString warning=QString::fromStdString(item->warning());
-                if(!warning.isEmpty())
-                {
-                    if(!msg.contains("<ul>"))
-                        msg+="<br><br>";
-
-                    msg+="<i>warning: " + Viewer::formatText(warning,QColor(196,103,36)) + "</i><br>";
-                }
-
-                if(!item->command().empty())
-                {
-                    QString cmdStr=QString::fromStdString(item->command());
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-                    cmdStr=cmdStr.toHtmlEscaped();
-#else
-                    cmdStr=Qt::escape(cmdStr);
-#endif
-                    if(!warning.isEmpty())
-                        msg+="<br>";
-                    else if(!msg.contains("<ul>"))
-                        msg+="<br><br>";
-
-                    msg+="<i>command: "  + Viewer::formatText(cmdStr,QColor(41,78,126)) + "</i>";
-                    msg+="<br>";
-                }
-
-                QMessageBox msgBox;               
-                msgBox.setText(msg);
-                msgBox.setTextFormat(Qt::RichText);
-                msgBox.setIcon(QMessageBox::Question);
-                msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-                if (msgBox.exec() == QMessageBox::Cancel)
-                {
-                    ok=false;
-                }
-            }
+            bool ok = confirmCommand(item, filteredNodes);
 
             if(ok)
                 CommandHandler::run(filteredNodes,item->command());
 
             if (customCommandDialog)
-                   delete customCommandDialog;
+                delete customCommandDialog;
         }
     }
+}
 
-/*
-	QMenu *menu=new QMenu(parent_);
+bool ActionHandler::confirmCommand(MenuItem* item,std::vector<VInfo_ptr>& filteredNodes,
+                                   const std::string& commandDescStr, std::size_t taskNum)
+{
+    bool needQuestion=item && !item->question().empty() &&
+            item->shouldAskQuestion(filteredNodes);
 
-	QList<QAction*> acLst;
+    //We can control if a confrmation is needed for a command from the config dialogue
+    if(needQuestion && !item->questionControl().empty())
+    if(VProperty* prop=VConfig::instance()->find(item->questionControl()))
+        needQuestion=prop->value().toBool();
 
-	QAction *ac=new QAction("Requeue",parent_);
-	acLst << ac;
+    if(needQuestion)
+    {
+        std::string fullNames("<ul>");
+        std::string nodeNames("<ul>");
+        if (filteredNodes.size() == 1)
+        {
+            fullNames = filteredNodes[0]->path();
+            nodeNames = "<b>" + filteredNodes[0]->name() + "</b>";
+        }
+        else
+        {
+            int numNodes = filteredNodes.size();
+            int numItemsToList = std::min(numNodes, 5);
 
-	ac=new QAction("Submit",parent_);
-	acLst << ac;
+            for(int i=0; i < numItemsToList; i++)
+            {
+                fullNames += "<li><b>";
+                fullNames += filteredNodes[i]->path();
+                fullNames += "</b></li>";
 
-	ac=new QAction("Set as root",parent_);
-		acLst << ac;
+                nodeNames += "<li><b>";
+                nodeNames += filteredNodes[i]->name();
+                nodeNames += "</b></li>";
+            }
+            if(numItemsToList < static_cast<int>(filteredNodes.size()))
+            {
+                std::string numExtra = QString::number(numNodes-numItemsToList).toStdString();
+                fullNames += "<b>...and " + numExtra + " more </b></li>";
+                nodeNames += "<b>...and " + numExtra + " more </b></li>";
+            }
+            fullNames += "</ul>";
+            nodeNames += "</ul>";
+        }
 
-	if(QAction* res=QMenu::exec(acLst,pos,0,parent_))
-	{
+        std::string question(item->question());
 
-		if(res->iconText() == "Set as root")
-		{
-			emit viewCommand(filteredNodes,"set_as_root");
-		}
-		else
-			ServerHandler::command(filteredNodes,res->iconText().toStdString());
-	}
+        std::string placeholder("<full_name>");
+        ecf::Str::replace_all(question, placeholder, fullNames);
+        placeholder = "<node_name>";
+        ecf::Str::replace_all(question, placeholder, nodeNames);
+        if (taskNum > 0) {
+            placeholder = "<task_num>";
+            ecf::Str::replace_all(question, placeholder,
+                              "<b>" + QString::number(taskNum).toStdString() + "</b>");
+        }
 
-	delete menu;
-*/
+        QString msg=QString::fromStdString(question);
+
+        QString warning=QString::fromStdString(item->warning());
+        if(!warning.isEmpty())
+        {
+            if(!msg.contains("<ul>"))
+                msg+="<br><br>";
+
+            msg+="<i>warning: " + Viewer::formatText(warning,QColor(196,103,36)) + "</i><br>";
+        }
+
+
+        QString cmdStr;
+        if (!commandDescStr.empty())
+            cmdStr=QString::fromStdString(commandDescStr);
+        else if(!item->command().empty())
+            cmdStr=QString::fromStdString(item->command());
+
+        if(!cmdStr.isEmpty())
+        {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+            cmdStr=cmdStr.toHtmlEscaped();
+#else
+            cmdStr=Qt::escape(cmdStr);
+#endif
+            if(!warning.isEmpty())
+                msg+="<br>";
+            else if(!msg.contains("<ul>"))
+                msg+="<br><br>";
+
+            msg+="<i>command: "  + Viewer::formatText(cmdStr,QColor(41,78,126)) + "</i>";
+            msg+="<br>";
+        }
+
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("Confirm command"));
+        msgBox.setText(msg);
+        msgBox.setTextFormat(Qt::RichText);
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+        return (msgBox.exec() == QMessageBox::Ok);
+    }
+
+    return true;
 }

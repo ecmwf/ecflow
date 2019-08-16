@@ -95,6 +95,13 @@ public:
 
    virtual bool is_repeat_day() const { return false; }
 
+   virtual bool isDate() const {return false;}
+   virtual bool isDateList() const {return false;}
+   virtual bool isInteger() const {return false;}
+   virtual bool isEnumerated() const {return false;}
+   virtual bool isString() const {return false;}
+   virtual bool isDay() const {return false;}
+
 protected:
    void incr_state_change_no();
 
@@ -149,6 +156,7 @@ public:
    void write(std::string&) const override;
 
    std::string dump() const override;
+   bool isDate() const override {return true;}
 
    /// Simulator functions:
    bool isInfinite() const override { return false;}
@@ -212,6 +220,7 @@ public:
    void set_value(long newValue) override;            // will NOT throw, allows any value
    void write(std::string&) const override;
    std::string dump() const override;
+   bool isDateList() constoverride { return true;}
 
    /// Simulator functions:
    bool isInfinite() const override { return false;}
@@ -264,7 +273,8 @@ public:
    void set_value(long newValue) override;            // will NOT throw, allows any value
    void write(std::string&) const override;
    std::string dump() const override;
-
+   bool isInteger() const override {return true;}
+   
    /// Simulator functions:
    bool isInfinite() const override { return false;}
 
@@ -318,6 +328,7 @@ public:
    void set_value(long newValue) override;            // will NOT throw, allows any value
    void write(std::string&) const override;
    std::string dump() const override;
+   bool isEnumerated() const override {return true;}
 
    /// Simulator functions:
    bool isInfinite() const override { return false;}
@@ -367,7 +378,8 @@ public:
    void set_value(long newValue) override;            // will NOT throw, allows any value
    void write(std::string&) const override;
    std::string dump() const override;
-
+   bool isString() const override {return true;}
+   
    /// Simulator functions:
    bool isInfinite() const override { return false;}
 
@@ -433,6 +445,8 @@ public:
    void set_value(long /*newValue*/) override            { /* do nothing */ }
    void write(std::string&) const override;
    std::string dump() const override;
+   bool isDay() const override {return true;}
+
 
    /// Simulator functions:
    bool isInfinite() const override { return true;}
