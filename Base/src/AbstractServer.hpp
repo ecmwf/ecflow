@@ -33,7 +33,9 @@ class AbstractServer {
 public:
 	virtual ~AbstractServer() = default;
 
-   /// return true if this is a ssl enabled server
+	/// Returns an NON empty string if server is ssl enabled.
+   /// 0/ "1 : enabled : uses shared ssl certificates";
+   /// 0/ "  : enabled : uses server/port specific ssl certificates";
 	virtual const std::string& ssl() const { return ecf::Str::EMPTY();}
 
 	/// returns the current state of the server
