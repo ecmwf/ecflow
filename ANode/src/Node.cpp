@@ -1491,7 +1491,8 @@ void Node::write_state(std::string& ret, bool& added_comment_char) const
       add_comment_char(ret,added_comment_char);
       ret += " suspended:1";
    }
-   if (!sc_rt_.is_special()) {
+   if (!sc_rt_.is_special() && (sc_rt_.hours() != 0 || sc_rt_.minutes() != 0 || sc_rt_.seconds() != 0)) {
+      add_comment_char(ret,added_comment_char);
       ret += " rt:";
       ret += to_simple_string(sc_rt_);
    }
@@ -1519,6 +1520,10 @@ void Node::read_state(const std::string& line,const std::vector<std::string>& li
       else if (line_token_i.find("dur:") != std::string::npos ) {
          if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state invalid duration for node: " + name());
          st_.second = duration_from_string(token);
+      }
+      else if (line_token_i.find("rt:") != std::string::npos ) {
+         if (!Extract::split_get_second(line_token_i,token)) throw std::runtime_error( "Node::read_state invalid runtime duration for node: " + name());
+         sc_rt_ = duration_from_string(token);
       }
       else if (line_token_i == "suspended:1") suspend();
    }
