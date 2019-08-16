@@ -823,13 +823,13 @@ private:
    Node*        parent_{nullptr}; // *NOT* persisted must be set by the parent class
    std::string  n_;
    bool                        suspended_{false};
-   boost::posix_time::time_duration sc_rt_{boost::posix_time::time_duration(0,0,0,0)}; // state change runtime
+   boost::posix_time::time_duration sc_rt_{boost::posix_time::time_duration(0,0,0,0)}; // state change runtime, Used to order peers, no persistence in cereal only defs.
    std::pair<NState,boost::posix_time::time_duration> st_{NState(),boost::posix_time::time_duration(0,0,0,0)}; // state and duration since suite start when state changed
    DState                      d_st_;    // default value is QUEUED
 
    std::vector<Variable>       vars_;
    mutable std::unique_ptr<Expression> c_expr_; // can only have one complete expression
-   mutable std::unique_ptr<Expression> t_expr_;  // can only have one trigger expression
+   mutable std::unique_ptr<Expression> t_expr_; // can only have one trigger expression
 
    std::vector<Meter>          meters_;
    std::vector<Event>          events_;
@@ -841,12 +841,12 @@ private:
    std::vector<DateAttr>       dates_;
    std::vector<DayAttr>        days_;
 
-   std::unique_ptr<ecf::LateAttr> late_;     // Can only have one late attribute per node
+   std::unique_ptr<ecf::LateAttr> late_;         // Can only have one late attribute per node
    std::unique_ptr<MiscAttrs>     misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies
    Repeat                         repeat_;       // each node can only have one repeat. By value, since has pimpl
 
-   std::vector<limit_ptr>      limits_;    // Ptrs since many in-limits can point to a single limit
-   InLimitMgr                  inLimitMgr_{this};  // manages the inlimit
+   std::vector<limit_ptr>      limits_;          // Ptrs since many in-limits can point to a single limit
+   InLimitMgr                  inLimitMgr_{this};// manages the inlimit
 
    ecf::Flag                   flag_;
 
