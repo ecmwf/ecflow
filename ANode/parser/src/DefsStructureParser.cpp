@@ -273,7 +273,7 @@ bool DefsStructureParser::semiColonInEditVariable()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-DefsString::DefsString(const std::string& defs_as_string): empty_(defs_as_string.empty()),line_pos_(0)
+DefsString::DefsString(const std::string& defs_as_string): empty_(defs_as_string.empty())
 {
    if (!empty_) {
       lines_.reserve(256);

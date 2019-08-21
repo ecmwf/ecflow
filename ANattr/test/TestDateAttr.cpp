@@ -21,8 +21,11 @@
 
 #include "DateAttr.hpp"
 #include "Cal.hpp"
+#include "Str.hpp"
+#include "PrintStyle.hpp"
 
 using namespace std;
+using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
@@ -58,6 +61,47 @@ BOOST_AUTO_TEST_CASE( test_date )
             BOOST_CHECK_MESSAGE(date1.name() == date2.name(),"name failed");
          }
       }
+   }
+}
+
+static DateAttr print_and_parse_attr(DateAttr & date){
+
+   PrintStyle style(PrintStyle::MIGRATE);
+   std::string output;
+   date.print(output);
+   output.erase( output.begin() +  output.size()-1); // remove trailing newline
+
+   std::vector<std::string> tokens;
+   Str::split_orig(output,tokens);
+
+   return DateAttr::create(tokens,true/*read state*/);
+}
+
+
+BOOST_AUTO_TEST_CASE( test_date_parsing ) {
+
+   cout << "ANattr:: ...test_date_parsing\n";
+   {
+      DateAttr date("12.12.2019");
+      date.setFree();
+      date.set_requeue_counter(3);
+      DateAttr parsed_date  = print_and_parse_attr(date);
+
+      BOOST_CHECK_MESSAGE(date == parsed_date,"Parse failed expected " << date.dump() << " but found " << parsed_date.dump());
+   }
+   {
+      DateAttr date("12.12.2019");
+      date.setFree();
+      DateAttr parsed_date  = print_and_parse_attr(date);
+
+      BOOST_CHECK_MESSAGE(date == parsed_date,"Parse failed expected " << date.dump() << " but found " << parsed_date.dump());
+   }
+   {
+      DateAttr date("12.12.2019");
+      date.set_requeue_counter(3);
+      DateAttr parsed_date  = print_and_parse_attr(date);
+
+      BOOST_CHECK_MESSAGE(date == parsed_date,"Parse failed expected " << date.dump() << " but found " << parsed_date.dump());
    }
 }
 

@@ -69,7 +69,6 @@ Node::Node() {}
 Node::Node(const Node& rhs)
 : parent_(nullptr),
   n_(rhs.n_),
-  suspended_(rhs.suspended_),
   st_( rhs.st_),
   d_st_(rhs.d_st_),
   vars_(rhs.vars_),
@@ -91,8 +90,7 @@ Node::Node(const Node& rhs)
   auto_cancel_((rhs.auto_cancel_)    ? new AutoCancelAttr(*rhs.auto_cancel_) : nullptr),
   auto_archive_((rhs.auto_archive_ ) ? new AutoArchiveAttr(*rhs.auto_archive_) : nullptr),
   auto_restore_((rhs.auto_restore_ ) ? new AutoRestoreAttr(*rhs.auto_restore_) : nullptr),
-  state_change_no_(0),variable_change_no_(0),suspended_change_no_(0),
-  graphic_ptr_(nullptr)
+  suspended_(rhs.suspended_)
 {
    inLimitMgr_.set_node(this);
    if ( misc_attrs_ ) misc_attrs_->set_node(this);

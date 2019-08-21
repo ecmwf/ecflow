@@ -191,20 +191,21 @@ private:
 
  	boost::posix_time::ptime         initTime_;   // When calendar was started, suite time(could be in the past OR real time)
  	boost::posix_time::ptime         suiteTime_;  // The suite time for hybrid DATE does not change.
+  	boost::posix_time::ptime         initLocalTime_;        // Real Time: When calendar was started, used to work out duration_
+ 	boost::posix_time::ptime         lastTime_;             // Real Time: Used to calculate calendarIncrement
 	boost::posix_time::time_duration duration_;   // duration since last call to init/begin, used on Node for late and autocancel
-  	boost::posix_time::ptime         initLocalTime_;   // Real Time: When calendar was started, used to work out duration_
- 	boost::posix_time::ptime         lastTime_;        // Real Time: Used to calculate calendarIncrement
-	boost::posix_time::time_duration increment_;
-	Clock_t                          ctype_{Calendar::REAL};      // *NOT* persisted: can be derived from suite clock attribute
- 	bool                             dayChanged_{false};
+	boost::posix_time::time_duration increment_{0,1,0,0};
 
 private:
    void update_cache() const;
-	mutable int day_of_week_{-1};  // Cache
-	mutable int day_of_year_{-1};  // Cache
-	mutable int day_of_month_{-1}; // Cache
-	mutable int month_{-1};        // Cache
-	mutable int year_{-1};         // Cache
+   mutable int day_of_week_{-1};  // Cache
+   mutable int day_of_year_{-1};  // Cache
+   mutable int day_of_month_{-1}; // Cache
+   mutable int month_{-1};        // Cache
+   mutable int year_{-1};         // Cache
+
+   Clock_t                          ctype_{Calendar::REAL};// *NOT* persisted: can be derived from suite clock attribute
+   bool                             dayChanged_{false};
 
 private:
 	// Note: The *only* reason to serialise the calendar is so that we can support

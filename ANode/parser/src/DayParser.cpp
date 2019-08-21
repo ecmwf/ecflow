@@ -31,16 +31,8 @@ bool DayParser::doParse( const std::string& line, std::vector<std::string >& lin
 		throw std::runtime_error("DayParser::doParse: Could not add day as node stack is empty at line: " + line );
 	}
 
-	DayAttr day = DayAttr::create( lineTokens[1] );
-
-   // state
-   if (lineTokens.size() == 4 && rootParser()->get_file_type() != PrintStyle::DEFS) {
-      if (lineTokens[3] == "free") {
-         day.setFree();
-      }
-   }
-
- 	nodeStack_top()->addDay( day );
+   // parse day and state
+ 	nodeStack_top()->addDay( DayAttr::create(lineTokens, rootParser()->get_file_type() != PrintStyle::DEFS));
 
 	return true;
 }

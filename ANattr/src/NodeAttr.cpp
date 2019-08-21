@@ -40,7 +40,7 @@ const Label& Label::EMPTY() { static const Label LABEL = Label(); return LABEL ;
 ////////////////////////////////////////////////////////////////////////////////////////////
 
 Event::Event( int number, const std::string& eventName,bool iv, bool check_name )
-: v_( iv ), iv_(iv), number_( number ), n_( eventName ),  state_change_no_( 0 )
+:  n_( eventName ), number_( number ), v_( iv ), iv_(iv)
 {
    if ( !eventName.empty() && check_name) {
       string msg;
@@ -51,7 +51,7 @@ Event::Event( int number, const std::string& eventName,bool iv, bool check_name 
 }
 
 Event::Event( const std::string& eventName, bool iv )
-: v_(iv), iv_(iv), number_( std::numeric_limits<int>::max() ), n_( eventName ),  state_change_no_( 0 )
+: n_( eventName ), v_(iv), iv_(iv)
 {
    if ( eventName.empty() ) {
       throw std::runtime_error( "Event::Event: Invalid event name : name must be specified if no number supplied");
@@ -198,7 +198,7 @@ bool Event::isValidState( const std::string& state ) {
 
 Meter::Meter( const std::string& name, int min, int max, int colorChange, int value, bool check ) :
 	         min_( min ), max_( max ), v_( value ), cc_( colorChange ),
-	         n_( name ),  state_change_no_( 0 )
+	         n_( name )
 {
    if (check) {
       if ( !Str::valid_name( name ) ) {
@@ -447,8 +447,8 @@ void Label::serialize(Archive & ar)
 template<class Archive>
 void Event::serialize(Archive & ar)
 {
-   CEREAL_OPTIONAL_NVP(ar,number_,[this](){return number_ != std::numeric_limits<int>::max();});
    CEREAL_OPTIONAL_NVP(ar,n_,     [this](){return !n_.empty();});
+   CEREAL_OPTIONAL_NVP(ar,number_,[this](){return number_ != std::numeric_limits<int>::max();});
    CEREAL_OPTIONAL_NVP(ar,v_,     [this](){return v_;});
    CEREAL_OPTIONAL_NVP(ar,iv_,    [this](){return iv_;});
 }

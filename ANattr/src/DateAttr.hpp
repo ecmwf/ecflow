@@ -17,6 +17,8 @@
 //============================================================================
 
 #include <iosfwd>
+#include <string>
+#include <vector>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <cereal/access.hpp>
 
@@ -30,8 +32,7 @@ public:
    explicit DateAttr(const std::string&);           // will throw std::runtime_error for if invalid date
    DateAttr() = default; // for serialisation
    explicit DateAttr(const boost::gregorian::date& date)
-   : day_(date.day()), month_(date.month()), year_(date.year()), 
-     state_change_no_(0) {} // for test
+   : day_(date.day()), month_(date.month()), year_(date.year()) {} // for test
 
    void print(std::string&) const;
    bool operator==(const DateAttr& rhs) const;
@@ -68,6 +69,7 @@ public:
    ///    *.1.*
    static void getDate(const std::string& date,int& day,int& month,int& year);
    static DateAttr create(const std::string& dateString);
+   static DateAttr create( const std::vector<std::string>& lineTokens, bool read_state);
 
    boost::gregorian::date next_matching_date(const ecf::Calendar&) const;
 
@@ -77,6 +79,7 @@ public:
    int year() const { return year_; }
 
    bool is_free(const ecf::Calendar&) const; // ignores free_
+   void set_requeue_counter(int rc) { requeue_counter_ = rc;}
 private:
    void write(std::string&) const;
 
@@ -84,9 +87,9 @@ private:
    int          day_{0};
    int          month_{0};
    int          year_{0};
-   bool         free_{false}; // persisted for use by why() on client side
    unsigned int state_change_no_{0};  // *not* persisted, only used on server side
    unsigned int requeue_counter_{0};  // ensure we run only once per requeue
+   bool         free_{false};         // persisted for use by why() on client side
 
    friend class cereal::access;
    template<class Archive>

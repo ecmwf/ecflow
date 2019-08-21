@@ -89,13 +89,11 @@ std::unique_ptr<AstTop> PartExpression::parseExpressions(std::string& errorMsg) 
 //===========================================================================
 
 Expression::Expression(const std::string& expression)
-:   state_change_no_(0)
 {
    add(PartExpression(expression));
 }
 
 Expression::Expression(const PartExpression& exp)
-:  state_change_no_(0)
 {
    add(exp);
 }
@@ -103,7 +101,7 @@ Expression::Expression(const PartExpression& exp)
 Expression::Expression() = default;
 
 Expression::Expression(const Expression& rhs)
-: vec_(rhs.vec_), free_(rhs.free_), state_change_no_(0)  {}
+: vec_(rhs.vec_), free_(rhs.free_) {}
 
 
 std::unique_ptr<AstTop> Expression::parse(const std::string& expression_to_parse,const std::string& error_msg_context)

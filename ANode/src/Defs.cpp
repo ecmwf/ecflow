@@ -55,11 +55,6 @@ Defs::Defs() {}
 Defs::Defs(const std::string& port) : server_(port) {}
 
 Defs::Defs(const Defs& rhs) :
-   print_cache_(0),
-   state_change_no_(0),
-   modify_change_no_( 0 ),
-   updateCalendarCount_(0),
-   order_state_change_no_(0),
    state_(rhs.state_),
    server_(rhs.server_),
    flag_(rhs.flag_),

@@ -96,28 +96,25 @@ class TodayAttr  {
 public:
    explicit TodayAttr(const std::string&);
 	TodayAttr() = default;
-	TodayAttr(int hour, int minute, bool relative = false )
-		: ts_(hour, minute,relative), state_change_no_(0) {}
- 	TodayAttr(const TimeSlot& t,    bool relative = false )
-		: ts_(t,relative), state_change_no_(0) {}
- 	explicit TodayAttr(const TimeSeries& ts)
-		: ts_(ts), state_change_no_(0) {}
+	TodayAttr(int hour, int minute, bool relative = false ) : ts_(hour, minute,relative) {}
+ 	TodayAttr(const TimeSlot& t,    bool relative = false ) : ts_(t,relative) {}
+ 	explicit TodayAttr(const TimeSeries& ts) : ts_(ts)  {}
 	TodayAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative =  false)
-		: ts_(start,finish,incr,relative), state_change_no_(0) {}
+		: ts_(start,finish,incr,relative) {}
 
 	void print(std::string&) const;
 	bool operator==(const TodayAttr& rhs) const;
    bool operator<(const TodayAttr& rhs) const { return ts_ < rhs.ts_; }
 	bool structureEquals(const TodayAttr& rhs) const;
 
-   /// This can set attribute as free, once free its stays free, until re-queue/reset
+	/// This can set attribute as free, once free its stays free, until re-queue/reset
 	void calendarChanged( const ecf::Calendar& c );
 	void resetRelativeDuration();
 
-    void reset_only() { clearFree(); ts_.reset_only();}
+	void reset_only() { clearFree(); ts_.reset_only();}
 	void reset(const ecf::Calendar& c) { clearFree(); ts_.reset(c);}       // updates state_change_no_
 	void requeue(const ecf::Calendar& c,bool reset_next_time_slot = true)
-	   { clearFree(); ts_.requeue(c,reset_next_time_slot);} // updates state_change_no_
+	{ clearFree(); ts_.requeue(c,reset_next_time_slot);} // updates state_change_no_
 
 	void miss_next_time_slot(); // updates state_change_no_
 	void setFree();               // ensures that isFree() always returns true, updates state_change_no_
@@ -165,9 +162,9 @@ private:
 	bool is_free(const ecf::Calendar&) const; // ignores free_
 
 private:
-	TimeSeries    ts_;
-	bool          free_{false};         // persisted for use by why() on client side && for state changes
+	TimeSeries   ts_;
 	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
+	bool         free_{false};         // persisted for use by why() on client side && for state changes
 
    friend class cereal::access;
    template<class Archive>

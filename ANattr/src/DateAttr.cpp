@@ -34,13 +34,12 @@ using namespace boost::posix_time;
 //==========================================================================================
 
 DateAttr::DateAttr( int day, int month, int year )
-: day_( day ), month_( month ), year_( year ),  state_change_no_(0)
+: day_( day ), month_( month ), year_( year )
 {
 	checkDate(day_,month_,year_,true /* allow wild cards */);
 }
 
 DateAttr::DateAttr(const std::string& str)
-:  state_change_no_(0)
 {
    DateAttr::getDate(str,day_,month_,year_);
    checkDate(day_,month_,year_,true /* allow wild cards */);
@@ -235,9 +234,21 @@ void DateAttr::print(std::string& os) const
 {
 	Indentor in;
 	Indentor::indent(os) ; write(os);
-   if (!PrintStyle::defsStyle()) {
-      if (free_) os += " # free";
-   }
+	if (!PrintStyle::defsStyle()) {
+	   if (free_) {
+	      os += " # free";
+	      if (requeue_counter_ != 0)  {
+	         os += " ";
+	         os += boost::lexical_cast<std::string>(requeue_counter_);
+	      }
+	   }
+	   else {
+	      if (requeue_counter_ != 0)  {
+	         os += " # ";
+	         os += boost::lexical_cast<std::string>(requeue_counter_);
+	      }
+	   }
+	}
 	os += "\n";
 }
 
@@ -270,12 +281,14 @@ std::string DateAttr::dump() const
 	return ss.str();
 }
 
-
 bool DateAttr::operator==(const DateAttr& rhs) const
 {
 	if (free_ != rhs.free_) {
 		return false;
 	}
+   if (requeue_counter_ != rhs.requeue_counter_ ) {
+      return false;
+   }
 	return structureEquals(rhs);
 }
 bool DateAttr::structureEquals(const DateAttr& rhs) const
@@ -291,6 +304,30 @@ DateAttr DateAttr::create(const std::string& dateString)
 	int day = -1,month = -1,year = -1;
 	getDate(dateString,day,month,year);
 	return {day,month,year};
+}
+
+DateAttr DateAttr::create( const std::vector<std::string >& lineTokens, bool read_state)
+{
+   //  date 15.11.2009 # free 2  // with PersistStyle::STATE & MIGRATE
+   //  date 15.*.*     # 2
+   //  date *.1.*
+
+//   for(size_t i =0; i < lineTokens.size() ; i++) {
+//      cout << "lineTokens[" << i << "] = '" << lineTokens[i] << "'\n";
+//   }
+
+   DateAttr date = DateAttr::create( lineTokens[1]) ;
+   if (read_state) {
+      for(size_t i = 3; i < lineTokens.size(); i++) {
+
+         if (lineTokens[i] == "free") date.setFree();
+         else {
+            try { date.set_requeue_counter(boost::lexical_cast<int>( lineTokens[i] ));}
+            catch(...) { throw std::runtime_error("DateAttr::create: could not parse state, for requeue_counter");}
+         }
+      }
+   }
+   return date;
 }
 
 void DateAttr::getDate(const std::string& date,int& day,int& month,int& year)

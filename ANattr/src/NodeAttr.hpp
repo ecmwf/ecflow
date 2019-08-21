@@ -93,7 +93,7 @@ class Event {
 public:
    Event(int number, const std::string& eventName = "", bool initial_val = false, bool check_name = true);
    Event(const std::string& eventName,bool initial_val = false);
-   Event() : number_(std::numeric_limits<int>::max()) {}
+   Event(){}
 
    std::string name_or_number() const; // if name present return, else return number
    const std::string& name() const { return  n_;}
@@ -125,12 +125,12 @@ private:
    void write(std::string&) const;
 
 private:
-   bool         v_{false};
-   bool         iv_{false}; // initial value ECFLOW-1526
-   int          number_;
    std::string  n_;
-   bool         used_{false};         // used by the simulator not persisted
+   int          number_{std::numeric_limits<int>::max()};
    unsigned int state_change_no_{0};  // *not* persisted, only used on server side
+   bool         v_{false};
+   bool         iv_{false};           // initial value ECFLOW-1526
+   bool         used_{false};         // used by the simulator not persisted
 
    friend class cereal::access;
    template<class Archive>
@@ -182,8 +182,8 @@ private:
    int          v_{0};                // value
    int          cc_{0};               // Colour change, used by gui ?
    std::string  n_;                   // name
-   bool         used_{false};         // used by the simulator not persisted
    unsigned int state_change_no_{0};  // *not* persisted, only used on server side
+   bool         used_{false};         // used by the simulator not persisted
 
    friend class cereal::access;
    template<class Archive>

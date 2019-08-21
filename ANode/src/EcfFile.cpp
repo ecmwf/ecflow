@@ -1247,9 +1247,6 @@ const std::string& EcfFile::get_extn() const
 
 PreProcessor::PreProcessor(EcfFile* ecfile)
 : ecfile_(ecfile),
-  nopp_(false),
-  comment_(false),
-  manual_(false),
   ecf_micro_(ecfile->ecfMicroCache_),
   jobLines_(ecfile->jobLines_)
 {

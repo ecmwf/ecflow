@@ -46,7 +46,6 @@ namespace ecf {
 CronAttr::CronAttr() = default;
 
 CronAttr::CronAttr(const std::string& str)
-:  w_(0),state_change_no_(0)
 {
    if (str.empty()) throw std::runtime_error("CronAttr::CronAttr : empty string passed");
    std::vector<std::string> tokens;

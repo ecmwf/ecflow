@@ -262,7 +262,7 @@ LogFlusher::~LogFlusher()
 
 //======================================================================================================
 LogImpl::LogImpl(const std::string& filename)
-: count_(0), file_(filename.c_str(), ios::out | ios::app)
+: file_(filename.c_str(), ios::out | ios::app)
 {
  	if (!file_.is_open()) {
 		std::cerr << "LogImpl::LogImpl: Could not open log file '" << filename << "'\n";
@@ -271,7 +271,6 @@ LogImpl::LogImpl(const std::string& filename)
 }
 
 LogImpl::~LogImpl() = default;
-
 
 static void append_log_type(std::string& str, Log::LogType lt)
 {

@@ -134,11 +134,7 @@ private:
 	friend void export_SuiteAndFamily();
 
 protected:
-   unsigned int order_state_change_no_{0};     // no need to persist
-   unsigned int add_remove_state_change_no_{0};// no need to persist
-
    void force_sync() override;
-
    void incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) const;
 
 private:
@@ -151,6 +147,9 @@ private:
 
 private:
   	std::vector<node_ptr> nodes_;
+protected:
+   unsigned int order_state_change_no_{0};     // no need to persist
+   unsigned int add_remove_state_change_no_{0};// no need to persist
 };
 
 #endif

@@ -66,10 +66,10 @@ private:
    void write(std::string&) const;
 
 private:
-	ecf::Child::ZombieType           zombie_type_{ecf::Child::NOT_SET};      // User,path or ecf
-	ecf::User::Action                action_{ecf::User::BLOCK};           // fob, fail,remove, adopt, block, kill
-	int                              zombie_lifetime_{0};  // How long zombie lives in server
-	std::vector<ecf::Child::CmdType> child_cmds_;       // init, event, meter,label, complete
+	std::vector<ecf::Child::CmdType> child_cmds_;                       // init, event, meter,label, complete
+	ecf::Child::ZombieType           zombie_type_{ecf::Child::NOT_SET}; // User,path or ecf
+	ecf::User::Action                action_{ecf::User::BLOCK};         // fob, fail,remove, adopt, block, kill
+	int                              zombie_lifetime_{0};               // How long zombie lives in server
 
    friend class cereal::access;
    template<class Archive>

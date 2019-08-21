@@ -60,9 +60,6 @@ void Task::copy(const Task& rhs)
 
 Task::Task(const Task& rhs)
 : Submittable(rhs),
-  order_state_change_no_(0),
-  add_remove_state_change_no_(0),
-  alias_change_no_(0),
   alias_no_(rhs.alias_no_)
 {
    copy(rhs);

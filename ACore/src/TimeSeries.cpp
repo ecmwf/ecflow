@@ -47,40 +47,32 @@ static void testTimeSlot( const ecf::TimeSlot& ts)
 
 namespace ecf {
 
-TimeSeries::TimeSeries()
-: relativeDuration_(0,0,0,0),
-  lastTimeSlot_(0,0,0,0) {}
+TimeSeries::TimeSeries() {}
 
 TimeSeries::TimeSeries(int hour, int minute, bool relative)
-: relativeToSuiteStart_(relative),
-  
-  start_(hour,minute),
+: start_(hour,minute),
   nextTimeSlot_(hour,minute),
-  relativeDuration_(0,0,0,0),
-  lastTimeSlot_(start_.duration())
+  lastTimeSlot_(start_.duration()),
+  relativeToSuiteStart_(relative)
 {
 	testTimeSlot(start_);
 }
 
 TimeSeries::TimeSeries(const TimeSlot& t,bool relative)
-: relativeToSuiteStart_(relative),
-  
-  start_(t),
+: start_(t),
   nextTimeSlot_(t),
-  relativeDuration_(0,0,0,0),
-  lastTimeSlot_(t.duration())
+  lastTimeSlot_(t.duration()),
+  relativeToSuiteStart_(relative)
 {
 	testTimeSlot(start_);
 }
 
 TimeSeries::TimeSeries(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative)
-: relativeToSuiteStart_(relative),
-  
-  start_( start ),
+: start_( start ),
   finish_( finish ),
   incr_( incr ),
   nextTimeSlot_( start ),
-  relativeDuration_(0,0,0,0)
+  relativeToSuiteStart_(relative)
 {
 	testTimeSlot(start);
 	testTimeSlot(finish);
@@ -864,13 +856,13 @@ void TimeSeries::testTime(int hour, int minute)
 template<class Archive>
 void TimeSeries::serialize(Archive & ar, std::uint32_t const  /*version*/)
 {
+   ar(CEREAL_NVP(start_ ));
+   CEREAL_OPTIONAL_NVP(ar,finish_,               [this](){return !finish_.isNULL();});
+   CEREAL_OPTIONAL_NVP(ar,incr_ ,                [this](){return !incr_.isNULL();});
+   CEREAL_OPTIONAL_NVP(ar,nextTimeSlot_,         [this](){return !nextTimeSlot_.isNULL() && nextTimeSlot_ != start_;});
+   CEREAL_OPTIONAL_NVP(ar,relativeDuration_,     [this](){return relativeDuration_ != boost::posix_time::time_duration(0,0,0,0);});
    CEREAL_OPTIONAL_NVP(ar, relativeToSuiteStart_,[this](){return relativeToSuiteStart_ ;});
    CEREAL_OPTIONAL_NVP(ar, isValid_,             [this](){return !isValid_ ;});
-   ar(CEREAL_NVP(start_ ));
-   CEREAL_OPTIONAL_NVP(ar,finish_,          [this](){return !finish_.isNULL();});
-   CEREAL_OPTIONAL_NVP(ar,incr_ ,           [this](){return !incr_.isNULL();});
-   CEREAL_OPTIONAL_NVP(ar,nextTimeSlot_,    [this](){return !nextTimeSlot_.isNULL() && nextTimeSlot_ != start_;});
-   CEREAL_OPTIONAL_NVP(ar,relativeDuration_,[this](){return relativeDuration_ != boost::posix_time::time_duration(0,0,0,0);});
 
    if (Archive::is_loading::value) {
       if (nextTimeSlot_.isNULL()) nextTimeSlot_ = start_;

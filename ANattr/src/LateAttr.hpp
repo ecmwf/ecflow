@@ -94,15 +94,14 @@ private:
    void write(std::string&) const;
 
 private:
-
 	TimeSlot s_;                    // relative by default
 	TimeSlot a_;
 	TimeSlot c_;
+	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 	bool c_is_rel_{false};
 	bool isLate_{false};
 
-	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
-
+private:
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar);

@@ -42,9 +42,9 @@ private:
   DefsString(const DefsString&) = delete;
   const DefsString& operator=(const DefsString&) = delete;
 private:
-   bool empty_;
-   size_t line_pos_;
    std::vector<std::string> lines_;
+   size_t line_pos_{0};
+   bool empty_;
 };
 
 

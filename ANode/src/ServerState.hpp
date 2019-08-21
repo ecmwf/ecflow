@@ -110,6 +110,7 @@ private:
 
 private:
 
+ 	int jobSubmissionInterval_{ 60 };                // NOT persisted, since set in the server
    unsigned int state_change_no_{0};                // *not* persisted, only used on server side
    unsigned int variable_state_change_no_{0};       // *not* persisted, only used on server side
 
@@ -117,9 +118,8 @@ private:
    std::vector<Variable>  server_variables_;
    std::vector<Variable>  user_variables_;
 
- 	int jobSubmissionInterval_{ 60 };                   // NOT persisted, since set in the server
- 	bool jobGeneration_{ true };                          // NOT persisted, since set in the server
  	std::pair<std::string,std::string> hostPort_; // NOT persisted, set by server hence no need to persist
+ 	bool jobGeneration_{ true };                          // NOT persisted, since set in the server
 
 private:
    friend class cereal::access;

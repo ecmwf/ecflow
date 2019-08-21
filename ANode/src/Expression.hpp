@@ -140,15 +140,13 @@ private:  /// For use by python interface,
    std::vector<PartExpression>::const_iterator part_end() const   { return vec_.end();}
 
 private:
-   std::vector<PartExpression> vec_;
-   bool                        free_{false};
-
-   unsigned int state_change_no_{0};                    // *not* persisted, only used on server side
-
    // They are created on demand. reasons:
    // 1/ Help with AIX serialisation
    // 2/ Help to reduce network traffic
    mutable std::unique_ptr< AstTop >  theCombinedAst_; // *not* persisted, demand created
+   std::vector<PartExpression> vec_;
+   unsigned int state_change_no_{0};                    // *not* persisted, only used on server side
+   bool free_{false};
 
 private:
    // prevent assignment since we have an unique_ptr

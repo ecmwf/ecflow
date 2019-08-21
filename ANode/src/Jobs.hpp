@@ -57,15 +57,15 @@ private:
   Jobs(const Jobs&) = delete;
   const Jobs& operator=(const Jobs&) = delete;
 public:
-   explicit Jobs(const defs_ptr& d) : defs_(d.get()), node_(nullptr) {}
-   explicit Jobs(Defs* d) : defs_(d), node_(nullptr) {}
-   explicit Jobs(Node* d) : defs_(nullptr), node_(d) {}
+   explicit Jobs(const defs_ptr& d) : defs_(d.get()) {}
+   explicit Jobs(Defs* d) : defs_(d) {}
+   explicit Jobs(Node* d) : node_(d) {}
 
  	bool generate( JobsParam& ) const;
  	bool generate() const;
 
 private:
-	Defs* defs_;
-	Node* node_;
+	Defs* defs_{nullptr};
+	Node* node_{nullptr};
 };
 #endif

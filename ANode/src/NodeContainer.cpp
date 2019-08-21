@@ -50,7 +50,7 @@ using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 NodeContainer::NodeContainer( const std::string& name, bool check)
-: Node(name,check),order_state_change_no_(0), add_remove_state_change_no_(0) {}
+: Node(name,check) {}
 
 NodeContainer::NodeContainer() = default;
 
@@ -74,10 +74,7 @@ void NodeContainer::copy(const NodeContainer& rhs)
    }
 }
 
-NodeContainer::NodeContainer(const NodeContainer& rhs )
-  : Node(rhs),
-    order_state_change_no_(0),
-    add_remove_state_change_no_(0)
+NodeContainer::NodeContainer(const NodeContainer& rhs ) : Node(rhs)
 {
    copy(rhs);
 }
@@ -393,7 +390,7 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 
 boost::posix_time::time_duration NodeContainer::sum_runtime()
 {
-   boost::posix_time::time_duration rt = boost::posix_time::time_duration(0,0,0,0);
+   boost::posix_time::time_duration rt;
    for(node_ptr node : nodes_) rt += node->sum_runtime();
    set_runtime(rt);
    return rt;

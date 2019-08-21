@@ -36,7 +36,7 @@ const QueueAttr& QueueAttr::EMPTY() { static const QueueAttr queueAttr = QueueAt
 QueueAttr& QueueAttr::EMPTY1() { static QueueAttr queueAttr = QueueAttr(); return queueAttr; }
 
 QueueAttr::QueueAttr(const std::string& name,const std::vector<std::string>& theQueue)
-  : state_change_no_(0),name_(name),theQueue_(theQueue)
+: theQueue_(theQueue),name_(name)
 {
    string msg;
    if ( !Str::valid_name( name, msg ) ) {
@@ -289,10 +289,11 @@ void QueueAttr::set_name( const std::string& name)
 template<class Archive>
 void QueueAttr::serialize(Archive & ar, std::uint32_t const version )
 {
-   ar( CEREAL_NVP(currentIndex_),
-       CEREAL_NVP(name_),
+   ar(
        CEREAL_NVP(theQueue_),
-       CEREAL_NVP(state_vec_)
+       CEREAL_NVP(state_vec_),
+       CEREAL_NVP(name_),
+       CEREAL_NVP(currentIndex_)
    );
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(QueueAttr);

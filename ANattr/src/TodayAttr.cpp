@@ -29,7 +29,6 @@ using namespace std;
 namespace ecf {
 
 TodayAttr::TodayAttr (const std::string& str)
-:  state_change_no_(0)
 {
    if (str.empty()) throw std::runtime_error("Today::Today: empty string passed");
    std::vector<std::string> tokens;
@@ -238,7 +237,7 @@ bool TodayAttr::why(const ecf::Calendar& c,const std::vector<DayAttr>& days,cons
 
 
 template<class Archive>
-void  TodayAttr::serialize(Archive & ar)
+void TodayAttr::serialize(Archive & ar)
 {
    ar( CEREAL_NVP(ts_));
    CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save

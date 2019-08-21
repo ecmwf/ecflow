@@ -151,7 +151,19 @@ void DayAttr::print(std::string& os) const
 	Indentor in;
 	Indentor::indent(os) ; write(os);
    if (!PrintStyle::defsStyle()) {
-      if (free_) os += " # free";
+      if (free_) {
+         os += " # free";
+         if (requeue_counter_ != 0)  {
+            os += " ";
+            os += boost::lexical_cast<std::string>(requeue_counter_);
+         }
+      }
+      else {
+         if (requeue_counter_ != 0)  {
+            os += " # ";
+            os += boost::lexical_cast<std::string>(requeue_counter_);
+         }
+      }
    }
 	os += "\n";
 }
@@ -195,12 +207,39 @@ bool DayAttr::structureEquals(const DayAttr& rhs) const
 
 DayAttr DayAttr::create(const std::string& dayStr)
 {
-	return DayAttr( getDay(dayStr) );
+   return DayAttr( getDay(dayStr) );
+}
+
+DayAttr DayAttr::create( const std::vector<std::string>& lineTokens, bool read_state)
+{
+   if ( lineTokens.size() < 2 ) {
+      throw std::runtime_error( "DayAttr::create date tokens to short :");
+   }
+
+//   for(size_t i =0; i < lineTokens.size() ; i++) {
+//      cout << "lineTokens[" << i << "] = '" << lineTokens[i] << "'\n";
+//   }
+
+   // day monday  # free 2
+   // day monday  # 2
+   DayAttr day = DayAttr::create( lineTokens[1] );
+
+   // state
+   if (read_state) {
+      for(size_t i = 3; i < lineTokens.size(); i++) {
+         if (lineTokens[i] == "free") day.setFree();
+         else {
+            try { day.set_requeue_counter(boost::lexical_cast<int>( lineTokens[i]));}
+            catch(...) { throw std::runtime_error("DateAttr::create: could not parse state, for requeue_counter");}
+         }
+      }
+   }
+   return day;
 }
 
 DayAttr::Day_t DayAttr::getDay(const std::string& day)
 {
-	if (day == "monday")         return DayAttr::MONDAY;
+	if (day == "monday")    return DayAttr::MONDAY;
 	if (day == "tuesday")   return DayAttr::TUESDAY;
 	if (day == "wednesday") return DayAttr::WEDNESDAY;
 	if (day == "thursday")  return DayAttr::THURSDAY;

@@ -37,10 +37,7 @@ public:
    ///=========================================================================
 	/// *Server side*
 	explicit DefsDelta(unsigned int client_state_change_no)
-	: sync_suite_clock_(false),
-	  client_state_change_no_(client_state_change_no),
-	  server_state_change_no_(0),
-	  server_modify_change_no_(0) {}
+	: client_state_change_no_(client_state_change_no) {}
 
 	/// This class can be re-used hence init() should reset all data members
  	void init(unsigned int client_state_change_no, bool sync_suite_clock);
@@ -72,11 +69,11 @@ public:
 	size_t size() const { return compound_mementos_.size(); }
 
 private:
-	bool sync_suite_clock_;                // *no* need to persist since only used on server side
+	bool sync_suite_clock_{false};         // *no* need to persist since only used on server side
 	unsigned int client_state_change_no_;  // *no* need to persist since only used on server side
 
-   unsigned int server_state_change_no_;
-   unsigned int server_modify_change_no_;
+   unsigned int server_state_change_no_{0};
+   unsigned int server_modify_change_no_{0};
 	std::vector<compound_memento_ptr> compound_mementos_;
 
    friend class cereal::access;

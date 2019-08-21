@@ -59,6 +59,7 @@ public:
 
 	// return the days, if input is not valid will throw a runtime_error
 	static DayAttr create(const std::string& dayStr);
+   static DayAttr create( const std::vector<std::string>& lineTokens, bool read_state);
 	static DayAttr::Day_t getDay(const std::string&);
 
 	static std::vector<std::string> allDays();
@@ -69,14 +70,15 @@ public:
 	boost::gregorian::date next_matching_date(const ecf::Calendar& c) const;
 
    bool is_free(const ecf::Calendar&) const; // ignores free_
+   void set_requeue_counter(int rc) { requeue_counter_ = rc;}
 private:
    void write(std::string&) const;
 
 private:
    DayAttr::Day_t day_{DayAttr::SUNDAY};
-   bool           free_{false};         // persisted for use by why() on client side
    unsigned int state_change_no_{0};    // *not* persisted, only used on server side
    unsigned int requeue_counter_{0};    // ensure we run only once per requeue
+   bool     free_{false};               // persisted for use by why() on client side
 
    friend class cereal::access;
    template<class Archive>

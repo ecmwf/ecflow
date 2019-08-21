@@ -166,16 +166,16 @@ public:
                    bool reset_next_time_slot,
                    bool reset_relative_duration,
                    bool log_state_changes = true) :
+                      clear_suspended_in_child_nodes_(clear_suspended_in_child_nodes),
                       resetRepeats_(resetRepeats),
                       reset_day_date_reueue_count_(reset_day_date_reueue_count),
-                      clear_suspended_in_child_nodes_(clear_suspended_in_child_nodes),
                       reset_next_time_slot_(reset_next_time_slot),
                       reset_relative_duration_(reset_relative_duration),
                       log_state_changes_(log_state_changes){}
 
+      int clear_suspended_in_child_nodes_{0};
       bool resetRepeats_{true};
       bool reset_day_date_reueue_count_{true};   // ensure task with date/date run once under a repeat
-      int clear_suspended_in_child_nodes_{0};
       bool reset_next_time_slot_{true};
       bool reset_relative_duration_{true};
       bool log_state_changes_{true};
@@ -822,8 +822,7 @@ private: /// For use by python interface,
 private:
    Node*        parent_{nullptr}; // *NOT* persisted must be set by the parent class
    std::string  n_;
-   bool                        suspended_{false};
-   boost::posix_time::time_duration sc_rt_{boost::posix_time::time_duration(0,0,0,0)}; // state change runtime, Used to order peers, no persistence in cereal only defs.
+   boost::posix_time::time_duration sc_rt_; // state change runtime, Used to order peers, no persistence in cereal only defs.
    std::pair<NState,boost::posix_time::time_duration> st_{NState(),boost::posix_time::time_duration(0,0,0,0)}; // state and duration since suite start when state changed
    DState                      d_st_;    // default value is QUEUED
 
@@ -853,6 +852,7 @@ private:
    std::unique_ptr<ecf::AutoCancelAttr>    auto_cancel_;  // Can only have 1 auto cancel per node
    std::unique_ptr<ecf::AutoArchiveAttr>   auto_archive_; // Can only have 1 auto archive per node
    std::unique_ptr<ecf::AutoRestoreAttr>   auto_restore_; // Can only have 1 autorestore per node
+   void* graphic_ptr_{nullptr};                           // for use with the gui only
 
    unsigned int state_change_no_{0};     // *not* persisted, only used on server side,Used to indicate addition or deletion of attribute
    unsigned int variable_change_no_{0};  // *not* persisted, placed here rather than Variable, to save memory
@@ -862,7 +862,7 @@ private:
    boost::posix_time::ptime  submit_to_complete_duration_;  // *not* persisted
 #endif
 
-   void* graphic_ptr_{nullptr};  // for use with the gui only
+   bool suspended_{false};
 
    friend class TimeDepAttrs;
    friend class MiscAttrs;

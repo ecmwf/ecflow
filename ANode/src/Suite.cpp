@@ -49,13 +49,7 @@ using namespace boost::gregorian;
 
 Suite::Suite(const Suite& rhs)
 : NodeContainer(rhs),
-  defs_(nullptr),
-  begun_(rhs.begun_),
-  state_change_no_(0),
-  modify_change_no_(0),
-  begun_change_no_(0),
-  calendar_change_no_(0),
-  suite_gen_variables_(nullptr)
+  begun_(rhs.begun_)
 {
    if (rhs.clockAttr_.get())
       clockAttr_ = std::make_shared<ClockAttr>( *rhs.clockAttr_ );

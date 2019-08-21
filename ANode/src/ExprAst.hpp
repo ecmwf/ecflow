@@ -384,7 +384,7 @@ public:
 class AstFunction : public AstLeaf {
 public:
    enum FuncType { DATE_TO_JULIAN, JULIAN_TO_DATE };
-   AstFunction(FuncType ft, Ast* arg) : ft_(ft), arg_(arg) { assert(arg_);}
+   AstFunction(FuncType ft, Ast* arg) : arg_(arg), ft_(ft) { assert(arg_);}
    ~AstFunction() override { delete arg_;}
 
    bool is_evaluateable() const override { return true; }
@@ -404,8 +404,8 @@ public:
    Ast* arg() const { return arg_;}
    FuncType ft() const { return ft_;}
 private:
-   FuncType ft_;
    Ast* arg_;
+   FuncType ft_;
 };
 
 
@@ -505,7 +505,7 @@ private:
 
 class AstFlag : public AstLeaf {
 public:
-   AstFlag(const std::string& n,ecf::Flag::Type ft) : flag_(ft),parentNode_(nullptr), nodePath_(n){}
+   AstFlag(const std::string& n,ecf::Flag::Type ft) : nodePath_(n), flag_(ft) {}
 
    std::string name() const override;
 
@@ -535,10 +535,11 @@ public:
 
 private:
    Node* get_ref_node() const { return ref_node_.lock().get(); }
-   ecf::Flag::Type flag_;
-   Node* parentNode_;                 // should always be non null, before evaluate.
+
    std::string nodePath_;
+   Node* parentNode_{nullptr};                 // should always be non null, before evaluate.
    mutable weak_node_ptr ref_node_;
+   ecf::Flag::Type flag_;
 };
 
 

@@ -150,11 +150,10 @@ private:
   const LogImpl& operator=(const LogImpl&) = delete;
 
 private:
-   unsigned int count_;
    std::string time_stamp_;
-   mutable std::ofstream file_;
-
    std::string log_type_and_time_stamp_; // re-use memory
+   mutable std::ofstream file_;
+   unsigned int count_{0};
 };
 
 /// Utility class used for debug. Enables log file messages to be written to standard out

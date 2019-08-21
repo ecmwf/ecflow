@@ -30,7 +30,7 @@
 // 
 class RepeatBase {
 public:
-   explicit RepeatBase(const std::string& name) : state_change_no_(0), name_(name) {}
+   explicit RepeatBase(const std::string& name) : name_(name) {}
    RepeatBase() = default;
    virtual ~RepeatBase();
 
@@ -105,9 +105,9 @@ public:
 protected:
    void incr_state_change_no();
 
-   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
-   std::string name_;
    mutable Variable var_;          // *not* persisted
+   std::string name_;
+   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
 
 private:
    friend class cereal::access;
@@ -335,11 +335,11 @@ public:
 
 private:
    RepeatEnumerated( const std::string& variable, const std::vector<std::string>& theEnums, int index)
-   : RepeatBase(variable), theEnums_(theEnums), currentIndex_(index) {}
+   : RepeatBase(variable),  currentIndex_(index), theEnums_(theEnums) {}
 
 private:
-   std::vector<std::string> theEnums_;
    int currentIndex_{0};
+   std::vector<std::string> theEnums_;
 
    friend class cereal::access;
    template<class Archive>
@@ -385,11 +385,11 @@ public:
 
 private:
    RepeatString( const std::string& variable, const std::vector<std::string>& theEnums, int index)
-   : RepeatBase(variable), theStrings_(theEnums), currentIndex_(index) {}
+   : RepeatBase(variable), currentIndex_(index), theStrings_(theEnums) {}
 
 private:
-   std::vector<std::string> theStrings_;
    int currentIndex_{0};
+   std::vector<std::string> theStrings_;
 
    friend class cereal::access;
    template<class Archive>

@@ -30,11 +30,7 @@ using namespace boost::posix_time;
 
 namespace ecf {
 
-Calendar::Calendar()
-: duration_(time_duration(0,0,0,0)),
-  increment_(time_duration(0,1,0,0))
-{
-}
+Calendar::Calendar(){}
 
 Calendar::Calendar(const Calendar& rhs)
 {

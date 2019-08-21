@@ -29,8 +29,7 @@ protected:
      rid_(rhs.rid_),
      abr_(rhs.abr_),
      tryNo_(rhs.tryNo_),
-     state_change_no_(0),
-     sub_gen_variables_(nullptr) {}
+     state_change_no_(0) {}
 
    Submittable& operator=(const Submittable&);
 

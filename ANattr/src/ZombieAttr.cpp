@@ -34,7 +34,7 @@ const ZombieAttr& ZombieAttr::EMPTY() { static const ZombieAttr ZOMBIEATTR = Zom
 
 // Constructor ==============================================================================
 ZombieAttr::ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::CmdType>& c, ecf::User::Action a, int zombie_lifetime)
-	: zombie_type_(t), action_(a), zombie_lifetime_(zombie_lifetime), child_cmds_(c)
+	: child_cmds_(c), zombie_type_(t), action_(a), zombie_lifetime_(zombie_lifetime)
 {
    /// Server typically checks every 60 seconds, hence this is lowest valid value for
    if (zombie_lifetime_ <= 0) {
@@ -56,10 +56,10 @@ ZombieAttr::ZombieAttr(ecf::Child::ZombieType t, const std::vector<ecf::Child::C
 
 bool ZombieAttr::operator==(const ZombieAttr& rhs) const
 {
+   if (child_cmds_ != rhs.child_cmds_) return false;
    if (zombie_type_ != rhs.zombie_type_) return false;
    if (action_ != rhs.action_) return false;
    if (zombie_lifetime_ != rhs.zombie_lifetime_) return false;
-   if (child_cmds_ != rhs.child_cmds_) return false;
    return true;
 }
 
@@ -256,10 +256,10 @@ ZombieAttr ZombieAttr::get_default_attr(ecf::Child::ZombieType zt)
 template<class Archive>
 void ZombieAttr::serialize(Archive & ar, std::uint32_t const version )
 {
-   ar( CEREAL_NVP(zombie_type_),
+   ar( CEREAL_NVP(child_cmds_),
+       CEREAL_NVP(zombie_type_),
        CEREAL_NVP(action_),
-       CEREAL_NVP(zombie_lifetime_),
-       CEREAL_NVP(child_cmds_)
+       CEREAL_NVP(zombie_lifetime_)
    );
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(ZombieAttr);

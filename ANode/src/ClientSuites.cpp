@@ -25,12 +25,9 @@ namespace ecf {
 
 ClientSuites::ClientSuites(Defs* defs,unsigned int handle, bool auto_add_new_suites, const std::vector<std::string>& suites,const std::string& user)
 : defs_(defs),
+  user_(user),
   handle_(handle),
-  state_change_no_(0),
-  modify_change_no_(0),
-  auto_add_new_suites_(auto_add_new_suites),
-  handle_changed_(false),
-  user_(user)
+  auto_add_new_suites_(auto_add_new_suites)
 {
    BOOST_FOREACH(const std::string& s, suites) {
       add_suite(s);

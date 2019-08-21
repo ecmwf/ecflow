@@ -62,16 +62,18 @@ public:
    static QueueAttr& EMPTY1();
 
    unsigned int state_change_no() const { return state_change_no_;}
+
 private:
    void incr_state_change_no();
    void write(std::string&) const;
 
-   bool used_in_trigger_{false};           // *not* persisted, used by simulator only
-   int currentIndex_{0};
-   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
-   std::string name_;
+private:
    std::vector<std::string>  theQueue_;
    std::vector<NState::State> state_vec_;
+   std::string name_;
+   int currentIndex_{0};
+   unsigned int state_change_no_{0};  // *not* persisted, only used on server side
+   bool used_in_trigger_{false};      // *not* persisted, used by simulator only
 
 private:
    friend class cereal::access;

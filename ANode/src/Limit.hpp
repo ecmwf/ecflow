@@ -73,12 +73,12 @@ private:
    void write(std::string&) const;
 
 private:
-   unsigned int             state_change_no_{0};  // *not* persisted, only used on server side
    std::string              n_;
+   Node*                    node_{nullptr} ;      // The parent NOT persisted
+   unsigned int             state_change_no_{0};  // *not* persisted, only used on server side
    int                      lim_{0};
    int                      value_{0};
-   std::set<std::string>    paths_;           // Updated via increment()/decrement()/reset(). Typically task paths
-   Node*                    node_{nullptr} ;           // The parent NOT persisted
+   std::set<std::string>    paths_;               // Updated via increment()/decrement()/reset(). Typically task paths
 
    friend class cereal::access;
    template<class Archive>

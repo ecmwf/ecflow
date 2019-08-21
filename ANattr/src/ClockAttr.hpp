@@ -75,15 +75,15 @@ private:
    void write(std::string& os) const;
 
 private:
-	bool hybrid_;
-	bool positiveGain_{false};
-	bool end_clock_{false};        // *NOT* persisted, used for end clock, simulator only
 	long gain_{0};                 // in seconds
 	int day_{0};
 	int month_{0};
 	int year_{0};
 
-	unsigned int   state_change_no_;  // *not* persisted, only used on server side
+	unsigned int state_change_no_;  // *not* persisted, only used on server side
+	bool hybrid_{false};
+	bool positiveGain_{false};
+	bool end_clock_{false};        // *NOT* persisted, used for end clock, simulator only
 
    friend class cereal::access;
 	template<class Archive>

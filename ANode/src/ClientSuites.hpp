@@ -127,19 +127,21 @@ private:
 
 private:
    Defs* defs_;
+
+	std::string user_;                        // user who create this handle
+	std::vector<HSuite> suites_;
+
    unsigned int handle_;                   // This must be unique
 
    // The modify_change_no_ is required specifically when a registered suite is deleted
    // Both modify_change_no_ & state_change_no_ are required when user has registered
    // with *ALL* the suites. In this case we need to ensure that after a SYNC/create_defs
    // the NewsCmd call to max_change_no() is in sync with global change numbers.
-   mutable unsigned int state_change_no_;
-   mutable unsigned int modify_change_no_;
+   mutable unsigned int state_change_no_{0};
+   mutable unsigned int modify_change_no_{0};
 
 	bool auto_add_new_suites_;
-	mutable bool handle_changed_;           // set when handle created, or when suites added/removed
-	std::string user_;                        // user who create this handle
-	std::vector<HSuite> suites_;
+	mutable bool handle_changed_{false};      // set when handle created, or when suites added/removed
 };
 }
 #endif

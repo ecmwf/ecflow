@@ -34,23 +34,19 @@ ServerState::ServerState() : server_state_( default_state() )
 	setup_default_env(Str::DEFAULT_PORT_NUMBER());
 }
 
-ServerState::ServerState(const std::string& port)  :
-    state_change_no_(0),
-    variable_state_change_no_(0),
-    server_state_( default_state() )
+ServerState::ServerState(const std::string& port) : server_state_( default_state() )
 {
    setup_default_env(port);
 }
 
 ServerState::ServerState(const ServerState& rhs)
-: state_change_no_(0),
-  variable_state_change_no_(0),
+:
+  jobSubmissionInterval_(rhs.jobSubmissionInterval_),
   server_state_(rhs.server_state_),
   server_variables_(rhs.server_variables_),
   user_variables_(rhs.user_variables_),
-  jobSubmissionInterval_(rhs.jobSubmissionInterval_),
-  jobGeneration_(rhs.jobGeneration_),
-  hostPort_(rhs.hostPort_)
+  hostPort_(rhs.hostPort_),
+  jobGeneration_(rhs.jobGeneration_)
 {}
 
 bool ServerState::operator==(const ServerState& rhs) const

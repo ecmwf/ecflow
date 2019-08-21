@@ -200,10 +200,6 @@ private:
 private:
    EcfFile* ecfile_;
 
-   bool nopp_;
-   bool comment_;
-   bool manual_;
-
    std::string pp_nopp_;
    std::string pp_comment_;
    std::string pp_manual_;
@@ -215,6 +211,10 @@ private:
    std::vector<std::pair<std::string,int> > globalIncludedFileSet_;// test for recursive includes, <no _of times it was included>
    std::vector<std::string> include_once_set_;
    std::string error_msg_;
+
+   bool nopp_{false};
+   bool comment_{false};
+   bool manual_{false};
 };
 
 #endif

@@ -65,13 +65,13 @@ private:
    friend class InLimitMgr;
 
 private:
+   std::weak_ptr<Limit>   limit_;                        // NOT persisted since computed on the fly
    std::string            n_;
    std::string            path_;
    int                    tokens_{1};
    bool                   limit_this_node_only_{false};  // default is false,if True, will consume one token(s) only, regardless of number of children
    bool                   limit_submission_{false};      // limit submission only
    bool                   incremented_{false};           // state
-   std::weak_ptr<Limit>   limit_;                        // NOT persisted since computed on the fly
 
    friend class cereal::access;
    template<class Archive>

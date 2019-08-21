@@ -61,14 +61,11 @@ class TimeAttr  {
 public:
    explicit TimeAttr(const std::string&);
    TimeAttr() = default;
-	TimeAttr(int hour, int minute, bool relative = false )
-		: ts_(hour, minute,relative), state_change_no_(0) {}
-	TimeAttr(const TimeSlot& t,    bool relative = false )
-		: ts_(t,relative), state_change_no_(0) {}
-	explicit TimeAttr(const TimeSeries& ts)
-		: ts_(ts), state_change_no_(0) {}
+	TimeAttr(int hour, int minute, bool relative = false ) : ts_(hour, minute,relative) {}
+	TimeAttr(const TimeSlot& t,    bool relative = false ) : ts_(t,relative)  {}
+	explicit TimeAttr(const TimeSeries& ts) : ts_(ts) {}
 	TimeAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
-		: ts_(start,finish,incr,relative), state_change_no_(0) {}
+		: ts_(start,finish,incr,relative) {}
 
 	void print(std::string&) const;
    bool operator==(const TimeAttr& rhs) const;
@@ -116,8 +113,8 @@ private:
 
 private:
  	TimeSeries   ts_;
-	bool         free_{false};
 	unsigned int state_change_no_{0};  // *not* persisted, only used on server side
+	bool         free_{false};
 
    friend class cereal::access;
    template<class Archive>

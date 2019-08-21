@@ -166,18 +166,17 @@ private:
 	void compute_last_time_slot(); // only call for series
 
 	bool match_duration_with_time_series(const boost::posix_time::time_duration& relative_or_real_td) const;
-	boost::posix_time::time_duration relativeDuration() const;
 
 private:
-	bool relativeToSuiteStart_{false};
-	bool isValid_{true};                                     // Needed for single slot to avoid multiple jobs submissions
 	TimeSlot start_;
 	TimeSlot finish_;
 	TimeSlot incr_;
 	TimeSlot nextTimeSlot_;                             // nextTimeSlot_ >= start && is incremented by incr
-	mutable TimeSlot suiteTimeAtReque_; // NOT persisted, check of day change, between requeue -> checkForRequeue, when we have series
+	mutable TimeSlot suiteTimeAtReque_;                 // NOT persisted, check of day change, between requeue -> checkForRequeue, when we have series
 	boost::posix_time::time_duration relativeDuration_;
 	boost::posix_time::time_duration lastTimeSlot_;    // Only used when we have a series, can be generated
+   bool relativeToSuiteStart_{false};
+   bool isValid_{true};                               // Needed for single slot to avoid multiple jobs submissions
 
 private:
 	// Note: isValid_      is persisted for use by why() command on the client side.

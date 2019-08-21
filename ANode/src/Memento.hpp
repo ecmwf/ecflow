@@ -85,11 +85,10 @@ public:
    const std::string& abs_node_path() const { return absNodePath_;}
 
 private:
-
-   bool clear_attributes_{false};
    std::string absNodePath_;
    std::vector<memento_ptr> vec_;
    mutable std::vector<ecf::Aspect::Type> aspects_; // not persisted only used on client side
+   bool clear_attributes_{false};
 
    friend class cereal::access;
    template<class Archive>
@@ -323,14 +322,14 @@ private:
 class NodeQueueIndexMemento : public Memento {
 public:
    NodeQueueIndexMemento(const std::string& name, int index,const std::vector<NState::State>& state_vec)
-    : index_(index), name_(name),state_vec_(state_vec) {}
+    : name_(name),state_vec_(state_vec),index_(index) {}
    NodeQueueIndexMemento()= default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
 
-   int index_{0};
    std::string name_;
    std::vector<NState::State> state_vec_;
+   int index_{0};
    friend class Node;
    friend class MiscAttrs;
 

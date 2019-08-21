@@ -33,9 +33,21 @@ using namespace boost;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 
+BOOST_AUTO_TEST_CASE( test_default_boost_time_duration )
+{
+   cout << "ACore:: ...test_default_boost_time_duration\n";
+
+   boost::posix_time::time_duration td;
+   BOOST_CHECK_MESSAGE( td.is_special() == false, "Default constructed boost::posix_time::time_duration, should not be special");
+   BOOST_CHECK_MESSAGE( td.hours() == 0, "Expected 0 for hours");
+   BOOST_CHECK_MESSAGE( td.minutes() == 0, "Expected 0 for minutes");
+   BOOST_CHECK_MESSAGE( td.seconds() == 0, "Expected 0 for seconds ");
+}
+
 BOOST_AUTO_TEST_CASE( test_time_series_min_max_time_slots )
 {
    cout << "ACore:: ...test_time_series_min_max_time_slots\n";
+
 
    TimeSlot the_min;
    TimeSlot the_max;

@@ -35,17 +35,8 @@ bool DateParser::doParse( const std::string& line,
 		throw std::runtime_error("DateParser::doParse: Could not add date as node stack is empty at line: " + line );
 	}
 
-	// DateAttr::create can throw for invalid dates
-	DateAttr date = DateAttr::create( lineTokens[1]) ;
-
-	// state
-	if (lineTokens.size() == 4 && rootParser()->get_file_type() != PrintStyle::DEFS) {
-	   if (lineTokens[3] == "free") {
-	      date.setFree();
-	   }
-	}
-
- 	nodeStack_top()->addDate( date );
+   // DateAttr::create can throw for invalid dates
+ 	nodeStack_top()->addDate( DateAttr::create( lineTokens,  rootParser()->get_file_type() != PrintStyle::DEFS) );
 
 	return true;
 }

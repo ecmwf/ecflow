@@ -126,10 +126,10 @@ private:
    std::vector<int> last_week_days_of_month_;
    std::vector<int> daysOfMonth_;
    std::vector<int> months_;
-   bool             last_day_of_month_{false};
-   bool             free_{false};         // persisted for use by why() on client side
    unsigned int     w_{0};                // NOT implemented, weekday nearest the given day of the month 15W
    unsigned int     state_change_no_{0};  // *not* persisted, only used on server side
+   bool             last_day_of_month_{false};
+   bool             free_{false};         // persisted for use by why() on client side
 
    friend class cereal::access;
    template<class Archive>

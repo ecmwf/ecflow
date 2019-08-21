@@ -22,6 +22,7 @@
 #include "DayAttr.hpp"
 #include "Calendar.hpp"
 #include "Str.hpp"
+#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -95,6 +96,44 @@ BOOST_AUTO_TEST_CASE( test_day_attr_constructor )
    }
 }
 
+static DayAttr print_and_parse_attr(DayAttr& day){
+
+   PrintStyle style(PrintStyle::MIGRATE);
+   std::string output;
+   day.print(output);
+   output.erase( output.begin() +  output.size()-1); // remove trailing newline
+
+   std::vector<std::string> tokens;
+   Str::split_orig(output,tokens);
+
+   return DayAttr::create(tokens,true/*read state*/);
+}
+
+BOOST_AUTO_TEST_CASE( test_day_parsing ) {
+
+   cout << "ANattr:: ...test_day_parsing\n";
+   {
+      DayAttr day(DayAttr::WEDNESDAY);
+      day.setFree();
+      day.set_requeue_counter(3);
+      DayAttr parsed_day = print_and_parse_attr(day);
+
+      BOOST_CHECK_MESSAGE(day == parsed_day,"Parse failed expected " << day.dump() << " but found " << parsed_day.dump());
+   }
+   {
+      DayAttr day(DayAttr::WEDNESDAY);
+      day.setFree();
+      DayAttr parsed_day = print_and_parse_attr(day);
+
+      BOOST_CHECK_MESSAGE(day == parsed_day,"Parse failed expected " << day.dump() << " but found " << parsed_day.dump());
+   }
+   {
+      DayAttr day(DayAttr::WEDNESDAY);
+      day.set_requeue_counter(3);
+      DayAttr parsed_day = print_and_parse_attr(day);
+
+      BOOST_CHECK_MESSAGE(day == parsed_day,"Parse failed expected " << day.dump() << " but found " << parsed_day.dump());
+   }
+}
 
 BOOST_AUTO_TEST_SUITE_END()
-
