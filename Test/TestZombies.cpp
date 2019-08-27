@@ -1056,7 +1056,7 @@ static void remove_all_user_zombies()
       }
       // make sure test does not take too long.
       if ( assertTimer.duration() >= assertTimer.timeConstraint() ) {
-         cout << "      removed " << removed_count << "user zombies. Quit waiting, to remove all zombies of type USER\n";
+         cout << "      removed " << removed_count << " user zombies. Quit waiting, to remove all zombies of type USER\n";
          cout << Zombie::pretty_print( zombies , 6);
          return;
       }
