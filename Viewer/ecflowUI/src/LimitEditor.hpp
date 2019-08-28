@@ -39,6 +39,8 @@ protected Q_SLOTS:
     void slotMaxChanged(int);
     void slotRemove();
     void slotRemoveAll();
+    void slotKill();
+    void slotSelection(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/);
     void slotLookUp();
     void slotDoubleClicked(const QModelIndex &index);
 

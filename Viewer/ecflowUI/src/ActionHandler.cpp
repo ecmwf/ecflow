@@ -322,92 +322,103 @@ bool ActionHandler::confirmCommand(MenuItem* item,std::vector<VInfo_ptr>& filter
 
     if(needQuestion)
     {
-        std::string fullNames("<ul>");
-        std::string nodeNames("<ul>");
-        if (filteredNodes.size() == 1)
-        {
-            fullNames = filteredNodes[0]->path();
-            nodeNames = "<b>" + filteredNodes[0]->name() + "</b>";
-        }
-        else
-        {
-            int numNodes = filteredNodes.size();
-            int numItemsToList = std::min(numNodes, 5);
-
-            for(int i=0; i < numItemsToList; i++)
-            {
-                fullNames += "<li><b>";
-                fullNames += filteredNodes[i]->path();
-                fullNames += "</b></li>";
-
-                nodeNames += "<li><b>";
-                nodeNames += filteredNodes[i]->name();
-                nodeNames += "</b></li>";
-            }
-            if(numItemsToList < static_cast<int>(filteredNodes.size()))
-            {
-                std::string numExtra = QString::number(numNodes-numItemsToList).toStdString();
-                fullNames += "<b>...and " + numExtra + " more </b></li>";
-                nodeNames += "<b>...and " + numExtra + " more </b></li>";
-            }
-            fullNames += "</ul>";
-            nodeNames += "</ul>";
-        }
-
-        std::string question(item->question());
-
-        std::string placeholder("<full_name>");
-        ecf::Str::replace_all(question, placeholder, fullNames);
-        placeholder = "<node_name>";
-        ecf::Str::replace_all(question, placeholder, nodeNames);
-        if (taskNum > 0) {
-            placeholder = "<task_num>";
-            ecf::Str::replace_all(question, placeholder,
-                              "<b>" + QString::number(taskNum).toStdString() + "</b>");
-        }
-
-        QString msg=QString::fromStdString(question);
-
-        QString warning=QString::fromStdString(item->warning());
-        if(!warning.isEmpty())
-        {
-            if(!msg.contains("<ul>"))
-                msg+="<br><br>";
-
-            msg+="<i>warning: " + Viewer::formatText(warning,QColor(196,103,36)) + "</i><br>";
-        }
-
-
-        QString cmdStr;
+        std::string cmdStr;
         if (!commandDescStr.empty())
-            cmdStr=QString::fromStdString(commandDescStr);
+            cmdStr=commandDescStr;
         else if(!item->command().empty())
-            cmdStr=QString::fromStdString(item->command());
+            cmdStr=item->command();
 
-        if(!cmdStr.isEmpty())
+        return ActionHandler::confirmCommand(filteredNodes,
+                                      item->question(),item->warning(),cmdStr,taskNum);
+    }
+    return true;
+}
+
+
+bool ActionHandler::confirmCommand(std::vector<VInfo_ptr>& filteredNodes,
+                                   const std::string& questionIn,
+                                   const std::string& warning,
+                                   const std::string& commandDescStr,
+                                   std::size_t taskNum)
+{
+    std::string fullNames("<ul>");
+    std::string nodeNames("<ul>");
+    if (filteredNodes.size() == 1)
+    {
+        fullNames = "<b>" + filteredNodes[0]->path() + "</b>";
+        nodeNames = "<b>" + filteredNodes[0]->name() + "</b>";
+    }
+    else
+    {
+        int numNodes = filteredNodes.size();
+        int numItemsToList = std::min(numNodes, 5);
+
+        for(int i=0; i < numItemsToList; i++)
         {
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-            cmdStr=cmdStr.toHtmlEscaped();
-#else
-            cmdStr=Qt::escape(cmdStr);
-#endif
-            if(!warning.isEmpty())
-                msg+="<br>";
-            else if(!msg.contains("<ul>"))
-                msg+="<br><br>";
+            fullNames += "<li><b>";
+            fullNames += filteredNodes[i]->path();
+            fullNames += "</b></li>";
 
-            msg+="<i>command: "  + Viewer::formatText(cmdStr,QColor(41,78,126)) + "</i>";
-            msg+="<br>";
+            nodeNames += "<li><b>";
+            nodeNames += filteredNodes[i]->name();
+            nodeNames += "</b></li>";
         }
-
-        QMessageBox msgBox;
-        msgBox.setWindowTitle(tr("Confirm command"));
-        msgBox.setText(msg);
-        msgBox.setTextFormat(Qt::RichText);
-        msgBox.setIcon(QMessageBox::Question);
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        return (msgBox.exec() == QMessageBox::Ok);
+        if(numItemsToList < static_cast<int>(filteredNodes.size()))
+        {
+            std::string numExtra = QString::number(numNodes-numItemsToList).toStdString();
+            fullNames += "<b>...and " + numExtra + " more </b></li>";
+            nodeNames += "<b>...and " + numExtra + " more </b></li>";
+        }
+        fullNames += "</ul>";
+        nodeNames += "</ul>";
     }
 
-    return true;
+    std::string question = questionIn;
+
+    std::string placeholder("<full_name>");
+    ecf::Str::replace_all(question, placeholder, fullNames);
+    placeholder = "<node_name>";
+    ecf::Str::replace_all(question, placeholder, nodeNames);
+    if (taskNum > 0) {
+        placeholder = "<task_num>";
+        ecf::Str::replace_all(question, placeholder,
+                              "<b>" + QString::number(taskNum).toStdString() + "</b>");
+    }
+
+    QString msg=QString::fromStdString(question);
+
+    QString warningStr=QString::fromStdString(warning);
+    if(!warningStr.isEmpty())
+    {
+        if(!msg.contains("<ul>"))
+            msg+="<br><br>";
+
+        msg+="<i>warning: " + Viewer::formatText(warningStr,QColor(196,103,36)) + "</i><br>";
+    }
+
+    QString cmdStr = QString::fromStdString(commandDescStr);
+
+    if(!cmdStr.isEmpty())
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        cmdStr=cmdStr.toHtmlEscaped();
+#else
+        cmdStr=Qt::escape(cmdStr);
+#endif
+        if(!warningStr.isEmpty())
+            msg+="<br>";
+        else if(!msg.contains("<ul>"))
+            msg+="<br><br>";
+
+        msg+="<i>command: "  + Viewer::formatText(cmdStr,QColor(41,78,126)) + "</i>";
+        msg+="<br>";
+    }
+
+    QMessageBox msgBox;
+    msgBox.setWindowTitle(tr("Confirm command"));
+    msgBox.setText(msg);
+    msgBox.setTextFormat(Qt::RichText);
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+    return (msgBox.exec() == QMessageBox::Ok);
 }

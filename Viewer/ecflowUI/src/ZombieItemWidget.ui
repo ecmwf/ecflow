@@ -230,6 +230,10 @@
    </property>
   </action>
   <action name="actionKill">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/icon_killed.svg</normaloff>:/viewer/icon_killed.svg</iconset>
+   </property>
    <property name="text">
     <string>&amp;Kill</string>
    </property>
