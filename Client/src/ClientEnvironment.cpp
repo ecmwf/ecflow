@@ -72,7 +72,7 @@ ClientEnvironment::ClientEnvironment(bool gui)
 // test constructor
 ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::string& host, const std::string& port)
 : AbstractClientEnv(),
-  task_try_num_(1),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT)
+  timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT)
 {
 	init();
 

@@ -68,9 +68,9 @@ private:
    std::string passwd() const;
 
 private:
-   bool init_for_client_{false};
-   std::string ssl_; // Non empty if ssl has been enabled
+   std::string ssl_;                       // Non empty if ssl has been enabled
    boost::asio::ssl::context ssl_context_;
+   bool init_for_client_{false};
 };
 
 std::ostream& operator<<(std::ostream& os, const ecf::Openssl&);

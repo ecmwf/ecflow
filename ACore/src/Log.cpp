@@ -54,7 +54,7 @@ void Log::destroy()
 }
 
 Log::Log(const std::string& fileName)
-: fileName_(fileName), logImpl_( std::make_unique<LogImpl>(fileName) )
+: logImpl_( std::make_unique<LogImpl>(fileName) ), fileName_(fileName)
 {
 }
 

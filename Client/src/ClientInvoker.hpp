@@ -368,19 +368,20 @@ private:
    friend class RoundTripRecorder;
    friend class RequestLogger;
 private:
-   bool gui_{false};
-	bool on_error_throw_exception_{true};
-	bool auto_sync_{false};
-	bool test_{false};                            // used in testing only
-	bool testInterface_{false};                   // used in testing only
-	unsigned int connection_attempts_{2};     // No of attempts to establish connection with the server
-	unsigned int retry_connection_period_; // No of seconds to wait before trying to connect in case of failure.
-
-	mutable boost::posix_time::time_duration rtt_;// record latency for each cmd.
-	mutable boost::posix_time::ptime start_time_; // Used for time out and measuring latency
 	mutable ClientEnvironment clientEnv_;         // Will read the environment *once* on construction. Must be before Client options
 	mutable ClientOptions     args_;              // Used for argument parsing & creating client request
 	mutable ServerReply server_reply_;            // stores the local defs, client_handle, & all server replies
+	unsigned int connection_attempts_{2};         // No of attempts to establish connection with the server
+	unsigned int retry_connection_period_;        // No of seconds to wait before trying to connect in case of failure.
+
+   mutable boost::posix_time::time_duration rtt_;// record latency for each cmd.
+   mutable boost::posix_time::ptime start_time_; // Used for time out and measuring latency
+
+   bool gui_{false};
+   bool on_error_throw_exception_{true};
+   bool auto_sync_{false};
+   bool test_{false};                            // used in testing only
+   bool testInterface_{false};                   // used in testing only
 
    /// For use by python interface,
    std::vector<std::string>::const_iterator changed_node_paths_begin() const { return server_reply_.changed_nodes().begin();}

@@ -121,16 +121,7 @@ public:
 
 private:
 	friend class SSyncCmd;
-	bool cli_{false};
- 	bool in_sync_{false};                          // clear at the start of invoke
- 	bool full_sync_{false};                        // clear at the start of invoke
-	News_t news_{NO_NEWS};                           // clear at the start of invoke
-	bool block_client_on_home_server_{false};      // clear at the start of invoke
-	bool block_client_server_halted_{false};       // clear at the start of invoke
-	bool block_client_zombie_detected_{false};     // clear at the start of invoke
-	bool delete_all_{false};                       // clear at the start of invoke
-   bool invalid_argument_{false};                  // clear at the start of invoke
-   bool eof_{false};                       // clear at the start of invoke
+
    std::string host_;                      // clear at the start of invoke
    std::string port_;                      // clear at the start of invoke
 	std::string str_;                       // clear at the start of invoke
@@ -141,8 +132,20 @@ private:
    std::vector<std::pair<unsigned int, std::vector<std::string> > > client_handle_suites_; // clear at the start of invoke
    Stats stats_;                        // Used for test only, ideally need to clear
 
-	int client_handle_{0};                  // set locally when suites are registered, and kept for reference
    defs_ptr    client_defs_;            // server reply stored as the client side defs, kept locally
    node_ptr    client_node_;            // server reply stored as the client side node, kept locally
+
+	int client_handle_{0};                  // set locally when suites are registered, and kept for reference
+   News_t news_{NO_NEWS};                           // clear at the start of invoke
+
+   bool cli_{false};
+   bool in_sync_{false};                          // clear at the start of invoke
+   bool full_sync_{false};                        // clear at the start of invoke
+   bool block_client_on_home_server_{false};      // clear at the start of invoke
+   bool block_client_server_halted_{false};       // clear at the start of invoke
+   bool block_client_zombie_detected_{false};     // clear at the start of invoke
+   bool delete_all_{false};                       // clear at the start of invoke
+   bool invalid_argument_{false};                  // clear at the start of invoke
+   bool eof_{false};                       // clear at the start of invoke
 };
 #endif

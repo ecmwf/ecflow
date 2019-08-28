@@ -229,14 +229,14 @@ protected:
    mutable Submittable* submittable_{nullptr}; // stored during authentication and re-used handle request, not persisted, server side only
 
 private:
-   mutable bool password_missmatch_{false}; // stored during authentication and re-used handle request, not persisted, server side only
-   mutable bool pid_missmatch_{false};      // stored during authentication and re-used handle request, not persisted, server side only
-
-private:
    std::string path_to_submittable_;
    std::string jobs_password_;
    std::string process_or_remote_id_;
    int try_no_{0};
+
+private:
+   mutable bool password_missmatch_{false}; // stored during authentication and re-used handle request, not persisted, server side only
+   mutable bool pid_missmatch_{false};      // stored during authentication and re-used handle request, not persisted, server side only
 
    friend class cereal::access;
    template<class Archive>
@@ -400,7 +400,7 @@ public:
             int try_no,
             const std::string& eventName,
             bool value = true) // true = set(default), false = clear
-   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no),value_(value), name_(eventName){}
+   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no),name_(eventName),value_(value) {}
    EventCmd() : TaskCmd() {}
 
    const std::string& name() const { return name_; }
@@ -422,8 +422,8 @@ private:
    ecf::Child::CmdType child_type() const override { return ecf::Child::EVENT; }
 
 private:
-   bool value_{true}; // true = set(default), false = clear
    std::string name_; // the events name
+   bool value_{true}; // true = set(default), false = clear
 
    friend class cereal::access;
    template<class Archive>
@@ -826,8 +826,8 @@ public:
    ClientHandleCmd(int client_handle,const std::vector<std::string>& suites, bool add_add_new_suites)
    : api_(REGISTER),
      client_handle_(client_handle),
-     auto_add_new_suites_(add_add_new_suites),
-     suites_(suites)
+     suites_(suites),
+     auto_add_new_suites_(add_add_new_suites)
       {}
 
    explicit ClientHandleCmd(int client_handle)
@@ -874,9 +874,9 @@ private:
 
    Api api_;
    int client_handle_{0};
-   bool auto_add_new_suites_{false};
    std::string drop_user_;
    std::vector<std::string> suites_;
+   bool auto_add_new_suites_{false};
 
    friend class cereal::access;
    template<class Archive>
@@ -885,9 +885,10 @@ private:
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(api_),
          CEREAL_NVP(client_handle_),
-         CEREAL_NVP(auto_add_new_suites_),
          CEREAL_NVP(drop_user_),
-         CEREAL_NVP(suites_));
+         CEREAL_NVP(suites_),
+         CEREAL_NVP(auto_add_new_suites_)
+         );
    }
 
 private:
@@ -956,9 +957,9 @@ private:
 class DeleteCmd : public UserCmd {
 public:
    DeleteCmd(const std::vector<std::string>& paths, bool force = false)
-      : force_(force),paths_(paths),group_cmd_(nullptr){}
+      : group_cmd_(nullptr),paths_(paths),force_(force){}
    DeleteCmd(const std::string& absNodePath, bool force = false);
-   DeleteCmd()  {};
+   DeleteCmd(){};
 
    const std::vector<std::string>& paths() const { return paths_;}
    bool force() const { return force_;}
@@ -987,19 +988,19 @@ private:
    void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after handlerequest
 
 private:
-   bool force_{false};
+   const GroupCTSCmd* group_cmd_{nullptr}; // not persisted only used in server
    std::vector<std::string> paths_;
+   bool force_{false};
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class< UserCmd >( this ),
-         CEREAL_NVP(force_),
-         CEREAL_NVP(paths_));
+         CEREAL_NVP(paths_),
+         CEREAL_NVP(force_)
+         );
    }
-private:
-   const GroupCTSCmd* group_cmd_{nullptr}; // not persisted only used in server
 };
 
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
@@ -1008,7 +1009,7 @@ public:
    enum Api { NO_CMD, SUSPEND, RESUME, KILL, STATUS, CHECK, EDIT_HISTORY, ARCHIVE, RESTORE };
 
    PathsCmd(Api api,const std::vector<std::string>& paths, bool force = false)
-      : api_(api),force_(force),paths_(paths){}
+      : api_(api),paths_(paths),force_(force){}
    PathsCmd(Api api,const std::string& absNodePath, bool force = false);
    explicit PathsCmd(Api api)
       : api_(api) { assert(api != NO_CMD); }
@@ -1040,8 +1041,8 @@ private:
 
 private:
    Api api_{NO_CMD};
-   bool force_{false};
    std::vector<std::string> paths_;
+   bool force_{false};
 
    friend class cereal::access;
    template<class Archive>
@@ -1049,8 +1050,9 @@ private:
    {
       ar(cereal::base_class< UserCmd >( this ),
          CEREAL_NVP(api_),
-         CEREAL_NVP(force_),
-         CEREAL_NVP(paths_));
+         CEREAL_NVP(paths_),
+         CEREAL_NVP(force_)
+         );
    }
 };
 
@@ -2076,16 +2078,17 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
 
 private:
-   bool cli_ = true;
    std::vector<Cmd_ptr> cmdVec_;
+   bool cli_{true};
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class< UserCmd >( this ),
-         CEREAL_NVP(cli_),
-         CEREAL_NVP(cmdVec_));
+         CEREAL_NVP(cmdVec_),
+         CEREAL_NVP(cli_)
+         );
    }
 };
 

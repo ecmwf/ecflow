@@ -26,7 +26,7 @@ using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
 
-DeleteCmd::DeleteCmd(const std::string& absNodePath, bool force) : force_(force), group_cmd_(nullptr)
+DeleteCmd::DeleteCmd(const std::string& absNodePath, bool force) : group_cmd_(nullptr), force_(force)
 {
    if (!absNodePath.empty()) paths_.push_back(absNodePath);
 }

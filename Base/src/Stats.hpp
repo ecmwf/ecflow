@@ -14,7 +14,6 @@
 //
 // Description :
 //============================================================================
-
 #include <sstream>
 
 #include "CheckPt.hpp"
@@ -33,7 +32,6 @@ struct Stats {
    void update_for_serialisation();
    void reset();
 
-	int status_{0};    // 0 HALTED, 1 SHUTDOWN, 2 RUNNING
 	std::string locked_by_user_;
 	std::string host_;
 	std::string port_;
@@ -45,6 +43,7 @@ struct Stats {
    std::string ECF_LOG_;
    std::string ECF_SSL_{"disabled"};
 
+	int status_{0};                // 0 HALTED, 1 SHUTDOWN, 2 RUNNING
 	int request_count_{0};
 	int job_sub_interval_{0};
    int checkpt_interval_{0};

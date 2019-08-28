@@ -109,8 +109,8 @@ private:
    explicit Log(const std::string& fileName);
    static Log* instance_;
 
-   std::string fileName_;
    std::unique_ptr<LogImpl> logImpl_;
+   std::string fileName_;
 };
 
 // Flush log on destruction

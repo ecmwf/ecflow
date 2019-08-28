@@ -312,8 +312,8 @@ void Zombie::serialize(Archive & ar, std::uint32_t const version )
        CEREAL_NVP(process_or_remote_id_),
        CEREAL_NVP(user_cmd_),
        CEREAL_NVP(host_),
-       CEREAL_NVP(user_action_set_),
-       CEREAL_NVP(attr_)
+       CEREAL_NVP(attr_),
+       CEREAL_NVP(user_action_set_)
    );
 }
 CEREAL_TEMPLATE_SPECIALIZE_V(Zombie);

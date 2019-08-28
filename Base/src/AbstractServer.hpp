@@ -197,9 +197,9 @@ protected:
 	AbstractServer()= default;
 
 private:
-	int job_gen_count_{0};
 	ZombieCtrl zombie_ctrl_;
 	Stats stats_;
+	int job_gen_count_{0};
 };
 
 #endif

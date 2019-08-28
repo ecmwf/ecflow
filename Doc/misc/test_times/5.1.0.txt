@@ -9,6 +9,7 @@
 #
 #  Overall performance of gain 4.065524550 -> 2.505218824
 # See: https://softwareengineering.stackexchange.com/questions/328775/how-important-is-memory-alignment-does-it-still-matter
+# see: http://www.catb.org/esr/structure-packing/
 ##########################################################################
 
 PERF
