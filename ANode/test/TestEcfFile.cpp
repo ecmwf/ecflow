@@ -1258,7 +1258,6 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_672 )
    boost::filesystem::remove( job_file_location );
 }
 
-
 static void basic_test_template(
       const std::string& test_name,
       const std::string& ecf_file1,
@@ -1321,6 +1320,10 @@ static void basic_test_template(
    /// Check generation of '.usr' and job files
    JobsParam jobsParam(true); // spawn_jobs = false
    if (expect_success) {
+      std::string file_with_used_variables;
+      try { ecfFile.edit_used_variables (file_with_used_variables ); }
+      catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected edit_used_variables to succeed " << e.what());}
+
       try { ecfFile.create_job(jobsParam); }
       catch ( std::exception& e) { BOOST_CHECK_MESSAGE(false,"Expected job creation to succeed " << e.what());}
 
@@ -1413,15 +1416,31 @@ BOOST_AUTO_TEST_CASE( test_script_override_ecf_micro )
 {
    string ecf_file;                            // ecf_micro in script OVERRIDES ECF_MICRO variable, but *only* in script
    ecf_file += "$simple$\n";                   // ECF_MICRO is set to $
-   ecf_file += "$ecfmicro &\n";                // ecf_micro change from $ -> &
+   ecf_file += "$ecfmicro &\n";                // ecfmicro change from $ -> &
    ecf_file += "&include <&simple&_head.h>\n";
-   ecf_file += "#body\n";
-   ecf_file += "&ecfmicro *\n";                // ecf_micro change from & -> *
+   ecf_file += "#body$fred&simple&\n";
+   ecf_file += "&ecfmicro *\n";                // ecfmicro change from & -> *
    ecf_file += "*include <simple_*tail*.h>\n";
 
-   std::string expected_job_file_contents = "simple\n#head.h\n#body\n#tail.h";
+   std::string expected_job_file_contents = "simple\n#head.h\n#body$fredsimple\n#tail.h";
 
    basic_test_template("test_script_override_ecf_micro",ecf_file,expected_job_file_contents,"$");
+}
+
+BOOST_AUTO_TEST_CASE( test_mistyped_ecf_micro )
+{
+   // same test as above, but we have mistyped ecf_micro. Make sure we don't ignore this.
+   string ecf_file;
+   ecf_file += "$simple$\n";
+   ecf_file += "$ecf_micro &\n";                   // ecfmicro has been mistyped
+   ecf_file += "&include <&simple&_head.h>\n";
+   ecf_file += "#body$fred&simple&\n";
+   ecf_file += "&ecf_micro *\n";
+   ecf_file += "*include <simple_*tail*.h>\n";
+
+   std::string expected_job_file_contents = "simple\n#head.h\n#body$fredsimple\n#tail.h";
+
+   basic_test_template("test_mistyped_ecf_micro",ecf_file,expected_job_file_contents,"$",false);
 }
 
 BOOST_AUTO_TEST_CASE( test_include_with_variables_mismatched_micros )
@@ -1448,6 +1467,5 @@ BOOST_AUTO_TEST_CASE( test_include_with_variable_not_defined )
 
    basic_test_template("test_include_with_variable_not_defined",ecf_file,expected_job_file_contents,""/*ecf_micro*/,false/*expect failure*/);
 }
-
 
 BOOST_AUTO_TEST_SUITE_END()

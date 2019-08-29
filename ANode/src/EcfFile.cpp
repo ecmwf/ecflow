@@ -1398,6 +1398,14 @@ void PreProcessor::preProcess_line(const std::string& script_line)
 
       return;
    }
+   else {
+      if (script_line.find("ecf_micro") == 1) {    //  Mistyped ecfmicro
+         std::stringstream ss;
+         ss << "Replace with 'ecf_micro' with 'ecfmicro' at line: " << script_line << "\nin file:" << ecfile_->script_path_or_cmd_;
+         error_msg_ += ss.str();
+         return;
+      }
+   }
 
    if (tokens_.size() < 2) {
       int ecfMicroCount = EcfFile::countEcfMicro( script_line, ecf_micro_ );
