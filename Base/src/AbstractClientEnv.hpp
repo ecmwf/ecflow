@@ -30,13 +30,13 @@ class AbstractClientEnv {
 protected:
  	AbstractClientEnv() = default;
 public:
- 	AbstractClientEnv(const  AbstractClientEnv&) = delete;
+ 	AbstractClientEnv(const AbstractClientEnv&) = delete;
    const AbstractClientEnv& operator=(const AbstractClientEnv&) = delete;
 
  	virtual ~AbstractClientEnv() = default;
 
- 	void set_cli(bool f) { cli_ = f ;}
- 	bool get_cli() const { return cli_;}
+ 	virtual void set_cli(bool f) =0;
+ 	virtual bool get_cli() const =0;
 
  	/// For all tasks/child based commands we require taskPath and password and optional Remote ID
  	/// When the jobs use a queueing system the remote id (ECF_RID) is used to
@@ -78,8 +78,5 @@ public:
 	/// when testing the client interface we want to avoid opening the log file.
 	virtual void set_test() = 0;
 	virtual bool under_test() const = 0;
-
-private:
-   bool cli_{false};  // Command Line Interface. Controls whether output written to standard out, and argument checking
 };
 #endif

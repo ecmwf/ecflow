@@ -57,13 +57,13 @@ using namespace boost::posix_time;
 // ==================================================================================
 // class ClientInvoker
 ClientInvoker::ClientInvoker()
-: clientEnv_(gui_),retry_connection_period_(RETRY_CONNECTION_PERIOD)
+: clientEnv_(false),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
 	if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 1=================start=================\n";
 }
 
 ClientInvoker::ClientInvoker(const std::string& host_port)
-: clientEnv_(gui_), retry_connection_period_(RETRY_CONNECTION_PERIOD)
+: clientEnv_(false), retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 2=================start=================\n";
    set_hostport(host_port);
@@ -77,14 +77,14 @@ ClientInvoker::ClientInvoker(bool gui,const std::string& host, const std::string
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
-: clientEnv_(gui_),retry_connection_period_(RETRY_CONNECTION_PERIOD)
+: clientEnv_(false),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
    set_host_port(host,port);
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, int port)
-: clientEnv_(gui_), retry_connection_period_(RETRY_CONNECTION_PERIOD)
+: clientEnv_(false), retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 4=================start=================\n";
    set_host_port(host, boost::lexical_cast<std::string>(port));

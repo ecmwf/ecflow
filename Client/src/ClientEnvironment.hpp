@@ -104,6 +104,8 @@ public:
 #endif
 
 // AbstractClientEnv functions:
+   void set_cli(bool f) override { cli_ = f ;}
+   bool get_cli() const override { return cli_;}
  	bool checkTaskPathAndPassword(std::string& errorMsg) const override;
  	const std::string& task_path() const override { return task_path_; }
  	int task_try_no() const override { return task_try_num_; }
@@ -149,6 +151,7 @@ private:
 	int  connect_timeout_{0};              // default 0, ECF_CONNECT_TIMEOUT, connection timeout
 	int  host_vec_index_{0};               // index into host_vec;
 
+	bool cli_{false};                          // Command Line Interface
 	bool denied_{false};                       // ECF_DENIED.If the server denies the communication, then the child command can be set to fail immediately
  	bool no_ecf_{false};                       // NO_ECF. if defined then abort cmd immediately. useful when test jobs stand-alone
 	bool debug_{false};                        // For live debug, enabled by env variable ECF_CLIENT_DEBUG

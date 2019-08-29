@@ -145,7 +145,7 @@ void UserCmd::setup_user_authentification(const std::string& user, const std::st
 
 bool UserCmd::setup_user_authentification(AbstractClientEnv& clientEnv)
 {
-   // A Custom use is one where:
+   // A Custom user is one where:
    //   o/ ECF_USER environment used
    //   o/ --user on the command line
    //   o/ ClientInvoker::set_user_name()
