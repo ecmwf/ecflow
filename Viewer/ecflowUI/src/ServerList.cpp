@@ -75,7 +75,8 @@ ServerItem* ServerList::find(const std::string& name, const std::string& host, c
 }
 
 ServerItem* ServerList::add(const std::string& name,const std::string& host,
-                            const std::string& port,bool favourite, bool ssl, bool saveIt)
+                            const std::string& port,const std::string& user,
+                            bool favourite, bool ssl, bool saveIt)
 {
     std::string errStr;
     if(!checkItemToAdd(name,host,port,true,errStr))
@@ -84,7 +85,7 @@ ServerItem* ServerList::add(const std::string& name,const std::string& host,
         return nullptr;
     }
 
-    auto* item=new ServerItem(name,host,port,favourite,ssl);
+    auto* item=new ServerItem(name,host,port,user,favourite,ssl);
 
     items_.push_back(item);
 
@@ -110,16 +111,17 @@ void ServerList::remove(ServerItem *item)
 	}
 }
 
-void ServerList::reset(ServerItem* item,const std::string& name,const std::string& host,const std::string& port)
+void ServerList::reset(ServerItem* item,const std::string& name,const std::string& host,
+                       const std::string& port, const std::string& user, bool ssl)
 {
 	auto it=std::find(items_.begin(),items_.end(),item);
 	if(it != items_.end())
 	{
-		//Check if there is an item with the same name. names have to be unique!
+        //Check if there is an item with the same name. Names have to be unique!
 		if(item->name() != name && find(name))
 			return;
 
-		item->reset(name,host,port);
+        item->reset(name,host,port,user,ssl);
 
 		save();
 		broadcastChanged();
@@ -282,14 +284,18 @@ bool ServerList::load()
         if(sv.size() >= 6)
             ssl=(sv[5]=="1")?true:false;
 
+        std::string user;
+        if(sv.size() >= 7)
+            user=sv[6];
+
         if(sv.size() >= 3)
 		{           
             std::string name=sv[0], host=sv[1], port=sv[2];
             ServerItem* item=nullptr;
             try
             {
-                item=add(name,host,port,favourite,ssl,false);
-                UI_ASSERT(item != nullptr,"name=" << name << " host=" << host << " port=" << port);
+                item=add(name,host,port,user,favourite,ssl,false);
+                UI_ASSERT(item != nullptr,"name=" << name << " host=" << host << " port=" << port << " user=" << user);
                 item->setSystem(sys);
             }
             catch(std::exception& e)
@@ -330,14 +336,14 @@ void ServerList::save()
 	if(!out.good())
         return;
 
-    out << "#Name Host Port Favourite System" << std::endl;
+    out << "#Name Host Port Favourite System Ssl user" << std::endl;
 
 	for(auto & item : items_)
 	{
         std::string fav=(item->isFavourite())?"1":"0";
         std::string ssl=(item->isSsl())?"1":"0";
         std::string sys=(item->isSystem())?"1":"0";
-        out << item->name() << "," << item->host() << "," <<  item->port() <<  "," <<  fav << "," <<  sys << "," <<  ssl << std::endl;
+        out << item->name() << "," << item->host() << "," <<  item->port() <<  "," <<  fav << "," <<  sys << "," <<  ssl << "," << item->user() << std::endl;
 	}
 	out.close();    
 }
@@ -372,7 +378,7 @@ bool ServerList::readRcFile()
                 std::string name=vec[0], host=vec[1], port=vec[2];                
                 try
                 {
-                    add(name,host,port,false,false,false);
+                    add(name,host,port,"",false,false,false);
                 }
                 catch(std::exception& e)
                 {
@@ -484,7 +490,7 @@ void ServerList::syncSystemFile()
             std::string name=i.name(),host=i.host(), port=i.port();
             try
             {
-                item=add(name,host,port,false,false,false);
+                item=add(name,host,port,"",false,false,false);
                 UI_ASSERT(item != nullptr,"name=" << name << " host=" << host
                           << " port=" << port);
                 item->setSystem(true);
@@ -513,7 +519,7 @@ void ServerList::syncSystemFile()
             syncChange_.push_back(new ServerListSyncChangeItem(i,localTmp,
                                      ServerListSyncChangeItem::MatchChange));
 
-            item->reset(i.name(),i.host(),i.port());
+            item->reset(i.name(),i.host(),i.port(), "",false);
             item->setSystem(true);
             broadcastChanged();
             continue;

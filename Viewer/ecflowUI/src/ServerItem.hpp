@@ -39,6 +39,7 @@ public:
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
 	const std::string& port() const {return port_;}
+    const std::string& user() const {return user_;}
     std::string longName() const;
 	bool isFavourite() const {return favourite_;}
     bool isSystem() const {return system_;}
@@ -53,13 +54,15 @@ public:
 
 protected:
 	explicit ServerItem(const std::string&);
-    ServerItem(const std::string&,const std::string&,const std::string&,bool favourite, bool ssl);
+    ServerItem(const std::string& name,const std::string& host,const std::string& port,
+               const std::string& user,bool favourite, bool ssl);
 	 ~ServerItem();
 
 	void  name(const std::string& name) {name_=name;}
 	void  host(const std::string& host) {host_=host;}
 	void  port(const std::string& port) {port_=port;}
-	void  reset(const std::string& name,const std::string& host,const std::string& port);
+    void  reset(const std::string& name,const std::string& host,const std::string& port,
+                const std::string& user, bool ssl);
     void  setFavourite(bool b);
     void  setSystem(bool b);
     void  setSsl(bool b);
@@ -73,6 +76,7 @@ protected:
 	std::string name_;
 	std::string host_;
 	std::string port_;
+    std::string user_;
 	bool favourite_;
     bool system_;
     bool ssl_;

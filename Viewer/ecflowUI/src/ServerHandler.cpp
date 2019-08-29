@@ -55,10 +55,12 @@ std::string ServerHandler::localHostName_;
 //#define __UI_SERVERCOMOBSERVER_DEBUG
 #define __UI_SERVERUPDATE_DEBUG
 
-ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port, bool ssl) :
+ServerHandler::ServerHandler(const std::string& name,const std::string& host, const std::string& port,
+                             const std::string& user,bool ssl) :
    name_(name),
    host_(host),
    port_(port),
+   user_(user),
    ssl_(ssl),
    client_(nullptr),
    updating_(false),
@@ -180,6 +182,17 @@ void ServerHandler::createClient(bool init)
             client_->disable_ssl();
         }
 #endif
+
+        if (!user_.empty()) {
+            try
+            {
+                client_->set_user_name(user_);
+            }
+            catch(std::exception& e)
+            {
+                UiLog().err() << std::string(e.what());
+            }
+        }
 
         client_->set_auto_sync(true); //will call sync_local() after each command!!!
         client_->set_retry_connection_period(1);
@@ -481,9 +494,10 @@ void ServerHandler::setActivity(Activity ac)
 	broadcast(&ServerObserver::notifyServerActivityChanged);
 }
 
-ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port, bool ssl)
+ServerHandler* ServerHandler::addServer(const std::string& name,const std::string& host, const std::string& port,
+                                        const std::string& user, bool ssl)
 {
-    auto* sh=new ServerHandler(name,host,port,ssl);    
+    auto* sh=new ServerHandler(name,host,port,user,ssl);
     return sh;
 }
 

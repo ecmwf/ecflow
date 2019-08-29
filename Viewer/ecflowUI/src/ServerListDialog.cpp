@@ -87,6 +87,16 @@ bool ServerDialogChecker::checkPort(QString port)
 	return true;
 }
 
+bool ServerDialogChecker::checkUser(QString user)
+{
+    if(user.contains(","))
+    {
+        error(QObject::tr("<b>Custom user</b> cannot contain comma character!"));
+        return false;
+    }
+
+    return true;
+}
 
 void ServerDialogChecker::error(QString msg)
 {
@@ -129,7 +139,7 @@ void ServerAddDialog::accept()
 {
 	QString name=nameEdit->text();
 	QString host=hostEdit->text();
-	QString port=portEdit->text();
+    QString port=portEdit->text();
 
 	if(!checkName(name) || !checkHost(host) || !checkPort(port))
 		return;
@@ -152,6 +162,11 @@ QString ServerAddDialog::port() const
 	return portEdit->text();
 }
 
+QString ServerAddDialog::user() const
+{
+    return userEdit->text();
+}
+
 bool ServerAddDialog::isSsl() const
 {
     return sslCb->isChecked();
@@ -168,7 +183,7 @@ bool ServerAddDialog::addToView() const
 //
 //======================================
 
-ServerEditDialog::ServerEditDialog(QString name, QString host, QString port,bool favourite,
+ServerEditDialog::ServerEditDialog(QString name, QString host, QString port,QString user,bool favourite,
                                    bool ssl, QWidget *parent) :
    QDialog(parent),
    ServerDialogChecker(tr("Cannot modify server!")),
@@ -178,7 +193,8 @@ ServerEditDialog::ServerEditDialog(QString name, QString host, QString port,bool
 
 	nameEdit->setText(name);
 	hostEdit->setText(host);
-	portEdit->setText(port);
+    portEdit->setText(port);
+    userEdit->setText(user);
     favCh->setChecked(favourite);
     sslCh->setChecked(ssl);
 
@@ -202,8 +218,9 @@ void ServerEditDialog::accept()
 	QString name=nameEdit->text();
 	QString host=hostEdit->text();
 	QString port=portEdit->text();
+    QString user=userEdit->text();
 
-    if(!checkName(name,oriName_) || !checkHost(host) || !checkPort(port))
+    if(!checkName(name,oriName_) || !checkHost(host) || !checkPort(port) || !checkUser(user))
 		return;
 
 	QDialog::accept();
@@ -223,6 +240,11 @@ QString ServerEditDialog::host() const
 QString ServerEditDialog::port() const
 {
 	return portEdit->text();
+}
+
+QString ServerEditDialog::user() const
+{
+    return userEdit->text();
 }
 
 bool ServerEditDialog::isFavourite() const
@@ -391,28 +413,32 @@ void ServerListDialog::editItem(const QModelIndex& index)
 
         ServerEditDialog d(QString::fromStdString(item->name()),
 						   QString::fromStdString(item->host()),
-						   QString::fromStdString(item->port()),
+                           QString::fromStdString(item->port()),
+                           QString::fromStdString(item->user()),
                            item->isFavourite(),item->isSsl(),this);
 
 		//The dialog checks the name, host and port!
-		if(d.exec()== QDialog::Accepted)
+        if(d.exec() == QDialog::Accepted)
 		{
-			ServerList::instance()->reset(item,d.name().toStdString(),d.host().toStdString(),d.port().toStdString());
+            ServerList::instance()->reset(item,d.name().toStdString(),d.host().toStdString(),
+                                          d.port().toStdString(), d.user().toStdString(), d.isSsl());
+            serverView->viewport()->update();
 
-			if(item->isFavourite()  != d.isFavourite())
+            if(item->isFavourite() != d.isFavourite())
 			{
 				ServerList::instance()->setFavourite(item,d.isFavourite());
-				QModelIndex idx=sortModel_->index(index.row(),ServerListModel::FavouriteColumn);
-				serverView->update(idx);
+                //QModelIndex idx=sortModel_->index(index.row(),ServerListModel::FavouriteColumn);
+                //serverView->update(idx);
 			}
 
+#if 0
             if(item->isSsl()  != d.isSsl())
             {
                 ServerList::instance()->setSsl(item,d.isSsl());
                 QModelIndex idx=sortModel_->index(index.row(),ServerListModel::SslColumn);
                 serverView->update(idx);
             }
-
+#endif
 		}
 	}
 }
@@ -425,14 +451,16 @@ void ServerListDialog::duplicateItem(const QModelIndex& index)
 
 		ServerEditDialog d(QString::fromStdString(dname),
 						   QString::fromStdString(item->host()),
-                           QString::fromStdString(item->port()),item->isFavourite(),item->isSsl(),this);
+                           QString::fromStdString(item->port()),
+                           QString::fromStdString(item->user()),
+                           item->isFavourite(),item->isSsl(),this);
 
 		//The dialog checks the name, host and port!
 		if(d.exec() == QDialog::Accepted)
 		{
 			model_->dataIsAboutToChange();
             ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),
-                                        item->isFavourite(), item->isSsl(), false);
+                                        d.user().toStdString(), item->isFavourite(), item->isSsl(), false);
 			model_->dataChangeFinished();
 		}
 	}
@@ -449,7 +477,7 @@ void ServerListDialog::addItem()
         ServerItem* item=nullptr;
         try {
             item=ServerList::instance()->add(d.name().toStdString(),d.host().toStdString(),d.port().toStdString(),
-                                             false, d.isSsl(), false);
+                                             d.user().toStdString(), false, d.isSsl(), false);
         }
         catch(std::exception& e)
         {
@@ -720,7 +748,7 @@ void ServerListDialog::readSettings()
 	}
 	else
 	{
-	  	resize(QSize(350,500));
+        resize(QSize(650,500));
 	}
 
 	if(settings.contains("filterFav"))
@@ -771,7 +799,7 @@ void ServerListModel::dataChangeFinished()
 
 int ServerListModel::columnCount(const QModelIndex& parent) const
 {
-    return 7;
+    return 8;
 }
 
 int ServerListModel::rowCount(const QModelIndex& parent) const
@@ -804,6 +832,7 @@ QVariant ServerListModel::data(const QModelIndex& index, int role) const
 		case NameColumn: return QString::fromStdString(item->name());
 		case HostColumn: return QString::fromStdString(item->host());
         case PortColumn: return QString::fromStdString(item->port());
+        case UserColumn: return QString::fromStdString(item->user());
         case SslColumn: return (item->isSsl())?"ssl":"";
         case UseColumn:
 		{
@@ -894,6 +923,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
     		case NameColumn: return tr("Name");
     		case HostColumn: return tr("Host");
             case PortColumn: return tr("Port");
+            case UserColumn: return tr("Custom user");
             case SystemColumn: return tr("S");
             case SslColumn: return tr("SSL");
             case FavouriteColumn: return tr("F");
@@ -909,6 +939,7 @@ QVariant ServerListModel::headerData(int section,Qt::Orientation ori,int role) c
     		case NameColumn: return tr("Server name is a freely customisable <b>nickname</b>. It is only used by the </b>viewer</b>.");
     		case HostColumn: return tr("Hostname of the server");
     		case PortColumn: return tr("Port number of the server");
+            case UserColumn: return tr("Custom user name");
             case SystemColumn: return tr("Indicates if a server appears in the centrally maintained <b>system server list</b>. \
                                          <br>The name, host and port of these server entries cannot be edited.");
             case SslColumn: return tr("Indicates if a server uses SSL communication.");

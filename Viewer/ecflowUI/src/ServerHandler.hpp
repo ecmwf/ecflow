@@ -109,7 +109,8 @@ public:
 	static void saveSettings();
 
 	static const std::vector<ServerHandler*>& servers() {return servers_;}
-    static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port, bool ssl);
+    static ServerHandler* addServer(const std::string &name,const std::string &host, const std::string &port,
+                                    const std::string &user,bool ssl);
 	static void removeServer(ServerHandler*);
 	static ServerHandler* findServer(const std::string &alias);
 
@@ -128,7 +129,8 @@ public:
     void writeDefs(VInfo_ptr info,const std::string& fileName);
 
 protected:
-    ServerHandler(const std::string& name,const std::string& host,const std::string&  port, bool ssl);
+    ServerHandler(const std::string& name,const std::string& host,const std::string&  port,
+                  const std::string& user, bool ssl);
 	~ServerHandler() override;
 
     //Only friend classes can access it. Practically it means we
@@ -149,6 +151,7 @@ protected:
 	std::string name_;
 	std::string host_;
 	std::string port_;
+    std::string user_;
     bool ssl_;
 	ClientInvoker* client_;
 	std::string longName_;

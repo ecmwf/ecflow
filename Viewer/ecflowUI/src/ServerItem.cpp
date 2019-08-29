@@ -28,8 +28,9 @@ ServerItem::ServerItem(const std::string& name) :
 }
 
 ServerItem::ServerItem(const std::string& name,const std::string& host,const std::string& port,
-                       bool favourite, bool ssl) :
+                       const std::string& user, bool favourite, bool ssl) :
   name_(name), host_(host), port_(port),
+  user_(user),
   favourite_(favourite),
   system_(false),
   ssl_(ssl),
@@ -52,11 +53,23 @@ bool ServerItem::isUsed() const
 }
 
 
-void ServerItem::reset(const std::string& name,const std::string& host,const std::string& port)
+void ServerItem::reset(const std::string& name,const std::string& host,const std::string& port,
+                       const std::string& user, bool ssl)
 {
-	name_=name;
-	host_=host;
-	port_=port;
+    name_=name;
+
+    if (host == host_ && port == port_) {
+        setSsl(ssl);
+        //setUser(user);
+    }
+    else
+    {
+        host_=host;
+        port_=port;
+        user_=port;
+        ssl_=ssl;
+        //TODO: reload the server!!!
+    }
 
 	broadcastChanged();
 }
@@ -102,7 +115,7 @@ void ServerItem::registerUsageBegin()
 {
 	if(!handler_)
 	{
-        handler_=ServerHandler::addServer(name_,host_,port_,ssl_);
+        handler_=ServerHandler::addServer(name_,host_,port_,user_,ssl_);
     }
     if(handler_)
         useCnt_++;

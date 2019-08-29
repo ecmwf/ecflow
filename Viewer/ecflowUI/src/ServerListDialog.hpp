@@ -30,7 +30,8 @@ protected:
 
     bool checkName(QString name,QString oriName=QString());
 	bool checkHost(QString host);
-	bool checkPort(QString port);
+    bool checkPort(QString port);
+    bool checkUser(QString user);
 	void error(QString msg);
 
 	QString errorText_;
@@ -42,11 +43,13 @@ class ServerEditDialog : public QDialog, private Ui::ServerEditDialog, public Se
 Q_OBJECT
 
 public:
-    ServerEditDialog(QString name,QString host, QString port, bool favourite, bool ssl, QWidget* parent=nullptr);
+    ServerEditDialog(QString name,QString host, QString port, QString user,
+                     bool favourite, bool ssl, QWidget* parent=nullptr);
 
 	QString name() const;
 	QString host() const;
 	QString port() const;
+    QString user() const;
     bool isSsl() const;
 	bool isFavourite() const;
 
@@ -67,7 +70,8 @@ public:
 
 	QString name() const;
 	QString host() const;
-	QString port() const;
+    QString port() const;
+    QString user() const;
 	bool addToView() const;
     bool isSsl() const;
 
@@ -148,8 +152,8 @@ public:
    	void dataChangeFinished();
    	ServerItem* indexToServer(const QModelIndex& index);
 
-    enum Columns {LoadColumn=0, NameColumn=1, HostColumn=2, PortColumn=3, SystemColumn=4, SslColumn=5,
-                  FavouriteColumn=6, UseColumn=7};
+    enum Columns {LoadColumn=0, NameColumn=1, HostColumn=2, PortColumn=3, UserColumn=4,
+                  SystemColumn=5, SslColumn=6,FavouriteColumn=7, UseColumn=8};
     enum CustomItemRole {IconStatusRole = Qt::UserRole+1};
 
 protected:

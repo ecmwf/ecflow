@@ -58,7 +58,7 @@
      <item row="2" column="1">
       <widget class="QLineEdit" name="portEdit"/>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
         <string>&amp;Favourite:</string>
@@ -68,12 +68,25 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="4" column="1">
       <widget class="QCheckBox" name="favCh">
        <property name="text">
         <string/>
        </property>
       </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Custom &amp;user:</string>
+       </property>
+       <property name="buddy">
+        <cstring>userEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="userEdit"/>
      </item>
     </layout>
    </item>
@@ -169,8 +182,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>257</x>
-     <y>218</y>
+     <x>266</x>
+     <y>256</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -185,8 +198,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>274</x>
-     <y>218</y>
+     <x>283</x>
+     <y>256</y>
     </hint>
     <hint type="destinationlabel">
      <x>283</x>
