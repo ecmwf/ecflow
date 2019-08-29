@@ -429,7 +429,12 @@
             "command"        : "ecflow_client --order <full_name> alpha",
             "status_tip"     : "__cmd__"
         },
-
+        {
+            "menu"           : "Order",
+            "name"           : "Runtime",
+            "command"        : "ecflow_client --order <full_name> runtime",
+            "status_tip"     : "__cmd__"
+        },
         {
             "menu"           : "Special",
             "name"           : "Ping",
