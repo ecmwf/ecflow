@@ -427,3 +427,4 @@ static AttributeEditorMaker<RepeatIntEditor> makerStr1("repeat_integer");
 static AttributeEditorMaker<RepeatStringEditor> makerStr2("repeat_string");
 static AttributeEditorMaker<RepeatStringEditor> makerStr3("repeat_enumerated");
 static AttributeEditorMaker<RepeatDateEditor> makerStr4("repeat_date");
+static AttributeEditorMaker<RepeatStringEditor> makerStr5("repeat_datelist");

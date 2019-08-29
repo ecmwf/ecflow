@@ -164,7 +164,7 @@
                     "default" : "rgb(40,59,153)"
                 },
                 "repeatDateColour"  : {
-                    "label"   : "Repeat date colour",
+                    "label"   : "Repeat date/datelist colour",
                     "default" : "rgb(0,0,0)"
                 },
                 "repeatDayColour"  : {

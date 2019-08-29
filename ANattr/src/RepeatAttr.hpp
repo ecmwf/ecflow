@@ -221,6 +221,7 @@ public:
    void write(std::string&) const override;
    std::string dump() const override;
    bool isDateList() const override { return true;}
+   int indexNum() const {return static_cast<int>(list_.size());}
 
    /// Simulator functions:
    bool isInfinite() const override { return false;}

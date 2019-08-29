@@ -16,6 +16,7 @@
 #include "VNode.hpp"
 
 std::string VRepeatDateAttr::subType_("date");
+std::string VRepeatDateListAttr::subType_("datelist");
 std::string VRepeatIntAttr::subType_("integer");
 std::string VRepeatStringAttr::subType_("string");
 std::string VRepeatEnumAttr::subType_("enumerated");
@@ -120,8 +121,12 @@ QString VRepeatAttrType::toolTip(QStringList d) const
             t+="<b>Name:</b> " + d[NameIndex] + "<br>";
             t+="<b>Value:</b> " + d[ValueIndex] + "<br>";
             t+="<b>Start:</b> " + d[StartIndex] + "<br>";
-            t+="<b>End:</b> " + d[EndIndex] + "<br>";
-            t+="<b>Step:</b> " + d[StepIndex];
+            t+="<b>End:</b> " + d[EndIndex];
+
+            if(d[SubtypeIndex] == "integer" || d[SubtypeIndex] == "date")
+            {
+                t+="<br><b>Step:</b> " + d[StepIndex];
+            }
         }
         else
         {
@@ -148,7 +153,7 @@ QString VRepeatAttrType::definition(QStringList d) const
             t+=" " + d[EndIndex];
             t+=" " + d[StepIndex];
         }
-        else if(subType == "string" || subType == "enumerated")
+        else if(subType == "string" || subType == "enumerated" || subType == "datelist")
         {
             t+=" " + d[NameIndex];
             t+=" " + d[AllValuesIndex];
@@ -161,7 +166,7 @@ QString VRepeatAttrType::definition(QStringList d) const
     return t;
 }
 
-void VRepeatAttrType::encode(const Repeat& r,QStringList& data,const std::string& type,QString allValues) const
+void VRepeatAttrType::encode(const Repeat& r,const VRepeatAttr* ra,QStringList& data,const std::string& type,QString allValues) const
 {
     //We try to avoid creating a VRepeat object everytime we are here
     //std::string type=VRepeat::type(r);
@@ -169,8 +174,7 @@ void VRepeatAttrType::encode(const Repeat& r,QStringList& data,const std::string
     data << qName_ << QString::fromStdString(type) <<
          QString::fromStdString(r.name()) <<
          QString::fromStdString(r.valueAsString()) <<
-         QString::fromStdString(r.value_as_string(r.start())) <<
-         QString::fromStdString(r.value_as_string(r.end())) <<
+         ra->startValue() << ra->endValue() <<
          QString::number(r.step()) <<
          allValues;
 }
@@ -209,7 +213,7 @@ QStringList VRepeatAttr::data(bool /*firstLine*/) const
     if(parent_->node_)
     {
         const Repeat& r=parent_->node_->repeat();
-        atype->encode(r,s,subType(),allValues());
+        atype->encode(r,this, s,subType(),allValues());
     }
     return s;
 }
@@ -236,6 +240,8 @@ void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 
             if(r.repeatBase()->isDate())
                 a=new VRepeatDateAttr(vnode);
+            else if(r.repeatBase()->isDateList())
+                a=new VRepeatDateListAttr(vnode);
             else if(r.repeatBase()->isInteger())
                 a=new VRepeatIntAttr(vnode);
             else if(r.repeatBase()->isString())
@@ -297,6 +303,26 @@ int VRepeatDateAttr::currentIndex() const
     return 0;
 }
 
+QString VRepeatDateAttr::startValue() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        return QString::number(r.start());
+    }
+    return {};
+}
+
+QString VRepeatDateAttr::endValue() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        return QString::number(r.end());
+    }
+    return {};
+}
+
 std::string VRepeatDateAttr::value(int index) const
 {
     std::stringstream ss;
@@ -308,6 +334,82 @@ std::string VRepeatDateAttr::value(int index) const
     }
 
     return ss.str();
+}
+
+//=====================================================
+//
+// VRepeatDateListAttr
+//
+//=====================================================
+
+
+std::string VRepeatDateListAttr::value(int index) const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        return r.value_as_string(index);
+    }
+    return {};
+}
+
+int VRepeatDateListAttr::endIndex() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        if(RepeatDateList *rdl = static_cast<RepeatDateList*>(r.repeatBase()))
+        {
+            return rdl->indexNum()-1;
+        }
+    }
+    return 0;
+}
+
+int VRepeatDateListAttr::currentIndex() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        return r.index_or_value();
+    }
+    return 0;
+}
+
+QString VRepeatDateListAttr::startValue() const
+{
+    return QString::fromStdString(value(0));
+}
+
+QString VRepeatDateListAttr::endValue() const
+{
+    return QString::fromStdString(value(endIndex()));
+}
+
+QString VRepeatDateListAttr::allValues() const
+{
+    QString vals;
+
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+
+        int start=0;
+        int end=endIndex();
+
+        if(end <= start)
+        {
+            return QString();
+        }
+
+        for(int i=start; i <= end; i++)
+        {
+            if(!vals.isEmpty()) vals+=" ";
+                vals+="\"" + QString::fromStdString(r.value_as_string(i)) + "\"";
+        }
+        return vals;
+    }
+    return vals;
 }
 
 //=====================================================
@@ -358,6 +460,26 @@ std::string VRepeatIntAttr::value(int index) const
     return ss.str();
 }
 
+QString VRepeatIntAttr::startValue() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        return QString::number(r.start());
+    }
+    return {};
+}
+
+QString VRepeatIntAttr::endValue() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        return QString::number(r.end());
+    }
+    return {};
+}
+
 //=====================================================
 //
 // VRepeatDayAttr
@@ -373,6 +495,16 @@ std::string VRepeatDayAttr::value(int /*index*/) const
         ss << r.step();
     }
     return ss.str();
+}
+
+QString VRepeatDayAttr::startValue() const
+{
+    return {};
+}
+
+QString VRepeatDayAttr::endValue() const
+{
+    return {};
 }
 
 //=====================================================
@@ -409,6 +541,16 @@ int VRepeatEnumAttr::currentIndex() const
         return r.index_or_value();
     }
     return 0;
+}
+
+QString VRepeatEnumAttr::startValue() const
+{
+    return QString::fromStdString(value(startIndex()));
+}
+
+QString VRepeatEnumAttr::endValue() const
+{
+    return QString::fromStdString(value(endIndex()));
 }
 
 QString VRepeatEnumAttr::allValues() const
@@ -475,6 +617,16 @@ int VRepeatStringAttr::currentIndex() const
         return r.index_or_value();
     }
     return 0;
+}
+
+QString VRepeatStringAttr::startValue() const
+{
+    return QString::fromStdString(value(startIndex()));
+}
+
+QString VRepeatStringAttr::endValue() const
+{
+    return QString::fromStdString(value(endIndex()));
 }
 
 QString VRepeatStringAttr::allValues() const

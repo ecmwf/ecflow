@@ -1382,7 +1382,7 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
         {
             rPen = repeatStringPen_;
         }
-        else if(type == "date")
+        else if(type == "date" || type == "datelist")
         {
             rPen = repeatDatePen_;
         }
