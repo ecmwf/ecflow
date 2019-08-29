@@ -1263,6 +1263,7 @@ static void basic_test_template(
       const std::string& test_name,
       const std::string& ecf_file1,
       const std::string& expected_job_file_contents,
+      const std::string& ecf_micro = "",
       bool expect_success = true
       )
 {
@@ -1287,6 +1288,7 @@ static void basic_test_template(
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->add_variable("simple","simple" );
       suite->add_variable("tail","tail" );
+      if (!ecf_micro.empty()) suite->add_variable("ECF_MICRO",ecf_micro);
       suite->addTask( task_t1 );
       theDefs.addSuite( suite );
    }
@@ -1396,7 +1398,7 @@ BOOST_AUTO_TEST_CASE( test_include_with_variable_alternative )
 BOOST_AUTO_TEST_CASE( test_include_with_variables_change_micro )
 {
    string ecf_file;
-   ecf_file += "%ecfmicro &\n";
+   ecf_file += "%ecfmicro &\n";               // ecf_micro in script OVERRIDES ECF_MICRO variable, but *only* in script
    ecf_file += "&include <&simple&_head.h>\n";
    ecf_file += "#body\n";
    ecf_file += "&ecfmicro *\n";
@@ -1405,6 +1407,21 @@ BOOST_AUTO_TEST_CASE( test_include_with_variables_change_micro )
    std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
 
    basic_test_template("test_include_with_variables_change_micro",ecf_file,expected_job_file_contents);
+}
+
+BOOST_AUTO_TEST_CASE( test_script_override_ecf_micro )
+{
+   string ecf_file;                            // ecf_micro in script OVERRIDES ECF_MICRO variable, but *only* in script
+   ecf_file += "$simple$\n";                   // ECF_MICRO is set to $
+   ecf_file += "$ecfmicro &\n";                // ecf_micro change from $ -> &
+   ecf_file += "&include <&simple&_head.h>\n";
+   ecf_file += "#body\n";
+   ecf_file += "&ecfmicro *\n";                // ecf_micro change from & -> *
+   ecf_file += "*include <simple_*tail*.h>\n";
+
+   std::string expected_job_file_contents = "simple\n#head.h\n#body\n#tail.h";
+
+   basic_test_template("test_script_override_ecf_micro",ecf_file,expected_job_file_contents,"$");
 }
 
 BOOST_AUTO_TEST_CASE( test_include_with_variables_mismatched_micros )
@@ -1417,7 +1434,7 @@ BOOST_AUTO_TEST_CASE( test_include_with_variables_mismatched_micros )
 
    std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
 
-   basic_test_template("test_include_with_variables_mismatched_micros",ecf_file,expected_job_file_contents,false/*expect failure*/);
+   basic_test_template("test_include_with_variables_mismatched_micros",ecf_file,expected_job_file_contents,""/*ecf_micro*/,false/*expect failure*/);
 }
 
 BOOST_AUTO_TEST_CASE( test_include_with_variable_not_defined )
@@ -1429,7 +1446,7 @@ BOOST_AUTO_TEST_CASE( test_include_with_variable_not_defined )
 
    std::string expected_job_file_contents = "#head.h\n#body\n#tail.h";
 
-   basic_test_template("test_include_with_variable_not_defined",ecf_file,expected_job_file_contents,false/*expect failure*/);
+   basic_test_template("test_include_with_variable_not_defined",ecf_file,expected_job_file_contents,""/*ecf_micro*/,false/*expect failure*/);
 }
 
 
