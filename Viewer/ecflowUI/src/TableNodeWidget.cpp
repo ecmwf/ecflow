@@ -22,6 +22,7 @@
 #include "TableNodeSortModel.hpp"
 #include "TableNodeView.hpp"
 #include "VFilter.hpp"
+#include "VModelData.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
@@ -82,6 +83,12 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,bool interactive,QWi
 
     connect(view_->realWidget(),SIGNAL(headerButtonClicked(QString,QPoint)),
     		filterW_,SLOT(slotHeaderFilter(QString,QPoint)));
+
+    connect(model_->data(),SIGNAL(updateBegin()),
+            view_->realWidget(),SLOT(slotUpdateBegin()));
+
+    connect(model_->data(),SIGNAL(updateEnd()),
+            view_->realWidget(),SLOT(slotUpdateEnd()));
 
 #if 0
 	connect(model_,SIGNAL(clearBegun(const VNode*)),

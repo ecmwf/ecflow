@@ -58,6 +58,8 @@ public Q_SLOTS:
 	void slotSizeHintChangedGlobal();
     void slotRerender();
     void slotAddVariableColumn();
+    void slotUpdateBegin();
+    void slotUpdateEnd();
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -73,6 +75,7 @@ protected:
     void setSortingEnabledNoExec(bool b);
     void collectVariableNames(std::set<std::string>& vars);
     void changeVariableColumn(QString varName);
+    void setCurrentSelectionAfterUpdate(VInfo_ptr info);
 
     TableNodeSortModel* model_;
 	ActionHandler* actionHandler_;
@@ -80,6 +83,8 @@ protected:
 	bool needItemsLayout_;
 	PropertyMapper* prop_;
     bool setCurrentIsRunning_;
+    VInfo_ptr lastSelection_;
+    bool setCurrentAfterUpdateIsRunning_;
 };
 
 class TableNodeHeaderButton

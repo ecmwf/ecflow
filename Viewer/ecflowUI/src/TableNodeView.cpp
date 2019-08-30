@@ -42,7 +42,8 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
      model_(model),
 	 needItemsLayout_(false),
      prop_(NULL),
-     setCurrentIsRunning_(false)
+     setCurrentIsRunning_(false),
+     setCurrentAfterUpdateIsRunning_(false)
 {
     setObjectName("view");
     setProperty("style","nodeView");
@@ -177,7 +178,7 @@ QModelIndexList TableNodeView::selectedList()
 void TableNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
 	QModelIndexList lst=selectedIndexes();
-	if(lst.count() > 0)
+    if(lst.count() > 0 && !setCurrentAfterUpdateIsRunning_)
 	{
 		VInfo_ptr info=model_->nodeInfo(lst.front());
 		if(info && !info->isEmpty())
@@ -205,6 +206,10 @@ VInfo_ptr TableNodeView::currentSelection()
 	return VInfo_ptr();
 }
 
+//Sets the current selection to the given VInfo item.
+// called:
+//  -from outside of the view when the selection is broadcast from another view
+//  -from within the view after a data update
 void TableNodeView::setCurrentSelection(VInfo_ptr info)
 {
     //While the current is being selected we do not allow
@@ -223,6 +228,38 @@ void TableNodeView::setCurrentSelection(VInfo_ptr info)
         setCurrentIndex(idx);
     }
     setCurrentIsRunning_=false;
+}
+
+void TableNodeView::setCurrentSelectionAfterUpdate(VInfo_ptr info)
+{
+    //While the current is being selected we do not allow
+    //another setCurrent call go through
+    if(setCurrentAfterUpdateIsRunning_)
+        return;
+
+    setCurrentAfterUpdateIsRunning_=true;
+    setCurrentSelection(info);
+    setCurrentAfterUpdateIsRunning_=false;
+}
+
+
+void TableNodeView::slotUpdateBegin()
+{
+    lastSelection_=currentSelection();
+}
+
+void TableNodeView::slotUpdateEnd()
+{
+    if(lastSelection_)
+    {
+        lastSelection_->regainData();
+        if(lastSelection_->hasData())
+        {
+            setCurrentSelectionAfterUpdate(lastSelection_);
+        }
+
+        lastSelection_.reset();
+    }
 }
 
 void TableNodeView::slotDoubleClickItem(const QModelIndex&)
