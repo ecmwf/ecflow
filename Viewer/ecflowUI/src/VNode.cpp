@@ -1863,6 +1863,14 @@ QString VServer::toolTip()
 	txt+="<b>Host</b>: " + QString::fromStdString(server_->host());
 	txt+=" <b>Port</b>: " + QString::fromStdString(server_->port()) + "<br>";
 
+    if (server_->isSsl() ) {
+        txt+="<b>SSL</b>: enabled<br>";
+    }
+
+    if (!server_->user().empty()) {
+        txt+="<b>Custom user</b>: " + QString::fromStdString(server_->user()) + "<br>";
+    }
+
 	ConnectState* st=server_->connectState();
     QColor colErr(255,95,95);
 

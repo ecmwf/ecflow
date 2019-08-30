@@ -79,7 +79,6 @@ public:
     void reset(ServerItem*,const std::string& name,const std::string& host,const std::string& port,
                const std::string& user, bool ssl);
 	void setFavourite(ServerItem*,bool);
-    void setSsl(ServerItem*,bool);
 
 	std::string uniqueName(const std::string&);
 
@@ -105,7 +104,6 @@ protected:
 
 	bool load();
 	bool readRcFile();
-    //bool readSystemFile();
     void clearSyncChange();
     bool checkItemToAdd(const std::string& name,const std::string& host,const std::string& port,
                         bool checkDuplicate,std::string& errStr);

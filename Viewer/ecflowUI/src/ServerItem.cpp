@@ -59,9 +59,12 @@ void ServerItem::reset(const std::string& name,const std::string& host,const std
     name_=name;
 
     if (host == host_ && port == port_) {
+        //TODO: these should be called together
         setSsl(ssl);
-        //setUser(user);
+        setUser(user);
     }
+
+    //host or port changed: full reload needed!!!
     else
     {
         host_=host;
@@ -100,6 +103,18 @@ void ServerItem::setSsl(bool b)
     }
     //broadcastChanged();
 }
+
+void ServerItem::setUser(const std::string& user)
+{
+    if(user_ != user)
+    {
+        user_=user;
+        if(handler_)
+            handler_->setUser(user_);
+    }
+    //broadcastChanged();
+}
+
 
 std::string ServerItem::longName() const
 {

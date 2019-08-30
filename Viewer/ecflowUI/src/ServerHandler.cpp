@@ -183,7 +183,7 @@ void ServerHandler::createClient(bool init)
         }
 #endif
 
-        if (!user_.empty()) {
+        if (!init || !user_.empty()) {
             try
             {
                 client_->set_user_name(user_);
@@ -285,6 +285,19 @@ void ServerHandler::setSsl(bool ssl)
         ssl_ = ssl;
 
         if (connectState_->state() != ConnectState::VersionIncompatible &&
+            connectState_->state() != ConnectState::FailedClient) {
+            deleteClient();
+            createClient(false);
+        }
+    }
+}
+
+void ServerHandler::setUser(const std::string& user)
+{
+    if (user != user_) {
+        user_ = user;
+
+        if (client_ && connectState_->state() != ConnectState::VersionIncompatible &&
             connectState_->state() != ConnectState::FailedClient) {
             deleteClient();
             createClient(false);

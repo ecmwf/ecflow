@@ -58,6 +58,19 @@
      <item row="2" column="1">
       <widget class="QLineEdit" name="portEdit"/>
      </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Custom &amp;user:</string>
+       </property>
+       <property name="buddy">
+        <cstring>userEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QLineEdit" name="userEdit"/>
+     </item>
      <item row="4" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
@@ -75,18 +88,25 @@
        </property>
       </widget>
      </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="label_5">
+     <item row="5" column="0">
+      <widget class="QLabel" name="sslLabel">
        <property name="text">
-        <string>Custom &amp;user:</string>
+        <string>Use &amp;SSL:</string>
        </property>
        <property name="buddy">
-        <cstring>userEdit</cstring>
+        <cstring>sslCh</cstring>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QLineEdit" name="userEdit"/>
+     <item row="5" column="1">
+      <widget class="QCheckBox" name="sslCh">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="MessageLabel" name="sslMessageLabel" native="true"/>
      </item>
     </layout>
    </item>
@@ -107,51 +127,7 @@
     </spacer>
    </item>
    <item>
-    <widget class="MessageLabel" name="sslMessageLabel" native="true"/>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="sslLabel">
-       <property name="text">
-        <string>Use SSL:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="sslCh">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <spacer name="verticalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
+    <layout class="QHBoxLayout" name="horizontalLayout"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

@@ -104,7 +104,6 @@ protected Q_SLOTS:
 	 void on_actionRescan_triggered();
 	 void on_serverView_doubleClicked(const QModelIndex& index);
      void on_actionFavourite_triggered(bool checked);
-     void on_actionSsl_triggered(bool checked);
      void on_sysSyncTb_clicked(bool);
      void on_sysSyncLogTb_toggled(bool);
      void slotItemSelected(const QModelIndex&,const QModelIndex&);
@@ -119,7 +118,9 @@ protected:
 	void addItem();
 	void removeItem(const QModelIndex& index);
     void setFavouriteItem(const QModelIndex& index,bool b);
+#if 0
     void setSslItem(const QModelIndex& index,bool b);
+#endif
 	void checkActionState();
 	void writeSettings();
 	void readSettings();

@@ -308,9 +308,6 @@ ServerListDialog::ServerListDialog(Mode mode,ServerFilter *filter,QWidget *paren
 	serverView->addAction(sep2);
 	serverView->addAction(actionDelete);
     serverView->addAction(sep3);
-//#ifdef ECF_OPENSSL
-//    serverView->addAction(actionSsl);
-//#endif
 	serverView->addAction(actionFavourite);
 
 	//Add actions for the toolbuttons
@@ -422,23 +419,14 @@ void ServerListDialog::editItem(const QModelIndex& index)
 		{
             ServerList::instance()->reset(item,d.name().toStdString(),d.host().toStdString(),
                                           d.port().toStdString(), d.user().toStdString(), d.isSsl());
-            serverView->viewport()->update();
 
             if(item->isFavourite() != d.isFavourite())
 			{
-				ServerList::instance()->setFavourite(item,d.isFavourite());
-                //QModelIndex idx=sortModel_->index(index.row(),ServerListModel::FavouriteColumn);
-                //serverView->update(idx);
+				ServerList::instance()->setFavourite(item,d.isFavourite());               
 			}
 
-#if 0
-            if(item->isSsl()  != d.isSsl())
-            {
-                ServerList::instance()->setSsl(item,d.isSsl());
-                QModelIndex idx=sortModel_->index(index.row(),ServerListModel::SslColumn);
-                serverView->update(idx);
-            }
-#endif
+            //update the whole view
+            sortModel_->invalidate();
 		}
 	}
 }
@@ -484,11 +472,12 @@ void ServerListDialog::addItem()
 
         }
 
+        if(d.addToView() && filter_)
+        {
+            filter_->addServer(item);
+        }
+
         model_->dataChangeFinished();
-		if(d.addToView() && filter_)
-		{
-			filter_->addServer(item);
-		}
 	}
 }
 
@@ -543,6 +532,7 @@ void ServerListDialog::setFavouriteItem(const QModelIndex& index,bool b)
 	serverView->update(idx);
 }
 
+#if 0
 void ServerListDialog::setSslItem(const QModelIndex& index,bool b)
 {
     ServerItem* item=model_->indexToServer(sortModel_->mapToSource(index));
@@ -555,6 +545,7 @@ void ServerListDialog::setSslItem(const QModelIndex& index,bool b)
     QModelIndex idx=sortModel_->index(index.row(),ServerListModel::SslColumn);
     serverView->update(idx);
 }
+#endif
 
 void ServerListDialog::on_serverView_doubleClicked(const QModelIndex& index)
 {
@@ -594,14 +585,6 @@ void ServerListDialog::on_actionFavourite_triggered(bool checked)
 {
 	QModelIndex index=serverView->currentIndex();
 	setFavouriteItem(index,checked);
-}
-
-void ServerListDialog::on_actionSsl_triggered(bool checked)
-{
-#ifdef ECF_OPENSSL
-    QModelIndex index=serverView->currentIndex();
-    setSslItem(index,checked);
-#endif
 }
 
 void ServerListDialog::on_actionRescan_triggered()
@@ -686,9 +669,6 @@ void ServerListDialog::checkActionState()
 		actionDuplicate->setEnabled(false);
 		actionDelete->setEnabled(false);
 		actionFavourite->setEnabled(false);
-#ifdef ECF_OPENSSL
-        actionSsl->setEnabled(false);
-#endif
 	}
 	else
 	{
@@ -701,10 +681,6 @@ void ServerListDialog::checkActionState()
         actionDelete->setEnabled(!item->isSystem());
 		actionFavourite->setEnabled(true);
 		actionFavourite->setChecked(item->isFavourite());
-#ifdef ECF_OPENSSL
-        actionSsl->setEnabled(true);
-        actionFavourite->setChecked(item->isSsl());
-#endif
 	}
 }
 

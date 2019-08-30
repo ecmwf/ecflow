@@ -66,6 +66,7 @@ protected:
     void  setFavourite(bool b);
     void  setSystem(bool b);
     void  setSsl(bool b);
+    void  setUser(const std::string&);
 
 	void registerUsageBegin();
 	void registerUsageEnd();

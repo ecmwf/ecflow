@@ -139,15 +139,6 @@ void ServerList::setFavourite(ServerItem* item,bool b)
 	}
 }
 
-void ServerList::setSsl(ServerItem* item,bool b)
-{
-    auto it=std::find(items_.begin(),items_.end(),item);
-    if(it != items_.end())
-    {
-        item->setSsl(b);
-    }
-}
-
 std::string ServerList::uniqueName(const std::string& name)
 {
 	bool hasIt=false;

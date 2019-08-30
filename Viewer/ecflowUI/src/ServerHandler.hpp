@@ -59,7 +59,10 @@ public:
 	const std::string& host() const {return host_;}
 	const std::string& longName() const {return longName_;}
 	const std::string& port() const {return port_;}
+    bool isSsl() const {return ssl_;}
+    const std::string& user() {return user_;}
     void setSsl(bool);
+    void setUser(const std::string& user);
 
 	Activity activity() const {return activity_;}
 	ConnectState* connectState() const {return connectState_;}

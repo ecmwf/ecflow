@@ -342,17 +342,6 @@
     <string>Ctrl+B</string>
    </property>
   </action>
-  <action name="actionSsl">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Use SSL communication</string>
-   </property>
-   <property name="toolTip">
-    <string>Use SSL communication for server</string>
-   </property>
-  </action>
   <zorder>buttonBox</zorder>
   <zorder></zorder>
  </widget>

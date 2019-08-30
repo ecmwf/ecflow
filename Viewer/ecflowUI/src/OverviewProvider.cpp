@@ -112,6 +112,14 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
 		f << inc << "Host    : " << server->host() << "\n";
 		f << inc << "Port    : " << server->port() << "\n";
 
+        if (server->isSsl()) {
+            f << inc << "SSL     : enabled\n";
+        }
+
+        if (!server->user().empty()) {
+            f << inc << "Custom user : " << server->user() << "\n";
+        }
+
 		if(cst->state() == ConnectState::Lost)
 		{
 			f << inc << "Last connection attempt  : " << VFileInfo::formatDate(cst->lastLostTime()).toStdString() << "\n";
