@@ -1310,7 +1310,7 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
 
     size=QSize(totalWidth,attrBox_->fullHeight);
 
-    if(data.count() <  7)
+    if(data.count() <  8)
          return;
 
     QString type=data.at(1);
@@ -1319,9 +1319,10 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
     QString start=data.at(4);
     QString end=data.at(5);
     QString step=data.at(6);
+    QString pos=data.at(8);
 
-    if(data.count() == 9)
-        name.prepend(data[8] + ":");
+    if(data.count() == 10)
+        name.prepend(data[9] + ":");
 
     bool selected=option.state & QStyle::State_Selected;
 
@@ -1388,20 +1389,18 @@ void NodeViewDelegate::renderRepeat(QPainter *painter,QStringList data,const QSt
         }
 
         QString endDot;
-        if(start == val)
-        {
+        if (pos == "0") {
             name+="=";
             endDot="...";
-        }
-        else if(end == val)
-        {
-            name+="=...";
-            endDot="";
-        }
-        else
-        {
+        } else if (pos == "1") {
             name+="=...";
             endDot="...";
+        } else if (pos == "2") {
+            name+="=...";
+            endDot="";
+        } else {
+            name+="=";
+            endDot="";
         }
 
         //The name rectangle

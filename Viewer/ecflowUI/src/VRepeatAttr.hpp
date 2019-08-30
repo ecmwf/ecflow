@@ -31,7 +31,8 @@ public:
     void encode(const Repeat&,const VRepeatAttr*, QStringList&,const std::string&,QString) const;
 
 private:
-    enum DataIndex {TypeIndex=0,SubtypeIndex=1,NameIndex=2,ValueIndex=3,StartIndex=4,EndIndex=5,StepIndex=6,AllValuesIndex=7};
+    enum DataIndex {TypeIndex=0,SubtypeIndex=1,NameIndex=2,ValueIndex=3,StartIndex=4,EndIndex=5,
+                    StepIndex=6,AllValuesIndex=7,CurrentPosIdex=8};
 };
 
 class VRepeatAttr : public VAttribute
@@ -46,6 +47,7 @@ public:
     virtual QString endValue() const=0;
     int step() const;
     virtual std::string value(int index) const=0;
+    virtual int currentPosition() const=0;
 
     VAttributeType* type() const override;
     QStringList data(bool firstLine) const override;
@@ -66,6 +68,7 @@ public:
     QString startValue() const override;
     QString endValue() const override;
     std::string value(int index) const override;
+    int currentPosition() const override;
     const std::string& subType() const override {return subType_;}
 
 protected:
@@ -83,6 +86,7 @@ public:
     std::string value(int index) const override;
     const std::string& subType() const override {return subType_;}
     QString allValues() const override;
+    int currentPosition() const override;
 
 protected:
     static std::string subType_;
@@ -98,6 +102,7 @@ public:
     QString endValue() const override;
     std::string value(int index) const override;
     const std::string& subType() const override {return subType_;}
+    int currentPosition() const override {return -1;}
 
 protected:
     static std::string subType_;
@@ -112,6 +117,7 @@ public:
     QString startValue() const override;
     QString endValue() const override;
     std::string value(int index) const override;
+    int currentPosition() const override;
     const std::string& subType() const override {return subType_;}
 
 protected:
@@ -129,6 +135,7 @@ public:
     std::string value(int index) const override;
     const std::string& subType() const override {return subType_;}
     QString allValues() const override;
+    int currentPosition() const override;
 
 protected:
     static std::string subType_;
@@ -145,6 +152,7 @@ public:
     std::string value(int index) const override;
     const std::string& subType() const override {return subType_;}
     QString allValues() const override;
+    int currentPosition() const override;
 
 protected:
     static std::string subType_;

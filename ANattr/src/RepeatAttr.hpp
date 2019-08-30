@@ -330,6 +330,7 @@ public:
    void write(std::string&) const override;
    std::string dump() const override;
    bool isEnumerated() const override {return true;}
+   int indexNum() const {return static_cast<int>(theEnums_.size());}
 
    /// Simulator functions:
    bool isInfinite() const override { return false;}
@@ -380,7 +381,8 @@ public:
    void write(std::string&) const override;
    std::string dump() const override;
    bool isString() const override {return true;}
-   
+   int indexNum() const {return static_cast<int>(theStrings_.size());}
+
    /// Simulator functions:
    bool isInfinite() const override { return false;}
 

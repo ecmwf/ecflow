@@ -102,7 +102,7 @@ long ecf_repeat_date_to_julian(long ddate)
 
 VRepeatAttrType::VRepeatAttrType() : VAttributeType("repeat")
 {
-    dataCount_=8;
+    dataCount_=9;
     searchKeyToData_["repeat_name"]=NameIndex;
     searchKeyToData_["repeat_value"]=ValueIndex;
     searchKeyToData_["name"]=NameIndex;
@@ -176,7 +176,7 @@ void VRepeatAttrType::encode(const Repeat& r,const VRepeatAttr* ra,QStringList& 
          QString::fromStdString(r.valueAsString()) <<
          ra->startValue() << ra->endValue() <<
          QString::number(r.step()) <<
-         allValues;
+         allValues << QString::number(ra->currentPosition());
 }
 
 //=====================================================
@@ -336,6 +336,25 @@ std::string VRepeatDateAttr::value(int index) const
     return ss.str();
 }
 
+int VRepeatDateAttr::currentPosition() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        if(r.start() == r.end())
+            return -1;
+        else if(r.value() == r.start())
+            return 0;
+        else if(r.value() == r.end() ||
+                ecf_repeat_date_to_julian(r.value()) + r.step() > ecf_repeat_date_to_julian(r.end()))
+            return 2;
+        else
+            return 1;
+    }
+
+    return -1;
+}
+
 //=====================================================
 //
 // VRepeatDateListAttr
@@ -412,6 +431,27 @@ QString VRepeatDateListAttr::allValues() const
     return vals;
 }
 
+int VRepeatDateListAttr::currentPosition() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        if(RepeatDateList *rdl = static_cast<RepeatDateList*>(r.repeatBase()))
+        {
+            if(rdl->indexNum() < 2)
+                return -1;
+            else if(rdl->index_or_value() == 0)
+                return 0;
+            else if(rdl->index_or_value() == rdl->indexNum()-1)
+                return 2;
+            else
+                return 1;
+        }
+    }
+    return -1;
+}
+
+
 //=====================================================
 //
 // VRepeatIntAttr
@@ -478,6 +518,23 @@ QString VRepeatIntAttr::endValue() const
         return QString::number(r.end());
     }
     return {};
+}
+
+int VRepeatIntAttr::currentPosition() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        if(r.start() == r.end())
+            return -1;
+        else if(r.value() == r.start())
+            return 0;
+        else if(r.value() == r.end() || r.value() + r.step() > r.end())
+            return 2;
+        else
+            return 1;
+    }
+    return -1;
 }
 
 //=====================================================
@@ -582,6 +639,26 @@ QString VRepeatEnumAttr::allValues() const
     return vals;
 }
 
+int VRepeatEnumAttr::currentPosition() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        if(RepeatEnumerated *rdl = static_cast<RepeatEnumerated*>(r.repeatBase()))
+        {
+            if(rdl->indexNum() < 2)
+                return -1;
+            else if(rdl->index_or_value() == 0)
+                return 0;
+            else if(rdl->index_or_value() == rdl->indexNum()-1)
+                return 2;
+            else
+                return 1;
+        }
+    }
+    return -1;
+}
+
 
 //=====================================================
 //
@@ -658,3 +735,22 @@ QString VRepeatStringAttr::allValues() const
     return vals;
 }
 
+int VRepeatStringAttr::currentPosition() const
+{
+    if(node_ptr node=parent_->node())
+    {
+        const Repeat& r=node->repeat();
+        if(RepeatString *rdl = static_cast<RepeatString*>(r.repeatBase()))
+        {
+            if(rdl->indexNum() < 2)
+                return -1;
+            else if(rdl->index_or_value() == 0)
+                return 0;
+            else if(rdl->index_or_value() == rdl->indexNum()-1)
+                return 2;
+            else
+                return 1;
+        }
+    }
+    return -1;
+}
