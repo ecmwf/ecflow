@@ -95,7 +95,12 @@ struct NodeDelegateBox : public BaseNodeDelegateBox
 //Attr renderer properties
 struct AttrDelegateBox : public BaseNodeDelegateBox
 {
-    AttrDelegateBox() = default;
+    AttrDelegateBox() : iconSize(16), iconPreGap(2),
+       iconGap(2) {}
+
+    int iconSize;
+    int iconPreGap;
+    int iconGap;
 
     void adjust(const QFont& f) override {
          QFontMetrics fm(f);
@@ -104,6 +109,17 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
          fullHeight=height+topMargin+bottomMargin;
          sizeHintCache=QSize(100,fullHeight);
          spacing=fm.width('A')*3/4;
+
+         int h=static_cast<int>(static_cast<float>(fm.height())*0.7);
+         iconSize=h;
+         if(iconSize % 2 == 1)
+             iconSize+=1;
+
+         iconGap=1;
+         if(iconSize > 16)
+             iconGap=2;
+
+         iconPreGap=fm.width('A')/2;
      }
 };
 
@@ -191,6 +207,11 @@ protected:
     QBrush  completeBgBrush_;
     QPen    completeBorderPen_;
     QPen    completeFontPen_;
+    QPen    holdingTimeFontPen_;
+    QPen    holdingDateFontPen_;
+
+    int holdingTimePixId_;
+    int holdingDatePixId_;
 };
 
 #endif

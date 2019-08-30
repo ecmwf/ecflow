@@ -15,6 +15,7 @@
 //#include "ArgvCreator.hpp"
 #include "Str.hpp"
 
+#include "ActionHandler.hpp"
 #include "ServerHandler.hpp"
 #include "ShellCommand.hpp"
 #include "UiLog.hpp"
@@ -34,6 +35,7 @@
 
 std::string CommandHandler::executeCmd_ = "ecflow_client --run <full_name>";
 std::string CommandHandler::rerunCmd_ = "ecflow_client --force queued <full_name>";
+std::string CommandHandler::killCmd_ = "ecflow_client --kill <full_name>";
 
 void CommandHandler::run(std::vector<VInfo_ptr> info, const std::string& cmd)
 {
@@ -271,6 +273,30 @@ void CommandHandler::rerunAborted(const std::vector<VNode*>& nodes)
     }
 
     CommandHandler::run(info_vec, rerunCmd_);
+}
+
+bool CommandHandler::kill(const std::vector<VNode*>& nodes, bool confirm)
+{
+    std::vector<VInfo_ptr> info_vec;
+    for(size_t i=0; i < nodes.size(); i++)
+    {
+        info_vec.push_back(VInfoNode::create(nodes[i]));
+        assert(nodes[i]);
+        //assert(nodes[i]->isTask());
+    }
+
+    if (confirm)
+    {
+        if (!ActionHandler::confirmCommand(info_vec, "Confirm <b>killing</b> of <full_name>",
+                                           "", killCmd_, info_vec.size()))
+        {
+            return false;
+        }
+    }
+
+    CommandHandler::run(info_vec, killCmd_);
+
+    return true;
 }
 
 std::string CommandHandler::commandToString(const std::vector<std::string>& cmd)

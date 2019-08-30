@@ -18,7 +18,7 @@
 
 VTimeAttrType::VTimeAttrType() : VAttributeType("time")
 {
-    dataCount_=2;
+    dataCount_=3;
     searchKeyToData_["time_name"]=NameIndex;
     searchKeyToData_["name"]=NameIndex;
     scanProc_=VTimeAttr::scan;
@@ -29,7 +29,8 @@ QString VTimeAttrType::toolTip(QStringList d) const
     QString t="<b>Type:</b> Time<br>";
     if(d.count() == dataCount_)
     {
-        t+="<b>Name:</b> " + d[NameIndex];
+        t+="<b>Name: </b>" + d[NameIndex] +
+           "<br><b>Status: </b>" + ((d[FreeIndex] == "1")?"Free":"Holding");
     }
     return t;
 }
@@ -44,19 +45,22 @@ QString VTimeAttrType::definition(QStringList d) const
     return t;
 }
 
-void VTimeAttrType::encode(const ecf::TimeAttr& d,QStringList& data)
+void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::TimeAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name());
+    data << qName_ << QString::fromStdString(d.name()) <<
+            (d.isFree(calendar)?"1":"0");
 }
 
-void VTimeAttrType::encode(const ecf::TodayAttr& d,QStringList& data)
+void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::TodayAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name());
+    data << qName_ << QString::fromStdString(d.name()) <<
+            (d.isFree(calendar)?"1":"0");
 }
 
-void VTimeAttrType::encode(const ecf::CronAttr& d,QStringList& data)
+void VTimeAttrType::encode(const ecf::Calendar& calendar, const ecf::CronAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name());
+    data << qName_ << QString::fromStdString(d.name())<<
+            (d.isFree(calendar)?"1":"0");
 }
 
 //=====================================================
@@ -98,23 +102,24 @@ QStringList VTimeAttr::data(bool /*firstLine*/) const
     QStringList s;
     if(parent_->node_)
     {
+        const ecf::Calendar& calendar = parent_->calendar();
         if(dataType_ == TimeData)
         {
             const std::vector<ecf::TimeAttr>& v=parent_->node_->timeVec();
             if(index_ < static_cast<int>(v.size()))
-                atype->encode(v[index_],s);
+                atype->encode(calendar, v[index_],s);
         }
         else if(dataType_ == TodayData)
         {
             const std::vector<ecf::TodayAttr>& v=parent_->node_->todayVec();
             if(index_ < static_cast<int>(v.size()))
-                atype->encode(v[index_],s);
+                atype->encode(calendar, v[index_],s);
         }
         else if(dataType_ == CronData)
         {
             const std::vector<ecf::CronAttr>& v=parent_->node_->crons();
             if(index_ < static_cast<int>(v.size()))
-                atype->encode(v[index_],s);
+                atype->encode(calendar, v[index_],s);
         }
     }
     return s;

@@ -155,6 +155,17 @@ public:
          fullHeight=height+topMargin+bottomMargin;
          sizeHintCache=QSize(100,fullHeight);
          spacing=fm.width('A')*3/4;
+
+         int h=static_cast<int>(static_cast<float>(fm.height())*0.7);
+         iconSize=h;
+         if(iconSize % 2 == 1)
+             iconSize+=1;
+
+         iconGap=1;
+         if(iconSize > 16)
+             iconGap=2;
+
+         iconPreGap=fm.width('A')/2;
      }
 
      QRect adjustTextRect(const QRect& rIn) const override

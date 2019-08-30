@@ -32,6 +32,12 @@ public:
 		void contextMenu(std::vector<VInfo_ptr>,QPoint);
         bool actionHandler();
 
+        static bool confirmCommand(std::vector<VInfo_ptr>& filteredNodes,
+                                           const std::string& questionIn,
+                                           const std::string& warning,
+                                           const std::string& commandDescStr,
+                                           std::size_t taskNum);
+
 Q_SIGNALS:
 	    void viewCommand(VInfo_ptr,QString);
 	    void infoPanelCommand(VInfo_ptr,QString);

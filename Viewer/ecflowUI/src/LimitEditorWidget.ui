@@ -55,7 +55,7 @@
      <item row="2" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
-        <string>Maximum:</string>
+        <string>Maximum: </string>
        </property>
       </widget>
      </item>
@@ -129,6 +129,16 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QToolButton" name="killTb_">
+       <property name="text">
+        <string>Kill</string>
+       </property>
+       <property name="toolButtonStyle">
+        <enum>Qt::ToolButtonTextBesideIcon</enum>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -163,7 +173,21 @@
     <string>Look up node in tree</string>
    </property>
   </action>
+  <action name="actionKill_">
+   <property name="icon">
+    <iconset resource="viewer.qrc">
+     <normaloff>:/viewer/icon_killed.svg</normaloff>:/viewer/icon_killed.svg</iconset>
+   </property>
+   <property name="text">
+    <string>Kill</string>
+   </property>
+   <property name="toolTip">
+    <string>Kill selected tasks</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

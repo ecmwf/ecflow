@@ -11,6 +11,7 @@
 #include "LimitEditor.hpp"
 
 #include <QItemSelectionModel>
+#include <QMessageBox>
 #include <QSettings>
 #include <QStringListModel>
 
@@ -23,14 +24,28 @@
 #include "VAttributeType.hpp"
 #include "VLimitAttr.hpp"
 #include "SessionHandler.hpp"
+#include "ServerHandler.hpp"
+#include "VNode.hpp"
 
 LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
 {
     setupUi(this);
     removeTb_->setDefaultAction(actionRemove_);
     removeAllTb_->setDefaultAction(actionRemoveAll_);
+    killTb_->setDefaultAction(actionKill_);
     //pathView_->addAction(actionRemove_);
+
+    QFont f=actionLookUp_->font();
+    f.setBold(true);
+    actionLookUp_->setFont(f);
+
     pathView_->addAction(actionLookUp_);
+    QAction* sep = new QAction(this);
+    sep->setSeparator(true);
+    pathView_->addAction(sep);
+    pathView_->addAction(actionRemove_);
+    pathView_->addAction(actionKill_);
+
     pathView_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     pathView_->setContextMenuPolicy(Qt::ActionsContextMenu);
 }
@@ -67,6 +82,7 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) :
     {
         w_->actionRemove_->setEnabled(false);
         w_->actionRemoveAll_->setEnabled(false);
+        w_->actionKill_->setEnabled(false);
         return;
     }
 
@@ -81,8 +97,15 @@ LimitEditor::LimitEditor(VInfo_ptr info,QWidget* parent) :
     connect(w_->actionRemoveAll_,SIGNAL(triggered()),
             this,SLOT(slotRemoveAll()));
 
+    connect(w_->actionKill_,SIGNAL(triggered()),
+            this,SLOT(slotKill()));
+
     connect(w_->actionLookUp_,SIGNAL(triggered()),
             this,SLOT(slotLookUp()));
+
+    connect(w_->pathView_->selectionModel(),
+            SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)),
+            this,SLOT(slotSelection(const QItemSelection&, const QItemSelection&)));
 
     connect(w_->pathView_,SIGNAL(doubleClicked(const QModelIndex&)),
             this,SLOT(slotDoubleClicked(const QModelIndex&)));
@@ -213,6 +236,39 @@ void LimitEditor::remove(bool all)
     //because command() is asynchronous
 }
 
+void LimitEditor::slotKill()
+{
+    if(!info_)
+        return;
+
+    Q_ASSERT(model_);
+
+    VAttribute* a=info_->attribute();
+    Q_ASSERT(a);
+    VLimitAttr* lim=static_cast<VLimitAttr*>(a);
+    Q_ASSERT(lim);
+
+    std::vector<VNode*> items;
+    Q_FOREACH(QModelIndex idx,w_->pathView_->selectionModel()->selectedRows())
+    {
+        std::string p = model_->data(idx,Qt::DisplayRole).toString().toStdString();
+        if (VNode* n=info_->server()->vRoot()->find(p))
+            if(n->isNode())
+                items.push_back(n);
+    }
+
+    if(items.empty())
+        return;
+
+    if(CommandHandler::kill(items, true))
+    {
+        //We cannot cancel the setting after kill is callled
+        disableCancel();
+    }
+
+    //Updating the gui with the new state will happen later
+    //because command() is asynchronous
+}
 void LimitEditor::nodeChanged(const std::vector<ecf::Aspect::Type>& aspect)
 {
     bool limitCh=(std::find(aspect.begin(),aspect.end(),ecf::Aspect::LIMIT) != aspect.end());
@@ -262,6 +318,14 @@ void LimitEditor::setModelData(QStringList lst)
         w_->actionRemoveAll_->setEnabled(false);
     }
 }
+
+void LimitEditor::slotSelection(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+{
+    bool st = w_->pathView_->selectionModel()->selectedIndexes().count() > 0;
+    w_->actionRemove_->setEnabled(st);
+    w_->actionKill_->setEnabled(st);
+}
+
 //Lookup in tree
 
 void LimitEditor::slotLookUp()

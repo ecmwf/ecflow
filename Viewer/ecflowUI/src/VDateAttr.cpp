@@ -21,7 +21,7 @@
 
 VDateAttrType::VDateAttrType() : VAttributeType("date")
 {
-    dataCount_=2;
+    dataCount_=3;
     searchKeyToData_["date_name"]=NameIndex;
     searchKeyToData_["name"]=NameIndex;
     scanProc_=VDateAttr::scan;
@@ -32,7 +32,8 @@ QString VDateAttrType::toolTip(QStringList d) const
     QString t="<b>Type:</b> Date<br>";
     if(d.count() == dataCount_)
     {
-        t+="<b>Name:</b> " + d[NameIndex];
+        t+="<b>Name:</b> " + d[NameIndex] +
+        "<br><b>Status: </b>" + ((d[FreeIndex] == "1")?"Free":"Holding");
     }
     return t;
 }
@@ -47,14 +48,16 @@ QString VDateAttrType::definition(QStringList d) const
     return t;
 }
 
-void VDateAttrType::encode(const DateAttr& d,QStringList& data)
+void VDateAttrType::encode(const ecf::Calendar& calendar, const DateAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name());
+    data << qName_ << QString::fromStdString(d.name()) <<
+        (d.isFree(calendar)?"1":"0");
 }
 
-void VDateAttrType::encode(const DayAttr& d,QStringList& data)
+void VDateAttrType::encode(const ecf::Calendar& calendar, const DayAttr& d,QStringList& data)
 {
-    data << qName_ << QString::fromStdString(d.name());
+    data << qName_ << QString::fromStdString(d.name())<<
+        (d.isFree(calendar)?"1":"0");
 }
 
 //=====================================================
@@ -89,17 +92,18 @@ QStringList VDateAttr::data(bool /*firstLine*/) const
     QStringList s;
     if(parent_->node_)
     {
+        const ecf::Calendar& calendar = parent_->calendar();
         if(dataType_ == DateData)
         {
             const std::vector<DateAttr>& v=parent_->node_->dates();
             if(index_ < static_cast<int>(v.size()))
-                atype->encode(v[index_],s);
+                atype->encode(calendar, v[index_],s);
         }
         else if(dataType_ == DayData)
         {
             const std::vector<DayAttr>& v=parent_->node_->days();
             if(index_ < static_cast<int>(v.size()))
-                atype->encode(v[index_],s);
+                atype->encode(calendar, v[index_],s);
         }
     }
     return s;

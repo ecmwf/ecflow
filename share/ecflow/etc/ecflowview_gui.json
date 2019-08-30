@@ -199,6 +199,12 @@
                         "line" : "completeBackground",
                         "line" : "completeBorderColour",
                         "line" : "completeFontColour"
+                    },
+                    "group" : {
+                        "title" : "Times and dates",
+                            "prefix" : "view.attribute",
+                            "line" : "holdingTimeFontColour",
+                            "line" : "holdingDateFontColour"
                     }
                 },
                 "tab" : {
