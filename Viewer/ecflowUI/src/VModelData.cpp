@@ -350,7 +350,8 @@ void VTreeServer::notifyBeginNodeChange(const VNode* vnode, const std::vector<ec
 			if(it == ecf::Aspect::METER ||  it == ecf::Aspect::EVENT ||
 			   it == ecf::Aspect::LABEL || it == ecf::Aspect::LIMIT ||
 			   it == ecf::Aspect::EXPR_TRIGGER || it == ecf::Aspect::EXPR_COMPLETE ||
-			   it == ecf::Aspect::REPEAT || it == ecf::Aspect::NODE_VARIABLE ||
+               it == ecf::Aspect::REPEAT || it == ecf::Aspect::REPEAT_INDEX ||
+               it == ecf::Aspect::NODE_VARIABLE ||
 			   it == ecf::Aspect::LATE || it == ecf::Aspect::TODAY || it == ecf::Aspect::TIME ||
 			   it == ecf::Aspect::DAY || it == ecf::Aspect::CRON || it == ecf::Aspect::DATE )
 			{
