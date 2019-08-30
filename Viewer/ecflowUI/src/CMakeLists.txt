@@ -347,6 +347,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TabWidget.hpp
     TableFilterWidget.hpp
     TableNodeModel.hpp 
+    TableNodeSortModel.hpp
     TableNodeView.hpp 
     TableNodeViewDelegate.hpp
     TableNodeWidget.hpp             

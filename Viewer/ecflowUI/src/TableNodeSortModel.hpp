@@ -20,6 +20,7 @@ class ModelColumn;
 
 class TableNodeSortModel : public QSortFilterProxyModel
 {
+    Q_OBJECT
 public:
     TableNodeSortModel(TableNodeModel*,QObject *parent=0);
     ~TableNodeSortModel();
@@ -35,6 +36,11 @@ public:
     void setSkipSort(bool b) {skipSort_=b;}
     void removeColumn(QString);
     ModelColumn* columns() const;
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+
+protected Q_SLOTS:
+    void skipSortingBegin();
+    void skipSortingEnd();
 
 protected:
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
