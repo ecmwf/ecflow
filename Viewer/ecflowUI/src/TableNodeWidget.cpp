@@ -167,9 +167,9 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     //Autoscroll to selection
     acAutoScroll_=new QAction(this);
     acAutoScroll_->setIcon(QPixmap(":viewer/autoscroll.svg"));
-    acAutoScroll_->setToolTip("Autoscroll to selection after refresh");
     acAutoScroll_->setCheckable(true);
     acAutoScroll_->setChecked(true);
+    acAutoScroll_->setToolTip("The view will <b>automatically scroll</b> to the selection after refresh. Click to toggle.");
     acLst << acAutoScroll_;
 
     connect(acAutoScroll_,SIGNAL(toggled(bool)),
