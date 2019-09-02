@@ -101,17 +101,31 @@ public:
    explicit StateMemento(NState::State state) : state_(state) {}
    StateMemento()= default;
 private:
-   void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f)    const override { n->set_memento(this,aspects,f);}
    void do_incremental_defs_sync(Defs* defs,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { defs->set_memento(this,aspects,f);}
 
    NState::State state_{NState::UNKNOWN};
-   friend class Node;
    friend class Defs;
 
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version );
 };
+
+class NodeStateMemento : public Memento {
+public:
+   explicit NodeStateMemento(std::pair<NState::State,boost::posix_time::time_duration> state) : state_(state) {}
+   NodeStateMemento()= default;
+private:
+   void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f)    const override { n->set_memento(this,aspects,f);}
+
+   std::pair<NState::State,boost::posix_time::time_duration> state_;
+   friend class Node;
+
+   friend class cereal::access;
+   template<class Archive>
+   void serialize(Archive & ar, std::uint32_t const version );
+};
+
 
 class OrderMemento : public Memento {
 public:
@@ -189,7 +203,6 @@ private:
 
    bool suspended_{false};
    friend class Node;
-   friend class Defs;
 
    friend class cereal::access;
    template<class Archive>

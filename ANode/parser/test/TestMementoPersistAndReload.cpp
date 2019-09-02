@@ -62,11 +62,25 @@ BOOST_AUTO_TEST_CASE( test_memento_persist_and_reload )
       suite_ptr suite = defs.add_suite("s1");
       node_ptr t = suite->add_task("t1");
 
-      StateMemento memento(NState::ABORTED);
-      t->set_memento(&memento,aspects,aspect_only);
+      StateMemento memento2(NState::ABORTED);
+      defs.set_memento(&memento2,aspects,aspect_only);
 
       PersistHelper helper;
       BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs),"StateMemento failed: " << helper.errorMsg());
+   }
+   {
+      Defs defs;
+      suite_ptr suite = defs.add_suite("s1");
+      node_ptr t = suite->add_task("t1");
+
+      std::pair<NState::State,boost::posix_time::time_duration> state;
+      state.first = NState::ABORTED;
+      state.second = boost::posix_time::time_duration(1,1,1,0);
+      NodeStateMemento memento(state);
+      t->set_memento(&memento,aspects,aspect_only);
+
+      PersistHelper helper;
+      BOOST_CHECK_MESSAGE( helper.test_state_persist_and_reload_with_checkpt(defs),"NodeStateMemento failed: " << helper.errorMsg());
    }
    {
       Defs defs;

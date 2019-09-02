@@ -72,6 +72,7 @@ class JobCreationCtrl;
 class AstTop;
 
 class StateMemento;
+class NodeStateMemento;
 class NodeDefStatusDeltaMemento;
 class SuspendedMemento;
 class ServerStateMemento;

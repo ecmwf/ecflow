@@ -16,6 +16,7 @@
 #include "Memento.hpp"
 #include "Str.hpp"
 #include "Serialization.hpp"
+#include "cereal_boost_time.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -127,6 +128,13 @@ void CompoundMemento::serialize(Archive & ar, std::uint32_t const version )
 
 template<class Archive>
 void StateMemento::serialize(Archive & ar, std::uint32_t const version )
+{
+   ar(cereal::base_class<Memento>(this),
+      CEREAL_NVP(state_));
+}
+
+template<class Archive>
+void NodeStateMemento::serialize(Archive & ar, std::uint32_t const version )
 {
    ar(cereal::base_class<Memento>(this),
       CEREAL_NVP(state_));
@@ -378,6 +386,7 @@ CEREAL_TEMPLATE_SPECIALIZE_V(Memento);
 CEREAL_TEMPLATE_SPECIALIZE_V(CompoundMemento);
 
 CEREAL_TEMPLATE_SPECIALIZE_V(StateMemento);
+CEREAL_TEMPLATE_SPECIALIZE_V(NodeStateMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(NodeDefStatusDeltaMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(SuspendedMemento);
 CEREAL_TEMPLATE_SPECIALIZE_V(ServerStateMemento);
@@ -415,6 +424,7 @@ CEREAL_TEMPLATE_SPECIALIZE_V(AliasNumberMemento);
 
 
 CEREAL_REGISTER_TYPE(StateMemento);
+CEREAL_REGISTER_TYPE(NodeStateMemento);
 CEREAL_REGISTER_TYPE(NodeDefStatusDeltaMemento);
 CEREAL_REGISTER_TYPE(SuspendedMemento);
 CEREAL_REGISTER_TYPE(ServerStateMemento);

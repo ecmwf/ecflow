@@ -515,7 +515,7 @@ public:
    virtual void collateChanges(DefsDelta& ) const = 0;
    void incremental_changes(DefsDelta&, compound_memento_ptr& comp) const;
 
-   void set_memento(const StateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
+   void set_memento(const NodeStateMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
    void set_memento(const NodeDefStatusDeltaMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
    void set_memento(const SuspendedMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
    void set_memento(const NodeEventMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );

@@ -66,7 +66,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	// determine if state changed
 	if (st_.first.state_change_no() > client_state_change_no) {
 		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-		comp->add( std::make_shared<StateMemento>( st_.first.state()) );
+		comp->add( std::make_shared<NodeStateMemento>( std::make_pair(st_.first.state(),st_.second)) );
 	}
 
 	// determine if def status changed
@@ -266,14 +266,17 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	}
 }
 
-void Node::set_memento(const StateMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
+void Node::set_memento(const NodeStateMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only) {
 
 #ifdef DEBUG_MEMENTO
 	std::cout << "Node::set_memento(const StateMemento* memento) " << debugNodePath() << "  " << NState::toString(memento->state_) << "\n";
 #endif
 
 	if (aspect_only) aspects.push_back(ecf::Aspect::STATE);
-	else             setStateOnly( memento->state_ );
+	else  {
+	   setStateOnly( memento->state_.first );
+	   st_.second = memento->state_.second;
+	}
 }
 
 void Node::set_memento( const NodeDefStatusDeltaMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {
