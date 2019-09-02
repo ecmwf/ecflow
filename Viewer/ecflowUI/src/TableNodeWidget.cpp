@@ -173,6 +173,9 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     acLst << acAutoScroll_;
 
     connect(acAutoScroll_,SIGNAL(toggled(bool)),
+            this,SLOT(slotSelectionAutoScrollChanged(bool)));
+
+    connect(acAutoScroll_,SIGNAL(toggled(bool)),
             view_->realWidget(),SLOT(slotSelectionAutoScrollChanged(bool)));
 
     tw->addActions(acLst);
@@ -197,6 +200,25 @@ void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b)
     {
         bcWidget_->setMode(NodePathWidget::TextMode);
     }
+}
+
+void TableNodeWidget::slotSelectionAutoScrollChanged(bool b)
+{
+    QString txt, pix;
+    if(b)
+    {
+        txt = "The view will <b>automatically scroll</b> to the selection after refresh.";
+        pix = ":viewer/autoscroll.svg";
+    }
+    else
+    {
+        txt = "This view will <b>not</b> automatically <b>scroll</b> to the selection after refresh.";
+        pix = ":viewer/autoscroll_off.svg";
+    }
+    txt += " Click to toggle.";
+
+    acAutoScroll_->setToolTip(txt);
+    acAutoScroll_->setIcon(QPixmap(pix));
 }
 
 void TableNodeWidget::rerender()

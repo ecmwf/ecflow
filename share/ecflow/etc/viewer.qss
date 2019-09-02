@@ -330,13 +330,17 @@ QToolButton[docktitle="1"] {
     background-color: transparent;
 }
 
-QToolButton[docktitle="1"]:checked {
-    border: 1px solid rgb(255,80,80);
+/*QToolButton[docktitle="1"]:checked {
+    border-left: 1px solid rgb(120,120,120);
+    border-top: 1px solid rgb(120,120,120);
+    border-right: 1px solid rgb(120,120,120);
+    border-bottom: 1px solid rgb(120,120,120);
     border-radius: 0px;
     padding: 0px;
     icon-size:  18px;
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(110,110,100), stop: 0.4 rgb(100,100,100), stop: 0.41 rgb(90,90,90), stop: 1 rgb(82,82,82));
-}
+    background: rgb(60, 60, 60);
+    /*background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 rgb(110,110,100), stop: 0.4 rgb(100,100,100), stop: 0.41 rgb(90,90,90), stop: 1 rgb(82,82,82));*/
+}*/
 
 /*QToolButton[docktitle="1"]:!focus {
     border-radius: 0px;
