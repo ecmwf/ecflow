@@ -536,6 +536,9 @@ void TableNodeView::readSettings(VSettings* vs)
     vs->get("visible",visVec);
     vs->get("width",wVec);
 
+    int sortColumn = vs->get<int>("sortColumn",0);
+    int sortOrder = vs->get<int>("sortOrder",0);
+
     vs->endGroup();
 
     if(orderVec.size() != visVec.size() || orderVec.size() != wVec.size())
@@ -569,6 +572,8 @@ void TableNodeView::readSettings(VSettings* vs)
         if(visCnt==0)
             header()->setSectionHidden(0,false);
     }
+
+    sortByColumn(sortColumn, (sortOrder==0)?Qt::AscendingOrder:Qt::DescendingOrder);
 }
 
 void TableNodeView::writeSettings(VSettings* vs)
@@ -588,6 +593,8 @@ void TableNodeView::writeSettings(VSettings* vs)
     vs->put("order",orderVec);
     vs->put("visible",visVec);
     vs->put("width",wVec);
+    vs->put("sortColumn",header_->sortIndicatorSection());
+    vs->put("sortOrder",header_->sortIndicatorOrder());
 
     vs->endGroup();
 }
