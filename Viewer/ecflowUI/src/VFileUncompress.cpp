@@ -23,21 +23,22 @@
 
 bool VFileUncompress::isCompressed(QString sourceFile)
 {
-    return sourceFile.endsWith(".gz") || sourceFile.endsWith(".Z");
+    return sourceFile.endsWith(".gz",Qt::CaseInsensitive) ||
+            sourceFile.endsWith(".Z", Qt::CaseInsensitive);
 }
 
 VFile_ptr VFileUncompress::uncompress(QString sourceFile, QString& errStr)
 {
     QFileInfo info(sourceFile);
-    QString suffix = info.suffix();
+    QString suffix = info.suffix().toLower();
 
-    if(suffix != "gz" && suffix != "Z")
+    if(suffix != "gz" && suffix != "z")
     {
         VFile_ptr z;
         return z;
     }
 
-    VFile_ptr targetFile = VFile::createTmpFile(false);
+    VFile_ptr targetFile = VFile::createTmpFile(true); //will be deleted automatically
     QProcess proc;
     proc.setStandardOutputFile(QString::fromStdString(targetFile->path()));
 
