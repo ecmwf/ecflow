@@ -30,7 +30,8 @@
 
 TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,bool interactive,QWidget * parent) :
     NodeWidget("table",serverFilter,parent),
-    sortModel_(0)
+    sortModel_(0),
+    acAutoScroll_(0)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -163,6 +164,17 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     connect(acVar,SIGNAL(triggered()),
             view_->realWidget(),SLOT(slotAddVariableColumn()));
 
+    //Autoscroll to selection
+    acAutoScroll_=new QAction(this);
+    acAutoScroll_->setIcon(QPixmap(":viewer/autoscroll.svg"));
+    acAutoScroll_->setToolTip("Autoscroll to selection after refresh");
+    acAutoScroll_->setCheckable(true);
+    acAutoScroll_->setChecked(true);
+    acLst << acAutoScroll_;
+
+    connect(acAutoScroll_,SIGNAL(toggled(bool)),
+            view_->realWidget(),SLOT(slotSelectionAutoScrollChanged(bool)));
+
     tw->addActions(acLst);
 }
 
@@ -207,6 +219,9 @@ void TableNodeWidget::writeSettings(VComboSettings* vs)
     view_->writeSettings(vs);
 
     DashboardWidget::writeSettings(vs);
+
+    if (acAutoScroll_)
+        vs->putAsBool("autoScrollToSelection", acAutoScroll_->isChecked());
 }
 
 void TableNodeWidget::readSettings(VComboSettings* vs)
@@ -239,9 +254,11 @@ void TableNodeWidget::readSettings(VComboSettings* vs)
     view_->readSettings(vs);
 
     DashboardWidget::readSettings(vs);
+
+    //autoscroll to selection
+    if (acAutoScroll_)
+    {
+        bool b=vs->getAsBool("autoScrollToSelection", true);
+        acAutoScroll_->setChecked(b);
+    }
 }
-
-
-
-
-

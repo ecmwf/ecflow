@@ -60,6 +60,7 @@ public Q_SLOTS:
     void slotAddVariableColumn();
     void slotUpdateBegin();
     void slotUpdateEnd();
+    void slotSelectionAutoScrollChanged(bool);
 
 Q_SIGNALS:
 	void selectionChanged(VInfo_ptr);
@@ -85,6 +86,7 @@ protected:
     bool setCurrentIsRunning_;
     VInfo_ptr lastSelection_;
     bool setCurrentAfterUpdateIsRunning_;
+    bool autoScrollToSelection_;
 };
 
 class TableNodeHeaderButton

@@ -43,7 +43,8 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
 	 needItemsLayout_(false),
      prop_(NULL),
      setCurrentIsRunning_(false),
-     setCurrentAfterUpdateIsRunning_(false)
+     setCurrentAfterUpdateIsRunning_(false),
+     autoScrollToSelection_(true)
 {
     setObjectName("view");
     setProperty("style","nodeView");
@@ -242,7 +243,6 @@ void TableNodeView::setCurrentSelectionAfterUpdate(VInfo_ptr info)
     setCurrentAfterUpdateIsRunning_=false;
 }
 
-
 void TableNodeView::slotUpdateBegin()
 {
     lastSelection_=currentSelection();
@@ -255,11 +255,28 @@ void TableNodeView::slotUpdateEnd()
         lastSelection_->regainData();
         if(lastSelection_->hasData())
         {
+            bool autoScr = hasAutoScroll();
+            if (autoScr != autoScrollToSelection_)
+            {
+                setAutoScroll(autoScrollToSelection_);
+            }
+
             setCurrentSelectionAfterUpdate(lastSelection_);
+
+            if (autoScr != autoScrollToSelection_)
+            {
+                setAutoScroll(autoScr);
+            }
+
         }
 
         lastSelection_.reset();
     }
+}
+
+void TableNodeView::slotSelectionAutoScrollChanged(bool st)
+{
+    autoScrollToSelection_ = st;
 }
 
 void TableNodeView::slotDoubleClickItem(const QModelIndex&)

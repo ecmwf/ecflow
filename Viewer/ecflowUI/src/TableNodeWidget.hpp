@@ -43,6 +43,7 @@ protected:
 private:
     TableNodeSortModel *sortModel_;
     VParamFilterMenu *stateFilterMenu_;
+    QAction* acAutoScroll_;
 };
 
 #endif

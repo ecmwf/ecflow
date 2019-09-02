@@ -331,7 +331,7 @@ QToolButton[docktitle="1"] {
 }
 
 QToolButton[docktitle="1"]:checked {
-    /*border: 1px solid rgb(80,80,80);*/
+    border: 1px solid rgb(255,80,80);
     border-radius: 0px;
     padding: 0px;
     icon-size:  18px;
