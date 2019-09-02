@@ -16,6 +16,7 @@
 
 #include "File_r.hpp"
 #include "TimelineData.hpp"
+#include "VFileUncompress.hpp"
 
 //=================================================================
 //
@@ -50,6 +51,22 @@ TimelineFileList::TimelineFileList(QStringList exprLst)
 
 void TimelineFileList::add(QString logFile)
 {
+    VFile_ptr tmp;
+    if(VFileUncompress::isCompressed(logFile))
+    {
+        QString errStr;
+        tmp=VFileUncompress::uncompress(logFile, errStr);
+        if(tmp)
+        {
+            logFile = QString::fromStdString(tmp->path());
+        }
+        else
+        {
+            items_ << TimelineFileListItem(logFile, 0,"Could not uncompress log file");
+            return;
+        }
+    }
+
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile.toStdString());
     if(!log_file.ok() )

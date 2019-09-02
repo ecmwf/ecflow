@@ -26,6 +26,7 @@
 
 #include "TimelineData.hpp"
 #include "VNState.hpp"
+#include "VFileUncompress.hpp"
 
 #include <limits>
 
@@ -282,15 +283,36 @@ void TimelineData::loadMultiLogFile(const std::string& logFile,const std::vector
     }
 }
 
-void TimelineData::loadLogFileCore(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites, bool multi)
+void TimelineData::loadLogFileCore(const std::string& logFileIn,size_t maxReadSize,const std::vector<std::string>& suites, bool multi)
 {
     //Clear all collected data
     //clear();
+
+    std::string logFile = logFileIn;
 
     //maxReadSize_=maxReadSize;
     //fullRead_=false;
     //loadStatus_=LoadNotTried;
     //loadedAt_=QDateTime::currentDateTime();
+    VFile_ptr tmpFile;
+    if(VFileUncompress::isCompressed(QString::fromStdString(logFileIn)))
+    {
+        QString errStr;
+        //the tmp file will be auto deleted when we return from this function
+        tmpFile=VFileUncompress::uncompress(QString::fromStdString(logFileIn), errStr);
+        if(tmpFile)
+        {
+            logFile = tmpFile->path();
+        }
+        else
+        {
+            loadStatus_=LoadFailed;
+            UiLog().warn() << "TimelineData::loadLogFileCore: Could not uncompress log file " << logFileIn ;
+            throw std::runtime_error("Could not uncompress open log file: " + logFileIn);
+            return;
+        }
+
+    }
 
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile);

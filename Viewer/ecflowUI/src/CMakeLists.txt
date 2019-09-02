@@ -197,6 +197,7 @@ set(viewer_srcs
     VFile.cpp
     VFileInfo.cpp
     VFileTransfer.cpp
+    VFileUncompress.cpp
     VItem.cpp
     VItemPathParser.cpp
     VLabelAttr.cpp
