@@ -55,6 +55,7 @@
 #include "Aspect.hpp"
 #include "Attr.hpp"
 #include "PrintStyle.hpp"
+#include "NodeStats.hpp"
 
 class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
@@ -627,6 +628,8 @@ public:
    /// If not attached to parent returns std::numeric_limits<std::size_t>::max();
    size_t position() const;
 
+   void stats(NodeStats&);
+
    /// called at the end of state change function
    /// ** Every time we set the state on a nodecontainer, we call handleStateChange
    /// ** This by default works out the most significant state of the children
@@ -864,14 +867,12 @@ private:
 
    bool suspended_{false};
 
-   friend class TimeDepAttrs;
    friend class MiscAttrs;
-   friend class AutoAttrs;
-
 private:
    // conditionally save to cut down on client/server bandwidth.
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version );
 };
+
 #endif

@@ -319,6 +319,8 @@ public:
    void read_history(const std::string& line,const std::vector<std::string>& lineTokens);
    bool compare_edit_history(const Defs&) const;
    bool compare_change_no(const Defs&) const;
+
+   std::string stats() const; // dump out definition stats
 private:
    void do_generate_scripts( const std::map<std::string,std::string>& override) const;
    void write_state(std::string&) const;

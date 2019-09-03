@@ -500,7 +500,6 @@ private:
 
    ecf::TodayAttr attr_;
    friend class Node;
-   friend class TimeDepAttrs;
 
    friend class cereal::access;
    template<class Archive>
@@ -516,7 +515,6 @@ private:
 
    ecf::TimeAttr attr_;
    friend class Node;
-   friend class TimeDepAttrs;
 
    friend class cereal::access;
    template<class Archive>
@@ -532,7 +530,6 @@ private:
 
    DayAttr attr_;
    friend class Node;
-   friend class TimeDepAttrs;
 
    friend class cereal::access;
    template<class Archive>
@@ -548,7 +545,6 @@ private:
 
    ecf::CronAttr attr_;
    friend class Node;
-   friend class TimeDepAttrs;
 
    friend class cereal::access;
    template<class Archive>
@@ -564,7 +560,6 @@ private:
 
    DateAttr attr_;
    friend class Node;
-   friend class TimeDepAttrs;
 
    friend class cereal::access;
    template<class Archive>

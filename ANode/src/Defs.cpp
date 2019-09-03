@@ -1846,6 +1846,37 @@ string::size_type DefsHistoryParser::find_log(const std::string& line, string::s
    return std::string::npos;
 }
 
+std::string Defs::stats() const
+{
+   std::vector<node_ptr> node_vec;
+   get_all_nodes(node_vec);
+
+   std::vector<Family*> family_vec;
+   getAllFamilies(family_vec );
+
+   std::vector<task_ptr> task_vec;
+   get_all_tasks(task_vec);
+
+   size_t alias = 0;
+   for(auto task : task_vec) alias += task->aliases().size();
+
+   NodeStats stats;
+   stats.suites_ = suiteVec_.size();
+   stats.family_ = family_vec.size();
+   stats.task_ = task_vec.size();
+   stats.alias_ = alias;
+   stats.nodes_ = node_vec.size();
+
+   stats.edit_history_nodes_ = edit_history_.size();
+   for(const auto& i : edit_history_) {
+      const std::vector<std::string>& vec = i.second;                          // list of requests
+      stats.edit_history_paths_ += vec.size();
+   }
+
+   for(auto node : node_vec)  node->stats(stats);
+   return stats.print();
+}
+
 
 template<class Archive>
 void Defs::serialize(Archive & ar, std::uint32_t const version )

@@ -178,7 +178,7 @@ bool Node::testTimeDependenciesForRequeue() const
 
 #ifdef DEBUG_REQUEUE
    LogToCout logtocout;
-   LOG(Log::DBG,"TimeDepAttrs::testTimeDependenciesForRequeue() " << debugNodePath() << " calendar " << calendar.toString());
+   LOG(Log::DBG,"Node::testTimeDependenciesForRequeue() " << debugNodePath() << " calendar " << calendar.toString());
 #endif
 
 
@@ -187,7 +187,7 @@ bool Node::testTimeDependenciesForRequeue() const
    BOOST_FOREACH(const CronAttr& cron, crons_ ) {
       if (cron.checkForRequeue(calendar)) {  // will always return true
 #ifdef DEBUG_REQUEUE
-         LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << debugNodePath() << " for cron");
+         LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for cron");
 #endif
          return true;
       }
@@ -200,7 +200,7 @@ bool Node::testTimeDependenciesForRequeue() const
       BOOST_FOREACH(const ecf::TimeAttr& time, times_) {
          if (time.checkForRequeue(calendar,the_min,the_max)) {
 #ifdef DEBUG_REQUEUE
-            LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << debugNodePath() << " for time " << time.toString());
+            LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for time " << time.toString());
 #endif
             return true;
          }
@@ -214,7 +214,7 @@ bool Node::testTimeDependenciesForRequeue() const
       BOOST_FOREACH(const ecf::TodayAttr& today,todays_) {
          if (today.checkForRequeue(calendar,the_min,the_max)) {
 #ifdef DEBUG_REQUEUE
-            LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << debugNodePath() << " for today " << today.toString());
+            LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for today " << today.toString());
 #endif
             return true;;
          }
@@ -230,7 +230,7 @@ bool Node::testTimeDependenciesForRequeue() const
    BOOST_FOREACH(const DateAttr& date, dates_ ) {
       if (date.checkForRequeue(calendar)) {
 #ifdef DEBUG_REQUEUE
-         LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << debugNodePath() << " for date " << date.toString());
+         LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for date " << date.toString());
 #endif
          return true;
       }
@@ -239,14 +239,14 @@ bool Node::testTimeDependenciesForRequeue() const
    BOOST_FOREACH(const DayAttr& day, days_ ) {
       if (day.checkForRequeue(calendar)) {
 #ifdef DEBUG_REQUEUE
-         LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << debugNodePath() << " for day " << day.toString());
+         LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for day " << day.toString());
 #endif
          return true;
       }
    }
 
 #ifdef DEBUG_REQUEUE
-   LOG(Log::DBG,"   TimeDepAttrs::testTimeDependenciesForRequeue() " << debugNodePath() << " HOLDING ");
+   LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " HOLDING ");
 #endif
    return false;
 }

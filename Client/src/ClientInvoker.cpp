@@ -599,11 +599,12 @@ int ClientInvoker::loadDefs(
          const std::string& filePath,
          bool force,      /* true means overwrite suite of same name */
          bool check_only, /* client side, true means don't send to server, just check only */
-         bool print       /* client side, print the defs */
+         bool print,      /* client side, print the defs */
+         bool stats       /* client side, print the defs statitics */
 ) const
 {
    if (testInterface_) return invoke(CtsApi::loadDefs(filePath,force,check_only,print));
-   Cmd_ptr cmd = LoadDefsCmd::create(filePath,force,check_only,print,&clientEnv_);
+   Cmd_ptr cmd = LoadDefsCmd::create(filePath,force,check_only,print,stats,&clientEnv_);
    // If check_only cmd will be empty
    if (cmd) return invoke(cmd);
    return 0;

@@ -27,7 +27,7 @@ void Node::deleteTime(const std::string& name )
        times_.clear();  // delete all
        state_change_no_ = Ecf::incr_state_change_no();
  #ifdef DEBUG_STATE_CHANGE_NO
-       std::cout << "TimeDepAttrs::deleteTime\n";
+       std::cout << "Node::deleteTime\n";
  #endif
        return;
     }
@@ -45,7 +45,7 @@ void Node::delete_time( const ecf::TimeAttr& attr )
          state_change_no_ = Ecf::incr_state_change_no();
 
 #ifdef DEBUG_STATE_CHANGE_NO
-         std::cout << "TimeDepAttrs::delete_time\n";
+         std::cout << "Node::delete_time\n";
 #endif
          return;
       }
@@ -59,7 +59,7 @@ void Node::deleteToday(const std::string& name)
       todays_.clear();
       state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
-      std::cout << "TimeDepAttrs::deleteToday\n";
+      std::cout << "Node::deleteToday\n";
 #endif
       return;
    }
@@ -77,7 +77,7 @@ void Node::delete_today(const ecf::TodayAttr& attr)
          todays_.erase( todays_.begin() + i );
          state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
-         std::cout << "TimeDepAttrs::delete_today\n";
+         std::cout << "Node::delete_today\n";
 #endif
          return;
       }
@@ -91,7 +91,7 @@ void Node::deleteDate(const std::string& name)
       dates_.clear();
       state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
-      std::cout << "TimeDepAttrs::deleteDate\n";
+      std::cout << "Node::deleteDate\n";
 #endif
       return;
    }
@@ -108,7 +108,7 @@ void Node::delete_date(const DateAttr& attr)
          dates_.erase( dates_.begin() + i );
          state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
-         std::cout << "TimeDepAttrs::delete_date\n";
+         std::cout << "Node::delete_date\n";
 #endif
          return;
       }
@@ -122,7 +122,7 @@ void Node::deleteDay(const std::string& name)
        days_.clear();
        state_change_no_ = Ecf::incr_state_change_no();
  #ifdef DEBUG_STATE_CHANGE_NO
-       std::cout << "TimeDepAttrs::deleteDay\n";
+       std::cout << "Node::deleteDay\n";
  #endif
        return;
     }
@@ -139,7 +139,7 @@ void Node::delete_day(const DayAttr& attr)
           days_.erase( days_.begin() + i );
           state_change_no_ = Ecf::incr_state_change_no();
  #ifdef DEBUG_STATE_CHANGE_NO
-          std::cout << "TimeDepAttrs::delete_day\n";
+          std::cout << "Node::delete_day\n";
  #endif
           return;
        }
@@ -153,7 +153,7 @@ void Node::deleteCron(const std::string& name)
        crons_.clear();
        state_change_no_ = Ecf::incr_state_change_no();
  #ifdef DEBUG_STATE_CHANGE_NO
-       std::cout << "TimeDepAttrs::deleteCron\n";
+       std::cout << "Node::deleteCron\n";
  #endif
        return;
     }
@@ -170,7 +170,7 @@ void Node::delete_cron(const ecf::CronAttr& attr)
          crons_.erase( crons_.begin() + i );
          state_change_no_ = Ecf::incr_state_change_no();
 #ifdef DEBUG_STATE_CHANGE_NO
-         std::cout << "TimeDepAttrs::deleteCron\n";
+         std::cout << "Node::delete_cron\n";
 #endif
          return ;
       }

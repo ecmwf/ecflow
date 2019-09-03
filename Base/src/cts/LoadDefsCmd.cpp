@@ -36,7 +36,7 @@ LoadDefsCmd::LoadDefsCmd(const defs_ptr& defs, bool force)
    }
 }
 
-LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool check_only, bool print,
+LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool check_only, bool print, bool stats,
                          const std::vector<std::pair<std::string,std::string> >& client_env)
 : force_(force), defs_filename_(defs_filename)
 {
@@ -57,8 +57,11 @@ LoadDefsCmd::LoadDefsCmd(const std::string& defs_filename, bool force, bool chec
          PrintStyle print_style(PrintStyle::NET); // should be same as MIGRATE, only differ on reload
          cout << defs;
       }
+      if (stats) {
+         cout << defs->stats();
+      }
 
-      if (!check_only) defs->save_as_string(defs_,PrintStyle::NET); // NET only takes affect on restore
+      if (!check_only && !stats && !print) defs->save_as_string(defs_,PrintStyle::NET); // NET only takes affect on restore
 
       // Output any warning to standard output
       cout << warningMsg;
@@ -134,13 +137,14 @@ const char* LoadDefsCmd::desc() {
             "To just check the definition and not send to server, use 'check_only'\n"
             "This command can also be used to load a checkpoint file into the server\n"
             "  arg1 = path to the definition file or checkpoint file\n"
-            "  arg2 = (optional) [ force | check_only | print ]   # default = false for all\n"
+            "  arg2 = (optional) [ force | check_only | print | stats ]  # default = false for all\n"
             "Usage:\n"
             "--load=/my/home/exotic.def               # will error if suites of same name exists\n"
             "--load=/my/home/exotic.def force         # overwrite suite's of same name in the server\n"
             "--load=/my/home/exotic.def check_only    # Just check, don't send to server\n"
+            "--load=/my/home/exotic.def stats         # Show defs statistics, don't send to server\n"
             "--load=host1.3141.check                  # Load checkpoint file to the server\n"
-            "--load=host1.3141.check print check_only # print definition to standard out in defs format\n"
+            "--load=host1.3141.check print            # print definition to standard out in defs format\n"
             ;
 }
 
@@ -157,29 +161,31 @@ void LoadDefsCmd::create( 	Cmd_ptr& cmd,
 
 	bool check_only = false;
 	bool force = false;
-	bool print = false;
+   bool print = false;
+   bool stats = false;
 	std::string defs_filename;
 	for(const auto & arg : args) {
 		if (arg == "force") force = true;
       else if (arg == "check_only") check_only = true;
       else if (arg == "print") print = true;
+      else if (arg == "stats") stats = true;
 		else defs_filename = arg;
 	}
-	if (clientEnv->debug()) cout << "  LoadDefsCmd::create:  Defs file '" <<  defs_filename << "'.\n";
+	if (clientEnv->debug()) cout << "  LoadDefsCmd::create: Defs file '" <<  defs_filename << "'.\n";
 
-	cmd = LoadDefsCmd::create(defs_filename,force,check_only,print,clientEnv );
+	cmd = LoadDefsCmd::create(defs_filename,force,check_only,print,stats,clientEnv );
 }
 
-Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename, bool force, bool check_only, bool print, AbstractClientEnv* clientEnv)
+Cmd_ptr LoadDefsCmd::create(const std::string& defs_filename,bool force,bool check_only,bool print,bool stats,AbstractClientEnv* clientEnv)
 {
    // For test allow the server environment to be changed, i.e. allow us to inject ECF_CLIENT
    // The server will also update the env on the defs, server will override client env, where they clash
 
    // The constructor can throw if parsing of defs_filename fail's
-   std::shared_ptr<LoadDefsCmd> load_cmd = std::make_shared<LoadDefsCmd>(defs_filename,force,check_only,print,clientEnv->env());
+   std::shared_ptr<LoadDefsCmd> load_cmd = std::make_shared<LoadDefsCmd>(defs_filename,force,check_only,print,stats,clientEnv->env());
 
    // Don't send to server if checking, i.e cmd not set
-   if (check_only) return Cmd_ptr();
+   if (check_only || stats || print) return Cmd_ptr();
 
    return load_cmd;
 }

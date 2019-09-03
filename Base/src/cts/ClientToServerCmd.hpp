@@ -1404,6 +1404,7 @@ class LoadDefsCmd : public UserCmd {
 public:
    LoadDefsCmd(const defs_ptr& defs, bool force = false);
    LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */,
+               bool stats = false/* not persisted */,
                const std::vector<std::pair<std::string,std::string> >& client_env = std::vector<std::pair<std::string,std::string> >());
    LoadDefsCmd()= default;
 
@@ -1421,7 +1422,7 @@ public:
    void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv ) const override;
-   static Cmd_ptr create(const std::string& defs_filename,bool force,bool check_only,bool print,AbstractClientEnv* clientEnv);
+   static Cmd_ptr create(const std::string& defs_filename,bool force,bool check_only,bool print,bool stats,AbstractClientEnv* clientEnv);
 
 private:
    static const char* arg();  // used for argument parsing

@@ -1753,7 +1753,7 @@ bool Node::operator==(const Node& rhs) const
    if (times_.size() != rhs.times_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeDepAttrs::operator==  (times_.size() != rhs.times_.size()) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (times_.size() != rhs.times_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1762,7 +1762,7 @@ bool Node::operator==(const Node& rhs) const
       if (!(times_[i] == rhs.times_[i] )) {
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
-            std::cout << "TimeDepAttrs::operator==  (!(times_[i] == rhs.times_[i] ))  " << debugNodePath() << "\n";
+            std::cout << "Node::operator==  (!(times_[i] == rhs.times_[i] ))  " << debugNodePath() << "\n";
          }
 #endif
          return false;
@@ -1772,7 +1772,7 @@ bool Node::operator==(const Node& rhs) const
    if (todays_.size() != rhs.todays_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeDepAttrs::operator==  (todays_.size() != rhs.todays_.size()) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  (todays_.size() != rhs.todays_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1781,7 +1781,7 @@ bool Node::operator==(const Node& rhs) const
       if (!(todays_[i] == rhs.todays_[i] )) {
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
-            std::cout << "TimeDepAttrs::operator==  (!(todays_[i] == rhs.todays_[i] ))  " << debugNodePath() << "\n";
+            std::cout << "Node::operator==  (!(todays_[i] == rhs.todays_[i] ))  " << debugNodePath() << "\n";
          }
 #endif
          return false;
@@ -1791,7 +1791,7 @@ bool Node::operator==(const Node& rhs) const
    if (dates_.size() != rhs.dates_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeDepAttrs::operator==   (dates_.size() != rhs.dates_.size()) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==   (dates_.size() != rhs.dates_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1800,7 +1800,7 @@ bool Node::operator==(const Node& rhs) const
       if (!(dates_[i] == rhs.dates_[i]) ) {
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
-            std::cout << "TimeDepAttrs::operator==   (!(dates_[i] == rhs.dates_[i]) " << debugNodePath() << "\n";
+            std::cout << "Node::operator==   (!(dates_[i] == rhs.dates_[i]) " << debugNodePath() << "\n";
          }
 #endif
          return false;
@@ -1810,7 +1810,7 @@ bool Node::operator==(const Node& rhs) const
    if (days_.size() != rhs.days_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeDepAttrs::operator==   (days_.size() != rhs.days_.size()) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==   (days_.size() != rhs.days_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1819,7 +1819,7 @@ bool Node::operator==(const Node& rhs) const
       if (!(days_[i] == rhs.days_[i]) ) {
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
-            std::cout << "TimeDepAttrs::operator==   (!(days_[i] == rhs.days_[i]) " << debugNodePath() << "\n";
+            std::cout << "Node::operator==   (!(days_[i] == rhs.days_[i]) " << debugNodePath() << "\n";
          }
 #endif
          return false;
@@ -1829,7 +1829,7 @@ bool Node::operator==(const Node& rhs) const
    if (crons_.size() != rhs.crons_.size()) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "TimeDepAttrs::operator==   (crons_.size() != rhs.crons_.size()) " << debugNodePath() << "\n";
+         std::cout << "Node::operator==   (crons_.size() != rhs.crons_.size()) " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1838,7 +1838,7 @@ bool Node::operator==(const Node& rhs) const
       if (!(crons_[i] == rhs.crons_[i]) ) {
 #ifdef DEBUG
          if (Ecf::debug_equality()) {
-            std::cout << "TimeDepAttrs::operator==   (!(crons_[i] == rhs.crons_[i]) " << debugNodePath() << "\n";
+            std::cout << "Node::operator==   (!(crons_[i] == rhs.crons_[i]) " << debugNodePath() << "\n";
          }
 #endif
          return false;
@@ -1958,7 +1958,7 @@ bool Node::operator==(const Node& rhs) const
       }
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "AutoAttrs::operator== auto_restore_ && rhs.auto_restore_   " << debugNodePath() << "\n";
+         std::cout << "Node::operator== auto_restore_ && rhs.auto_restore_   " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1966,7 +1966,7 @@ bool Node::operator==(const Node& rhs) const
    else if ( !auto_restore_ && rhs.auto_restore_) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "AutoAttrs::operator==  !auto_restore_ && rhs.auto_restore_ " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  !auto_restore_ && rhs.auto_restore_ " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -1974,7 +1974,7 @@ bool Node::operator==(const Node& rhs) const
    else if ( auto_restore_ && !rhs.auto_restore_ ) {
 #ifdef DEBUG
       if (Ecf::debug_equality()) {
-         std::cout << "AutoAttrs::operator==  auto_restore_ && !rhs.auto_restore_  " << debugNodePath() << "\n";
+         std::cout << "Node::operator==  auto_restore_ && !rhs.auto_restore_  " << debugNodePath() << "\n";
       }
 #endif
       return false;
@@ -2516,6 +2516,37 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const
    }
    return false;
 }
+
+void Node::stats(NodeStats& stats)
+{
+   stats.vars_ += vars_.size();
+   if (c_expr_) stats.c_trigger_++;
+   if (t_expr_) stats.trigger_++;
+   stats.meters_ += meters_.size();
+   stats.events_ += events_.size();
+   stats.labels_ += labels_.size();
+   stats.times_  += times_.size();
+   stats.todays_ += todays_.size();
+   stats.crons_  += crons_.size();
+   stats.dates_  += dates_.size();
+   stats.days_   += days_.size();
+
+   if (late_) stats.late_++;
+   if (misc_attrs_) {
+      stats.verifys_ += misc_attrs_->verifys().size();
+      stats.zombies_ +=  misc_attrs_->zombies().size();
+      stats.queues_ +=  misc_attrs_->queues().size();
+      stats.generics_ +=  misc_attrs_->generics().size();
+   }
+   if (!repeat_.empty()) stats.repeats_++;
+
+   stats.limits_ += limits_.size();
+   stats.inlimits_ += inLimitMgr_.inlimits().size();
+   if (auto_cancel_) stats.auto_cancel_++;
+   if (auto_archive_) stats.auto_archive_++;
+   if (auto_restore_ ) stats.auto_restore_++;
+}
+
 
 static std::vector<VerifyAttr> verifys_;
 static std::vector<ZombieAttr> zombies_;
