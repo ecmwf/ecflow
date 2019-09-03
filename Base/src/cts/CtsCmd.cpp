@@ -475,7 +475,7 @@ void CtsCmd::addOption(boost::program_options::options_description& desc) const
       }
       case CtsCmd::STATS:{
          desc.add_options()( CtsApi::statsArg(),
-                  "Returns the server statistics."
+                  "Returns the server statistics as a string."
          );
          break;
       }
