@@ -64,13 +64,18 @@ $PYTHON ./reload.py -s ecflow
 git checkout master
 
 # ========================================================================
-# test suites
+# test suites. Use installed ecflow:
 # ========================================================================
 cd $WK
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/basic.def
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/sub_only1.def
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/inlimit_node.def
+    
+# Use the installed ecflow   
+# must be done after since TestBench.py will use build dir
+ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /
+       
        
 # =======================================================================
 # Start the GUI
