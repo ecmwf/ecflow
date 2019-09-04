@@ -891,9 +891,9 @@ void Node::setStateOnly(NState::State newState,bool force,const std::string& add
       }
    }
 
-   Submittable* submittable = isSubmittable();
    if ( newState == NState::ABORTED) {
       if (force) flag().set(ecf::Flag::FORCE_ABORT);
+      Submittable* submittable = isSubmittable();
       if ( submittable ) {
          flag().set(ecf::Flag::TASK_ABORTED);
          if (do_log_state_changes) {
@@ -924,10 +924,8 @@ void Node::setStateOnly(NState::State newState,bool force,const std::string& add
    }
 
    st_.first.setState(newState);      // this will update state_change_no
-   if ( submittable ) {
-      if (newState == NState::QUEUED) sc_rt_ = boost::posix_time::time_duration(0,0,0,0);
-      else                            sc_rt_ = calendar.duration() - st_.second;
-   }
+   if (newState == NState::QUEUED) sc_rt_ = boost::posix_time::time_duration(0,0,0,0);
+   else                            sc_rt_ = calendar.duration() - st_.second;
    st_.second = calendar.duration();  // record state change duration for late, autocancel,autoarchive,etc
 
    // Record state changes for verification
