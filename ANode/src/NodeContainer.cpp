@@ -379,6 +379,11 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
          throw std::runtime_error("NodeContainer::order DOWN, immediate child not found");
 		}
       case NOrder::RUNTIME: {
+         for(node_ptr node : nodes_) {
+            if (node->state() != NState::COMPLETE) {
+               throw std::runtime_error("NodeContainer::order: To order by RUNTIME All nodes must be complete");
+            }
+         }
          (void) sum_runtime();
          std::sort(nodes_.begin(),nodes_.end(),
                    [](const node_ptr& a,const node_ptr& b){ return a->state_change_runtime() > b->state_change_runtime();});

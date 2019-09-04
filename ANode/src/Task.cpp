@@ -727,6 +727,11 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
          throw std::runtime_error("Task::order DOWN, immediate child not found");
       }
       case NOrder::RUNTIME: {
+         for(alias_ptr alias : aliases_ ) {
+            if (alias->state() != NState::COMPLETE) {
+               throw std::runtime_error("Task::order: To order by RUNTIME All aliases must be complete");
+            }
+         }
          (void) sum_runtime();
          std::sort(aliases_.begin(), aliases_.end(),
                    [](const alias_ptr& a,const alias_ptr& b){ return a->state_change_runtime() > b->state_change_runtime();});
