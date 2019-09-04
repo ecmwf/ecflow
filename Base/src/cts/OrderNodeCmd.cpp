@@ -77,7 +77,7 @@ const char* OrderNodeCmd::desc() {
             "   o order   Arranges for all the peers of selected note to be sorted in reverse alphabet(case-insensitive)\n"
             "   o up      Moves the selected node up one place amongst its peers\n"
             "   o down    Moves the selected node down one place amongst its peers\n\n"
-            "   o runtime Orders the task according to state change runtime\n"
+            "   o runtime Orders the nodes according to state change runtime\n"
             "             for families by accumulated runtime of its children\n"
             "             useful to submit the task that take longer earlier\n\n"
             "This command can fail because:\n"
