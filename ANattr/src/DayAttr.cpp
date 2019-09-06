@@ -43,10 +43,10 @@ static std::string theDay(DayAttr::Day_t day)
 
 //===============================================================================
 
-void DayAttr::calendarChanged( const ecf::Calendar& c )
+void DayAttr::calendarChanged( const ecf::Calendar& c, bool clear_at_midnight )
 {
-   // See ECFLOW-337
-   if (c.dayChanged()) {
+   // See ECFLOW-337 versus ECFLOW-1550
+   if (clear_at_midnight && c.dayChanged()) {
       clearFree();
    }
    if (makeFree_) {
