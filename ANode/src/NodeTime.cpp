@@ -74,8 +74,22 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
    //        day monday  # Job will run at Monday morning *AND* at 10:00
    if (cal_args.holding_parent_day_or_date_) {
       // No point FREEING any of time attributes as we are HOLDING on parent day/date attribute
+      //cout << "cal_args.holding_parent_day_or_date_ ***************************************\n";
       return;
    }
+
+   //cout << "calendar_changed_timeattrs " << c.toString() << "\n";
+//   std::vector<node_ptr> all_children1;
+//   allChildren(all_children1);
+//   for(size_t t = 0; t <  all_children1.size(); t++) {
+//       cout << "   " << all_children1[t]->debugNodePath() << " " << NState::toString(all_children1[t]->state()) << "\n";
+//   }
+//   AstTop* ast = triggerAst();
+//   if (ast) {
+//      ast->print(cout);
+//      cout << "\n";
+//   }
+
 
    if (days_.empty() && dates_.empty() ) {
 
@@ -85,7 +99,6 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
       for(auto & cron  : crons_)  {  cron.calendarChanged(c); }
    }
    else {
-      //cout << c.toString() << "\n";
 
        // If *BEFORE* midnight we have FREE day/date and submitted or active jobs, don't clear the day/dates
        // i.e take:
@@ -97,7 +110,8 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
        // This is only applicable for NodeContainers, for task with day/date always CLEAR at midnight
        // ECFLOW-337 versus ECFLOW-1550
 
-      bool clear_day_date_at_midnight = true;
+      bool clear_day_at_midnight = true;
+      bool clear_date_at_midnight = true;
       if (c.dayChanged() && isNodeContainer()) {
 
          // Check if day/date are free *BEFORE* midnight and *BEFORE* calendarChanged called(since that clears Day::makeFree_)
@@ -126,12 +140,14 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
                   else if (all_children[t]->state() == NState::COMPLETE) completed++;
                   else if (all_children[t]->state() == NState::QUEUED) queued++;
                   if (active || submitted) {
-                     clear_day_date_at_midnight = false;
+                     if (free_date) clear_date_at_midnight = false;
+                     if (free_day)  clear_day_at_midnight = false;
                      //cout << "if (active || submitted ) clear_day_date_at_midnight = false\n";
                      break;
                   }
                   if (completed && (active || submitted || queued)) {
-                     clear_day_date_at_midnight = false;
+                     if (free_date) clear_date_at_midnight = false;
+                     if (free_day)  clear_day_at_midnight = false;
                      //cout << "if (completed && (active || submitted || queued))    clear_day_date_at_midnight = false\n";
                      break;
                   }
@@ -143,13 +159,13 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
 
       bool at_least_one_day_free = false;
       for(auto & day : days_){
-         day.calendarChanged(c,cal_args.top_level_repeat_,clear_day_date_at_midnight);
+         day.calendarChanged(c,cal_args.top_level_repeat_,clear_day_at_midnight);
          if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
       }
 
       bool at_least_one_date_free = false;
       for(auto & date : dates_) {
-         date.calendarChanged(c,cal_args.top_level_repeat_,clear_day_date_at_midnight);
+         date.calendarChanged(c,cal_args.top_level_repeat_,clear_date_at_midnight);
          if (!at_least_one_date_free) at_least_one_date_free = date.isFree(c);
       }
 
@@ -171,12 +187,12 @@ bool Node::holding_day_or_date(const ecf::Calendar& c) const
 
    bool at_least_one_day_free = false;
    for(auto & day : days_){
-      if (!at_least_one_day_free) at_least_one_day_free = day.is_free(c);
+      if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
    }
 
    bool at_least_one_date_free = false;
    for(auto & date : dates_) {
-      if (!at_least_one_date_free) at_least_one_date_free = date.is_free(c);
+      if (!at_least_one_date_free) at_least_one_date_free = date.isFree(c);
    }
 
    if (at_least_one_day_free || at_least_one_date_free ) {
