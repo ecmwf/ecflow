@@ -35,7 +35,8 @@ if (ENABLE_ALL_TESTS)
 	./TestClkSync.cpp
 	./TestComplete.cpp
 	./TestCron.cpp
-	./TestCtsWaitCmd.cpp
+    ./TestCtsWaitCmd.cpp
+    ./TestDayDate.cpp
 	./TestEvents.cpp
 	./TestFileCmd.cpp
 	./TestHandle.cpp
