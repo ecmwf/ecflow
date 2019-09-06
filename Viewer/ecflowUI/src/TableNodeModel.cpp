@@ -510,7 +510,15 @@ void TableNodeModel::slotEndServerScan(VModelServer* server,int num)
 #endif
 
 	if(num >0)
-		endInsertRows();
+    {
+        //The sort model cannot perform sort properly in endInsertRows():
+        //it seems that it is not able to see the newly added rows yet!!!
+        //So we skip sorting then force to do it after calling endInsertRows().
+        //This seems to work!!!
+        Q_EMIT skipSortingBegin();
+        endInsertRows();
+        Q_EMIT skipSortingEnd();
+    }
 
 #ifdef _UI_TABLENODEMODEL_DEBUG
      UiLog().dbg() << "  elapsed: " << t.elapsed() << " ms";

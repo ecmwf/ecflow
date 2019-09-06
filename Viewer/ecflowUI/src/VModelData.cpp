@@ -959,7 +959,9 @@ void VTableServer::notifyServerActivityChanged(ServerHandler* server)
 //filter to this point but now we need to do it.
 void VTableServer::notifyEndServerSync(ServerHandler*)
 {
+    Q_EMIT updateBegin();
     reload();
+    Q_EMIT updateEnd();
 }
 
 void VTableServer::notifyBeginNodeChange(const VNode* node, const std::vector<ecf::Aspect::Type>& types,const VNodeChange&)
@@ -1366,10 +1368,12 @@ void VModelData::reload()
 
     Q_ASSERT(active_);
 
+    Q_EMIT updateBegin();
     for(int i=0; i < serverNum_; i++)
     {
         servers_[i]->reload();
-    }
+    }    
+    Q_EMIT updateEnd();
 }
 
 void VModelData::slotFilterDefChanged()
@@ -1503,8 +1507,9 @@ void VTreeModelData::deleteExpandState()
 
 VTableModelData::VTableModelData(NodeFilterDef* filterDef,AbstractNodeModel* model) :
 		VModelData(filterDef,model)
-{
+{  
 }
+
 void VTableModelData::connectToModel(VModelServer* s)
 {
     VModelData::connectToModel(s);
@@ -1514,8 +1519,8 @@ void VTableModelData::connectToModel(VModelServer* s)
 
     connect(ts,SIGNAL(nodeChanged(VTableServer*,const VNode*)),
         model_,SLOT(slotNodeChanged(VTableServer*,const VNode*)));
-
 }
+
 void VTableModelData::add(ServerHandler *server)
 {
     //We need to check it. See the comment in VModelData::notifyServerFilterAdded
@@ -1528,6 +1533,12 @@ void VTableModelData::add(ServerHandler *server)
     connectToModel(d);
 
     VModelData::addToServers(d);
+
+    connect(d,SIGNAL(updateBegin()),
+            this,SIGNAL(updateBegin()));
+
+    connect(d,SIGNAL(updateEnd()),
+            this,SIGNAL(updateEnd()));
 
     if(active_)
         reload();

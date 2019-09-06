@@ -88,7 +88,7 @@ void DateAttr::checkDate(int day, int month, int year, bool allow_wild_cards)
 	}
 }
 
-void DateAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat)
+void DateAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat, bool clear_at_midnight)
 {
    if (top_level_repeat) {
       // Once free we stay free until re-queue, if we have a top level repeat
@@ -97,9 +97,10 @@ void DateAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat)
       }
    }
 
+   // See ECFLOW-337 versus ECFLOW-1550
    if (c.dayChanged()) {
       requeue_counter_ = 0;
-      clearFree();
+      if (clear_at_midnight) clearFree();
    }
 
    if (free_) {

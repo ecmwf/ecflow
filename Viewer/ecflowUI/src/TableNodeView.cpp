@@ -42,7 +42,9 @@ TableNodeView::TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,
      model_(model),
 	 needItemsLayout_(false),
      prop_(nullptr),
-     setCurrentIsRunning_(false)
+     setCurrentIsRunning_(false),
+     setCurrentAfterUpdateIsRunning_(false),
+     autoScrollToSelection_(true)
 {
     setObjectName("view");
     setProperty("style","nodeView");
@@ -177,7 +179,7 @@ QModelIndexList TableNodeView::selectedList()
 void TableNodeView::selectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
 	QModelIndexList lst=selectedIndexes();
-	if(lst.count() > 0)
+    if(lst.count() > 0 && !setCurrentAfterUpdateIsRunning_)
 	{
 		VInfo_ptr info=model_->nodeInfo(lst.front());
 		if(info && !info->isEmpty())
@@ -205,6 +207,10 @@ VInfo_ptr TableNodeView::currentSelection()
 	return VInfo_ptr();
 }
 
+//Sets the current selection to the given VInfo item.
+// called:
+//  -from outside of the view when the selection is broadcast from another view
+//  -from within the view after a data update
 void TableNodeView::setCurrentSelection(VInfo_ptr info)
 {
     //While the current is being selected we do not allow
@@ -223,6 +229,54 @@ void TableNodeView::setCurrentSelection(VInfo_ptr info)
         setCurrentIndex(idx);
     }
     setCurrentIsRunning_=false;
+}
+
+void TableNodeView::setCurrentSelectionAfterUpdate(VInfo_ptr info)
+{
+    //While the current is being selected we do not allow
+    //another setCurrent call go through
+    if(setCurrentAfterUpdateIsRunning_)
+        return;
+
+    setCurrentAfterUpdateIsRunning_=true;
+    setCurrentSelection(info);
+    setCurrentAfterUpdateIsRunning_=false;
+}
+
+void TableNodeView::slotUpdateBegin()
+{
+    lastSelection_=currentSelection();
+}
+
+void TableNodeView::slotUpdateEnd()
+{
+    if(lastSelection_)
+    {
+        lastSelection_->regainData();
+        if(lastSelection_->hasData())
+        {
+            bool autoScr = hasAutoScroll();
+            if (autoScr != autoScrollToSelection_)
+            {
+                setAutoScroll(autoScrollToSelection_);
+            }
+
+            setCurrentSelectionAfterUpdate(lastSelection_);
+
+            if (autoScr != autoScrollToSelection_)
+            {
+                setAutoScroll(autoScr);
+            }
+
+        }
+
+        lastSelection_.reset();
+    }
+}
+
+void TableNodeView::slotSelectionAutoScrollChanged(bool st)
+{
+    autoScrollToSelection_ = st;
 }
 
 void TableNodeView::slotDoubleClickItem(const QModelIndex&)
@@ -482,6 +536,9 @@ void TableNodeView::readSettings(VSettings* vs)
     vs->get("visible",visVec);
     vs->get("width",wVec);
 
+    int sortColumn = vs->get<int>("sortColumn",0);
+    int sortOrder = vs->get<int>("sortOrder",0);
+
     vs->endGroup();
 
     if(orderVec.size() != visVec.size() || orderVec.size() != wVec.size())
@@ -515,6 +572,8 @@ void TableNodeView::readSettings(VSettings* vs)
         if(visCnt==0)
             header()->setSectionHidden(0,false);
     }
+
+    sortByColumn(sortColumn, (sortOrder==0)?Qt::AscendingOrder:Qt::DescendingOrder);
 }
 
 void TableNodeView::writeSettings(VSettings* vs)
@@ -534,6 +593,8 @@ void TableNodeView::writeSettings(VSettings* vs)
     vs->put("order",orderVec);
     vs->put("visible",visVec);
     vs->put("width",wVec);
+    vs->put("sortColumn",header_->sortIndicatorSection());
+    vs->put("sortOrder",header_->sortIndicatorOrder());
 
     vs->endGroup();
 }

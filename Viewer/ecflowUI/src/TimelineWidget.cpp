@@ -404,7 +404,7 @@ void TimelineWidget::updateInfoLabel(bool showDetails)
     {
         if(archiveLogList_.loadableCount() == 1)
         {
-           txt= Viewer::formatBoldText("Log file: ",col) + logFile_;
+           txt= Viewer::formatBoldText("Log file: ",col) + archiveLogList_.firstLoadablePath();
         }
         else if(archiveLogList_.loadableCount() > 1)
         {
@@ -916,8 +916,9 @@ void TimelineWidget::loadArchive()
 
         try
         {
-            data_->loadMultiLogFile(archiveLogList_.items()[i].fileName_.toStdString(),suites_,
+            data_->loadMultiLogFile(archiveLogList_.items()[i].dataPath().toStdString(),suites_,
                                     i, (i == archiveLogList_.items().count()-1));
+
             loadDone=true;
         }
 

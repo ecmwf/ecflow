@@ -83,6 +83,8 @@ public Q_SLOTS:
 Q_SIGNALS:
   void filterChangeBegun();
   void filterChangeEnded();
+  void skipSortingBegin();
+  void skipSortingEnd();
 
 protected:
   bool isServer(const QModelIndex & index) const {return false;}

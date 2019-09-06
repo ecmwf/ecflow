@@ -16,6 +16,7 @@
 
 #include "File_r.hpp"
 #include "TimelineData.hpp"
+#include "VFileUncompress.hpp"
 
 //=================================================================
 //
@@ -48,8 +49,28 @@ TimelineFileList::TimelineFileList(QStringList exprLst)
     }
 }
 
-void TimelineFileList::add(QString logFile)
+void TimelineFileList::add(QString logFileIn)
 {
+    QString logFile = logFileIn;
+
+    //if the file is compressed we uncompress it and store it in a
+    //temporary file object - will be deleted automatically
+    VFile_ptr tmpUnComp;
+    if(VFileUncompress::isCompressed(logFile))
+    {
+        QString errStr;
+        tmpUnComp=VFileUncompress::uncompress(logFile, errStr);
+        if(tmpUnComp)
+        {
+            logFile = QString::fromStdString(tmpUnComp->path());
+        }
+        else
+        {
+            items_ << TimelineFileListItem(logFile, 0,"Could not uncompress log file");
+            return;
+        }
+    }
+
     /// The log file can be massive > 50Mb
     ecf::File_r log_file(logFile.toStdString());
     if(!log_file.ok() )
@@ -111,7 +132,7 @@ void TimelineFileList::add(QString logFile)
         }
     }
 
-    items_ << TimelineFileListItem(logFile,startTime,endTime,fInfo.size());
+    items_ << TimelineFileListItem(logFileIn,tmpUnComp,startTime,endTime,fInfo.size());
 }
 
 int TimelineFileList::loadableCount() const
@@ -131,4 +152,14 @@ qint64 TimelineFileList::totalSize() const
             t += item.size_;
 
     return t;
+}
+
+QString TimelineFileList::firstLoadablePath() const
+{
+    int t=0;
+    Q_FOREACH(TimelineFileListItem item, items_)
+        if(item.loadable_)
+            return item.fileName_;
+
+    return {};
 }

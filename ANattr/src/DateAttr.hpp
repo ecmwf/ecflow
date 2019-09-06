@@ -45,7 +45,7 @@ public:
    void setFree();   // ensures that isFree() always returns true
    void clearFree(); // resets the free flag
    bool isSetFree() const { return free_; }
-   void calendarChanged( const ecf::Calendar& c , bool top_level_repeat); // can set attribute free
+   void calendarChanged( const ecf::Calendar& c , bool top_level_repeat,bool clear_at_midnight = true); // can set attribute free
    bool isFree(const ecf::Calendar&) const;
    bool checkForRequeue( const ecf::Calendar&) const;
    bool validForHybrid(const ecf::Calendar&) const;
