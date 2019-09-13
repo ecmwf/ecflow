@@ -149,11 +149,11 @@ echo "using compiler $tool with build $1 release variants"
 # ========================================================================
 # <TODO> - boost system is header only from boost version 1.69
 # ========================================================================
-./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=release  -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release   -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j2
-./bjam --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=release  -j2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=release  -j2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release   -j2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=release  -j2
 
 
 # Allow python to be disabled  
@@ -204,11 +204,17 @@ else
     #   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
     #   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
     #
-    #      using python 
-    #       : 3.5 
-    #       : /usr/local/apps/python3/3.6.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
-    #       : /usr/local/apps/python3/3.6.1-01/include/python3.6m # include directory
-    #       ; 
+    #      # using python : 2.7 : "/usr/local/apps/python/2.7.15-01" ;
+    #      # using python 
+    #      # : 3.6 
+    #      # : /usr/local/apps/python3/3.6.8-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
+    #      # : /usr/local/apps/python3/3.6.8-01/include/python3.6m # include directory
+    #      # ;
+    #        using python 
+    #       : 3.7 
+    #       : /usr/local/apps/python3/3.7.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
+    #       : /usr/local/apps/python3/3.7.1-01/include/python3.7m # include directory
+    #       ;  
     #       ...
     #      option.set includedir : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;  # ***MAKE*** sure this is set
     #
@@ -227,7 +233,8 @@ else
     #   nm -D *python* | grep PyClass_Type                                                # PyClass_Type is a symbol *ONLY* used in python2.x
     #   nm -D  /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
     # ===============================================================================
-               
-    ./bjam toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
-    ./bjam toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+    
+    ./b2 --with-python --clean       
+    ./b2 toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+    ./b2 toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
