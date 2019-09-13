@@ -62,7 +62,13 @@ test_uname ()
 # of the library name. However it it does add the boost version.
 # Hence we will use this to distinguish between the g++ and cray boost libs
 # On *CRAY* we can have 3 compilers we will use the versioned for CRAY and INTEL library
-layout=system
+# 
+# https://gitlab.kitware.com/cmake/cmake/issues/18908
+# FROM boost 1.69 layout=tagged adds -x86
+# Hence make sure top level CMakeList.txt adds:
+# set(Boost_ARCHITECTURE       "-x64") # from boost 1.69 layout=tagged adds libboost_system-mt-x64.a
+# 
+layout=tagged
 
 CXXFLAGS=-d2     # dummy argument, since CXXFLAGS is quoted
 CXXFLAGS=cxxflags=-fPIC
