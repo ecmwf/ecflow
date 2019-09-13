@@ -16,9 +16,9 @@
 
 #include <string>
 #include <iostream>
+#include <iterator> // std::ostream_iterator
 
 #include <boost/test/unit_test.hpp>
-#include <boost/timer.hpp>
 
 #include "NodePath.hpp"
 

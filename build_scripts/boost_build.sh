@@ -55,14 +55,14 @@ test_uname ()
 
 #
 # --layout=system    -> libboost_system.a (default)
-# --layout=tagged    -> libboost_system-mt-d.a(debug)          libboost_system-mt.a(release) 
+# --layout=tagged    -> libboost_system-mt-d-x86.a(debug)      libboost_system-mt-x86.a(release) 
 # --layout=versioned -> libboost_system-xlc-mt-d-1.42(debug)   libboost_system-xlc-mt-1_42.a(release)
 #
 # for some reason on cray versioned does not embed the compiler name as a part
 # of the library name. However it it does add the boost version.
 # Hence we will use this to distinguish between the g++ and cray boost libs
 # On *CRAY* we can have 3 compilers we will use the versioned for CRAY and INTEL library
-layout=tagged
+layout=system
 
 CXXFLAGS=-d2     # dummy argument, since CXXFLAGS is quoted
 CXXFLAGS=cxxflags=-fPIC
@@ -163,7 +163,7 @@ if [ -n "$ECF_NO_PYTHON" ] ; then
    echo "****************************************************************************"
 else
    # ================================================================================
-   # Build python
+   echo Build python
    # ================================================================================
    #*** If the boost python HAS not been built, and we build in $WK/Pyext, then it will build 
    #*** boost python in $BOOST_ROOT/bin.v2/
@@ -210,7 +210,7 @@ else
     #      # : /usr/local/apps/python3/3.6.8-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
     #      # : /usr/local/apps/python3/3.6.8-01/include/python3.6m # include directory
     #      # ;
-    #        using python 
+    #      using python 
     #       : 3.7 
     #       : /usr/local/apps/python3/3.7.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
     #       : /usr/local/apps/python3/3.7.1-01/include/python3.7m # include directory
@@ -234,7 +234,7 @@ else
     #   nm -D  /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
     # ===============================================================================
     
-    ./b2 --with-python --clean       
+    ./b2 --with-python --clean     # this may clean the other libs 
     ./b2 toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
     ./b2 toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi

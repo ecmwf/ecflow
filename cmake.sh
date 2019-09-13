@@ -164,9 +164,10 @@ fi
 
 module swap gnu/7.3.0     
 module load ecbuild/new
-module load python2
-module load python3/3.6.5-01
-module load cmake/3.12.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
+module load python
+module load python3/3.6.8-01
+#module load python3/3.7.1-01
+module load cmake/3.15.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
 # To build python3 when cmake < 3.12.0 use
 # -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
 
@@ -354,7 +355,7 @@ $ecbuild $source_dir \
             ${log_options} \
             ${test_options} # -DCMAKE_PREFIX_PATH="/tmp/$USER/opt/qt5/"
             
-            #-DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.5-01/bin/python3 \
+            #-DPYTHON_EXECUTABLE=/usr/local/apps/python3/3.6.8-01/bin/python3 \
             #-DPYTHON_EXECUTABLE=/usr/local/apps/python/2.7.12-01/bin/python \
             #-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=memory -fPIE -pie' 
             #-DENABLE_STATIC_BOOST_LIBS=ON \

@@ -18,7 +18,6 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/foreach.hpp>
-#include "boost/progress.hpp"
 
 #include <iostream>
 #include <fstream>

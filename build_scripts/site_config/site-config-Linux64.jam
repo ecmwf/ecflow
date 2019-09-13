@@ -18,7 +18,7 @@ local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 
 #
 # --layout=system    -> libboost_system.a (default)
-# --layout=tagged    -> libboost_system-mt-d.a(debug)          libboost_system-mt.a(release) 
+# --layout=tagged    -> libboost_system-mt-d-x86.a(debug)      libboost_system-mt-x86.a(release)    -x86 added after boost 1.71
 # --layout=versioned -> libboost_system-xlc-mt-d-1.42(debug)   libboost_system-xlc-mt-1_42.a(release)
 #
 # Boost libraries referenced in client/server programs
@@ -27,34 +27,34 @@ local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;
 
 # we dont build debug boost anymore, hence debug uses release libs
 
-lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
-lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
-lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
-lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
-lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
-lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
-lib boost_python_static : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
-lib boost_python36_static : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt.a ;
+lib boost_system : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_system.a ;
+lib boost_test   : :          <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework.a ;
+lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor.a ;
+lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options.a ;
+lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem.a ;
+lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time.a ;
+lib boost_python_static : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;
+lib boost_python36_static : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python36.a ;
 
 
 # profile uses release libs
-lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
-lib boost_test   : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
-lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
-lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
-lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
-lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
-lib boost_python_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
-lib boost_python36_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt.a ;
+lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system.a ;
+lib boost_test   : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework.a ;
+lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor.a ;
+lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options.a ;
+lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem.a ;
+lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time.a ;
+lib boost_python_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;
+lib boost_python36_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python36.a ;
 
-lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
-lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
-lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor-mt.a ;
-lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
-lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
-lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
-lib boost_python_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
-lib boost_python36_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt.a ;
+lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system.a ;
+lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework.a ;
+lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_test_exec_monitor.a ;
+lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options.a ;
+lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem.a ;
+lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time.a ;
+lib boost_python_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;
+lib boost_python36_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python36.a ;
 
 #
 # Notice: we don't add  requirements <library>pthread , because

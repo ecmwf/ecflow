@@ -18,7 +18,6 @@
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include "boost/progress.hpp"
 #include <boost/timer.hpp>
 #include "boost/date_time/posix_time/posix_time_types.hpp"
 
