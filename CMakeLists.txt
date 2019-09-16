@@ -223,7 +223,14 @@ set(Boost_ARCHITECTURE       "-x64") # from boost 1.69 layout=tagged adds libboo
 #set(Boost_DEBUG                 ON) # Set to ON to enable debug output from FindBoost
 
 set(ECFLOW_BOOST_VERSION "1.64.0")
-find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system unit_test_framework test_exec_monitor filesystem program_options date_time )
+find_package( Boost ${ECFLOW_BOOST_VERSION} ) # need upfront to get a hold of Boost_VERSION_STRING
+
+if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
+    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system unit_test_framework test_exec_monitor filesystem program_options date_time )
+else()
+    # for boost version 1.69 or greater Boost.System is now header-only.
+    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS unit_test_framework test_exec_monitor filesystem program_options date_time )
+endif()
 #ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 
 
