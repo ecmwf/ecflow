@@ -15,7 +15,7 @@
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 
@@ -152,12 +152,12 @@ BOOST_AUTO_TEST_CASE( test_file_tokenizer )
 #ifdef FILE_PERF_CHECK_IMPLEMENTATIONS
 	{
 		size_t openFileNTimes = 100000;
-	 	boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+		boost::timer::cpu_timer timer;
  		for (size_t i = 0; i < openFileNTimes; i++) {
 			std::vector<std::string> lines;
 			BOOST_CHECK_MESSAGE( File::splitFileIntoLines(path,lines)," Failed to open file " << path<< " (" << strerror(errno) << ")");
   		}
-		cout << "Time for opening file " << openFileNTimes << " times = " << timer.elapsed() << "\n";
+		cout << "Time for opening file " << openFileNTimes << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
 	}
 #endif
 

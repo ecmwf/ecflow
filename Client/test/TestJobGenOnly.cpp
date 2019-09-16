@@ -20,7 +20,6 @@
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 #include <boost/foreach.hpp>
-#include <boost/timer.hpp>
 
 #include "Defs.hpp"
 #include "NodeAttr.hpp"

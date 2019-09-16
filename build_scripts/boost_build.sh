@@ -53,22 +53,23 @@ test_uname ()
     fi
 }
 
-#
+# =================================================================================================
+# LAYOUT
 # --layout=system    -> libboost_system.a (default)
 # --layout=tagged    -> libboost_system-mt-d-x86.a(debug)      libboost_system-mt-x86.a(release) 
 # --layout=versioned -> libboost_system-xlc-mt-d-1.42(debug)   libboost_system-xlc-mt-1_42.a(release)
 #
 # for some reason on cray versioned does not embed the compiler name as a part
-# of the library name. However it it does add the boost version.
+# of the library name. However it does add the boost version.
 # Hence we will use this to distinguish between the g++ and cray boost libs
 # On *CRAY* we can have 3 compilers we will use the versioned for CRAY and INTEL library
 # 
 # https://gitlab.kitware.com/cmake/cmake/issues/18908
-# FROM boost 1.69 layout=tagged adds -x86
+# FROM boost 1.69 'layout=tagged' adds -x86 to the library names
 # Hence make sure top level CMakeList.txt adds:
 # set(Boost_ARCHITECTURE       "-x64") # from boost 1.69 layout=tagged adds libboost_system-mt-x64.a
 # 
-layout=tagged
+layout=system
 
 CXXFLAGS=-d2     # dummy argument, since CXXFLAGS is quoted
 CXXFLAGS=cxxflags=-fPIC
@@ -152,14 +153,16 @@ fi
 #
 echo "using compiler $tool with build $1 release variants"
  
-# ========================================================================
-# <TODO> - boost system is header only from boost version 1.69
-# ========================================================================
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j2
+if [[ ${BOOST_NUMERIC_VERSION} -le 1690 ]] ; then
+   # boost system is header only from boost version 1.69, stub library built for compatibility
+   ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j2
+fi
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=release  -j2
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release   -j2
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j2
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=release  -j2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-timer variant=release  -j2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-chrono variant=release  -j2
 
 
 # Allow python to be disabled  
@@ -178,69 +181,78 @@ else
    # To prebuild the boost python:
    #
    
-    # ===============================================================================
-    # Error to watch out for:
-    # 1/ error: No best alternative for /python_for_extensions
-    #    next alternative: required properties: <python>2.7 <target-os>linux
-    #        matched
-    #    next alternative: required properties: <python>2.7 <target-os>linux
-    #        matched
-    # 2/ pyconfig.h cant find include file:
-    #
-    # Note: ./bootstrap.sh will create a project-config.jam
-    #
-    # For both errors: Please check if you have more than one 'using python' in configuration files.
-    # Please check site-config.jam, user-config.jam and project-config.jam and 
-    # remove duplicated 'using python'.  Typically we remove $HOME/user-config.jam is using python is defined in it.
-    # for 2/ use    
-    #    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/apps/python/2.7.12-01/include/python2.7/"
-    # *ONLY* if first solution fails ???
-    # 
-    #
-    # When installing BOOST-python libs, make sure to call module load python *FIRST*
-    # Otherwise it will pick the python specified in project-config.jam, which make not be correct
-    #
-    # ==========================================================================================
-    # PYTHON3:
-    # To build BOTH python2 and Python 3 libraries, the order is important.
-    # - First build python3 and then python2. This is because in boost 1.53 not all python libs have the 3 tag.
-    # Build:
-    #   0/ ./b2 --with-python --clean # clean any previous python build. VERY IMPORTANT
-    #   1/ module load python3, this update the $PATH
-    #   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
-    #   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
-    #
-    #      # using python : 2.7 : "/usr/local/apps/python/2.7.15-01" ;
-    #      # using python 
-    #      # : 3.6 
-    #      # : /usr/local/apps/python3/3.6.8-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
-    #      # : /usr/local/apps/python3/3.6.8-01/include/python3.6m # include directory
-    #      # ;
-    #      using python 
-    #       : 3.7 
-    #       : /usr/local/apps/python3/3.7.1-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
-    #       : /usr/local/apps/python3/3.7.1-01/include/python3.7m # include directory
-    #       ;  
-    #       ...
-    #      option.set includedir : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;  # ***MAKE*** sure this is set
-    #
-    #     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
-    #     python 2.7 and 3.5, YUK, took ages to debug
-    #
-    # Python 2:
-    #   0/ ./b2 --with-python --clean   # Clean previous build
-    #   1/ module unload python; module load python2
-    #   2/ ./bootstrap.sh --with-python=/path/to/python2.7
-    #   3/ invoke this script
-    #
-    # Check:
-    #   To check the build make sure we don't have symbol pulled in from python2 libs
-    #   cd $BOOST_ROOT/stage/lib
-    #   nm -D *python* | grep PyClass_Type                                                # PyClass_Type is a symbol *ONLY* used in python2.x
-    #   nm -D  /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
-    # ===============================================================================
+   # ===============================================================================
+   # Error to watch out for:
+   # 1/ error: No best alternative for /python_for_extensions
+   #    next alternative: required properties: <python>2.7 <target-os>linux
+   #        matched
+   #    next alternative: required properties: <python>2.7 <target-os>linux
+   #        matched
+   # 2/ pyconfig.h cant find include file:
+   #
+   # Note: ./bootstrap.sh will create a project-config.jam
+   #
+   # For both errors: Please check if you have more than one 'using python' in configuration files.
+   # Please check site-config.jam, user-config.jam and project-config.jam and 
+   # remove duplicated 'using python'.  Typically we remove $HOME/user-config.jam is using python is defined in it.
+   # for 2/ use    
+   #    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/apps/python/2.7.12-01/include/python2.7/"
+   # *ONLY* if first solution fails ???
+   # 
+   #
+   # When installing BOOST-python libs, make sure to call module load python *FIRST*
+   # Otherwise it will pick the python specified in project-config.jam, which make not be correct
+   #
+   # ==========================================================================================
+   # PYTHON3:
+   # BOOST < 1.67
+   #   To build BOTH python2 and Python 3 libraries, the order is important 
+   #   - First build python3 and then python2. This is because in boost 1.53 not all python libs have the 3 tag.
+   #   Build:
+   #   0/ ./b2 --with-python --clean # clean any previous python build. VERY IMPORTANT
+   #   1/ module load python3, this update the $PATH
+   #   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
+   #   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
+   #
+   #      # using python : 2.7 : "/usr/local/apps/python/2.7.15-01" ;
+   #      # using python 
+   #      # : 3.6 
+   #      # : /usr/local/apps/python3/3.6.8-01/bin/python3  # ***** If this is left, includes get messed up, have mix of python2 & 3
+   #      # : /usr/local/apps/python3/3.6.8-01/include/python3.6m # include directory
+   #      # ;
+   #      using python 
+   #       : 3.7 
+   #       : /usr/local/apps/python3/3.7.1-01/bin/python3  # ***** If this is left, includes get messed up, have mix of python2 & 3
+   #       : /usr/local/apps/python3/3.7.1-01/include/python3.7m # include directory
+   #       ;  
+   #       ...
+   #      option.set includedir : /usr/local/apps/python3/3.5.1-01/include/python3.5m ;  # ***MAKE*** sure this is set
+   #
+   #     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
+   #     python 2.7 and 3.6, YUK, took ages to debug
+   #
+   #   Python 2:
+   #     0/ ./b2 --with-python --clean   # Clean previous build
+   #     1/ module load python2
+   #     2/ ./bootstrap.sh --with-python=/path/to/python2.7
+   #     3/ invoke this script
+   #
+   #   Check:
+   #     To check the build make sure we don't have symbol pulled in from python2 libs
+   #     cd $BOOST_ROOT/stage/lib
+   #     nm -D *python* | grep PyClass_Type                                                 # PyClass_Type is a symbol *ONLY* used in python2.x
+   #     nm -D  /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
+   #
+   # BOOST 1.67 >=
+   #   we can now use
+   #     ./b2 python=2.7,3.6,3.7 ....
+   #   to build all the python variants, providing project-config.jam *has* multiple 'using python' statements
+   #     using python : 2.7 : "/usr/local/apps/python/2.7.15-01" ;
+   #     using python : 3.6 : /usr/local/apps/python3/3.6.8-01/bin/python3 : /usr/local/apps/python3/3.6.8-01/include/python3.6m ;
+   #     using python : 3.7 : /usr/local/apps/python3/3.7.1-01/bin/python3 : /usr/local/apps/python3/3.7.1-01/include/python3.7m ;  
+   # ===========================================================================================================
     
-    ./b2 --with-python --clean     # this may clean the other libs 
-    ./b2 toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
-    ./b2 toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+   #./b2 --with-python --clean     
+   #./b2 python=2.7,3.6,3.7 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+   ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi

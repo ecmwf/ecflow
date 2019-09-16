@@ -35,12 +35,16 @@ if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
    target_link_libraries(core debug ${Boost_FILESYSTEM_LIBRARY_DEBUG}      ${Boost_FILESYSTEM_LIBRARY_RELEASE}
                               debug ${Boost_DATE_TIME_LIBRARY_DEBUG}       ${Boost_DATE_TIME_LIBRARY_RELEASE}
                               debug ${Boost_SYSTEM_LIBRARY_DEBUG}          ${Boost_SYSTEM_LIBRARY_RELEASE}
+                              debug ${Boost_TIMER_LIBRARY_DEBUG}           ${Boost_TIMER_LIBRARY_RELEASE}
+                              debug ${Boost_CHRONO_LIBRARY_DEBUG}          ${Boost_CHRONO_LIBRARY_RELEASE}
                               ${CRYPT_LIB}
                            )   
 else()
    # for boost version 1.69 or greater Boost.System is now header-only.
    target_link_libraries(core debug ${Boost_FILESYSTEM_LIBRARY_DEBUG}      ${Boost_FILESYSTEM_LIBRARY_RELEASE}
                               debug ${Boost_DATE_TIME_LIBRARY_DEBUG}       ${Boost_DATE_TIME_LIBRARY_RELEASE}
+                              debug ${Boost_TIMER_LIBRARY_DEBUG}           ${Boost_TIMER_LIBRARY_RELEASE}
+                              debug ${Boost_CHRONO_LIBRARY_DEBUG}          ${Boost_CHRONO_LIBRARY_RELEASE}
                               ${CRYPT_LIB}
                            )   
 endif()             

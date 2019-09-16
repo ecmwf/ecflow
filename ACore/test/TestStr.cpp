@@ -18,7 +18,7 @@
 #include <fstream>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 #include <boost/foreach.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
@@ -565,31 +565,31 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //	vec.reserve(vecSize);
 //	for (size_t i = 0; i < vecSize ; i++) { vec.push_back(Fred(i));}
 //
-// 	boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+// 	boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 //	BOOST_FOREACH(Fred& fred, vec) { fred.inc(); }
-// 	cout << "Time: BOOST_FOREACH(Fred& fred, vec) { fred.inc(); }                                       " << timer.elapsed() << "\n";
+// 	cout << "Time: BOOST_FOREACH(Fred& fred, vec) { fred.inc(); }                                       " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //
 //   timer.restart();
 //   for(auto &fred : vec) { fred.inc(); }
-//   cout << "Time: for(auto &fred : vec) { fred.inc(); }                                                " << timer.elapsed() << "\n";
+//   cout << "Time: for(auto &fred : vec) { fred.inc(); }                                                " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //
 //   timer.restart();
 //   std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );
-//   cout << "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 " << timer.elapsed() << "\n";
+//   cout << "Time: std::for_each(vec.begin(),vec.end(),[](Fred& fred) { fred.inc();} );                 " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //
 // 	timer.restart();
 //	std::vector<Fred>::iterator theEnd = vec.end();
 // 	for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); }
-// 	cout << "Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } " << timer.elapsed() << "\n";
+// 	cout << "Time: for (std::vector<Fred>::iterator  i = vec.begin(); i < theEnd ; i++) { (*i).inc(); } " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //
 // 	timer.restart();
 // 	std::for_each(vec.begin(),vec.end(),std::mem_fun_ref(&Fred::inc) );
-// 	cout << "Time: std::for_each(vec.begin();vec.end(),std::mem_fun_ref(&Fred::inc))                    " << timer.elapsed() << "\n";
+// 	cout << "Time: std::for_each(vec.begin();vec.end(),std::mem_fun_ref(&Fred::inc))                    " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //
 // 	timer.restart();
 // 	size_t theSize = vec.size();
 //	for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }
-// 	cout << "Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              " << timer.elapsed() << "\n";
+// 	cout << "Time: for (size_t i = 0; i < theSize ; i++) { vec[i].inc(); }                              " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //}
 
 
@@ -680,14 +680,14 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //	std::vector<int> numberRes; numberRes.reserve(expectedNumberRes.size());
 //
 //	{
-//		boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+//		boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 //		for(size_t i =0; i < stringTokens.size(); i++) {
 //			method1(stringTokens[i], stringRes, numberRes );
 //		}
 //		for(size_t i =0; i < numberTokens.size(); i++) {
 //			method1(numberTokens[i], stringRes, numberRes );
 //		}
-//		cout << "Time for method1  elapsed time = " << timer.elapsed() << "\n";
+//		cout << "Time for method1  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //		BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes," method 1 wrong");
 //		BOOST_CHECK_MESSAGE(stringTokens == stringRes,"method 1 wrong");
 //		numberRes.clear();
@@ -695,14 +695,14 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //	}
 //
 //	{
-//		boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+//		boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 //		for(size_t i =0; i < stringTokens.size(); i++) {
 //			methodX(stringTokens[i], stringRes, numberRes );
 //		}
 //		for(size_t i =0; i < numberTokens.size(); i++) {
 //			methodX(numberTokens[i], stringRes, numberRes );
 //		}
-//		cout << "Time for methodX  elapsed time = " << timer.elapsed() << "\n";
+//		cout << "Time for methodX  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //		BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes," method X wrong");
 //		BOOST_CHECK_MESSAGE(stringTokens == stringRes,"method X wrong");
 //		numberRes.clear();
@@ -710,14 +710,14 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //	}
 //
 //	{
-//		boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+//		boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 //		for(size_t i =0; i < stringTokens.size(); i++) {
 //			method2(stringTokens[i], stringRes, numberRes );
 //		}
 //		for(size_t i =0; i < numberTokens.size(); i++) {
 //			method2(numberTokens[i], stringRes, numberRes );
 //		}
-//		cout << "Time for method2  elapsed time = " << timer.elapsed() << "\n";
+//		cout << "Time for method2  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //		BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes,"method 2 wrong");
 //		BOOST_CHECK_MESSAGE(stringTokens == stringRes,"method 2 wrong");
 //		numberRes.clear();
@@ -725,14 +725,14 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //	}
 //
 //	{
-//		boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+//		boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 //		for(size_t i =0; i < stringTokens.size(); i++) {
 //			method3(stringTokens[i], stringRes, numberRes );
 //		}
 //		for(size_t i =0; i < numberTokens.size(); i++) {
 //			method3(numberTokens[i], stringRes, numberRes );
 //		}
-//		cout << "Time for method3  elapsed time = " << timer.elapsed() << "\n";
+//		cout << "Time for method3  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //		BOOST_CHECK_MESSAGE(numberRes == expectedNumberRes," method3 wrong  numberRes.size()=" << numberRes.size() << " expected size = " << expectedNumberRes.size());
 //		BOOST_CHECK_MESSAGE(stringTokens == stringRes," method3 wrong  stringRes.size()=" << stringRes.size() << " expected size = " << stringTokens.size());
 //		numberRes.clear();
@@ -750,22 +750,22 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 //
 //   const int the_size = 1000000;
 //   {
-//      boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+//      boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 //      for(size_t i =0; i < the_size; i++) {
 //         std::ostringstream st;
 //         st << i;
 //         std::string s = st.str();
 //      }
-//      cout << "Time for int to string using ostringstream  elapsed time = " << timer.elapsed() << "\n";
+//      cout << "Time for int to string using ostringstream  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //   }
 //
 //
 //   {
-//      boost::timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+//      boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 //      for(size_t i =0; i < the_size; i++) {
 //         std::string s = boost::lexical_cast<std::string>(i);
 //      }
-//      cout << "Time for int to string using boost::lexical_cast  elapsed time = " << timer.elapsed() << "\n";
+//      cout << "Time for int to string using boost::lexical_cast  elapsed time = " << timer.format(3,Str::cpu_timer_format()) << "\n";
 //   }
 //}
 

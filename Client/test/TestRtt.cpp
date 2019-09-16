@@ -16,7 +16,6 @@
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include <boost/timer.hpp>
 
 #include "Rtt.hpp"
 #include "File.hpp"

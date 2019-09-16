@@ -54,6 +54,8 @@ exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_program_options
+           /site-config//boost_timer
+           /site-config//boost_chrono
            /site-config//boost_test
            pthread
          : <include>../ANode/test

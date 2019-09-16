@@ -197,11 +197,9 @@ ecbuild_info("")
 include_directories( ${CMAKE_SOURCE_DIR}/cereal/include )
  
 
-
-# =========================================================================================
-# Boost
-# =========================================================================================
-
+message( STATUS "====================================================================================================================" )
+message( STATUS "BOOST" )
+message( STATUS "====================================================================================================================" )
 # this can help in some situations:
 set (_CMAKE_PREFIX_PATH_BACKUP ${CMAKE_PREFIX_PATH}) # make a backup of CMAKE_PREFIX_PATH
 foreach(BOOST_PATH_TO_SEARCH ${BOOST_PATH} ${BOOST_ROOT} $ENV{BOOST_ROOT})
@@ -223,13 +221,16 @@ set(Boost_ARCHITECTURE       "-x64") # from boost 1.69 layout=tagged adds libboo
 #set(Boost_DEBUG                 ON) # Set to ON to enable debug output from FindBoost
 
 set(ECFLOW_BOOST_VERSION "1.64.0")
-find_package( Boost ${ECFLOW_BOOST_VERSION} ) # need upfront to get a hold of Boost_VERSION_STRING
 
+# need upfront to get a hold of Boost_VERSION_STRING
+find_package( Boost ${ECFLOW_BOOST_VERSION} ) 
+
+# Need timer for boost::time::cpu_timer this needs boost:crono. These are used in the test only
 if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
-    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system unit_test_framework test_exec_monitor filesystem program_options date_time )
+    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
 else()
     # for boost version 1.69 or greater Boost.System is now header-only.
-    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS unit_test_framework test_exec_monitor filesystem program_options date_time )
+    find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS        timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
 endif()
 #ecbuild_info( "Boost_LIBRARIES     : ${Boost_LIBRARIES}" )
 

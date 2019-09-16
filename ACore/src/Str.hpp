@@ -187,6 +187,9 @@ public:
    static const std::string& WHITE_LIST_FILE();
    static const std::string& ECF_PASSWD();
    static const std::string& ECF_CUSTOM_PASSWD();
+
+   static const char* cpu_timer_format() { return "%ws wall, (%us user + %ss system = %ts) CPU (%p%)";}
+
 private:
    Str()= default;
    Str(const Str&) = delete;

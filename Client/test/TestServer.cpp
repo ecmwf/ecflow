@@ -17,7 +17,7 @@
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include <boost/timer.hpp>
+#include <boost/timer/timer.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
 
 #include "ClientInvoker.hpp"
@@ -183,7 +183,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test )
 #endif
 
 	{
-	   boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+	   boost::timer::cpu_timer boost_timer;
 	   DurationTimer duration_timer;
       Timer<std::chrono::milliseconds> chrono_timer;
 	   for(int i = 0; i < load; i++) {
@@ -209,14 +209,14 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test )
 	      BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
 	   }
 	   cout << " Server handled " << load * 16
-	            << " requests in boost_timer(" << boost_timer.elapsed() << ")"
+	            << " requests in boost_timer(" << boost_timer.format(3,Str::cpu_timer_format()) << ")"
 	            << " DurationTimer(" << to_simple_string(duration_timer.elapsed()) << ")"
 	            << " Chrono_timer(" << std::chrono::duration<double,std::milli>(chrono_timer.elapsed()).count() << " milli)"
 	            << endl;
 	}
 	{
 	   theClient.set_auto_sync(true);
-	   boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+	   boost::timer::cpu_timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 	   DurationTimer duration_timer;
       Timer<std::chrono::milliseconds> chrono_timer;
 	   for(int i = 0; i < load; i++) {
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test )
 	      BOOST_REQUIRE_MESSAGE(theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
 	   }
       cout << " Server handled " << load * 8
-               << " requests in boost_timer(" << boost_timer.elapsed() << ")"
+               << " requests in boost_timer(" << boost_timer.format(3,Str::cpu_timer_format()) << ")"
                << " DurationTimer(" << to_simple_string(duration_timer.elapsed()) << ")"
                << " Chrono_timer(" << std::chrono::duration<double,std::milli>(chrono_timer.elapsed()).count() << " milli)"
                << " *with* AUTO SYNC" << endl;
@@ -251,7 +251,7 @@ BOOST_AUTO_TEST_CASE( test_server_group_stress_test )
 
    std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
 
-  	boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+  	boost::timer::cpu_timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
 	DurationTimer duration_timer;
 	ClientInvoker theClient(invokeServer.host(), invokeServer.port());
 
@@ -284,7 +284,7 @@ BOOST_AUTO_TEST_CASE( test_server_group_stress_test )
   		BOOST_REQUIRE_MESSAGE( theClient.defs()->suiteVec().size() >= 1,"  no suite ?");
  	}
 	cout << " Server handled " << load * 8
-	     << " commands using " << load << " group requests in boost_timer(" << boost_timer.elapsed()
+	     << " commands using " << load << " group requests in boost_timer(" << boost_timer.format(3,Str::cpu_timer_format())
 	     << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
 	     << ")" << endl;
 }
@@ -318,7 +318,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
    if (getenv("ECF_SSL")) load = 10;
 #endif
 
-   boost::timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
+   boost::timer::cpu_timer boost_timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
    DurationTimer duration_timer;
    ClientInvoker theClient(invokeServer.host(), invokeServer.port());
    theClient.set_throw_on_error(false);
@@ -419,7 +419,7 @@ BOOST_AUTO_TEST_CASE( test_server_stress_test_2 )
    int no_of_client_calls = 74;
   
    cout << " Server handled " << load * no_of_client_calls
-        << " requests in boost_timer(" << boost_timer.elapsed()
+        << " requests in boost_timer(" << boost_timer.format(3,Str::cpu_timer_format())
         << ") DurationTimer(" << to_simple_string(duration_timer.elapsed())
         << ")" << endl;
 }

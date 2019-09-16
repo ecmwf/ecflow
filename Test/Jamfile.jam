@@ -59,7 +59,9 @@ exe s_test : [ glob Test*.cpp : TestSingle.cpp TestZombies.cpp ]
            /site-config//boost_filesystem
            /site-config//boost_program_options
            /site-config//boost_datetime
+           /site-config//boost_timer
            /site-config//boost_test
+           /site-config//boost_chrono
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
            <library>/ecflow_top//openssl_libs 
@@ -77,7 +79,9 @@ exe s_test_zombies : [ glob TestZombies.cpp  ]
            /site-config//boost_filesystem
            /site-config//boost_program_options
            /site-config//boost_datetime
+           /site-config//boost_timer
            /site-config//boost_test
+           /site-config//boost_chrono
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
            <library>/ecflow_top//openssl_libs 
@@ -95,7 +99,9 @@ exe singletest : [ glob TestSingle.cpp  ]
            /site-config//boost_filesystem
            /site-config//boost_program_options
            /site-config//boost_datetime
+           /site-config//boost_timer
            /site-config//boost_test
+           /site-config//boost_chrono
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
            <library>/ecflow_top//openssl_libs 
