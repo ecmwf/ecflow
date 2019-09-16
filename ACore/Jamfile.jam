@@ -21,7 +21,6 @@ project theCore ;
 lib core : [ glob src/*.cpp ]
          : <link>static
            <variant>debug:<define>DEBUG
-           <use>/site-config//boost_system
            <use>/site-config//boost_filesystem
            <use>/site-config//boost_test
            <use>/site-config//boost_datetime
@@ -38,7 +37,6 @@ lib core : [ glob src/*.cpp ]
 #
 exe u_acore : [ glob test/*.cpp ]
            core
-           /site-config//boost_system
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_test

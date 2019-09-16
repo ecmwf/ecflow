@@ -37,7 +37,6 @@ lib libsimu : [ glob src/*.cpp ]
                 <use>/theNodeAttr//nodeattr
                 <use>/theNode//node
                 <use>/theBase//base
-            	<use>/site-config//boost_system
              	<use>/site-config//boost_filesystem
              	<use>/site-config//boost_program_options
              	<use>/site-config//boost_datetime
@@ -55,7 +54,6 @@ exe c_csim : [ glob test/*.cpp : test/TestSingleSimulator.cpp ]
              /theNode//node
              /theBase//base
              libsimu
-             /site-config//boost_system
              /site-config//boost_filesystem
              /site-config//boost_datetime
              /site-config//boost_program_options
@@ -73,7 +71,6 @@ exe c_csim_single : [ glob test/TestSingleSimulator.cpp test/TestUtil.cpp ]
              /theNode//node
              /theBase//base
              libsimu
-             /site-config//boost_system
              /site-config//boost_filesystem
              /site-config//boost_datetime
              /site-config//boost_program_options

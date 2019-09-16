@@ -19,7 +19,6 @@ lib nodeattr : [ glob src/*.cpp ]
          : <link>static
            <variant>debug:<define>DEBUG
            <use>/theCore//core
-           <use>/site-config//boost_system
            <use>/site-config//boost_filesystem
            <use>/site-config//boost_datetime
            <use>/site-config//boost_test
@@ -34,7 +33,6 @@ lib nodeattr : [ glob src/*.cpp ]
 exe u_anattr : [ glob test/*.cpp ]
            /theCore//core
            nodeattr
-           /site-config//boost_system
            /site-config//boost_filesystem
            /site-config//boost_datetime
            /site-config//boost_test

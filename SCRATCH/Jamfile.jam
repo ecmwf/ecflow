@@ -26,7 +26,6 @@ lib dl ;  # this dependency for using libcrypto, i.e dlopen,dlclose etc, when us
 # ***********************************************************
 #exe test : [ glob src/*.cpp  ] 
 #           pthread
-#           /site-config//boost_system
 #           /site-config//boost_serialization
 #           /site-config//boost_test
 #         : <include>../SCRATCH/src
@@ -38,7 +37,6 @@ exe client : [ glob src/client.cpp  ]
            libssl
            libcrypto
            dl
-           /site-config//boost_system
          : <include>src/
            <variant>debug:<define>DEBUG
          ;
@@ -48,7 +46,6 @@ exe server : [ glob src/server.cpp  ]
            libssl
            libcrypto
            dl
-           /site-config//boost_system
          : <include>src/
            <variant>debug:<define>DEBUG
          ;

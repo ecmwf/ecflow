@@ -16,7 +16,6 @@ lib pthread ;
 # ***********************************************************
 #exe test : [ glob src/*.cpp  ] 
 #           pthread
-#           /site-config//boost_system
 #           /site-config//boost_serialization
 #           /site-config//boost_test
 #         : <include>../SCRATCH/src

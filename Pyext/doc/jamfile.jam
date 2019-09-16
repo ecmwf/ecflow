@@ -131,7 +131,6 @@ python-extension ecflow : [ glob src/*.cpp ]
     /theBase//base
     /theClient//libclient
     /theSimulator//libsimu
-    /site-config//boost_system
     /site-config//boost_filesystem
     /site-config//boost_program_options
     /site-config//boost_datetime

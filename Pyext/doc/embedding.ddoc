@@ -27,7 +27,6 @@
 #    <use>/theBase//base
 #    <use>/theClient//libclient
 #    <use>/theSimulator//libsimu
-#    <use>/site-config//boost_system
 #    <use>/site-config//boost_filesystem
 #    <use>/site-config//boost_program_options
 #    <use>/site-config//boost_datetime
@@ -66,7 +65,6 @@
 #             /theClient//libclient
 #             /theSimulator//libsimu
 #             libecf_ext
-#             /site-config//boost_system
 #             /site-config//boost_filesystem
 #             /site-config//boost_program_options
 #             /site-config//boost_datetime
