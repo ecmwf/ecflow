@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          reconstructed.clear();
          BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
       }
-      cout << " Time for istreamstream " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
+      cout << " Time for istreamstream " << times << "                 times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
    }
 
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          reconstructed.clear();
          BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
       }
-      cout << " Time for std::getline " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
+      cout << " Time for std::getline " << times << "                  times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
    }
 
@@ -101,7 +101,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          reconstructed.clear();
          BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
       }
-      cout << " Time for boost::split " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
+      cout << " Time for boost::split " << times << "                  times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       //BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'"); // add extra space
    }
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          reconstructed.clear();
          BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
       }
-      cout << " Time for Str::split_orig " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
+      cout << " Time for Str::split_orig " << times << "               times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed," error");
    }
    { // Str::split_orig1
@@ -124,7 +124,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          reconstructed.clear();
          BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
       }
-      cout << " Time for Str::split_orig1 " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
+      cout << " Time for Str::split_orig1 " << times << "              times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed," error");
    }
    { // Str::split_using_string_view2
@@ -146,7 +146,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          reconstructed.clear();
          BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
       }
-      cout << " Time for Str::split_using_string_view " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
+      cout << " Time for Str::split_using_string_view " << times << "  times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed," error");
    }
 
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          }
          reconstructed = ss.str();
       }
-      cout << " Time for make_split_iterator::split " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
+      cout << " Time for make_split_iterator::split " << times << "    times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       // BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
    }
 
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
             reconstructed += " ";
          }
       }
-      cout << " Time for boost::string_view " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
+      cout << " Time for boost::string_view " << times << "            times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
    }
 
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
             reconstructed += " ";
          }
       }
-      cout << " Time for boost::string_view(2) " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
+      cout << " Time for boost::string_view(2) " << times << "         times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
    }
 }

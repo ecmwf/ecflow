@@ -158,28 +158,29 @@ void Str::split(const std::string& line, std::vector< std::string >& tokens,cons
 #else
    Str::split_orig(line,tokens,delimiters);
 #endif
-   //    Time for istreamstream                 1000000 times = 2.89956
-   //    Time for std::getline                  1000000 times = 2.35009
-   //    Time for boost::split                  1000000 times = 1.41382
-   //    Time for Str::split_orig               1000000 times = 1.66867
-   //    Time for Str::split_orig1              1000000 times = 0.922604
-   //    Time for Str::split_using_string_view2 1000000 times = 0.952284
-   //    Time for Str::split_using_string_view  1000000 times = 0.883083
-   //    Time for make_split_iterator::split    1000000 times = 5.39053
-   //    Time for boost::string_view            1000000 times = 1.42954
-   //    Time for boost::string_view(2)         1000000 times = 1.08913
-   //   ACore:: ...test_str_split_perf_with_file
-   //    This test will split each line in file /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
-   //    Time for istreamstream 2001774                 times = 2.17015
-   //    Time for std::getline 2001774                  times = 3.712
-   //    Time for boost::split 2001774                  times = 2.30856
-   //    Time for Str::split_orig 2001774               times = 1.03166
-   //    Time for Str::split_orig1 2001774              times = 0.63027
-   //    Time for Str::split_using_string_view 2001774  times = 0.626403
-   //    Time for Str::split_using_string_view2 2001774 times = 0.653635
-   //    Time for boost::make_split_iterator 2001774    times = 4.91331
-   //    Time for boost::string_view 2001774            times = 0.994274
-   //    Time for boost::string_view(2) 2001774         times = 0.903887
+//   This test will split a line 1000000 times: 'This is a long string that is going to be used to test the performance of splitting with different Implementations the fastest times wins '
+//   Time for istreamstream 1000000                 times = 2.131s wall, (2.140s user + 0.000s system = 2.140s) CPU (100.4%)
+//   Time for std::getline 1000000                  times = 1.490s wall, (1.490s user + 0.000s system = 1.490s) CPU (100.0%)
+//   Time for boost::split 1000000                  times = 0.930s wall, (0.920s user + 0.000s system = 0.920s) CPU (99.0%)
+//   Time for Str::split_orig 1000000               times = 1.065s wall, (1.070s user + 0.000s system = 1.070s) CPU (100.5%)
+//   Time for Str::split_orig1 1000000              times = 0.561s wall, (0.560s user + 0.000s system = 0.560s) CPU (99.9%)
+//   Time for Str::split_using_string_view2 1000000 times = 0.686s wall, (0.690s user + 0.000s system = 0.690s) CPU (100.6%)
+//   Time for Str::split_using_string_view 1000000  times = 0.482s wall, (0.480s user + 0.000s system = 0.480s) CPU (99.6%)
+//   Time for make_split_iterator::split 1000000    times = 3.611s wall, (3.610s user + 0.000s system = 3.610s) CPU (100.0%)
+//   Time for boost::string_view 1000000            times = 0.769s wall, (0.770s user + 0.000s system = 0.770s) CPU (100.1%)
+//   Time for boost::string_view(2) 1000000         times = 0.688s wall, (0.690s user + 0.000s system = 0.690s) CPU (100.3%)
+//  ACore:: ...test_str_split_perf_with_file
+//   This test will split each line in file /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+//   Time for istreamstream 2001774                 times = 1.567s wall, (1.570s user + 0.000s system = 1.570s) CPU (100.2%)
+//   Time for std::getline 2001774                  times = 2.456s wall, (2.460s user + 0.000s system = 2.460s) CPU (100.2%)
+//   Time for boost::split 2001774                  times = 1.698s wall, (1.690s user + 0.000s system = 1.690s) CPU (99.5%)
+//   Time for Str::split_orig 2001774               times = 0.822s wall, (0.830s user + 0.000s system = 0.830s) CPU (101.0%)
+//   Time for Str::split_orig1 2001774              times = 0.502s wall, (0.500s user + 0.000s system = 0.500s) CPU (99.7%)
+//   Time for Str::split_using_string_view 2001774  times = 0.489s wall, (0.490s user + 0.000s system = 0.490s) CPU (100.3%)
+//   Time for Str::split_using_string_view2 2001774 times = 0.639s wall, (0.630s user + 0.000s system = 0.630s) CPU (98.6%)
+//   Time for boost::make_split_iterator 2001774    times = 3.338s wall, (3.340s user + 0.000s system = 3.340s) CPU (100.1%)
+//   Time for boost::string_view 2001774            times = 0.599s wall, (0.600s user + 0.000s system = 0.600s) CPU (100.1%)
+//   Time for boost::string_view(2) 2001774         times = 0.696s wall, (0.700s user + 0.000s system = 0.700s) CPU (100.6%)
 }
 
 void Str::split_orig(const std::string& line, std::vector< std::string >& tokens,const std::string& delimiters )
@@ -250,24 +251,32 @@ void Str::split_using_string_view2(boost::string_view strv, std::vector< std::st
 
 bool Str::get_token(boost::string_view str,size_t pos,std::string& token,boost::string_view delims)
 {
-   //   Time for StringSplitter::get_token 250000 times = 2.40008
-   //   Time for Str::get_token            250000 times = 0.813302
-   //   Time for Str::get_token2           250000 times = 0.917736
-   //   Time for Str::get_token3           250000 times = 1.04581
+//   Time for StringSplitter::get_token 250000 times = 1.457s wall, (1.460s user + 0.000s system = 1.460s) CPU (100.2%)
+//   Time for Str::get_token            250000 times = 0.566s wall, (0.560s user + 0.000s system = 0.560s) CPU (99.0%)
+//   Time for Str::get_token2           250000 times = 0.668s wall, (0.670s user + 0.000s system = 0.670s) CPU (100.3%)
+//   Time for Str::get_token3           250000 times = 0.620s wall, (0.620s user + 0.000s system = 0.620s) CPU (100.0%)
 
    size_t current_pos = 0;
-   for (auto first = str.data(), second = str.data(), last = first + str.size(); second != last && first != last; first = second + 1) {
+   auto first = std::cbegin(str);
+   auto end = std::cend(str);
 
-      second = std::find_first_of(first, last, std::cbegin(delims), std::cend(delims));
-      if (first != second) {
-         if (current_pos == pos) {
-            token = std::string(first, second - first);
-            return true;
-         }
-         current_pos++;
-      }
+   while (first != end) {
+       const auto second = std::find_first_of(first, end, std::cbegin(delims), std::cend(delims));
+
+       if (first != second) {
+          if (current_pos == pos) {
+             token = std::string(first, second);
+             return true;
+          }
+          current_pos++;
+       }
+
+       if (second == end) break;
+
+       first = std::next(second);
    }
    return false;
+
 }
 
 bool Str::get_token2(boost::string_view strv,size_t pos,std::string& token,boost::string_view delims)
@@ -294,26 +303,19 @@ bool Str::get_token2(boost::string_view strv,size_t pos,std::string& token,boost
    return false;
 }
 
-bool Str::get_token3(boost::string_view line,size_t pos,std::string& token,boost::string_view delims)
+bool Str::get_token3(boost::string_view str,size_t pos,std::string& token,boost::string_view delims)
 {
    size_t current_pos = 0;
-   auto first = std::cbegin(line);
-   auto end = std::cend(line);
+   for (auto first = str.data(), second = str.data(), last = first + str.size(); second != last && first != last; first = second + 1) {
 
-   while (first != end) {
-       const auto second = std::find_first_of(first, end, std::cbegin(delims), std::cend(delims));
-
-       if (first != second) {
-          if (current_pos == pos) {
-             token = std::string(first, second);
-             return true;
-          }
-          current_pos++;
-       }
-
-       if (second == end) break;
-
-       first = std::next(second);
+      second = std::find_first_of(first, last, std::cbegin(delims), std::cend(delims));
+      if (first != second) {
+         if (current_pos == pos) {
+            token = std::string(first, second - first);
+            return true;
+         }
+         current_pos++;
+      }
    }
    return false;
 }
