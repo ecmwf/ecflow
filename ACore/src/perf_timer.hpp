@@ -62,48 +62,4 @@ public:
    }
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Print function timing in order
-class ScopedIndentor{
-public:
-   ScopedIndentor()  { pos_++; vec_.push_back(std::string());}
-   ~ScopedIndentor() { pos_--;}
-   void cout(const char* msg,const std::string& time) {
-      std::string str;
-      for(int i=0; i < pos_; i++) str += ' '; // indent depending on scope
-      str += msg;
-      str += ' ';
-      str += time;
-      assert(pos_ >= 0); vec_[pos_] = str;
-      if (pos_ == 0) {
-         for(size_t i=0; i < vec_.size(); i++) std::cout << vec_[i] << "\n";
-         vec_.clear();
-      }
-   }
-private:
-   static std::vector<std::string> vec_;
-   static int pos_;
-};
-
-// milliseconds - 1 million of a second
-// microseconds - 1 thousand of a second
-template<class Resolution = std::chrono::milliseconds>
-class ScopedTimer {
-public:
-   using Clock = std::conditional_t<std::chrono::high_resolution_clock::is_steady,
-                                    std::chrono::high_resolution_clock,
-                                    std::chrono::steady_clock>;
-private:
-   const Clock::time_point start_ = Clock::now();
-   const char* msg_;
-   ScopedIndentor indentor_;
-public:
-   ScopedTimer(const char* msg) : msg_(msg) { }
-   ~ScopedTimer() {
-      const auto end = Clock::now();
-      std::string time = boost::lexical_cast<std::string>( std::chrono::duration_cast<Resolution>(end - start_).count());
-      indentor_.cout(msg_,time);
-   }
-};
-
 #endif
