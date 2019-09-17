@@ -101,6 +101,7 @@ ecbuild_add_test( TARGET    s_client
                   SOURCES   ${test_srcs}
                   LIBS      libclient ${OPENSSL_LIBRARIES}
                             ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                            ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
                   INCLUDES  ../ANode/test
                             ../Base/test 
                             ${Boost_INCLUDE_DIRS}

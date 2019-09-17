@@ -225,7 +225,7 @@ set(ECFLOW_BOOST_VERSION "1.64.0")
 # need upfront to get a hold of Boost_VERSION_STRING
 find_package( Boost ${ECFLOW_BOOST_VERSION} ) 
 
-# Need timer for boost::time::cpu_timer this needs boost:crono. These are used in the test only
+# Need timer for boost::time::cpu_timer this needs boost:crono, which need librt These are used in the test only
 if ( Boost_VERSION_STRING VERSION_LESS "1.69.0" )
     find_package( Boost ${ECFLOW_BOOST_VERSION} REQUIRED COMPONENTS system timer chrono unit_test_framework test_exec_monitor filesystem program_options date_time )
 else()
@@ -243,9 +243,20 @@ if (NOT "${CMAKE_PREFIX_PATH}" EQUAL "${_CMAKE_PREFIX_PATH_BACKUP}")
     ecbuild_debug("Resetting CMAKE_PREFIX_PATH to ${CMAKE_PREFIX_PATH}")
 endif()
 
-# =======================================================================
-# SSL
-# =======================================================================
+
+message( STATUS "====================================================================================================================" )
+message( STATUS "LIB RT  needed by some test, boost_timer->boost_chrono-> -lrt" )
+message( STATUS "====================================================================================================================" )
+find_library(LIBRT rt)                                                                                                                                                                                                                                                                                        
+if(LIBRT)
+    message( STATUS "LIB RT FOUND" )
+else()
+    message( STATUS "LIB RT NOTFOUND" )
+endif()
+
+message( STATUS "====================================================================================================================" )
+message( STATUS "SSL" )
+message( STATUS "====================================================================================================================" )
 if (ENABLE_SSL)
     find_package(OpenSSL REQUIRED)
     if (OPENSSL_FOUND)

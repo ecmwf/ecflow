@@ -37,7 +37,8 @@ if (ENABLE_ALL_TESTS)
 	ecbuild_add_test( TARGET   perf_aparser
                       SOURCES  ${t2_src}
                       LIBS     node nodeattr core
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}  
+                               ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
                       INCLUDES src 
                                ../../ACore/src 
                                ../../ANattr/src 
@@ -53,7 +54,8 @@ if (ENABLE_ALL_TESTS)
     ecbuild_add_test( TARGET   perf_aparser_timer
                       ARGS     ${CMAKE_CURRENT_SOURCE_DIR}/test/data/single_defs/mega.def
                       SOURCES  ${t3_src}
-                      LIBS     node nodeattr core 
+                      LIBS     node nodeattr core  
+                               ${Boost_TIMER_LIBRARY} ${Boost_CHRONO_LIBRARY} ${LIBRT}
                       INCLUDES src 
                                ../../ACore/src 
                                ../../ANattr/src 
