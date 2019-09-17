@@ -214,6 +214,9 @@ endforeach()
 if ( ENABLE_STATIC_BOOST_LIBS )
     set(Boost_USE_STATIC_LIBS ON)
 endif()
+
+# if Boost_NO_BOOST_CMAKE is not set, we seem to mess up in find right python libs, 
+# for boost 1.71 or greater and cmake 3.15 or greater
 set(Boost_NO_BOOST_CMAKE     ON) # if cmake used to install boost, from boost 1.70, Set Boost_NO_BOOST_CMAKE to ON, to disable the search for boost-cmake
 set(Boost_USE_MULTITHREADED  ON)
 set(Boost_NO_SYSTEM_PATHS    ON)
