@@ -105,6 +105,9 @@ else()
 		    	message( STATUS "  PYTHON_LIBRARIES                  : ${PYTHON_LIBRARIES}" )
 
     			if ( Boost_MINOR_VERSION GREATER 66 )
+    			    # cmake 3.15
+    			    # see: https://gitlab.kitware.com/cmake/cmake/issues/19656
+                    # INTERFACE_LIBRARY targets may only have whitelisted properties." 
            		    find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS python${Python2_VERSION_MAJOR}${Python2_VERSION_MINOR} )
 			    else()
 	   			    find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS python )
@@ -141,6 +144,9 @@ else()
 		message( STATUS "  Python3_VERSION_PATCH             : ${Python3_VERSION_PATCH}" )
 
 	    if ( Boost_MINOR_VERSION GREATER 66 )
+            # cmake 3.15
+	        # see: https://gitlab.kitware.com/cmake/cmake/issues/19656
+	        # INTERFACE_LIBRARY targets may only have whitelisted properties.  
 	       	find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS python${Python3_VERSION_MAJOR}${Python3_VERSION_MINOR} )
 		else()
 	   		find_package( Boost ${ECFLOW_BOOST_VERSION} COMPONENTS python3 )
