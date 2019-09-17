@@ -214,13 +214,14 @@ endforeach()
 if ( ENABLE_STATIC_BOOST_LIBS )
     set(Boost_USE_STATIC_LIBS ON)
 endif()
-set(Boost_USE_MULTITHREADED      ON)
-set(Boost_NO_SYSTEM_PATHS        ON)
-set(Boost_DETAILED_FAILURE_MSG   ON)
+set(Boost_NO_BOOST_CMAKE     ON) # if cmake used to install boost, from boost 1.70, Set Boost_NO_BOOST_CMAKE to ON, to disable the search for boost-cmake
+set(Boost_USE_MULTITHREADED  ON)
+set(Boost_NO_SYSTEM_PATHS    ON)
+set(Boost_DETAILED_FAILURE_MSG ON)
 set(Boost_ARCHITECTURE       "-x64") # from boost 1.69 layout=tagged adds libboost_system-mt-x64.a, https://gitlab.kitware.com/cmake/cmake/issues/18908
-#set(Boost_DEBUG                 ON) # Set to ON to enable debug output from FindBoost
+set(Boost_DEBUG                ON) # Set to ON to enable debug output from FindBoost
 
-set(ECFLOW_BOOST_VERSION "1.64.0")
+set(ECFLOW_BOOST_VERSION "1.68.0")
 
 # need upfront to get a hold of Boost_VERSION_STRING
 find_package( Boost ${ECFLOW_BOOST_VERSION} ) 

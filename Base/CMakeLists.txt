@@ -90,7 +90,7 @@ ecbuild_add_library( TARGET   base
                      )
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
-target_link_libraries(base debug ${Boost_PROGRAM_OPTIONS_LIBRARY_DEBUG}   ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE})
+target_link_libraries(base ${Boost_PROGRAM_OPTIONS_LIBRARY_RELEASE})
 
 list( APPEND test_srcs
    test/TestAlterCmd.cpp

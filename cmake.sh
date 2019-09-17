@@ -141,6 +141,8 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
 
+module swap gnu/7.3.0     
+
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	module unload gnu
@@ -162,7 +164,6 @@ if [[ "$intel_arg" = intel ]] ; then
     #CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
 fi
 
-module swap gnu/7.3.0     
 module load ecbuild/new
 module load python
 module load python3/3.6.8-01
@@ -213,7 +214,8 @@ fi
 
 # This must be done after change of compiler/environment
 # versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
-module load boost/1.68.0     # comment to use local BOOST_ROOT
+module load boost/1.71.0     # comment to use local BOOST_ROOT
+
 
 # ====================================================================================
 # default to Release  
