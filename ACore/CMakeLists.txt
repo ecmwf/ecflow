@@ -44,7 +44,8 @@ else()
                               ${CRYPT_LIB}
                            )   
 endif()             
-                   
+
+#  ${LIBRT} See: https://stackoverflow.com/questions/13653361/another-undefined-reference-error-when-linking-boost-libraries                   
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 ecbuild_add_test( TARGET   u_acore 
                   SOURCES  ${test_srcs}
