@@ -12,13 +12,13 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <assert.h>
+#include <cassert>
+#include <cerrno>      // for errno()
+#include <cstring>     // for strerror()
+#include <pwd.h>        // for getpwuid()
+#include <sstream>
 #include <stdexcept>
 #include <unistd.h>     // ofr getuid()
-#include <pwd.h>        // for getpwuid()
-#include <string.h>     // for strerror()
-#include <errno.h>      // for errno()
-#include <sstream>
 
 #include "User.hpp"
 

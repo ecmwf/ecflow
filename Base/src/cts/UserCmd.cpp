@@ -16,8 +16,8 @@
 #include <sstream>
 #include <fstream>
 
+#include <cstdio>      /* tolower */
 #include <sys/types.h>
-#include <stdio.h>      /* tolower */
 
 #include "ClientToServerCmd.hpp"
 

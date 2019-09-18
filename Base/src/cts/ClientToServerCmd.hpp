@@ -867,7 +867,7 @@ public:
             AbstractClientEnv* clientEnv ) const override;
 
    // called in the server
-   virtual void set_group_cmd(const GroupCTSCmd* cmd) { group_cmd_ = cmd;}
+   void set_group_cmd(const GroupCTSCmd* cmd) override { group_cmd_ = cmd;}
 
 private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
@@ -978,7 +978,7 @@ public:
             AbstractClientEnv* clientEnv ) const override;
 
    // called in the server
-   virtual void set_group_cmd(const GroupCTSCmd* cmd) { group_cmd_ = cmd;}
+   void set_group_cmd(const GroupCTSCmd* cmd) override { group_cmd_ = cmd;}
 
    static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete);
 

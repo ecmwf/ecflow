@@ -24,8 +24,8 @@
 #include "IconProvider.hpp"
 #include "UiLog.hpp"
 
+#include <cassert>
 #include <map>
-#include <assert.h>
 
 class MessageLabelData {
 public:

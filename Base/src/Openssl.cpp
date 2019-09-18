@@ -12,7 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <stdlib.h>  // getenv
+#include <cstdlib>  // getenv
 #include <iostream>
 
 #include "boost/filesystem/operations.hpp"

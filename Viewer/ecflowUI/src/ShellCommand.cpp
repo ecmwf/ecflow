@@ -13,7 +13,7 @@
 #include <QProcess>
 #include <QString>
 
-#include <stdio.h>
+#include <cstdio>
 
 #include "CommandOutputDialog.hpp"
 #include "DirectoryHandler.hpp"
