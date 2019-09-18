@@ -212,7 +212,7 @@ QModelIndex NodeQueryResultModel::index( int row, int column, const QModelIndex 
 		return createIndex(row,column);
 	}
 
-	return QModelIndex();
+	return {};
 
 }
 

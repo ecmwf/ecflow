@@ -1116,7 +1116,7 @@ QTime NodeTimelineHeader::posToTime(QPoint pos) const
 {
     int logicalIndex=logicalIndexAt(pos);
     if(logicalIndex == -1)
-        return QTime();
+        return {};
 
     int xp=sectionPosition(logicalIndex);
     int w=sectionSize(logicalIndex);

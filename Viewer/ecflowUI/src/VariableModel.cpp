@@ -295,7 +295,7 @@ QModelIndex VariableModel::index( int row, int column, const QModelIndex & paren
 		return createIndex(row,column,(parent.row()+1)*1000);
 	}
 
-	return QModelIndex();
+	return {};
 
 }
 
@@ -318,7 +318,7 @@ QModelIndex VariableModel::parent(const QModelIndex &child) const
 #endif
 	}
 
-	return QModelIndex();
+	return {};
 }
 
 //----------------------------------------------
@@ -395,7 +395,7 @@ QModelIndex VariableModel::infoToIndex(VInfo_ptr info) const
         return blockIndex;
     }
 
-    return QModelIndex();
+    return {};
 }
 
 //----------------------------------------------

@@ -289,7 +289,7 @@ QModelIndex ChangeNotifyEditorModel::index( int row, int column, const QModelInd
 		return createIndex(row,column);
 	}
 
-	return QModelIndex();
+	return {};
 
 }
 

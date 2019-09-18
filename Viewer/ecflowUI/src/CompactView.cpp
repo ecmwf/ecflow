@@ -948,7 +948,7 @@ QRect CompactView::visualRect(const QModelIndex &index) const
         //return QRect(viewItems_[vi].x, y, viewItems_[vi].width,rh); //TODO: optimise it
         return QRect(viewItems_[vi].x-1-translation(), y, viewItems_[vi].width+2,rh);
     }
-    return QRect();
+    return {};
 }
 
 //Returns the viewport y coordinate for  item.

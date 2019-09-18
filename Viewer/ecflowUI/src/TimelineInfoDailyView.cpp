@@ -176,13 +176,13 @@ QModelIndex TimelineInfoDailyModel::index( int row, int column, const QModelInde
         return createIndex(row,column);
     }
 
-    return QModelIndex();
+    return {};
 
 }
 
 QModelIndex TimelineInfoDailyModel::parent(const QModelIndex &child) const
 {
-    return QModelIndex();
+    return {};
 }
 
 //======================================================================
@@ -249,7 +249,7 @@ void TimelineInfoDailyDelegate::updateSettings()
 QSize TimelineInfoDailyDelegate::sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const
 {
     QSize size=QStyledItemDelegate::sizeHint(option,index);
-    return QSize(size.width(),fm_.height() + topPadding_ + bottomPadding_);
+    return {size.width(),fm_.height() + topPadding_ + bottomPadding_};
     return size;
 }
 

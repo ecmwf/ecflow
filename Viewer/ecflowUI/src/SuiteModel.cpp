@@ -307,7 +307,7 @@ QModelIndex SuiteModel::index( int row, int column, const QModelIndex & parent )
 		return createIndex(row,column);
 	}
 
-	return QModelIndex();
+	return {};
 
 }
 

@@ -401,7 +401,7 @@ public:
         } else {
             if (!hasNext()) {
                 ok = false;
-                return QChar();
+                return {};
             }
             ok = true;
             return next();

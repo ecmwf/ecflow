@@ -160,7 +160,7 @@ QModelIndex ChangeNotifyModel::index( int row, int column, const QModelIndex & p
 		return createIndex(row,column);
 	}
 
-	return QModelIndex();
+	return {};
 
 }
 

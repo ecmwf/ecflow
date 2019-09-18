@@ -330,7 +330,7 @@ QModelIndex TableNodeModel::index( int row, int column, const QModelIndex & pare
 		return createIndex(row,column,node);
 	}
 
-	return QModelIndex();
+	return {};
 }
 
 QModelIndex TableNodeModel::parent(const QModelIndex& /*child*/) const
@@ -364,7 +364,7 @@ QModelIndex TableNodeModel::nodeToIndex(const VNode* node, int column) const
 	{
 		return createIndex(row,column,const_cast<VNode*>(node));
 	}
-	return QModelIndex();
+	return {};
 }
 
 
@@ -379,7 +379,7 @@ QModelIndex TableNodeModel::nodeToIndex(VTableServer* server,const VNode* node, 
 	{
 		return createIndex(row,column,const_cast<VNode*>(node));
 	}
-	return QModelIndex();
+	return {};
 }
 
 QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) const
@@ -396,7 +396,7 @@ QModelIndex TableNodeModel::attributeToIndex(const VAttribute* a, int column) co
     {
         return createIndex(row,column,const_cast<VNode*>(node));
     }
-    return QModelIndex();
+    return {};
 }
 
 void TableNodeModel::selectionChanged(QModelIndexList lst)

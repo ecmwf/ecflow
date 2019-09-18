@@ -704,7 +704,7 @@ QRect StandardView::visualRect(const QModelIndex &index) const
         //return QRect(viewItems_[vi].x, y, viewItems_[vi].width,rh); //TODO: optimise it
         return QRect(viewItems_[vi].x-1-translation(), y, viewItems_[vi].width+2,viewItems_[vi].height);
     }
-    return QRect();
+    return {};
 }
 
 //Returns the viewport y coordinate for  item.

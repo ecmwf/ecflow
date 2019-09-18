@@ -346,7 +346,7 @@ QModelIndex LogModel::index( int row, int column, const QModelIndex & parent ) c
 		return createIndex(row,column);
 	}
 
-	return QModelIndex();
+	return {};
 
 }
 

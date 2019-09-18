@@ -359,7 +359,7 @@ QTextLine TextPagerLayout::lineForPosition(int pos, int *offsetInLine, int *line
     qWarning() << "Couldn't find a line for" << pos << "viewportPosition" << viewportPosition
                << "layoutEnd" << layoutEnd;
     Q_ASSERT(0);
-    return QTextLine();
+    return {};
 }
 
 // pos is not necessarily on a newline. Finds closest newline in the

@@ -438,7 +438,7 @@ QModelIndex TreeNodeModel::index( int row, int column, const QModelIndex & paren
 			return createIndex(row,column,parentNode);
 		}
 	}
-	return QModelIndex();
+	return {};
 }
 
 QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
@@ -481,7 +481,7 @@ QModelIndex TreeNodeModel::parent(const QModelIndex &child) const
 		}
 	}
 
-	return QModelIndex();
+	return {};
 }
 
 //----------------------------------------------
@@ -789,7 +789,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VNode* node, int column) const
         }
 	}
 
-	return QModelIndex();
+	return {};
 }
 
 //Find the index for the node
@@ -828,7 +828,7 @@ QModelIndex TreeNodeModel::nodeToIndex(const VTreeNode* node, int column) const
         }
     }
 
-    return QModelIndex();
+    return {};
 
 }
 
@@ -859,7 +859,7 @@ QModelIndex TreeNodeModel::nodeToIndex(VTreeServer* server,const VTreeNode* node
 		}
 	}
 
-	return QModelIndex();
+	return {};
 
 }
 
@@ -894,7 +894,7 @@ QModelIndex TreeNodeModel::attributeToIndex(const VAttribute* a, int column) con
         }
     }
 
-    return QModelIndex();
+    return {};
 }
 
 #if 0

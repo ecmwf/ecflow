@@ -256,13 +256,13 @@ QModelIndex TimelineInfoModel::index( int row, int column, const QModelIndex & p
         return createIndex(row,column);
     }
 
-    return QModelIndex();
+    return {};
 
 }
 
 QModelIndex TimelineInfoModel::parent(const QModelIndex &child) const
 {
-    return QModelIndex();
+    return {};
 }
 
 

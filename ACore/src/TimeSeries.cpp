@@ -293,7 +293,7 @@ TimeSlot TimeSeries::compute_next_time_slot(const ecf::Calendar& c) const
    }
 
    if (nextTimeSlot > finish_) {
-      return TimeSlot();  // time has expired
+      return {};  // time has expired
    }
    return nextTimeSlot;
 }
@@ -520,7 +520,7 @@ boost::posix_time::time_duration TimeSeries::duration(const ecf::Calendar& c ) c
 
 	LOG_ASSERT(!c.suiteTime().is_special(),"init has not been called on calendar. TimeSeries::duration");
 	time_duration time_of_day = c.suiteTime().time_of_day();
-	return boost::posix_time::time_duration( time_of_day.hours(), time_of_day.minutes(), 0, 0 );
+	return { time_of_day.hours(), time_of_day.minutes(), 0, 0 };
 }
 
 

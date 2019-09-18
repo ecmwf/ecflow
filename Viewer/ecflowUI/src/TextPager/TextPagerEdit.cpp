@@ -730,7 +730,7 @@ QRect TextPagerEdit::cursorBlockRect(const TextPagerCursor &textCursor) const
     if (const QTextLayout *l = d->layoutForPosition(textCursor.position())) {
         return l->boundingRect().toRect();
     }
-    return QRect();
+    return {};
 }
 
 QRect TextPagerEdit::cursorRect(const TextPagerCursor &textCursor) const
@@ -746,7 +746,7 @@ QRect TextPagerEdit::cursorRect(const TextPagerCursor &textCursor) const
         	return QRect(x, line.y(), d->cursorWidth, line.height());
         }
     }
-    return QRect();
+    return {};
 }
 
 int TextPagerEdit::lineNumber(int position) const

@@ -195,7 +195,7 @@ QModelIndex OutputModel::index( int row, int column, const QModelIndex & parent 
 		return createIndex(row,column,static_cast<void*>(nullptr));
 	}
 
-	return QModelIndex();
+	return {};
 
 }
 

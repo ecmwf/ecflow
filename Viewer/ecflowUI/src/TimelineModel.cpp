@@ -236,13 +236,13 @@ QModelIndex TimelineModel::index( int row, int column, const QModelIndex & paren
         return createIndex(row,column);
     }
 
-    return QModelIndex();
+    return {};
 
 }
 
 QModelIndex TimelineModel::parent(const QModelIndex &child) const
 {
-    return QModelIndex();
+    return {};
 }
 
 void TimelineModel::setPeriod(QDateTime t1,QDateTime t2)
