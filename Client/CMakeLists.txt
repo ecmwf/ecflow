@@ -97,6 +97,7 @@ if (ENABLE_SERVER)
 endif()
               
 # if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
+# boost_timer -> boost_chrono -> librt
 ecbuild_add_test( TARGET    s_client
                   SOURCES   ${test_srcs}
                   LIBS      libclient ${OPENSSL_LIBRARIES}
@@ -113,10 +114,11 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	# 
 	# Simple stand alone test
 	#
+	# libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
 	ecbuild_add_test( TARGET   perf_test_large_defs 
                       SOURCES  test/TestSinglePerf.cpp test/SCPort.cpp
                       LIBS     libclient ${OPENSSL_LIBRARIES}
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                       INCLUDES ../ANode/test
                                ../Base/test 
                                ${Boost_INCLUDE_DIRS}
@@ -129,7 +131,7 @@ if (ENABLE_ALL_TESTS AND ENABLE_SERVER)
 	ecbuild_add_test( TARGET m_test_migration
                       SOURCES  test/TestMigration.cpp test/SCPort.cpp
                       LIBS     libclient ${OPENSSL_LIBRARIES}
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                       INCLUDES ../ANode/test
                                ../Base/test 
                                ${Boost_INCLUDE_DIRS}

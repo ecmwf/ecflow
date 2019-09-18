@@ -73,12 +73,13 @@ SET_TARGET_PROPERTIES(ecflow_server PROPERTIES
                           
 # ================================================================================                         
 # TEST
+# libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
 ecbuild_add_test( TARGET       u_server
                   SOURCES      test/TestServerEnvironment.cpp 
                                test/TestServer1.cpp
                   INCLUDES     ${Boost_INCLUDE_DIRS}
                   LIBS         libserver ${OPENSSL_LIBRARIES}
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                   TEST_DEPENDS u_base
               )
 

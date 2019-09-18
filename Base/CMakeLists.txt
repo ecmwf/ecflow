@@ -117,10 +117,11 @@ list( APPEND test_srcs
 )
 
 # if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
+# libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
 ecbuild_add_test( TARGET       u_base
                   SOURCES      ${test_srcs}
                   LIBS         base pthread ${OPENSSL_LIBRARIES}
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                   INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_aparser
                   )

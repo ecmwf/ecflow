@@ -68,10 +68,11 @@ test/TestVariableSubstitutionDefs.cpp
 test/TestZombies.cpp
 )
 
+# libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
 ecbuild_add_test(TARGET  u_anode
                  SOURCES      ${test_srcs}
                  INCLUDES     ${Boost_INCLUDE_DIRS}
-                 LIBS         node ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                 LIBS         node ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                  TEST_DEPENDS u_anattr
                  )
 
@@ -80,7 +81,7 @@ if (ENABLE_ALL_TESTS)
 	ecbuild_add_test( TARGET       u_anode_stest
                       SOURCES      ${stest_srcs}
                       INCLUDES     ${Boost_INCLUDE_DIRS}
-                      LIBS         node ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                      LIBS         node ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                       TEST_DEPENDS u_anattr
                     )
 endif()

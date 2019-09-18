@@ -36,7 +36,7 @@ ecbuild_add_test( TARGET   c_csim
                   SOURCES  ${test_srcs}
                   LIBS     libsimu        
                            pthread 
-                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                   INCLUDES ../ANode/test ${Boost_INCLUDE_DIRS}
                   TEST_DEPENDS u_base
                  )
@@ -47,7 +47,7 @@ if (ENABLE_ALL_TESTS)
                       SOURCES      test/TestSingleSimulator.cpp test/TestUtil.cpp
                       LIBS         libsimu   
                                    pthread 
-                                   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                                   ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                       INCLUDES     ../ANode/test ${Boost_INCLUDE_DIRS}
                       TEST_DEPENDS u_base
                  )

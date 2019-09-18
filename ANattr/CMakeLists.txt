@@ -14,9 +14,10 @@ ecbuild_add_library( TARGET   nodeattr
 
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 
+# libboost_unit_test_framework  undefined reference to `clock_gettime', ${LIBRT} needed for boost 1.71
 ecbuild_add_test( TARGET       u_anattr
                   SOURCES      ${test_srcs}
                   INCLUDES     ${Boost_INCLUDE_DIRS}
-                  LIBS         nodeattr ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                  LIBS         nodeattr ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                   TEST_DEPENDS u_acore
                  )
