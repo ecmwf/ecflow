@@ -45,7 +45,7 @@ Q_OBJECT
 
 public:
     explicit TimelineWidget(QWidget *parent=0);
-    ~TimelineWidget();
+    ~TimelineWidget() override;
 
     void clear();
     void initLoad(QString serverName, QString host, QString port, QString logFile,

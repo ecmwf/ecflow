@@ -49,7 +49,7 @@ Q_SIGNALS:
     void cancelLoad();
 
 protected:
-    void paintEvent(QPaintEvent *);
+    void paintEvent(QPaintEvent *) override;
 
 private:
     void showMessage(const Type&,QString);

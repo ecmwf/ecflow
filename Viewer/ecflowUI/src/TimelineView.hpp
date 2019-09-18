@@ -38,7 +38,7 @@ Q_OBJECT
 
 public:
     explicit TimelineView(TimelineSortModel* model,QWidget *parent=0);
-    ~TimelineView();
+    ~TimelineView() override;
 
     enum ViewMode {TimelineMode,DurationMode};
     ViewMode viewMode() const {return viewMode_;}
@@ -53,7 +53,7 @@ public:
     void setZoomActions(QAction* zoomInAction,QAction* zoomOutAction);
     void setViewMode(ViewMode vm, bool force=false);
 
-    void notifyChange(VProperty* p);
+    void notifyChange(VProperty* p) override;
 
     void readSettings(VSettings*);
     void writeSettings(VSettings*);
@@ -83,7 +83,7 @@ protected:
     QModelIndexList selectedList();
     void handleContextMenu(QModelIndex indexClicked,QModelIndexList indexLst,QPoint globalPos,QPoint widgetPos,QWidget *widget);
     void adjustBackground(QColor col);
-    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
     void setSortingEnabledNoExec(bool b);
     void showDetails(const QModelIndex& indexClicked);
     void lookup(const QModelIndex&);
@@ -112,13 +112,13 @@ class TimelineDelegate : public QStyledItemDelegate, public VPropertyObserver
 
 public:
     explicit TimelineDelegate(TimelineModel* model,QWidget *parent);
-    ~TimelineDelegate();
+    ~TimelineDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
+                   const QModelIndex& index) const override;
 
-    void notifyChange(VProperty* p);
+    void notifyChange(VProperty* p) override;
 
     void setStartDate(QDateTime);
     void setEndDate(QDateTime);

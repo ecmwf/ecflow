@@ -32,19 +32,19 @@ Q_OBJECT
 public:
   TableNodeModel(ServerFilter* serverFilter,NodeFilterDef* filterDef,QObject *parent=nullptr);
 
-  int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-  int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+  int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+  int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
   
-  QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-  QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+  QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+  QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
   
-  QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-  QModelIndex parent (const QModelIndex & ) const;
+  QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+  QModelIndex parent (const QModelIndex & ) const override;
   
-  VInfo_ptr nodeInfo(const QModelIndex&);
+  VInfo_ptr nodeInfo(const QModelIndex&) override;
   void selectionChanged(QModelIndexList lst);
   
-  VModelData* data() const;
+  VModelData* data() const override;
   void removeColumn(QString);
   ModelColumn* columns() const {return columns_;}
 
@@ -55,21 +55,21 @@ public:
            ExtraColumn = 8 };
    
 public Q_SLOTS:
-  void slotServerAddBegin(int);
-  void slotServerAddEnd();
-  void slotServerRemoveBegin(VModelServer* server,int);
-  void slotServerRemoveEnd(int);
+  void slotServerAddBegin(int) override;
+  void slotServerAddEnd() override;
+  void slotServerRemoveBegin(VModelServer* server,int) override;
+  void slotServerRemoveEnd(int) override;
   
-  void slotDataChanged(VModelServer*) {}
+  void slotDataChanged(VModelServer*) override {}
   void slotNodeChanged(VTableServer*,const VNode*);
   void slotAttributesChanged(VModelServer*,const VNode*) {}
   void slotBeginAddRemoveAttributes(VModelServer*,const VNode*,int,int) {}
   void slotEndAddRemoveAttributes(VModelServer*,const VNode*,int,int) {}
   
-  void slotBeginServerScan(VModelServer* server,int);
-  void slotEndServerScan(VModelServer* server,int);
-  void slotBeginServerClear(VModelServer* server,int);
-  void slotEndServerClear(VModelServer* server,int);
+  void slotBeginServerScan(VModelServer* server,int) override;
+  void slotEndServerScan(VModelServer* server,int) override;
+  void slotBeginServerClear(VModelServer* server,int) override;
+  void slotEndServerClear(VModelServer* server,int) override;
 
   void slotAppendColumnBegin();
   void slotAppendColumnEnd();
@@ -90,13 +90,13 @@ protected:
   bool isServer(const QModelIndex & index) const {return false;}
   ServerHandler* indexToRealServer(const QModelIndex & index) const {return NULL;}
   VModelServer* indexToServer(const QModelIndex & index) const {return NULL;}
-  QModelIndex serverToIndex(ServerHandler*) const {return QModelIndex();}
+  QModelIndex serverToIndex(ServerHandler*) const override {return QModelIndex();}
   
   QModelIndex nodeToIndex(VTableServer* server,const VNode* node, int column) const;
-  QModelIndex nodeToIndex(const VNode*,int column=0) const;
+  QModelIndex nodeToIndex(const VNode*,int column=0) const override;
   VNode* indexToNode( const QModelIndex & index) const;
   
-  QModelIndex attributeToIndex(const VAttribute* a, int column=0) const;
+  QModelIndex attributeToIndex(const VAttribute* a, int column=0) const override;
   
   QVariant nodeData(const QModelIndex& index,int role) const;
   

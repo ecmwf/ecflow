@@ -23,7 +23,7 @@ class TimelinePreLoadDialog : public QDialog
 {
 public:
     explicit TimelinePreLoadDialog(QWidget *parent=0);
-    ~TimelinePreLoadDialog();
+    ~TimelinePreLoadDialog() override;
 
     void init(const TimelineFileList& lst);
 

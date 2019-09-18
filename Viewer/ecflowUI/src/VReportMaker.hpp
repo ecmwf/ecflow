@@ -25,8 +25,8 @@ public:
     static void sendReport(VInfo_ptr);
 
     //From VInfoPresenter
-    void infoReady(VReply*);
-    void infoFailed(VReply*);
+    void infoReady(VReply*) override;
+    void infoFailed(VReply*) override;
     //void infoProgress(VReply*);
     //void infoProgressStart(const std::string& text,int max);
     //void infoProgress(const std::string& text,int value);

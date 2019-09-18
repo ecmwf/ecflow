@@ -43,9 +43,9 @@ class VTriggerAttr : public VAttribute
 public:
     VTriggerAttr(VNode *parent,Expression*, int index);
 
-    VAttributeType* type() const;
-    QStringList data(bool firstLine) const;
-    std::string strName() const;
+    VAttributeType* type() const override;
+    QStringList data(bool firstLine) const override;
+    std::string strName() const override;
     std::string ast_str() const;
 
     static void scan(VNode* vnode,std::vector<VAttribute*>& vec);

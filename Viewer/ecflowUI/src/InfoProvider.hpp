@@ -84,7 +84,7 @@ class ScriptProvider : public InfoProvider
 public:
 	 explicit ScriptProvider(InfoPresenter* owner);
 protected:
-     void visit(VInfoNode* info);
+     void visit(VInfoNode* info) override;
 };
 
 class HistoryProvider : public InfoProvider

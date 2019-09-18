@@ -34,17 +34,17 @@ class TimelineInfoDailyModel : public QAbstractItemModel
 {
 public:
     explicit TimelineInfoDailyModel(QObject *parent=0);
-    ~TimelineInfoDailyModel();
+    ~TimelineInfoDailyModel() override;
 
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+    int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+    int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
 
-    Qt::ItemFlags flags ( const QModelIndex & index) const;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+    Qt::ItemFlags flags ( const QModelIndex & index) const override;
+    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
 
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-    QModelIndex parent (const QModelIndex & ) const;
+    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+    QModelIndex parent (const QModelIndex & ) const override;
 
     TimelineItem* data() const {return data_;}
     void load(TimelineItem*,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
@@ -66,13 +66,13 @@ class TimelineInfoDailyDelegate : public QStyledItemDelegate, public VPropertyOb
 
 public:
     explicit TimelineInfoDailyDelegate(TimelineInfoDailyModel* model,QWidget *parent);
-    ~TimelineInfoDailyDelegate();
+    ~TimelineInfoDailyDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const;
+    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
-                   const QModelIndex& index) const;
+                   const QModelIndex& index) const override;
 
-    void notifyChange(VProperty* p);
+    void notifyChange(VProperty* p) override;
 
     void setStartTime(QTime);
     void setEndTime(QTime);
@@ -109,7 +109,7 @@ Q_OBJECT
 
 public:
     explicit TimelineInfoDailyView(QWidget *parent=0);
-    ~TimelineInfoDailyView();
+    ~TimelineInfoDailyView() override;
 
     void rerender();
 

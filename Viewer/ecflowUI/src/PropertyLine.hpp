@@ -324,7 +324,7 @@ public:
 
 public Q_SLOTS:
     void slotSelectionChanged();
-	void slotReset(QVariant);
+	void slotReset(QVariant) override;
 
 protected:
 	void setEnabledEditable(bool) override;

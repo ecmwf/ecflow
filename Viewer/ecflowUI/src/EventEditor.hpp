@@ -33,7 +33,7 @@ class EventEditor : public AttributeEditor
 Q_OBJECT
 public:
     EventEditor(VInfo_ptr,QWidget* parent=0);
-    ~EventEditor();
+    ~EventEditor() override;
 
 protected Q_SLOTS:  
     void slotLookUp();
@@ -45,11 +45,11 @@ protected Q_SLOTS:
     void buildList();
 
 protected:
-    void paintEvent(QPaintEvent *e);
-    void resetValue();
-    void apply();
-    bool isValueChanged();
-    void nodeChanged(const std::vector<ecf::Aspect::Type>& a);
+    void paintEvent(QPaintEvent *e) override;
+    void resetValue() override;
+    void apply() override;
+    bool isValueChanged() override;
+    void nodeChanged(const std::vector<ecf::Aspect::Type>& a) override;
     void setModelData(QStringList lst);
     void lookup(const QModelIndex &index);
     void readSettings();

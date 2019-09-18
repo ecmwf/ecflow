@@ -32,17 +32,17 @@ public:
                      ActiveDurationColumn=3};
 
     explicit TimelineModel(QObject *parent=0);
-    ~TimelineModel();
+    ~TimelineModel() override;
 
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+    int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+    int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
 
-    Qt::ItemFlags flags ( const QModelIndex & index) const;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+    Qt::ItemFlags flags ( const QModelIndex & index) const override;
+    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
 
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-    QModelIndex parent (const QModelIndex & ) const;
+    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+    QModelIndex parent (const QModelIndex & ) const override;
 
     void setData(TimelineData* data);
 
@@ -68,14 +68,14 @@ class TimelineSortModel : public QSortFilterProxyModel
 
 public:
     TimelineSortModel(TimelineModel*,QObject *parent=0);
-    ~TimelineSortModel();
+    ~TimelineSortModel() override;
 
     enum SortMode {PathSortMode, TimeSortMode, TreeSortMode, QtSortMode};
     enum ChangeFilterMode {TimelineChangeFilterMode, DurationChangeFilterMode,NoChangeFilterMode};
 
     //From QSortFilterProxyModel:
     //we set the source model in the constructor. So this function should not do anything.
-    void setSourceModel(QAbstractItemModel*) {}
+    void setSourceModel(QAbstractItemModel*) override {}
     TimelineModel* tlModel() const {return tlModel_;}
 
     void selectionChanged(QModelIndexList lst);
@@ -96,8 +96,8 @@ Q_SIGNALS:
     void invalidateCalled();
 
 protected:
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
-    bool filterAcceptsRow(int sourceRow, const QModelIndex &/*sourceParent*/) const;
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &/*sourceParent*/) const override;
 
     TimelineModel* tlModel_;
     bool skipSort_;

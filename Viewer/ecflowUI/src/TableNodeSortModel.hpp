@@ -36,14 +36,14 @@ public:
     void setSkipSort(bool b) {skipSort_=b;}
     void removeColumn(QString);
     ModelColumn* columns() const;
-    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder);
+    void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
 protected Q_SLOTS:
     void skipSortingBegin();
     void skipSortingEnd();
 
 protected:
-    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 
     TableNodeModel* nodeModel_;
     bool skipSort_;

@@ -27,12 +27,12 @@ class AddModelColumnDialog : public QDialog
 
 public:
     explicit AddModelColumnDialog(QWidget *parent = 0);
-    virtual ~AddModelColumnDialog();
+    ~AddModelColumnDialog() override;
 
     void init(ModelColumn* mc,const std::set<std::string>&,QString defaultText = QString(""));
 
 public Q_SLOTS:
-    void accept();
+    void accept() override ;
 
 protected:
     Ui::AddModelColumnDialog *ui;
@@ -49,7 +49,7 @@ public:
     void setColumn(QString);
 
 public Q_SLOTS:
-    void accept();
+    void accept() override;
 
 protected:
     QString columnName_;

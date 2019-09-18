@@ -31,17 +31,17 @@ class TimelineInfoModel : public QAbstractItemModel
 {
 public:
     explicit TimelineInfoModel(QObject *parent=0);
-    ~TimelineInfoModel();
+    ~TimelineInfoModel() override;
 
-    int columnCount (const QModelIndex& parent = QModelIndex() ) const;
-    int rowCount (const QModelIndex& parent = QModelIndex() ) const;
+    int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
+    int rowCount (const QModelIndex& parent = QModelIndex() ) const override;
 
-    Qt::ItemFlags flags ( const QModelIndex & index) const;
-    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const;
-    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const;
+    Qt::ItemFlags flags ( const QModelIndex & index) const override;
+    QVariant data (const QModelIndex& , int role = Qt::DisplayRole ) const override;
+    QVariant headerData(int,Qt::Orientation,int role = Qt::DisplayRole ) const override;
 
-    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const;
-    QModelIndex parent (const QModelIndex & ) const;
+    QModelIndex index (int, int, const QModelIndex& parent = QModelIndex() ) const override;
+    QModelIndex parent (const QModelIndex & ) const override;
 
     void setData(TimelineItem*,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
                  unsigned int endDateSec);
@@ -68,7 +68,7 @@ Q_OBJECT
 
 public:
     explicit TimelineInfoWidget(QWidget *parent=0);
-    ~TimelineInfoWidget() {}
+    ~TimelineInfoWidget() override {}
 
     void clear() {}
     void load(QString host,QString port,TimelineData*,int,QDateTime,QDateTime);
@@ -104,12 +104,12 @@ class TimelineInfoDialog : public QDialog
 {
 public:
     TimelineInfoDialog(QWidget* parent=0);
-    ~TimelineInfoDialog();
+    ~TimelineInfoDialog() override;
 
     TimelineInfoWidget* infoW_;
 
 protected:
-    void closeEvent(QCloseEvent * event);
+    void closeEvent(QCloseEvent * event) override;
     void readSettings();
     void writeSettings();
 };

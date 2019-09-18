@@ -23,24 +23,24 @@ class TimelineItemWidget : public QWidget, public InfoPanelItem
 {
 public:
     explicit TimelineItemWidget(QWidget *parent=0);
-    ~TimelineItemWidget();
+    ~TimelineItemWidget() override;
 
-    void reload(VInfo_ptr);
-    QWidget* realWidget();
-    void clearContents();
-    bool hasSameContents(VInfo_ptr info);
-    void notifyInfoChanged(const std::string& path);
+    void reload(VInfo_ptr) override;
+    QWidget* realWidget() override;
+    void clearContents() override;
+    bool hasSameContents(VInfo_ptr info) override;
+    void notifyInfoChanged(const std::string& path) override;
 
-    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) {}
-    void defsChanged(const std::vector<ecf::Aspect::Type>&) {}
+    void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+    void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
-    void writeSettings(VComboSettings* vs);
-    void readSettings(VComboSettings* vs);
+    void writeSettings(VComboSettings* vs) override;
+    void readSettings(VComboSettings* vs) override;
 
 protected:
-    void updateState(const ChangeFlags&);
-    void serverSyncFinished();
-    void connectStateChanged();
+    void updateState(const ChangeFlags&) override;
+    void serverSyncFinished() override;
+    void connectStateChanged() override;
 private:
     void load();
 

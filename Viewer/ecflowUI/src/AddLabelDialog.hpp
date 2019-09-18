@@ -29,11 +29,11 @@ public:
     AddLabelDialog(VInfo_ptr info, QString labelName, QWidget* parent=0);
 
 protected Q_SLOTS:
-    void accept();
-    void reject();
+    void accept() override ;
+    void reject() override ;
 
 protected:
-    void closeEvent(QCloseEvent * event);
+    void closeEvent(QCloseEvent * event) override ;
     void writeSettings();
     void readSettings();
 

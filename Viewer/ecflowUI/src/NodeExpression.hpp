@@ -321,10 +321,10 @@ class EnvVarCondition : public BaseNodeCondition
 {
 public:
     explicit EnvVarCondition(QString envVarName) : envVarName_(envVarName), defined_(-1) {}
-    ~EnvVarCondition() {}
+    ~EnvVarCondition() override {}
 
-    bool execute(VItem*);
-    std::string print() {return envVarName_.toStdString();}
+    bool execute(VItem*) override;
+    std::string print() override {return envVarName_.toStdString();}
 
 private:
     QString envVarName_;

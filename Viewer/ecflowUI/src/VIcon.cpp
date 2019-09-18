@@ -83,7 +83,7 @@ class VTimeFreeIcon : public VIcon
 {
 public:
     explicit VTimeFreeIcon(const std::string& name) : VIcon(name) {}
-    bool show(VNode*);
+    bool show(VNode*) override;
 };
 
 class VDateIcon : public VIcon

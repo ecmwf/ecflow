@@ -37,7 +37,7 @@ class SimpleSettingsLoader : public VSettingsLoader
 public:
     explicit SimpleSettingsLoader() : VSettingsLoader() {}
 protected:
-    void loadSettings() { T::loadSettings();}
+    void loadSettings() override { T::loadSettings();}
 };
 
 #endif // VSETTINGSLOADER_HPP
