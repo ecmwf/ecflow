@@ -18,7 +18,7 @@ list( APPEND test_srcs
 ecbuild_add_test( TARGET       u_aparser
                   SOURCES      ${test_srcs}
                   LIBS         node nodeattr core
-                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY}
+                               ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} ${Boost_TEST_EXEC_MONITOR_LIBRARY} ${LIBRT}
                   INCLUDES     src 
                                ../../ACore/src 
                                ../../ANattr/src 
