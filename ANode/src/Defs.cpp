@@ -1117,9 +1117,9 @@ node_ptr Defs::replaceChild(const std::string& path,
 
 		std::vector<node_ptr> all_server_node_children;
 		serverNode->allChildren( all_server_node_children);
-		for(std::vector<node_ptr>::iterator i = all_server_node_children.begin(); i != all_server_node_children.end(); i++){
-		   if ((*i)->isSuspended()) {
-		      node_ptr client_node = clientDefs->findAbsNode( (*i)->absNodePath() );
+		for(auto & i : all_server_node_children){
+		   if (i->isSuspended()) {
+		      node_ptr client_node = clientDefs->findAbsNode( i->absNodePath() );
 		      if (client_node) client_node->suspend();
 		   }
 		}

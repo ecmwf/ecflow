@@ -117,8 +117,8 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
          // Check if day/date are free *BEFORE* midnight and *BEFORE* calendarChanged called(since that clears Day::makeFree_)
          // The isFree below relies on Day::makeFree_/Date:makeFree_ not being cleared till after midnight
          bool free_date = false; bool free_day = false;
-         for(size_t i =0; i < dates_.size(); i++) { if (dates_[i].isFree(c)) { free_date  = true; break; }}
-         for(size_t i =0; i < days_.size(); i++)  { if (days_[i].isFree(c))  { free_day = true; break; }}
+         for(auto & date : dates_) { if (date.isFree(c)) { free_date  = true; break; }}
+         for(auto & day : days_)  { if (day.isFree(c))  { free_day = true; break; }}
 
          //cout << "free_day " << free_day << " free_date " <<  free_date << "\n";
 
@@ -132,13 +132,13 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
             int submitted = 0;
             int queued = 0;
             int active = 0;
-            for(size_t t = 0; t <  all_children.size(); t++) {
+            for(auto & t : all_children) {
                //cout << all_children[t]->debugNodePath() << " " << NState::toString(all_children[t]->state()) << "\n";
-               if (  all_children[t]->isTask()) {
-                  if ( all_children[t]->state() == NState::SUBMITTED) submitted++;
-                  else if (all_children[t]->state() == NState::ACTIVE) active++;
-                  else if (all_children[t]->state() == NState::COMPLETE) completed++;
-                  else if (all_children[t]->state() == NState::QUEUED) queued++;
+               if (  t->isTask()) {
+                  if ( t->state() == NState::SUBMITTED) submitted++;
+                  else if (t->state() == NState::ACTIVE) active++;
+                  else if (t->state() == NState::COMPLETE) completed++;
+                  else if (t->state() == NState::QUEUED) queued++;
                   if (active || submitted) {
                      if (free_date) clear_date_at_midnight = false;
                      if (free_day)  clear_day_at_midnight = false;

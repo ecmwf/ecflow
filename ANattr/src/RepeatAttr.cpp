@@ -469,16 +469,16 @@ RepeatDateList::RepeatDateList( const std::string& variable, const std::vector<i
    }
    if (list_.empty()) throw std::runtime_error("RepeatDateList: " + variable + " is empty");
 
-   for(size_t i = 0; i < list_.size(); i++) {
-      std::string date_i = boost::lexical_cast< std::string >(list_[i]);
+   for(int i : list_) {
+      std::string date_i = boost::lexical_cast< std::string >(i);
       if (date_i.size() != 8) {
-         std::stringstream ss; ss << "Invalid Repeat datelist : " << variable << " the date " << list_[i]  << " is not valid. Please use yyyymmdd format.";
+         std::stringstream ss; ss << "Invalid Repeat datelist : " << variable << " the date " << i  << " is not valid. Please use yyyymmdd format.";
          throw std::runtime_error("Invalid Repeat datelist " + ss.str());
       }
 
       try { boost::gregorian::date(from_undelimited_string(date_i));}
       catch (std::exception& e) {
-         std::stringstream ss; ss << "Invalid Repeat datelist : " << variable << " the date " << list_[i]  << " is not valid. Please use yyyymmdd format.";
+         std::stringstream ss; ss << "Invalid Repeat datelist : " << variable << " the date " << i  << " is not valid. Please use yyyymmdd format.";
          throw std::runtime_error("Invalid Repeat datelist " + ss.str());
       }
    }

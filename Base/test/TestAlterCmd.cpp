@@ -474,12 +474,12 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       std::vector<node_ptr> all_nodes;
       defs.get_all_nodes(all_nodes);
       std::vector<std::string> paths;
-      for(size_t i=0; i<all_nodes.size();i++) paths.push_back(all_nodes[i]->absNodePath());
+      for(auto & all_node : all_nodes) paths.push_back(all_node->absNodePath());
       BOOST_CHECK_MESSAGE(paths.size() >= 2,"expected at least 2 nodes");
 
-      for(size_t i=0; i<all_nodes.size();i++) {
-         if (all_nodes[i]->variables().size() > 0) {
-            TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(all_nodes[i]->absNodePath(),AlterCmd::DEL_VARIABLE)));
+      for(auto & all_node : all_nodes) {
+         if (all_node->variables().size() > 0) {
+            TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(all_node->absNodePath(),AlterCmd::DEL_VARIABLE)));
          }
       }
 
@@ -487,8 +487,8 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::ADD_VARIABLE,"FRED1","_val_")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::ADD_VARIABLE,"FRED2","_val_")));
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::ADD_VARIABLE,"FRED3","_val_")));
-      for(size_t i=0; i<all_nodes.size();i++) {
-         BOOST_CHECK_MESSAGE( all_nodes[i]->variables().size() == 3, "expected 3 variable but found " << all_nodes[i]->variables().size());
+      for(auto & all_node : all_nodes) {
+         BOOST_CHECK_MESSAGE( all_node->variables().size() == 3, "expected 3 variable but found " << all_node->variables().size());
       }
 
       // test change variable
@@ -502,13 +502,13 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
       // test delete variables
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::DEL_VARIABLE,"FRED1")));
-      for(size_t i=0; i<all_nodes.size();i++) {
-         BOOST_CHECK_MESSAGE( all_nodes[i]->variables().size() == 2, "expected 2 variable but found " << all_nodes[i]->variables().size());
+      for(auto & all_node : all_nodes) {
+         BOOST_CHECK_MESSAGE( all_node->variables().size() == 2, "expected 2 variable but found " << all_node->variables().size());
       }
 
       TestHelper::invokeRequest(&defs,Cmd_ptr( new AlterCmd(paths,AlterCmd::DEL_VARIABLE)));
-      for(size_t i=0; i<all_nodes.size();i++) {
-         BOOST_CHECK_MESSAGE( all_nodes[i]->variables().size() == 0, "expected 0 variable but found " << all_nodes[i]->variables().size());
+      for(auto & all_node : all_nodes) {
+         BOOST_CHECK_MESSAGE( all_node->variables().size() == 0, "expected 0 variable but found " << all_node->variables().size());
       }
    }
 
