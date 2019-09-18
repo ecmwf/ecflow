@@ -248,6 +248,7 @@ if (NOT "${CMAKE_PREFIX_PATH}" EQUAL "${_CMAKE_PREFIX_PATH_BACKUP}")
 endif()
 
 
+# See: https://stackoverflow.com/questions/13653361/another-undefined-reference-error-when-linking-boost-libraries
 message( STATUS "====================================================================================================================" )
 message( STATUS "LIB RT  needed by some test, boost_timer->boost_chrono-> -lrt" )
 message( STATUS "====================================================================================================================" )
