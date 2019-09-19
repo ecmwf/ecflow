@@ -108,7 +108,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->loadFileTb->hide();
 
     // view mode
-    QButtonGroup *viewModeGr = new QButtonGroup(this);
+    auto *viewModeGr = new QButtonGroup(this);
     viewModeGr->addButton(ui_->timelineViewTb,0);
     viewModeGr->addButton(ui_->durationViewTb,1);
     viewModeGr->setExclusive(true);
@@ -130,7 +130,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_->sortCombo->addItem("Sort by tree","tree");
     ui_->sortCombo->setCurrentIndex(0);
 
-    QButtonGroup *sortGr = new QButtonGroup(this);
+    auto *sortGr = new QButtonGroup(this);
     sortGr->addButton(ui_->sortUpTb,0);
     sortGr->addButton(ui_->sortDownTb,1);
     sortGr->setExclusive(true);

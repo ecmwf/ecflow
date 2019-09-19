@@ -118,7 +118,7 @@ void OverviewItemWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
 	if(frozen_)
 		return;
 
-	for(std::vector<ecf::Aspect::Type>::const_iterator it=aspect.begin(); it != aspect.end(); ++it)
+	for(auto it=aspect.begin(); it != aspect.end(); ++it)
 	{
         if(*it != ecf::Aspect::ORDER && *it != ecf::Aspect::NOT_DEFINED)
 		{

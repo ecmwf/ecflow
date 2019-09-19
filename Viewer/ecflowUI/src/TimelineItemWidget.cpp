@@ -29,7 +29,7 @@
 TimelineItemWidget::TimelineItemWidget(QWidget *parent) :
     delayedLoad_(false)
 {
-    QVBoxLayout* vb=new QVBoxLayout(this);
+    auto* vb=new QVBoxLayout(this);
     vb->setContentsMargins(0,0,0,0);
 
     w_=new TimelineWidget(this);

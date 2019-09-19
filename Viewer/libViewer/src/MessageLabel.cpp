@@ -101,7 +101,7 @@ MessageLabel::MessageLabel(QWidget *parent) :
     loadCancelTb_->setIcon(QPixmap(":/viewer/remove.svg"));
     loadCancelTb_->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-    QHBoxLayout* loadLayout=new QHBoxLayout(loadWidget_);
+    auto* loadLayout=new QHBoxLayout(loadWidget_);
     loadLayout->setContentsMargins(2,2,2,2);
     loadLayout->addWidget(loadIconLabel_);
     loadLayout->addWidget(loadTextLabel_);
@@ -116,7 +116,7 @@ MessageLabel::MessageLabel(QWidget *parent) :
     progCancelTb_->setText(tr("Cancel"));
     progCancelTb_->hide();
 
-    QHBoxLayout* progLayout=new QHBoxLayout(progWidget_);
+    auto* progLayout=new QHBoxLayout(progWidget_);
     progLayout->setContentsMargins(2,2,2,2);
     progLayout->addWidget(progBar_);
     progLayout->addWidget(progLabel_);
@@ -131,12 +131,12 @@ MessageLabel::MessageLabel(QWidget *parent) :
 	layout_=new QHBoxLayout(this);
 	layout_->setContentsMargins(2,2,2,2);	    
 
-    QVBoxLayout *pixLayout=new QVBoxLayout();
+    auto *pixLayout=new QVBoxLayout();
     pixLayout->addWidget(pixLabel_);
     pixLayout->addStretch(1);
     layout_->addLayout(pixLayout);
 
-    QVBoxLayout* rightVb=new QVBoxLayout;
+    auto* rightVb=new QVBoxLayout;
     rightVb->addWidget(msgLabel_);
     rightVb->addWidget(progWidget_);
     rightVb->addWidget(loadWidget_);

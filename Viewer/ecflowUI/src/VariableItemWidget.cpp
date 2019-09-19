@@ -713,9 +713,9 @@ VariableItemWidget::VariableItemWidget(QWidget *parent) :
 	sep1->setSeparator(true);
 	auto* sep2=new QAction(this);
 	sep2->setSeparator(true);
-	QAction* sep3=new QAction(this);
+	auto* sep3=new QAction(this);
     sep3->setSeparator(true);
-    QAction* sep4=new QAction(this);
+    auto* sep4=new QAction(this);
     sep4->setSeparator(true);
 
 	//Build context menu

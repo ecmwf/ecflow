@@ -56,7 +56,7 @@ int ModelColumn::indexOf(QString id) const
 
 void ModelColumn::loadItem(VProperty *p)
 {
-    ModelColumnItem* obj=new ModelColumnItem(p->strName());
+    auto* obj=new ModelColumnItem(p->strName());
     obj->label_=p->param("label");
     obj->tooltip_=p->param("tooltip");
     obj->icon_=p->param("icon");
@@ -240,7 +240,7 @@ void ModelColumn::load(VProperty* group)
 {
     Q_ASSERT(group);
 
-    ModelColumn* m=new ModelColumn(group->strName());
+    auto* m=new ModelColumn(group->strName());
 	for(int i=0; i < group->children().size(); i++)
     {
         VProperty *p=group->children().at(i);
@@ -254,7 +254,7 @@ void ModelColumn::load(VProperty* group)
 //Called via VSettingsLoader after the users settings are read
 void ModelColumn::loadSettings()
 {
-    for(std::map<std::string,ModelColumn*>::iterator it=defs.begin(); it != defs.end(); ++it)
+    for(auto it=defs.begin(); it != defs.end(); ++it)
     {
         it->second->loadUserSettings();
     }

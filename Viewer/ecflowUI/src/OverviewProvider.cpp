@@ -311,7 +311,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
     //Other attributes
     const std::vector<VAttribute*>& attr=node->attr();
-    for(std::vector<VAttribute*>::const_iterator it=attr.begin(); it != attr.end(); ++it)
+    for(auto it=attr.begin(); it != attr.end(); ++it)
     {
         if((*it)->typeName() != "var" && (*it)->typeName() != "genvar")
         {
@@ -319,7 +319,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
             if((*it)->typeName() == "trigger" || (*it)->typeName() == "complete")
             {
-                if(VTriggerAttr* tgAtt=static_cast<VTriggerAttr*>(*it))
+                if(auto* tgAtt=static_cast<VTriggerAttr*>(*it))
                 {
                     std::string trigger_ast=tgAtt->ast_str();
                     if(!trigger_ast.empty())

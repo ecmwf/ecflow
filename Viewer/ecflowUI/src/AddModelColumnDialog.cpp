@@ -31,7 +31,7 @@ void AddModelColumnDialog::init(ModelColumn* mc,const std::set<std::string>& var
 {
     modelColumn_=mc;
     QStringList varLst;
-    for(std::set<std::string>::const_iterator it=vars.begin();
+    for(auto it=vars.begin();
         it != vars.end(); ++it)
     {
         int idx=-1;
@@ -44,7 +44,7 @@ void AddModelColumnDialog::init(ModelColumn* mc,const std::set<std::string>& var
             varLst << n;
     }
 
-    QCompleter *c=new QCompleter(varLst,this);
+    auto *c=new QCompleter(varLst,this);
     c->setCaseSensitivity(Qt::CaseInsensitive);
     ui->variableLe->setCompleter(c);
     ui->variableLe->setText(defaultText);

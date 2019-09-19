@@ -40,7 +40,7 @@ LimitEditorWidget::LimitEditorWidget(QWidget* parent) : QWidget(parent)
     actionLookUp_->setFont(f);
 
     pathView_->addAction(actionLookUp_);
-    QAction* sep = new QAction(this);
+    auto* sep = new QAction(this);
     sep->setSeparator(true);
     pathView_->addAction(sep);
     pathView_->addAction(actionRemove_);
@@ -245,7 +245,7 @@ void LimitEditor::slotKill()
 
     VAttribute* a=info_->attribute();
     Q_ASSERT(a);
-    VLimitAttr* lim=static_cast<VLimitAttr*>(a);
+    auto* lim=static_cast<VLimitAttr*>(a);
     Q_ASSERT(lim);
 
     std::vector<VNode*> items;

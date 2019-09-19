@@ -111,7 +111,7 @@ AboutDialog::AboutDialog(QWidget* parent) : QDialog(parent)
         if(envKey.startsWith("ECFLOWUI_"))
         {
             QString envVal=env.value(envKey);
-            QTreeWidgetItem* item=new QTreeWidgetItem(envTree_);
+            auto* item=new QTreeWidgetItem(envTree_);
             item->setText(0,envKey);
             item->setText(1,envVal);
         }

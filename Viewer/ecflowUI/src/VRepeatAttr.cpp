@@ -377,7 +377,7 @@ int VRepeatDateListAttr::endIndex() const
     if(node_ptr node=parent_->node())
     {
         const Repeat& r=node->repeat();
-        if(RepeatDateList *rdl = static_cast<RepeatDateList*>(r.repeatBase()))
+        if(auto *rdl = static_cast<RepeatDateList*>(r.repeatBase()))
         {
             return rdl->indexNum()-1;
         }
@@ -436,7 +436,7 @@ int VRepeatDateListAttr::currentPosition() const
     if(node_ptr node=parent_->node())
     {
         const Repeat& r=node->repeat();
-        if(RepeatDateList *rdl = static_cast<RepeatDateList*>(r.repeatBase()))
+        if(auto *rdl = static_cast<RepeatDateList*>(r.repeatBase()))
         {
             if(rdl->indexNum() < 2)
                 return -1;
@@ -644,7 +644,7 @@ int VRepeatEnumAttr::currentPosition() const
     if(node_ptr node=parent_->node())
     {
         const Repeat& r=node->repeat();
-        if(RepeatEnumerated *rdl = static_cast<RepeatEnumerated*>(r.repeatBase()))
+        if(auto *rdl = static_cast<RepeatEnumerated*>(r.repeatBase()))
         {
             if(rdl->indexNum() < 2)
                 return -1;
@@ -740,7 +740,7 @@ int VRepeatStringAttr::currentPosition() const
     if(node_ptr node=parent_->node())
     {
         const Repeat& r=node->repeat();
-        if(RepeatString *rdl = static_cast<RepeatString*>(r.repeatBase()))
+        if(auto *rdl = static_cast<RepeatString*>(r.repeatBase()))
         {
             if(rdl->indexNum() < 2)
                 return -1;

@@ -87,7 +87,7 @@ void TimelineInfoModel::determineRowsInPeriod()
 
     if(firstRowInPeriod_ != -11)
     {
-        for(unsigned int i=static_cast<unsigned int>(firstRowInPeriod_); i < data_->size(); i++)
+        for(auto i=static_cast<unsigned int>(firstRowInPeriod_); i < data_->size(); i++)
         {
             if(viewEndDateSec_ <= data_->start_[i])
             {
@@ -291,7 +291,7 @@ TimelineInfoWidget::TimelineInfoWidget(QWidget *parent) :
     ui_->titleLabel->setTextInteractionFlags(Qt::LinksAccessibleByMouse|Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse);
 
     //Time tree
-    TimelineInfoDelegate *delegate=new TimelineInfoDelegate(this);
+    auto *delegate=new TimelineInfoDelegate(this);
     ui_->timeTree->setItemDelegate(delegate);
 
     model_=new TimelineInfoModel(this);
@@ -486,13 +486,13 @@ TimelineInfoDialog::TimelineInfoDialog(QWidget* parent) : QDialog(parent)
 {
     setWindowTitle(tr("ecFlowUI - Timeline details"));
 
-    QVBoxLayout *vb=new QVBoxLayout(this);
+    auto *vb=new QVBoxLayout(this);
     vb->setContentsMargins(4,4,4,4);
 
     infoW_=new TimelineInfoWidget(this);
     vb->addWidget(infoW_);
 
-    QDialogButtonBox *buttonBox=new QDialogButtonBox(this);
+    auto *buttonBox=new QDialogButtonBox(this);
     vb->addWidget(buttonBox);
 
     buttonBox->addButton(QDialogButtonBox::Close);

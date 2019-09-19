@@ -756,9 +756,9 @@ void TimelineView::handleContextMenu(QModelIndex indexClicked,QModelIndexList in
     if(!indexClicked.isValid())
         return;
 
-    QMenu *menu=new QMenu(this);
+    auto *menu=new QMenu(this);
 
-    QAction *ac=new QAction(this);
+    auto *ac=new QAction(this);
     ac->setText(tr("Show details"));
     QFont fBold;
     fBold.setBold(true);

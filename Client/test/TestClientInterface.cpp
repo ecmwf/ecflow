@@ -278,7 +278,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
       // need test interface that allows client handle to set on ClinetInvoker
       // ch1_add needs a non zero handle
       BOOST_REQUIRE_MESSAGE( theClient.ch1_register(true,suites) == 0,"--ch1_drop \n" << theClient.errorMsg());
-      ServerReply& svr = const_cast<ServerReply&>(theClient.server_reply());
+      auto& svr = const_cast<ServerReply&>(theClient.server_reply());
       svr.set_client_handle(1);
       BOOST_REQUIRE_MESSAGE( theClient.ch1_drop() == 0,"--ch1_drop \n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.ch1_add(suites) == 0,"--ch1_add \n" << theClient.errorMsg());

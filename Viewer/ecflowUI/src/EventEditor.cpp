@@ -119,7 +119,7 @@ void EventEditor::buildList()
 
     if(VNode* node=info_->node())
     {
-        TriggeredScanner* scanner=new TriggeredScanner(this);
+        auto* scanner=new TriggeredScanner(this);
 
         connect(scanner,SIGNAL(scanStarted()),
                 this,SLOT(scanStarted()));

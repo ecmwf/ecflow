@@ -60,7 +60,7 @@ void TimelinePreLoadDialog::init(const TimelineFileList& lst)
     {
         if(lst.items()[i].loadable_)
         {
-            QTreeWidgetItem* item=new QTreeWidgetItem(ui_->tree);
+            auto* item=new QTreeWidgetItem(ui_->tree);
             item->setData(0,Qt::DisplayRole,lst.items()[i].fileName_);
             item->setData(1,Qt::DisplayRole,
                        TimelineItem::toQDateTime(lst.items()[i].startTime_).toString((" hh:mm:ss dd-MMM-yyyy")));
@@ -74,7 +74,7 @@ void TimelinePreLoadDialog::init(const TimelineFileList& lst)
         else
         {
             hasBadFile=true;
-            QTreeWidgetItem* item=new QTreeWidgetItem(ui_->treeBad);
+            auto* item=new QTreeWidgetItem(ui_->treeBad);
             item->setData(0,Qt::DisplayRole,lst.items()[i].fileName_);
             item->setData(1,Qt::DisplayRole,
                           QString::number(lst.items()[i].size_/(1024*1024)) + " MB");

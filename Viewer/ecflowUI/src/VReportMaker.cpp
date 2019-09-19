@@ -85,7 +85,7 @@ void VReportMaker::sendJiraReport(VFile_ptr file)
 
 void VReportMaker::sendReport(VInfo_ptr info)
 {
-    VReportMaker* maker=new VReportMaker();
+    auto* maker=new VReportMaker();
     maker->run(info);
     //maker will delete itself when the job is done!
 }
