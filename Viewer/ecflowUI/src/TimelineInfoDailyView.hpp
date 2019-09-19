@@ -8,7 +8,7 @@
 //============================================================================
 
 #ifndef TIMELINEINFODIALYVIEW_HPP
-#define TIMELINEINFODIALYVIEW_HPPP
+#define TIMELINEINFODIALYVIEW_HPP
 
 #include <QDialog>
 #include <QSettings>
