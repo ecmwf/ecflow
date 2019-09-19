@@ -27,8 +27,8 @@ public:
 
 private:
     // No copy allowed
-    explicit VSettingsLoader(const VSettingsLoader&);
-    VSettingsLoader& operator=(const VSettingsLoader&);
+    explicit VSettingsLoader(const VSettingsLoader&) = delete;
+    VSettingsLoader& operator=(const VSettingsLoader&) = delete;
 };
 
 template<class T>
