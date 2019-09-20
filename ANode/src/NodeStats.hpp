@@ -15,7 +15,7 @@
 #include <string>
 
 struct NodeStats {
-   NodeStats() {}
+   NodeStats() = default;
 
    std::string print() const;
 

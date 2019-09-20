@@ -83,7 +83,7 @@ public:
    // Server called functions:
    /// Required when we have time attributes, when time related attribute are free they stay free, until re-queu
    struct Calendar_args {
-      Calendar_args() {}
+      Calendar_args() = default;
 
       std::vector<node_ptr> auto_cancelled_nodes_;
       std::vector<node_ptr> auto_archive_nodes_;
@@ -160,7 +160,7 @@ public:
    /// However if the JOB *abort* we clear NO_REQUE_IF_SINGLE_TIME_DEP
    /// Otherwise if we run again, we miss additional time slots necessarily
    struct Requeue_args {
-      Requeue_args() {}
+      Requeue_args() = default;
       Requeue_args(bool resetRepeats,
                    bool reset_day_date_reueue_count,
                    int clear_suspended_in_child_nodes,

@@ -33,7 +33,7 @@ Q_OBJECT
 
 public:
     explicit TimelineInfoDailyWidget(QWidget *parent=0);
-    ~TimelineInfoDailyWidget() override {}
+    ~TimelineInfoDailyWidget() override = default;
 
     void clear() {}
     //void load(QString host,QString port,TimelineData*,int,QDateTime,QDateTime);

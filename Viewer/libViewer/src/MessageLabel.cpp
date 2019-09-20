@@ -46,7 +46,7 @@ public:
         }
     }
 
-    MessageLabelData()  {}
+    MessageLabelData()  = default;
 
 	QPixmap pix_;
     QPixmap pixSmall_;

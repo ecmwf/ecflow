@@ -60,8 +60,7 @@ bool DiagDataServerItem::checkSizes() const
 }
 
 DiagData::DiagData()
-{
-}
+= default;
 
 DiagData* DiagData::instance()
 {

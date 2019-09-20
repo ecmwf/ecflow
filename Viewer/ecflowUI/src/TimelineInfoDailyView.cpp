@@ -49,8 +49,7 @@ TimelineInfoDailyModel::TimelineInfoDailyModel(QObject *parent) :
 }
 
 TimelineInfoDailyModel::~TimelineInfoDailyModel()
-{
-}
+= default;
 
 void TimelineInfoDailyModel::load(TimelineItem *data,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
                                 unsigned int endDateSec)
@@ -220,8 +219,7 @@ TimelineInfoDailyDelegate::TimelineInfoDailyDelegate(TimelineInfoDailyModel *mod
 }
 
 TimelineInfoDailyDelegate::~TimelineInfoDailyDelegate()
-{
-}
+= default;
 
 void TimelineInfoDailyDelegate::notifyChange(VProperty* p)
 {
@@ -631,8 +629,7 @@ TimelineInfoDailyView::TimelineInfoDailyView(QWidget* parent) :
 }
 
 TimelineInfoDailyView::~TimelineInfoDailyView()
-{
-}
+= default;
 
 
 void TimelineInfoDailyView::load(TimelineItem *data,unsigned int viewStartDateSec,unsigned int viewEndDateSec,

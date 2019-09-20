@@ -43,7 +43,7 @@ private:
 class TimelineFileList
 {
 public:
-    TimelineFileList() {}
+    TimelineFileList() = default;
     TimelineFileList(QStringList exprLst);
     TimelineFileList(const TimelineFileList& o) {items_=o.items();}
     QList<TimelineFileListItem> items() const {return items_;}

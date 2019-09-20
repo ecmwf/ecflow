@@ -47,7 +47,7 @@ static void testTimeSlot( const ecf::TimeSlot& ts)
 
 namespace ecf {
 
-TimeSeries::TimeSeries() {}
+TimeSeries::TimeSeries() = default;
 
 TimeSeries::TimeSeries(int hour, int minute, bool relative)
 : start_(hour,minute),

@@ -75,8 +75,7 @@ TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
 }
 
 TimelineDelegate::~TimelineDelegate()
-{
-}
+= default;
 
 void TimelineDelegate::notifyChange(VProperty* p)
 {

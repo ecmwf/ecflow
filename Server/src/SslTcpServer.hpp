@@ -23,7 +23,7 @@ class SslTcpServer : public TcpBaseServer {
 public:
    /// Constructor opens the acceptor and starts waiting for the first incoming connection.
    explicit SslTcpServer(SslServer*,boost::asio::io_service& io_service,ServerEnvironment&);
-   ~SslTcpServer() {}
+   ~SslTcpServer() = default;
 
 private:
    /// ssl and connection functions

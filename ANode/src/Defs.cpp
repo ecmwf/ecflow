@@ -50,7 +50,7 @@ using namespace std;
 //#define DEBUG_JOB_SUBMISSION 1
 //#define DEBUG_MEMENTO 1
 
-Defs::Defs() {}
+Defs::Defs() = default;
 
 Defs::Defs(const std::string& port) : server_(port) {}
 
@@ -1802,7 +1802,7 @@ std::ostream& operator<<(std::ostream& os, const Defs& d)  { std::string s; d.pr
 
 // =========================================================================
 
-DefsHistoryParser::DefsHistoryParser() {}
+DefsHistoryParser::DefsHistoryParser() = default;
 
 void DefsHistoryParser::parse(const std::string& line)
 {

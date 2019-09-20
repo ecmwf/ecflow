@@ -93,7 +93,7 @@ class Event {
 public:
    Event(int number, const std::string& eventName = "", bool initial_val = false, bool check_name = true);
    Event(const std::string& eventName,bool initial_val = false);
-   Event(){}
+   Event()= default;
 
    std::string name_or_number() const; // if name present return, else return number
    const std::string& name() const { return  n_;}

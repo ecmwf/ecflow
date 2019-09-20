@@ -19,8 +19,7 @@ TimelineModel::TimelineModel(QObject *parent) :
 }
 
 TimelineModel::~TimelineModel()
-{
-}
+= default;
 
 void TimelineModel::setData(TimelineData *data)
 {
@@ -291,8 +290,7 @@ TimelineSortModel::TimelineSortModel(TimelineModel* tlModel,QObject *parent) :
 }
 
 TimelineSortModel::~TimelineSortModel()
-{
-}
+= default;
 
 void TimelineSortModel::slotPeriodChanged()
 {

@@ -26,7 +26,7 @@ class TcpBaseServer {
 public:
    /// Constructor opens the acceptor and starts waiting for the first incoming connection.
    explicit TcpBaseServer(BaseServer*,boost::asio::io_service& io_service,ServerEnvironment&);
-   ~TcpBaseServer() {}
+   ~TcpBaseServer() = default;
 
    void handle_request();
    void handle_read_error(  const boost::system::error_code& e );

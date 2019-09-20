@@ -47,8 +47,7 @@ TimelineInfoModel::TimelineInfoModel(QObject *parent) :
 }
 
 TimelineInfoModel::~TimelineInfoModel()
-{
-}
+= default;
 
 void TimelineInfoModel::setData(TimelineItem *data,unsigned int viewStartDateSec,unsigned int viewEndDateSec,
                                 unsigned int endDateSec)

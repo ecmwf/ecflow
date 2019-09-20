@@ -64,7 +64,7 @@ Node::Node(const std::string& n,bool check) : n_(n)
    }
 }
 
-Node::Node() {}
+Node::Node() = default;
 
 Node::Node(const Node& rhs)
 : parent_(nullptr),

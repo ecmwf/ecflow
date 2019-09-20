@@ -63,8 +63,7 @@ TimelineInfoDelegate::TimelineInfoDelegate(QWidget *parent) :
 }
 
 TimelineInfoDelegate::~TimelineInfoDelegate()
-{
-}
+= default;
 
 void TimelineInfoDelegate::updateSettings()
 {

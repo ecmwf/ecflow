@@ -51,7 +51,7 @@ private:
    const Clock::time_point start_ = Clock::now();
 public:
    Timer() = default;
-   ~Timer() {}
+   ~Timer() = default;
    void elapsed(const char* msg) const {
       const auto end = Clock::now();
       std::cout << msg << " " << std::chrono::duration_cast<Resolution>(end - start_).count() << std::endl;

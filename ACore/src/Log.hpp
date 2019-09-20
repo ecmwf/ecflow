@@ -116,7 +116,7 @@ private:
 // Flush log on destruction
 class LogFlusher {
 public:
-   LogFlusher(){}
+   LogFlusher()= default;
    ~LogFlusher();
 private:
    LogFlusher(const  LogFlusher&) = delete;
