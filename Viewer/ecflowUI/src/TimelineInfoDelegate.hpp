@@ -27,7 +27,7 @@ class TimelineInfoDailyModel;
 class TimelineInfoDelegate : public NodeViewDelegate
 {
 public:
-    explicit TimelineInfoDelegate(QWidget *parent=0);
+    explicit TimelineInfoDelegate(QWidget *parent=nullptr);
     ~TimelineInfoDelegate() override;
 
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;

@@ -26,7 +26,7 @@ class AddModelColumnDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit AddModelColumnDialog(QWidget *parent = 0);
+    explicit AddModelColumnDialog(QWidget *parent = nullptr);
     ~AddModelColumnDialog() override;
 
     void init(ModelColumn* mc,const std::set<std::string>&,QString defaultText = QString(""));
@@ -44,7 +44,7 @@ class ChangeModelColumnDialog : public AddModelColumnDialog
     Q_OBJECT
 
 public:
-    explicit ChangeModelColumnDialog(QWidget *parent = 0);
+    explicit ChangeModelColumnDialog(QWidget *parent = nullptr);
 
     void setColumn(QString);
 

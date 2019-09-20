@@ -46,7 +46,7 @@ TimelineInfoDelegate::TimelineInfoDelegate(QWidget *parent) :
   borderPen_(QColor(230,230,230))
 {
     nodeBox_=new TimelineInfoNodeDelegateBox;
-    attrBox_=0;
+    attrBox_=nullptr;
 
     nodeBox_->adjust(font_);
 

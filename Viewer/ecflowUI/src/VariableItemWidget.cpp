@@ -627,9 +627,9 @@ void VariableAddDialog::readSettings()
 //========================================================
 
 VariableItemWidget::VariableItemWidget(QWidget *parent) :
-    shadowProp_(0),
+    shadowProp_(nullptr),
     canSaveLastSelection_(true),
-    tableViewColumns_(0)
+    tableViewColumns_(nullptr)
 {
 	//This item displays all the ancestors of the info object
     useAncestors_=true;

@@ -33,7 +33,7 @@ class NodeTimelineHeader;
 class TimelineInfoDailyModel : public QAbstractItemModel
 {
 public:
-    explicit TimelineInfoDailyModel(QObject *parent=0);
+    explicit TimelineInfoDailyModel(QObject *parent=nullptr);
     ~TimelineInfoDailyModel() override;
 
     int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
@@ -108,7 +108,7 @@ class TimelineInfoDailyView : public QTreeView
 Q_OBJECT
 
 public:
-    explicit TimelineInfoDailyView(QWidget *parent=0);
+    explicit TimelineInfoDailyView(QWidget *parent=nullptr);
     ~TimelineInfoDailyView() override;
 
     void rerender();

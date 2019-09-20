@@ -89,7 +89,7 @@ public:
 
     void add(VItem* triggered,VAttribute* trigger)
     {
-        static VAttributeType *eventType=NULL;
+        static VAttributeType *eventType=nullptr;
         if(!eventType)
             eventType=VAttributeType::find("event");
 

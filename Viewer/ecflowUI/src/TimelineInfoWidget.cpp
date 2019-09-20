@@ -42,7 +42,7 @@
 
 TimelineInfoModel::TimelineInfoModel(QObject *parent) :
           QAbstractItemModel(parent),
-          data_(0), firstRowInPeriod_(-1), lastRowInPeriod_(-1)
+          data_(nullptr), firstRowInPeriod_(-1), lastRowInPeriod_(-1)
 {
 }
 
@@ -100,7 +100,7 @@ void TimelineInfoModel::determineRowsInPeriod()
 void TimelineInfoModel::clearData()
 {
     beginResetModel();
-    data_=0;
+    data_=nullptr;
     firstRowInPeriod_=-1;
     lastRowInPeriod_=-1;
     endResetModel();
@@ -108,7 +108,7 @@ void TimelineInfoModel::clearData()
 
 bool TimelineInfoModel::hasData() const
 {
-    return (data_ != NULL);
+    return (data_ != nullptr);
 }
 
 int TimelineInfoModel::columnCount( const QModelIndex& /*parent */) const

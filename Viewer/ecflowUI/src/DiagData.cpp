@@ -23,7 +23,7 @@
 #include <QString>
 #include <QStringList>
 
-DiagData* DiagData::instance_=NULL;
+DiagData* DiagData::instance_=nullptr;
 
 DiagDataServerItem::DiagDataServerItem(const std::string& host,const std::string& port, size_t colNum) :
     host_(host), port_(port)
@@ -101,7 +101,7 @@ const std::string& DiagData::dataAt(VNode* vn,int column) const
 DiagDataServerItem* DiagData::findServerData(const std::string& host,const std::string& port) const
 {
     if(host.empty() || port.empty())
-        return NULL;
+        return nullptr;
 
     for(size_t i=0; i < serverData_.size(); i++)
     {
@@ -109,7 +109,7 @@ DiagDataServerItem* DiagData::findServerData(const std::string& host,const std::
             return serverData_[i];
     }
 
-    return NULL;
+    return nullptr;
 }
 
 
@@ -192,7 +192,7 @@ void DiagData::loadFile(const std::string& fileName)
 
         std::string path=lst[pathColumnIndex].toStdString();
         std::string host, port;
-        DiagDataServerItem* data=NULL;
+        DiagDataServerItem* data=nullptr;
         VItemPathParser parser(path,VItemPathParser::DiagFormat);
         if(parser.itemType() != VItemPathParser::NoType)
         {

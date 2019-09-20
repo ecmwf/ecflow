@@ -33,7 +33,7 @@ class TableNodeView : public QTreeView, public NodeViewBase, public VPropertyObs
 {
 Q_OBJECT
 public:
-	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=0);
+	explicit TableNodeView(TableNodeSortModel* model,NodeFilterDef* filterDef,QWidget *parent=nullptr);
     ~TableNodeView() override;
 
     void reload() override {}

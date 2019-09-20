@@ -44,7 +44,7 @@ class TimelineWidget : public QWidget
 Q_OBJECT
 
 public:
-    explicit TimelineWidget(QWidget *parent=0);
+    explicit TimelineWidget(QWidget *parent=nullptr);
     ~TimelineWidget() override;
 
     void clear();

@@ -14,11 +14,11 @@
 
 typedef std::vector<VSettingsLoader*> Vec;
 
-static Vec* makers = 0;
+static Vec* makers = nullptr;
 
 VSettingsLoader::VSettingsLoader()
 {
-    if(makers == 0)
+    if(makers == nullptr)
         makers = new Vec();
 
     makers->push_back(Vec::value_type(this));

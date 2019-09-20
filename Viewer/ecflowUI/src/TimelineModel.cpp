@@ -14,7 +14,7 @@
 #include <QDebug>
 
 TimelineModel::TimelineModel(QObject *parent) :
-          QAbstractItemModel(parent), data_(0)
+          QAbstractItemModel(parent), data_(nullptr)
 {
 }
 
@@ -31,7 +31,7 @@ void TimelineModel::setData(TimelineData *data)
 void TimelineModel::clearData()
 {
     beginResetModel();
-    data_=0;
+    data_=nullptr;
     endResetModel();
 }
 

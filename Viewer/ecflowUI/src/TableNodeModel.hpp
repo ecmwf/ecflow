@@ -88,8 +88,8 @@ Q_SIGNALS:
 
 protected:
   bool isServer(const QModelIndex & index) const {return false;}
-  ServerHandler* indexToRealServer(const QModelIndex & index) const {return NULL;}
-  VModelServer* indexToServer(const QModelIndex & index) const {return NULL;}
+  ServerHandler* indexToRealServer(const QModelIndex & index) const {return nullptr;}
+  VModelServer* indexToServer(const QModelIndex & index) const {return nullptr;}
   QModelIndex serverToIndex(ServerHandler*) const override {return {};}
   
   QModelIndex nodeToIndex(VTableServer* server,const VNode* node, int column) const;

@@ -134,7 +134,7 @@ VNState* VNState::find(unsigned char ucId)
     if(it != idMap_.end())
         return it->second;
 
-    return NULL;
+    return nullptr;
 }
 
 //

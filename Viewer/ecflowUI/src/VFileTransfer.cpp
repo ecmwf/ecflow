@@ -19,7 +19,7 @@
 
 VFileTransfer::VFileTransfer(QObject* parent) :
     QObject(parent),
-    proc_(NULL),
+    proc_(nullptr),
     ignoreSetX_(true),
     scriptName_("ecflow_ui_transfer_file.sh")
 {
@@ -37,9 +37,9 @@ void VFileTransfer::transfer(QString sourceFile,QString host,QString targetFile,
     {
         proc_->kill();
         proc_->deleteLater();
-        proc_=NULL;
+        proc_=nullptr;
     }
-    Q_ASSERT(proc_ == NULL);
+    Q_ASSERT(proc_ == nullptr);
 
     if(!proc_)
     {

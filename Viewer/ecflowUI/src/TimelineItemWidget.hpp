@@ -22,7 +22,7 @@ class TimelineWidget;
 class TimelineItemWidget : public QWidget, public InfoPanelItem
 {
 public:
-    explicit TimelineItemWidget(QWidget *parent=0);
+    explicit TimelineItemWidget(QWidget *parent=nullptr);
     ~TimelineItemWidget() override;
 
     void reload(VInfo_ptr) override;

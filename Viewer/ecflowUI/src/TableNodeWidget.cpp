@@ -30,8 +30,8 @@
 
 TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,bool interactive,QWidget * parent) :
     NodeWidget("table",serverFilter,parent),
-    sortModel_(0),
-    acAutoScroll_(0)
+    sortModel_(nullptr),
+    acAutoScroll_(nullptr)
 {
 	//Init qt-creator form
 	setupUi(this);

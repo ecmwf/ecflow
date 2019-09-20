@@ -31,7 +31,7 @@ public:
     enum ColumnType {PathColumn=0, TimelineColumn=1, SubmittedDurationColumn=2,
                      ActiveDurationColumn=3};
 
-    explicit TimelineModel(QObject *parent=0);
+    explicit TimelineModel(QObject *parent=nullptr);
     ~TimelineModel() override;
 
     int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
@@ -67,7 +67,7 @@ class TimelineSortModel : public QSortFilterProxyModel
     Q_OBJECT
 
 public:
-    TimelineSortModel(TimelineModel*,QObject *parent=0);
+    TimelineSortModel(TimelineModel*,QObject *parent=nullptr);
     ~TimelineSortModel() override;
 
     enum SortMode {PathSortMode, TimeSortMode, TreeSortMode, QtSortMode};

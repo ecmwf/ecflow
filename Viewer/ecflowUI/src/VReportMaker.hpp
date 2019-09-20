@@ -32,7 +32,7 @@ public:
     //void infoProgress(const std::string& text,int value);
 
 protected:
-     VReportMaker(QObject* parent=0);
+     VReportMaker(QObject* parent=nullptr);
      void run(VInfo_ptr);
      void sendJiraReport(VFile_ptr file);
 

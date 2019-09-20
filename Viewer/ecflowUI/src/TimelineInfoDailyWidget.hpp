@@ -32,7 +32,7 @@ class TimelineInfoDailyWidget : public QWidget
 Q_OBJECT
 
 public:
-    explicit TimelineInfoDailyWidget(QWidget *parent=0);
+    explicit TimelineInfoDailyWidget(QWidget *parent=nullptr);
     ~TimelineInfoDailyWidget() override = default;
 
     void clear() {}

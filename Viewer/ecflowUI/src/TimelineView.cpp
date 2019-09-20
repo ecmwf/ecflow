@@ -565,10 +565,10 @@ int TimelineDelegate::getDurationMaxTextWidth(int duration) const
 TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
      QTreeView(parent),
      model_(model),
-     header_(NULL),
+     header_(nullptr),
      headerBeingAdjusted_(false),
      needItemsLayout_(false),
-     prop_(NULL),
+     prop_(nullptr),
      setCurrentIsRunning_(false),
      viewMode_(TimelineMode),
      durationColumnWidthInitialised_(false)

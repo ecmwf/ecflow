@@ -504,7 +504,7 @@ void TableNodeView::slotHeaderContextMenu(const QPoint &position)
         else if(ac->data().toString() == "remove")
         {
             delete menu;
-            if(QMessageBox::question(0,tr("Confirm: remove column"),
+            if(QMessageBox::question(nullptr,tr("Confirm: remove column"),
                             tr("Are you sure that you want to remove column <b>") + varName + "</b>?",
                             QMessageBox::Ok | QMessageBox::Cancel,QMessageBox::Cancel) == QMessageBox::Ok)
             {

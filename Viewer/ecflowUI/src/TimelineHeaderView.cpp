@@ -53,8 +53,8 @@ TimelineHeader::TimelineHeader(QTreeView *view) :
     majorTickSize_(5),
     zoomCol_(224,236,248,190),
     inZoom_(false),
-    zoomInAction_(0),
-    zoomOutAction_(0)
+    zoomInAction_(nullptr),
+    zoomOutAction_(nullptr)
     //submittedMaxDuration_(-1),
     //activeMaxDuration_(-1)
 {

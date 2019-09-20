@@ -236,7 +236,7 @@ void VRepeatAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
         const Repeat& r=vnode->node_->repeat();
         if(r.empty() == false && r.repeatBase())
         {
-            VRepeatAttr *a=0;
+            VRepeatAttr *a=nullptr;
 
             if(r.repeatBase()->isDate())
                 a=new VRepeatDateAttr(vnode);

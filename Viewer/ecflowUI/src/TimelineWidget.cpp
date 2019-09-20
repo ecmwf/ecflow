@@ -46,7 +46,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     ui_(new Ui::TimelineWidget),
     maxReadSize_(100*1024*1024),
     logMode_(LatestMode),
-    data_(0),
+    data_(nullptr),
     filterTriggeredByEnter_(false),
     filterTriggerLimit_(200000),
     ignoreTimeEdited_(false),
@@ -56,7 +56,7 @@ TimelineWidget::TimelineWidget(QWidget *parent) :
     localLog_(true),
     logLoaded_(false),
     logTransferred_(false),
-    fileTransfer_(0),
+    fileTransfer_(nullptr),
     detached_(false)
 {
     ui_->setupUi(this);

@@ -115,8 +115,8 @@ public:
 
     //Attributes
     const std::vector<VAttribute*>& attr() const {return attr_;}
-    int attrNum(AttributeFilter* filter=0) const;
-    VAttribute* attribute(int,AttributeFilter *filter=0) const;
+    int attrNum(AttributeFilter* filter=nullptr) const;
+    VAttribute* attribute(int,AttributeFilter *filter=nullptr) const;
     VAttribute* attributeForType(int,VAttributeType*) const;
     int indexOfAttribute(const VAttribute* a, AttributeFilter *filter) const;
     VAttribute* findAttribute(QStringList aData);
@@ -196,7 +196,7 @@ public:
     void triggerExpr(std::string&,std::string&) const;
 
     void triggers(TriggerCollector*);   
-    void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=0);
+    void triggered(TriggerCollector* tlc,TriggeredScanner* scanner=nullptr);
     void clearTriggerData();
     void addTriggeredData(VItem* n);
     void addTriggeredData(VItem* a,VAttribute* n);
@@ -266,12 +266,12 @@ public:
 	~VServer() override;
 
 	ServerHandler* server() const override {return server_;}
-    VNode* suite() const override {return NULL;}
+    VNode* suite() const override {return nullptr;}
 
 	bool isEmpty() const { return numOfChildren() == 0;}
 	bool isTopLevel() const override {return false;}
     VServer* isServer() const override {return const_cast<VServer*>(this);}
-    VNode* isNode() const override {return NULL;}
+    VNode* isNode() const override {return nullptr;}
 
 	int totalNum() const {return totalNum_;}
 	int totalNumOfTopLevel(int) const;

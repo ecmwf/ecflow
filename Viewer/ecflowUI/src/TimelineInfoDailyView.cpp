@@ -44,7 +44,7 @@ static std::vector<std::string> propVec;
 //=======================================================
 
 TimelineInfoDailyModel::TimelineInfoDailyModel(QObject *parent) :
-          QAbstractItemModel(parent), data_(0)
+          QAbstractItemModel(parent), data_(nullptr)
 {
 }
 
@@ -80,14 +80,14 @@ void TimelineInfoDailyModel::load(TimelineItem *data,unsigned int viewStartDateS
 void TimelineInfoDailyModel::clearData()
 {
     beginResetModel();
-    data_=0;
+    data_=nullptr;
     days_.clear();
     endResetModel();
 }
 
 bool TimelineInfoDailyModel::hasData() const
 {
-    return (data_ != NULL);
+    return (data_ != nullptr);
 }
 
 int TimelineInfoDailyModel::columnCount( const QModelIndex& /*parent */) const
@@ -559,8 +559,8 @@ void TimelineInfoDailyDelegate::setPeriod(QTime t1,QTime t2)
 
 TimelineInfoDailyView::TimelineInfoDailyView(QWidget* parent) :
      QTreeView(parent),
-     model_(NULL),
-     header_(NULL),
+     model_(nullptr),
+     header_(nullptr),
      headerBeingAdjusted_(false),
      needItemsLayout_(false),
      startTime_(QTime(0,0,0)),

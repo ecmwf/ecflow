@@ -1204,7 +1204,7 @@ ServerHandler* VModelData::serverHandler(void* idPointer) const
         if(servers_[i] == idPointer)
             return servers_[i]->server_;
     }
-	return NULL;
+	return nullptr;
 }
 
 VModelServer* VModelData::server(const void* idPointer) const
@@ -1214,7 +1214,7 @@ VModelServer* VModelData::server(const void* idPointer) const
         if(servers_[i] == idPointer)
             return servers_[i];
     }
-	return NULL;
+	return nullptr;
 }
 
 VModelServer* VModelData::server(const std::string& name) const

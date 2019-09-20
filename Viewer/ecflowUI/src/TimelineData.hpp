@@ -83,7 +83,7 @@ class TimelineData : public QObject
 public:
     enum LoadStatus {LoadNotTried,LoadFailed,LoadDone};
 
-    TimelineData(QObject* parent=0) : QObject(parent),
+    TimelineData(QObject* parent=nullptr) : QObject(parent),
         startTime_(0), endTime_(0), maxReadSize_(0), fullRead_(false), loadStatus_(LoadNotTried) {}
 
     void loadLogFile(const std::string& logFile,size_t maxReadSize,const std::vector<std::string>& suites);

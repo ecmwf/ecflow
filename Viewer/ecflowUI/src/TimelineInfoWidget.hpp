@@ -30,7 +30,7 @@ namespace Ui {
 class TimelineInfoModel : public QAbstractItemModel
 {
 public:
-    explicit TimelineInfoModel(QObject *parent=0);
+    explicit TimelineInfoModel(QObject *parent=nullptr);
     ~TimelineInfoModel() override;
 
     int columnCount (const QModelIndex& parent = QModelIndex() ) const override;
@@ -67,7 +67,7 @@ Q_OBJECT
    friend class TimelineInfoDialog;
 
 public:
-    explicit TimelineInfoWidget(QWidget *parent=0);
+    explicit TimelineInfoWidget(QWidget *parent=nullptr);
     ~TimelineInfoWidget() override {}
 
     void clear() {}
@@ -103,7 +103,7 @@ private:
 class TimelineInfoDialog : public QDialog
 {
 public:
-    TimelineInfoDialog(QWidget* parent=0);
+    TimelineInfoDialog(QWidget* parent=nullptr);
     ~TimelineInfoDialog() override;
 
     TimelineInfoWidget* infoW_;

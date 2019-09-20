@@ -22,7 +22,7 @@ namespace Ui {
 class TimelinePreLoadDialog : public QDialog
 {
 public:
-    explicit TimelinePreLoadDialog(QWidget *parent=0);
+    explicit TimelinePreLoadDialog(QWidget *parent=nullptr);
     ~TimelinePreLoadDialog() override;
 
     void init(const TimelineFileList& lst);

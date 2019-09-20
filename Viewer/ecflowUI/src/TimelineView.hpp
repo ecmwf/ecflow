@@ -37,7 +37,7 @@ class TimelineView : public QTreeView,public VPropertyObserver
 Q_OBJECT
 
 public:
-    explicit TimelineView(TimelineSortModel* model,QWidget *parent=0);
+    explicit TimelineView(TimelineSortModel* model,QWidget *parent=nullptr);
     ~TimelineView() override;
 
     enum ViewMode {TimelineMode,DurationMode};
