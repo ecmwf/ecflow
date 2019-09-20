@@ -65,7 +65,7 @@
 #  - some tests require:
 #    test/ecflow_test_util.py
 #    migrate/ecflow_migrate.py
-project : requirements <pythonpath>./test:./migrate  ;
+project : requirements <pythonpath>"./test:./migrate" ;
 
 project thePyext ;
 
