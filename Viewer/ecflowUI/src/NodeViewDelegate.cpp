@@ -112,26 +112,26 @@ void NodeViewDelegate::notifyChange(VProperty* p)
 
 void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
 {
-    propVec.push_back("view.common.node_gradient");
-    propVec.push_back("view.attribute.eventFillColour");
-    propVec.push_back("view.attribute.meterFillColour");
-    propVec.push_back("view.attribute.meterThresholdColour");
-    propVec.push_back("view.attribute.limitShape");
-    propVec.push_back("view.attribute.limitFillColour");
-    propVec.push_back("view.attribute.limitExtraFillColour");
-    propVec.push_back("view.attribute.repeatDateColour");
-    propVec.push_back("view.attribute.repeatDayColour");
-    propVec.push_back("view.attribute.repeatEnumColour");
-    propVec.push_back("view.attribute.repeatIntColour");
-    propVec.push_back("view.attribute.repeatStringColour");
-    propVec.push_back("view.attribute.triggerBackground");
-    propVec.push_back("view.attribute.triggerBorderColour");
-    propVec.push_back("view.attribute.triggerFontColour");
-    propVec.push_back("view.attribute.completeBackground");
-    propVec.push_back("view.attribute.completeBorderColour");
-    propVec.push_back("view.attribute.completeFontColour");
-    propVec.push_back("view.attribute.holdingTimeFontColour");
-    propVec.push_back("view.attribute.holdingDateFontColour");
+    propVec.emplace_back("view.common.node_gradient");
+    propVec.emplace_back("view.attribute.eventFillColour");
+    propVec.emplace_back("view.attribute.meterFillColour");
+    propVec.emplace_back("view.attribute.meterThresholdColour");
+    propVec.emplace_back("view.attribute.limitShape");
+    propVec.emplace_back("view.attribute.limitFillColour");
+    propVec.emplace_back("view.attribute.limitExtraFillColour");
+    propVec.emplace_back("view.attribute.repeatDateColour");
+    propVec.emplace_back("view.attribute.repeatDayColour");
+    propVec.emplace_back("view.attribute.repeatEnumColour");
+    propVec.emplace_back("view.attribute.repeatIntColour");
+    propVec.emplace_back("view.attribute.repeatStringColour");
+    propVec.emplace_back("view.attribute.triggerBackground");
+    propVec.emplace_back("view.attribute.triggerBorderColour");
+    propVec.emplace_back("view.attribute.triggerFontColour");
+    propVec.emplace_back("view.attribute.completeBackground");
+    propVec.emplace_back("view.attribute.completeBorderColour");
+    propVec.emplace_back("view.attribute.completeFontColour");
+    propVec.emplace_back("view.attribute.holdingTimeFontColour");
+    propVec.emplace_back("view.attribute.holdingDateFontColour");
 }
 
 void NodeViewDelegate::updateBaseSettings()

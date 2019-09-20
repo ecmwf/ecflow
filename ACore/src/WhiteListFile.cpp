@@ -501,7 +501,7 @@ bool WhiteListFile::createWithReadAccess( const std::string& pathToFile,std::str
 {
 	std::vector<std::string> lines; lines.reserve( 2 );
 
-	lines.push_back("4.4.14");
+	lines.emplace_back("4.4.14");
  	lines.push_back("-" + User::login_name());
 
 	return File::create(pathToFile,lines,errorMsg);
@@ -511,7 +511,7 @@ bool WhiteListFile::createWithWriteAccess( const std::string& pathToFile , std::
 {
 	std::vector<std::string> lines; lines.reserve( 2 );
 
-	lines.push_back("4.4.14");
+	lines.emplace_back("4.4.14");
 	lines.push_back(User::login_name()); // equivalent to the login name
 
 	return File::create(pathToFile,lines,errorMsg);
@@ -521,11 +521,11 @@ bool WhiteListFile::createWithNoAccess( const std::string& pathToFile,std::strin
 {
    std::vector<std::string> lines; lines.reserve(5);
 
-   lines.push_back("4.4.14");
-   lines.push_back("userXX");
-   lines.push_back("userYY");
-   lines.push_back("-userZZ");
-   lines.push_back("-userZY");
+   lines.emplace_back("4.4.14");
+   lines.emplace_back("userXX");
+   lines.emplace_back("userYY");
+   lines.emplace_back("-userZZ");
+   lines.emplace_back("-userZY");
 
    return File::create(pathToFile,lines,errorMsg);
 }
@@ -533,7 +533,7 @@ bool WhiteListFile::createWithNoAccess( const std::string& pathToFile,std::strin
 bool WhiteListFile::createEmpty( const std::string& pathToFile,std::string& errorMsg)
 {
    std::vector<std::string> lines; lines.reserve( 1 );
-   lines.push_back("4.4.14");
+   lines.emplace_back("4.4.14");
 
    return File::create(pathToFile,lines,errorMsg);
 }

@@ -63,7 +63,7 @@ TimelineDelegate::TimelineDelegate(TimelineModel *model,QWidget *parent) :
     //Property
     if(propVec.empty())
     {
-        propVec.push_back("view.table.font");
+        propVec.emplace_back("view.table.font");
 
         //Base settings
         //addBaseSettings(propVec);
@@ -640,7 +640,7 @@ TimelineView::TimelineView(TimelineSortModel* model,QWidget* parent) :
 
     //Properties
     std::vector<std::string> propVec;
-    propVec.push_back("view.table.background");
+    propVec.emplace_back("view.table.background");
     prop_=new PropertyMapper(propVec,this);
 
     //Initialise bg

@@ -175,7 +175,7 @@ void VParamSet::writeSettings(VSettings *vs)
 
     if(isComplete())
     {
-        array.push_back("_ALL_");
+        array.emplace_back("_ALL_");
     }
     else
     {

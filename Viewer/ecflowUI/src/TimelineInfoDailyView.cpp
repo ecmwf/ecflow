@@ -207,7 +207,7 @@ TimelineInfoDailyDelegate::TimelineInfoDailyDelegate(TimelineInfoDailyModel *mod
     //Property
     if(propVec.empty())
     {
-        propVec.push_back("view.table.font");
+        propVec.emplace_back("view.table.font");
 
         //Base settings
         //addBaseSettings(propVec);

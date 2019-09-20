@@ -60,8 +60,8 @@ BcWidget::BcWidget(QWidget* parent) :
     //Property
     if(propVec.empty())
     {
-        propVec.push_back("view.common.node_style");
-        propVec.push_back("view.common.node_gradient");
+        propVec.emplace_back("view.common.node_style");
+        propVec.emplace_back("view.common.node_gradient");
     }
 
     prop_=new PropertyMapper(propVec,this);

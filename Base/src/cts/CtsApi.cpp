@@ -81,8 +81,8 @@ std::vector<std::string> CtsApi::ch_register( int client_handle, bool auto_add_n
    if (client_handle != 0) {
       ret += boost::lexical_cast<std::string>(client_handle);
       retVec.push_back(ret);
-      if ( auto_add_new_suites ) retVec.push_back("true");
-      else                       retVec.push_back("false");
+      if ( auto_add_new_suites ) retVec.emplace_back("true");
+      else                       retVec.emplace_back("false");
    }
    else {
       if ( auto_add_new_suites ) ret += "true";

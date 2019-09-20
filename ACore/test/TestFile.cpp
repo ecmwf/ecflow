@@ -258,7 +258,7 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
    BOOST_REQUIRE_MESSAGE(File::createDirectories( combined_dir_path),"Failed to create dirs" << combined_dir_path);
 
    // Create a file in each of the directories.
-   std::vector<std::string> fileContents; fileContents.push_back("something");
+   std::vector<std::string> fileContents; fileContents.emplace_back("something");
    vector<std::string> nodePathTokens;
    NodePath::split(nodePath,nodePathTokens);
    while ( nodePathTokens.size() > 0 ) {

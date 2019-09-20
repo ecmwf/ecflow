@@ -369,8 +369,8 @@ void TimelineData::loadLogFileCore(const std::string& logFile,size_t maxReadSize
             }
             else
             {
-                items_.push_back(TimelineItem(name,statusId,statusTime,
-                                              guessNodeType(line,name)));
+                items_.emplace_back(name,statusId,statusTime,
+                                              guessNodeType(line,name));
 
                 pathHash_.insert(QString::fromStdString(name),items_.size()-1);
             }

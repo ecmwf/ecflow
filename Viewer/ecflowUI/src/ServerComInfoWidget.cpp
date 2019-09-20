@@ -154,8 +154,8 @@ ServerRefreshInfoWidget::ServerRefreshInfoWidget(QAction* refreshAction,QWidget 
 
     //properties to use
     std::vector<std::string> propVec;
-    propVec.push_back("server.update.blinkUpdateButtonLimit");
-    propVec.push_back("server.update.showLastRefreshTimeInAutoMode");
+    propVec.emplace_back("server.update.blinkUpdateButtonLimit");
+    propVec.emplace_back("server.update.showLastRefreshTimeInAutoMode");
     prop_=new PropertyMapper(propVec,this);
     updateSettings();
 }

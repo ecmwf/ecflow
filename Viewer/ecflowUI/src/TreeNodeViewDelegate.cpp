@@ -219,12 +219,12 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent)
     //Property
     if(propVec.empty())
     {
-        propVec.push_back("view.tree.nodeFont");
-        propVec.push_back("view.tree.attributeFont");
-        propVec.push_back("view.tree.display_child_count");
-        propVec.push_back("view.tree.displayNodeType");
-        propVec.push_back("view.tree.background");
-        propVec.push_back("view.common.node_style");
+        propVec.emplace_back("view.tree.nodeFont");
+        propVec.emplace_back("view.tree.attributeFont");
+        propVec.emplace_back("view.tree.display_child_count");
+        propVec.emplace_back("view.tree.displayNodeType");
+        propVec.emplace_back("view.tree.background");
+        propVec.emplace_back("view.common.node_style");
 
         //Base settings
         addBaseSettings(propVec);

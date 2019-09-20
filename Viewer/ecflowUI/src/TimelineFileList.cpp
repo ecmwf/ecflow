@@ -35,7 +35,7 @@ TimelineFileList::TimelineFileList(QStringList exprLst)
     std::vector<std::pair<size_t, unsigned int> > sortVec;
     for(int i = 0; i < items_.size(); i++)
     {
-        sortVec.push_back(std::make_pair(i,items_[i].startTime_));
+        sortVec.emplace_back(i,items_[i].startTime_);
     }
 
     std::sort(sortVec.begin(), sortVec.end());
