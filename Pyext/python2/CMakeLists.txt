@@ -12,6 +12,10 @@ ecbuild_add_library( TARGET    ecflow
                                ${PYTHON_INCLUDE_DIRS} 
                     )
 
+# Stop annoying message:
+#   warning: '_POSIX_C_SOURCE' macro redefined [-Wmacro-redefined]
+#   warning: '_XOPEN_SOURCE' macro redefined [-Wmacro-redefined]
+target_compile_options(ecflow PRIVATE  -Wno-macro-redefined)
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs 
 # Currently we only build optimised boost libs
