@@ -11,11 +11,14 @@ ecbuild_add_library( TARGET    ecflow
                      INCLUDES  ${Boost_INCLUDE_DIRS}
                                ${PYTHON_INCLUDE_DIRS} 
                     )
-
-# Stop annoying message:
-#   warning: '_POSIX_C_SOURCE' macro redefined [-Wmacro-redefined]
-#   warning: '_XOPEN_SOURCE' macro redefined [-Wmacro-redefined]
-target_compile_options(ecflow PRIVATE  -Wno-macro-redefined)
+                    
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+   # using regular Clang or AppleClang
+   # Stop annoying message:
+   #   warning: '_POSIX_C_SOURCE' macro redefined [-Wmacro-redefined]
+   #   warning: '_XOPEN_SOURCE' macro redefined [-Wmacro-redefined]
+   target_compile_options(ecflow PRIVATE -Wno-macro-redefined)
+endif()
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs 
 # Currently we only build optimised boost libs
