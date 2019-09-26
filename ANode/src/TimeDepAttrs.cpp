@@ -102,7 +102,6 @@ void TimeDepAttrs::calendarChanged(const ecf::Calendar& c )
    // (Otherwise we will end up running the task at Monday Midnight
    //  and not Monday at 10.00)
    //
-
    if (days_.empty() && dates_.empty() ) {
 
       // No Day or Date, If time matches  calendarChanged(c) will free time dependencies
@@ -111,16 +110,71 @@ void TimeDepAttrs::calendarChanged(const ecf::Calendar& c )
       for(size_t i = 0; i < crons_.size(); i++)    {    crons_[i].calendarChanged(c); }
    }
    else {
+      //cout << c.toString() << "\n";
+
+      // If *BEFORE* midnight we have FREE day/date and submitted or active jobs, don't clear the day/dates
+      // i.e take:
+      //    family f1
+      //       day monday
+      //       time 23:00
+      //       task t1  # This took longer than 1 hour
+      //       task t2  # allow task to continue to the next day
+      // This is only applicable for NodeContainers, for task with day/date always CLEAR at midnight
+      // ECFLOW-337 versus ECFLOW-1550
+
+      bool clear_day_date_at_midnight = true;
+      if (c.dayChanged() && node_->isNodeContainer()) {
+
+         // Check if day/date are free *BEFORE* midnight and *BEFORE* calendarChanged called(since that clears Day::makeFree_)
+         // The isFree below relies on Day::makeFree_/Date:makeFree_ not being cleared till after midnight
+         bool free_date = false; bool free_day = false;
+         for(size_t i =0; i < dates_.size(); i++) { if (dates_[i].isFree(c)) { free_date  = true; break; }}
+         for(size_t i =0; i < days_.size(); i++)  { if (days_[i].isFree(c))  { free_day = true; break; }}
+
+         //cout << "free_day " << free_day << " free_date " <<  free_date << "\n";
+
+         if (free_date || free_day) {
+            // See if we have any complete submitted or active children,
+            // if so DONT clear day/date at midnight. hence day/date will *STAY* *FREE*
+            // Allow following tasks to complete
+            std::vector<node_ptr> all_children;
+            node_->allChildren(all_children);
+            int completed = 0;
+            int submitted = 0;
+            int queued = 0;
+            int active = 0;
+            for(size_t t = 0; t <  all_children.size(); t++) {
+               //cout << all_children[t]->debugNodePath() << " " << NState::toString(all_children[t]->state()) << "\n";
+               if (  all_children[t]->isTask()) {
+                  if ( all_children[t]->state() == NState::SUBMITTED) submitted++;
+                  else if (all_children[t]->state() == NState::ACTIVE) active++;
+                  else if (all_children[t]->state() == NState::COMPLETE) completed++;
+                  else if (all_children[t]->state() == NState::QUEUED) queued++;
+                  if (active || submitted) {
+                     clear_day_date_at_midnight = false;
+                     //cout << "if (active || submitted ) clear_day_date_at_midnight = false\n";
+                     break;
+                  }
+                  if (completed && (active || submitted || queued)) {
+                     clear_day_date_at_midnight = false;
+                     //cout << "if (completed && (active || submitted || queued))    clear_day_date_at_midnight = false\n";
+                     break;
+                  }
+               }
+            }
+         }
+      }
+
 
       bool at_least_one_day_free = false;
       for(size_t i = 0; i < days_.size(); i++){
-         days_[i].calendarChanged(c);
+         days_[i].calendarChanged(c,clear_day_date_at_midnight);
          if (!at_least_one_day_free) at_least_one_day_free = days_[i].isFree(c);
       }
 
       bool at_least_one_date_free = false;
       for(size_t i = 0; i < dates_.size(); i++) {
-         dates_[i].calendarChanged(c);
+         dates_[i].calendarChanged(c,clear_day_date_at_midnight);
          if (!at_least_one_date_free) at_least_one_date_free = dates_[i].isFree(c);
       }
 
