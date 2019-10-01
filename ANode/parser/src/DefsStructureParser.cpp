@@ -197,11 +197,20 @@ void DefsStructureParser::getNextLine(std::string& line)
 			   // ignore lines which have ';' but start with a comment.  i.e.
 			   //     # task a, task b
 	         /// calling trim can be very expensive, hence avoid if possible
-	         std::string::size_type first_non_space_char_pos = line.find_first_not_of(' ');
-	         if (first_non_space_char_pos != std::string::npos && line[first_non_space_char_pos] == '#') {
-	            // found leading_comment can ignore this line
-	            return;
-	         }
+			   std::vector<std::string> lineTokens;
+			   Str::split(line, lineTokens);
+			   if (!lineTokens.empty()) {
+			      if (lineTokens[0][0] == '#') {
+			         // found leading_comment can ignore this line
+			         return;
+			      }
+
+			      // Can't properly handle labels with ';'. ECFLOW-1554   label foo "a;b;c"
+			      // Just assume labels are on one line. Hence we don't support multiple labels on one line
+			      if (lineTokens[0] == "label") {
+			         return;
+			      }
+			   }
 
 
 	         // Handle multiple statement with # comment at the end
