@@ -1,0 +1,8 @@
+suite s
+  family f
+    label foo "a; b"
+    task t1
+       label label1 "fred ;  bill;  joe;  kate b"
+       label label2 ";;;;;;;;;;;"
+  endfamily
+endsuite
