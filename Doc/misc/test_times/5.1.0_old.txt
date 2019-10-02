@@ -1,0 +1,175 @@
+##########################################################################
+# Changes after using -wpadded to ensure alignment. 
+# Big performance improvements. perf shows with aligned data members we get:
+#
+# 1/ Drastic drop in task-clock      3161.641425 -> 1976.067513
+# 2/ Drastic drop in page faults         266,665 -> 144,402
+# 3/ Drastic drop in cycles       12,162,288,156 -> 7,660,607,774
+# 4/ Drastic drop in branch-misses   206,823,695 -> 11,703,135
+#
+#  Overall performance of gain 4.065524550 -> 2.505218824
+# See: https://softwareengineering.stackexchange.com/questions/328775/how-important-is-memory-alignment-does-it-still-matter
+# see: http://www.catb.org/esr/structure-packing/
+##########################################################################
+
+PERF
+===================================================================================================
+
++ perf stat -r 10 bin/ecflow_client --port 3160 --sync_full 0
+
+ Performance counter stats for 'bin/ecflow_client --port 3160 --sync_full 0' (10 runs):
+
+       1976.067513      task-clock (msec)         #    0.789 CPUs utilized            ( +-  0.08% )
+               809      context-switches          #    0.409 K/sec                    ( +-  6.46% )
+                 0      cpu-migrations            #    0.000 K/sec                    ( +- 50.92% )
+           144,402      page-faults               #    0.073 M/sec                    ( +-  0.12% )
+     7,660,607,774      cycles                    #    3.877 GHz                      ( +-  0.07% )
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+    16,500,975,808      instructions              #    2.15  insns per cycle          ( +-  0.00% )
+     4,099,656,396      branches                  # 2074.654 M/sec                    ( +-  0.00% )
+        11,703,135      branch-misses             #    0.29% of all branches          ( +-  0.74% )
+
+       2.505218824 seconds time elapsed                                          ( +-  0.44% )
+
+
+Using GNU 7.3
+=================================================================================================
+
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
+real    0m0.90s
+user    0m0.79s
+sys 0m0.10s
+
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+real    0m1.47s
+user    0m1.33s
+sys 0m0.13s
+
++ ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+ Parsing Node tree and AST creation time     = 0.805904 parse(1)
+ Parsing Node tree *only* time               = 0.611694 parse(1)
+ Save and restore as string(DEFS)            = 0.921929 -> string size(33231624)
+ Save and restore as string(NET)             = 0.662953 -> string size(33232282) checks relaxed
+ Save and restore as string(MIGRATE)         = 0.656668 -> string size(33232286)
+ Save as DEFS checkpoint, time taken         = 0.104942
+ Save as CEREAL checkpoint, time taken       = 1.14957
+ Checkpt(DEFS) and reload, time taken        = 0.689473 file_size(33235526)  result(1) msg()
+ Checkpt(CEREAL) and reload , time taken     = 3.28388 file_size(82569727)  result(1) msg()
+ Test all paths can be found. time taken     = 0.295727
+ time for 10 jobSubmissions                  = 0.261077s jobs:4
+ Time for Defs::check(inlimit resolution)    = 0.05472 result(1)
+ time for deleting all nodes                 = 0.256552
+ Total elapsed time = 10 seconds
+ 
++ ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+ Parsing Node tree and AST creation time     = 1.20136 parse(1)
+ Parsing Node tree *only* time               = 1.20124 parse(1)
+ Save and restore as string(DEFS)            = 1.43861 -> string size(57634217)
+ Save and restore as string(NET)             = 1.04594 -> string size(68295827) checks relaxed
+ Save and restore as string(MIGRATE)         = 1.1497 -> string size(68295831)
+ Save as DEFS checkpoint, time taken         = 0.298943
+ Save as CEREAL checkpoint, time taken       = 2.3684
+ Checkpt(DEFS) and reload, time taken        = 1.48601 file_size(118606320)  result(1) msg()
+ Checkpt(CEREAL) and reload , time taken     = 6.29163 file_size(190958164)  result(1) msg()
+ Test all paths can be found. time taken     = 0.514886
+ time for 10 jobSubmissions                  = 0.092553s jobs:0
+ Time for Defs::check(inlimit resolution)    = 0.521291 result(0)
+ time for deleting all nodes                 = 0.363313
+ Total elapsed time = 18 seconds
+ 
++ Client/perf_test_large_defs
+Running 1 test case...
+Client:: ...test_perf_for_large_defs:   port(3160)
+
+/var/tmp/ma0/BIG_DEFS/vsms2.31415.def  : file size 153539843
+ Load:                4039ms
+ Begin:               119ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 2601(ms)
+ Download(Sync):      2299 33 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 2307 2311 2309 2391 2302 2302 2303 2306 2305 2303 : Avg:2.3139(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      2722 2612 2564 2565 2554 2545 2532 2535 2539 2532 : Avg:2.57(sec)  : get_defs() from different client
+ Suspend 262323 tasks : 1.04   news_local() : 0   sync_local() : 3.55
+ Resume 262323 tasks  : 1.048   news_local() : 0   sync_local() : 2.643
+ Suspend 262323 tasks : 3.335 : auto-sync
+ Resume 262323 tasks  : 3.573 : auto-sync
+ check  262323 tasks  : 0.528   news_local() : 0.005   sync_local() : 0.061
+ kill   262323 tasks  : 1.316   news_local() : 0.003   sync_local() : 0
+ force  262323 tasks  : 1.767   news_local() : 0.007   sync_local() : 5.635
+ force  262323 tasks  : 0.803 : auto-sync
+ Check pt:            656 597 617 612 609 610 615 615 615 613 : Avg:0.6159(sec)
+ Delete:              606ms
+
+/var/tmp/ma0/BIG_DEFS/3199.def  : file size 59631577
+ Load:                2087ms
+ Begin:               332ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 1407(ms)
+ Download(Sync):      1281 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 1287 1297 1290 1285 1287 1285 1288 1289 1288 1286 : Avg:1.2882(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      1490 1489 1477 1479 1488 1476 1473 1478 1477 1491 : Avg:1.4818(sec)  : get_defs() from different client
+ Suspend 215437 tasks : 0.735   news_local() : 0   sync_local() : 2.817
+ Resume 215437 tasks  : 0.771   news_local() : 0.006   sync_local() : 2.035
+ Suspend 215437 tasks : 2.539 : auto-sync
+ Resume 215437 tasks  : 2.719 : auto-sync
+ check  215437 tasks  : 0.762   news_local() : 0   sync_local() : 0.035
+ kill   215437 tasks  : 0.494   news_local() : 0   sync_local() : 0
+ force  215437 tasks  : 1.289   news_local() : 0   sync_local() : 4.007
+ force  215437 tasks  : 0.624 : auto-sync
+ Check pt:            319 272 245 244 247 255 247 247 241 248 : Avg:0.2565(sec)
+ Delete:              346ms
+
+/var/tmp/ma0/BIG_DEFS/od.def  : file size 11078737
+Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenced FAMILY '/lbc/perle/process' does not define the limit excl
+
+ Load:                558ms
+ Begin:               58ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 286(ms)
+ Download(Sync):      260 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 260 259 260 259 260 259 259 260 260 260 : Avg:0.2596(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      301 299 298 298 298 301 300 301 299 298 : Avg:0.2993(sec)  : get_defs() from different client
+ Suspend 43305 tasks : 0.138   news_local() : 0   sync_local() : 0.536
+ Resume 43305 tasks  : 0.153   news_local() : 0   sync_local() : 0.382
+ Suspend 43305 tasks : 0.471 : auto-sync
+ Resume 43305 tasks  : 0.49 : auto-sync
+ check  43305 tasks  : 0.194   news_local() : 0   sync_local() : 0.006
+ kill   43305 tasks  : 0.093   news_local() : 0   sync_local() : 0
+ force  43305 tasks  : 0.251   news_local() : 0   sync_local() : 0.757
+ force  43305 tasks  : 0.116 : auto-sync
+ Check pt:            66 55 44 44 47 44 47 47 47 47 : Avg:0.0488(sec)
+ Delete:              60ms
+
+/var/tmp/ma0/BIG_DEFS/mega.def  : file size 6721759
+ Load:                334ms
+ Begin:               35ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 177(ms)
+ Download(Sync):      161 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 158 158 158 157 158 159 159 158 159 158 : Avg:0.1582(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      188 184 185 186 183 183 187 184 183 183 : Avg:0.1846(sec)  : get_defs() from different client
+ Suspend 27436 tasks : 0.091   news_local() : 0   sync_local() : 0.336
+ Resume 27436 tasks  : 0.096   news_local() : 0   sync_local() : 0.24
+ Suspend 27436 tasks : 0.298 : auto-sync
+ Resume 27436 tasks  : 0.312 : auto-sync
+ check  27436 tasks  : 0.11   news_local() : 0   sync_local() : 0.004
+ kill   27436 tasks  : 0.057   news_local() : 0   sync_local() : 0
+ force  27436 tasks  : 0.156   news_local() : 0   sync_local() : 0.508
+ force  27436 tasks  : 0.074 : auto-sync
+ Check pt:            38 28 29 29 28 27 30 27 29 28 : Avg:0.0293(sec)
+ Delete:              40ms
+
+/var/tmp/ma0/BIG_DEFS/empty.def  : file size 13
+ Load:                0ms
+ Begin:               0ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 1(ms)
+ Download(Sync):      0 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 0 0 0 0 0 0 0 0 0 0 : Avg:0(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      0 0 0 0 0 0 0 0 0 0 : Avg:0(sec)  : get_defs() from different client
+ Suspend 0 tasks : 0   news_local() : 0   sync_local() : 0
+ Resume 0 tasks  : 0   news_local() : 0   sync_local() : 0
+ Suspend 0 tasks : 0 : auto-sync
+ Resume 0 tasks  : 0 : auto-sync
+ check  0 tasks  : 0   news_local() : 0   sync_local() : 0
+ kill   0 tasks  : 0   news_local() : 0   sync_local() : 0
+ force  0 tasks  : 0   news_local() : 0   sync_local() : 0
+ force  0 tasks  : 0 : auto-sync
+ Check pt:            1 1 0 0 0 0 0 0 0 0 : Avg:0.0002(sec)
+ Delete:              0ms
