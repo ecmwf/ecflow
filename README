@@ -10,12 +10,12 @@
      The python installation should include the development packages
      
    - ecflow_ui: ( new GUI )
-     QT5 at least version 5.0.0 is required  or  Qt4 4.8.0 and above
+     QT5 at least version 5.0.0 is required  
      
 * ecfFlow consists of two tar files i.e. :
    
-   - boost_1_53_0.tar.gz
-   - ecFlow-4.12.0-Source.tar.gz
+   - boost_1_71_0.tar.gz
+   - ecFlow-5.1.0-Source.tar.gz
    
 * Create a directory for the build::
 
@@ -25,18 +25,18 @@
    
 * Un-zip then un-tar the two file files::
 
-  > tar -zxf boost_1_53_0.tar.gz
-  > tar -zxf ecFlow-4.12.0-Source.tar.gz
+  > tar -zxf boost_1_71_0.tar.gz
+  > tar -zxf ecFlow-5.1.0-Source.tar.gz
    
 * You should have two directories created::
 
-   - boost_1_53_0
-   - ecFlow-4.12.0-Source
+   - boost_1_71_0
+   - ecFlow-5.1.0-Source
     
 * Create two environment variables. These are used by some of scripts::
 
-  > export WK=/tmp/ecflow_build/ecFlow-4.12.0-Source
-  > export BOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
+  > export WK=/tmp/ecflow_build/ecFlow-5.1.0-Source
+  > export BOOST_ROOT=/tmp/ecflow_build/boost_1_71_0
    
 * ecflow uses bjam to build BOOST libraries and cmake to build ecflow
   
@@ -69,7 +69,7 @@ Use the following step to build boost from scratch:
 cmake
 =====================================================================
 * By default will install /usr/local, hence may require root access rights
-  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
+  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
   > mkdir build; cd build
   > cmake ..  
   > make -j2
@@ -79,7 +79,7 @@ cmake
 
 * Optionally you can specify install prefix directory:
 
-  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
+  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow 
   > make -j2
@@ -88,7 +88,7 @@ cmake
 
 * Optionally if you do *NOT* want to build the GUI(ecflowview) or UI(ecflow_ui) or Python api:
 
-  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
+  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DENABLE_UI=OFF            \
@@ -99,18 +99,18 @@ cmake
 
 * Optionally if you did not export BOOST_ROOT you can specify on the command line:
 
-  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
+  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Debug \
-             -DBOOST_ROOT=/tmp/ecflow_build/boost_1_53_0
+             -DBOOST_ROOT=/tmp/ecflow_build/boost_1_71_0
   > make -j2
   > make install
 
 
 * On some platforms(AIX) you may need to specify the c++ compiler
 
-  > cd /tmp/ecflow_build/ecFlow-4.12.0-Source
+  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
   > mkdir build; cd build
   > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_CXX_COMPILER=xlC_r"
