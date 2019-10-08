@@ -333,8 +333,14 @@ BOOST_AUTO_TEST_CASE( test_repeat_last_value )
 
    {
       Repeat rep(RepeatDate("YMD",20090916,20090930,1));
+      rep.update_repeat_genvar();
+      const Variable& gen_var = rep.find_gen_variable("YMD_JULIAN");
+      int old_value = gen_var.value();
       rep.setToLastValue();
+      int new_value = gen_var.value();
+
       BOOST_CHECK_MESSAGE(rep.value() == 20090930,"Set to last value did not work, expected 20090930 but found " << rep.value());
+      BOOST_CHECK_MESSAGE(old_value != new_value ,"Expected to update the generated variables ");
    }
    {
       Repeat rep(RepeatDate("YMD",20090930,20090916,-1));
@@ -432,9 +438,22 @@ BOOST_AUTO_TEST_CASE( test_repeat_increment )
 
    {
       Repeat rep(RepeatDate("YMD",20090916,20090920,1));
+      rep.update_repeat_genvar();
+      const Variable& gen_var = rep.find_gen_variable("YMD_JULIAN");
+      const Variable& gen_var2 = rep.find_gen_variable("YMD_DOW");
+      int old_value = gen_var.value();
+      int old_value2 = gen_var2.value();
+
       while( rep.valid()) { rep.increment(); }
+
       BOOST_CHECK_MESSAGE(rep.value() == 20090921,"expected 20090921 but found " << rep.value());
       BOOST_CHECK_MESSAGE(rep.last_valid_value() == 20090920,"expected 20090920 but found " << rep.last_valid_value());
+      BOOST_CHECK_MESSAGE(old_value != gen_var.value(),"Expected generated variables to change on increment");
+      BOOST_CHECK_MESSAGE(old_value2 != gen_var2.value(),"Expected generated variables to change on increment");
+
+      rep.reset();
+      BOOST_CHECK_MESSAGE(old_value = gen_var.value(),"Expected generated variables to be the same after reset");
+      BOOST_CHECK_MESSAGE(old_value2 = gen_var2.value(),"Expected generated variables to be the same after reset");
    }
    {
       Repeat rep(RepeatDate("YMD",20090920,20090916,-1));
