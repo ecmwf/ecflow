@@ -207,8 +207,19 @@ void RepeatDate::update_repeat_genvar() const
    dow_.set_name( name_ + "_DOW");      dom_.set_value("<invalid>");
    julian_.set_name( name_ + "_JULIAN");julian_.set_value("<invalid>");
 
+   yyyy_.set_name( name_ + "_YYYY");
+   mm_.set_name( name_ + "_MM");
+   dom_.set_name( name_ + "_DD");
+   dow_.set_name( name_ + "_DOW");
+   julian_.set_name( name_ + "_JULIAN");
+
+   update_repeat_genvar_value();
+}
+
+void RepeatDate::update_repeat_genvar_value() const
+{
+   std::string date_as_string = valueAsString();
    if (valid()) {
-      std::string date_as_string = valueAsString();
       try {
          boost::gregorian::date the_date(from_undelimited_string(date_as_string));
          if (the_date.is_special()) {
@@ -217,7 +228,6 @@ void RepeatDate::update_repeat_genvar() const
             log(Log::ERR,ss.str());
             return;
          }
-
          //int day_of_year  = the_date.day_of_year();
          int day_of_week  = the_date.day_of_week().as_number();
          int day_of_month = the_date.day();
@@ -235,11 +245,13 @@ void RepeatDate::update_repeat_genvar() const
       }
       catch (std::exception& e) {
          std::stringstream ss;
-         ss << "RepeatDate::update_repeat_genvar(): invalid current date: " << date_as_string;
+         ss << "RepeatDate::update_repeat_genvar_value : " << toString() << "\n The current date(" << date_as_string  << ") is not valid";
          log(Log::ERR,ss.str());
+         return;
       }
    }
 }
+
 
 bool RepeatDate::compare(RepeatBase* rb) const
 {
@@ -250,8 +262,7 @@ bool RepeatDate::compare(RepeatBase* rb) const
 
 void RepeatDate::setToLastValue()
 {
-   value_ = end_;
-	incr_state_change_no();
+   set_value(end_);
 }
 
 long RepeatDate::last_valid_value() const
@@ -287,9 +298,9 @@ long RepeatDate::last_valid_value_plus(int val) const
    return Cal::julian_to_date(julian);
 }
 
-void RepeatDate::reset() {
-	value_ = start_;
-	incr_state_change_no();
+void RepeatDate::reset()
+{
+   set_value(start_);
 }
 
 void RepeatDate::write(std::string& ret) const
@@ -384,9 +395,7 @@ void RepeatDate::increment()
 {
    long julian = Cal::date_to_julian(value_);
    julian += delta_;
-   value_ = Cal::julian_to_date(julian);
-
-   incr_state_change_no();
+   set_value(Cal::julian_to_date(julian));
 }
 
 void RepeatDate::change( const std::string& newdate)
@@ -456,6 +465,7 @@ void RepeatDate::set_value(long the_new_date)
    // This can be seen when do a incremental sync,
    // *hence* allow memento to copy the value as is.
    value_ = the_new_date;
+   update_repeat_genvar_value();
    incr_state_change_no();
 }
 
