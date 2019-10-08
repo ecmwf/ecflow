@@ -136,7 +136,7 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 7.3  -Wno-maybe-uninitialized     -> boost python warnings, specific to Pyext only
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-maybe-uninitialized"
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-exceptions"
 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
@@ -167,7 +167,6 @@ fi
 module load ecbuild/new   
 module load python
 module load python3/3.6.8-01
-#module load python3/3.7.1-01
 module load cmake/3.15.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
 # To build python3 when cmake < 3.12.0 use
 # -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
