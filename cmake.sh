@@ -136,7 +136,7 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 6.1  -Wno-deprecated-declarations -> auto_ptr deprecated warning, mostly in boost headers  
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-address"
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-address -Wno-maybe-uninitialized"
  
 
 # ==================== modules ================================================
