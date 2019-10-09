@@ -143,6 +143,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 # To load module automatically requires Korn shell, system start scripts
 #
 module unload clang
+module load gnu/7.3.0
 cmake_extra_options=""
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     # ecflow fails to write boost ser' files with clang 6.0.1/7.0.1, but in debug all tests pass
@@ -156,8 +157,6 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
 	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
 	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 	fi
-else
-    module load gnu/7.3.0
 fi
 
 module load cmake/new    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
