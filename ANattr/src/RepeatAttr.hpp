@@ -232,6 +232,8 @@ private:
    RepeatDateList( const std::string& variable, const std::vector<int>& l, int index)
    : RepeatBase(variable), currentIndex_(index) , list_(l) {}
 
+   void update_repeat_genvar_value() const;
+
 private:
    int currentIndex_{0};
    std::vector<int> list_;

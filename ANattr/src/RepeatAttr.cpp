@@ -525,13 +525,18 @@ void RepeatDateList::update_repeat_genvar() const
    dow_.set_name( name_ + "_DOW");      dom_.set_value("<invalid>");
    julian_.set_name( name_ + "_JULIAN");julian_.set_value("<invalid>");
 
+   update_repeat_genvar_value();
+}
+
+void RepeatDateList::update_repeat_genvar_value() const
+{
    if (valid()) {
       std::string date_as_string = valueAsString();
       try {
          boost::gregorian::date the_date(from_undelimited_string(date_as_string));
          if (the_date.is_special()) {
             std::stringstream ss;
-            ss << "RepeatDateList::update_repeat_genvar(): " << toString() << "\n invalid current date: " << date_as_string << " is special ";
+            ss << "RepeatDateList::update_repeat_genvar_value(): " << toString() << "\n invalid current date: " << date_as_string << " is special ";
             log(Log::ERR,ss.str());
             return;
          }
@@ -553,7 +558,7 @@ void RepeatDateList::update_repeat_genvar() const
       }
       catch (std::exception& e) {
          std::stringstream ss;
-         ss << "RepeatDateList::update_repeat_genvar(): " << toString() << "\n invalid current date: " << date_as_string;
+         ss << "RepeatDateList::update_repeat_genvar_value(): " << toString() << "\n invalid current date: " << date_as_string;
          log(Log::ERR,ss.str());
       }
    }
@@ -594,16 +599,14 @@ std::string RepeatDateList::dump() const
    return ss.str();
 }
 
-void RepeatDateList::reset() {
-   if (list_.empty()) return;
-   currentIndex_ = 0;
-   incr_state_change_no();
+void RepeatDateList::reset()
+{
+   set_value( 0 );
 }
 
-void RepeatDateList::increment() {
-   if (list_.empty()) return;
-   currentIndex_++;
-   incr_state_change_no();
+void RepeatDateList::increment()
+{
+   set_value( currentIndex_ + 1 );
 }
 
 long RepeatDateList::value() const
@@ -651,8 +654,7 @@ long RepeatDateList::last_valid_value_plus(int val) const
 void RepeatDateList::setToLastValue()
 {
    if (list_.empty()) return;
-   currentIndex_ = static_cast<int> ( list_.size()  - 1);
-   incr_state_change_no();
+   set_value(static_cast<int> ( list_.size()  - 1));
 }
 
 std::string RepeatDateList::valueAsString() const
@@ -702,8 +704,7 @@ void RepeatDateList::change( const std::string& newValue)
 
    for(size_t i = 0; i < list_.size(); i++) {
       if ( list_[i] == new_val) {
-         currentIndex_ = i;
-         incr_state_change_no();
+         set_value(i);
          return;
       }
    }
@@ -736,6 +737,7 @@ void RepeatDateList::set_value(long the_new_index)
    // This can be seen when do a incremental sync,
    // *hence* allow memento to copy the value as is.
    currentIndex_ = the_new_index;
+   update_repeat_genvar_value();
    incr_state_change_no();
 }
 
