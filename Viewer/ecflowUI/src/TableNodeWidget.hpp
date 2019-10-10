@@ -36,6 +36,7 @@ public:
 protected Q_SLOTS:
 	void on_actionBreadcrumbs_triggered(bool b);
     void slotSelectionChangedInView(VInfo_ptr info);
+    void slotSelectionAutoScrollChanged(bool b);
 
 protected:
     void detachedChanged() {}
@@ -43,6 +44,7 @@ protected:
 private:
     TableNodeSortModel *sortModel_;
     VParamFilterMenu *stateFilterMenu_;
+    QAction* acAutoScroll_;
 };
 
 #endif

@@ -108,6 +108,7 @@ public:
     VServer *root() const;
     ServerHandler* server() const;
     virtual VNode* suite() const;
+    const ecf::Calendar& calendar() const;
     node_ptr node() const {return node_;}  
     VNode* isNode() const {return const_cast<VNode*>(this);}
     bool isTopLevel() const;

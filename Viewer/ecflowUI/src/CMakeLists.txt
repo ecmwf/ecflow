@@ -197,6 +197,7 @@ set(viewer_srcs
     VFile.cpp
     VFileInfo.cpp
     VFileTransfer.cpp
+    VFileUncompress.cpp
     VItem.cpp
     VItemPathParser.cpp
     VLabelAttr.cpp
@@ -347,6 +348,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TabWidget.hpp
     TableFilterWidget.hpp
     TableNodeModel.hpp 
+    TableNodeSortModel.hpp
     TableNodeView.hpp 
     TableNodeViewDelegate.hpp
     TableNodeWidget.hpp             

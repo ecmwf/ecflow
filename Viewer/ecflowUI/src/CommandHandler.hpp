@@ -26,6 +26,7 @@ public:
     static void openLinkInBrowser(VInfo_ptr);
     static void executeAborted(const std::vector<VNode*>& info_vec);
     static void rerunAborted(const std::vector<VNode*>& info_vec);
+    static bool kill(const std::vector<VNode*>& info_vec, bool confirm);
     static const std::string& executeCmd() {return executeCmd_;}
     static const std::string& rerunCmd() {return rerunCmd_;}
 
@@ -35,6 +36,7 @@ protected:
 
     static std::string executeCmd_;
     static std::string rerunCmd_;
+    static std::string killCmd_;
 };
 
 #endif // COMMANDHANDLER_HPP

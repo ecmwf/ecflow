@@ -34,6 +34,8 @@
     <file alias="add_tab.svg">../images/add_tab.svg</file> 
     <file alias="add_variable_column.svg">../images/add_variable_column.svg</file>    
     <file alias="attribute.svg">../images/attribute.svg</file>
+    <file alias="autoscroll.svg">../images/autoscroll.svg</file>
+    <file alias="autoscroll_off.svg">../images/autoscroll_off.svg</file>
     <file alias="chain.svg">../images/chain.svg</file>
     <file alias="chain_open.svg">../images/chain_open.svg</file>
     <file alias="chain_closed.svg">../images/chain_closed.svg</file>

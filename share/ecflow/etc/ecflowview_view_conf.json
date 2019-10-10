@@ -198,7 +198,16 @@
                 "completeFontColour"  : {
                     "label"   : "Complete font colour",
                     "default" : "rgb(0,0,255)"
-                }
+                },
+                "holdingTimeFontColour"  : {
+                    "label"   : "Holding time/today/cron colour",
+                    "default" : "rgb(171,22,22)"
+                },
+                "holdingDateFontColour"  : {
+                    "label"   : "Holding day/date colour",
+                    "default" : "rgb(171,22,22)"
+            }
+
            },
 
            "textEdit" : {

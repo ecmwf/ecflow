@@ -194,6 +194,8 @@ public:
 
 Q_SIGNALS:
      void nodeChanged(VTableServer*,const VNode*);
+     void updateBegin();
+     void updateEnd();
 
 private:
      TableNodeFilter* filter_;
@@ -251,6 +253,8 @@ Q_SIGNALS:
 	void serverAddEnd();
     void serverRemoveBegin(VModelServer*,int);
     void serverRemoveEnd(int);
+    void updateBegin();
+    void updateEnd();
 
 protected:
 	void init();

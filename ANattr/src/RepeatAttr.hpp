@@ -167,6 +167,8 @@ private:
    RepeatDate( const std::string& name, int start, int end, int delta, long value)
    : RepeatBase(name),start_(start),end_(end),delta_(delta),value_(value) {}
 
+   void update_repeat_genvar_value() const;
+
 private:
    int  start_;
    int  end_;

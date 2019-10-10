@@ -217,6 +217,21 @@ VNode* VNode::suite() const
     return NULL;
 }
 
+const ecf::Calendar& VNode::calendar() const
+{
+    if(VNode* sn = suite())
+    {
+        if(Suite *s = sn->node()->isSuite())
+        {
+            return s->calendar();
+        }
+    }
+
+    static ecf::Calendar emptyCal;
+    return emptyCal;
+}
+
+
 bool VNode::isTopLevel() const
 {
     return isSuite();

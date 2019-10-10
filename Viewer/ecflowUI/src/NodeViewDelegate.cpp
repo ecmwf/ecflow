@@ -15,6 +15,7 @@
 #include <QPainter>
 
 #include "AbstractNodeModel.hpp"
+#include "IconProvider.hpp"
 #include "PropertyMapper.hpp"
 #include "UiLog.hpp"
 
@@ -78,6 +79,12 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     completeBorderPen_=QPen(QColor(150,150,150));
     completeFontPen_=QPen(QColor(0,0,255));
 
+    holdingTimeFontPen_=QPen(QColor(255,0,0));
+    holdingDateFontPen_=QPen(QColor(255,0,0));
+
+    holdingTimePixId_ = IconProvider::add(":/viewer/icon_clock.svg", "icon_clock");
+    holdingDatePixId_ = IconProvider::add(":/viewer/icon_calendar.svg", "icon_calendar");
+
 	attrRenderers_["meter"]=&NodeViewDelegate::renderMeter;
 	attrRenderers_["label"]=&NodeViewDelegate::renderLabel;
 	attrRenderers_["event"]=&NodeViewDelegate::renderEvent;
@@ -129,6 +136,8 @@ void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
     propVec.push_back("view.attribute.completeBackground");
     propVec.push_back("view.attribute.completeBorderColour");
     propVec.push_back("view.attribute.completeFontColour");
+    propVec.push_back("view.attribute.holdingTimeFontColour");
+    propVec.push_back("view.attribute.holdingDateFontColour");
 }
 
 void NodeViewDelegate::updateBaseSettings()
@@ -224,6 +233,14 @@ void NodeViewDelegate::updateBaseSettings()
     if(VProperty* p=prop_->find("view.attribute.completeFontColour"))
     {
         completeFontPen_=QPen(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.holdingTimeFontColour"))
+    {
+        holdingTimeFontPen_=QPen(p->value().value<QColor>());
+    }
+    if(VProperty* p=prop_->find("view.attribute.holdingDateFontColour"))
+    {
+        holdingDateFontPen_=QPen(p->value().value<QColor>());
     }
 
     //limit pixmaps
@@ -1130,13 +1147,13 @@ void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyl
 
     size=QSize(totalWidth,attrBox_->fullHeight);
 
-    if(data.count() < 2)
+    if(data.count() < 3)
         return;
 
     QString name=data[1];
 
-    if(data.count() == 3)
-        name.prepend(data[2] + ":");
+    if(data.count() == 4)
+        name.prepend(data[3] + ":");
 
     bool selected=option.state & QStyle::State_Selected;
 
@@ -1151,8 +1168,22 @@ void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyl
     QRect nameRect = contRect.adjusted(attrBox_->leftPadding,0,0,0);
 	nameRect.setWidth(nameWidth);
 
+    int currentRight=nameRect.x()+nameRect.width();
+
+    //Icon
+    QPixmap pix;
+    QRect pixRect;
+    if(data[2] == "0")
+    {
+        int xp=currentRight+attrBox_->iconPreGap;
+        int yp=nameRect.center().y()+1-attrBox_->iconSize/2;
+        pix = IconProvider::pixmap(holdingTimePixId_,attrBox_->iconSize);
+        pixRect = QRect(xp,yp,attrBox_->iconSize,attrBox_->iconSize);
+        currentRight=xp+attrBox_->iconSize+attrBox_->iconGap;
+    }
+
 	//Define clipping
-    int rightPos=nameRect.x()+nameRect.width()+attrBox_->rightPadding+attrBox_->rightMargin;
+    int rightPos=currentRight+attrBox_->rightPadding+attrBox_->rightMargin;
     totalWidth=rightPos-option.rect.x();
     const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -1162,9 +1193,20 @@ void NodeViewDelegate::renderTime(QPainter *painter,QStringList data,const QStyl
 	}
 
 	//Draw name
-	painter->setPen(Qt::black);
+    if(data[2] == "1") {
+        painter->setPen(Qt::black);
+    } else {
+        painter->setPen(holdingTimeFontPen_);
+    }
+
 	painter->setFont(nameFont);
     painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
+
+    //Draw icon
+    if(!pix.isNull())
+    {
+        painter->drawPixmap(pixRect, pix);
+    }
 
     if(selected && drawAttrSelectionRect_)
     {
@@ -1187,13 +1229,13 @@ void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyl
 
     size=QSize(totalWidth,attrBox_->fullHeight);
 
-    if(data.count() < 2)
+    if(data.count() < 3)
         return;
 
     QString name=data[1];
 
-    if(data.count() == 3)
-        name.prepend(data[2] + ":");
+    if(data.count() == 4)
+        name.prepend(data[3] + ":");
 
     bool selected=option.state & QStyle::State_Selected;
 
@@ -1208,8 +1250,22 @@ void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyl
     QRect nameRect = contRect.adjusted(attrBox_->leftPadding,0,0,0);
 	nameRect.setWidth(nameWidth);
 
+    int currentRight=nameRect.x()+nameRect.width();
+
+    //Icon
+    QPixmap pix;
+    QRect pixRect;
+    if(data[2] == "0")
+    {
+        int xp=currentRight+attrBox_->iconPreGap;
+        int yp=nameRect.center().y()+1-attrBox_->iconSize/2;
+        pix = IconProvider::pixmap(holdingDatePixId_,attrBox_->iconSize);
+        pixRect = QRect(xp,yp,attrBox_->iconSize,attrBox_->iconSize);
+        currentRight=xp+attrBox_->iconSize+attrBox_->iconGap;
+    }
+
 	//Define clipping
-    int rightPos=nameRect.x()+nameRect.width()+attrBox_->rightPadding+attrBox_->rightMargin;
+    int rightPos=currentRight+attrBox_->rightPadding+attrBox_->rightMargin;
     totalWidth=rightPos-option.rect.x();
     const bool setClipRect = rightPos > option.rect.right();
 	if(setClipRect)
@@ -1219,9 +1275,20 @@ void NodeViewDelegate::renderDate(QPainter *painter,QStringList data,const QStyl
 	}
 
 	//Draw name
-	painter->setPen(Qt::black);
+    if(data[2] == "1") {
+        painter->setPen(Qt::black);
+    } else {
+        painter->setPen(holdingDateFontPen_);
+    }
+
 	painter->setFont(nameFont);
     painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
+
+    //Draw icon
+    if(!pix.isNull())
+    {
+        painter->drawPixmap(pixRect, pix);
+    }
 
     if(selected && drawAttrSelectionRect_)
     {

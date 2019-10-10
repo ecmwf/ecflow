@@ -22,6 +22,7 @@
 #include "TableNodeSortModel.hpp"
 #include "TableNodeView.hpp"
 #include "VFilter.hpp"
+#include "VModelData.hpp"
 #include "VSettings.hpp"
 #include "WidgetNameProvider.hpp"
 
@@ -29,7 +30,8 @@
 
 TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,bool interactive,QWidget * parent) :
     NodeWidget("table",serverFilter,parent),
-    sortModel_(0)
+    sortModel_(0),
+    acAutoScroll_(0)
 {
 	//Init qt-creator form
 	setupUi(this);
@@ -82,6 +84,12 @@ TableNodeWidget::TableNodeWidget(ServerFilter* serverFilter,bool interactive,QWi
 
     connect(view_->realWidget(),SIGNAL(headerButtonClicked(QString,QPoint)),
     		filterW_,SLOT(slotHeaderFilter(QString,QPoint)));
+
+    connect(model_->data(),SIGNAL(updateBegin()),
+            view_->realWidget(),SLOT(slotUpdateBegin()));
+
+    connect(model_->data(),SIGNAL(updateEnd()),
+            view_->realWidget(),SLOT(slotUpdateEnd()));
 
 #if 0
 	connect(model_,SIGNAL(clearBegun(const VNode*)),
@@ -156,6 +164,20 @@ void TableNodeWidget::populateDockTitleBar(DashboardDockTitleWidget* tw)
     connect(acVar,SIGNAL(triggered()),
             view_->realWidget(),SLOT(slotAddVariableColumn()));
 
+    //Autoscroll to selection
+    acAutoScroll_=new QAction(this);
+    acAutoScroll_->setIcon(QPixmap(":viewer/autoscroll.svg"));
+    acAutoScroll_->setCheckable(true);
+    acAutoScroll_->setChecked(true);
+    acAutoScroll_->setToolTip("The view will <b>automatically scroll</b> to the selection after refresh. Click to toggle.");
+    acLst << acAutoScroll_;
+
+    connect(acAutoScroll_,SIGNAL(toggled(bool)),
+            this,SLOT(slotSelectionAutoScrollChanged(bool)));
+
+    connect(acAutoScroll_,SIGNAL(toggled(bool)),
+            view_->realWidget(),SLOT(slotSelectionAutoScrollChanged(bool)));
+
     tw->addActions(acLst);
 }
 
@@ -180,6 +202,25 @@ void TableNodeWidget::on_actionBreadcrumbs_triggered(bool b)
     }
 }
 
+void TableNodeWidget::slotSelectionAutoScrollChanged(bool b)
+{
+    QString txt, pix;
+    if(b)
+    {
+        txt = "The view will <b>automatically scroll</b> to the selection after refresh.";
+        pix = ":viewer/autoscroll.svg";
+    }
+    else
+    {
+        txt = "This view will <b>not</b> automatically <b>scroll</b> to the selection after refresh.";
+        pix = ":viewer/autoscroll_off.svg";
+    }
+    txt += " Click to toggle.";
+
+    acAutoScroll_->setToolTip(txt);
+    acAutoScroll_->setIcon(QPixmap(pix));
+}
+
 void TableNodeWidget::rerender()
 {
 	bcWidget_->rerender();
@@ -200,6 +241,9 @@ void TableNodeWidget::writeSettings(VComboSettings* vs)
     view_->writeSettings(vs);
 
     DashboardWidget::writeSettings(vs);
+
+    if (acAutoScroll_)
+        vs->putAsBool("autoScrollToSelection", acAutoScroll_->isChecked());
 }
 
 void TableNodeWidget::readSettings(VComboSettings* vs)
@@ -232,9 +276,11 @@ void TableNodeWidget::readSettings(VComboSettings* vs)
     view_->readSettings(vs);
 
     DashboardWidget::readSettings(vs);
+
+    //autoscroll to selection
+    if (acAutoScroll_)
+    {
+        bool b=vs->getAsBool("autoScrollToSelection", true);
+        acAutoScroll_->setChecked(b);
+    }
 }
-
-
-
-
-

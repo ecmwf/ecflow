@@ -24,17 +24,19 @@ class VNode;
 class DateAttr;
 class DayAttr;
 
+namespace ecf { class Calendar;} // forward declare class
+
 class VDateAttrType : public VAttributeType
 {
 public:
     explicit VDateAttrType();
     QString toolTip(QStringList d) const;
     QString definition(QStringList d) const;
-    void encode(const DateAttr& d,QStringList& data);
-    void encode(const DayAttr& d,QStringList& data);
+    void encode(const ecf::Calendar& calendar, const DateAttr& d,QStringList& data);
+    void encode(const ecf::Calendar& calendar, const DayAttr& d,QStringList& data);
 
 private:
-    enum DataIndex {TypeIndex=0,NameIndex=1};
+    enum DataIndex {TypeIndex=0,NameIndex=1,FreeIndex=2};
 };
 
 class VDateAttr : public VAttribute

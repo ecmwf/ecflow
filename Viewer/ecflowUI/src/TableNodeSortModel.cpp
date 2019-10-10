@@ -12,14 +12,18 @@
 #include "TableNodeModel.hpp"
 #include "ModelColumn.hpp"
 
+#include <QDebug>
+
 TableNodeSortModel::TableNodeSortModel(TableNodeModel* nodeModel,QObject *parent) :
 		QSortFilterProxyModel(parent),
         nodeModel_(nodeModel),
         skipSort_(false)
 {
     Q_ASSERT(nodeModel_);
-    //connect(nodeModel_,SIGNAL(filterChanged()),
-    //		this,SLOT(slotFilterChanged()));
+    connect(nodeModel_,SIGNAL(skipSortingBegin()),
+            this,SLOT(skipSortingBegin()));
+    connect(nodeModel_,SIGNAL(skipSortingEnd()),
+            this,SLOT(skipSortingEnd()));
 
 	QSortFilterProxyModel::setSourceModel(nodeModel_);
 
@@ -94,4 +98,20 @@ ModelColumn* TableNodeSortModel::columns() const
     return nodeModel_->columns();
 }
 
+void TableNodeSortModel::sort(int column, Qt::SortOrder order)
+{
+    if (!skipSort_)
+        QSortFilterProxyModel::sort(column, order);
+}
+
+void TableNodeSortModel::skipSortingBegin()
+{
+    setSkipSort(true);
+}
+
+void TableNodeSortModel::skipSortingEnd()
+{
+    setSkipSort(false);
+    sort(sortColumn(),sortOrder());
+}
 

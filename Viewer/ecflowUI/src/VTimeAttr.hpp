@@ -31,12 +31,12 @@ public:
     explicit VTimeAttrType();
     QString toolTip(QStringList d) const;
     QString definition(QStringList d) const;
-    void encode(const ecf::TimeAttr& d,QStringList& data);
-    void encode(const ecf::TodayAttr& d,QStringList& data);
-    void encode(const ecf::CronAttr& d,QStringList& data);
+    void encode(const ecf::Calendar& calendar, const ecf::TimeAttr& d,QStringList& data);
+    void encode(const ecf::Calendar& calendar, const ecf::TodayAttr& d,QStringList& data);
+    void encode(const ecf::Calendar& calendar, const ecf::CronAttr& d,QStringList& data);
 
 private:
-    enum DataIndex {TypeIndex=0,NameIndex=1};
+    enum DataIndex {TypeIndex=0,NameIndex=1,FreeIndex=2};
 };
 
 class VTimeAttr : public VAttribute
