@@ -51,7 +51,7 @@ Rtt::Rtt(const std::string& filename)
 {
    if (!file_.is_open()) {
       std::cerr << "Rtt::Rtt Could not open file '" << filename << "'\n";
-      std::runtime_error("Rtt::Rtt: Could not open file " + filename);
+      throw std::runtime_error("Rtt::Rtt: Could not open file " + filename);
    }
 }
 

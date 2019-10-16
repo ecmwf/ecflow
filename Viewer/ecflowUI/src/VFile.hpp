@@ -38,7 +38,7 @@ public:
 	StorageMode storageMode() const {return storageMode_;}
     void setStorageMode(StorageMode);
 
-	static const size_t maxDataSize() {return maxDataSize_;}
+	static size_t maxDataSize() {return maxDataSize_;}
 	size_t dataSize() const {return dataSize_;}
 	const char* data() const {return data_;}
 

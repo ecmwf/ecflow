@@ -10,7 +10,7 @@ set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 #export ECF_DEBUG_CLIENT=1
-ECFLOW_VERSION=5.1.0
+ECFLOW_VERSION=5.1.1
 #export ECF_SSL=polonius.4142 # use server specfic <host>.<port>.*** certificates
 export ECF_PORT=4142
 export PATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
@@ -28,6 +28,7 @@ fi
 # =======================================================================
 rm -rf 5nightly
 cp -r $WK/build_scripts/5nightly .
+cd 5nightly
 
 # =======================================================================
 # Kill the server

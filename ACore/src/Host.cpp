@@ -45,7 +45,7 @@ void Host::get_host_name()
          the_host_name = string(hostNameArray);
       }
       else {
-         std::runtime_error("Host::Host() failed, could not get host name?\n");
+         throw std::runtime_error("Host::Host() failed, could not get host name?\n");
       }
    }
    the_host_name_ = the_host_name;

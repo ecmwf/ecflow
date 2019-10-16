@@ -189,11 +189,11 @@ void RepeatDate::gen_variables(std::vector<Variable>& vec) const
 const Variable& RepeatDate::find_gen_variable(const std::string& name) const
 {
    if (name == name_) return var_;
-   if (name == yyyy_.name()) return yyyy_;
-   if (name == mm_.name()) return mm_;
-   if (name == dom_.name()) return dom_;
-   if (name == dow_.name()) return dow_;
    if (name == julian_.name()) return julian_;
+   if (name == dow_.name()) return dow_;
+   if (name == dom_.name()) return dom_;
+   if (name == mm_.name()) return mm_;
+   if (name == yyyy_.name()) return yyyy_;
    return Variable::EMPTY();
 }
 
