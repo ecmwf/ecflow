@@ -25,11 +25,6 @@
 #include "Indentor.hpp"
 #include "TimeStamp.hpp"
 
-//#define DEBUG_BLOCKING_DISK_IO 1
-//#if DEBUG_BLOCKING_DISK_IO
-//#include "DurationTimer.hpp"
-//#endif
-
 using namespace std;
 namespace fs = boost::filesystem;
 
@@ -69,7 +64,16 @@ bool Log::log(Log::LogType lt,const std::string& message)
 	if (!logImpl_) {
 		logImpl_ = new LogImpl(fileName_);
 	}
-	return logImpl_->log(lt,message);
+
+	if (! logImpl_->log(lt,message)) {
+	   // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
+      std::string fail_message = handle_write_failure();
+
+      (void)logImpl_->log(Log::ERR,fail_message); // must be after handle_write_failure
+	   (void)logImpl_->log(lt,message);
+	   return false;
+	}
+	return true;
 }
 
 bool Log::log_no_newline(Log::LogType lt,const std::string& message)
@@ -77,7 +81,16 @@ bool Log::log_no_newline(Log::LogType lt,const std::string& message)
    if (!logImpl_) {
       logImpl_ = new LogImpl(fileName_);
    }
-   return logImpl_->log_no_newline(lt,message);
+
+   if (! logImpl_->log_no_newline(lt,message)) {
+      // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
+      std::string fail_message = handle_write_failure();
+
+      (void)logImpl_->log(Log::ERR,fail_message);  // must be after handle_write_failure
+      (void)logImpl_->log_no_newline(lt,message);
+      return false;
+   }
+   return true;
 }
 
 bool Log::append(const std::string& message)
@@ -85,7 +98,16 @@ bool Log::append(const std::string& message)
    if (!logImpl_) {
       logImpl_ = new LogImpl(fileName_) ;
    }
-   return logImpl_->append(message);
+
+   if (! logImpl_->append(message)) {
+      // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
+      std::string fail_message = handle_write_failure();
+
+      (void)logImpl_->log(Log::ERR,fail_message);  // must be after handle_write_failure
+      (void)logImpl_->append(message);
+      return false;
+   }
+   return true;
 }
 
 void Log::cache_time_stamp()
@@ -194,6 +216,26 @@ std::string Log::contents(int get_last_n_lines)
    return File::get_first_n_lines(fileName_,std::abs(get_last_n_lines),error_msg);
 }
 
+std::string Log::handle_write_failure()
+{
+   std::string msg = "Failed to write to log file: ";
+   if (logImpl_->bad()) msg += "(badbit)";
+   if (logImpl_->eof()) msg += "(eofbit)";
+   if (logImpl_->fail()) msg += "(failbit)";
+   if (errno) { msg += ", errno:"; msg += std::string(strerror(errno));}
+   msg += " : Attempting to close/reopen log file";
+
+   if (LogToCout::ok()) Indentor::indent(cout) << msg << '\n';
+
+   // handle write failure, by closing then re-opening log file
+   delete logImpl_; logImpl_ =  NULL;
+   logImpl_ = new LogImpl(fileName_);
+
+   return msg;
+}
+
+
+
 bool log(Log::LogType lt,const std::string& message)
 {
 	if (Log::instance()) {
@@ -273,8 +315,16 @@ LogImpl::LogImpl(const std::string& filename)
 : count_(0), file_(filename.c_str(), ios::out | ios::app)
 {
  	if (!file_.is_open()) {
-		std::cerr << "LogImpl::LogImpl: Could not open log file '" << filename << "'\n";
-		std::runtime_error("LogImpl::LogImpl: Could not open log file " + filename);
+ 	   std::string msg = "LogImpl::LogImpl: Could not open log file '";
+ 	   msg += filename;
+ 	   msg += "'";
+      if (file_.bad())  msg += " badbit set";
+      if (file_.fail()) msg += " failbit set";
+      if (file_.eof())  msg += " eofbit set";
+      if (errno) { msg += ", errno:"; msg += std::string(strerror(errno));}
+		std::cerr << msg << "\n";
+		// Do *NOT* throw std::runtime_error(msg), HERE as this can cause server to die.
+		// This would diagnose ECFLOW-1558 but is not acceptable
 	}
 }
 
@@ -296,9 +346,6 @@ static void append_log_type(std::string& str, Log::LogType lt)
 
 bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
 {
-//#if DEBUG_BLOCKING_DISK_IO
-//   ecf::DurationTimer timer;
-//#endif
    count_++;
 
    // XXX:[HH:MM:SS D.M.YYYY] chd:fullname [+additional information]
@@ -323,20 +370,7 @@ bool LogImpl::do_log(Log::LogType lt,const std::string& message, bool newline)
          file_ << log_type_and_time_stamp_ << lines[i] << '\n';
       }
    }
-
-   // Check to see, if writing to file was ok.
-   return check_file_write(message);
-
-//#if DEBUG_BLOCKING_DISK_IO
-//   long total_seconds = timer.elapsed().total_seconds();
-//   if (total_seconds >= 1) {
-//      std::stringstream ss;
-//      ss << " took " << total_seconds << " seconds **************************************************************";
-//      std::string time_taken = ss.str();
-//      file_ << log_type_and_time_stamp_ << message << time_taken << "\n";
-//      cout << log_type_and_time_stamp_ << message << time_taken << "\n";
-//   }
-//#endif
+   return file_.good();
 }
 
 void LogImpl::flush() {
@@ -351,17 +385,7 @@ bool LogImpl::append(const std::string& message)
 {
    count_++;
    file_ << message << '\n';
-   return check_file_write(message);
-}
-
-bool LogImpl::check_file_write(const std::string& message) const
-{
-   bool file_is_good = file_.good();
-   if (!file_is_good) cout << "LogImpl::append: Could not write to log file! File system full/deleted ? Try ecflow_client --log=flush !" << '\n';
-   if (LogToCout::ok() || !file_is_good) {
-      Indentor::indent(cout) << message << '\n';
-   }
-   return file_is_good;
+   return file_.good();
 }
 
 void LogImpl::create_time_stamp()

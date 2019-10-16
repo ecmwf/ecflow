@@ -94,6 +94,8 @@ public:
    static void get_log_types(std::vector<std::string>&);
 
 private:
+	/// If writing to the log fails, close log file and re-create it.
+   std::string handle_write_failure();
 
    /// make sure path is not a directory & path has a parent directory.
    /// Will throw std::runtime_error for errors
@@ -124,7 +126,7 @@ public:
    LogImpl(const std::string& filename);
    ~LogImpl();
 
-   bool log(Log::LogType lt,const std::string& message) { return do_log(lt,message,true); }
+   bool log(Log::LogType lt,const std::string& message)            { return do_log(lt,message,true); }
    bool log_no_newline(Log::LogType lt,const std::string& message) { return do_log(lt,message,false); }
    bool append(const std::string& message);
 
@@ -133,9 +135,12 @@ public:
 
    void flush();
 
+   bool eof() const { return file_.eof();}
+   bool fail() const { return file_.fail();}
+   bool bad() const { return file_.bad();}
+
 private:
    bool do_log(Log::LogType,const std::string& message, bool newline);
-   bool check_file_write(const std::string& message) const;
 
 private:
    unsigned int count_;
