@@ -78,8 +78,8 @@
             },
             "slow" : {
                 "label" : "Slow server write",
-                "tooltip" : "Slow chekpoint file or job file writing.",               
-                "shortDesc" : "Slow writing",
+                "tooltip" : "Slow writing of chekpoint file or log errors.",
+                "shortDesc" : "Slow writing of chekpoint file or log errors",
                 "icon"  : {
                     "default" : "icon_slow.svg"
                 }
