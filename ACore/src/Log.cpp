@@ -219,8 +219,8 @@ std::string Log::handle_write_failure()
    if (LogToCout::ok()) Indentor::indent(cout) << msg << '\n';
 
    // handle write failure, by closing then re-opening log file
-   delete logImpl_; logImpl_ =  NULL;
-   logImpl_ = new LogImpl(fileName_);
+   logImpl_.reset();
+   create_logimpl();
 
    return msg;
 }
