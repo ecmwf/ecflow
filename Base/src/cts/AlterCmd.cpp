@@ -314,7 +314,11 @@ STC_Cmd_ptr AlterCmd::alter_server_state(AbstractServer* as) const
    // Update defs flag state
    if (flag_type_ != Flag::NOT_SET) {
       if (flag_) as->defs()->flag().set(flag_type_);
-      else       as->defs()->flag().clear(flag_type_);
+      else       {
+         as->defs()->flag().clear(flag_type_);
+         if (flag_type_ == Flag::LOG_ERROR) as->defs()->set_server().delete_user_variable("ECF_LOG_ERROR");
+         if (flag_type_ == Flag::CHECKPT_ERROR) as->defs()->set_server().delete_user_variable("ECF_CHECKPT_ERROR");
+      }
    }
 
 	// sort

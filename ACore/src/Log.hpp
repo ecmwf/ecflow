@@ -90,6 +90,9 @@ public:
    /// Returns the current log file path name
    std::string path() const;
 
+   /// Errors in opening or writing to log file
+   const std::string& log_error() const { return log_error_;}
+
    // returns vec = MSG, LOG, ERR, WAR, DBG, OTH
    static void get_log_types(std::vector<std::string>&);
 
@@ -113,6 +116,7 @@ private:
 
    std::unique_ptr<LogImpl> logImpl_;
    std::string fileName_;
+   std::string log_error_;
 };
 
 // Flush log on destruction
@@ -143,6 +147,7 @@ public:
 
    void flush();
    const std::ofstream& stream() const { return file_;}
+   const std::string& log_open_error() const { return log_open_error_;}
 private:
    bool do_log(Log::LogType,const std::string& message, bool newline);
 
@@ -153,6 +158,7 @@ private:
 private:
    std::string time_stamp_;
    std::string log_type_and_time_stamp_; // re-use memory
+   std::string log_open_error_;
    mutable std::ofstream file_;
    unsigned int count_{0};
 };

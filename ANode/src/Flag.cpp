@@ -46,7 +46,7 @@ void Flag::reset() {
 
 std::vector<Flag::Type> Flag::list()
 {
-   std::vector<Flag::Type> ret; ret.reserve(19);
+   std::vector<Flag::Type> ret; ret.reserve(21);
    ret.push_back(Flag::FORCE_ABORT);
    ret.push_back(Flag::USER_EDIT);
    ret.push_back(Flag::TASK_ABORTED);
@@ -66,12 +66,14 @@ std::vector<Flag::Type> Flag::list()
    ret.push_back(Flag::RESTORED);
    ret.push_back(Flag::THRESHOLD);
    ret.push_back(Flag::ECF_SIGTERM);
+   ret.push_back(Flag::LOG_ERROR);
+   ret.push_back(Flag::CHECKPT_ERROR);
    return ret;
 }
 
-constexpr std::array<Flag::Type,19> Flag::array()
+constexpr std::array<Flag::Type,21> Flag::array()
 {
-   return std::array<Flag::Type,19>{
+   return std::array<Flag::Type,21>{
       Flag::FORCE_ABORT,
       Flag::USER_EDIT,
       Flag::TASK_ABORTED,
@@ -90,7 +92,9 @@ constexpr std::array<Flag::Type,19> Flag::array()
       Flag::ARCHIVED,
       Flag::RESTORED,
       Flag::THRESHOLD,
-      Flag::ECF_SIGTERM
+      Flag::ECF_SIGTERM,
+      Flag::LOG_ERROR,
+      Flag::CHECKPT_ERROR
    };
 }
 
@@ -117,6 +121,8 @@ std::string Flag::enum_to_string(Flag::Type flag) {
       case Flag::RESTORED:     return "restored"; break;
       case Flag::THRESHOLD:    return "threshold"; break;
       case Flag::ECF_SIGTERM:  return "sigterm"; break;
+      case Flag::LOG_ERROR:    return "log_error"; break;
+      case Flag::CHECKPT_ERROR:return "checkpt_error"; break;
       case Flag::NOT_SET:      return "not_set"; break;
       default: break;
    };
@@ -144,6 +150,8 @@ const char* Flag::enum_to_char_star(Flag::Type flag) {
       case Flag::RESTORED:     return "restored"; break;
       case Flag::THRESHOLD:    return "threshold"; break;
       case Flag::ECF_SIGTERM:  return "sigterm"; break;
+      case Flag::LOG_ERROR:    return "log_error"; break;
+      case Flag::CHECKPT_ERROR:return "checkpt_error"; break;
       case Flag::NOT_SET:      return "not_set"; break;
       default: break;
    };
@@ -172,12 +180,14 @@ Flag::Type Flag::string_to_flag_type(const std::string& s)
    if (s == "restored") return Flag::RESTORED;
    if (s == "threshold") return Flag::THRESHOLD;
    if (s == "sigterm") return Flag::ECF_SIGTERM;
+   if (s == "log_error") return Flag::LOG_ERROR;
+   if (s == "checkpt_error") return Flag::CHECKPT_ERROR;
    return Flag::NOT_SET;
 }
 
 void Flag::valid_flag_type(std::vector<std::string>& vec)
 {
-   vec.reserve(19);
+   vec.reserve(21);
    vec.emplace_back("force_aborted");
    vec.emplace_back("user_edit");
    vec.emplace_back("task_aborted");
@@ -197,6 +207,8 @@ void Flag::valid_flag_type(std::vector<std::string>& vec)
    vec.emplace_back("restored");
    vec.emplace_back("threshold");
    vec.emplace_back("sigterm");
+   vec.emplace_back("log_error");
+   vec.emplace_back("checkpt_error");
 }
 
 std::string Flag::to_string() const
@@ -209,7 +221,7 @@ std::string Flag::to_string() const
 void Flag::write(std::string& ret) const
 {
    bool added = false;
-   std::array<Flag::Type,19> flag_list = Flag::array();
+   std::array<Flag::Type,21> flag_list = Flag::array();
    for (auto & i : flag_list) {
       if ( is_set( i ) ) {
          if (added) ret += ',';

@@ -54,7 +54,7 @@ public:
       JOBCMD_FAILED =  4,  // task*
       NO_SCRIPT     =  5,  // task*
       KILLED        =  6,  // task* do not run when try_no > ECF_TRIES, and task killed by user
-      LATE          =  7,  // Node attribute, Task is late, or Defs checkpt takes to long
+      LATE          =  7,  // Node attribute,
       MESSAGE       =  8,  // Node
       BYRULE        =  9,  // Node*, set if node is set to complete by complete trigger expression
       QUEUELIMIT    = 10,  // Node                                   ( NOT USED currently)
@@ -66,7 +66,9 @@ public:
       RESTORED      = 16,  // Container*, Avoid re-archiving node that is restored, until it is re-queued again
       THRESHOLD     = 17,  // Job threshold exceeded.(slow disk,large includes/huge scripts,overloaded machine,server)
       ECF_SIGTERM   = 18,  // Record on defs that server received SIGTERM signal, main used in test
-      NOT_SET       = 19
+      NOT_SET       = 19,
+      LOG_ERROR     = 20,  // Error in opening or writing to the log file
+      CHECKPT_ERROR = 21   // Error in saving checkpoint file
    };
 
    bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }
@@ -96,7 +98,7 @@ public:
 
    /// returns the list of all flag types
    static std::vector<Flag::Type> list();
-   static constexpr std::array<Flag::Type,19> array();
+   static constexpr std::array<Flag::Type,21> array();
 
    /// Converts from string to flag types.
    static Flag::Type string_to_flag_type(const std::string& s);

@@ -308,27 +308,29 @@ void export_NodeAttr()
    ;
 
    enum_<Flag::Type>("FlagType",
-         "Flags store state associated with a node\n\n"
-         "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
-         "- USER_EDIT     - task\n"
-         "- TASK_ABORTED  - task*\n"
-         "- EDIT_FAILED   - task*\n"
-         "- JOBCMD_FAILED - task*\n"
-         "- NO_SCRIPT     - task*\n"
-         "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
-         "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
-         "- MESSAGE       - Node\n"
-         "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
-         "- QUEUELIMIT    - Node\n"
-         "- WAIT          - task* \n"
-         "- LOCKED        - Server\n"
-         "- ZOMBIE        - task*\n"
-         "- NO_REQUE      - task\n"
-         "- ARCHIVED      - Suite/Family\n"
-         "- RESTORED      - Family/Family\n"
-         "- THRESHOLD     - task\n"
-         "- SIGTERM       - Defs, records that server received a SIGTERM signal\n"
-         "- NOT_SET\n"
+                     "Flags store state associated with a node\n\n"
+                     "- FORCE_ABORT   - Node* do not run when try_no > ECF_TRIES, and task aborted by user\n"
+                     "- USER_EDIT     - task\n"
+                     "- TASK_ABORTED  - task*\n"
+                     "- EDIT_FAILED   - task*\n"
+                     "- JOBCMD_FAILED - task*\n"
+                     "- NO_SCRIPT     - task*\n"
+                     "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+                     "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
+                     "- MESSAGE       - Node\n"
+                     "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
+                     "- QUEUELIMIT    - Node\n"
+                     "- WAIT          - task* \n"
+                     "- LOCKED        - Server\n"
+                     "- ZOMBIE        - task*\n"
+                     "- NO_REQUE      - task\n"
+                     "- ARCHIVED      - Suite/Family\n"
+                     "- RESTORED      - Family/Family\n"
+                     "- THRESHOLD     - task\n"
+                     "- SIGTERM       - Defs, records that server received a SIGTERM signal\n"
+                     "- LOG_ERROR     - Error in opening or writing to log file\n"
+                     "- CHECKPT_ERROR - Error in opening or writing to checkpt file \n"
+                     "- NOT_SET\n"
    )
          .value("force_abort",  Flag::FORCE_ABORT)
          .value("user_edit",    Flag::USER_EDIT)
@@ -350,6 +352,8 @@ void export_NodeAttr()
          .value("threshold",    Flag::THRESHOLD)
          .value("sigterm",      Flag::ECF_SIGTERM)
          .value("not_set",      Flag::NOT_SET)
+         .value("log_error",    Flag::LOG_ERROR)
+         .value("checkpt_error",Flag::CHECKPT_ERROR)
          ;
 
    class_<Flag>("Flag",

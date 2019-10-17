@@ -50,8 +50,7 @@ void Log::destroy()
 
 Log::Log(const std::string& fileName)
 : logImpl_( std::make_unique<LogImpl>(fileName) ), fileName_(fileName)
-{
-}
+{}
 
 void Log::create_logimpl()
 {
@@ -66,9 +65,9 @@ bool Log::log(Log::LogType lt,const std::string& message)
 
 	if (! logImpl_->log(lt,message)) {
 	   // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
-      std::string fail_message = handle_write_failure();
+	   log_error_ = handle_write_failure();
 
-      (void)logImpl_->log(Log::ERR,fail_message); // must be after handle_write_failure
+      (void)logImpl_->log(Log::ERR,log_error_);
 	   (void)logImpl_->log(lt,message);
 	   return false;
 	}
@@ -81,9 +80,9 @@ bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 
    if (! logImpl_->log_no_newline(lt,message)) {
       // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
-      std::string fail_message = handle_write_failure();
+      log_error_ = handle_write_failure();
 
-      (void)logImpl_->log(Log::ERR,fail_message);  // must be after handle_write_failure
+      (void)logImpl_->log(Log::ERR,log_error_);
       (void)logImpl_->log_no_newline(lt,message);
       return false;
    }
@@ -96,9 +95,9 @@ bool Log::append(const std::string& message)
 
   if (! logImpl_->append(message)) {
       // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
-      std::string fail_message = handle_write_failure();
+      log_error_ = handle_write_failure();
 
-      (void)logImpl_->log(Log::ERR,fail_message);  // must be after handle_write_failure
+      (void)logImpl_->log(Log::ERR,log_error_);
       (void)logImpl_->append(message);
       return false;
    }
@@ -210,16 +209,18 @@ std::string Log::contents(int get_last_n_lines)
 
 std::string Log::handle_write_failure()
 {
-   std::string msg = "Failed to write to log file: ";
+   std::string msg = logImpl_->log_open_error();
+   msg += "\nFailed to write to log file: ";
    msg += File::stream_error_condition(logImpl_->stream());
-   msg += " : Attempting to close/reopen log file";
-
-   if (LogToCout::ok()) Indentor::indent(cout) << msg << '\n';
 
    // handle write failure, by closing then re-opening log file
    logImpl_.reset();
    create_logimpl();
 
+   if (logImpl_->log_open_error().empty())  msg += "\nAttempting to close/reopen log file.";
+   else                                     msg += "\nAttempting to close/reopen log file did not work!";
+
+   if (LogToCout::ok()) Indentor::indent(cout) <<  msg << '\n';
    return msg;
 }
 
@@ -304,12 +305,12 @@ LogImpl::LogImpl(const std::string& filename)
 : file_(filename.c_str(), ios::out | ios::app)
 {
  	if (!file_.is_open()) {
- 	   std::string msg = "LogImpl::LogImpl: Could not open log file '";
- 	   msg += filename;
- 	   msg += "' ";
- 	   msg += File::stream_error_condition(file_);
-	   std::cerr << msg << "\n";
-	   // Do *NOT* throw std::runtime_error(msg), HERE as this can cause server to die.
+ 	   log_open_error_ = "LogImpl::LogImpl: Could not open log file '";
+ 	   log_open_error_ += filename;
+ 	   log_open_error_ += "' ";
+ 	   log_open_error_ += File::stream_error_condition(file_);
+	   std::cerr << log_open_error_ << "\n";
+	   // Do *NOT* throw std::runtime_error(log_open_error_), HERE as this can cause server to die.
 	   // This would diagnose ECFLOW-1558 but is not acceptable
 	}
 }

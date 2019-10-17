@@ -107,8 +107,11 @@ void ClientToServerCmd::do_log(AbstractServer* as) const
    std::stringstream ss;
    print(ss);                        // Populate the stream with command details:
    if (!log(Log::MSG,ss.str())) {    // will automatically add end of line
-      // problems writing to log file, warn users, ECFLOW-536
-      as->defs()->flag().set(ecf::Flag::LATE);
+      // problems with opening or writing to log file, warn users, ECFLOW-536
+      as->defs()->flag().set(ecf::Flag::LOG_ERROR);
+      if (Log::instance()) {
+         as->defs()->set_server().add_or_update_user_variables("ECF_LOG_ERROR",Log::instance()->log_error());
+      }
    }
 }
 
