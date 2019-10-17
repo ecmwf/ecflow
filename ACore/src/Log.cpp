@@ -63,6 +63,7 @@ void Log::create_logimpl()
 bool Log::log(Log::LogType lt,const std::string& message)
 {
    create_logimpl();
+
 	if (! logImpl_->log(lt,message)) {
 	   // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
       std::string fail_message = handle_write_failure();
@@ -210,10 +211,7 @@ std::string Log::contents(int get_last_n_lines)
 std::string Log::handle_write_failure()
 {
    std::string msg = "Failed to write to log file: ";
-   if (logImpl_->bad()) msg += "(badbit)";
-   if (logImpl_->eof()) msg += "(eofbit)";
-   if (logImpl_->fail()) msg += "(failbit)";
-   if (errno) { msg += ", errno:"; msg += std::string(strerror(errno));}
+   msg += File::stream_error_condition(logImpl_->stream());
    msg += " : Attempting to close/reopen log file";
 
    if (LogToCout::ok()) Indentor::indent(cout) << msg << '\n';
@@ -308,14 +306,11 @@ LogImpl::LogImpl(const std::string& filename)
  	if (!file_.is_open()) {
  	   std::string msg = "LogImpl::LogImpl: Could not open log file '";
  	   msg += filename;
- 	   msg += "'";
-      if (file_.bad())  msg += " badbit set";
-      if (file_.fail()) msg += " failbit set";
-      if (file_.eof())  msg += " eofbit set";
-      if (errno) { msg += ", errno:"; msg += std::string(strerror(errno));}
-	  std::cerr << msg << "\n";
-	  // Do *NOT* throw std::runtime_error(msg), HERE as this can cause server to die.
-	  // This would diagnose ECFLOW-1558 but is not acceptable
+ 	   msg += "' ";
+ 	   msg += File::stream_error_condition(file_);
+	   std::cerr << msg << "\n";
+	   // Do *NOT* throw std::runtime_error(msg), HERE as this can cause server to die.
+	   // This would diagnose ECFLOW-1558 but is not acceptable
 	}
 }
 

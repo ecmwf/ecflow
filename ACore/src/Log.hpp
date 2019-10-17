@@ -142,11 +142,7 @@ public:
    const std::string& get_cached_time_stamp() const { return time_stamp_;}
 
    void flush();
-
-   bool eof() const { return file_.eof();}
-   bool fail() const { return file_.fail();}
-   bool bad() const { return file_.bad();}
-
+   const std::ofstream& stream() const { return file_;}
 private:
    bool do_log(Log::LogType,const std::string& message, bool newline);
 

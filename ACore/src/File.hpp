@@ -20,6 +20,7 @@
 #include <boost/filesystem/path.hpp>
 #include <string>
 #include <vector>
+#include <ios>
 
 
 namespace ecf {
@@ -66,6 +67,9 @@ public:
 	/// else returns false and an error message
 	static bool create(const std::string& filename, const std::vector<std::string>& lines, std::string& errorMsg);
 	static bool create(const std::string& filename, const std::string& contents, std::string& errorMsg);
+
+	/// When a stream fails, uses this construct the error message
+	static std::string stream_error_condition(const std::ios& stream);
 
 	/// recursively look for a file, given a starting directory
 	/// Return the first file that matches
