@@ -136,7 +136,7 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 # GNU 7.3  -Wno-maybe-uninitialized     -> boost python warnings, specific to Pyext only
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-exceptions"
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-maybe-uninitialized"
 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
