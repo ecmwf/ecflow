@@ -160,7 +160,7 @@ void CheckPtSaver::explicitSave(bool from_server) const
 #endif
 		}
 		catch (std::exception& e) {
-	 		LOG(Log::ERR,"Could not save checkPoint file! " << e.what() << " File system full?");
+	 		LOG(Log::ERR,"Could not save checkPoint file! " << e.what());
 	 	}
 	}
 	else {
