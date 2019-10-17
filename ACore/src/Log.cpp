@@ -53,6 +53,13 @@ Log::Log(const std::string& fileName)
 {
 }
 
+void Log::create_logimpl()
+{
+   if (!logImpl_) {
+      logImpl_ = new LogImpl(fileName_);
+   }
+}
+
 Log::~Log()
 {
 	delete logImpl_;
@@ -61,9 +68,7 @@ Log::~Log()
 
 bool Log::log(Log::LogType lt,const std::string& message)
 {
-	if (!logImpl_) {
-		logImpl_ = new LogImpl(fileName_);
-	}
+   create_logimpl();
 
 	if (! logImpl_->log(lt,message)) {
 	   // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
@@ -78,9 +83,7 @@ bool Log::log(Log::LogType lt,const std::string& message)
 
 bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 {
-   if (!logImpl_) {
-      logImpl_ = new LogImpl(fileName_);
-   }
+   create_logimpl();
 
    if (! logImpl_->log_no_newline(lt,message)) {
       // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
@@ -95,9 +98,7 @@ bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 
 bool Log::append(const std::string& message)
 {
-   if (!logImpl_) {
-      logImpl_ = new LogImpl(fileName_) ;
-   }
+   create_logimpl();
 
    if (! logImpl_->append(message)) {
       // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
@@ -112,9 +113,7 @@ bool Log::append(const std::string& message)
 
 void Log::cache_time_stamp()
 {
-	if (!logImpl_) {
-		logImpl_ = new LogImpl(fileName_) ;
-	}
+   create_logimpl();
 	logImpl_->create_time_stamp();
 }
 
@@ -219,17 +218,14 @@ std::string Log::contents(int get_last_n_lines)
 std::string Log::handle_write_failure()
 {
    std::string msg = "Failed to write to log file: ";
-   if (logImpl_->bad()) msg += "(badbit)";
-   if (logImpl_->eof()) msg += "(eofbit)";
-   if (logImpl_->fail()) msg += "(failbit)";
-   if (errno) { msg += ", errno:"; msg += std::string(strerror(errno));}
+   msg += File::stream_error_condition(logImpl_->stream());
    msg += " : Attempting to close/reopen log file";
 
    if (LogToCout::ok()) Indentor::indent(cout) << msg << '\n';
 
    // handle write failure, by closing then re-opening log file
    delete logImpl_; logImpl_ =  NULL;
-   logImpl_ = new LogImpl(fileName_);
+   create_logimpl();
 
    return msg;
 }
@@ -317,11 +313,8 @@ LogImpl::LogImpl(const std::string& filename)
  	if (!file_.is_open()) {
  	   std::string msg = "LogImpl::LogImpl: Could not open log file '";
  	   msg += filename;
- 	   msg += "'";
-      if (file_.bad())  msg += " badbit set";
-      if (file_.fail()) msg += " failbit set";
-      if (file_.eof())  msg += " eofbit set";
-      if (errno) { msg += ", errno:"; msg += std::string(strerror(errno));}
+ 	   msg += "' ";
+ 	   msg += File::stream_error_condition(file_);
 		std::cerr << msg << "\n";
 		// Do *NOT* throw std::runtime_error(msg), HERE as this can cause server to die.
 		// This would diagnose ECFLOW-1558 but is not acceptable

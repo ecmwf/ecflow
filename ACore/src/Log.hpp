@@ -101,6 +101,8 @@ private:
    /// Will throw std::runtime_error for errors
    static void check_new_path(const std::string& new_path);
 
+   void create_logimpl();
+
 private:
    ~Log();
    explicit Log(const std::string& fileName);
@@ -134,11 +136,7 @@ public:
    const std::string& get_cached_time_stamp() const { return time_stamp_;}
 
    void flush();
-
-   bool eof() const { return file_.eof();}
-   bool fail() const { return file_.fail();}
-   bool bad() const { return file_.bad();}
-
+   const std::ofstream& stream() const { return file_;}
 private:
    bool do_log(Log::LogType,const std::string& message, bool newline);
 

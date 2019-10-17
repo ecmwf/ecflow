@@ -1218,8 +1218,9 @@ void Defs::save_as_filename(const std::string& the_fileName,PrintStyle::Type_t p
    ofs << this;
 
    if (!ofs.good()) {
-      std::stringstream ss; ss << "Defs::save_as_filename: path(" << the_fileName << ") failed";
-      throw std::runtime_error(ss.str());
+      std::string err = "Defs::save_as_filename: path("; err += the_fileName; err += ") failed: ";
+      err += File::stream_error_condition(ofs);
+      throw std::runtime_error(err);
    }
 }
 

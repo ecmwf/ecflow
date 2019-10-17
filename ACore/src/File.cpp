@@ -341,6 +341,19 @@ bool File::create(const std::string& filename, const std::string& contents, std:
 	return true;
 }
 
+std::string File::stream_error_condition(const std::ios& stream )
+{
+   std::string msg;
+   if (stream.fail()) msg += " Logical error on i/o operation";
+   if (stream.bad())  msg += " Read/Writing error on i/o operation";
+   if (stream.eof())  msg += " End-of-File reached on input operation";
+   if (errno) {
+      msg += ", errno:";
+      msg += std::string(strerror(errno));
+   }
+   return msg;
+}
+
 bool File::find(
                  const boost::filesystem::path& dir_path,    // from this directory downwards,
                  const std::string&             file_name,   // search for this name,
