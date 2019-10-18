@@ -33,7 +33,7 @@ if test_uname Linux ; then
    # for clang 5.0.1 see: https://svn.boost.org/trac10/ticket/8120
    cp $WK/build_scripts/gnu_fix/boost_1_53_0/iserializer.hpp  $BOOST_ROOT/boost/archive/detail/.
    
-   # fix for python 3.7
+   # fix for python 3.7 *alternatively* use -fpermissive
    cp $WK/build_scripts/gnu_fix/boost_1_53_0/builtin_converters.cpp $BOOST_ROOT/libs/python/src/converter/.
   
 elif test_uname HP-UX ; then

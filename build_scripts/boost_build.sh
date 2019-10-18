@@ -209,14 +209,13 @@ else
     #   3/ Comment out any other 'using python' then  
     #      manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
     #
-    #      using python 
-    #       : 3.5 
-    #       : /usr/local/apps/python3/3.6.5-01/bin/python3  # ***** If this is left as python3, includes get messed up, have mix of python2 & 3
-    #       : /usr/local/apps/python3/3.6.5-01/include/python3.6m # include directory
-    #       ; 
+    #     using python : 3.6 : /usr/local/apps/python3/3.6.9-01/bin/python3 : /usr/local/apps/python3/3.6.9-01/include/python3.6m ;  
     #
     #     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
     #     python 2.7 and 3.5, YUK, took ages to debug
+    #
+    #   4/ It may fail with python 3.7, in whic case use:
+    #      CXXFLAGS="$CXXFLAGS -fpermissive"
     #
     # Python 2:
     #   0/ ./b2 --with-python --clean   # Clean previous build
@@ -230,7 +229,8 @@ else
     #   nm -D *python* | grep PyClass_Type                                                # PyClass_Type is a symbol *ONLY* used in python2.x
     #   nm -D /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
     # ===============================================================================
-               
-   ./bjam toolset=$tool link=shared variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
-   ./bjam toolset=$tool link=static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+           
+    #CXXFLAGS="$CXXFLAGS -fpermissive"  # for python 3.7 or greater
+   ./bjam --with-python --clean    
+   ./bjam toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
