@@ -63,6 +63,10 @@ bool Log::log(Log::LogType lt,const std::string& message)
 {
    create_logimpl();
 
+//   if (!logImpl_->log_open_error().empty()) {
+//      cerr << "Log::log: " << message << "\n";
+//   }
+
 	if (! logImpl_->log(lt,message)) {
 	   // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
 	   log_error_ = handle_write_failure();
@@ -77,6 +81,10 @@ bool Log::log(Log::LogType lt,const std::string& message)
 bool Log::log_no_newline(Log::LogType lt,const std::string& message)
 {
    create_logimpl();
+
+//   if (!logImpl_->log_open_error().empty()) {
+//      cerr << "Log::log_no_newline : " << message << "\n";
+//   }
 
    if (! logImpl_->log_no_newline(lt,message)) {
       // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
@@ -93,7 +101,11 @@ bool Log::append(const std::string& message)
 {
    create_logimpl();
 
-  if (! logImpl_->append(message)) {
+//   if (!logImpl_->log_open_error().empty()) {
+//      cerr << "Log::append : " << message << "\n";
+//   }
+
+   if (! logImpl_->append(message)) {
       // handle write failure and Get the failure reason. This will delete logImpl_ & recreate
       log_error_ = handle_write_failure();
 
@@ -309,7 +321,7 @@ LogImpl::LogImpl(const std::string& filename)
  	   log_open_error_ += filename;
  	   log_open_error_ += "' ";
  	   log_open_error_ += File::stream_error_condition(file_);
-	   std::cerr << log_open_error_ << "\n";
+	   //std::cerr << log_open_error_ << "\n";
 	   // Do *NOT* throw std::runtime_error(log_open_error_), HERE as this can cause server to die.
 	   // This would diagnose ECFLOW-1558 but is not acceptable
 	}

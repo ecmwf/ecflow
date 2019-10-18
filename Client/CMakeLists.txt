@@ -86,6 +86,7 @@ if (ENABLE_SERVER)
         test/TestCustomUser.cpp
         test/TestGroupCmd.cpp
         test/TestLoadDefsCmd.cpp
+        test/TestLogAndCheckptErrors.cpp
         test/TestPasswdFile.cpp
         test/TestPlugCmd.cpp
         test/TestServer.cpp
