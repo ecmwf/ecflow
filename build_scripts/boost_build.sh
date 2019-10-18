@@ -203,7 +203,6 @@ else
     # - First build python3 and then python2. This is because in boost 1.53 not all python libs have the 3 tag.
     #
     # Python 3:
-    #   0/ ./b2 --with-python --clean   # Clean previous build
     #   1/ module unload python; module load python3, this update the $PATH
     #   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
     #   3/ Comment out any other 'using python' then  
@@ -214,11 +213,9 @@ else
     #     ***** cmd/prefix must be path to python3, otherwise compilation include files has a mixture of
     #     python 2.7 and 3.5, YUK, took ages to debug
     #
-    #   4/ It may fail with python 3.7, in whic case use:
-    #      CXXFLAGS="$CXXFLAGS -fpermissive"
+    #   4/ invoke this script
     #
     # Python 2:
-    #   0/ ./b2 --with-python --clean   # Clean previous build
     #   1/ module unload python; module load python2
     #   2/ ./bootstrap.sh --with-python=/path/to/python2.7
     #   3/ invoke this script
@@ -230,7 +227,10 @@ else
     #   nm -D /tmp/ma0/workspace/bdir/release/ecflow/Pyext/ecflow.so | grep PyClass_Type  # check ecflow.so
     # ===============================================================================
            
-    #CXXFLAGS="$CXXFLAGS -fpermissive"  # for python 3.7 or greater
-   ./bjam --with-python --clean    
-   ./bjam toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+    python3=$(which python3 | grep "3.7")
+    if [[ -n $python3 ]] ; then
+        CXXFLAGS="$CXXFLAGS -fpermissive"  # for python 3.7 or greater
+    fi
+    ./bjam --with-python --clean    
+    ./bjam toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
