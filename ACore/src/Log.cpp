@@ -222,8 +222,10 @@ std::string Log::contents(int get_last_n_lines)
 std::string Log::handle_write_failure()
 {
    std::string msg = logImpl_->log_open_error();
-   msg += "\nFailed to write to log file: ";
-   msg += File::stream_error_condition(logImpl_->stream());
+   if (msg.empty()) {
+      msg += "\nFailed to write to log file: ";
+      msg += File::stream_error_condition(logImpl_->stream());
+   }
 
    // handle write failure, by closing then re-opening log file
    logImpl_.reset();
@@ -319,7 +321,7 @@ LogImpl::LogImpl(const std::string& filename)
  	if (!file_.is_open()) {
  	   log_open_error_ = "LogImpl::LogImpl: Could not open log file '";
  	   log_open_error_ += filename;
- 	   log_open_error_ += "' ";
+ 	   log_open_error_ += "'. ";
  	   log_open_error_ += File::stream_error_condition(file_);
 	   //std::cerr << log_open_error_ << "\n";
 	   // Do *NOT* throw std::runtime_error(log_open_error_), HERE as this can cause server to die.
