@@ -542,7 +542,10 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
 
 static void create_and_start_test(const std::string& suite_name, const std::string& create_zombies_with, bool add_delay_before_init = false) {
 
-   if (ecf_debug_enabled) std::cout << "\n   Creating defs\n";
+   if (ecf_debug_enabled) {
+      TestFixture::client().get_log_path();
+      std::cout << "\n   Creating defs, log path " << TestFixture::client().get_string() << "\n";
+   }
    Defs theDefs;
    populate_defs(theDefs,suite_name);
    if (add_delay_before_init) {
