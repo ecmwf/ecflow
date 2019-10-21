@@ -45,15 +45,20 @@ bool CheckPtCmd::equals(ClientToServerCmd* rhs) const
 
 bool CheckPtCmd::isWrite() const
 {
-   // TODO: if save to takes to long, the the late flag is set. Even when command is read only ?
-   // Also if writing to checkpoint fails we set: ecf::Flag::CHECKPT_ERROR
-   // Likewise writing to the log file can also fail, hence we set: ecf::Flag::LOG_ERROR, when manually check pointing
-   // Even when command is read only ?
-   // This an exceptional situation!!
    if (mode_ != ecf::CheckPt::UNDEFINED) return true;
    if (check_pt_interval_ != 0) return true;
    if (check_pt_save_time_alarm_ != 0) return true;
    return false;
+}
+
+bool CheckPtCmd::is_mutable() const
+{
+   // if save to takes to long, the the late flag is set. Even when command is read only
+   // Also if writing to checkpoint fails we set: ecf::Flag::CHECKPT_ERROR
+   // Likewise writing to the log file can also fail, hence we set: ecf::Flag::LOG_ERROR, when manually check pointing
+   // Even when command is read only ?
+   // This an exceptional situation!!
+   return true;
 }
 
 const char* CheckPtCmd::theArg() const

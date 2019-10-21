@@ -73,15 +73,18 @@ EditHistoryMgr::~EditHistoryMgr()
          }
          else {
             // Read only command, that is making data model changes, oops ?
-            // TODO, Can happen when check pt command set late flag, even though its read only command.
-            //       i.e when saving takes more the 30 seconds
-            std::stringstream ss;
-            cts_cmd_->print(ss);
-            cout << "cmd " << ss.str() << " should return true from isWrite() ******************\n";
-            cout << "Read only command is making data changes to defs ?????\n";
-            cout << "Ecf::state_change_no() " << Ecf::state_change_no() << " Ecf::modify_change_no() " << Ecf::modify_change_no() << "\n";
-            cout << "state_change_no_       " << state_change_no_       << " modify_change_no_       " << modify_change_no_ << "\n";
-            cout.flush();
+            // Can happen with check pt command, when ecf_home can't be written to, (exceptional)
+            // i.e set late flag( when saving takes more the 30 seconds) *OR* Flag::CHECKPT_ERROR | Flag::LOG_ERROR
+            //       even though its read only command. In which case is_mutable() should return true.
+            if (!cts_cmd_->is_mutable()) {
+               std::stringstream ss;
+               cts_cmd_->print(ss);
+               cout << "cmd " << ss.str() << " should return true from isWrite() ******************\n";
+               cout << "Read only command is making data changes to defs ?????\n";
+               cout << "Ecf::state_change_no() " << Ecf::state_change_no() << " Ecf::modify_change_no() " << Ecf::modify_change_no() << "\n";
+               cout << "state_change_no_       " << state_change_no_       << " modify_change_no_       " << modify_change_no_ << "\n";
+               cout.flush();
+            }
          }
       }
    }

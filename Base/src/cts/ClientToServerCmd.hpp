@@ -86,6 +86,12 @@ public:
    /// Used by the server for authentication since only write only users are allowed to edit.
    virtual bool isWrite() const { return false; /* returning false means read only */ }
 
+   /// Some read only commands under exceptional situation can modify the DEFS.
+   /// i.e if write permission is removed from ECF_HOME then the check_pt command can fail
+   /// in which case if can set flags, Flag::LATE, Flag::CHECKPT_ERROR, Flag::LOG_ERROR to warn the users
+   /// This function is used to avoid unnecessary warning message.
+   virtual bool is_mutable() const { return false;}
+
    /// Some commands modify the server but do not affect defs. i.e reload white list file,password file
    /// Other like ClientHandleCmd make edits to defs(well kind off) but are read only.(i.e anyone can call them)
    /// This return true for those commands that affect the defs, that we need sync on the client side.
@@ -731,6 +737,7 @@ public:
    std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
    bool isWrite() const override;
+   bool is_mutable() const override;
    const char* theArg() const override;
    void addOption(boost::program_options::options_description& desc) const override;
    void create(    Cmd_ptr& cmd,
