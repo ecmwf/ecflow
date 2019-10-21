@@ -195,7 +195,7 @@ void TestFixture::init(const std::string& project_test_dir)
       theServerInvokePath += "&";
       if ( system( theServerInvokePath.c_str() ) != 0)  assert(false); // " Server invoke failed "
 
-      std::cout << "   ECF_HOST not specified, starting LOCAL " << theServerInvokePath << "\n";
+      std::cout << "   ECF_HOST not specified, starting LOCAL " << theServerInvokePath << "\nat dir: " << fs::current_path() << " log: " << pathToLogFile() << "\n";
    }
 
    /// Ping the server to see if its running
