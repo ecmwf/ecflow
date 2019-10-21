@@ -86,12 +86,17 @@ ClientInvoker& TestFixture::client()
 void TestFixture::init(const std::string& project_test_dir)
 {
    TestFixture::project_test_dir_ = project_test_dir;
+   std::cout << "TestFixture::TestFixture() project_test_dir      :" << project_test_dir << "\n";
+   std::cout << "TestFixture::TestFixture() local_ecf_home        :" << local_ecf_home() << "\n";
+   std::cout << "TestFixture::TestFixture() jobSubmissionInterval :" << job_submission_interval() << "\n";
+   std::cout << "TestFixture::TestFixture() cwd                   :" << fs::current_path() << "\n";
 
    if ( !fs::exists( local_ecf_home() ) )  fs::create_directory( local_ecf_home() );
 
    // client side file for recording all ClientInvoker round trip times
    boost::filesystem::remove(rtt_filename);
    Rtt::create(rtt_filename);
+
 
    // ********************************************************
    // Note: Global fixture Constructor can not use BOOST macro
@@ -103,7 +108,6 @@ void TestFixture::init(const std::string& project_test_dir)
    // This becomes an issue when the server is on a different machine
    host_ = ClientEnvironment::hostSpecified();
    port_ = ClientEnvironment::portSpecified(); // returns ECF_PORT, otherwise Str::DEFAULT_PORT_NUMBER
-   std::cout << "TestFixture::TestFixture()  jobSubmissionInterval = " << job_submission_interval() << "\n";
 #ifdef ECF_OPENSSL
    if (getenv("ECF_SSL"))  std::cout << "   Openssl enabled\n";
 #endif
@@ -195,7 +199,7 @@ void TestFixture::init(const std::string& project_test_dir)
       theServerInvokePath += "&";
       if ( system( theServerInvokePath.c_str() ) != 0)  assert(false); // " Server invoke failed "
 
-      std::cout << "   ECF_HOST not specified, starting LOCAL " << theServerInvokePath << "\nat dir: " << fs::current_path() << " log: " << pathToLogFile() << "\n";
+      std::cout << "   ECF_HOST not specified, starting LOCAL " << theServerInvokePath << "\n";
    }
 
    /// Ping the server to see if its running
