@@ -162,24 +162,9 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
       sleep(1);
    }
 
-   // return the real state of the server zombies.
-   // *** Note: remove is immediate hence z.remove() below is not valid
-   action_set = 0;
-   BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
-   std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-   BOOST_FOREACH(const Zombie& z, zombies) {
-      switch (uc) {
-         case User::FOB:    { if (z.fob())    action_set++; break; }
-         case User::FAIL:   { if (z.fail())   action_set++; break; }
-         case User::ADOPT:  { if (z.adopt())  action_set++; break; }
-         case User::REMOVE: { if (z.remove()) action_set++; break; }
-         case User::BLOCK:  { if (z.block())  action_set++; break; }
-         case User::KILL:   { if (z.kill())   action_set++; break; }
-      }
-   }
    if (ecf_debug_zombies) {
       cout << "   " << action_set << " zombies set to user action " << User::to_string(uc) << " returning\n";
-      cout << Zombie::pretty_print( zombies , 6);
+      cout << Zombie::pretty_print( action_set_zombies, 6);
    }
    return action_set;
 }

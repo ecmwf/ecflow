@@ -594,7 +594,7 @@ BOOST_AUTO_TEST_CASE(test_path_zombie_creation)
    // Fobing does *NOT* alter node tree state, however COMPLETE should auto delete the zombie
    // Hence after this command, the number of fobed zombies may *NOT* be the same
    // as the number of tasks. Since the fobed zombies are auto deleted when a complete
-   // child command is recieved.
+   // child command is received.
    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
    BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0,"Expected some fobed zombies but found none ?");
 
@@ -851,8 +851,6 @@ BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_complete )
 
    // Fob all the zombies child commands allowing them to finish
    (void) ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
-   // int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
-   // BOOST_CHECK_MESSAGE(no_of_fobed_zombies == NUM_OF_TASKS,"Expected " << NUM_OF_TASKS << " Fobed zombies but found " << no_of_fobed_zombies);
 
    // Wait for zombies to complete, they should get removed automatically
    wait_for_no_zombies( timeout);
@@ -878,8 +876,6 @@ BOOST_AUTO_TEST_CASE( test_user_zombie_creation_via_abort )
 
    // Fob all the zombies child commands allowing them to finish
    (void) ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
-   // int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
-   // BOOST_CHECK_MESSAGE(no_of_fobed_zombies == NUM_OF_TASKS,"Expected " << NUM_OF_TASKS << " Fobed zombies but found " << no_of_fobed_zombies);
 
    // Wait for zombies to complete, they should get removed automatically
    wait_for_no_zombies(timeout);
@@ -1084,14 +1080,14 @@ BOOST_AUTO_TEST_CASE( test_ecf_zombie_type_creation )
    /// We have two *sets* of jobs, Wait for ALL the tasks(non zombies) to complete
    BOOST_REQUIRE_MESSAGE(waitForTaskState(ALL,NState::COMPLETE,timeout),"Expected non-zombie tasks to complete");
 
-   // wait and remove all user zombies.
+   // wait and remove all *USER* zombies.
    remove_all_user_zombies();
 
-   // wait of at least one user zombie of type ecf
+   // wait of at least *ONE* zombie of type *ECF*
    wait_for_zombies_of_type(Child::ECF,NUM_OF_TASKS,timeout);
 
    int no_of_fobed_zombies = ZombieUtil::do_zombie_user_action(User::FOB, NUM_OF_TASKS, timeout);
-   BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0,"Expected  some fobed zombies but found none ?");
+   BOOST_CHECK_MESSAGE(no_of_fobed_zombies > 0,"Expected some fobed zombies but found none ?");
 
    // Fobing does *NOT* alter node tree state, however child COMPLETE should auto delete the zombie
    if (!wait_for_zombie_termination(timeout)) {
