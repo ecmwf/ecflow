@@ -209,6 +209,11 @@ if [[ "$ARCH" = cray ]] ; then
     export ECFLOW_CRAY_BATCH=1
 fi
 
+#####################################################################################
+# Boost:
+#  By default it looks for environment variable BOOST_ROOT, if not it can specified on the command line. i.e
+#  -DBOOST_ROOT=/var/tmp/$USER/boost/boost_1_53_0
+#
 # This must be done after change of compiler/environment
 # versions of boost >= 1.67 now tag the python libs, i.e. libboost_python27-mt.a, libboost_python36-mt.so
 module load boost/1.71.0     # comment to use local BOOST_ROOT
@@ -233,9 +238,15 @@ fi
 
 # ====================================================================================
 # Use for local install
+#
 release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
 major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
 minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+
+install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
+if [[ $sys_install = sys_install ]] ; then
+   install_prefix=/usr/local/apps/ecflow/$release.$major.$minor
+fi
 
 # =======================================================================================
 # Change directory
@@ -324,11 +335,6 @@ if [[ $package_source_arg = package_source ]] ; then
     gui_options=  
 fi
 
-install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
-if [[ $sys_install = sys_install ]] ; then
-   install_prefix=/usr/local/apps/ecflow/$release.$major.$minor
-fi
-
 ecbuild=ecbuild
 if [[ $ecbuild_arg = ecbuild ]] ; then
    ecbuild=$workspace/ecbuild/bin/ecbuild
@@ -407,12 +413,6 @@ if [[ $package_source_arg = package_source ]] ; then
 	
 	cp ecFlow-$release.$major.$minor-Source.tar.gz $SCRATCH/.
 fi
-
-# =========================================================================================
-# NOTES:
-# Boost:  
-#  By default it looks for environment variable BOOST_ROOT, if not it can specified on the command line. i.e
-#  -DBOOST_ROOT=/var/tmp/$USER/boost/boost_1_53_0
 
 # ============================================================================================
 # Python:
