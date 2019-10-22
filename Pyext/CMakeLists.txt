@@ -128,6 +128,7 @@ else()
 	message( STATUS "====================================================================================================================" )
 	message( STATUS "PYTHON3" )
 	message( STATUS "====================================================================================================================" )
+	# The python must include the Development packages. As the headers in these packages is used by boost python.
 	find_package(Python3 COMPONENTS Interpreter Development)
 	if (Python3_FOUND)
 		message( STATUS "  Python3_Interpreter_FOUND         : ${Python3_Interpreter_FOUND}" )
