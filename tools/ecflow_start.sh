@@ -36,13 +36,14 @@ verbose=false
 rerun=false
 check=false
 ssl=false
+halted=false
 
 #==========================================================================
 # Syntax
 # ecflow_start [-b] [-d ecf_home_directory] [-f] [-h] [-s] [-p port_number ]
 #==========================================================================
 # get command line options if any.
-while getopts chfbd:vp:r option
+while getopts chHfbd:vp:r option
 do
 case $option in
 c)
@@ -50,6 +51,9 @@ check=true
 ;;
 f)
 force=true
+;;
+H)
+halted=true
 ;;
 b)
 backup_server=true
@@ -75,6 +79,7 @@ echo "       -b        start ECF for backup server or e-suite"
 echo "       -c        test check point file for errors"
 echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
 echo "       -f        forces the ECF to be restarted"
+echo "       -H        Halted mode (manual restart), overrides -f option"
 echo "       -v        verbose mode"
 echo "       -s        enable ssl server. Requires client/server built with openssl libs"
 echo "       -h        print this help page"
@@ -87,6 +92,7 @@ echo "       -b        start ECF for backup server or e-suite"
 echo "       -c        test check point file for errors"
 echo "       -d <dir>  specify the ECF_HOME directory - default $HOME/ecflow_server"
 echo "       -f        forces the ECF to be restarted"
+echo "       -H        Halted mode (manual restart), overrides -f option"
 echo "       -v        verbose mode"
 echo "       -s        enable ssl server. Requires client/server built with openssl libs"
 echo "       -h        print this help page"
@@ -124,6 +130,7 @@ export ECF_PORT=$port_number
 
 #===============================================================================
 # Setup ECF_HOME 
+
 export ECF_HOME=${ecf_home_directory:-$HOME/ecflow_server}
 export ECF_LISTS=${ECF_LISTS:-$ECF_HOME/ecf.lists}
 
@@ -281,7 +288,9 @@ fi
 nohup ${ECFLOW_BINDIR}/ecflow_server > $ECF_OUT 2>&1 < /dev/null &
 
 # the sleep allows time for server to start
-if [ "$force" = "true" ]; then
+if [ "$halted" = "true" ]; then
+   echo "Server is in Halted mode..."  
+elif [ "$force" = "true" ]; then
    echo "Placing server into RESTART mode..."
    sleep 5  
    ${ECFLOW_BINDIR}/ecflow_client --restart || { echo "restart of server failed" ; exit 1; }
