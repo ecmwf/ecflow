@@ -34,8 +34,6 @@ show_error_and_exit() {
    echo "                    copies the tar file to $SCRATCH"
    echo "   copy_tarball   - copies ecFlow-<version>-Source.tar.gz to /tmp/$USER/tmp/. and untars file"
    echo ""
-   echo "\nTo Build with system boost, just call:"
-   echo " 'module load boost/1.68.0' "
    echo "For a system install"
    echo "./cmake.sh sys_install make -j8 install"
    exit 1
