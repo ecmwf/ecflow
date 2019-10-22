@@ -252,7 +252,7 @@ else
    #     using python : 3.7 : /usr/local/apps/python3/3.7.1-01/bin/python3 : /usr/local/apps/python3/3.7.1-01/include/python3.7m ;  
    # ===========================================================================================================
     
-   #./b2 --with-python --clean     
+   ./b2 --with-python --clean     
    #./b2 python=2.7,3.6,3.7 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
    ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
 fi
