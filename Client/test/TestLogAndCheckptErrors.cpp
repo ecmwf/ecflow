@@ -27,6 +27,7 @@
 #include "Str.hpp"
 #include "File.hpp"
 #include "Pid.hpp"
+#include "PrintStyle.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -61,6 +62,11 @@ BOOST_AUTO_TEST_CASE( test_log_and_checkpt_write_errors )
       if (debug_me) cout << "->load a defs file to the server\n";
       std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
       BOOST_CHECK_MESSAGE(theClient.loadDefs(path) == 0,"load defs failed \n" << theClient.errorMsg());
+      if (debug_me) {
+         BOOST_CHECK_MESSAGE(theClient.sync_local() == 0,"sync_local failed \n" << theClient.errorMsg());
+         PrintStyle style(PrintStyle::STATE);
+         cout << theClient.defs() << "\n";
+      }
 
       if (debug_me) cout << "->flush the log file, this will close the log file in the server\n";
       BOOST_CHECK_MESSAGE(theClient.flushLog() == 0,"flushLog failed \n" << theClient.errorMsg());
