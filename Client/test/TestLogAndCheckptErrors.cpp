@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE( test_log_and_checkpt_write_errors )
    // This test needs to change directory *BEFORE* before the server starts.
    // Hence if the server is already running ignore this test.
    if (!ClientEnvironment::hostSpecified().empty()) {
-      cout << "Client:: ...test_log_and_checkpt_write_errors. IGNORING when server is already running\n";
+      cout << "Client:: ...test_log_and_checkpt_write_errors. IGNORING when server is already running" << endl;
       return;
    }
 
