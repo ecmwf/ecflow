@@ -40,7 +40,14 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // ************************************************************************************
 BOOST_AUTO_TEST_CASE( test_log_and_checkpt_write_errors )
 {
-   bool debug_me = true;
+   // This test needs to change directory *BEFORE* before the server starts.
+   // Hence if the server is already running ignore this test.
+   if (!ClientEnvironment::hostSpecified().empty()) {
+      cout << "Client:: ...test_log_and_checkpt_write_errors. IGNORING when server is already running\n";
+      return;
+   }
+
+   bool debug_me = false;
    if (debug_me) cout << "->Create a directory from where we will start the server\n";
    std::string ecf_home = "test_log_and_checkpt_write_errors" + Pid::getpid();
    fs::create_directory(ecf_home);
