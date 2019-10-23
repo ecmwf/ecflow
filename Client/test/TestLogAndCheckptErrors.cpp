@@ -108,6 +108,6 @@ BOOST_AUTO_TEST_CASE( test_log_and_checkpt_write_errors )
 
    if (debug_me) cout << "->remove created directory " << ecf_home << "\n";
    if (debug_me) cout << "->current path = " << boost::filesystem::current_path() << "\n";
-   BOOST_CHECK_MESSAGE(File::removeDir( ecf_home ),"Failed to remove dir " << ecf_home << "  error: " << strerror(errno) );
+   if (!debug_me) {BOOST_CHECK_MESSAGE(File::removeDir( ecf_home ),"Failed to remove dir " << ecf_home << "  error: " << strerror(errno) );}
 }
 BOOST_AUTO_TEST_SUITE_END()
