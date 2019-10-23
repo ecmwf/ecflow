@@ -157,11 +157,11 @@ bool CheckPtSaver::explicitSave(bool from_server) const
 #endif
 		}
 		catch (std::exception& e) {
+	 		ret = false;
          std::string msg =  "Could not save checkPoint file! "; msg += e.what();
          server_->defs_->flag().set(ecf::Flag::CHECKPT_ERROR);
          server_->defs()->set_server().add_or_update_user_variables("ECF_CHECKPT_ERROR",msg);
 	 		LOG(Log::ERR,msg);
-	 		ret = false;
 	 	}
 	}
 	else {
