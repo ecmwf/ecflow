@@ -34,9 +34,7 @@ public:
                   bool remove_checkpt_file_after_server_exit = true
 	             ) : port_(port),
 	                 host_(ClientEnvironment::hostSpecified()),
-	                 remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit),
-	                 server_started_(false)
-
+	                 remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit)
    {
 		if (host_.empty()) {
 			if(!msg.empty()) {
@@ -73,8 +71,7 @@ public:
                   bool remove_checkpt_file_before_server_start = true,
                   bool remove_checkpt_file_after_server_exit = true
                 ) : port_(port),
-                    remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit),
-                    server_started_(false)
+                    remove_checkpt_file_after_server_exit_(remove_checkpt_file_after_server_exit)
    {
       // host_ is empty.
       doStart("",port_,server_started_,disable_job_generation,remove_checkpt_file_before_server_start);
@@ -84,7 +81,7 @@ public:
 	   // This will also remove the generated files.
 	   // Will only terminate local server, host_ is *EMPTY* for local server, using two constructors above
 	   if (host_.empty()) {
-	      doEnd(ecf::Str::LOCALHOST(), port_, remove_checkpt_file_after_server_exit_);
+	      doEnd(ecf::Str::LOCALHOST(), port_, remove_checkpt_file_after_server_exit_,remove_log_file_after_server_exit_);
 	   }
 	}
 
@@ -95,6 +92,7 @@ public:
  	std::string ecf_checkpt_file() const        { return host_name_.ecf_checkpt_file(port_); }
 	std::string ecf_backup_checkpt_file() const { return host_name_.ecf_backup_checkpt_file(port_); }
 	bool server_started() const { return server_started_;}
+	void keep_log_file_after_server_exit() { remove_log_file_after_server_exit_ = false;}
 
 private:
 	static void doStart(const std::string& msg,
@@ -136,7 +134,7 @@ private:
       if (!msg.empty()) theClient.logMsg( msg );
 	}
 
-   static void doEnd( const std::string& host, const std::string& port, bool remove_checkpt_file_after_server_exit )
+   static void doEnd( const std::string& host, const std::string& port, bool remove_checkpt_file_after_server_exit,bool remove_log_file_after_server_exit )
    {
       //    std::cout << "*****InvokeServer::doEnd    Closing server on  " << host << ecf::Str::COLON() << port << "\n";
       {
@@ -150,8 +148,10 @@ private:
 
       // Remove generated file comment for debug
       ecf::Host h;
-      boost::filesystem::remove(h.ecf_log_file(port));
-      BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_log_file(port)), "log file " << h.ecf_log_file(port) << " not deleted\n");
+      if (remove_log_file_after_server_exit) {
+         boost::filesystem::remove(h.ecf_log_file(port));
+         BOOST_CHECK_MESSAGE(!boost::filesystem::exists(h.ecf_log_file(port)), "log file " << h.ecf_log_file(port) << " not deleted\n");
+      }
 
       if (remove_checkpt_file_after_server_exit) {
          boost::filesystem::remove(h.ecf_checkpt_file(port));
@@ -166,8 +166,9 @@ private:
 	std::string port_;
 	std::string host_;
 	ecf::Host   host_name_;
-	bool remove_checkpt_file_after_server_exit_;
-	bool server_started_;
+   bool remove_checkpt_file_after_server_exit_{true};
+   bool remove_log_file_after_server_exit_{true};
+	bool server_started_{false};
 };
 
 #endif

@@ -52,6 +52,7 @@ BOOST_AUTO_TEST_CASE( test_log_and_checkpt_write_errors )
       if (debug_me) cout << "->start the server\n";
       InvokeServer invokeServer("Client:: ...test_log_and_checkpt_write_errors",SCPort::next());
       BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
+      if (debug_me) invokeServer.keep_log_file_after_server_exit();
 
       ClientInvoker theClient(invokeServer.host(),invokeServer.port());
       theClient.set_throw_on_error(false);
