@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // ************************************************************************************
 BOOST_AUTO_TEST_CASE( test_log_and_checkpt_write_errors )
 {
-   bool debug_me = false;
+   bool debug_me = true;
    if (debug_me) cout << "->Create a directory from where we will start the server\n";
    std::string ecf_home = "test_log_and_checkpt_write_errors" + Pid::getpid();
    fs::create_directory(ecf_home);
