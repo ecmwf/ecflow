@@ -267,13 +267,13 @@ void BaseServer::clear_defs()
    defs_->clear();
 }
 
-void BaseServer::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_pt_save_time_alarm)
+bool BaseServer::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int check_pt_save_time_alarm)
 {
    if (serverEnv_.debug())
       cout << "   BaseServer::checkPtDefs() mode(" << m << ") check_pt_interval(" << check_pt_interval << ") check_pt_save_time_alarm(" << check_pt_save_time_alarm << ")" << endl;
 
    if (m == ecf::CheckPt::UNDEFINED && check_pt_interval == 0 && check_pt_save_time_alarm == 0) {
-      checkPtSaver_.explicitSave();  // will always save
+      return checkPtSaver_.explicitSave();  // will always save
    }
    else {
       if ( m != ecf::CheckPt::UNDEFINED ) {
@@ -289,6 +289,7 @@ void BaseServer::checkPtDefs(ecf::CheckPt::Mode m, int check_pt_interval, int ch
          stats().checkpt_save_time_alarm_ = check_pt_save_time_alarm;
       }
    }
+   return true;
 }
 
 void BaseServer::restore_defs_from_checkpt()

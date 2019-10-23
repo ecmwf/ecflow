@@ -42,9 +42,9 @@ public:
 	defs_ptr defs() const override { return defs_;}
 	void updateDefs(defs_ptr d, bool force) override { assert(defs_.get()); defs_->absorb(d.get(),force); }
  	void clear_defs() override { if (defs_.get()) defs_->clear(); } // dont delete since we pass in Fixture defs. Otherwise it will crash
-   void checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
+   bool checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
                                int check_pt_interval = 0,
-                               int check_pt_save_time_alarm = 0) override {}
+                               int check_pt_save_time_alarm = 0) override { return true;}
  	void restore_defs_from_checkpt() override {}
 	void nodeTreeStateChanged() override {}
 	bool allowTaskCommunication() const override { return true;}

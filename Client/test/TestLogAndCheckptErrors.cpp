@@ -54,6 +54,7 @@ BOOST_AUTO_TEST_CASE( test_log_and_checkpt_write_errors )
       BOOST_REQUIRE_MESSAGE( invokeServer.server_started(), "Server failed to start on " <<  invokeServer.host() << ":" << invokeServer.port() );
 
       ClientInvoker theClient(invokeServer.host(),invokeServer.port());
+      theClient.set_throw_on_error(false);
       BOOST_REQUIRE_MESSAGE( theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0 server not started, or connection refused\n" << theClient.errorMsg());
 
       if (debug_me) cout << "->load a defs file to the server\n";
@@ -68,7 +69,7 @@ BOOST_AUTO_TEST_CASE( test_log_and_checkpt_write_errors )
       BOOST_CHECK_MESSAGE( chmod(ecf_home.c_str(), strtol("0444" , 0, 8)) == 0 , "Can't chmod : " << strerror(errno)  );
 
       if (debug_me) cout << "->write the checkpoint file,  this should also try to re-open the log file and fail\n";
-      BOOST_CHECK_MESSAGE(theClient.checkPtDefs() == 0,CtsApi::checkPtDefs() << " Checkpoint expected to pass\n" << theClient.errorMsg());
+      BOOST_CHECK_MESSAGE(theClient.checkPtDefs() == 1,CtsApi::checkPtDefs() << " Checkpoint expected to fail\n" << theClient.errorMsg());
 
       if (debug_me) cout << "->get the defs from server, Check flags, check server variables\n";
       BOOST_CHECK_MESSAGE(theClient.sync_local() == 0,"sync_local failed \n" << theClient.errorMsg());

@@ -73,7 +73,9 @@ STC_Cmd_ptr CheckPtCmd::doHandleRequest(AbstractServer* as) const
    // want to skew this, and hence we ignore implicit request's via signal handling,
    // or when server terminates( does implicit check pt also)
    as->update_stats().checkpt_++;
-   as->checkPtDefs(mode_,check_pt_interval_,check_pt_save_time_alarm_);
+   if (!as->checkPtDefs(mode_,check_pt_interval_,check_pt_save_time_alarm_)) {
+      throw std::runtime_error("Could not save check point file. file system full or permissions ?");
+   }
    return PreAllocatedReply::ok_cmd();
 }
 

@@ -64,7 +64,7 @@ public:
 
  	/// Forces the defs file in the server to be written to disk *IF* no args provided.
  	/// Otherwise updated mode OR check_pt interval OR check pt alarm
- 	virtual void checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
+ 	virtual bool checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
  	                            int check_pt_interval = 0,
  	                            int check_pt_save_time_alarm = 0) = 0;
 

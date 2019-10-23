@@ -51,7 +51,8 @@ public:
    /// The input argument is used in logging. When check pointing via user command
    /// we log the request. However we also check point automatically via the server
    /// This allows us to distinguish the two cases in the log file:
-	void explicitSave(bool from_server = false) const;
+   /// Return true if no errors, otherwise false
+	bool explicitSave(bool from_server = false) const;
 
 	/// This function is called after node state changes. Check for save
 	/// CheckPt::ON_TIME - will do nothing since we will save periodically

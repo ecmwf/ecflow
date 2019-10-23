@@ -106,8 +106,9 @@ void CheckPtSaver::terminate()
 }
 
 
-void CheckPtSaver::explicitSave(bool from_server) const
+bool CheckPtSaver::explicitSave(bool from_server) const
 {
+   bool ret = true;
 	if ( server_->defs_ ) {
 
 		try {
@@ -160,6 +161,7 @@ void CheckPtSaver::explicitSave(bool from_server) const
          server_->defs_->flag().set(ecf::Flag::CHECKPT_ERROR);
          server_->defs()->set_server().add_or_update_user_variables("ECF_CHECKPT_ERROR",msg);
 	 		LOG(Log::ERR,msg);
+	 		ret = false;
 	 	}
 	}
 	else {
@@ -167,6 +169,7 @@ void CheckPtSaver::explicitSave(bool from_server) const
 		std::cout << "      CheckPtSaver::explicitSave() Node tree not loaded, can not save check pt file\n";
 #endif
 	}
+	return ret;
 }
 
 void CheckPtSaver::periodicSaveCheckPt(const boost::system::error_code& error )
@@ -212,7 +215,7 @@ void CheckPtSaver::doSave() const
 #endif
 		return;
 	}
-	explicitSave(true/* from the server, hence log */);
+	(void)explicitSave(true/* from the server, hence log */);
 }
 
 void CheckPtSaver::saveIfAllowed()

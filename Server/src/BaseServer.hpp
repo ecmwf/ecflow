@@ -53,7 +53,7 @@ public:
    defs_ptr defs() const override { return defs_;}
    void updateDefs(defs_ptr,bool force) override;
    void clear_defs() override;
-   void checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
+   bool checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED,
                                int check_pt_interval = 0,
                                int check_pt_save_time_alarm = 0) override;
    void restore_defs_from_checkpt() override;
