@@ -28,6 +28,7 @@
 #include "File.hpp"
 #include "Pid.hpp"
 #include "PrintStyle.hpp"
+#include "User.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -44,6 +45,12 @@ BOOST_AUTO_TEST_CASE( test_log_and_checkpt_write_errors )
    // Hence if the server is already running ignore this test.
    if (!ClientEnvironment::hostSpecified().empty()) {
       cout << "Client:: ...test_log_and_checkpt_write_errors. IGNORING when server is already running" << endl;
+      return;
+   }
+
+   // When this test is run in Bamboo/Docker, the users is root, hence the chmod below will not work and test will fail
+   if (User::login_name() == "root") {
+      cout << "Client:: ...test_log_and_checkpt_write_errors. IGNORING when user is root." << endl;
       return;
    }
 
