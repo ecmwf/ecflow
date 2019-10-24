@@ -142,9 +142,8 @@ void Limit::increment( int tokens , const std::string& abs_node_path) {
    // Note: previously we had:
    //     if ( value_ < lim_ ) {
 
-   if (paths_.find(abs_node_path) == paths_.end()) {
-
-      paths_.insert( abs_node_path );
+   auto result = paths_.insert( abs_node_path );
+   if (result.second) {
       value_ += tokens;
       update_change_no();
    }

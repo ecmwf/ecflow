@@ -961,9 +961,9 @@ std::string File::test_data(const std::string& rel_path, const std::string& dir)
       test_file += rel_path;
    }
    else {
-      std::string work_space = root_source_dir();
-      if (!work_space.empty()) {
-         test_file = work_space;
+      std::string root_source = root_source_dir();
+      if (!root_source.empty()) {
+         test_file = root_source;
          if (!rel_path.empty() && rel_path[0] != '/' ) test_file += "/";
          test_file += rel_path;
       }
@@ -1009,8 +1009,8 @@ std::string File::root_source_dir()
       current_path = current_path.parent_path();
 
       // bjam
-      std::string version_cmake = std::string(current_path.string()) + "/Jamroot.jam";
-      if (fs::exists(version_cmake)) {
+      std::string jamroot_file = std::string(current_path.string()) + "/Jamroot.jam";
+      if (fs::exists(jamroot_file)) {
          std::string the_root_source_dir = current_path.string();  // cos current_path.string() is returned by reference
          return the_root_source_dir;
       }
@@ -1049,12 +1049,12 @@ std::string File::root_build_dir()
       the_current_path = current_path.string(); // cos current_path.string() is returned by reference
 
       // bjam
-      std::string version_cmake = the_current_path + "/Jamroot.jam";
-      if (fs::exists(version_cmake))  return the_current_path;
+      std::string jamroot_file = the_current_path + "/Jamroot.jam";
+      if (fs::exists(jamroot_file))  return the_current_path;
 
       // cmake
-      std::string cmake_cache = the_current_path + "/CMakeCache.txt";
-      if (fs::exists(cmake_cache)) return the_current_path;
+      std::string cmake_cache1 = the_current_path + "/CMakeCache.txt";
+      if (fs::exists(cmake_cache1)) return the_current_path;
 
       stem = current_path.stem().string();
       count++;
