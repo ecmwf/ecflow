@@ -17,6 +17,7 @@
 #include "ecflow_version.h"
 #include <boost/version.hpp>
 #include <boost/lexical_cast.hpp>
+#include <cereal/version.hpp>
 
 namespace ecf {
 
@@ -65,7 +66,7 @@ std::string Version::description()
    std::string the_comp = compiler();
    if (!the_comp.empty()) ss << " compiler(" << the_comp << ")";
 
-   ss << " protocol(JSON)";
+   ss << " protocol(JSON cereal " << CEREAL_VERSION_MAJOR << "." << CEREAL_VERSION_MINOR << "." << CEREAL_VERSION_PATCH << ")";
 
 #ifdef ECF_OPENSSL
    ss << " openssl(enabled)";
