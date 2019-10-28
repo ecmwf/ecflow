@@ -599,14 +599,14 @@ static void replace(  string::size_type commentPos,
    string::size_type childPos = jobLine.find(smsChildCmd);
    if ( childPos != std::string::npos ) {
       if ( commentPos == std::string::npos) {
-         std::string replace = clientPath;
-         replace +=  ecfEquiv;
-         Str::replace(jobLine,smsChildCmd,replace);
+         std::string replace1 = clientPath;
+         replace1 +=  ecfEquiv;
+         Str::replace(jobLine,smsChildCmd,replace1);
       }
       else if ( childPos < commentPos) {
-         std::string replace = clientPath;
-         replace +=  ecfEquiv;
-         Str::replace(jobLine,smsChildCmd,replace);
+         std::string replace2 = clientPath;
+         replace2 +=  ecfEquiv;
+         Str::replace(jobLine,smsChildCmd,replace2);
       }
    }
 }
@@ -652,7 +652,7 @@ bool EcfFile::extract_ecfmicro(const std::string& line, std::string& ecfmicro, s
    return true;
 }
 
-void EcfFile::variableSubstitution(JobsParam& jobsParam)
+void EcfFile::variableSubstitution(const JobsParam& jobsParam)
 {
    // Allow variable substitution in comment and manual blocks.
    // But if it fails, don't report as an error
