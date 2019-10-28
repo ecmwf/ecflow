@@ -335,6 +335,7 @@ ecbuild_dont_pack( DIRS
                     CUSTOMER 
                     build_scripts/nightly build_scripts/test_bench
                     cereal-1.2.2
+                    cereal-1.3.0
                     Debug
                     Doc
 )
