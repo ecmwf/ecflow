@@ -30,10 +30,8 @@ NodeQueryResultItem::NodeQueryResultItem(VNode* node)  :
 }
 
 NodeQueryResultItem::NodeQueryResultItem(NodeQueryResultTmp_ptr d)
+: node_(d->node_), attr_(d->attr_)
 {
-	node_=d->node_;
-	attr_=d->attr_;
-
 	if(node_)
 		server_=node_->server();
 }
@@ -246,14 +244,14 @@ void NodeQueryResult::clear()
 {
 	Q_EMIT beginReset();
 
-	for(std::map<ServerHandler*,NodeQueryResultBlock>::const_iterator it=blocks_.begin(); it != blocks_.end(); it++)
+	for(std::map<ServerHandler*,NodeQueryResultBlock>::const_iterator it=blocks_.begin(); it != blocks_.end(); ++it)
 	{
 		it->first->removeServerObserver(this);
 		it->first->removeNodeObserver(this);
 	}
 	blocks_.clear();
 
-	for(std::vector<NodeQueryResultItem*>::const_iterator it=data_.begin(); it != data_.end(); it++)
+	for(std::vector<NodeQueryResultItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
 	{
 		delete *it;
 	}

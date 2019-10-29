@@ -185,7 +185,7 @@ const std::string& VariableModelData::value(int index) const
 	return defaultStr;
 }
 
-const std::string& VariableModelData::value(const std::string n,bool& hasIt) const
+const std::string& VariableModelData::value(const std::string& n,bool& hasIt) const
 {
     hasIt=false;
     if(n.empty())

@@ -37,7 +37,7 @@ public:
 	std::string type();
 	const std::string& name(int index) const;
     const std::string& value(int index) const;
-    const std::string& value(const std::string name,bool&) const;
+    const std::string& value(const std::string& name,bool&) const;
     VInfo_ptr info() const {return info_;}
     VInfo_ptr info(int index) const;
     int indexOf(const std::string& varName,bool genVar) const;

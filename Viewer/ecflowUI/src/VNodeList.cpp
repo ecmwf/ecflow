@@ -166,7 +166,7 @@ void VNodeList::trim()
 
 bool VNodeList::contains(VNode *node)
 {
-	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); it++)
+	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
 	{
 		if((*it)->sameAs(node))
 			return true;
@@ -180,14 +180,14 @@ void VNodeList::clear()
 {
 	Q_EMIT beginReset();
 
-	for(std::map<ServerHandler*,int>::const_iterator it=serverCnt_.begin(); it != serverCnt_.end(); it++)
+	for(std::map<ServerHandler*,int>::const_iterator it=serverCnt_.begin(); it != serverCnt_.end(); ++it)
 	{
 		it->first->removeServerObserver(this);
 		it->first->removeNodeObserver(this);
 	}
 	serverCnt_.clear();
 
-	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); it++)
+	for(std::vector<VNodeListItem*>::const_iterator it=data_.begin(); it != data_.end(); ++it)
 	{
 		delete *it;
 	}

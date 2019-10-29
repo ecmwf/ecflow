@@ -56,9 +56,8 @@ struct TableAttrDelegateBox : public AttrDelegateBox
 };
 
 TableNodeViewDelegate::TableNodeViewDelegate(QWidget *parent)
+: borderPen_(QPen(QColor(230,230,230)))
 {
-	borderPen_=QPen(QColor(230,230,230));
-
 	columns_=ModelColumn::def("table_columns");
 
     nodeBox_=new TableNodeDelegateBox;

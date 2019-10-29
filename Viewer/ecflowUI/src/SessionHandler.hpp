@@ -34,7 +34,7 @@ public:
 	std::string serverFile(const std::string& serverName) const;
     std::string infoPanelDialogFile() const;
 	std::string qtDir() const;
-	std::string qtSettingsFile(const std::string name) const;   
+	std::string qtSettingsFile(const std::string& name) const;
     void temporary(bool t) {isTemporary_ = t;}
     bool temporary() const {return isTemporary_;}
     void temporaryServerAlias(const std::string &alias) {temporaryServerAlias_ = alias;}

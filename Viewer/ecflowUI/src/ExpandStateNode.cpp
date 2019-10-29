@@ -13,11 +13,11 @@
 #include "VNode.hpp"
 
 ExpandStateNode::ExpandStateNode(const VNode* node,bool expanded) :
+    name_(node->strName()),
     expanded_(expanded),
     expandedAll_(0),
     collapsedAll_(0)
 {
-    name_=node->strName();
     reserveChildren(node->numOfChildren());
 }
 

@@ -60,11 +60,9 @@ struct TriggerAttrDelegateBox : public AttrDelegateBox
 };
 
 TriggerViewDelegate::TriggerViewDelegate(QWidget *parent) :
-    TreeNodeViewDelegate(nullptr,parent)
+    TreeNodeViewDelegate(nullptr,parent),
+    borderPen_(QPen(QColor(220,220,220)))
 {
-    //borderPen_=QPen(QColor(230,230,230));
-    borderPen_=QPen(QColor(220,220,220));
-
     nodeBox_=new TriggerNodeDelegateBox;
     attrBox_=new TriggerAttrDelegateBox;
 

@@ -94,7 +94,7 @@ std::string SessionItem::qtDir() const
     return qtPath_;
 }
 
-std::string SessionItem::qtSettingsFile(const std::string name) const
+std::string SessionItem::qtSettingsFile(const std::string& name) const
 {
     return DirectoryHandler::concatenate(qtPath_, name + ".conf");
 }

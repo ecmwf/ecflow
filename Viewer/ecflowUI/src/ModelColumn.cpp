@@ -281,9 +281,8 @@ void ModelColumn::loadUserSettings()
 }
 
 ModelColumnItem::ModelColumnItem(const std::string& id, bool extra) :
-    index_(-1), extra_(extra), editable_(extra)
+    id_(QString::fromStdString(id)),index_(-1), extra_(extra), editable_(extra)
 {
-	id_=QString::fromStdString(id);
 }
 
 static SimpleLoader<ModelColumn> loaderQuery("query_columns");

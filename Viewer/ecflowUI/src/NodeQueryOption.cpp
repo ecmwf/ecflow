@@ -83,15 +83,14 @@ NodeQueryOption* NodeQueryOptionFactory::create(VProperty *p)
 //
 //===============================================
 
-NodeQueryOption::NodeQueryOption(VProperty* p) : ignoreIfAny_(false)
+NodeQueryOption::NodeQueryOption(VProperty* p)
+: type_(p->param("type")),
+  name_(p->name()),
+  label_(p->param("label")),
+  ignoreIfAny_( (p->param("ignoreIfAny") == "true")?true:false)
 {
-    type_=p->param("type");
-    name_=p->name();
-    label_=p->param("label");
     if(label_.isEmpty())
         label_=name_;
-
-    ignoreIfAny_=(p->param("ignoreIfAny") == "true")?true:false;
 }
 
 void NodeQueryOption::build(NodeQuery* query)
@@ -243,10 +242,10 @@ void NodeQueryStringOption::load(VSettings* vs)
 //===============================================
 
 NodeQueryListOption::NodeQueryListOption(VProperty* p) :
-  NodeQueryOption(p)
+  NodeQueryOption(p),
+  values_(p->param("values").split("|")),
+  valueLabels_(p->param("labels").split("|"))
 {
-    values_=p->param("values").split("|");
-    valueLabels_=p->param("labels").split("|");
     if(valueLabels_.count() == 1 && valueLabels_[0].isEmpty())
         valueLabels_=values_;
 
@@ -302,10 +301,10 @@ void NodeQueryListOption::load(VSettings* vs)
 //===============================================
 
 NodeQueryComboOption::NodeQueryComboOption(VProperty* p) :
-  NodeQueryOption(p)
+  NodeQueryOption(p),
+  values_(p->param("values").split("|")),
+  valueLabels_(p->param("labels").split("|"))
 {
-    values_=p->param("values").split("|");
-    valueLabels_=p->param("labels").split("|");
     if(valueLabels_.count() == 1 && valueLabels_[0].isEmpty())
         valueLabels_=values_;
 
