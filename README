@@ -62,7 +62,6 @@ Use the following step to build boost from scratch:
   and will configure boost build according to your platform
   
   > cd $BOOST_ROOT
-  > $WK/build_scripts/boost_1_53_fix.sh    # fix for boost, only for some platforms
   > $WK/build_scripts/boost_build.sh       # compile boost libs used by ecFlow
 
 
