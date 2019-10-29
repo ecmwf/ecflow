@@ -128,6 +128,9 @@ int CtsNodeCmd::timeout() const
    if (api_ == CtsNodeCmd::GET) {
       return time_out_for_load_sync_and_get();
    }
+   if (api_ == CtsNodeCmd::MIGRATE) {
+      return 120;
+   }
    return ClientToServerCmd::timeout();
 }
 
