@@ -1,0 +1,5 @@
+%manual
+%include <help_manual.h>
+
+This the manual for boost_suite
+%end
