@@ -58,8 +58,8 @@ Use the following step to build boost from scratch:
   Now make sure bjam is accessible from $PATH
 
 * Ecflow uses some of compiled libraries in boost. The following script
-  will build the required lib's, in both debug and release forms
-  and will configure boost build according to your platform
+  will build the required lib's, and will configure boost build according 
+  to your platform
   
   > cd $BOOST_ROOT
   > $WK/build_scripts/boost_build.sh       # compile boost libs used by ecFlow
