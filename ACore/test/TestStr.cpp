@@ -559,16 +559,12 @@ BOOST_AUTO_TEST_CASE( test_str_less_greater)
 
 //BOOST_AUTO_TEST_CASE( test_loop )
 //{
-//	// DEBUG release shows BOOST_FOREACH has worst perf, however in release mode its par with the fastest.
 //	size_t vecSize = 200000000;
 //	std::vector<Fred> vec;
 //	vec.reserve(vecSize);
 //	for (size_t i = 0; i < vecSize ; i++) { vec.push_back(Fred(i));}
 //
-// 	boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed
-//	BOOST_FOREACH(Fred& fred, vec) { fred.inc(); }
-// 	cout << "Time: BOOST_FOREACH(Fred& fred, vec) { fred.inc(); }                                       " << timer.format(3,Str::cpu_timer_format()) << "\n";
-//
+// 	boost::timer::cpu_timer timer; // measures CPU, replace with cpu_timer with boost > 1.51, measures cpu & elapsed//
 //   timer.restart();
 //   for(auto &fred : vec) { fred.inc(); }
 //   cout << "Time: for(auto &fred : vec) { fred.inc(); }                                                " << timer.format(3,Str::cpu_timer_format()) << "\n";
