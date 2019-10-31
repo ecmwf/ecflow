@@ -99,32 +99,32 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
  		comp->clear_attributes();
 
 
-      BOOST_FOREACH(const Meter& m, meters_) { comp->add( std::make_shared<NodeMeterMemento>( m) ); }
-      BOOST_FOREACH(const Event& e, events_) { comp->add( std::make_shared<NodeEventMemento>( e) ); }
-      BOOST_FOREACH(const Label& l, labels_) { comp->add( std::make_shared<NodeLabelMemento>( l) ); }
+      for(const Meter& m: meters_) { comp->add( std::make_shared<NodeMeterMemento>( m) ); }
+      for(const Event& e: events_) { comp->add( std::make_shared<NodeEventMemento>( e) ); }
+      for(const Label& l: labels_) { comp->add( std::make_shared<NodeLabelMemento>( l) ); }
 
-      BOOST_FOREACH(const ecf::TodayAttr& attr, todays_){ comp->add( std::make_shared<NodeTodayMemento>( attr) ); }
-      BOOST_FOREACH(const ecf::TimeAttr& attr, times_ ) { comp->add( std::make_shared<NodeTimeMemento>( attr) ); }
-      BOOST_FOREACH(const DayAttr& attr, days_ )          { comp->add( std::make_shared<NodeDayMemento>( attr) ); }
-      BOOST_FOREACH(const DateAttr& attr, dates_ )        { comp->add( std::make_shared<NodeDateMemento>( attr) ); }
-      BOOST_FOREACH(const CronAttr& attr, crons_ )        { comp->add( std::make_shared<NodeCronMemento>( attr) ); }
+      for(const ecf::TodayAttr& attr: todays_){ comp->add( std::make_shared<NodeTodayMemento>( attr) ); }
+      for(const ecf::TimeAttr& attr: times_ ) { comp->add( std::make_shared<NodeTimeMemento>( attr) ); }
+      for(const DayAttr& attr: days_ )          { comp->add( std::make_shared<NodeDayMemento>( attr) ); }
+      for(const DateAttr& attr: dates_ )        { comp->add( std::make_shared<NodeDateMemento>( attr) ); }
+      for(const CronAttr& attr: crons_ )        { comp->add( std::make_shared<NodeCronMemento>( attr) ); }
 
 		if (misc_attrs_) {
          const std::vector<VerifyAttr>& verify_attrs = misc_attrs_->verifys();
          if (!verify_attrs.empty()) comp->add( std::make_shared<NodeVerifyMemento>( verify_attrs) );
 
          const std::vector<ZombieAttr>& zombie_attrs = misc_attrs_->zombies();
-         BOOST_FOREACH(const ZombieAttr& attr, zombie_attrs){ comp->add( std::make_shared<NodeZombieMemento>( attr) ); }
+         for(const ZombieAttr& attr: zombie_attrs){ comp->add( std::make_shared<NodeZombieMemento>( attr) ); }
 
          const std::vector<QueueAttr>& queue_attrs = misc_attrs_->queues();
-         BOOST_FOREACH(const QueueAttr& attr, queue_attrs){ comp->add( std::make_shared<NodeQueueMemento>( attr) ); }
+         for(const QueueAttr& attr: queue_attrs){ comp->add( std::make_shared<NodeQueueMemento>( attr) ); }
 
          const std::vector<GenericAttr>& generic_attrs = misc_attrs_->generics();
-         BOOST_FOREACH(const GenericAttr& attr,generic_attrs){ comp->add( std::make_shared<NodeGenericMemento>( attr) ); }
+         for(const GenericAttr& attr:generic_attrs){ comp->add( std::make_shared<NodeGenericMemento>( attr) ); }
 		}
 
-		BOOST_FOREACH(limit_ptr l, limits_ )         { comp->add( std::make_shared<NodeLimitMemento>(  *l) ); }
-  		BOOST_FOREACH(const Variable& v, vars_ )     { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
+		for(limit_ptr l: limits_ )         { comp->add( std::make_shared<NodeLimitMemento>(  *l) ); }
+  		for(const Variable& v: vars_ )     { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
 
  		inLimitMgr_.get_memento(comp);
 
@@ -144,19 +144,19 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	// ** if start to Change ZombieAttr then it needs to be added here, currently we only add/delete.
 
 	// determine if event, meter, label   changed.
-	BOOST_FOREACH(const Event& e, events_ ) {
+	for(const Event& e: events_ ) {
 	   if (e.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeEventMemento>(e) );
 	   }
 	}
-	BOOST_FOREACH(const Meter& m, meters_) {
+	for(const Meter& m: meters_) {
 	   if (m.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeMeterMemento>( m) );
 	   }
 	}
-	BOOST_FOREACH(const Label& l, labels_ ) {
+	for(const Label& l: labels_ ) {
 	   if (l.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeLabelMemento>(  l) );
@@ -164,31 +164,31 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	}
 
 	// Determine if the time related dependency changed
-	BOOST_FOREACH(const TodayAttr& attr, todays_  ) {
+	for(const TodayAttr& attr: todays_  ) {
 	   if (attr.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeTodayMemento>( attr) );
 	   }
 	}
-	BOOST_FOREACH(const TimeAttr& attr, times_  ) {
+	for(const TimeAttr& attr: times_  ) {
 	   if (attr.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeTimeMemento>( attr) );
 	   }
 	}
-	BOOST_FOREACH(const DayAttr& attr, days_ ) {
+	for(const DayAttr& attr: days_ ) {
 	   if (attr.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeDayMemento>( attr) );
 	   }
 	}
-	BOOST_FOREACH(const DateAttr& attr, dates_ ) {
+	for(const DateAttr& attr: dates_ ) {
 	   if (attr.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeDateMemento>( attr) );
 	   }
 	}
-	BOOST_FOREACH(const CronAttr& attr, crons_ ) {
+	for(const CronAttr& attr: crons_ ) {
 	   if (attr.state_change_no() > client_state_change_no) {
 	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
 	      comp->add( std::make_shared<NodeCronMemento>( attr) );
@@ -199,7 +199,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
    if (misc_attrs_) {
 
       const std::vector<QueueAttr>& queue_attrs = misc_attrs_->queues();
-      BOOST_FOREACH(const QueueAttr& attr, queue_attrs ) {
+      for(const QueueAttr& attr: queue_attrs ) {
          if (attr.state_change_no() > client_state_change_no) {
             if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
             comp->add( std::make_shared<NodeQueueIndexMemento>( attr.name(), attr.index(), attr.state_vec() ) );
@@ -209,7 +209,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       // zombies have no state that changes
       // If one verify changes then copy all. Avoids having to work out which one changed
       const std::vector<VerifyAttr>& verify_attrs = misc_attrs_->verifys();
-      BOOST_FOREACH(const VerifyAttr& v, verify_attrs ) {
+      for(const VerifyAttr& v: verify_attrs ) {
          if (v.state_change_no() > client_state_change_no) {
             if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
             comp->add( std::make_shared<NodeVerifyMemento>( verify_attrs) );
@@ -235,7 +235,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	}
 
 	// determine if limits changed.
-	BOOST_FOREACH(limit_ptr l, limits_ ) {
+	for(limit_ptr l: limits_ ) {
 		if (l->state_change_no() > client_state_change_no) {
 			if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
 			comp->add( std::make_shared<NodeLimitMemento>(  *l) );
@@ -245,7 +245,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	// determine if variable values changed. Copy all variables. Save on having variable_change_no_ per variable
 	if (variable_change_no_ > client_state_change_no) {
       if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
-	   BOOST_FOREACH(const Variable& v, vars_ )  { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
+	   for(const Variable& v: vars_ )  { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
 	}
 
 	// Determine if the late attribute has changed

@@ -260,7 +260,7 @@ static bp::list wrap_set_of_strings(Limit* limit)
 {
    bp::list list;
    const std::set<std::string>& paths = limit->paths();
-   BOOST_FOREACH(std::string path, paths) { list.append(path); }
+   for(std::string path: paths) { list.append(path); }
    return list;
 }
 

@@ -17,7 +17,7 @@
 #include <sstream>
 #include <ostream>
 
-#include <boost/foreach.hpp>
+
 #include <boost/lexical_cast.hpp>
 
 #include "NodeAttr.hpp"

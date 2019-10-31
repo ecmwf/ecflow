@@ -29,7 +29,7 @@ ClientSuites::ClientSuites(Defs* defs,unsigned int handle, bool auto_add_new_sui
   handle_(handle),
   auto_add_new_suites_(auto_add_new_suites)
 {
-   BOOST_FOREACH(const std::string& s, suites) {
+   for(const std::string& s: suites) {
       add_suite(s);
    }
 }
@@ -127,7 +127,7 @@ void ClientSuites::suite_deleted_in_defs(suite_ptr suite)
 
 void ClientSuites::collateChanges(DefsDelta& changes) const
 {
-   BOOST_FOREACH(const HSuite& s, suites_) {
+   for(const HSuite& s: suites_) {
       suite_ptr suite = s.weak_suite_ptr_.lock();
       if (suite.get()) {
          if (suite->state_change_no() > changes.client_state_change_no()) {
@@ -239,7 +239,7 @@ void ClientSuites::max_change_no(unsigned int& the_max_state_change_no,unsigned 
    the_max_modify_change_no = 0;
    the_max_modify_change_no = std::max( the_max_modify_change_no,  modify_change_no_  );
 
-   BOOST_FOREACH(const HSuite& p, suites_) {
+   for(const HSuite& p: suites_) {
       suite_ptr suite = p.weak_suite_ptr_.lock();
       if (suite.get()) {
          the_max_modify_change_no = std::max( the_max_modify_change_no, suite->modify_change_no() );

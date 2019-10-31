@@ -82,7 +82,7 @@ static int NUM_OF_TASKS = 5;
 static std::string dump_tasks(const vector<Task*>& tasks) {
    std::stringstream ss;
    ss << "     task status: no of tasks(" << tasks.size() << ")\n";
-   BOOST_FOREACH(const Task* task, tasks) {
+   for(const Task* task: tasks) {
       ss << "      "
          << task->absNodePath() << " "
          << NState::toString(task->state())
@@ -130,7 +130,7 @@ static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState:
       defs_ptr defs = TestFixture::client().defs();
       vector<Task*> tasks; defs->getAllTasks(tasks);
       if (num_of_tasks == SINGLE) {
-         BOOST_FOREACH(Task* task, tasks) {
+         for(Task* task: tasks) {
             if (task->state() == state1 || task->state() == state2 ) {
                if (ecf_debug_enabled) {
                   if (task->state() == state1) std::cout << "    Found at least one Task with state " << NState::toString(state1) << " returning\n";
@@ -143,7 +143,7 @@ static bool waitForTaskStates(WaitType num_of_tasks,NState::State state1,NState:
       }
       else {
          size_t count = 0;
-         BOOST_FOREACH(Task* task, tasks) { if (task->state() == state1 || task->state() == state2)  count++; }
+         for(Task* task: tasks) { if (task->state() == state1 || task->state() == state2)  count++; }
          if (count == tasks.size()) {
             if (ecf_debug_enabled) {
                if (state2 == state1) std::cout << "    All tasks(" << tasks.size() << ") have reached state " << NState::toString(state1) << " returning\n";
@@ -220,7 +220,7 @@ static void remove_stale_zombies()
 
    BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-   BOOST_FOREACH(const Zombie& z, zombies) {
+   for(const Zombie& z: zombies) {
       if (z.process_or_remote_id().empty()) {
          cout << "\n      **** removing_stale_zombies ***** " << z << "\n";
          cout << "        Typically happens when a submitted job, never creates a process ?\n";
@@ -240,7 +240,7 @@ static void wait_for_zombies_of_type(Child::ZombieType zt, int no_of_tasks, int 
    while (1) {
       BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
       zombies = TestFixture::client().server_reply().zombies();
-      BOOST_FOREACH(const Zombie& z, zombies) { if (z.type() == zt )  no_of_zombies++; }
+      for(const Zombie& z: zombies) { if (z.type() == zt )  no_of_zombies++; }
       if (no_of_zombies >= no_of_tasks) break;
 
       // make sure test does not take too long.
@@ -337,7 +337,7 @@ static void wait_for_zombies_child_cmd(WaitType wait_type,ecf::Child::CmdType ch
       }
 
       size_t completed_zombies = 0;
-      BOOST_FOREACH(const Zombie& z, zombies) {
+      for(const Zombie& z: zombies) {
          if (ecf_debug_enabled) std::cout << "   " << z << "\n";
          if (z.last_child_cmd() == child_cmd) {
             child_type_found = true;
@@ -358,7 +358,7 @@ static void wait_for_zombies_child_cmd(WaitType wait_type,ecf::Child::CmdType ch
             std::cout << Zombie::pretty_print( zombies, 6);
          }
          if (do_delete) {
-            BOOST_FOREACH(const Zombie& z, zombies) {
+            for(const Zombie& z: zombies) {
                if (ecf_debug_enabled) std::cout << "   deleteing " << z << "\n";
                TestFixture::client().zombieRemove(z);
             }
@@ -514,7 +514,7 @@ static void create_and_start_test(Defs& theDefs, const std::string& suite_name, 
       /// Check we have zombies and they are of type USER
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
       BOOST_CHECK_MESSAGE(zombies.size() > 0," NO zombies created");
-      BOOST_FOREACH(const Zombie& z, zombies) {
+      for(const Zombie& z: zombies) {
          if (create_zombies_with == "begin") {
             BOOST_CHECK_MESSAGE(z.type() == Child::USER,"Creating zombies via begin, Expected 'user' zombie type but got: " << z);
          }
@@ -913,7 +913,7 @@ BOOST_AUTO_TEST_CASE( test_zombie_inheritance )
    TestFixture::client().zombieGet();
    std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
    BOOST_CHECK_MESSAGE(!zombies.empty(),"No zombies found");
-   BOOST_FOREACH(const Zombie& z, zombies) {
+   for(const Zombie& z: zombies) {
       BOOST_CHECK_MESSAGE(z.user_action() == ecf::User::FOB, "Expected zombies with user action of type FOB but found " << User::to_string(z.user_action()));
       break;
    }
@@ -935,7 +935,7 @@ static int wait_for_killed_zombies(int no_of_tasks, int max_time_to_wait)
       int killed = 0;
       TestFixture::client().zombieGet();
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-      BOOST_FOREACH(const Zombie& z, zombies) {
+      for(const Zombie& z: zombies) {
          if (z.kill()) killed++;
       }
       if (ecf_debug_enabled) std::cout << "   found " << killed << " killed zombies\n";
@@ -983,7 +983,7 @@ BOOST_AUTO_TEST_CASE( test_zombie_kill )
           int completed = 0; int aborted = 0;
           TestFixture::client().zombieGet();
           std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-          BOOST_FOREACH(const Zombie& z, zombies) {
+          for(const Zombie& z: zombies) {
              if (z.last_child_cmd() == ecf::Child::ABORT) aborted++;
              if (z.last_child_cmd() == ecf::Child::COMPLETE) completed++;
           }
@@ -1005,7 +1005,7 @@ BOOST_AUTO_TEST_CASE( test_zombie_kill )
       while (1) {
           TestFixture::client().zombieGet();
           std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-          BOOST_FOREACH(const Zombie& z, zombies) {
+          for(const Zombie& z: zombies) {
              if (z.block()) {  // something went wrong, fob so don't leave process hanging
                 TestFixture::client().zombieFob(z);
                 task_became_blocked = true;
@@ -1047,7 +1047,7 @@ static void remove_all_user_zombies()
    while(removed_count < NUM_OF_TASKS) {
       TestFixture::client().zombieGet();
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
-      BOOST_FOREACH(const Zombie& z, zombies) {
+      for(const Zombie& z: zombies) {
          if (z.type() == ecf::Child::USER) {
             TestFixture::client().zombieRemove(z);  // This should be immediate, and is not remembered
             removed_count++;

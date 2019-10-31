@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_locator )
 	theDefs.beginAll();
 
 	// Test for ECF_ file location
-  	BOOST_FOREACH(Task* t, theTasks) {
+  	for(Task* t: theTasks) {
   		try {
   			EcfFile ecf_file = t->locatedEcfFile();
   		   //cout << "Task: " << t->absNodePath() << " " << ecf_file.ecf_file_origin_dump() << "\n";
@@ -383,7 +383,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_locator_using_ECF_FILES )
    theDefs.beginAll();
 
    // Test for ECF_ file location
-   BOOST_FOREACH(Task* t, theTasks) {
+   for(Task* t: theTasks) {
       try {
          EcfFile ecf_file = t->locatedEcfFile();
          //cout << "Task: " << t->absNodePath() << " " << ecf_file.ecf_file_origin_dump() << "\n";
@@ -450,7 +450,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file_locator_using_ECF_FILES_variable_substitutio
    theDefs.beginAll();
 
    // Test for ECF_ file location
-   BOOST_FOREACH(Task* t, theTasks) {
+   for(Task* t: theTasks) {
       try {
          EcfFile ecf_file = t->locatedEcfFile();
          //cout << "Task: " << t->absNodePath() << " " << ecf_file.ecf_file_origin_dump() << "\n";

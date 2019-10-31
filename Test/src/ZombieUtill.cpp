@@ -70,7 +70,7 @@ int ZombieUtil::do_zombie_user_action(User::Action uc, int expected_action_cnt, 
       BOOST_REQUIRE_MESSAGE(TestFixture::client().zombieGet() == 0, "zombieGet failed should return 0\n" << TestFixture::client().errorMsg());
       std::vector<Zombie> zombies = TestFixture::client().server_reply().zombies();
       bool continue_looping = false;
-      BOOST_FOREACH(const Zombie& z, zombies) {
+      for(const Zombie& z: zombies) {
          switch (uc) {
             case User::FOB: {
                if (!z.fob()) {

@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( test_file_cmd )
    std::vector<Node*> nodeVec;
    theDefs.getAllNodes(nodeVec);
 
-   BOOST_FOREACH(Node* node, nodeVec) {
+   for(Node* node: nodeVec) {
 
       string nodePath = node->absNodePath();
       std::vector<CFileCmd::File_t> fileTypesVec = CFileCmd::fileTypesVec();

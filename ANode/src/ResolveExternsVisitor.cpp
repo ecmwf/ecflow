@@ -32,7 +32,7 @@ namespace ecf {
 ResolveExternsVisitor::ResolveExternsVisitor(Defs* defs) : defs_(defs) {}
 
 void ResolveExternsVisitor::visitDefs( Defs* d) {
-  	BOOST_FOREACH(suite_ptr s, d->suiteVec()) { s->acceptVisitTraversor(*this); }
+  	for(suite_ptr s: d->suiteVec()) { s->acceptVisitTraversor(*this); }
 }
 
 void ResolveExternsVisitor::visitSuite( Suite* s)   { visitNodeContainer(s);}
@@ -42,7 +42,7 @@ void ResolveExternsVisitor::visitNodeContainer(NodeContainer* nc){
 
  	setup(nc);
 
-	BOOST_FOREACH(node_ptr t, nc->nodeVec()) {
+	for(node_ptr t: nc->nodeVec()) {
  		t->acceptVisitTraversor(*this);
   	}
 }

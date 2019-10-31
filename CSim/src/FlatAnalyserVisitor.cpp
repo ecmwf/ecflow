@@ -31,7 +31,7 @@ namespace ecf {
 FlatAnalyserVisitor::FlatAnalyserVisitor() = default;
 
 void FlatAnalyserVisitor::visitDefs( Defs* d) {
-	BOOST_FOREACH(suite_ptr s, d->suiteVec()) { s->acceptVisitTraversor(*this); }
+	for(suite_ptr s: d->suiteVec()) { s->acceptVisitTraversor(*this); }
 }
 
 void FlatAnalyserVisitor::visitSuite( Suite* s)   { visitNodeContainer(s);}
@@ -46,7 +46,7 @@ void FlatAnalyserVisitor::visitNodeContainer(NodeContainer* nc)
 
  	// Dont bother traversing children if parent is holding on trigger/complete expression
  	if (traverseChildren) {
- 		BOOST_FOREACH(node_ptr t, nc->nodeVec())       { t->acceptVisitTraversor(*this);}
+ 		for(node_ptr t: nc->nodeVec())       { t->acceptVisitTraversor(*this);}
  	}
 }
 
@@ -83,7 +83,7 @@ bool FlatAnalyserVisitor::analyse(Node* node)
 
 			AstAnalyserVisitor astVisitor;
 	 		node->completeAst()->accept(astVisitor);
-	 		BOOST_FOREACH(const string& nodePath, astVisitor.dependentNodePaths()) {
+	 		for(const string& nodePath: astVisitor.dependentNodePaths()) {
 	 			Indentor in; Indentor::indent(ss_) << "'" << nodePath << "' is not defined in the expression\n";
 	 		}
 	 		ss_ << *node->completeAst();
@@ -96,7 +96,7 @@ bool FlatAnalyserVisitor::analyse(Node* node)
 
 			AstAnalyserVisitor astVisitor;
 			node->triggerAst()->accept(astVisitor);
-	 		BOOST_FOREACH(const string& nodePath, astVisitor.dependentNodePaths()) {
+	 		for(const string& nodePath: astVisitor.dependentNodePaths()) {
 	 			Indentor in; Indentor::indent(ss_) << "'" << nodePath << "' is not defined in the expression\n";
 	 		}
 			ss_ << *node->triggerAst();

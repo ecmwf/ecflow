@@ -34,7 +34,7 @@
 #include "boost/lambda/lambda.hpp"
 #include "boost/lambda/bind.hpp"
 #include "boost/cast.hpp"
-#include <boost/foreach.hpp>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 

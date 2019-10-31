@@ -113,7 +113,7 @@ void delete_some_attributes(defs_ptr defs)
 {
 	std::vector<Task*> tasks;
 	defs->getAllTasks(tasks);
-	BOOST_FOREACH(Task* task, tasks) {
+	for(Task* task: tasks) {
 
 		SuiteChanged1 changed(task->suite());
 
@@ -122,9 +122,9 @@ void delete_some_attributes(defs_ptr defs)
 		std::vector<Meter> meters = task->meters();
 		std::vector<Label> labels = task->labels();
 
-		BOOST_FOREACH(const Event& e, events) { task->deleteEvent( e.name_or_number() );}
-		BOOST_FOREACH(const Meter& m, meters) { task->deleteMeter( m.name() ); }
-		BOOST_FOREACH(const Label& l, labels) { task->deleteLabel( l.name() ); }
+		for(const Event& e: events) { task->deleteEvent( e.name_or_number() );}
+		for(const Meter& m: meters) { task->deleteMeter( m.name() ); }
+		for(const Label& l: labels) { task->deleteLabel( l.name() ); }
 
 		BOOST_REQUIRE_MESSAGE( task->events().empty(),"Expected all events to be deleted");
 		BOOST_REQUIRE_MESSAGE( task->meters().empty(),"Expected all meters to be deleted");
@@ -136,7 +136,7 @@ void delete_time_attributes(defs_ptr defs)
 {
    std::vector<Node*> nodes;
    defs->getAllNodes(nodes);
-   BOOST_FOREACH(Node* node, nodes) {
+   for(Node* node: nodes) {
 
       SuiteChanged1 changed(node->suite());
 
@@ -147,11 +147,11 @@ void delete_time_attributes(defs_ptr defs)
       std::vector<DateAttr> dates = node->dates();
       std::vector<CronAttr> crons = node->crons();
 
-      BOOST_FOREACH(const TimeAttr& t, times) { node->delete_time( t );}
-      BOOST_FOREACH(const TodayAttr& t, todays) { node->delete_today( t );}
-      BOOST_FOREACH(const DayAttr& t, days) { node->delete_day( t );}
-      BOOST_FOREACH(const DateAttr& t, dates) { node->delete_date( t );}
-      BOOST_FOREACH(const CronAttr& t, crons) { node->delete_cron( t );}
+      for(const TimeAttr& t: times) { node->delete_time( t );}
+      for(const TodayAttr& t: todays) { node->delete_today( t );}
+      for(const DayAttr& t: days) { node->delete_day( t );}
+      for(const DateAttr& t: dates) { node->delete_date( t );}
+      for(const CronAttr& t: crons) { node->delete_cron( t );}
 
       BOOST_REQUIRE_MESSAGE( node->timeVec().empty(),"Expected all times to be deleted");
       BOOST_REQUIRE_MESSAGE( node->todayVec().empty(),"Expected all todays to be deleted");
@@ -165,7 +165,7 @@ void delete_misc_attributes(defs_ptr defs)
 {
    std::vector<Node*> nodes;
    defs->getAllNodes(nodes);
-   BOOST_FOREACH(Node* node, nodes) {
+   for(Node* node: nodes) {
 
       SuiteChanged1 changed(node->suite());
 
@@ -173,8 +173,8 @@ void delete_misc_attributes(defs_ptr defs)
       std::vector<ZombieAttr> zombies = node->zombies();
       //std::vector<VerifyAttr> verifys = node->verifys()();
 
-      BOOST_FOREACH(const ZombieAttr & t, zombies ) { node->delete_zombie( t.zombie_type() );}
-      //BOOST_FOREACH(const VerifyAttr & t, verifys ) { node->delete_verify( t );}
+      for(const ZombieAttr & t: zombies ) { node->delete_zombie( t.zombie_type() );}
+      //for(const VerifyAttr & t: verifys ) { node->delete_verify( t );}
 
       BOOST_REQUIRE_MESSAGE( node->zombies().empty(),"Expected all zombies to be deleted");
       //BOOST_REQUIRE_MESSAGE( node->verifys().empty(),"Expected all verifys to be deleted");
@@ -184,7 +184,7 @@ void delete_misc_attributes(defs_ptr defs)
 void add_some_attributes(defs_ptr defs) {
 	std::vector<task_ptr> tasks;
 	defs->get_all_tasks(tasks);
-	BOOST_FOREACH(task_ptr task, tasks) { SuiteChanged1 changed(task->suite()); task->addDay( DayAttr(DayAttr::TUESDAY) );}
+	for(task_ptr task: tasks) { SuiteChanged1 changed(task->suite()); task->addDay( DayAttr(DayAttr::TUESDAY) );}
 }
 
 void begin(defs_ptr defs) { defs->beginAll();} // reset all attributes
@@ -205,7 +205,7 @@ void remove_all_aliases(defs_ptr defs) {
    defs->get_all_aliases(aliases);
    BOOST_REQUIRE_MESSAGE( !aliases.empty(), "Expected at least one alias");
 
-   BOOST_FOREACH(alias_ptr alias, aliases) {
+   for(alias_ptr alias: aliases) {
       TestHelper::invokeRequest(defs.get(),Cmd_ptr( new DeleteCmd(alias->absNodePath())));
    }
 
@@ -219,7 +219,7 @@ void remove_all_tasks(defs_ptr defs) {
 	// Remove tasks should force a incremental sync
 	std::vector<task_ptr> tasks;
 	defs->get_all_tasks(tasks);
-	BOOST_FOREACH(task_ptr task, tasks) { SuiteChanged1 changed(task->suite()); task->remove() ;}
+	for(task_ptr task: tasks) { SuiteChanged1 changed(task->suite()); task->remove() ;}
 
 	tasks.clear();
 	defs->get_all_tasks(tasks);
@@ -245,7 +245,7 @@ void remove_a_family(defs_ptr defs) {
 
 
 void change_clock_gain(defs_ptr defs) {
-  	BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+  	for(suite_ptr suite: defs->suiteVec()) {
 		if (suite->clockAttr().get()) {
 			SuiteChanged changed(suite);
  			suite->changeClockGain("100001");
@@ -254,7 +254,7 @@ void change_clock_gain(defs_ptr defs) {
 }
 void change_clock_type_to_real(defs_ptr defs) {
 
-   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+   for(suite_ptr suite: defs->suiteVec()) {
       if (suite->clockAttr().get()) {
          SuiteChanged changed(suite);
          suite->changeClockType("real");
@@ -263,7 +263,7 @@ void change_clock_type_to_real(defs_ptr defs) {
 }
 void change_clock_type_to_hybrid(defs_ptr defs) {
 
-   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+   for(suite_ptr suite: defs->suiteVec()) {
       if (suite->clockAttr().get()) {
          SuiteChanged changed(suite);
          suite->changeClockType("hybrid");
@@ -272,7 +272,7 @@ void change_clock_type_to_hybrid(defs_ptr defs) {
 }
 void change_clock_date(defs_ptr defs) {
 
-   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+   for(suite_ptr suite: defs->suiteVec()) {
       if (suite->clockAttr().get()) {
          SuiteChanged changed(suite);
          suite->changeClockDate("1.1.2001");
@@ -281,7 +281,7 @@ void change_clock_date(defs_ptr defs) {
 }
 void change_clock_sync(defs_ptr defs) {
 
-   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+   for(suite_ptr suite: defs->suiteVec()) {
       if (suite->clockAttr().get()) {
          SuiteChanged changed(suite);
          suite->changeClockSync();
@@ -295,9 +295,9 @@ void change_clock_sync(defs_ptr defs) {
 /// max value, however because we had, changed value as well it got masked.
 void change_limit_max(defs_ptr defs) {
 
-   BOOST_FOREACH(suite_ptr s, defs->suiteVec()) {
+   for(suite_ptr s: defs->suiteVec()) {
       std::vector<limit_ptr> theLimits =  s->limits();
-      BOOST_FOREACH(limit_ptr l, theLimits) {
+      for(limit_ptr l: theLimits) {
          //std::cout << "found " << l->toString() << "\n";
          TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LIMIT_MAX,l->name(),"90")));
          limit_ptr v = s->find_limit(l->name());
@@ -307,9 +307,9 @@ void change_limit_max(defs_ptr defs) {
 }
 void change_limit_value(defs_ptr defs) {
 
-   BOOST_FOREACH(suite_ptr s, defs->suiteVec()) {
+   for(suite_ptr s: defs->suiteVec()) {
       std::vector<limit_ptr> theLimits =  s->limits();
-      BOOST_FOREACH(limit_ptr l, theLimits) {
+      for(limit_ptr l: theLimits) {
          TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(s->absNodePath(),AlterCmd::LIMIT_VAL,l->name(),"33")));
          limit_ptr v = s->find_limit(l->name());
          BOOST_CHECK_MESSAGE( v.get() && v->value() == 33, "expected to find limit with value of 33");
@@ -323,7 +323,7 @@ void update_repeat(defs_ptr defs) {
    std::vector<Node*> nodes;
    defs->getAllNodes(nodes);
 
-   BOOST_FOREACH(Node* n, nodes) {
+   for(Node* n: nodes) {
       if (!n->repeat().empty()) {
          SuiteChanged1 changed(n->suite());
          n->increment_repeat();
@@ -339,7 +339,7 @@ void update_calendar(defs_ptr defs) {
    defs->updateCalendar(p);
 
    // Currently updating the calendar, does not cause change, Hence force a change
-   BOOST_FOREACH(suite_ptr suite, defs->suiteVec()) {
+   for(suite_ptr suite: defs->suiteVec()) {
       SuiteChanged changed(suite);
       suite->add_variable("name","value");
    }

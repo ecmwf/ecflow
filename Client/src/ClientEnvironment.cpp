@@ -18,7 +18,6 @@
 #include <iterator>
 #include <cstdlib> // for getenv()
 
-#include "boost/foreach.hpp"
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
@@ -193,8 +192,7 @@ std::string ClientEnvironment::toString() const
 	if (host_vec_.empty()) ss << "   ECF_HOST =\n   ";
 	else  {
 		ss << "   ECF_HOST : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size() << "\n";
-		std::pair<std::string,std::string> i;
-		BOOST_FOREACH(i, host_vec_) { ss << "   " << i.first << Str::COLON() << i.second << "\n";}
+		for(std::pair<std::string,std::string> i : host_vec_) { ss << "   " << i.first << Str::COLON() << i.second << "\n";}
   	}
 	ss << "   ECF_NAME = " << task_path_ << "\n";
 	ss << "   ECF_PASS = " << jobs_password_ << "\n";

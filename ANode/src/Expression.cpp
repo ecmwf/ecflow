@@ -130,7 +130,7 @@ std::unique_ptr<AstTop> Expression::parse_no_throw(const std::string& expression
 
 void Expression::print(std::string& os, const std::string& exprType) const
 {
-   BOOST_FOREACH(const PartExpression& expr, vec_ ) {
+   for(const PartExpression& expr: vec_ ) {
       expr.print(os,exprType,free_);
    }
 }

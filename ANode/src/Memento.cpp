@@ -44,7 +44,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
  		//
       // Notify observers what aspect is going to change, before make-ing data model changes
  		//
- 		BOOST_FOREACH(memento_ptr m, vec_) {
+ 		for(memento_ptr m: vec_) {
   			m->do_incremental_defs_sync( client_def.get(), aspects_,true/* collect aspects only, don't make any changes*/);
  		}
  		size_t aspect_size = aspects_.size();
@@ -54,7 +54,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
       /// make data model change.
  		/// Notify any interested parties incremental changes
       /// Aspects records the kind of changes.
-      BOOST_FOREACH(memento_ptr m, vec_) {
+      for(memento_ptr m: vec_) {
 #ifdef DEBUG_MEMENTO
           cout << "   " << typeid(*(m.get())).name() << "\n";
 #endif
@@ -78,7 +78,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
 
  		if (clear_attributes_)  aspects_.push_back(ecf::Aspect::ADD_REMOVE_ATTR);
 
- 		BOOST_FOREACH(memento_ptr m, vec_) {
+ 		for(memento_ptr m: vec_) {
 #ifdef DEBUG_MEMENTO
  		   cout << "   " << typeid(*(m.get())).name() << "\n";
 #endif
@@ -96,7 +96,7 @@ void CompoundMemento::incremental_sync(defs_ptr client_def) const
       //
       if (clear_attributes_) node->clear();
 
-      BOOST_FOREACH(memento_ptr m, vec_) {
+      for(memento_ptr m: vec_) {
          if (task)        m->do_incremental_task_sync( task, aspects_, false/*Data model changes only*/);
          else if (alias)  m->do_incremental_alias_sync( alias, aspects_,false/*Data model changes only*/);
          else if (suite)  m->do_incremental_suite_sync( suite , aspects_,false/*Data model changes only*/);

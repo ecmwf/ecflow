@@ -661,9 +661,8 @@ void Defs::print(std::string& os) const
       }
    }
 
-   size_t the_size = suiteVec_.size();
-   for(size_t s = 0; s < the_size; s++) {
-      suiteVec_[s]->print(os);
+   for(const auto& s: suiteVec_) {
+      s->print(os);
    }
 
    os += "# enddef\n"; // ECFLOW-1227 so user knows there was no truncation
@@ -1088,7 +1087,7 @@ node_ptr Defs::replaceChild(const std::string& path,
 		vector<Task*> taskVec;
 		serverNode->getAllTasks(taskVec); // taskVec will be empty if serverNode is a task
  		int count = 0;
-		BOOST_FOREACH(Task* t, taskVec) { if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED)  count++;}
+		for(Task* t: taskVec) { if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED)  count++;}
 		if (count != 0) {
 			std::stringstream ss;
 			ss << "Can not replace node " << serverNode->debugNodePath() << " because it has " << count << " tasks which are active or submitted\n";

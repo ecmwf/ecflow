@@ -123,7 +123,7 @@ void SSyncCmd::init(
 #ifdef DEBUG_SERVER_SYNC
    cout << ": *handle* used " << client_handle << " : ";
    std::vector<string> suites; client_suite_mgr.suites(client_handle,suites);
-   BOOST_FOREACH(const std::string& name, suites) { std::cout << name << " "; }
+   for(const std::string& name: suites) { std::cout << name << " "; }
 #endif
 
    /// *** The client_modify_change_no and client_state_change_no should always be trailing the server

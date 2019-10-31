@@ -55,7 +55,7 @@ void test_find_task_using_path( NodeContainer* f,const Defs& defs )
 {
    BOOST_CHECK_MESSAGE(f == defs.findAbsNode(f->absNodePath()).get(), "Could not find path " << f->absNodePath() << "\n");
 
-   BOOST_FOREACH(node_ptr t, f->nodeVec()) {
+   for(node_ptr t: f->nodeVec()) {
       BOOST_CHECK_MESSAGE(t.get() == defs.findAbsNode(t->absNodePath()).get(), "Could not find path " << t->absNodePath() << "\n");
       Family* family = t->isFamily();
       if (family) {
@@ -158,7 +158,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
    }
    {
       timer.start();
-      BOOST_FOREACH(suite_ptr s, defs.suiteVec()) { test_find_task_using_path(s.get(),defs); }
+      for(suite_ptr s: defs.suiteVec()) { test_find_task_using_path(s.get(),defs); }
       BOOST_CHECK_MESSAGE(get_seconds(timer.elapsed().user) < expectedTimeForFindAllPaths,"Performance regression, expected < " << expectedTimeForFindAllPaths << " seconds to find all paths, but found " << timer.format(3,Str::cpu_timer_format()));
       cout << " Test all paths can be found. time taken                = "
            << timer.format(3,Str::cpu_timer_format()) << " < limit(" << expectedTimeForFindAllPaths << ")" << endl;
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
       std::vector<Task*> tasks;
       defs.getAllTasks(tasks);
       BOOST_CHECK_MESSAGE( tasks.size() > 0,"Expected > 0 tasks but found " << tasks.size());
-      BOOST_FOREACH(Task* t, tasks) {
+      for(Task* t: tasks) {
          BOOST_REQUIRE_MESSAGE(defs.deleteChild(t)," Failed to delete task");
       }
       tasks.clear(); defs.getAllTasks(tasks);
@@ -273,9 +273,9 @@ BOOST_AUTO_TEST_CASE( test_single_defs )
 
       std::vector<suite_ptr> vec = defs.suiteVec(); // make a copy, to avoid invalidating iterators
       BOOST_CHECK_MESSAGE( vec.size() > 0,"Expected > 0 Suites but found " << vec.size());
-      BOOST_FOREACH(suite_ptr s, vec) {
+      for(suite_ptr s: vec) {
          std::vector<node_ptr> familyVec = s->nodeVec(); // make a copy, to avoid invalidating iterators
-         BOOST_FOREACH(node_ptr f, familyVec) {
+         for(node_ptr f: familyVec) {
             BOOST_REQUIRE_MESSAGE(defs.deleteChild(f.get())," Failed to delete family");
          }
          BOOST_REQUIRE_MESSAGE( s->nodeVec().empty(),"Expected all Families to be deleted but found " << s->nodeVec().size());

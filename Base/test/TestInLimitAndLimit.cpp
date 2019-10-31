@@ -17,7 +17,7 @@
 #include <fstream>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/foreach.hpp>
+
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE( test_limit1 )
  		BOOST_CHECK_MESSAGE( jobs.generate(jobsParam),jobsParam.getErrorMsg());
  		BOOST_CHECK_MESSAGE( jobsParam.submitted().size() == 0, "Expected 0 task to submit but found " << jobsParam.submitted().size());
 		if (jobsParam.submitted().size() != 0 ) {
-			BOOST_FOREACH(Submittable* t, jobsParam.submitted()) { cerr << "Submittable " << t->absNodePath() << "\n";}
+			for(Submittable* t: jobsParam.submitted()) { cerr << "Submittable " << t->absNodePath() << "\n";}
 		}
  	}
 

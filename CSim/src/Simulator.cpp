@@ -138,7 +138,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 
  	// Do we have autocancel, must be done before.
    int hasAutoCancel = 0;
-   BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) { if (s->hasAutoCancel()) hasAutoCancel++; }
+   for(suite_ptr s: theDefs.suiteVec()) { if (s->hasAutoCancel()) hasAutoCancel++; }
 
    // ==================================================================================
 	// Start simulation ...
@@ -149,7 +149,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	while (duration <= max_simulation_period) {
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
-      BOOST_FOREACH(suite_ptr ss, theDefs.suiteVec()) {
+      for(suite_ptr ss: theDefs.suiteVec()) {
          cout << "duration: " << to_simple_string(duration) << " " << ss->calendar().toString() << endl;
       }
 #endif
@@ -159,7 +159,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 
  		// Increment calendar per suite. *MUST* use *COPY* as update_calendar() can remove suites (auto-cancel)
  		std::vector<suite_ptr> suiteVec = theDefs.suiteVec();
- 		BOOST_FOREACH(suite_ptr suite, suiteVec ) {
+ 		for(suite_ptr suite: suiteVec ) {
  		   boost::posix_time::time_duration max_duration_for_suite = simiVisitor.max_simulation_period(suite.get());
  		   if (duration < max_duration_for_suite) {
  		      theDefs.update_calendar(suite.get(), calUpdateParams );
@@ -180,11 +180,11 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	// Ignore suites with autocancel, as suite may get deleted
  	if (!simiVisitor.foundCrons() && (hasAutoCancel == 0)) {
  	   size_t completeSuiteCnt = 0;
- 	   BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) { if (s->state() == NState::COMPLETE) completeSuiteCnt++; }
+ 	   for(suite_ptr s: theDefs.suiteVec()) { if (s->state() == NState::COMPLETE) completeSuiteCnt++; }
 
  	   if ( (theDefs.suiteVec().size() != completeSuiteCnt)) {
  	      std::stringstream ss; ss << "\nDefs file " << defs_filename << "\n";
- 	      BOOST_FOREACH(suite_ptr s, theDefs.suiteVec()) {
+ 	      for(suite_ptr s: theDefs.suiteVec()) {
  	         if (s->state() != NState::COMPLETE) ss << "  suite '/" << s->name() << "' has not completed\n";
  	      }
  	      errorMsg += ss.str();
@@ -235,7 +235,7 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 	// through the task events and meters and updating them and then
 	// re-checking for job submission. Finally mark task as complete
 	// This is important as there may be other task dependent on this.
-	BOOST_FOREACH(Submittable* t, jobsParam.submitted()) {
+	for(Submittable* t: jobsParam.submitted()) {
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
 		// If task repeating themselves, determine what is causing this:
@@ -270,7 +270,7 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 
 		// If the task has any event used in the trigger expressions, then update event.
       std::string msg;
- 		BOOST_FOREACH(Event& event, t->ref_events()) {
+ 		for(Event& event: t->ref_events()) {
  			if (event.usedInTrigger()) { // event used in trigger/complete expression
  			   // initial value, if the value taken by the event on begin/re-queue. Child command is expected to invert the event
  			   if (event.initial_value()) event.set_value(false);  // initial value is set,   hence clear event
@@ -296,7 +296,7 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
   		}
 
 		// if the task has any meters used in trigger expressions, then increment meters
- 		BOOST_FOREACH(Meter& meter, t->ref_meters()) {
+ 		for(Meter& meter: t->ref_meters()) {
  			if (meter.usedInTrigger()) { // meter used in trigger/complete expression
  				while (meter.value() < meter.max()) {
  					meter.set_value(meter.value()+1);
@@ -338,7 +338,7 @@ bool Simulator::doJobSubmission(Defs& theDefs, std::string& errorMsg) const
 
 bool Simulator::update_for_queues(Submittable* t,std::string& msg, std::vector<QueueAttr>& queues,Defs& theDefs, std::string& errorMsg) const
 {
-   BOOST_FOREACH(QueueAttr& queue, queues) {
+   for(QueueAttr& queue: queues) {
       const std::vector<std::string>& queue_list = queue.list();
       for(size_t i = 0; i < queue_list.size(); i++) {
          std::string step = queue.active();

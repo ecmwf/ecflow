@@ -19,7 +19,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
-#include <boost/foreach.hpp>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <algorithm>
@@ -119,8 +119,8 @@ static void check(const std::string& line,
 	BOOST_CHECK_MESSAGE(result == expected,"failed for '" << line  << "'");
 	if (result != expected) {
 	   cout << "Line    :'" << line << "'\n";
-		cout << "Actual  :"; BOOST_FOREACH(const string& t, result)   { cout << "'" << t << "'"; } cout << "\n";
-		cout << "Expected:"; BOOST_FOREACH(const string& t, expected) { cout << "'" << t << "'"; } cout << "\n";
+		cout << "Actual  :"; for(const string& t: result)   { cout << "'" << t << "'"; } cout << "\n";
+		cout << "Expected:"; for(const string& t: expected) { cout << "'" << t << "'"; } cout << "\n";
  	}
 }
 

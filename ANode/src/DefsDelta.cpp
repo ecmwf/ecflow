@@ -56,7 +56,7 @@ bool DefsDelta::incremental_sync(defs_ptr client_def, std::vector<std::string>& 
 #endif
 
 	   // For each compound memento, we should have a changed node,
-      BOOST_FOREACH(compound_memento_ptr m, compound_mementos_) {
+      for(compound_memento_ptr m: compound_mementos_) {
          changed_nodes.push_back( m->abs_node_path());  // Record changed nodes for the Python interface
          m->incremental_sync(client_def);
       }

@@ -14,7 +14,7 @@
 //               Placed in this category, since the server does not need to link
 //               with it.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/foreach.hpp>
+
 #include "UrlCmd.hpp"
 #include "Defs.hpp"
 #include "Node.hpp"

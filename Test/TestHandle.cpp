@@ -48,14 +48,14 @@ BOOST_AUTO_TEST_SUITE( TestSuite  )
 //   TestFixture::client().suites();
 //   {
 //      const std::vector<std::string>& suites =  TestFixture::client().server_reply().get_string_vec();
-//      BOOST_FOREACH(const std::string& suite, suites) { std::cout << "\n---> " << suite; }
+//      for(const std::string& suite: suites) { std::cout << "\n---> " << suite; }
 //      std::cout << "\n";
 //
 //      const std::vector<std::pair<unsigned int, std::vector<std::string> > >& handles = TestFixture::client().server_reply().get_client_handle_suites();
 //      std::pair<unsigned int, std::vector<std::string> > int_str_pair;
 //      for(size_t i =0; i < handles.size(); i++) {
 //          std::cout << "handle: " << handles[i].first << " : ";
-//          BOOST_FOREACH(const std::string& suite, handles[i].second) {
+//          for(const std::string& suite: handles[i].second) {
 //            std::cout << suite << " ";
 //         }
 //         std::cout << "\n";

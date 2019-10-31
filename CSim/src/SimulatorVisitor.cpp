@@ -54,7 +54,7 @@ SimulatorVisitor::SimulatorVisitor(const std::string& defs_filename)
   {}
 
 void SimulatorVisitor::visitDefs( Defs* d) {
-	BOOST_FOREACH(suite_ptr s, d->suiteVec()) { s->acceptVisitTraversor(*this); }
+	for(suite_ptr s: d->suiteVec()) { s->acceptVisitTraversor(*this); }
 }
 
 void SimulatorVisitor::visitSuite( Suite* s)
@@ -131,7 +131,7 @@ void SimulatorVisitor::visitNodeContainer(NodeContainer* nc)
       foundTime_= true;
    }
 
-	BOOST_FOREACH(node_ptr t, nc->nodeVec()) { t->acceptVisitTraversor(*this);}
+	for(node_ptr t: nc->nodeVec()) { t->acceptVisitTraversor(*this);}
 }
 
 void SimulatorVisitor::visitTask( Task* t )

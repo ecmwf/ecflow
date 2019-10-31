@@ -12,7 +12,7 @@
 //
 // Description : Holds the zombie structure
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/foreach.hpp>
+
 
 #include "Zombie.hpp"
 #include "Calendar.hpp"
@@ -225,7 +225,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
    std::string ecf_path =            "Task not found. Nodes replaced whilst jobs were running";
    std::string exp;
 
-   BOOST_FOREACH(const Zombie& z, zombies) {
+   for(const Zombie& z: zombies) {
       path_width = std::max(path_width,z.path_to_task().size());
       type_width = std::max(type_width,z.type_str().size());
       password_width = std::max(password_width,z.jobs_password().size());
@@ -268,7 +268,7 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
 
    list.push_back(ss.str());
 
-   BOOST_FOREACH(const Zombie& z, zombies) {
+   for(const Zombie& z: zombies) {
      std::stringstream ss;
      if (indent != 0) for(int i = 0; i < indent; i++) ss << " ";
 

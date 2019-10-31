@@ -93,19 +93,19 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd )
    BOOST_REQUIRE_MESSAGE(!task->triggerAst()->evaluate(),"Trigger should not evaluate");
 
    const Calendar& cal = suite->calendar();
-   BOOST_FOREACH(const ecf::TimeAttr&  attr, task->timeVec()) {
+   for(const ecf::TimeAttr&  attr: task->timeVec()) {
       BOOST_CHECK_MESSAGE(!attr.isFree(cal)," Time should not be free");
    }
-   BOOST_FOREACH(const ecf::TodayAttr&  attr, task->todayVec()) {
+   for(const ecf::TodayAttr&  attr: task->todayVec()) {
       BOOST_CHECK_MESSAGE(!attr.isFree(cal)," Today should not be free");
    }
-   BOOST_FOREACH(const ecf::CronAttr&  attr, task->crons()) {
+   for(const ecf::CronAttr&  attr: task->crons()) {
       BOOST_CHECK_MESSAGE(!attr.isFree(cal)," Cron should not be free");
    }
-   BOOST_FOREACH(const DateAttr&  attr, task->dates()) {
+   for(const DateAttr&  attr: task->dates()) {
       BOOST_CHECK_MESSAGE(!attr.isFree(cal)," Date should not be free");
    }
-   BOOST_FOREACH(const DayAttr&  attr, task->days()) {
+   for(const DayAttr&  attr: task->days()) {
       BOOST_CHECK_MESSAGE(!attr.isFree(cal),"Day should not be free");
    }
 
@@ -122,31 +122,31 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd )
    // Dependencies should now all be free now.
    BOOST_REQUIRE_MESSAGE(task->get_trigger()->isFree(),"Trigger should evaluate");
    bool at_least_one_free = false;
-   BOOST_FOREACH(const ecf::TimeAttr&  attr, task->timeVec()) {
+   for(const ecf::TimeAttr&  attr: task->timeVec()) {
       if (attr.isFree(cal)) { at_least_one_free = true; break;}
    }
    BOOST_CHECK_MESSAGE(at_least_one_free,"At least one Time should be free");
 
    at_least_one_free = false;
-   BOOST_FOREACH(const ecf::TodayAttr&  attr, task->todayVec()) {
+   for(const ecf::TodayAttr&  attr: task->todayVec()) {
       if (attr.isFree(cal)) { at_least_one_free = true; break;}
    }
    BOOST_CHECK_MESSAGE(at_least_one_free,"At least one Today should be free");
 
    at_least_one_free = false;
-   BOOST_FOREACH(const ecf::CronAttr&  attr, task->crons()) {
+   for(const ecf::CronAttr&  attr: task->crons()) {
       if (attr.isFree(cal)) { at_least_one_free = true; break;}
    }
    BOOST_CHECK_MESSAGE(at_least_one_free,"At least one Cron should be free");
 
    at_least_one_free = false;
-   BOOST_FOREACH(const DateAttr&  attr, task->dates()) {
+   for(const DateAttr&  attr: task->dates()) {
       if (attr.isFree(cal)) { at_least_one_free = true; break;}
    }
    BOOST_CHECK_MESSAGE(at_least_one_free,"At least one Date should be free");
 
    at_least_one_free = false;
-   BOOST_FOREACH(const DayAttr&  attr, task->days()) {
+   for(const DayAttr&  attr: task->days()) {
       if (attr.isFree(cal)) { at_least_one_free = true; break;}
    }
    BOOST_CHECK_MESSAGE(at_least_one_free,"At least one Day should be free");
@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd_single_time_slot )
 
    // expect task to be holding at 9:30
    const Calendar& cal = suite->calendar();
-   BOOST_FOREACH(const ecf::TimeAttr&  attr, task->timeVec()) {
+   for(const ecf::TimeAttr&  attr: task->timeVec()) {
       BOOST_CHECK_MESSAGE(!attr.isFree(cal)," Time should not be free");
    }
 
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd_single_time_slot )
 
    // expect task to be free
    bool at_least_one_free = false;
-   BOOST_FOREACH(const ecf::TimeAttr&  attr, task->timeVec()) {
+   for(const ecf::TimeAttr&  attr: task->timeVec()) {
       if (attr.isFree(cal)) { at_least_one_free = true; break;}
    }
    BOOST_CHECK_MESSAGE(at_least_one_free,"At least one Time should be free");
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd_with_time_series )
 
    // expect task to be holding, at 9:29
    const Calendar& cal = suite->calendar();
-   BOOST_FOREACH(const ecf::TimeAttr&  attr, task->timeVec()) {
+   for(const ecf::TimeAttr&  attr: task->timeVec()) {
       BOOST_CHECK_MESSAGE(!attr.isFree(cal)," Time should not be free");
    }
 
@@ -239,7 +239,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd_with_time_series )
 
    // expect task to be free
    bool at_least_one_free = false;
-   BOOST_FOREACH(const ecf::TimeAttr&  attr, task->timeVec()) {
+   for(const ecf::TimeAttr&  attr: task->timeVec()) {
       if (attr.isFree(cal)) { at_least_one_free = true; break;}
    }
    BOOST_CHECK_MESSAGE(at_least_one_free,"At least one Time should be free");
@@ -276,7 +276,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd_with_time_series_2 )
 
    // expect task to be holding, at 9:29
    const Calendar& cal = suite->calendar();
-   BOOST_FOREACH(const ecf::TimeAttr&  attr, task->timeVec()) {
+   for(const ecf::TimeAttr&  attr: task->timeVec()) {
       BOOST_CHECK_MESSAGE(!attr.isFree(cal)," Time should not be free");
    }
 
@@ -289,7 +289,7 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd_with_time_series_2 )
 
    // expect task to be free
    bool at_least_one_free = false;
-   BOOST_FOREACH(const ecf::TimeAttr&  attr, task->timeVec()) {
+   for(const ecf::TimeAttr&  attr: task->timeVec()) {
       if (attr.isFree(cal)) { at_least_one_free = true; break;}
    }
    BOOST_CHECK_MESSAGE(at_least_one_free,"At least one Time should be free");

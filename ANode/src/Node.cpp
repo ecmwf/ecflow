@@ -966,7 +966,7 @@ DState::State Node::dstate() const {
 }
 
 bool Node::set_event( const std::string& event_name_or_number)  {
-   BOOST_FOREACH(Event& e, events_) {
+   for(Event& e: events_) {
       if (e.name_or_number() == event_name_or_number) {
          e.set_value( true );
          return true;
@@ -975,7 +975,7 @@ bool Node::set_event( const std::string& event_name_or_number)  {
    return false;
 }
 bool Node::clear_event(const std::string& event_name_or_number ){
-   BOOST_FOREACH(Event& e, events_) {
+   for(Event& e: events_) {
       if (e.name_or_number() == event_name_or_number) {
          e.set_value( false );
          return true;
@@ -1575,28 +1575,28 @@ void Node::print(std::string& os) const
    }
    repeat_.print(os);  // if repeat is empty print(..) does nothing
 
-   BOOST_FOREACH(const Variable& v, vars_ )       { v.print(os); }
+   for(const Variable& v: vars_ )       { v.print(os); }
 
    if ( PrintStyle::getStyle() == PrintStyle::STATE ) {
       // Distinguish normal variable from generated, by adding a #
       // This also allows it be read in again and compared in the AParser/tests
       std::vector<Variable> gvec;
       gen_variables(gvec);
-      BOOST_FOREACH(const Variable& v, gvec ) { v.print_generated(os); }
+      for(const Variable& v: gvec ) { v.print_generated(os); }
    }
 
-   BOOST_FOREACH(limit_ptr l, limits_)       { l->print(os); }
+   for(limit_ptr l: limits_)       { l->print(os); }
    inLimitMgr_.print(os);
 
-   BOOST_FOREACH(const Label& la, labels_ )  { la.print(os); }
-   BOOST_FOREACH(const Meter& m, meters_ )   { m.print(os); }
-   BOOST_FOREACH(const Event& e, events_ )   { e.print(os); }
+   for(const Label& la: labels_ )  { la.print(os); }
+   for(const Meter& m: meters_ )   { m.print(os); }
+   for(const Event& e: events_ )   { e.print(os); }
 
-   BOOST_FOREACH(const ecf::TimeAttr& t, times_) { t.print(os);    }
-   BOOST_FOREACH(const ecf::TodayAttr& t,todays_){ t.print(os);    }
-   BOOST_FOREACH(const DateAttr& date, dates_)   { date.print(os); }
-   BOOST_FOREACH(const DayAttr& day, days_)      { day.print(os);  }
-   BOOST_FOREACH(const CronAttr& cron, crons_)   { cron.print(os); }
+   for(const ecf::TimeAttr& t: times_) { t.print(os);    }
+   for(const ecf::TodayAttr& t:todays_){ t.print(os);    }
+   for(const DateAttr& date: dates_)   { date.print(os); }
+   for(const DayAttr& day: days_)      { day.print(os);  }
+   for(const CronAttr& cron: crons_)   { cron.print(os); }
 
    if (auto_cancel_) auto_cancel_->print(os);
    if (auto_archive_) auto_archive_->print(os);
@@ -2150,9 +2150,9 @@ bool Node::why(std::vector<std::string>& vec,bool html) const
 
 bool Node::checkInvariants(std::string& errorMsg) const
 {
-   BOOST_FOREACH(const ecf::TimeAttr& t, times_)  { if (!t.checkInvariants(errorMsg)) return false; }
-   BOOST_FOREACH(const ecf::TodayAttr& t,todays_) { if (!t.checkInvariants(errorMsg)) return false; }
-   BOOST_FOREACH(const CronAttr& cron, crons_ )     { if (!cron.checkInvariants(errorMsg)) return false; }
+   for(const ecf::TimeAttr& t: times_)  { if (!t.checkInvariants(errorMsg)) return false; }
+   for(const ecf::TodayAttr& t:todays_) { if (!t.checkInvariants(errorMsg)) return false; }
+   for(const CronAttr& cron: crons_ )     { if (!cron.checkInvariants(errorMsg)) return false; }
 
    if (misc_attrs_) {
       if (!misc_attrs_->checkInvariants(errorMsg)) {
@@ -2483,7 +2483,7 @@ bool Node::checkForAutoCancel(const ecf::Calendar& calendar) const
          /// anywhere for our children
          vector<Task*> taskVec;
          getAllTasks(taskVec);
-         BOOST_FOREACH(Task* t, taskVec) {
+         for(Task* t: taskVec) {
             if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
                return false;
             }
@@ -2503,7 +2503,7 @@ bool Node::check_for_auto_archive(const ecf::Calendar& calendar) const
             /// *Only* archive this node if we don't create zombies anywhere for our children
             vector<Task*> taskVec;
             getAllTasks(taskVec);
-            BOOST_FOREACH(Task* t, taskVec) {
+            for(Task* t: taskVec) {
                if (t->state() == NState::ACTIVE || t->state() == NState::SUBMITTED) {
                   return false;
                }

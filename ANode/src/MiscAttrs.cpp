@@ -65,10 +65,10 @@ void MiscAttrs::requeue()
 
 void MiscAttrs::print(std::string& os) const
 {
-   BOOST_FOREACH(const ZombieAttr& z, zombies_)  { z.print(os); }
-   BOOST_FOREACH(const VerifyAttr& v, verifys_ ) { v.print(os); }
-   BOOST_FOREACH(const QueueAttr& q, queues_ )   { q.print(os); }
-   BOOST_FOREACH(const GenericAttr& g, generics_){ g.print(os); }
+   for(const ZombieAttr& z: zombies_)  { z.print(os); }
+   for(const VerifyAttr& v: verifys_ ) { v.print(os); }
+   for(const QueueAttr& q: queues_ )   { q.print(os); }
+   for(const GenericAttr& g: generics_){ g.print(os); }
 }
 
 bool MiscAttrs::operator==(const MiscAttrs& rhs) const
@@ -153,7 +153,7 @@ bool MiscAttrs::operator==(const MiscAttrs& rhs) const
 
 void MiscAttrs::verification(std::string& errorMsg) const
 {
-   BOOST_FOREACH(const VerifyAttr& v, verifys_) {
+   for(const VerifyAttr& v: verifys_) {
       if (v.expected() != v.actual()) {
          std::stringstream ss;
          ss << node_->debugNodePath() << " expected " << v.expected() << " " << NState::toString(v.state()) << " but found " << v.actual() << "\n";

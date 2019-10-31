@@ -98,8 +98,8 @@ BOOST_AUTO_TEST_CASE( test_requeue_node )
 	// since we requed each task should have completed 8 times
 	std::vector<Task*> taskVec;
 	serverDefs->getAllTasks(taskVec);
-	BOOST_FOREACH(Task* t, taskVec) {
- 		BOOST_FOREACH(const VerifyAttr& v, t->verifys()) {
+	for(Task* t: taskVec) {
+ 		for(const VerifyAttr& v: t->verifys()) {
  			if (v.state() == NState::COMPLETE) {
  				BOOST_CHECK_MESSAGE(v.actual() == 8,"Expected task " << t->absNodePath() << " to complete 8 times, due to reque, but it completed only " << v.actual() << " times\n");
  			}

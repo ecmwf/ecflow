@@ -75,18 +75,18 @@ BOOST_AUTO_TEST_CASE( test_alias_create )
    BOOST_CHECK_MESSAGE(alias->meters().size() == 2,"Expected 2 meter to be copied from task but found " << alias->meters().size());
    BOOST_CHECK_MESSAGE(alias->events().size() == 2,"Expected 2 events to be copied from task but found " << alias->events().size());
    BOOST_CHECK_MESSAGE(alias->labels().size() == 2,"Expected 2 labels to be copied from task but found " << alias->labels().size());
-   BOOST_FOREACH(const Meter& meter, alias->meters()){BOOST_CHECK_MESSAGE(meter.value() == meter.min(),"Expected meter value " << meter.min() << " but found " << meter.value() << " for " << meter.dump());}
-   BOOST_FOREACH(const Event& event, alias->events()){BOOST_CHECK_MESSAGE(!event.value(),"Expected " << event.dump() << " to be clear");}
-   BOOST_FOREACH(const Label& label, alias->labels()){BOOST_CHECK_MESSAGE(label.new_value().empty(),"Expected " << label.dump() << " to be clear");}
+   for(const Meter& meter :alias->meters()){BOOST_CHECK_MESSAGE(meter.value() == meter.min(),"Expected meter value " << meter.min() << " but found " << meter.value() << " for " << meter.dump());}
+   for(const Event& event: alias->events()){BOOST_CHECK_MESSAGE(!event.value(),"Expected " << event.dump() << " to be clear");}
+   for(const Label& label: alias->labels()){BOOST_CHECK_MESSAGE(label.new_value().empty(),"Expected " << label.dump() << " to be clear");}
 
 
    // Ensure Task state was not changed
    BOOST_CHECK_MESSAGE(t->meters().size() == 2,"Did not expect task state to change, expected 2 meter but found: " << t->meters().size());
    BOOST_CHECK_MESSAGE(t->events().size() == 2,"Did not expect task state to change, expected 2 events but found:" << t->events().size());
    BOOST_CHECK_MESSAGE(t->labels().size() == 2,"Did not expect task state to change, expected 2 labels but found:" << t->labels().size());
-   BOOST_FOREACH(const Meter& meter, t->meters()){BOOST_CHECK_MESSAGE(meter.value() == 10,"Expected meter value 10 but found " << meter.value() << " for " << meter.dump());}
-   BOOST_FOREACH(const Event& event, t->events()){BOOST_CHECK_MESSAGE(event.value(),"Expected " << event.dump() << " to be set");}
-   BOOST_FOREACH(const Label& label, t->labels()){BOOST_CHECK_MESSAGE(label.new_value() == "new_value","Expected label with 'new_value' but found " << label.new_value());}
+   for(const Meter& meter: t->meters()){BOOST_CHECK_MESSAGE(meter.value() == 10,"Expected meter value 10 but found " << meter.value() << " for " << meter.dump());}
+   for(const Event& event: t->events()){BOOST_CHECK_MESSAGE(event.value(),"Expected " << event.dump() << " to be set");}
+   for(const Label& label: t->labels()){BOOST_CHECK_MESSAGE(label.new_value() == "new_value","Expected label with 'new_value' but found " << label.new_value());}
 
 
    // test that user variables passed in got added as Variables
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( test_alias_create )
    BOOST_CHECK_MESSAGE(alias_vec.size() == 2,"Expected 2 aliases but found " << alias_vec.size());
 
    // Check alias remove
-   BOOST_FOREACH(alias_ptr al,alias_vec) { al->remove();}
+   for(alias_ptr al:alias_vec) { al->remove();}
    alias_vec.clear();
    theDefs.get_all_aliases(alias_vec);
    BOOST_CHECK_MESSAGE(alias_vec.empty(),"Expected no aliases but found " << alias_vec.size());

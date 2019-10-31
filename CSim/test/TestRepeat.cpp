@@ -453,7 +453,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_enumerated )
 
    std::vector<Task*> theServerTasks;
    theDefs.getAllTasks(theServerTasks);
-   BOOST_FOREACH(Task* t, theServerTasks) {
+   for(Task* t: theServerTasks) {
       // verify repeat has the last value
       auto* family = dynamic_cast<Family*>(t->parent());
       const Repeat& repeat = family->findRepeat("ENUM");
@@ -503,7 +503,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_string )
 
  	std::vector<Task*> theServerTasks;
  	theDefs.getAllTasks(theServerTasks);
- 	BOOST_FOREACH(Task* t, theServerTasks) {
+ 	for(Task* t: theServerTasks) {
  	   // verify repeat has the last value
  	   auto* family = dynamic_cast<Family*>(t->parent());
  	   const Repeat& repeat = family->findRepeat("STRING");

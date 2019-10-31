@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE( test_why_limit )
          updateCalendarCount = defs->updateCalendarCount();
          bool wait = false;
          vector<Task*> tasks; defs->getAllTasks(tasks);
-         BOOST_FOREACH(Task* task, tasks) {
+         for(Task* task: tasks) {
             if (task->state() != NState::COMPLETE) wait = true;
          }
          if (!wait) break;

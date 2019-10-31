@@ -397,8 +397,7 @@ void EditScriptCmd::create( 	Cmd_ptr& cmd,
 
 	 		// Convert MAP to Vec
 	 		NameValueVec used_variables_as_vec;
-	 		std::pair<std::string, std::string> pair;
-	 		BOOST_FOREACH(pair, used_variables_as_map) { used_variables_as_vec.push_back( std::make_pair(pair.first,pair.second) ); }
+	 		for(const std::pair<std::string, std::string>& pair: used_variables_as_map) { used_variables_as_vec.push_back( std::make_pair(pair.first,pair.second) ); }
 
 	 		if (edit_type == EditScriptCmd::SUBMIT) {
 	 			cmd = std::make_shared<EditScriptCmd>( path_to_task, used_variables_as_vec); //SUMBIT

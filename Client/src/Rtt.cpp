@@ -16,7 +16,7 @@
 #include <vector>
 #include <iostream>
 #include <boost/lexical_cast.hpp>
-#include <boost/foreach.hpp>
+
 #include "boost/date_time/posix_time/posix_time.hpp" //include all types plus i/o
 
 #include "Rtt.hpp"
@@ -125,8 +125,7 @@ std::string Rtt::analyis(const std::string& filename)
    // Create title
    std::stringstream ss;
    ss << left << setw(max_cmd_size+1) << "Command" << right << setw(5) << "count" << setw(9) << "min" << setw(9) << "average" << setw(9) << "max" << setw(9) << right << "std\n";
-   std::pair<string, vector<time_duration> > p;
-   BOOST_FOREACH(p, cmd_time_map) {
+   for(std::pair<string, vector<time_duration> > p: cmd_time_map) {
 
       time_duration average_td(0,0,0,0);
       time_duration min(24,59,59,0);

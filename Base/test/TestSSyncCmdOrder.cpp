@@ -44,7 +44,7 @@ template <typename T>
 static std::vector<std::string> toStrVec(const std::vector<T>& vec)
 {
    std::vector<std::string> retVec; retVec.reserve(vec.size());
-   BOOST_FOREACH(T s, vec) { retVec.push_back(s->name()); }
+   for(T s: vec) { retVec.push_back(s->name()); }
    return retVec;
 }
 

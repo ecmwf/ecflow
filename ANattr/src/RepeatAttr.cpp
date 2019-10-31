@@ -17,7 +17,7 @@
 #include <sstream>
 #include <ostream>
 
-#include <boost/foreach.hpp>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
 #include <boost/date_time/posix_time/posix_time_types.hpp>
@@ -585,7 +585,7 @@ bool RepeatDateList::compare(RepeatBase* rb) const
 void RepeatDateList::write(std::string& ret) const
 {
    ret += "repeat datelist ";  ret += name_;
-   BOOST_FOREACH(int date, list_) { ret += " \"";  ret += boost::lexical_cast<std::string>(date); ret += "\""; }
+   for(int date: list_) { ret += " \"";  ret += boost::lexical_cast<std::string>(date); ret += "\""; }
    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
       ret += " # ";
       ret += boost::lexical_cast<std::string>(currentIndex_);
@@ -998,7 +998,7 @@ bool RepeatEnumerated::compare(RepeatBase* rb) const
 void RepeatEnumerated::write(std::string& ret) const
 {
    ret += "repeat enumerated ";  ret += name_;
-   BOOST_FOREACH(const string& s, theEnums_) { ret += " \""; ret += s; ret += "\""; }
+   for(const string& s: theEnums_) { ret += " \""; ret += s; ret += "\""; }
    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
       ret += " # ";
       ret += boost::lexical_cast<std::string>(currentIndex_);
@@ -1216,7 +1216,7 @@ bool RepeatString::compare(RepeatBase* rb) const
 void RepeatString::write(std::string& ret) const
 {
    ret += "repeat string ";  ret += name_;
-   BOOST_FOREACH(const string& s, theStrings_) { ret += " \""; ret += s; ret += "\""; }
+   for(const string& s: theStrings_) { ret += " \""; ret += s; ret += "\""; }
    if (!PrintStyle::defsStyle() && (currentIndex_ != 0)) {
       ret += " # ";
       ret += boost::lexical_cast<std::string>(value());

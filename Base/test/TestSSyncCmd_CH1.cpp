@@ -350,7 +350,7 @@ static bool s0_delete_some_attributes(defs_ptr defs) {
    suite->getAllTasks(tasks);
    BOOST_REQUIRE_MESSAGE( !tasks.empty(), "Expected at least one task");
 
-   BOOST_FOREACH(Task* task, tasks) {
+   for(Task* task: tasks) {
       SuiteChanged1 changed(task->suite());
       task->addMeter(Meter("meter",0,100));
    }
@@ -366,7 +366,7 @@ static bool s0_add_some_attributes(defs_ptr defs) {
    suite->get_all_tasks(tasks);
    BOOST_REQUIRE_MESSAGE( !tasks.empty(), "Expected at least one task");
 
-   BOOST_FOREACH(task_ptr task, tasks) { SuiteChanged1 changed(suite.get()); task->addDay( DayAttr(DayAttr::TUESDAY) );}
+   for(task_ptr task: tasks) { SuiteChanged1 changed(suite.get()); task->addDay( DayAttr(DayAttr::TUESDAY) );}
    return true;
 }
 
@@ -402,7 +402,7 @@ static bool s0_remove_all_tasks(defs_ptr defs) {
    std::vector<task_ptr> tasks;
    suite->get_all_tasks(tasks);
    BOOST_REQUIRE_MESSAGE( !tasks.empty(), "Expected at least one task");
-   BOOST_FOREACH(task_ptr task, tasks) { SuiteChanged1 changed(task->suite()); task->remove() ;}
+   for(task_ptr task: tasks) { SuiteChanged1 changed(task->suite()); task->remove() ;}
 
    tasks.clear();
    suite->get_all_tasks(tasks);
@@ -475,7 +475,7 @@ static bool s0_change_limit_max(defs_ptr defs) {
 
    std::vector<limit_ptr> theLimits =  suite->limits();
    BOOST_REQUIRE_MESSAGE( !theLimits.empty(),"The limit are empty on suite s0 " << defs);
-   BOOST_FOREACH(limit_ptr l, theLimits) {
+   for(limit_ptr l: theLimits) {
       //std::cout << "found " << l->toString() << "\n";
       TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(suite->absNodePath(),AlterCmd::LIMIT_MAX,l->name(),"90")));
       limit_ptr v = suite->find_limit(l->name());
@@ -490,7 +490,7 @@ static bool s0_change_limit_value(defs_ptr defs) {
    // Note: we ONLY* need MockSuiteChangedServer, when we make changes via functions and not commands
 
    std::vector<limit_ptr> theLimits =  suite->limits();
-   BOOST_FOREACH(limit_ptr l, theLimits) {
+   for(limit_ptr l: theLimits) {
       TestHelper::invokeRequest(defs.get(),Cmd_ptr( new AlterCmd(suite->absNodePath(),AlterCmd::LIMIT_VAL,l->name(),"33")));
       limit_ptr v = suite->find_limit(l->name());
       BOOST_CHECK_MESSAGE( v.get() && v->value() == 33, "expected to find limit with value of 33");

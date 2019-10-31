@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE( test_task_script_generator )
    theDefs.beginAll();
 
    // Test for ECF_ file location
-   BOOST_FOREACH(Task* t, theTasks) {
+   for(Task* t: theTasks) {
       try {
          EcfFile ecf_file = t->locatedEcfFile();
          BOOST_REQUIRE_MESSAGE( ecf_file.valid(), "Could not locate ecf file for task ");
@@ -224,7 +224,7 @@ BOOST_AUTO_TEST_CASE( test_task_script_generator_with_dummy_tasks )
    theDefs.beginAll();
 
    // Test for script generation
-   BOOST_FOREACH(task_ptr t, tasks_with_scripts) {
+   for(task_ptr t: tasks_with_scripts) {
       try {
          EcfFile ecf_file = t->locatedEcfFile();
          BOOST_REQUIRE_MESSAGE( ecf_file.valid(), "Could not locate ecf file for task ");
@@ -235,7 +235,7 @@ BOOST_AUTO_TEST_CASE( test_task_script_generator_with_dummy_tasks )
    }
 
    // Test  that no scripts are generated when ECF_DUMMY_TASK is used
-   BOOST_FOREACH(task_ptr t, tasks_without_scripts) {
+   for(task_ptr t: tasks_without_scripts) {
       BOOST_REQUIRE_THROW(t->locatedEcfFile(),std::runtime_error);
    }
 

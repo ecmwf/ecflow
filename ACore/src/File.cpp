@@ -22,7 +22,7 @@
 #include <boost/token_functions.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/foreach.hpp>
+
 #include <boost/tokenizer.hpp>
 
 #include "File.hpp"
@@ -413,7 +413,7 @@ std::string File::findPath(
 	if ( !paths.empty() ) {
 
 		// find the path that has leafDir in it.
- 		BOOST_FOREACH(fs::path path, paths) {
+ 		for(fs::path path: paths) {
 			std::string thePath = path.string();
 			if (thePath.rfind(leafDir) != std::string::npos) return thePath;
 		}
@@ -433,10 +433,10 @@ std::string File::findPath(
    if ( !paths.empty() ) {
 
       // find the path that has all the tokens specified by the vector tokens
-      BOOST_FOREACH(fs::path path, paths) {
+      for(fs::path path: paths) {
          std::string thePath = path.string();
          size_t matches = 0;
-         BOOST_FOREACH(const std::string& required_path_tokens, tokens) {
+         for(const std::string& required_path_tokens: tokens) {
             if (thePath.rfind(required_path_tokens) != std::string::npos) matches++;
          }
          if (matches == tokens.size()) return thePath;
@@ -602,7 +602,7 @@ std::string File::diff(const std::string& file,
 
 				if (fileLines[i] !=  file2Lines[i]) {
 					bool doIgnore = false;
-					BOOST_FOREACH(const std::string& ignore, ignoreVec) {
+					for(const std::string& ignore: ignoreVec) {
 						if ( fileLines[i].find(ignore) != std::string::npos || file2Lines[i].find(ignore) != std::string::npos  ) {
 							doIgnore = true; break;
 						}

@@ -16,7 +16,7 @@
 #include "ExprDuplicate.hpp"
 
 #include <boost/test/unit_test.hpp>
-#include <boost/foreach.hpp>
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/posix_time/conversion.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
@@ -50,8 +50,7 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
    exprMap[":var == 0"] = std::make_pair(AstEqual::stype(),true);
    exprMap[":var != 1"] = std::make_pair(AstNotEqual::stype(),true);
 
- 	std::pair<string, std::pair<string,bool> > p;
-	BOOST_FOREACH(p, exprMap ) {
+	for(std::pair<string, std::pair<string,bool>> p : exprMap ) {
 
   		ExprParser theExprParser(p.first);
 		std::string errorMsg;

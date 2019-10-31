@@ -14,7 +14,7 @@
 //============================================================================
 #include <sstream>
 #include <fstream>
-#include <boost/foreach.hpp>
+
 
 #include "Parser.hpp"
 #include "DefsStructureParser.hpp"
@@ -75,7 +75,7 @@ bool Parser::doParse(const std::string& line, std::vector<std::string>& lineToke
 
 #ifdef DEBUG_PARSER
 	cerr << "Parser::" << keyword() << " token = '" << *lineTokens.begin() << "' did not match parsers(";
-	BOOST_FOREACH(Parser* p, expectedParsers_) { cerr << " " <<  p->keyword() ; }
+	for(Parser* p: expectedParsers_) { cerr << " " <<  p->keyword() ; }
 	cerr << ") Trying parent ";
 	if (parent()) cout << "Parser::" << parent()->keyword();
 	cerr << "\n";
@@ -159,12 +159,12 @@ void Parser::dump(const std::vector<std::string>& lineTokens)
 void Parser::printStats()
 {
  	Indentor::indent( std::cout ) << "Parser::" << keyword() << "\n";
-	BOOST_FOREACH(Parser* p, expectedParsers_) {
+	for(Parser* p: expectedParsers_) {
 		Indentor::indent( std::cout ) << p->keyword() << " " << p->parserCount() << "\n";
 	}
 
 	Indentor in;
-	BOOST_FOREACH(Parser* p, expectedParsers_) {
+	for(Parser* p: expectedParsers_) {
  		if (p->hasChildren()) {
 			p->printStats();
 		}

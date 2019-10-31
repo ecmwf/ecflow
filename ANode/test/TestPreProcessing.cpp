@@ -147,7 +147,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 		// a bug in autoDiscoverVariables
 		std::set<std::string> discoveredVariables;
 		autoDiscoverVariables(ecf_home + "/includes", discoveredVariables );
-		BOOST_FOREACH(const string& var, discoveredVariables) {
+		for(const string& var: discoveredVariables) {
 // 			cerr << "autoDiscoverVariables = " << var << "\n";
 			suite->addVariable( Variable( var, "gobblygook" ) );
 		}
@@ -185,7 +185,7 @@ void test_sms_preprocessing(const std::string& directory, bool pass)
 	theDefs.beginAll();
 
 	// Test Job creator, this will pre-process and perform variable substitution on ecf files
-	BOOST_FOREACH(Task* t, theTasks) {
+	for(Task* t: theTasks) {
 
 	   //cout << "  task " << t->absNodePath() << "\n";
 	   JobsParam jobsParam; // create jobs =  false, spawn_jobs = false

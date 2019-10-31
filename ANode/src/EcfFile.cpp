@@ -18,7 +18,6 @@
 #include <cerrno>
 #include <memory>
 
-#include "boost/foreach.hpp"
 #include "boost/filesystem/operations.hpp"
 #include <boost/algorithm/string/trim.hpp>
 
@@ -756,8 +755,7 @@ void EcfFile::get_used_variables(std::string& used_variables) const
       // The used variables are typically *user* variable *in* the scripts, that user may need
       // to modify. Hence we have also excluded generated variables SUITE, FAMILY, TASK
       // ****************************************************************************************
-      std::pair<std::string, std::string> item;
-      BOOST_FOREACH(item, used_variables_map) {
+      for(std::pair<std::string, std::string> item : used_variables_map) {
          if ( item.first.find(Str::ECF_TRYNO())   != std::string::npos) continue;
          if ( item.first.find(Str::ECF_JOB())     != std::string::npos) continue;
          if ( item.first.find(Str::ECF_JOBOUT())  != std::string::npos) continue;

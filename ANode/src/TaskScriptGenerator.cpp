@@ -128,7 +128,7 @@ void TaskScriptGenerator::generate(const std::map<std::string,std::string>& over
 
 static void add_queue(std::string& content,const std::string& client_exe, const std::string& sleep,const std::vector<QueueAttr>& queues)
 {
-   BOOST_FOREACH(const QueueAttr& queue, queues) {
+   for(const QueueAttr& queue: queues) {
       content += "\n";
       content += "for i in";
       const std::vector<std::string>& queue_list = queue.list();
@@ -175,14 +175,14 @@ std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const
    content += "%end\n";
    content += "\n";
    content += "echo do some work\n";
-   BOOST_FOREACH(const Event& e, task_->events()) {
+   for(const Event& e: task_->events()) {
       if (e.initial_value()) content += client_exe + "--event=" + e.name_or_number() + " clear\n";
       else                   content += client_exe + "--event=" + e.name_or_number() + "\n"; // same as set
       content += sleep;
    }
 
    content += "\n";
-   BOOST_FOREACH(const Meter& m, task_->meters()) {
+   for(const Meter& m: task_->meters()) {
       content += "for i in";
       for(int i = m.min(); i <= m.max(); i = i + 1) {
          content += " ";
@@ -197,7 +197,7 @@ std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const
    content += "\n";
 
    /// labels require at least 2 arguments,
-   BOOST_FOREACH(const Label& label, task_->labels()) {
+   for(const Label& label: task_->labels()) {
 
       if (!label.new_value().empty()) {
          content += client_exe + "--label=" + label.name() + " " + label.new_value() + "\n";

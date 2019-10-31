@@ -54,9 +54,9 @@ static void waitForTimeDependenciesToBeFree(int max_time_to_wait)
       defs_ptr defs = TestFixture::client().defs();
       vector<Task*> tasks; defs->getAllTasks(tasks);
       size_t taskTimeDepIsFree = 0 ;
-      BOOST_FOREACH(Task* task, tasks) {
+      for(Task* task: tasks) {
          size_t attSetFree = 0;
-         BOOST_FOREACH( const ecf::TimeAttr& timeAttr, task->timeVec()) {
+         for( const ecf::TimeAttr& timeAttr: task->timeVec()) {
             if (timeAttr.isFree(task->suite()->calendar())) attSetFree++;
          }
          if ( attSetFree == task->timeVec().size()) taskTimeDepIsFree++;

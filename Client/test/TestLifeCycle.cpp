@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE( test_node_tree_lifecycle )
 		JobsParam jobsParam; // create jobs = false, spawn jobs = false
 		Jobs jobs(&defs);
 		BOOST_CHECK_MESSAGE(jobs.generate(jobsParam),jobsParam.getErrorMsg());
-		BOOST_FOREACH(Submittable* t, jobsParam.submitted() ) {
+		for(Submittable* t: jobsParam.submitted() ) {
 			BOOST_CHECK_MESSAGE( t->state() == NState::SUBMITTED, "jobSubmission should change Node state");
  		}
 

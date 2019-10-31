@@ -19,7 +19,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/foreach.hpp>
+
 #include "boost/filesystem/operations.hpp"
 
 #include "ServerEnvironment.hpp"
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE( test_server_environment_log_file )
 
    bool found_var = false;
    typedef std::pair<std::string, std::string> mpair;
-   BOOST_FOREACH(const mpair& p, server_vars ) {
+   for(const mpair& p: server_vars ) {
       if (Str::ECF_LOG() == p.first) {
          BOOST_CHECK_MESSAGE(p.second == Log::instance()->path(),"Expected " << Log::instance()->path() << " but found " << p.second);
          found_var = true;
@@ -158,11 +158,11 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);
-   BOOST_FOREACH(const std::string& expected_var, expected_variables) {
+   for(const std::string& expected_var: expected_variables) {
 
       bool found_var = false;
       typedef std::pair<std::string, std::string> s_pair;
-      BOOST_FOREACH(const s_pair& p, server_vars ) {
+      for(const s_pair& p: server_vars ) {
          if (expected_var == p.first) { found_var = true; break; }
       }
       BOOST_CHECK_MESSAGE(found_var,"Failed to find server var " << expected_var);
@@ -171,9 +171,9 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
    {
       // check other way, so that this test gets updated
       typedef std::pair<std::string, std::string> mpair;
-      BOOST_FOREACH(const mpair& p, server_vars ) {
+      for(const mpair& p: server_vars ) {
          bool found_var = false;
-         BOOST_FOREACH(const std::string& expected_var, expected_variables) {
+         for(const std::string& expected_var: expected_variables) {
             if (expected_var == p.first) { found_var = true; break; }
          }
          BOOST_CHECK_MESSAGE(found_var,"Failed to update test for server var " << p.first);
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE( test_server_config_file )
    // o ignore ECF_CHECKMODE: not a server variable
    //
    typedef std::pair<std::string, std::string> mpair;
-   BOOST_FOREACH(const mpair& p, server_vars ) {
+   for(const mpair& p: server_vars ) {
       //std::cout << "server variables " << p.first << "  " << p.second << "\n";
       if (Str::ECF_HOME() == p.first) {
          BOOST_CHECK_MESSAGE(p.second == fs::current_path().string(),"for ECF_HOME expected " << fs::current_path().string() << " but found " << p.second);
@@ -281,11 +281,11 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
 
    std::vector<std::pair<std::string,std::string> > server_vars;
    serverEnv.variables(server_vars);
-   BOOST_FOREACH(const std::string& expected_var, expected_variables) {
+   for(const std::string& expected_var: expected_variables) {
 
       bool found_var = false;
       typedef std::pair<std::string, std::string> mpair;
-      BOOST_FOREACH(const mpair& p, server_vars ) {
+      for(const mpair& p: server_vars ) {
          if (expected_var == p.first) { found_var = true; break; }
       }
       BOOST_CHECK_MESSAGE(found_var,"Failed to find server var " << expected_var);
@@ -293,9 +293,9 @@ BOOST_AUTO_TEST_CASE( test_server_environment_variables )
 
    // check other way, so that this test gets updated
    typedef std::pair<std::string, std::string> mpair;
-   BOOST_FOREACH(const mpair& p, server_vars ) {
+   for(const mpair& p: server_vars ) {
       bool found_var = false;
-      BOOST_FOREACH(const std::string& expected_var, expected_variables) {
+      for(const std::string& expected_var: expected_variables) {
          if (expected_var == p.first) { found_var = true; break; }
       }
       BOOST_CHECK_MESSAGE(found_var,"Failed to update test for server var " << p.first);

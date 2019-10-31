@@ -17,7 +17,7 @@
 #include <fstream>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/foreach.hpp>
+
 
 #include "Defs.hpp"
 #include "Suite.hpp"

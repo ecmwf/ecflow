@@ -12,7 +12,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-#include <boost/foreach.hpp>
+
 
 #include "NodeExpression.hpp"
 #include "UiLog.hpp"

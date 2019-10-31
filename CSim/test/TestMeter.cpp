@@ -89,7 +89,7 @@ BOOST_AUTO_TEST_CASE( test_meter )
 	bool found_task = false;
 	std::vector<Task*> theServerTasks;
 	theDefs.getAllTasks(theServerTasks);
-	BOOST_FOREACH(Task* t, theServerTasks) {
+	for(Task* t: theServerTasks) {
 		if (t->name() == "fc") {
 			found_task = true;
 	  		const std::vector<Meter>& meters = t->meters();

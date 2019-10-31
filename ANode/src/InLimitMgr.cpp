@@ -15,7 +15,7 @@
 #include <cassert>
 #include <ostream>
 
-#include <boost/foreach.hpp>
+
 
 #include "InLimitMgr.hpp"
 #include "Limit.hpp"
@@ -48,7 +48,7 @@ InLimitMgr& InLimitMgr::operator=(const InLimitMgr& rhs)
 
 void InLimitMgr::print(std::string& os) const
 {
-	BOOST_FOREACH(const InLimit& i, vec_) { i.print(os); }
+	for(const InLimit& i: vec_) { i.print(os); }
 }
 
 bool InLimitMgr::operator==(const InLimitMgr& rhs) const
@@ -145,7 +145,7 @@ void InLimitMgr::get_memento( compound_memento_ptr& comp) const
 	std::cout << "InLimitMgr::get_memento " << node_->debugNodePath() << "\n";
 #endif
 
- 	BOOST_FOREACH(const InLimit& l, vec_ )  { comp->add( std::make_shared<NodeInLimitMemento>(  l) ); }
+ 	for(const InLimit& l: vec_ )  { comp->add( std::make_shared<NodeInLimitMemento>(  l) ); }
 }
 
 
@@ -210,7 +210,7 @@ void InLimitMgr::incrementInLimit( std::set<Limit*>& limitSet,const std::string&
 
 	resolveInLimitReferences();
 
-	BOOST_FOREACH(InLimit& inlimit, vec_) {
+	for(InLimit& inlimit: vec_) {
 		Limit* limit = inlimit.limit();
 		if (limit && limitSet.find(limit) == limitSet.end()) {
 			limitSet.insert(limit);
@@ -255,7 +255,7 @@ void InLimitMgr::decrementInLimit( std::set<Limit*>& limitSet,const std::string&
    resolveInLimitReferences();
 
 	std::vector<task_ptr> task_vec;
-	BOOST_FOREACH(InLimit& inlimit, vec_) {
+	for(InLimit& inlimit: vec_) {
 		Limit* limit = inlimit.limit();
 		if (limit && limitSet.find(limit) == limitSet.end()) {
 			limitSet.insert(limit);
@@ -267,7 +267,7 @@ void InLimitMgr::decrementInLimit( std::set<Limit*>& limitSet,const std::string&
                // Can only decrement this once, i.e when all child tasks are completed or aborted or queued or unknown
                bool at_least_one_active = false;
                if (task_vec.empty()) node_->get_all_tasks(task_vec); // Get tasks once, inside for loop
-               BOOST_FOREACH(task_ptr task,task_vec) {
+               for(task_ptr task:task_vec) {
                   if (task->state() == NState::ACTIVE || task->state() == NState::SUBMITTED) { at_least_one_active = true; break;}
                }
                if (at_least_one_active) continue;
@@ -290,7 +290,7 @@ void InLimitMgr::decrementInLimitForSubmission( std::set<Limit*>& limitSet,const
    resolveInLimitReferences();
 
    std::vector<task_ptr> task_vec;
-   BOOST_FOREACH(InLimit& inlimit, vec_) {
+   for(InLimit& inlimit: vec_) {
       Limit* limit = inlimit.limit();
       if (limit && limitSet.find(limit) == limitSet.end()) {
          limitSet.insert(limit);

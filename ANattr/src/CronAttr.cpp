@@ -14,7 +14,7 @@
 //============================================================================
 #include <sstream>
 
-#include <boost/foreach.hpp>
+
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
@@ -59,7 +59,7 @@ CronAttr::CronAttr(const std::string& str)
 void CronAttr::addWeekDays( const std::vector<int>& w)
 {
 	weekDays_ = w;
-	BOOST_FOREACH(int day,weekDays_) {
+	for(int day:weekDays_) {
 		if (day < 0 || day > 6) {
 			std::stringstream ss; ss << "Invalid range for day(" << day << ") of the week expected range is 0==Sun to 6==Sat";
  			throw std::out_of_range(ss.str());
@@ -74,7 +74,7 @@ void CronAttr::addWeekDays( const std::vector<int>& w)
 void CronAttr::add_last_week_days_of_month( const std::vector<int>& w)
 {
    last_week_days_of_month_ = w;
-   BOOST_FOREACH(int day, last_week_days_of_month_) {
+   for(int day: last_week_days_of_month_) {
       if (day < 0 || day > 6) {
          std::stringstream ss; ss << "Invalid range for day(" << day << ") of the week expected range is 0==Sun to 6==Sat";
          throw std::out_of_range(ss.str());
@@ -90,7 +90,7 @@ void CronAttr::add_last_week_days_of_month( const std::vector<int>& w)
 void CronAttr::addDaysOfMonth( const std::vector<int>& d)
 {
 	daysOfMonth_ = d;
-	BOOST_FOREACH(int day_of_month,daysOfMonth_) {
+	for(int day_of_month:daysOfMonth_) {
 		if (day_of_month < 1 || day_of_month > 31) {
 			std::stringstream ss; ss << "Invalid range for day of month(" << day_of_month << ") expected range is  1-31";
  			throw std::out_of_range(ss.str());
@@ -101,7 +101,7 @@ void CronAttr::addDaysOfMonth( const std::vector<int>& d)
 void CronAttr::addMonths( const std::vector<int>& m)
 {
 	months_ = m;
-	BOOST_FOREACH(int month,months_) {
+	for(int month:months_) {
 		if (month < 1 || month > 12) {
 			std::stringstream ss; ss << "Invalid range for month(" << month << ")  expected range is 1==Jan to 12==Dec";
  			throw std::out_of_range(ss.str());
@@ -441,7 +441,7 @@ bool CronAttr::is_day_of_week_day_of_month_and_month_free( const ecf::Calendar& 
 
 bool CronAttr::week_day_matches( int theDayOfWeek ) const
 {
- 	BOOST_FOREACH(int theWeekDay, weekDays_) {
+ 	for(int theWeekDay: weekDays_) {
  		if ( theDayOfWeek == theWeekDay)  return true;
  	}
  	return false;
@@ -453,7 +453,7 @@ bool CronAttr::last_week_day_of_month_matches( const ecf::Calendar& c  ) const
    boost::gregorian::date last_day_of_month = c.date().end_of_month();
    boost::gregorian::date_duration diff_current_date_and_last_day_of_month = last_day_of_month - c.date();
 
-   BOOST_FOREACH(int cron_last_week_day_of_month,last_week_days_of_month_ ) {
+   for(int cron_last_week_day_of_month:last_week_days_of_month_ ) {
       if ( cal_day_of_week == cron_last_week_day_of_month ) {
 
          if ( diff_current_date_and_last_day_of_month.days() < 7) {
@@ -466,7 +466,7 @@ bool CronAttr::last_week_day_of_month_matches( const ecf::Calendar& c  ) const
 
 bool CronAttr::day_of_month_matches(int theDayOfMonth, const ecf::Calendar& c) const
 {
-	BOOST_FOREACH(int dayOfMonth, daysOfMonth_) {
+	for(int dayOfMonth: daysOfMonth_) {
 	 	if ( theDayOfMonth == dayOfMonth)  return true;
 	}
 	if (last_day_of_month_) {
@@ -477,7 +477,7 @@ bool CronAttr::day_of_month_matches(int theDayOfMonth, const ecf::Calendar& c) c
 
 bool CronAttr::month_matches(int theMonth) const
 {
- 	 BOOST_FOREACH(int month, months_) {
+ 	 for(int month: months_) {
 	 	if ( theMonth == month) return true;
 	 }
  	 return false;

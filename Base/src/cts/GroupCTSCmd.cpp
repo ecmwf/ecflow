@@ -15,7 +15,7 @@
 
 #include <iostream>
 #include <memory>
-#include <boost/foreach.hpp>
+
 #include <boost/algorithm/string/trim.hpp>
 
 #include "ClientToServerCmd.hpp"
@@ -132,19 +132,19 @@ GroupCTSCmd::GroupCTSCmd(const std::string& cmdSeries,AbstractClientEnv* clientE
 
 bool GroupCTSCmd::isWrite() const
 {
- 	BOOST_FOREACH(Cmd_ptr subCmd, cmdVec_) { if (subCmd->isWrite()) return true; }
+ 	for(Cmd_ptr subCmd: cmdVec_) { if (subCmd->isWrite()) return true; }
  	return false;
 }
 
 bool GroupCTSCmd::cmd_updates_defs() const
 {
-   BOOST_FOREACH(Cmd_ptr subCmd, cmdVec_) { if (subCmd->cmd_updates_defs()) return true; }
+   for(Cmd_ptr subCmd: cmdVec_) { if (subCmd->cmd_updates_defs()) return true; }
    return false;
 }
 
 bool GroupCTSCmd::get_cmd() const
 {
- 	BOOST_FOREACH(Cmd_ptr subCmd, cmdVec_) { if (subCmd->get_cmd()) return true; }
+ 	for(Cmd_ptr subCmd: cmdVec_) { if (subCmd->get_cmd()) return true; }
  	return false;
 }
 
@@ -152,7 +152,7 @@ PrintStyle::Type_t GroupCTSCmd::show_style() const
 {
    // Only return non default style( PrintStyle::NOTHING ) if sub command
    // contains a show cmd
- 	BOOST_FOREACH(Cmd_ptr subCmd, cmdVec_) {
+ 	for(Cmd_ptr subCmd: cmdVec_) {
  	   if ( subCmd->show_cmd() ) return subCmd->show_style();
  	}
  	return PrintStyle::NOTHING;
@@ -160,19 +160,19 @@ PrintStyle::Type_t GroupCTSCmd::show_style() const
 
 bool GroupCTSCmd::task_cmd() const
 {
- 	BOOST_FOREACH(Cmd_ptr subCmd, cmdVec_) { if (subCmd->task_cmd()) return true; }
+ 	for(Cmd_ptr subCmd: cmdVec_) { if (subCmd->task_cmd()) return true; }
  	return false;
 }
 
 bool GroupCTSCmd::terminate_cmd() const
 {
- 	BOOST_FOREACH(Cmd_ptr subCmd, cmdVec_) { if (subCmd->terminate_cmd()) return true; }
+ 	for(Cmd_ptr subCmd: cmdVec_) { if (subCmd->terminate_cmd()) return true; }
  	return false;
 }
 
 bool GroupCTSCmd::why_cmd( std::string& nodePath) const
 {
- 	BOOST_FOREACH(Cmd_ptr subCmd, cmdVec_) { if (subCmd->why_cmd(nodePath)) return true; }
+ 	for(Cmd_ptr subCmd: cmdVec_) { if (subCmd->why_cmd(nodePath)) return true; }
  	return false;
 }
 

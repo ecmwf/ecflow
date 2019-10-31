@@ -18,7 +18,7 @@
 #include <fstream>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/foreach.hpp>
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/posix_time/conversion.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
@@ -371,8 +371,8 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
 
    int parse_failure = 0;
    int ast_failure = 0;
-   std::pair<string, std::pair<string,bool> > p;
-   BOOST_FOREACH(p, exprMap ) {
+   //std::pair<string, std::pair<string,bool> > p;
+   for(const auto& p: exprMap ) {
 
       //cout << "parsing: " << p.first << "\n";
       ExprParser theExprParser(p.first);
@@ -434,8 +434,7 @@ BOOST_AUTO_TEST_CASE( test_trigger_functions )
 
    int parse_failure = 0;
    int ast_failure = 0;
-   std::pair<string, std::pair<string,bool> > p;
-   BOOST_FOREACH(p, exprMap ) {
+   for(std::pair<string, std::pair<string,bool> > p: exprMap ) {
 
       //cout << "parsing: " << p.first << "\n";
       ExprParser theExprParser(p.first);
@@ -531,8 +530,7 @@ BOOST_AUTO_TEST_CASE( test_trigger_functions_with_boost_date )
 
    int parse_failure = 0;
    int ast_failure = 0;
-   std::pair<string, std::pair<string,bool> > p;
-   BOOST_FOREACH(p, exprMap ) {
+   for(std::pair<string, std::pair<string,bool> > p: exprMap ) {
 
       //cout << "parsing: " << p.first << "\n";
       ExprParser theExprParser(p.first);
@@ -580,8 +578,8 @@ BOOST_AUTO_TEST_CASE( test_trigger_expression_divide_by_zero )
    exprMap[":YMD % 0 == 0"] = std::make_pair(AstEqual::stype(),true);
    exprMap[":YMD / 0 == 0"] = std::make_pair(AstEqual::stype(),true);
 
-   std::pair<string, std::pair<string,bool> > p;
-   BOOST_FOREACH(p, exprMap ) {
+   //std::pair<string, std::pair<string,bool> > p;
+   for(const auto& p: exprMap ) {
 
       ExprParser theExprParser(p.first);
       std::string errorMsg;
@@ -659,7 +657,7 @@ BOOST_AUTO_TEST_CASE( test_parser_bad_expressions )
    exprvec.emplace_back("/mofc/mon/hind/14/back == complete or %s:DOW ne 5"); // ECFLOW-888
 
 
-   BOOST_FOREACH(const string& expr, exprvec ) {
+   for(const string& expr: exprvec ) {
 
       //std::cout << "parsing expression " << expr << "\n";
       ExprParser theExprParser(expr);

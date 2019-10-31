@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE( test_force_cmd_recursive )
 
    MockServer mockServer(the_defs);
    std::vector< std::string > all_states = NState::allStates();
-   BOOST_FOREACH(const std::string& state, all_states) {
+   for(const std::string& state: all_states) {
       doForce(mockServer,suite.get(),state,nodes);
    }
 }
@@ -147,10 +147,10 @@ BOOST_AUTO_TEST_CASE( test_force_cmd_bubbles_up_state_changes )
    MockServer mockServer(the_defs);
 
    std::vector< std::string > all_states = NState::allStates();
-   BOOST_FOREACH(const std::string& state, all_states) {
+   for(const std::string& state: all_states) {
 
       // 		cout << "Setting all tasks to state " << state << "\n";
-      BOOST_FOREACH(Task* task, tasks) {
+      for(Task* task: tasks) {
          ForceCmd cmd(task->absNodePath(), state, false /*recursive */, false /* set Repeat to last value */);
          cmd.setup_user_authentification();
          STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
@@ -177,13 +177,13 @@ BOOST_AUTO_TEST_CASE( test_force_cmd_alias_does_not_bubble_up_state_changes )
    node_ptr suite = the_defs->findAbsNode("/s1");
 
    // initialize by setting all nodes to state QUEUED
-   BOOST_FOREACH(Node* n, nodes) { n->set_state(NState::QUEUED); }
+   for(Node* n: nodes) { n->set_state(NState::QUEUED); }
 
    MockServer mockServer(the_defs);
    std::vector< std::string > all_states = NState::allStates();
-   BOOST_FOREACH(const std::string& state, all_states) {
+   for(const std::string& state: all_states) {
 
-      BOOST_FOREACH(alias_ptr alias, aliases) {
+      for(alias_ptr alias: aliases) {
          ForceCmd cmd(alias->absNodePath(), state, false /*recursive */, false /* set Repeat to last value */);
          cmd.setup_user_authentification();
          STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
@@ -209,27 +209,27 @@ BOOST_AUTO_TEST_CASE( test_force_events )
    suite->getAllNodes(nodes);
 
    /// Set and clear events
-   BOOST_FOREACH(Node* node, nodes) {
-      BOOST_FOREACH(const Event& e, node->events()) {
+   for(Node* node: nodes) {
+      for(const Event& e: node->events()) {
          std::string path = node->absNodePath() + ":" + e.name_or_number();
          ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
          cmd.setup_user_authentification();
          STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
          BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force event for node " << node->debugNodePath());
       }
-      BOOST_FOREACH(const Event& e, node->events()) {
+      for(const Event& e: node->events()) {
          BOOST_CHECK_MESSAGE(e.value(), "Event not set as expected for node " << node->debugNodePath());
       }
    }
-   BOOST_FOREACH(Node* node, nodes) {
-      BOOST_FOREACH(const Event& e, node->events()) {
+   for(Node* node: nodes) {
+      for(const Event& e: node->events()) {
          std::string path = node->absNodePath() + ":" + e.name_or_number();
          ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
          cmd.setup_user_authentification();
          STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
          BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force event for node " << node->debugNodePath());
       }
-      BOOST_FOREACH(const Event& e, node->events()) {
+      for(const Event& e: node->events()) {
          BOOST_CHECK_MESSAGE(!e.value(), "Event not cleared as expected for node " << node->debugNodePath());
       }
    }
@@ -248,16 +248,16 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
    suite->getAllNodes(nodes);
 
    /// Make a path that does not exist
-   BOOST_FOREACH(Node* node, nodes) {
-      BOOST_FOREACH(const Event& e, node->events()) {
+   for(Node* node: nodes) {
+      for(const Event& e: node->events()) {
          std::string path = node->absNodePath() + "/path/doesnot/exist" + ":" + e.name_or_number();
          ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
          cmd.setup_user_authentification();
          BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
       }
    }
-   BOOST_FOREACH(Node* node, nodes) {
-      BOOST_FOREACH(const Event& e, node->events()) {
+   for(Node* node: nodes) {
+      for(const Event& e: node->events()) {
          std::string path = node->absNodePath() + "/path/doesnot/exist" + ":" + e.name_or_number();
          ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
          cmd.setup_user_authentification();
@@ -266,7 +266,7 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
    }
 
    /// Make path that does not contain a event
-   BOOST_FOREACH(Node* node, nodes) {
+   for(Node* node: nodes) {
       if (node->events().empty()) {
          std::string path = node->absNodePath() ;
          ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
@@ -274,7 +274,7 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
          BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
       }
    }
-   BOOST_FOREACH(Node* node, nodes) {
+   for(Node* node: nodes) {
       if (node->events().empty()) {
          std::string path = node->absNodePath();
          ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
@@ -284,16 +284,16 @@ BOOST_AUTO_TEST_CASE( test_force_events_errors )
    }
 
    /// Make a event that does not exist
-   BOOST_FOREACH(Node* node, nodes) {
-      BOOST_FOREACH(const Event& e, node->events()) {
+   for(Node* node: nodes) {
+      for(const Event& e: node->events()) {
          std::string path = node->absNodePath() +  ":" + e.name_or_number() + "made_up";
          ForceCmd cmd(path, Event::SET(), false /*recursive */, false /* set Repeat to last value */);
          cmd.setup_user_authentification();
          BOOST_REQUIRE_THROW(cmd.handleRequest( &mockServer ) , std::runtime_error);
       }
    }
-   BOOST_FOREACH(Node* node, nodes) {
-      BOOST_FOREACH(const Event& e, node->events()) {
+   for(Node* node: nodes) {
+      for(const Event& e: node->events()) {
          std::string path = node->absNodePath() + ":" + e.name_or_number() + "made_up";
          ForceCmd cmd(path, Event::CLEAR(), false /*recursive */, false /* set Repeat to last value */);
          cmd.setup_user_authentification();

@@ -13,7 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <cassert>
-#include <boost/foreach.hpp>
+
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -256,7 +256,7 @@ bool Node::testTimeDependenciesForRequeue() const
 
    // When we have a mixture of cron *with* other time based attributes
    // The cron *takes* priority.  Crons should always return true, for checkForRequeue
-   BOOST_FOREACH(const CronAttr& cron, crons_ ) {
+   for(const CronAttr& cron: crons_ ) {
       if (cron.checkForRequeue(calendar)) {  // will always return true
 #ifdef DEBUG_REQUEUE
          LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for cron");
@@ -268,8 +268,8 @@ bool Node::testTimeDependenciesForRequeue() const
 
    if (!times_.empty()) {
       TimeSlot the_min,the_max; // Needs to handle multiple single slot time attributes
-      BOOST_FOREACH(const ecf::TimeAttr& time, times_) { time.min_max_time_slots(the_min,the_max);}
-      BOOST_FOREACH(const ecf::TimeAttr& time, times_) {
+      for(const ecf::TimeAttr& time: times_) { time.min_max_time_slots(the_min,the_max);}
+      for(const ecf::TimeAttr& time: times_) {
          if (time.checkForRequeue(calendar,the_min,the_max)) {
 #ifdef DEBUG_REQUEUE
             LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for time " << time.toString());
@@ -282,8 +282,8 @@ bool Node::testTimeDependenciesForRequeue() const
 
    if (!todays_.empty()) {
       TimeSlot the_min,the_max; // Needs to handle multiple single slot today attributes
-      BOOST_FOREACH(const ecf::TodayAttr& today,todays_)  { today.min_max_time_slots(the_min,the_max);}
-      BOOST_FOREACH(const ecf::TodayAttr& today,todays_) {
+      for(const ecf::TodayAttr& today:todays_)  { today.min_max_time_slots(the_min,the_max);}
+      for(const ecf::TodayAttr& today:todays_) {
          if (today.checkForRequeue(calendar,the_min,the_max)) {
 #ifdef DEBUG_REQUEUE
             LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for today " << today.toString());
@@ -299,7 +299,7 @@ bool Node::testTimeDependenciesForRequeue() const
    // We now need to determine if this node has a future time dependency which
    // should re-queue this node
    // *********************************************************************
-   BOOST_FOREACH(const DateAttr& date, dates_ ) {
+   for(const DateAttr& date: dates_ ) {
       if (date.checkForRequeue(calendar)) {
 #ifdef DEBUG_REQUEUE
          LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for date " << date.toString());
@@ -308,7 +308,7 @@ bool Node::testTimeDependenciesForRequeue() const
       }
    }
 
-   BOOST_FOREACH(const DayAttr& day, days_ ) {
+   for(const DayAttr& day: days_ ) {
       if (day.checkForRequeue(calendar)) {
 #ifdef DEBUG_REQUEUE
          LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for day " << day.toString());

@@ -17,7 +17,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
-#include <boost/foreach.hpp>
+
 
 #include "Str.hpp"
 #include "StringSplitter.hpp"
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          std::vector<std::string> result((std::istream_iterator<std::string>(iss)),
                                           std::istream_iterator<std::string>());
          reconstructed.clear();
-         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+         for(const std::string& s: result) { reconstructed += s;  reconstructed += " "; }
       }
       cout << " Time for istreamstream " << times << "                 times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          result.clear();
          std::vector<std::string> result = split_using_getline(line,' ');
          reconstructed.clear();
-         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+         for(const std::string& s: result) { reconstructed += s;  reconstructed += " "; }
       }
       cout << " Time for std::getline " << times << "                  times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'");
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          boost::split(result, line, [](char c){return c == ' ';});
 
          reconstructed.clear();
-         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+         for(const std::string& s: result) { reconstructed += s;  reconstructed += " "; }
       }
       cout << " Time for boost::split " << times << "                  times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       //BOOST_CHECK_MESSAGE(line==reconstructed,"\n'" << line << "'\n'" << reconstructed << "'"); // add extra space
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          result.clear(); Str::split_orig(line,result);
 
          reconstructed.clear();
-         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+         for(const std::string& s: result) { reconstructed += s;  reconstructed += " "; }
       }
       cout << " Time for Str::split_orig " << times << "               times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed," error");
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          result.clear(); Str::split_orig1(line,result);
 
          reconstructed.clear();
-         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+         for(const std::string& s: result) { reconstructed += s;  reconstructed += " "; }
       }
       cout << " Time for Str::split_orig1 " << times << "              times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed," error");
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          result.clear(); Str::split_using_string_view2(line,result);
 
          reconstructed.clear();
-         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+         for(const std::string& s: result) { reconstructed += s;  reconstructed += " "; }
       }
       cout << " Time for Str::split_using_string_view2 " << times << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed," error");
@@ -144,7 +144,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf )
          result.clear(); Str::split_using_string_view(line,result);
 
          reconstructed.clear();
-         BOOST_FOREACH(const std::string& s, result) { reconstructed += s;  reconstructed += " "; }
+         for(const std::string& s: result) { reconstructed += s;  reconstructed += " "; }
       }
       cout << " Time for Str::split_using_string_view " << times << "  times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       BOOST_CHECK_MESSAGE(line==reconstructed," error");

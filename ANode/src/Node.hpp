@@ -31,7 +31,7 @@
 #include <limits>
 
 #include <boost/noncopyable.hpp>
-#include <boost/foreach.hpp>                      // used so often just placed here for convenience
+                      // used so often just placed here for convenience
 
 #include "DState.hpp"
 #include "NOrder.hpp"

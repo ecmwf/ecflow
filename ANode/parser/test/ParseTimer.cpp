@@ -49,7 +49,7 @@ void test_find_task_using_path( NodeContainer* f,const Defs& defs )
 {
    if (f != defs.findAbsNode(f->absNodePath()).get() ) cout << "Could not find path " << f->absNodePath() << "\n";
 
-   BOOST_FOREACH(node_ptr t, f->nodeVec()) {
+   for(node_ptr t: f->nodeVec()) {
       if (t.get() != defs.findAbsNode(t->absNodePath()).get()) cout <<  "Could not find path " << t->absNodePath() << "\n";
       Family* family = t->isFamily();
       if (family) {
@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
 
    {
       timer.start();
-      BOOST_FOREACH(suite_ptr s, defs.suiteVec()) { test_find_task_using_path(s.get(),defs); }
+      for(suite_ptr s : defs.suiteVec()) { test_find_task_using_path(s.get(),defs); }
       cout << " Test all paths can be found. time taken        = " << timer.format(3,Str::cpu_timer_format()) << endl;
    }
    {
@@ -214,16 +214,16 @@ int main(int argc, char* argv[])
       timer.start();
       std::vector<Task*> tasks;
       defs.getAllTasks(tasks);
-      BOOST_FOREACH(Task* t, tasks) {
+      for(Task* t: tasks) {
          if (!defs.deleteChild(t)) cout << "Failed to delete task\n";
       }
       tasks.clear(); defs.getAllTasks(tasks);
       if (!tasks.empty()) cout << "Expected all tasks to be deleted but found " << tasks.size() << "\n";
 
       std::vector<suite_ptr> vec = defs.suiteVec(); // make a copy, to avoid invalidating iterators
-      BOOST_FOREACH(suite_ptr s, vec) {
+      for(suite_ptr s: vec) {
          std::vector<node_ptr> familyVec = s->nodeVec(); // make a copy, to avoid invalidating iterators
-         BOOST_FOREACH(node_ptr f, familyVec) {
+         for(node_ptr f: familyVec) {
             if (!defs.deleteChild(f.get())) cout << "Failed to delete family\n";
          }
          if (!s->nodeVec().empty()) cout << "Expected all Families to be deleted but found " << s->nodeVec().size() << "\n";

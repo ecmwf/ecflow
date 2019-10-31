@@ -18,7 +18,7 @@
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include <boost/foreach.hpp>
+
 
 #include "ClientInvoker.hpp"
 #include "ClientToServerCmd.hpp"
@@ -190,7 +190,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.force(event_paths,"set") == 0,  " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.force(event_paths,"clear") == 0," should return 0\n" << theClient.errorMsg());
    std::vector<std::string> validStates = NState::allStates(); // HPUX barfs if use NState::allStates() directly
-   BOOST_FOREACH(const string& state, validStates) {
+   for(const string& state: validStates) {
       BOOST_REQUIRE_MESSAGE( theClient.force("/s",state,true,true) == 0, "force " << state << " should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE( theClient.force(paths,state,true,true) == 0, "force " << state << " should return 0\n" << theClient.errorMsg());
    }
@@ -345,8 +345,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","label","name","/value/with/paths") == 0,"--alter should return 0\n" << theClient.errorMsg());
 
 
-   std::vector<std::string> validDays = DayAttr::allDays(); // HPUX barfs if use DayAttr::allDays() directly in BOOST_FOREACH
-   BOOST_FOREACH(const string& day, validDays) {
+   for(const string& day : DayAttr::allDays()) {
       BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","day",day) == 0,"--alter should return 0\n" << theClient.errorMsg());
    }
    BOOST_REQUIRE_MESSAGE( theClient.alter("/",  "delete","variable") == 0,"--alter should return 0\n" << theClient.errorMsg());

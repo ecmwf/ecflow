@@ -13,7 +13,7 @@
 // Description :
 //============================================================================
 #include <sstream>
-#include <boost/foreach.hpp>
+
 
 #include "LateAttr.hpp"
 #include "Indentor.hpp"

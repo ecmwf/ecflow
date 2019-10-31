@@ -417,7 +417,7 @@ std::string TestFixture::taskAbsNodePath(const Defs& theDefs, const std::string&
 {
 	std::vector<Task*> vec;
 	theDefs.getAllTasks(vec);
-	BOOST_FOREACH(Task* t , vec ) {
+	for(Task* t : vec ) {
 		if (t->name() == taskName) return t->absNodePath();
 	}
 

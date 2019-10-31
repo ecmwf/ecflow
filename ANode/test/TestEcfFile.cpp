@@ -815,12 +815,11 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
    // Create a defs file, where the task name mirrors the sms files in the given directory
    task_ptr task_t1 = Task::create( "t1" );
    suite_ptr suite = Suite::create( Pid::unique_name("test_ecf_file") );
-   std::pair<std::string,std::string> p;
    Defs theDefs; {
       suite->addVariable( Variable( Str::ECF_INCLUDE(), "$ECF_HOME/includes" ) );
       suite->addVariable( Variable( "SLEEPTIME", "1" ) );
       suite->addVariable( Variable( "ECF_CLIENT_EXE_PATH",  "a/made/up/path" ) );
-      BOOST_FOREACH(p,expected_used_variables) { task_t1->addVariable( Variable( p.first,  p.second) );}
+      for(const std::pair<std::string,std::string>& p : expected_used_variables) { task_t1->addVariable( Variable( p.first,  p.second) );}
       suite->addTask( task_t1 );
       theDefs.addSuite( suite );
    }
@@ -844,8 +843,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
    comment_body +=       " end.\n";
    string comment_tail ="%end\n\n";
    string ecf_body; {
-      std::pair<std::string,std::string> p;
-      BOOST_FOREACH(p,expected_used_variables) {  ecf_body += Ecf::MICRO() + p.first + Ecf::MICRO() + "\n";}
+      for(std::pair<std::string,std::string> p:expected_used_variables) {  ecf_body += Ecf::MICRO() + p.first + Ecf::MICRO() + "\n";}
       ecf_body +="%VAR3:substitute_var%\n";
    }
    string tail = "\n%include <tail.h>\n# ===================================";
@@ -899,7 +897,7 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
    ecfFile.edit_used_variables(file_with_used_variables);
    //    std::cout << "file_with_used_variables:----------------------------------------------------------------\n" << file_with_used_variables << "\n";
    BOOST_CHECK_MESSAGE(file_with_used_variables.find("%comment") == 0, "Expected to find variable %comment on the very first line: but found at: " << file_with_used_variables.find("%comment"));
-   BOOST_FOREACH(p,expected_used_variables) {
+   for(std::pair<std::string,std::string> p:expected_used_variables) {
       BOOST_CHECK_MESSAGE(file_with_used_variables.find(p.first) != string::npos, "Expected to find variable" << p.first);
    }
 
@@ -908,11 +906,11 @@ BOOST_AUTO_TEST_CASE( test_ecf_file )
    Str::split(file_with_used_variables,script_lines,"\n"); //  will ignore empty lines, but will do for this case
    NameValueMap extracted_used_variables;
    EcfFile::extract_used_variables( extracted_used_variables, script_lines );
-   BOOST_FOREACH(p,expected_used_variables) {
+   for(std::pair<std::string,std::string> p:expected_used_variables) {
       BOOST_CHECK_MESSAGE( extracted_used_variables.find(p.first) != extracted_used_variables.end()," expected to find variable " << p.first << " in the extracted variables\n");
    }
-   //    cout << "Expected:----\n"; BOOST_FOREACH(p,expected_used_variables) { cout << p.first << " " << p.second << "\n";}
-   //    cout << "Actual:------\n"; BOOST_FOREACH(p,extracted_used_variables) { cout << p.first << " " << p.second << "\n";}
+   //    cout << "Expected:----\n"; for(p:expected_used_variables) { cout << p.first << " " << p.second << "\n";}
+   //    cout << "Actual:------\n"; for(p:extracted_used_variables) { cout << p.first << " " << p.second << "\n";}
 
 
    /// Test pre-processing

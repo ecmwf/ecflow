@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( test_set_state )
 
 // 	cout << "Defs setState\n";
  	Defs theDefs;
-  	BOOST_FOREACH(NState::State state, stateVec) {
+  	for(NState::State state: stateVec) {
   		theDefs.set_state(state);
   		BOOST_REQUIRE_MESSAGE(theDefs.state() == state,"Expected defs state " << NState::toString(state) << " but found " << NState::toString(theDefs.state()));
   	}
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( test_set_state )
 // 	cout << "Suite setState\n";
  	suite_ptr s = Suite::create("s");
  	theDefs.addSuite(s);
-  	BOOST_FOREACH(NState::State state, stateVec) {
+  	for(NState::State state: stateVec) {
  		set_state(s,state,state);         // suite with no children, state should be what was set
   	}
  	s->resume();                   // unset the suspended state. Start with default, for next set of test
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE( test_set_state )
 // 	cout << "family setState\n";
  	family_ptr f = Family::create("f");
  	s->addFamily(f);
-  	BOOST_FOREACH(NState::State state, stateVec) {
+  	for(NState::State state: stateVec) {
  		set_state(f,state,state);         // family with no children, state should be what was set
   	}
  	f->resume();                   // unset the suspended state. Start with default, for next set of test
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( test_set_state )
  	task_ptr t = Task::create("t");
  	f->addTask(t);
 
-  	BOOST_FOREACH(NState::State state, stateVec) {
+  	for(NState::State state: stateVec) {
   		f->setStateOnly(NState::UNKNOWN);  // reset family state
   		s->setStateOnly(NState::UNKNOWN);  // reset suite state
 		set_state(t,state,state);          // task state should be what was set

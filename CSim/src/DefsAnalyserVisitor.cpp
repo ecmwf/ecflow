@@ -31,7 +31,7 @@ namespace ecf {
 DefsAnalyserVisitor::DefsAnalyserVisitor() = default;
 
 void DefsAnalyserVisitor::visitDefs( Defs* d) {
-	BOOST_FOREACH(suite_ptr s, d->suiteVec()) { s->acceptVisitTraversor(*this); }
+	for(suite_ptr s: d->suiteVec()) { s->acceptVisitTraversor(*this); }
 }
 
 void DefsAnalyserVisitor::visitSuite( Suite* s)   { visitNodeContainer(s);}
@@ -42,7 +42,7 @@ void DefsAnalyserVisitor::visitNodeContainer(NodeContainer* nc)
  	std::set<Node*> dependentNodes;
 	analyse(nc,dependentNodes);
 
-	BOOST_FOREACH(node_ptr t, nc->nodeVec())       { t->acceptVisitTraversor(*this);}
+	for(node_ptr t: nc->nodeVec())       { t->acceptVisitTraversor(*this);}
 }
 
 void DefsAnalyserVisitor::visitTask( Task* t)
@@ -84,7 +84,7 @@ void DefsAnalyserVisitor::analyse(Node* node,std::set<Node*>& dependentNodes, bo
  		// follow child nodes
   		auto* nc =  dynamic_cast<NodeContainer*>(node);
  		if (nc) {
- 			  BOOST_FOREACH(node_ptr t, nc->nodeVec())       { t->acceptVisitTraversor(*this);}
+ 			  for(node_ptr t: nc->nodeVec())       { t->acceptVisitTraversor(*this);}
  		}
 	}
 
@@ -96,7 +96,7 @@ void DefsAnalyserVisitor::analyse(Node* node,std::set<Node*>& dependentNodes, bo
 		// follow child nodes
  		auto* nc =  dynamic_cast<NodeContainer*>(node);
  		if (nc) {
- 			BOOST_FOREACH(node_ptr t, nc->nodeVec())       { t->acceptVisitTraversor(*this);}
+ 			for(node_ptr t: nc->nodeVec())       { t->acceptVisitTraversor(*this);}
   		}
   	}
 }
@@ -124,12 +124,12 @@ void DefsAnalyserVisitor::analyseExpressions(Node* node,std::set<Node*>& depende
  	}
 
 	// Warn about NULL node references in the trigger expressions
-	BOOST_FOREACH(const string& nodePath, astVisitor.dependentNodePaths()) {
+	for(const string& nodePath: astVisitor.dependentNodePaths()) {
 		Indentor in; Indentor::indent(ss_) << "'" << nodePath << "' is not defined in the expression\n";
 	}
 
 	// **** NOTE: Currently for COMPLETE expression will only follow trigger expressions
-	BOOST_FOREACH(Node* triggerNode, astVisitor.dependentNodes()) {
+	for(Node* triggerNode: astVisitor.dependentNodes()) {
 
 
 		Indentor in; Indentor::indent(ss_) << "EXPRESSION NODE " << triggerNode->debugNodePath();
@@ -147,7 +147,7 @@ void DefsAnalyserVisitor::analyseExpressions(Node* node,std::set<Node*>& depende
 
 //				cerr << "Node = " << node->absNodePath() << "\n";
 //				cerr << "triggerNode = " << triggerNode->absNodePath() << "\n";
-//				BOOST_FOREACH(Node* n,visitor.dependentNodes() ) {
+//				for(Node* n:visitor.dependentNodes() ) {
 //					cerr << "triggerNode Node dependents = " << n->absNodePath() << "\n";
 //				}
 

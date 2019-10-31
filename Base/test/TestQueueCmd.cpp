@@ -13,7 +13,7 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
-#include <boost/foreach.hpp>
+
 #include <string>
 #include <iostream>
 #include <fstream>

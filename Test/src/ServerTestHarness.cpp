@@ -100,7 +100,7 @@ ServerTestHarness::doRun(Defs& theClientDefs, const std::map<std::string,std::st
    // Allow user to add SLEEPTIME, otherwise add a default
    int customSmsCnt = 0;
    auto taskSmsMapSize = static_cast<int>(customTaskSmsMap.size());
-   BOOST_FOREACH(suite_ptr s, theClientDefs.suiteVec()) {
+   for(suite_ptr s: theClientDefs.suiteVec()) {
 
       // Always override these to correctly locate files.
       s->addVariable( Variable( Str::ECF_HOME(),  ecf_home ) );
@@ -348,7 +348,7 @@ ServerTestHarness::testWaiter( const Defs& theClientDefs, int timeout, bool veri
          // record the number of times that the server updated the calendar. Allow debug of time dependencies
          serverUpdateCalendarCount_ = full_defs->updateCalendarCount();
 
-         BOOST_FOREACH(suite_ptr s, full_defs->suiteVec()) {
+         for(suite_ptr s: full_defs->suiteVec()) {
             if (s->state() == NState::COMPLETE) completeSuiteCnt++;
             if (s->hasAutoCancel()) hasAutoCancel++;
          }
@@ -415,7 +415,7 @@ void ServerTestHarness::createDirAndEcfFiles(
       theManFile << "%end\n";
    }
 
-   BOOST_FOREACH(node_ptr n, nc->nodeVec()) {
+   for(node_ptr n: nc->nodeVec()) {
 
       Task* t = n->isTask();
       if (t) {
@@ -442,7 +442,7 @@ void ServerTestHarness::createDirAndEcfFiles(
 
 static void add_queue(std::string& content,const std::vector<QueueAttr>& queues)
 {
-   BOOST_FOREACH(const QueueAttr& queue, queues) {
+   for(const QueueAttr& queue: queues) {
       content += "\n";
       content += "for i in";
       const std::vector< std::string >& queue_list = queue.list();
@@ -472,13 +472,13 @@ std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const
    templateEcfFile += "%end\n";
    templateEcfFile += "%include <head.h>\n";
    templateEcfFile += "\n";
-   BOOST_FOREACH(const Event& e, t->events()) {
+   for(const Event& e: t->events()) {
       // if initial value is set, then child cmd clears
       // else if initial value is clear, then child cmd sets (default)
       if (e.initial_value()) templateEcfFile += "%ECF_CLIENT_EXE_PATH% --event=" + e.name_or_number() + " clear\n";
       else                   templateEcfFile += "%ECF_CLIENT_EXE_PATH% --event=" + e.name_or_number() + "\n";
    }
-   BOOST_FOREACH(const Meter& m, t->meters()) {
+   for(const Meter& m: t->meters()) {
       templateEcfFile += "for i in";
       int min = m.min();
       int max = m.max();
@@ -494,7 +494,7 @@ std::string ServerTestHarness::getDefaultTemplateEcfFile(Task* t) const
       templateEcfFile += "done\n";
    }
    /// labels require at least 2 arguments,
-   BOOST_FOREACH(const Label& label, t->labels()) {
+   for(const Label& label: t->labels()) {
       if (!label.new_value().empty()) {
          templateEcfFile += "%ECF_CLIENT_EXE_PATH% --label=" + label.name() + " " + label.new_value() + "\n";
       }

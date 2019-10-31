@@ -13,7 +13,7 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/foreach.hpp>
+
 #include "GroupSTCCmd.hpp"
 #include "ClientToServerCmd.hpp"
 #include "Str.hpp"
@@ -56,7 +56,7 @@ bool GroupSTCCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts
 	if (debug) std::cout << "  GroupSTCCmd::handle_server_response\n";
 
 	bool ret_flag = true;
-	BOOST_FOREACH(STC_Cmd_ptr subCmd, cmdVec_) {
+	for(STC_Cmd_ptr subCmd: cmdVec_) {
 		if (!subCmd->handle_server_response(server_reply, cts_cmd, debug)) ret_flag = false; // one of the commands failed
   	}
 	if (!server_reply.cli()) return ret_flag;

@@ -232,7 +232,7 @@ static void test_persistence(const Defs& theFixtureDefs )
 	int getRequest = 0;
 	int terminateRequest = 0;
 	int groupRequest = 0;
-	BOOST_FOREACH(const Cmd_ptr& theCmd, cmd_vec) {
+	for(const Cmd_ptr& theCmd: cmd_vec) {
 
 		//std::cout << "TheCmd "; theCmd->print(std::cout); std::cout << "\n";
 		if (theCmd->connect_to_different_servers()) {
@@ -292,7 +292,7 @@ static void test_persistence(const Defs& theFixtureDefs )
 	BOOST_CHECK_MESSAGE(groupRequest ==1," expected 1 group Request but found " << groupRequest );
 
 
-	BOOST_FOREACH(const STC_Cmd_ptr& theCmd, stc_cmd_vec) {
+	for(const STC_Cmd_ptr& theCmd: stc_cmd_vec) {
 //		std::cout << "TheCmd "; theCmd->print(std::cout); std::cout << "\n";
 
 		const ServerToClientResponse cmd_request(theCmd); // MUST be const to avoid AIX compiler warning

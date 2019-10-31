@@ -127,7 +127,7 @@ void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr 
    }
 
    vector<Task*> activeVec,submittedVec;
-   BOOST_FOREACH(Task* t, taskVec) {
+   for(Task* t: taskVec) {
       if (t->state() == NState::ACTIVE)  activeVec.push_back(t);
       if (t->state() == NState::SUBMITTED)  submittedVec.push_back(t);
    }

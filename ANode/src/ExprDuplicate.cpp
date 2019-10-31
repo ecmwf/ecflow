@@ -12,7 +12,7 @@
 //
 // Description :
 //============================================================================
-#include <boost/foreach.hpp>
+
 
 #include "ExprDuplicate.hpp"
 #include "ExprAst.hpp"
@@ -28,7 +28,7 @@ typedef std::unordered_map< std::string, AstTop* > my_map;
 ExprDuplicate::~ExprDuplicate()
 {
    //cout << "ExprDuplicate::~ExprDuplicate: server(" << Ecf::server() << ") " << duplicate_expr.size() << " *****************************************************************\n";
-   BOOST_FOREACH(my_map::value_type i, duplicate_expr) {
+   for(my_map::value_type i: duplicate_expr) {
       //cout << " deleting: " << i.first << " :" << i.second << "\n";
       delete i.second;
       i.second = NULL;
@@ -39,7 +39,7 @@ ExprDuplicate::~ExprDuplicate()
 void ExprDuplicate::dump(const std::string& msg )
 {
    cout << "ExprDuplicate::dump server(" << Ecf::server() << ") " << msg << "\n";
-   BOOST_FOREACH(const my_map::value_type& i, duplicate_expr) {
+   for(const my_map::value_type& i: duplicate_expr) {
       cout << "   " << i.first << " :" << i.second << "\n";
    }
 }

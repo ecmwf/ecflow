@@ -675,7 +675,7 @@ node_ptr findRelativeNode(	const vector<std::string>& theExtractedPath,node_ptr 
 
    errorMsg = "Could not find node '";
    if (extractedPathSize == 1)  errorMsg += theExtractedPath[0];
-   else { BOOST_FOREACH(const string& s, theExtractedPath) { errorMsg += s; errorMsg += Str::PATH_SEPERATOR();} }
+   else { for(const string& s: theExtractedPath) { errorMsg += s; errorMsg += Str::PATH_SEPERATOR();} }
    errorMsg += "' from node ";
    errorMsg += triggerNode->absNodePath();
    if (extractedPathSize == 1) {
@@ -791,7 +791,7 @@ node_ptr Node::findReferencedNode(const std::string& nodePath, const std::string
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
    debug_path += "extracted path = ";
-   BOOST_FOREACH(const string& s, theExtractedPath) { debug_path += ",";debug_path += s;}
+   for(const string& s: theExtractedPath) { debug_path += ",";debug_path += s;}
    debug_path += "\n";
 #endif
 
@@ -902,7 +902,7 @@ node_ptr Node::findReferencedNode(const std::string& nodePath, const std::string
 
 #ifdef DEBUG_FIND_REFERENCED_NODE
          debug_path += "searching = " + theParent->name()  + "\n";
-         BOOST_FOREACH(const std::string& s , theExtractedPath) { debug_path += Str::PATH_SEPERATOR() + s; }
+         for(const std::string& s : theExtractedPath) { debug_path += Str::PATH_SEPERATOR() + s; }
          debug_path += "\n";
 #endif
 

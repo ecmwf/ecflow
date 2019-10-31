@@ -19,7 +19,7 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
-#include <boost/foreach.hpp>
+
 
 #include "Defs.hpp"
 #include "NodeAttr.hpp"
@@ -61,8 +61,8 @@ BOOST_AUTO_TEST_CASE( test_jobgenonly )
 	std::string t1_man = ecf_home + "/suite/family/t1.man";  generatedFiles.push_back(t1_man);
 	std::string t3_man = ecf_home + "/suite/family/t3.man";  generatedFiles.push_back(t3_man);
 #endif
-	BOOST_FOREACH(const std::string& s, generatedFiles ) { fs::remove(s); }
-	BOOST_FOREACH(const std::string& s, generatedFiles ) { BOOST_REQUIRE_MESSAGE(!fs::exists(s),"Could not delete file " << s);  }
+	for(const std::string& s: generatedFiles ) { fs::remove(s); }
+	for(const std::string& s: generatedFiles ) { BOOST_REQUIRE_MESSAGE(!fs::exists(s),"Could not delete file " << s);  }
 
 
 	// Load the defs file 'jobgenonly.def'
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( test_jobgenonly )
 	BOOST_REQUIRE_MESSAGE(jobCtrl->fail_submittables().empty(),"Expected no failing tasks");
 
 	// Check if jobs file were generated.
-	BOOST_FOREACH(const std::string& s, generatedFiles ) { BOOST_REQUIRE_MESSAGE(fs::exists(s),"File " << s << " should have been created");  }
+	for(const std::string& s: generatedFiles ) { BOOST_REQUIRE_MESSAGE(fs::exists(s),"File " << s << " should have been created");  }
 }
 
 BOOST_AUTO_TEST_SUITE_END()

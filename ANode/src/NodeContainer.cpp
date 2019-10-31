@@ -768,8 +768,8 @@ node_ptr NodeContainer::find_relative_node( const std::vector< std::string >& pa
 #ifdef DEBUG_FIND_NODE
 	 cout << "NodeContainer::find_relative_node for '" << name() << "\n";
 	 cout << " path :";
-	 BOOST_FOREACH(const std::string& s,pathToNode ) { cout << " " << s;} cout << "\n";
-    BOOST_FOREACH(node_ptr t, nodes_ ) { cout << " " << t->name();} cout << "\n";
+	 for(const std::string& s:pathToNode ) { cout << " " << s;} cout << "\n";
+    for(node_ptr t: nodes_ ) { cout << " " << t->name();} cout << "\n";
 #endif
  	if (pathToNode.empty())  return node_ptr();
 	auto pathSize = static_cast<int>(pathToNode.size());
@@ -1091,8 +1091,9 @@ bool NodeContainer::operator==(const NodeContainer& rhs) const
 
 void NodeContainer::print(std::string& os) const
 {
- 	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->print( os ); }
+	for(const auto& node : nodes_) {
+	   node->print( os );
+	}
 }
 
 bool NodeContainer::checkInvariants(std::string& errorMsg) const

@@ -19,7 +19,7 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
-#include <boost/foreach.hpp>
+
 
 #include "PersistHelper.hpp"
 #include "PrintStyle.hpp"
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( test_defs_structure_persistence_and_reload )
  	// Hence in order for this test to pass, we must delete the alias first & reset task alias_no
    std::vector<alias_ptr> alias_vec;
    theDefsFixture.defsfile_.get_all_aliases(alias_vec);
-   BOOST_FOREACH(alias_ptr al,alias_vec) {
+   for(alias_ptr al:alias_vec) {
       al->parent()->isTask()->reset_alias_number();
       al->remove();
    }
@@ -76,7 +76,7 @@ void test_find_task_using_path( NodeContainer* f,const Defs& defs )
 {
  	BOOST_CHECK_MESSAGE(f == defs.findAbsNode(f->absNodePath()).get(), "Could not find path " << f->absNodePath() << "\n");
 
-	BOOST_FOREACH(node_ptr t, f->nodeVec()) {
+	for(node_ptr t: f->nodeVec()) {
  		BOOST_CHECK_MESSAGE( t.get() == defs.findAbsNode(t->absNodePath()).get(), "Could not find path " << t->absNodePath() << "\n");
  		Family* family = t->isFamily();
  		if (family) {
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( test_find_task_using_paths )
  	MyDefsFixture theDefsFixture;
 
 	const std::vector<suite_ptr>& suiteVec = theDefsFixture.defsfile_.suiteVec();
-	BOOST_FOREACH(suite_ptr s, suiteVec) {
+	for(suite_ptr s: suiteVec) {
 		test_find_task_using_path(s.get(),theDefsFixture.defsfile_);
 	}
 }

@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
       BOOST_CHECK_MESSAGE( vec.size() > 0,"Expected > 0 aliases but found " << vec.size());
 
       std::vector<std::string> paths; paths.reserve(vec.size());
-      BOOST_FOREACH(alias_ptr t, vec) { paths.push_back(t->absNodePath()); }
+      for(alias_ptr t: vec) { paths.push_back(t->absNodePath()); }
 
       size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
       BOOST_CHECK_MESSAGE( !paths.empty(),"Expected paths to be specified, *OTHERWISE* we delete all nodes");
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 		BOOST_CHECK_MESSAGE( vec.size() > 0,"Expected > 0 tasks but found " << vec.size());
 
 	   std::vector<std::string> paths; paths.reserve(vec.size());
-	   BOOST_FOREACH(Task* t, vec) { paths.push_back(t->absNodePath()); }
+	   for(Task* t: vec) { paths.push_back(t->absNodePath()); }
 
       BOOST_CHECK_MESSAGE( !paths.empty(),"Expected paths to be specified, *OTHERWISE* we delete all nodes");
       size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 	{
 		std::vector<suite_ptr> vec =  fixtureDef.defsfile_.suiteVec();
 		BOOST_CHECK_MESSAGE( vec.size() > 0,"Expected > 0 Suites but found " << vec.size());
-		BOOST_FOREACH(suite_ptr s, vec) {
+		for(suite_ptr s: vec) {
 		   {
 		      // Delete all Families
             // *********************************************************************************************
@@ -119,10 +119,10 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
             // *********************************************************************************************
 		      std::vector<family_ptr> familyVec = s->familyVec();
 		      // 	DONT USE:
-		      //        BOOST_FOREACH(family_ptr f, s->familyVec()) {
+		      //        for(family_ptr f: s->familyVec()) {
 		      //  As with this will invalidate the iterators.
 		      std::vector<std::string> paths; paths.reserve(vec.size());
-		      BOOST_FOREACH(family_ptr f, familyVec) { paths.push_back(f->absNodePath()); }
+		      for(family_ptr f: familyVec) { paths.push_back(f->absNodePath()); }
 
 		      if (!paths.empty()) {
 		         size_t edit_history_size_before = fixtureDef.defsfile_.get_edit_history(Str::ROOT_PATH()).size();
