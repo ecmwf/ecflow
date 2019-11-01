@@ -69,9 +69,14 @@ to Software.Software@ecmwf.int or in the Software Support page at ECMWF.
 The issue management system on GitHub should only be used for issues around code contributions to the packages. 
 If in doubt please contact ECMWF Software Support.
 
+Prebuilt binaries
+-----------------
 
-Install
--------
+Prebuilt binaries are available for most linix `distributions. <https://confluence.ecmwf.int/display/ECFLOW/Packages>`_
+
+
+Install from source
+-------------------
  
 * dependencies::
 
@@ -217,8 +222,8 @@ For you to be able to contribute any code to our software packages you need to a
 To do so, you and your organisation need to sign a contributors agreement.
 
 
-Contact
--------
+Support/Contact
+---------------
 
 Please see: `ECMWF Support page <https://confluence.ecmwf.int/display/SUP/Support>`_
 
