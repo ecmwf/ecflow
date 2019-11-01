@@ -1,6 +1,6 @@
 
-ECFLOW
-======
+**ECFLOW**
+==========
 ecFlow is a work-flow manager that enables users to run a large number of programs, 
 with dependencies on each other and on time, in a controlled environment. 
 It provides tolerance, for hardware and software failures, combined with 
@@ -28,12 +28,12 @@ interrelations between tasks, and other references and limits.
 
 Documentation
 -------------
-ecFlow comes with a user manual, online tutorial, Python API and reference documentation.
-see: https://confluence.ecmwf.int/display/ECFLOW/ecflow+home 
+ecFlow comes with a user manual, online tutorial, Python API and reference `documentation_
+<https://confluence.ecmwf.int/display/ECFLOW/ecflow+home>`_. 
 
 
-**Install**
-===========
+Install
+-------
  
 * dependencies
 
@@ -45,31 +45,35 @@ see: https://confluence.ecmwf.int/display/ECFLOW/ecflow+home
    - ecflow_ui: ( new GUI )
      QT5 at least version 5.0.0 is required  
      
-* ecfFlow consists of two tar files i.e. :
-   
+* ecfFlow consists of two tar files i.e. ::
+
    - boost_1_71_0.tar.gz
    - ecFlow-5.1.0-Source.tar.gz
    
 * Create a directory for the build::
+   .. code-block:: bash
 
-  > mkdir /tmp/ecflow_build
+    mkdir /tmp/ecflow_build
    
 * Copy the the two tar file into this directory, then change directory to /tmp/ecflow_build
    
 * Un-zip then un-tar the two file files::
+   .. code-block:: bash
 
-  > tar -zxf boost_1_71_0.tar.gz
-  > tar -zxf ecFlow-5.1.0-Source.tar.gz
+    tar -zxf boost_1_71_0.tar.gz
+    tar -zxf ecFlow-5.1.0-Source.tar.gz
    
 * You should have two directories created::
+   .. code-block:: bash
 
-   - boost_1_71_0
-   - ecFlow-5.1.0-Source
+     - boost_1_71_0
+     - ecFlow-5.1.0-Source
     
 * Create two environment variables. These are used by some of scripts::
+   .. code-block:: bash
 
-  > export WK=/tmp/ecflow_build/ecFlow-5.1.0-Source
-  > export BOOST_ROOT=/tmp/ecflow_build/boost_1_71_0
+    export WK=/tmp/ecflow_build/ecFlow-5.1.0-Source
+    export BOOST_ROOT=/tmp/ecflow_build/boost_1_71_0
    
 * ecflow uses bjam to build BOOST libraries and cmake to build ecflow
   
@@ -79,86 +83,91 @@ see: https://confluence.ecmwf.int/display/ECFLOW/ecflow+home
   boost release please ensure environment variable BOOST_ROOT is set
 
 boost libs
-==========
+----------
 Use the following step to build boost from scratch:
 
-* Boost uses bjam for building the boost libraries.  
-  bjam source is available in boost, hence we first need to build bjam itself
+* Boost uses bjam for building the boost libraries. bjam source is available in boost, hence we first need to build bjam itself::
+   .. code-block:: bash
   
-  > cd $BOOST_ROOT
-  > ./bootstrap.sh
-  
+    cd $BOOST_ROOT
+    ./bootstrap.sh
+
+
   Now make sure bjam is accessible from $PATH
 
-* Ecflow uses some of compiled libraries in boost. The following script
-  will build the required lib's, and will configure boost build according 
-  to your platform
+* Ecflow uses some of compiled libraries in boost. The following script will build the required lib's, and will configure boost build according to your platform::
+   .. code-block:: bash
   
-  > cd $BOOST_ROOT
-  > $WK/build_scripts/boost_build.sh       # compile boost libs used by ecFlow
+    cd $BOOST_ROOT
+    $WK/build_scripts/boost_build.sh       # compile boost libs used by ecFlow
 
 
 cmake
-===== 
-* By default will install /usr/local, hence may require root access rights
-  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
-  > mkdir build; cd build
-  > cmake ..  
-  > make -j2
-  > make install
-  > make test 
+-----
+* By default will install /usr/local, hence may require root access rights::
+   .. code-block:: bash
+
+    cd /tmp/ecflow_build/ecFlow-5.1.0-Source
+    mkdir build; cd build
+    cmake ..  
+    make -j2
+    make install
+    make test 
 
 
-* Optionally you can specify install prefix directory:
+* Optionally you can specify install prefix directory::
+   .. code-block:: bash
 
-  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
-  > mkdir build; cd build
-  > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow 
-  > make -j2
-  > make install
+    cd /tmp/ecflow_build/ecFlow-5.1.0-Source
+    mkdir build; cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow 
+    make -j2
+    make install
 
 
-* Optionally if you do *NOT* want to build the GUI(ecflowview) or UI(ecflow_ui) or Python api:
+* Optionally if you do *NOT* want to build the GUI(ecflowview) or UI(ecflow_ui) or Python api::
+   .. code-block:: bash
 
-  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
-  > mkdir build; cd build
-  > cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
+    cd /tmp/ecflow_build/ecFlow-5.1.0-Source
+    mkdir build; cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/var/tmp/$USER/install/cmake/ecflow \
              -DENABLE_UI=OFF            \
              -DENABLE_PYTHON=OFF
-  > make -j2
-  > make install
+    make -j2
+    make install
 
 
-* Optionally if you did not export BOOST_ROOT you can specify on the command line:
+* Optionally if you did not export BOOST_ROOT you can specify on the command line::
+   .. code-block:: bash
 
-  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
-  > mkdir build; cd build
-  > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
+    cd /tmp/ecflow_build/ecFlow-5.1.0-Source
+    mkdir build; cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
              -DCMAKE_BUILD_TYPE=Debug \
              -DBOOST_ROOT=/tmp/ecflow_build/boost_1_71_0
-  > make -j2
-  > make install
+    make -j2
+    make install
 
 
-* On some platforms(AIX) you may need to specify the c++ compiler
+* On some platforms(AIX) you may need to specify the c++ compiler::
+   .. code-block:: bash
+    
+    cd /tmp/ecflow_build/ecFlow-5.1.0-Source
+    mkdir build; cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
+                -DCMAKE_CXX_COMPILER=xlC_r"
+    make -j2
+    make install
 
-  > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
-  > mkdir build; cd build
-  > cmake .. -DCMAKE_INSTALL_PREFIX=/usr/local/apps/ecflow \
-             -DCMAKE_CXX_COMPILER=xlC_r"
-  > make -j2
-  > make install
 
+* To use the python_api, you need to add/change PYTHONPATH and LD_LIBRARY_PATH::
+   .. code-block:: bash
 
-     
-* To use the python_api, you need to add/change 
-  PYTHONPATH and LD_LIBRARY_PATH
-  
-      export PYTHONPATH=$PYTHONPATH:$ECFLOW_PYTHON_INSTALL_DIR
-      export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ECFLOW_PYTHON_INSTALL_DIR
+    export PYTHONPATH=$PYTHONPATH:$ECFLOW_PYTHON_INSTALL_DIR
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$ECFLOW_PYTHON_INSTALL_DIR
       
       
 Ecflow uses Semantic versioning
-===============================
+-------------------------------
 See: http://semver.org/
 
