@@ -27,12 +27,11 @@ In addition, it allows checking of the suite, testing the defined
 interrelations between tasks, and other references and limits.
 
 Documentation
-=============
+-------------
 ecFlow comes with a user manual, online tutorial, Python API and reference documentation.
 see: https://confluence.ecmwf.int/display/ECFLOW/ecflow+home 
 
 
-===========
 **Install**
 ===========
  
@@ -80,7 +79,7 @@ see: https://confluence.ecmwf.int/display/ECFLOW/ecflow+home
   boost release please ensure environment variable BOOST_ROOT is set
 
 boost libs
-=====================================================================
+==========
 Use the following step to build boost from scratch:
 
 * Boost uses bjam for building the boost libraries.  
@@ -100,7 +99,7 @@ Use the following step to build boost from scratch:
 
 
 cmake
-=====================================================================
+===== 
 * By default will install /usr/local, hence may require root access rights
   > cd /tmp/ecflow_build/ecFlow-5.1.0-Source
   > mkdir build; cd build
