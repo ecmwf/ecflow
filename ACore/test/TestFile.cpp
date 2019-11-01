@@ -16,7 +16,6 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/timer/timer.hpp>
-
 #include <boost/lexical_cast.hpp>
 
 #include <string>
@@ -470,6 +469,39 @@ BOOST_AUTO_TEST_CASE( test_get_last_lines_of_a_file )
    }
 
    fs::remove(path); // Remove the file. Comment out for debugging
+}
+
+
+BOOST_AUTO_TEST_CASE( test_directory_traversal )
+{
+   cout << "ACore:: ...test_directory_traversal\n";
+
+   int regular_file = 0;
+   int directory = 0;
+   int symlink = 0;
+   int other = 0;
+
+   for(auto & entry : fs::directory_iterator(fs::current_path())) {
+      if (is_regular_file(entry)) regular_file++;
+      if (is_directory(entry))    directory++;
+      if (is_symlink(entry))      symlink++;
+      if (is_other(entry))        other++;
+//      cout << "name.path()            " << entry.path() << "\n";
+//      cout << "name.path().string()   " << entry.path().string() << "\n";
+//      cout << "name.path().filename() " << entry.path().filename() << "\n";
+      if (is_regular_file(entry)) {
+         boost::uintmax_t entry_size = fs::file_size(entry);
+         boost::uintmax_t path_size = fs::file_size(entry.path());
+         BOOST_REQUIRE_MESSAGE( entry_size == path_size , "Directory entry file size " << entry_size << " not the same as entry.path() " <<  path_size);
+         BOOST_REQUIRE_MESSAGE( fs::last_write_time(entry)==fs::last_write_time(entry.path()), "Directory entry last write time, not the same as entry.path()");
+//         cout << "file_size " << fs::file_size(entry) << "\n";
+      }
+   }
+//   cout << "regular_file " << regular_file << "\n";
+//   cout << "directory  " <<  directory << "\n";
+//   cout << "symlink  " << symlink  << "\n";
+//   cout << "other  " << other  << "\n";
+   BOOST_REQUIRE_MESSAGE(regular_file > 0, "Expected some files in directory" );
 }
 
 BOOST_AUTO_TEST_SUITE_END()
