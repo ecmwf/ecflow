@@ -144,7 +144,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 #
 module unload clang
 module load gnu/7.3.0
-cmake_extra_options=""
+cmake_extra_options="-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
 if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     # ecflow fails to write boost ser' files with clang 6.0.1/7.0.1, but in debug all tests pass
     # Had to apply fix: http://clang-developers.42468.n3.nabble.com/boost-serialization-crash-with-clang-5-0-0-td4058283.html
@@ -153,10 +153,6 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     module load clang/7.0.1
     CXX_FLAGS=""
     CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined"
-
-	if [[ "$clang_tidy_arg" = clang_tidy ]] ; then
-	   cmake_extra_options="$cmake_extra_options -DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
-	fi
 fi
 
 module load cmake/new    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
