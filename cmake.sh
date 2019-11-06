@@ -37,6 +37,7 @@ show_error_and_exit() {
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
    echo "   clang_tidy     - create compilation database for clang_tdiy and then call run-clang-tidy.py"
+   echo "   iwyu           - INCLUDE what you use"
    echo "   tsan           - is short for clang thread sanitiser"
    echo "   asan           - is short for address sanitiser"
    echo "   msan           - is short for memory sanitiser"
@@ -73,6 +74,7 @@ no_ssl_arg=
 log_arg=
 asan_arg=
 msan_arg=
+iwyu_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -92,6 +94,7 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break
+   elif [[ "$1" = iwyu ]] ;    then iwyu_arg=$1 ;
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
    elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
    elif [[ "$1" = sys_install ]] ; then sys_install=$1 ;
@@ -155,7 +158,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 module swap gnu/7.3.0     
 
 cmake_extra_options=""
-if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
+if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy || "$iwyu_arg" = iwyu ]] ; then
 	module unload gnu
 	module load clang/7.0.1
 
@@ -163,6 +166,10 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     # [-Wmacro-redefined]     /usr/local/apps/python/2.7.12-01/include/python2.7/pyconfig.h:1215:9: warning: '_XOPEN_SOURCE' macro redefined
     CXX_FLAGS=""
     CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
+
+    if [[ "$iwyu_arg" = iwyu ]] ; then
+        cmake_extra_options="-DCMAKE_CXX_INCLUDE_WHAT_YOU_USE=/usr/local/apps/iwyu/0.11/bin/include-what-you-use"
+    fi
 fi
 if [[ "$intel_arg" = intel ]] ; then
     # fails because:
