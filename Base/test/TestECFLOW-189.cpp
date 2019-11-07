@@ -15,11 +15,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "ServerToClientCmd.hpp"
-#include "MockServer.hpp"
 #include "TestHelper.hpp"
 #include "System.hpp"
-#include "PrintStyle.hpp"
 #include "Defs.hpp"
 #include "Family.hpp"
 

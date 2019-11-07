@@ -17,7 +17,6 @@
 #include "Str.hpp"
 #include "NodePath.hpp"
 #include "Defs.hpp"
-#include "Log.hpp"
 #include "Limit.hpp"
 
 using namespace ecf;

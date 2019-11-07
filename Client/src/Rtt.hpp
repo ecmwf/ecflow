@@ -17,7 +17,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <string>
 #include <fstream>
-#include <sstream>
+
 #include <boost/lambda/lambda.hpp>
 
 namespace ecf {

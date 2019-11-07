@@ -13,22 +13,15 @@
 // Description :
 //============================================================================
 #include <iostream>
-#include <fstream>
 
-#include "boost/make_shared.hpp"
+#include "boost/make_shared.hpp"      // IWYU pragma: keep
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-#include <boost/test/unit_test.hpp>
-
+#include <boost/test/unit_test.hpp>  // IWYU pragma: keep
 
 #include "Defs.hpp"
-#include "NodeAttr.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "Str.hpp"
 #include "File.hpp"
-#include "ExprAst.hpp"
-#include "TestHelper.hpp"
 #include "JobCreationCtrl.hpp"
 
 using namespace std;

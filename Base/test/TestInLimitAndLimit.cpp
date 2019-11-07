@@ -18,7 +18,6 @@
 
 #include <boost/test/unit_test.hpp>
 
-
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
@@ -27,7 +26,7 @@
 #include "JobsParam.hpp"
 #include "Jobs.hpp"
 #include "System.hpp"
-#include "PrintStyle.hpp"
+#include "PrintStyle.hpp" // IWYU pragma: keep
 #include "Limit.hpp"
 
 using namespace std;

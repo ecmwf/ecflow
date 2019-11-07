@@ -14,7 +14,6 @@
 //============================================================================
 
 #include <iostream>
-#include <fstream>
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -30,7 +29,6 @@
 #include "Task.hpp"
 #include "File.hpp"
 #include "AssertTimer.hpp"
-#include "TestHelper.hpp"
 #include "WhyCmd.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"

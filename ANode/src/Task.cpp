@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 
-#include <cassert>
 #include <sstream>
 
 #include "boost/filesystem/operations.hpp"

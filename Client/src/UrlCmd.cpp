@@ -17,7 +17,6 @@
 
 #include "UrlCmd.hpp"
 #include "Defs.hpp"
-#include "Node.hpp"
 
 UrlCmd::UrlCmd(defs_ptr defs, const std::string& absNodePath)
 : defs_(defs),node_(nullptr)

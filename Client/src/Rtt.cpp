@@ -12,17 +12,13 @@
 //
 // Description : Simple singleton implementation of log
 //============================================================================
-#include <cassert>
 #include <vector>
 #include <iostream>
-#include <boost/lexical_cast.hpp>
 
 #include "boost/date_time/posix_time/posix_time.hpp" //include all types plus i/o
 
 #include "Rtt.hpp"
 #include "File.hpp"
-#include "Str.hpp"
-#include "Indentor.hpp"
 
 using namespace std;
 using namespace boost::gregorian;

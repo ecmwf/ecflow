@@ -17,10 +17,13 @@
 #include "Calendar.hpp"
 #include "CalendarUpdateParams.hpp"
 #include "Log.hpp"
-#include "Ecf.hpp"
 #include "Extract.hpp"
 #include "Serialization.hpp"
 #include "cereal_boost_time.hpp"
+
+#ifdef DEBUG
+#include "Ecf.hpp"
+#endif
 
 using namespace std;
 using namespace boost::gregorian;

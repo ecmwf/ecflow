@@ -15,10 +15,7 @@
 //============================================================================
 
 #include <cstdlib>    // for getenv()
-
 #include <iostream>
-#include <fstream>
-#include <iterator>
 
 #include <boost/program_options.hpp>
 #include <boost/bind.hpp>
@@ -34,7 +31,6 @@
 #include "Ecf.hpp"
 #include "Version.hpp"
 #include "Calendar.hpp"
-#include "File.hpp"
 #include "JobProfiler.hpp"
 #include "Pid.hpp"
 

@@ -12,11 +12,11 @@
 //
 // Description :
 //============================================================================
+#include <iostream>
+
 #include "ServerOptions.hpp"
 #include "Version.hpp"
 #include "ServerEnvironment.hpp"
-#include <boost/lexical_cast.hpp>
-#include <iostream>
 
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"

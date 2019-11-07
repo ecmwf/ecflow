@@ -14,6 +14,8 @@
 //============================================================================
 
 #include "ssl_connection.hpp"
+#include "Log.hpp"
+#include "Ecf.hpp"
 
 ssl_connection::~ssl_connection() {
 #ifdef DEBUG_CONNECTION

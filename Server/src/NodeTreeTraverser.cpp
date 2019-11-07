@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 
-#include <iostream>
 #include "boost/bind.hpp"
 
 #include "ServerEnvironment.hpp"
@@ -26,12 +25,15 @@
 #include "CalendarUpdateParams.hpp"
 #include "Calendar.hpp"
 
+//#define DEBUG_TRAVERSER 1
+//#define DEBUG_POLL 1
+
+#ifdef DEBUG_TRAVERSER
+#include <iostream>
+#endif
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
-
-//#define DEBUG_TRAVERSER 1
-//#define DEBUG_POLL 1
 
 // ***********************************************************************
 // It was noticed that having a poll of 60 seconds was not very accurate

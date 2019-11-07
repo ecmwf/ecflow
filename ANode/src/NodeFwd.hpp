@@ -37,6 +37,7 @@ class Event;
 class Meter;
 class Repeat;
 class Variable;
+class Zombie;
 
 namespace ecf { class LateAttr; class AutoCancelAttr; class AutoArchiveAttr; class AutoRestoreAttr; } // forward declare class
 

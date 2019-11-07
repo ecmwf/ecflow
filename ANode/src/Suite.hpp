@@ -17,8 +17,7 @@
 
 #include "NodeContainer.hpp"
 #include "Calendar.hpp"
-#include "ClockAttr.hpp"
-#include "NodeFwd.hpp"
+#include "ClockAttr.hpp" // IWYU pragma: keep
 
 class SuiteGenVariables;
 namespace ecf { class CalendarUpdateParams;  } // forward declare

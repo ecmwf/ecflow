@@ -17,8 +17,8 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
-#include <boost/python.hpp>
+#include <boost/noncopyable.hpp> // IWYU pragma: keep
+#include <boost/python.hpp>      // IWYU pragma: keep
 #include "Variable.hpp"
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects

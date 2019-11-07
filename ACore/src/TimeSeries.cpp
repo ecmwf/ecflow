@@ -16,22 +16,27 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
 #include "TimeSeries.hpp"
 
-#include "Indentor.hpp"
 #include "Calendar.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
-#include "Ecf.hpp"
 #include "Extract.hpp"
 #include "Serialization.hpp"
 #include "cereal_boost_time.hpp"
+#ifdef DEBUG
+#include "Ecf.hpp"
+#endif
+
+//#define DEBUG_TIME_SERIES 1
+//#define DEBUG_TIME_SERIES_IS_FREE 1
+#ifdef DEBUG_TIME_SERIES_IS_FREE
+#include "Indentor.hpp"
+#endif
 
 using namespace std;
 using namespace ecf;
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 
-//#define DEBUG_TIME_SERIES 1
-//#define DEBUG_TIME_SERIES_IS_FREE 1
 
 static void testTimeSlot( const ecf::TimeSlot& ts)
 {

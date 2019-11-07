@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 #include <iostream>
-#include <fstream>
 #include <cstdlib>
 
 #include <boost/test/unit_test.hpp>
@@ -25,9 +24,6 @@
 #include "EcfPortLock.hpp"
 #include "Log.hpp"
 #include "Host.hpp"
-#include "Str.hpp"
-#include "Ecf.hpp"
-#include "File.hpp"
 #include "Server.hpp"
 #include "Defs.hpp"
 

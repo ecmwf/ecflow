@@ -13,19 +13,15 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "ClientToServerCmd.hpp"
 #include "ServerToClientCmd.hpp"
 #include "MyDefsFixture.hpp"
-#include "TestHelper.hpp"
-#include "DurationTimer.hpp"
 #include "Str.hpp"
+#include "MockServer.hpp"
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 

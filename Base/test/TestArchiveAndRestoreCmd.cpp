@@ -14,20 +14,17 @@
 //============================================================================
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "ClientToServerCmd.hpp"
-#include "ServerToClientCmd.hpp"
 #include "TestHelper.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
-#include "Task.hpp"
 #include "Str.hpp"
 #include "System.hpp"
 #include "Pid.hpp"
 #include "File.hpp"
-#include "PrintStyle.hpp"
+//#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

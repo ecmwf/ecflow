@@ -15,7 +15,6 @@
 // Description :
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <memory>
 #include "boost/date_time/posix_time/posix_time_types.hpp"
 
 #include "ClientEnvironment.hpp"
@@ -25,7 +24,6 @@
 #include "TaskApi.hpp"
 #include "NodeFwd.hpp"
 #include "ServerReply.hpp"
-#include "Zombie.hpp"
 #include "NOrder.hpp"
 
 /// Invokes the client depending on the arguments

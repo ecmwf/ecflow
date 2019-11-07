@@ -17,9 +17,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
-#include "Suite.hpp"
-#include "ClientToServerCmd.hpp"
-#include "ServerToClientCmd.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "System.hpp"

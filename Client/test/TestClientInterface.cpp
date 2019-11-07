@@ -12,21 +12,17 @@
 //
 // Description :
 //============================================================================
-#include <fstream>
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
-
 #include "ClientInvoker.hpp"
 #include "ClientToServerCmd.hpp"
-#include "ClientEnvironment.hpp"
 #include "NState.hpp"
 #include "Defs.hpp"
 #include "Task.hpp"
-#include "Suite.hpp"
 #include "Child.hpp"
 #include "File.hpp"
 #include "Flag.hpp"

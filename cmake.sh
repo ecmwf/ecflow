@@ -142,6 +142,8 @@ echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
+source_dir=$(pwd)
+
 # ==================== compiler flags ========================================
 # 
 # GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
@@ -168,7 +170,7 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy || "$iwyu_arg" = iw
     CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
 
     if [[ "$iwyu_arg" = iwyu ]] ; then
-        cmake_extra_options="-DCMAKE_CXX_INCLUDE_WHAT_YOU_USE=/usr/local/apps/iwyu/0.11/bin/include-what-you-use"
+        cmake_extra_options="-DCMAKE_CXX_INCLUDE_WHAT_YOU_USE=/usr/local/apps/iwyu/0.11/bin/include-what-you-use;-Xiwyu;--mapping_file=$source_dir/build_scripts/iwyu/boost.imp"
     fi
 fi
 if [[ "$intel_arg" = intel ]] ; then
@@ -271,7 +273,6 @@ fi
 # =======================================================================================
 # Change directory
 #
-source_dir=$(pwd)
 workspace=$(pwd)/..
 
 if [[ $clean_arg = clean ]] ; then

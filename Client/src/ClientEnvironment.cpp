@@ -14,12 +14,12 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iostream>
-#include <fstream>
 #include <iterator>
 #include <cstdlib> // for getenv()
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
+#include "boost/lexical_cast.hpp"
 
 #include "ClientEnvironment.hpp"
 #include "ClientToServerCmd.hpp"

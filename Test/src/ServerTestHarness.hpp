@@ -20,7 +20,6 @@
 #include "NodeFwd.hpp"
 #include "ZombieUtil.hpp"
 #include "PrintStyle.hpp"
-class ClientInvoker;
 
 // This class provides a test harness for running defs file in a client server environment
 // To avoid Address in use errors, we can have client/server use a different port number

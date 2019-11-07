@@ -13,19 +13,12 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iostream>
-#include <sstream>
 
 #include "ClientToServerCmd.hpp"
 #include "ServerToClientCmd.hpp"
 
 #include "Defs.hpp"
-#include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
-#include "Alias.hpp"
 
-#include "JobsParam.hpp"
-#include "Jobs.hpp"
 #include "AbstractServer.hpp"
 #include "Log.hpp"
 #include "Str.hpp"

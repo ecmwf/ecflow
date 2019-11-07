@@ -16,18 +16,15 @@
 #include <boost/function.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "ServerToClientCmd.hpp"
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
 #include "SSyncCmd.hpp"
 #include "Ecf.hpp"
-#include "SuiteChanged.hpp"
 #include "System.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
-#include "Limit.hpp"
 
 using namespace std;
 using namespace ecf;

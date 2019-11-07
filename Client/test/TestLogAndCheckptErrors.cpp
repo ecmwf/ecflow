@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 #include <string>
-#include <fstream>
 #include <sys/stat.h>
 
 #include "boost/filesystem/operations.hpp"
@@ -24,7 +23,6 @@
 #include "ClientEnvironment.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "Str.hpp"
 #include "File.hpp"
 #include "Pid.hpp"
 #include "PrintStyle.hpp"

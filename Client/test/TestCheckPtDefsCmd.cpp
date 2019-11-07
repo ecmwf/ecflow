@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 #include <string>
-#include <fstream>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -26,7 +25,6 @@
 #include "Str.hpp"
 #include "File.hpp"
 #include "MyDefsFixture.hpp"
-#include "Version.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

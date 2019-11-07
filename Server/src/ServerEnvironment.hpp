@@ -26,8 +26,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
-#include <exception>
 #include <boost/asio.hpp>
 
 #include "Host.hpp"

@@ -16,13 +16,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
-#include "Task.hpp"
 #include "TestHelper.hpp"
 #include "MockServer.hpp"
 
@@ -31,7 +27,6 @@
 #include "SCPort.hpp"
 #include "File.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

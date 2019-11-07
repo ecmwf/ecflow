@@ -15,20 +15,15 @@
 #include <fstream>
 
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "ClientInvoker.hpp"
-#include "ClientEnvironment.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
 #include "Task.hpp"
 #include "File.hpp"
 #include "PrintStyle.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

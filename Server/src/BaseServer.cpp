@@ -22,7 +22,6 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
 
 #include "BaseServer.hpp"  // Must come before boost/serialization headers.
 #include "Defs.hpp"
@@ -32,8 +31,6 @@
 #include "Ecf.hpp"
 #include "Calendar.hpp"
 #include "Version.hpp"
-#include "Str.hpp"
-#include "File.hpp"
 #include "ExprDuplicate.hpp"
 
 using boost::asio::ip::tcp;

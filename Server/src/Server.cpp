@@ -12,7 +12,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "Server.hpp"
-#include "ServerEnvironment.hpp"
 
 Server::Server(boost::asio::io_service& io_service, ServerEnvironment& serverEnv )
 : BaseServer(io_service,serverEnv),

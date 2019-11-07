@@ -13,7 +13,6 @@
 // Description : This class is used as a helper class
 //============================================================================
 
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
@@ -22,11 +21,9 @@
 #include <boost/token_functions.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string.hpp>
-
 #include <boost/tokenizer.hpp>
 
 #include "File.hpp"
-#include "File_r.hpp"
 #include "Log.hpp"
 #include "NodePath.hpp"
 #include "Str.hpp"

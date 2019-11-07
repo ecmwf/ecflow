@@ -12,13 +12,9 @@
 //
 // Description :
 //============================================================================
-#include <cassert>
-
 #include "Jobs.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
 #include "Log.hpp"
 #include "DurationTimer.hpp"
 #include "JobsParam.hpp"

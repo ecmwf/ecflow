@@ -15,7 +15,6 @@
 
 #include "Signal.hpp"
 #include <csignal>
-#include <iostream>
 
 namespace ecf {
 

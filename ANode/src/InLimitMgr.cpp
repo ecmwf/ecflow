@@ -12,19 +12,19 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <cassert>
 #include <ostream>
-
-
 
 #include "InLimitMgr.hpp"
 #include "Limit.hpp"
 #include "Node.hpp"
 #include "Memento.hpp"
-#include "Ecf.hpp"
 #include "Str.hpp"
 #include "Extract.hpp"
 #include "Serialization.hpp"
+
+#ifdef DEBUG
+#include "Ecf.hpp"
+#endif
 
 using namespace ecf;
 using namespace std;

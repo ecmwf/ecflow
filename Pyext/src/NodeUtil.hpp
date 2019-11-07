@@ -16,9 +16,9 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/python.hpp>
+#include <boost/noncopyable.hpp>
 
 #include "NodeFwd.hpp"
-#include <boost/noncopyable.hpp>
 
 class  NodeUtil : private boost::noncopyable {
 public:

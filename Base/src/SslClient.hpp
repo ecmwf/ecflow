@@ -19,7 +19,6 @@
 //               hence the server itself will NEED to ACT as a client.
 //               This is why client lives in Base and not the Client project
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/asio.hpp>
 
 #include "ssl_connection.hpp"
 #include "ClientToServerRequest.hpp"

@@ -12,27 +12,20 @@
 //
 // Description :
 //============================================================================
-#include <fstream>
-
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/timer/timer.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
 
 #include "ClientInvoker.hpp"
 #include "ClientEnvironment.hpp"
 #include "File.hpp"
-#include "TestHelper.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
 #include "Str.hpp"
 #include "DurationTimer.hpp"
-#include "Host.hpp"
 #include "Version.hpp"
 #include "perf_timer.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

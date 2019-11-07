@@ -13,7 +13,6 @@
 // Description : This class is used as a helper class
 //============================================================================
 
-#include <iostream>
 
 #include "File_r.hpp"
 

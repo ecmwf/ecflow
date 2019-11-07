@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 
-#include <cassert>
 #include <sstream>
 
 #include "boost/filesystem/operations.hpp"
@@ -26,9 +25,7 @@
 #include "Suite.hpp"
 #include "File.hpp"
 #include "Passwd.hpp"
-#include "Stl.hpp"
 #include "Str.hpp"
-#include "Indentor.hpp"
 #include "Log.hpp"
 #include "System.hpp"
 #include "JobsParam.hpp"

@@ -15,7 +15,6 @@
 #include <stdexcept>
 
 #include "ClockParser.hpp"
-#include "DateParser.hpp"
 #include "TimeSeries.hpp"
 #include "Extract.hpp"
 #include "Str.hpp"

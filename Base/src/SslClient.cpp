@@ -13,7 +13,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <fstream>
-#include <iostream>
 #include <sstream>
 #include <cassert>
 
@@ -27,6 +26,7 @@
 
 #ifdef DEBUG_CLIENT
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
+#include <iostream>
 #endif
 
 /// The timeout will typically happen when the server has died, but socket is still open

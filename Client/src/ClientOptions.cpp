@@ -15,7 +15,6 @@
 #include <boost/lexical_cast.hpp>
 #include <iostream>
 #include <iomanip>
-#include <memory>
 
 #include "ClientOptions.hpp"
 #include "ClientEnvironment.hpp"

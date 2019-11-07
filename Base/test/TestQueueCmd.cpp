@@ -16,7 +16,6 @@
 
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #include "Defs.hpp"
 #include "Suite.hpp"

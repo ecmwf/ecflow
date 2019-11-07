@@ -20,7 +20,6 @@
 #include "WhiteListFile.hpp"
 #include "File.hpp"
 #include "Str.hpp"
-#include "Log.hpp"
 #include "User.hpp"
 
 using namespace ecf;

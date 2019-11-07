@@ -13,11 +13,9 @@
 // Description :
 //============================================================================
 
-#include <boost/lexical_cast.hpp>
 #include "JobProfiler.hpp"
 #include "JobsParam.hpp"
 #include "Task.hpp"
-#include "Str.hpp"
 #include "Log.hpp"
 
 using namespace ecf;

@@ -21,7 +21,6 @@
 #include "PasswdFile.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "Str.hpp"
 #include "User.hpp"
 
 namespace fs = boost::filesystem;

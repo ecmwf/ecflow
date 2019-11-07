@@ -13,8 +13,6 @@
 // Description :
 //============================================================================
 
-#include <cassert>
-#include <sstream>
 #include <ostream>
 
 #include "Limit.hpp"

@@ -29,14 +29,15 @@
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "Log.hpp"
-#include "Str.hpp"
-#include "Ecf.hpp"
 #include "Serialization.hpp"
+
+//#define DEBUG_CONNECTION 1
+#ifdef DEBUG_CONNECTION
+#include "Ecf.hpp"
+#endif
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 
-//#define DEBUG_CONNECTION 1
 
 /// The connection class provides serialisation primitives on top of a socket.
 /**

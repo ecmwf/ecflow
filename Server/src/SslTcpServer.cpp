@@ -13,13 +13,11 @@
 
 #include <iostream>
 #include <boost/bind.hpp>
-#include "boost/filesystem/operations.hpp"
 
 #include "SslTcpServer.hpp"
 #include "SslServer.hpp"
 #include "Log.hpp"
 #include "ServerEnvironment.hpp"
-#include "Version.hpp"
 
 using boost::asio::ip::tcp;
 using namespace std;

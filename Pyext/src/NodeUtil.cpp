@@ -18,9 +18,7 @@
 #include "Trigger.hpp"
 
 #include "Defs.hpp"
-#include "Suite.hpp"
 #include "Task.hpp"
-#include "Str.hpp"
 
 #include "NodeAttr.hpp"
 #include "Limit.hpp"

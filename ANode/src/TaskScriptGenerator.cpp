@@ -21,7 +21,6 @@
 #include "File.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
-#include "JobCreationCtrl.hpp"
 
 using namespace std;
 using namespace boost;

@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <cassert>
 
 #include "ServerState.hpp"
 #include "Str.hpp"

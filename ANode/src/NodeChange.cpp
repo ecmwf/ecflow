@@ -16,8 +16,6 @@
 
 #include "Node.hpp"
 #include "ExprAst.hpp"
-#include "Stl.hpp"
-#include "NState.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
 #include "Limit.hpp"

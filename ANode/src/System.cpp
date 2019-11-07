@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <cassert>
 #include <iostream>
 #include <csignal>
 #include <sys/stat.h>

@@ -18,15 +18,9 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "Extract.hpp"
-#include "Stl.hpp"
-#include "Str.hpp"
-
-#include <sstream>
-#include <fstream>
 
 //#define DEBUG_PARSER 1
 
-using namespace ecf;
 using namespace std;
 using namespace boost;
 using namespace boost::gregorian;

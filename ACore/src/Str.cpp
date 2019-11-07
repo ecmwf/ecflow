@@ -13,10 +13,8 @@
 //
 // Description : This class is used as a helper class
 //============================================================================
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "StringSplitter.hpp"
 #include "Str.hpp"
 
 using namespace std;

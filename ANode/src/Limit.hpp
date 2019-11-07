@@ -21,7 +21,6 @@
 //               for incremental sync, since we directly access the parent suite
 //============================================================================
 
-#include <iosfwd>
 #include <set>
 #include <string>
 #include <cereal/access.hpp>

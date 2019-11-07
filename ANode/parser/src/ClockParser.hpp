@@ -17,7 +17,6 @@
 //============================================================================
 
 #include "Parser.hpp"
-class ClockAttr;
 
 class ClockParser : public Parser {
 public:

@@ -21,8 +21,8 @@
 //  o Dynamic and/or Private Ports.                    49151-65535
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <memory>
 #include <boost/asio.hpp>
+
 #include "NodeTreeTraverser.hpp"
 #include "CheckPtSaver.hpp"
 #include "AbstractServer.hpp"

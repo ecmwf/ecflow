@@ -1,0 +1,17 @@
+[
+{ include: ["@<boost/date_time/posix_time/.*>",    "public", "<boost/date_time/posix_time/posix_time.hpp>",       "public"] },
+{ include: ["@<boost/date_time/posix_time/.*>",    "public", "<boost/date_time/posix_time/posix_time_types.hpp>", "public"] },
+
+{ include : ["<boost/preprocessor/comparison/not_equal.hpp>",          "public", "<boost/test/unit_test.hpp>",      "public"] },  
+{ include : ["<boost/preprocessor/control/iif.hpp>",                   "public", "<boost/test/unit_test.hpp>",      "public"] },      
+{ include : ["<boost/preprocessor/logical/bool.hpp>",                  "public", "<boost/test/unit_test.hpp>",      "public"] },                      
+{ include : ["<boost/preprocessor/logical/compl.hpp>",                 "public", "<boost/test/unit_test.hpp>",      "public"] },                       
+{ include : ["<boost/test/tools/old/interface.hpp>",                   "public", "<boost/test/unit_test.hpp>",      "public"] },                        
+{ include : ["<boost/test/unit_test_suite.hpp>",                       "public", "<boost/test/unit_test.hpp>",      "public"] },                            
+{ include : ["<boost/test/utils/basic_cstring/basic_cstring.hpp>",     "public", "<boost/test/unit_test.hpp>",      "public"] },           
+{ include : ["<boost/test/utils/basic_cstring/basic_cstring_fwd.hpp>", "public", "<boost/test/unit_test.hpp>",      "public"] },      
+
+{ include: ["<boost/core/noncopyable.hpp>",        "public", "<boost/noncopyable.hpp>",                            "public"] },
+{ include: ["@<boost/filesystem/.*>",              "public", "<boost/filesystem.hpp>",                             "public"] }
+]                
+                                

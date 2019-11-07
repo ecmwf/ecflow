@@ -13,10 +13,8 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "Suite.hpp"
-#include "Ecf.hpp"
 #include "DefsDelta.hpp"
 #include "ExprAst.hpp"
-#include "Stl.hpp"
 #include "Memento.hpp"
 
 using namespace ecf;

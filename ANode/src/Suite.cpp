@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 
-#include <cassert>
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
@@ -24,12 +23,10 @@
 #include "DefsDelta.hpp"
 #include "Memento.hpp"
 
-#include "Stl.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
 #include "ExprAst.hpp"
-#include "Log.hpp"
 #include "CalendarUpdateParams.hpp"
 #include "SuiteChanged.hpp"
 #include "JobsParam.hpp"

@@ -15,7 +15,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "ServerToClientCmd.hpp"
 #include "TestHelper.hpp"
 #include "Str.hpp"
 #include "System.hpp"

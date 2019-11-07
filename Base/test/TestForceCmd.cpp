@@ -12,7 +12,7 @@
 //
 // Description :
 //============================================================================
-#include <boost/test/unit_test.hpp>
+#include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
 #include "ClientToServerCmd.hpp"
 #include "ServerToClientCmd.hpp"
@@ -20,7 +20,7 @@
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
 #include "System.hpp"
-#include "PrintStyle.hpp"
+#include "PrintStyle.hpp" // IWYU pragma: keep
 
 using namespace std;
 using namespace ecf;
