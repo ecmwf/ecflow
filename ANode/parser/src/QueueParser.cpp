@@ -19,7 +19,6 @@
 #include "PrintStyle.hpp"
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
-#include "Str.hpp"
 
 using namespace ecf;
 using namespace std;

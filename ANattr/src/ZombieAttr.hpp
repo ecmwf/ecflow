@@ -14,7 +14,6 @@
 //
 // Description :
 //============================================================================
-#include <iosfwd>
 #include <cereal/access.hpp>
 #include "Child.hpp"
 

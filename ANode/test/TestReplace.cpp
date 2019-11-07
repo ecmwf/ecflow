@@ -21,9 +21,8 @@
 
 #include "JobsParam.hpp"
 #include "Jobs.hpp"
-#include "System.hpp"
 #include "File.hpp"
-#include "PrintStyle.hpp"
+//#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

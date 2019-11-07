@@ -21,7 +21,6 @@
 #include "Indentor.hpp"
 #include "ExprParser.hpp"
 #include "Ecf.hpp"
-#include "ExprAstVisitor.hpp"
 #include "Node.hpp"
 #include "Log.hpp"
 #include "Serialization.hpp"

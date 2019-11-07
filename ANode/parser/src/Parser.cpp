@@ -15,17 +15,15 @@
 #include <sstream>
 #include <fstream>
 
-
 #include "Parser.hpp"
 #include "DefsStructureParser.hpp"
 #include "Stl.hpp"
 #include "Str.hpp"
-#include "Indentor.hpp"
+#include "Node.hpp"
 
-#include "Defs.hpp"
-#include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
+#ifdef SHOW_PARSER_STATS
+#include "Indentor.hpp"
+#endif
 
 using namespace ecf;
 using namespace std;
@@ -39,8 +37,6 @@ ostream& operator<<(ostream& os, const vector<T>& v) {
     copy(v.begin(), v.end(), ostream_iterator<T>(cout, ","));
     return os;
 }
-
-
 
 // ===============================================================================
 

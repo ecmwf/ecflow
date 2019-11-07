@@ -14,7 +14,6 @@
 
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
 #include "Task.hpp"
 
 using namespace std;

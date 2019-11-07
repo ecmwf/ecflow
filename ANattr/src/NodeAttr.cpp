@@ -13,16 +13,13 @@
 // Description :
 //============================================================================
 
-#include <cassert>
 #include <sstream>
 #include <ostream>
-
 
 #include <boost/lexical_cast.hpp>
 
 #include "NodeAttr.hpp"
 #include "Indentor.hpp"
-#include "Calendar.hpp"
 #include "PrintStyle.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"

@@ -20,7 +20,6 @@
 //    a mechanism to stop this, when reset is called, via server this is disabled
 //============================================================================
 
-#include <iosfwd>
 #include <memory>
 #include <boost/utility.hpp>
 #include "Variable.hpp"

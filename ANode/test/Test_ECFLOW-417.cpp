@@ -12,9 +12,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
 #include "Task.hpp"
-#include "PrintStyle.hpp"
 #include "CalendarUpdateParams.hpp"
 
 #include <boost/test/unit_test.hpp>

@@ -31,9 +31,8 @@
 #include "ZombieAttr.hpp"
 #include "QueueAttr.hpp"
 #include "GenericAttr.hpp"
-#include "Calendar.hpp"
 #include "SerializationTest.hpp"
-#include "TimeSeries.hpp"
+#include "TimeSlot.hpp"
 #include "File.hpp"
 
 using namespace std;

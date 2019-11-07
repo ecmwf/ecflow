@@ -18,10 +18,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Variable.hpp"
-#include "Str.hpp"
 
 using namespace std;
-using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE( ANattrTestSuite )
 

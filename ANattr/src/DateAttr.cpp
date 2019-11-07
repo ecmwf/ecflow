@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 
-#include <cassert>
 #include <sstream>
 #include <ostream>
 #include <boost/date_time/posix_time/posix_time_types.hpp>

@@ -25,7 +25,6 @@
 #include "Str.hpp"
 #include "Extract.hpp"
 #include "NodePath.hpp"
-#include "Stl.hpp"
 #include "Ecf.hpp"
 #include "NodeState.hpp"
 #include "JobCreationCtrl.hpp"

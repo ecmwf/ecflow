@@ -14,7 +14,6 @@
 //============================================================================
 
 #include "ExternParser.hpp"
-#include "Extract.hpp"
 #include "Defs.hpp"
 
 using namespace std;

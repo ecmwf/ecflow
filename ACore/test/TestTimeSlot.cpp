@@ -13,16 +13,9 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/date_time/posix_time/time_formatters.hpp>
 
-#include <string>
 #include <iostream>
-#include <fstream>
-#include "TimeSeries.hpp"
-#include "Calendar.hpp"
-#include "Str.hpp"
+#include "TimeSlot.hpp"
 
 using namespace std;
 using namespace ecf;

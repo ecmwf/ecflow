@@ -24,10 +24,10 @@
 
 #include "DefsStructureParser.hpp"
 #include "Defs.hpp"
-#include "PrintStyle.hpp"
 #include "PersistHelper.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
+//#include "PrintStyle.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

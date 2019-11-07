@@ -14,7 +14,6 @@
 //============================================================================
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -22,11 +21,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
-#include "NodeContainer.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
-#include "Family.hpp"
-#include "Log.hpp"
 #include "File.hpp"
 
 namespace fs = boost::filesystem;

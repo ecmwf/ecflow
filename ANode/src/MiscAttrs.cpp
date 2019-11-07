@@ -12,15 +12,10 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <cassert>
 #include <ostream>
 
-#include "Defs.hpp"
-#include "Suite.hpp"
-
+#include "Node.hpp"
 #include "MiscAttrs.hpp"
-#include "Str.hpp"
-#include "Log.hpp"
 #include "Ecf.hpp"
 #include "Memento.hpp"
 #include "Serialization.hpp"

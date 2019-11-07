@@ -13,16 +13,13 @@
 // Description :
 //============================================================================
 
-#include <cassert>
 #include <sstream>
 
 #include "Family.hpp"
-#include "Log.hpp"
 #include "PrintStyle.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "Ecf.hpp"
 
-#include "Stl.hpp"
 #include "Str.hpp"
 #include "Indentor.hpp"
 #include "DefsDelta.hpp"

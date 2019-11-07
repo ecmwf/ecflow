@@ -27,7 +27,6 @@
 #include "SuiteChanged.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "File.hpp"
-#include "Stl.hpp"
 #include "Str.hpp"
 #include "Indentor.hpp"
 #include "Log.hpp"

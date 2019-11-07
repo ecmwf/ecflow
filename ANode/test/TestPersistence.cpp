@@ -15,11 +15,7 @@
 #include "boost/filesystem/path.hpp"
 
 #include "MyDefsFixture.hpp"
-#include "Ecf.hpp"
 #include "Defs.hpp"
-#include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -16,7 +16,6 @@
 // Description :
 //============================================================================
 
-#include <iosfwd>
 #include <memory> // for unique_ptr
 #include <cereal/access.hpp>
 

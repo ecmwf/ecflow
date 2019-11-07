@@ -20,7 +20,6 @@
 #include <string>
 class Node;
 
-class Ast;
 class AstTop;
 class AstRoot;
 class AstAnd;

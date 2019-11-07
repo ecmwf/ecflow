@@ -22,10 +22,7 @@
 #include "boost/filesystem/path.hpp"
 
 #include "Defs.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
 #include "PersistHelper.hpp"
-#include "Flag.hpp"
 #include "Memento.hpp"
 
 namespace fs = boost::filesystem;

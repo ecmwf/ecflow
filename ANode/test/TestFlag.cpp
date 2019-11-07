@@ -14,7 +14,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Flag.hpp"
-#include "Str.hpp"
 
 using namespace std;
 using namespace ecf;

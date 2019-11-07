@@ -15,7 +15,6 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <cassert>
 #include <sstream>
 #include <stdexcept>
 #include <ostream>
@@ -25,8 +24,10 @@
 #include "Indentor.hpp"
 #include "PrintStyle.hpp"
 #include "Str.hpp"
-#include "Ecf.hpp"
 #include "Serialization.hpp"
+#ifdef DEBUG
+#include "Ecf.hpp"
+#endif
 
 using namespace std;
 using namespace ecf;

@@ -14,7 +14,6 @@
 //
 // Description :
 //============================================================================
-#include <iosfwd>
 #include <boost/operators.hpp>
 #include "NState.hpp"
 

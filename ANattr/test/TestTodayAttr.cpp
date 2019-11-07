@@ -15,14 +15,12 @@
 
 #include <string>
 #include <iostream>
-#include <fstream>
 #include <boost/test/unit_test.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>
 
 #include "TodayAttr.hpp"
 #include "TimeSeries.hpp"
 #include "Calendar.hpp"
-#include "Str.hpp"
 
 using namespace std;
 using namespace ecf;

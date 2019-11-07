@@ -14,17 +14,14 @@
 //============================================================================
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 
-
 #include "PersistHelper.hpp"
 #include "PrintStyle.hpp"
 #include "MyDefsFixture.hpp"
-#include "File.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

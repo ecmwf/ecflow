@@ -17,7 +17,6 @@
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
-#include "Task.hpp"
 #include "AbstractObserver.hpp"
 
 using namespace std;

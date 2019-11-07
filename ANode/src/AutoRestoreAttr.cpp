@@ -17,12 +17,14 @@
 
 #include "AutoRestoreAttr.hpp"
 #include "Indentor.hpp"
-#include "Ecf.hpp"
 #include "NodeContainer.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
 #include "Serialization.hpp"
+#ifdef DEBUG
+#include "Ecf.hpp"
+#endif
 
 using namespace std;
 

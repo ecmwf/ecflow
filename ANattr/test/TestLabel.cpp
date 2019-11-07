@@ -15,7 +15,7 @@
 
 #include <string>
 #include <iostream>
-#include <fstream>
+
 #include <boost/test/unit_test.hpp>
 
 #include "NodeAttr.hpp"

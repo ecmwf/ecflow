@@ -15,7 +15,6 @@
 #include <stdexcept>
 
 #include "CalendarParser.hpp"
-#include "Str.hpp"
 #include "Suite.hpp"
 
 using namespace ecf;

@@ -17,7 +17,6 @@
 #include "TodayAttr.hpp"
 #include "Calendar.hpp"
 #include "Indentor.hpp"
-#include "Log.hpp"
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
@@ -133,7 +132,6 @@ bool TodayAttr::isFree(const ecf::Calendar& calendar) const
 {
 	// The FreeDepCmd can be used to free the today,
  	if (free_) {
-//		LOG(Log::DBG,"   TodayAttr::isFree free_");
 		return true;
 	}
  	return is_free(calendar);

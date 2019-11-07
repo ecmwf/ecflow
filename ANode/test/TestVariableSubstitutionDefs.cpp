@@ -18,9 +18,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-
 #include "Defs.hpp"
-#include "Str.hpp"
 #include "Version.hpp"
 #include "Ecf.hpp"
 

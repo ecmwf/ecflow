@@ -15,11 +15,6 @@
 
 #include <sstream>
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/exception.hpp"
-#include <boost/lexical_cast.hpp>
-
 #include "Alias.hpp"
 #include "Defs.hpp"
 #include "Ecf.hpp"
@@ -30,7 +25,6 @@
 #include "PrintStyle.hpp"
 #include "Serialization.hpp"
 
-namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
 using namespace boost;

@@ -14,7 +14,6 @@
 //============================================================================
 #include <sstream>
 
-
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/tokenizer.hpp>
@@ -28,7 +27,6 @@
 #include "PrintStyle.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
-#include "Log.hpp"
 #include "Serialization.hpp"
 
 using namespace std;

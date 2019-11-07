@@ -38,7 +38,6 @@
 #include "Attr.hpp"
 #include "PrintStyle.hpp"
 
-class Limit;
 class AbstractObserver;
 namespace ecf { class NodeTreeVisitor; class CalendarUpdateParams; } // forward declare
 

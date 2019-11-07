@@ -28,7 +28,6 @@
 
 #include "NodeState.hpp"
 #include "NodePath.hpp"
-#include "Stl.hpp"
 #include "Str.hpp"
 #include "Indentor.hpp"
 #include "ExprAst.hpp"
