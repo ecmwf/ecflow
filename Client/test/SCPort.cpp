@@ -30,7 +30,7 @@ namespace ecf {
 #ifdef DEBUG
 int SCPort::thePort_ = 3161;
 #else
-int SCPort::thePort_ = 3142;
+int SCPort::thePort_ = 3144;
 #endif
 
 
