@@ -14,10 +14,7 @@
 //============================================================================
 #include <string>
 #include <iostream>
-#include <fstream>
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
@@ -26,7 +23,6 @@
 
 using namespace std;
 using namespace ecf;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 

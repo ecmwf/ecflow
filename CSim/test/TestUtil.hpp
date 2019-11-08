@@ -18,8 +18,6 @@
 
 #include <boost/noncopyable.hpp>
 #include <string>
-#include <map>
-#include "Defs.hpp"
 
 // This class provides a test harness for running defs file in a client server environment
 // To avoid Address in use errors, we can have client/server use a different port number
@@ -27,7 +25,6 @@
 //
 class TestUtil : private boost::noncopyable {
 public:
-
 
 	/// Returns the location of the defs file, such thats it in the test data area
 	static std::string testDataLocation( const std::string& defsFile);

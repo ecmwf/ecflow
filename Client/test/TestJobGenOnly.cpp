@@ -16,7 +16,6 @@
 
 #include "boost/make_shared.hpp"      // IWYU pragma: keep
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>  // IWYU pragma: keep
 
 #include "Defs.hpp"

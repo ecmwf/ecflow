@@ -15,17 +15,16 @@
 //
 // Description :
 //============================================================================
-
-#include <boost/noncopyable.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <string>
 #include <map>
 #include <vector>
+
+#include <boost/noncopyable.hpp>
+
 #include "QueueAttr.hpp"
 #include "PrintStyle.hpp"
 
 class Defs;
-class Task;
 class Submittable;
 namespace ecf { class SimulatorVisitor;}
 

@@ -14,7 +14,6 @@
 //============================================================================
 
 #include <sstream>
-#include <ostream>
 
 #include <boost/lexical_cast.hpp>
 

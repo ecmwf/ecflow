@@ -13,16 +13,12 @@
 // Description :
 //============================================================================
 #include <iostream>
-#include <fstream>
-#include <cstdlib>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "Simulator.hpp"
 
-#include "File.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"

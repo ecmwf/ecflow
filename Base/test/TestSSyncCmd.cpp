@@ -13,10 +13,8 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
-#include <boost/function.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "ServerToClientCmd.hpp"
 #include "MyDefsFixture.hpp"
 #include "MockServer.hpp"
 #include "TestHelper.hpp"

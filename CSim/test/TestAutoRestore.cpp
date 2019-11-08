@@ -13,26 +13,22 @@
 // Description :
 //============================================================================
 #include <iostream>
-#include <fstream>
-#include <cstdlib>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "Simulator.hpp"
 #include "File.hpp"
-#include "Log.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Str.hpp"
 #include "TestUtil.hpp"
-#include "PrintStyle.hpp"
 #include "AutoRestoreAttr.hpp"
 #include "AutoArchiveAttr.hpp"
+//#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

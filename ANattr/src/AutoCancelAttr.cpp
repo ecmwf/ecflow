@@ -13,8 +13,6 @@
 // Description :
 //============================================================================
 
-#include <sstream>
-
 #include "AutoCancelAttr.hpp"
 #include "Calendar.hpp"
 #include "Indentor.hpp"

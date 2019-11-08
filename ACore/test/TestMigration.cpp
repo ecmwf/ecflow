@@ -14,8 +14,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "TimeSeries.hpp"
 #include "Calendar.hpp"
@@ -29,7 +27,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
-namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 

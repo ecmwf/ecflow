@@ -12,15 +12,14 @@
 //
 // Description :
 //============================================================================
-
-#include <boost/test/unit_test.hpp>
 #include <string>
 #include <iostream>
-#include <fstream>
+
+#include <boost/test/unit_test.hpp>
+#include <boost/date_time/posix_time/time_formatters.hpp>
 
 #include "Calendar.hpp"
 #include "TimeSeries.hpp"
-#include <boost/date_time/posix_time/time_formatters.hpp>
 
 using namespace std;
 using namespace ecf;

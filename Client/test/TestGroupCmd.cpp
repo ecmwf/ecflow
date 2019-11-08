@@ -18,11 +18,11 @@
 
 #include "ClientInvoker.hpp"
 #include "Suite.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
 #include "File.hpp"
-#include "PrintStyle.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
+//#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

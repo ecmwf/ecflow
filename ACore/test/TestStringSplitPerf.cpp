@@ -12,12 +12,14 @@
 //
 // Description :
 //============================================================================
+
+#include <boost/test/unit_test.hpp>
+
+#ifdef STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_
 #include <iostream>
 #include <fstream>
 
-#include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
-
 
 #include "Str.hpp"
 #include "StringSplitter.hpp"
@@ -26,6 +28,7 @@
 using namespace std;
 using namespace ecf;
 using namespace boost;
+#endif
 
 // **************************************************************************************************************
 // IMPORTANT: Str:split uses StringSplitter:

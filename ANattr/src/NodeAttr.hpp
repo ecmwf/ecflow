@@ -19,7 +19,6 @@
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/operators.hpp>
-#include <boost/utility.hpp>
 #include <cereal/access.hpp>
 
 

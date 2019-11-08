@@ -12,26 +12,19 @@
 //
 // Description :
 //============================================================================
-#include <fstream>
 
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "ClientInvoker.hpp"
 #include "ClientEnvironment.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
 #include "File.hpp"
-#include "PrintStyle.hpp"
-#include "WhiteListFile.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "Str.hpp"
 #include "System.hpp"             // kill singleton for valgrind
+//#include "PrintStyle.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

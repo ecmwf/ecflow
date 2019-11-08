@@ -14,7 +14,7 @@
 //============================================================================
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+
 #include "ClientToServerCmd.hpp"
 #include "TestHelper.hpp"
 #include "Defs.hpp"

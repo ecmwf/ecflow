@@ -15,11 +15,10 @@
 //
 // Description :
 //============================================================================
-
-#include "NodeTreeVisitor.hpp"
 #include <sstream>
 #include <set>
-#include <vector>
+
+#include "NodeTreeVisitor.hpp"
 class Node;
 
 namespace ecf {

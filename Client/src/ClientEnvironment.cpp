@@ -18,11 +18,9 @@
 #include <cstdlib> // for getenv()
 
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include "boost/lexical_cast.hpp"
 
 #include "ClientEnvironment.hpp"
-#include "ClientToServerCmd.hpp"
 #include "File.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"

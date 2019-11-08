@@ -13,14 +13,12 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
-#include <boost/lexical_cast.hpp>
 #include <boost/archive/tmpdir.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
 
 #include <iostream>
-#include <fstream>
 #if defined(__APPLE__)
 #include <unistd.h>
 #else

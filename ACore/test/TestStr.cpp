@@ -15,14 +15,13 @@
 #include <string>
 #include <iostream>
 #include <iomanip>
-#include <fstream>
+#include <algorithm>
+//#include <fstream>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/timer/timer.hpp>
-
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <algorithm>
+//#include <boost/timer/timer.hpp>
+//#include <boost/lexical_cast.hpp>
+//#include <boost/algorithm/string.hpp>
 
 #include "Str.hpp"
 #include "StringSplitter.hpp"

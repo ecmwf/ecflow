@@ -12,13 +12,10 @@
 //
 // Description :
 //============================================================================
-#include <iostream>
 #include <fstream>
 #include <cstdlib>
 
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
 
 #include "Simulator.hpp"
@@ -26,8 +23,7 @@
 #include "SimulatorVisitor.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
 #include "Log.hpp"
 #include "JobsParam.hpp"
 #include "Jobs.hpp"

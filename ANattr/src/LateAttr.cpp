@@ -12,9 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <sstream>
-
-
 #include "LateAttr.hpp"
 #include "Indentor.hpp"
 #include "Calendar.hpp"

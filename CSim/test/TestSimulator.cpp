@@ -16,7 +16,6 @@
 
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
@@ -25,7 +24,6 @@
 #include "System.hpp"
 #include "Simulator.hpp"
 #include "File.hpp"
-#include "LogVerification.hpp"
 
 namespace fs = boost::filesystem;
 

@@ -12,14 +12,12 @@
 //
 // Description :
 //============================================================================
+#include <fstream>
 
 #include "Analyser.hpp"
 #include "DefsAnalyserVisitor.hpp"
 #include "FlatAnalyserVisitor.hpp"
 #include "Defs.hpp"
-#include "File.hpp"
-#include <iostream>
-#include <fstream>
 
 using namespace std;
 

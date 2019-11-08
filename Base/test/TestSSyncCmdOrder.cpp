@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
-#include <boost/function.hpp>
 
 #include "ClientToServerCmd.hpp"
 #include "MockServer.hpp"
