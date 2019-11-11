@@ -17,7 +17,6 @@
 #include "ArgvCreator.hpp"
 #include <sstream>
 #include <cassert>
-#include <cstdlib>   // for malloc/free and gcc 4.4.3, not required for gcc 4.2.1
 #include <cstring>   // for strcpy and gcc 4.4.3, not required for gcc 4.2.1
 using namespace std;
 

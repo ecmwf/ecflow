@@ -12,13 +12,10 @@
 //
 // Description :
 //============================================================================
-#include <iostream>
 #include <fstream>
 #include <sstream>
 
-#include <boost/archive/tmpdir.hpp>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "PersistHelper.hpp"
 #include "Defs.hpp"

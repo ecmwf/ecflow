@@ -18,8 +18,6 @@
 #include "DefsStructureParser.hpp"
 
 using namespace std;
-using namespace boost;
-
 
 bool DefsStateParser::doParse( const std::string& line, std::vector<std::string >& lineTokens )
 {

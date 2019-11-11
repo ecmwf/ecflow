@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 
-#include <cstdlib>
 #include <unistd.h>
 
 #include "Passwd.hpp"

@@ -11,15 +11,14 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <iostream>
+#include <boost/test/unit_test.hpp>
+
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 
-#include <boost/test/unit_test.hpp>
-#include <map>
-#include <iostream>
-#include <fstream>
 using namespace std;
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )

@@ -15,9 +15,7 @@
 //============================================================================
 #include <string>
 #include <iostream>
-#include <fstream>
 
-#include <boost/archive/tmpdir.hpp>
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -27,6 +25,7 @@
 #include "PersistHelper.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
+#include "Node.hpp"
 //#include "PrintStyle.hpp"
 
 namespace fs = boost::filesystem;

@@ -13,7 +13,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <cassert>
-#include <deque>
 #include <ostream>
 
 #include "Defs.hpp"
@@ -27,8 +26,6 @@
 #include "Limit.hpp"
 
 #include "Extract.hpp"
-#include "NodeState.hpp"
-#include "NodePath.hpp"
 #include "NodeStats.hpp"
 #include "Str.hpp"
 #include "Indentor.hpp"
@@ -36,7 +33,6 @@
 #include "Expression.hpp"
 #include "Log.hpp"
 #include "PrintStyle.hpp"
-#include "JobsParam.hpp"
 #include "ExprAstVisitor.hpp"
 #include "Ecf.hpp"
 #include "SuiteChanged.hpp"

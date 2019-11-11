@@ -17,6 +17,7 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
+#include "Alias.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
 #include "CalendarUpdateParams.hpp"

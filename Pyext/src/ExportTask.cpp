@@ -18,6 +18,7 @@
 #include <boost/core/noncopyable.hpp>
 
 #include "Task.hpp"
+#include "Alias.hpp"
 #include "DefsDoc.hpp"
 #include "BoostPythonUtil.hpp"
 #include "NodeUtil.hpp"

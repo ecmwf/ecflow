@@ -13,13 +13,11 @@
 #include <iostream>
 
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
-#include "Task.hpp"
 #include "Str.hpp"
 #include "File.hpp"
 #include "Log.hpp"

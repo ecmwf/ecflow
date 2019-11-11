@@ -14,13 +14,10 @@
 //============================================================================
 
 #include <sstream>
-
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/exception.hpp"
 #include <boost/lexical_cast.hpp>
 
 #include "Task.hpp"
+#include "Alias.hpp"
 #include "Defs.hpp"
 #include "PrintStyle.hpp"
 #include "Suite.hpp"
@@ -30,7 +27,6 @@
 #include "Str.hpp"
 #include "Indentor.hpp"
 #include "Log.hpp"
-#include "ExprAst.hpp"
 #include "JobsParam.hpp"
 #include "Ecf.hpp"
 #include "DefsDelta.hpp"
@@ -40,10 +36,8 @@
 #include "JobProfiler.hpp"
 #include "Serialization.hpp"
 
-namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 //#define DEBUG_TASK_LOCATION 1
 void Task::copy(const Task& rhs)

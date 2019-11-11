@@ -17,9 +17,8 @@
 #include <boost/test/unit_test.hpp>
 
 #include <string>
-#include <map>
 #include <iostream>
-#include <fstream>
+
 using namespace std;
 using namespace ecf;
 

@@ -17,7 +17,6 @@
 #include <boost/lexical_cast.hpp>
 
 #include "Suite.hpp"
-#include "Defs.hpp"
 #include "PrintStyle.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "DefsDelta.hpp"
@@ -26,8 +25,6 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
-#include "ExprAst.hpp"
-#include "CalendarUpdateParams.hpp"
 #include "SuiteChanged.hpp"
 #include "JobsParam.hpp"
 #include "Serialization.hpp"

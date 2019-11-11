@@ -18,17 +18,15 @@
 
 #include <string>
 #include <stack>
-#include <map>
+#include <unordered_map>
 #include <vector>
 #include <fstream>
 
 #include "File_r.hpp"
 #include "PrintStyle.hpp"
 #include "DefsParser.hpp"
-#include "Node.hpp"
+#include "NodeFwd.hpp"
 
-class Defs;
-class Node;
 class Parser;
 
 // This class is used get a line of defs format from a defs string

@@ -13,8 +13,6 @@
 // Description :
 //============================================================================
 
-#include <sstream>
-
 #include "DefsParser.hpp"
 #include "ExternParser.hpp"
 #include "AutoCancelParser.hpp"
@@ -49,8 +47,7 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
-
-#include <boost/token_functions.hpp>
+#include "Alias.hpp"
 
 using namespace ecf;
 using namespace std;

@@ -14,17 +14,13 @@
 //============================================================================
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "File.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

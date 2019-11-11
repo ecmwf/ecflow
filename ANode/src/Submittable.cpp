@@ -16,13 +16,9 @@
 #include <sstream>
 
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/exception.hpp"
 #include <boost/lexical_cast.hpp>
 
 #include "Submittable.hpp"
-#include "Defs.hpp"
-#include "Suite.hpp"
 #include "File.hpp"
 #include "Passwd.hpp"
 #include "Str.hpp"

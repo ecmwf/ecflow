@@ -15,15 +15,12 @@
 #include <string>
 #include <iostream>
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 
 #include "PersistHelper.hpp"
 #include "PrintStyle.hpp"
 #include "MyDefsFixture.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

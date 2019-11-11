@@ -17,7 +17,6 @@
 #include <cassert>
 #include <sstream>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "NodeContainer.hpp"
 #include "Family.hpp"
@@ -28,8 +27,6 @@
 #include "JobsParam.hpp"
 #include "NodeTreeVisitor.hpp"
 
-#include "ExprAst.hpp"
-#include "NodeState.hpp"
 #include "Ecf.hpp"
 #include "NodeState.hpp"
 #include "SuiteChanged.hpp"

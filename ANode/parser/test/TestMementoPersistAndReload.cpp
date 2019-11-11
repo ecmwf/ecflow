@@ -14,18 +14,13 @@
 //============================================================================
 #include <string>
 #include <iostream>
-#include <fstream>
 
-#include <boost/archive/tmpdir.hpp>
 #include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "Defs.hpp"
 #include "PersistHelper.hpp"
 #include "Memento.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

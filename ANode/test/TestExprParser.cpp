@@ -15,13 +15,8 @@
 #include <string>
 #include <map>
 #include <iostream>
-#include <fstream>
 
 #include <boost/test/unit_test.hpp>
-
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <boost/date_time/posix_time/conversion.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib, for to_simple_string
 
 #include "ExprParser.hpp"
 #include "ExprAst.hpp"

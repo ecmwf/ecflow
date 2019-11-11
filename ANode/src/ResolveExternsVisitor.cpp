@@ -14,7 +14,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "ResolveExternsVisitor.hpp"
-#include "ExprAstVisitor.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
