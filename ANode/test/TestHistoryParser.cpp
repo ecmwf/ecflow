@@ -14,6 +14,7 @@
 //============================================================================
 #include <string>
 #include <iostream>
+#include <iterator>
 #include <fstream>
 
 #include <boost/test/unit_test.hpp>

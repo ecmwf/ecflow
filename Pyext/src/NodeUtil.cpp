@@ -18,6 +18,7 @@
 #include "Trigger.hpp"
 
 #include "Defs.hpp"
+#include "Suite.hpp"
 #include "Task.hpp"
 
 #include "NodeAttr.hpp"

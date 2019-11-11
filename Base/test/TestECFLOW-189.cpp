@@ -18,6 +18,7 @@
 #include "TestHelper.hpp"
 #include "System.hpp"
 #include "Defs.hpp"
+#include "Suite.hpp"
 #include "Family.hpp"
 
 using namespace std;

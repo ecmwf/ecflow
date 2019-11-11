@@ -18,7 +18,7 @@
 #include "ServerToClientCmd.hpp"
 
 #include "Defs.hpp"
-
+#include "Suite.hpp"
 #include "AbstractServer.hpp"
 #include "Log.hpp"
 #include "Str.hpp"

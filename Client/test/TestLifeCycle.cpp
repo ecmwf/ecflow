@@ -17,6 +17,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
+#include "Suite.hpp"
 #include "Task.hpp"
 #include "TestHelper.hpp"
 #include "JobsParam.hpp"

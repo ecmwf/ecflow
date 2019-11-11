@@ -17,7 +17,7 @@
 #include "SNodeCmd.hpp"
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
-#include "Node.hpp"
+#include "Suite.hpp"
 #include "AbstractServer.hpp"
 #include "PrintStyle.hpp"
 

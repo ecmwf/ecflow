@@ -21,6 +21,7 @@
 #include "ClientToServerCmd.hpp"
 #include "NState.hpp"
 #include "Defs.hpp"
+#include "Suite.hpp"
 #include "Task.hpp"
 #include "Child.hpp"
 #include "File.hpp"

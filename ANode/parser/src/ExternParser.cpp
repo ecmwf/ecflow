@@ -17,7 +17,6 @@
 #include "Defs.hpp"
 
 using namespace std;
-using namespace boost;
 
 bool ExternParser::doParse( const std::string& line,
                             std::vector<std::string >& lineTokens )

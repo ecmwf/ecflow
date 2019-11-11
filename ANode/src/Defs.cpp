@@ -13,8 +13,6 @@
 // Description :
 //============================================================================
 #include <cassert>
-#include <sstream>
-#include <ostream>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
