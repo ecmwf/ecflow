@@ -20,6 +20,7 @@
 #include "Task.hpp"
 #include "DurationTimer.hpp"
 #include "Limit.hpp"
+#include "VerifyAttr.hpp"
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"

@@ -9,6 +9,7 @@
 
 #include "OverviewProvider.hpp"
 #include "AutoCancelAttr.hpp"
+#include "Suite.hpp"
 
 #include "ConnectState.hpp"
 #include "ServerHandler.hpp"

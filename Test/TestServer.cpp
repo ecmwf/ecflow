@@ -30,6 +30,7 @@
 #include "DurationTimer.hpp"
 #include "Host.hpp"
 #include "Str.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

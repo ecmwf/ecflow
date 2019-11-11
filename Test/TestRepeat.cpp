@@ -34,6 +34,7 @@
 #include "WhyCmd.hpp"
 #include "PrintStyle.hpp"
 #include "Str.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;

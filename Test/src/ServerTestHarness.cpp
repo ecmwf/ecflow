@@ -32,6 +32,7 @@
 #include "WhyCmd.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
+#include "MiscAttrs.hpp"
 
 using namespace std;
 using namespace ecf;

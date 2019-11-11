@@ -16,8 +16,6 @@
 #include <sstream>   // for std::stringstream
 
 #include "ClientSuiteMgr.hpp"
-#include "Defs.hpp"
-#include "DefsDelta.hpp"
 #include "Ecf.hpp"
 
 using namespace ecf;

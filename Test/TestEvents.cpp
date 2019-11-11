@@ -29,6 +29,7 @@
 #include "Task.hpp"
 #include "DurationTimer.hpp"
 #include "TestFixture.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

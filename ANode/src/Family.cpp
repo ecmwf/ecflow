@@ -22,7 +22,6 @@
 
 #include "Str.hpp"
 #include "Indentor.hpp"
-#include "DefsDelta.hpp"
 #include "JobsParam.hpp"
 #include "Serialization.hpp"
 

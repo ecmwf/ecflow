@@ -20,6 +20,7 @@
 #include "Str.hpp"
 #include "DefsStructureParser.hpp"
 #include "Node.hpp"
+#include "Expression.hpp"
 
 using namespace ecf;
 using namespace std;

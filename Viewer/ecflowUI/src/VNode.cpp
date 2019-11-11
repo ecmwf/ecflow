@@ -10,7 +10,8 @@
 
 #include "VNode.hpp"
 
-#include "Node.hpp"
+#include "Suite.hpp"
+#include "Expression.hpp"
 #include "Variable.hpp"
 
 #include "AstCollateVNodesVisitor.hpp"

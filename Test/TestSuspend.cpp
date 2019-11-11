@@ -29,6 +29,7 @@
 #include "DurationTimer.hpp"
 #include "PrintStyle.hpp"
 #include "AssertTimer.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

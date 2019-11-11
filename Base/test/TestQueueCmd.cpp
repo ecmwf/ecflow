@@ -23,6 +23,7 @@
 #include "Task.hpp"
 #include "TestHelper.hpp"
 #include "System.hpp"
+#include "QueueAttr.hpp"
 
 using namespace std;
 using namespace ecf;

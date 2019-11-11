@@ -24,6 +24,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

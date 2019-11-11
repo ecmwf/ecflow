@@ -15,6 +15,7 @@
 
 #include "VerifyParser.hpp"
 #include "Node.hpp"
+#include "VerifyAttr.hpp"
 #include "DefsStructureParser.hpp"
 #include "Extract.hpp"
 

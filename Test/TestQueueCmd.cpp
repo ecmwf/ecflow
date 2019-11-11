@@ -28,6 +28,8 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
+#include "VerifyAttr.hpp"
+#include "QueueAttr.hpp"
 
 using namespace std;
 using namespace ecf;

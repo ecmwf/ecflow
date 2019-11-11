@@ -35,9 +35,7 @@
 #include "NodeAttr.hpp"
 #include "InLimit.hpp"
 #include "Variable.hpp"
-#include "LateAttr.hpp"
 #include "RepeatAttr.hpp"
-#include "Expression.hpp"
 #include "InLimitMgr.hpp"
 
 #include "TimeAttr.hpp"
@@ -46,17 +44,15 @@
 #include "DayAttr.hpp"
 #include "CronAttr.hpp"
 
-#include "MiscAttrs.hpp"
 #include "NodeFwd.hpp"
 #include "Flag.hpp"
 #include "Aspect.hpp"
 #include "Attr.hpp"
+#include "Child.hpp"
 #include "PrintStyle.hpp"
-#include "NodeStats.hpp"
 
-class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
-namespace ecf { class Calendar; class NodeTreeVisitor; } // forward declare class
+namespace ecf { class Calendar; class NodeTreeVisitor; class LateAttr;} // forward declare class
 
 class Node : public std::enable_shared_from_this<Node>  {
 protected:

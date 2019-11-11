@@ -16,7 +16,6 @@
 
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
 #include "Task.hpp"
 #include "Log.hpp"
 #include "NodeTreeVisitor.hpp"
@@ -38,6 +37,7 @@
 #include "Serialization.hpp"
 #include "Memento.hpp"
 #include "CalendarUpdateParams.hpp"
+#include "NodeStats.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;

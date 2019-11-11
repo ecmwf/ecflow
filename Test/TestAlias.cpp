@@ -40,6 +40,7 @@
 #include "AssertTimer.hpp"
 #include "Str.hpp"
 #include "NOrder.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

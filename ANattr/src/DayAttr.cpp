@@ -14,7 +14,6 @@
 //============================================================================
 #include <cassert>
 #include <sstream>
-#include <ostream>
 
 #include "DayAttr.hpp"
 #include "Indentor.hpp"

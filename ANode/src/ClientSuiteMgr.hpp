@@ -37,6 +37,7 @@
 
 #include "ClientSuites.hpp"
 class DefsDelta;
+class Defs;
 
 class ClientSuiteMgr {
 public:

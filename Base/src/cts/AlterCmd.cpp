@@ -27,6 +27,9 @@
 #include "Log.hpp"
 #include "Extract.hpp"
 #include "Limit.hpp"
+#include "LateAttr.hpp"
+#include "MiscAttrs.hpp"
+#include "Expression.hpp"
 
 using namespace ecf;
 using namespace std;

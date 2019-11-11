@@ -33,6 +33,7 @@
 #include "AssertTimer.hpp"
 #include "Limit.hpp"
 #include "WhyCmd.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

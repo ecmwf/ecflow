@@ -38,6 +38,13 @@ class Meter;
 class Repeat;
 class Variable;
 class Zombie;
+class NodeStats;
+class MiscAttrs;
+class VerifyAttr;
+class ZombieAttr;
+class QueueAttr;
+class GenericAttr;
+class PartExpression;
 
 namespace ecf { class LateAttr; class AutoCancelAttr; class AutoArchiveAttr; class AutoRestoreAttr; } // forward declare class
 
@@ -62,15 +69,14 @@ typedef std::weak_ptr<Submittable> weak_submittable_ptr;
 typedef std::weak_ptr<Node>  weak_node_ptr;
 
 typedef std::map<std::string,std::string> NameValueMap;
-
 typedef std::vector< std::pair< std::string,std::string> > NameValueVec;
-
 
 class NodeContainer;
 class DefsDelta;
 class JobsParam;
 class JobCreationCtrl;
 class AstTop;
+class Ast;
 
 class StateMemento;
 class NodeStateMemento;

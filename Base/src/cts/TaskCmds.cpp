@@ -16,8 +16,9 @@
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
 #include "TaskApi.hpp"
-#include "ExprAst.hpp"
+#include "Expression.hpp"
 #include "ExprAstVisitor.hpp"
+#include "QueueAttr.hpp"
 
 #include "Defs.hpp"
 #include "Task.hpp"

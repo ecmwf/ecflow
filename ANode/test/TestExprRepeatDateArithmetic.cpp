@@ -15,6 +15,7 @@
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
+#include "Expression.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -39,7 +40,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_data_arithmetic )
    BOOST_REQUIRE_MESSAGE(theDefs.check(errorMsg,warningMsg),"Expected triggers expressions to parse " << errorMsg);
 
    // Get the trigger AST
-   Ast* trigger = t2->triggerAst();
+   AstTop* trigger = t2->triggerAst();
    BOOST_REQUIRE_MESSAGE(trigger,"Expected trigger");
 
    // check evaluation

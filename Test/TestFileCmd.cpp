@@ -30,6 +30,7 @@
 #include "DurationTimer.hpp"
 #include "ClientToServerCmd.hpp"
 #include "File.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

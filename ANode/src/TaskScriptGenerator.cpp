@@ -18,6 +18,7 @@
 
 #include "TaskScriptGenerator.hpp"
 #include "Task.hpp"
+#include "QueueAttr.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"

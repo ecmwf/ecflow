@@ -20,6 +20,7 @@
 #include "Memento.hpp"
 #include "Str.hpp"
 #include "Extract.hpp"
+#include "VerifyAttr.hpp"
 #include "Serialization.hpp"
 
 #ifdef DEBUG

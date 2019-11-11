@@ -13,12 +13,15 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/lexical_cast.hpp>
+
 #include "AutoRestoreAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoArchiveAttr.hpp"
 #include "Limit.hpp"
 #include "Node.hpp"
-
+#include "LateAttr.hpp"
+#include "MiscAttrs.hpp"
+#include "Expression.hpp"
 #include "Ecf.hpp"
 
 using namespace ecf;

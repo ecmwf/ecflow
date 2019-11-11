@@ -47,6 +47,9 @@
 #include "Task.hpp"
 #include "Alias.hpp"
 #include "Limit.hpp"
+#include "LateAttr.hpp"
+#include "Expression.hpp"
+#include "MiscAttrs.hpp"
 
 //#define DEBUG_MEMENTO 1
 

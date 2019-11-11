@@ -9,6 +9,7 @@
 //============================================================================
 
 #include "AstCollateVNodesVisitor.hpp"
+#include "ExprAst.hpp"
 
 #include <cassert>
 

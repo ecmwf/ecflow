@@ -10,6 +10,7 @@
 #include "ServerComThread.hpp"
 
 #include "Defs.hpp"
+#include "Suite.hpp"
 #include "ClientInvoker.hpp"
 #include "ArgvCreator.hpp"
 

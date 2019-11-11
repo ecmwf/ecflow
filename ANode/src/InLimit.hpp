@@ -15,11 +15,8 @@
 // Description :
 //============================================================================
 
-#include <iosfwd>
-#include <boost/weak_ptr.hpp>
-namespace cereal { class access; }
-
 #include "LimitFwd.hpp"
+namespace cereal { class access; }
 
 
 // Inlimit. Multiple inlimits on same Node are logically ANDED

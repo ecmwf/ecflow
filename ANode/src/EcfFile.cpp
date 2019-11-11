@@ -14,7 +14,6 @@
 //============================================================================
 #include <sstream>
 #include <sys/stat.h>
-#include <iostream>
 #include <cerrno>
 #include <memory>
 
@@ -26,13 +25,8 @@
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "File.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
 #include "JobsParam.hpp"
-
-namespace fs = boost::filesystem;
-using namespace std;
-using namespace ecf;
-using namespace boost;
 
 //#define DEBUG_ECF_ 1
 //#define DEBUG_PRE_PROCESS 1
@@ -43,6 +37,14 @@ using namespace boost;
 //#define DEBUG_VAR_SUB_OUTPUT 1
 //#define DEBUG_MAN_FILE 1
 
+#ifdef DEBUG_ECF_
+#include <iostream>
+#endif
+
+namespace fs = boost::filesystem;
+using namespace std;
+using namespace ecf;
+using namespace boost;
 static const char* T_NOOP        = "nopp";
 static const char* T_COMMENT     = "comment";
 static const char* T_MANUAL      = "manual";

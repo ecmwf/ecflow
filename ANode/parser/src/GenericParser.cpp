@@ -15,6 +15,7 @@
 
 #include "GenericParser.hpp"
 #include "Node.hpp"
+#include "GenericAttr.hpp"
 
 using namespace ecf;
 using namespace std;

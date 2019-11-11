@@ -20,6 +20,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "System.hpp"
+#include "ZombieAttr.hpp"
 
 using namespace std;
 using namespace ecf;

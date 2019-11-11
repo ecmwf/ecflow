@@ -15,6 +15,9 @@
 #include "Node.hpp"
 #include "Limit.hpp"
 #include "Ecf.hpp"
+#include "LateAttr.hpp"
+#include "MiscAttrs.hpp"
+#include "Expression.hpp"
 
 using namespace ecf;
 using namespace std;

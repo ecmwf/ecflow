@@ -25,6 +25,7 @@
 #include "Task.hpp"
 #include "TestUtil.hpp"
 #include "AutoCancelAttr.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

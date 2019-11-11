@@ -13,10 +13,8 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
-#include <boost/archive/tmpdir.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-
 
 #include <iostream>
 #if defined(__APPLE__)

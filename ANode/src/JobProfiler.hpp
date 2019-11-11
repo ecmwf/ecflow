@@ -22,8 +22,8 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
-#include "NodeFwd.hpp"
 class JobsParam;
+class Task;
 
 namespace ecf {
 

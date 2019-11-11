@@ -15,6 +15,7 @@
 #include "Suite.hpp"
 #include "DefsDelta.hpp"
 #include "Memento.hpp"
+#include "MiscAttrs.hpp"
 
 using namespace ecf;
 using namespace std;

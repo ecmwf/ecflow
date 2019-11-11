@@ -16,6 +16,7 @@
 //               as each new object is created we add it here, to test
 //               Serialisation read/write and migration of previous fixtures
 //============================================================================
+#include <algorithm> //for for_each()
 #include <boost/lexical_cast.hpp>
 
 #include "Str.hpp"
@@ -27,9 +28,11 @@
 #include "AutoRestoreAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoArchiveAttr.hpp"
+#include "LateAttr.hpp"
 #include "Limit.hpp"
+#include "MiscAttrs.hpp"
+#include "Expression.hpp"
 
-#include <algorithm> //for for_each()
 // =======================================================================
 // This struct is used in the node migration tests.
 // If we ever add to this , then update TestMigration.cpp

@@ -13,8 +13,6 @@
 // Description :
 //============================================================================
 
-#include <ostream>
-
 #include "Limit.hpp"
 #include "Indentor.hpp"
 #include "PrintStyle.hpp"

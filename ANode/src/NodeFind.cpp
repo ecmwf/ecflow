@@ -18,6 +18,7 @@
 #include "NodePath.hpp"
 #include "Defs.hpp"
 #include "Limit.hpp"
+#include "MiscAttrs.hpp"
 
 using namespace ecf;
 using namespace std;

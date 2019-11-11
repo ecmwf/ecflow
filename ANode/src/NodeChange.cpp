@@ -19,6 +19,7 @@
 #include "Ecf.hpp"
 #include "Str.hpp"
 #include "Limit.hpp"
+#include "LateAttr.hpp"
 
 using namespace ecf;
 using namespace std;

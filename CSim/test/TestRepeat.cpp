@@ -24,6 +24,8 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
+#include "VerifyAttr.hpp"
+
 //#include "PrintStyle.hpp"
 
 using namespace std;

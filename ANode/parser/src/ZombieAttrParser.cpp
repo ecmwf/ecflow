@@ -15,6 +15,7 @@
 
 #include "ZombieAttrParser.hpp"
 #include "Node.hpp"
+#include "ZombieAttr.hpp"
 
 using namespace ecf;
 using namespace std;

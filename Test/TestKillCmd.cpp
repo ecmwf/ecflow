@@ -32,6 +32,7 @@
 #include "ClientToServerCmd.hpp"
 #include "AssertTimer.hpp"
 #include "File.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

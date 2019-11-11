@@ -15,7 +15,6 @@
 
 #include <cassert>
 #include <sstream>
-#include <ostream>
 
 #include "Expression.hpp"
 #include "Indentor.hpp"

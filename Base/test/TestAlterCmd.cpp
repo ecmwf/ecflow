@@ -24,6 +24,8 @@
 #include "Suite.hpp"
 #include "Defs.hpp"
 #include "Limit.hpp"
+#include "LateAttr.hpp"
+#include "MiscAttrs.hpp"
 
 using namespace std;
 using namespace ecf;

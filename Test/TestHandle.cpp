@@ -33,6 +33,7 @@
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
 #include "AssertTimer.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

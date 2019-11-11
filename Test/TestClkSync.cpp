@@ -31,6 +31,7 @@
 #include "Task.hpp"
 #include "DurationTimer.hpp"
 #include "PrintStyle.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;

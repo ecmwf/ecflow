@@ -28,6 +28,7 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
+#include "LateAttr.hpp"
 #include "DurationTimer.hpp"
 #include "PrintStyle.hpp"
 #include "ClientToServerCmd.hpp"
