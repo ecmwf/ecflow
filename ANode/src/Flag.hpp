@@ -17,7 +17,8 @@
 
 #include <vector>
 #include <string>
-#include <cereal/access.hpp>
+#include <array>
+namespace cereal { class access; }
 
 namespace  ecf {
 

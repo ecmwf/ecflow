@@ -15,7 +15,7 @@
 // Description :
 //============================================================================
 
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 #include "ClientToServerCmd.hpp"
 
 // Base class for client to server requesting.

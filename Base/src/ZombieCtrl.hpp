@@ -15,7 +15,7 @@
 // Description : manages the zombies
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "Zombie.hpp"
 #include "NodeFwd.hpp"

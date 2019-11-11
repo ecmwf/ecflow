@@ -14,7 +14,7 @@
 //
 // Description :
 //============================================================================
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 #include "ServerToClientCmd.hpp"
 
 // Base class for server to client requesting. This class is used in the IPC messaging between

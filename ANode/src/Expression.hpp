@@ -17,10 +17,10 @@
 //============================================================================
 
 #include <memory> // for unique_ptr
-#include <cereal/access.hpp>
 
 #include "ExprAst.hpp"
 class Node;
+namespace cereal { class access; }
 
 /// class PartExpression:
 ///  Hold a single expression, optional can specify whether it is to be And' or

@@ -19,7 +19,6 @@
 
 #include <cassert>
 #include <iosfwd>
-#include <boost/noncopyable.hpp>
 
 #include "DState.hpp"
 #include "Flag.hpp"

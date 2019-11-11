@@ -23,7 +23,7 @@
 
 #include <set>
 #include <string>
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 class Node;
 
 // Class Limit: The limit is zero based, hence if limit is 10, increment must use < 10

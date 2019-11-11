@@ -15,11 +15,11 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <set>
-#include <cereal/access.hpp>
 
 #include "InLimit.hpp"
 #include "LimitFwd.hpp"
 #include "NodeFwd.hpp"
+namespace cereal { class access; }
 
 // class InLimitMgr:
 // Design notes:

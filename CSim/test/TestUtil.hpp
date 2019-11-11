@@ -16,7 +16,7 @@
 // Description :
 //============================================================================
 
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 #include <string>
 
 // This class provides a test harness for running defs file in a client server environment

@@ -17,7 +17,7 @@
 
 #include <iosfwd>
 #include <boost/weak_ptr.hpp>
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 
 #include "LimitFwd.hpp"
 

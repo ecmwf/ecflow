@@ -83,10 +83,9 @@
 //============================================================================
 
 #include "TimeSeries.hpp"
-#include "DayAttr.hpp"  // Used in Why
-#include "DateAttr.hpp" // Used in Why
 
-
+class DateAttr; // Used in Why
+class DayAttr;  // Used in Why
 namespace ecf { class Calendar;} // forward declare class
 
 namespace ecf {

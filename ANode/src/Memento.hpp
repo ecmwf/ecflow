@@ -39,6 +39,8 @@
 // Hence we need to ensure we use the minimum number of serializable types.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <boost/core/noncopyable.hpp>
+
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"

@@ -17,7 +17,7 @@
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
-#include <boost/noncopyable.hpp> // IWYU pragma: keep
+#include <boost/core/noncopyable.hpp>
 #include <boost/python.hpp>      // IWYU pragma: keep
 #include "Variable.hpp"
 

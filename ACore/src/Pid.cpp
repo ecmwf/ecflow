@@ -14,7 +14,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "Pid.hpp"
-#include <sys/types.h> // for getpid
 #include <unistd.h>    // for getpid
 #include <boost/lexical_cast.hpp>
 

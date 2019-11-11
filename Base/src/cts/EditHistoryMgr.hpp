@@ -18,7 +18,7 @@
 // Additionally we check that if there was an edit then the command must
 // return ClientToServerCmd::isWrite() true.
 //============================================================================
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 #include <string>
 
 class ClientToServerCmd;

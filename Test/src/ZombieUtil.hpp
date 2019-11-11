@@ -14,6 +14,7 @@
 //============================================================================
 
 #include "Child.hpp"
+#include "User.hpp"
 class ClientInvoker;
 
 class ZombieUtil {

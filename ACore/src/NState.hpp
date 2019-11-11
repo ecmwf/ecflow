@@ -17,7 +17,8 @@
 //============================================================================
 
 #include <vector>
-#include <cereal/access.hpp>
+#include <string>
+namespace cereal { class access; }
 
 // NState: stores the state of a node.
 // *The class NState just used to define the enum, however we also

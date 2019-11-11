@@ -11,7 +11,10 @@
 { include : ["<boost/test/utils/basic_cstring/basic_cstring.hpp>",     "public", "<boost/test/unit_test.hpp>",      "public"] },           
 { include : ["<boost/test/utils/basic_cstring/basic_cstring_fwd.hpp>", "public", "<boost/test/unit_test.hpp>",      "public"] },      
 
-{ include: ["<boost/core/noncopyable.hpp>",        "public", "<boost/noncopyable.hpp>",                            "public"] },
-{ include: ["@<boost/filesystem/.*>",              "public", "<boost/filesystem.hpp>",                             "public"] }
+{ include: ["@<boost/bind/.*>", private, "<boost/bind.hpp>", public ] },
+{ include: ["@<boost/format/.*>", private, "<boost/format.hpp>", public ] },
+{ include: ["@<boost/filesystem/.*>", private, "<boost/filesystem.hpp>", public ] },
+{ include: ["@<boost/function/.*>", private, "<boost/function.hpp>", public ] }
+
 ]                
                                 

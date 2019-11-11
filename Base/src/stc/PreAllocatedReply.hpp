@@ -15,7 +15,7 @@
 // Description :
 //============================================================================
 #include <string>
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 #include "Cmd.hpp"
 #include "NodeFwd.hpp"
 #include "Child.hpp"

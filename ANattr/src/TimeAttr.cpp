@@ -16,6 +16,8 @@
 #include <sstream>
 
 #include "TimeAttr.hpp"
+#include "DayAttr.hpp"  // Used in Why
+#include "DateAttr.hpp" // Used in Why
 #include "Indentor.hpp"
 #include "Calendar.hpp"
 #include "PrintStyle.hpp"

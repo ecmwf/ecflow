@@ -13,11 +13,10 @@
 // Description :
 //============================================================================
 
-#include "Passwd.hpp"
-#include <iostream>
-#include <sys/types.h>
 #include <cstdlib>
 #include <unistd.h>
+
+#include "Passwd.hpp"
 
 //extern char *crypt(const char *key, const char *salt);
 

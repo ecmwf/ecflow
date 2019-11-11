@@ -16,7 +16,7 @@
 // Description : This class is used as a helper class for file utilities
 //============================================================================
 
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 #include <boost/filesystem/path.hpp>
 #include <string>
 #include <vector>

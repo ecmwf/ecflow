@@ -6,6 +6,7 @@
 //
 //#include <boost/python.hpp>
 //#include <boost/detail/lightweight_test.hpp>
+//#include <boost/core/noncopyable.hpp>
 //#include <iostream>
 //
 //namespace python = boost::python;

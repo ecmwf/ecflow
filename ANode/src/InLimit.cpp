@@ -13,11 +13,11 @@
 // Description :
 //============================================================================
 
-#include <boost/lexical_cast.hpp>
-
 #include <sstream>
 #include <stdexcept>
 #include <ostream>
+
+#include <boost/lexical_cast.hpp>
 
 #include "InLimit.hpp"
 #include "Limit.hpp"

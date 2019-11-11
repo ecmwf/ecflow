@@ -30,9 +30,6 @@
 #include <iosfwd>
 #include <limits>
 
-#include <boost/noncopyable.hpp>
-                      // used so often just placed here for convenience
-
 #include "DState.hpp"
 #include "NOrder.hpp"
 #include "NodeAttr.hpp"

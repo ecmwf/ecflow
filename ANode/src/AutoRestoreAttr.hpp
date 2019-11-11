@@ -17,7 +17,7 @@
 
 #include <vector>
 #include <string>
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 
 class Node;
 

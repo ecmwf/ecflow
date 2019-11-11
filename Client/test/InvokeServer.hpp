@@ -17,7 +17,7 @@
 #include <iostream>
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #include "TestHelper.hpp"
 #include "ClientInvoker.hpp"

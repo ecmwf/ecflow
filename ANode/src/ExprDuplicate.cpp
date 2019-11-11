@@ -13,6 +13,8 @@
 // Description :
 //============================================================================
 
+#include <unordered_map>
+#include <iostream>
 
 #include "ExprDuplicate.hpp"
 #include "ExprAst.hpp"

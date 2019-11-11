@@ -14,8 +14,10 @@
 //
 // Description :
 //============================================================================
-#include <cereal/access.hpp>
 #include "Child.hpp"
+#include "User.hpp"
+
+namespace cereal { class access; }
 
 // Class ZombieAttr:
 // Use compiler , generated destructor, assignment, copy constructor

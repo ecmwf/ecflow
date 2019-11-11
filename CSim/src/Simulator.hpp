@@ -19,7 +19,7 @@
 #include <map>
 #include <vector>
 
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #include "QueueAttr.hpp"
 #include "PrintStyle.hpp"

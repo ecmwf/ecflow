@@ -19,7 +19,7 @@
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/operators.hpp>
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////

@@ -27,7 +27,7 @@
 // Note:: updating state_change_no() on the *client side*  a no-op() it has no effect
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "NodeFwd.hpp"
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 
 class DefsDelta {
 private:

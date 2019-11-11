@@ -24,6 +24,7 @@
 
 #include <iosfwd>
 #include <set>
+#include <unordered_map>
 
 #include "boost/date_time/posix_time/posix_time_types.hpp"
  // used so often just placed here for convenience
@@ -39,6 +40,7 @@
 #include "PrintStyle.hpp"
 
 class AbstractObserver;
+namespace cereal { class access; }
 namespace ecf { class NodeTreeVisitor; class CalendarUpdateParams; } // forward declare
 
 class Defs {

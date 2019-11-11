@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 
 namespace ecf { class Calendar;} // forward declare class that is in a name space
 
