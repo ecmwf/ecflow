@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 #include "LateAttr.hpp"
+#include "NState.hpp"
 #include "Indentor.hpp"
 #include "Calendar.hpp"
 #include "Ecf.hpp"

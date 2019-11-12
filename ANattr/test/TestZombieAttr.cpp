@@ -14,7 +14,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <iostream>
-#include <cstdio>
 #include <boost/test/unit_test.hpp>
 
 #include "ZombieAttr.hpp"

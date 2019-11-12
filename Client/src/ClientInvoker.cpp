@@ -32,7 +32,10 @@
 #include "DurationTimer.hpp"
 #include "TimeStamp.hpp"
 #include "Log.hpp"
+#ifdef DEBUG_PERF
 #include "DebugPerf.hpp"
+#endif
+
 
 #ifdef DEBUG
 

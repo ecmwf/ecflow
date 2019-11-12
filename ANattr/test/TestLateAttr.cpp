@@ -19,6 +19,7 @@
 #include <boost/date_time/posix_time/time_formatters.hpp>
 
 #include "LateAttr.hpp"
+#include "NState.hpp"
 #include "Calendar.hpp"
 
 using namespace std;

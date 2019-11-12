@@ -19,7 +19,12 @@
 #include <vector>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "NodeTreeVisitor.hpp"
-#include "NodeFwd.hpp"
+
+class Defs;
+class Family;
+class NodeContainer;
+class Suite;
+class Task;
 
 namespace ecf {
 

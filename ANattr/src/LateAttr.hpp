@@ -15,10 +15,13 @@
 // Description :
 //============================================================================
 
+#include <string>
+#include <vector>
+#include <utility>  // for pair
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "TimeSlot.hpp"
-#include "NState.hpp"
-
+class NState;
 namespace ecf { class Calendar;} // forward declare class
 
 namespace ecf {
