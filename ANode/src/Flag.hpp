@@ -59,7 +59,7 @@ public:
       MESSAGE       =  8,  // Node
       BYRULE        =  9,  // Node*, set if node is set to complete by complete trigger expression
       QUEUELIMIT    = 10,  // Node                                   ( NOT USED currently)
-      WAIT          = 11,  // task*  Set/cleared but never queried ? ( NOT USED currently )
+      WAIT          = 11,  // task*  set when waiting for trigger expression in client command
       LOCKED        = 12,  // Server                                 ( NOT USED currently)
       ZOMBIE        = 13,  // task*  Set/cleared but never queried by GUI
       NO_REQUE_IF_SINGLE_TIME_DEP = 14,  //
