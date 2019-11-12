@@ -35,6 +35,8 @@
 #include "TodayAttr.hpp"
 #include "VerifyAttr.hpp"
 #include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
+#include "AutoRestoreAttr.hpp"
 #include "ZombieAttr.hpp"
 #include "Attr.hpp"
 #include "Flag.hpp"
@@ -104,14 +106,16 @@ object NodeUtil::do_add(node_ptr self, const bp::object& arg){
    else if (extract<LateAttr>(arg).check())  self->addLate(extract<LateAttr>(arg));
    else if (extract<ZombieAttr>(arg).check())self->addZombie(extract<ZombieAttr>(arg));
    else if (extract<RepeatDate>(arg).check())self->addRepeat(Repeat(extract<RepeatDate>(arg)  ));
-   else if (extract<RepeatDateList>(arg).check())self->addRepeat(Repeat(extract<RepeatDateList>(arg)  ));
-   else if (extract<RepeatInteger>(arg).check())self->addRepeat(Repeat(extract<RepeatInteger>(arg)  ));
+   else if (extract<RepeatDateList>(arg).check())  self->addRepeat(Repeat(extract<RepeatDateList>(arg)  ));
+   else if (extract<RepeatInteger>(arg).check())   self->addRepeat(Repeat(extract<RepeatInteger>(arg)  ));
    else if (extract<RepeatEnumerated>(arg).check())self->addRepeat(Repeat(extract<RepeatEnumerated>(arg)  ));
-   else if (extract<RepeatString>(arg).check())self->addRepeat(Repeat(extract<RepeatString>(arg)  ));
-   else if (extract<RepeatDay>(arg).check())self->addRepeat(Repeat(extract<RepeatDay>(arg)  ));
-   else if (extract<AutoCancelAttr>(arg).check())self->addAutoCancel(extract<AutoCancelAttr>(arg));
-   else if (extract<VerifyAttr>(arg).check())self->addVerify(extract<VerifyAttr>(arg));
+   else if (extract<RepeatString>(arg).check())    self->addRepeat(Repeat(extract<RepeatString>(arg)  ));
+   else if (extract<RepeatDay>(arg).check())       self->addRepeat(Repeat(extract<RepeatDay>(arg)  ));
+   else if (extract<AutoCancelAttr>(arg).check())  self->addAutoCancel(extract<AutoCancelAttr>(arg));
    else if (extract<Defstatus>(arg).check()){Defstatus t = extract<Defstatus>(arg);self->addDefStatus(t.state());}
+   else if (extract<AutoArchiveAttr>(arg).check()) self->add_autoarchive(extract<AutoArchiveAttr>(arg));
+   else if (extract<AutoRestoreAttr>(arg).check()) self->add_autorestore(extract<AutoRestoreAttr>(arg));
+   else if (extract<VerifyAttr>(arg).check())self->addVerify(extract<VerifyAttr>(arg));
    else if (extract<bp::list>(arg).check()){
       //std::cout << "  do_add list\n";
       bp::list the_list  = extract<bp::list>(arg);

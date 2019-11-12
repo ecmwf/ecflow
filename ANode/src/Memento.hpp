@@ -49,7 +49,10 @@
 #include "Limit.hpp"
 #include "LateAttr.hpp"
 #include "Expression.hpp"
-#include "MiscAttrs.hpp"
+#include "QueueAttr.hpp"
+#include "ZombieAttr.hpp"
+#include "GenericAttr.hpp"
+#include "VerifyAttr.hpp"
 
 //#define DEBUG_MEMENTO 1
 

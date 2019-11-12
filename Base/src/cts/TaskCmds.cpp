@@ -17,11 +17,10 @@
 #include "AbstractClientEnv.hpp"
 #include "TaskApi.hpp"
 #include "Expression.hpp"
-#include "ExprAstVisitor.hpp"
 #include "QueueAttr.hpp"
 
 #include "Defs.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
 #include "SuiteChanged.hpp"
 #include "Log.hpp"
 #include "Str.hpp"

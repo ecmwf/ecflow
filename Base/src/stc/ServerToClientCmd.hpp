@@ -19,7 +19,6 @@
 #include "NodeFwd.hpp"
 #include "ServerReply.hpp"
 #include "Serialization.hpp"
-class AbstractServer;
 
 //================================================================================
 // Start of Server->client

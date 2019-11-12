@@ -28,7 +28,6 @@
 #include "TestUtil.hpp"
 #include "AutoRestoreAttr.hpp"
 #include "AutoArchiveAttr.hpp"
-#include "VerifyAttr.hpp"
 
 //#include "PrintStyle.hpp"
 

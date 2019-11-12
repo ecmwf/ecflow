@@ -12,13 +12,11 @@
 //
 // Description :
 //============================================================================
-#include <cassert>
 #include <sstream>
 #include <stdexcept>
 
 #include "ServerToClientResponse.hpp"
 #include "ClientToServerRequest.hpp" // for throw
-#include "AbstractServer.hpp"
 
 using namespace std;
 using namespace ecf;

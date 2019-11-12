@@ -18,7 +18,7 @@
 
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
 #include "TestHelper.hpp"
 #include "JobsParam.hpp"
 #include "Jobs.hpp"

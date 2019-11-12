@@ -19,7 +19,8 @@
 
 #include <boost/core/noncopyable.hpp>
 #include <boost/python.hpp>      // IWYU pragma: keep
-#include "Variable.hpp"
+
+class Variable;
 
 // See: http://wiki.python.org/moin/boost.python/HowTo#boost.function_objects
 

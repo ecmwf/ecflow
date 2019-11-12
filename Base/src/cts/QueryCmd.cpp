@@ -15,13 +15,11 @@
 #include <iostream>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
-#include "Str.hpp"
 #include "CtsApi.hpp"
 #include "AbstractClientEnv.hpp"
 #include "Extract.hpp"
 #include "Expression.hpp"
 #include "Node.hpp"
-#include "ExprAstVisitor.hpp"
 
 using namespace ecf;
 using namespace std;

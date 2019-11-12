@@ -17,7 +17,6 @@
 #include "SSyncCmd.hpp"
 #include "Defs.hpp"
 #include "Ecf.hpp"
-#include "Log.hpp"
 #include "AbstractServer.hpp"
 
 using namespace std;

@@ -14,9 +14,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iostream>
 #include "ClientToServerCmd.hpp"
-#include "AbstractServer.hpp"
-#include "Str.hpp"
-#include "CtsApi.hpp"
 #include "AbstractClientEnv.hpp"
 
 using namespace ecf;

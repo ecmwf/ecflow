@@ -16,7 +16,6 @@
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
 #include "Node.hpp"
 #include "SuiteChanged.hpp"
 #include "Log.hpp"

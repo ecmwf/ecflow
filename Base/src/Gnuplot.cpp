@@ -16,10 +16,8 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
-#include <fstream>
 #include <sys/stat.h> // for chmod
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "Gnuplot.hpp"
 #include "File_r.hpp"

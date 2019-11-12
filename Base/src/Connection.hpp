@@ -28,12 +28,12 @@
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "Log.hpp"
-#include "Str.hpp"
-#include "Ecf.hpp"
 #include "Serialization.hpp"
 
 //#define DEBUG_CONNECTION 1
+#ifdef DEBUG_CONNECTION
+#include "Ecf.hpp"
+#endif
 
 /// The connection class provides serialisation primitives on top of a socket.
 /**

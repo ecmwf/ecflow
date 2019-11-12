@@ -12,7 +12,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/lexical_cast.hpp>
 
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
@@ -20,9 +19,7 @@
 #include "CtsApi.hpp"
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
-#include "Defs.hpp"
 #include "Log.hpp"
-#include "Ecf.hpp"
 #include "Gnuplot.hpp"
 
 using namespace ecf;

@@ -22,7 +22,7 @@
 #include "NState.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
 #include "Child.hpp"
 #include "File.hpp"
 #include "Flag.hpp"

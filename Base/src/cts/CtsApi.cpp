@@ -14,7 +14,6 @@
 //============================================================================
 
 #include <sstream>
-#include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "CtsApi.hpp"

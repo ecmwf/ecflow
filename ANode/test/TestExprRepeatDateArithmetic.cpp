@@ -15,7 +15,7 @@
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Task.hpp"
-#include "Expression.hpp"
+#include "ExprAst.hpp"
 
 using namespace std;
 using namespace ecf;

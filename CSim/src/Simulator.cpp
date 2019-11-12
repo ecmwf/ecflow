@@ -23,6 +23,7 @@
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Submittable.hpp"
+#include "QueueAttr.hpp"
 #include "Log.hpp"
 #include "JobsParam.hpp"
 #include "Jobs.hpp"

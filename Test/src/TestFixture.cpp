@@ -24,6 +24,7 @@
 #include "Defs.hpp"
 #include "Task.hpp"
 #include "ClientEnvironment.hpp" // needed for static ClientEnvironment::hostSpecified(); ONLY
+
 #include "File.hpp"
 #include "TestHelper.hpp"
 #include "Str.hpp"

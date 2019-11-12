@@ -18,7 +18,6 @@
 #include "ClientToServerCmd.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "AbstractServer.hpp"
 #include "PrintStyle.hpp"
 
 using namespace std;

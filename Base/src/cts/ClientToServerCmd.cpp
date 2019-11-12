@@ -18,10 +18,9 @@
 #include "ServerToClientCmd.hpp"
 
 #include "Defs.hpp"
-#include "Suite.hpp"
+#include "Calendar.hpp"
 #include "AbstractServer.hpp"
 #include "Log.hpp"
-#include "Str.hpp"
 #include "CmdContext.hpp"
 #include "EditHistoryMgr.hpp"
 #include "Host.hpp"

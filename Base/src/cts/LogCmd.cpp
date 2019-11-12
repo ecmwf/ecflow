@@ -12,9 +12,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/operations.hpp"
-
 #include <boost/algorithm/string/trim.hpp>
 
 #include "ClientToServerCmd.hpp"
@@ -29,7 +26,6 @@ using namespace ecf;
 using namespace std;
 using namespace boost;
 namespace po = boost::program_options;
-namespace fs = boost::filesystem;
 
 
 LogCmd::LogCmd(LogApi a, int get_last_n_lines)

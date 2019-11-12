@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <boost/algorithm/string/trim.hpp>
 #include "TaskApi.hpp"
 
 std::string TaskApi::init(const std::string& process_id)

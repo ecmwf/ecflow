@@ -18,7 +18,6 @@
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Task.hpp"
-#include "Suite.hpp"
 #include "Log.hpp"
 
 using namespace ecf;

@@ -17,7 +17,7 @@
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "Task.hpp"
+#include "Node.hpp"
 
 using namespace ecf;
 using namespace std;

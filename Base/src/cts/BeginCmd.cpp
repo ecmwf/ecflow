@@ -18,7 +18,7 @@
 #include "AbstractClientEnv.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
 #include "Str.hpp"
 
 using namespace ecf;

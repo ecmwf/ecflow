@@ -12,7 +12,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iostream>
 
-#include "boost/make_shared.hpp"
 #include "boost/filesystem/operations.hpp"
 #include <boost/test/unit_test.hpp>
 

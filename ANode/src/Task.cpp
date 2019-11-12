@@ -18,9 +18,7 @@
 
 #include "Task.hpp"
 #include "Alias.hpp"
-#include "Defs.hpp"
 #include "PrintStyle.hpp"
-#include "Suite.hpp"
 #include "SuiteChanged.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "File.hpp"

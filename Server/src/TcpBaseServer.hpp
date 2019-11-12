@@ -15,12 +15,12 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/asio.hpp>
-#include "ServerEnvironment.hpp"
 #include "ClientToServerRequest.hpp"
 #include "ServerToClientResponse.hpp"
 #include "Log.hpp"
 
 class BaseServer;
+class ServerEnvironment;
 
 class TcpBaseServer {
 public:

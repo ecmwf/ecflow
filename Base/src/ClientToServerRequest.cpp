@@ -12,11 +12,8 @@
 //
 // Description :
 //============================================================================
-#include <cassert>
 #include <fstream>
-
 #include "ClientToServerRequest.hpp"
-#include "AbstractServer.hpp"
 
 using namespace std;
 

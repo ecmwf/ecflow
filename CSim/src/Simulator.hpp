@@ -21,12 +21,11 @@
 
 #include <boost/core/noncopyable.hpp>
 
-#include "QueueAttr.hpp"
 #include "PrintStyle.hpp"
 
+class QueueAttr;
 class Defs;
 class Submittable;
-namespace ecf { class SimulatorVisitor;}
 
 namespace ecf {
 

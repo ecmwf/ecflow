@@ -15,6 +15,7 @@
 #include "TcpBaseServer.hpp"
 #include "BaseServer.hpp"
 #include "Version.hpp"
+#include "ServerEnvironment.hpp"
 
 using boost::asio::ip::tcp;
 

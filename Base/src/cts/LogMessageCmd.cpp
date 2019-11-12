@@ -17,7 +17,6 @@
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
-#include "Log.hpp"
 #include "Stats.hpp"
 #include "CtsApi.hpp"
 

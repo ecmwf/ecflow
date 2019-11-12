@@ -19,10 +19,8 @@
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "Task.hpp"
 #include "Suite.hpp"
 #include "SuiteChanged.hpp"
-#include "Ecf.hpp"
 #include "Log.hpp"
 
 using namespace ecf;

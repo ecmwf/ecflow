@@ -18,7 +18,6 @@
 #include "AbstractClientEnv.hpp"
 #include "Defs.hpp"
 #include "Task.hpp"
-#include "Str.hpp"
 
 using namespace ecf;
 using namespace std;

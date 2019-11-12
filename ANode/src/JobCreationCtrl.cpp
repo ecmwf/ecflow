@@ -17,7 +17,6 @@
 #include <cstdlib> // for getenv()
 
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include "JobCreationCtrl.hpp"
 
 namespace fs = boost::filesystem;

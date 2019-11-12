@@ -14,8 +14,7 @@
 //============================================================================
 #include <iostream>
 #include <csignal>
-#include <sys/stat.h>
-#include <sys/wait.h>
+#include <sys/wait.h> // for waitpid
 #include <cerrno>
 
 #ifndef O_WRONLY

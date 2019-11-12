@@ -17,7 +17,6 @@
 #include "AbstractServer.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "ClientSuiteMgr.hpp"
 #include "ClientToServerCmd.hpp"
 
 using namespace std;

@@ -14,6 +14,8 @@
 //============================================================================
 
 #include "Connection.hpp"
+#include "Log.hpp"
+#include "Ecf.hpp"
 
 connection::~connection() {
 #ifdef DEBUG_CONNECTION

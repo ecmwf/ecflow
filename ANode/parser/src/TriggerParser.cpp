@@ -14,7 +14,6 @@
 //============================================================================
 
 #include <stdexcept>
-#include <sstream>
 
 #include "TriggerParser.hpp"
 #include "Str.hpp"

@@ -24,6 +24,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "ServerToClientCmd.hpp"
+class AbstractServer;
 
 class SNewsCmd : public ServerToClientCmd {
 public:

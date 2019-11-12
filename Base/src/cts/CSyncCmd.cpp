@@ -18,7 +18,6 @@
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
-#include "Ecf.hpp"
 
 using namespace ecf;
 using namespace std;

@@ -16,7 +16,6 @@
 #include <iostream>
 
 #include <boost/filesystem.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "ServerTestHarness.hpp"
@@ -32,7 +31,7 @@
 #include "WhyCmd.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
-#include "MiscAttrs.hpp"
+#include "QueueAttr.hpp"
 
 using namespace std;
 using namespace ecf;

@@ -14,12 +14,10 @@
 //============================================================================
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include "boost/make_shared.hpp"
 
 #include "MyDefsFixture.hpp"
 #include "ServerToClientResponse.hpp"
 #include "TestHelper.hpp"
-#include "SerializationTest.hpp"
 #include "DefsCmd.hpp"
 #include "SNodeCmd.hpp"
 #include "ErrorCmd.hpp"

@@ -12,10 +12,11 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <iomanip>  // for setw
+
 #include "SClientHandleSuitesCmd.hpp"
 #include "AbstractServer.hpp"
 #include "Defs.hpp"
-#include "Suite.hpp"
 #include "ClientSuiteMgr.hpp"
 #include "ClientToServerCmd.hpp"
 

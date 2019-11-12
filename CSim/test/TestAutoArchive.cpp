@@ -27,7 +27,6 @@
 #include "Str.hpp"
 #include "TestUtil.hpp"
 #include "AutoArchiveAttr.hpp"
-#include "VerifyAttr.hpp"
 //#include "PrintStyle.hpp"
 
 using namespace std;

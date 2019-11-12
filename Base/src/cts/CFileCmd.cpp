@@ -21,9 +21,8 @@
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
 #include "File.hpp"
+#include "Submittable.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
-#include "Task.hpp"
 #include "EcfFile.hpp"
 #include "Str.hpp"
 

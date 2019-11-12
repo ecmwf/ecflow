@@ -17,9 +17,7 @@
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "Task.hpp"
 #include "JobCreationCtrl.hpp"
-#include "Ecf.hpp"
 #include "Jobs.hpp"
 
 using namespace ecf;

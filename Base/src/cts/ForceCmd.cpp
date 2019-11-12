@@ -16,12 +16,10 @@
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
 #include "Node.hpp"
 #include "Str.hpp"
 #include "SuiteChanged.hpp"
 #include "Extract.hpp"
-#include "Log.hpp"
 
 using namespace ecf;
 using namespace std;

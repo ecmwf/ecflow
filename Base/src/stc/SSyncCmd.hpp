@@ -18,6 +18,7 @@
 #include "ServerToClientCmd.hpp"
 #include "DefsDelta.hpp"
 #include "DefsCache.hpp"
+class AbstractServer;
 
 //================================================================================
 // class SSyncCmd: Used to transfer changes made in the server to the client

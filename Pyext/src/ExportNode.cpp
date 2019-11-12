@@ -15,12 +15,11 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/raw_function.hpp>
-
 #include <boost/core/noncopyable.hpp>
 
 #include "Defs.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "Node.hpp"
+#include "NodeContainer.hpp"
 #include "Limit.hpp"
 #include "LateAttr.hpp"
 #include "AutoCancelAttr.hpp"
@@ -28,8 +27,6 @@
 #include "AutoRestoreAttr.hpp"
 #include "MiscAttrs.hpp"
 #include "Expression.hpp"
-#include "JobCreationCtrl.hpp"
-#include "Str.hpp"
 #include "ClientInvoker.hpp"
 
 #include "NodeUtil.hpp"

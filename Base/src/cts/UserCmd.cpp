@@ -13,19 +13,12 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iostream>
-#include <sstream>
-#include <fstream>
-
 #include <cstdio>      /* tolower */
-#include <sys/types.h>
 
 #include "ClientToServerCmd.hpp"
-
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
-#include "Log.hpp"
 #include "Str.hpp"
-#include "Host.hpp"
 #include "User.hpp"
 
 using namespace std;
