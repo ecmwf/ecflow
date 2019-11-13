@@ -14,7 +14,6 @@
 //============================================================================
 
 #include <fstream>
-#include <sstream>
 
 #include "boost/filesystem.hpp"
 //#include <boost/token_functions.hpp>

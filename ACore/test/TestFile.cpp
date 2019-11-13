@@ -22,7 +22,7 @@
 #endif
 
 #include <string>
-#include <fstream>
+#include <fstream>  // for std::ofstream
 #include <iostream>
 #include <cstdlib> // for getenv()
 

@@ -384,8 +384,7 @@ boost::posix_time::ptime Calendar::second_clock_time()
  	return second_clock::universal_time();  // UTC
 }
 
-
-
+// ==================================================================================
 
 template<class Archive>
 void Calendar::serialize(Archive & ar, std::uint32_t const /*version*/)

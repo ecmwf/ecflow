@@ -12,16 +12,12 @@
 //
 // Description :
 //============================================================================
+#include <iostream>
+#include <unistd.h>
+
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
-
-#include <iostream>
-#if defined(__APPLE__)
-#include <unistd.h>
-#else
-#include <crypt.h>
-#endif
 
 #include "PasswdFile.hpp"
 #include "File.hpp"

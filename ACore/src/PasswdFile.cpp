@@ -13,12 +13,9 @@
 // Description : Parser for white list file
 //============================================================================
 
-#if defined(__APPLE__)
-#include <unistd.h>
-#else
-#include <crypt.h>
-#endif
+#include <unistd.h>  // for crypt
 #include <iostream>
+
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 

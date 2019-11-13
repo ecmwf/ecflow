@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <iostream>
 #include <sstream>
 
 #include "LogVerification.hpp"

@@ -15,7 +15,6 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
-#include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "Extract.hpp"
 

@@ -17,7 +17,6 @@
 #include <iostream>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>
 
 #include "DayAttr.hpp"
 #include "Calendar.hpp"

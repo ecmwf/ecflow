@@ -19,7 +19,6 @@
 #include <vector>
 #include <limits>
 
-#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/utility/string_view.hpp>
 
