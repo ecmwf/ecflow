@@ -107,12 +107,12 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
    }
    else if (query_type == "state" || query_type == "dstate") {
       // for state and dstate attribute is empty
-      if (args.size() >= 1) path_to_attribute = args[1];
+      if (args.size() > 1) path_to_attribute = args[1];
       if (args.size() > 2) throw std::runtime_error( "QueryCmd: invalid (state | dstate) query : " + args[2]);
    }
    else if (query_type == "repeat" ) {
       // for repeat attribute can only be next or prev
-      if (args.size() >= 1) path_to_attribute = args[1];
+      if (args.size() > 1) path_to_attribute = args[1];
       if (args.size() == 3) {
          attribute = args[2];
          if (attribute != "next" && attribute != "prev") {
