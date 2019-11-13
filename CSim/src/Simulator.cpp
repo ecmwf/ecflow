@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <fstream>
 
 #include "boost/filesystem/operations.hpp"
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib

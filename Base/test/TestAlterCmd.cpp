@@ -25,7 +25,7 @@
 #include "Defs.hpp"
 #include "Limit.hpp"
 #include "LateAttr.hpp"
-#include "MiscAttrs.hpp"
+#include "GenericAttr.hpp"
 
 using namespace std;
 using namespace ecf;

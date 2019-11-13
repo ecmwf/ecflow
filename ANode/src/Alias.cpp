@@ -14,6 +14,7 @@
 //============================================================================
 
 #include <sstream>
+#include <limits>
 
 #include "Alias.hpp"
 #include "Ecf.hpp"
