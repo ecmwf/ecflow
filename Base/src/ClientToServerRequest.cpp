@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <fstream>
 #include "ClientToServerRequest.hpp"
 
 using namespace std;
@@ -24,9 +23,7 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const
 	}
 
 	/// means programming error somewhere
- 	std::stringstream ss;
-	ss << "ClientToServerRequest::handleRequest: Can not send a NULL request to the server !";
-  	throw std::runtime_error(ss.str());
+  	throw std::runtime_error("ClientToServerRequest::handleRequest: Can not send a NULL request to the server !");
 }
 
 std::ostream& ClientToServerRequest::print( std::ostream& os ) const {
