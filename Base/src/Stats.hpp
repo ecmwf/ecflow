@@ -14,7 +14,8 @@
 //
 // Description :
 //============================================================================
-#include <sstream>
+#include <string>
+#include <deque>
 
 #include "CheckPt.hpp"
 #include "Serialization.hpp"

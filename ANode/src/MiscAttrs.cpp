@@ -12,13 +12,16 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <ostream>
 
 #include "Node.hpp"
 #include "MiscAttrs.hpp"
 #include "Ecf.hpp"
 #include "Memento.hpp"
 #include "Serialization.hpp"
+
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 using namespace ecf;
 using namespace std;

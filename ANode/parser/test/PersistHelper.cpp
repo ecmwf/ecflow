@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <fstream>
 #include <sstream>
 
 #include "boost/filesystem/operations.hpp"

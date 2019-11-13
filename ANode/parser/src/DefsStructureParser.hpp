@@ -20,7 +20,6 @@
 #include <stack>
 #include <unordered_map>
 #include <vector>
-#include <fstream>
 
 #include "File_r.hpp"
 #include "PrintStyle.hpp"

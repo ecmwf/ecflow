@@ -16,7 +16,6 @@
 #include <iostream>
 
 #include "boost/filesystem/operations.hpp"
-#include "boost/date_time/posix_time/posix_time_types.hpp"
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
@@ -25,7 +24,6 @@
 namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
-using namespace boost::posix_time;
 
 BOOST_AUTO_TEST_SUITE( ParserTestSuite )
 

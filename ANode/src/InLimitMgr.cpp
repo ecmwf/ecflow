@@ -12,7 +12,6 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <ostream>
 
 #include "InLimitMgr.hpp"
 #include "Limit.hpp"
@@ -20,10 +19,10 @@
 #include "Memento.hpp"
 #include "Str.hpp"
 #include "Extract.hpp"
-#include "VerifyAttr.hpp"
 #include "Serialization.hpp"
 
 #ifdef DEBUG
+#include <ostream>
 #include "Ecf.hpp"
 #endif
 

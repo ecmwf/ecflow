@@ -15,7 +15,7 @@
 
 #include <sstream>
 #include <iomanip>
-#include <string>
+
 #include "Stats.hpp"
 #include "SState.hpp"
 

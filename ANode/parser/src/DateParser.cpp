@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 
-#include <iostream>
 #include "DefsStructureParser.hpp"
 #include "DateParser.hpp"
 #include "Node.hpp"

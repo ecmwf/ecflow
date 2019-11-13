@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <iostream>
 #include <csignal>
 #include <sys/wait.h> // for waitpid
 #include <cerrno>
@@ -32,6 +31,10 @@
 //#define DEBUG_CATCH_CHILD 1
 //#define DEBUG_TERMINATED_CHILD 1
 //#define DEBUG_CHILD_ABORT 1
+
+#ifdef DEBUG_FORK
+#include <iostream>
+#endif
 
 using namespace std;
 

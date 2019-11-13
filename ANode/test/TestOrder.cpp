@@ -11,7 +11,6 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/test/unit_test.hpp>
-#include <boost/date_time/posix_time/time_formatters.hpp>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -27,9 +26,6 @@ using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
 using namespace boost::gregorian;
-
-using namespace std;
-using namespace ecf;
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
