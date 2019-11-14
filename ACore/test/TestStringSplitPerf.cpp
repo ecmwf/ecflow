@@ -19,7 +19,7 @@
 // IMPORTANT: Str:split uses StringSplitter:
 //            to run these tests, please switch off Str.cpp::USE_STRINGSPLITTER
 // **************************************************************************************************************
-#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
+//#define STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_ 1;
 
 #ifdef STRING_SPLIT_IMPLEMENTATIONS_PERF_CHECK_
 #include <iostream>
@@ -248,9 +248,7 @@ BOOST_AUTO_TEST_CASE( test_str_split_perf_with_file )
       { // std::getline
          boost::timer::cpu_timer timer;
           for(size_t i = 0; i < file_contents.size(); i++) {
-             result.clear();
-             std::vector<std::string> result =  split_using_getline(file_contents[i],' ');
-             reconstruct_line(result);
+             reconstruct_line( split_using_getline(file_contents[i],' '));
           }
           cout << " Time for std::getline " << file_contents.size() << " times = " << timer.format(3,Str::cpu_timer_format()) << "\n";
       }
