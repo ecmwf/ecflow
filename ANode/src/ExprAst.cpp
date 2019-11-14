@@ -91,7 +91,7 @@ std::ostream& AstTop::print(std::ostream& os) const
 	Indentor in;
 	Indentor::indent(os) << "# Trigger Evaluation Tree\n";
  	if (root_) {
-		Indentor in;
+		Indentor in2;
 		return root_->print(os);
 	}
 	return os;

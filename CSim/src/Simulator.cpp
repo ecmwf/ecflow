@@ -144,8 +144,8 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	while (duration <= max_simulation_period) {
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
-      for(suite_ptr ss: theDefs.suiteVec()) {
-         cout << "duration: " << to_simple_string(duration) << " " << ss->calendar().toString() << endl;
+      for(suite_ptr my_suite: theDefs.suiteVec()) {
+         cout << "duration: " << to_simple_string(duration) << " " << my_suite->calendar().toString() << endl;
       }
 #endif
 
@@ -178,11 +178,11 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	   for(suite_ptr s: theDefs.suiteVec()) { if (s->state() == NState::COMPLETE) completeSuiteCnt++; }
 
  	   if ( (theDefs.suiteVec().size() != completeSuiteCnt)) {
- 	      std::stringstream ss; ss << "\nDefs file " << defs_filename << "\n";
+ 	      std::stringstream mss; mss << "\nDefs file " << defs_filename << "\n";
  	      for(suite_ptr s: theDefs.suiteVec()) {
- 	         if (s->state() != NState::COMPLETE) ss << "  suite '/" << s->name() << "' has not completed\n";
+ 	         if (s->state() != NState::COMPLETE) mss << "  suite '/" << s->name() << "' has not completed\n";
  	      }
- 	      errorMsg += ss.str();
+ 	      errorMsg += mss.str();
 
  	      run_analyser(theDefs,errorMsg);
  	      return false;

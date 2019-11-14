@@ -79,8 +79,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
  	const Zombie& zombie = as->zombie_ctrl().find(path_to_submittable_,process_or_remote_id_,jobs_password_);
  	if (!zombie.empty()) std::cout << "  " << zombie;
  	else {
- 	 	const Zombie& zombie = as->zombie_ctrl().find_by_path_only(path_to_submittable_);
- 	 	if (!zombie.empty()) std::cout << "  find_by_path_only: " << zombie;
+ 	 	const Zombie& zombiep = as->zombie_ctrl().find_by_path_only(path_to_submittable_);
+ 	 	if (!zombiep.empty()) std::cout << "  find_by_path_only: " << zombiep;
  	}
 #endif
 	/// ***************************************************************************

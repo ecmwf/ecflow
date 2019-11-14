@@ -213,8 +213,8 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
    bool setRepeatToLastValue = false;
    bool recursive = false;
    std::string stateOrEvent;
-   size_t vec_size = options.size();
-   for(size_t i = 0; i < vec_size; i++) {
+   size_t options_size = options.size();
+   for(size_t i = 0; i < options_size; i++) {
       if (Str::caseInsCompare(options[i],"recursive"))  recursive = true;
       else if (Str::caseInsCompare( options[i],"full"))  setRepeatToLastValue = true;
       else if (NState::isValid(options[i])) { is_valid_state = true; stateOrEvent = options[i];}
@@ -234,8 +234,8 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
 
  	if ( is_valid_event_state ) {
  		// When set or clear used the path needs to include the name of the event:
- 	   size_t vec_size = paths.size();
- 	   for(size_t i = 0; i < vec_size; i++) {
+ 	   size_t path_size = paths.size();
+ 	   for(size_t i = 0; i < path_size; i++) {
  	      string the_event,the_path;
   	      Extract::pathAndName(paths[i],the_path, the_event);
   	      if ( the_path.empty() || the_event.empty() ) {

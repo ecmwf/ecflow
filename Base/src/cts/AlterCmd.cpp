@@ -424,8 +424,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
              int int_value = 0;
              try { int_value = boost::lexical_cast< int >( value_ ); }
              catch ( boost::bad_lexical_cast& ) {
-                std::stringstream ss; ss << "AlterCmd: add_limit " << name_ << " " << value_ << " failed. Expected '" <<  value_ << "' to be convertible to an integer";
-                throw std::runtime_error( ss.str() );
+                std::stringstream mss; mss << "AlterCmd: add_limit " << name_ << " " << value_ << " failed. Expected '" <<  value_ << "' to be convertible to an integer";
+                throw std::runtime_error( mss.str() );
              }
             node->addLimit( Limit(name_, int_value));
             break;

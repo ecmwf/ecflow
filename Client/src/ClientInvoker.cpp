@@ -352,7 +352,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
                   SslClient theClient(io_service,clientEnv_.openssl().context(),cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
                   {
 #ifdef DEBUG_PERF
-                     ecf::ScopedDurationTimer timer(" io_service.run()");
+                     ecf::ScopedDurationTimer my_timer(" io_service.run()");
 #endif
                      io_service.run();
                   }
@@ -376,7 +376,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					   Client theClient(io_service,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
                   {
 #ifdef DEBUG_PERF
-					      ecf::ScopedDurationTimer timer(" io_service.run()");
+					      ecf::ScopedDurationTimer my_timer(" io_service.run()");
 #endif
 					      io_service.run();
 					   }

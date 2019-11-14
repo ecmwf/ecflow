@@ -67,9 +67,9 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	   }
 
 	   if (!node->suite()->begun()) {
-	      std::stringstream ss;
-	      ss << "RunNodeCmd failed: For " << paths_[i] << ". The suite " << node->suite()->name() << " must be 'begun' first\n";
-	      throw std::runtime_error( ss.str() ) ;
+	      std::stringstream mss;
+	      mss << "RunNodeCmd failed: For " << paths_[i] << ". The suite " << node->suite()->name() << " must be 'begun' first\n";
+	      throw std::runtime_error( mss.str() ) ;
 	   }
 
 	   SuiteChanged0 changed(node);

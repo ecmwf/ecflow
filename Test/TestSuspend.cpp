@@ -193,8 +193,8 @@ BOOST_AUTO_TEST_CASE( test_suspend_node )
          task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
          task->addVerify( VerifyAttr(NState::COMPLETE,1) );      // task should complete 1 times
 
-         boost::posix_time::ptime time1 =  theLocalTime +  minutes(1 + i);
-         task->addTime( ecf::TimeAttr( ecf::TimeSlot(time1.time_of_day())  ));
+         boost::posix_time::ptime time3 = theLocalTime + minutes(1 + i);
+         task->addTime( ecf::TimeAttr( ecf::TimeSlot(time3.time_of_day())  ));
       }
    }
 

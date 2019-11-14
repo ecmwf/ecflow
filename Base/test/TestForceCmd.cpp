@@ -87,14 +87,14 @@ BOOST_AUTO_TEST_CASE( test_force_cmd )
 
 
 static void doForce(MockServer& mockServer,
-         Node* node,
+         Node* fnode,
          const std::string& stateOrEvent,
          const std::vector<Node*>& nodes)
 {
-   ForceCmd cmd(node->absNodePath(), stateOrEvent, true /*recursive */, true /* set Repeat to last value */);
+   ForceCmd cmd(fnode->absNodePath(), stateOrEvent, true /*recursive */, true /* set Repeat to last value */);
    cmd.setup_user_authentification();
    STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
-   BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force for node " << node->debugNodePath());
+   BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force for node " << fnode->debugNodePath());
 
    for(auto node : nodes) {
       if (NState::isValid(stateOrEvent)) {

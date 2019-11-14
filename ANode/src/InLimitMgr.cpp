@@ -289,7 +289,6 @@ void InLimitMgr::decrementInLimitForSubmission( std::set<Limit*>& limitSet,const
 
    resolveInLimitReferences();
 
-   std::vector<task_ptr> task_vec;
    for(InLimit& inlimit: vec_) {
       Limit* limit = inlimit.limit();
       if (limit && limitSet.find(limit) == limitSet.end()) {

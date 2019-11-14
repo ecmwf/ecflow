@@ -1547,7 +1547,7 @@ void Node::print(std::string& os) const
             if (!defs()) {
                // Full defs is required for extern checking, and finding absolute node paths
                // Hence print will with no defs can give in-accurate information
-               Indentor in;
+               Indentor in2;
                Indentor::indent(os); os += "# Warning: Full/correct AST evaluation requires the definition\n";
             }
             std::stringstream ss; completeAst()->print(ss);
@@ -1562,7 +1562,7 @@ void Node::print(std::string& os) const
          if (t_expr_->isFree()) { Indentor::indent(os); os += "# (free)\n"; }
          if ( triggerAst() ) {
             if (!defs()) {
-               Indentor in;
+               Indentor in2;
                Indentor::indent(os); os += "# Warning: Full/correct AST evaluation requires the definition\n";
             }
             std::stringstream ss;  triggerAst()->print(ss);

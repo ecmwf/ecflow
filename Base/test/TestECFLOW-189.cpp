@@ -57,8 +57,6 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_189 )
    cout << "Base:: ...test_ECFLOW_189\n";
    defs_ptr the_defs = create_defs();
    the_defs->beginAll();
-   node_ptr s1 = the_defs->findAbsNode("/s1");
-   node_ptr f1 = the_defs->findAbsNode("/s1/f1");
    node_ptr t1 = the_defs->findAbsNode("/s1/f1/t1");
    node_ptr t2 = the_defs->findAbsNode("/s1/f1/t2");
 

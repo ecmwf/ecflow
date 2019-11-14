@@ -273,8 +273,8 @@ limit_ptr  Node::findLimitUpNodeTree(const std::string& name) const
    Node* theParent = parent();
    while (theParent != nullptr) {
 
-      limit_ptr theFndLimit = theParent->find_limit(name);
-      if (theFndLimit.get()) return theFndLimit;
+      limit_ptr theFndLimit2 = theParent->find_limit(name);
+      if (theFndLimit2.get()) return theFndLimit2;
 
       theParent = theParent->parent();
    }
@@ -952,9 +952,9 @@ bool Node::findParentZombie(ecf::Child::ZombieType z_type, ZombieAttr& z) const
 
    Node* theParent =  parent();
    while (theParent) {
-      const ZombieAttr& the_zombie = theParent->findZombie(z_type);
-      if ( !the_zombie.empty() ) {
-         z = the_zombie;
+      const ZombieAttr& the_zombie2 = theParent->findZombie(z_type);
+      if ( !the_zombie2.empty() ) {
+         z = the_zombie2;
          return true;
       }
       theParent = theParent->parent();

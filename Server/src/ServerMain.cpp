@@ -24,7 +24,7 @@
 using namespace ecf;
 using namespace std;
 
-int run_server(boost::asio::io_service& io_service, ServerEnvironment& server_environment)
+int run_server(boost::asio::io_service& io_service, const ServerEnvironment& server_environment)
 {
     for(;;) {
        try {

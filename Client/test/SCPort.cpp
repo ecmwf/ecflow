@@ -42,12 +42,12 @@ std::string SCPort::next()
    if (debug) std::cout << "\nSCPort::next() : ";
 
    // Allow parallel tests
-   char* ecf_port = getenv("TEST_ECF_PORT");
-   if ( ecf_port )  {
-      if (debug) std::cout << " seed_port=TEST_ECF_PORT=(" << ecf_port << ")";
-      std::string port = ecf_port;
+   char* test_ecf_port = getenv("TEST_ECF_PORT");
+   if ( test_ecf_port )  {
+      if (debug) std::cout << " seed_port=TEST_ECF_PORT=(" << test_ecf_port << ")";
+      std::string port = test_ecf_port;
       try { thePort_ = boost::lexical_cast<int>(port);}
-      catch (...){ std::cout << "SCPort::next()  TEST_ECF_PORT(" << ecf_port  << ") not convertible to an integer\n";}
+      catch (...){ std::cout << "SCPort::next()  TEST_ECF_PORT(" << test_ecf_port  << ") not convertible to an integer\n";}
    }
 
 

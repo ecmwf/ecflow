@@ -265,9 +265,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
                continue;
             }
             if (!theNode->suite()->begun()) {
-               std::stringstream ss;
-               ss << "Status failed. For " << paths_[i] << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
-               throw std::runtime_error( ss.str() ) ;
+               std::stringstream mss;
+               mss << "Status failed. For " << paths_[i] << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
+               throw std::runtime_error( mss.str() ) ;
             }
             SuiteChanged0 changed(theNode);
             theNode->status();   // this can throw std::runtime_error

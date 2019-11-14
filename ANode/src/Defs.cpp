@@ -13,6 +13,7 @@
 // Description :
 //============================================================================
 #include <cassert>
+#include <limits>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -441,7 +442,7 @@ suite_ptr Defs::removeSuite(suite_ptr s)
 
  	// Something serious has gone wrong. Can not find the suite
  	cout << "Defs::removeSuite: assert failure:  suite '" << s->name() << "' suiteVec_.size() = " << suiteVec_.size() << "\n";
-	for(unsigned i = 0; i < suiteVec_.size(); ++i) { cout << i << " " << suiteVec_[i]->name() << "\n";}
+	for(unsigned si = 0; si < suiteVec_.size(); ++si) { cout << si << " " << suiteVec_[si]->name() << "\n";}
  	LOG_ASSERT(false,"Defs::removeSuite the suite not found");
 	return suite_ptr();
 }

@@ -310,8 +310,8 @@ void ClientHandleCmd::create( 	Cmd_ptr& cmd,
 			int client_handle = 0;
 			bool auto_add_new_suites = false;
 			std::vector<std::string> suite_names; suite_names.reserve( args.size() );
-			int suite_names_index = 1;
 			if (!args.empty()) {
+			   int suite_names_index = 1;
 			   try {
 			      client_handle = boost::lexical_cast<int>(args[0]);
 			      if (args.size() > 1) {

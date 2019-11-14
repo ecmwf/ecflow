@@ -445,11 +445,11 @@ void Suite::changeClockDate(const std::string& theDate)
    // This will update calendar by repeat days.
    // Hence take this into account by decrementing by number of days
    if ( clockAttr_.get() && clockAttr_->hybrid() && repeat().is_repeat_day()) {
-      boost::gregorian::date theDate( year, month, dayy );
-      theDate -= date_duration(repeat().step());
-      dayy = theDate.day();
-      month = theDate.month();
-      year = theDate.year();
+      boost::gregorian::date the_date( year, month, dayy );
+      the_date -= date_duration(repeat().step());
+      dayy = the_date.day();
+      month = the_date.month();
+      year = the_date.year();
    }
 
 

@@ -195,11 +195,11 @@ void DeleteCmd::create(   Cmd_ptr& cmd,
       if (paths.empty()) confirm = "Are you sure you want to delete all the suites ? ";
       else {
          confirm = "Are you sure want to delete nodes at paths:\n";
-         size_t vec_size = paths.size();
-         for(size_t i = 0; i < vec_size; i++) {
+         size_t path_size = paths.size();
+         for(size_t i = 0; i < path_size; i++) {
             confirm += "  " + paths[i];
-            if ( i == vec_size -1) confirm += " ? ";
-            else                   confirm += "\n";
+            if ( i == path_size -1) confirm += " ? ";
+            else                    confirm += "\n";
          }
       }
       prompt_for_confirmation(confirm);

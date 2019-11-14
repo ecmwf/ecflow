@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
 
             std::vector<std::string> theReasonWhy;
             tasks[i]->bottom_up_why(theReasonWhy,false/*html tags*/);
-            for(const auto & i : theReasonWhy) {  cout << "  Reason: " << i << "\n";}
+            for(const auto & r : theReasonWhy) {  cout << "  Reason: " << r << "\n";}
          }
       }
    }
