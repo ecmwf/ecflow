@@ -1,6 +1,9 @@
-general perf: http://www.brendangregg.com/USEmethod/use-linux.html
+general perf:
 ==================================================================
-Good collection of performance debug
+- http://www.brendangregg.com/USEmethod/use-linux.html                - Good collection of performance debug
+- https://easyperf.net/notes/
+- https://easyperf.net/blog/2019/08/02/Perf-measurement-environment-on-Linux
+- https://easyperf.net/blog/2018/08/26/Basics-of-profiling-with-perf  - Basic perf understanding
 
 Use of perf:  http://www.brendangregg.com/perf.html
 ===============================================================
