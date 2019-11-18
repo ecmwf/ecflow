@@ -33,6 +33,7 @@ test/TestAdd.cpp
 test/TestAlias.cpp
 test/TestAssignmentOperator.cpp
 test/TestChangeMgrSingleton.cpp
+test/TestClientSuiteMgr.cpp
 test/TestCopyConstructor.cpp
 test/TestDefStatus.cpp
 test/TestDefs.cpp

@@ -12,7 +12,7 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <algorithm> // for sort
+#include <algorithm> // for sort, remove_if
 #include <sstream>   // for std::stringstream
 
 #include "ClientSuiteMgr.hpp"
@@ -60,31 +60,32 @@ unsigned int ClientSuiteMgr::create_client_suite(bool auto_add_new_suites, const
 
 void ClientSuiteMgr::remove_client_suite(unsigned int client_handle)
 {
-   size_t client_suites_size = clientSuites_.size();
-	for(size_t i = 0; i < client_suites_size; i++) {
-		if (clientSuites_[i].handle() == client_handle) {
-			clientSuites_.erase( clientSuites_.begin() + i);
+   size_t before = clientSuites_.size();
+   clientSuites_.erase(std::remove_if(clientSuites_.begin(),
+                                      clientSuites_.end(),
+                                      [client_handle] (const ecf::ClientSuites& cs) { return cs.handle() == client_handle; }
+                                     ),
+                       clientSuites_.end());
+
+   if ( before == clientSuites_.size()) {
+      std::stringstream ss; ss << "ClientSuiteMgr::remove_registered_suite: handle(" << client_handle << ") does not exist";
+      throw std::runtime_error(ss.str());
+   }
 #ifdef DEBUG_HANDLE
-			std::cout << "ClientSuiteMgr::remove_client_suite: handle(" << client_handle << ") " << dump() << "\n";
+   std::cout << "ClientSuiteMgr::remove_client_suite: handle(" << client_handle << ") " << dump() << "\n";
 #endif
-			return;
-		}
-	}
-	std::stringstream ss; ss << "ClientSuiteMgr::remove_registered_suite: handle(" << client_handle << ") does not exist";
-	throw std::runtime_error(ss.str());
 }
 
 void ClientSuiteMgr::remove_client_suites(const std::string& user_to_drop)
 {
-   bool did_drop = false;
-   for(auto i = clientSuites_.begin(); i!= clientSuites_.end(); ++i) {
-      if ((*i).user() == user_to_drop) {
-         did_drop = true;
-         clientSuites_.erase(i--);
-      }
-   }
+   size_t before = clientSuites_.size();
+   clientSuites_.erase(std::remove_if(clientSuites_.begin(),
+                                      clientSuites_.end(),
+                                      [&user_to_drop] (const ecf::ClientSuites& cs) { return cs.user() == user_to_drop; }
+                                     ),
+                       clientSuites_.end());
 
-   if (!did_drop) {
+   if ( before == clientSuites_.size()) {
       std::stringstream ss; ss << "ClientSuiteMgr::remove_registered_suites: user(" << user_to_drop << ") has no registered handles";
       throw std::runtime_error(ss.str());
    }
