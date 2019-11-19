@@ -27,7 +27,7 @@ public:
    AutoArchiveAttr()= default;
    AutoArchiveAttr(int hour, int minute, bool relative ) : time_(hour, minute), relative_(relative) {}
    AutoArchiveAttr(const TimeSlot& ts,   bool relative ) : time_(ts),           relative_(relative) {}
-   AutoArchiveAttr(int days) : time_( TimeSlot(days*24,0) ),  days_(true) {}
+   explicit AutoArchiveAttr(int days) : time_( TimeSlot(days*24,0) ),  days_(true) {}
 
    void print(std::string&) const;
    bool operator==(const AutoArchiveAttr& rhs) const;

@@ -89,8 +89,8 @@ private:
 // use std::numeric_limits<int>::max()
 class Event {
 public:
-   Event(int number, const std::string& eventName = "", bool initial_val = false, bool check_name = true);
-   Event(const std::string& eventName,bool initial_val = false);
+   explicit Event(int number, const std::string& eventName = "", bool initial_val = false, bool check_name = true);
+   explicit Event(const std::string& eventName,bool initial_val = false);
    Event()= default;
 
    std::string name_or_number() const; // if name present return, else return number

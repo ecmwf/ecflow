@@ -96,7 +96,7 @@ public:
    explicit TodayAttr(const std::string&);
 	TodayAttr() = default;
 	TodayAttr(int hour, int minute, bool relative = false ) : ts_(hour, minute,relative) {}
- 	TodayAttr(const TimeSlot& t,    bool relative = false ) : ts_(t,relative) {}
+	explicit TodayAttr(const TimeSlot& t,    bool relative = false ) : ts_(t,relative) {}
  	explicit TodayAttr(const TimeSeries& ts) : ts_(ts)  {}
 	TodayAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative =  false)
 		: ts_(start,finish,incr,relative) {}

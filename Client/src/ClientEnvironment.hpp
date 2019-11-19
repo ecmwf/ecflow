@@ -24,10 +24,10 @@
 class ClientEnvironment : public AbstractClientEnv {
 public:
 	/// The constructor will load the environment
-	ClientEnvironment(bool gui);
+   explicit ClientEnvironment(bool gui);
 
 	/// This constructor is only used in Test environment, as it allow the host file to be set
-	ClientEnvironment(const std::string& hostFile, const std::string& host = "", const std::string& port = "");
+   explicit ClientEnvironment(const std::string& hostFile, const std::string& host = "", const std::string& port = "");
 
    /// This controls for how long child commands continue trying to connect to Server before failing.
 	/// Maximum time in seconds for client to deliver message to server/servers. This is

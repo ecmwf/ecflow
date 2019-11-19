@@ -396,7 +396,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
 		task_checkdata->addEvent( Event(1,"done"));
 
  		CronAttr cronAttr;
- 		cronAttr.addTimeSeries( ecf::TimeSlot(time_plus_2_minute.time_of_day()) );
+ 		cronAttr.addTimeSeries( ecf::TimeSeries(ecf::TimeSlot(time_plus_2_minute.time_of_day())) );
 		task_checkdata->addCron( cronAttr  );
 		task_checkdata->addVerify( VerifyAttr(NState::COMPLETE,8) );
 

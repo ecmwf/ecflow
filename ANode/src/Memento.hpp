@@ -310,7 +310,7 @@ private:
 
 class NodeQueueMemento : public Memento {
 public:
-   NodeQueueMemento(const QueueAttr& e) : queue_(e) {}
+   explicit NodeQueueMemento(const QueueAttr& e) : queue_(e) {}
    NodeQueueMemento() = default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
@@ -326,7 +326,7 @@ private:
 
 class NodeGenericMemento : public Memento {
 public:
-   NodeGenericMemento(const GenericAttr& e) : generic_(e) {}
+   explicit NodeGenericMemento(const GenericAttr& e) : generic_(e) {}
    NodeGenericMemento() = default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
@@ -407,7 +407,7 @@ private:
 
 class NodeRepeatIndexMemento : public Memento {
 public:
-   NodeRepeatIndexMemento( const Repeat& e ) : index_or_value_(e.index_or_value()) {}
+   explicit NodeRepeatIndexMemento( const Repeat& e ) : index_or_value_(e.index_or_value()) {}
    NodeRepeatIndexMemento()= default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}

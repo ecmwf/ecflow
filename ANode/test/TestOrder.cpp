@@ -12,6 +12,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/test/unit_test.hpp>
 
+#include "TestUtil.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
@@ -29,27 +30,11 @@ using namespace boost::gregorian;
 
 BOOST_AUTO_TEST_SUITE( NodeTestSuite )
 
-template <typename T>
-static std::vector<std::string> toStrVec(const std::vector<T>& vec)
-{
-	std::vector<std::string> retVec; retVec.reserve(vec.size());
-	for(T s: vec) { retVec.push_back(s->name()); }
-	return retVec;
-}
-
-std::string toString(const std::vector<std::string>& c)
-{
-	std::stringstream ss;
-	std::copy (c.begin(), c.end(), std::ostream_iterator <std::string> (ss, ", "));
-	return ss.str();
-}
-
 static void test_invariants(Defs& the_defs, int line) {
    std::string errorMsg;
    bool passed = the_defs.checkInvariants(errorMsg);
    BOOST_REQUIRE_MESSAGE( passed,"Invariants failed " << errorMsg << " at line " << line);
 }
-
 
 BOOST_AUTO_TEST_CASE( test_order )
 {

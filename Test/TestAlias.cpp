@@ -42,6 +42,7 @@
 #include "Str.hpp"
 #include "NOrder.hpp"
 #include "VerifyAttr.hpp"
+#include "TestUtil.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -50,21 +51,6 @@ using namespace boost::posix_time;
 namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( TestSingleSuite  )
-
-template <typename T>
-static std::vector<std::string> toStrVec(const std::vector<T>& vec)
-{
-   std::vector<std::string> retVec; retVec.reserve(vec.size());
-   for(T s: vec) { retVec.push_back(s->name()); }
-   return retVec;
-}
-
-std::string toString(const std::vector<std::string>& c)
-{
-   std::stringstream ss;
-   std::copy (c.begin(), c.end(), std::ostream_iterator <std::string> (ss, ", "));
-   return ss.str();
-}
 
 void wait_for_alias_to_complete(const std::string& alias_path)
 {

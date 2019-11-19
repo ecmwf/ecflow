@@ -27,7 +27,7 @@
 
 class InvokeServer : private boost::noncopyable {
 public:
-	InvokeServer(const std::string& msg,
+   explicit InvokeServer(const std::string& msg,
 	               const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER(),
 	               bool disable_job_generation = false,
                   bool remove_checkpt_file_before_server_start = true,

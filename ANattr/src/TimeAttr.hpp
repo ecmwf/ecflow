@@ -62,7 +62,7 @@ public:
    explicit TimeAttr(const std::string&);
    TimeAttr() = default;
 	TimeAttr(int hour, int minute, bool relative = false ) : ts_(hour, minute,relative) {}
-	TimeAttr(const TimeSlot& t,    bool relative = false ) : ts_(t,relative)  {}
+	explicit TimeAttr(const TimeSlot& t,    bool relative = false ) : ts_(t,relative)  {}
 	explicit TimeAttr(const TimeSeries& ts) : ts_(ts) {}
 	TimeAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr, bool relative = false)
 		: ts_(start,finish,incr,relative) {}

@@ -23,7 +23,7 @@ namespace ecf {
 // Local timer class used to ensure, job submission takes less than 60 seconds
 class AssertTimer {
 public:
-	AssertTimer(int t, bool doAssert = true)
+	explicit AssertTimer(int t, bool doAssert = true)
 	: timeConstraint_(t), doAssert_(doAssert), start_time_(Calendar::second_clock_time()) {}
 	~AssertTimer();
 

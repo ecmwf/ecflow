@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE( test_autorestore_family )
       suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family("family");
-      fam->add_autoarchive( 0 );
+      fam->add_autoarchive( AutoArchiveAttr(0) );
       task_ptr task = fam->add_task("t");
       task->addTime(ecf::TimeAttr(1,0,true));
       vec.push_back(fam->absNodePath());

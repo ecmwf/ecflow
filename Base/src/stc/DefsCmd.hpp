@@ -25,7 +25,7 @@ class AbstractServer;
 //================================================================================
 class DefsCmd : public ServerToClientCmd {
 public:
-  	DefsCmd(AbstractServer* as, bool save_edit_history = false);
+   explicit DefsCmd(AbstractServer* as, bool save_edit_history = false);
 	DefsCmd()= default;
 
 	void init(AbstractServer* as, bool save_edit_history);

@@ -134,7 +134,7 @@ private:
 /// the log file
 class LogImpl {
 public:
-   LogImpl(const std::string& filename);
+   explicit LogImpl(const std::string& filename);
    ~LogImpl();
 
    bool log(Log::LogType lt,const std::string& message)            { return do_log(lt,message,true); }

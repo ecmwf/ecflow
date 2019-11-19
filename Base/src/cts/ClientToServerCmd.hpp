@@ -963,9 +963,9 @@ private:
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
 class DeleteCmd : public UserCmd {
 public:
-   DeleteCmd(const std::vector<std::string>& paths, bool force = false)
+   explicit DeleteCmd(const std::vector<std::string>& paths, bool force = false)
       : group_cmd_(nullptr),paths_(paths),force_(force){}
-   DeleteCmd(const std::string& absNodePath, bool force = false);
+   explicit DeleteCmd(const std::string& absNodePath, bool force = false);
    DeleteCmd()= default;
 
    const std::vector<std::string>& paths() const { return paths_;}
@@ -1071,7 +1071,7 @@ private:
 class LogCmd : public UserCmd {
 public:
    enum LogApi { GET, CLEAR, FLUSH, NEW , PATH };
-   LogCmd(LogApi a, int get_last_n_lines = 0); // for zero we take default from log. Avoid adding dependency on log.hpp
+   explicit LogCmd(LogApi a, int get_last_n_lines = 0); // for zero we take default from log. Avoid adding dependency on log.hpp
    explicit LogCmd(const std::string& path); // NEW
    LogCmd();
 
@@ -1147,7 +1147,7 @@ private:
 // class Begin:  if suiteName is empty we will begin all suites
 class BeginCmd : public UserCmd {
 public:
-   BeginCmd(const std::string& suiteName, bool force = false);
+   explicit BeginCmd(const std::string& suiteName, bool force = false);
    BeginCmd()= default;
 
    const std::string& suiteName() const { return suiteName_;}
@@ -1230,10 +1230,10 @@ class RequeueNodeCmd : public UserCmd {
 public:
    enum Option { NO_OPTION, ABORT, FORCE };
 
-   RequeueNodeCmd(const std::vector<std::string>& paths, Option op = NO_OPTION)
+   explicit RequeueNodeCmd(const std::vector<std::string>& paths, Option op = NO_OPTION)
    : paths_(paths), option_(op) {}
 
-   RequeueNodeCmd(const std::string& absNodepath, Option op = NO_OPTION)
+   explicit RequeueNodeCmd(const std::string& absNodepath, Option op = NO_OPTION)
    : paths_(std::vector<std::string>(1,absNodepath)), option_(op) {}
 
    RequeueNodeCmd()= default;
@@ -1409,8 +1409,8 @@ private:
 // to Node, events, meters, limits, variables defined on another suite.
 class LoadDefsCmd : public UserCmd {
 public:
-   LoadDefsCmd(const defs_ptr& defs, bool force = false);
-   LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */,
+   explicit LoadDefsCmd(const defs_ptr& defs, bool force = false);
+   explicit LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */,
                bool stats = false/* not persisted */,
                const std::vector<std::pair<std::string,std::string> >& client_env = std::vector<std::pair<std::string,std::string> >());
    LoadDefsCmd()= default;
@@ -1572,7 +1572,7 @@ private:
 // Free Dependencies
 class FreeDepCmd : public UserCmd {
 public:
-   FreeDepCmd(const std::vector<std::string>& paths,
+   explicit FreeDepCmd(const std::vector<std::string>& paths,
             bool trigger = true,
             bool all = false, // day, date, time, today, trigger, cron
             bool date = false,
@@ -1580,7 +1580,7 @@ public:
    )
    : paths_(paths), trigger_(trigger), all_(all), date_(date), time_(time) {}
 
-   FreeDepCmd(const std::string& path,
+   explicit FreeDepCmd(const std::string& path,
             bool trigger = true,
             bool all = false, // day, date, time, today, trigger, cron
             bool date = false,
@@ -2048,7 +2048,7 @@ private:
 class GroupCTSCmd : public UserCmd {
 public:
    GroupCTSCmd(const std::string& list_of_commands,AbstractClientEnv* clientEnv);
-   GroupCTSCmd(Cmd_ptr cmd) : cli_(false) { addChild(cmd);}
+   explicit GroupCTSCmd(Cmd_ptr cmd) : cli_(false) { addChild(cmd);}
    GroupCTSCmd()= default;
 
    bool isWrite() const override;

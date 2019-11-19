@@ -20,7 +20,7 @@
 
 class AutoArchiveParser : public Parser {
 public:
-   AutoArchiveParser(DefsStructureParser* p) : Parser(p) {}
+   explicit AutoArchiveParser(DefsStructureParser* p) : Parser(p) {}
    const char* keyword() const override { return "autoarchive"; }
    bool doParse(const std::string& line,std::vector<std::string>& lineTokens) override;
 };

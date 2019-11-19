@@ -24,7 +24,7 @@ namespace cereal { class access; }
 class GenericAttr {
 public:
    GenericAttr(const std::string& name, const std::vector<std::string>& values);
-   GenericAttr(const std::string& name);
+   explicit GenericAttr(const std::string& name);
    GenericAttr() = default;
 
    bool operator==(const GenericAttr& rhs) const;
