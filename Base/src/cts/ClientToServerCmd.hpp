@@ -27,6 +27,7 @@
 #include "CheckPt.hpp"
 #include "PreAllocatedReply.hpp"
 #include "Serialization.hpp"
+#include "Variable.hpp"
 
 class AbstractServer;
 class AbstractClientEnv;
@@ -261,10 +262,13 @@ public:
    InitCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
             const std::string& process_or_remote_id,
-            int try_no )
-   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no) {}
+            int try_no,
+            const std::vector<Variable>& vec = {})
+   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), var_to_add_(vec) {}
 
    InitCmd() : TaskCmd()  {}
+
+   const std::vector<Variable>& variables_to_add() const { return var_to_add_;}
 
    std::ostream& print(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
@@ -281,22 +285,29 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
    ecf::Child::CmdType child_type() const override { return ecf::Child::INIT; }
 
+private:
+   std::vector<Variable> var_to_add_;
+
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class< TaskCmd >( this ));
+      CEREAL_OPTIONAL_NVP(ar, var_to_add_, [this](){return !var_to_add_.empty(); }); // conditionally save
    }
 };
 
 class CompleteCmd : public TaskCmd {
 public:
    CompleteCmd(const std::string& pathToTask,
-            const std::string& jobsPassword,
-            const std::string& process_or_remote_id = "",
-            int try_no  = 1)
-   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no) {}
+               const std::string& jobsPassword,
+               const std::string& process_or_remote_id = "",
+               int try_no  = 1,
+               const std::vector<std::string>& vec = std::vector<std::string>())
+   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), var_to_del_(vec) {}
    CompleteCmd() : TaskCmd() {}
+
+   const std::vector<std::string>& variables_to_delete() const { return var_to_del_;}
 
    std::ostream& print(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
@@ -313,11 +324,15 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
    ecf::Child::CmdType child_type() const override { return ecf::Child::COMPLETE; }
 
+private:
+   std::vector<std::string> var_to_del_; //  variables to delete on task
+
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class< TaskCmd >( this ));
+      CEREAL_OPTIONAL_NVP(ar, var_to_del_, [this](){return !var_to_del_.empty(); }); // conditionally save
    }
 };
 

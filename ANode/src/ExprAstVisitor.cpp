@@ -15,6 +15,7 @@
 
 #include "ExprAstVisitor.hpp"
 #include "ExprAst.hpp"
+#include "Defs.hpp"
 #include "Node.hpp"
 #include "Log.hpp"
 
@@ -61,6 +62,15 @@ void AstResolveVisitor::visitParentVariable(AstParentVariable* astvar)
       astvar->setParentNode(const_cast<Node*>(triggerNode_));
 
       if (!astvar->find_node_which_references_variable()) {
+
+         // Check externs if possible
+         Defs* defs = triggerNode_->defs();
+         if (defs) {
+            if (defs->find_extern(triggerNode_->absNodePath() , astvar->name())) {
+               return;
+            }
+         }
+
          std::stringstream ss;
          ss << " Could not find variable " << astvar->name()
                   << " on node " << triggerNode_->debugNodePath() << " OR any of its parent nodes";

@@ -74,11 +74,11 @@ AstResolveExternVisitor::~AstResolveExternVisitor() = default;
 
 void AstResolveExternVisitor::visitNode(AstNode* astNode)
 {
-	//std::cout << "AstResolveExternVisitor::visitNode " << triggerNode_->debugNodePath() << "\n";
+	//std::cout << " AstResolveExternVisitor::visitNode " << triggerNode_->debugNodePath() << "\n";
 
 	astNode->setParentNode(triggerNode_);
 
-	// See if can reference the path, on the AstNode, if we cant, it should be added as an extern
+	// See if can reference the path, on the AstNode, if we can't, it should be added as an extern
 	std::string errorMsg;
 	Node* node = astNode->referencedNode( errorMsg );
 	if ( !node ) {
@@ -89,7 +89,7 @@ void AstResolveExternVisitor::visitNode(AstNode* astNode)
 
 void AstResolveExternVisitor::visitVariable(AstVariable* astVar)
 {
-	//std::cout << "AstResolveExternVisitor::visitNode " << triggerNode_->debugNodePath() << "\n";
+	//std::cout << " AstResolveExternVisitor::visitNode " << triggerNode_->debugNodePath() << "\n";
 
 	astVar->setParentNode(triggerNode_);
 
@@ -97,7 +97,7 @@ void AstResolveExternVisitor::visitVariable(AstVariable* astVar)
 	std::string errorMsg;
 	Node* theReferencedNode = astVar->referencedNode( errorMsg );
 	if ( !theReferencedNode ) {
-		addExtern(astVar->nodePath(),astVar->name());
+      addExtern(astVar->nodePath(),astVar->name());
  		return;
 	}
 	LOG_ASSERT(errorMsg.empty(),"");
@@ -112,9 +112,21 @@ void AstResolveExternVisitor::visitVariable(AstVariable* astVar)
 	addExtern(astVar->nodePath(),astVar->name());
 }
 
+void AstResolveExternVisitor::visitParentVariable(AstParentVariable* astvar)
+{
+   //std::cout << " AstResolveExternVisitor::visitParentVariable  " << triggerNode_->debugNodePath() << "\n";
+
+   astvar->setParentNode(const_cast<Node*>(triggerNode_));
+
+   if (!astvar->find_node_which_references_variable()) {
+
+      addExtern(triggerNode_->absNodePath(),astvar->name()); // absolute var
+   }
+}
+
 void AstResolveExternVisitor::visitFlag(AstFlag* astVar)
 {
-   //std::cout << "AstResolveExternVisitor::visitFlag " << triggerNode_->debugNodePath() << "\n";
+   //std::cout << " AstResolveExternVisitor::visitFlag " << triggerNode_->debugNodePath() << "\n";
 
    astVar->setParentNode(triggerNode_);
 
@@ -134,6 +146,7 @@ void AstResolveExternVisitor::addExtern(const std::string& absNodePath, const st
 		ext += Str::COLON();
 		ext += var;
 	}
+	//cout << " AstResolveExternVisitor::addExtern " << ext << "\n";
 	defs_->add_extern(ext); // stored in a set:
 }
 }

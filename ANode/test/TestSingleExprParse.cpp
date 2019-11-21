@@ -60,18 +60,26 @@ BOOST_AUTO_TEST_CASE( test_single_expression )
 		string expectedRootType       = p.second.first;
 		bool expectedEvaluationResult = p.second.second;
 
-      std::stringstream ss;
-
 		Ast* top = theExprParser.getAst();
 		BOOST_REQUIRE_MESSAGE( top ,"No abstract syntax tree");
 		BOOST_REQUIRE_MESSAGE( top->left() ,"No root created");
 		BOOST_REQUIRE_MESSAGE( top->left()->isRoot() || top->left()->is_attribute() ,"First child of top should be a root or attribute " + p.first);
 		BOOST_REQUIRE_MESSAGE( top->left()->is_evaluateable(),"expected ast to be evaluatable. found: " << top->left()->type() << " " << p.first);
 		BOOST_REQUIRE_MESSAGE( top->left()->type() == expectedRootType || top->left()->type() == "variable","expected root type " << expectedRootType << " or 'variable' but found " << top->left()->type() << " " << p.first);
-      top->print_flat(ss);
-		BOOST_REQUIRE_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << ss.str() << "\n" << *top);
+      {
+		   std::stringstream ss;
+		   top->print_flat(ss);
+		   std::string print_flat = ss.str();
+		   cout << print_flat << "\n";
+		   BOOST_REQUIRE_MESSAGE( expectedEvaluationResult == top->evaluate(),"evaluation not as expected for:\n" << p.first << "\n" << print_flat << "\n" << *top);
+      }
+      {
+         std::stringstream ss;
+         top->print(ss);
+         cout << ss.str() << "\n";
+      }
 
-		std::string why;
+      std::string why;
 		top->why(why);
 		cout << "why: " << why << "\n";
 	}

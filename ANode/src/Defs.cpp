@@ -497,16 +497,20 @@ void Defs::add_extern(const std::string& ex )
       throw std::runtime_error("Defs::add_extern: Can not add empty extern");
    }
    externs_.insert(ex);
+   //auto result = externs_.insert(ex);
+   //cout << "Defs::add_extern " << ex << " result " << result.second << "\n";
 }
 
 void Defs::auto_add_externs(bool remove_existing_externs_first)
 {
+   //cout << "\nDefs::auto_add_externs START EXTERNS size: " << externs_.size() << " ==================================================== \n";
 	if (remove_existing_externs_first) {
 		externs_.clear();
 	}
 	/// Automatically add externs
 	ResolveExternsVisitor visitor(this);
 	acceptVisitTraversor(visitor);
+	//cout << "Defs::auto_add_externs END EXTERNS size : " << externs_.size() << " ==================================================== \n";
 }
 
 void Defs::beginSuite(const suite_ptr& suite)

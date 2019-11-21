@@ -1744,6 +1744,17 @@ VariableHelper::VariableHelper(const AstVariable* astVariable, std::string& erro
 		return;
 	}
 
+ 	// Check externs if possible
+   Defs* defs = theReferenceNode_->defs();
+   if (defs) {
+      if (defs->find_extern(astVariable_->nodePath(),astVariable_->name())) {
+         return;
+      }
+      if (defs->find_extern(theReferenceNode_->absNodePath(),astVariable_->name())) {
+         return;
+      }
+   }
+
 	std::stringstream ss;
 	ss << "From expression Variable " << astVariable_->nodePath() << Str::COLON() << astVariable_->name() ;
 	ss << " the referenced node is " << theReferenceNode_->debugNodePath() << "\n";

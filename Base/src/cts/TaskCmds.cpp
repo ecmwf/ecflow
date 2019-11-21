@@ -101,7 +101,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 #endif
 		// Create path zombie, if not already created:
 	   std::string action_taken;
-		(void)as->zombie_ctrl().handle_path_zombie(as,this,action_taken,theReply);
+		static_cast<void>(as->zombie_ctrl().handle_path_zombie(as,this,action_taken,theReply));
 
 		// distinguish output by using *path*
 		std::stringstream ss;
@@ -310,6 +310,7 @@ bool InitCmd::equals(ClientToServerCmd* rhs) const
 {
 	auto* the_rhs = dynamic_cast<InitCmd*>(rhs);
 	if (!the_rhs) return false;
+   if (var_to_add_ != the_rhs->variables_to_add()) return false;
 	return TaskCmd::equals(rhs);
 }
 
@@ -320,6 +321,10 @@ STC_Cmd_ptr InitCmd::doHandleRequest(AbstractServer* as) const
 	{   // update suite change numbers before job submission. submittable_ setup during authentication
 		SuiteChanged1 changed(submittable_->suite());
 		submittable_->init(process_or_remote_id());    // will set task->set_state(NState::ACTIVE);
+
+      for(const auto& var_to_add: var_to_add_) {
+         submittable_->addVariable(var_to_add); // will update or add variable
+      }
 	}
 
 	// Do job submission in case any triggers dependent on NState::ACTIVE
@@ -338,12 +343,15 @@ const char* InitCmd::desc() {
             "The default can be overridden by using zombie attributes.\n"
             "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
             "Usage:\n"
-            "  ecflow_client --init=$$"
+            "  ecflow_client --init=$$\n"
+            "  ecflow_client --init=$$ --add name=value name2=value2 # add variables to task"
  	;
 }
 
 void InitCmd::addOption(boost::program_options::options_description& desc) const{
-	desc.add_options()( InitCmd::arg(), po::value< string >(), InitCmd::desc() );
+	desc.add_options()
+	         ( InitCmd::arg(), po::value< string >(), InitCmd::desc() )
+	         ( "add",          po::value< vector<string> >()->multitoken(), "add variables i.e name=value name1=value1" );
 }
 
 void InitCmd::create( 	Cmd_ptr& cmd,
@@ -375,11 +383,27 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 		throw std::runtime_error(ss.str());
 	}
 
+ 	std::vector<Variable> variable_vec;
+ 	if (vm.count("add")) {
+ 	   vector<string> var_args = vm[ "add" ].as< vector<string> >();
+ 	   if (!var_args.empty()) {
+ 	      variable_vec.reserve(var_args.size());
+ 	      for(const auto& v : var_args) {
+ 	         std::vector<std::string> tokens;
+ 	         Str::split(v,tokens,"=");
+ 	         if (tokens.size() != 2) {
+ 	            throw std::runtime_error("Could not parse variable provided to --add; Expected  var1=value1 var2=value2 but found " + v );
+ 	         }
+ 	         variable_vec.emplace_back(tokens[0],tokens[1]);
+ 	      }
+ 	   }
+ 	}
+
 	cmd = std::make_shared<InitCmd>( clientEnv->task_path(),
-	                            clientEnv->jobs_password(),
-	                            process_or_remote_id,
-	                            clientEnv->task_try_no()
-	             );
+	                                 clientEnv->jobs_password(),
+	                                 process_or_remote_id,
+	                                 clientEnv->task_try_no(),
+	                                 variable_vec);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -392,6 +416,7 @@ bool CompleteCmd::equals(ClientToServerCmd* rhs) const
 {
 	auto* the_rhs = dynamic_cast<CompleteCmd*>(rhs);
 	if (!the_rhs) return false;
+	if (var_to_del_ != the_rhs->variables_to_delete()) return false;
  	return TaskCmd::equals(rhs);
 }
 
@@ -408,6 +433,10 @@ STC_Cmd_ptr CompleteCmd::doHandleRequest(AbstractServer* as) const
       // update suite change numbers before job submission, submittable_ setup during authentication
 		SuiteChanged1 changed(submittable_->suite());
 		submittable_->complete();          // will set task->set_state(NState::COMPLETE);
+
+		for(const auto& var_to_delete: var_to_del_) {
+		   submittable_->delete_variable_no_error(var_to_delete);
+		}
 	}
 
 	// Do job submission in case any triggers dependent on NState::COMPLETE
@@ -425,16 +454,19 @@ const char* CompleteCmd::desc()
 	         "The default can be overridden by using zombie attributes.\n"
 	         "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
 	         "Usage:\n"
-	         "  ecflow_client --complete"
+            "  ecflow_client --complete\n"
+            "  ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
 	         ;
 }
 
 void CompleteCmd::addOption(boost::program_options::options_description& desc) const {
-	desc.add_options()( CompleteCmd::arg(), CompleteCmd::desc() );
+	desc.add_options()
+	         ( CompleteCmd::arg(), CompleteCmd::desc() )
+	         ( "remove",po::value< vector<string> >()->multitoken(), "remove variables i.e name name2" );
 }
-void CompleteCmd::create( 	Cmd_ptr& cmd,
-							boost::program_options::variables_map& vm,
-							AbstractClientEnv* clientEnv ) const
+void CompleteCmd::create( Cmd_ptr& cmd,
+                          boost::program_options::variables_map& vm,
+                          AbstractClientEnv* clientEnv ) const
 {
 	if (clientEnv->debug())
 		cout << "  CompleteCmd::create " << CompleteCmd::arg()
@@ -450,10 +482,14 @@ void CompleteCmd::create( 	Cmd_ptr& cmd,
 	 	throw std::runtime_error( "CompleteCmd: " + errorMsg );
 	}
 
+	std::vector<std::string> variable_vec;
+	if (vm.count("remove")) variable_vec = vm[ "remove" ].as< vector<string> >();
+
 	cmd = std::make_shared<CompleteCmd>( clientEnv->task_path(),
-	                                clientEnv->jobs_password(),
-	                                clientEnv->process_or_remote_id(),
-	                                clientEnv->task_try_no()) ;
+	                                     clientEnv->jobs_password(),
+	                                     clientEnv->process_or_remote_id(),
+	                                     clientEnv->task_try_no(),
+	                                     variable_vec) ;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +502,7 @@ CtsWaitCmd::CtsWaitCmd(const std::string& pathToTask,
  : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), expression_(expression)
 {
    // Parse expression to make sure its valid
-   (void)Expression::parse(expression,"CtsWaitCmd:"); // will throw for errors
+   static_cast<void>(Expression::parse(expression,"CtsWaitCmd:")); // will throw for errors
 }
 
 std::ostream& CtsWaitCmd::print(std::ostream& os) const

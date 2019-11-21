@@ -19,7 +19,9 @@
 #include "Defs.hpp"
 #include "JobCreationCtrl.hpp"
 #include "Jobs.hpp"
+#ifdef DEBUG
 #include "Ecf.hpp"
+#endif
 
 using namespace ecf;
 using namespace std;

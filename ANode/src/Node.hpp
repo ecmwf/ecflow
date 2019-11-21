@@ -408,7 +408,7 @@ public:
 
    // Add functions: ===============================================================
    void addVerify( const VerifyAttr& );  // for testing and verification Can throw std::runtime_error
-   void addVariable(const Variable& );   // will throw std::runtime_error if duplicate
+   void addVariable(const Variable& );   // will update if duplicate
    void add_variable(const std::string& name, const std::string& value );// will write to std:out if duplicates
    void add_variable_bypass_name_check(const std::string& name, const std::string& value );// will write to std:out if duplicates
    void add_variable_int(const std::string& name, int);// will throw std::runtime_error if duplicate
@@ -466,7 +466,8 @@ public:
    void delete_cron(const ecf::CronAttr&);
 
    void delete_zombie(const ecf::Child::ZombieType);
-   void deleteVariable( const std::string& name);
+   void deleteVariable( const std::string& name);           // if name not found throw, if name empty delete all variables
+   void delete_variable_no_error( const std::string& name); // if variable not found don't error, if name empty do nothing
    void deleteEvent(const std::string& name);
    void deleteMeter(const std::string& name);
    void deleteLabel(const std::string& name);

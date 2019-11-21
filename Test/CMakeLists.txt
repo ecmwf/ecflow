@@ -39,7 +39,8 @@ if (ENABLE_ALL_TESTS)
     ./TestDayDate.cpp
 	./TestEvents.cpp
 	./TestFileCmd.cpp
-	./TestHandle.cpp
+    ./TestHandle.cpp
+    ./TestInitAddVariable.cpp
 	./TestKillCmd.cpp
 	./TestLate.cpp
 	./TestLimit.cpp

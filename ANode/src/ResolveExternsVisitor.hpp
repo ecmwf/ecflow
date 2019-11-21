@@ -68,7 +68,7 @@ public:
  	void visitEventState(AstEventState*) override{}
  	void visitNode(AstNode*) override;
    void visitVariable(AstVariable*) override;
-   void visitParentVariable(AstParentVariable*) override {}
+   void visitParentVariable(AstParentVariable*) override;
    void visitFlag(AstFlag*) override;
 
 private:

@@ -11,7 +11,7 @@ finish_time=$(date +%s)
 echo "Job End: Time duration: $((finish_time - start_time)) secs."
 
 # Notify ECF of a normal end
-%ECF_CLIENT_EXE_PATH% --complete
+%ECF_CLIENT_EXE_PATH% --complete %COMPLETE_DEL_VARIABLES:%
 trap 0                          # Remove all traps
 exit 0                          # End the shell
 

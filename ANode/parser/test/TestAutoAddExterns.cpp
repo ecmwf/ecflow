@@ -37,20 +37,20 @@ BOOST_AUTO_TEST_CASE( test_auto_add_externs )
 
 	Defs defs;
 	std::string errorMsg,warningMsg;
-  	BOOST_REQUIRE_MESSAGE(defs.restore(path,errorMsg,warningMsg),errorMsg);
+  	BOOST_REQUIRE_MESSAGE(defs.restore(path,errorMsg,warningMsg),"Expected no errors, but found " << errorMsg);
    BOOST_REQUIRE_MESSAGE(warningMsg.empty(),"Expected no warnings but found:\n" << warningMsg);
 
    // Check number of extrens read in: Duplicate should be ignore
-  	BOOST_REQUIRE_MESSAGE(defs.externs().size() ==  9 ,"Expected 9 externs as starting point but found " << defs.externs().size() << "\n");
+  	BOOST_REQUIRE_MESSAGE(defs.externs().size() == 11 ,"Expected 11 externs as starting point but found " << defs.externs().size() << "\n" << defs << "\n");
 
   	// Test auto extern generation. Don't remove existing extern's
    defs.auto_add_externs(false/* remove_existing_externs_first*/);
-  	BOOST_REQUIRE_MESSAGE(defs.externs().size() ==  9 ,"Expected 9, auto_add_extern(false) gave: " << defs.externs().size() << "\n" << defs << "\n");
+  	BOOST_REQUIRE_MESSAGE(defs.externs().size() == 11 ,"Expected 11, auto_add_extern(false) gave: " << defs.externs().size() << "\n" << defs << "\n");
 
   	// By removing the externs read, in we can determine the real number of extern;s from
   	// parsing all the trigger expressions, and inlimit references
    defs.auto_add_externs(true/* remove_existing_externs_first*/);
-  	BOOST_REQUIRE_MESSAGE(defs.externs().size() ==  8 ,"Expected 8 externs, since redundant externs removed, auto_add_extern(true) gave: " << defs.externs().size() << "\n"<< defs << "\n");
+  	BOOST_REQUIRE_MESSAGE(defs.externs().size() == 10 ,"Expected 10 externs, since redundant externs removed, auto_add_extern(true) gave: " << defs.externs().size() << "\n"<< defs << "\n");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -73,6 +73,7 @@ list( APPEND test_srcs
     test/TestClientInterface.cpp
     test/TestJobGenOnly.cpp
     test/TestLifeCycle.cpp
+    test/TestInitAddVariables.cpp
     test/TestRtt.cpp
     test/TestUrlCmd.cpp
     )

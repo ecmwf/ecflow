@@ -207,6 +207,29 @@ void Node::deleteVariable( const std::string& name)
 	throw std::runtime_error("Node::deleteVariable: Can not find 'user' variable of name " + name);
 }
 
+void Node::delete_variable_no_error( const std::string& name)
+{
+   if (name.empty()) {
+#ifdef DEBUG_STATE_CHANGE_NO
+      std::cout << "Node::delete_variable_no_error\n";
+#endif
+      return;
+   }
+
+   size_t theSize = vars_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (vars_[i].name() == name) {
+         vars_.erase( vars_.begin() + i );
+         state_change_no_ = Ecf::incr_state_change_no();
+
+#ifdef DEBUG_STATE_CHANGE_NO
+         std::cout << "Node::delete_variable_no_error\n";
+#endif
+         return;
+      }
+   }
+}
+
 void Node::deleteEvent(const std::string& name)
 {
    if (name.empty()) {
