@@ -149,6 +149,13 @@ public:
     bool show(VNode*) override;
 };
 
+class VCheckpointErrorIcon : public VIcon
+{
+public:
+    explicit VCheckpointErrorIcon(const std::string& name) : VIcon(name) {}
+    bool show(VNode*) override;
+};
+
 //==========================================================
 //
 // Create VIcon instances
@@ -170,7 +177,9 @@ static VSlowIcon slowIcon("slow");
 static VArchivedIcon archivedIcon("archived");
 static VRestoredIcon restoredIcon("restored");
 static VSlowJobCreationIcon slowJobCreationIcon("slow_job");
-static VNoLogIcon noLogIcon("no_log");
+static VNoLogIcon noLog("no_log");
+static VCheckpointErrorIcon noCheckptIcon("checkpt_err");
+
 //==========================================================
 //
 // The VIcon baseclass
@@ -601,4 +610,17 @@ bool VNoLogIcon::show(VNode *n)
         return false;
 
     return n->isFlagSet(ecf::Flag::LOG_ERROR);
+}
+
+//==========================================================
+// Cannot open/write to checkpoint
+//==========================================================
+
+//Server only
+bool VCheckpointErrorIcon::show(VNode *n)
+{
+    if(!n || !n->isServer())
+        return false;
+
+    return n->isFlagSet(ecf::Flag::CHECKPT_ERROR);
 }

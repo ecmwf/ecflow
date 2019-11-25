@@ -184,6 +184,16 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
         }
     }
 
+    if(snode->isFlagSet(ecf::Flag::CHECKPT_ERROR))
+    {
+        const std::string& errTxt=snode->findVariable("ECF_CHECKPT_ERROR", true);
+        if(!errTxt.empty())
+        {
+            f << "checkpoint error : " + errTxt + "\n";
+            f << "----------\n";
+        }
+    }
+
     //Start block: Type, name
     f << typeName << " " << server->name() << "\n";
 

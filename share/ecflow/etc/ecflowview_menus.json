@@ -556,7 +556,13 @@
             "command"        : "ecflow_client --alter clear_flag log_error /",
             "status_tip"     : "__cmd__"
         },
-
+        {
+            "menu"           : "Special",
+            "name"           : "Clear checkpoint error flag",
+            "visible_for"    : "server",
+            "command"        : "ecflow_client --alter clear_flag checkpt_error /",
+            "status_tip"     : "__cmd__"
+        },
         {
             "menu"           : "Special",
             "name"           : "Clear killed flag",
