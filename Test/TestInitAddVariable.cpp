@@ -37,6 +37,12 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 // This test does not have any time dependencies in the def file.
 BOOST_AUTO_TEST_CASE( test_init_add_variable )
 {
+   // Added since in 5.2.0 (only 5.2.0 server supports this behaviour)
+   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
+      std::cout << "\n    Disable test_init_add_variable for old server , re-enable when 5.2.0 is minimum version\n";
+      return;
+   }
+
    DurationTimer timer;
    cout << "Test:: ...test_init_add_variable "<< flush;
    TestClean clean_at_start_and_end;
