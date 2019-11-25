@@ -173,6 +173,17 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
         f << "flags   : " << flags << "\n";
 
     f << "----------\n";
+
+    if(snode->isFlagSet(ecf::Flag::LOG_ERROR))
+    {
+        const std::string& errTxt=snode->findVariable("ECF_LOG_ERROR", true);
+        if(!errTxt.empty())
+        {
+            f << "log error : " + errTxt + "\n";
+            f << "----------\n";
+        }
+    }
+
     //Start block: Type, name
     f << typeName << " " << server->name() << "\n";
 

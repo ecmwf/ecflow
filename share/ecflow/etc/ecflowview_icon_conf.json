@@ -115,6 +115,14 @@
                 "icon"  : {
                     "default" : "icon_slow_job_creation.svg"
                 }
+            },
+            "no_log" : {
+                "label" : "Log error",
+                "tooltip" : "Error in opening/writing to log",
+                "shortDesc" : "Error in opening /writing to log",
+                "icon"  : {
+                    "default" : "icon_no_log.svg"
             }
+        }
      }
 }

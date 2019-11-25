@@ -264,6 +264,11 @@ QVariant TreeNodeModel::serverData(const QModelIndex& index,int role) const
 			txt+=VIcon::toolTip(server->vRoot(),icons_);
 			return txt;
 		}
+
+        else if(role == LogErrorRole)
+        {
+            return server->vRoot()->logOrCheckpointError();
+        }
 	}
 
 	return QVariant();

@@ -1833,6 +1833,20 @@ bool VServer::isFlagSet(ecf::Flag::Type f) const
 	return cache_.flag_.is_set(f);
 }
 
+QString VServer::logOrCheckpointError() const
+{
+    std::string s;
+    if (isFlagSet(ecf::Flag::LOG_ERROR)) {
+        s = findVariable("ECF_LOG_ERROR", true);
+    }
+    if (isFlagSet(ecf::Flag::CHECKPT_ERROR)) {
+        if (!s.empty())
+            s += " ";
+        s += findVariable("ECF_CHECKPT_ERROR", true);
+    }
+    return QString::fromStdString(s);
+}
+
 void VServer::updateCache()
 {
 	cache_.clear();

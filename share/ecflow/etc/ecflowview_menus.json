@@ -549,6 +549,13 @@
             "command"        : "ecflow_client --alter clear_flag late /",
             "status_tip"     : "__cmd__"
         },
+        {
+            "menu"           : "Special",
+            "name"           : "Clear log error flag",
+            "visible_for"    : "server",
+            "command"        : "ecflow_client --alter clear_flag log_error /",
+            "status_tip"     : "__cmd__"
+        },
 
         {
             "menu"           : "Special",

@@ -24,6 +24,11 @@
                      "colour"  : "rgb(172,0,0)"
                 },
 
+                "log_error" : {
+                    "pattern" : "log error : ([^\n]*)",
+                     "colour"  : "rgb(172,0,0)"
+                },
+
                 "comment" : {
                     "pattern" : "(#[^\n]*)",                     
                     "colour"  : "rgb(100,100,100)",

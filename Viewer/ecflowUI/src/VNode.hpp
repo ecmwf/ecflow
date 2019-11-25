@@ -320,6 +320,7 @@ public:
 	bool isFlagSet(ecf::Flag::Type f) const override;
 
 	void why(std::vector<std::string>& theReasonWhy) const override;
+    QString logOrCheckpointError() const;
 
     bool triggeredScanned() const {return triggeredScanned_;}
 

@@ -42,7 +42,7 @@ public:
 			     NodeTypeRole = Qt::UserRole + 13, NodeTypeForegroundRole = Qt::UserRole + 14,
                  ServerPointerRole = Qt::UserRole + 15, SortRole = Qt::UserRole + 16,
                  NodePointerRole = Qt::UserRole + 17, VariableRole = Qt::UserRole + 18,
-                 FailedSubmissionRole = Qt::UserRole + 19};
+                 FailedSubmissionRole = Qt::UserRole + 19, LogErrorRole = Qt::UserRole + 20};
 
 	void dataIsAboutToChange();
 	virtual VInfo_ptr nodeInfo(const QModelIndex& index)=0;
