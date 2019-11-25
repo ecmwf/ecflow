@@ -1325,9 +1325,14 @@ std::string ClientInvoker::find_free_port(int seed_port_number, bool debug)
       }
       catch ( std::runtime_error& e) {
          std::string error_msg = e.what();
-         if (debug) cout << "   " << e.what();
+         if (debug) cout << "   " << error_msg;
          if (error_msg.find("authentication failed") != std::string::npos) {
-            if (debug) cout << "   Could not connect, due to authentication failure, hence port " << the_port << " is used,trying next port\n";
+            if (debug) cout << "   Could not connect, due to authentication failure, hence port " << the_port << " is used, trying next port\n";
+            the_port++;
+            continue;
+         }
+         if (error_msg.find("invalid_argument") != std::string::npos) {
+            if (debug) cout << "   Mixing 4 and 5 series ?, hence port " << the_port << " is used, trying next port\n";
             the_port++;
             continue;
          }
