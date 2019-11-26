@@ -29,6 +29,13 @@
                  "default": "font(Monospace,)"
              }
         },
+        "job_status" : {
+
+             "font" : {
+                 "label" : "Job status tab",
+                 "default": "font(Monospace,)"
+             }
+        },
         "script" : {
                     
              "font" : {

@@ -114,7 +114,7 @@ void InfoProvider::visit(VInfoNode* info)
     if(!fileVarName_.empty())
     {
         //Get the fileName
-        fileName=n->genVariable(fileVarName_);
+        fileName=n->genVariable(fileVarName_) + fileSuffix_;
     }
 
     //We try to read the file directly from the disk
@@ -234,13 +234,29 @@ bool JobProvider::handleFileMissing(const std::string& fileName,VReply *reply)
 		owner_->infoReady(reply_);
 		return true;
 	}
-
-
-	/*else
-	{
-		reply->setWarningText(fileMissingText_);
-	}*/
 	return false;
+}
+
+JobStatusProvider::JobStatusProvider(InfoPresenter* owner) :
+        InfoProvider(owner,VTask::JobStatusFileTask)
+{
+    fileVarName_ ="ECF_JOB";
+    fileSuffix_ = ".stat";
+    fileNotDefinedText_ = "Job status is <b>not</b> defined";
+    fileMissingText_ = "Job status file <b>not</b> found! <br> Check <b>ECF_HOME</b> directory  \
+                 for read/write access. Check for file presence and read access below. \
+                 The file may have been deleted or this may be a '<i>dummy</i>' task";
+}
+
+bool JobStatusProvider::handleFileMissing(const std::string& fileName,VReply *reply)
+{
+    if(fileName.find(".job0") != std::string::npos)
+    {
+        reply->setInfoText("No job to be expected when <b>TRYNO</b> is 0!");
+        owner_->infoReady(reply_);
+        return true;
+    }
+    return false;
 }
 
 ManualProvider::ManualProvider(InfoPresenter* owner) :
@@ -343,7 +359,7 @@ void ScriptProvider::visit(VInfoNode* info)
     if(!fileVarName_.empty())
     {
         //Get the fileName
-        fileName=n->genVariable(fileVarName_);
+        fileName=n->genVariable(fileVarName_) + fileSuffix_;
     }
 
     //Define a task for getting the info from the server.

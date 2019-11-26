@@ -44,7 +44,16 @@
             "button_tooltip" : "Open <b>job</b> tab in a new Info Panel dialog",
             "visible_for" : "task or alias"            
         },    
-        
+
+        {
+            "name"    : "job_status",
+            "label"   : "Job status",
+            "icon"	  : "job_status.svg",
+            "show"    : "toolbar",
+            "button_tooltip" : "Open <b>Job status</b> tab in a new Info Panel dialog",
+            "visible_for" : "task or alias"
+        },
+
         {
         	"name"    : "output",
             "label"   : "Output",
@@ -114,8 +123,8 @@
             "button_tooltip" : "Open <b>Node log</b> tab in a new Info Panel dialog",
             "visible_for" : "server or node"
              
-        },     
-        
+        },
+
         {
         	"name"    : "zombie",
             "label"   : "Zombies",

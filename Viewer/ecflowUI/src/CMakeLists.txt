@@ -62,6 +62,7 @@ set(viewer_srcs
     InfoProvider.cpp
     InputEventLog.cpp
     JobItemWidget.cpp
+    JobStatusItemWidget.cpp
     LabelEditor.cpp
     LimitEditor.cpp
     LineEdit.cpp  
@@ -293,6 +294,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     HtmlItemWidget.hpp
     InfoPanel.hpp
     InputEventLog.hpp
+    JobStatusItemWidget.hpp
     LabelEditor.hpp
     LimitEditor.hpp
     LineEdit.hpp   

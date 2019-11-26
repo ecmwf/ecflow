@@ -200,9 +200,9 @@ void ServerComThread::run()
                         ci_->zombieKill(zombie_);
 
                     break;
-                 }
+                }
 
-                 default:
+                default:
                  {
                     Q_ASSERT(0);
                     exit(1);
@@ -247,6 +247,7 @@ void ServerComThread::run()
                 case VTask::ManualTask:
                 case VTask::ScriptTask:
                 case VTask::OutputTask:
+                case VTask::JobStatusFileTask:
                 {
                     UiLog(serverName_).dbg() << " FILE" << " " << params_["clientPar"];
                     if(maxLineNum_ < 0)
@@ -265,7 +266,7 @@ void ServerComThread::run()
                 case VTask::StatsTask:
                     UiLog(serverName_).dbg() << " STATS";
                     ci_->stats();
-                    break;
+                    break;;
 
                 case VTask::HistoryTask:
                     UiLog(serverName_).dbg() << " SERVER LOG";

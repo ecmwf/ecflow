@@ -51,7 +51,8 @@ protected:
 	VTask_ptr task_;
 	VReply* reply_;
 	VTask::Type taskType_;
-	std::string fileVarName_;
+    std::string fileVarName_;
+    std::string fileSuffix_;
 	std::string fileNotDefinedText_;
 	std::string fileMissingText_;
     bool active_;
@@ -66,6 +67,15 @@ public:
 protected:
 	 bool handleFileMissing(const std::string& fileName,VReply *reply) override;
 };
+
+class JobStatusProvider : public InfoProvider
+{
+public:
+     explicit JobStatusProvider(InfoPresenter* owner);
+protected:
+     bool handleFileMissing(const std::string& fileName,VReply *reply) override;
+};
+
 
 class ManualProvider : public InfoProvider
 {

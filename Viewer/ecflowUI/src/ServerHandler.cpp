@@ -680,7 +680,10 @@ void ServerHandler::run(VTask_ptr task)
 		break;
 	case VTask::ManualTask:
 		return manual(task);
-		break;
+        break;
+    case VTask::JobStatusFileTask:
+        return jobstatus(task);
+        break;
 	case VTask::HistoryTask:
 	case VTask::MessageTask:
 	case VTask::StatsTask:
@@ -728,6 +731,14 @@ void ServerHandler::jobout(VTask_ptr task)
 
 	task->param("clientPar","jobout");
 	comQueue_->addTask(task);
+}
+
+void ServerHandler::jobstatus(VTask_ptr task)
+{
+    //static std::string errText="no job output...";
+
+    task->param("clientPar","stat");
+    comQueue_->addTask(task);
 }
 
 void ServerHandler::manual(VTask_ptr task)

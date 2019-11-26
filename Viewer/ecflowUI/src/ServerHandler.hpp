@@ -206,6 +206,7 @@ private:
 	void script(VTask_ptr req);
 	void job(VTask_ptr req);
 	void jobout(VTask_ptr req);
+    void jobstatus(VTask_ptr req);
 	void manual(VTask_ptr req);
 
 	defs_ptr defs();

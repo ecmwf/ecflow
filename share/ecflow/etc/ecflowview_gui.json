@@ -254,6 +254,7 @@
                 "line" : "manual.font",
                 "line" : "script.font",
                 "line" : "job.font",
+                "line" : "job_status.font",
                 "line" : "output.font",
                 "line" : "why.font",
                 "line" : "edit.font"
