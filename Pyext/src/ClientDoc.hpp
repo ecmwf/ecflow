@@ -93,6 +93,8 @@ public:
    static const char* set_child_pid();
    static const char* set_child_try_no();
    static const char* set_child_timeout();
+   static const char* set_child_init_add_vars();
+   static const char* set_child_complete_del_vars();
 
 private:
 	ClientDoc()= default;

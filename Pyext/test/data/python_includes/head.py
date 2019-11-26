@@ -21,7 +21,7 @@ class Client(object):
        handle exceptions and signals, by calling the abort child command.
        *ONLY* one instance of this class, should be used. Otherwise zombies will be created.
     """
-    def __init__(self):
+    def __init__(self,init_add_vars = False):
         print ("Creating Client")
         self.ci = ecflow.Client()
         self.ci.set_host_port("%ECF_HOST%","%ECF_PORT%")
@@ -29,6 +29,10 @@ class Client(object):
         self.ci.set_child_path("%ECF_NAME%")
         self.ci.set_child_password("%ECF_PASS%")
         self.ci.set_child_try_no(%ECF_TRYNO%)
+        if init_add_vars:
+            self.ci.set_child_init_add_vars({"name1":"1", "name2":"2"})
+            self.ci.set_child_init_add_vars([ecflow.Variable("name3","3"), ecflow.Variable("name4","4")])
+            self.ci.set_child_complete_del_vars(["name","name1","name2","name3","name4"])
     
         print("Only wait 20 seconds, if the server cannot be contacted (note default is 24 hours) before failing")
         self.ci.set_child_timeout(20)

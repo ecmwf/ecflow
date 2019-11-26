@@ -1559,3 +1559,18 @@ const char* ClientDoc::set_child_timeout()
             "This can be overridden for the python child api"
             ;
 }
+
+const char* ClientDoc::set_child_init_add_vars()
+{
+   return   "Set the list of variables to be added when a task becomes active\n"
+            "Needs a dictionary of name/value pairs, or a list of ecflow Variables"
+            ;
+}
+
+const char* ClientDoc::set_child_complete_del_vars()
+{
+   return   "Set the list of variables to be deleted when a task becomes complete\n"
+            "Needs a list of strings, representing the variable names."
+            ;
+}
+

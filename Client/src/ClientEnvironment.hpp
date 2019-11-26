@@ -17,6 +17,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "AbstractClientEnv.hpp"
+#include "Variable.hpp"
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
 #endif
@@ -129,6 +130,11 @@ public:
    void set_child_password(const std::string& pass) { jobs_password_ = pass;}
    void set_child_pid(const std::string& pid) { remote_id_ = pid;}
    void set_child_try_no(unsigned int try_no) { task_try_num_ = try_no;}
+   void set_child_init_add_vars(const std::vector<Variable>& vars)  { init_add_vars_ = vars;}
+   void set_child_complete_del_vars(std::vector<std::string>& vars) { complete_del_vars_ = vars;}
+
+   const std::vector<Variable>& init_add_vars() const { return init_add_vars_;}
+   const std::vector<std::string>& complete_del_vars() const { return complete_del_vars_;}
 
 private:
  	std::string task_path_;             // ECF_NAME = /aSuit/aFam/aTask
@@ -140,6 +146,9 @@ private:
 
 	long timeout_;                      // ECF_TIMEOUT. Host file iteration time out
    long zombie_timeout_;               // ECF_ZOMBIE_TIMEOUT. Host file iteration time out for zombies, default same as ECF_TIMEOUT
+   std::vector<Variable> init_add_vars_;
+   std::vector<std::string> complete_del_vars_;
+
 	std::vector<std::pair<std::string,std::string> > env_; // For test allow env variable to be set on defs
 	std::vector<std::pair<std::string, std::string> > host_vec_; // The list of host:port pairs
 
