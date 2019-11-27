@@ -21,7 +21,7 @@
 
 JobStatusItemWidget::JobStatusItemWidget(QWidget *parent) :
     CodeItemWidget(parent),
-    timeout_(15000),
+    timeout_(2000),
     fetchFileScheduled_(false)
 {
     messageLabel_->setShowTypeTitle(false);
