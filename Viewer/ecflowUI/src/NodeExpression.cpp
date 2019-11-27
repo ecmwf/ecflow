@@ -680,7 +680,7 @@ bool StateNodeCondition::execute(VItem* item)
         assert(s);
         return (s->serverStateName() == stateName_);
     }
-    else
+    else if(item->isNode())
     {
         auto* n=static_cast<VNode*>(item);
         assert(n);

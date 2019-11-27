@@ -372,7 +372,11 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 
     //Get the set of visible info panel tabs for the selection
 	std::vector<InfoPanelDef*> ids;
-	InfoPanelHandler::instance()->visible(selection_,ids);
+    if(info && info->isAttribute()) {
+        InfoPanelHandler::instance()->visible(VInfo::createParent(info), ids);
+    } else {
+        InfoPanelHandler::instance()->visible(selection_,ids);
+    }
 
     //Set status of the info panel actions in the toolbar accordingly
 	Q_FOREACH(QAction* ac,infoPanelActions_)
