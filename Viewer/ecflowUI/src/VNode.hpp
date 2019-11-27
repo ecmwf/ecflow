@@ -162,17 +162,17 @@ public:
     virtual bool isSuspended() const;
     virtual bool isAborted() const;
     virtual bool isSubmitted() const;
-    virtual QColor  stateColour() const;
-    virtual QColor  realStateColour() const;
-    virtual QColor  stateFontColour() const;
-    virtual QColor  typeFontColour() const;
+    virtual bool isActive() const;
+    virtual QColor stateColour() const;
+    virtual QColor realStateColour() const;
+    virtual QColor stateFontColour() const;
+    virtual QColor typeFontColour() const;
     virtual int tryNo() const;
     virtual void internalState(VNodeInternalState&) {}
 
     bool hasAccessed() const;
     std::vector<VNode*> ancestors(SortMode sortMode);
     VNode* ancestorAt(int idx,SortMode sortMode);
-
 
     virtual std::string flagsAsStr() const;
     virtual bool isFlagSet(ecf::Flag::Type f) const;

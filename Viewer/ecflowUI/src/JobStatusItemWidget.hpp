@@ -41,10 +41,15 @@ protected Q_SLOTS:
 protected:
       void updateState(const ChangeFlags&) override;
       void reloadRequested() override;
+      void commandRequested() override;
+      void stopStatusCommand();
+      bool prolongStatusCommand();
       void runStatusCommand();
 
       QTimer* timer_;
       int timeout_;
+      int timeoutCount_;
+      int maxTimeoutCount_;
       bool fetchFileScheduled_;
 };
 

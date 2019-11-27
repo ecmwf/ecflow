@@ -51,7 +51,7 @@
             "icon"	  : "job_status.svg",
             "show"    : "toolbar",
             "button_tooltip" : "Open <b>Job status</b> tab in a new Info Panel dialog",
-            "visible_for" : "(task or alias) and (active or submitted)"
+            "visible_for" : "task or alias"
         },
 
         {

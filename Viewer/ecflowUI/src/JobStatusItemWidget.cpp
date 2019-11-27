@@ -16,14 +16,20 @@
 #include "MessageLabel.hpp"
 #include "ServerHandler.hpp"
 #include "VConfig.hpp"
+#include "VNode.hpp"
 #include "VReply.hpp"
 #include "CommandHandler.hpp"
 
 JobStatusItemWidget::JobStatusItemWidget(QWidget *parent) :
     CodeItemWidget(parent),
-    timeout_(2000),
+    timeout_(3000),
+    timeoutCount_(0),
+    maxTimeoutCount_(10),
     fetchFileScheduled_(false)
 {
+    commandTb_->show();
+    commandTb_->setText(tr("Execute --status command"));
+
     messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();
     textEdit_->setShowLineNumbers(false);
@@ -72,19 +78,12 @@ void JobStatusItemWidget::reload(VInfo_ptr info)
     //Info must be a node
     if(info_ && info_->isNode() && info_->node())
     {
-        reloadTb_->setEnabled(false);
-        messageLabel_->showInfo("Generating job status information ...");
-        messageLabel_->startLoadLabel();
-        runStatusCommand();
-        timer_->start(timeout_);
+        fetchJobStatusFile();
     }
 }
 
 void JobStatusItemWidget::fetchJobStatusFile()
 {
-    messageLabel_->stopLoadLabel();
-    messageLabel_->hide();
-    timer_->stop();
     if(info_ && info_->isNode() && info_->node())
     {
         reloadTb_->setEnabled(false);
@@ -97,6 +96,7 @@ void JobStatusItemWidget::clearContents()
     fetchFileScheduled_ = false;
     messageLabel_->stopLoadLabel();
     timer_->stop();
+    timeoutCount_ = 0;
     InfoPanelItem::clear();
     textEdit_->clear();
     messageLabel_->hide();
@@ -109,6 +109,12 @@ void JobStatusItemWidget::infoReady(VReply* reply)
     Q_ASSERT(reply);
     QString s=QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
+
+    // handle status command
+    if(s.isEmpty() && prolongStatusCommand())
+        return;
+    else
+        stopStatusCommand();
 
     if(reply->hasWarning())
     {
@@ -135,14 +141,54 @@ void JobStatusItemWidget::infoProgress(VReply* reply)
 
 void JobStatusItemWidget::infoFailed(VReply* reply)
 {
-    QString s=QString::fromStdString(reply->errorText());
-    messageLabel_->showError(s);
-    reloadTb_->setEnabled(true);
+    if(!prolongStatusCommand())
+    {
+        QString s=QString::fromStdString(reply->errorText());
+        messageLabel_->showError(s);
+        reloadTb_->setEnabled(true);
+    }
 }
 
 void JobStatusItemWidget::reloadRequested()
 {
-    reload(info_);
+    fetchJobStatusFile();
+}
+
+void JobStatusItemWidget::commandRequested()
+{
+    runStatusCommand();
+}
+
+void JobStatusItemWidget::stopStatusCommand()
+{
+    if(timeoutCount_ > 0)
+    {
+        commandTb_->setEnabled(true);
+        reloadTb_->setEnabled(true);
+        messageLabel_->stopLoadLabel();
+        messageLabel_->hide();
+        timeoutCount_ = 0;
+        timer_->stop();
+    }
+}
+
+bool JobStatusItemWidget::prolongStatusCommand()
+{
+    if (timeoutCount_ > 0)
+    {
+        timeoutCount_++;
+        if (timeoutCount_ < maxTimeoutCount_)
+        {
+            timer_->start(timeout_);
+            return true;
+        }
+        else
+        {
+            stopStatusCommand();
+            return false;
+        }
+    }
+    return false;
 }
 
 void JobStatusItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
@@ -181,11 +227,22 @@ void JobStatusItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 
 void JobStatusItemWidget::runStatusCommand()
 {
-    std::vector<std::string> cmd;
-    cmd.emplace_back("ecflow_client");
-    cmd.emplace_back("--status");
-    cmd.emplace_back("<full_name>");
-    CommandHandler::run(info_,cmd);
+    if(info_ && info_->isNode() && info_->node() && timeoutCount_ == 0)
+    {
+        commandTb_->setEnabled(false);
+        reloadTb_->setEnabled(false);
+        messageLabel_->showInfo("Generating job status information ...");
+        messageLabel_->startLoadLabel();
+
+        std::vector<std::string> cmd;
+        cmd.emplace_back("ecflow_client");
+        cmd.emplace_back("--status");
+        cmd.emplace_back("<full_name>");
+        CommandHandler::run(info_,cmd);
+
+        timeoutCount_ = 1;
+        timer_->start(timeout_);
+    }
 }
 
 static InfoPanelItemMaker<JobStatusItemWidget> maker1("job_status");

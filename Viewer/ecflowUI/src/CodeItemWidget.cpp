@@ -28,6 +28,7 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) :
 	setupUi(this);
 
 	externalTb_->hide();
+    commandTb_->hide();
 
 	fileLabel_->setProperty("fileInfo","1");
 
@@ -81,6 +82,11 @@ void CodeItemWidget::on_fontSizeDownTb__clicked()
 void CodeItemWidget::on_reloadTb__clicked()
 {
     reloadRequested();
+}
+
+void CodeItemWidget::on_commandTb__clicked()
+{
+    commandRequested();
 }
 
 //-----------------------------------------

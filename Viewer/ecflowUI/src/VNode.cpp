@@ -761,6 +761,11 @@ bool VNode::isSubmitted() const
     return (node_ && node_->state() == NState::SUBMITTED);
 }
 
+bool VNode::isActive() const
+{
+    return (node_ && node_->state() == NState::ACTIVE);
+}
+
 QColor  VNode::stateColour() const
 {
 	return VNState::toColour(this);
