@@ -21,14 +21,12 @@
 
 JobStatusItemWidget::JobStatusItemWidget(QWidget *parent) :
     CodeItemWidget(parent),
-    timeout_(2000)
+    timeout_(15000),
+    fetchFileScheduled_(false)
 {
     messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();
     textEdit_->setShowLineNumbers(false);
-
-    //The document becomes the owner of the highlighter
-    new Highlighter(textEdit_->document(), "manual");
 
     infoProvider_=new JobStatusProvider(this);
 
@@ -75,6 +73,8 @@ void JobStatusItemWidget::reload(VInfo_ptr info)
     if(info_ && info_->isNode() && info_->node())
     {
         reloadTb_->setEnabled(false);
+        messageLabel_->showInfo("Generating job status information ...");
+        messageLabel_->startLoadLabel();
         runStatusCommand();
         timer_->start(timeout_);
     }
@@ -82,6 +82,8 @@ void JobStatusItemWidget::reload(VInfo_ptr info)
 
 void JobStatusItemWidget::fetchJobStatusFile()
 {
+    messageLabel_->stopLoadLabel();
+    messageLabel_->hide();
     timer_->stop();
     if(info_ && info_->isNode() && info_->node())
     {
@@ -92,6 +94,8 @@ void JobStatusItemWidget::fetchJobStatusFile()
 
 void JobStatusItemWidget::clearContents()
 {
+    fetchFileScheduled_ = false;
+    messageLabel_->stopLoadLabel();
     timer_->stop();
     InfoPanelItem::clear();
     textEdit_->clear();
@@ -149,6 +153,12 @@ void JobStatusItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         if(suspended_)
         {
             reloadTb_->setEnabled(false);
+            if (timer_->isActive()) {
+                timer_->stop();
+                messageLabel_->stopLoadLabel();
+                messageLabel_->hide();
+                fetchFileScheduled_ = true;
+            }
         }
         //Resume
         else
@@ -156,6 +166,10 @@ void JobStatusItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
             if(info_ && info_->node())
             {
                 reloadTb_->setEnabled(true);
+                if (fetchFileScheduled_) {
+                    fetchFileScheduled_ = false;
+                    reload(info_);
+                }
             }
             else
             {

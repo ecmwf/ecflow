@@ -45,6 +45,7 @@ protected:
 
       QTimer* timer_;
       int timeout_;
+      bool fetchFileScheduled_;
 };
 
 #endif // JOBSTATUSITEMWIDGET_HPP
