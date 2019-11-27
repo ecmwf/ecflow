@@ -77,7 +77,7 @@
                 }
             },
             "slow" : {
-                "label" : "Slow server write",
+                "label" : "Slow checkpoint write",
                 "tooltip" : "Slow writing of chekpoint file",
                 "shortDesc" : "Slow writing of chekpoint file",
                 "icon"  : {
