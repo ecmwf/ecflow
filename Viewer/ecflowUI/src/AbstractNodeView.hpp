@@ -134,6 +134,9 @@ protected:
         return expandedIndexes.contains(idx);
     }
 
+    //navigation
+    void navigateDown(const QModelIndex& idx);
+
     //selection
     void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command, bool shiftKeyPressed);
     void select(const QModelIndex &topIndex, const QModelIndex &bottomIndex,

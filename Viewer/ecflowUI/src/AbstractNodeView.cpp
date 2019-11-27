@@ -281,6 +281,9 @@ void AbstractNodeView::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Minus:
             collapse(current);
             break;
+        case Qt::Key_Down:
+            navigateDown(current);
+            break;
         }
     }
 
@@ -931,6 +934,23 @@ void AbstractNodeView::collapseAll()
     expandedIndexes.clear();
     doItemsLayout();
 }
+
+//========================================================
+//
+// Navigation
+//
+//========================================================
+
+void AbstractNodeView::navigateDown(const QModelIndex& idx)
+{
+    int item = viewIndex(idx);
+    if (item != -1 && viewItems_.size() > static_cast<size_t>(item+1)) // is visible
+    {
+         const QModelIndex &downIndex = viewItems_[item+1].index;
+         setCurrentIndex(downIndex);
+    }
+}
+
 
 //========================================================
 //
