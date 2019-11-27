@@ -475,6 +475,21 @@
 
         {
             "menu"           : "Special",
+            "name"           : "Status",
+            "visible_for"    : "(task or alias)",
+            "enabled_for"    : "(active or submitted)",
+            "command"        : "ecflow_client --status <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "-"
+        },
+
+
+        {
+            "menu"           : "Special",
             "name"           : "URL command",
             "command"        : "sh %ECF_URL_CMD%",
             "multi"          : "false",

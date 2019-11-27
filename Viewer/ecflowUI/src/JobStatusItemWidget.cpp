@@ -78,6 +78,9 @@ void JobStatusItemWidget::reload(VInfo_ptr info)
     //Info must be a node
     if(info_ && info_->isNode() && info_->node())
     {
+        VNode *node = info_->node();
+        Q_ASSERT(node);
+        commandTb_->setEnabled(node->isActive() || node->isSubmitted());
         fetchJobStatusFile();
     }
 }
