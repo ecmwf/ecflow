@@ -28,7 +28,7 @@ JobStatusItemWidget::JobStatusItemWidget(QWidget *parent) :
     fetchFileScheduled_(false)
 {
     commandTb_->show();
-    commandTb_->setText(tr("Execute --status command"));
+    commandTb_->setText(tr("Execute status command"));
 
     messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();
