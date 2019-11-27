@@ -30,7 +30,6 @@
 #include "ClientInvoker.hpp"
 
 #include "NodeUtil.hpp"
-#include "Edit.hpp"
 #include "DefsDoc.hpp"
 #include "NodeAttrDoc.hpp"
 #include "BoostPythonUtil.hpp"

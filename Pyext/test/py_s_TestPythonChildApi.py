@@ -57,7 +57,9 @@ def create_defs(name,the_port):
 
     family.add_task("t2")  # test wait
     family.add_task("t3").add_trigger("t1:q1 >= 3 and t1:event_fred and t1:event_set == clear") # wait on queue q1 and events
+    family.add_task("t4").add_trigger("t1:name1 == 1 and t1:name2 == 2 and t1:name3 == 3 and t1:name4 == 4") # test ECFLOW-1573
  
+    defs.auto_add_externs(True) # because variable name1,name2,name3,name4  are not added until t1 is active.(i.e. runtime)
     return defs;
     
 def wait_for_suite_to_complete(ci,suite_name):
@@ -78,18 +80,19 @@ def wait_for_suite_to_complete(ci,suite_name):
         
     ci.log_msg("Looped " + str(count) + " times")
     
-def test_python_child_api(ci):            
-    print("\ntest_python_child_api " + ci.get_host() + ":" + str(ci.get_port()))
+def test_python_child_api(ci):   
+    suite_name = "test_python_child_api"         
+    print("\n" + suite_name + " " + ci.get_host() + ":" + str(ci.get_port()))
     print(" ECF_HOME(" + Test.ecf_home(ci.get_port()) + ")")
     print(" ECF_INCLUDES(" + ecf_includes() + ")")
     ci.delete_all(True)     
-    defs = create_defs("test_python_child_api",ci.get_port())  
-    suite = defs.find_suite("test_python_child_api")
+    defs = create_defs(suite_name,ci.get_port())  
+    suite = defs.find_suite(suite_name)
     suite.add_defstatus(DState.suspended)
 
     # create the ecf file /test_python_child_api/f1/t1
     ecf_home = Test.ecf_home(ci.get_port())
-    dir = ecf_home + "/test_python_child_api/f1"
+    dir = ecf_home + "/" + suite_name + "/f1"
     
     # on cray creating recursive directories can fail, try again. yuk
     try:
@@ -109,7 +112,7 @@ def test_python_child_api(ci):
     server_version = ci.server_version()
     file = dir + "/t1.ecf"
     contents = "%include <head.py>\n\n"
-    contents += "with Client() as ci:\n"
+    contents += "with Client(True) as ci:\n" # Here True means add variables durint init and remove them on complete ECFLOW-1573
     contents += "    print('doing some work: t1.ecf')\n"
     contents += "    if ci.version() != '" + server_version + "':\n"
     contents += "        assert False, 'Client and server versions different'\n"
@@ -149,7 +152,15 @@ def test_python_child_api(ci):
     contents += "    print('Running t3.ecf')\n"
     open(file,'w').write(contents)
     print(" Created file " + file)
-        
+    
+    # create the ecf file /test_python_child_api/f1/t4
+    file = dir + "/t4.ecf"
+    contents = "%include <head.py>\n\n"
+    contents += "with Client() as ci:\n"
+    contents += "    print('Running t4.ecf')\n"
+    open(file,'w').write(contents)
+    print(" Created file " + file)
+            
     ci.restart_server()
     ci.load(defs)          
     ci.begin_all_suites()
@@ -158,12 +169,14 @@ def test_python_child_api(ci):
 
     wait_for_suite_to_complete(ci,"test_python_child_api");
     
+    defs.save_as_defs(os.path.join(ecf_home,suite_name, suite_name + ".def"))
+
     if not Test.debugging():
         dir_to_remove = Test.ecf_home(ci.get_port()) + "/" + "test_python_child_api"
         print(" Test OK: removing directory " , dir_to_remove)
         shutil.rmtree(dir_to_remove)      
-        
-# //////////////////////////////////////////////////////////////////////////////////////        
+
+#///////////////////////////////////////////////////////////////////////////////////////        
 
 if __name__ == "__main__":
     Test.print_test_start(os.path.basename(__file__))

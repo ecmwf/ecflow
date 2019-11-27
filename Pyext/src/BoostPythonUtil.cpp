@@ -36,6 +36,15 @@ void BoostPythonUtil::list_to_str_vec(const boost::python::list& list, std::vect
    }
 }
 
+void BoostPythonUtil::list_to_str_vec(const boost::python::list& list, std::vector<Variable>& vec )
+{
+   int the_list_size = len(list);
+   vec.reserve(the_list_size);
+   for (int i = 0; i < the_list_size; ++i) {
+      vec.push_back(boost::python::extract<Variable>(list[i]));
+   }
+}
+
 void BoostPythonUtil::dict_to_str_vec(const boost::python::dict& dict, std::vector<std::pair<std::string,std::string> >& str_pair_vec)
 {
    boost::python::list keys = dict.keys();

@@ -246,10 +246,12 @@ class Server(object):
         print("   Terminate server "+ self.at_time() )
         self.ci.terminate_server()  
         print("   Terminate server OK " + self.at_time() )
-        self.lock_file.remove(self.the_port)
+        if not debugging():
+            self.lock_file.remove(self.the_port)
         
         # Do not clean up data, if an assert was raised. This allow debug
         if exctype == None:
-            clean_up_server(str(self.the_port))
-            clean_up_data(str(self.the_port))
+            if not debugging():
+                clean_up_server(str(self.the_port))
+                clean_up_data(str(self.the_port))
         return False

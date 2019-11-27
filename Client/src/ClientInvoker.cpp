@@ -1443,7 +1443,7 @@ void ClientInvoker::child_init()
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( std::make_shared<InitCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no()  ));
+   invoke( std::make_shared<InitCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(), clientEnv_.init_add_vars()));
 }
 
 void ClientInvoker::child_abort(const std::string& reason )
@@ -1497,7 +1497,7 @@ void ClientInvoker::child_complete()
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( std::make_shared<CompleteCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no() ));
+   invoke( std::make_shared<CompleteCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(), clientEnv_.complete_del_vars()));
 }
 
 // ==========================================================================
