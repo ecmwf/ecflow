@@ -135,7 +135,14 @@ protected:
     }
 
     //navigation
-    void navigateDown(const QModelIndex& idx);
+    void navigateNext(const QModelIndex& idx);
+    void navigatePrev(const QModelIndex& idx);
+    virtual void navigateUp(const QModelIndex& idx)=0;
+    virtual void navigateDown(const QModelIndex& idx)=0;
+    virtual void navigateLeft(const QModelIndex& idx)=0;
+    virtual void navigateRight(const QModelIndex& idx)=0;
+    void navigateHome(const QModelIndex& idx);
+    void navigateEnd(const QModelIndex& idx);
 
     //selection
     void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command, bool shiftKeyPressed);

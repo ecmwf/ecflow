@@ -788,3 +788,23 @@ void StandardView::updateViewport(const QRect rect)
     else
         viewport()->update(rect);
 }
+
+void StandardView::navigateLeft(const QModelIndex& idx)
+{
+    collapse(idx);
+}
+
+void StandardView::navigateRight(const QModelIndex& idx)
+{
+    expand(idx);
+}
+
+void StandardView::navigateUp(const QModelIndex& idx)
+{
+    navigatePrev(idx);
+}
+
+void StandardView::navigateDown(const QModelIndex& idx)
+{
+    navigateNext(idx);
+}
