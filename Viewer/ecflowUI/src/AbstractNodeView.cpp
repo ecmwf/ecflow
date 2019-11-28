@@ -293,6 +293,9 @@ void AbstractNodeView::keyPressEvent(QKeyEvent *event)
         case Qt::Key_Down:
             navigateDown(current);
             break;
+        case Qt::Key_Space:
+            toggleExpand(current);
+            break;
         case Qt::Key_Asterisk:
         case Qt::Key_Period:
             expandAll(current);
@@ -305,6 +308,8 @@ void AbstractNodeView::keyPressEvent(QKeyEvent *event)
             break;
         case Qt::Key_End:
             navigateEnd(current);
+            break;
+        default:
             break;
         }
     }
@@ -955,6 +960,15 @@ void AbstractNodeView::collapseAll()
 {
     expandedIndexes.clear();
     doItemsLayout();
+}
+
+void AbstractNodeView::toggleExpand(const QModelIndex& idx)
+{
+    if (isExpanded(idx)) {
+        collapse(idx);
+    } else {
+        expand(idx);
+    }
 }
 
 //========================================================

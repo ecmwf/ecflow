@@ -127,7 +127,7 @@ protected:
     void removeAllFromExpanded(const QModelIndex &index);
     void totalNumOfChildren(const QModelIndex& idx,int& num) const;
     void totalNumOfExpandedChildren(const QModelIndex& idx,int& num) const;
-
+    void toggleExpand(const QModelIndex& idx);
     inline bool isIndexExpanded(const QModelIndex &idx) const
     {
         //We first check if the idx is a QPersistentModelIndex, because creating QPersistentModelIndex is slow
