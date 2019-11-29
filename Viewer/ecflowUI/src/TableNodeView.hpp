@@ -53,6 +53,7 @@ public:
 public Q_SLOTS:
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
+    void slotCommandShortcut();
     void slotViewCommand(VInfo_ptr,QString);
 	void slotHeaderContextMenu(const QPoint &position);
 	void slotSizeHintChangedGlobal();

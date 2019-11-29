@@ -14,6 +14,7 @@
 #include <QHeaderView>
 #include <QPalette>
 #include <QScrollBar>
+#include <QShortcut>
 #include <QTime>
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
@@ -325,6 +326,21 @@ void TreeNodeView::slotDoubleClickItem(const QModelIndex& idx)
     if(info && info->isAttribute())
     {
         slotViewCommand(info,"edit");
+    }
+}
+
+void TreeNodeView::slotCommandShortcut()
+{
+    if (QShortcut* sc = static_cast<QShortcut*>(QObject::sender())) {
+        QModelIndexList indexLst=selectedList();
+        std::vector<VInfo_ptr> nodeLst;
+        for(int i=0; i < indexLst.count(); i++)
+        {
+            VInfo_ptr info=model_->nodeInfo(indexLst[i]);
+            if(info && !info->isEmpty())
+                nodeLst.push_back(info);
+        }
+        actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
     }
 }
 

@@ -18,6 +18,7 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QScrollBar>
+#include <QShortcut>
 #include <QStyle>
 #include <QToolButton>
 
@@ -315,6 +316,22 @@ void TableNodeView::handleContextMenu(QModelIndex indexClicked,QModelIndexList i
 		else
 		{
 		}
+}
+
+
+void TableNodeView::slotCommandShortcut()
+{
+    if (QShortcut* sc = static_cast<QShortcut*>(QObject::sender())) {
+        QModelIndexList indexLst=selectedList();
+        std::vector<VInfo_ptr> nodeLst;
+        for(int i=0; i < indexLst.count(); i++)
+        {
+            VInfo_ptr info=model_->nodeInfo(indexLst[i]);
+            if(info && !info->isEmpty())
+                nodeLst.push_back(info);
+        }
+        actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
+    }
 }
 
 void TableNodeView::slotViewCommand(VInfo_ptr info,QString cmd)

@@ -44,6 +44,7 @@ public Q_SLOTS:
 	void slotSelectItem(const QModelIndex&);
 	void slotDoubleClickItem(const QModelIndex&);
 	void slotContextMenu(const QPoint &position);
+    void slotCommandShortcut();
 	void slotViewCommand(std::vector<VInfo_ptr>,QString);
 	void slotSetCurrent(VInfo_ptr);
 	void slotRerender();

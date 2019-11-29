@@ -70,7 +70,7 @@ void MenuConfigDialog::addChildrenToMenuTree(Menu *menu, QTreeWidgetItem *parent
     if(!menu)
         return;
 
-    std::vector<MenuItem *>&items = menu->items();
+    const std::vector<MenuItem *>& items = menu->items();
 
 	for (auto & itItems : items)
 	{

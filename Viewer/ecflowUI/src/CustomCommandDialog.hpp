@@ -21,16 +21,11 @@ class CustomCommandDialog : public QDialog, private Ui::CustomCommandDialog
 
 public:
 	explicit CustomCommandDialog(QWidget *parent = nullptr);
-	~CustomCommandDialog() override = default;;
+    ~CustomCommandDialog() override = default;
 
-	MenuItem &menuItem() {return commandDesigner_->menuItem();};
-	void setNodes(std::vector<VInfo_ptr> &nodes) {commandDesigner_->setNodes(nodes);};
-	std::vector<VInfo_ptr> &selectedNodes() {return commandDesigner_->selectedNodes();};
-
-
-
-//public Q_SLOTS:
-//	void insertCurrentText();
+    MenuItem &menuItem() {return commandDesigner_->menuItem();}
+    void setNodes(const std::vector<VInfo_ptr> &nodes) {commandDesigner_->setNodes(nodes);}
+    const std::vector<VInfo_ptr> &selectedNodes() {return commandDesigner_->selectedNodes();}
 };
 
 #endif

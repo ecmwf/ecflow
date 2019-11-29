@@ -22,11 +22,10 @@
 
 class QMenu;
 class QAction;
+class QShortcut;
 class QWidget;
 class Node;
 class BaseNodeCondition;
-
-
 
 // -------------------------
 // MenuItem
@@ -50,6 +49,7 @@ public:
     void setWarning(const std::string &warning) {warning_=warning;}
     void setIcon(const std::string &icon);
     void setStatustip(const std::string &statustip) {statustip_=statustip;}
+    void setShortcut(const std::string &shortcut) {shortcut_=shortcut;}
     void setHidden(bool b) {hidden_=b;}
     void setMultiSelect(bool b) {multiSelect_=b;}
     void setAsSubMenu() {isSubMenu_ = true;}
@@ -60,12 +60,13 @@ public:
     BaseNodeCondition *visibleCondition() const {return visibleCondition_;}
     BaseNodeCondition *enabledCondition() const  {return enabledCondition_;}
     BaseNodeCondition *questionCondition() const {return questionCondition_;}
-    bool shouldAskQuestion(std::vector<VInfo_ptr> &nodes);
+    bool shouldAskQuestion(const std::vector<VInfo_ptr> &nodes) const;
     bool isSubMenu() const {return isSubMenu_;}
     bool isDivider() const {return isDivider_;}
     bool isCustom()  const {return isCustom_;}
     const std::string& name() const {return name_;}
     const std::string& handler() const {return handler_;}
+    const std::string& shortcut() const {return shortcut_;}
     bool isValidView(const std::string&) const;
     const std::string& command() const {return command_;}
     const std::string& question() const {return question_;}
@@ -73,8 +74,10 @@ public:
     const std::string& warning() const {return warning_;}
     bool hidden() const {return hidden_;}
     bool multiSelect() const {return multiSelect_;}
+    bool isValidFor(const std::vector<VInfo_ptr>& nodes) const;
     int id() const {return id_;}
     QAction* createAction(QWidget* parent);
+    QShortcut* createShortcut(QWidget* parent, const std::string& view);
 
 private:
     //No copy allowed
@@ -93,6 +96,7 @@ private:
     std::string defaultAnswer_;
     std::string warning_;
     std::string handler_;
+    std::string shortcut_;
     std::vector<std::string> views_;
     bool hidden_;
     bool multiSelect_; //multiple selecttion
@@ -129,20 +133,21 @@ public:
     explicit Menu(const std::string &name);
     ~Menu();
     QString exec(std::vector<Node *> nodes);
-    std::string &name()       {return name_;};
-    void addItemToFixedList(MenuItem *item) {itemsFixed_.push_back(item);};
-    void addItemToCustomList(MenuItem *item) {itemsCustom_.push_back(item);};
+    const std::string& name() const {return name_;}
+    void addItemToFixedList(MenuItem *item) {itemsFixed_.push_back(item);}
+    void addItemToCustomList(MenuItem *item) {itemsCustom_.push_back(item);}
     void clearFixedList() {itemsFixed_.clear();}
     QMenu *generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* parentMenu,const std::string& view,QList<QAction*>&);
-    std::vector<MenuItem *>& items() {return itemsCombined_;};
+    const std::vector<MenuItem*>& itemsFixed() const {return itemsFixed_;}
+    const std::vector<MenuItem*>& items() const {return itemsCombined_;}
 
 private:
     void buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu);
 
     std::string             name_;
-    std::vector<MenuItem *> itemsFixed_;
-    std::vector<MenuItem *> itemsCustom_;
-    std::vector<MenuItem *> itemsCombined_;  // items from config file plus custom commands
+    std::vector<MenuItem*> itemsFixed_;
+    std::vector<MenuItem*> itemsCustom_;
+    std::vector<MenuItem*> itemsCombined_;  // items from config file plus custom commands
 
 };
 
@@ -168,6 +173,8 @@ public:
     static void addMenu(Menu *menu) {menus_.push_back(menu);}
     static void interceptCommandsThatNeedConfirmation(MenuItem *item);
     static void refreshCustomMenuCommands();
+    static void setupShortcut(QObject* receiver,QWidget* w, const std::string& view);
+    static MenuItem* findItemById(int id);
 
 private:
     typedef std::map<std::string, std::string> ConfirmationMap;
@@ -178,9 +185,6 @@ private:
     static ConfirmationMap commandsWhichRequireConfirmation_;
     static TrueNodeCondition trueCond_;
     static FalseNodeCondition falseCond_;
-    //static std::vector<MenuItem> items_;
-
 };
-
 
 #endif 

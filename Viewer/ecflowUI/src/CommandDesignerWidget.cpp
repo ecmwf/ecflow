@@ -159,7 +159,7 @@ void CommandDesignerWidget::changeToTab(TabIndexes i)
 }
 
 
-void CommandDesignerWidget::setNodes(std::vector<VInfo_ptr> &nodes)
+void CommandDesignerWidget::setNodes(const std::vector<VInfo_ptr> &nodes)
 {
 	nodes_ = nodes;
 
@@ -207,7 +207,7 @@ void CommandDesignerWidget::on_nodeSelectionChanged()
 }
 
 
-std::vector<VInfo_ptr>& CommandDesignerWidget::selectedNodes()
+const std::vector<VInfo_ptr>& CommandDesignerWidget::selectedNodes()
 {
 	nodeSelectionView_->getListOfSelectedNodes(nodes_);
 	return nodes_;

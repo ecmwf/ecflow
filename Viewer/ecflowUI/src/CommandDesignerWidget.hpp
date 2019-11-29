@@ -31,8 +31,8 @@ public:
 	~CommandDesignerWidget() override;
 
 	MenuItem &menuItem();
-	void setNodes(std::vector<VInfo_ptr> &nodes);
-    std::vector<VInfo_ptr>& selectedNodes();
+    void setNodes(const std::vector<VInfo_ptr> &nodes);
+    const std::vector<VInfo_ptr>& selectedNodes();
 
 public Q_SLOTS:
 	void insertComponent(QListWidgetItem *);

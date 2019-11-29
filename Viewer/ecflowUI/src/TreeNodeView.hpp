@@ -51,6 +51,7 @@ public:
 
 public Q_SLOTS:
     void slotContextMenu(const QPoint &position);
+    void slotCommandShortcut();
     void slotViewCommand(VInfo_ptr,QString);
 #if 0
     void slotSaveExpand();

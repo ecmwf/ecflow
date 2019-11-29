@@ -67,7 +67,8 @@
             "name"           : "Suspend",
             "visible_for"    : "not suspended and node",
             "command"        : "ecflow_client --suspend <full_name>",
-            "status_tip"     : "__cmd__"
+            "status_tip"     : "__cmd__",
+            "shortcut"       : "Ctrl+S"
         },
 
         {
@@ -75,7 +76,8 @@
             "name"           : "Resume",
             "visible_for"    : "suspended and node",
             "command"        : "ecflow_client --resume <full_name>",
-            "status_tip"     : "__cmd__"
+            "status_tip"     : "__cmd__",
+            "shortcut"       : "Ctrl+R"
         },
 
         {
@@ -84,7 +86,8 @@
             "visible_for"    : "task",
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --force queued <full_name>",
-            "status_tip"     : "__cmd__"
+            "status_tip"     : "__cmd__",
+            "shortcut"       : "Ctrl+U"
         },
 
         {
@@ -119,7 +122,8 @@
             "visible_for"    : "task or alias",
             "enabled_for"    : "(not active) and (not submitted)",
             "command"        : "ecflow_client --run <full_name>",
-            "status_tip"     : "__cmd__"
+            "status_tip"     : "__cmd__",
+            "shortcut"       : "Ctrl+E"
         },        
 
         {
@@ -855,7 +859,8 @@
             "command"        : "edit",
             "multi"          : "false",
             "handler"        : "info_panel",
-            "icon"           : "edit.svg"          
+            "icon"           : "edit.svg",
+            "shortcut"       : "e"
         },  
         {            
             "menu"           : "Node",
@@ -864,7 +869,8 @@
             "command"        : "output",
             "multi"          : "false",
             "handler"        : "info_panel",
-            "icon"           : "output.svg"          
+            "icon"           : "output.svg",
+            "shortcut"       : "o"
         },
         {            
             "menu"           : "Node",
@@ -873,7 +879,8 @@
             "command"        : "variable",
             "multi"          : "false",
             "handler"        : "info_panel",
-            "icon"           : "variable.svg"          
+            "icon"           : "variable.svg",
+            "shortcut"       : "v"
         },                  
         {
             "menu"           : "Node",
