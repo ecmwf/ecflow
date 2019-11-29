@@ -1,0 +1,8 @@
+suite s
+ family anon    
+   task t6
+     inlimit ../anon:anon   # relative limit (parent)
+   task t7
+     inlimit ../../s:disk   # relative limit (parents/parent)
+ endfamily
+endsuite
