@@ -148,6 +148,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string multiSelect   = ItemDef.get("multi", "true");
                 std::string statustip  = ItemDef.get("status_tip", "");
                 std::string shortcut  = ItemDef.get("shortcut", "");
+                std::string panelPopupControl = ItemDef.get("panel_control", "");
 
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
@@ -188,6 +189,7 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setIcon(icon);
                 item->setStatustip(statustip);
                 item->setShortcut(shortcut);
+                item->setPanelPopupControl(panelPopupControl);
 
                 if(!views.empty())
                 {
@@ -616,8 +618,18 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     	if(!itItems->isValidView(view))
     		continue;
 
-        bool visible = true;
+        // Control if some items are shown
+        if(!itItems->panelPopupControl().empty())
+        {
+            if(VProperty* prop=VConfig::instance()->find(itItems->panelPopupControl()))
+                if(!prop->valueAsString().contains(
+                   QString::fromStdString(itItems->command()), Qt::CaseSensitive))
+                    {
+                        continue;
+                    }
+         }
 
+        bool visible = true;
         for (auto & node : nodes)
         {
             //compatible = compatible && (*itItems)->compatibleWithNode(*itNodes);

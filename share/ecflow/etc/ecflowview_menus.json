@@ -808,98 +808,144 @@
         },
         {
             "menu"           : "Node",
-            "name"           : "Server log ...",
-            "visible_for"    : "server",        
-            "command"        : "history",
-            "multi"          : "false",
-            "handler"        : "info_panel",
-            "icon"           : "server_log.svg"          
-        },         
-        {
-            "menu"           : "Node",
-            "name"           : "Suite filter ...",
-            "visible_for"    : "server",        
-            "command"        : "suite",
-            "multi"          : "false",
-            "handler"        : "info_panel",            
-            "icon"           : "filter.svg"          
-        }, 
-        {
-            "menu"           : "Node",
-            "name"           : "Zombies ...",
-            "visible_for"    : "server or node",
-            "command"        : "zombie",
-            "multi"          : "false",
-            "handler"        : "info_panel",
-            "icon"           : "zombie.svg"            
-        }, 
-        {
-            "menu"           : "Node",
-            "name"           : "Server settings ...",
-            "visible_for"    : "server",        
-            "command"        : "server_settings",
-            "multi"          : "false",
-            "handler"        : "info_panel",
-            "icon"           : "cogwheel_blue.svg"
-        }, 
-        {
-            "menu"           : "Node",
-            "name"           : "Info ...",
-            "visible_for"    : "server or node",        
-            "command"        : "overview",
-            "multi"          : "false",
-            "handler"        : "info_panel",
-            "icon"           : "overview.svg"          
-        }, 
-        
-        {
-            "menu"           : "Node",
             "name"           : "Edit ...",
-            "visible_for"    : "task or alias",        
+            "visible_for"    : "task or alias",
+            "panel_control"  : "menu.panel.visiblePanelActions",
             "command"        : "edit",
             "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "edit.svg",
             "shortcut"       : "e"
-        },  
-        {            
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Info ...",
+            "visible_for"    : "server or node",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "overview",
+            "multi"          : "false",
+            "handler"        : "info_panel",
+            "icon"           : "overview.svg",
+            "shortcut"       : "i"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Job ...",
+            "visible_for"    : "task or alias",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "job",
+            "multi"          : "false",
+            "handler"        : "info_panel",
+            "icon"           : "job.svg",
+            "shortcut"       : "j"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Manual ...",
+            "visible_for"    : "node",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "manual",
+            "multi"          : "false",
+            "handler"        : "info_panel",
+            "icon"           : "manual.svg",
+            "shortcut"       : "m"
+        },
+        {
             "menu"           : "Node",
             "name"           : "Output ...",
-            "visible_for"    : "task or alias",        
+            "visible_for"    : "task or alias",
+            "panel_control"  : "menu.panel.visiblePanelActions",
             "command"        : "output",
             "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "output.svg",
             "shortcut"       : "o"
         },
-        {            
+        {
+            "menu"           : "Node",
+            "name"           : "Script ...",
+            "visible_for"    : "task or alias",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "script",
+            "multi"          : "false",
+            "handler"        : "info_panel",
+            "icon"           : "script.svg",
+            "shortcut"       : "s"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Server log ...",
+            "visible_for"    : "server",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "history",
+            "multi"          : "false",
+            "handler"        : "info_panel",
+            "icon"           : "server_log.svg"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Server settings ...",
+            "visible_for"    : "server",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "server_settings",
+            "multi"          : "false",
+            "handler"        : "info_panel",
+            "icon"           : "cogwheel_blue.svg"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Suite filter ...",
+            "visible_for"    : "server",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "suite",
+            "multi"          : "false",
+            "handler"        : "info_panel",
+            "icon"           : "filter.svg"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Triggers ...",
+            "visible_for"    : "node",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "triggers",
+            "multi"          : "false",
+            "handler"        : "info_panel",
+            "icon"           : "trigger.svg",
+            "shortcut"       : "t"
+        },
+        {
             "menu"           : "Node",
             "name"           : "Variables ...",
-            "visible_for"    : "server or node",        
+            "visible_for"    : "server or node",
+            "panel_control"  : "menu.panel.visiblePanelActions",
             "command"        : "variable",
             "multi"          : "false",
             "handler"        : "info_panel",
             "icon"           : "variable.svg",
             "shortcut"       : "v"
-        },                  
+        },
         {
             "menu"           : "Node",
-            "name"           : "Script ...",
-            "visible_for"    : "task or alias",        
-            "command"        : "script",
+            "name"           : "Why ...",
+            "visible_for"    : "node",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "why",
             "multi"          : "false",
             "handler"        : "info_panel",
-            "icon"           : "script.svg"          
-        }, 
+            "icon"           : "why.svg",
+            "shortcut"       : "w"
+        },
         {
             "menu"           : "Node",
-            "name"           : "Job ...",
-            "visible_for"    : "task or alias",        
-            "command"        : "job",
+            "name"           : "Zombies ...",
+            "visible_for"    : "server or node",
+            "panel_control"  : "menu.panel.visiblePanelActions",
+            "command"        : "zombie",
             "multi"          : "false",
             "handler"        : "info_panel",
-            "icon"           : "job.svg"          
-        }, 
+            "icon"           : "zombie.svg",
+            "shortcut"       : "z"
+        },
          {
             "menu"           : "Node",
             "name"           : "-"

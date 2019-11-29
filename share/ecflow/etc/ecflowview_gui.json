@@ -266,47 +266,62 @@
             "desc" : "Menus",
             "icon" : "menu.svg",
 
-            "group" : {
-                "title" : "Node context menu",
+            "tabs"  : {
+                "tab" : {
+                    "label"  : "Menu mode",
+                    "group" : {
+                        "title" : "Node context menu",
 
-                "line" : "server.menu.nodeMenuMode",
-                "note" : {
-                        "default" : "Operator and Administrator modes allow suites to be <b>begun</b>, nodes to be <b>removed</b> and servers to be <b>unlocked</b>. Administrator mode additionally enables the <b><I>Force</I></b> and <b><I>Order</I></b> menus."
-                },                
-                "note" : {
-                        "default" : "These settings can be customised for each server separately"
-                }
-            },
+                        "line" : "server.menu.nodeMenuMode",
+                        "note" : {
+                                "default" : "Operator and Administrator modes allow suites to be <b>begun</b>, nodes to be <b>removed</b> and servers to be <b>unlocked</b>. Administrator mode additionally enables the <b><I>Force</I></b> and <b><I>Order</I></b> menus."
+                        },
+                        "note" : {
+                                "default" : "These settings can be customised for each server separately"
+                        }
+                    },
 
-            "group" : {
-                "title" : "Node context menu control",
+                    "group" : {
+                        "title" : "Node context menu control",
 
-                "line" : "server.menu.defStatusMenuModeControl",
-                "note" : {
-                        "default" : "These settings can be customised for each server separately"
-                }
-            },
+                        "line" : "server.menu.defStatusMenuModeControl",
+                        "note" : {
+                                "default" : "These settings can be customised for each server separately"
+                        }
+                    }
+                },
+                "tab" : {
+                    "label"  : "Confirmation",
+                    "group" : {
+                        "title" : "Request confirmation when:",
+                        "prefix" : "menu.confirm",
 
-            "group" : {
-                "title" : "Request confirmation when:",
-                "prefix" : "menu.confirm",
+                        "line" : "confirmRequeue",
+                        "line" : "confirmRequeueAborted",
+                        "line" : "confirmSetComplete",
+                        "line" : "confirmSetABorted",
+                        "line" : "confirmForceComplete",
+                        "line" : "confirmForceAborted",
+                        "line" : "confirmKillTask",
+                        "line" : "confirmKillSuite"
+                    },
 
-                "line" : "confirmRequeue",
-                "line" : "confirmRequeueAborted",
-                "line" : "confirmSetComplete",
-                "line" : "confirmSetABorted",
-                "line" : "confirmForceComplete",
-                "line" : "confirmForceAborted",
-                "line" : "confirmKillTask",
-                "line" : "confirmKillSuite"
-            },
+                    "group" : {
+                        "title" : "Request confirmation when:",
+                        "prefix" : "menu.web",
 
-            "group" : {
-                "title" : "Request confirmation when:",
-                "prefix" : "menu.web",
-
-                "line" : "defaultBrowser"
-            }
+                        "line" : "defaultBrowser"
+                    }
+                },
+                "tab" : {
+                    "label" : "Info panel",
+                    "group" : {
+                        "title" : "Node context menu:",
+                        "prefix" : "menu.panel",
+                        "line" : "visiblePanelActions"
+                    }
+               }
+           }
         },
 
         "notification":  {
