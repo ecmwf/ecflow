@@ -207,8 +207,45 @@
                     "label"   : "Holding day/date colour",
                     "default" : "rgb(171,22,22)"
             }
-
            },
+
+           "label": {
+                "errorEnabled" : {
+                    "label"   : "Enable",
+                    "default" : "false"
+                },
+                "errorFontColour" : {
+                    "label"   : "Font colour",
+                    "default" : "rgb(0,0,0)",
+                    "disabledRule": "errorEnabled=false"
+                },
+                "errorBgEnabled" : {
+                    "label"   : "Fill background",
+                    "default" : "false",
+                    "disabledRule": "errorEnabled=false"
+                },
+                "errorBgColour" : {
+                    "label"   : "Background colour",
+                    "default" : "rgb(171,22,22)",
+                    "disabledRule": "errorBgEnabled=false/or/errorEnabled=false"
+                },
+                "warningEnabled" : {
+                    "label"   : "Enable",
+                    "default" : "false"
+                },
+                "warningBgEnabled" : {
+                    "label"   : "Fill background",
+                    "default" : "false"
+                },
+                "warningBgColour" : {
+                    "label"   : "Background colour",
+                    "default" : "rgb(171,22,22)"
+                },
+                "warningFontColour" : {
+                    "label"   : "Font colour",
+                    "default" : "rgb(0,0,0)"
+                }
+            },
 
            "textEdit" : {
 			     

@@ -123,6 +123,25 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
      }
 };
 
+class LabelStyle
+{
+public:
+    LabelStyle(const std::string& prefix, PropertyMapper* prop);
+    void update();
+
+    bool enabled_;
+    bool enabledBg_;
+    QPen fontPen_;
+    QBrush bgBrush_;
+
+protected:
+    VProperty *enabledProp_;
+    VProperty *enabledBgProp_;
+    VProperty *fontProp_;
+    VProperty *bgProp_;
+};
+
+
 class NodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
 {
 public:
@@ -212,6 +231,10 @@ protected:
 
     int holdingTimePixId_;
     int holdingDatePixId_;
+
+    enum LabelType {ErrorLabel, WarningLabel};
+    QStringList labelPropKeys_;
+    QMap<LabelType, LabelStyle*> labelStyle_;
 };
 
 #endif

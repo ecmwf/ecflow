@@ -23,6 +23,31 @@ int NodeViewDelegate::lighter_=150;
 
 static std::vector<std::string> propVec;
 
+LabelStyle::LabelStyle(const std::string& prefix, PropertyMapper *prop):
+    enabled_(false),
+    enabledBg_(false)
+{
+    enabledProp_ = prop->find(prefix + "Enabled");
+    enabledBgProp_ = prop->find(prefix + "BgEnabled");
+    fontProp_ = prop->find(prefix + "FontColour");
+    bgProp_ = prop->find(prefix + "BgColour");
+    Q_ASSERT(enabledProp_);
+    Q_ASSERT(enabledBgProp_);
+    Q_ASSERT(fontProp_);
+    Q_ASSERT(bgProp_);
+
+    update();
+}
+
+void LabelStyle::update()
+{
+    enabled_ = enabledProp_->value().toBool();
+    enabledBg_ = enabledBgProp_->value().toBool();
+    fontPen_ = QPen(fontProp_->value().value<QColor>());
+    bgBrush_ = QBrush(bgProp_->value().value<QColor>());
+}
+
+
 NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     QStyledItemDelegate(parent)
 {
@@ -73,6 +98,8 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     completeBorderPen_=QPen(QColor(150,150,150));
     completeFontPen_=QPen(QColor(0,0,255));
 
+    labelPropKeys_ << "error" << "warning";
+
     holdingTimeFontPen_=QPen(QColor(255,0,0));
     holdingDateFontPen_=QPen(QColor(255,0,0));
 
@@ -103,6 +130,11 @@ NodeViewDelegate::~NodeViewDelegate()
 
     if(prop_)
         delete prop_;
+
+    Q_FOREACH(LabelStyle* s, labelStyle_.values()) {
+        if(s)
+            delete s;
+    }
 }
 
 void NodeViewDelegate::notifyChange(VProperty* p)
@@ -132,6 +164,13 @@ void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
     propVec.emplace_back("view.attribute.completeFontColour");
     propVec.emplace_back("view.attribute.holdingTimeFontColour");
     propVec.emplace_back("view.attribute.holdingDateFontColour");
+
+    Q_FOREACH(QString s, labelPropKeys_) {
+        propVec.emplace_back("view.label." + s.toStdString()  + "Enabled");
+        propVec.emplace_back("view.label." + s.toStdString()  + "BgEnabled");
+        propVec.emplace_back("view.label." + s.toStdString()  + "BgColour");
+        propVec.emplace_back("view.label." + s.toStdString()  + "FontColour");
+    }
 }
 
 void NodeViewDelegate::updateBaseSettings()
@@ -268,6 +307,16 @@ void NodeViewDelegate::updateBaseSettings()
         painter.setBrush(QColor(240,240,240));
         painter.drawEllipse(1,1,itemSize-2,itemSize-2);
         limitEmptyPix_=QPixmap::fromImage(img);
+    }
+
+    //labels
+    if(labelStyle_.count() == 0) {
+        labelStyle_[ErrorLabel]= new LabelStyle("view.label.error", prop_);
+        labelStyle_[WarningLabel]= new LabelStyle("view.label.warning", prop_);
+    }
+
+    Q_FOREACH(LabelStyle* s, labelStyle_.values()) {
+        s->update();
     }
 }
 
@@ -568,7 +617,6 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
                      valRestRect.x() + valRestRect.width());
 	}
 
-
 	//Define clipping
     int rightPos=currentRight+attrBox_->rightPadding+attrBox_->rightMargin;
     totalWidth=rightPos-option.rect.left();
@@ -579,13 +627,33 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 		painter->setClipRect(option.rect);
 	}
 
+    QPen fontPen(Qt::black);
+    LabelStyle* labelStyle=nullptr;
+    if(name.contains("error")) {
+        labelStyle = labelStyle_.value(ErrorLabel, nullptr);
+    } else if(name.contains("warning")) {
+        labelStyle = labelStyle_.value(WarningLabel, nullptr);
+    }
+
+    if (labelStyle) {
+        if(labelStyle->enabled_) {
+            fontPen = labelStyle->fontPen_;
+            //draw bg
+            if (labelStyle->enabledBg_) {
+                QRect sr=option.rect;
+                sr.setWidth(rightPos-sr.x());
+                painter->fillRect(attrBox_->adjustSelectionRect(sr), labelStyle->bgBrush_);
+            }
+        }
+    }
+
 	//Draw name
-	painter->setPen(Qt::black);
+    painter->setPen(fontPen);
 	painter->setFont(nameFont);
     painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
 
 	//Draw value   
-    painter->setPen(Qt::black);
+    painter->setPen(fontPen);
     painter->setFont(valFont);
 
     if(multiCnt ==0 )

@@ -44,7 +44,50 @@ protected:
 
 };
 
+class PropertyRule
+{
+public:
+    PropertyRule() {}
+    virtual bool execute() const=0;
+    virtual QList<PropertyLine*> propertyLines() const=0;
+};
 
+class PropertyValueRule : public PropertyRule
+{
+public:
+    PropertyValueRule(PropertyLine* propLine, QString val) : propLine_(propLine), val_(val) {}
+    bool execute() const override;
+    QList<PropertyLine*> propertyLines() const override;
+    static PropertyValueRule* make(VProperty* parent, QString expr, QList<PropertyLine*> lines);
+    PropertyLine *propertyLine()const {return propLine_;}
+protected:
+    PropertyLine* propLine_;
+    QString val_;
+};
+
+class PropertyOrRule : public PropertyRule
+{
+public:
+    PropertyOrRule(PropertyValueRule* left, PropertyValueRule* right) :
+        left_(left), right_(right) {}
+    bool execute() const override;
+    QList<PropertyLine*> propertyLines() const override;
+protected:
+    PropertyValueRule *left_;
+    PropertyValueRule *right_;
+};
+
+class PropertyAndRule : public PropertyRule
+{
+public:
+    PropertyAndRule(PropertyValueRule* left, PropertyValueRule* right) :
+        left_(left), right_(right) {}
+    bool execute() const override;
+    QList<PropertyLine*> propertyLines() const override;
+protected:
+    PropertyValueRule *left_;
+    PropertyValueRule *right_;
+};
 
 //-------------------------------------
 // Factory
@@ -94,8 +137,7 @@ public:
     QToolButton* masterTb() {return masterTb_;}
 	VProperty* property() const {return prop_;}
 	VProperty* guiProperty() const {return guiProp_;}
-    VProperty* ruleProperty();
-    void addRuleLine(PropertyLine*);
+    void initPropertyRule(QList<PropertyLine*> lines);
     virtual bool canExpand() const {return false;}
 
 	void addHelper(PropertyLine*);
@@ -124,6 +166,7 @@ protected:
 	virtual void setEnabledEditable(bool)=0;
 	bool applyMaster();
 	void valueChanged();
+    void addRuleLine(PropertyLine*);
 
 	VProperty* prop_;
 	VProperty* guiProp_;
@@ -135,8 +178,9 @@ protected:
 	QVariant oriVal_;
 	bool doNotEmitChange_;
 	QMap<QString,PropertyLine*> helpers_;
-    PropertyLine* ruleLine_;
-    QString ruleValue_;
+    PropertyRule* rule_;
+    QList<PropertyLine*> ruleLines_;
+    //QString ruleValue_;
 };
 
 //-------------------------------------

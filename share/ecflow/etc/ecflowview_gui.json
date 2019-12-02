@@ -158,6 +158,28 @@
                     }
                 },
                 "tab" : {
+                    "prefix" : "view.label",
+                    "label"  : "Labels",
+                    "adjustLineLabel" : "25",
+
+                    "group" : {
+                        "title" : "Error",
+                        "prefix" : "view.label",
+                        "line" : "errorEnabled",
+                        "line" : "errorFontColour",
+                        "line" : "errorBgEnabled",
+                        "line" : "errorBgColour"
+                    },
+                    "group" : {
+                        "title" : "Warning",
+                        "prefix" : "view.label",
+                        "line" : "warningEnabled",
+                        "line" : "warningFontColour",
+                        "line" : "warningBgEnabled",
+                        "line" : "warningBgColour"
+                    }
+                },
+                "tab" : {
 
                     "prefix" : "view.attribute",
                     "label"  : "Attributes",

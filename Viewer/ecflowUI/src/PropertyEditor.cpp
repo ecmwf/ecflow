@@ -115,17 +115,7 @@ void PropertyEditor::addRules()
 {
     Q_FOREACH(PropertyLine* line,lineItems_)
     {
-        if(VProperty* ruleProp=line->ruleProperty())
-        {
-            Q_FOREACH(PropertyLine* ll,lineItems_)
-            {
-                if(ll->property() == ruleProp)
-                {
-                    line->addRuleLine(ll);
-                    break;
-                }
-            }
-        }
+        line->initPropertyRule(lineItems_);
     }
 }
 
