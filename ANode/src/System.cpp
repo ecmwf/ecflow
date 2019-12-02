@@ -257,7 +257,7 @@ void System::processTerminatedChildren()
 		if ((*i).have_status_) {
 
 #ifdef DEBUG_TERMINATED_CHILD
-			std::cout << "System::processTerminatedChildren() path(" << (*i).absNodePath_  << ")  pid(" << (*i).pid_ << ") has status " << endl;
+			std::cout << "System::processTerminatedChildren() path(" << (*i).absNodePath_  << ")  pid(" << (*i).pid_ << ") has status(stopped or terminated)" << endl;
 #endif
 			// exit status is one of mutually exclusive [ WIFEXITED | WIFSIGNALED | WIFSTOPPED | WIFCONTINUED ]
 			if (WIFEXITED((*i).status_)) {
@@ -271,7 +271,7 @@ void System::processTerminatedChildren()
             else {
                // exit(0) child terminated normally
 #ifdef DEBUG_TERMINATED_CHILD
-               LOG( Log::DBG, "PID " << (*i).pid_  << " exited normally [ " << (*i).cmd_ << " ]" );
+               LOG( Log::DBG, " PID " << (*i).pid_  << " exited normally [ " << (*i).cmd_ << " ]" );
 #endif
             }
 

@@ -60,6 +60,7 @@ test/TestPreProcessing.cpp
 test/TestRepeatWithTimeDependencies.cpp
 test/TestReplace.cpp
 test/TestSetState.cpp
+test/TestSystem.cpp
 test/TestTaskScriptGenerator.cpp
 test/TestTimeDependencies.cpp
 test/TestVariableGeneration.cpp
