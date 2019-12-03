@@ -315,6 +315,8 @@ void export_NodeAttr()
                      "- TASK_ABORTED  - task*\n"
                      "- EDIT_FAILED   - task*\n"
                      "- JOBCMD_FAILED - task*\n"
+                     "- KILLCMD_FAILED   - task*\n"
+                     "- STATUSCMD_FAILED - task*\n"
                      "- NO_SCRIPT     - task*\n"
                      "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
                      "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
@@ -338,6 +340,8 @@ void export_NodeAttr()
          .value("task_aborted", Flag::TASK_ABORTED)
          .value("edit_failed",  Flag::EDIT_FAILED)
          .value("jobcmd_failed",Flag::JOBCMD_FAILED)
+         .value("killcmd_failed",  Flag::KILLCMD_FAILED)
+         .value("statuscmd_failed",Flag::STATUSCMD_FAILED)
          .value("no_script",    Flag::NO_SCRIPT)
          .value("killed",       Flag::KILLED)
          .value("late",         Flag::LATE)

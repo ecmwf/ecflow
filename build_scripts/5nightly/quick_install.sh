@@ -22,6 +22,12 @@ else
    export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python2.7/site-packages
 fi
 
+# =======================================================================
+# Kill the server
+# =======================================================================
+which ecflow_client
+ecflow_client --version
+ecflow_client --terminate=yes
 
 # =======================================================================
 # Create build scripts files. Must be before python $WK/build_scripts/5nightly/build.py
@@ -31,18 +37,9 @@ cp -r $WK/build_scripts/5nightly .
 cd 5nightly
 
 # =======================================================================
-# Kill the server
-# =======================================================================
-which ecflow_client
-ecflow_client --version
-ecflow_client --terminate=yes
-
-# =======================================================================
 # Start server. 
 # =======================================================================
 rm -rf `hostname`.${ECF_PORT}.*
-
-
 ecflow_server&
 sleep 4
 ecflow_client --server_version
@@ -72,7 +69,8 @@ $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/basic.
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/sub_only1.def
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/inlimit_node.def
-    
+$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/label/multi_line_lables.def 
+                                   ANode/parser/test/data/good_defs/label/multi_line_lables.def
 # Use the installed ecflow   
 # must be done after since TestBench.py will use build dir
 ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /

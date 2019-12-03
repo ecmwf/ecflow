@@ -69,7 +69,9 @@ public:
       ECF_SIGTERM   = 18,  // Record on defs that server received SIGTERM signal, main used in test
       NOT_SET       = 19,
       LOG_ERROR     = 20,  // Error in opening or writing to the log file
-      CHECKPT_ERROR = 21   // Error in saving checkpoint file
+      CHECKPT_ERROR = 21,  // Error in saving checkpoint file
+      KILLCMD_FAILED= 22,  // task*
+      STATUSCMD_FAILED= 23 // task*
    };
 
    bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }
@@ -99,7 +101,7 @@ public:
 
    /// returns the list of all flag types
    static std::vector<Flag::Type> list();
-   static constexpr std::array<Flag::Type,21> array();
+   static constexpr std::array<Flag::Type,23> array();
 
    /// Converts from string to flag types.
    static Flag::Type string_to_flag_type(const std::string& s);

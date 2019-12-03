@@ -237,7 +237,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     //If we are here we coud not get the file
     if(n->isFlagSet(ecf::Flag::JOBCMD_FAILED))
     {
-        reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
+       reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
     }
     owner_->infoFailed(reply_);
 }

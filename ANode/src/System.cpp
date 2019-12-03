@@ -45,11 +45,12 @@ namespace ecf {
 // ===========================================================================
 struct Process {
 public:
-	Process(const std::string& absPath,const std::string& cmdToSpawn, pid_t pid)
-	: absNodePath_(absPath), cmd_(cmdToSpawn),have_status_(0), pid_(pid), status_(0) {}
+	Process(const std::string& absPath,const std::string& cmdToSpawn,System::CmdType cmd_type, pid_t pid)
+	: absNodePath_(absPath),cmd_(cmdToSpawn),cmd_type_(cmd_type),have_status_(0),pid_(pid),status_(0){}
 
     std::string absNodePath_; // Path to Task(ECF_JOB_CMD), empty for ECF_KILL_CMD & ECF_STATUS_CMD
     std::string cmd_;         // the command that was spawned
+    System::CmdType cmd_type_;// Type of command
     sig_atomic_t have_status_;// Nonzero if this process has stopped or terminated.  */
     pid_t pid_;               // The process ID of this child.
     int status_;              // The status of this child; 0 if running,
@@ -96,7 +97,7 @@ void System::destroy()
 System::System() = default;
 System::~System()= default;
 
-bool System::spawn(const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg)
+bool System::spawn(System::CmdType cmd_type,const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg)
 {
 #ifdef DEBUG_FORK
 	std::cout << " System::spawn path(" << absPath << ")  cmd(" << cmdToSpawn << ")\n";
@@ -106,7 +107,7 @@ bool System::spawn(const std::string& cmdToSpawn,const std::string& absPath,std:
 	int tryi = 1; /* Currently hardcoded */
 
 	for (rc = 1; tryi && rc; tryi--) {
-		rc = sys(cmdToSpawn,absPath,errorMsg);
+		rc = sys(cmd_type,cmdToSpawn,absPath,errorMsg);
 		if ( rc ) sleep( 1 ); /* May be 2 many processes */
 	}
 
@@ -123,7 +124,7 @@ bool System::spawn(const std::string& cmdToSpawn,const std::string& absPath,std:
  	return true;
 }
 
-int System::sys(const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg)
+int System::sys(System::CmdType cmd_type,const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg)
 {
 #ifdef DEBUG_FORK
 	std::cout << "  System::sys path(" << absPath << ")  cmd(" << cmdToSpawn << ")\n";
@@ -177,7 +178,7 @@ int System::sys(const std::string& cmdToSpawn,const std::string& absPath,std::st
 	}
 
 	// Store the process pid, so that we can wait for it. ho ho.
-	processVec_.emplace_back(absPath,cmdToSpawn,child_pid);
+	processVec_.emplace_back(absPath,cmdToSpawn,cmd_type,child_pid);
 
 #ifdef DEBUG_FORK
 	//LogToCout logToCoutAsWell;
@@ -257,7 +258,7 @@ void System::processTerminatedChildren()
 		if ((*i).have_status_) {
 
 #ifdef DEBUG_TERMINATED_CHILD
-			std::cout << "System::processTerminatedChildren() path(" << (*i).absNodePath_  << ")  pid(" << (*i).pid_ << ") has status(stopped or terminated)" << endl;
+			std::cout << "System::processTerminatedChildren(): " << System::cmd_type((*i).cmd_type_) << " path(" << (*i).absNodePath_  << ") pid(" << (*i).pid_ << ") has status(stopped or terminated)" << endl;
 #endif
 			// exit status is one of mutually exclusive [ WIFEXITED | WIFSIGNALED | WIFSTOPPED | WIFCONTINUED ]
 			if (WIFEXITED((*i).status_)) {
@@ -265,13 +266,13 @@ void System::processTerminatedChildren()
 			   // *Normal* termination via exit
             if ( WEXITSTATUS( (*i).status_ )) {
                // exit is non zero.
-               std::stringstream ss; ss << " PID(" << (*i).pid_  << ")  path(" << (*i).absNodePath_ << ")  exited with status " << WEXITSTATUS((*i).status_)<< " [ " << (*i).cmd_ << " ]";
-               died( (*i).absNodePath_, ss.str());
+               std::stringstream ss; ss << System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_  << ")  path(" << (*i).absNodePath_ << ")  exited with status " << WEXITSTATUS((*i).status_)<< " [ " << (*i).cmd_ << " ]";
+               died( (*i).absNodePath_, (*i).cmd_type_, ss.str());
             }
             else {
                // exit(0) child terminated normally
 #ifdef DEBUG_TERMINATED_CHILD
-               LOG( Log::DBG, " PID " << (*i).pid_  << " exited normally [ " << (*i).cmd_ << " ]" );
+               LOG( Log::DBG, System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_  << ") exited normally [ " << (*i).cmd_ << " ]" );
 #endif
             }
 
@@ -281,25 +282,25 @@ void System::processTerminatedChildren()
 			else if ( WIFSIGNALED( (*i).status_) ) {
 
 			   // *abnormal* child process terminated by a signal
-			   std::stringstream ss; ss << " ECF-PROCESS-CHILD:PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_ << ")  died of signal " << WTERMSIG((*i).status_) << " [ " << (*i).cmd_ << " ]";
-			   died( (*i).absNodePath_, ss.str());
+			   std::stringstream ss; ss << System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_ << ") path(" << (*i).absNodePath_ << ") died of signal " << WTERMSIG((*i).status_) << " [ " << (*i).cmd_ << " ]";
+			   died( (*i).absNodePath_, (*i).cmd_type_, ss.str());
 
             // remove the process since it has terminated
             processVec_.erase(i--);
 			}
 			else if ( WIFSTOPPED( (*i).status_) ) {
 
-            LOG( Log::WAR, " ECF-PROCESS-CHILD:PID " << (*i).pid_ << " STOPPED? [ " << (*i).absNodePath_ << " ] [ " << (*i).cmd_ << " ]");
+            LOG( Log::WAR, System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_ << ") STOPPED? [ " << (*i).absNodePath_ << " ] [ " << (*i).cmd_ << " ]");
 			}
 			else {
 
 			   // Can only be WIFCONTINUED. (XSI extension to POSIX)
-            LOG( Log::WAR, " ECF-PROCESS-CHILD:PID " << (*i).pid_ << " CONTINUED? [ " << (*i).absNodePath_ << " ] [ " << (*i).cmd_ << " ]");
+            LOG( Log::WAR, System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_ << ") CONTINUED? [ " << (*i).absNodePath_ << " ] [ " << (*i).cmd_ << " ]");
 			}
 		}
 		else {
 #ifdef DEBUG_TERMINATED_CHILD
- 			LOG( Log::DBG, "   ECF-PROCESS-CHILD:stray PID " << (*i).pid_  << " (ignored)  [ " << (*i).cmd_ << " ]" );
+ 			LOG( Log::DBG, System::cmd_type((*i).cmd_type_) << " stray PID(" << (*i).pid_  << ") (ignored) [ " << (*i).cmd_ << " ]" );
 #endif
 		}
 	}
@@ -353,7 +354,7 @@ void System::catchChildProcessTermination()
 	signal_( SIGCHLD, catch_child );
 }
 
-void System::died( const std::string& absNodePath, const std::string& reason)
+void System::died( const std::string& absNodePath, CmdType cmd_type, const std::string& reason)
 /**************************************************************************
  ?  Process the death of the process. This is most unwanted and implies
  |  that the shell died abnormally.
@@ -400,13 +401,32 @@ void System::died( const std::string& absNodePath, const std::string& reason)
 	// ECFLOW-104 aborted state for a task following an error at submission
 	SuiteChanged1 changed(submittable->suite());
 
-	submittable->flag().set(ecf::Flag::JOBCMD_FAILED);
-
+	// Only failure of the JOB command should cause SUBMITTABLE to abort.
+	// i.e Badly formed status and kill commands should not abort a running job
+	switch(cmd_type) {
+	   case System::ECF_JOB_CMD: {
+	      submittable->flag().set(ecf::Flag::JOBCMD_FAILED);
 #ifdef DEBUG_CHILD_ABORT
-	std::cout << "System::died aborting task " << absNodePath << "\n";
+	      std::cout << "System::died aborting task " << absNodePath << "\n";
 #endif
-	// Set state aborted since the job terminated abnormally, and provide a reason
-	submittable->aborted(reason);
+	      // Set state aborted since the job terminated abnormally, and provide a reason
+	      submittable->aborted(reason);
+	      break;
+	   }
+      case System::ECF_KILL_CMD:   submittable->flag().set(ecf::Flag::KILLCMD_FAILED); break;
+      case System::ECF_STATUS_CMD: submittable->flag().set(ecf::Flag::STATUSCMD_FAILED); break;
+	};
+}
+
+std::string System::cmd_type(System::CmdType cmd_type)
+{
+   switch (cmd_type) {
+      case System::ECF_JOB_CMD: return "ECF_JOB_CMD";
+      case System::ECF_KILL_CMD : return "ECF_KILL_CMD";
+      case System::ECF_STATUS_CMD: return "ECF_STATUS_CMD";
+      default: assert(false);
+   }
+   return "ECF_JOB_CMD";
 }
 
 }

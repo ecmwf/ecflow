@@ -1,6 +1,5 @@
 #ifndef SYSTEM_HPP_
 #define SYSTEM_HPP_
-
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 // Name        :
 // Author      : Avi
@@ -14,6 +13,21 @@
 // nor does it submit to any jurisdiction. 
 //
 // Description : Works with class Signal
+//
+// When a child process terminates it does not disappear entirely.
+// Instead it becomes a ‘zombie process’ which is no longer capable of executing,
+// but which still has a PID and an entry in the process table.
+// This is indicated by the state code Z in ps or top.
+//
+// The presence of a moderate number of zombie processes is not particularly harmful,
+// but they add unnecessary clutter that can be confusing to the administrator.
+// In extreme cases they could exhaust the number of available process table slots.
+//
+// For these reasons, well-behaved programs should ensure that zombie processes are removed in a timely manner.
+// The process of eliminating zombie processes is known as ‘reaping’.
+// The simplest method is to call wait, but this will block the parent process if the child has not yet terminated.
+// Alternatives are to use waitpid to poll or SIGCHLD to reap asynchronously.
+// The Class uses waitpid.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <string>
@@ -52,7 +66,8 @@ public:
     // For jobs, We can't store reference to Task*, as future functionality like
     // auto-migrate, etc, means we may end up pointing to garbage.
     // so instead we will store absNodePath. For other commands this can be empty
-    bool spawn(const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg);
+    enum CmdType { ECF_JOB_CMD, ECF_KILL_CMD, ECF_STATUS_CMD};
+    bool spawn(CmdType,const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg);
 
     // Handle children that have stopped,aborted or terminated, etc
     // The signal handler is kept as light as possible, since it is re-entrant.
@@ -74,11 +89,12 @@ private:
     // When a process terminates abnormally. This function is used to find the
     // associated task, and set it to the abort state.
     // Relies on the stored Defs ptr. which was set in the server
-    void died( const std::string& absNodePath, const std::string& reason);
+    void died( const std::string& absNodePath, CmdType, const std::string& reason);
 
     /// Does the real work of spawning children
-    int sys(const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg);
+    int sys(CmdType,const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg);
 
+    static std::string cmd_type(CmdType);
 private:
     weak_defs_ptr  defs_;      // weak_ptr is an observer of a shared_ptr
     static System* instance_;
