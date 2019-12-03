@@ -1185,6 +1185,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
             case VTask::ManualTask:
             case VTask::HistoryTask:
             case VTask::JobTask:
+            case VTask::JobStatusFileTask:
             {
                 task->reply()->fileReadMode(VReply::ServerReadMode);
                 task->reply()->setText(serverReply.get_string());
