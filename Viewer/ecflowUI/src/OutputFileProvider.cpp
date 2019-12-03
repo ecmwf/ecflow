@@ -239,14 +239,6 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     {
        reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
     }
-    if(n->isFlagSet(ecf::Flag::KILLCMD_FAILED))
-    {
-       reply_->setErrorText("ECF_KILL_CMD command failed! Check path, and non zero return.");
-    }
-    if(n->isFlagSet(ecf::Flag::STATUSCMD_FAILED))
-    {
-       reply_->setErrorText("ECF_STATUS_CMD command failed! Check path, and non zero return.");
-    }
     owner_->infoFailed(reply_);
 }
 
