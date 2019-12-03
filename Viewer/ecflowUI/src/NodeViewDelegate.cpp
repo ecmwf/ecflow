@@ -637,7 +637,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
     } else if(name.contains("critical")) {
         labelStyle = labelStyle_.value(CriticalLabel, nullptr);
     } else if(name.contains("note")) {
-        labelStyle = labelStyle_.value(CriticalLabel, nullptr);
+        labelStyle = labelStyle_.value(NoteLabel, nullptr);
     } else if(name.contains("info")) {
         labelStyle = labelStyle_.value(InfoLabel, nullptr);
     }
