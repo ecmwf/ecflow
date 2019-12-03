@@ -1,7 +1,10 @@
- 
 suite s3
-   label foo ""
-   label foo2 "value"
-   label foo3 "value\\nvalue" #\\n should be converted to new line
-   label foo4 "value\\nvalue  \\nfred fred2\\n" # \\n should be converted to new line
+   label error "This is an error"
+   label warning "This is an warning"
+   label Note "This is an note"
+   label Critical "This is an critical"
+   label info "This is an info"
+   label warning2 "value"
+   label note2 "value\\nvalue" #\\n should be converted to new line
+   label info2 "value\\nvalue  \\nfred fred2\\n" # \\n should be converted to new line
 endsuite

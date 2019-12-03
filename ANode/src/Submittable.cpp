@@ -536,6 +536,8 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
    flag().clear(ecf::Flag::NO_SCRIPT);
    flag().clear(ecf::Flag::EDIT_FAILED);
    flag().clear(ecf::Flag::JOBCMD_FAILED);
+   flag().clear(ecf::Flag::KILLCMD_FAILED);
+   flag().clear(ecf::Flag::STATUSCMD_FAILED);
    requeue_labels(); // ECFLOW-195, requeue no longer resets labels on tasks, hence we do it at task run time.
 
    theValue.clear();
@@ -767,7 +769,7 @@ void Submittable::kill(const std::string& zombie_pid)
    // Done as two separate steps as kill command is not blocking on the server
 //   LOG(Log::DBG,"Submittable::kill " << absNodePath() << "  " << ecf_kill_cmd );
    std::string errorMsg;
-   if (!System::instance()->spawn(ecf_kill_cmd,"", errorMsg)) {
+   if (!System::instance()->spawn(System::ECF_KILL_CMD,ecf_kill_cmd,absNodePath(), errorMsg)) {
       throw std::runtime_error( errorMsg );
    }
    flag().set(ecf::Flag::KILLED);
@@ -812,7 +814,7 @@ void Submittable::status()
    // Please note: this is *non blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
    // SPAWN process, attach signal to monitor process. returns true
    std::string errorMsg;
-   if (!System::instance()->spawn(ecf_status_cmd,"", errorMsg)) {
+   if (!System::instance()->spawn(System::ECF_STATUS_CMD,ecf_status_cmd,absNodePath(), errorMsg)) {
       throw std::runtime_error( errorMsg );
    }
 
@@ -843,7 +845,7 @@ bool Submittable::createChildProcess(JobsParam& jobsParam)
    if ( jobsParam.spawnJobs() ) {
 
       // SPAWN process, attach signal to monitor process. returns true
-      return System::instance()->spawn(ecf_job_cmd,absNodePath(),jobsParam.errorMsg());
+      return System::instance()->spawn(System::ECF_JOB_CMD,ecf_job_cmd,absNodePath(),jobsParam.errorMsg());
    }
 
    // Test path ONLY

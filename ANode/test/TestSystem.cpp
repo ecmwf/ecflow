@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE( test_system )
    std::string cmd = "echo sat siri akal dunyia > " + file;
 
    std::string errorMsg;
-   BOOST_REQUIRE_MESSAGE(System::instance()->spawn(cmd ,"", errorMsg) ,"System::instance()->spawn() failed: " << errorMsg);
+   BOOST_REQUIRE_MESSAGE(System::instance()->spawn(System::ECF_STATUS_CMD,cmd,"", errorMsg) ,"System::instance()->spawn() failed: " << errorMsg);
    while (System::instance()->process() !=0 ) {
       // Capture child process termination. Child sends SIGNAl SIGCHLD, caught by parent
       Signal unblock_on_desctruction_then_reblock;

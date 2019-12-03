@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
 
    cout << "Invoke command: " << argv[1] << "\n";
    std::string errorMsg;
-   if (!System::instance()->spawn(argv[1],"", errorMsg)) {
+   if (!System::instance()->spawn(System::ECF_STATUS_CMD,argv[1],"", errorMsg)) {
       throw std::runtime_error( errorMsg );
    }
 
