@@ -159,11 +159,11 @@
                 },
                 "tab" : {
                     "prefix" : "view.label",
-                    "label"  : "Labels",
+                    "label"  : "Node labels",
                     "adjustLineLabel" : "25",
 
                     "group" : {
-                        "title" : "Error",
+                        "title" : "Error style",
                         "prefix" : "view.label",
                         "line" : "errorEnabled",
                         "line" : "errorFontColour",
@@ -171,12 +171,36 @@
                         "line" : "errorBgColour"
                     },
                     "group" : {
-                        "title" : "Warning",
+                        "title" : "Warning style",
                         "prefix" : "view.label",
                         "line" : "warningEnabled",
                         "line" : "warningFontColour",
                         "line" : "warningBgEnabled",
                         "line" : "warningBgColour"
+                    },
+                   "group" : {
+                        "title" : "Critical style",
+                        "prefix" : "view.label",
+                        "line" : "criticalEnabled",
+                        "line" : "criticalFontColour",
+                        "line" : "criticalBgEnabled",
+                        "line" : "criticalBgColour"
+                    },
+                    "group" : {
+                        "title" : "Note style",
+                        "prefix" : "view.label",
+                        "line" : "noteEnabled",
+                        "line" : "noteFontColour",
+                        "line" : "noteBgEnabled",
+                        "line" : "noteBgColour"
+                    },
+                    "group" : {
+                        "title" : "Info style",
+                        "prefix" : "view.label",
+                        "line" : "infoEnabled",
+                        "line" : "infoFontColour",
+                        "line" : "infoBgEnabled",
+                        "line" : "infoBgColour"
                     }
                 },
                 "tab" : {

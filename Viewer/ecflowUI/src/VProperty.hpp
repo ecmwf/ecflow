@@ -61,6 +61,7 @@ public:
     QVariant value() const;
     QString valueLabel() const;
     QString valueAsString() const;
+    QString variantToString(QVariant) const;
     std::string valueAsStdString() const;
     Type type() const {return type_;}
     GuiType guiType() const {return guiType_;}

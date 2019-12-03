@@ -80,7 +80,8 @@ PropertyValueRule *PropertyValueRule::make(VProperty* parent, QString expr, QLis
 bool PropertyValueRule::execute() const
 {
     Q_ASSERT(propLine_);
-    return propLine_->currentValue() == val_;
+    Q_ASSERT(propLine_->property());
+    return propLine_->property()->variantToString(propLine_->currentValue()) == val_;
 }
 
 QList<PropertyLine*> PropertyValueRule::propertyLines() const

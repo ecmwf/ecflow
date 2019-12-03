@@ -489,12 +489,12 @@ void TimelineInfoDailyDelegate::drawCell(QPainter *painter,QRect r,QColor fillCo
     QColor endCol;
     if(lighter)
     {
-        fillCol.light(130);
+        fillCol = fillCol.lighter(130);
         fillCol.setAlpha(110);
     }
     else
     {
-        fillCol.dark(110);
+        fillCol = fillCol.darker(110);
     }
 
     QBrush fillBrush(fillCol);

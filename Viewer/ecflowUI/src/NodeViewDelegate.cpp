@@ -18,19 +18,20 @@
 #include "IconProvider.hpp"
 #include "PropertyMapper.hpp"
 #include "UiLog.hpp"
+#include "VConfig.hpp"
 
 int NodeViewDelegate::lighter_=150;
 
 static std::vector<std::string> propVec;
 
-LabelStyle::LabelStyle(const std::string& prefix, PropertyMapper *prop):
+LabelStyle::LabelStyle(const std::string& prefix):
     enabled_(false),
     enabledBg_(false)
 {
-    enabledProp_ = prop->find(prefix + "Enabled");
-    enabledBgProp_ = prop->find(prefix + "BgEnabled");
-    fontProp_ = prop->find(prefix + "FontColour");
-    bgProp_ = prop->find(prefix + "BgColour");
+    enabledProp_ = VConfig::instance()->find(prefix + "Enabled");
+    enabledBgProp_ = VConfig::instance()->find(prefix + "BgEnabled");
+    fontProp_ = VConfig::instance()->find(prefix + "FontColour");
+    bgProp_ = VConfig::instance()->find(prefix + "BgColour");
     Q_ASSERT(enabledProp_);
     Q_ASSERT(enabledBgProp_);
     Q_ASSERT(fontProp_);
@@ -98,7 +99,12 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     completeBorderPen_=QPen(QColor(150,150,150));
     completeFontPen_=QPen(QColor(0,0,255));
 
-    labelPropKeys_ << "error" << "warning";
+    labelStyle_[ErrorLabel]= new LabelStyle("view.label.error");
+    labelStyle_[WarningLabel]= new LabelStyle("view.label.warning");
+    labelStyle_[CriticalLabel]= new LabelStyle("view.label.critical");
+    labelStyle_[NoteLabel]= new LabelStyle("view.label.note");
+    labelStyle_[InfoLabel]= new LabelStyle("view.label.info");
+
 
     holdingTimeFontPen_=QPen(QColor(255,0,0));
     holdingDateFontPen_=QPen(QColor(255,0,0));
@@ -165,11 +171,11 @@ void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
     propVec.emplace_back("view.attribute.holdingTimeFontColour");
     propVec.emplace_back("view.attribute.holdingDateFontColour");
 
-    Q_FOREACH(QString s, labelPropKeys_) {
-        propVec.emplace_back("view.label." + s.toStdString()  + "Enabled");
-        propVec.emplace_back("view.label." + s.toStdString()  + "BgEnabled");
-        propVec.emplace_back("view.label." + s.toStdString()  + "BgColour");
-        propVec.emplace_back("view.label." + s.toStdString()  + "FontColour");
+    Q_FOREACH(LabelStyle* s, labelStyle_.values()) {
+        propVec.emplace_back(s->enabledProp_->path());
+        propVec.emplace_back(s->enabledBgProp_->path());
+        propVec.emplace_back(s->fontProp_->path());
+        propVec.emplace_back(s->bgProp_->path());
     }
 }
 
@@ -310,11 +316,6 @@ void NodeViewDelegate::updateBaseSettings()
     }
 
     //labels
-    if(labelStyle_.count() == 0) {
-        labelStyle_[ErrorLabel]= new LabelStyle("view.label.error", prop_);
-        labelStyle_[WarningLabel]= new LabelStyle("view.label.warning", prop_);
-    }
-
     Q_FOREACH(LabelStyle* s, labelStyle_.values()) {
         s->update();
     }
@@ -633,6 +634,12 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
         labelStyle = labelStyle_.value(ErrorLabel, nullptr);
     } else if(name.contains("warning")) {
         labelStyle = labelStyle_.value(WarningLabel, nullptr);
+    } else if(name.contains("critical")) {
+        labelStyle = labelStyle_.value(CriticalLabel, nullptr);
+    } else if(name.contains("note")) {
+        labelStyle = labelStyle_.value(CriticalLabel, nullptr);
+    } else if(name.contains("info")) {
+        labelStyle = labelStyle_.value(InfoLabel, nullptr);
     }
 
     if (labelStyle) {

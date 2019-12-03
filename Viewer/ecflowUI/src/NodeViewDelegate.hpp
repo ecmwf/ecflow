@@ -126,15 +126,13 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
 class LabelStyle
 {
 public:
-    LabelStyle(const std::string& prefix, PropertyMapper* prop);
+    LabelStyle(const std::string& prefix);
     void update();
 
     bool enabled_;
     bool enabledBg_;
     QPen fontPen_;
     QBrush bgBrush_;
-
-protected:
     VProperty *enabledProp_;
     VProperty *enabledBgProp_;
     VProperty *fontProp_;
@@ -232,8 +230,7 @@ protected:
     int holdingTimePixId_;
     int holdingDatePixId_;
 
-    enum LabelType {ErrorLabel, WarningLabel};
-    QStringList labelPropKeys_;
+    enum LabelType {ErrorLabel, WarningLabel, CriticalLabel, NoteLabel, InfoLabel};
     QMap<LabelType, LabelStyle*> labelStyle_;
 };
 

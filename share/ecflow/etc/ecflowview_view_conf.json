@@ -211,7 +211,7 @@
 
            "label": {
                 "errorEnabled" : {
-                    "label"   : "Enable",
+                    "label"   : "Enable style",
                     "default" : "false"
                 },
                 "errorFontColour" : {
@@ -230,20 +230,80 @@
                     "disabledRule": "errorBgEnabled=false/or/errorEnabled=false"
                 },
                 "warningEnabled" : {
-                    "label"   : "Enable",
+                    "label"   : "Enable style",
                     "default" : "false"
                 },
                 "warningBgEnabled" : {
                     "label"   : "Fill background",
-                    "default" : "false"
+                    "default" : "false",
+                    "disabledRule": "warningEnabled=false"
                 },
                 "warningBgColour" : {
                     "label"   : "Background colour",
-                    "default" : "rgb(171,22,22)"
+                    "default" : "rgb(171,22,22)",
+                    "disabledRule": "warningBgEnabled=false/or/warningEnabled=false"
                 },
                 "warningFontColour" : {
                     "label"   : "Font colour",
-                    "default" : "rgb(0,0,0)"
+                    "default" : "rgb(0,0,0)",
+                    "disabledRule": "warningEnabled=false"
+                },
+                "criticalEnabled" : {
+                    "label"   : "Enable style",
+                    "default" : "false"
+                },
+                "criticalBgEnabled" : {
+                    "label"   : "Fill background",
+                    "default" : "false",
+                    "disabledRule": "criticalEnabled=false"
+                },
+                "criticalBgColour" : {
+                    "label"   : "Background colour",
+                    "default" : "rgb(171,22,22)",
+                    "disabledRule": "criticalBgEnabled=false/or/criticalEnabled=false"
+                },
+                "criticalFontColour" : {
+                    "label"   : "Font colour",
+                    "default" : "rgb(0,0,0)",
+                    "disabledRule": "criticalEnabled=false"
+                },
+                "noteEnabled" : {
+                    "label"   : "Enable style",
+                    "default" : "false"
+                },
+                "noteBgEnabled" : {
+                    "label"   : "Fill background",
+                    "default" : "false",
+                    "disabledRule": "noteEnabled=false"
+                },
+                "noteBgColour" : {
+                    "label"   : "Background colour",
+                    "default" : "rgb(171,22,22)",
+                    "disabledRule": "noteBgEnabled=false/or/noteEnabled=false"
+                },
+                "noteFontColour" : {
+                    "label"   : "Font colour",
+                    "default" : "rgb(0,0,0)",
+                    "disabledRule": "noteEnabled=false"
+                },
+                "infoEnabled" : {
+                    "label"   : "Enable style",
+                    "default" : "false"
+                },
+                "infoBgEnabled" : {
+                    "label"   : "Fill background",
+                    "default" : "false",
+                    "disabledRule": "infoEnabled=false"
+                },
+                "infoBgColour" : {
+                    "label"   : "Background colour",
+                    "default" : "rgb(171,22,22)",
+                    "disabledRule": "infoBgEnabled=false/or/infoEnabled=false"
+                },
+                "infoFontColour" : {
+                    "label"   : "Font colour",
+                    "default" : "rgb(0,0,0)",
+                    "disabledRule": "infoEnabled=false"
                 }
             },
 

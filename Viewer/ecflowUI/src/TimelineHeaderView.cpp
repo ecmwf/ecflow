@@ -625,7 +625,7 @@ void MainTimelineHeader::renderTimeline(const QRect& rect,QPainter* painter,int 
     {
         majorTickSec << 86400 << 2*86400 << 3*86400 << 4*86400 << 5*86400 << 10*86400 << 20*86400;
     }
-    else if(365 * 86400)
+    else if(period < 365 * 86400)
     {
         majorTickSec << 5*86400 << 10*86400 << 20*86400 << 30*86400 << 60*86400 << 90*86400 << 180*86400;
     }
