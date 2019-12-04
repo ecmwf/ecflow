@@ -374,8 +374,8 @@ const char*  get_status_desc(){
             "This will allow the output of status command to be shown by the --file command\n"
             "i.e /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1::\n"
             "Usage::\n"
-            "   --status=/s1/f1/t1 /s1/f2/t2\n"
-            "   --file=/s1/f1/t1 stat  # write to standard out the '.stat' file"
+            "   --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat\n"
+            "   --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
             ;
 }
 const char* get_edit_history_desc(){
