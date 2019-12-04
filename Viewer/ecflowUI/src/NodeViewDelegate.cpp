@@ -24,15 +24,22 @@ int NodeViewDelegate::lighter_=150;
 
 static std::vector<std::string> propVec;
 
-LabelStyle::LabelStyle(const std::string& prefix):
-    enabled_(false),
-    enabledBg_(false)
+LabelStyle::LabelStyle(const std::string& prefix, bool alwaysEnabled):
+    alwaysEnabled_(alwaysEnabled),
+    enabled_(true),
+    enabledBg_(true)
 {
     enabledProp_ = VConfig::instance()->find(prefix + "Enabled");
     enabledBgProp_ = VConfig::instance()->find(prefix + "BgEnabled");
     fontProp_ = VConfig::instance()->find(prefix + "FontColour");
     bgProp_ = VConfig::instance()->find(prefix + "BgColour");
-    Q_ASSERT(enabledProp_);
+    regexProp_ = VConfig::instance()->find(prefix + "Pattern");
+
+    if (!alwaysEnabled_) {
+        Q_ASSERT(enabledProp_);
+        Q_ASSERT(regexProp_);
+    }
+
     Q_ASSERT(enabledBgProp_);
     Q_ASSERT(fontProp_);
     Q_ASSERT(bgProp_);
@@ -42,7 +49,12 @@ LabelStyle::LabelStyle(const std::string& prefix):
 
 void LabelStyle::update()
 {
-    enabled_ = enabledProp_->value().toBool();
+    if(!alwaysEnabled_) {
+        enabled_ = enabledProp_->value().toBool();
+        regex_ = QRegExp(regexProp_->value().toString());
+        regex_.setCaseSensitivity(Qt::CaseInsensitive);
+    }
+
     enabledBg_ = enabledBgProp_->value().toBool();
     fontPen_ = QPen(fontProp_->value().value<QColor>());
     bgBrush_ = QBrush(bgProp_->value().value<QColor>());
@@ -99,12 +111,10 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
     completeBorderPen_=QPen(QColor(150,150,150));
     completeFontPen_=QPen(QColor(0,0,255));
 
+    labelStyle_[DefaultLabel]= new LabelStyle("view.label.default", true);
     labelStyle_[ErrorLabel]= new LabelStyle("view.label.error");
     labelStyle_[WarningLabel]= new LabelStyle("view.label.warning");
-    labelStyle_[CriticalLabel]= new LabelStyle("view.label.critical");
-    labelStyle_[NoteLabel]= new LabelStyle("view.label.note");
     labelStyle_[InfoLabel]= new LabelStyle("view.label.info");
-
 
     holdingTimeFontPen_=QPen(QColor(255,0,0));
     holdingDateFontPen_=QPen(QColor(255,0,0));
@@ -172,10 +182,15 @@ void NodeViewDelegate::addBaseSettings(std::vector<std::string>& propVec)
     propVec.emplace_back("view.attribute.holdingDateFontColour");
 
     Q_FOREACH(LabelStyle* s, labelStyle_.values()) {
-        propVec.emplace_back(s->enabledProp_->path());
+        if (s->enabledProp_) {
+            propVec.emplace_back(s->enabledProp_->path());
+        }
         propVec.emplace_back(s->enabledBgProp_->path());
         propVec.emplace_back(s->fontProp_->path());
         propVec.emplace_back(s->bgProp_->path());
+        if (s->regexProp_) {
+            propVec.emplace_back(s->regexProp_->path());
+        }
     }
 }
 
@@ -565,6 +580,7 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 	nameFont.setBold(true);
 	QFont valFont=attrFont_;
     QString valFirst,valRest;
+    QString full;
 
 	if(multiCnt ==0 )
 	{
@@ -616,6 +632,8 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 
         currentRight=qMax(valRect.x()+valRect.width(),
                      valRestRect.x() + valRestRect.width());
+
+        val =  valFirst + " " + valRest;
 	}
 
 	//Define clipping
@@ -629,17 +647,17 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 	}
 
     QPen fontPen(Qt::black);
-    LabelStyle* labelStyle=nullptr;
-    if(name.contains("error", Qt::CaseInsensitive)) {
-        labelStyle = labelStyle_.value(ErrorLabel, nullptr);
-    } else if(name.contains("warning", Qt::CaseInsensitive)) {
-        labelStyle = labelStyle_.value(WarningLabel, nullptr);
-    } else if(name.contains("critical", Qt::CaseInsensitive)) {
-        labelStyle = labelStyle_.value(CriticalLabel, nullptr);
-    } else if(name.contains("note", Qt::CaseInsensitive)) {
-        labelStyle = labelStyle_.value(NoteLabel, nullptr);
-    } else if(name.contains("info", Qt::CaseInsensitive)) {
-        labelStyle = labelStyle_.value(InfoLabel, nullptr);
+    LabelStyle* labelStyle=labelStyle_[DefaultLabel];
+    QList<LabelType> types;
+    types << ErrorLabel << WarningLabel << InfoLabel;
+    full = name + " " + val;
+    Q_FOREACH(LabelType t, types) {
+        if (labelStyle_[t]->enabled_) {
+            if (full.contains(labelStyle_[t]->regex_)) {
+                labelStyle = labelStyle_[t];
+                break;
+            }
+        }
     }
 
     if (labelStyle) {

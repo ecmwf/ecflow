@@ -209,38 +209,57 @@
             }
            },
 
-           "label": {
+           "label": {               
+               "defaultFontColour" : {
+                   "label"   : "Font colour",
+                   "default" : "rgb(0,0,0)",
+                   "disabledRule": "errorEnabled=false"
+               },
+               "defaultBgEnabled" : {
+                   "label"   : "Fill background",
+                   "default" : "false"
+               },
+               "defaultBgColour" : {
+                   "label"   : "Background colour",
+                   "default" : "rgb(209,225,235)",
+                   "disabledRule": "defaultBgEnabled=false"
+               },
                 "errorEnabled" : {
-                    "label"   : "Enable style",
-                    "default" : "false"
-                },
+                    "label"   : "Enable error style",
+                    "default" : "true"
+                },                
                 "errorFontColour" : {
                     "label"   : "Font colour",
-                    "default" : "rgb(0,0,0)",
+                    "default" : "rgb(255,255,255)",
                     "disabledRule": "errorEnabled=false"
                 },
                 "errorBgEnabled" : {
                     "label"   : "Fill background",
-                    "default" : "false",
+                    "default" : "true",
                     "disabledRule": "errorEnabled=false"
                 },
                 "errorBgColour" : {
                     "label"   : "Background colour",
-                    "default" : "rgb(171,22,22)",
+                    "default" : "rgb(255,55,66)",
                     "disabledRule": "errorBgEnabled=false/or/errorEnabled=false"
                 },
+                "errorPattern" : {
+                    "label"   : "Regexp pattern",
+                    "default" : "\\berror\\b",
+                    "disabledRule": "errorEnabled=false"
+                },
                 "warningEnabled" : {
-                    "label"   : "Enable style",
-                    "default" : "false"
+                    "label"   : "Enable warning style",
+                    "default" : "true"
                 },
                 "warningBgEnabled" : {
                     "label"   : "Fill background",
-                    "default" : "false",
+                    "default" : "true",
                     "disabledRule": "warningEnabled=false"
                 },
                 "warningBgColour" : {
                     "label"   : "Background colour",
-                    "default" : "rgb(171,22,22)",
+                    "default" : "rgb(245,189,45)",
                     "disabledRule": "warningBgEnabled=false/or/warningEnabled=false"
                 },
                 "warningFontColour" : {
@@ -248,61 +267,33 @@
                     "default" : "rgb(0,0,0)",
                     "disabledRule": "warningEnabled=false"
                 },
-                "criticalEnabled" : {
-                    "label"   : "Enable style",
-                    "default" : "false"
-                },
-                "criticalBgEnabled" : {
-                    "label"   : "Fill background",
-                    "default" : "false",
-                    "disabledRule": "criticalEnabled=false"
-                },
-                "criticalBgColour" : {
-                    "label"   : "Background colour",
-                    "default" : "rgb(171,22,22)",
-                    "disabledRule": "criticalBgEnabled=false/or/criticalEnabled=false"
-                },
-                "criticalFontColour" : {
-                    "label"   : "Font colour",
-                    "default" : "rgb(0,0,0)",
-                    "disabledRule": "criticalEnabled=false"
-                },
-                "noteEnabled" : {
-                    "label"   : "Enable style",
-                    "default" : "false"
-                },
-                "noteBgEnabled" : {
-                    "label"   : "Fill background",
-                    "default" : "false",
-                    "disabledRule": "noteEnabled=false"
-                },
-                "noteBgColour" : {
-                    "label"   : "Background colour",
-                    "default" : "rgb(171,22,22)",
-                    "disabledRule": "noteBgEnabled=false/or/noteEnabled=false"
-                },
-                "noteFontColour" : {
-                    "label"   : "Font colour",
-                    "default" : "rgb(0,0,0)",
-                    "disabledRule": "noteEnabled=false"
+                "warningPattern" : {
+                    "label"   : "Regexp pattern",
+                    "default" : "\\bwarning\\b",
+                    "disabledRule": "warningEnabled=false"
                 },
                 "infoEnabled" : {
-                    "label"   : "Enable style",
-                    "default" : "false"
+                    "label"   : "Enable info style",
+                    "default" : "true"
                 },
                 "infoBgEnabled" : {
                     "label"   : "Fill background",
-                    "default" : "false",
+                    "default" : "true",
                     "disabledRule": "infoEnabled=false"
                 },
                 "infoBgColour" : {
                     "label"   : "Background colour",
-                    "default" : "rgb(171,22,22)",
+                    "default" : "rgb(241,224,128)",
                     "disabledRule": "infoBgEnabled=false/or/infoEnabled=false"
                 },
                 "infoFontColour" : {
                     "label"   : "Font colour",
                     "default" : "rgb(0,0,0)",
+                    "disabledRule": "infoEnabled=false"
+                },
+                "infoPattern" : {
+                    "label"   : "Regexp pattern",
+                    "default" : "\\binfo\\b",
                     "disabledRule": "infoEnabled=false"
                 }
             },

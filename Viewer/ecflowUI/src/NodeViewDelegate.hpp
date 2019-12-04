@@ -15,6 +15,7 @@
 #include <QLinearGradient>
 #include <QMap>
 #include <QPen>
+#include <QRegExp>
 #include <QStyledItemDelegate>
 
 #include "FontMetrics.hpp"
@@ -126,17 +127,20 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
 class LabelStyle
 {
 public:
-    LabelStyle(const std::string& prefix);
+    LabelStyle(const std::string& prefix, bool alwaysEnabled = false);
     void update();
 
+    bool alwaysEnabled_;
     bool enabled_;
     bool enabledBg_;
     QPen fontPen_;
     QBrush bgBrush_;
+    QRegExp regex_;
     VProperty *enabledProp_;
     VProperty *enabledBgProp_;
     VProperty *fontProp_;
     VProperty *bgProp_;
+    VProperty *regexProp_;
 };
 
 
@@ -230,7 +234,7 @@ protected:
     int holdingTimePixId_;
     int holdingDatePixId_;
 
-    enum LabelType {ErrorLabel, WarningLabel, CriticalLabel, NoteLabel, InfoLabel};
+    enum LabelType {DefaultLabel, ErrorLabel, WarningLabel, InfoLabel};
     QMap<LabelType, LabelStyle*> labelStyle_;
 };
 

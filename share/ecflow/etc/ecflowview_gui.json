@@ -162,45 +162,44 @@
                     "label"  : "Node labels",
                     "adjustLineLabel" : "25",
 
+                    "note" : {
+                        "default" : "Use <b>regexp patterns</b> on the full label text to define styles."
+                     },
+
                     "group" : {
-                        "title" : "Error style",
+                        "title" : "Default label style",
+                        "prefix" : "view.label",
+                        "line" : "defaultFontColour",
+                        "line" : "defaultBgEnabled",
+                        "line" : "defaultBgColour"
+                    },
+
+                    "group" : {
+                        "title" : "Error label style",
                         "prefix" : "view.label",
                         "line" : "errorEnabled",
                         "line" : "errorFontColour",
                         "line" : "errorBgEnabled",
-                        "line" : "errorBgColour"
+                        "line" : "errorBgColour",
+                        "line" : "errorPattern"
                     },
                     "group" : {
-                        "title" : "Warning style",
+                        "title" : "Warning label style",
                         "prefix" : "view.label",
                         "line" : "warningEnabled",
                         "line" : "warningFontColour",
                         "line" : "warningBgEnabled",
-                        "line" : "warningBgColour"
-                    },
-                   "group" : {
-                        "title" : "Critical style",
-                        "prefix" : "view.label",
-                        "line" : "criticalEnabled",
-                        "line" : "criticalFontColour",
-                        "line" : "criticalBgEnabled",
-                        "line" : "criticalBgColour"
-                    },
+                        "line" : "warningBgColour",
+                        "line" : "warningPattern"
+                    },                   
                     "group" : {
-                        "title" : "Note style",
-                        "prefix" : "view.label",
-                        "line" : "noteEnabled",
-                        "line" : "noteFontColour",
-                        "line" : "noteBgEnabled",
-                        "line" : "noteBgColour"
-                    },
-                    "group" : {
-                        "title" : "Info style",
+                        "title" : "Info label style",
                         "prefix" : "view.label",
                         "line" : "infoEnabled",
                         "line" : "infoFontColour",
                         "line" : "infoBgEnabled",
-                        "line" : "infoBgColour"
+                        "line" : "infoBgColour",
+                        "line" : "infoPattern"
                     }
                 },
                 "tab" : {
