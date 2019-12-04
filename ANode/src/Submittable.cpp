@@ -777,8 +777,15 @@ void Submittable::kill(const std::string& zombie_pid)
 
 void Submittable::status()
 {
+   // Jobs::generate will un-block SIGCHLD (by using Signal class)
+   // This will allow child process termination to handled by the signal handler in System
+   // Note:: Jobs::generate is called every minute *AND* when there is a state change.
+
+   // Note: Only is active state do we have a ECF_RID
    if (state() != NState::ACTIVE && state() != NState::SUBMITTED) {
-      return;
+      std::stringstream ss;
+      ss << "Submittable::status: To use status command the node " << absNodePath() << " must be active or submitted";
+      throw std::runtime_error( ss.str() );
    }
 
    // *** Generated variables are *NOT* persisted.                                     ***
@@ -794,7 +801,7 @@ void Submittable::status()
    /// If we are in active state, then ECF_RID must have been setup
    if (state() == NState::ACTIVE && get_genvar_ecfrid().theValue().empty()) {
       std::stringstream ss;
-      ss << "Submittable::status: Generated variable ECF_RID is empty for task " << absNodePath();
+      ss << "Submittable::status: Generated variable ECF_RID is empty for ACTIVE task " << absNodePath();
       throw std::runtime_error( ss.str() );
    }
 
@@ -814,7 +821,7 @@ void Submittable::status()
    // Please note: this is *non blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
    // SPAWN process, attach signal to monitor process. returns true
    std::string errorMsg;
-   if (!System::instance()->spawn(System::ECF_STATUS_CMD,ecf_status_cmd,absNodePath(), errorMsg)) {
+   if (!System::instance()->spawn(System::ECF_STATUS_CMD,ecf_status_cmd,absNodePath(),errorMsg)) {
       throw std::runtime_error( errorMsg );
    }
 

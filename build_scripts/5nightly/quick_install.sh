@@ -28,6 +28,7 @@ fi
 which ecflow_client
 ecflow_client --version
 ecflow_client --terminate=yes
+sleep 3
 
 # =======================================================================
 # Create build scripts files. Must be before python $WK/build_scripts/5nightly/build.py

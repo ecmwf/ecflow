@@ -29,6 +29,8 @@ if __name__ == "__main__":
                      ecflow.FlagType.task_aborted,
                      ecflow.FlagType.edit_failed,
                      ecflow.FlagType.jobcmd_failed,
+                     ecflow.FlagType.killcmd_failed,
+                     ecflow.FlagType.statuscmd_failed,
                      ecflow.FlagType.no_script,
                      ecflow.FlagType.killed,
                      ecflow.FlagType.late,
