@@ -784,7 +784,7 @@ void Submittable::status()
    // Note: Only is active state do we have a ECF_RID
    if (state() != NState::ACTIVE && state() != NState::SUBMITTED) {
       std::stringstream ss;
-      ss << "Submittable::status: To use status command the node " << absNodePath() << " must be active or submitted";
+      ss << "Submittable::status: To use status command on a *single* node(" << absNodePath() << ") it must be active or submitted";
       throw std::runtime_error( ss.str() );
    }
 

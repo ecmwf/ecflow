@@ -202,7 +202,14 @@ void NodeContainer::kill(const std::string& /* zombie_pid, only valid for single
 void NodeContainer::status()
 {
  	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++)   {     nodes_[t]->status(); }
+	for(size_t t = 0; t < node_vec_size; t++)   {
+	   // Avoid exception for top down case, if Task is not active or submitted
+	   // Allows status cmd to run over more Tasks, without early exit, when some tasks are not active/sumitted
+	   if (nodes_[t]->isTask() && ( nodes_[t]->state() != NState::ACTIVE && nodes_[t]->state() != NState::SUBMITTED)) {
+	      continue;
+	   }
+	   nodes_[t]->status();
+	}
 }
 
 bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
