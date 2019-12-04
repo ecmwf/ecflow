@@ -266,7 +266,7 @@ void System::processTerminatedChildren()
 			   // *Normal* termination via exit
             if ( WEXITSTATUS( (*i).status_ )) {
                // exit is non zero.
-               std::stringstream ss; ss << System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_  << ")  path(" << (*i).absNodePath_ << ")  exited with status " << WEXITSTATUS((*i).status_)<< " [ " << (*i).cmd_ << " ]";
+               std::stringstream ss; ss << System::cmd_type((*i).cmd_type_) << " PID(" << (*i).pid_  << ") path(" << (*i).absNodePath_ << ") exited with status " << WEXITSTATUS((*i).status_)<< " [ " << (*i).cmd_ << " ]";
                died( (*i).absNodePath_, (*i).cmd_type_, ss.str());
             }
             else {
@@ -368,7 +368,7 @@ void System::died( const std::string& absNodePath, CmdType cmd_type, const std::
 	ecf::log(Log::ERR,reason);
 
 	/// If the Path is empty, then this could be something *OTHER THAN* job submission
-	/// that has failed. i.e kill cmd, or any other command, so don;t assert
+	/// Typically testing, don't assert
  	if ( absNodePath.empty() ) {
 		return;
 	}
