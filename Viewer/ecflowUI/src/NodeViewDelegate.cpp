@@ -630,15 +630,15 @@ void NodeViewDelegate::renderLabel(QPainter *painter,QStringList data,const QSty
 
     QPen fontPen(Qt::black);
     LabelStyle* labelStyle=nullptr;
-    if(name.contains("error")) {
+    if(name.contains("error", Qt::CaseInsensitive)) {
         labelStyle = labelStyle_.value(ErrorLabel, nullptr);
-    } else if(name.contains("warning")) {
+    } else if(name.contains("warning", Qt::CaseInsensitive)) {
         labelStyle = labelStyle_.value(WarningLabel, nullptr);
-    } else if(name.contains("critical")) {
+    } else if(name.contains("critical", Qt::CaseInsensitive)) {
         labelStyle = labelStyle_.value(CriticalLabel, nullptr);
-    } else if(name.contains("note")) {
+    } else if(name.contains("note", Qt::CaseInsensitive)) {
         labelStyle = labelStyle_.value(NoteLabel, nullptr);
-    } else if(name.contains("info")) {
+    } else if(name.contains("info", Qt::CaseInsensitive)) {
         labelStyle = labelStyle_.value(InfoLabel, nullptr);
     }
 
