@@ -99,8 +99,8 @@ bool PathsCmd::isWrite() const
    switch (api_) {
       case PathsCmd::SUSPEND:           return true;  break; // requires write privilege
       case PathsCmd::RESUME:            return true;  break; // requires write privilege
-      case PathsCmd::KILL:              return true;  break; // requires write privilege
-      case PathsCmd::STATUS:            return false; break; // read only
+      case PathsCmd::KILL:              return true;  break; // requires write privilege, modifies Flag::KILLCMD_FAILED
+      case PathsCmd::STATUS:            return true;  break; // requires write privilege, modifies Flag::STATUSCMD_FAILED
       case PathsCmd::CHECK:             return false; break; // read only
       case PathsCmd::EDIT_HISTORY:      return false; break; // read only
       case PathsCmd::ARCHIVE:           return true;  break; // requires write privilege
