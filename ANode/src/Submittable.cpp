@@ -768,6 +768,7 @@ void Submittable::kill(const std::string& zombie_pid)
    // The output is accessible via the --file cmd
    // Done as two separate steps as kill command is not blocking on the server
 //   LOG(Log::DBG,"Submittable::kill " << absNodePath() << "  " << ecf_kill_cmd );
+   flag().clear(ecf::Flag::KILLCMD_FAILED);
    std::string errorMsg;
    if (!System::instance()->spawn(System::ECF_KILL_CMD,ecf_kill_cmd,absNodePath(), errorMsg)) {
       throw std::runtime_error( errorMsg );
@@ -820,6 +821,7 @@ void Submittable::status()
 
    // Please note: this is *non blocking* the output of the command(ECF_STATUS_CMD) should be written to %ECF_JOB%.stat
    // SPAWN process, attach signal to monitor process. returns true
+   flag().clear(ecf::Flag::STATUSCMD_FAILED);
    std::string errorMsg;
    if (!System::instance()->spawn(System::ECF_STATUS_CMD,ecf_status_cmd,absNodePath(),errorMsg)) {
       throw std::runtime_error( errorMsg );
