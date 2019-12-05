@@ -42,15 +42,19 @@ protected:
       void updateState(const ChangeFlags&) override;
       void reloadRequested() override;
       void commandRequested() override;
-      void stopStatusCommand();
-      bool prolongStatusCommand();
-      void runStatusCommand();
+      void startFileFetchTask();
+      void startStatusCommandTask();
+      bool checkStatusCommandTask(VReply* reply);
+      bool isStatusCmdFailedFlagSet() const;
 
+      enum TaskMode {NoTask, FetchFileTask, StatusCommandTask};
+
+      InfoProvider* statusProvider_;
       QTimer* timer_;
       int timeout_;
       int timeoutCount_;
       int maxTimeoutCount_;
-      bool fetchFileScheduled_;
+      TaskMode taskMode_;
 };
 
 #endif // JOBSTATUSITEMWIDGET_HPP

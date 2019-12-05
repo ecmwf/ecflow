@@ -303,6 +303,11 @@ void ServerComThread::run()
                     ci_->zombieGet();
                     break;
 
+                case VTask::JobStatusTask:
+                    UiLog(serverName_).dbg() << " JOB STATUS";
+                    ci_->status(nodePath_);
+                    break;
+
                 default:
                     break;
 
@@ -318,7 +323,7 @@ void ServerComThread::run()
         errorString = e.what();
     }
 
-    // we can get an error string in one of two ways - either an exception is raised, or
+    // we can get an error string in two ways - either an exception is raised, or
     // the get_string() of the server reply is non-empty.
     if (!isMessage && (taskType_ == VTask::CommandTask) && !(ci_->server_reply().get_string().empty()))
     {

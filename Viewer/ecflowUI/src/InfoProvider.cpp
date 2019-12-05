@@ -237,7 +237,7 @@ bool JobProvider::handleFileMissing(const std::string& fileName,VReply *reply)
 	return false;
 }
 
-JobStatusProvider::JobStatusProvider(InfoPresenter* owner) :
+JobStatusFileProvider::JobStatusFileProvider(InfoPresenter* owner) :
         InfoProvider(owner,VTask::JobStatusFileTask)
 {
     fileVarName_ ="ECF_JOB";
@@ -248,7 +248,7 @@ JobStatusProvider::JobStatusProvider(InfoPresenter* owner) :
                  The file may have been deleted or this may be a '<i>dummy</i>' task";
 }
 
-bool JobStatusProvider::handleFileMissing(const std::string& fileName,VReply *reply)
+bool JobStatusFileProvider::handleFileMissing(const std::string& fileName,VReply *reply)
 {
     if(fileName.find(".job0") != std::string::npos)
     {
@@ -257,6 +257,12 @@ bool JobStatusProvider::handleFileMissing(const std::string& fileName,VReply *re
         return true;
     }
     return false;
+}
+
+JobStatusProvider::JobStatusProvider(InfoPresenter* owner) :
+        InfoProvider(owner,VTask::JobStatusTask)
+{
+
 }
 
 ManualProvider::ManualProvider(InfoPresenter* owner) :

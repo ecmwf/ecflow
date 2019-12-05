@@ -694,6 +694,7 @@ void ServerHandler::run(VTask_ptr task)
     case VTask::WhySyncTask:
     case VTask::ZombieListTask:
     case VTask::ZombieCommandTask:
+    case VTask::JobStatusTask:
 		comQueue_->addTask(task);
 		break;
 	default:

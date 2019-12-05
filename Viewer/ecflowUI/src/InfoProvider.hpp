@@ -68,12 +68,18 @@ protected:
 	 bool handleFileMissing(const std::string& fileName,VReply *reply) override;
 };
 
+class JobStatusFileProvider : public InfoProvider
+{
+public:
+     explicit JobStatusFileProvider(InfoPresenter* owner);
+protected:
+     bool handleFileMissing(const std::string& fileName,VReply *reply) override;
+};
+
 class JobStatusProvider : public InfoProvider
 {
 public:
      explicit JobStatusProvider(InfoPresenter* owner);
-protected:
-     bool handleFileMissing(const std::string& fileName,VReply *reply) override;
 };
 
 

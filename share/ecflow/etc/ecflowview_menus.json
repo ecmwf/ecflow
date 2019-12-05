@@ -480,6 +480,15 @@
         {
             "menu"           : "Special",
             "name"           : "Status",
+            "visible_for"    : "(suite or family)",
+            "enabled_for"    : "(active or submitted or aborted or suspended)",
+            "command"        : "ecflow_client --status <full_name>",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Status",
             "visible_for"    : "(task or alias)",
             "enabled_for"    : "(active or submitted)",
             "command"        : "ecflow_client --status <full_name>",
