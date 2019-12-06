@@ -129,7 +129,8 @@ bool NodeExpressionParser::isNodeFlag(const std::string &str) const
     if (str == "is_late" || str == "has_message" ||
         str == "is_rerun" || str == "is_waiting" || str == "is_zombie" ||
         str == "is_archived" || str == "is_restored" ||
-        str ==  "is_ecfcmd_failed" || str == "is_killed")
+        str ==  "is_ecfcmd_failed" || str == "is_killed" || str == "is_killcmd_failed" ||
+        str == "is_statuscmd_failed")
         return true;
 
     return false;
@@ -934,7 +935,11 @@ bool NodeFlagCondition::execute(VItem* item)
         else if(nodeFlagName_ == "is_killed")
             return vnode->isFlagSet(ecf::Flag::KILLED);
 
+        else if(nodeFlagName_ == "is_killcmd_failed")
+            return vnode->isFlagSet(ecf::Flag::KILLCMD_FAILED);
 
+        else if(nodeFlagName_ == "is_statuscmd_failed")
+            return vnode->isFlagSet(ecf::Flag::STATUSCMD_FAILED);
 	}
 
 	return false;
