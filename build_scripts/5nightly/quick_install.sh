@@ -11,15 +11,15 @@ set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 #export ECF_DEBUG_CLIENT=1
 ECFLOW_VERSION=5.2.0
-#export ECF_SSL=polonius.4142 # use server specfic <host>.<port>.*** certificates
+#export ECF_SSL=`hostname`.4142 # use server specfic <host>.<port>.*** certificates
 export ECF_PORT=4142
-export PATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
+export PATH=/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
 PYTHON=python3
 if [[ $PYTHON == "python3" ]] ; then
    module load python3
-   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python3.6/site-packages
+   export PYTHONPATH=/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python3.6/site-packages
 else
-   export PYTHONPATH=/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python2.7/site-packages
+   export PYTHONPATH=/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python2.7/site-packages
 fi
 
 # =======================================================================
@@ -55,7 +55,7 @@ ecflow_client --delete=_all_ yes
 # ======================================================================
 # ecflow metabuilder.  
 # ======================================================================
-cd /var/tmp/ma0/workspace/metabuilder
+cd /var/tmp/${USER}/workspace/metabuilder
 git checkout develop
 $PYTHON ./clean.py -s ecflow 
 $PYTHON ./generate.py -s ecflow
@@ -74,7 +74,7 @@ $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/label/multi_
                                    ANode/parser/test/data/good_defs/label/multi_line_lables.def
 # Use the installed ecflow   
 # must be done after since TestBench.py will use build dir
-ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "/tmp/ma0/install/cmake/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /
+ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /
        
        
 # =======================================================================
