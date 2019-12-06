@@ -319,6 +319,7 @@ void export_NodeAttr()
                      "- STATUSCMD_FAILED - task*\n"
                      "- NO_SCRIPT     - task*\n"
                      "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+                     "- STATUS        - task* indicates that the status command has been run\n"
                      "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
                      "- MESSAGE       - Node\n"
                      "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
@@ -344,6 +345,7 @@ void export_NodeAttr()
          .value("statuscmd_failed",Flag::STATUSCMD_FAILED)
          .value("no_script",    Flag::NO_SCRIPT)
          .value("killed",       Flag::KILLED)
+         .value("status",       Flag::STATUS)
          .value("late",         Flag::LATE)
          .value("message",      Flag::MESSAGE)
          .value("byrule",       Flag::BYRULE)

@@ -538,6 +538,8 @@ bool Submittable::submit_job_only( JobsParam& jobsParam)
    flag().clear(ecf::Flag::JOBCMD_FAILED);
    flag().clear(ecf::Flag::KILLCMD_FAILED);
    flag().clear(ecf::Flag::STATUSCMD_FAILED);
+   flag().clear(ecf::Flag::KILLED);
+   flag().clear(ecf::Flag::STATUS);
    requeue_labels(); // ECFLOW-195, requeue no longer resets labels on tasks, hence we do it at task run time.
 
    theValue.clear();
@@ -717,6 +719,7 @@ bool Submittable::run(JobsParam& jobsParam, bool force)
 void Submittable::kill(const std::string& zombie_pid)
 {
    flag().clear(ecf::Flag::KILLCMD_FAILED);
+   flag().clear(ecf::Flag::KILLED);
 
    std::string ecf_kill_cmd;
    if ( zombie_pid.empty() ) {
@@ -788,6 +791,7 @@ void Submittable::status()
    // This will allow child process termination to handled by the signal handler in System
    // Note:: Jobs::generate is called every minute *AND* when there is a state change.
    flag().clear(ecf::Flag::STATUSCMD_FAILED);
+   flag().clear(ecf::Flag::STATUS);
 
    // Note: Only is active state do we have a ECF_RID
    if (state() != NState::ACTIVE && state() != NState::SUBMITTED) {
@@ -838,7 +842,7 @@ void Submittable::status()
       throw std::runtime_error( errorMsg );
    }
 
-// flag().set(ecf::Flag::STATUS);
+   flag().set(ecf::Flag::STATUS);
 }
 
 

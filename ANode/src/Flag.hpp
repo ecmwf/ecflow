@@ -71,7 +71,8 @@ public:
       LOG_ERROR     = 20,  // Error in opening or writing to the log file
       CHECKPT_ERROR = 21,  // Error in saving checkpoint file
       KILLCMD_FAILED= 22,  // task*
-      STATUSCMD_FAILED= 23 // task*
+      STATUSCMD_FAILED= 23, // task*
+      STATUS          = 24 // task*
    };
 
    bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }
@@ -101,7 +102,7 @@ public:
 
    /// returns the list of all flag types
    static std::vector<Flag::Type> list();
-   static constexpr std::array<Flag::Type,23> array();
+   static constexpr std::array<Flag::Type,24> array();
 
    /// Converts from string to flag types.
    static Flag::Type string_to_flag_type(const std::string& s);
