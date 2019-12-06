@@ -119,15 +119,6 @@ void JobStatusItemWidget::startStatusCommandTask()
         timer_->stop();
         timeoutCount_ = 0;
         statusProvider_->info(info_);
-
-        /*std::vector<std::string> cmd;
-        cmd.emplace_back("ecflow_client");
-        cmd.emplace_back("--status");
-        cmd.emplace_back("<full_name>");
-        CommandHandler::run(info_,cmd);*/
-
-        //timeoutCount_ = 1;
-        //timer_->start(timeout_);
     }
 }
 
@@ -357,32 +348,7 @@ void JobStatusItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         {
             if(info_ && info_->node())
             {
-                if (taskMode_ == StatusCommandTask)
-                {
-                    commandTb_->setEnabled(false);
-                    reloadTb_->setEnabled(false);
-                    messageLabel_->showInfo("Generating job status information ...");
-                    messageLabel_->startLoadLabel();
-                    if (timeoutCount_ > 0)
-                    {
-                        timer_->start(timeout_);
-                    }
-                }
-                else if (taskMode_ == NoTask)
-                {
-                    reloadTb_->setEnabled(true);
-                    if(info_ && info_->isNode() && info_->node())
-                    {
-                        VNode* node = info_->node();
-                        Q_ASSERT(node);
-                        commandTb_->setEnabled(node->isActive() || node->isSubmitted());
-                    }
-                }
-                else
-                {
-                    reloadTb_->setEnabled(false);
-                    commandTb_->setEnabled(false);
-                }
+                reload(info_);
             }
             else
             {

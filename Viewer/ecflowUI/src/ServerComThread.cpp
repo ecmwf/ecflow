@@ -94,7 +94,8 @@ void ServerComThread::run()
     {
         // define the tasks that will explicitly/implicitly call ci_->sync_local()
         std::set<VTask::Type> sync_tasks = {VTask::CommandTask, VTask::SyncTask,
-                      VTask::WhySyncTask,VTask::ScriptSubmitTask,VTask::ZombieCommandTask};
+                      VTask::WhySyncTask,VTask::ScriptSubmitTask,VTask::ZombieCommandTask,
+                      VTask::JobStatusTask};
 
         // this is called during reset - it requires a special treatment
         if(taskType_  == VTask::ResetTask)
@@ -201,9 +202,15 @@ void ServerComThread::run()
 
                     break;
                 }
+                case VTask::JobStatusTask:
+                {
+                    UiLog(serverName_).dbg() << " JOB STATUS";
+                    ci_->status(nodePath_);
+                    break;
+                }
 
                 default:
-                 {
+                {
                     Q_ASSERT(0);
                     exit(1);
                  }
@@ -301,11 +308,6 @@ void ServerComThread::run()
                 case VTask::ZombieListTask:
                     UiLog(serverName_).dbg() << " ZOMBIES";
                     ci_->zombieGet();
-                    break;
-
-                case VTask::JobStatusTask:
-                    UiLog(serverName_).dbg() << " JOB STATUS";
-                    ci_->status(nodePath_);
                     break;
 
                 default:
@@ -438,7 +440,9 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 {
     //This function can only be called during a SYNC_LOCAl task!!!!
     assert(taskType_ == VTask::CommandTask ||
-           taskType_ == VTask::SyncTask || taskType_ == VTask::WhySyncTask);
+           taskType_ == VTask::SyncTask || taskType_ == VTask::WhySyncTask ||
+           taskType_ == VTask::JobStatusTask || taskType_ == VTask::ScriptSubmitTask ||
+           taskType_ == VTask::ZombieCommandTask);
 
     std::vector<ecf::Aspect::Type> typesCopy=types;
 
