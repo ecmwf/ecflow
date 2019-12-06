@@ -27,7 +27,7 @@ ShortcutHelpDialog::ShortcutHelpDialog(QWidget *parent) :
 
     //Set css for the text formatting
     QString cssDoc="td {padding-left: 3px; padding-right: 10px; paddig-top: 1px; padding-bottom: 1px; background-color: #F3F3F3;color: #323232;} \
-                    td.title {padding-left: 8px; padding-top: 2px; padding-bottom: 2px;background-color: #5B6C8F; color: #ffffff; font-weight: bold;}\
+                    td.title {padding-left: 8px; padding-top: 2px; padding-bottom: 2px;background-color: #4769A0; color:#EBEEF1; font-weight: bold;}\
                     td.maintitle {padding-left: 8px; padding-top: 2px; padding-bottom: 2px;background-color:#765B8F ; color: #eeeeee;}\
                     td.first {font-weight: bold;}\
                     td.empty {background-color: none;}\
@@ -48,7 +48,7 @@ void ShortcutHelpDialog::loadText(QString fileName)
 {
     QString t = "<body><table width=\'100%\'>";
     //t += "<tr><td class=\'maintitle\' colspan=\'2\'><h2>EcFlowUI</h2></td></tr>";
-    t += "<tr><td class=\'maintitle\' colspan=\'2\'><h3>Keyboard shortcuts</h3></td></tr>";
+    t += "<tr><td class=\'empty\' colspan=\'2\'><h3>Keyboard shortcuts</h3></td></tr>";
 
     QFile f(fileName);
     if(f.open(QIODevice::ReadOnly | QIODevice::Text))
