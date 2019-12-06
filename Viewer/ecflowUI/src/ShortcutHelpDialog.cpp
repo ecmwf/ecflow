@@ -27,8 +27,8 @@ ShortcutHelpDialog::ShortcutHelpDialog(QWidget *parent) :
 
     //Set css for the text formatting
     QString cssDoc="td {padding-left: 3px; padding-right: 10px; paddig-top: 1px; padding-bottom: 1px; background-color: #F3F3F3;color: #323232;} \
-                    td.title {padding-left: 8px; padding-top: 2px; padding-bottom: 2px;background-color: #F19236; color: #ffffff; font-size: 120%; font-weight: bold;}\
-                    td.maintitle {padding-left: 8px; padding-top: 2px; padding-bottom: 2px;background-color: #5B6C8F; color: #ffffff;}\
+                    td.title {padding-left: 8px; padding-top: 2px; padding-bottom: 2px;background-color: #5B6C8F; color: #ffffff; font-weight: bold;}\
+                    td.maintitle {padding-left: 8px; padding-top: 2px; padding-bottom: 2px;background-color:#765B8F ; color: #eeeeee;}\
                     td.first {font-weight: bold;}\
                     td.empty {background-color: none;}\
                     body {width: 100%; background-color: #E8E8E8;}";
@@ -47,8 +47,8 @@ ShortcutHelpDialog::ShortcutHelpDialog(QWidget *parent) :
 void ShortcutHelpDialog::loadText(QString fileName)
 {
     QString t = "<body><table width=\'100%\'>";
-    t += "<tr><td class=\'maintitle\' colspan=\'2\'><h2>EcFlowUI</h2></td></tr>";
-    t += "<tr><td class=\'a\' colspan=\'2\'>Keyboard shortcuts</td></tr>";
+    //t += "<tr><td class=\'maintitle\' colspan=\'2\'><h2>EcFlowUI</h2></td></tr>";
+    t += "<tr><td class=\'maintitle\' colspan=\'2\'><h3>Keyboard shortcuts</h3></td></tr>";
 
     QFile f(fileName);
     if(f.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -61,7 +61,7 @@ void ShortcutHelpDialog::loadText(QString fileName)
                 QStringList lst = line.split("||");
                 t += "<tr>";
                 if (lst.count() >= 2) {
-                    t += "<td class=\'title\' colspan=\'2\'>" + lst[1] + "</td>";
+                    t += "<td class=\'title\' colspan=\'2\'><h4>" + lst[1] + "</h4></td>";
                 }
                 t += "</tr>";
             }
