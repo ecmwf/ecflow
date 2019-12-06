@@ -88,6 +88,14 @@ void JobStatusItemWidget::startFileFetchTask()
     if(info_ && info_->isNode() && info_->node())
     {
         VNode *node = info_->node();
+        if(!(node->isActive() || node->isSubmitted()))
+        {
+            taskMode_=NoTask;
+            reloadTb_->setEnabled(false);
+            commandTb_->setEnabled(false);
+            messageLabel_->showWarning("Job status is only available for <b>active</b> or <b>submitted</b> nodes!");
+            return;
+        }
         if(node->isFlagSet(ecf::Flag::STATUSCMD_FAILED))
         {
             taskMode_=NoTask;
@@ -97,6 +105,7 @@ void JobStatusItemWidget::startFileFetchTask()
             commandTb_->setEnabled(node->isActive() || node->isSubmitted());
             return;
         }
+
         taskMode_=FetchFileTask;
         commandTb_->setEnabled(false);
         reloadTb_->setEnabled(false);
