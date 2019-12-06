@@ -138,6 +138,7 @@ set(viewer_srcs
     SessionRenameDialog.cpp
     SessionHandler.cpp
     ShellCommand.cpp
+    ShortcutHelpDialog.cpp
     Sound.cpp
     StandardView.cpp
     StringMatchCombo.cpp
@@ -331,6 +332,7 @@ set(viewer_moc_files AbstractNodeModel.hpp
     PropertyEditor.hpp
     PropertyLine.hpp
     SaveSessionAsDialog.hpp
+    ShortcutHelpDialog.hpp
     RepeatEditor.hpp
     RichTextEdit.hpp
     ServerComInfoWidget.hpp
@@ -442,6 +444,7 @@ set(viewer_wrap_ui_files
     ServerSettingsItemWidget.ui
     SessionDialog.ui
     SessionRenameDialog.ui
+    ShortcutHelpDialog.ui
     SuiteItemWidget.ui
     TableFilterWidget.ui
     TableNodeWidget.ui

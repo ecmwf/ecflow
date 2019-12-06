@@ -44,6 +44,7 @@
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
+#include "ShortcutHelpDialog.hpp"
 #include "CommandOutputDialog.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
@@ -341,6 +342,12 @@ void MainWindow::on_actionAddInfoPanel_triggered()
 void MainWindow::on_actionAbout_triggered()
 {
     AboutDialog d;
+    d.exec();
+}
+
+void MainWindow::on_actionShortcutHelp_triggered()
+{
+    ShortcutHelpDialog d;
     d.exec();
 }
 
