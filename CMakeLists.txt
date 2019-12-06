@@ -333,8 +333,7 @@ ecbuild_dont_pack( DIRS
                    	ecbuild
                     SCRATCH
                     CUSTOMER 
-                    build_scripts/nightly build_scripts/test_bench
-                    cereal-1.2.2
+                    build_scripts/5nightly build_scripts/test_bench
                     cereal-1.3.0
                     Debug
                     Doc
