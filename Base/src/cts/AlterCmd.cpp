@@ -500,7 +500,7 @@ const char* AlterCmd::desc() {
          "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label ]\n"
          "       For set_flag and clear_flag:\n"
          "         [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed \n"
-         "           statuscmd_failed | killcmd_failed | no_script | killed | migrated | late | message | \n"
+         "           statuscmd_failed | killcmd_failed | no_script | killed | status | migrated | late | message | \n"
          "           complete | queue_limit | task_waiting | locked | zombie | archived | restored |\n"
          "           threshold | log_error | checkpt_error]\n"
          "       For sort:\n"

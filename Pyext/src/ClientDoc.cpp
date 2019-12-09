@@ -993,7 +993,7 @@ const char* ClientDoc::alter(){
             "         change : [ variable,clock-type,clock-gain,event,meter,label,trigger,complete,repeat,limit-max,limit-value,late]\n"
             "         set_flag and clear_flag:\n"
             "                  [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | statuscmd_failed | killcmd_failed |\n"
-            "                    no_script | killed | late | message | complete | queue_limit | task_waiting | locked | zombie ]\n"
+            "                    no_script | killed | status | late | message | complete | queue_limit | task_waiting | locked | zombie ]\n"
             "      string name               : used to locate the attribute, when multiple attributes of the same type,\n"
             "                                  optional for some.i.e. when changing, attributes like variable,meter,event,label,limits\n"
             "      string value              : Only used when 'changing' a attribute. provides a new value\n"
