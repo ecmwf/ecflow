@@ -16,6 +16,7 @@
 
 #include <string>
 #include <iostream>
+#include <iterator>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/timer.hpp>
