@@ -25,10 +25,10 @@ ecbuild_add_library( TARGET core
                     )
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
-target_link_libraries(core debug ${Boost_SERIALIZATION_LIBRARY_DEBUG}   ${Boost_SERIALIZATION_LIBRARY_RELEASE}
-                           debug ${Boost_FILESYSTEM_LIBRARY_DEBUG}      ${Boost_FILESYSTEM_LIBRARY_RELEASE}
-                           debug ${Boost_DATE_TIME_LIBRARY_DEBUG}       ${Boost_DATE_TIME_LIBRARY_RELEASE}
-                           debug ${Boost_SYSTEM_LIBRARY_DEBUG}          ${Boost_SYSTEM_LIBRARY_RELEASE}
+target_link_libraries(core  ${Boost_SERIALIZATION_LIBRARY_RELEASE}
+                            ${Boost_FILESYSTEM_LIBRARY_RELEASE}
+                            ${Boost_DATE_TIME_LIBRARY_RELEASE}
+                            ${Boost_SYSTEM_LIBRARY_RELEASE}
                            )                
                    
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )

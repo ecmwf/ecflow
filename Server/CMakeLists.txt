@@ -28,7 +28,7 @@ ecbuild_add_library( TARGET libserver
                      )
 
 # This ensures that for debug config, we only link with debug boost libs, for other configs, we link with optimised boost libs
-target_link_libraries(libserver debug ${Boost_THREAD_LIBRARY_DEBUG} ${Boost_THREAD_LIBRARY_RELEASE})
+target_link_libraries(libserver ${Boost_THREAD_LIBRARY_RELEASE})
 
 # =======================================================
 # EXE ecflow_server, if OpenSSL not enabled ${OPENSSL_LIBRARIES}, is empty
