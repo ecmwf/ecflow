@@ -25,10 +25,17 @@ JobStatusItemWidget::JobStatusItemWidget(QWidget *parent) :
     timeout_(3000),
     timeoutCount_(0),
     maxTimeoutCount_(10),
-    taskMode_(NoTask)
+    taskMode_(NoTask),
+    nodeStatusMode_(UnsetCommandMode),
+    fetchTried_(false)
 {
     commandTb_->show();
     commandTb_->setText(tr("Execute status command"));
+
+    statusCommandLabel_ = new MessageLabel(this);
+    statusCommandLabel_->setShowTypeTitle(false);
+    verticalLayout->insertWidget(1, statusCommandLabel_);
+    statusCommandLabel_->hide();
 
     messageLabel_->setShowTypeTitle(false);
     messageLabel_->hide();
@@ -86,45 +93,92 @@ void JobStatusItemWidget::reload(VInfo_ptr info)
 
 void JobStatusItemWidget::startFileFetchTask()
 {
+    Q_ASSERT(taskMode_==NoTask);
+    taskMode_ = NoTask;
     if(info_ && info_->isNode() && info_->node())
     {
         VNode *node = info_->node();
-        if(!(node->isActive() || node->isSubmitted()))
-        {
-            taskMode_=NoTask;
-            reloadTb_->setEnabled(false);
-            commandTb_->setEnabled(false);
-            messageLabel_->showWarning("Job status is only available for <b>active</b> or <b>submitted</b> nodes!");
-            return;
-        }
+        nodeStatusMode_ = (node->isActive() || node->isSubmitted())?EnabledCommandMode:DisabledCommandMode;
+
+        // the status could be partially generated so we need to fetch it
         if(node->isFlagSet(ecf::Flag::STATUSCMD_FAILED))
         {
-            taskMode_=NoTask;
+            taskMode_=FetchFileTask;
             QString err = "Previous --status command has failed, check path/permissions!";
-            messageLabel_->showError(err);
-            reloadTb_->setEnabled(true);
-            commandTb_->setEnabled(node->isActive() || node->isSubmitted());
-            return;
+            statusCommandLabel_->showError(err);
+            reloadTb_->setEnabled(false);
+            commandTb_->setEnabled(false);
+            infoProvider_->info(info_);
         }
+        else if(nodeStatusMode_ == EnabledCommandMode)
+        {
+            if(!node->isFlagSet(ecf::Flag::STATUS))
+            {
+                QString err = "The --status command has not been run yet!";
+                statusCommandLabel_->showWarning(err);
+                reloadTb_->setEnabled(false);
+                commandTb_->setEnabled(nodeStatusMode_ == EnabledCommandMode);
+            }
+            else
+            {
+                taskMode_=FetchFileTask;
+                reloadTb_->setEnabled(false);
+                commandTb_->setEnabled(false);
+                infoProvider_->info(info_);
+            }
+        }
+        else
+        {
+            QString warn = "The --status command can only be run for <b>active</b> or <b>submitted</b> nodes!";
+            statusCommandLabel_->showWarning(warn);
+            reloadTb_->setEnabled(false);
+            commandTb_->setEnabled(false);
+        }
+     }
+}
 
-        taskMode_=FetchFileTask;
-        commandTb_->setEnabled(false);
-        reloadTb_->setEnabled(false);
-        infoProvider_->info(info_);
+void JobStatusItemWidget::finishFileFetchTask()
+{
+    Q_ASSERT(taskMode_==NoTask);
+    if(info_ && info_->isNode() && info_->node())
+    {
+        VNode *node = info_->node();
+        if(node->isFlagSet(ecf::Flag::STATUSCMD_FAILED))
+        {
+            QString err = "Previous --status command has failed, check path/permissions!";
+            statusCommandLabel_->showError(err);
+            reloadTb_->setEnabled(nodeStatusMode_ == EnabledCommandMode);
+            commandTb_->setEnabled(nodeStatusMode_ == EnabledCommandMode);
+        }
+        else if(!node->isFlagSet(ecf::Flag::STATUS))
+        {
+            QString err = "The --status command has not been run yet!";
+            statusCommandLabel_->showWarning(err);
+            reloadTb_->setEnabled(false);
+            commandTb_->setEnabled(nodeStatusMode_ == EnabledCommandMode);
+        }
+        else
+        {
+            reloadTb_->setEnabled(true);
+            commandTb_->setEnabled(nodeStatusMode_ == EnabledCommandMode);
+        }
     }
 }
 
+
 void JobStatusItemWidget::startStatusCommandTask()
 {
-    if(taskMode_==NoTask && info_ && info_->isNode() && info_->node())
+    if(taskMode_==NoTask && nodeStatusMode_ == EnabledCommandMode &&
+       info_ && info_->isNode() && info_->node())
     {
+        Q_ASSERT(nodeStatusMode_ == EnabledCommandMode);
         Q_ASSERT(timeoutCount_ == 0);
         Q_ASSERT(!timer_->isActive());
         taskMode_=StatusCommandTask;
         commandTb_->setEnabled(false);
         reloadTb_->setEnabled(false);
-        messageLabel_->showInfo("Generating job status information ...");
-        messageLabel_->startLoadLabel();
+        statusCommandLabel_->showInfo("Generating job status information ...");
+        statusCommandLabel_->startLoadLabel();
 
         timer_->stop();
         timeoutCount_ = 0;
@@ -140,14 +194,25 @@ bool JobStatusItemWidget::checkStatusCommandTask(VReply* reply)
     QString s=QString::fromStdString(reply->text());
     if (taskMode_ == StatusCommandTask)
     {
+        Q_ASSERT(nodeStatusMode_ == EnabledCommandMode);
         VNode *node = nullptr;
         if (info_ && info_->isNode() && info_->node())
         {
             node = info_->node();
-            Q_ASSERT(node);
+            // check if the node status changed significantly
+            bool st=(node->isActive() || node->isSubmitted());
+            if ((st && nodeStatusMode_ != EnabledCommandMode) ||
+                 (!st && nodeStatusMode_ != DisabledCommandMode))
+            {
+                reload(info_);
+            }
+        }
+        else {
+            reload(info_);
+            return false;
         }
 
-        //the status has just command finished
+        //the status command has just finished
         if(reply->sender() == statusProvider_)
         {
             Q_ASSERT(timeoutCount_ ==0);
@@ -156,10 +221,10 @@ bool JobStatusItemWidget::checkStatusCommandTask(VReply* reply)
             {
                 taskMode_=NoTask;
                 QString err = QString::fromStdString(reply->errorText());
-                messageLabel_->stopLoadLabel();
-                messageLabel_->showError(err);
+                statusCommandLabel_->stopLoadLabel();
+                statusCommandLabel_->showError(err);
                 reloadTb_->setEnabled(true);
-                commandTb_->setEnabled(node->isActive() || node->isSubmitted());
+                commandTb_->setEnabled(true);
                 timeoutCount_ = 0;
                 timer_->stop();
             }
@@ -171,24 +236,22 @@ bool JobStatusItemWidget::checkStatusCommandTask(VReply* reply)
         }
 
         //here we must be fetching the status file
+        Q_ASSERT(node);
         Q_ASSERT(reply->sender() == infoProvider_);
-        if(isStatusCmdFailedFlagSet())
+        if(node->isFlagSet(ecf::Flag::STATUSCMD_FAILED))
         {
             taskMode_=NoTask;
             QString err = "Previous --status command has failed, check path/permissions!";
-            messageLabel_->showError(err);
+            statusCommandLabel_->showError(err);
+            statusCommandLabel_->stopLoadLabel();
             reloadTb_->setEnabled(true);
-            commandTb_->setEnabled(node->isActive() || node->isSubmitted());
-            messageLabel_->stopLoadLabel();
+            commandTb_->setEnabled(true);
             timeoutCount_ = 0;
             timer_->stop();
-            return false;
+            return true;
         }
         else if(s.isEmpty())
-        {
-            //Q_ASSERT(timeoutCount_ > 0);
-            //if (timeoutCount_ > 0)
-            //{
+        {           
             timeoutCount_++;
             if (timeoutCount_ < maxTimeoutCount_)
             {
@@ -199,22 +262,21 @@ bool JobStatusItemWidget::checkStatusCommandTask(VReply* reply)
             {
                 taskMode_=NoTask;
                 reloadTb_->setEnabled(true);
-                commandTb_->setEnabled(node->isActive() || node->isSubmitted());
-                messageLabel_->stopLoadLabel();
-                messageLabel_->hide();
+                commandTb_->setEnabled(true);
+                statusCommandLabel_->stopLoadLabel();
+                statusCommandLabel_->hide();
                 timeoutCount_ = 0;
                 timer_->stop();
                 return true;
-            }
-           // }
+            }          
         }
         else
         {
             taskMode_=NoTask;
             reloadTb_->setEnabled(true);
-            commandTb_->setEnabled(node->isActive() || node->isSubmitted());
-            messageLabel_->stopLoadLabel();
-            messageLabel_->hide();
+            commandTb_->setEnabled(true);
+            statusCommandLabel_->stopLoadLabel();
+            statusCommandLabel_->hide();
             timeoutCount_ = 0;
             timer_->stop();
             return true;
@@ -236,6 +298,8 @@ void JobStatusItemWidget::fetchJobStatusFile()
 void JobStatusItemWidget::clearContents()
 {
     taskMode_=NoTask;
+    nodeStatusMode_=UnsetCommandMode;
+    fetchTried_ = false;
     messageLabel_->stopLoadLabel();
     timer_->stop();
     timeoutCount_ = 0;
@@ -256,17 +320,13 @@ void JobStatusItemWidget::infoReady(VReply* reply)
         return;
     }
 
-    if(taskMode_ == FetchFileTask) {
+    fetchTried_ = true;
+    if(taskMode_ == FetchFileTask) {      
         taskMode_ = NoTask;
+        finishFileFetchTask();
     }
 
     Q_ASSERT(taskMode_ == NoTask);
-    if(info_ && info_->isNode() && info_->node())
-    {
-        VNode* node = info_->node();
-        Q_ASSERT(node);
-        commandTb_->setEnabled(node->isActive() || node->isSubmitted());
-    }
 
     QString s=QString::fromStdString(reply->text());
     textEdit_->setPlainText(s);
@@ -283,18 +343,9 @@ void JobStatusItemWidget::infoReady(VReply* reply)
     {
         messageLabel_->showInfo("Job status is <b>not</b> available");
     }
-
-    if(taskMode_ == FetchFileTask) {
-        taskMode_ = NoTask;
-    }
-    Q_ASSERT(taskMode_ == NoTask);
-
-    reloadTb_->setEnabled(true);
-    if(info_ && info_->isNode() && info_->node())
+    else
     {
-        VNode* node = info_->node();
-        Q_ASSERT(node);
-        commandTb_->setEnabled(node->isActive() || node->isSubmitted());
+        messageLabel_->hide();
     }
 
     fileLabel_->update(reply);
@@ -308,22 +359,16 @@ void JobStatusItemWidget::infoProgress(VReply* reply)
 void JobStatusItemWidget::infoFailed(VReply* reply)
 {    
     if(checkStatusCommandTask(reply))
-    {
-        QString s=QString::fromStdString(reply->errorText());
-        messageLabel_->showError(s);
-
+    {    
+        fetchTried_ = true;
         if(taskMode_ == FetchFileTask) {
             taskMode_ = NoTask;
+            finishFileFetchTask();
         }
-        Q_ASSERT(taskMode_ == NoTask);
 
-        reloadTb_->setEnabled(true);
-        if(info_ && info_->isNode() && info_->node())
-        {
-            VNode* node = info_->node();
-            Q_ASSERT(node);
-            commandTb_->setEnabled(node->isActive() || node->isSubmitted());
-        }
+        Q_ASSERT(taskMode_ == NoTask);
+        QString s=QString::fromStdString(reply->errorText());
+        messageLabel_->showError(s);
     }
 }
 
@@ -380,29 +425,17 @@ void JobStatusItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Asp
             {
                 VNode *node = info_->node();
                 bool st=(node->isActive() || node->isSubmitted());
-
-                if(taskMode_ == NoTask)
-                {
-                    if(st)
+                if ((st && nodeStatusMode_ != EnabledCommandMode) ||
+                     (!st && nodeStatusMode_ != DisabledCommandMode))
                     {
-                        reload(info_);
+                        if(taskMode_ == NoTask)
+                        {
+                            reload(info_);
+                        }
                     }
-                }
             }
         }
     }
 }
-
-
-bool JobStatusItemWidget::isStatusCmdFailedFlagSet() const
-{
-    if(info_ && info_->isNode() && info_->node())
-    {
-        VNode *node = info_->node();
-        return node->isFlagSet(ecf::Flag::STATUSCMD_FAILED);
-    }
-    return false;
-}
-
 
 static InfoPanelItemMaker<JobStatusItemWidget> maker1("job_status");

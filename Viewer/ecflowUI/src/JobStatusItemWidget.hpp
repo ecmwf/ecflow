@@ -14,6 +14,7 @@
 #include "InfoPanelItem.hpp"
 #include "CodeItemWidget.hpp"
 
+class MessageLabel;
 class QTimer;
 
 class JobStatusItemWidget : public CodeItemWidget, public InfoPanelItem
@@ -43,18 +44,22 @@ protected:
       void reloadRequested() override;
       void commandRequested() override;
       void startFileFetchTask();
+      void finishFileFetchTask();
       void startStatusCommandTask();
       bool checkStatusCommandTask(VReply* reply);
-      bool isStatusCmdFailedFlagSet() const;
 
       enum TaskMode {NoTask, FetchFileTask, StatusCommandTask};
+      enum StatusCommandMode {UnsetCommandMode, EnabledCommandMode, DisabledCommandMode};
 
       InfoProvider* statusProvider_;
+      MessageLabel* statusCommandLabel_;
       QTimer* timer_;
       int timeout_;
       int timeoutCount_;
       int maxTimeoutCount_;
       TaskMode taskMode_;
+      StatusCommandMode nodeStatusMode_;
+      bool fetchTried_;
 };
 
 #endif // JOBSTATUSITEMWIDGET_HPP
