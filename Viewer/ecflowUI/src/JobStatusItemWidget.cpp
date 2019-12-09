@@ -74,7 +74,8 @@ void JobStatusItemWidget::reload(VInfo_ptr info)
         setEnabled(true);
     }
 
-    info_=info;
+    //set the info
+    adjust(info);
 
     //Info must be a node
     if(info_ && info_->isNode() && info_->node())
@@ -366,6 +367,32 @@ void JobStatusItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         }
     }
 }
+
+void JobStatusItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
+{
+    //Changes in the nodes
+    for(auto it : aspect)
+    {
+        if(it == ecf::Aspect::STATE || it == ecf::Aspect::DEFSTATUS ||
+            it == ecf::Aspect::SUSPENDED)
+        {
+            if(info_ && info_->isNode() && info_->node())
+            {
+                VNode *node = info_->node();
+                bool st=(node->isActive() || node->isSubmitted());
+
+                if(taskMode_ == NoTask)
+                {
+                    if(st)
+                    {
+                        reload(info_);
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 bool JobStatusItemWidget::isStatusCmdFailedFlagSet() const
 {

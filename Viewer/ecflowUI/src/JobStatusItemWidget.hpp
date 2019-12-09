@@ -32,7 +32,7 @@ public:
       void infoFailed(VReply*) override;
       void infoProgress(VReply*) override;
 
-      void nodeChanged(const VNode*, const std::vector<ecf::Aspect::Type>&) override {}
+      void nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect) override;
       void defsChanged(const std::vector<ecf::Aspect::Type>&) override {}
 
 protected Q_SLOTS:
