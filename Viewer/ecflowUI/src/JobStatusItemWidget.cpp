@@ -26,8 +26,7 @@ JobStatusItemWidget::JobStatusItemWidget(QWidget *parent) :
     timeoutCount_(0),
     maxTimeoutCount_(10),
     taskMode_(NoTask),
-    nodeStatusMode_(UnsetCommandMode),
-    fetchTried_(false)
+    nodeStatusMode_(UnsetCommandMode)
 {
     commandTb_->show();
     commandTb_->setText(tr("Execute status command"));
@@ -69,6 +68,7 @@ void JobStatusItemWidget::reload(VInfo_ptr info)
 
     clearContents();
 
+    statusCommandLabel_->hide();
     messageLabel_->hide();
 
     if(info && info->server() && info->server()->isDisabled())
@@ -100,11 +100,11 @@ void JobStatusItemWidget::startFileFetchTask()
         VNode *node = info_->node();
         nodeStatusMode_ = (node->isActive() || node->isSubmitted())?EnabledCommandMode:DisabledCommandMode;
 
-        // the status could be partially generated so we need to fetch it
+        // the status file could be partially generated so we need to fetch it
         if(node->isFlagSet(ecf::Flag::STATUSCMD_FAILED))
         {
             taskMode_=FetchFileTask;
-            QString err = "Previous --status command has failed, check path/permissions!";
+            QString err = "Previous --status command has failed, check script/path/permissions!";
             statusCommandLabel_->showError(err);
             reloadTb_->setEnabled(false);
             commandTb_->setEnabled(false);
@@ -145,7 +145,7 @@ void JobStatusItemWidget::finishFileFetchTask()
         VNode *node = info_->node();
         if(node->isFlagSet(ecf::Flag::STATUSCMD_FAILED))
         {
-            QString err = "Previous --status command has failed, check path/permissions!";
+            QString err = "Previous --status command has failed, check script/path/permissions!";
             statusCommandLabel_->showError(err);
             reloadTb_->setEnabled(nodeStatusMode_ == EnabledCommandMode);
             commandTb_->setEnabled(nodeStatusMode_ == EnabledCommandMode);
@@ -299,8 +299,7 @@ void JobStatusItemWidget::clearContents()
 {
     taskMode_=NoTask;
     nodeStatusMode_=UnsetCommandMode;
-    fetchTried_ = false;
-    messageLabel_->stopLoadLabel();
+    statusCommandLabel_->stopLoadLabel();
     timer_->stop();
     timeoutCount_ = 0;
     InfoPanelItem::clear();
@@ -320,7 +319,6 @@ void JobStatusItemWidget::infoReady(VReply* reply)
         return;
     }
 
-    fetchTried_ = true;
     if(taskMode_ == FetchFileTask) {      
         taskMode_ = NoTask;
         finishFileFetchTask();
@@ -360,7 +358,6 @@ void JobStatusItemWidget::infoFailed(VReply* reply)
 {    
     if(checkStatusCommandTask(reply))
     {    
-        fetchTried_ = true;
         if(taskMode_ == FetchFileTask) {
             taskMode_ = NoTask;
             finishFileFetchTask();

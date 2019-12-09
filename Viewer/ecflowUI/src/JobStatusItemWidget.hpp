@@ -59,7 +59,6 @@ protected:
       int maxTimeoutCount_;
       TaskMode taskMode_;
       StatusCommandMode nodeStatusMode_;
-      bool fetchTried_;
 };
 
 #endif // JOBSTATUSITEMWIDGET_HPP
