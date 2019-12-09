@@ -155,6 +155,7 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined"
 fi
 
+# to use boost 1.71 or newer need at least cmake/3.15.3
 module load cmake/new    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
 module load ecbuild/new
 module load boost/1.53.0     # uncomment to use local BOOST_ROOT  may need -DBOOST_ROOT=$BOOST_ROOT 
