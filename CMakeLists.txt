@@ -225,7 +225,7 @@ set(Boost_USE_MULTITHREADED  ON)
 set(Boost_NO_SYSTEM_PATHS    ON)
 set(Boost_DETAILED_FAILURE_MSG ON)
 set(Boost_ARCHITECTURE       "-x64") # from boost 1.69 layout=tagged adds libboost_system-mt-x64.a, https://gitlab.kitware.com/cmake/cmake/issues/18908
-set(Boost_DEBUG                ON) # Set to ON to enable debug output from FindBoost
+#set(Boost_DEBUG                ON) # Set to ON to enable debug output from FindBoost
 
 set(ECFLOW_BOOST_VERSION "1.68.0")
 
