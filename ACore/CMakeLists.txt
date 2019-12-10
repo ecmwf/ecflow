@@ -45,6 +45,9 @@ else()
                            )   
 endif()             
 
+
+message(STATUS "XXXXY core ${Boost_FILESYSTEM_LIBRARY_RELEASE} ${Boost_DATE_TIME_LIBRARY_RELEASE} ${CRYPT_LIB}")
+
 #  ${LIBRT} See: https://stackoverflow.com/questions/13653361/another-undefined-reference-error-when-linking-boost-libraries                   
 file( GLOB test_srcs RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "test/*.cpp" )
 ecbuild_add_test( TARGET   u_acore 
