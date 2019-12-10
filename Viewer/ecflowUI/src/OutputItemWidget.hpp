@@ -22,6 +22,8 @@ class OutputDirProvider;
 class OutputFetchInfo;
 class OutputModel;
 class OutputSortModel;
+class VProperty;
+class QTimer;
 
 class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
@@ -56,6 +58,7 @@ protected Q_SLOTS:
     void on_saveFileAsTb__clicked();
     void on_copyPathTb__clicked();
     void on_dirReloadTb__clicked();
+    void on_lineNumberTb__clicked(bool st);
 
 protected:
     void setCurrentInDir(const std::string&,VFile::FetchMode fetchMode);
@@ -81,6 +84,7 @@ protected:
     OutputFetchInfo* fetchInfo_;
     bool dirColumnsAdjusted_{false};
     bool submittedWarning_{false};
+    VProperty* lineNumProp_{nullptr};
 };
 
 #endif

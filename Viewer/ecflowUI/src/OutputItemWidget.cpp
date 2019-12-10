@@ -147,6 +147,13 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     //
     browser_->setSearchButtons(searchTb_);
+
+    //line number
+    lineNumProp_ = VConfig::instance()->find("panel.output.showLineNumber");
+    Q_ASSERT(lineNumProp_);
+    bool showLineNum = lineNumProp_->value().toBool();
+    lineNumberTb_->setChecked(showLineNum);
+    on_lineNumberTb__clicked(showLineNum);
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -724,6 +731,17 @@ void OutputItemWidget::on_fontSizeDownTb__clicked()
 {
 	//We need to call a custom slot here instead of "zoomOut"!!!
 	browser_->zoomOut();
+}
+
+//-----------------------------------------
+// Show line number
+//-----------------------------------------
+
+void OutputItemWidget::on_lineNumberTb__clicked(bool st)
+{
+    browser_->setShowLineNumbers(st);
+    Q_ASSERT(lineNumProp_);
+    lineNumProp_->setValue(st);
 }
 
 //-----------------------------------------

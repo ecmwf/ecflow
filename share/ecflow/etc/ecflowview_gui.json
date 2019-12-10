@@ -4,6 +4,7 @@
         "hidden" : {
             "visible" : "false",
             "line" : "panel.variable.showShadowed",
+            "line" : "panel.output.showLineNumber",
             "line" : "view.table.variableColumns"
         },
 

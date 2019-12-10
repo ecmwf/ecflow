@@ -425,6 +425,12 @@ void OutputBrowser::zoomOut()
     htmlEdit_->zoomOut();
 }
 
+void OutputBrowser::setShowLineNumbers(bool st)
+{
+    textEdit_->setShowLineNumbers(st);
+    textPager_->textEditor()->setShowLineNumbers(st);
+}
+
 void OutputBrowser::showConfirmSearchLabel()
 {
 	if(searchLine_->isVisible() &&  searchLine_->confirmSearch())
