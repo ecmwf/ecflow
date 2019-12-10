@@ -131,8 +131,18 @@ void JobStatusItemWidget::startFileFetchTask()
         {
             QString warn = "The --status command can only be run for <b>active</b> or <b>submitted</b> nodes!";
             statusCommandLabel_->showWarning(warn);
-            reloadTb_->setEnabled(false);
-            commandTb_->setEnabled(false);
+            if(node->isFlagSet(ecf::Flag::STATUS))
+            {
+                taskMode_=FetchFileTask;
+                reloadTb_->setEnabled(false);
+                commandTb_->setEnabled(false);
+                infoProvider_->info(info_);
+            }
+            else
+            {
+                reloadTb_->setEnabled(false);
+                commandTb_->setEnabled(false);
+            }
         }
      }
 }
