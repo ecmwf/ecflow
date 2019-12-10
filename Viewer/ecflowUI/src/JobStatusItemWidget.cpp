@@ -194,17 +194,18 @@ bool JobStatusItemWidget::checkStatusCommandTask(VReply* reply)
     QString s=QString::fromStdString(reply->text());
     if (taskMode_ == StatusCommandTask)
     {
-        Q_ASSERT(nodeStatusMode_ == EnabledCommandMode);
+        //Q_ASSERT(nodeStatusMode_ == EnabledCommandMode);
         VNode *node = nullptr;
         if (info_ && info_->isNode() && info_->node())
         {
             node = info_->node();
-            // check if the node status changed significantly
+            // check if the node status significantly changed
             bool st=(node->isActive() || node->isSubmitted());
             if ((st && nodeStatusMode_ != EnabledCommandMode) ||
                  (!st && nodeStatusMode_ != DisabledCommandMode))
             {
                 reload(info_);
+                return;
             }
         }
         else {
@@ -287,6 +288,13 @@ bool JobStatusItemWidget::checkStatusCommandTask(VReply* reply)
 
 void JobStatusItemWidget::fetchJobStatusFile()
 {
+    if(taskMode_ != StatusCommandTask)
+    {
+        timer_->stop();
+        timeoutCount_=0;
+        return;
+    }
+
     Q_ASSERT(taskMode_==StatusCommandTask);
     if(info_ && info_->isNode() && info_->node())
     {
@@ -297,11 +305,13 @@ void JobStatusItemWidget::fetchJobStatusFile()
 
 void JobStatusItemWidget::clearContents()
 {
+    timer_->stop();
+    timeoutCount_ = 0;
     taskMode_=NoTask;
     nodeStatusMode_=UnsetCommandMode;
     statusCommandLabel_->stopLoadLabel();
-    timer_->stop();
-    timeoutCount_ = 0;
+    statusCommandLabel_->clear();
+    statusCommandLabel_->hide();
     InfoPanelItem::clear();
     textEdit_->clear();
     messageLabel_->hide();
@@ -391,8 +401,8 @@ void JobStatusItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
             if (taskMode_ ==  StatusCommandTask)
             {
                 timer_->stop();
-                messageLabel_->stopLoadLabel();
-                messageLabel_->hide();
+                statusCommandLabel_->stopLoadLabel();
+                statusCommandLabel_->hide();
             }
         }
         //Resume
