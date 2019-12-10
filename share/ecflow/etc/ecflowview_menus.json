@@ -17,7 +17,7 @@
         },
 
         {
-            "name"    : "Order",
+            "name"    : "Order peers",
             "modes"   : ["Submenu"]
         },
 
@@ -241,7 +241,7 @@
 
         {
             "menu"           : "Node",
-            "name"           : "Order",
+            "name"           : "Order peers",
             "type"           : "Submenu",
             "visible_for"    : "(node or alias) and admin",
             "command"        : "None"
@@ -404,37 +404,37 @@
         },
 
         {
-            "menu"           : "Order",
+            "menu"           : "Order peers",
             "name"           : "Top",
             "command"        : "ecflow_client --order <full_name> top",
             "status_tip"     : "__cmd__"
         },
         {
-            "menu"           : "Order",
+            "menu"           : "Order peers",
             "name"           : "Up",
             "command"        : "ecflow_client --order <full_name> up",
             "status_tip"     : "__cmd__"
         },
         {
-            "menu"           : "Order",
+            "menu"           : "Order peers",
             "name"           : "Down",
             "command"        : "ecflow_client --order <full_name> down",
             "status_tip"     : "__cmd__"
         },
         {
-            "menu"           : "Order",
+            "menu"           : "Order peers",
             "name"           : "Bottom",
             "command"        : "ecflow_client --order <full_name> bottom",
             "status_tip"     : "__cmd__"
         },
         {
-            "menu"           : "Order",
+            "menu"           : "Order peers",
             "name"           : "Alphabetically",
             "command"        : "ecflow_client --order <full_name> alpha",
             "status_tip"     : "__cmd__"
         },
         {
-            "menu"           : "Order",
+            "menu"           : "Order peers",
             "name"           : "Runtime",
             "command"        : "ecflow_client --order <full_name> runtime",
             "status_tip"     : "__cmd__"
