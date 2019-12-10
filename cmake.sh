@@ -184,7 +184,9 @@ if [[ "$intel_arg" = intel ]] ; then
     #CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
 fi
 
-module load ecbuild/new   
+if [[ $ecbuild_arg != ecbuild ]] ; then
+    module load ecbuild/new   
+fi
 module load python
 module load python3/3.6.8-01
 module load cmake/3.15.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
