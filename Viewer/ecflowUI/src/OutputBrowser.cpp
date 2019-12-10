@@ -73,7 +73,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
     textEdit_=new PlainTextEdit(this);
     textEdit_->setReadOnly(true);
     textEdit_->setWordWrapMode(QTextOption::NoWrap);
-    textEdit_->setShowLineNumbers(false);
+    textEdit_->setShowLineNumbers(true);
 
     textEditSearchInterface_=new PlainTextSearchInterface();
     textEditSearchInterface_->setEditor(textEdit_);
@@ -84,7 +84,7 @@ OutputBrowser::OutputBrowser(QWidget* parent) :
 
     //Pager for very large files
     textPager_=new TextPagerWidget(this);
-    textPager_->textEditor()->setShowLineNumbers(false);
+    textPager_->textEditor()->setShowLineNumbers(true);
 
     //textEdit_->setReadOnly(true);
 
