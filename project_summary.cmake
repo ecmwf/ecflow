@@ -1,6 +1,10 @@
 message( STATUS "------------------------------------------------------" )
 
 if(Boost_FOUND)
+    message( STATUS " Boost_NO_BOOST_CMAKE              : [${Boost_NO_BOOST_CMAKE}]" )
+    message( STATUS " Boost_USE_MULTITHREADED           : [${Boost_USE_MULTITHREADED}]" )
+    message( STATUS " Boost_NO_SYSTEM_PATHS             : [${Boost_NO_SYSTEM_PATHS}]" )
+    message( STATUS " Boost_DETAILED_FAILURE_MSG        : [${Boost_DETAILED_FAILURE_MSG}]" )
     message( STATUS " Boost_MAJOR_VERSION               : [${Boost_MAJOR_VERSION}]" )
     message( STATUS " Boost_MINOR_VERSION               : [${Boost_MINOR_VERSION}]" )
     message( STATUS " Boost_SUBMINOR_VERSION            : [${Boost_SUBMINOR_VERSION}]" )
