@@ -205,7 +205,7 @@ bool JobStatusItemWidget::checkStatusCommandTask(VReply* reply)
                  (!st && nodeStatusMode_ != DisabledCommandMode))
             {
                 reload(info_);
-                return;
+                return false;
             }
         }
         else {
