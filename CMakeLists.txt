@@ -215,6 +215,12 @@ if ( ENABLE_STATIC_BOOST_LIBS )
     set(Boost_USE_STATIC_LIBS ON)
 endif()
 
+# By default cmake assume boost was built with cmake. Hence looks for package config file BoostConfig.cmake/boost-config.cmake
+# This seems to mess up the search for boost python libs.
+# if Boost_NO_BOOST_CMAKE is not set, we seem to mess up in finding right python libs(python3 and python2), 
+# for boost 1.71 and cmake 3.15 or greater
+set(Boost_NO_BOOST_CMAKE ON) 
+
 set(Boost_USE_MULTITHREADED  ON)
 set(Boost_NO_SYSTEM_PATHS    ON)
 set(Boost_DETAILED_FAILURE_MSG ON)
