@@ -97,6 +97,7 @@
     <file alias="job.svg">../images/job.svg</file>
     <file alias="job_status.svg">../images/job_status.svg</file>
     <file alias="large_file_search.svg">../images/large_file_search.svg</file>
+    <file alias="line_num.svg">../images/line_num.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
     <file alias="logo.png">../images/logo.png</file>

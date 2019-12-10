@@ -199,7 +199,14 @@
            <property name="text">
             <string>...</string>
            </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/line_num.svg</normaloff>:/viewer/line_num.svg</iconset>
+           </property>
            <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="autoRaise">
             <bool>true</bool>
            </property>
           </widget>
