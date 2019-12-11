@@ -204,7 +204,7 @@ void NodeQueryEngine::runRecursively(VNode *node)
             while (it != attrParser_.constEnd())
             {
                 //Process a given attribute type
-                const std::vector<VAttribute*>& av=node->attr();
+                const std::vector<VAttribute*>& av=node->attrForSearch();
                 bool hasType=false;
                 for(auto i : av)
                 {

@@ -115,6 +115,7 @@ public:
 
     //Attributes
     const std::vector<VAttribute*>& attr() const {return attr_;}
+    virtual const std::vector<VAttribute*>& attrForSearch() {return attr_;}
     int attrNum(AttributeFilter* filter=nullptr) const;
     VAttribute* attribute(int,AttributeFilter *filter=nullptr) const;
     VAttribute* attributeForType(int,VAttributeType*) const;
@@ -226,7 +227,7 @@ protected:
 
     node_ptr node_;
     std::vector<VNode*> children_;
-    std::vector<VAttribute*> attr_;
+    mutable std::vector<VAttribute*> attr_;
     int index_;
     VNodeTriggerData* data_;
 };
@@ -277,6 +278,8 @@ public:
 	int totalNumOfTopLevel(int) const;
     int totalNumOfTopLevel(VNode*) const;
     int totalNumOfTopLevel(const std::string&) const;
+
+    const std::vector<VAttribute*>& attrForSearch() override;
 
 	VNode* toVNode(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
@@ -350,6 +353,8 @@ private:
     VServerCache cache_;
     std::vector<Variable> prevGenVars_;
     ecf::Flag prevFlag_;
+
+    std::vector<VAttribute*> attrForSearch_;
 
     std::map<std::string,VNodeInternalState> prevNodeState_;
 };
