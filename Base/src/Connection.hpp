@@ -28,6 +28,7 @@
 #include <boost/bind.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <boost/version.hpp>
 
 #include "Log.hpp"
 #include "Str.hpp"
@@ -114,8 +115,11 @@ public:
 			// Unable to decode data. Something went wrong, inform the caller.
 			log_archive_error("Connection::async_write, boost::archive::archive_exception ",ae,outbound_data_);
 			boost::system::error_code error(boost::asio::error::invalid_argument);
+#if BOOST_VERSION > 106500
+         boost::asio::post(socket_.get_executor(), boost::bind(handler, error));
+#else
          socket_.get_io_service().post(boost::bind(handler, error));
-         //boost::asio::post(socket_.get_executor(), boost::bind(handler, error));
+#endif
 			return;
 		}
 
@@ -129,8 +133,12 @@ public:
 			// Something went wrong, inform the caller.
 			log_error("Connection::async_write, could not format header");
 			boost::system::error_code error(boost::asio::error::invalid_argument);
+
+#if BOOST_VERSION > 106500
+         boost::asio::post(socket_.get_executor(), boost::bind(handler, error));
+#else
          socket_.get_io_service().post(boost::bind(handler, error));
-         //boost::asio::post(socket_.get_executor(), boost::bind(handler, error));
+#endif
 			return;
 		}
 		outbound_header_ = header_stream.str();
