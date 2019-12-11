@@ -1,4 +1,10 @@
-PERF
+REF:
+====
+https://www.bfilipek.com/2019/11/perfguidecpu.html
+https://easyperf.net/notes/
+https://easyperf.net/blog/2019/08/02/Perf-measurement-environment-on-Linux
+
+PERF 
 ====
 # Is a sampling profiler. Not 100% precies. Artifacts of measurement will have precision loss.
   perf stat <exe>  # course grain
