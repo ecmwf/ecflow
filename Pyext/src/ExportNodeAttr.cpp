@@ -708,7 +708,7 @@ void export_NodeAttr()
    .def("relative",&AutoArchiveAttr::relative, "Returns a boolean where true means the time is relative")
    .def("days",    &AutoArchiveAttr::days,     "Returns a boolean true if time was specified in days")
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    boost::python::register_ptr_to_python< std::shared_ptr<AutoArchiveAttr> >(); // needed for mac and boost 1.6
 #endif
 
@@ -720,7 +720,7 @@ void export_NodeAttr()
    .def("__copy__",copyObject<AutoRestoreAttr>)              // __copy__ uses copy constructor
    .def("nodes_to_restore",&AutoRestoreAttr::nodes_to_restore, return_value_policy<copy_const_reference>(), "returns a list of nodes to be restored")
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    boost::python::register_ptr_to_python< std::shared_ptr<AutoRestoreAttr> >(); // needed for mac and boost 1.6
 #endif
 
