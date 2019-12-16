@@ -337,8 +337,9 @@ const char* InitCmd::desc() {
    return
             "Mark task as started(active). For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables.\n"
-            "  arg = process_or_remote_id. The process id of the job or remote_id\n"
-            "                              Using remote id allows the jobs to be killed\n\n"
+            "  arg1(string)         = process_or_remote_id The process id of the job or remote_id\n"
+            "                         Using remote id allows the jobs to be killed\n"
+            "  arg2(--add)(optional)= add variables as name value pairs\n\n"
             "If this child command is a zombie, then the default action will be to *block*.\n"
             "The default can be overridden by using zombie attributes.\n"
             "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
@@ -452,7 +453,10 @@ const char* CompleteCmd::desc()
 	         "Hence the context is supplied via environment variables\n\n"
 	         "If this child command is a zombie, then the default action will be to *block*.\n"
 	         "The default can be overridden by using zombie attributes.\n"
-	         "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
+            "Otherwise the blocking period is defined by ECF_TIMEOUT.\n"
+	         "The init command allows variables to be added, and complete command\n"
+	         "allows for them to be removed.\n"
+            "  arg1(--remove)(optional) = a list of variables to removed from this task\n\n"
 	         "Usage:\n"
             "  ecflow_client --complete\n"
             "  ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
@@ -553,7 +557,7 @@ const char* CtsWaitCmd::desc() {
 	return
 	         "Evaluates an expression, and block while the expression is false.\n"
 	         "For use in the '.ecf' file *only*, hence the context is supplied via environment variables\n"
-	         "  arg1 = string(expression)\n"
+	         "  arg1 = string(expression)\n\n"
 	         "Usage:\n"
 	         "  ecflow_client --wait=\"/suite/taskx == complete\""
 	;
@@ -729,14 +733,14 @@ const char* EventCmd::desc() {
             "Change event. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
             "  arg1(string | int)     = event-name\n\n"
-            "  arg2(string)(optional) = [ set | clear] defalt value is set\n\n"
+            "  arg2(string)(optional) = [ set | clear] default value is set\n\n"
             "If this child command is a zombie, then the default action will be to *fob*,\n"
             "i.e allow the ecflow client command to complete without an error\n"
             "The default can be overridden by using zombie attributes.\n\n"
             "Usage:\n"
             "  ecflow_client --event=ev       # set the event, default since event initial value is clear\n"
             "  ecflow_client --event=ev set   # set the event, explicit\n"
-            "  ecflow_client --event=ev clear # clear the event, uses when event initial value is set\n"
+            "  ecflow_client --event=ev clear # clear the event, use when event initial value is set\n"
             ;
 }
 
