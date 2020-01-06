@@ -406,6 +406,20 @@ void System::died( const std::string& absNodePath, CmdType cmd_type, const std::
 	switch(cmd_type) {
 	   case System::ECF_JOB_CMD: {
 	      submittable->flag().set(ecf::Flag::JOBCMD_FAILED);
+
+	      // NORMAL flow   :  queued->submitted->abort  : for failing ECF_JOB_CMD
+	      //
+	      // Occasionally TRIMURTI can time out and fail, even when the job is complete.
+	      // ABNORMAL flow is:  queued->submitted->active->complete  See: ECFLOW-1589
+	      //                    In this case we should avoid setting node to aborted.
+	      if (submittable->state() == NState::COMPLETE) {
+	         // ABNORMAL flow
+	         std::string str = "System::died: ECF_JOB_CMD failed, but state is already complete : "; str += absNodePath; str += " setting zombie flag";
+	         ecf::log(Log::ERR,str);
+	         submittable->flag().set(ecf::Flag::ZOMBIE);
+	         return;
+	      }
+
 #ifdef DEBUG_CHILD_ABORT
 	      std::cout << "System::died aborting task " << absNodePath << "\n";
 #endif
