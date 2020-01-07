@@ -100,7 +100,8 @@ System::~System()= default;
 bool System::spawn(System::CmdType cmd_type,const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg)
 {
 #ifdef DEBUG_FORK
-	std::cout << " System::spawn path(" << absPath << ")  cmd(" << cmdToSpawn << ")\n";
+   LogToCout logToCoutAsWell;
+   LOG( Log::DBG,"  System::spawn path(" << absPath << ") cmd(" << cmdToSpawn << ") cmd_type("<< cmd_type << ")\n");
 #endif
 
 	int rc   = 1; /* Not a zero          */
@@ -117,7 +118,7 @@ bool System::spawn(System::CmdType cmd_type,const std::string& cmdToSpawn,const 
 		if ( !absPath.empty() ) ss << " at path(" << absPath << ")";
 		errorMsg = ss.str();
 #ifdef DEBUG_FORK
-		std::cout << " System::spawn returning false " << endl;
+	   LOG( Log::DBG,"  System::spawn returning false\n");
 #endif
 		return false;
  	}
@@ -127,7 +128,8 @@ bool System::spawn(System::CmdType cmd_type,const std::string& cmdToSpawn,const 
 int System::sys(System::CmdType cmd_type,const std::string& cmdToSpawn,const std::string& absPath,std::string& errorMsg)
 {
 #ifdef DEBUG_FORK
-	std::cout << "  System::sys path(" << absPath << ")  cmd(" << cmdToSpawn << ")\n";
+   LogToCout logToCoutAsWell;
+   LOG( Log::DBG,"  System::sys path(" << absPath << ")  cmd(" << cmdToSpawn << ")  cmd_type("<< cmd_type << ")\n");
 #endif
 	/**************************************************************************
 	 ?  Execute the command (cmdToSpawn) and return, DO NOT WAIT for the termination
