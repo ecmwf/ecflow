@@ -58,6 +58,7 @@ test/TestPersistence.cpp
 test/TestPreProcessing.cpp
 test/TestReplace.cpp
 test/TestSetState.cpp
+test/TestSystem.cpp
 test/TestTaskScriptGenerator.cpp
 test/TestTimeDependencies.cpp
 test/TestVariableGeneration.cpp
