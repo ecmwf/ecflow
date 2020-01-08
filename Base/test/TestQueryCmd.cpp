@@ -21,6 +21,7 @@
 #include "Task.hpp"
 #include "TestHelper.hpp"
 #include "System.hpp"
+#include "Limit.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -32,6 +33,7 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    cout << "Base:: ...test_query_cmd\n";
    // Create the defs file.
    // suite suite
+   //    limit limit_x 12
    //    repeat date YMD 20090916 20200916
    //    family f
    //          edit var2 var2
@@ -55,12 +57,15 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    std::string meter_name = "m";
    std::string event_name = "event";
    std::string label_name = "name";
+   std::string limit_name = "limit_x";
    {
       t1->addMeter( Meter(meter_name,0,100,100));
       t1->addEvent( Event(event_name));
       t1->add_variable("var1","var1");
 
       suite_ptr s = defs.add_suite("suite");
+      s->addLimit( Limit(limit_name,12) );
+
       s->addRepeat( RepeatDate("YMD",20090916,20200916,1) );
       family_ptr f = s->add_family("f");
       f->add_variable("var2","var2");
@@ -80,6 +85,8 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite/f/t1","eventxx","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","/suite",event_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("event","xxxx/f/t1",event_name,"/suite/f/t1")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("limit","xxxx/f/t1",limit_name,"/suite")));
+   TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("limit_max","xxxx/f/t1",limit_name,"/suite")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1","meterxx","/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite",meter_name,"/suite/f/t1")));
    TestHelper::invokeFailureRequest(&defs,Cmd_ptr( new QueryCmd("label","/suite/f/t1",label_name,"/suite/f/t1"))); // no label on t1
@@ -128,6 +135,12 @@ BOOST_AUTO_TEST_CASE( test_query_cmd )
 
    res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("meter","/suite/f/t1",meter_name,"/suite/f/t1")), false);
    BOOST_CHECK_MESSAGE(res == "0","expected query meter to return 0 but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("limit","/suite",limit_name,"/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "0","expected query limit to return 0 but found: " << res);
+
+   res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("limit_max","/suite",limit_name,"/suite/f/t1")), false);
+   BOOST_CHECK_MESSAGE(res == "12","expected query limit_max to return 12 but found: " << res);
 
 
    res = TestHelper::invokeRequest(&defs,Cmd_ptr( new QueryCmd("label","/suite/f/t2",label_name,"/suite/f/t2")), false);
