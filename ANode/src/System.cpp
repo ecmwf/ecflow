@@ -403,35 +403,46 @@ void System::died( const std::string& absNodePath, CmdType cmd_type, const std::
 	// ECFLOW-104 aborted state for a task following an error at submission
 	SuiteChanged1 changed(submittable->suite());
 
-	// Only failure of the JOB command should cause SUBMITTABLE to abort.
-	// i.e Badly formed status and kill commands should not abort a running job
-	switch(cmd_type) {
-	   case System::ECF_JOB_CMD: {
-	      submittable->flag().set(ecf::Flag::JOBCMD_FAILED);
+   // Only failure of the JOB command should cause SUBMITTABLE to abort.
+   // i.e Badly formed status and kill commands should not abort a running job
+   switch ( cmd_type ) {
+      case System::ECF_JOB_CMD: {
+         submittable->flag().set(ecf::Flag::JOBCMD_FAILED);
 
-	      // NORMAL flow   :  queued->submitted->abort  : for failing ECF_JOB_CMD
-	      //
-	      // Occasionally TRIMURTI can time out and fail, even when the job is complete.
-	      // ABNORMAL flow is:  queued->submitted->active->complete  See: ECFLOW-1589
-	      //                    In this case we should avoid setting node to aborted.
-	      if (submittable->state() == NState::COMPLETE) {
-	         // ABNORMAL flow
-	         std::string str = "System::died: ECF_JOB_CMD failed, but state is already complete : "; str += absNodePath; str += " setting zombie flag";
-	         ecf::log(Log::ERR,str);
-	         submittable->flag().set(ecf::Flag::ZOMBIE);
-	         return;
-	      }
+         if (submittable->state() == NState::COMPLETE || submittable->state() == NState::ACTIVE) {
+            // ABNORMAL flow
+            // Occasionally TRIMURTI can time out and fail, even when the job is active or complete.(i.e for super fast jobs)
+            // queued->submitted->active->complete  See: ECFLOW-1589
+            // In this case we should *AVOID* setting node to aborted.
+            std::string str = "System::died: ECF_JOB_CMD *failed*, but state is ";
+            str += NState::toString(submittable->state());
+            str += "(";
+            str += absNodePath;
+            str += ") setting zombie flag";
+            ecf::log(Log::ERR, str);
+            submittable->flag().set(ecf::Flag::ZOMBIE);
+#ifdef DEBUG_CHILD_ABORT
+            std::cout << str << "\n";
+#endif
+            return;
+         }
 
 #ifdef DEBUG_CHILD_ABORT
 	      std::cout << "System::died aborting task " << absNodePath << "\n";
 #endif
-	      // Set state aborted since the job terminated abnormally, and provide a reason
-	      submittable->aborted(reason);
-	      break;
-	   }
-      case System::ECF_KILL_CMD:   submittable->flag().set(ecf::Flag::KILLCMD_FAILED); break;
-      case System::ECF_STATUS_CMD: submittable->flag().set(ecf::Flag::STATUSCMD_FAILED); break;
-	};
+         // NORMAL flow   :  queued->submitted->abort  : for failing ECF_JOB_CMD
+         //
+         // Set state aborted since the job terminated abnormally, and provide a reason
+         submittable->aborted(reason);
+         break;
+      }
+      case System::ECF_KILL_CMD:
+         submittable->flag().set(ecf::Flag::KILLCMD_FAILED);
+         break;
+      case System::ECF_STATUS_CMD:
+         submittable->flag().set(ecf::Flag::STATUSCMD_FAILED);
+         break;
+   };
 }
 
 std::string System::cmd_type(System::CmdType cmd_type)
