@@ -163,7 +163,7 @@ int System::sys(System::CmdType cmd_type,const std::string& cmdToSpawn,const std
       int fd_limit = sysconf(_SC_OPEN_MAX);
       for (int i=3; i<fd_limit; i++) close(i);
 
-      execl( "/bin/sh", "sh", "-c", cmdToSpawn.c_str(), (char *)nullptr );
+      execl( "/bin/sh", "sh", "-c", cmdToSpawn.c_str(), (char *)NULL );
       /*
        *  Maybe the file protection failed (no executable bit set)
        *  or the shell couldn't be found. Look at man execve(2).
@@ -214,8 +214,8 @@ static void catch_child(int sig)
    //  - returns -1 on error
    while ( (child_pid = waitpid( -1, &status, WNOHANG )) != -1 && child_pid != 0) {
 
-      auto theEnd = processVec_.end();
-      for(auto i = processVec_.begin(); i!= theEnd; ++i) {
+      std::vector<Process>::iterator theEnd = processVec_.end();
+      for(std::vector<Process>::iterator i = processVec_.begin(); i!= theEnd; ++i) {
          if ((*i).pid_ == child_pid) {
 
 #ifdef DEBUG_CATCH_CHILD
