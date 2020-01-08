@@ -73,7 +73,7 @@ if(ENABLE_UI)
 
     ecbuild_info("")
     ecbuild_info("------------------------------ Qt start ---------------------------")
-    ecbuild_info("ecFlowUI is enabled - searching for Qt5; if not found, will try Qt4")
+    ecbuild_info("ecFlowUI is enabled - searching for Qt5")
     ecbuild_info("To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH")
 
     find_package(Qt5Widgets 5.0.0)
@@ -108,16 +108,8 @@ if(ENABLE_UI)
           endif()
 
     else()
-        ecbuild_info("Could not find all required Qt5 packages (Qt5Widgets, Qt5Gui and Qt5Network) - searching for Qt4")
         ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
-
-        find_package(Qt4 4.8.0 REQUIRED QtCore QtGui QtNetwork QtSvg)
-        if(QT_FOUND)
-            ecbuild_info("Found Qt 4, please ignore any warnings about Qt5 components that were not found.")
-        else()
-            ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
-            ecbuild_critical("Qt5 and Qt4 not found - one of these is required for ecFlowUI; or use -DENABLE_UI=OFF")
-        endif()
+        ecbuild_critical("Qt5 Widgets, Network and Gui not found - these are required for ecFlowUI; or use -DENABLE_UI=OFF")
     endif()
 
     set(ECFLOW_QT 1)
