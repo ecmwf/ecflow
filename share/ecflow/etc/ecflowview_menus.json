@@ -685,6 +685,20 @@
 
         {
             "menu"           : "Special",
+            "name"           : "-",
+            "visible_for"    : "server"
+        },
+
+        {
+            "menu"           : "Special",
+            "name"           : "Flush server log",
+            "visible_for"    : "server",
+            "command"        : "ecflow_client --log=flush",
+            "status_tip"     : "__cmd__"
+        },
+
+        {
+            "menu"           : "Special",
             "name"           : "Walk",
             "visible_for"    : "(suite or family)",
             "command"        : "ecflow_client --force-dep-eval <full_name>",
