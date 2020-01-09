@@ -36,6 +36,7 @@ show_error_and_exit() {
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
+   echo "   intel          - build with intel compiler"
    echo "   clang_tidy     - create compilation database for clang_tdiy and then call run-clang-tidy.py"
    echo "   iwyu           - INCLUDE what you use"
    echo "   tsan           - is short for clang thread sanitiser"
@@ -176,11 +177,13 @@ fi
 if [[ "$intel_arg" = intel ]] ; then
     # fails because:
     # /tmp/ma0/workspace/ecflow/ACore/src/cereal_optional_nvp.hpp(52): error: namespace "std" has no member "enable_if_t"
+    # > icc -v
+    # > icc version 19.0.4.243 (gcc version 4.8.0 compatibility)
+    # The installtion of intel 19, was build with wrong version of GNU, we need at least GNU 7.3 which add c++14 standard library
     module unload eccodes
     module unload gnu
-    module load intel/18.0.1
-    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/intel-18/boost_1_67_0"
-    CXX_FLAGS="-std=c++17"
+    module load intel/19.0.4
+    CXX_FLAGS="-std=c++14"
     #CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
 fi
 
