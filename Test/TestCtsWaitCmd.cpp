@@ -106,7 +106,7 @@ static bool wait_for_state(
 BOOST_AUTO_TEST_CASE( test_wait_cmd )
 {
    DurationTimer timer;
-   cout << "Test:: ...test_wait_cmd "<< flush;
+   cout << "Test:: ...test_wait_cmd " << flush;
    TestClean clean_at_start_and_end;
 
    Defs theDefs;
