@@ -179,10 +179,14 @@ if [[ "$intel_arg" = intel ]] ; then
     # /tmp/ma0/workspace/ecflow/ACore/src/cereal_optional_nvp.hpp(52): error: namespace "std" has no member "enable_if_t"
     # > icc -v
     # > icc version 19.0.4.243 (gcc version 4.8.0 compatibility)
-    # The installtion of intel 19, was build with wrong version of GNU, we need at least GNU 7.3 which add c++14 standard library
+    # Require setting LD_RUN_PATH an CXX, to correctly pick the right std library
     module unload eccodes
     module unload gnu
     module load intel/19.0.4
+    export LD_RUN_PATH="/usr/local/apps/gcc/8.3.0/lib64"
+    export CXX="icpc -cxxlib=/usr/local/apps/gcc/8.3.0"
+    $CXX -v
+    #exit 1
     CXX_FLAGS="-std=c++14"
     #CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
 fi
