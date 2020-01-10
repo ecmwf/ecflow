@@ -266,13 +266,13 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
       std::string path = NodePath::createPath(nodePathTokens);
       std::string combinedPath = rootPath + path +  File::ECF_EXTN(); // .ecf, .man , etc
 
-      //cout << "Creating file       : " << combinedPath << "\n";
+      //cout << " Creating file       : " << combinedPath << "  nodePathTokens.size() " << nodePathTokens.size() << "\n";
       std::string errorMsg;
       BOOST_REQUIRE_MESSAGE(File::create(combinedPath,fileContents,errorMsg),"Failed to create " << combinedPath << " because " << errorMsg);
 
       // Preserve the last token, i.e task
       if ( nodePathTokens.size() >= 2 ) nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size()-2); // consume one from last path token
-      else nodePathTokens.erase(nodePathTokens.end());
+      else                              nodePathTokens.erase(nodePathTokens.end());
    }
 
    // Now do a forward search for them:
