@@ -185,6 +185,7 @@ if [[ "$intel_arg" = intel ]] ; then
     module load intel/19.0.4
     export LD_RUN_PATH="/usr/local/apps/gcc/8.3.0/lib64"
     export CXX="icpc -cxxlib=/usr/local/apps/gcc/8.3.0"
+    export PATH="/usr/local/apps/gcc/8.3.0/bin:$PATH"
     $CXX -v
     #exit 1
     CXX_FLAGS="-std=c++14"
