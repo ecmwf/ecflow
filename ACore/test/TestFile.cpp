@@ -256,6 +256,7 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
    BOOST_REQUIRE_MESSAGE(File::createDirectories( combined_dir_path),"Failed to create dirs" << combined_dir_path);
 
    // Create a file in each of the directories.
+   //cout << "nodePath: " << nodePath << "\n";
    std::vector<std::string> fileContents; fileContents.emplace_back("something");
    vector<std::string> nodePathTokens;
    NodePath::split(nodePath,nodePathTokens);
@@ -269,7 +270,7 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
       std::string errorMsg;
       BOOST_REQUIRE_MESSAGE(File::create(combinedPath,fileContents,errorMsg),"Failed to create " << combinedPath << " because " << errorMsg);
 
-      // Preserve the last token
+      // Preserve the last token, i.e task
       if ( nodePathTokens.size() >= 2 ) nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size()-2); // consume one from last path token
       else nodePathTokens.erase(nodePathTokens.end());
    }
@@ -282,9 +283,8 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
    // test/data/dir0/dir1/task.ecf
    // test/data/dir0/task.ecf
    // test/data/task.ecf
-//   cout << "rootPath: " << rootPath << "\n";
-//   cout << "nodePath: " << nodePath << "\n";
-//   cout << "ECF_EXTN: " << File::ECF_EXTN()  << "\n";
+   //cout << "rootPath: " << rootPath << "\n";
+   //cout << "ECF_EXTN: " << File::ECF_EXTN()  << "\n";
    int filesFound = 0;
    for(int i = 0; i < 6; i++) {
       std::string theFile = File::forwardSearch(rootPath,nodePath,File::ECF_EXTN());
