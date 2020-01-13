@@ -75,7 +75,7 @@ def wait_for_suite_to_complete(ci,suite_name):
             print(ci.get_defs());
             assert False," Suite aborted \n"  
         time.sleep(2)
-        if count > 14:
+        if count > 20:
             assert False, suite_name + " aborted after " + str(count) + " loops, printing defs:\n" + str(ci.get_defs())
         
     ci.log_msg("Looped " + str(count) + " times")
