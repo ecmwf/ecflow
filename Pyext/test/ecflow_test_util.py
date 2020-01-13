@@ -242,7 +242,6 @@ class Server(object):
         print("   exctype:",exctype)
         print("   value:",value)
         print("   tb:",tb)
-        print("   Terminate server" + self.at_time())
         print("   Terminate server "+ self.at_time() )
         self.ci.terminate_server()  
         print("   Terminate server OK " + self.at_time() )
