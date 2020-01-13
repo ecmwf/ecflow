@@ -134,12 +134,14 @@ BOOST_AUTO_TEST_CASE( test_event_and_query )
    BOOST_CHECK_MESSAGE(TestFixture::client().query("label",task_b->absNodePath(),"task_b_label")==0,"query command failed " << TestFixture::client().errorMsg());
    BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "new_label_value","Expected query of label to return 'new_label_value' but found " << TestFixture::client().get_string());
 
-   BOOST_CHECK_MESSAGE(TestFixture::client().query("limit",suite->absNodePath(),"limit_x")==0,"query command failed " << TestFixture::client().errorMsg());
-   BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "0","Expected query of limit to return '0' but found " << TestFixture::client().get_string());
+   // Added since in 5.2.0 (only 5.2.0 server supports this behaviour)
+   if (!getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
+      BOOST_CHECK_MESSAGE(TestFixture::client().query("limit",suite->absNodePath(),"limit_x")==0,"query command failed " << TestFixture::client().errorMsg());
+      BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "0","Expected query of limit to return '0' but found " << TestFixture::client().get_string());
 
-   BOOST_CHECK_MESSAGE(TestFixture::client().query("limit_max",suite->absNodePath(),"limit_x")==0,"query command failed " << TestFixture::client().errorMsg());
-   BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "15","Expected query of limit_max to return '15' but found " << TestFixture::client().get_string());
-
+      BOOST_CHECK_MESSAGE(TestFixture::client().query("limit_max",suite->absNodePath(),"limit_x")==0,"query command failed " << TestFixture::client().errorMsg());
+      BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "15","Expected query of limit_max to return '15' but found " << TestFixture::client().get_string());
+   }
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
 
