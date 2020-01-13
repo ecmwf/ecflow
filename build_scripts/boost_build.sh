@@ -195,13 +195,13 @@ else
    # For both errors: Please check if you have more than one 'using python' in configuration files.
    # Please check site-config.jam, user-config.jam and project-config.jam and 
    # remove duplicated 'using python'.  Typically we remove $HOME/user-config.jam is using python is defined in it.
+   #
    # for 2/ use    
-   #    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/apps/python/2.7.12-01/include/python2.7/"
-   # *ONLY* if first solution fails ???
+   #    Try to fix the includes using notes below: i.e using python, needs include path
    # 
    #
    # When installing BOOST-python libs, make sure to call module load python *FIRST*
-   # Otherwise it will pick the python specified in project-config.jam, which make not be correct
+   # Otherwise it will pick the python specified in project-config.jam, which may not be correct
    #
    # ==========================================================================================
    # PYTHON3:
