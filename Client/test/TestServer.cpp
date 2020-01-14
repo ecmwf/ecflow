@@ -137,22 +137,14 @@ BOOST_AUTO_TEST_CASE( test_server_state_changes_with_auto_sync )
    BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::RUNNING,"Expected server state RUNNING but found " << SState::to_string(theClient.defs()->server().get_state()));
 
-   /// Repeat test using sync_local() to test incremental changes of server
-   BOOST_REQUIRE_MESSAGE(theClient.shutdownServer() == 0,CtsApi::shutdownServer() << " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::SHUTDOWN,"Expected server state SHUTDOWN but found " << SState::to_string(theClient.defs()->server().get_state()));
-
-   BOOST_REQUIRE_MESSAGE(theClient.haltServer() == 0,CtsApi::haltServer() << " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::HALTED,"Expected server state HALTED but found " << SState::to_string(theClient.defs()->server().get_state()));
-
-   BOOST_REQUIRE_MESSAGE(theClient.restartServer() == 0,CtsApi::restartServer() << " should return 0\n" << theClient.errorMsg());
-   BOOST_REQUIRE_MESSAGE(theClient.defs()->server().get_state() == SState::RUNNING,"Expected server state RUNNING but found " << SState::to_string(theClient.defs()->server().get_state()));
-
    if (ClientEnvironment::hostSpecified().empty()) {
       // This check only valid if server was invoked locally. Ignore for remote servers
 
       // make sure edit history updated
       BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n" << theClient.errorMsg());
-      BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() ==  7,"Expected edit history of size 7, but found " << theClient.server_reply().get_string_vec().size());
+      BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 8 && theClient.server_reply().get_string_vec().size() <= Defs::max_edit_history_size_per_node(),
+                            "Expected edit history of size 8, but found " << theClient.server_reply().get_string_vec().size()
+                            << "\n" << Str::dump_string_vec(theClient.server_reply().get_string_vec()));
 
       // make sure edit history was *NOT* serialized, It is only serialized when check pointing
       BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg());

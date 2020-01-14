@@ -122,6 +122,7 @@ public:
    virtual bool ping_cmd() const { return false;}
    virtual bool why_cmd( std::string& ) const { return false;}
    virtual bool show_cmd() const { return false ;}
+   virtual void add_edit_history(AbstractServer*) const;
 
    // used by group_cmd to postfix syncCmd on all user commands that modify defs
    virtual void set_client_handle(int client_handle) {} // used by group_cmd
@@ -172,6 +173,10 @@ protected:
    void add_node_for_edit_history(AbstractServer* as, const std::string& absNodepath) const;
    void add_node_for_edit_history(node_ptr) const;
    void add_node_path_for_edit_history(const std::string& absNodepath) const;
+
+
+   void add_edit_history(AbstractServer*,const std::string& path) const;
+   void add_delete_edit_history(AbstractServer*,const std::string& path) const;
 
 private:
    friend class GroupCTSCmd;
@@ -2089,6 +2094,9 @@ public:
    void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv ) const override;
+
+   void add_edit_history(AbstractServer*) const override;
+
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user

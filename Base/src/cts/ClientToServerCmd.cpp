@@ -23,7 +23,10 @@
 #include "Log.hpp"
 #include "CmdContext.hpp"
 #include "EditHistoryMgr.hpp"
+#include "SuiteChanged.hpp"
 #include "Host.hpp"
+#include "Flag.hpp"
+#include "Node.hpp"
 
 using namespace std;
 using namespace boost;
@@ -169,6 +172,67 @@ void ClientToServerCmd::add_node_for_edit_history(node_ptr the_node) const
 void ClientToServerCmd::add_node_path_for_edit_history(const std::string& absNodepath) const
 {
    edit_history_node_paths_.push_back(absNodepath);
+}
+
+void ClientToServerCmd::add_edit_history(AbstractServer* as) const
+{
+   // record all the user edits to the node. Reuse the time stamp cache created in handleRequest()
+   if (edit_history_nodes_.empty() && edit_history_node_paths_.empty()) {
+
+      as->defs()->flag().set(ecf::Flag::MESSAGE);
+      add_edit_history(as,Str::ROOT_PATH());
+   }
+   else {
+      // edit_history_node_paths_ is only populated by the delete command
+      size_t the_size = edit_history_node_paths_.size();
+      if (the_size != 0) as->defs()->flag().set(ecf::Flag::MESSAGE);
+      for(size_t i = 0; i < the_size; i++) {
+         add_delete_edit_history(as,edit_history_node_paths_[i]);
+      }
+
+      the_size = edit_history_nodes_.size();
+      for(size_t i = 0; i < the_size; i++) {
+         node_ptr edited_node = edit_history_nodes_[i].lock();
+         if (edited_node.get()) {
+            // Setting the flag will make a state change. But its OK command allows it.
+            // Since we only get called if command can make state changes (isWrite() == true)
+            SuiteChanged0 suiteChanged(edited_node);
+            edited_node->flag().set(ecf::Flag::MESSAGE);  // trap state change in suite for sync
+            add_edit_history(as,edited_node->absNodePath());
+         }
+      }
+   }
+
+   edit_history_nodes_.clear();
+   edit_history_node_paths_.clear();
+}
+
+void ClientToServerCmd::add_edit_history(AbstractServer* as,const std::string& path) const
+{
+   // Note: if the cts_cmd_, had thousands of paths, calling  cts_cmd_->print(ss); will append those paths to the
+   //       output, HUGE performance bottle neck, Since we are recording what command was applied to each node
+   //       we ONLY need the single path.
+   //
+   //       The old code hacked around this issue by doing vector<string>().swap(paths_);in handleRequest()
+   //       This caused its own set of problems. JIRA 434
+   // See: Client/bin/gcc-4.8/release/perf_test_large_defs
+
+   // record all the user edits to the node. Reuse the time stamp cache created in handleRequest()
+   std::stringstream ss;
+   ss << "MSG:";
+   if (Log::instance()) ss << Log::instance()->get_cached_time_stamp();
+   print(ss,path); // custom print
+   as->defs()->add_edit_history(path,ss.str());
+}
+
+void ClientToServerCmd::add_delete_edit_history(AbstractServer* as,const std::string& path) const
+{
+   // History is added to Str::ROOT_PATH(), but the path must show deleted node path
+   std::stringstream ss;
+   ss << "MSG:";
+   if (Log::instance()) ss << Log::instance()->get_cached_time_stamp();
+   print(ss,path); // custom print
+   as->defs()->add_edit_history(Str::ROOT_PATH(),ss.str());
 }
 
 CEREAL_REGISTER_TYPE(ServerVersionCmd);

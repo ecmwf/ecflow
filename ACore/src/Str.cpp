@@ -469,4 +469,14 @@ bool Str::truncate_at_end(  std::string& fileContents, size_t max_lines)
    return false;
 }
 
+std::string Str::dump_string_vec(const std::vector<std::string>& vec)
+{
+   std::string str;
+   for(const auto& s: vec) {
+      str += s;
+      str += "\n";
+   }
+   return str;
+}
+
 }

@@ -237,6 +237,13 @@ void GroupCTSCmd::setup_user_authentification()
    }
 }
 
+void GroupCTSCmd::add_edit_history(AbstractServer* as) const
+{
+   for(Cmd_ptr subCmd: cmdVec_)  {
+      subCmd->add_edit_history(as);
+   }
+}
+
 bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const
 {
 	// Can only run Group cmd if all child commands authenticate

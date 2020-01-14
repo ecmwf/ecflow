@@ -126,6 +126,8 @@ public:
    static bool truncate_at_start(  std::string& fileContents, size_t max_lines);
    static bool truncate_at_end(  std::string& fileContents, size_t max_lines);
 
+   static std::string dump_string_vec(const std::vector<std::string>& vec);
+
 	/// Only use strcmp if the first characters are the same
 	static int local_strcmp(const char* s, const char* t)
 	{
