@@ -12,6 +12,11 @@
 //
 // Description :
 //============================================================================
+#include <string>
+#include <fstream>  // for std::ofstream
+#include <iostream>
+#include <cstdlib> // for getenv()
+
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include <boost/lexical_cast.hpp>
@@ -21,13 +26,9 @@
 #include <boost/timer/timer.hpp>
 #endif
 
-#include <string>
-#include <fstream>  // for std::ofstream
-#include <iostream>
-#include <cstdlib> // for getenv()
-
 #include "File.hpp"
 #include "NodePath.hpp"
+#include "User.hpp"
 
 using namespace boost;
 using namespace std;
@@ -233,7 +234,7 @@ BOOST_AUTO_TEST_CASE( test_file_backwardSearch )
 
 BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
 {
-   cout << "ACore:: ...test_file_forwardSearch\n";
+   cout << "ACore:: ...test_file_forwardSearch user:" << ecf::User::login_name() << "\n";
 
    std::string dir_path = "/dir0/dir1/dir2/dir3/dir4";
    std::string nodePath = dir_path + "/task";
