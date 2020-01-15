@@ -744,12 +744,20 @@ std::string File::forwardSearch( const std::string& rootPath, const std::string&
    // Look for file in the root path
    std::string ecf_file = leafName + fileExtn;
    fs::path ecf_filePath = fs::path( fs::path(rootPath) / ecf_file );
-   if (fs::exists(ecf_filePath)) {
+
+   try {
+      if (fs::exists(ecf_filePath)) {
 #ifdef DEBUG_TASK_LOCATION
-      std::cout << "forwardSearch Node " << leafName << " Found " << ecf_file << " in root path '" << rootPath << "'\n";
+      std::cout << "Task::forwardSearch Node " << leafName << " Found " << ecf_file << " in root path '" << rootPath << "'\n";
 #endif
-      std::string result = ecf_filePath.string(); // is returned by reference hence must take a copy
-      return result ;
+         std::string result = ecf_filePath.string(); // is returned by reference hence must take a copy
+         return result;
+      }
+   }
+   catch ( fs::filesystem_error &e ) {
+#ifdef DEBUG_TASK_LOCATION
+      std::cout << "Task::forwardSearch Caught exception for root_path fs::exists('" << ecf_filePath  <<"')\n" << e.what() << "\n";
+#endif
    }
 
    // failed to find file via forward search
