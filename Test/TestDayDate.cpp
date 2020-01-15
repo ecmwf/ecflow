@@ -41,12 +41,6 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 
 BOOST_AUTO_TEST_CASE( test_day_at_midnight )
 {
-   // Added since in 4.17.0 no longer sets state if it has not changed.
-   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
-      std::cout << "\n    Disable test_complete for old server ,re-enable when 4.17.0 is minimum version\n";
-      return;
-   }
-
    // See ECFLOW-337 versus ECFLOW-1550
    DurationTimer timer;
    cout << "Test:: ...test_day_at_midnight " << flush;
@@ -102,12 +96,6 @@ BOOST_AUTO_TEST_CASE( test_day_at_midnight )
 
 BOOST_AUTO_TEST_CASE( test_date_at_midnight )
 {
-   // Added since in 4.17.0 no longer sets state if it has not changed.
-   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
-      std::cout << "\n    Disable test_complete for old server ,re-enable when 4.17.0 is minimum version\n";
-      return;
-   }
-
    // See ECFLOW-337 versus ECFLOW-1550
    DurationTimer timer;
    cout << "Test:: ...test_date_at_midnight " << flush;
