@@ -257,7 +257,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
          }
 		}
 		else {
-			std::stringstream ss; ss << "Option " << CFileCmd::toString(file_) << " is only valid for tasks. ";
+			std::stringstream ss; ss << "Option " << CFileCmd::toString(file_) << " is only valid for tasks";
 			throw std::runtime_error( ss.str() ) ;
   		}
 	}
