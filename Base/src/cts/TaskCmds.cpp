@@ -303,7 +303,14 @@ Submittable* TaskCmd::get_submittable(AbstractServer* as) const
 
 std::ostream& InitCmd::print(std::ostream& os) const
 {
-   return os << Str::CHILD_CMD() << "init " << path_to_node();
+   os << Str::CHILD_CMD() << "init " << path_to_node();
+   if (!var_to_add_.empty()) {
+      os << " --add";
+      for(const auto& var_to_add: var_to_add_) {
+         os << " " << var_to_add.name() << "=" << var_to_add.theValue();
+      }
+   }
+   return os;
 }
 
 bool InitCmd::equals(ClientToServerCmd* rhs) const
@@ -410,7 +417,14 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 
 std::ostream& CompleteCmd::print(std::ostream& os) const
 {
-   return os << Str::CHILD_CMD() << "complete " << path_to_node();
+   os << Str::CHILD_CMD() << "complete " << path_to_node();
+   if (!var_to_del_.empty()) {
+      os << " --remove";
+      for(const auto& var_to_del: var_to_del_) {
+         os << " " << var_to_del;
+      }
+   }
+   return os;
 }
 
 bool CompleteCmd::equals(ClientToServerCmd* rhs) const
