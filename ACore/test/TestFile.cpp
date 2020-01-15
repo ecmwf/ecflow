@@ -275,6 +275,7 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
       if ( nodePathTokens.size() >= 2 ) nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size()-2); // consume one from last path token
       else                              nodePathTokens.erase(nodePathTokens.end());
    }
+   BOOST_REQUIRE_MESSAGE(nodePathTokens.empty() ,"Expected nodePathTokens vec to be empty");
 
    // Now do a forward search for them:
    // Expect the following files to be found:
@@ -288,6 +289,7 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
    //cout << "ECF_EXTN: " << File::ECF_EXTN()  << "\n";
    int filesFound = 0;
    for(int i = 0; i < 6; i++) {
+      BOOST_REQUIRE_MESSAGE(i >=0 ,"Dummy to debug on macos");
       std::string theFile = File::forwardSearch(rootPath,nodePath,File::ECF_EXTN());
       BOOST_CHECK_MESSAGE( !theFile.empty(), i << ": Failed to find task.ecf with rootPath " << rootPath << " and node path " << nodePath);
       if (!theFile.empty()) {
