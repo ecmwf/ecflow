@@ -550,9 +550,9 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir)
 bool File::createDirectories(const std::string& pathToDir)
 {
 	if (pathToDir.empty()) return false;
-	if (fs::exists(pathToDir)) return true;
 
 	try {
+	   if (fs::exists(pathToDir)) return true;
 		return fs::create_directories(pathToDir);
 	}
 	catch (std::exception&) {}
