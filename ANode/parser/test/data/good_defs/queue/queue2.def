@@ -1,0 +1,8 @@
+suite queue2
+  queue name 001 002 003 # status 0
+  queue name1 001 002 003 # status 0
+  family f1
+    task t
+  endfamily
+endsuite
+ 
