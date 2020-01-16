@@ -177,7 +177,7 @@ def test_python_child_api(ci):
 
     if not Test.debugging():
         print(" Test OK: removing directory ",test_home)
-        shutil.rmtree(test_home)      
+        shutil.rmtree(test_home,ignore_errors=True)      
 
 #///////////////////////////////////////////////////////////////////////////////////////        
 
