@@ -1,3 +1,4 @@
 suite repeat_string_quotes
-     repeat string quotes "str1" "str2"  "str2" # comment
+  repeat string quotes "str1" "str2"  "str2" # comment
+  task t1
 endsuite

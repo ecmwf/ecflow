@@ -1,10 +1,13 @@
 suite repeat_datelist_s1
-    repeat datelist YMD 20090331 20121212 20121212 # status 0
+  repeat datelist YMD 20090331 20121212 20121212 # status 0
+  task t1
 endsuite
 
 suite repeat_datelist_s2
-    repeat datelist YMD 20121212 20090331 20090331 # status 0
+  repeat datelist YMD 20121212 20090331 20090331 # status 0
+  task t1
 endsuite
 
 suite repeat_datelist_s3; repeat datelist YMD 20090331 20121212 20090331 # status 0
+  task t1
 endsuite
