@@ -137,13 +137,15 @@ bool GroupSTCCmd::ok() const
 
 std::string GroupSTCCmd::error() const
 {
+   std::string ret;
    for(const auto & i : cmdVec_) {
       std::string error_str = i->error();
       if (!error_str.empty()) {
-         return error_str;
+         ret += error_str;
+         ret += "\n";
       }
    }
-   return string();
+   return ret;
 }
 
 std::ostream& operator<<(std::ostream& os, const GroupSTCCmd& c)   { return c.print(os); }
