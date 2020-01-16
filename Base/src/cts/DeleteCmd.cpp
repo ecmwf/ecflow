@@ -86,7 +86,6 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const
          node_ptr theNodeToDelete =  as->defs()->findAbsNode(paths_[i]);
          if (!theNodeToDelete.get()) {
             ss << "DeleteCmd:Delete: Could not find node at path '" << paths_[i] << "'\n";
-            LOG(Log::ERR,"Delete: Could not find node at path " << paths_[i]);
             continue;
          }
          // since node is to be deleted, we need to record the paths.
