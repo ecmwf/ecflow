@@ -75,7 +75,7 @@ $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/label/multi_
 # Use the installed ecflow   
 # must be done after since TestBench.py will use build dir
 ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /
-ecflow_client --alter change variable METAB_PYTHON_VERSION $PYTHON /eflow
+ecflow_client --alter change variable METAB_PYTHON_VERSION $PYTHON /ecflow
        
        
 # =======================================================================
