@@ -1,4 +1,4 @@
-suite  theSuiteName
+suite suite_hier
 	task t1
 	task t2
 	task t3
@@ -8,7 +8,7 @@ suite  theSuiteName
 	endfamily
 	task t4
 endsuite
-suite  s1
+suite suite_hier_s1
 	task t1
 	task t2
 	task t3

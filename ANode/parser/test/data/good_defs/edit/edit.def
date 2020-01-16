@@ -1,5 +1,4 @@
- 
-suite edit
+ suite edit
 	edit ECF_INCLUDE /home/ma/map/sms/example/x                  # comment line
 	edit ECF_FILES   /home/ma/map/sms/example/x                  #comment line
     edit EXPVER 'f8na'                                          #

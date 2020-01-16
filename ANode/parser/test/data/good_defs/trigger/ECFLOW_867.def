@@ -1,4 +1,4 @@
-suite testdot
+suite trigger_ecflow_867
   family f1.1
     task t1
   endfamily

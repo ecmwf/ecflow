@@ -1,5 +1,5 @@
 # 4.11.1
-suite geff_re
+suite trigger_ecflow_1442
   defstatus suspended
   edit FIRE_YMD '19000101'
   family setup
@@ -25,7 +25,7 @@ suite geff_re
   family daily
     repeat date YMD 19790101 20220101 1
     family init
-      trigger ../../geff_re:FIRE_YMD >= ../daily:YMD
+      trigger ../../trigger_ecflow_1442:FIRE_YMD >= ../daily:YMD
       task const_prep
     endfamily
     task ic
@@ -49,7 +49,7 @@ suite geff_re
     task ei_clean
       trigger ei_arch == complete
     family last
-      trigger ../../geff_re:FIRE_YMD > ../daily:YMD and init == complete and ic == complete and forcings == complete and ecfire == complete and update_latest == complete and ei_tar == complete and ei_arch == complete and ei_clean == complete
+      trigger ../../trigger_ecflow_1442:FIRE_YMD > ../daily:YMD and init == complete and ic == complete and forcings == complete and ecfire == complete and update_latest == complete and ei_tar == complete and ei_arch == complete and ei_clean == complete
     endfamily
   endfamily
 endsuite

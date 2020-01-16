@@ -1,4 +1,4 @@
-suite suiteName
+suite defstatus
    defstatus suspended
    family familyName0
       defstatus complete
@@ -8,7 +8,7 @@ suite suiteName
    endfamily
 endsuite
 
-suite s1;
+suite defstatus_s1;
    defstatus suspended
    family familyName0
       defstatus complete

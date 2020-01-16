@@ -1,4 +1,4 @@
-suite s
+suite autorestore2
  family f1
     task t1
         autorestore ../f2 ../f3  # autorestore

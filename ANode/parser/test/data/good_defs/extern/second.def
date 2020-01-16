@@ -1,9 +1,7 @@
- 
 #
 # The defs is used conjunction with first.def to test resolution of externs
 #
-
-suite a
+suite event_second
    family b
    		family c
    			family d

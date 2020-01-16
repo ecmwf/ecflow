@@ -2,7 +2,7 @@
 # This is defs file that show use of comments
 # # comment 
 
-suite suiteName                      # comment 
+suite comment                       # comment 
    family familyName0                # comment 
       task taskName0                 # comment 
          event 0                     # comment 
@@ -30,6 +30,4 @@ suite suiteName                      # comment
 endsuite                             # comment 
 
 # Final comment  # comment 
-                    
-
-
+            

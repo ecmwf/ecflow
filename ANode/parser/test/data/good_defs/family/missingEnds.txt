@@ -1,3 +1,3 @@
-suite suiteName
+suite family_missing_ends
    family familyName0    # missing endfamily and endsuite, should parse ok if its last family and suite
  

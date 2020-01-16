@@ -1,4 +1,4 @@
-suite a
+suite generic
   generic a #dddd
   generic b c f #
   family b

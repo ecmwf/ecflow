@@ -1,12 +1,12 @@
-suite s
+suite limit_check
  limit disk 1
  family anon    
    inlimit disk             # no path, find limit name up the tree
    limit anon 1
    task t1
-     inlimit /s/anon:anon   # absolute path to node defining the limit
+     inlimit /limit_check/anon:anon   # absolute path to node defining the limit
    task t2
-     inlimit /s:disk        # absolute path to node defining the limit
+     inlimit /limit_check:disk        # absolute path to node defining the limit
    task t3
      limit rel_limit 1
    task t4
@@ -16,6 +16,6 @@ suite s
    task t6
      inlimit ../anon:anon   # relative limit (parent)
    task t7
-     inlimit ../../s:disk   # relative limit (parents/parent)
+     inlimit ../../limit_check:disk   # relative limit (parents/parent)
  endfamily
 endsuite

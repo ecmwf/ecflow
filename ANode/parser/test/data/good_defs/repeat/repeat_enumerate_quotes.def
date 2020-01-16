@@ -1,10 +1,10 @@
-suite suiteName
+suite repeat_enumerated1
    
      repeat enumerated quotes "first" "second" "third"  # sdsdsd 
    
 endsuite
 
-suite suiteName2
+suite repeat_enumerated2
    
      repeat enumerated quotes 'first' 'second' "third"  # sdsdsd 
    

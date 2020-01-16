@@ -1,5 +1,5 @@
  
-suite suiteName
+suite trigger_extension
   family familyName
   	    task b
   	    task c

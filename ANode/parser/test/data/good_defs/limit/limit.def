@@ -7,7 +7,7 @@ suite suiteName
 	limit mars 10
 endsuite
 
-suite s1
+suite limit_s1
 	limit mars 10
 	limit sg1  10
 endsuite
@@ -23,8 +23,8 @@ suite obs
     	task t1
     		inlimit /suiteName:sg1        # another suite limit
     		inlimit /suiteName:mars       # another suite limit
-    		inlimit /s1:mars              # another suite limit
-    		inlimit /s1:sg1               # another suite limit
+    		inlimit /limit_s1:mars              # another suite limit
+    		inlimit /limit_s1:sg1               # another suite limit
    		task t2
    			inlimit /obs/limits:hpcd      # This suite limit
   		task t3

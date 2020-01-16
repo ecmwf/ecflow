@@ -1,14 +1,18 @@
-suite s
+suite autocancel
  family f1
     autocancel +01:00 # cancel one hour after complete
+    task t1
  endfamily
  family f2
      autocancel 01:00 # cancel at 1 am in morning after complete
+    task t1
  endfamily
  family f3
     autocancel 10     # cancel 10 days after complete
+    task t1
  endfamily
  family f4
     autocancel 0      # cancel immediately after complete
+    task t1
  endfamily
 endsuite

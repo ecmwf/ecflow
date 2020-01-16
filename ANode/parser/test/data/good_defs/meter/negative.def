@@ -1,4 +1,4 @@
-suite suiteName
+suite meter_negative
    family familyName
       task taskName
           meter myMeter  -1 100 100  # meter <name> <min> <max> [optional color change]

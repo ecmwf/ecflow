@@ -1,4 +1,4 @@
-    suite suiteName
+suite family_hier
       edit VAR value
       edit VAR1 "value"
       family familyName0

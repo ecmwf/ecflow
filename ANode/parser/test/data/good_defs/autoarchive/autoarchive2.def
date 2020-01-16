@@ -1,4 +1,4 @@
-suite test
+suite autoarchive_with_family_limit
  limit fam 1
  family f1
      inlimit -n fam 

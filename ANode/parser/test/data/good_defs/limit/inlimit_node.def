@@ -1,4 +1,4 @@
-suite test
+suite limit_node
  limit fam 1
  family f1
      inlimit -n fam 

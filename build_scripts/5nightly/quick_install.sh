@@ -101,12 +101,11 @@ git checkout master
 # test suites. Use installed ecflow:
 # ========================================================================
 cd $WK
-$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/basic.def
-$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/trigger/all_trigger_examples.def
-$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/sub_only1.def
-$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/inlimit_node.def
-$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/label/multi_line_lables.def 
-
+for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
+   echo "->$defs_file"
+   $PYTHON Pyext/samples/TestBench.py $defs_file
+done
+ 
 # Use the installed ecflow for ecflow_client, to stop mixing of ecflow 4/5
 # must be done after since TestBench.py will use build dir
 ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /

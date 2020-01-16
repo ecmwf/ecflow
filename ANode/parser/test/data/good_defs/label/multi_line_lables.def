@@ -1,4 +1,4 @@
-suite s3
+suite label_multi_line
    label error "This is an error"
    label warning "This is an warning"
    label Note "This is an note"

@@ -3,12 +3,12 @@ extern /limits:linux_cluster
 extern /limits:pdb
 extern /limits:q2diss
 
-suite suiteName
+suite limit
     limit sg1  10
     limit mars 10
 endsuite
 
-suite obs
+suite limit_inlimit
     limit fred 1000
     inlimit -n /limits:c1a
     
@@ -24,11 +24,11 @@ suite obs
     family anon    
         inlimit -n fred      
         task t1
-            inlimit -n /suiteName:sg1 3      # another suite limit
-            inlimit -n /obs/limits:hpcd      # This suite limit
+            inlimit -n /limit:sg1 3          # another suite limit
+            inlimit -n /limit_inlimit/limits:hpcd      # This suite limit
             inlimit -n /limits:c1a           # extern suite limit
         task t2
-            inlimit -n /obs/limits:hpcd      # This suite limit
+            inlimit -n /limit_inlimit/limits:hpcd      # This suite limit
         task t3
             inlimit -n /limits:c1a           # extern suite limit
         task t4
