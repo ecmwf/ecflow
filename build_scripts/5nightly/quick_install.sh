@@ -1,5 +1,10 @@
 #!/bin/sh
-# assume $WK is defined
+# assumes:
+# - $WK is defined to be root of ecflow tree
+# - ecflow is installed to: /tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}
+#   Install using: cd $WK; ./cmake.sh make -j8 install
+# - metabuilder is at /var/tmp/${USER}/workspace
+
 # Alter the command below to either
 # a/ use the system installed version, everywhere, avoid miss-match between different releases
 # b/ Test the latest release, requires compatible client/server versions
@@ -98,7 +103,7 @@ $PYTHON ./reload.py -s ecflow
 git checkout master
 
 # ========================================================================
-# test suites. Use installed ecflow:
+# Generate test suites, based on definitions known to be good 
 # ========================================================================
 cd $WK
 for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
@@ -106,6 +111,7 @@ for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
    $PYTHON Pyext/samples/TestBench.py $defs_file
 done
  
+# Use python3 for ecflow 5 series
 # Use the installed ecflow for ecflow_client, to stop mixing of ecflow 4/5
 # must be done after since TestBench.py will use build dir
 ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /
@@ -119,4 +125,3 @@ export ECFLOWUI_DEVELOP_MODE=1      # enable special menu to diff ecflowui defs 
 #export ECFLOWUI_SESSION_MANAGER=1  # to minimise output for debug, use session with a single server
 #ecflow_ui.x > ecflow_ui.log 2>&1 & 
 ecflow_ui -confd ${HOME}/.ecflow5_ui &
-
