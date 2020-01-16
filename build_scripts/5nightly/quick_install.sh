@@ -27,8 +27,25 @@ fi
 # =======================================================================
 which ecflow_client
 ecflow_client --version
-ecflow_client --terminate=yes
-sleep 3
+ecflow_client --terminate=yes >> /dev/null
+ 
+set +e # ignore error 
+count=0
+while [ 1 ] ; do   
+    ecflow_client --ping 2> /dev/null
+    if [[ $? == 1 ]] ; then
+        echo "server terminates after $count seconds"
+        break
+    fi
+    sleep 1
+    count=$((count + 1))
+    #echo $count
+    if [ "$count" -gt "3" ] ; then
+        echo "Timed out after 3 seconds"
+        break
+    fi
+done
+set -e  # re-enable error
 
 # =======================================================================
 # Create build scripts files. Must be before python $WK/build_scripts/5nightly/build.py
@@ -42,7 +59,26 @@ cd 5nightly
 # =======================================================================
 rm -rf `hostname`.${ECF_PORT}.*
 ecflow_server&
-sleep 4
+
+# wait for server to start
+set +e # ignore error 
+count=0
+while [ 1 ] ; do   
+    ecflow_client --ping 2> /dev/null
+    if [[ $? == 0 ]] ; then
+        echo "server up and running after $count seconds"
+        break;
+    fi
+    sleep 1
+    count=$((count + 1))
+    #echo $count
+    if [ "$count" -gt "4" ] ; then
+        echo "Timed out after 4 seconds"
+        exit 1
+    fi
+done
+set -e  # re-enable error 
+
 ecflow_client --server_version
 
 # =======================================================================
@@ -50,7 +86,6 @@ ecflow_client --server_version
 # =======================================================================
 ecflow_client --restart
 ecflow_client --delete=_all_ yes
-
 
 # ======================================================================
 # ecflow metabuilder.  
@@ -71,8 +106,8 @@ $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/trigger/all_
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/sub_only1.def
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/inlimit_node.def
 $PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/label/multi_line_lables.def 
-                                   ANode/parser/test/data/good_defs/label/multi_line_lables.def
-# Use the installed ecflow   
+
+# Use the installed ecflow for ecflow_client, to stop mixing of ecflow 4/5
 # must be done after since TestBench.py will use build dir
 ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /
 ecflow_client --alter change variable METAB_PYTHON_VERSION $PYTHON /ecflow
