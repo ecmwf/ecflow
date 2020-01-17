@@ -1224,7 +1224,7 @@ void NodeContainer::archive()
 
    std::vector<node_ptr>().swap(nodes_);                    // reclaim vector memory
    add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
-   string msg = "autoarchive "; msg += debugNodePath();       // inform user via log
+   string msg = " autoarchive "; msg += debugNodePath();       // inform user via log
    ecf::log(Log::LOG,msg);
 }
 
@@ -1288,7 +1288,7 @@ void NodeContainer::restore()
    flag().set(ecf::Flag::RESTORED);                          // set restored flag, to stop automatic autoarchive
    add_remove_state_change_no_ = Ecf::incr_state_change_no();// For sync
 
-   string msg = "autorestore "; msg += debugNodePath();      // inform user via log
+   string msg = " autorestore "; msg += debugNodePath();      // inform user via log
    ecf::log(Log::LOG,msg);
 
    fs::remove(the_archive_path);                             // remove the file, could still throw
