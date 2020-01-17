@@ -1,14 +1,14 @@
 suite complete
  family f
    task t
-   	meter step 0 240 120
+   	meter step 0 5 4
    task tt
-   	complete t:step ge 120
+   	complete t:step ge 2
    	trigger t == complete
  endfamily
 endsuite
 
-suite complete_s1; family f; task t;meter step 0 240 120;task tt;complete t:step ge 120;trigger t == complete
+suite complete_s1; family f; task t;meter step 0 6 3;task tt;complete t:step ge 1;trigger t == complete
 endfamily
 endsuite
 
