@@ -1,7 +1,7 @@
 suite meter_simple
-   family familyName
-      task taskName
-          meter myMeter  0 100 100  # meter <name> <min> <max> [optional color change]
-          meter myMeter2 0 100      
+   family f
+      task t
+          meter myMeter  0 10 10  # meter <name> <min> <max> [optional color change]
+          meter myMeter2 0 5      
     endfamily
 endsuite

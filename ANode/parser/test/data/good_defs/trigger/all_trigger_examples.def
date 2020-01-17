@@ -2,7 +2,7 @@ suite trigger_examples_all
    limit top_level_limit 20
    task a
       event EVENT
-      meter METER 1 100 50
+      meter METER 1 9 5
       edit  VAR_DATE 20170701
       edit  VAR_STRING "captain scarlett"      # This is not convertible to an integer, if referenced will use '0'
       late -c +02:00                           # add late flag if task takes longer than 2 hours to complete
@@ -22,7 +22,7 @@ suite trigger_examples_all
    family f2
       inlimit /trigger_examples_all:top_level_limit
       task event_meter
-          trigger /trigger_examples_all/a:EVENT == set and /trigger_examples_all/a:METER >= 30
+          trigger /trigger_examples_all/a:EVENT == set and /trigger_examples_all/a:METER >= 6
       task variable
           trigger /trigger_examples_all/a:VAR_DATE >= 20170801 and /trigger_examples_all/a:VAR_STRING == 0
       task repeat_string

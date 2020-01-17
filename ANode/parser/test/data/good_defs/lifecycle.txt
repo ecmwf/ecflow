@@ -2,15 +2,15 @@ suite zombie_lifecycle
   family family1
    	task a
         event 1 myEvent
-        meter myMeter 0 100
+        meter myMeter 0 10
    	task b
    		trigger a == complete
    endfamily
    family family2
    		task aa
-   			trigger ../family1/a:myMeter >= 20 and ../family1/a:myEvent 
+   			trigger ../family1/a:myMeter >= 3 and ../family1/a:myEvent 
    		task bb
-   			trigger ../family1/a:myMeter >= 50  or  ../family1/a:myEvent
+   			trigger ../family1/a:myMeter >= 4  or  ../family1/a:myEvent
     endfamily
 endsuite
 
