@@ -817,6 +817,14 @@ void Node::handleStateChange()
 {
    if (state() == NState::COMPLETE) {
       if ( auto_restore_ ) auto_restore_->do_autorestore();
+
+      Node* the_parent = parent();
+      while (the_parent) {
+         if (the_parent->state() == NState::COMPLETE && the_parent->get_autorestore()) {
+            the_parent->get_autorestore()->do_autorestore();
+         }
+         the_parent = the_parent->parent();
+      }
    }
 }
 

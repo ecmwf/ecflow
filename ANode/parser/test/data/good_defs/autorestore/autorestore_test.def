@@ -1,0 +1,20 @@
+suite autorestore_test
+ family farchive_now
+    autoarchive 0      # archive immediately after complete, may have to wait 60 seconds
+    task t1
+ endfamily
+ family farchive2_now
+    autoarchive 0      # archive immediately after complete, may have to wait 60 seconds
+    task t1
+ endfamily
+family frestore_from_family_now
+    autorestore ./farchive_now       
+    task t1
+       edit SLEEP 60
+ endfamily
+family frestore_from_task_now
+    task t1
+       edit SLEEP 60
+       autorestore ../farchive2_now       
+ endfamily
+endsuite
