@@ -1,4 +1,4 @@
-suite suiteName
+suite label_spaces
    family familyName
       task taskName
       
@@ -7,4 +7,3 @@ suite suiteName
       	label fred ""
     endfamily
 endsuite
-

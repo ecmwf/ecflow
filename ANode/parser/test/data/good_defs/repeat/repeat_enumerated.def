@@ -1,11 +1,13 @@
-suite s1
+suite repeat_enumnerate_s1
    
     repeat enumerated VARIABLE first second third #sdsdsd
+  task t1
    
 endsuite
 
-suite s2
+suite repeat_enumnerate_s1s2
    
     repeat enumerated VARIABLE 20130101 20130102 20130103 #sdsdsd
+  task t1
    
 endsuite

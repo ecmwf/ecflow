@@ -1,4 +1,4 @@
-suite suiteName
+suite event_1
    family familyName0
       task taskName0
          event 0 
@@ -8,7 +8,7 @@ suite suiteName
      endfamily
 endsuite
 
-suite s1;family familyName0 ; task taskName0 ; event 0  ;event name ;event 1 eventName
+suite event_1s1;family familyName0 ; task taskName0 ; event 0  ;event name ;event 1 eventName
          event 2 eventNamea ; endfamily
 endsuite
 

@@ -33,6 +33,7 @@ test/TestAdd.cpp
 test/TestAlias.cpp
 test/TestAssignmentOperator.cpp
 test/TestChangeMgrSingleton.cpp
+test/TestClientSuiteMgr.cpp
 test/TestCopyConstructor.cpp
 test/TestDefStatus.cpp
 test/TestDefs.cpp
@@ -59,6 +60,7 @@ test/TestPreProcessing.cpp
 test/TestRepeatWithTimeDependencies.cpp
 test/TestReplace.cpp
 test/TestSetState.cpp
+test/TestSystem.cpp
 test/TestTaskScriptGenerator.cpp
 test/TestTimeDependencies.cpp
 test/TestVariableGeneration.cpp

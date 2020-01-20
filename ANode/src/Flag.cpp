@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #12 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <stdexcept>
+
 #include "Flag.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
@@ -46,14 +47,17 @@ void Flag::reset() {
 
 std::vector<Flag::Type> Flag::list()
 {
-   std::vector<Flag::Type> ret; ret.reserve(21);
+   std::vector<Flag::Type> ret; ret.reserve(24);
    ret.push_back(Flag::FORCE_ABORT);
    ret.push_back(Flag::USER_EDIT);
    ret.push_back(Flag::TASK_ABORTED);
    ret.push_back(Flag::EDIT_FAILED);
    ret.push_back(Flag::JOBCMD_FAILED);
+   ret.push_back(Flag::KILLCMD_FAILED);
+   ret.push_back(Flag::STATUSCMD_FAILED);
    ret.push_back(Flag::NO_SCRIPT);
    ret.push_back(Flag::KILLED);
+   ret.push_back(Flag::STATUS);
    ret.push_back(Flag::LATE);
    ret.push_back(Flag::MESSAGE);
    ret.push_back(Flag::BYRULE);
@@ -71,16 +75,19 @@ std::vector<Flag::Type> Flag::list()
    return ret;
 }
 
-constexpr std::array<Flag::Type,21> Flag::array()
+constexpr std::array<Flag::Type,24> Flag::array()
 {
-   return std::array<Flag::Type,21>{
+   return std::array<Flag::Type,24>{
       Flag::FORCE_ABORT,
       Flag::USER_EDIT,
       Flag::TASK_ABORTED,
       Flag::EDIT_FAILED,
       Flag::JOBCMD_FAILED,
+      Flag::KILLCMD_FAILED,
+      Flag::STATUSCMD_FAILED,
       Flag::NO_SCRIPT,
       Flag::KILLED,
+      Flag::STATUS,
       Flag::LATE,
       Flag::MESSAGE,
       Flag::BYRULE,
@@ -123,6 +130,9 @@ std::string Flag::enum_to_string(Flag::Type flag) {
       case Flag::ECF_SIGTERM:  return "sigterm"; break;
       case Flag::LOG_ERROR:    return "log_error"; break;
       case Flag::CHECKPT_ERROR:return "checkpt_error"; break;
+      case Flag::KILLCMD_FAILED:return "killcmd_failed"; break;
+      case Flag::STATUSCMD_FAILED:return "statuscmd_failed"; break;
+      case Flag::STATUS:       return "status"; break;
       case Flag::NOT_SET:      return "not_set"; break;
       default: break;
    };
@@ -136,6 +146,9 @@ const char* Flag::enum_to_char_star(Flag::Type flag) {
       case Flag::TASK_ABORTED: return "task_aborted"; break;
       case Flag::EDIT_FAILED:  return "edit_failed"; break;
       case Flag::JOBCMD_FAILED:return "ecfcmd_failed"; break;
+      case Flag::KILLCMD_FAILED:return "killcmd_failed"; break;
+      case Flag::STATUSCMD_FAILED:return "statuscmd_failed"; break;
+      case Flag::STATUS:       return "status"; break;
       case Flag::NO_SCRIPT:    return "no_script"; break;
       case Flag::KILLED:       return "killed"; break;
       case Flag::LATE:         return "late"; break;
@@ -165,7 +178,10 @@ Flag::Type Flag::string_to_flag_type(const std::string& s)
    if (s == "user_edit") return Flag::USER_EDIT;
    if (s == "task_aborted") return Flag::TASK_ABORTED;
    if (s == "edit_failed") return Flag::EDIT_FAILED;
-   if (s == "ecfcmd_failed") return Flag::JOBCMD_FAILED;
+   if (s == "ecfcmd_failed")    return Flag::JOBCMD_FAILED;
+   if (s == "killcmd_failed")   return Flag::KILLCMD_FAILED;
+   if (s == "statuscmd_failed") return Flag::STATUSCMD_FAILED;
+   if (s == "status")           return Flag::STATUS;
    if (s == "no_script") return Flag::NO_SCRIPT;
    if (s == "killed") return Flag::KILLED;
    if (s == "late") return Flag::LATE;
@@ -187,14 +203,17 @@ Flag::Type Flag::string_to_flag_type(const std::string& s)
 
 void Flag::valid_flag_type(std::vector<std::string>& vec)
 {
-   vec.reserve(21);
+   vec.reserve(24);
    vec.emplace_back("force_aborted");
    vec.emplace_back("user_edit");
    vec.emplace_back("task_aborted");
    vec.emplace_back("edit_failed");
    vec.emplace_back("ecfcmd_failed");
+   vec.emplace_back("statuscmd_failed");
+   vec.emplace_back("killcmd_failed");
    vec.emplace_back("no_script");
    vec.emplace_back("killed");
+   vec.emplace_back("status");
    vec.emplace_back("late");
    vec.emplace_back("message");
    vec.emplace_back("by_rule");
@@ -221,7 +240,7 @@ std::string Flag::to_string() const
 void Flag::write(std::string& ret) const
 {
    bool added = false;
-   std::array<Flag::Type,21> flag_list = Flag::array();
+   std::array<Flag::Type,24> flag_list = Flag::array();
    for (auto & i : flag_list) {
       if ( is_set( i ) ) {
          if (added) ret += ',';

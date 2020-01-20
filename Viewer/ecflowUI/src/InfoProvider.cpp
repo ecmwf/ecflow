@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -114,7 +114,7 @@ void InfoProvider::visit(VInfoNode* info)
     if(!fileVarName_.empty())
     {
         //Get the fileName
-        fileName=n->genVariable(fileVarName_);
+        fileName=n->genVariable(fileVarName_) + fileSuffix_;
     }
 
     //We try to read the file directly from the disk
@@ -234,13 +234,35 @@ bool JobProvider::handleFileMissing(const std::string& fileName,VReply *reply)
 		owner_->infoReady(reply_);
 		return true;
 	}
-
-
-	/*else
-	{
-		reply->setWarningText(fileMissingText_);
-	}*/
 	return false;
+}
+
+JobStatusFileProvider::JobStatusFileProvider(InfoPresenter* owner) :
+        InfoProvider(owner,VTask::JobStatusFileTask)
+{
+    fileVarName_ ="ECF_JOB";
+    fileSuffix_ = ".stat";
+    fileNotDefinedText_ = "Job status is <b>not</b> defined";
+    fileMissingText_ = "Job status file <b>not</b> found! <br> Check <b>ECF_HOME</b> directory  \
+                 for read/write access. Check for file presence and read access below. \
+                 The file may have been deleted or this may be a '<i>dummy</i>' task";
+}
+
+bool JobStatusFileProvider::handleFileMissing(const std::string& fileName,VReply *reply)
+{
+    if(fileName.find(".job0") != std::string::npos)
+    {
+        reply->setInfoText("No job to be expected when <b>TRYNO</b> is 0!");
+        owner_->infoReady(reply_);
+        return true;
+    }
+    return false;
+}
+
+JobStatusProvider::JobStatusProvider(InfoPresenter* owner) :
+        InfoProvider(owner,VTask::JobStatusTask)
+{
+
 }
 
 ManualProvider::ManualProvider(InfoPresenter* owner) :
@@ -343,7 +365,7 @@ void ScriptProvider::visit(VInfoNode* info)
     if(!fileVarName_.empty())
     {
         //Get the fileName
-        fileName=n->genVariable(fileVarName_);
+        fileName=n->genVariable(fileVarName_) + fileSuffix_;
     }
 
     //Define a task for getting the info from the server.

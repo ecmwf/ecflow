@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #22 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -18,7 +18,6 @@
 #include "CtsApi.hpp"
 #include "Defs.hpp"
 #include "Log.hpp"
-#include "Ecf.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -90,8 +89,11 @@ void CSyncCmd::do_log(AbstractServer* as) const
       std::stringstream ss;
       print(ss);                                   // Populate the stream with command details:
       if (!log_no_newline(Log::MSG,ss.str())) {    // log command without adding newline
-         // problems writing to log file, warn user ECFLOW-536
-         as->defs()->flag().set(ecf::Flag::LATE);
+         // problems with opening or writing to log file, warn users, ECFLOW-536
+         as->defs()->flag().set(ecf::Flag::LOG_ERROR);
+         if (Log::instance()) {
+            as->defs()->set_server().add_or_update_user_variables("ECF_LOG_ERROR",Log::instance()->log_error());
+         }
       }
       return;
    }

@@ -1,14 +1,14 @@
-suite suiteName
-   family familyName
-      task taskName
+suite meter_spaces
+   family f
+      task t
       
-          meter myMeter  0 100 100  # meter <name> <min> <max> [optional color change]
+          meter myMeter  0 4 4  # meter <name> <min> <max> [optional color change]
           
-          meter myMeter1 0 100      
+          meter myMeter1 0 5      
           
-          meter myMeter2 0 100      
+          meter myMeter2 0 4      
           
-          meter myMeter3 0 100      
+          meter myMeter3 0 3     
           
     endfamily
 endsuite

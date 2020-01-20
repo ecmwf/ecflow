@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #24 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -12,21 +12,23 @@
 //
 // Description :
 //============================================================================
-#include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/timer/timer.hpp>
-#include <boost/lexical_cast.hpp>
-
 #include <string>
+#include <fstream>  // for std::ofstream
 #include <iostream>
-#include <fstream>
 #include <cstdlib> // for getenv()
 
-#include "DurationTimer.hpp"
+#include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
+#include <boost/lexical_cast.hpp>
+
+//#define FILE_PERF_CHECK_IMPLEMENTATIONS 1;
+#ifdef FILE_PERF_CHECK_IMPLEMENTATIONS
+#include <boost/timer/timer.hpp>
+#endif
+
 #include "File.hpp"
 #include "NodePath.hpp"
-#include "Str.hpp"
+#include "User.hpp"
 
 using namespace boost;
 using namespace std;
@@ -34,8 +36,6 @@ using namespace ecf;
 namespace fs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE( CoreTestSuite )
-
-//#define FILE_PERF_CHECK_IMPLEMENTATIONS 1;
 
 BOOST_AUTO_TEST_CASE( test_splitFileIntoLines )
 {
@@ -234,7 +234,7 @@ BOOST_AUTO_TEST_CASE( test_file_backwardSearch )
 
 BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
 {
-   cout << "ACore:: ...test_file_forwardSearch\n";
+   cout << "ACore:: ...test_file_forwardSearch user:" << ecf::User::login_name() << "\n";
 
    std::string dir_path = "/dir0/dir1/dir2/dir3/dir4";
    std::string nodePath = dir_path + "/task";
@@ -257,6 +257,7 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
    BOOST_REQUIRE_MESSAGE(File::createDirectories( combined_dir_path),"Failed to create dirs" << combined_dir_path);
 
    // Create a file in each of the directories.
+   //cout << "nodePath: " << nodePath << "\n";
    std::vector<std::string> fileContents; fileContents.emplace_back("something");
    vector<std::string> nodePathTokens;
    NodePath::split(nodePath,nodePathTokens);
@@ -266,14 +267,15 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
       std::string path = NodePath::createPath(nodePathTokens);
       std::string combinedPath = rootPath + path +  File::ECF_EXTN(); // .ecf, .man , etc
 
-      //cout << "Creating file       : " << combinedPath << "\n";
+      //cout << " Creating file       : " << combinedPath << "  nodePathTokens.size() " << nodePathTokens.size() << "\n";
       std::string errorMsg;
       BOOST_REQUIRE_MESSAGE(File::create(combinedPath,fileContents,errorMsg),"Failed to create " << combinedPath << " because " << errorMsg);
 
-      // Preserve the last token
+      // Preserve the last token, i.e task
       if ( nodePathTokens.size() >= 2 ) nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size()-2); // consume one from last path token
-      else nodePathTokens.erase(nodePathTokens.end());
+      else                              nodePathTokens.erase(nodePathTokens.end());
    }
+   BOOST_REQUIRE_MESSAGE(nodePathTokens.empty() ,"Expected nodePathTokens vec to be empty");
 
    // Now do a forward search for them:
    // Expect the following files to be found:
@@ -283,11 +285,11 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
    // test/data/dir0/dir1/task.ecf
    // test/data/dir0/task.ecf
    // test/data/task.ecf
-//   cout << "rootPath: " << rootPath << "\n";
-//   cout << "nodePath: " << nodePath << "\n";
-//   cout << "ECF_EXTN: " << File::ECF_EXTN()  << "\n";
+   //cout << "rootPath: " << rootPath << "\n";
+   //cout << "ECF_EXTN: " << File::ECF_EXTN()  << "\n";
    int filesFound = 0;
    for(int i = 0; i < 6; i++) {
+      BOOST_REQUIRE_MESSAGE(i >=0 ,"Dummy to debug on macos");
       std::string theFile = File::forwardSearch(rootPath,nodePath,File::ECF_EXTN());
       BOOST_CHECK_MESSAGE( !theFile.empty(), i << ": Failed to find task.ecf with rootPath " << rootPath << " and node path " << nodePath);
       if (!theFile.empty()) {

@@ -14,9 +14,9 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <iosfwd>
 #include <vector>
-#include <cereal/access.hpp>
+#include <string>
+namespace cereal { class access; }
 
 // Class GenericAttr:
 // Use compiler , generated destructor, assignment, copy constructor
@@ -24,7 +24,7 @@
 class GenericAttr {
 public:
    GenericAttr(const std::string& name, const std::vector<std::string>& values);
-   GenericAttr(const std::string& name);
+   explicit GenericAttr(const std::string& name);
    GenericAttr() = default;
 
    bool operator==(const GenericAttr& rhs) const;

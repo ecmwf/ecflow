@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,21 +13,18 @@
 // Description :
 //============================================================================
 #include <boost/test/unit_test.hpp>
-#include <boost/function.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "ServerToClientCmd.hpp"
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
 #include "SSyncCmd.hpp"
 #include "Ecf.hpp"
-#include "SuiteChanged.hpp"
 #include "System.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
-#include "Limit.hpp"
+#include "TestUtil.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -39,21 +36,6 @@ BOOST_AUTO_TEST_SUITE( BaseTestSuite )
 
 /// define a function which returns nothing, and takes a defs_ptr parameter
 typedef boost::function<void (defs_ptr)> defs_change_cmd;
-
-template <typename T>
-static std::vector<std::string> toStrVec(const std::vector<T>& vec)
-{
-   std::vector<std::string> retVec; retVec.reserve(vec.size());
-   for(T s: vec) { retVec.push_back(s->name()); }
-   return retVec;
-}
-
-static std::string toString(const std::vector<std::string>& c)
-{
-   std::stringstream ss;
-   std::copy (c.begin(), c.end(), std::ostream_iterator <std::string> (ss, ", "));
-   return ss.str();
-}
 
 static std::vector<std::string> vector_abcd() {
     std::vector<std::string> names; names.reserve(4);

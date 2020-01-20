@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -28,6 +28,7 @@ CodeItemWidget::CodeItemWidget(QWidget *parent) :
 	setupUi(this);
 
 	externalTb_->hide();
+    commandTb_->hide();
 
 	fileLabel_->setProperty("fileInfo","1");
 
@@ -81,6 +82,11 @@ void CodeItemWidget::on_fontSizeDownTb__clicked()
 void CodeItemWidget::on_reloadTb__clicked()
 {
     reloadRequested();
+}
+
+void CodeItemWidget::on_commandTb__clicked()
+{
+    commandRequested();
 }
 
 //-----------------------------------------

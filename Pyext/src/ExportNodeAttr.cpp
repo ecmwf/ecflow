@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #53 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -15,6 +15,7 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/raw_function.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #include "NodeAttr.hpp"
 #include "Limit.hpp"
@@ -314,8 +315,11 @@ void export_NodeAttr()
                      "- TASK_ABORTED  - task*\n"
                      "- EDIT_FAILED   - task*\n"
                      "- JOBCMD_FAILED - task*\n"
+                     "- KILLCMD_FAILED   - task*\n"
+                     "- STATUSCMD_FAILED - task*\n"
                      "- NO_SCRIPT     - task*\n"
                      "- KILLED        - task* do not run when try_no > ECF_TRIES, and task killed by user\n"
+                     "- STATUS        - task* indicates that the status command has been run\n"
                      "- LATE          - Node attribute, Task is late, or Defs checkpt takes to long\n"
                      "- MESSAGE       - Node\n"
                      "- BYRULE        - Node*, set if node is set to complete by complete trigger expression\n"
@@ -337,8 +341,11 @@ void export_NodeAttr()
          .value("task_aborted", Flag::TASK_ABORTED)
          .value("edit_failed",  Flag::EDIT_FAILED)
          .value("jobcmd_failed",Flag::JOBCMD_FAILED)
+         .value("killcmd_failed",  Flag::KILLCMD_FAILED)
+         .value("statuscmd_failed",Flag::STATUSCMD_FAILED)
          .value("no_script",    Flag::NO_SCRIPT)
          .value("killed",       Flag::KILLED)
+         .value("status",       Flag::STATUS)
          .value("late",         Flag::LATE)
          .value("message",      Flag::MESSAGE)
          .value("byrule",       Flag::BYRULE)
@@ -701,7 +708,7 @@ void export_NodeAttr()
    .def("relative",&AutoArchiveAttr::relative, "Returns a boolean where true means the time is relative")
    .def("days",    &AutoArchiveAttr::days,     "Returns a boolean true if time was specified in days")
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    boost::python::register_ptr_to_python< std::shared_ptr<AutoArchiveAttr> >(); // needed for mac and boost 1.6
 #endif
 
@@ -713,7 +720,7 @@ void export_NodeAttr()
    .def("__copy__",copyObject<AutoRestoreAttr>)              // __copy__ uses copy constructor
    .def("nodes_to_restore",&AutoRestoreAttr::nodes_to_restore, return_value_policy<copy_const_reference>(), "returns a list of nodes to be restored")
    ;
-#if defined(__clang__)
+#if ECF_ENABLE_PYTHON_PTR_REGISTER
    boost::python::register_ptr_to_python< std::shared_ptr<AutoRestoreAttr> >(); // needed for mac and boost 1.6
 #endif
 

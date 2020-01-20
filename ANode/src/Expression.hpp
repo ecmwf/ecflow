@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #20 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -16,12 +16,11 @@
 // Description :
 //============================================================================
 
-#include <iosfwd>
 #include <memory> // for unique_ptr
-#include <cereal/access.hpp>
 
 #include "ExprAst.hpp"
 class Node;
+namespace cereal { class access; }
 
 /// class PartExpression:
 ///  Hold a single expression, optional can specify whether it is to be And' or

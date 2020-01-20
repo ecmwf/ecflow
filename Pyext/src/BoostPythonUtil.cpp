@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #4 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -16,6 +16,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "BoostPythonUtil.hpp"
+#include "Variable.hpp"
 
 void BoostPythonUtil::list_to_int_vec(const boost::python::list& list, std::vector<int>& int_vec)
 {
@@ -32,6 +33,15 @@ void BoostPythonUtil::list_to_str_vec(const boost::python::list& list, std::vect
    vec.reserve(the_list_size);
    for (int i = 0; i < the_list_size; ++i) {
       vec.push_back(boost::python::extract<std::string>(list[i]));
+   }
+}
+
+void BoostPythonUtil::list_to_str_vec(const boost::python::list& list, std::vector<Variable>& vec )
+{
+   int the_list_size = len(list);
+   vec.reserve(the_list_size);
+   for (int i = 0; i < the_list_size; ++i) {
+      vec.push_back(boost::python::extract<Variable>(list[i]));
    }
 }
 

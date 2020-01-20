@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #204 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,26 +13,18 @@
 // Description :
 //============================================================================
 
-#include <cassert>
 #include <sstream>
-
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/exception.hpp"
 #include <boost/lexical_cast.hpp>
 
 #include "Task.hpp"
-#include "Defs.hpp"
+#include "Alias.hpp"
 #include "PrintStyle.hpp"
-#include "Suite.hpp"
 #include "SuiteChanged.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "File.hpp"
-#include "Stl.hpp"
 #include "Str.hpp"
 #include "Indentor.hpp"
 #include "Log.hpp"
-#include "ExprAst.hpp"
 #include "JobsParam.hpp"
 #include "Ecf.hpp"
 #include "DefsDelta.hpp"
@@ -42,10 +34,8 @@
 #include "JobProfiler.hpp"
 #include "Serialization.hpp"
 
-namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
-using namespace boost;
 
 //#define DEBUG_TASK_LOCATION 1
 void Task::copy(const Task& rhs)

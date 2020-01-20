@@ -1,4 +1,4 @@
-suite suiteName
+suite task2
    family f
       task t1
       endtask

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #286 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -12,18 +12,16 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <cassert>
-#include <ostream>
 
-#include "Defs.hpp"
-#include "Suite.hpp"
-
+#include "Node.hpp"
 #include "MiscAttrs.hpp"
-#include "Str.hpp"
-#include "Log.hpp"
 #include "Ecf.hpp"
 #include "Memento.hpp"
 #include "Serialization.hpp"
+
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 using namespace ecf;
 using namespace std;

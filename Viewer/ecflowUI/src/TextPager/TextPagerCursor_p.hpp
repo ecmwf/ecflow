@@ -22,7 +22,6 @@
 #include <QAtomicInt>
 #include <QCoreApplication>
 #include <QTextCursor>
-#include "TextPagerCursor_p.hpp"
 #include "TextPagerEdit.hpp"
 #include "TextPagerEdit_p.hpp"
 

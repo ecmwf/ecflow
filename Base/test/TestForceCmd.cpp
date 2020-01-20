@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #23 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -12,7 +12,7 @@
 //
 // Description :
 //============================================================================
-#include <boost/test/unit_test.hpp>
+#include <boost/test/unit_test.hpp> // IWYU pragma: keep
 
 #include "ClientToServerCmd.hpp"
 #include "ServerToClientCmd.hpp"
@@ -20,7 +20,7 @@
 #include "MockServer.hpp"
 #include "TestHelper.hpp"
 #include "System.hpp"
-#include "PrintStyle.hpp"
+#include "PrintStyle.hpp" // IWYU pragma: keep
 
 using namespace std;
 using namespace ecf;
@@ -87,14 +87,14 @@ BOOST_AUTO_TEST_CASE( test_force_cmd )
 
 
 static void doForce(MockServer& mockServer,
-         Node* node,
+         Node* fnode,
          const std::string& stateOrEvent,
          const std::vector<Node*>& nodes)
 {
-   ForceCmd cmd(node->absNodePath(), stateOrEvent, true /*recursive */, true /* set Repeat to last value */);
+   ForceCmd cmd(fnode->absNodePath(), stateOrEvent, true /*recursive */, true /* set Repeat to last value */);
    cmd.setup_user_authentification();
    STC_Cmd_ptr returnCmd  = cmd.handleRequest( &mockServer );
-   BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force for node " << node->debugNodePath());
+   BOOST_REQUIRE_MESSAGE(returnCmd->ok(),"Failed to force for node " << fnode->debugNodePath());
 
    for(auto node : nodes) {
       if (NState::isValid(stateOrEvent)) {

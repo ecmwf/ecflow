@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -27,28 +27,32 @@ class ActionHandler : public QObject
 {
 Q_OBJECT
 public:
-        explicit ActionHandler(QObject*,QWidget* menuParent);
+    explicit ActionHandler(QObject*,QWidget* menuParent);
 
-		void contextMenu(std::vector<VInfo_ptr>,QPoint);
-        bool actionHandler();
+    void contextMenu(const std::vector<VInfo_ptr>&,QPoint);
+    void runCommand(const std::vector<VInfo_ptr>& nodesLst, int commandId);
+    bool actionHandler();
 
-        static bool confirmCommand(std::vector<VInfo_ptr>& filteredNodes,
-                                           const std::string& questionIn,
-                                           const std::string& warning,
-                                           const std::string& commandDescStr,
-                                           std::size_t taskNum);
+    static bool confirmCommand(const std::vector<VInfo_ptr>& filteredNodes,
+                               const std::string& questionIn,
+                               const std::string& warning,
+                               const std::string& commandDescStr,
+                               std::size_t taskNum);
 
 Q_SIGNALS:
-	    void viewCommand(VInfo_ptr,QString);
-	    void infoPanelCommand(VInfo_ptr,QString);
-	    void dashboardCommand(VInfo_ptr,QString);
+    void viewCommand(VInfo_ptr,QString);
+    void infoPanelCommand(VInfo_ptr,QString);
+    void dashboardCommand(VInfo_ptr,QString);
 
 protected:      
-        bool confirmCommand(MenuItem* item,std::vector<VInfo_ptr>& filteredNodes,
-                            const std::string& commandDescStr = std::string(),
-                            std::size_t task_num=0);
-        QObject *actionSender_;
-        QWidget *menuParent_;
+    void filterNodes(const std::vector<VInfo_ptr>& nodesLst, std::vector<VInfo_ptr>&) const;
+    void handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& filteredNodes);
+    bool confirmCommand(MenuItem* item,const std::vector<VInfo_ptr>& filteredNodes,
+                        const std::string& commandDescStr = std::string(),
+                        std::size_t task_num=0);
+
+    QObject *actionSender_;
+    QWidget *menuParent_;
 };
 
 #endif

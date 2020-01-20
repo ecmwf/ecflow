@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #38 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -15,9 +15,10 @@
 #include <sstream>
 
 #include "TodayAttr.hpp"
+#include "DayAttr.hpp"  // Used in Why
+#include "DateAttr.hpp" // Used in Why
 #include "Calendar.hpp"
 #include "Indentor.hpp"
-#include "Log.hpp"
 #include "PrintStyle.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
@@ -133,7 +134,6 @@ bool TodayAttr::isFree(const ecf::Calendar& calendar) const
 {
 	// The FreeDepCmd can be used to free the today,
  	if (free_) {
-//		LOG(Log::DBG,"   TodayAttr::isFree free_");
 		return true;
 	}
  	return is_free(calendar);

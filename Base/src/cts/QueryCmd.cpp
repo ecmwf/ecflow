@@ -15,13 +15,12 @@
 #include <iostream>
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
-#include "Str.hpp"
 #include "CtsApi.hpp"
 #include "AbstractClientEnv.hpp"
 #include "Extract.hpp"
 #include "Expression.hpp"
 #include "Node.hpp"
-#include "ExprAstVisitor.hpp"
+#include "Limit.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -79,19 +78,19 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
    std::string attribute;
 
    if (args.size()) query_type = args[0];
-   if ( query_type == "event" || query_type == "meter" || query_type == "label" || query_type == "variable") {
-      // second argument must be <path>:event_or_meter_or_label_or_variable
+   if ( query_type == "event" || query_type == "meter" || query_type == "label" || query_type == "variable" || query_type == "limit" || query_type == "limit_max") {
+      // second argument must be <path>:event_or_meter_or_label_or_variable_or_limit
       std::string path_and_name ;
       if (args.size() == 2) {
          path_and_name = args[1];
          if ( !Extract::pathAndName( path_and_name , path_to_attribute, attribute  ) ) {
             throw std::runtime_error(
-                     "QueryCmd: second argument must be of the form <path>:name for query\n, where name is [event | meter | label | variable ] name "
+                     "QueryCmd: second argument must be of the form <path>:name for query\n, where name is [event | meter | label | variable | limit | limit_max ] name "
                      + query_type + " : could not extract from:" + path_and_name );
          }
       }
       else {
-         std::stringstream ss; ss << "QueryCmd: second argument must be of the form <path>:name for query\n where name is [event | meter | label | variable ] name " << query_type;
+         std::stringstream ss; ss << "QueryCmd: second argument must be of the form <path>:name for query\n where name is [event | meter | label | variable | limit | limit_max] name " << query_type;
          ss << " args size = " << args.size() << " expected 2 arguments";
          throw std::runtime_error(ss.str());
       }
@@ -109,12 +108,12 @@ void  QueryCmd::create(   Cmd_ptr& cmd,
    }
    else if (query_type == "state" || query_type == "dstate") {
       // for state and dstate attribute is empty
-      if (args.size() >= 1) path_to_attribute = args[1];
+      if (args.size() > 1) path_to_attribute = args[1];
       if (args.size() > 2) throw std::runtime_error( "QueryCmd: invalid (state | dstate) query : " + args[2]);
    }
    else if (query_type == "repeat" ) {
       // for repeat attribute can only be next or prev
-      if (args.size() >= 1) path_to_attribute = args[1];
+      if (args.size() > 1) path_to_attribute = args[1];
       if (args.size() == 3) {
          attribute = args[2];
          if (attribute != "next" && attribute != "prev") {
@@ -145,27 +144,30 @@ const char* QueryCmd::desc() {
    return
             "Query the status of attributes\n"
             " i.e state,dstate,repeat,event,meter,label,variable or trigger expression without blocking\n"
-            " - state    return [unknown | complete | queued |             aborted | submitted | active] to standard out\n"
-            " - dstate   return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out\n"
-            " - repeat   returns current value as a string to standard out\n"
-            " - event    return 'set' | 'clear' to standard out\n"
-            " - meter    return value of the meter to standard out\n"
-            " - label    return new value otherwise the old value\n"
-            " - variable return value of the variable, repeat or generated variable to standard out,\n"
-            "            will search up the node tree\n"
-            " - trigger  returns 'true' if the expression is true, otherwise 'false'\n\n"
+            " - state     return [unknown | complete | queued |             aborted | submitted | active] to standard out\n"
+            " - dstate    return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out\n"
+            " - repeat    returns current value as a string to standard out\n"
+            " - event     return 'set' | 'clear' to standard out\n"
+            " - meter     return value of the meter to standard out\n"
+            " - limit     return current value of limit to standard out\n"
+            " - limit_max return limit max value to standard out\n"
+            " - label     return new value otherwise the old value\n"
+            " - variable  return value of the variable, repeat or generated variable to standard out,\n"
+            "             will search up the node tree\n"
+            " - trigger   returns 'true' if the expression is true, otherwise 'false'\n\n"
             "If this command is called within a '.ecf' script we will additionally log the task calling this command\n"
             "This is required to aid debugging for excessive use of this command\n"
             "The command will fail if the node path to the attribute does not exist in the definition and if:\n"
             " - repeat   The repeat is not found\n"
             " - event    The event is not found\n"
             " - meter    The meter is not found\n"
+            " - limit    The limit is not found\n"
             " - label    The label is not found\n"
             " - variable No user or generated variable or repeat of that name found on node, or any of its parents\n"
             " - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid\n"
             "Arguments:\n"
-            "  arg1 = [ state | dstate | repeat | event | meter | label | variable | trigger ]\n"
-            "  arg2 = <path> | <path>:name where name is name of a event, meter, label or variable\n"
+            "  arg1 = [ state | dstate | repeat | event | meter | label | variable | trigger | limit | limit_max ]\n"
+            "  arg2 = <path> | <path>:name where name is name of a event, meter, label, limit or variable\n"
             "  arg3 = trigger expression | prev | next # prev,next only used when arg1 is repeat\n\n"
             "Usage:\n"
             " ecflow_client --query state /path/to/node                         # return node state to standard out\n"
@@ -175,6 +177,8 @@ const char* QueryCmd::desc() {
             " ecflow_client --query repeat /path/to/node next                   # return the next value as a string\n"
             " ecflow_client --query event /path/to/task/with/event:event_name   # return set | clear to standard out\n"
             " ecflow_client --query meter /path/to/task/with/meter:meter_name   # returns the current value of the meter to standard out\n"
+            " ecflow_client --query limit /path/to/task/with/limit:limit_name   # returns the current value of the limit to standard out\n"
+            " ecflow_client --query limit_max /path/to/task/with/limit:limit_name # returns the max value of the limit to standard out\n"
             " ecflow_client --query label /path/to/task/with/label:label_name   # returns the current value of the label to standard out\n"
             " ecflow_client --query variable /path/to/task/with/var:var_name    # returns the variable value to standard out\n"
             " ecflow_client --query trigger /path/to/node/with/trigger \"/suite/task == complete\" # return true if expression evaluates false otherwise\n"
@@ -204,6 +208,17 @@ STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
          throw std::runtime_error(ss.str());
       }
       return PreAllocatedReply::string_cmd(boost::lexical_cast<std::string>(meter.value()));
+   }
+
+   if (query_type_ == "limit") {
+      limit_ptr limit = node->find_limit(attribute_);
+      if (!limit.get())  throw std::runtime_error("QueryCmd: Could not find limit " + attribute_ );
+      return PreAllocatedReply::string_cmd(boost::lexical_cast<std::string>(limit->value()));
+   }
+   if (query_type_ == "limit_max") {
+      limit_ptr limit = node->find_limit(attribute_);
+      if (!limit.get())  throw std::runtime_error("QueryCmd: Could not find limit " + attribute_ );
+      return PreAllocatedReply::string_cmd(boost::lexical_cast<std::string>(limit->theLimit()));
    }
 
    if (query_type_ == "label") {

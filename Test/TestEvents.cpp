@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #26 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -19,7 +19,6 @@
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "ServerTestHarness.hpp"
 
@@ -27,8 +26,10 @@
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
+#include "Limit.hpp"
 #include "DurationTimer.hpp"
 #include "TestFixture.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -43,7 +44,7 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 BOOST_AUTO_TEST_CASE( test_event_and_query )
 {
    DurationTimer timer;
-   cout << "Test:: ...test_event_and_query"<< flush;
+   cout << "Test:: ...test_event_and_query " << flush;
    TestClean clean_at_start_and_end;
 
    // Create the defs file corresponding to the text below
@@ -76,8 +77,10 @@ BOOST_AUTO_TEST_CASE( test_event_and_query )
    Defs theDefs;
    task_ptr task_a;
    task_ptr task_b;
+   suite_ptr suite;
    {
-      suite_ptr suite = theDefs.add_suite("test_events" );
+      suite = theDefs.add_suite("test_events" );
+      suite->addLimit(Limit("limit_x",15)); // just to test query ; limit
       {
          family_ptr fam = suite->add_family("family1");
          task_a = fam->add_task("a");
@@ -131,6 +134,14 @@ BOOST_AUTO_TEST_CASE( test_event_and_query )
    BOOST_CHECK_MESSAGE(TestFixture::client().query("label",task_b->absNodePath(),"task_b_label")==0,"query command failed " << TestFixture::client().errorMsg());
    BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "new_label_value","Expected query of label to return 'new_label_value' but found " << TestFixture::client().get_string());
 
+   // Added since in 5.2.0 (only 5.2.0 server supports this behaviour)
+   if (!getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
+      BOOST_CHECK_MESSAGE(TestFixture::client().query("limit",suite->absNodePath(),"limit_x")==0,"query command failed " << TestFixture::client().errorMsg());
+      BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "0","Expected query of limit to return '0' but found " << TestFixture::client().get_string());
+
+      BOOST_CHECK_MESSAGE(TestFixture::client().query("limit_max",suite->absNodePath(),"limit_x")==0,"query command failed " << TestFixture::client().errorMsg());
+      BOOST_CHECK_MESSAGE(TestFixture::client().get_string() == "15","Expected query of limit_max to return '15' but found " << TestFixture::client().get_string());
+   }
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";
 }
 

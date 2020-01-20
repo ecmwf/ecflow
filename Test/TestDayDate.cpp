@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #25 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -19,6 +19,7 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "DurationTimer.hpp"
+#include "VerifyAttr.hpp"
 
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
@@ -40,12 +41,6 @@ BOOST_AUTO_TEST_SUITE( TestSuite )
 
 BOOST_AUTO_TEST_CASE( test_day_at_midnight )
 {
-   // Added since in 4.17.0 no longer sets state if it has not changed.
-   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
-      std::cout << "\n    Disable test_complete for old server ,re-enable when 4.17.0 is minimum version\n";
-      return;
-   }
-
    // See ECFLOW-337 versus ECFLOW-1550
    DurationTimer timer;
    cout << "Test:: ...test_day_at_midnight " << flush;
@@ -101,12 +96,6 @@ BOOST_AUTO_TEST_CASE( test_day_at_midnight )
 
 BOOST_AUTO_TEST_CASE( test_date_at_midnight )
 {
-   // Added since in 4.17.0 no longer sets state if it has not changed.
-   if (getenv("ECF_DISABLE_TEST_FOR_OLD_SERVERS")) {
-      std::cout << "\n    Disable test_complete for old server ,re-enable when 4.17.0 is minimum version\n";
-      return;
-   }
-
    // See ECFLOW-337 versus ECFLOW-1550
    DurationTimer timer;
    cout << "Test:: ...test_date_at_midnight " << flush;

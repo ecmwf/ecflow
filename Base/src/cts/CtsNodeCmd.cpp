@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #70 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,10 +17,11 @@
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "Task.hpp"
 #include "JobCreationCtrl.hpp"
-#include "Ecf.hpp"
 #include "Jobs.hpp"
+#ifdef DEBUG
+#include "Ecf.hpp"
+#endif
 
 using namespace ecf;
 using namespace std;

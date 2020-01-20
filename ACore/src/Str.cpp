@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #49 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,10 +13,8 @@
 //
 // Description : This class is used as a helper class
 //============================================================================
-#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "StringSplitter.hpp"
 #include "Str.hpp"
 
 using namespace std;
@@ -469,6 +467,16 @@ bool Str::truncate_at_end(  std::string& fileContents, size_t max_lines)
       }
    }
    return false;
+}
+
+std::string Str::dump_string_vec(const std::vector<std::string>& vec)
+{
+   std::string str;
+   for(const auto& s: vec) {
+      str += s;
+      str += "\n";
+   }
+   return str;
 }
 
 }

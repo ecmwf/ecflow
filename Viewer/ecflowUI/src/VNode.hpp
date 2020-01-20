@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -115,6 +115,7 @@ public:
 
     //Attributes
     const std::vector<VAttribute*>& attr() const {return attr_;}
+    virtual const std::vector<VAttribute*>& attrForSearch() {return attr_;}
     int attrNum(AttributeFilter* filter=nullptr) const;
     VAttribute* attribute(int,AttributeFilter *filter=nullptr) const;
     VAttribute* attributeForType(int,VAttributeType*) const;
@@ -162,17 +163,17 @@ public:
     virtual bool isSuspended() const;
     virtual bool isAborted() const;
     virtual bool isSubmitted() const;
-    virtual QColor  stateColour() const;
-    virtual QColor  realStateColour() const;
-    virtual QColor  stateFontColour() const;
-    virtual QColor  typeFontColour() const;
+    virtual bool isActive() const;
+    virtual QColor stateColour() const;
+    virtual QColor realStateColour() const;
+    virtual QColor stateFontColour() const;
+    virtual QColor typeFontColour() const;
     virtual int tryNo() const;
     virtual void internalState(VNodeInternalState&) {}
 
     bool hasAccessed() const;
     std::vector<VNode*> ancestors(SortMode sortMode);
     VNode* ancestorAt(int idx,SortMode sortMode);
-
 
     virtual std::string flagsAsStr() const;
     virtual bool isFlagSet(ecf::Flag::Type f) const;
@@ -226,7 +227,7 @@ protected:
 
     node_ptr node_;
     std::vector<VNode*> children_;
-    std::vector<VAttribute*> attr_;
+    mutable std::vector<VAttribute*> attr_;
     int index_;
     VNodeTriggerData* data_;
 };
@@ -278,6 +279,8 @@ public:
     int totalNumOfTopLevel(VNode*) const;
     int totalNumOfTopLevel(const std::string&) const;
 
+    const std::vector<VAttribute*>& attrForSearch() override;
+
 	VNode* toVNode(const Node* nc) const;
 	void beginUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,VNodeChange&);
 	void endUpdate(VNode* node,const std::vector<ecf::Aspect::Type>& aspect,const VNodeChange&);
@@ -320,6 +323,7 @@ public:
 	bool isFlagSet(ecf::Flag::Type f) const override;
 
 	void why(std::vector<std::string>& theReasonWhy) const override;
+    QString logOrCheckpointError() const;
 
     bool triggeredScanned() const {return triggeredScanned_;}
 
@@ -349,6 +353,8 @@ private:
     VServerCache cache_;
     std::vector<Variable> prevGenVars_;
     ecf::Flag prevFlag_;
+
+    std::vector<VAttribute*> attrForSearch_;
 
     std::map<std::string,VNodeInternalState> prevNodeState_;
 };

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #14 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -18,10 +18,10 @@
 
 #include "TaskScriptGenerator.hpp"
 #include "Task.hpp"
+#include "QueueAttr.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
 #include "Str.hpp"
-#include "JobCreationCtrl.hpp"
 
 using namespace std;
 using namespace boost;
@@ -126,8 +126,9 @@ void TaskScriptGenerator::generate(const std::map<std::string,std::string>& over
    std::cout << "Generated script file " << ecf_file_path << "\n";
 }
 
-static void add_queue(std::string& content,const std::string& client_exe, const std::string& sleep,const std::vector<QueueAttr>& queues)
+static void add_queue(std::string& content,const std::string& client_exe, const std::string& sleep,const Node* node)
 {
+   const std::vector<QueueAttr>& queues = node->queues();
    for(const QueueAttr& queue: queues) {
       content += "\n";
       content += "for i in";
@@ -138,10 +139,10 @@ static void add_queue(std::string& content,const std::string& client_exe, const 
       }
       content += "\n";
       content += "do\n";
-      content += "   step=$(" + client_exe + "--queue=" + queue.name() + " active )\n";
+      content += "   step=$(" + client_exe + "--queue=" + queue.name() + " active " + node->absNodePath()  + " )\n";
       content += "   echo $step\n";
       content += "   " + sleep;
-      content += "   " + client_exe + "--queue=" + queue.name() + " complete $step\n";
+      content += "   " + client_exe + "--queue=" + queue.name() + " complete $step " + node->absNodePath() + "\n";
       content += "done\n";
    }
 }
@@ -209,10 +210,10 @@ std::string TaskScriptGenerator::getDefaultTemplateEcfFile() const
    }
 
    /// Queues
-   add_queue(content,client_exe,sleep,task_->queues());
+   add_queue(content,client_exe,sleep,task_);
    Node* parent = task_->parent();
    while(parent) {
-      add_queue(content,client_exe,sleep,parent->queues());
+      add_queue(content,client_exe,sleep,parent);
       parent = parent->parent();
    }
 

@@ -57,6 +57,18 @@
                 "tooltip" : "Specifies the default browser used to open wev links",
                 "default": "firefox"
             }
-       }
+       },
+        "panel": {
+            "label" : "",
+            "tooltip" : "",
+            "visiblePanelActions": {
+                "label": "Show action for",
+                "tooltip" : "Controls when the Defstatus submenu is available",
+                "values"  : "edit/overview/job/manual/output/script/history/server_settings/suite/triggers/variables/why/zombies",
+                "values_label" : "Edit/Info/Job/Manual/Output/Script/Server log/Server settings/Suite filter/Triggers/Variables/Why/Zombies",
+                "default": "edit/overview/job/output/script/history/server_settings/suite/variables/zombies",
+                "multi"   : "true"
+            }
+        }
     }
 }

@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #31 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -34,7 +34,6 @@
 #include <memory>
 #include <string>
 #include <fstream>
-#include <sstream>
 #include <boost/lambda/lambda.hpp>
 
 namespace ecf {
@@ -135,7 +134,7 @@ private:
 /// the log file
 class LogImpl {
 public:
-   LogImpl(const std::string& filename);
+   explicit LogImpl(const std::string& filename);
    ~LogImpl();
 
    bool log(Log::LogType lt,const std::string& message)            { return do_log(lt,message,true); }
@@ -192,7 +191,7 @@ std::string stringize_f(Functor const & f) {
 }
 #define STRINGIZE(EXPRESSION)  (ecf::stringize_f(boost::lambda::_1 << EXPRESSION))
 #define LOG(level, EXPRESSION) ecf::log(level, STRINGIZE(EXPRESSION))
-#define LOG_ASSERT(expr,EXPRESSION) ((expr)? ((void)0): ecf::log_assert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
+#define LOG_ASSERT(expr,EXPRESSION) ((expr)? (static_cast<void>(0)): ecf::log_assert(#expr, __FILE__, __LINE__, STRINGIZE(EXPRESSION)))
 
 }
 

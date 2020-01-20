@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #26 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -31,6 +31,7 @@
 #include "Task.hpp"
 #include "DurationTimer.hpp"
 #include "PrintStyle.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -104,7 +105,7 @@ BOOST_AUTO_TEST_CASE( test_suite_calendar_sync )
       ClockAttr clockAttr(today, false);
       suite->addClock( clockAttr );
 
-      // ** add tomorrow days so that node stays queued **
+      // ** add tomorrow days so that node stays queued, hence EXPECT no job and no output **
       task->addDay( DayAttr( today.date() +  boost::gregorian::date_duration(1 ) ) );
    }
 
@@ -116,9 +117,12 @@ BOOST_AUTO_TEST_CASE( test_suite_calendar_sync )
 
    // Get full defs, so that next sync_local does incremental update
    BOOST_REQUIRE_MESSAGE(TestFixture::client().getDefs() == 0,CtsApi::get() << " failed should return 0 " << TestFixture::client().errorMsg());
+   std::stringstream ss;
+   ss << "\n Start time"
+      << "\n sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString() << "\n";
 
    for(size_t i=0; i < 3; i++) {
-      //cout << "\nstart count: " << i << "\n";
+      //cout << "\n loop:" << i << " sleeping for " << TestFixture::job_submission_interval() << "s\n";
       sleep(TestFixture::job_submission_interval());
 
       BOOST_REQUIRE_MESSAGE(TestFixture::client().sync_local(true/*sync suite clock*/) == 0, "sync_local failed should return 0\n" << TestFixture::client().errorMsg());
@@ -131,8 +135,11 @@ BOOST_AUTO_TEST_CASE( test_suite_calendar_sync )
       //cout << " sync_full: suite time : " << TestFixture::client().defs()->suiteVec()[0]->calendar().toString() << "\n";
 
       BOOST_REQUIRE_MESSAGE(sync_clock_suiteTime == sync_full_suiteTime,
-                  "Sync clock suite time :" << to_simple_string(sync_clock_suiteTime)
-               << "\nSync full suite time:" << to_simple_string(sync_full_suiteTime) );
+                  ss.str() <<
+                  "\nloop:" << i << " waited for " << TestFixture::job_submission_interval() << "s"
+                  "\nSync clock suite time:" << to_simple_string(sync_clock_suiteTime) <<
+                  "\nSync full suite time :" << to_simple_string(sync_full_suiteTime) <<
+                  "\n" << TestFixture::client().defs());
    }
 
    cout << timer.duration() << " update-calendar-count(" << serverTestHarness.serverUpdateCalendarCount() << ")\n";

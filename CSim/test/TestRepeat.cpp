@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #7 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -12,24 +12,21 @@
 //
 // Description :
 //============================================================================
+#include <iostream>
+
+#include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+
 #include "Simulator.hpp"
-#include "File.hpp"
-#include "Log.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "TestUtil.hpp"
-#include "PrintStyle.hpp"
+#include "VerifyAttr.hpp"
 
-#include <boost/test/unit_test.hpp>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
+//#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -399,7 +396,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_with_cron  )
 		task_checkdata->addEvent( Event(1,"done"));
 
  		CronAttr cronAttr;
- 		cronAttr.addTimeSeries( ecf::TimeSlot(time_plus_2_minute.time_of_day()) );
+ 		cronAttr.addTimeSeries( ecf::TimeSeries(ecf::TimeSlot(time_plus_2_minute.time_of_day())) );
 		task_checkdata->addCron( cronAttr  );
 		task_checkdata->addVerify( VerifyAttr(NState::COMPLETE,8) );
 

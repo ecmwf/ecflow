@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,7 +10,8 @@
 
 #include "VNode.hpp"
 
-#include "Node.hpp"
+#include "Suite.hpp"
+#include "Expression.hpp"
 #include "Variable.hpp"
 
 #include "AstCollateVNodesVisitor.hpp"
@@ -177,7 +178,9 @@ VNode::VNode(VNode* parent,node_ptr node) :
 	if(node_)
 		node_->set_graphic_ptr(this);
 
-    scanAttr();
+    // do not scan for attributes in a server
+    if (parent_)
+        scanAttr();
 }
 
 VNode::~VNode()
@@ -760,6 +763,11 @@ bool VNode::isSubmitted() const
     return (node_ && node_->state() == NState::SUBMITTED);
 }
 
+bool VNode::isActive() const
+{
+    return (node_ && node_->state() == NState::ACTIVE);
+}
+
 QColor  VNode::stateColour() const
 {
 	return VNState::toColour(this);
@@ -1279,13 +1287,14 @@ VServer::VServer(ServerHandler* server) :
     totalNum_(0),
     triggeredScanned_(false)
 {
+    //Attributes are not scannedfor servers
+    Q_ASSERT(attr_.empty());
 }
 
 VServer::~VServer()
 {
 	clear();
 }
-
 
 int VServer::totalNumOfTopLevel(VNode* n) const
 {
@@ -1334,6 +1343,13 @@ void VServer::clear()
 	cache_.clear();
 	prevNodeState_.clear();
 
+    //clear attrubutes
+    Q_ASSERT(attr_.empty());
+    for(auto & i : attrForSearch_)
+        delete i;
+
+    attrForSearch_.clear();
+
 	bool hasNotifications=server_->conf()->notificationsEnabled();
 
 	//Delete the children nodes. It will recursively delete all the nodes. It also saves the prevNodeState!!
@@ -1355,20 +1371,6 @@ void VServer::clear()
 
     triggeredScanned_=false;
 }
-
-//Clear the contents of a particular VNode
-/*void VServer::clear(VNode* node)
-{
-	//Delete the children of node. It will recursively delete all the nodes
-	//below this node
-	for(unsigned int i=0; i < node->numOfChildren(); i++)
-	{
-		deleteNode(node->childAt(i));
-	}
-
-	//Clear the node contents
-	node->clear();
-}*/
 
 //Delete a particular node
 void VServer::deleteNode(VNode* node,bool hasNotifications)
@@ -1521,29 +1523,7 @@ void VServer::beginScan(VServerChange& change)
 {
 	//Clear the contents
 	clear();
-#if 0
-	//Get the Defs.
-	{
-		ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
-		defs_ptr defs = defsAccess.defs();
-		if (!defs)
-			return;
 
-		const std::vector<suite_ptr> &suites = defs->suiteVec();
-		change.suiteNum_=suites.size();
-
-		std::vector<node_ptr> nv;
-		defs->get_all_nodes(nv);
-		change.totalNum_=change.suiteNum_+nv.size();
-
-		//We need to update the cache server variables
-		updateCache(defs);
-	}
-
-	//This will use ServerDefsAccess as well. So we have to be sure that t=the mutex is
-	//released at this point.
-	change.attrNum_=currentAttrNum();
-#endif
     //Get the Defs.
     {
         ServerDefsAccess defsAccess(server_);  // will reliquish its resources on destruction
@@ -1551,7 +1531,7 @@ void VServer::beginScan(VServerChange& change)
         if (!defs)
             return;
 
-        //We need to update the cache server variables
+        //We need to update the cached server variables
         updateCache(defs);
     }
 }
@@ -1580,12 +1560,6 @@ void VServer::endScan()
 			scan(vn,hasNotifications);
 		}
 	}
-
-#if 0
-	//This will use ServerDefsAccess as well. So we have to be sure that the mutex is
-	//released at this point.
-	endUpdateAttrNum();
-#endif
 
 	if(totalNum_ > 0)
 	{
@@ -1742,6 +1716,25 @@ void VServer::beginUpdate(const std::vector<ecf::Aspect::Type>& aspect)
 	}
 }
 
+// NOTE: server attributes are only used for search, because the tree is not yet
+// able to manage them. So we always keep the attr_ vector empty and use attrForSearch_
+// when server attribute data is needed for the search.
+const std::vector<VAttribute*>& VServer::attrForSearch()
+{
+    Q_ASSERT(attr_.empty());
+    for(auto & i : attrForSearch_)
+        delete i;
+
+    attrForSearch_.clear();
+
+    // this call will update the attr_ vector !!
+    rescanAttr();
+
+    attrForSearch_ = attr_;
+    attr_.clear();
+    return attrForSearch_;
+}
+
 void VServer::suites(std::vector<std::string>& sv)
 {
 	for(int i=0; i < numOfChildren(); i++)
@@ -1830,6 +1823,20 @@ std::string VServer::flagsAsStr() const
 bool VServer::isFlagSet(ecf::Flag::Type f) const
 {
 	return cache_.flag_.is_set(f);
+}
+
+QString VServer::logOrCheckpointError() const
+{
+    std::string s;
+    if (isFlagSet(ecf::Flag::LOG_ERROR)) {
+        s = findVariable("ECF_LOG_ERROR", true);
+    }
+    if (isFlagSet(ecf::Flag::CHECKPT_ERROR)) {
+        if (!s.empty())
+            s += " ";
+        s += findVariable("ECF_CHECKPT_ERROR", true);
+    }
+    return QString::fromStdString(s);
 }
 
 void VServer::updateCache()

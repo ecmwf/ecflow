@@ -1,4 +1,4 @@
-suite s1
+suite queue
   queue name 001 002 003 # status 0
   queue name1 001 002 003 # status 0
   family f1

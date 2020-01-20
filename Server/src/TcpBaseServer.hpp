@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #62 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,12 +15,12 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/asio.hpp>
-#include "ServerEnvironment.hpp"
 #include "ClientToServerRequest.hpp"
 #include "ServerToClientResponse.hpp"
 #include "Log.hpp"
 
 class BaseServer;
+class ServerEnvironment;
 
 class TcpBaseServer {
 public:

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -237,7 +237,7 @@ void OutputFileProvider::fetchFile(ServerHandler *server,VNode *n,const std::str
     //If we are here we coud not get the file
     if(n->isFlagSet(ecf::Flag::JOBCMD_FAILED))
     {
-        reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
+       reply_->setErrorText("Submission command failed! Check .sub file, ssh, or queueing system error.");
     }
     owner_->infoFailed(reply_);
 }

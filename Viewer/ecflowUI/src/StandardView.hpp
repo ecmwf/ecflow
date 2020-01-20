@@ -53,6 +53,11 @@ protected:
     void updateScrollBars() override;
     void updateViewport(const QRect rect) override;
 
+    void navigateLeft(const QModelIndex& idx) override;
+    void navigateRight(const QModelIndex& idx) override;
+    void navigateUp(const QModelIndex& idx) override;
+    void navigateDown(const QModelIndex& idx) override;
+
     int expandIndicatorBoxWidth_;
     int expandIndicatorWidth_;
 

@@ -2,7 +2,7 @@
 #define MAINWINDOW_HPP_
 
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -89,7 +89,8 @@ protected Q_SLOTS:
 	void on_actionSearch_triggered();
     void on_actionNotification_triggered();
     void on_actionCommandOutput_triggered();
-	void on_actionAbout_triggered();
+    void on_actionAbout_triggered();
+    void on_actionShortcutHelp_triggered();
 	void on_actionSaveSessionAs_triggered();
 	void on_actionManageSessions_triggered();
 

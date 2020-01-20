@@ -2,17 +2,17 @@ extern /limits:c1a
 extern /limits:linux_cluster
 extern /limits:pdb
 extern /limits:q2diss
-suite suiteName
+suite limit_suiteName
 	limit sg1  10
 	limit mars 10
 endsuite
 
-suite s1
+suite limit_s1
 	limit mars 10
 	limit sg1  10
 endsuite
 
-suite obs
+suite limit_extern_and_submission_limits
     inlimit -s /limits:c1a
     family limits
     	limit hpcd 20
@@ -21,12 +21,12 @@ suite obs
     family anon    
    		inlimit -s limits:hpcd       
     	task t1
-    		inlimit -s /suiteName:sg1        # another suite limit
-    		inlimit -s /suiteName:mars       # another suite limit
-    		inlimit -s /s1:mars              # another suite limit
-    		inlimit -s /s1:sg1               # another suite limit
+    		inlimit -s /limit_suiteName:sg1        # another suite limit
+    		inlimit -s /limit_suiteName:mars       # another suite limit
+    		inlimit -s /limit_s1:mars              # another suite limit
+    		inlimit -s /limit_s1:sg1               # another suite limit
    		task t2
-   			inlimit -s /obs/limits:hpcd      # This suite limit
+   			inlimit -s /limit_extern_and_submission_limits/limits:hpcd      # This suite limit
   		task t3
    			inlimit -s /limits:c1a           # extern suite limit
     endfamily

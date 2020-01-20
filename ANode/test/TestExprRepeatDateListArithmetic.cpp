@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,8 +14,8 @@
 
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
 #include "Task.hpp"
+#include "ExprAst.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_date_list_arithmetic )
    BOOST_REQUIRE_MESSAGE(theDefs.check(errorMsg,warningMsg),"Expected triggers expressions to parse " << errorMsg);
 
    // Get the trigger AST
-   Ast* trigger = t2->triggerAst();
+   AstTop* trigger = t2->triggerAst();
    BOOST_REQUIRE_MESSAGE(trigger,"Expected trigger");
 
    // check evaluation

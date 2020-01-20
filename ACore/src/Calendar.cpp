@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #65 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,10 +17,13 @@
 #include "Calendar.hpp"
 #include "CalendarUpdateParams.hpp"
 #include "Log.hpp"
-#include "Ecf.hpp"
 #include "Extract.hpp"
 #include "Serialization.hpp"
 #include "cereal_boost_time.hpp"
+
+#ifdef DEBUG
+#include "Ecf.hpp"
+#endif
 
 using namespace std;
 using namespace boost::gregorian;
@@ -381,8 +384,7 @@ boost::posix_time::ptime Calendar::second_clock_time()
  	return second_clock::universal_time();  // UTC
 }
 
-
-
+// ==================================================================================
 
 template<class Archive>
 void Calendar::serialize(Archive & ar, std::uint32_t const /*version*/)

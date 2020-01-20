@@ -275,11 +275,41 @@ void AbstractNodeView::keyPressEvent(QKeyEvent *event)
     {
         switch(event->key())
         {
-        case Qt::Key_Plus:
-            expand(current);
+        case Qt::Key_Right:
+            navigateRight(current);
+            break;
+        case Qt::Key_Left:
+            navigateLeft(current);
             break;
         case Qt::Key_Minus:
             collapse(current);
+            break;
+        case Qt::Key_Plus:
+            expand(current);
+            break;
+        case Qt::Key_Up:
+            navigateUp(current);
+            break;
+        case Qt::Key_Down:
+            navigateDown(current);
+            break;
+        case Qt::Key_Space:
+            toggleExpand(current);
+            break;
+        case Qt::Key_Asterisk:
+        case Qt::Key_Period:
+            expandAll(current);
+            break;
+        case Qt::Key_Comma:
+            collapseAll(current);
+            break;
+        case Qt::Key_Home:
+            navigateHome(current);
+            break;
+        case Qt::Key_End:
+            navigateEnd(current);
+            break;
+        default:
             break;
         }
     }
@@ -930,6 +960,76 @@ void AbstractNodeView::collapseAll()
 {
     expandedIndexes.clear();
     doItemsLayout();
+}
+
+void AbstractNodeView::toggleExpand(const QModelIndex& idx)
+{
+    if (isExpanded(idx)) {
+        collapse(idx);
+    } else {
+        expand(idx);
+    }
+}
+
+//========================================================
+//
+// Navigation
+//
+//========================================================
+
+void AbstractNodeView::navigatePrev(const QModelIndex& idx)
+{
+    int item = viewIndex(idx);
+    if (item > 0) {
+         const QModelIndex &upIndex = viewItems_[item-1].index;
+         setCurrentIndex(upIndex);
+    }
+}
+
+void AbstractNodeView::navigateNext(const QModelIndex& idx)
+{
+    int item = viewIndex(idx);
+    if (item != -1 && viewItems_.size() > static_cast<size_t>(item+1)) {
+         const QModelIndex &downIndex = viewItems_[item+1].index;
+         setCurrentIndex(downIndex);
+    }
+}
+
+void AbstractNodeView::navigateHome(const QModelIndex& idx)
+{
+    int item = viewIndex(idx);
+    if (item > 0) {
+        int parentItem = item;
+        int cnt = 0;
+        while (cnt < 500)
+        {
+            item = parentItem;
+            parentItem = viewItems_[item].parentItem;
+            cnt++;
+            if (parentItem == -1) {
+                Q_ASSERT(item >= 0);
+                setCurrentIndex(viewItems_[item].index);
+                return;
+            }
+        }
+    }
+}
+
+void AbstractNodeView::navigateEnd(const QModelIndex& idx)
+{
+    int item = viewIndex(idx);
+    if (item > 0) {
+        item++;
+        while (item < static_cast<int>(viewItems_.size())) {
+            if (viewItems_[item].parentItem == -1) {
+               Q_ASSERT(item > 0);
+               setCurrentIndex(viewItems_[item-1].index);
+               return;
+            } else {
+               item++;
+            }
+        }
+    }
 }
 
 //========================================================

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #16 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -19,10 +19,8 @@
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "Task.hpp"
 #include "Suite.hpp"
 #include "SuiteChanged.hpp"
-#include "Ecf.hpp"
 #include "Log.hpp"
 
 using namespace ecf;
@@ -101,8 +99,8 @@ bool PathsCmd::isWrite() const
    switch (api_) {
       case PathsCmd::SUSPEND:           return true;  break; // requires write privilege
       case PathsCmd::RESUME:            return true;  break; // requires write privilege
-      case PathsCmd::KILL:              return true;  break; // requires write privilege
-      case PathsCmd::STATUS:            return false; break; // read only
+      case PathsCmd::KILL:              return true;  break; // requires write privilege, modifies Flag::KILLCMD_FAILED
+      case PathsCmd::STATUS:            return true;  break; // requires write privilege, modifies Flag::STATUSCMD_FAILED
       case PathsCmd::CHECK:             return false; break; // read only
       case PathsCmd::EDIT_HISTORY:      return false; break; // read only
       case PathsCmd::ARCHIVE:           return true;  break; // requires write privilege
@@ -267,9 +265,9 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
                continue;
             }
             if (!theNode->suite()->begun()) {
-               std::stringstream ss;
-               ss << "Status failed. For " << paths_[i] << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
-               throw std::runtime_error( ss.str() ) ;
+               std::stringstream mss;
+               mss << "Status failed. For " << paths_[i] << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
+               throw std::runtime_error( mss.str() ) ;
             }
             SuiteChanged0 changed(theNode);
             theNode->status();   // this can throw std::runtime_error
@@ -376,8 +374,8 @@ const char*  get_status_desc(){
             "This will allow the output of status command to be shown by the --file command\n"
             "i.e /home/ma/emos/bin/ecfstatus  %USER% %HOST% %ECF_RID% %ECF_JOB% > %ECF_JOB%.stat 2>&1::\n"
             "Usage::\n"
-            "   --status=/s1/f1/t1 /s1/f2/t2\n"
-            "   --file=/s1/f1/t1 stat  # write to standard out the '.stat' file"
+            "   --status=/s1/f1/t1     # ECF_STATUS_CMD should output to %ECF_JOB%.stat\n"
+            "   --file=/s1/f1/t1 stat  # Return contents of %ECF_JOB%.stat file"
             ;
 }
 const char* get_edit_history_desc(){
@@ -405,30 +403,67 @@ const char* resume_desc(){
 }
 const char* archive_desc(){
    return
-         "Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).\n"
-         "Saves the suite/family nodes to disk, and then removes the child nodes from the definition\n"
-         "This saves memory in the server, when dealing with huge definitions that are not needed.\n"
-         "It improves time taken to checkpoint and reduces network bandwidth\n"
-         "If the node is re-queued or begun, the child nodes are automatically restored\n"
-         "Use --restore to reload the archived nodes manually\n"
-         "Care must be taken if you have trigger reference to the archived nodes\n"
-         "The nodes are saved to ECF_HOME/ECF_NAME.check, where '/' has been replace with ':' in ECF_NAME\n"
-         "Usage::\n"
-         "   --archive=/s1           # archive suite s1\n"
-         "   --archive=/s1/f1 /s2    # archive family /s1/f1 and suite /s2\n"
-         "   --archive=force /s1 /s2 # archive suites /s1,/s2 even if they have active tasks\n"
-         ;
+            "Archives suite or family nodes *IF* they have child nodes(otherwise does nothing).\n"
+            "Saves the suite/family nodes to disk, and then removes the child nodes from the definition.\n"
+            "This saves memory in the server, when dealing with huge definitions that are not needed.\n"
+            "It improves time taken to checkpoint and reduces network bandwidth.\n"
+            "If the node is re-queued or begun, the child nodes are automatically restored.\n"
+            "Use --restore to reload the archived nodes manually\n"
+            "Care must be taken if you have trigger reference to the archived nodes\n"
+            "The nodes are saved to ECF_HOME/ECF_NAME.check, where '/' has been replace with ':' in ECF_NAME\n\n"
+            "Nodes like (family and suites) can also to automatically archived by using,\n"
+            "the 'autoarchive' attribute. The attribute is only applied once the node is complete\n\n"
+            "suite autoarchive\n"
+            " family f1\n"
+            "    autoarchive +01:00 # archive one hour after complete\n"
+            "    task t1\n"
+            " endfamily\n"
+            " family f2\n"
+            "     autoarchive 01:00 # archive at 1 am in morning after complete\n"
+            "    task t1\n"
+            " endfamily\n"
+            " family f3\n"
+            "    autoarchive 10     # archive 10 days after complete\n"
+            "    task t1\n"
+            " endfamily\n"
+            " family f4\n"
+            "    autoarchive 0      # archive immediately (upto 60s) after complete\n"
+            "    task t1\n"
+            "  endfamily\n"
+            "endsuite\n"
+            "\n"
+            "Usage::\n"
+            "   --archive=/s1           # archive suite s1\n"
+            "   --archive=/s1/f1 /s2    # archive family /s1/f1 and suite /s2\n"
+            "   --archive=force /s1 /s2 # archive suites /s1,/s2 even if they have active tasks"
+            ;
 }
 const char* restore_desc(){
    return
-         "Restore archived nodes.\n"
+         "Manually restore archived nodes.\n"
          "Restore will fail if:\n"
          "  - Node has not been archived\n"
-         "  - Node has children, i.e as a part of replace\n"
+         "  - Node has children, (since archived nodes have no children)\n"
          "  - If the file ECF_HOME/ECF_NAME.check does not exist\n"
+         "Nodes can be restored manually(as in this command) but also automatically\n\n"
+         "Automatic restore is done using the 'autorestore' attribute.\n"
+         "Once the node containing the 'autorestore' completes, the attribute is applied\n\n"
+         " suite s\n"
+         "   family farchive_now\n"
+         "     autoarchive 0      # archive immediately after complete, may have to wait 60 seconds\n"
+         "     task t1\n"
+         "   endfamily\n"
+         "   family frestore_from_task\n"
+         "     task t1\n"
+         "        edit SLEEP 60\n"
+         "        autorestore ../farchive_now  # call autorestore when t1 completes\n"
+         "   endfamily\n"
+         " endsuite\n\n"
+         "In this example when '/s/frestore_from_task/t1' completes, it will check to see 'farchive_now'\n"
+         "is complete and archived, in which case it will be automatically restored\n"
          "Usage::\n"
          "   --restore=/s1/f1   # restore family /s1/f1\n"
-         "   --restore=/s1 /s2  # restore suites /s1 and /s2\n"
+         "   --restore=/s1 /s2  # restore suites /s1 and /s2"
          ;
 }
 

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,6 +15,7 @@
 #include <QLinearGradient>
 #include <QMap>
 #include <QPen>
+#include <QRegExp>
 #include <QStyledItemDelegate>
 
 #include "FontMetrics.hpp"
@@ -123,6 +124,26 @@ struct AttrDelegateBox : public BaseNodeDelegateBox
      }
 };
 
+class LabelStyle
+{
+public:
+    LabelStyle(const std::string& prefix, bool alwaysEnabled = false);
+    void update();
+
+    bool alwaysEnabled_;
+    bool enabled_;
+    bool enabledBg_;
+    QPen fontPen_;
+    QBrush bgBrush_;
+    QRegExp regex_;
+    VProperty *enabledProp_;
+    VProperty *enabledBgProp_;
+    VProperty *fontProp_;
+    VProperty *bgProp_;
+    VProperty *regexProp_;
+};
+
+
 class NodeViewDelegate : public QStyledItemDelegate, public VPropertyObserver
 {
 public:
@@ -212,6 +233,9 @@ protected:
 
     int holdingTimePixId_;
     int holdingDatePixId_;
+
+    enum LabelType {DefaultLabel, ErrorLabel, WarningLabel, InfoLabel};
+    QMap<LabelType, LabelStyle*> labelStyle_;
 };
 
 #endif

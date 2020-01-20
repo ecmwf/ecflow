@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #91 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -16,11 +16,11 @@
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
 #include "TaskApi.hpp"
-#include "ExprAst.hpp"
-#include "ExprAstVisitor.hpp"
+#include "Expression.hpp"
+#include "QueueAttr.hpp"
 
 #include "Defs.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
 #include "SuiteChanged.hpp"
 #include "Log.hpp"
 #include "Str.hpp"
@@ -79,8 +79,8 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
  	const Zombie& zombie = as->zombie_ctrl().find(path_to_submittable_,process_or_remote_id_,jobs_password_);
  	if (!zombie.empty()) std::cout << "  " << zombie;
  	else {
- 	 	const Zombie& zombie = as->zombie_ctrl().find_by_path_only(path_to_submittable_);
- 	 	if (!zombie.empty()) std::cout << "  find_by_path_only: " << zombie;
+ 	 	const Zombie& zombiep = as->zombie_ctrl().find_by_path_only(path_to_submittable_);
+ 	 	if (!zombiep.empty()) std::cout << "  find_by_path_only: " << zombiep;
  	}
 #endif
 	/// ***************************************************************************
@@ -101,7 +101,7 @@ bool TaskCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& theReply) const
 #endif
 		// Create path zombie, if not already created:
 	   std::string action_taken;
-		(void)as->zombie_ctrl().handle_path_zombie(as,this,action_taken,theReply);
+		static_cast<void>(as->zombie_ctrl().handle_path_zombie(as,this,action_taken,theReply));
 
 		// distinguish output by using *path*
 		std::stringstream ss;
@@ -303,13 +303,21 @@ Submittable* TaskCmd::get_submittable(AbstractServer* as) const
 
 std::ostream& InitCmd::print(std::ostream& os) const
 {
-   return os << Str::CHILD_CMD() << "init " << path_to_node();
+   os << Str::CHILD_CMD() << "init " << path_to_node();
+   if (!var_to_add_.empty()) {
+      os << " --add";
+      for(const auto& var_to_add: var_to_add_) {
+         os << " " << var_to_add.name() << "=" << var_to_add.theValue();
+      }
+   }
+   return os;
 }
 
 bool InitCmd::equals(ClientToServerCmd* rhs) const
 {
 	auto* the_rhs = dynamic_cast<InitCmd*>(rhs);
 	if (!the_rhs) return false;
+   if (var_to_add_ != the_rhs->variables_to_add()) return false;
 	return TaskCmd::equals(rhs);
 }
 
@@ -320,6 +328,10 @@ STC_Cmd_ptr InitCmd::doHandleRequest(AbstractServer* as) const
 	{   // update suite change numbers before job submission. submittable_ setup during authentication
 		SuiteChanged1 changed(submittable_->suite());
 		submittable_->init(process_or_remote_id());    // will set task->set_state(NState::ACTIVE);
+
+      for(const auto& var_to_add: var_to_add_) {
+         submittable_->addVariable(var_to_add); // will update or add variable
+      }
 	}
 
 	// Do job submission in case any triggers dependent on NState::ACTIVE
@@ -332,18 +344,22 @@ const char* InitCmd::desc() {
    return
             "Mark task as started(active). For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables.\n"
-            "  arg = process_or_remote_id. The process id of the job or remote_id\n"
-            "                              Using remote id allows the jobs to be killed\n\n"
+            "  arg1(string)         = process_or_remote_id The process id of the job or remote_id\n"
+            "                         Using remote id allows the jobs to be killed\n"
+            "  arg2(--add)(optional)= add variables as name value pairs\n\n"
             "If this child command is a zombie, then the default action will be to *block*.\n"
             "The default can be overridden by using zombie attributes.\n"
             "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
             "Usage:\n"
-            "  ecflow_client --init=$$"
+            "  ecflow_client --init=$$\n"
+            "  ecflow_client --init=$$ --add name=value name2=value2 # add variables to task"
  	;
 }
 
 void InitCmd::addOption(boost::program_options::options_description& desc) const{
-	desc.add_options()( InitCmd::arg(), po::value< string >(), InitCmd::desc() );
+	desc.add_options()
+	         ( InitCmd::arg(), po::value< string >(), InitCmd::desc() )
+	         ( "add",          po::value< vector<string> >()->multitoken(), "add variables i.e name=value name1=value1" );
 }
 
 void InitCmd::create( 	Cmd_ptr& cmd,
@@ -375,23 +391,47 @@ void InitCmd::create( 	Cmd_ptr& cmd,
 		throw std::runtime_error(ss.str());
 	}
 
+ 	std::vector<Variable> variable_vec;
+ 	if (vm.count("add")) {
+ 	   vector<string> var_args = vm[ "add" ].as< vector<string> >();
+ 	   if (!var_args.empty()) {
+ 	      variable_vec.reserve(var_args.size());
+ 	      for(const auto& v : var_args) {
+ 	         std::vector<std::string> tokens;
+ 	         Str::split(v,tokens,"=");
+ 	         if (tokens.size() != 2) {
+ 	            throw std::runtime_error("Could not parse variable provided to --add; Expected  var1=value1 var2=value2 but found " + v );
+ 	         }
+ 	         variable_vec.emplace_back(tokens[0],tokens[1]);
+ 	      }
+ 	   }
+ 	}
+
 	cmd = std::make_shared<InitCmd>( clientEnv->task_path(),
-	                            clientEnv->jobs_password(),
-	                            process_or_remote_id,
-	                            clientEnv->task_try_no()
-	             );
+	                                 clientEnv->jobs_password(),
+	                                 process_or_remote_id,
+	                                 clientEnv->task_try_no(),
+	                                 variable_vec);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 std::ostream& CompleteCmd::print(std::ostream& os) const
 {
-   return os << Str::CHILD_CMD() << "complete " << path_to_node();
+   os << Str::CHILD_CMD() << "complete " << path_to_node();
+   if (!var_to_del_.empty()) {
+      os << " --remove";
+      for(const auto& var_to_del: var_to_del_) {
+         os << " " << var_to_del;
+      }
+   }
+   return os;
 }
 
 bool CompleteCmd::equals(ClientToServerCmd* rhs) const
 {
 	auto* the_rhs = dynamic_cast<CompleteCmd*>(rhs);
 	if (!the_rhs) return false;
+	if (var_to_del_ != the_rhs->variables_to_delete()) return false;
  	return TaskCmd::equals(rhs);
 }
 
@@ -408,6 +448,10 @@ STC_Cmd_ptr CompleteCmd::doHandleRequest(AbstractServer* as) const
       // update suite change numbers before job submission, submittable_ setup during authentication
 		SuiteChanged1 changed(submittable_->suite());
 		submittable_->complete();          // will set task->set_state(NState::COMPLETE);
+
+		for(const auto& var_to_delete: var_to_del_) {
+		   submittable_->delete_variable_no_error(var_to_delete);
+		}
 	}
 
 	// Do job submission in case any triggers dependent on NState::COMPLETE
@@ -423,18 +467,24 @@ const char* CompleteCmd::desc()
 	         "Hence the context is supplied via environment variables\n\n"
 	         "If this child command is a zombie, then the default action will be to *block*.\n"
 	         "The default can be overridden by using zombie attributes.\n"
-	         "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
+            "Otherwise the blocking period is defined by ECF_TIMEOUT.\n"
+	         "The init command allows variables to be added, and complete command\n"
+	         "allows for them to be removed.\n"
+            "  arg1(--remove)(optional) = a list of variables to removed from this task\n\n"
 	         "Usage:\n"
-	         "  ecflow_client --complete"
+            "  ecflow_client --complete\n"
+            "  ecflow_client --complete --remove name1 name2 # delete variables name1 and name2 on the task"
 	         ;
 }
 
 void CompleteCmd::addOption(boost::program_options::options_description& desc) const {
-	desc.add_options()( CompleteCmd::arg(), CompleteCmd::desc() );
+	desc.add_options()
+	         ( CompleteCmd::arg(), CompleteCmd::desc() )
+	         ( "remove",po::value< vector<string> >()->multitoken(), "remove variables i.e name name2" );
 }
-void CompleteCmd::create( 	Cmd_ptr& cmd,
-							boost::program_options::variables_map& vm,
-							AbstractClientEnv* clientEnv ) const
+void CompleteCmd::create( Cmd_ptr& cmd,
+                          boost::program_options::variables_map& vm,
+                          AbstractClientEnv* clientEnv ) const
 {
 	if (clientEnv->debug())
 		cout << "  CompleteCmd::create " << CompleteCmd::arg()
@@ -450,10 +500,14 @@ void CompleteCmd::create( 	Cmd_ptr& cmd,
 	 	throw std::runtime_error( "CompleteCmd: " + errorMsg );
 	}
 
+	std::vector<std::string> variable_vec;
+	if (vm.count("remove")) variable_vec = vm[ "remove" ].as< vector<string> >();
+
 	cmd = std::make_shared<CompleteCmd>( clientEnv->task_path(),
-	                                clientEnv->jobs_password(),
-	                                clientEnv->process_or_remote_id(),
-	                                clientEnv->task_try_no()) ;
+	                                     clientEnv->jobs_password(),
+	                                     clientEnv->process_or_remote_id(),
+	                                     clientEnv->task_try_no(),
+	                                     variable_vec) ;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -466,7 +520,7 @@ CtsWaitCmd::CtsWaitCmd(const std::string& pathToTask,
  : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), expression_(expression)
 {
    // Parse expression to make sure its valid
-   (void)Expression::parse(expression,"CtsWaitCmd:"); // will throw for errors
+   static_cast<void>(Expression::parse(expression,"CtsWaitCmd:")); // will throw for errors
 }
 
 std::ostream& CtsWaitCmd::print(std::ostream& os) const
@@ -517,7 +571,7 @@ const char* CtsWaitCmd::desc() {
 	return
 	         "Evaluates an expression, and block while the expression is false.\n"
 	         "For use in the '.ecf' file *only*, hence the context is supplied via environment variables\n"
-	         "  arg1 = string(expression)\n"
+	         "  arg1 = string(expression)\n\n"
 	         "Usage:\n"
 	         "  ecflow_client --wait=\"/suite/taskx == complete\""
 	;
@@ -693,14 +747,14 @@ const char* EventCmd::desc() {
             "Change event. For use in the '.ecf' script file *only*\n"
             "Hence the context is supplied via environment variables\n"
             "  arg1(string | int)     = event-name\n\n"
-            "  arg2(string)(optional) = [ set | clear] defalt value is set\n\n"
+            "  arg2(string)(optional) = [ set | clear] default value is set\n\n"
             "If this child command is a zombie, then the default action will be to *fob*,\n"
             "i.e allow the ecflow client command to complete without an error\n"
             "The default can be overridden by using zombie attributes.\n\n"
             "Usage:\n"
             "  ecflow_client --event=ev       # set the event, default since event initial value is clear\n"
             "  ecflow_client --event=ev set   # set the event, explicit\n"
-            "  ecflow_client --event=ev clear # clear the event, uses when event initial value is set\n"
+            "  ecflow_client --event=ev clear # clear the event, use when event initial value is set\n"
             ;
 }
 

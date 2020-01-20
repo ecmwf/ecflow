@@ -1,4 +1,4 @@
-suite suiteName
+suite edit_variable
  
    edit SMSURLCMD '${BROWSER:=firefox} -new-tab %SMSURLBASE%/%SMSURL%'
    
@@ -15,7 +15,7 @@ suite suiteName
 
 endsuite
 
-suite s1
+suite edit_variable_s1
  
    edit SMSURLCMD '${BROWSER:=firefox} -new-tab %SMSURLBASE%/%SMSURL%'; edit VAR  "value !£$%^&*() ~@: ?><,."
    

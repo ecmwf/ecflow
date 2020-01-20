@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #13 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -15,10 +15,13 @@
 // Description :
 //============================================================================
 
+#include <string>
+#include <vector>
+#include <utility>  // for pair
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include "TimeSlot.hpp"
-#include "NState.hpp"
-
+class NState;
 namespace ecf { class Calendar;} // forward declare class
 
 namespace ecf {

@@ -77,9 +77,9 @@
                 }
             },
             "slow" : {
-                "label" : "Slow server write",
-                "tooltip" : "Slow writing of chekpoint file or log errors.",
-                "shortDesc" : "Slow writing of chekpoint file or log errors",
+                "label" : "Slow checkpoint write",
+                "tooltip" : "Slow writing of chekpoint file",
+                "shortDesc" : "Slow writing of chekpoint file",
                 "icon"  : {
                     "default" : "icon_slow.svg"
                 }
@@ -114,6 +114,22 @@
                 "shortDesc" : "Slow job creation",
                 "icon"  : {
                     "default" : "icon_slow_job_creation.svg"
+                }
+            },
+            "no_log" : {
+                "label" : "Log error",
+                "tooltip" : "Error in opening/writing to log",
+                "shortDesc" : "Error in opening /writing to log",
+                "icon"  : {
+                    "default" : "icon_no_log.svg"
+                }
+            },
+            "checkpt_err" : {
+                "label" : "Checkpoint error",
+                "tooltip" : "Error in opening/writing to checkpoint file",
+                "shortDesc" : "Error in opening /writing to checkpoint",
+                "icon"  : {
+                    "default" : "icon_checkpt_err.svg"
                 }
             }
      }

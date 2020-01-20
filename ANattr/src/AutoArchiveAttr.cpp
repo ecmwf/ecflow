@@ -13,14 +13,11 @@
 // Description :
 //============================================================================
 
-#include <sstream>
-
 #include "AutoArchiveAttr.hpp"
 #include "Calendar.hpp"
 #include "Indentor.hpp"
 #include "Log.hpp"
 #include "Serialization.hpp"
-
 
 #ifdef DEBUG
 #include <boost/date_time/posix_time/time_formatters.hpp>

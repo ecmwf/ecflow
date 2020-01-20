@@ -7,7 +7,7 @@ extern /a/b/c/d/e:meter
 
 extern /a/b/c/d/e/f/g/h/j     # this does not exist in second.def
 
-suite suiteName
+suite extern_first
    family familyName
    	task p
    			trigger /a/b/c/d == complete  		  # extern path

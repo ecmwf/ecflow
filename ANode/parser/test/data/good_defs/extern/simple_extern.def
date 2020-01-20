@@ -36,5 +36,5 @@ extern /o/main/00/prod/240/prod_wparam
 extern /limits:mars
 extern /mofc/00/efi/swarm/sync_climate
 
-suite suiteName
+suite extern_simple1
 endsuite

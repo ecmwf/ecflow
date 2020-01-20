@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #7 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -12,11 +12,7 @@
 //
 // Description :
 //============================================================================
-#include <cassert>
-#include <fstream>
-
 #include "ClientToServerRequest.hpp"
-#include "AbstractServer.hpp"
 
 using namespace std;
 
@@ -27,9 +23,7 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const
 	}
 
 	/// means programming error somewhere
- 	std::stringstream ss;
-	ss << "ClientToServerRequest::handleRequest: Can not send a NULL request to the server !";
-  	throw std::runtime_error(ss.str());
+  	throw std::runtime_error("ClientToServerRequest::handleRequest: Can not send a NULL request to the server !");
 }
 
 std::ostream& ClientToServerRequest::print( std::ostream& os ) const {

@@ -1041,3 +1041,37 @@ void CompactView::updateViewport(const QRect rect)
 {
     viewport()->update(rect);
 }
+
+void CompactView::navigateLeft(const QModelIndex& idx)
+{
+    int item = viewIndex(idx);
+    if (item > -1) {
+        if (viewItems_[item].isFirstChild()) {
+            navigatePrev(idx);
+        } else {
+            collapse(idx);
+        }
+    }
+}
+
+void CompactView::navigateRight(const QModelIndex& idx)
+{
+    int item = viewIndex(idx);
+    if (item > -1) {
+        if (viewItems_[item].expanded && viewItems_[item].hasChildren) {
+            navigateNext(idx);
+        } else {
+            expand(idx);
+        }
+    }
+}
+
+void CompactView::navigateUp(const QModelIndex& idx)
+{
+    navigatePrev(idx);
+}
+
+void CompactView::navigateDown(const QModelIndex& idx)
+{
+    navigateNext(idx);
+}

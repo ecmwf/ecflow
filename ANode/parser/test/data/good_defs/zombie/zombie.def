@@ -1,4 +1,4 @@
-suite suiteName
+suite zombie
    zombie ecf:fob:init:100
    zombie ecf_pid:fob:init:100
    zombie ecf_pid_passwd:fob:init:100

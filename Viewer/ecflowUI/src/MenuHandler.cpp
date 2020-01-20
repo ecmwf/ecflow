@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -23,6 +23,7 @@
 #include <QWidgetAction>
 #include <QDebug>
 #include <QObject>
+#include <QShortcut>
 #include <QVBoxLayout>
 
 #include "Str.hpp"
@@ -146,6 +147,8 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 std::string hidden   = ItemDef.get("hidden", "false");
                 std::string multiSelect   = ItemDef.get("multi", "true");
                 std::string statustip  = ItemDef.get("status_tip", "");
+                std::string shortcut  = ItemDef.get("shortcut", "");
+                std::string panelPopupControl = ItemDef.get("panel_control", "");
 
                 //std::cout << "  " << name << " :" << menuName << std::endl;
 
@@ -185,6 +188,8 @@ bool MenuHandler::readMenuConfigFile(const std::string &configFile)
                 item->setHandler(handler);
                 item->setIcon(icon);
                 item->setStatustip(statustip);
+                item->setShortcut(shortcut);
+                item->setPanelPopupControl(panelPopupControl);
 
                 if(!views.empty())
                 {
@@ -378,6 +383,22 @@ MenuItem* MenuHandler::findItem(QAction* ac)
 	return nullptr;
 }
 
+MenuItem* MenuHandler::findItemById(int id)
+{
+    for(auto & menu : menus_)
+    {
+        for(auto & item: menu->itemsFixed())
+        {
+            if(item->id() == id)
+            {
+                return item;
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 MenuItem* MenuHandler::newItem(const std::string &name)
 {
 	return nullptr;
@@ -495,9 +516,22 @@ void MenuHandler::interceptCommandsThatNeedConfirmation(MenuItem *item)
 	}
 }
 
+void MenuHandler::setupShortcut(QObject* receiver, QWidget* w, const std::string& view)
+{
+    for(auto m: menus_) {
+        for (auto item: m->itemsFixed()) {
+            if(QShortcut* sc = item->createShortcut(w, view)) {
+                QObject::connect(sc, SIGNAL(activated()),
+                    receiver, SLOT(slotCommandShortcut()));
+            }
+        }
+    }
+}
+
+
+
+
 // -----------------------------------------------------------------
-
-
 ///////////////////////////////////////////////////////////
 
 // --------------------
@@ -584,8 +618,18 @@ QMenu *Menu::generateMenu(std::vector<VInfo_ptr> nodes, QWidget *parent,QMenu* p
     	if(!itItems->isValidView(view))
     		continue;
 
-        bool visible = true;
+        // Control if some items are shown
+        if(!itItems->panelPopupControl().empty())
+        {
+            if(VProperty* prop=VConfig::instance()->find(itItems->panelPopupControl()))
+                if(!prop->valueAsString().contains(
+                   QString::fromStdString(itItems->command()), Qt::CaseSensitive))
+                    {
+                        continue;
+                    }
+         }
 
+        bool visible = true;
         for (auto & node : nodes)
         {
             //compatible = compatible && (*itItems)->compatibleWithNode(*itNodes);
@@ -747,6 +791,9 @@ void Menu::buildMenuTitle(std::vector<VInfo_ptr> nodes, QMenu* qmenu)
 }
 
 
+
+
+
 // ------------------------
 // MenuItem class functions
 // ------------------------
@@ -793,7 +840,7 @@ void MenuItem::setIcon(const std::string& icon)
 	}
 }
 
-bool MenuItem::shouldAskQuestion(std::vector<VInfo_ptr> &nodes)
+bool MenuItem::shouldAskQuestion(const std::vector<VInfo_ptr> &nodes) const
 {
     bool askQuestion = false;
 
@@ -821,6 +868,11 @@ QAction* MenuItem::createAction(QWidget* parent)
     ac->setText(QString::fromStdString(name_));
 	ac->setIcon(icon_);
 
+    if(!shortcut_.empty())
+    {
+        ac->setShortcut(QKeySequence(QString::fromStdString(shortcut_)));
+    }
+
 	if(!statustip_.empty())
 	{
 		if(statustip_ == "__cmd__")
@@ -833,87 +885,38 @@ QAction* MenuItem::createAction(QWidget* parent)
 
 }
 
+QShortcut* MenuItem::createShortcut(QWidget* parent, const std::string& view)
+{
+    if (!shortcut_.empty() && isValidView(view)) {
+        QShortcut* sc = new QShortcut(QString::fromStdString(shortcut_), parent);
+        sc->setContext(Qt::WidgetShortcut);
+        sc->setProperty("id", id_);
+        return sc;
+    }
+    return nullptr;
+}
 
-// // adds an entry to the list of valid node types for this menu item(*itItems)
-// void MenuItem::addValidType(std::string type)
-// {
-//     static NodeType all[] = {TASK, FAMILY, SUITE, SERVER, ALIAS};
-// 
-//     if     (type == "server")
-//         validNodeTypes_.push_back(SERVER);
-//     else if(type == "suite")
-//         validNodeTypes_.push_back(SUITE);
-//     else if(type == "task")
-//         validNodeTypes_.push_back(TASK);
-//     else if(type == "family")
-//         validNodeTypes_.push_back(FAMILY);
-//     else if(type == "alias")
-//         validNodeTypes_.push_back(ALIAS);
-//     else if(type == "all")
-//         validNodeTypes_.insert(validNodeTypes_.begin(), all, all+5);
-// }
-// 
-// 
-// // adds an entry to the list of valid node types for this menu item
-// void MenuItem::addValidState(std::string state)
-// {
-//     DState::State dstate;
-// 
-//     if (DState::isValid(state))
-//     {
-//         dstate = DState::toState(state);
-//         validNodeStates_.push_back(dstate);
-//     }
-//     else if (state == "all")
-//     {
-//         // add the list of all states
-//         std::vector<DState::State> allDstates = DState::states();
-//         validNodeStates_.insert(validNodeStates_.end(), allDstates.begin(), allDstates.end());
-//     }
-//     else
-//     {
-//         UserMessage::message(UserMessage::ERROR, false, std::string("Bad node state in menu file: " + state));
-//     }
-// }
+bool MenuItem::isValidFor(const std::vector<VInfo_ptr>& nodes) const
+{
+    if(hidden())
+        return false;
 
+    if(nodes.size() > 1 && !multiSelect())
+        return false;
 
-// bool MenuItem::isNodeTypeValidForMenuItem(NodeType type)
-// {
-//     if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), type) == validNodeTypes_.end())
-//         return false;
-//     else
-//         return true;
-// }
-// 
-// 
-// bool MenuItem::compatibleWithNode(VInfo_ptr nodeInfo)
-// {
-//     // check each node type and return false if we don't match
-// 
-//     if(nodeInfo->isServer())
-//         if(std::find(validNodeTypes_.begin(), validNodeTypes_.end(), SERVER) == validNodeTypes_.end())
-//             return false;
-// 
-//     if(nodeInfo->isNode())
-//     {
-//         Node *node = nodeInfo->node()->node();
-// 
-//         if(node->isSuite())
-//             if (!isNodeTypeValidForMenuItem(SUITE))
-//                 return false;
-// 
-//         if(node->isTask())
-//             if (!isNodeTypeValidForMenuItem(TASK))
-//                 return false;
-// 
-//         if(node->isAlias())
-//             if (!isNodeTypeValidForMenuItem(ALIAS))
-//                 return false;
-// 
-//         if(node->isFamily())
-//             if (!isNodeTypeValidForMenuItem(FAMILY))
-//                 return false;
-//     }
-// 
-//     return true;
-// }
+    for (auto & node : nodes)
+    {
+        if (!visibleCondition()->execute(node)) {
+            return false;
+        }
+    }
+
+    for (auto & node : nodes)
+    {
+        if(!enabledCondition()->execute(node)) {
+             return false;
+        }
+    }
+
+    return true;
+}

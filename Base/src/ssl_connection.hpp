@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #26 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -29,14 +29,15 @@
 #include <boost/bind.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "Log.hpp"
-#include "Str.hpp"
-#include "Ecf.hpp"
 #include "Serialization.hpp"
+
+//#define DEBUG_CONNECTION 1
+#ifdef DEBUG_CONNECTION
+#include "Ecf.hpp"
+#endif
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 
-//#define DEBUG_CONNECTION 1
 
 /// The connection class provides serialisation primitives on top of a socket.
 /**

@@ -37,7 +37,7 @@
      <x>0</x>
      <y>0</y>
      <width>852</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <property name="nativeMenuBar">
@@ -67,6 +67,7 @@
     <property name="title">
      <string>&amp;Help</string>
     </property>
+    <addaction name="actionShortcutHelp"/>
     <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menuServer">
@@ -351,6 +352,11 @@
    </property>
    <property name="text">
     <string>Server load (standalone app) ...</string>
+   </property>
+  </action>
+  <action name="actionShortcutHelp">
+   <property name="text">
+    <string>Keyboard shortcuts ...</string>
    </property>
   </action>
  </widget>

@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -22,6 +22,8 @@ class OutputDirProvider;
 class OutputFetchInfo;
 class OutputModel;
 class OutputSortModel;
+class VProperty;
+class QTimer;
 
 class OutputItemWidget : public QWidget, public InfoPanelItem, protected Ui::OutputItemWidget
 {
@@ -56,6 +58,7 @@ protected Q_SLOTS:
     void on_saveFileAsTb__clicked();
     void on_copyPathTb__clicked();
     void on_dirReloadTb__clicked();
+    void on_lineNumberTb__clicked(bool st);
 
 protected:
     void setCurrentInDir(const std::string&,VFile::FetchMode fetchMode);
@@ -81,6 +84,7 @@ protected:
     OutputFetchInfo* fetchInfo_;
     bool dirColumnsAdjusted_{false};
     bool submittedWarning_{false};
+    VProperty* lineNumProp_{nullptr};
 };
 
 #endif

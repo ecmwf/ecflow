@@ -2,7 +2,7 @@ extern /a/b/c/d
 extern /a/b/c/d/e:event        
 extern /a/b/c/d/e:meter        
 
-suite suiteName
+suite trigger_complex
   edit int_var 20
   family familyName
    		task a
@@ -56,7 +56,7 @@ suite suiteName
    		task n
    			trigger ../familyName/heir_familyName/taskName0:myMeter >= 10  	     # relative path
   		task o
-   			trigger /suiteName/familyName/heir_familyName/taskName0:myMeter >= 10  # absolute path
+   			trigger /trigger_complex/familyName/heir_familyName/taskName0:myMeter >= 10  # absolute path
   		task p
    			trigger /a/b/c/d == complete  		                                   # extern path
   		task q

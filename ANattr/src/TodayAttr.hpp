@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #30 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -83,10 +83,9 @@
 //============================================================================
 
 #include "TimeSeries.hpp"
-#include "DayAttr.hpp"  // Used in Why
-#include "DateAttr.hpp" // Used in Why
 
-
+class DateAttr; // Used in Why
+class DayAttr;  // Used in Why
 namespace ecf { class Calendar;} // forward declare class
 
 namespace ecf {
@@ -97,7 +96,7 @@ public:
    explicit TodayAttr(const std::string&);
 	TodayAttr() = default;
 	TodayAttr(int hour, int minute, bool relative = false ) : ts_(hour, minute,relative) {}
- 	TodayAttr(const TimeSlot& t,    bool relative = false ) : ts_(t,relative) {}
+	explicit TodayAttr(const TimeSlot& t,    bool relative = false ) : ts_(t,relative) {}
  	explicit TodayAttr(const TimeSeries& ts) : ts_(ts)  {}
 	TodayAttr(const TimeSlot& start, const TimeSlot& finish, const TimeSlot& incr,bool relative =  false)
 		: ts_(start,finish,incr,relative) {}

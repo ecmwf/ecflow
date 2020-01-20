@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -115,17 +115,7 @@ void PropertyEditor::addRules()
 {
     Q_FOREACH(PropertyLine* line,lineItems_)
     {
-        if(VProperty* ruleProp=line->ruleProperty())
-        {
-            Q_FOREACH(PropertyLine* ll,lineItems_)
-            {
-                if(ll->property() == ruleProp)
-                {
-                    line->addRuleLine(ll);
-                    break;
-                }
-            }
-        }
+        line->initPropertyRule(lineItems_);
     }
 }
 

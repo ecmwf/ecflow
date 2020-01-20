@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -21,7 +21,6 @@
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Indentor.hpp"
-#include "Str.hpp"
 
 using namespace std;
 
@@ -125,14 +124,13 @@ void DefsAnalyserVisitor::analyseExpressions(Node* node,std::set<Node*>& depende
 
 	// Warn about NULL node references in the trigger expressions
 	for(const string& nodePath: astVisitor.dependentNodePaths()) {
-		Indentor in; Indentor::indent(ss_) << "'" << nodePath << "' is not defined in the expression\n";
+		Indentor in2; Indentor::indent(ss_) << "'" << nodePath << "' is not defined in the expression\n";
 	}
 
 	// **** NOTE: Currently for COMPLETE expression will only follow trigger expressions
 	for(Node* triggerNode: astVisitor.dependentNodes()) {
 
-
-		Indentor in; Indentor::indent(ss_) << "EXPRESSION NODE " << triggerNode->debugNodePath();
+		Indentor in2; Indentor::indent(ss_) << "EXPRESSION NODE " << triggerNode->debugNodePath();
 		ss_ << " state(" << NState::toString(triggerNode->state()) << ")";
 		if (triggerNode->triggerAst()) ss_ << " trigger(evaluation = " << triggerNode->evaluateTrigger() << "))";
 		if (analysedNodes_.find(triggerNode) != analysedNodes_.end()) ss_ << " analysed ";
@@ -152,9 +150,9 @@ void DefsAnalyserVisitor::analyseExpressions(Node* node,std::set<Node*>& depende
 //				}
 
 				if (visitor.dependentNodes().find(node) !=  visitor.dependentNodes().end()) {
-					Indentor in;  Indentor::indent(ss_) << "Deadlock detected between:\n";
-					Indentor in2; Indentor::indent(ss_) << node->debugNodePath() << "\n";
-	 			                  Indentor::indent(ss_) << triggerNode->debugNodePath() << "\n";
+					Indentor in3; Indentor::indent(ss_) << "Deadlock detected between:\n";
+					Indentor in4; Indentor::indent(ss_) << node->debugNodePath() << "\n";
+	 			                 Indentor::indent(ss_) << triggerNode->debugNodePath() << "\n";
 				}
 			}
 	 		continue;

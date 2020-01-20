@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #128 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,24 +13,18 @@
 // Description :
 //============================================================================
 
-#include <cassert>
 #include <sstream>
 #include <boost/lexical_cast.hpp>
 
 #include "Suite.hpp"
-#include "Defs.hpp"
 #include "PrintStyle.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "DefsDelta.hpp"
 #include "Memento.hpp"
 
-#include "Stl.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
 #include "Indentor.hpp"
-#include "ExprAst.hpp"
-#include "Log.hpp"
-#include "CalendarUpdateParams.hpp"
 #include "SuiteChanged.hpp"
 #include "JobsParam.hpp"
 #include "Serialization.hpp"
@@ -451,11 +445,11 @@ void Suite::changeClockDate(const std::string& theDate)
    // This will update calendar by repeat days.
    // Hence take this into account by decrementing by number of days
    if ( clockAttr_.get() && clockAttr_->hybrid() && repeat().is_repeat_day()) {
-      boost::gregorian::date theDate( year, month, dayy );
-      theDate -= date_duration(repeat().step());
-      dayy = theDate.day();
-      month = theDate.month();
-      year = theDate.year();
+      boost::gregorian::date the_date( year, month, dayy );
+      the_date -= date_duration(repeat().step());
+      dayy = the_date.day();
+      month = the_date.month();
+      year = the_date.year();
    }
 
 

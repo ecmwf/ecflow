@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #15 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,7 +17,8 @@
 
 #include <vector>
 #include <string>
-#include <cereal/access.hpp>
+#include <array>
+namespace cereal { class access; }
 
 namespace  ecf {
 
@@ -58,7 +59,7 @@ public:
       MESSAGE       =  8,  // Node
       BYRULE        =  9,  // Node*, set if node is set to complete by complete trigger expression
       QUEUELIMIT    = 10,  // Node                                   ( NOT USED currently)
-      WAIT          = 11,  // task*  Set/cleared but never queried ? ( NOT USED currently )
+      WAIT          = 11,  // task*  set when waiting for trigger expression in client command
       LOCKED        = 12,  // Server                                 ( NOT USED currently)
       ZOMBIE        = 13,  // task*  Set/cleared but never queried by GUI
       NO_REQUE_IF_SINGLE_TIME_DEP = 14,  //
@@ -68,7 +69,10 @@ public:
       ECF_SIGTERM   = 18,  // Record on defs that server received SIGTERM signal, main used in test
       NOT_SET       = 19,
       LOG_ERROR     = 20,  // Error in opening or writing to the log file
-      CHECKPT_ERROR = 21   // Error in saving checkpoint file
+      CHECKPT_ERROR = 21,  // Error in saving checkpoint file
+      KILLCMD_FAILED= 22,  // task*
+      STATUSCMD_FAILED= 23, // task*
+      STATUS          = 24 // task*
    };
 
    bool operator==(const Flag& rhs) const { return flag_ == rhs.flag_; }
@@ -98,7 +102,7 @@ public:
 
    /// returns the list of all flag types
    static std::vector<Flag::Type> list();
-   static constexpr std::array<Flag::Type,21> array();
+   static constexpr std::array<Flag::Type,24> array();
 
    /// Converts from string to flag types.
    static Flag::Type string_to_flag_type(const std::string& s);

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #26 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -14,9 +14,10 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include "Node.hpp"
 #include "Limit.hpp"
-#include "ExprAst.hpp"
-#include "Stl.hpp"
 #include "Ecf.hpp"
+#include "LateAttr.hpp"
+#include "MiscAttrs.hpp"
+#include "Expression.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -204,6 +205,29 @@ void Node::deleteVariable( const std::string& name)
 		}
 	}
 	throw std::runtime_error("Node::deleteVariable: Can not find 'user' variable of name " + name);
+}
+
+void Node::delete_variable_no_error( const std::string& name)
+{
+   if (name.empty()) {
+#ifdef DEBUG_STATE_CHANGE_NO
+      std::cout << "Node::delete_variable_no_error\n";
+#endif
+      return;
+   }
+
+   size_t theSize = vars_.size();
+   for(size_t i = 0; i < theSize; i++) {
+      if (vars_[i].name() == name) {
+         vars_.erase( vars_.begin() + i );
+         state_change_no_ = Ecf::incr_state_change_no();
+
+#ifdef DEBUG_STATE_CHANGE_NO
+         std::cout << "Node::delete_variable_no_error\n";
+#endif
+         return;
+      }
+   }
 }
 
 void Node::deleteEvent(const std::string& name)

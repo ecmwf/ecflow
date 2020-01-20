@@ -43,7 +43,7 @@
         <widget class="MessageLabel" name="messageLabel_" native="true"/>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0,0,0,0,0,0,0">
+        <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
          <property name="spacing">
           <number>0</number>
          </property>
@@ -185,6 +185,26 @@
            </property>
            <property name="shortcut">
             <string>Ctrl+L</string>
+           </property>
+           <property name="autoRaise">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="lineNumberTb_">
+           <property name="toolTip">
+            <string>Show line number</string>
+           </property>
+           <property name="text">
+            <string>...</string>
+           </property>
+           <property name="icon">
+            <iconset resource="viewer.qrc">
+             <normaloff>:/viewer/line_num.svg</normaloff>:/viewer/line_num.svg</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
            <property name="autoRaise">
             <bool>true</bool>

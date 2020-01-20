@@ -1,5 +1,5 @@
-suite suiteName
-	clock real 01.01.2006 +02:00
+suite clock5
+ clock real 01.01.2006 +02:00
 endsuite
 
-suite s1;clock real 01.01.2006 +02:00;endsuite
+suite clock5_s1;clock real 01.01.2006 +02:00;endsuite

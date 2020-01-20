@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -44,6 +44,7 @@
 #include "ServerListSyncWidget.hpp"
 #include "SessionHandler.hpp"
 #include "SaveSessionAsDialog.hpp"
+#include "ShortcutHelpDialog.hpp"
 #include "CommandOutputDialog.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
@@ -344,6 +345,12 @@ void MainWindow::on_actionAbout_triggered()
     d.exec();
 }
 
+void MainWindow::on_actionShortcutHelp_triggered()
+{
+    ShortcutHelpDialog d;
+    d.exec();
+}
+
 void MainWindow::on_actionSaveSessionAs_triggered()
 {
     SaveSessionAsDialog d;
@@ -372,7 +379,11 @@ void MainWindow::slotSelectionChanged(VInfo_ptr info)
 
     //Get the set of visible info panel tabs for the selection
 	std::vector<InfoPanelDef*> ids;
-	InfoPanelHandler::instance()->visible(selection_,ids);
+    if(info && info->isAttribute()) {
+        InfoPanelHandler::instance()->visible(VInfo::createParent(info), ids);
+    } else {
+        InfoPanelHandler::instance()->visible(selection_,ids);
+    }
 
     //Set status of the info panel actions in the toolbar accordingly
 	Q_FOREACH(QAction* ac,infoPanelActions_)

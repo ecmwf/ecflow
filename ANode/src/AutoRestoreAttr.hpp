@@ -17,7 +17,7 @@
 
 #include <vector>
 #include <string>
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 
 class Node;
 
@@ -27,7 +27,7 @@ namespace ecf {
 class AutoRestoreAttr  {
 public:
    AutoRestoreAttr(const AutoRestoreAttr& rhs) : node_(nullptr),nodes_to_restore_(rhs.nodes_to_restore_)  {}
-   AutoRestoreAttr(const std::vector<std::string>& nodes_to_restore) : node_(nullptr),nodes_to_restore_(nodes_to_restore) {}
+   explicit AutoRestoreAttr(const std::vector<std::string>& nodes_to_restore) : node_(nullptr),nodes_to_restore_(nodes_to_restore) {}
    AutoRestoreAttr() = default;
 
    // needed by node copy constructor and persistence

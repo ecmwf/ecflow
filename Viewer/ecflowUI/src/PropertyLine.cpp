@@ -52,7 +52,77 @@ QString FontSizeSpin::textFromValue(int value) const
 	return QString();
 }
 
+//=========================================================================
+//
+// Rules
+//
+//=========================================================================
 
+PropertyValueRule *PropertyValueRule::make(VProperty* parent, QString expr, QList<PropertyLine*> lines)
+{
+    QStringList lst = expr.split('=');
+    if(parent && lst.count() == 2) {
+        QString key=lst[0].simplified();
+        QString val=lst[1].simplified();
+        if(!key.isEmpty() && parent) {
+            if(VProperty* rp=parent->findChild(key)) {
+                Q_FOREACH(PropertyLine *line, lines) {
+                    if(line->property() == rp) {
+                        return new PropertyValueRule(line, val);
+                    }
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
+bool PropertyValueRule::execute() const
+{
+    Q_ASSERT(propLine_);
+    Q_ASSERT(propLine_->property());
+    return propLine_->property()->variantToString(propLine_->currentValue()) == val_;
+}
+
+QList<PropertyLine*> PropertyValueRule::propertyLines() const
+{
+    Q_ASSERT(propLine_);
+    QList<PropertyLine*> lines;
+    lines << propLine_;
+    return lines;
+}
+
+bool PropertyOrRule::execute() const
+{
+    Q_ASSERT(left_);
+    Q_ASSERT(right_);
+    return left_->execute() || right_->execute();
+}
+
+QList<PropertyLine*> PropertyOrRule::propertyLines() const
+{
+    Q_ASSERT(left_);
+    Q_ASSERT(right_);
+    QList<PropertyLine*> lines;
+    lines << left_->propertyLines()[0] << right_->propertyLines()[0];
+    return lines;
+}
+
+bool PropertyAndRule::execute() const
+{
+    Q_ASSERT(left_);
+    Q_ASSERT(right_);
+    return left_->execute() && right_->execute();
+}
+
+QList<PropertyLine*> PropertyAndRule::propertyLines() const
+{
+    Q_ASSERT(left_);
+    Q_ASSERT(right_);
+    QList<PropertyLine*> lines;
+    lines << left_->propertyLines()[0] << right_->propertyLines()[0];
+    return lines;
+}
 
 //=========================================================================
 //
@@ -102,7 +172,8 @@ PropertyLine::PropertyLine(VProperty* guiProp,bool addLabel,QWidget * parent) :
 	masterTb_(nullptr),
 	enabled_(true),
     doNotEmitChange_(false),
-    ruleLine_(nullptr)
+    rule_(nullptr)
+    //ruleLine_(nullptr)
 {
 	prop_=guiProp_->link();
 	assert(prop_);
@@ -272,43 +343,50 @@ void PropertyLine::addHelper(PropertyLine* line)
 
 //A simple dependency on other properties' values
 
-VProperty* PropertyLine::ruleProperty()
+void PropertyLine::initPropertyRule(QList<PropertyLine*> lines)
 {
-    if(!prop_->master())
-    {
-        QStringList disabledFor=prop_->param("disabledRule").split("=");
-        if(disabledFor.count() == 2)
-        {
-            QString key=disabledFor[0].simplified();
-            QString val=disabledFor[1].simplified();
-            if(key.isEmpty() == false && prop_->parent())
-            {
-                if(VProperty* rp=prop_->parent()->findChild(key))
-                {
-                    ruleValue_=val;
-                    return rp;
+    if(!prop_->master() && !prop_->param("disabledRule").isEmpty()) {
+        QStringList lst=prop_->param("disabledRule").split("/");
+        if(lst.count() == 1) {
+            rule_ = PropertyValueRule::make(prop_->parent(), lst[0], lines);
+        } else if(lst.count() == 3) {
+            if (lst[1].simplified() == "or") {
+                PropertyValueRule* left=PropertyValueRule::make(prop_->parent(), lst[0], lines);
+                PropertyValueRule* right=PropertyValueRule::make(prop_->parent(), lst[2], lines);
+                if (left && right) {
+                    if (lst[1].simplified() == "or") {
+                        rule_ = new PropertyOrRule(left, right);
+                    } else if (lst[2].simplified() == "and") {
+                        rule_ = new PropertyAndRule(left, right);
+                    }
                 }
             }
         }
     }
-    return nullptr;
+    if(rule_ ) {
+        Q_FOREACH(PropertyLine* line, rule_->propertyLines()) {
+            addRuleLine(line);
+        }
+    }
 }
 
 void PropertyLine::addRuleLine(PropertyLine *r)
 {
-    ruleLine_=r;
-    Q_ASSERT(ruleLine_);
-    connect(ruleLine_,SIGNAL(changed()),
+    Q_ASSERT(r);
+    if(!ruleLines_.contains(r)) {
+        ruleLines_ << r;
+        connect(r,SIGNAL(changed()),
             this,SLOT(slotRule()));
 
-    //init
-    slotRule();
+        //init
+        slotRule();
+    }
 }
 
 void PropertyLine::slotRule()
 {
-    Q_ASSERT(ruleLine_);
-    slotEnabled(ruleLine_->currentValue().toString() != ruleValue_);
+    Q_ASSERT(rule_);
+    slotEnabled(rule_->execute() == false);
 }
 
 

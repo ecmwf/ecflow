@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #37 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -24,7 +24,7 @@
 using namespace ecf;
 using namespace std;
 
-int run_server(boost::asio::io_service& io_service, ServerEnvironment& server_environment)
+int run_server(boost::asio::io_service& io_service, const ServerEnvironment& server_environment)
 {
     for(;;) {
        try {

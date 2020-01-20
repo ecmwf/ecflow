@@ -3,7 +3,7 @@
 # Author      : Avi
 # Revision    : $Revision: #10 $
 #
-# Copyright 2009-2019 ECMWF.
+# Copyright 2009-2020 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 # In applying this licence, ECMWF does not waive the privileges and immunities
@@ -29,8 +29,11 @@ if __name__ == "__main__":
                      ecflow.FlagType.task_aborted,
                      ecflow.FlagType.edit_failed,
                      ecflow.FlagType.jobcmd_failed,
+                     ecflow.FlagType.killcmd_failed,
+                     ecflow.FlagType.statuscmd_failed,
                      ecflow.FlagType.no_script,
                      ecflow.FlagType.killed,
+                     ecflow.FlagType.status,
                      ecflow.FlagType.late,
                      ecflow.FlagType.message,
                      ecflow.FlagType.byrule,
@@ -52,7 +55,7 @@ if __name__ == "__main__":
     for flg in my_flag_list: print("flag ",flag.type_to_string(flg))
 
     assert len(flag_list) == len(my_flag_list), "expected flag list have changed"
-    expected_flags = "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,no_script,killed,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque,archived,restored,threshold,sigterm,log_error,checkpt_error";
+    expected_flags = "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,killcmd_failed,statuscmd_failed,no_script,killed,status,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque,archived,restored,threshold,sigterm,log_error,checkpt_error";
 
     #Set *ALL* the flags
     for flg in flag_list:

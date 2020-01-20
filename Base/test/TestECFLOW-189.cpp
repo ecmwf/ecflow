@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #23 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,12 +15,10 @@
 #include <boost/test/unit_test.hpp>
 
 #include "ClientToServerCmd.hpp"
-#include "ServerToClientCmd.hpp"
-#include "MockServer.hpp"
 #include "TestHelper.hpp"
 #include "System.hpp"
-#include "PrintStyle.hpp"
 #include "Defs.hpp"
+#include "Suite.hpp"
 #include "Family.hpp"
 
 using namespace std;
@@ -59,8 +57,6 @@ BOOST_AUTO_TEST_CASE( test_ECFLOW_189 )
    cout << "Base:: ...test_ECFLOW_189\n";
    defs_ptr the_defs = create_defs();
    the_defs->beginAll();
-   node_ptr s1 = the_defs->findAbsNode("/s1");
-   node_ptr f1 = the_defs->findAbsNode("/s1/f1");
    node_ptr t1 = the_defs->findAbsNode("/s1/f1/t1");
    node_ptr t2 = the_defs->findAbsNode("/s1/f1/t2");
 

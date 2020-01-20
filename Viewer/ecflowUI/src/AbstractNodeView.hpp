@@ -127,12 +127,22 @@ protected:
     void removeAllFromExpanded(const QModelIndex &index);
     void totalNumOfChildren(const QModelIndex& idx,int& num) const;
     void totalNumOfExpandedChildren(const QModelIndex& idx,int& num) const;
-
+    void toggleExpand(const QModelIndex& idx);
     inline bool isIndexExpanded(const QModelIndex &idx) const
     {
         //We first check if the idx is a QPersistentModelIndex, because creating QPersistentModelIndex is slow
         return expandedIndexes.contains(idx);
     }
+
+    //navigation
+    void navigateNext(const QModelIndex& idx);
+    void navigatePrev(const QModelIndex& idx);
+    virtual void navigateUp(const QModelIndex& idx)=0;
+    virtual void navigateDown(const QModelIndex& idx)=0;
+    virtual void navigateLeft(const QModelIndex& idx)=0;
+    virtual void navigateRight(const QModelIndex& idx)=0;
+    void navigateHome(const QModelIndex& idx);
+    void navigateEnd(const QModelIndex& idx);
 
     //selection
     void setSelection(const QRect &rect, QItemSelectionModel::SelectionFlags command, bool shiftKeyPressed);

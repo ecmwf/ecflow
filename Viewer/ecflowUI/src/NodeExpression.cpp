@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -129,7 +129,8 @@ bool NodeExpressionParser::isNodeFlag(const std::string &str) const
     if (str == "is_late" || str == "has_message" ||
         str == "is_rerun" || str == "is_waiting" || str == "is_zombie" ||
         str == "is_archived" || str == "is_restored" ||
-        str ==  "is_ecfcmd_failed" || str == "is_killed")
+        str ==  "is_ecfcmd_failed" || str == "is_killed" || str == "is_killcmd_failed" ||
+        str == "is_statuscmd_failed")
         return true;
 
     return false;
@@ -680,7 +681,7 @@ bool StateNodeCondition::execute(VItem* item)
         assert(s);
         return (s->serverStateName() == stateName_);
     }
-    else
+    else if(item->isNode())
     {
         auto* n=static_cast<VNode*>(item);
         assert(n);
@@ -934,7 +935,11 @@ bool NodeFlagCondition::execute(VItem* item)
         else if(nodeFlagName_ == "is_killed")
             return vnode->isFlagSet(ecf::Flag::KILLED);
 
+        else if(nodeFlagName_ == "is_killcmd_failed")
+            return vnode->isFlagSet(ecf::Flag::KILLCMD_FAILED);
 
+        else if(nodeFlagName_ == "is_statuscmd_failed")
+            return vnode->isFlagSet(ecf::Flag::STATUSCMD_FAILED);
 	}
 
 	return false;

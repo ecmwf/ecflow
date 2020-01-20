@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #57 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -14,8 +14,6 @@
 //============================================================================
 
 #include <iostream>
-#include <vector>
-
 
 #include "ExprAst.hpp"
 #include "Indentor.hpp"
@@ -93,7 +91,7 @@ std::ostream& AstTop::print(std::ostream& os) const
 	Indentor in;
 	Indentor::indent(os) << "# Trigger Evaluation Tree\n";
  	if (root_) {
-		Indentor in;
+		Indentor in2;
 		return root_->print(os);
 	}
 	return os;
@@ -1745,6 +1743,17 @@ VariableHelper::VariableHelper(const AstVariable* astVariable, std::string& erro
  	if (theReferenceNode_->findExprVariable( astVariable_->name() ) ) {
 		return;
 	}
+
+ 	// Check externs if possible
+   Defs* defs = theReferenceNode_->defs();
+   if (defs) {
+      if (defs->find_extern(astVariable_->nodePath(),astVariable_->name())) {
+         return;
+      }
+      if (defs->find_extern(theReferenceNode_->absNodePath(),astVariable_->name())) {
+         return;
+      }
+   }
 
 	std::stringstream ss;
 	ss << "From expression Variable " << astVariable_->nodePath() << Str::COLON() << astVariable_->name() ;

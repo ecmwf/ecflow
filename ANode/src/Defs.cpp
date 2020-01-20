@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #270 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,19 +13,16 @@
 // Description :
 //============================================================================
 #include <cassert>
-#include <sstream>
-#include <ostream>
+#include <limits>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
 #include "Task.hpp"
 #include "Log.hpp"
 #include "NodeTreeVisitor.hpp"
 #include "Str.hpp"
 #include "Extract.hpp"
 #include "NodePath.hpp"
-#include "Stl.hpp"
 #include "Ecf.hpp"
 #include "NodeState.hpp"
 #include "JobCreationCtrl.hpp"
@@ -41,6 +38,7 @@
 #include "Serialization.hpp"
 #include "Memento.hpp"
 #include "CalendarUpdateParams.hpp"
+#include "NodeStats.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -444,7 +442,7 @@ suite_ptr Defs::removeSuite(suite_ptr s)
 
  	// Something serious has gone wrong. Can not find the suite
  	cout << "Defs::removeSuite: assert failure:  suite '" << s->name() << "' suiteVec_.size() = " << suiteVec_.size() << "\n";
-	for(unsigned i = 0; i < suiteVec_.size(); ++i) { cout << i << " " << suiteVec_[i]->name() << "\n";}
+	for(unsigned si = 0; si < suiteVec_.size(); ++si) { cout << si << " " << suiteVec_[si]->name() << "\n";}
  	LOG_ASSERT(false,"Defs::removeSuite the suite not found");
 	return suite_ptr();
 }
@@ -499,16 +497,20 @@ void Defs::add_extern(const std::string& ex )
       throw std::runtime_error("Defs::add_extern: Can not add empty extern");
    }
    externs_.insert(ex);
+   //auto result = externs_.insert(ex);
+   //cout << "Defs::add_extern " << ex << " result " << result.second << "\n";
 }
 
 void Defs::auto_add_externs(bool remove_existing_externs_first)
 {
+   //cout << "\nDefs::auto_add_externs START EXTERNS size: " << externs_.size() << " ==================================================== \n";
 	if (remove_existing_externs_first) {
 		externs_.clear();
 	}
 	/// Automatically add externs
 	ResolveExternsVisitor visitor(this);
 	acceptVisitTraversor(visitor);
+	//cout << "Defs::auto_add_externs END EXTERNS size : " << externs_.size() << " ==================================================== \n";
 }
 
 void Defs::beginSuite(const suite_ptr& suite)

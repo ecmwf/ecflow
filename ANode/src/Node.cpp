@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #305 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,8 +13,6 @@
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <cassert>
-#include <deque>
-#include <ostream>
 
 #include "Defs.hpp"
 #include "Suite.hpp"
@@ -22,19 +20,18 @@
 #include "AutoRestoreAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoArchiveAttr.hpp"
+#include "MiscAttrs.hpp"
+#include "LateAttr.hpp"
 #include "Limit.hpp"
 
 #include "Extract.hpp"
-
-#include "NodeState.hpp"
-#include "NodePath.hpp"
-#include "Stl.hpp"
+#include "NodeStats.hpp"
 #include "Str.hpp"
 #include "Indentor.hpp"
 #include "ExprAst.hpp"
+#include "Expression.hpp"
 #include "Log.hpp"
 #include "PrintStyle.hpp"
-#include "JobsParam.hpp"
 #include "ExprAstVisitor.hpp"
 #include "Ecf.hpp"
 #include "SuiteChanged.hpp"
@@ -820,6 +817,14 @@ void Node::handleStateChange()
 {
    if (state() == NState::COMPLETE) {
       if ( auto_restore_ ) auto_restore_->do_autorestore();
+
+      Node* the_parent = parent();
+      while (the_parent) {
+         if (the_parent->state() == NState::COMPLETE && the_parent->get_autorestore()) {
+            the_parent->get_autorestore()->do_autorestore();
+         }
+         the_parent = the_parent->parent();
+      }
    }
 }
 
@@ -1550,7 +1555,7 @@ void Node::print(std::string& os) const
             if (!defs()) {
                // Full defs is required for extern checking, and finding absolute node paths
                // Hence print will with no defs can give in-accurate information
-               Indentor in;
+               Indentor in2;
                Indentor::indent(os); os += "# Warning: Full/correct AST evaluation requires the definition\n";
             }
             std::stringstream ss; completeAst()->print(ss);
@@ -1565,7 +1570,7 @@ void Node::print(std::string& os) const
          if (t_expr_->isFree()) { Indentor::indent(os); os += "# (free)\n"; }
          if ( triggerAst() ) {
             if (!defs()) {
-               Indentor in;
+               Indentor in2;
                Indentor::indent(os); os += "# Warning: Full/correct AST evaluation requires the definition\n";
             }
             std::stringstream ss;  triggerAst()->print(ss);

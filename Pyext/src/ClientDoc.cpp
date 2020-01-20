@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #89 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -948,15 +948,17 @@ const char* ClientDoc::plug(){
 
 const char* ClientDoc::query(){
    return
-            "Query the status of event, meter, state, variable or trigger expression without blocking\n\n"
-            " - state    return [unknown | complete | queued |             aborted | submitted | active] to standard out\n"
-            " - dstate   return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out\n"
-            " - event    return 'set' | 'clear' to standard out\n"
-            " - meter    return value of the meter to standard out\n"
-            " - variable return value to standard out\n"
-            " - trigger  returns 'true' if the expression is true, otherwise 'false'\n::\n\n"
+            "Query the status of event, meter, state, variable, limit, limit_max or trigger expression without blocking\n\n"
+            " - state     return [unknown | complete | queued |             aborted | submitted | active] to standard out\n"
+            " - dstate    return [unknown | complete | queued | suspended | aborted | submitted | active] to standard out\n"
+            " - event     return 'set' | 'clear' to standard out\n"
+            " - meter     return value of the meter to standard out\n"
+            " - limit     return value of the limit to standard out\n"
+            " - limit_max return max value of the limit to standard out\n"
+            " - variable  return value to standard out\n"
+            " - trigger   returns 'true' if the expression is true, otherwise 'false'\n::\n\n"
             "  string query(\n"
-            "     string query_type        # [ event | meter | variable | trigger ]\n"
+            "     string query_type        # [ event | meter | variable | trigger | limit | limit_max ]\n"
             "     string path_to_attribute # path to the attribute\n"
             "     string attribute         # name of the attribute or trigger expression\n"
             "  )\n\n"
@@ -964,6 +966,7 @@ const char* ClientDoc::query(){
             "Exceptions can be raised if the path to the attribute does not exist and because:\n\n"
             "- No event of the given name exists on the specified node\n"
             "- No meter of the given name exists on the specified node\n"
+            "- No limit of the given name exists on the specified node\n"
             "- No variable of the given name (repeat or generated variable) exists on the\n"
             "  specified node or any of its parent\n"
             "- trigger expression does not parse, or if references to node/attributes are not defined\n"
@@ -972,6 +975,8 @@ const char* ClientDoc::query(){
             "       ci = Client()    # use default host(ECF_HOST) & port(ECF_PORT)\n"
             "       res = ci.query('event','/path/to/node','event_name') # returns 'SET' | 'CLEAR'\n"
             "       res = ci.query('meter','/path/to/node','meter_name') # returns meter value as a string\n"
+            "       res = ci.query('limit','/path/to/node','limit_name') # returns limit value as a string\n"
+            "       res = ci.query('limit_max','/path/to/node','limit_name') # returns max limit value as a string\n"
             "       res = ci.query('variable','/path/to/node,'var')      # returns variable value as a string\n"
             "       res = ci.query('trigger','/path/to/node','/joe90 == complete') # return 'true' | 'false' as a string\n"
             "       res = ci.query('state','/path/to/node') # return node state as a string\n"
@@ -992,8 +997,8 @@ const char* ClientDoc::alter(){
             "         delete : [ variable,time,today,date,day,label,cron,event,meter,trigger,complete,repeat,limit,inlimit,limit_path,zombie,late]\n"
             "         change : [ variable,clock-type,clock-gain,event,meter,label,trigger,complete,repeat,limit-max,limit-value,late]\n"
             "         set_flag and clear_flag:\n"
-            "                  [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | no_script | killed |\n"
-            "                    late | message | complete | queue_limit | task_waiting | locked | zombie ]\n"
+            "                  [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed | statuscmd_failed | killcmd_failed |\n"
+            "                    no_script | killed | status | late | message | complete | queue_limit | task_waiting | locked | zombie ]\n"
             "      string name               : used to locate the attribute, when multiple attributes of the same type,\n"
             "                                  optional for some.i.e. when changing, attributes like variable,meter,event,label,limits\n"
             "      string value              : Only used when 'changing' a attribute. provides a new value\n"
@@ -1559,3 +1564,18 @@ const char* ClientDoc::set_child_timeout()
             "This can be overridden for the python child api"
             ;
 }
+
+const char* ClientDoc::set_child_init_add_vars()
+{
+   return   "Set the list of variables to be added when a task becomes active\n"
+            "Needs a dictionary of name/value pairs, or a list of ecflow Variables"
+            ;
+}
+
+const char* ClientDoc::set_child_complete_del_vars()
+{
+   return   "Set the list of variables to be deleted when a task becomes complete\n"
+            "Needs a list of strings, representing the variable names."
+            ;
+}
+

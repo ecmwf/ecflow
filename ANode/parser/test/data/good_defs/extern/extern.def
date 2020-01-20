@@ -33,20 +33,20 @@ extern /o/main/00/prod/240/prod_wparam
 extern /limits:mars
 extern /mofc/00/efi/swarm/sync_climate
 
-suite suiteName
+suite extern
 	limit sg1  10
 	limit mars 10
 endsuite
 
-suite obs
+suite extern_obs
     family limits
     	limit hpcd 20
     endfamily
     
     family anon
     	task t1
-    		inlimit /suiteName:sg1
+    		inlimit /extern:sg1
    		task t2
-   			inlimit /obs/limits:hpcd         
+   			inlimit /extern_obs/limits:hpcd         
     endfamily
 endsuite

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -11,11 +11,9 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <iostream>
-#include <fstream>
-#include <cstdlib>
+#include <cstdlib> // for getenv
 
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
 
 #include "Defs.hpp"
@@ -24,13 +22,12 @@
 #include "Task.hpp"
 #include "EcfFile.hpp"
 #include "JobsParam.hpp"
-#include "Jobs.hpp"
 #include "System.hpp"
 #include "File.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
-#include "PrintStyle.hpp"
 #include "Pid.hpp"
+//#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;

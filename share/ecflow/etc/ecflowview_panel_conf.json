@@ -29,6 +29,13 @@
                  "default": "font(Monospace,)"
              }
         },
+        "job_status" : {
+
+             "font" : {
+                 "label" : "Job status tab",
+                 "default": "font(Monospace,)"
+             }
+        },
         "script" : {
                     
              "font" : {
@@ -79,6 +86,10 @@
                     "values_label" : "Top/Bottom",
                     "default": "bottom"
                 }
+            },
+             "showLineNumber": {
+                "label": "Show line number",
+                "default": "false"
             }
         },
         "why" : {

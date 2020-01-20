@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #85 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,22 +15,21 @@
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <boost/python/raw_function.hpp>
-
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #include "Defs.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
+#include "Node.hpp"
+#include "NodeContainer.hpp"
 #include "Limit.hpp"
+#include "LateAttr.hpp"
 #include "AutoCancelAttr.hpp"
 #include "AutoArchiveAttr.hpp"
 #include "AutoRestoreAttr.hpp"
-#include "JobCreationCtrl.hpp"
-#include "Str.hpp"
+#include "MiscAttrs.hpp"
+#include "Expression.hpp"
 #include "ClientInvoker.hpp"
 
 #include "NodeUtil.hpp"
-#include "Edit.hpp"
 #include "DefsDoc.hpp"
 #include "NodeAttrDoc.hpp"
 #include "BoostPythonUtil.hpp"

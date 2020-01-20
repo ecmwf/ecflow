@@ -1,0 +1,46 @@
+
+||Server refresh||
+|F5|Refresh current server|
+|Shift+F5|Refresh all servers in tab|
+
+||Tree navigation||
+|Left|Collapse branch or go to parent in compact mode|
+|Right|Expand branch or go to first child in compact mode (if already expanded)|
+|Up|Go to previous node|
+|Down|Go to next node|
+|+ (=plus)|Expand branch|
+|- (=minus)|Collapse branch|
+|. (=period) or * (=asterisk)|Expand all children|
+|, (=comma)|Collapse all children|
+|Space|Expand/collapse|
+|Home|Go to server|
+|End|Go to last expanded node in branch|
+
+||Node context menu||
+|Ctrl+S|Suspend|
+|Ctrl+R|Resume|
+|Ctrl+E|Execute|
+|Ctrl+U|Rerun|
+|e|Edit panel popup|
+|i|Info panel popup|
+|j|Job panel popup|
+|m|Manual panel popup|
+|o|Output panel popup|
+|s|Script panel popup|
+|t|Triggers panel popup|
+|v|Variables panel popup|
+|w|Why panel popup|
+|z|Zombies panel popup|
+
+||Search in text views||
+|Ctrl+F|Search|
+|F3|Go to next macth|
+|Shift+F3|Go to previous match|
+|Alt+C|Toggle case sensitive|
+|Alt+W|Toggle whole words|
+|Alt+A|Toggle highlight all|
+
+||Text views||
+|Ctrl+L|Go to line number|
+|Ctrl++ or Ctrl+WheelUp|Increase font size|
+|Ctrl+- or Ctrl+WheelDown|Decrease font size|

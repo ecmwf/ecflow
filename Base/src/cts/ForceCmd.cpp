@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #36 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -16,12 +16,10 @@
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
 #include "Node.hpp"
 #include "Str.hpp"
 #include "SuiteChanged.hpp"
 #include "Extract.hpp"
-#include "Log.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -215,8 +213,8 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
    bool setRepeatToLastValue = false;
    bool recursive = false;
    std::string stateOrEvent;
-   size_t vec_size = options.size();
-   for(size_t i = 0; i < vec_size; i++) {
+   size_t options_size = options.size();
+   for(size_t i = 0; i < options_size; i++) {
       if (Str::caseInsCompare(options[i],"recursive"))  recursive = true;
       else if (Str::caseInsCompare( options[i],"full"))  setRepeatToLastValue = true;
       else if (NState::isValid(options[i])) { is_valid_state = true; stateOrEvent = options[i];}
@@ -236,8 +234,8 @@ void ForceCmd::create( 	Cmd_ptr& cmd,
 
  	if ( is_valid_event_state ) {
  		// When set or clear used the path needs to include the name of the event:
- 	   size_t vec_size = paths.size();
- 	   for(size_t i = 0; i < vec_size; i++) {
+ 	   size_t path_size = paths.size();
+ 	   for(size_t i = 0; i < path_size; i++) {
  	      string the_event,the_path;
   	      Extract::pathAndName(paths[i],the_path, the_event);
   	      if ( the_path.empty() || the_event.empty() ) {

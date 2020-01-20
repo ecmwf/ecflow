@@ -1,5 +1,4 @@
-
-suite suiteName
+suite verify
    verify complete:3 
    verify unknown:3 
    verify queued:3 

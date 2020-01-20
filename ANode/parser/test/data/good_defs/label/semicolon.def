@@ -1,4 +1,4 @@
-suite s
+suite label_semicolon
   family f
     label foo "a; b"
     task t1

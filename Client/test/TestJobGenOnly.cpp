@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #40 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,22 +13,13 @@
 // Description :
 //============================================================================
 #include <iostream>
-#include <fstream>
 
-#include "boost/make_shared.hpp"
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/test/unit_test.hpp>
-
+#include <boost/test/unit_test.hpp>  // IWYU pragma: keep
 
 #include "Defs.hpp"
-#include "NodeAttr.hpp"
-#include "Suite.hpp"
-#include "Task.hpp"
 #include "Str.hpp"
 #include "File.hpp"
-#include "ExprAst.hpp"
-#include "TestHelper.hpp"
 #include "JobCreationCtrl.hpp"
 
 using namespace std;

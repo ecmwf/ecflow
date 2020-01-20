@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #61 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -21,10 +21,9 @@
 //               for incremental sync, since we directly access the parent suite
 //============================================================================
 
-#include <iosfwd>
 #include <set>
 #include <string>
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 class Node;
 
 // Class Limit: The limit is zero based, hence if limit is 10, increment must use < 10

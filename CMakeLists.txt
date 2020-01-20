@@ -73,7 +73,7 @@ if(ENABLE_UI)
 
     ecbuild_info("")
     ecbuild_info("------------------------------ Qt start ---------------------------")
-    ecbuild_info("ecFlowUI is enabled - searching for Qt5; if not found, will try Qt4")
+    ecbuild_info("ecFlowUI is enabled - searching for Qt5")
     ecbuild_info("To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH")
 
     find_package(Qt5Widgets 5.0.0)
@@ -108,16 +108,8 @@ if(ENABLE_UI)
           endif()
 
     else()
-        ecbuild_info("Could not find all required Qt5 packages (Qt5Widgets, Qt5Gui and Qt5Network) - searching for Qt4")
         ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
-
-        find_package(Qt4 4.8.0 REQUIRED QtCore QtGui QtNetwork QtSvg)
-        if(QT_FOUND)
-            ecbuild_info("Found Qt 4, please ignore any warnings about Qt5 components that were not found.")
-        else()
-            ecbuild_info(" ** To use a self-built Qt installation, try setting CMAKE_PREFIX_PATH **")
-            ecbuild_critical("Qt5 and Qt4 not found - one of these is required for ecFlowUI; or use -DENABLE_UI=OFF")
-        endif()
+        ecbuild_critical("Qt5 Widgets, Network and Gui not found - these are required for ecFlowUI; or use -DENABLE_UI=OFF")
     endif()
 
     set(ECFLOW_QT 1)
@@ -215,14 +207,17 @@ if ( ENABLE_STATIC_BOOST_LIBS )
     set(Boost_USE_STATIC_LIBS ON)
 endif()
 
-# if Boost_NO_BOOST_CMAKE is not set, we seem to mess up in finding right python libs(python3), 
+# By default cmake assume boost was built with cmake. Hence looks for package config file BoostConfig.cmake/boost-config.cmake
+# This seems to mess up the search for boost python libs.
+# if Boost_NO_BOOST_CMAKE is not set, we seem to mess up in finding right python libs(python3 and python2), 
 # for boost 1.71 and cmake 3.15 or greater
-set(Boost_NO_BOOST_CMAKE     ON) # if cmake used to install boost, from boost 1.70, Set Boost_NO_BOOST_CMAKE to ON, to disable the search for boost-cmake
+set(Boost_NO_BOOST_CMAKE ON) 
+
 set(Boost_USE_MULTITHREADED  ON)
 set(Boost_NO_SYSTEM_PATHS    ON)
 set(Boost_DETAILED_FAILURE_MSG ON)
 set(Boost_ARCHITECTURE       "-x64") # from boost 1.69 layout=tagged adds libboost_system-mt-x64.a, https://gitlab.kitware.com/cmake/cmake/issues/18908
-set(Boost_DEBUG                ON) # Set to ON to enable debug output from FindBoost
+#set(Boost_DEBUG                ON) # Set to ON to enable debug output from FindBoost
 
 set(ECFLOW_BOOST_VERSION "1.68.0")
 
@@ -333,8 +328,7 @@ ecbuild_dont_pack( DIRS
                    	ecbuild
                     SCRATCH
                     CUSTOMER 
-                    build_scripts/nightly build_scripts/test_bench
-                    cereal-1.2.2
+                    build_scripts/5nightly build_scripts/test_bench
                     cereal-1.3.0
                     Debug
                     Doc

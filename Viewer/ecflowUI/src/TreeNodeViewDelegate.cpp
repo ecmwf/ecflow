@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -31,7 +31,7 @@ static std::vector<std::string> propVec;
 static QColor typeFgColourClassic=QColor(Qt::white);
 static QColor typeBgColourClassic=QColor(150,150,150);
 static QColor childCountColour=QColor(90,91,92);
-
+static QColor errColour=QColor(172,0,0);
 
 struct NodeShape
 {
@@ -614,6 +614,24 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
         }
     }
 
+    //The log/checkpoint error
+    QRect errRect;
+    QString errTxt = index.data(AbstractNodeModel::LogErrorRole).toString();
+    if(errTxt.contains('\n'))
+        errTxt = errTxt.split("\n").first();
+
+    bool hasErr = (!errTxt.isEmpty());
+    if(hasErr)
+    {
+        QFontMetrics fmErr(abortedReasonFont_);
+        errRect = nodeText.br_;
+        errRect.setLeft(currentRight+fmErr.width('A')/2);
+        errTxt=fmErr.elidedText(errTxt,Qt::ElideRight,220);
+        errRect.setWidth(fmErr.width(errTxt));
+        currentRight = errRect.x()+errRect.width();
+    }
+
+
     //Update
 #if 0
     bool hasUpdate=false;
@@ -703,6 +721,15 @@ int TreeNodeViewDelegate::renderServer(QPainter *painter,const QModelIndex& inde
             painter->drawPixmap(loadRect,an->currentPixmap());
         }
     }
+
+    //Draw log/checkpoint error
+    if(hasErr)
+    {
+        painter->setPen(errColour);
+        painter->setFont(abortedReasonFont_);
+        painter->drawText(errRect,Qt::AlignLeft | Qt::AlignVCenter,errTxt);
+    }
+
 #if 0
     if(hasUpdate)
     {

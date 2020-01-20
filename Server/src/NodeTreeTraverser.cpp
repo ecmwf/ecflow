@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #101 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,7 +13,6 @@
 // Description :
 //============================================================================
 
-#include <iostream>
 #include "boost/bind.hpp"
 
 #include "ServerEnvironment.hpp"
@@ -26,12 +25,15 @@
 #include "CalendarUpdateParams.hpp"
 #include "Calendar.hpp"
 
+//#define DEBUG_TRAVERSER 1
+//#define DEBUG_POLL 1
+
+#ifdef DEBUG_TRAVERSER
+#include <iostream>
+#endif
 using namespace std;
 using namespace ecf;
 using namespace boost::posix_time;
-
-//#define DEBUG_TRAVERSER 1
-//#define DEBUG_POLL 1
 
 // ***********************************************************************
 // It was noticed that having a poll of 60 seconds was not very accurate

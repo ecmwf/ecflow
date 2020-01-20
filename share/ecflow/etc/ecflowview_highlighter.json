@@ -21,7 +21,17 @@
 
                 "aborted_reason" : {
                     "pattern" : "aborted reason : ([^\n]*)",
-                     "colour"  : "rgb(172,0,0)"
+                    "colour"  : "rgb(172,0,0)"
+                },
+
+                "log_error" : {
+                    "pattern" : "log error : ([^\n]*)",
+                    "colour"  : "rgb(172,0,0)"
+                },
+
+                "checkpt_error" : {
+                    "pattern" : "checkpoint error : ([^\n]*)",
+                    "colour"  : "rgb(172,0,0)"
                 },
 
                 "comment" : {

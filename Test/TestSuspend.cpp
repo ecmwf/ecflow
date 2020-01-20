@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #24 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -29,6 +29,7 @@
 #include "DurationTimer.hpp"
 #include "PrintStyle.hpp"
 #include "AssertTimer.hpp"
+#include "VerifyAttr.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -192,8 +193,8 @@ BOOST_AUTO_TEST_CASE( test_suspend_node )
          task_ptr task = fam->add_task("t" + boost::lexical_cast<std::string>(i));
          task->addVerify( VerifyAttr(NState::COMPLETE,1) );      // task should complete 1 times
 
-         boost::posix_time::ptime time1 =  theLocalTime +  minutes(1 + i);
-         task->addTime( ecf::TimeAttr( ecf::TimeSlot(time1.time_of_day())  ));
+         boost::posix_time::ptime time3 = theLocalTime + minutes(1 + i);
+         task->addTime( ecf::TimeAttr( ecf::TimeSlot(time3.time_of_day())  ));
       }
    }
 

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #128 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -14,13 +14,10 @@
 //============================================================================
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/make_shared.hpp"
 
 #include "MyDefsFixture.hpp"
 #include "ServerToClientResponse.hpp"
 #include "TestHelper.hpp"
-#include "SerializationTest.hpp"
 #include "DefsCmd.hpp"
 #include "SNodeCmd.hpp"
 #include "ErrorCmd.hpp"
@@ -123,6 +120,11 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new CtsWaitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"1 eq 1")));
    cmd_vec.push_back( Cmd_ptr( new LabelCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"labelName","label value")));
    cmd_vec.push_back( Cmd_ptr( new QueueCmd("/suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"queue1","active","","/suiteName")));
+
+   std::vector<Variable>    to_add{ Variable("name","value"),  Variable("name2","value")};
+   std::vector<std::string> to_del{  "name", "name2"};
+   cmd_vec.push_back( Cmd_ptr( new InitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,to_add)));
+   cmd_vec.push_back( Cmd_ptr( new CompleteCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,to_del)));
 
    cmd_vec.push_back( Cmd_ptr( new ForceCmd("/suiteName","complete",true,true)));
 	cmd_vec.push_back( Cmd_ptr( new FreeDepCmd("/suiteName")));

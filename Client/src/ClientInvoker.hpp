@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -15,7 +15,6 @@
 // Description :
 //
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <memory>
 #include "boost/date_time/posix_time/posix_time_types.hpp"
 
 #include "ClientEnvironment.hpp"
@@ -25,7 +24,6 @@
 #include "TaskApi.hpp"
 #include "NodeFwd.hpp"
 #include "ServerReply.hpp"
-#include "Zombie.hpp"
 #include "NOrder.hpp"
 
 /// Invokes the client depending on the arguments
@@ -178,7 +176,9 @@ public:
 	void set_child_pid(const std::string& pid) { clientEnv_.set_child_pid(pid);}
 	void set_child_try_no(unsigned int try_no) { clientEnv_.set_child_try_no(try_no);}
 	void set_child_timeout(unsigned int seconds) { clientEnv_.set_child_cmd_timeout(seconds);} // ECF_TIMEOUT default is 24 hours allow python jobs to override
-   void set_zombie_child_timeout(unsigned int seconds){clientEnv_.set_zombie_child_cmd_timeout(seconds);} // ECF_ZOMBIE_TIMEOUT default is 24 hours allow python jobs to override
+    void set_child_init_add_vars(const std::vector<Variable>& vars) { clientEnv_.set_child_init_add_vars(vars);}
+    void set_child_complete_del_vars(std::vector<std::string>& vars) { clientEnv_.set_child_complete_del_vars(vars);}
+    void set_zombie_child_timeout(unsigned int seconds){clientEnv_.set_zombie_child_cmd_timeout(seconds);} // ECF_ZOMBIE_TIMEOUT default is 24 hours allow python jobs to override
 
 	void child_init();
 	void child_abort(const std::string& reason  = "");

@@ -4,7 +4,7 @@
 # Author      : Avi
 # Revision    : $Revision: #5 $ 
 #
-# Copyright 2009-2019 ECMWF.
+# Copyright 2009-2020 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0 
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 # In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -36,7 +36,9 @@ show_error_and_exit() {
    echo "   test_safe      - only run deterministic tests"
    echo "   ctest          - all ctest -R <test> -V"
    echo "   clang          - build with clang compiler"
+   echo "   intel          - build with intel compiler"
    echo "   clang_tidy     - create compilation database for clang_tdiy and then call run-clang-tidy.py"
+   echo "   iwyu           - INCLUDE what you use"
    echo "   tsan           - is short for clang thread sanitiser"
    echo "   asan           - is short for address sanitiser"
    echo "   msan           - is short for memory sanitiser"
@@ -73,6 +75,7 @@ no_ssl_arg=
 log_arg=
 asan_arg=
 msan_arg=
+iwyu_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
       mode_arg=$1
@@ -92,6 +95,7 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break
+   elif [[ "$1" = iwyu ]] ;    then iwyu_arg=$1 ;
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
    elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
    elif [[ "$1" = sys_install ]] ; then sys_install=$1 ;
@@ -139,6 +143,8 @@ echo "ecbuild_arg=$ecbuild_arg"
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
+source_dir=$(pwd)
+
 # ==================== compiler flags ========================================
 # 
 # GNU 4.8+ -Wno-unused-local-typedefs   -> get round warning in boost headers
@@ -155,7 +161,7 @@ CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-decla
 module swap gnu/7.3.0     
 
 cmake_extra_options=""
-if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
+if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy || "$iwyu_arg" = iwyu ]] ; then
 	module unload gnu
 	module load clang/7.0.1
 
@@ -163,19 +169,32 @@ if [[ "$clang_arg" = clang || "$clang_tidy_arg" = clang_tidy ]] ; then
     # [-Wmacro-redefined]     /usr/local/apps/python/2.7.12-01/include/python2.7/pyconfig.h:1215:9: warning: '_XOPEN_SOURCE' macro redefined
     CXX_FLAGS=""
     CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
+
+    if [[ "$iwyu_arg" = iwyu ]] ; then
+        cmake_extra_options="-DCMAKE_CXX_INCLUDE_WHAT_YOU_USE=/usr/local/apps/iwyu/0.11/bin/include-what-you-use;-Xiwyu;--mapping_file=$source_dir/build_scripts/iwyu/boost.imp"
+    fi
 fi
 if [[ "$intel_arg" = intel ]] ; then
     # fails because:
     # /tmp/ma0/workspace/ecflow/ACore/src/cereal_optional_nvp.hpp(52): error: namespace "std" has no member "enable_if_t"
+    # > icc -v
+    # > icc version 19.0.4.243 (gcc version 4.8.0 compatibility)
+    # Require setting LD_RUN_PATH an CXX, to correctly pick the right std library
     module unload eccodes
     module unload gnu
-    module load intel/18.0.1
-    cmake_extra_options="-DBOOST_ROOT=/var/tmp/ma0/boost/intel-18/boost_1_67_0"
-    CXX_FLAGS="-std=c++17"
+    module load intel/19.0.4
+    export LD_RUN_PATH="/usr/local/apps/gcc/8.3.0/lib64"
+    export CXX="icpc -cxxlib=/usr/local/apps/gcc/8.3.0"
+    export PATH="/usr/local/apps/gcc/8.3.0/bin:$PATH"
+    $CXX -v
+    #exit 1
+    CXX_FLAGS="-std=c++14"
     #CXX_FLAGS="$CXX_FLAGS -Wno-deprecated-declarations -Wno-deprecated-register -Wno-expansion-to-defined -Wno-exceptions"
 fi
 
-module load ecbuild/new   
+if [[ $ecbuild_arg != ecbuild ]] ; then
+    module load ecbuild/new   
+fi
 module load python
 module load python3/3.6.8-01
 module load cmake/3.15.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
@@ -264,7 +283,6 @@ fi
 # =======================================================================================
 # Change directory
 #
-source_dir=$(pwd)
 workspace=$(pwd)/..
 
 if [[ $clean_arg = clean ]] ; then
@@ -286,21 +304,27 @@ if [[ $test_safe_arg = test_safe ]] ; then
 	   exit 0
 	fi
 fi
+
+
 if [[ "$ctest_arg" != "" ]] ; then
     if [[ "$asan_arg" = asan ]] ; then
+        export LD_PRELOAD=/usr/local/apps/clang/7.0.1/lib64/libasan.so  
+    
         if [[ $clang_arg != "clang" ]] ; then
             # for python module we need to preload asan as it needs to be the very first library
             # ==2971==ASan runtime does not come first in initial library list; 
             #              you should either link runtime to your application or manually preload it with LD_PRELOAD.
-	        export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libasan.so.3 
+	        export LD_PRELOAD=/usr/local/apps/gcc/7.3.0/lib64/gcc/x86_64-suse-linux/7.3.0/libasan.so 
 	    fi
 	    export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp  
 	    export LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_lsan.supp
 	    $ctest_arg  
     elif [[ "$tsan_arg" = tsan ]] ; then
+        export LD_PRELOAD=/usr/local/apps/clang/7.0.1/lib64/libtsan.so  
+
         if [[ $clang_arg != "clang" ]] ; then
             # LD_PRELOAD needed otherwise we get: .... cannot allocate memory in static TLS block
-            export LD_PRELOAD=/usr/local/apps/gcc/6.3.0/lib64/gcc/x86_64-suse-linux/6.3.0/libtsan.so
+            export LD_PRELOAD=/usr/local/apps/gcc/7.3.0/lib64/gcc/x86_64-suse-linux/7.3.0/libtsan.so
         fi
         export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp  
         export LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_lsan.supp

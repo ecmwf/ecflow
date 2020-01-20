@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -10,6 +10,7 @@
 #include "ServerComThread.hpp"
 
 #include "Defs.hpp"
+#include "Suite.hpp"
 #include "ClientInvoker.hpp"
 #include "ArgvCreator.hpp"
 
@@ -93,7 +94,8 @@ void ServerComThread::run()
     {
         // define the tasks that will explicitly/implicitly call ci_->sync_local()
         std::set<VTask::Type> sync_tasks = {VTask::CommandTask, VTask::SyncTask,
-                      VTask::WhySyncTask,VTask::ScriptSubmitTask,VTask::ZombieCommandTask};
+                      VTask::WhySyncTask,VTask::ScriptSubmitTask,VTask::ZombieCommandTask,
+                      VTask::JobStatusTask};
 
         // this is called during reset - it requires a special treatment
         if(taskType_  == VTask::ResetTask)
@@ -199,10 +201,16 @@ void ServerComThread::run()
                         ci_->zombieKill(zombie_);
 
                     break;
-                 }
+                }
+                case VTask::JobStatusTask:
+                {
+                    UiLog(serverName_).dbg() << " JOB STATUS";
+                    ci_->status(nodePath_);
+                    break;
+                }
 
-                 default:
-                 {
+                default:
+                {
                     Q_ASSERT(0);
                     exit(1);
                  }
@@ -246,6 +254,7 @@ void ServerComThread::run()
                 case VTask::ManualTask:
                 case VTask::ScriptTask:
                 case VTask::OutputTask:
+                case VTask::JobStatusFileTask:
                 {
                     UiLog(serverName_).dbg() << " FILE" << " " << params_["clientPar"];
                     if(maxLineNum_ < 0)
@@ -264,7 +273,7 @@ void ServerComThread::run()
                 case VTask::StatsTask:
                     UiLog(serverName_).dbg() << " STATS";
                     ci_->stats();
-                    break;
+                    break;;
 
                 case VTask::HistoryTask:
                     UiLog(serverName_).dbg() << " SERVER LOG";
@@ -316,7 +325,7 @@ void ServerComThread::run()
         errorString = e.what();
     }
 
-    // we can get an error string in one of two ways - either an exception is raised, or
+    // we can get an error string in two ways - either an exception is raised, or
     // the get_string() of the server reply is non-empty.
     if (!isMessage && (taskType_ == VTask::CommandTask) && !(ci_->server_reply().get_string().empty()))
     {
@@ -431,7 +440,9 @@ void ServerComThread::update(const Node* node, const std::vector<ecf::Aspect::Ty
 {
     //This function can only be called during a SYNC_LOCAl task!!!!
     assert(taskType_ == VTask::CommandTask ||
-           taskType_ == VTask::SyncTask || taskType_ == VTask::WhySyncTask);
+           taskType_ == VTask::SyncTask || taskType_ == VTask::WhySyncTask ||
+           taskType_ == VTask::JobStatusTask || taskType_ == VTask::ScriptSubmitTask ||
+           taskType_ == VTask::ZombieCommandTask);
 
     std::vector<ecf::Aspect::Type> typesCopy=types;
 

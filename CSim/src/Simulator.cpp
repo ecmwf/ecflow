@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -12,13 +12,8 @@
 //
 // Description :
 //============================================================================
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
 
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <boost/lexical_cast.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>  // requires boost date and time lib
 
 #include "Simulator.hpp"
@@ -26,8 +21,8 @@
 #include "SimulatorVisitor.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
-#include "Family.hpp"
-#include "Task.hpp"
+#include "Submittable.hpp"
+#include "QueueAttr.hpp"
 #include "Log.hpp"
 #include "JobsParam.hpp"
 #include "Jobs.hpp"
@@ -149,8 +144,8 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	while (duration <= max_simulation_period) {
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
-      for(suite_ptr ss: theDefs.suiteVec()) {
-         cout << "duration: " << to_simple_string(duration) << " " << ss->calendar().toString() << endl;
+      for(suite_ptr my_suite: theDefs.suiteVec()) {
+         cout << "duration: " << to_simple_string(duration) << " " << my_suite->calendar().toString() << endl;
       }
 #endif
 
@@ -183,11 +178,11 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	   for(suite_ptr s: theDefs.suiteVec()) { if (s->state() == NState::COMPLETE) completeSuiteCnt++; }
 
  	   if ( (theDefs.suiteVec().size() != completeSuiteCnt)) {
- 	      std::stringstream ss; ss << "\nDefs file " << defs_filename << "\n";
+ 	      std::stringstream mss; mss << "\nDefs file " << defs_filename << "\n";
  	      for(suite_ptr s: theDefs.suiteVec()) {
- 	         if (s->state() != NState::COMPLETE) ss << "  suite '/" << s->name() << "' has not completed\n";
+ 	         if (s->state() != NState::COMPLETE) mss << "  suite '/" << s->name() << "' has not completed\n";
  	      }
- 	      errorMsg += ss.str();
+ 	      errorMsg += mss.str();
 
  	      run_analyser(theDefs,errorMsg);
  	      return false;

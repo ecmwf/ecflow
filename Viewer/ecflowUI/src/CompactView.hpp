@@ -57,6 +57,11 @@ protected:
 
     void adjustWidthInParent(int start);
 
+    void navigateLeft(const QModelIndex& idx) override;
+    void navigateRight(const QModelIndex& idx) override;
+    void navigateUp(const QModelIndex& idx) override;
+    void navigateDown(const QModelIndex& idx) override;
+
 private:
     int connectorPos(TreeNodeViewItem* item, TreeNodeViewItem* parent) const;
 };

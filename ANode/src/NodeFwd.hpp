@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #44 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -37,6 +37,14 @@ class Event;
 class Meter;
 class Repeat;
 class Variable;
+class Zombie;
+class NodeStats;
+class MiscAttrs;
+class VerifyAttr;
+class ZombieAttr;
+class QueueAttr;
+class GenericAttr;
+class PartExpression;
 
 namespace ecf { class LateAttr; class AutoCancelAttr; class AutoArchiveAttr; class AutoRestoreAttr; } // forward declare class
 
@@ -61,15 +69,14 @@ typedef std::weak_ptr<Submittable> weak_submittable_ptr;
 typedef std::weak_ptr<Node>  weak_node_ptr;
 
 typedef std::map<std::string,std::string> NameValueMap;
-
 typedef std::vector< std::pair< std::string,std::string> > NameValueVec;
-
 
 class NodeContainer;
 class DefsDelta;
 class JobsParam;
 class JobCreationCtrl;
 class AstTop;
+class Ast;
 
 class StateMemento;
 class NodeStateMemento;

@@ -19,6 +19,7 @@ set (files ecflowview_menus.json
            ecflow_ui_test.def
            ecflow_ui_test_session_template.json
            ecflow_ui_test_server_scripts.tar.gz
+           shortcuts.txt
            viewer.qss)
 
 # for each file, copy it into the build directory at build time

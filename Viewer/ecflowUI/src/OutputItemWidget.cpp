@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -147,6 +147,13 @@ OutputItemWidget::OutputItemWidget(QWidget *parent) :
 
     //
     browser_->setSearchButtons(searchTb_);
+
+    //line number
+    lineNumProp_ = VConfig::instance()->find("panel.output.showLineNumber");
+    Q_ASSERT(lineNumProp_);
+    bool showLineNum = lineNumProp_->value().toBool();
+    lineNumberTb_->setChecked(showLineNum);
+    on_lineNumberTb__clicked(showLineNum);
 }
 
 OutputItemWidget::~OutputItemWidget()
@@ -724,6 +731,17 @@ void OutputItemWidget::on_fontSizeDownTb__clicked()
 {
 	//We need to call a custom slot here instead of "zoomOut"!!!
 	browser_->zoomOut();
+}
+
+//-----------------------------------------
+// Show line number
+//-----------------------------------------
+
+void OutputItemWidget::on_lineNumberTb__clicked(bool st)
+{
+    browser_->setShowLineNumbers(st);
+    Q_ASSERT(lineNumProp_);
+    lineNumProp_->setValue(st);
 }
 
 //-----------------------------------------

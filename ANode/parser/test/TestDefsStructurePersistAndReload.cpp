@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -14,19 +14,13 @@
 //============================================================================
 #include <string>
 #include <iostream>
-#include <fstream>
 
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/test/unit_test.hpp>
-
 
 #include "PersistHelper.hpp"
 #include "PrintStyle.hpp"
 #include "MyDefsFixture.hpp"
-#include "File.hpp"
 
-namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
 

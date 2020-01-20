@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,6 +17,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "AbstractClientEnv.hpp"
+#include "Variable.hpp"
 #ifdef ECF_OPENSSL
 #include "Openssl.hpp"
 #endif
@@ -24,10 +25,10 @@
 class ClientEnvironment : public AbstractClientEnv {
 public:
 	/// The constructor will load the environment
-	ClientEnvironment(bool gui);
+   explicit ClientEnvironment(bool gui);
 
 	/// This constructor is only used in Test environment, as it allow the host file to be set
-	ClientEnvironment(const std::string& hostFile, const std::string& host = "", const std::string& port = "");
+   explicit ClientEnvironment(const std::string& hostFile, const std::string& host = "", const std::string& port = "");
 
    /// This controls for how long child commands continue trying to connect to Server before failing.
 	/// Maximum time in seconds for client to deliver message to server/servers. This is
@@ -129,6 +130,11 @@ public:
    void set_child_password(const std::string& pass) { jobs_password_ = pass;}
    void set_child_pid(const std::string& pid) { remote_id_ = pid;}
    void set_child_try_no(unsigned int try_no) { task_try_num_ = try_no;}
+   void set_child_init_add_vars(const std::vector<Variable>& vars)  { init_add_vars_ = vars;}
+   void set_child_complete_del_vars(std::vector<std::string>& vars) { complete_del_vars_ = vars;}
+
+   const std::vector<Variable>& init_add_vars() const { return init_add_vars_;}
+   const std::vector<std::string>& complete_del_vars() const { return complete_del_vars_;}
 
 private:
  	std::string task_path_;             // ECF_NAME = /aSuit/aFam/aTask
@@ -140,6 +146,9 @@ private:
 
 	long timeout_;                      // ECF_TIMEOUT. Host file iteration time out
    long zombie_timeout_;               // ECF_ZOMBIE_TIMEOUT. Host file iteration time out for zombies, default same as ECF_TIMEOUT
+   std::vector<Variable> init_add_vars_;
+   std::vector<std::string> complete_del_vars_;
+
 	std::vector<std::pair<std::string,std::string> > env_; // For test allow env variable to be set on defs
 	std::vector<std::pair<std::string, std::string> > host_vec_; // The list of host:port pairs
 

@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #41 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -39,12 +39,20 @@
 // Hence we need to ensure we use the minimum number of serializable types.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+#include <boost/core/noncopyable.hpp>
+
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Alias.hpp"
 #include "Limit.hpp"
+#include "LateAttr.hpp"
+#include "Expression.hpp"
+#include "QueueAttr.hpp"
+#include "ZombieAttr.hpp"
+#include "GenericAttr.hpp"
+#include "VerifyAttr.hpp"
 
 //#define DEBUG_MEMENTO 1
 
@@ -302,7 +310,7 @@ private:
 
 class NodeQueueMemento : public Memento {
 public:
-   NodeQueueMemento(const QueueAttr& e) : queue_(e) {}
+   explicit NodeQueueMemento(const QueueAttr& e) : queue_(e) {}
    NodeQueueMemento() = default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
@@ -318,7 +326,7 @@ private:
 
 class NodeGenericMemento : public Memento {
 public:
-   NodeGenericMemento(const GenericAttr& e) : generic_(e) {}
+   explicit NodeGenericMemento(const GenericAttr& e) : generic_(e) {}
    NodeGenericMemento() = default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}
@@ -399,7 +407,7 @@ private:
 
 class NodeRepeatIndexMemento : public Memento {
 public:
-   NodeRepeatIndexMemento( const Repeat& e ) : index_or_value_(e.index_or_value()) {}
+   explicit NodeRepeatIndexMemento( const Repeat& e ) : index_or_value_(e.index_or_value()) {}
    NodeRepeatIndexMemento()= default;
 private:
    void do_incremental_node_sync(Node* n,std::vector<ecf::Aspect::Type>& aspects,bool f) const override { n->set_memento(this,aspects,f);}

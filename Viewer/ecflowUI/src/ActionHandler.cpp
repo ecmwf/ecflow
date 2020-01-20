@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -57,10 +57,32 @@ ActionHandler::ActionHandler(QObject *actionSender,QWidget* menuParent) :
 	connect(this,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
             actionSender_,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
 
-	//makeShortcut();
+    MenuHandler::setupShortcut(actionSender_, menuParent_,
+                               menuParent_->property("view").toString().toStdString());
 }
 
-void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
+void ActionHandler::contextMenu(const std::vector<VInfo_ptr>& nodeLst,QPoint pos)
+{
+    std::vector<VInfo_ptr> filteredNodes;
+    filterNodes(nodeLst, filteredNodes);
+    std::string view=menuParent_->property("view").toString().toStdString();
+    if( MenuItem* item=MenuHandler::invokeMenu("Node", filteredNodes, pos,  menuParent_,view)) {
+        handleCommand(item, filteredNodes);
+    }
+}
+
+void ActionHandler::runCommand(const std::vector<VInfo_ptr>& nodeLst, int commandId)
+{
+    if(MenuItem* item = MenuHandler::findItemById(commandId)) {
+        std::vector<VInfo_ptr> filteredNodes;
+        filterNodes(nodeLst, filteredNodes);
+        if (item->isValidFor(filteredNodes)) {
+            handleCommand(item, filteredNodes);
+        }
+    }
+}
+
+void ActionHandler::filterNodes(const std::vector<VInfo_ptr>& nodesLst, std::vector<VInfo_ptr>& filteredNodes) const
 {
     // deal with tricky cases - if the user selects a combination of 'normal' nodes
     // and attribute nodes, we want to ignore the attribute nodes, so we will remove
@@ -76,7 +98,6 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
             numNonAttrNodes++;
     }
 
-    std::vector<VInfo_ptr> filteredNodes;
     if (numAttrs > 0 && numNonAttrNodes > 0)  // just keep the non-attribute nodes
     {
         for (auto & itNodes : nodesLst)
@@ -89,15 +110,12 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     {
         filteredNodes = nodesLst;
     }
+}
 
-
-
-    std::string view=menuParent_->property("view").toString().toStdString();
-    MenuItem* item=MenuHandler::invokeMenu("Node", filteredNodes, pos,  menuParent_,view);
-
+void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& filteredNodes)
+{
     if(item)
     {
-
 #ifdef _UI_ACTIONHANDLER_DEBUG
         UiLog().dbg() << "ActionHandler::contextMenu --> item=" + item->name();
 #endif
@@ -309,7 +327,7 @@ void ActionHandler::contextMenu(std::vector<VInfo_ptr> nodesLst,QPoint pos)
     }
 }
 
-bool ActionHandler::confirmCommand(MenuItem* item,std::vector<VInfo_ptr>& filteredNodes,
+bool ActionHandler::confirmCommand(MenuItem* item,const std::vector<VInfo_ptr>& filteredNodes,
                                    const std::string& commandDescStr, std::size_t taskNum)
 {
     bool needQuestion=item && !item->question().empty() &&
@@ -335,7 +353,7 @@ bool ActionHandler::confirmCommand(MenuItem* item,std::vector<VInfo_ptr>& filter
 }
 
 
-bool ActionHandler::confirmCommand(std::vector<VInfo_ptr>& filteredNodes,
+bool ActionHandler::confirmCommand(const std::vector<VInfo_ptr>& filteredNodes,
                                    const std::string& questionIn,
                                    const std::string& warning,
                                    const std::string& commandDescStr,
@@ -422,3 +440,4 @@ bool ActionHandler::confirmCommand(std::vector<VInfo_ptr>& filteredNodes,
     msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
     return (msgBox.exec() == QMessageBox::Ok);
 }
+

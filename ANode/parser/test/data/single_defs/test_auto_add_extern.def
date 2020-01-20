@@ -14,7 +14,11 @@ extern limits:hpcd
 extern /suiteName:sg1
 extern /obs/limits:hpcd
 
-# Expect 9 unique externs
+extern /extern/f1/parent_variable:var1
+extern /extern/f1/parent_variable:var2
+
+# Expect 10 unique externs
+# expect:  extern /made/up/redundant/extren  to be removed
 # Also because we have defined externs , expect no warnings:
 
 suite extern
@@ -25,6 +29,8 @@ suite extern
             trigger /a/b/c/d/e:event == set       # extern event path
       task r
             trigger /a/b/c/d/e:meter le 30        # extern meter path   
+      task parent_variable
+            trigger :var1 == 1 and :var2 == 2
     endfamily
     
     

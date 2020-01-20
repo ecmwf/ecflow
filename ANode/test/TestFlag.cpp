@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #10 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,7 +14,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Flag.hpp"
-#include "Str.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -26,7 +25,8 @@ BOOST_AUTO_TEST_CASE( test_node_flags )
 	cout << "ANode:: ...test_node_flags\n";
 
 	Flag flag;
-	std::string expected_flags = "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,no_script,killed,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque,archived,restored,threshold,sigterm,log_error,checkpt_error";
+	std::string expected_flags =
+	         "force_aborted,user_edit,task_aborted,edit_failed,ecfcmd_failed,killcmd_failed,statuscmd_failed,no_script,killed,status,late,message,by_rule,queue_limit,task_waiting,locked,zombie,no_reque,archived,restored,threshold,sigterm,log_error,checkpt_error";
 
 	/// Set the flags
 	std::vector<Flag::Type> flag_list =  Flag::list();

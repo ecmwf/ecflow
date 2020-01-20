@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -214,8 +214,8 @@ int main(int argc, char* argv[])
       timer.start();
       std::vector<Task*> tasks;
       defs.getAllTasks(tasks);
-      for(Task* t: tasks) {
-         if (!defs.deleteChild(t)) cout << "Failed to delete task\n";
+      for(Task* ta: tasks) {
+         if (!defs.deleteChild(ta)) cout << "Failed to delete task\n";
       }
       tasks.clear(); defs.getAllTasks(tasks);
       if (!tasks.empty()) cout << "Expected all tasks to be deleted but found " << tasks.size() << "\n";

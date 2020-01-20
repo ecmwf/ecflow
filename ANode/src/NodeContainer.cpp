@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #135 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,7 +17,6 @@
 #include <cassert>
 #include <sstream>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "NodeContainer.hpp"
 #include "Family.hpp"
@@ -28,10 +27,6 @@
 #include "JobsParam.hpp"
 #include "NodeTreeVisitor.hpp"
 
-#include "Stl.hpp"
-#include "Indentor.hpp"
-#include "ExprAst.hpp"
-#include "NodeState.hpp"
 #include "Ecf.hpp"
 #include "NodeState.hpp"
 #include "SuiteChanged.hpp"
@@ -207,7 +202,14 @@ void NodeContainer::kill(const std::string& /* zombie_pid, only valid for single
 void NodeContainer::status()
 {
  	size_t node_vec_size = nodes_.size();
-	for(size_t t = 0; t < node_vec_size; t++)   {     nodes_[t]->status(); }
+	for(size_t t = 0; t < node_vec_size; t++)   {
+	   // Avoid exception for top down case, if Task is not active or submitted
+	   // Allows status cmd to run over more Tasks, without early exit, when some tasks are not active/sumitted
+	   if (nodes_[t]->isTask() && ( nodes_[t]->state() != NState::ACTIVE && nodes_[t]->state() != NState::SUBMITTED)) {
+	      continue;
+	   }
+	   nodes_[t]->status();
+	}
 }
 
 bool NodeContainer::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
@@ -1222,8 +1224,8 @@ void NodeContainer::archive()
 
    std::vector<node_ptr>().swap(nodes_);                    // reclaim vector memory
    add_remove_state_change_no_ = Ecf::incr_state_change_no(); // For sync
-   string msg = "autoarchive "; msg += debugNodePath();       // inform user via log
-   ecf::log(Log::MSG,msg);
+   string msg = " autoarchive "; msg += debugNodePath();       // inform user via log
+   ecf::log(Log::LOG,msg);
 }
 
 void NodeContainer::swap(NodeContainer& rhs)
@@ -1285,7 +1287,11 @@ void NodeContainer::restore()
    flag().clear(ecf::Flag::ARCHIVED);                        // clear flag archived
    flag().set(ecf::Flag::RESTORED);                          // set restored flag, to stop automatic autoarchive
    add_remove_state_change_no_ = Ecf::incr_state_change_no();// For sync
-   fs::remove(the_archive_path);                             // remove the file
+
+   string msg = " autorestore "; msg += debugNodePath();      // inform user via log
+   ecf::log(Log::LOG,msg);
+
+   fs::remove(the_archive_path);                             // remove the file, could still throw
 }
 
 

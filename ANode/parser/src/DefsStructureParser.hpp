@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #12 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -18,17 +18,14 @@
 
 #include <string>
 #include <stack>
-#include <map>
+#include <unordered_map>
 #include <vector>
-#include <fstream>
 
 #include "File_r.hpp"
 #include "PrintStyle.hpp"
 #include "DefsParser.hpp"
-#include "Node.hpp"
+#include "NodeFwd.hpp"
 
-class Defs;
-class Node;
 class Parser;
 
 // This class is used get a line of defs format from a defs string

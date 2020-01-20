@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #42 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -21,9 +21,8 @@
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
 #include "File.hpp"
+#include "Submittable.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
-#include "Task.hpp"
 #include "EcfFile.hpp"
 #include "Str.hpp"
 
@@ -258,7 +257,7 @@ STC_Cmd_ptr CFileCmd::doHandleRequest(AbstractServer* as) const
          }
 		}
 		else {
-			std::stringstream ss; ss << "Option " << CFileCmd::toString(file_) << " is only valid for tasks. ";
+			std::stringstream ss; ss << "Option " << CFileCmd::toString(file_) << " is only valid for tasks";
 			throw std::runtime_error( ss.str() ) ;
   		}
 	}

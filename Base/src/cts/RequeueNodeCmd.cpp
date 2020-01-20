@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #32 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -16,7 +16,7 @@
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
+#include "Suite.hpp"
 #include "Task.hpp"
 #include "SuiteChanged.hpp"
 #include "Log.hpp"
@@ -86,9 +86,9 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
       }
 
       if (!theNodeToRequeue->suite()->begun()) {
-         std::stringstream ss;
-         ss << "RequeueNodeCmd::doHandleRequest: For node " << paths_[i] << ". The suite " << theNodeToRequeue->suite()->name() << " must be 'begun' first\n";
-         throw std::runtime_error( ss.str() ) ;
+         std::stringstream mss;
+         mss << "RequeueNodeCmd::doHandleRequest: For node " << paths_[i] << ". The suite " << theNodeToRequeue->suite()->name() << " must be 'begun' first\n";
+         throw std::runtime_error( mss.str() ) ;
       }
 
 	   SuiteChanged0 changed(theNodeToRequeue);
@@ -97,10 +97,10 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // ONLY Re-queue the aborted tasks
 	      std::vector<Task*> taskVec;
 	      theNodeToRequeue->getAllTasks(taskVec);
-	      for(auto & i : taskVec) {
-	         if (i->state() == NState::ABORTED) {
-	            i->requeue(args);
-	            i->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
+	      for(auto & task : taskVec) {
+	         if (task->state() == NState::ABORTED) {
+	            task->requeue(args);
+	            task->set_most_significant_state_up_node_tree(); // Must in loop and not outside ECFLOW-428
 	         }
 	      }
 
@@ -112,8 +112,8 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	      // ONLY Re-queue if there no tasks in submitted or active states
 	      std::vector<Task*> taskVec;
 	      theNodeToRequeue->getAllTasks(taskVec);
-	      for(auto & i : taskVec) {
-	         if (i->state() == NState::SUBMITTED || i->state() == NState::ACTIVE) {
+	      for(auto & task : taskVec) {
+	         if (task->state() == NState::SUBMITTED || task->state() == NState::ACTIVE) {
 	            return PreAllocatedReply::ok_cmd();
 	         }
 	      }

@@ -1,0 +1,28 @@
+suite limit_family
+ limit fam 1
+ family f1
+     inlimit -n fam 
+     task t1
+     task t2
+ endfamily
+ family f2
+     inlimit -n fam 
+     task t1
+     task t2
+ endfamily
+ family f3
+     inlimit -n fam 
+     task t1
+     task t2
+ endfamily
+ family f4
+     inlimit -n fam 
+     task t1
+     task t2
+ endfamily
+ family f5
+     inlimit -n fam 
+     task t1
+     task t2
+ endfamily
+endsuite

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #43 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -12,7 +12,6 @@
 //
 // Description :
 //============================================================================
-#include <fstream>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 #include "boost/bind.hpp"
@@ -26,7 +25,6 @@
 #include "CtsApi.hpp"
 #include "Str.hpp"
 #include "Ecf.hpp"
-#include "File.hpp"
 
 //#define DEBUG_CHECKPT 1
 //#define DEBUG_CHECKPT_SAVE_ALLOWED 1

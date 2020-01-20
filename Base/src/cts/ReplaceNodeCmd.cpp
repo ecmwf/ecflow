@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #37 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -18,6 +18,7 @@
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
+#include "Suite.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -174,6 +175,7 @@ const char* ReplaceNodeCmd::desc() {
             "- The client definition(arg2) must be free of errors\n"
             "- If the third argument is not provided, then node path(arg1) must exist in the server\n"
             "- Nodes to be replaced are in active/submitted state, in which case arg4(force) can be used\n\n"
+            "Replace will preserve the suspended status, if this is not required please re-queue first\n"
             "After replace is done, we check trigger expressions. These are reported to standard output.\n"
             "It is up to the user to correct invalid trigger expressions, otherwise the tasks will *not* run.\n"
             "Please note, you can use --check to check trigger expression and limits in the server.\n"

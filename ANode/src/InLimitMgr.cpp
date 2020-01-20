@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #28 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -12,19 +12,19 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <cassert>
-#include <ostream>
-
-
 
 #include "InLimitMgr.hpp"
 #include "Limit.hpp"
 #include "Node.hpp"
 #include "Memento.hpp"
-#include "Ecf.hpp"
 #include "Str.hpp"
 #include "Extract.hpp"
 #include "Serialization.hpp"
+
+#ifdef DEBUG
+#include <ostream>
+#include "Ecf.hpp"
+#endif
 
 using namespace ecf;
 using namespace std;
@@ -289,7 +289,6 @@ void InLimitMgr::decrementInLimitForSubmission( std::set<Limit*>& limitSet,const
 
    resolveInLimitReferences();
 
-   std::vector<task_ptr> task_vec;
    for(InLimit& inlimit: vec_) {
       Limit* limit = inlimit.limit();
       if (limit && limitSet.find(limit) == limitSet.end()) {

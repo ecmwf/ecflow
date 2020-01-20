@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -15,23 +15,26 @@
 //============================================================================
 #include <string>
 #include <iostream>
-#include <fstream>
 
-#include <boost/archive/tmpdir.hpp>
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
 #include "boost/filesystem/path.hpp"
 
 #include "DefsStructureParser.hpp"
 #include "Defs.hpp"
-#include "PrintStyle.hpp"
 #include "PersistHelper.hpp"
 #include "File.hpp"
 #include "Ecf.hpp"
+#include "Node.hpp"
+//#include "PrintStyle.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
 using namespace ecf;
+
+std::vector<std::string> defs_with_expected_warnings() {
+   return { "limit/limit3.def" };
+}
 
 BOOST_AUTO_TEST_SUITE( ParserTestSuite )
 
@@ -70,6 +73,16 @@ void test_defs(const std::string& directory, bool pass)
 				BOOST_CHECK_MESSAGE(parsedOk,"Failed to parse file " << relPath << "\n" << errorMsg);
 
 				if (parsedOk) {
+				   // Check triggers and limits
+				   std::string err_msg,warn_msg;
+				   defs.check(err_msg,warn_msg);
+               BOOST_CHECK_MESSAGE(err_msg.empty(),"Expected no errors but found:" << err_msg << "File: " << relPath.string());
+
+               // expect warnings for some file:
+               bool ignore = false;
+               for(auto path: defs_with_expected_warnings()) { if (relPath.string().find(path) != std::string::npos) { ignore = true; break; }}
+               if (!ignore) BOOST_CHECK_MESSAGE(warn_msg.empty(),"Expected no warnings but found:" << warn_msg << "File: "  << relPath.string());
+
  					// Write parsed file to a temporary file on disk, and reload, then compare defs, should be the same
  					PersistHelper helper;
 					BOOST_CHECK_MESSAGE( helper.test_persist_and_reload(defs,parser.get_file_type()), relPath.string() << " " << helper.errorMsg());
@@ -104,8 +117,15 @@ void test_defs(const std::string& directory, bool pass)
 			}
 			else {
 				// test expected to fail
-			   //std::cout << errorMsg << "\n";
-				BOOST_CHECK_MESSAGE(!parsedOk,"Parse expected to fail for " << relPath << "\n" << errorMsg);
+ 			   if (parsedOk) {
+ 			      // Check triggers and limits
+ 			      std::string err_msg,warn_msg;
+ 			      defs.check(err_msg,warn_msg);
+ 			      BOOST_CHECK_MESSAGE(!err_msg.empty() || !warn_msg.empty(),"Expected problems with trigger/limits but found none for file"  << relPath << "\n" );
+ 			   }
+ 			   else {
+ 			      BOOST_CHECK_MESSAGE(!parsedOk,"Parse expected to fail for " << relPath << "\n" << errorMsg);
+ 			   }
  			}
 		}
 		catch ( const std::exception & ex )

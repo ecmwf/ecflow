@@ -1,8 +1,8 @@
 
-suite suiteName
+suite suite_ml_empty
  
 endsuite
 
-suite obs
+suite suite_ml_empty_obs
  
 endsuite

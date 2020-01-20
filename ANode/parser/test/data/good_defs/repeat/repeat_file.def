@@ -1,4 +1,5 @@
-suite suiteName
+suite repeat_file
  
     repeat file filename fred.txt   # comment
+  task t1
 endsuite

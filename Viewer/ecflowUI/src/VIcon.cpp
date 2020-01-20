@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -142,6 +142,20 @@ public:
     bool show(VNode*) override;
 };
 
+class VNoLogIcon : public VIcon
+{
+public:
+    explicit VNoLogIcon(const std::string& name) : VIcon(name) {}
+    bool show(VNode*) override;
+};
+
+class VCheckpointErrorIcon : public VIcon
+{
+public:
+    explicit VCheckpointErrorIcon(const std::string& name) : VIcon(name) {}
+    bool show(VNode*) override;
+};
+
 //==========================================================
 //
 // Create VIcon instances
@@ -163,6 +177,9 @@ static VSlowIcon slowIcon("slow");
 static VArchivedIcon archivedIcon("archived");
 static VRestoredIcon restoredIcon("restored");
 static VSlowJobCreationIcon slowJobCreationIcon("slow_job");
+static VNoLogIcon noLog("no_log");
+static VCheckpointErrorIcon noCheckptIcon("checkpt_err");
+
 //==========================================================
 //
 // The VIcon baseclass
@@ -580,4 +597,30 @@ bool VSlowJobCreationIcon::show(VNode *n)
         return false;
 
     return n->isFlagSet(ecf::Flag::THRESHOLD);
+}
+
+//==========================================================
+// No log - cannot be open/write
+//==========================================================
+
+//Server only
+bool VNoLogIcon::show(VNode *n)
+{
+    if(!n || !n->isServer())
+        return false;
+
+    return n->isFlagSet(ecf::Flag::LOG_ERROR);
+}
+
+//==========================================================
+// Cannot open/write to checkpoint
+//==========================================================
+
+//Server only
+bool VCheckpointErrorIcon::show(VNode *n)
+{
+    if(!n || !n->isServer())
+        return false;
+
+    return n->isFlagSet(ecf::Flag::CHECKPT_ERROR);
 }

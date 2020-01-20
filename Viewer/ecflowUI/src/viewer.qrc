@@ -13,11 +13,13 @@
     <file>../images/add_tree.svg</file>
     <file alias="icon_archived.svg">../images/icon_archived.svg</file>
     <file alias="icon_calendar.svg">../images/icon_calendar.svg</file>
+    <file alias="icon_checkpt_err.svg">../images/icon_checkpt_err.svg</file>
     <file alias="icon_clock.svg">../images/icon_clock.svg</file>     
     <file alias="icon_clock_free.svg">../images/icon_clock_free.svg</file>
     <file alias="icon_complete.svg">../images/icon_complete.svg</file>
     <file alias="icon_killed.svg">../images/icon_killed.svg</file>
     <file alias="icon_late.svg">../images/icon_late.svg</file>
+    <file alias="icon_no_log.svg">../images/icon_no_log.svg</file>
     <file alias="icon_children_hidden.svg">../images/icon_children_hidden.svg</file>
     <file alias="icon_node_log.svg">../images/icon_node_log.svg</file>
     <file alias="icon_rerun.svg">../images/icon_rerun.svg</file>
@@ -93,7 +95,9 @@
     <file alias="grey_info.svg">../images/grey_info.svg</file>
     <file alias="overview.svg">../images/overview.svg</file>
     <file alias="job.svg">../images/job.svg</file>
+    <file alias="job_status.svg">../images/job_status.svg</file>
     <file alias="large_file_search.svg">../images/large_file_search.svg</file>
+    <file alias="line_num.svg">../images/line_num.svg</file>
     <file alias="log_info.svg">../images/log_info.svg</file>
     <file alias="log_error.svg">../images/log_error.svg</file>
     <file alias="logo.png">../images/logo.png</file>

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #34 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -15,9 +15,7 @@
 #include "ClientToServerCmd.hpp"
 #include "AbstractServer.hpp"
 #include "AbstractClientEnv.hpp"
-#include "Str.hpp"
 #include "CtsApi.hpp"
-#include "Defs.hpp"
 #include "Suite.hpp"
 #include "JobsParam.hpp"
 #include "SuiteChanged.hpp"
@@ -69,9 +67,9 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	   }
 
 	   if (!node->suite()->begun()) {
-	      std::stringstream ss;
-	      ss << "RunNodeCmd failed: For " << paths_[i] << ". The suite " << node->suite()->name() << " must be 'begun' first\n";
-	      throw std::runtime_error( ss.str() ) ;
+	      std::stringstream mss;
+	      mss << "RunNodeCmd failed: For " << paths_[i] << ". The suite " << node->suite()->name() << " must be 'begun' first\n";
+	      throw std::runtime_error( mss.str() ) ;
 	   }
 
 	   SuiteChanged0 changed(node);

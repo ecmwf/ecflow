@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #19 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,26 +13,18 @@
 // Description :
 //============================================================================
 
-#include <cassert>
 #include <sstream>
-
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include "boost/filesystem/exception.hpp"
-#include <boost/lexical_cast.hpp>
+#include <limits>
 
 #include "Alias.hpp"
-#include "Defs.hpp"
 #include "Ecf.hpp"
 #include "Log.hpp"
-#include "Stl.hpp"
 #include "Str.hpp"
 #include "File.hpp"
 #include "Indentor.hpp"
 #include "PrintStyle.hpp"
 #include "Serialization.hpp"
 
-namespace fs = boost::filesystem;
 using namespace ecf;
 using namespace std;
 using namespace boost;

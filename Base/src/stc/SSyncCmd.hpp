@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #25 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -14,11 +14,11 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-#include <boost/noncopyable.hpp>
 
 #include "ServerToClientCmd.hpp"
 #include "DefsDelta.hpp"
 #include "DefsCache.hpp"
+class AbstractServer;
 
 //================================================================================
 // class SSyncCmd: Used to transfer changes made in the server to the client

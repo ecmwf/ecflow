@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #70 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,20 +13,15 @@
 // Description : This class is used as a helper class
 //============================================================================
 
-#include <iostream>
 #include <fstream>
-#include <sstream>
 
 #include "boost/filesystem.hpp"
-#include "boost/filesystem/operations.hpp"
-#include <boost/token_functions.hpp>
-#include <boost/algorithm/string/trim.hpp>
-#include <boost/algorithm/string.hpp>
-
-#include <boost/tokenizer.hpp>
+//#include <boost/token_functions.hpp>
+//#include <boost/algorithm/string/trim.hpp>
+//#include <boost/algorithm/string.hpp>
+//#include <boost/tokenizer.hpp>
 
 #include "File.hpp"
-#include "File_r.hpp"
 #include "Log.hpp"
 #include "NodePath.hpp"
 #include "Str.hpp"
@@ -555,9 +550,9 @@ bool File::createMissingDirectories(const std::string& pathToFileOrDir)
 bool File::createDirectories(const std::string& pathToDir)
 {
 	if (pathToDir.empty()) return false;
-	if (fs::exists(pathToDir)) return true;
 
 	try {
+	   if (fs::exists(pathToDir)) return true;
 		return fs::create_directories(pathToDir);
 	}
 	catch (std::exception&) {}
@@ -749,12 +744,20 @@ std::string File::forwardSearch( const std::string& rootPath, const std::string&
    // Look for file in the root path
    std::string ecf_file = leafName + fileExtn;
    fs::path ecf_filePath = fs::path( fs::path(rootPath) / ecf_file );
-   if (fs::exists(ecf_filePath)) {
+
+   try {
+      if (fs::exists(ecf_filePath)) {
 #ifdef DEBUG_TASK_LOCATION
-      std::cout << "forwardSearch Node " << leafName << " Found " << ecf_file << " in root path '" << rootPath << "'\n";
+      std::cout << "Task::forwardSearch Node " << leafName << " Found " << ecf_file << " in root path '" << rootPath << "'\n";
 #endif
-      std::string result = ecf_filePath.string(); // is returned by reference hence must take a copy
-      return result ;
+         std::string result = ecf_filePath.string(); // is returned by reference hence must take a copy
+         return result;
+      }
+   }
+   catch ( fs::filesystem_error &e ) {
+#ifdef DEBUG_TASK_LOCATION
+      std::cout << "Task::forwardSearch Caught exception for root_path fs::exists('" << ecf_filePath  <<"')\n" << e.what() << "\n";
+#endif
    }
 
    // failed to find file via forward search

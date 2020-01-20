@@ -1,6 +1,47 @@
-general perf: http://www.brendangregg.com/USEmethod/use-linux.html
+REF:
+====
+https://www.bfilipek.com/2019/11/perfguidecpu.html
+https://easyperf.net/notes/
+https://easyperf.net/blog/2019/08/02/Perf-measurement-environment-on-Linux
+
+PERF 
+====
+# Is a sampling profiler. Not 100% precies. Artifacts of measurement will have precision loss.
+  perf stat <exe>  # course grain
+  
+# By default perf shows calle data. Expanding the tree will show the callers.
+# But des not show proper call graph
+  perf record <exe>
+  perf report
+  
+# For callgraph use -g,  this requires, frame pointers
+# Hence make sure to compile/link with -fno-omit-frame-ponter 
+# This tells the compiler to stop deleting the frame pointer,allowing us to walk up/down the call stack
+# At the cost of one register. 
+  perf record -g <exe>
+  perf report -g
+ 
+# Can have a flags file for compiler options:
+-O3
+-std=c++14
+-lc++abi
+-fno-exceptions
+-fno-rtti
+-pedantic
+-fno-omit-frame-ponter
+
+  clang++ $(< flags) -o <test-name> <src file> -lbenchmark && ./<test-name>
+
+# For proper callgraphs (top down) use:
+# # 0.5 if for filtering function ?, caller means caller on top, then callee
+  perf record -g <exe>
+  oerf report -g "graph,0.5,caller"  
+
 ==================================================================
-Good collection of performance debug
+- http://www.brendangregg.com/USEmethod/use-linux.html                - Good collection of performance debug
+- https://easyperf.net/notes/
+- https://easyperf.net/blog/2019/08/02/Perf-measurement-environment-on-Linux
+- https://easyperf.net/blog/2018/08/26/Basics-of-profiling-with-perf  - Basic perf understanding
 
 Use of perf:  http://www.brendangregg.com/perf.html
 ===============================================================

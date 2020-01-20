@@ -14,7 +14,7 @@ defs_state MIGRATE
 # This will test that for alias we allow _variables_ names *without* checking
 # i.e for tasks EDACLASS:"od" would be an illegal variable name
 # ===============================================================================
-suite suiteName
+suite alias
 
   task t1
     alias alias0

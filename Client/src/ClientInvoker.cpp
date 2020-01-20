@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -32,8 +32,10 @@
 #include "DurationTimer.hpp"
 #include "TimeStamp.hpp"
 #include "Log.hpp"
+#ifdef DEBUG_PERF
 #include "DebugPerf.hpp"
-#include "PasswdFile.hpp"
+#endif
+
 
 #ifdef DEBUG
 
@@ -350,7 +352,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
                   SslClient theClient(io_service,clientEnv_.openssl().context(),cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
                   {
 #ifdef DEBUG_PERF
-                     ecf::ScopedDurationTimer timer(" io_service.run()");
+                     ecf::ScopedDurationTimer my_timer(" io_service.run()");
 #endif
                      io_service.run();
                   }
@@ -374,7 +376,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					   Client theClient(io_service,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
                   {
 #ifdef DEBUG_PERF
-					      ecf::ScopedDurationTimer timer(" io_service.run()");
+					      ecf::ScopedDurationTimer my_timer(" io_service.run()");
 #endif
 					      io_service.run();
 					   }
@@ -1323,9 +1325,14 @@ std::string ClientInvoker::find_free_port(int seed_port_number, bool debug)
       }
       catch ( std::runtime_error& e) {
          std::string error_msg = e.what();
-         if (debug) cout << "   " << e.what();
+         if (debug) cout << "   " << error_msg;
          if (error_msg.find("authentication failed") != std::string::npos) {
-            if (debug) cout << "   Could not connect, due to authentication failure, hence port " << the_port << " is used,trying next port\n";
+            if (debug) cout << "   Could not connect, due to authentication failure, hence port " << the_port << " is used, trying next port\n";
+            the_port++;
+            continue;
+         }
+         if (error_msg.find("invalid_argument") != std::string::npos) {
+            if (debug) cout << "   Mixing 4 and 5 series ?, hence port " << the_port << " is used, trying next port\n";
             the_port++;
             continue;
          }
@@ -1436,7 +1443,7 @@ void ClientInvoker::child_init()
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( std::make_shared<InitCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no()  ));
+   invoke( std::make_shared<InitCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(), clientEnv_.init_add_vars()));
 }
 
 void ClientInvoker::child_abort(const std::string& reason )
@@ -1490,7 +1497,7 @@ void ClientInvoker::child_complete()
 {
    check_child_parameters();
    on_error_throw_exception_ = true; // for python always throw exception
-   invoke( std::make_shared<CompleteCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no() ));
+   invoke( std::make_shared<CompleteCmd>(clientEnv_.task_path(), clientEnv_.jobs_password(), clientEnv_.process_or_remote_id(), clientEnv_.task_try_no(), clientEnv_.complete_del_vars()));
 }
 
 // ==========================================================================

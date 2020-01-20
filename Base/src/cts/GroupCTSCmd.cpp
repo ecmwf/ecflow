@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #29 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -234,6 +234,13 @@ void GroupCTSCmd::setup_user_authentification()
    UserCmd::setup_user_authentification();
    for(auto & i : cmdVec_) {
       i->setup_user_authentification();
+   }
+}
+
+void GroupCTSCmd::add_edit_history(AbstractServer* as) const
+{
+   for(Cmd_ptr subCmd: cmdVec_)  {
+      subCmd->add_edit_history(as);
    }
 }
 

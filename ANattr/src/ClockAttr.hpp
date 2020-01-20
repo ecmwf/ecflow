@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #18 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -16,9 +16,8 @@
 // Description :
 //============================================================================
 
-#include <iosfwd>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 
 namespace ecf { class Calendar;} // forward declare class that is in a namesapce
 
@@ -38,7 +37,7 @@ class ClockAttr {
 public:
 	/// The following constructor is used for test only. It allows us to
 	/// create a clock attribute initialised with given date and time
-	ClockAttr(const boost::posix_time::ptime&, bool hybrid = false, bool positiveGain = true);
+   explicit ClockAttr(const boost::posix_time::ptime&, bool hybrid = false, bool positiveGain = true);
 	ClockAttr(int day, int month, int year, bool hybrid = false );
 	explicit ClockAttr(bool hybrid = false);
 

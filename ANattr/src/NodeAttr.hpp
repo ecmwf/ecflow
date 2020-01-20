@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #61 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -15,13 +15,11 @@
 // Description :
 //============================================================================
 
-#include <iosfwd>
 #include <vector>
 #include <limits> // for std::numeric_limits<int>::max()
 
 #include <boost/operators.hpp>
-#include <boost/utility.hpp>
-#include <cereal/access.hpp>
+namespace cereal { class access; }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -91,8 +89,8 @@ private:
 // use std::numeric_limits<int>::max()
 class Event {
 public:
-   Event(int number, const std::string& eventName = "", bool initial_val = false, bool check_name = true);
-   Event(const std::string& eventName,bool initial_val = false);
+   explicit Event(int number, const std::string& eventName = "", bool initial_val = false, bool check_name = true);
+   explicit Event(const std::string& eventName,bool initial_val = false);
    Event()= default;
 
    std::string name_or_number() const; // if name present return, else return number

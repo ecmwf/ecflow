@@ -1,4 +1,4 @@
-suite suiteName
+suite today
    family familyName0
    		today 15:00
    		today 00:00 23:59 00:30
@@ -6,7 +6,7 @@ suite suiteName
    endfamily
 endsuite
 
-suite s1
+suite today_s1
    family familyName0
    		today 15:00 ; today 00:00 23:59 00:30
         today 00:00 06:59 00:30

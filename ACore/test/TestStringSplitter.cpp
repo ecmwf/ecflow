@@ -51,10 +51,9 @@ static void check(const std::string& line, const std::vector<std::string>& expec
    std::vector<std::string> result;
    std::vector<boost::string_view> result2;
    StringSplitter::split2(line,result2,delims);
-   for(const auto& s: result2) {
-      //std::cout << "ref:'" <<  s << "'\n";
-      result.emplace_back(std::string(s.begin(),s.end()));
-   }
+   std::transform(result2.begin(),result2.end(),std::back_inserter(result),
+                  [](const boost::string_view& sv) { return std::string(sv.begin(),sv.end()); });
+
    BOOST_CHECK_MESSAGE(result.size() == expected.size(),"expected size " << expected.size() << " but found " << result.size() << " for '" << line << "'");
    BOOST_CHECK_MESSAGE(result == expected,"failed for '" << line  << "'");
    if (result != expected) {

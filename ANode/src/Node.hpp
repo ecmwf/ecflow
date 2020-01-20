@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #251 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -30,17 +30,12 @@
 #include <iosfwd>
 #include <limits>
 
-#include <boost/noncopyable.hpp>
-                      // used so often just placed here for convenience
-
 #include "DState.hpp"
 #include "NOrder.hpp"
 #include "NodeAttr.hpp"
 #include "InLimit.hpp"
 #include "Variable.hpp"
-#include "LateAttr.hpp"
 #include "RepeatAttr.hpp"
-#include "Expression.hpp"
 #include "InLimitMgr.hpp"
 
 #include "TimeAttr.hpp"
@@ -49,17 +44,15 @@
 #include "DayAttr.hpp"
 #include "CronAttr.hpp"
 
-#include "MiscAttrs.hpp"
 #include "NodeFwd.hpp"
 #include "Flag.hpp"
 #include "Aspect.hpp"
 #include "Attr.hpp"
+#include "Child.hpp"
 #include "PrintStyle.hpp"
-#include "NodeStats.hpp"
 
-class AbstractObserver;
 namespace ecf { class Simulator; class SimulatorVisitor; class DefsAnalyserVisitor; class FlatAnalyserVisitor; } // forward declare for friendship
-namespace ecf { class Calendar; class NodeTreeVisitor; } // forward declare class
+namespace ecf { class Calendar; class NodeTreeVisitor; class LateAttr;} // forward declare class
 
 class Node : public std::enable_shared_from_this<Node>  {
 protected:
@@ -415,7 +408,7 @@ public:
 
    // Add functions: ===============================================================
    void addVerify( const VerifyAttr& );  // for testing and verification Can throw std::runtime_error
-   void addVariable(const Variable& );   // will throw std::runtime_error if duplicate
+   void addVariable(const Variable& );   // will update if duplicate
    void add_variable(const std::string& name, const std::string& value );// will write to std:out if duplicates
    void add_variable_bypass_name_check(const std::string& name, const std::string& value );// will write to std:out if duplicates
    void add_variable_int(const std::string& name, int);// will throw std::runtime_error if duplicate
@@ -473,7 +466,8 @@ public:
    void delete_cron(const ecf::CronAttr&);
 
    void delete_zombie(const ecf::Child::ZombieType);
-   void deleteVariable( const std::string& name);
+   void deleteVariable( const std::string& name);           // if name not found throw, if name empty delete all variables
+   void delete_variable_no_error( const std::string& name); // if variable not found don't error, if name empty do nothing
    void deleteEvent(const std::string& name);
    void deleteMeter(const std::string& name);
    void deleteLabel(const std::string& name);

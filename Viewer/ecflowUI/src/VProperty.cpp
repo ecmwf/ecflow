@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -174,6 +174,8 @@ void VProperty::setValue(QVariant val)
 
 QString VProperty::valueAsString() const
 {
+    return variantToString(value());
+#if 0
     QString s;
 
     switch(type_)
@@ -201,7 +203,40 @@ QString VProperty::valueAsString() const
     }
 
     return s;
+#endif
 }
+
+QString VProperty::variantToString(QVariant val) const
+{
+    QString s;
+
+    switch(type_)
+    {
+    case StringType:
+        s=val.toString();
+        break;
+    case IntType:
+        s=QString::number(val.toInt());
+        break;
+    case BoolType:
+        s=(val.toBool() == true)?"true":"false";
+        break;
+    case ColourType:
+        s=VProperty::toString(val.value<QColor>());
+        break;
+    case FontType:
+        s=VProperty::toString(val.value<QFont>());
+        break;
+    case SoundType:
+        s=val.toString();
+        break;
+    default:
+        break;
+    }
+
+    return s;
+}
+
 
 std::string VProperty::valueAsStdString() const
 {	

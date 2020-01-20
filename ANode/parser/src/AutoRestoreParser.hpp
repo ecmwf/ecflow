@@ -6,7 +6,7 @@
 // Author      : Avi
 // Revision    : $Revision: #6 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -20,7 +20,7 @@
 
 class AutoRestoreParser : public Parser {
 public:
-   AutoRestoreParser(DefsStructureParser* p) : Parser(p) {}
+   explicit AutoRestoreParser(DefsStructureParser* p) : Parser(p) {}
    const char* keyword() const override { return "autorestore"; }
    bool doParse(const std::string& line,std::vector<std::string>& lineTokens) override;
 };

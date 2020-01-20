@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -9,6 +9,7 @@
 
 #include "OverviewProvider.hpp"
 #include "AutoCancelAttr.hpp"
+#include "Suite.hpp"
 
 #include "ConnectState.hpp"
 #include "ServerHandler.hpp"
@@ -172,6 +173,27 @@ void OverviewProvider::serverInfo(VInfoServer* info,std::stringstream& f)
         f << "flags   : " << flags << "\n";
 
     f << "----------\n";
+
+    if(snode->isFlagSet(ecf::Flag::LOG_ERROR))
+    {
+        const std::string& errTxt=snode->findVariable("ECF_LOG_ERROR", true);
+        if(!errTxt.empty())
+        {
+            f << "log error : " + errTxt + "\n";
+            f << "----------\n";
+        }
+    }
+
+    if(snode->isFlagSet(ecf::Flag::CHECKPT_ERROR))
+    {
+        const std::string& errTxt=snode->findVariable("ECF_CHECKPT_ERROR", true);
+        if(!errTxt.empty())
+        {
+            f << "checkpoint error : " + errTxt + "\n";
+            f << "----------\n";
+        }
+    }
+
     //Start block: Type, name
     f << typeName << " " << server->name() << "\n";
 

@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -82,7 +82,7 @@ double get_seconds( const boost::timer::nanosecond_type& elapsed )
 
 BOOST_AUTO_TEST_CASE( test_single_defs )
 {
-   boost::timer::auto_cpu_timer t;
+   boost::timer::auto_cpu_timer auto_cpu_timer;
 
    std::string path = File::test_data("ANode/parser/test/data/single_defs/mega.def","parser");
    size_t mega_file_size = fs::file_size(path);

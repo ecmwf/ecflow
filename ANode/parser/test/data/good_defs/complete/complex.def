@@ -1,4 +1,4 @@
-suite suite
+suite complete1
     family family
     	task t1
     	task t2
@@ -12,7 +12,8 @@ suite suite
     	task t10
 		task a             
          	event eventName 
-    	task b             
+    	task b  
+    	    trigger 1 == 0                  # impossible trigger, keeps task queued           
    			complete t1  == complete        # a comment at end of trigger
    			complete -a t2  == complete     # a comment at end of trigger
    			complete -a t3  == complete     # a comment at end of trigger

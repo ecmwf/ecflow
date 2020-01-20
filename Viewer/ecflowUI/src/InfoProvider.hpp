@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -51,7 +51,8 @@ protected:
 	VTask_ptr task_;
 	VReply* reply_;
 	VTask::Type taskType_;
-	std::string fileVarName_;
+    std::string fileVarName_;
+    std::string fileSuffix_;
 	std::string fileNotDefinedText_;
 	std::string fileMissingText_;
     bool active_;
@@ -66,6 +67,21 @@ public:
 protected:
 	 bool handleFileMissing(const std::string& fileName,VReply *reply) override;
 };
+
+class JobStatusFileProvider : public InfoProvider
+{
+public:
+     explicit JobStatusFileProvider(InfoPresenter* owner);
+protected:
+     bool handleFileMissing(const std::string& fileName,VReply *reply) override;
+};
+
+class JobStatusProvider : public InfoProvider
+{
+public:
+     explicit JobStatusProvider(InfoPresenter* owner);
+};
+
 
 class ManualProvider : public InfoProvider
 {

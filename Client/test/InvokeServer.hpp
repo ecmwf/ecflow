@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #32 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -17,7 +17,7 @@
 #include <iostream>
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #include "TestHelper.hpp"
 #include "ClientInvoker.hpp"
@@ -27,7 +27,7 @@
 
 class InvokeServer : private boost::noncopyable {
 public:
-	InvokeServer(const std::string& msg,
+   explicit InvokeServer(const std::string& msg,
 	               const std::string& port = ecf::Str::DEFAULT_PORT_NUMBER(),
 	               bool disable_job_generation = false,
                   bool remove_checkpt_file_before_server_start = true,

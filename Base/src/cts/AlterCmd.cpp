@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #62 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -20,13 +20,16 @@
 #include "AbstractClientEnv.hpp"
 #include "CtsApi.hpp"
 #include "Defs.hpp"
-#include "Task.hpp"
+#include "Suite.hpp"
 #include "Str.hpp"
 #include "ExprAst.hpp"
 #include "SuiteChanged.hpp"
 #include "Log.hpp"
 #include "Extract.hpp"
 #include "Limit.hpp"
+#include "LateAttr.hpp"
+#include "MiscAttrs.hpp"
+#include "Expression.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -421,8 +424,8 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
              int int_value = 0;
              try { int_value = boost::lexical_cast< int >( value_ ); }
              catch ( boost::bad_lexical_cast& ) {
-                std::stringstream ss; ss << "AlterCmd: add_limit " << name_ << " " << value_ << " failed. Expected '" <<  value_ << "' to be convertible to an integer";
-                throw std::runtime_error( ss.str() );
+                std::stringstream mss; mss << "AlterCmd: add_limit " << name_ << " " << value_ << " failed. Expected '" <<  value_ << "' to be convertible to an integer";
+                throw std::runtime_error( mss.str() );
              }
             node->addLimit( Limit(name_, int_value));
             break;
@@ -483,7 +486,7 @@ const char* AlterCmd::desc() {
             /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
    return  "Alter the node according to the options.\n"
          "To add/delete/change server variables use '/' for the path.\n"
-         "arg1 = [ delete | change | add | set_flag | clear_flag | sort ]\n"
+         "arg1 =   [ delete | change | add | set_flag | clear_flag | sort ]\n"
          "         one option must be specified\n"
          "arg2 = For delete:\n"
          "         [ variable | time | today | date  | day | cron | event | meter | late | generic | queue |\n"
@@ -496,10 +499,10 @@ const char* AlterCmd::desc() {
          "       For add:\n"
          "         [ variable | time | today | date | day | zombie | late | limit | inlimit | label ]\n"
          "       For set_flag and clear_flag:\n"
-         "         [ force_aborted | user_edit | task_aborted | edit_failed |\n"
-         "           ecfcmd_failed | no_script | killed | migrated | late |\n"
-         "           message | complete | queue_limit | task_waiting | locked | zombie ]\n"
-         "             archived | restored]\n"
+         "         [ force_aborted | user_edit | task_aborted | edit_failed | ecfcmd_failed \n"
+         "           statuscmd_failed | killcmd_failed | no_script | killed | status | migrated | late | message | \n"
+         "           complete | queue_limit | task_waiting | locked | zombie | archived | restored |\n"
+         "           threshold | log_error | checkpt_error]\n"
          "       For sort:\n"
          "         [ event | meter | label | variable| limit | all ]\n"
          "arg3 = name/value\n"

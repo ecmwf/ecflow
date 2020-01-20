@@ -69,7 +69,7 @@ QStringList VGenVarAttr::data(bool /*firstLine*/) const
 {
     static auto* atype=static_cast<VGenVarAttrType*>(type());
     QStringList s;
-    if(parent_->isServer() == nullptr)
+    if(parent_)
     {
         std::vector<Variable> v;
         parent_->genVariables(v);
@@ -80,7 +80,7 @@ QStringList VGenVarAttr::data(bool /*firstLine*/) const
 
 std::string VGenVarAttr::strName() const
 {
-    if(parent_->isServer() == nullptr)
+    if(parent_)
     {
         std::vector<Variable> v;
         parent_->genVariables(v);
@@ -91,7 +91,7 @@ std::string VGenVarAttr::strName() const
 
 void VGenVarAttr::scan(VNode* vnode,std::vector<VAttribute*>& vec)
 {
-    if(vnode->isServer() == nullptr)
+    if(vnode)
     {
         std::vector<Variable> v;
         vnode->genVariables(v);

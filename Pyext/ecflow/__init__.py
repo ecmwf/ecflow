@@ -4,7 +4,7 @@ from .ecflow import *
 # Author      : Avi
 # Revision    : $Revision: #10 $ 
 #
-# Copyright 2009-2019 ECMWF.
+# Copyright 2009-2020 ECMWF.
 # This software is licensed under the terms of the Apache Licence version 2.0 
 # which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 # In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -15,6 +15,6 @@ from .ecflow import *
 The ecFlow python module
 """
 
-__version__ = '5.1.1'
+__version__ = '5.2.0'
 
 # http://stackoverflow.com/questions/13040646/how-do-i-create-documentation-with-pydoc

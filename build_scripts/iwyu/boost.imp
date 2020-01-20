@@ -1,0 +1,23 @@
+[
+{ symbol: ["std::stringstream", "private", "<sstream>", "public"] },
+
+{ include: ["@<boost/date_time/posix_time/.*>",    "public", "<boost/date_time/posix_time/posix_time.hpp>",       "public"] },
+{ include: ["@<boost/date_time/posix_time/.*>",    "public", "<boost/date_time/posix_time/posix_time_types.hpp>", "public"] },
+
+{ include : ["<boost/preprocessor/comparison/not_equal.hpp>",          "private", "<boost/test/unit_test.hpp>",      "public"] },  
+{ include : ["<boost/preprocessor/control/iif.hpp>",                   "private", "<boost/test/unit_test.hpp>",      "public"] },      
+{ include : ["<boost/preprocessor/logical/bool.hpp>",                  "private", "<boost/test/unit_test.hpp>",      "public"] },                      
+{ include : ["<boost/preprocessor/logical/compl.hpp>",                 "private", "<boost/test/unit_test.hpp>",      "public"] },                       
+{ include : ["<boost/test/tools/old/interface.hpp>",                   "private", "<boost/test/unit_test.hpp>",      "public"] },                        
+{ include : ["<boost/test/unit_test_suite.hpp>",                       "private", "<boost/test/unit_test.hpp>",      "public"] },                            
+{ include : ["<boost/test/utils/basic_cstring/basic_cstring.hpp>",     "private", "<boost/test/unit_test.hpp>",      "public"] },           
+{ include : ["<boost/test/utils/basic_cstring/basic_cstring_fwd.hpp>", "private", "<boost/test/unit_test.hpp>",      "public"] },      
+{ include : ["<boost/test/utils/lazy_ostream.hpp>",                    "private", "<boost/test/unit_test.hpp>",      "public"] },      
+
+{ include: ["@<boost/bind/.*>", private, "<boost/bind.hpp>", public ] },
+{ include: ["@<boost/format/.*>", private, "<boost/format.hpp>", public ] },
+{ include: ["@<boost/filesystem/.*>", private, "<boost/filesystem.hpp>", public ] },
+{ include: ["@<boost/function/.*>", private, "<boost/function.hpp>", public ] }
+
+]                
+                                

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #4 $
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -14,14 +14,12 @@
 //============================================================================
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 
 #include "ClientInvoker.hpp"
 #include "ClientEnvironment.hpp"
 #include "PasswdFile.hpp"
 #include "InvokeServer.hpp"
 #include "SCPort.hpp"
-#include "Str.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;
@@ -39,7 +37,7 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 
 class Add_ECF_PASSWD_env {
 public:
-   Add_ECF_PASSWD_env(const std::string& passwd_file) : env_("ECF_PASSWD=") {
+   explicit Add_ECF_PASSWD_env(const std::string& passwd_file) : env_("ECF_PASSWD=") {
       env_ += passwd_file;
       auto* put = const_cast<char*>(env_.c_str());
       BOOST_CHECK_MESSAGE(putenv(put) == 0,"putenv failed for " << put);

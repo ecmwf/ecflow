@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #15 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -251,22 +251,23 @@ void Zombie::pretty_print(const std::vector<Zombie>& zombies,
       explanation_width = std::max(explanation_width,exp.size());
    }
 
-   std::stringstream ss;
-   if (indent != 0) for(int i = 0; i < indent; i++) ss << " ";
-   ss << left << setw(path_width) << path << " "
-            << setw(type_width) << type << " "
-            << setw(duration_width) << duration << " "
-            << setw(password_width) << password << " "
-            << setw(rid_width) << rid << " "
-            << setw(tryno_width) << try_no << " "
-            << setw(user_action_width) << user_action << " "
-            << setw(child_type_width) << child_type << " "
-            << setw(calls_width) << calls << " "
-            << setw(host_width) << host << " "
-            << setw(explanation_width) << explanation
-   ;
-
-   list.push_back(ss.str());
+   {
+      std::stringstream ss;
+      if (indent != 0) for(int i = 0; i < indent; i++) ss << " ";
+      ss << left << setw(path_width)   << path << " "
+               << setw(type_width)     << type << " "
+               << setw(duration_width) << duration << " "
+               << setw(password_width) << password << " "
+               << setw(rid_width)      << rid << " "
+               << setw(tryno_width)    << try_no << " "
+               << setw(user_action_width) << user_action << " "
+               << setw(child_type_width)  << child_type << " "
+               << setw(calls_width)       << calls << " "
+               << setw(host_width)        << host << " "
+               << setw(explanation_width) << explanation
+               ;
+      list.push_back(ss.str());
+   }
 
    for(const Zombie& z: zombies) {
      std::stringstream ss;

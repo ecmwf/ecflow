@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #35 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -13,10 +13,9 @@
 // Description :
 //============================================================================
 
-#include <iostream>
 #include <sstream>
 #include <iomanip>
-#include <string>
+
 #include "Stats.hpp"
 #include "SState.hpp"
 
@@ -53,7 +52,7 @@ void Stats::update_for_serialisation()
       count++;
       request += (*i).first;
       seconds += (*i).second;
-      double request_per_second = (double)request/seconds;
+      double request_per_second = static_cast<double>(request/seconds);
 
       if (count == 1) {
          ss << setiosflags(ios::fixed) << setprecision(2) << request_per_second;

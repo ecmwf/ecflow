@@ -13,26 +13,23 @@
 // Description :
 //============================================================================
 #include <iostream>
-#include <fstream>
-#include <cstdlib>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "Simulator.hpp"
 #include "File.hpp"
-#include "Log.hpp"
 #include "Defs.hpp"
 #include "Suite.hpp"
 #include "Family.hpp"
 #include "Task.hpp"
 #include "Str.hpp"
 #include "TestUtil.hpp"
-#include "PrintStyle.hpp"
 #include "AutoRestoreAttr.hpp"
 #include "AutoArchiveAttr.hpp"
+
+//#include "PrintStyle.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -113,7 +110,7 @@ BOOST_AUTO_TEST_CASE( test_autorestore_family )
       suite->addClock( clockAttr );
 
       family_ptr fam = suite->add_family("family");
-      fam->add_autoarchive( 0 );
+      fam->add_autoarchive( AutoArchiveAttr(0) );
       task_ptr task = fam->add_task("t");
       task->addTime(ecf::TimeAttr(1,0,true));
       vec.push_back(fam->absNodePath());

@@ -1,4 +1,4 @@
-suite suiteName
+suite event_2
    family familyName0
       task taskName0
          event 0 

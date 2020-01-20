@@ -1,10 +1,10 @@
-suite suiteName
+suite clock
  clock real 300
  endclock 400
 endsuite
 
-suite s1
+suite clock_s1
  clock real 300
 endsuite
 
-suite s2; clock real 300; endclock 400; endsuite
+suite clock_s2; clock real 300; endclock 400; endsuite

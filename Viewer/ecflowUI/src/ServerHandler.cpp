@@ -1,5 +1,5 @@
 //============================================================================
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 // In applying this licence, ECMWF does not waive the privileges and immunities
@@ -680,7 +680,10 @@ void ServerHandler::run(VTask_ptr task)
 		break;
 	case VTask::ManualTask:
 		return manual(task);
-		break;
+        break;
+    case VTask::JobStatusFileTask:
+        return jobstatus(task);
+        break;
 	case VTask::HistoryTask:
 	case VTask::MessageTask:
 	case VTask::StatsTask:
@@ -691,6 +694,7 @@ void ServerHandler::run(VTask_ptr task)
     case VTask::WhySyncTask:
     case VTask::ZombieListTask:
     case VTask::ZombieCommandTask:
+    case VTask::JobStatusTask:
 		comQueue_->addTask(task);
 		break;
 	default:
@@ -728,6 +732,14 @@ void ServerHandler::jobout(VTask_ptr task)
 
 	task->param("clientPar","jobout");
 	comQueue_->addTask(task);
+}
+
+void ServerHandler::jobstatus(VTask_ptr task)
+{
+    //static std::string errText="no job output...";
+
+    task->param("clientPar","stat");
+    comQueue_->addTask(task);
 }
 
 void ServerHandler::manual(VTask_ptr task)
@@ -1174,6 +1186,7 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
             case VTask::ManualTask:
             case VTask::HistoryTask:
             case VTask::JobTask:
+            case VTask::JobStatusFileTask:
             {
                 task->reply()->fileReadMode(VReply::ServerReadMode);
                 task->reply()->setText(serverReply.get_string());

@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision$ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -12,11 +12,9 @@
 //
 // Description :
 //============================================================================
-#include <boost/archive/tmpdir.hpp>
+#include <sstream>
+
 #include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
-#include <iostream>
-#include <fstream>
 
 #include "PersistHelper.hpp"
 #include "Defs.hpp"
@@ -67,8 +65,8 @@ bool PersistHelper::test_defs_checkpt_and_reload( const Defs& theInMemoryDefs, b
    // Reload the file we just persisted and compare with in memory defs
    Defs savedDef;
    bool reload_result = reload_from_defs_file(theInMemoryDefs,savedDef,tmpFilename,do_compare);
-   if (reload_result)  return savedDef.checkInvariants(errorMsg_);
-   return reload_result;
+   if (reload_result) return savedDef.checkInvariants(errorMsg_);
+   return false;
 }
 
 
@@ -84,7 +82,7 @@ bool PersistHelper::test_cereal_checkpt_and_reload( const Defs& theInMemoryDefs,
  	Defs reloaded_defs;
  	bool reload_result = reload_from_cereal_checkpt_file(theInMemoryDefs,reloaded_defs,do_compare);
    if (reload_result)  return reloaded_defs.checkInvariants(errorMsg_);
-   return reload_result;
+   return false;
 }
 
 bool PersistHelper::test_state_persist_and_reload_with_checkpt(const Defs& theInMemoryDefs )

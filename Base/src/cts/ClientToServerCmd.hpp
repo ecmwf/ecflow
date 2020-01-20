@@ -5,7 +5,7 @@
 // Author      : Avi
 // Revision    : $Revision: #143 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -27,6 +27,7 @@
 #include "CheckPt.hpp"
 #include "PreAllocatedReply.hpp"
 #include "Serialization.hpp"
+#include "Variable.hpp"
 
 class AbstractServer;
 class AbstractClientEnv;
@@ -121,6 +122,7 @@ public:
    virtual bool ping_cmd() const { return false;}
    virtual bool why_cmd( std::string& ) const { return false;}
    virtual bool show_cmd() const { return false ;}
+   virtual void add_edit_history(AbstractServer*) const;
 
    // used by group_cmd to postfix syncCmd on all user commands that modify defs
    virtual void set_client_handle(int client_handle) {} // used by group_cmd
@@ -171,6 +173,10 @@ protected:
    void add_node_for_edit_history(AbstractServer* as, const std::string& absNodepath) const;
    void add_node_for_edit_history(node_ptr) const;
    void add_node_path_for_edit_history(const std::string& absNodepath) const;
+
+
+   void add_edit_history(AbstractServer*,const std::string& path) const;
+   void add_delete_edit_history(AbstractServer*,const std::string& path) const;
 
 private:
    friend class GroupCTSCmd;
@@ -261,10 +267,13 @@ public:
    InitCmd(const std::string& pathToTask,
             const std::string& jobsPassword,
             const std::string& process_or_remote_id,
-            int try_no )
-   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no) {}
+            int try_no,
+            const std::vector<Variable>& vec = {})
+   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), var_to_add_(vec) {}
 
    InitCmd() : TaskCmd()  {}
+
+   const std::vector<Variable>& variables_to_add() const { return var_to_add_;}
 
    std::ostream& print(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
@@ -281,22 +290,29 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
    ecf::Child::CmdType child_type() const override { return ecf::Child::INIT; }
 
+private:
+   std::vector<Variable> var_to_add_;
+
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class< TaskCmd >( this ));
+      CEREAL_OPTIONAL_NVP(ar, var_to_add_, [this](){return !var_to_add_.empty(); }); // conditionally save
    }
 };
 
 class CompleteCmd : public TaskCmd {
 public:
    CompleteCmd(const std::string& pathToTask,
-            const std::string& jobsPassword,
-            const std::string& process_or_remote_id = "",
-            int try_no  = 1)
-   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no) {}
+               const std::string& jobsPassword,
+               const std::string& process_or_remote_id = "",
+               int try_no  = 1,
+               const std::vector<std::string>& vec = std::vector<std::string>())
+   : TaskCmd(pathToTask,jobsPassword,process_or_remote_id,try_no), var_to_del_(vec) {}
    CompleteCmd() : TaskCmd() {}
+
+   const std::vector<std::string>& variables_to_delete() const { return var_to_del_;}
 
    std::ostream& print(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
@@ -313,11 +329,15 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
    ecf::Child::CmdType child_type() const override { return ecf::Child::COMPLETE; }
 
+private:
+   std::vector<std::string> var_to_del_; //  variables to delete on task
+
    friend class cereal::access;
    template<class Archive>
    void serialize(Archive & ar, std::uint32_t const version )
    {
       ar(cereal::base_class< TaskCmd >( this ));
+      CEREAL_OPTIONAL_NVP(ar, var_to_del_, [this](){return !var_to_del_.empty(); }); // conditionally save
    }
 };
 
@@ -963,9 +983,9 @@ private:
 // DELETE If paths_ empty will delete all suites (beware) else will delete the chosen nodes.
 class DeleteCmd : public UserCmd {
 public:
-   DeleteCmd(const std::vector<std::string>& paths, bool force = false)
+   explicit DeleteCmd(const std::vector<std::string>& paths, bool force = false)
       : group_cmd_(nullptr),paths_(paths),force_(force){}
-   DeleteCmd(const std::string& absNodePath, bool force = false);
+   explicit DeleteCmd(const std::string& absNodePath, bool force = false);
    DeleteCmd()= default;
 
    const std::vector<std::string>& paths() const { return paths_;}
@@ -1071,7 +1091,7 @@ private:
 class LogCmd : public UserCmd {
 public:
    enum LogApi { GET, CLEAR, FLUSH, NEW , PATH };
-   LogCmd(LogApi a, int get_last_n_lines = 0); // for zero we take default from log. Avoid adding dependency on log.hpp
+   explicit LogCmd(LogApi a, int get_last_n_lines = 0); // for zero we take default from log. Avoid adding dependency on log.hpp
    explicit LogCmd(const std::string& path); // NEW
    LogCmd();
 
@@ -1147,7 +1167,7 @@ private:
 // class Begin:  if suiteName is empty we will begin all suites
 class BeginCmd : public UserCmd {
 public:
-   BeginCmd(const std::string& suiteName, bool force = false);
+   explicit BeginCmd(const std::string& suiteName, bool force = false);
    BeginCmd()= default;
 
    const std::string& suiteName() const { return suiteName_;}
@@ -1230,10 +1250,10 @@ class RequeueNodeCmd : public UserCmd {
 public:
    enum Option { NO_OPTION, ABORT, FORCE };
 
-   RequeueNodeCmd(const std::vector<std::string>& paths, Option op = NO_OPTION)
+   explicit RequeueNodeCmd(const std::vector<std::string>& paths, Option op = NO_OPTION)
    : paths_(paths), option_(op) {}
 
-   RequeueNodeCmd(const std::string& absNodepath, Option op = NO_OPTION)
+   explicit RequeueNodeCmd(const std::string& absNodepath, Option op = NO_OPTION)
    : paths_(std::vector<std::string>(1,absNodepath)), option_(op) {}
 
    RequeueNodeCmd()= default;
@@ -1409,8 +1429,8 @@ private:
 // to Node, events, meters, limits, variables defined on another suite.
 class LoadDefsCmd : public UserCmd {
 public:
-   LoadDefsCmd(const defs_ptr& defs, bool force = false);
-   LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */,
+   explicit LoadDefsCmd(const defs_ptr& defs, bool force = false);
+   explicit LoadDefsCmd(const std::string& defs_filename,bool force = false,bool check_only = false/* not persisted */,bool print = false/* not persisted */,
                bool stats = false/* not persisted */,
                const std::vector<std::pair<std::string,std::string> >& client_env = std::vector<std::pair<std::string,std::string> >());
    LoadDefsCmd()= default;
@@ -1572,7 +1592,7 @@ private:
 // Free Dependencies
 class FreeDepCmd : public UserCmd {
 public:
-   FreeDepCmd(const std::vector<std::string>& paths,
+   explicit FreeDepCmd(const std::vector<std::string>& paths,
             bool trigger = true,
             bool all = false, // day, date, time, today, trigger, cron
             bool date = false,
@@ -1580,7 +1600,7 @@ public:
    )
    : paths_(paths), trigger_(trigger), all_(all), date_(date), time_(time) {}
 
-   FreeDepCmd(const std::string& path,
+   explicit FreeDepCmd(const std::string& path,
             bool trigger = true,
             bool all = false, // day, date, time, today, trigger, cron
             bool date = false,
@@ -2048,7 +2068,7 @@ private:
 class GroupCTSCmd : public UserCmd {
 public:
    GroupCTSCmd(const std::string& list_of_commands,AbstractClientEnv* clientEnv);
-   GroupCTSCmd(Cmd_ptr cmd) : cli_(false) { addChild(cmd);}
+   explicit GroupCTSCmd(Cmd_ptr cmd) : cli_(false) { addChild(cmd);}
    GroupCTSCmd()= default;
 
    bool isWrite() const override;
@@ -2074,6 +2094,9 @@ public:
    void create( 	Cmd_ptr& cmd,
             boost::program_options::variables_map& vm,
             AbstractClientEnv* clientEnv ) const override;
+
+   void add_edit_history(AbstractServer*) const override;
+
 private:
    static const char* arg();  // used for argument parsing
    static const char* desc(); // The description of the argument as provided to user

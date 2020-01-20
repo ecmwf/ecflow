@@ -1,5 +1,4 @@
- 
-suite suiteName
+ suite trigger_extension
   family familyName
   	    task b
   	    task c
@@ -9,4 +8,3 @@ suite suiteName
    			        c == complete
    endfamily
 endsuite
-

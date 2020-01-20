@@ -3,7 +3,7 @@
 // Author      : Avi
 // Revision    : $Revision: #85 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -12,8 +12,9 @@
 //
 // Description :
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
+#include <algorithm>  // for std::transform
 #include <boost/python.hpp>
-#include <boost/noncopyable.hpp>
+#include <boost/core/noncopyable.hpp>
 
 #include "ClientInvoker.hpp"
 #include "Defs.hpp"
@@ -163,6 +164,29 @@ void alter_sort(ClientInvoker* self,
           bool recursive = true) {self->alter_sort(std::vector<std::string>(1,path),attribute_name,recursive );  }
 
 void set_child_pid(ClientInvoker* self,int pid) { self->set_child_pid( boost::lexical_cast<std::string>(pid)); }
+
+void set_child_init_add_vars(ClientInvoker* self,const bp::dict& dict){
+   std::vector<std::pair<std::string,std::string> > vars;
+   BoostPythonUtil::dict_to_str_vec(dict,vars);
+
+   std::vector<Variable> vec;
+   std::transform(vars.begin(),vars.end(),std::back_inserter(vec),
+             []( const std::pair<std::string,std::string>& var) { return Variable(var.first,var.second);});
+
+   self->set_child_init_add_vars(vec);
+}
+
+void set_child_init_add_vars2(ClientInvoker* self,const bp::list& dict){
+   std::vector<Variable> vec;
+   BoostPythonUtil::list_to_str_vec(dict,vec);
+   self->set_child_init_add_vars(vec);
+}
+
+void set_child_complete_del_vars(ClientInvoker* self,const bp::list& dict){
+   std::vector<std::string> vars;
+   BoostPythonUtil::list_to_str_vec(dict,vars);
+   self->set_child_complete_del_vars(vars);
+}
 
 // Context mgr. The expression is evaluated and should result in an object called a ``context manager''
 // with expression [as variable]:
@@ -345,6 +369,10 @@ void export_Client()
    .def("set_child_pid",       &set_child_pid,                     ClientDoc::set_child_pid())
    .def("set_child_try_no",    &ClientInvoker::set_child_try_no,   ClientDoc::set_child_try_no())
    .def("set_child_timeout",   &ClientInvoker::set_child_timeout,  ClientDoc::set_child_timeout())
+   .def("set_child_init_add_vars",    &set_child_init_add_vars,    ClientDoc::set_child_init_add_vars() )
+   .def("set_child_init_add_vars",    &set_child_init_add_vars2,   ClientDoc::set_child_init_add_vars() )
+   .def("set_child_complete_del_vars",&set_child_complete_del_vars,ClientDoc::set_child_complete_del_vars() )
+
    .def("set_zombie_child_timeout",&ClientInvoker::set_zombie_child_timeout, "Set timeout for zombie child commands,that can not connect to server, default is 24 hours. The input is required to be in seconds")
    .def("child_init",          &ClientInvoker::child_init,    "Child command,notify server job has started")
    .def("child_abort",         &ClientInvoker::child_abort,(bp::arg("reason")=""), "Child command,notify server job has aborted, can provide an optional reason")

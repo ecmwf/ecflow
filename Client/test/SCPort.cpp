@@ -4,7 +4,7 @@
 // Author      : Avi
 // Revision    : $Revision: #8 $ 
 //
-// Copyright 2009-2019 ECMWF.
+// Copyright 2009-2020 ECMWF.
 // This software is licensed under the terms of the Apache Licence version 2.0 
 // which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 // In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -30,7 +30,7 @@ namespace ecf {
 #ifdef DEBUG
 int SCPort::thePort_ = 3161;
 #else
-int SCPort::thePort_ = 3142;
+int SCPort::thePort_ = 3144;
 #endif
 
 
@@ -42,12 +42,12 @@ std::string SCPort::next()
    if (debug) std::cout << "\nSCPort::next() : ";
 
    // Allow parallel tests
-   char* ecf_port = getenv("TEST_ECF_PORT");
-   if ( ecf_port )  {
-      if (debug) std::cout << " seed_port=TEST_ECF_PORT=(" << ecf_port << ")";
-      std::string port = ecf_port;
+   char* test_ecf_port = getenv("TEST_ECF_PORT");
+   if ( test_ecf_port )  {
+      if (debug) std::cout << " seed_port=TEST_ECF_PORT=(" << test_ecf_port << ")";
+      std::string port = test_ecf_port;
       try { thePort_ = boost::lexical_cast<int>(port);}
-      catch (...){ std::cout << "SCPort::next()  TEST_ECF_PORT(" << ecf_port  << ") not convertible to an integer\n";}
+      catch (...){ std::cout << "SCPort::next()  TEST_ECF_PORT(" << test_ecf_port  << ") not convertible to an integer\n";}
    }
 
 

@@ -1,4 +1,4 @@
-suite suiteName
+suite today1
    family familyName0
    		today 15:00            #comment
    		today 19:00

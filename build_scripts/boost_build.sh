@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Copyright 2009-2019 ECMWF.
+## Copyright 2009-2020 ECMWF.
 ## This software is licensed under the terms of the Apache Licence version 2.0 
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
 ## In applying this licence, ECMWF does not waive the privileges and immunities 
@@ -108,13 +108,13 @@ if test_uname Linux ; then
        		fi
   	  elif [ $tool = intel ] ; then
       		#module unload gnu
-      		#module load intel/15.0.2
+      		#module load intel/19.0.4
   
       		cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
 
   	  elif [ $tool = clang ] ; then
       		# module unload gnu
-      		# module load clang/5.0.1
+      		# module load clang/7.0.1
   
       		cp $WK/build_scripts/site_config/site-config-Linux64-clang.jam $SITE_CONFIG_LOCATION 
        		CXXFLAGS=cxxflags="-fPIC -ftemplate-depth=1024 -Wno-unused-local-typedefs -Wno-deprecated-declarations -Wno-unused-variable"
@@ -155,14 +155,14 @@ echo "using compiler $tool with build $1 release variants"
  
 if [[ ${BOOST_NUMERIC_VERSION} -le 1690 ]] ; then
    # boost system is header only from boost version 1.69, stub library built for compatibility
-   ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j2
+   ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j4
 fi
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time variant=release  -j2
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release   -j2
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j2
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test variant=release  -j2
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-timer variant=release  -j2
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-chrono variant=release  -j2
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time  variant=release -j4
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release -j4
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j4
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test   variant=release -j4
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-timer  variant=release -j4
+./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-chrono variant=release -j4
 
 
 # Allow python to be disabled  
@@ -177,9 +177,6 @@ else
    #*** If the boost python HAS not been built, and we build in $WK/Pyext, then it will build 
    #*** boost python in $BOOST_ROOT/bin.v2/
    #*** It appears to build boost python single threaded. (i.e you do not see threading-multi) in the directory path.
-   #
-   # To prebuild the boost python:
-   #
    
    # ===============================================================================
    # Error to watch out for:
@@ -195,13 +192,16 @@ else
    # For both errors: Please check if you have more than one 'using python' in configuration files.
    # Please check site-config.jam, user-config.jam and project-config.jam and 
    # remove duplicated 'using python'.  Typically we remove $HOME/user-config.jam is using python is defined in it.
-   # for 2/ use    
-   #    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/usr/local/apps/python/2.7.12-01/include/python2.7/"
-   # *ONLY* if first solution fails ???
-   # 
    #
-   # When installing BOOST-python libs, make sure to call module load python *FIRST*
-   # Otherwise it will pick the python specified in project-config.jam, which make not be correct
+   # for 2/ use    
+   #    We use the python snippet below to work out the correct include path
+   #    This is because ./bootstrap.sh --with-python=python3 
+   #    does not configure the python correctly
+   #    if all else fails comment ot the python snippet below and use:
+   #    export CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:<path to pythn includes"
+   # 
+   # When installing BOOST-python libs, make sure to call module load python3 *FIRST*
+   # Otherwise it will pick the python specified in project-config.jam, which may not be correct
    #
    # ==========================================================================================
    # PYTHON3:
@@ -211,9 +211,12 @@ else
    #   Build:
    #   0/ ./b2 --with-python --clean # clean any previous python build. VERY IMPORTANT
    #   1/ module load python3, this update the $PATH
-   #   2/ ./bootstrap.sh --with-python=/usr/local/apps/python3/3.5.1-01/bin/python3
+   #   2/ ./bootstrap.sh --with-python=python3
    #   3/ Need to manually edit $BOOST_ROOT/project-config.jam,  make sure file '$BOOST_ROOT/project-config.jam' has:
-   #
+   #      Can be generated with:
+   #      > python3 -c "import sys;from sysconfig import get_paths;print('using python : ','{0}.{1}'.format(sys.version_info[0], sys.version_info[1]),' : ',get_paths()['data'],' : ',get_paths()['include'])"
+   #      verify path is correct using: python3.6-config --includes
+   #     
    #      # using python : 2.7 : "/usr/local/apps/python/2.7.15-01" ;
    #      # using python 
    #      # : 3.6 
@@ -252,7 +255,46 @@ else
    #     using python : 3.7 : /usr/local/apps/python3/3.7.1-01/bin/python3 : /usr/local/apps/python3/3.7.1-01/include/python3.7m ;  
    # ===========================================================================================================
     
-   ./b2 --with-python --clean     
-   #./b2 python=2.7,3.6,3.7 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
-   ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j2
+   # ===========================================================================================================
+   # Attempt at replacing 'using python' with the correct python include dir in project-config.jam
+   # ===========================================================================================================
+   python_file=compute_python_using_statement.py
+
+cat << EOF > $python_file
+import sys
+from sysconfig import get_paths
+
+python_version = "{0}.{1}".format(sys.version_info[0], sys.version_info[1])
+python_path_info = get_paths()
+python_root = python_path_info['data']
+python_include = python_path_info['include']
+
+using_python = '   using python : ' + python_version  + ' : ' + python_root  + ' : ' + python_include  + ' ;\n'
+with open('project-config.jam.orig','r') as fd1, open('project-config.jam','w') as fd2:
+    for line in fd1:
+        if line.find('using python') != -1:
+           fd2.write(using_python)
+        else:
+           fd2.write(line)
+EOF
+
+   mv project-config.jam project-config.jam.orig
+   which python3
+   if [ "$?" = "0" ] ; then
+      python3 $python_file   # project-config.jam.orig -> project-config.jam
+      ./b2 --with-python --clean     
+      ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
+   fi
+
+   which python
+   if [ "$?" = "0" ] ; then
+      mv project-config.jam project-config.jam.python3 || true
+      python $python_file   # project-config.jam.orig -> project-config.jam
+      ./b2 --with-python --clean     
+      ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
+   fi
+
+   #rm $python_file               # comment out to debug
+   #rm project-config.jam.orig    # comment out to debug
+   #rm project-config.jam.python3 # comment out to debug
 fi
