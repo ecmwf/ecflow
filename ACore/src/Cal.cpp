@@ -15,7 +15,6 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "Cal.hpp"
-//#include <cstdio>
 
 long Cal::julian_to_date(long jdate)
 {
