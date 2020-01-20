@@ -1,18 +1,18 @@
 # ECFLOW-713, moved from bad_defs/limit to good_defs/limit
 # Allow Limit value of zero, i.e inlimit greater than limit, as a way of controlling job submission.
-suite limit_over
+suite limit_with_higher_inlimit
     limit disk 50
     family anon    
-    	inlimit /limit_over:disk 100    # inlimit value is greater than the LIMIT
+    	inlimit /limit_with_higher_inlimit:disk 100    # inlimit value is greater than the LIMIT
     	task t1
     	task t2
     endfamily
 endsuite
 
-suite limit_suite1
+suite limit_with_value_zero
     limit disk 0
     family anon    
-        inlimit /limit_suite1:disk 100    # inlimit value is greater than the LIMIT
+        inlimit /limit_with_value_zero:disk 100    # inlimit value is greater than the LIMIT
         task t1
         task t2
     endfamily

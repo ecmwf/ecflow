@@ -8,7 +8,7 @@ suite limit
     limit mars 10
 endsuite
 
-suite limit_inlimit
+suite limit_with_node_inlimit
     limit fred 1000
     inlimit -n /limits:c1a
     
@@ -25,10 +25,10 @@ suite limit_inlimit
         inlimit -n fred      
         task t1
             inlimit -n /limit:sg1 3          # another suite limit
-            inlimit -n /limit_inlimit/limits:hpcd      # This suite limit
+            inlimit -n /limit_with_node_inlimit/limits:hpcd      # This suite limit
             inlimit -n /limits:c1a           # extern suite limit
         task t2
-            inlimit -n /limit_inlimit/limits:hpcd      # This suite limit
+            inlimit -n /limit_with_node_inlimit/limits:hpcd      # This suite limit
         task t3
             inlimit -n /limits:c1a           # extern suite limit
         task t4

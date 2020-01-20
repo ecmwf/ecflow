@@ -12,7 +12,7 @@ suite limit_s1
 	limit sg1  10
 endsuite
 
-suite limit_obs
+suite limit_extern_and_submission_limits
     inlimit -s /limits:c1a
     family limits
     	limit hpcd 20
@@ -26,7 +26,7 @@ suite limit_obs
     		inlimit -s /limit_s1:mars              # another suite limit
     		inlimit -s /limit_s1:sg1               # another suite limit
    		task t2
-   			inlimit -s /limit_obs/limits:hpcd      # This suite limit
+   			inlimit -s /limit_extern_and_submission_limits/limits:hpcd      # This suite limit
   		task t3
    			inlimit -s /limits:c1a           # extern suite limit
     endfamily
