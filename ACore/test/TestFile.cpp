@@ -263,11 +263,12 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
    while ( nodePathTokens.size() > 0 ) {
 
       std::string path = NodePath::createPath(nodePathTokens);
-      BOOST_REQUIRE_MESSAGE(!path.empty() ,"Expected Reconstituted path, but found empty");
-      std::string combinedPath = rootPath + path + File::ECF_EXTN(); // .ecf, .man , etc
-      cout << "   Reconstituted path  : " << path << "\n";
+      BOOST_REQUIRE_MESSAGE(!path.empty() ,"Expected Reconstituted path, but found empty. nodePathTokens.size() "<< nodePathTokens.size());
+      cout << "   Reconstituted path  : " << path << " from nodePathTokens.size() " << nodePathTokens.size() << "\n";
 
-      cout << "   Creating file       : " << combinedPath << "  nodePathTokens.size() " << nodePathTokens.size() << "\n";
+      std::string combinedPath = rootPath + path + File::ECF_EXTN(); // .ecf, .man , etc
+      cout << "   Creating file       : " << combinedPath << "\n";
+
       std::string errorMsg;
       BOOST_REQUIRE_MESSAGE(File::create(combinedPath,fileContents,errorMsg),"Failed to create " << combinedPath << " because " << errorMsg);
 
