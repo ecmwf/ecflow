@@ -65,19 +65,19 @@ dest_dir default = "" ;
 constant ECFLOW_DESTDIR : $(dest_dir) ;
 
 local ECFLOW_VERSION = [ SHELL "cd $(TOP); ./version.sh" ] ;
-echo "ECFLOW_VERSION            = '$(ECFLOW_VERSION)'" ;
+#echo "ECFLOW_VERSION            = '$(ECFLOW_VERSION)'" ;
 
 local install_dir = [ os.environ ECFLOW_INSTALL_DIR ] ;
 if $(install_dir) {
-   echo "ECFLOW_INSTALL_DIR        = '$(install_dir)'" ;
+   #echo "ECFLOW_INSTALL_DIR        = '$(install_dir)'" ;
    install_dir = "$(install_dir)/ecflow/$(ECFLOW_VERSION)" ;
-   echo "ECFLOW_INSTALL_DIR        = '$(install_dir)'" ;
+   #echo "ECFLOW_INSTALL_DIR        = '$(install_dir)'" ;
 }
 
 install_dir default = "/usr/local/apps/ecflow/$(ECFLOW_VERSION)" ;
 constant ECFLOW_INSTALL_DIR : $(install_dir) ;
 
-echo "ECFLOW_DESTDIR            = '$(ECFLOW_DESTDIR)'" ;
+#echo "ECFLOW_DESTDIR            = '$(ECFLOW_DESTDIR)'" ;
 
 # ** NO LONGER used **
 # Allow the installation directory be be defined externally, by the environment variable ECFLOW_INSTALL_DIR
