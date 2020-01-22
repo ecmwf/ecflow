@@ -123,12 +123,6 @@ install install-doc
 	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/doc/ecflow
 	;
 
-# Fix bugs associated with the output of old version of ecflow_client --migrate
-install install-migrate
-	: [ glob Pyext/migrate/ecflow_migrate.py ]
-	: <location>$(ECFLOW_DESTDIR)/$(ECFLOW_INSTALL_DIR)/bin
-	;
-
 # ===============================================================================================
 
 # Use this for a non-python install
@@ -137,7 +131,6 @@ alias install-base :
 	install-client
 	install-tools
 	install-doc
-   install-migrate
 	;
 alias install :
 	install-base
@@ -146,14 +139,13 @@ alias install :
 	;
 alias install-all :
 	install
-   ;
+    ;
 
 # make install explicit, otherwise we end installing for all calls to bjam
 explicit install-server ;
 explicit install-client ;
 explicit install-tools ;
 explicit install-doc ;
-explicit install-migrate ;
 explicit install ;
 explicit install-base ;
 explicit install-all ;
