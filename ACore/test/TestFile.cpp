@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
 
       // Preserve the last token
       if ( nodePathTokens.size() >= 2 ) nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size()-2); // consume one from last path token
-      else nodePathTokens.erase(nodePathTokens.end());
+      else nodePathTokens.erase(nodePathTokens.begin());
    }
 
    // Now do a forward search for them:

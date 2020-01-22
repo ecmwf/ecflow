@@ -743,7 +743,7 @@ std::string File::forwardSearch( const std::string& rootPath, const std::string&
          nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size()-2); // consume one from last path token
       }
       else {
-         nodePathTokens.erase(nodePathTokens.end());
+         nodePathTokens.erase(nodePathTokens.begin());
       }
    }
 
