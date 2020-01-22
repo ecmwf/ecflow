@@ -305,12 +305,20 @@ EcfFile Submittable::locatedEcfFile() const
    //    if this variable exist, we need to flag it,
    //    So that that file is obtained from running the command. (Output of popen)
    // o/ ECF_FILES (Typically in the definition file, defines a directory) (backward search)
+   //    if ECF_FILES_LOOKUP=PRUNE_LEAF (forward_search)
    // o/ ECF_HOME (backward search)
-   //    where: backward search is root_path = (ECF_FILES | ECF_HOME)
+   //    if ECF_FILES_LOOKUP=PRUNE_LEAF (forward_search)
+   //    where: backward search is root_path = (ECF_FILES | ECF_HOME) (PRUNE_ROOT)
    //           <root-path>/suite/family/family2/task.ecf
    //           <root-path>/family/family2/task.ecf
    //           <root-path>/family2/task.ecf
    //           <root-path>/task.ecf
+   //    where: forward search is root_path = (ECF_FILES | ECF_HOME) (PRUNE_LEAF)
+   //           <root-path>/suite/family/family2/task.ecf
+   //           <root-path>/suite/family/task.ecf
+   //           <root-path>/suite/task.ecf
+   //           <root-path>/task.ecf
+
    std::string reasonEcfFileNotFound;
    std::string theAbsNodePath = absNodePath();
    std::string ecf_home;
