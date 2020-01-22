@@ -251,23 +251,23 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
    //         or  ACore/test/data/dir0/dir1/dir3/dir3/dir4/task
    BOOST_REQUIRE_MESSAGE(path == expected," Error expected " << expected << " but found " << path);
 
-   // Create the directories
    string combined_dir_path = rootPath + dir_path;
-   //cout << "creating directories: " <<  combined_dir_path  << "\n";
+   cout << " creating directories  : " << combined_dir_path  << "\n";
    BOOST_REQUIRE_MESSAGE(File::createDirectories( combined_dir_path),"Failed to create dirs" << combined_dir_path);
 
-   // Create a file in each of the directories.
-   //cout << "nodePath: " << nodePath << "\n";
+   cout << " Create a file(task.ecf) in each of the directories  nodePath: " << nodePath << "\n";
    std::vector<std::string> fileContents; fileContents.emplace_back("something");
    vector<std::string> nodePathTokens;
    NodePath::split(nodePath,nodePathTokens);
+   BOOST_REQUIRE_MESSAGE(nodePathTokens.size() == 6 ,"Expected node path tokens of size 6 but found " << nodePathTokens.size());
    while ( nodePathTokens.size() > 0 ) {
 
-      // Reconstitute the path
       std::string path = NodePath::createPath(nodePathTokens);
-      std::string combinedPath = rootPath + path +  File::ECF_EXTN(); // .ecf, .man , etc
+      BOOST_REQUIRE_MESSAGE(!path.empty() ,"Expected Reconstituted path, but found empty");
+      std::string combinedPath = rootPath + path + File::ECF_EXTN(); // .ecf, .man , etc
+      cout << "   Reconstituted path  : " << path << "\n";
 
-      //cout << " Creating file       : " << combinedPath << "  nodePathTokens.size() " << nodePathTokens.size() << "\n";
+      cout << "   Creating file       : " << combinedPath << "  nodePathTokens.size() " << nodePathTokens.size() << "\n";
       std::string errorMsg;
       BOOST_REQUIRE_MESSAGE(File::create(combinedPath,fileContents,errorMsg),"Failed to create " << combinedPath << " because " << errorMsg);
 
