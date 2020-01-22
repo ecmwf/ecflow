@@ -101,7 +101,7 @@ Install from source
 
 * Copy the the two tar file into this directory, then change directory to /tmp/ecflow_build
    
-* Un-zip then un-tar the two file files::
+* Un-zip then un-tar the two files::
    .. code-block:: bash
 
     tar -zxf boost_1_71_0.tar.gz
