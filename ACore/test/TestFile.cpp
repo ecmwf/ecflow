@@ -273,7 +273,7 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
 
       // Preserve the last token, i.e task
       if ( nodePathTokens.size() >= 2 ) nodePathTokens.erase(nodePathTokens.begin() + nodePathTokens.size()-2); // consume one from last path token
-      else                              nodePathTokens.erase(nodePathTokens.end());
+      else                              nodePathTokens.erase(nodePathTokens.begin());
    }
    BOOST_REQUIRE_MESSAGE(nodePathTokens.empty() ,"Expected nodePathTokens vec to be empty");
 
