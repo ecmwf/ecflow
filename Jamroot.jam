@@ -65,19 +65,19 @@ dest_dir default = "" ;
 constant ECFLOW_DESTDIR : $(dest_dir) ;
 
 local ECFLOW_VERSION = [ SHELL "cd $(TOP); ./version.sh" ] ;
+echo "ECFLOW_VERSION            = '$(ECFLOW_VERSION)'" ;
+
 local install_dir = [ os.environ ECFLOW_INSTALL_DIR ] ;
+if $(install_dir) {
+   echo "ECFLOW_INSTALL_DIR        = '$(install_dir)'" ;
+   install_dir = "$(install_dir)/ecflow/$(ECFLOW_VERSION)" ;
+   echo "ECFLOW_INSTALL_DIR        = '$(install_dir)'" ;
+}
+
 install_dir default = "/usr/local/apps/ecflow/$(ECFLOW_VERSION)" ;
 constant ECFLOW_INSTALL_DIR : $(install_dir) ;
 
-local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
-#python_install_dir default = $(install_dir)/lib/python2.7/site-packages/ecflow ;  # change $HOME/user_config.jam as well
-python_install_dir default = $(install_dir)/lib/python3.6/site-packages/ecflow ;
-constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
-
-#echo "ECFLOW_VERSION            = '$(ECFLOW_VERSION)'" ;
-#echo "ECFLOW_DESTDIR            = '$(ECFLOW_DESTDIR)'" ;
-#echo "ECFLOW_INSTALL_DIR        = '$(ECFLOW_INSTALL_DIR)'" ;
-#echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
+echo "ECFLOW_DESTDIR            = '$(ECFLOW_DESTDIR)'" ;
 
 # ** NO LONGER used **
 # Allow the installation directory be be defined externally, by the environment variable ECFLOW_INSTALL_DIR
