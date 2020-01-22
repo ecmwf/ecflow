@@ -70,7 +70,8 @@ install_dir default = "/usr/local/apps/ecflow/$(ECFLOW_VERSION)" ;
 constant ECFLOW_INSTALL_DIR : $(install_dir) ;
 
 local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
-python_install_dir default = $(install_dir)/lib/python2.7/site-packages/ecflow ;
+#python_install_dir default = $(install_dir)/lib/python2.7/site-packages/ecflow ;  # change $HOME/user_config.jam as well
+python_install_dir default = $(install_dir)/lib/python3.6/site-packages/ecflow ;
 constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 
 #echo "ECFLOW_VERSION            = '$(ECFLOW_VERSION)'" ;
