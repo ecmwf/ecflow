@@ -81,7 +81,7 @@ Install from source
 * dependencies::
 
    - GNU C++ (or CLANG) compiler
-   - PYTHON_API: python 2.7,  Python 3.0  
+   - PYTHON_API(optional): python 2.7,  Python 3.0  
      If you intend to use ecFlow Python api, You will need to install python.
      The python installation should include the development packages
    - QT5 at least version 5.0.0 is required (optional)
