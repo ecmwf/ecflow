@@ -252,22 +252,20 @@ BOOST_AUTO_TEST_CASE( test_file_forwardSearch )
    BOOST_REQUIRE_MESSAGE(path == expected," Error expected " << expected << " but found " << path);
 
    string combined_dir_path = rootPath + dir_path;
-   cout << " creating directories  : " << combined_dir_path  << "\n";
+   //cout << " creating directories  : " << combined_dir_path  << "\n";
    BOOST_REQUIRE_MESSAGE(File::createDirectories( combined_dir_path),"Failed to create dirs" << combined_dir_path);
 
-   cout << " Create a file(task.ecf) in each of the directories  nodePath: " << nodePath << "\n";
+   //cout << " Create a file(task.ecf) in each of the directories  nodePath: " << nodePath << "\n";
    std::vector<std::string> fileContents; fileContents.emplace_back("something");
    vector<std::string> nodePathTokens;
    NodePath::split(nodePath,nodePathTokens);
-   BOOST_REQUIRE_MESSAGE(nodePathTokens.size() == 6 ,"Expected node path tokens of size 6 but found " << nodePathTokens.size());
    while ( nodePathTokens.size() > 0 ) {
 
       std::string path = NodePath::createPath(nodePathTokens);
-      BOOST_REQUIRE_MESSAGE(!path.empty() ,"Expected Reconstituted path, but found empty. nodePathTokens.size() "<< nodePathTokens.size());
-      cout << "   Reconstituted path  : " << path << " from nodePathTokens.size() " << nodePathTokens.size() << "\n";
+      //cout << "   Reconstituted path  : " << path << " from nodePathTokens.size() " << nodePathTokens.size() << "\n";
 
       std::string combinedPath = rootPath + path + File::ECF_EXTN(); // .ecf, .man , etc
-      cout << "   Creating file       : " << combinedPath << "\n";
+      //cout << "   Creating file       : " << combinedPath << "\n";
 
       std::string errorMsg;
       BOOST_REQUIRE_MESSAGE(File::create(combinedPath,fileContents,errorMsg),"Failed to create " << combinedPath << " because " << errorMsg);
