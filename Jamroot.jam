@@ -133,11 +133,12 @@ alias install-base :
 	install-tools
 	install-doc
 	;
+	
 alias install :
-	install-base
-	Pyext//install-py
- 	Pyext//install-py1
-	;
+    install-base
+    Pyext//install
+    ;
+	
 alias install-all :
 	install
     ;

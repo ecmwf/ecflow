@@ -164,6 +164,11 @@ install install-py1
    : <location>$(ECFLOW_DESTDIR)/$(ECFLOW_PYTHON_INSTALL_DIR)
    ;
 
+install install-api
+   : [ glob samples/api/*.py ] 
+   : <location>$(ECFLOW_DESTDIR)/$(ECFLOW_PYTHON_INSTALL_DIR)
+   ;
+   
 # - <dll-path> for install Left in, in case its fixed in the future. 
 # - This install is referenced in JamRoot.jam
 # - <install-dependencies>on will also install boost_python shared lib and add repath to it.
@@ -176,8 +181,14 @@ install install-py
 
 # make install explicit, otherwise we end installing for all calls to bjam
 explicit install-py1 ;
+explicit install-api ;
 explicit install-py  ;
 
+alias install :
+    install-py
+    install-py1
+    install-api
+    ;
 # ========================================================================
 # TESTING: unit-tests and test for python fragments in online tutorial
 # ========================================================================
