@@ -41,6 +41,7 @@ BOOST_AUTO_TEST_CASE( test_sanitizer_use_of_out_of_scope_stack_memory )
       cout << "dodgy pointer:" << *pointer << "\n";  // Error: invalid access of stack memory out of declaration scope
       *pointer = 42;
       cout << "dodgy pointer:" << *pointer << "\n";
+      BOOST_CHECK_MESSAGE( true,"stop boost test from complaining");
    }
 }
 
@@ -56,6 +57,7 @@ BOOST_AUTO_TEST_CASE( test_sanitizer_vector_overflow )
       std::vector<int> vector{0,1,2};
       auto *pointer = &vector[0];
       cout << pointer[3]; // Error: out of bounds access for vector
+      BOOST_CHECK_MESSAGE( true,"stop boost test from complaining");
    }
 }
 

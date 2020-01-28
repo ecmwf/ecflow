@@ -43,6 +43,7 @@ BOOST_AUTO_TEST_CASE( test_sanitizer_invalid_object_size )
       // This check detects pointer casts in which the size of the source type is less than the size of the destination type.
       // Using the result of such a cast to access out-of-bounds data has undefined behaviour
       cout << getDerived()->pad2 << "\n";
+      BOOST_CHECK_MESSAGE( true,"stop boost test from complaining");
    }
 }
 
@@ -67,6 +68,7 @@ BOOST_AUTO_TEST_CASE( test_sanitizer_misaligned_structure_pointer_assignment )
       // One solution is to mark the struct as packed. In the following example, the A structure is packed,
       // preventing the compiler from adding padding between members.
       // struct A { ... } __attribute__((packed));
+      BOOST_CHECK_MESSAGE( true,"stop boost test from complaining");
    }
 }
 
@@ -105,6 +107,7 @@ BOOST_AUTO_TEST_CASE( test_sanitizer_member_access_through_null_pointer )
 
       A *a = nullptr;
       int x = a->getX(); // Error: member access through null pointer
+      BOOST_CHECK_MESSAGE( x,"stop boost test from complaining");
    }
 }
 
