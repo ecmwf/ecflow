@@ -167,7 +167,7 @@ cmake
     make -j2
     make install
 
-* Optionally if you do *NOT* want to build the GUI(ecflowview) or UI(ecflow_ui) or Python api
+* Optionally if you do *NOT* want to build the UI(ecflow_ui) or Python api
    .. code-block:: bash
 
     cd /tmp/ecflow_build/ecFlow-5.2.0-Source
