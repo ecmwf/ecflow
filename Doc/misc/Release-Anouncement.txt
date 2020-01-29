@@ -1,7 +1,7 @@
  ======================================================================================
 Subject: New release of ecFlow(5.3.0) now available  
 
-A new version of the ecFlow(5.3.0) has been released:
+A new version of ecFlow(5.3.0) has been released:
 
 
 This release is accessible from: /usr/local/apps/ecflow/5.3.0
