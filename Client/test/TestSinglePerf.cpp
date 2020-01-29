@@ -110,7 +110,7 @@ void time_load_and_downloads(
             DurationTimer duration_timer;
 
             size_t i;
-            for(i = 0; i < paths.size() && i < 50000; i++) {
+            for(i = 0; i < paths.size() && i < 100000; i++) {
                theClient.suspend(paths[i]);
             }
             cout << i << " times " << duration_timer.elapsed().total_milliseconds() << "(ms)" << endl;
