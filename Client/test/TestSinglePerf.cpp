@@ -100,140 +100,156 @@ void time_load_and_downloads(
             cout << " Begin:               " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
          }
          {
-            cout << " Download(news_local):"; cout.flush();
-            ClientInvoker client_news(host,port);
-            DurationTimer duration_timer;
-            for(int i = 0; i < count; i++) {
-               if (i == 0 || i != 1) {
-                  client_news.news_local();
-                  switch (client_news.server_reply().get_news()) {
-                     case ServerReply::DO_FULL_SYNC: cout << "FULL ";break;
-                     case ServerReply::NEWS: cout << "NEWS ";break;
-                     case ServerReply::NO_NEWS: cout << "NO_NEWS ";break;
-                  }
-               }
-               else if (i == 1) client_news.sync_local();
-            }
-            cout << ": 1:news_local(),2:sync_local(),n:news_local with the new Client: "
-                 <<  duration_timer.elapsed().total_milliseconds() << "(ms)" << endl;
-         }
-         {
-            cout << " Download(Sync):      "; cout.flush();
-            for(int i = 0; i < count; i++) {
-               DurationTimer duration_timer;
-               theClient.sync_local();
-               int seconds = duration_timer.elapsed().total_milliseconds();
-               cout << seconds << " ";
-            }
-            cout << ":(milli-seconds) sync_local() with the same Client. First call updates cache." << endl;
-         }
-         {
-            // On construction of Defs, hence should be slightly faster
-            cout << " Download(Sync-FULL): "; cout.flush();
-            double total = 0;
-            for(int i = 0; i < count; i++) {
-               ClientInvoker client(host,port);
-               DurationTimer duration_timer;
-               client.sync_local();
-               int mil_secs = duration_timer.elapsed().total_milliseconds();
-               cout << mil_secs  << " ";
-               total += mil_secs;
-            }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : sync_local() with *different* clients.uses cache!" << endl;
-         }
-         {
-            cout << " Download(FULL):      "; cout.flush();
-            double total = 0;
-            for(int i = 0; i < count; i++) {
-               ClientInvoker client(host,port);
-               DurationTimer duration_timer;
-               theClient.getDefs();
-               int seconds = duration_timer.elapsed().total_milliseconds();
-               cout << seconds << " ";
-               total += seconds;
-            }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : get_defs() from different client" << endl;
-         }
-         {
+            theClient.sync_local();
+
             std::vector<task_ptr> all_tasks;
-            theClient.defs()->get_all_tasks(all_tasks);
+            if (theClient.defs()) theClient.defs()->get_all_tasks(all_tasks);
             std::vector<std::string> paths;paths.reserve(all_tasks.size());
             for(size_t i = 0; i < all_tasks.size(); i++)  paths.push_back(all_tasks[i]->absNodePath());
+            cout << " SameClient(suspend): " ;  cout.flush();
+            DurationTimer duration_timer;
 
-            {
-               cout << " Suspend " << paths.size() << " tasks : "; cout.flush();
-               DurationTimer duration_timer;
-               theClient.suspend(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
-               sync_and_news_local(theClient);
+            size_t i;
+            for(i = 0; i < paths.size() && i < 50000; i++) {
+               theClient.suspend(paths[i]);
             }
-            {
-               cout << " Resume " << paths.size() << " tasks  : "; cout.flush();
-               DurationTimer duration_timer;
-               theClient.resume(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
-               sync_and_news_local(theClient);
-            }
-            {
-               cout << " Suspend " << paths.size() << " tasks : "; cout.flush();
-               theClient.set_auto_sync(true);
-               DurationTimer duration_timer;
-               theClient.suspend(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
-               theClient.set_auto_sync(false);
-            }
-            {
-               cout << " Resume " << paths.size() << " tasks  : "; cout.flush();
-               theClient.set_auto_sync(true);
-               DurationTimer duration_timer;
-               theClient.resume(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
-               theClient.set_auto_sync(false);
-            }
-            {
-               cout << " check  " << paths.size() << " tasks  : "; cout.flush();
-               DurationTimer duration_timer;
-               theClient.check(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
-               sync_and_news_local(theClient);
-            }
-            {
-               cout << " kill   " << paths.size() << " tasks  : "; cout.flush();
-               DurationTimer duration_timer;
-               theClient.kill(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
-               sync_and_news_local(theClient);
-            }
-            {
-               // force complete on all tasks, on some suites(3199.def), can cause infinite recursion, i.e cause repeats to loop
-               // Hence we will call force aborted instead
-               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
-               DurationTimer duration_timer;
-               theClient.force(paths,"aborted");
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
-               sync_and_news_local(theClient);
-            }
-            {
-               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
-               theClient.set_auto_sync(true);
-               DurationTimer duration_timer;
-               theClient.force(paths,"aborted");
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
-               theClient.set_auto_sync(false);
-            }
+            cout << i << " times " << duration_timer.elapsed().total_milliseconds() << "(ms)" << endl;
          }
-         {
-            cout << " Check pt:            "; cout.flush();
-            double total = 0;
-            for(int i = 0; i < count; i++) {
-               DurationTimer duration_timer;
-               theClient.checkPtDefs();
-               int seconds = duration_timer.elapsed().total_milliseconds();
-               cout << seconds << " ";
-               total += seconds;
-            }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)" << endl;
-         }
+//         {
+//            cout << " Download(news_local):"; cout.flush();
+//            ClientInvoker client_news(host,port);
+//            DurationTimer duration_timer;
+//            for(int i = 0; i < count; i++) {
+//               if (i == 0 || i != 1) {
+//                  client_news.news_local();
+//                  switch (client_news.server_reply().get_news()) {
+//                     case ServerReply::DO_FULL_SYNC: cout << "FULL ";break;
+//                     case ServerReply::NEWS: cout << "NEWS ";break;
+//                     case ServerReply::NO_NEWS: cout << "NO_NEWS ";break;
+//                  }
+//               }
+//               else if (i == 1) client_news.sync_local();
+//            }
+//            cout << ": 1:news_local(),2:sync_local(),n:news_local with the new Client: "
+//                 <<  duration_timer.elapsed().total_milliseconds() << "(ms)" << endl;
+//         }
+//         {
+//            cout << " Download(Sync):      "; cout.flush();
+//            for(int i = 0; i < count; i++) {
+//               DurationTimer duration_timer;
+//               theClient.sync_local();
+//               int seconds = duration_timer.elapsed().total_milliseconds();
+//               cout << seconds << " ";
+//            }
+//            cout << ":(milli-seconds) sync_local() with the same Client. First call updates cache." << endl;
+//         }
+//         {
+//            // On construction of Defs, hence should be slightly faster
+//            cout << " Download(Sync-FULL): "; cout.flush();
+//            double total = 0;
+//            for(int i = 0; i < count; i++) {
+//               ClientInvoker client(host,port);
+//               DurationTimer duration_timer;
+//               client.sync_local();
+//               int mil_secs = duration_timer.elapsed().total_milliseconds();
+//               cout << mil_secs  << " ";
+//               total += mil_secs;
+//            }
+//            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : sync_local() with *different* clients.uses cache!" << endl;
+//         }
+//         {
+//            cout << " Download(FULL):      "; cout.flush();
+//            double total = 0;
+//            for(int i = 0; i < count; i++) {
+//               ClientInvoker client(host,port);
+//               DurationTimer duration_timer;
+//               theClient.getDefs();
+//               int seconds = duration_timer.elapsed().total_milliseconds();
+//               cout << seconds << " ";
+//               total += seconds;
+//            }
+//            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : get_defs() from different client" << endl;
+//         }
+//         {
+//            std::vector<task_ptr> all_tasks;
+//            theClient.defs()->get_all_tasks(all_tasks);
+//            std::vector<std::string> paths;paths.reserve(all_tasks.size());
+//            for(size_t i = 0; i < all_tasks.size(); i++)  paths.push_back(all_tasks[i]->absNodePath());
+//
+//            {
+//               cout << " Suspend " << paths.size() << " tasks : "; cout.flush();
+//               DurationTimer duration_timer;
+//               theClient.suspend(paths);
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+//               sync_and_news_local(theClient);
+//            }
+//            {
+//               cout << " Resume " << paths.size() << " tasks  : "; cout.flush();
+//               DurationTimer duration_timer;
+//               theClient.resume(paths);
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+//               sync_and_news_local(theClient);
+//            }
+//            {
+//               cout << " Suspend " << paths.size() << " tasks : "; cout.flush();
+//               theClient.set_auto_sync(true);
+//               DurationTimer duration_timer;
+//               theClient.suspend(paths);
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+//               theClient.set_auto_sync(false);
+//            }
+//            {
+//               cout << " Resume " << paths.size() << " tasks  : "; cout.flush();
+//               theClient.set_auto_sync(true);
+//               DurationTimer duration_timer;
+//               theClient.resume(paths);
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+//               theClient.set_auto_sync(false);
+//            }
+//            {
+//               cout << " check  " << paths.size() << " tasks  : "; cout.flush();
+//               DurationTimer duration_timer;
+//               theClient.check(paths);
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+//               sync_and_news_local(theClient);
+//            }
+//            {
+//               cout << " kill   " << paths.size() << " tasks  : "; cout.flush();
+//               DurationTimer duration_timer;
+//               theClient.kill(paths);
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+//               sync_and_news_local(theClient);
+//            }
+//            {
+//               // force complete on all tasks, on some suites(3199.def), can cause infinite recursion, i.e cause repeats to loop
+//               // Hence we will call force aborted instead
+//               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
+//               DurationTimer duration_timer;
+//               theClient.force(paths,"aborted");
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+//               sync_and_news_local(theClient);
+//            }
+//            {
+//               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
+//               theClient.set_auto_sync(true);
+//               DurationTimer duration_timer;
+//               theClient.force(paths,"aborted");
+//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+//               theClient.set_auto_sync(false);
+//            }
+//         }
+//         {
+//            cout << " Check pt:            "; cout.flush();
+//            double total = 0;
+//            for(int i = 0; i < count; i++) {
+//               DurationTimer duration_timer;
+//               theClient.checkPtDefs();
+//               int seconds = duration_timer.elapsed().total_milliseconds();
+//               cout << seconds << " ";
+//               total += seconds;
+//            }
+//            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)" << endl;
+//         }
          {
             DurationTimer duration_timer;
             BOOST_REQUIRE_MESSAGE(theClient.delete_all(true)  == 0,"delete all defs failed \n" << theClient.errorMsg());
