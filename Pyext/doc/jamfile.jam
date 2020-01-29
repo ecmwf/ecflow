@@ -211,9 +211,9 @@ install ecflow/ : ecflow  ;
 # as emos will not have permission to write into workspace first.
 #
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-# The hacky workaround is to use <dll-path> when building the extension. This requires
-# that ECFLOW_INSTALL_DIR is correctly set, which requires that ECFLOW_INSTALL_DIR
-# is correctly set. i.e during the build and NOT just install
+# The hacky workaround is to use <dll-path> when building the extension. 
+# This requires that ECFLOW_INSTALL_DIR is correctly set, 
+# i.e during the build and NOT just install
 # >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 # - install __init__.py file. 

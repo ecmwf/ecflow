@@ -75,6 +75,7 @@ no_ssl_arg=
 log_arg=
 asan_arg=
 msan_arg=
+ubsan_arg=
 iwyu_arg=
 while [[ "$#" != 0 ]] ; do   
    if [[ "$1" = debug || "$1" = release ]] ; then
@@ -108,6 +109,7 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = tsan ]]   ; then tsan_arg=$1 ;
    elif [[ "$1" = asan ]]  ; then asan_arg=$1 ;
    elif [[ "$1" = msan ]]  ; then msan_arg=$1 ;
+   elif [[ "$1" = ubsan ]]  ; then ubsan_arg=$1 ;
    elif [[ "$1" = package_source ]] ; then package_source_arg=$1 ;
    elif [[ "$1" = copy_tarball ]] ; then copy_tarball_arg=$1 ;
    elif [[ "$1" = test ]] ;  then test_arg=$1 ;
@@ -154,6 +156,7 @@ source_dir=$(pwd)
 # CLANG    -ftemplate-depth=512
 #
 CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-maybe-uninitialized"
+CXX_LINK_FLAGS=""
 
 # ==================== modules ================================================
 # To load module automatically requires Korn shell, system start scripts
@@ -198,8 +201,6 @@ fi
 module load python
 module load python3/3.6.8-01
 module load cmake/3.15.0    # need cmake 3.12.0 to build python3. Allow boost python 2 and 3 libs to be found  
-# To build python3 when cmake < 3.12.0 use
-# -DPYTHON_EXECUTABLE=/usr/local/apps/python3/%PYTHON3_VERSION%/bin/python3 
 
 
 # ==============================================================================================
@@ -209,16 +210,23 @@ if [[ "$tsan_arg" = tsan && "$asan_arg" = asan ]] ; then
 fi
 if [[ "$tsan_arg" = tsan ]] ; then
    CXX_FLAGS="$CXX_FLAGS -fsanitize=thread -fno-omit-frame-pointer"
-   cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=thread'"  # LINK FLAGS
+   CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=thread"
 fi
 if [[ "$asan_arg" = asan ]] ; then
    CXX_FLAGS="$CXX_FLAGS -fsanitize=address -fno-omit-frame-pointer"
-   cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address'"  # LINK FLAGS
+   CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=address"
+   export ECF_TEST_SANITIZER_AS=1  # enable address sanitizer tests
+fi
+if [[ "$ubsan_arg" = ubsan ]] ; then
+   #CXX_FLAGS="$CXX_FLAGS -fsanitize=undefined -fsanitize-minimal-runtime -fno-omit-frame-pointer -fno-sanitize-recover=all" # exit after all errors minimal info
+   #CXX_FLAGS="$CXX_FLAGS -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=all"                           # exit on first error, max info
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=undefined -fno-omit-frame-pointer"                                                     # report error, max info, no exit on error
+   CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=undefined"
+   export ECF_TEST_SANITIZER_UB=1  # enable undefined behaviour tests
 fi
 if [[ "$msan_arg" = msan ]] ; then
    CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fPIE -fno-omit-frame-pointer -fsanitize-memory-track-origins"
-   cmake_extra_options="$cmake_extra_options -DCMAKE_EXE_LINKER_FLAGS=-fsanitize=memory"  # LINK FLAGS
-   #LINK_FLAGS='-DCMAKE_EXE_LINKER_FLAGS="-fsanitize=memory -fPIE -pie"'
+   CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=memory" # -fPIE -pie"
 fi
 
 if [[ "$ARCH" = cray ]] ; then
@@ -308,14 +316,15 @@ fi
 
 if [[ "$ctest_arg" != "" ]] ; then
     if [[ "$asan_arg" = asan ]] ; then
-        export LD_PRELOAD=/usr/local/apps/clang/7.0.1/lib64/libasan.so  
     
-        if [[ $clang_arg != "clang" ]] ; then
-            # for python module we need to preload asan as it needs to be the very first library
-            # ==2971==ASan runtime does not come first in initial library list; 
-            #              you should either link runtime to your application or manually preload it with LD_PRELOAD.
-	        export LD_PRELOAD=/usr/local/apps/gcc/7.3.0/lib64/gcc/x86_64-suse-linux/7.3.0/libasan.so 
-	    fi
+        # LD_PRELOAD is only required when creating a shared lib, than needs asan
+        # export LD_PRELOAD=/usr/local/apps/clang/7.0.1/lib64/libasan.so  
+        #if [[ $clang_arg != "clang" ]] ; then
+        #    # for python module we need to preload asan as it needs to be the very first library
+        #    # ==2971==ASan runtime does not come first in initial library list; 
+        #    #              you should either link runtime to your application or manually preload it with LD_PRELOAD.
+	    #    export LD_PRELOAD=/usr/local/apps/gcc/7.3.0/lib64/gcc/x86_64-suse-linux/7.3.0/libasan.so 
+	    #fi
 	    export ASAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_asan.supp  
 	    export LSAN_OPTIONS=suppressions=$WK/build_scripts/ecflow_lsan.supp
 	    $ctest_arg  
@@ -389,6 +398,7 @@ $ecbuild $source_dir \
             -DCMAKE_INSTALL_PREFIX=$install_prefix  \
             -DENABLE_WARNINGS=ON \
             -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
+            -DCMAKE_EXE_LINKER_FLAGS="$CXX_LINK_FLAGS" \
             -DSITE_SPECIFIC_SERVER_SCRIPT="/home/ma/emos/bin/ecflow_site.sh" \
             ${cmake_extra_options} \
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \

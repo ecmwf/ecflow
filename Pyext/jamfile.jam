@@ -5,6 +5,13 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
+import os ;
+local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
+#python_install_dir default = $(ECFLOW_INSTALL_DIR)/lib/python2.7/site-packages/ecflow ;  # change $HOME/user_config.jam as well
+python_install_dir default  = $(ECFLOW_INSTALL_DIR)/lib/python3.6/site-packages/ecflow ;
+constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
+#echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
+
 # =============================================================================
 # This jam file, allows for creation of ecflow python extension module, where
 # we have a STATIC link to boost python 
@@ -130,7 +137,8 @@ python-extension ecflow : [ glob src/*.cpp ]
     /site-config//boost_filesystem
     /site-config//boost_program_options
     /site-config//boost_datetime
-    /site-config//boost_python_static
+    #/site-config//boost_python_static   # python2
+    /site-config//boost_python36_static
     : <variant>debug:<define>DEBUG
       <toolset>acc:<library>hpux_std_libs  
       <library>/ecflow_top//openssl_libs 
@@ -156,6 +164,11 @@ install install-py1
    : <location>$(ECFLOW_DESTDIR)/$(ECFLOW_PYTHON_INSTALL_DIR)
    ;
 
+install install-api
+   : [ glob samples/api/*.py ] 
+   : <location>$(ECFLOW_DESTDIR)/$(ECFLOW_PYTHON_INSTALL_DIR)
+   ;
+   
 # - <dll-path> for install Left in, in case its fixed in the future. 
 # - This install is referenced in JamRoot.jam
 # - <install-dependencies>on will also install boost_python shared lib and add repath to it.
@@ -168,8 +181,14 @@ install install-py
 
 # make install explicit, otherwise we end installing for all calls to bjam
 explicit install-py1 ;
+explicit install-api ;
 explicit install-py  ;
 
+alias install :
+    install-py
+    install-py1
+    install-api
+    ;
 # ========================================================================
 # TESTING: unit-tests and test for python fragments in online tutorial
 # ========================================================================

@@ -1,14 +1,10 @@
  ======================================================================================
-Subject: New release of ecFlow(5.1.0) now available  
+Subject: New release of ecFlow(5.3.0) now available  
 
-A new version of the ecFlow(5.1.0) has been released:
-||||||| merged common ancestors
-A new version of the ecFlow(4.17.0) has been released:
-=======
-A new version of the ecFlow(4.18.0) has been released:
+A new version of the ecFlow(5.3.0) has been released:
 
 
-This release is accessible from: /usr/local/apps/ecflow/5.1.0
+This release is accessible from: /usr/local/apps/ecflow/5.3.0
 on the following platforms:
 
    o linux 11.3                (lxop-dev)
@@ -17,6 +13,7 @@ on the following platforms:
    o linux cluster             (lxg/lxc)
    o virtual machines          (vsms1 -> operational and research VM are linked to this)
    o cca/ccb/cct/cck           (cray) 
+   o centos7                   (centos)
  
 The release includes the following changes:
 
@@ -27,7 +24,7 @@ Note: The GUI(ecflowview) is only available on linux
 
    module avail ecflow
    module unload ecflow 
-   module load ecflow/5.1.0
+   module load ecflow/5.3.0
       
 The new GUI(ecflow_ui) is available from vsms1,ecgb,lxop-dev,lxc,leap42
             
@@ -37,7 +34,7 @@ The client/Server from one release should not be mixed with another.
 To avoid this problem it is *highly* recommended that you use a 
 specific version:
 
-   module load ecflow/5.1.0
+   module load ecflow/5.3.0
 
 Additionally references to ecflow_client in the scripts(.ecf) should use
 the server variable %ECF_VERSION% to locate the executable, this ensures
