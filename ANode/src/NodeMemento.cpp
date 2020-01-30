@@ -296,7 +296,7 @@ void Node::set_memento( const SuspendedMemento* memento,std::vector<ecf::Aspect:
 	}
 
 	if (memento->suspended_) suspend();
-	else                     clearSuspended();
+	else                     resume();
 }
 
 void Node::set_memento( const NodeEventMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {
