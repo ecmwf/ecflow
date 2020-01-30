@@ -2107,6 +2107,7 @@ private:
 
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   void cleanup() override; // cleanup all children
 
 private:
    std::vector<Cmd_ptr> cmdVec_;
