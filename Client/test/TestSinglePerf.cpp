@@ -208,24 +208,25 @@ void time_load_and_downloads(
                cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
                sync_and_news_local(theClient);
             }
-//            {
-//               // force complete on all tasks, on some suites(3199.def), can cause infinite recursion, i.e cause repeats to loop
-//               // Hence we will call force aborted instead
-//               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
-//               DurationTimer duration_timer;
-//               theClient.force(paths,"submitted");
-//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " force(submitted)";
-//               sync_and_news_local(theClient);
-//            }
-//            // Takes to long and times out after 60s ???
-//            {
-//               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
-//               theClient.set_auto_sync(true);
-//               DurationTimer duration_timer;
-//               theClient.force(paths,"queued");  // can't use aborted again, as it already aborted, and hence will be ignored
-//               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync :  force(aborted)" << endl;
-//               theClient.set_auto_sync(false);
-//            }
+            {
+               // force complete on all tasks, on some suites(3199.def), can cause infinite recursion, i.e cause repeats to loop
+               // Hence we will call force aborted instead.
+               // Also AVOID active/submitted otherwise we spend a huge time adding zombies, for the subsequent force cmd below.
+               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
+               DurationTimer duration_timer;
+               theClient.force(paths,"aborted");
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " force(aborted)";
+               sync_and_news_local(theClient);
+            }
+            // Takes to long and times out after 60s ???
+            {
+               cout << " force  " << paths.size() << " tasks  : "; cout.flush();
+               theClient.set_auto_sync(true);
+               DurationTimer duration_timer;
+               theClient.force(paths,"queued");  // can't use aborted again, as it already aborted, and hence will be ignored
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync :  force(aborted)" << endl;
+               theClient.set_auto_sync(false);
+            }
          }
          {
             cout << " Check pt:            "; cout.flush();
