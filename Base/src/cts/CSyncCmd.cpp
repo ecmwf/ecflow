@@ -38,6 +38,12 @@ std::ostream& CSyncCmd::print(std::ostream& os) const
    }
    return user_cmd(os,ss.str());
 }
+
+std::ostream& CSyncCmd::print_short(std::ostream& os) const
+{
+   return print_only(os);
+}
+
 std::ostream& CSyncCmd::print_only(std::ostream& os) const
 {
    switch (api_) {

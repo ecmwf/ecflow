@@ -43,15 +43,40 @@ std::ostream& ForceCmd::print(std::ostream& os) const
 {
    return user_cmd(os,CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
+
+std::ostream& ForceCmd::print_short(std::ostream& os) const
+{
+   std::vector<std::string> paths;
+   if (!paths_.empty()) paths.emplace_back(paths_[0]);
+
+   my_print_only(os,paths);
+
+   if (paths_.size() > 1) os << " : truncated : " << paths_.size()-1 << " paths *not* shown";
+   return os;
+}
+
 std::ostream& ForceCmd::print_only(std::ostream& os) const
 {
-   os << CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)); return os;
+   return my_print_only(os,paths_);
 }
+
 std::ostream& ForceCmd::print(std::ostream& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);
+   return my_print(os,paths);
+}
+
+std::ostream& ForceCmd::my_print(std::ostream& os, const std::vector<std::string>& paths) const
+{
    return user_cmd(os,CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
+
+std::ostream& ForceCmd::my_print_only(std::ostream& os, const std::vector<std::string>& paths) const
+{
+   os << CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_));
+   return os;
+}
+
 
 STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
 {

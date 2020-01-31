@@ -42,7 +42,7 @@ void SSyncCmd::reset_data_members(unsigned int client_state_change_no, bool sync
    full_defs_ = false;
    incremental_changes_.init(client_state_change_no,sync_suite_clock); // persisted, used for returning INCREMENTAL changes
    server_defs_.clear();                         // persisted, used for returning FULL definition
-   full_server_defs_as_string_.clear();          // semi-persisted, i.e on load & not on saving
+   full_server_defs_as_string_.clear();          // semi-persisted, i.e on load & not on saving used to return cached defs
 }
 
 void SSyncCmd::init(
@@ -226,6 +226,14 @@ void SSyncCmd::full_sync(unsigned int client_handle, AbstractServer* as)
    if (the_server_defs) cout << ": no of suites(" <<  the_server_defs->suiteVec().size() << ")" << endl;
    else                 cout << ": NULL defs!" << endl;
 #endif
+}
+
+void SSyncCmd::cleanup()
+{
+   /// run in the server, after command sent to client
+   incremental_changes_.cleanup();
+   std::string().swap(server_defs_);
+   std::string().swap(full_server_defs_as_string_); // will typically be empty in server
 }
 
 bool SSyncCmd::equals(ServerToClientCmd* rhs) const

@@ -39,6 +39,15 @@ std::ostream& PathsCmd::print(std::ostream& os) const
    return my_print(os,paths_);
 }
 
+std::ostream& PathsCmd::print_short(std::ostream& os) const
+{
+   std::vector<std::string> paths;
+   if (!paths_.empty()) paths.emplace_back(paths_[0]);
+   my_print_only(os,paths);
+   if (paths_.size() > 1) os << " : truncated : " << paths_.size() -1 << " paths *not* shown";
+   return os;
+}
+
 std::ostream& PathsCmd::print_only(std::ostream& os) const
 {
    return my_print_only(os,paths_);

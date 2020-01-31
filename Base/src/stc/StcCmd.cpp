@@ -63,7 +63,7 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
          if (debug) std::cout << "  StcCmd::handle_server_response END_OF_FILE\n";
          server_reply.set_eof(); // requires further work, by ClientInvoker
          std::stringstream ss;
-         ss << "Error: request( "; cts_cmd->print(ss); ss << " ) failed! Server replied with: EOF(Server did not reply or mixing ssl and non-ssl)\n";
+         ss << "Error: request( "; cts_cmd->print_short(ss); ss << " ) failed! Server replied with: EOF(Server did not reply or mixing ssl and non-ssl)\n";
          server_reply.set_error_msg(ss.str());
          break;
       }
@@ -73,7 +73,7 @@ bool StcCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cmd,
 			if (debug) std::cout << "  StcCmd::handle_server_response INVALID_ARGUMENT\n";
 			server_reply.set_invalid_argument();// requires further work, by ClientInvoker
 			std::stringstream ss;
-			ss << "Error: request( "; cts_cmd->print(ss); ss << " ) failed! Server replied with: invalid_argument(Could not decode client protocol)\n";
+			ss << "Error: request( "; cts_cmd->print_short(ss); ss << " ) failed! Server replied with: invalid_argument(Could not decode client protocol)\n";
 			server_reply.set_error_msg(ss.str());
 			break;
  		}

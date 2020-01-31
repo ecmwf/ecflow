@@ -33,7 +33,7 @@ bool ServerToClientResponse::handle_server_response( ServerReply& r, Cmd_ptr cts
 	ss << "ServerToClientResponse::handle_server_response: ";
 	if (cts_cmd.get()) {
 		ss << "Client request ";
-		cts_cmd->print(ss);
+		cts_cmd->print_short(ss);
 		ss << " failed. ";
 	}
 	ss << "Server replied with a NULL message\n";

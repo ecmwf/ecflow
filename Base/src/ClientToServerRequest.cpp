@@ -28,7 +28,7 @@ STC_Cmd_ptr ClientToServerRequest::handleRequest(AbstractServer* as) const
 
 std::ostream& ClientToServerRequest::print( std::ostream& os ) const {
 	if (cmd_.get()) {
-		return cmd_->print(os);
+		return cmd_->print_short(os); // avoid printing hundreds of paths in the commands
 	}
 	return os << "NULL request";
 }

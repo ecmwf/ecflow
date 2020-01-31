@@ -74,7 +74,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
    if ( !node.get() ) {
       std::stringstream ss;
       ss << "SNodeCmd::handle_server_response: Error Node could not be retrieved from server. Request ";
-      cts_cmd->print(ss); ss << " failed.\n";
+      cts_cmd->print_short(ss); ss << " failed.\n";
       ss << error_msg;
       throw std::runtime_error(ss.str());
    }

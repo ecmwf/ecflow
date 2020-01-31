@@ -42,6 +42,9 @@ public:
 	/// This class can be re-used hence init() should reset all data members
  	void init(unsigned int client_state_change_no, bool sync_suite_clock);
 
+ 	/// reclaim memory
+ 	void cleanup() { std::vector<compound_memento_ptr>().swap(compound_mementos_);}
+
  	// ECFLOW-631, allow the suite calendar to be sync'ed, even if there are no other changes
  	bool sync_suite_clock() const { return sync_suite_clock_;}
 
