@@ -15,6 +15,7 @@
 #include "AbstractServer.hpp"
 #include "Defs.hpp"
 #include "Ecf.hpp"
+//#include "Log.hpp"
 
 using namespace std;
 using namespace boost;
@@ -32,6 +33,8 @@ EditHistoryMgr::EditHistoryMgr(const ClientToServerCmd* c,AbstractServer* a)
 
 EditHistoryMgr::~EditHistoryMgr()
 {
+   //LogTimer timer(" EditHistoryMgr::~EditHistoryMgr()");
+
    // check if state changed
    if (state_change_no_ != Ecf::state_change_no() || modify_change_no_ != Ecf::modify_change_no()) {
 

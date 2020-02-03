@@ -16,6 +16,7 @@
 // Description : Simple class the reports wall clock time duration
 //============================================================================
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+//#include <iostream>
 
 namespace ecf {
 
@@ -31,6 +32,7 @@ public:
 
 	boost::posix_time::time_duration elapsed() const { return boost::posix_time::microsec_clock::universal_time() - start_time_;}
 
+	double elapsed_seconds() const { return (double) elapsed().total_milliseconds()/(double)1000 ; }
 private:
  	boost::posix_time::ptime start_time_;
 };

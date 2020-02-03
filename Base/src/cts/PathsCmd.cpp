@@ -141,6 +141,8 @@ const char* PathsCmd::theArg() const
 
 STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 {
+   // LogTimer timer(" PathsCmd::doHandleRequest");
+
    std::stringstream ss;
    switch (api_) {
 

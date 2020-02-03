@@ -35,6 +35,7 @@
 #include <string>
 #include <fstream>
 #include <boost/lambda/lambda.hpp>
+#include "DurationTimer.hpp"
 
 namespace ecf {
 
@@ -126,6 +127,17 @@ public:
 private:
    LogFlusher(const  LogFlusher&) = delete;
    const  LogFlusher& operator=(const LogFlusher&) = delete;
+};
+
+class LogTimer {
+public:
+   LogTimer(const char* msg) : msg_(msg) {}
+   ~LogTimer();
+private:
+   const char* msg_;
+   DurationTimer timer_;
+   LogTimer (const   LogTimer&) = delete;
+   const LogTimer& operator=(const LogTimer&) = delete;
 };
 
 /// The LogImpl allows the ofstream object to be closed, and so provide strongest

@@ -14,6 +14,8 @@
 // nor does it submit to any jurisdiction.
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
+//#include <boost/timer/timer.hpp>
+
 #include "TcpBaseServer.hpp"
 #include "Connection.hpp"
 class Server;
@@ -35,6 +37,8 @@ private:
    void handle_read(const boost::system::error_code& e, connection_ptr conn);
 
    void start_accept();
+
+   //boost::timer::cpu_timer timer_; // time_cmds for debug
 };
 
 #endif

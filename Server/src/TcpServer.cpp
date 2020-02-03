@@ -27,6 +27,8 @@ using namespace ecf;
 TcpServer::TcpServer(Server* server,boost::asio::io_service& io_service, ServerEnvironment& serverEnv )
 :  TcpBaseServer(server,io_service,serverEnv)
 {
+   //timer_.stop(); // for timing of commands.
+
    start_accept();
 }
 
@@ -79,6 +81,9 @@ void TcpServer::handle_accept( const boost::system::error_code& e, connection_pt
 
 void TcpServer::handle_read(  const boost::system::error_code& e,connection_ptr conn )
 {
+   // start read
+   //timer_.start();
+
    /// Handle completion of a write operation.
    // **********************************************************************************
    // This function *must* finish with write, otherwise it ends up being called recursively
@@ -86,6 +91,10 @@ void TcpServer::handle_read(  const boost::system::error_code& e,connection_ptr 
    if ( !e ) {
 
       handle_request(); // populates outbound_response_
+      //log(Log::DBG," handle_read()  n"  + timer_.format(3,Str::cpu_timer_format()));
+
+      // start write
+      //timer_.start();
 
       // Always *Reply* back to the client, Otherwise client will get EOF
       conn->async_write( outbound_response_,
@@ -131,5 +140,7 @@ void TcpServer::handle_write( const boost::system::error_code& e, connection_ptr
    //           we do this by checking that the out bound response was ok
    //           i.e a read only user should not be allowed to terminate server.
    handle_terminate_request();
+
+   //log(Log::DBG," handle_write() "  + timer_.format(3,Str::cpu_timer_format()));
 }
 

@@ -303,6 +303,7 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const
 #ifdef	DEBUG_GROUP_CMD
 	std::cout << "GroupCTSCmd::doHandleRequest cmdVec_.size() = " << cmdVec_.size() << "\n";
 #endif
+   //ecf::LogTimer timer(" GroupCTSCmd::doHandleRequest");
 
 	as->update_stats().group_cmd_++;
 

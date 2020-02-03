@@ -313,6 +313,16 @@ LogFlusher::~LogFlusher()
    }
 }
 
+//======================================================================================================
+
+LogTimer::~LogTimer()
+{
+   Log* the_log = Log::instance();
+   if ( the_log ) {
+      std::stringstream ss; ss << " " << msg_ << " " << timer_.elapsed_seconds();
+      the_log->log(Log::DBG,ss.str());
+   }
+}
 
 //======================================================================================================
 LogImpl::LogImpl(const std::string& filename)

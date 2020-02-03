@@ -18,7 +18,9 @@
 #include "Defs.hpp"
 #include "Ecf.hpp"
 #include "AbstractServer.hpp"
+//#include "Log.hpp"
 
+using namespace ecf;
 using namespace std;
 using namespace boost;
 
@@ -111,6 +113,7 @@ void SSyncCmd::init(
       if (incremental_changes_.size()) cout << ":*small* scale changes: no of changes(" << incremental_changes_.size() << ")\n";
       else cout << ": *No changes*\n";
 #endif
+      //LOG(Log::DBG,"SSyncCmd::init incremental_changes_.size() " << incremental_changes_.size() );
       return;
    }
 

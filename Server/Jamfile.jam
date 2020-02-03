@@ -54,6 +54,8 @@ exe ecflow_server : [ glob src/*Main.cpp ]
              /site-config//boost_filesystem
              /site-config//boost_datetime
              /site-config//boost_program_options
+             #/site-config//boost_timer   #  for debug only
+             #/site-config//boost_chrono  # for debug only
            : <variant>debug:<define>DEBUG
              <library>/ecflow_top//openssl_libs 
            ;
