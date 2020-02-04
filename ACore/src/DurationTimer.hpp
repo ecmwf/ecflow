@@ -16,7 +16,6 @@
 // Description : Simple class the reports wall clock time duration
 //============================================================================
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-//#include <iostream>
 
 namespace ecf {
 
@@ -40,9 +39,7 @@ private:
 class ScopedDurationTimer {
 public:
    ScopedDurationTimer(const char* msg) : start_time_(boost::posix_time::microsec_clock::universal_time()),msg_(msg) {}
-   ~ScopedDurationTimer() {
-      std::cout << msg_ << " " << (double)elapsed().total_milliseconds()/(double)1000 << "s\n";
-   }
+   ~ScopedDurationTimer();
 
    boost::posix_time::time_duration elapsed() const { return boost::posix_time::microsec_clock::universal_time() - start_time_;}
 
