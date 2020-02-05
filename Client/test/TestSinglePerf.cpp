@@ -224,7 +224,7 @@ void time_load_and_downloads(
                theClient.set_auto_sync(true);
                DurationTimer duration_timer;
                theClient.force(paths,"queued");  // can't use aborted again, as it already aborted, and hence will be ignored
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync :  force(aborted)" << endl;
+               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync :  force(queued)" << endl;
                theClient.set_auto_sync(false);
             }
          }
