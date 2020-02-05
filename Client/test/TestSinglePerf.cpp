@@ -49,13 +49,13 @@ static void sync_and_news_local(ClientInvoker& theClient)
       cout << "   news_local() : ";
       DurationTimer duration_timer;
       theClient.news_local();
-      cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+      cout << duration_timer.elapsed_seconds();
    }
    {
       cout << "   sync_local() : ";
       DurationTimer duration_timer;
       theClient.sync_local();
-      cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << endl;
+      cout << duration_timer.elapsed_seconds() << endl;
    }
 }
 
@@ -168,14 +168,14 @@ void time_load_and_downloads(
                cout << " Suspend " << paths.size() << " tasks : "; cout.flush();
                DurationTimer duration_timer;
                theClient.suspend(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               cout << duration_timer.elapsed_seconds();
                sync_and_news_local(theClient);
             }
             {
                cout << " Resume " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.resume(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               cout << duration_timer.elapsed_seconds();
                sync_and_news_local(theClient);
             }
             {
@@ -183,7 +183,7 @@ void time_load_and_downloads(
                theClient.set_auto_sync(true);
                DurationTimer duration_timer;
                theClient.suspend(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+               cout << duration_timer.elapsed_seconds() << " : auto-sync" << endl;
                theClient.set_auto_sync(false);
             }
             {
@@ -191,21 +191,21 @@ void time_load_and_downloads(
                theClient.set_auto_sync(true);
                DurationTimer duration_timer;
                theClient.resume(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+               cout << duration_timer.elapsed_seconds() << " : auto-sync" << endl;
                theClient.set_auto_sync(false);
             }
             {
                cout << " check  " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.check(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               cout << duration_timer.elapsed_seconds();
                sync_and_news_local(theClient);
             }
             {
                cout << " kill   " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.kill(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               cout << duration_timer.elapsed_seconds();
                sync_and_news_local(theClient);
             }
             {
@@ -215,7 +215,7 @@ void time_load_and_downloads(
                cout << " force  " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.force(paths,"aborted");
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " force(aborted)";
+               cout << duration_timer.elapsed_seconds() << " force(aborted)";
                sync_and_news_local(theClient);
             }
             // Takes to long and times out after 60s ???
@@ -224,7 +224,7 @@ void time_load_and_downloads(
                theClient.set_auto_sync(true);
                DurationTimer duration_timer;
                theClient.force(paths,"queued");  // can't use aborted again, as it already aborted, and hence will be ignored
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync :  force(queued)" << endl;
+               cout << duration_timer.elapsed_seconds() << " : auto-sync :  force(queued)" << endl;
                theClient.set_auto_sync(false);
             }
          }
