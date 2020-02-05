@@ -101,6 +101,13 @@ void SSyncCmd::init(
          return;
       }
 
+//      // small scale changes.
+//      // When we going to get thousand of memento, quicker to do a full sync
+//      if (Ecf::state_change_no()-client_state_change_no > 200000) {
+//         full_sync(client_handle,as);
+//         return;
+//      }
+
       // small scale changes. Collate changes over *defs* and all suites.
       // Suite stores the maximum state change, over *all* its children, this is used by client handle mechanism
       // and here to avoid traversing down the hierarchy.
@@ -113,7 +120,7 @@ void SSyncCmd::init(
       if (incremental_changes_.size()) cout << ":*small* scale changes: no of changes(" << incremental_changes_.size() << ")\n";
       else cout << ": *No changes*\n";
 #endif
-      //LOG(Log::DBG,"SSyncCmd::init incremental_changes_.size() " << incremental_changes_.size() );
+//      LOG(Log::DBG,"SSyncCmd::init incremental_changes_.size() " << incremental_changes_.size() << " Ecf::state_change_no()-client_state_change_no " << Ecf::state_change_no()-client_state_change_no );
       return;
    }
 
