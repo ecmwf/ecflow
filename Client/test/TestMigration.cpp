@@ -31,7 +31,6 @@
 #include "Str.hpp"
 #include "Host.hpp"
 #include "Rtt.hpp"
-#include "DurationTimer.hpp"
 
 namespace fs = boost::filesystem;
 using namespace std;

@@ -35,7 +35,6 @@
 #include "PersistHelper.hpp"
 #include "JobsParam.hpp"
 #include "Jobs.hpp"
-#include "DurationTimer.hpp"
 #include "Log.hpp"
 #include "System.hpp"
 #include "File.hpp"
