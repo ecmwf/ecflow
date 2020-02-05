@@ -181,6 +181,8 @@ protected:
    void add_edit_history(AbstractServer*,const std::string& path) const;
    void add_delete_edit_history(AbstractServer*,const std::string& path) const;
 
+
+   mutable bool use_EditHistoryMgr_{true}; // sometime quicker to add edit history in command, than using EditHistoryMgr
 private:
    friend class GroupCTSCmd;
    friend class EditHistoryMgr;
@@ -1011,7 +1013,7 @@ public:
    // called in the server
    void set_group_cmd(const GroupCTSCmd* cmd) override { group_cmd_ = cmd;}
 
-   static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete);
+   static void check_for_active_or_submitted_tasks(AbstractServer* as,Node* theNodeToDelete);
 
 private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;

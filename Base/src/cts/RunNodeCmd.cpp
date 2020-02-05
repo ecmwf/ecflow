@@ -89,7 +89,7 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	   jobsParam.logDebugMessage(" from RunNodeCmd::doHandleRequest");
 #endif
 
-	   if (force_) as->zombie_ctrl().add_user_zombies(node,CtsApi::runArg());
+	   if (force_) as->zombie_ctrl().add_user_zombies(node.get(),CtsApi::runArg());
 
 	   // Avoid re-running the task again on the same time slot
       node->miss_next_time_slot();

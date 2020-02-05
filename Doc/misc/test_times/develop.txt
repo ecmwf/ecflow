@@ -1,0 +1,311 @@
++ perf stat -r 10 bin/ecflow_client --port 3160 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def check_only
+
+ Performance counter stats for 'bin/ecflow_client --port 3160 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def check_only' (10 runs):
+
+       1528.718338      task-clock (msec)         #    0.999 CPUs utilized            ( +-  3.39% )
+                 5      context-switches          #    0.003 K/sec                    ( +-  8.70% )
+                 0      cpu-migrations            #    0.000 K/sec                    ( +- 66.67% )
+           131,036      page-faults               #    0.086 M/sec                    ( +-  0.00% )
+     5,874,597,455      cycles                    #    3.843 GHz                      ( +-  3.38% )
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+    10,215,807,969      instructions              #    1.74  insns per cycle          ( +-  0.00% )
+     2,895,337,722      branches                  # 1893.964 M/sec                    ( +-  0.00% )
+        14,632,250      branch-misses             #    0.51% of all branches          ( +-  0.87% )
+
+       1.529554755 seconds time elapsed                                          ( +-  3.39% )
+
+
+
++ bin/ecflow_client --port 3160 --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
++ echo run strace
+run strace
++ strace -c bin/ecflow_client --port 3160 --sync_full 0
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 35.58    0.018638         981        19           munmap
+ 31.64    0.016574           4      4041           brk
+ 29.14    0.015261          14      1084         1 recvmsg
+  3.42    0.001790           2      1083           epoll_wait
+  0.13    0.000068           5        15           mremap
+  0.06    0.000033           1        54           mmap
+  0.02    0.000011           0        31           close
+  0.01    0.000003           0        33        14 open
+  0.00    0.000000           0        20           read
+  0.00    0.000000           0         1           write
+  0.00    0.000000           0         9         3 stat
+  0.00    0.000000           0        16           fstat
+  0.00    0.000000           0         5           poll
+  0.00    0.000000           0         1           lseek
+  0.00    0.000000           0        22           mprotect
+  0.00    0.000000           0         2           rt_sigaction
+  0.00    0.000000           0         1           rt_sigprocmask
+  0.00    0.000000           0         2           ioctl
+  0.00    0.000000           0         2         2 access
+  0.00    0.000000           0         7           socket
+  0.00    0.000000           0         6         2 connect
+  0.00    0.000000           0         3           sendto
+  0.00    0.000000           0         1           sendmsg
+  0.00    0.000000           0         1           bind
+  0.00    0.000000           0         3           getsockname
+  0.00    0.000000           0         2           getsockopt
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           uname
+  0.00    0.000000           0         1           getrlimit
+  0.00    0.000000           0         2           getuid
+  0.00    0.000000           0         1           arch_prctl
+  0.00    0.000000           0         4           futex
+  0.00    0.000000           0         1           set_tid_address
+  0.00    0.000000           0         6           epoll_ctl
+  0.00    0.000000           0         1           set_robust_list
+  0.00    0.000000           0         1           timerfd_create
+  0.00    0.000000           0         4           timerfd_settime
+  0.00    0.000000           0         1           eventfd2
+  0.00    0.000000           0         1           epoll_create1
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.052378                  6489        22 total
+
++ perf stat -r 10 bin/ecflow_client --port 3160 --sync_full 0
+
+ Performance counter stats for 'bin/ecflow_client --port 3160 --sync_full 0' (10 runs):
+
+       1742.450488      task-clock (msec)         #    0.765 CPUs utilized            ( +-  0.41% )
+               648      context-switches          #    0.372 K/sec                    ( +-  8.03% )
+                 0      cpu-migrations            #    0.000 K/sec                    ( +- 55.28% )
+           266,671      page-faults               #    0.153 M/sec                    ( +-  0.00% )
+     6,701,061,197      cycles                    #    3.846 GHz                      ( +-  0.40% )
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+    12,205,242,896      instructions              #    1.82  insns per cycle          ( +-  0.00% )
+     3,198,382,873      branches                  # 1835.566 M/sec                    ( +-  0.00% )
+        12,097,256      branch-misses             #    0.38% of all branches          ( +-  0.58% )
+
+       2.278306869 seconds time elapsed                                          ( +-  0.35% )
+
+       
+
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/3199.def
+real    0m0.92s
+user    0m0.79s
+sys     0m0.11s
+
++ ANode/parser/perf_aparser_only /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+real    0m1.46s
+user    0m1.32s
+sys     0m0.14s
+
++ ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/3199.def
+ Parsing Node tree & AST creation time parse(1) = 0.822s wall, (0.760s user + 0.050s system = 0.810s) CPU (98.5%)
+ Parsing Node tree *only* time         parse(1) = 0.622s wall, (0.530s user + 0.090s system = 0.620s) CPU (99.7%)
+ Save and restore as string(DEFS)               = 0.977s wall, (0.860s user + 0.120s system = 0.980s) CPU (100.4%) -> string size(33231624)
+ Save and restore as string(NET)                = 0.689s wall, (0.660s user + 0.030s system = 0.690s) CPU (100.2%) -> string size(33232282) checks relaxed
+ Save and restore as string(MIGRATE)            = 0.684s wall, (0.660s user + 0.020s system = 0.680s) CPU (99.4%) -> string size(33232286)
+ Save as DEFS checkpoint, time taken            = 0.107s wall, (0.100s user + 0.010s system = 0.110s) CPU (102.8%)
+ Save as CEREAL checkpoint, time taken          = 1.320s wall, (1.320s user + 0.000s system = 1.320s) CPU (100.0%)
+ Checkpt(DEFS) and reload, time taken           = 0.712s wall, (0.680s user + 0.030s system = 0.710s) CPU (99.7%) file_size(33235526)  result(1) msg()
+ Checkpt(CEREAL) and reload , time taken        = 2.702s wall, (2.620s user + 0.090s system = 2.710s) CPU (100.3%) file_size(99379310)  result(1) msg()
+ Test all paths can be found. time taken        = 0.326s wall, (0.320s user + 0.000s system = 0.320s) CPU (98.3%)
+ time for 10 jobSubmissions                     = 0.268s wall, (0.270s user + 0.000s system = 0.270s) CPU (100.6%) jobs:4
+ Time for Defs::check(inlimit resolution)       = 0.057s wall, (0.050s user + 0.000s system = 0.050s) CPU (88.3%) result(1)
+ time for deleting all nodes                    = 0.264s wall, (0.270s user + 0.000s system = 0.270s) CPU (102.3%)
+ 9.939348s wall, 9.470000s user + 0.460000s system = 9.930000s CPU (99.9%)
+
++ ANode/parser/perf_aparser_timer /var/tmp/ma0/BIG_DEFS/vsms2.31415.def
+ Parsing Node tree & AST creation time parse(1) = 1.239s wall, (1.090s user + 0.140s system = 1.230s) CPU (99.3%)
+ Parsing Node tree *only* time         parse(1) = 1.231s wall, (1.050s user + 0.180s system = 1.230s) CPU (100.0%)
+ Save and restore as string(DEFS)               = 1.518s wall, (1.380s user + 0.140s system = 1.520s) CPU (100.2%) -> string size(57634217)
+ Save and restore as string(NET)                = 1.078s wall, (1.050s user + 0.040s system = 1.090s) CPU (101.1%) -> string size(68295827) checks relaxed
+ Save and restore as string(MIGRATE)            = 1.209s wall, (1.130s user + 0.080s system = 1.210s) CPU (100.1%) -> string size(68295831)
+ Save as DEFS checkpoint, time taken            = 0.310s wall, (0.270s user + 0.050s system = 0.320s) CPU (103.3%)
+ Save as CEREAL checkpoint, time taken          = 2.653s wall, (2.650s user + 0.000s system = 2.650s) CPU (99.9%)
+ Checkpt(DEFS) and reload, time taken           = 1.521s wall, (1.450s user + 0.080s system = 1.530s) CPU (100.6%) file_size(118606320)  result(1) msg()
+ Checkpt(CEREAL) and reload , time taken        = 5.332s wall, (5.110s user + 0.220s system = 5.330s) CPU (100.0%) file_size(216055639)  result(1) msg()
+ Test all paths can be found. time taken        = 0.551s wall, (0.550s user + 0.000s system = 0.550s) CPU (99.8%)
+ time for 10 jobSubmissions                     = 0.096s wall, (0.090s user + 0.000s system = 0.090s) CPU (94.2%) jobs:0
+ Time for Defs::check(inlimit resolution)       = 0.541s wall, (0.540s user + 0.000s system = 0.540s) CPU (99.9%) result(0)
+ time for deleting all nodes                    = 0.373s wall, (0.380s user + 0.000s system = 0.380s) CPU (101.8%)
+ 18.435547s wall, 17.470000s user + 0.960000s system = 18.430000s CPU (100.0%)
+
++ Client/perf_test_large_defs
+Running 1 test case...
+Client:: ...test_perf_for_large_defs:   port(3160)
+
+/var/tmp/ma0/BIG_DEFS/vsms2.31415.def  : file size 153539843
+ Load:                3902ms
+ Begin:               121ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 2479(ms)
+ Download(Sync):      2087 35 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 2082 2100 2088 2088 2091 2082 2086 2083 2083 2083 : Avg:2.0866(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      2549 2327 2253 2248 2225 2239 2247 2297 2220 2226 : Avg:2.2831(sec)  : get_defs() from different client
+ Suspend 262323 tasks : 0.987   news_local() : 0   sync_local() : 3.114
+ Resume 262323 tasks  : 0.979   news_local() : 0   sync_local() : 2.201
+ Suspend 262323 tasks : 3.343 : auto-sync
+ Resume 262323 tasks  : 3.484 : auto-sync
+ check  262323 tasks  : 0.455   news_local() : 0.013   sync_local() : 0.003
+ kill   262323 tasks  : 1.447   news_local() : 0.012   sync_local() : 0.017
+ force  262323 tasks  : 2.035 force(aborted)   news_local() : 0.017   sync_local() : 5.998
+ force  262323 tasks  : 7.803 : auto-sync :  force(aborted)
+ Check pt:            972 728 755 743 741 742 745 740 744 744 : Avg:0.7654(sec)
+ client cmds:         2000 times 6350(ms) (sync_local) with same client (suspend,resume,force,alter,requeue)
+ client cmds:         2000 times 5478(ms) (auto_sync ) with same client (suspend,resume,force,alter,requeue)
+ Delete:              913ms
+
+/var/tmp/ma0/BIG_DEFS/3199.def  : file size 59631577
+ Load:                1904ms
+ Begin:               335ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 1188(ms)
+ Download(Sync):      1077 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 1070 1075 1072 1069 1077 1072 1070 1068 1071 1071 : Avg:1.0715(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      1280 1287 1257 1270 1276 1281 1267 1269 1262 1255 : Avg:1.2704(sec)  : get_defs() from different client
+ Suspend 215437 tasks : 0.711   news_local() : 0   sync_local() : 2.431
+ Resume 215437 tasks  : 0.754   news_local() : 0.001   sync_local() : 1.714
+ Suspend 215437 tasks : 2.548 : auto-sync
+ Resume 215437 tasks  : 2.644 : auto-sync
+ check  215437 tasks  : 0.697   news_local() : 0   sync_local() : 0
+ kill   215437 tasks  : 0.467   news_local() : 0.013   sync_local() : 0
+ force  215437 tasks  : 1.288 force(aborted)   news_local() : 0.012   sync_local() : 4.054
+ force  215437 tasks  : 5.456 : auto-sync :  force(aborted)
+ Check pt:            548 412 343 341 342 343 341 343 341 343 : Avg:0.3697(sec)
+ client cmds:         2000 times 6940(ms) (sync_local) with same client (suspend,resume,force,alter,requeue)
+ client cmds:         2000 times 5874(ms) (auto_sync ) with same client (suspend,resume,force,alter,requeue)
+ Delete:              500ms
+
+/var/tmp/ma0/BIG_DEFS/od.def  : file size 11078737
+Warning: TASK /lbc/perle/local/perle has a inlimit ../process:excl :The referenced FAMILY '/lbc/perle/process' does not define the limit excl
+
+ Load:                518ms
+ Begin:               58ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 240(ms)
+ Download(Sync):      216 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 216 217 216 216 215 216 216 215 217 216 : Avg:0.216(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      255 256 258 255 256 257 257 255 257 257 : Avg:0.2563(sec)  : get_defs() from different client
+ Suspend 43305 tasks : 0.13   news_local() : 0   sync_local() : 0.453
+ Resume 43305 tasks  : 0.136   news_local() : 0   sync_local() : 0.312
+ Suspend 43305 tasks : 0.477 : auto-sync
+ Resume 43305 tasks  : 0.501 : auto-sync
+ check  43305 tasks  : 0.201   news_local() : 0   sync_local() : 0
+ kill   43305 tasks  : 0.078   news_local() : 0.002   sync_local() : 0
+ force  43305 tasks  : 0.251 force(aborted)   news_local() : 0   sync_local() : 0.768
+ force  43305 tasks  : 1.037 : auto-sync :  force(aborted)
+ Check pt:            92 73 55 56 58 56 56 56 56 57 : Avg:0.0615(sec)
+ client cmds:         2000 times 4537(ms) (sync_local) with same client (suspend,resume,force,alter,requeue)
+ client cmds:         2000 times 3615(ms) (auto_sync ) with same client (suspend,resume,force,alter,requeue)
+ Delete:              75ms
+
+/var/tmp/ma0/BIG_DEFS/mega.def  : file size 6721759
+ Load:                321ms
+ Begin:               35ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 146(ms)
+ Download(Sync):      132 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 132 131 131 132 132 131 132 132 131 133 : Avg:0.1317(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      157 158 157 159 157 158 158 157 159 168 : Avg:0.1588(sec)  : get_defs() from different client
+ Suspend 27436 tasks : 0.085   news_local() : 0   sync_local() : 0.301
+ Resume 27436 tasks  : 0.09   news_local() : 0   sync_local() : 0.199
+ Suspend 27436 tasks : 0.303 : auto-sync
+ Resume 27436 tasks  : 0.307 : auto-sync
+ check  27436 tasks  : 0.107   news_local() : 0   sync_local() : 0
+ kill   27436 tasks  : 0.05   news_local() : 0.001   sync_local() : 0
+ force  27436 tasks  : 0.153 force(aborted)   news_local() : 0   sync_local() : 0.516
+ force  27436 tasks  : 0.675 : auto-sync :  force(aborted)
+ Check pt:            47 36 35 36 34 35 35 35 35 34 : Avg:0.0362(sec)
+ client cmds:         2000 times 3863(ms) (sync_local) with same client (suspend,resume,force,alter,requeue)
+ client cmds:         2000 times 2858(ms) (auto_sync ) with same client (suspend,resume,force,alter,requeue)
+ Delete:              55ms
+
+/var/tmp/ma0/BIG_DEFS/empty.def  : file size 13
+ Load:                0ms
+ Begin:               0ms
+ Download(news_local):NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS NO_NEWS : 1:news_local(),2:sync_local(),n:news_local with the new Client: 1(ms)
+ Download(Sync):      0 0 0 0 0 0 0 0 0 0 :(milli-seconds) sync_local() with the same Client. First call updates cache.
+ Download(Sync-FULL): 0 0 0 0 0 0 0 0 0 0 : Avg:0(sec)  : sync_local() with *different* clients.uses cache!
+ Download(FULL):      0 0 0 0 0 0 0 0 0 0 : Avg:0(sec)  : get_defs() from different client
+ Suspend 0 tasks : 0   news_local() : 0   sync_local() : 0
+ Resume 0 tasks  : 0   news_local() : 0   sync_local() : 0
+ Suspend 0 tasks : 0 : auto-sync
+ Resume 0 tasks  : 0 : auto-sync
+ check  0 tasks  : 0   news_local() : 0   sync_local() : 0
+ kill   0 tasks  : 0   news_local() : 0   sync_local() : 0
+ force  0 tasks  : 0 force(aborted)   news_local() : 0   sync_local() : 0
+ force  0 tasks  : 0 : auto-sync :  force(aborted)
+ Check pt:            2 2 0 0 0 0 0 0 0 0 : Avg:0.0004(sec)
+ client cmds:         0 times 0(ms) (sync_local) with same client (suspend,resume,force,alter,requeue)
+ client cmds:         0 times 0(ms) (auto_sync ) with same client (suspend,resume,force,alter,requeue)
+ Delete:              0ms
+
+
++ bin/ecflow_client --load /var/tmp/ma0/BIG_DEFS/vsms2.31415.def stats
+Definition statistics
+Nodes               457888
+Suites              37
+Family              195527
+Task                262323
+Alias               1
+
+Edit history nodes  67727
+Edit history paths  255692
+
+vars                933908
+triggers            63356
+complete triggers   2044
+events              54876
+labels              99237
+meters              9703
+
+times               321
+todays              3
+crons               33
+dates               5
+days                0
+
+late                15127
+inlimits            89267
+limits              1232
+repeats             219
+zombies             29
+
+auto_cancel         0
+auto_archive        0
+auto_restore        0
+verifys             0
+queues              0
+generics            0
++ bin/ecflow_client --load /var/tmp/ma0/BIG_DEFS/3199.def stats
+Definition statistics
+Nodes               320829
+Suites              18
+Family              105374
+Task                215437
+Alias               0
+
+Edit history nodes  0
+Edit history paths  0
+
+vars                885532
+triggers            88812
+complete triggers   551
+events              35477
+labels              46714
+meters              14994
+
+times               245
+todays              0
+crons               0
+dates               0
+days                0
+
+late                41023
+inlimits            52376
+limits              635
+repeats             90
+zombies             0
+
+auto_cancel         0
+auto_archive        0
+auto_restore        0
+verifys             0
+queues              0
+generics            0   
+       
+       
+       
+       

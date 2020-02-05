@@ -176,6 +176,10 @@ void ClientToServerCmd::add_node_path_for_edit_history(const std::string& absNod
 
 void ClientToServerCmd::add_edit_history(AbstractServer* as) const
 {
+   if (!use_EditHistoryMgr_) {
+      return; // edit history will be added by the command
+   }
+
    // record all the user edits to the node. Reuse the time stamp cache created in handleRequest()
    if (edit_history_nodes_.empty() && edit_history_node_paths_.empty()) {
 
