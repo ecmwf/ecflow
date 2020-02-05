@@ -212,13 +212,13 @@ void time_load_and_downloads(
                // force complete on all tasks, on some suites(3199.def), can cause infinite recursion, i.e cause repeats to loop
                // Hence we will call force aborted instead.
                // Also AVOID active/submitted otherwise we spend a huge time adding zombies, for the subsequent force cmd below.
+               // Node: state change memento, will also persist duration time of state change.
                cout << " force  " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.force(paths,"aborted");
                cout << duration_timer.elapsed_seconds() << " force(aborted)";
                sync_and_news_local(theClient);
             }
-            // Takes to long and times out after 60s ???
             {
                cout << " force  " << paths.size() << " tasks  : "; cout.flush();
                theClient.set_auto_sync(true);
