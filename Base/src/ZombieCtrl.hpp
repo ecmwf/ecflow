@@ -49,7 +49,6 @@ public:
 	/// Then add as 'USER' zombies. This should be called when commands like, delete, requeue,
 	/// run, are using the force option, and will create zombies.
 	void add_user_zombies(Node*,const std::string& user_cmd);
-	void add_user_zombies(suite_ptr,const std::string& user_cmd);
 	void add_user_zombies(defs_ptr,const std::string& user_cmd);
    void add_user_zombies(const std::vector<Submittable*>& tasks,const std::string& user_cmd);
 
