@@ -93,12 +93,14 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  		throw std::runtime_error( ss.str() ) ;
  	}
 
+   string the_path;
+   string the_event;
    std::stringstream error_ss;
  	size_t vec_size = paths_.size();
  	for(size_t i = 0; i < vec_size; i++) {
 
- 	   string the_path = paths_[i];
- 	   string the_event;
+ 	   the_path = paths_[i];
+ 	   the_event.clear();
  	   if ( is_event_state ) {
  	      Extract::pathAndName(paths_[i],the_path, the_event);
  	      if ( the_path.empty() || the_event.empty() ) {

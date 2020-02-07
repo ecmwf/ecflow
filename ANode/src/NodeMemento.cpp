@@ -59,22 +59,23 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 #endif
 
 	unsigned int client_state_change_no = changes.client_state_change_no();
+	std::string the_abs_node_path = absNodePath();
 
 	// determine if state changed
 	if (st_.first.state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 		comp->add( std::make_shared<NodeStateMemento>( std::make_pair(st_.first.state(),st_.second)) );
 	}
 
 	// determine if def status changed
 	if (d_st_.state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 		comp->add( std::make_shared<NodeDefStatusDeltaMemento>( d_st_.state()) );
 	}
 
 	// determine if node suspend changed
 	if (suspended_change_no_  > client_state_change_no) {
-		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 		comp->add( std::make_shared<SuspendedMemento>( suspended_) );
 	}
 
@@ -92,7 +93,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 #endif
 	    // Note: auto-cancel does not have any alterable state hence, *NO* memento
 
-	   if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+	   if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
  		comp->clear_attributes();
 
 
@@ -143,19 +144,19 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	// determine if event, meter, label   changed.
 	for(const Event& e: events_ ) {
 	   if (e.state_change_no() > client_state_change_no) {
-	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(the_abs_node_path);
 	      comp->add( std::make_shared<NodeEventMemento>(e) );
 	   }
 	}
 	for(const Meter& m: meters_) {
 	   if (m.state_change_no() > client_state_change_no) {
-	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(the_abs_node_path);
 	      comp->add( std::make_shared<NodeMeterMemento>( m) );
 	   }
 	}
 	for(const Label& l: labels_ ) {
 	   if (l.state_change_no() > client_state_change_no) {
-	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(the_abs_node_path);
 	      comp->add( std::make_shared<NodeLabelMemento>(  l) );
 	   }
 	}
@@ -163,31 +164,31 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 	// Determine if the time related dependency changed
 	for(const TodayAttr& attr: todays_  ) {
 	   if (attr.state_change_no() > client_state_change_no) {
-	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(the_abs_node_path);
 	      comp->add( std::make_shared<NodeTodayMemento>( attr) );
 	   }
 	}
 	for(const TimeAttr& attr: times_  ) {
 	   if (attr.state_change_no() > client_state_change_no) {
-	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(the_abs_node_path);
 	      comp->add( std::make_shared<NodeTimeMemento>( attr) );
 	   }
 	}
 	for(const DayAttr& attr: days_ ) {
 	   if (attr.state_change_no() > client_state_change_no) {
-	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(the_abs_node_path);
 	      comp->add( std::make_shared<NodeDayMemento>( attr) );
 	   }
 	}
 	for(const DateAttr& attr: dates_ ) {
 	   if (attr.state_change_no() > client_state_change_no) {
-	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(the_abs_node_path);
 	      comp->add( std::make_shared<NodeDateMemento>( attr) );
 	   }
 	}
 	for(const CronAttr& attr: crons_ ) {
 	   if (attr.state_change_no() > client_state_change_no) {
-	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(absNodePath());
+	      if (!comp.get()) comp = std::make_shared<CompoundMemento>(the_abs_node_path);
 	      comp->add( std::make_shared<NodeCronMemento>( attr) );
 	   }
 	}
@@ -198,7 +199,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       const std::vector<QueueAttr>& queue_attrs = misc_attrs_->queues();
       for(const QueueAttr& attr: queue_attrs ) {
          if (attr.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
             comp->add( std::make_shared<NodeQueueIndexMemento>( attr.name(), attr.index(), attr.state_vec() ) );
          }
       }
@@ -208,7 +209,7 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
       const std::vector<VerifyAttr>& verify_attrs = misc_attrs_->verifys();
       for(const VerifyAttr& v: verify_attrs ) {
          if (v.state_change_no() > client_state_change_no) {
-            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+            if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
             comp->add( std::make_shared<NodeVerifyMemento>( verify_attrs) );
             break;
          }
@@ -217,43 +218,43 @@ void Node::incremental_changes( DefsDelta& changes, compound_memento_ptr& comp) 
 
 	// determine if the trigger or complete changed
 	if (t_expr_ && t_expr_->state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 		comp->add( std::make_shared<NodeTriggerMemento>(  *t_expr_) );
 	}
  	if (c_expr_ && c_expr_->state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 		comp->add( std::make_shared<NodeCompleteMemento>(  *c_expr_) );
 	}
 
 	// determine if the repeat changed
 	if (!repeat_.empty() && repeat_.state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 		comp->add( std::make_shared<NodeRepeatIndexMemento>( repeat_) );
 	}
 
 	// determine if limits changed.
 	for(limit_ptr l: limits_ ) {
 		if (l->state_change_no() > client_state_change_no) {
-			if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+			if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 			comp->add( std::make_shared<NodeLimitMemento>(  *l) );
 		}
 	}
 
 	// determine if variable values changed. Copy all variables. Save on having variable_change_no_ per variable
 	if (variable_change_no_ > client_state_change_no) {
-      if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+      if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 	   for(const Variable& v: vars_ )  { comp->add( std::make_shared<NodeVariableMemento>( v) ); }
 	}
 
 	// Determine if the late attribute has changed
 	if (late_ && late_->state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 		comp->add( std::make_shared<NodeLateMemento>( *late_) );
 	}
 
 	// Determine if the flag changed
 	if (flag_.state_change_no() > client_state_change_no) {
-		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(absNodePath());
+		if (!comp.get()) comp =  std::make_shared<CompoundMemento>(the_abs_node_path);
 		comp->add( std::make_shared<FlagMemento>( flag_ ) );
 	}
 
