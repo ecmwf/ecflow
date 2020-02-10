@@ -238,7 +238,7 @@ void time_load_and_downloads(
                cout << seconds << " ";
                total += seconds;
             }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)" << endl;
+            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(s)" << endl;
          }
          {
             cout << " client cmds:         " ;  cout.flush();
@@ -251,7 +251,7 @@ void time_load_and_downloads(
                theClient.alter(paths[i],"add","variable","XXXX","XXXX"); theClient.sync_local();
                theClient.requeue(paths[i]);         theClient.sync_local();
             }
-            cout << i << " times " << duration_timer.elapsed().total_milliseconds() << "(ms) (sync_local) with same client (suspend,resume,force,alter,requeue)" << endl;
+            cout << i << " times " << duration_timer.elapsed_seconds()  << "(s) (sync_local) with same client (suspend,resume,force,alter,requeue)" << endl;
          }
          {
             cout << " client cmds:         " ;  cout.flush();
@@ -265,7 +265,7 @@ void time_load_and_downloads(
                theClient.alter(paths[i],"add","variable","ZZZZ","XXXX");
                theClient.requeue(paths[i]);
             }
-            cout << i << " times " << duration_timer.elapsed().total_milliseconds() << "(ms) (auto_sync ) with same client (suspend,resume,force,alter,requeue)" << endl;
+            cout << i << " times " << duration_timer.elapsed_seconds() << "(s) (auto_sync ) with same client (suspend,resume,force,alter,requeue)" << endl;
             theClient.set_auto_sync(false);
          }
 
