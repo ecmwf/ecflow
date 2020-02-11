@@ -58,6 +58,21 @@ private:
 	unsigned int modify_change_no_;
 };
 
+// Faster than using node_ptr.
+class SuiteChangedPtr  {
+private:
+   SuiteChangedPtr(const SuiteChangedPtr&) = delete;
+  const  SuiteChangedPtr& operator=(const  SuiteChangedPtr&) = delete;
+public:
+   explicit SuiteChangedPtr(Node* s);
+   ~SuiteChangedPtr();
+private:
+   Node* node_;
+   Suite* suite_; // if node is removed suite pointer is not accessible, hence store first
+   unsigned int state_change_no_;
+   unsigned int modify_change_no_;
+};
+
 
 class SuiteChanged1 {
 private:

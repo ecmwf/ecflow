@@ -355,7 +355,7 @@ STC_Cmd_ptr AlterCmd::doHandleRequest(AbstractServer* as) const
          continue;
       }
 
-      SuiteChanged0 changed(node);
+      SuiteChangedPtr changed(node.get());
       try {
          switch (del_attr_type_) {
          case AlterCmd::DEL_VARIABLE:  node->deleteVariable(name_); break;

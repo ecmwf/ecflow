@@ -159,7 +159,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
                LOG(Log::ERR,"Suspend: Could not find node at path " << paths_[i]);
                continue;
             }
-            SuiteChanged0 changed(theNode);
+            SuiteChangedPtr changed(theNode.get());
             theNode->suspend();
             theNode->flag().set(ecf::Flag::MESSAGE);
             add_edit_history(as,paths_[i]);
@@ -181,7 +181,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
                LOG(Log::ERR,"Resume: Could not find path " << paths_[i]);
                continue;
             }
-            SuiteChanged0 changed(theNode);
+            SuiteChangedPtr changed(theNode.get());
             theNode->resume();
             theNode->flag().set(ecf::Flag::MESSAGE);
             add_edit_history(as,paths_[i]);
@@ -299,7 +299,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
                mss << "Status failed. For " << paths_[i] << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
                throw std::runtime_error( mss.str() ) ;
             }
-            SuiteChanged0 changed(theNode);
+            SuiteChangedPtr changed(theNode.get());
             theNode->status();   // this can throw std::runtime_error
          }
          break;

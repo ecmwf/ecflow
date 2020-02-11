@@ -114,7 +114,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      error_ss << "ForceCmd: Could not find node at path " << the_path << "\n";
  	      continue;
  	   }
- 	   SuiteChanged0 changed(node); // Cater for suites in handles
+ 	   SuiteChangedPtr changed(node.get()); // Cater for suites in handles
 
  	   if (is_node_state) {
  	      /// We want this to have side effects. i.e bubble up state and re-queue if complete and has repeat's

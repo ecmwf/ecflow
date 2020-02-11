@@ -91,7 +91,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
          throw std::runtime_error( mss.str() ) ;
       }
 
-	   SuiteChanged0 changed(theNodeToRequeue);
+	   SuiteChangedPtr changed(theNodeToRequeue.get());
 
 	   if (option_ == RequeueNodeCmd::ABORT) {
 	      // ONLY Re-queue the aborted tasks

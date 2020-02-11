@@ -72,7 +72,7 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	      throw std::runtime_error( mss.str() ) ;
 	   }
 
-	   SuiteChanged0 changed(node);
+	   SuiteChangedPtr changed(node.get());
 
 	   // Please note: that if any tasks under theNode are in
 	   // active or submitted states, then we will have created zombies jobs

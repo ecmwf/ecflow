@@ -98,7 +98,7 @@ STC_Cmd_ptr EditScriptCmd::doHandleRequest(AbstractServer* as) const
 	if (!submittable)  throw std::runtime_error( "EditScriptCmd failed. Can not locate task or alias at path " + path_to_node_ ) ;
 
 	/// record any changes made to suite. Needed for incremental updates
-   SuiteChanged0 changed(node);
+   SuiteChangedPtr changed(node.get());
 
 	switch (edit_type_) {
 		case EditScriptCmd::EDIT: {
