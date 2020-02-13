@@ -28,6 +28,7 @@ public:
    bool check_defaults() const override;
 
 	static task_ptr create(const std::string& name, bool check = true);
+   static task_ptr create_me(const std::string& name); // python api, to pick correct init function
 
 	void print(std::string&) const override;
    bool operator==(const Task& rhs) const;

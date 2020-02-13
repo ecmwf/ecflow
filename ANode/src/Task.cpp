@@ -96,6 +96,11 @@ task_ptr Task::create(const std::string& name, bool check)
 	return std::make_shared<Task>( name, check );
 }
 
+task_ptr Task::create_me(const std::string& name)
+{
+   return std::make_shared<Task>( name, true );
+}
+
 void Task::print(std::string& os) const
 {
    Indentor in;

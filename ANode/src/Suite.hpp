@@ -34,6 +34,7 @@ public:
    ~Suite() override;
 
    static suite_ptr create(const std::string& name, bool check = true);
+   static suite_ptr create_me(const std::string& name); // python api, to pick correct init function
 
    bool check_defaults() const override;
 

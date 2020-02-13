@@ -94,6 +94,11 @@ suite_ptr Suite::create(const std::string& name, bool check)
 	return std::make_shared<Suite>( name, check );
 }
 
+suite_ptr Suite::create_me(const std::string& name)
+{
+   return std::make_shared<Suite>( name, true );
+}
+
 bool Suite::check_defaults() const
 {
    if (defs_ != nullptr) throw std::runtime_error("Suite::check_defaults(): defs_ != nullptr");
