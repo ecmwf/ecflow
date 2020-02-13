@@ -97,6 +97,7 @@ Suite::~Suite()
 
 suite_ptr Suite::create(const std::string& name)
 {
+   //cout << "Suite::create " << name << "\n";
 	return boost::make_shared<Suite>( name );
 }
 
