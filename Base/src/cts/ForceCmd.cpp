@@ -43,15 +43,40 @@ std::ostream& ForceCmd::print(std::ostream& os) const
 {
    return user_cmd(os,CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
+
+std::ostream& ForceCmd::print_short(std::ostream& os) const
+{
+   std::vector<std::string> paths;
+   if (!paths_.empty()) paths.emplace_back(paths_[0]);
+
+   my_print_only(os,paths);
+
+   if (paths_.size() > 1) os << " : truncated : " << paths_.size()-1 << " paths *not* shown";
+   return os;
+}
+
 std::ostream& ForceCmd::print_only(std::ostream& os) const
 {
-   os << CtsApi::to_string(CtsApi::force(paths_,stateOrEvent_,recursive_,setRepeatToLastValue_)); return os;
+   return my_print_only(os,paths_);
 }
+
 std::ostream& ForceCmd::print(std::ostream& os, const std::string& path) const
 {
    std::vector<std::string> paths(1,path);
+   return my_print(os,paths);
+}
+
+std::ostream& ForceCmd::my_print(std::ostream& os, const std::vector<std::string>& paths) const
+{
    return user_cmd(os,CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_)));
 }
+
+std::ostream& ForceCmd::my_print_only(std::ostream& os, const std::vector<std::string>& paths) const
+{
+   os << CtsApi::to_string(CtsApi::force(paths,stateOrEvent_,recursive_,setRepeatToLastValue_));
+   return os;
+}
+
 
 STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
 {
@@ -68,12 +93,14 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  		throw std::runtime_error( ss.str() ) ;
  	}
 
+   string the_path;
+   string the_event;
    std::stringstream error_ss;
  	size_t vec_size = paths_.size();
  	for(size_t i = 0; i < vec_size; i++) {
 
- 	   string the_path = paths_[i];
- 	   string the_event;
+ 	   the_path = paths_[i];
+ 	   the_event.clear();
  	   if ( is_event_state ) {
  	      Extract::pathAndName(paths_[i],the_path, the_event);
  	      if ( the_path.empty() || the_event.empty() ) {
@@ -87,7 +114,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      error_ss << "ForceCmd: Could not find node at path " << the_path << "\n";
  	      continue;
  	   }
- 	   SuiteChanged0 changed(node); // Cater for suites in handles
+ 	   SuiteChangedPtr changed(node.get()); // Cater for suites in handles
 
  	   if (is_node_state) {
  	      /// We want this to have side effects. i.e bubble up state and re-queue if complete and has repeat's
@@ -99,7 +126,7 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
  	      }
 
  	      if ( new_state != NState::ACTIVE && new_state != NState::SUBMITTED) {
- 	         as->zombie_ctrl().add_user_zombies(node,CtsApi::forceArg());
+ 	         as->zombie_ctrl().add_user_zombies(node.get(),CtsApi::forceArg());
  	      }
 
  	      if (recursive_) node->set_state_hierarchically( new_state, true /* force */ );

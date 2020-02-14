@@ -91,7 +91,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
          throw std::runtime_error( mss.str() ) ;
       }
 
-	   SuiteChanged0 changed(theNodeToRequeue);
+	   SuiteChangedPtr changed(theNodeToRequeue.get());
 
 	   if (option_ == RequeueNodeCmd::ABORT) {
 	      // ONLY Re-queue the aborted tasks
@@ -136,7 +136,7 @@ STC_Cmd_ptr RequeueNodeCmd::doHandleRequest(AbstractServer* as) const
 	   }
 	   else if ( option_ == RequeueNodeCmd::FORCE) {
 
-	      as->zombie_ctrl().add_user_zombies(theNodeToRequeue,CtsApi::requeueArg());
+	      as->zombie_ctrl().add_user_zombies(theNodeToRequeue.get(),CtsApi::requeueArg());
 
 	      // Please note: that if any tasks under theNodeToRequeue are in
 	      // active or submitted states, then we will have created zombie jobs

@@ -99,7 +99,7 @@ void export_SuiteAndFamily()
    class_<Family, bases<NodeContainer>, family_ptr>("Family",DefsDoc::family_doc())
    .def("__init__",raw_function(&NodeUtil::node_raw_constructor,1))  // will call -> family_init
    .def("__init__",make_constructor(&family_init), DefsDoc::family_doc())
-   .def("__init__",make_constructor(&Family::create), DefsDoc::family_doc())
+   .def("__init__",make_constructor(&Family::create_me), DefsDoc::family_doc())
    .def(self == self )                    // __eq__
    .def("__str__",   &Family::to_string)  // __str__
    .def("__copy__",  copyObject<Family>)  // __copy__ uses copy constructor
@@ -115,7 +115,7 @@ void export_SuiteAndFamily()
    class_<Suite, bases<NodeContainer>, suite_ptr>("Suite",DefsDoc::suite_doc())
    .def("__init__",raw_function(&NodeUtil::node_raw_constructor,1))  // will call -> suite_init
    .def("__init__",make_constructor(&suite_init), DefsDoc::suite_doc())
-   .def("__init__",make_constructor(&Suite::create), DefsDoc::suite_doc())
+   .def("__init__",make_constructor(&Suite::create_me), DefsDoc::suite_doc())
    .def(self == self )                   // __eq__
    .def("__str__",   &Suite::to_string)  // __str__
    .def("__copy__",  copyObject<Suite>)  // __copy__ uses copy constructor

@@ -13,6 +13,7 @@
 
 #  code for testing derivation works
 import os
+import sys
 import ecflow
 import ecflow_test_util as Test
 
@@ -21,6 +22,32 @@ class MySuite(ecflow.Suite): pass
 class MyFamily(ecflow.Family): pass
 class MyTask(ecflow.Task): pass
 class MyClient(ecflow.Client): pass
+
+if sys.version_info[0] > 2:
+    class MySuite2(ecflow.Suite):
+        def __init__(self, name):
+            super().__init__(name)
+    
+    class MyFamily2(ecflow.Family):
+        def __init__(self, name):
+            super().__init__(name)
+    
+    class MyTask2(ecflow.Task):
+        def __init__(self, name):
+            super().__init__(name)
+
+    n = MySuite2('s')
+    print(n)
+
+    n = MyFamily2('f')
+    print(n)
+
+    n = MyTask2('t')
+    print(n)
+
+else:
+    print("Python2 ignoring derivation test")
+
 
 if __name__ == "__main__":
     

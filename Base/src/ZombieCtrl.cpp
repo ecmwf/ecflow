@@ -405,19 +405,11 @@ void ZombieCtrl::add_user_zombies(const std::vector<Submittable*>& tasks,const s
 	}
 }
 
-void ZombieCtrl::add_user_zombies( node_ptr node,const std::string& user_cmd)
+void ZombieCtrl::add_user_zombies( Node* node,const std::string& user_cmd)
 {
-	if (!node.get()) return;
+	if (!node) return;
 	std::vector<Submittable*> tasks;
 	node->get_all_active_submittables(tasks);
-	add_user_zombies(tasks,user_cmd);
-}
-
-void ZombieCtrl::add_user_zombies( suite_ptr suite,const std::string& user_cmd)
-{
-	if (!suite.get()) return;
-	std::vector<Submittable*> tasks;
-	suite->get_all_active_submittables(tasks);
 	add_user_zombies(tasks,user_cmd);
 }
 

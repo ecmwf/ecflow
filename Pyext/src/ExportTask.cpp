@@ -63,7 +63,7 @@ void export_Task()
    class_<Task, bases<Submittable>, task_ptr>("Task",DefsDoc::task_doc() )
    .def("__init__",raw_function(&NodeUtil::node_raw_constructor,1))  // will call -> task_init
    .def("__init__",make_constructor(&task_init), DefsDoc::task_doc())
-   .def("__init__",make_constructor(&Task::create), DefsDoc::task_doc())
+   .def("__init__",make_constructor(&Task::create_me), DefsDoc::task_doc())  // create_me take a single string argument
    .def(self == self )                        // __eq__
    .def("__enter__", &task_enter)             // allow with statement, hence indentation support
    .def("__exit__",  &task_exit)              // allow with statement, hence indentation support

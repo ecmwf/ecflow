@@ -72,14 +72,14 @@ private:
 
    void reset_data_members(unsigned int client_state_change_no, bool sync_suite_clock);
    void full_sync(unsigned int client_handle,AbstractServer* as);
-   void cleanup() override { std::string().swap(server_defs_); } /// run in the server, after command send to client
+   void cleanup() override; /// run in the server, after command sent to client
 
 private:
 
    bool      full_defs_{false};
    DefsDelta incremental_changes_;
-   std::string server_defs_;               // for returning a subset of the suites
-   std::string full_server_defs_as_string_;
+   std::string server_defs_;                // for returning a subset of the suites
+   std::string full_server_defs_as_string_; // semi-persisted, i.e on load & not on saving, used to return cached defs
 
    friend class cereal::access;
    template<class Archive>

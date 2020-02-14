@@ -53,6 +53,9 @@ public:
    /// Print the command without trailing <user>@<host>. Used by Group command, avoids duplicate user@host for each child command
    virtual std::ostream& print_only(std::ostream& os ) const { return print(os); }
 
+   /// Print with minimal information. Deals with errors report where cmd have thousands of paths. truncate to one path.
+   virtual std::ostream& print_short(std::ostream& os) const { return print(os); }
+
    virtual bool equals(ClientToServerCmd* rhs) const;
 
    /// Called by the _server_ to service the client depending on the Command
@@ -178,6 +181,8 @@ protected:
    void add_edit_history(AbstractServer*,const std::string& path) const;
    void add_delete_edit_history(AbstractServer*,const std::string& path) const;
 
+
+   mutable bool use_EditHistoryMgr_{true}; // sometime quicker to add edit history in command, than using EditHistoryMgr
 private:
    friend class GroupCTSCmd;
    friend class EditHistoryMgr;
@@ -809,6 +814,7 @@ public:
 
    void set_client_handle(int client_handle) override { client_handle_ = client_handle;} // used by group_cmd
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_short(std::ostream& os) const override;
    std::ostream& print_only(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
    int timeout() const override;
@@ -1007,7 +1013,7 @@ public:
    // called in the server
    void set_group_cmd(const GroupCTSCmd* cmd) override { group_cmd_ = cmd;}
 
-   static void check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete);
+   static void check_for_active_or_submitted_tasks(AbstractServer* as,Node* theNodeToDelete);
 
 private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
@@ -1047,6 +1053,7 @@ public:
    bool force() const { return force_;}
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_short(std::ostream& os) const override;
    std::ostream& print_only(std::ostream& os) const override;
    std::ostream& print(std::ostream& os, const std::string& path) const override;
 
@@ -1554,6 +1561,7 @@ public:
 
    bool isWrite() const override { return true; }
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_short(std::ostream& os) const override;
    std::ostream& print_only(std::ostream& os) const override;
    std::ostream& print(std::ostream& os, const std::string& path) const override;
    bool equals(ClientToServerCmd*) const override;
@@ -1570,6 +1578,9 @@ private:
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
    void cleanup() override { std::vector<std::string>().swap(paths_);} /// run in the server, after doHandleRequest
+
+   std::ostream& my_print(std::ostream& os, const std::vector<std::string>& paths) const;
+   std::ostream& my_print_only(std::ostream& os, const std::vector<std::string>& paths) const;
 
 private:
    std::vector<std::string> paths_;
@@ -2084,6 +2095,7 @@ public:
    void set_client_handle(int client_handle) const; // used in group sync with client register
 
    std::ostream& print(std::ostream& os) const override;
+   std::ostream& print_short(std::ostream& os) const override;
    bool equals(ClientToServerCmd*) const override;
 
    void addChild(Cmd_ptr childCmd);
@@ -2107,6 +2119,7 @@ private:
 
    bool authenticate(AbstractServer*, STC_Cmd_ptr&) const override;
    STC_Cmd_ptr doHandleRequest(AbstractServer*) const override;
+   void cleanup() override; // cleanup all children
 
 private:
    std::vector<Cmd_ptr> cmdVec_;

@@ -68,7 +68,7 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const
    std::stringstream ss;
 
    if ( paths_.empty() ) {
-      if (!force_) check_for_active_or_submitted_tasks(as,node_ptr());
+      if (!force_) check_for_active_or_submitted_tasks(as,nullptr);
       else         as->zombie_ctrl().add_user_zombies(as->defs(),CtsApi::delete_node_arg());
       as->clear_defs();
 
@@ -91,8 +91,8 @@ STC_Cmd_ptr DeleteCmd::doHandleRequest(AbstractServer* as) const
          // since node is to be deleted, we need to record the paths.
          add_node_path_for_edit_history(paths_[i]);
 
-         if (!force_) check_for_active_or_submitted_tasks(as,theNodeToDelete);
-         else         as->zombie_ctrl().add_user_zombies(theNodeToDelete,CtsApi::delete_node_arg());
+         if (!force_) check_for_active_or_submitted_tasks(as,theNodeToDelete.get());
+         else         as->zombie_ctrl().add_user_zombies(theNodeToDelete.get(),CtsApi::delete_node_arg());
 
          if (!as->defs()->deleteChild( theNodeToDelete.get() )) {
             std::string errorMsg = "Delete: Can not delete node " + theNodeToDelete->debugNodePath();
@@ -114,10 +114,10 @@ bool DeleteCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& cmd) const
    return do_authenticate(as,cmd,paths_);
 }
 
-void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr theNodeToDelete)
+void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as,Node* theNodeToDelete)
 {
    vector<Task*> taskVec;
-   if ( theNodeToDelete.get() ) {
+   if ( theNodeToDelete ) {
       theNodeToDelete->getAllTasks(taskVec);
    }
    else {
@@ -131,8 +131,8 @@ void DeleteCmd::check_for_active_or_submitted_tasks(AbstractServer* as,node_ptr 
    }
    if (!activeVec.empty() || !submittedVec.empty()) {
       std::stringstream ss;
-      if (theNodeToDelete.get()) ss << "Can not delete node " << theNodeToDelete->debugNodePath() << "\n";
-      else                       ss << "Can not delete all nodes.\n";
+      if (theNodeToDelete) ss << "Can not delete node " << theNodeToDelete->debugNodePath() << "\n";
+      else                 ss << "Can not delete all nodes.\n";
       if (!activeVec.empty() ) {
          ss << " There are " << activeVec.size() << " active tasks. First : " << activeVec.front()->absNodePath() << "\n";
       }

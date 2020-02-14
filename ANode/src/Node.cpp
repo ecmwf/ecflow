@@ -207,13 +207,6 @@ bool Node::isParentSuspended() const
 
 void Node::resume()
 {
-   if ( suspended_) {
-      clearSuspended();
-   }
-}
-
-void Node::clearSuspended()
-{
    /// Guard against unnecessary creation of memento's
    if (suspended_) {
       suspended_ = false;
@@ -465,7 +458,7 @@ void Node::initState(int clear_suspended_in_child_nodes, bool log_state_changes 
    else {
 
       if (clear_suspended_in_child_nodes > 0) {
-         clearSuspended();
+         resume();
       }
 
       // convert DState --> NState.

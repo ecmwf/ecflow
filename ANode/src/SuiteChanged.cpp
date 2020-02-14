@@ -66,6 +66,27 @@ SuiteChanged0::~SuiteChanged0()
 	}
 }
 
+// ============================================================================
+SuiteChangedPtr::SuiteChangedPtr(Node* s)
+: node_(s),
+  suite_(s->suite()),
+  state_change_no_(Ecf::state_change_no()),
+  modify_change_no_(Ecf::modify_change_no())
+  {}
+
+SuiteChangedPtr::~SuiteChangedPtr()
+{
+   if (suite_) {
+      if ( modify_change_no_ != Ecf::modify_change_no() ) {
+         suite_->set_modify_change_no(Ecf::modify_change_no());
+         //std::cout << "SuiteChangedPtr::~SuiteChangedPtr() modify_ changed \n";
+      }
+      if ( state_change_no_ != Ecf::state_change_no() ) {
+         suite_->set_state_change_no(Ecf::state_change_no());
+         //std::cout << "SuiteChangedPtr::~SuiteChangedPtr() state changed \n";
+      }
+   }
+}
 //================================================================
 
 SuiteChanged1::SuiteChanged1(Suite* s)

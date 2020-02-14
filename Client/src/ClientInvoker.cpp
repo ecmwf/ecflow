@@ -277,7 +277,7 @@ int ClientInvoker::invoke(Cmd_ptr cts_cmd) const
 int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 {
 #ifdef DEBUG_PERF
-   ecf::ScopedDurationTimer timer("ClientInvoker::do_invoke_cmd");
+   ecf::ScopedDurationTimer timer("  ClientInvoker::do_invoke_cmd");
 #endif
 
 	if (clientEnv_.debug()) cout << "\n" << TimeStamp::now() << "ClientInvoker::do_invoke_cmd : on_error_throw_exception_(" << on_error_throw_exception_ << ")" << std::endl;
@@ -334,7 +334,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
                }
 
 					if (clientEnv_.debug()) {
-					   cout << TimeStamp::now() << "ClientInvoker: >>> "; cts_cmd->print(cout);
+					   cout << TimeStamp::now() << "ClientInvoker: >>> "; cts_cmd->print_short(cout);
 					   cout << " on " << client_env_host_port() << " : retry_connection_period(" << retry_connection_period  << ") no_of_tries(" << no_of_tries << ") cmd_connect_timeout("
 					        << cts_cmd->timeout() << ") ECF_CONNECT_TIMEOUT(" << clientEnv_.connect_timeout()
 #ifdef ECF_OPENSSL
@@ -352,7 +352,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
                   SslClient theClient(io_service,clientEnv_.openssl().context(),cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
                   {
 #ifdef DEBUG_PERF
-                     ecf::ScopedDurationTimer my_timer(" io_service.run()");
+                     ecf::ScopedDurationTimer my_timer("   io_service.run()");
 #endif
                      io_service.run();
                   }
@@ -376,7 +376,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					   Client theClient(io_service,cts_cmd,clientEnv_.host(),clientEnv_.port(),clientEnv_.connect_timeout());
                   {
 #ifdef DEBUG_PERF
-					      ecf::ScopedDurationTimer my_timer(" io_service.run()");
+					      ecf::ScopedDurationTimer my_timer("   io_service.run()");
 #endif
 					      io_service.run();
 					   }
@@ -401,18 +401,18 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 					if ( server_reply_.block_client_on_home_server()) {
 						// Valid reply from server. Typically waiting on a expression
 						// Ok _Block_ on _current_ server, and continue waiting, until server reply is ok
-						if (!report_block_client_on_home_server || clientEnv_.debug()) { cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : WAITING on home server, continue waiting\n";report_block_client_on_home_server = true;}
+						if (!report_block_client_on_home_server || clientEnv_.debug()) { cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print_short(cout); cout << " : " << client_env_host_port() << " : WAITING on home server, continue waiting\n";report_block_client_on_home_server = true;}
 						no_of_tries++;
  					}
 					else if (server_reply_.block_client_server_halted()) {
 						// Valid reply from server.
 					   // fall through try again, then try other hosts
-						if (!report_block_client_server_halted || clientEnv_.debug()){ cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : server is HALTED, continue waiting\n";report_block_client_server_halted = true;}
+						if (!report_block_client_server_halted || clientEnv_.debug()){ cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print_short(cout); cout << " : " << client_env_host_port() << " : blocking : server is HALTED, continue waiting\n";report_block_client_server_halted = true;}
   					}
 					else if (server_reply_.block_client_zombie_detected()) {
 						// Valid reply from server.
 					   // fall through try again, then try other hosts
-						if (!report_block_client_zombie_detected || clientEnv_.debug()){ cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " : " << client_env_host_port() << " : blocking : zombie detected, continue waiting\n";report_block_client_zombie_detected = true;}
+						if (!report_block_client_zombie_detected || clientEnv_.debug()){ cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print_short(cout); cout << " : " << client_env_host_port() << " : blocking : zombie detected, continue waiting\n";report_block_client_zombie_detected = true;}
   					}
 					else if (server_reply_.invalid_argument()) {
 						// Server could not decode client message and/or client could not decode server reply
@@ -429,11 +429,11 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 						// This error is ONLY valid if we got a real reply from the server
 						// as opposed to some kind of connection errors. For connections errors
 						// we fall through and try again.
-						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ClientInvoker:"; cts_cmd->print(cout); cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
+						if (clientEnv_.debug()) {cout << TimeStamp::now() << "ClientInvoker:"; cts_cmd->print_short(cout); cout << " failed : " << client_env_host_port() << " : " << server_reply_.error_msg() << "\n";}
 						return 1;
 					}
 					else {
-						std::cout << TimeStamp::now() << "ClientInvoker: missed response? for request "; cts_cmd->print(cout); std::cout << " oops" << endl;
+						std::cout << TimeStamp::now() << "ClientInvoker: missed response? for request "; cts_cmd->print_short(cout); std::cout << " oops" << endl;
 					}
  				}
 				catch (std::exception& e) {
@@ -456,7 +456,7 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 			//  4/ Dealing with non tasks based request
 			if (!cts_cmd->connect_to_different_servers() || test_ || cts_cmd->ping_cmd() || clientEnv_.denied() ) {
 				std::stringstream ss;
- 				ss << TimeStamp::now() << "Request( "; cts_cmd->print(ss) << " )";
+ 				ss << TimeStamp::now() << "Request( "; cts_cmd->print_short(ss) << " )";
  				if (clientEnv_.denied()) ss << " ECF_DENIED ";
  				ss << ", Failed to connect to "  << client_env_host_port()
  				   << ". After " << connection_attempts_ << " attempts. Is the server running ?\n";
@@ -491,10 +491,10 @@ int ClientInvoker::do_invoke_cmd(Cmd_ptr cts_cmd) const
 			std::string local_error_msg;
 			if (!clientEnv_.get_next_host(local_error_msg)) {
 			   /// Instead of exiting, Just spit out a warning
-			   cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " get next host failed because: " << local_error_msg  << endl;
+			   cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print_short(cout); cout << " get next host failed because: " << local_error_msg  << endl;
 			}
 
-			cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print(cout); cout << " current host(" << current_host_port << ") trying next host(" << client_env_host_port() << ")" << endl;
+			cout << TimeStamp::now() << "ClientInvoker: "; cts_cmd->print_short(cout); cout << " current host(" << current_host_port << ") trying next host(" << client_env_host_port() << ")" << endl;
 
 			if( never_polled ) never_polled = false; // To avoid the first wait
 			else               sleep(NEXT_HOST_POLL_PERIOD);
@@ -1509,7 +1509,7 @@ RequestLogger::~RequestLogger() {
    // *assumes* destructor of RoundTripRecorder was invoked first, to allow recording of the time rtt_
    if (cmd_.get()) {
       if (ci_->clientEnv_.debug() && ci_->server_reply_.error_msg().empty()) {
-         cout << TimeStamp::now() << "ClientInvoker: "; cmd_->print(cout); cout << " SUCCEEDED " << to_simple_string(ci_->rtt_) << "\n";
+         cout << TimeStamp::now() << "ClientInvoker: "; cmd_->print_short(cout); cout << " SUCCEEDED " << to_simple_string(ci_->rtt_) << "\n";
       }
 
       if (Rtt::instance()) {

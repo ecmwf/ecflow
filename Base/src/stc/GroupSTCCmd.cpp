@@ -135,6 +135,14 @@ bool GroupSTCCmd::ok() const
    return true;
 }
 
+void GroupSTCCmd::cleanup()
+{
+   /// After the command has run this function can be used to reclaim memory
+   for(auto & cmd : cmdVec_) {
+      cmd->cleanup();
+   }
+}
+
 std::string GroupSTCCmd::error() const
 {
    std::string ret;

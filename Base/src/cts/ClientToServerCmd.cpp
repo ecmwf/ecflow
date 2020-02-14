@@ -67,7 +67,7 @@ STC_Cmd_ptr ClientToServerCmd::handleRequest(AbstractServer* as) const
    }
 #endif
 
-
+   //LogTimer timer("ClientToServerCmd::handleRequest");
    STC_Cmd_ptr halted;
    if (! authenticate(as,halted)) {
       assert (halted.get());
@@ -176,6 +176,10 @@ void ClientToServerCmd::add_node_path_for_edit_history(const std::string& absNod
 
 void ClientToServerCmd::add_edit_history(AbstractServer* as) const
 {
+   if (!use_EditHistoryMgr_) {
+      return; // edit history will be added by the command
+   }
+
    // record all the user edits to the node. Reuse the time stamp cache created in handleRequest()
    if (edit_history_nodes_.empty() && edit_history_node_paths_.empty()) {
 
@@ -196,7 +200,7 @@ void ClientToServerCmd::add_edit_history(AbstractServer* as) const
          if (edited_node.get()) {
             // Setting the flag will make a state change. But its OK command allows it.
             // Since we only get called if command can make state changes (isWrite() == true)
-            SuiteChanged0 suiteChanged(edited_node);
+            SuiteChangedPtr suiteChanged(edited_node.get());
             edited_node->flag().set(ecf::Flag::MESSAGE);  // trap state change in suite for sync
             add_edit_history(as,edited_node->absNodePath());
          }

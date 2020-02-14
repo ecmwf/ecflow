@@ -68,7 +68,7 @@ STC_Cmd_ptr FreeDepCmd::doHandleRequest(AbstractServer* as) const
          continue;
       }
 
-	   SuiteChanged0 changed(node);
+	   SuiteChangedPtr changed(node.get());
 	   if (all_) {
 	      node->freeTrigger();
 	      node->freeHoldingDateDependencies();

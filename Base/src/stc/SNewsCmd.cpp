@@ -77,7 +77,7 @@ void SNewsCmd::init(
 
 #if DEBUG_NEWS
          std::stringstream ss;
-         ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ") : *Large* scale changes :NEWS]";
+         ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ") : *Large* scale changes(" << (Ecf::modify_change_no()-client_modify_change_no) << ") :NEWS]";
          log_append(ss.str());
 #else
          log_append("");
@@ -91,7 +91,7 @@ void SNewsCmd::init(
 
 #if DEBUG_NEWS
          std::stringstream ss;
-         ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ") : *Small* scale changes :NEWS]";
+         ss << " [server(" << Ecf::state_change_no() << "," << Ecf::modify_change_no() << ") : *Small* scale changes(" << (Ecf::state_change_no()-client_state_change_no) << ") :NEWS]";
          log_append( ss.str());
 #else
          log_append("");

@@ -38,6 +38,12 @@ std::ostream& CSyncCmd::print(std::ostream& os) const
    }
    return user_cmd(os,ss.str());
 }
+
+std::ostream& CSyncCmd::print_short(std::ostream& os) const
+{
+   return print_only(os);
+}
+
 std::ostream& CSyncCmd::print_only(std::ostream& os) const
 {
    switch (api_) {
@@ -103,6 +109,8 @@ void CSyncCmd::do_log(AbstractServer* as) const
 
 STC_Cmd_ptr CSyncCmd::doHandleRequest(AbstractServer* as) const
 {
+   //LogTimer timer(" CSyncCmd::doHandleRequest");
+
 	// If no defs not loaded, SSyncCmd and SNewsCmd do nothing. This is a valid state, hence don't error for this request
    switch (api_) {
       case CSyncCmd::NEWS: {

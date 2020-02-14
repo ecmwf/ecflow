@@ -31,6 +31,7 @@ public:
 
 	boost::posix_time::time_duration elapsed() const { return boost::posix_time::microsec_clock::universal_time() - start_time_;}
 
+	double elapsed_seconds() const { return (double) elapsed().total_milliseconds()/(double)1000 ; }
 private:
  	boost::posix_time::ptime start_time_;
 };
@@ -38,9 +39,7 @@ private:
 class ScopedDurationTimer {
 public:
    ScopedDurationTimer(const char* msg) : start_time_(boost::posix_time::microsec_clock::universal_time()),msg_(msg) {}
-   ~ScopedDurationTimer() {
-      std::cout << msg_ << " " << (double)elapsed().total_milliseconds()/(double)1000 << "s\n";
-   }
+   ~ScopedDurationTimer();
 
    boost::posix_time::time_duration elapsed() const { return boost::posix_time::microsec_clock::universal_time() - start_time_;}
 

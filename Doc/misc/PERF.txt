@@ -63,6 +63,7 @@ Use of perf:  http://www.brendangregg.com/perf.html
   
   # for a graphical display, you can use flame graphs. This *ONLY* works properly with debug builds
   # and you must use -g (collect stack traces)
+  # http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
   # assume you have down loaded Flamegraph, git clone https://github.com/brendangregg/FlameGraph
   # The wider the graph the more time is spent.
   perf record -g Base/bin/gcc-6.3.0/debug/perf_job_gen ./metabuilder.def
@@ -70,6 +71,10 @@ Use of perf:  http://www.brendangregg.com/perf.html
   cat out.perf-folded | $HOME/FlameGraph/flamegraph.pl > my_perf.svg
   display my_perf.svg
   
+  *alternatively* view from the browser, as this will also show:
+    - *full* function names
+    - no of samples
+    - percentage cpu times
 
 
 The metabuilder.def below needs preparation for perf test below: 

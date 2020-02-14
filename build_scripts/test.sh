@@ -123,7 +123,7 @@ if test_uname Linux ; then
    if [ "$safe" = no ] ; then
       # run python/C++ test
       cd Pyext
-      $BOOST_ROOT/bjam $TOOLSET $CXXFLAGS variant=$mode $OPEN_SSL test-all $TEST_OPTS
+      $BOOST_ROOT/b2 $TOOLSET $CXXFLAGS variant=$mode $OPEN_SSL test-all $TEST_OPTS
       cd ..
    fi
    
@@ -149,7 +149,7 @@ elif test_uname HP-UX ; then
    if [ "$safe" = no ] ; then
       # run python/C++ test, use test to bypass 'with' statement tests
       cd Pyext
-      $BOOST_ROOT/bjam variant=$mode test $TEST_OPTS
+      $BOOST_ROOT/b2 variant=$mode test $TEST_OPTS
       cd ..
    fi
    exit 1
@@ -176,7 +176,7 @@ elif test_uname AIX ; then
    if [ "$safe" = no ] ; then
       # run python/C++ test
       cd Pyext
-      $BOOST_ROOT/bjam variant=$mode test-all $TEST_OPTS
+      $BOOST_ROOT/b2 variant=$mode test-all $TEST_OPTS
       cd ..
    fi
    Client/bin/vacpp/$mode/threading-multi/s_client  --log_level=message $TEST_OPTS

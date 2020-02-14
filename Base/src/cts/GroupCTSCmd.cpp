@@ -189,6 +189,19 @@ std::ostream& GroupCTSCmd::print(std::ostream& os) const
 	return os;
 }
 
+std::ostream& GroupCTSCmd::print_short(std::ostream& os) const
+{
+   std::stringstream ss;
+   size_t the_size = cmdVec_.size();
+   for(size_t i = 0; i < the_size; i++) {
+      if (i != 0) ss << "; ";
+      cmdVec_[i]->print_short(ss); // limit number of paths shown
+   }
+   if (cli_) return user_cmd(os,CtsApi::group(ss.str()));
+   os << ss.str() << " :" << user() << '@' << hostname();
+   return os;
+}
+
 bool GroupCTSCmd::equals(ClientToServerCmd* rhs) const
 {
 	auto* the_rhs = dynamic_cast< GroupCTSCmd* > ( rhs );
@@ -244,6 +257,14 @@ void GroupCTSCmd::add_edit_history(AbstractServer* as) const
    }
 }
 
+void GroupCTSCmd::cleanup()
+{
+   for(Cmd_ptr subCmd: cmdVec_)  {
+       subCmd->cleanup();
+    }
+}
+
+
 bool GroupCTSCmd::authenticate(AbstractServer* as, STC_Cmd_ptr& errorMsg) const
 {
 	// Can only run Group cmd if all child commands authenticate
@@ -282,6 +303,7 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const
 #ifdef	DEBUG_GROUP_CMD
 	std::cout << "GroupCTSCmd::doHandleRequest cmdVec_.size() = " << cmdVec_.size() << "\n";
 #endif
+   //ecf::LogTimer timer(" GroupCTSCmd::doHandleRequest");
 
 	as->update_stats().group_cmd_++;
 
@@ -300,9 +322,11 @@ STC_Cmd_ptr GroupCTSCmd::doHandleRequest(AbstractServer* as) const
       STC_Cmd_ptr theReturnCmd;
       try { theReturnCmd = cmdVec_[i]->doHandleRequest(as); }
       catch ( std::exception& e ) {
+         cmdVec_[i]->cleanup(); // recover memory asap, important when cmd has a large number of paths.
          theReturnedGroupCmd->addChild(std::make_shared<ErrorCmd>(e.what()));
          continue;
       }
+      cmdVec_[i]->cleanup(); // recover memory asap, important when cmd has a large number of paths.
 
 #ifdef DEBUG_GROUP_CMD
       std::cout << " return Cmd = "; theReturnCmd->print(std::cout);  std::cout << " to client\n";

@@ -39,6 +39,15 @@ std::ostream& PathsCmd::print(std::ostream& os) const
    return my_print(os,paths_);
 }
 
+std::ostream& PathsCmd::print_short(std::ostream& os) const
+{
+   std::vector<std::string> paths;
+   if (!paths_.empty()) paths.emplace_back(paths_[0]);
+   my_print_only(os,paths);
+   if (paths_.size() > 1) os << " : truncated : " << paths_.size() -1 << " paths *not* shown";
+   return os;
+}
+
 std::ostream& PathsCmd::print_only(std::ostream& os) const
 {
    return my_print_only(os,paths_);
@@ -132,39 +141,52 @@ const char* PathsCmd::theArg() const
 
 STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 {
+   // LogTimer timer(" PathsCmd::doHandleRequest");
+
+   defs_ptr defs = as->defs();
    std::stringstream ss;
    switch (api_) {
 
       case PathsCmd::SUSPEND: {
+         use_EditHistoryMgr_ = false; // will add edit history ourselves. Quicker than EditHistoryMgr when we have > 200000 paths
+
          as->update_stats().node_suspend_++;
          size_t vec_size = paths_.size();
          for(size_t i = 0; i < vec_size; i++) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
+            node_ptr theNode = defs->findAbsNode(paths_[i]);
             if (!theNode.get()) {
                ss << "PathsCmd:Suspend: Could not find node at path '" << paths_[i] << "'\n";
                LOG(Log::ERR,"Suspend: Could not find node at path " << paths_[i]);
                continue;
             }
-            SuiteChanged0 changed(theNode);
+            SuiteChangedPtr changed(theNode.get());
             theNode->suspend();
+            theNode->flag().set(ecf::Flag::MESSAGE);
+            add_edit_history(as,paths_[i]);
+            assert(isWrite()); // should only add edit history for write-able commands
          }
          break;
       }
 
       case PathsCmd::RESUME: {
+         use_EditHistoryMgr_ = false; // will add edit history ourselves. Quicker than EditHistoryMgr when we have > 200000 paths
 
          // At the end of resume, we need to traverse node tree, and do job submission
          as->update_stats().node_resume_++;
          size_t vec_size = paths_.size();
          for(size_t i = 0; i < vec_size; i++) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
+            node_ptr theNode = defs->findAbsNode(paths_[i]);
             if (!theNode.get()) {
                ss << "PathsCmd:Resume: Could not find node at path '" << paths_[i] << "'\n";
                LOG(Log::ERR,"Resume: Could not find path " << paths_[i]);
                continue;
             }
-            SuiteChanged0 changed(theNode);
+            SuiteChangedPtr changed(theNode.get());
             theNode->resume();
+            theNode->flag().set(ecf::Flag::MESSAGE);
+            add_edit_history(as,paths_[i]);
+            assert(isWrite()); // should only add edit history for write-able commands
+
             as->increment_job_generation_count(); // in case we throw below
          }
          break;
@@ -195,13 +217,15 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
       }
 
       case PathsCmd::ARCHIVE: {
+         use_EditHistoryMgr_ = false; // will add edit history ourselves
+
          as->update_stats().node_archive_++;
          if (paths_.empty()) throw std::runtime_error( "No paths specified for archive") ;
 
          // make sure paths don't overlap, Should not find same path up the hierarchy, which is also in paths_
          std::vector<NodeContainer*> containers_to_archive; containers_to_archive.reserve(paths_.size());
          for(size_t i = 0; i < paths_.size(); i++) {
-            node_ptr theNode = find_node_for_edit_no_throw(as,paths_[i]);
+            node_ptr theNode = defs->findAbsNode(paths_[i]);
             if (!theNode.get()) {
                ss << "PathsCmd:ARCHIVE: Could not find node at path '" << paths_[i] << "'\n";
                LOG(Log::ERR,"ARCHIVE: Could not find node at path " << paths_[i]);
@@ -209,9 +233,6 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             }
             NodeContainer* container = theNode->isNodeContainer();
             if (!container) continue;
-
-            if (!force_) DeleteCmd::check_for_active_or_submitted_tasks(as,theNode);
-            else         as->zombie_ctrl().add_user_zombies(theNode,CtsApi::archive_arg());
 
             bool unique = true;
             Node* parent = theNode->parent();
@@ -228,7 +249,16 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          size_t vec_size = containers_to_archive.size();
          for(size_t i = 0; i < vec_size; i++) {
             NodeContainer* the_container = containers_to_archive[i];
+
+            if (!force_) DeleteCmd::check_for_active_or_submitted_tasks(as, the_container);
+            else         as->zombie_ctrl().add_user_zombies(the_container,CtsApi::archive_arg());
+
             SuiteChanged1 changed(the_container->suite());
+
+            the_container->flag().set(ecf::Flag::MESSAGE);
+            add_edit_history(as,the_container->absNodePath());
+            assert(isWrite()); // should only add edit history for write-able commands
+
             the_container->archive();  // this can throw std::runtime_error
          }
          break;
@@ -269,7 +299,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
                mss << "Status failed. For " << paths_[i] << " The suite " << theNode->suite()->name() << " must be 'begun' first\n";
                throw std::runtime_error( mss.str() ) ;
             }
-            SuiteChanged0 changed(theNode);
+            SuiteChangedPtr changed(theNode.get());
             theNode->status();   // this can throw std::runtime_error
          }
          break;
@@ -281,7 +311,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
          if (  paths_.empty() ) {
             // check all the defs,
             std::string error_msg,warning_msg;
-            if (!as->defs()->check(error_msg,warning_msg)) {
+            if (!defs->check(error_msg,warning_msg)) {
                error_msg += "\n";
                error_msg += warning_msg;
                return PreAllocatedReply::string_cmd(error_msg);
@@ -293,7 +323,7 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
             size_t vec_size = paths_.size();
             for(size_t i = 0; i < vec_size; i++) {
 
-               node_ptr theNodeToCheck =  as->defs()->findAbsNode(paths_[i]);
+               node_ptr theNodeToCheck = defs->findAbsNode(paths_[i]);
                if (!theNodeToCheck.get()) {
                   ss << "PathsCmd:Check: Could not find node at path '" << paths_[i] << "'\n";
                   LOG(Log::ERR,"Check: Could not find node at path " << paths_[i]);

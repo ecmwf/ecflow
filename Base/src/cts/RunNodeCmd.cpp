@@ -72,7 +72,7 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	      throw std::runtime_error( mss.str() ) ;
 	   }
 
-	   SuiteChanged0 changed(node);
+	   SuiteChangedPtr changed(node.get());
 
 	   // Please note: that if any tasks under theNode are in
 	   // active or submitted states, then we will have created zombies jobs
@@ -89,7 +89,7 @@ STC_Cmd_ptr RunNodeCmd::doHandleRequest(AbstractServer* as) const
 	   jobsParam.logDebugMessage(" from RunNodeCmd::doHandleRequest");
 #endif
 
-	   if (force_) as->zombie_ctrl().add_user_zombies(node,CtsApi::runArg());
+	   if (force_) as->zombie_ctrl().add_user_zombies(node.get(),CtsApi::runArg());
 
 	   // Avoid re-running the task again on the same time slot
       node->miss_next_time_slot();

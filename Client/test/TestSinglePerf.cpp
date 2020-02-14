@@ -43,19 +43,31 @@ BOOST_AUTO_TEST_SUITE( ClientTestSuite )
 // Note: If you make edits to node tree, they will have no effect until the server is rebuilt
 // ************************************************************************************
 
+// These thresholds are based on the largest definition in the tests.
+static int load_threshold_ms  = 4500;
+static int begin_threshold_ms = 400;
+static double sync_full_threshold_s = 2.6;
+static double full_threshold_s = 2.8;
+static double suspend_threshold_s = 3.5;
+static double resume_threshold_s = 3.5;
+static double force_threshold_s = 8.5;
+static double check_pt_threshold_s = 1.0;
+static double client_cmds_threshold_s = 7.5;
+
+
 static void sync_and_news_local(ClientInvoker& theClient)
 {
    {
       cout << "   news_local() : ";
       DurationTimer duration_timer;
       theClient.news_local();
-      cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+      cout << duration_timer.elapsed_seconds();
    }
    {
       cout << "   sync_local() : ";
       DurationTimer duration_timer;
       theClient.sync_local();
-      cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << endl;
+      cout << duration_timer.elapsed_seconds() << endl;
    }
 }
 
@@ -73,6 +85,7 @@ void time_load_and_downloads(
    BOOST_CHECK(fs::is_directory( full_path ));
 
    int count = 10;
+   std::vector<std::string> paths;
 
    //std::cout << "\nIn directory: " << full_path.directory_string() << "\n\n";
    fs::directory_iterator end_iter;
@@ -93,12 +106,15 @@ void time_load_and_downloads(
             DurationTimer duration_timer;
             BOOST_REQUIRE_MESSAGE(theClient.loadDefs(relPath.string()) == 0,"load defs failed \n" << theClient.errorMsg());
             cout << " Load:                " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
+            BOOST_CHECK_MESSAGE(duration_timer.elapsed().total_milliseconds() < load_threshold_ms,"regression in load, exceeded threshold of " << load_threshold_ms);
          }
          {
             DurationTimer duration_timer;
             BOOST_REQUIRE_MESSAGE(theClient.begin_all_suites() == 0,"begin failed \n" << theClient.errorMsg());
             cout << " Begin:               " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
+            BOOST_CHECK_MESSAGE(duration_timer.elapsed().total_milliseconds() < begin_threshold_ms,"regression in begin, exceeded threshold of " << begin_threshold_ms );
          }
+
          {
             cout << " Download(news_local):"; cout.flush();
             ClientInvoker client_news(host,port);
@@ -139,7 +155,9 @@ void time_load_and_downloads(
                cout << mil_secs  << " ";
                total += mil_secs;
             }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : sync_local() with *different* clients.uses cache!" << endl;
+            double average = (double)(total)/((double)count*1000);
+            cout << ": Avg:" << average << "(sec)  : sync_local() with *different* clients.uses cache!" << endl;
+            BOOST_CHECK_MESSAGE(average < sync_full_threshold_s,"regression in  Sync-FULL, exceeded threshold of " << sync_full_threshold_s );
          }
          {
             cout << " Download(FULL):      "; cout.flush();
@@ -152,26 +170,30 @@ void time_load_and_downloads(
                cout << seconds << " ";
                total += seconds;
             }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)  : get_defs() from different client" << endl;
+            double average = (double)(total)/((double)count*1000);
+            cout << ": Avg:" <<  average << "(sec)  : get_defs() from different client" << endl;
+            BOOST_CHECK_MESSAGE(average < full_threshold_s,"regression in FULL(sync), exceeded threshold of " << full_threshold_s );
          }
          {
             std::vector<task_ptr> all_tasks;
+            if (!theClient.defs()) theClient.sync_local();
             theClient.defs()->get_all_tasks(all_tasks);
-            std::vector<std::string> paths;paths.reserve(all_tasks.size());
+            paths.clear();
+            paths.reserve(all_tasks.size());
             for(size_t i = 0; i < all_tasks.size(); i++)  paths.push_back(all_tasks[i]->absNodePath());
 
             {
                cout << " Suspend " << paths.size() << " tasks : "; cout.flush();
                DurationTimer duration_timer;
                theClient.suspend(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               cout << duration_timer.elapsed_seconds();
                sync_and_news_local(theClient);
             }
             {
                cout << " Resume " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.resume(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               cout << duration_timer.elapsed_seconds();
                sync_and_news_local(theClient);
             }
             {
@@ -179,7 +201,8 @@ void time_load_and_downloads(
                theClient.set_auto_sync(true);
                DurationTimer duration_timer;
                theClient.suspend(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+               cout << duration_timer.elapsed_seconds() << " : auto-sync" << endl;
+               BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < suspend_threshold_s,"regression in suspend, exceeded threshold of " << suspend_threshold_s);
                theClient.set_auto_sync(false);
             }
             {
@@ -187,38 +210,42 @@ void time_load_and_downloads(
                theClient.set_auto_sync(true);
                DurationTimer duration_timer;
                theClient.resume(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+               cout << duration_timer.elapsed_seconds() << " : auto-sync" << endl;
+               BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < resume_threshold_s,"regression in resume, exceeded threshold of " << resume_threshold_s);
                theClient.set_auto_sync(false);
             }
             {
                cout << " check  " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.check(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               cout << duration_timer.elapsed_seconds();
                sync_and_news_local(theClient);
             }
             {
                cout << " kill   " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.kill(paths);
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               cout << duration_timer.elapsed_seconds();
                sync_and_news_local(theClient);
             }
             {
                // force complete on all tasks, on some suites(3199.def), can cause infinite recursion, i.e cause repeats to loop
-               // Hence we will call force aborted instead
+               // Hence we will call force aborted instead.
+               // Also AVOID active/submitted otherwise we spend a huge time adding zombies, for the subsequent force cmd below.
+               // Node: state change memento, will also persist duration time of state change.
                cout << " force  " << paths.size() << " tasks  : "; cout.flush();
                DurationTimer duration_timer;
                theClient.force(paths,"aborted");
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000;
+               cout << duration_timer.elapsed_seconds() << " force(aborted)";
                sync_and_news_local(theClient);
             }
             {
                cout << " force  " << paths.size() << " tasks  : "; cout.flush();
                theClient.set_auto_sync(true);
                DurationTimer duration_timer;
-               theClient.force(paths,"aborted");
-               cout << (double)duration_timer.elapsed().total_milliseconds()/(double)1000 << " : auto-sync" << endl;
+               theClient.force(paths,"queued");  // can't use aborted again, as it already aborted, and hence will be ignored
+               cout << duration_timer.elapsed_seconds() << " : auto-sync :  force(queued)" << endl;
+               BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < force_threshold_s,"regression in force, exceeded threshold of " << force_threshold_s);
                theClient.set_auto_sync(false);
             }
          }
@@ -232,11 +259,44 @@ void time_load_and_downloads(
                cout << seconds << " ";
                total += seconds;
             }
-            cout << ": Avg:" << (double)(total)/((double)count*1000) << "(sec)" << endl;
+            double average = (double)(total)/((double)count*1000);
+            cout << ": Avg:" << average << "(s)" << endl;
+            BOOST_CHECK_MESSAGE(average < check_pt_threshold_s,"regression in check_pt, exceeded threshold of " << check_pt_threshold_s );
          }
          {
+            cout << " client cmds:         " ;  cout.flush();
             DurationTimer duration_timer;
-            BOOST_REQUIRE_MESSAGE(theClient.delete_all(true)  == 0,"delete all defs failed \n" << theClient.errorMsg());
+            size_t i;
+            for(i = 0; i < paths.size() && i < 2000; i++) {
+               theClient.suspend(paths[i]);         theClient.sync_local();
+               theClient.resume(paths[i]);          theClient.sync_local();
+               theClient.force(paths[i],"aborted"); theClient.sync_local();
+               theClient.alter(paths[i],"add","variable","XXXX","XXXX"); theClient.sync_local();
+               theClient.requeue(paths[i]);         theClient.sync_local();
+            }
+            cout << i << " times " << duration_timer.elapsed_seconds()  << "(s) (sync_local) with same client (suspend,resume,force,alter,requeue)" << endl;
+            BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < client_cmds_threshold_s,"regression, exceeded threshold of " <<  client_cmds_threshold_s );
+         }
+         {
+            cout << " client cmds:         " ;  cout.flush();
+            theClient.set_auto_sync(true);
+            DurationTimer duration_timer;
+            size_t i;
+            for(i = 0; i < paths.size() && i < 2000; i++) {
+               theClient.suspend(paths[i]);
+               theClient.resume(paths[i]);
+               theClient.force(paths[i],"aborted");
+               theClient.alter(paths[i],"add","variable","ZZZZ","XXXX");
+               theClient.requeue(paths[i]);
+            }
+            cout << i << " times " << duration_timer.elapsed_seconds() << "(s) (auto_sync ) with same client (suspend,resume,force,alter,requeue)" << endl;
+            BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < client_cmds_threshold_s,"regression, exceeded threshold of " <<  client_cmds_threshold_s );
+            theClient.set_auto_sync(false);
+         }
+
+         {
+            DurationTimer duration_timer;
+            BOOST_REQUIRE_MESSAGE(theClient.delete_all(true) == 0,"delete all defs failed \n" << theClient.errorMsg());
             cout << " Delete:              " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
          }
       }

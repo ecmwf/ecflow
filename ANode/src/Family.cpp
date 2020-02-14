@@ -61,6 +61,11 @@ family_ptr Family::create(const std::string& name, bool check)
 	return std::make_shared<Family>( name, check );
 }
 
+family_ptr Family::create_me(const std::string& name)
+{
+   return std::make_shared<Family>( name, true );
+}
+
 bool Family::check_defaults() const
 {
    if (fam_gen_variables_ != nullptr) throw std::runtime_error("Family ::check_defaults():  fam_gen_variables_ != nullptr");

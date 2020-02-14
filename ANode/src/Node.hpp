@@ -739,8 +739,6 @@ private:
    /// Can also clear suspended see re-queue()
    void initState(int clear_suspended_in_child_nodes, bool log_state_changes = true);
 
-   // Clear the node suspended and update state change number, no other side effects
-   void clearSuspended();
    void delete_misc_attrs_if_empty();
 
    /// Under the hybrid calendar some time dependent attributes may not be applicable
