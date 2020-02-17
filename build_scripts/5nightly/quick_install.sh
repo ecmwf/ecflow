@@ -15,7 +15,12 @@ set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
 #export ECF_DEBUG_CLIENT=1
-ECFLOW_VERSION=5.2.0
+cd $WK
+release=$(cat ACore/src/ecflow_version.h | grep 'ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+major=$(cat ACore/src/ecflow_version.h   | grep 'ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+minor=$(cat ACore/src/ecflow_version.h   | grep 'ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+ECFLOW_VERSION=$release.$major.$minor 
+
 #export ECF_SSL=`hostname`.4142 # use server specfic <host>.<port>.*** certificates
 export ECF_PORT=4142
 export PATH=/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
@@ -55,6 +60,7 @@ set -e  # re-enable error
 # =======================================================================
 # Create build scripts files. Must be before python $WK/build_scripts/5nightly/build.py
 # =======================================================================
+cd $SCRATCH
 rm -rf 5nightly
 cp -r $WK/build_scripts/5nightly .
 cd 5nightly
@@ -125,4 +131,5 @@ ecflow_client --order=/ecflow top
 export ECFLOWUI_DEVELOP_MODE=1      # enable special menu to diff ecflowui defs and downloaded defs
 #export ECFLOWUI_SESSION_MANAGER=1  # to minimise output for debug, use session with a single server
 #ecflow_ui.x > ecflow_ui.log 2>&1 & 
-ecflow_ui -confd ${HOME}/.ecflow5_ui &
+#ecflow_ui -confd ${HOME}/.ecflow5_ui &
+ecflow_ui&
