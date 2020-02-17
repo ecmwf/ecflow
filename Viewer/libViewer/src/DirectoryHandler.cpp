@@ -59,7 +59,7 @@ void DirectoryHandler::init(const std::string& exeStr)
         std::string confStr(confCh);
         configDir=boost::filesystem::path(confStr);
     }
-    //By default the config dir is .ecflow_ui in $HOME,
+    //By default the config dir is .ecflow_ui_v5 in $HOME,
     //in this case we might import older settings from $HOME/.ecflowrc
     else if(char *h=getenv("HOME"))
 	{
@@ -67,7 +67,7 @@ void DirectoryHandler::init(const std::string& exeStr)
         boost::filesystem::path homeDir(home);
 
         configDir = boost::filesystem::path(homeDir);
-        configDir /= ".ecflow_ui";
+        configDir /= ".ecflow_ui_v5";
 
         boost::filesystem::path rcDir = homeDir;
         rcDir /= ".ecflowrc";
