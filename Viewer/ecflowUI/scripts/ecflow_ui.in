@@ -282,11 +282,33 @@ export ECFLOWUI_LOGFILE=$ECFLOWUI_TMPDIR/ecflowui_uilog_$$.$LOGNAME.txt
 export ECFLOWUI_SOCKETDIR=$ECFLOWUI_TMPDIR/sockets
 mkdir -p $ECFLOWUI_SOCKETDIR
 
+
+#---------------------------------------------------------------
+# Manage config dir.
+# From version 5.3.0 onwards the default config
+# dir is: ${HOME}/.ecflow_ui_v5.
+# Previously it was: ${HOME}/.ecflow_ui
+#---------------------------------------------------------------
+
+confDirDefault="${HOME}/.ecflow_ui_v5"
+confDir=${confDirDefault}
+confDir_v4="${HOME}/.ecflow_ui"
+
+# if the config dir does not exists we try to copy it
+# from an existing one
+if [[ ! -d "${confDir}" ]] ; then
+    # the user started ecFlowUI with the -confd option and the
+    # custom cond directory already exists
+    if  [[ ! -d "${ECFLOWUI_CONFIG_DIR}" && -d "${confDir_v4}" ]] ; then
+        cp -Rf "${confDir_v4}" "${confDir}"
+    fi
+fi
+
 #---------------------------------------------------------------
 # Remove lock files created more than 3 s ago (see ECFLOW-980)
 #---------------------------------------------------------------
 
-confDir=${ECFLOWUI_CONFIG_DIR:=${HOME}/.ecflow_ui}
+confDir=${ECFLOWUI_CONFIG_DIR:=${confDirDefault}}
 #We are extra careful an delete the files in a loop instead of using exec for find
 if [[ -d $confDir ]] ; then
     for fn in $(find $confDir -type f -cmin +0.05 -name *.lock) ; do
