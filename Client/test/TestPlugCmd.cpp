@@ -29,56 +29,66 @@
 using namespace std;
 using namespace ecf;
 
+static void get_defs(Defs& defs) {
+   // suite suite1
+   //   family family1
+   //       task a
+   //         event 1 myEvent
+   //         meter myMeter 0 100
+   //       task b
+   //          trigger a == complete
+   //    endfamily
+   //    family family2
+   //          task aa
+   //             trigger ../family1/a:myMeter >= 20 and ../family1/a:myEvent
+   //          task bb
+   //             trigger ../family1/a:myMeter >= 50 || ../family1/a:myEvent
+   //     endfamily
+   // endsuite
+   std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
+   std::string errorMsg,warningMsg;
+   bool parse = defs.restore(path,errorMsg,warningMsg);
+   if (!parse)  std::cerr << errorMsg;
+   BOOST_CHECK(parse);
+}
+
 BOOST_AUTO_TEST_SUITE( ClientTestSuite)
 
 BOOST_AUTO_TEST_CASE( test_plug_cmd )
 {
 	cout << "Client:: ...test_plug_cmd" << endl;
+	{
+	   Defs defs;
+	   get_defs(defs);
 
-   std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
+	   /// Test failure modes, MockServer defaults to localhost:3141
+	   // test source node that does not exist, fails
+	   TestHelper::invokeFailureRequest(&defs, Cmd_ptr( new PlugCmd("I/dont/exist/on/the server", "suite1/family2") ));
 
-	Defs defs;
-	std::string errorMsg,warningMsg;
-	bool parse = defs.restore(path,errorMsg,warningMsg);
-	if (!parse)  std::cerr << errorMsg;
-	BOOST_CHECK(parse);
+	   // test dest node that does not exist, fails
+	   TestHelper::invokeFailureRequest(&defs, Cmd_ptr( new PlugCmd("suite1/family1/a", "i/dont/exist/on/server") ));
 
-//	suite suite1
-//	  family family1
-//	   	task a
-//	        event 1 myEvent
-//	        meter myMeter 0 100
-//	   	task b
-//	   		trigger a == complete
-//	   endfamily
-//	   family family2
-//	   		task aa
-//	   			trigger ../family1/a:myMeter >= 20 and ../family1/a:myEvent
-//	   		task bb
-//	   			trigger ../family1/a:myMeter >= 50 || ../family1/a:myEvent
-//	    endfamily
-//	endsuite
+	   // test source node same as dest node, fails
+	   TestHelper::invokeFailureRequest(&defs, Cmd_ptr( new PlugCmd("suite1/family1/a", "suite1/family1/a") ));
 
-	/// Test failure modes, MockServer defaults to localhost:3141
-	// test source node that does not exist, fails
-	TestHelper::invokeFailureRequest(&defs, Cmd_ptr( new PlugCmd("I/dont/exist/on/the server", "suite1/family2") ));
+	   // test dest node that matches local server host and port, but where path does not exist, fails
+	   TestHelper::invokeFailureRequest(&defs, Cmd_ptr( new PlugCmd("suite1/family1/a", "//localhost:3141/i/dont/exist/on/local_server") ));
+	}
+	{
+	   Defs defs;
+	   get_defs(defs);
 
-	// test dest node that does not exist, fails
-	TestHelper::invokeFailureRequest(&defs, Cmd_ptr( new PlugCmd("suite1/family1/a", "i/dont/exist/on/server") ));
+	   // Lock server as another user. Invoke a valid request that should fail, due to a lock
+	   MockServer server(&defs);
+	   BOOST_REQUIRE_MESSAGE(server.lock("A user"),"Lock expected to succeed");
+	   TestHelper::invokeFailureRequest(server,Cmd_ptr( new PlugCmd("suite1/family1/a", "suite1/family2")));
+	}
+	{
+      Defs defs;
+      get_defs(defs);
+      MockServer server(&defs);
 
-	// test source node same as dest node, fails
-	TestHelper::invokeFailureRequest(&defs, Cmd_ptr( new PlugCmd("suite1/family1/a", "suite1/family1/a") ));
-
-	// test dest node that matches local server host and port, but where path does not exist, fails
-	TestHelper::invokeFailureRequest(&defs, Cmd_ptr( new PlugCmd("suite1/family1/a", "//localhost:3141/i/dont/exist/on/local_server") ));
-
-	// Lock server as another user. Invoke a valid request that should fail, due to a lock
-	MockServer server(&defs);
-	BOOST_REQUIRE_MESSAGE(server.lock("A user"),"Lock expected to succeed");
-	TestHelper::invokeFailureRequest(server,Cmd_ptr( new PlugCmd("suite1/family1/a", "suite1/family2")));
-
-
-	{   // Move the TASKS: on family1 --> family2
+	   // Move the TASKS: on family1 --> family2
 		// Note: if on the destination node we select a task 'suite1/family2/aa', then node is moved to its parent
 		TestHelper::invokeRequest(&defs,Cmd_ptr( new PlugCmd("suite1/family1/a", "suite1/family2")));
 		TestHelper::invokeRequest(&defs,Cmd_ptr( new PlugCmd("suite1/family1/b", "//localhost:3141/suite1/family2/aa")));
@@ -92,7 +102,12 @@ BOOST_AUTO_TEST_CASE( test_plug_cmd )
 		BOOST_REQUIRE_MESSAGE( node2->isFamily()->taskVec().size() == 4, "family2 two should have 4 tasks");
 	}
 
-	{   // Move FAMILIES: Add a new suite and move family1 and  family2 to it.
+	{
+	   Defs defs;
+	   get_defs(defs);
+      MockServer server(&defs);
+
+	   // Move FAMILIES: Add a new suite and move family1 and  family2 to it.
 		defs.addSuite(  Suite::create("suite2") );
 
 		TestHelper::invokeRequest(&defs,Cmd_ptr( new PlugCmd("suite1/family1", "suite2")));
@@ -108,34 +123,51 @@ BOOST_AUTO_TEST_CASE( test_plug_cmd )
 	}
 }
 
+BOOST_AUTO_TEST_CASE( test_plug_cmd_preserves_server_state )
+{
+   cout << "Client:: ...test_plug_cmd_preserves_server_state" << endl;
+   {
+      Defs defs;
+      get_defs(defs);
+      MockServer server(&defs);
+      server.shutdown();
+
+      // Move the TASKS: on family1 --> family2
+      TestHelper::invokeRequest(&server,Cmd_ptr( new PlugCmd("suite1/family1/a", "suite1/family2")));
+
+      BOOST_CHECK_MESSAGE(server.state() == SState::SHUTDOWN,"Expected server state SHUTDOWN to be preserved after plug, but found state " << SState::to_string(server.state()));
+   }
+   {
+      Defs defs;
+      get_defs(defs);
+      MockServer server(&defs);
+      server.halted();
+
+      // Move the TASKS: on family1 --> family2
+      TestHelper::invokeRequest(&server,Cmd_ptr( new PlugCmd("suite1/family1/a", "suite1/family2")));
+
+      BOOST_CHECK_MESSAGE(server.state() == SState::HALTED,"Expected server state HALTED to be preserved after plug, but found state " << SState::to_string(server.state()));
+   }
+   {
+      Defs defs;
+      get_defs(defs);
+      MockServer server(&defs);
+      server.restart();
+
+      // Move the TASKS: on family1 --> family2
+      TestHelper::invokeRequest(&server,Cmd_ptr( new PlugCmd("suite1/family1/a", "suite1/family2")));
+
+      BOOST_CHECK_MESSAGE(server.state() == SState::RUNNING,"Expected server state RUNNING to be preserved after plug, but found state " << SState::to_string(server.state()));
+   }
+}
+
 
 BOOST_AUTO_TEST_CASE( test_plug_cmd_with_handles )
 {
    cout << "Client:: ...test_plug_cmd_with_handles" << endl;
 
-   std::string path = File::test_data("Client/test/data/lifecycle.txt","Client");
-
    Defs defs;
-   std::string errorMsg,warningMsg;
-   bool parse = defs.restore(path,errorMsg,warningMsg);
-   if (!parse)  std::cerr << errorMsg;
-   BOOST_CHECK(parse);
-
-// suite suite1
-//   family family1
-//       task a
-//         event 1 myEvent
-//         meter myMeter 0 100
-//       task b
-//          trigger a == complete
-//    endfamily
-//    family family2
-//          task aa
-//             trigger ../family1/a:myMeter >= 20 and ../family1/a:myEvent
-//          task bb
-//             trigger ../family1/a:myMeter >= 50 || ../family1/a:myEvent
-//     endfamily
-// endsuite
+   get_defs(defs);
 
    /// create client handle which references suites suite in the server defs
     std::vector<std::string> suite_names; suite_names.emplace_back("suite"); suite_names.emplace_back("suite2");
