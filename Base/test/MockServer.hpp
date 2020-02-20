@@ -39,7 +39,14 @@ public:
 	explicit MockServer(defs_ptr defs) : defs_(defs)                                   { Ecf::set_server(true); }
 	~MockServer() override { Ecf::set_server(false); }
 
-	SState::State state() const override { return  SState::RUNNING;}
+   void set_server_state(SState::State ss) {
+      serverState_ = ss;
+      stats().status_ = static_cast<int>(serverState_);
+      defs_->set_server().set_state( serverState_ );
+   }
+
+	// AbstractServer functions
+	SState::State state() const override { return serverState_;}
 	std::pair<std::string,std::string> hostPort() const override { assert(defs_.get()); return defs_->server().hostPort(); }
 	defs_ptr defs() const override { return defs_;}
 	void updateDefs(defs_ptr d, bool force) override { assert(defs_.get()); defs_->absorb(d.get(),force); }
@@ -49,10 +56,10 @@ public:
                                int check_pt_save_time_alarm = 0) override { return true;}
  	void restore_defs_from_checkpt() override {}
 	void nodeTreeStateChanged() override {}
-	bool allowTaskCommunication() const override { return true;}
- 	void shutdown() override {}
- 	void halted() override {}
- 	void restart() override {}
+	bool allowTaskCommunication() const override { return (serverState_ != SState::HALTED) ? true : false;}
+ 	void shutdown() override { set_server_state(SState::SHUTDOWN); }
+ 	void halted()  override  { set_server_state(SState::HALTED); }
+ 	void restart() override  { set_server_state(SState::RUNNING); }
 	bool reloadWhiteListFile(std::string&) override { return true;}
    bool reloadPasswdFile(std::string& errorMsg) override { return true;}
    bool reloadCustomPasswdFile(std::string& errorMsg) override { return true;}
@@ -64,15 +71,30 @@ public:
    bool authenticateWriteAccess(const std::string&, const std::vector<std::string>&) override{ return true;}
 
  	bool lock(const std::string& user) override {
- 		if (userWhoHasLock_.empty()) {
- 			userWhoHasLock_ = user;
- 			shutdown();
- 			return true;
- 		}
- 		return false;
+ 	   if (userWhoHasLock_.empty()) {
+ 	      userWhoHasLock_ = user;
+ 	      stats().locked_by_user_ = user;
+ 	      server_state_to_preserve_ = state();
+ 	      shutdown();
+ 	      return true;
+ 	   }
+ 	   else if ( userWhoHasLock_ == user && serverState_ == SState::SHUTDOWN ) {
+ 	      // Same user attempting multiple locks
+ 	      return true;
+ 	   }
+ 	   return false;
  	}
- 	void unlock() override { userWhoHasLock_.clear(); restart(); }
+ 	void unlock() override {
+ 	   userWhoHasLock_.clear();
+ 	   stats().locked_by_user_.clear();
+ 	   switch(server_state_to_preserve_) {
+         case SState::RUNNING: restart();   break;
+         case SState::SHUTDOWN: shutdown(); break;
+         case SState::HALTED:  halted();    break;
+ 	   }
+ 	}
  	const std::string& lockedUser() const override { return userWhoHasLock_;}
+
    void traverse_node_tree_and_job_generate(const boost::posix_time::ptime& time_now,bool user_cmd_context) const override {
       if (state() == SState::RUNNING && defs_.get()) {
           JobsParam jobsParam(poll_interval(), false /* as->allow_job_creation_during_tree_walk() */ );
@@ -88,6 +110,8 @@ public:
 private:
 	defs_ptr defs_;
  	std::string userWhoHasLock_;
+   SState::State serverState_{SState::RUNNING};
+   SState::State server_state_to_preserve_{SState::RUNNING};
 };
 
 /// This class is used to create a Mock Server, so that we can make direct
