@@ -134,6 +134,7 @@ NodeViewDelegate::NodeViewDelegate(QWidget *parent) :
 	attrRenderers_["date"]=&NodeViewDelegate::renderDate;
 	attrRenderers_["repeat"]=&NodeViewDelegate::renderRepeat;
 	attrRenderers_["late"]=&NodeViewDelegate::renderLate;
+    attrRenderers_["autoarchive"]=&NodeViewDelegate::renderAutoArchive;
 }
 
 NodeViewDelegate::~NodeViewDelegate()
@@ -1626,6 +1627,62 @@ void NodeViewDelegate::renderLate(QPainter *painter,QStringList data,const QStyl
 	{
 		painter->restore();
 	}
+
+    size.setWidth(totalWidth);
+}
+
+void NodeViewDelegate::renderAutoArchive(QPainter *painter,QStringList data,const QStyleOptionViewItem& option,QSize& size) const
+{
+    int totalWidth=0;
+
+    size=QSize(totalWidth,attrBox_->fullHeight);
+
+    if(data.count() < 2)
+        return;
+
+    QString name="autoarchive: " + data[1];
+
+    if(data.count() == 3)
+        name.prepend(data[2] + ":");
+
+    bool selected=option.state & QStyle::State_Selected;
+
+    //The border rect (we will adjust its  width)
+    QRect contRect=option.rect.adjusted(attrBox_->leftMargin,attrBox_->topMargin,0,-attrBox_->bottomMargin);
+
+    //The text rectangle
+    QFont nameFont=attrFont_;
+    QFontMetrics fm(nameFont);
+    int nameWidth=fm.width(name);
+    QRect nameRect = contRect.adjusted(attrBox_->leftPadding,0,0,0);
+    nameRect.setWidth(nameWidth);
+
+    //Define clipping
+    int rightPos=nameRect.x()+nameRect.width()+attrBox_->rightPadding+attrBox_->rightMargin;
+    totalWidth=rightPos-option.rect.x();
+    const bool setClipRect = rightPos > option.rect.right();
+    if(setClipRect)
+    {
+        painter->save();
+        painter->setClipRect(option.rect);
+    }
+
+    //Draw name
+    painter->setPen(Qt::black);
+    painter->setFont(nameFont);
+    painter->drawText(attrBox_->adjustTextRect(nameRect),Qt::AlignLeft | Qt::AlignVCenter,name);
+
+    if(selected && drawAttrSelectionRect_)
+    {
+        QRect sr=option.rect;
+        sr.setWidth(rightPos-sr.x());
+        renderSelectionRect(painter,attrBox_->adjustSelectionRect(sr));
+    }
+
+    if(setClipRect)
+    {
+        painter->restore();
+    }
 
     size.setWidth(totalWidth);
 }

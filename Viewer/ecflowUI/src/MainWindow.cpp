@@ -48,6 +48,7 @@
 #include "CommandOutputDialog.hpp"
 #include "TextFormat.hpp"
 #include "UiLog.hpp"
+#include "VAttributeType.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VSettings.hpp"
@@ -817,6 +818,9 @@ void MainWindow::save(MainWindow *topWin)
 
     //Save server list
 	ServerHandler::saveSettings();
+
+    //Save attribute type list
+    VAttributeType::saveLastNames();
 
     //Save icon name list
     VIcon::saveLastNames();

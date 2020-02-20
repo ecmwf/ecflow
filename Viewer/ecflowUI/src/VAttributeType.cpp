@@ -20,17 +20,20 @@
 #include <algorithm>
 #include <map>
 
+#include "DirectoryHandler.hpp"
 #include "VNode.hpp"
 #include "VConfigLoader.hpp"
 #include "VProperty.hpp"
 #include "VFilter.hpp"
 #include "VAttribute.hpp"
+#include "VSettings.hpp"
 #include "UiLog.hpp"
 #include "UserMessage.hpp"
 #include "UIDebug.hpp"
 
 std::map<std::string,VAttributeType*> VAttributeType::typesMap_;
 std::vector<VAttributeType*> VAttributeType::types_;
+std::vector<std::string> VAttributeType::lastNames_;
 
 //#define _UI_ATTR_DEBUG
 
@@ -103,6 +106,29 @@ QStringList VAttributeType::searchKeys() const
     return lst;
 }
 
+void VAttributeType::saveLastNames()
+{
+    lastNames_.clear();
+    for(const auto & it: typesMap_)
+        lastNames_.push_back(it.first);
+
+    std::string attrFile = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "last_attributes.txt");
+    VSettings vs(attrFile);
+    vs.clear();
+    vs.put("attributes",lastNames_);
+    vs.write();
+}
+
+void VAttributeType::initLastNames()
+{
+    //It has to be called only once
+    assert(lastNames_.empty());
+    std::string attrFile = DirectoryHandler::concatenate(DirectoryHandler::configDir(), "last_attributes.txt");
+    VSettings vs(attrFile);
+    if(vs.read(false))
+        vs.get("attributes",lastNames_);
+}
+
 //Load the attributes parameter file
 void VAttributeType::load(VProperty* group)
 {
@@ -158,6 +184,7 @@ static SimpleLoader<VAttributeType> loader("attribute");
 #include "VLateAttr.hpp"
 #include "VGenVarAttr.hpp"
 #include "VUserVarAttr.hpp"
+#include "VAutoArchiveAttr.hpp"
 
 static VLabelAttrType labelAttrType;
 static VMeterAttrType meterAttType;
@@ -171,3 +198,5 @@ static VTimeAttrType timeAttrType;
 static VLateAttrType lateAttrType;
 static VGenVarAttrType genvarAttrType;
 static VUserVarAttrType uservarAttrType;
+static VAutoArchiveAttrType autoarchiveAttrType;
+

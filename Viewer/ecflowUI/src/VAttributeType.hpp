@@ -41,6 +41,11 @@ public:
     typedef void (*ScanProc) (VNode* vnode,std::vector<VAttribute*>& vec);
     ScanProc scanProc() {return scanProc_;}
 
+    static const std::vector<std::string>& lastNames() {return lastNames_;}
+    static void saveLastNames();
+    static void initLastNames();
+
+
     //Called from VConfigLoader
     static void load(VProperty*);
 
@@ -53,6 +58,7 @@ protected:
     int dataCount_;
     int typeId_;
     ScanProc scanProc_;
+    static std::vector<std::string> lastNames_;
 
 private:
     static std::map<std::string,VAttributeType*> typesMap_;

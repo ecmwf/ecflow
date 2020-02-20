@@ -46,6 +46,9 @@
         },
         "genvar" : {
               "label" : "Generated variables"
+        },
+        "autoarchive" : {
+               "label": "Auto archive"
         }
 	}
 }

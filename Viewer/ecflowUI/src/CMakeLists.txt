@@ -188,6 +188,7 @@ set(viewer_srcs
     UpdateTimer.cpp
     VAttribute.cpp
     VAttributeType.cpp
+    VAutoArchiveAttr.cpp
     VConfig.cpp
     VConfigLoader.cpp
     VDateAttr.cpp

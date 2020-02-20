@@ -77,10 +77,10 @@
 
                  "defaultAttributes" : {
                     "label" : "Default visible attributes",
-                    "default" : "meter/event/repeat/trigger/label/time/date/limit/limiter/late",
+                    "default" : "meter/event/repeat/trigger/label/time/date/limit/limiter/late/autoarchive",
                     "multi"   : "true",
-                    "values"  : "meter/event/repeat/trigger/label/time/date/limit/limiter/late/var/genvar",
-                    "values_label" : "Meters/Events/Repeats/Triggers/Labels/Times/Dates/Limits/Limiters/Late/Variables/Generated variables"
+                    "values"  : "meter/event/repeat/trigger/label/time/date/limit/limiter/late/var/genvar/autoarchive",
+                    "values_label" : "Meters/Events/Repeats/Triggers/Labels/Times/Dates/Limits/Limiters/Late/Variables/Generated variables/Auto archive"
                  },
                  "attributesPolicy" : {
                     "label" : "In new tree views show",

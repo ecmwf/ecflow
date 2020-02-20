@@ -92,8 +92,11 @@ public:
     void clearForceShowAttr();
     void updateForceShowAttr();
     VAttribute* forceShowAttr() const;
+    void readSettings(VSettings* vs) override;
 
 private:
+    std::vector<VParam*> defaults() const;
+
     VInfo_ptr forceShowAttr_;
 };
 

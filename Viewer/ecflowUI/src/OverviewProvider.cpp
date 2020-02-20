@@ -9,7 +9,6 @@
 
 #include "OverviewProvider.hpp"
 #include "AutoCancelAttr.hpp"
-#include "AutoArchiveAttr.hpp"
 #include "AutoRestoreAttr.hpp"
 #include "QueueAttr.hpp"
 #include "Suite.hpp"
@@ -314,12 +313,6 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 
     //Autorestore
     if(ecf::AutoRestoreAttr* attr = nn->get_autorestore())
-    {
-        f << inc << attr->toString() << "\n";
-    }
-
-    //Autoarchive
-    if(ecf::AutoArchiveAttr* attr = nn->get_autoarchive())
     {
         f << inc << attr->toString() << "\n";
     }
