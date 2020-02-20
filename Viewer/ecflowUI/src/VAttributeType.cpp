@@ -185,6 +185,7 @@ static SimpleLoader<VAttributeType> loader("attribute");
 #include "VGenVarAttr.hpp"
 #include "VUserVarAttr.hpp"
 #include "VAutoArchiveAttr.hpp"
+#include "VAutoCancelAttr.hpp"
 #include "VAutoRestoreAttr.hpp"
 #include "VQueueAttr.hpp"
 
@@ -201,5 +202,6 @@ static VLateAttrType lateAttrType;
 static VGenVarAttrType genvarAttrType;
 static VUserVarAttrType uservarAttrType;
 static VAutoArchiveAttrType autoarchiveAttrType;
+static VAutoCancelAttrType autoacancelAttrType;
 static VAutoRestoreAttrType autorestoreAttrType;
 static VQueueAttrType queueAttrType;

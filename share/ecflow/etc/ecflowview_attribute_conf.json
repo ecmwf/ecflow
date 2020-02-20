@@ -50,11 +50,14 @@
         "autoarchive" : {
                "label": "Auto archive"
         },
+        "autocancel" : {
+               "label": "Auto cancel"
+        },
         "autorestore" : {
             "label": "Auto restore"
         },
         "queue" : {
-            "label": "Queue"
+            "label": "Queues"
         }
 	}
 }

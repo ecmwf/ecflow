@@ -177,6 +177,7 @@ protected:
     virtual void renderRepeat(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderAutoArchive(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderAutoCancel(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderAutoRestore(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderQueue(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
 

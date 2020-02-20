@@ -8,7 +8,6 @@
 //============================================================================
 
 #include "OverviewProvider.hpp"
-#include "AutoCancelAttr.hpp"
 #include "Suite.hpp"
 
 #include "ConnectState.hpp"
@@ -297,13 +296,6 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	const std::vector<ZombieAttr> & vect = nn->zombies();
 	for (const auto & it : vect)
 		f << inc << it.toString() << "\n";
-
-
-	//Autocancel
-    if(ecf::AutoCancelAttr* attr = nn->get_autocancel())
-    {
-        f << inc << attr->toString() << "\n";
-    }
 
     //For suspended nodes
 	if(nn->isSuspended())
