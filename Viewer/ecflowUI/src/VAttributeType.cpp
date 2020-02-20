@@ -185,6 +185,7 @@ static SimpleLoader<VAttributeType> loader("attribute");
 #include "VGenVarAttr.hpp"
 #include "VUserVarAttr.hpp"
 #include "VAutoArchiveAttr.hpp"
+#include "VAutoRestoreAttr.hpp"
 
 static VLabelAttrType labelAttrType;
 static VMeterAttrType meterAttType;
@@ -199,4 +200,4 @@ static VLateAttrType lateAttrType;
 static VGenVarAttrType genvarAttrType;
 static VUserVarAttrType uservarAttrType;
 static VAutoArchiveAttrType autoarchiveAttrType;
-
+static VAutoRestoreAttrType autorestoreAttrType;

@@ -49,6 +49,9 @@
         },
         "autoarchive" : {
                "label": "Auto archive"
+        },
+        "autorestore" : {
+            "label": "Auto restore"
         }
 	}
 }
