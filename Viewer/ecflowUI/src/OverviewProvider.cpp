@@ -9,6 +9,8 @@
 
 #include "OverviewProvider.hpp"
 #include "AutoCancelAttr.hpp"
+#include "AutoArchiveAttr.hpp"
+#include "AutoRestoreAttr.hpp"
 #include "Suite.hpp"
 
 #include "ConnectState.hpp"
@@ -299,10 +301,22 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 		f << inc << it.toString() << "\n";
 
 	//Autocancel
-	if(nn->hasAutoCancel() && nn->get_autocancel())
-		f << inc << nn->get_autocancel()->toString() << "\n";
+    if(ecf::AutoCancelAttr* attr = nn->get_autocancel())
+    {
+        f << inc << attr->toString() << "\n";
+    }
 
-	//For suspended nodes
+    if(ecf::AutoRestoreAttr* attr = nn->get_autorestore())
+    {
+        f << inc << attr->toString() << "\n";
+    }
+
+    if(ecf::AutoArchiveAttr* attr = nn->get_autoarchive())
+    {
+        f << inc << attr->toString() << "\n";
+    }
+
+    //For suspended nodes
 	if(nn->isSuspended())
 	{
 		f << inc << "# " << typeName << " " << nodeName << " is " << statusName << "\n";
