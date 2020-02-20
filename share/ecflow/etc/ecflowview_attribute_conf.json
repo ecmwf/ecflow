@@ -52,6 +52,9 @@
         },
         "autorestore" : {
             "label": "Auto restore"
+        },
+        "queue" : {
+            "label": "Queue"
         }
 	}
 }

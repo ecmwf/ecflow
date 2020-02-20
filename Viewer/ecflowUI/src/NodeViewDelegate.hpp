@@ -178,6 +178,7 @@ protected:
     virtual void renderLate(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderAutoArchive(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
     virtual void renderAutoRestore(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
+    virtual void renderQueue(QPainter *painter,QStringList data,const QStyleOptionViewItem& option, QSize&) const;
 
     void labelSize(QStringList data,int& totalWidth,int& totalHeight) const;
     int labelHeight(int) const;

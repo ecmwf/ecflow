@@ -217,6 +217,7 @@ set(viewer_srcs
     VNState.cpp
     VParam.cpp
     VProperty.cpp
+    VQueueAttr.cpp
     VRepeatAttr.cpp
     VReply.cpp
     VReportMaker.cpp

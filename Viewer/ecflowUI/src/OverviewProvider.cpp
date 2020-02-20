@@ -9,7 +9,6 @@
 
 #include "OverviewProvider.hpp"
 #include "AutoCancelAttr.hpp"
-#include "QueueAttr.hpp"
 #include "Suite.hpp"
 
 #include "ConnectState.hpp"
@@ -299,10 +298,6 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	for (const auto & it : vect)
 		f << inc << it.toString() << "\n";
 
-    //Queues attribute
-    const std::vector<QueueAttr> & qVect = nn->queues();
-    for (const auto & it : qVect)
-        f << inc << it.toString() << "\n";
 
 	//Autocancel
     if(ecf::AutoCancelAttr* attr = nn->get_autocancel())
