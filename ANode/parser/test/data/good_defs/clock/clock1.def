@@ -1,6 +1,7 @@
 suite clock1
  clock real +01:00
  endclock   +02:00
+ task t1
 endsuite
 
-suite clock1_s1; clock real +01:00; endclock +01:00; endsuite
+suite clock1_s1; clock real +01:00; endclock +01:00; task t1; endsuite
