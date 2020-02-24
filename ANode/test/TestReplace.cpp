@@ -381,6 +381,46 @@ BOOST_AUTO_TEST_CASE( test_replace_preserves_begun_status )
    BOOST_CHECK_MESSAGE(comparisonDef == *serverDefs,"comparisonDef and servers defs should be the same");
 }
 
+BOOST_AUTO_TEST_CASE( test_replace_preserves_begun_where_client_not_begun )
+{
+   cout << "ANode:: ...test_replace_preserves_begun_where_client_not_begun\n" ; // ECFLOW-1612
+   // In this test we will end up calling begin on the time attribute.
+   // However we had called begin on the client defs side, where the calendar/suite had not been begun
+   // Thus causing an assert failure. The fix is to call begin on the server side, after the replace.
+   defs_ptr clientDef = Defs::create(); {
+      suite_ptr suite = Suite::create( "suite1" ) ;
+      family_ptr fam = suite->add_family("family" ) ;
+      task_ptr t2 = fam->add_task( "t2" );
+      t2->addTime( ecf::TimeAttr(ecf::TimeSlot(0,0),ecf::TimeSlot(10,1),ecf::TimeSlot(0,1),false) );
+      clientDef->addSuite( suite );
+   }
+
+   // add Child t2 to the server defs
+   Defs serverDefs; {
+      suite_ptr suite = Suite::create( "suite1" ) ;
+      family_ptr fam = suite->add_family("family" ) ;
+      fam->add_task( "t1"  );
+      serverDefs.addSuite( suite );
+      serverDefs.beginAll();
+   }
+
+   Defs expectedDefs;  {
+      suite_ptr suite = Suite::create( "suite1" ) ;
+      family_ptr fam = suite->add_family("family" ) ;
+      task_ptr t2 = fam->add_task(  "t2"   );   // notice we preserve client position, and not server position
+      t2->addTime( ecf::TimeAttr(ecf::TimeSlot(0,0),ecf::TimeSlot(10,1),ecf::TimeSlot(0,1),false) );
+      fam->add_task(  "t1"   );
+      expectedDefs.addSuite( suite );
+      expectedDefs.beginAll();
+   }
+
+   ExpectStateChange expect_state_change;
+   std::string errorMsg;
+   BOOST_REQUIRE_MESSAGE( serverDefs.replaceChild("/suite1/family/t2",clientDef,true/*create nodes as needed*/, false/*force*/, errorMsg), errorMsg  );
+   BOOST_CHECK_MESSAGE(expectedDefs == serverDefs,"expectedDefs and servers defs should be the same");
+}
+
+
 BOOST_AUTO_TEST_CASE( test_replace_add_node )
 {
 	cout << "ANode:: ...test_replace_add_node\n" ;
