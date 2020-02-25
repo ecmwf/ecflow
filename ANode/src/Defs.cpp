@@ -1734,6 +1734,11 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
    }
 }
 
+void Defs::clear_edit_history()
+{
+   edit_history_.clear();
+}
+
 const std::vector<std::string>& Defs::get_edit_history(const std::string& path) const
 {
    auto i = edit_history_.find(path);

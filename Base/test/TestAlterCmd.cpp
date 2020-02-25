@@ -850,6 +850,12 @@ BOOST_AUTO_TEST_CASE( test_alter_cmd )
 
    BOOST_CHECK_MESSAGE( defs.get_edit_history(s->absNodePath()).size() == 10, "expected edit_history to be truncated to 10, but found " <<  defs.get_edit_history(s->absNodePath()).size());
 
+   {
+      // clear edit history
+      TestHelper::invokeRequest(&defs,Cmd_ptr( new PathsCmd(PathsCmd::EDIT_HISTORY,"clear")), false);
+      BOOST_CHECK_MESSAGE( defs.get_edit_history().size() == 0, "expected edit_history to be cleared but found" << defs.get_edit_history().size());
+   }
+
    {  // Change suite def status =====================================================================================================
       TestStateChanged changed(s);
       std::vector<std::string> dstates = DState::allStates();

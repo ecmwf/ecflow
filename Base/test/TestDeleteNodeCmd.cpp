@@ -155,6 +155,12 @@ BOOST_AUTO_TEST_CASE( test_delete_node_cmd )
 
 		BOOST_REQUIRE_MESSAGE( fixtureDef.defsfile_.suiteVec().empty(),"Expected all Suites to be deleted but found " << fixtureDef.defsfile_.suiteVec().size());
 	}
+
+	{
+	   // Clear edit history
+	   fixtureDef.defsfile_.clear_edit_history();
+      BOOST_CHECK_MESSAGE(fixtureDef.defsfile_.get_edit_history().size()==0  , "Expected edit history to be empty");
+	}
 }
 
 BOOST_AUTO_TEST_SUITE_END()

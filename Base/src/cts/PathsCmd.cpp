@@ -111,7 +111,10 @@ bool PathsCmd::isWrite() const
       case PathsCmd::KILL:              return true;  break; // requires write privilege, modifies Flag::KILLCMD_FAILED
       case PathsCmd::STATUS:            return true;  break; // requires write privilege, modifies Flag::STATUSCMD_FAILED
       case PathsCmd::CHECK:             return false; break; // read only
-      case PathsCmd::EDIT_HISTORY:      return false; break; // read only
+      case PathsCmd::EDIT_HISTORY:  {
+         if (paths_.size() == 1 && paths_[0] == "clear") return true; // requires write privilege
+         return false; break; // read only
+      }
       case PathsCmd::ARCHIVE:           return true;  break; // requires write privilege
       case PathsCmd::RESTORE:           return true;  break; // requires write privilege
       case PathsCmd::NO_CMD: break;
@@ -211,7 +214,11 @@ STC_Cmd_ptr PathsCmd::doHandleRequest(AbstractServer* as) const
 
       case PathsCmd::EDIT_HISTORY: {
          as->update_stats().node_edit_history_++;
-         if (paths_.empty()) throw std::runtime_error( "No paths specified for edit history") ;
+         if (paths_.empty()) throw std::runtime_error( "No paths/options specified for edit history") ;
+         if (paths_.size() == 1 && paths_[0] == "clear") {
+            as->defs()->clear_edit_history();
+            break;
+         }
          // Only first path used
          return PreAllocatedReply::string_vec_cmd( as->defs()->get_edit_history(paths_[0]) );
       }
@@ -411,8 +418,10 @@ const char*  get_status_desc(){
 const char* get_edit_history_desc(){
    return
             "Returns the edit history associated with a Node.\n"
+            "Can also be used to clear the edit history.\n"
              "Usage::\n"
-            "   --edit_history=/s1/f1/t1\n"
+            "   --edit_history=/s1/f1/t1  # return history of changes for the given node\n"
+            "   --edit_history=clear      # clear/purge *ALL* edit history from all nodes.\n"
             ;
 }
 const char* suspend_desc(){
@@ -565,6 +574,17 @@ void PathsCmd::create(   Cmd_ptr& cmd,
       if (paths.size() == 1 && paths[0] == "/") {
          // treat as _all_
          paths.clear();
+      }
+   }
+   else if (api_ == PathsCmd::EDIT_HISTORY) {
+
+      if (paths.empty()) {
+         if (options.size() == 1 && options[0] == "clear") paths.push_back("clear");
+         else {
+            std::stringstream ss;
+            ss << theArg() << ":  No paths or option specified. Paths must begin with a leading '/' character\n";
+            throw std::runtime_error( ss.str() );
+         }
       }
    }
    else {
