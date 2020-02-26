@@ -27,6 +27,9 @@ ClockWidget::ClockWidget(QWidget* parent) : QLabel(parent), showSec_(false)
     QString sh="QLabel {color: rgb(34,107,138); margin-left: 5px; }";
     setStyleSheet(sh);
 
+    //has to be hidden initially
+    hide();
+
     std::vector<std::string> propVec;
     propVec.push_back("view.clock.showClock");
     propVec.push_back("view.clock.clockFormat");
