@@ -108,6 +108,11 @@ BOOST_AUTO_TEST_CASE( test_server_state_changes )
       // make sure edit history was *NOT* serialized, It is only serialized when check pointing
       BOOST_REQUIRE_MESSAGE(theClient.getDefs() == 0,CtsApi::get() << " failed should return 0\n" << theClient.errorMsg());
       BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() ==  0,"Expected edit history of size 0, but found " <<  theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
+
+      // clear edit history
+      BOOST_REQUIRE_MESSAGE(theClient.edit_history("clear") == 0,CtsApi::to_string(CtsApi::edit_history("clear")) << " should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE(theClient.edit_history(Str::ROOT_PATH()) == 0,CtsApi::to_string(CtsApi::edit_history(Str::ROOT_PATH())) << " should return 0\n" << theClient.errorMsg());
+      BOOST_REQUIRE_MESSAGE(theClient.server_reply().get_string_vec().size() == 0,"Expected no edit history " << theClient.server_reply().get_string_vec().size());
    }
 }
 

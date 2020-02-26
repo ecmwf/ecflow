@@ -1,6 +1,7 @@
 suite clock3
  clock real 20.1.2006
  endclock  24.1.2006
+ task t1;
 endsuite
 
-suite clock3_s1;clock real 20.1.2006;endclock 20.1.2017; endsuite
+suite clock3_s1;clock real 20.1.2006;endclock 20.1.2017; task t1; endsuite

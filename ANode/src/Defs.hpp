@@ -278,7 +278,9 @@ public:
    const ecf::Flag& get_flag() const { return flag_;}
 
    void add_edit_history(const std::string& path, const std::string& request);
+   void clear_edit_history();
    const std::vector<std::string>& get_edit_history(const std::string& path) const;
+   const std::unordered_map<std::string, std::vector<std::string> >&  get_edit_history() const { return edit_history_;}
    void save_edit_history(bool f) const { save_edit_history_ = f ;}
    static const std::vector<std::string>& empty_edit_history();
    constexpr static size_t max_edit_history_size_per_node() { return 10; }

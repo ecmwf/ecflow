@@ -121,6 +121,7 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    BOOST_REQUIRE_MESSAGE( theClient.resume("/s") == 0,CtsApi::to_string(CtsApi::resume("/s")) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.resume(paths) == 0,CtsApi::to_string(CtsApi::resume(paths)) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.edit_history("/s") == 0,CtsApi::to_string(CtsApi::edit_history("/s")) << " should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.edit_history("clear") == 0,CtsApi::to_string(CtsApi::edit_history("clear")) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.archive("/s") == 0,CtsApi::to_string(CtsApi::archive("/s")) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.archive(paths) == 0,CtsApi::to_string(CtsApi::archive(paths)) << " should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.archive("/s",true) == 0,CtsApi::to_string(CtsApi::archive("/s",true)) << " should return 0\n" << theClient.errorMsg());

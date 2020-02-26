@@ -64,7 +64,17 @@ BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 //   BOOST_CHECK_MESSAGE(diff_d(t1,t2) == expected," Expected " << to_simple_string(expected) << " but found " << to_simple_string(diff_d(t1,t2)));
 //}
 
+BOOST_AUTO_TEST_CASE( test_calendar_default_ptime )
+{
+   cout << "ACore:: ...test_calendar_default_ptime \n";
 
+   ptime time;
+   BOOST_CHECK_MESSAGE(time.is_special(),         "Default ptime is special");
+   BOOST_CHECK_MESSAGE(time.is_not_a_date_time(), "Default ptime is_not_a_date_time");
+   BOOST_CHECK_MESSAGE(!time.is_infinity(),       "Expected Default ptime not is_infinity");
+   BOOST_CHECK_MESSAGE(!time.is_pos_infinity(),   "Expected default ptime not is_pos_infinity");
+   BOOST_CHECK_MESSAGE(!time.is_neg_infinity(),   "Expected default ptime not is_neg_infinity");
+}
 
 BOOST_AUTO_TEST_CASE( test_calendar_state_parsing )
 {

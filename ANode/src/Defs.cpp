@@ -1112,9 +1112,11 @@ node_ptr Defs::replaceChild(const std::string& path,
 
 		// HAVE a FULL match in the server
 
-		// Copy over begun and suspended states, otherwise preserve state of client node
-		if (serverNode->suite()->begun()) clientNode->begin();
-		if (serverNode->isSuspended())    clientNode->suspend();
+	   // Take a note of begun status, in case the suite is being replaced.
+		bool begin_node = serverNode->suite()->begun();
+
+		// Preserver suspended states, otherwise preserve state of client node
+		if (serverNode->isSuspended()) clientNode->suspend();
 
 		std::vector<node_ptr> all_server_node_children;
 		serverNode->allChildren( all_server_node_children);
@@ -1140,6 +1142,12 @@ node_ptr Defs::replaceChild(const std::string& path,
 	 	if ( parentNodeOnServer ) addOk = parentNodeOnServer->addChild( client_node_to_add , child_pos);
 		else                      addOk = addChild( client_node_to_add , child_pos);
 	 	LOG_ASSERT(addOk,"");
+
+	 	// preserve begun status. Note: we should't call begin() on the client side. As the suites will not have been begun.
+	 	// This can cause assert, because begin time attributes assumes that calendar has been initialised. This is not the case for client
+	 	// ASSERT failure: !c.suiteTime().is_special() at ../ACore/src/TimeSeries.cpp:526 init has not been called on calendar. TimeSeries::duration
+	 	// ECFLOW-1612
+      if (begin_node) client_node_to_add->begin();
 
 	 	client_node_to_add->set_most_significant_state_up_node_tree();
 	 	return client_node_to_add;
@@ -1201,14 +1209,19 @@ node_ptr Defs::replaceChild(const std::string& path,
 	   deleteChild(server_child.get());
 	}
 
-	/// copy over begin/queued status if not migrated
-	if (server_parent->suite()->begun())  {
-	   last_client_child->begin();
-	}
-
+	// Take a note of begun status, in case the suite is being replaced.
+	bool begin_node = server_parent->suite()->begun();
+	
 	node_ptr client_node_to_add = last_client_child->remove();
 	bool addOk = server_parent->addChild( client_node_to_add , client_child_pos);
 	LOG_ASSERT( addOk,"" );
+
+   // preserve begun status. Note: we should't call begin() on the client side. As the suites will not have been begun.
+   // This can cause assert, because begin time attributes assumes that calendar has been initialised. This is not the case for client
+   // ASSERT failure: !c.suiteTime().is_special() at ../ACore/src/TimeSeries.cpp:526 init has not been called on calendar. TimeSeries::duration
+   // ECFLOW-1612
+   if (begin_node) client_node_to_add->begin();
+
 	client_node_to_add->set_most_significant_state_up_node_tree();
 
 	return client_node_to_add;
@@ -1719,6 +1732,11 @@ void Defs::add_edit_history(const std::string& path, const std::string& request)
          (*i).second.erase((*i).second.begin() );
       }
    }
+}
+
+void Defs::clear_edit_history()
+{
+   edit_history_.clear();
 }
 
 const std::vector<std::string>& Defs::get_edit_history(const std::string& path) const
