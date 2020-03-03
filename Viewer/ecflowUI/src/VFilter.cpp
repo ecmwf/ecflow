@@ -126,7 +126,7 @@ void VParamSet::setCurrent(const std::vector<VParam*>& items,bool broadcast)
 
     for(std::vector<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
 	{
-        if(std::find(all_.begin(),all_.end(),*it) != all_.end())
+        if(std::find(items.begin(),items.end(),*it) != items.end())
         {
             addToCurrent(*it);
         }
@@ -254,13 +254,7 @@ AttributeFilter::AttributeFilter() : VParamSet()
     settingsId_="attributes";
     settingsIdV0_="attribute";
     std::vector<VParam*> v=VAttributeType::filterItems();
-	init(v);
-
-	/*for(std::set<VParam*>::const_iterator it=all_.begin(); it != all_.end(); ++it)
-	{
-		if((*it)->strName() != "var" && (*it)->strName() != "genvar")
-			current_.insert(*it);
-	}*/
+    init(v);
 }
 
 bool AttributeFilter::matchForceShowAttr(const VNode *n,VAttributeType* t) const
@@ -300,6 +294,55 @@ void AttributeFilter::updateForceShowAttr()
     }
 }
 
+//By default all but the uservar and genvar attributes should be visible
+std::vector<VParam*> AttributeFilter::defaults() const
+{
+    std::vector<VParam*> def;
+    for(auto it: all_)
+    {
+        if (it->strName() != "var" && it->strName() != "genvar")
+        {
+            def.emplace_back(it);
+        }
+    }
+    return def;
+}
+
+void AttributeFilter::readSettings(VSettings* vs)
+{
+    VParamSet::readSettings(vs);
+
+    //If the filter list is not complete we need to be sure that a newly added attribute type
+    //is automatically enabled in the filter. This is based on the contents of the lastNames attribute
+    //file. This file is updated on exit and stores the full list of attribute names (existing at exit).
+    //So we can figure out if a new attribute type were introduced since the last startup and we can
+    //guarantee that is is always enabled for the first time.
+    if(!isComplete())
+    {
+        const std::vector<std::string>& lastNames=VAttributeType::lastNames();
+
+        //The lastNames are not found. This must be the first startup after the lastNames concept were introduced
+        //or it is a fresh startup after cleaning the config (or the very first one). We enable all the .
+        //It could be only a one-time problem for users who already set their attribute filter.
+        if(lastNames.empty())
+        {
+            setCurrent(defaults(),false);
+        }
+        else
+        {
+            //Check which default attribute types are not in lastNames
+            for(auto it: defaults()) {
+                //The item is not in lastNames so it must be a newly added type. We add it to the filter list
+                if(std::find(lastNames.begin(),lastNames.end(),it->strName()) == lastNames.end())
+                {
+                    addToCurrent(it);
+                }
+
+            }
+        }
+    }
+}
+
 //==============================================
 //
 // IconFilter
@@ -329,7 +372,7 @@ void IconFilter::readSettings(VSettings* vs)
 
         //The lastNames are not found. This must be the first startup after lastNames concept were introduced
         //or it is a fresh startup after cleaning the config (or the very first one). We enable all the icons.
-        //It could be only a one-time problem for users who already set theit icon filter.
+        //It could be only a one-time problem for users who already set their icon filter.
         if(lastNames.empty())
         {
             setCurrent(all_,false);

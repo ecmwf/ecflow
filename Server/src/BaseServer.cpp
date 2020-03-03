@@ -441,6 +441,7 @@ bool BaseServer::lock(const std::string& user)
    if (userWhoHasLock_.empty()) {
       userWhoHasLock_ = user;
       stats().locked_by_user_ = user;
+      server_state_to_preserve_ = state();
       shutdown();
       return true;
    }
@@ -456,7 +457,12 @@ void BaseServer::unlock()
 
    userWhoHasLock_.clear();
    stats().locked_by_user_.clear();
-   if ( serverState_ == SState::SHUTDOWN ) restart();
+
+   switch(server_state_to_preserve_) {
+      case SState::RUNNING:  restart();  break;
+      case SState::SHUTDOWN: shutdown(); break;
+      case SState::HALTED:   halted();   break;
+   }
 }
 const std::string& BaseServer::lockedUser() const
 {

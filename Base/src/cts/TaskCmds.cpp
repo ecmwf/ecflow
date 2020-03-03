@@ -346,13 +346,13 @@ const char* InitCmd::desc() {
             "Hence the context is supplied via environment variables.\n"
             "  arg1(string)         = process_or_remote_id The process id of the job or remote_id\n"
             "                         Using remote id allows the jobs to be killed\n"
-            "  arg2(--add)(optional)= add variables as name value pairs\n\n"
+            "  arg2(--add)(optional)= add/update variables as name value pairs\n\n"
             "If this child command is a zombie, then the default action will be to *block*.\n"
             "The default can be overridden by using zombie attributes.\n"
             "Otherwise the blocking period is defined by ECF_TIMEOUT.\n\n"
             "Usage:\n"
             "  ecflow_client --init=$$\n"
-            "  ecflow_client --init=$$ --add name=value name2=value2 # add variables to task"
+            "  ecflow_client --init=$$ --add name=value name2=value2 # add/update variables to task"
  	;
 }
 

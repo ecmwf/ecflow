@@ -8,7 +8,6 @@
 //============================================================================
 
 #include "OverviewProvider.hpp"
-#include "AutoCancelAttr.hpp"
 #include "Suite.hpp"
 
 #include "ConnectState.hpp"
@@ -298,11 +297,7 @@ void OverviewProvider::nodeInfo(VInfoNode* info,std::stringstream& f)
 	for (const auto & it : vect)
 		f << inc << it.toString() << "\n";
 
-	//Autocancel
-	if(nn->hasAutoCancel() && nn->get_autocancel())
-		f << inc << nn->get_autocancel()->toString() << "\n";
-
-	//For suspended nodes
+    //For suspended nodes
 	if(nn->isSuspended())
 	{
 		f << inc << "# " << typeName << " " << nodeName << " is " << statusName << "\n";

@@ -99,6 +99,8 @@ protected:
    friend class CheckPtSaver;
 
    SState::State serverState_;
+   SState::State server_state_to_preserve_{SState::RUNNING}; // preserve state over plug cmd ECFLOW-1606
+
    ServerEnvironment& serverEnv_;
    std::string userWhoHasLock_;
 };

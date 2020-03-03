@@ -188,6 +188,9 @@ set(viewer_srcs
     UpdateTimer.cpp
     VAttribute.cpp
     VAttributeType.cpp
+    VAutoArchiveAttr.cpp
+    VAutoCancelAttr.cpp
+    VAutoRestoreAttr.cpp
     VConfig.cpp
     VConfigLoader.cpp
     VDateAttr.cpp
@@ -215,6 +218,7 @@ set(viewer_srcs
     VNState.cpp
     VParam.cpp
     VProperty.cpp
+    VQueueAttr.cpp
     VRepeatAttr.cpp
     VReply.cpp
     VReportMaker.cpp

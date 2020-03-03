@@ -52,7 +52,7 @@ static double suspend_threshold_s = 3.5;
 static double resume_threshold_s = 3.5;
 static double force_threshold_s = 8.5;
 static double check_pt_threshold_s = 1.0;
-static double client_cmds_threshold_s = 7.5;
+static double client_cmds_threshold_s = 8.5;
 
 
 static void sync_and_news_local(ClientInvoker& theClient)

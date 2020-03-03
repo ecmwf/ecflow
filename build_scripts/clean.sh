@@ -53,9 +53,13 @@ find . -name gnuplot.dat -exec rm -rf gnuplot.dat {} \; -print
 find . -name gnuplot.script -exec rm -rf gnuplot.script {} \; -print
 find . -name ecflow.html -exec rm -rf ecflow.html {} \; -print
 find . -name core -exec rm -rf core {} \; -print
-find . -name `hostname`.*.ecf.* -exec rm -rf `hostname`.*.ecf.* {} \; -print
 find . -name callgrind.out.\* -exec rm -rf callgrind.out.\* {} \; -print
 find . -name massif.out.\* -exec rm -rf massif.out.* {} \; -print
+
+for file in `hostname`.*.ecf.* ; do
+    echo $file
+    rm -rf $file
+done
 
 # remove any defs file at the workspace level. There should not be any
 rm -rf *.def

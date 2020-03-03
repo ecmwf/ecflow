@@ -46,6 +46,18 @@
         },
         "genvar" : {
               "label" : "Generated variables"
+        },
+        "autoarchive" : {
+               "label": "Auto archive"
+        },
+        "autocancel" : {
+               "label": "Auto cancel"
+        },
+        "autorestore" : {
+            "label": "Auto restore"
+        },
+        "queue" : {
+            "label": "Queues"
         }
 	}
 }

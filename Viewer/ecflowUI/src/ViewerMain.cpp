@@ -30,6 +30,7 @@
 #include "CustomCommandHandler.hpp"
 #include "Palette.hpp"
 #include "ServerList.hpp"
+#include "VAttributeType.hpp"
 #include "VConfig.hpp"
 #include "VIcon.hpp"
 #include "VServerSettings.hpp"
@@ -160,6 +161,9 @@ int main(int argc, char **argv)
     //Initialise the system palette
     Palette::load(DirectoryHandler::concatenate(DirectoryHandler::etcDir(),
 		      "ecflowview_palette.json")); 
+
+    //Initialise the list containing all the attribute type names existed on last exit
+    VAttributeType::initLastNames();
 
     //Initialise the list containing all the icon names existed on last exit
     VIcon::initLastNames();

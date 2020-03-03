@@ -53,6 +53,32 @@ public:
 		return std::string();
 	}
 
+    static std::string invokeRequest( AbstractServer* server, Cmd_ptr theCmd, bool check_change_numbers = true ) {
+
+       // Check that state change happens
+       unsigned int state_change_no = Ecf::state_change_no();
+       unsigned int modify_change_no = Ecf::modify_change_no();
+
+       // Setup command for invocation
+        ClientToServerRequest cmd_request;
+        cmd_request.set_cmd( theCmd );
+        // std::cout << cmd_request << "\n";
+
+        STC_Cmd_ptr result = cmd_request.handleRequest(server);
+        BOOST_CHECK_MESSAGE( result, "ClientToServerRequest " << cmd_request << " returned NULL\n");
+        BOOST_CHECK_MESSAGE( result->error().empty(), cmd_request << " " << result->error());
+        if (check_change_numbers) {
+           BOOST_CHECK_MESSAGE( state_change_no != Ecf::state_change_no() ||  modify_change_no != Ecf::modify_change_no(),
+                                "State & modify change numbers unaltered by command " << cmd_request);
+
+           // Some tests(TestSSyncCmd_CH1.cpp), create defs where invariants like change numbers are deliberately different
+           std::string error_msg;
+           BOOST_CHECK_MESSAGE(server->defs()->checkInvariants(error_msg),"invokeRequest checkInvariants failed " << error_msg << " for cmd " << cmd_request );
+        }
+        if (result) return result->get_string();
+        return std::string();
+    }
+
 	static void invokeFailureRequest( Defs* defs, Cmd_ptr theCmd ) {
 
 		ClientToServerRequest cmd_request;

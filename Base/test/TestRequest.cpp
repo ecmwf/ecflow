@@ -67,7 +67,6 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::PING)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::DEBUG_SERVER_ON)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::DEBUG_SERVER_OFF)));
-   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::SHUTDOWN_SERVER)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER)));
    cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER)));
@@ -112,6 +111,8 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1, true)));                               // auto_add new suites
 	cmd_vec.push_back( Cmd_ptr( new ClientHandleCmd(1)));                                     // de-register/drop
 
+   cmd_vec.push_back( Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER)));                         // make sure server is restarted or child cmds fail, as server will not allow comms
+
 	cmd_vec.push_back( Cmd_ptr( new InitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1)));
 	cmd_vec.push_back( Cmd_ptr( new EventCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"eventName")));
 	cmd_vec.push_back( Cmd_ptr( new MeterCmd("suiteName/familyName/heir_familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"myMeter",100)));
@@ -144,7 +145,6 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	std::shared_ptr<GroupCTSCmd>  theGroupCmd = std::make_shared<GroupCTSCmd>();
    theGroupCmd->addChild(  Cmd_ptr( new ServerVersionCmd())  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::PING))  );
-   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::SHUTDOWN_SERVER))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::HALT_SERVER))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::TERMINATE_SERVER))  );
@@ -168,6 +168,7 @@ static void populateCmdVec(std::vector<Cmd_ptr>& cmd_vec, std::vector<STC_Cmd_pt
 	theGroupCmd->addChild(  Cmd_ptr( new RequeueNodeCmd("/suiteName",RequeueNodeCmd::NO_OPTION))  );
 	theGroupCmd->addChild(  Cmd_ptr( new OrderNodeCmd("/suiteName",NOrder::ALPHA))  );
 	theGroupCmd->addChild(  Cmd_ptr( new RunNodeCmd("/suiteName",true/*force for test*/, true /* for test */))  );
+   theGroupCmd->addChild(  Cmd_ptr( new CtsCmd(CtsCmd::RESTART_SERVER))  );
    theGroupCmd->addChild(  Cmd_ptr( new InitCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1))  );
    theGroupCmd->addChild(  Cmd_ptr( new CtsNodeCmd(CtsNodeCmd::CHECK_JOB_GEN_ONLY,"EmptySuite"))  ); // will *reset* begin
    theGroupCmd->addChild(  Cmd_ptr( new EventCmd("suiteName/familyName/taskName",Submittable::DUMMY_JOBS_PASSWORD(),Submittable::DUMMY_PROCESS_OR_REMOTE_ID(),1,"eventName"))  );
