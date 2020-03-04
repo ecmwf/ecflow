@@ -169,6 +169,17 @@ void NodeContainer::requeue_time_attrs()
    }
 }
 
+void NodeContainer::reset_late_event_meters(bool recursive)
+{
+   Node::reset_late_event_meters(recursive);
+   if (recursive) {
+      size_t node_vec_size = nodes_.size();
+      for(size_t t = 0; t < node_vec_size; t++) {
+         nodes_[t]->reset_late_event_meters(recursive);
+      }
+   }
+}
+
 void NodeContainer::handle_defstatus_propagation()
 {
    if ( d_st_ == DState::COMPLETE ) {

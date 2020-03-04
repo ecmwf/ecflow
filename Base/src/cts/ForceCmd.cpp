@@ -131,6 +131,11 @@ STC_Cmd_ptr ForceCmd::doHandleRequest(AbstractServer* as) const
 
  	      if (recursive_) node->set_state_hierarchically( new_state, true /* force */ );
  	      else            node->set_state( new_state, true /* force */  );
+
+         // force queued allows a job to re-run preserving job output.
+         // However other nodes may reference this nodes events/meters/late in trigger expression, hence
+         // reset events,meters and late flag ECFLOW-1617
+         if (new_state == NState::QUEUED) node->reset_late_event_meters(recursive_);
  	   }
  	   else {
  	      // The recursive option is *NOT* applicable to events, hence ignore. According to Axel !!!!
