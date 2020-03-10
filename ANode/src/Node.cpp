@@ -339,7 +339,7 @@ void Node::requeue(Requeue_args& args)
    decrementInLimit(limitSet);    // will recurse up, expensive but needed
 }
 
-void Node::reset_late_event_meters(bool /*recursive*/)
+void Node::reset_late_event_meters()
 {
    if (late_) late_->reset();
    for(auto & meter : meters_)     {   meter.reset(); }

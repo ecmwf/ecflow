@@ -36,7 +36,7 @@ public:
 	void begin() override;
 	void requeue(Requeue_args&) override;
    void requeue_time_attrs() override;
-   void reset_late_event_meters(bool recursive) override;
+   void reset_late_event_meters() override;
 	bool run(JobsParam& jobsParam, bool force) override;
 	void kill(const std::string& zombie_pid = "") override;
 	void status() override;
