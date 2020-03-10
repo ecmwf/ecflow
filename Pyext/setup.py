@@ -1,11 +1,4 @@
 #!/usr/bin/env python
-## Copyright 2009-2020 ECMWF.
-## This software is licensed under the terms of the Apache Licence version 2.0 
-## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0. 
-## In applying this licence, ECMWF does not waive the privileges and immunities 
-## granted to it by virtue of its status as an intergovernmental organisation 
-## nor does it submit to any jurisdiction. 
-
 from distutils.core import setup, Extension
 import os
 import sys
@@ -20,45 +13,24 @@ import glob
 #     /usr/local/apps/python/current/lib/python2.7/site-packages/ecflow
 #
 # To test install manually, we can:
+#   python3 setup.py --help-commands # help
+#
 #   cd $WK/Pyext
-#   rm -rf build/   # for a clean build
-#   python setup.py build_ext
-#   python setup.py install --home=~
+#   rm -rf build/                     # for a clean build
+#   python setup.py build_ext         # build C/C++ extensions (compile/link to build directory)
+#   python setup.py install --home=~  # ln -s ecflow.so ecflow.cpython-36m-x86_64-linux-gnu.so , otherwise puthon3 -c "import ecflow" not working
 #
 # See: http://docs.python.org/2/distutils/apiref.html?highlight=extension#distutils.core.Extension
 #
-# ========================================================================
-# AIX: On AIX we need custom compile and link flags:
-# The final link line is wrong: xlC_r xlc_r  , 
-#                              /usr/local/lpp/vacpp11109/usr/vacpp/bin/.orig/xlC_r: 1501-228 (W) input file xlc_r not found
-#           
-# Removing the duplicated xlc_r, We then get a little further,
-#         ld: 0711-317 ERROR: Undefined symbol: .main
-#      Using -bnoquiet
-#        .main                     [12]    ER PR crt0_64.s(/lib/crt0_64.o)
-#                                          00000070 .text    R_RBR    [34]    .__start
-# This is because it is missing -G (generate dynamic library)
-# When we manually add -G, we sucessfully link(ecflow.so)
-#
-#      Both of these can be fixed, by overriding the Link line with:
-#      export LDSHARED="xlC_r -G -Wl,-bI:/usr/local/apps/python/2.7.2-01/lib/python2.7/config/python.exp"
-#
-# To find out what python is going to use:
-#         python -c "from distutils import sysconfig; print sysconfig.get_config_vars('LDSHARED')[0]"
-# On AIX, it does not use this  value ? 
-#
-#      See python issue 18235  _sysconfigdata.py wrong on AIX installations
 # ==========================================================================
-
-# ==========================================================================
-# Permissions: The permission of congfigured file are wrong: 2 choices
+# Permissions: The permission of configured file are wrong: 2 choices
 # o Make sure origin file, has the right permissions
 # o Copy file to different directory, and change the permissions
 #   since file(COPY) does rename files
-#   configure_file(setup.py.in /tmp/ma0/workspace/bdir/release/ecflow/CMakeFiles/setup.py)
+#   configure_file(setup.py.in /tmp/ma0/workspace/bdir5/release/ecflow/CMakeFiles/setup.py)
 #       now copy the temporary into the final destination, setting the permissions
-#   file(COPY /tmp/ma0/workspace/bdir/release/ecflow/CMakeFiles/setup.py
-#     DESTINATION /tmp/ma0/workspace/bdir/release/ecflow
+#   file(COPY /tmp/ma0/workspace/bdir5/release/ecflow/CMakeFiles/setup.py
+#     DESTINATION /tmp/ma0/workspace/bdir5/release/ecflow
 #     FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
 #     GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 # ============================================================================
@@ -68,8 +40,10 @@ import glob
 # to get this to work, you will need to include the path
 # to your boost installation and  ecflow includes
 boost_root=os.getenv("BOOST_ROOT") 
-include_dirs = [ "/tmp/ma0/workspace/ecflow/Pyext/../ACore/src", 
+include_dirs = [ "/tmp/ma0/workspace/ecflow/Pyext/../cereal/include",
+                 "/tmp/ma0/workspace/ecflow/Pyext/../ACore/src", 
                  "/tmp/ma0/workspace/ecflow/Pyext/../ANattr/src", 
+                 "/tmp/ma0/workspace/ecflow/Pyext/../ANode/parser/src",
                  "/tmp/ma0/workspace/ecflow/Pyext/../ANode/src",
                  "/tmp/ma0/workspace/ecflow/Pyext/../Base/src",
                  "/tmp/ma0/workspace/ecflow/Pyext/../Base/src/cts",
@@ -83,35 +57,26 @@ include_dirs = [ "/tmp/ma0/workspace/ecflow/Pyext/../ACore/src",
 # define the library directories to include any extra libraries that may be needed.
 # Give preference to release libs   
 boost_lib_dir = boost_root + "/stage/lib/"
-library_dirs = ['/tmp/ma0/workspace/bdir/release/ecflow/ACore',
-                '/tmp/ma0/workspace/bdir/release/ecflow/ANattr/',
-                '/tmp/ma0/workspace/bdir/release/ecflow/ANode/',
-                '/tmp/ma0/workspace/bdir/release/ecflow/Base/', 
-                '/tmp/ma0/workspace/bdir/release/ecflow/CSim/', 
-                '/tmp/ma0/workspace/bdir/release/ecflow/Client/', 
+library_dirs = ['/tmp/ma0/workspace/bdir5/release/ecflow/ACore',
+                '/tmp/ma0/workspace/bdir5/release/ecflow/ANattr/',
+                '/tmp/ma0/workspace/bdir5/release/ecflow/ANode/',
+                '/tmp/ma0/workspace/bdir5/release/ecflow/Base/', 
+                '/tmp/ma0/workspace/bdir5/release/ecflow/CSim/', 
+                '/tmp/ma0/workspace/bdir5/release/ecflow/Client/', 
                 boost_lib_dir  
                ]
 
 # define the libraries to link with this includes the boost lib
 libraries = [ 'core' , 'nodeattr', 'node', 'base', 'libsimu', 'libclient',
-              'boost_system-mt',
-              'boost_filesystem-mt',
-              'boost_program_options-mt',
-              'boost_date_time-mt', 
-              'boost_python-mt' ]
+              'boost_system',
+              'boost_filesystem',
+              'boost_program_options',
+              'boost_date_time', 
+              'boost_python36' ]
 
-# Using gcc-4.8 with boost 1.53 on linux requires these flags
-extra_compile_args = ['-ftemplate-depth-512', '-Wno-unused-local-typedefs' ]
+# Using gcc-4.8 with boost 1.53 linux requires these flags
+extra_compile_args = ['-ftemplate-depth-512','-Wno-unused-variable','-Wno-deprecated-declarations','-Wno-unused-local-typedefs','-Wno-maybe-uninitialized' ]
 extra_link_args = []
-
-# extra compile flags needed for AIX only
-# Note setup.py will add -q64 -qcpluscmt -DNDEBUG  automatically
-# Note: two extra_compile_args, debug and release, use the debug for testing and faster compiles
-if sys.platform.startswith("aix"):
-   extra_compile_args =  [ '-qsuppress=1540-0198', '-O3', '-qstrict', '-qfuncsect', '-qeh', '-qrtti'  ]
-   #extra_compile_args = [ '-qsuppress=1540-0198',  '-qNOOPTimize', '-qnoinline', '-qfullpath', '-qfuncsect', '-qeh', '-qrtti' ]
-   extra_link_args= [ '-lpthread', '-ldl', '-bbigtoc' ]  # '-G', '-noipath', 
- 
 
 # create the extension and add it to the python distribution
 # o glob.glob(os.path.join('src', '*.cpp'))
@@ -123,10 +88,12 @@ if sys.platform.startswith("aix"):
 #   lib/python2.7/site-packages/ecflow/ecflow.so
 #                                     __init__.py               
 setup( name='ecflow', 
-       version='4.8.0', 
+       version='5.3.1', 
        author      = 'ECMWF',
        description = """ecflow Python interface""",
        packages = [ 'ecflow' ],
+       url = 'https://confluence.ecmwf.int/display/ECFLOW/ecflow+home',
+       license = 'Apache',
        package_dir={'ecflow': '/tmp/ma0/workspace/ecflow/Pyext/ecflow'},
        ext_modules=[ Extension( 
                               'ecflow.ecflow', 
