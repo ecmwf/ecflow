@@ -18,7 +18,7 @@ import glob
 #   cd $WK/Pyext
 #   rm -rf build/                     # for a clean build
 #   python setup.py build_ext         # build C/C++ extensions (compile/link to build directory)
-#   python setup.py install --home=~  # ln -s ecflow.so ecflow.cpython-36m-x86_64-linux-gnu.so , otherwise puthon3 -c "import ecflow" not working
+#   python setup.py install --home=~
 #
 # See: http://docs.python.org/2/distutils/apiref.html?highlight=extension#distutils.core.Extension
 #
@@ -27,10 +27,10 @@ import glob
 # o Make sure origin file, has the right permissions
 # o Copy file to different directory, and change the permissions
 #   since file(COPY) does rename files
-#   configure_file(setup.py.in /tmp/ma0/workspace/bdir5/release/ecflow/CMakeFiles/setup.py)
+#   configure_file(setup.py.in /Users/avibahra/bitbucket/bdir/CMakeFiles/setup.py)
 #       now copy the temporary into the final destination, setting the permissions
-#   file(COPY /tmp/ma0/workspace/bdir5/release/ecflow/CMakeFiles/setup.py
-#     DESTINATION /tmp/ma0/workspace/bdir5/release/ecflow
+#   file(COPY /Users/avibahra/bitbucket/bdir/CMakeFiles/setup.py
+#     DESTINATION /Users/avibahra/bitbucket/bdir
 #     FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
 #     GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 # ============================================================================
@@ -40,29 +40,29 @@ import glob
 # to get this to work, you will need to include the path
 # to your boost installation and  ecflow includes
 boost_root=os.getenv("BOOST_ROOT") 
-include_dirs = [ "/tmp/ma0/workspace/ecflow/Pyext/../cereal/include",
-                 "/tmp/ma0/workspace/ecflow/Pyext/../ACore/src", 
-                 "/tmp/ma0/workspace/ecflow/Pyext/../ANattr/src", 
-                 "/tmp/ma0/workspace/ecflow/Pyext/../ANode/parser/src",
-                 "/tmp/ma0/workspace/ecflow/Pyext/../ANode/src",
-                 "/tmp/ma0/workspace/ecflow/Pyext/../Base/src",
-                 "/tmp/ma0/workspace/ecflow/Pyext/../Base/src/cts",
-                 "/tmp/ma0/workspace/ecflow/Pyext/../Base/src/stc",
-                 "/tmp/ma0/workspace/ecflow/Pyext/../CSim/src", 
-                 "/tmp/ma0/workspace/ecflow/Pyext/../Client/src",
-                 "/tmp/ma0/workspace/ecflow/Pyext/src",
+include_dirs = [ "/Users/avibahra/bitbucket/ecflow/Pyext/../cereal/include",
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/../ACore/src", 
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/../ANattr/src", 
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/../ANode/parser/src",
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/../ANode/src",
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/../Base/src",
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/../Base/src/cts",
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/../Base/src/stc",
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/../CSim/src", 
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/../Client/src",
+                 "/Users/avibahra/bitbucket/ecflow/Pyext/src",
                  boost_root,
                ]
 
 # define the library directories to include any extra libraries that may be needed.
 # Give preference to release libs   
 boost_lib_dir = boost_root + "/stage/lib/"
-library_dirs = ['/tmp/ma0/workspace/bdir5/release/ecflow/ACore',
-                '/tmp/ma0/workspace/bdir5/release/ecflow/ANattr/',
-                '/tmp/ma0/workspace/bdir5/release/ecflow/ANode/',
-                '/tmp/ma0/workspace/bdir5/release/ecflow/Base/', 
-                '/tmp/ma0/workspace/bdir5/release/ecflow/CSim/', 
-                '/tmp/ma0/workspace/bdir5/release/ecflow/Client/', 
+library_dirs = ['/Users/avibahra/bitbucket/bdir/ACore',
+                '/Users/avibahra/bitbucket/bdir/ANattr/',
+                '/Users/avibahra/bitbucket/bdir/ANode/',
+                '/Users/avibahra/bitbucket/bdir/Base/', 
+                '/Users/avibahra/bitbucket/bdir/CSim/', 
+                '/Users/avibahra/bitbucket/bdir/Client/', 
                 boost_lib_dir  
                ]
 
@@ -94,10 +94,10 @@ setup( name='ecflow',
        packages = [ 'ecflow' ],
        url = 'https://confluence.ecmwf.int/display/ECFLOW/ecflow+home',
        license = 'Apache',
-       package_dir={'ecflow': '/tmp/ma0/workspace/ecflow/Pyext/ecflow'},
+       package_dir={'ecflow': '/Users/avibahra/bitbucket/ecflow/Pyext/ecflow'},
        ext_modules=[ Extension( 
                               'ecflow.ecflow', 
-                              glob.glob(os.path.join('/tmp/ma0/workspace/ecflow/Pyext/src', '*.cpp')), 
+                              glob.glob(os.path.join('/Users/avibahra/bitbucket/ecflow/Pyext/src', '*.cpp')), 
                               include_dirs=include_dirs, 
                               library_dirs=library_dirs, 
                               libraries=libraries,
