@@ -3,7 +3,7 @@
 ## which can be obtained at http://www.apache.org/licenses/LICENSE-2.0.
 ## In applying this licence, ECMWF does not waive the privileges and immunities
 ## granted to it by virtue of its status as an intergovernmental organisation
-## nor does it submit to any jurisdiction.
+## nor does it submit to any jurisdiction
 #
 # export BOOST_ROOT=...
 # alias b8r='$BOOST_ROOT/bjam c++-template-depth=512 cxxflags="-Wno-unused-local-typedefs -Wno-unused-variable" -j8 -q release'
