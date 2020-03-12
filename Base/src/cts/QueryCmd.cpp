@@ -161,7 +161,7 @@ const char* QueryCmd::desc() {
             " - repeat   The repeat is not found\n"
             " - event    The event is not found\n"
             " - meter    The meter is not found\n"
-            " - limit    The limit is not found\n"
+            " - limit/limit_max The limit is not found\n"
             " - label    The label is not found\n"
             " - variable No user or generated variable or repeat of that name found on node, or any of its parents\n"
             " - trigger  Trigger does not parse, or reference to nodes/attributes in the expression are not valid\n"
