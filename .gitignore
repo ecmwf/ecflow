@@ -22,6 +22,7 @@ ecbuild/
 build/
 
 # ecflow 
+Pyext/setup.py
 bin/
 swap
 *.job0
