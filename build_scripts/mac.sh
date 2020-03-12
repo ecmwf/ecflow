@@ -3,6 +3,9 @@
 #https://medium.com/@timmykko/using-openssl-library-with-macos-sierra-7807cfd47892
 #
 #brew install cmake
+#
+# the brew version of boost was built with -fvisibility=hidden -fvisibility-inlines-hidden
+# We need same flags, otherwise large warning messages
 #brew install boost
 #brew install boost-python3
 #brew install openssl  # however this may not set the right links
