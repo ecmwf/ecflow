@@ -32,7 +32,6 @@
 #clang -x c -v -E /dev/null
 #
 
-
 # ====================================================================================
 # Build type to Release    
 cmake_build_type=Release
@@ -42,14 +41,31 @@ if [[ $# -eq 1 ]] ; then
    fi
 fi
 
-cmake ${HOME}/git/ecflow/ \
-      -DCMAKE_CXX_COMPILER=g++ \
-      -DCMAKE_MODULE_PATH=${HOME}/git/ecbuild/cmake/   \
+clang_arg=
+
+CXX_FLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -Wno-deprecated-declarations"
+#CXX_LINK_FLAGS=""
+
+cmake_extra_options=""
+if [[ "$clang_arg" = clang ]] ; then
+   cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/usr/local"
+   CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512"
+else
+   cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=${HOME}/boost/boost_1_72_0"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_C_COMPILER=/usr/local/opt/gcc/bin/gcc-9"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_CXX_COMPILER=/usr/local/opt/gcc/bin/g++-9"
+fi
+
+cmake ${HOME}/git/ecflow \
+      -DCMAKE_MODULE_PATH=${HOME}/git/ecbuild/cmake \
+      -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
       -DCMAKE_BUILD_TYPE=$cmake_build_type \
-      -DCMAKE_CXX_FLAGS='-fvisibility=hidden -fvisibility-inlines-hidden -ftemplate-depth=512 -Wno-deprecated-declarations' \
-      -DBOOST_ROOT=/usr/local \
       -DCMAKE_PREFIX_PATH=/usr/local/opt/qt \
       -DCMAKE_INSTALL_PREFIX=${HOME}/install_test \
-      -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl
+      -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+      ${cmake_extra_options}
+      
+      #-DCMAKE_EXE_LINKER_FLAGS="$CXX_LINK_FLAGS" \
+      
       
       

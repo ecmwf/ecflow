@@ -73,6 +73,7 @@ layout=system
 
 CXXFLAGS=-d2     # dummy argument, since CXXFLAGS is quoted
 CXXFLAGS=cxxflags=-fPIC
+
 if test_uname Linux ; then
   X64=$(uname -m)
   if [ "$X64" = x86_64 ]
@@ -125,6 +126,9 @@ if test_uname Linux ; then
     cp $WK/build_scripts/site_config/site-config-Linux.jam $SITE_CONFIG_LOCATION
   fi
   
+elif test_uname Darwin ; then
+
+  cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
 
 elif test_uname HP-UX ; then
 
@@ -157,7 +161,7 @@ if [[ ${BOOST_NUMERIC_VERSION} -le 1690 ]] ; then
    # boost system is header only from boost version 1.69, stub library built for compatibility
    ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j4
 fi
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time  variant=release -j4
+./b2 --debug-configuration --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time  variant=release -j4
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release -j4
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j4
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test   variant=release -j4
@@ -266,10 +270,10 @@ from sysconfig import get_paths
 
 python_version = "{0}.{1}".format(sys.version_info[0], sys.version_info[1])
 python_path_info = get_paths()
-python_root = python_path_info['data']
+python_exe = sys.executable
 python_include = python_path_info['include']
 
-using_python = '   using python : ' + python_version  + ' : ' + python_root  + ' : ' + python_include  + ' ;\n'
+using_python = '   using python : ' + python_version  + ' : ' + python_exe  + ' : ' + python_include  + ' ;\n'
 with open('project-config.jam.orig','r') as fd1, open('project-config.jam','w') as fd2:
     for line in fd1:
         if line.find('using python') != -1:
