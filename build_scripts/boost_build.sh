@@ -130,6 +130,11 @@ elif test_uname Darwin ; then
 
   cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
 
+   export PATH=/usr/local/gcc/bin:$PATH
+   cd /usr/local/opt/gcc/bin 
+   ln -s g++-9 g++ 
+   ln -s gcc-9 gcc
+
 elif test_uname HP-UX ; then
 
   tool=acc
