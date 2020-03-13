@@ -12,25 +12,6 @@
 # Using lldb-mi debugger
 #https://wiki.eclipse.org/CDT/User/FAQ#How_do_I_get_the_LLDB_debugger.3F
 #
-#
-#brew install cmake
-#
-# the brew version of boost was built with -fvisibility=hidden -fvisibility-inlines-hidden
-# We need same flags, otherwise large warning messages
-#brew install boost
-#brew install boost-python3
-#
-#https://medium.com/@timmykko/using-openssl-library-with-macos-sierra-7807cfd47892
-#brew install openssl  # however this may not set the right links
-#
-# Do the following if config steps fails with cannot find openssl
-#ln -s /usr/local/opt/openssl/include/openssl /usr/local/include
-#
-#ln -s /usr/local/opt/openssl/lib/libssl.1.1.1.dylib /usr/local/lib/
-#
-# to list the clang default system search path use:
-#clang -x c -v -E /dev/null
-#
 
 # ====================================================================================
 # Build type to Release    
@@ -48,6 +29,24 @@ CXX_FLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -Wno-deprecated-decla
 
 cmake_extra_options=""
 if [[ "$clang_arg" = clang ]] ; then
+    # relies on brew install
+    #brew install cmake
+    #
+    # the brew version of boost was built with -fvisibility=hidden -fvisibility-inlines-hidden
+    # We need same flags, otherwise large warning messages
+    #brew install boost
+    #brew install boost-python3
+    #
+    #https://medium.com/@timmykko/using-openssl-library-with-macos-sierra-7807cfd47892
+    #brew install openssl  # however this may not set the right links
+    #
+    # Do the following if config steps fails with cannot find openssl
+    #ln -s /usr/local/opt/openssl/include/openssl /usr/local/include
+    #
+    #ln -s /usr/local/opt/openssl/lib/libssl.1.1.1.dylib /usr/local/lib/
+    #
+    # to list the clang default system search path use:
+    #clang -x c -v -E /dev/null
    cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/usr/local"
    CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512"
 else
