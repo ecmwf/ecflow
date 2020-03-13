@@ -61,10 +61,5 @@ project site-config
 	: requirements <include>$(BOOST_ROOT)
  	;
 
-# using syntax:
-# using toolset-name : version : invocation-command : options ;
-#   where options allows <cflags, cxxflags, compileflags and linkflags >
-#
-using gcc ;
 using testing ;
 

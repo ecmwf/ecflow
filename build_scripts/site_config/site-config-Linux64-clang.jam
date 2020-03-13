@@ -64,13 +64,5 @@ project site-config
     : requirements <include>$(BOOST_ROOT)  
     ;
 
-# using syntax:
-# using toolset-name : version :invocation-command : options ;
-#   where options allows <cflags, cxxflags, compileflags and linkflags >
-#
-# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)
-# hence we need to compile with -fPIC
-using clang : : : <cxxflags>-fPIC ;
-
 using testing ;
 
