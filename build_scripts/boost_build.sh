@@ -224,12 +224,12 @@ else
    #      # using python : 2.7 : "/usr/local/apps/python/2.7.15-01" ;
    #      # using python 
    #      # : 3.6 
-   #      # : /usr/local/apps/python3/3.6.8-01/bin/python3  # ***** If this is left, includes get messed up, have mix of python2 & 3
+   #      # : /usr/local/apps/python3/3.6.8-01/bin/python3  # ***** If this is a prefix dir, includes get messed up, have mix of python2 & 3
    #      # : /usr/local/apps/python3/3.6.8-01/include/python3.6m # include directory
    #      # ;
    #      using python 
    #       : 3.7 
-   #       : /usr/local/apps/python3/3.7.1-01/bin/python3  # ***** If this is left, includes get messed up, have mix of python2 & 3
+   #       : /usr/local/apps/python3/3.7.1-01/bin/python3  # ***** If this is a prefix dir, includes get messed up, have mix of python2 & 3
    #       : /usr/local/apps/python3/3.7.1-01/include/python3.7m # include directory
    #       ;  
    #       ...
