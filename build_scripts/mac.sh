@@ -50,6 +50,8 @@ if [[ "$clang_arg" = clang ]] ; then
    cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/usr/local"
    CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512"
 else
+   # brew install gcc
+   # manually installed boost, built with brew gcc
    cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=${HOME}/boost/boost_1_72_0"
    cmake_extra_options="$cmake_extra_options -DCMAKE_C_COMPILER=/usr/local/opt/gcc/bin/gcc-9"
    cmake_extra_options="$cmake_extra_options -DCMAKE_CXX_COMPILER=/usr/local/opt/gcc/bin/g++-9"
