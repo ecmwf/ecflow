@@ -145,7 +145,7 @@ elif test_uname Darwin ; then
    cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
 
    grep -v "using gcc" $HOME/user-config.jam > temp.txt && mv temp.txt $HOME/user-config.jam 
-   echo "using gcc : gcc-9 : /usr/local/opt/gcc/bin/g++-9 : <cxxflags>-fPIC ;" >> $HOME/user-config.jam
+   echo "using gcc : : /usr/local/opt/gcc/bin/gcc-9 : <cxxflags>-fPIC ;" >> $HOME/user-config.jam
 
 elif test_uname HP-UX ; then
 

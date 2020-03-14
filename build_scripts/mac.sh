@@ -22,7 +22,7 @@ if [[ $# -eq 1 ]] ; then
    fi
 fi
 
-clang_arg=
+clang_arg=clang
 
 CXX_FLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -Wno-deprecated-declarations"
 #CXX_LINK_FLAGS=""
