@@ -66,6 +66,12 @@ ClientEnvironment::ClientEnvironment(bool gui)
 	init();
 }
 
+ClientEnvironment::ClientEnvironment(bool gui,const std::string& host, const std::string& port)
+{
+	init();
+	set_host_port(host,port); //assumes we NOT going to read host file
+}
+
 // test constructor
 ClientEnvironment::ClientEnvironment(const std::string& hostFile, const std::string& host, const std::string& port)
 : AbstractClientEnv(),
@@ -133,12 +139,14 @@ const std::string& ClientEnvironment::host() const
 // cout << "ClientEnvironment::host()  host_vec_index_ = " << host_vec_index_
 //      << " host_vec_[host_vec_index_] = " << host_vec_[host_vec_index_] << "\n";
 #endif
+   assert(!host_vec_.empty());
    assert( host_vec_index_ >=0 && host_vec_index_ <  static_cast<int>(host_vec_.size()));
    return host_vec_[host_vec_index_].first;
 }
 
 const std::string& ClientEnvironment::port() const
 {
+   assert(!host_vec_.empty());
    assert( host_vec_index_ >=0 && host_vec_index_ <  static_cast<int>(host_vec_.size()));
    return host_vec_[host_vec_index_].second;
 }
@@ -187,9 +195,8 @@ std::string ClientEnvironment::toString() const
 	std::stringstream ss;
 	ss << "ClientEnvironment:\n";
 	ss << TimeStamp::now() << Version::description() << "\n";
-	if (host_vec_.empty()) ss << "   ECF_HOST =\n   ";
-	else  {
-		ss << "   ECF_HOST : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size() << "\n";
+	ss << "   ECF_HOST/ECF_PORT : host_vec_index_ = " << host_vec_index_ << " host_vec_.size() = " << host_vec_.size() << "\n";
+	if (!host_vec_.empty()) {
 		for(std::pair<std::string,std::string> i : host_vec_) { ss << "   " << i.first << Str::COLON() << i.second << "\n";}
   	}
 	ss << "   ECF_NAME = " << task_path_ << "\n";
@@ -197,13 +204,10 @@ std::string ClientEnvironment::toString() const
 	ss << "   ECF_RID = " << remote_id_ << "\n";
  	ss << "   ECF_TRYNO = " << task_try_num_ << "\n";
 	ss << "   ECF_HOSTFILE = " << host_file_ << "\n";
-   ss << "   ECF_TIMEOUT = " << timeout_ << "\n";
-   ss << "   ECF_ZOMBIE_TIMEOUT = " << zombie_timeout_ << "\n";
-   ss << "   ECF_CONNECT_TIMEOUT = " << connect_timeout_ << "\n";
+    ss << "   ECF_TIMEOUT = " << timeout_ << "\n";
+    ss << "   ECF_ZOMBIE_TIMEOUT = " << zombie_timeout_ << "\n";
+    ss << "   ECF_CONNECT_TIMEOUT = " << connect_timeout_ << "\n";
 	ss << "   ECF_DENIED = " << denied_ << "\n";
-	assert( host_vec_index_ >=0 && host_vec_index_ <  static_cast<int>(host_vec_.size()));
-	if (host_vec_.empty())  ss << "   ECF_PORT =  \n";
-	else                    ss << "   ECF_PORT = " <<  host_vec_[host_vec_index_].second << "\n";
 	ss << "   NO_ECF = " << no_ecf_ << "\n";
 	for(const auto & i : env_) {
 		ss << "   " << i.first << " = " << i.second << "\n";
