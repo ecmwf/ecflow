@@ -61,12 +61,15 @@ ostream& operator<<(ostream& os, const vector<T>& v)
 
 
 ClientEnvironment::ClientEnvironment(bool gui)
-: AbstractClientEnv(),timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),gui_(gui)
+: AbstractClientEnv(),
+  timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),gui_(gui)
 {
 	init();
 }
 
 ClientEnvironment::ClientEnvironment(bool gui,const std::string& host, const std::string& port)
+: AbstractClientEnv(),
+  timeout_(MAX_TIMEOUT),zombie_timeout_(DEFAULT_ZOMBIE_TIMEOUT),gui_(gui)
 {
 	init();
 	set_host_port(host,port); //assumes we NOT going to read host file

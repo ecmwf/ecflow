@@ -7,8 +7,8 @@
 
 import os ;
 local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
-#python_install_dir default = $(ECFLOW_INSTALL_DIR)/lib/python2.7/site-packages/ecflow ;  # change $HOME/user_config.jam as well
-python_install_dir default  = $(ECFLOW_INSTALL_DIR)/lib/python3.6/site-packages/ecflow ;
+python_install_dir default = $(ECFLOW_INSTALL_DIR)/lib/python2.7/site-packages/ecflow ;  # change $HOME/user_config.jam as well
+#python_install_dir default  = $(ECFLOW_INSTALL_DIR)/lib/python3.6/site-packages/ecflow ;
 constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 #echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
 
@@ -137,8 +137,8 @@ python-extension ecflow : [ glob src/*.cpp ]
     /site-config//boost_filesystem
     /site-config//boost_program_options
     /site-config//boost_datetime
-    #/site-config//boost_python_static   # python2
-    /site-config//boost_python36_static
+    /site-config//boost_python_static   # python2
+    #/site-config//boost_python36_static
     : <variant>debug:<define>DEBUG
       <toolset>acc:<library>hpux_std_libs  
       <library>/ecflow_top//openssl_libs 
