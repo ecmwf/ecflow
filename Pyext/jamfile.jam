@@ -7,8 +7,8 @@
 
 import os ;
 local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
-#python_install_dir default = $(ECFLOW_INSTALL_DIR)/lib/python2.7/site-packages/ecflow ;  # change $HOME/user_config.jam as well
-python_install_dir default  = $(ECFLOW_INSTALL_DIR)/lib/python3.6/site-packages/ecflow ;
+python_install_dir default = $(ECFLOW_INSTALL_DIR)/lib/python2.7/site-packages/ecflow ;  # change $HOME/user_config.jam as well
+#python_install_dir default  = $(ECFLOW_INSTALL_DIR)/lib/python3.6/site-packages/ecflow ;
 constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
 #echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
 
