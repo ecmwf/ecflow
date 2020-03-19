@@ -42,6 +42,7 @@ public:
 	~ServerComThread() override;
 
 	void task(VTask_ptr);
+    void blockingLogout();
 
 	//From AbstractObserver
     void update_start(const Node*, const std::vector<ecf::Aspect::Type>&) override {}
@@ -57,6 +58,7 @@ Q_SIGNALS:
 	void rescanNeed();
 	void failed(std::string message);
 	void suiteListChanged(const std::vector<std::string>&,const std::vector<std::string>&);
+    void logoutDone();
 
 protected:
 	void run() override;
