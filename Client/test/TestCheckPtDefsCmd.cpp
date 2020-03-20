@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
    // Create a defs file from the check pt file & check edit history
    {
       Defs defs;
-      defs.restore(invokeServer.ecf_checkpt_file()); // make a data model change
+      defs.restore(invokeServer.ecf_checkpt_file()); // restore defs from checkpoint
       BOOST_REQUIRE_MESSAGE(defs.get_edit_history(Str::ROOT_PATH()).size() == 5,"Expected edit history of size 5, but found " <<  defs.get_edit_history(Str::ROOT_PATH()).size());
    }
 
@@ -262,7 +262,7 @@ BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
 
       // restore defs from checkpoint file
       Defs defs;
-      defs.restore(invokeServer.ecf_checkpt_file()); // make a data model change
+      defs.restore(invokeServer.ecf_checkpt_file()); // restore defs from checkpoint
       BOOST_REQUIRE_MESSAGE(defs.get_edit_history().size() == 0,"Expected edit history of size 0, but found " <<  defs.get_edit_history().size());
    }
 }
