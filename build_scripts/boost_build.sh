@@ -21,12 +21,12 @@ cp $BOOST_ROOT/tools/build/example/user-config.jam $HOME/.
 # using syntax:
 # using toolset-name : version :invocation-command : options ;
 #   where options allows <cflags, cxxflags, compileflags and linkflags >
-echo "# ----------------------------------------------------------------------------------------" >> $HOME/user-config.jam
+echo "# ----------------------------------------------------------------------------------------"  >> $HOME/user-config.jam
 echo "# ecflow configuration" >> $HOME/user-config.jam
-echo "# ----------------------------------------------------------------------------------------" >> $HOME/user-config.jam
+echo "# ----------------------------------------------------------------------------------------"  >> $HOME/user-config.jam
 echo "# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)" >> $HOME/user-config.jam
-echo "# hence we need to compile with -fPIC" >> $HOME/user-config.jam
-echo "using $tool : : : <cxxflags>-fPIC ;" >> $HOME/user-config.jam
+echo "# hence we need to compile with -fPIC"                                                       >> $HOME/user-config.jam
+echo "using $tool : : : <cxxflags>-fPIC ;"                                                         >> $HOME/user-config.jam
 
 # ===============================================================
 # This file is used build the boost libs used by ecflow
@@ -276,6 +276,11 @@ else
    #     using python : 3.7 : /usr/local/apps/python3/3.7.1-01/bin/python3 : /usr/local/apps/python3/3.7.1-01/include/python3.7m ;  
    # ===========================================================================================================
     
+    
+    echo "import os ;"                                     >>  $HOME/user-config.jam
+    echo "local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;"  >>  $HOME/user-config.jam
+    echo "ECF_PYTHON2 = [ os.environ ECF_PYTHON2 ] ;"      >>  $HOME/user-config.jam
+
    # ===========================================================================================================
    # Attempt at replacing 'using python' with the correct python include dir in user-config.jam
    # ===========================================================================================================
@@ -288,16 +293,18 @@ python_version = "{0}.{1}".format(sys.version_info[0], sys.version_info[1])
 python_path_info = get_paths()
 python_exe = sys.executable
 python_include = python_path_info['include']
-using_python = 'using python : ' + python_version  + ' : ' + python_exe  + ' : ' + python_include  + ' ;\n'
+using_python = '   using python : ' + python_version  + ' : ' + python_exe  + ' : ' + python_include  + ' ;\n'
 print(using_python)
 EOF
 
-   # remove using python from $HOME/user-config.jam in case this script is run again
-   grep -v "using python" $HOME/user-config.jam > temp.txt && mv temp.txt $HOME/user-config.jam 
 
    which python3
    if [ "$?" = "0" ] ; then
-      python3 $python_file >> $HOME/user-config.jam
+      echo "if ! $(ECF_PYTHON2) {"                                                      >> $HOME/user-config.jam
+      echo "  lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python36.a ;" >> $HOME/user-config.jam
+      python3 $python_file                                                              >> $HOME/user-config.jam
+      echo "}"                                                                          >> $HOME/user-config.jam
+      
       cp $HOME/user-config.jam $HOME/user-config.jam_python3
       ./b2 --with-python --clean     
       ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
@@ -305,9 +312,14 @@ EOF
 
    which python
    if [ "$?" = "0" ] ; then
-      # delete last using python
-      grep -v "using python" $HOME/user-config.jam > temp.txt && mv temp.txt $HOME/user-config.jam 
-      python $python_file >> $HOME/user-config.jam 
+      echo "if $(ECF_PYTHON2) {"                                                        >> $HOME/user-config.jam
+      echo "  lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;" >> $HOME/user-config.jam
+      python3 $python_file                                                              >> $HOME/user-config.jam
+      echo "}"                                                                          >> $HOME/user-config.jam
+      
+      python_version=$(python3 -c 'import sys;print(sys.version_info[0],".",sys.version_info[1],sep="")')
+      
+      echo "constant PYTHON3_VERSION : $python_version ;"                               >> $HOME/user-config.jam
       ./b2 --with-python --clean     
       ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
    fi
