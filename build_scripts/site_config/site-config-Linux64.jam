@@ -35,8 +35,6 @@ lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time.a ;
 lib boost_timer           : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_timer.a ;
 lib boost_chrono          : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_chrono.a ;
-lib boost_python_static : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;
-lib boost_python36_static : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python36.a ;
 
 
 # profile uses release libs
@@ -48,8 +46,6 @@ lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time.a ;
 lib boost_timer           : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_timer.a ;
 lib boost_chrono          : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_chrono.a ;
-lib boost_python_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;
-lib boost_python36_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python36.a ;
 
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system.a ;
 lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework.a ;
@@ -59,8 +55,6 @@ lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time.a ;
 lib boost_timer           : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_timer.a ;
 lib boost_chrono          : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_chrono.a ;
-lib boost_python_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;
-lib boost_python36_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python36.a ;
 
 #
 # Notice: we don't add  requirements <library>pthread , because

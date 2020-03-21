@@ -30,8 +30,6 @@ lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d.a ;
 lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d.a ;
 lib boost_timer           : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_timer-mt-d.a ;
-lib boost_python_static : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt-d.a ;
-lib boost_python36_static : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt-d.a ;
 
 # profile uses release libs
 lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
@@ -41,8 +39,6 @@ lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
 lib boost_timer           : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_timer-mt.a ;
-lib boost_python_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
-lib boost_python36_static : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt.a ;
 
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
 lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
@@ -51,8 +47,6 @@ lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
 lib boost_timer           : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_timer-mt.a ;
-lib boost_python_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
-lib boost_python36_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt.a ;
 
 #
 # Notice: we don't add  requirements <library>pthread , because
