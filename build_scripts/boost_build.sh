@@ -21,12 +21,12 @@ cp $BOOST_ROOT/tools/build/example/user-config.jam $HOME/.
 # using syntax:
 # using toolset-name : version :invocation-command : options ;
 #   where options allows <cflags, cxxflags, compileflags and linkflags >
-echo "# ----------------------------------------------------------------------------------------" >> $HOME/user-config.jam
+echo "# ----------------------------------------------------------------------------------------"  >> $HOME/user-config.jam
 echo "# ecflow configuration" >> $HOME/user-config.jam
-echo "# ----------------------------------------------------------------------------------------" >> $HOME/user-config.jam
+echo "# ----------------------------------------------------------------------------------------"  >> $HOME/user-config.jam
 echo "# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)" >> $HOME/user-config.jam
-echo "# hence we need to compile with -fPIC" >> $HOME/user-config.jam
-echo "using $tool : : : <cxxflags>-fPIC ;" >> $HOME/user-config.jam
+echo "# hence we need to compile with -fPIC"                                                       >> $HOME/user-config.jam
+echo "using $tool : : : <cxxflags>-fPIC ;"                                                         >> $HOME/user-config.jam
 
 # ===============================================================
 # This file is used build the boost libs used by ecflow
@@ -108,8 +108,8 @@ if test_uname Linux ; then
     else
       if [ $tool = gcc ] ; then
   
-            cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
-            
+      		cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
+      		
             # for boost 1.53 and > gcc 4.3 -Wno-unused-local-typedefs  : not valid
             # for boost 1.53 and > gcc 4.8 -Wno-unused-local-typedefs  : get a lot warning messages , suppress
             # for boost 1.53 and > gcc 6.1 -Wno-deprecated-declarations: std::auto_ptr deprecated messages, suppress
@@ -117,23 +117,23 @@ if test_uname Linux ; then
             compiler=$(gcc -dumpversion | sed 's/\.//g' )  # assume major.minor.patch
             if [ "$compiler" -gt 430  ] ; then
                 CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs"
-            fi
-            if [ "$compiler" -gt 610  ] ; then
-               CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs -Wno-deprecated-declarations"
-            fi
-      elif [ $tool = intel ] ; then
-            #module unload gnu
-            #module load intel/19.0.4
+       		fi
+       		if [ "$compiler" -gt 610  ] ; then
+       		   CXXFLAGS=cxxflags="-fPIC -Wno-unused-local-typedefs -Wno-deprecated-declarations"
+       		fi
+  	  elif [ $tool = intel ] ; then
+      		#module unload gnu
+      		#module load intel/19.0.4
   
-            cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
+      		cp $WK/build_scripts/site_config/site-config-Linux64-intel.jam $SITE_CONFIG_LOCATION 
 
-      elif [ $tool = clang ] ; then
-            # module unload gnu
-            # module load clang/7.0.1
+  	  elif [ $tool = clang ] ; then
+      		# module unload gnu
+      		# module load clang/7.0.1
   
-            cp $WK/build_scripts/site_config/site-config-Linux64-clang.jam $SITE_CONFIG_LOCATION 
-            CXXFLAGS=cxxflags="-fPIC -ftemplate-depth=1024 -Wno-unused-local-typedefs -Wno-deprecated-declarations -Wno-unused-variable"
-      fi
+      		cp $WK/build_scripts/site_config/site-config-Linux64-clang.jam $SITE_CONFIG_LOCATION 
+       		CXXFLAGS=cxxflags="-fPIC -ftemplate-depth=1024 -Wno-unused-local-typedefs -Wno-deprecated-declarations -Wno-unused-variable"
+  	  fi
    fi
      
   else 
@@ -277,6 +277,15 @@ else
    # ===========================================================================================================
     
    # ===========================================================================================================
+   # user-config.jam is used to build BOOST, and also used to build ecflow(Needs a different config)
+   # ===========================================================================================================
+   cp $HOME/user-config.jam $HOME/user-config.ecflow
+   echo 'project user-config ;'                           >>  $HOME/user-config.ecflow
+   echo "import os ;"                                     >>  $HOME/user-config.ecflow
+   echo "local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;"  >>  $HOME/user-config.ecflow
+   echo "ECF_PYTHON2 = [ os.environ ECF_PYTHON2 ] ;"      >>  $HOME/user-config.ecflow
+
+   # ===========================================================================================================
    # Attempt at replacing 'using python' with the correct python include dir in user-config.jam
    # ===========================================================================================================
    python_file=compute_python_using_statement.py
@@ -288,7 +297,7 @@ python_version = "{0}.{1}".format(sys.version_info[0], sys.version_info[1])
 python_path_info = get_paths()
 python_exe = sys.executable
 python_include = python_path_info['include']
-using_python = 'using python : ' + python_version  + ' : ' + python_exe  + ' : ' + python_include  + ' ;\n'
+using_python = '   using python : ' + python_version  + ' : ' + python_exe  + ' : ' + python_include  + ' ;'
 print(using_python)
 EOF
 
@@ -297,25 +306,35 @@ EOF
 
    which python3
    if [ "$?" = "0" ] ; then
-      python3 $python_file >> $HOME/user-config.jam
+      python3 $python_file                                                               >> $HOME/user-config.jam
       cp $HOME/user-config.jam $HOME/user-config.jam_python3
       ./b2 --with-python --clean     
       ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
+
+      echo 'if ! $(ECF_PYTHON2) {'                                                       >> $HOME/user-config.ecflow
+      echo '   lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python36.a ;' >> $HOME/user-config.ecflow
+      python3 $python_file                                                               >> $HOME/user-config.ecflow
+      echo '}'                                                                           >> $HOME/user-config.ecflow
+      python_version=$(python3 -c 'import sys;print(sys.version_info[0],".",sys.version_info[1],sep="")')
+      echo "constant PYTHON3_VERSION : $python_version ;"                                >> $HOME/user-config.ecflow
    fi
 
    which python
    if [ "$?" = "0" ] ; then
       # delete last using python
       grep -v "using python" $HOME/user-config.jam > temp.txt && mv temp.txt $HOME/user-config.jam 
-      python $python_file >> $HOME/user-config.jam 
+      python $python_file                                                               >> $HOME/user-config.jam
       ./b2 --with-python --clean     
       ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
+
+      echo 'if $(ECF_PYTHON2) {'                                                         >> $HOME/user-config.ecflow
+      echo '   lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;' >> $HOME/user-config.ecflow
+      python $python_file                                                                >> $HOME/user-config.ecflow
+      echo '}'                                                                           >> $HOME/user-config.ecflow
    fi
 
-   # ecflow jam uses python3
-   if [[ -e $HOME/user-config.jam_python3 ]] ; then
-      mv $HOME/user-config.jam_python3 $HOME/user-config.jam
-   fi
+   # Now setup use-config.jam used to build ecflow, using bjam
+   mv $HOME/user-config.ecflow $HOME/user-config.jam
  
-   rm compute_python_using_statement.py
+   rm $python_file
 fi
