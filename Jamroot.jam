@@ -56,10 +56,11 @@ if $(install_dir) {
    #echo "ECFLOW_INSTALL_DIR        = '$(install_dir)'" ;
 }
 
-install_dir default = "/usr/local/apps/ecflow/$(ECFLOW_VERSION)" ;
+install_dir default = "$(ECFLOW_INSTALL_PREFIX)/ecflow/$(ECFLOW_VERSION)" ; # ECFLOW_INSTALL_PREFIX is defined in site-config.jam 
 constant ECFLOW_INSTALL_DIR : $(install_dir) ;
 
-#echo "ECFLOW_DESTDIR            = '$(ECFLOW_DESTDIR)'" ;
+echo "ECFLOW_INSTALL_DIR        = '$(ECFLOW_INSTALL_DIR)'" ;
+#echo "ECFLOW_DESTDIR           = '$(ECFLOW_DESTDIR)'" ;
 
 # ** NO LONGER used **
 # Allow the installation directory be be defined externally, by the environment variable ECFLOW_INSTALL_DIR

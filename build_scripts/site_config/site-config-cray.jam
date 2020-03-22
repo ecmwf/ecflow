@@ -140,6 +140,9 @@ project site-config
 
 using testing ;
 
+# ==================== INSTALL =====================================================ß
+constant ECFLOW_INSTALL_PREFIX : /usr/local/apps ; 
+
 # ==================== OPENSSL ======================================================
 # OPENSSL support, should really be in site-config.jam
 # Currently we always build with ssl support#

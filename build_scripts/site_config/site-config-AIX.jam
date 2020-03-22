@@ -107,6 +107,9 @@ lib libcrypto : : <file>/usr/lib64/libcrypto.so ;
 lib dl ;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
 alias openssl_libs : libssl libcrypto dl ;
 
+# ==================== INSTALL =====================================================ß
+constant ECFLOW_INSTALL_PREFIX : /usr/local/apps ; 
+
 # ==================================================================================
 # Config generated from $WK/build_scripts/boost_build.sh
 # ==================================================================================

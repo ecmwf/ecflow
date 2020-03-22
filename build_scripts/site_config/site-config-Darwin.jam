@@ -79,6 +79,9 @@ project site-config
 
 using testing ;
 
+# ==================== INSTALL =====================================================ß
+constant ECFLOW_INSTALL_PREFIX : "/usr/local/opt" ; 
+
 # ==================== OPENSSL ======================================================
 # OPENSSL support 
 # Currently we always build with ssl support#
