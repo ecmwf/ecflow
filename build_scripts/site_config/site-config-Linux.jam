@@ -46,14 +46,38 @@ lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
 
+
+# ===============================================================================
+# force all exe to link with crypt 
+lib crypt : : <file>/usr/lib64/libcrypt.so ;
+explicit crypt ; 
+
+
 #
 # Notice: we don't add requirements <library>pthread ,  because
 #  	a/ Not all tests require it
 #  	b/ Can cause links errors
 # Hence left to individual projects/test
 project site-config
-	: requirements <include>$(BOOST_ROOT)
+	: requirements <include>$(BOOST_ROOT) <library>crypt 
  	;
 
 using testing ;
+
+# ==================== OPENSSL ======================================================
+# OPENSSL support, should really be in site-config.jam
+# Currently we always build with ssl support#
+#
+# link with libdl.so, shared lib containing dlopen(),dlclose()dysym(),
+# these functions are used by OpenSSL internally & thus -ldl is an
+# indirect dependency when using -lcrypto(on Linux) Because we linking
+# with static version of crypto, need to explicitly link against indirect dependencies.
+lib libssl    : : <file>/usr/lib64/libssl.so ;
+lib libcrypto : : <file>/usr/lib64/libcrypto.so ;
+lib dl ;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
+alias openssl_libs : libssl libcrypto dl ;
+
+# ==================================================================================
+# Config generated from $WK/build_scripts/boost_build.sh
+# ==================================================================================
 

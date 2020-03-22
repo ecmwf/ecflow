@@ -72,6 +72,7 @@ test_uname ()
 }
 
 unset ECF_PORT
+OPEN_SSL=
 
 if test_uname Linux ; then
 
@@ -101,11 +102,46 @@ if test_uname Linux ; then
 
    exe_path=$compiler/$mode
    
-   OPEN_SSL=
    if [ "$ssl" = on ] ; then
       exe_path="$exe_path/ssl-on"
       OPEN_SSL="ssl=on"
    fi
+   
+   echo "*****************************************"
+   echo "Testing: $exe_path"
+   echo "*****************************************"
+
+   ACore/bin/$exe_path/u_acore      --log_level=message $TEST_OPTS
+   ANattr/bin/$exe_path/u_anattr    --log_level=message $TEST_OPTS
+   ANode/bin/$exe_path/u_anode      --log_level=message $TEST_OPTS
+   ANode/parser/bin/$exe_path/u_aparser  --log_level=message $TEST_OPTS
+   if [ "$safe" = no ] ; then
+      ANode/parser/bin/$exe_path/perf_aparser --log_level=message $TEST_OPTS
+   fi
+   Base/bin/$exe_path/u_base         --log_level=message $TEST_OPTS
+   
+   if [ "$safe" = no ] ; then
+      # run python/C++ test
+      cd Pyext
+      $BOOST_ROOT/b2 $TOOLSET $CXXFLAGS variant=$mode $OPEN_SSL test-all $TEST_OPTS
+      cd ..
+   fi
+   
+   Client/bin/$exe_path/s_client     --log_level=message $TEST_OPTS
+   Server/bin/$exe_path/u_server     --log_level=message $TEST_OPTS
+   CSim/bin/$exe_path/c_csim         --log_level=message $TEST_OPTS
+   if [ "$safe" = no ] ; then
+      Test/bin/$exe_path/s_test          --log_level=message $TEST_OPTS
+      Test/bin/$exe_path/s_test_zombies  --log_level=message $TEST_OPTS
+   fi
+   
+elif test_uname Darwin ; then
+
+   TOOLSET=
+   CXXFLAGS=
+   compiler=gcc-$(/usr/local/opt/gcc/bin/gcc -dumpversion)
+   
+   exe_path=$compiler/$mode
    
    echo "*****************************************"
    echo "Testing: $exe_path"

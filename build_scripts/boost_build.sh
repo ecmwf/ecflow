@@ -7,26 +7,21 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
+set -x
+#set -u
+
+# Only uncomment for debugging this script
+#rm -rf stage
+#rm -rf tmpBuildDir
+#rm -rf bin.v2
+
 # ===============================================================
 # allow tool to be overridden
 tool=gcc
+tool_path=""
 if [ "$#" = 1 ] ; then   
     tool=$1
 fi
-
-# ===============================================================
-## Configure user-config.jam to use gcc
-cp $BOOST_ROOT/tools/build/example/user-config.jam $HOME/.
-
-# using syntax:
-# using toolset-name : version :invocation-command : options ;
-#   where options allows <cflags, cxxflags, compileflags and linkflags >
-echo "# ----------------------------------------------------------------------------------------"  >> $HOME/user-config.jam
-echo "# ecflow configuration" >> $HOME/user-config.jam
-echo "# ----------------------------------------------------------------------------------------"  >> $HOME/user-config.jam
-echo "# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)" >> $HOME/user-config.jam
-echo "# hence we need to compile with -fPIC"                                                       >> $HOME/user-config.jam
-echo "using $tool : : : <cxxflags>-fPIC ;"                                                         >> $HOME/user-config.jam
 
 # ===============================================================
 # This file is used build the boost libs used by ecflow
@@ -142,10 +137,8 @@ if test_uname Linux ; then
   
 elif test_uname Darwin ; then
 
-   cp $WK/build_scripts/site_config/site-config-Linux64.jam $SITE_CONFIG_LOCATION 
-
-   grep -v "using gcc" $HOME/user-config.jam > temp.txt && mv temp.txt $HOME/user-config.jam 
-   echo "using gcc : : /usr/local/opt/gcc/bin/gcc-9 : <cxxflags>-fPIC ;" >> $HOME/user-config.jam
+   cp $WK/build_scripts/site_config/site-config-Darwin.jam $SITE_CONFIG_LOCATION 
+   tool_path="/usr/local/opt/gcc/bin/gcc-9"
 
 elif test_uname HP-UX ; then
 
@@ -159,9 +152,20 @@ elif test_uname AIX ; then
    cp $WK/build_scripts/site_config/site-config-AIX.jam $SITE_CONFIG_LOCATION
 fi
 
-# Only uncomment for debugging this script
-#rm -rf stage
-#rm -rf tmpBuildDir
+
+# ===============================================================
+# USER-CONFIG.JAM
+#
+# *** placing using gcc, in user-config.jam otherwise errors in building python ****
+# using syntax:
+# using toolset-name : version :invocation-command : options ;
+#   where options allows <cflags, cxxflags, compileflags and linkflags >
+#
+cp $BOOST_ROOT/tools/build/example/user-config.jam $HOME/.
+echo "# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)" >> $HOME/user-config.jam
+echo "# hence we need to compile with -fPIC"                                                       >> $HOME/user-config.jam
+echo "using $tool : : $tool_path : <cxxflags>-fPIC ;"                                              >> $HOME/user-config.jam
+
 
 #
 # Note: if '--build-dir=./tmpBuildDir' is omitted, boost will build the libs in a directory:
@@ -172,7 +176,7 @@ fi
 
 # We use tagged as that allows the debug and release builds to built together, if required
 #
-echo "using compiler $tool with build $1 release variants"
+echo "using compiler $tool with release variants"
  
 if [[ ${BOOST_NUMERIC_VERSION} -le 1690 ]] ; then
    # boost system is header only from boost version 1.69, stub library built for compatibility
@@ -275,15 +279,6 @@ else
    #     using python : 3.6 : /usr/local/apps/python3/3.6.8-01/bin/python3 : /usr/local/apps/python3/3.6.8-01/include/python3.6m ;
    #     using python : 3.7 : /usr/local/apps/python3/3.7.1-01/bin/python3 : /usr/local/apps/python3/3.7.1-01/include/python3.7m ;  
    # ===========================================================================================================
-    
-   # ===========================================================================================================
-   # user-config.jam is used to build BOOST, and also used to build ecflow(Needs a different config)
-   # ===========================================================================================================
-   cp $HOME/user-config.jam $HOME/user-config.ecflow
-   echo 'project user-config ;'                           >>  $HOME/user-config.ecflow
-   echo "import os ;"                                     >>  $HOME/user-config.ecflow
-   echo "local BOOST_ROOT = [ os.environ BOOST_ROOT ] ;"  >>  $HOME/user-config.ecflow
-   echo "ECF_PYTHON2 = [ os.environ ECF_PYTHON2 ] ;"      >>  $HOME/user-config.ecflow
 
    # ===========================================================================================================
    # Attempt at replacing 'using python' with the correct python include dir in user-config.jam
@@ -301,40 +296,34 @@ using_python = '   using python : ' + python_version  + ' : ' + python_exe  + ' 
 print(using_python)
 EOF
 
-   # remove using python from $HOME/user-config.jam in case this script is run again
-   grep -v "using python" $HOME/user-config.jam > temp.txt && mv temp.txt $HOME/user-config.jam 
-
+   echo "ECF_PYTHON2 = [ os.environ ECF_PYTHON2 ] ;"  >>  $SITE_CONFIG_LOCATION
+   
    which python3
    if [ "$?" = "0" ] ; then
-      python3 $python_file                                                               >> $HOME/user-config.jam
-      cp $HOME/user-config.jam $HOME/user-config.jam_python3
+      
+      python_version=$(python3 -c 'import sys;print(sys.version_info[0],sys.version_info[1],sep="")')
+      python_dot_version=$(python3 -c 'import sys;print(sys.version_info[0],".",sys.version_info[1],sep="")')
+      echo 'if ! $(ECF_PYTHON2) {'                                                       >> $SITE_CONFIG_LOCATION
+      echo "   lib boost_python : : <file>\$(BOOST_ROOT)/stage/lib/libboost_python${python_version}.a ;" >> $SITE_CONFIG_LOCATION
+      python3 $python_file                                                               >> $SITE_CONFIG_LOCATION
+      echo '}'                                                                           >> $SITE_CONFIG_LOCATION
+      echo "constant PYTHON3_VERSION : $python_dot_version ;"                            >> $SITE_CONFIG_LOCATION
+      
       ./b2 --with-python --clean     
       ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
-
-      echo 'if ! $(ECF_PYTHON2) {'                                                       >> $HOME/user-config.ecflow
-      echo '   lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python36.a ;' >> $HOME/user-config.ecflow
-      python3 $python_file                                                               >> $HOME/user-config.ecflow
-      echo '}'                                                                           >> $HOME/user-config.ecflow
-      python_version=$(python3 -c 'import sys;print(sys.version_info[0],".",sys.version_info[1],sep="")')
-      echo "constant PYTHON3_VERSION : $python_version ;"                                >> $HOME/user-config.ecflow
    fi
 
    which python
    if [ "$?" = "0" ] ; then
-      # delete last using python
-      grep -v "using python" $HOME/user-config.jam > temp.txt && mv temp.txt $HOME/user-config.jam 
-      python $python_file                                                               >> $HOME/user-config.jam
+      export ECF_PYTHON2=1 # so that we use ' using python ......'
+      echo 'if $(ECF_PYTHON2) {'                                                         >> $SITE_CONFIG_LOCATION
+      echo '   lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;' >> $SITE_CONFIG_LOCATION
+      python $python_file                                                                >> $SITE_CONFIG_LOCATION
+      echo '}'                                                                           >> $SITE_CONFIG_LOCATION
+                                                                            
       ./b2 --with-python --clean     
       ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
-
-      echo 'if $(ECF_PYTHON2) {'                                                         >> $HOME/user-config.ecflow
-      echo '   lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;' >> $HOME/user-config.ecflow
-      python $python_file                                                                >> $HOME/user-config.ecflow
-      echo '}'                                                                           >> $HOME/user-config.ecflow
    fi
-
-   # Now setup use-config.jam used to build ecflow, using bjam
-   mv $HOME/user-config.ecflow $HOME/user-config.jam
- 
+   
    rm $python_file
 fi
