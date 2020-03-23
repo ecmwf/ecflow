@@ -21,8 +21,8 @@ major=$(cat ACore/src/ecflow_version.h   | grep 'ECFLOW_MAJOR'   | awk '{print $
 minor=$(cat ACore/src/ecflow_version.h   | grep 'ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 ECFLOW_VERSION=$release.$major.$minor 
 
-#export ECF_SSL=`hostname`.4142 # use server specfic <host>.<port>.*** certificates
-export ECF_PORT=4142
+#export ECF_SSL=`hostname`.4141 # use server specfic <host>.<port>.*** certificates
+export ECF_PORT=4141
 export PATH=/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
 PYTHON=python3
 if [[ $PYTHON == "python3" ]] ; then
