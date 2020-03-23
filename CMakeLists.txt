@@ -351,6 +351,12 @@ ecbuild_dont_pack( FILES
 # final
 # =========================================================================================
 
+# print all variables
+#get_cmake_property(_variableNames VARIABLES)
+#foreach (_variableName ${_variableNames})
+#    ecbuild_info("  ${_variableName}=${${_variableName}}")
+#endforeach()
+
 # prepares a tar.gz of your sources and/or binaries
 ecbuild_install_project( NAME ecFlow )
 
