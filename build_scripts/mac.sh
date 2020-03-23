@@ -138,7 +138,6 @@ if [[ $package_source_arg = package_source ]] ; then
     gui_options=  
 fi
 
-
 mkdir -p ${HOME}/git/bdir/ecflow/$mode_arg
 cd ${HOME}/git/bdir/ecflow/$mode_arg
 
@@ -150,17 +149,15 @@ fi
 
 # ====================================================================================
 # Use for local install
-#
-release=$(cat ${HOME}/git/ecflow/VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
-major=$(cat   ${HOME}/git/ecflow/VERSION.cmake | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
-minor=$(cat   ${HOME}/git/ecflow/VERSION.cmake | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+version=$(awk '/^project/ && /ecflow/ && /VERSION/ {for (I=1;I<=NF;I++) if ($I == "VERSION") {print $(I+1)};}' ${HOME}/git/ecflow/CMakeLists.txt) 
+#echo $version
 
 cmake ${HOME}/git/ecflow \
       -DCMAKE_MODULE_PATH=${HOME}/git/ecbuild/cmake \
       -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
       -DCMAKE_BUILD_TYPE=$cmake_build_type \
       -DCMAKE_PREFIX_PATH=/usr/local/opt/qt \
-      -DCMAKE_INSTALL_PREFIX=${HOME}/install/ecflow/$release.$major.$minor \
+      -DCMAKE_INSTALL_PREFIX=${HOME}/install/ecflow/${version} \
       -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
       ${cmake_extra_options} \
       ${gui_options} \

@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE( test_version )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_version_against_VERSION_cmake )
+BOOST_AUTO_TEST_CASE( test_version_against_cmake )
 {
    cout << "ACore:: ...test_version_against_cmake" << endl;
 
@@ -44,29 +44,13 @@ BOOST_AUTO_TEST_CASE( test_version_against_VERSION_cmake )
    BOOST_REQUIRE_MESSAGE(!lines.empty(),"File " << version_cmake_file << " does not contain version info ??");
 
    // Expecting lines like:
-   //   set( ECFLOW_RELEASE  "4" )
-   //   set( ECFLOW_MAJOR    "0" )
-   //   set( ECFLOW_MINOR    "4" )
    //   project( ecflow LANGUAGES CXX VERSION 5.3.1 )
    // Compare against VERSION
-   std::string ecflow_release,ecflow_major,ecflow_minor,cmake_version;
+   std::string cmake_version;
    for(auto & line : lines) {
       std::vector<std::string> tokens;
       Str::split(line,tokens);
 
-      // expecting third token to contain version data
-      if (line.find("set( ECFLOW_RELEASE") != std::string::npos && tokens.size() >= 3) {
-         ecflow_release = tokens[2];
-         Str::removeQuotes(ecflow_release);
-      }
-      if (line.find("set( ECFLOW_MAJOR") != std::string::npos && tokens.size() >= 3) {
-         ecflow_major = tokens[2];
-         Str::removeQuotes(ecflow_major);
-      }
-      if (line.find("set( ECFLOW_MINOR") != std::string::npos && tokens.size() >= 3) {
-         ecflow_minor = tokens[2];
-         Str::removeQuotes(ecflow_minor);
-      }
       if (line.find("project") != std::string::npos &&
     		  line.find("ecflow") != std::string::npos &&
     		  line.find("LANGUAGES") != std::string::npos &&
@@ -84,11 +68,8 @@ BOOST_AUTO_TEST_CASE( test_version_against_VERSION_cmake )
       }
    }
 
-   std::string extracted_version = ecflow_release + "." + ecflow_major + "." + ecflow_minor;
-
    // The if they don't match, we have failed to regenrate and check in ecflow_version.h
    BOOST_REQUIRE_MESSAGE(!cmake_version.empty(),"Expected to find 'project( ecflow LANGUAGES CXX VERSION N.N.N )' in file " << version_cmake_file);
-   BOOST_REQUIRE_MESSAGE(Version::raw() == extracted_version,"\n  Expected " << extracted_version << " but found " << Version::raw() << ", Please regenerate file $WK/ACore/src/ecflow_version.h by calling 'sh -x $WK/cmake.sh'");
    BOOST_REQUIRE_MESSAGE(Version::raw() == cmake_version ,   "\n  Expected " << cmake_version     << " but found " << Version::raw() << ", Please regenerate file $WK/ACore/src/ecflow_version.h by calling 'sh -x $WK/cmake.sh'");
 }
 
