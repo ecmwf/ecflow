@@ -140,7 +140,7 @@ ecflow_client --order=/ecflow top
 # =======================================================================
 # Start the GUI
 # =======================================================================
-ps -ef | grep -v awk | awk '/ecflow/ && /5.3.1/ {print $2}' | xargs kill -9
+ps -ef | grep -v awk | awk '/ecflow/ && /5.3.1/ {print $2}' | xargs kill -9 | true
 
 export ECFLOWUI_DEVELOP_MODE=1      # enable special menu to diff ecflowui defs and downloaded defs
 #export ECFLOWUI_SESSION_MANAGER=1  # to minimise output for debug, use session with a single server
