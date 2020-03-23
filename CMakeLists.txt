@@ -22,8 +22,10 @@ if (NOT DEFINED CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration type" FORCE)
 endif()
 
-
-project( ecflow CXX )
+set( ECFLOW_RELEASE  "5" )
+set( ECFLOW_MAJOR    "3" )
+set( ECFLOW_MINOR    "1" )
+project( ecflow LANGUAGES CXX VERSION 5.3.1 )
 
 set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
 # ecbuild_info( "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
