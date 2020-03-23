@@ -157,15 +157,16 @@ fi
 # USER-CONFIG.JAM
 #
 # *** placing using gcc, in user-config.jam otherwise errors in building python ****
-# using syntax:
+#
 # using toolset-name : version :invocation-command : options ;
 #   where options allows <cflags, cxxflags, compileflags and linkflags >
 #
-cp $BOOST_ROOT/tools/build/example/user-config.jam $HOME/.
-echo "# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)" >> $HOME/user-config.jam
-echo "# hence we need to compile with -fPIC"                                                       >> $HOME/user-config.jam
-echo "using $tool : : $tool_path : <cxxflags>-fPIC ;"                                              >> $HOME/user-config.jam
-
+if [[ ! -e $HOME/user-config.jam ]] ; then
+   cp $BOOST_ROOT/tools/build/example/user-config.jam $HOME/.
+   echo "# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)" >> $HOME/user-config.jam
+   echo "# hence we need to compile with -fPIC"                                                       >> $HOME/user-config.jam
+   echo "using $tool : : $tool_path : <cxxflags>-fPIC ;"                                              >> $HOME/user-config.jam
+fi
 
 #
 # Note: if '--build-dir=./tmpBuildDir' is omitted, boost will build the libs in a directory:
@@ -281,7 +282,7 @@ else
    # ===========================================================================================================
 
    # ===========================================================================================================
-   # Attempt at replacing 'using python' with the correct python include dir in user-config.jam
+   # Attempt at replacing 'using python' with the correct python include dir in site-config.jam
    # ===========================================================================================================
    python_file=compute_python_using_statement.py
 
