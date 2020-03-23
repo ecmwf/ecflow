@@ -1,9 +1,10 @@
 #!/bin/sh
 # assumes:
 # - $WK is defined to be root of ecflow tree
-# - ecflow is installed to: /tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}
+# - ecflow is installed to: Linux  - /tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION} 
+#                           Darwin - $(HOME)/install/ecflow/${ECFLOW_VERSION} 
 #   Install using: cd $WK; ./cmake.sh make -j8 install
-# - metabuilder is at /var/tmp/${USER}/workspace
+# - metabuilder is at $WK/../metabuild
 
 # Alter the command below to either
 # a/ use the system installed version, everywhere, avoid miss-match between different releases
@@ -14,6 +15,13 @@ set -u # fail when using an undefined variable
 set -x # echo script lines as they are executed
 set -o pipefail # fail if last(rightmost) command exits with a non-zero status
 
+install_prefix="/tmp/${USER}/install/cmake"
+os_variant=$(uname -s)
+if [[ $os_variant = Darwin ]] ; then
+   install_prefix=$HOME/install
+   ECF_HOST=localhost
+fi
+
 #export ECF_DEBUG_CLIENT=1
 cd $WK
 release=$(cat ACore/src/ecflow_version.h | grep 'ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
@@ -23,13 +31,17 @@ ECFLOW_VERSION=$release.$major.$minor
 
 #export ECF_SSL=`hostname`.4141 # use server specfic <host>.<port>.*** certificates
 export ECF_PORT=4141
-export PATH=/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin:$PATH
+export PATH=${install_prefix}/ecflow/${ECFLOW_VERSION}/bin:$PATH
 PYTHON=python3
 if [[ $PYTHON == "python3" ]] ; then
-   module load python3
-   export PYTHONPATH=/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python3.6/site-packages
+   if [[ $os_variant != Darwin ]] ; then
+      module load python3
+   fi
+   
+   python_dot_version=$(python3 -c 'import sys;print(sys.version_info[0],".",sys.version_info[1],sep="")')
+   export PYTHONPATH=${install_prefix}/ecflow/${ECFLOW_VERSION}/lib/python${python_dot_version}/site-packages
 else
-   export PYTHONPATH=/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/lib/python2.7/site-packages
+   export PYTHONPATH=${install_prefix}/ecflow/${ECFLOW_VERSION}/lib/python2.7/site-packages
 fi
 
 # =======================================================================
@@ -38,7 +50,7 @@ fi
 which ecflow_client
 ecflow_client --version
 ecflow_client --terminate=yes >> /dev/null
- 
+
 set +e # ignore error 
 count=0
 while [ 1 ] ; do   
@@ -58,12 +70,12 @@ done
 set -e  # re-enable error
 
 # =======================================================================
-# Create build scripts files. Must be before python $WK/build_scripts/5nightly/build.py
+# Create build scripts files. Must be before python $WK/build_scripts/nightly/build.py
 # =======================================================================
 cd $SCRATCH
-rm -rf 5nightly
-cp -r $WK/build_scripts/5nightly .
-cd 5nightly
+rm -rf nightly
+cp -r $WK/build_scripts/nightly .
+cd nightly
 
 # =======================================================================
 # Start server. 
@@ -101,7 +113,7 @@ ecflow_client --delete=_all_ yes
 # ======================================================================
 # ecflow metabuilder.  
 # ======================================================================
-cd /var/tmp/${USER}/workspace/metabuilder
+cd $WK/../metabuilder
 git checkout develop
 $PYTHON ./clean.py -s ecflow 
 $PYTHON ./generate.py -s ecflow
@@ -112,15 +124,15 @@ git checkout master
 # Generate test suites, based on definitions known to be good 
 # ========================================================================
 cd $WK
-for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
-   echo "->$defs_file"
-   $PYTHON Pyext/samples/TestBench.py $defs_file
-done
+#for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
+#   echo "->$defs_file"
+#   $PYTHON Pyext/samples/TestBench.py $defs_file
+#done
  
 # Use python3 for ecflow 5 series
 # Use the installed ecflow for ecflow_client, to stop mixing of ecflow 4/5
 # must be done after since TestBench.py will use build dir
-ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "/tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /
+ecflow_client --alter change variable ECF_CLIENT_EXE_PATH "${install_prefix}/ecflow/${ECFLOW_VERSION}/bin/ecflow_client" /
 ecflow_client --alter change variable METAB_PYTHON_VERSION $PYTHON /ecflow
 ecflow_client --order=/ecflow alpha      #  sort suites  
 ecflow_client --order=/ecflow top    
