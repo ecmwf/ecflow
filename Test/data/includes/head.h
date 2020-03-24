@@ -34,7 +34,13 @@ if [[ "%ECF_SSL:%" != "" ]] ; then
 fi
 
 # SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
-host %ECF_HOST%
+# on Mac we get
+#   Host User-MacBook-Pro.local not found: 3(NXDOMAIN)
+# Should be using 'dig user-MacBook-Pro.local'
+os_name=$(uname -s)
+if [[ $os_name = Linux ]] ; then
+   host %ECF_HOST%
+fi
 
 # to debug client communication with the server, enable this environment
 #export ECF_DEBUG_CLIENT=1
