@@ -32,7 +32,7 @@ show_error_and_exit() {
 # ====================================================================================
 # Build type to Release    
 mode_arg=release
-clang_arg=clang
+compiler=clang
 
 package_source_arg=
 make_arg=
@@ -40,6 +40,7 @@ test_arg=
 ctest_arg=
 no_gui_arg=
 log_arg=
+clean_arg=
 
 while [[ "$#" != 0 ]] ; do   
 
@@ -53,11 +54,12 @@ while [[ "$#" != 0 ]] ; do
          shift
       done
       break
-   elif [[ "$1" = gcc ]] ;     then clang_arg=gcc ;
+   elif [[ "$1" = clean ]] ;   then clean_arg=$1 ;
+   elif [[ "$1" = gcc ]] ;     then compiler=$1 ;
+   elif [[ "$1" = clang ]] ;   then compiler=$1 ;
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
    elif [[ "$1" = log ]]   ;   then log_arg=$1 ;
    elif [[ "$1" = test ]] ;    then test_arg=$1 ;
-   elif [[ "$1" = clang ]] ;   then clang_arg=$1 ;
    elif [[ "$1" = package_source ]] ; then package_source_arg=$1 ;
    elif [[ "$1" = ctest ]] ; then  
       ctest_arg=$1 ; 
@@ -89,7 +91,7 @@ CXX_FLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -Wno-deprecated-decla
 #CXX_LINK_FLAGS=""
 
 cmake_extra_options=""
-if [[ "$clang_arg" = clang ]] ; then
+if [[ "$compiler" = clang ]] ; then
     # relies on brew install
     # brew install cmake
     #
@@ -138,8 +140,12 @@ if [[ $package_source_arg = package_source ]] ; then
     gui_options=  
 fi
 
-mkdir -p ${HOME}/git/bdir/ecflow/$mode_arg
-cd ${HOME}/git/bdir/ecflow/$mode_arg
+bdir=${HOME}/git/bdir/ecflow/$mode_arg/$compiler
+if [[ $clean_arg = clean ]] ; then
+   rm -rf ${HOME}/git/bdir
+fi
+mkdir -p $bdir
+cd $bdir
 
 if [[ "$ctest_arg" != "" ]] ; then
     $ctest_arg 
