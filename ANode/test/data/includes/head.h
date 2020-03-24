@@ -36,7 +36,10 @@ fi
 #export ECF_DEBUG_CLIENT=
 
 # SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
-host %ECF_HOST%
+os_name=$(uname -s)
+if [[ $os_name = Linux ]] ; then
+   host %ECF_HOST%
+fi
 
 # Typically we dont set this, however the zombie automated test require this.
 # it allows us to disambiguate a zomie from a real job.

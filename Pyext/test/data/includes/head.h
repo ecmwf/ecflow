@@ -25,7 +25,10 @@ if [[ "%ECF_SSL:%" != "" ]] ; then
 fi
 
 # SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
-host %ECF_HOST%
+os_name=$(uname -s)
+if [[ $os_name = Linux ]] ; then
+   host %ECF_HOST%
+fi
 
 echo "About to run ecflow_client --version"
 %ECF_CLIENT_EXE_PATH:ecflow_client% --version

@@ -12,7 +12,7 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 import datetime,time
-import os, signal
+import os, signal, platform
 import ecflow
 
 print("cwd: " + os.getcwd())
@@ -65,8 +65,9 @@ class Client(object):
         signal.signal(signal.SIGUSR2, self.signal_handler)
         signal.signal(signal.SIGPIPE, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
-        signal.signal(signal.SIGXCPU, self.signal_handler)
-        signal.signal(signal.SIGPWR,  self.signal_handler)
+        signal.signal(signal.SIGXCPU, self.signal_handler) 
+        if platform.uname().system != "Darwin":
+            signal.signal(signal.SIGPWR,  self.signal_handler)
      
     def at_time(self):
 %ecfmicro #
