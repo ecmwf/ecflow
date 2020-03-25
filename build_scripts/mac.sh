@@ -41,6 +41,7 @@ ctest_arg=
 no_gui_arg=
 log_arg=
 clean_arg=
+install_arg=
 
 while [[ "$#" != 0 ]] ; do   
 
@@ -55,6 +56,7 @@ while [[ "$#" != 0 ]] ; do
       done
       break
    elif [[ "$1" = clean ]] ;   then clean_arg=$1 ;
+   elif [[ "$1" = install ]] ; then install_arg=$1 ;
    elif [[ "$1" = gcc ]] ;     then compiler=$1 ;
    elif [[ "$1" = clang ]] ;   then compiler=$1 ;
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
@@ -158,12 +160,19 @@ fi
 version=$(awk '/^project/ && /ecflow/ && /VERSION/ {for (I=1;I<=NF;I++) if ($I == "VERSION") {print $(I+1)};}' ${HOME}/git/ecflow/CMakeLists.txt) 
 #echo $version
 
+# ====================================================================================
+# default to install in $HOME/install, otherwise if install passed, /usr/local/opt  
+install_prefix=${HOME}/install/ecflow/${version}
+if [[ $install_arg = install ]] ; then
+    install_prefix=/usr/local/opt/ecflow/${version}
+fi
+
 cmake ${HOME}/git/ecflow \
       -DCMAKE_MODULE_PATH=${HOME}/git/ecbuild/cmake \
       -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
       -DCMAKE_BUILD_TYPE=$cmake_build_type \
       -DCMAKE_PREFIX_PATH=/usr/local/opt/qt \
-      -DCMAKE_INSTALL_PREFIX=${HOME}/install/ecflow/${version} \
+      -DCMAKE_INSTALL_PREFIX=${install_prefix} \
       -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
       ${cmake_extra_options} \
       ${gui_options} \
