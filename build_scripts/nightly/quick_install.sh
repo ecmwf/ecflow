@@ -118,7 +118,7 @@ git checkout develop
 $PYTHON ./clean.py -s ecflow 
 $PYTHON ./generate.py -s ecflow
 $PYTHON ./reload.py -s ecflow
-git checkout master
+#git checkout master
 
 # ========================================================================
 # Generate test suites, based on definitions known to be good 
