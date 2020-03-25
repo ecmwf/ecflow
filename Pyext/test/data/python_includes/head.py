@@ -66,7 +66,7 @@ class Client(object):
         signal.signal(signal.SIGPIPE, self.signal_handler)
         signal.signal(signal.SIGTERM, self.signal_handler)
         signal.signal(signal.SIGXCPU, self.signal_handler) 
-        if platform.uname().system != "Darwin":
+        if platform.system() != "Darwin":
             signal.signal(signal.SIGPWR,  self.signal_handler)
      
     def at_time(self):
