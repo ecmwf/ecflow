@@ -157,9 +157,11 @@ void TriggerItemWidget::load()
         exprTe_->setPlainText(txt);
 
         triggerTable_->setInfo(info_);
+        triggerGraph_->setInfo(info_);
 
         //Load table
         triggerTable_->beginTriggerUpdate();
+        triggerGraph_->beginTriggerUpdate();
 
         //collect the list of triggers of this node
         triggerCollector_->setDependency(dependency());
@@ -170,6 +172,9 @@ void TriggerItemWidget::load()
 
         triggerTable_->setTriggerCollector(triggerCollector_,triggeredCollector_);
         triggerTable_->endTriggerUpdate();
+
+        triggerGraph_->setTriggerCollector(triggerCollector_,triggeredCollector_);
+        triggerGraph_->endTriggerUpdate();
 
         triggerTable_->resumeSelection();
 

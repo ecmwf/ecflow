@@ -42,6 +42,9 @@ public:
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
     void writeSettings(VComboSettings* vs);
     void readSettings(VComboSettings* vs);
+    TriggerTableModel *nodeModel() {return nodeModel_;}
+    TriggerTableModel *triggerModel() {return triggerModel_;}
+    TriggerTableModel *triggeredModel() {return triggeredModel_;}
 
 public Q_SLOTS:
     void slotShowDependencyInfo(bool);

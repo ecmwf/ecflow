@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,1">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0">
    <property name="spacing">
     <number>1</number>
    </property>
@@ -102,7 +102,21 @@
     <widget class="QPlainTextEdit" name="exprTe_"/>
    </item>
    <item>
-    <widget class="TriggerTableWidget" name="triggerTable_" native="true"/>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <widget class="TriggerTableWidget" name="triggerTable_">
+      <attribute name="title">
+       <string>Table</string>
+      </attribute>
+     </widget>
+     <widget class="TriggerGraphWidget" name="triggerGraph_">
+      <attribute name="title">
+       <string>Graph</string>
+      </attribute>
+     </widget>
+    </widget>
    </item>
   </layout>
   <action name="actionTextMode_">
@@ -133,6 +147,12 @@
    <class>TriggerTableWidget</class>
    <extends>QWidget</extends>
    <header>TriggerTableWidget.hpp</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TriggerGraphWidget</class>
+   <extends>QWidget</extends>
+   <header>TriggerGraphWidget.hpp</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

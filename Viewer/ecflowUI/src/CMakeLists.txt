@@ -179,6 +179,10 @@ set(viewer_srcs
     TriggerItemWidget.cpp
     TriggerTextWidget.cpp    
     TriggerCollector.cpp
+    TriggerGraphDelegate.cpp
+    TriggerGraphModel.cpp
+    TriggerGraphWidget.cpp
+    TriggerGraphView.cpp
     TriggerTableModel.cpp
     TriggerTableView.cpp
     TriggerTableWidget.cpp
@@ -376,6 +380,8 @@ set(viewer_moc_files AbstractNodeModel.hpp
     TreeNodeViewDelegate.hpp
     TreeNodeWidget.hpp    
     TriggerEditor.hpp
+    TriggerGraphWidget.hpp
+    TriggerGraphView.hpp
     TriggerItemWidget.hpp
     TriggerTableView.hpp
     TriggerTableWidget.hpp
@@ -461,6 +467,7 @@ set(viewer_wrap_ui_files
     TimelineWidget.ui
     TreeNodeWidget.ui
     TriggerEditorWidget.ui
+    TriggerGraphWidget.ui
     TriggerItemWidget.ui
     TriggerTableWidget.ui
     VariableAddDialog.ui
