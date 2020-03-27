@@ -161,19 +161,36 @@ void TriggerGraphView::setInfo(VInfo_ptr info)
     }
 }
 
-QModelIndex TriggerGraphView::indexAt(QPointF scenePos)
+QModelIndex TriggerGraphView::indexAt(QPointF scenePos) const
 {
     QGraphicsItem* item = scene()->itemAt(scenePos, QTransform());
     return itemToIndex(item);
 }
 
-QModelIndex TriggerGraphView::itemToIndex(QGraphicsItem* item)
+QModelIndex TriggerGraphView::itemToIndex(QGraphicsItem* item) const
 {
     if (item && item->type() == TriggerGraphNodeItem::Type) {
         TriggerGraphNodeItem* nItem = static_cast<TriggerGraphNodeItem*>(item);
         return nItem->index();
     }
     return {};
+}
+
+TriggerGraphNodeItem* TriggerGraphView::indexToItem(const QModelIndex& index) const
+{
+    if (!index.isValid())
+        return nullptr;
+
+    Q_FOREACH(QGraphicsItem* item, items()) {
+        if(item->type() == TriggerGraphNodeItem::Type) {
+            TriggerGraphNodeItem* nItem = static_cast<TriggerGraphNodeItem*>(item);
+            if (index == nItem->index()) {
+                return nItem;
+            }
+       }
+    }
+
+    return nullptr;
 }
 
 QModelIndexList TriggerGraphView::selectedIndexes()
@@ -304,4 +321,11 @@ void TriggerGraphView::notifyChange(VProperty* p)
     }
 }
 
+void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+{
+    QModelIndex index = model_->nodeToIndex(node);
+    if (TriggerGraphNodeItem *item = indexToItem(index)) {
+        item->update();
+    }
 
+}

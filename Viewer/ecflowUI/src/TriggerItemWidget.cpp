@@ -439,7 +439,10 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     }
 
     //For the rest of the changes in we rerender the collected items that might have changed
-    triggerTable_->nodeChanged(n,aspect);
+    if (tab_->currentIndex() ==  TableTabIndex)
+        triggerTable_->nodeChanged(n,aspect);
+    else if (tab_->currentIndex() ==  GraphTabIndex)
+        triggerGraph_->nodeChanged(n, aspect);
 }
 
 static InfoPanelItemMaker<TriggerItemWidget> maker1("triggers");

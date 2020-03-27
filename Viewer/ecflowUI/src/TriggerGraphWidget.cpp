@@ -110,5 +110,9 @@ void TriggerGraphWidget::endTriggerUpdate()
         TriggerGraphEdgeItem* itemE =new TriggerGraphEdgeItem(itemN, item, nullptr);
         scene_->addItem(itemE);
     }
+}
 
+void TriggerGraphWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
+{
+    ui_->view->nodeChanged(node, aspect);
 }

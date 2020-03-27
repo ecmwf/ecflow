@@ -41,6 +41,7 @@ public:
     void setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2);
     void beginTriggerUpdate();
     void endTriggerUpdate();
+    void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
 
 Q_SIGNALS:
     void infoPanelCommand(VInfo_ptr,QString);

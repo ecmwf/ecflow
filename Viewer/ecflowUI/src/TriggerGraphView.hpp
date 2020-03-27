@@ -92,6 +92,7 @@ public:
     void setInfo(VInfo_ptr);
     void notifyChange(VProperty* p) override;
     void adjustBackground(VProperty* p=nullptr);
+    void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
 
 public Q_SLOTS:
     //void slotSelectItem(const QModelIndex&);
@@ -108,8 +109,9 @@ Q_SIGNALS:
     void dashboardCommand(VInfo_ptr,QString);
 
 protected:
-    QModelIndex indexAt(QPointF scenePos);
-    QModelIndex itemToIndex(QGraphicsItem* item);
+    QModelIndex indexAt(QPointF scenePos) const;
+    QModelIndex itemToIndex(QGraphicsItem* item) const;
+    TriggerGraphNodeItem* indexToItem(const QModelIndex& index) const;
     QModelIndexList selectedIndexes();
     void adjustParentConnectColour(VProperty* p=nullptr);
     void adjustTriggerConnectColour(VProperty* p=nullptr);

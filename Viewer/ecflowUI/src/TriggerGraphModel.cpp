@@ -74,11 +74,14 @@ void TriggerGraphModel::setTriggerCollectors(TriggerTableCollector *triggerTc, T
 
 bool TriggerGraphModel::hasData() const
 {
-    if(triggerTc_) {
-        Q_ASSERT(triggeredTc_);
-        return (triggerTc_->size() > 0 || triggeredTc_->size() > 0);
-    }
-    return false;
+    return (node_ != nullptr);
+//        return false;
+
+//    if(triggerTc_) {
+//        Q_ASSERT(triggeredTc_);
+//        return (triggerTc_->size() > 0 || triggeredTc_->size() > 0);
+//    }
+//    return false;
 }
 
 bool TriggerGraphModel::hasTrigger() const
@@ -266,6 +269,28 @@ VInfo_ptr TriggerGraphModel::nodeInfo(const QModelIndex& index)
 
     VInfo_ptr res;
     return res;
+}
+
+QModelIndex TriggerGraphModel::nodeToIndex(const VNode *node) const
+{
+    if (!hasData() || !node)
+        return {};
+
+    if (node_->item() == node)
+        return index(0, 0);
+
+    if (hasTrigger()) {
+        for (size_t i=0; i < triggerTc_->items().size(); i++) {
+            if (triggerTc_->items()[i]->item() == node)
+                return index(1+i, 0);
+        }
+        for (size_t i=0; i < triggeredTc_->items().size(); i++) {
+            if (triggeredTc_->items()[i]->item() == node)
+                return index(1 + triggerTc_->size() + i, 0);
+        }
+    }
+
+    return {};
 }
 
 QModelIndex TriggerGraphModel::itemToIndex(TriggerTableItem *item)
