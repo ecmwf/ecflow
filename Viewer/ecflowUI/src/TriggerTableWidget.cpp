@@ -140,6 +140,19 @@ void TriggerTableWidget::setInfo(VInfo_ptr info)
     nodeModel_->endUpdate();
 }
 
+void TriggerTableWidget::adjust(VInfo_ptr info, TriggerTableCollector* tc1, TriggerTableCollector* tc2)
+{
+    if (!info) {
+        clear();
+    } else if(info_ != info) {
+        setInfo(info_);
+        beginTriggerUpdate();
+        setTriggerCollector(tc1, tc2);
+        endTriggerUpdate();
+        resumeSelection();
+    }
+}
+
 void TriggerTableWidget::slotTriggerClicked(TriggerTableItem* item)
 {
     Q_ASSERT(item);

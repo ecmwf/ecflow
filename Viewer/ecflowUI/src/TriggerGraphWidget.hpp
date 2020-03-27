@@ -33,10 +33,11 @@ class TriggerGraphWidget : public QWidget
     Q_OBJECT
 public:
     explicit TriggerGraphWidget(QWidget *parent = nullptr);
-    ~TriggerGraphWidget() override {}
+    ~TriggerGraphWidget() override;
 
-    //void init(TriggerTableModel* nodeModel, TriggerTableModel*, TriggerTableModel*);
+    void clear();
     void setInfo(VInfo_ptr info);
+    void adjust(VInfo_ptr info, TriggerTableCollector* triggerTc1, TriggerTableCollector* tc2);
     void setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2);
     void beginTriggerUpdate();
     void endTriggerUpdate();

@@ -336,7 +336,7 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIn
 }
 
 //This has to be extremely fast
-void  TreeNodeViewDelegate::sizeHint(const QModelIndex& index,int& w,int& h) const
+void  TreeNodeViewDelegate::sizeHintCompute(const QModelIndex& index,int& w,int& h) const
 {
     QVariant tVar=index.data(Qt::DisplayRole);
 
@@ -346,7 +346,7 @@ void  TreeNodeViewDelegate::sizeHint(const QModelIndex& index,int& w,int& h) con
     if(tVar.type() == QVariant::String)
     {
         QString text=index.data(Qt::DisplayRole).toString();
-        if(index.data(AbstractNodeModel::ServerRole).toInt() ==0)
+        if(index.data(AbstractNodeModel::ServerRole).toInt() ==  1)
         {
             widthHintServer(index,w,text);
         }
@@ -413,7 +413,7 @@ void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &o
     {
         int width=0;
         QString text=index.data(Qt::DisplayRole).toString();
-        if(index.data(AbstractNodeModel::ServerRole).toInt() ==0)
+        if(index.data(AbstractNodeModel::ServerRole).toInt() == 1)
         {
             width=renderServer(painter,index,vopt,text);
         }

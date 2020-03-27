@@ -29,9 +29,22 @@ public:
     explicit TriggerGraphModel(Mode mode,QObject *parent=nullptr);
     ~TriggerGraphModel() override;
 
+//    ServerRole = Qt::UserRole+3, NodeNumRole = Qt::UserRole+4,
+//    InfoRole = Qt::UserRole+5, LoadRole = Qt::UserRole+6,
+//    ConnectionRole = Qt::UserRole+7, ServerDataRole = Qt::UserRole+8,
+//    NodeDataRole = Qt::UserRole+9, AttributeRole = Qt::UserRole+10,
+//    AttributeLineRole = Qt::UserRole+11, AbortedReasonRole = Qt::UserRole + 12,
+//    NodeTypeRole = Qt::UserRole + 13, NodeTypeForegroundRole = Qt::UserRole + 14,
+//    ServerPointerRole = Qt::UserRole + 15, SortRole = Qt::UserRole + 16,
+//    NodePointerRole = Qt::UserRole + 17, VariableRole = Qt::UserRole + 18,
+//    FailedSubmissionRole = Qt::UserRole + 19, LogErrorRole = Qt::UserRole + 20};
+
     //The custom roles must have the same numerical value as in AbstractNodeModel.hpp because the
     //core delegate was written to only handle the custom roles it defines!
     enum CustomItemRole {FilterRole = Qt::UserRole+1, IconRole = Qt::UserRole+2,
+                         ServerRole = Qt::UserRole+3,
+                         AttributeRole = Qt::UserRole+10,
+                         AttributeLineRole = Qt::UserRole+11,
                          NodeTypeRole = Qt::UserRole + 13,
                          NodeTypeForegroundRole = Qt::UserRole + 14,
                          NodePointerRole = Qt::UserRole + 17};

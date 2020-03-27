@@ -46,7 +46,7 @@ public:
     //custom implementations
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index,QSize&) const;
-    void sizeHint(const QModelIndex& index,int& w,int& h) const;
+    void sizeHintCompute(const QModelIndex& index,int& w,int& h) const;
 
 
 Q_SIGNALS:

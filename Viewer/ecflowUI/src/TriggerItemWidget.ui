@@ -102,7 +102,7 @@
     <widget class="QPlainTextEdit" name="exprTe_"/>
    </item>
    <item>
-    <widget class="QTabWidget" name="tabWidget">
+    <widget class="QTabWidget" name="tab_">
      <property name="currentIndex">
       <number>1</number>
      </property>

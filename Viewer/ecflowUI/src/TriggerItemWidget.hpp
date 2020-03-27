@@ -55,6 +55,7 @@ protected Q_SLOTS:
     void slotLinkSelected(VInfo_ptr info);
     void slotInfoPanelCommand(VInfo_ptr info,QString cmd);
     void slotDashboardCommand(VInfo_ptr info,QString cmd);
+    void slotCurrentTabChanged(int);
 
 protected:
     void load();
@@ -62,6 +63,8 @@ protected:
     TriggeredScanner* triggeredScanner() const {return scanner_;}
     void checkActionState();
     void clearTriggers();
+
+    enum TabIndex {TableTabIndex=0, GraphTabIndex=1};
 
     TriggerTableCollector* triggerCollector_;
     TriggerTableCollector* triggeredCollector_;

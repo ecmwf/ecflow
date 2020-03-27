@@ -145,7 +145,7 @@ QVariant TreeNodeModel::data(const QModelIndex& index, int role ) const
         else if(role == ServerRole)
         {
             if(isServerForValid(index))
-                return 0;
+                return 1;
             else
                 return -1;
         }

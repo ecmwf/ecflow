@@ -140,6 +140,10 @@ QVariant TriggerGraphModel::data( const QModelIndex& index, int role ) const
 
     if(index.column() == 0)
     {
+        if (role == ServerRole) {
+            return -1;
+        }
+
         if(VAttribute* a=t->isAttribute())
         {
             if(role == Qt::DisplayRole)

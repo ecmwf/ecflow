@@ -83,6 +83,15 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     exprTe_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
     exprTe_->setFixedHeight(fm.size(0,"A\nA\nA").height()+fm.height()/2);
 
+    //tabs - we show the table by default
+    tab_->setCurrentIndex(TableTabIndex);
+    //triggerTable_->setActive(true);
+    //graphTable_->setActive(false);
+
+    connect(tab_, SIGNAL(currentChanged(int)),
+            this, SLOT(slotCurrentTabChanged(int)));
+
+    //table
     connect(triggerTable_,SIGNAL(depInfoWidgetClosureRequested()),
             this,SLOT(slotHandleDefInfoWidgetClosure()));
 
@@ -93,6 +102,13 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
         this,SLOT(slotInfoPanelCommand(VInfo_ptr,QString)));
 
     connect(triggerTable_,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+        this,SLOT(slotDashboardCommand(VInfo_ptr,QString)));
+
+    //graph
+    connect(triggerGraph_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+        this,SLOT(slotInfoPanelCommand(VInfo_ptr,QString)));
+
+    connect(triggerGraph_,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
         this,SLOT(slotDashboardCommand(VInfo_ptr,QString)));
 }
 
@@ -148,7 +164,6 @@ void TriggerItemWidget::load()
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
-
         //Display trigger expression
         std::string te,ce;
         n->triggerExpr(te,ce);
@@ -156,12 +171,13 @@ void TriggerItemWidget::load()
         if(txt.isEmpty()) txt=tr("No trigger expression is available for the selected node!");
         exprTe_->setPlainText(txt);
 
-        triggerTable_->setInfo(info_);
-        triggerGraph_->setInfo(info_);
-
-        //Load table
-        triggerTable_->beginTriggerUpdate();
-        triggerGraph_->beginTriggerUpdate();
+        if (tab_->currentIndex() == TableTabIndex) {
+            triggerTable_->setInfo(info_);
+            triggerTable_->beginTriggerUpdate();
+        } else if (tab_->currentIndex() == TableTabIndex) {
+            triggerGraph_->setInfo(info_);
+            triggerGraph_->beginTriggerUpdate();
+        }
 
         //collect the list of triggers of this node
         triggerCollector_->setDependency(dependency());
@@ -170,13 +186,15 @@ void TriggerItemWidget::load()
         triggeredCollector_->setDependency(dependency());
         n->triggered(triggeredCollector_,triggeredScanner());
 
-        triggerTable_->setTriggerCollector(triggerCollector_,triggeredCollector_);
-        triggerTable_->endTriggerUpdate();
-
-        triggerGraph_->setTriggerCollector(triggerCollector_,triggeredCollector_);
-        triggerGraph_->endTriggerUpdate();
-
-        triggerTable_->resumeSelection();
+        if (tab_->currentIndex() == TableTabIndex) {
+            triggerTable_->setTriggerCollector(triggerCollector_,triggeredCollector_);
+            triggerTable_->endTriggerUpdate();
+            triggerTable_->resumeSelection();
+        } else {
+            triggerGraph_->setTriggerCollector(triggerCollector_,triggeredCollector_);
+            triggerGraph_->endTriggerUpdate();
+            triggerTable_->resumeSelection();
+        }
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QGuiApplication::restoreOverrideCursor();
@@ -189,6 +207,7 @@ void TriggerItemWidget::clearContents()
     InfoPanelItem::clear();
     exprTe_->clear();
     triggerTable_->clear();
+    triggerGraph_->clear();
 
     if(!active_)
         triggerTable_->clearSelection();
@@ -202,6 +221,7 @@ void TriggerItemWidget::clearTriggers()
 {
     exprTe_->clear();
     triggerTable_->clear();
+    triggerGraph_->clear();
 
     //At this point the tables are cleared so it is safe to clear the collectors
     triggerCollector_->clear();
@@ -267,6 +287,7 @@ void TriggerItemWidget::on_dependTb__toggled(bool b)
 void TriggerItemWidget::on_dependInfoTb__toggled(bool b)
 {
     triggerTable_->slotShowDependencyInfo(b);
+    //triggerGraph_->showDependencyInfo(b);
 }
 
 void TriggerItemWidget::slotHandleDefInfoWidgetClosure()
@@ -283,7 +304,6 @@ bool TriggerItemWidget::dependency() const
 {
     return dependTb_->isChecked();
 }
-
 
 void TriggerItemWidget::slotLinkSelected(VInfo_ptr info)
 {
@@ -313,6 +333,17 @@ void TriggerItemWidget::infoProgress(const std::string& text,int value)
 }
 
 #endif
+
+void TriggerItemWidget::slotCurrentTabChanged(int)
+{
+    if (tab_->currentIndex() == TableTabIndex) {
+        triggerTable_->adjust(info_, triggerCollector_, triggeredCollector_);
+        //graphTable_->setActive(false);
+    } else if (tab_->currentIndex() == GraphTabIndex) {
+        triggerGraph_->adjust(info_, triggerCollector_, triggeredCollector_);
+        //graphTable_->setActive(false);
+    }
+}
 
 void TriggerItemWidget::scanStarted()
 {

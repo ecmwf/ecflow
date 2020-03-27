@@ -25,6 +25,8 @@ TriggerGraphWidget::TriggerGraphWidget(QWidget* parent) :
     ui_->setupUi(this);
     scene_ = new TriggerGraphScene(this);
     ui_->view->setScene(scene_);
+    // the bg can only be set correctly when the scene is set on the view
+    ui_->view->adjustBackground();
 
     model_ = new TriggerGraphModel(TriggerGraphModel::TriggerMode,this);
     ui_->view->setModel(model_);
@@ -39,8 +41,18 @@ TriggerGraphWidget::TriggerGraphWidget(QWidget* parent) :
 
     connect(ui_->view,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
             this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+}
 
+TriggerGraphWidget::~TriggerGraphWidget()
+{
+    clear();
+}
 
+void TriggerGraphWidget::clear()
+{
+    info_.reset();
+    model_->clearData();
+    scene_->clear();
 }
 
 void TriggerGraphWidget::setInfo(VInfo_ptr info)
@@ -59,6 +71,18 @@ void TriggerGraphWidget::setInfo(VInfo_ptr info)
     model_->setNode(info);
 
     //ui_->view->setInfo(info);
+}
+
+void TriggerGraphWidget::adjust(VInfo_ptr info, TriggerTableCollector* tc1, TriggerTableCollector* tc2)
+{
+    if (!info) {
+        clear();
+    } else if(info_ != info) {
+        setInfo(info);
+        beginTriggerUpdate();
+        setTriggerCollector(tc1,tc2);
+        endTriggerUpdate();
+    }
 }
 
 void TriggerGraphWidget::setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2)

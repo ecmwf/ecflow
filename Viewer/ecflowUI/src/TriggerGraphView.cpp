@@ -11,6 +11,7 @@
 
 #include "ActionHandler.hpp"
 #include "AttributeEditor.hpp"
+#include "PropertyMapper.hpp"
 #include "TriggerGraphDelegate.hpp"
 #include "TriggerGraphModel.hpp"
 
@@ -59,8 +60,12 @@ void TriggerGraphNodeItem::adjust()
 {
     prepareGeometryChange();
 
+    int w, h;
+    QModelIndex idx=index_;
+    delegate_->sizeHintCompute(idx,w,h);
+
     QString name  = index_.data(Qt::DisplayRole).toString();
-    bRect_        = QRectF(QPointF(0, 0), QSize(300,50));
+    bRect_        = QRectF(QPointF(0, 0), QSize(w, h));
     //QPoint refPos = index_.data(MvQFolderModel::PositionRole).toPoint();
     if (col_ == 0)
         setPos(600, 25);
@@ -118,6 +123,29 @@ TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent)
     connect(this, SIGNAL(customContextMenuRequested(const QPoint&)),
             this, SLOT(slotContextMenu(const QPoint&)));
 
+    //Properties
+    std::vector<std::string> propVec;
+    propVec.emplace_back("view.trigger.background");
+    propVec.emplace_back("view.trigger.parentConnectorColour");
+    propVec.emplace_back("view.trigger.triggerConnectorColour");
+    propVec.emplace_back("view.trigger.dependencyConnectorColour");
+
+    prop_=new PropertyMapper(propVec,this);
+
+    VProperty *prop=nullptr;
+    std::string propName;
+
+    //init
+    adjustBackground(prop_->find("view.trigger.background", true));
+    adjustParentConnectColour(prop_->find("view.trigger.parentConnectorColour", true));
+    adjustTriggerConnectColour(prop_->find("view.trigger.triggerConnectorColour", true));
+    adjustDepConnectColour(prop_->find("view.trigger.dependencyConnectorColour", true));
+}
+
+TriggerGraphView::~TriggerGraphView()
+{
+    delete actionHandler_;
+    delete prop_;
 }
 
 void TriggerGraphView::setModel(TriggerGraphModel* model)
@@ -190,6 +218,11 @@ void TriggerGraphView::slotContextMenu(const QPoint& position)
     }
 }
 
+void TriggerGraphView::slotCommandShortcut()
+{
+
+}
+
 void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
 {
     if(cmd == "lookup")
@@ -205,3 +238,70 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
         }
     }
 }
+
+void TriggerGraphView::adjustBackground(VProperty *p)
+{
+    if (!p)
+        p = prop_->find("view.trigger.background", true);
+
+    if(p) {
+        QColor col = p->value().value<QColor>();
+        if (col.isValid()) {
+            setBackgroundBrush(col);
+        }
+    }
+}
+
+void TriggerGraphView::adjustParentConnectColour(VProperty *p)
+{
+    if (!p)
+        p = prop_->find("view.trigger.parentConnectorColour", true);
+
+    if(p) {
+        QColor col = p->value().value<QColor>();
+        if (col.isValid()) {
+            parentConnectPen_ = QPen(col);
+        }
+    }
+}
+
+void TriggerGraphView::adjustTriggerConnectColour(VProperty *p)
+{
+    if (!p)
+        p = prop_->find("view.trigger.triggerConnectorColour", true);
+
+    if(p) {
+        QColor col = p->value().value<QColor>();
+        if (col.isValid()) {
+            triggerConnectPen_ = QPen(col);
+        }
+    }
+}
+
+void TriggerGraphView::adjustDepConnectColour(VProperty *p)
+{
+    if (!p)
+        p = prop_->find("view.trigger.dependencyConnectorColour", true);
+
+    if(p) {
+        QColor col = p->value().value<QColor>();
+        if (col.isValid())  {
+            depConnectPen_ = QPen(col);
+        }
+    }
+}
+
+void TriggerGraphView::notifyChange(VProperty* p)
+{
+    if(p->path() == "view.trigger.background") {
+        adjustBackground(p);
+    } else if(p->path() == "view.trigger.parentConnectorColour") {
+        adjustParentConnectColour(p);
+    } else if(p->path() == "view.trigger.triggerConnectorColour") {
+        adjustTriggerConnectColour(p);
+    } else if(p->path() == "view.trigger.depConnectorColour") {
+        adjustDepConnectColour(p);
+    }
+}
+
+

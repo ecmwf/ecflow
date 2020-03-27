@@ -11,6 +11,7 @@
 #define TRIGGERGRAPHVIEW_HPP
 
 #include "VInfo.hpp"
+#include "VProperty.hpp"
 
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -19,6 +20,7 @@
 #include <QPersistentModelIndex>
 
 class ActionHandler;
+class PropertyMapper;
 class TriggerGraphDelegate;
 class TriggerGraphModel;
 class QModelIndex;
@@ -79,20 +81,23 @@ public:
     TriggerGraphScene(QWidget* parent= nullptr);
 };
 
-class TriggerGraphView : public QGraphicsView
+class TriggerGraphView : public QGraphicsView, public VPropertyObserver
 {
     Q_OBJECT
 public:
     TriggerGraphView(QWidget* parent=nullptr);
+    ~TriggerGraphView() override;
 
     void setModel(TriggerGraphModel* model);
     void setInfo(VInfo_ptr);
+    void notifyChange(VProperty* p) override;
+    void adjustBackground(VProperty* p=nullptr);
 
 public Q_SLOTS:
     //void slotSelectItem(const QModelIndex&);
     //void slotDoubleClickItem(const QModelIndex&);
     void slotContextMenu(const QPoint &position);
-    //void slotCommandShortcut();
+    void slotCommandShortcut();
     void slotViewCommand(VInfo_ptr,QString);
     //void slotRerender();
     //void slotSizeHintChangedGlobal();
@@ -106,9 +111,16 @@ protected:
     QModelIndex indexAt(QPointF scenePos);
     QModelIndex itemToIndex(QGraphicsItem* item);
     QModelIndexList selectedIndexes();
+    void adjustParentConnectColour(VProperty* p=nullptr);
+    void adjustTriggerConnectColour(VProperty* p=nullptr);
+    void adjustDepConnectColour(VProperty* p=nullptr);
 
     TriggerGraphModel* model_{nullptr};
     ActionHandler* actionHandler_;
+    PropertyMapper* prop_;
+    QPen parentConnectPen_ {QPen(Qt::red)};
+    QPen triggerConnectPen_ {QPen(Qt::black)};
+    QPen depConnectPen_ {QPen(Qt::blue)};
 };
 
 #endif // TRIGGERGRAPHVIEW_HPP
