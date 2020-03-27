@@ -106,13 +106,15 @@ void time_load_and_downloads(
             DurationTimer duration_timer;
             BOOST_REQUIRE_MESSAGE(theClient.loadDefs(relPath.string()) == 0,"load defs failed \n" << theClient.errorMsg());
             cout << " Load:                " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
-            BOOST_CHECK_MESSAGE(duration_timer.elapsed().total_milliseconds() < load_threshold_ms,"regression in load, exceeded threshold of " << load_threshold_ms);
+            BOOST_CHECK_MESSAGE(duration_timer.elapsed().total_milliseconds() < load_threshold_ms,
+            		"regression load(" << duration_timer.elapsed().total_milliseconds() << "), exceeded threshold of " << load_threshold_ms);
          }
          {
             DurationTimer duration_timer;
             BOOST_REQUIRE_MESSAGE(theClient.begin_all_suites() == 0,"begin failed \n" << theClient.errorMsg());
             cout << " Begin:               " << duration_timer.elapsed().total_milliseconds() << "ms" << endl;
-            BOOST_CHECK_MESSAGE(duration_timer.elapsed().total_milliseconds() < begin_threshold_ms,"regression in begin, exceeded threshold of " << begin_threshold_ms );
+            BOOST_CHECK_MESSAGE(duration_timer.elapsed().total_milliseconds() < begin_threshold_ms,
+            		"regression begin(" << duration_timer.elapsed().total_milliseconds() << "), exceeded threshold of " << begin_threshold_ms );
          }
 
          {
@@ -157,7 +159,8 @@ void time_load_and_downloads(
             }
             double average = (double)(total)/((double)count*1000);
             cout << ": Avg:" << average << "(sec)  : sync_local() with *different* clients.uses cache!" << endl;
-            BOOST_CHECK_MESSAGE(average < sync_full_threshold_s,"regression in  Sync-FULL, exceeded threshold of " << sync_full_threshold_s );
+            BOOST_CHECK_MESSAGE(average < sync_full_threshold_s,
+            		"regression Sync-FULL(" << average << "), exceeded threshold of " << sync_full_threshold_s );
          }
          {
             cout << " Download(FULL):      "; cout.flush();
@@ -172,7 +175,8 @@ void time_load_and_downloads(
             }
             double average = (double)(total)/((double)count*1000);
             cout << ": Avg:" <<  average << "(sec)  : get_defs() from different client" << endl;
-            BOOST_CHECK_MESSAGE(average < full_threshold_s,"regression in FULL(sync), exceeded threshold of " << full_threshold_s );
+            BOOST_CHECK_MESSAGE(average < full_threshold_s,
+            		"regression FULL(sync)(" << average << ") exceeded threshold of " << full_threshold_s );
          }
          {
             std::vector<task_ptr> all_tasks;
@@ -202,7 +206,8 @@ void time_load_and_downloads(
                DurationTimer duration_timer;
                theClient.suspend(paths);
                cout << duration_timer.elapsed_seconds() << " : auto-sync" << endl;
-               BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < suspend_threshold_s,"regression in suspend, exceeded threshold of " << suspend_threshold_s);
+               BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < suspend_threshold_s,
+            		   "regression suspend(" << duration_timer.elapsed_seconds() << ") exceeded threshold of " << suspend_threshold_s);
                theClient.set_auto_sync(false);
             }
             {
@@ -211,7 +216,8 @@ void time_load_and_downloads(
                DurationTimer duration_timer;
                theClient.resume(paths);
                cout << duration_timer.elapsed_seconds() << " : auto-sync" << endl;
-               BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < resume_threshold_s,"regression in resume, exceeded threshold of " << resume_threshold_s);
+               BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < resume_threshold_s,
+            		   "regression resume(" << duration_timer.elapsed_seconds() << ") exceeded threshold of " << resume_threshold_s);
                theClient.set_auto_sync(false);
             }
             {
@@ -245,7 +251,8 @@ void time_load_and_downloads(
                DurationTimer duration_timer;
                theClient.force(paths,"queued");  // can't use aborted again, as it already aborted, and hence will be ignored
                cout << duration_timer.elapsed_seconds() << " : auto-sync :  force(queued)" << endl;
-               BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < force_threshold_s,"regression in force, exceeded threshold of " << force_threshold_s);
+               BOOST_CHECK_MESSAGE(duration_timer.elapsed_seconds() < force_threshold_s,
+            		   "regression force(" << duration_timer.elapsed_seconds() << ") exceeded threshold of " << force_threshold_s);
                theClient.set_auto_sync(false);
             }
          }
@@ -261,7 +268,8 @@ void time_load_and_downloads(
             }
             double average = (double)(total)/((double)count*1000);
             cout << ": Avg:" << average << "(s)" << endl;
-            BOOST_CHECK_MESSAGE(average < check_pt_threshold_s,"regression in check_pt, exceeded threshold of " << check_pt_threshold_s );
+            BOOST_CHECK_MESSAGE(average < check_pt_threshold_s,
+            		"regression in check_pt(" << average << ") exceeded threshold of " << check_pt_threshold_s );
          }
          {
             cout << " client cmds:         " ;  cout.flush();
