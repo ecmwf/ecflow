@@ -179,9 +179,9 @@ class Server(object):
     def __init__(self):
         print("Server:__init__: Starting server")    
         if not debugging():
-            seed_port = int(os.getenv('TEST_ECF_PORT', '3153'))
+            seed_port = int(os.getenv('ECF_FREE_PORT', '3153'))
             if sys.version_info[0] == 3: # python3 can run at same time
-                seed_port = int(os.getenv('TEST_ECF_PORT', '3154'))  
+                seed_port = int(os.getenv('ECF_FREE_PORT', '3154'))  
             if debug_build(): seed_port = seed_port + 1 
             self.lock_file = EcfPortLock()
             self.the_port = self.lock_file.find_free_port(seed_port)   
