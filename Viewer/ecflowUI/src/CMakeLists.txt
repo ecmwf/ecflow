@@ -180,6 +180,8 @@ set(viewer_srcs
     TriggerTextWidget.cpp    
     TriggerCollector.cpp
     TriggerGraphDelegate.cpp
+    TriggerGraphLayout.cpp
+    TriggerGraphLayoutBuilder.cpp
     TriggerGraphModel.cpp
     TriggerGraphWidget.cpp
     TriggerGraphView.cpp

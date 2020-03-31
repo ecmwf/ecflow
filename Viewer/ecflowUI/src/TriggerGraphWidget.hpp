@@ -12,6 +12,7 @@
 
 #include "VInfo.hpp"
 #include "Aspect.hpp"
+#include "TriggerCollector.hpp"
 
 #include <QWidget>
 
@@ -21,12 +22,18 @@ class TriggerTableCollector;
 class TriggerItemWidget;
 class TriggerGraphScene;
 class TriggerGraphDelegate;
+class TriggerGraphLayout;
+class TriggerGraphNodeItem;
+class TriggerGraphEdgeItem;
 
 class VComboSettings;
 
 namespace Ui {
     class TriggerGraphWidget;
 }
+
+class TriggerGraphWidget;
+
 
 class TriggerGraphWidget : public QWidget
 {
@@ -42,6 +49,8 @@ public:
     void beginTriggerUpdate();
     void endTriggerUpdate();
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
+    void scan();
+    //void scan(VNode*);
 
 Q_SIGNALS:
     void infoPanelCommand(VInfo_ptr,QString);
@@ -51,13 +60,17 @@ private:
     Ui::TriggerGraphWidget* ui_;
 
 private:
-    TriggerGraphScene* scene_;
-    TriggerGraphDelegate* delegate_;
+    //TriggerGraphScene* scene_;
+    //TriggerGraphDelegate* delegate_;
     VInfo_ptr info_;
-    TriggerTableCollector* nodeCollector_;
+    TriggerTableCollector* triggerTc_ {nullptr};
+    TriggerTableCollector* triggeredTc_ {nullptr};
     VInfo_ptr lastSelectedItem_;
     QString depLabelText_;
-    TriggerGraphModel* model_;
+    //TriggerGraphModel* model_;
+    //TriggerGraphLayout* layout_;
+    //std::vector<TriggerGraphNodeItem*> nodes_;
+    //std::vector<TriggerGraphEdgeItem*> edges_;
 };
 
 #endif // TRIGGERGRAPHWIDGET_HPP

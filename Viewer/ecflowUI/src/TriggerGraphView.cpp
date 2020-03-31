@@ -13,7 +13,9 @@
 #include "AttributeEditor.hpp"
 #include "PropertyMapper.hpp"
 #include "TriggerGraphDelegate.hpp"
+#include "TriggerGraphLayout.hpp"
 #include "TriggerGraphModel.hpp"
+#include "UiLog.hpp"
 
 #include <QScrollBar>
 
@@ -74,10 +76,12 @@ void TriggerGraphNodeItem::adjust()
 }
 
 
-TriggerGraphEdgeItem::TriggerGraphEdgeItem(QGraphicsItem* srcItem, QGraphicsItem* targetItem, QGraphicsItem* parent) :
+TriggerGraphEdgeItem::TriggerGraphEdgeItem(QGraphicsItem* srcItem, QGraphicsItem* targetItem,
+                                           TriggerCollector::Mode mode, QGraphicsItem* parent) :
     QGraphicsPathItem(parent),
     srcItem_(srcItem),
-    targetItem_(targetItem)
+    targetItem_(targetItem),
+    mode_(mode)
 {
     adjust();
 }
@@ -86,17 +90,23 @@ void TriggerGraphEdgeItem::adjust()
 {
     prepareGeometryChange();
 
+    int gap = 3;
     QPainterPath p;
     QRectF srcRect = srcItem_->mapRectToParent(srcItem_->boundingRect());
     QRectF targetRect = targetItem_->mapRectToParent(targetItem_->boundingRect());
 
-    QPointF p1(targetRect.left() - srcRect.right(),
+    QPointF p1(targetRect.left() - srcRect.right() - 2*gap,
                targetRect.center().y() - srcRect.center().y());
-    p.lineTo(p1);
+    QPointF c1(p1.x()/2, 0);
+    QPointF c2(p1.x()/2, targetRect.center().y() - srcRect.center().y());
 
-    bRect_        = QRectF(QPointF(0, 0), QSize(300,50));
+    //p.lineTo(p1);
+    p.cubicTo(c1, c2, p1);
+
+    //bRect_        = QRectF(QPointF(0, 0), QSize(300,50));
     //QPoint refPos = index_.data(MvQFolderModel::PositionRole).toPoint();
-    setPos(QPointF(srcRect.right(), srcRect.center().y()));
+    setPos(QPointF(srcRect.right() + gap, srcRect.center().y()));
+
 
     setPath(p);
 }
@@ -110,12 +120,27 @@ void TriggerGraphEdgeItem::adjust()
 TriggerGraphScene::TriggerGraphScene(QWidget* parent) :
     QGraphicsScene(parent)
 {
-
 }
+
+//===========================================================
+//
+// TriggerGraphView
+//
+//===========================================================
 
 TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent)
 {
+    scene_ = new TriggerGraphScene(this);
+    setScene(scene_);
+
+    model_ = new TriggerGraphModel(TriggerGraphModel::TriggerMode,this);
+    delegate_ = new TriggerGraphDelegate(this);
+    layout_ = new TriggerGraphLayout(this);
+
     actionHandler_=new ActionHandler(this,this);
+
+    setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    setRenderHints(QPainter::Antialiasing);
 
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -148,10 +173,10 @@ TriggerGraphView::~TriggerGraphView()
     delete prop_;
 }
 
-void TriggerGraphView::setModel(TriggerGraphModel* model)
+void TriggerGraphView::clear()
 {
-    Q_ASSERT(model_ == nullptr);
-    model_ = model;
+    model_->clearData();
+    layout_->clear();
 }
 
 void TriggerGraphView::setInfo(VInfo_ptr info)
@@ -308,6 +333,14 @@ void TriggerGraphView::adjustDepConnectColour(VProperty *p)
     }
 }
 
+void TriggerGraphView::adjustSceneRect()
+{
+    QRectF r = scene()->itemsBoundingRect();
+    r.setTopLeft(QPointF(0, 0));
+    r.setBottom(r.bottom() + 10);
+    scene()->setSceneRect(r);
+}
+
 void TriggerGraphView::notifyChange(VProperty* p)
 {
     if(p->path() == "view.trigger.background") {
@@ -328,4 +361,105 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
         item->update();
     }
 
+}
+
+//------------------------------------------
+// Contents handling
+//------------------------------------------
+
+//void TriggerGraphView::scan()
+//{
+//    if (!info_ || !info_->node())
+//        return;
+
+//    VNode *node = info_->node();
+//    Q_ASSERT(node);
+//    scan(node);
+
+//    UiLog().dbg() << model_->rowCount() << layout_->nodes_.size();
+
+//    if(VNode *p = node->parent()) {
+//        layout_->addRelation(p, node, nullptr, TriggerCollector::Hierarchy, nullptr);
+//        scan(p);
+//    }
+//}
+
+void TriggerGraphView::scan(VNode* node)
+{
+    Q_ASSERT(node);
+
+    layout_->scan(node);
+    model_->setItems(layout_->nodes());
+    for(int i=0; i < model_->rowCount(); i++) {
+        layout_->nodes()[i]->addGrNode(model_->index(i,0), delegate_);
+    }
+
+    layout_->build();
+    //layout_->postBuild();s
+    adjustSceneRect();
+
+#if 0
+    // add the node to the layout
+    layout_->addNode(node);
+
+    // performs the trigger collection - it will populate the layout
+    TriggerRelationCollector tc(node, layout_, false);
+    node->triggers(&tc);
+
+//    std::vector<VItem*> items;
+//    for(size_t i=oriNum; i < layout_->nodes_.size(); i++) {
+//        items.push_back(layout_->nodes_[i]->item_);
+//    }
+
+    model_->setItems(layout_->nodes());
+
+    for(int i=0; i < model_->rowCount(); i++) {
+        layout_->nodes()[i]->addGrItem(model_->index(i,0), delegate_);
+    }
+
+    layout_->build();
+    //layout_->postBuild();
+
+//    for(size_t i=0; i < nodes_.size(); i++) {
+//        nodes_[i]->setPos(QPoint(layout_->nodes_[i]->tmpX_, layout_->nodes_[i]->tmpY_));
+//        if (i >= oriNum)
+//            scene_->addItem(nodes_[i]);
+//    }
+
+//    for(size_t i=0; i < edges_.size(); i++) {
+//        scene_->removeItem(edges_[i]);
+//        delete edges_[i];
+//    }
+//    edges_.clear();
+
+//    for(auto e: layout_->edges_) {
+//        TriggerGraphEdgeItem* itemE =new TriggerGraphEdgeItem(nodes_[e->from_], nodes_[e->to_], nullptr);
+//        if (e->mode_ == TriggerCollector::Normal) {
+//            itemE->setPen(ui_->view->triggerConnectPen_);
+//        } else if(e->mode_ == TriggerCollector::Hierarchy) {
+//            itemE->setPen(ui_->view->parentConnectPen_);
+//        } else {
+//            itemE->setPen(ui_->view->depConnectPen_);
+//        }
+//        edges_.push_back(itemE);
+//        scene_->addItem(itemE);
+//    }
+
+    adjustSceneRect();
+#endif
+}
+
+void TriggerGraphView::setEdgePen(TriggerGraphEdgeItem* e)
+{
+    Q_ASSERT(e);
+    switch (e->mode()) {
+        case TriggerCollector::Normal:
+            e->setPen(triggerConnectPen_);
+            break;
+        case TriggerCollector::Hierarchy:
+            e->setPen(parentConnectPen_);
+            break;
+        default:
+            e->setPen(depConnectPen_);
+    }
 }

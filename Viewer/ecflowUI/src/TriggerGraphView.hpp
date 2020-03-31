@@ -10,6 +10,7 @@
 #ifndef TRIGGERGRAPHVIEW_HPP
 #define TRIGGERGRAPHVIEW_HPP
 
+#include "TriggerCollector.hpp"
 #include "VInfo.hpp"
 #include "VProperty.hpp"
 
@@ -22,8 +23,21 @@
 class ActionHandler;
 class PropertyMapper;
 class TriggerGraphDelegate;
+class TriggerGraphLayout;
 class TriggerGraphModel;
 class QModelIndex;
+
+//class NodeRelation
+//{
+//public:
+//    NodeRelation(VItem* trigger, VItem* through, int mode):
+//        trigger_(trigger), through_(through), mode_(mode) {}
+
+//    VItem* trigger_;
+//    VItem* through_;
+//    int	mode_;
+//    NodeRelation* next_ {nullptr};
+//};
 
 class TriggerGraphNodeItem: public QGraphicsItem
 {
@@ -40,6 +54,7 @@ public:
                     QWidget *widget) override;
     int type() const override { return Type; }
 
+    void setIndex(const QModelIndex& index) {index_ = index;}
     const QModelIndex& index() {return index_;}
 
 protected:
@@ -60,17 +75,21 @@ public:
         Type = UserType + 2
     };
 
-    TriggerGraphEdgeItem(QGraphicsItem* srcItem, QGraphicsItem* targetItem, QGraphicsItem* parent);
+    TriggerGraphEdgeItem(QGraphicsItem* srcItem, QGraphicsItem* targetItem,
+                         TriggerCollector::Mode mode, QGraphicsItem* parent);
     int type() const override { return Type; }
     //QRectF boundingRect() const override;
     //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
     //                QWidget *widget) override;
+
+    TriggerCollector::Mode mode() const {return mode_;}
 
 protected:
     void adjust();
 
     QGraphicsItem* srcItem_;
     QGraphicsItem* targetItem_;
+    TriggerCollector::Mode mode_;
     QRectF bRect_;
 };
 
@@ -88,11 +107,14 @@ public:
     TriggerGraphView(QWidget* parent=nullptr);
     ~TriggerGraphView() override;
 
-    void setModel(TriggerGraphModel* model);
+    void clear();
     void setInfo(VInfo_ptr);
     void notifyChange(VProperty* p) override;
     void adjustBackground(VProperty* p=nullptr);
+    void adjustSceneRect();
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
+    void scan(VNode*);
+    void setEdgePen(TriggerGraphEdgeItem* e);
 
 public Q_SLOTS:
     //void slotSelectItem(const QModelIndex&);
@@ -117,12 +139,17 @@ protected:
     void adjustTriggerConnectColour(VProperty* p=nullptr);
     void adjustDepConnectColour(VProperty* p=nullptr);
 
-    TriggerGraphModel* model_{nullptr};
+    TriggerGraphScene* scene_;
+    TriggerGraphDelegate* delegate_;
+    TriggerGraphModel* model_;
     ActionHandler* actionHandler_;
     PropertyMapper* prop_;
+
     QPen parentConnectPen_ {QPen(Qt::red)};
     QPen triggerConnectPen_ {QPen(Qt::black)};
     QPen depConnectPen_ {QPen(Qt::blue)};
+
+    TriggerGraphLayout* layout_;
 };
 
 #endif // TRIGGERGRAPHVIEW_HPP

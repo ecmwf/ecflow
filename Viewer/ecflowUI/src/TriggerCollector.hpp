@@ -176,6 +176,27 @@ protected:
     std::vector<TriggerTableItem*> items_;
 };
 
+//class TriggerRelationCollector : public TriggerCollector
+//{
+//public:
+//    TriggerRelationCollector(VItem* node, TriggerGraphWidget* w, bool e) :
+//       node_(node), w_(w), e_(e) {}
+
+//    bool scanParents() override { return e_; }
+//    bool scanKids() override { return e_; }
+
+//    bool add(VItem* n, VItem* p,Mode mode) override {
+//        w_->addRelation(n, node_, p, mode, n);
+//        n_++;
+//    }
+
+//private:
+//    int n_ {0};
+//    VItem* node_;
+//    TriggerGraphWidget* w_;
+//    bool e_;
+//};
+
 #if 0
 class nl1 : public trigger_lister {
     int	    n_;
