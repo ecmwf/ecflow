@@ -241,7 +241,7 @@ BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
    BOOST_REQUIRE_MESSAGE(theClient.defs()->get_edit_history(Str::ROOT_PATH()).size() ==  0,"Expected edit history of size 0, but found " <<  theClient.defs()->get_edit_history(Str::ROOT_PATH()).size());
 
    // This should write the edit history
-   BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs(ecf::CheckPt::ALWAYS) == 0,CtsApi::checkPtDefs(ecf::CheckPt::ALWAYS) << " failed should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs() == 0,CtsApi::checkPtDefs() << " failed should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE(fs::exists(invokeServer.ecf_checkpt_file()),CtsApi::checkPtDefs() << " failed No check pt file(" << invokeServer.ecf_checkpt_file() << ") saved");
    BOOST_REQUIRE_MESSAGE(fs::file_size(invokeServer.ecf_checkpt_file()) !=0,"Expected check point file(" << invokeServer.ecf_checkpt_file() << ") to have file size > 0  ");
 
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
    // Create a defs file from the check pt file & check edit history
    {
       Defs defs;
-      defs.restore(invokeServer.ecf_checkpt_file()); // make a data model change
+      defs.restore(invokeServer.ecf_checkpt_file()); // restore defs from checkpoint
       BOOST_REQUIRE_MESSAGE(defs.get_edit_history(Str::ROOT_PATH()).size() == 5,"Expected edit history of size 5, but found " <<  defs.get_edit_history(Str::ROOT_PATH()).size());
    }
 
@@ -257,12 +257,12 @@ BOOST_AUTO_TEST_CASE( test_check_pt_edit_history )
       // clear edit history
       BOOST_REQUIRE_MESSAGE(theClient.edit_history("clear") == 0,CtsApi::to_string(CtsApi::edit_history("clear")) << " should return 0\n" << theClient.errorMsg());
 
-      // write checkpoint file
-      BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs(ecf::CheckPt::ALWAYS) == 0,CtsApi::checkPtDefs(ecf::CheckPt::ALWAYS) << " failed should return 0\n" << theClient.errorMsg());
+      // write checkpoint file, NOTE: theClient.checkPtDefs(ecf::CheckPt::ALWAYS) *ONLY* changes the mode.
+      BOOST_REQUIRE_MESSAGE(theClient.checkPtDefs() == 0,CtsApi::checkPtDefs() << " failed should return 0\n" << theClient.errorMsg());
 
       // restore defs from checkpoint file
       Defs defs;
-      defs.restore(invokeServer.ecf_checkpt_file()); // make a data model change
+      defs.restore(invokeServer.ecf_checkpt_file()); // restore defs from checkpoint
       BOOST_REQUIRE_MESSAGE(defs.get_edit_history().size() == 0,"Expected edit history of size 0, but found " <<  defs.get_edit_history().size());
    }
 }

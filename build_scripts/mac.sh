@@ -13,40 +13,105 @@
 #https://wiki.eclipse.org/CDT/User/FAQ#How_do_I_get_the_LLDB_debugger.3F
 #
 
+# ====================================================================
+show_error_and_exit() {
+   echo "cmake.sh expects at least one argument"
+   echo " cmake.sh [ options] "
+   echo ""
+   echo "   debug          - make a DEBUG build"
+   echo "   make           - run make after cmake"
+   echo "   ctest          - all ctest -R <test> -V"
+   echo "   clang          - build with clang compiler"
+   echo "   no_gui         - Don't build the gui"
+   echo "   no_ssl         - build without using openssl"
+   echo "   log            - enable debug output"
+   echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
+   exit 1
+}
+
 # ====================================================================================
 # Build type to Release    
-cmake_build_type=Release
-if [[ $# -eq 1 ]] ; then
-   if [[ $1 = debug ]] ; then
-       cmake_build_type=Debug
-   fi
-fi
+mode_arg=release
+compiler=clang
 
-clang_arg=
+package_source_arg=
+make_arg=
+test_arg=
+ctest_arg=
+no_gui_arg=
+log_arg=
+clean_arg=
+install_arg=
+
+while [[ "$#" != 0 ]] ; do   
+
+   if [[ "$1" = debug || "$1" = release ]] ; then
+      mode_arg=$1
+   elif  [[ "$1" = make ]] ; then
+      make_arg=$1
+      shift
+      while [[ "$#" != 0 ]] ; do
+         make_arg="$make_arg $1"
+         shift
+      done
+      break
+   elif [[ "$1" = clean ]] ;   then clean_arg=$1 ;
+   elif [[ "$1" = install ]] ; then install_arg=$1 ;
+   elif [[ "$1" = gcc ]] ;     then compiler=$1 ;
+   elif [[ "$1" = clang ]] ;   then compiler=$1 ;
+   elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
+   elif [[ "$1" = log ]]   ;   then log_arg=$1 ;
+   elif [[ "$1" = test ]] ;    then test_arg=$1 ;
+   elif [[ "$1" = package_source ]] ; then package_source_arg=$1 ;
+   elif [[ "$1" = ctest ]] ; then  
+      ctest_arg=$1 ; 
+      shift
+      while [[ "$#" != 0 ]] ; do
+         ctest_arg="$ctest_arg $1"
+         shift
+      done
+      break
+   else
+     show_error_and_exit
+   fi
+
+   # shift remove last argument
+   shift
+done
+
+
+# ====================================================================================
+# default to Release  
+cmake_build_type=
+if [[ $mode_arg = debug ]] ; then
+    cmake_build_type=Debug
+else
+    cmake_build_type=Release
+fi
 
 CXX_FLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -Wno-deprecated-declarations"
 #CXX_LINK_FLAGS=""
 
 cmake_extra_options=""
-if [[ "$clang_arg" = clang ]] ; then
+if [[ "$compiler" = clang ]] ; then
     # relies on brew install
-    #brew install cmake
+    # brew install cmake
     #
     # the brew version of boost was built with -fvisibility=hidden -fvisibility-inlines-hidden
     # We need same flags, otherwise large warning messages
-    #brew install boost
-    #brew install boost-python3
+    # brew install boost
+    # brew install boost-python3
     #
-    #https://medium.com/@timmykko/using-openssl-library-with-macos-sierra-7807cfd47892
-    #brew install openssl  # however this may not set the right links
+    # https://medium.com/@timmykko/using-openssl-library-with-macos-sierra-7807cfd47892
+    # brew install openssl  # however this may not set the right links
     #
     # Do the following if config steps fails with cannot find openssl
-    #ln -s /usr/local/opt/openssl/include/openssl /usr/local/include
+    # ln -s /usr/local/opt/openssl/include/openssl /usr/local/include
     #
-    #ln -s /usr/local/opt/openssl/lib/libssl.1.1.1.dylib /usr/local/lib/
+    # ln -s /usr/local/opt/openssl/lib/libssl.1.1.1.dylib /usr/local/lib/
     #
     # to list the clang default system search path use:
-    #clang -x c -v -E /dev/null
+    # clang -x c -v -E /dev/null
    cmake_extra_options="$cmake_extra_options -DBOOST_ROOT=/usr/local"
    CXX_FLAGS="$CXX_FLAGS -ftemplate-depth=512"
 else
@@ -57,16 +122,67 @@ else
    cmake_extra_options="$cmake_extra_options -DCMAKE_CXX_COMPILER=/usr/local/opt/gcc/bin/g++-9"
 fi
 
+log_options=
+if [[ $log_arg = log ]] ; then
+    log_options="-DECBUILD_LOG_LEVEL=DEBUG"
+fi
+
+gui_options=
+if [[ $no_gui_arg = no_gui ]] ; then
+    gui_options="-DENABLE_UI=OFF"
+fi
+
+test_options=
+if [[ $test_arg = test ]] ; then
+   test_options="-DENABLE_ALL_TESTS=ON"
+fi
+
+if [[ $package_source_arg = package_source ]] ; then
+    # for packaging we build GUI by default, and do not run all tests
+    gui_options=  
+fi
+
+bdir=${HOME}/git/bdir/ecflow/$mode_arg/$compiler
+if [[ $clean_arg = clean ]] ; then
+   rm -rf ${HOME}/git/bdir
+fi
+mkdir -p $bdir
+cd $bdir
+
+if [[ "$ctest_arg" != "" ]] ; then
+    $ctest_arg 
+    exit 0
+fi
+
+
+# ====================================================================================
+# Use for local install
+version=$(awk '/^project/ && /ecflow/ && /VERSION/ {for (I=1;I<=NF;I++) if ($I == "VERSION") {print $(I+1)};}' ${HOME}/git/ecflow/CMakeLists.txt) 
+#echo $version
+
+# ====================================================================================
+# default to install in $HOME/install, otherwise if install passed, /usr/local/opt  
+install_prefix=${HOME}/install/ecflow/${version}
+if [[ $install_arg = install ]] ; then
+    install_prefix=/usr/local/opt/ecflow/${version}
+fi
+
 cmake ${HOME}/git/ecflow \
       -DCMAKE_MODULE_PATH=${HOME}/git/ecbuild/cmake \
       -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
       -DCMAKE_BUILD_TYPE=$cmake_build_type \
       -DCMAKE_PREFIX_PATH=/usr/local/opt/qt \
-      -DCMAKE_INSTALL_PREFIX=${HOME}/install_test \
+      -DCMAKE_INSTALL_PREFIX=${install_prefix} \
       -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
-      ${cmake_extra_options}
-      
+      ${cmake_extra_options} \
+      ${gui_options} \
+      ${ssl_options} \
+      ${log_options} \
+      ${test_options}  
       #-DCMAKE_EXE_LINKER_FLAGS="$CXX_LINK_FLAGS" \
       
-      
-      
+# =============================================================================================
+if [[ "$make_arg" != "" ]] ; then
+    $make_arg 
+fi
+

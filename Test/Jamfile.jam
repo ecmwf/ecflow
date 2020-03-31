@@ -64,7 +64,7 @@ exe s_test : [ glob Test*.cpp : TestSingle.cpp TestZombies.cpp ]
            /site-config//boost_chrono
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
-           <library>/ecflow_top//openssl_libs 
+           <library>/site-config//openssl_libs 
  	     ;
  	     
 # Split because this was more error prone, Now stabilised all all platforms ?
@@ -84,7 +84,7 @@ exe s_test_zombies : [ glob TestZombies.cpp  ]
            /site-config//boost_chrono
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
-           <library>/ecflow_top//openssl_libs 
+           <library>/site-config//openssl_libs 
         ;
 
 # use for standalone testing
@@ -104,5 +104,5 @@ exe singletest : [ glob TestSingle.cpp  ]
            /site-config//boost_chrono
          : <include>../Base/test 
            <variant>debug:<define>DEBUG
-           <library>/ecflow_top//openssl_libs 
+           <library>/site-config//openssl_libs 
  	     ;

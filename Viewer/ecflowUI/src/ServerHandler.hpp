@@ -58,6 +58,7 @@ public:
 	const std::string& name() const {return name_;}
 	const std::string& host() const {return host_;}
 	const std::string& longName() const {return longName_;}
+    const std::string& fullLongName() const {return fullLongName_;}
 	const std::string& port() const {return port_;}
     bool isSsl() const {return ssl_;}
     const std::string& user() {return user_;}
@@ -135,6 +136,8 @@ protected:
     ServerHandler(const std::string& name,const std::string& host,const std::string&  port,
                   const std::string& user, bool ssl);
 	~ServerHandler() override;
+    void logout();
+    void queueLoggedOut();
 
     //Only friend classes can access it. Practically it means we
     //we can only run it through CommandHandler!!!
@@ -158,6 +161,7 @@ protected:
     bool ssl_;
 	ClientInvoker* client_;
 	std::string longName_;
+    std::string fullLongName_;
 	bool updating_;
 	bool communicating_;
 	std::vector<NodeObserver*> nodeObservers_;

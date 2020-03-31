@@ -130,9 +130,7 @@ void ClientSuites::collateChanges(DefsDelta& changes) const
    for(const HSuite& s: suites_) {
       suite_ptr suite = s.weak_suite_ptr_.lock();
       if (suite.get()) {
-         if (suite->state_change_no() > changes.client_state_change_no()) {
-            suite->collateChanges( changes );
-         }
+         suite->collateChanges( changes );
       }
    }
 }
