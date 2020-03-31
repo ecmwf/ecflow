@@ -69,7 +69,7 @@ void ServerItem::reset(const std::string& name,const std::string& host,const std
     {
         host_=host;
         port_=port;
-        user_=port;
+        user_=user;
         ssl_=ssl;
         //TODO: reload the server!!!
     }
