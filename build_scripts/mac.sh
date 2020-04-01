@@ -95,6 +95,7 @@ cmake_extra_options=""
 if [[ "$compiler" = clang ]] ; then
     # relies on brew install
     # brew install cmake
+    # brew install qt
     #
     # the brew version of boost was built with -fvisibility=hidden -fvisibility-inlines-hidden
     # We need same flags, otherwise large warning messages
