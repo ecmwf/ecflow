@@ -37,6 +37,7 @@ make_arg=
 test_arg=
 ctest_arg=
 no_gui_arg=
+no_ssl_arg=
 log_arg=
 clean_arg=
 install_arg=
@@ -58,6 +59,7 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = gcc ]] ;     then compiler=$1 ;
    elif [[ "$1" = clang ]] ;   then compiler=$1 ;
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
+   elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
    elif [[ "$1" = log ]]   ;   then log_arg=$1 ;
    elif [[ "$1" = test ]] ;    then test_arg=$1 ;
    elif [[ "$1" = ctest ]] ; then  
@@ -129,6 +131,11 @@ if [[ $no_gui_arg = no_gui ]] ; then
     gui_options="-DENABLE_UI=OFF"
 fi
 
+ssl_options="-DOPENSSL_ROOT_DIR=/usr/local/opt/openssl"
+if [[ $no_ssl_arg = no_ssl ]] ; then
+    ssl_options="-DENABLE_SSL=OFF"
+fi
+
 test_options=
 if [[ $test_arg = test ]] ; then
    test_options="-DENABLE_ALL_TESTS=ON"
@@ -165,7 +172,6 @@ cmake ${HOME}/git/ecflow \
       -DCMAKE_BUILD_TYPE=$cmake_build_type \
       -DCMAKE_PREFIX_PATH=/usr/local/opt/qt \
       -DCMAKE_INSTALL_PREFIX=${install_prefix} \
-      -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
       ${cmake_extra_options} \
       ${gui_options} \
       ${ssl_options} \
