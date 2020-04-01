@@ -168,7 +168,7 @@ void SimpleGraphLayoutBuilder::buildIt()
 {
     int H_DIST = 10;
     int V_DIST = 10;
-    int H_MIN_SPACE = 30;
+    int H_MIN_SPACE = 80;
     int V_MIN_SPACE = 10;
     int max_in_a_level = 0;
     int max_level = 0;

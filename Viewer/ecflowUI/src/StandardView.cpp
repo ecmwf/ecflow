@@ -431,7 +431,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
 
         //Draw the item with the delegate
         QSize paintedSize;
-        delegate_->paint(painter,opt,item->index,paintedSize);
+        delegate_->paintIt(painter,opt,item->index,paintedSize);
 
         //we have to know if the item width/height is the same that we expected.
         //This can happen when:

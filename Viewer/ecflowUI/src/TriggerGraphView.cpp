@@ -49,6 +49,28 @@ private:
     bool e_;
 };
 
+class TriggeredRelationCollector : public TriggerCollector
+{
+public:
+    TriggeredRelationCollector(VItem* node, TriggerGraphView* view, bool e) :
+       node_(node), view_(view), e_(e) {}
+
+    bool scanParents() override { return e_; }
+    bool scanKids() override { return e_; }
+
+    bool add(VItem* n, VItem* p,Mode mode) override {
+        view_->addRelation(node_, n, p, mode, n);
+        n_++;
+        return true;
+    }
+
+private:
+    int n_ {0};
+    VItem* node_;
+    TriggerGraphView* view_;
+    bool e_;
+};
+
 //=============================================================
 //
 // TriggerGraphNodeItem
@@ -97,10 +119,10 @@ void TriggerGraphNodeItem::adjustSize()
 {
     prepareGeometryChange();
 
-    int w, h;
+    int w=0, h=0;
     QModelIndex idx=view_->model()->index(index_, 0);
     if (idx.isValid()) {
-        view_->delegate()->sizeHintCompute(idx,w,h);
+        view_->delegate()->sizeHintCompute(idx,w,h, true);
         bRect_ = QRectF(QPointF(0, 0), QSize(w, h));
     }
 }
@@ -116,15 +138,6 @@ void TriggerGraphNodeItem::addRelation(TriggerGraphNodeItem* o)
     children_.push_back(o);
     o->parents_.push_back(this);
 }
-
-//void TriggerGraphNodeNode::addGrNode(const QModelIndex& idx, TriggerGraphDelegate* delegate)
-//{
-//    if (!grItem_) {
-//        grItem_ = new TriggerGraphNodeItem(idx, delegate, -1, nullptr);
-//    } else {
-//        grItem_->setIndex(idx);
-//    }
-//}
 
 void TriggerGraphNodeItem::adjustPos(int x, int y)
 {
@@ -146,7 +159,6 @@ GraphLayoutNode* TriggerGraphNodeItem::toGraphNode()
 }
 
 
-
 //=============================================================
 //
 // TriggerGraphEdgeItem
@@ -160,7 +172,6 @@ TriggerGraphEdgeItem::TriggerGraphEdgeItem(
     from_(from), to_(to), through_(through), mode_(mode),
     trigger_(trigger), view_(view)
 {
-    //adjust();
 }
 
 void TriggerGraphEdgeItem::adjust()
@@ -177,18 +188,19 @@ void TriggerGraphEdgeItem::adjust()
     QPointF c1(p1.x()/2, 0);
     QPointF c2(p1.x()/2, targetRect.center().y() - srcRect.center().y());
 
-    //p.lineTo(p1);
+    // bezier curve
     p.cubicTo(c1, c2, p1);
 
     // add arrow to mid-point of curve
     auto poly = p.toSubpathPolygons();
+    QPolygonF tri;
     if (poly.count() == 1) {
         if (poly[0].count() > 3) {
             int n = poly[0].count()/2-1;
             double angle = atan2(poly[0].at(n+1).y() - poly[0].at(n).y(),
                     poly[0].at(n+1).x() - poly[0].at(n).x());
+
             //define triangle
-            QPolygonF tri;
             tri << QPointF(0.,-arrowHeight_/2) <<
                 QPointF(arrowWidth_, 0.) <<
                 QPointF(0.,arrowHeight_/2);
@@ -201,10 +213,21 @@ void TriggerGraphEdgeItem::adjust()
 
                 tri[i] += poly[0].at(n);
             }
+        } else if (poly[0].count() == 2) {
+            //define triangle
+            tri << QPointF(0.,-arrowHeight_/2) <<
+                QPointF(arrowWidth_, 0.) <<
+                QPointF(0.,arrowHeight_/2);
 
-            p.addPolygon(tri);
+            //translate triangle
+            for(int i=0; i < tri.count(); i++) {
+                tri[i] += (poly[0].at(0) + poly[0].at(1))/2.;
+            }
         }
     }
+
+    if (tri.count() > 0)
+        p.addPolygon(tri);
 
     view_->setEdgePen(this);
 
@@ -215,12 +238,6 @@ void TriggerGraphEdgeItem::adjust()
     if (!scene())
         view_->scene()->addItem(this);
 }
-
-//QRectF TriggerGraphEdgeItem::boundingRect() const
-//{
-//    return bRect_;
-//}
-
 
 TriggerGraphScene::TriggerGraphScene(QWidget* parent) :
     QGraphicsScene(parent)
@@ -593,6 +610,9 @@ void TriggerGraphView::scanOne(VNode* node)
     // performs the trigger collection - it will populate the layout
     TriggerRelationCollector tc(node, this, dependency_);
     node->triggers(&tc);
+
+    TriggeredRelationCollector tc1(node, this, dependency_);
+    node->triggered(&tc1);
 }
 
 void TriggerGraphView::buildLayout()

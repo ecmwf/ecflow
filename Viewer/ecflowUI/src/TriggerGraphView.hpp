@@ -179,6 +179,7 @@ class TriggerGraphView : public QGraphicsView, public VPropertyObserver
 {
     Q_OBJECT
     friend class TriggerRelationCollector;
+    friend class TriggeredRelationCollector;
 
 public:
     TriggerGraphView(QWidget* parent=nullptr);

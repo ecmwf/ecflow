@@ -17,14 +17,8 @@
 #include <QWidget>
 
 class TriggerTableItem;
-class TriggerGraphModel;
 class TriggerTableCollector;
 class TriggerItemWidget;
-class TriggerGraphScene;
-class TriggerGraphDelegate;
-class TriggerGraphLayout;
-class TriggerGraphNodeItem;
-class TriggerGraphEdgeItem;
 
 class VComboSettings;
 
@@ -63,18 +57,12 @@ private:
     Ui::TriggerGraphWidget* ui_;
 
 private:
-    //TriggerGraphScene* scene_;
-    //TriggerGraphDelegate* delegate_;
     VInfo_ptr info_;
     bool dependency_ {false};
     TriggerTableCollector* triggerTc_ {nullptr};
     TriggerTableCollector* triggeredTc_ {nullptr};
     VInfo_ptr lastSelectedItem_;
     QString depLabelText_;
-    //TriggerGraphModel* model_;
-    //TriggerGraphLayout* layout_;
-    //std::vector<TriggerGraphNodeItem*> nodes_;
-    //std::vector<TriggerGraphEdgeItem*> edges_;
 };
 
 #endif // TRIGGERGRAPHWIDGET_HPP

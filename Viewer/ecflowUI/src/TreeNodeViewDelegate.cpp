@@ -255,6 +255,8 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent)
 TreeNodeViewDelegate::~TreeNodeViewDelegate()
 {
     delete animation_;
+    if (tmpPainter_)
+        delete tmpPainter_;
 }
 
 void TreeNodeViewDelegate::updateSettings()
@@ -336,7 +338,7 @@ QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIn
 }
 
 //This has to be extremely fast
-void  TreeNodeViewDelegate::sizeHintCompute(const QModelIndex& index,int& w,int& h) const
+void  TreeNodeViewDelegate::sizeHintCompute(const QModelIndex& index,int& w,int& h, bool compAttrWidth) const
 {
     QVariant tVar=index.data(Qt::DisplayRole);
 
@@ -364,18 +366,35 @@ void  TreeNodeViewDelegate::sizeHintCompute(const QModelIndex& index,int& w,int&
         h=attrBox_->fullHeight;
 
         //It is a big enough hint for the width.
-        w=300;
+        if (!compAttrWidth) {
+            w=300;
 
-        //For multiline labels we need to compute the height
-        int attLineNum=0;
-        if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 1)
-        {
-            h=labelHeight(attLineNum);
+            //For multiline labels we need to compute the height
+            int attLineNum=0;
+            if((attLineNum=index.data(AbstractNodeModel::AttributeLineRole).toInt()) > 1)
+            {
+                h=labelHeight(attLineNum);
+            }
+        } else {
+            if (tmpPix_.isNull() || tmpPix_.height() < attrBox_->fullHeight + 4) {
+                tmpPix_ = QPixmap(1000, attrBox_->fullHeight + 4);
+                if (tmpPainter_) {
+                    delete tmpPainter_;
+                }
+                tmpPainter_ = new QPainter(&tmpPix_);
+            }
+            Q_ASSERT(tmpPainter_);
+            QStyleOptionViewItem opt;
+            opt.rect=QRect(0,0, tmpPix_.width(), tmpPix_.height());
+            QSize s;
+            paintIt(tmpPainter_, opt, index, s);
+            h = s.height();
+            w = s.width();
         }
     }
 }
 
-void TreeNodeViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
+void TreeNodeViewDelegate::paintIt(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index,QSize& size) const
 {
     size=QSize(0,0);
