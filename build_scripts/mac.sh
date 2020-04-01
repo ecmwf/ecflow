@@ -25,7 +25,6 @@ show_error_and_exit() {
    echo "   no_gui         - Don't build the gui"
    echo "   no_ssl         - build without using openssl"
    echo "   log            - enable debug output"
-   echo "   package_source - produces ecFlow-<version>-Source.tar.gz file, for users"
    exit 1
 }
 
@@ -34,7 +33,6 @@ show_error_and_exit() {
 mode_arg=release
 compiler=clang
 
-package_source_arg=
 make_arg=
 test_arg=
 ctest_arg=
@@ -62,7 +60,6 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = no_gui ]] ;  then no_gui_arg=$1 ;
    elif [[ "$1" = log ]]   ;   then log_arg=$1 ;
    elif [[ "$1" = test ]] ;    then test_arg=$1 ;
-   elif [[ "$1" = package_source ]] ; then package_source_arg=$1 ;
    elif [[ "$1" = ctest ]] ; then  
       ctest_arg=$1 ; 
       shift
@@ -135,11 +132,6 @@ fi
 test_options=
 if [[ $test_arg = test ]] ; then
    test_options="-DENABLE_ALL_TESTS=ON"
-fi
-
-if [[ $package_source_arg = package_source ]] ; then
-    # for packaging we build GUI by default, and do not run all tests
-    gui_options=  
 fi
 
 bdir=${HOME}/git/bdir/ecflow/$mode_arg/$compiler
