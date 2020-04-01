@@ -3,7 +3,8 @@
 # - $WK is defined to be root of ecflow tree
 # - ecflow is installed to: Linux  - /tmp/${USER}/install/cmake/ecflow/${ECFLOW_VERSION} 
 #                           Darwin - $(HOME)/install/ecflow/${ECFLOW_VERSION} 
-#   Install using: cd $WK; ./cmake.sh make -j8 install
+#   Linux Install using: cd $WK; ./cmake.sh make -j8 install
+#   mac   Install using: cd $WK; build_scripts/mac.sh make -j8 install
 # - metabuilder is at $WK/../metabuild
 
 # Alter the command below to either
