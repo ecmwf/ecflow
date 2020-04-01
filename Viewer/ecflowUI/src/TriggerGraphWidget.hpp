@@ -43,13 +43,16 @@ public:
     ~TriggerGraphWidget() override;
 
     void clear();
-    void setInfo(VInfo_ptr info);
-    void adjust(VInfo_ptr info, TriggerTableCollector* triggerTc1, TriggerTableCollector* tc2);
+    void setInfo(VInfo_ptr info, bool dependency);
+    VInfo_ptr info() const {return info_;}
+    bool dependency() const {return dependency_;}
+    void adjust(VInfo_ptr info, bool dependency, TriggerTableCollector* triggerTc1, TriggerTableCollector* tc2);
     void setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2);
     void beginTriggerUpdate();
     void endTriggerUpdate();
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
     void scan();
+    void setTriggeredScanner(TriggeredScanner*);
     //void scan(VNode*);
 
 Q_SIGNALS:
@@ -63,6 +66,7 @@ private:
     //TriggerGraphScene* scene_;
     //TriggerGraphDelegate* delegate_;
     VInfo_ptr info_;
+    bool dependency_ {false};
     TriggerTableCollector* triggerTc_ {nullptr};
     TriggerTableCollector* triggeredTc_ {nullptr};
     VInfo_ptr lastSelectedItem_;

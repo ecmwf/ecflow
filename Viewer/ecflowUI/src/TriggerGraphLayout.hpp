@@ -83,9 +83,11 @@ public:
     ~TriggerGraphLayout();
 
     void clear();
-    void scan(VNode* node);
+    void scan(VNode* node, bool dependency);
     void build();
     const std::vector<TriggerGraphLayoutNode*> nodes() const {return nodes_;}
+    bool dependency() const {return dependency_;}
+    void setTriggeredScanner(TriggeredScanner* scanner) {triggeredScanner_=scanner;}
 
 protected:
     void scanOne(VNode* node);
@@ -100,6 +102,10 @@ protected:
     std::vector<TriggerGraphLayoutNode*> nodes_;
     std::vector<TriggerGraphLayoutEdge*> edges_;
     TriggerGraphView* view_;
+
+    bool dependency_ {false};
+    TriggeredScanner *triggeredScanner_ {nullptr};
+
 };
 
 #endif // TRIGGERGRAPHLAYOUT_HPP

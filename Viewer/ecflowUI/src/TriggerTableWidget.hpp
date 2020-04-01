@@ -33,6 +33,8 @@ public:
     ~TriggerTableWidget() override;
 
     void setInfo(VInfo_ptr);
+    VInfo_ptr info() const {return info_;}
+    bool needToAdjust(VInfo_ptr, bool) const;
     void adjust(VInfo_ptr info, TriggerTableCollector* triggerTc1, TriggerTableCollector* tc2);
     void setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2);
 	void clear();

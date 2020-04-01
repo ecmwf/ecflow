@@ -130,9 +130,10 @@ void TriggerGraphLayout::clear()
     edges_.clear();
 }
 
-void TriggerGraphLayout::scan(VNode* node)
+void TriggerGraphLayout::scan(VNode* node, bool dependency)
 {
     Q_ASSERT(node);
+    dependency_ = dependency;s
     scanOne(node);
 
 //    if(VNode *p = node->parent()) {
@@ -149,7 +150,7 @@ void TriggerGraphLayout::scanOne(VNode* node)
     addNode(node);
 
     // performs the trigger collection - it will populate the layout
-    TriggerRelationCollector tc(node, this, true);
+    TriggerRelationCollector tc(node, this, dependency_);
     node->triggers(&tc);
 }
 

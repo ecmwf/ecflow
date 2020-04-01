@@ -52,6 +52,8 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     connect(scanner_,SIGNAL(scanProgressed(int)),
             this,SLOT(scanProgressed(int)));
 
+    triggerGraph_->setTriggeredScanner(scanner_);
+
     //Messages
     messageLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
@@ -172,34 +174,65 @@ void TriggerItemWidget::load()
         exprTe_->setPlainText(txt);
 
         if (tab_->currentIndex() == TableTabIndex) {
-            triggerTable_->setInfo(info_);
-            triggerTable_->beginTriggerUpdate();
-        } else if (tab_->currentIndex() == TableTabIndex) {
-            triggerGraph_->setInfo(info_);
-            triggerGraph_->beginTriggerUpdate();
-        }
-
-        //collect the list of triggers of this node
-        triggerCollector_->setDependency(dependency());
-        n->triggers(triggerCollector_);
-
-        triggeredCollector_->setDependency(dependency());
-        n->triggered(triggeredCollector_,triggeredScanner());
-
-        if (tab_->currentIndex() == TableTabIndex) {
-            triggerTable_->setTriggerCollector(triggerCollector_,triggeredCollector_);
-            triggerTable_->endTriggerUpdate();
-            triggerTable_->resumeSelection();
+            loadTable();
         } else {
-            triggerGraph_->setTriggerCollector(triggerCollector_,triggeredCollector_);
-            triggerGraph_->endTriggerUpdate();
-            triggerTable_->resumeSelection();
+            loadGraph();
         }
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QGuiApplication::restoreOverrideCursor();
 #endif
     }
+}
+
+void TriggerItemWidget::loadTable()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+    triggerTable_->clear();
+
+    if(!info_ || !info_->isNode() || !info_->node())
+        return;
+
+    VNode* n=info_->node();
+    Q_ASSERT(n);
+
+    //At this point the tables are cleared so it is safe to clear the collectors
+    triggerCollector_->clear();
+    triggeredCollector_->clear();
+
+    triggerTable_->setInfo(info_);
+    triggerTable_->beginTriggerUpdate();
+
+    //collect the list of triggers of this node
+    triggerCollector_->setDependency(dependency());
+    n->triggers(triggerCollector_);
+
+    triggeredCollector_->setDependency(dependency());
+    n->triggered(triggeredCollector_,triggeredScanner());
+
+    triggerTable_->setTriggerCollector(triggerCollector_,triggeredCollector_);
+    triggerTable_->endTriggerUpdate();
+    triggerTable_->resumeSelection();
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
+}
+
+void TriggerItemWidget::loadGraph()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+
+    triggerGraph_->clear();
+    triggerGraph_->setInfo(info_, dependency());
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
 }
 
 void TriggerItemWidget::clearContents()
@@ -337,11 +370,13 @@ void TriggerItemWidget::infoProgress(const std::string& text,int value)
 void TriggerItemWidget::slotCurrentTabChanged(int)
 {
     if (tab_->currentIndex() == TableTabIndex) {
-        triggerTable_->adjust(info_, triggerCollector_, triggeredCollector_);
-        //graphTable_->setActive(false);
+        if (triggerTable_->info() != info_ || triggerCollector_->isExtended() != dependency()) {
+            loadTable();
+        }
     } else if (tab_->currentIndex() == GraphTabIndex) {
-        triggerGraph_->adjust(info_, triggerCollector_, triggeredCollector_);
-        //graphTable_->setActive(false);
+        if (triggerGraph_->info() != info_ || triggerGraph_->dependency() != dependency()) {
+            loadGraph();
+        }
     }
 }
 

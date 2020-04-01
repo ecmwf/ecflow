@@ -162,6 +162,7 @@ public:
     bool scanParents() override { return extended_; }
     bool scanKids() override { return extended_; }
     void setDependency(bool);
+    bool isExtended() const {return extended_;}
     void clear();
     size_t size() const {return items_.size();}
 

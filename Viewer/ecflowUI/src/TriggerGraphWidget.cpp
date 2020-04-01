@@ -62,14 +62,13 @@ void TriggerGraphWidget::clear()
 {
     info_.reset();
     ui_->view->clear();
-    //model_->clearData();
-    //scene_->clear();
 }
 
-void TriggerGraphWidget::setInfo(VInfo_ptr info)
+void TriggerGraphWidget::setInfo(VInfo_ptr info, bool dependency)
 {
     info_=info;
-
+    dependency_ = dependency;
+    scan();
     //nodeModel_->beginUpdate();
     //nodeCollector_->clear();
     //if(info_)
@@ -84,13 +83,13 @@ void TriggerGraphWidget::setInfo(VInfo_ptr info)
     //ui_->view->setInfo(info);
 }
 
-void TriggerGraphWidget::adjust(VInfo_ptr info, TriggerTableCollector* tc1, TriggerTableCollector* tc2)
+void TriggerGraphWidget::adjust(VInfo_ptr info, bool dependency, TriggerTableCollector* tc1, TriggerTableCollector* tc2)
 {
     if (!info) {
         clear();
     } else if(info_ != info) {
-        setInfo(info);
-        scan();
+        setInfo(info, dependency);
+        //scan();
 //        beginTriggerUpdate();
 //        setTriggerCollector(tc1,tc2);
 //        endTriggerUpdate();
@@ -140,7 +139,7 @@ void TriggerGraphWidget::scan()
 
     VNode *node = info_->node();
     Q_ASSERT(node);
-    ui_->view->scan(node);
+    ui_->view->scan(node, dependency_);
 
 //    UiLog().dbg() << model_->rowCount() << layout_->nodes_.size();
 
@@ -149,6 +148,11 @@ void TriggerGraphWidget::scan()
 //        scan(p);
 //    }
 
+}
+
+void TriggerGraphWidget::setTriggeredScanner(TriggeredScanner* scanner)
+{
+    ui_->view->setTriggeredScanner(scanner);
 }
 
 //void TriggerGraphWidget::scan(VNode* node)

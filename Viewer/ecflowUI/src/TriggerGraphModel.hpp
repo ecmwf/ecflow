@@ -20,7 +20,7 @@
 #include "Aspect.hpp"
 
 class NodeQueryResult;
-class TriggerGraphLayoutNode;
+class TriggerGraphNodeItem;
 
 class TriggerGraphModel : public QAbstractItemModel
 {
@@ -64,7 +64,7 @@ public:
 //    void setTriggerCollectors(TriggerTableCollector *triggerTc,
 //                              TriggerTableCollector *triggeredTv);
 
-    void setItems(const std::vector<TriggerGraphLayoutNode*>&);
+    void setItems(const std::vector<TriggerGraphNodeItem*>&);
     void appendItems(const std::vector<VItem*>& items);
 
     void clearData();

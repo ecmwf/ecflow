@@ -12,7 +12,7 @@
 
 #include "IconProvider.hpp"
 #include "ServerHandler.hpp"
-#include "TriggerGraphLayout.hpp"
+#include "TriggerGraphView.hpp"
 #include "VAttribute.hpp"
 #include "VAttributeType.hpp"
 #include "VIcon.hpp"
@@ -37,7 +37,7 @@ void TriggerGraphModel::clearData()
     endResetModel();
 }
 
-void TriggerGraphModel::setItems(const std::vector<TriggerGraphLayoutNode*>& items)
+void TriggerGraphModel::setItems(const std::vector<TriggerGraphNodeItem*>& items)
 {
     beginResetModel();
     for(auto it: items) {
