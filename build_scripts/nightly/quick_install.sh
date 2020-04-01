@@ -31,7 +31,7 @@ else
    install_prefix="/tmp/${USER}/install/cmake"
    export PATH=${install_prefix}/ecflow/${ECFLOW_VERSION}/bin:$PATH
    if [[ $PYTHON == "python3" ]] ; then
-      module load python3
+      #module load python3
   
       python_dot_version=$(python3 -c 'import sys;print(sys.version_info[0],".",sys.version_info[1],sep="")')
       export PYTHONPATH=${install_prefix}/ecflow/${ECFLOW_VERSION}/lib/python${python_dot_version}/site-packages
@@ -141,9 +141,9 @@ ecflow_client --order=/ecflow alpha      #  sort suites
 ecflow_client --order=/ecflow top    
   
 # =======================================================================
-# Start the GUI
+# START the GUI, kill first
 # =======================================================================
-ps -ef | grep -v awk | awk '/ecflow/ && /5.3.1/ {print $2}' | xargs kill -9 || true
+ps -ef | grep -v awk | awk '/ecflow_ui/ {print $2}' | xargs kill -9 || true
 
 export ECFLOWUI_DEVELOP_MODE=1      # enable special menu to diff ecflowui defs and downloaded defs
 #export ECFLOWUI_SESSION_MANAGER=1  # to minimise output for debug, use session with a single server
