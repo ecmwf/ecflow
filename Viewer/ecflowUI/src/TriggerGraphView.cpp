@@ -447,6 +447,7 @@ void TriggerGraphView::adjustParentConnectColour(VProperty *p)
         QColor col = p->value().value<QColor>();
         if (col.isValid()) {
             parentConnectPen_ = QPen(col);
+            updateEdgePens();
         }
     }
 }
@@ -460,6 +461,7 @@ void TriggerGraphView::adjustTriggerConnectColour(VProperty *p)
         QColor col = p->value().value<QColor>();
         if (col.isValid()) {
             triggerConnectPen_ = QPen(col);
+            updateEdgePens();
         }
     }
 }
@@ -473,6 +475,8 @@ void TriggerGraphView::adjustDepConnectColour(VProperty *p)
         QColor col = p->value().value<QColor>();
         if (col.isValid())  {
             depConnectPen_ = QPen(col);
+            updateEdgePens();
+            Q_EMIT linePenChanged();
         }
     }
 }
@@ -640,6 +644,13 @@ void TriggerGraphView::addRelation(VItem* from, VItem* to,
     auto edge = addEdge(from_n, to_n, through, mode, trigger);
 }
 
+void TriggerGraphView::updateEdgePens()
+{
+    for(auto e: edges_) {
+        setEdgePen(e);
+    }
+}
+
 void TriggerGraphView::setEdgePen(TriggerGraphEdgeItem* e)
 {
     Q_ASSERT(e);
@@ -678,14 +689,20 @@ QPixmap TriggerGraphView::makeLegendPixmap()
     pix.fill(Qt::transparent);
     int lineY = pix.height()/2;
     QPainter p(&pix);
+    p.setRenderHints(QPainter::Antialiasing);
 
     int xp = 0;
     QRect r(0,0,margin, pix.height());
     Q_FOREACH(QString s, data.keys()) {
         xp = r.right() + gap;
+        QPen pen(data[s]);
+        pen.setWidth(2);
         p.setPen(data[s]);
         p.drawLine(xp, lineY, xp + lineLen, lineY);
-        p.setPen(Qt::black);
+        p.drawLine(xp + lineLen/2 + 3, lineY, xp + lineLen/2 - 3, lineY -3);
+        p.drawLine(xp + lineLen/2 + 3, lineY, xp + lineLen/2 - 3, lineY +3);
+        //p.setPen(Qt::black);
+        pen.setWidth(1);
         xp += lineLen + gap;
         r.setX(xp);
         r.setWidth(fm.width(s));

@@ -26,9 +26,15 @@ TriggerGraphWidget::TriggerGraphWidget(QWidget* parent) :
 {
     ui_->setupUi(this);
 
+    ui_->zoomSlider->setMaximumWidth(200);
     ui_->zoomSlider->setRange(ui_->view->minZoomLevel(),
                                ui_->view->maxZoomLevel());
     ui_->zoomSlider->setValue(ui_->view->defaultZoomLevel());
+
+    ui_->zoomTitle->setProperty("graphTitle", "1");
+    ui_->legendTitle->setProperty("graphTitle", "1");
+    ui_->legendLabel->setProperty("legend", "1");
+    updateLegend();
 
     adjustButtons();
 
@@ -48,8 +54,9 @@ TriggerGraphWidget::TriggerGraphWidget(QWidget* parent) :
     connect(ui_->zoomResetTb, SIGNAL(clicked()),
             this, SLOT(resetZoomLevel()));
 
-    ui_->legendLabel->setProperty("legend", "1");
-    updateLegend();
+    connect(ui_->view, SIGNAL(linePenChanged()),
+            this, SLOT(updateLegend()));
+
 }
 
 TriggerGraphWidget::~TriggerGraphWidget()

@@ -56,13 +56,13 @@ Q_SIGNALS:
 protected Q_SLOTS:
     void setZoomLevel(int);
     void resetZoomLevel();
+    void updateLegend();
 
 private:
     Ui::TriggerGraphWidget* ui_;
 
 private:
-    void scan(bool dependency);
-    void updateLegend();
+    void scan(bool dependency);   
     void adjustButtons();
 
     VInfo_ptr info_;

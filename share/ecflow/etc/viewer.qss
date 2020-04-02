@@ -275,6 +275,11 @@ QLabel[legend="1"] {
      background: rgb(253, 253, 253);
 }
 
+QLabel[graphTitle="1"] {
+    color:  rgb(40, 41, 42);
+    font-weight: bold;
+}
+
 /*----------------------------
   Property editor
 ------------------------------*/

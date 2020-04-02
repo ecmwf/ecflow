@@ -151,6 +151,7 @@ Q_SIGNALS:
     void infoPanelCommand(VInfo_ptr,QString);
     void dashboardCommand(VInfo_ptr,QString);
     void linkSelected(VInfo_ptr);
+    void linePenChanged();
 
 protected:
     TriggerGraphNodeItem* nodeItemAt(QPointF scenePos) const;
@@ -174,7 +175,7 @@ protected:
             TriggerGraphNodeItem* from, TriggerGraphNodeItem* to,
             VItem* through, TriggerCollector::Mode mode, VItem *trigger);
 
-
+    void updateEdgePens();
     float currentScale() const;
     float scaleFromLevel(int level) const;
 
@@ -195,11 +196,11 @@ protected:
     QPen triggerConnectPen_ {QPen(Qt::black)};
     QPen depConnectPen_ {QPen(Qt::blue)};
 
-    int minZoomLevel_ {-5};
-    int maxZoomLevel_ {5};
+    int minZoomLevel_ {-10};
+    int maxZoomLevel_ {10};
     int defaultZoomLevel_ {0};
     int zoomLevel_ {0};
-    float zoomDelta_ {0.2};
+    float zoomDelta_ {0.18};
 };
 
 #endif // TRIGGERGRAPHVIEW_HPP
