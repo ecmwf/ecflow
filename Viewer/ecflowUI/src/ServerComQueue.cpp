@@ -14,8 +14,11 @@
 #include "ServerHandler.hpp"
 #include "UIDebug.hpp"
 #include "UiLogS.hpp"
+#include "UserMessage.hpp"
 
 #include "Log.hpp"
+
+#include <QApplication>
 
 #define _UI_SERVERCOMQUEUE_DEBUG
 
@@ -38,7 +41,7 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client) :
     state_(NoState), //the queue is enabled but not running
     taskStarted_(false),
     taskIsBeingFinished_(false),
-	taskIsBeingFailed_(false)
+    taskIsBeingFailed_(false)
 {
 	timer_=new QTimer(this);
 	timer_->setInterval(timeout_);
@@ -46,41 +49,17 @@ ServerComQueue::ServerComQueue(ServerHandler *server,ClientInvoker *client) :
 	connect(timer_,SIGNAL(timeout()),
 			this,SLOT(slotRun()));
 
-
     if(client_)
         createThread();
 }
 
+// the deletion is inititated by logout()
 ServerComQueue::~ServerComQueue()
 {
-	state_=DisabledState;
-
-	//Stop the timer
-	timer_->stop();
-
-	//Empty the tasks
-	tasks_.clear();
-
-    if (comThread_) {
-
-        //Disconnects all the signals from the thread
-        comThread_->disconnect(nullptr,this);
-
-        //If the comthread is running we need to wait
-        //until it finishes its task.
-        if(comThread_->wait(5000))
-        {
-            //Send a logout task
-            VTask_ptr task=VTask::create(VTask::LogOutTask);
-            comThread_->task(task);
-
-            //Wait until the logout finishes
-            comThread_->wait(3000);
-        }
-
-        delete comThread_;
-    }
+    UI_ASSERT(state_ == DisabledState, "state=" << state_);
+    Q_ASSERT(comThread_ == nullptr);
 }
+
 
 void ServerComQueue::createThread()
 {
@@ -673,4 +652,110 @@ void ServerComQueue::slotTaskFailed(std::string msg)
     server_->clientTaskFailed(task,msg,client_->server_reply());
 
 	taskIsBeingFailed_=false;
+}
+
+bool ServerComQueue::logout() {
+    state_=DisabledState;
+
+    //Stop the timer
+    timer_->stop();
+
+    //Empty the tasks
+    tasks_.clear();
+
+    // The app is not quitting
+    if (qApp->property("inQuit").toString() != "1") {
+
+        if (comThread_) {
+            //Disconnects all the signals from the thread
+            comThread_->disconnect();
+
+            //If the comthread is running we need to wait
+            //until it finishes its task.
+            if (comThread_->wait(500)) {
+                startLogout();
+                return false;
+            //if it is still running we check it status regularly and
+            //start the logout when the thread finishes.
+            } else {
+                UiLogS(server_).warn() << "Waiting for ComThread to stop and start logout!";
+                QTimer::singleShot(5000, this, SLOT(slotLogoutCheck()));
+            }
+        } else {
+            deleteLater();
+            return true;
+        }
+    // the app is quitting
+    } else {
+        if (comThread_) {
+            //Disconnects all the signals from the thread
+            comThread_->disconnect();
+
+            //If the comthread is running we need to wait
+            //until it finishes its task. Otherwise we do not perform
+            //logout and leave it to the system to clean up.
+            if (comThread_->wait(1000)) {
+                //we perform the logout without running the thread
+                comThread_->blockingLogout();
+                comThread_->deleteLater();
+                comThread_ = nullptr;
+                deleteLater();
+                return true;
+            }
+        } else {
+            deleteLater();
+            return true;
+        }
+    }
+   return false;
+}
+
+void ServerComQueue::slotLogoutCheck()
+{
+    Q_ASSERT(state_ == DisabledState);
+    //If the comthread is running we need to wait
+    //until it finishes its task.
+
+    logoutTryNo_++;
+    //Otherwise there is nothing to do!!
+    if (logoutTryNo_ > maxLogoutTryNo_) {
+        UserMessage::message(UserMessage::ERROR, true,
+             "Could not start logout for server " + server_->fullLongName() +
+             " because the ServerCom thread cannot be stopped (timeout =" + std::to_string(logoutInterval_*maxLogoutTryNo_/1000) +
+             "s has passed). The SeverCom thread must be in a bad state." \
+             "EcFlowUI will terminate!");
+        exit(1);
+    }
+
+    UiLogS(server_).warn() << "Checking ComThread status to start logout. Tryno=" << logoutTryNo_;
+
+    if (!comThread_->isRunning()) {
+        startLogout();
+    } else {
+        QTimer::singleShot(logoutInterval_, this, SLOT(slotLogoutCheck()));
+    }
+}
+
+void ServerComQueue::startLogout()
+{
+    Q_ASSERT(state_ == DisabledState);
+    Q_ASSERT(comThread_->isRunning() == false);
+    connect(comThread_, SIGNAL(logoutDone()),
+        this, SLOT(slotLogoutDone()));
+
+    VTask_ptr task=VTask::create(VTask::LogOutTask);
+    comThread_->task(task);
+}
+
+void ServerComQueue::slotLogoutDone()
+{
+    Q_ASSERT(state_ == DisabledState);
+    if(comThread_) {
+        Q_ASSERT(comThread_->isRunning() == false);
+        comThread_->deleteLater();
+        comThread_ = nullptr;
+    }
+    // notify the server that the queue and the thread is being deleted
+    server_->queueLoggedOut();
+    deleteLater();
 }

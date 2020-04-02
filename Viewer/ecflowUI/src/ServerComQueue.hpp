@@ -37,6 +37,8 @@ public:
     ServerComQueue(ServerHandler *server,ClientInvoker* client);
 	~ServerComQueue() override;
 
+    bool logout();
+
 	enum State {NoState,RunningState,SuspendedState,ResetState,DisabledState};
 	State state() const {return state_;}
 
@@ -61,6 +63,8 @@ protected Q_SLOTS:
     void slotTaskStarted();
 	void slotTaskFinished();
 	void slotTaskFailed(std::string);
+    void slotLogoutCheck();
+    void slotLogoutDone();
 
 protected:
     void createThread();
@@ -69,6 +73,7 @@ protected:
     void endReset();
 	bool hasTask(VTask::Type t) const;
 	bool isNextTask(VTask::Type t) const;
+    void startLogout();
 
 	ServerHandler *server_;
 	ClientInvoker* client_;
@@ -86,6 +91,9 @@ protected:
     bool taskStarted_;
     bool taskIsBeingFinished_;
 	bool taskIsBeingFailed_;
+    int logoutTryNo_ {0};
+    int maxLogoutTryNo_ {12};
+    int logoutInterval_ {10000};
 };
 
 #endif

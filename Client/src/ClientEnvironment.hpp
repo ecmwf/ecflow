@@ -26,6 +26,8 @@ class ClientEnvironment : public AbstractClientEnv {
 public:
 	/// The constructor will load the environment
    explicit ClientEnvironment(bool gui);
+   explicit ClientEnvironment(bool gui,const std::string& host, const std::string& port);
+
 
 	/// This constructor is only used in Test environment, as it allow the host file to be set
    explicit ClientEnvironment(const std::string& hostFile, const std::string& host = "", const std::string& port = "");

@@ -7,11 +7,20 @@
 ## granted to it by virtue of its status as an intergovernmental organisation 
 ## nor does it submit to any jurisdiction. 
 
+set -x
+#set -u
+
+# Only uncomment for debugging this script
+#rm -rf stage
+#rm -rf tmpBuildDir
+#rm -rf bin.v2
+
 # ===============================================================
 # allow tool to be overridden
 tool=gcc
+tool_path=""
 if [ "$#" = 1 ] ; then   
-	tool=$1
+    tool=$1
 fi
 
 # ===============================================================
@@ -73,6 +82,7 @@ layout=system
 
 CXXFLAGS=-d2     # dummy argument, since CXXFLAGS is quoted
 CXXFLAGS=cxxflags=-fPIC
+
 if test_uname Linux ; then
   X64=$(uname -m)
   if [ "$X64" = x86_64 ]
@@ -125,6 +135,10 @@ if test_uname Linux ; then
     cp $WK/build_scripts/site_config/site-config-Linux.jam $SITE_CONFIG_LOCATION
   fi
   
+elif test_uname Darwin ; then
+
+   cp $WK/build_scripts/site_config/site-config-Darwin.jam $SITE_CONFIG_LOCATION 
+   tool_path="/usr/local/opt/gcc/bin/gcc-9"
 
 elif test_uname HP-UX ; then
 
@@ -138,9 +152,21 @@ elif test_uname AIX ; then
    cp $WK/build_scripts/site_config/site-config-AIX.jam $SITE_CONFIG_LOCATION
 fi
 
-# Only uncomment for debugging this script
-#rm -rf stage
-#rm -rf tmpBuildDir
+
+# ===============================================================
+# USER-CONFIG.JAM
+#
+# *** placing using gcc, in user-config.jam otherwise errors in building python ****
+#
+# using toolset-name : version :invocation-command : options ;
+#   where options allows <cflags, cxxflags, compileflags and linkflags >
+#
+if [[ ! -e $HOME/user-config.jam ]] ; then
+   cp $BOOST_ROOT/tools/build/example/user-config.jam $HOME/.
+   echo "# On linux 64, because most of the static library's, are placed in a shared libs(ecflow.so)" >> $HOME/user-config.jam
+   echo "# hence we need to compile with -fPIC"                                                       >> $HOME/user-config.jam
+   echo "using $tool : : $tool_path : <cxxflags>-fPIC ;"                                              >> $HOME/user-config.jam
+fi
 
 #
 # Note: if '--build-dir=./tmpBuildDir' is omitted, boost will build the libs in a directory:
@@ -151,13 +177,13 @@ fi
 
 # We use tagged as that allows the debug and release builds to built together, if required
 #
-echo "using compiler $tool with build $1 release variants"
+echo "using compiler $tool with release variants"
  
 if [[ ${BOOST_NUMERIC_VERSION} -le 1690 ]] ; then
    # boost system is header only from boost version 1.69, stub library built for compatibility
    ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-system variant=release -j4
 fi
-./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time  variant=release -j4
+./b2 --debug-configuration --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-date_time  variant=release -j4
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-filesystem variant=release -j4
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-program_options variant=release -j4
 ./b2 --build-dir=./tmpBuildDir toolset=$tool "$CXXFLAGS" stage link=static --layout=$layout --with-test   variant=release -j4
@@ -220,12 +246,12 @@ else
    #      # using python : 2.7 : "/usr/local/apps/python/2.7.15-01" ;
    #      # using python 
    #      # : 3.6 
-   #      # : /usr/local/apps/python3/3.6.8-01/bin/python3  # ***** If this is left, includes get messed up, have mix of python2 & 3
+   #      # : /usr/local/apps/python3/3.6.8-01/bin/python3  # ***** If this is a prefix dir, includes get messed up, have mix of python2 & 3
    #      # : /usr/local/apps/python3/3.6.8-01/include/python3.6m # include directory
    #      # ;
    #      using python 
    #       : 3.7 
-   #       : /usr/local/apps/python3/3.7.1-01/bin/python3  # ***** If this is left, includes get messed up, have mix of python2 & 3
+   #       : /usr/local/apps/python3/3.7.1-01/bin/python3  # ***** If this is a prefix dir, includes get messed up, have mix of python2 & 3
    #       : /usr/local/apps/python3/3.7.1-01/include/python3.7m # include directory
    #       ;  
    #       ...
@@ -254,47 +280,51 @@ else
    #     using python : 3.6 : /usr/local/apps/python3/3.6.8-01/bin/python3 : /usr/local/apps/python3/3.6.8-01/include/python3.6m ;
    #     using python : 3.7 : /usr/local/apps/python3/3.7.1-01/bin/python3 : /usr/local/apps/python3/3.7.1-01/include/python3.7m ;  
    # ===========================================================================================================
-    
+
    # ===========================================================================================================
-   # Attempt at replacing 'using python' with the correct python include dir in project-config.jam
+   # Attempt at replacing 'using python' with the correct python include dir in site-config.jam
    # ===========================================================================================================
    python_file=compute_python_using_statement.py
 
 cat << EOF > $python_file
 import sys
 from sysconfig import get_paths
-
 python_version = "{0}.{1}".format(sys.version_info[0], sys.version_info[1])
 python_path_info = get_paths()
-python_root = python_path_info['data']
+python_exe = sys.executable
 python_include = python_path_info['include']
-
-using_python = '   using python : ' + python_version  + ' : ' + python_root  + ' : ' + python_include  + ' ;\n'
-with open('project-config.jam.orig','r') as fd1, open('project-config.jam','w') as fd2:
-    for line in fd1:
-        if line.find('using python') != -1:
-           fd2.write(using_python)
-        else:
-           fd2.write(line)
+using_python = '   using python : ' + python_version  + ' : ' + python_exe  + ' : ' + python_include  + ' ;'
+print(using_python)
 EOF
 
-   mv project-config.jam project-config.jam.orig
+   echo "ECF_PYTHON2 = [ os.environ ECF_PYTHON2 ] ;"  >>  $SITE_CONFIG_LOCATION
+   
    which python3
    if [ "$?" = "0" ] ; then
-      python3 $python_file   # project-config.jam.orig -> project-config.jam
+      
+      python_version=$(python3 -c 'import sys;print(sys.version_info[0],sys.version_info[1],sep="")')
+      python_dot_version=$(python3 -c 'import sys;print(sys.version_info[0],".",sys.version_info[1],sep="")')
+      echo 'if ! $(ECF_PYTHON2) {'                                                       >> $SITE_CONFIG_LOCATION
+      echo "   lib boost_python : : <file>\$(BOOST_ROOT)/stage/lib/libboost_python${python_version}.a ;" >> $SITE_CONFIG_LOCATION
+      python3 $python_file                                                               >> $SITE_CONFIG_LOCATION
+      echo '}'                                                                           >> $SITE_CONFIG_LOCATION
+      echo "constant PYTHON3_VERSION : $python_dot_version ;"                            >> $SITE_CONFIG_LOCATION
+      
       ./b2 --with-python --clean     
       ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
    fi
 
    which python
    if [ "$?" = "0" ] ; then
-      mv project-config.jam project-config.jam.python3 || true
-      python $python_file   # project-config.jam.orig -> project-config.jam
+      export ECF_PYTHON2=1 # so that we use ' using python ......'
+      echo 'if $(ECF_PYTHON2) {'                                                         >> $SITE_CONFIG_LOCATION
+      echo '   lib boost_python : : <file>$(BOOST_ROOT)/stage/lib/libboost_python27.a ;' >> $SITE_CONFIG_LOCATION
+      python $python_file                                                                >> $SITE_CONFIG_LOCATION
+      echo '}'                                                                           >> $SITE_CONFIG_LOCATION
+                                                                            
       ./b2 --with-python --clean     
       ./b2 toolset=$tool link=shared,static variant=release "$CXXFLAGS" stage --layout=$layout threading=multi --with-python -d2 -j4
    fi
-
-   #rm $python_file               # comment out to debug
-   #rm project-config.jam.orig    # comment out to debug
-   #rm project-config.jam.python3 # comment out to debug
+   
+   rm $python_file
 fi

@@ -57,24 +57,28 @@ void ServerComThread::task(VTask_ptr task)
         //We set the parameters needed to run the task. These members are not protected by
         //a mutex, because apart from this function only run() can access them!!
         serverName_=server_->longName();
-        command_=task->command();
-        params_=task->params();
-        contents_=task->contents();
-        vars_=task->vars();
-        nodePath_.clear();
         taskType_=task->type();
-        nodePath_=task->targetPath();
-        zombie_=task->zombie();
 
-        //Suite filter
-        hasSuiteFilter_=server_->suiteFilter()->isEnabled();
-        autoAddNewSuites_=server_->suiteFilter()->autoAddNewSuites();
-        if(hasSuiteFilter_)
-            filteredSuites_=server_->suiteFilter()->filter();
-        else
-            filteredSuites_.clear();
+        if (taskType_ != VTask::LogOutTask) {
 
-        maxLineNum_=server_->conf()->intValue(VServerSettings::MaxOutputFileLines);
+            command_=task->command();
+            params_=task->params();
+            contents_=task->contents();
+            vars_=task->vars();
+            nodePath_.clear();
+            nodePath_=task->targetPath();
+            zombie_=task->zombie();
+
+            //Suite filter
+            hasSuiteFilter_=server_->suiteFilter()->isEnabled();
+            autoAddNewSuites_=server_->suiteFilter()->autoAddNewSuites();
+            if(hasSuiteFilter_)
+                filteredSuites_=server_->suiteFilter()->filter();
+            else
+                filteredSuites_.clear();
+
+            maxLineNum_=server_->conf()->intValue(VServerSettings::MaxOutputFileLines);
+        }
 
         //Start the thread execution
         start();
@@ -120,6 +124,7 @@ void ServerComThread::run()
         {
             UiLog(serverName_).dbg() << " SERVER_VERSION";
             ci_->server_version();
+            UiLog(serverName_).dbg() << " SERVER_VERSION FINISHED";
         }
         // tasks that will explicitly/implicitly call ci_->sync_local()
         else if(sync_tasks.find(taskType_) != sync_tasks.end())
@@ -340,6 +345,11 @@ void ServerComThread::run()
         // because we can't call Qt widgets from a worker thread
 
         UiLog(serverName_).dbg() << " thread failed: " <<  errorString;
+        if (taskType_ == VTask::LogOutTask) {
+            Q_EMIT logoutDone();
+            return;
+        }
+
         Q_EMIT failed(errorString);
 
         //Reset flags
@@ -348,6 +358,12 @@ void ServerComThread::run()
         //This will stop the thread.
         return;
     }
+
+    if (taskType_ == VTask::LogOutTask) {
+        Q_EMIT logoutDone();
+        return;
+    }
+
 
     //Reset flags
     rescanNeed_=false;
@@ -633,5 +649,18 @@ void ServerComThread::aspectToStr(std::stringstream& ss,const std::vector<ecf::A
         if(!ss.str().empty())
             ss << ",";
         ss << it;
+    }
+}
+
+//performa a logout task without running a thread
+void ServerComThread::blockingLogout()
+{
+    Q_ASSERT(isRunning() == false);
+
+    UiLog(serverName_).dbg() << " LOGOUT";
+    detach();
+    if(ci_->client_handle() > 0)
+    {
+        ci_->ch1_drop();
     }
 }

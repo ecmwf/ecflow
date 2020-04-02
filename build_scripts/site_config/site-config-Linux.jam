@@ -30,8 +30,6 @@ lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-d.a ;
 lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d.a ;
 lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d.a ;
-lib boost_python_static   : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt-d.a ;
-lib boost_python36_static   : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt-d.a ;
 
 # profile uses release libs
 lib boost_system : :          <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
@@ -40,8 +38,6 @@ lib boost_test_monitor : :    <variant>profile <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_program_options : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
 lib boost_filesystem      : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
-lib boost_python_static   : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
-lib boost_python36_static   : : <variant>profile <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt.a ;
 
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
 lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
@@ -49,8 +45,13 @@ lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
 lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
-lib boost_python_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
-lib boost_python36_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python36-mt.a ;
+
+
+# ===============================================================================
+# force all exe to link with crypt 
+lib crypt : : <file>/usr/lib64/libcrypt.so ;
+explicit crypt ; 
+
 
 #
 # Notice: we don't add requirements <library>pthread ,  because
@@ -58,13 +59,28 @@ lib boost_python36_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 #  	b/ Can cause links errors
 # Hence left to individual projects/test
 project site-config
-	: requirements <include>$(BOOST_ROOT)
+	: requirements <include>$(BOOST_ROOT) <library>crypt 
  	;
 
-# using syntax:
-# using toolset-name : version : invocation-command : options ;
-#   where options allows <cflags, cxxflags, compileflags and linkflags >
-#
-using gcc ;
 using testing ;
+
+# ==================== INSTALL =====================================================ß
+constant ECFLOW_INSTALL_PREFIX : /usr/local/apps ; 
+
+# ==================== OPENSSL ======================================================
+# OPENSSL support, should really be in site-config.jam
+# Currently we always build with ssl support#
+#
+# link with libdl.so, shared lib containing dlopen(),dlclose()dysym(),
+# these functions are used by OpenSSL internally & thus -ldl is an
+# indirect dependency when using -lcrypto(on Linux) Because we linking
+# with static version of crypto, need to explicitly link against indirect dependencies.
+lib libssl    : : <file>/usr/lib64/libssl.so ;
+lib libcrypto : : <file>/usr/lib64/libcrypto.so ;
+lib dl ;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
+alias openssl_libs : libssl libcrypto dl ;
+
+# ==================================================================================
+# Config generated from $WK/build_scripts/boost_build.sh
+# ==================================================================================
 

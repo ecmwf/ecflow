@@ -23,7 +23,6 @@ lib boost_test_monitor : :    <variant>debug <file>$(BOOST_ROOT)/stage/lib/libbo
 lib boost_program_options : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt-d.a ;
 lib boost_filesystem      : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt-d.a ;
 lib boost_datetime        : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt-d.a ;
-lib boost_python_static  : : <variant>debug <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt-d.a ;
 
 lib boost_system : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_system-mt.a ;
 lib boost_test   : :          <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_unit_test_framework-mt.a ;
@@ -31,7 +30,6 @@ lib boost_test_monitor : :    <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_program_options : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_program_options-mt.a ;
 lib boost_filesystem      : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_filesystem-mt.a ;
 lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_date_time-mt.a ;
-lib boost_python_static : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_python27-mt.a ;
 
 # Lib for run time checks, use for debug builds only
 lib rtc : :  <variant>debug <file>/opt/langtools/lib/hpux32/librtc.so ;
@@ -46,8 +44,15 @@ lib rtc : :  <variant>debug <file>/opt/langtools/lib/hpux32/librtc.so ;
 # hence use of BOOST_THREAD_DONT_USE_CHRONO, See http://www.boost.org/doc/libs/1_51_0/doc/html/thread/build.html
 # Even with this boost thread/chrono does not compile. Kept in case fixed in the future
 #
+
+# ===============================================================================
+# force all exe to link with crypt 
+lib crypt : : <file>/usr/lib64/libcrypt.so ;
+explicit crypt ; 
+
+
 project site-config
-	: requirements <include>$(BOOST_ROOT)
+	: requirements <include>$(BOOST_ROOT) <library>crypt 
 	: requirements <threading>multi
 	: requirements <define>HPUX
    : requirements <define>_XOPEN_SOURCE_EXTENDED
@@ -99,7 +104,28 @@ project site-config
 # using toolset-name : version : invocation-command : options ;
 #   where options allows <cflags, cxxflags, compileflags and linkflags >
 #
-using acc : : : <compileflags>+W2236,2461,2191,2815,4232,4189
-          ;
+#using acc : : : <compileflags>+W2236,2461,2191,2815,4232,4189
+#          ;
 
 using testing ;
+
+# ==================== OPENSSL ======================================================
+# OPENSSL support, should really be in site-config.jam
+# Currently we always build with ssl support#
+#
+# link with libdl.so, shared lib containing dlopen(),dlclose()dysym(),
+# these functions are used by OpenSSL internally & thus -ldl is an
+# indirect dependency when using -lcrypto(on Linux) Because we linking
+# with static version of crypto, need to explicitly link against indirect dependencies.
+lib libssl    : : <file>/usr/lib64/libssl.so ;
+lib libcrypto : : <file>/usr/lib64/libcrypto.so ;
+lib dl ;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
+alias openssl_libs : libssl libcrypto dl ;
+
+# ==================== INSTALL =====================================================ß
+constant ECFLOW_INSTALL_PREFIX : /usr/local/apps ; 
+
+# ==================================================================================
+# Config generated from $WK/build_scripts/boost_build.sh
+# ==================================================================================
+

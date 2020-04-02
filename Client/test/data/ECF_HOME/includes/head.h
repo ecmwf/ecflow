@@ -18,7 +18,10 @@ if [[ "%ECF_SSL:%" != "" ]] ; then
 fi
 
 # SANITY Check, typically only valid for new platforms. make sure hostname is resolvable to an IP address
-host %ECF_HOST%
+os_name=$(uname -s)
+if [[ $os_name = Linux ]] ; then
+   host %ECF_HOST%
+fi
 
 # Tell ECF_ we have stated
 # The ECF_ variable ECF_RID will be set to parameter of smsinit

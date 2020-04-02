@@ -25,6 +25,13 @@ set(INIT_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py.in")
 set(INIT_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/ecflow/__init__.py")
 configure_file(${INIT_PY_IN} ${INIT_PY_OUT} )
 
+# =============================================================================
+# Configure setup.py. Note used locally. Uses existing libraries
+# =============================================================================
+set(SETUP_PY_IN  "${CMAKE_CURRENT_SOURCE_DIR}/setup.py.in")
+set(SETUP_PY_OUT "${CMAKE_CURRENT_SOURCE_DIR}/setup.py")
+configure_file(${SETUP_PY_IN} ${SETUP_PY_OUT} )
+
 
 # ==============================================================================
 # local includes

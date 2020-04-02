@@ -176,6 +176,11 @@ public:
    };
    virtual void requeue(Requeue_args&);
 
+   // force queued allows a job to re-run preserving job output.
+   // However other nodes may reference this nodes events/meters/late in trigger expression, hence
+   // reset events,meters and late flag ECFLOW-1617
+   virtual void reset_late_event_meters();
+
    /// Re queue the time based attributes only.
    /// Used as a part of Alter (clock) functionality.
    /// Note: Under the hybrid clock this will not mark node as complete, (if we have day,date,cron attributes)

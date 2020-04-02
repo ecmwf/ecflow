@@ -56,11 +56,14 @@ lib boost_datetime        : : <variant>release <file>$(BOOST_ROOT)/stage/lib/lib
 lib boost_timer           : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_timer.a ;
 lib boost_chrono          : : <variant>release <file>$(BOOST_ROOT)/stage/lib/libboost_chrono.a ;
 
+
 # ===============================================================================
 # force all exe to link with crypt 
-lib crypt : : <file>/usr/lib64/libcrypt.so ;
+lib crypt : : <file>/usr/local/opt/openssl/lib/libcrypto.dylib ;
 explicit crypt ; 
 
+lib stdc++ ;
+explicit stdc++ ;
 
 #
 # Notice: we don't add  requirements <library>pthread , because
@@ -70,26 +73,31 @@ explicit crypt ;
 #
 project site-config 
     : requirements <include>$(BOOST_ROOT) <library>crypt 
+                   <include>/usr/local/opt/openssl/include
+                   <library>stdc++
     ;
 
 using testing ;
 
+# ==================== INSTALL =====================================================ß
+constant ECFLOW_INSTALL_PREFIX : "/usr/local/opt" ; 
+
 # ==================== OPENSSL ======================================================
-# OPENSSL support, should really be in site-config.jam
+# OPENSSL support 
 # Currently we always build with ssl support#
 #
 # link with libdl.so, shared lib containing dlopen(),dlclose()dysym(),
 # these functions are used by OpenSSL internally & thus -ldl is an
 # indirect dependency when using -lcrypto(on Linux) Because we linking
 # with static version of crypto, need to explicitly link against indirect dependencies.
-lib libssl    : : <file>/usr/lib64/libssl.so ;
-lib libcrypto : : <file>/usr/lib64/libcrypto.so ;
+lib libssl    : : <file>/usr/local/opt/openssl/lib/libssl.dylib ;
+lib libcrypto : : <file>/usr/local/opt/openssl/lib/libcrypto.dylib ;
 lib dl ;      # this dependency for using libcrypto, i.e dlopen,dlclose etc, when using static libcrypto
 alias openssl_libs : libssl libcrypto dl ;
 
-# ==================== INSTALL =====================================================ß
-constant ECFLOW_INSTALL_PREFIX : /usr/local/apps ; 
 
 # ==================================================================================
 # Config generated from $WK/build_scripts/boost_build.sh
 # ==================================================================================
+
+

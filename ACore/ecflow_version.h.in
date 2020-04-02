@@ -1,9 +1,14 @@
 #ifndef ecflow_version_config_h
 #define ecflow_version_config_h
  
-#define ECFLOW_VERSION   "@ECFLOW_VERSION_STR@"
-#define ECFLOW_RELEASE   "@ECFLOW_RELEASE@"
-#define ECFLOW_MAJOR     "@ECFLOW_MAJOR@"
-#define ECFLOW_MINOR     "@ECFLOW_MINOR@"
+#define ECFLOW_VERSION   "@ecflow_VERSION@"
+#define ECFLOW_RELEASE   "@ecflow_VERSION_MAJOR@"
+#define ECFLOW_MAJOR     "@ecflow_VERSION_MINOR@"
+#define ECFLOW_MINOR     "@ecflow_VERSION_PATCH@"
 
+// available but not used
+//PROJECT_VERSION=@PROJECT_VERSION@
+//PROJECT_VERSION_MAJOR=@PROJECT_VERSION_MAJOR@
+//PROJECT_VERSION_MINOR=@PROJECT_VERSION_MINOR@
+//PROJECT_VERSION_PATCH=@PROJECT_VERSION_PATCH@
 #endif 
