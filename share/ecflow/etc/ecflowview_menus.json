@@ -48,13 +48,27 @@
 
     "menu_items" :
     [
-
+        {
+            "menu"           : "Node",
+            "name"           : "Expand graph",
+            "command"        : "expand",
+            "enabled_for"    : "node",
+            "handler"        : "graph",
+            "view"           : "graph"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Expand parent's graph",
+            "command"        : "expand_parent",
+            "handler"        : "graph",
+            "view"           : "graph"
+        },
         {
             "menu"           : "Node",
             "name"           : "Lookup in tree",
             "command"        : "lookup",
             "handler"        : "trigger",
-            "view"           : "trigger"
+            "view"           : "trigger/graph"
         },
 
         {

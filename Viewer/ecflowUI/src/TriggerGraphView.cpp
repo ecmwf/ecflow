@@ -252,14 +252,17 @@ TriggerGraphScene::TriggerGraphScene(QWidget* parent) :
 
 TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent)
 {
+    // used by ActioHandler to identfy this view
+    setProperty("view","graph");
+
+    actionHandler_=new ActionHandler(this,this);
+
     scene_ = new TriggerGraphScene(this);
     setScene(scene_);
 
     model_ = new TriggerGraphModel(TriggerGraphModel::TriggerMode,this);
     delegate_ = new TriggerGraphDelegate(this);
     builder_ = new SimpleGraphLayoutBuilder();
-
-    actionHandler_=new ActionHandler(this,this);
 
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
     setRenderHints(QPainter::Antialiasing);
@@ -404,13 +407,17 @@ void TriggerGraphView::slotCommandShortcut()
 
 void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
 {
-    if(cmd == "lookup")
-    {
-        //Q_EMIT linkSelected(info);
-    }
-
-    else if(cmd ==  "edit")
-    {
+    if(cmd == "lookup") {
+        Q_EMIT linkSelected(info);
+    } else if(cmd == "expand") {
+        if (info && info->node()) {
+            show(info->node());
+        }
+    } else if(cmd == "expand_parent") {
+        if (info && info->item()) {
+            showParent(info->item());
+        }
+    } else if(cmd ==  "edit") {
         if(info && info->isAttribute())
         {
             AttributeEditor::edit(info,this);
@@ -521,86 +528,39 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
 //    }
 //}
 
-void TriggerGraphView::scan(VNode* node, bool dependency)
+// called by the graph widget
+void TriggerGraphView::show(VNode* node, bool dependency)
+{
+    clear();
+    dependency_ = dependency;
+    show(node);
+}
+
+void TriggerGraphView::show(VNode* node)
 {
     Q_ASSERT(node);
 
-    dependency_ = dependency;
-
-    scanOne(node);
+    scan(node);
     model_->setItems(nodes_);
     for(auto n: nodes_) {
+        //UiLog().dbg() << n->item()->fullPath();
         n->adjustSize();
     }
 
     buildLayout();
     adjustSceneRect();
-
-#if 0
-    // add the node to the layout
-    layout_->addNode(node);
-
-    // performs the trigger collection - it will populate the layout
-    TriggerRelationCollector tc(node, layout_, false);
-    node->triggers(&tc);
-
-//    std::vector<VItem*> items;
-//    for(size_t i=oriNum; i < layout_->nodes_.size(); i++) {
-//        items.push_back(layout_->nodes_[i]->item_);
-//    }
-
-    model_->setItems(layout_->nodes());
-
-    for(int i=0; i < model_->rowCount(); i++) {
-        layout_->nodes()[i]->addGrItem(model_->index(i,0), delegate_);
-    }
-
-    layout_->build();
-    //layout_->postBuild();
-
-//    for(size_t i=0; i < nodes_.size(); i++) {
-//        nodes_[i]->setPos(QPoint(layout_->nodes_[i]->tmpX_, layout_->nodes_[i]->tmpY_));
-//        if (i >= oriNum)
-//            scene_->addItem(nodes_[i]);
-//    }
-
-//    for(size_t i=0; i < edges_.size(); i++) {
-//        scene_->removeItem(edges_[i]);
-//        delete edges_[i];
-//    }
-//    edges_.clear();
-
-//    for(auto e: layout_->edges_) {
-//        TriggerGraphEdgeItem* itemE =new TriggerGraphEdgeItem(nodes_[e->from_], nodes_[e->to_], nullptr);
-//        if (e->mode_ == TriggerCollector::Normal) {
-//            itemE->setPen(ui_->view->triggerConnectPen_);
-//        } else if(e->mode_ == TriggerCollector::Hierarchy) {
-//            itemE->setPen(ui_->view->parentConnectPen_);
-//        } else {
-//            itemE->setPen(ui_->view->depConnectPen_);
-//        }
-//        edges_.push_back(itemE);
-//        scene_->addItem(itemE);
-//    }
-
-    adjustSceneRect();
-#endif
 }
 
+void TriggerGraphView::showParent(VItem* item)
+{
+    Q_ASSERT(item);
+    if(VNode *p = item->parent()) {
+        addRelation(p, item, nullptr, TriggerCollector::Hierarchy, nullptr);
+        show(p);
+    }
+}
 
-//void TriggerGraphView::scanOne(VNode* node)
-//{
-//    Q_ASSERT(node);
-//    dependency_ = dependency;
-//    scanOne(node);
-
-////    if(VNode *p = node->parent()) {
-////        addRelation(p, node, nullptr, TriggerCollector::Hierarchy, nullptr);
-////        scanOne(p);
-////    }
-//}
-
-void TriggerGraphView::scanOne(VNode* node)
+void TriggerGraphView::scan(VNode* node)
 {
     Q_ASSERT(node);
 
@@ -630,21 +590,8 @@ void TriggerGraphView::buildLayout()
     }
     lnodes.clear();
 
-//    for(auto e: edges_) {
-//        view_->scene()->removeItem(e->grItem_);
-//        delete e->grItem_;
-//    }
-    //edges_.clear();
-
     for(auto e: edges_) {
         e->adjust();
-        //TriggerGraphEdgeItem* itemE =
-        //        new TriggerGraphEdgeItem(nodes_[e->from_]->grNode(), nodes_[e->to_]->grNode(), e->mode_, nullptr);
-
-//        e->grItem_ = itemE;
-//        view_->setEdgePen(itemE);
-//        //edges_.push_back(itemE);
-//        view_->scene()->addItem(itemE);
     }
 }
 
@@ -707,3 +654,77 @@ void TriggerGraphView::setEdgePen(TriggerGraphEdgeItem* e)
             e->setPen(depConnectPen_);
     }
 }
+
+QPixmap TriggerGraphView::makeLegendPixmap()
+{
+    QFont f;
+    QFontMetrics fm(f);
+    int margin = 2;
+    int gap = 6;
+    int lineLen = 20;
+
+    QMap<QString, QPen> data;
+    data["trigger"] = triggerConnectPen_;
+    data["dependency"] = depConnectPen_;
+    data["parent"] = parentConnectPen_;
+
+    int totalWidth = margin;
+    Q_FOREACH(QString s, data.keys()) {
+        totalWidth += lineLen + gap + fm.width(s) + gap;
+    }
+    totalWidth += margin;
+
+    QPixmap pix(totalWidth,fm.height() + 2* margin);
+    pix.fill(Qt::transparent);
+    int lineY = pix.height()/2;
+    QPainter p(&pix);
+
+    int xp = 0;
+    QRect r(0,0,margin, pix.height());
+    Q_FOREACH(QString s, data.keys()) {
+        xp = r.right() + gap;
+        p.setPen(data[s]);
+        p.drawLine(xp, lineY, xp + lineLen, lineY);
+        p.setPen(Qt::black);
+        xp += lineLen + gap;
+        r.setX(xp);
+        r.setWidth(fm.width(s));
+        p.drawText(r, Qt::AlignVCenter, s);
+    }
+
+    xp = r.right() + gap;
+
+    return pix;
+}
+
+void TriggerGraphView::setZoomLevel(int level)
+{
+    if (level >= minZoomLevel_ && level <= maxZoomLevel_) {
+        float actScale = scaleFromLevel(zoomLevel_);
+        zoomLevel_     = level;
+        float newScale = scaleFromLevel(level);
+        float factor   = newScale / actScale;
+        scale(factor, factor);
+    }
+}
+
+//int TriggerGraphView::zoomLevelFromScale(float sc) const
+//{
+//    int level = static_cast<int>(round(log(sc) / log(1 + zoomDelta_)));
+//    if (level < minZoomLevel_)
+//        level = minZoomLevel_;
+//    if (level > maxZoomLevel_)
+//        level = maxZoomLevel_;
+//    return level;
+//}
+
+float TriggerGraphView::currentScale() const
+{
+    return pow(1. + zoomDelta_, zoomLevel_);
+}
+
+float TriggerGraphView::scaleFromLevel(int level) const
+{
+    return pow(1. + zoomDelta_, level);
+}
+

@@ -40,6 +40,7 @@ void TriggerGraphModel::clearData()
 void TriggerGraphModel::setItems(const std::vector<TriggerGraphNodeItem*>& items)
 {
     beginResetModel();
+    items_.clear();
     for(auto it: items) {
         items_.push_back(it->item());
     }

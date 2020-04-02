@@ -39,26 +39,33 @@ public:
     void clear();
     void setInfo(VInfo_ptr info, bool dependency);
     VInfo_ptr info() const {return info_;}
-    bool dependency() const {return dependency_;}
+    bool dependency() const;
     void adjust(VInfo_ptr info, bool dependency, TriggerTableCollector* triggerTc1, TriggerTableCollector* tc2);
     void setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2);
     void beginTriggerUpdate();
     void endTriggerUpdate();
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
-    void scan();
     void setTriggeredScanner(TriggeredScanner*);
     //void scan(VNode*);
 
 Q_SIGNALS:
     void infoPanelCommand(VInfo_ptr,QString);
     void dashboardCommand(VInfo_ptr,QString);
+    void linkSelected(VInfo_ptr);
+
+protected Q_SLOTS:
+    void setZoomLevel(int);
+    void resetZoomLevel();
 
 private:
     Ui::TriggerGraphWidget* ui_;
 
 private:
+    void scan(bool dependency);
+    void updateLegend();
+    void adjustButtons();
+
     VInfo_ptr info_;
-    bool dependency_ {false};
     TriggerTableCollector* triggerTc_ {nullptr};
     TriggerTableCollector* triggeredTc_ {nullptr};
     VInfo_ptr lastSelectedItem_;

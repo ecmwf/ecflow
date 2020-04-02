@@ -129,7 +129,8 @@ void ActionHandler::handleCommand(MenuItem* item, const std::vector<VInfo_ptr>& 
             Q_EMIT dashboardCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;
     	}
-        else if(item->handler() == "tree" || item->handler() == "table" || item->handler() == "trigger")
+        else if(item->handler() == "tree" || item->handler() == "table" ||
+                item->handler() == "trigger" || item->handler() == "graph")
     	{
             Q_EMIT viewCommand(filteredNodes.at(0),QString::fromStdString(item->command()));
     		return;

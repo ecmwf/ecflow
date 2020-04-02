@@ -30,6 +30,68 @@
     <number>0</number>
    </property>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Zoom: </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="zoomSlider">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="zoomResetTb">
+       <property name="toolTip">
+        <string>Reset zoom</string>
+       </property>
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="viewer.qrc">
+         <normaloff>:/viewer/reset_to_default.svg</normaloff>:/viewer/reset_to_default.svg</iconset>
+       </property>
+       <property name="autoRaise">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>Legend:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="legendLabel">
+       <property name="text">
+        <string>TextLabel</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="TriggerGraphView" name="view"/>
    </item>
   </layout>
@@ -41,6 +103,8 @@
    <header>TriggerGraphView.hpp</header>
   </customwidget>
  </customwidgets>
- <resources/>
+ <resources>
+  <include location="viewer.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -26,12 +26,30 @@ TriggerGraphWidget::TriggerGraphWidget(QWidget* parent) :
 {
     ui_->setupUi(this);
 
+    ui_->zoomSlider->setRange(ui_->view->minZoomLevel(),
+                               ui_->view->maxZoomLevel());
+    ui_->zoomSlider->setValue(ui_->view->defaultZoomLevel());
+
+    adjustButtons();
+
     //relay commands
     connect(ui_->view,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
             this,SIGNAL(infoPanelCommand(VInfo_ptr,QString)));
 
     connect(ui_->view,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
             this,SIGNAL(dashboardCommand(VInfo_ptr,QString)));
+
+    connect(ui_->view,SIGNAL(linkSelected(VInfo_ptr)),
+            this,SIGNAL(linkSelected(VInfo_ptr)));
+
+    connect(ui_->zoomSlider, SIGNAL(valueChanged(int)),
+            this, SLOT(setZoomLevel(int)));
+
+    connect(ui_->zoomResetTb, SIGNAL(clicked()),
+            this, SLOT(resetZoomLevel()));
+
+    ui_->legendLabel->setProperty("legend", "1");
+    updateLegend();
 }
 
 TriggerGraphWidget::~TriggerGraphWidget()
@@ -48,8 +66,7 @@ void TriggerGraphWidget::clear()
 void TriggerGraphWidget::setInfo(VInfo_ptr info, bool dependency)
 {
     info_=info;
-    dependency_ = dependency;
-    scan();
+    scan(dependency);
 }
 
 void TriggerGraphWidget::adjust(VInfo_ptr info, bool dependency, TriggerTableCollector* tc1, TriggerTableCollector* tc2)
@@ -87,14 +104,14 @@ void TriggerGraphWidget::nodeChanged(const VNode* node, const std::vector<ecf::A
     ui_->view->nodeChanged(node, aspect);
 }
 
-void TriggerGraphWidget::scan()
+void TriggerGraphWidget::scan(bool dependency)
 {
     if (!info_ || !info_->node())
         return;
 
     VNode *node = info_->node();
     Q_ASSERT(node);
-    ui_->view->scan(node, dependency_);
+    ui_->view->show(node, dependency);
 
 //    UiLog().dbg() << model_->rowCount() << layout_->nodes_.size();
 
@@ -108,4 +125,32 @@ void TriggerGraphWidget::scan()
 void TriggerGraphWidget::setTriggeredScanner(TriggeredScanner* scanner)
 {
     ui_->view->setTriggeredScanner(scanner);
+}
+
+bool TriggerGraphWidget::dependency() const
+{
+    return ui_->view->dependency();
+}
+
+void TriggerGraphWidget::updateLegend()
+{
+    QPixmap pix = ui_->view->makeLegendPixmap();
+    ui_->legendLabel->setPixmap(pix);
+}
+
+void TriggerGraphWidget::setZoomLevel(int v)
+{
+    ui_->view->setZoomLevel(v);
+    adjustButtons();
+}
+
+void TriggerGraphWidget::resetZoomLevel()
+{
+    ui_->zoomSlider->setValue(ui_->view->defaultZoomLevel());
+}
+
+void TriggerGraphWidget::adjustButtons()
+{
+    ui_->zoomResetTb->setEnabled(
+                ui_->view->zoomLevel() != ui_->view->defaultZoomLevel());
 }

@@ -107,6 +107,9 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
         this,SLOT(slotDashboardCommand(VInfo_ptr,QString)));
 
     //graph
+    connect(triggerGraph_,SIGNAL(linkSelected(VInfo_ptr)),
+            this,SLOT(slotLinkSelected(VInfo_ptr)));
+
     connect(triggerGraph_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
         this,SLOT(slotInfoPanelCommand(VInfo_ptr,QString)));
 

@@ -31,65 +31,6 @@ class GraphLayoutNode;
 class QModelIndex;
 
 
-//class NodeRelation
-//{
-//public:
-//    NodeRelation(VItem* trigger, VItem* through, int mode):
-//        trigger_(trigger), through_(through), mode_(mode) {}
-
-//    VItem* trigger_;
-//    VItem* through_;
-//    int	mode_;
-//    NodeRelation* next_ {nullptr};
-//};
-
-//class TriggerGraphLayoutNode {
-//public:
-//    TriggerGraphLayoutNode(int index, VItem* item) : index_(index), item_(item) {}
-//    void addRelation(TriggerGraphLayoutNode* o);
-
-//    int index() const {return index_;}
-//    VItem* item() const {return item_;}
-
-//    TriggerGraphNodeItem* grNode() const {return grItem_;}
-//    void addGrNode(const QModelIndex& idx, TriggerGraphDelegate* delegate);
-//    void adjustGrPos(int x, int y, QGraphicsScene* scene);
-//    GraphLayoutNode* cloneGraphNode();
-//    int width() const;
-//    int height() const;
-
-//protected:
-//    std::vector<TriggerGraphLayoutNode*> parents_;
-//    std::vector<TriggerGraphLayoutNode*> children_;
-//    int index_;
-//    VItem* item_;
-//    TriggerGraphNodeItem* grItem_ {nullptr};
-//};
-
-
-//class TriggerGraphLayoutEdge
-//{
-//public:
-//    TriggerGraphLayoutEdge(
-//        int from, int to, VItem* through, TriggerCollector::Mode mode, VItem* trigger) :
-//        from_(from), to_(to), through_(through), mode_(mode), trigger_(trigger) {}
-
-//    bool sameAs(int from, int to, VItem* through, TriggerCollector::Mode mode,
-//                VItem* trigger) const {
-//        return (from == from_ && to_ == to && through == through_ &&
-//                mode == mode_ && trigger == trigger_);
-//    }
-
-//    int from_;
-//    int to_;
-//    VItem* through_;
-//    TriggerCollector::Mode mode_;
-//    VItem* trigger_;
-//    TriggerGraphEdgeItem* grItem_;
-//};
-
-
-
 class TriggerGraphNodeItem: public QGraphicsItem
 {
 public:
@@ -105,15 +46,12 @@ public:
                     QWidget *widget) override;
     int type() const override { return Type; }
 
-    //void setIndex(const QModelIndex& index) {index_ = index;}
-    //const QModelIndex& index() {return index_;}
-
     int index() const {return index_;}
     VItem* item() const {return item_;}
-    //void addGrNode(const QModelIndex& idx, TriggerGraphDelegate* delegate);
     void addRelation(TriggerGraphNodeItem* o);
     void adjustSize();
     void adjustPos(int x, int y);
+    void setCentral(bool c) {central_= c;}
     GraphLayoutNode* toGraphNode();
 
 protected:
@@ -123,6 +61,7 @@ protected:
     TriggerGraphView* view_;
     std::vector<TriggerGraphNodeItem*> parents_;
     std::vector<TriggerGraphNodeItem*> children_;
+    bool central_ {false};
 };
 
 
@@ -139,14 +78,6 @@ public:
                          VItem* trigger, TriggerGraphView* view);
 
     int type() const override { return Type; }
-    //QRectF boundingRect() const override;
-    //void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-    //                QWidget *widget) override;
-
-//    TriggerGraphLayoutEdge(
-//        int from, int to, VItem* through, TriggerCollector::Mode mode, VItem* trigger) :
-//        from_(from), to_(to), through_(through), mode_(mode), trigger_(trigger) {}
-
     bool sameAs(TriggerGraphNodeItem* from, TriggerGraphNodeItem* to, VItem* through, TriggerCollector::Mode mode,
                 VItem* trigger) const {
         return (from == from_ && to_ == to && through == through_ &&
@@ -194,8 +125,14 @@ public:
 
     TriggerGraphDelegate* delegate() const {return delegate_;}
     TriggerGraphModel* model() const {return model_;}
+    bool dependency() const {return dependency_;}
+    QPixmap makeLegendPixmap();
+    int minZoomLevel() const {return minZoomLevel_;}
+    int maxZoomLevel() const {return maxZoomLevel_;}
+    int defaultZoomLevel() const {return defaultZoomLevel_;}
+    int zoomLevel() const {return zoomLevel_;}
 
-    void scan(VNode*, bool dependency);
+    void show(VNode*, bool dependency);
     void setEdgePen(TriggerGraphEdgeItem* e);
     void setTriggeredScanner(TriggeredScanner* scanner) {triggeredScanner_ = scanner;}
 
@@ -205,6 +142,7 @@ public Q_SLOTS:
     void slotContextMenu(const QPoint &position);
     void slotCommandShortcut();
     void slotViewCommand(VInfo_ptr,QString);
+    void setZoomLevel(int);
     //void slotRerender();
     //void slotSizeHintChangedGlobal();
     //void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected) override;
@@ -212,6 +150,7 @@ public Q_SLOTS:
 Q_SIGNALS:
     void infoPanelCommand(VInfo_ptr,QString);
     void dashboardCommand(VInfo_ptr,QString);
+    void linkSelected(VInfo_ptr);
 
 protected:
     TriggerGraphNodeItem* nodeItemAt(QPointF scenePos) const;
@@ -224,7 +163,9 @@ protected:
     void adjustTriggerConnectColour(VProperty* p=nullptr);
     void adjustDepConnectColour(VProperty* p=nullptr);
 
-    void scanOne(VNode*);
+    void show(VNode*);
+    void showParent(VItem*);
+    void scan(VNode*);
     void buildLayout();
     void addRelation(VItem* from, VItem* to,
                      VItem* through, TriggerCollector::Mode mode, VItem *trigger);
@@ -233,6 +174,9 @@ protected:
             TriggerGraphNodeItem* from, TriggerGraphNodeItem* to,
             VItem* through, TriggerCollector::Mode mode, VItem *trigger);
 
+
+    float currentScale() const;
+    float scaleFromLevel(int level) const;
 
     TriggerGraphScene* scene_;
     TriggerGraphDelegate* delegate_;
@@ -250,6 +194,12 @@ protected:
     QPen parentConnectPen_ {QPen(Qt::red)};
     QPen triggerConnectPen_ {QPen(Qt::black)};
     QPen depConnectPen_ {QPen(Qt::blue)};
+
+    int minZoomLevel_ {-5};
+    int maxZoomLevel_ {5};
+    int defaultZoomLevel_ {0};
+    int zoomLevel_ {0};
+    float zoomDelta_ {0.2};
 };
 
 #endif // TRIGGERGRAPHVIEW_HPP

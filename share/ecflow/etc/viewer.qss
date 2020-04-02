@@ -270,6 +270,11 @@ QToolButton[triggertitle="1"]:hover {
     background: rgb(140,140,140);
 }
 
+QLabel[legend="1"] {
+     border: 1px solid rgb(206,209,196);
+     background: rgb(253, 253, 253);
+}
+
 /*----------------------------
   Property editor
 ------------------------------*/
