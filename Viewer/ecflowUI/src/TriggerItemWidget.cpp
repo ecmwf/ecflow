@@ -20,6 +20,8 @@
 #include <QGuiApplication>
 #endif
 
+#include <QButtonGroup>
+
 //========================================================
 //
 // TriggerItemWidget
@@ -35,7 +37,6 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     unselectedFlags_.clear();
 
     setupUi(this);
-
     //The collectors
     triggerCollector_=new TriggerTableCollector(false);
     triggeredCollector_=new TriggerTableCollector(false);
@@ -85,13 +86,20 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     exprTe_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
     exprTe_->setFixedHeight(fm.size(0,"A\nA\nA").height()+fm.height()/2);
 
-    //tabs - we show the table by default
-    tab_->setCurrentIndex(TableTabIndex);
-    //triggerTable_->setActive(true);
-    //graphTable_->setActive(false);
+    //view mode - we show the table by default
+    modeGroup_ = new QButtonGroup(this);
+    modeGroup_->addButton(tableTb_, TableModeIndex);
+    modeGroup_->addButton(graphTb_, GraphModeIndex);
+    tableTb_->setChecked(true);
+    modeStacked_->setCurrentIndex(TableModeIndex);
 
-    connect(tab_, SIGNAL(currentChanged(int)),
-            this, SLOT(slotCurrentTabChanged(int)));
+    connect(modeGroup_, SIGNAL(buttonToggled(int,bool)),
+            this, SLOT(slotChangeMode(int, bool)));
+
+    zoomSlider_->setMaximumWidth(120);
+    triggerGraph_->setZoomSlider(zoomSlider_);
+    zoomLabel_->setProperty("graphTitle", "1");
+    showGraphButtons(false);
 
     //table
     connect(triggerTable_,SIGNAL(depInfoWidgetClosureRequested()),
@@ -176,7 +184,7 @@ void TriggerItemWidget::load()
         if(txt.isEmpty()) txt=tr("No trigger expression is available for the selected node!");
         exprTe_->setPlainText(txt);
 
-        if (tab_->currentIndex() == TableTabIndex) {
+        if (modeGroup_->checkedId() == TableModeIndex) {
             loadTable();
         } else {
             loadGraph();
@@ -370,17 +378,27 @@ void TriggerItemWidget::infoProgress(const std::string& text,int value)
 
 #endif
 
-void TriggerItemWidget::slotCurrentTabChanged(int)
+void TriggerItemWidget::slotChangeMode(int, bool)
 {
-    if (tab_->currentIndex() == TableTabIndex) {
+    modeStacked_->setCurrentIndex(modeGroup_->checkedId());
+    showGraphButtons(modeGroup_->checkedId() == GraphModeIndex);
+
+    if (modeGroup_->checkedId() == TableModeIndex) {
         if (triggerTable_->info() != info_ || triggerCollector_->isExtended() != dependency()) {
             loadTable();
         }
-    } else if (tab_->currentIndex() == GraphTabIndex) {
+    } else if (modeGroup_->checkedId() == GraphModeIndex) {
         if (triggerGraph_->info() != info_ || triggerGraph_->dependency() != dependency()) {
             loadGraph();
         }
     }
+}
+
+void TriggerItemWidget::showGraphButtons(bool b)
+{
+    zoomLabel_->setVisible(b);
+    zoomSlider_->setVisible(b);
+    infoTb_->setVisible(b);
 }
 
 void TriggerItemWidget::scanStarted()
@@ -477,9 +495,9 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     }
 
     //For the rest of the changes in we rerender the collected items that might have changed
-    if (tab_->currentIndex() ==  TableTabIndex)
+    if (modeGroup_->checkedId() ==  TableModeIndex)
         triggerTable_->nodeChanged(n,aspect);
-    else if (tab_->currentIndex() ==  GraphTabIndex)
+    else if (modeGroup_->checkedId() ==  GraphModeIndex)
         triggerGraph_->nodeChanged(n, aspect);
 }
 

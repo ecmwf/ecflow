@@ -26,17 +26,17 @@ TriggerGraphWidget::TriggerGraphWidget(QWidget* parent) :
 {
     ui_->setupUi(this);
 
-    ui_->zoomSlider->setMaximumWidth(200);
-    ui_->zoomSlider->setRange(ui_->view->minZoomLevel(),
-                               ui_->view->maxZoomLevel());
-    ui_->zoomSlider->setValue(ui_->view->defaultZoomLevel());
+//    ui_->zoomSlider->setMaximumWidth(200);
+//    ui_->zoomSlider->setRange(ui_->view->minZoomLevel(),
+//                               ui_->view->maxZoomLevel());
+//    ui_->zoomSlider->setValue(ui_->view->defaultZoomLevel());
 
-    ui_->zoomTitle->setProperty("graphTitle", "1");
-    ui_->legendTitle->setProperty("graphTitle", "1");
-    ui_->legendLabel->setProperty("legend", "1");
+//    ui_->zoomTitle->setProperty("graphTitle", "1");
+//    ui_->legendTitle->setProperty("graphTitle", "1");
+//    ui_->legendLabel->setProperty("legend", "1");
+
+//    ui_->headerW->setProperty("triggertitle","1");
     updateLegend();
-
-    adjustButtons();
 
     //relay commands
     connect(ui_->view,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
@@ -47,12 +47,6 @@ TriggerGraphWidget::TriggerGraphWidget(QWidget* parent) :
 
     connect(ui_->view,SIGNAL(linkSelected(VInfo_ptr)),
             this,SIGNAL(linkSelected(VInfo_ptr)));
-
-    connect(ui_->zoomSlider, SIGNAL(valueChanged(int)),
-            this, SLOT(setZoomLevel(int)));
-
-    connect(ui_->zoomResetTb, SIGNAL(clicked()),
-            this, SLOT(resetZoomLevel()));
 
     connect(ui_->view, SIGNAL(linePenChanged()),
             this, SLOT(updateLegend()));
@@ -141,23 +135,28 @@ bool TriggerGraphWidget::dependency() const
 
 void TriggerGraphWidget::updateLegend()
 {
-    QPixmap pix = ui_->view->makeLegendPixmap();
-    ui_->legendLabel->setPixmap(pix);
+    //QPixmap pix = ui_->view->makeLegendPixmap();
+    //ui_->legendLabel->setPixmap(pix);
 }
 
 void TriggerGraphWidget::setZoomLevel(int v)
 {
     ui_->view->setZoomLevel(v);
-    adjustButtons();
 }
 
 void TriggerGraphWidget::resetZoomLevel()
 {
-    ui_->zoomSlider->setValue(ui_->view->defaultZoomLevel());
+    Q_ASSERT(zoomSlider_);
+    zoomSlider_->setValue(ui_->view->defaultZoomLevel());
 }
 
-void TriggerGraphWidget::adjustButtons()
+void TriggerGraphWidget::setZoomSlider(QSlider* slider)
 {
-    ui_->zoomResetTb->setEnabled(
-                ui_->view->zoomLevel() != ui_->view->defaultZoomLevel());
+    zoomSlider_ = slider;
+    zoomSlider_->setRange(ui_->view->minZoomLevel(),
+                               ui_->view->maxZoomLevel());
+    zoomSlider_->setValue(ui_->view->defaultZoomLevel());
+
+    connect(zoomSlider_, SIGNAL(valueChanged(int)),
+            this, SLOT(setZoomLevel(int)));
 }

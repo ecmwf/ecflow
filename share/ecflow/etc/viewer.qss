@@ -276,7 +276,7 @@ QLabel[legend="1"] {
 }
 
 QLabel[graphTitle="1"] {
-    color:  rgb(40, 41, 42);
+    color:  rgb(60, 61, 62);
     font-weight: bold;
 }
 

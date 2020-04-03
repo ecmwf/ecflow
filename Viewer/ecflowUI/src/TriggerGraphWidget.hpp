@@ -19,8 +19,9 @@
 class TriggerTableItem;
 class TriggerTableCollector;
 class TriggerItemWidget;
-
 class VComboSettings;
+class QSlider;
+class QToolButton;
 
 namespace Ui {
     class TriggerGraphWidget;
@@ -46,7 +47,7 @@ public:
     void endTriggerUpdate();
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
     void setTriggeredScanner(TriggeredScanner*);
-    //void scan(VNode*);
+    void setZoomSlider(QSlider*);
 
 Q_SIGNALS:
     void infoPanelCommand(VInfo_ptr,QString);
@@ -70,6 +71,7 @@ private:
     TriggerTableCollector* triggeredTc_ {nullptr};
     VInfo_ptr lastSelectedItem_;
     QString depLabelText_;
+    QSlider* zoomSlider_ {nullptr};
 };
 
 #endif // TRIGGERGRAPHWIDGET_HPP

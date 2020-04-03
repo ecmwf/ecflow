@@ -686,7 +686,7 @@ QPixmap TriggerGraphView::makeLegendPixmap()
     totalWidth += margin;
 
     QPixmap pix(totalWidth,fm.height() + 2* margin);
-    pix.fill(Qt::transparent);
+    pix.fill(QColor(253, 253, 253));
     int lineY = pix.height()/2;
     QPainter p(&pix);
     p.setRenderHints(QPainter::Antialiasing);
