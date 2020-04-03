@@ -1,6 +1,9 @@
 ### ecflow python bindings
 # NOTES:
+# 1/ Building multiple python3 versions not supported, since find_python(..) caches variables, Hack: clear cached variable.
+#    https://gitlab.kitware.com/cmake/cmake/issues/19820
 #
+# 2/
 # To see the python link line: Do python-config  --ldflags, i.e
 #   > /usr/local/apps/python/2.7.8-01/bin/python-config  --ldflags
 #   > -lpthread -ldl -lutil -lm -lpython2.7 -Xlinker -export-dynamic
