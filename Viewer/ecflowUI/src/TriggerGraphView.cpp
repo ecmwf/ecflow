@@ -16,10 +16,14 @@
 #include "TriggerGraphModel.hpp"
 #include "TriggerGraphLayoutBuilder.hpp"
 #include "UiLog.hpp"
+#include "VItemPathParser.hpp"
+#include "VNState.hpp"
 
 #include <math.h>
 
+#include <QFile>
 #include <QScrollBar>
+#include <QTextDocument>
 
 //=============================================================
 //
@@ -84,7 +88,7 @@ TriggerGraphNodeItem::TriggerGraphNodeItem(int index, VItem* item,
     view_(view)
 {
     setFlag(QGraphicsItem::ItemIsSelectable, true);
-    //adjust();
+    setZValue(10.);
 }
 
 QRectF TriggerGraphNodeItem::boundingRect() const
@@ -172,6 +176,7 @@ TriggerGraphEdgeItem::TriggerGraphEdgeItem(
     from_(from), to_(to), through_(through), mode_(mode),
     trigger_(trigger), view_(view)
 {
+     setFlag(QGraphicsItem::ItemIsSelectable, true);
 }
 
 void TriggerGraphEdgeItem::adjust()
@@ -239,10 +244,78 @@ void TriggerGraphEdgeItem::adjust()
         view_->scene()->addItem(this);
 }
 
+QVariant TriggerGraphEdgeItem::itemChange(GraphicsItemChange change, const QVariant &value)
+{
+    if (change == ItemSelectedHasChanged && scene()) {
+        if (isSelected()) {
+            view_->notifyEdgeSelected(this);
+        }
+    }
+    return QGraphicsItem::itemChange(change, value);
+}
+
 TriggerGraphScene::TriggerGraphScene(QWidget* parent) :
     QGraphicsScene(parent)
 {
 }
+
+TriggerGraphEdgeInfoItem::TriggerGraphEdgeInfoItem(TriggerGraphView* view) : view_(view)
+{
+    //Read css for the text formatting
+    QString cssDoc;
+    QFile f(":/viewer/trigger.css");
+    //QTextStream in(&f);
+    if(f.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        cssDoc=QString(f.readAll());
+    }
+    f.close();
+
+    //Add css for state names
+    std::vector<VParam*> states=VNState::filterItems();
+    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
+    {
+       cssDoc+="font." + (*it)->name() +
+               " {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " +
+               (*it)->colour().lighter(120).name() + ", stop: 1 " +  (*it)->colour().name() +
+               "); color: " +  (*it)->typeColour().name() + ";}";
+
+    }
+
+    //Add css for false statements
+    QColor falseCol(218,219,219);
+    cssDoc+="font.false {background-color: " + falseCol.name() + ";}";
+
+    document()->setDefaultStyleSheet(cssDoc);
+}
+
+void TriggerGraphEdgeInfoItem::setInfo(TriggerGraphEdgeItem* e)
+{
+    prepareGeometryChange();
+    setHtml(makeHtml(e));
+    setPos(e->pos());
+    if(!scene())
+        view_->scene()->addItem(this);
+}
+
+QString TriggerGraphEdgeInfoItem::makeHtml(TriggerGraphEdgeItem* e) const
+{
+    QString s;
+
+    VItem *t = e->from_->item();
+
+    QString type=QString::fromStdString(t->typeName());
+    QString path=QString::fromStdString(t->fullPath());
+    QString anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
+
+    s+="  " + type;
+    //s+=" <a class=\'chp\' href=\'" + anchor + "\'>" + path +"</a>";
+    s+=" <a href=\'" + anchor + "\'>" + path +"</a>";
+    s+="</td></tr>";
+
+    return s;
+}
+
 
 //===========================================================
 //
@@ -306,6 +379,7 @@ void TriggerGraphView::clear()
     nodes_.clear();
     edges_.clear();
     scene()->clear();
+    edgeInfo_ = nullptr;
 }
 
 void TriggerGraphView::setInfo(VInfo_ptr info)
@@ -664,6 +738,14 @@ void TriggerGraphView::setEdgePen(TriggerGraphEdgeItem* e)
         default:
             e->setPen(depConnectPen_);
     }
+}
+
+void TriggerGraphView::notifyEdgeSelected(TriggerGraphEdgeItem* e)
+{
+    if (!edgeInfo_)
+        edgeInfo_ = new TriggerGraphEdgeInfoItem(this);
+
+    edgeInfo_->setInfo(e);
 }
 
 QPixmap TriggerGraphView::makeLegendPixmap()

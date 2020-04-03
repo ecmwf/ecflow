@@ -18,6 +18,7 @@
 #include <QGraphicsScene>
 #include <QGraphicsItem>
 #include <QGraphicsPathItem>
+#include <QGraphicsTextItem>
 #include <QPersistentModelIndex>
 
 class ActionHandler;
@@ -67,6 +68,7 @@ protected:
 
 class TriggerGraphEdgeItem: public QGraphicsPathItem
 {
+    friend class TriggerGraphEdgeInfoItem;
 public:
     enum
     {
@@ -88,6 +90,8 @@ public:
     TriggerCollector::Mode mode() const {return mode_;}
 
 protected:
+    QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+
     TriggerGraphNodeItem* from_;
     TriggerGraphNodeItem* to_;
     VItem* through_;
@@ -99,6 +103,21 @@ protected:
     float arrowHeight_  {8.};
 };
 
+class TriggerGraphEdgeInfoItem: public QGraphicsTextItem
+{
+public:
+    enum
+    {
+        Type = UserType + 3
+    };
+
+    TriggerGraphEdgeInfoItem(TriggerGraphView* view);
+    void setInfo(TriggerGraphEdgeItem*);
+
+protected:
+    QString makeHtml(TriggerGraphEdgeItem*) const;
+    TriggerGraphView* view_;
+};
 
 class TriggerGraphScene : public QGraphicsScene
 {
@@ -135,6 +154,7 @@ public:
     void show(VNode*, bool dependency);
     void setEdgePen(TriggerGraphEdgeItem* e);
     void setTriggeredScanner(TriggeredScanner* scanner) {triggeredScanner_ = scanner;}
+    void notifyEdgeSelected(TriggerGraphEdgeItem*);
 
 public Q_SLOTS:
     //void slotSelectItem(const QModelIndex&);
@@ -185,6 +205,7 @@ protected:
     GraphLayoutBuilder* builder_;
     std::vector<TriggerGraphNodeItem*> nodes_;
     std::vector<TriggerGraphEdgeItem*> edges_;
+    TriggerGraphEdgeInfoItem* edgeInfo_ {nullptr};
 
     bool dependency_ {false};
     TriggeredScanner *triggeredScanner_ {nullptr};
