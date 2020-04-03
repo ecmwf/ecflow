@@ -294,13 +294,19 @@ confDirDefault="${HOME}/.ecflow_ui_v5"
 confDir=${confDirDefault}
 confDir_v4="${HOME}/.ecflow_ui"
 
-# if the config dir does not exists we try to copy it
+# if default the config dir does not exist we try to copy it
 # from an existing one
 if [[ ! -d "${confDir}" ]] ; then
-    # the user started ecFlowUI with the -confd option and the
-    # custom cond directory already exists
-    if  [[ ! -d "${ECFLOWUI_CONFIG_DIR}" && -d "${confDir_v4}" ]] ; then
+    export ECFLOWUI_CONFIG_DIR_COPIED=1
+    # the user did not start ecFlowUI with the -confd option and the
+    # old confdir exists
+    if  [[ x"${ECFLOWUI_CONFIG_DIR}" == x && -d "${confDir_v4}" ]] ; then
         cp -Rf "${confDir_v4}" "${confDir}"
+        #  the session description is not copied over
+        session_json="${confDir}/default.session/session.json"
+        if [[ -f "${session_json}" ]] ; then
+            rm -f "${session_json}"
+        fi
     fi
 fi
 
