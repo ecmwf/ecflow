@@ -18,8 +18,11 @@
 #include <QGraphicsScene>
 #include <QGraphicsItem>
 #include <QGraphicsPathItem>
+#include <QGraphicsProxyWidget>
 #include <QGraphicsTextItem>
+#include <QGraphicsWidget>
 #include <QPersistentModelIndex>
+#include <QTextBrowser>
 
 class ActionHandler;
 class PropertyMapper;
@@ -29,6 +32,7 @@ class TriggerGraphModel;
 class TriggerGraphView;
 class GraphLayoutBuilder;
 class GraphLayoutNode;
+class QToolButton;
 class QModelIndex;
 
 
@@ -68,7 +72,7 @@ protected:
 
 class TriggerGraphEdgeItem: public QGraphicsPathItem
 {
-    friend class TriggerGraphEdgeInfoItem;
+    friend class TriggerGraphEdgeInfoProxy;
 public:
     enum
     {
@@ -103,26 +107,44 @@ protected:
     float arrowHeight_  {8.};
 };
 
-class TriggerGraphEdgeInfoItem: public QGraphicsTextItem
+class TriggerGraphEdgeInfoWidget : public QWidget
 {
+    friend class TriggerGraphEdgeInfoProxy;
+public:
+     TriggerGraphEdgeInfoWidget();
+
+protected:
+     void paintEvent(QPaintEvent*);
+
+     QToolButton* closeTb_;
+     QTextBrowser* te_;
+};
+
+class TriggerGraphEdgeInfoProxy : public QGraphicsProxyWidget
+{
+    Q_OBJECT
 public:
     enum
     {
         Type = UserType + 3
     };
-
-    TriggerGraphEdgeInfoItem(TriggerGraphView* view);
+    TriggerGraphEdgeInfoProxy(TriggerGraphView* view);
     void setInfo(TriggerGraphEdgeItem*);
 
-protected:
-    QString makeHtml(TriggerGraphEdgeItem*) const;
-    TriggerGraphView* view_;
-};
+Q_SIGNALS:
+    void anchorClicked(const QUrl& link);
 
-class TriggerGraphScene : public QGraphicsScene
-{
-public:
-    TriggerGraphScene(QWidget* parent= nullptr);
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent*);
+    void mouseMoveEvent(QGraphicsSceneMouseEvent*);
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent*);
+    QString makeHtml(TriggerGraphEdgeItem*) const;
+    void makeRow(QString label, VItem* t, QString& s) const;
+
+    TriggerGraphEdgeInfoWidget* w_;
+    TriggerGraphView* view_;
+    bool inDrag_ {false};
+    QPointF dragDelta_;
 };
 
 class TriggerGraphView : public QGraphicsView, public VPropertyObserver
@@ -163,6 +185,7 @@ public Q_SLOTS:
     void slotCommandShortcut();
     void slotViewCommand(VInfo_ptr,QString);
     void setZoomLevel(int);
+    void slotEdgeInfo(const QUrl& link);
     //void slotRerender();
     //void slotSizeHintChangedGlobal();
     //void selectionChanged (const QItemSelection &selected, const QItemSelection &deselected) override;
@@ -199,13 +222,13 @@ protected:
     float currentScale() const;
     float scaleFromLevel(int level) const;
 
-    TriggerGraphScene* scene_;
+    QGraphicsScene* scene_;
     TriggerGraphDelegate* delegate_;
     TriggerGraphModel* model_;
     GraphLayoutBuilder* builder_;
     std::vector<TriggerGraphNodeItem*> nodes_;
     std::vector<TriggerGraphEdgeItem*> edges_;
-    TriggerGraphEdgeInfoItem* edgeInfo_ {nullptr};
+    TriggerGraphEdgeInfoProxy* edgeInfo_ {nullptr};
 
     bool dependency_ {false};
     TriggeredScanner *triggeredScanner_ {nullptr};

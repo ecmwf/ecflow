@@ -7,6 +7,14 @@
 // nor does it submit to any jurisdiction.
 //
 //============================================================================*/
+body {
+    background: white;
+}
+
+div {
+    background: blue;
+}
+
 
 p
 {

@@ -22,8 +22,15 @@
 #include <math.h>
 
 #include <QFile>
+#include <QGraphicsDropShadowEffect>
+#include <QGraphicsLinearLayout>
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsProxyWidget>
+#include <QHBoxLayout>
 #include <QScrollBar>
 #include <QTextDocument>
+#include <QToolButton>
+#include <QVBoxLayout>
 
 //=============================================================
 //
@@ -176,7 +183,7 @@ TriggerGraphEdgeItem::TriggerGraphEdgeItem(
     from_(from), to_(to), through_(through), mode_(mode),
     trigger_(trigger), view_(view)
 {
-     setFlag(QGraphicsItem::ItemIsSelectable, true);
+     setFlags(QGraphicsItem::ItemIsSelectable);
 }
 
 void TriggerGraphEdgeItem::adjust()
@@ -254,13 +261,34 @@ QVariant TriggerGraphEdgeItem::itemChange(GraphicsItemChange change, const QVari
     return QGraphicsItem::itemChange(change, value);
 }
 
-TriggerGraphScene::TriggerGraphScene(QWidget* parent) :
-    QGraphicsScene(parent)
-{
-}
+//=============================================================
+//
+// TriggerGraphEdgeInfoWidget
+//
+//=============================================================
 
-TriggerGraphEdgeInfoItem::TriggerGraphEdgeInfoItem(TriggerGraphView* view) : view_(view)
+TriggerGraphEdgeInfoWidget::TriggerGraphEdgeInfoWidget()
 {
+    setProperty("graphInfo", "1");
+
+    QVBoxLayout *vb = new QVBoxLayout(this);
+    vb->setContentsMargins(2,2,2,2);
+    vb->setSpacing(2);
+
+    QHBoxLayout *hb = new QHBoxLayout();
+    hb->addStretch(1);
+    closeTb_ = new QToolButton(this);
+    closeTb_->setAutoRaise(true);
+    closeTb_->setIcon(QPixmap(":/viewer/favourite.svg"));
+    closeTb_->setToolTip(tr("Close"));
+    closeTb_->setProperty("graphInfo", "1");
+    hb->addWidget(closeTb_);
+
+    te_ = new QTextBrowser(this);
+    te_->setOpenExternalLinks(false);
+    te_->setOpenLinks(false);
+    te_->setReadOnly(true);
+
     //Read css for the text formatting
     QString cssDoc;
     QFile f(":/viewer/trigger.css");
@@ -270,52 +298,115 @@ TriggerGraphEdgeInfoItem::TriggerGraphEdgeInfoItem(TriggerGraphView* view) : vie
         cssDoc=QString(f.readAll());
     }
     f.close();
+    te_->document()->setDefaultStyleSheet(cssDoc);
 
-    //Add css for state names
-    std::vector<VParam*> states=VNState::filterItems();
-    for(std::vector<VParam*>::const_iterator it=states.begin(); it!=states.end();++it)
-    {
-       cssDoc+="font." + (*it)->name() +
-               " {background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 " +
-               (*it)->colour().lighter(120).name() + ", stop: 1 " +  (*it)->colour().name() +
-               "); color: " +  (*it)->typeColour().name() + ";}";
 
+    vb->addLayout(hb);
+    vb->addWidget(te_);
+}
+
+void TriggerGraphEdgeInfoWidget::paintEvent(QPaintEvent*)
+{
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+//=============================================================
+//
+// TriggerGraphEdgeInfoProxy
+//
+//=============================================================
+
+TriggerGraphEdgeInfoProxy::TriggerGraphEdgeInfoProxy(TriggerGraphView* view) :
+    view_(view)
+{
+    w_ = new TriggerGraphEdgeInfoWidget();
+    setWidget(w_);
+
+    setFlags(QGraphicsItem::ItemIsSelectable | QGraphicsItem::ItemIsMovable);
+    setOpacity(1.);
+    QGraphicsDropShadowEffect* effect = new QGraphicsDropShadowEffect(this);
+    effect->setXOffset(3.);
+    effect->setYOffset(3.);
+    setGraphicsEffect(effect);
+
+    setZValue(100.);
+
+    connect(w_->te_, SIGNAL(anchorClicked(const QUrl&)),
+            this, SIGNAL(anchorClicked(const QUrl&)));
+
+    connect(w_->closeTb_, SIGNAL(clicked()),
+            this, SLOT(close()));
+}
+
+void TriggerGraphEdgeInfoProxy::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+     if (event->pos().y() < 20) {
+        inDrag_ = true;
+        dragDelta_ = mapToParent(event->pos()) - pos();
+        return;
+    } else {
+        inDrag_ = false;
+        QGraphicsProxyWidget::mousePressEvent(event);
     }
 
-    //Add css for false statements
-    QColor falseCol(218,219,219);
-    cssDoc+="font.false {background-color: " + falseCol.name() + ";}";
-
-    document()->setDefaultStyleSheet(cssDoc);
 }
 
-void TriggerGraphEdgeInfoItem::setInfo(TriggerGraphEdgeItem* e)
+void TriggerGraphEdgeInfoProxy::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+{
+    if (inDrag_) {
+        setPos(mapToParent(event->pos()) - dragDelta_);
+    } else {
+        QGraphicsProxyWidget::mouseMoveEvent(event);
+    }
+}
+
+void TriggerGraphEdgeInfoProxy::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+{
+    inDrag_ = false;
+    dragDelta_ = QPointF(0, 0);
+    QGraphicsProxyWidget::mouseReleaseEvent(event);
+}
+
+void TriggerGraphEdgeInfoProxy::setInfo(TriggerGraphEdgeItem* e)
 {
     prepareGeometryChange();
-    setHtml(makeHtml(e));
+    w_->te_->setHtml(makeHtml((e)));
     setPos(e->pos());
-    if(!scene())
+    if(!scene()) {
         view_->scene()->addItem(this);
+    }
+    show();
 }
 
-QString TriggerGraphEdgeInfoItem::makeHtml(TriggerGraphEdgeItem* e) const
+QString TriggerGraphEdgeInfoProxy::makeHtml(TriggerGraphEdgeItem* e) const
 {
-    QString s;
+    QString s = "<table width=\'100%\'>";
 
     VItem *t = e->from_->item();
+    makeRow("from:", t, s);
 
-    QString type=QString::fromStdString(t->typeName());
-    QString path=QString::fromStdString(t->fullPath());
-    QString anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
+    t = e->to_->item();
+    makeRow("to:", t, s);
 
-    s+="  " + type;
-    //s+=" <a class=\'chp\' href=\'" + anchor + "\'>" + path +"</a>";
-    s+=" <a href=\'" + anchor + "\'>" + path +"</a>";
-    s+="</td></tr>";
+    s += "</table>";
 
     return s;
 }
 
+void TriggerGraphEdgeInfoProxy::makeRow(QString label, VItem* t, QString& s) const
+{
+    QString type=QString::fromStdString(t->typeName());
+    QString path=QString::fromStdString(t->fullPath());
+    QString anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
+
+    s += "<tr><td><b>" + label + "</b>  </td><td>" + type + "</td><td>";
+    s += " <a href=\'" + anchor + "\'>" + path +"</a>";
+    s += "</td></tr>";
+
+}
 
 //===========================================================
 //
@@ -330,7 +421,7 @@ TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent)
 
     actionHandler_=new ActionHandler(this,this);
 
-    scene_ = new TriggerGraphScene(this);
+    scene_ = new QGraphicsScene(this);
     setScene(scene_);
 
     model_ = new TriggerGraphModel(TriggerGraphModel::TriggerMode,this);
@@ -371,15 +462,24 @@ TriggerGraphView::~TriggerGraphView()
     delete prop_;
     delete builder_;
     clear();
+    scene()->clear();
 }
 
 void TriggerGraphView::clear()
 {
     model_->clearData();
+    for(auto n: nodes_) {
+        scene()->removeItem(n);
+    }
     nodes_.clear();
+
+    for(auto e: edges_) {
+        scene()->removeItem(e);
+    }
     edges_.clear();
-    scene()->clear();
-    edgeInfo_ = nullptr;
+
+    if (edgeInfo_)
+        edgeInfo_->close();
 }
 
 void TriggerGraphView::setInfo(VInfo_ptr info)
@@ -450,6 +550,8 @@ TriggerGraphNodeItem* TriggerGraphView::nodeItemAt(QPointF scenePos) const
 void TriggerGraphView::slotContextMenu(const QPoint& position)
 {
     auto itemClicked = nodeItemAt(mapToScene(position));
+    if(!itemClicked)
+        return;
 
     QPoint scrollOffset(horizontalScrollBar()->value(), verticalScrollBar()->value());
     QPoint globalPos = mapToGlobal(position); //, position + scrollOffset;
@@ -742,10 +844,24 @@ void TriggerGraphView::setEdgePen(TriggerGraphEdgeItem* e)
 
 void TriggerGraphView::notifyEdgeSelected(TriggerGraphEdgeItem* e)
 {
-    if (!edgeInfo_)
-        edgeInfo_ = new TriggerGraphEdgeInfoItem(this);
+    if (!edgeInfo_) {
+        edgeInfo_ = new TriggerGraphEdgeInfoProxy(this);
+        connect(edgeInfo_, SIGNAL(anchorClicked(QUrl)),
+                this, SLOT(slotEdgeInfo(QUrl)));
+    }
 
     edgeInfo_->setInfo(e);
+}
+
+void TriggerGraphView::slotEdgeInfo(const QUrl& link)
+{
+    if (nodes_.size() > 0 && nodes_[0]->item()) {
+        VInfo_ptr info=VInfo::createFromPath(
+                    nodes_[0]->item()->server(),
+                    link.toString().toStdString());
+        if(info)
+            Q_EMIT linkSelected(info);
+    }
 }
 
 QPixmap TriggerGraphView::makeLegendPixmap()
