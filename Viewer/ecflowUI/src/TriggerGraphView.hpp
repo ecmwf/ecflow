@@ -14,6 +14,7 @@
 #include "VInfo.hpp"
 #include "VProperty.hpp"
 
+#include <QDialog>
 #include <QGraphicsView>
 #include <QGraphicsScene>
 #include <QGraphicsItem>
@@ -73,6 +74,7 @@ protected:
 class TriggerGraphEdgeItem: public QGraphicsPathItem
 {
     friend class TriggerGraphEdgeInfoProxy;
+    friend class TriggerGraphEdgeInfoDialog;
 public:
     enum
     {
@@ -84,67 +86,45 @@ public:
                          VItem* trigger, TriggerGraphView* view);
 
     int type() const override { return Type; }
-    bool sameAs(TriggerGraphNodeItem* from, TriggerGraphNodeItem* to, VItem* through, TriggerCollector::Mode mode,
-                VItem* trigger) const {
-        return (from == from_ && to_ == to && through == through_ &&
-                mode == mode_ && trigger == trigger_);
+    bool sameAs(TriggerGraphNodeItem* from, TriggerGraphNodeItem* to) const {
+        return (from == from_ && to_ == to);
     }
+    void addTrigger(VItem* through, TriggerCollector::Mode mode,
+                VItem* trigger);
 
     void adjust();
-    TriggerCollector::Mode mode() const {return mode_;}
+    TriggerCollector::Mode mode() const {return modes_[0];}
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
 
     TriggerGraphNodeItem* from_;
     TriggerGraphNodeItem* to_;
-    VItem* through_;
-    TriggerCollector::Mode mode_;
-    VItem* trigger_;
+    std::vector<VItem*> throughs_;
+    std::vector<TriggerCollector::Mode> modes_;
+    std::vector<VItem*> triggers_;
     QRectF bRect_;
     TriggerGraphView* view_;
     float arrowWidth_ {10.};
     float arrowHeight_  {8.};
 };
 
-class TriggerGraphEdgeInfoWidget : public QWidget
-{
-    friend class TriggerGraphEdgeInfoProxy;
-public:
-     TriggerGraphEdgeInfoWidget();
-
-protected:
-     void paintEvent(QPaintEvent*);
-
-     QToolButton* closeTb_;
-     QTextBrowser* te_;
-};
-
-class TriggerGraphEdgeInfoProxy : public QGraphicsProxyWidget
+class TriggerGraphEdgeInfoDialog : public QDialog
 {
     Q_OBJECT
 public:
-    enum
-    {
-        Type = UserType + 3
-    };
-    TriggerGraphEdgeInfoProxy(TriggerGraphView* view);
-    void setInfo(TriggerGraphEdgeItem*);
+     TriggerGraphEdgeInfoDialog(QWidget* parent=nullptr);
+     void setInfo(TriggerGraphEdgeItem*);
 
 Q_SIGNALS:
     void anchorClicked(const QUrl& link);
 
 protected:
-    void mousePressEvent(QGraphicsSceneMouseEvent*);
-    void mouseMoveEvent(QGraphicsSceneMouseEvent*);
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent*);
-    QString makeHtml(TriggerGraphEdgeItem*) const;
-    void makeRow(QString label, VItem* t, QString& s) const;
+     QString makeHtml(TriggerGraphEdgeItem*) const;
+     void makeRow(QString label, VItem* t, QString& s) const;
+     void makeTrigger(VItem* trigger, VItem* through, TriggerCollector::Mode mode, QString& s) const;
 
-    TriggerGraphEdgeInfoWidget* w_;
-    TriggerGraphView* view_;
-    bool inDrag_ {false};
-    QPointF dragDelta_;
+     QTextBrowser* te_;
 };
 
 class TriggerGraphView : public QGraphicsView, public VPropertyObserver
@@ -228,7 +208,7 @@ protected:
     GraphLayoutBuilder* builder_;
     std::vector<TriggerGraphNodeItem*> nodes_;
     std::vector<TriggerGraphEdgeItem*> edges_;
-    TriggerGraphEdgeInfoProxy* edgeInfo_ {nullptr};
+    TriggerGraphEdgeInfoDialog* edgeInfo_ {nullptr};
 
     bool dependency_ {false};
     TriggeredScanner *triggeredScanner_ {nullptr};

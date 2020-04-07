@@ -281,12 +281,19 @@ QLabel[graphTitle="1"] {
 }
 
 QWidget[graphInfo="1"] {
-    background:  rgb(60, 61, 62);
+    background:  rgb(112, 112, 112);
 }
 
 QToolButton[graphInfo="1"] {
     border: none;
     background-color: transparent;
+}
+
+QToolButton[graphInfo="1"]:hover {
+    border-radius: 0px;
+    padding: 0px;
+    icon-size:  18px;
+    background: rgb(140,140,140);
 }
 
 /*----------------------------
