@@ -2129,33 +2129,33 @@ bool Node::why(std::vector<std::string>& vec,bool html) const
    // The complete expression is used to set node to complete, when it evaluates and hence
    // should not prevent further tree walking. evaluate each leaf branch
    // **************************************************************************************
+
+   // Only report on trigger expression, if:
+   // 1/ No complete expression
+   // 2/ Have complete expression, but it does not evaluate
+   bool report_on_trigger_expression = true;
+   AstTop* theCompleteAst = completeAst();
+   if (theCompleteAst) {
+	   if (c_expr_->isFree() || theCompleteAst->evaluate()) {
+		   report_on_trigger_expression = false; // complete is free, hence we do not look at trigger
+	   }
+   }
+
    AstTop* theTriggerAst = triggerAst();
-   if (theTriggerAst) {
-      // Note 1: A trigger can be freed by the ForceCmd
-      // Note 2: if we have a non NULL trigger ast, we must have trigger expression
-      // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
-      if (!t_expr_->isFree() ) {
-
-    	  // Only report on trigger expression, if:
-    	  // 1/ No complete expression
-    	  // 2/ Have complete expression, but it does not evaluate
-    	  bool report_on_trigger_expression = true;
-    	  AstTop* theCompleteAst = completeAst();
-    	  if (theCompleteAst) {
-    		  if (c_expr_->isFree()) report_on_trigger_expression = false; // complete is free, hence we do not look at trigger
-    	  }
-
-    	  if (report_on_trigger_expression) {
+   if (report_on_trigger_expression && theTriggerAst) {
+	   // Note 1: A trigger can be freed by the ForceCmd
+	   // Note 2: if we have a non NULL trigger ast, we must have trigger expression
+	   // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
+	   if (!t_expr_->isFree() ) {
 #ifdef DEBUG_WHY
-         std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
+		   std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
 #endif
-         	 std::string postFix;
-			 if (theTriggerAst->why(postFix, html)) {
-				vec.push_back(prefix + postFix);
-				why_found = true; // return true if why found
-			 }
-		  }
-      }
+		   std::string postFix;
+		   if (theTriggerAst->why(postFix, html)) {
+			   vec.push_back(prefix + postFix);
+			   why_found = true; // return true if why found
+		   }
+	   }
    }
 
 #ifdef DEBUG_WHY
