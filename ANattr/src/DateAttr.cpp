@@ -123,7 +123,7 @@ void DateAttr::requeue(bool reset_requeue_counter)
 {
    free_ = false;
    if (reset_requeue_counter) requeue_counter_ = 0; // Manual re-queue, set to true when repeats are reset.
-   else                       requeue_counter_++;
+   else                       requeue_counter_++;   // incremental re-queue under a repeat, once free stays free. ECFLOW-1537
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
