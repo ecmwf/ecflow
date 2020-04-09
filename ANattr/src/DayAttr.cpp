@@ -64,7 +64,7 @@ void DayAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat, bo
    }
  
    // This AFFECTs the code above with top_level_repeat.
-   // If we have been re-queued under a repeat(incremental), then once free stay free
+   // If we have been re-queued under a repeat(incremental), then once free stay free ECFLOW-1537
    if (requeue_counter_ == 0 && isFree(c)) {
       setFree();
    }
