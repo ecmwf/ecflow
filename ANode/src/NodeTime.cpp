@@ -104,6 +104,7 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
        //       time 23:00
        //       task t1  # This took longer than 1 hour
        //       task t2  # allow task to continue to the next day
+	   //         trigger t1 == complete
        // This is only applicable for NodeContainers, for task with day/date always CLEAR at midnight
        // ECFLOW-337 versus ECFLOW-1550
 
