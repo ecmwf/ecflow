@@ -44,44 +44,49 @@ static const char* theDay(DayAttr::Day_t day)
 
 //===============================================================================
 
-void DayAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat, bool clear_at_midnight)
+void DayAttr::calendarChanged( const ecf::Calendar& c, bool clear_at_midnight)
 {
-   if (top_level_repeat) {
-      // Once free we stay free until re-queue, if we have a top level repeat
-      if (free_) {
-         return;
-      }
-   }
+	// See ECFLOW-337
+	//	repeat ....
+	//    family start
+	//      family 0
+	//        time 10:00
+	//        day monday        # if there was no c.dayChanged(), then after re-queue, & before midnight Monday is still free.
+	//        task dummy        # hence we will end up also running on Tuesday at 10:00
+	//          complete 1==1
+	//          trigger 0==1
+	//
+	//  ECFLOW-1550            # If children of a family with day/date are still active/submitted/queued, then don't clear at midnight.
+	//  repeat ....            #  This is only applicable for NodeContainers, for task with day/date always CLEAR at midnight
+	//	family f1
+	//	   day monday
+	//	   time 23:00
+	//	   task t1             # Task t1 took longer than 1 hour
+	//	   task t2             # allow task t2 to continue to the next day, i.e clear_at_midnight = False
+	//	      trigger t1 == complete
 
-   // See ECFLOW-337 versus ECFLOW-1550
-   if (c.dayChanged()) {
-      requeue_counter_ = 0;
-      if (clear_at_midnight) clearFree();
-   }
+	if (c.dayChanged()) {
+		if (clear_at_midnight) clearFree();
+	}
 
-   if (free_) {
-      return;
-   }
- 
-   // This AFFECTs the code above with top_level_repeat.
-   // If we have been re-queued under a repeat(incremental), then once free stay free ECFLOW-1537
-   if (requeue_counter_ == 0 && isFree(c)) {
-      setFree();
-   }
+	if (free_) {
+		return;
+	}
+
+	if (is_free(c)) {
+		setFree();
+	}
 }
 
 void DayAttr::reset()
 {
    free_ = false;
-   requeue_counter_ = 0;
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void DayAttr::requeue(bool reset_requeue_counter)
+void DayAttr::requeue()
 {
    free_ = false;
-   if (reset_requeue_counter) requeue_counter_ = 0; // Manual re-queue, set to true when repeats are reset.
-   else                       requeue_counter_++;   // incremental re-queue under a repeat, once free stays free. ECFLOW-1537
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -153,16 +158,6 @@ void DayAttr::print(std::string& os) const
    if (!PrintStyle::defsStyle()) {
       if (free_) {
          os += " # free";
-         if (requeue_counter_ != 0)  {
-            os += " ";
-            os += boost::lexical_cast<std::string>(requeue_counter_);
-         }
-      }
-      else {
-         if (requeue_counter_ != 0)  {
-            os += " # ";
-            os += boost::lexical_cast<std::string>(requeue_counter_);
-         }
       }
    }
 	os += "\n";
@@ -187,7 +182,6 @@ std::string DayAttr::dump() const
 	ss << toString();
  	if (free_) ss << " (free)";
 	else       ss << " (holding)";
- 	ss << " requeue_counter_:" << requeue_counter_;
   	return ss.str();
 }
 
@@ -220,18 +214,13 @@ DayAttr DayAttr::create( const std::vector<std::string>& lineTokens, bool read_s
 //      cout << "lineTokens[" << i << "] = '" << lineTokens[i] << "'\n";
 //   }
 
-   // day monday  # free 2
-   // day monday  # 2
+   // day monday  # free
    DayAttr day = DayAttr::create( lineTokens[1] );
 
    // state
    if (read_state) {
       for(size_t i = 3; i < lineTokens.size(); i++) {
          if (lineTokens[i] == "free") day.setFree();
-         else {
-            try { day.set_requeue_counter(boost::lexical_cast<int>( lineTokens[i]));}
-            catch(...) { throw std::runtime_error("DateAttr::create: could not parse state, for requeue_counter");}
-         }
       }
    }
    return day;
