@@ -129,8 +129,8 @@ $PYTHON ./reload.py -s ecflow
 # Generate test suites, based on definitions known to be good 
 # ========================================================================
 cd $WK
-$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/limit/sub_only1.def
-$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/complete/why.def
+$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/JIRA/ecflow_337.def
+$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/JIRA/ecflow_1550.def
 
 #for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
 #   echo "->$defs_file"
