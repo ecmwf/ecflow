@@ -5,15 +5,15 @@ suite ecflow_337
     family start
       complete start/0 == complete or start/1 == complete
       family 0
-        time 11:08
+        time 10:00
         day monday
         task dummy
           complete 1==1
           trigger 0==1
       endfamily
       family 1
-        time 13:01
-        day monday
+        time 10:00
+        day thursday
         task dummy
           complete 1==1
           trigger 0==1
