@@ -12,11 +12,13 @@
 #include "ActionHandler.hpp"
 #include "AttributeEditor.hpp"
 #include "PropertyMapper.hpp"
+#include "SessionHandler.hpp"
 #include "TriggerGraphDelegate.hpp"
 #include "TriggerGraphModel.hpp"
 #include "TriggerGraphLayoutBuilder.hpp"
 #include "UiLog.hpp"
 #include "VItemPathParser.hpp"
+#include "VSettings.hpp"
 #include "VNState.hpp"
 
 #include <math.h>
@@ -27,8 +29,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsProxyWidget>
 #include <QHBoxLayout>
-#include <QLinearGradient>
 #include <QScrollBar>
+#include <QSettings>
 #include <QTextDocument>
 #include <QToolButton>
 #include <QVBoxLayout>
@@ -289,7 +291,7 @@ void TriggerGraphEdgeItem::addTrigger(VItem* through, TriggerCollector::Mode mod
 TriggerGraphEdgeInfoDialog::TriggerGraphEdgeInfoDialog(QWidget* parent) :
     QDialog(parent)
 {
-    setWindowTitle(tr("Edge details"));
+    setWindowTitle(tr("Trigger details"));
     setModal(false);
 
     QVBoxLayout *vb = new QVBoxLayout(this);
@@ -315,12 +317,26 @@ TriggerGraphEdgeInfoDialog::TriggerGraphEdgeInfoDialog(QWidget* parent) :
 
     connect(te_, SIGNAL(anchorClicked(const QUrl&)),
             this, SIGNAL(anchorClicked(const QUrl&)));
+
+    hide();
+    resize(lastSize_);
+}
+
+void TriggerGraphEdgeInfoDialog::closeEvent(QCloseEvent * event)
+{
+    event->accept();
+    lastSize_ = size();
 }
 
 void TriggerGraphEdgeInfoDialog::setInfo(TriggerGraphEdgeItem* e)
 {
     te_->setHtml(makeHtml((e)));
     //setPos(e->pos());
+
+    if (!isVisible()) {
+        resize(lastSize_);
+    }
+
     show();
 }
 
@@ -333,6 +349,15 @@ QString TriggerGraphEdgeInfoDialog::makeHtml(TriggerGraphEdgeItem* e) const
 
     t = e->to_->item();
     makeRow("to", t, s);
+
+    if (e->triggers_.size() > 0) {
+        makeModeRow(e->modes_[0], s);
+
+        if (e->triggers_[0] || e->triggers_.size() > 1) {
+            s += "<tr><td></td><td></td></tr>";
+            s += "<tr><td class=\'grtitle\' colspan=\'2\'> Triggers </td></tr>";
+        }
+    }
 
     for(size_t i=0; i < e->triggers_.size(); i++) {
         if (e->triggers_[i]) {
@@ -351,11 +376,22 @@ void TriggerGraphEdgeInfoDialog::makeRow(QString label, VItem* t, QString& s) co
     QString path=QString::fromStdString(t->fullPath());
     QString anchor=QString::fromStdString(VItemPathParser::encode(t->fullPath(),t->typeName()));
 
-    s += "<tr><td align=\'center\'class=\'title\' colspan=\'2\'><b>" + label + "</b></td></tr>";
-    s += "<tr><td>" + type + "</td><td>";
-    s += " <a href=\'" + anchor + "\'>" + path +"</a>";
+    s += "<tr><td class=\'grfirst\'>" + label + "</td>";
+    s += "<td>[" + type + "] <a href=\'" + anchor + "\'>" + path +"</a>";
     s += "</td></tr>";
 
+}
+void TriggerGraphEdgeInfoDialog::makeModeRow(TriggerCollector::Mode mode, QString &s) const
+{
+    QString modeTxt = "direct trigger";
+    if (mode == TriggerCollector::Parent)
+        modeTxt = "dependency via parent";
+    else if (mode ==  TriggerCollector::Child)
+        modeTxt = "dependency via child";
+    else if (mode == TriggerCollector::Hierarchy)
+        modeTxt = "parent-child relationship";
+
+    s += "<tr><td class=\'grfirst\'>type</td><td>" + modeTxt + "</td></tr>";
 }
 
 void TriggerGraphEdgeInfoDialog::makeTrigger(VItem* trigger, VItem* through, TriggerCollector::Mode mode, QString& s) const
@@ -366,29 +402,46 @@ void TriggerGraphEdgeInfoDialog::makeTrigger(VItem* trigger, VItem* through, Tri
     QString anchor=QString::fromStdString(
                 VItemPathParser::encode(trigger->fullPath(),trigger->typeName()));
 
-    s += "<tr><td></td></tr>";
-    s += "<tr><td colspan=\'2\'><b>trigger</b></td></tr>";
-    s += "<tr><td>" + type + "</td><td>";
-    s += " <a href=\'" + anchor + "\'>" + path +"</a>";
+    s += "<tr><td class=\'grfirst\'>trigger</td>";
+    s += "<td>[" + type + "] <a href=\'" + anchor + "\'>" + path +"</a>";
     s += "</td></tr>";
 
     if (through)  {
         QString modeStr;
         if (mode == TriggerCollector::Parent) {
-            modeStr = "through parent";
+            modeStr = "via parent";
         } else if (mode == TriggerCollector::Child) {
-            modeStr = "through child";
+            modeStr = "via child";
         }
         type=QString::fromStdString(through->typeName());
         path=QString::fromStdString(through->fullPath());
         anchor=QString::fromStdString(
                     VItemPathParser::encode(through->fullPath(),through->typeName()));
 
-        s += "<tr><td colspan=\'2\'><b>" + modeStr + "</b></td></tr>";
-        s += "<tr><td>" + type + "</td><td>";
-        s += " <a href=\'" + anchor + "\'>" + path +"</a>";
+        s += "<tr><td class=\'grfirst\'>" + modeStr + "</td>";
+        s += "<td> [" + type + "] <a href=\'" + anchor + "\'>" + path +"</a>";
         s += "</td></tr>";
     }
+
+    s += "<tr><td></td></tr>";
+}
+
+
+void TriggerGraphEdgeInfoDialog::writeSettings(VComboSettings* vs)
+{
+    vs->beginGroup("infoDialog");
+    vs->putQs("size",size());
+    vs->endGroup();
+}
+
+void TriggerGraphEdgeInfoDialog::readSettings(VComboSettings* vs)
+{
+    vs->beginGroup("infoDialog");
+    if(vs->containsQs("size"))
+    {
+        resize(vs->getQs("size").toSize());
+    }
+    vs->endGroup();
 }
 
 //===========================================================
@@ -437,6 +490,11 @@ TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent)
     adjustParentConnectColour(prop_->find("view.trigger.parentConnectorColour", true));
     adjustTriggerConnectColour(prop_->find("view.trigger.triggerConnectorColour", true));
     adjustDepConnectColour(prop_->find("view.trigger.dependencyConnectorColour", true));
+
+    // create the info dialogie, stays hidden
+    edgeInfo_ = new TriggerGraphEdgeInfoDialog(this);
+    connect(edgeInfo_, SIGNAL(anchorClicked(QUrl)),
+            this, SLOT(slotEdgeInfo(QUrl)));
 }
 
 TriggerGraphView::~TriggerGraphView()
@@ -453,9 +511,7 @@ void TriggerGraphView::clear()
     scene_->clear();
     nodes_.clear();
     edges_.clear();
-
-    if (edgeInfo_)
-        edgeInfo_->close();
+    edgeInfo_->close();
 }
 
 void TriggerGraphView::setInfo(VInfo_ptr info)
@@ -822,12 +878,7 @@ void TriggerGraphView::setEdgePen(TriggerGraphEdgeItem* e)
 
 void TriggerGraphView::notifyEdgeSelected(TriggerGraphEdgeItem* e)
 {
-    if (!edgeInfo_) {
-        edgeInfo_ = new TriggerGraphEdgeInfoDialog(this);
-        connect(edgeInfo_, SIGNAL(anchorClicked(QUrl)),
-                this, SLOT(slotEdgeInfo(QUrl)));
-    }
-
+    Q_ASSERT(edgeInfo_);
     edgeInfo_->setInfo(e);
 }
 
@@ -921,3 +972,18 @@ float TriggerGraphView::scaleFromLevel(int level) const
     return pow(1. + zoomDelta_, level);
 }
 
+void TriggerGraphView::writeSettings(VComboSettings* vs)
+{
+    Q_ASSERT(edgeInfo_);
+    vs->beginGroup("view");
+    edgeInfo_->writeSettings(vs);
+    vs->endGroup();
+}
+
+void TriggerGraphView::readSettings(VComboSettings* vs)
+{
+    Q_ASSERT(edgeInfo_);
+    vs->beginGroup("view");
+    edgeInfo_->readSettings(vs);
+    vs->endGroup();
+}

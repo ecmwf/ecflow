@@ -332,6 +332,11 @@ bool TreeNodeViewDelegate::isSingleHeight(int h) const
     return (h==nodeBox_->fullHeight || h == attrBox_->fullHeight);
 }
 
+int TreeNodeViewDelegate::nodeBoxHeight()
+{
+    return nodeBox_->fullHeight;
+}
+
 QSize TreeNodeViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIndex & index ) const
 {
     return nodeBox_->sizeHintCache;

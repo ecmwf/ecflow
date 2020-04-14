@@ -49,6 +49,7 @@ public:
                    const QModelIndex& index,QSize&) const;
     void sizeHintCompute(const QModelIndex& index,int& w,int& h, bool compAttrWidth=false) const;
 
+    int nodeBoxHeight();
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();

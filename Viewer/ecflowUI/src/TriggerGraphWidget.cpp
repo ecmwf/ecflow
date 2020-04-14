@@ -160,3 +160,17 @@ void TriggerGraphWidget::setZoomSlider(QSlider* slider)
     connect(zoomSlider_, SIGNAL(valueChanged(int)),
             this, SLOT(setZoomLevel(int)));
 }
+
+void TriggerGraphWidget::writeSettings(VComboSettings* vs)
+{
+    vs->beginGroup("triggerGraph");
+    ui_->view->writeSettings(vs);
+    vs->endGroup();
+}
+
+void TriggerGraphWidget::readSettings(VComboSettings* vs)
+{
+    vs->beginGroup("triggerGraph");
+    ui_->view->readSettings(vs);
+    vs->endGroup();
+}

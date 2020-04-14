@@ -38,10 +38,7 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
     nodeView_->setModel(nodeModel_);
 
     //Set the height of the node display area
-    QFont fNode;
-    QFontMetrics fm(fNode);
-    nodeView_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
-    nodeView_->setFixedHeight(fm.size(0,"A").height()+fm.height()/3);
+    nodeView_->enableOneRowMode();
 
     //Set the size of the left and right arrow labels
     leftArrowLabel_->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);

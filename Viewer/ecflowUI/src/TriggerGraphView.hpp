@@ -31,6 +31,7 @@ class TriggerGraphDelegate;
 class TriggerGraphLayout;
 class TriggerGraphModel;
 class TriggerGraphView;
+class VComboSettings;
 class GraphLayoutBuilder;
 class GraphLayoutNode;
 class QToolButton;
@@ -115,16 +116,21 @@ class TriggerGraphEdgeInfoDialog : public QDialog
 public:
      TriggerGraphEdgeInfoDialog(QWidget* parent=nullptr);
      void setInfo(TriggerGraphEdgeItem*);
+     void readSettings(VComboSettings* vs);
+     void writeSettings(VComboSettings* vs);
 
 Q_SIGNALS:
     void anchorClicked(const QUrl& link);
 
 protected:
+     void closeEvent(QCloseEvent * event);
      QString makeHtml(TriggerGraphEdgeItem*) const;
      void makeRow(QString label, VItem* t, QString& s) const;
+     void makeModeRow(TriggerCollector::Mode mode, QString &s) const;
      void makeTrigger(VItem* trigger, VItem* through, TriggerCollector::Mode mode, QString& s) const;
 
      QTextBrowser* te_;
+     QSize lastSize_ {QSize(350, 280)};
 };
 
 class TriggerGraphView : public QGraphicsView, public VPropertyObserver
@@ -157,6 +163,9 @@ public:
     void setEdgePen(TriggerGraphEdgeItem* e);
     void setTriggeredScanner(TriggeredScanner* scanner) {triggeredScanner_ = scanner;}
     void notifyEdgeSelected(TriggerGraphEdgeItem*);
+
+    void readSettings(VComboSettings* vs);
+    void writeSettings(VComboSettings* vs);
 
 public Q_SLOTS:
     //void slotSelectItem(const QModelIndex&);
@@ -208,7 +217,7 @@ protected:
     GraphLayoutBuilder* builder_;
     std::vector<TriggerGraphNodeItem*> nodes_;
     std::vector<TriggerGraphEdgeItem*> edges_;
-    TriggerGraphEdgeInfoDialog* edgeInfo_ {nullptr};
+    TriggerGraphEdgeInfoDialog* edgeInfo_;
 
     bool dependency_ {false};
     TriggeredScanner *triggeredScanner_ {nullptr};

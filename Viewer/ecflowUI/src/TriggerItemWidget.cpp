@@ -67,7 +67,7 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     on_dependInfoTb__toggled(false);
 
     //Dependency is off by default
-    dependTb_->setProperty("triggerDepend","1");
+    //dependTb_->setProperty("triggerDepend","1");
     dependTb_->setChecked(false);
     on_dependTb__toggled(false);
 
@@ -99,6 +99,7 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     zoomSlider_->setMaximumWidth(120);
     triggerGraph_->setZoomSlider(zoomSlider_);
     zoomLabel_->setProperty("graphTitle", "1");
+    infoTb_->hide();
     showGraphButtons(false);
 
     //table
@@ -394,11 +395,12 @@ void TriggerItemWidget::slotChangeMode(int, bool)
     }
 }
 
+
 void TriggerItemWidget::showGraphButtons(bool b)
 {
+    dependInfoTb_->setVisible(!b);
     zoomLabel_->setVisible(b);
     zoomSlider_->setVisible(b);
-    infoTb_->setVisible(b);
 }
 
 void TriggerItemWidget::scanStarted()
@@ -425,8 +427,10 @@ void TriggerItemWidget::writeSettings(VComboSettings* vs)
     vs->putAsBool("dependency",dependency());
     vs->putAsBool("dependencyInfo",dependInfoTb_->isChecked());
     vs->putAsBool("expression",exprTb_->isChecked());
+    vs->put("mode", modeGroup_->checkedId());
 
     triggerTable_->writeSettings(vs);
+    triggerGraph_->writeSettings(vs);
     vs->endGroup();
 }
 
@@ -445,7 +449,16 @@ void TriggerItemWidget::readSettings(VComboSettings* vs)
 #endif
 
     exprTb_->setChecked(vs->getAsBool("expression",exprTb_->isChecked()));
+
+    int mode = vs->get<int>("mode", 0);
+    if (mode == TableModeIndex) {
+        tableTb_->setChecked(true);
+    } else if (mode == GraphModeIndex) {
+        graphTb_->setChecked(true);
+    }
+
     triggerTable_->readSettings(vs);
+    triggerGraph_->readSettings(vs);
     vs->endGroup();
 }
 
