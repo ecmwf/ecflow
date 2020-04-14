@@ -123,9 +123,18 @@ void TriggerGraphNodeItem::paint(QPainter *painter, const QStyleOptionGraphicsIt
     QModelIndex idx=view_->model()->index(index_, 0);
     view_->delegate()->paint(painter,opt,idx);
 
-    if (isSelected()) {
-        painter->setPen(Qt::red);
-        painter->drawRect(opt.rect.adjusted(1,1,-1,-1));
+    if (!expanded_) {
+        if (isSelected()) {
+            painter->setPen(QPen(Qt::black, 1, Qt::DashLine));
+            painter->drawRect(opt.rect.adjusted(1,1,-1,-1));
+        }
+    } else  {
+        if (!isSelected())
+            painter->setPen(QPen(Qt::black, 2));
+        else
+            painter->setPen(QPen(Qt::black, 2, Qt::DashLine));
+
+        painter->drawRect(opt.rect.adjusted(2,2,-2,-2));
     }
 }
 
@@ -172,6 +181,11 @@ GraphLayoutNode* TriggerGraphNodeItem::toGraphNode()
     return n;
 }
 
+void TriggerGraphNodeItem::setExpanded(bool e)
+{
+    expanded_= e;
+    update();
+}
 
 //=============================================================
 //
@@ -446,6 +460,35 @@ void TriggerGraphEdgeInfoDialog::readSettings(VComboSettings* vs)
 
 //===========================================================
 //
+// TriggerGraphExpandState
+//
+//===========================================================
+
+void TriggerGraphExpandState::add(VInfo_ptr node, Mode mode)
+{
+    items_.push_back(std::make_pair(mode, node));
+}
+
+void TriggerGraphExpandState::remove(VInfo_ptr info)
+{
+    if (info) {
+        for (auto it: items_) {
+            if (it.second == info) {
+                //items_.erase(it);
+                return;
+            }
+        }
+    }
+}
+
+void TriggerGraphExpandState::clear()
+{
+    items_.clear();
+}
+
+
+//===========================================================
+//
 // TriggerGraphView
 //
 //===========================================================
@@ -462,6 +505,7 @@ TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent)
 
     model_ = new TriggerGraphModel(TriggerGraphModel::TriggerMode,this);
     delegate_ = new TriggerGraphDelegate(this);
+    delegate_->setMaxLimitItems(6);
     builder_ = new SimpleGraphLayoutBuilder();
 
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -512,6 +556,7 @@ void TriggerGraphView::clear()
     nodes_.clear();
     edges_.clear();
     edgeInfo_->close();
+    expandState_.clear();
 }
 
 void TriggerGraphView::setInfo(VInfo_ptr info)
@@ -619,11 +664,15 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
         Q_EMIT linkSelected(info);
     } else if(cmd == "expand") {
         if (info && info->node()) {
-            show(info->node());
+            expandItem(info);
+        }
+    } else if(cmd == "collapse") {
+        if (info && info->node()) {
+            collapse(info);
         }
     } else if(cmd == "expand_parent") {
         if (info && info->item()) {
-            showParent(info->item());
+            expandParent(info);
         }
     } else if(cmd ==  "edit") {
         if(info && info->isAttribute())
@@ -741,14 +790,33 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
 //}
 
 // called by the graph widget
-void TriggerGraphView::show(VNode* node, bool dependency)
+void TriggerGraphView::show(VInfo_ptr info, bool dependency)
 {
     clear();
     dependency_ = dependency;
-    show(node);
+    expandItem(info);
 }
 
-void TriggerGraphView::show(VNode* node)
+void TriggerGraphView::expandItem(VInfo_ptr info)
+{
+    Q_ASSERT(info);
+    expandState_.add(info, TriggerGraphExpandState::ExpandNode);
+    expand(info->node());
+}
+
+void TriggerGraphView::expandParent(VInfo_ptr info)
+{
+    Q_ASSERT(info);
+    if (VItem* item = info->item()) {
+        if(VNode *p = item->parent()) {
+            addRelation(p, item, nullptr, TriggerCollector::Hierarchy, nullptr);
+            expandState_.add(info, TriggerGraphExpandState::ExpandParent);
+            expand(p);
+        }
+    }
+}
+
+void TriggerGraphView::expand(VNode* node)
 {
     Q_ASSERT(node);
 
@@ -760,15 +828,36 @@ void TriggerGraphView::show(VNode* node)
     }
 
     buildLayout();
+    for (auto n: nodes_) {
+        if (n->item() == node) {
+            n->setExpanded(true);
+        }
+    }
     adjustSceneRect();
 }
 
-void TriggerGraphView::showParent(VItem* item)
+void TriggerGraphView::collapse(VInfo_ptr info)
 {
-    Q_ASSERT(item);
-    if(VNode *p = item->parent()) {
-        addRelation(p, item, nullptr, TriggerCollector::Hierarchy, nullptr);
-        show(p);
+    if(info && info->node()) {
+        expandState_.remove(info);
+        rebuild();
+    }
+}
+
+void TriggerGraphView::rebuild()
+{
+    auto expandCopy = expandState_;
+    clear();
+    for(auto it: expandCopy.items_) {
+        if (it.first == TriggerGraphExpandState::ExpandNode) {
+            if (it.second && it.second->node()) {
+                expandItem(it.second);
+            }
+        } else {
+            if (it.second && it.second->node()) {
+                expandParent(it.second);
+            }
+        }
     }
 }
 
@@ -784,7 +873,7 @@ void TriggerGraphView::scan(VNode* node)
     node->triggers(&tc);
 
     TriggeredRelationCollector tc1(node, this, dependency_);
-    node->triggered(&tc1);
+    node->triggered(&tc1, triggeredScanner_);
 }
 
 void TriggerGraphView::buildLayout()

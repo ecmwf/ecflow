@@ -58,6 +58,14 @@
         },
         {
             "menu"           : "Node",
+            "name"           : "Collaps graph",
+            "command"        : "collaps",
+            "enabled_for"    : "node",
+            "handler"        : "graph",
+            "view"           : "graph"
+        },
+        {
+            "menu"           : "Node",
             "name"           : "Expand parent's graph",
             "command"        : "expand_parent",
             "handler"        : "graph",

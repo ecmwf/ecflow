@@ -112,7 +112,7 @@ void TriggerGraphWidget::scan(bool dependency)
 
     VNode *node = info_->node();
     Q_ASSERT(node);
-    ui_->view->show(node, dependency);
+    ui_->view->show(info_, dependency);
 
 //    UiLog().dbg() << model_->rowCount() << layout_->nodes_.size();
 

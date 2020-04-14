@@ -14,6 +14,8 @@
 #include "VInfo.hpp"
 #include "VProperty.hpp"
 
+#include <utility>
+
 #include <QDialog>
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -58,7 +60,7 @@ public:
     void addRelation(TriggerGraphNodeItem* o);
     void adjustSize();
     void adjustPos(int x, int y);
-    void setCentral(bool c) {central_= c;}
+    void setExpanded(bool);
     GraphLayoutNode* toGraphNode();
 
 protected:
@@ -68,7 +70,7 @@ protected:
     TriggerGraphView* view_;
     std::vector<TriggerGraphNodeItem*> parents_;
     std::vector<TriggerGraphNodeItem*> children_;
-    bool central_ {false};
+    bool expanded_ {false};
 };
 
 
@@ -133,6 +135,18 @@ protected:
      QSize lastSize_ {QSize(350, 280)};
 };
 
+class TriggerGraphExpandState
+{
+public:
+    enum Mode {ExpandNode=0, ExpandParent=1};
+
+    void add(VInfo_ptr, Mode);
+    void remove(VInfo_ptr);
+    void clear();
+
+    std::vector<std::pair<Mode, VInfo_ptr> > items_;
+};
+
 class TriggerGraphView : public QGraphicsView, public VPropertyObserver
 {
     Q_OBJECT
@@ -159,7 +173,7 @@ public:
     int defaultZoomLevel() const {return defaultZoomLevel_;}
     int zoomLevel() const {return zoomLevel_;}
 
-    void show(VNode*, bool dependency);
+    void show(VInfo_ptr, bool dependency);
     void setEdgePen(TriggerGraphEdgeItem* e);
     void setTriggeredScanner(TriggeredScanner* scanner) {triggeredScanner_ = scanner;}
     void notifyEdgeSelected(TriggerGraphEdgeItem*);
@@ -196,9 +210,12 @@ protected:
     void adjustTriggerConnectColour(VProperty* p=nullptr);
     void adjustDepConnectColour(VProperty* p=nullptr);
 
-    void show(VNode*);
-    void showParent(VItem*);
+    void expand(VNode*);
+    void expandItem(VInfo_ptr);
+    void expandParent(VInfo_ptr);
+    void collapse(VInfo_ptr);
     void scan(VNode*);
+    void rebuild();
     void buildLayout();
     void addRelation(VItem* from, VItem* to,
                      VItem* through, TriggerCollector::Mode mode, VItem *trigger);
@@ -234,6 +251,9 @@ protected:
     int defaultZoomLevel_ {0};
     int zoomLevel_ {0};
     float zoomDelta_ {0.18};
+
+    TriggerGraphExpandState expandState_;
 };
+
 
 #endif // TRIGGERGRAPHVIEW_HPP

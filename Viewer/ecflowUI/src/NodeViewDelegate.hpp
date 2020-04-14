@@ -151,6 +151,7 @@ public:
 	~NodeViewDelegate() override;
 
 	void notifyChange(VProperty*) override;
+    void setMaxLimitItems(int v) {maxLimitItems_=v;}
 
 protected:
 	virtual void updateSettings()=0;
@@ -221,6 +222,7 @@ protected:
     QPixmap limitExtraFillPix_;
     enum LimitShape {RectLimitShape,CircleLimitShape};
     LimitShape  limitShape_;
+    int maxLimitItems_ {-1};
     QPen    repeatDayPen_;
     QPen    repeatDatePen_;
     QPen    repeatEnumPen_;
