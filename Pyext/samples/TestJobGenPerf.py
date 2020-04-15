@@ -85,49 +85,49 @@ if __name__ == "__main__":
                         help="Show verbose output")
     ARGS = PARSER.parse_args()
     ARGS.defs_file = os.path.expandvars(ARGS.defs_file) # expand references to any environment variables
-    print ARGS    
+    print(ARGS)    
     
     # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
     if not ARGS.ecf_home:
         if os.getenv("WK") == None:
-            print "No ecf_home specified. Please specify a writable directory"
+            print("No ecf_home specified. Please specify a writable directory")
             exit(1)
         ARGS.ecf_home = "/var/tmp/ma0/ECFLOW_TEST/TestJobGenPerf/ECF_HOME"
         if ARGS.verbose:
-            print "Workspace is defined" 
-            print "using /Client/bin/gcc\-4.5/debug/ecflow_client"
+            print("Workspace is defined") 
+            print("using /Client/bin/gcc\-4.5/debug/ecflow_client")
 
-    print "Using ECF_HOME=" + ARGS.ecf_home
-    print "removing directory " + ARGS.ecf_home
+    print("Using ECF_HOME=" + ARGS.ecf_home)
+    print("removing directory " + ARGS.ecf_home)
     try:
         shutil.rmtree(ARGS.ecf_home)   
     except:
         pass   
         
     if not os.path.exists(ARGS.ecf_home): 
-        print ARGS.ecf_home + " directory does not exist, creating"
+        print(ARGS.ecf_home + " directory does not exist, creating")
         os.makedirs(ARGS.ecf_home)
 
-    print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
+    print("\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n")
     
     try:
         DEFS = ecflow.Defs(ARGS.defs_file)
-    except RuntimeError, ex:
-        print "   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex)
+    except RuntimeError as ex:
+        print("   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex))
         exit(1)
     
     if ARGS.verbose: 
-        print "remove test data associated with the DEFS, so we start fresh, Allows rerun"
+        print("remove test data associated with the DEFS, so we start fresh, Allows rerun")
     for suite in DEFS.suites:
         dir_to_remove = ARGS.ecf_home + suite.get_abs_node_path()
         if ARGS.verbose: 
-            print "   Deleting directory: " + dir_to_remove + "\n"
+            print("   Deleting directory: " + dir_to_remove + "\n")
         shutil.rmtree(dir_to_remove, True)  
         
     if ARGS.verbose: 
-        print "remove remote reference to ECF_HOME and ECF_INCLUDE, since we inject or own\n"
+        print("remove remote reference to ECF_HOME and ECF_INCLUDE, since we inject or own\n")
     for suite in DEFS.suites:
-        print "add variables required for script generation, for all suites\n"
+        print("add variables required for script generation, for all suites\n")
         traverse_container(suite)
   
         suite.add_variable("ECF_HOME", ARGS.ecf_home)
@@ -143,13 +143,13 @@ if __name__ == "__main__":
     DEFS.generate_scripts()
 
     if ARGS.verbose: 
-        print "\nchecking script file generation, pre-processing & variable substitution\n"
+        print("\nchecking script file generation, pre-processing & variable substitution\n")
     JOB_CTRL = ecflow.JobCreationCtrl()
     DEFS.check_job_creation(JOB_CTRL)       
     assert len(JOB_CTRL.get_error_msg()) == 0, JOB_CTRL.get_error_msg()
     
     
     newDefs = ARGS.ecf_home + "/../" + os.path.basename(ARGS.defs_file)
-    print "Saving modified defs as " + newDefs 
+    print("Saving modified defs as " + newDefs) 
     DEFS.save_as_defs(newDefs)
 

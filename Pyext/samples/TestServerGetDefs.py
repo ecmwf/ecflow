@@ -24,10 +24,10 @@ def main(ci,inc = 2):
         start_time = datetime.datetime.now()
         try:
             ci.get_server_defs() 
-        except RuntimeError, e : 
-            print "Error:" + str(e)
+        except RuntimeError as e : 
+            print("Error:" + str(e))
 
-        print "get_server_defs took: " + str(datetime.datetime.now() - start_time)
+        print("get_server_defs took: " + str(datetime.datetime.now() - start_time))
         time.sleep(inc)
 
 if __name__ == "__main__":
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         #i =  i + 1
         
     if  numargs > 3:
-        print "usage: " + sys.argv[0] + " host port  seconds_delay"
+        print("usage: " + sys.argv[0] + " host port  seconds_delay")
         sys.exit(1)
         
     port = "3142"

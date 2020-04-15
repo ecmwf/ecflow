@@ -24,6 +24,6 @@ try:
     for task in task_vec:
         print task.get_abs_node_path()  + " "  + str(task.get_state())
         
-except RuntimeError, e:
-    print "Failed: " + str(e)
+except RuntimeError as e:
+    print("Failed: " + str(e))
     
