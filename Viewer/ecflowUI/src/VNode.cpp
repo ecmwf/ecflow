@@ -684,6 +684,18 @@ std::string VNode::absNodePath() const
 	return (node_)?node_->absNodePath():"";
 }
 
+bool VNode::pathEndMatch(const std::string &relPath) const
+{
+    std::string pPath = absNodePath();
+    if (relPath.empty() || pPath.size() < relPath.size()) {
+        return false;
+    } else {
+        return
+            (pPath.substr(pPath.size()-relPath.size(), std::string::npos) == relPath);
+    }
+    return false;
+}
+
 bool VNode::sameContents(VItem* item) const
 {
     return item == this;
@@ -1190,50 +1202,93 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
          return &dummy_node::get(path + ":" + name);
 #endif
 
-    //If
+    //path is a valid absolute path
     VNode* n=this;
     if(!path.empty() && path[0] == '/')
     {
         n=server()->vRoot()->find(path);
-        if(!n)
+        if (n) {
+            return n->hasLimit(name);
+        } else {
             return nullItem;
-
+        }
         //if(n && n != this)
         //    return n->findLimit(path,name);
     }
 
-    //Find the matching limit in the node
+    // if we are here it must be an empty or relative path
+    if (path.empty() || pathEndMatch(path))
+    {
+        if (VAttribute* lim = hasLimit(name) )
+            return lim;
+    }
+//        //Find the matching limit in the node
+//        std::vector<VAttribute*> limit;
+//        n->findAttributes(VAttributeType::find("limit"),limit);
+//        std::size_t limitNum=limit.size();
+//        for(std::size_t i=0; i < limitNum; i++)
+//        {
+//           if(limit[i]->strName() == name)
+//           {
+//               return limit[i];
+//           }
+//        }
+    //}
+
+    VNode* p=n->parent();
+    if(p && !p->isServer()) {
+        //Find the matching limit in the siblings
+        int chNum= p->numOfChildren();
+        for(int i=0; i < chNum; i++) {
+            VNode* ch=p->childAt(i);
+            if (ch !=n && (path.empty() || ch->pathEndMatch(path))) {
+                if (VAttribute* lim = ch->hasLimit(name) )
+                    return lim;
+            }
+        }
+
+        // continue search in parent
+        return p->findLimit(path, name);
+    }
+
+    return nullItem;
+
+
+//    VNode* p=n->parent();
+//    Q_ASSERT(p);
+//    int chNum= p->numOfChildren();
+//    for(int i=0; i < chNum; i++)
+//    {
+//        VNode* ch=p->childAt(i);
+//        if(ch !=n && ch->strName() == path.substr(0, ch->name().size()))
+//        {
+//            std::string::size_type next = path.find('/');
+//            if ( next != std::string::npos) {
+//               return ch->findLimit(path.substr(next+1, path.size()), name);
+//            }
+//        }
+//    }
+
+//    return nullItem;
+
+   //return &dummy_node::get(path + ":" + name);
+}
+
+VAttribute* VNode::hasLimit(const std::string& name)
+{
+    VAttribute* nullItem=nullptr;
     std::vector<VAttribute*> limit;
-    n->findAttributes(VAttributeType::find("limit"),limit);
+    findAttributes(VAttributeType::find("limit"),limit);
     std::size_t limitNum=limit.size();
     for(std::size_t i=0; i < limitNum; i++)
-    {       
+    {
        if(limit[i]->strName() == name)
        {
            return limit[i];
        }
     }
 
-    //Find the matching limit in the ancestors
-    if (path.empty()) return nullItem;
-    VNode* p=n->parent();
-    Q_ASSERT(p);
-    int chNum= p->numOfChildren();
-    for(int i=0; i < chNum; i++)
-    {
-        VNode* ch=p->childAt(i);
-        if(ch !=n && ch->strName() == path.substr(0, ch->name().size()))
-        {
-            std::string::size_type next = path.find('/');
-            if ( next != std::string::npos) {
-               return ch->findLimit(path.substr(next+1, path.size()), name);
-            }
-        }
-    }
-
     return nullItem;
-
-   //return &dummy_node::get(path + ":" + name);
 }
 
 QString VNode::nodeMenuMode() const

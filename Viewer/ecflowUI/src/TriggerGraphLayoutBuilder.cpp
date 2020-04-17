@@ -17,6 +17,7 @@
 #include "TriggerGraphModel.hpp"
 #include "TriggerGraphDelegate.hpp"
 #include "VSettings.hpp"
+#include "UiLog.hpp"
 
 
 //========================================================
@@ -37,17 +38,44 @@ void SimpleGraphLayoutBuilder::clear()
     nodes_.clear();
 }
 
-void SimpleGraphLayoutBuilder::build(std::vector<GraphLayoutNode*>& nodes)
+void SimpleGraphLayoutBuilder::build(std::vector<GraphLayoutNode*>& nodes,
+                                     std::vector<GraphLayoutEdge*>& edges, int focus)
 {
     clear();
     for(auto n: nodes) {
         nodes_.emplace_back(new SimpleGraphLayoutNode(n));
     }
 
-    buildIt();
-    for(size_t i=0; i < nodes_.size(); i++) {
+    // additional (dummy) nodes might be addedd during build
+    size_t num = nodes_.size();
+    focus_ = focus;
+    buildIt(true);
+
+    assert(num <= nodes_.size());
+    for(size_t i=0; i < num; i++) {
         nodes[i]->x_ = nodes_[i]->x_;
         nodes[i]->y_ = nodes_[i]->y_;
+
+        // add edge points via dummy nodes
+        for(auto j: nodes_[i]->children_) {
+            auto ch = nodes_[j];
+            if (ch->dummy_) {
+                std::vector<int> x, y;
+                while(ch->hasChildren()) {
+                    x.push_back(ch->x_);
+                    y.push_back(ch->y_);
+                    int chIndex = ch->children_[0];
+                    ch = nodes_[chIndex];
+                    if (!ch->dummy_) {
+                        auto e=new GraphLayoutEdge(i, chIndex);
+                        e->x_ = x;
+                        e->y_ = y;
+                        edges.push_back(e);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     clear();
@@ -164,7 +192,91 @@ int SimpleGraphLayoutBuilder::compute_arc(SimpleGraphLayoutNode *item)
     return a;
 }
 
-void SimpleGraphLayoutBuilder::buildIt()
+
+int SimpleGraphLayoutBuilder::insertDummyNode(int parentIndex, int chIndex, int level)
+{
+    auto p = nodes_[parentIndex];
+    auto ch = nodes_[chIndex];
+    int chInParentIndex = p->indexOfChild(chIndex);
+    int parentInChIndex = ch->indexOfParent(parentIndex);
+
+    assert(chInParentIndex != -1);
+    assert(parentInChIndex != -1);
+
+    auto d = new SimpleGraphLayoutNode();
+    d->dummy_ = true;
+    d->level_ = level;
+    int dummyIndex = static_cast<int>(nodes_.size());
+    nodes_.push_back(d);
+
+    p->children_[chInParentIndex] = dummyIndex;
+    d->parents_.push_back(parentIndex);
+
+    ch->parents_[parentInChIndex] = dummyIndex;
+    d->children_.push_back(chIndex);
+
+    return dummyIndex;
+}
+
+bool SimpleGraphLayoutBuilder::addDummy(int nodeIndex)
+{
+    auto n = nodes_[nodeIndex];
+    assert(n);
+    int more = false;
+    int level = n->level_;
+
+    if (n->visited_)
+        return false;
+
+    n->visited_ = true;
+
+    for (auto i: n->children_) {
+        auto ch = nodes_[i];
+        if (ch->managed_) {
+            int chLevel = ch->level_;
+            int dist = chLevel - level;
+            int actLevel = level;
+
+            // insert dummy nodes between the node and the child
+            int currentIndex = nodeIndex;
+            int chIndex= i;
+
+            while(dist-- > 1) {
+                currentIndex = insertDummyNode(currentIndex, chIndex, ++actLevel);
+                more = true;
+            }
+        }
+
+        more = addDummy(i) || more;
+    }
+
+    n->visited_ = false;
+    return more;
+}
+
+bool SimpleGraphLayoutBuilder::addDummyNodes()
+{
+    bool more = false;
+    // nodes can grow in the loop!
+    size_t num = nodes_.size();
+    for(size_t i=0; i < num; i++) {
+        more = addDummy(i) || more;
+    }
+    return more;
+}
+
+void SimpleGraphLayoutBuilder::printState(const std::vector<int>& nodes)
+{
+    for(size_t i=0; i < nodes.size(); i++) {
+        auto n = nodes_[nodes[i]];
+        std::cout << i << " arc=" << n->arc_ << " lev=" << n->level_ <<
+                     " " << n->width_ << " " << n->height_ <<
+                     " x=" << n->x_ << " y=" << n->y_ <<
+                     " d=" << n->dummy_ << std::endl;
+    }
+}
+
+void SimpleGraphLayoutBuilder::buildIt(bool dummy)
 {
     int H_DIST = 10;
     int V_DIST = 10;
@@ -183,7 +295,7 @@ void SimpleGraphLayoutBuilder::buildIt()
         if (item->managed_)
             nodes.push_back(i);
 
-        item->x_ = item->y_ = 0;
+        //item->x_ = item->y_ = 0;
         item->level_ = item->arc_ = -1;
         item->visited_ = false;
     }
@@ -192,7 +304,7 @@ void SimpleGraphLayoutBuilder::buildIt()
         return;
 
     if(!focus)
-        focus = nodes_[0];
+        focus = nodes_[focus_];
 
     std::vector<int> levels(nodes.size(),0);
     std::vector<int> widths(nodes.size(),0);
@@ -222,6 +334,13 @@ void SimpleGraphLayoutBuilder::buildIt()
             compute_level_pass2(item);
     }
 
+    printState(nodes);
+
+    if (dummy && addDummyNodes()) {
+        buildIt(false);
+        return;
+    }
+
     // sort by level
     std::sort(nodes.begin(), nodes.end(), [this](int idx1, int idx2)
     {
@@ -248,6 +367,8 @@ void SimpleGraphLayoutBuilder::buildIt()
 
     levelNum++;
 
+    printState(nodes);
+
     //int a = 0;
     for (int i = 0, a = 0 ;i < levelNum;i ++) {
         int b = widths[i] + H_MIN_SPACE;
@@ -262,6 +383,8 @@ void SimpleGraphLayoutBuilder::buildIt()
         auto item = nodes_[i];
         item->x_ = widths[item->level_];
     }
+
+    printState(nodes);
 
     for (size_t a=0; a<2; a++) {
         for (auto i: nodes) {
@@ -280,7 +403,7 @@ void SimpleGraphLayoutBuilder::buildIt()
     std::sort(nodes.begin(), nodes.end(), [this](int idx1, int idx2)
     {
         if(nodes_[idx1]->level_ != nodes_[idx2]->level_)
-            return nodes_[idx1]->level_ > nodes_[idx2]->level_;
+            return nodes_[idx1]->level_ < nodes_[idx2]->level_;
 
         return nodes_[idx1]->arc_ < nodes_[idx2]->arc_;
     });
@@ -295,18 +418,22 @@ void SimpleGraphLayoutBuilder::buildIt()
     std::sort(nodes.begin(), nodes.end(), [this](int idx1, int idx2)
     {
         if(nodes_[idx1]->level_ != nodes_[idx2]->level_)
-            return nodes_[idx1]->level_ > nodes_[idx2]->level_;
+            return nodes_[idx1]->level_ < nodes_[idx2]->level_;
 
         return nodes_[idx1]->y_ < nodes_[idx2]->y_;
     });
+
+    printState(nodes);
 
     int move_it = 0;
     int more = 1;
     int count = 0;
     while (more--) {
-        count = num_nodes;
+        //UiLog().dbg() << "more=" << more;
+        count = static_cast<int>(nodes.size());
         while (count--) {
-             for (auto i: nodes) {
+            //UiLog().dbg() << "  count=" << count;
+            for (auto i: nodes) {
                 int n = 0;
                 int y = 0;
                 auto item = nodes_[i];
@@ -334,7 +461,7 @@ void SimpleGraphLayoutBuilder::buildIt()
             std::sort(nodes.begin(), nodes.end(), [this](int idx1, int idx2)
             {
                  if(nodes_[idx1]->level_ != nodes_[idx2]->level_)
-                     return nodes_[idx1]->level_ > nodes_[idx2]->level_;
+                     return nodes_[idx1]->level_ < nodes_[idx2]->level_;
 
                  return nodes_[idx1]->y_ < nodes_[idx2]->y_;
             });
@@ -361,9 +488,8 @@ void SimpleGraphLayoutBuilder::buildIt()
         }
     }
 
-
-    int minY = nodes_[0]->y_;
-    int minX = nodes_[0]->x_;
+    int minY = nodes_[nodes[0]]->y_;
+    int minX = nodes_[nodes[0]]->x_;
 
     for (size_t i=1; i < nodes.size() ;i++) {
         auto item = nodes_[nodes[i]];
@@ -374,12 +500,18 @@ void SimpleGraphLayoutBuilder::buildIt()
     }
 
     minX -= 20;
-    minY -= 20;
+    minY -= 10;
+    if (!nodes_.empty()) {
+        minY -= nodes_[0]->height_/2;
+    }
+
 
     for (auto i: nodes) {
         auto item = nodes_[i];
         item->x_ -= minX;
         item->y_ -= minY;
     }
+
+    printState(nodes);
 
 }

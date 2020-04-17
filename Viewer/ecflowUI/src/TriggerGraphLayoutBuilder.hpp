@@ -23,6 +23,21 @@ struct GraphLayoutNode
 
     bool hasParents() const {return parents_.size() > 0;}
     bool hasChildren() const {return children_.size() > 0;}
+    int indexOfParent(int v) const {
+        for(size_t i=0; i < parents_.size(); i++) {
+            if (parents_[i] == v)
+                return static_cast<int>(i);
+        }
+        return -1;
+    }
+
+    int indexOfChild(int v) const {
+        for(size_t i=0; i < children_.size(); i++) {
+            if (children_[i] == v)
+                return static_cast<int>(i);
+        }
+        return -1;
+    }
 
     int x_ {0};
     int y_ {0};
@@ -32,16 +47,28 @@ struct GraphLayoutNode
     std::vector<int> children_;
 };
 
+class GraphLayoutEdge
+{
+public:
+    GraphLayoutEdge(int from, int to) : from_(from), to_(to) {}
+
+    int from_;
+    int to_;
+    std::vector<int> x_;
+    std::vector<int> y_;
+};
 
 struct SimpleGraphLayoutNode : GraphLayoutNode
 {
     SimpleGraphLayoutNode(GraphLayoutNode* n) : GraphLayoutNode(n) {}
+    SimpleGraphLayoutNode() : GraphLayoutNode(0, 0) {}
 
     int arc_ {0};
     int level_ {0};
     int group_ {0};
     bool visited_ {false};
     bool managed_ {true};
+    bool dummy_ {false};
 };
 
 
@@ -51,7 +78,7 @@ public:
     GraphLayoutBuilder() {}
     virtual ~GraphLayoutBuilder() {}
     virtual void clear() =0;
-    virtual void build(std::vector<GraphLayoutNode*>&) =0;
+    virtual void build(std::vector<GraphLayoutNode*>&, std::vector<GraphLayoutEdge*>&, int focus) =0;
 };
 
 class SimpleGraphLayoutBuilder : public GraphLayoutBuilder
@@ -60,7 +87,7 @@ public:
     SimpleGraphLayoutBuilder() {}
     ~SimpleGraphLayoutBuilder() override;
     void clear() override;
-    void build(std::vector<GraphLayoutNode*>& nodes) override;
+    void build(std::vector<GraphLayoutNode*>& nodes, std::vector<GraphLayoutEdge*>& edges, int focus) override;
 
 protected:
     bool hasManagedParent(SimpleGraphLayoutNode*) const;
@@ -73,9 +100,15 @@ protected:
             const std::vector<int>& nodes, const std::vector<int>& levels,
             std::vector<int>& positions, int max_in_a_level, int no_levels,
             int v_dist);
-    void buildIt();
+    void buildIt(bool dummy);
+
+    int insertDummyNode(int parentIndex, int chIndex, int level);
+    bool addDummy(int nodeIndex);
+    bool addDummyNodes();
+    void printState(const std::vector<int>& nodes);
 
     std::vector<SimpleGraphLayoutNode*> nodes_;
+    int focus_ {0};
 };
 
 

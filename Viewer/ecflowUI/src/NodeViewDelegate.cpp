@@ -1011,7 +1011,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
     QString trailTxt("...");
     bool allItems = (itemNum ==  totalVal);
     if (!allItems) {
-        trailRect.setX(rightPos + itemOffset);
+        trailRect.setX(rightPos + 2*itemOffset);
         trailRect.setWidth(fm.width(trailTxt) + itemOffset);
         rightPos = trailRect.x() + trailRect.width();
     }

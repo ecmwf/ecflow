@@ -21,7 +21,12 @@
 #include "VSettings.hpp"
 #include "VNState.hpp"
 
+#include <algorithm>
 #include <math.h>
+
+#include "Spline.hpp"
+//#include <boost/math/interpolators/cubic_b_spline.hpp>
+//#include "splines.hpp"
 
 #include <QFile>
 #include <QGraphicsDropShadowEffect>
@@ -215,51 +220,73 @@ void TriggerGraphEdgeItem::adjust()
     QRectF srcRect = from_->mapRectToParent(from_->boundingRect());
     QRectF targetRect = to_->mapRectToParent(to_->boundingRect());
 
+    QPointF pOffset(srcRect.right() + gap, srcRect.center().y());
     QPointF p1(targetRect.left() - srcRect.right() - 2*gap,
                targetRect.center().y() - srcRect.center().y());
-    QPointF c1(p1.x()/2, 0);
-    QPointF c2(p1.x()/2, targetRect.center().y() - srcRect.center().y());
 
-    // bezier curve
-    p.cubicTo(c1, c2, p1);
+    bool splineUsed = false;
 
-    // add arrow to mid-point of curve
-    auto poly = p.toSubpathPolygons();
-    QPolygonF tri;
-    if (poly.count() == 1) {
-        if (poly[0].count() > 3) {
-            int n = poly[0].count()/2-1;
-            double angle = atan2(poly[0].at(n+1).y() - poly[0].at(n).y(),
-                    poly[0].at(n+1).x() - poly[0].at(n).x());
+    // gry to draw spline if there are waypoints
+    if (!wayPoints_.empty()) {
+        std::vector<double> xp, yp;
 
-            //define triangle
-            tri << QPointF(0.,-arrowHeight_/2) <<
-                QPointF(arrowWidth_, 0.) <<
-                QPointF(0.,arrowHeight_/2);
+        xp.push_back(0.);
+        yp.push_back(0.);
+        for(auto v: wayPoints_) {
+            xp.push_back(v.x()-pOffset.x());
+            yp.push_back(v.y()-pOffset.y());
+        }
+        xp.push_back(p1.x());
+        yp.push_back(p1.y());
 
-            //rotate + translate triangle
-            for(int i=0; i < tri.count(); i++) {
-                tri[i] = QPointF(
-                            tri[i].x() * cos(angle) - tri[i].y() * sin(angle),
-                            tri[i].x() * sin(angle) + tri[i].y() * cos(angle));
-
-                tri[i] += poly[0].at(n);
+        Q_ASSERT(xp.size() >= 3);
+        Spline spline(xp, yp);
+        if (spline.status())  {
+            splineUsed = true;
+            double start=xp[0];
+            double end=xp[xp.size()-1];
+            size_t stepNum=100;
+            double step = (end-start)/(stepNum-1);
+            QPolygonF pf;
+            for (size_t i=0; i < stepNum; i++) {
+                double xp = start + static_cast<double>(i)*step;
+                pf << QPointF(xp, spline.eval(xp));
             }
-        } else if (poly[0].count() == 2) {
-            //define triangle
-            tri << QPointF(0.,-arrowHeight_/2) <<
-                QPointF(arrowWidth_, 0.) <<
-                QPointF(0.,arrowHeight_/2);
 
-            //translate triangle
-            for(int i=0; i < tri.count(); i++) {
-                tri[i] += (poly[0].at(0) + poly[0].at(1))/2.;
-            }
+            p.addPolygon(pf);
+
+            double xmid1 = (start + end)/2. - 5;
+            double xmid2 = (start + end)/2. + 5;
+            addArrow(p, xmid1, spline.eval(xmid1),
+                        xmid2, spline.eval(xmid2));
+
         }
     }
 
-    if (tri.count() > 0)
-        p.addPolygon(tri);
+    // bezier curve
+    if (!splineUsed) {
+        QPointF c1(p1.x()/2, 0);
+        QPointF c2(p1.x()/2, targetRect.center().y() - srcRect.center().y());
+
+        p.cubicTo(c1, c2, p1);
+
+        // add arrow to mid-point of curve
+        auto poly = p.toSubpathPolygons();
+        if (poly.count() == 1) {
+            int n = -1;
+            if (poly[0].count() > 3) {
+                n = poly[0].count()/2-1;
+            // staright line
+            } else if (poly[0].count() == 2) {
+                n = 0;
+            }
+            if (n >= 0) {
+                addArrow(p,
+                    poly[0].at(n).x(), poly[0].at(n).y(),
+                    poly[0].at(n+1).x(), poly[0].at(n+1).y());
+            }
+       }
+    }
 
     view_->setEdgePen(this);
 
@@ -269,6 +296,39 @@ void TriggerGraphEdgeItem::adjust()
 
     if (!scene())
         view_->scene()->addItem(this);
+}
+
+void TriggerGraphEdgeItem::addArrow(QPainterPath& pPath, double x1, double y1, double x2, double y2)
+{
+    double angle = atan2(y2 - y1, x2 - x1);
+
+    //define triangle
+    QPolygonF tri;
+    tri << QPointF(0.,-arrowHeight_/2) <<
+           QPointF(arrowWidth_, 0.) <<
+           QPointF(0.,arrowHeight_/2);
+
+    //rotate + translate triangle
+    for(int i=0; i < tri.count(); i++) {
+        tri[i] = QPointF(
+            tri[i].x() * cos(angle) - tri[i].y() * sin(angle),
+            tri[i].x() * sin(angle) + tri[i].y() * cos(angle));
+
+        tri[i] += QPointF((x2+x1)/2., (y2+y1)/2.);
+    }
+
+    pPath.addPolygon(tri);
+}
+
+void TriggerGraphEdgeItem::setWayPoints(const std::vector<int>& x, const std::vector<int>& y)
+{
+    wayPoints_.clear();
+    if (x.size() != y.size()) {
+        return;
+    }
+    for (size_t i=0; i < x.size(); i++) {
+        wayPoints_.emplace_back(QPointF(x[i], y[i]));
+    }
 }
 
 QVariant TriggerGraphEdgeItem::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -472,13 +532,19 @@ void TriggerGraphExpandState::add(VInfo_ptr node, Mode mode)
 void TriggerGraphExpandState::remove(VInfo_ptr info)
 {
     if (info) {
-        for (auto it: items_) {
-            if (it.second == info) {
-                //items_.erase(it);
-                return;
-            }
-        }
+        items_.erase(
+            std::remove_if(items_.begin(), items_.end(),
+            [info](auto x){return x.second == info;}));
     }
+}
+
+bool TriggerGraphExpandState::contains(VItem* item) const
+{
+    for (auto it: items_) {
+        if (it.second->item() == item)
+            return true;
+    }
+    return false;
 }
 
 void TriggerGraphExpandState::clear()
@@ -551,12 +617,14 @@ TriggerGraphView::~TriggerGraphView()
 
 void TriggerGraphView::clear()
 {
+    info_.reset();
     model_->clearData();
     scene_->clear();
     nodes_.clear();
     edges_.clear();
     edgeInfo_->close();
     expandState_.clear();
+    focus_ = nullptr;
 }
 
 void TriggerGraphView::setInfo(VInfo_ptr info)
@@ -664,7 +732,7 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
         Q_EMIT linkSelected(info);
     } else if(cmd == "expand") {
         if (info && info->node()) {
-            expandItem(info);
+            expandItem(info, false);
         }
     } else if(cmd == "collapse") {
         if (info && info->node()) {
@@ -672,7 +740,7 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
         }
     } else if(cmd == "expand_parent") {
         if (info && info->item()) {
-            expandParent(info);
+            expandParent(info, false);
         }
     } else if(cmd ==  "edit") {
         if(info && info->isAttribute())
@@ -794,34 +862,51 @@ void TriggerGraphView::show(VInfo_ptr info, bool dependency)
 {
     clear();
     dependency_ = dependency;
-    expandItem(info);
+    info_ = info;
+    expandItem(info_, false);
 }
 
-void TriggerGraphView::expandItem(VInfo_ptr info)
+void TriggerGraphView::expandItem(VInfo_ptr info, bool scanOnly)
 {
     Q_ASSERT(info);
-    expandState_.add(info, TriggerGraphExpandState::ExpandNode);
-    expand(info->node());
-}
-
-void TriggerGraphView::expandParent(VInfo_ptr info)
-{
-    Q_ASSERT(info);
-    if (VItem* item = info->item()) {
-        if(VNode *p = item->parent()) {
-            addRelation(p, item, nullptr, TriggerCollector::Hierarchy, nullptr);
-            expandState_.add(info, TriggerGraphExpandState::ExpandParent);
-            expand(p);
+    if (info->node() && !expandState_.contains(info->node())) {
+        expandState_.add(info, TriggerGraphExpandState::ExpandNode);
+        scan(info->node());
+        if(!scanOnly) {
+            updateAfterScan();
         }
     }
 }
 
-void TriggerGraphView::expand(VNode* node)
+void TriggerGraphView::expandParent(VInfo_ptr info, bool scanOnly)
 {
-    Q_ASSERT(node);
+    Q_ASSERT(info);
+    focus_=nullptr;
+    if (VItem* item = info->item()) {
+        if(VNode *p = item->parent()) {
+            addRelation(p, item, nullptr, TriggerCollector::Hierarchy, nullptr);
+            expandState_.add(info, TriggerGraphExpandState::ExpandParent);
+            if (info->node()) {
+                scan(info->node());
+                focus_ = info->node();
+            }
+            scan(p);
+            if(!scanOnly) {
+                updateAfterScan();
+            }
+        }
+    }
+}
 
-    scan(node);
+void TriggerGraphView::updateAfterScan()
+{
     model_->setItems(nodes_);
+
+    if (!info_ || !info_->node()) {
+        clear();
+        return;
+    }
+
     for(auto n: nodes_) {
         //UiLog().dbg() << n->item()->fullPath();
         n->adjustSize();
@@ -829,7 +914,7 @@ void TriggerGraphView::expand(VNode* node)
 
     buildLayout();
     for (auto n: nodes_) {
-        if (n->item() == node) {
+        if (expandState_.contains(n->item())) {
             n->setExpanded(true);
         }
     }
@@ -838,9 +923,11 @@ void TriggerGraphView::expand(VNode* node)
 
 void TriggerGraphView::collapse(VInfo_ptr info)
 {
-    if(info && info->node()) {
-        expandState_.remove(info);
-        rebuild();
+    if(info && info->node() && info != info_) {
+        if (expandState_.contains(info->node())) {
+            expandState_.remove(info);
+            rebuild();
+        }
     }
 }
 
@@ -851,14 +938,16 @@ void TriggerGraphView::rebuild()
     for(auto it: expandCopy.items_) {
         if (it.first == TriggerGraphExpandState::ExpandNode) {
             if (it.second && it.second->node()) {
-                expandItem(it.second);
+                expandItem(it.second, true);
             }
         } else {
             if (it.second && it.second->node()) {
-                expandParent(it.second);
+                expandParent(it.second, true);
             }
         }
     }
+
+    updateAfterScan();
 }
 
 void TriggerGraphView::scan(VNode* node)
@@ -883,17 +972,45 @@ void TriggerGraphView::buildLayout()
         lnodes.emplace_back(n->toGraphNode());
     }
 
-    builder_->build(lnodes);
+    std::vector<GraphLayoutEdge*> enodes;
+
+    int focus = 0;
+    if (focus_) {
+        for (auto n: nodes_) {
+            if (n->item() == focus_) {
+                focus = n->index();
+                break;
+            }
+        }
+    }
+
+    builder_->build(lnodes, enodes, focus);
 
     for (size_t i=0; i < nodes_.size(); i++) {
         nodes_[i]->adjustPos(lnodes[i]->x_, lnodes[i]->y_);
         delete lnodes[i];
     }
+
     lnodes.clear();
+
+    for(auto en: enodes) {
+        for(auto e: edges_) {
+            if (e->from()->index() == en->from_ &&
+                    e->to()->index() == en->to_) {
+                e->setWayPoints(en->x_, en->y_);
+                break;
+            }
+        }
+    }
 
     for(auto e: edges_) {
         e->adjust();
     }
+
+    for(auto en: enodes) {
+        delete en;
+    }
+
 }
 
 

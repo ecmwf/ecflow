@@ -58,8 +58,8 @@
         },
         {
             "menu"           : "Node",
-            "name"           : "Collaps graph",
-            "command"        : "collaps",
+            "name"           : "Collapse graph",
+            "command"        : "collapse",
             "enabled_for"    : "node",
             "handler"        : "graph",
             "view"           : "graph"

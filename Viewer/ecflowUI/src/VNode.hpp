@@ -150,6 +150,7 @@ public:
 
     std::string fullPath() const override;
     virtual std::string absNodePath() const;
+    bool pathEndMatch(const std::string &relPath) const;
 
     bool sameName(const std::string& name) const;
     bool sameContents(VItem* item) const override;
@@ -222,6 +223,7 @@ protected:
     void setIndex(int i) {index_=i;}
 
     VAttribute* findLimit(const std::string& path, const std::string& name);
+    VAttribute* hasLimit(const std::string& name);
     static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
     static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);
 

@@ -96,10 +96,14 @@ public:
                 VItem* trigger);
 
     void adjust();
+    void setWayPoints(const std::vector<int>& x, const std::vector<int>& y);
+    TriggerGraphNodeItem* from() const {return from_;}
+    TriggerGraphNodeItem* to() const {return to_;}
     TriggerCollector::Mode mode() const {return modes_[0];}
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
+    void addArrow(QPainterPath& pPath, double x1, double y1, double x2, double y2);
 
     TriggerGraphNodeItem* from_;
     TriggerGraphNodeItem* to_;
@@ -110,6 +114,7 @@ protected:
     TriggerGraphView* view_;
     float arrowWidth_ {10.};
     float arrowHeight_  {8.};
+    std::vector<QPointF> wayPoints_;
 };
 
 class TriggerGraphEdgeInfoDialog : public QDialog
@@ -142,6 +147,7 @@ public:
 
     void add(VInfo_ptr, Mode);
     void remove(VInfo_ptr);
+    bool contains(VItem*) const;
     void clear();
 
     std::vector<std::pair<Mode, VInfo_ptr> > items_;
@@ -211,10 +217,11 @@ protected:
     void adjustDepConnectColour(VProperty* p=nullptr);
 
     void expand(VNode*);
-    void expandItem(VInfo_ptr);
-    void expandParent(VInfo_ptr);
+    void expandItem(VInfo_ptr, bool scanOnly);
+    void expandParent(VInfo_ptr, bool scanOnly);
     void collapse(VInfo_ptr);
     void scan(VNode*);
+    void updateAfterScan();
     void rebuild();
     void buildLayout();
     void addRelation(VItem* from, VItem* to,
@@ -235,6 +242,7 @@ protected:
     std::vector<TriggerGraphNodeItem*> nodes_;
     std::vector<TriggerGraphEdgeItem*> edges_;
     TriggerGraphEdgeInfoDialog* edgeInfo_;
+    VInfo_ptr info_;
 
     bool dependency_ {false};
     TriggeredScanner *triggeredScanner_ {nullptr};
@@ -253,6 +261,7 @@ protected:
     float zoomDelta_ {0.18};
 
     TriggerGraphExpandState expandState_;
+    VNode* focus_ {nullptr};
 };
 
 

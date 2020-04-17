@@ -140,6 +140,7 @@ set(viewer_srcs
     ShellCommand.cpp
     ShortcutHelpDialog.cpp
     Sound.cpp
+    Spline.cpp
     StandardView.cpp
     StringMatchCombo.cpp
     StringMatchMode.cpp
@@ -512,7 +513,7 @@ ecbuild_add_executable( TARGET   ecflow_ui.x
      ../../../Base/src/cts
      ../../../Base/src/stc
      ../../../Client/src
-     TextPager    
+     TextPager
      ${Boost_INCLUDE_DIRS} 
      ${CMAKE_CURRENT_BINARY_DIR}
     LIBS viewer core nodeattr node base libclient
