@@ -42,7 +42,7 @@ public:
 
    /// This controls for how long child zombie commands continue trying to connect to Server before failing.
    /// Maximum time in seconds for client to deliver message to server/servers. This is
-   /// typically 24 hours in a real environment.
+   /// typically 12 hours in a real environment.
    /// for the CHILD/task commands *ONLY*
    /// Can be overridden by  changing environment variable ECF_ZOMBIE_TIMEOUT
    long max_zombie_child_cmd_timeout() const  { return zombie_timeout_; }
