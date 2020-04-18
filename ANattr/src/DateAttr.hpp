@@ -40,12 +40,12 @@ public:
    bool structureEquals(const DateAttr& rhs) const;
 
    void reset();
-   void requeue(bool reset_queue_counter);
+   void requeue();
 
    void setFree();   // ensures that isFree() always returns true
    void clearFree(); // resets the free flag
    bool isSetFree() const { return free_; }
-   void calendarChanged( const ecf::Calendar& c , bool top_level_repeat,bool clear_at_midnight = true); // can set attribute free
+   void calendarChanged( const ecf::Calendar& c,bool clear_at_midnight = true); // can set attribute free
    bool isFree(const ecf::Calendar&) const;
    bool checkForRequeue( const ecf::Calendar&) const;
    bool validForHybrid(const ecf::Calendar&) const;
@@ -79,7 +79,6 @@ public:
    int year() const { return year_; }
 
    bool is_free(const ecf::Calendar&) const; // ignores free_
-   void set_requeue_counter(int rc) { requeue_counter_ = rc;}
 private:
    void write(std::string&) const;
 
@@ -88,7 +87,6 @@ private:
    int          month_{0};
    int          year_{0};
    unsigned int state_change_no_{0};  // *not* persisted, only used on server side
-   unsigned int requeue_counter_{0};  // ensure we run only once per requeue
    bool         free_{false};         // persisted for use by why() on client side
 
    friend class cereal::access;

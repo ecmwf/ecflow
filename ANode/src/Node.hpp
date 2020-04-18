@@ -81,7 +81,6 @@ public:
       std::vector<node_ptr> auto_cancelled_nodes_;
       std::vector<node_ptr> auto_archive_nodes_;
       Node* holding_parent_day_or_date_{nullptr};  // Node with holding day/date. Avoid freeing child node time attributes
-      Node* top_level_repeat_{nullptr};            // Node holding top level repeat
    };
    virtual void calendarChanged(const ecf::Calendar&,Node::Calendar_args&,const ecf::LateAttr* inherited_late);
 
@@ -155,21 +154,18 @@ public:
    struct Requeue_args {
       Requeue_args() = default;
       Requeue_args(bool resetRepeats,
-                   bool reset_day_date_reueue_count,
                    int clear_suspended_in_child_nodes,
                    bool reset_next_time_slot,
                    bool reset_relative_duration,
                    bool log_state_changes = true) :
                       clear_suspended_in_child_nodes_(clear_suspended_in_child_nodes),
                       resetRepeats_(resetRepeats),
-                      reset_day_date_reueue_count_(reset_day_date_reueue_count),
                       reset_next_time_slot_(reset_next_time_slot),
                       reset_relative_duration_(reset_relative_duration),
                       log_state_changes_(log_state_changes){}
 
       int clear_suspended_in_child_nodes_{0};
       bool resetRepeats_{true};
-      bool reset_day_date_reueue_count_{true};   // ensure task with date/date run once under a repeat
       bool reset_next_time_slot_{true};
       bool reset_relative_duration_{true};
       bool log_state_changes_{true};
@@ -753,7 +749,7 @@ private:
    bool testTimeDependenciesForRequeue() const;
    void calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_args&);
    bool holding_day_or_date(const ecf::Calendar& c) const;
-   void do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion, bool reset_repeats);
+   void do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion);
    bool has_time_dependencies() const;
 
 private: // alow simulator access

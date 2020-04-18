@@ -23,7 +23,7 @@ using namespace boost::posix_time;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion, bool reset_day_date_reque_counter)
+void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion)
 {
    // must be done before the re-queue
    if (reset_relative_duartion) {
@@ -41,8 +41,8 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
    for(auto & time : times_)   { time.requeue(calendar,reset_next_time_slot);}
    for(auto & cron : crons_)   { cron.requeue(calendar,reset_next_time_slot);}
 
-   for(auto & day : days_)     {  day.requeue(reset_day_date_reque_counter); } // make sure only run once
-   for(auto & date : dates_)   { date.requeue(reset_day_date_reque_counter); } // make sure only run once
+   for(auto & day : days_)     {  day.requeue(); } // make sure only run once
+   for(auto & date : dates_)   { date.requeue(); } // make sure only run once
 }
 
 void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_args& cal_args)
@@ -104,6 +104,7 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
        //       time 23:00
        //       task t1  # This took longer than 1 hour
        //       task t2  # allow task to continue to the next day
+	   //         trigger t1 == complete
        // This is only applicable for NodeContainers, for task with day/date always CLEAR at midnight
        // ECFLOW-337 versus ECFLOW-1550
 
@@ -114,8 +115,8 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
          // Check if day/date are free *BEFORE* midnight and *BEFORE* calendarChanged called(since that clears Day::makeFree_)
          // The isFree below relies on Day::makeFree_/Date:makeFree_ not being cleared till after midnight
          bool free_date = false; bool free_day = false;
-         for(auto & date : dates_) { if (date.isFree(c)) { free_date  = true; break; }}
-         for(auto & day : days_)  { if (day.isFree(c))  { free_day = true; break; }}
+         for(auto & date : dates_) { if (date.isFree(c)) { free_date = true; break; }}
+         for(auto & day : days_)   { if (day.isFree(c))  { free_day  = true; break; }}
 
          //cout << "free_day " << free_day << " free_date " <<  free_date << "\n";
 
@@ -145,7 +146,7 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
                   if (completed && (active || submitted || queued)) {
                      if (free_date) clear_date_at_midnight = false;
                      if (free_day)  clear_day_at_midnight = false;
-                     //cout << "if (completed && (active || submitted || queued))    clear_day_date_at_midnight = false\n";
+                     //cout << "if (completed && (active || submitted || queued)) clear_day_date_at_midnight = false\n";
                      break;
                   }
                }
@@ -156,13 +157,13 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
 
       bool at_least_one_day_free = false;
       for(auto & day : days_){
-         day.calendarChanged(c,cal_args.top_level_repeat_,clear_day_at_midnight);
+         day.calendarChanged(c,clear_day_at_midnight);
          if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
       }
 
       bool at_least_one_date_free = false;
       for(auto & date : dates_) {
-         date.calendarChanged(c,cal_args.top_level_repeat_,clear_date_at_midnight);
+         date.calendarChanged(c,clear_date_at_midnight);
          if (!at_least_one_date_free) at_least_one_date_free = date.isFree(c);
       }
 
@@ -172,7 +173,7 @@ void Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
          for(auto & cron : crons_)   { cron.calendarChanged(c); }
       }
       else {
-         // Node has *HOLDING* day or date dependency. Avoid free time dependencies of an child nodes
+         // Node has *HOLDING* day or date dependency. Avoid free time dependencies of any child nodes
          cal_args.holding_parent_day_or_date_ = this;
       }
    }

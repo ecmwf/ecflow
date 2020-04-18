@@ -50,6 +50,10 @@ suite trigger_examples_all
           trigger /trigger_examples_all:top_level_limit < 5        # low priority task, only valid when system is not loaded
       task trigger_with_ref_to_late_flag
           trigger /trigger_examples_all/a<flag>late                # Only triggers if task /trigger_examples_all/a is late
+      task trigger_with_ref_to_zombie_flag
+          trigger /trigger_examples_all/a<flag>zombie              # Only triggers if task /trigger_examples_all/a is a zombie
+      task trigger_with_ref_to_archived_flag
+          trigger /trigger_examples_all<flag>archived              # Only triggers if family /trigger_examples_all is archived -> only family/suite can be archived
    endfamily
    family time_trigger
       trigger /trigger_examples_all:DOW == 0  or /trigger_examples_all:DOW == 1   # DOW is a generated variable on the suite representing DAY of the week. i.e Sundày and Monday in this case

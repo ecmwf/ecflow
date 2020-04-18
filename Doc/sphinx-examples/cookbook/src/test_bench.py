@@ -107,8 +107,8 @@ if __name__ == "__main__":
         print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
     try:
         DEFS = ecflow.Defs(ARGS.defs_file)
-    except RuntimeError, ex:
-        print "   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex)
+    except RuntimeError as ex:
+        print("   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex))
         exit(1)
     
     if ARGS.verbose: 
@@ -116,7 +116,7 @@ if __name__ == "__main__":
     for suite in DEFS.suites:
         dir_to_remove = ARGS.ecf_home + suite.get_abs_node_path()
         if ARGS.verbose: 
-            print "   Deleting directory: " + dir_to_remove + "\n"
+            print("   Deleting directory: " + dir_to_remove + "\n")
         shutil.rmtree(dir_to_remove, True)  
         
     if ARGS.verbose: 
@@ -140,7 +140,7 @@ if __name__ == "__main__":
     
     # ecflow.PrintStyle.set_style(ecflow.Style.STATE)
     if ARGS.verbose: 
-        print DEFS
+        print(DEFS)
 
     if ARGS.verbose: 
         print "Generating script files(.ecf) from the definition"
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     CL = ecflow.Client(ARGS.host, ARGS.port)
     try:
         if ARGS.verbose: 
-            print "check server " + ARGS.host + ":" + ARGS.port + " is running"
+            print("check server " + ARGS.host + ":" + ARGS.port + " is running")
         CL.ping() 
 
         if ARGS.verbose: 
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         try:
             for suite in DEFS.suites:
                 CL.delete(suite.get_abs_node_path(), True)
-        except RuntimeError, ex:
+        except RuntimeError as ex:
             pass # For first run this will fail, hence ignore
         
         if ARGS.verbose: 
@@ -183,5 +183,5 @@ if __name__ == "__main__":
             print "   " + suite.name()
         print "into server " + ARGS.host \
                              + ":" + ARGS.port + ", please view the playable suites in the GUI"
-    except RuntimeError, ex:
+    except RuntimeError as ex:
         print "Error: " + str(ex)

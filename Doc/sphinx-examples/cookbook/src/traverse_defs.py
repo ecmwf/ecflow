@@ -135,6 +135,6 @@ try:
     traverser = DefsTraverser(server_defs)
     traverser.write_to_file("server.defs")
         
-except RuntimeError, e:
+except RuntimeError as e:
     print "failed: " + str(e)
     

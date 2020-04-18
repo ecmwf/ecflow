@@ -141,12 +141,7 @@ void NodeContainer::requeue(Requeue_args& args)
 	if (d_st_ == DState::COMPLETE )
 	   args.log_state_changes_ = false;
 
-	// date/day attributes under a repeat should only run once per repeat increment
-	bool reset_day_date_reueue_count = args.reset_day_date_reueue_count_;
-	if (!repeat().empty() && args.resetRepeats_) reset_day_date_reueue_count = true;
-
    Node::Requeue_args largs(true /* reset repeats, Moot for tasks */,
-                            reset_day_date_reueue_count,
                             args.clear_suspended_in_child_nodes_,
                             args.reset_next_time_slot_,
                             true /* reset relative duration */,
@@ -435,9 +430,6 @@ void NodeContainer::calendarChanged(
 	   overridden_late.override_with(late_.get());
 	}
 
-	// top_level_repeat_ is used in ensuring that day/date attributes stay free in calendarChanged(), even after midnight
-   cal_args.top_level_repeat_ = (!repeat().empty()) ? this : nullptr;
-
    size_t node_vec_size = nodes_.size();
    for(size_t t = 0; t < node_vec_size; t++) {
       nodes_[t]->calendarChanged(c,cal_args,&overridden_late);
@@ -445,7 +437,6 @@ void NodeContainer::calendarChanged(
 
    // clear *IF* at the *SAME* level
    if ( cal_args.holding_parent_day_or_date_ == this) cal_args.holding_parent_day_or_date_ = nullptr;
-   if ( cal_args.top_level_repeat_           == this) cal_args.top_level_repeat_ = nullptr;
 }
 
 bool NodeContainer::hasAutoCancel() const

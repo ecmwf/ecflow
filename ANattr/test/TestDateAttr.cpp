@@ -82,7 +82,6 @@ BOOST_AUTO_TEST_CASE( test_date_parsing ) {
    {
       DateAttr date("12.12.2019");
       date.setFree();
-      date.set_requeue_counter(3);
       DateAttr parsed_date  = print_and_parse_attr(date);
 
       BOOST_CHECK_MESSAGE(date == parsed_date,"Parse failed expected " << date.dump() << " but found " << parsed_date.dump());
@@ -96,7 +95,6 @@ BOOST_AUTO_TEST_CASE( test_date_parsing ) {
    }
    {
       DateAttr date("12.12.2019");
-      date.set_requeue_counter(3);
       DateAttr parsed_date  = print_and_parse_attr(date);
 
       BOOST_CHECK_MESSAGE(date == parsed_date,"Parse failed expected " << date.dump() << " but found " << parsed_date.dump());

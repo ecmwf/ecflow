@@ -42,5 +42,5 @@ try:
         # To avoid overloading server ensure sleep is > 60 seconds 
         time.sleep(300)
         
-except RuntimeError, e:
-    print str(e)
+except RuntimeError as e:
+    print(str(e))

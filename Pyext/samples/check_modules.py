@@ -45,14 +45,14 @@ def main():
 
     delimter = "module "
     module_cmds = [e.strip() for e in ARGS.m.split(delimter) if e.strip() != ""]
-    print "module_cmds ",module_cmds
+    print("module_cmds ",module_cmds)
 
     module_actions = ("load", "add", "rm", "unload", "swap", "switch")
     modules_required = dict()
     modules_missing = set()
 
     def set_version(s):
-        print " set_version ",s
+        print(" set_version ",s)
         try:
             mod, version = s.split('/')
         except ValueError:
@@ -64,7 +64,7 @@ def main():
 
     def unset_version(s):
         # Unloading a specific version has no effect if a different version is loaded!
-        print " unset_version ",s
+        print(" unset_version ",s)
         try:
             mod, version = s.split('/')
             if mod in modules_required and modules_required[mod] == version:
@@ -75,37 +75,37 @@ def main():
                 modules_required.pop(s)
             modules_missing.add(s)
 
-    print "========================================================="
-    print "Read input module list->",module_cmds
-    print "========================================================="
+    print("=========================================================")
+    print("Read input module list->",module_cmds)
+    print("=========================================================")
     for mod in module_cmds:
         module_cmd = mod.split()
-        print "module_cmd ",module_cmd
+        print("module_cmd ",module_cmd)
         action = module_cmd[0]
         if action not in module_actions:
-            print "Error: Module command ", module_cmd, " is not correctly formed, second arg must be one of", ', '.join(module_actions)
+            print("Error: Module command ", module_cmd, " is not correctly formed, second arg must be one of", ', '.join(module_actions))
             return 1
         if action in ('load', 'add'):
             if len(module_cmd) != 2:
-                print "Error: invalid module command '%s'" % ' '.join(module_cmd)
+                print("Error: invalid module command '%s'" % ' '.join(module_cmd))
             set_version(module_cmd[1])
         if action in ('swap', 'switch'):
             # Swap takes either 1 or 2 arguments
             # module swap pkg/version <-- unloads pkg, loads pkg/version
             # module swap pkg1/v1 pkg2/v2 <-- unloads pkg1/v1, loads pkg2/v2
             if len(module_cmd) > 3:
-                print "Error: invalid module command '%s'" % ' '.join(module_cmd)
+                print("Error: invalid module command '%s'" % ' '.join(module_cmd))
             if len(module_cmd) == 3:
                 unset_version(module_cmd[1])
             set_version(module_cmd[-1])
         if action in ('rm', 'unload'):
             if len(module_cmd) != 2:
-                print "Error: invalid module command '%s'" % ' '.join(module_cmd)
+                print("Error: invalid module command '%s'" % ' '.join(module_cmd))
             unset_version(module_cmd[1])
 
-    print "========================================================="
-    print "Read module list file->",ARGS.f
-    print "========================================================="
+    print("=========================================================")
+    print("Read module list file->",ARGS.f)
+    print("=========================================================")
     modules_loaded = dict()
     module_list = list()
     with open(ARGS.f) as module_list_file:
@@ -122,33 +122,33 @@ def main():
                 if count == 1:
                    mod,version = tok.split('/')
                    version = version.split("(")[0]
-                   print "->(",mod,",",version,")"
+                   print("->(",mod,",",version,")")
                    modules_loaded[mod] = version
                 else:
-                   print "->(",tok,",None)"
+                   print("->(",tok,",None)")
                    modules_loaded[tok] = None
 
-    print "========================================================="
-    print "Checking"
-    print "========================================================="
-    print "->module_missing:   ",modules_missing
-    print "->modules_required: ",modules_required
-    print "->module list:      ",modules_loaded
+    print("=========================================================")
+    print("Checking")
+    print("=========================================================")
+    print("->module_missing:   ",modules_missing)
+    print("->modules_required: ",modules_required)
+    print("->module list:      ",modules_loaded)
     failed = 0
-    for mod, version in modules_required.items():
+    for mod, version in list(modules_required.items()):
         if version and modules_loaded.get(mod) != version or version is None and mod not in modules_loaded:
-            print "Error: expected module %s/%s not found in module list" % (mod, version)
+            print("Error: expected module %s/%s not found in module list" % (mod, version))
             failed = 1
     for module in modules_missing:
-        print "modules_missing - ", module
+        print("modules_missing - ", module)
         if '/' in module:
             mod, version = module.split('/')
             if modules_loaded.get(mod) == version:
-                print "Error: unexpected module %s/%s found in module list" % (mod, version)
+                print("Error: unexpected module %s/%s found in module list" % (mod, version))
                 failed = 1
         else:
             if module in modules_loaded:
-                print "Error: unexpected module %s found in module list" % module
+                print("Error: unexpected module %s found in module list" % module)
                 failed = 1
     return failed
 

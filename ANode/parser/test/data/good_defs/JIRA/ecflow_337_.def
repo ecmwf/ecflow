@@ -1,0 +1,55 @@
+suite ecflow_337
+  defstatus suspended
+  family barrier
+    repeat enumerated YMD 1 2 3 4
+    family monday
+        time 10:00
+        day monday
+        task dummy
+          complete 1==1
+          trigger 0==1
+    endfamily
+    family tuesday
+        time 10:00
+        day tuesday
+        task dummy
+          complete 1==1
+          trigger 0==1
+    endfamily
+    family wednesday
+        time 10:00
+        day wednesday
+        task dummy
+          complete 1==1
+          trigger 0==1
+    endfamily
+    family thursday
+        time 10:00
+        day thursday
+        task dummy
+          complete 1==1
+          trigger 0==1
+    endfamily
+    family friday
+        time 10:00
+        day friday
+        task dummy
+          complete 1==1
+          trigger 0==1
+    endfamily
+    family saturday
+        time 10:00
+        day saturday
+        task dummy
+          complete 1==1
+          trigger 0==1
+    endfamily
+    family sunday
+        time 10:00
+        day sunday
+        task dummy
+          complete 1==1
+          trigger 0==1
+    endfamily
+  endfamily
+endsuite

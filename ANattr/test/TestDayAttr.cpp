@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( test_day_attr)
 
       // cout << " day_changed(" << day_changed << ") calendar.day_of_week() = " <<  calendar.day_of_week() << "\n";
 
-      day.calendarChanged( calendar, false);
+      day.calendarChanged( calendar);
 
       if ( calendar.day_of_week() < day.day() ) {
          BOOST_CHECK_MESSAGE(!day.isFree(calendar),day.toString() << " is free should fail at day " << calendar.day_of_week() );
@@ -114,7 +114,6 @@ BOOST_AUTO_TEST_CASE( test_day_parsing ) {
    {
       DayAttr day(DayAttr::WEDNESDAY);
       day.setFree();
-      day.set_requeue_counter(3);
       DayAttr parsed_day = print_and_parse_attr(day);
 
       BOOST_CHECK_MESSAGE(day == parsed_day,"Parse failed expected " << day.dump() << " but found " << parsed_day.dump());
@@ -128,7 +127,6 @@ BOOST_AUTO_TEST_CASE( test_day_parsing ) {
    }
    {
       DayAttr day(DayAttr::WEDNESDAY);
-      day.set_requeue_counter(3);
       DayAttr parsed_day = print_and_parse_attr(day);
 
       BOOST_CHECK_MESSAGE(day == parsed_day,"Parse failed expected " << day.dump() << " but found " << parsed_day.dump());

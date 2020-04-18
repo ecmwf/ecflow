@@ -14,10 +14,10 @@
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 """ tkinter example with ecflow
 """
-from __future__ import with_statement, print_function
-import Tkinter as tki
-from Tkinter import *
-import Queue
+
+import tkinter as tki
+from tkinter import *
+import queue
 import sys
 import time
 import os
@@ -229,7 +229,7 @@ class Client(object):
                 self.process_nc(item, win)
 
     def process_node(self, item, wins):
-        for kind, win in wins.items():
+        for kind, win in list(wins.items()):
             status = "%s" % item.get_state()
             if status != kind:
                 continue
@@ -288,9 +288,9 @@ class ClientSMS(Client):
             kid = node.kids
             while kid:
                 self.process_node(kid, wins)
-                kid = kid.next
+                kid = kid.__next__
         else:
-            for kind, win in wins.items():
+            for kind, win in list(wins.items()):
                 state = "%s" % ClientSMS.status(node)
                 if state != kind:
                     continue
@@ -399,7 +399,7 @@ class Application(tki.Frame):
     def check_queue(self):
         try:
             self.__queue.get(block=False)
-        except Queue.Empty:
+        except queue.Empty:
             pass
         else:
             self.update()
@@ -407,7 +407,7 @@ class Application(tki.Frame):
 
     def update(self, event=None):
         self.label.update()
-        for kind, win in self.__wins.items():
+        for kind, win in list(self.__wins.items()):
             win.clear()
         for client in self.__clients:
             if type(client) == list:
@@ -431,7 +431,7 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 1:
         clients = []
-        for num in xrange(1, len(sys.argv)):            
+        for num in range(1, len(sys.argv)):            
             sep = ','
             arg = sys.argv[num]
             if sep in arg:
@@ -445,7 +445,7 @@ if __name__ == '__main__':
         print("# using", one)
         clients = [Client(one), ]
 
-    queue = Queue.Queue()
+    queue = queue.Queue()
     app = Application(client=clients, queue=queue)
     app.master.title(PROGRAM_NAME)
     app.columnconfigure(0, weight=1)
