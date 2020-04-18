@@ -190,7 +190,6 @@ public:
     TriggerGraphDelegate* delegate() const {return delegate_;}
     TriggerGraphModel* model() const {return model_;}
     bool dependency() const {return dependency_;}
-    QPixmap makeLegendPixmap();
     int minZoomLevel() const {return minZoomLevel_;}
     int maxZoomLevel() const {return maxZoomLevel_;}
     int defaultZoomLevel() const {return defaultZoomLevel_;}

@@ -1053,7 +1053,7 @@
             "command"        : "edit",
             "multi"          : "false",
             "handler"        : "tree",
-            "view"           : "tree/trigger"
+            "view"           : "tree/trigger/graph"
         },
         {
             "menu"           : "Node",
@@ -1062,7 +1062,7 @@
             "command"        : "edit",
             "multi"          : "false",
             "handler"        : "tree",
-            "view"           : "tree/trigger"
+            "view"           : "tree/trigger/graph"
         },
 
         {

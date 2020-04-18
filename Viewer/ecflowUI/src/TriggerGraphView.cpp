@@ -1126,54 +1126,6 @@ void TriggerGraphView::slotEdgeInfo(const QUrl& link)
     }
 }
 
-QPixmap TriggerGraphView::makeLegendPixmap()
-{
-    QFont f;
-    QFontMetrics fm(f);
-    int margin = 2;
-    int gap = 6;
-    int lineLen = 20;
-
-    QMap<QString, QPen> data;
-    data["trigger"] = triggerConnectPen_;
-    data["dependency"] = depConnectPen_;
-    data["parent"] = parentConnectPen_;
-
-    int totalWidth = margin;
-    Q_FOREACH(QString s, data.keys()) {
-        totalWidth += lineLen + gap + fm.width(s) + gap;
-    }
-    totalWidth += margin;
-
-    QPixmap pix(totalWidth,fm.height() + 2* margin);
-    pix.fill(QColor(253, 253, 253));
-    int lineY = pix.height()/2;
-    QPainter p(&pix);
-    p.setRenderHints(QPainter::Antialiasing);
-
-    int xp = 0;
-    QRect r(0,0,margin, pix.height());
-    Q_FOREACH(QString s, data.keys()) {
-        xp = r.right() + gap;
-        QPen pen(data[s]);
-        pen.setWidth(2);
-        p.setPen(data[s]);
-        p.drawLine(xp, lineY, xp + lineLen, lineY);
-        p.drawLine(xp + lineLen/2 + 3, lineY, xp + lineLen/2 - 3, lineY -3);
-        p.drawLine(xp + lineLen/2 + 3, lineY, xp + lineLen/2 - 3, lineY +3);
-        //p.setPen(Qt::black);
-        pen.setWidth(1);
-        xp += lineLen + gap;
-        r.setX(xp);
-        r.setWidth(fm.width(s));
-        p.drawText(r, Qt::AlignVCenter, s);
-    }
-
-    xp = r.right() + gap;
-
-    return pix;
-}
-
 void TriggerGraphView::setZoomLevel(int level)
 {
     if (level >= minZoomLevel_ && level <= maxZoomLevel_) {
@@ -1184,16 +1136,6 @@ void TriggerGraphView::setZoomLevel(int level)
         scale(factor, factor);
     }
 }
-
-//int TriggerGraphView::zoomLevelFromScale(float sc) const
-//{
-//    int level = static_cast<int>(round(log(sc) / log(1 + zoomDelta_)));
-//    if (level < minZoomLevel_)
-//        level = minZoomLevel_;
-//    if (level > maxZoomLevel_)
-//        level = maxZoomLevel_;
-//    return level;
-//}
 
 float TriggerGraphView::currentScale() const
 {
