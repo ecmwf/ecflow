@@ -17,6 +17,7 @@
 #include "TriggerGraphModel.hpp"
 #include "TriggerGraphLayoutBuilder.hpp"
 #include "UiLog.hpp"
+#include "VAttribute.hpp"
 #include "VItemPathParser.hpp"
 #include "VSettings.hpp"
 #include "VNState.hpp"
@@ -524,31 +525,43 @@ void TriggerGraphEdgeInfoDialog::readSettings(VComboSettings* vs)
 //
 //===========================================================
 
-void TriggerGraphExpandState::add(VInfo_ptr node, Mode mode)
+TriggerGraphExpandState::TriggerGraphExpandState(const TriggerGraphExpandState &o)
 {
-    items_.push_back(std::make_pair(mode, node));
-}
-
-void TriggerGraphExpandState::remove(VInfo_ptr info)
-{
-    if (info) {
-        items_.erase(
-            std::remove_if(items_.begin(), items_.end(),
-            [info](auto x){return x.second == info;}));
+    for(auto v: o.items_) {
+        add(v->info_, v->mode_);
     }
 }
 
-bool TriggerGraphExpandState::contains(VItem* item) const
+void TriggerGraphExpandState::add(VInfo_ptr info, Mode mode)
 {
-    for (auto it: items_) {
-        if (it.second->item() == item)
-            return true;
+    items_.push_back(new TriggerGraphExpandStateItem(info, mode));
+}
+
+TriggerGraphExpandStateItem* TriggerGraphExpandState::find(VItem* item) const
+{
+    for(auto v: items_) {
+        if (v->info_->item() == item)
+            return v;
     }
-    return false;
+    return nullptr;
+}
+
+void TriggerGraphExpandState::remove(TriggerGraphExpandStateItem* item)
+{
+    if (item) {
+        auto it = std::find(items_.begin(), items_.end(), item);
+        if (it != items_.end()) {
+            items_.erase(it);
+        }
+        delete item;
+    }
 }
 
 void TriggerGraphExpandState::clear()
 {
+    for(auto v: items_) {
+        delete v;
+    }
     items_.clear();
 }
 
@@ -618,7 +631,12 @@ TriggerGraphView::~TriggerGraphView()
 
 void TriggerGraphView::clear()
 {
-    info_.reset();
+    info_.reset();    
+    clearGraph();
+}
+
+void TriggerGraphView::clearGraph()
+{
     model_->clearData();
     scene_->clear();
     nodes_.clear();
@@ -713,11 +731,11 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
         }
     } else if(cmd == "collapse") {
         if (info && info->node()) {
-            collapse(info);
+            collapseItem(info);
         }
     } else if(cmd == "toggle_expand") {
         if (info && info->node()) {
-            expandItem(info, false);
+            toggleExpandItem(info);
         }
     } else if(cmd == "expand_parent") {
         if (info && info->item()) {
@@ -729,6 +747,11 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
             AttributeEditor::edit(info,this);
         }
     }
+}
+
+void TriggerGraphView::rerender()
+{
+    scene()->update();
 }
 
 void TriggerGraphView::adjustBackground(VProperty *p)
@@ -810,11 +833,21 @@ void TriggerGraphView::notifyChange(VProperty* p)
 
 void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
-//    QModelIndex index = model_->nodeToIndex(node);
-//    if (TriggerGraphNodeItem *item = indexToItem(index)) {
-//        item->update();
-//    }
-
+    for (auto n: nodes_) {
+        if (VItem* item = n->item()) {
+            if(VNode* vn=item->isNode()) {
+                if (vn == node) {
+                    rerender();
+                    return;
+                }
+            } else if (VAttribute *a = item->isAttribute()) {
+                if(a->parent() == node) {
+                    rerender();
+                    return;
+                }
+            }
+        }
+    }
 }
 
 //------------------------------------------
@@ -833,7 +866,7 @@ void TriggerGraphView::show(VInfo_ptr info, bool dependency)
 void TriggerGraphView::expandItem(VInfo_ptr info, bool scanOnly)
 {
     Q_ASSERT(info);
-    if (info->node() && !expandState_.contains(info->node())) {
+    if (info->isNode() && info->node() && !expandState_.find(info->node())) {
         expandState_.add(info, TriggerGraphExpandState::ExpandNode);
         scan(info->node());
         if(!scanOnly) {
@@ -842,22 +875,45 @@ void TriggerGraphView::expandItem(VInfo_ptr info, bool scanOnly)
     }
 }
 
+void TriggerGraphView::toggleExpandItem(VInfo_ptr info)
+{
+    Q_ASSERT(info);
+    if (info->isNode() && info->node()) {
+        if (expandState_.find(info->node())) {
+            collapseItem(info);
+        } else {
+            expandItem(info, false);
+        }
+    }
+}
+
 void TriggerGraphView::expandParent(VInfo_ptr info, bool scanOnly)
 {
     Q_ASSERT(info);
     focus_=nullptr;
-    if (VItem* item = info->item()) {
-        if(VNode *p = item->parent()) {
-            addRelation(p, item, nullptr, TriggerCollector::Hierarchy, nullptr);
+    if (VNode* n = info->node()) {
+        VNode *p = n->parent();
+
+        if (p)
+            addRelation(p, n, nullptr, TriggerCollector::Hierarchy, nullptr);
+
+        focus_ = n;
+        auto exItem = expandState_.find(n);
+        if (!exItem) {
             expandState_.add(info, TriggerGraphExpandState::ExpandParent);
-            if (info->node()) {
-                scan(info->node());
-                focus_ = info->node();
-            }
+            scan(n);
+        } else if (exItem->mode_ == TriggerGraphExpandState::ExpandNode) {
+            exItem->mode_ = TriggerGraphExpandState::ExpandParent;
+        }
+
+        if (p && !expandState_.find(p)) {
+            VInfo_ptr pInfo = VInfo::createFromItem(p);
+            expandState_.add(pInfo, TriggerGraphExpandState::ExpandNode);
             scan(p);
-            if(!scanOnly) {
-                updateAfterScan();
-            }
+        }
+
+        if(!scanOnly) {
+            updateAfterScan();
         }
     }
 }
@@ -878,18 +934,19 @@ void TriggerGraphView::updateAfterScan()
 
     buildLayout();
     for (auto n: nodes_) {
-        if (expandState_.contains(n->item())) {
+        if (expandState_.find(n->item())) {
             n->setExpanded(true);
         }
     }
     adjustSceneRect();
 }
 
-void TriggerGraphView::collapse(VInfo_ptr info)
+void TriggerGraphView::collapseItem(VInfo_ptr info)
 {
     if(info && info->node() && info != info_) {
-        if (expandState_.contains(info->node())) {
-            expandState_.remove(info);
+        auto exItem = expandState_.find(info->node());
+        if (exItem) {
+            expandState_.remove(exItem);
             rebuild();
         }
     }
@@ -898,15 +955,21 @@ void TriggerGraphView::collapse(VInfo_ptr info)
 void TriggerGraphView::rebuild()
 {
     auto expandCopy = expandState_;
-    clear();
+    clearGraph();
+
+    // make sure info is always added upfront
+    if (info_ && info_->node() && !expandCopy.find(info_->node())) {
+        addNode(info_->node());
+    }
+
     for(auto it: expandCopy.items_) {
-        if (it.first == TriggerGraphExpandState::ExpandNode) {
-            if (it.second && it.second->node()) {
-                expandItem(it.second, true);
+        if (it->mode_ == TriggerGraphExpandState::ExpandNode) {
+            if (it->info_ && it->info_->node()) {
+                expandItem(it->info_, true);
             }
         } else {
-            if (it.second && it.second->node()) {
-                expandParent(it.second, true);
+            if (it->info_ && it->info_->node()) {
+                expandParent(it->info_, true);
             }
         }
     }

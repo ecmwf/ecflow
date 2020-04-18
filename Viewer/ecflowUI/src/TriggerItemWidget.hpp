@@ -20,7 +20,6 @@
 
 class QButtonGroup;
 class TriggeredScanner;
-class TriggerTableCollector;
 
 class TriggerItemWidget : public QWidget, public InfoPanelItem, protected Ui::TriggerItemWidget
 {
@@ -69,8 +68,6 @@ protected:
 
     enum ModeIndex {TableModeIndex=0, GraphModeIndex=1};
 
-    TriggerTableCollector* triggerCollector_;
-    TriggerTableCollector* triggeredCollector_;
     TriggeredScanner *scanner_;  
     QButtonGroup* modeGroup_;
 };

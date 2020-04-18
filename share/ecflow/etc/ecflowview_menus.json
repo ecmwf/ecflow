@@ -82,7 +82,8 @@
             "name"           : "Expand graph via parent",
             "command"        : "expand_parent",
             "handler"        : "graph",
-            "view"           : "graph"
+            "view"           : "graph",
+            "shortcut"       : "Left"
         },
         {
             "menu"           : "Node",

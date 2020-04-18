@@ -141,17 +141,33 @@ protected:
      QSize lastSize_ {QSize(350, 280)};
 };
 
+class TriggerGraphExpandStateItem;
+
 class TriggerGraphExpandState
 {
 public:
     enum Mode {ExpandNode=0, ExpandParent=1};
 
+    TriggerGraphExpandState() {}
+    TriggerGraphExpandState(const TriggerGraphExpandState&);
+    ~TriggerGraphExpandState() {clear();}
     void add(VInfo_ptr, Mode);
-    void remove(VInfo_ptr);
-    bool contains(VItem*) const;
+    void remove(TriggerGraphExpandStateItem*);
+    TriggerGraphExpandStateItem* find(VItem*) const;
     void clear();
 
-    std::vector<std::pair<Mode, VInfo_ptr> > items_;
+    std::vector<TriggerGraphExpandStateItem*> items_;
+};
+
+class TriggerGraphExpandStateItem
+{
+public:
+    TriggerGraphExpandStateItem(
+            VInfo_ptr info, TriggerGraphExpandState::Mode mode) :
+        info_(info), mode_(mode) {}
+
+    VInfo_ptr info_;
+    TriggerGraphExpandState::Mode mode_;
 };
 
 class TriggerGraphView : public QGraphicsView, public VPropertyObserver
@@ -209,6 +225,7 @@ Q_SIGNALS:
     void linePenChanged();
 
 protected:
+    void clearGraph();
     void showEvent(QShowEvent*) override;
     TriggerGraphNodeItem* nodeItemAt(QPointF scenePos) const;
     TriggerGraphNodeItem* currentNodeItem() const;
@@ -216,11 +233,13 @@ protected:
     void adjustParentConnectColour(VProperty* p=nullptr);
     void adjustTriggerConnectColour(VProperty* p=nullptr);
     void adjustDepConnectColour(VProperty* p=nullptr);
+    void rerender();
 
     void expand(VNode*);
     void expandItem(VInfo_ptr, bool scanOnly);
+    void toggleExpandItem(VInfo_ptr);
     void expandParent(VInfo_ptr, bool scanOnly);
-    void collapse(VInfo_ptr);
+    void collapseItem(VInfo_ptr);
     void scan(VNode*);
     void updateAfterScan();
     void rebuild();

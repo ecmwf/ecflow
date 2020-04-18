@@ -10,6 +10,7 @@
 #include "TriggerTableWidget.hpp"
 
 #include "Highlighter.hpp"
+#include "TriggeredScanner.hpp"
 #include "TriggerItemWidget.hpp"
 #include "TriggerTableModel.hpp"
 #include "TriggerViewDelegate.hpp"
@@ -21,6 +22,8 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
 	setupUi(this);
 
     nodeCollector_=new TriggerTableCollector(false);
+    triggerCollector_=new TriggerTableCollector(false);
+    triggeredCollector_=new TriggerTableCollector(false);
 
     depInfoCloseTb_->setProperty("triggertitle","1");
     depInfoCloseTb_->parent()->setProperty("triggertitle","1");
@@ -104,6 +107,8 @@ TriggerTableWidget::TriggerTableWidget(QWidget *parent) :
 TriggerTableWidget::~TriggerTableWidget()
 {
     delete nodeCollector_;
+    delete triggerCollector_;
+    delete triggeredCollector_;
 }
 
 void TriggerTableWidget::clear()
@@ -116,6 +121,10 @@ void TriggerTableWidget::clear()
 
     depLabel_->setText(depLabelText_);
     depBrowser_->clear();
+
+    //At this point the tables are cleared so it is safe to clear the collectors
+    triggerCollector_->clear();
+    triggeredCollector_->clear();
 }
 
 void TriggerTableWidget::clearSelection()
@@ -123,9 +132,18 @@ void TriggerTableWidget::clearSelection()
     lastSelectedItem_.reset();
 }
 
-void TriggerTableWidget::setInfo(VInfo_ptr info)
+void TriggerTableWidget::setInfo(VInfo_ptr info, bool dependency)
 {
-    info_=info;
+    clear();
+
+    info_ = info;
+    dependency_ = dependency;
+
+    if(!info_ || !info_->isNode() || !info_->node())
+        return;
+
+    VNode* n=info_->node();
+    Q_ASSERT(n);
 
     nodeModel_->beginUpdate();
     nodeCollector_->clear();
@@ -135,19 +153,22 @@ void TriggerTableWidget::setInfo(VInfo_ptr info)
     }
     nodeModel_->setTriggerCollector(nodeCollector_);
     nodeModel_->endUpdate();
-}
 
-void TriggerTableWidget::adjust(VInfo_ptr info, TriggerTableCollector* tc1, TriggerTableCollector* tc2)
-{
-    if (!info) {
-        clear();
-    } else if(info_ != info) {
-        setInfo(info_);
-        beginTriggerUpdate();
-        setTriggerCollector(tc1, tc2);
-        endTriggerUpdate();
-        resumeSelection();
-    }
+    beginTriggerUpdate();
+
+    //collect the list of triggers of this node
+    triggerCollector_->setDependency(dependency_);
+    n->triggers(triggerCollector_);
+
+    triggeredCollector_->setDependency(dependency_);
+    n->triggered(triggeredCollector_, triggeredScanner_);
+
+    triggerModel_->setTriggerCollector(triggerCollector_);
+    triggeredModel_->setTriggerCollector(triggeredCollector_);
+
+    endTriggerUpdate();
+
+    resumeSelection();
 }
 
 void TriggerTableWidget::slotTriggerClicked(TriggerTableItem* item)
@@ -309,12 +330,6 @@ void TriggerTableWidget::endTriggerUpdate()
     triggeredModel_->endUpdate();
 }
 
-void TriggerTableWidget::setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2)
-{
-    triggerModel_->setTriggerCollector(tc1);
-    triggeredModel_->setTriggerCollector(tc2);
-}
-
 void TriggerTableWidget::resumeSelection()
 {
     //try to reselect the last selected item
@@ -346,6 +361,11 @@ void TriggerTableWidget::resumeSelection()
             lastSelectedItem_.reset();
         }
     }
+}
+
+void TriggerTableWidget::setTriggeredScanner(TriggeredScanner* scanner)
+{
+    triggeredScanner_ = scanner;
 }
 
 void TriggerTableWidget::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)

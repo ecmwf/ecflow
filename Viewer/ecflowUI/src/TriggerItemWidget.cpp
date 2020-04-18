@@ -11,7 +11,6 @@
 
 #include "Highlighter.hpp"
 #include "ServerHandler.hpp"
-#include "TriggerCollector.hpp"
 #include "TriggeredScanner.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
@@ -37,9 +36,6 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     unselectedFlags_.clear();
 
     setupUi(this);
-    //The collectors
-    triggerCollector_=new TriggerTableCollector(false);
-    triggeredCollector_=new TriggerTableCollector(false);
 
     //Scanner
     scanner_=new TriggeredScanner(this);
@@ -53,6 +49,7 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     connect(scanner_,SIGNAL(scanProgressed(int)),
             this,SLOT(scanProgressed(int)));
 
+    triggerTable_->setTriggeredScanner(scanner_);
     triggerGraph_->setTriggeredScanner(scanner_);
 
     //Messages
@@ -129,8 +126,6 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 TriggerItemWidget::~TriggerItemWidget()
 {
     clearContents();
-    delete triggerCollector_;
-    delete triggeredCollector_;
 }
 
 QWidget* TriggerItemWidget::realWidget()
@@ -203,30 +198,7 @@ void TriggerItemWidget::loadTable()
         QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
     triggerTable_->clear();
-
-    if(!info_ || !info_->isNode() || !info_->node())
-        return;
-
-    VNode* n=info_->node();
-    Q_ASSERT(n);
-
-    //At this point the tables are cleared so it is safe to clear the collectors
-    triggerCollector_->clear();
-    triggeredCollector_->clear();
-
-    triggerTable_->setInfo(info_);
-    triggerTable_->beginTriggerUpdate();
-
-    //collect the list of triggers of this node
-    triggerCollector_->setDependency(dependency());
-    n->triggers(triggerCollector_);
-
-    triggeredCollector_->setDependency(dependency());
-    n->triggered(triggeredCollector_,triggeredScanner());
-
-    triggerTable_->setTriggerCollector(triggerCollector_,triggeredCollector_);
-    triggerTable_->endTriggerUpdate();
-    triggerTable_->resumeSelection();
+    triggerTable_->setInfo(info_, dependency());
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QGuiApplication::restoreOverrideCursor();
@@ -256,10 +228,6 @@ void TriggerItemWidget::clearContents()
 
     if(!active_)
         triggerTable_->clearSelection();
-
-    //At this point the tables are cleared so it is safe to clear the collectors
-    triggerCollector_->clear();
-    triggeredCollector_->clear();
 }
 
 void TriggerItemWidget::clearTriggers()
@@ -267,10 +235,6 @@ void TriggerItemWidget::clearTriggers()
     exprTe_->clear();
     triggerTable_->clear();
     triggerGraph_->clear();
-
-    //At this point the tables are cleared so it is safe to clear the collectors
-    triggerCollector_->clear();
-    triggeredCollector_->clear();
 }
 
 void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
@@ -332,7 +296,6 @@ void TriggerItemWidget::on_dependTb__toggled(bool b)
 void TriggerItemWidget::on_dependInfoTb__toggled(bool b)
 {
     triggerTable_->slotShowDependencyInfo(b);
-    //triggerGraph_->showDependencyInfo(b);
 }
 
 void TriggerItemWidget::slotHandleDefInfoWidgetClosure()
@@ -385,17 +348,18 @@ void TriggerItemWidget::slotChangeMode(int, bool)
     showGraphButtons(modeGroup_->checkedId() == GraphModeIndex);
 
     if (modeGroup_->checkedId() == TableModeIndex) {
-        if (triggerTable_->info() != info_ || triggerCollector_->isExtended() != dependency()) {
+        if (triggerTable_->info() != info_ ||
+            triggerTable_->dependency() != dependency()) {
             triggerGraph_->becameInactive();
             loadTable();
         }
     } else if (modeGroup_->checkedId() == GraphModeIndex) {
-        if (triggerGraph_->info() != info_ || triggerGraph_->dependency() != dependency()) {
+        if (triggerGraph_->info() != info_ ||
+            triggerGraph_->dependency() != dependency()) {
             loadGraph();
         }
     }
 }
-
 
 void TriggerItemWidget::showGraphButtons(bool b)
 {
@@ -495,22 +459,28 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     }
 
     //For other changes we only reload the triggers if the change happened to an item in the collected triggers
-    for(auto it : aspect)
-    {
-        if(it == ecf::Aspect::NODE_VARIABLE || it == ecf::Aspect::METER || it == ecf::Aspect::LIMIT ||
-                it == ecf::Aspect::EVENT)
-        {
-           if(triggerCollector_->contains(n,true) || triggeredCollector_->contains(n,true))
-           {
-               load();
-               return;
-           }
-        }
-    }
+//    for(auto it : aspect)
+//    {
+//        if(it == ecf::Aspect::NODE_VARIABLE || it == ecf::Aspect::METER || it == ecf::Aspect::LIMIT ||
+//                it == ecf::Aspect::EVENT)
+//        {
+//           if (modeGroup_->checkedId() ==  TableModeIndex) {
+//               if (triggerTable_->contains(n)) {
+//                   load();
+//                   return;
+//               }
+//           } else if (modeGroup_->checkedId() ==  TableModeIndex) {
+//               if (triggerGraph_->contains(n)) {
+//                   load();
+//                   return;
+//               }
+//           }
+//        }
+//    }
 
     //For the rest of the changes in we rerender the collected items that might have changed
     if (modeGroup_->checkedId() ==  TableModeIndex)
-        triggerTable_->nodeChanged(n,aspect);
+        triggerTable_->nodeChanged(n, aspect);
     else if (modeGroup_->checkedId() ==  GraphModeIndex)
         triggerGraph_->nodeChanged(n, aspect);
 }
