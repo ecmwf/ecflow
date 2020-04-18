@@ -74,13 +74,14 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
    prevServerState_(SState::RUNNING),
    conf_(nullptr)
 {
-	if(localHostName_.empty())
+    if(localHostName_.empty())
 	{
 		localHostName_=boost::asio::ip::host_name();
 	}
 
 	//Create longname
 	longName_=host_ + "@" + port_;
+    fullLongName_ = name_ + "[" + longName_ + "]";
 
 	conf_=new VServerSettings(this);
 
@@ -105,33 +106,59 @@ ServerHandler::ServerHandler(const std::string& name,const std::string& host, co
     createClient(true);
 }
 
+// the real deletion is performed by logout()/queueLoggedOut()
 ServerHandler::~ServerHandler()
 {
-    //Save settings
-	saveConf();
+    Q_ASSERT(comQueue_ == nullptr);
+    Q_ASSERT(client_ == nullptr);
+}
 
-	//Notify the observers
+void ServerHandler::logout()
+{
+    //Save settings
+    saveConf();
+
+    //Notify the observers
     broadcast(&ServerObserver::notifyServerDelete);
 
-	//The queue must be deleted before the client, since the thread might
-	//be running a job on the client!!
-	if (comQueue_)
-		delete comQueue_;
+    //The queue must be deleted before the client, since the thread might
+    //be running a job on the client!!
+    bool queueLoggedOut = true;
+    if (comQueue_) {
+        queueLoggedOut = comQueue_->logout();
+    }
 
-	//Remove itself from the server vector
-	auto it=std::find(servers_.begin(),servers_.end(),this);
-	if(it != servers_.end())
-		servers_.erase(it);
+    //ComQueue will delete itself - it will delete the ComThread as well
+    comQueue_ = nullptr;
 
-	delete vRoot_;
-	delete connectState_;
-	delete suiteFilter_;
+    //Remove itself from the server vector
+    auto it=std::find(servers_.begin(),servers_.end(),this);
+    if(it != servers_.end())
+        servers_.erase(it);
 
-	//The safest is to delete the client in the end
-	if(client_)
-		delete client_;
+    delete vRoot_;
+    delete connectState_;
+    delete suiteFilter_;
+    delete conf_;
 
-	delete conf_;
+    //The safest is to delete the client in the end
+    if(queueLoggedOut) {
+        if (client_) {
+            delete client_;
+            client_ = nullptr;
+        }
+        deleteLater();
+    }
+}
+
+void ServerHandler::queueLoggedOut()
+{
+    //at this point both the queue and the thread are being deleted
+    if (client_) {
+        delete client_;
+        client_ = nullptr;
+    }
+    deleteLater();
 }
 
 // called from the constructor with init=true
@@ -521,7 +548,7 @@ void ServerHandler::removeServer(ServerHandler* server)
 	{
 		ServerHandler *s=*it;
 		servers_.erase(it);
-		delete s;
+        s->logout();
 	}
 }
 
@@ -1269,7 +1296,7 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg,co
 
     if(task->type() == VTask::NewsTask)
     {
-        //This was a news() called after afterServerVersionTask failed!
+        //This was a news() called after ServerVersionTask failed!
         if (task->param("sslcheck") == "1" &&
             errMsg.find("possibly non-ssl server") != std::string::npos) {
             sslIncompatibleServer(errMsg);
@@ -1296,7 +1323,7 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg,co
         {
             // but ... the error message is not make it 100% certain!
             // So we will ask for the news! It will give back an error message
-            // that could properly parsed to identify if it is really
+            // that be could properly parsed to identify if it is really
             // an SSL issue!
             compatibility_ = Compatibility::CanBeCompatible;
             comQueue_->addNewsTask("sslcheck","1");

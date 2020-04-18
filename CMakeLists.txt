@@ -22,8 +22,11 @@ if (NOT DEFINED CMAKE_BUILD_TYPE)
    set(CMAKE_BUILD_TYPE Release CACHE STRING "Build Configuration type" FORCE)
 endif()
 
+# this will generate variables, see ACore/ecflow_version.h.in
+project( ecflow LANGUAGES CXX VERSION 5.3.2 )
 
-project( ecflow CXX )
+
+
 
 set( CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/../ecbuild/cmake")
 # ecbuild_info( "CMAKE_MODULE_PATH    : ${CMAKE_MODULE_PATH}")
@@ -328,7 +331,7 @@ ecbuild_dont_pack( DIRS
                    	ecbuild
                     SCRATCH
                     CUSTOMER 
-                    build_scripts/5nightly build_scripts/test_bench
+                    build_scripts/nightly build_scripts/test_bench
                     cereal-1.3.0
                     Debug
                     Doc
@@ -348,6 +351,12 @@ ecbuild_dont_pack( FILES
 # =========================================================================================
 # final
 # =========================================================================================
+
+# print all variables
+#get_cmake_property(_variableNames VARIABLES)
+#foreach (_variableName ${_variableNames})
+#    ecbuild_info("  ${_variableName}=${${_variableName}}")
+#endforeach()
 
 # prepares a tar.gz of your sources and/or binaries
 ecbuild_install_project( NAME ecFlow )

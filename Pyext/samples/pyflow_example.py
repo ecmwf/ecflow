@@ -25,12 +25,12 @@ import sys; sys.path.append("/home/ma/emos/def/pyflow")
 import os
 from pyflow import (Suite, Family, Task, Variable)
    
-print "Creating suite definition"   
+print("Creating suite definition")   
 with Suite("test" ) as suite: 
  ECF_HOME = os.path.join(os.getenv("HOME"),  "course") # python vriable
  Variable("ECF_HOME", ECF_HOME)  # suite variable
  Task("t1")
-print suite.ecflow_definition() 
+print(suite.ecflow_definition()) 
 
 #Then run as a python script:
 

@@ -32,7 +32,7 @@ if __name__ == "__main__":
     PARSER.add_argument('--name', default="install",   
                         help="The name of the node")
     ARGS = PARSER.parse_args()
-    print ARGS    
+    print(ARGS)    
      
     # ===========================================================================
     CL = ecflow.Client(ARGS.host, ARGS.port)
@@ -45,7 +45,7 @@ if __name__ == "__main__":
         # check to see if definition exists in the server
         defs = CL.get_defs()
         if defs == None :
-            print "No definition found, exiting..."
+            print("No definition found, exiting...")
             exit(0) 
          
         paths_list = []
@@ -75,6 +75,6 @@ if __name__ == "__main__":
 #             if len(paths_list) > 0:
 #                  CL.resume(paths_list)
         
-    except RuntimeError, ex:
-        print "Error: " + str(ex)
-        print "Check host and port number are correct."
+    except RuntimeError as ex:
+        print("Error: " + str(ex))
+        print("Check host and port number are correct.")

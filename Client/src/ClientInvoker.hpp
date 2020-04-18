@@ -292,6 +292,7 @@ public:
    int order(const std::string& absNodePath,const std::string& order) const; // slow
    int order(const std::string& absNodePath,NOrder::Order) const;             // fast
 
+   // Note: if *ALL* arguments are defaulted only then do we do a explicit save.
    int checkPtDefs(ecf::CheckPt::Mode m = ecf::CheckPt::UNDEFINED, int check_pt_interval = 0, int check_pt_save_time_alarm = 0) const;
 	int restoreDefsFromCheckPt() const;
 

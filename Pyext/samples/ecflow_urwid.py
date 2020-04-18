@@ -14,7 +14,7 @@
 """Thanks https://github.com/pazz/urwidtrees
 """
 
-from __future__ import print_function
+
 
 import os
 import re
@@ -586,7 +586,7 @@ def add_widget(path, widget):
 
 def get_flagged_names():
     lst = []
-    for w in _widget_cache.values():
+    for w in list(_widget_cache.values()):
         if w.flagged:
             node = w.get_node().get_value()
             lst.append(get_name(node))

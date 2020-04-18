@@ -26,6 +26,8 @@ class ClientEnvironment : public AbstractClientEnv {
 public:
 	/// The constructor will load the environment
    explicit ClientEnvironment(bool gui);
+   explicit ClientEnvironment(bool gui,const std::string& host, const std::string& port);
+
 
 	/// This constructor is only used in Test environment, as it allow the host file to be set
    explicit ClientEnvironment(const std::string& hostFile, const std::string& host = "", const std::string& port = "");
@@ -40,7 +42,7 @@ public:
 
    /// This controls for how long child zombie commands continue trying to connect to Server before failing.
    /// Maximum time in seconds for client to deliver message to server/servers. This is
-   /// typically 24 hours in a real environment.
+   /// typically 12 hours in a real environment.
    /// for the CHILD/task commands *ONLY*
    /// Can be overridden by  changing environment variable ECF_ZOMBIE_TIMEOUT
    long max_zombie_child_cmd_timeout() const  { return zombie_timeout_; }

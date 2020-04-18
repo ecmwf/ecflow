@@ -7,11 +7,17 @@
 
 import os ;
 local python_install_dir = [ os.environ ECFLOW_PYTHON_INSTALL_DIR ] ;
-#python_install_dir default = $(ECFLOW_INSTALL_DIR)/lib/python2.7/site-packages/ecflow ;  # change $HOME/user_config.jam as well
-python_install_dir default  = $(ECFLOW_INSTALL_DIR)/lib/python3.6/site-packages/ecflow ;
-constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
-#echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
 
+# PYTHON3_VERSION is defined in site-config.jam
+python_install_dir default  = $(ECFLOW_INSTALL_DIR)/lib/python$(PYTHON3_VERSION)/site-packages/ecflow ;
+ECF_PYTHON2 = [ os.environ ECF_PYTHON2 ] ;
+echo "ECF_PYTHON2 =  $(ECF_PYTHON2)" ;
+if $(ECF_PYTHON2) {
+    python_install_dir default = $(ECFLOW_INSTALL_DIR)/lib/python2.7/site-packages/ecflow ;
+} 
+constant ECFLOW_PYTHON_INSTALL_DIR : $(python_install_dir) ;
+echo "ECFLOW_PYTHON_INSTALL_DIR = '$(ECFLOW_PYTHON_INSTALL_DIR)'" ;
+ 
 # =============================================================================
 # This jam file, allows for creation of ecflow python extension module, where
 # we have a STATIC link to boost python 
@@ -137,11 +143,10 @@ python-extension ecflow : [ glob src/*.cpp ]
     /site-config//boost_filesystem
     /site-config//boost_program_options
     /site-config//boost_datetime
-    #/site-config//boost_python_static   # python2
-    /site-config//boost_python36_static
+    /site-config//boost_python
     : <variant>debug:<define>DEBUG
       <toolset>acc:<library>hpux_std_libs  
-      <library>/ecflow_top//openssl_libs 
+      <library>/site-config//openssl_libs 
     ;
 
 # ========================================================================

@@ -306,7 +306,7 @@ void Node::requeue(Requeue_args& args)
       }
 
       // must be done before the re-queue
-      do_requeue_time_attrs(reset_next_time_slot,args.reset_relative_duration_,args.reset_day_date_reueue_count_);
+      do_requeue_time_attrs(reset_next_time_slot,args.reset_relative_duration_);
       markHybridTimeDependentsAsComplete();
    }
 
@@ -381,7 +381,7 @@ void Node::requeue_time_attrs()
    // Note: we *dont* mark hybrid time dependencies as complete.
    //       i.e. since this is called during alter command, it could be that
    //        the task is in a submitted or active state.
-   do_requeue_time_attrs(true/*reset_next_time_slot*/,true /*reset_relative_duration*/,true /*reset day/date re-queue counters*/);
+   do_requeue_time_attrs(true/*reset_next_time_slot*/,true /*reset_relative_duration*/);
 }
 
 void Node::requeue_labels()
@@ -522,7 +522,6 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             // That time attribute will have expired, typically we show next day. In the case where we have a parent repeat
             // we need to clear the flag, otherwise the task/family with time based attribute would wait for next day.
             Node::Requeue_args args(false /* don't reset repeats */,
-                                    false /* reset_day_date_reueue_count  */,
                                     clear_suspended_in_child_nodes,
                                     true /* reset_next_time_slot */,
                                     true /* reset relative duration */);
@@ -549,7 +548,6 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
          }
 
          Node::Requeue_args args(false /* don't reset repeats */,
-                                 false /* reset_day_date_reueue_count  */,
                                  clear_suspended_in_child_nodes,
                                  reset_next_time_slot ,
                                  false /*  don't reset relative duration */);
@@ -2129,22 +2127,33 @@ bool Node::why(std::vector<std::string>& vec,bool html) const
    // The complete expression is used to set node to complete, when it evaluates and hence
    // should not prevent further tree walking. evaluate each leaf branch
    // **************************************************************************************
-   AstTop* theTriggerAst = triggerAst();
-   if (theTriggerAst) {
-      // Note 1: A trigger can be freed by the ForceCmd
-      // Note 2: if we have a non NULL trigger ast, we must have trigger expression
-      // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
-      if (!t_expr_->isFree() ) {
 
+   // Only report on trigger expression, if:
+   // 1/ No complete expression
+   // 2/ Have complete expression, but it does not evaluate
+   bool report_on_trigger_expression = true;
+   AstTop* theCompleteAst = completeAst();
+   if (theCompleteAst) {
+	   if (c_expr_->isFree() || theCompleteAst->evaluate()) {
+		   report_on_trigger_expression = false; // complete is free, hence we do not look at trigger
+	   }
+   }
+
+   AstTop* theTriggerAst = triggerAst();
+   if (report_on_trigger_expression && theTriggerAst) {
+	   // Note 1: A trigger can be freed by the ForceCmd
+	   // Note 2: if we have a non NULL trigger ast, we must have trigger expression
+	   // Note 3: The freed state is stored on the expression ( i.e *NOT* on the ast (abstract syntax tree) )
+	   if (!t_expr_->isFree() ) {
 #ifdef DEBUG_WHY
-         std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
+		   std::cout << "   Node::why " << debugNodePath() << " checking trigger dependencies\n";
 #endif
-         std::string postFix;
-         if (theTriggerAst->why(postFix,html)) {
-            vec.push_back(prefix + postFix);
-            why_found = true ; // return true if why found
-         }
-      }
+		   std::string postFix;
+		   if (theTriggerAst->why(postFix, html)) {
+			   vec.push_back(prefix + postFix);
+			   why_found = true; // return true if why found
+		   }
+	   }
    }
 
 #ifdef DEBUG_WHY

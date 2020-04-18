@@ -72,24 +72,21 @@ ClientInvoker::ClientInvoker(const std::string& host_port)
 }
 
 ClientInvoker::ClientInvoker(bool gui,const std::string& host, const std::string& port)
-: clientEnv_(gui), retry_connection_period_(RETRY_CONNECTION_PERIOD),gui_(gui)
+: clientEnv_(gui,host,port), retry_connection_period_(RETRY_CONNECTION_PERIOD),gui_(gui)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
-   set_host_port(host,port);
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, const std::string& port)
-: clientEnv_(false),retry_connection_period_(RETRY_CONNECTION_PERIOD)
+: clientEnv_(false,host,port),retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 3=================start=================\n";
-   set_host_port(host,port);
 }
 
 ClientInvoker::ClientInvoker(const std::string& host, int port)
-: clientEnv_(false), retry_connection_period_(RETRY_CONNECTION_PERIOD)
+: clientEnv_(false,host, boost::lexical_cast<std::string>(port)), retry_connection_period_(RETRY_CONNECTION_PERIOD)
 {
    if (clientEnv_.debug()) cout << TimeStamp::now() << "ClientInvoker::ClientInvoker(): 4=================start=================\n";
-   set_host_port(host, boost::lexical_cast<std::string>(port));
 }
 
 void ClientInvoker::set_host_port(const std::string& host, const std::string& port)

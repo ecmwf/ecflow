@@ -91,9 +91,9 @@ BOOST_AUTO_TEST_CASE( test_server )
 
    // Create a unique port number, allowing debug and release,gnu,clang,intel to run at the same time
    // Hence the lock file is not always sufficient.
-   // TEST_ECF_PORT should be unique among  gnu,clang,intel, etc
+   // ECF_FREE_PORT should be unique among  gnu,clang,intel, etc
    std::string the_port1 = "3144" ;
-   char* test_ecf_port = getenv("TEST_ECF_PORT");  // from metabuilder, allow parallel tests
+   char* test_ecf_port = getenv("ECF_FREE_PORT");  // from metabuilder, allow parallel tests
    if ( test_ecf_port ) the_port1 = test_ecf_port;
    cout << "Find free port to start server, starting with port " << the_port1 << "\n";
 

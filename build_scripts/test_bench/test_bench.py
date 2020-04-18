@@ -41,5 +41,5 @@ try:
     #ci.replace("/suite",defs,True,True)     
     ci.begin_all_suites()   # need only begin once 
  
-except RuntimeError, e:
-    print "failed: " + str(e)
+except RuntimeError as e:
+    print("failed: " + str(e))

@@ -59,7 +59,7 @@ exe u_base : [ glob test/*.cpp : test/TestJobGenPerf.cpp ]
            /site-config//boost_test
            pthread
          : <include>../ANode/test
-           <library>/ecflow_top//openssl_libs 
+           <library>/site-config//openssl_libs 
            <variant>debug:<define>DEBUG
 	     ;
 	     

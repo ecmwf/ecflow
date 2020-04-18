@@ -92,7 +92,15 @@ void DirectoryHandler::init(const std::string& exeStr)
 						std::string("Could not create configDir: " + configDir_ + " reason: " + err.what()));
 				exit(1);
 			}
-		}
+        }
+        else
+        {
+            //the config dir was copied from v4
+            if(char *confCh=getenv("ECFLOWUI_CONFIG_DIR_COPIED"))
+            {
+                firstStartUp=true;
+            }
+        }
 	}
     else
     {

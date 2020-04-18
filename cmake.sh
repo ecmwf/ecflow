@@ -155,7 +155,7 @@ source_dir=$(pwd)
 # GNU 7.3  -Wno-maybe-uninitialized     -> boost python warnings, specific to Pyext only
 # CLANG    -ftemplate-depth=512
 #
-CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-maybe-uninitialized"
+CXX_FLAGS="-Wno-unused-local-typedefs -Wno-unused-variable -Wno-deprecated-declarations -Wno-uninitialized"
 CXX_LINK_FLAGS=""
 
 # ==================== modules ================================================
@@ -279,9 +279,10 @@ fi
 # ====================================================================================
 # Use for local install
 #
-release=$(cat VERSION.cmake | grep 'set( ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
-major=$(cat VERSION.cmake   | grep 'set( ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
-minor=$(cat VERSION.cmake   | grep 'set( ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
+cd $WK
+release=$(cat ACore/src/ecflow_version.h | grep 'ECFLOW_RELEASE' | awk '{print $3}'| sed 's/["]//g')
+major=$(cat ACore/src/ecflow_version.h   | grep 'ECFLOW_MAJOR'   | awk '{print $3}'| sed 's/["]//g')
+minor=$(cat ACore/src/ecflow_version.h   | grep 'ECFLOW_MINOR'   | awk '{print $3}'| sed 's/["]//g')
 
 install_prefix=/var/tmp/$USER/install/cmake/ecflow/$release.$major.$minor
 if [[ $sys_install = sys_install ]] ; then

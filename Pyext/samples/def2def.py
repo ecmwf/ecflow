@@ -290,13 +290,13 @@ if __name__ == '__main__':
 """
 
 def usage():
-        print """def2def.py
+        print("""def2def.py
   -f file    [filename]
   -s string  [description of the suite]
   -c client  [host@post:/path/to/node]
   -h help
 
-"""
+""")
 
 def test(quiet=1):
         import os
@@ -321,7 +321,7 @@ def test(quiet=1):
 def process(desc=None, path=None, fname=None):
         if desc is not None: 
                 import tempfile
-                print "#desc: ", desc # , "\n"
+                print("#desc: ", desc) # , "\n"
                 # import unicodedata
                 #unic = unicodedata.normalize('NFKD', desc).encode('ascii', 'ignore')
                 #print "#unic: ", unic # , "\n"
@@ -341,14 +341,14 @@ def process(desc=None, path=None, fname=None):
                 except RuntimeError as e:    
                         out = "#WAR: failed: " + str(e)
                         # print "temp, NOK"; sys.exit(1)
-                        print out
+                        print(out)
                         return out
                 # return "%s" % defs
         elif path is not None: 
                 import re
                 node, rem = path.split("@")
                 port, suite = rem.split('/')[0:2]
-                print node, port, suite
+                print(node, port, suite)
                 client = ec.Client(node, port)
                 client.ch_register(False, [ suite ])
                 client.sync_local()
@@ -361,7 +361,7 @@ def process(desc=None, path=None, fname=None):
         if fname:
                 defs = ec.Defs(fname)
         defs.auto_add_externs(True)
-        if DEBUG: print defs
+        if DEBUG: print(defs)
         return DefFormat(defs).main()
 
 DEBUG = 0
@@ -382,6 +382,6 @@ if __name__ == '__main__':
                 if o in ("-t", "test"): test(QUIET); sys.exit(0)
                 if o in ("-q", "quiet"): QUIET = 1
 
-        print process(desc, path, fname)
+        print(process(desc, path, fname))
 # ./def2def.py -q -t 
 # ./def2def.py -t 

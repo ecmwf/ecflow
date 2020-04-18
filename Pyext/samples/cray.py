@@ -12,7 +12,7 @@
 # granted to it by virtue of its status as an intergovernmental organisation
 # nor does it submit to any jurisdiction.
 #////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
-from __future__ import with_statement
+
 import sys, os, pwd, getopt
 sys.path.append('/home/ma/emos/def/o/def')
 import inc_emos as ic
@@ -29,9 +29,9 @@ def get_uid():
     return pwd.getpwnam(get_username()).pw_uid
 
 def create_wrapper(name, content):
-    print "#MSG: creating file %s/" % wdir + name
+    print("#MSG: creating file %s/" % wdir + name)
     wrapper = open(wdir + "/%s" % name, 'w')
-    print >>wrapper, content
+    print(content, file=wrapper)
     wrapper.close()    
 ##############################################
 
@@ -641,16 +641,16 @@ def create_de():
     try:    os.stat(wdir + "/de")
     except: os.mkdir(wdir + "/de")       
     task = open(wdir + "/de/setup.ecf", 'w')
-    print >>task, '''#!/bin/ksh
+    print('''#!/bin/ksh
 %include <head.h>
 %ecfmicro ~
 ~includenopp <scripts/setup.run>
 ~ecfmicro %
 %include <tail.h>
-'''
+''', file=task)
 
     task = open(wdir + "/de/model.ecf", 'w')
-    print >>task, '''#!/bin/ksh
+    print('''#!/bin/ksh
 # QSUB -lh  %THREADS:1%
 # QSUB -lPv %NPES:1%
 # @ tasks_per_node = 64
@@ -659,7 +659,7 @@ def create_de():
 ~includenopp <scripts/model.run>
 ~ecfmicro %
 %include <tail.h>
-'''
+''', file=task)
 
     logdir = "/s2o2/emos_dir"
     return Family("de").add(
@@ -687,7 +687,7 @@ def create_de():
 
 def create_smhi():
     submit = open(wdir + "/smhi_run.sh", 'w')
-    print >>submit, '''#!/bin/ksh
+    print('''#!/bin/ksh
 set -eux
 ECF_NAME=$1
 ECF_PASS=$2
@@ -698,16 +698,16 @@ ECF_PORT=$6
 export ECF_NAME ECF_PASS ECF_HOST ECF_PORT ECF_JOB ECF_JOBOUT
 echo "#MSG: START USER SCRIPT"
 . $ECF_JOB # >> $ECF_JOBOUT 2>&1
-'''
+''', file=submit)
 
     man = open(wdir + "/smhi_man.h", 'w')
-    print >> man, '''
+    print('''
 an example for include manual page
-'''
+''', file=man)
     man.close()
 
     shell = open(wdir + "/smhi.sh", 'w')
-    print >> shell, '''#!/bin/ksh
+    print('''#!/bin/ksh
 set -eux
 # use ecflow || 
 export PATH=/usr/local/apps/ecflow/current/bin:$PATH
@@ -731,9 +731,9 @@ echo "simulates an error"; exit 1
 echo "simulates an early exit: expect this to be trapped and reflected as error"
 exit 0 # test bubbling up an error through ssh
 
-'''
+''', file=shell)
     wrapper = open(wdir + "/smhi_v.sms", 'w')
-    print >>wrapper, '''
+    print('''
 %manual
   example of minimalist script: only variables, wrapper is added at submission time
 %end
@@ -746,10 +746,10 @@ exit 0 # test bubbling up an error through ssh
 #SET ECF_TRYNO=%ECF_TRYNO%
 #SET SCRIPT_PATH=%SCRIPT_PATH%
 #SET SCRIPT_NAME=%SCRIPT_NAME%
-'''
+''', file=wrapper)
 
     submit = open(wdir + "/smhisubmit.sh", 'w')
-    print >>submit, '''#!/bin/ksh
+    print('''#!/bin/ksh
 set -eux
 ECF_JOB=$1
 grep "#SET " $ECF_JOB | sed -e "s:#SET ::" > $ECF_JOB.set
@@ -799,7 +799,7 @@ exit 0
 chmod 755 $ECF_JOB
 $ECF_JOB > $ECF_JOBOUT 2>&1 &
 
-'''
+''', file=submit)
 
     os.system("chmod 755 " + wdir + "/smhisubmit.sh")
     wrapper = open(wdir + "/smhi.sms", 'w')
@@ -808,9 +808,9 @@ $ECF_JOB > $ECF_JOBOUT 2>&1 &
     os.system(cmd + "a.sms")
     os.system(cmd + "a1.sms")
     os.system(cmd + "a11.sms")
-    print "##cmd", cmd
+    print("##cmd", cmd)
 
-    print >> wrapper, '''#!/bin/ksh
+    print('''#!/bin/ksh
 %manual 
 %include <smhi_man.h>
 %end
@@ -858,7 +858,7 @@ trap 0
 ecflow_client --complete
 uname -a; date; times
 exit 0
-'''
+''', file=wrapper)
 
 def dummy(): return Task("test")
 
@@ -1331,7 +1331,7 @@ def turkey_loop(suite_name):
     start = 20120723; end=20301231 # beware addition below does not consider start as a date
     path = "/%s/weekly/" % suite_name
 
-    for num in xrange(7): 
+    for num in range(7): 
         out.append(Family(days[num]).add(
                 Repeat(kind='date', name='YMD', 
                        start= start + num, end=end, step=7),
@@ -1490,7 +1490,7 @@ class Compile(object):
 
     def compile(self, host=None, add=None, but=None):
         version = "4.4.15"
-        if host is None: dest = hosts.keys()
+        if host is None: dest = list(hosts.keys())
         else: dest = (host, )
         out = []
         for host in sorted(dest):
@@ -1921,7 +1921,7 @@ class Cray(ic.SeedOD):
         msg = "have you? setup ssh login, created remote directory" 
         msg += ", set START_LOGSVR=1 (edit task), once, to launch the logserver"
         if "eod" in host: user = "emos"
-        print "#MSG: host, user", host, user
+        print("#MSG: host, user", host, user)
 
         node = node.family("submit").add(
             unit("jonas", "ibis", "no", "/tmp/$USER/jobs", add=(Today("07:00"),
@@ -1941,7 +1941,7 @@ class Cray(ic.SeedOD):
     def burst(self):
         sub = "/home/ma/emos/bin/smssubmit "
         out = []
-        for num in xrange(0, 10):
+        for num in range(0, 10):
             out.append(Family("%03d" % num).add(Task("test")))
         
         return Family("arg3").add(
@@ -2104,8 +2104,8 @@ def maker():
                   ECF_OUT= "/vol/lxop_emos_nc/output",),   )
 
 def usage():
-    print '''cray.py -h -u [user] -n [node] -s [suite-name] \
- -e: ecflow'''
+    print('''cray.py -h -u [user] -n [node] -s [suite-name] \
+ -e: ecflow''')
 
 if __name__ == "__main__":
     global user, udir, ecflow, host
@@ -2124,7 +2124,7 @@ if __name__ == "__main__":
     opts, args = getopt.getopt(
           sys.argv[1:], "hp:u:es:n:p:", 
           ["help", "port", "user", "ecflow", "suite", "node", "path"])
-    print "#MSG: opts, args", opts, args
+    print("#MSG: opts, args", opts, args)
 
     output = None
     verbose = False
@@ -2138,7 +2138,7 @@ if __name__ == "__main__":
             user = a
         elif o in ("-p", "--port"):
             port = a
-        else: print "#ERR: what?", o, a; assert False, "unhandled option"
+        else: print("#ERR: what?", o, a); assert False, "unhandled option"
 
     import cli_proc
 
@@ -2158,7 +2158,7 @@ if __name__ == "__main__":
         sms2ecf.ECF_MODE = "sms"
         ic.ecf.ECF_MODE = "sms"
 
-    print "#MSG: ecflow/sms: ", ic.ecf.ECF_MODE
+    print("#MSG: ecflow/sms: ", ic.ecf.ECF_MODE)
     global wdir, rdir, fdef, jdir
 
     ########### SETTINGS ################
@@ -2177,7 +2177,7 @@ if __name__ == "__main__":
         rdir="/vol/lxop_emos_nc/output"
         udir="/vol/lxop_emos_nc/output"
 
-    print "##", host, suite
+    print("##", host, suite)
     argv = cli_proc.process(suites, selection=suite, host=host, proc=False)
     try:    os.makedirs(wdir)
     except: pass # one line on purpose

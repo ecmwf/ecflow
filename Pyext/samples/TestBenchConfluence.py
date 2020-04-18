@@ -103,55 +103,55 @@ if __name__ == "__main__":
                         help="Show verbose output")
     ARGS = PARSER.parse_args()
     ARGS.defs_file = os.path.expandvars(ARGS.defs_file) # expand references to any environment variables
-    print ARGS 
+    print(ARGS) 
     
     # If running on local work space, use /Pyext/test/data/CUSTOMER/ECF_HOME as ecf_home
     if ARGS.verbose:
-        print "Using ECF_HOME=" + ARGS.ecf_home
+        print("Using ECF_HOME=" + ARGS.ecf_home)
          
     if ARGS.verbose: 
-        print "\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n"
+        print("\nloading the definition from the input arguments(" + ARGS.defs_file + ")\n")
     try:
         DEFS = ecflow.Defs(ARGS.defs_file)
-    except RuntimeError, ex:
-        print "   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex)
+    except RuntimeError as ex:
+        print("   ecflow.Defs(" + ARGS.defs_file + ") failed:\n" + str(ex))
         exit(1)
     
     if ARGS.verbose: 
-        print "remove test data associated with the DEFS, so we start fresh, Allows rerun"
+        print("remove test data associated with the DEFS, so we start fresh, Allows rerun")
     for suite in DEFS.suites:
         dir_to_remove = ARGS.ecf_home + suite.get_abs_node_path()
         if ARGS.verbose: 
-            print "   Deleting directory: " + dir_to_remove + "\n"
+            print("   Deleting directory: " + dir_to_remove + "\n")
         shutil.rmtree(dir_to_remove, True)  
         
     if ARGS.verbose: 
-        print "remove remote reference to ECF_HOME and ECF_INCLUDE, since we inject or own\n"
+        print("remove remote reference to ECF_HOME and ECF_INCLUDE, since we inject or own\n")
     for suite in DEFS.suites:
         traverse_container(suite)
   
     if ARGS.verbose: 
-        print "add variables required for script generation, for all suites\n"
+        print("add variables required for script generation, for all suites\n")
     DEFS.add_variable("ECF_HOME", ARGS.ecf_home)
     DEFS.add_variable("SLEEP", "10")  # not strictly required since default is 1 second
     DEFS.add_variable("ECF_INCLUDE", ARGS.ecf_home + "/includes")
 
 
     if ARGS.verbose: 
-        print "Place all suites into suspended state, so they can be started by the GUI\n"  
+        print("Place all suites into suspended state, so they can be started by the GUI\n")  
     for suite in DEFS.suites:
         suite.add_defstatus(ecflow.DState.suspended)
     
     if ARGS.verbose: 
         #ecflow.PrintStyle.set_style(ecflow.Style.STATE)
-        print DEFS
+        print(DEFS)
 
     if ARGS.verbose: 
-        print "Generating script files(.ecf) from the definition"
+        print("Generating script files(.ecf) from the definition")
     DEFS.generate_scripts()
 
     if ARGS.verbose: 
-        print "\nchecking script file generation, pre-processing & variable substitution\n"
+        print("\nchecking script file generation, pre-processing & variable substitution\n")
     msg = DEFS.check_job_creation()       
     assert len(msg) == 0, msg
 
@@ -159,35 +159,35 @@ if __name__ == "__main__":
     CL = ecflow.Client(ARGS.host, ARGS.port)
     try:
         if ARGS.verbose: 
-            print "check server " + ARGS.host + ":" + ARGS.port + " is running"
+            print("check server " + ARGS.host + ":" + ARGS.port + " is running")
         CL.ping() 
 
         if ARGS.verbose: 
-            print "Server is already running. re-start the server"
+            print("Server is already running. re-start the server")
         CL.restart_server() 
 
         if ARGS.verbose: 
-            print "Remove suites associated with this DEFS, allows rerun *******************************************"
+            print("Remove suites associated with this DEFS, allows rerun *******************************************")
         for suite in DEFS.suites:
             try:
                 CL.delete(suite.get_abs_node_path(), True)
-            except RuntimeError, ex:
+            except RuntimeError as ex:
                 pass # For first run this will fail, hence ignore
         
         if ARGS.verbose: 
-            print "Load the definition into " + ARGS.host + ":" + ARGS.port
+            print("Load the definition into " + ARGS.host + ":" + ARGS.port)
         if ARGS.path == "/":
             CL.load(DEFS) 
         else:
             CL.replace(ARGS.path, DEFS)
 
         if ARGS.verbose: 
-            print "Begin all suites. They should be suspended."
-        print "Loaded suites:"
+            print("Begin all suites. They should be suspended.")
+        print("Loaded suites:")
         for suite in DEFS.suites:
             CL.begin_suite(suite.name())
-            print "   " + suite.name()
-        print "into server " + ARGS.host \
-                             + ":" + ARGS.port + ", please view the playable suites in the GUI"
-    except RuntimeError, ex:
-        print "Error: " + str(ex)
+            print("   " + suite.name())
+        print("into server " + ARGS.host \
+                             + ":" + ARGS.port + ", please view the playable suites in the GUI")
+    except RuntimeError as ex:
+        print("Error: " + str(ex))

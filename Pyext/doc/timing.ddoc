@@ -1,7 +1,5 @@
 #How to time a function using a decorator:
 #==========================================================================
-
-#!/usr/bin/env python2.7
 import ecflow
 
 #
@@ -30,10 +28,10 @@ def time_client_sync_local():
     try:
         print "Creating client"
         ci = ecflow.Client()
-        print "Doing a sync local"
+        print("Doing a sync local")
         ci.sync_local()                        # retrieve server definition, by sync with client defs
-    except RuntimeError, e:
-        print "Failed: " + str(e)
+    except RuntimeError as e:
+        print("Failed: " + str(e))
         
 if __name__ == '__main__':
     time_client_sync_local()
@@ -65,11 +63,11 @@ with timer:
         ci = ecflow.Client()
         print "Doing a sync local"
         ci.sync_local()                        # retrieve server definition, by sync with client defs
-    except RuntimeError, e:
-        print "Failed: " + str(e)
+    except RuntimeError as e:
+        print("Failed: " + str(e))
         
     # time.sleep(2)
 
-print timer.duration_in_seconds()
+print(timer.duration_in_seconds())s
 
 
