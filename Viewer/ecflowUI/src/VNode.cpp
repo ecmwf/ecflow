@@ -1193,7 +1193,6 @@ void VNode::triggeredByEvent(const std::string& name,std::vector<std::string>& t
 
 VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
 {
-   // if (!strncmp("/", path.c_str(), 1))
    VAttribute* nullItem=nullptr;
 
 #if 0
@@ -1212,8 +1211,6 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
         } else {
             return nullItem;
         }
-        //if(n && n != this)
-        //    return n->findLimit(path,name);
     }
 
     // if we are here it must be an empty or relative path
@@ -1222,18 +1219,6 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
         if (VAttribute* lim = hasLimit(name) )
             return lim;
     }
-//        //Find the matching limit in the node
-//        std::vector<VAttribute*> limit;
-//        n->findAttributes(VAttributeType::find("limit"),limit);
-//        std::size_t limitNum=limit.size();
-//        for(std::size_t i=0; i < limitNum; i++)
-//        {
-//           if(limit[i]->strName() == name)
-//           {
-//               return limit[i];
-//           }
-//        }
-    //}
 
     VNode* p=n->parent();
     if(p && !p->isServer()) {
@@ -1252,26 +1237,6 @@ VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
     }
 
     return nullItem;
-
-
-//    VNode* p=n->parent();
-//    Q_ASSERT(p);
-//    int chNum= p->numOfChildren();
-//    for(int i=0; i < chNum; i++)
-//    {
-//        VNode* ch=p->childAt(i);
-//        if(ch !=n && ch->strName() == path.substr(0, ch->name().size()))
-//        {
-//            std::string::size_type next = path.find('/');
-//            if ( next != std::string::npos) {
-//               return ch->findLimit(path.substr(next+1, path.size()), name);
-//            }
-//        }
-//    }
-
-//    return nullItem;
-
-   //return &dummy_node::get(path + ":" + name);
 }
 
 VAttribute* VNode::hasLimit(const std::string& name)
