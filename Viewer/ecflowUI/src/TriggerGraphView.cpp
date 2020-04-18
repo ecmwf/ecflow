@@ -25,8 +25,6 @@
 #include <math.h>
 
 #include "Spline.hpp"
-//#include <boost/math/interpolators/cubic_b_spline.hpp>
-//#include "splines.hpp"
 
 #include <QFile>
 #include <QGraphicsDropShadowEffect>
@@ -36,6 +34,8 @@
 #include <QHBoxLayout>
 #include <QScrollBar>
 #include <QSettings>
+#include <QShortcut>
+#include <QShowEvent>
 #include <QTextDocument>
 #include <QToolButton>
 #include <QVBoxLayout>
@@ -234,7 +234,7 @@ void TriggerGraphEdgeItem::adjust()
         yp.push_back(0.);
         for(auto v: wayPoints_) {
             xp.push_back(v.x()-pOffset.x());
-            yp.push_back(v.y()-pOffset.y());
+            yp.push_back(v.y()-pOffset.y() + srcRect.height()/2);
         }
         xp.push_back(p1.x());
         yp.push_back(p1.y());
@@ -565,6 +565,7 @@ TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent)
     setProperty("view","graph");
 
     actionHandler_=new ActionHandler(this,this);
+    actionHandler_->setallowShortcutsForHiddenItems(true);
 
     scene_ = new QGraphicsScene(this);
     setScene(scene_);
@@ -644,53 +645,15 @@ TriggerGraphNodeItem* TriggerGraphView::nodeItemAt(QPointF scenePos) const
     return nullptr;
 }
 
-//QModelIndex TriggerGraphView::indexAt(QPointF scenePos) const
-//{
-//    QGraphicsItem* item = scene()->itemAt(scenePos, QTransform());
-//    return itemToIndex(item);
-//}
-
-//QModelIndex TriggerGraphView::itemToIndex(QGraphicsItem* item) const
-//{
-//    if (item && item->type() == TriggerGraphNodeItem::Type) {
-//        TriggerGraphNodeItem* nItem = static_cast<TriggerGraphNodeItem*>(item);
-//        return nItem->index();
-//    }
-//    return {};
-//}
-
-//TriggerGraphNodeItem* TriggerGraphView::indexToItem(const QModelIndex& index) const
-//{
-//    if (!index.isValid())
-//        return nullptr;
-
-//    Q_FOREACH(QGraphicsItem* item, items()) {
-//        if(item->type() == TriggerGraphNodeItem::Type) {
-//            TriggerGraphNodeItem* nItem = static_cast<TriggerGraphNodeItem*>(item);
-//            if (index == nItem->index()) {
-//                return nItem;
-//            }
-//       }
-//    }
-
-//    return nullptr;
-//}
-
-//QModelIndexList TriggerGraphView::selectedIndexes()
-//{
-//    Q_ASSERT(model_);
-//    QModelIndexList lst;
-
-//    Q_FOREACH(QGraphicsItem* item, items()) {
-//        if (item->isSelected()) {
-//            QModelIndex index = itemToIndex(item);
-//            if (index.isValid())
-//                lst << index;
-//        }
-//    }
-
-//    return lst;
-//}
+TriggerGraphNodeItem* TriggerGraphView::currentNodeItem() const
+{
+    Q_FOREACH(QGraphicsItem* item, items()) {
+        if (item->isSelected() && item->type() == TriggerGraphNodeItem::Type) {
+            return static_cast<TriggerGraphNodeItem*>(item);
+        }
+    }
+    return nullptr;
+}
 
 void TriggerGraphView::slotContextMenu(const QPoint& position)
 {
@@ -711,11 +674,11 @@ void TriggerGraphView::slotContextMenu(const QPoint& position)
         itemLst.push_back(itemClicked);
 
         std::vector<VInfo_ptr> nodeLst;
-            for(auto n: itemLst) {
-                VInfo_ptr info = VInfo::createFromItem(n->item());
-                if(info && !info->isEmpty())
-                    nodeLst.push_back(info);
-            }
+        for(auto n: itemLst) {
+            VInfo_ptr info = VInfo::createFromItem(n->item());
+            if(info && !info->isEmpty())
+                nodeLst.push_back(info);
+        }
 
         actionHandler_->contextMenu(nodeLst,globalPos);
     }
@@ -723,7 +686,21 @@ void TriggerGraphView::slotContextMenu(const QPoint& position)
 
 void TriggerGraphView::slotCommandShortcut()
 {
+    if (QShortcut* sc = static_cast<QShortcut*>(QObject::sender())) {
+        TriggerGraphNodeItem* item = currentNodeItem();
+        if (item) {
+            std::vector<TriggerGraphNodeItem*> itemLst;
+            itemLst.push_back(item);
 
+            std::vector<VInfo_ptr> nodeLst;
+            for(auto n: itemLst) {
+                VInfo_ptr info = VInfo::createFromItem(n->item());
+                if(info && !info->isEmpty())
+                    nodeLst.push_back(info);
+            }
+            actionHandler_->runCommand(nodeLst, sc->property("id").toInt());
+        }
+    }
 }
 
 void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
@@ -737,6 +714,10 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
     } else if(cmd == "collapse") {
         if (info && info->node()) {
             collapse(info);
+        }
+    } else if(cmd == "toggle_expand") {
+        if (info && info->node()) {
+            expandItem(info, false);
         }
     } else if(cmd == "expand_parent") {
         if (info && info->item()) {
@@ -839,23 +820,6 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
 //------------------------------------------
 // Contents handling
 //------------------------------------------
-
-//void TriggerGraphView::scan()
-//{
-//    if (!info_ || !info_->node())
-//        return;
-
-//    VNode *node = info_->node();
-//    Q_ASSERT(node);
-//    scan(node);
-
-//    UiLog().dbg() << model_->rowCount() << layout_->nodes_.size();
-
-//    if(VNode *p = node->parent()) {
-//        layout_->addRelation(p, node, nullptr, TriggerCollector::Hierarchy, nullptr);
-//        scan(p);
-//    }
-//}
 
 // called by the graph widget
 void TriggerGraphView::show(VInfo_ptr info, bool dependency)
@@ -1176,6 +1140,19 @@ float TriggerGraphView::currentScale() const
 float TriggerGraphView::scaleFromLevel(int level) const
 {
     return pow(1. + zoomDelta_, level);
+}
+
+void TriggerGraphView::becameInactive()
+{
+    edgeInfo_->close();
+}
+
+void TriggerGraphView::showEvent(QShowEvent* e)
+{
+    if(!e->spontaneous()) {
+        edgeInfo_->close();
+    }
+    QGraphicsView::showEvent(e);
 }
 
 void TriggerGraphView::writeSettings(VComboSettings* vs)

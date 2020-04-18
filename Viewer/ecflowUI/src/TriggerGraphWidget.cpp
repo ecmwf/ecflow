@@ -161,10 +161,16 @@ void TriggerGraphWidget::setZoomSlider(QSlider* slider)
             this, SLOT(setZoomLevel(int)));
 }
 
+void TriggerGraphWidget::becameInactive()
+{
+    ui_->view->becameInactive();
+}
+
 void TriggerGraphWidget::writeSettings(VComboSettings* vs)
 {
     vs->beginGroup("triggerGraph");
     ui_->view->writeSettings(vs);
+    vs->put("zoom", zoomSlider_->value());
     vs->endGroup();
 }
 
@@ -172,5 +178,11 @@ void TriggerGraphWidget::readSettings(VComboSettings* vs)
 {
     vs->beginGroup("triggerGraph");
     ui_->view->readSettings(vs);
+
+    int zoomLevel = vs->get<int>("zoom", -10000);
+    if (zoomLevel > -10000) {
+        zoomSlider_->setValue(zoomLevel);
+    }
+
     vs->endGroup();
 }

@@ -76,7 +76,7 @@ public:
     const std::string& warning() const {return warning_;}
     bool hidden() const {return hidden_;}
     bool multiSelect() const {return multiSelect_;}
-    bool isValidFor(const std::vector<VInfo_ptr>& nodes) const;
+    bool isValidFor(const std::vector<VInfo_ptr>& nodes, bool allowHidden=false) const;
     int id() const {return id_;}
     QAction* createAction(QWidget* parent);
     QShortcut* createShortcut(QWidget* parent, const std::string& view);

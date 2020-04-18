@@ -76,7 +76,7 @@ void ActionHandler::runCommand(const std::vector<VInfo_ptr>& nodeLst, int comman
     if(MenuItem* item = MenuHandler::findItemById(commandId)) {
         std::vector<VInfo_ptr> filteredNodes;
         filterNodes(nodeLst, filteredNodes);
-        if (item->isValidFor(filteredNodes)) {
+        if (item->isValidFor(filteredNodes, allowShortcutsForHiddenItems_)) {
             handleCommand(item, filteredNodes);
         }
     }

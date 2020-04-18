@@ -386,6 +386,7 @@ void TriggerItemWidget::slotChangeMode(int, bool)
 
     if (modeGroup_->checkedId() == TableModeIndex) {
         if (triggerTable_->info() != info_ || triggerCollector_->isExtended() != dependency()) {
+            triggerGraph_->becameInactive();
             loadTable();
         }
     } else if (modeGroup_->checkedId() == GraphModeIndex) {

@@ -256,7 +256,7 @@
                 "tab" : {
                     "label" : "Triggers",
                     "group" : {
-                        "title" : "Options",
+                        "title" : "Trigger graph view",
                         "prefix": "view.trigger",
                         "line": "background",
                         "line": "parentConnectorColour",

@@ -53,27 +53,40 @@
             "name"           : "Expand graph",
             "command"        : "expand",
             "enabled_for"    : "node",
+            "hidden"         : "true",
             "handler"        : "graph",
-            "view"           : "graph"
+            "view"           : "graph",
+            "shortcut"       : "+"
         },
         {
             "menu"           : "Node",
             "name"           : "Collapse graph",
             "command"        : "collapse",
             "enabled_for"    : "node",
+            "hidden"         : "true",
             "handler"        : "graph",
-            "view"           : "graph"
+            "view"           : "graph",
+            "shortcut"       : "-"
         },
         {
             "menu"           : "Node",
-            "name"           : "Expand parent's graph",
+            "name"           : "Expand/collapse graph",
+            "command"        : "toggle_expand",
+            "enabled_for"    : "node",
+            "handler"        : "graph",
+            "view"           : "graph",
+            "shortcut"       : "Space"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Expand graph via parent",
             "command"        : "expand_parent",
             "handler"        : "graph",
             "view"           : "graph"
         },
         {
             "menu"           : "Node",
-            "name"           : "Lookup in tree",
+            "name"           : "Select in tree",
             "command"        : "lookup",
             "handler"        : "trigger",
             "view"           : "trigger/graph"

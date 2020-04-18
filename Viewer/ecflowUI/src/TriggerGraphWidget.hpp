@@ -48,6 +48,7 @@ public:
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
     void setTriggeredScanner(TriggeredScanner*);
     void setZoomSlider(QSlider*);
+    void becameInactive();
     void readSettings(VComboSettings* vs);
     void writeSettings(VComboSettings* vs);
 

@@ -36,6 +36,7 @@ class TriggerGraphView;
 class VComboSettings;
 class GraphLayoutBuilder;
 class GraphLayoutNode;
+class QShowEvent;
 class QToolButton;
 class QModelIndex;
 
@@ -184,6 +185,8 @@ public:
     void setTriggeredScanner(TriggeredScanner* scanner) {triggeredScanner_ = scanner;}
     void notifyEdgeSelected(TriggerGraphEdgeItem*);
 
+    void becameInactive();
+
     void readSettings(VComboSettings* vs);
     void writeSettings(VComboSettings* vs);
 
@@ -206,11 +209,9 @@ Q_SIGNALS:
     void linePenChanged();
 
 protected:
+    void showEvent(QShowEvent*) override;
     TriggerGraphNodeItem* nodeItemAt(QPointF scenePos) const;
-    //QModelIndex indexAt(QPointF scenePos) const;
-    //QModelIndex itemToIndex(QGraphicsItem* item) const;
-    //TriggerGraphNodeItem* indexToItem(const QModelIndex& index) const;
-    //QModelIndexList selectedIndexes();
+    TriggerGraphNodeItem* currentNodeItem() const;
     void adjustBackground(VProperty* p=nullptr);
     void adjustParentConnectColour(VProperty* p=nullptr);
     void adjustTriggerConnectColour(VProperty* p=nullptr);
