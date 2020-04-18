@@ -97,7 +97,8 @@ public:
                 VItem* trigger);
 
     void adjust();
-    void setWayPoints(const std::vector<int>& x, const std::vector<int>& y);
+    void setWayRects(const std::vector<int>& x, const std::vector<int>& y,
+                      const std::vector<int>& width);
     TriggerGraphNodeItem* from() const {return from_;}
     TriggerGraphNodeItem* to() const {return to_;}
     TriggerCollector::Mode mode() const {return modes_[0];}
@@ -115,7 +116,7 @@ protected:
     TriggerGraphView* view_;
     float arrowWidth_ {10.};
     float arrowHeight_  {8.};
-    std::vector<QPointF> wayPoints_;
+    std::vector<QRectF> wayRects_;
 };
 
 class TriggerGraphEdgeInfoDialog : public QDialog

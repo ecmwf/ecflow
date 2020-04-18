@@ -60,16 +60,18 @@ void SimpleGraphLayoutBuilder::build(std::vector<GraphLayoutNode*>& nodes,
         for(auto j: nodes_[i]->children_) {
             auto ch = nodes_[j];
             if (ch->dummy_) {
-                std::vector<int> x, y;
+                std::vector<int> x, y, w;
                 while(ch->hasChildren()) {
                     x.push_back(ch->x_);
                     y.push_back(ch->y_);
+                    w.push_back(ch->width_);
                     int chIndex = ch->children_[0];
                     ch = nodes_[chIndex];
                     if (!ch->dummy_) {
                         auto e=new GraphLayoutEdge(i, chIndex);
                         e->x_ = x;
                         e->y_ = y;
+                        e->width_ = w;
                         edges.push_back(e);
                         break;
                     }
@@ -269,7 +271,7 @@ void SimpleGraphLayoutBuilder::printState(const std::vector<int>& nodes)
 {
     for(size_t i=0; i < nodes.size(); i++) {
         auto n = nodes_[nodes[i]];
-        std::cout << i << " arc=" << n->arc_ << " lev=" << n->level_ <<
+        std::cout << i << "[" << nodes[i] << "] " << " arc=" << n->arc_ << " lev=" << n->level_ <<
                      " " << n->width_ << " " << n->height_ <<
                      " x=" << n->x_ << " y=" << n->y_ <<
                      " d=" << n->dummy_ << std::endl;
@@ -280,8 +282,6 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
 {
     int H_DIST = 10;
     int V_DIST = 10;
-    int H_MIN_SPACE = 80;
-    int V_MIN_SPACE = 10;
     int max_in_a_level = 0;
     int max_level = 0;
     int levelNum = 0;
@@ -325,8 +325,8 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
         V_DIST = std::max(V_DIST,item->height_);
     }
 
-    H_DIST += H_MIN_SPACE;
-    V_DIST += V_MIN_SPACE;
+    H_DIST += xMinGap_;
+    V_DIST += yMinGap_;
 
     for(auto i: nodes) {
         auto item = nodes_[i];
@@ -371,12 +371,12 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
 
     //int a = 0;
     for (int i = 0, a = 0 ;i < levelNum;i ++) {
-        int b = widths[i] + H_MIN_SPACE;
+        int b = widths[i] + xMinGap_;
 
         b += children[i] * 2 ; /* +5 pixels per node with max kids in level */
         widths[i] = a;
         a += b;
-        heights[i] += V_MIN_SPACE;
+        heights[i] += yMinGap_;
     }
 
     for (auto i: nodes) {
@@ -428,6 +428,7 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
     int move_it = 0;
     int more = 1;
     int count = 0;
+
     while (more--) {
         //UiLog().dbg() << "more=" << more;
         count = static_cast<int>(nodes.size());
@@ -505,6 +506,7 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
         minY -= nodes_[0]->height_/2;
     }
 
+    UiLog().dbg() << "focus="  << focus_;
 
     for (auto i: nodes) {
         auto item = nodes_[i];
@@ -512,6 +514,17 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
         item->y_ -= minY;
     }
 
+    // set width for dummy nodes
+    std::vector<int> minW(levelNum, 100000);
+    for (auto n: nodes_) {
+        if (!n->dummy_ && n->level_ >=0)
+           minW[n->level_] = std::min(minW[n->level_], n->width_);
+    }
+
+    for (auto n: nodes_) {
+        if (n->dummy_ && n->level_ >=0 && n->level_ < static_cast<int>(minW.size()))
+            n->width_ = minW[n->level_];
+    }
     printState(nodes);
 
 }

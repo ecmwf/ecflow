@@ -56,6 +56,7 @@ public:
     int to_;
     std::vector<int> x_;
     std::vector<int> y_;
+    std::vector<int> width_;
 };
 
 struct SimpleGraphLayoutNode : GraphLayoutNode
@@ -79,6 +80,12 @@ public:
     virtual ~GraphLayoutBuilder() {}
     virtual void clear() =0;
     virtual void build(std::vector<GraphLayoutNode*>&, std::vector<GraphLayoutEdge*>&, int focus) =0;
+    void setXMinGap(int v) {xMinGap_ = v;}
+    void setyMinGap(int v) {yMinGap_ = v;}
+
+protected:
+    int xMinGap_  {60};
+    int yMinGap_  {10};
 };
 
 class SimpleGraphLayoutBuilder : public GraphLayoutBuilder

@@ -117,14 +117,7 @@ void TriggerGraphNodeItem::paint(QPainter *painter, const QStyleOptionGraphicsIt
 {
     //Init style option
     QStyleOptionViewItem opt;
-
-    //if(selectionModel_->isSelected(item->index))
-    //    opt.state |= QStyle::State_Selected;
-
-    //int optWidth=2000;
-    //if(item->width > optWidth)
-    //optWidth=item->width;
-    opt.rect=bRect_.toRect(); //  QRect(item->x,yp,optWidth,item->height);
+    opt.rect=bRect_.toRect();
 
     QModelIndex idx=view_->model()->index(index_, 0);
     view_->delegate()->paint(painter,opt,idx);
@@ -228,14 +221,16 @@ void TriggerGraphEdgeItem::adjust()
     bool splineUsed = false;
 
     // gry to draw spline if there are waypoints
-    if (!wayPoints_.empty()) {
+    if (!wayRects_.empty()) {
         std::vector<double> xp, yp;
 
         xp.push_back(0.);
         yp.push_back(0.);
-        for(auto v: wayPoints_) {
-            xp.push_back(v.x()-pOffset.x());
+        for(auto v: wayRects_) {
+            xp.push_back(v.center().x()-pOffset.x());
             yp.push_back(v.y()-pOffset.y() + srcRect.height()/2);
+            //xp.push_back(v.right()-pOffset.x());
+            //yp.push_back(v.y()-pOffset.y() + srcRect.height()/2);
         }
         xp.push_back(p1.x());
         yp.push_back(p1.y());
@@ -275,7 +270,7 @@ void TriggerGraphEdgeItem::adjust()
         auto poly = p.toSubpathPolygons();
         if (poly.count() == 1) {
             int n = -1;
-            if (poly[0].count() > 3) {
+            if (poly[0].count() >= 3) {
                 n = poly[0].count()/2-1;
             // staright line
             } else if (poly[0].count() == 2) {
@@ -321,14 +316,16 @@ void TriggerGraphEdgeItem::addArrow(QPainterPath& pPath, double x1, double y1, d
     pPath.addPolygon(tri);
 }
 
-void TriggerGraphEdgeItem::setWayPoints(const std::vector<int>& x, const std::vector<int>& y)
+void TriggerGraphEdgeItem::setWayRects(const std::vector<int>& x,
+                                        const std::vector<int>& y,
+                                        const std::vector<int>& width)
 {
-    wayPoints_.clear();
-    if (x.size() != y.size()) {
+    wayRects_.clear();
+    if (x.size() != y.size() || x.size() != width.size()) {
         return;
     }
     for (size_t i=0; i < x.size(); i++) {
-        wayPoints_.emplace_back(QPointF(x[i], y[i]));
+        wayRects_.emplace_back(QRectF(x[i], y[i], width[0], 0));
     }
 }
 
@@ -1011,6 +1008,7 @@ void TriggerGraphView::buildLayout()
         }
     }
 
+    focus = 0; //TODO: refine it
     builder_->build(lnodes, enodes, focus);
 
     for (size_t i=0; i < nodes_.size(); i++) {
@@ -1024,7 +1022,7 @@ void TriggerGraphView::buildLayout()
         for(auto e: edges_) {
             if (e->from()->index() == en->from_ &&
                     e->to()->index() == en->to_) {
-                e->setWayPoints(en->x_, en->y_);
+                e->setWayRects(en->x_, en->y_, en->width_);
                 break;
             }
         }
