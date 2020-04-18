@@ -12,6 +12,7 @@
 
 #include "Suite.hpp"
 #include "Expression.hpp"
+#include "Limit.hpp"
 #include "Variable.hpp"
 
 #include "AstCollateVNodesVisitor.hpp"
@@ -1013,6 +1014,10 @@ void VNode::triggerExpr(std::string& trigger, std::string& complete) const
 void VNode::triggers(TriggerCollector* tlc)
 {
     VItem* nullItem=nullptr;
+    if (!node_) {
+        return;
+    }
+
     //Check the node itself
     //if(tlr.self())
     {
@@ -1039,22 +1044,15 @@ void VNode::triggers(TriggerCollector* tlc)
         //Check other attributes
 
         //Limiters
-        std::vector<VAttribute*> limiterVec;
-        findAttributes(VAttributeType::find("limiter"),limiterVec);
-        std::size_t n=limiterVec.size();
-        for(std::size_t i=0; i < n; i++)
-        {
-            VAttribute *a=limiterVec[i];
-            assert(a);
-            std::string val;
-            if(a->value("limiter_path",val))
-            {
-                if(VAttribute* n = findLimit(val, a->strName()))
-                {
-#ifdef _UI_VNODE_DEBUG
-                    //UiLog().dbg() << "trigger limit: " << n->name();
-#endif                   
-                    tlc->add(n,nullItem, TriggerCollector::Normal);
+        const std::vector<InLimit>& limiterVec=node_->inlimits();
+        for (auto & limiter: limiterVec) {
+            if (Limit* lim = node_->findLimitViaInLimit(limiter)) {
+                if (Node *limParent = lim->node()) {
+                    if (VNode *p = root()->toVNode(limParent)) {
+                        if(VAttribute *n=p->getLimit(lim->name())) {
+                            tlc->add(n,nullItem, TriggerCollector::Normal);
+                        }
+                    }
                 }
             }
         }
@@ -1062,7 +1060,7 @@ void VNode::triggers(TriggerCollector* tlc)
         //Date
         std::vector<VAttribute*> dateVec;
         findAttributes(VAttributeType::find("date"),dateVec);
-        n=dateVec.size();
+        size_t n=dateVec.size();
         for(std::size_t i=0; i < n; i++)
         {
             tlc->add(dateVec[i],nullItem,TriggerCollector::Normal);
@@ -1190,56 +1188,7 @@ void VNode::triggeredByEvent(const std::string& name,std::vector<std::string>& t
        data_->getEvent(this,name,triggeredVec);
 }
 
-
-VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
-{
-   VAttribute* nullItem=nullptr;
-
-#if 0
-   if(!path.empty() && path[0] == '/')
-      if (! (f = serv().top()->find(path)))
-         return &dummy_node::get(path + ":" + name);
-#endif
-
-    //path is a valid absolute path
-    VNode* n=this;
-    if(!path.empty() && path[0] == '/')
-    {
-        n=server()->vRoot()->find(path);
-        if (n) {
-            return n->hasLimit(name);
-        } else {
-            return nullItem;
-        }
-    }
-
-    // if we are here it must be an empty or relative path
-    if (path.empty() || pathEndMatch(path))
-    {
-        if (VAttribute* lim = hasLimit(name) )
-            return lim;
-    }
-
-    VNode* p=n->parent();
-    if(p && !p->isServer()) {
-        //Find the matching limit in the siblings
-        int chNum= p->numOfChildren();
-        for(int i=0; i < chNum; i++) {
-            VNode* ch=p->childAt(i);
-            if (ch !=n && (path.empty() || ch->pathEndMatch(path))) {
-                if (VAttribute* lim = ch->hasLimit(name) )
-                    return lim;
-            }
-        }
-
-        // continue search in parent
-        return p->findLimit(path, name);
-    }
-
-    return nullItem;
-}
-
-VAttribute* VNode::hasLimit(const std::string& name)
+VAttribute* VNode::getLimit(const std::string& name)
 {
     VAttribute* nullItem=nullptr;
     std::vector<VAttribute*> limit;

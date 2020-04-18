@@ -222,8 +222,7 @@ protected:
     virtual void check(VServerSettings* conf,const VNodeInternalState&) {}
     void setIndex(int i) {index_=i;}
 
-    VAttribute* findLimit(const std::string& path, const std::string& name);
-    VAttribute* hasLimit(const std::string& name);
+    VAttribute* getLimit(const std::string& name);
     static void triggersInChildren(VNode *n,VNode* nn,TriggerCollector* tlc);
     static void triggeredByChildren(VNode *n,VNode* parent,TriggerCollector* tlc);
 
