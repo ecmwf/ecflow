@@ -39,6 +39,7 @@
 #include "Memento.hpp"
 #include "CalendarUpdateParams.hpp"
 #include "NodeStats.hpp"
+#include "move_peer.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -1522,6 +1523,14 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
       }
 	}
 }
+
+void Defs::move_peer(Node* source, Node* dest)
+{
+	move_peer_node(suiteVec_,source,dest,"Defs");
+    order_state_change_no_ = Ecf::incr_state_change_no();
+    client_suite_mgr_.update_suite_order();
+}
+
 
 void Defs::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {

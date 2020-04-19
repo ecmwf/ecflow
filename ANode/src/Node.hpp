@@ -123,6 +123,7 @@ public:
 
    /// Order the node using the second parameter
    virtual void order(Node*/*immediateChild*/, NOrder::Order) {}
+   virtual void move_peer(Node* src, Node* dest) {}
 
    /// reset all. Used after job generation.
    /// Unlike re-queue/begin, will reset time attributes. see ECFLOW-1204

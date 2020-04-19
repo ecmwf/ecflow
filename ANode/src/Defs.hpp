@@ -251,6 +251,7 @@ public:
 
    // Order the suite
    void order(Node* immediateChild, NOrder::Order);
+   void move_peer(Node* src, Node* dest);
 
    /// determines why the node is not running.
    void top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags = false) const;

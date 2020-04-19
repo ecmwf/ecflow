@@ -95,6 +95,8 @@ public:
  	bool isAddChildOk( Node* child, std::string& errorMsg) const override;
 
    void order(Node* immediateChild, NOrder::Order) override;
+   void move_peer(Node* src,Node* dest) override;
+
    void generate_scripts( const std::map<std::string,std::string>& override) const override;
 
    bool checkInvariants(std::string& errorMsg) const override;

@@ -45,6 +45,7 @@ public:
    void set_memento(const OrderMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
    void set_memento(const ChildrenMemento*,std::vector<ecf::Aspect::Type>& aspects,bool f );
    void order(Node* immediateChild, NOrder::Order) override;
+   void move_peer(Node* src, Node* dest) override;
 
 	bool hasAutoCancel() const override;
    void calendarChanged(const ecf::Calendar&,Node::Calendar_args&,const ecf::LateAttr* inherited_late) override;

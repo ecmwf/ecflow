@@ -129,13 +129,13 @@ $PYTHON ./reload.py -s ecflow
 # Generate test suites, based on definitions known to be good 
 # ========================================================================
 cd $WK
-$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/JIRA/ecflow_337_.def
-$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/JIRA/ecflow_1550.def
+#$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/JIRA/ecflow_337_.def
+#$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/JIRA/ecflow_1550.def
 
-#for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
-#   echo "->$defs_file"
-#   $PYTHON Pyext/samples/TestBench.py $defs_file
-#done
+for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
+   echo "->$defs_file"
+   $PYTHON Pyext/samples/TestBench.py $defs_file
+done
  
 # Use python3 for ecflow 5 series
 # Use the installed ecflow for ecflow_client, to stop mixing of ecflow 4/5

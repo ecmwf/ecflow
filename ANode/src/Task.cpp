@@ -32,6 +32,7 @@
 #include "TaskScriptGenerator.hpp"
 #include "Extract.hpp"
 #include "JobProfiler.hpp"
+#include "move_peer.hpp"
 #include "Serialization.hpp"
 
 using namespace ecf;
@@ -735,6 +736,13 @@ void Task::order(Node* immediateChild, NOrder::Order ord)
       }
    }
 }
+
+void Task::move_peer(Node* src, Node* dest)
+{
+	move_peer_node(aliases_,src,dest,"Task");
+    order_state_change_no_ = Ecf::incr_state_change_no();
+}
+
 
 bool Task::checkInvariants(std::string& errorMsg) const
 {
