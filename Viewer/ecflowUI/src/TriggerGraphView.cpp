@@ -27,6 +27,7 @@
 
 #include "Spline.hpp"
 
+#include <QDebug>
 #include <QFile>
 #include <QGraphicsDropShadowEffect>
 #include <QGraphicsLinearLayout>
@@ -256,6 +257,7 @@ void TriggerGraphEdgeItem::adjust()
             addArrow(p, xmid1, spline.eval(xmid1),
                         xmid2, spline.eval(xmid2));
 
+            buildShape(pf);
         }
     }
 
@@ -281,6 +283,8 @@ void TriggerGraphEdgeItem::adjust()
                     poly[0].at(n).x(), poly[0].at(n).y(),
                     poly[0].at(n+1).x(), poly[0].at(n+1).y());
             }
+
+            buildShape(poly[0]);
        }
     }
 
@@ -315,6 +319,34 @@ void TriggerGraphEdgeItem::addArrow(QPainterPath& pPath, double x1, double y1, d
 
     pPath.addPolygon(tri);
 }
+
+void TriggerGraphEdgeItem::buildShape(QPolygonF pf)
+{
+    QPointF delta(0, 6);
+    QPolygonF shapePoly;
+    if (pf.count() < 10) {
+        for(int i=0; i < pf.count(); i++) {
+            shapePoly << pf[i] + delta;
+        }
+        for(int i=pf.count()-1; i >=0; i--) {
+            shapePoly << pf[i] - delta;
+        }
+    } else {
+        int n = pf.count()/10;
+        for(int i=0; i < pf.count(); i+=n) {
+            shapePoly << pf[i] + delta;
+        }
+        shapePoly << pf.last() + delta;
+        for(int i=pf.count()-1; i >=0; i-=n) {
+            shapePoly << pf[i] - delta;
+        }
+        shapePoly << pf.first() - delta;
+    }
+
+    shapePath_ = QPainterPath();
+    shapePath_.addPolygon(shapePoly);
+}
+
 
 void TriggerGraphEdgeItem::setWayRects(const std::vector<int>& x,
                                         const std::vector<int>& y,

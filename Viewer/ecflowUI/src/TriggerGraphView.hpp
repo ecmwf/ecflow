@@ -102,10 +102,12 @@ public:
     TriggerGraphNodeItem* from() const {return from_;}
     TriggerGraphNodeItem* to() const {return to_;}
     TriggerCollector::Mode mode() const {return modes_[0];}
+    QPainterPath shape() const override {return shapePath_;}
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void addArrow(QPainterPath& pPath, double x1, double y1, double x2, double y2);
+    void buildShape(QPolygonF pf);
 
     TriggerGraphNodeItem* from_;
     TriggerGraphNodeItem* to_;
@@ -117,6 +119,7 @@ protected:
     float arrowWidth_ {10.};
     float arrowHeight_  {8.};
     std::vector<QRectF> wayRects_;
+    QPainterPath shapePath_;
 };
 
 class TriggerGraphEdgeInfoDialog : public QDialog
