@@ -86,6 +86,7 @@ double Spline::eval(double x) const
         }
     }
 
+    // we use the Horner method to evaluate the polynom
     if (idx >=0) {
         double t = x-xp_[idx];
         return ((coeffA_[idx]*t + coeffB_[idx])*t + coeffC_[idx])*t + yp_[idx];

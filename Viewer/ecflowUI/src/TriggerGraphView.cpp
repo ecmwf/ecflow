@@ -322,7 +322,7 @@ void TriggerGraphEdgeItem::addArrow(QPainterPath& pPath, double x1, double y1, d
 
 void TriggerGraphEdgeItem::buildShape(QPolygonF pf)
 {
-    QPointF delta(0, 6);
+    QPointF delta(0, shapeSpread_);
     QPolygonF shapePoly;
     if (pf.count() < 10) {
         for(int i=0; i < pf.count(); i++) {

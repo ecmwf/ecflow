@@ -120,6 +120,7 @@ protected:
     float arrowHeight_  {8.};
     std::vector<QRectF> wayRects_;
     QPainterPath shapePath_;
+    float shapeSpread_ {6.};
 };
 
 class TriggerGraphEdgeInfoDialog : public QDialog
