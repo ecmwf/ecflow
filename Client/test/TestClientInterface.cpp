@@ -13,6 +13,8 @@
 // Description :
 //============================================================================
 #include <iostream>
+#include <vector>
+#include <string>
 
 #include <boost/test/unit_test.hpp>
 #include "boost/filesystem/operations.hpp"
@@ -293,6 +295,9 @@ BOOST_AUTO_TEST_CASE( test_client_interface )
    /// test alter
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf:fob::10") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf:fob::") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf_pid:fob::") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf_passwd:fob::") == 0,"--alter should return 0\n" << theClient.errorMsg());
+   BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","ecf_pid_passwd:fob::") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","user:fob::10") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","path:fob::10") == 0,"--alter should return 0\n" << theClient.errorMsg());
    BOOST_REQUIRE_MESSAGE( theClient.alter("/s1","add","zombie","path:fob::") == 0,"--alter should return 0\n" << theClient.errorMsg());
