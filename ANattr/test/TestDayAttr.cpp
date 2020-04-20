@@ -43,6 +43,7 @@ BOOST_AUTO_TEST_CASE( test_day_attr)
    BOOST_CHECK_MESSAGE(calendar.day_of_week() == 2 ," Expected tuesday(2) but found " <<  calendar.day_of_week() );
 
    DayAttr day(DayAttr::WEDNESDAY);
+   std::vector<DayAttr> days; days.push_back(day);
 
    int day_changed = 0; // after midnight make sure we keep day_changed
    // day_changed = 0;  tuesday
@@ -58,16 +59,16 @@ BOOST_AUTO_TEST_CASE( test_day_attr)
 
       if ( calendar.day_of_week() < day.day() ) {
          BOOST_CHECK_MESSAGE(!day.isFree(calendar),day.toString() << " is free should fail at day " << calendar.day_of_week() );
-         BOOST_CHECK_MESSAGE(day.checkForRequeue(calendar),day.toString() << " checkForRequeue should pass at " << calendar.day_of_week() );
+         BOOST_CHECK_MESSAGE(!day.checkForRequeue(calendar,days),day.toString() << " checkForRequeue should return false for a single day " << calendar.day_of_week() );
       }
       else if (calendar.day_of_week() == day.day()  ) {
          BOOST_CHECK_MESSAGE(day.isFree(calendar),day.toString() << " is free should pass at day " << calendar.day_of_week() );
-         BOOST_CHECK_MESSAGE(!day.checkForRequeue(calendar),day.toString() << " checkForRequeue should fail at " << calendar.day_of_week() );
+         BOOST_CHECK_MESSAGE(!day.checkForRequeue(calendar,days),day.toString() << " checkForRequeue should fail at " << calendar.day_of_week() );
       }
       else {
          BOOST_CHECK_MESSAGE(calendar.day_of_week() > day.day(),"");
          BOOST_CHECK_MESSAGE(!day.isFree(calendar),day.toString() << " is free should pass at day " << calendar.day_of_week() );
-         BOOST_CHECK_MESSAGE(!day.checkForRequeue(calendar),day.toString() << " checkForRequeue should fail at " << calendar.day_of_week() );
+         BOOST_CHECK_MESSAGE(!day.checkForRequeue(calendar,days),day.toString() << " checkForRequeue should fail at " << calendar.day_of_week() );
       }
    }
 }

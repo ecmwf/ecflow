@@ -1,0 +1,128 @@
+suite ecflow_1628
+  edit SLEEP 120
+  family barrier
+    repeat enumerated YMD 1 2 3 4 5 6 7
+    verify complete:7
+    family start
+      complete start/0 == complete and start/1 == complete and start/2 == complete and start/3 == complete and start/4 == complete and start/5 == complete and start/6 == complete
+      family 0
+        verify complete:7
+        time 23:59
+        day monday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 1
+        verify complete:7
+        time 23:59
+        day tuesday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 2
+        verify complete:7
+        time 23:59
+        day wednesday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 3
+        verify complete:7
+        time 23:59
+        day thursday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 4
+        verify complete:7
+        time 23:59
+        day friday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 5
+        verify complete:7
+        time 23:59
+        day saturday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 6
+        verify complete:7
+        time 23:59
+        day sunday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+    endfamily
+  endfamily
+endsuite
+
+#
+# The following fails, since for sunday(0) DayAttr::check_for_reque() will always return false, (ECFLOW-1628)
+#
+#
+#suite ecflow__1628
+#  clock    real 20.04.2020     # Monday
+#  endclock      27.04.2020     # Monday, add endclock otherwise we simulate for year due to repeat.
+#
+#  family fam
+#    verify complete:2  # after saturday@8am we re-queue due to future time dependency     
+#    day sunday # saturday
+#    day tuesday # sunday
+#    time 08:00
+#     
+#    task t1
+#        verify complete:2        
+#
+#  endfamily
+#endsuite

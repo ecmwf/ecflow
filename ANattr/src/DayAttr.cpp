@@ -122,15 +122,61 @@ void DayAttr::clearFree() {
 #endif
 }
 
-bool DayAttr::checkForRequeue( const ecf::Calendar& calendar) const
+bool DayAttr::checkForRequeue( const ecf::Calendar& calendar,const std::vector<DayAttr>& days) const
 {
  	// if calendar is hybrid, we can't requeue
 	if (calendar.hybrid()) {
 		return false;
 	}
 
-	// checkForRequeue is called when we are deciding whether to re-queue the node.
+	// checkForRequeue is called when we are deciding whether to re-queue the node.(under AUTOMATED RE-QUEUE)
+	// Hence we *MUST* have completed with *THIS* day. Also crons,time,today have all returned false.
 	// If this date is in the future, they we should re-queue
+	// 	    return (day_ > calendar.day_of_week() );
+	//    sunday    0
+	//    monday    1
+	//    tuesday   2
+	//    wednesday 3
+	//    thursday  4
+	//    friday    5
+	//    saturday  6
+	//  *HOWEVER* this breaks if day is Saturday(6) and next day is Sunday(0) *or* any other day,
+	//  or put another way, this will always re-queue for Saturday, irrespective of future day.
+	//    task t1
+	//       time 23:00
+	//       day  saturday
+	//       day  monday
+	//  This becomes more problematic when we have top level repeat, as it will never complete, i.e ECFLOW-1628
+	//  ECFLOW-1628
+	//  repeat ....
+	//	  family f1
+	//	    day monday
+	//	    time 23:00
+	//	    task t1
+	//	  family f1
+	//	    day saturday  # using   return (day_ > calendar.day_of_week() ); means checkForRequeue() will always true for Saturday
+	//	    time 23:00
+	//	    task t1
+	//
+	// Likewise:
+	//	suite ecflow_1628
+	//	  clock    real 20.04.2020     # Monday
+	//	  endclock      27.04.2020     # Monday, add endclock otherwise we simulate for year due to repeat.
+	//	  family fam
+	//	    verify complete:2 
+	//	    day sunday
+	//	    day tuesday
+	//	    time 08:00
+	//	    task t1
+	//	        verify complete:2        # task should complete twice
+	// This will ONLY complete once, because sunday(0) will *NEVER* satisfy (day_ > calendar.day_of_week()) <TODO>
+
+	// The *NORMAL* use case is to have a single day, hence we will return false, when ever we have a single day.
+	if (days.size() == 1) {
+		// just have a single day, which *MUST* be this day
+		return false; // Handle the single Saturday under a repeat loop.
+	}
+
 	return (day_ > calendar.day_of_week() );
 }
 
