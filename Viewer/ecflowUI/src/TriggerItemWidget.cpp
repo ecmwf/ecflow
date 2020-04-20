@@ -33,7 +33,7 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     handleAnyChange_=true;
 
     //We will not keep the contents when the item becomes unselected
-    unselectedFlags_.clear();
+    //unselectedFlags_.clear();
 
     setupUi(this);
 
@@ -237,6 +237,15 @@ void TriggerItemWidget::clearTriggers()
     triggerGraph_->clear();
 }
 
+void TriggerItemWidget::rerender()
+{
+    if (modeGroup_->checkedId() == TableModeIndex) {
+        //
+    } else {
+        triggerGraph_->rerender();
+    }
+}
+
 void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
 {
     if(flags.isSet(SuspendedChanged))
@@ -254,9 +263,15 @@ void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         {
             load();
         }
+    } else if(flags.isSet(SelectedChanged)) {
+        if (selected_ && active_) {
+            if (!info_ || !info_->node()) {
+                load();
+            } else {
+                rerender();
+            }
+        }
     }
-
-    Q_ASSERT(!flags.isSet(SelectedChanged));
 
     checkActionState();
 }
@@ -433,10 +448,6 @@ void TriggerItemWidget::readSettings(VComboSettings* vs)
 
 void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
 {
-    //We do not track changes when the item is not selected
-    if(!selected_ || !active_)
-        return;
-
     if(!info_ || !info_->isNode())
         return;
 
@@ -444,7 +455,11 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     //we need to reload the item
     if(!info_->node()->root()->triggeredScanned())
     {
-        load();
+        if(selected_ && active_) {
+            load();
+        } else {
+            clearContents();
+        }
         return;
     }
 
@@ -453,7 +468,11 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     {
         if(it == ecf::Aspect::ADD_REMOVE_ATTR || it == ecf::Aspect::EXPR_TRIGGER)
         {
-            load();
+            if(selected_ && active_) {
+                load();
+            } else {
+                clearContents();
+            }
             return;
         }
     }
@@ -477,6 +496,10 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
 //           }
 //        }
 //    }
+
+    //We do not track further  changes when the item is not selected
+    if(!selected_ || !active_)
+        return;
 
     //For the rest of the changes in we rerender the collected items that might have changed
     if (modeGroup_->checkedId() ==  TableModeIndex)

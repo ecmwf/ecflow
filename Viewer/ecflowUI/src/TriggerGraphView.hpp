@@ -160,6 +160,7 @@ public:
     void remove(TriggerGraphExpandStateItem*);
     TriggerGraphExpandStateItem* find(VItem*) const;
     void clear();
+    bool isEmpty() const {return items_.empty();}
 
     std::vector<TriggerGraphExpandStateItem*> items_;
 };
@@ -185,7 +186,7 @@ public:
     TriggerGraphView(QWidget* parent=nullptr);
     ~TriggerGraphView() override;
 
-    void clear();
+    void clear(bool keepConfig=false);
     void setInfo(VInfo_ptr);
     void notifyChange(VProperty* p) override;
 
@@ -199,6 +200,7 @@ public:
     int maxZoomLevel() const {return maxZoomLevel_;}
     int defaultZoomLevel() const {return defaultZoomLevel_;}
     int zoomLevel() const {return zoomLevel_;}
+    void rerender();
 
     void show(VInfo_ptr, bool dependency);
     void setEdgePen(TriggerGraphEdgeItem* e);
@@ -229,7 +231,7 @@ Q_SIGNALS:
     void linePenChanged();
 
 protected:
-    void clearGraph();
+    void clearGraph(bool keepConfig=false);
     void showEvent(QShowEvent*) override;
     TriggerGraphNodeItem* nodeItemAt(QPointF scenePos) const;
     TriggerGraphNodeItem* currentNodeItem() const;
@@ -237,7 +239,6 @@ protected:
     void adjustParentConnectColour(VProperty* p=nullptr);
     void adjustTriggerConnectColour(VProperty* p=nullptr);
     void adjustDepConnectColour(VProperty* p=nullptr);
-    void rerender();
 
     void expand(VNode*);
     void expandItem(VInfo_ptr, bool scanOnly);

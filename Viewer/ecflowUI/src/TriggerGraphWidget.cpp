@@ -58,10 +58,10 @@ TriggerGraphWidget::~TriggerGraphWidget()
     clear();
 }
 
-void TriggerGraphWidget::clear()
+void TriggerGraphWidget::clear(bool keepConfig)
 {
     info_.reset();
-    ui_->view->clear();
+    ui_->view->clear(keepConfig);
 }
 
 void TriggerGraphWidget::setInfo(VInfo_ptr info, bool dependency)
@@ -159,6 +159,11 @@ void TriggerGraphWidget::setZoomSlider(QSlider* slider)
 
     connect(zoomSlider_, SIGNAL(valueChanged(int)),
             this, SLOT(setZoomLevel(int)));
+}
+
+void TriggerGraphWidget::rerender()
+{
+    ui_->view->rerender();
 }
 
 void TriggerGraphWidget::becameInactive()

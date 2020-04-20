@@ -658,20 +658,22 @@ TriggerGraphView::~TriggerGraphView()
     clear();
 }
 
-void TriggerGraphView::clear()
+void TriggerGraphView::clear(bool keepConfig)
 {
     info_.reset();    
-    clearGraph();
+    clearGraph(keepConfig);
 }
 
-void TriggerGraphView::clearGraph()
+void TriggerGraphView::clearGraph(bool keepConfig)
 {
     model_->clearData();
     scene_->clear();
     nodes_.clear();
     edges_.clear();
     edgeInfo_->close();
-    expandState_.clear();
+    if (keepConfig) {
+        expandState_.clear();
+    }
     focus_ = nullptr;
 }
 
@@ -886,10 +888,17 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
 // called by the graph widget
 void TriggerGraphView::show(VInfo_ptr info, bool dependency)
 {
-    clear();
+    bool sameInfo = (info_ && info == info_);
+    clear(sameInfo);
     dependency_ = dependency;
     info_ = info;
-    expandItem(info_, false);
+
+    if(!sameInfo || !expandState_.find(info_->node())) {
+        expandState_.clear();
+        expandItem(info_, false);
+    } else {
+        rebuild();
+    }
 }
 
 void TriggerGraphView::expandItem(VInfo_ptr info, bool scanOnly)

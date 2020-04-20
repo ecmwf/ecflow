@@ -37,7 +37,7 @@ public:
     explicit TriggerGraphWidget(QWidget *parent = nullptr);
     ~TriggerGraphWidget() override;
 
-    void clear();
+    void clear(bool keepConfig=false);
     void setInfo(VInfo_ptr info, bool dependency);
     VInfo_ptr info() const {return info_;}
     bool dependency() const;
@@ -49,6 +49,7 @@ public:
     void setTriggeredScanner(TriggeredScanner*);
     void setZoomSlider(QSlider*);
     void becameInactive();
+    void rerender();
     void readSettings(VComboSettings* vs);
     void writeSettings(VComboSettings* vs);
 

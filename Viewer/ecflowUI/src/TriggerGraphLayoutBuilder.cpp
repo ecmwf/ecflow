@@ -334,7 +334,7 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
             compute_level_pass2(item);
     }
 
-    printState(nodes);
+    //printState(nodes);
 
     if (dummy && addDummyNodes()) {
         buildIt(false);
@@ -367,7 +367,7 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
 
     levelNum++;
 
-    printState(nodes);
+    //printState(nodes);
 
     //int a = 0;
     for (int i = 0, a = 0 ;i < levelNum;i ++) {
@@ -384,7 +384,7 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
         item->x_ = widths[item->level_];
     }
 
-    printState(nodes);
+    //printState(nodes);
 
     for (size_t a=0; a<2; a++) {
         for (auto i: nodes) {
@@ -423,7 +423,7 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
         return nodes_[idx1]->y_ < nodes_[idx2]->y_;
     });
 
-    printState(nodes);
+    //printState(nodes);
 
     int move_it = 0;
     int more = 1;
@@ -525,6 +525,7 @@ void SimpleGraphLayoutBuilder::buildIt(bool dummy)
         if (n->dummy_ && n->level_ >=0 && n->level_ < static_cast<int>(minW.size()))
             n->width_ = minW[n->level_];
     }
-    printState(nodes);
+
+    //printState(nodes);
 
 }

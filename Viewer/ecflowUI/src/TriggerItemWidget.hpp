@@ -60,6 +60,7 @@ protected:
     void load();
     void loadTable();
     void loadGraph();
+    void rerender();
     void updateState(const ChangeFlags&) override;
     TriggeredScanner* triggeredScanner() const {return scanner_;}
     void checkActionState();
