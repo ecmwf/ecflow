@@ -45,7 +45,7 @@ public:
 	bool isSetFree() const { return free_; }
 	void calendarChanged( const ecf::Calendar& c, bool clear_at_midnight = true) ; // can set attribute free
 	bool isFree(const ecf::Calendar&) const;
-	bool checkForRequeue( const ecf::Calendar&) const;
+	bool checkForRequeue( const ecf::Calendar&,const std::vector<DayAttr>&) const;
 	bool validForHybrid(const ecf::Calendar&) const;
  	bool why(const ecf::Calendar&, std::string& theReasonWhy) const;
 

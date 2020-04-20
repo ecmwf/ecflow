@@ -294,8 +294,8 @@ bool Node::testTimeDependenciesForRequeue() const
 
    // **********************************************************************
    // If we get here there are **NO** time/today/cron dependencies which are free
-   // We now need to determine if this node has a future time dependency which
-   // should re-queue this node
+   // We now need to determine if this node has a *FUTURE* time dependency which
+   // should re-queue this node.
    // *********************************************************************
    for(const DateAttr& date: dates_ ) {
       if (date.checkForRequeue(calendar)) {
@@ -306,8 +306,16 @@ bool Node::testTimeDependenciesForRequeue() const
       }
    }
 
+   // if single day will return false from checkForRequeue, for multiple days will see if there is a *FUTURE* day.
+   // Note: problem with saturday(6) which is future day for all other current days!!! ECFLOW-1628
+   // Note: problem with sunday(0) which can never be a future day since less than any other day.
+   //   task t1
+   //      time 09:00 # free
+   //      time 10:00 # free
+   //      day saturday
+   //      day sunday
    for(const DayAttr& day: days_ ) {
-      if (day.checkForRequeue(calendar)) {
+      if (day.checkForRequeue(calendar,days_)) {
 #ifdef DEBUG_REQUEUE
          LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for day " << day.toString());
 #endif

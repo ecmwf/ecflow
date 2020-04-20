@@ -34,6 +34,7 @@
 #include "Str.hpp"
 #include "Memento.hpp"
 #include "Serialization.hpp"
+#include "move_peer.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -397,6 +398,12 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
          break;
       }
 	}
+}
+
+void NodeContainer::move_peer(Node* src, Node* dest)
+{
+	move_peer_node(nodes_,src,dest,"NodeContainer");
+    order_state_change_no_ = Ecf::incr_state_change_no();
 }
 
 boost::posix_time::time_duration NodeContainer::sum_runtime()
