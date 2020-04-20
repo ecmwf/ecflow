@@ -888,17 +888,20 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
 // called by the graph widget
 void TriggerGraphView::show(VInfo_ptr info, bool dependency)
 {
-    bool sameInfo = (info_ && info == info_);
-    clear(sameInfo);
+    //TODO: save and reload expand state when server is reset
+    //bool sameInfo = (info_ && info == info_);
+    //clear(sameInfo);
     dependency_ = dependency;
     info_ = info;
+    expandState_.clear();
+    expandItem(info_, false);
 
-    if(!sameInfo || !expandState_.find(info_->node())) {
-        expandState_.clear();
-        expandItem(info_, false);
-    } else {
-        rebuild();
-    }
+//    if(!sameInfo || !expandState_.find(info_->node())) {
+//        expandState_.clear();
+//        expandItem(info_, false);
+//    } else {
+//        rebuild();
+//    }
 }
 
 void TriggerGraphView::expandItem(VInfo_ptr info, bool scanOnly)
