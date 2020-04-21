@@ -74,9 +74,9 @@ double Spline::eval(double x) const
 
     int idx = -1;
     const double delta = 1E-5;
-    if (abs(x-xp_[0]) < delta) {
+    if (fabs(x-xp_[0]) < delta) {
         idx = 0;
-    } else if (abs(x - xp_.back()) < delta) {
+    } else if (fabs(x - xp_.back()) < delta) {
         idx = xp_.size()-1;
     } else {
         for (size_t i=0; i < xp_.size()-1; i++) {
@@ -123,7 +123,7 @@ bool Spline::tdma( const std::vector<double> &a, const std::vector<double> &b, c
    for ( i = 1; i < n; i++ )
    {
       denominator = b[i] + a[i] * P[i-1];
-      if ( abs( denominator ) < SMALL ) return false;
+      if ( fabs( denominator ) < SMALL ) return false;
       P[i] =  -c[i]                   / denominator;
       Q[i] = ( d[i] - a[i] * Q[i-1] ) / denominator;
    }
