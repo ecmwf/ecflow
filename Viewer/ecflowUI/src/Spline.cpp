@@ -10,6 +10,7 @@
 #include "Spline.hpp"
 
 #include <cmath>
+#include <cstddef>
 #include "assert.h"
 
 Spline::Spline(const std::vector<double>& x,

@@ -7,8 +7,8 @@
 // nor does it submit to any jurisdiction.
 //============================================================================
 
-#ifndef SPLINE_CPP
-#define SPLINE_CPP
+#ifndef SPLINE_HPP
+#define SPLINE_HPP
 
 #include <vector>
 
