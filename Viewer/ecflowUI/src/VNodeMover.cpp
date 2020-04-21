@@ -97,27 +97,33 @@ void VNodeMover::moveMarkedNode(VInfo_ptr destNode)
         return;
     }
 
-    bool ok = UserMessage::confirm("About to move node <b>" + nodeMarkedForMove_->relativePath() +
-                                   "</b> from server <b>" + serverSrc->name() +
-                                   " (" + serverSrc->host() + ":" + serverSrc->port() + ")</b> to <b>" +
-                                   serverDest->name() +
-                                   " (" + serverDest->host() + ":" + serverDest->port() + ") " +
-                                   destNode->relativePath() + "</b>. Ok?");
+    std::string msg;
+    if (serverSrc ==  serverDest) {
+        msg = "About to move node <b>" + nodeMarkedForMove_->relativePath() +
+        "</b> before node <b>" + destNode->relativePath() + "</b>. Ok?";
+    } else {
+        msg = "About to move node <b>" + nodeMarkedForMove_->relativePath() +
+              "</b> from server <b>" + serverSrc->name() +
+              " (" + serverSrc->host() + ":" + serverSrc->port() + ")</b> to <b>" +
+              serverDest->name() +
+              " (" + serverDest->host() + ":" + serverDest->port() + ") " +
+              destNode->relativePath() + "</b>. Ok?";
+    }
 
-    // do it (?)
-    if(ok)
+    if(UserMessage::confirm(msg))
     {
-        std::string plugCommand;
-        plugCommand = "ecflow_client --plug <full_name> " + serverDest->host() +
-                ":" + serverDest->port() + destNode->relativePath();
-        CommandHandler::run(nodeMarkedForMove_,plugCommand); //this will run it on the source server!!
+        // the plug command will be invoked on src server
+        VTask_ptr task=VTask::create(VTask::PlugTask);
+
+        task->param("source", nodeMarkedForMove_->relativePath() );
+        task->param("target", serverDest->host() + ":" + serverDest->port() +
+                       destNode->relativePath());
+
+        if (serverSrc != serverDest) {
+            task->param("target_server_name", serverDest->name());
+        }
+        serverSrc->run(task);
 
         nodeMarkedForMove_.reset();
-
-        //We should update the dest server only when the plug command has finished.
-        //However the run command above is asynchronous, so we would need an observer to properly
-        //time this update. As a temporary measure we call reset here, it takes some time and we
-        //have more time to the plug command to finish.
-        serverDest->reset(); //TODO: use VTask and update serverDest with refresh()
     }
 }
