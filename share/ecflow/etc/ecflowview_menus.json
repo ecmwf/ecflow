@@ -48,13 +48,49 @@
 
     "menu_items" :
     [
-
         {
             "menu"           : "Node",
-            "name"           : "Lookup in tree",
+            "name"           : "Expand graph",
+            "command"        : "expand",
+            "enabled_for"    : "node",
+            "hidden"         : "true",
+            "handler"        : "graph",
+            "view"           : "graph",
+            "shortcut"       : "+"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Collapse graph",
+            "command"        : "collapse",
+            "enabled_for"    : "node",
+            "hidden"         : "true",
+            "handler"        : "graph",
+            "view"           : "graph",
+            "shortcut"       : "-"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Expand/collapse graph",
+            "command"        : "toggle_expand",
+            "enabled_for"    : "node",
+            "handler"        : "graph",
+            "view"           : "graph",
+            "shortcut"       : "Space"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Expand graph via parent",
+            "command"        : "expand_parent",
+            "handler"        : "graph",
+            "view"           : "graph",
+            "shortcut"       : "Left"
+        },
+        {
+            "menu"           : "Node",
+            "name"           : "Select in tree",
             "command"        : "lookup",
             "handler"        : "trigger",
-            "view"           : "trigger"
+            "view"           : "trigger/graph"
         },
 
         {
@@ -1017,7 +1053,7 @@
             "command"        : "edit",
             "multi"          : "false",
             "handler"        : "tree",
-            "view"           : "tree/trigger"
+            "view"           : "tree/trigger/graph"
         },
         {
             "menu"           : "Node",
@@ -1026,7 +1062,7 @@
             "command"        : "edit",
             "multi"          : "false",
             "handler"        : "tree",
-            "view"           : "tree/trigger"
+            "view"           : "tree/trigger/graph"
         },
 
         {

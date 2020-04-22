@@ -39,6 +39,8 @@ public:
                                const std::string& commandDescStr,
                                std::size_t taskNum);
 
+    void setallowShortcutsForHiddenItems(bool v) {allowShortcutsForHiddenItems_=v;}
+
 Q_SIGNALS:
     void viewCommand(VInfo_ptr,QString);
     void infoPanelCommand(VInfo_ptr,QString);
@@ -53,6 +55,7 @@ protected:
 
     QObject *actionSender_;
     QWidget *menuParent_;
+    bool allowShortcutsForHiddenItems_ {false};
 };
 
 #endif

@@ -78,6 +78,13 @@ TriggerTableView::~TriggerTableView()
     delete actionHandler_;
 }
 
+void TriggerTableView::enableOneRowMode()
+{
+    int h = delegate_->nodeBoxHeight();
+    setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    setFixedHeight(h+2);
+}
+
 //We should only call it once!!!
 void TriggerTableView::setModel(TriggerTableModel* model)
 {

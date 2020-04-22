@@ -38,6 +38,7 @@ public:
    bool operator==(const Limit& rhs) const;
    const std::string& name() const { return  n_;}
 
+   Node*  node() const {return node_;}
    void set_node(Node* n) { node_ = n; }
 
    void setValue(int v);

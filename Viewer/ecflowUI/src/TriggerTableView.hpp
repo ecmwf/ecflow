@@ -35,6 +35,7 @@ public:
     void rerender();
     void setCurrentItem(TriggerTableItem*);
     void enableContextMenu(bool enable);
+    void enableOneRowMode();
 
 public Q_SLOTS:
     void slotSelectItem(const QModelIndex&);

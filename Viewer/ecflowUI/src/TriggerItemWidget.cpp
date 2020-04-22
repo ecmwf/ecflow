@@ -11,7 +11,6 @@
 
 #include "Highlighter.hpp"
 #include "ServerHandler.hpp"
-#include "TriggerCollector.hpp"
 #include "TriggeredScanner.hpp"
 #include "VNode.hpp"
 #include "VSettings.hpp"
@@ -19,6 +18,8 @@
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include <QGuiApplication>
 #endif
+
+#include <QButtonGroup>
 
 //========================================================
 //
@@ -32,13 +33,9 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     handleAnyChange_=true;
 
     //We will not keep the contents when the item becomes unselected
-    unselectedFlags_.clear();
+    //unselectedFlags_.clear();
 
     setupUi(this);
-
-    //The collectors
-    triggerCollector_=new TriggerTableCollector(false);
-    triggeredCollector_=new TriggerTableCollector(false);
 
     //Scanner
     scanner_=new TriggeredScanner(this);
@@ -52,6 +49,9 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     connect(scanner_,SIGNAL(scanProgressed(int)),
             this,SLOT(scanProgressed(int)));
 
+    triggerTable_->setTriggeredScanner(scanner_);
+    triggerGraph_->setTriggeredScanner(scanner_);
+
     //Messages
     messageLabel_->hide();
     messageLabel_->setShowTypeTitle(false);
@@ -64,7 +64,7 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     on_dependInfoTb__toggled(false);
 
     //Dependency is off by default
-    dependTb_->setProperty("triggerDepend","1");
+    //dependTb_->setProperty("triggerDepend","1");
     dependTb_->setChecked(false);
     on_dependTb__toggled(false);
 
@@ -83,6 +83,23 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     exprTe_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
     exprTe_->setFixedHeight(fm.size(0,"A\nA\nA").height()+fm.height()/2);
 
+    //view mode - we show the table by default
+    modeGroup_ = new QButtonGroup(this);
+    modeGroup_->addButton(tableTb_, TableModeIndex);
+    modeGroup_->addButton(graphTb_, GraphModeIndex);
+    tableTb_->setChecked(true);
+    modeStacked_->setCurrentIndex(TableModeIndex);
+
+    connect(modeGroup_, SIGNAL(buttonToggled(int,bool)),
+            this, SLOT(slotChangeMode(int, bool)));
+
+    zoomSlider_->setMaximumWidth(120);
+    triggerGraph_->setZoomSlider(zoomSlider_);
+    zoomLabel_->setProperty("graphTitle", "1");
+    infoTb_->hide();
+    showGraphButtons(false);
+
+    //table
     connect(triggerTable_,SIGNAL(depInfoWidgetClosureRequested()),
             this,SLOT(slotHandleDefInfoWidgetClosure()));
 
@@ -94,13 +111,21 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
 
     connect(triggerTable_,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
         this,SLOT(slotDashboardCommand(VInfo_ptr,QString)));
+
+    //graph
+    connect(triggerGraph_,SIGNAL(linkSelected(VInfo_ptr)),
+            this,SLOT(slotLinkSelected(VInfo_ptr)));
+
+    connect(triggerGraph_,SIGNAL(infoPanelCommand(VInfo_ptr,QString)),
+        this,SLOT(slotInfoPanelCommand(VInfo_ptr,QString)));
+
+    connect(triggerGraph_,SIGNAL(dashboardCommand(VInfo_ptr,QString)),
+        this,SLOT(slotDashboardCommand(VInfo_ptr,QString)));
 }
 
 TriggerItemWidget::~TriggerItemWidget()
 {
     clearContents();
-    delete triggerCollector_;
-    delete triggeredCollector_;
 }
 
 QWidget* TriggerItemWidget::realWidget()
@@ -148,7 +173,6 @@ void TriggerItemWidget::load()
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 #endif
-
         //Display trigger expression
         std::string te,ce;
         n->triggerExpr(te,ce);
@@ -156,22 +180,11 @@ void TriggerItemWidget::load()
         if(txt.isEmpty()) txt=tr("No trigger expression is available for the selected node!");
         exprTe_->setPlainText(txt);
 
-        triggerTable_->setInfo(info_);
-
-        //Load table
-        triggerTable_->beginTriggerUpdate();
-
-        //collect the list of triggers of this node
-        triggerCollector_->setDependency(dependency());
-        n->triggers(triggerCollector_);
-
-        triggeredCollector_->setDependency(dependency());
-        n->triggered(triggeredCollector_,triggeredScanner());
-
-        triggerTable_->setTriggerCollector(triggerCollector_,triggeredCollector_);
-        triggerTable_->endTriggerUpdate();
-
-        triggerTable_->resumeSelection();
+        if (modeGroup_->checkedId() == TableModeIndex) {
+            loadTable();
+        } else {
+            loadGraph();
+        }
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
         QGuiApplication::restoreOverrideCursor();
@@ -179,28 +192,58 @@ void TriggerItemWidget::load()
     }
 }
 
+void TriggerItemWidget::loadTable()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+    triggerTable_->clear();
+    triggerTable_->setInfo(info_, dependency());
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
+}
+
+void TriggerItemWidget::loadGraph()
+{
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+#endif
+
+    triggerGraph_->clear();
+    triggerGraph_->setInfo(info_, dependency());
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+        QGuiApplication::restoreOverrideCursor();
+#endif
+}
+
 void TriggerItemWidget::clearContents()
 {
     InfoPanelItem::clear();
     exprTe_->clear();
     triggerTable_->clear();
+    triggerGraph_->clear();
 
     if(!active_)
         triggerTable_->clearSelection();
-
-    //At this point the tables are cleared so it is safe to clear the collectors
-    triggerCollector_->clear();
-    triggeredCollector_->clear();
 }
 
 void TriggerItemWidget::clearTriggers()
 {
     exprTe_->clear();
     triggerTable_->clear();
+    triggerGraph_->clear();
+}
 
-    //At this point the tables are cleared so it is safe to clear the collectors
-    triggerCollector_->clear();
-    triggeredCollector_->clear();
+void TriggerItemWidget::rerender()
+{
+    if (modeGroup_->checkedId() == TableModeIndex) {
+        //
+    } else {
+        triggerGraph_->rerender();
+    }
 }
 
 void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
@@ -220,9 +263,15 @@ void TriggerItemWidget::updateState(const FlagSet<ChangeFlag>& flags)
         {
             load();
         }
+    } else if(flags.isSet(SelectedChanged)) {
+        if (selected_ && active_) {
+            if (!info_ || !info_->node()) {
+                load();
+            } else {
+                rerender();
+            }
+        }
     }
-
-    Q_ASSERT(!flags.isSet(SelectedChanged));
 
     checkActionState();
 }
@@ -279,7 +328,6 @@ bool TriggerItemWidget::dependency() const
     return dependTb_->isChecked();
 }
 
-
 void TriggerItemWidget::slotLinkSelected(VInfo_ptr info)
 {
    InfoPanelItem::linkSelected(info);
@@ -309,6 +357,32 @@ void TriggerItemWidget::infoProgress(const std::string& text,int value)
 
 #endif
 
+void TriggerItemWidget::slotChangeMode(int, bool)
+{
+    modeStacked_->setCurrentIndex(modeGroup_->checkedId());
+    showGraphButtons(modeGroup_->checkedId() == GraphModeIndex);
+
+    if (modeGroup_->checkedId() == TableModeIndex) {
+        if (triggerTable_->info() != info_ ||
+            triggerTable_->dependency() != dependency()) {
+            triggerGraph_->becameInactive();
+            loadTable();
+        }
+    } else if (modeGroup_->checkedId() == GraphModeIndex) {
+        if (triggerGraph_->info() != info_ ||
+            triggerGraph_->dependency() != dependency()) {
+            loadGraph();
+        }
+    }
+}
+
+void TriggerItemWidget::showGraphButtons(bool b)
+{
+    dependInfoTb_->setVisible(!b);
+    zoomLabel_->setVisible(b);
+    zoomSlider_->setVisible(b);
+}
+
 void TriggerItemWidget::scanStarted()
 {
     messageLabel_->showInfo("Mapping trigger connections in the whole tree ...");
@@ -333,8 +407,10 @@ void TriggerItemWidget::writeSettings(VComboSettings* vs)
     vs->putAsBool("dependency",dependency());
     vs->putAsBool("dependencyInfo",dependInfoTb_->isChecked());
     vs->putAsBool("expression",exprTb_->isChecked());
+    vs->put("mode", modeGroup_->checkedId());
 
     triggerTable_->writeSettings(vs);
+    triggerGraph_->writeSettings(vs);
     vs->endGroup();
 }
 
@@ -353,7 +429,16 @@ void TriggerItemWidget::readSettings(VComboSettings* vs)
 #endif
 
     exprTb_->setChecked(vs->getAsBool("expression",exprTb_->isChecked()));
+
+    int mode = vs->get<int>("mode", 0);
+    if (mode == TableModeIndex) {
+        tableTb_->setChecked(true);
+    } else if (mode == GraphModeIndex) {
+        graphTb_->setChecked(true);
+    }
+
     triggerTable_->readSettings(vs);
+    triggerGraph_->readSettings(vs);
     vs->endGroup();
 }
 
@@ -363,10 +448,6 @@ void TriggerItemWidget::readSettings(VComboSettings* vs)
 
 void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspect::Type>& aspect)
 {
-    //We do not track changes when the item is not selected
-    if(!selected_ || !active_)
-        return;
-
     if(!info_ || !info_->isNode())
         return;
 
@@ -374,7 +455,11 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     //we need to reload the item
     if(!info_->node()->root()->triggeredScanned())
     {
-        load();
+        if(selected_ && active_) {
+            load();
+        } else {
+            clearContents();
+        }
         return;
     }
 
@@ -383,27 +468,44 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     {
         if(it == ecf::Aspect::ADD_REMOVE_ATTR || it == ecf::Aspect::EXPR_TRIGGER)
         {
-            load();
+            if(selected_ && active_) {
+                load();
+            } else {
+                clearContents();
+            }
             return;
         }
     }
 
     //For other changes we only reload the triggers if the change happened to an item in the collected triggers
-    for(auto it : aspect)
-    {
-        if(it == ecf::Aspect::NODE_VARIABLE || it == ecf::Aspect::METER || it == ecf::Aspect::LIMIT ||
-                it == ecf::Aspect::EVENT)
-        {
-           if(triggerCollector_->contains(n,true) || triggeredCollector_->contains(n,true))
-           {
-               load();
-               return;
-           }
-        }
-    }
+//    for(auto it : aspect)
+//    {
+//        if(it == ecf::Aspect::NODE_VARIABLE || it == ecf::Aspect::METER || it == ecf::Aspect::LIMIT ||
+//                it == ecf::Aspect::EVENT)
+//        {
+//           if (modeGroup_->checkedId() ==  TableModeIndex) {
+//               if (triggerTable_->contains(n)) {
+//                   load();
+//                   return;
+//               }
+//           } else if (modeGroup_->checkedId() ==  TableModeIndex) {
+//               if (triggerGraph_->contains(n)) {
+//                   load();
+//                   return;
+//               }
+//           }
+//        }
+//    }
+
+    //We do not track further  changes when the item is not selected
+    if(!selected_ || !active_)
+        return;
 
     //For the rest of the changes in we rerender the collected items that might have changed
-    triggerTable_->nodeChanged(n,aspect);
+    if (modeGroup_->checkedId() ==  TableModeIndex)
+        triggerTable_->nodeChanged(n, aspect);
+    else if (modeGroup_->checkedId() ==  GraphModeIndex)
+        triggerGraph_->nodeChanged(n, aspect);
 }
 
 static InfoPanelItemMaker<TriggerItemWidget> maker1("triggers");

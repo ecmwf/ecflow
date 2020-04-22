@@ -722,6 +722,7 @@ void ServerHandler::run(VTask_ptr task)
     case VTask::ZombieListTask:
     case VTask::ZombieCommandTask:
     case VTask::JobStatusTask:
+    case VTask::PlugTask:
 		comQueue_->addTask(task);
 		break;
 	default:
@@ -1063,6 +1064,12 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
     //The status of the tasks sent from the info panel must be properly set to
     //FINISHED!! Only that will notify the observers about the change!!
 
+    // task finished but a reset is already on its way
+    if (activity() == LoadActivity && task->type()  != VTask::ResetTask) {
+        //TODO: more refinement here is needed
+        return;
+    }
+
     // The news reply has to be carefully checked
     if(task->type() == VTask::NewsTask)
     {
@@ -1242,6 +1249,16 @@ void ServerHandler::clientTaskFinished(VTask_ptr task,const ServerReply& serverR
                 break;
             }
 
+            //PlugTask silently performs sync_local().
+            case VTask::PlugTask:
+            {
+                auto target = task->param("target_server_name");
+                if (ServerHandler* targetSvr = ServerHandler::find(target)) {
+                    targetSvr->refresh();
+                }
+                break;
+
+            }
             case VTask::StatsTask:
             {
                 task->reply()->text( serverReply.get_string() );
@@ -1294,6 +1311,12 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg,co
 
 	//TODO: suite filter  + ci_ observers
 
+    // task failed but a reset is already on its way
+    if (activity() == LoadActivity && task->type()  != VTask::ResetTask) {
+        //TODO: more refinement here is needed
+        return;
+    }
+
     if(task->type() == VTask::NewsTask)
     {
         //This was a news() called after ServerVersionTask failed!
@@ -1336,6 +1359,12 @@ void ServerHandler::clientTaskFailed(VTask_ptr task,const std::string& errMsg,co
     else if(task->type()  == VTask::CommandTask)
     {
         //comQueue_->addSyncTask();
+        task->reply()->setErrorText(errMsg);
+        task->status(VTask::ABORTED);
+        UserMessage::message(UserMessage::WARN, true, errMsg);
+    }
+    else if(task->type()  == VTask::PlugTask)
+    {
         task->reply()->setErrorText(errMsg);
         task->status(VTask::ABORTED);
         UserMessage::message(UserMessage::WARN, true, errMsg);

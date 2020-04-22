@@ -13,6 +13,7 @@
 
 #include <QBrush>
 #include <QMap>
+#include <QPainter>
 #include <QPen>
 #include <QStyledItemDelegate>
 
@@ -44,10 +45,11 @@ public:
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const override;
 
     //custom implementations
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
+    void paintIt(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index,QSize&) const;
-    void sizeHint(const QModelIndex& index,int& w,int& h) const;
+    void sizeHintCompute(const QModelIndex& index,int& w,int& h, bool compAttrWidth=false) const;
 
+    int nodeBoxHeight();
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();
@@ -97,6 +99,9 @@ protected:
     QString subFailText_;
 
     TreeNodeModel* model_;
+
+    mutable QPixmap tmpPix_;
+    mutable QPainter* tmpPainter_ {nullptr};
 };
 
 #endif // TREENODEVIEWDELEGATEBASE_HPP

@@ -520,6 +520,9 @@ void MenuHandler::setupShortcut(QObject* receiver, QWidget* w, const std::string
 {
     for(auto m: menus_) {
         for (auto item: m->itemsFixed()) {
+            if (item->command() == "expand") {
+                int a=1;
+            }
             if(QShortcut* sc = item->createShortcut(w, view)) {
                 QObject::connect(sc, SIGNAL(activated()),
                     receiver, SLOT(slotCommandShortcut()));
@@ -896,9 +899,9 @@ QShortcut* MenuItem::createShortcut(QWidget* parent, const std::string& view)
     return nullptr;
 }
 
-bool MenuItem::isValidFor(const std::vector<VInfo_ptr>& nodes) const
+bool MenuItem::isValidFor(const std::vector<VInfo_ptr>& nodes, bool allowHidden) const
 {
-    if(hidden())
+    if(!allowHidden && hidden())
         return false;
 
     if(nodes.size() > 1 && !multiSelect())
