@@ -48,7 +48,7 @@ public:
    void move_peer(Node* src, Node* dest) override;
 
 	bool hasAutoCancel() const override;
-   void calendarChanged(const ecf::Calendar&,Node::Calendar_args&,const ecf::LateAttr* inherited_late) override;
+   bool calendarChanged(const ecf::Calendar&,Node::Calendar_args&,const ecf::LateAttr* inherited_late,bool holding_parent_day_or_date) override;
  	bool resolveDependencies(JobsParam& ) override;
    bool has_time_based_attributes() const override;
  	bool check(std::string& errorMsg, std::string& warningMsg) const override;

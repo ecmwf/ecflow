@@ -416,7 +416,8 @@ void TimeSeries::miss_next_time_slot()
    }
 }
 
-bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot& the_min, const TimeSlot& the_max) const
+
+bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot& the_min, const TimeSlot& the_max,bool cmd_context) const
 {
    // ************************************************************************
    // THIS IS CALLED IN THE CONTEXT WHERE NODE HAS COMPLETED. Hence ****asyncronous****
@@ -424,10 +425,11 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
    // HENCE THIS FUNCTION MUST RETURN FALSE, WHEN END OF TIME SLOT HAS BEEN REACHED/expired
    // The resolution is in minutes
    // *************************************************************************
-   //cout << "TimeSeries::checkForRequeue " << calendar.toString() << "\n";
+   //cout << "TimeSeries::checkForRequeue " << calendar.suite_time_str() << " min: " << the_min << " max: " << the_max << " cmd_context(" << cmd_context << ") +++++++++++++++\n";
 
    if (!isValid_) {
       // time has expired, hence can no longer re-queues, i.e no future time dependency
+	   //cout << " TimeSeries::checkForRequeue " << calendar.suite_time_str() << "  HOLDING\n";
       return false;
    }
 
@@ -441,6 +443,7 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
       // If the current value is greater that finish, then returning true would increment
       // value past the end, and force node state to be stuck in state queue.
       if ( nextTimeSlot_ > finish_ ) {
+   	    //cout << " TimeSeries::checkForRequeue ( nextTimeSlot_ > finish_ )    HOLDING\n";
          return false;
       }
 
@@ -455,14 +458,22 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
          }
          else {
             // The day changed between (requeue/reset):->queued->submitted->active->complete->(checkForRequeue)
-            //cout << "TimeSeries::checkForRequeue day changed =====================================================\n";
+            //cout << " TimeSeries::checkForRequeue day changed ===================================================== HOLDING\n";
             return false;
          }
       }
 
       time_duration calendar_duration = duration(calendar);
-      if ( calendar_duration < lastTimeSlot_) {
-         return true;
+      if (cmd_context) {
+    	  // In the *COMMAND* context, allow re-queue if we are *BEFORE* the last time slot
+    	  if (calendar_duration < lastTimeSlot_) {
+    		  return true;
+    	  }
+      }
+      else {
+    	  if (calendar_duration >= start_.duration() && calendar_duration < lastTimeSlot_) {
+    		  return true;
+    	  }
       }
       return false;
    }
@@ -475,14 +486,27 @@ bool TimeSeries::checkForRequeue( const ecf::Calendar& calendar, const TimeSlot&
 
    // We have a single time slot, *OR* multiple with same time slot
    if (the_min == the_max) {
+	   //cout << " TimeSeries::checkForRequeue (the_min == the_max) HOLDING \n";
       return false;
    }
 
    // The the_min/the_max takes into account *all* start/finish Time and Today attributes
    time_duration calendar_duration = duration(calendar);
-   if (calendar_duration < the_max.duration()) {
-      return true;
+   if (cmd_context) {
+ 	   // In the *COMMAND* context, allow re-queue if we are *BEFORE* the max time slot
+	   if (calendar_duration < the_max.duration()) {
+		   //cout << " TimeSeries::checkForRequeue *COMMAND* context calendar_duration < the_max.duration()) --> allow requeue\n";
+		   return true;
+	   }
    }
+   else {
+	   if (calendar_duration >= the_min.duration() && calendar_duration < the_max.duration()) {
+		   //cout << " TimeSeries::checkForRequeue (calendar_duration > the_min.duration() && calendar_duration < the_max.duration()) --> allow requeue\n";
+		   return true;
+	   }
+   }
+
+   //cout << " TimeSeries::checkForRequeue calendar duration " << to_simple_string(calendar_duration) << " not in range " <<  to_simple_string(the_min.duration())  << "-" <<  to_simple_string(the_max.duration()) << "  HOLDING \n";
 
    return false;
 }

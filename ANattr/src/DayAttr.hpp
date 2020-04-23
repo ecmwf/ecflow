@@ -37,15 +37,17 @@ public:
    bool operator<(const DayAttr& rhs) const { return day_ < rhs.day_; }
 	bool structureEquals(const DayAttr& rhs) const;
 
-   void reset();
-   void requeue();
+	void reset();
+	void reset(const ecf::Calendar& c);
+	void requeue();
+	void requeue(const ecf::Calendar& c);
 
 	void setFree();   // ensures that isFree() always returns true
 	void clearFree(); // resets the free flag
 	bool isSetFree() const { return free_; }
 	void calendarChanged( const ecf::Calendar& c, bool clear_at_midnight = true) ; // can set attribute free
 	bool isFree(const ecf::Calendar&) const;
-	bool checkForRequeue( const ecf::Calendar&,const std::vector<DayAttr>&) const;
+	bool checkForRequeue( const ecf::Calendar&) const;
 	bool validForHybrid(const ecf::Calendar&) const;
  	bool why(const ecf::Calendar&, std::string& theReasonWhy) const;
 
@@ -65,17 +67,21 @@ public:
 
 	// access
 	DayAttr::Day_t day() const { return day_;}
+	const boost::gregorian::date& date() const { return date_;}
 
 	boost::gregorian::date next_matching_date(const ecf::Calendar& c) const;
 
-   bool is_free(const ecf::Calendar&) const; // ignores free_
 private:
+   bool is_free(const ecf::Calendar&) const; // ignores free_
+   boost::gregorian::date matching_date(const ecf::Calendar& c) const;
    void write(std::string&) const;
 
 private:
    DayAttr::Day_t day_{DayAttr::SUNDAY};
    unsigned int state_change_no_{0};    // *not* persisted, only used on server side
    bool     free_{false};               // persisted for use by why() on client side
+
+   boost::gregorian::date date_;        // corresponding to day_
 
    friend class cereal::access;
    template<class Archive>

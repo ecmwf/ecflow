@@ -250,7 +250,7 @@ void Suite::updateCalendar(const ecf::CalendarUpdateParams & calParams, Node::Ca
 
 		update_generated_variables();
 
- 		calendarChanged(cal_,cal_args,get_late());
+ 		(void)calendarChanged(cal_,cal_args,get_late(),false /*holding_parent_day_or_date*/);
 	}
 }
 

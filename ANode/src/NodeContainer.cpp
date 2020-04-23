@@ -142,7 +142,8 @@ void NodeContainer::requeue(Requeue_args& args)
 	if (d_st_ == DState::COMPLETE )
 	   args.log_state_changes_ = false;
 
-   Node::Requeue_args largs(true /* reset repeats, Moot for tasks */,
+   Node::Requeue_args largs(args.requeue_t,
+		                    true /* reset repeats, Moot for tasks */,
                             args.clear_suspended_in_child_nodes_,
                             args.reset_next_time_slot_,
                             true /* reset relative duration */,
@@ -414,20 +415,24 @@ boost::posix_time::time_duration NodeContainer::sum_runtime()
    return rt;
 }
 
-void NodeContainer::calendarChanged(
+bool NodeContainer::calendarChanged(
          const ecf::Calendar& c,
          Node::Calendar_args& cal_args,
-         const ecf::LateAttr* inherited_late)
+         const ecf::LateAttr* inherited_late,
+		 bool holding_parent_day_or_date)
 {
    // A node that is archived should not allow any change of state.
    if (get_flag().is_set(ecf::Flag::ARCHIVED)) {
-      return;
+      return false;
    }
 
    // The late attribute is inherited, we only set late on the task/alias
    // This will set: cal_args.holding_parent_day_or_date_ = this;
    // holding_parent_day_or_date_ is used to avoid freeing time attributes, when we have a holding parent day/date
-   Node::calendarChanged(c,cal_args,nullptr);
+   holding_parent_day_or_date = Node::calendarChanged(c,cal_args,nullptr,holding_parent_day_or_date);
+
+   //if (holding_parent_day_or_date)
+	//   cout << " calendarChanged: " << debugNodePath() << " " << holding_parent_day_or_date << " •••••••••• \n";
 
 	LateAttr overridden_late;
    if (inherited_late && !inherited_late->isNull()) {
@@ -439,11 +444,9 @@ void NodeContainer::calendarChanged(
 
    size_t node_vec_size = nodes_.size();
    for(size_t t = 0; t < node_vec_size; t++) {
-      nodes_[t]->calendarChanged(c,cal_args,&overridden_late);
+      (void)nodes_[t]->calendarChanged(c,cal_args,&overridden_late,holding_parent_day_or_date);
    }
-
-   // clear *IF* at the *SAME* level
-   if ( cal_args.holding_parent_day_or_date_ == this) cal_args.holding_parent_day_or_date_ = nullptr;
+   return false;
 }
 
 bool NodeContainer::hasAutoCancel() const

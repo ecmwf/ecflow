@@ -164,15 +164,17 @@ void Submittable::requeue(Requeue_args& args)
 }
 
 
-void Submittable::calendarChanged(
+bool Submittable::calendarChanged(
          const ecf::Calendar& c,
          Node::Calendar_args& cal_args,
-         const ecf::LateAttr* inherited_late)
+         const ecf::LateAttr* inherited_late,
+		 bool holding_parent_day_or_date)
 {
-   Node::calendarChanged(c, cal_args, nullptr);
+   (void)Node::calendarChanged(c, cal_args, nullptr, holding_parent_day_or_date);
 
    // Late flag should ONLY be set on Submittable
    check_for_lateness(c,inherited_late);
+   return false;
 }
 
 void Submittable::write_state(std::string& ret, bool& added_comment_char) const

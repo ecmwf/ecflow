@@ -86,8 +86,8 @@ public:
 	void setFree();   // ensures that isFree() always returns true, updates state_change_no_
 	bool isSetFree() const { return free_; }
  	bool isFree(const ecf::Calendar&) const;
-   bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max) const
-   { return ts_.checkForRequeue(c,the_min,the_max);}
+   bool checkForRequeue( const ecf::Calendar& c,const TimeSlot& the_min,const TimeSlot& the_max,bool cmd_context = false) const
+   { return ts_.checkForRequeue(c,the_min,the_max,cmd_context);}
 	void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const {ts_.min_max_time_slots(the_min,the_max);}
  	bool why(const ecf::Calendar&,const std::vector<DayAttr>&,const std::vector<DateAttr>&, std::string& theReasonWhy) const;
 

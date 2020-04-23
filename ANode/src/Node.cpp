@@ -249,7 +249,10 @@ void Node::begin()
       for(auto & time : times_)   {  time.reset(calendar);}
       for(auto & cron : crons_)   {  cron.reset(calendar);}
 
-      for(auto & day : days_)     {  day.reset(); }
+      for(auto & day : days_)     {  day.reset(calendar); }
+      days_copy_ = days_;
+      for(auto & day : days_copy_){  day.reset(calendar); }
+
       for(auto & date : dates_)   { date.reset(); }
       markHybridTimeDependentsAsComplete();
    }
@@ -306,7 +309,7 @@ void Node::requeue(Requeue_args& args)
       }
 
       // must be done before the re-queue
-      do_requeue_time_attrs(reset_next_time_slot,args.reset_relative_duration_);
+      do_requeue_time_attrs(reset_next_time_slot,args.reset_relative_duration_,args.requeue_t);
       markHybridTimeDependentsAsComplete();
    }
 
@@ -359,8 +362,9 @@ void Node::reset()
    for(auto & today : todays_) { today.resetRelativeDuration(); today.reset_only();}
    for(auto & time : times_)   {  time.resetRelativeDuration(); time.reset_only();}
    for(auto & cron : crons_)   {  cron.resetRelativeDuration(); cron.reset_only();}
-   for(auto & day : days_)     {  day.reset(); }
    for(auto & date : dates_)   { date.reset(); }
+   for(auto & day : days_)     {  day.reset(); }
+   days_copy_.clear();
 
    flag_.reset();
 
@@ -381,7 +385,7 @@ void Node::requeue_time_attrs()
    // Note: we *dont* mark hybrid time dependencies as complete.
    //       i.e. since this is called during alter command, it could be that
    //        the task is in a submitted or active state.
-   do_requeue_time_attrs(true/*reset_next_time_slot*/,true /*reset_relative_duration*/);
+   do_requeue_time_attrs(true/*reset_next_time_slot*/,true /*reset_relative_duration*/, Requeue_args::FULL);
 }
 
 void Node::requeue_labels()
@@ -390,12 +394,30 @@ void Node::requeue_labels()
    for(auto & label : labels_)  {   label.reset(); }
 }
 
-void Node::calendarChanged(
+//#define DEBUG_DAYS 1
+bool Node::calendarChanged(
 			const ecf::Calendar& c,
 			Node::Calendar_args& cal_args,
-			const ecf::LateAttr*)
+			const ecf::LateAttr*,
+			bool holding_parent_day_or_date
+			)
 {
-   calendar_changed_timeattrs(c,cal_args);
+   //cout << " Node:calendarChanged: " << debugNodePath() << " holding_parent_day_or_date " << holding_parent_day_or_date << "\n";
+
+   if (!holding_parent_day_or_date) {
+	   holding_parent_day_or_date = calendar_changed_timeattrs(c,cal_args);
+
+#ifdef DEBUG_DAYS
+	   if (holding_parent_day_or_date) {
+		   cout << " Node::calendarChanged: " << debugNodePath() << " SETTING holding_parent_day_or_date " << holding_parent_day_or_date << " ***********\n";
+	   }
+#endif
+   }
+#ifdef DEBUG_DAYS
+   else {
+	   cout << " Node::calendarChanged: " << debugNodePath() << " IGNORING since holding_parent_day_or_date  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n";
+   }
+#endif
 
    if (checkForAutoCancel(c)) {
       cal_args.auto_cancelled_nodes_.push_back(shared_from_this());
@@ -405,6 +427,7 @@ void Node::calendarChanged(
    if (!flag().is_set(ecf::Flag::RESTORED) && check_for_auto_archive(c)) {
       cal_args.auto_archive_nodes_.push_back(shared_from_this());
    }
+   return holding_parent_day_or_date;
 }
 
 void Node::check_for_lateness(const ecf::Calendar& c,const ecf::LateAttr* inherited_late)
@@ -521,7 +544,8 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             // This handles the case where a user, has manually intervened (i.e via run or complete) and we had a time attribute
             // That time attribute will have expired, typically we show next day. In the case where we have a parent repeat
             // we need to clear the flag, otherwise the task/family with time based attribute would wait for next day.
-            Node::Requeue_args args(false /* don't reset repeats */,
+            Node::Requeue_args args(Node::Requeue_args::REPEAT_INCREMENT,
+            		                false /* don't reset repeats */,
                                     clear_suspended_in_child_nodes,
                                     true /* reset_next_time_slot */,
                                     true /* reset relative duration */);
@@ -547,7 +571,8 @@ void Node::requeueOrSetMostSignificantStateUpNodeTree()
             }
          }
 
-         Node::Requeue_args args(false /* don't reset repeats */,
+         Node::Requeue_args args(Node::Requeue_args::TIME,
+        		                 false /* don't reset repeats */,
                                  clear_suspended_in_child_nodes,
                                  reset_next_time_slot ,
                                  false /*  don't reset relative duration */);
@@ -1598,7 +1623,21 @@ void Node::print(std::string& os) const
    for(const ecf::TimeAttr& t: times_) { t.print(os);    }
    for(const ecf::TodayAttr& t:todays_){ t.print(os);    }
    for(const DateAttr& date: dates_)   { date.print(os); }
-   for(const DayAttr& day: days_)      { day.print(os);  }
+
+   for(const DayAttr& day: days_) {
+	   bool day_found = false;
+	   for(const DayAttr& day_copy: days_copy_) {
+		   if (day == day_copy) {
+			   day_copy.print(os);
+			   day_found = true;
+			   break;
+		   }
+	   }
+	   if (!day_found) {
+		   day.print(os);
+	   }
+   }
+
    for(const CronAttr& cron: crons_)   { cron.print(os); }
 
    if (auto_cancel_) auto_cancel_->print(os);

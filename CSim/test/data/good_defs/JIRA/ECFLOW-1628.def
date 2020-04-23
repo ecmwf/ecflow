@@ -106,23 +106,3 @@ suite ecflow_1628
     endfamily
   endfamily
 endsuite
-
-#
-# The following fails, since for sunday(0) DayAttr::check_for_reque() will always return false, (ECFLOW-1628)
-#
-#
-#suite ecflow__1628
-#  clock    real 20.04.2020     # Monday
-#  endclock      27.04.2020     # Monday, add endclock otherwise we simulate for year due to repeat.
-#
-#  family fam
-#    verify complete:2  # after saturday@8am we re-queue due to future time dependency     
-#    day sunday # saturday
-#    day tuesday # sunday
-#    time 08:00
-#     
-#    task t1
-#        verify complete:2        
-#
-#  endfamily
-#endsuite

@@ -565,11 +565,7 @@ void Defs::requeue()
    flag_.reset();
    if (edit_history_set) flag().set(ecf::Flag::MESSAGE);
 
-   Node::Requeue_args args(true /* reset repeats */,
-                           true /* reset_day_date_reueue_count  */,
-                           0    /* clear_suspended_in_child_nodes*/,
-                           true /* reset_next_time_slot */,
-                           true /* reset relative duration */);
+   Node::Requeue_args args;
    size_t theSuiteVecSize = suiteVec_.size();
    for(size_t s = 0; s < theSuiteVecSize; s++) {
       suiteVec_[s]->requeue(args);

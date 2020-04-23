@@ -24,6 +24,9 @@
 
 using namespace std;
 using namespace ecf;
+using namespace boost::gregorian;
+
+//#define DEBUG_DAYS 1
 
 //===============================================================================
 
@@ -65,8 +68,17 @@ void DayAttr::calendarChanged( const ecf::Calendar& c, bool clear_at_midnight)
 	//	   task t2             # allow task t2 to continue to the next day, i.e clear_at_midnight = False
 	//	      trigger t1 == complete
 
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::calendarChanged " << dump() << " clear_at_midnight " << clear_at_midnight << " calendar:" << c.suite_time_str() << "\n";
+#endif
+
 	if (c.dayChanged()) {
-		if (clear_at_midnight) clearFree();
+		if (clear_at_midnight) {
+			clearFree();
+#ifdef DEBUG_DAYS
+			cout << " DayAttr::calendarChanged MIDNIGHT " << dump() << " calendar:" <<  c.suite_time_str() << "\n";
+#endif
+		}
 	}
 
 	if (free_) {
@@ -75,6 +87,9 @@ void DayAttr::calendarChanged( const ecf::Calendar& c, bool clear_at_midnight)
 
 	if (is_free(c)) {
 		setFree();
+#ifdef DEBUG_DAYS
+		cout << " DayAttr::calendarChanged SET FREE " << dump() << " calendar:" << c.suite_time_str() << "\n";
+#endif
 	}
 }
 
@@ -82,12 +97,39 @@ void DayAttr::reset()
 {
    free_ = false;
    state_change_no_ = Ecf::incr_state_change_no();
+   
+#ifdef DEBUG_DAYS
+   cout << " DayAttr::reset :" << dump() << "\n";
+#endif
+}
+
+void DayAttr::reset(const ecf::Calendar& c)
+{
+	reset();
+	date_ = matching_date(c);
+	
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::reset(calendar) :" << dump() << " calendar:" << c.suite_time_str() << "\n";
+#endif
 }
 
 void DayAttr::requeue()
 {
    free_ = false;
    state_change_no_ = Ecf::incr_state_change_no();
+#ifdef DEBUG_DAYS
+   cout << " DayAttr::requeue " << dump() << "\n";
+#endif
+}
+
+void DayAttr::requeue(const ecf::Calendar& c)
+{
+	requeue();
+	date_ = next_matching_date(c);
+	
+#ifdef DEBUG_DAYS
+	cout << "  DayAttr::requeue(calendar) " << dump() << " calendar:" << c.suite_time_str() << "\n";
+#endif
 }
 
 bool DayAttr::isFree(const ecf::Calendar& calendar) const
@@ -99,17 +141,21 @@ bool DayAttr::isFree(const ecf::Calendar& calendar) const
  	return is_free(calendar);
 }
 
-bool DayAttr::is_free(const ecf::Calendar& calendar) const
+bool DayAttr::is_free(const ecf::Calendar& c) const
 {
-   return (calendar.day_of_week() == day_);
+#ifdef DEBUG_DAYS
+   cout << " DayAttr::is_free " << dump() << " calendar:" << c.suite_time_str() << "  " << (c.date() == date_) <<  "\n";
+#endif
+
+   return (c.date() == date_);
 }
 
 void DayAttr::setFree() {
 	free_ = true;
 	state_change_no_ = Ecf::incr_state_change_no();
 
-#ifdef DEBUG_STATE_CHANGE_NO
-	std::cout << "DayAttr::setFree()\n";
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::setFree() " << dump() << "\n";
 #endif
 }
 
@@ -117,67 +163,30 @@ void DayAttr::clearFree() {
 	free_ = false;
 	state_change_no_ = Ecf::incr_state_change_no();
 
-#ifdef DEBUG_STATE_CHANGE_NO
-	std::cout << "DayAttr::clearFree()\n";
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::clearFree() " << dump() << "\n";
 #endif
 }
 
-bool DayAttr::checkForRequeue( const ecf::Calendar& calendar,const std::vector<DayAttr>& days) const
+bool DayAttr::checkForRequeue( const ecf::Calendar& c) const
 {
  	// if calendar is hybrid, we can't requeue
-	if (calendar.hybrid()) {
+	if (c.hybrid()) {
 		return false;
 	}
 
-	// checkForRequeue is called when we are deciding whether to re-queue the node.(under AUTOMATED RE-QUEUE)
+	// checkForRequeue is called when we are deciding whether to re-queue the node
 	// Hence we *MUST* have completed with *THIS* day. Also crons,time,today have all returned false.
 	// If this date is in the future, they we should re-queue
-	// 	    return (day_ > calendar.day_of_week() );
-	//    sunday    0
-	//    monday    1
-	//    tuesday   2
-	//    wednesday 3
-	//    thursday  4
-	//    friday    5
-	//    saturday  6
-	//  *HOWEVER* this breaks if day is Saturday(6) and next day is Sunday(0) *or* any other day,
-	//  or put another way, this will always re-queue for Saturday, irrespective of future day.
-	//    task t1
-	//       time 23:00
-	//       day  saturday
-	//       day  monday
-	//  This becomes more problematic when we have top level repeat, as it will never complete, i.e ECFLOW-1628
-	//  ECFLOW-1628
-	//  repeat ....
-	//	  family f1
-	//	    day monday
-	//	    time 23:00
-	//	    task t1
-	//	  family f1
-	//	    day saturday  # using   return (day_ > calendar.day_of_week() ); means checkForRequeue() will always true for Saturday
-	//	    time 23:00
-	//	    task t1
-	//
-	// Likewise:
-	//	suite ecflow_1628
-	//	  clock    real 20.04.2020     # Monday
-	//	  endclock      27.04.2020     # Monday, add endclock otherwise we simulate for year due to repeat.
-	//	  family fam
-	//	    verify complete:2 
-	//	    day sunday
-	//	    day tuesday
-	//	    time 08:00
-	//	    task t1
-	//	        verify complete:2        # task should complete twice
-	// This will ONLY complete once, because sunday(0) will *NEVER* satisfy (day_ > calendar.day_of_week()) <TODO>
 
-	// The *NORMAL* use case is to have a single day, hence we will return false, when ever we have a single day.
-	if (days.size() == 1) {
-		// just have a single day, which *MUST* be this day
-		return false; // Handle the single Saturday under a repeat loop.
-	}
+	assert(!date_.is_special());
 
-	return (day_ > calendar.day_of_week() );
+	bool res = (date_ > c.date() );
+
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::check_for_requeue " << dump() << " calendar:" << c.suite_time_str() << " returning " << res << " ************\n";
+#endif
+	return res;
 }
 
 bool DayAttr::validForHybrid(const ecf::Calendar& calendar) const
@@ -201,11 +210,15 @@ void DayAttr::print(std::string& os) const
 {
 	Indentor in;
 	Indentor::indent(os) ; write(os);
-   if (!PrintStyle::defsStyle()) {
-      if (free_) {
-         os += " # free";
-      }
-   }
+	if (!PrintStyle::defsStyle()) {
+		if (free_) {
+			os += " # free ";
+		}
+#ifdef DEBUG_DAYS
+		os += " ";
+		os += to_simple_string(date_);
+#endif
+	}
 	os += "\n";
 }
 
@@ -228,6 +241,7 @@ std::string DayAttr::dump() const
 	ss << toString();
  	if (free_) ss << " (free)";
 	else       ss << " (holding)";
+ 	ss << " " << to_simple_string(date_);
   	return ss.str();
 }
 
@@ -300,6 +314,21 @@ std::vector< std::string > DayAttr::allDays() {
 	vec.emplace_back("saturday");
 	vec.emplace_back("sunday");
 	return vec;
+}
+
+boost::gregorian::date DayAttr::matching_date(const ecf::Calendar& c) const
+{
+    boost::gregorian::date_duration one_day(1);
+    boost::gregorian::date the_next_matching_date = c.date();  // todays date
+
+    for(int i=0; i<7; i++) {
+    	if (the_next_matching_date.day_of_week().as_number() == day_) {
+    		return the_next_matching_date;
+    	}
+    	the_next_matching_date += one_day;
+    }
+    assert(false);
+    return c.date();
 }
 
 boost::gregorian::date DayAttr::next_matching_date(const ecf::Calendar& c) const

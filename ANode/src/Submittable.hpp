@@ -48,7 +48,7 @@ public:
    void complete();
 
    /// The late attribute, ONLY applies to the Submittable and not NodeContainer
-   void calendarChanged(const ecf::Calendar&, Node::Calendar_args&,const ecf::LateAttr* inherited_late) override;
+   bool calendarChanged(const ecf::Calendar&, Node::Calendar_args&,const ecf::LateAttr* inherited_late,bool holding_parent_day_or_date) override;
 
    /// Overridden to reset the try number
    /// The tasks job can be invoked multiple times. For each invocation we want to preserve

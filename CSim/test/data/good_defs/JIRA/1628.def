@@ -1,0 +1,31 @@
+suite ecflow__1628
+  clock    real 20.04.2020     # Monday
+  endclock      27.04.2020     # Monday, add endclock otherwise we simulate for year due to repeat.
+
+  task t1 ;  day monday ;    verify complete:1      
+  task t2 ;  day tuesday ;   verify complete:1        
+  task t3 ;  day wednesday ; verify complete:1        
+  task t4 ;  day thursday ;  verify complete:1       
+  task t5 ;  day friday ;    verify complete:1       
+  task t6 ;  day saturday ;  verify complete:1        
+  task t7 ;  day sunday ;    verify complete:1  
+  
+  task t11 ;  day monday ;    day tuesday ;   verify complete:2        
+  task t21 ;  day tuesday ;   day monday ;    verify complete:2        
+  task t31 ;  day wednesday ; day tuesday ;   verify complete:2        
+  task t41 ;  day thursday ;  day wednesday ; verify complete:2        
+  task t51 ;  day friday ;    day thursday ;  verify complete:2        
+  task t61 ;  day saturday ;  day friday ;    verify complete:2        
+  task t71 ;  day sunday ;    day saturday ;  verify complete:2  
+
+  task t72 ;  day sunday ; day monday ; day tuesday ; day wednesday ; day thursday ; day sunday ; day friday ; day saturday ;  verify complete:7  
+
+  family fam
+    verify complete:2      
+    day sunday 
+    day tuesday  
+    time 08:00
+    task t1
+        verify complete:2        
+  endfamily
+endsuite

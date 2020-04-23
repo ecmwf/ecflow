@@ -194,6 +194,7 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
    timeSeries2.reset( c );
    timeSeries3.reset( c );
 
+   bool cmd_context = true;
 	for(int hour=1; hour < 24; hour++) {
 		// Update calendar every hour, then see we can match time series, *RELATIVE* to suite start
 		c.update( time_duration( hours(1) ) );
@@ -204,8 +205,9 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
 //		cerr << "hour = " << hour << " calendar_duration " << to_simple_string(timeSeries.duration(c))
 //		    << " timeSeries=" << timeSeries.toString() << " timeSeries2=" << timeSeries2.toString() << " timeSeries3=" << timeSeries3.toString() << "\n";
 		if (hour < timeSeries.start().hour()) {
-         BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(c,t1_min,t1_max)," Time series " << timeSeries.toString() << "checkForRequeue should pass at " << hour );
-         BOOST_CHECK_MESSAGE(!timeSeries.isFree(c),"Time series " << timeSeries.toString() << " should NOT be free at hour " << hour );
+	         BOOST_CHECK_MESSAGE(timeSeries.checkForRequeue(c,t1_min,t1_max,cmd_context)," Time series " << timeSeries.toString() << " checkForRequeue should pass at " << c.suite_time_str() );
+	         BOOST_CHECK_MESSAGE(!timeSeries.checkForRequeue(c,t1_min,t1_max)," Time series " << timeSeries.toString() << " checkForRequeue should fail at " << c.suite_time_str() );
+             BOOST_CHECK_MESSAGE(!timeSeries.isFree(c),"Time series " << timeSeries.toString() << " should NOT be free at hour " << hour );
 		}
 		else if (hour >= timeSeries.start().hour() && hour <= timeSeries.finish().hour()) {
 			BOOST_CHECK_MESSAGE(timeSeries.isFree(c),"Time series " << timeSeries.toString() << " should be free at hour " << hour );
@@ -226,7 +228,7 @@ BOOST_AUTO_TEST_CASE( test_time_series_increment_real )
 
 
       if (hour < timeSeries2.start().hour()) {
-         BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(c,t1_min,t1_max)," Time series " << timeSeries2.toString() << "checkForRequeue should pass at " << hour );
+         BOOST_CHECK_MESSAGE(!timeSeries2.checkForRequeue(c,t1_min,t1_max)," Time series " << timeSeries2.toString() << "checkForRequeue should pass at " << hour );
          BOOST_CHECK_MESSAGE(!timeSeries2.isFree(c),"Time series " << timeSeries2.toString() << " should NOT be free at hour " << hour );
       }
       else if (hour >= timeSeries2.start().hour() && hour <=timeSeries2.finish().hour()) {
@@ -425,10 +427,10 @@ BOOST_AUTO_TEST_CASE( test_time_series_finish_not_divisble_by_increment )
   			}
 
          if (calendar.dayChanged()) {
-            BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()));
+            BOOST_CHECK_MESSAGE(!timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()));
          }
          else if ( calendar.suiteTime().time_of_day() < timeSeries2.start().duration()) {
-            BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
+            BOOST_CHECK_MESSAGE(!timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()) );
          }
          else if ( calendar.suiteTime().time_of_day() >= timeSeries2.start().duration() && calendar.suiteTime().time_of_day() < last2	) {
      			BOOST_CHECK_MESSAGE(timeSeries2.checkForRequeue(calendar,t2_min,t2_max)," expected " << timeSeries2.toString() << " checkForRequeue to pass at " << to_simple_string(calendar.suiteTime()));

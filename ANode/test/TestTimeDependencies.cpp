@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( test_day_time_combination )
 
       defs.updateCalendar(calUpdateParams);
       if ( suite->calendar().dayChanged() ) {
-         Node::Requeue_args args;
+         Node::Requeue_args args(Node::Requeue_args::TIME);
          t1->requeue(args);
       }
       //cout << "Suite time " << suite->calendar().suiteTime() << " dayChanged: " <<   suite->calendar().dayChanged() << "\n";
@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE( test_time_day_combination_in_hierarchy )
    //  clock real 7.6.2015 # sunday
    //  family f1
    //    time 10:00
-   //    task t1      # task should run twice, Monday morning, and Monday at 10:00
+   //    task t1      # task should run *ONCE*, Monday morning , the 10:00 has no effect
    //      day monday
    Defs  defs;
    suite_ptr suite = defs.add_suite("s1");
@@ -201,7 +201,6 @@ BOOST_AUTO_TEST_CASE( test_time_day_combination_in_hierarchy )
 
    CalendarUpdateParams calUpdateParams( hours(1) );
    boost::posix_time::ptime expected_time1 = boost::posix_time::ptime(date(2015,6,8),time_duration(0,0,0)); //Monday & 00:00
-   boost::posix_time::ptime expected_time2 = boost::posix_time::ptime(date(2015,6,8),time_duration(10,0,0)); //Monday & 10
    //cout << defs << "\n";
 
    int submitted = 0;
@@ -222,10 +221,6 @@ BOOST_AUTO_TEST_CASE( test_time_day_combination_in_hierarchy )
          if ( submitted == 1)
             BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time1,"\nExpected to submit at " << expected_time1 << " only, but also found " << suite->calendar().suiteTime());
 
-         // 2nd Run: Monday at 10:00 am
-         if ( submitted == 2)
-            BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time2,"\nExpected to submit at " << expected_time2 << " only, but also found " << suite->calendar().suiteTime());
-
          Node::Requeue_args args;
          f1->requeue(args);
          //cout << "   requeue f1 at " << suite->calendar().suiteTime() << " " << days[0].dump() << " " << times[0].dump() << "\n";
@@ -233,7 +228,7 @@ BOOST_AUTO_TEST_CASE( test_time_day_combination_in_hierarchy )
 
       defs.updateCalendar(calUpdateParams);
    }
-   BOOST_CHECK_MESSAGE( submitted == 2 ,"Expected two submission but found " << submitted);
+   BOOST_CHECK_MESSAGE( submitted == 1 ,"Expected one submission but found " << submitted);
 }
 
 

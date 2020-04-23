@@ -242,13 +242,12 @@ std::string Log::handle_write_failure()
 
 bool log(Log::LogType lt,const std::string& message)
 {
+	if (LogToCout::ok()) {
+		Indentor::indent(cout) << message << '\n';
+	}
+
 	if (Log::instance()) {
  		return Log::instance()->log(lt,message);
-	}
-	else {
-		if (LogToCout::ok()) {
-			Indentor::indent(cout) << message << '\n';
-		}
 	}
 	return true;
 }
