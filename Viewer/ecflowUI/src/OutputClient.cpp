@@ -9,6 +9,7 @@
 
 #include "OutputClient.hpp"
 
+#include <QNetworkProxy>
 #include <QTimer>
 
 OutputClient::OutputClient(const std::string& host,const std::string& portStr,QObject* parent) :
@@ -23,6 +24,9 @@ OutputClient::OutputClient(const std::string& host,const std::string& portStr,QO
 		port_=atoi(portStr.c_str());
 
 	soc_=new QTcpSocket(nullptr);
+
+    soc_->setProxy(QNetworkProxy::NoProxy);
+
 	connect(soc_,SIGNAL(readyRead()),
 		  this, SLOT(slotRead()));
 
