@@ -53,7 +53,9 @@ fi
 # =======================================================================
 which ecflow_client
 ecflow_client --version
+set +e # disable error
 ecflow_client --terminate=yes >> /dev/null
+set -e # stop the shell on first error
 
 set +e # ignore error 
 count=0
