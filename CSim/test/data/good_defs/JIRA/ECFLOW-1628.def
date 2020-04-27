@@ -7,7 +7,7 @@ suite ecflow_1628
       complete start/0 == complete and start/1 == complete and start/2 == complete and start/3 == complete and start/4 == complete and start/5 == complete and start/6 == complete
       family 0
         verify complete:7
-        time 23:59
+        time 23:00
         day monday
         task t1
         task t2
@@ -21,7 +21,7 @@ suite ecflow_1628
       endfamily
       family 1
         verify complete:7
-        time 23:59
+        time 23:00
         day tuesday
         task t1
         task t2
@@ -35,7 +35,7 @@ suite ecflow_1628
       endfamily
       family 2
         verify complete:7
-        time 23:59
+        time 23:00
         day wednesday
         task t1
         task t2
@@ -49,7 +49,7 @@ suite ecflow_1628
       endfamily
       family 3
         verify complete:7
-        time 23:59
+        time 23:00
         day thursday
         task t1
         task t2
@@ -63,7 +63,7 @@ suite ecflow_1628
       endfamily
       family 4
         verify complete:7
-        time 23:59
+        time 23:00
         day friday
         task t1
         task t2
@@ -77,7 +77,7 @@ suite ecflow_1628
       endfamily
       family 5
         verify complete:7
-        time 23:59
+        time 23:00
         day saturday
         task t1
         task t2
@@ -91,7 +91,7 @@ suite ecflow_1628
       endfamily
       family 6
         verify complete:7
-        time 23:59
+        time 23:00
         day sunday
         task t1
         task t2

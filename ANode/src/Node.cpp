@@ -250,9 +250,6 @@ void Node::begin()
       for(auto & cron : crons_)   {  cron.reset(calendar);}
 
       for(auto & day : days_)     {  day.reset(calendar); }
-      days_copy_ = days_;
-      for(auto & day : days_copy_){  day.reset(calendar); }
-
       for(auto & date : dates_)   { date.reset(); }
       markHybridTimeDependentsAsComplete();
    }
@@ -364,7 +361,6 @@ void Node::reset()
    for(auto & cron : crons_)   {  cron.resetRelativeDuration(); cron.reset_only();}
    for(auto & date : dates_)   { date.reset(); }
    for(auto & day : days_)     {  day.reset(); }
-   days_copy_.clear();
 
    flag_.reset();
 
@@ -1623,21 +1619,7 @@ void Node::print(std::string& os) const
    for(const ecf::TimeAttr& t: times_) { t.print(os);    }
    for(const ecf::TodayAttr& t:todays_){ t.print(os);    }
    for(const DateAttr& date: dates_)   { date.print(os); }
-
-   for(const DayAttr& day: days_) {
-	   bool day_found = false;
-	   for(const DayAttr& day_copy: days_copy_) {
-		   if (day == day_copy) {
-			   day_copy.print(os);
-			   day_found = true;
-			   break;
-		   }
-	   }
-	   if (!day_found) {
-		   day.print(os);
-	   }
-   }
-
+   for(const DayAttr& day: days_)      { day.print(os);}
    for(const CronAttr& cron: crons_)   { cron.print(os); }
 
    if (auto_cancel_) auto_cancel_->print(os);

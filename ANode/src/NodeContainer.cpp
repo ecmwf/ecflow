@@ -42,7 +42,7 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //#define DEBUG_FIND_NODE 1
-//#define DEBUG_JOB_SUBMISSION 1
+//#define DEBUG_DEPENDENCIES 1
 
 /////////////////////////////////////////////////////////////////////////////////////////
 NodeContainer::NodeContainer( const std::string& name, bool check)
@@ -485,10 +485,16 @@ private:
 
 bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
 {
+#ifdef DEBUG_DEPENDENCIES
+	   LogToCout toCoutAsWell;
+#endif
+
    //cout << "NodeContainer::resolveDependencies " << absNodePath() << endl;
    HoldingDayOrDate holding_day_or_date(this,jobsParam);
    if (jobsParam.holding_parent_day_or_date()) {
-      //cout << "   NodeContainer::resolveDependencies " << absNodePath() << " HOLDING day or date " << endl;
+#ifdef DEBUG_DEPENDENCIES
+      cout << "   NodeContainer::resolveDependencies " << absNodePath() << " HOLDING day or date " << endl;
+#endif
       return false;
    }
 
@@ -498,9 +504,8 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
 	//        returned false in this case, to stop any job submission
 	if ( ! Node::resolveDependencies(jobsParam) ) {
 
-#ifdef DEBUG_JOB_SUBMISSION
-		LOG(Log::DBG, "   NodeContainer::resolveDependencies " << absNodePath() << " could not resolve dependencies, may have completed");
-		cout << "NodeContainer::resolveDependencies " << absNodePath() << " could not resolve dependencies may have completed" << endl;
+#ifdef DEBUG_DEPENDENCIES
+		LOG(Log::DBG, "   NodeContainer::resolveDependencies " << absNodePath() << " could not resolve dependencies, may have completed HOLDING");
 #endif
 		return false;
 	}

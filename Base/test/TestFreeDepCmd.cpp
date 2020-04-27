@@ -64,8 +64,8 @@ BOOST_AUTO_TEST_CASE( test_free_dep_cmd )
       ));
       task->addToday( ecf::TodayAttr( TimeSlot(time_plus_hour.time_of_day()) ) );
       task->addToday( ecf::TodayAttr( TimeSlot(time_plus_2_hour.time_of_day()) ) );
-      task->addDate( DateAttr(tomorrows_date.day(),tomorrows_date.month(),tomorrows_date.year()) );
-      task->addDate( DateAttr(tomorrows_date_1.day(),tomorrows_date_1.month(),tomorrows_date_1.year()) );
+      task->addDate( DateAttr(tomorrows_date) );
+      task->addDate( DateAttr(tomorrows_date_1 ) );
       task->addDay( DayAttr(static_cast<DayAttr::Day_t>(day_1.tm_wday) ));
       task->addDay( DayAttr(static_cast<DayAttr::Day_t>(day_2.tm_wday) ));
       task->add_trigger( "t2 == complete" );

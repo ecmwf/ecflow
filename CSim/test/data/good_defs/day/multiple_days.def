@@ -6,6 +6,9 @@ suite multiple
     day monday                     
     day thursday                    
     task t                         # run monday and thursday morning
-       verify complete:2     
+       verify complete:2  
+    task t2
+       trigger ./t == complete
+       verify complete:2  
   endfamily
 endsuite

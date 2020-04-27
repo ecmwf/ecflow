@@ -38,3 +38,6 @@ However this is flawed because:
    o day saturday, will always re-queue
    o day sunday    will never re-queue
    
+The new implementaion uses a real matching date, where we have two re-queues
+  - requeue due to time dependences leaves the date on the day attribute as is. Allowing a check for expiration
+  - requeue due to repeat increment allows reseting the day attribute to a future date

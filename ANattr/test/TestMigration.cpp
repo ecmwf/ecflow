@@ -14,6 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include <boost/test/unit_test.hpp>
+#include "boost/filesystem/operations.hpp"
 
 #include "TodayAttr.hpp"
 #include "TimeAttr.hpp"
@@ -195,6 +196,122 @@ BOOST_AUTO_TEST_CASE( test_migration_restore )
    do_restore<ZombieAttr>(file_name + "ZombieAttr1",ZombieAttr(ecf::Child::USER, child_cmds, ecf::User::FOB,500));
    do_restore<QueueAttr>(file_name + "QueueAttr",QueueAttr("queue",theVec));
    do_restore<GenericAttr>(file_name + "GenericAttr",GenericAttr("gen1",theVec));
+}
+
+
+// The following test shows that CEREAL ignores new data members it does not recognise.
+// This allows new data members, which will be ignored by the old client.
+// OLD server to NEW Client(GUI), will not be a problem, since the the new data member is conditional.
+// In ecflow 5.4.0 we added a new data member to the DayAttribute class.
+// This test shows that when NEW SERVER send DayAttr to OLD Client(GUI), this new data member is ignored.
+namespace version_old {
+class DayAttr {
+public:
+	enum Day_t { SUNDAY=0, MONDAY=1, TUESDAY=2, WEDNESDAY=3, THURSDAY=4, FRIDAY=5, SATURDAY=6 };
+	DayAttr() = default;
+	explicit DayAttr(Day_t day) : day_(day) {}
+	bool operator==(const DayAttr& rhs) const { return day_ == rhs.day() && free_ == rhs.free();}
+
+	DayAttr::Day_t day() const { return day_;}
+	bool free() const { return free_;}
+	void set_free()   { free_ = true;}
+private:
+	DayAttr::Day_t day_{DayAttr::SUNDAY};
+	bool           free_{false};
+
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive & ar ) {
+		ar( CEREAL_NVP(day_));
+		CEREAL_OPTIONAL_NVP(ar, free_,    [this](){return free_;});  // conditionally save
+	}
+};
+}
+
+namespace version_new_data_member {
+class DayAttr {
+public:
+	enum Day_t { SUNDAY=0, MONDAY=1, TUESDAY=2, WEDNESDAY=3, THURSDAY=4, FRIDAY=5, SATURDAY=6 };
+	DayAttr() = default;
+	explicit DayAttr(Day_t day) : day_(day) {}
+  	bool operator==(const DayAttr& rhs) const { return day_ == rhs.day_ && expired_ == rhs.expired() && free_ == rhs.free();}
+
+	DayAttr::Day_t day() const { return day_;}
+	bool expired() const { return expired_;}
+	bool free() const { return free_;}
+
+	void set_free()    { free_ = true;}
+	void set_expired() { expired_ = true;}
+private:
+	DayAttr::Day_t day_{DayAttr::SUNDAY};
+	bool           free_{false};
+	bool           expired_{false};
+
+	friend class cereal::access;
+	template<class Archive>
+	void serialize(Archive & ar ) {
+		ar( CEREAL_NVP(day_));
+		CEREAL_OPTIONAL_NVP(ar, free_,    [this](){return free_;});     // conditionally save
+		CEREAL_OPTIONAL_NVP(ar, expired_, [this](){return expired_;});  // conditionally save
+	}
+};
+}
+
+BOOST_AUTO_TEST_CASE( test_day_migration )
+{
+   cout << "ANattr:: ...test_day_migration\n";
+   // OLD -> NEW  i.e OLD SERVER --> NEW CLIENT
+   {
+      const version_old::DayAttr t = version_old::DayAttr();
+      ecf::save("test_day_migration",t);
+   }
+   {
+      version_new_data_member::DayAttr t;
+      ecf::restore("test_day_migration",t);
+      BOOST_CHECK_MESSAGE(t == version_new_data_member::DayAttr(),"Should be the same");
+   }
+
+
+   // NEW->OLD  i.e NEW SERVER --> OLD CLIENT
+   // IMPORTANT: This shows that CEREAL ignore data members is does NOT RECOGNIZE.
+   {
+	   version_new_data_member::DayAttr def;
+	   ecf::save("test_day_migration_def",def);
+
+	   version_new_data_member::DayAttr def_free; def_free.set_free();
+	   ecf::save("test_day_migration_free",def_free);
+
+	   version_new_data_member::DayAttr def_expired; def_expired.set_expired();
+	   ecf::save("test_day_migration_expired",def_expired);
+
+	   version_new_data_member::DayAttr def_free_and_expired; def_free_and_expired.set_expired(); def_free_and_expired.set_free();
+	   ecf::save("test_day_migration_free_and_expired",def_free_and_expired);
+   }
+   {
+	   version_old::DayAttr def = version_old::DayAttr();
+	   ecf::restore("test_day_migration_def",def);
+	   BOOST_CHECK_MESSAGE(def == version_old::DayAttr(),"Should be the same");
+
+	   version_old::DayAttr def_free = version_old::DayAttr();
+	   ecf::restore("test_day_migration_free",def_free);
+	   version_old::DayAttr cdef_free; cdef_free.set_free();
+	   BOOST_CHECK_MESSAGE(def_free == cdef_free,"Should be the same");
+
+	   version_old::DayAttr def_expired = version_old::DayAttr();
+	   ecf::restore("test_day_migration_expired",def_expired);
+	   BOOST_CHECK_MESSAGE(def_expired == version_old::DayAttr(), "No expired, should be same as default");
+
+	   version_old::DayAttr def_free_and_expired = version_old::DayAttr();
+	   ecf::restore("test_day_migration_free_and_expired",def_free_and_expired);
+	   BOOST_CHECK_MESSAGE(def_free_and_expired == cdef_free,"No expired,But free should be set,Should be the same");
+   }
+
+   // remove the generated filea, comment out to debug.
+   boost::filesystem::remove("test_day_migration");
+   boost::filesystem::remove("test_day_migration_def");
+   boost::filesystem::remove("test_day_migration_free");
+   boost::filesystem::remove("test_day_migration_expired");
+   boost::filesystem::remove("test_day_migration_free_and_expired");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

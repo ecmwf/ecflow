@@ -125,7 +125,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	std::string msg = ss.str();
  	log(Log::MSG,msg);
 #ifdef DEBUG_LONG_RUNNING_SUITES
- 	cout << defs_filename << msg << "\n";
+ 	cout << defs_filename << msg << "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 #endif
 
  	// Do we have autocancel, must be done before.
@@ -142,7 +142,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
       for(suite_ptr my_suite: theDefs.suiteVec()) {
-         cout << "duration: " << to_simple_string(duration) << " " << my_suite->calendar().toString() << endl;
+         cout << "duration: " << to_simple_string(duration) << " " << my_suite->calendar().toString() <<  " +++++++++++++++++++++++++++++++++++ " << endl;
 
     	 // use following to snapshot definition state at a given point in time
 //         {

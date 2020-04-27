@@ -149,7 +149,7 @@ BOOST_AUTO_TEST_CASE( test_time_and_date )
 
       family_ptr fam = suite->add_family( "family" );
       task_ptr task = fam->add_task("t");
-      task->addDate( DateAttr(todaysDate.day(),todaysDate.month(),todaysDate.year()) );
+      task->addDate( DateAttr(todaysDate) );
       task->addTime( ecf::TimeAttr( TimeSlot(time_plus_minute.time_of_day()) ) );
       task->addVerify( VerifyAttr(NState::COMPLETE,1) );  // expect task to complete 1 time
 
@@ -195,7 +195,7 @@ BOOST_AUTO_TEST_CASE( test_time_and_tomorrows_date )
 
       family_ptr fam = suite->add_family( "family" );
       task_ptr task = fam->add_task("t");
-      task->addDate( DateAttr(tomorrows_date.day(),tomorrows_date.month(),tomorrows_date.year()) );
+      task->addDate( DateAttr(tomorrows_date) );
       task->addTime( ecf::TimeAttr( TimeSlot(time_plus_minute.time_of_day()) ) );
       task->addVerify( VerifyAttr(NState::COMPLETE,1) );  // expect task to complete 1 time
 
@@ -247,8 +247,8 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates )
 
       family_ptr fam = suite->add_family( "family" );
       task_ptr task = fam->add_task("t");
-      task->addDate( DateAttr(todaysDate.day(),todaysDate.month(),todaysDate.year()) );
-      task->addDate( DateAttr(tomarrows_date.day(),tomarrows_date.month(),tomarrows_date.year()) );
+      task->addDate( DateAttr(todaysDate) );
+      task->addDate( DateAttr(tomarrows_date) );
       task->addTime( TimeAttr( TimeSlot(td_plus_minute) ));
       task->addTime( TimeAttr( TimeSlot(td_plus_hour) ));
       task->addVerify( VerifyAttr(NState::COMPLETE,4) );  // expect task to complete 4 time
@@ -293,8 +293,8 @@ BOOST_AUTO_TEST_CASE( test_multiple_times_and_dates_hybrid )
 
       family_ptr fam = suite->add_family("family");
       task_ptr task = fam->add_task("t");
-      task->addDate( DateAttr(todaysDate.day(),todaysDate.month(),todaysDate.year()) );
-      task->addDate( DateAttr(tomorrows_date.day(),tomorrows_date.month(),tomorrows_date.year()) );
+      task->addDate( DateAttr(todaysDate) );
+      task->addDate( DateAttr(tomorrows_date) );
       task->addTime( TimeAttr( TimeSlot(td_plus_minute) ));
       task->addTime( TimeAttr( TimeSlot(td_plus_10_minute) ));
       task->addVerify( VerifyAttr(NState::COMPLETE,2) );  // expect task to complete 2 time

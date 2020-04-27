@@ -57,23 +57,21 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
 #ifdef DEBUG_DAY
 	       cout << " Node::do_requeue_time_attrs  Requeue_args::FULL \n";
 #endif
-		   days_copy_ = days_;
-		   for(auto & day : days_copy_) {  day.requeue(calendar); }
+		   for(auto & day : days_) {  day.requeue(calendar); }
 		   break;
 	   }
 	   case Requeue_args::REPEAT_INCREMENT: {
 #ifdef DEBUG_DAY
 	       cout << " Node::do_requeue_time_attrs  Requeue_args::REPEAT_INCREMENT \n";
 #endif
-		   days_copy_ = days_;
-		   for(auto & day : days_copy_) {  day.requeue(calendar); }
+		   for(auto & day : days_) {  day.requeue(calendar); }
 		   break;
 	   }
 	   case Requeue_args::TIME: {
 #ifdef DEBUG_DAY
 	       cout << " Node::do_requeue_time_attrs  Requeue_args::TIME \n";
 #endif
-		   for(auto & day : days_copy_) {  day.requeue(); }
+		   for(auto & day : days_) {  day.requeue(); }
 		   break;
 	   }
 	   }
@@ -82,6 +80,10 @@ void Node::do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_
 
 bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_args& cal_args)
 {
+#ifdef DEBUG_DAY
+    cout << "Node::calendar_changed_timeattrs " << debugNodePath() << " " << c.suite_time_str() <<  "\n";
+#endif
+
    // For time/today/cron attributes if the time is free, it *remains* free until re-queued
    // However if we have day/date dependencies, that do NOT match, then we should *NOT* free
    // any time/today/cron attributes.
@@ -142,14 +144,18 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
       bool clear_date_at_midnight = true;
       if (c.dayChanged() && isNodeContainer()) {
 
+#ifdef DEBUG_DAY
+    	 cout << "  Node::calendar_changed_timeattrs DAY CHANGED " << debugNodePath() << " " << c.suite_time_str() <<  "\n";
+#endif
          // Check if day/date are free *BEFORE* midnight and *BEFORE* calendarChanged called(since that clears Day::makeFree_)
          // The isFree below relies on Day::makeFree_/Date:makeFree_ not being cleared till after midnight
          bool free_date = false; bool free_day = false;
-         for(auto & date : dates_) { if (date.isFree(c)) { free_date = true; break; }}
-         for(auto & day : days_copy_) { if (day.isFree(c)) { free_day = true; break; }}
+         for(const auto & date : dates_) { if (date.isFree(c)) { free_date = true; break; }}
+         for(const auto & day : days_)   { if (day.isFree(c)) { free_day = true; break; }}
 
-         //cout << " Node::calendar_changed_timeattrs free_day " << free_day << " free_date " <<  free_date << "\n";
-
+#ifdef DEBUG_DAY
+         cout << "  Node::calendar_changed_timeattrs free_day " << free_day << " free_date " <<  free_date << "\n";
+#endif
          if (free_date || free_day) {
             // See if we have any complete submitted or active children,
             // if so DONT clear day/date at midnight. hence day/date will *STAY* *FREE*
@@ -170,13 +176,17 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
                   if (active || submitted) {
                      if (free_date) clear_date_at_midnight = false;
                      if (free_day)  clear_day_at_midnight = false;
-                     //cout << "if (active || submitted ) clear_day_date_at_midnight = false\n";
+#ifdef DEBUG_DAY
+                     cout << "  if (active || submitted ) clear_day_date_at_midnight = false\n";
+#endif
                      break;
                   }
                   if (completed && (active || submitted || queued)) {
                      if (free_date) clear_date_at_midnight = false;
                      if (free_day)  clear_day_at_midnight = false;
-                     //cout << "if (completed && (active || submitted || queued)) clear_day_date_at_midnight = false\n";
+#ifdef DEBUG_DAY
+                     cout << "  if (completed && (active || submitted || queued)) clear_day_date_at_midnight = false\n";
+#endif
                      break;
                   }
                }
@@ -186,7 +196,7 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
 
 
       bool at_least_one_day_free = false;
-      for(auto & day : days_copy_){
+      for(auto & day : days_){
          day.calendarChanged(c,clear_day_at_midnight);
          if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
       }
@@ -204,7 +214,9 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
       }
       else {
          // Node has *HOLDING* day or date dependency. Avoid free time dependencies of *ANY* child nodes
-         //cout << "Node::calendar_changed_timeattrs " << debugNodePath() << " SETTING holding_parent_day_or_date_  at " << c.suite_time_str() <<  "\n";
+#ifdef DEBUG_DAY
+         cout << "Node::calendar_changed_timeattrs " << debugNodePath() << " SETTING holding_parent_day_or_date_  at " << c.suite_time_str() <<  "\n";
+#endif
          return true;
       }
    }
@@ -216,7 +228,7 @@ bool Node::holding_day_or_date(const ecf::Calendar& c) const
    if (days_.empty() && dates_.empty()) return false;
 
    bool at_least_one_day_free = false;
-   for(auto & day : days_copy_){
+   for(auto & day : days_){
       if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
    }
 
@@ -243,7 +255,7 @@ void Node::markHybridTimeDependentsAsComplete()
 
          int noOfTimeDependencies = 0;
          if (!dates_.empty())    noOfTimeDependencies++;
-         if (!days_copy_.empty()) noOfTimeDependencies++;
+         if (!days_.empty()) noOfTimeDependencies++;
          if (!crons_.empty())    noOfTimeDependencies++;
 
          bool oneDateIsFree = false;
@@ -251,14 +263,14 @@ void Node::markHybridTimeDependentsAsComplete()
          bool oneCronIsFree = false;
 
          for(auto & date : dates_) { if (date.validForHybrid(calendar)) { if (noOfTimeDependencies == 1) { setStateOnly(NState::QUEUED); return;}oneDateIsFree = true;break;}}
-         for(auto & day : days_copy_) { if (day.validForHybrid(calendar))  { if (noOfTimeDependencies == 1) { setStateOnly(NState::QUEUED); return;}oneDayIsFree = true;break;}}
+         for(auto & day : days_) { if (day.validForHybrid(calendar))  { if (noOfTimeDependencies == 1) { setStateOnly(NState::QUEUED); return;}oneDayIsFree = true;break;}}
          for(auto & cron : crons_) { if (cron.validForHybrid(calendar)) { if (noOfTimeDependencies == 1) { setStateOnly(NState::QUEUED); return;}oneCronIsFree = true;break;}}
 
          if ( oneDateIsFree || oneDayIsFree ||  oneCronIsFree) {
             if ( noOfTimeDependencies > 1 ) {
                // when we have multiple time dependencies they results *MUST* be anded for the node to be free.
                if (!dates_.empty() && !oneDateIsFree) { setStateOnly(NState::COMPLETE); return;}
-               if (!days_copy_.empty()  && !oneDayIsFree)  { setStateOnly(NState::COMPLETE); return;}
+               if (!days_.empty()  && !oneDayIsFree)  { setStateOnly(NState::COMPLETE); return;}
                if (!crons_.empty() && !oneCronIsFree) { setStateOnly(NState::COMPLETE); return;}
 
                // We will only get here, if we have a multiple time dependencies any there is one free in each category
@@ -274,8 +286,9 @@ void Node::markHybridTimeDependentsAsComplete()
 
 //#define DEBUG_REQUEUE 1
 //#include "Log.hpp"
-bool Node::testTimeDependenciesForRequeue() const
+bool Node::testTimeDependenciesForRequeue()
 {
+   /// This function is called as a part of handling state change.
    // Check for re-queue required for all time related attributes
    const Calendar& calendar = suite()->calendar();
 
@@ -340,38 +353,27 @@ bool Node::testTimeDependenciesForRequeue() const
       }
    }
 
-   // if single day will return false from checkForRequeue, for multiple days will see if there is a *FUTURE* day.
-   // Note: problem with saturday(6) which is future day for all other current days!!! ECFLOW-1628
-   // Note: problem with sunday(0) which can never be a future day since less than any other day.
+   // If any day matches calendar day, then expire it, so we don't run again on that day.
+   // Must be done BEFORE checkForRequeue
    //   task t1
-   //      time 09:00 # free
-   //      time 10:00 # free
-   //      day saturday
+   //      time 09:00    # time attribute get considered before day/date, allowing multiple re-queues on the same day
+   //      time 10:00    #
+   //      day saturday  # After time expiration, day must be expired
    //      day sunday
-   bool allow_requeue = false;
-   for(std::vector<DayAttr>::iterator i=days_copy_.begin(); i != days_copy_.end(); ++i) {
-
-      if ((*i).checkForRequeue(calendar)) { // if days_ size is one we always return false.
-#ifdef DEBUG_REQUEUE
-         LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for " << (*i).dump() << " -> allow-requeue");
-#endif
-         allow_requeue = true;
-      }
-      else {
-    	  // failed re-queue no longer consider for free
-#ifdef DEBUG_REQUEUE
-         LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " ERASING " << (*i).dump());
-#endif
-    	  days_copy_.erase(i--);
-      }
+   for(DayAttr& day : days_ ) {
+		day.check_for_expiration(calendar);
    }
-   if (allow_requeue) {
-	   return true;
+   for(const DayAttr& day : days_ ) {
+	   if (day.checkForRequeue(calendar)) {
+#ifdef DEBUG_REQUEUE
+           LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " for days  -> allow-requeue");
+#endif
+		   return true;
+	   }
    }
 
-
 #ifdef DEBUG_REQUEUE
-   LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " HOLDING  days_copy_.size() = " << days_copy_.size());
+   LOG(Log::DBG,"   Node::testTimeDependenciesForRequeue() " << debugNodePath() << " HOLDING");
 #endif
    return false;
 }
@@ -534,7 +536,7 @@ bool Node::timeDependenciesFree() const
    for(const auto & time : times_){ if (time.isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
    for(const auto & cron : crons_){ if (cron.isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
    for(const auto & date : dates_){ if (date.isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneDateIsFree = true;break;}}
-   for(auto day : days_copy_)     { if (day.isFree(calendar)) {if ( noOfTimeDependencies == 1) return true;oneDayIsFree = true;break;}}
+   for(const auto & day  : days_) { if (day.isFree(calendar)) {if ( noOfTimeDependencies == 1) return true;oneDayIsFree = true;break;}}
 
    if (!todays_.empty()) {
       // : single Today: (single-time)   is free, if calendar time >= today_time

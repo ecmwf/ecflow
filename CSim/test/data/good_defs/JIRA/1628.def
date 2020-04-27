@@ -18,7 +18,7 @@ suite ecflow__1628
   task t61 ;  day saturday ;  day friday ;    verify complete:2        
   task t71 ;  day sunday ;    day saturday ;  verify complete:2  
 
-  task t72 ;  day sunday ; day monday ; day tuesday ; day wednesday ; day thursday ; day sunday ; day friday ; day saturday ;  verify complete:7  
+  task t72 ;  day sunday ; day monday ; day tuesday ; day wednesday ; day thursday ; day friday ; day saturday ;  verify complete:7  
 
   family fam
     verify complete:2      
@@ -26,6 +26,15 @@ suite ecflow__1628
     day tuesday  
     time 08:00
     task t1
-        verify complete:2        
+        verify complete:2 
+   endfamily
+        
+  family fam2
+    verify complete:14 
+    day sunday ; day monday ; day tuesday ; day wednesday ; day thursday ; day friday ; day saturday ; 
+    time 08:00
+    time 09:00
+    task t1
+        verify complete:14        
   endfamily
 endsuite

@@ -369,7 +369,6 @@ public:
    const std::vector<ecf::TodayAttr>&  todayVec() const { return todays_; }
    const std::vector<DateAttr>&        dates()    const { return dates_; }
    const std::vector<DayAttr>&         days()     const { return days_; }
-   std::vector<DayAttr>&               edit_days()      { return days_; }
    const std::vector<ecf::CronAttr>&   crons()    const { return crons_; }
 
    const std::vector<VerifyAttr>&      verifys()  const;
@@ -752,7 +751,7 @@ private:
    /// i.e if day,date,cron attributes does correspond to 24 hours of today, then we
    /// need make them as complete.
    void markHybridTimeDependentsAsComplete();
-   bool testTimeDependenciesForRequeue() const;
+   bool testTimeDependenciesForRequeue();
    bool calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_args&);
    bool holding_day_or_date(const ecf::Calendar& c) const;
    void do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion,Requeue_args::Requeue_t);
@@ -841,7 +840,6 @@ private:
    std::vector<ecf::CronAttr>  crons_;
    std::vector<DateAttr>       dates_;
    std::vector<DayAttr>        days_;
-   mutable std::vector<DayAttr>        days_copy_;
 
 
    std::unique_ptr<ecf::LateAttr> late_;         // Can only have one late attribute per node

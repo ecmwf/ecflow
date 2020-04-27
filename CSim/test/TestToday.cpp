@@ -147,7 +147,7 @@ BOOST_AUTO_TEST_CASE( test_today_time_and_date )
 
       family_ptr fam = suite->add_family( "family" );
       task_ptr task = fam->add_task( "t" );
-      task->addDate( DateAttr(todaysDate.day(),todaysDate.month(),todaysDate.year()) );
+      task->addDate( DateAttr(todaysDate) );
       task->addTime( ecf::TimeAttr( TimeSlot(time_plus_hour.time_of_day()) ) );
       task->addToday( ecf::TodayAttr( TimeSlot(time_plus_hour.time_of_day()) ) );
 
