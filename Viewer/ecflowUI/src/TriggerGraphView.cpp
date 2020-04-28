@@ -12,11 +12,13 @@
 #include "ActionHandler.hpp"
 #include "AttributeEditor.hpp"
 #include "PropertyMapper.hpp"
+#include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 #include "TriggerViewDelegate.hpp"
 #include "TriggerGraphModel.hpp"
 #include "TriggerGraphLayoutBuilder.hpp"
 #include "UiLog.hpp"
+#include "UiLogS.hpp"
 #include "VAttribute.hpp"
 #include "VItemPathParser.hpp"
 #include "VSettings.hpp"
@@ -161,6 +163,20 @@ bool TriggerGraphNodeItem::detectSizeChange() const
     return ((w==0 && bRect_.width() != 0) ||
             w+1 != bRect_.width() ||
             h != bRect_.height());
+}
+
+bool TriggerGraphNodeItem::detectSizeGrowth() const
+{
+    int w=0, h=0;
+    QModelIndex idx=view_->model()->index(index_, 0);
+    if (idx.isValid()) {
+        view_->delegate()->sizeHintCompute(idx,w,h, true);
+    }
+
+    if (w == 0)
+        return false;
+
+    return (w+1 > bRect_.width() || h > bRect_.height());
 }
 
 void TriggerGraphNodeItem::addRelation(TriggerGraphNodeItem* o)
@@ -691,6 +707,7 @@ void TriggerGraphView::clearGraph(bool keepConfig)
         expandState_.clear();
     }
     focus_ = nullptr;
+    cancelDelayedLayout();
 }
 
 void TriggerGraphView::setInfo(VInfo_ptr info)
@@ -799,7 +816,7 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
 void TriggerGraphView::rerender()
 {
     // check if the first nodes's size changed
-    // it is a good indicator if need to recompute the layout
+    // it is a good indicator if we need to recompute the layout
     bool sizeChanged = false;
     for(auto n: nodes_) {
         if (n->item()->isNode()) {
@@ -809,10 +826,10 @@ void TriggerGraphView::rerender()
     }
 
     if (sizeChanged) {
-        rebuild();
+        doDelayedLayout();
+    } else {
+        scene()->update();
     }
-
-    scene()->update();
 }
 
 //void TriggerGraphView::slotSizeHintChangedGlobal()
@@ -899,21 +916,89 @@ void TriggerGraphView::notifyChange(VProperty* p)
 
 void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect)
 {
+    ServerHandler* server =  node->server();
+    if (!server)
+        return;
+
+    //NOTE: the re-layout, if needed, is delayed by 0.1 s. It might be
+    //too short and if there are a lot of changes at a synch and a lot of nodes
+    //in the graph view it can be too demanding.
+
+    // if the refresh period is too short we do not attemt a
+    // re-layout just udpate the relevant graphical nodes
+    bool longRefresh = (server->currentRefreshPeriod() == -1 ||
+                        server->currentRefreshPeriod() > 5);
+
+    // redraw the item - if its size grew we schedule a re-layout
+    bool hasNode = false;
     for (auto n: nodes_) {
         if (VItem* item = n->item()) {
             if(VNode* vn=item->isNode()) {
                 if (vn == node) {
-                    rerender();
-                    return;
-                }
-            } else if (VAttribute *a = item->isAttribute()) {
-                if(a->parent() == node) {
-                    rerender();
-                    return;
+                    n->update();
+                    if (longRefresh && n->detectSizeGrowth()) {
+                        doDelayedLayout();
+                    }
+                    hasNode = true;
+                    break;
                 }
             }
         }
     }
+
+    if (hasNode) {
+        bool attrChange = false;
+        for(auto it : aspect)
+        {
+            if(it == ecf::Aspect::NODE_VARIABLE || it == ecf::Aspect::METER || it == ecf::Aspect::LIMIT ||
+               it == ecf::Aspect::EVENT) {
+                 attrChange = true;
+                 break;
+            }
+        }
+
+        // redraw the attributes belongoing to the node -
+        // if any of their sizes grew we schedule a re-layout
+        if (attrChange) {
+            for(auto n: nodes_) {
+                if (VItem* item = n->item()) {
+                    if (VAttribute *a = item->isAttribute()) {
+                        if(a->parent() == node) {
+                            n->update();
+                            if (longRefresh && !delayedLayoutTimer_.isActive() &&
+                                n->detectSizeGrowth()) {
+                                doDelayedLayout();
+                            }
+                        }
+                    }
+                }
+            }
+         }
+    }
+}
+
+void TriggerGraphView::timerEvent(QTimerEvent *event)
+{
+    if(event->timerId() == delayedLayoutTimer_.timerId()) {
+        if (info_ && info_->server()) {
+            UiLogS(info_->server()).dbg() << "TriggerGraphView delayed layout";
+        }
+        updateLayout();
+        delayedLayoutTimer_.stop();
+    }
+}
+
+void TriggerGraphView::doDelayedLayout()
+{
+    if(!delayedLayoutTimer_.isActive())
+    {
+        delayedLayoutTimer_.start(100,this);
+    }
+}
+
+void TriggerGraphView::cancelDelayedLayout()
+{
+    delayedLayoutTimer_.stop();
 }
 
 //------------------------------------------
@@ -1114,9 +1199,22 @@ void TriggerGraphView::buildLayout()
     for(auto en: enodes) {
         delete en;
     }
-
 }
 
+void TriggerGraphView::updateLayout()
+{
+    for(auto n: nodes_) {
+        n->adjustSize();
+    }
+
+    buildLayout();
+    for (auto n: nodes_) {
+        if (expandState_.find(n->item())) {
+            n->setExpanded(true);
+        }
+    }
+    adjustSceneRect();
+}
 
 TriggerGraphNodeItem* TriggerGraphView::addNode(VItem* item)
 {

@@ -16,6 +16,7 @@
 
 #include <utility>
 
+#include <QBasicTimer>
 #include <QDialog>
 #include <QGraphicsView>
 #include <QGraphicsScene>
@@ -38,6 +39,7 @@ class GraphLayoutBuilder;
 class GraphLayoutNode;
 class QShowEvent;
 class QToolButton;
+
 class QModelIndex;
 
 
@@ -62,6 +64,7 @@ public:
     void adjustSize();
     void adjustPos(int x, int y);
     bool detectSizeChange() const;
+    bool detectSizeGrowth() const;
     void setExpanded(bool);
     GraphLayoutNode* toGraphNode();
 
@@ -234,6 +237,7 @@ Q_SIGNALS:
 protected:
     void clearGraph(bool keepConfig=false);
     void showEvent(QShowEvent*) override;
+    void timerEvent(QTimerEvent *event) override;
     TriggerGraphNodeItem* nodeItemAt(QPointF scenePos) const;
     TriggerGraphNodeItem* currentNodeItem() const;
     void adjustBackground(VProperty* p=nullptr);
@@ -250,6 +254,9 @@ protected:
     void updateAfterScan();
     void rebuild();
     void buildLayout();
+    void updateLayout();
+    void doDelayedLayout();
+    void cancelDelayedLayout();
     void addRelation(VItem* from, VItem* to,
                      VItem* through, TriggerCollector::Mode mode, VItem *trigger);
     TriggerGraphNodeItem* addNode(VItem* item);
@@ -269,7 +276,7 @@ protected:
     std::vector<TriggerGraphEdgeItem*> edges_;
     TriggerGraphEdgeInfoDialog* edgeInfo_;
     VInfo_ptr info_;
-    //bool needItemsLayout_ {false};
+    bool needItemsLayout_ {false};
 
     bool dependency_ {false};
     TriggeredScanner *triggeredScanner_ {nullptr};
@@ -289,6 +296,8 @@ protected:
 
     TriggerGraphExpandState expandState_;
     VNode* focus_ {nullptr};
+
+    QBasicTimer delayedLayoutTimer_;
 };
 
 

@@ -363,6 +363,14 @@ bool ServerHandler::updateInfo(int& basePeriod,int& currentPeriod,int &drift,int
     return true;
 }
 
+int ServerHandler::currentRefreshPeriod() const
+{
+    if(!refreshTimer_->isActive())
+        return -1;
+
+    return refreshTimer_->interval()/1000;
+}
+
 int ServerHandler::secsSinceLastRefresh() const
 {
     return static_cast<int>(lastRefresh_.secsTo(QDateTime::currentDateTime()));

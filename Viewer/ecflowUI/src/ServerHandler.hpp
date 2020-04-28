@@ -119,8 +119,9 @@ public:
 	static ServerHandler* findServer(const std::string &alias);
 
 	void searchBegan();
-	void searchFinished();    
+    void searchFinished();
     bool updateInfo(int& basePeriod,int& currentPeriod,int &drift,int& toNext);
+    int currentRefreshPeriod() const;
     QDateTime lastRefresh() const {return lastRefresh_;}
     int secsSinceLastRefresh() const;
     int secsTillNextRefresh() const;
