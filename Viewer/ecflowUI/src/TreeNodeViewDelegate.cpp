@@ -203,6 +203,18 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent)
     subFailText_("submission failed"),
     model_(model)
 {
+    nodeBox_=new TreeNodeDelegateBox;
+    attrBox_=new TreeAttrDelegateBox;
+
+//    if (nodeBox)
+//        nodeBox_ = nodeBox;
+//    else
+//        nodeBox_=new TreeNodeDelegateBox;
+
+//    if (attrBox)
+//        attrBox_ = attrBox;
+//    else
+//        attrBox_=new TreeAttrDelegateBox;
 
     drawAttrSelectionRect_=true;
 
@@ -238,9 +250,6 @@ TreeNodeViewDelegate::TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent)
 
     //The parent must be the view!!!
     animation_=new AnimationHandler(parent);
-
-    nodeBox_=new TreeNodeDelegateBox;
-    attrBox_=new TreeAttrDelegateBox;
 
     nodeBox_->adjust(font_);
     attrBox_->adjust(attrFont_);
@@ -359,7 +368,7 @@ void  TreeNodeViewDelegate::sizeHintCompute(const QModelIndex& index,int& w,int&
         }
         else
         {
-            w=nodeWidth(index,text);
+            w=nodeWidth(index,h, text);
         }
     }
     //For attributes we do not need the exact width since they do not have children so
@@ -1357,7 +1366,7 @@ void TreeNodeViewDelegate::widthHintServer(const QModelIndex& index,int& itemWid
     itemWidth=currentRight+1;
 }
 
-int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,QString text) const
+int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,int height, QString text) const
 {
     VNode* node=static_cast<VNode*>(index.data(AbstractNodeModel::NodePointerRole).value<void*>());
     Q_ASSERT(node);
@@ -1365,8 +1374,7 @@ int TreeNodeViewDelegate::nodeWidth(const QModelIndex& index,QString text) const
     int offset=nodeBox_->leftMargin;
     QFontMetrics fm(font_);
 
-    //The initial filled rect. We only care about the width!
-    QRect itemRect(offset,0,10,10);
+    QRect itemRect(offset,0,10,height - (nodeBox_->topMargin + nodeBox_->bottomMargin));
     int currentRight=itemRect.left();
 
     bool hasRealBg=node->isSuspended();

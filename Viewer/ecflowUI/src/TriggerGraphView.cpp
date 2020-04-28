@@ -13,7 +13,7 @@
 #include "AttributeEditor.hpp"
 #include "PropertyMapper.hpp"
 #include "SessionHandler.hpp"
-#include "TriggerGraphDelegate.hpp"
+#include "TriggerViewDelegate.hpp"
 #include "TriggerGraphModel.hpp"
 #include "TriggerGraphLayoutBuilder.hpp"
 #include "UiLog.hpp"
@@ -134,7 +134,7 @@ void TriggerGraphNodeItem::paint(QPainter *painter, const QStyleOptionGraphicsIt
         else
             painter->setPen(QPen(Qt::black, 2, Qt::DashLine));
 
-        painter->drawRect(opt.rect.adjusted(2,2,-2,-2));
+        painter->drawRect(opt.rect.adjusted(1,1,-2,-2));
     }
 }
 
@@ -146,8 +146,21 @@ void TriggerGraphNodeItem::adjustSize()
     QModelIndex idx=view_->model()->index(index_, 0);
     if (idx.isValid()) {
         view_->delegate()->sizeHintCompute(idx,w,h, true);
-        bRect_ = QRectF(QPointF(0, 0), QSize(w, h));
+        bRect_ = QRectF(QPointF(0, 0), QSize(w+1, h));
     }
+}
+
+bool TriggerGraphNodeItem::detectSizeChange() const
+{
+    int w=0, h=0;
+    QModelIndex idx=view_->model()->index(index_, 0);
+    if (idx.isValid()) {
+        view_->delegate()->sizeHintCompute(idx,w,h, true);
+    }
+
+    return ((w==0 && bRect_.width() != 0) ||
+            w+1 != bRect_.width() ||
+            h != bRect_.height());
 }
 
 void TriggerGraphNodeItem::addRelation(TriggerGraphNodeItem* o)
@@ -613,8 +626,11 @@ TriggerGraphView::TriggerGraphView(QWidget* parent) : QGraphicsView(parent)
     setScene(scene_);
 
     model_ = new TriggerGraphModel(TriggerGraphModel::TriggerMode,this);
-    delegate_ = new TriggerGraphDelegate(this);
+    delegate_ = new TriggerViewDelegate(this);
     delegate_->setMaxLimitItems(6);
+//    connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
+//            this,SLOT(slotSizeHintChangedGlobal()));
+
     builder_ = new SimpleGraphLayoutBuilder();
 
     setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -671,7 +687,7 @@ void TriggerGraphView::clearGraph(bool keepConfig)
     nodes_.clear();
     edges_.clear();
     edgeInfo_->close();
-    if (keepConfig) {
+    if (!keepConfig) {
         expandState_.clear();
     }
     focus_ = nullptr;
@@ -782,8 +798,27 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
 
 void TriggerGraphView::rerender()
 {
+    // check if the first nodes's size changed
+    // it is a good indicator if need to recompute the layout
+    bool sizeChanged = false;
+    for(auto n: nodes_) {
+        if (n->item()->isNode()) {
+            sizeChanged = n->detectSizeChange();
+            break;
+        }
+    }
+
+    if (sizeChanged) {
+        rebuild();
+    }
+
     scene()->update();
 }
+
+//void TriggerGraphView::slotSizeHintChangedGlobal()
+//{
+//    needItemsLayout_=true;
+//}
 
 void TriggerGraphView::adjustBackground(VProperty *p)
 {

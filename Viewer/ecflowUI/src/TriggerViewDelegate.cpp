@@ -60,39 +60,12 @@ struct TriggerAttrDelegateBox : public AttrDelegateBox
 };
 
 TriggerViewDelegate::TriggerViewDelegate(QWidget *parent) :
-    TreeNodeViewDelegate(nullptr,parent),
+    TreeNodeViewDelegate(nullptr,
+                         //new TriggerNodeDelegateBox,
+                         //new TriggerAttrDelegateBox,
+                         parent),
     borderPen_(QPen(QColor(220,220,220)))
 {
-    nodeBox_=new TriggerNodeDelegateBox;
-    attrBox_=new TriggerAttrDelegateBox;
-
-    nodeBox_->adjust(font_);
-    attrBox_->adjust(attrFont_);
-
-    //Property
-    if(propVec.empty())
-    {
-        //Base settings
-        addBaseSettings(propVec);
-    }
-
-    prop_=new PropertyMapper(propVec,this);
-
-    updateSettings();
-}
-
-TriggerViewDelegate::~TriggerViewDelegate()
-= default;
-
-void TriggerViewDelegate::updateSettings()
-{
-    //Update the settings handled by the base class
-    updateBaseSettings();
-}
-
-QSize TriggerViewDelegate::sizeHint(const QStyleOptionViewItem&, const QModelIndex & index ) const
-{
-    return nodeBox_->sizeHintCache;
 }
 
 void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &option,
@@ -127,14 +100,14 @@ void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &op
         {
             QString text=index.data(Qt::DisplayRole).toString();
 
-            //If the textalignment is AlignCenter we node is displayed
+            //If the textalignment is AlignCenter the node is displayed
             //as centered in the opt rect!
             QVariant vTa=index.data(Qt::TextAlignmentRole);
             if(!vTa.isNull())
             {
                 if(vTa.toInt() == Qt::AlignCenter)
                 {
-                    int w=nodeWidth(index,text);
+                    int w=nodeWidth(index,vopt.rect.height(), text);
                     int dw=(vopt.rect.width()-w)/2;
                     if(dw > 0)
                         vopt.rect.moveLeft(dw);
@@ -160,13 +133,13 @@ void TriggerViewDelegate::paint(QPainter *painter,const QStyleOptionViewItem &op
             }
         }
     }
-
     //Render the horizontal border for rows. We only render the top border line.
-    //With this technique we miss the bottom border line of the last row!!!
-    //QRect fullRect=QRect(0,option.rect.y(),painter->device()->width(),option.rect.height());
-    QRect bgRect=option.rect;
-    painter->setPen(borderPen_);
-    painter->drawLine(bgRect.topLeft(),bgRect.topRight());
+    //With this technique we miss the bottom border line of the last row!!
+    if (renderSeparatorLine_) {
+        QRect bgRect=option.rect;
+        painter->setPen(borderPen_);
+        painter->drawLine(bgRect.topLeft(),bgRect.topRight());
+    }
 
     painter->restore();
 }

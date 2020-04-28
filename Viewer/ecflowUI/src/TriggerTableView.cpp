@@ -39,6 +39,7 @@ TriggerTableView::TriggerTableView(QWidget* parent) :
 
     //Create delegate to the view
     delegate_=new TriggerViewDelegate(this);
+    delegate_->setRenderSeparatorLine(true);
     setItemDelegate(delegate_);
 
     connect(delegate_,SIGNAL(sizeHintChangedGlobal()),

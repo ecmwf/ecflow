@@ -11,12 +11,9 @@
 #include "TriggerGraphLayoutBuilder.hpp"
 
 #include <algorithm>
+#include <assert.h>
+#include <iostream>
 
-#include "TriggerGraphView.hpp"
-#include "TriggerItemWidget.hpp"
-#include "TriggerGraphModel.hpp"
-#include "TriggerGraphDelegate.hpp"
-#include "VSettings.hpp"
 #include "UiLog.hpp"
 
 

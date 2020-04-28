@@ -501,7 +501,7 @@ void TriggerItemWidget::nodeChanged(const VNode* n, const std::vector<ecf::Aspec
     if(!selected_ || !active_)
         return;
 
-    //For the rest of the changes in we rerender the collected items that might have changed
+    //For the rest of the changes we rerender the collected items that might have changed
     if (modeGroup_->checkedId() ==  TableModeIndex)
         triggerTable_->nodeChanged(n, aspect);
     else if (modeGroup_->checkedId() ==  GraphModeIndex)

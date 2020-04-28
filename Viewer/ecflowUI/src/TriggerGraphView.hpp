@@ -29,7 +29,7 @@
 
 class ActionHandler;
 class PropertyMapper;
-class TriggerGraphDelegate;
+class TriggerViewDelegate;
 class TriggerGraphLayout;
 class TriggerGraphModel;
 class TriggerGraphView;
@@ -61,6 +61,7 @@ public:
     void addRelation(TriggerGraphNodeItem* o);
     void adjustSize();
     void adjustPos(int x, int y);
+    bool detectSizeChange() const;
     void setExpanded(bool);
     GraphLayoutNode* toGraphNode();
 
@@ -193,7 +194,7 @@ public:
     void adjustSceneRect();
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
 
-    TriggerGraphDelegate* delegate() const {return delegate_;}
+    TriggerViewDelegate* delegate() const {return delegate_;}
     TriggerGraphModel* model() const {return model_;}
     bool dependency() const {return dependency_;}
     int minZoomLevel() const {return minZoomLevel_;}
@@ -261,13 +262,14 @@ protected:
     float scaleFromLevel(int level) const;
 
     QGraphicsScene* scene_;
-    TriggerGraphDelegate* delegate_;
+    TriggerViewDelegate* delegate_;
     TriggerGraphModel* model_;
     GraphLayoutBuilder* builder_;
     std::vector<TriggerGraphNodeItem*> nodes_;
     std::vector<TriggerGraphEdgeItem*> edges_;
     TriggerGraphEdgeInfoDialog* edgeInfo_;
     VInfo_ptr info_;
+    //bool needItemsLayout_ {false};
 
     bool dependency_ {false};
     TriggeredScanner *triggeredScanner_ {nullptr};

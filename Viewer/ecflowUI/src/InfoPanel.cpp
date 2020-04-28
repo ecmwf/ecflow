@@ -790,6 +790,10 @@ void InfoPanel::notifyEndServerSync(ServerHandler* server)
 void InfoPanel::rerender()
 {
 	bcWidget_->rerender();
+    Q_FOREACH(InfoPanelItemHandler *item,items_)
+    {
+        item->item()->rerender();
+    }
 }
 
 void InfoPanel::writeSettings(VComboSettings* vs)
