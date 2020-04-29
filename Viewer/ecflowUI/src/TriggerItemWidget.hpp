@@ -71,6 +71,8 @@ protected:
 
     TriggeredScanner *scanner_;  
     QButtonGroup* modeGroup_;
+    int exprHeight_;
+    int exprEmptyHeight_;
 };
 
 #endif

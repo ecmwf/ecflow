@@ -81,7 +81,9 @@ TriggerItemWidget::TriggerItemWidget(QWidget *parent) : QWidget(parent)
     fTe.setBold(true);
     QFontMetrics fm(fTe);
     exprTe_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
-    exprTe_->setFixedHeight(fm.size(0,"A\nA\nA").height()+fm.height()/2);
+    exprHeight_ = fm.size(0,"A\nA\nA").height()+fm.height()/2;
+    exprEmptyHeight_ = fm.size(0,"A").height()+fm.height()/2;
+    exprTe_->setFixedHeight(exprEmptyHeight_);
 
     //view mode - we show the table by default
     modeGroup_ = new QButtonGroup(this);
@@ -177,7 +179,14 @@ void TriggerItemWidget::load()
         std::string te,ce;
         n->triggerExpr(te,ce);
         QString txt=QString::fromStdString(te);
-        if(txt.isEmpty()) txt=tr("No trigger expression is available for the selected node!");
+        if(txt.isEmpty()) {
+            txt=tr("No trigger expression is available for the selected node!");
+            if (exprTe_->height() != exprEmptyHeight_) {
+                exprTe_->setFixedHeight(exprEmptyHeight_);
+            }
+        } else if (exprTe_->height() != exprHeight_) {
+            exprTe_->setFixedHeight(exprHeight_);
+        }
         exprTe_->setPlainText(txt);
 
         if (modeGroup_->checkedId() == TableModeIndex) {

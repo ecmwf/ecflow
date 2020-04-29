@@ -255,6 +255,7 @@ protected:
     void rebuild();
     void buildLayout();
     void updateLayout();
+    void initVisibleRegion();
     void doDelayedLayout();
     void cancelDelayedLayout();
     void addRelation(VItem* from, VItem* to,
@@ -276,6 +277,7 @@ protected:
     std::vector<TriggerGraphEdgeItem*> edges_;
     TriggerGraphEdgeInfoDialog* edgeInfo_;
     VInfo_ptr info_;
+    VInfo_ptr lastExpandSelected_;
     bool needItemsLayout_ {false};
 
     bool dependency_ {false};
@@ -297,6 +299,7 @@ protected:
     TriggerGraphExpandState expandState_;
     VNode* focus_ {nullptr};
 
+    int layoutDurationInMs_ {0};
     QBasicTimer delayedLayoutTimer_;
 };
 

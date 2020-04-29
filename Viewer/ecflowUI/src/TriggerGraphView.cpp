@@ -35,6 +35,7 @@
 #include <QGraphicsLinearLayout>
 #include <QGraphicsSceneMouseEvent>
 #include <QGraphicsProxyWidget>
+#include <QGuiApplication>
 #include <QHBoxLayout>
 #include <QScrollBar>
 #include <QSettings>
@@ -693,6 +694,7 @@ TriggerGraphView::~TriggerGraphView()
 void TriggerGraphView::clear(bool keepConfig)
 {
     info_.reset();    
+    lastExpandSelected_.reset();
     clearGraph(keepConfig);
 }
 
@@ -708,6 +710,7 @@ void TriggerGraphView::clearGraph(bool keepConfig)
     }
     focus_ = nullptr;
     cancelDelayedLayout();
+    layoutDurationInMs_ = 0;
 }
 
 void TriggerGraphView::setInfo(VInfo_ptr info)
@@ -750,7 +753,7 @@ void TriggerGraphView::slotContextMenu(const QPoint& position)
     //handleContextMenu(index, lst, mapToGlobal(position), position + scrollOffset, this);
 
     //Node actions
-    if(itemClicked->item())   //indexLst[0].isValid() && indexLst[0].column() == 0)
+    if(itemClicked->item())
     {
         std::vector<TriggerGraphNodeItem*> itemLst; //selectedIndexes();
         itemLst.push_back(itemClicked);
@@ -791,18 +794,22 @@ void TriggerGraphView::slotViewCommand(VInfo_ptr info,QString cmd)
         Q_EMIT linkSelected(info);
     } else if(cmd == "expand") {
         if (info && info->node()) {
+            lastExpandSelected_ = info;
             expandItem(info, false);
         }
     } else if(cmd == "collapse") {
         if (info && info->node()) {
+            lastExpandSelected_ = info;
             collapseItem(info);
         }
     } else if(cmd == "toggle_expand") {
         if (info && info->node()) {
+            lastExpandSelected_ = info;
             toggleExpandItem(info);
         }
     } else if(cmd == "expand_parent") {
         if (info && info->item()) {
+            lastExpandSelected_ = info;
             expandParent(info, false);
         }
     } else if(cmd ==  "edit") {
@@ -924,10 +931,11 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
     //too short and if there are a lot of changes at a synch and a lot of nodes
     //in the graph view it can be too demanding.
 
-    // if the refresh period is too short we do not attemt a
-    // re-layout just udpate the relevant graphical nodes
-    bool longRefresh = (server->currentRefreshPeriod() == -1 ||
-                        server->currentRefreshPeriod() > 5);
+    // if the refresh period is too short or the layouting takes too long
+    // we do not attemt a re-layout just udpate the relevant graphical nodes
+    bool canDoLayout = layoutDurationInMs_ < 5000 &&
+                      (server->currentRefreshPeriod() == -1 ||
+                       server->currentRefreshPeriod() > 5);
 
     // redraw the item - if its size grew we schedule a re-layout
     bool hasNode = false;
@@ -936,7 +944,7 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
             if(VNode* vn=item->isNode()) {
                 if (vn == node) {
                     n->update();
-                    if (longRefresh && n->detectSizeGrowth()) {
+                    if (canDoLayout && n->detectSizeGrowth()) {
                         doDelayedLayout();
                     }
                     hasNode = true;
@@ -957,7 +965,7 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
             }
         }
 
-        // redraw the attributes belongoing to the node -
+        // redraw the attributes belonging to the node -
         // if any of their sizes grew we schedule a re-layout
         if (attrChange) {
             for(auto n: nodes_) {
@@ -965,7 +973,7 @@ void TriggerGraphView::nodeChanged(const VNode* node, const std::vector<ecf::Asp
                     if (VAttribute *a = item->isAttribute()) {
                         if(a->parent() == node) {
                             n->update();
-                            if (longRefresh && !delayedLayoutTimer_.isActive() &&
+                            if (canDoLayout && !delayedLayoutTimer_.isActive() &&
                                 n->detectSizeGrowth()) {
                                 doDelayedLayout();
                             }
@@ -1015,13 +1023,6 @@ void TriggerGraphView::show(VInfo_ptr info, bool dependency)
     info_ = info;
     expandState_.clear();
     expandItem(info_, false);
-
-//    if(!sameInfo || !expandState_.find(info_->node())) {
-//        expandState_.clear();
-//        expandItem(info_, false);
-//    } else {
-//        rebuild();
-//    }
 }
 
 void TriggerGraphView::expandItem(VInfo_ptr info, bool scanOnly)
@@ -1099,7 +1100,10 @@ void TriggerGraphView::updateAfterScan()
             n->setExpanded(true);
         }
     }
+
     adjustSceneRect();
+
+    initVisibleRegion();
 }
 
 void TriggerGraphView::collapseItem(VInfo_ptr info)
@@ -1172,8 +1176,22 @@ void TriggerGraphView::buildLayout()
         }
     }
 
-    focus = 0; //TODO: refine it
+    //TODO: refine it
+    focus = 0;
+
+    QTime stopwatch;
+    stopwatch.start();
+    bool showCursor = (QGuiApplication::overrideCursor() == nullptr ||
+            QGuiApplication::overrideCursor()->shape() != Qt::WaitCursor);
+
+    if (showCursor)
+        QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     builder_->build(lnodes, enodes, focus);
+    layoutDurationInMs_ = stopwatch.elapsed();
+
+    if (showCursor)
+        QGuiApplication::restoreOverrideCursor();
 
     for (size_t i=0; i < nodes_.size(); i++) {
         nodes_[i]->adjustPos(lnodes[i]->x_, lnodes[i]->y_);
@@ -1214,6 +1232,25 @@ void TriggerGraphView::updateLayout()
         }
     }
     adjustSceneRect();
+}
+
+void TriggerGraphView::initVisibleRegion()
+{
+    if(info_ && info_->item()) {
+        VItem *item =  nullptr;
+        if (lastExpandSelected_)
+            item = lastExpandSelected_->item();
+        if (!item)
+            item = info_->item();
+
+        Q_ASSERT(item);
+        for (auto n: nodes_) {
+            if (n->item() == item) {
+                ensureVisible(n);
+                break;
+            }
+        }
+    }
 }
 
 TriggerGraphNodeItem* TriggerGraphView::addNode(VItem* item)
