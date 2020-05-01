@@ -14,7 +14,7 @@
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 
 #include "PrintStyle.hpp"
-#include <iostream>
+//#include <iostream>
 
 static PrintStyle::Type_t style_ = PrintStyle::NOTHING;
 
@@ -25,8 +25,7 @@ PrintStyle::Type_t PrintStyle::getStyle()
 
 void PrintStyle::setStyle(PrintStyle::Type_t f)
 {
-	std::cout << "PrintStyle::setStyle() BEFORE " << PrintStyle::to_string(style_) << " AFTER " <<  PrintStyle::to_string(f) << "   *********************\n";
-
+	//std::cout << "PrintStyle::setStyle() BEFORE " << PrintStyle::to_string(style_) << " AFTER " <<  PrintStyle::to_string(f) << "   *********************\n";
 	style_ = f;
 }
 

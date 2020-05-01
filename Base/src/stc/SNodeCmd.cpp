@@ -94,7 +94,7 @@ bool SNodeCmd::handle_server_response( ServerReply& server_reply, Cmd_ptr cts_cm
             Defs defs;
             defs.addSuite(std::dynamic_pointer_cast<Suite>( node ));
             defs.auto_add_externs();
-            std::cout << defs.print();
+            std::cout << defs.print(cts_cmd->show_style());
             return true;
          }
 
