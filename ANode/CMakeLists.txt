@@ -51,6 +51,7 @@ test/TestJobCreator.cpp
 test/TestJobProfiler.cpp
 test/TestLimit.cpp
 test/TestMigration.cpp
+test/TestMovePeer.cpp
 test/TestMissNextTimeSlot.cpp
 test/TestNodeBeginReque.cpp
 test/TestNodeState.cpp

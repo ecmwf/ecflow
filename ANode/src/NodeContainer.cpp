@@ -34,6 +34,7 @@
 #include "Str.hpp"
 #include "Memento.hpp"
 #include "Serialization.hpp"
+#include "move_peer.hpp"
 
 namespace fs = boost::filesystem;
 using namespace ecf;
@@ -41,7 +42,7 @@ using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 //#define DEBUG_FIND_NODE 1
-//#define DEBUG_JOB_SUBMISSION 1
+//#define DEBUG_DEPENDENCIES 1
 
 /////////////////////////////////////////////////////////////////////////////////////////
 NodeContainer::NodeContainer( const std::string& name, bool check)
@@ -141,12 +142,8 @@ void NodeContainer::requeue(Requeue_args& args)
 	if (d_st_ == DState::COMPLETE )
 	   args.log_state_changes_ = false;
 
-	// date/day attributes under a repeat should only run once per repeat increment
-	bool reset_day_date_reueue_count = args.reset_day_date_reueue_count_;
-	if (!repeat().empty() && args.resetRepeats_) reset_day_date_reueue_count = true;
-
-   Node::Requeue_args largs(true /* reset repeats, Moot for tasks */,
-                            reset_day_date_reueue_count,
+   Node::Requeue_args largs(args.requeue_t,
+		                    true /* reset repeats, Moot for tasks */,
                             args.clear_suspended_in_child_nodes_,
                             args.reset_next_time_slot_,
                             true /* reset relative duration */,
@@ -404,6 +401,12 @@ void NodeContainer::order(Node* immediateChild, NOrder::Order ord)
 	}
 }
 
+void NodeContainer::move_peer(Node* src, Node* dest)
+{
+	move_peer_node(nodes_,src,dest,"NodeContainer");
+    order_state_change_no_ = Ecf::incr_state_change_no();
+}
+
 boost::posix_time::time_duration NodeContainer::sum_runtime()
 {
    boost::posix_time::time_duration rt;
@@ -412,20 +415,24 @@ boost::posix_time::time_duration NodeContainer::sum_runtime()
    return rt;
 }
 
-void NodeContainer::calendarChanged(
+bool NodeContainer::calendarChanged(
          const ecf::Calendar& c,
          Node::Calendar_args& cal_args,
-         const ecf::LateAttr* inherited_late)
+         const ecf::LateAttr* inherited_late,
+		 bool holding_parent_day_or_date)
 {
    // A node that is archived should not allow any change of state.
    if (get_flag().is_set(ecf::Flag::ARCHIVED)) {
-      return;
+      return false;
    }
 
    // The late attribute is inherited, we only set late on the task/alias
    // This will set: cal_args.holding_parent_day_or_date_ = this;
    // holding_parent_day_or_date_ is used to avoid freeing time attributes, when we have a holding parent day/date
-   Node::calendarChanged(c,cal_args,nullptr);
+   holding_parent_day_or_date = Node::calendarChanged(c,cal_args,nullptr,holding_parent_day_or_date);
+
+   //if (holding_parent_day_or_date)
+	//   cout << " calendarChanged: " << debugNodePath() << " " << holding_parent_day_or_date << " •••••••••• \n";
 
 	LateAttr overridden_late;
    if (inherited_late && !inherited_late->isNull()) {
@@ -435,17 +442,11 @@ void NodeContainer::calendarChanged(
 	   overridden_late.override_with(late_.get());
 	}
 
-	// top_level_repeat_ is used in ensuring that day/date attributes stay free in calendarChanged(), even after midnight
-   cal_args.top_level_repeat_ = (!repeat().empty()) ? this : nullptr;
-
    size_t node_vec_size = nodes_.size();
    for(size_t t = 0; t < node_vec_size; t++) {
-      nodes_[t]->calendarChanged(c,cal_args,&overridden_late);
+      (void)nodes_[t]->calendarChanged(c,cal_args,&overridden_late,holding_parent_day_or_date);
    }
-
-   // clear *IF* at the *SAME* level
-   if ( cal_args.holding_parent_day_or_date_ == this) cal_args.holding_parent_day_or_date_ = nullptr;
-   if ( cal_args.top_level_repeat_           == this) cal_args.top_level_repeat_ = nullptr;
+   return false;
 }
 
 bool NodeContainer::hasAutoCancel() const
@@ -484,10 +485,16 @@ private:
 
 bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
 {
+#ifdef DEBUG_DEPENDENCIES
+	   LogToCout toCoutAsWell;
+#endif
+
    //cout << "NodeContainer::resolveDependencies " << absNodePath() << endl;
    HoldingDayOrDate holding_day_or_date(this,jobsParam);
    if (jobsParam.holding_parent_day_or_date()) {
-      //cout << "   NodeContainer::resolveDependencies " << absNodePath() << " HOLDING day or date " << endl;
+#ifdef DEBUG_DEPENDENCIES
+      cout << "   NodeContainer::resolveDependencies " << absNodePath() << " HOLDING day or date " << endl;
+#endif
       return false;
    }
 
@@ -497,9 +504,8 @@ bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
 	//        returned false in this case, to stop any job submission
 	if ( ! Node::resolveDependencies(jobsParam) ) {
 
-#ifdef DEBUG_JOB_SUBMISSION
-		LOG(Log::DBG, "   NodeContainer::resolveDependencies " << absNodePath() << " could not resolve dependencies, may have completed");
-		cout << "NodeContainer::resolveDependencies " << absNodePath() << " could not resolve dependencies may have completed" << endl;
+#ifdef DEBUG_DEPENDENCIES
+		LOG(Log::DBG, "   NodeContainer::resolveDependencies " << absNodePath() << " could not resolve dependencies, may have completed HOLDING");
 #endif
 		return false;
 	}

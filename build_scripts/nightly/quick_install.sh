@@ -53,7 +53,9 @@ fi
 # =======================================================================
 which ecflow_client
 ecflow_client --version
+set +e # disable error
 ecflow_client --terminate=yes >> /dev/null
+set -e # stop the shell on first error
 
 set +e # ignore error 
 count=0
@@ -129,10 +131,13 @@ $PYTHON ./reload.py -s ecflow
 # Generate test suites, based on definitions known to be good 
 # ========================================================================
 cd $WK
-#for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
-#   echo "->$defs_file"
-#   $PYTHON Pyext/samples/TestBench.py $defs_file
-#done
+#$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/JIRA/ecflow_337_.def
+#$PYTHON Pyext/samples/TestBench.py ANode/parser/test/data/good_defs/JIRA/ecflow_1550.def
+
+for defs_file in $(find ANode/parser/test/data/good_defs -type f); do
+   echo "->$defs_file"
+   $PYTHON Pyext/samples/TestBench.py $defs_file
+done
  
 # Use python3 for ecflow 5 series
 # Use the installed ecflow for ecflow_client, to stop mixing of ecflow 4/5

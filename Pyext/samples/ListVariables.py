@@ -46,20 +46,20 @@ if __name__ == "__main__":
         # check to see if definition exists in the server
         defs = CL.get_defs()
         if defs == None :
-            print "No definition found, exiting..."
+            print("No definition found, exiting...")
             exit(0) 
             
         # print defs;
         if ARGS.path == "/":
-            for var in defs.server_variables:  print "edit " + var.name() + " '" + var.value() + "'"
-            for var in defs.user_variables:    print "edit " + var.name() + " '" + var.value() + "'"
+            for var in defs.server_variables:  print("edit " + var.name() + " '" + var.value() + "'")
+            for var in defs.user_variables:    print("edit " + var.name() + " '" + var.value() + "'")
         else:
             node = defs.find_abs_node(ARGS.path)
             if node == None:  
-                print "No node found at path " + ARGS.path
+                print("No node found at path " + ARGS.path)
             else:
-                for var in node.variables:     print "edit " + var.name() + " '" + var.value() + "'"
+                for var in node.variables:     print("edit " + var.name() + " '" + var.value() + "'")
 
-    except RuntimeError, ex:
-        print "Error: " + str(ex)
-        print "Check host and port number are correct."
+    except RuntimeError as ex:
+        print("Error: " + str(ex))
+        print("Check host and port number are correct.")

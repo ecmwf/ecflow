@@ -12,6 +12,7 @@
 
 #include "Suite.hpp"
 #include "Expression.hpp"
+#include "Limit.hpp"
 #include "Variable.hpp"
 
 #include "AstCollateVNodesVisitor.hpp"
@@ -684,6 +685,18 @@ std::string VNode::absNodePath() const
 	return (node_)?node_->absNodePath():"";
 }
 
+bool VNode::pathEndMatch(const std::string &relPath) const
+{
+    std::string pPath = absNodePath();
+    if (relPath.empty() || pPath.size() < relPath.size()) {
+        return false;
+    } else {
+        return
+            (pPath.substr(pPath.size()-relPath.size(), std::string::npos) == relPath);
+    }
+    return false;
+}
+
 bool VNode::sameContents(VItem* item) const
 {
     return item == this;
@@ -1001,6 +1014,10 @@ void VNode::triggerExpr(std::string& trigger, std::string& complete) const
 void VNode::triggers(TriggerCollector* tlc)
 {
     VItem* nullItem=nullptr;
+    if (!node_) {
+        return;
+    }
+
     //Check the node itself
     //if(tlr.self())
     {
@@ -1027,22 +1044,15 @@ void VNode::triggers(TriggerCollector* tlc)
         //Check other attributes
 
         //Limiters
-        std::vector<VAttribute*> limiterVec;
-        findAttributes(VAttributeType::find("limiter"),limiterVec);
-        std::size_t n=limiterVec.size();
-        for(std::size_t i=0; i < n; i++)
-        {
-            VAttribute *a=limiterVec[i];
-            assert(a);
-            std::string val;
-            if(a->value("limiter_path",val))
-            {
-                if(VAttribute* n = findLimit(val, a->strName()))
-                {
-#ifdef _UI_VNODE_DEBUG
-                    //UiLog().dbg() << "trigger limit: " << n->name();
-#endif                   
-                    tlc->add(n,nullItem, TriggerCollector::Normal);
+        const std::vector<InLimit>& limiterVec=node_->inlimits();
+        for (auto & limiter: limiterVec) {
+            if (Limit* lim = node_->findLimitViaInLimit(limiter)) {
+                if (Node *limParent = lim->node()) {
+                    if (VNode *p = root()->toVNode(limParent)) {
+                        if(VAttribute *n=p->getLimit(lim->name())) {
+                            tlc->add(n,nullItem, TriggerCollector::Normal);
+                        }
+                    }
                 }
             }
         }
@@ -1050,7 +1060,7 @@ void VNode::triggers(TriggerCollector* tlc)
         //Date
         std::vector<VAttribute*> dateVec;
         findAttributes(VAttributeType::find("date"),dateVec);
-        n=dateVec.size();
+        size_t n=dateVec.size();
         for(std::size_t i=0; i < n; i++)
         {
             tlc->add(dateVec[i],nullItem,TriggerCollector::Normal);
@@ -1178,62 +1188,21 @@ void VNode::triggeredByEvent(const std::string& name,std::vector<std::string>& t
        data_->getEvent(this,name,triggeredVec);
 }
 
-
-VAttribute* VNode::findLimit(const std::string& path, const std::string& name)
+VAttribute* VNode::getLimit(const std::string& name)
 {
-   // if (!strncmp("/", path.c_str(), 1))
-   VAttribute* nullItem=nullptr;
-
-#if 0
-   if(!path.empty() && path[0] == '/')
-      if (! (f = serv().top()->find(path)))
-         return &dummy_node::get(path + ":" + name);
-#endif
-
-    //If
-    VNode* n=this;
-    if(!path.empty() && path[0] == '/')
-    {
-        n=server()->vRoot()->find(path);
-        if(!n)
-            return nullItem;
-
-        //if(n && n != this)
-        //    return n->findLimit(path,name);
-    }
-
-    //Find the matching limit in the node
+    VAttribute* nullItem=nullptr;
     std::vector<VAttribute*> limit;
-    n->findAttributes(VAttributeType::find("limit"),limit);
+    findAttributes(VAttributeType::find("limit"),limit);
     std::size_t limitNum=limit.size();
     for(std::size_t i=0; i < limitNum; i++)
-    {       
+    {
        if(limit[i]->strName() == name)
        {
            return limit[i];
        }
     }
 
-    //Find the matching limit in the ancestors
-    if (path.empty()) return nullItem;
-    VNode* p=n->parent();
-    Q_ASSERT(p);
-    int chNum= p->numOfChildren();
-    for(int i=0; i < chNum; i++)
-    {
-        VNode* ch=p->childAt(i);
-        if(ch !=n && ch->strName() == path.substr(0, ch->name().size()))
-        {
-            std::string::size_type next = path.find('/');
-            if ( next != std::string::npos) {
-               return ch->findLimit(path.substr(next+1, path.size()), name);
-            }
-        }
-    }
-
     return nullItem;
-
-   //return &dummy_node::get(path + ":" + name);
 }
 
 QString VNode::nodeMenuMode() const

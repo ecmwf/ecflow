@@ -99,7 +99,7 @@ void ServerComThread::run()
         // define the tasks that will explicitly/implicitly call ci_->sync_local()
         std::set<VTask::Type> sync_tasks = {VTask::CommandTask, VTask::SyncTask,
                       VTask::WhySyncTask,VTask::ScriptSubmitTask,VTask::ZombieCommandTask,
-                      VTask::JobStatusTask};
+                      VTask::JobStatusTask, VTask::PlugTask};
 
         // this is called during reset - it requires a special treatment
         if(taskType_  == VTask::ResetTask)
@@ -211,6 +211,12 @@ void ServerComThread::run()
                 {
                     UiLog(serverName_).dbg() << " JOB STATUS";
                     ci_->status(nodePath_);
+                    break;
+                }
+                case VTask::PlugTask:
+                {
+                    UiLog(serverName_).dbg() << " PLUG";
+                    ci_->plug(params_["source"], params_["target"]);
                     break;
                 }
 

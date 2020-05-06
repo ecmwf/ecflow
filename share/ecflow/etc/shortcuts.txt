@@ -44,3 +44,10 @@
 |Ctrl+L|Go to line number|
 |Ctrl++ or Ctrl+WheelUp|Increase font size|
 |Ctrl+- or Ctrl+WheelDown|Decrease font size|
+
+||Trigger graph||
+|Left|Expand graph via parent|
+|+ (=plus)|Expand graph|
+|- (=minus)|Collapse graph|
+|Space|Expand/collapse graph|
+

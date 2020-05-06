@@ -80,10 +80,9 @@ public:
 
       std::vector<node_ptr> auto_cancelled_nodes_;
       std::vector<node_ptr> auto_archive_nodes_;
-      Node* holding_parent_day_or_date_{nullptr};  // Node with holding day/date. Avoid freeing child node time attributes
-      Node* top_level_repeat_{nullptr};            // Node holding top level repeat
    };
-   virtual void calendarChanged(const ecf::Calendar&,Node::Calendar_args&,const ecf::LateAttr* inherited_late);
+   virtual bool calendarChanged(const ecf::Calendar&,Node::Calendar_args&,const ecf::LateAttr* inherited_late,bool holding_parent_day_or_date);
+
 
    /// resolving dependencies means we look at day,date,time and triggers and check to
    /// to see if a node is free or still holding. When a node if free of its dependencies and limits
@@ -124,6 +123,7 @@ public:
 
    /// Order the node using the second parameter
    virtual void order(Node*/*immediateChild*/, NOrder::Order) {}
+   virtual void move_peer(Node* src, Node* dest) {}
 
    /// reset all. Used after job generation.
    /// Unlike re-queue/begin, will reset time attributes. see ECFLOW-1204
@@ -153,23 +153,24 @@ public:
    /// However if the JOB *abort* we clear NO_REQUE_IF_SINGLE_TIME_DEP
    /// Otherwise if we run again, we miss additional time slots necessarily
    struct Requeue_args {
+	  enum Requeue_t { REPEAT_INCREMENT=1, TIME=2, FULL=3 };
       Requeue_args() = default;
-      Requeue_args(bool resetRepeats,
-                   bool reset_day_date_reueue_count,
+      Requeue_args(Requeue_t r_t) : requeue_t(r_t) {};
+      Requeue_args(Requeue_t r_t,
+    		       bool resetRepeats,
                    int clear_suspended_in_child_nodes,
                    bool reset_next_time_slot,
                    bool reset_relative_duration,
                    bool log_state_changes = true) :
+                	  requeue_t(r_t),
                       clear_suspended_in_child_nodes_(clear_suspended_in_child_nodes),
                       resetRepeats_(resetRepeats),
-                      reset_day_date_reueue_count_(reset_day_date_reueue_count),
                       reset_next_time_slot_(reset_next_time_slot),
                       reset_relative_duration_(reset_relative_duration),
                       log_state_changes_(log_state_changes){}
-
+      Requeue_t requeue_t{FULL};
       int clear_suspended_in_child_nodes_{0};
       bool resetRepeats_{true};
-      bool reset_day_date_reueue_count_{true};   // ensure task with date/date run once under a repeat
       bool reset_next_time_slot_{true};
       bool reset_relative_duration_{true};
       bool log_state_changes_{true};
@@ -750,10 +751,10 @@ private:
    /// i.e if day,date,cron attributes does correspond to 24 hours of today, then we
    /// need make them as complete.
    void markHybridTimeDependentsAsComplete();
-   bool testTimeDependenciesForRequeue() const;
-   void calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_args&);
+   bool testTimeDependenciesForRequeue();
+   bool calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_args&);
    bool holding_day_or_date(const ecf::Calendar& c) const;
-   void do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion, bool reset_repeats);
+   void do_requeue_time_attrs(bool reset_next_time_slot, bool reset_relative_duartion,Requeue_args::Requeue_t);
    bool has_time_dependencies() const;
 
 private: // alow simulator access
@@ -839,6 +840,7 @@ private:
    std::vector<ecf::CronAttr>  crons_;
    std::vector<DateAttr>       dates_;
    std::vector<DayAttr>        days_;
+
 
    std::unique_ptr<ecf::LateAttr> late_;         // Can only have one late attribute per node
    std::unique_ptr<MiscAttrs>     misc_attrs_;   // VerifyAttr(used for statistics and test verification) & Zombies

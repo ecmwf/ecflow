@@ -86,18 +86,10 @@ void DateAttr::checkDate(int day, int month, int year, bool allow_wild_cards)
 	}
 }
 
-void DateAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat, bool clear_at_midnight)
+void DateAttr::calendarChanged( const ecf::Calendar& c, bool clear_at_midnight)
 {
-   if (top_level_repeat) {
-      // Once free we stay free until re-queue, if we have a top level repeat
-      if (free_) {
-         return;
-      }
-   }
-
    // See ECFLOW-337 versus ECFLOW-1550
    if (c.dayChanged()) {
-      requeue_counter_ = 0;
       if (clear_at_midnight) clearFree();
    }
 
@@ -105,9 +97,7 @@ void DateAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat, b
       return;
    }
    
-   // This AFFECTs the code above with top_level_repeat.
-   // If we have been re-queued under a repeat(incremental), then once free stay free
-   if (requeue_counter_ == 0 && isFree(c)) {
+   if (is_free(c)) {
       setFree();
    }
 }
@@ -115,15 +105,12 @@ void DateAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat, b
 void DateAttr::reset()
 {
    free_ = false;
-   requeue_counter_ = 0;
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
-void DateAttr::requeue(bool reset_requeue_counter)
+void DateAttr::requeue()
 {
    free_ = false;
-   if (reset_requeue_counter) requeue_counter_ = 0; // Manual re-queue, set to true when repeats are reset.
-   else                       requeue_counter_++;
    state_change_no_ = Ecf::incr_state_change_no();
 }
 
@@ -236,16 +223,6 @@ void DateAttr::print(std::string& os) const
 	if (!PrintStyle::defsStyle()) {
 	   if (free_) {
 	      os += " # free";
-	      if (requeue_counter_ != 0)  {
-	         os += " ";
-	         os += boost::lexical_cast<std::string>(requeue_counter_);
-	      }
-	   }
-	   else {
-	      if (requeue_counter_ != 0)  {
-	         os += " # ";
-	         os += boost::lexical_cast<std::string>(requeue_counter_);
-	      }
 	   }
 	}
 	os += "\n";
@@ -276,7 +253,6 @@ std::string DateAttr::dump() const
 	std::stringstream ss; ss << toString();
  	if (free_) ss << " (free)";
 	else       ss << " (holding)";
-   ss << " requeue_counter_:" << requeue_counter_;
 	return ss.str();
 }
 
@@ -285,9 +261,6 @@ bool DateAttr::operator==(const DateAttr& rhs) const
 	if (free_ != rhs.free_) {
 		return false;
 	}
-   if (requeue_counter_ != rhs.requeue_counter_ ) {
-      return false;
-   }
 	return structureEquals(rhs);
 }
 bool DateAttr::structureEquals(const DateAttr& rhs) const
@@ -307,8 +280,8 @@ DateAttr DateAttr::create(const std::string& dateString)
 
 DateAttr DateAttr::create( const std::vector<std::string >& lineTokens, bool read_state)
 {
-   //  date 15.11.2009 # free 2  // with PersistStyle::STATE & MIGRATE
-   //  date 15.*.*     # 2
+   //  date 15.11.2009 # free   // with PersistStyle::STATE & MIGRATE
+   //  date 15.*.*     #
    //  date *.1.*
 
 //   for(size_t i =0; i < lineTokens.size() ; i++) {
@@ -318,12 +291,7 @@ DateAttr DateAttr::create( const std::vector<std::string >& lineTokens, bool rea
    DateAttr date = DateAttr::create( lineTokens[1]) ;
    if (read_state) {
       for(size_t i = 3; i < lineTokens.size(); i++) {
-
          if (lineTokens[i] == "free") date.setFree();
-         else {
-            try { date.set_requeue_counter(boost::lexical_cast<int>( lineTokens[i] ));}
-            catch(...) { throw std::runtime_error("DateAttr::create: could not parse state, for requeue_counter");}
-         }
       }
    }
    return date;

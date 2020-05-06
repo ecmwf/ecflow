@@ -145,7 +145,7 @@ void StandardView::layout(int parentId, bool recursiveExpanding,bool afterIsUnin
         //We compute the size of the item. For attributes we delay the width computation until we
         //actually paint them and we set their width to 300.
         int w,h;
-        delegate_->sizeHint(currentIndex,w,h);
+        delegate_->sizeHintCompute(currentIndex,w,h);
         item->width=w;
         item->height=h;
 
@@ -431,7 +431,7 @@ void StandardView::drawRow(QPainter* painter,int start,int xOffset,int& yp,std::
 
         //Draw the item with the delegate
         QSize paintedSize;
-        delegate_->paint(painter,opt,item->index,paintedSize);
+        delegate_->paintIt(painter,opt,item->index,paintedSize);
 
         //we have to know if the item width/height is the same that we expected.
         //This can happen when:

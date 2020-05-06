@@ -27,7 +27,6 @@
 #include "JobsParam.hpp"
 #include "Jobs.hpp"
 #include "CalendarUpdateParams.hpp"
-#include "CmdContext.hpp"
 #include "Str.hpp"
 
 using namespace boost::gregorian;
@@ -64,8 +63,6 @@ bool Simulator::run(const std::string& theDefsFile,std::string& errorMsg) const
 
 bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::string& errorMsg, bool do_checks) const
 {
-   CmdContext cmd_context;
-
 #ifdef DEBUG_LONG_RUNNING_SUITES
 	std::cout << "Simulator::run " << defs_filename << " no of suites " << theDefs.suiteVec().size() << endl;
 #endif
@@ -128,7 +125,7 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
  	std::string msg = ss.str();
  	log(Log::MSG,msg);
 #ifdef DEBUG_LONG_RUNNING_SUITES
- 	cout << defs_filename << msg << "\n";
+ 	cout << defs_filename << msg << "   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 #endif
 
  	// Do we have autocancel, must be done before.
@@ -145,7 +142,16 @@ bool Simulator::run(Defs& theDefs, const std::string& defs_filename,  std::strin
 
 #ifdef DEBUG_LONG_RUNNING_SUITES
       for(suite_ptr my_suite: theDefs.suiteVec()) {
-         cout << "duration: " << to_simple_string(duration) << " " << my_suite->calendar().toString() << endl;
+         cout << "duration: " << to_simple_string(duration) << " " << my_suite->calendar().toString() <<  " +++++++++++++++++++++++++++++++++++ " << endl;
+
+    	 // use following to snapshot definition state at a given point in time
+//         {
+//        	 boost::gregorian::date debug_date(2019,8,5);
+//        	 ptime debug_time(debug_date, hours(10) );
+//        	 if (my_suite->calendar().suiteTime() == debug_time) {
+//        		 cout << theDefs.print(PrintStyle::MIGRATE) << endl;
+//        	 }
+//         }
       }
 #endif
 

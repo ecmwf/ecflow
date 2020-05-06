@@ -297,7 +297,24 @@
                     "disabledRule": "infoEnabled=false"
                 }
             },
-
+            "trigger": {
+                "background" : {
+                    "label"   : "Background colour",
+                    "default" : "rgb(242,242,242)"
+                },
+                "parentConnectorColour" : {
+                    "label"   : "Parent-child connector colour",
+                    "default" : "rgb(255,0,0)"
+                },
+                "triggerConnectorColour" : {
+                    "label"   : "Trigger connector colour",
+                    "default" : "rgb(0,0,0)"
+                },
+                "dependencyConnectorColour" : {
+                    "label"   : "Dependency connector colour",
+                    "default" : "rgb(0,0,255)"
+                }
+           },
            "textEdit" : {
 			     
                  "numAreaBackground" : {

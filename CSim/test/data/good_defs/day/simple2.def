@@ -1,0 +1,15 @@
+suite simple
+  clock    real 19.04.2020     # Sunday
+  endclock      27.04.2020     # Monday, add endclock otherwise we simulate for year due to repeat.
+      
+      family 0
+        verify complete:1
+        time 23:00
+        day monday
+        task t1
+        task t2
+           trigger ./t1 == complete
+      endfamily   
+endsuite
+
+ 

@@ -18,9 +18,8 @@
 
 #include "ui_TriggerItemWidget.h"
 
-class QActionGroup;
+class QButtonGroup;
 class TriggeredScanner;
-class TriggerTableCollector;
 
 class TriggerItemWidget : public QWidget, public InfoPanelItem, protected Ui::TriggerItemWidget
 {
@@ -55,17 +54,25 @@ protected Q_SLOTS:
     void slotLinkSelected(VInfo_ptr info);
     void slotInfoPanelCommand(VInfo_ptr info,QString cmd);
     void slotDashboardCommand(VInfo_ptr info,QString cmd);
+    void slotChangeMode(int, bool);
 
 protected:
     void load();
+    void loadTable();
+    void loadGraph();
+    void rerender() override;
     void updateState(const ChangeFlags&) override;
     TriggeredScanner* triggeredScanner() const {return scanner_;}
     void checkActionState();
     void clearTriggers();
+    void showGraphButtons(bool b);
 
-    TriggerTableCollector* triggerCollector_;
-    TriggerTableCollector* triggeredCollector_;
+    enum ModeIndex {TableModeIndex=0, GraphModeIndex=1};
+
     TriggeredScanner *scanner_;  
+    QButtonGroup* modeGroup_;
+    int exprHeight_;
+    int exprEmptyHeight_;
 };
 
 #endif

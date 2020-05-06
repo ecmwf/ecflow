@@ -21,6 +21,7 @@
 #include "Expression.hpp"
 #include "Node.hpp"
 #include "Limit.hpp"
+#include "Defs.hpp"
 
 using namespace ecf;
 using namespace std;
@@ -170,6 +171,7 @@ const char* QueryCmd::desc() {
             "  arg2 = <path> | <path>:name where name is name of a event, meter, label, limit or variable\n"
             "  arg3 = trigger expression | prev | next # prev,next only used when arg1 is repeat\n\n"
             "Usage:\n"
+            " ecflow_client --query state /                                     # return top level state to standard out\n"
             " ecflow_client --query state /path/to/node                         # return node state to standard out\n"
             " ecflow_client --query dstate /path/to/node                        # state that can included suspended\n"
             " ecflow_client --query repeat /path/to/node                        # return the current value as a string\n"
@@ -188,6 +190,14 @@ const char* QueryCmd::desc() {
 STC_Cmd_ptr QueryCmd::doHandleRequest(AbstractServer* as) const
 {
    as->update_stats().query_++;
+
+   if (path_to_attribute_ == "/") {
+	   if (query_type_ == "state") {
+	      return PreAllocatedReply::string_cmd( NState::toString(as->defs()->state()));
+	   }
+       std::stringstream ss; ss << "QueryCmd: The only valid query for the server is 'state', i.e. ecflow_client --query state /";
+       throw std::runtime_error(ss.str());
+   }
 
    node_ptr node = find_node(as,path_to_attribute_);
 

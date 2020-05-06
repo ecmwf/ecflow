@@ -63,7 +63,7 @@ AbstractNodeView::AbstractNodeView(TreeNodeModel* model,QWidget* parent) :
     //so cannot be called from the constructor. We need to call it from
     //the constructor of the derived classes
 
-    delegate_=new TreeNodeViewDelegate(model_,this);
+    delegate_=new TreeNodeViewDelegate(model_, this);
 }
 
 AbstractNodeView::~AbstractNodeView()

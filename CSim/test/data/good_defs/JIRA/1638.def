@@ -1,0 +1,18 @@
+#5.4.0
+suite ECFLOW_1638
+  clock real 1.5.2020
+  endclock 3.5.2020
+  task t2
+    date 1.5.2010
+    date 1.5.2011
+    verify complete:0
+  task t3
+    time 23:00
+    verify complete:1
+  task t4
+    cron 23:00
+    verify complete:2
+  task t5
+    cron 10:00 20:00 01:00
+    verify complete:22
+endsuite

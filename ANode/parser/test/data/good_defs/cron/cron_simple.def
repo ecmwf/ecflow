@@ -1,0 +1,11 @@
+suite cron_simple
+  
+ task t1
+      cron 00:00 17:59 00:01   
+ task t2
+      cron 17:40               
+ task t3
+      cron 17:55    
+ task t4
+      cron 21:45    
+endsuite

@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_time_day_combination_in_hierarchy )
    //  family f
    //    repeat integer rep 0 1
    //    family f1
-   //       time 10:00  # should run, monday at 10:00 twice, due to repeat
+   //       time 10:00  # should run, 2 on monday at midnight, the time has NO effect
    //       task t1
    //          day monday
    Defs  defs;
@@ -130,9 +130,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_time_day_combination_in_hierarchy )
 
    CalendarUpdateParams calUpdateParams( hours(1) );
    boost::posix_time::ptime expected_time1 = boost::posix_time::ptime(date(2019,8,5),time_duration(0,0,0));   // Monday & 00:00
-   boost::posix_time::ptime expected_time2 = boost::posix_time::ptime(date(2019,8,5),time_duration(10,0,0));  // Monday & 10
    boost::posix_time::ptime expected_time3 = boost::posix_time::ptime(date(2019,8,12),time_duration(0,0,0));  // Monday & 00:00
-   boost::posix_time::ptime expected_time4 = boost::posix_time::ptime(date(2019,8,12),time_duration(10,0,0)); // Monday & 10
    //cout << defs << "\n";
 
    int submitted = 0;
@@ -154,17 +152,9 @@ BOOST_AUTO_TEST_CASE( test_repeat_time_day_combination_in_hierarchy )
          if ( submitted == 1)
             BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time1,"\nExpected to submit at " << expected_time1 << " only, but also found " << suite->calendar().suiteTime());
 
-         // 2nd Run: Monday at 10:00 am
-         if ( submitted == 2)
-             BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time2,"\nExpected to submit at " << expected_time2 << " only, but also found " << suite->calendar().suiteTime());
-
          // 1st Run: Monday at 00:00 am
-         if ( submitted == 3)
+         if ( submitted == 2)
             BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time3,"\nExpected to submit at " << expected_time3 << " only, but also found " << suite->calendar().suiteTime());
-
-         // 2nd Run: Monday at 10:00 am
-         if ( submitted == 4)
-             BOOST_CHECK_MESSAGE( suite->calendar().suiteTime() == expected_time4,"\nExpected to submit at " << expected_time4 << " only, but also found " << suite->calendar().suiteTime());
 
          t1->set_state(NState::COMPLETE); // cause repeat to loop
          //cout << "   set_complete t1 at " << suite->calendar().suiteTime() << " " << days[0].dump() << " " << times[0].dump() << "\n";
@@ -174,7 +164,7 @@ BOOST_AUTO_TEST_CASE( test_repeat_time_day_combination_in_hierarchy )
 
       defs.updateCalendar(calUpdateParams);
    }
-   BOOST_CHECK_MESSAGE( submitted == 4 ,"Expected four submission but found " << submitted);
+   BOOST_CHECK_MESSAGE( submitted == 2,"Expected two submission but found " << submitted);
 }
 
 BOOST_AUTO_TEST_CASE( test_repeat_with_impossible_day_combination_in_hierarchy  )

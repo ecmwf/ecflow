@@ -69,8 +69,8 @@ BOOST_AUTO_TEST_CASE( test_force_cmd )
    TestHelper::test_state(f1,NState::COMPLETE);
    TestHelper::test_state(t1,NState::COMPLETE);
 
-   Node::Requeue_args args(true  /* reset repeats*/,
-                           true  /* reset_day_date_reueue_count  */,
+   Node::Requeue_args args(Node::Requeue_args::FULL,
+		                   true  /* reset repeats*/,
                            0     /* clear_suspended_in_child_nodes */,
                            false /* reset_next_time_slot_ */,
                            true  /* reset relative duration */);

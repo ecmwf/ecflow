@@ -1,0 +1,101 @@
+suite ecflow_1550
+  defstatus suspended
+  edit SLEEP 120
+  family barrier
+    repeat enumerated YMD 1 2 3 4 5 6 7 8 #sdsdsd
+    family start
+      complete start/0 == complete and start/1 == complete and start/2 == complete and start/3 == complete and start/4 == complete and start/5 == complete and start/6 == complete
+      family 0
+        time 23:59
+        day monday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 1
+        time 23:59
+        day tuesday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 2
+        time 23:59
+        day wednesday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 3
+        time 23:59
+        day thursday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 4
+        time 23:59
+        day friday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 5
+        time 23:59
+        day saturday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+      family 6
+        time 23:59
+        day sunday
+        task t1
+        task t2
+           trigger ./t1 == complete
+        task t3
+           trigger ./t2 == complete
+        task t4
+           trigger ./t3 == complete
+        task t5
+           trigger ./t4 == complete
+      endfamily
+    endfamily
+  endfamily
+endsuite

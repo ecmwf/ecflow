@@ -26,7 +26,7 @@ namespace ecf { class Calendar;} // forward declare class that is in a name spac
 class DayAttr {
 public:
 	enum Day_t { SUNDAY=0, MONDAY=1, TUESDAY=2, WEDNESDAY=3, THURSDAY=4, FRIDAY=5, SATURDAY=6 };
-   DayAttr() = default;
+	DayAttr() = default;
    explicit DayAttr(Day_t day) : day_(day) {}
    explicit DayAttr(const std::string& str) : day_(DayAttr::getDay(str)) {}
    explicit DayAttr(const boost::gregorian::date& date)
@@ -37,13 +37,31 @@ public:
    bool operator<(const DayAttr& rhs) const { return day_ < rhs.day_; }
 	bool structureEquals(const DayAttr& rhs) const;
 
-   void reset();
-   void requeue(bool reset_queue_counter);
+	// called at begin time.
+	void reset();
+	void reset(const ecf::Calendar& c);
+
+	// called when we need a requed based on a time attribute. Should not clear expired flag.
+	void requeue();
+
+	// called when re-queing because of:
+	//    - automatic re-queue due to repeat increment
+	//    - manual re-queue
+	// Clears expired flag, and sets day attribute to a next matching *FUTURE* day
+	void requeue(const ecf::Calendar& c);
+
+	// Called after a node has completed, if calendar day corresponds to *THIS* day. *Expire* it
+	// This should be called just before: checkForRequeue.
+	// This day attribute should be treated as being deleted. returns false form
+	//  - isFree()          stops re-queue on expired day
+	//  - calendarChanged() stops clearing of free.
+	// Expired flag is RESET only by: void requeue(const ecf::Calendar& c);
+	void check_for_expiration(const ecf::Calendar&);
+
 
 	void setFree();   // ensures that isFree() always returns true
-	void clearFree(); // resets the free flag
 	bool isSetFree() const { return free_; }
-	void calendarChanged( const ecf::Calendar& c, bool top_level_repeat,bool clear_at_midnight = true) ; // can set attribute free
+	void calendarChanged( const ecf::Calendar& c, bool clear_at_midnight = true) ; // can set attribute free
 	bool isFree(const ecf::Calendar&) const;
 	bool checkForRequeue( const ecf::Calendar&) const;
 	bool validForHybrid(const ecf::Calendar&) const;
@@ -65,19 +83,26 @@ public:
 
 	// access
 	DayAttr::Day_t day() const { return day_;}
+	const boost::gregorian::date& date() const { return date_;}
 
 	boost::gregorian::date next_matching_date(const ecf::Calendar& c) const;
 
-   bool is_free(const ecf::Calendar&) const; // ignores free_
-   void set_requeue_counter(int rc) { requeue_counter_ = rc;}
+	void set_expired(); // ********* TREAT this Day Attribute as deleted **********
+	bool expired() const { return expired_;}
 private:
+	void clearFree(); // resets the free flag
+	void clear_expired();
+	bool is_free(const ecf::Calendar&) const; // ignores free_
+   boost::gregorian::date matching_date(const ecf::Calendar& c) const;
    void write(std::string&) const;
 
 private:
    DayAttr::Day_t day_{DayAttr::SUNDAY};
    unsigned int state_change_no_{0};    // *not* persisted, only used on server side
-   unsigned int requeue_counter_{0};    // ensure we run only once per requeue
    bool     free_{false};               // persisted for use by why() on client side
+   bool     expired_{false};            // added for ecflow 5.4.0
+
+   boost::gregorian::date date_;        // corresponding to day_
 
    friend class cereal::access;
    template<class Archive>

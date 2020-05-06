@@ -356,6 +356,30 @@ BOOST_AUTO_TEST_CASE( test_parser_good_expressions )
    exprMap["(/s/f/t<flag>late or 1)"] = std::make_pair(AstOr::stype(),true);
    exprMap["/<flag>late"] = std::make_pair(AstFlag::stype(),false);
 
+   exprMap["/s/f/t<flag>zombie"] = std::make_pair(AstFlag::stype(),false);
+   exprMap["./s<flag>zombie"] = std::make_pair(AstFlag::stype(),false);
+   exprMap["../s/f/t<flag>zombie"] = std::make_pair(AstFlag::stype(),false);
+   exprMap["/s/f/t<flag>zombie == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["0 == /s/f/t<flag>zombie"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["/s/f/t<flag>zombie and /s/f/t<flag>zombie"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["/s/f/t<flag>zombie or /s/f/t<flag>zombie"] = std::make_pair(AstOr::stype(),false);
+   exprMap["! /s/f/t<flag>zombie and ! /s/f/t<flag>zombie"] = std::make_pair(AstAnd::stype(),true);
+   exprMap["! /s/f/t<flag>zombie"] = std::make_pair(AstNot::stype(),true);
+   exprMap["/s/f/t<flag>zombie + 2 >= 2"] = std::make_pair(AstGreaterEqual::stype(),true);
+   exprMap["(/s/f/t<flag>zombie or 1)"] = std::make_pair(AstOr::stype(),true);
+
+   exprMap["/s/f/t<flag>archived"] = std::make_pair(AstFlag::stype(),false);
+   exprMap["./s<flag>archived"] = std::make_pair(AstFlag::stype(),false);
+   exprMap["../s/f/t<flag>archived"] = std::make_pair(AstFlag::stype(),false);
+   exprMap["/s/f/t<flag>archived == 0"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["0 == /s/f/t<flag>archived"] = std::make_pair(AstEqual::stype(),true);
+   exprMap["/s/f/t<flag>archived and /s/f/t<flag>archived"] = std::make_pair(AstAnd::stype(),false);
+   exprMap["/s/f/t<flag>archived or /s/f/t<flag>archived"] = std::make_pair(AstOr::stype(),false);
+   exprMap["! /s/f/t<flag>archived and ! /s/f/t<flag>archived"] = std::make_pair(AstAnd::stype(),true);
+   exprMap["! /s/f/t<flag>archived"] = std::make_pair(AstNot::stype(),true);
+   exprMap["/s/f/t<flag>archived + 2 >= 2"] = std::make_pair(AstGreaterEqual::stype(),true);
+   exprMap["(/s/f/t<flag>archived or 1)"] = std::make_pair(AstOr::stype(),true);
+
    exprMap[":VAR == 0"] = std::make_pair(AstEqual::stype(),true);
    exprMap[":VAR == 1"] = std::make_pair(AstEqual::stype(),false);
    exprMap[":VAR == /mc/main/ref:MC_STOP"] = std::make_pair(AstEqual::stype(),true);
@@ -601,6 +625,7 @@ BOOST_AUTO_TEST_CASE( test_parser_bad_expressions )
 {
    std::cout << "ANode:: ...test_parser_bad_expressions\n";
    vector<string> exprvec;
+   exprvec.emplace_back("/s/f/t<flag>restored");
    exprvec.emplace_back("a <= complete");
    exprvec.emplace_back("a >= complete");
    exprvec.emplace_back("a = complete");

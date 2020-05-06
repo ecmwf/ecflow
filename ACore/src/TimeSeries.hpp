@@ -94,7 +94,7 @@ public:
 	/// in order to determine whether we should re-queue.
 	/// Additionally when we have a time range, what if the last jobs runs over midnight. In this case
 	/// we need to return false. i.e do not re-queue ECFLOW-130
-   bool checkForRequeue( const ecf::Calendar& calendar, const TimeSlot& the_min, const TimeSlot& the_max) const;
+   bool checkForRequeue( const ecf::Calendar& calendar, const TimeSlot& the_min, const TimeSlot& the_max,bool cmd_context = false) const;
 
    void min_max_time_slots(TimeSlot& the_min, TimeSlot& the_max) const;
 

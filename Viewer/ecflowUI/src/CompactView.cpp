@@ -122,7 +122,7 @@ void CompactView::layout(int parentId, bool recursiveExpanding,bool afterIsUnini
     {
         int w,h;
         QModelIndex currentIndex=model_->index(i-first,0,parentIndex);
-        delegate_->sizeHint(currentIndex,w,h);
+        delegate_->sizeHintCompute(currentIndex,w,h);
         itemWidthVec.push_back(w);
         itemHeightVec.push_back(h);
 
@@ -430,7 +430,7 @@ void CompactView::drawRow(QPainter* painter,int start,int xOffset,int& yp,int& i
 
             //Draw the item with the delegate
             QSize paintedSize;
-            delegate_->paint(painter,opt,item->index,paintedSize);
+            delegate_->paintIt(painter,opt,item->index,paintedSize);
 
             //we have to know if the item width/height is the same that we expected.
             //This can happen when:
@@ -634,7 +634,7 @@ void CompactView::adjustWidthInParent(int start)
             QModelIndex idx=model_->index(i,0,parentIndex);
             if(model_->isNode(idx))
             {
-                delegate_->sizeHint(idx,w,h);
+                delegate_->sizeHintCompute(idx,w,h);
                 if(w >widest) widest=w;
             }
         }

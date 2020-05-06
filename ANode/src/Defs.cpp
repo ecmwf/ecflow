@@ -39,6 +39,7 @@
 #include "Memento.hpp"
 #include "CalendarUpdateParams.hpp"
 #include "NodeStats.hpp"
+#include "move_peer.hpp"
 
 using namespace boost::gregorian;
 using namespace boost::posix_time;
@@ -564,11 +565,7 @@ void Defs::requeue()
    flag_.reset();
    if (edit_history_set) flag().set(ecf::Flag::MESSAGE);
 
-   Node::Requeue_args args(true /* reset repeats */,
-                           true /* reset_day_date_reueue_count  */,
-                           0    /* clear_suspended_in_child_nodes*/,
-                           true /* reset_next_time_slot */,
-                           true /* reset relative duration */);
+   Node::Requeue_args args;
    size_t theSuiteVecSize = suiteVec_.size();
    for(size_t s = 0; s < theSuiteVecSize; s++) {
       suiteVec_[s]->requeue(args);
@@ -1522,6 +1519,14 @@ void Defs::order(Node* immediateChild, NOrder::Order ord)
       }
 	}
 }
+
+void Defs::move_peer(Node* source, Node* dest)
+{
+	move_peer_node(suiteVec_,source,dest,"Defs");
+    order_state_change_no_ = Ecf::incr_state_change_no();
+    client_suite_mgr_.update_suite_order();
+}
+
 
 void Defs::top_down_why(std::vector<std::string>& theReasonWhy,bool html_tags) const
 {

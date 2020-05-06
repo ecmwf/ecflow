@@ -385,6 +385,17 @@ void reorder_suites(defs_ptr defs) {
    TestHelper::invokeRequest(defs.get(),Cmd_ptr( new OrderNodeCmd(path,NOrder::ALPHA)));
 }
 
+void move_peers(defs_ptr defs) {
+   std::vector<suite_ptr> suiteVec =  defs->suiteVec();
+   BOOST_REQUIRE_MESSAGE(suiteVec.size() >=2,"Expected suites");
+   TestHelper::invokeRequest(defs.get(),Cmd_ptr( new PlugCmd(suiteVec[0]->absNodePath() ,suiteVec[1]->absNodePath() )));
+}
+void move_peers1(defs_ptr defs) {
+	std::vector<suite_ptr> suiteVec =  defs->suiteVec();
+	BOOST_REQUIRE_MESSAGE(suiteVec.size() >=2,"Expected suites");
+	TestHelper::invokeRequest(defs.get(),Cmd_ptr( new PlugCmd(suiteVec[1]->absNodePath() ,suiteVec[0]->absNodePath() )));
+}
+
 void set_defs_flag(defs_ptr defs) {
    defs->flag().set(ecf::Flag::MESSAGE);
 }
@@ -427,6 +438,8 @@ BOOST_AUTO_TEST_CASE( test_ssync_cmd  )
    test_sync_scaffold(delete_server_variable,"delete_server_variable");
 
    test_sync_scaffold(reorder_suites,"reorder_suites");
+   test_sync_scaffold(move_peers,"move_peers");
+   test_sync_scaffold(move_peers1,"move_peers1");
 
    test_sync_scaffold(set_defs_flag,"set_defs_flag");
    test_sync_scaffold(set_defs_state,"set_defs_state");

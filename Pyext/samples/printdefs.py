@@ -26,7 +26,7 @@ class Indentor:
     @classmethod
     def indent(cls):
         for i in range(Indentor._index):
-            print ' ',
+            print(' ', end=' ')
      
 class DefsTraverser:
     """Traverse the ecflow.Defs definition and writes to standard out.
@@ -82,7 +82,7 @@ class DefsTraverser:
        del indent
 
     def __print_node(self,node):
-        print node.name() + " # state:" + str(node.get_state()) 
+        print(node.name() + " # state:" + str(node.get_state())) 
         
         indent = Indentor()
         defStatus = node.get_defstatus()
@@ -105,7 +105,7 @@ class DefsTraverser:
                 if part_expr.and_expr(): trig = trig + "-a "
                 if part_expr.or_expr():  trig = trig + "-o "
                 self.__print(trig)
-                print part_expr.get_expression()
+                print(part_expr.get_expression())
         trigger_expr = node.get_trigger()
         if trigger_expr:
             for part_expr in trigger_expr.parts:
@@ -113,7 +113,7 @@ class DefsTraverser:
                 if part_expr.and_expr(): trig = trig + "-a "
                 if part_expr.or_expr():  trig = trig + "-o "
                 self.__print(trig)
-                print part_expr.get_expression() 
+                print(part_expr.get_expression()) 
                 
         for var in node.variables:    self.__println("edit " + var.name() + " '" + var.value() + "'")
         for meter in node.meters:     self.__println(str(meter) + " # value: " + str(meter.value()))
@@ -134,11 +134,11 @@ class DefsTraverser:
 
     def __print(self,the_string):
         Indentor.indent()
-        print the_string,
+        print(the_string, end=' ')
 
     def __println(self,the_string):
         Indentor.indent()
-        print the_string
+        print(the_string)
  
 if __name__ == "__main__":
     
@@ -167,13 +167,13 @@ if __name__ == "__main__":
         # check to see if definition exists in the server
         defs = CL.get_defs()
         if defs == None :
-            print "No definition found, exiting..."
+            print("No definition found, exiting...")
             exit(0) 
             
         # print defs;
         defs_traverser = DefsTraverser(defs)
         defs_traverser.do_print()
 
-    except RuntimeError, ex:
-        print "Error: " + str(ex)
-        print "Check host and port number are correct."
+    except RuntimeError as ex:
+        print("Error: " + str(ex))
+        print("Check host and port number are correct.")

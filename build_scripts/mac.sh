@@ -41,6 +41,10 @@ no_ssl_arg=
 log_arg=
 clean_arg=
 install_arg=
+asan_arg=
+msan_arg=
+ubsan_arg=
+
 
 while [[ "$#" != 0 ]] ; do   
 
@@ -62,7 +66,10 @@ while [[ "$#" != 0 ]] ; do
    elif [[ "$1" = no_ssl ]] ;  then no_ssl_arg=$1 ;
    elif [[ "$1" = log ]]   ;   then log_arg=$1 ;
    elif [[ "$1" = test ]] ;    then test_arg=$1 ;
-   elif [[ "$1" = ctest ]] ; then  
+   elif [[ "$1" = asan ]]  ;   then asan_arg=$1 ;
+   elif [[ "$1" = msan ]]  ;   then msan_arg=$1 ;
+   elif [[ "$1" = ubsan ]]  ;  then ubsan_arg=$1 ;
+   elif [[ "$1" = ctest ]] ;   then  
       ctest_arg=$1 ; 
       shift
       while [[ "$#" != 0 ]] ; do
@@ -89,7 +96,7 @@ else
 fi
 
 CXX_FLAGS="-fvisibility=hidden -fvisibility-inlines-hidden -Wno-deprecated-declarations"
-#CXX_LINK_FLAGS=""
+CXX_LINK_FLAGS=""
 
 cmake_extra_options=""
 if [[ "$compiler" = clang ]] ; then
@@ -122,6 +129,31 @@ else
    cmake_extra_options="$cmake_extra_options -DCMAKE_CXX_COMPILER=/usr/local/opt/gcc/bin/g++-9"
 fi
 
+if [[ "$asan_arg" = asan ]] ; then
+
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=address -fno-omit-frame-pointer"
+   CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=address"
+   export ECF_TEST_SANITIZER_AS=1  # enable address sanitizer tests
+   
+   #cmake_extra_options="$cmake_extra_options -CMAKE_CXX_LINK_EXECUTABLE= "
+   #cmake -DCMAKE_LINKER=/path/to/linker -DCMAKE_CXX_LINK_EXECUTABLE="<CMAKE_LINKER> <FLAGS> <CMAKE_CXX_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> <LINK_LIBRARIES>"
+   #cmake_extra_options="$cmake_extra_options -DCMAKE_BUILD_TYPE=ASAN"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_LINKER=/Library/Developer/CommandLineTools/usr/bin/clang"
+fi
+if [[ "$ubsan_arg" = ubsan ]] ; then
+   #CXX_FLAGS="$CXX_FLAGS -fsanitize=undefined -fsanitize-minimal-runtime -fno-omit-frame-pointer -fno-sanitize-recover=all" # exit after all errors minimal info
+   #CXX_FLAGS="$CXX_FLAGS -fsanitize=undefined -fno-omit-frame-pointer -fno-sanitize-recover=all"                           # exit on first error, max info
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=undefined -fno-omit-frame-pointer"                                                     # report error, max info, no exit on error
+   CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=undefined"
+   export ECF_TEST_SANITIZER_UB=1  # enable undefined behaviour tests
+   cmake_extra_options="$cmake_extra_options -DCMAKE_LINKER=/Library/Developer/CommandLineTools/usr/bin/clang"
+fi
+if [[ "$msan_arg" = msan ]] ; then
+   CXX_FLAGS="$CXX_FLAGS -fsanitize=memory -fno-omit-frame-pointer -fsanitize-memory-track-origins"
+   CXX_LINK_FLAGS="$CXX_LINK_FLAGS -fsanitize=memory"
+   cmake_extra_options="$cmake_extra_options -DCMAKE_LINKER=/Library/Developer/CommandLineTools/usr/bin/clang"
+fi
+
 log_options=
 if [[ $log_arg = log ]] ; then
     log_options="-DECBUILD_LOG_LEVEL=DEBUG"
@@ -150,6 +182,11 @@ mkdir -p $bdir
 cd $bdir
 
 if [[ "$ctest_arg" != "" ]] ; then
+
+    if [[ "$asan_arg" = asan ]] ; then
+      ASAN_OPTIONS=detect_leaks=1
+    fi
+    
     $ctest_arg 
     exit 0
 fi
@@ -170,6 +207,7 @@ fi
 cmake ${HOME}/git/ecflow \
       -DCMAKE_MODULE_PATH=${HOME}/git/ecbuild/cmake \
       -DCMAKE_CXX_FLAGS="$CXX_FLAGS" \
+      -DCMAKE_EXE_LINKER_FLAGS="$CXX_LINK_FLAGS" \
       -DCMAKE_BUILD_TYPE=$cmake_build_type \
       -DCMAKE_PREFIX_PATH=/usr/local/opt/qt \
       -DCMAKE_INSTALL_PREFIX=${install_prefix} \
@@ -178,7 +216,6 @@ cmake ${HOME}/git/ecflow \
       ${ssl_options} \
       ${log_options} \
       ${test_options}  
-      #-DCMAKE_EXE_LINKER_FLAGS="$CXX_LINK_FLAGS" \
       
 # =============================================================================================
 if [[ "$make_arg" != "" ]] ; then

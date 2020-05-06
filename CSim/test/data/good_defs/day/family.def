@@ -1,0 +1,11 @@
+suite family
+  clock real 04.08.2019   # Sunday
+  endclock   13.08.2019   # added endclock to avoid simulation for a year due to repeat
+  family f1
+       time 10:00   
+       time 11:00   
+       task t1
+            day monday         # run at midnight 1 time  
+            verify complete:1    
+    endfamily
+endsuite

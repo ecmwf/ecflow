@@ -24,6 +24,9 @@
 
 using namespace std;
 using namespace ecf;
+using namespace boost::gregorian;
+
+//#define DEBUG_DAYS 1
 
 //===============================================================================
 
@@ -44,67 +47,144 @@ static const char* theDay(DayAttr::Day_t day)
 
 //===============================================================================
 
-void DayAttr::calendarChanged( const ecf::Calendar& c, bool top_level_repeat, bool clear_at_midnight)
+void DayAttr::calendarChanged( const ecf::Calendar& c, bool clear_at_midnight)
 {
-   if (top_level_repeat) {
-      // Once free we stay free until re-queue, if we have a top level repeat
-      if (free_) {
-         return;
-      }
-   }
+	// See ECFLOW-337
+	//	repeat ....
+	//    family start
+	//      family 0
+	//        time 10:00
+	//        day monday        # if there was no c.dayChanged(), then after re-queue, & before midnight Monday is still free.
+	//        task dummy        # hence we will end up also running on Tuesday at 10:00
+	//          complete 1==1
+	//          trigger 0==1
+	//
+	//  ECFLOW-1550            # If children of a family with day/date are still active/submitted/queued, then don't clear at midnight.
+	//  repeat ....            # This is only applicable for NodeContainers, for task with day/date always CLEAR at midnight
+	//	family f1
+	//	   day monday
+	//	   time 23:00
+	//	   task t1             # Task t1 took longer than 1 hour
+	//	   task t2             # allow task t2 to continue to the next day, i.e clear_at_midnight = False
+	//	      trigger t1 == complete
 
-   // See ECFLOW-337 versus ECFLOW-1550
-   if (c.dayChanged()) {
-      requeue_counter_ = 0;
-      if (clear_at_midnight) clearFree();
-   }
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::calendarChanged " << dump() << " clear_at_midnight " << clear_at_midnight << " calendar:" << c.suite_time_str() << "\n";
+#endif
+	if (expired_) {
+		// ********* TREAT this Day Attribute as deleted ECFLOW-128 **********
+		return;
+	}
 
-   if (free_) {
-      return;
-   }
- 
-   // This AFFECTs the code above with top_level_repeat.
-   // If we have been re-queued under a repeat(incremental), then once free stay free
-   if (requeue_counter_ == 0 && isFree(c)) {
-      setFree();
-   }
+	if (c.dayChanged()) {
+		if (clear_at_midnight) {
+			clearFree();
+#ifdef DEBUG_DAYS
+			cout << " DayAttr::calendarChanged MIDNIGHT " << dump() << " calendar:" <<  c.suite_time_str() << "\n";
+#endif
+		}
+	}
+
+	if (free_) {
+		return;
+	}
+
+	if (is_free(c)) {
+		setFree();
+#ifdef DEBUG_DAYS
+		cout << " DayAttr::calendarChanged SET FREE " << dump() << " calendar:" << c.suite_time_str() << "\n";
+#endif
+	}
 }
 
 void DayAttr::reset()
 {
+   expired_ = false;
    free_ = false;
-   requeue_counter_ = 0;
    state_change_no_ = Ecf::incr_state_change_no();
+   
+#ifdef DEBUG_DAYS
+   cout << " DayAttr::reset :" << dump() << "\n";
+#endif
 }
 
-void DayAttr::requeue(bool reset_requeue_counter)
+void DayAttr::reset(const ecf::Calendar& c)
 {
-   free_ = false;
-   if (reset_requeue_counter) requeue_counter_ = 0; // Manual re-queue, set to true when repeats are reset.
-   else                       requeue_counter_++;
-   state_change_no_ = Ecf::incr_state_change_no();
+	reset();
+	date_ = matching_date(c);
+	
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::reset(calendar) :" << dump() << " calendar:" << c.suite_time_str() << "\n";
+#endif
 }
 
-bool DayAttr::isFree(const ecf::Calendar& calendar) const
+void DayAttr::requeue()
 {
+#ifdef DEBUG_DAYS
+   cout << " DayAttr::requeue " << dump() << "\n";
+#endif
+
+	if (expired_) {
+		// ********* TREAT this Day Attribute as deleted **********
+#ifdef DEBUG_DAYS
+   cout << " DayAttr::requeue " << dump() << " EXPIRED(do nothing) returning\n";
+#endif
+		return;
+	}
+
+	free_ = false;
+    state_change_no_ = Ecf::incr_state_change_no();
+}
+
+void DayAttr::requeue(const ecf::Calendar& c)
+{
+	expired_ = false;
+	requeue();
+	date_ = next_matching_date(c);
+	
+#ifdef DEBUG_DAYS
+	cout << "  DayAttr::requeue(calendar) " << dump() << " calendar:" << c.suite_time_str() << "\n";
+#endif
+}
+
+bool DayAttr::isFree(const ecf::Calendar& c) const
+{
+	if (expired_) {
+		// ********* TREAT this Day Attribute as deleted **********
+#ifdef DEBUG_DAYS
+   cout << " DayAttr::isFree " << dump() << " calendar:" << c.suite_time_str() << " HOLDING due to EXPIRED flag\n";
+#endif
+ 		return false;
+ 	}
+
 	// The FreeDepCmd can be used to free the dates,
  	if (free_) {
+#ifdef DEBUG_DAYS
+   cout << " DayAttr::isFree " << dump() << " calendar:" << c.suite_time_str() << " FREE free_ = TRUE\n";
+#endif
 		return true;
 	}
- 	return is_free(calendar);
+
+ 	bool res = is_free(c);
+
+#ifdef DEBUG_DAYS
+ 	if (res ) cout << " DayAttr::isFree " << dump() << " calendar:" << c.suite_time_str() << " date is FREE\n";
+ 	else      cout << " DayAttr::isFree " << dump() << " calendar:" << c.suite_time_str() << " date is HOLDING\n";
+#endif
+   return res;
 }
 
-bool DayAttr::is_free(const ecf::Calendar& calendar) const
+bool DayAttr::is_free(const ecf::Calendar& c) const
 {
-   return (calendar.day_of_week() == day_);
+   return (c.date() == date_);
 }
 
 void DayAttr::setFree() {
 	free_ = true;
 	state_change_no_ = Ecf::incr_state_change_no();
 
-#ifdef DEBUG_STATE_CHANGE_NO
-	std::cout << "DayAttr::setFree()\n";
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::setFree() " << dump() << "\n";
 #endif
 }
 
@@ -112,21 +192,71 @@ void DayAttr::clearFree() {
 	free_ = false;
 	state_change_no_ = Ecf::incr_state_change_no();
 
-#ifdef DEBUG_STATE_CHANGE_NO
-	std::cout << "DayAttr::clearFree()\n";
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::clearFree() " << dump() << "\n";
 #endif
 }
 
-bool DayAttr::checkForRequeue( const ecf::Calendar& calendar) const
+void DayAttr::set_expired()
 {
- 	// if calendar is hybrid, we can't requeue
-	if (calendar.hybrid()) {
+	expired_ = true;
+	state_change_no_ = Ecf::incr_state_change_no();
+
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::set_expired() " << dump() << "\n";
+#endif
+}
+
+void DayAttr::clear_expired()
+{
+	expired_ = false;
+	state_change_no_ = Ecf::incr_state_change_no();
+
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::clear_expired() " << dump() << "\n";
+#endif
+}
+
+void DayAttr::check_for_expiration(const ecf::Calendar& c)
+{
+#ifdef DEBUG_DAYS
+	cout << "DayAttr::check_for_expiration " << dump() << " calendar:" << c.suite_time_str() << "\n";
+#endif
+	// This function is called when a Node has COMPLETED. Avoid running again on same day date <= calendar, expire the date
+	// Note: time attribute, they get handled before. i.e allowing multiple re-queues on the same date
+	// This function *MUST* be called before checkForRequeue.
+	assert(!date_.is_special());
+	if (date_ <= c.date()) {
+		set_expired();
+	}
+}
+
+bool DayAttr::checkForRequeue( const ecf::Calendar& c) const
+{
+	if (expired_) {
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::check_for_requeue ALREADY EXPIRED " << dump() << " calendar:" << c.suite_time_str() << "  HOLDING <<<<<<<<<<<<\n";
+#endif
 		return false;
 	}
 
-	// checkForRequeue is called when we are deciding whether to re-queue the node.
-	// If this date is in the future, they we should re-queue
-	return (day_ > calendar.day_of_week() );
+ 	// if calendar is hybrid, we can't requeue
+	if (c.hybrid()) {
+		return false;
+	}
+
+	// checkForRequeue is called when we are deciding whether to re-queue the node
+	// Hence we *MUST* have completed. Also crons,time,today have all returned false.
+	// *IF* this date is in the future, they we should re-queue
+
+	assert(!date_.is_special());
+
+	bool future_date = (date_ > c.date() );
+
+#ifdef DEBUG_DAYS
+	cout << " DayAttr::check_for_requeue " << dump() << " calendar:" << c.suite_time_str() << " returning " << future_day << " ************\n";
+#endif
+	return future_date;
 }
 
 bool DayAttr::validForHybrid(const ecf::Calendar& calendar) const
@@ -140,6 +270,8 @@ bool DayAttr::why(const ecf::Calendar& c, std::string& theReasonWhy) const
 
 	theReasonWhy += " is day dependent ( next run on ";
 	theReasonWhy += theDay(day_);
+	theReasonWhy += " ";
+	theReasonWhy += to_simple_string(next_matching_date(c));
 	theReasonWhy += " the current day is ";
 	theReasonWhy += theDay(static_cast<DayAttr::Day_t>(c.day_of_week()));
 	theReasonWhy += " )";
@@ -150,21 +282,21 @@ void DayAttr::print(std::string& os) const
 {
 	Indentor in;
 	Indentor::indent(os) ; write(os);
-   if (!PrintStyle::defsStyle()) {
-      if (free_) {
-         os += " # free";
-         if (requeue_counter_ != 0)  {
-            os += " ";
-            os += boost::lexical_cast<std::string>(requeue_counter_);
-         }
-      }
-      else {
-         if (requeue_counter_ != 0)  {
-            os += " # ";
-            os += boost::lexical_cast<std::string>(requeue_counter_);
-         }
-      }
-   }
+	if (!PrintStyle::defsStyle()) {
+		bool added_hash = false;
+		if (free_) {
+			os += " # free";
+			added_hash = true;
+		}
+		if (expired_) {
+			if (added_hash) os += " expired";
+			else            os += " # expired";
+			added_hash = true;
+		}
+
+		if (added_hash) { os += " "; os += to_simple_string(date_);}
+		else            { os += " # "; os += to_simple_string(date_);}
+	}
 	os += "\n";
 }
 
@@ -186,8 +318,8 @@ std::string DayAttr::dump() const
 	std::stringstream ss;
 	ss << toString();
  	if (free_) ss << " (free)";
-	else       ss << " (holding)";
- 	ss << " requeue_counter_:" << requeue_counter_;
+ 	if (expired_) ss << " (expired)";
+ 	ss << " " << to_simple_string(date_);
   	return ss.str();
 }
 
@@ -220,18 +352,15 @@ DayAttr DayAttr::create( const std::vector<std::string>& lineTokens, bool read_s
 //      cout << "lineTokens[" << i << "] = '" << lineTokens[i] << "'\n";
 //   }
 
-   // day monday  # free 2
-   // day monday  # 2
+   // day monday  # free expired
+   // day monday  # expired
    DayAttr day = DayAttr::create( lineTokens[1] );
 
    // state
    if (read_state) {
       for(size_t i = 3; i < lineTokens.size(); i++) {
-         if (lineTokens[i] == "free") day.setFree();
-         else {
-            try { day.set_requeue_counter(boost::lexical_cast<int>( lineTokens[i]));}
-            catch(...) { throw std::runtime_error("DateAttr::create: could not parse state, for requeue_counter");}
-         }
+          if (lineTokens[i] == "free")    day.setFree();
+          if (lineTokens[i] == "expired") day.set_expired();
       }
    }
    return day;
@@ -267,6 +396,21 @@ std::vector< std::string > DayAttr::allDays() {
 	return vec;
 }
 
+boost::gregorian::date DayAttr::matching_date(const ecf::Calendar& c) const
+{
+    boost::gregorian::date_duration one_day(1);
+    boost::gregorian::date matching_date = c.date();  // todays date
+
+    for(int i=0; i<7; i++) {
+    	if (matching_date.day_of_week().as_number() == day_) {
+    		return matching_date;
+    	}
+    	matching_date += one_day;
+    }
+    assert(false); // no matching day ?s
+    return c.date();
+}
+
 boost::gregorian::date DayAttr::next_matching_date(const ecf::Calendar& c) const
 {
     boost::gregorian::date_duration one_day(1);
@@ -286,6 +430,7 @@ template<class Archive>
 void DayAttr::serialize(Archive & ar )
 {
    ar( CEREAL_NVP(day_));
-   CEREAL_OPTIONAL_NVP(ar, free_, [this](){return free_;});  // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, free_,    [this](){return free_;});     // conditionally save
+   CEREAL_OPTIONAL_NVP(ar, expired_, [this](){return expired_;});  // conditionally save, new to ecflow 5.4.0, should be ignored by old clients. see tests
 }
 CEREAL_TEMPLATE_SPECIALIZE(DayAttr);

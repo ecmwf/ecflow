@@ -1,10 +1,11 @@
-suite suite
+suite day_suite
  clock real 11.10.2009   # 11 October 2009 was a Sunday, task x should hold for a day
  family family
    verify complete:1     # family should complete once
    task y
+     verify complete:1        # task should complete once
    task x
-      trigger ./y == complete
+     trigger ./y == complete
 	  time 01:00
  	  day monday               # simulate for 1 week, due to day
  	  verify complete:1        # task should complete once

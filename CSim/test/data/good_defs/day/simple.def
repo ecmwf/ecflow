@@ -1,0 +1,9 @@
+suite simple
+ clock real 19.04.2020   #  was a Sunday,  
+ family family
+   verify complete:1     # family should complete once
+   task t
+     day monday               # simulate for 1 week, due to day
+     verify complete:1        # task should complete once
+ endfamily
+endsuite

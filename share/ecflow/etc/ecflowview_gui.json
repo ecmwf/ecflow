@@ -254,6 +254,17 @@
                     }
                 },
                 "tab" : {
+                    "label" : "Triggers",
+                    "group" : {
+                        "title" : "Trigger graph view",
+                        "prefix": "view.trigger",
+                        "line": "background",
+                        "line": "parentConnectorColour",
+                        "line": "triggerConnectorColour",
+                        "line": "dependencyConnectorColour"
+                    }
+                },
+                "tab" : {
                     "label" : "Other",
 
                     "group" : {

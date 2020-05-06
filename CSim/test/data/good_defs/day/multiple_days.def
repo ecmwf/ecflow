@@ -1,11 +1,14 @@
-suite Icemap2_to_DB
+suite multiple
   clock real 04.12.2016            # Sunday
   endclock   09.12.2016            # Friday added endclock to avoid simulation for a year due to repeat
   repeat enumerated VARIABLE first # with repeat max duration is 8760 hours, i.e 1 year
-  family icemap
-    day monday      # with 1 hour resolution, will run 24 times on Monday, will re-queue due to future day Thursday
-    day thursday    # On Thursday will run once only. End of repeat
-    task from_Icemap2
-       verify complete:25      
+  family f    
+    day monday                     
+    day thursday                    
+    task t                         # run monday and thursday morning
+       verify complete:2  
+    task t2
+       trigger ./t == complete
+       verify complete:2  
   endfamily
 endsuite

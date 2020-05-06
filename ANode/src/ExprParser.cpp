@@ -136,9 +136,10 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
    static const int flag_path_ID     = 57;
    static const int flag_late_ID     = 58;
    static const int flag_zombie_ID   = 59;
-   static const int flag_ID          = 60;
-   static const int root_path_ID     = 61;
-   static const int parent_variable_ID = 62;
+   static const int flag_archived_ID = 60;
+   static const int flag_ID          = 61;
+   static const int root_path_ID     = 62;
+   static const int parent_variable_ID = 63;
 
     template <typename ScannerT>
     struct definition {
@@ -201,9 +202,10 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
         rule<ScannerT,parser_tag<parent_variable_ID> >   parent_variable ;
         rule<ScannerT,parser_tag<compare_expression_ID> >   compare_expression;
 
-        rule<ScannerT,parser_tag<flag_path_ID> >   flag_path;
-        rule<ScannerT,parser_tag<flag_late_ID> >   flag_late;
+        rule<ScannerT,parser_tag<flag_path_ID> >     flag_path;
+        rule<ScannerT,parser_tag<flag_late_ID> >     flag_late;
         rule<ScannerT,parser_tag<flag_zombie_ID> >   flag_zombie;
+        rule<ScannerT,parser_tag<flag_archived_ID> > flag_archived;
         rule<ScannerT,parser_tag<flag_ID> >   flag;
 
         rule<ScannerT> not_r,less_than_comparable,expression,andExpr,operators;
@@ -293,7 +295,7 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
           or_r =  root_node_d [str_p("or") ] || root_node_d [str_p("||")] || root_node_d [str_p("OR")];
           and_or =  and_r | or_r;
 
-        	 event_state = leaf_node_d[ str_p("set") ] || leaf_node_d[ str_p("clear")] ;
+          event_state = leaf_node_d[ str_p("set") ] || leaf_node_d[ str_p("clear")] ;
 
           node_state_unknown = root_node_d [ str_p("unknown") ];
           node_state_complete = root_node_d [ str_p("complete") ];
@@ -312,7 +314,8 @@ struct ExpressionGrammer : public grammar<ExpressionGrammer>
 
           flag_late = root_node_d[ str_p("late") ];
           flag_zombie = root_node_d[ str_p("zombie") ];
-          flag = flag_late | flag_zombie;
+          flag_archived = root_node_d[ str_p("archived") ];
+          flag = flag_late | flag_zombie | flag_archived;
 
           variable = leaf_node_d [ nodename ];
           basic_variable_path = nodepath >> discard_node_d[ ch_p(':') ] >> variable ;

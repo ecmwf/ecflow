@@ -630,12 +630,11 @@ void Node::set_memento( const NodeDayMemento* memento,std::vector<ecf::Aspect::T
       // We need to ignore state changes (ie we don't use equality operator)
       // otherwise attributes will never compare
       if ( day.structureEquals(memento->attr_) ) {
-         if (memento->attr_.isSetFree()) day.setFree();
-         else                            day.clearFree();
+    	  day = memento->attr_;
          return;
       }
    }
-	addDay(memento->attr_);
+   addDay(memento->attr_);
 }
 
 void Node::set_memento( const NodeDateMemento* memento,std::vector<ecf::Aspect::Type>& aspects,bool aspect_only ) {

@@ -242,6 +242,11 @@ std::string Log::handle_write_failure()
 
 bool log(Log::LogType lt,const std::string& message)
 {
+// For debug of simulator enable this
+//	if (LogToCout::ok()) {
+//		Indentor::indent(cout) << message << '\n';
+//	}
+
 	if (Log::instance()) {
  		return Log::instance()->log(lt,message);
 	}

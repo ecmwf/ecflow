@@ -999,7 +999,22 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
     valRect.setWidth(valWidth);
 
     int xItem=valRect.x()+valRect.width()+attrBox_->spacing;
-    int rightPos=xItem+totalVal*(itemWidth+itemOffset)+itemOffset;
+
+    int itemNum = totalVal;
+    if (maxLimitItems_ > 0) {
+        itemNum = std::min(itemNum, maxLimitItems_);
+    }
+
+    int rightPos=xItem+itemNum*(itemWidth+itemOffset)+itemOffset;
+
+    QRect trailRect = valRect;
+    QString trailTxt("...");
+    bool allItems = (itemNum ==  totalVal);
+    if (!allItems) {
+        trailRect.setX(rightPos + 2*itemOffset);
+        trailRect.setWidth(fm.width(trailTxt) + itemOffset);
+        rightPos = trailRect.x() + trailRect.width();
+    }
 
     rightPos+=attrBox_->rightPadding + attrBox_->rightMargin;
     totalWidth=rightPos-option.rect.x();
@@ -1038,7 +1053,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
         painter->setPen(Qt::NoPen);
         painter->setBrush(limitFillBrush_);
 
-        for(int i=0; i < totalVal; i++)
+        for(int i=0; i < itemNum; i++)
         {
             QRect r(xItem,yItem,itemWidth,itemHeight);
 
@@ -1069,7 +1084,7 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
     else
     {
         int yItem=option.rect.y()+(option.rect.height()-itemHeight)/2;
-        for(int i=0; i < totalVal; i++)
+        for(int i=0; i < itemNum; i++)
 		{	 
             if(i >= maxVal)
                painter->drawPixmap(xItem,yItem,itemWidth,itemHeight,limitExtraFillPix_);
@@ -1081,6 +1096,13 @@ void NodeViewDelegate::renderLimit(QPainter *painter,QStringList data,const QSty
             xItem+=itemOffset+itemHeight;
         }       
 	}
+
+    // draw trailing ...
+    if (!allItems) {
+        painter->setPen(QColor(60, 61, 62));
+        painter->setFont(nameFont);
+        painter->drawText(attrBox_->adjustTextRect(trailRect),Qt::AlignLeft | Qt::AlignVCenter, trailTxt);
+    }
 
     if(selected && drawAttrSelectionRect_)
     {

@@ -39,6 +39,7 @@ TriggerTableView::TriggerTableView(QWidget* parent) :
 
     //Create delegate to the view
     delegate_=new TriggerViewDelegate(this);
+    delegate_->setRenderSeparatorLine(true);
     setItemDelegate(delegate_);
 
     connect(delegate_,SIGNAL(sizeHintChangedGlobal()),
@@ -76,6 +77,13 @@ TriggerTableView::TriggerTableView(QWidget* parent) :
 TriggerTableView::~TriggerTableView()
 {
     delete actionHandler_;
+}
+
+void TriggerTableView::enableOneRowMode()
+{
+    int h = delegate_->nodeBoxHeight();
+    setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
+    setFixedHeight(h+2);
 }
 
 //We should only call it once!!!

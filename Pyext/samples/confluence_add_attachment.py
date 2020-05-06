@@ -33,9 +33,9 @@ class TestConfluence(unittest.TestCase):
         for space_key in space_key_list:
             page_id = self.c.get_page_id(space_key,title) 
             if page_id == None:
-                print "Could not find page id for space_key ",space_key," and title:",title
+                print("Could not find page id for space_key ",space_key," and title:",title)
             else:
-                print "space key:",space_key," page id:",page_id
+                print("space key:",space_key," page id:",page_id)
 
         comment = "production release"
         file = "/var/tmp/ma0/workspace/ecflow/Pyext/samples/test.tar.gz"
@@ -44,7 +44,7 @@ class TestConfluence(unittest.TestCase):
             
             attachment = self.c.get_attachment_id(page_id,file)
             if attachment != None:
-                print "space key:",space_key," allready has an attachment for file ",file
+                print("space key:",space_key," allready has an attachment for file ",file)
             else:
                 self.c.create_attachment(page_id,comment,file)
 

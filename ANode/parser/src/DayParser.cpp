@@ -22,8 +22,8 @@ using namespace std;
 
 bool DayParser::doParse( const std::string& line, std::vector<std::string >& lineTokens )
 {
-	//  day monday  # free
-	//  day tuesday
+	//  day monday  # free expired
+	//  day tuesday # expired
 	if ( lineTokens.size() < 2 ) {
 		throw std::runtime_error( "DayParser::doParse: Invalid day :" + line );
 	}

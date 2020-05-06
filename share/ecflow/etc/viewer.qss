@@ -270,6 +270,32 @@ QToolButton[triggertitle="1"]:hover {
     background: rgb(140,140,140);
 }
 
+QLabel[legend="1"] {
+     border: 1px solid rgb(206,209,196);
+     background: rgb(253, 253, 253);
+}
+
+QLabel[graphTitle="1"] {
+    color:  rgb(60, 61, 62);
+    font-weight: bold;
+}
+
+QWidget[graphInfo="1"] {
+    background:  rgb(112, 112, 112);
+}
+
+QToolButton[graphInfo="1"] {
+    border: none;
+    background-color: transparent;
+}
+
+QToolButton[graphInfo="1"]:hover {
+    border-radius: 0px;
+    padding: 0px;
+    icon-size:  18px;
+    background: rgb(140,140,140);
+}
+
 /*----------------------------
   Property editor
 ------------------------------*/

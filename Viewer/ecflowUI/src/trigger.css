@@ -7,6 +7,14 @@
 // nor does it submit to any jurisdiction.
 //
 //============================================================================*/
+body {
+    background: white;
+}
+
+div {
+    background: blue;
+}
+
 
 p
 {
@@ -82,4 +90,22 @@ td
 {
     background-color: #F5F5F5;
     color: #000000;
+}
+
+td.grtitle
+{
+    padding-left: 4px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+    background-color: #676E81;
+    color: #ffffff;
+    text-align: left;
+}
+
+td.grfirst {
+    padding-left: 2px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    color: #777777;
+    font-weight: bold;
 }

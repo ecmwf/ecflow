@@ -23,7 +23,7 @@ if (NOT DEFINED CMAKE_BUILD_TYPE)
 endif()
 
 # this will generate variables, see ACore/ecflow_version.h.in
-project( ecflow LANGUAGES CXX VERSION 5.3.1 )
+project( ecflow LANGUAGES CXX VERSION 5.4.0 )
 
 
 

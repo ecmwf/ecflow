@@ -13,6 +13,7 @@
 
 #include <QBrush>
 #include <QMap>
+#include <QPainter>
 #include <QPen>
 #include <QStyledItemDelegate>
 
@@ -27,13 +28,15 @@ class NodeShape;
 class NodeText;
 class ServerUpdateData;
 class TreeNodeModel;
+class TreeNodeDelegateBox;
+class TreeAttrDelegateBox;
 
 class TreeNodeViewDelegate : public NodeViewDelegate
 {
 Q_OBJECT
 
 public:
-    explicit TreeNodeViewDelegate(TreeNodeModel* model,QWidget *parent=nullptr);
+    explicit TreeNodeViewDelegate(TreeNodeModel* model, QWidget *parent=nullptr);
     ~TreeNodeViewDelegate() override;
 
     bool isSingleHeight(int h) const;
@@ -44,10 +47,11 @@ public:
     QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex& index ) const override;
 
     //custom implementations
-    void paint(QPainter *painter,const QStyleOptionViewItem &option,
+    void paintIt(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index,QSize&) const;
-    void sizeHint(const QModelIndex& index,int& w,int& h) const;
+    void sizeHintCompute(const QModelIndex& index,int& w,int& h, bool compAttrWidth=false) const;
 
+    int nodeBoxHeight();
 
 Q_SIGNALS:
     void sizeHintChangedGlobal();
@@ -72,7 +76,7 @@ protected:
     void renderServerUpdate(QPainter* painter,const ServerUpdateData&) const;
 
     void widthHintServer(const QModelIndex& index,int& itemWidth,QString text) const;
-    int nodeWidth(const QModelIndex& index,QString text) const;
+    int nodeWidth(const QModelIndex& index,int height, QString text) const;
 
     QString formatTime(int timeInSec) const;
     QColor interpolate(QColor c1,QColor c2,float r) const;
@@ -97,6 +101,9 @@ protected:
     QString subFailText_;
 
     TreeNodeModel* model_;
+
+    mutable QPixmap tmpPix_;
+    mutable QPainter* tmpPainter_ {nullptr};
 };
 
 #endif // TREENODEVIEWDELEGATEBASE_HPP

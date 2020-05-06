@@ -22,6 +22,7 @@ class TriggerTableItem;
 class TriggerTableModel;
 class TriggerTableCollector;
 class TriggerItemWidget;
+class TriggeredScanner;
 class VComboSettings;
 
 class TriggerTableWidget : public QWidget, private Ui::triggerTableWidget
@@ -32,13 +33,13 @@ public:
     explicit TriggerTableWidget(QWidget *parent = nullptr);
     ~TriggerTableWidget() override;
 
-    void setInfo(VInfo_ptr);
-    void setTriggerCollector(TriggerTableCollector *tc1,TriggerTableCollector *tc2);
-	void clear();
+    void setInfo(VInfo_ptr, bool);
+    VInfo_ptr info() const {return info_;}
+
+    void clear();
     void clearSelection();
-    void resumeSelection();
-    void beginTriggerUpdate();
-    void endTriggerUpdate();
+    void setTriggeredScanner(TriggeredScanner* scanner);
+    bool dependency() const {return dependency_;}
     void nodeChanged(const VNode* node, const std::vector<ecf::Aspect::Type>& aspect);
     void writeSettings(VComboSettings* vs);
     void readSettings(VComboSettings* vs);
@@ -61,13 +62,21 @@ Q_SIGNALS:
     void depInfoWidgetClosureRequested();
 
 private:
+    void resumeSelection();
+    void beginTriggerUpdate();
+    void endTriggerUpdate();
+
     VInfo_ptr info_;
     TriggerTableCollector* nodeCollector_;
+    TriggerTableCollector* triggerCollector_;
+    TriggerTableCollector* triggeredCollector_;
+    TriggeredScanner *triggeredScanner_ {nullptr};
     TriggerTableModel *nodeModel_;
     TriggerTableModel *triggerModel_;
     TriggerTableModel *triggeredModel_;
     VInfo_ptr lastSelectedItem_;
     QString depLabelText_;
+    bool dependency_ {false};
 };
 
 #endif

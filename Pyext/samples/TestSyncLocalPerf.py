@@ -21,7 +21,7 @@ def timing_decorator(function_to_time):
         start = time.time()
         function_return = function_to_time(*function_args)
         end = time.time()
-        print '%s function took %0.3f ms for %s' % (function_to_time.func_name, (end-start)*1000.0, function_args[1])
+        print('%s function took %0.3f ms for %s' % (function_to_time.__name__, (end-start)*1000.0, function_args[1]))
         return function_return
     return scafold
 
@@ -45,15 +45,15 @@ if __name__ == "__main__":
     PARSER.add_argument('--port', default="3141",   
                         help="The port on the host, defaults to 3141")
     ARGS = PARSER.parse_args()
-    print ARGS   
+    print(ARGS)   
      
     print("####################################################################")
-    print("Test performance of sync local using " + Client().version() + " debug build(" + str(debug_build()) +")")
+    print(("Test performance of sync local using " + Client().version() + " debug build(" + str(debug_build()) +")"))
     print("####################################################################")
 
     CL = Client(ARGS.host, ARGS.port)
     sync_local(CL,"* All suites *")   # timing for downloading all suites
-    print ""
+    print("")
 
     suites = CL.get_defs().suites
     for suite in suites:

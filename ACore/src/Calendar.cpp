@@ -283,6 +283,20 @@ void Calendar::dump(const std::string& title) const
 	);
 }
 
+std::string Calendar::suite_time_str() const {
+	std::string ss;
+	if (day_of_week_ == 0) ss += " SUNDAY";
+	else if (day_of_week_ == 1) ss += " MONDAY";
+	else if (day_of_week_ == 2) ss += " TUESDAY";
+	else if (day_of_week_ == 3) ss += " WEDNESDAY";
+	else if (day_of_week_ == 4) ss += " THURSDAY";
+	else if (day_of_week_ == 5) ss += " FRIDAY";
+	else if (day_of_week_ == 6) ss += " SATURDAY";
+	ss += " ";
+	ss +=  to_simple_string(suiteTime_);
+	return ss;
+}
+
 std::string Calendar::toString() const
 {
 	std::stringstream ss;

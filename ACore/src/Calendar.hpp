@@ -138,6 +138,7 @@ public:
  	/// return the init() time + the accumulated duration from calls to update(...)
   	/// This should only be used when this calendar is real.
  	const boost::posix_time::ptime& suiteTime() const { return suiteTime_;}
+	std::string suite_time_str() const;
 
  	// duration since last call to init, essentially suite duration
 	const boost::posix_time::time_duration& duration() const { return duration_;}

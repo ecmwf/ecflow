@@ -13,40 +13,55 @@
 // Description
 /////////1/////////2/////////3/////////4/////////5/////////6/////////7/////////8
 #include <boost/test/unit_test.hpp>
+#include <boost/lexical_cast.hpp>
+#include <vector>
+#include <string>
 #include <iostream>
 
 using namespace boost;
 using namespace std;
 
+//#define DEBUG_ME 1
+
 class MyType {
 public:
    MyType(std::string str) : mName(std::move(str)) {
-//      std::cout << "MyType::MyType " << mName << " my_int:" << my_int_ << '\n';
+#ifdef DEBUG_ME
+      std::cout << "MyType::MyType " << mName << " my_int:" << my_int_ << '\n';
+#endif
    }
 
    ~MyType() {
-//      std::cout << "MyType::~MyType " << mName << " my_int:" << my_int_ << '\n';
+#ifdef DEBUG_ME
+      std::cout << "MyType::~MyType " << mName << " my_int:" << my_int_ << '\n';
+#endif
    }
 
    MyType(const MyType& other) : mName(other.mName) {
-//      std::cout << "MyType::MyType(const MyType&) " << mName << " my_int:" << my_int_ << '\n';
+#ifdef DEBUG_ME
+      std::cout << "MyType::MyType(const MyType&) " << mName << " my_int:" << my_int_ << '\n';
+#endif
    }
 
-   MyType(MyType&& other) noexcept : mName(std::move(other.mName)) {
-//      std::cout << "MyType::MyType(MyType&&) " << mName << " my_int:" << my_int_ << '\n';
+   MyType(MyType&& other) noexcept : mName(std::move(other.mName)) { // vector needs noexcept to call move copy constructor during resize.
+#ifdef DEBUG_ME
+      std::cout << "MyType::MyType(MyType&&) " << mName << " my_int:" << my_int_ << '\n';
+#endif
    }
 
    MyType& operator=(const MyType& other) {
-      if (this != &other)
-         mName = other.mName;
-//      std::cout << "MyType::operator=(const MyType&) " << mName << " my_int:" << my_int_ << '\n';
+      if (this != &other)  mName = other.mName;
+#ifdef DEBUG_ME
+      std::cout << "MyType::operator=(const MyType&) " << mName << " my_int:" << my_int_ << '\n';
+#endif
       return *this;
    }
 
    MyType& operator=(MyType&& other) noexcept {
-      if (this != &other)
-         mName = std::move(other.mName);
-//      std::cout << "MyType::operator=(MyType&&) " << mName << " my_int:" << my_int_ << '\n';
+      if (this != &other)  mName = std::move(other.mName);
+#ifdef DEBUG_ME
+      std::cout << "MyType::operator=(MyType&&) " << mName << " my_int:" << my_int_ << '\n';
+#endif
       return *this;
    }
 
@@ -65,6 +80,16 @@ BOOST_AUTO_TEST_SUITE( CoreTestSuite )
 BOOST_AUTO_TEST_CASE( test_class_data_member_init )
 {
    cout << "ACore:: ...test_class_data_member_init \n" ;
+
+//    // MyType needs noexcept on move copy constructor, during vec resize.
+//	std::vector<MyType> vec;
+//	for(int i =0; i < 4; i++) {
+//		//vec.push_back(MyType(boost::lexical_cast<string>(i)));
+//		vec.emplace_back(boost::lexical_cast<string>(i));
+//		cout << vec.size() << " " << vec.capacity() << endl;
+//	}
+
+
    {
       MyType type("ABC");
       auto tmoved = std::move(type);

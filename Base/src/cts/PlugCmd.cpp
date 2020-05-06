@@ -125,7 +125,7 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
       destPath = NodePath::removeHostPortFromPath(dest_);
 
       std::pair<std::string,std::string> hostPortPair = as->hostPort();
-      if ( hostPortPair.first == host  && hostPortPair.second == port) {
+      if ((hostPortPair.first == host || host == "localhost") && hostPortPair.second == port) {
 
          // Matches local server, try to find dest node again.
          destNode =  as->defs()->findAbsNode(destPath);
@@ -199,22 +199,31 @@ STC_Cmd_ptr PlugCmd::doHandleRequest(AbstractServer* as) const
    }
 
    // source and destination on same defs file
-
-   // If the destination is task, replace with its parent
-
-   Node* theDestNode = destNode.get();
-   if (theDestNode->isTask()) theDestNode = theDestNode->parent();
+   // See if its a sibling move:
    SuiteChanged1 suiteChanged(destNode->suite());
+   SuiteChanged1 suiteChanged1(sourceNode->suite());
 
-   // Before we do remove the source node, check its ok to add it as a child
-   std::string errorMsg;
-   if (!theDestNode->isAddChildOk(sourceNode.get(),errorMsg) ) {
-      throw std::runtime_error(  "Plug command failed. " +  errorMsg ) ;
+   if (sourceNode->parent() == destNode->parent()) {
+	   Node* parent = sourceNode->parent();
+	   if (parent) parent->move_peer(sourceNode.get(), destNode.get());
+	   else    as->defs()->move_peer(sourceNode.get(), destNode.get());
    }
+   else {
 
-   if (!theDestNode->addChild(  sourceNode->remove()  ) ) {
-      // This should never fail !!!! else we have lost/ and leaked source node !!!!
-      throw std::runtime_error("Fatal error plug command failed.") ;
+	   // If the destination is task, replace with its parent
+	   Node* theDestNode = destNode.get();
+	   if (theDestNode->isTask()) theDestNode = theDestNode->parent();
+
+	   // Before we do remove the source node, check its ok to add it as a child
+	   std::string errorMsg;
+	   if (!theDestNode->isAddChildOk(sourceNode.get(),errorMsg) ) {
+		   throw std::runtime_error(  "Plug command failed. " +  errorMsg ) ;
+	   }
+
+	   if (!theDestNode->addChild(  sourceNode->remove()  ) ) {
+		   // This should never fail !!!! else we have lost/ and leaked source node !!!!
+		   throw std::runtime_error("Fatal error plug command failed.") ;
+	   }
    }
 
    add_node_for_edit_history(destNode);

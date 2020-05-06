@@ -22,23 +22,19 @@
 
 #include <string>
 
-class ModelColumn;
-
 class TriggerViewDelegate : public TreeNodeViewDelegate
 {
 public:
     explicit TriggerViewDelegate(QWidget *parent=nullptr);
-    ~TriggerViewDelegate() override;
 
-    QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const override;
     void paint(QPainter *painter,const QStyleOptionViewItem &option,
                    const QModelIndex& index) const override;
 
+    void setRenderSeparatorLine(bool v) {renderSeparatorLine_ = v;}
+
 protected:
-    void updateSettings() override;
-
+    bool renderSeparatorLine_ {false};
     QPen borderPen_;
-
 };
 
 #endif // TRIGGERVIEWDELEGATE_HPP
