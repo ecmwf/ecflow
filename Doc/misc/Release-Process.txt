@@ -36,23 +36,23 @@ Process
    <Inform Daniel>
    
 0/ Build release: Two approaches, both use meta-builder: 
-    1/ git flow release start  4.16.0 
-       git_tag=release/4.16.0
+    1/ git flow release start  5.4.1 
+       git_tag=release/5.4.1
        Use this approach when multiple people working on the release.
       *Push* branch onto stash, otherwise we can not pull, from the remote machines
        - In eclipse, you *may* have to push this branch first Team->Push Branch
         *otherwise* the option Team->Push Upstream  may well be greyed out.
        
-    2/ git flow release start  4.16.0
-       git flow release finish 4.16.0  
-       push
-       git_tag=4.16.0
+    2/ git flow release start  5.4.1
+       git flow release finish 5.4.1  
+       git push --tags
+       git_tag=5.4.1
        When single person making release
  
-0/ Update ECFLOW_GIT_BRANCH to "4.16.0" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/4.16.0)
+0/ Update ECFLOW_GIT_BRANCH to "5.4.1" in meta-builder(settings/ecflow/ecflow.py# git_tag=release/5.4.1)
    Then use the meta builder to build/install.
    Note: if used 
-     > git flow release start 4.16.0        # -> it will create a branch release/4.16.0
+     > git flow release start 5.4.1        # -> it will create a branch release/5.4.1
 
 0/ For a PREPIFS release change file:
      /usr/local/apps/ecflow/.modulerc
@@ -96,8 +96,8 @@ Process
   
 AFTER the release 
 =======================================================================================
-   o increment the version number in $WK/VERSION.cmake THEN, run:
-     sh -x $WK/cmake.sh debug
+   o increment the version number in $WK/CMakeLists.txt THEN, run:
+     sh -x $WK/cmake.sh  
      
      This will update the version number for $WK/ACore/src/ecflow_version.h
      This file is included in $WK/ACore/src/Version.cpp
