@@ -337,8 +337,13 @@
                      "label": "Show number of resulting lines",
                      "default": "false"
                   }
-          },
-
+         },
+        "infoPanel" : {
+             "showTabTitle" : {
+                "label": "Show tab title",
+                "default": "true"
+             }
+        },
         "clock" : {
              "showClock" : {
                    "label" : "Show clock",

@@ -15,6 +15,7 @@
 #include "DashboardWidget.hpp"
 #include "ServerObserver.hpp"
 #include "VInfo.hpp"
+#include "VProperty.hpp"
 
 #include "ui_InfoPanel.h"
 
@@ -25,6 +26,7 @@ class DashboardDockTitleWidget;
 class InfoPanel;
 class InfoPanelDef;
 class InfoPanelItem;
+class PropertyMapper;
 
 class InfoPanelItemHandler
 {
@@ -40,7 +42,7 @@ public:
 	InfoPanelDef* def() const {return def_;}
 
 protected:
-	void addToTab(QTabWidget *);
+    void addToTab(QTabWidget *, bool);
 
 private:
 	InfoPanelDef* def_;
@@ -48,7 +50,8 @@ private:
 };
 
 
-class InfoPanel : public DashboardWidget, public ServerObserver, public VInfoObserver, private Ui::InfoPanel
+class InfoPanel : public DashboardWidget, public ServerObserver, public VInfoObserver,
+                  public VPropertyObserver, private Ui::InfoPanel
 {
     Q_OBJECT
 
@@ -63,6 +66,7 @@ public:
     void relayDashboardCommand(VInfo_ptr info,QString cmd);
 
     void populateDialog() override;
+    void notifyChange(VProperty* p) override;
 
     //From DashboardWidget
     void populateDockTitleBar(DashboardDockTitleWidget*) override;
@@ -117,12 +121,15 @@ private:
 	void clearTab();
 	void updateTitle();
     QMenu* buildOptionsMenu();
+    bool isTabTitleVisible();
+    void setTabTitleVisible(bool);
 
 	QList<InfoPanelItemHandler*> items_;
 	VInfo_ptr info_;
     VInfo_ptr lastBroadcastInfo_;
 	bool tabBeingCleared_;
 	bool tabBeingAdjusted_;
+    PropertyMapper* prop_{nullptr};
 };
 
 #endif

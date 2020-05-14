@@ -280,6 +280,11 @@
                         "line" : "clockFormat"
                     },
                     "group" : {
+                        "title" : "Info panel",
+                        "prefix" : "view.infoPanel",
+                        "line" : "showTabTitle"
+                    },
+                    "group" : {
                         "title" : "Text filter in Output tab",
                         "prefix" : "view.textEdit",
                         "line" : "showLineNumInTextFilter"
