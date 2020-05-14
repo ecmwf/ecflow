@@ -340,7 +340,7 @@
          },
         "infoPanel" : {
              "showTabTitle" : {
-                "label": "Show tab title",
+                "label": "Show tab titles",
                 "default": "true"
              }
         },
