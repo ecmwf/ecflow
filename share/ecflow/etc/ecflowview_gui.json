@@ -278,6 +278,11 @@
                         "prefix" : "view.clock",
                         "line" : "showClock",
                         "line" : "clockFormat"
+                    },
+                    "group" : {
+                        "title" : "Text filter in Output tab",
+                        "prefix" : "view.textEdit",
+                        "line" : "showLineNumInTextFilter"
                     }
                 }
             }

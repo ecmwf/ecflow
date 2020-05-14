@@ -332,6 +332,10 @@
                   "numAreaCurrent" : {
                     "label": "Line number area current line colour",
                     "default": "rgb(212,212,255)"
+                  },
+                  "showLineNumInTextFilter" : {
+                     "label": "Show number of resulting lines",
+                     "default": "false"
                   }
           },
 

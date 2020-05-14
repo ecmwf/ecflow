@@ -23,6 +23,8 @@
 
 #include "TextFormat.hpp"
 #include "ViewerUtil.hpp"
+#include "VConfig.hpp"
+#include "VProperty.hpp"
 
 TextFilterWidget::TextFilterWidget(QWidget *parent) :
     QWidget(parent)
@@ -60,8 +62,18 @@ TextFilterWidget::TextFilterWidget(QWidget *parent) :
 
     refreshCompleter();
 
+    numberLabel_->setProperty("textFilter", "1");
+    numberLabel_->hide();
+
+    showLineNumProp_ = VConfig::instance()->find("view.textEdit.showLineNumInTextFilter");
+
     //Initially it is hidden
     hide();
+}
+
+bool TextFilterWidget::needNumberOfLines() const
+{
+    return (showLineNumProp_)?showLineNumProp_->value().toBool():false;
 }
 
 bool TextFilterWidget::isActive() const
@@ -420,7 +432,7 @@ void TextFilterWidget::setStatus(FilterStatus status,bool force)
     if(force || status_ != status)
     {
         status_=status;
-
+        numberLabel_->hide();
         QBrush br=oriBrush_;
         QPalette p=le_->palette();
         switch(status_)
@@ -468,6 +480,16 @@ bool TextFilterWidget::isCurrentSaved() const
 {
     return TextFilterHandler::Instance()->contains(filterText().toStdString(),
                                              isMatched(),isCaseSensitive());
+}
+
+void TextFilterWidget::setNumberOfLines(int n)
+{
+    if (n <= 0 || !needNumberOfLines()) {
+        numberLabel_->hide();
+    } else {
+        numberLabel_->setText("(" + QString::number(n) + " lines)");
+        numberLabel_->show();
+    }
 }
 
 void TextFilterWidget::paintEvent(QPaintEvent *)
