@@ -574,7 +574,7 @@ void Defs::requeue()
    set_most_significant_state();
 }
 
-void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive)
+void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive,const std::vector<std::string>& no_sort)
 {
    if (attr == ecf::Attr::VARIABLE || attr == ecf::Attr::ALL) server_.sort_variables();
 
@@ -582,7 +582,7 @@ void Defs::sort_attributes(ecf::Attr::Type attr,bool recursive)
       size_t theSuiteVecSize = suiteVec_.size();
       for(size_t s = 0; s < theSuiteVecSize; s++) {
          SuiteChanged changed(suiteVec_[s]);
-         suiteVec_[s]->sort_attributes(attr,recursive);
+         suiteVec_[s]->sort_attributes(attr,recursive,no_sort);
       }
    }
 }

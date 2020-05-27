@@ -122,14 +122,24 @@ node_ptr add_repeat_string(node_ptr self,const RepeatString& d)     { self->addR
 node_ptr add_repeat_enum(node_ptr self,const RepeatEnumerated& d)   { self->addRepeat(d); return self; }
 node_ptr add_repeat_day(node_ptr self,const RepeatDay& d)           { self->addRepeat(d); return self; }
 
-void sort_attributes(node_ptr self,const std::string& attribute_name, bool recursive){
+void sort_attributes(node_ptr self, ecf::Attr::Type attr) { self->sort_attributes(attr);}
+void sort_attributes1(node_ptr self, ecf::Attr::Type attr, bool recursive) { self->sort_attributes(attr,recursive);}
+void sort_attributes2(node_ptr self, ecf::Attr::Type attr, bool recursive,const bp::list& list) {
+	std::vector<std::string> no_sort;
+	BoostPythonUtil::list_to_str_vec(list,no_sort);
+	self->sort_attributes(attr,recursive,no_sort);
+}
+
+void sort_attributes3(node_ptr self,const std::string& attribute_name, bool recursive,const bp::list& list){
    std::string attribute = attribute_name; boost::algorithm::to_lower(attribute);
    ecf::Attr::Type attr = Attr::to_attr(attribute_name);
    if (attr == ecf::Attr::UNKNOWN) {
       std::stringstream ss;  ss << "sort_attributes: the attribute " << attribute_name << " is not valid";
       throw std::runtime_error(ss.str());
    }
-   self->sort_attributes(attr,recursive);
+   std::vector<std::string> no_sort;
+   BoostPythonUtil::list_to_str_vec(list,no_sort);
+   self->sort_attributes(attr,recursive,no_sort);
 }
 
 std::vector<node_ptr> get_all_nodes(node_ptr self){ std::vector<node_ptr> nodes; self->get_all_nodes(nodes); return nodes; }
@@ -384,8 +394,11 @@ void export_Node()
    .def("delete_zombie",    &Node::delete_zombie        )
    .def("change_trigger",   &Node::changeTrigger        )
    .def("change_complete",  &Node::changeComplete       )
+   .def("sort_attributes",  &sort_attributes)
+   .def("sort_attributes",  &sort_attributes1)
+   .def("sort_attributes",  &sort_attributes2)
+   .def("sort_attributes",  &sort_attributes3,(bp::arg("attribute_type"),bp::arg("recursive")=true,bp::arg("no_sort")=bp::list()))
    .def("sort_attributes",  &Node::sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
-   .def("sort_attributes",  &sort_attributes,(bp::arg("attribute_type"),bp::arg("recursive")=true))
    .def("get_abs_node_path",    &Node::absNodePath, DefsDoc::abs_node_path_doc())
    .def("has_time_dependencies",      &Node::hasTimeDependencies)
    .def("update_generated_variables", &Node::update_generated_variables)

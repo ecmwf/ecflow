@@ -1310,12 +1310,12 @@ void NodeContainer::restore()
 }
 
 
-void NodeContainer::sort_attributes(ecf::Attr::Type attr,bool recursive)
+void NodeContainer::sort_attributes(ecf::Attr::Type attr,bool recursive,const std::vector<std::string>& no_sort)
 {
-   Node::sort_attributes(attr,recursive);
+   Node::sort_attributes(attr,recursive,no_sort);
    if (recursive) {
       size_t node_vec_size = nodes_.size();
-      for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->sort_attributes(attr,recursive); }
+      for(size_t t = 0; t < node_vec_size; t++) { nodes_[t]->sort_attributes(attr,recursive,no_sort); }
    }
 }
 

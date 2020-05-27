@@ -455,7 +455,7 @@ public:
 
    // sort
    // expect one attr to be [ event | meter | label | limits | variable ]
-   virtual void sort_attributes( ecf::Attr::Type at, bool recursive);
+   virtual void sort_attributes(ecf::Attr::Type at,bool recursive = true,const std::vector<std::string>& no_sort = std::vector<std::string>());
 
    // Delete functions: can throw std::runtime_error ===================================
    // if name argument is empty, delete all attributes of that type

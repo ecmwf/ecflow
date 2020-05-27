@@ -106,7 +106,7 @@ public:
 	void setStateOnlyHierarchically(NState::State s,bool force = false) override;
 	void set_state_hierarchically(NState::State s, bool force) override;
    void update_limits() override;
-   void sort_attributes(ecf::Attr::Type attr,bool recursive) override;
+   void sort_attributes(ecf::Attr::Type attr,bool recursive = true,const std::vector<std::string>& no_sort = std::vector<std::string>()) override;
 
    void archive();
    void restore();

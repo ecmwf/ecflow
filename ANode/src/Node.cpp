@@ -2476,8 +2476,19 @@ bool Node::is_observed(AbstractObserver* obs) const
    return false;
 }
 
-void Node::sort_attributes(ecf::Attr::Type attr, bool /* recursive */)
+void Node::sort_attributes(ecf::Attr::Type attr, bool recursive,const std::vector<std::string>& no_sort)
 {
+  // cout << "Node::sort_attributes " << absNodePath() << "  " << attr << " recursive " << recursive << " no_sort.size() " << no_sort.size() << "\n";
+
+   if (recursive && !no_sort.empty()) {
+	   std::string path = absNodePath();
+	   for(const auto& p: no_sort) {
+		   // cout << " no_sort: " << p << "\n";
+		   if (p == path) {
+			   return;
+		   }
+	   }
+   }
    auto caseInsen = [](const auto& a, const auto& b){ return Str::caseInsLess(a.name(),b.name());};
 
    state_change_no_ = Ecf::incr_state_change_no();

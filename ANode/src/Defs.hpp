@@ -176,7 +176,8 @@ public:
 
    /// recursively sort the attributes
    // expect one attr to be [ event | meter | label | limits | variable ]
-   void sort_attributes(ecf::Attr::Type attr, bool recursive = true);
+   // if recursive is true, ignore nodes on no_sort list
+   void sort_attributes(ecf::Attr::Type attr, bool recursive = true, const std::vector<std::string>& no_sort = std::vector<std::string>());
 
    /// This function is called when ALL definition has been parsed successfully
    /// Client Side:: The client side has externs, hence any references to node paths

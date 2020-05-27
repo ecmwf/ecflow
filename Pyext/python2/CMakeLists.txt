@@ -85,6 +85,7 @@ list( APPEND u_tests
         py_u_TestTraversal     
         py_u_TestUserManual    
         py_u_TestWith         
+        py_u_sort         
 )
 foreach( test ${u_tests} )
 
