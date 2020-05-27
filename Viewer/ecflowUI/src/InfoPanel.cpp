@@ -18,6 +18,7 @@
 #include "InfoPanelItem.hpp"
 #include "InfoPanelHandler.hpp"
 #include "NodePathWidget.hpp"
+#include "PropertyMapper.hpp"
 #include "ServerHandler.hpp"
 #include "SessionHandler.hpp"
 #include "UiLog.hpp"
@@ -43,10 +44,15 @@ bool InfoPanelItemHandler::match(const std::vector<InfoPanelDef*>& ids) const
 	return (std::find(ids.begin(),ids.end(),def_) != ids.end());
 }
 
-void  InfoPanelItemHandler::addToTab(QTabWidget *tab)
+void  InfoPanelItemHandler::addToTab(QTabWidget *tab, bool showTitle)
 {
-	int idx=tab->addTab(item_->realWidget(),QString::fromStdString(def_->label()));
-	tab->setTabIcon(idx,QPixmap(":/viewer/" + QString::fromStdString(def_->icon())));
+    QString title;
+    if (showTitle) {
+        title = QString::fromStdString(def_->label());
+    }
+    int idx=tab->addTab(item_->realWidget(), title);
+    tab->setTabToolTip(idx, QString::fromStdString(def_->label()));
+    tab->setTabIcon(idx,QPixmap(":/viewer/" + QString::fromStdString(def_->icon())));
 }
 
 //==============================================
@@ -78,6 +84,11 @@ InfoPanel::InfoPanel(QWidget* parent) :
 
     WidgetNameProvider::nameChildren(this);
 
+    //Properties
+    std::vector<std::string> propVec;
+    propVec.emplace_back("view.infoPanel.showTabTitle");
+    prop_=new PropertyMapper(propVec,this);
+
     //Create the handler for all the possible panels!
     for(auto it : InfoPanelHandler::instance()->panels())
     {
@@ -88,6 +99,8 @@ InfoPanel::InfoPanel(QWidget* parent) :
 InfoPanel::~InfoPanel()
 {
     localClear();
+
+    delete prop_;
 
 	Q_FOREACH(InfoPanelItemHandler *d,items_)
 		delete d;
@@ -408,7 +421,7 @@ void InfoPanel::adjustTabs(VInfo_ptr info)
 		{
 			if(InfoPanelItemHandler* d=findHandler(id))
 			{
-                d->addToTab(tab_);
+                d->addToTab(tab_, isTabTitleVisible());
                 d->item()->setActive(true);
 			}
 		}
@@ -552,6 +565,33 @@ void InfoPanel::clearTab()
 	tabBeingCleared_=true;
 	tab_->clear();
 	tabBeingCleared_=false;
+}
+
+void InfoPanel::setTabTitleVisible(bool st)
+{
+    for(int i=0; i < tab_->count(); i++)
+    {
+        QString title;
+        if(InfoPanelItemHandler* d=findHandler(tab_->widget(i))) {
+            title = QString::fromStdString(d->def()->label());
+        }
+        tab_->setTabText(i, (st)?(title):QString());
+        tab_->setTabToolTip(i, title);
+    }
+}
+
+bool InfoPanel::isTabTitleVisible()
+{
+    VProperty* prop=prop_->find("view.infoPanel.showTabTitle",true);
+    return (prop)?prop->value().toBool():true;
+}
+
+void InfoPanel::notifyChange(VProperty* p)
+{
+    if(p->path() == "view.infoPanel.showTabTitle")
+    {
+        setTabTitleVisible(p->value().toBool());
+    }
 }
 
 void InfoPanel::detachedChanged()

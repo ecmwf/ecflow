@@ -274,6 +274,25 @@ bool VFile::isEmpty() const
     return false;
 }
 
+int VFile::numberOfLines() const
+{
+    if(storageMode_ != VFile::DiskStorage || isEmpty())
+        return -1;
+
+    int num =0;
+    int c;
+    FILE* fp = fopen(path_.c_str(), "r");
+    if(!fp)
+        return -1;
+
+    for (c = getc(fp); c != EOF; c = getc(fp))
+        if (c == '\n')
+            num++;
+
+    fclose(fp);
+    return num;
+}
+
 void VFile::print()
 {
     std::string str="  VFile contents --> storage:";
