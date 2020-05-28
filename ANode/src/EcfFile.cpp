@@ -1482,9 +1482,9 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,c
    //   %include "../file.name"   -> script_file_location/../file.name
    //   %include "./file.name"    -> script_file_location/./file.name
    //   %include "file.name"      -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
-   //   %include <file.name>      -> %ECF_INCLUDE%/filename
+   //   %include <file.name>      -> %ECF_INCLUDE%/filename || %ECF_HOME%/filename # note: ECF_HOME is always a single path
    //
-   //   %include <%file%.name>        -> %ECF_INCLUDE%/filename
+   //   %include <%file%.name>        -> %ECF_INCLUDE%/filename || %ECF_HOME%/filename
    //   %include "%file%.name"        -> %ECF_HOME%/%SUITE%/%FAMILY%/filename
    //   %include "./%file%.name"      -> script_file_location/./file.name
    //   %include "/%tmp%/%file%.name" -> /%tmp%/%file%.name
@@ -1572,7 +1572,7 @@ std::string PreProcessor::getIncludedFilePath(const std::string& includedFile1,c
       // we have two forms: "head.h" & "../head.h"
 
       //  ECFLOW-274 need to allow:
-      //     - %include "../fred.h"     # this one directory up
+      //     - %include "../fred.h"     # this is one directory up
       //     - %include "./fred.h"      # this is at the same level as script
       std::string path;
       if ( includedFile.find("./") == 1 || includedFile.find("../") == 1) {
