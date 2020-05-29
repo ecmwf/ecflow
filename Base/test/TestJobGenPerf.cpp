@@ -168,22 +168,19 @@ int main(int argc, char* argv[])
 
    if ( jobParam.submitted().size() != tasks.size()) {
 	   for(size_t i = 0; i < tasks.size(); i++) {
-		   if (tasks[i]->state() != NState::SUBMITTED) {
-			   const Variable& dummy_task = tasks[i]->findVariable("ECF_DUMMY_TASK");
-			   if (!dummy_task.empty()) {
+		   if (tasks[i]->state() != NState::SUBMITTED && tasks[i]->findVariable("ECF_DUMMY_TASK") == Variable::EMPTY()) {
+			   // We are NOT a dummy task
+			   cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
 
-				   cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
-
-				   Node* parent = tasks[i]->parent();
-				   while (parent) {
-					   cout << " node " << parent->absNodePath() << " state: " << NState::toString(parent->state()) << "\n";
-					   parent = parent->parent();
-				   }
-
-				   std::vector<std::string> theReasonWhy;
-				   tasks[i]->bottom_up_why(theReasonWhy,false/*html tags*/);
-				   for(const auto & r : theReasonWhy) {  cout << "  Reason: " << r << "\n";}
+			   Node* parent = tasks[i]->parent();
+			   while (parent) {
+				   cout << " node " << parent->absNodePath() << " state: " << NState::toString(parent->state()) << "\n";
+				   parent = parent->parent();
 			   }
+
+			   std::vector<std::string> theReasonWhy;
+			   tasks[i]->bottom_up_why(theReasonWhy,false/*html tags*/);
+			   for(const auto & r : theReasonWhy) {  cout << "  Reason: " << r << "\n";}
 		   }
 	   }
    }
