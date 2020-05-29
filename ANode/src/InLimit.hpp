@@ -42,6 +42,7 @@ public:
 
    void print(std::string&) const;
    bool operator==(const InLimit& rhs) const;
+   bool operator<(const InLimit& rhs) const { return n_ < rhs.name();}
 
    const std::string& name() const { return  n_;}         // must be defined
    const std::string& pathToNode() const { return path_;} // can be empty,the node referenced by the In-Limit, this should hold the Limit.

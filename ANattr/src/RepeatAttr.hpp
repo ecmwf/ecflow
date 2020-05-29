@@ -135,6 +135,7 @@ public:
 
    void delta(int d) { delta_ = d;}
    bool operator==(const RepeatDate& rhs) const;
+   bool operator<(const RepeatDate& rhs) const { return name() < rhs.name();}
 
    RepeatDate* clone() const override { return new RepeatDate(name_, start_, end_, delta_, value_) ; }
    bool compare(RepeatBase*) const override;
@@ -194,6 +195,7 @@ public:
    void update_repeat_genvar() const override;
 
    bool operator==(const RepeatDateList& rhs) const;
+   bool operator<(const  RepeatDateList& rhs) const { return name() < rhs.name();}
 
    int start() const override;
    int end() const override;
@@ -253,6 +255,7 @@ public:
    RepeatInteger();
 
    bool operator==(const RepeatInteger& rhs) const;
+   bool operator<(const  RepeatInteger& rhs) const { return name() < rhs.name();}
 
    int start() const override { return start_; }
    int end() const override   { return end_; }
@@ -307,6 +310,7 @@ public:
    RepeatEnumerated() = default;
 
    bool operator==(const RepeatEnumerated& rhs) const;
+   bool operator<(const  RepeatEnumerated& rhs) const { return name() < rhs.name();}
 
    int start() const override { return 0; }
    int end() const override;
@@ -358,6 +362,7 @@ public:
    RepeatString() = default;
 
    bool operator==(const RepeatString& rhs) const;
+   bool operator<(const  RepeatString& rhs) const { return name() < rhs.name();}
 
    int start() const override { return 0; }
    int end() const override;
@@ -426,6 +431,7 @@ public:
    RepeatDay() : RepeatBase("day") {}
 
    bool operator==(const RepeatDay& rhs) const;
+   bool operator<(const  RepeatDay& rhs) const { return step_ < rhs.step();}
 
    int start() const override { return 0; }
    int end() const override   { return 0; }
@@ -485,6 +491,7 @@ public:
    Repeat& operator=(const Repeat& rhs);
    Repeat& operator=(Repeat&& rhs);
    bool operator==(const Repeat& rhs) const;
+   bool operator<(const Repeat& rhs) const { return name() < rhs.name();}
 
    bool empty() const { return (type_) ? false : true; }
    void clear() { type_.reset(nullptr); }

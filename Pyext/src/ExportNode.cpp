@@ -294,6 +294,7 @@ void export_Node()
    class_<Node, boost::noncopyable, node_ptr >("Node", DefsDoc::node_doc(), no_init)
    .def("name",&Node::name, return_value_policy<copy_const_reference>() )
    .def("add", raw_function(add,1),           DefsDoc::add())  // a.add(b) & a.add([b])
+   .def(self < self)                                    // __lt__
    .def("__add__",  &NodeUtil::do_add,                  DefsDoc::add())  // a + b
    .def("__rshift__",  &do_rshift)                             // nc >> a >> b >> c     a + (b.add(Trigger('a==complete')) + (c.add(Trigger('b==complete')))
    .def("__lshift__",  &do_lshift)                             // nc << a << b << c     (a.add(Trigger('b==complete')) + (b.add(Trigger('c==complete'))) + c

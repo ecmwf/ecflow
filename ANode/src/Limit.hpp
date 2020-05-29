@@ -36,6 +36,7 @@ public:
 
    void print(std::string&) const;
    bool operator==(const Limit& rhs) const;
+   bool operator<(const Limit& rhs) const { return n_ < rhs.name();}
    const std::string& name() const { return  n_;}
 
    Node*  node() const {return node_;}

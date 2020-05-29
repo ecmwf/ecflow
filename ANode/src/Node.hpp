@@ -60,6 +60,8 @@ protected:
    Node();
 public:
    Node& operator=(const Node&);
+   bool operator<(const Node& rhs) { return name() < rhs.name();}
+
    Node(const Node& rhs);
    virtual ~Node();
    virtual bool check_defaults() const;

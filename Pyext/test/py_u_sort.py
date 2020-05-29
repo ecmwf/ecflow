@@ -14,8 +14,32 @@
 import unittest 
 from ecflow import *
 
+class Test_sort(unittest.TestCase):
+
+    def get_object_list(self,obj,name_list):
+        if obj == 'Meter': 
+            return [ Meter(name,0,100) for name in name_list ]
+        elif obj == 'Label':
+            return [ Label(name,'value') for name in name_list ]
+        elif obj == 'Variable':
+            return [ Variable(name,'value') for name in name_list ]
+        elif obj == 'Limit':
+            return [ Limit(name,10) for name in name_list ]
+        else:
+            return [ eval(obj)(name) for name in name_list ]
+
+    def test_sort_objects(self):
+        names = [ 'zz',  'ww', 'aa']
+        object_list = [ 'Task','Family','Suite','Event','Meter','Label','Variable','Limit']
+        for obj in object_list:
+            self.assertEqual(sorted(self.get_object_list(obj,names)), self.get_object_list(obj,sorted(names)), " sort of " + obj + " failed")
+#             print(obj,'-----------------')
+#             for item in sorted(self.get_object_list(obj,names)):
+#                 print(item)
+                
+                
 class Test_sort_api(unittest.TestCase):
-    def test_sort_api(self):
+    def test_sort_attributes_api(self):
         nodes = [ Defs(), Suite('s'), Family('f'), Task('t')]
         sort_attr = ['event','meter','label','variable','all']
         for attr in sort_attr:
@@ -32,7 +56,7 @@ class Test_sort_api(unittest.TestCase):
                 node.sort_attributes(attr,True,['/path','/path2'])
 
 # see ECFLOW-1642
-class Test_sort(unittest.TestCase):
+class Test_ECFLOW_1642(unittest.TestCase):
     def get_events(self):
         return [Event(name) for name in
             "foo buzz bar google zulu mason".split()]
@@ -72,7 +96,7 @@ class Test_sort(unittest.TestCase):
         self.assertEqual(defs,self.expected_def(),"Expected\n" + str(self.expected_def()) + "but found\n" + str(defs))
     
 class Test_defs_sort(unittest.TestCase):
-    def test_defs_sort(self):
+    def test_defs_sort_attributes(self):
         defs = Defs()
         defs.add_variable("ZFRED", "/tmp/")
         defs.add_variable("YECF_URL_CMD", "${BROWSER:=firefox} -new-tab %ECF_URL_BASE%/%ECF_URL%")

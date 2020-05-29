@@ -98,6 +98,17 @@ std::string Event::name_or_number() const {
    return n_;
 }
 
+bool Event::operator<(const Event& rhs) const
+{
+	if (!n_.empty() && !rhs.name().empty()) {
+		return n_ < rhs.name();
+	}
+	if (n_.empty() && rhs.name().empty()) {
+		return number_ < rhs.number();
+	}
+	return name_or_number() < rhs.name_or_number();
+}
+
 bool Event::operator==( const Event& rhs ) const {
    if ( v_ != rhs.v_ ) {
 #ifdef DEBUG
