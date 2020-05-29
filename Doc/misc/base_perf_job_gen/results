@@ -1,0 +1,64 @@
+RESULTS
+============================================================================
+cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
+time Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
+
+submitted 4553 out of 4559
+real    0m2.45s
+user    0m1.91s
+sys     0m0.52s
+
+
+strace -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
+submitted 4553 out of 4559
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 32.97    0.098267           1    163674           read
+ 15.05    0.044856           1     41404           write
+ 13.59    0.040501           1     73919           lseek
+ 11.46    0.034150           3     10760        17 open
+ 10.51    0.031337           3     10742           close
+  9.67    0.028827           1     31948     12134 stat
+  2.40    0.007139           2      4553           chmod
+  1.88    0.005617           1      4555           munmap
+  1.41    0.004200           1      4578           mmap
+  0.89    0.002646           1      4563           fstat
+  0.11    0.000334           1       243           brk
+  0.06    0.000193           4        51           writev
+  0.00    0.000000           0         2         1 lstat
+  0.00    0.000000           0        14           mprotect
+  0.00    0.000000           0         3           rt_sigaction
+  0.00    0.000000           0         4           rt_sigprocmask
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           uname
+  0.00    0.000000           0         1           unlink
+  0.00    0.000000           0         1           getrlimit
+  0.00    0.000000           0         1           arch_prctl
+  0.00    0.000000           0         2           futex
+  0.00    0.000000           0         1           set_tid_address
+  0.00    0.000000           0         1           set_robust_list
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.298067                351023     12153 total
+
+
+
+perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
+ Performance counter stats for 'Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
+
+       2637.099995      task-clock (msec)         #    0.996 CPUs utilized            ( +-  2.31% )
+               218      context-switches          #    0.083 K/sec                    ( +- 74.32% )
+                 0      cpu-migrations            #    0.000 K/sec                    ( +-100.00% )
+             9,658      page-faults               #    0.004 M/sec                    ( +-  0.00% )
+    10,122,555,334      cycles                    #    3.839 GHz                      ( +-  2.30% )  (49.94%)
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
+    12,804,414,325      instructions              #    1.26  insns per cycle          ( +-  0.10% )  (62.47%)
+     3,209,766,689      branches                  # 1217.158 M/sec                    ( +-  0.07% )  (62.49%)
+       121,179,840      branch-misses             #    3.78% of all branches          ( +-  0.47% )  (62.53%)
+     3,061,094,579      L1-dcache-loads           # 1160.781 M/sec                    ( +-  0.10% )  (62.23%)
+       274,551,085      L1-dcache-load-misses     #    8.97% of all L1-dcache hits    ( +-  0.44% )  (25.03%)
+        87,217,818      LLC-loads                 #   33.073 M/sec                    ( +-  1.71% )  (25.04%)
+         1,055,192      LLC-load-misses           #    1.21% of all LL-cache hits     ( +-  5.56% )  (37.50%)
+
+       2.647587094 seconds time elapsed                                          ( +-  2.27% )
