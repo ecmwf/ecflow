@@ -25,6 +25,7 @@
 #include "Jobs.hpp"
 #include "JobsParam.hpp"
 #include "JobProfiler.hpp"
+#include "Variable.hpp"
 
 using namespace std;
 using namespace ecf;
@@ -167,7 +168,7 @@ int main(int argc, char* argv[])
 
    if ( jobParam.submitted().size() != tasks.size()) {
       for(size_t i = 0; i < tasks.size(); i++) {
-         if (tasks[i]->state() != NState::SUBMITTED) {
+         if (tasks[i]->state() != NState::SUBMITTED && !(tasks[i]->findVariable("ECF_DUMMY_TASK") == Variable::EMPTY())) {
             cout << "task " << tasks[i]->absNodePath() << " state: " << NState::toString(tasks[i]->state()) << "\n";
 
             Node* parent = tasks[i]->parent();
