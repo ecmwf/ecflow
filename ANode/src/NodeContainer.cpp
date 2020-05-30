@@ -426,14 +426,13 @@ bool NodeContainer::calendarChanged(
       return false;
    }
 
-   // The late attribute is inherited, we only set late on the task/alias
-   // This will set: cal_args.holding_parent_day_or_date_ = this;
    // holding_parent_day_or_date_ is used to avoid freeing time attributes, when we have a holding parent day/date
    holding_parent_day_or_date = Node::calendarChanged(c,cal_args,nullptr,holding_parent_day_or_date);
 
    //if (holding_parent_day_or_date)
 	//   cout << " calendarChanged: " << debugNodePath() << " " << holding_parent_day_or_date << " •••••••••• \n";
 
+   // The late attribute is inherited, we only set late on the task/alias
 	LateAttr overridden_late;
    if (inherited_late && !inherited_late->isNull()) {
       overridden_late = *inherited_late;
@@ -464,40 +463,13 @@ void NodeContainer::invalidate_trigger_references() const
    for(size_t t = 0; t < node_vec_size; t++) {  nodes_[t]->invalidate_trigger_references(); }
 }
 
-class HoldingDayOrDate {
-public:
-   HoldingDayOrDate(Node* n,JobsParam& jobsParam) : node_(n),jobsParam_(jobsParam)  {
-      if (!jobsParam.holding_parent_day_or_date()) {
-         if (node_->holding_day_or_date(node_->suite()->calendar()) ) {
-            jobsParam.set_holding_parent_day_or_date(node_);
-         }
-      }
-   }
-   ~HoldingDayOrDate()  {
-       if (jobsParam_.holding_parent_day_or_date()) {
-          jobsParam_.set_holding_parent_day_or_date(nullptr);
-       }
-    }
-private:
-   Node* node_;
-   JobsParam& jobsParam_;
-};
-
 bool NodeContainer::resolveDependencies(JobsParam& jobsParam)
 {
 #ifdef DEBUG_DEPENDENCIES
 	   LogToCout toCoutAsWell;
 #endif
 
-   //cout << "NodeContainer::resolveDependencies " << absNodePath() << endl;
-   HoldingDayOrDate holding_day_or_date(this,jobsParam);
-   if (jobsParam.holding_parent_day_or_date()) {
-#ifdef DEBUG_DEPENDENCIES
-      cout << "   NodeContainer::resolveDependencies " << absNodePath() << " HOLDING day or date " << endl;
-#endif
-      return false;
-   }
-
+    //cout << "NodeContainer::resolveDependencies " << absNodePath() << endl;
 	// Don't evaluate children unless parent is free. BOMB out early for this case.
 	// Note:: Task::resolveDependencies() will check inLimit up front. *** THIS CHECKS UP THE HIERARCHY ***
 	// Note:: Node::resolveDependencies() may have forced family node to complete, should have have

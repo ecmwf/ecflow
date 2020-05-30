@@ -524,7 +524,7 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
 #endif
 
    /// If we have been forcibly aborted by the user. Do not resubmit jobs, until *begin* or *re-queue*
-	/// This can be set via ALTER, so independent of state.
+   /// ***** This can be set via ALTER, so independent of state ***********
    if (get_flag().is_set(ecf::Flag::FORCE_ABORT)) {
 #ifdef DEBUG_DEPENDENCIES
       LOG(Log::DBG,"   Task::resolveDependencies() " << absNodePath() << " HOLDING as task state " << NState::toString(state()) << " has been forcibly aborted." );
@@ -532,8 +532,15 @@ bool Task::resolveDependencies(JobsParam& jobsParam)
       return false;
    }
 
+   // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
+   // Does not deal with inherited late
+   if (get_late()) {
+      // since the suite() traverse up the tree, only call when have a late attribute
+      checkForLateness(suite()->calendar());
+   }
 
-	if ( ! Node::resolveDependencies(jobsParam) ) {
+
+   if ( ! Node::resolveDependencies(jobsParam) ) {
 
 #ifdef DEBUG_JOB_SUBMISSION
 		LOG(Log::DBG, "   Task::resolveDependencies " << absNodePath() << " could not resolve dependencies, may have completed");

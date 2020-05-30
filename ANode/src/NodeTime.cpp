@@ -223,25 +223,6 @@ bool Node::calendar_changed_timeattrs(const ecf::Calendar& c, Node::Calendar_arg
    return false;
 }
 
-bool Node::holding_day_or_date(const ecf::Calendar& c) const
-{
-   if (days_.empty() && dates_.empty()) return false;
-
-   bool at_least_one_day_free = false;
-   for(auto & day : days_){
-      if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
-   }
-
-   bool at_least_one_date_free = false;
-   for(auto & date : dates_) {
-      if (!at_least_one_date_free) at_least_one_date_free = date.isFree(c);
-   }
-
-   if (at_least_one_day_free || at_least_one_date_free ) {
-      return false;
-   }
-   return true;
-}
 
 void Node::markHybridTimeDependentsAsComplete()
 {
@@ -514,17 +495,43 @@ bool Node::has_time_dependencies() const
 }
 
 
+bool Node::holding_day_or_date(const ecf::Calendar& c) const
+{
+   if (days_.empty() && dates_.empty()) return false;
+
+   bool at_least_one_day_free = false;
+   for(auto & day : days_){
+      if (!at_least_one_day_free) at_least_one_day_free = day.isFree(c);
+   }
+
+   bool at_least_one_date_free = false;
+   for(auto & date : dates_) {
+      if (!at_least_one_date_free) at_least_one_date_free = date.isFree(c);
+   }
+
+   if (at_least_one_day_free || at_least_one_date_free ) {
+      return false;
+   }
+   return true;
+}
+
 bool Node::timeDependenciesFree() const
 {
    int noOfTimeDependencies = 0;
    if (!times_.empty())  noOfTimeDependencies++;
    if (!todays_.empty()) noOfTimeDependencies++;
-   if (!dates_.empty())    noOfTimeDependencies++;
-   if (!days_.empty())     noOfTimeDependencies++;
-   if (!crons_.empty())    noOfTimeDependencies++;
+   if (!dates_.empty())  noOfTimeDependencies++;
+   if (!days_.empty())   noOfTimeDependencies++;
+   if (!crons_.empty())  noOfTimeDependencies++;
 
    // if no time dependencies we are free
    if (noOfTimeDependencies == 0) return true;
+
+   // if we have a holding day/date don't consider other time attributes
+   const Calendar& calendar = suite()->calendar();
+   if (holding_day_or_date(calendar)) {
+	   return false;
+   }
 
    bool oneDateIsFree = false;
    bool oneDayIsFree = false;
@@ -532,7 +539,6 @@ bool Node::timeDependenciesFree() const
    bool oneTimeIsFree = false;
    bool oneCronIsFree = false;
 
-   const Calendar& calendar = suite()->calendar();
    for(const auto & time : times_){ if (time.isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneTimeIsFree = true;break;}}
    for(const auto & cron : crons_){ if (cron.isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneCronIsFree = true;break;}}
    for(const auto & date : dates_){ if (date.isFree(calendar)){if ( noOfTimeDependencies == 1) return true;oneDateIsFree = true;break;}}

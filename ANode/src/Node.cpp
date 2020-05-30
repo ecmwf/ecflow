@@ -638,13 +638,6 @@ bool Node::resolveDependencies(JobsParam& jobsParam)
    // A node that is archived should not allow any change of state.
    if (get_flag().is_set(ecf::Flag::ARCHIVED)) return false;
 
-
-   // Improve the granularity for the check for lateness (during job submission). See SUP-873 "late" functionality
-   if (late_ && isSubmittable()) {
-      // since the suite() traverse up the tree, only call when have a late attribute
-      checkForLateness(suite()->calendar());
-   }
-
    if (isSuspended()) {
 #ifdef DEBUG_DEPENDENCIES
       LOG(Log::DBG,"   Node::resolveDependencies() " << absNodePath() << " HOLDING as node state " << NState::toString(state()) << " is SUSPENDED " );
