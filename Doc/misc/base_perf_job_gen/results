@@ -2,11 +2,12 @@ RESULTS
 ============================================================================
 cd $WK ; cp /var/tmp/ma0/DEFS/metabuilder.def .
 time Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
-
 submitted 4553 out of 4559
-real    0m2.45s
-user    0m1.91s
-sys     0m0.52s
+
+real    0m2.22s
+user    0m1.82s
+sys     0m0.39s
+ 
 
 
 strace -c Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
@@ -42,7 +43,7 @@ submitted 4553 out of 4559
 100.00    0.298067                351023     12153 total
 
 
-
+# baseline
 perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
  Performance counter stats for 'Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
 
@@ -63,6 +64,8 @@ perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
 
        2.647587094 seconds time elapsed                                          ( +-  2.27% )
        
+       
+# move check for holding day/date to where we check for time dependencies. Avoid redundant class, and reuse calendar
 git develop/55f9b8c6fae
 perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
  Performance counter stats for 'Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
@@ -85,6 +88,7 @@ perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
        2.576901973 seconds time elapsed                                          ( +-  0.97% )
 
 
+# Only loop over job line once, when removing comment/manual and job lines
 git develop/c1875ca6f5e
 perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
  Performance counter stats for 'Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
@@ -107,5 +111,27 @@ perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
        2.461374810 seconds time elapsed                                          ( +-  0.82% )
 
 
-      
-       
+# Use std::move() to avoid string copy, when processing job lines, remove dangling string reference
+git develop/e0bab94495c,d77fa0e7424
+
+perf stat -r 10 -d Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def
+ Performance counter stats for 'Base/bin/gcc-7.3.0/release/perf_job_gen ./metabuilder.def' (10 runs):
+
+       2252.060052      task-clock (msec)         #    0.997 CPUs utilized            ( +-  0.21% )
+                59      context-switches          #    0.026 K/sec                    ( +-  3.66% )
+                 0      cpu-migrations            #    0.000 K/sec
+             9,656      page-faults               #    0.004 M/sec                    ( +-  0.00% )
+     8,655,849,508      cycles                    #    3.844 GHz                      ( +-  0.22% )  (50.03%)
+   <not supported>      stalled-cycles-frontend
+   <not supported>      stalled-cycles-backend
+    11,243,970,572      instructions              #    1.30  insns per cycle          ( +-  0.05% )  (62.57%)
+     2,815,604,290      branches                  # 1250.235 M/sec                    ( +-  0.03% )  (62.60%)
+       108,327,891      branch-misses             #    3.85% of all branches          ( +-  0.09% )  (62.59%)
+     2,760,671,220      L1-dcache-loads           # 1225.843 M/sec                    ( +-  0.06% )  (62.16%)
+       258,914,707      L1-dcache-load-misses     #    9.38% of all L1-dcache hits    ( +-  0.16% )  (24.95%)
+        87,798,314      LLC-loads                 #   38.986 M/sec                    ( +-  0.93% )  (25.05%)
+           952,271      LLC-load-misses           #    1.08% of all LL-cache hits     ( +-  4.52% )  (37.53%)
+
+       2.259696222 seconds time elapsed                                          ( +-  0.20% )
+
+ 
